@@ -45,162 +45,7 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-// 🚀 [최적화 P0 / Step 20 - 옥타헤드럴 64개 격자 방향/각도 LUT 테이블화]
-// 8x8 = 64개 옥타헤드럴 타일 중심 3D 방향 벡터 사전 계산 LUT (매 픽셀 역투영/정규화 연산 100% 제거)
-const OCT_GRID_DIRS: array<vec3<f32>, 64> = array<vec3<f32>, 64>(
-    vec3<f32>(0.0000000, 0.1414214, -0.9899495),
-    vec3<f32>(0.1622214, 0.1622214, -0.9733285),
-    vec3<f32>(0.3651484, 0.1825742, -0.9128709),
-    vec3<f32>(0.5883484, 0.1961161, -0.7844645),
-    vec3<f32>(0.7844645, 0.1961161, -0.5883484),
-    vec3<f32>(0.9128709, 0.1825742, -0.3651484),
-    vec3<f32>(0.9733285, 0.1622214, -0.1622214),
-    vec3<f32>(0.9899495, 0.1414214, 0.0000000),
-    vec3<f32>(-0.1622214, 0.1622214, -0.9733285),
-    vec3<f32>(0.0000000, 0.3713907, -0.9284767),
-    vec3<f32>(0.2182179, 0.4364358, -0.8728716),
-    vec3<f32>(0.4850713, 0.4850713, -0.7276069),
-    vec3<f32>(0.7276069, 0.4850713, -0.4850713),
-    vec3<f32>(0.8728716, 0.4364358, -0.2182179),
-    vec3<f32>(0.9284767, 0.3713907, 0.0000000),
-    vec3<f32>(0.9733285, 0.1622214, 0.1622214),
-    vec3<f32>(-0.3651484, 0.1825742, -0.9128709),
-    vec3<f32>(-0.2182179, 0.4364358, -0.8728716),
-    vec3<f32>(0.0000000, 0.7071068, -0.7071068),
-    vec3<f32>(0.2672612, 0.8017837, -0.5345225),
-    vec3<f32>(0.5345225, 0.8017837, -0.2672612),
-    vec3<f32>(0.7071068, 0.7071068, 0.0000000),
-    vec3<f32>(0.8728716, 0.4364358, 0.2182179),
-    vec3<f32>(0.9128709, 0.1825742, 0.3651484),
-    vec3<f32>(-0.5883484, 0.1961161, -0.7844645),
-    vec3<f32>(-0.4850713, 0.4850713, -0.7276069),
-    vec3<f32>(-0.2672612, 0.8017837, -0.5345225),
-    vec3<f32>(0.0000000, 0.9701425, -0.2425356),
-    vec3<f32>(0.2425356, 0.9701425, 0.0000000),
-    vec3<f32>(0.5345225, 0.8017837, 0.2672612),
-    vec3<f32>(0.7276069, 0.4850713, 0.4850713),
-    vec3<f32>(0.7844645, 0.1961161, 0.5883484),
-    vec3<f32>(-0.7844645, 0.1961161, -0.5883484),
-    vec3<f32>(-0.7276069, 0.4850713, -0.4850713),
-    vec3<f32>(-0.5345225, 0.8017837, -0.2672612),
-    vec3<f32>(-0.2425356, 0.9701425, 0.0000000),
-    vec3<f32>(0.0000000, 0.9701425, 0.2425356),
-    vec3<f32>(0.2672612, 0.8017837, 0.5345225),
-    vec3<f32>(0.4850713, 0.4850713, 0.7276069),
-    vec3<f32>(0.5883484, 0.1961161, 0.7844645),
-    vec3<f32>(-0.9128709, 0.1825742, -0.3651484),
-    vec3<f32>(-0.8728716, 0.4364358, -0.2182179),
-    vec3<f32>(-0.7071068, 0.7071068, 0.0000000),
-    vec3<f32>(-0.5345225, 0.8017837, 0.2672612),
-    vec3<f32>(-0.2672612, 0.8017837, 0.5345225),
-    vec3<f32>(0.0000000, 0.7071068, 0.7071068),
-    vec3<f32>(0.2182179, 0.4364358, 0.8728716),
-    vec3<f32>(0.3651484, 0.1825742, 0.9128709),
-    vec3<f32>(-0.9733285, 0.1622214, -0.1622214),
-    vec3<f32>(-0.9284767, 0.3713907, 0.0000000),
-    vec3<f32>(-0.8728716, 0.4364358, 0.2182179),
-    vec3<f32>(-0.7276069, 0.4850713, 0.4850713),
-    vec3<f32>(-0.4850713, 0.4850713, 0.7276069),
-    vec3<f32>(-0.2182179, 0.4364358, 0.8728716),
-    vec3<f32>(0.0000000, 0.3713907, 0.9284767),
-    vec3<f32>(0.1622214, 0.1622214, 0.9733285),
-    vec3<f32>(-0.9899495, 0.1414214, 0.0000000),
-    vec3<f32>(-0.9733285, 0.1622214, 0.1622214),
-    vec3<f32>(-0.9128709, 0.1825742, 0.3651484),
-    vec3<f32>(-0.7844645, 0.1961161, 0.5883484),
-    vec3<f32>(-0.5883484, 0.1961161, 0.7844645),
-    vec3<f32>(-0.3651484, 0.1825742, 0.9128709),
-    vec3<f32>(-0.1622214, 0.1622214, 0.9733285),
-    vec3<f32>(0.0000000, 0.1414214, 0.9899495)
-);
 
-// 8x8 = 64개 옥타헤드럴 타일의 [수평 회전각(angleG), 수평 길이(lenGH)] 사전 계산 LUT (매 픽셀 atan2/length 100% 제거)
-const OCT_GRID_ANGLE_LEN: array<vec2<f32>, 64> = array<vec2<f32>, 64>(
-    vec2<f32>(-1.5707963, 0.9899495),
-    vec2<f32>(-1.4056476, 0.9867545),
-    vec2<f32>(-1.1902899, 0.9831921),
-    vec2<f32>(-0.9272952, 0.9805807),
-    vec2<f32>(-0.6435011, 0.9805807),
-    vec2<f32>(-0.3805064, 0.9831921),
-    vec2<f32>(-0.1651487, 0.9867545),
-    vec2<f32>(0.0000000, 0.9899495),
-    vec2<f32>(-1.7359451, 0.9867545),
-    vec2<f32>(-1.5707963, 0.9284767),
-    vec2<f32>(-1.3258177, 0.8997354),
-    vec2<f32>(-0.9827937, 0.8744746),
-    vec2<f32>(-0.5880026, 0.8744746),
-    vec2<f32>(-0.2449787, 0.8997354),
-    vec2<f32>(0.0000000, 0.9284767),
-    vec2<f32>(0.1651487, 0.9867545),
-    vec2<f32>(-1.9513028, 0.9831921),
-    vec2<f32>(-1.8157750, 0.8997354),
-    vec2<f32>(-1.5707963, 0.7071068),
-    vec2<f32>(-1.1071487, 0.5976143),
-    vec2<f32>(-0.4636476, 0.5976143),
-    vec2<f32>(0.0000000, 0.7071068),
-    vec2<f32>(0.2449787, 0.8997354),
-    vec2<f32>(0.3805064, 0.9831921),
-    vec2<f32>(-2.2142974, 0.9805807),
-    vec2<f32>(-2.1587989, 0.8744746),
-    vec2<f32>(-2.0344439, 0.5976143),
-    vec2<f32>(-1.5707963, 0.2425356),
-    vec2<f32>(0.0000000, 0.2425356),
-    vec2<f32>(0.4636476, 0.5976143),
-    vec2<f32>(0.5880026, 0.8744746),
-    vec2<f32>(0.6435011, 0.9805807),
-    vec2<f32>(-2.4980915, 0.9805807),
-    vec2<f32>(-2.5535901, 0.8744746),
-    vec2<f32>(-2.6779450, 0.5976143),
-    vec2<f32>(3.1415927, 0.2425356),
-    vec2<f32>(1.5707963, 0.2425356),
-    vec2<f32>(1.1071487, 0.5976143),
-    vec2<f32>(0.9827937, 0.8744746),
-    vec2<f32>(0.9272952, 0.9805807),
-    vec2<f32>(-2.7610863, 0.9831921),
-    vec2<f32>(-2.8966139, 0.8997354),
-    vec2<f32>(3.1415927, 0.7071068),
-    vec2<f32>(2.6779450, 0.5976143),
-    vec2<f32>(2.0344439, 0.5976143),
-    vec2<f32>(1.5707963, 0.7071068),
-    vec2<f32>(1.3258177, 0.8997354),
-    vec2<f32>(1.1902899, 0.9831921),
-    vec2<f32>(-2.9764439, 0.9867545),
-    vec2<f32>(3.1415927, 0.9284767),
-    vec2<f32>(2.8966139, 0.8997354),
-    vec2<f32>(2.5535901, 0.8744746),
-    vec2<f32>(2.1587989, 0.8744746),
-    vec2<f32>(1.8157750, 0.8997354),
-    vec2<f32>(1.5707963, 0.9284767),
-    vec2<f32>(1.4056476, 0.9867545),
-    vec2<f32>(3.1415927, 0.9899495),
-    vec2<f32>(2.9764439, 0.9867545),
-    vec2<f32>(2.7610863, 0.9831921),
-    vec2<f32>(2.4980915, 0.9805807),
-    vec2<f32>(2.2142974, 0.9805807),
-    vec2<f32>(1.9513028, 0.9831921),
-    vec2<f32>(1.7359451, 0.9867545),
-    vec2<f32>(1.5707963, 0.9899495)
-);
-
-fn getSubTileRotatedUVLUT(p: vec2<f32>, lenVH: f32, angleV: f32, gridIdx: u32) -> vec2<f32> {
-    let angleLen = OCT_GRID_ANGLE_LEN[gridIdx];
-    let angleG = angleLen.x;
-    let lenGH = angleLen.y;
-
-    var rotAngle = 0.0;
-    if (lenVH > 0.01 && lenGH > 0.01) {
-        var diff = angleV - angleG;
-        diff = diff - floor((diff + 3.14159265) * 0.15915494) * 6.2831853;
-
-        let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
-        rotAngle = diff * poleFade;
-    }
-
-    let c = cos(rotAngle);
-    let s = sin(rotAngle);
-    let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
-    return rotatedP + vec2<f32>(0.5);
-}
 
 fn sampleOctahedralAtlas(
     tex: texture_2d<f32>,
@@ -315,35 +160,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
 
-    let idx00 = u32(g00.y) * 8u + u32(g00.x);
-    let idx10 = u32(g10.y) * 8u + u32(g10.x);
-    let idx01 = u32(g01.y) * 8u + u32(g01.x);
-    let idx11 = u32(g11.y) * 8u + u32(g11.x);
-
-    // 🚀 [최적화 P0 / Step 20 - 옥타헤드럴 LUT 룩업]
-    // 64개 정적 LUT 테이블을 통해 매 픽셀 hemiOctahedralUVToDir(역투영 4회) 및 atan2(초월함수 4회), length(제곱근 4회)를 100% 제거!
-    let pQuad = inputData.uv - vec2<f32>(0.5);
-    let viewH = vec2<f32>(localView.x, localView.z);
-    let lenVH = length(viewH);
-    var angleV = 0.0;
-    if (lenVH > 0.01) {
-        angleV = atan2(localView.z, localView.x);
-    }
-
-    let uv00 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx00);
-    let uv10 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx10);
-    let uv01 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx01);
-    let uv11 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx11);
+    // 🚀 [최적화 & 왜곡 해결] 인위적인 2D UV 회전을 완전히 제거하고 빌보드 쿼드 UV를 직접 사용
+    // 모든 옥타헤드럴 타일에서 나무 기둥이 U=0.5 중앙에 정확히 정렬되어 기둥 분열(다리 여러 개) 현상을 근본적으로 차단합니다.
+    let subUV = inputData.uv;
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
     let ddxAtlas = ddxUV / n;
     let ddyAtlas = ddyUV / n;
 
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
 
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
     let w10 = frac.x * (1.0 - frac.y);
@@ -409,24 +238,23 @@ fn main(inputData: InputData) -> OutputFragment {
     // 500m 밖에서는 1그루의 화면 크기가 15~30px에 불과하므로 대표 서브타일 1탭만 샘플링 (Normal/ORM 8탭 ➔ 2탭 75% 즉각 절감!)
     if (distSq > 250000.0) {
         var domG = g00;
-        var domUV = uv00;
         var maxCov = cov00;
-        if (cov10 > maxCov) { maxCov = cov10; domG = g10; domUV = uv10; }
-        if (cov01 > maxCov) { maxCov = cov01; domG = g01; domUV = uv01; }
-        if (cov11 > maxCov) { maxCov = cov11; domG = g11; domUV = uv11; }
+        if (cov10 > maxCov) { maxCov = cov10; domG = g10; }
+        if (cov01 > maxCov) { maxCov = cov01; domG = g01; }
+        if (cov11 > maxCov) { maxCov = cov11; domG = g11; }
 
-        rawNormalDepth = sampleOctahedralAtlas(normalTexture, normalTextureSampler, domG, domUV, n, ddxAtlas, ddyAtlas);
-        rawORM = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, domG, domUV, n, ddxAtlas, ddyAtlas);
+        rawNormalDepth = sampleOctahedralAtlas(normalTexture, normalTextureSampler, domG, subUV, n, ddxAtlas, ddyAtlas);
+        rawORM = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, domG, subUV, n, ddxAtlas, ddyAtlas);
     } else {
-        let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-        let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-        let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-        let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+        let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
+        let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
+        let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
+        let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
 
-        let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-        let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-        let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-        let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+        let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
+        let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
+        let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
+        let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
 
         rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
         rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;

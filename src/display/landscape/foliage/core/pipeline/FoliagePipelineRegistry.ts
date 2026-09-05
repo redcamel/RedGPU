@@ -3,7 +3,6 @@ import ResourceManager from "../../../../../resources/core/resourceManager/Resou
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
 import foliageDepthPrepassWGSL from "./foliageDepthPrepass.wgsl";
 import foliageShadowDepthWGSL from "./foliageShadowDepth.wgsl";
-import octahedralImpostorDepthOnlyWGSL from "../impostor/octahedral/octahedralImpostorDepthOnly.wgsl";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
 export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth' | 'shadow' | 'shadowOpaque';
@@ -14,7 +13,6 @@ class FoliagePipelineRegistry {
     #vertexShaderModule: GPUShaderModule | null = null;
     #depthPrepassFragmentShaderModule: GPUShaderModule | null = null;
     #shadowDepthFragmentShaderModule: GPUShaderModule | null = null;
-    #octahedralDepthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
     constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
@@ -48,18 +46,22 @@ class FoliagePipelineRegistry {
         const isShadow = depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque';
         const isShadowOpaque = depthPassMode === 'shadowOpaque';
         const isDepthPrepass = depthPassMode === 'depthPrepass';
+        const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
         const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
+
+        // 🚀 임포스터는 뎁스 프리패스 및 섀도우 패스를 타지 않고 메인 패스에서만 렌더링되므로 Prepass/Shadow 파이프라인 생성 차단
+        if (isOctahedral && (isDepthPrepass || isShadow)) {
+            return null;
+        }
         if (isDepthPrepass && !hasBaseColorTexture) {
             return null;
         }
 
-        const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
-
         let fragmentModule: GPUShaderModule | null = null;
         if (isShadow) {
-            fragmentModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#shadowDepthFragmentShaderModule;
+            fragmentModule = this.#shadowDepthFragmentShaderModule;
         } else if (isDepthPrepass) {
-            fragmentModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#depthPrepassFragmentShaderModule;
+            fragmentModule = this.#depthPrepassFragmentShaderModule;
         } else {
             fragmentModule = material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule;
         }
@@ -251,14 +253,6 @@ class FoliagePipelineRegistry {
             });
         }
         this.#shadowDepthFragmentShaderModule = shadowDepthFModule;
-
-        let octDepthFModule = resourceManager.getGPUShaderModule('OctahedralImpostorDepthOnlyFragmentShader_Module');
-        if (!octDepthFModule) {
-            octDepthFModule = resourceManager.createGPUShaderModule('OctahedralImpostorDepthOnlyFragmentShader_Module', {
-                code: octahedralImpostorDepthOnlyWGSL,
-            });
-        }
-        this.#octahedralDepthOnlyFragmentShaderModule = octDepthFModule;
     }
 }
 
