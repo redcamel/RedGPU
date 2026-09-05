@@ -4,7 +4,6 @@ import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
-import ACamera from "../ACamera";
 import METERING_MODE from "../METERING_MODE";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
@@ -61,6 +60,11 @@ class AutoExposure extends RedGPUObject {
     #downsampleBindGroup0Cache: WeakMap<GPUTexture, { swap0: GPUBindGroup, swap1: GPUBindGroup }> = new WeakMap();
     #downsampleBindGroup1: GPUBindGroup;
     #adaptationBindGroup0: GPUBindGroup;
+
+    // [KO] 매 프레임 힙 메모리 할당 및 GC 부하 방지를 위한 재사용 버퍼
+    // [EN] Reusable buffers to prevent per-frame heap allocation and GC overhead
+    #cachedUniformData: Float32Array = new Float32Array(16);
+    #cachedEV100Data: Float32Array = new Float32Array(1);
 
     constructor(view: View3D) {
         super(view.redGPUContext)
@@ -344,8 +348,9 @@ class AutoExposure extends RedGPUObject {
      */
     set currentAdaptedEV100(value: number) {
         this.#currentAdaptedEV100 = value;
-        const initialData = new Float32Array([value]);
-        this.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, initialData.buffer);
+        const u = this.#cachedEV100Data;
+        u[0] = value;
+        this.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, u.buffer, u.byteOffset, u.byteLength);
     }
 
     /**
@@ -380,29 +385,31 @@ class AutoExposure extends RedGPUObject {
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산
         const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
 
-        // Update uniforms
+        // Update uniforms (재사용 버퍼 인플레이스 갱신으로 매 프레임 GC 0건 유지)
+        const u = this.#cachedUniformData;
+        u[0] = deltaTime;
+        u[1] = this.#targetLuminance;
+        u[2] = this.#adaptationSpeedUp;
+        u[3] = this.#adaptationSpeedDown;
+        u[4] = this.#exposureCompensation;
+        u[5] = this.#minEV100;
+        u[6] = this.#maxEV100;
+        u[7] = ev100Range;
+        u[8] = this.#lowPercentile;
+        u[9] = this.#highPercentile;
+        u[10] = 1.0 / ev100Range;
+        u[11] = width;
+        u[12] = height;
+        u[13] = currentPreExposure;
+        u[14] = this.#maxExposureMultiplier;
+        u[15] = this.#meteringMode;
+
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer,
             0,
-            new Float32Array([
-                deltaTime,
-                this.#targetLuminance,
-                this.#adaptationSpeedUp,
-                this.#adaptationSpeedDown,
-                this.#exposureCompensation,
-                this.#minEV100,
-                this.#maxEV100,
-                ACamera.CALIBRATION_CONSTANT,
-                ev100Range,
-                this.#lowPercentile,
-                this.#highPercentile,
-                1.0 / ev100Range,
-                width,
-                height,
-                currentPreExposure,
-                this.#maxExposureMultiplier,
-                this.#meteringMode
-            ])
+            u.buffer,
+            u.byteOffset,
+            u.byteLength
         );
 
         const msaaChanged = this.#prevMSAAID !== msaaID;
@@ -441,11 +448,6 @@ class AutoExposure extends RedGPUObject {
             };
             this.#downsampleBindGroup0Cache.set(sourceTextureInfo.texture, cachedBG0);
         }
-
-        // [KO] 히스토그램 버퍼 명시적 초기화
-        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
-            encoder.clearBuffer(this.#histogramBuffer.gpuBuffer);
-        });
 
         // Pass 1: Generate Histogram
         const pipeline = this.#getDownsamplePipeline(useMSAA);
@@ -533,8 +535,8 @@ class AutoExposure extends RedGPUObject {
     #calculatePreExposure(ev100: number, exposureCompensation: number): number {
         // [KO] UE5 표준 물리 노출 공식 적용: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
         // [EN] Apply UE5 standard physical exposure formula: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
-        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수(K)이며, ACamera.CALIBRATION_CONSTANT(12.5)와 조합되어 최종 휘도를 결정합니다.
-        // [EN] Here, 1.2 is Unreal's exposure calibration factor, used in combination with ACamera.CALIBRATION_CONSTANT (12.5) to determine final luminance.
+        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수이며, ISO 2720 표준(K=12.5)과 조합되어 최종 휘도를 결정합니다.
+        // [EN] Here, 1.2 is Unreal's exposure calibration factor, used in combination with ISO 2720 standard (K=12.5) to determine final luminance.
         return Math.pow(2, exposureCompensation) / (1.2 * Math.pow(2, ev100));
     }
 
@@ -560,8 +562,8 @@ class AutoExposure extends RedGPUObject {
             label: 'AutoExposure_ReadBuffer'
         });
 
-        // [KO] 통합 유니폼 데이터 구성 (총 18개 요소) [EN] Unified globalStruct data configuration (total 18 elements)
-        const uniformData = new Float32Array(18);
+        // [KO] 통합 유니폼 데이터 구성 (총 16개 요소) [EN] Unified globalStruct data configuration (total 16 elements)
+        const uniformData = new Float32Array(16);
         this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }
 

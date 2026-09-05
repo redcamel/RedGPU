@@ -12,7 +12,6 @@ struct AutoExposureUniforms {
     exposureCompensation: f32,
     minEV100: f32,
     maxEV100: f32,
-    calibrationConstant: f32,
     ev100Range: f32,
     lowPercentile: f32,
     highPercentile: f32,
@@ -54,29 +53,34 @@ fn main(
             if (texel.a > 0.0) {
                 let color = texel.rgb;
                 let brightness = max(color.r, max(color.g, color.b));
-                let lum = brightness / max(uniforms.currentPreExposure, 0.0001);
+                let lum = brightness / max(uniforms.currentPreExposure, 0.0000001);
                 
-                if (lum > 0.0001) {
-                    // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
-                    // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
-                    let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
+                if (lum > 0.0000001) {
+                    // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
+                    // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
+                    let ev100 = log2(lum) + 3.0;
                     
                     let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
                     let binIndex = u32(normalizedEV100 * 255.0);
 
-                    // [KO] 측광 가중치 계산 [EN] Calculate metering weight
+                    // [KO] 측광 가중치 계산 (기본 AVERAGE 모드 시 나눗셈/SFU sqrt 완전 바이패스)
+                    // [EN] Calculate metering weight (Completely bypass divisions/SFU sqrt in default AVERAGE mode)
                     var weight = 1.0;
-                    let uv = vec2<f32>(f32(coords.x) / uniforms.width, f32(coords.y) / uniforms.height);
-                    let dist = distance(uv, vec2<f32>(0.5, 0.5));
+                    if (uniforms.meteringMode > 0.5) {
+                        let uv = vec2<f32>(f32(coords.x) / uniforms.width, f32(coords.y) / uniforms.height);
+                        let delta = uv - vec2<f32>(0.5, 0.5);
+                        let dist = sqrt(dot(delta, delta));
 
-                    if (uniforms.meteringMode == 1.0) {
-                        // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
-                        weight = clamp(1.0 - dist * 1.0, 0.0, 1.0);
-                        weight = weight * weight; // [KO] 부드러운 감쇄 [EN] Smooth falloff
-                    } else if (uniforms.meteringMode == 2.0) {
-                        // [KO] 스포트 측광 (Spot) [EN] Spot
-                        weight = clamp(1.0 - dist * 4.0, 0.0, 1.0);
-                        weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
+                        if (uniforms.meteringMode < 1.5) {
+                            // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
+                            let w = clamp(1.0 - dist, 0.0, 1.0);
+                            weight = w * w;
+                        } else {
+                            // [KO] 스포트 측광 (Spot) [EN] Spot
+                            let w = clamp(1.0 - dist * 4.0, 0.0, 1.0);
+                            let w2 = w * w;
+                            weight = w2 * w2;
+                        }
                     }
 
                     // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)

@@ -6,7 +6,6 @@ struct AutoExposureUniforms {
     exposureCompensation: f32,
     minEV100: f32,
     maxEV100: f32,
-    calibrationConstant: f32,
     ev100Range: f32,
     lowPercentile: f32,
     highPercentile: f32,
@@ -66,9 +65,9 @@ fn main() {
     // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
     // [KO] UE5 표준 공식(1 / (1.2 * 2^EV100))에 따라, targetLuminance가 최종 결과물의 평균 휘도가 되도록 EV100을 계산합니다.
     // [EN] According to the UE5 standard formula (1 / (1.2 * 2^EV100)), calculate EV100 so that targetLuminance becomes the average luminance of the final result.
-    // [KO] 기준점 계산: log2((1.2 * 100.0 * targetLuminance) / calibrationConstant)
-    // [EN] Reference point calculation: log2((1.2 * 100.0 * targetLuminance) / calibrationConstant)
-    var targetEV100 = avgEV100 - log2((120.0 * uniforms.targetLuminance) / uniforms.calibrationConstant) - uniforms.exposureCompensation;
+    // [KO] 기준점 계산: log2((1.2 * 100.0 * targetLuminance) / 12.5) = log2(9.6 * targetLuminance)
+    // [EN] Reference point calculation: log2((1.2 * 100.0 * targetLuminance) / 12.5) = log2(9.6 * targetLuminance)
+    var targetEV100 = avgEV100 - log2(9.6 * uniforms.targetLuminance) - uniforms.exposureCompensation;
 
     // [KO] 노출 배율 제한 적용 (너무 어두울 때 스페큘러가 타는 현상 방지)
     // [EN] Apply exposure multiplier limit (prevents specular blooming in very dark scenes)
