@@ -21,11 +21,8 @@ fn main(inputData: InputData) -> VertexOutput {
     // System uniforms
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
 
-    let su_viewMatrix = systemUniforms.camera.viewMatrix;
-
     // Vertex uniforms
     let gu_matrixList = globalVertexData.matrixList;
-    let gu_uvTransform = globalVertexData.uvTransform;
 
     let gu_localMatrix = gu_matrixList.localMatrix;
     let gu_modelMatrix = gu_matrixList.modelMatrix;
