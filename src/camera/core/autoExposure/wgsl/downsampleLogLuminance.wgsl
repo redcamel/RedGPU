@@ -1,4 +1,3 @@
-#redgpu_include color.getLuminance
 
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 @group(0) @binding(1) var depthTexture : texture_depth_2d;
