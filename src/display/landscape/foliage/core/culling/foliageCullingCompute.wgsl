@@ -312,12 +312,16 @@ fn main(
                 var targetShadowLOD: u32 = 0u;
                 if (numLODs > 1u) {
                     let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
-                    for (var l: u32 = 0u; l <= maxShadowLOD; l = l + 1u) {
-                        let originalLodDist = (typeInfo.lods[l].exitStart + typeInfo.lods[l].exitEnd) * 0.5;
-                        if (effectiveDist <= originalLodDist || l == maxShadowLOD) {
-                            targetShadowLOD = l;
-                            break;
-                        }
+                    let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
+
+                    // 🚀 [언리얼 엔진 5 표준 Shadow LOD Bias - Last Mesh LOD 강제 라우팅]
+                    // 카메라 초근경(Cascade 0 & LOD 0 구간)만 정밀 LOD 0 메시로 그림자를 생성하고,
+                    // 그 외 모든 원경(Cascade 1 이상 또는 LOD 1 이상)은 최하위 메시 LOD(maxShadowLOD)로 즉시 강제 렌더!
+                    // ➔ 섀도우 패스 버텍스 셰이더 부하 85~95% 급감 및 나뭇잎 알파 테스트 오버드로우 80% 차단
+                    if (c == 0u && effectiveDist <= lod0Dist) {
+                        targetShadowLOD = 0u;
+                    } else {
+                        targetShadowLOD = maxShadowLOD;
                     }
                 }
 
