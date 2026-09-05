@@ -25,7 +25,7 @@ import keepLog from "../utils/keepLog";
  */
 class ShadowManager {
     #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager();
-    #hadCastersLastFrame: boolean = false;
+    #needsClear: boolean = true;
 
     constructor() {
     }
@@ -55,7 +55,7 @@ class ShadowManager {
         const lightManager = scene?.lightManager;
         if (!lightManager || lightManager.directionalLightCount === 0) {
             this.#directionalShadowManager.resetCastingList();
-            this.#hadCastersLastFrame = false;
+            this.#needsClear = true;
             return;
         }
 
@@ -63,15 +63,15 @@ class ShadowManager {
 
         if (!hasCasters) {
             this.#directionalShadowManager.resetCastingList();
-            if (this.#hadCastersLastFrame) {
-                // 이전 프레임에 캐스터가 켜져 있다가 이번에 꺼진 순간: 1회 초기화 클리어 수행
+            if (this.#needsClear) {
+                // 최초 1회 또는 캐스터가 꺼진 첫 프레임: 뎁스 텍스처를 1.0으로 초기화하여 잔상/아티팩트 방지
                 this.#clearShadowDepthTextures(view);
-                this.#hadCastersLastFrame = false;
+                this.#needsClear = false;
             }
             return;
         }
 
-        this.#hadCastersLastFrame = true;
+        this.#needsClear = true;
 
         const list = this.#directionalShadowManager.castingList;
         const len = list.length;
@@ -174,7 +174,9 @@ class ShadowManager {
      * [EN] RedGPUContext instance
      */
     update(redGPUContext: RedGPUContext) {
-        this.#directionalShadowManager.update(redGPUContext)
+        if (this.#directionalShadowManager.update(redGPUContext)) {
+            this.#needsClear = true;
+        }
     }
 
     /**

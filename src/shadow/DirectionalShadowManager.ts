@@ -431,9 +431,9 @@ class DirectionalShadowManager {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      */
-    update(redGPUContext: RedGPUContext) {
+    update(redGPUContext: RedGPUContext): boolean {
         this.#redGPUContext = redGPUContext;
-        this.#checkDepthTexture();
+        return this.#checkDepthTexture();
     }
 
     /**
@@ -464,12 +464,14 @@ class DirectionalShadowManager {
     }
 
     /** 뎁스 텍스처 변경 여부 확인 및 재생성 */
-    #checkDepthTexture() {
+    #checkDepthTexture(): boolean {
         if (this.#shadowDepthTexture?.width !== this.#shadowDepthTextureSize) {
             this.destroy();
             this.#createDepthTexture();
             this.#calcVideoMemory();
+            return true;
         }
+        return false;
     }
 
     /** 빈 뎁스 텍스처(1x1x4 2D Array) 생성 */

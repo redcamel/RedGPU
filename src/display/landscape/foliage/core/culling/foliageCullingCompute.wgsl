@@ -115,10 +115,9 @@ fn main(
 
     let numLODs = typeInfo.lodCount;
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
-    let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
+    let effectiveCullingDistSq = cullingDistSq;
 
-    
-    
+    // 1차 거리 컬링 (카메라로부터 xz 수평거리 기반)
     let isVisibleRange = isValid && (horizontalDistSq < effectiveCullingDistSq);
 
     var realY = instance.posY - typeInfo.bottomOffset;
@@ -209,12 +208,10 @@ fn main(
 
         if (inMainFrustum) {
             var globalFade: f32 = 1.0;
-            if (!hasInfiniteImpostor) {
-                let fadeStartDist = typeInfo.fadeStartDistance;
-                if (dist > fadeStartDist) {
-                    
-                    globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
-                }
+            let fadeStartDist = typeInfo.fadeStartDistance;
+            if (dist > fadeStartDist) {
+                // fadeStartDistance ~ cullingDistance 사이에서 1.0 -> 0.0 으로 선형 페이드아웃
+                globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
             }
 
             if (numLODs <= 1u) {
