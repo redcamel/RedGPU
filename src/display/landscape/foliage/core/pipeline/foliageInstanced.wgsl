@@ -6,7 +6,7 @@ struct SubMeshUniforms {
     relativeNormalMatrix: mat4x4<f32>,
     globalFragmentSlotIndex: u32,
     hasHierarchyTransform: u32,
-    pad1: u32,
+    receiveShadow: f32,
     pad2: u32,
 };
 
@@ -59,8 +59,6 @@ fn mainInput(input : VertexInput) -> OutputData {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    
-    
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
@@ -84,9 +82,6 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        
-        
-        
         let rightXZ = vec2<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[2][0]);
         let rightLenSq = dot(rightXZ, rightXZ);
         let billboardRight = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(rightXZ.x, 0.0, rightXZ.y) * inverseSqrt(rightLenSq), rightLenSq > 0.0001);
@@ -137,16 +132,13 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 
     output.combinedOpacity = combinedOpacity;
-    output.receiveShadow = 1.0;
+    output.receiveShadow = subMeshUniforms.receiveShadow;
 
     output.motionVector = vec3<f32>(0.0);
     output.pickingId = vec4<f32>(0.0);
 
     return output;
 }
-
-
-
 
 struct FoliageShadowOutput {
     @builtin(position) position: vec4<f32>,
@@ -165,8 +157,6 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    
-    
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
@@ -185,7 +175,6 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        
         var billboardRight = vec3<f32>(1.0, 0.0, 0.0);
         var lightForward = vec3<f32>(0.0, 0.0, 1.0);
         if (systemUniforms.directionalLightCount > 0u) {
@@ -221,8 +210,6 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
     return output;
 }
 
-
-
 struct ShadowOpaqueVertexInput {
     @location(0) position : vec3<f32>,
 
@@ -230,9 +217,6 @@ struct ShadowOpaqueVertexInput {
     @location(7) instanceRotQuat : vec4<f32>,
     @location(8) instanceScaleXZ : vec2<f32>,
 };
-
-
-
 
 struct FoliageShadowOpaqueOutput {
     @builtin(position) position: vec4<f32>,
@@ -262,5 +246,3 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     return output;
 }
-
-

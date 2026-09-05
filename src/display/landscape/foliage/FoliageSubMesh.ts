@@ -29,12 +29,15 @@ export interface FoliageSubMeshInitOptions {
     isImpostor?: boolean;
     impostorWidth?: number;
     impostorHeight?: number;
+    receiveShadow?: boolean;
 
     instanceBufferOffset?: number;
     indirectOffsetBytes?: number;
 }
 
 class FoliageSubMesh {
+    static readonly #singleFloatBuffer: Float32Array = new Float32Array(1);
+
     readonly mesh: Mesh;
     readonly geometry: Geometry;
     readonly material: any;
@@ -57,6 +60,7 @@ class FoliageSubMesh {
     isImpostor: boolean;
     impostorWidth: number;
     impostorHeight: number;
+    receiveShadow: boolean;
 
     instanceBufferOffset: number;
     indirectOffsetBytes: number;
@@ -85,9 +89,24 @@ class FoliageSubMesh {
         this.isImpostor = init.isImpostor ?? false;
         this.impostorWidth = init.impostorWidth ?? 0;
         this.impostorHeight = init.impostorHeight ?? 0;
+        this.receiveShadow = init.receiveShadow !== false;
 
         this.instanceBufferOffset = init.instanceBufferOffset ?? 0;
         this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+    }
+
+    updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
+        this.receiveShadow = receiveShadow;
+        if (this.vertexUniformBuffer && gpuDevice) {
+            FoliageSubMesh.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
+            gpuDevice.queue.writeBuffer(
+                this.vertexUniformBuffer,
+                34 * 4,
+                FoliageSubMesh.#singleFloatBuffer.buffer,
+                FoliageSubMesh.#singleFloatBuffer.byteOffset,
+                4
+            );
+        }
     }
 
 

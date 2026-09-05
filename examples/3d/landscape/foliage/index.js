@@ -301,6 +301,7 @@ RedGPU.init(
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {label: 'Instances', readonly: true});
                         typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
+                        typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
                         typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
                             options: {
                                 'Cascade 0 (Near Only)': 0,

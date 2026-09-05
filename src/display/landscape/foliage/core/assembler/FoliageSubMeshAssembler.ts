@@ -358,7 +358,8 @@ class FoliageSubMeshAssembler {
             true,
             bbWidth,
             bbHeight,
-            bbBottomOffset
+            bbBottomOffset,
+            options.receiveShadow !== false
         );
         subList.push(bbSubMesh);
 
@@ -773,7 +774,12 @@ class FoliageSubMeshAssembler {
                 FoliageSubMeshAssembler.#identityMatrix,
                 FoliageSubMeshAssembler.#identityMatrix,
                 PBR_STRIDE_BYTES,
-                lodIndex
+                lodIndex,
+                false,
+                0,
+                0,
+                0,
+                options.receiveShadow !== false
             );
 
             resultSubMeshes.push(combinedSubMesh);
@@ -796,7 +802,8 @@ class FoliageSubMeshAssembler {
         isImpostorOverride: boolean = false,
         impostorWidth: number = 0,
         impostorHeight: number = 0,
-        bottomOffset: number = 0
+        bottomOffset: number = 0,
+        receiveShadow: boolean = true
     ): FoliageSubMesh {
         const isIndexed = !!geom.indexBuffer;
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
@@ -822,7 +829,7 @@ class FoliageSubMeshAssembler {
             relMatrix[12] === 0 && relMatrix[13] === 0 && relMatrix[14] === 0 && relMatrix[15] === 1
         );
         uintView[33] = isIdentity ? 0 : 1;
-        uintView[34] = 0;
+        floatView[34] = receiveShadow ? 1.0 : 0.0;
         uintView[35] = 0;
 
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
@@ -868,6 +875,7 @@ class FoliageSubMeshAssembler {
             isImpostor,
             impostorWidth,
             impostorHeight,
+            receiveShadow,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,
         });

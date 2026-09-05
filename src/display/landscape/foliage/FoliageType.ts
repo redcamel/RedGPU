@@ -48,6 +48,9 @@ export interface FoliageTypeOptions {
     castShadow?: boolean;
 
 
+    receiveShadow?: boolean;
+
+
     maxShadowCascadeIndex?: number;
 
 
@@ -76,6 +79,7 @@ class FoliageType {
     #nameHash: number = 0;
     #numLODs: number = 1;
     #castShadow: boolean = true;
+    #receiveShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
     #shadowCutoffCascadeIndex: number = 0;
     #shadowOpaqueLodThreshold: number = 1;
@@ -96,6 +100,7 @@ class FoliageType {
         this.#options = options;
         this.#onDirty = onDirty;
         this.#castShadow = options.castShadow !== false;
+        this.#receiveShadow = options.receiveShadow !== false;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
         this.#shadowCutoffCascadeIndex = options.shadowCutoffCascadeIndex !== undefined
             ? Math.max(0, Math.min(3, Math.floor(options.shadowCutoffCascadeIndex)))
@@ -130,6 +135,7 @@ class FoliageType {
             isFoliage: options.isFoliage !== false,
             groundOffset: options.groundOffset,
             castShadow: this.#castShadow,
+            receiveShadow: this.#receiveShadow,
             maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
             shadowCutoffCascadeIndex: this.#shadowCutoffCascadeIndex,
             shadowOpaqueLodThreshold: this.#shadowOpaqueLodThreshold,
@@ -302,6 +308,27 @@ class FoliageType {
             this.#castShadow = boolVal;
             this.#syncTypeParams();
             this.#onDirty?.();
+        }
+    }
+
+
+    get receiveShadow(): boolean {
+        return this.#receiveShadow;
+    }
+
+
+    set receiveShadow(value: boolean) {
+        const boolVal = !!value;
+        if (this.#receiveShadow !== boolVal) {
+            this.#receiveShadow = boolVal;
+            const gpuDevice = this.#redGPUContext.gpuDevice;
+            if (gpuDevice) {
+                const subMeshes = this.#subMeshes;
+                const count = subMeshes.length;
+                for (let i = 0; i < count; i++) {
+                    subMeshes[i].updateReceiveShadow(gpuDevice, boolVal);
+                }
+            }
         }
     }
 
