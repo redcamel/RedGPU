@@ -83,121 +83,12 @@ struct LandscapeUniforms {
 @group(2) @binding(4) var layerORMArray: texture_2d_array<f32>;
 @group(2) @binding(5) var layerWeightMapArray: texture_2d_array<f32>;
 
-struct DirectLayerResult {
-    albedo: vec3<f32>,
-    normal: vec3<f32>,
-    roughness: f32,
-    metallic: f32,
-    ao: f32,
-};
-
 fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
 }
 
-fn computeDirectLayersPBR(
-    globalUV: vec2<f32>,
-    worldTileUV: vec2<f32>,
-    ddxGlobalUV: vec2<f32>,
-    ddyGlobalUV: vec2<f32>,
-    ddxWorldTileUV: vec2<f32>,
-    ddyWorldTileUV: vec2<f32>,
-    baseN: vec3<f32>
-) -> DirectLayerResult {
-    var res: DirectLayerResult;
-    var baseAlbedo = uniforms.color.rgb;
-    var baseRoughness = 0.9;
-    var baseMetallic = 0.0;
-    var baseAO = 1.0;
-
-    let activeLayerCount = uniforms.activeLayerCount;
-    var totalLayerWeight = 0.0;
-    var blendedAlbedo = vec3<f32>(0.0);
-    var blendedNormalTangent = vec3<f32>(0.0, 0.0, 0.0);
-    var blendedRoughness = 0.0;
-    var blendedAO = 0.0;
-
-    
-    let splatMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
-
-    for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-        let layerParams = uniforms.layerParams[i];
-        if (layerParams.enabled <= 0.5) { continue; }
-
-        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
-        var weightVal = splatMapSample.r;
-        if (chIdx == 1u) { weightVal = splatMapSample.g; }
-        else if (chIdx == 2u) { weightVal = splatMapSample.b; }
-        else if (chIdx == 3u) {
-            let isAlphaFull = splatMapSample.a >= 0.99;
-            let remainingWeight = clamp(1.0 - (splatMapSample.r + splatMapSample.g + splatMapSample.b), 0.0, 1.0);
-            weightVal = select(splatMapSample.a, remainingWeight, isAlphaFull);
-        }
-        let layerW = clamp(weightVal, 0.0, 1.0);
-
-        if (layerW <= 0.001) { continue; }
-
-        let layerIdx = i32(i);
-        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
-        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
-        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
-
-        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
-        let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
-        let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
-        let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
-
-        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
-        let layerRoughness = layerParams.roughness * layerORMSample.g;
-        let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
-        let layerAO = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
-
-        blendedAlbedo += layerAlbedo * layerW;
-        blendedNormalTangent += layerNormalSample * layerW;
-        blendedRoughness += layerRoughness * layerW;
-        blendedAO += layerAO * layerW;
-
-        totalLayerWeight += layerW;
-    }
-
-    if (totalLayerWeight > 0.0001) {
-        let invW = 1.0 / totalLayerWeight;
-        let layerBlendAlbedo = blendedAlbedo * invW;
-        let layerBlendNormal = normalize(blendedNormalTangent);
-        let layerBlendRoughness = blendedRoughness * invW;
-        let layerBlendAO = blendedAO * invW;
-
-        let alpha = clamp(totalLayerWeight, 0.0, 1.0);
-
-        res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
-
-        
-        if (dot(layerBlendNormal.xy, layerBlendNormal.xy) > 1e-6) {
-            let lenSq = max(1.0 - baseN.x * baseN.x, 1e-4);
-            let invLen = inverseSqrt(lenSq);
-            let tangentX = vec3<f32>(1.0 - baseN.x * baseN.x, -baseN.x * baseN.y, -baseN.x * baseN.z) * invLen;
-            let tangentZ = cross(baseN, tangentX);
-            let perturbedWorldN = tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z;
-            res.normal = normalize(mix(baseN, perturbedWorldN, alpha));
-        } else {
-            res.normal = baseN;
-        }
-        res.roughness = mix(baseRoughness, layerBlendRoughness, alpha);
-        res.metallic = 0.0;
-        res.ao = mix(baseAO, layerBlendAO, alpha);
-    } else {
-        res.albedo = baseAlbedo;
-        res.normal = baseN;
-        res.roughness = baseRoughness;
-        res.metallic = 0.0;
-        res.ao = baseAO;
-    }
-
-    return res;
-}
-
-fn computeDistantLayersAlbedo(
+fn computeLandscapeLayersAlbedo(
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
     ddxGlobalUV: vec2<f32>,
@@ -210,7 +101,6 @@ fn computeDistantLayersAlbedo(
         return uniforms.color.rgb;
     }
 
-    
     let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
 
     var totalLayerWeight = 0.0;
@@ -379,69 +269,7 @@ fn getDirectPbrLighting(
     return totalDirectLighting;
 }
 
-fn getIndirectPbrLighting(
-    N: vec3<f32>,
-    V: vec3<f32>,
-    NdotV: f32,
-    albedo: vec3<f32>,
-    roughnessParameter: f32,
-    occlusionParameter: f32
-) -> vec3<f32> {
-    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
-    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
-    let preExposure = systemUniforms.preExposure;
-    let F0 = vec3<f32>(0.04);
-
-    if (u_usePrefilterTexture || u_useSkyAtmosphere) {
-        let R = getReflectionVectorFromViewDirection(V, N);
-        let NdotV_IBL = max(abs(dot(N, V)), 0.04);
-        var reflectedColor = vec3<f32>(0.0);
-        var iblDiffuseColor = vec3<f32>(0.0);
-
-        if (u_usePrefilterTexture) {
-            let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-            let mipLevel = roughnessParameter * iblMipmapCount;
-            reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
-        }
-
-        if (u_useSkyAtmosphere) {
-            let u_atmo = systemUniforms.skyAtmosphere;
-            let camH = u_atmo.cameraHeight;
-            let atmH = u_atmo.atmosphereHeight;
-            let skyIntensity = u_atmo.sunIntensity;
-            let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-            let atmoMipLevel = roughnessParameter * atmoMipCount;
-            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
-            reflectedColor = (reflectedColor * specTrans) + specSkyScat;
-
-            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
-            iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
-        }
-
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
-        reflectedColor *= energyCompensation;
-
-        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
-        reflectedColor *= horizonOcclusion * horizonOcclusion;
-
-        let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
-        let kD = vec3<f32>(1.0) - F_IBL;
-
-        let diffIBL = (kD * iblDiffuseColor) * (albedo * occlusionParameter);
-        let specIBL = (reflectedColor * F_IBL) * occlusionParameter;
-        return diffIBL + specIBL;
-    } else {
-        let ambFactor = systemUniforms.ambientLight.intensity * (preExposure * occlusionParameter);
-        return albedo * (systemUniforms.ambientLight.color * ambFactor);
-    }
-}
-
-
-fn getDistantIndirectPbrLighting(
+fn getLandscapeIndirectLighting(
     N: vec3<f32>,
     albedo: vec3<f32>,
     occlusionParameter: f32
@@ -474,19 +302,6 @@ fn getDistantIndirectPbrLighting(
     }
 }
 
-const bayerMatrix4x4 = array<f32, 16>(
-     0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0,
-    12.0 / 16.0,  4.0 / 16.0, 14.0 / 16.0,  6.0 / 16.0,
-     3.0 / 16.0, 11.0 / 16.0,  1.0 / 16.0,  9.0 / 16.0,
-    15.0 / 16.0,  7.0 / 16.0, 13.0 / 16.0,  5.0 / 16.0
-);
-
-fn getBayerDither4x4(pixelCoord: vec2<f32>) -> f32 {
-    let x = u32(pixelCoord.x) % 4u;
-    let y = u32(pixelCoord.y) % 4u;
-    return bayerMatrix4x4[y * 4u + x];
-}
-
 fn computeLandscapeHeightmapShadow(
     worldPos: vec3<f32>,
     L: vec3<f32>,
@@ -505,23 +320,19 @@ fn computeLandscapeHeightmapShadow(
 
     var shadowFactor: f32 = 1.0;
 
-    
     let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
     let baseUV = (worldPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
     let uvDir = L.xz * invWorldSize;
 
     for (var i = 0u; i < stepCount; i = i + 1u) {
-        
         let u = (f32(i) + 0.5) * invStepCount;
         let t = minDistance + distRange * (u * u);
         let samplePosY = worldPos.y + L.y * t;
 
-        
         if (samplePosY > heightScale) {
             break;
         }
 
-        
         let uv = baseUV + uvDir * t;
 
         if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
@@ -554,7 +365,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let input_vertexPosition = inputData.vertexPosition;
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let globalUV = inputData.uv1;
-    let lod = inputData.lodLevel;
     let worldTileUV = inputData.uv;
 
     let ddxGlobalUV = dpdx(globalUV);
@@ -562,47 +372,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let ddxWorldTileUV = dpdx(worldTileUV);
     let ddyWorldTileUV = dpdy(worldTileUV);
 
-    var albedo: vec3<f32>;
-    var N: vec3<f32>;
-    var roughnessFactor: f32;
-    var ambientOcclusion: f32;
-
-    let baseN = getBaseNormal(globalUV);
+    var albedo = computeLandscapeLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
+    let N = getBaseNormal(globalUV);
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
 
-    var isDirectPBR = false;
-    if (lod < 0.5) {
-        
-        
-        
-        let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
-        let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
-
-        let NdotV_angle = max(abs(dot(baseN, V)), 0.04);
-        let angleFactor = clamp(NdotV_angle, 0.35, 1.0);
-
-        let lod0Dist = min(50.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x))) * angleFactor;
-        let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
-        let fade = smoothstep(lod0Dist * fadeRatio, lod0Dist, viewDist);
-        let ditherThreshold = getBayerDither4x4(inputData.position.xy);
-        isDirectPBR = fade <= ditherThreshold;
-    }
-
-    if (isDirectPBR) {
-        
-        let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
-        albedo = direct.albedo;
-        N = direct.normal;
-        roughnessFactor = direct.roughness;
-        ambientOcclusion = direct.ao;
-    } else {
-        
-        albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-        N = baseN;
-        roughnessFactor = 0.85;
-        ambientOcclusion = 1.0;
-    }
+    let roughnessFactor = 0.85;
+    let ambientOcclusion = 1.0;
 
     if (inputData.instanceColor.a > 0.0) {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
@@ -620,10 +396,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var visibility = 1.0;
 
-    
-    
-    
-    
     if (receiveShadowYn && NdotL > 0.001) {
         var terrainShadowVis = 1.0;
         var isDeepTerrainShadow = false;
@@ -646,9 +418,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
-        
         if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
-            
             let rawVisibility: f32 = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -659,7 +429,6 @@ fn main(inputData: InputData) -> OutputFragment {
             let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
             visibility = min(csmVisibility, terrainShadowVis);
         } else {
-            
             visibility = terrainShadowVis;
         }
     }
@@ -671,22 +440,11 @@ fn main(inputData: InputData) -> OutputFragment {
         visibility
     );
 
-    var indirectLighting = vec3<f32>(0.0);
-    if (isDirectPBR) {
-        indirectLighting = getIndirectPbrLighting(
-            N, V, NdotV,
-            albedo,
-            roughnessParameter,
-            ambientOcclusion
-        );
-    } else {
-        
-        indirectLighting = getDistantIndirectPbrLighting(
-            N,
-            albedo,
-            ambientOcclusion
-        );
-    }
+    let indirectLighting = getLandscapeIndirectLighting(
+        N,
+        albedo,
+        ambientOcclusion
+    );
 
     let finalColor = vec4<f32>(directLighting + indirectLighting, 1.0);
 
