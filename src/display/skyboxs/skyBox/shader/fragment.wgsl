@@ -10,7 +10,6 @@ struct Uniforms {
     blur: f32,
     intensityMultiplier: f32,
     luminance: f32,
-    averageLuminance: f32,
     opacity: f32,
     transitionProgress: f32,
 };

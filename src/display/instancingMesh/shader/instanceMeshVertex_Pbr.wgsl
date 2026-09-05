@@ -13,21 +13,14 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // [KO] 시스템 유니폼 접근
     // [EN] Access system uniforms
-    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_camera = systemUniforms.camera;
-    let u_viewMatrix = u_camera.viewMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
+    let u_cameraPosition = systemUniforms.camera.cameraPosition;
 
     let input_position = inputData.position;
     let input_vertexNormal = inputData.vertexNormal;
     let input_uv = inputData.uv;
 
     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
-
-    // [KO] 월드 좌표 변환
-    // [EN] World coordinate transformation
-    let worldPosition = position.xyz;
 
     // Displacement 처리
     if (u_useDisplacementTexture) {

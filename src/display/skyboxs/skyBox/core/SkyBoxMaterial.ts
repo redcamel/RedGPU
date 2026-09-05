@@ -48,11 +48,6 @@ interface SkyBoxMaterial {
      */
     luminance: number;
     /**
-     * [KO] 분석 완료된 HDR 텍스처의 평균 휘도
-     * [EN] The analyzed average luminance of the HDR texture
-     */
-    averageLuminance: number;
-    /**
      * [KO] 스카이박스의 불투명도 수치 (0.0 ~ 1.0)
      * [EN] Opacity value of the skybox (0.0 to 1.0)
      */
