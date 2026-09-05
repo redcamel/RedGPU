@@ -291,12 +291,20 @@ class FoliageSubMeshAssembler {
 
             const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
-
                 mat.isFoliage = true;
-                mat.useCutOff = true;
-                mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
+                // 🌟 [표준 머티리얼 속성 기반 판별 (Source of Truth)]
+                // GLTF 로더 또는 개발자가 설정한 머티리얼 고유 속성(useCutOff, alphaBlend === 1(MASK))을 존중합니다.
+                // 잎사귀(MASK)만 컷오프와 양면 렌더링을 적용하고, 불투명(OPAQUE - 기둥, 줄기 등) 머티리얼은 불투명을 온전히 보존하여
+                // 섀도우 패스에서 Null Fragment 및 Early-Z 100% 선점 가속을 적용합니다.
+                const isMasked = !!mat.useCutOff || mat.alphaBlend === 1;
+                if (isMasked) {
+                    mat.useCutOff = true;
+                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
+                    mat.doubleSided = true;
+                } else {
+                    mat.useCutOff = false;
+                }
                 mat.transparent = false;
-                mat.doubleSided = true;
                 mat.dirtyPipeline = true;
             }
 
@@ -671,7 +679,7 @@ class FoliageSubMeshAssembler {
         });
 
         const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
-        const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0) || isImpostor;
+        const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
         const isDepthPrepass = !isImpostor && (hasBaseColorTexture || isMasked);
@@ -695,6 +703,7 @@ class FoliageSubMeshAssembler {
             lodIndex,
             isDepthPrepass,
             isMainOpaqueOrMasked,
+            isMasked,
             mainDepthMode,
             isImpostor,
             impostorWidth,

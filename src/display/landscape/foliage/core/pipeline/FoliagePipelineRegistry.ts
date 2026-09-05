@@ -5,7 +5,7 @@ import foliageDepthOnlyWGSL from "./foliageDepthOnly.wgsl";
 import octahedralImpostorDepthOnlyWGSL from "../impostor/octahedral/octahedralImpostorDepthOnly.wgsl";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
-export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth' | 'shadow';
+export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth' | 'shadow' | 'shadowOpaque';
 
 class FoliagePipelineRegistry {
     #redGPUContext: RedGPUContext;
@@ -43,7 +43,8 @@ class FoliagePipelineRegistry {
             material._updateFragmentState?.();
         }
 
-        const isShadow = depthPassMode === 'shadow';
+        const isShadow = depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque';
+        const isShadowOpaque = depthPassMode === 'shadowOpaque';
         const isDepthPrepass = depthPassMode === 'depthPrepass';
         const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
         if (isDepthPrepass && !hasBaseColorTexture) {
@@ -52,6 +53,9 @@ class FoliagePipelineRegistry {
 
         const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
         const depthModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#depthOnlyFragmentShaderModule;
+
+        const isMaskedOrTransparent = !!material.useCutOff || material.alphaBlend === 1 || material.alphaBlend === 2 || !!material.transparent || isOctahedral;
+        const needsShadowFragment = isShadow && !isShadowOpaque && isMaskedOrTransparent && hasBaseColorTexture;
 
         const fragmentModule = (isDepthPrepass || isShadow)
             ? depthModule
@@ -100,7 +104,7 @@ class FoliagePipelineRegistry {
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || this.#emptyBindGroupLayout;
 
-        const bindGroupLayouts: GPUBindGroupLayout[] = (isShadow && !hasBaseColorTexture)
+        const bindGroupLayouts: GPUBindGroupLayout[] = (isShadow && !needsShadowFragment)
             ? [systemBindGroupLayout, effectiveSubMeshBGL]
             : [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
@@ -181,7 +185,7 @@ class FoliagePipelineRegistry {
         const vertexEntryPoint = isShadow ? 'entryPointShadowVertex' : 'mainInput';
         const fragmentEntryPoint = isShadow ? 'shadowMain' : 'main';
 
-        const fragmentState = (isShadow && !hasBaseColorTexture) ? undefined : {
+        const fragmentState = (isShadow && !needsShadowFragment) ? undefined : {
             module: fragmentModule!,
             entryPoint: fragmentEntryPoint,
             targets: targets,

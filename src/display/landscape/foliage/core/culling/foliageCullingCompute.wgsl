@@ -284,6 +284,11 @@ fn main(
 
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
 
+    // 🚀 [최적화 - 그림자 비활성화 조기 탈출] castShadow가 꺼진 식생 유형(maxShadowCascadeIndex > 3u)은 평면 내적 연산 0회 즉시 종료
+    if (typeInfo.maxShadowCascadeIndex > 3u) {
+        return;
+    }
+
     // 🚀 [최적화 P0 / Step 22 - 섀도우 캐스케이드 루프 Early Break (평면 내적 18~24회 100% 생략)]
     for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
         let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;

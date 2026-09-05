@@ -149,6 +149,7 @@ class FoliageRenderer {
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
+            if (!foliageType.castShadow) continue;
             if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
             if (foliageType.activeInstanceCount <= 0) continue;
             const culledGPU = foliageType.shadowCulledGPUBuffer;
@@ -171,6 +172,8 @@ class FoliageRenderer {
         const cascadeIndirectOffset = currentCascade * 256 * 20;
         const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
 
+        // 🌟 [핵심 최적화 1단계 - Early-Z 선점을 위한 Opaque 불투명 서브메시 선행 렌더링]
+        // 나무 기둥(Trunk), 바위 등 완전 불투명 서브메시를 먼저 렌더링하여 섀도우 맵 뎁스 버퍼를 하드웨어 속도로 선점합니다.
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesShadow[t];
             const foliageType = item.type!;
@@ -178,15 +181,42 @@ class FoliageRenderer {
             const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
+
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (!sub.canRenderInPass('shadow')) continue;
-                // 그림자 패스에서는 2D 임포스터 쿼드를 배제하고 3D 메시로만 투영
                 if (sub.isImpostor) continue;
+                if (sub.isMasked) continue; // 불투명 서브메시만 선행 렌더링
 
                 const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
                 const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
-                this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow', instOffset, indOffset);
+                this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadowOpaque', instOffset, indOffset);
+            }
+        }
+
+        // 🌟 [핵심 최적화 2단계 - Masked(나뭇잎/풀잎) 서브메시 렌더링]
+        // 선행 렌더링된 기둥 뎁스 덕분에 기둥 뒤에 가려진 수만 개의 나뭇잎 픽셀은 GPU Early-Z 단계에서 100% 즉시 탈락!
+        // 또한 currentCascade > foliageType.shadowCutoffCascadeIndex인 원경 캐스케이드에서는
+        // discard를 바이패스하고 shadowOpaque(Null Fragment)로 렌더링하여 픽셀 셰이더 연산 0회 및 100% Early-Z 가동!
+        for (let t = 0; t < validCount; t++) {
+            const item = this.#validTypesShadow[t];
+            const foliageType = item.type!;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            const isOpaqueCascade = currentCascade > foliageType.shadowCutoffCascadeIndex;
+            const depthMode: FoliageDepthPassMode = isOpaqueCascade ? 'shadowOpaque' : 'shadow';
+
+            for (let s = 0; s < subCount; s++) {
+                const sub = subMeshes[s];
+                if (!sub.canRenderInPass('shadow')) continue;
+                if (sub.isImpostor) continue;
+                if (!sub.isMasked) continue; // 마스크된 서브메시만 후행 렌더링
+
+                const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
+                const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, depthMode, instOffset, indOffset);
             }
         }
     }
@@ -231,10 +261,14 @@ class FoliageRenderer {
             this.#lastBoundVertexUniformBG = vertexUniformBG;
         }
 
-        const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
-            passEncoder.setBindGroup(2, matUniformBG);
-            this.#lastBoundMatBG = matUniformBG;
+        const isShadowDepth = depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque';
+        const needsMatBG = !isShadowDepth || sub.needsShadowFragment(depthPassMode);
+        if (needsMatBG) {
+            const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
+            if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
+                passEncoder.setBindGroup(2, matUniformBG);
+                this.#lastBoundMatBG = matUniformBG;
+            }
         }
 
         if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {

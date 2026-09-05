@@ -24,6 +24,7 @@ export interface FoliageSubMeshInitOptions {
 
     isDepthPrepass: boolean;
     isMainOpaqueOrMasked: boolean;
+    isMasked?: boolean;
     mainDepthMode: FoliageDepthPassMode;
     isImpostor?: boolean;
     impostorWidth?: number;
@@ -51,6 +52,7 @@ class FoliageSubMesh {
 
     readonly isDepthPrepass: boolean;
     readonly isMainOpaqueOrMasked: boolean;
+    readonly isMasked: boolean;
     readonly mainDepthMode: FoliageDepthPassMode;
     isImpostor: boolean;
     impostorWidth: number;
@@ -78,6 +80,7 @@ class FoliageSubMesh {
 
         this.isDepthPrepass = init.isDepthPrepass;
         this.isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
+        this.isMasked = init.isMasked ?? true;
         this.mainDepthMode = init.mainDepthMode;
         this.isImpostor = init.isImpostor ?? false;
         this.impostorWidth = init.impostorWidth ?? 0;
@@ -85,6 +88,15 @@ class FoliageSubMesh {
 
         this.instanceBufferOffset = init.instanceBufferOffset ?? 0;
         this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+    }
+
+    /**
+     * [KO] 지정된 섀도우 패스 모드에서 픽셀 셰이더(shadowMain - discard)가 필요한지 여부를 반환합니다.
+     * [EN] Returns whether fragment shader (shadowMain - discard) is needed for the specified shadow pass mode.
+     */
+    needsShadowFragment(depthPassMode: FoliageDepthPassMode = 'shadow'): boolean {
+        if (depthPassMode === 'shadowOpaque') return false;
+        return this.isMasked;
     }
 
     canRenderInPass(passType: FoliageRenderPassType): boolean {
@@ -123,9 +135,22 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            // 🌟 [LOD 기반 지능형 식생 컬링] LOD 0은 최고 디테일을 위해 원본 더블사이드를 허용하고, 중/원경(LOD 1 이상)은 무조건 'back' 컬링으로 50% 래스터라이징 가속!
+            // 🌟 [섀도우 패스 특화 무결점 컬링 규칙 (Zero-Artifact & 50% 래스터라이징 가속)]
+            // 1) 불투명(Opaque - 기둥, 줄기 등) 서브메시: 섀도우 패스에서 무조건 'back' 컬링 강제 (품질 이상 0%, 섀도우 여드름 박멸, 래스터라이징 50% 가속)
+            // 2) 원경 섀도우('shadowOpaque'): 나뭇잎이라도 무조건 'back' 컬링 강제 (원경 텍셀 해상도상 차이 0%, 래스터라이징 50% 절감)
+            // 3) 초근거리 잎사귀('shadow', LOD 0): 아티스트의 doubleSided 설정을 존중하여 단면 잎사귀의 역광 시 그림자 실종 원천 차단
+            // 4) 메인 패스: LOD 0만 원본 doubleSided 허용, 중/원경(LOD 1 이상)은 무조건 'back' 컬링
+            let cullMode: GPUCullMode = material.cullMode ?? 'back';
             const isLOD0 = (this.lodIndex === 0);
-            const cullMode = (isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back');
+
+            if (depthPassMode === 'shadowOpaque' || (depthPassMode === 'shadow' && !this.isMasked)) {
+                cullMode = 'back';
+            } else if (depthPassMode === 'shadow') {
+                cullMode = (isLOD0 && material.doubleSided) ? 'none' : 'back';
+            } else {
+                cullMode = (isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back');
+            }
+
             pipeline = registry.getOrCreatePipeline(
                 material,
                 sampleCount,

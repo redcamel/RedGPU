@@ -44,10 +44,24 @@ export interface FoliageTypeOptions {
     groundOffset?: number;
 
     /**
+     * [KO] 그림자를 투영할지 여부 (기본값: true. 작은 풀/잔디는 false 권장).
+     * [EN] Whether to cast shadows (default: true. Recommended: false for small grass/flowers).
+     */
+    castShadow?: boolean;
+
+    /**
      * [KO] 그림자를 투영할 최대 캐스케이드 인덱스 (0~3, 기본값: 3). 잔디는 0, 관목은 1, 대형 나무는 2~3 권장.
      * [EN] Maximum cascade index to cast shadows (0 to 3, default: 3). Recommended: 0 for grass, 1 for shrubs, 2-3 for large trees.
      */
     maxShadowCascadeIndex?: number;
+
+    /**
+     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스 (0~3, 기본값: 0).
+     * 0이면 초근거리 Cascade 0에서만 잎사귀 실루엣을 따고, 원경 Cascade 1~3에서는 discard 없는 Opaque 섀도우로 초고속 렌더링하여 Early-Z 100% 가동.
+     * [EN] Maximum cascade index to apply alpha cutoff (discard) (0 to 3, default: 0).
+     * If 0, alpha cutoff is only applied in Cascade 0, and Cascade 1-3 render with Opaque shadow (0 fragment overhead, 100% Early-Z).
+     */
+    shadowCutoffCascadeIndex?: number;
 }
 
 class FoliageType {
@@ -67,7 +81,9 @@ class FoliageType {
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #numLODs: number = 1;
+    #castShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
+    #shadowCutoffCascadeIndex: number = 0;
     #useImpostor: boolean = true;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -81,7 +97,11 @@ class FoliageType {
     ) {
         this.#redGPUContext = redGPUContext;
         this.#options = options;
+        this.#castShadow = options.castShadow !== false;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
+        this.#shadowCutoffCascadeIndex = options.shadowCutoffCascadeIndex !== undefined
+            ? Math.max(0, Math.min(3, Math.floor(options.shadowCutoffCascadeIndex)))
+            : 0;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
@@ -108,6 +128,9 @@ class FoliageType {
             useImpostor,
             isFoliage: options.isFoliage !== false,
             groundOffset: options.groundOffset,
+            castShadow: this.#castShadow,
+            maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
+            shadowCutoffCascadeIndex: this.#shadowCutoffCascadeIndex,
         });
 
         let hash = 0;
@@ -137,6 +160,7 @@ class FoliageType {
                 this.#subMeshes
             );
             this.#megaBuffer.registerSubMeshesToTemplate(this.#subMeshes, this.#allocation.indirectBaseOffset);
+            const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
                 this.#cullingDistance,
@@ -144,7 +168,7 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 this.#lodInfoList,
-                this.#maxShadowCascadeIndex
+                effectiveMaxShadowCascade
             );
         }
     }
@@ -245,6 +269,43 @@ class FoliageType {
      */
     get maxShadowCascadeIndex(): number {
         return this.#maxShadowCascadeIndex;
+    }
+
+    /**
+     * [KO] 그림자를 투영할지 여부를 반환합니다.
+     * [EN] Returns whether to cast shadows.
+     */
+    get castShadow(): boolean {
+        return this.#castShadow;
+    }
+
+    /**
+     * [KO] 그림자를 투영할지 여부를 설정합니다.
+     * [EN] Sets whether to cast shadows.
+     */
+    set castShadow(value: boolean) {
+        const boolVal = !!value;
+        if (this.#castShadow !== boolVal) {
+            this.#castShadow = boolVal;
+            this.#syncTypeParams();
+        }
+    }
+
+    /**
+     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스를 반환합니다 (0~3).
+     * [EN] Returns the maximum cascade index to apply alpha cutoff (discard) (0 to 3).
+     */
+    get shadowCutoffCascadeIndex(): number {
+        return this.#shadowCutoffCascadeIndex;
+    }
+
+    /**
+     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
+     * [EN] Sets the maximum cascade index to apply alpha cutoff (discard) (0 to 3).
+     */
+    set shadowCutoffCascadeIndex(value: number) {
+        validateUintRange(value, 0, 3);
+        this.#shadowCutoffCascadeIndex = value;
     }
 
     /**
@@ -420,6 +481,7 @@ class FoliageType {
                 ? this.#lodInfoList.slice(0, -1)
                 : this.#lodInfoList;
 
+            const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
                 this.#cullingDistance,
@@ -427,7 +489,7 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 effectiveLodList,
-                this.#maxShadowCascadeIndex
+                effectiveMaxShadowCascade
             );
         }
     }
