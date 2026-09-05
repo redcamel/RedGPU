@@ -24,6 +24,39 @@ class FoliagePipelineRegistry {
         this.#initShaderModules();
     }
 
+    // 🚀 [Zero-GC & 버텍스 대역폭 최적화] 패스별 버텍스 속성 정적 배열 분리
+    static readonly #GEO_ATTRIBUTES_ALL: readonly GPUVertexAttribute[] = [
+        {shaderLocation: 0, offset: 0, format: 'float32x3'},
+        {shaderLocation: 1, offset: 12, format: 'float32x3'},
+        {shaderLocation: 2, offset: 24, format: 'float32x2'},
+        {shaderLocation: 3, offset: 32, format: 'float32x2'},
+        {shaderLocation: 4, offset: 40, format: 'float32x4'},
+        {shaderLocation: 5, offset: 56, format: 'float32x4'},
+    ];
+
+    static readonly #GEO_ATTRIBUTES_SHADOW_MASKED: readonly GPUVertexAttribute[] = [
+        {shaderLocation: 0, offset: 0, format: 'float32x3'},
+        {shaderLocation: 2, offset: 24, format: 'float32x2'},
+        {shaderLocation: 5, offset: 56, format: 'float32x4'},
+    ];
+
+    static readonly #GEO_ATTRIBUTES_SHADOW_OPAQUE: readonly GPUVertexAttribute[] = [
+        {shaderLocation: 0, offset: 0, format: 'float32x3'},
+    ];
+
+    static readonly #INSTANCE_ATTRIBUTES_ALL: readonly GPUVertexAttribute[] = [
+        {shaderLocation: 6, offset: 0, format: 'float32x4'},
+        {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
+        {shaderLocation: 8, offset: 24, format: 'float16x2'},
+        {shaderLocation: 9, offset: 28, format: 'float32'},
+    ];
+
+    static readonly #INSTANCE_ATTRIBUTES_SHADOW_OPAQUE: readonly GPUVertexAttribute[] = [
+        {shaderLocation: 6, offset: 0, format: 'float32x4'},
+        {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
+        {shaderLocation: 8, offset: 24, format: 'float16x2'},
+    ];
+
     getOrCreatePipeline(
         material: any,
         sampleCount: number,
@@ -81,29 +114,25 @@ class FoliagePipelineRegistry {
         }
 
         const validStrideBytes = Math.max(strideBytes, 72);
-        const geoAttributes: GPUVertexAttribute[] = [
-            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-            {shaderLocation: 3, offset: 32, format: 'float32x2'},
-            {shaderLocation: 4, offset: 40, format: 'float32x4'},
-            {shaderLocation: 5, offset: 56, format: 'float32x4'},
-        ];
+
+        // 🚀 [최적화 P0] shadowOpaque는 오직 position(12B)만 페치하여 버텍스 대역폭 낭비 100% 차단
+        const effectiveGeoAttributes = isShadowOpaque
+            ? FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_OPAQUE
+            : (isShadow ? FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_MASKED : FoliagePipelineRegistry.#GEO_ATTRIBUTES_ALL);
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: validStrideBytes,
-            attributes: geoAttributes,
+            attributes: effectiveGeoAttributes as GPUVertexAttribute[],
         };
+
+        const effectiveInstanceAttributes = isShadowOpaque
+            ? FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_SHADOW_OPAQUE
+            : FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL;
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 8 * 4, 
             stepMode: 'instance',
-            attributes: [
-                {shaderLocation: 6, offset: 0, format: 'float32x4'},
-                {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
-                {shaderLocation: 8, offset: 24, format: 'float16x2'},
-                {shaderLocation: 9, offset: 28, format: 'float32'},   
-            ],
+            attributes: effectiveInstanceAttributes as GPUVertexAttribute[],
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
@@ -190,7 +219,10 @@ class FoliagePipelineRegistry {
             }
         }
 
-        const vertexEntryPoint = isShadow ? 'entryPointShadowVertex' : 'mainInput';
+        // 🚀 [최적화 P0] shadowOpaque 전용 초경량 버텍스 엔트리포인트 바인딩
+        const vertexEntryPoint = isShadowOpaque
+            ? 'entryPointShadowOpaqueVertex'
+            : (isShadow ? 'entryPointShadowVertex' : 'mainInput');
         const fragmentEntryPoint = isShadow ? 'shadowMain' : 'main';
 
         const fragmentState = (isShadow && !needsShadowFragment) ? undefined : {

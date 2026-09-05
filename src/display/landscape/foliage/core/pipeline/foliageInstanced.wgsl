@@ -220,3 +220,47 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
 
     return output;
 }
+
+// 🚀 [최적화 P0 - shadowOpaque 전용 초경량 입력 구조체 (location 0, 6, 7, 8만 선언)]
+// VertexState와 100% 일치시켜 불필요한 슬롯 에러를 방지하고 GPU 버텍스 페치 오버헤드를 최소화합니다.
+struct ShadowOpaqueVertexInput {
+    @location(0) position : vec3<f32>,
+
+    @location(6) instancePos_scaleY : vec4<f32>,
+    @location(7) instanceRotQuat : vec4<f32>,
+    @location(8) instanceScaleXZ : vec2<f32>,
+};
+
+// 🚀 [최적화 P0 - shadowOpaque 전용 초경량 버텍스 셰이더 (Varying 0개 / 0바이트 대역폭)]
+// 프래그먼트 셰이더가 없는 순수 뎁스 패스를 위해 오직 @builtin(position)만 출력하여
+// GPU 래스터라이저 보간 대역폭을 100% 제거하고 버텍스 처리 속도를 극대화합니다.
+struct FoliageShadowOpaqueOutput {
+    @builtin(position) position: vec4<f32>,
+};
+
+@vertex
+fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShadowOpaqueOutput {
+    var output : FoliageShadowOpaqueOutput;
+
+    let instancePos = input.instancePos_scaleY.xyz;
+    let scaleY = input.instancePos_scaleY.w;
+
+    let instanceRotQuat = input.instanceRotQuat;
+    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
+
+    var hierarchyPos = input.position;
+    if (subMeshUniforms.hasHierarchyTransform != 0u) {
+        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
+    }
+
+    let safeScale = max(instanceScale, vec3<f32>(0.0001));
+    let scaledPos = hierarchyPos * safeScale;
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
+
+    let worldPos = rotatedPos + instancePos;
+
+    output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
+    return output;
+}
+
+

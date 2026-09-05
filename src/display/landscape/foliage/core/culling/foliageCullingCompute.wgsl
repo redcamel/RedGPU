@@ -289,16 +289,22 @@ fn main(
         return;
     }
 
-    // 🚀 [최적화 P0 / Step 22 - 섀도우 캐스케이드 루프 Early Break (평면 내적 18~24회 100% 생략)]
-    for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
+    // 🚀 [최적화 P0 / Step 22 - 섀도우 캐스케이드 루프 한도 축소 (잔디/관목 루프 1~2회로 축소)]
+    let maxAllowedCascade = min(activeCascades, typeInfo.maxShadowCascadeIndex + 1u);
+
+    for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
+        if (globalUniforms.cascades[c].hasShadow == 0u) {
+            continue;
+        }
+
         let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
         let isOverlapCascade = (c < activeCascades - 1u); 
         let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
         let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
         let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-        // 🚀 [최적화 & CullingDistance 동기화] 식생 유형별 최대 그림자 캐스케이드 한도, 캐스케이드 거리 및 cullingDistance 검사
-        if (c <= typeInfo.maxShadowCascadeIndex && globalUniforms.cascades[c].hasShadow != 0u && distSq < shadowEffectiveDistSq && distSq < effectiveCullingDistSq) {
+        // 🚀 [최적화 & CullingDistance 동기화] 캐스케이드 거리 및 cullingDistance 검사
+        if (distSq < shadowEffectiveDistSq && distSq < effectiveCullingDistSq) {
             let cascadeInfo = globalUniforms.cascades[c];
             let inShadowFrustum =
                 dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&

@@ -182,11 +182,25 @@ class FoliageRenderer {
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
 
+            const numLODs = foliageType.lodInfoList.length;
+            const hasImp = foliageType.useImpostor;
+            const maxShadowLOD = numLODs > 1 ? (hasImp ? Math.max(numLODs - 2, 0) : numLODs - 1) : 0;
+            const isFarCascade = currentCascade >= 1;
+
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (!sub.canRenderInPass('shadow')) continue;
                 if (sub.isImpostor) continue;
                 if (sub.isMasked) continue; // 불투명 서브메시만 선행 렌더링
+
+                // 🚀 [최적화 P0 - Cascade-Aware CPU DrawCall Filter]
+                // 1) Cascade >= 1인 원경 캐스케이드는 Compute Culling에서 오직 maxShadowLOD만 생성되므로,
+                //    LOD 0 및 중간 LOD 서브메시의 CPU 드로우콜 인코딩을 100% 즉시 스킵!
+                // 2) Cascade 0에서도 중간 LOD(0 < sub.lodIndex < maxShadowLOD)는 생성되지 않으므로 스킵!
+                if (numLODs > 1) {
+                    if (isFarCascade && sub.lodIndex !== maxShadowLOD) continue;
+                    if (!isFarCascade && sub.lodIndex !== 0 && sub.lodIndex !== maxShadowLOD) continue;
+                }
 
                 const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
                 const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
@@ -209,11 +223,25 @@ class FoliageRenderer {
             const isOpaqueCascade = currentCascade > foliageType.shadowCutoffCascadeIndex;
             const shadowOpaqueLodThreshold = foliageType.shadowOpaqueLodThreshold;
 
+            const numLODs = foliageType.lodInfoList.length;
+            const hasImp = foliageType.useImpostor;
+            const maxShadowLOD = numLODs > 1 ? (hasImp ? Math.max(numLODs - 2, 0) : numLODs - 1) : 0;
+            const isFarCascade = currentCascade >= 1;
+
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (!sub.canRenderInPass('shadow')) continue;
                 if (sub.isImpostor) continue;
                 if (!sub.isMasked) continue; // 마스크된 서브메시만 후행 렌더링
+
+                // 🚀 [최적화 P0 - Cascade-Aware CPU DrawCall Filter]
+                // 1) Cascade >= 1인 원경 캐스케이드는 Compute Culling에서 오직 maxShadowLOD만 생성되므로,
+                //    LOD 0 및 중간 LOD 서브메시의 CPU 드로우콜 인코딩을 100% 즉시 스킵!
+                // 2) Cascade 0에서도 중간 LOD(0 < sub.lodIndex < maxShadowLOD)는 생성되지 않으므로 스킵!
+                if (numLODs > 1) {
+                    if (isFarCascade && sub.lodIndex !== maxShadowLOD) continue;
+                    if (!isFarCascade && sub.lodIndex !== 0 && sub.lodIndex !== maxShadowLOD) continue;
+                }
 
                 const isLodOpaque = sub.lodIndex >= shadowOpaqueLodThreshold;
                 const depthMode: FoliageDepthPassMode = (isOpaqueCascade || isLodOpaque) ? 'shadowOpaque' : 'shadow';
