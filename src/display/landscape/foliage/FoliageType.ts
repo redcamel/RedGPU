@@ -62,6 +62,14 @@ export interface FoliageTypeOptions {
      * If 0, alpha cutoff is only applied in Cascade 0, and Cascade 1-3 render with Opaque shadow (0 fragment overhead, 100% Early-Z).
      */
     shadowCutoffCascadeIndex?: number;
+
+    /**
+     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스 (기본값: 1).
+     * LOD 1 이상의 중경/원경 식생 메쉬는 discard를 바이패스하고 Opaque 섀도우(Double-Speed Z-Fill)로 초고속 렌더링합니다.
+     * [EN] Minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (default: 1).
+     * Foliage meshes at LOD 1 or higher bypass discard and render with ultra-fast Opaque shadow (Double-Speed Z-Fill).
+     */
+    shadowOpaqueLodThreshold?: number;
 }
 
 class FoliageType {
@@ -84,6 +92,7 @@ class FoliageType {
     #castShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
     #shadowCutoffCascadeIndex: number = 0;
+    #shadowOpaqueLodThreshold: number = 1;
     #useImpostor: boolean = true;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -102,6 +111,9 @@ class FoliageType {
         this.#shadowCutoffCascadeIndex = options.shadowCutoffCascadeIndex !== undefined
             ? Math.max(0, Math.min(3, Math.floor(options.shadowCutoffCascadeIndex)))
             : 0;
+        this.#shadowOpaqueLodThreshold = options.shadowOpaqueLodThreshold !== undefined
+            ? Math.max(0, Math.floor(options.shadowOpaqueLodThreshold))
+            : 1;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
@@ -131,6 +143,7 @@ class FoliageType {
             castShadow: this.#castShadow,
             maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
             shadowCutoffCascadeIndex: this.#shadowCutoffCascadeIndex,
+            shadowOpaqueLodThreshold: this.#shadowOpaqueLodThreshold,
         });
 
         let hash = 0;
@@ -306,6 +319,23 @@ class FoliageType {
     set shadowCutoffCascadeIndex(value: number) {
         validateUintRange(value, 0, 3);
         this.#shadowCutoffCascadeIndex = value;
+    }
+
+    /**
+     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스를 반환합니다 (기본값: 1).
+     * [EN] Returns the minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (default: 1).
+     */
+    get shadowOpaqueLodThreshold(): number {
+        return this.#shadowOpaqueLodThreshold;
+    }
+
+    /**
+     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스를 설정합니다 (0~16).
+     * [EN] Sets the minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (0 to 16).
+     */
+    set shadowOpaqueLodThreshold(value: number) {
+        validateUintRange(value, 0, 16);
+        this.#shadowOpaqueLodThreshold = value;
     }
 
     /**

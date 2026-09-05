@@ -196,8 +196,9 @@ class FoliageRenderer {
 
         // 🌟 [핵심 최적화 2단계 - Masked(나뭇잎/풀잎) 서브메시 렌더링]
         // 선행 렌더링된 기둥 뎁스 덕분에 기둥 뒤에 가려진 수만 개의 나뭇잎 픽셀은 GPU Early-Z 단계에서 100% 즉시 탈락!
-        // 또한 currentCascade > foliageType.shadowCutoffCascadeIndex인 원경 캐스케이드에서는
-        // discard를 바이패스하고 shadowOpaque(Null Fragment)로 렌더링하여 픽셀 셰이더 연산 0회 및 100% Early-Z 가동!
+        // 또한 currentCascade > foliageType.shadowCutoffCascadeIndex인 원경 캐스케이드 및
+        // sub.lodIndex >= foliageType.shadowOpaqueLodThreshold (기본값: 1)인 중경/원경 LOD 메쉬에서는
+        // discard를 바이패스하고 shadowOpaque(Null Fragment)로 렌더링하여 픽셀 셰이더 연산 0회 및 100% Early-Z / Double-Speed Z 가동!
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesShadow[t];
             const foliageType = item.type!;
@@ -206,13 +207,16 @@ class FoliageRenderer {
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
             const isOpaqueCascade = currentCascade > foliageType.shadowCutoffCascadeIndex;
-            const depthMode: FoliageDepthPassMode = isOpaqueCascade ? 'shadowOpaque' : 'shadow';
+            const shadowOpaqueLodThreshold = foliageType.shadowOpaqueLodThreshold;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (!sub.canRenderInPass('shadow')) continue;
                 if (sub.isImpostor) continue;
                 if (!sub.isMasked) continue; // 마스크된 서브메시만 후행 렌더링
+
+                const isLodOpaque = sub.lodIndex >= shadowOpaqueLodThreshold;
+                const depthMode: FoliageDepthPassMode = (isOpaqueCascade || isLodOpaque) ? 'shadowOpaque' : 'shadow';
 
                 const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
                 const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;

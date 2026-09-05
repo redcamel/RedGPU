@@ -1,7 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
-import foliageDepthOnlyWGSL from "./foliageDepthOnly.wgsl";
+import foliageDepthPrepassWGSL from "./foliageDepthPrepass.wgsl";
+import foliageShadowDepthWGSL from "./foliageShadowDepth.wgsl";
 import octahedralImpostorDepthOnlyWGSL from "../impostor/octahedral/octahedralImpostorDepthOnly.wgsl";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
@@ -11,7 +12,8 @@ class FoliagePipelineRegistry {
     #redGPUContext: RedGPUContext;
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
-    #depthOnlyFragmentShaderModule: GPUShaderModule | null = null;
+    #depthPrepassFragmentShaderModule: GPUShaderModule | null = null;
+    #shadowDepthFragmentShaderModule: GPUShaderModule | null = null;
     #octahedralDepthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
@@ -52,14 +54,18 @@ class FoliagePipelineRegistry {
         }
 
         const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
-        const depthModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#depthOnlyFragmentShaderModule;
+
+        let fragmentModule: GPUShaderModule | null = null;
+        if (isShadow) {
+            fragmentModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#shadowDepthFragmentShaderModule;
+        } else if (isDepthPrepass) {
+            fragmentModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#depthPrepassFragmentShaderModule;
+        } else {
+            fragmentModule = material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule;
+        }
 
         const isMaskedOrTransparent = !!material.useCutOff || material.alphaBlend === 1 || material.alphaBlend === 2 || !!material.transparent || isOctahedral;
         const needsShadowFragment = isShadow && !isShadowOpaque && isMaskedOrTransparent && hasBaseColorTexture;
-
-        const fragmentModule = (isDepthPrepass || isShadow)
-            ? depthModule
-            : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
 
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
@@ -230,13 +236,21 @@ class FoliagePipelineRegistry {
         }
         this.#vertexShaderModule = vModule;
 
-        let depthFModule = resourceManager.getGPUShaderModule('FoliageDepthOnlyFragmentShader_Module');
-        if (!depthFModule) {
-            depthFModule = resourceManager.createGPUShaderModule('FoliageDepthOnlyFragmentShader_Module', {
-                code: foliageDepthOnlyWGSL,
+        let depthPrepassFModule = resourceManager.getGPUShaderModule('FoliageDepthPrepassFragmentShader_Module');
+        if (!depthPrepassFModule) {
+            depthPrepassFModule = resourceManager.createGPUShaderModule('FoliageDepthPrepassFragmentShader_Module', {
+                code: foliageDepthPrepassWGSL,
             });
         }
-        this.#depthOnlyFragmentShaderModule = depthFModule;
+        this.#depthPrepassFragmentShaderModule = depthPrepassFModule;
+
+        let shadowDepthFModule = resourceManager.getGPUShaderModule('FoliageShadowDepthFragmentShader_Module');
+        if (!shadowDepthFModule) {
+            shadowDepthFModule = resourceManager.createGPUShaderModule('FoliageShadowDepthFragmentShader_Module', {
+                code: foliageShadowDepthWGSL,
+            });
+        }
+        this.#shadowDepthFragmentShaderModule = shadowDepthFModule;
 
         let octDepthFModule = resourceManager.getGPUShaderModule('OctahedralImpostorDepthOnlyFragmentShader_Module');
         if (!octDepthFModule) {
