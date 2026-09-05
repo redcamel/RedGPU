@@ -841,17 +841,6 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 리소스를 해제합니다.
-     * [EN] Disposes of the resources.
-     */
-    dispose() {
-        if (this.#globalVertexSlotIndex !== -1) {
-            this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
-            this.#globalVertexSlotIndex = -1;
-        }
-    }
-
-    /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.
      * @param enableDebugger -
