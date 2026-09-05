@@ -346,32 +346,20 @@ RedGPU.init(
                         typeFolder.addBinding(lodInfo, 'lodsSummary', {label: 'LOD Ranges', readonly: true});
 
                         const lodList = type.lodInfoList || [];
-                        const numMeshLODs = (type.useImpostor && lodList.length > 1) ? lodList.length - 1 : lodList.length;
+                        const numMeshLODs = (type.hasImpostor && lodList.length > 1) ? lodList.length - 1 : lodList.length;
                         if (numMeshLODs > 0) {
                             const lodFolder = typeFolder.addFolder({title: '📐 LOD Distances', expanded: true});
                             for (let l = 0; l < numMeshLODs; l++) {
                                 const lodIdx = l;
                                 const lodBinding = {
                                     get distance() {
-                                        if (typeof type.getLODDistance === 'function') {
-                                            return type.getLODDistance(lodIdx);
-                                        }
-                                        return type.lodInfoList?.[lodIdx]?.lodDistance ?? 0;
+                                        return type.getLODDistance(lodIdx);
                                     },
                                     set distance(v) {
-                                        if (typeof type.setLODDistance === 'function') {
-                                            type.setLODDistance(lodIdx, v);
-                                        } else if (type.lodInfoList && type.lodInfoList[lodIdx]) {
-                                            type.lodInfoList[lodIdx].lodDistance = Math.max(0, v);
-                                            if (type.useImpostor) {
-                                                type.impostorDistance = type.impostorDistance;
-                                            }
-                                        }
+                                        type.setLODDistance(lodIdx, v);
                                     }
                                 };
-                                const initDist = typeof type.getLODDistance === 'function'
-                                    ? type.getLODDistance(lodIdx)
-                                    : (type.lodInfoList?.[lodIdx]?.lodDistance ?? 80);
+                                const initDist = type.getLODDistance(lodIdx);
                                 const maxVal = Math.max(800, Math.ceil(initDist * 2.5 / 50) * 50);
                                 lodFolder.addBinding(lodBinding, 'distance', {
                                     min: 10,
@@ -382,19 +370,12 @@ RedGPU.init(
                             }
                         }
 
-                        if (type.useImpostor) {
+                        if (type.hasImpostor) {
                             const impostorFolder = typeFolder.addFolder({
                                 title: '🎭 Octahedral Impostor',
                                 expanded: true
                             });
                             impostorFolder.addBinding(type, 'useImpostor', {label: 'Enable Impostor'});
-                            impostorFolder.addBinding(type, 'impostorDistance', {
-                                min: 30,
-                                max: 800,
-                                step: 10,
-                                label: 'Switch Distance'
-                            });
-
                             impostorFolder.addButton({title: '🔍 Inspect Impostor Atlas'}).on('click', () => {
                                 FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, typeName);
                             });

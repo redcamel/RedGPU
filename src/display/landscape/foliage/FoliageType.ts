@@ -381,23 +381,6 @@ class FoliageType {
     }
 
 
-    get impostorDistance(): number {
-        if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return 0;
-        return this.#lodInfoList[this.#lodInfoList.length - 2].lodDistance;
-    }
-
-
-    set impostorDistance(value: number) {
-        if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return;
-        const targetIdx = this.#lodInfoList.length - 2;
-        const numVal = Math.max(0, value);
-        if (this.#lodInfoList[targetIdx].lodDistance !== numVal) {
-            (this.#lodInfoList[targetIdx] as any).lodDistance = numVal;
-            this.#syncTypeParams();
-        }
-    }
-
-
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
         return this.#lodInfoList[lodIndex].lodDistance;
