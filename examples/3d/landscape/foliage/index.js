@@ -252,10 +252,20 @@ RedGPU.init(
 
         new RedGPUExampleHelper(redGPUContext, {
             RedGPU,
-            directionalShadow: false,
+            directionalShadow: true,
             ibl: false,
             skybox: false,
             gui: (pane) => {
+                const lightFolder = pane.addFolder({title: '☀️ Directional Light', expanded: false});
+                lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1, label: 'Azimuth'});
+                lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1, label: 'Elevation'});
+                lightFolder.addBinding(directionalLight, 'lux', {
+                    min: 0,
+                    max: 200000,
+                    step: 1000,
+                    label: 'Intensity (Lux)'
+                });
+
                 const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
                 const globalStats = {
@@ -290,6 +300,16 @@ RedGPU.init(
                         });
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {label: 'Instances', readonly: true});
+                        typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
+                        typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
+                            options: {
+                                'Cascade 0 (Near Only)': 0,
+                                'Cascade 1 (~50m)': 1,
+                                'Cascade 2 (~112m)': 2,
+                                'Cascade 3 (Full Far)': 3,
+                            },
+                            label: 'Max Shadow Cascade'
+                        });
                         typeFolder.addBinding(type, 'groundOffset', {
                             min: -5.0,
                             max: 5.0,
@@ -301,12 +321,6 @@ RedGPU.init(
                             max: 8000,
                             step: 50,
                             label: 'Culling Distance'
-                        });
-                        typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
-                            min: 0,
-                            max: 3,
-                            step: 1,
-                            label: 'Max Shadow Cascade'
                         });
 
                         const lodInfo = {
