@@ -112,7 +112,8 @@ class LandscapeFoliageManager {
             this.#redGPUContext,
             options,
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
-            this.#megaBuffer
+            this.#megaBuffer,
+            () => this.#renderer.markShadowBundleDirty()
         );
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);

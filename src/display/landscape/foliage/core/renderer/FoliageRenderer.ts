@@ -34,9 +34,10 @@ class FoliageRenderer {
 
 
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
-    #isShadowBundleDirty: boolean = true;
+    #shadowBundleValid: boolean[] = [false, false, false, false];
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
     #lastRecordedTypeCount: number = 0;
+    readonly #singleBundleArray: [GPURenderBundle] = [null as any];
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -57,9 +58,9 @@ class FoliageRenderer {
 
 
     markShadowBundleDirty(): void {
-        this.#isShadowBundleDirty = true;
         for (let i = 0; i < 4; i++) {
             this.#shadowRenderBundles[i] = null;
+            this.#shadowBundleValid[i] = false;
             this.#lastSystemBGByCascade[i] = null;
         }
     }
@@ -154,12 +155,11 @@ class FoliageRenderer {
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
-            this.#isShadowBundleDirty = true;
+            this.markShadowBundleDirty();
             this.#lastRecordedTypeCount = typeCount;
         }
 
-        let bundle = this.#shadowRenderBundles[currentCascade];
-        const needsRebuild = this.#isShadowBundleDirty || !bundle || this.#lastSystemBGByCascade[currentCascade] !== systemBG;
+        const needsRebuild = !this.#shadowBundleValid[currentCascade] || this.#lastSystemBGByCascade[currentCascade] !== systemBG;
 
         if (needsRebuild) {
             let validCount = 0;
@@ -184,17 +184,24 @@ class FoliageRenderer {
             }
 
             if (validCount > 0) {
-                bundle = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
+                this.#shadowRenderBundles[currentCascade] = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
+            } else {
+                this.#shadowRenderBundles[currentCascade] = null;
             }
+            this.#shadowBundleValid[currentCascade] = true;
+            this.#lastSystemBGByCascade[currentCascade] = systemBG;
         }
 
+        const bundle = this.#shadowRenderBundles[currentCascade];
         if (bundle) {
-            passEncoder.executeBundles([bundle]);
+            this.#singleBundleArray[0] = bundle;
+            passEncoder.executeBundles(this.#singleBundleArray);
         }
     }
 
     destroy(): void {
         this.markShadowBundleDirty();
+        this.#singleBundleArray[0] = null as any;
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
         this.#lastBoundVertexUniformBG = null;

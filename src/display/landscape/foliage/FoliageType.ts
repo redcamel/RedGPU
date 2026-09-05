@@ -83,15 +83,18 @@ class FoliageType {
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
+    #onDirty?: () => void;
 
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
-        megaBuffer?: FoliageMegaBuffer | null
+        megaBuffer?: FoliageMegaBuffer | null,
+        onDirty?: () => void
     ) {
         this.#redGPUContext = redGPUContext;
         this.#options = options;
+        this.#onDirty = onDirty;
         this.#castShadow = options.castShadow !== false;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
         this.#shadowCutoffCascadeIndex = options.shadowCutoffCascadeIndex !== undefined
@@ -278,6 +281,7 @@ class FoliageType {
         if (this.#maxShadowCascadeIndex !== value) {
             this.#maxShadowCascadeIndex = value;
             this.#syncTypeParams();
+            this.#onDirty?.();
         }
     }
 
@@ -297,6 +301,7 @@ class FoliageType {
         if (this.#castShadow !== boolVal) {
             this.#castShadow = boolVal;
             this.#syncTypeParams();
+            this.#onDirty?.();
         }
     }
 
@@ -308,7 +313,10 @@ class FoliageType {
 
     set shadowCutoffCascadeIndex(value: number) {
         validateUintRange(value, 0, 3);
-        this.#shadowCutoffCascadeIndex = value;
+        if (this.#shadowCutoffCascadeIndex !== value) {
+            this.#shadowCutoffCascadeIndex = value;
+            this.#onDirty?.();
+        }
     }
 
 
@@ -319,7 +327,10 @@ class FoliageType {
 
     set shadowOpaqueLodThreshold(value: number) {
         validateUintRange(value, 0, 16);
-        this.#shadowOpaqueLodThreshold = value;
+        if (this.#shadowOpaqueLodThreshold !== value) {
+            this.#shadowOpaqueLodThreshold = value;
+            this.#onDirty?.();
+        }
     }
 
 
@@ -334,6 +345,7 @@ class FoliageType {
         if (this.#useImpostor !== boolVal) {
             this.#useImpostor = boolVal;
             this.#syncTypeParams();
+            this.#onDirty?.();
         }
     }
 
