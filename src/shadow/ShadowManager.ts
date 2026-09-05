@@ -24,7 +24,8 @@ import keepLog from "../utils/keepLog";
  * @category Shadow
  */
 class ShadowManager {
-    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
+    #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager();
+    #hadCastersLastFrame: boolean = false;
 
     constructor() {
     }
@@ -50,12 +51,27 @@ class ShadowManager {
      * [EN] Target View3D
      */
     render(view: View3D) {
-        const {redGPUContext, scene} = view
+        const {redGPUContext, scene} = view;
         const lightManager = scene?.lightManager;
         if (!lightManager || lightManager.directionalLightCount === 0) {
             this.#directionalShadowManager.resetCastingList();
+            this.#hadCastersLastFrame = false;
             return;
         }
+
+        const hasCasters = this.#hasAnyShadowCaster(view);
+
+        if (!hasCasters) {
+            this.#directionalShadowManager.resetCastingList();
+            if (this.#hadCastersLastFrame) {
+                // 이전 프레임에 캐스터가 켜져 있다가 이번에 꺼진 순간: 1회 초기화 클리어 수행
+                this.#clearShadowDepthTextures(view);
+                this.#hadCastersLastFrame = false;
+            }
+            return;
+        }
+
+        this.#hadCastersLastFrame = true;
 
         const list = this.#directionalShadowManager.castingList;
         const len = list.length;
@@ -92,6 +108,61 @@ class ShadowManager {
         }
 
         this.#directionalShadowManager.resetCastingList()
+    }
+
+    /**
+     * [KO] 현재 씬 내에 그림자를 투영할 대상(Mesh, Landscape, Foliage)이 하나라도 존재하는지 빠르게 검사합니다 (Zero-GC).
+     * [EN] Quickly checks if there are any objects (Mesh, Landscape, Foliage) that cast shadows in the scene (Zero-GC).
+     */
+    #hasAnyShadowCaster(view: View3D): boolean {
+        if (this.#directionalShadowManager.castingList.length > 0) return true;
+
+        const scene = (view as any).rawScene || view.scene;
+        if (!scene) return false;
+
+        const landscapes = scene.landscapeChildren;
+        if (!landscapes || landscapes.length === 0) return false;
+
+        const count = landscapes.length;
+        for (let i = 0; i < count; i++) {
+            const landscape = landscapes[i];
+            if (!landscape) continue;
+            if (landscape.castShadow) return true;
+
+            const foliage = landscape.foliageManager;
+            if (foliage) {
+                const types = foliage.types;
+                const typeCount = types.length;
+                for (let t = 0; t < typeCount; t++) {
+                    if (types[t].castShadow) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * [KO] 캐스터가 꺼지는 전환 프레임에서 잔상(Ghosting)을 지우기 위해 1회 뎁스 텍스처를 1.0으로 초기화합니다.
+     * [EN] Clears depth textures to 1.0 once in the transition frame when casters turn off to eliminate ghosting.
+     */
+    #clearShadowDepthTextures(view: View3D): void {
+        const {redGPUContext} = view;
+        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        for (let c = 0; c < cascadeCount; c++) {
+            const cascadePassDescriptor: GPURenderPassDescriptor = {
+                label: `${view.name} CSM Cascade ${c} Cleanup Clear Pass`,
+                colorAttachments: [],
+                depthStencilAttachment: {
+                    view: this.#directionalShadowManager.getCascadeLayerView(c),
+                    depthClearValue: 1.0,
+                    depthLoadOp: GPU_LOAD_OP.CLEAR,
+                    depthStoreOp: GPU_STORE_OP.STORE,
+                },
+            };
+            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, () => {
+            });
+        }
     }
 
     /**

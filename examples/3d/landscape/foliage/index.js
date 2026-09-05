@@ -236,7 +236,7 @@ RedGPU.init(
         //         scene.addChild(root)
         //     }
         // );
-        landscape.debuggerManager.spatialGrid = true;
+        // landscape.debuggerManager.spatialGrid = true;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
