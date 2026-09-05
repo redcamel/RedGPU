@@ -66,7 +66,7 @@ class SSAO extends AMultiPassPostEffect {
         );
         this.#effect_ao = this.passList[0] as SSAO_AO
         this.#effect_blur = this.passList[1] as GaussianBlur
-        this.#effect_blur.size = 3.0
+        this.#effect_blur.size = 1.5
         this.#effect_blend = this.passList[2] as SSAOBlend
     }
 
@@ -285,25 +285,36 @@ class SSAO extends AMultiPassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
+        const downW = Math.max(1, (width * 0.5) | 0);
+        const downH = Math.max(1, (height * 0.5) | 0);
+
+        // 1단계: 1/2 해상도로 AO 차폐도 계산 (연산량 75% 절감)
         const aoResult = this.#effect_ao.render(
-            view, width, height, sourceTextureInfo
-        )
+            view, downW, downH, sourceTextureInfo
+        );
+
         if (this.useBlur) {
+            // 2단계: 1/2 해상도에서 GaussianBlur 노이즈 완화 (대역폭 75% 절감)
             const blurResult = this.#effect_blur.render(
-                view, width, height, aoResult
-            )
-            // aoResult는 blur에서 사용된 후 더 이상 필요 없음
+                view, downW, downH, aoResult
+            );
             pool.release(aoResult.texture);
 
+            // 3단계: Full-Res 원본과 1/2 블러 AO를 Bilateral Depth-Aware Upsample로 합성
             const blendResult = this.#effect_blend.render(
                 view, width, height, sourceTextureInfo, blurResult
-            )
-            // blurResult는 blend에서 사용된 후 더 이상 필요 없음
+            );
             pool.release(blurResult.texture);
 
             return blendResult;
         } else {
-            return aoResult
+            // 블러를 끈 경우에도 Bilateral Depth-Aware Upsample로 합성
+            const blendResult = this.#effect_blend.render(
+                view, width, height, sourceTextureInfo, aoResult
+            );
+            pool.release(aoResult.texture);
+
+            return blendResult;
         }
     }
 }
