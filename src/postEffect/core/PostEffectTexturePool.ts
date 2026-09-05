@@ -202,12 +202,12 @@ class PostEffectTexturePool extends RedGPUObject {
      * [EN] Returns all active textures to the pool.
      */
     releaseAll(): void {
-        this.#activeTextures.forEach(texture => {
+        for (const texture of this.#activeTextures) {
             const key = this.#textureToKey.get(texture);
             if (key) {
                 this.#pool.get(key)!.push(texture);
             }
-        });
+        }
         this.#activeTextures.clear();
     }
 

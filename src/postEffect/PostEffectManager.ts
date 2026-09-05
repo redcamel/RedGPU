@@ -52,10 +52,15 @@ class PostEffectManager {
     #texturePool: PostEffectTexturePool
 
     /**
-     * [KO] 이전 프레임 텍스처 크기
-     * [EN] Texture size of the previous frame
+     * [KO] 이전 프레임 텍스처 가로 크기
+     * [EN] Previous frame texture width
      */
-    #previousDimensions: { width: number, height: number }
+    #prevWidth: number = 0
+    /**
+     * [KO] 이전 프레임 텍스처 세로 크기
+     * [EN] Previous frame texture height
+     */
+    #prevHeight: number = 0
     /**
      * [KO] 시스템 유니폼 버퍼
      * [EN] System globalStruct buffer
@@ -80,6 +85,7 @@ class PostEffectManager {
     #ssr: SSR;
     #useSSR: boolean = false;
     #autoExposure: AutoExposure;
+    #initialResult: IPostEffectResult = {texture: null as any, textureView: null as any};
 
     // G-Buffer 공유 자원 관련
     #gbufferBindGroupLayoutMSAA: GPUBindGroupLayout;
@@ -416,11 +422,6 @@ class PostEffectManager {
             this.#texturePool.clear();
         }
 
-        // 초기 텍스처 설정 (MSAA 여부에 따라 소스 결정)
-        const initialSourceTexture = useMSAA
-            ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
-            : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-
         this.#updateSystemUniforms();
         this.#updateGbufferBindGroup();
         const {useAutoExposure} = this.#view.rawCamera;
@@ -430,29 +431,14 @@ class PostEffectManager {
         // [KO] 1. HDR 단계: SkyAtmosphere, SSAO, SSR (장면 구성 요소)
         // [EN] 1. HDR Phase: SkyAtmosphere, SSAO, SSR (Scene components)
         if (this.#view.skyAtmosphere) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.skyAtmosphere.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.#view.skyAtmosphere, currentTextureView, width, height);
         }
 
         if (this.#useSSAO) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssao.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.ssao, currentTextureView, width, height);
         }
         if (this.#useSSR) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.ssr.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
         }
 
         // [KO] 2. 노출 및 사용자 이펙트 단계 (Smart Tone Mapping Transition)
@@ -462,74 +448,40 @@ class PostEffectManager {
         }
 
         let toneMapped = false;
-        this.#postEffects.forEach(effect => {
+        const effects = this.#postEffects;
+        for (let i = 0, len = effects.length; i < len; i++) {
+            const effect = effects[i];
             // [KO] 처음으로 LDR 이펙트를 만나면 그 즉시 톤매핑 수행
             // [EN] Perform tone mapping immediately upon encountering the first LDR effect
             if (effect.isLdr && !toneMapped) {
-                currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
+                currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
                 toneMapped = true;
             }
 
-            currentTextureView = this.#applyEffect(currentTextureView, () => effect.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView,
-            ));
-        });
+            currentTextureView = this.#applySingleEffect(effect, currentTextureView, width, height);
+        }
 
         // [KO] 루프가 끝날 때까지 톤매핑이 수행되지 않았다면 마지막에 수행
         // [EN] If tone mapping hasn't been performed by the end of the loop, perform it at the end
         if (!toneMapped) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
         }
-
 
         // [KO] 3. LDR 단계: AA (FXAA / TAA)
         // [EN] 3. LDR Phase: AA (FXAA / TAA)
         if (useFXAA) {
-            currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView
-            ));
+            currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
         }
 
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
-                currentTextureView = this.#applyEffect(currentTextureView, () => taa.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
+                currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
                 if (!this.#taaSharpenEffect) {
                     this.#taaSharpenEffect = new TAASharpen(redGPUContext)
                 }
-                currentTextureView = this.#applyEffect(currentTextureView, () => this.#taaSharpenEffect.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
+                currentTextureView = this.#applySingleEffect(this.#taaSharpenEffect, currentTextureView, width, height);
             } else {
-                currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
-                    this.#view,
-                    width,
-                    height,
-                    currentTextureView
-                ));
+                currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
             }
         }
 
@@ -553,8 +505,15 @@ class PostEffectManager {
         }
     }
 
-    #applyEffect(currentTextureView: IPostEffectResult, renderFn: () => IPostEffectResult): IPostEffectResult {
-        const nextTextureView = renderFn();
+    #applySingleEffect(
+        effect: {
+            render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult
+        },
+        currentTextureView: IPostEffectResult,
+        width: number,
+        height: number
+    ): IPostEffectResult {
+        const nextTextureView = effect.render(this.#view, width, height, currentTextureView);
         if (currentTextureView && currentTextureView.texture) {
             this.#texturePool.release(currentTextureView.texture);
         }
@@ -600,7 +559,7 @@ class PostEffectManager {
         const {width, height} = gBufferColorTexture;
 
         const msaaChanged = this.#prevMSAAID_for_gbuffer !== msaaID;
-        const dimensionsChanged = this.#previousDimensions?.width !== width || this.#previousDimensions?.height !== height;
+        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
         if (msaaChanged || dimensionsChanged) {
             const depthView0 = viewRenderTextureManager.depthTextureView;
@@ -748,19 +707,22 @@ class PostEffectManager {
         const {antialiasingManager} = redGPUContext;
         const {width, height} = gBufferColorTexture;
 
-        const dimensionsChanged = width !== this.#previousDimensions?.width || height !== this.#previousDimensions?.height;
+        const dimensionsChanged = width !== this.#prevWidth || height !== this.#prevHeight;
         if (dimensionsChanged) {
             this.#texturePool.clear();
-            this.#previousDimensions = {width, height};
+            this.#prevWidth = width;
+            this.#prevHeight = height;
         }
         const initialSourceTexture = antialiasingManager.useMSAA
             ? viewRenderTextureManager.getGBufferResolveTexture(GBUFFER_TYPE.COLOR)
             : viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
 
-        return {
-            texture: initialSourceTexture,
-            textureView: antialiasingManager.useMSAA ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR) : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR)
-        };
+        this.#initialResult.texture = initialSourceTexture;
+        this.#initialResult.textureView = antialiasingManager.useMSAA
+            ? viewRenderTextureManager.getGBufferResolveTextureView(GBUFFER_TYPE.COLOR)
+            : viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.COLOR);
+
+        return this.#initialResult;
     }
 }
 

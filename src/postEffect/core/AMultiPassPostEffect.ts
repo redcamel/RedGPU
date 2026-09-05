@@ -106,13 +106,15 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         let targetOutputInfo: IPostEffectResult;
         const pool = view.postEffectManager.texturePool;
+        const passList = this.#passList;
 
-        this.#passList.forEach((effect: ASinglePassPostEffect, index) => {
+        for (let i = 0, len = passList.length; i < len; i++) {
+            const effect = passList[i];
             const prevTemp = targetOutputInfo;
 
             // [KO] 두 번째 패스부터는 이전 패스의 결과물을 입력 소스로 사용합니다.
             // [EN] From the second pass onwards, use the result of the previous pass as the input source.
-            if (index) sourceTextureInfo = targetOutputInfo;
+            if (i > 0) sourceTextureInfo = targetOutputInfo;
 
             targetOutputInfo = effect.render(view, width, height, sourceTextureInfo);
 
@@ -121,7 +123,7 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
             if (prevTemp) {
                 pool.release(prevTemp.texture);
             }
-        });
+        }
 
         return targetOutputInfo;
     }
