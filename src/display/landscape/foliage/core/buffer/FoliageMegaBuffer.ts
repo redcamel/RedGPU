@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import type {FoliageLODInfo} from "../../FoliageType";
 import type FoliageSubMesh from "../../FoliageSubMesh";
+import type FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 
 export interface FoliageTypeAllocation {
     typeId: number;
@@ -147,7 +148,9 @@ class FoliageMegaBuffer {
     allocateTypeSegment(
         name: string,
         maxInstances: number,
-        subMeshes: readonly FoliageSubMesh[]
+        subMeshes: readonly FoliageSubMesh[],
+        shadowMergedSubMeshes?: readonly FoliageShadowMergedSubMesh[],
+        lodInfoList?: readonly FoliageLODInfo[]
     ): FoliageTypeAllocation {
         if (this.#allocations.has(name)) {
             return this.#allocations.get(name)!;
@@ -192,7 +195,17 @@ class FoliageMegaBuffer {
             sub.indirectOffsetBytes = (indirectBaseOffset + s) * 20;
         }
 
-        this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset);
+        if (shadowMergedSubMeshes && lodInfoList) {
+            for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
+                const shadowSub = shadowMergedSubMeshes[i];
+                const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+                const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
+                shadowSub.instanceBufferOffset = (culledBaseOffset + (shadowSub.lodIndex * maxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
+                shadowSub.indirectOffsetBytes = (indirectBaseOffset + subOffset) * 20;
+            }
+        }
+
+        this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset, shadowMergedSubMeshes, lodInfoList);
         this.#unifiedCullingBindGroup = null; 
 
         return allocation;
@@ -604,7 +617,12 @@ class FoliageMegaBuffer {
         this.#allocatedTypes.length = 0;
     }
 
-    registerSubMeshesToTemplate(subMeshes: readonly FoliageSubMesh[], indirectBaseOffset: number): void {
+    registerSubMeshesToTemplate(
+        subMeshes: readonly FoliageSubMesh[],
+        indirectBaseOffset: number,
+        shadowMergedSubMeshes?: readonly FoliageShadowMergedSubMesh[],
+        lodInfoList?: readonly FoliageLODInfo[]
+    ): void {
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
@@ -613,6 +631,23 @@ class FoliageMegaBuffer {
             for (let c = 0; c < 4; c++) {
                 const shadowSlot = (c * this.#maxSubMeshes + indirectBaseOffset + s) * 5;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
+            }
+        }
+
+        // 🌟 [차세대 아키텍처 - 그림자 전용 통합 메쉬 템플릿 등록]
+        // 각 LOD의 첫 번째 슬롯(indirectBaseOffset + lodInfo.subMeshOffset)에 shadowMergedSubMesh의 indexCount를 등록하여
+        // 섀도우 패스에서 단 1회의 Indirect Draw로 해당 LOD의 모든 지오메트리(기둥+잎사귀)를 일괄 렌더링
+        if (shadowMergedSubMeshes && lodInfoList) {
+            for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
+                const shadowSub = shadowMergedSubMeshes[i];
+                const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+                if (!lodInfo) continue;
+                const count = shadowSub.isIndexed ? shadowSub.indexCount : shadowSub.vertexCount;
+                const slotIndex = indirectBaseOffset + lodInfo.subMeshOffset;
+                for (let c = 0; c < 4; c++) {
+                    const shadowSlot = (c * this.#maxSubMeshes + slotIndex) * 5;
+                    this.#shadowIndirectResetTemplate[shadowSlot] = count;
+                }
             }
         }
 

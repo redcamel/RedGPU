@@ -10,6 +10,7 @@ import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOct
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../../FoliageSubMesh";
+import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageTypeOptions} from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
@@ -27,8 +28,18 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
 const PBR_STRIDE = 18;
 const PBR_STRIDE_BYTES = PBR_STRIDE * 4;
 
+const POSITION_ONLY_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
+    {
+        position: VertexInterleaveType.float32x3,
+    },
+    'PositionOnly'
+);
+const POSITION_ONLY_STRIDE = 3;
+const POSITION_ONLY_STRIDE_BYTES = POSITION_ONLY_STRIDE * 4;
+
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
+    shadowMergedSubMeshes: FoliageShadowMergedSubMesh[];
     lod0SubMeshCount: number;
     lodInfoList: FoliageLODInfo[];
     bottomOffset: number;
@@ -62,7 +73,14 @@ class FoliageSubMeshAssembler {
         const lodInfoList: FoliageLODInfo[] = [];
 
         if (!gpuDevice || !subMeshBindGroupLayout) {
-            return {subMeshes: subList, lod0SubMeshCount: 0, lodInfoList: [], bottomOffset: 0, boundingRadius: 10.0};
+            return {
+                subMeshes: subList,
+                shadowMergedSubMeshes: [],
+                lod0SubMeshCount: 0,
+                lodInfoList: [],
+                bottomOffset: 0,
+                boundingRadius: 10.0
+            };
         }
 
         const useImpostor = options.useImpostor !== false;
@@ -114,6 +132,25 @@ class FoliageSubMeshAssembler {
             );
         }
 
+        // 🌟 [차세대 아키텍처 - LOD 단위 그림자 전용 통합 메쉬(Shadow Merged Mesh) 조립]
+        // 섀도우 패스에서 불필요한 머티리얼 분리를 제거하고, Position(Float32x3 = 12B)만 추출하여 LOD당 단 1개의 지오메트리로 통합
+        const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
+        for (let l = 0; l < numLODs; l++) {
+            const subsInLod = subList.filter(s => s.lodIndex === l && !s.isImpostor);
+            if (subsInLod.length > 0) {
+                const shadowSub = FoliageSubMeshAssembler.buildShadowMergedGeometry(
+                    redGPUContext,
+                    subsInLod,
+                    l,
+                    options,
+                    subMeshBindGroupLayout
+                );
+                if (shadowSub) {
+                    shadowMergedSubMeshes.push(shadowSub);
+                }
+            }
+        }
+
         const lod0SubMeshCount = lodInfoList.length > 0 ? lodInfoList[0].subMeshCount : subList.length;
 
         let minOffset = 0;
@@ -140,8 +177,15 @@ class FoliageSubMeshAssembler {
                     const dSq = vx * vx + vy * vy + vz * vz;
                     if (dSq > maxDistSq) maxDistSq = dSq;
                 }
-
             }
+        }
+
+        for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
+            const shadowSub = shadowMergedSubMeshes[i];
+            const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+            const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
+            shadowSub.instanceBufferOffset = (shadowSub.lodIndex ?? 0) * maxInstances * 32;
+            shadowSub.indirectOffsetBytes = subOffset * 20;
         }
 
         const boundingRadius = Math.sqrt(maxDistSq);
@@ -155,11 +199,133 @@ class FoliageSubMeshAssembler {
 
         return {
             subMeshes: subList,
+            shadowMergedSubMeshes,
             lod0SubMeshCount,
             lodInfoList,
             bottomOffset: finalBottomOffset,
             boundingRadius,
         };
+    }
+
+    /**
+     * [KO] 특정 LOD 레벨에 속한 모든 서브메시의 Position(12B)과 Index를 1개의 경량 지오메트리로 통합합니다.
+     * [EN] Merges Positions (12B) and Indices of all submeshes in a specific LOD into a single lightweight geometry.
+     */
+    static buildShadowMergedGeometry(
+        redGPUContext: RedGPUContext,
+        subMeshesInLod: FoliageSubMesh[],
+        lodIndex: number,
+        options: FoliageTypeOptions,
+        subMeshBindGroupLayout: GPUBindGroupLayout
+    ): FoliageShadowMergedSubMesh | null {
+        if (!subMeshesInLod || subMeshesInLod.length === 0) return null;
+
+        let totalVertexCount = 0;
+        let totalIndexCount = 0;
+
+        for (let i = 0; i < subMeshesInLod.length; i++) {
+            const sub = subMeshesInLod[i];
+            if (sub.isImpostor) continue;
+            const geom = sub.geometry;
+            totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
+            totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
+        }
+
+        if (totalVertexCount === 0) return null;
+
+        // Position만 추출 (정점당 3개 float = 12 bytes)
+        const mergedPositions = new Float32Array(totalVertexCount * POSITION_ONLY_STRIDE);
+        const mergedIndices = new Uint32Array(totalIndexCount);
+
+        let vertexOffset = 0;
+        let indexOffset = 0;
+
+        for (let i = 0; i < subMeshesInLod.length; i++) {
+            const sub = subMeshesInLod[i];
+            if (sub.isImpostor) continue;
+            const geom = sub.geometry;
+            const srcVB = geom.vertexBuffer;
+            const srcIB = geom.indexBuffer;
+            const srcVData = srcVB?.data;
+            const srcIData = srcIB?.data;
+            const vCount = srcVB?.vertexCount ?? 0;
+            const stride = srcVB?.stride || (srcVB?.interleavedStruct?.arrayStride ? srcVB.interleavedStruct.arrayStride / 4 : 18);
+
+            if (srcVData && vCount > 0) {
+                for (let v = 0; v < vCount; v++) {
+                    const srcIdx = v * stride;
+                    const dstIdx = (vertexOffset + v) * POSITION_ONLY_STRIDE;
+                    mergedPositions[dstIdx + 0] = srcVData[srcIdx + 0];
+                    mergedPositions[dstIdx + 1] = srcVData[srcIdx + 1];
+                    mergedPositions[dstIdx + 2] = srcVData[srcIdx + 2];
+                }
+            }
+
+            if (srcIData) {
+                const iCount = srcIB.indexCount;
+                for (let idx = 0; idx < iCount; idx++) {
+                    mergedIndices[indexOffset + idx] = srcIData[idx] + vertexOffset;
+                }
+                indexOffset += iCount;
+            } else {
+                for (let idx = 0; idx < vCount; idx++) {
+                    mergedIndices[indexOffset + idx] = vertexOffset + idx;
+                }
+                indexOffset += vCount;
+            }
+
+            vertexOffset += vCount;
+        }
+
+        const seq = ++FoliageSubMeshAssembler.#bufferSeq;
+        const vKey = `FoliageShadowVB_${options.name}_LOD${lodIndex}_${seq}`;
+        const iKey = `FoliageShadowIB_${options.name}_LOD${lodIndex}_${seq}`;
+        const combinedVB = new VertexBuffer(redGPUContext, mergedPositions, POSITION_ONLY_INTERLEAVED_STRUCT, undefined, vKey);
+        const combinedIB = new IndexBuffer(redGPUContext, mergedIndices, undefined, iKey);
+        const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
+
+        const gpuDevice = redGPUContext.gpuDevice;
+        const uniformBuffer = gpuDevice.createBuffer({
+            label: `FoliageShadowSubMesh_UniformBuffer_${options.name}_LOD${lodIndex}`,
+            size: 144,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
+        const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
+        const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
+        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
+        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
+        uintView[32] = 0;
+        uintView[33] = 0; // isIdentity = true
+        uintView[34] = 0;
+        uintView[35] = 0;
+
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+
+        const vertexBindGroup = gpuDevice.createBindGroup({
+            label: `FoliageShadowSubMesh_VertexBindGroup_${options.name}_LOD${lodIndex}`,
+            layout: subMeshBindGroupLayout,
+            entries: [
+                {
+                    binding: 0,
+                    resource: {buffer: uniformBuffer}
+                }
+            ]
+        });
+
+        return new FoliageShadowMergedSubMesh({
+            lodIndex,
+            geometry: combinedGeom,
+            vertexCount: totalVertexCount,
+            indexCount: totalIndexCount,
+            isIndexed: true,
+            indexFormat: 'uint32',
+            strideBytes: POSITION_ONLY_STRIDE_BYTES,
+            vertexUniformBuffer: uniformBuffer,
+            vertexUniformBindGroup: vertexBindGroup,
+            instanceBufferOffset: 0,
+            indirectOffsetBytes: 0,
+        });
     }
 
     static #buildAndAttachImpostor(

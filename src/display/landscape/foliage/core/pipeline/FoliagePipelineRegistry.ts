@@ -113,7 +113,7 @@ class FoliagePipelineRegistry {
             return cachedPipeline;
         }
 
-        const validStrideBytes = Math.max(strideBytes, 72);
+        const validStrideBytes = isShadowOpaque ? Math.max(strideBytes, 12) : Math.max(strideBytes, 72);
 
         // 🚀 [최적화 P0] shadowOpaque는 오직 position(12B)만 페치하여 버텍스 대역폭 낭비 100% 차단
         const effectiveGeoAttributes = isShadowOpaque
@@ -247,6 +247,71 @@ class FoliagePipelineRegistry {
             depthStencil: depthStencil,
             multisample: {
                 count: isShadow ? 1 : sampleCount,
+            },
+        };
+
+        const newPipeline = gpuDevice.createRenderPipeline(pipelineDescriptor);
+        this.#pipelineCache.set(pipelineKey, newPipeline);
+        return newPipeline;
+    }
+
+    /**
+     * [KO] 그림자 전용 통합 메쉬(Shadow Merged Mesh)를 위한 Null Fragment 초경량 GPURenderPipeline을 생성하거나 캐시에서 반환합니다.
+     * [EN] Gets or creates an ultra-lightweight Null Fragment GPURenderPipeline for Shadow Merged Meshes.
+     */
+    getOrCreateShadowMergedPipeline(
+        strideBytes: number = 12,
+        cullMode: GPUCullMode = 'back',
+        subMeshBindGroupLayout?: GPUBindGroupLayout | null
+    ): GPURenderPipeline {
+        const pipelineKey = `FoliageShadowMerged_stride${strideBytes}_cull${cullMode}`;
+        const cachedPipeline = this.#pipelineCache.get(pipelineKey);
+        if (cachedPipeline) {
+            return cachedPipeline;
+        }
+
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+
+        const geometryBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: strideBytes,
+            attributes: FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_OPAQUE as GPUVertexAttribute[],
+        };
+
+        const instanceBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: 8 * 4,
+            stepMode: 'instance',
+            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_SHADOW_OPAQUE as GPUVertexAttribute[],
+        };
+
+        const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
+
+        const pipelineLayout = gpuDevice.createPipelineLayout({
+            label: `FoliagePipelineLayout_${pipelineKey}`,
+            bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL],
+        });
+
+        const pipelineDescriptor: GPURenderPipelineDescriptor = {
+            label: `FoliageRenderPipeline_${pipelineKey}`,
+            layout: pipelineLayout,
+            vertex: {
+                module: this.#vertexShaderModule!,
+                entryPoint: 'entryPointShadowOpaqueVertex',
+                buffers: [geometryBufferLayout, instanceBufferLayout],
+            },
+            fragment: undefined,
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: cullMode,
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: 1,
             },
         };
 

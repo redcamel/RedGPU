@@ -4,10 +4,11 @@ import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 import FoliageSubMesh from "./FoliageSubMesh";
+import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
-export {FoliageSubMesh};
+export {FoliageSubMesh, FoliageShadowMergedSubMesh};
 
 export interface FoliageLODConfig {
 
@@ -77,6 +78,7 @@ class FoliageType {
     #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
+    #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
     #megaBuffer: FoliageMegaBuffer | null = null;
@@ -159,6 +161,7 @@ class FoliageType {
             this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
+        this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#bottomOffset = options.groundOffset !== undefined ? options.groundOffset : (assembleResult.bottomOffset ?? 0);
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
@@ -170,9 +173,16 @@ class FoliageType {
             this.#allocation = this.#megaBuffer.allocateTypeSegment(
                 this.#options.name,
                 this.#options.maxInstances,
-                this.#subMeshes
+                this.#subMeshes,
+                this.#shadowMergedSubMeshes,
+                this.#lodInfoList
             );
-            this.#megaBuffer.registerSubMeshesToTemplate(this.#subMeshes, this.#allocation.indirectBaseOffset);
+            this.#megaBuffer.registerSubMeshesToTemplate(
+                this.#subMeshes,
+                this.#allocation.indirectBaseOffset,
+                this.#shadowMergedSubMeshes,
+                this.#lodInfoList
+            );
             const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
@@ -204,6 +214,23 @@ class FoliageType {
 
     get subMeshes(): readonly FoliageSubMesh[] {
         return this.#subMeshes;
+    }
+
+    get shadowMergedSubMeshes(): readonly FoliageShadowMergedSubMesh[] {
+        return this.#shadowMergedSubMeshes;
+    }
+
+    /**
+     * [KO] 특정 LOD 레벨에 해당하는 그림자 전용 통합 서브메시(Shadow Merged Mesh)를 반환합니다.
+     * [EN] Returns the shadow merged submesh for a specific LOD level.
+     */
+    getShadowMergedMesh(lodIndex: number): FoliageShadowMergedSubMesh | null {
+        for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
+            if (this.#shadowMergedSubMeshes[i].lodIndex === lodIndex) {
+                return this.#shadowMergedSubMeshes[i];
+            }
+        }
+        return null;
     }
 
     get lodInfoList(): readonly FoliageLODInfo[] {
@@ -501,6 +528,11 @@ class FoliageType {
             sub.destroy();
         }
         this.#subMeshes.length = 0;
+        for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
+            const shadowSub = this.#shadowMergedSubMeshes[i];
+            shadowSub.destroy();
+        }
+        this.#shadowMergedSubMeshes.length = 0;
         this.#loadedTileKeys.clear();
     }
 

@@ -336,10 +336,8 @@ fn main(
                 let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
                 let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
 
-                let numSubs = lodInfo.subMeshCount;
-                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                    atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-                }
+                // 🚀 [최적화 - Shadow Merged Mesh per LOD]
+                // 섀도우 패스는 LOD 단위 단일 병합 지오메트리로 렌더링되므로, 중복 서브메시 atomicAdd 루프를 100% 제거!
 
                 var shadowInst = instance;
                 shadowInst.posY = realY;
