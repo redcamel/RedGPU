@@ -91,7 +91,6 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             const TEST_STATE = {
                 GaussianBlur: true,
                 size: effect.size,
-                sampleCount: effect.sampleCount,
             }
             const folder = pane.addFolder({title: 'PostEffect', expanded: true})
 
@@ -104,20 +103,15 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                     targetView.postEffectManager.removeAllEffect();
                 }
                 sizeControl.disabled = !v.value;
-                sampleCountControl.disabled = !v.value;
             });
 
-            const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.size = v.value
-            })
-            const sampleCountControl = folder.addBinding(TEST_STATE, 'sampleCount', {
-                min: 1,
+            const sizeControl = folder.addBinding(TEST_STATE, 'size', {
+                min: 0,
                 max: 100,
-                step: 1
+                step: 0.1
             }).on('change', (v) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.sampleCount = v.value
+                if (currentEffect) currentEffect.size = v.value
             })
         }
     });

@@ -30,7 +30,6 @@ class GaussianBlur extends AMultiPassPostEffect {
      * @defaultValue 32
      */
     #size: number = 32
-    #sampleCount: number = 10
 
     /**
      * [KO] GaussianBlur 인스턴스를 생성합니다.
@@ -47,7 +46,6 @@ class GaussianBlur extends AMultiPassPostEffect {
             ],
         );
         this.size = this.size
-        this.sampleCount = this.#sampleCount
     }
 
     /**
@@ -73,31 +71,6 @@ class GaussianBlur extends AMultiPassPostEffect {
     set size(value: number) {
         this.#size = value;
         this.passList.forEach((v: BlurX | BlurY) => v.size = value)
-    }
-
-    /**
-     * [KO] 현재 샘플 수를 반환합니다.
-     * [EN] Returns the current sample count.
-     *
-     * @returns
-     * [KO] 샘플 수
-     * [EN] Sample count
-     */
-    get sampleCount(): number {
-        return this.#sampleCount;
-    }
-
-    /**
-     * [KO] 샘플 수를 설정합니다.
-     * [EN] Sets the sample count.
-     *
-     * @param value -
-     * [KO] 설정할 샘플 수
-     * [EN] Sample count to set
-     */
-    set sampleCount(value: number) {
-        this.#sampleCount = value;
-        this.passList.forEach((v: BlurX | BlurY) => v.sampleCount = value)
     }
 }
 

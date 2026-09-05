@@ -87,29 +87,19 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
         },
         gui: pane => {
 
-            const effect = targetView.postEffectManager.getEffectAt(0);
-
             const TEST_STATE = {
                 Blur: true,
-                size: effect.size,
             }
             const folder = pane.addFolder({title: 'PostEffect', expanded: true})
 
             folder.addBinding(TEST_STATE, 'Blur').on('change', (v) => {
                 if (v.value) {
                     const newEffect = new RedGPU.PostEffect.Blur(redGPUContext);
-                    newEffect.size = TEST_STATE.size;
                     targetView.postEffectManager.addEffect(newEffect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                sizeControl.disabled = !v.value;
             });
-
-            const sizeControl = folder.addBinding(TEST_STATE, 'size', {min: 0, max: 100}).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.size = v.value
-            })
         }
     });
 

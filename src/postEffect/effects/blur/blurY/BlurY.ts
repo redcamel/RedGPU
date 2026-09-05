@@ -4,12 +4,9 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
-import defineUint from "../../../../defineProperty/funcs/number/defineUint";
-
 
 interface BlurY {
-    size: number,
-    sampleCount: number
+    size: number
 }
 
 /**
@@ -22,8 +19,7 @@ interface BlurY {
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.BlurY(redGPUContext);
- * effect.size = 64;         // 블러 강도 조절
- * effect.sampleCount = 20;  // 샘플링 횟수 조절 (품질 향상)
+ * effect.size = 64; // 블러 강도 조절
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -51,9 +47,6 @@ class BlurY extends ASinglePassPostEffect {
 
 definePositiveNumber(BlurY, [
     {key: 'size', value: 32, min: 0, max: 512}
-])
-defineUint(BlurY, [
-    {key: 'sampleCount', value: 10, min: 1, max: 100}
 ])
 Object.freeze(BlurY)
 export default BlurY
