@@ -383,16 +383,6 @@ abstract class ABaseMaterial extends ResourceBase {
         const {gpuDevice, resourceManager} = this.redGPUContext
         this.#checkVariant()
         const entries: GPUBindGroupEntry[] = []
-        // for (const k in this.#storageInfo) {
-        // 	const info = this.#storageInfo[k]
-        // 	const {binding, name} = info
-        // 	entries.push(
-        // 		{
-        // 			binding: binding,
-        // 			resource: name === 'outputTexture' ? targetOutputView : sourceTextureView[binding],
-        // 		}
-        // 	)
-        // }
         for (const k in this.#TEXTURE_STRUCT) {
             const info = this.#TEXTURE_STRUCT[k]
             const {binding, name, group, type} = info

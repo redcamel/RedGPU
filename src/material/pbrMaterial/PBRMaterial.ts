@@ -861,45 +861,6 @@ class PBRMaterial extends AUVTransformBaseMaterial {
         )
     }
 
-    // async setupPackedKHR_clearcoatTexture() {
-    // 	const width = Math.max(
-    // 		this.KHR_clearcoatTexture?.gpuTexture?.width || 1,
-    // 		this.KHR_clearcoatRoughnessTexture?.gpuTexture?.width || 1
-    // 	);
-    // 	const height = Math.max(
-    // 		this.KHR_clearcoatTexture?.gpuTexture?.height || 1,
-    // 		this.KHR_clearcoatRoughnessTexture?.gpuTexture?.height || 1
-    // 	);
-    // 	await this.#packedKHR_clearcoatTexture.packing(
-    // 		{
-    // 			r: this.KHR_clearcoatTexture?.gpuTexture,
-    // 			g: this.KHR_clearcoatRoughnessTexture?.gpuTexture,
-    // 		},
-    // 		width,
-    // 		height,
-    // 		'packedKHR_clearcoatTexture'
-    // 	)
-    // }
-    //
-    // async setupPackedKHR_transmission() {
-    // 	const width = Math.max(
-    // 		this.KHR_transmissionTexture?.gpuTexture?.width || 1,
-    // 		this.KHR_thicknessTexture?.gpuTexture?.width || 1
-    // 	);
-    // 	const height = Math.max(
-    // 		this.KHR_transmissionTexture?.gpuTexture?.height || 1,
-    // 		this.KHR_thicknessTexture?.gpuTexture?.height || 1
-    // 	);
-    // 	await this.#packedKHR_transmission.packing(
-    // 		{
-    // 			r: this.KHR_transmissionTexture?.gpuTexture,
-    // 			g: this.KHR_thicknessTexture?.gpuTexture,
-    // 		},
-    // 		width,
-    // 		height,
-    // 		'packedKHR_transmission'
-    // 	)
-    // }
     /**
      * [KO] Diffuse Transmission 텍스처 패킹 설정
      * [EN] Setup Diffuse Transmission texture packing

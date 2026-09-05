@@ -59,7 +59,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     currentTime: number
     targetRenderer: Renderer
-    /**ㄹ
+    /**
      * [KO] GPU 캔버스 구성 정보 (WebGPU 설정용)
      * [EN] GPU canvas configuration info (for WebGPU setup)
      */

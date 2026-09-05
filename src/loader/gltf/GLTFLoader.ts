@@ -246,14 +246,6 @@ class GLTFLoader extends RedGPUObject {
         return this.#url;
     }
 
-    // stopAnimation(parsedSingleClip: GLTFParsedSingleClip) {
-    //     const {activeAnimations} = this
-    //     let index = activeAnimations.indexOf(parsedSingleClip);
-    //     if (index > -1) {
-    //         activeAnimations.splice(index, 1);
-    //     }
-    // };
-
     /**
      * [KO] 모든 활성화된 애니메이션을 중지합니다.
      * [EN] Stops all active animations.
