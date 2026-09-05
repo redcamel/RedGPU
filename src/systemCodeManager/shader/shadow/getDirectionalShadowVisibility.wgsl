@@ -23,7 +23,12 @@ const VOGEL_WEIGHTS_16 = array<f32, 16>(
 const TOTAL_VOGEL_WEIGHT: f32 = 10.0;
 
 /**
- * 🌟 [단일 패스 언리얼 엔진 5 표준 16-Tap 안티앨리어싱 가우시안 텐트 PCF]
+ * 🌟 [언리얼 엔진 5 표준 적응형 가변 탭 섀도우 샘플링]
+ * - Cascade 0 (0~30m): 16-Tap Vogel Spiral (초근경 무결점 화질 100% 사수)
+ * - Cascade 1 (30~80m): 8-Tap Golden Disk (50% 연산 절감)
+ * - Cascade 2 (80~200m): 4-Tap PCF (75% 연산 절감)
+ * - Cascade 3 & Impostor (200m+): 1-Tap 하드웨어 Bilinear PCF (94% 연산 절감)
+ * - 선행 4-Tap 반음영 검사로 완전 양지/음지 즉시 조기 탈출 (Early Exit)
  */
 fn sampleModernCascadeShadow(
     directionalShadowMap: texture_depth_2d_array,
@@ -39,14 +44,37 @@ fn sampleModernCascadeShadow(
     // 🌟 [슬로프 스케일 뎁스 바이어스] 경사면에서의 텍셀 깊이 오차 보정
     let cascadeBias = bias * (1.0 + slopeFactor * 2.0) * (1.0 + f32(cascadeIndex) * 0.25);
 
+    let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+    if (invalidDepth) {
+        return 1.0;
+    }
+
+    // 1. 캐스케이드 거리 레벨별 탭 수 결정 (16 / 8 / 4 / 1)
+    let tapCount = select(select(select(1u, 4u, cascadeIndex == 2u), 8u, cascadeIndex == 1u), 16u, cascadeIndex == 0u);
+
+    // 2. Cascade 3 (초원경): 하드웨어 2x2 바이리니어 PCF 1-Tap 즉시 리턴
+    if (tapCount == 1u) {
+        let tUV = shadowCoord.xy;
+        let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+        if (outOfBounds) { return 1.0; }
+        return textureSampleCompareLevel(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            cascadeIndex,
+            shadowDepth - cascadeBias
+        );
+    }
+
     // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
     let cascadeScale = mix(2.5, 3.2, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
 
     var weightedVisibility: f32 = 0.0;
+    var totalWeight: f32 = 0.0;
 
-    // 16-Tap Vogel Spiral 가우시안 텐트 필터링을 조기 탈출 손실 없이 온전히 샘플링하여 부드러운 그러데이션 완성
-    for (var i = 0; i < 16; i++) {
+    // 3. 선행 4-Tap 반음영(Penumbra) 검사 & 조기 탈출 (Early Exit)
+    for (var i = 0u; i < 4u; i++) {
         let offset = VOGEL_DISK_16[i] * filterRadius;
         let tUV = shadowCoord.xy + offset;
 
@@ -60,12 +88,36 @@ fn sampleModernCascadeShadow(
 
         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
         let vis = select(sampleVisibility, 1.0, outOfBounds);
-        weightedVisibility += vis * VOGEL_WEIGHTS_16[i];
+        let w = VOGEL_WEIGHTS_16[i];
+        weightedVisibility += vis * w;
+        totalWeight += w;
     }
 
-    let visibility = weightedVisibility / TOTAL_VOGEL_WEIGHT;
-    let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
-    return select(visibility, 1.0, invalidDepth);
+    // 🚀 [Early Exit] 4개 선행 탭이 모두 완전 햇빛(1.0)이거나 완전 암부(0.0)이면 나머지 루프 100% 스킵
+    if (weightedVisibility >= totalWeight - 0.0001) { return 1.0; }
+    if (weightedVisibility <= 0.0001) { return 0.0; }
+
+    // 4. 반음영(Penumbra) 경계선 픽셀만 나머지 탭 정밀 샘플링
+    for (var i = 4u; i < tapCount; i++) {
+        let offset = VOGEL_DISK_16[i] * filterRadius;
+        let tUV = shadowCoord.xy + offset;
+
+        let sampleVisibility = textureSampleCompareLevel(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            cascadeIndex,
+            shadowDepth - cascadeBias
+        );
+
+        let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+        let vis = select(sampleVisibility, 1.0, outOfBounds);
+        let w = VOGEL_WEIGHTS_16[i];
+        weightedVisibility += vis * w;
+        totalWeight += w;
+    }
+
+    return weightedVisibility / totalWeight;
 }
 
 /**
@@ -158,6 +210,7 @@ fn getDirectionalShadowVisibility(
     var finalVisibility = visibility;
 
     // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+    // 🚀 [32-Tap 폭풍 차단]: 현재 캐스케이드가 완전 햇빛(1.0) 또는 완전 암부(0.0)이면 다음 캐스케이드 샘플링 완전 스킵!
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
@@ -165,7 +218,7 @@ fn getDirectionalShadowVisibility(
         let blendMargin = cascadeRange * 0.20;
         let blendStart = splitFar - blendMargin;
 
-        if (viewDepth > blendStart) {
+        if (viewDepth > blendStart && visibility > 0.0001 && visibility < 0.9999) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);
@@ -200,3 +253,4 @@ fn getDirectionalShadowVisibility(
     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
     return finalVisibility * horizonFade;
 }
+
