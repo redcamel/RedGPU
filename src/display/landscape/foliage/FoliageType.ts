@@ -205,6 +205,10 @@ class FoliageType {
         return this.#allocation;
     }
 
+    get megaBuffer(): FoliageMegaBuffer | null {
+        return this.#megaBuffer;
+    }
+
     get subMeshes(): readonly FoliageSubMesh[] {
         return this.#subMeshes;
     }

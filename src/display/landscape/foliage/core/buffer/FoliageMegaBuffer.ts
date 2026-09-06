@@ -108,6 +108,14 @@ class FoliageMegaBuffer {
         return this.#rawGPUBuffer;
     }
 
+    get cpuRawDataBuffer(): Float32Array {
+        return this.#cpuRawDataBuffer;
+    }
+
+    get cpuRawDataUint32(): Uint32Array {
+        return this.#cpuRawDataUint32;
+    }
+
     get culledGPUBuffer(): GPUBuffer | null {
         return this.#culledGPUBuffer;
     }
