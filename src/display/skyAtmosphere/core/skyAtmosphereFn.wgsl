@@ -168,7 +168,10 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
     var optExt = vec3<f32>(0.0);
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
-        let viewHeight = length(origin + dir * t) - params.groundRadius;
+        let p = origin + dir * t;
+        let pSq = dot(p, p);
+        let invPLen = inverseSqrt(pSq);
+        let viewHeight = (pSq * invPLen) - params.groundRadius;
         if (viewHeight < 0.0) { continue; }
         let d = getAtmosphereDensities(viewHeight, params);
         
@@ -305,12 +308,14 @@ fn integrateScatSegment(
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
         let p = origin + dir * t;
-        let pLen = length(p);
+        let pSq = dot(p, p);
+        let invPLen = inverseSqrt(pSq);
+        let pLen = pSq * invPLen;
         let viewHeight = pLen - r;
         
         if (r > 0.0 && viewHeight < 0.0) { continue; }
 
-        let up = p / pLen;
+        let up = p * invPLen;
         let cosSun = dot(up, sunDir);
         
         var sunTrans: vec3<f32>;

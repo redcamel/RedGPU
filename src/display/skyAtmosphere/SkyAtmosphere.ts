@@ -23,6 +23,13 @@ import {IPostEffectResult} from "../../postEffect/core/types";
 import RedGPUObject from "../../base/RedGPUObject";
 
 
+interface CachedUniformMember {
+    key: string;
+    offset: number;
+    isFloat: boolean;
+    isArray: boolean;
+}
+
 /**
  * [KO] SkyAtmosphere 클래스는 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 시스템입니다.
  * [EN] The SkyAtmosphere class is a physics-based atmospheric scattering simulation system.
@@ -56,6 +63,9 @@ class SkyAtmosphere extends RedGPUObject {
     #backgroundRenderer: SkyAtmosphereBackground;
     /** [KO] 대기 투과 포스트 이펙트 [EN] Atmospheric transmittance post-effect */
     #postEffect: SkyAtmospherePostEffect;
+
+    /** [KO] Zero-GC 유니폼 업데이트를 위한 사전 캐싱된 멤버 정보 [EN] Pre-cached member info for Zero-GC uniform updates */
+    #cachedUniformMembers: CachedUniformMember[] = [];
 
     /** [KO] 물리 시뮬레이션 파라미터 [EN] Physical simulation parameters */
     #params = {
@@ -148,6 +158,8 @@ class SkyAtmosphere extends RedGPUObject {
         this.#skyLight = new SkyLight(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#backgroundRenderer = new SkyAtmosphereBackground(redGPUContext);
         this.#postEffect = new SkyAtmospherePostEffect(redGPUContext, this);
+
+        this.#initCachedUniformMembers();
     }
 
 
@@ -572,21 +584,41 @@ class SkyAtmosphere extends RedGPUObject {
         this.#markDirty(lut, skyView, ibl);
     }
 
-    #updateSharedUniformBuffer(): void {
+    #initCachedUniformMembers(): void {
         const {members} = this.#UNIFORM_STRUCT;
+        this.#cachedUniformMembers = [];
+        for (const [key, member] of Object.entries(members)) {
+            const targetMember = member as any;
+            const isArray = targetMember.arrayLength !== undefined || targetMember.isVector;
+            this.#cachedUniformMembers.push({
+                key,
+                offset: targetMember.uniformOffset / 4,
+                isFloat: targetMember.View === Float32Array,
+                isArray
+            });
+        }
+    }
+
+    #updateSharedUniformBuffer(): void {
         const dataViewF32 = this.#sharedUniformBuffer.dataViewF32;
         const dataViewU32 = this.#sharedUniformBuffer.dataViewU32;
+        const members = this.#cachedUniformMembers;
+        const params = this.#params as any;
+        const len = members.length;
 
-        for (const [key, member] of Object.entries(members)) {
-            const value = (this.#params as any)[key];
+        // [KO] 사전 캐싱된 멤버 테이블을 순회하여 매 프레임 Object.entries 힙 할당(GC) 완전 제거 (Zero-GC)
+        // [EN] Iterate through pre-cached member table to completely eliminate per-frame Object.entries heap allocations (Zero-GC)
+        for (let i = 0; i < len; i++) {
+            const item = members[i];
+            const value = params[item.key];
             if (value !== undefined) {
-                const targetMember = member as any;
-                const offset = targetMember.uniformOffset / 4;
+                const offset = item.offset;
                 if (typeof value === 'number') {
-                    if (targetMember.View === Float32Array) dataViewF32[offset] = value;
+                    if (item.isFloat) dataViewF32[offset] = value;
                     else dataViewU32[offset] = value;
                 } else if (value instanceof Float32Array || Array.isArray(value)) {
-                    for (let i = 0; i < value.length; i++) dataViewF32[offset + i] = value[i];
+                    const vLen = value.length;
+                    for (let j = 0; j < vLen; j++) dataViewF32[offset + j] = value[j];
                 }
             }
         }
