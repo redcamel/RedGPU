@@ -39,7 +39,9 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
             ]);
         }
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
+        // [KO] 1개 워크그룹(128스레드)이 1개 텍셀을 전담하여 32x32 워크그룹 디스패치
+        // [EN] 1 workgroup (128 threads) dedicated to 1 texel, dispatching 32x32 workgroups
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [1, 1, 1]);
     }
 
     destroy(): void {
