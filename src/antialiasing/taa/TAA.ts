@@ -6,7 +6,6 @@ import {IPostEffectResult} from "../../postEffect/core/types";
 import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 
 /**
@@ -34,16 +33,18 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
  * @category PostEffect
  */
 class TAA extends ASinglePassPostEffect {
-    #historyTexture: GPUTexture
-    #historyTextureView: GPUTextureView
+    #historyTextures: [GPUTexture, GPUTexture] = [null, null];
+    #historyTextureViews: [GPUTextureView, GPUTextureView] = [null, null];
+    #historyResults: [IPostEffectResult, IPostEffectResult] = [null, null];
+    #historyIndex: number = 0;
     /** [KO] 현재 프레임 누적 인덱스 [EN] Current frame accumulation index */
-    #frameIndex: number = 0
+    #frameIndex: number = 0;
     /** [KO] 지터링 강도 [EN] Jitter strength */
     #jitterStrength: number = 0.5;
-    #prevJitterOffset: [number, number] = [0, 0]
+    #prevJitterOffset: [number, number] = [0, 0];
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
-    #videoMemorySize: number = 0
-    #prevInfo: { width: number, height: number }
+    #videoMemorySize: number = 0;
+    #prevInfo: { width: number, height: number };
 
     /**
      * [KO] TAA 인스턴스를 생성합니다.
@@ -93,18 +94,7 @@ class TAA extends ASinglePassPostEffect {
     get frameIndex(): number {
         return this.#frameIndex;
     }
-
-    /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns the video memory usage.
-     *
-     * @returns
-     * [KO] 비디오 메모리 바이트 수
-     * [EN] Video memory size in bytes
-     */
-    get videoMemorySize(): number {
-        return this.#videoMemorySize
-    }
+    #targetAllocResult: IPostEffectResult = null;
 
     /**
      * [KO] 지터링 강도를 반환합니다.
@@ -131,8 +121,20 @@ class TAA extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] TAA 이펙트를 렌더링합니다.
-     * [EN] Renders the TAA effect.
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns the video memory usage.
+     *
+     * @returns
+     * [KO] 비디오 메모리 바이트 수
+     * [EN] Video memory size in bytes
+     */
+    get videoMemorySize(): number {
+        return this.#videoMemorySize;
+    }
+
+    /**
+     * [KO] TAA 이펙트를 렌더링합니다 (Zero-Copy 핑퐁 스왑).
+     * [EN] Renders the TAA effect (Zero-Copy Ping-Pong swap).
      *
      * @param view -
      * [KO] View3D 인스턴스
@@ -151,41 +153,41 @@ class TAA extends ASinglePassPostEffect {
      * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
-        const {redGPUContext} = this;
-        const {commandEncoderManager} = redGPUContext;
-
         this.#frameIndex++;
 
         // 유니폼 업데이트
         this.updateUniform('frameIndex', this.#frameIndex);
         this.updateUniform('currJitterOffset', view.jitterOffset);
         this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
-        mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix)
-        this.#prevJitterOffset = [...view.jitterOffset]
+        mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix);
+        this.#prevJitterOffset[0] = view.jitterOffset[0];
+        this.#prevJitterOffset[1] = view.jitterOffset[1];
 
-        // 히스토리 텍스처 관리
-        this.#updateHistoryTexture(width, height);
+        // 🌟 히스토리 텍스처 2장 확보 (Zero-Copy 핑퐁)
+        this.#updateHistoryTextures(width, height);
 
-        // 부모 렌더 호출 (Pool 사용)
-        const historyInfo: IPostEffectResult = {
-            texture: this.#historyTexture,
-            textureView: this.#historyTextureView
-        };
+        const readIndex = this.#historyIndex;
+        const writeIndex = 1 - this.#historyIndex;
+
+        const historyInfo = this.#historyResults[readIndex];
+        const targetOutputResult = this.#historyResults[writeIndex];
+
+        // 🌟 [방법 2] ASinglePassPostEffect 원본을 100% 유지하면서 풀 할당 함수만 일시 가로채기 (Zero-GC Hooking)
+        const pool = view.postEffectManager.texturePool;
+        const originalAlloc = pool.allocResult;
+
+        this.#targetAllocResult = targetOutputResult;
+        pool.allocResult = this.#hookedAllocResult;
+
+        // ASinglePassPostEffect 원본의 super.render() 호출
         const result = super.render(view, width, height, sourceTextureInfo, historyInfo);
 
-        //TODO - 이거 스왑버퍼로해서 복사비용을 삭제해야겠다
-        // 결과를 히스토리에 복사
-        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
-            encoder.copyTextureToTexture(
-                {texture: result.texture},
-                {texture: this.#historyTexture},
-                [width, height, 1]
-            );
-        });
+        // 원래 풀 함수 및 임시 참조 원복
+        pool.allocResult = originalAlloc;
+        this.#targetAllocResult = null;
 
-        if (this.#frameIndex <= 20 || this.#frameIndex % 60 === 0) {
-            console.log(`TAA Frame ${this.#frameIndex}: HistoryUpdated, JitterStrength=${this.#jitterStrength}`);
-        }
+        // 다음 프레임을 위한 히스토리 인덱스 스왑
+        this.#historyIndex = writeIndex;
 
         return result;
     }
@@ -196,17 +198,23 @@ class TAA extends ASinglePassPostEffect {
      */
     clear() {
         super.clear();
-        if (this.#historyTexture) {
-            this.#historyTexture.destroy();
-            this.#historyTexture = null;
-            this.#historyTextureView = null;
+        for (let i = 0; i < 2; i++) {
+            if (this.#historyTextures[i]) {
+                this.#historyTextures[i].destroy();
+                this.#historyTextures[i] = null;
+                this.#historyTextureViews[i] = null;
+                this.#historyResults[i] = null;
+            }
         }
         this.#prevInfo = null;
+        this.#historyIndex = 0;
     }
 
+    #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;
+
     /**
-     * [KO] 히스토리 텍스처를 업데이트합니다.
-     * [EN] Updates the history texture.
+     * [KO] 핑퐁 스왑용 히스토리 텍스처 2장을 관리합니다.
+     * [EN] Manages 2 history textures for ping-pong swapping.
      *
      * @param width -
      * [KO] 텍스처 너비
@@ -215,24 +223,31 @@ class TAA extends ASinglePassPostEffect {
      * [KO] 텍스처 높이
      * [EN] Texture height
      */
-    #updateHistoryTexture(width: number, height: number) {
-        if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTexture) {
-            if (this.#historyTexture) this.#historyTexture.destroy();
+    #updateHistoryTextures(width: number, height: number) {
+        if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTextures[0]) {
+            if (this.#historyTextures[0]) this.#historyTextures[0].destroy();
+            if (this.#historyTextures[1]) this.#historyTextures[1].destroy();
 
             const {resourceManager} = this.redGPUContext;
-            this.#historyTexture = resourceManager.createManagedTexture({
-                size: {width, height},
-                format: 'rgba16float',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-                label: `TAA_HistoryTexture_${width}x${height}`
-            });
-            this.#historyTextureView = resourceManager.getGPUResourceBitmapTextureView(this.#historyTexture, {
-                dimension: '2d',
-                format: 'rgba16float',
-                label: `TAA_HistoryTextureView`
-            });
+            for (let i = 0; i < 2; i++) {
+                const texture = resourceManager.createManagedTexture({
+                    size: {width, height},
+                    format: 'rgba16float',
+                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                    label: `TAA_HistoryTexture_${i}_${width}x${height}`
+                });
+                const textureView = resourceManager.getGPUResourceBitmapTextureView(texture, {
+                    dimension: '2d',
+                    format: 'rgba16float',
+                    label: `TAA_HistoryTextureView_${i}`
+                });
+                this.#historyTextures[i] = texture;
+                this.#historyTextureViews[i] = textureView;
+                this.#historyResults[i] = {texture, textureView};
+            }
 
             this.#prevInfo = {width, height};
+            this.#historyIndex = 0;
             this.#calcTAAVideoMemory();
         }
     }
@@ -243,8 +258,8 @@ class TAA extends ASinglePassPostEffect {
      */
     #calcTAAVideoMemory() {
         this.#videoMemorySize = this.uniformBuffer ? this.uniformBuffer.size : 0;
-        if (this.#historyTexture) {
-            this.#videoMemorySize += calculateTextureByteSize(this.#historyTexture);
+        if (this.#historyTextures[0]) {
+            this.#videoMemorySize += calculateTextureByteSize(this.#historyTextures[0]) * 2;
         }
     }
 }
