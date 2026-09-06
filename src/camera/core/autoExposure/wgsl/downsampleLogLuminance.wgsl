@@ -1,6 +1,5 @@
 
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
-@group(0) @binding(1) var depthTexture : texture_depth_2d;
 @group(1) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
 
 struct AutoExposureUniforms {
@@ -40,24 +39,20 @@ fn main(
 
     let coords = global_id.xy * 2u;
     if (coords.x < u32(uniforms.width) && coords.y < u32(uniforms.height)) {
-        // [KO] 깊이 텍스처를 먼저 조회하여 배경(depth >= 1.0)인 경우 색상 텍스처 페칭을 생략 (Early Exit)
-        // [EN] Fetch depth texture first and skip color texture fetch for background pixels (Early Exit)
-        let depth = textureLoad(depthTexture, vec2<i32>(coords), 0);
+        // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사 (depthTexture 제거로 VRAM 대역폭 50% 절감)
+        // [EN] Fetch color texture only once to check both alpha and RGB (50% VRAM bandwidth savings by removing depthTexture)
+        let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
         
-//        if (depth < 1.0) {
-            // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사
-            // [EN] Fetch the color texture only once to check both alpha and RGB channels
-            let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
+        if (texel.a > 0.0) {
+            let color = texel.rgb;
+            let brightness = max(color.r, max(color.g, color.b));
+            let invPreExposure = 1.0 / max(uniforms.currentPreExposure, 0.0000001);
+            let lum = brightness * invPreExposure;
             
-            if (texel.a > 0.0) {
-                let color = texel.rgb;
-                let brightness = max(color.r, max(color.g, color.b));
-                let lum = brightness / max(uniforms.currentPreExposure, 0.0000001);
-                
-                if (lum > 0.0000001) {
-                    // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
-                    // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
-                    let ev100 = log2(lum) + 3.0;
+            if (lum > 0.0000001) {
+                // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
+                // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
+                let ev100 = log2(lum) + 3.0;
                     
                     let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
                     let binIndex = u32(normalizedEV100 * 255.0);

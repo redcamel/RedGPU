@@ -28,9 +28,8 @@ class AutoExposure extends RedGPUObject {
     #histogramBuffer: StorageBuffer;
 
     #adaptationPipeline: GPUComputePipeline;
-
-    #cachedDownsampleBindGroupLayouts: Map<boolean, GPUBindGroupLayout> = new Map();
-    #cachedDownsamplePipelines: Map<boolean, GPUComputePipeline> = new Map();
+    #downsamplePipeline: GPUComputePipeline;
+    #downsampleBindGroupLayout0: GPUBindGroupLayout;
     #downsampleBindGroupLayout1: GPUBindGroupLayout;
     #adaptationBindGroupLayout0: GPUBindGroupLayout;
 
@@ -54,10 +53,9 @@ class AutoExposure extends RedGPUObject {
     #exposureCompensation: number = 0.0;
 
     // 캐싱 관련 필드
-    #prevMSAAID: string;
     #prevWidth: number;
     #prevHeight: number;
-    #downsampleBindGroup0Cache: WeakMap<GPUTexture, { swap0: GPUBindGroup, swap1: GPUBindGroup }> = new WeakMap();
+    #downsampleBindGroup0Cache: WeakMap<GPUTexture, GPUBindGroup> = new WeakMap();
     #downsampleBindGroup1: GPUBindGroup;
     #adaptationBindGroup0: GPUBindGroup;
 
@@ -412,48 +410,30 @@ class AutoExposure extends RedGPUObject {
             u.byteLength
         );
 
-        const msaaChanged = this.#prevMSAAID !== msaaID;
         const sizeChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
-        if (msaaChanged || sizeChanged) {
+        if (sizeChanged) {
             this.#downsampleBindGroup0Cache = new WeakMap();
-            this.#prevMSAAID = msaaID;
             this.#prevWidth = width;
             this.#prevHeight = height;
         }
 
         let cachedBG0 = this.#downsampleBindGroup0Cache.get(sourceTextureInfo.texture);
         if (!cachedBG0) {
-            const depthView0 = viewRenderTextureManager.depthTextureView;
-            const depthView1 = viewRenderTextureManager.prevDepthTextureView;
-            const layout0 = this.#getDownsampleBindGroupLayout0(useMSAA);
-
-            cachedBG0 = {
-                swap0: gpuDevice.createBindGroup({
-                    label: 'AutoExposure_Downsample_BG0_Swap0',
-                    layout: layout0,
-                    entries: [
-                        {binding: 0, resource: sourceTextureInfo.textureView},
-                        {binding: 1, resource: depthView0}
-                    ]
-                }),
-                swap1: gpuDevice.createBindGroup({
-                    label: 'AutoExposure_Downsample_BG0_Swap1',
-                    layout: layout0,
-                    entries: [
-                        {binding: 0, resource: sourceTextureInfo.textureView},
-                        {binding: 1, resource: depthView1}
-                    ]
-                })
-            };
+            cachedBG0 = gpuDevice.createBindGroup({
+                label: 'AutoExposure_Downsample_BG0',
+                layout: this.#downsampleBindGroupLayout0,
+                entries: [
+                    {binding: 0, resource: sourceTextureInfo.textureView}
+                ]
+            });
             this.#downsampleBindGroup0Cache.set(sourceTextureInfo.texture, cachedBG0);
         }
 
-        // Pass 1: Generate Histogram
-        const pipeline = this.#getDownsamplePipeline(useMSAA);
+        // Pass 1: Generate Histogram (depthTexture 제거로 단일 텍스처 바인딩)
         commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
-            pass1.setPipeline(pipeline);
-            pass1.setBindGroup(0, swapBufferIndex ? cachedBG0.swap1 : cachedBG0.swap0);
+            pass1.setPipeline(this.#downsamplePipeline);
+            pass1.setBindGroup(0, cachedBG0);
             pass1.setBindGroup(1, this.#downsampleBindGroup1);
             pass1.dispatchWorkgroups(Math.ceil(width / 32), Math.ceil(height / 32), 1);
         });
@@ -515,8 +495,8 @@ class AutoExposure extends RedGPUObject {
         }
 
         this.#adaptationPipeline = null;
-        this.#cachedDownsampleBindGroupLayouts.clear();
-        this.#cachedDownsamplePipelines.clear();
+        this.#downsamplePipeline = null;
+        this.#downsampleBindGroupLayout0 = null;
         this.#downsampleBindGroupLayout1 = null;
         this.#adaptationBindGroupLayout0 = null;
         this.#downsampleBindGroup1 = null;
@@ -568,15 +548,28 @@ class AutoExposure extends RedGPUObject {
     }
 
     #initPipelines() {
-        const {gpuDevice, resourceManager,} = this;
+        const {gpuDevice, resourceManager} = this;
 
+        const downsampleModule = resourceManager.createGPUShaderModule('AutoExposure_Downsample', {code: downsampleLogLuminanceCode});
         const adaptationModule = resourceManager.createGPUShaderModule('AutoExposure_Adaptation', {code: adaptationCode});
+
+        this.#downsampleBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL0', {
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {}}
+            ]
+        });
 
         this.#downsampleBindGroupLayout1 = resourceManager.createBindGroupLayout('AutoExposure_Downsample_BGL1', {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
             ]
+        });
+
+        this.#downsamplePipeline = gpuDevice.createComputePipeline({
+            label: 'AutoExposure_Downsample_Pipeline',
+            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [this.#downsampleBindGroupLayout0, this.#downsampleBindGroupLayout1]}),
+            compute: {module: downsampleModule, entryPoint: 'main'}
         });
 
         this.#adaptationBindGroupLayout0 = resourceManager.createBindGroupLayout('AutoExposure_Adaptation_BGL0', {
@@ -611,43 +604,6 @@ class AutoExposure extends RedGPUObject {
                 {binding: 2, resource: {buffer: this.#uniformBuffer.gpuBuffer}}
             ]
         });
-    }
-
-    #getDownsamplePipeline(useMSAA: boolean): GPUComputePipeline {
-        if (this.#cachedDownsamplePipelines.has(useMSAA)) return this.#cachedDownsamplePipelines.get(useMSAA);
-
-        const {gpuDevice, resourceManager} = this;
-        const shaderCode = useMSAA
-            ? downsampleLogLuminanceCode.replace('texture_depth_2d', 'texture_depth_multisampled_2d')
-            : downsampleLogLuminanceCode;
-
-        const module = resourceManager.createGPUShaderModule(`AutoExposure_Downsample_${useMSAA ? 'MSAA' : 'NonMSAA'}`, {code: shaderCode});
-        const layout = this.#getDownsampleBindGroupLayout0(useMSAA);
-
-        const pipeline = gpuDevice.createComputePipeline({
-            label: `AutoExposure_Downsample_Pipeline_${useMSAA ? 'MSAA' : 'NonMSAA'}`,
-            layout: gpuDevice.createPipelineLayout({bindGroupLayouts: [layout, this.#downsampleBindGroupLayout1]}),
-            compute: {module, entryPoint: 'main'}
-        });
-
-        this.#cachedDownsamplePipelines.set(useMSAA, pipeline);
-        return pipeline;
-    }
-
-    #getDownsampleBindGroupLayout0(useMSAA: boolean): GPUBindGroupLayout {
-        if (this.#cachedDownsampleBindGroupLayouts.has(useMSAA)) return this.#cachedDownsampleBindGroupLayouts.get(useMSAA);
-
-        const {gpuDevice} = this;
-        const layout = gpuDevice.createBindGroupLayout({
-            label: `AutoExposure_Downsample_BGL0_${useMSAA ? 'MSAA' : 'NonMSAA'}`,
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'depth', multisampled: useMSAA}}
-            ]
-        });
-
-        this.#cachedDownsampleBindGroupLayouts.set(useMSAA, layout);
-        return layout;
     }
 }
 
