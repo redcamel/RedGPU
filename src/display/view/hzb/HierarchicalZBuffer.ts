@@ -20,15 +20,18 @@ class HierarchicalZBuffer {
 
     #pipelineMip0: GPUComputePipeline | null = null;
     #pipelineMip0MSAA: GPUComputePipeline | null = null;
-    #pipelineDownsample: GPUComputePipeline | null = null;
+    #pipelineDownsampleSPD5: GPUComputePipeline | null = null;
+    #pipelineDownsampleTail: GPUComputePipeline | null = null;
 
     #bglMip0: GPUBindGroupLayout | null = null;
     #bglMip0MSAA: GPUBindGroupLayout | null = null;
-    #bglDownsample: GPUBindGroupLayout | null = null;
+    #bglDownsampleSPD5: GPUBindGroupLayout | null = null;
+    #bglDownsampleTail: GPUBindGroupLayout | null = null;
 
-    #uniformBuffers: GPUBuffer[] = [];
+    #uniformBufferMip0: GPUBuffer | null = null;
     #bindGroupsMip0: Map<GPUTextureView, GPUBindGroup> = new Map();
-    #bindGroupsDownsample: GPUBindGroup[] = [];
+    #bindGroupDownsampleSPD5: GPUBindGroup | null = null;
+    #bindGroupDownsampleTail: GPUBindGroup | null = null;
 
     #lastSrcWidth: number = -1;
     #lastSrcHeight: number = -1;
@@ -54,7 +57,7 @@ class HierarchicalZBuffer {
     }
 
     /**
-     * Depth Texture로부터 8단계 HZB Mipmap 피라미드를 고속(0.02ms) 생성합니다.
+     * Depth Texture로부터 8단계 HZB Mipmap 피라미드를 초고속 SPD(Single-Pass Downsampler)로 생성합니다.
      */
     generate(
         commandEncoder: GPUCommandEncoder,
@@ -63,7 +66,7 @@ class HierarchicalZBuffer {
         srcHeight: number,
         isMSAA: boolean = false
     ): void {
-        if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineMip0MSAA || !this.#pipelineDownsample) return;
+        if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineMip0MSAA || !this.#pipelineDownsampleSPD5 || !this.#pipelineDownsampleTail) return;
         const gpuDevice = this.#redGPUContext.gpuDevice;
 
         // Mip 0 파라미터 업데이트 (해상도 변경 시에만 1회 전송 및 GC 0건 인플레이스 기록)
@@ -76,7 +79,7 @@ class HierarchicalZBuffer {
             p[1] = srcHeight;
             p[2] = HierarchicalZBuffer.HZB_WIDTH;
             p[3] = HierarchicalZBuffer.HZB_HEIGHT;
-            gpuDevice.queue.writeBuffer(this.#uniformBuffers[0], 0, p.buffer, p.byteOffset, p.byteLength);
+            gpuDevice.queue.writeBuffer(this.#uniformBufferMip0!, 0, p.buffer, p.byteOffset, p.byteLength);
         }
 
         // Mip 0 바인드그룹 조회 또는 생성
@@ -89,7 +92,7 @@ class HierarchicalZBuffer {
                 entries: [
                     {binding: 0, resource: sourceDepthTextureView},
                     {binding: 1, resource: this.#hzbMipViews[0]},
-                    {binding: 2, resource: {buffer: this.#uniformBuffers[0]}},
+                    {binding: 2, resource: {buffer: this.#uniformBufferMip0!}},
                 ],
             });
             this.#bindGroupsMip0.set(sourceDepthTextureView, bgMip0);
@@ -99,7 +102,7 @@ class HierarchicalZBuffer {
             label: 'HierarchicalZBuffer_Generation_Pass',
         });
 
-        // 1. Mip 0 생성 (Depth -> HZB Mip 0)
+        // 1. Mip 0 생성 (Depth -> HZB Mip 0: 512x256)
         const pipelineMip0 = isMSAA ? this.#pipelineMip0MSAA : this.#pipelineMip0;
         pass.setPipeline(pipelineMip0);
         pass.setBindGroup(0, bgMip0);
@@ -108,15 +111,15 @@ class HierarchicalZBuffer {
             Math.ceil(HierarchicalZBuffer.HZB_HEIGHT / 8)
         );
 
-        // 2. Mip 1..N 다운샘플링 (HZB Mip[K-1] -> HZB Mip[K])
-        pass.setPipeline(this.#pipelineDownsample);
-        for (let m = 1; m < HierarchicalZBuffer.MIP_COUNT; m++) {
-            const dstW = Math.max(HierarchicalZBuffer.HZB_WIDTH >> m, 1);
-            const dstH = Math.max(HierarchicalZBuffer.HZB_HEIGHT >> m, 1);
+        // 2. SPD Stage 1: Mip 1 ~ Mip 5 단일 패스 LDS 계층 동시 축약 (16x16 워크그룹 x 128개 = 단 1회 디스패치)
+        pass.setPipeline(this.#pipelineDownsampleSPD5);
+        pass.setBindGroup(0, this.#bindGroupDownsampleSPD5!);
+        pass.dispatchWorkgroups(16, 8);
 
-            pass.setBindGroup(0, this.#bindGroupsDownsample[m - 1]);
-            pass.dispatchWorkgroups(Math.ceil(dstW / 8), Math.ceil(dstH / 8));
-        }
+        // 3. SPD Stage 2: Mip 5 -> Mip 6 (8x4), Mip 7 (4x2) 최종 온칩 축약 (단 1개 워크그룹 디스패치)
+        pass.setPipeline(this.#pipelineDownsampleTail);
+        pass.setBindGroup(0, this.#bindGroupDownsampleTail!);
+        pass.dispatchWorkgroups(1, 1);
 
         pass.end();
     }
@@ -126,16 +129,19 @@ class HierarchicalZBuffer {
         this.#hzbTexture = null;
         this.#hzbFullTextureView = null;
         this.#hzbMipViews.length = 0;
-        this.#uniformBuffers.forEach(b => b.destroy());
-        this.#uniformBuffers.length = 0;
+        this.#uniformBufferMip0?.destroy();
+        this.#uniformBufferMip0 = null;
         this.#bindGroupsMip0.clear();
-        this.#bindGroupsDownsample.length = 0;
+        this.#bindGroupDownsampleSPD5 = null;
+        this.#bindGroupDownsampleTail = null;
         this.#pipelineMip0 = null;
         this.#pipelineMip0MSAA = null;
-        this.#pipelineDownsample = null;
+        this.#pipelineDownsampleSPD5 = null;
+        this.#pipelineDownsampleTail = null;
         this.#bglMip0 = null;
         this.#bglMip0MSAA = null;
-        this.#bglDownsample = null;
+        this.#bglDownsampleSPD5 = null;
+        this.#bglDownsampleTail = null;
         this.#isInitialized = false;
     }
 
@@ -234,23 +240,53 @@ class HierarchicalZBuffer {
             ],
         });
 
-        this.#bglDownsample = gpuDevice.createBindGroupLayout({
-            label: 'HZB_BGL_Downsample',
+        // 🚀 SPD Stage 1 BindGroupLayout (Mip 0 읽기 + Mip 1~5 동시 쓰기)
+        this.#bglDownsampleSPD5 = gpuDevice.createBindGroupLayout({
+            label: 'HZB_BGL_Downsample_SPD5',
             entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'unfilterable-float'},
-                },
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
                 {
                     binding: 1,
                     visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'r32float'},
+                    storageTexture: {access: 'write-only', format: 'r32float'}
                 },
                 {
                     binding: 2,
                     visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'uniform'},
+                    storageTexture: {access: 'write-only', format: 'r32float'}
+                },
+                {
+                    binding: 3,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'}
+                },
+                {
+                    binding: 4,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'}
+                },
+                {
+                    binding: 5,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'}
+                },
+            ],
+        });
+
+        // 🚀 SPD Stage 2 BindGroupLayout (Mip 5 읽기 + Mip 6, 7 동시 쓰기)
+        this.#bglDownsampleTail = gpuDevice.createBindGroupLayout({
+            label: 'HZB_BGL_Downsample_Tail',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'}
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'}
                 },
             ],
         });
@@ -278,53 +314,58 @@ class HierarchicalZBuffer {
             },
         });
 
-        this.#pipelineDownsample = gpuDevice.createComputePipeline({
-            label: 'HZB_Pipeline_Downsample',
+        this.#pipelineDownsampleSPD5 = gpuDevice.createComputePipeline({
+            label: 'HZB_Pipeline_Downsample_SPD5',
             layout: gpuDevice.createPipelineLayout({
-                bindGroupLayouts: [this.#bglDownsample],
+                bindGroupLayouts: [this.#bglDownsampleSPD5],
             }),
             compute: {
                 module: shaderModule,
-                entryPoint: 'mainDownsample',
+                entryPoint: 'mainDownsampleSPD5',
             },
         });
 
-        // 6. Uniform Buffers (Mip별 파라미터 캐싱)
-        this.#uniformBuffers = [];
-        for (let m = 0; m < HierarchicalZBuffer.MIP_COUNT; m++) {
-            const buf = gpuDevice.createBuffer({
-                label: `HZB_UniformBuffer_Mip_${m}`,
-                size: 16, // 4 x u32
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-            this.#uniformBuffers.push(buf);
-        }
+        this.#pipelineDownsampleTail = gpuDevice.createComputePipeline({
+            label: 'HZB_Pipeline_Downsample_Tail',
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [this.#bglDownsampleTail],
+            }),
+            compute: {
+                module: shaderModule,
+                entryPoint: 'mainDownsampleTail',
+            },
+        });
 
-        // 7. Mip 1..N 다운샘플 바인드그룹 사전 생성
-        this.#bindGroupsDownsample = [];
-        for (let m = 1; m < HierarchicalZBuffer.MIP_COUNT; m++) {
-            const srcMip = m - 1;
-            const dstMip = m;
+        // 6. Uniform Buffer (Mip 0 전용)
+        this.#uniformBufferMip0 = gpuDevice.createBuffer({
+            label: 'HZB_UniformBuffer_Mip0',
+            size: 16, // 4 x u32
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
 
-            const srcW = Math.max(HierarchicalZBuffer.HZB_WIDTH >> srcMip, 1);
-            const srcH = Math.max(HierarchicalZBuffer.HZB_HEIGHT >> srcMip, 1);
-            const dstW = Math.max(HierarchicalZBuffer.HZB_WIDTH >> dstMip, 1);
-            const dstH = Math.max(HierarchicalZBuffer.HZB_HEIGHT >> dstMip, 1);
+        // 7. SPD 바인드그룹 사전 생성 (Mip 0, Mip 5 기반 고정 바인드그룹)
+        this.#bindGroupDownsampleSPD5 = gpuDevice.createBindGroup({
+            label: 'HZB_BindGroup_Downsample_SPD5',
+            layout: this.#bglDownsampleSPD5,
+            entries: [
+                {binding: 0, resource: this.#hzbMipViews[0]},
+                {binding: 1, resource: this.#hzbMipViews[1]},
+                {binding: 2, resource: this.#hzbMipViews[2]},
+                {binding: 3, resource: this.#hzbMipViews[3]},
+                {binding: 4, resource: this.#hzbMipViews[4]},
+                {binding: 5, resource: this.#hzbMipViews[5]},
+            ],
+        });
 
-            const paramData = new Uint32Array([srcW, srcH, dstW, dstH]);
-            gpuDevice.queue.writeBuffer(this.#uniformBuffers[dstMip], 0, paramData);
-
-            const bg = gpuDevice.createBindGroup({
-                label: `HZB_BindGroup_Downsample_${m}`,
-                layout: this.#bglDownsample,
-                entries: [
-                    {binding: 0, resource: this.#hzbMipViews[srcMip]},
-                    {binding: 1, resource: this.#hzbMipViews[dstMip]},
-                    {binding: 2, resource: {buffer: this.#uniformBuffers[dstMip]}},
-                ],
-            });
-            this.#bindGroupsDownsample.push(bg);
-        }
+        this.#bindGroupDownsampleTail = gpuDevice.createBindGroup({
+            label: 'HZB_BindGroup_Downsample_Tail',
+            layout: this.#bglDownsampleTail,
+            entries: [
+                {binding: 0, resource: this.#hzbMipViews[5]},
+                {binding: 1, resource: this.#hzbMipViews[6]},
+                {binding: 2, resource: this.#hzbMipViews[7]},
+            ],
+        });
 
         this.#isInitialized = true;
     }
