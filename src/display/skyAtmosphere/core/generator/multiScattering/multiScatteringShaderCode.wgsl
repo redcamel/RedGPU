@@ -6,6 +6,9 @@
 @group(0) @binding(2) var skyAtmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 
+const GOLDEN_SPHERE_STEP: f32 = 10.16640738463052; // (sqrt(5.0) + 1.0) * PI
+const INV_MULTI_SCAT_SAMPLES: f32 = 1.0 / f32(MULTI_SCAT_SAMPLES);
+
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [KO] 1. 인덱스 및 정규화된 좌표 계산
@@ -28,10 +31,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [EN] 2. Numerical integration loop for multi-scattering approximation
     for (var i = 0u; i < MULTI_SCAT_SAMPLES; i = i + 1u) {
         let step = f32(i) + 0.5;
-        // 구형 샘플링을 통한 대기 전체 방향 기여도 합산
-        let theta = acos(clamp(1.0 - 2.0 * step / f32(MULTI_SCAT_SAMPLES), -1.0, 1.0));
-        let phi = (sqrt(5.0) + 1.0) * PI * step;
-        let rayDir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
+        // [KO] 구형 균등 분포: acos/cos 호출을 제거하고 대수적 삼각 항등식으로 직결
+        // [EN] Spherical uniform distribution: Eliminate acos/cos via algebraic trigonometric identities
+        let cosTheta = clamp(1.0 - 2.0 * step * INV_MULTI_SCAT_SAMPLES, -1.0, 1.0);
+        let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
+        let phi = GOLDEN_SPHERE_STEP * step;
+        let cosPhi = cos(phi);
+        let sinPhi = sin(phi);
+        let rayDir = vec3<f32>(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
 
         let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
         let tEarth = getRaySphereIntersection(rayOrigin, rayDir, groundRadius);
@@ -45,7 +52,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, tEarth, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
 
             let hitP = rayOrigin + rayDir * tEarth;
-            let up = normalize(hitP);
+            let dotHitP = dot(hitP, hitP);
+            let up = hitP * inverseSqrt(dotHitP);
             let localCosSun = dot(up, sunDir);
             // [KO] 하드웨어 선형 샘플링을 통해 투과율 조회
             // [EN] Retrieve transmittance via hardware linear sampling
@@ -59,12 +67,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         lumTotal += L1;
-        fmsTotal += f1 / f32(MULTI_SCAT_SAMPLES);
+        fmsTotal += f1 * INV_MULTI_SCAT_SAMPLES;
     }
 
     // [KO] 3. 무한 등비급수 원리를 이용한 최종 다중 산란 강도 산출
     // [EN] 3. Calculate final multi-scattering intensity using infinite geometric series principle
-    let output = (lumTotal / f32(MULTI_SCAT_SAMPLES)) / (1.0 - min(fmsTotal, vec3<f32>(0.999)));
+    let output = (lumTotal * INV_MULTI_SCAT_SAMPLES) / (1.0 - min(fmsTotal, vec3<f32>(0.999)));
     textureStore(multiScatLUT, global_id.xy, vec4<f32>(output, 1.0));
 }
 
@@ -73,17 +81,19 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
     let groundRadius = params.groundRadius;
     let stepSize = (tMax - tMin) / f32(steps);
 
-    let phaseIsotropic = 1.0 / (4.0 * PI);
+    let phaseIsotropic = 0.25 * INV_PI;
 
     for (var j = 0u; j < steps; j = j + 1u) {
         let t = tMin + (f32(j) + 0.5) * stepSize;
         let p = origin + dir * t;
-        let pLen = length(p);
+        let dotP = dot(p, p);
+        let invPLen = inverseSqrt(dotP);
+        let pLen = dotP * invPLen;
         let h = pLen - groundRadius;
         
         let d = getAtmosphereDensities(h, params);
         
-        let up = p / pLen;
+        let up = p * invPLen;
         let localCosSun = dot(up, sunDir);
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, h, localCosSun, params.atmosphereHeight);
         let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius, params);
