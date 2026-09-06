@@ -30,9 +30,11 @@ class FoliageMegaBuffer {
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageMegaBuffer.#tempFloat32.buffer);
     #cpuRawDataUint32: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, maxTotalInstances: number = 500000, maxSubMeshes: number = 256) {
+    #onRecreated: (() => void) | null = null;
+
+    constructor(redGPUContext: RedGPUContext, initialCapacity: number = 65536, maxSubMeshes: number = 256) {
         this.#redGPUContext = redGPUContext;
-        this.#maxTotalInstances = maxTotalInstances;
+        this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
         this.#maxSubMeshes = maxSubMeshes;
         this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
@@ -140,6 +142,75 @@ class FoliageMegaBuffer {
         return this.#maxSubMeshes;
     }
 
+    get onRecreated(): (() => void) | null {
+        return this.#onRecreated;
+    }
+
+    set onRecreated(cb: (() => void) | null) {
+        this.#onRecreated = cb;
+    }
+
+    ensureCapacity(requiredCapacity: number): boolean {
+        if (requiredCapacity <= this.#maxTotalInstances) {
+            return false;
+        }
+
+        let newCapacity = this.#maxTotalInstances;
+        while (newCapacity < requiredCapacity) {
+            newCapacity = Math.ceil((newCapacity * 2) / 64) * 64;
+        }
+
+        this.#maxTotalInstances = newCapacity;
+
+        const oldCpuBuffer = this.#cpuRawDataBuffer;
+        this.#cpuRawDataBuffer = new Float32Array(newCapacity * FoliageMegaBuffer.#STRIDE_FLOATS);
+        this.#cpuRawDataBuffer.set(oldCpuBuffer);
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            const rawByteSize = this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_BYTES;
+            const culledByteSize = this.#maxTotalInstances * 8 * FoliageMegaBuffer.#STRIDE_BYTES;
+
+            this.#rawGPUBuffer?.destroy();
+            this.#culledGPUBuffer?.destroy();
+            this.#shadowCulledGPUBuffer?.destroy();
+
+            this.#rawGPUBuffer = gpuDevice.createBuffer({
+                label: 'FoliageMegaBuffer_Raw',
+                size: rawByteSize,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            });
+
+            this.#culledGPUBuffer = gpuDevice.createBuffer({
+                label: 'FoliageMegaBuffer_Culled_Main',
+                size: culledByteSize,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            });
+
+            this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
+                label: 'FoliageMegaBuffer_Culled_ShadowMega',
+                size: culledByteSize * 4,
+                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            });
+
+            if (this.#nextRawOffset > 0) {
+                gpuDevice.queue.writeBuffer(
+                    this.#rawGPUBuffer,
+                    0,
+                    this.#cpuRawDataBuffer.buffer,
+                    this.#cpuRawDataBuffer.byteOffset,
+                    this.#nextRawOffset * FoliageMegaBuffer.#STRIDE_BYTES
+                );
+            }
+
+            this.#unifiedCullingBindGroup = null;
+            this.#onRecreated?.();
+        }
+
+        return true;
+    }
+
     get totalAllocatedRange(): number {
         return this.#nextRawOffset;
     }
@@ -172,6 +243,8 @@ class FoliageMegaBuffer {
         const subMeshCount = subMeshes.length;
         // 🌟 워크그룹(64 스레드) 단위 완전 격리를 위한 64-배수 올림 정렬
         const alignedMaxInstances = Math.ceil(maxInstances / 64) * 64;
+        this.ensureCapacity(this.#nextRawOffset + alignedMaxInstances);
+
         const rawBaseOffset = this.#nextRawOffset;
         const culledBaseOffset = this.#nextCulledOffset;
         const indirectBaseOffset = this.#nextIndirectOffset;
@@ -234,6 +307,8 @@ class FoliageMegaBuffer {
     writeInstancesData(allocation: FoliageTypeAllocation, data: Float32Array, count: number): void {
         allocation.activeCount = count;
         if (count <= 0) return;
+
+        this.ensureCapacity(allocation.rawBaseOffset + count);
 
         const baseFloatOffset = allocation.rawBaseOffset * FoliageMegaBuffer.#STRIDE_FLOATS;
         const writeFloats = Math.min(count * FoliageMegaBuffer.#STRIDE_FLOATS, allocation.maxInstances * FoliageMegaBuffer.#STRIDE_FLOATS);

@@ -234,8 +234,13 @@ class FoliageRenderer {
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
 
-        const cascadeIndirectOffset = currentCascade * 256 * 20;
-        const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
+        const firstType = validCount > 0 ? this.#validTypesShadow[0].type : null;
+        const megaBuffer = firstType?.megaBuffer;
+        const maxSubMeshes = megaBuffer?.maxSubMeshes ?? 256;
+        const maxTotalInstances = megaBuffer?.maxTotalInstances ?? 65536;
+
+        const cascadeIndirectOffset = currentCascade * maxSubMeshes * 20;
+        const cascadeInstanceOffset = currentCascade * (maxTotalInstances * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesShadow[t];

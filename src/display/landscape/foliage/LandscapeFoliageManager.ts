@@ -65,6 +65,10 @@ class LandscapeFoliageManager {
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer);
+
+        this.#megaBuffer.onRecreated = () => {
+            this.#renderer.markShadowBundleDirty();
+        };
     }
 
     handleTileLoaded(comp: any): void {
