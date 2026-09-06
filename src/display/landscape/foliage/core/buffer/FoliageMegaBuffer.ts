@@ -206,7 +206,13 @@ class FoliageMegaBuffer {
         if (shadowMergedSubMeshes && lodInfoList) {
             for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
                 const shadowSub = shadowMergedSubMeshes[i];
-                const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+                let lodInfo: any = null;
+                for (let l = 0; l < lodInfoList.length; l++) {
+                    if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
+                        lodInfo = lodInfoList[l];
+                        break;
+                    }
+                }
                 const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
                 shadowSub.instanceBufferOffset = (culledBaseOffset + (shadowSub.lodIndex * maxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
                 shadowSub.indirectOffsetBytes = (indirectBaseOffset + subOffset) * 20;
@@ -646,7 +652,13 @@ class FoliageMegaBuffer {
         if (shadowMergedSubMeshes && lodInfoList) {
             for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
                 const shadowSub = shadowMergedSubMeshes[i];
-                const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+                let lodInfo: any = null;
+                for (let l = 0; l < lodInfoList.length; l++) {
+                    if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
+                        lodInfo = lodInfoList[l];
+                        break;
+                    }
+                }
                 if (!lodInfo) continue;
                 const count = shadowSub.isIndexed ? shadowSub.indexCount : shadowSub.vertexCount;
                 const slotIndex = indirectBaseOffset + lodInfo.subMeshOffset;

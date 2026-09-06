@@ -125,7 +125,12 @@ class FoliageSubMeshAssembler {
 
         if (useImpostor && subList.length > 0) {
             const impostorLODIndex = lodInfoList.length;
-            const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
+            const lod0SubMeshes: FoliageSubMesh[] = [];
+            for (let i = 0; i < subList.length; i++) {
+                if (subList[i].lodIndex === 0) {
+                    lod0SubMeshes.push(subList[i]);
+                }
+            }
 
             FoliageSubMeshAssembler.#buildAndAttachImpostor(
                 redGPUContext,
@@ -170,7 +175,13 @@ class FoliageSubMeshAssembler {
 
         for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
             const shadowSub = shadowMergedSubMeshes[i];
-            const lodInfo = lodInfoList.find(info => info.lodIndex === shadowSub.lodIndex);
+            let lodInfo: any = null;
+            for (let l = 0; l < lodInfoList.length; l++) {
+                if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
+                    lodInfo = lodInfoList[l];
+                    break;
+                }
+            }
             const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
             shadowSub.instanceBufferOffset = (shadowSub.lodIndex ?? 0) * maxInstances * 32;
             shadowSub.indirectOffsetBytes = subOffset * 20;
@@ -562,19 +573,10 @@ class FoliageSubMeshAssembler {
         const offsetY = isFinite(minY) ? minY : 0;
         const offsetZ = (isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0;
 
-        const getMaterialKey = (mat: any): string => {
-            if (!mat) return 'default_mat';
-            const matType = mat.constructor?.name || 'Material';
-            const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
-            const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
-            const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
-            return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
-        };
-
         const materialGroups = new Map<string, { material: any; raws: RawSubMesh[] }>();
         for (let i = 0; i < rawList.length; i++) {
             const raw = rawList[i];
-            const matKey = getMaterialKey(raw.material);
+            const matKey = FoliageSubMeshAssembler.#getMaterialKey(raw.material);
             let entry = materialGroups.get(matKey);
             if (!entry) {
                 entry = {material: raw.material, raws: []};
@@ -591,7 +593,7 @@ class FoliageSubMeshAssembler {
         let shadowVertexOffset = 0;
         let shadowIndexOffset = 0;
 
-        materialGroups.forEach((entry) => {
+        for (const entry of materialGroups.values()) {
             const group = entry.raws;
             const mat = entry.material;
 
@@ -789,7 +791,7 @@ class FoliageSubMeshAssembler {
             );
 
             resultSubMeshes.push(combinedSubMesh);
-        });
+        }
 
         let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
         if (lodTotalVertices > 0) {
@@ -823,21 +825,24 @@ class FoliageSubMeshAssembler {
                 entries: [
                     {
                         binding: 0,
-                        resource: {buffer: uniformBuffer}
-                    }
-                ]
+                        resource: {
+                            buffer: uniformBuffer,
+                            size: 144,
+                        },
+                    },
+                ],
             });
 
             shadowMergedSubMesh = new FoliageShadowMergedSubMesh({
-                lodIndex,
                 geometry: combinedGeom,
-                vertexCount: lodTotalVertices,
                 indexCount: lodTotalIndices,
+                vertexCount: lodTotalVertices,
                 isIndexed: true,
                 indexFormat: 'uint32',
                 strideBytes: POSITION_ONLY_STRIDE_BYTES,
                 vertexUniformBuffer: uniformBuffer,
                 vertexUniformBindGroup: vertexBindGroup,
+                lodIndex,
                 instanceBufferOffset: 0,
                 indirectOffsetBytes: 0,
             });
@@ -845,8 +850,17 @@ class FoliageSubMeshAssembler {
 
         return {
             subMeshes: resultSubMeshes,
-            shadowMergedSubMesh
+            shadowMergedSubMesh,
         };
+    }
+
+    static #getMaterialKey(mat: any): string {
+        if (!mat) return 'default_mat';
+        const matType = mat.constructor?.name || 'Material';
+        const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
+        const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
+        const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
+        return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
     }
 
     static #createSubMeshInstance(

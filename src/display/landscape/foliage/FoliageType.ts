@@ -160,7 +160,14 @@ class FoliageType {
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#bottomOffset = options.groundOffset !== undefined ? options.groundOffset : (assembleResult.bottomOffset ?? 0);
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
-        this.#impostorSubMesh = this.#subMeshes.find(s => s.isImpostor) || null;
+        let impostorSub: FoliageSubMesh | null = null;
+        for (let i = 0; i < this.#subMeshes.length; i++) {
+            if (this.#subMeshes[i].isImpostor) {
+                impostorSub = this.#subMeshes[i];
+                break;
+            }
+        }
+        this.#impostorSubMesh = impostorSub;
 
         this.#updatePassBuckets();
 
