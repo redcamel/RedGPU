@@ -228,10 +228,11 @@ class Mesh extends MeshBase {
      */
     #enableDebugger: boolean = false;
     /**
-     * [KO] 캐싱된 AABB
-     * [EN] Cached AABB
+     * [KO] 캐싱된 AABB (Zero-GC 재사용)
+     * [EN] Cached AABB (Zero-GC reusable)
      */
-    #cachedBoundingAABB: AABB;
+    #cachedBoundingAABB: AABB = new AABB();
+    #dirtyBoundingAABB: boolean = true;
     /**
      * [KO] 캐싱된 OBB
      * [EN] Cached OBB
@@ -812,22 +813,23 @@ class Mesh extends MeshBase {
      */
     get boundingOBB(): OBB {
         if (!this.#cachedBoundingOBB || this.dirtyTransform) {
-            this.#cachedBoundingOBB = null;
-            this.#cachedBoundingAABB = null;
             this.#cachedBoundingOBB = calculateMeshOBB(this);
         }
         return this.#cachedBoundingOBB;
     }
 
     /**
-     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
-     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information.
+     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다. (Zero-GC 인플레이스 재사용)
+     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information. (Zero-GC in-place reuse)
      */
     get boundingAABB(): AABB {
-        if (!this.#cachedBoundingAABB || this.dirtyTransform) {
-            this.#cachedBoundingOBB = null;
-            this.#cachedBoundingAABB = null;
-            this.#cachedBoundingAABB = calculateMeshAABB(this);
+        if (!this.#cachedBoundingAABB) {
+            this.#cachedBoundingAABB = new AABB();
+            this.#dirtyBoundingAABB = true;
+        }
+        if (this.#dirtyBoundingAABB || this.dirtyTransform) {
+            calculateMeshAABB(this, this.#cachedBoundingAABB);
+            this.#dirtyBoundingAABB = false;
         }
         return this.#cachedBoundingAABB;
     }
@@ -1292,7 +1294,7 @@ class Mesh extends MeshBase {
 
 
             this.dirtyTransform = false
-            this.#cachedBoundingAABB = null
+            this.#dirtyBoundingAABB = true
             this.#cachedBoundingOBB = null
         }
 
@@ -1305,21 +1307,23 @@ class Mesh extends MeshBase {
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
         distanceSquared = 0
-        if (useDistanceCulling && currentGeometry || lodLen) {
-            const {rawCamera} = view
-            const aabb = this.boundingAABB;
-            // AABB 중심점과 카메라 위치 간의 거리 계산
-            const dx = rawCamera.x - aabb.centerX;
-            const dy = rawCamera.y - aabb.centerY;
-            const dz = rawCamera.z - aabb.centerZ;
-            // 거리 제곱 계산
-            distanceSquared = dx * dx + dy * dy + dz * dz;
+        const aabb = (useDistanceCulling && currentGeometry || lodLen || (frustumPlanes && !this.#ignoreFrustumCulling)) ? this.boundingAABB : null;
+        if (aabb) {
+            if (useDistanceCulling && currentGeometry || lodLen) {
+                const {rawCamera} = view
+                // AABB 중심점과 카메라 위치 간의 거리 계산
+                const dx = rawCamera.x - aabb.centerX;
+                const dy = rawCamera.y - aabb.centerY;
+                const dz = rawCamera.z - aabb.centerZ;
+                // 거리 제곱 계산
+                distanceSquared = dx * dx + dy * dy + dz * dz;
+            }
         }
         if (needCheckInterleavedCulling) {
             passFrustumCulling = true
 
-            if (useDistanceCulling && currentGeometry) {
-                const geometryRadius = this.boundingAABB.geometryRadius;
+            if (useDistanceCulling && currentGeometry && aabb) {
+                const geometryRadius = aabb.geometryRadius;
                 // AABB의 반지름을 고려한 컬링 거리 계산
                 const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
                 if (distanceSquared > cullingDistanceWithRadius) {
@@ -1327,9 +1331,9 @@ class Mesh extends MeshBase {
                 }
             }
             // check frustumCulling
-            if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+            if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling && aabb) {
                 const {rawCamera} = view
-                const combinedAABB = this.boundingAABB;
+                const combinedAABB = aabb;
 
                 const isIsometricController = rawCamera.constructor.name === 'IsometricController';
 
@@ -1879,12 +1883,14 @@ class Mesh extends MeshBase {
         //     this.#drawDebugger = null;
         // }
 
-        // 6. LOD 및 렌더 번들 참조 해제
+        // 6. LOD 및 렌더 번들 및 바운딩 캐시 참조 해제
         this.#lodGPURenderInfoList = [];
         this.#renderBundle = null;
         this.#renderBundle_LODList = [];
         this.#prevSystemBindGroupList = [];
         this.#prevFragmentBindGroup = null;
+        this.#cachedBoundingAABB = null;
+        this.#cachedBoundingOBB = null;
 
         // 7. 지오메트리 및 재질 참조 해제 및 파괴
         if (this._geometry) {

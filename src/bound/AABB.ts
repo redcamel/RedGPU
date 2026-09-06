@@ -106,26 +106,67 @@ export class AABB {
      * [EN] Maximum Z value
      */
     constructor(
+        minX: number = 0,
+        maxX: number = 0,
+        minY: number = 0,
+        maxY: number = 0,
+        minZ: number = 0,
+        maxZ: number = 0
+    ) {
+        this.set(minX, maxX, minY, maxY, minZ, maxZ);
+    }
+
+    /**
+     * [KO] 기존 AABB 인스턴스의 경계값을 인플레이스로 갱신합니다. (Zero-GC)
+     * [EN] Updates the bounding values of an existing AABB instance in-place. (Zero-GC)
+     *
+     * @param minX - [KO] X축 최소값 [EN] Minimum X value
+     * @param maxX - [KO] X축 최대값 [EN] Maximum X value
+     * @param minY - [KO] Y축 최소값 [EN] Minimum Y value
+     * @param maxY - [KO] Y축 최대값 [EN] Maximum Y value
+     * @param minZ - [KO] Z축 최소값 [EN] Minimum Z value
+     * @param maxZ - [KO] Z축 최대값 [EN] Maximum Z value
+     * @returns [KO] 갱신된 현재 인스턴스 [EN] Updated current instance
+     */
+    set(
         minX: number,
         maxX: number,
         minY: number,
         maxY: number,
         minZ: number,
         maxZ: number
-    ) {
-        this.minX = minX;
-        this.maxX = maxX;
-        this.minY = minY;
-        this.maxY = maxY;
-        this.minZ = minZ;
-        this.maxZ = maxZ;
-        this.centerX = (maxX + minX) / 2;
-        this.centerY = (maxY + minY) / 2;
-        this.centerZ = (maxZ + minZ) / 2;
-        this.xSize = (maxX - minX);
-        this.ySize = (maxY - minY);
-        this.zSize = (maxZ - minZ);
-        this.geometryRadius = Math.sqrt((this.xSize / 2) ** 2 + (this.ySize / 2) ** 2 + (this.zSize / 2) ** 2);
+    ): this {
+        (this as any).minX = minX;
+        (this as any).maxX = maxX;
+        (this as any).minY = minY;
+        (this as any).maxY = maxY;
+        (this as any).minZ = minZ;
+        (this as any).maxZ = maxZ;
+        (this as any).centerX = (maxX + minX) * 0.5;
+        (this as any).centerY = (maxY + minY) * 0.5;
+        (this as any).centerZ = (maxZ + minZ) * 0.5;
+        const xSize = (maxX - minX);
+        const ySize = (maxY - minY);
+        const zSize = (maxZ - minZ);
+        (this as any).xSize = xSize;
+        (this as any).ySize = ySize;
+        (this as any).zSize = zSize;
+        const hx = xSize * 0.5;
+        const hy = ySize * 0.5;
+        const hz = zSize * 0.5;
+        (this as any).geometryRadius = Math.sqrt(hx * hx + hy * hy + hz * hz);
+        return this;
+    }
+
+    /**
+     * [KO] 다른 AABB의 값을 현재 인스턴스에 복사합니다. (Zero-GC)
+     * [EN] Copies values from another AABB into the current instance. (Zero-GC)
+     *
+     * @param other - [KO] 복사할 원본 AABB [EN] Source AABB to copy from
+     * @returns [KO] 현재 인스턴스 [EN] Current instance
+     */
+    copy(other: AABB): this {
+        return this.set(other.minX, other.maxX, other.minY, other.maxY, other.minZ, other.maxZ);
     }
 
     /**
