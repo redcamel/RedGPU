@@ -94,7 +94,7 @@ if (drawSunDisk) {
 // [KO] 4. 최종 산란광 합산 및 장면 합성
 // [EN] 4. Sum final scattering and composite scene
 let addedRadiance = (mieGlow + sunDisk) * sunShadow * (1.0 - finalCloudMask);
-let totalScattering = (baseScattering * PI * uniforms.sunIntensity + addedRadiance * uniforms.sunIntensity) * systemUniforms.preExposure;
+let totalScattering = (baseScattering * uniforms.sunIntensity + addedRadiance * uniforms.sunIntensity) * systemUniforms.preExposure;
 let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));

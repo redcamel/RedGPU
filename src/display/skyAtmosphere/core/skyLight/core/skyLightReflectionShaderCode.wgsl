@@ -65,6 +65,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 3. 평균 산란광 저장
     // [EN] 3. Store average radiance
-    let radiance = totalRadiance / f32(SAMPLE_COUNT);
+    let radiance = totalRadiance / f32(SAMPLE_COUNT) * PI;
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
