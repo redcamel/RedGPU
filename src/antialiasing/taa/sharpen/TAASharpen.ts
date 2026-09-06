@@ -40,12 +40,18 @@ class TAASharpen extends ASinglePassPostEffect {
      * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {x: 8, y: 8});
         this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_TAA_SHARPEN',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode)
+            createBasicPostEffectCode(
+                this,
+                computeCode,
+                uniformStructCode,
+                {name: 'sourceTexture'},
+                false
+            )
         );
     }
 }
