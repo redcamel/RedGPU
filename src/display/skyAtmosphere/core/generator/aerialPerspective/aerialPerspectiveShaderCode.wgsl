@@ -16,14 +16,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let uvw = (vec3<f32>(global_id) + 0.5) / vec3<f32>(size);
 
-    // [KO] 2. 카메라 방향 및 슬라이스 거리 산출
-    // [EN] 2. Deriving camera direction and slice distance
+    // [KO] 2. 카메라 방향 및 슬라이스 거리 산출 (단일 normalize로 sqrt/DIV 1회 제거)
+    // [EN] 2. Deriving camera direction and slice distance (Single normalize to eliminate redundant sqrt/DIV)
     let invP = systemUniforms.projection.inverseProjectionMatrix;
     let invV = systemUniforms.camera.inverseViewMatrix;
     let ndc = vec2<f32>(uvw.x * 2.0 - 1.0, (1.0 - uvw.y) * 2.0 - 1.0);
-    let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
     let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
-    let viewDir = normalize(worldRotation * viewSpaceDir);
+    let viewDir = normalize(worldRotation * vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
 
     // Z축(depth) 매핑: 제곱 스케일을 사용하여 근거리 정밀도 확보
     let sliceDist = uvw.z * uvw.z * params.aerialPerspectiveDistanceScale; 
@@ -53,6 +52,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 4. 3D LUT에 최종 저장 (Alpha 채널에는 평균 투과율 보관)
     // [EN] 4. Final storage in 3D LUT (Average transmittance stored in Alpha channel)
-    let avgTrans = (transmittance.r + transmittance.g + transmittance.b) / 3.0;
+    let avgTrans = (transmittance.r + transmittance.g + transmittance.b) * (1.0 / 3.0);
     textureStore(aerialPerspectiveLUT, global_id, vec4<f32>(radiance, avgTrans));
 }
