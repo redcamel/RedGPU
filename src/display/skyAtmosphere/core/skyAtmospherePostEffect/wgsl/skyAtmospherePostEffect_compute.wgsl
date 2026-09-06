@@ -10,14 +10,16 @@ var sceneColor = sceneSample.rgb;
 
 let rawDepth = fetchDepth(id);
 
-// [KO] 1. 레이 방향 및 파라미터 준비
-// [EN] 1. Prepare ray direction and parameters
+// [KO] 1. 레이 방향 및 파라미터 준비 (단일 inverseSqrt로 length/normalize 동시 해결)
+// [EN] 1. Prepare ray direction and parameters (Single inverseSqrt for length and normalize)
 let invP = systemUniforms.projection.inverseProjectionMatrix;
 let viewSpacePos = vec3<f32>((uv.x * 2.0 - 1.0) * invP[0][0], ((1.0 - uv.y) * 2.0 - 1.0) * invP[1][1], -1.0);
-let rayLengthRatio = length(viewSpacePos); 
+let dotPos = dot(viewSpacePos, viewSpacePos);
+let invRayLengthRatio = inverseSqrt(dotPos);
+let rayLengthRatio = dotPos * invRayLengthRatio;
 
 let worldRotation = mat3x3<f32>(systemUniforms.camera.inverseViewMatrix[0].xyz, systemUniforms.camera.inverseViewMatrix[1].xyz, systemUniforms.camera.inverseViewMatrix[2].xyz);
-let viewDir = normalize(worldRotation * viewSpacePos);
+let viewDir = (worldRotation * viewSpacePos) * invRayLengthRatio;
 
 let sunDir = normalize(uniforms.sunDirection);
 let viewSunCos = dot(viewDir, sunDir);
@@ -44,7 +46,7 @@ if (rawDepth >= 1.0) {
     let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
     // Z축 매핑: LUT 생성 시의 제곱 스케일 역산
-    let apW = clamp(sqrt(apDist / maxApDist), 0.0, 1.0);
+    let apW = clamp(sqrt(apDist * (1.0 / maxApDist)), 0.0, 1.0);
     var apSample = textureSampleLevel(aerialPerspectiveLUT, basicSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
 
     // 근거리 보정 (분해능 한계 극복용 해석적 보간)
@@ -59,7 +61,7 @@ if (rawDepth >= 1.0) {
         let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO;
         let analyticalScat = localScat * actualDist;
         let analyticalTrans = exp(-localExt * actualDist);
-        let analyticalA = (analyticalTrans.r + analyticalTrans.g + analyticalTrans.b) / 3.0;
+        let analyticalA = (analyticalTrans.r + analyticalTrans.g + analyticalTrans.b) * (1.0 / 3.0);
         apSample = mix(vec4<f32>(analyticalScat, analyticalA), apSample, smoothstep(0.0, NEAR_FIELD_CORRECTION_DIST, actualDist));
     }
     
