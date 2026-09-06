@@ -1,17 +1,45 @@
 {
-    // [KO] 1. 인덱스 및 기초 데이터 로드
-    // [EN] 1. Index and basic data loading
-    let pixelCoord = vec2<i32>(global_id.xy);
     let screenSizeU = textureDimensions(sourceTexture);
     let screenSize = vec2<f32>(screenSizeU);
-    let yFlipVec2 = vec2<f32>(1.0, -1.0);
+    let c_max = vec2<i32>(screenSizeU) - 1;
 
+    // 🚀 [무손실 3: LDS 협력 로딩 (Cooperative LDS Loading)]
+    // 8x8 타일 + 1픽셀 외곽 패딩 = 10x10 (100개 픽셀)을 64개 스레드가 협동 로드
+    // VRAM 텍스처 접근을 1,152회 ➡️ 200회로 82.6% 급감
+    let tileOrigin = vec2<i32>(workgroup_id.xy) * 8 - vec2<i32>(1, 1);
+    let tid = i32(local_invocation_index);
+
+    // 1차 로드 (스레드 0~63 ➡️ 슬롯 0~63)
+    let lx0 = tid % 10;
+    let ly0 = tid / 10;
+    let coord0 = clamp(tileOrigin + vec2<i32>(lx0, ly0), vec2<i32>(0), c_max);
+    s_color[ly0][lx0] = textureLoad(sourceTexture, coord0, 0);
+    s_depth[ly0][lx0] = textureLoad(depthTexture, coord0, 0);
+
+    // 2차 로드 (스레드 0~35 ➡️ 슬롯 64~99)
+    let tid2 = tid + 64;
+    if (tid2 < 100) {
+        let lx1 = tid2 % 10;
+        let ly1 = tid2 / 10;
+        let coord1 = clamp(tileOrigin + vec2<i32>(lx1, ly1), vec2<i32>(0), c_max);
+        s_color[ly1][lx1] = textureLoad(sourceTexture, coord1, 0);
+        s_depth[ly1][lx1] = textureLoad(depthTexture, coord1, 0);
+    }
+
+    // 워크그룹 전체 100개 픽셀 로딩 완료 동기화
+    workgroupBarrier();
+
+    // 화면 경계 밖 스레드는 동기화 이후 안전하게 종료
+    let pixelCoord = vec2<i32>(global_id.xy);
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
-    // [KO] 2. 지터링(Jittering)이 보정된 현재 UV 및 주변 통계 산출
-    // [EN] 2. Calculate current UV with jittering correction and neighborhood stats
+    let localCoord = vec2<i32>(local_id.xy) + vec2<i32>(1, 1);
+    let yFlipVec2 = vec2<f32>(1.0, -1.0);
+
+    // [KO] 2. 지터링(Jittering)이 보정된 현재 UV 및 온칩 LDS 주변 통계 산출
+    // [EN] 2. Calculate current UV with jittering correction and on-chip LDS neighborhood stats
     let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2) / screenSize;
-    let stats = calculate_neighborhood_stats_ycocg(pixelCoord, screenSizeU);
+    let stats = calculate_neighborhood_stats_ycocg_lds(localCoord);
 
     // [KO] 하드웨어 샘플러를 통한 현재 프레임 컬러 로드
     // [EN] Load current frame color via hardware sampler
@@ -20,41 +48,29 @@
     let currentAlpha = currentRGBA.a;
     let currentYCoCg = rgbToYCoCg(currentRGB);
     
-    // 🚀 [최적화 2: 3x3 뎁스 탐색 언롤링 (Unrolled Closest Depth Search)]
-    // 이중 for 루프, 분기문, 인덱스 클램핑 오버헤드를 100% 제거하고 하드웨어 버스트 페치 가속
-    let c_min = vec2<i32>(0);
-    let c_max = vec2<i32>(screenSizeU) - 1;
-
-    let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
+    // 🚀 [무손실 3: LDS 온칩 3x3 뎁스 탐색 (On-Chip 3x3 Closest Depth Search)]
+    // VRAM 텍스처 접근 0회! 온칩 초고속 SRAM에서 9개 뎁스 비교
+    let currentDepth = s_depth[localCoord.y][localCoord.x];
     var closestDepth = currentDepth;
     var closestCoord = pixelCoord;
 
-    let p_l  = clamp(pixelCoord + vec2<i32>(-1,  0), c_min, c_max);
-    let p_r  = clamp(pixelCoord + vec2<i32>( 1,  0), c_min, c_max);
-    let p_t  = clamp(pixelCoord + vec2<i32>( 0, -1), c_min, c_max);
-    let p_b  = clamp(pixelCoord + vec2<i32>( 0,  1), c_min, c_max);
-    let p_tl = clamp(pixelCoord + vec2<i32>(-1, -1), c_min, c_max);
-    let p_tr = clamp(pixelCoord + vec2<i32>( 1, -1), c_min, c_max);
-    let p_bl = clamp(pixelCoord + vec2<i32>(-1,  1), c_min, c_max);
-    let p_br = clamp(pixelCoord + vec2<i32>( 1,  1), c_min, c_max);
+    let d_l  = s_depth[localCoord.y][localCoord.x - 1];
+    let d_r  = s_depth[localCoord.y][localCoord.x + 1];
+    let d_t  = s_depth[localCoord.y - 1][localCoord.x];
+    let d_b  = s_depth[localCoord.y + 1][localCoord.x];
+    let d_tl = s_depth[localCoord.y - 1][localCoord.x - 1];
+    let d_tr = s_depth[localCoord.y - 1][localCoord.x + 1];
+    let d_bl = s_depth[localCoord.y + 1][localCoord.x - 1];
+    let d_br = s_depth[localCoord.y + 1][localCoord.x + 1];
 
-    let d_l  = textureLoad(depthTexture, p_l,  0);
-    let d_r  = textureLoad(depthTexture, p_r,  0);
-    let d_t  = textureLoad(depthTexture, p_t,  0);
-    let d_b  = textureLoad(depthTexture, p_b,  0);
-    let d_tl = textureLoad(depthTexture, p_tl, 0);
-    let d_tr = textureLoad(depthTexture, p_tr, 0);
-    let d_bl = textureLoad(depthTexture, p_bl, 0);
-    let d_br = textureLoad(depthTexture, p_br, 0);
-
-    if (d_l  < closestDepth) { closestDepth = d_l;  closestCoord = p_l;  }
-    if (d_r  < closestDepth) { closestDepth = d_r;  closestCoord = p_r;  }
-    if (d_t  < closestDepth) { closestDepth = d_t;  closestCoord = p_t;  }
-    if (d_b  < closestDepth) { closestDepth = d_b;  closestCoord = p_b;  }
-    if (d_tl < closestDepth) { closestDepth = d_tl; closestCoord = p_tl; }
-    if (d_tr < closestDepth) { closestDepth = d_tr; closestCoord = p_tr; }
-    if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = p_bl; }
-    if (d_br < closestDepth) { closestDepth = d_br; closestCoord = p_br; }
+    if (d_l  < closestDepth) { closestDepth = d_l;  closestCoord = clamp(pixelCoord + vec2<i32>(-1,  0), vec2<i32>(0), c_max); }
+    if (d_r  < closestDepth) { closestDepth = d_r;  closestCoord = clamp(pixelCoord + vec2<i32>( 1,  0), vec2<i32>(0), c_max); }
+    if (d_t  < closestDepth) { closestDepth = d_t;  closestCoord = clamp(pixelCoord + vec2<i32>( 0, -1), vec2<i32>(0), c_max); }
+    if (d_b  < closestDepth) { closestDepth = d_b;  closestCoord = clamp(pixelCoord + vec2<i32>( 0,  1), vec2<i32>(0), c_max); }
+    if (d_tl < closestDepth) { closestDepth = d_tl; closestCoord = clamp(pixelCoord + vec2<i32>(-1, -1), vec2<i32>(0), c_max); }
+    if (d_tr < closestDepth) { closestDepth = d_tr; closestCoord = clamp(pixelCoord + vec2<i32>( 1, -1), vec2<i32>(0), c_max); }
+    if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = clamp(pixelCoord + vec2<i32>(-1,  1), vec2<i32>(0), c_max); }
+    if (d_br < closestDepth) { closestDepth = d_br; closestCoord = clamp(pixelCoord + vec2<i32>( 1,  1), vec2<i32>(0), c_max); }
     
     let closestMotionData = textureLoad(gBufferMotionVector, closestCoord, 0);
     let velocity = closestMotionData.xy;

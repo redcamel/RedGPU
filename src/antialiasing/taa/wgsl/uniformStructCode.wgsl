@@ -52,8 +52,12 @@ fn fetch_depth_bilinear(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
 }
 
-fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u32>) -> NeighborhoodStats {
-    let screenSize = vec2<f32>(screenSizeU);
+// ===== 1.5. LDS (Workgroup Shared Memory) 선언 =====
+// 8x8 타일 + 1픽셀 외곽 패딩 = 10x10 타일 (총 2.0 KB 온칩 캐시)
+var<workgroup> s_color : array<array<vec4<f32>, 10>, 10>;
+var<workgroup> s_depth : array<array<f32, 10>, 10>;
+
+fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> NeighborhoodStats {
     var m1 = vec3<f32>(0.0);
     var m2 = vec3<f32>(0.0);
     var m1L = 0.0;
@@ -66,8 +70,8 @@ fn calculate_neighborhood_stats_ycocg(pixelCoord: vec2<i32>, screenSizeU: vec2<u
 
     for (var y: i32 = -1; y <= 1; y++) {
         for (var x: i32 = -1; x <= 1; x++) {
-            let sampleCoord = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let colorRGBA = textureLoad(sourceTexture, sampleCoord, 0);
+            let samplePos = localCoord + vec2<i32>(x, y);
+            let colorRGBA = s_color[samplePos.y][samplePos.x];
             let colorRGB = colorRGBA.rgb;
             let colorYCoCg = rgbToYCoCg(colorRGB);
             let lum = getLuminance(colorRGB);

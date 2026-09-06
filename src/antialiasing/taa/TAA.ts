@@ -65,7 +65,8 @@ class TAA extends ASinglePassPostEffect {
                 [
                     {name: 'sourceTexture'},
                     {name: 'historyTexture'}
-                ]
+                ],
+                false
             )
         );
         this.jitterStrength = this.#jitterStrength;
