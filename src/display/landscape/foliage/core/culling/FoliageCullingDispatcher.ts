@@ -201,7 +201,16 @@ class FoliageCullingDispatcher {
             const cascadeParams = FoliageCullingDispatcher.#cachedCascadeParams;
             const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
 
-            if (dirShadow && activeCascadeCount > 0) {
+            if (stateData && stateData.activeCascadeCount > 0) {
+                // 🌟 RenderViewStateData에서 사전 계산 및 더티 캐싱된 섀도우 평면을 직접 사용 (계산 0회)
+                const cCount = stateData.activeCascadeCount;
+                for (let c = 0; c < 4; c++) {
+                    const param = cascadeParams[c];
+                    param.maxDistance = stateData.cascadeSplitDepths[c];
+                    param.hasShadow = c < cCount;
+                    param.frustumPlanes = (c < cCount) ? stateData.shadowFrustumPlanes[c] : null;
+                }
+            } else if (dirShadow && activeCascadeCount > 0) {
                 const cascadePV = dirShadow.cascadeProjectionViewMatrices;
                 const splitDepths = dirShadow.cascadeSplitDepths;
                 for (let c = 0; c < 4; c++) {
