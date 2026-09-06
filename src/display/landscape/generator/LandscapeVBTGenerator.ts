@@ -17,6 +17,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 
     #storageViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
     #sampleViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
+    #tileMipBindGroupsCache: WeakMap<GPUTexture, Map<number, GPUBindGroup>> = new WeakMap();
+    #tileMipUniformBuffers: GPUBuffer[] = [];
 
     #tileMipPipeline: GPUComputePipeline | null = null;
     #tileMipBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -141,72 +143,66 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
-    #dispatchTileMipmaps(
+    override destroy(): void {
+        super.destroy();
+        for (let i = 0; i < this.#tileMipUniformBuffers.length; i++) {
+            this.#tileMipUniformBuffers[i]?.destroy();
+        }
+        this.#tileMipUniformBuffers = [];
+        this.#tileMipPipeline = null;
+        this.#tileMipBindGroupLayout = null;
+    }
+
+    #getOrCreateTileMipUniformBuffer(mipLevel: number): GPUBuffer {
+        let buffer = this.#tileMipUniformBuffers[mipLevel];
+        if (!buffer) {
+            buffer = this.redGPUContext.gpuDevice.createBuffer({
+                label: `Landscape_TileMip_FixedUBO_Mip${mipLevel}`,
+                size: Math.max(16, this.#tileMipUniformByteLength),
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            });
+            this.#tileMipUniformBuffers[mipLevel] = buffer;
+        }
+        return buffer;
+    }
+
+    #getOrCreateTileMipBindGroup(
         bcTex: GPUTexture,
         normTex: GPUTexture,
         ormTex: GPUTexture,
-        originX: number,
-        originZ: number,
-        tileSizePixels: number,
-        maxMipLevels: number = 6
-    ): void {
-        if (!this.#tileMipPipeline || !this.#tileMipBindGroupLayout) return;
-        const device = this.redGPUContext.gpuDevice;
+        mipLevel: number
+    ): GPUBindGroup {
+        let bgMap = this.#tileMipBindGroupsCache.get(bcTex);
+        if (!bgMap) {
+            bgMap = new Map();
+            this.#tileMipBindGroupsCache.set(bcTex, bgMap);
+        }
+        let bindGroup = bgMap.get(mipLevel);
+        if (!bindGroup) {
+            const mipUniformBuffer = this.#getOrCreateTileMipUniformBuffer(mipLevel);
+            const srcBcView = this.#getSampleTextureView(bcTex, mipLevel - 1);
+            const dstBcView = this.#getStorageTextureView(bcTex, mipLevel);
+            const srcNormView = this.#getSampleTextureView(normTex, mipLevel - 1);
+            const dstNormView = this.#getStorageTextureView(normTex, mipLevel);
+            const srcOrmView = this.#getSampleTextureView(ormTex, mipLevel - 1);
+            const dstOrmView = this.#getStorageTextureView(ormTex, mipLevel);
 
-        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
-            const pass = commandEncoder.beginComputePass({
-                label: `Landscape_TileMipmap_Pass_[${originX},${originZ}]`
+            bindGroup = this.redGPUContext.gpuDevice.createBindGroup({
+                label: `Landscape_TileMip_BG_Mip_${mipLevel}`,
+                layout: this.#tileMipBindGroupLayout!,
+                entries: [
+                    {binding: 0, resource: {buffer: mipUniformBuffer}},
+                    {binding: 1, resource: srcBcView},
+                    {binding: 2, resource: dstBcView},
+                    {binding: 3, resource: srcNormView},
+                    {binding: 4, resource: dstNormView},
+                    {binding: 5, resource: srcOrmView},
+                    {binding: 6, resource: dstOrmView},
+                ]
             });
-            pass.setPipeline(this.#tileMipPipeline!);
-
-            for (let m = 1; m < maxMipLevels; m++) {
-                const srcOriginX = originX >> (m - 1);
-                const srcOriginZ = originZ >> (m - 1);
-                const dstOriginX = originX >> m;
-                const dstOriginZ = originZ >> m;
-                const dstW = Math.max(1, tileSizePixels >> m);
-                const dstH = Math.max(1, tileSizePixels >> m);
-
-                const uArr = this.#mipUniformArray;
-                uArr[0] = srcOriginX;
-                uArr[1] = srcOriginZ;
-                uArr[2] = dstOriginX;
-                uArr[3] = dstOriginZ;
-                uArr[4] = dstW;
-                uArr[5] = dstH;
-                uArr[6] = 0;
-                uArr[7] = 0;
-
-                const mipUniformBuffer = this.acquireUniformBuffer(this.#tileMipUniformByteLength);
-                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
-
-                const srcBcView = this.#getSampleTextureView(bcTex, m - 1);
-                const dstBcView = this.#getStorageTextureView(bcTex, m);
-                const srcNormView = this.#getSampleTextureView(normTex, m - 1);
-                const dstNormView = this.#getStorageTextureView(normTex, m);
-                const srcOrmView = this.#getSampleTextureView(ormTex, m - 1);
-                const dstOrmView = this.#getStorageTextureView(ormTex, m);
-
-                const mipBindGroup = device.createBindGroup({
-                    label: `Landscape_TileMip_BG_Mip_${m}`,
-                    layout: this.#tileMipBindGroupLayout!,
-                    entries: [
-                        {binding: 0, resource: {buffer: mipUniformBuffer}},
-                        {binding: 1, resource: srcBcView},
-                        {binding: 2, resource: dstBcView},
-                        {binding: 3, resource: srcNormView},
-                        {binding: 4, resource: dstNormView},
-                        {binding: 5, resource: srcOrmView},
-                        {binding: 6, resource: dstOrmView},
-                    ]
-                });
-
-                pass.setBindGroup(0, mipBindGroup);
-                pass.dispatchWorkgroups(Math.max(1, Math.ceil(dstW / 16)), Math.max(1, Math.ceil(dstH / 16)));
-            }
-
-            pass.end();
-        });
+            bgMap.set(mipLevel, bindGroup);
+        }
+        return bindGroup;
     }
 
     #getStorageTextureView(tex: GPUTexture, mipLevel: number = 0): GPUTextureView {
@@ -303,10 +299,53 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         });
     }
 
-    override destroy(): void {
-        super.destroy();
-        this.#tileMipPipeline = null;
-        this.#tileMipBindGroupLayout = null;
+    #dispatchTileMipmaps(
+        bcTex: GPUTexture,
+        normTex: GPUTexture,
+        ormTex: GPUTexture,
+        originX: number,
+        originZ: number,
+        tileSizePixels: number,
+        maxMipLevels: number = 6
+    ): void {
+        if (!this.#tileMipPipeline || !this.#tileMipBindGroupLayout) return;
+        const device = this.redGPUContext.gpuDevice;
+
+        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+            const pass = commandEncoder.beginComputePass({
+                label: `Landscape_TileMipmap_Pass_[${originX},${originZ}]`
+            });
+            pass.setPipeline(this.#tileMipPipeline!);
+
+            for (let m = 1; m < maxMipLevels; m++) {
+                const srcOriginX = originX >> (m - 1);
+                const srcOriginZ = originZ >> (m - 1);
+                const dstOriginX = originX >> m;
+                const dstOriginZ = originZ >> m;
+                const dstW = Math.max(1, tileSizePixels >> m);
+                const dstH = Math.max(1, tileSizePixels >> m);
+
+                const uArr = this.#mipUniformArray;
+                uArr[0] = srcOriginX;
+                uArr[1] = srcOriginZ;
+                uArr[2] = dstOriginX;
+                uArr[3] = dstOriginZ;
+                uArr[4] = dstW;
+                uArr[5] = dstH;
+                uArr[6] = 0;
+                uArr[7] = 0;
+
+                const mipUniformBuffer = this.#getOrCreateTileMipUniformBuffer(m);
+                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
+
+                const mipBindGroup = this.#getOrCreateTileMipBindGroup(bcTex, normTex, ormTex, m);
+
+                pass.setBindGroup(0, mipBindGroup);
+                pass.dispatchWorkgroups(Math.max(1, Math.ceil(dstW / 16)), Math.max(1, Math.ceil(dstH / 16)));
+            }
+
+            pass.end();
+        });
     }
 }
 
