@@ -468,17 +468,25 @@ fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -
     return normalize(worldRotation * viewSpaceDir);
 }
 
-// [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
+// [KO] 정수 비트 조작 기반 고속 해시 (sin 초월함수 100% 제거) [EN] Fast integer bit-manipulation hash (100% sin SFU elimination)
+fn cloud_hash_u(p: vec2<u32>) -> f32 {
+    var q = p * vec2<u32>(1597334673u, 3812015801u);
+    let n = (q.x ^ q.y) * 1597334673u;
+    return f32(n) * (1.0 / 4294967296.0);
+}
+
 fn cloud_hash(p: vec2<f32>) -> f32 {
-    return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
+    let ui = vec2<u32>(vec2<i32>(floor(p)) + vec2<i32>(0x8000));
+    return cloud_hash_u(ui);
 }
 
 fn cloud_noise(p: vec2<f32>) -> f32 {
     let i = floor(p);
     let f = fract(p);
     let u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(cloud_hash(i + vec2<f32>(0.0, 0.0)), cloud_hash(i + vec2<f32>(1.0, 0.0)), u.x),
-               mix(cloud_hash(i + vec2<f32>(0.0, 1.0)), cloud_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+    let ui = vec2<u32>(vec2<i32>(i) + vec2<i32>(0x8000));
+    return mix(mix(cloud_hash_u(ui + vec2<u32>(0u, 0u)), cloud_hash_u(ui + vec2<u32>(1u, 0u)), u.x),
+               mix(cloud_hash_u(ui + vec2<u32>(0u, 1u)), cloud_hash_u(ui + vec2<u32>(1u, 1u)), u.x), u.y);
 }
 
 fn cloud_fbm(p: vec2<f32>) -> f32 {
@@ -517,7 +525,10 @@ fn getCloudNormal(hitP: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
     let warpedUV = getCloudWarpedUV(hitP, params);
     let density = cloud_fbm(warpedUV);
     let eps = 0.2;
-    let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) / eps;
-    let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) / eps;
-    return normalize(vec3<f32>(-dIdx, 2.0, -dIdy));
+    const INV_EPS: f32 = 5.0; // 1.0 / 0.2
+    let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) * INV_EPS;
+    let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) * INV_EPS;
+    let n = vec3<f32>(-dIdx, 2.0, -dIdy);
+    let invNLen = inverseSqrt(dot(n, n));
+    return n * invNLen;
 }

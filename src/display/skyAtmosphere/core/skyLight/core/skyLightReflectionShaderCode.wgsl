@@ -53,8 +53,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;
         let uv = (vec2<f32>(global_id.xy) + 0.5 + offset) / size;
         
-        var viewDir = getCubeMapDirection(uv, face);
-        viewDir = normalize(viewDir);
+        let rawDir = getCubeMapDirection(uv, face);
+        let invLen = inverseSqrt(dot(rawDir, rawDir));
+        var viewDir = rawDir * invLen;
         
         if (abs(viewDir.y) > 0.9999) {
             viewDir = vec3<f32>(0.0, sign(viewDir.y), 0.0);
@@ -65,6 +66,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 3. 평균 산란광 저장
     // [EN] 3. Store average radiance
-    let radiance = totalRadiance / f32(SAMPLE_COUNT) * PI;
+    const INV_SAMPLE_COUNT_PI: f32 = (1.0 / f32(SAMPLE_COUNT)) * PI;
+    let radiance = totalRadiance * INV_SAMPLE_COUNT_PI;
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
