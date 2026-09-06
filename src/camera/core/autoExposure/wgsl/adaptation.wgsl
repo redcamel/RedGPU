@@ -43,12 +43,14 @@ fn main() {
     var weightedEV100Sum: f32 = 0.0;
     var totalValidPixels: f32 = 0.0;
 
+    const INV_255: f32 = 1.0 / 255.0;
+
     for (var i = 0u; i < 256u; i = i + 1u) {
         let nextCounter = pixelCounter + countBuffer[i];
         
         let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
         if (validPixels > 0.0) {
-            let ev100 = uniforms.minEV100 + (f32(i) / 255.0) * uniforms.ev100Range;
+            let ev100 = uniforms.minEV100 + (f32(i) * INV_255) * uniforms.ev100Range;
             
             // [KO] 로그 공간(EV100)에서 직접 가중 평균 수행 (언리얼 방식의 Log-Luminance Average)
             // [EN] Perform weighted average directly in EV100 space (Unreal-style Log-Luminance Average)
@@ -59,7 +61,7 @@ fn main() {
     }
 
     // [KO] 로그 공간에서의 평균 EV100 산출 [EN] Calculate average EV100 in log space
-    let avgEV100 = weightedEV100Sum / max(totalValidPixels, 1.0);
+    let avgEV100 = weightedEV100Sum * (1.0 / max(totalValidPixels, 1.0));
 
     // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
     // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
