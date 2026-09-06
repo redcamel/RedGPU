@@ -49,14 +49,9 @@ class FoliageCullingDispatcher {
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
 
-    readonly #onResetMultiIndirectCommandsBound: (encoder: GPUCommandEncoder) => void;
-    readonly #onPreProcessComputePassBound: (computePass: GPUComputePassEncoder) => void;
-
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null) {
         this.#redGPUContext = redGPUContext;
         this.#megaBuffer = megaBuffer || null;
-        this.#onResetMultiIndirectCommandsBound = (encoder: GPUCommandEncoder) => this.#onResetMultiIndirectCommands(encoder);
-        this.#onPreProcessComputePassBound = (computePass: GPUComputePassEncoder) => this.#onPreProcessComputePass(computePass);
         this.#initComputePipeline();
     }
 
@@ -259,13 +254,13 @@ class FoliageCullingDispatcher {
 
             this.#redGPUContext.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
-                this.#onResetMultiIndirectCommandsBound
+                this.#onResetMultiIndirectCommands
             );
 
 
             this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
                 FoliageCullingDispatcher.#COMPUTE_PASS_DESCRIPTOR,
-                this.#onPreProcessComputePassBound
+                this.#onPreProcessComputePass
             );
         }
     }
@@ -306,11 +301,11 @@ class FoliageCullingDispatcher {
         });
     }
 
-    #onResetMultiIndirectCommands(encoder: GPUCommandEncoder): void {
+    #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
         this.#megaBuffer?.resetMultiIndirectCommands(encoder);
-    }
+    };
 
-    #onPreProcessComputePass(computePass: GPUComputePassEncoder): void {
+    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         const pipeline = this.#cullingComputePipeline;
         const bindGroupLayout = this.#cullingBindGroupLayout;
         if (!pipeline || !bindGroupLayout) return;
@@ -359,7 +354,7 @@ class FoliageCullingDispatcher {
                 computePass.dispatchWorkgroups(workgroupCount);
             }
         }
-    }
+    };
 }
 
 Object.freeze(FoliageCullingDispatcher);

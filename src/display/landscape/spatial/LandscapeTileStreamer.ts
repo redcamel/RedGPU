@@ -38,6 +38,7 @@ export class LandscapeTileStreamer {
     #rebakeQueue: LandscapeComponent[] = [];
     #isRebaking: boolean = false;
     #rebakeRafId: number | null = null;
+    #rebakeBudgetPerFrame: number = 3;
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, boolean> = new Map();
     #cpuHeightMap: Map<string, any> = new Map();
@@ -45,13 +46,14 @@ export class LandscapeTileStreamer {
 
     static #sortCamX = 0;
     static #sortCamZ = 0;
-    static readonly #sortCompare = (a: LandscapeComponent, b: LandscapeComponent): number => {
+
+    static #sortCompare(a: LandscapeComponent, b: LandscapeComponent): number {
         const da = (a.worldX - LandscapeTileStreamer.#sortCamX) * (a.worldX - LandscapeTileStreamer.#sortCamX)
             + (a.worldZ - LandscapeTileStreamer.#sortCamZ) * (a.worldZ - LandscapeTileStreamer.#sortCamZ);
         const db = (b.worldX - LandscapeTileStreamer.#sortCamX) * (b.worldX - LandscapeTileStreamer.#sortCamX)
             + (b.worldZ - LandscapeTileStreamer.#sortCamZ) * (b.worldZ - LandscapeTileStreamer.#sortCamZ);
         return da - db;
-    };
+    }
 
     static readonly #NEIGHBOR_OFFSETS: readonly (readonly [number, number])[] = Object.freeze([
         [-1, 0],
@@ -313,10 +315,11 @@ export class LandscapeTileStreamer {
         }
 
         this.#isRebaking = true;
-        this.#processRebakeQueue(budgetPerFrame);
+        this.#rebakeBudgetPerFrame = budgetPerFrame;
+        this.#processRebakeQueue();
     }
 
-    #processRebakeQueue = (budgetPerFrame: number = 3): void => {
+    #processRebakeQueue = (): void => {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) {
             this.#isRebaking = false;
             this.#rebakeQueue.length = 0;
@@ -325,7 +328,7 @@ export class LandscapeTileStreamer {
         }
 
         const TILE_PIXEL_SIZE = 512;
-        const count = Math.min(budgetPerFrame, this.#rebakeQueue.length);
+        const count = Math.min(this.#rebakeBudgetPerFrame, this.#rebakeQueue.length);
 
         for (let i = 0; i < count; i++) {
             const comp = this.#rebakeQueue.shift()!;
@@ -342,7 +345,7 @@ export class LandscapeTileStreamer {
         }
 
         if (this.#rebakeQueue.length > 0) {
-            this.#rebakeRafId = requestAnimationFrame(() => this.#processRebakeQueue(budgetPerFrame));
+            this.#rebakeRafId = requestAnimationFrame(this.#processRebakeQueue);
         } else {
             this.#isRebaking = false;
             this.#rebakeRafId = null;
