@@ -37,7 +37,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         viewElevation = horizonElevation - ratio * ratio * (horizonElevation + HPI);
     }
 
-    let viewDir = vec3<f32>(cos(viewElevation) * cos(azimuth), sin(viewElevation), cos(viewElevation) * sin(azimuth));
+    let cosEl = cos(viewElevation);
+    let sinEl = sin(viewElevation);
+    let cosAz = cos(azimuth);
+    let sinAz = sin(azimuth);
+    let viewDir = vec3<f32>(cosEl * cosAz, sinEl, cosEl * sinAz);
     let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
 
     var radiance = vec3<f32>(0.0);
@@ -54,8 +58,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         integrateScatSegment(rayOrigin, viewDir, 0.0, tEarth, SKY_VIEW_STEPS / 2u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
 
         let hitPoint = rayOrigin + viewDir * tEarth;
-        let up = normalize(hitPoint);
-        let localCosSun = dot(up, normalize(params.sunDirection));
+        let up = hitPoint * inverseSqrt(dot(hitPoint, hitPoint));
+        let sunDir = normalize(params.sunDirection);
+        let localCosSun = dot(up, sunDir);
 
         // 지면의 투과율 및 다중 산란 에너지 기여도 합산
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, localCosSun, atmosphereHeight);
@@ -71,5 +76,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 4. 결과 저장 (산란광 및 평균 투과율)
     // [EN] 4. Store result (Radiance and average transmittance)
-    textureStore(skyViewLUT, global_id.xy, vec4<f32>(radiance, (transmittance.r + transmittance.g + transmittance.b) / 3.0));
+    let avgTrans = (transmittance.r + transmittance.g + transmittance.b) * (1.0 / 3.0);
+    textureStore(skyViewLUT, global_id.xy, vec4<f32>(radiance, avgTrans));
 }

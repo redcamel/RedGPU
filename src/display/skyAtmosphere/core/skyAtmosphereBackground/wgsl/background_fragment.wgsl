@@ -32,6 +32,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
+    let sunDir = normalize(uniforms.sunDirection);
+    let viewSunCos = dot(viewDir, sunDir);
+
     var baseRadiance: vec3<f32>;
     var skyTransmittance: f32 = 1.0;
 
@@ -39,8 +42,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
         // [KO] 1-A. 지면 충돌 시: 지면의 물리적 반사광 계산
         // [EN] 1-A. Ground Hit: Calculate physical ground radiance
         let hitPoint = camPos + viewDir * tEarth;
-        let up = normalize(hitPoint);
-        let sunDir = normalize(uniforms.sunDirection);
+        let up = hitPoint * inverseSqrt(dot(hitPoint, hitPoint));
         let localCosSun = dot(up, sunDir);
 
         // 직접광 투과율 및 다중 산란 에너지 기여도 합산
@@ -58,9 +60,6 @@ fn main(input : VertexOutput) -> FragmentOutput {
         baseRadiance = skySample.rgb;
         skyTransmittance = skySample.a;
     }
-
-    let sunDir = normalize(uniforms.sunDirection);
-    let viewSunCos = dot(viewDir, sunDir);
 
     // [KO] 2. 태양 디스크(Sun Disk) 및 태양 주변부 광륜(Mie Glow) 계산
     // [EN] 2. Calculate Sun Disk and forward scattering Mie Glow (Sun Halo)
@@ -102,7 +101,8 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     // [KO] 4. 최종 복사휘도 합성 (기초 산란광 * PI + 태양 디스크 + 미 산란 광륜)
     // [EN] 4. Final radiance composition (Base scattering * PI + Sun Disk + Mie Glow)
-    var finalRadiance = (baseRadiance * PI * uniforms.sunIntensity + addedRadiance * uniforms.sunIntensity) * systemUniforms.preExposure;
+    let scaledSunIntensity = uniforms.sunIntensity * systemUniforms.preExposure;
+    var finalRadiance = (baseRadiance * PI + addedRadiance) * scaledSunIntensity;
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);
