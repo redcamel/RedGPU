@@ -59,33 +59,50 @@ fn main(input : VertexOutput) -> FragmentOutput {
         skyTransmittance = skySample.a;
     }
 
-    // 기초 광량에 태양 강도와 노출 적용
-    var finalRadiance = baseRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
+    let sunDir = normalize(uniforms.sunDirection);
+    let viewSunCos = dot(viewDir, sunDir);
 
-    // [KO] 2. 절차적 구름 레이어 합성 (Simple Procedural Clouds)
-    // [EN] 2. Composite procedural cloud layer
+    // [KO] 2. 태양 디스크(Sun Disk) 및 태양 주변부 광륜(Mie Glow) 계산
+    // [EN] 2. Calculate Sun Disk and forward scattering Mie Glow (Sun Halo)
+    var addedRadiance = vec3<f32>(0.0);
+    if (!isGroundHit) {
+        let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, vec3<f32>(skyTransmittance), 0.0);
+        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance), 0.01, uniforms);
+        addedRadiance = (mieGlow + sunDisk) * sunShadow;
+    }
+
+    // [KO] 3. 절차적 구름 레이어 합성 (Simple Procedural Clouds)
+    // [EN] 3. Composite procedural cloud layer
+    var finalCloudMask: f32 = 0.0;
     if (!isGroundHit && viewDir.y > 0.0) {
         let cloudR = groundRadius + uniforms.cloudHeight;
         let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
         
         if (tCloud > 0.0) {
             let hitP = camPos + viewDir * tCloud;
-            let cloudMask = getCloudDensity(hitP, uniforms);
+            finalCloudMask = getCloudDensity(hitP, uniforms);
             
-            if (cloudMask > 0.0) {
-                let sunDir = normalize(uniforms.sunDirection);
+            if (finalCloudMask > 0.0) {
                 let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, uniforms.cloudHeight, sunDir.y, atmosphereHeight);
                 
                 // 구름용 가짜 조명(Pseudo-Lighting) 및 색상 결정
                 let cloudNormal = getCloudNormal(hitP, uniforms);
                 let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
-                let cloudColor = (sunT * uniforms.sunIntensity * 0.5 + baseRadiance * 0.5) * cloudShadow * systemUniforms.preExposure;
+                let cloudColor = (sunT * uniforms.sunIntensity * 0.5 + baseRadiance * PI * uniforms.sunIntensity * 0.5) * cloudShadow;
                 
-                // 최종 합성
-                finalRadiance = mix(finalRadiance, cloudColor, cloudMask * skyTransmittance);
+                // 구름 마스크 적용
+                baseRadiance = mix(baseRadiance * PI * uniforms.sunIntensity, cloudColor, finalCloudMask * skyTransmittance) / (max(uniforms.sunIntensity, 0.0001) * PI);
             }
         }
     }
+
+    // 구름에 의한 태양 및 광륜 감쇠
+    addedRadiance *= (1.0 - finalCloudMask);
+
+    // [KO] 4. 최종 복사휘도 합성 (기초 산란광 * PI + 태양 디스크 + 미 산란 광륜)
+    // [EN] 4. Final radiance composition (Base scattering * PI + Sun Disk + Mie Glow)
+    var finalRadiance = (baseRadiance * PI * uniforms.sunIntensity + addedRadiance * uniforms.sunIntensity) * systemUniforms.preExposure;
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);

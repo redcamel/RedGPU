@@ -40,6 +40,8 @@ RedGPU.init(
         let currentSkybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, currentHdr.luminance);
         view.skybox = currentSkybox;
 
+        view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext)
+
         // 2. Directional Light 및 Shadow 설정
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
