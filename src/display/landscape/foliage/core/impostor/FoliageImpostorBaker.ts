@@ -40,6 +40,7 @@ class FoliageImpostorBaker {
     } {
         let minX = Infinity, minY = Infinity, minZ = Infinity;
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+        let maxHorizDistSq = 0;
 
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
@@ -69,6 +70,9 @@ class FoliageImpostorBaker {
                 if (wx > maxX) maxX = wx;
                 if (wy > maxY) maxY = wy;
                 if (wz > maxZ) maxZ = wz;
+
+                const horizDistSq = wx * wx + wz * wz;
+                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
             }
         }
 
@@ -93,37 +97,10 @@ class FoliageImpostorBaker {
         const centerZ = 0.0;
         const bottomOffset = minY;
 
-        let maxDistSq = 0;
-        for (let s = 0; s < subMeshes.length; s++) {
-            const sub = subMeshes[s];
-            if (sub.isImpostor) continue;
-
-            const vBuffer = sub.geometry?.vertexBuffer;
-            const vData = vBuffer?.data;
-            if (!vData || vData.length === 0) continue;
-
-            const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
-            const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
-            const m = sub.relativeModelMatrix;
-
-            for (let i = 0; i < vCount; i++) {
-                const idx = i * stride;
-                const x = vData[idx];
-                const y = vData[idx + 1];
-                const z = vData[idx + 2];
-
-                const wx = (m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x);
-                const wy = (m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y) - centerY;
-                const wz = (m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z);
-
-                const dSq = wx * wx + wy * wy + wz * wz;
-                if (dSq > maxDistSq) maxDistSq = dSq;
-            }
-        }
-
-        const rawMaxRadius = Math.sqrt(maxDistSq);
-        const fallbackRadius = Math.hypot(Math.max(Math.abs(minX), Math.abs(maxX)), height * 0.5, Math.max(Math.abs(minZ), Math.abs(maxZ)));
-        const maxRadius = (Number.isFinite(rawMaxRadius) && rawMaxRadius > 0.1) ? rawMaxRadius : fallbackRadius;
+        const halfHeight = height * 0.5;
+        const calculatedMaxRadius = Math.sqrt(maxHorizDistSq + halfHeight * halfHeight);
+        const fallbackRadius = Math.hypot(Math.max(Math.abs(minX), Math.abs(maxX)), halfHeight, Math.max(Math.abs(minZ), Math.abs(maxZ)));
+        const maxRadius = (Number.isFinite(calculatedMaxRadius) && calculatedMaxRadius > 0.1) ? calculatedMaxRadius : fallbackRadius;
 
         return {
             min: [minX, minY, minZ],
@@ -361,26 +338,56 @@ class FoliageImpostorBaker {
         const emptyTexView = resourceManager.emptyBitmapTextureView;
         const basicSampler = resourceManager.basicSampler;
 
-        const subBindGroups: (GPUBindGroup | null)[] = [];
+        const cachedSubMeshes: {
+            isImpostor: boolean;
+            pipeline: GPURenderPipeline | null;
+            bindGroup: GPUBindGroup | null;
+            vertexBuffer: GPUBuffer | null;
+            indexBuffer: GPUBuffer | null;
+            isIndexed: boolean;
+            indexCount: number;
+            indexFormat: GPUIndexFormat;
+            vertexCount: number;
+            relativeModelMatrix: mat4;
+            matProps: Float32Array;
+            modelMatProps: Float32Array;
+            isFoliage: number;
+        }[] = [];
+
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
             if (sub.isImpostor) {
-                subBindGroups.push(null);
+                cachedSubMeshes.push({
+                    isImpostor: true,
+                    pipeline: null,
+                    bindGroup: null,
+                    vertexBuffer: null,
+                    indexBuffer: null,
+                    isIndexed: false,
+                    indexCount: 0,
+                    indexFormat: 'uint32',
+                    vertexCount: 0,
+                    relativeModelMatrix: sub.relativeModelMatrix,
+                    matProps: new Float32Array(12),
+                    modelMatProps: new Float32Array(12),
+                    isFoliage: 0,
+                });
                 continue;
             }
+
             const mat = sub.material;
-            const diffTex = mat.diffuseTexture || mat.baseColorTexture;
-            const diffSampler = mat.diffuseTextureSampler || mat.baseColorTextureSampler || basicSampler;
-            const normTex = mat.normalTexture;
-            const normSampler = mat.normalTextureSampler || basicSampler;
-            const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
-            const ormSampler = mat.packedORMTextureSampler || mat.metallicRoughnessTextureSampler || basicSampler;
+            const diffTex = mat?.diffuseTexture || mat?.baseColorTexture;
+            const diffSampler = mat?.diffuseTextureSampler || mat?.baseColorTextureSampler || basicSampler;
+            const normTex = mat?.normalTexture;
+            const normSampler = mat?.normalTextureSampler || basicSampler;
+            const ormTex = mat?.packedORMTexture || mat?.metallicRoughnessTexture || mat?.occlusionTexture;
+            const ormSampler = mat?.packedORMTextureSampler || mat?.metallicRoughnessTextureSampler || basicSampler;
 
             const diffView = (diffTex && diffTex.gpuTexture) ? diffTex.gpuTexture.createView() : emptyTexView;
             const normView = (normTex && normTex.gpuTexture) ? normTex.gpuTexture.createView() : emptyTexView;
             const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyTexView;
 
-            const bg = gpuDevice.createBindGroup({
+            const bindGroup = gpuDevice.createBindGroup({
                 label: `BakeBindGroup_${s}`,
                 layout: this.#bakeBindGroupLayout!,
                 entries: [
@@ -392,7 +399,70 @@ class FoliageImpostorBaker {
                     {binding: 5, resource: ormSampler.gpuSampler},
                 ]
             });
-            subBindGroups.push(bg);
+
+            let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
+            let roughness = 1.0;
+            let metallic = 0.0;
+            let ao = 1.0;
+            let cutOff = 0.35;
+            let useVertexColor = false;
+            if (mat) {
+                const bcf = mat.baseColorFactor || mat.diffuseColor || mat.color;
+                if (bcf) {
+                    if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
+                        r = bcf[0] ?? 1.0;
+                        g = bcf[1] ?? 1.0;
+                        b = bcf[2] ?? 1.0;
+                        a = bcf[3] ?? 1.0;
+                    } else if (typeof bcf.r === 'number') {
+                        r = bcf.r;
+                        g = bcf.g;
+                        b = bcf.b;
+                        a = bcf.a ?? 1.0;
+                    }
+                }
+                if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
+                else if (typeof mat.roughness === 'number') roughness = mat.roughness;
+                if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
+                else if (typeof mat.metallic === 'number') metallic = mat.metallic;
+                if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
+                if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
+                useVertexColor = !!(mat.useVertexColor || mat.useVertexColor_0 || mat.useVertexColor0);
+            }
+
+            const hasDiff = !!(diffTex && diffTex.gpuTexture);
+            const hasNorm = !!(normTex && normTex.gpuTexture);
+            const hasORM = !!(ormTex && ormTex.gpuTexture);
+            const isFoliage = mat?.isFoliage !== false ? 1.0 : 0.0;
+
+            const matProps = new Float32Array([
+                r, g, b, a,
+                roughness, metallic, ao, cutOff,
+                hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
+            ]);
+
+            const m = sub.relativeModelMatrix;
+            const modelMatProps = new Float32Array([
+                m[0], m[1], m[2], m[12],
+                m[4], m[5], m[6], m[13],
+                m[8], m[9], m[10], m[14]
+            ]);
+
+            cachedSubMeshes.push({
+                isImpostor: false,
+                pipeline: this.#getOrCreateBakePipeline(redGPUContext, sub),
+                bindGroup,
+                vertexBuffer: sub.geometry.vertexBuffer?.gpuBuffer || null,
+                indexBuffer: sub.geometry.indexBuffer?.gpuBuffer || null,
+                isIndexed: !!sub.isIndexed,
+                indexCount: sub.indexCount,
+                indexFormat: sub.indexFormat || 'uint32',
+                vertexCount: sub.vertexCount,
+                relativeModelMatrix: m,
+                matProps,
+                modelMatProps,
+                isFoliage,
+            });
         }
 
         const totalViews = renderPassViews.length;
@@ -403,104 +473,36 @@ class FoliageImpostorBaker {
         const allInstanceData = new Float32Array(totalFloats);
 
         const tempMVP = mat4.create();
-        const tempNMat = mat4.create();
 
         let drawSlot = 0;
         for (let v = 0; v < totalViews; v++) {
             const vpInfo = renderPassViews[v];
+            const normX = vpInfo.normX;
+            const normY = vpInfo.normY;
+            const normZ = vpInfo.normZ;
+
             for (let s = 0; s < totalSub; s++) {
-                const sub = subMeshes[s];
+                const cached = cachedSubMeshes[s];
                 const baseOffset = drawSlot * strideFloats;
                 drawSlot++;
 
-                if (sub.isImpostor) continue;
+                if (cached.isImpostor) continue;
 
-                mat4.multiply(tempMVP, vpInfo.projView, sub.relativeModelMatrix);
-                mat4.invert(tempNMat, sub.relativeModelMatrix);
-                mat4.transpose(tempNMat, tempNMat);
-
-                let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
-                let roughness = 1.0;
-                let metallic = 0.0;
-                let ao = 1.0;
-                let cutOff = 0.35;
-                let useVertexColor = false;
-                const mat = sub.material;
-                if (mat) {
-                    const bcf = mat.baseColorFactor || mat.diffuseColor || mat.color;
-                    if (bcf) {
-                        if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
-                            r = bcf[0] ?? 1.0;
-                            g = bcf[1] ?? 1.0;
-                            b = bcf[2] ?? 1.0;
-                            a = bcf[3] ?? 1.0;
-                        } else if (typeof bcf.r === 'number') {
-                            r = bcf.r;
-                            g = bcf.g;
-                            b = bcf.b;
-                            a = bcf.a ?? 1.0;
-                        }
-                    }
-                    if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
-                    else if (typeof mat.roughness === 'number') roughness = mat.roughness;
-                    if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
-                    else if (typeof mat.metallic === 'number') metallic = mat.metallic;
-                    if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
-                    if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
-                    useVertexColor = !!(mat.useVertexColor || mat.useVertexColor_0 || mat.useVertexColor0);
-                }
-
-                const diffTex = mat.diffuseTexture || mat.baseColorTexture;
-                const normTex = mat.normalTexture;
-                const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
-                const hasDiff = !!(diffTex && diffTex.gpuTexture);
-                const hasNorm = !!(normTex && normTex.gpuTexture);
-                const hasORM = !!(ormTex && ormTex.gpuTexture);
-                const isFoliage = mat?.isFoliage !== false;
-
+                mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix);
                 allInstanceData.set(tempMVP, baseOffset);
 
-                allInstanceData[baseOffset + 16] = r;
-                allInstanceData[baseOffset + 17] = g;
-                allInstanceData[baseOffset + 18] = b;
-                allInstanceData[baseOffset + 19] = a;
-
-                allInstanceData[baseOffset + 20] = roughness;
-                allInstanceData[baseOffset + 21] = metallic;
-                allInstanceData[baseOffset + 22] = ao;
-                allInstanceData[baseOffset + 23] = cutOff;
-
-                allInstanceData[baseOffset + 24] = hasDiff ? 1.0 : 0.0;
-                allInstanceData[baseOffset + 25] = hasNorm ? 1.0 : 0.0;
-                allInstanceData[baseOffset + 26] = hasORM ? 1.0 : 0.0;
-                allInstanceData[baseOffset + 27] = useVertexColor ? 1.0 : 0.0;
-
-                const m = sub.relativeModelMatrix;
-                allInstanceData[baseOffset + 28] = m[0];
-                allInstanceData[baseOffset + 29] = m[1];
-                allInstanceData[baseOffset + 30] = m[2];
-                allInstanceData[baseOffset + 31] = m[12]; 
-
-                allInstanceData[baseOffset + 32] = m[4];
-                allInstanceData[baseOffset + 33] = m[5];
-                allInstanceData[baseOffset + 34] = m[6];
-                allInstanceData[baseOffset + 35] = m[13]; 
-
-                allInstanceData[baseOffset + 36] = m[8];
-                allInstanceData[baseOffset + 37] = m[9];
-                allInstanceData[baseOffset + 38] = m[10];
-                allInstanceData[baseOffset + 39] = m[14]; 
+                allInstanceData.set(cached.matProps, baseOffset + 16);
+                allInstanceData.set(cached.modelMatProps, baseOffset + 28);
 
                 allInstanceData[baseOffset + 40] = centerX;
                 allInstanceData[baseOffset + 41] = centerY;
                 allInstanceData[baseOffset + 42] = centerZ;
                 allInstanceData[baseOffset + 43] = maxRadius;
 
-                allInstanceData[baseOffset + 44] = vpInfo.normX;
-                allInstanceData[baseOffset + 45] = vpInfo.normY;
-                allInstanceData[baseOffset + 46] = vpInfo.normZ;
-                allInstanceData[baseOffset + 47] = isFoliage ? 1.0 : 0.0;
-
+                allInstanceData[baseOffset + 44] = normX;
+                allInstanceData[baseOffset + 45] = normY;
+                allInstanceData[baseOffset + 46] = normZ;
+                allInstanceData[baseOffset + 47] = cached.isFoliage;
             }
         }
 
@@ -528,7 +530,6 @@ class FoliageImpostorBaker {
                     loadOp: 'clear',
                     storeOp: 'store',
                 },
-
                 {
                     view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 1.0, g: 1.0, b: 0.0, a: 0.0},
@@ -551,33 +552,26 @@ class FoliageImpostorBaker {
             renderPass.setScissorRect(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize);
 
             for (let s = 0; s < totalSub; s++) {
-                const sub = subMeshes[s];
+                const cached = cachedSubMeshes[s];
                 const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
                 currentDrawSlot++;
 
-                if (sub.isImpostor) continue;
+                if (cached.isImpostor || !cached.pipeline || !cached.vertexBuffer) continue;
 
-                const pipeline = this.#getOrCreateBakePipeline(redGPUContext, sub);
-                if (!pipeline) continue;
+                renderPass.setPipeline(cached.pipeline);
 
-                renderPass.setPipeline(pipeline);
-
-                const bindGroup = subBindGroups[s];
-                if (bindGroup) {
-                    renderPass.setBindGroup(0, bindGroup);
+                if (cached.bindGroup) {
+                    renderPass.setBindGroup(0, cached.bindGroup);
                 }
 
-                const vBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
-                if (!vBuffer) continue;
-
-                renderPass.setVertexBuffer(0, vBuffer);
+                renderPass.setVertexBuffer(0, cached.vertexBuffer);
                 renderPass.setVertexBuffer(1, sharedTransformGPUBuffer, bufferOffsetBytes);
 
-                if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-                    renderPass.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, sub.indexFormat || 'uint32');
-                    renderPass.drawIndexed(sub.indexCount);
+                if (cached.isIndexed && cached.indexBuffer) {
+                    renderPass.setIndexBuffer(cached.indexBuffer, cached.indexFormat);
+                    renderPass.drawIndexed(cached.indexCount);
                 } else {
-                    renderPass.draw(sub.vertexCount);
+                    renderPass.draw(cached.vertexCount);
                 }
             }
         }
@@ -701,63 +695,71 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
         });
 
-        const initCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_InitCopy'});
-        initCopyEncoder.copyTextureToTexture(
-            {texture: targetTexture, mipLevel: 0},
-            {texture: pingPongA, mipLevel: 0},
-            [width, height, 1]
-        );
-        gpuDevice.queue.submit([initCopyEncoder.finish()]);
-
         const steps = [1, 2, 4, 8];
-        let currentSource = pingPongA;
-        let currentDest = pingPongB;
+        const viewA = pingPongA.createView({baseMipLevel: 0, mipLevelCount: 1});
+        const viewB = pingPongB.createView({baseMipLevel: 0, mipLevelCount: 1});
 
-        const uniformBuffer = gpuDevice.createBuffer({
-            label: 'ImpostorDilation_UniformBuffer',
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        const uniformBuffers: GPUBuffer[] = [];
+        const stepBindGroups: GPUBindGroup[] = [];
+
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            const uniformBuffer = gpuDevice.createBuffer({
+                label: `ImpostorDilation_Uniform_Step${step}`,
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM,
+                mappedAtCreation: true
+            });
+            new Uint32Array(uniformBuffer.getMappedRange()).set([width, height, tileSize, step]);
+            uniformBuffer.unmap();
+            uniformBuffers.push(uniformBuffer);
+
+            const isEven = (i % 2 === 0);
+            const srcView = isEven ? viewA : viewB;
+            const dstView = isEven ? viewB : viewA;
+
+            stepBindGroups.push(gpuDevice.createBindGroup({
+                label: `ImpostorDilation_BG_Step${step}`,
+                layout: this.#dilationBindGroupLayout!,
+                entries: [
+                    {binding: 0, resource: srcView},
+                    {binding: 1, resource: dstView},
+                    {binding: 2, resource: {buffer: uniformBuffer}}
+                ]
+            }));
+        }
 
         const numWorkgroupsX = Math.ceil(width / 8);
         const numWorkgroupsY = Math.ceil(height / 8);
 
+        const commandEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_BatchCommands'});
+
+        commandEncoder.copyTextureToTexture(
+            {texture: targetTexture, mipLevel: 0},
+            {texture: pingPongA, mipLevel: 0},
+            [width, height, 1]
+        );
+
         for (let i = 0; i < steps.length; i++) {
-            const step = steps[i];
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, new Uint32Array([width, height, tileSize, step]));
-
-            const bindGroup = gpuDevice.createBindGroup({
-                label: `ImpostorDilation_BG_Step${step}`,
-                layout: this.#dilationBindGroupLayout!,
-                entries: [
-                    {binding: 0, resource: currentSource.createView({baseMipLevel: 0, mipLevelCount: 1})},
-                    {binding: 1, resource: currentDest.createView({baseMipLevel: 0, mipLevelCount: 1})},
-                    {binding: 2, resource: {buffer: uniformBuffer}}
-                ]
-            });
-
-            const commandEncoder = gpuDevice.createCommandEncoder({label: `ImpostorDilation_Pass_Step${step}`});
-            const computePass = commandEncoder.beginComputePass();
-            computePass.setPipeline(this.#dilationPipeline);
-            computePass.setBindGroup(0, bindGroup);
+            const computePass = commandEncoder.beginComputePass({label: `ImpostorDilation_ComputeStep_${steps[i]}`});
+            computePass.setPipeline(this.#dilationPipeline!);
+            computePass.setBindGroup(0, stepBindGroups[i]);
             computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
             computePass.end();
-            gpuDevice.queue.submit([commandEncoder.finish()]);
-
-            const temp = currentSource;
-            currentSource = currentDest;
-            currentDest = temp;
         }
 
-        const finalCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_FinalCopy'});
-        finalCopyEncoder.copyTextureToTexture(
-            {texture: currentSource, mipLevel: 0},
+        // 4회 핑퐁(0:A->B, 1:B->A, 2:A->B, 3:B->A) 후 최종 결과는 pingPongA에 저장됨
+        commandEncoder.copyTextureToTexture(
+            {texture: pingPongA, mipLevel: 0},
             {texture: targetTexture, mipLevel: 0},
             [width, height, 1]
         );
-        gpuDevice.queue.submit([finalCopyEncoder.finish()]);
 
-        uniformBuffer.destroy();
+        gpuDevice.queue.submit([commandEncoder.finish()]);
+
+        for (let i = 0; i < uniformBuffers.length; i++) {
+            uniformBuffers[i].destroy();
+        }
         pingPongA.destroy();
         pingPongB.destroy();
     }
