@@ -111,16 +111,11 @@ class FoliageRenderer {
             const foliageType = item.type!;
             const culledGPU = item.culledGPU!;
             const indirectGPU = item.indirectGPU!;
-            const subMeshes = foliageType.subMeshes;
+            const subMeshes = foliageType.depthPrepassSubMeshes;
             const subCount = subMeshes.length;
-            const useImp = foliageType.useImpostor;
 
             for (let s = 0; s < subCount; s++) {
-                const sub = subMeshes[s];
-                if (!useImp && sub.isImpostor) continue;
-                if (sub.canRenderInPass('depthPrepass')) {
-                    this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
-                }
+                this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
@@ -129,16 +124,12 @@ class FoliageRenderer {
             const foliageType = item.type!;
             const culledGPU = item.culledGPU!;
             const indirectGPU = item.indirectGPU!;
-            const subMeshes = foliageType.subMeshes;
+            const subMeshes = foliageType.mainSubMeshes;
             const subCount = subMeshes.length;
-            const useImp = foliageType.useImpostor;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (!useImp && sub.isImpostor) continue;
-                if (sub.canRenderInPass('main')) {
-                    this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, sub.mainDepthMode);
-                }
+                this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, sub.mainDepthMode);
             }
         }
     }

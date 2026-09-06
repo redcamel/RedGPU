@@ -65,6 +65,8 @@ class FoliageType {
     #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
+    #depthPrepassSubMeshes: FoliageSubMesh[] = [];
+    #mainSubMeshes: FoliageSubMesh[] = [];
     #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
@@ -160,6 +162,8 @@ class FoliageType {
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         this.#impostorSubMesh = this.#subMeshes.find(s => s.isImpostor) || null;
 
+        this.#updatePassBuckets();
+
         this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.#impostorSubMesh ? 2 : 1);
 
         if (this.#megaBuffer) {
@@ -211,6 +215,14 @@ class FoliageType {
 
     get subMeshes(): readonly FoliageSubMesh[] {
         return this.#subMeshes;
+    }
+
+    get depthPrepassSubMeshes(): readonly FoliageSubMesh[] {
+        return this.#depthPrepassSubMeshes;
+    }
+
+    get mainSubMeshes(): readonly FoliageSubMesh[] {
+        return this.#mainSubMeshes;
     }
 
     get shadowMergedSubMeshes(): readonly FoliageShadowMergedSubMesh[] {
@@ -379,6 +391,7 @@ class FoliageType {
         const boolVal = !!value;
         if (this.#useImpostor !== boolVal) {
             this.#useImpostor = boolVal;
+            this.#updatePassBuckets();
             this.#syncTypeParams();
             this.#onDirty?.();
         }
@@ -500,6 +513,29 @@ class FoliageType {
         }
         this.#shadowMergedSubMeshes.length = 0;
         this.#loadedTileKeys.clear();
+    }
+
+    #updatePassBuckets(): void {
+        const useImp = this.#useImpostor;
+        const subList = this.#subMeshes;
+        const count = subList.length;
+
+        const prepassList: FoliageSubMesh[] = [];
+        const mainList: FoliageSubMesh[] = [];
+
+        for (let i = 0; i < count; i++) {
+            const sub = subList[i];
+            if (!useImp && sub.isImpostor) continue;
+            if (sub.canRenderInPass('depthPrepass')) {
+                prepassList.push(sub);
+            }
+            if (sub.canRenderInPass('main')) {
+                mainList.push(sub);
+            }
+        }
+
+        this.#depthPrepassSubMeshes = prepassList;
+        this.#mainSubMeshes = mainList;
     }
 
     #syncTypeParams(): void {
