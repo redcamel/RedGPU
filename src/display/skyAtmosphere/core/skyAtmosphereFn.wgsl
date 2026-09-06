@@ -8,6 +8,7 @@
 #redgpu_include color.getLuminance
 
 const MAX_TAU: f32 = 100.0;
+const LN_HALF: f32 = -0.69314718056;
 
 const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465;
 const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
@@ -186,7 +187,10 @@ fn phaseRayleigh(cosTheta: f32) -> f32 {
 
 fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     let g2 = g * g;
-    return 1.0 / (4.0 * PI) * ((1.0 - g2) / pow(max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
+    let denom = max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta);
+    let invSqrtDenom = inverseSqrt(denom);
+    let invDenom15 = invSqrtDenom * invSqrtDenom * invSqrtDenom;
+    return (0.25 * INV_PI) * ((1.0 - g2) * invDenom15);
 }
 
 fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
@@ -194,12 +198,13 @@ fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
 }
 
 fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
+    let viewSunDot = dot(viewDir, sunDir);
     let sunElevationParam = saturate(sunDir.y);
     let squashFactor = mix(0.85, 1.0, sunElevationParam);
     let verticalDist = viewDir.y - sunDir.y;
-    let correctionGuard = saturate(dot(viewDir, sunDir) * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
+    let correctionGuard = saturate(viewSunDot * 10.0) * (1.0 - sunElevationParam * sunElevationParam);
     let squashCorrection = (1.0 / (squashFactor * squashFactor) - 1.0) * (verticalDist * verticalDist) * correctionGuard;
-    return dot(viewDir, sunDir) - squashCorrection;
+    return viewSunDot - squashCorrection;
 }
 
 fn getSunDiskRadianceUnit(
@@ -411,7 +416,7 @@ fn evaluateIBLRadiance(
 
 fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
     let cosHalf = cos(lobeHalfAngle);
-    let sunLobePower = clamp(log(0.5) / log(max(1e-4, cosHalf)), 2.0, 128.0);
+    let sunLobePower = clamp(LN_HALF / log(max(1e-4, cosHalf)), 2.0, 128.0);
     let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
     return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
 }
