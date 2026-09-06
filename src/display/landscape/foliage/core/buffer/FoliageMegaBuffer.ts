@@ -170,6 +170,8 @@ class FoliageMegaBuffer {
         }
 
         const subMeshCount = subMeshes.length;
+        // 🌟 워크그룹(64 스레드) 단위 완전 격리를 위한 64-배수 올림 정렬
+        const alignedMaxInstances = Math.ceil(maxInstances / 64) * 64;
         const rawBaseOffset = this.#nextRawOffset;
         const culledBaseOffset = this.#nextCulledOffset;
         const indirectBaseOffset = this.#nextIndirectOffset;
@@ -177,7 +179,7 @@ class FoliageMegaBuffer {
         const allocation: FoliageTypeAllocation = {
             typeId,
             name,
-            maxInstances,
+            maxInstances: alignedMaxInstances,
             rawBaseOffset,
             culledBaseOffset,
             indirectBaseOffset,
@@ -189,17 +191,17 @@ class FoliageMegaBuffer {
         this.#allocatedTypes.push(allocation);
 
         const baseFloat = rawBaseOffset * FoliageMegaBuffer.#STRIDE_FLOATS;
-        for (let i = 0; i < maxInstances; i++) {
+        for (let i = 0; i < alignedMaxInstances; i++) {
             this.#cpuRawDataBuffer[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 7] = typeId;
         }
 
-        this.#nextRawOffset += maxInstances;
-        this.#nextCulledOffset += maxInstances * 8; 
+        this.#nextRawOffset += alignedMaxInstances;
+        this.#nextCulledOffset += alignedMaxInstances * 8; 
         this.#nextIndirectOffset += subMeshCount;
 
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
-            sub.instanceBufferOffset = (culledBaseOffset + (sub.lodIndex * maxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
+            sub.instanceBufferOffset = (culledBaseOffset + (sub.lodIndex * alignedMaxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
             sub.indirectOffsetBytes = (indirectBaseOffset + s) * 20;
         }
 
@@ -214,7 +216,7 @@ class FoliageMegaBuffer {
                     }
                 }
                 const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
-                shadowSub.instanceBufferOffset = (culledBaseOffset + (shadowSub.lodIndex * maxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
+                shadowSub.instanceBufferOffset = (culledBaseOffset + (shadowSub.lodIndex * alignedMaxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
                 shadowSub.indirectOffsetBytes = (indirectBaseOffset + subOffset) * 20;
             }
         }
