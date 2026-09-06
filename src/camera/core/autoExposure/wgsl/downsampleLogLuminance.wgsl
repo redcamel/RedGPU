@@ -4,10 +4,10 @@
 
 struct AutoExposureUniforms {
     deltaTime: f32,
-    targetLuminance: f32,
+    targetEV100Bias: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
-    exposureCompensation: f32,
+    minPossibleEV100: f32,
     minEV100: f32,
     maxEV100: f32,
     ev100Range: f32,
@@ -17,7 +17,7 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    maxExposureMultiplier: f32,
+    padding: f32,
     meteringMode: f32
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;

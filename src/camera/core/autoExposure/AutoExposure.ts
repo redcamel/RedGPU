@@ -383,13 +383,18 @@ class AutoExposure extends RedGPUObject {
         // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산
         const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
 
+        // [KO] CPU 측에서 log2 초월함수(SFU) 사전 계산 (GPU SFU 호출 0회화)
+        // [EN] Precalculate log2 transcendental functions (SFU) on CPU (0 GPU SFU calls)
+        const targetEV100Bias = Math.log2(9.6 * Math.max(0.000001, this.#targetLuminance)) + this.#exposureCompensation;
+        const minPossibleEV100 = this.#exposureCompensation - Math.log2(1.2 * Math.max(1.0, this.#maxExposureMultiplier));
+
         // Update uniforms (재사용 버퍼 인플레이스 갱신으로 매 프레임 GC 0건 유지)
         const u = this.#cachedUniformData;
         u[0] = deltaTime;
-        u[1] = this.#targetLuminance;
+        u[1] = targetEV100Bias;
         u[2] = this.#adaptationSpeedUp;
         u[3] = this.#adaptationSpeedDown;
-        u[4] = this.#exposureCompensation;
+        u[4] = minPossibleEV100;
         u[5] = this.#minEV100;
         u[6] = this.#maxEV100;
         u[7] = ev100Range;
@@ -399,7 +404,7 @@ class AutoExposure extends RedGPUObject {
         u[11] = width;
         u[12] = height;
         u[13] = currentPreExposure;
-        u[14] = this.#maxExposureMultiplier;
+        u[14] = 0.0;
         u[15] = this.#meteringMode;
 
         gpuDevice.queue.writeBuffer(

@@ -1,9 +1,9 @@
 struct AutoExposureUniforms {
     deltaTime: f32,
-    targetLuminance: f32,
+    targetEV100Bias: f32,
     adjustmentSpeedUp: f32,
     adjustmentSpeedDown: f32,
-    exposureCompensation: f32,
+    minPossibleEV100: f32,
     minEV100: f32,
     maxEV100: f32,
     ev100Range: f32,
@@ -13,7 +13,7 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    maxExposureMultiplier: f32,
+    padding: f32,
     meteringMode: f32
 };
 
@@ -63,20 +63,13 @@ fn main() {
     // [KO] 로그 공간에서의 평균 EV100 산출 [EN] Calculate average EV100 in log space
     let avgEV100 = weightedEV100Sum * (1.0 / max(totalValidPixels, 1.0));
 
-    // [KO] 목표 휘도 및 사용자의 노출 보정(Compensation)을 반영한 목표 EV100 결정
-    // [EN] Determine target EV100 reflecting target luminance and user's exposure compensation
-    // [KO] UE5 표준 공식(1 / (1.2 * 2^EV100))에 따라, targetLuminance가 최종 결과물의 평균 휘도가 되도록 EV100을 계산합니다.
-    // [EN] According to the UE5 standard formula (1 / (1.2 * 2^EV100)), calculate EV100 so that targetLuminance becomes the average luminance of the final result.
-    // [KO] 기준점 계산: log2((1.2 * 100.0 * targetLuminance) / 12.5) = log2(9.6 * targetLuminance)
-    // [EN] Reference point calculation: log2((1.2 * 100.0 * targetLuminance) / 12.5) = log2(9.6 * targetLuminance)
-    var targetEV100 = avgEV100 - log2(9.6 * uniforms.targetLuminance) - uniforms.exposureCompensation;
+    // [KO] 목표 휘도 및 노출 보정을 반영한 목표 EV100 결정 (CPU에서 log2 사전 계산 완료하여 SFU 0회)
+    // [EN] Determine target EV100 reflecting target luminance and exposure compensation (log2 precalculated on CPU, 0 SFU calls)
+    var targetEV100 = avgEV100 - uniforms.targetEV100Bias;
 
-    // [KO] 노출 배율 제한 적용 (너무 어두울 때 스페큘러가 타는 현상 방지)
-    // [EN] Apply exposure multiplier limit (prevents specular blooming in very dark scenes)
-    // [KO] EV100 공식 역산을 통해 최대 노출 배율에 해당하는 최소 EV100 결정 (CPU측 preExposure 공식과 일치시킴)
-    // [EN] Determine minimum EV100 corresponding to the maximum exposure multiplier (consistent with CPU-side preExposure formula)
-    let minPossibleEV100 = uniforms.exposureCompensation - log2(1.2 * uniforms.maxExposureMultiplier);
-    targetEV100 = max(targetEV100, minPossibleEV100);
+    // [KO] 노출 배율 제한 적용 (CPU에서 log2 사전 계산 완료)
+    // [EN] Apply exposure multiplier limit (log2 precalculated on CPU)
+    targetEV100 = max(targetEV100, uniforms.minPossibleEV100);
 
     // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
     // [EN] Eye adaptation simulation (performed in EV100 space)
