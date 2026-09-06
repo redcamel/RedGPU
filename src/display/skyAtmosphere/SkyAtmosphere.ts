@@ -119,6 +119,7 @@ class SkyAtmosphere extends RedGPUObject {
     #prevSunSource: DirectionalLight = null;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
+    #dirtyAerialPerspective: boolean = true;
     #dirtyUniformBuffer: boolean = true;
 
     #lastUpdateFrame: number = -1;
@@ -403,9 +404,15 @@ class SkyAtmosphere extends RedGPUObject {
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
 
-        // [KO] 구름 애니메이션 시간 업데이트 (절대 시간 및 배율 사용) [EN] Update cloud animation time (using absolute time and multiplier)
-        this.#params.cloudTime = view.renderViewStateData.time * 0.001 * this.#params.cloudTimeMultiplier;
-        this.#dirtyUniformBuffer = true;
+        // [KO] 구름 애니메이션 시간 업데이트 (구름 속도가 0이 아닐 때만 갱신하여 정적 상태에서 버퍼 쓰기 방지)
+        // [EN] Update cloud animation time (Only update when cloud speed is non-zero to prevent buffer writes in static state)
+        if (this.#params.cloudTimeMultiplier !== 0) {
+            const newCloudTime = view.renderViewStateData.time * 0.001 * this.#params.cloudTimeMultiplier;
+            if (Math.abs(this.#params.cloudTime - newCloudTime) > 0.0001) {
+                this.#params.cloudTime = newCloudTime;
+                this.#dirtyUniformBuffer = true;
+            }
+        }
 
         this.#updateSunInfo(view);
         this.#updateLUTs(view);
@@ -453,7 +460,10 @@ class SkyAtmosphere extends RedGPUObject {
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
         this.#dirtyUniformBuffer = true;
         if (lut) this.#dirtyLUT = true;
-        if (skyView) this.#dirtySkyView = true;
+        if (skyView) {
+            this.#dirtySkyView = true;
+            this.#dirtyAerialPerspective = true;
+        }
         if (ibl) this.#skyLight.dirty = true;
     }
 
@@ -504,11 +514,17 @@ class SkyAtmosphere extends RedGPUObject {
         const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
         const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0));
 
+        // [KO] 카메라 고도 변화 감지: 고도가 바뀔 때만 SkyView 및 AerialPerspective 재생성
+        // [EN] Detect camera altitude change: Regenerate SkyView and AerialPerspective only when altitude changes
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
             this.#params.cameraHeight = currentHeightKm;
             this.#dirtyUniformBuffer = true;
+            this.#dirtySkyView = true;
+            this.#dirtyAerialPerspective = true;
         }
 
+        // [KO] 카메라 뷰 행렬 변화 감지: 회전 시에는 AerialPerspective만 갱신하고, 회전 불변인 SkyView LUT는 베이킹 스킵!
+        // [EN] Detect camera view matrix change: On rotation, only update AerialPerspective and SKIP baking rotation-invariant SkyView LUT!
         const camMatrix = rawCamera.viewMatrix;
         let camMoved = false;
         for (let i = 0; i < 16; i++) {
@@ -520,7 +536,7 @@ class SkyAtmosphere extends RedGPUObject {
 
         if (camMoved) {
             mat4.copy(this.#prevCameraMatrix, camMatrix);
-            this.#dirtySkyView = true;
+            this.#dirtyAerialPerspective = true;
         }
 
         if (this.#dirtyUniformBuffer) {
@@ -533,13 +549,18 @@ class SkyAtmosphere extends RedGPUObject {
             this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
+            this.#dirtyAerialPerspective = true;
             this.#skyLight.dirty = true;
         }
 
         if (this.#dirtySkyView) {
             this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
-            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
             this.#dirtySkyView = false;
+        }
+
+        if (this.#dirtyAerialPerspective) {
+            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#dirtyAerialPerspective = false;
         }
 
         this.#skyLight.update(this);
