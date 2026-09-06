@@ -241,7 +241,7 @@ fn getSunDiskRadianceIBL(
     let falloff = exp(-diff / max(1e-7, sigma_sq));
     if (falloff < 0.001) { return vec3<f32>(0.0); }
 
-    return (radScale * falloff) * skyTrans;
+    return (radScale * falloff) * skyTrans / PI;
 }
 
 fn getMieGlowAmountUnit(
