@@ -57,13 +57,13 @@ fn main(
                 let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
                 let binIndex = u32(normalizedEV100 * 255.0);
 
-                // [KO] 측광 가중치 계산 (기본 AVERAGE 모드 시 나눗셈/SFU sqrt 완전 바이패스)
-                // [EN] Calculate metering weight (Completely bypass divisions/SFU sqrt in default AVERAGE mode)
+                // [KO] 측광 가중치 계산 (화면비 왜곡 보정 적용으로 완벽한 정원 측광 수행)
+                // [EN] Calculate metering weight (Aspect ratio distortion corrected for perfect circular metering)
                 var weight = 1.0;
                 if (uniforms.meteringMode > 0.5) {
-                    let invScreenSize = vec2<f32>(1.0 / uniforms.width, 1.0 / uniforms.height);
-                    let uv = vec2<f32>(coords) * invScreenSize;
-                    let delta = uv - vec2<f32>(0.5, 0.5);
+                    let invHeight = 1.0 / uniforms.height;
+                    let center = vec2<f32>(uniforms.width, uniforms.height) * 0.5;
+                    let delta = (vec2<f32>(coords) - center) * invHeight;
                     let dist = sqrt(dot(delta, delta));
 
                     if (uniforms.meteringMode < 1.5) {
