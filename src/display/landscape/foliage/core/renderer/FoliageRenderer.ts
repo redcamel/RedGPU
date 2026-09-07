@@ -163,7 +163,7 @@ class FoliageRenderer {
                 if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
                 const culledGPU = foliageType.shadowCulledGPUBuffer;
                 const indirectGPU = foliageType.shadowIndirectGPUBuffer;
-                if (!culledGPU || !indirectGPU || (foliageType.shadowMergedSubMeshes.length === 0 && foliageType.subMeshes.length === 0)) continue;
+                if (!culledGPU || !indirectGPU || foliageType.shadowMergedSubMeshes.length === 0) continue;
 
                 let item = this.#validTypesShadow[validCount];
                 if (!item) {
@@ -258,34 +258,18 @@ class FoliageRenderer {
             const shadowSubMeshes = foliageType.shadowMergedSubMeshes;
             const shadowCount = shadowSubMeshes.length;
 
-            if (shadowCount > 0) {
-                for (let s = 0; s < shadowCount; s++) {
-                    const shadowSub = shadowSubMeshes[s];
-                    const lodIdx = shadowSub.lodIndex;
+            for (let s = 0; s < shadowCount; s++) {
+                const shadowSub = shadowSubMeshes[s];
+                const lodIdx = shadowSub.lodIndex;
 
-                    if (num3DLODs > 1) {
-                        if (isFarCascade && lodIdx !== maxShadowLOD) continue;
-                        if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
-                    }
+                if (num3DLODs > 1) {
+                    if (isFarCascade && lodIdx !== maxShadowLOD) continue;
+                    if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
+                }
 
-                    const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
-                    const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
-                    this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
-                }
-            } else {
-                const subMeshes = foliageType.subMeshes;
-                const subCount = subMeshes.length;
-                for (let s = 0; s < subCount; s++) {
-                    const sub = subMeshes[s];
-                    if (!sub.canRenderInPass('shadow') || sub.isImpostor) continue;
-                    if (num3DLODs > 1) {
-                        if (isFarCascade && sub.lodIndex !== maxShadowLOD) continue;
-                        if (!isFarCascade && sub.lodIndex !== 0 && sub.lodIndex !== maxShadowLOD) continue;
-                    }
-                    const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
-                    const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
-                    this.#drawSubMesh(bundleEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadowOpaque', instOffset, indOffset);
-                }
+                const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
+                const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
+                this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
             }
         }
 
