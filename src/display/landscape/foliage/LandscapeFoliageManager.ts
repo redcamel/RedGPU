@@ -78,10 +78,6 @@ class LandscapeFoliageManager {
         }
     }
 
-    get types(): readonly FoliageType[] {
-        return this.#typeList;
-    }
-
     get megaBuffer(): FoliageMegaBuffer {
         return this.#megaBuffer;
     }
@@ -149,6 +145,13 @@ class LandscapeFoliageManager {
     }
 
     get typeList(): readonly FoliageType[] {
+        return this.#typeList;
+    }
+
+    /**
+     * @deprecated Use `typeList` instead.
+     */
+    get types(): readonly FoliageType[] {
         return this.#typeList;
     }
 

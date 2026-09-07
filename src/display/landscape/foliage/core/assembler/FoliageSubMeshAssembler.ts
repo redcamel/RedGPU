@@ -168,8 +168,9 @@ class FoliageSubMeshAssembler {
         const boundingRadius = Math.sqrt(maxDistSq);
 
         let finalBottomOffset = minOffset;
-        if (options.groundOffset !== undefined) {
-            finalBottomOffset = options.groundOffset;
+        const userOffset = options.bottomOffset ?? options.groundOffset;
+        if (userOffset !== undefined) {
+            finalBottomOffset = userOffset;
         } else if (boundingRadius > 0) {
             finalBottomOffset = Math.max(minOffset, Math.min(boundingRadius * 0.025, 0.35));
         }
