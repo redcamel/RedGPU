@@ -40,7 +40,7 @@ RedGPU.init(
         let currentSkybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, currentHdr.luminance);
         view.skybox = currentSkybox;
 
-        view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext)
+        // view.skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext)
 
         // 2. Directional Light 및 Shadow 설정
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -272,7 +272,7 @@ RedGPU.init(
 
                 const globalStats = {
                     get totalTypes() {
-                        return foliageManager.types.length;
+                        return foliageManager.typeList.length;
                     },
                     get totalInstances() {
                         return foliageManager.megaBuffer?.totalActiveInstances ?? 0;
@@ -289,7 +289,7 @@ RedGPU.init(
 
                 const createdTypeFolders = new Set();
                 const updateFoliageTypeGUI = () => {
-                    const types = foliageManager.types;
+                    const types = foliageManager.typeList;
                     for (let i = 0; i < types.length; i++) {
                         const type = types[i];
                         const typeName = type.name;
@@ -313,11 +313,11 @@ RedGPU.init(
                             },
                             label: 'Max Shadow Cascade'
                         });
-                        typeFolder.addBinding(type, 'groundOffset', {
+                        typeFolder.addBinding(type, 'bottomOffset', {
                             min: -5.0,
                             max: 5.0,
                             step: 0.05,
-                            label: 'Ground Offset'
+                            label: 'Bottom Offset'
                         });
                         typeFolder.addBinding(type, 'cullingDistance', {
                             min: 200,
