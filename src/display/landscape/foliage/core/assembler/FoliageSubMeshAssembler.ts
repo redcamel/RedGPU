@@ -97,13 +97,16 @@ class FoliageSubMeshAssembler {
             const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
             const startSubOffset = subList.length;
 
+            const lodReceiveShadow = lodCfg.receiveShadow !== false;
+
             const assembled = FoliageSubMeshAssembler.#assembleMeshList(
                 redGPUContext,
                 lodMeshes,
                 l,
                 options,
                 subMeshBindGroupLayout,
-                subMeshUniformCache
+                subMeshUniformCache,
+                lodReceiveShadow
             );
 
             const assembledSubMeshes = assembled.subMeshes;
@@ -124,6 +127,7 @@ class FoliageSubMeshAssembler {
                 lodDistance: switchDist,
                 subMeshOffset: startSubOffset,
                 subMeshCount: subCountForThisLOD,
+                receiveShadow: lodReceiveShadow,
             });
         }
 
@@ -278,7 +282,7 @@ class FoliageSubMeshAssembler {
             impostorLODIndex,
             true,
             bbBottomOffset,
-            options.receiveShadow !== false,
+            false,
             options.isFoliage !== false,
             subMeshUniformCache
         );
@@ -289,6 +293,7 @@ class FoliageSubMeshAssembler {
             lodDistance: 1000000.0,
             subMeshOffset: bbStartOffset,
             subMeshCount: 1,
+            receiveShadow: false,
         });
     }
 
@@ -436,7 +441,8 @@ class FoliageSubMeshAssembler {
         lodIndex: number,
         options: FoliageTypeOptions,
         subMeshBindGroupLayout: GPUBindGroupLayout,
-        subMeshUniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>
+        subMeshUniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>,
+        lodReceiveShadow: boolean = true
     ): {
         subMeshes: FoliageSubMesh[];
         shadowMergedSubMesh: FoliageShadowMergedSubMesh | null;
@@ -711,7 +717,7 @@ class FoliageSubMeshAssembler {
                 lodIndex,
                 false,
                 0,
-                options.receiveShadow !== false,
+                lodReceiveShadow,
                 options.isFoliage !== false,
                 subMeshUniformCache
             );

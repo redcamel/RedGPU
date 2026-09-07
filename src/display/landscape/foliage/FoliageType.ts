@@ -15,6 +15,8 @@ export interface FoliageLODConfig {
     mesh: Mesh | Mesh[];
 
     lodDistance?: number;
+
+    receiveShadow?: boolean;
 }
 
 export interface FoliageLODInfo {
@@ -22,6 +24,7 @@ export interface FoliageLODInfo {
     lodDistance: number;
     subMeshOffset: number;
     subMeshCount: number;
+    receiveShadow?: boolean;
 }
 
 export interface FoliageTypeOptions {
@@ -48,10 +51,6 @@ export interface FoliageTypeOptions {
 
     castShadow?: boolean;
 
-
-    receiveShadow?: boolean;
-
-
     maxShadowCascadeIndex?: number;
 }
 
@@ -75,7 +74,6 @@ class FoliageType {
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #castShadow: boolean = true;
-    #receiveShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
     #useImpostor: boolean = true;
     #isFoliage: boolean = true;
@@ -96,7 +94,6 @@ class FoliageType {
         this.#options = options;
         this.#onDirty = onDirty;
         this.#castShadow = options.castShadow !== false;
-        this.#receiveShadow = options.receiveShadow !== false;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
@@ -128,7 +125,6 @@ class FoliageType {
             useDepthPrepass: this.#useDepthPrepass,
             bottomOffset: options.bottomOffset,
             castShadow: this.#castShadow,
-            receiveShadow: this.#receiveShadow,
             maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
         });
 
@@ -306,24 +302,30 @@ class FoliageType {
     }
 
 
-    get receiveShadow(): boolean {
-        return this.#receiveShadow;
+    getLODReceiveShadow(lodIndex: number): boolean {
+        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return false;
+        return this.#lodInfoList[lodIndex].receiveShadow !== false;
     }
 
-
-    set receiveShadow(value: boolean) {
+    setLODReceiveShadow(lodIndex: number, value: boolean): void {
+        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
         const boolVal = !!value;
-        if (this.#receiveShadow !== boolVal) {
-            this.#receiveShadow = boolVal;
-            const gpuDevice = this.#redGPUContext.gpuDevice;
-            if (gpuDevice) {
-                const subMeshes = this.#subMeshes;
-                const count = subMeshes.length;
-                for (let i = 0; i < count; i++) {
+        const lodInfo = this.#lodInfoList[lodIndex];
+        if (lodInfo.receiveShadow === boolVal) return;
+
+        (lodInfo as any).receiveShadow = boolVal;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            const subMeshes = this.#subMeshes;
+            const count = subMeshes.length;
+            for (let i = 0; i < count; i++) {
+                if (subMeshes[i].lodIndex === lodIndex) {
                     subMeshes[i].updateReceiveShadow(gpuDevice, boolVal);
                 }
             }
         }
+        this.#onDirty?.();
     }
 
 
