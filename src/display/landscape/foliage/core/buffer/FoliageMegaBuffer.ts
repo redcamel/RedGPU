@@ -85,7 +85,6 @@ class FoliageMegaBuffer {
 
     #indirectResetTemplate: Uint32Array;
     #shadowIndirectResetTemplate: Uint32Array;
-
     #dirtyTypeParams: boolean = true;
 
     #allocations: Map<string, FoliageTypeAllocation> = new Map();
@@ -300,10 +299,6 @@ class FoliageMegaBuffer {
         return allocation;
     }
 
-    getAllocation(name: string): FoliageTypeAllocation | undefined {
-        return this.#allocations.get(name);
-    }
-
     writeInstancesData(allocation: FoliageTypeAllocation, data: Float32Array, count: number): void {
         allocation.activeCount = count;
         if (count <= 0) return;
@@ -357,21 +352,6 @@ class FoliageMegaBuffer {
         u32[offset + 5] = FoliageMegaBuffer.#pack2x16snorm(rotZ, rotW);
         u32[offset + 6] = FoliageMegaBuffer.#pack2x16float(scaleX, scaleZ);
         f32[offset + 7] = allocation.typeId;
-    }
-
-    uploadAllocationToGPU(allocation: FoliageTypeAllocation): void {
-        if (!this.#rawGPUBuffer || allocation.activeCount <= 0) return;
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const byteOffset = allocation.rawBaseOffset * FoliageMegaBuffer.#STRIDE_BYTES;
-        const byteCount = allocation.activeCount * FoliageMegaBuffer.#STRIDE_BYTES;
-
-        gpuDevice.queue.writeBuffer(
-            this.#rawGPUBuffer,
-            byteOffset,
-            this.#cpuRawDataBuffer.buffer,
-            this.#cpuRawDataBuffer.byteOffset + byteOffset,
-            byteCount
-        );
     }
 
     uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
@@ -671,16 +651,6 @@ class FoliageMegaBuffer {
         this.#cachedHZBView = targetHZBView;
         this.#cachedHZBSampler = targetHZBSampler;
         return this.#unifiedCullingBindGroup;
-    }
-
-    getOrCreateGlobalCullingBindGroup(
-        layout: GPUBindGroupLayout,
-        vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler,
-        hzbTextureView?: GPUTextureView,
-        hzbSampler?: GPUSampler
-    ): GPUBindGroup | null {
-        return this.getOrCreateUnifiedCullingBindGroup(layout, vhtTextureView, vhtSampler, hzbTextureView, hzbSampler);
     }
 
     destroy(): void {

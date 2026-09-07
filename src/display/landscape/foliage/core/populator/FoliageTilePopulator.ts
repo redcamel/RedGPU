@@ -50,120 +50,75 @@ class FoliageTilePopulator {
 
         const megaBuffer = foliageType.megaBuffer;
         const allocation = foliageType.allocation;
+        if (!megaBuffer || !allocation) return 0;
 
-        if (megaBuffer && allocation) {
-            const f32 = megaBuffer.cpuRawDataBuffer;
-            const u32 = megaBuffer.cpuRawDataUint32;
-            const baseFloat = (allocation.rawBaseOffset + startIdx) * 8;
-            const typeId = allocation.typeId;
+        const f32 = megaBuffer.cpuRawDataBuffer;
+        const u32 = megaBuffer.cpuRawDataUint32;
+        const baseFloat = (allocation.rawBaseOffset + startIdx) * 8;
+        const typeId = allocation.typeId;
 
-            for (let i = 0; i < actualCount; i++) {
-                const offset = baseFloat + i * 8;
+        for (let i = 0; i < actualCount; i++) {
+            const offset = baseFloat + i * 8;
 
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rX = (seed >>> 0) / 4294967296.0;
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rX = (seed >>> 0) / 4294967296.0;
 
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rZ = (seed >>> 0) / 4294967296.0;
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rZ = (seed >>> 0) / 4294967296.0;
 
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rScale = (seed >>> 0) / 4294967296.0;
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rScale = (seed >>> 0) / 4294967296.0;
 
-                const posX = minX + rX * rangeX;
-                const posZ = minZ + rZ * rangeZ;
+            const posX = minX + rX * rangeX;
+            const posZ = minZ + rZ * rangeZ;
 
-                const scaleX = minScale[0] + rScale * scaleDiffX;
-                const scaleY = minScale[1] + rScale * scaleDiffY;
-                const scaleZ = isUniformXZ ? scaleX : (minScale[2] + rScale * scaleDiffZ);
+            const scaleX = minScale[0] + rScale * scaleDiffX;
+            const scaleY = minScale[1] + rScale * scaleDiffY;
+            const scaleZ = isUniformXZ ? scaleX : (minScale[2] + rScale * scaleDiffZ);
 
-                let posY = 0.0;
-                if (hasGetHeight) {
-                    posY = landscape.getHeightAt(posX, posZ);
-                }
-
-                f32[offset] = posX;
-                f32[offset + 1] = posY;
-                f32[offset + 2] = posZ;
-                f32[offset + 3] = scaleY;
-
-                if (randomRotationY) {
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rAngle = (seed >>> 0) / 4294967296.0;
-                    const angle = rAngle * (Math.PI * 2);
-                    const halfAngle = angle * 0.5;
-                    const rotY = Math.sin(halfAngle);
-                    const rotW = Math.cos(halfAngle);
-
-                    const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
-                    const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
-
-                    u32[offset + 4] = (iy & 0xFFFF) << 16;
-                    u32[offset + 5] = (iw & 0xFFFF) << 16;
-                } else {
-                    u32[offset + 4] = 0;
-                    u32[offset + 5] = 32767 << 16;
-                }
-
-                if (isUniformXZ) {
-                    u32[offset + 6] = FoliageTilePopulator.#fastPackUniformScale(scaleX);
-                } else {
-                    u32[offset + 6] = FoliageTilePopulator.#fastPack2x16float(scaleX, scaleZ);
-                }
-
-                f32[offset + 7] = typeId;
+            let posY = 0.0;
+            if (hasGetHeight) {
+                posY = landscape.getHeightAt(posX, posZ);
             }
-        } else {
-            for (let i = 0; i < actualCount; i++) {
-                const idx = startIdx + i;
 
+            f32[offset] = posX;
+            f32[offset + 1] = posY;
+            f32[offset + 2] = posZ;
+            f32[offset + 3] = scaleY;
+
+            if (randomRotationY) {
                 seed ^= seed << 13;
                 seed ^= seed >>> 17;
                 seed ^= seed << 5;
-                const rX = (seed >>> 0) / 4294967296.0;
+                const rAngle = (seed >>> 0) / 4294967296.0;
+                const angle = rAngle * (Math.PI * 2);
+                const halfAngle = angle * 0.5;
+                const rotY = Math.sin(halfAngle);
+                const rotW = Math.cos(halfAngle);
 
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rZ = (seed >>> 0) / 4294967296.0;
+                const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
+                const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
 
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rScale = (seed >>> 0) / 4294967296.0;
-
-                const posX = minX + rX * rangeX;
-                const posZ = minZ + rZ * rangeZ;
-
-                const scaleX = minScale[0] + rScale * scaleDiffX;
-                const scaleY = minScale[1] + rScale * scaleDiffY;
-                const scaleZ = minScale[2] + rScale * scaleDiffZ;
-
-                let posY = 0.0;
-                if (hasGetHeight) {
-                    posY = landscape.getHeightAt(posX, posZ);
-                }
-
-                let rotX = 0, rotY = 0, rotZ = 0, rotW = 1;
-                if (randomRotationY) {
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rAngle = (seed >>> 0) / 4294967296.0;
-                    const angle = rAngle * Math.PI * 2;
-                    rotY = Math.sin(angle * 0.5);
-                    rotW = Math.cos(angle * 0.5);
-                }
-
-                foliageType.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0);
+                u32[offset + 4] = (iy & 0xFFFF) << 16;
+                u32[offset + 5] = (iw & 0xFFFF) << 16;
+            } else {
+                u32[offset + 4] = 0;
+                u32[offset + 5] = 32767 << 16;
             }
+
+            if (isUniformXZ) {
+                u32[offset + 6] = FoliageTilePopulator.#fastPackUniformScale(scaleX);
+            } else {
+                u32[offset + 6] = FoliageTilePopulator.#fastPack2x16float(scaleX, scaleZ);
+            }
+
+            f32[offset + 7] = typeId;
         }
 
         foliageType.uploadRangeToGPU(startIdx, actualCount);
