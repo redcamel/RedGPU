@@ -51,6 +51,7 @@ import getViewNormalFromGNormalBuffer_wgsl from './shader/math/reconstruct/getVi
 import getShadowCoord_wgsl from './shader/shadow/getShadowCoord.wgsl';
 import getShadowClipPosition_wgsl from './shader/shadow/getShadowClipPosition.wgsl';
 import getDirectionalShadowVisibility_wgsl from './shader/shadow/getDirectionalShadowVisibility.wgsl';
+import getDirectionalShadowVisibilityFoliage_wgsl from './shader/shadow/getDirectionalShadowVisibilityFoliage.wgsl';
 import getMotionVector_wgsl from './shader/math/getMotionVector.wgsl';
 import getBillboardMatrix_wgsl from './shader/math/billboard/getBillboardMatrix.wgsl';
 import getBillboardResult_wgsl from './shader/math/billboard/getBillboardResult.wgsl';
@@ -1151,6 +1152,7 @@ export namespace ShadowLibrary {
      * ```
      */
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
+    export const getDirectionalShadowVisibilityFoliage = getDirectionalShadowVisibilityFoliage_wgsl;
 }
 
 export namespace ColorLibrary {

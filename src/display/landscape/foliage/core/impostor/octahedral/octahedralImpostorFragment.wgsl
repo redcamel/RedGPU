@@ -6,7 +6,7 @@
 #redgpu_include math.INV_PI;
 #redgpu_include math.PI;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
-#redgpu_include shadow.getDirectionalShadowVisibility;
+#redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -288,7 +288,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         
         if (distSq < maxCSMDist * maxCSMDist) {
-            let rawVis = getDirectionalShadowVisibility(
+            let rawVis = getDirectionalShadowVisibilityFoliage(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 inputData.vertexPosition,

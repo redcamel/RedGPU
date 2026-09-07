@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getDirectionalShadowVisibility;
+#redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 #redgpu_include color.getTintBlendMode;
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
@@ -375,7 +376,11 @@ fn main(inputData:InputData) -> OutputFragment {
         let rawViewDist = distance(systemUniforms.camera.cameraPosition, input_vertexPosition);
 
         if (rawViewDist < maxCSMDist) {
-            let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+            #redgpu_if isFoliage
+                let rawVis = getDirectionalShadowVisibilityFoliage(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+            #redgpu_else
+                let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+            #redgpu_endIf
             visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
         }
     }
