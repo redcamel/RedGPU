@@ -270,15 +270,6 @@ RedGPU.init(
 
                 const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
-                const passConfigFolder = folderFoliage.addFolder({title: '⚡ Pass Pipeline Settings', expanded: true});
-                const prepassBinding = passConfigFolder.addBinding(foliageManager, 'useDepthPrepass', {label: 'Depth Prepass'});
-                passConfigFolder.addButton({
-                    title: '⚡ Toggle Depth Prepass'
-                }).on('click', () => {
-                    foliageManager.useDepthPrepass = !foliageManager.useDepthPrepass;
-                    prepassBinding.refresh();
-                    console.log(`[Foliage] useDepthPrepass toggled to: ${foliageManager.useDepthPrepass}`);
-                });
 
                 const globalStats = {
                     get totalTypes() {
