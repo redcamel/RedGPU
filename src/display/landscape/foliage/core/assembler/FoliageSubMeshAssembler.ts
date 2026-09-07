@@ -217,7 +217,8 @@ class FoliageSubMeshAssembler {
             impostorLODIndex,
             true,
             bbBottomOffset,
-            options.receiveShadow !== false
+            options.receiveShadow !== false,
+            options.isFoliage !== false
         );
         subList.push(bbSubMesh);
 
@@ -643,7 +644,8 @@ class FoliageSubMeshAssembler {
                 lodIndex,
                 false,
                 0,
-                options.receiveShadow !== false
+                options.receiveShadow !== false,
+                options.isFoliage !== false
             );
 
             resultSubMeshes.push(combinedSubMesh);
@@ -732,7 +734,8 @@ class FoliageSubMeshAssembler {
         lodIndex: number = 0,
         isImpostorOverride: boolean = false,
         bottomOffset: number = 0,
-        receiveShadow: boolean = true
+        receiveShadow: boolean = true,
+        isFoliage: boolean = true
     ): FoliageSubMesh {
         const isIndexed = !!geom.indexBuffer;
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
@@ -778,7 +781,7 @@ class FoliageSubMeshAssembler {
         const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        const isDepthPrepass = !isImpostor && (hasBaseColorTexture || isMasked);
+        const isDepthPrepass = isFoliage && !isImpostor && (hasBaseColorTexture || isMasked);
         const isMainOpaqueOrMasked = true;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 

@@ -109,6 +109,7 @@ class FoliageRenderer {
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesMain[t];
             const foliageType = item.type!;
+            if (!foliageType.isFoliage) continue;
             const culledGPU = item.culledGPU!;
             const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.depthPrepassSubMeshes;
@@ -126,10 +127,12 @@ class FoliageRenderer {
             const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.mainSubMeshes;
             const subCount = subMeshes.length;
+            const isFoliage = foliageType.isFoliage;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, sub.mainDepthMode);
+                const depthMode = isFoliage ? sub.mainDepthMode : 'normal';
+                this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
         }
     }

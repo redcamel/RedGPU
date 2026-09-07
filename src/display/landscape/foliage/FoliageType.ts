@@ -82,6 +82,7 @@ class FoliageType {
     #receiveShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
     #useImpostor: boolean = true;
+    #isFoliage: boolean = true;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -108,6 +109,7 @@ class FoliageType {
 
         const useImpostor = options.useImpostor !== false;
         this.#useImpostor = useImpostor;
+        this.#isFoliage = options.isFoliage !== false;
         this.#cullingDistance = options.cullingDistance ?? 2000.0;
         this.#fadeStartDistance = options.fadeStartDistance ?? 1500.0;
 
@@ -124,7 +126,7 @@ class FoliageType {
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
-            isFoliage: options.isFoliage !== false,
+            isFoliage: this.#isFoliage,
             bottomOffset: options.bottomOffset ?? options.groundOffset,
             groundOffset: options.bottomOffset ?? options.groundOffset,
             castShadow: this.#castShadow,
@@ -364,6 +366,19 @@ class FoliageType {
         }
     }
 
+    get isFoliage(): boolean {
+        return this.#isFoliage;
+    }
+
+    set isFoliage(value: boolean) {
+        const boolVal = !!value;
+        if (this.#isFoliage !== boolVal) {
+            this.#isFoliage = boolVal;
+            this.#updatePassBuckets();
+            this.#onDirty?.();
+        }
+    }
+
 
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
@@ -463,6 +478,7 @@ class FoliageType {
 
     #updatePassBuckets(): void {
         const useImp = this.#useImpostor;
+        const isFoliage = this.#isFoliage;
         const subList = this.#subMeshes;
         const count = subList.length;
 
@@ -472,7 +488,7 @@ class FoliageType {
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
             if (!useImp && sub.isImpostor) continue;
-            if (sub.canRenderInPass('depthPrepass')) {
+            if (isFoliage && sub.canRenderInPass('depthPrepass')) {
                 prepassList.push(sub);
             }
             if (sub.canRenderInPass('main')) {
