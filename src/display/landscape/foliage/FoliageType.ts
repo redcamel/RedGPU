@@ -162,12 +162,6 @@ class FoliageType {
                 this.#shadowMergedSubMeshes,
                 this.#lodInfoList
             );
-            this.#megaBuffer.registerSubMeshesToTemplate(
-                this.#subMeshes,
-                this.#allocation.indirectBaseOffset,
-                this.#shadowMergedSubMeshes,
-                this.#lodInfoList
-            );
             const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
