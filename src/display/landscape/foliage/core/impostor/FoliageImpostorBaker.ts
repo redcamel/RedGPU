@@ -10,18 +10,12 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 
 export interface FoliageBakeResult {
     baseColorTexture: DirectTexture;
-    texture: DirectTexture; 
     normalTexture: DirectTexture;
     packedORMTexture: DirectTexture;
-    ormTexture: DirectTexture; 
     width: number;
     height: number;
     depth: number;
     bottomOffset: number;
-
-    tileUVScale: [number, number];
-
-    tileUVOffset: [number, number];
 }
 
 class FoliageImpostorBaker {
@@ -630,16 +624,12 @@ class FoliageImpostorBaker {
 
         return {
             baseColorTexture: directTexture,
-            texture: directTexture,
             normalTexture: directNormalTexture,
             packedORMTexture: directORMTexture,
-            ormTexture: directORMTexture,
             width: actualQuadWidth,
             height: actualQuadHeight,
             depth: actualQuadWidth,
             bottomOffset: actualBottomOffset,
-            tileUVScale: [1.0, 1.0] as [number, number],
-            tileUVOffset: [0.0, 0.0] as [number, number],
         };
 
     }
