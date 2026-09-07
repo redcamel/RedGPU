@@ -80,50 +80,29 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(7) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(8) var vhtSampler: sampler;
 
-// 🌟 [워크그룹 아토믹 집계용 온칩 공유 메모리 (총 0.48 KB)]
-var<workgroup> wgMainCounts: array<atomic<u32>, 8>;
-var<workgroup> wgMainLocalSlots: array<atomic<u32>, 8>;
-var<workgroup> wgMainGlobalOffsets: array<u32, 8>;
-
-var<workgroup> wgShadowCounts: array<atomic<u32>, 32>;
-var<workgroup> wgShadowLocalSlots: array<atomic<u32>, 32>;
-var<workgroup> wgShadowGlobalOffsets: array<u32, 32>;
-
 @compute @workgroup_size(64)
 fn main(
-    @builtin(global_invocation_id) global_id: vec3<u32>,
-    @builtin(local_invocation_id) local_id: vec3<u32>
+    @builtin(global_invocation_id) global_id: vec3<u32>
 ) {
-    let localIdx = local_id.x;
-
-    // 1단계: 온칩 카운터 초기화
-    if (localIdx < 8u) {
-        atomicStore(&wgMainCounts[localIdx], 0u);
-        atomicStore(&wgMainLocalSlots[localIdx], 0u);
-    }
-    if (localIdx < 32u) {
-        atomicStore(&wgShadowCounts[localIdx], 0u);
-        atomicStore(&wgShadowLocalSlots[localIdx], 0u);
-    }
-    workgroupBarrier();
-
     let idx = global_id.x;
-    var isValid = (idx < globalUniforms.totalInstanceCount);
+    if (idx >= globalUniforms.totalInstanceCount) {
+        return;
+    }
 
-    var instance = rawInstanceBuffer[min(idx, globalUniforms.totalInstanceCount - 1u)];
+    var instance = rawInstanceBuffer[idx];
     let typeIdx = u32(instance.fadeOrType);
     if (typeIdx >= 64u) {
-        isValid = false;
+        return;
     }
 
-    var typeInfo = typeParams[min(typeIdx, 63u)];
+    let typeInfo = typeParams[typeIdx];
     if (typeInfo.activeCount == 0u || idx < typeInfo.rawBaseOffset) {
-        isValid = false;
+        return;
     }
 
     let localSlotIdx = idx - typeInfo.rawBaseOffset;
     if (localSlotIdx >= typeInfo.activeCount) {
-        isValid = false;
+        return;
     }
 
     let camPos = globalUniforms.cameraPosition;
@@ -132,233 +111,182 @@ fn main(
     let horizontalDistSq = dx * dx + dz * dz;
 
     let cullingDist = typeInfo.cullingDistance;
-    let cullingDistSq = cullingDist * cullingDist;
+    let effectiveCullingDistSq = cullingDist * cullingDist;
+
+    // 수평 거리 1차 조기 탈출
+    if (horizontalDistSq >= effectiveCullingDistSq) {
+        return;
+    }
+
+    let scaleXZ = unpack2x16float(instance.packedScaleXZ);
+    let scaleX = scaleXZ.x;
+    let scaleZ = scaleXZ.y;
+    let scaleY = instance.scaleY;
+
+    var realY = instance.posY - typeInfo.bottomOffset;
+    if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+        let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
+        let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
+        if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
+            let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
+            let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
+            realY = terrainHeight - typeInfo.bottomOffset;
+        }
+    }
+
+    let dy = realY - camPos.y;
+    let distSq = horizontalDistSq + dy * dy;
+    if (distSq >= effectiveCullingDistSq) {
+        return;
+    }
+
+    let dist = sqrt(distSq);
+    let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
+
+    let maxScale = max(max(scaleX, scaleY), scaleZ);
+    let scaledRadius = typeInfo.boundingRadius * maxScale;
+    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
+    let r = -scaledRadius;
 
     let numLODs = typeInfo.lodCount;
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
-    let effectiveCullingDistSq = cullingDistSq;
 
-    // 1차 거리 컬링 (카메라로부터 xz 수평거리 기반)
-    let isVisibleRange = isValid && (horizontalDistSq < effectiveCullingDistSq);
+    // 1. 메인 패스 절두체 컬링 & LOD 기록
+    var inMainFrustum =
+        dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[2]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
 
-    var realY = instance.posY - typeInfo.bottomOffset;
-    var distSq = horizontalDistSq;
-    var effectiveDist: f32 = 0.0;
-    var scaledRadius: f32 = 0.0;
-    var spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
-    var r: f32 = 0.0;
-
-    var mainPassedMask: u32 = 0u;
-    var mainAlpha: array<f32, 8>;
-
-    var shadowPassedMask: u32 = 0u;
-    var shadowTargetLOD: array<u32, 4>;
-
-    let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
-    let maxAllowedCascade = select(0u, min(activeCascades, typeInfo.maxShadowCascadeIndex + 1u), typeInfo.maxShadowCascadeIndex <= 3u);
-
-    if (isVisibleRange) {
-        let scaleXZ = unpack2x16float(instance.packedScaleXZ);
-        let scaleX = scaleXZ.x;
-        let scaleZ = scaleXZ.y;
-        let scaleY = instance.scaleY;
-
-        
-        if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
-            let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
-            let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
-            if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
-                let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-                let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
-                realY = terrainHeight - typeInfo.bottomOffset;
-            }
-        }
-
-        let dy = realY - camPos.y;
-        distSq = horizontalDistSq + dy * dy;
-        let dist = sqrt(distSq);
-        effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
-
-        let maxScale = max(max(scaleX, scaleY), scaleZ);
-        scaledRadius = typeInfo.boundingRadius * maxScale;
-        spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
-        r = -scaledRadius;
-
-        var inMainFrustum = false;
-        
-        if (distSq < effectiveCullingDistSq) {
-            inMainFrustum =
-                dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
-                dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
-                dot(spherePos, globalUniforms.mainFrustumPlanes[2]) >= r &&
-                dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
-                dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
-                dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
-
-            if (inMainFrustum) {
-                let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
-                let screenPixelDiameter = (scaledRadius * vpHeight) / max(effectiveDist, 0.001);
-                if (screenPixelDiameter < 2.0) {
-                    inMainFrustum = false;
-                }
-            }
-        }
-
-        // 메인 패스 LOD 판정 및 온칩 로컬 카운트 집계
-        if (inMainFrustum) {
-            var globalFade: f32 = 1.0;
-            let fadeStartDist = typeInfo.fadeStartDistance;
-            if (dist > fadeStartDist) {
-                globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
-            }
-
-            if (numLODs <= 1u) {
-                let finalAlpha = globalFade;
-                if (finalAlpha > 0.001) {
-                    mainPassedMask |= 1u;
-                    mainAlpha[0] = finalAlpha;
-                    atomicAdd(&wgMainCounts[0], 1u);
-                }
-            } else {
-                for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                    let lodInfo = typeInfo.lods[l];
-                    let isLastLOD = (l == numLODs - 1u);
-
-                    if (effectiveDist >= lodInfo.enterStart && (isLastLOD || effectiveDist <= lodInfo.exitEnd)) {
-                        var alpha: f32 = 1.0;
-                        if (l > 0u && effectiveDist < lodInfo.enterEnd) {
-                            alpha = clamp((effectiveDist - lodInfo.enterStart) * lodInfo.invEnterRange, 0.0, 1.0);
-                        } else if (!isLastLOD && effectiveDist > lodInfo.exitStart) {
-                            alpha = clamp((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange, 0.0, 1.0);
-                        }
-
-                        let finalAlpha = alpha * globalFade;
-                        if (finalAlpha > 0.001) {
-                            mainPassedMask |= (1u << l);
-                            mainAlpha[l] = finalAlpha;
-                            atomicAdd(&wgMainCounts[l], 1u);
-                        }
-
-                        if (alpha >= 0.999 && !isLastLOD && effectiveDist < lodInfo.exitStart) {
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        // 섀도우 패스 캐스케이드 판정 및 온칩 로컬 카운트 집계
-        for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
-            if (globalUniforms.cascades[c].hasShadow == 0u) {
-                continue;
-            }
-
-            let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
-            let isOverlapCascade = (c < activeCascades - 1u); 
-            let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
-            let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-            let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
-
-            if (distSq < shadowEffectiveDistSq && distSq < effectiveCullingDistSq) {
-                let cascadeInfo = globalUniforms.cascades[c];
-                let inShadowFrustum =
-                    dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
-
-                if (inShadowFrustum) {
-                    var targetShadowLOD: u32 = 0u;
-                    if (numLODs > 1u) {
-                        let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
-                        let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
-
-                        if (c == 0u && effectiveDist <= lod0Dist) {
-                            targetShadowLOD = 0u;
-                        } else {
-                            targetShadowLOD = maxShadowLOD;
-                        }
-                    }
-
-                    shadowPassedMask |= (1u << c);
-                    shadowTargetLOD[c] = targetShadowLOD;
-                    let shadowSlotKey = c * 8u + targetShadowLOD;
-                    atomicAdd(&wgShadowCounts[shadowSlotKey], 1u);
-                }
-            }
+    if (inMainFrustum) {
+        let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
+        let screenPixelDiameter = (scaledRadius * vpHeight) / max(effectiveDist, 0.001);
+        if (screenPixelDiameter < 2.0) {
+            inMainFrustum = false;
         }
     }
 
-    // 2단계: 워크그룹 로컬 집계 완료 동기화
-    workgroupBarrier();
-
-    // 3단계: 워크그룹 대표 스레드들의 글로벌 VRAM 아토믹 1회 일괄 호출
-    if (localIdx < numLODs) {
-        let count = atomicLoad(&wgMainCounts[localIdx]);
-        if (count > 0u) {
-            let lodInfo = typeInfo.lods[localIdx];
-            let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-            let globalSlot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, count);
-            wgMainGlobalOffsets[localIdx] = globalSlot;
-
-            let numSubs = lodInfo.subMeshCount;
-            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, count);
-            }
+    if (inMainFrustum) {
+        var globalFade: f32 = 1.0;
+        let fadeStartDist = typeInfo.fadeStartDistance;
+        if (dist > fadeStartDist) {
+            globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
         }
-    }
 
-    if (localIdx < 32u) {
-        let c = localIdx / 8u;
-        let l = localIdx % 8u;
-        let count = atomicLoad(&wgShadowCounts[localIdx]);
-        if (count > 0u && c < activeCascades && globalUniforms.cascades[c].hasShadow != 0u && l < numLODs) {
-            let lodInfo = typeInfo.lods[l];
-            let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-            let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-            let globalSlot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, count);
-            wgShadowGlobalOffsets[localIdx] = globalSlot;
-        }
-    }
+        if (numLODs <= 1u) {
+            let finalAlpha = globalFade;
+            if (finalAlpha > 0.001) {
+                let lodInfo = typeInfo.lods[0];
+                let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
 
-    // 4단계: 글로벌 오프셋 획득 완료 동기화
-    workgroupBarrier();
-
-    // 5단계: 개별 스레드의 인스턴스 버퍼 최종 기록
-    if (mainPassedMask != 0u) {
-        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-            if ((mainPassedMask & (1u << l)) != 0u) {
-                let localSlot = atomicAdd(&wgMainLocalSlots[l], 1u);
-                let globalOffset = wgMainGlobalOffsets[l];
-                let slot = globalOffset + localSlot;
+                let numSubs = lodInfo.subMeshCount;
+                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                    atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                }
 
                 var culledInst = instance;
                 culledInst.posY = realY;
-                culledInst.fadeOrType = mainAlpha[l];
+                culledInst.fadeOrType = finalAlpha;
 
-                let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                let outIdx = typeInfo.culledBaseOffset + slot;
                 mainCulledInstanceBuffer[outIdx] = culledInst;
+            }
+        } else {
+            for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                let lodInfo = typeInfo.lods[l];
+                let isLastLOD = (l == numLODs - 1u);
+
+                if (effectiveDist >= lodInfo.enterStart && (isLastLOD || effectiveDist <= lodInfo.exitEnd)) {
+                    var alpha: f32 = 1.0;
+                    if (l > 0u && effectiveDist < lodInfo.enterEnd) {
+                        alpha = clamp((effectiveDist - lodInfo.enterStart) * lodInfo.invEnterRange, 0.0, 1.0);
+                    } else if (!isLastLOD && effectiveDist > lodInfo.exitStart) {
+                        alpha = clamp((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange, 0.0, 1.0);
+                    }
+
+                    let finalAlpha = alpha * globalFade;
+                    if (finalAlpha > 0.001) {
+                        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                        let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+
+                        let numSubs = lodInfo.subMeshCount;
+                        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                            atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                        }
+
+                        var culledInst = instance;
+                        culledInst.posY = realY;
+                        culledInst.fadeOrType = finalAlpha;
+
+                        let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                        mainCulledInstanceBuffer[outIdx] = culledInst;
+                    }
+
+                    if (alpha >= 0.999 && !isLastLOD && effectiveDist < lodInfo.exitStart) {
+                        break;
+                    }
+                }
             }
         }
     }
 
-    if (shadowPassedMask != 0u) {
-        for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
-            if ((shadowPassedMask & (1u << c)) != 0u) {
-                let l = shadowTargetLOD[c];
-                let shadowSlotKey = c * 8u + l;
-                let localSlot = atomicAdd(&wgShadowLocalSlots[shadowSlotKey], 1u);
-                let globalOffset = wgShadowGlobalOffsets[shadowSlotKey];
-                let slot = globalOffset + localSlot;
+    // 2. 섀도우 패스 캐스케이드 컬링 & 렌더링
+    let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
+    let maxAllowedCascade = select(0u, min(activeCascades, typeInfo.maxShadowCascadeIndex + 1u), typeInfo.maxShadowCascadeIndex <= 3u);
+
+    for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
+        if (globalUniforms.cascades[c].hasShadow == 0u) {
+            continue;
+        }
+
+        let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
+        let isOverlapCascade = (c < activeCascades - 1u); 
+        let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
+        let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+        let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+
+        if (distSq < shadowEffectiveDistSq) {
+            let cascadeInfo = globalUniforms.cascades[c];
+            let inShadowFrustum =
+                dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+
+            if (inShadowFrustum) {
+                var targetShadowLOD: u32 = 0u;
+                if (numLODs > 1u) {
+                    let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
+                    let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
+
+                    if (c == 0u && effectiveDist <= lod0Dist) {
+                        targetShadowLOD = 0u;
+                    } else {
+                        targetShadowLOD = maxShadowLOD;
+                    }
+                }
+
+                let lodInfo = typeInfo.lods[targetShadowLOD];
+                let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+                let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+
+                let numSubs = lodInfo.subMeshCount;
+                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                    atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                }
 
                 var shadowInst = instance;
                 shadowInst.posY = realY;
                 shadowInst.fadeOrType = 1.0;
 
                 let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
-                let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
                 shadowCulledInstanceBuffer[outIdx] = shadowInst;
             }
         }
