@@ -27,8 +27,6 @@ export interface FoliageSubMeshInitOptions {
     isMasked?: boolean;
     mainDepthMode: FoliageDepthPassMode;
     isImpostor?: boolean;
-    impostorWidth?: number;
-    impostorHeight?: number;
     receiveShadow?: boolean;
 
     instanceBufferOffset?: number;
@@ -58,8 +56,6 @@ class FoliageSubMesh {
     readonly isMasked: boolean;
     readonly mainDepthMode: FoliageDepthPassMode;
     isImpostor: boolean;
-    impostorWidth: number;
-    impostorHeight: number;
     receiveShadow: boolean;
 
     instanceBufferOffset: number;
@@ -87,8 +83,6 @@ class FoliageSubMesh {
         this.isMasked = init.isMasked ?? true;
         this.mainDepthMode = init.mainDepthMode;
         this.isImpostor = init.isImpostor ?? false;
-        this.impostorWidth = init.impostorWidth ?? 0;
-        this.impostorHeight = init.impostorHeight ?? 0;
         this.receiveShadow = init.receiveShadow !== false;
 
         this.instanceBufferOffset = init.instanceBufferOffset ?? 0;

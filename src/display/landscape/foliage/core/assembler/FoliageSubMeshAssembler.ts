@@ -40,7 +40,6 @@ const POSITION_ONLY_STRIDE_BYTES = POSITION_ONLY_STRIDE * 4;
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
     shadowMergedSubMeshes: FoliageShadowMergedSubMesh[];
-    lod0SubMeshCount: number;
     lodInfoList: FoliageLODInfo[];
     bottomOffset: number;
     boundingRadius: number;
@@ -76,7 +75,6 @@ class FoliageSubMeshAssembler {
             return {
                 subMeshes: subList,
                 shadowMergedSubMeshes: [],
-                lod0SubMeshCount: 0,
                 lodInfoList: [],
                 bottomOffset: 0,
                 boundingRadius: 10.0
@@ -144,8 +142,6 @@ class FoliageSubMeshAssembler {
             );
         }
 
-        const lod0SubMeshCount = lodInfoList.length > 0 ? lodInfoList[0].subMeshCount : subList.length;
-
         let minOffset = 0;
         let maxDistSq = 0;
         const maxInstances = options.maxInstances ?? 50000;
@@ -199,129 +195,10 @@ class FoliageSubMeshAssembler {
         return {
             subMeshes: subList,
             shadowMergedSubMeshes,
-            lod0SubMeshCount,
             lodInfoList,
             bottomOffset: finalBottomOffset,
             boundingRadius,
         };
-    }
-
-
-    static buildShadowMergedGeometry(
-        redGPUContext: RedGPUContext,
-        subMeshesInLod: FoliageSubMesh[],
-        lodIndex: number,
-        options: FoliageTypeOptions,
-        subMeshBindGroupLayout: GPUBindGroupLayout
-    ): FoliageShadowMergedSubMesh | null {
-        if (!subMeshesInLod || subMeshesInLod.length === 0) return null;
-
-        let totalVertexCount = 0;
-        let totalIndexCount = 0;
-
-        for (let i = 0; i < subMeshesInLod.length; i++) {
-            const sub = subMeshesInLod[i];
-            if (sub.isImpostor) continue;
-            const geom = sub.geometry;
-            totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
-            totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
-        }
-
-        if (totalVertexCount === 0) return null;
-
-
-        const mergedPositions = new Float32Array(totalVertexCount * POSITION_ONLY_STRIDE);
-        const mergedIndices = new Uint32Array(totalIndexCount);
-
-        let vertexOffset = 0;
-        let indexOffset = 0;
-
-        for (let i = 0; i < subMeshesInLod.length; i++) {
-            const sub = subMeshesInLod[i];
-            if (sub.isImpostor) continue;
-            const geom = sub.geometry;
-            const srcVB = geom.vertexBuffer;
-            const srcIB = geom.indexBuffer;
-            const srcVData = srcVB?.data;
-            const srcIData = srcIB?.data;
-            const vCount = srcVB?.vertexCount ?? 0;
-            const stride = srcVB?.stride || (srcVB?.interleavedStruct?.arrayStride ? srcVB.interleavedStruct.arrayStride / 4 : 18);
-
-            if (srcVData && vCount > 0) {
-                for (let v = 0; v < vCount; v++) {
-                    const srcIdx = v * stride;
-                    const dstIdx = (vertexOffset + v) * POSITION_ONLY_STRIDE;
-                    mergedPositions[dstIdx + 0] = srcVData[srcIdx + 0];
-                    mergedPositions[dstIdx + 1] = srcVData[srcIdx + 1];
-                    mergedPositions[dstIdx + 2] = srcVData[srcIdx + 2];
-                }
-            }
-
-            if (srcIData) {
-                const iCount = srcIB.indexCount;
-                for (let idx = 0; idx < iCount; idx++) {
-                    mergedIndices[indexOffset + idx] = srcIData[idx] + vertexOffset;
-                }
-                indexOffset += iCount;
-            } else {
-                for (let idx = 0; idx < vCount; idx++) {
-                    mergedIndices[indexOffset + idx] = vertexOffset + idx;
-                }
-                indexOffset += vCount;
-            }
-
-            vertexOffset += vCount;
-        }
-
-        const seq = ++FoliageSubMeshAssembler.#bufferSeq;
-        const vKey = `FoliageShadowVB_${options.name}_LOD${lodIndex}_${seq}`;
-        const iKey = `FoliageShadowIB_${options.name}_LOD${lodIndex}_${seq}`;
-        const combinedVB = new VertexBuffer(redGPUContext, mergedPositions, POSITION_ONLY_INTERLEAVED_STRUCT, undefined, vKey);
-        const combinedIB = new IndexBuffer(redGPUContext, mergedIndices, undefined, iKey);
-        const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
-
-        const gpuDevice = redGPUContext.gpuDevice;
-        const uniformBuffer = gpuDevice.createBuffer({
-            label: `FoliageShadowSubMesh_UniformBuffer_${options.name}_LOD${lodIndex}`,
-            size: 144,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
-
-        const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
-        const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
-        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
-        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
-        uintView[32] = 0;
-        uintView[33] = 0; 
-        uintView[34] = 0;
-        uintView[35] = 0;
-
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
-
-        const vertexBindGroup = gpuDevice.createBindGroup({
-            label: `FoliageShadowSubMesh_VertexBindGroup_${options.name}_LOD${lodIndex}`,
-            layout: subMeshBindGroupLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {buffer: uniformBuffer}
-                }
-            ]
-        });
-
-        return new FoliageShadowMergedSubMesh({
-            lodIndex,
-            geometry: combinedGeom,
-            vertexCount: totalVertexCount,
-            indexCount: totalIndexCount,
-            isIndexed: true,
-            indexFormat: 'uint32',
-            strideBytes: POSITION_ONLY_STRIDE_BYTES,
-            vertexUniformBuffer: uniformBuffer,
-            vertexUniformBindGroup: vertexBindGroup,
-            instanceBufferOffset: 0,
-            indirectOffsetBytes: 0,
-        });
     }
 
     static #buildAndAttachImpostor(
@@ -356,8 +233,6 @@ class FoliageSubMeshAssembler {
             PBR_STRIDE_BYTES,
             impostorLODIndex,
             true,
-            bbWidth,
-            bbHeight,
             bbBottomOffset,
             options.receiveShadow !== false
         );
@@ -785,8 +660,6 @@ class FoliageSubMeshAssembler {
                 lodIndex,
                 false,
                 0,
-                0,
-                0,
                 options.receiveShadow !== false
             );
 
@@ -875,8 +748,6 @@ class FoliageSubMeshAssembler {
         strideBytes: number,
         lodIndex: number = 0,
         isImpostorOverride: boolean = false,
-        impostorWidth: number = 0,
-        impostorHeight: number = 0,
         bottomOffset: number = 0,
         receiveShadow: boolean = true
     ): FoliageSubMesh {
@@ -948,8 +819,6 @@ class FoliageSubMeshAssembler {
             isMasked,
             mainDepthMode,
             isImpostor,
-            impostorWidth,
-            impostorHeight,
             receiveShadow,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,
