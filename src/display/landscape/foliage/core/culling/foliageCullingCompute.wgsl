@@ -43,7 +43,7 @@ struct UnifiedGlobalCullingUniforms {
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
-    hasHZB: u32,
+    padHZB: u32,
     viewportHeight: f32,
     pad2: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
@@ -79,8 +79,6 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(7) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(8) var vhtSampler: sampler;
-@group(0) @binding(9) var hzbTexture: texture_2d<f32>;
-@group(0) @binding(10) var hzbSampler: sampler;
 
 // 🌟 [워크그룹 아토믹 집계용 온칩 공유 메모리 (총 0.48 KB)]
 var<workgroup> wgMainCounts: array<atomic<u32>, 8>;
@@ -201,37 +199,6 @@ fn main(
                 let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
                 let screenPixelDiameter = (scaledRadius * vpHeight) / max(effectiveDist, 0.001);
                 if (screenPixelDiameter < 2.0) {
-                    inMainFrustum = false;
-                }
-            }
-        }
-
-        if (inMainFrustum && globalUniforms.hasHZB != 0u) {
-            let clipPos = globalUniforms.mainProjectionViewMatrix * spherePos;
-            if (clipPos.w > 0.1) {
-                let invW = 1.0 / clipPos.w;
-                let ndc = clipPos.xy * invW;
-                let uvCenter = vec2<f32>(ndc.x * 0.5 + 0.5, 1.0 - (ndc.y * 0.5 + 0.5)); 
-
-                let screenRadius = (scaledRadius * globalUniforms.fovFactor * 2.0) * invW;
-                let minUV = clamp(uvCenter - vec2<f32>(screenRadius), vec2<f32>(0.0), vec2<f32>(1.0));
-                let maxUV = clamp(uvCenter + vec2<f32>(screenRadius), vec2<f32>(0.0), vec2<f32>(1.0));
-
-                let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
-                let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-                
-                let uDim = max(u32(maxDim + 0.999), 1u);
-                let mipLevel = f32(min(firstLeadingBit(uDim * 2u - 1u), 7u));
-
-                let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
-                let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
-                let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
-                let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
-                let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
-
-                let nearDepth = (clipPos.z - scaledRadius) * invW;
-
-                if (nearDepth > maxHZBDepth + 0.001) {
                     inMainFrustum = false;
                 }
             }

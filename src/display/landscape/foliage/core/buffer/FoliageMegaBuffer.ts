@@ -96,8 +96,6 @@ class FoliageMegaBuffer {
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedVHTView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
-    #cachedHZBView: GPUTextureView | null = null;
-    #cachedHZBSampler: GPUSampler | null = null;
 
     static #pack2x16float(x: number, y: number): number {
         const hx = FoliageMegaBuffer.#floatToHalf(x);
@@ -426,8 +424,6 @@ class FoliageMegaBuffer {
         mainFrustumPlanes: number[][] | null,
         cascades: readonly CascadeCullingParam[],
         activeCascadeCount: number = 4,
-        hasHZB: boolean = false,
-        mainProjectionViewMatrix: any = null,
         viewportHeight: number = 1080.0
     ): void {
         if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
@@ -448,7 +444,7 @@ class FoliageMegaBuffer {
         gu32[8] = this.#maxSubMeshes;
         gu32[9] = this.#maxTotalInstances * 8;
         gu32[10] = activeCascadeCount;
-        gu32[11] = hasHZB ? 1 : 0;
+        gu32[11] = 0;
         gf32[12] = viewportHeight > 0 ? viewportHeight : 1080.0;
         gu32[13] = 0;
         gu32[14] = 0;
@@ -490,12 +486,6 @@ class FoliageMegaBuffer {
                 gu32[cascadeBase + 1] = 0;
                 gu32[cascadeBase + 2] = 0;
                 gu32[cascadeBase + 3] = 0;
-            }
-        }
-
-        if (mainProjectionViewMatrix && mainProjectionViewMatrix.length >= 16) {
-            for (let m = 0; m < 16; m++) {
-                gf32[152 + m] = mainProjectionViewMatrix[m];
             }
         }
 
@@ -606,9 +596,7 @@ class FoliageMegaBuffer {
     getOrCreateUnifiedCullingBindGroup(
         layout: GPUBindGroupLayout,
         vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler,
-        hzbTextureView?: GPUTextureView,
-        hzbSampler?: GPUSampler
+        vhtSampler?: GPUSampler
     ): GPUBindGroup | null {
         if (!this.#rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer ||
             !this.#culledGPUBuffer || !this.#indirectGPUBuffer ||
@@ -618,12 +606,9 @@ class FoliageMegaBuffer {
 
         const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
         const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
-        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
-            this.#cachedVHTView === targetVHTView && this.#cachedVHTSampler === targetVHTSampler &&
-            this.#cachedHZBView === targetHZBView && this.#cachedHZBSampler === targetHZBSampler) {
+            this.#cachedVHTView === targetVHTView && this.#cachedVHTSampler === targetVHTSampler) {
             return this.#unifiedCullingBindGroup;
         }
 
@@ -641,15 +626,11 @@ class FoliageMegaBuffer {
                 {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
                 {binding: 7, resource: targetVHTView},
                 {binding: 8, resource: targetVHTSampler},
-                {binding: 9, resource: targetHZBView},
-                {binding: 10, resource: targetHZBSampler},
             ],
         });
 
         this.#cachedVHTView = targetVHTView;
         this.#cachedVHTSampler = targetVHTSampler;
-        this.#cachedHZBView = targetHZBView;
-        this.#cachedHZBSampler = targetHZBSampler;
         return this.#unifiedCullingBindGroup;
     }
 

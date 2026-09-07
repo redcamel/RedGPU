@@ -40,8 +40,6 @@ class FoliageCullingDispatcher {
 
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
     #cachedVHTView: GPUTextureView | null = null;
-    #cachedHZBView: GPUTextureView | null = null;
-    #cachedHZBSampler: GPUSampler | null = null;
 
     #landscapeRef: Landscape | null = null;
 
@@ -181,18 +179,6 @@ class FoliageCullingDispatcher {
         }
         const fovFactor = this.#cachedFovFactor;
 
-        const currentView = stateData?.view || (viewOrCamera && viewOrCamera.hierarchicalZBuffer ? viewOrCamera : null);
-        const hzb = currentView?.hierarchicalZBuffer;
-        const hasHZB = !!(hzb?.textureView);
-        this.#cachedHZBView = hzb?.textureView || null;
-        this.#cachedHZBSampler = hzb?.sampler || null;
-
-        let mainPVMatrix: mat4 | null = null;
-        if (camera?.projectionMatrix && camera?.viewMatrix) {
-            mainPVMatrix = FoliageCullingDispatcher.#tempPVMatrix;
-            mat4.multiply(mainPVMatrix, camera.projectionMatrix, camera.viewMatrix);
-        }
-
         if (this.#megaBuffer) {
 
             const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
@@ -240,8 +226,6 @@ class FoliageCullingDispatcher {
                 frustumPlanes,
                 cascadeParams,
                 activeCascadeCount,
-                hasHZB,
-                mainPVMatrix,
                 viewportHeight
             );
         }
@@ -326,9 +310,7 @@ class FoliageCullingDispatcher {
             const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
                 bindGroupLayout,
                 vhtView,
-                vhtSampler,
-                this.#cachedHZBView || undefined,
-                this.#cachedHZBSampler || undefined
+                vhtSampler
             );
             if (unifiedBindGroup) {
                 const workgroupCount = Math.ceil(totalAllocatedRange / 64);
