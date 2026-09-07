@@ -6,6 +6,7 @@ import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
+import FOLIAGE_TYPE from "./FOLIAGE_TYPE";
 
 export {FoliageSubMesh, FoliageShadowMergedSubMesh};
 
@@ -42,6 +43,14 @@ export interface FoliageTypeOptions {
 
     useImpostor?: boolean;
 
+    /**
+     * [KO] 스캐터 인스턴스 분류 타입 ('foliage' | 'grass' | 'basic')
+     * [EN] Scatter instance classification type ('foliage' | 'grass' | 'basic')
+     * @default FOLIAGE_TYPE.FOLIAGE
+     */
+    type?: FOLIAGE_TYPE;
+
+    /** @deprecated Use type instead */
     isFoliage?: boolean;
 
     useDepthPrepass?: boolean;
@@ -77,6 +86,7 @@ class FoliageType {
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
+    #type: FOLIAGE_TYPE = FOLIAGE_TYPE.FOLIAGE;
     #castShadow: boolean = true;
     #maxShadowDistance: number = 300.0;
     #useImpostor: boolean = true;
@@ -99,17 +109,32 @@ class FoliageType {
         this.#onDirty = onDirty;
         this.#castShadow = options.castShadow !== false;
 
+        const resolvedType: FOLIAGE_TYPE = options.type
+            || (options.isFoliage === false ? FOLIAGE_TYPE.BASIC : FOLIAGE_TYPE.FOLIAGE);
+        this.#type = resolvedType;
+
+        const isBasic = resolvedType === FOLIAGE_TYPE.BASIC;
+        const isGrass = resolvedType === FOLIAGE_TYPE.GRASS;
+
+        this.#isFoliage = !isBasic;
+        this.#useImpostor = options.useImpostor !== undefined
+            ? options.useImpostor
+            : (!isBasic && !isGrass);
+        this.#useDepthPrepass = options.useDepthPrepass !== undefined
+            ? options.useDepthPrepass
+            : !isBasic;
+
+        let defaultShadowDist = 300.0;
+        if (isGrass) defaultShadowDist = 35.0;
+        else if (isBasic) defaultShadowDist = 150.0;
+
         this.#maxShadowDistance = options.maxShadowDistance !== undefined
             ? Math.max(0, Number(options.maxShadowDistance) || 0)
-            : 300.0;
+            : defaultShadowDist;
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
 
-        const useImpostor = options.useImpostor !== false;
-        this.#useImpostor = useImpostor;
-        this.#isFoliage = options.isFoliage !== false;
-        this.#useDepthPrepass = options.useDepthPrepass !== false;
         this.#cullingDistance = options.cullingDistance ?? 2000.0;
         this.#fadeStartDistance = options.fadeStartDistance ?? 1500.0;
 
@@ -118,6 +143,7 @@ class FoliageType {
 
         this.#options = Object.freeze({
             name: options.name,
+            type: this.#type,
             lods: options.lods,
             maxInstances: options.maxInstances ?? 50000,
             cullingDistance: this.#cullingDistance,
@@ -125,7 +151,7 @@ class FoliageType {
             minScale,
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
-            useImpostor,
+            useImpostor: this.#useImpostor,
             isFoliage: this.#isFoliage,
             useDepthPrepass: this.#useDepthPrepass,
             bottomOffset: options.bottomOffset,
@@ -357,15 +383,37 @@ class FoliageType {
         }
     }
 
+    /**
+     * [KO] 스캐터 인스턴스 분류 타입 ('foliage' | 'grass' | 'basic')
+     * [EN] Scatter instance classification type ('foliage' | 'grass' | 'basic')
+     */
+    get type(): FOLIAGE_TYPE {
+        return this.#type;
+    }
+
+    set type(value: FOLIAGE_TYPE) {
+        if (this.#type !== value) {
+            this.#type = value;
+            this.#isFoliage = value !== FOLIAGE_TYPE.BASIC;
+            this.#updatePassBuckets();
+            this.#syncTypeParams();
+            this.#onDirty?.();
+        }
+    }
+
+    /** @deprecated Use type instead */
     get isFoliage(): boolean {
         return this.#isFoliage;
     }
 
+    /** @deprecated Use type instead */
     set isFoliage(value: boolean) {
         const boolVal = !!value;
         if (this.#isFoliage !== boolVal) {
             this.#isFoliage = boolVal;
+            this.#type = boolVal ? FOLIAGE_TYPE.FOLIAGE : FOLIAGE_TYPE.BASIC;
             this.#updatePassBuckets();
+            this.#syncTypeParams();
             this.#onDirty?.();
         }
     }

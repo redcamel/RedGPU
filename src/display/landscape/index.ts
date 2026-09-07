@@ -7,6 +7,7 @@ import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
+import FOLIAGE_TYPE from "./foliage/FOLIAGE_TYPE";
 import FoliageSubMesh from "./foliage/FoliageSubMesh";
 import FoliageMegaBuffer from "./foliage/core/buffer/FoliageMegaBuffer";
 import OctahedralImpostorMaterial from "./foliage/core/impostor/octahedral/OctahedralImpostorMaterial";
@@ -22,6 +23,7 @@ export {
     validateLandscapeBaseGridSize,
     LandscapeFoliageManager,
     FoliageType,
+    FOLIAGE_TYPE,
     FoliageSubMesh,
     FoliageMegaBuffer,
     OctahedralImpostorMaterial,

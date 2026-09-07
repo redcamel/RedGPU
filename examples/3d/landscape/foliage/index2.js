@@ -11,10 +11,9 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 1005;
+        controller.y = 1150;
         controller.z = 0;
-        controller.tilt = -10;
-        controller.moveSpeed = 500;
+        controller.moveSpeed = 1200;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -34,7 +33,7 @@ RedGPU.init(
             {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', luminance: 25000}
         ];
 
-        let currentHdr = iblList[2];
+        let currentHdr = iblList[0];
         let currentIbl = new RedGPU.Resource.IBL(redGPUContext, currentHdr.path, currentHdr.luminance);
         view.ibl = currentIbl;
 
@@ -50,11 +49,9 @@ RedGPU.init(
         directionalLight.lux = 90000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 그림자 설정 (산악 스케일에 맞춘 600m 가시거리)
+        // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 600;
-
-
+        directionalShadowManager.maxShadowDistance = 1000;
 
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
@@ -103,7 +100,7 @@ RedGPU.init(
                 name: 'Leave',
                 key: 'leave',
                 weightChannel: 'A',
-                uvScale: [300, 300],
+                uvScale: [50, 50],
                 roughness: 0.8,
                 metallic: 0.0,
                 normalIntensity: 1.4,
@@ -186,27 +183,22 @@ RedGPU.init(
                         const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
                         if (!lod0) return;
 
-                        lodConfigs.push({mesh: lod0, lodDistance: 50, receiveShadow: true});
-                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({
-                            mesh: lods.lod1,
-                            lodDistance: 100,
-                            receiveShadow: true
-                        });
+                        lodConfigs.push({mesh: lod0, lodDistance: 80});
+                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 180});
                         if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
                             mesh: lods.lod2,
-                            lodDistance: 180,
-                            receiveShadow: false // 100m 밖 로우폴리는 CSM 샘플링 스킵하여 프레임 최적화
+                            lodDistance: 320
                         });
 
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
-                            type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
                             maxInstances: 100000,
-                            minScale: [0.35, 0.35, 0.35],
-                            maxScale: [0.65, 0.65, 0.65],
+                            minScale: [0.85, 0.85, 0.85],
+                            maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
-                            useImpostor: true,
+                            isFoliage: true,
+                            useImpostor: true
                         });
                     });
                 }
@@ -224,55 +216,28 @@ RedGPU.init(
         //         foliageManager.addFoliageType({
         //             name: 'FrangipaniTree',
         //             lods: [{mesh: root, lodDistance: 120}],
-        //             maxInstances: 10000,
+        //             maxInstances: 50000,
         //             minScale: [4.2, 4.2, 4.2],
         //             maxScale: [6.2, 6.2, 6.2],
         //             randomRotationY: true,
         //             cullingDistance: 3500,
         //             fadeStartDistance: 2800,
-        //             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
+        //             isFoliage: true,
         //             useImpostor: true
         //         });
         //     }
         // );
-
-        // 3. River Rock (Static Opaque Mesh Scatter) 로드
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/river_rock.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                console.log('🪨 [river_rock.glb] Loaded Root:', root);
-
-                // 원점 중심의 RiverRock 노드 탐색 (없으면 root 사용)
-                let rockMesh = root;
-                const findMeshNode = (node) => {
-                    if (node.name === 'RiverRock' || node.name === 'RiverRock_lambert3_0') return node;
-                    if (node.children) {
-                        for (let i = 0; i < node.children.length; i++) {
-                            const found = findMeshNode(node.children[i]);
-                            if (found) return found;
-                        }
-                    }
-                    return null;
-                };
-                const targetNode = findMeshNode(root);
-                if (targetNode) {
-                    rockMesh = targetNode;
-                }
-
-                foliageManager.addFoliageType({
-                    name: 'RiverRock',
-                    type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
-                    lods: [{mesh: rockMesh, lodDistance: 300}],
-                    maxInstances: 100000,
-                    minScale: [4.3, 4.3, 4.3],
-                    maxScale: [7.2, 7.2, 7.2],
-                    randomRotationY: true,
-                    bottomOffset: 6.5,
-                });
-            }
-        );
+        // new RedGPU.GLTFLoader(
+        //     redGPUContext,
+        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+        //     (loader) => {
+        //         const root = loader.resultMesh;
+        //       root.setScale(10)
+        //         root.y = 1000
+        //         scene.addChild(root)
+        //     }
+        // );
+        // landscape.debuggerManager.spatialGrid = true;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
@@ -293,12 +258,13 @@ RedGPU.init(
             skybox: false,
             gui: (pane) => {
                 const lightFolder = pane.addFolder({title: '☀️ Directional Light', expanded: false});
-                lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-                lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+                lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1, label: 'Azimuth'});
+                lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1, label: 'Elevation'});
                 lightFolder.addBinding(directionalLight, 'lux', {
                     min: 0,
                     max: 200000,
-                    step: 1000
+                    step: 1000,
+                    label: 'Intensity (Lux)'
                 });
 
                 const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
@@ -317,9 +283,9 @@ RedGPU.init(
                 };
 
                 const statsFolder = folderFoliage.addFolder({title: 'Global Buffer Stats', expanded: true});
-                statsFolder.addBinding(globalStats, 'totalTypes', {readonly: true});
-                statsFolder.addBinding(globalStats, 'totalInstances', {readonly: true});
-                statsFolder.addBinding(globalStats, 'maxCapacity', {readonly: true});
+                statsFolder.addBinding(globalStats, 'totalTypes', {label: 'Active Types', readonly: true});
+                statsFolder.addBinding(globalStats, 'totalInstances', {label: 'Rendered Trees', readonly: true});
+                statsFolder.addBinding(globalStats, 'maxCapacity', {label: 'Max Capacity', readonly: true});
 
                 const createdTypeFolders = new Set();
                 const updateFoliageTypeGUI = () => {
@@ -335,23 +301,30 @@ RedGPU.init(
                             expanded: true
                         });
 
-                        typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
-                        typeFolder.addBinding(type, 'useDepthPrepass');
-                        typeFolder.addBinding(type, 'castShadow');
-                        typeFolder.addBinding(type, 'maxShadowDistance', {
-                            min: 0,
-                            max: 1000,
-                            step: 1
+                        typeFolder.addBinding(type, 'activeInstanceCount', {label: 'Instances', readonly: true});
+                        typeFolder.addBinding(type, 'useDepthPrepass', {label: 'Depth Prepass'});
+                        typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
+                        typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
+                        typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
+                            options: {
+                                'Cascade 0 (Near Only)': 0,
+                                'Cascade 1 (~50m)': 1,
+                                'Cascade 2 (~112m)': 2,
+                                'Cascade 3 (Full Far)': 3,
+                            },
+                            label: 'Max Shadow Cascade'
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
                             min: -5.0,
                             max: 5.0,
-                            step: 0.05
+                            step: 0.05,
+                            label: 'Bottom Offset'
                         });
                         typeFolder.addBinding(type, 'cullingDistance', {
                             min: 200,
                             max: 8000,
-                            step: 50
+                            step: 50,
+                            label: 'Culling Distance'
                         });
 
                         const lodInfo = {
@@ -373,37 +346,30 @@ RedGPU.init(
                                 return parts.join(' | ');
                             }
                         };
-                        typeFolder.addBinding(lodInfo, 'lodsSummary', {readonly: true});
+                        typeFolder.addBinding(lodInfo, 'lodsSummary', {label: 'LOD Ranges', readonly: true});
 
                         const lodList = type.lodInfoList || [];
                         const numMeshLODs = (type.hasImpostor && lodList.length > 1) ? lodList.length - 1 : lodList.length;
                         if (numMeshLODs > 0) {
-                            const lodFolder = typeFolder.addFolder({title: '📐 LOD Settings & Shadows', expanded: true});
+                            const lodFolder = typeFolder.addFolder({title: '📐 LOD Distances', expanded: true});
                             for (let l = 0; l < numMeshLODs; l++) {
                                 const lodIdx = l;
-                                const subFolder = lodFolder.addFolder({title: `LOD ${lodIdx}`, expanded: true});
                                 const lodBinding = {
                                     get distance() {
                                         return type.getLODDistance(lodIdx);
                                     },
                                     set distance(v) {
                                         type.setLODDistance(lodIdx, v);
-                                    },
-                                    get receiveShadow() {
-                                        return type.getLODReceiveShadow(lodIdx);
-                                    },
-                                    set receiveShadow(v) {
-                                        type.setLODReceiveShadow(lodIdx, v);
                                     }
                                 };
                                 const initDist = type.getLODDistance(lodIdx);
                                 const maxVal = Math.max(800, Math.ceil(initDist * 2.5 / 50) * 50);
-                                subFolder.addBinding(lodBinding, 'distance', {
+                                lodFolder.addBinding(lodBinding, 'distance', {
                                     min: 10,
                                     max: maxVal,
-                                    step: 5
+                                    step: 5,
+                                    label: `LOD ${lodIdx} Dist`
                                 });
-                                subFolder.addBinding(lodBinding, 'receiveShadow');
                             }
                         }
 
@@ -412,17 +378,7 @@ RedGPU.init(
                                 title: '🎭 Octahedral Impostor',
                                 expanded: true
                             });
-                            impostorFolder.addBinding(type, 'useImpostor');
-                            const impostorLODIndex = lodList.length - 1;
-                            const impostorBinding = {
-                                get receiveShadow() {
-                                    return type.getLODReceiveShadow(impostorLODIndex);
-                                },
-                                set receiveShadow(v) {
-                                    type.setLODReceiveShadow(impostorLODIndex, v);
-                                }
-                            };
-                            impostorFolder.addBinding(impostorBinding, 'receiveShadow');
+                            impostorFolder.addBinding(type, 'useImpostor', {label: 'Enable Impostor'});
                             impostorFolder.addButton({title: '🔍 Inspect Impostor Atlas'}).on('click', () => {
                                 FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, typeName);
                             });

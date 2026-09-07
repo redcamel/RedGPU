@@ -268,7 +268,7 @@ RedGPU.init(
             maxScale: [1.3, 20, 1.3],
             randomRotationY: true,
             useOcclusionCulling: false,
-            maxShadowCascadeIndex: 0
+            maxShadowDistance: 35
         });
 
         // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (HUD 모니터, 2D 공간 분할 그리드, VHT 고도 아틀라스, VNT 노멀 아틀라스)
