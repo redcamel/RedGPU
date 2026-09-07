@@ -180,8 +180,7 @@ class FoliageRenderer {
             let validCount = 0;
             for (let t = 0; t < typeCount; t++) {
                 const foliageType = typeList[t];
-                if (!foliageType.castShadow) continue;
-                if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
+                if (!foliageType.castShadow || foliageType.maxShadowDistance <= 0) continue;
                 const culledGPU = foliageType.shadowCulledGPUBuffer;
                 const indirectGPU = foliageType.shadowIndirectGPUBuffer;
                 if (!culledGPU || !indirectGPU || foliageType.shadowMergedSubMeshes.length === 0) continue;

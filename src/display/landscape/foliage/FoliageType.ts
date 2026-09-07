@@ -6,7 +6,6 @@ import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
-import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
 export {FoliageSubMesh, FoliageShadowMergedSubMesh};
 
@@ -51,7 +50,12 @@ export interface FoliageTypeOptions {
 
     castShadow?: boolean;
 
-    maxShadowCascadeIndex?: number;
+    /**
+     * [KO] 해당 식생이 그림자를 투영(Casting)할 최대 물리적 거리 (m)
+     * [EN] Maximum shadow casting distance in meters
+     * @default 300.0
+     */
+    maxShadowDistance?: number;
 }
 
 class FoliageType {
@@ -74,7 +78,7 @@ class FoliageType {
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #castShadow: boolean = true;
-    #maxShadowCascadeIndex: number = 3;
+    #maxShadowDistance: number = 300.0;
     #useImpostor: boolean = true;
     #isFoliage: boolean = true;
     #useDepthPrepass: boolean = true;
@@ -94,12 +98,13 @@ class FoliageType {
         this.#options = options;
         this.#onDirty = onDirty;
         this.#castShadow = options.castShadow !== false;
-        this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
+
+        this.#maxShadowDistance = options.maxShadowDistance !== undefined
+            ? Math.max(0, Number(options.maxShadowDistance) || 0)
+            : 300.0;
+
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
-        this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
-            ? Math.max(0, Math.min(3, Math.floor(options.maxShadowCascadeIndex)))
-            : 3;
 
         const useImpostor = options.useImpostor !== false;
         this.#useImpostor = useImpostor;
@@ -125,7 +130,7 @@ class FoliageType {
             useDepthPrepass: this.#useDepthPrepass,
             bottomOffset: options.bottomOffset,
             castShadow: this.#castShadow,
-            maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
+            maxShadowDistance: this.#maxShadowDistance,
         });
 
         let hash = 0;
@@ -165,7 +170,7 @@ class FoliageType {
                 this.#shadowMergedSubMeshes,
                 this.#lodInfoList
             );
-            const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
+            const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
                 this.#cullingDistance,
@@ -173,7 +178,7 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 this.#lodInfoList,
-                effectiveMaxShadowCascade
+                effectiveShadowDist
             );
         }
     }
@@ -272,18 +277,21 @@ class FoliageType {
     }
 
 
-    set maxShadowCascadeIndex(value: number) {
-        validateUintRange(value, 0, 3);
-        if (this.#maxShadowCascadeIndex !== value) {
-            this.#maxShadowCascadeIndex = value;
+    /**
+     * [KO] 해당 식생이 그림자를 투영(Casting)할 최대 물리적 거리 (m)
+     * [EN] Maximum shadow casting distance in meters
+     */
+    get maxShadowDistance(): number {
+        return this.#maxShadowDistance;
+    }
+
+    set maxShadowDistance(value: number) {
+        const numVal = Math.max(0, Number(value) || 0);
+        if (this.#maxShadowDistance !== numVal) {
+            this.#maxShadowDistance = numVal;
             this.#syncTypeParams();
             this.#onDirty?.();
         }
-    }
-
-
-    get maxShadowCascadeIndex(): number {
-        return this.#maxShadowCascadeIndex;
     }
 
 
@@ -504,7 +512,7 @@ class FoliageType {
                 ? this.#lodInfoList.slice(0, -1)
                 : this.#lodInfoList;
 
-            const effectiveMaxShadowCascade = this.#castShadow ? this.#maxShadowCascadeIndex : 999;
+            const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
                 this.#cullingDistance,
@@ -512,7 +520,7 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 effectiveLodList,
-                effectiveMaxShadowCascade
+                effectiveShadowDist
             );
         }
     }

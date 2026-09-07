@@ -47,6 +47,7 @@ class FoliagePipelineRegistry {
         {shaderLocation: 6, offset: 0, format: 'float32x4'},
         {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
         {shaderLocation: 8, offset: 24, format: 'float16x2'},
+        {shaderLocation: 9, offset: 28, format: 'float32'},
     ];
 
     getOrCreatePipeline(
@@ -252,7 +253,11 @@ class FoliagePipelineRegistry {
                 entryPoint: 'entryPointShadowOpaqueVertex',
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
-            fragment: undefined,
+            fragment: {
+                module: this.#vertexShaderModule!,
+                entryPoint: 'entryPointShadowOpaqueFragment',
+                targets: [],
+            },
             primitive: {
                 topology: 'triangle-list',
                 cullMode: cullMode,

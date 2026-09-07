@@ -20,7 +20,7 @@ struct FoliageTypeParam {
     indirectBaseOffset: u32,
     rawBaseOffset: u32,
     activeCount: u32,
-    maxShadowCascadeIndex: u32,
+    maxShadowDistance: f32,
     invFadeRange: f32,
     lods: array<FoliageLODUniformInfo, 8>,
 };
@@ -141,18 +141,21 @@ fn main(
     let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
     let isSubpixel = (approxEffectiveDist * 2.0 > scaledRadius * vpHeight);
 
-    // 3단계: 섀도우 최대 유효 거리 사전 계산
+    // 3단계: 섀도우 최대 유효 거리 사전 계산 (인스턴스 물리적 거리 기반)
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
-    let maxAllowedCascade = select(0u, min(activeCascades, typeInfo.maxShadowCascadeIndex + 1u), typeInfo.maxShadowCascadeIndex <= 3u);
+    let userShadowDist = typeInfo.maxShadowDistance;
+    let shadowMargin = scaledRadius * 4.0;
+    let effectiveUserDist = userShadowDist + shadowMargin;
+    let userShadowDistSq = effectiveUserDist * effectiveUserDist;
 
-    var maxShadowDistSq: f32 = 0.0;
-    if (maxAllowedCascade > 0u) {
-        let lastCascadeMax = globalUniforms.cascades[maxAllowedCascade - 1u].maxDistance;
-        let lastMargin = scaledRadius * 4.0;
-        let lastDist = lastCascadeMax + lastMargin;
-        maxShadowDistSq = lastDist * lastDist;
+    var cascadeGlobalMaxDist: f32 = 0.0;
+    if (activeCascades > 0u) {
+        let lastCascadeMax = globalUniforms.cascades[activeCascades - 1u].maxDistance;
+        cascadeGlobalMaxDist = lastCascadeMax + shadowMargin;
     }
-    let canHaveShadow = (maxAllowedCascade > 0u && approxDistSq < maxShadowDistSq);
+    let cascadeGlobalMaxDistSq = cascadeGlobalMaxDist * cascadeGlobalMaxDist;
+    let maxShadowDistSq = min(userShadowDistSq, cascadeGlobalMaxDistSq);
+    let canHaveShadow = (userShadowDist > 0.0 && activeCascades > 0u && approxDistSq < maxShadowDistSq);
 
     // 4단계: 동시 조기 탈출 (메인 서브픽셀 기각 + 섀도우 범위 초과)
     if (isSubpixel && !canHaveShadow) {
@@ -271,57 +274,66 @@ fn main(
 
     // 8단계: 섀도우 패스 캐스케이드 컬링 & 1-Pass Direct Culling 슬롯 할당
     if (canHaveShadow && distSq < maxShadowDistSq) {
-        for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
-            if (globalUniforms.cascades[c].hasShadow == 0u) {
-                continue;
-            }
+        let shadowFadeRange = clamp(userShadowDist * 0.20, 10.0, 60.0);
+        let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);
+        var shadowFade: f32 = 1.0;
+        if (dist > shadowFadeStart) {
+            shadowFade = clamp((userShadowDist - dist) / shadowFadeRange, 0.0, 1.0);
+        }
 
-            let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
-            let isOverlapCascade = (c < activeCascades - 1u); 
-            let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
-            let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-            let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+        if (shadowFade > 0.001) {
+            for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
+                if (globalUniforms.cascades[c].hasShadow == 0u) {
+                    continue;
+                }
 
-            if (distSq < shadowEffectiveDistSq) {
-                let cascadeInfo = globalUniforms.cascades[c];
-                let inShadowFrustum =
-                    dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+                let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
+                let isOverlapCascade = (c < activeCascades - 1u); 
+                let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
+                let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+                let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-                if (inShadowFrustum) {
-                    var targetShadowLOD: u32 = 0u;
-                    if (numLODs > 1u) {
-                        let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
-                        let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
+                if (distSq < shadowEffectiveDistSq) {
+                    let cascadeInfo = globalUniforms.cascades[c];
+                    let inShadowFrustum =
+                        dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+                        dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+                        dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+                        dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+                        dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+                        dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
 
-                        if (c == 0u && effectiveDist <= lod0Dist) {
-                            targetShadowLOD = 0u;
-                        } else {
-                            targetShadowLOD = maxShadowLOD;
+                    if (inShadowFrustum) {
+                        var targetShadowLOD: u32 = 0u;
+                        if (numLODs > 1u) {
+                            let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
+                            let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
+
+                            if (c == 0u && effectiveDist <= lod0Dist) {
+                                targetShadowLOD = 0u;
+                            } else {
+                                targetShadowLOD = maxShadowLOD;
+                            }
                         }
+
+                        let lodInfo = typeInfo.lods[targetShadowLOD];
+                        let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+                        let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                        let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+
+                        let numSubs = lodInfo.subMeshCount;
+                        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                            atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                        }
+
+                        var shadowInst = instance;
+                        shadowInst.posY = realY;
+                        shadowInst.fadeOrType = shadowFade;
+
+                        let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
+                        let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
+                        shadowCulledInstanceBuffer[outIdx] = shadowInst;
                     }
-
-                    let lodInfo = typeInfo.lods[targetShadowLOD];
-                    let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-                    let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                    let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-
-                    let numSubs = lodInfo.subMeshCount;
-                    for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                        atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-                    }
-
-                    var shadowInst = instance;
-                    shadowInst.posY = realY;
-                    shadowInst.fadeOrType = 1.0;
-
-                    let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
-                    let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
-                    shadowCulledInstanceBuffer[outIdx] = shadowInst;
                 }
             }
         }

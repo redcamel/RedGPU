@@ -146,10 +146,12 @@ struct ShadowOpaqueVertexInput {
     @location(6) instancePos_scaleY : vec4<f32>,
     @location(7) instanceRotQuat : vec4<f32>,
     @location(8) instanceScaleXZ : vec2<f32>,
+    @location(9) instanceFade : f32,
 };
 
 struct FoliageShadowOpaqueOutput {
     @builtin(position) position: vec4<f32>,
+    @location(0) shadowFade: f32,
 };
 
 @vertex
@@ -174,5 +176,21 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     let worldPos = rotatedPos + instancePos;
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
+    output.shadowFade = input.instanceFade;
     return output;
 }
+
+@fragment
+fn entryPointShadowOpaqueFragment(input : FoliageShadowOpaqueOutput) {
+    if (input.shadowFade < 0.999) {
+        let px = u32(input.position.x) & 3u;
+        let py = u32(input.position.y) & 3u;
+        let idx = (py << 2u) | px;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+        if (input.shadowFade < threshold) {
+            discard;
+        }
+    }
+}
+

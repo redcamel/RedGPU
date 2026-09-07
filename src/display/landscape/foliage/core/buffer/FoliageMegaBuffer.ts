@@ -528,7 +528,7 @@ class FoliageMegaBuffer {
         boundingRadius: number,
         bottomOffset: number,
         lodInfoList: readonly FoliageLODInfo[],
-        maxShadowCascadeIndex: number = 3
+        maxShadowDistance: number = 300.0
     ): void {
         this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
@@ -550,7 +550,7 @@ class FoliageMegaBuffer {
         const fadeRange = Math.max(cullingDistance - fadeStartDistance, 1.0);
         u32[baseOffset + 8] = allocation.rawBaseOffset;
         u32[baseOffset + 9] = allocation.activeCount;
-        u32[baseOffset + 10] = maxShadowCascadeIndex;
+        f32[baseOffset + 10] = maxShadowDistance;
 
         f32[baseOffset + 11] = 1.0 / fadeRange;
 
