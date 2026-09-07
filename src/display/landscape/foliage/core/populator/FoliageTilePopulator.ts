@@ -122,7 +122,6 @@ class FoliageTilePopulator {
         }
 
         foliageType.uploadRangeToGPU(startIdx, actualCount);
-        foliageType.resetIndirectBuffer();
 
         return actualCount;
     }
