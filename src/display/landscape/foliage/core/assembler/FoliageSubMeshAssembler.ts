@@ -378,15 +378,19 @@ class FoliageSubMeshAssembler {
                 mat.isFoliage = true;
 
 
-                const isMasked = !!mat.useCutOff || mat.alphaBlend === 1;
+                const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent;
                 if (isMasked) {
                     mat.useCutOff = true;
                     mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
                     mat.doubleSided = true;
+                    mat.alphaBlend = 1;
+                    mat.transparent = false;
                 } else {
                     mat.useCutOff = false;
+                    mat.doubleSided = false;
+                    mat.alphaBlend = 0;
+                    mat.transparent = false;
                 }
-                mat.transparent = false;
                 mat.dirtyPipeline = true;
             }
 
@@ -830,7 +834,7 @@ class FoliageSubMeshAssembler {
         }
 
         const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
-        const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || isImpostor;
+        const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
         const isDepthPrepass = isFoliage && !isImpostor && (hasBaseColorTexture || isMasked);
