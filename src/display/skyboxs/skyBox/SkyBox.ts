@@ -97,7 +97,7 @@ class SkyBox extends RedGPUObject {
         this.#material = new SkyBoxMaterial(redGPUContext, this.#texture)
         this.luminance = this.#luminance = luminance;
         this.#primitiveState = new PrimitiveState(this)
-        this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
+        this.#primitiveState.cullMode = GPU_CULL_MODE.FRONT
         this.#depthStencilState = new DepthStencilState(this)
         this.#depthStencilState.depthWriteEnabled = false
     }
