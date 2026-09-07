@@ -44,12 +44,6 @@ export interface FoliageTypeOptions {
 
     bottomOffset?: number;
 
-    /**
-     * @deprecated Use `bottomOffset` instead.
-     */
-    groundOffset?: number;
-
-
     castShadow?: boolean;
 
 
@@ -127,8 +121,7 @@ class FoliageType {
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
             isFoliage: this.#isFoliage,
-            bottomOffset: options.bottomOffset ?? options.groundOffset,
-            groundOffset: options.bottomOffset ?? options.groundOffset,
+            bottomOffset: options.bottomOffset,
             castShadow: this.#castShadow,
             receiveShadow: this.#receiveShadow,
             maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
@@ -149,7 +142,7 @@ class FoliageType {
         this.#subMeshes = assembleResult.subMeshes;
         this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
-        const userOffset = options.bottomOffset ?? options.groundOffset;
+        const userOffset = options.bottomOffset;
         this.#bottomOffset = userOffset !== undefined ? userOffset : (assembleResult.bottomOffset ?? 0);
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         let impostorSub: FoliageSubMesh | null = null;
@@ -247,23 +240,6 @@ class FoliageType {
     }
 
     set bottomOffset(val: number) {
-        if (this.#bottomOffset !== val) {
-            this.#bottomOffset = val;
-            this.#syncTypeParams();
-        }
-    }
-
-    /**
-     * @deprecated Use `bottomOffset` instead.
-     */
-    get groundOffset(): number {
-        return this.#bottomOffset;
-    }
-
-    /**
-     * @deprecated Use `bottomOffset` instead.
-     */
-    set groundOffset(val: number) {
         if (this.#bottomOffset !== val) {
             this.#bottomOffset = val;
             this.#syncTypeParams();

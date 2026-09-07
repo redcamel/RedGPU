@@ -148,13 +148,6 @@ class LandscapeFoliageManager {
         return this.#typeList;
     }
 
-    /**
-     * @deprecated Use `typeList` instead.
-     */
-    get types(): readonly FoliageType[] {
-        return this.#typeList;
-    }
-
     get foliageTypes(): ReadonlyMap<string, FoliageType> {
         return this.#foliageTypes;
     }
