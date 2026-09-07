@@ -39,6 +39,8 @@ class FoliageRenderer {
     #lastRecordedTypeCount: number = 0;
     readonly #singleBundleArray: [GPURenderBundle] = [null as any];
 
+    #useDepthPrepass: boolean = true;
+
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
@@ -56,6 +58,13 @@ class FoliageRenderer {
         }
     }
 
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    set useDepthPrepass(value: boolean) {
+        this.#useDepthPrepass = !!value;
+    }
 
     markShadowBundleDirty(): void {
         for (let i = 0; i < 4; i++) {
@@ -106,19 +115,30 @@ class FoliageRenderer {
         }
         if (validCount === 0) return;
 
-        for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type!;
-            if (!foliageType.isFoliage) continue;
-            const culledGPU = item.culledGPU!;
-            const indirectGPU = item.indirectGPU!;
-            const subMeshes = foliageType.depthPrepassSubMeshes;
-            const subCount = subMeshes.length;
+        if (this.#useDepthPrepass) {
+            for (let t = 0; t < validCount; t++) {
+                const item = this.#validTypesMain[t];
+                const foliageType = item.type!;
+                if (!foliageType.isFoliage || !foliageType.useDepthPrepass) continue;
+                const culledGPU = item.culledGPU!;
+                const indirectGPU = item.indirectGPU!;
+                const subMeshes = foliageType.depthPrepassSubMeshes;
+                const subCount = subMeshes.length;
 
-            for (let s = 0; s < subCount; s++) {
-                this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                for (let s = 0; s < subCount; s++) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                }
             }
         }
+
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundVertexUniformBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        this.#lastBoundInstanceOffset = -1;
 
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesMain[t];
@@ -128,10 +148,11 @@ class FoliageRenderer {
             const subMeshes = foliageType.mainSubMeshes;
             const subCount = subMeshes.length;
             const isFoliage = foliageType.isFoliage;
+            const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const depthMode = isFoliage ? sub.mainDepthMode : 'normal';
+                const depthMode = (isFoliage && effectiveUsePrepass) ? sub.mainDepthMode : 'normal';
                 this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
         }
@@ -380,14 +401,10 @@ class FoliageRenderer {
             this.#lastBoundVertexUniformBG = vertexUniformBG;
         }
 
-        const isShadowDepth = depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque';
-        const needsMatBG = !isShadowDepth || sub.needsShadowFragment(depthPassMode);
-        if (needsMatBG) {
-            const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
-            if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
-                passEncoder.setBindGroup(2, matUniformBG);
-                this.#lastBoundMatBG = matUniformBG;
-            }
+        const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
+            passEncoder.setBindGroup(2, matUniformBG);
+            this.#lastBoundMatBG = matUniformBG;
         }
 
         if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {

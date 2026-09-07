@@ -23,6 +23,7 @@ class LandscapeFoliageManager {
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
     #cullingDispatcher: FoliageCullingDispatcher;
+    #useDepthPrepass: boolean = true;
 
     constructor(landscape: Landscape) {
         this.#landscape = landscape;
@@ -84,6 +85,18 @@ class LandscapeFoliageManager {
 
     get hasFoliageTypes(): boolean {
         return this.#typeList.length > 0;
+    }
+
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    set useDepthPrepass(val: boolean) {
+        const boolVal = !!val;
+        if (this.#useDepthPrepass !== boolVal) {
+            this.#useDepthPrepass = boolVal;
+            this.#renderer.useDepthPrepass = boolVal;
+        }
     }
 
     render(view: any, passEncoder: GPURenderPassEncoder): void {

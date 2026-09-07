@@ -4,7 +4,7 @@ import Geometry from "../../../geometry/Geometry";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 
-export type FoliageRenderPassType = 'depthPrepass' | 'main' | 'shadow';
+export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
 export interface FoliageSubMeshInitOptions {
     mesh: Mesh;
@@ -105,17 +105,11 @@ class FoliageSubMesh {
     }
 
 
-    needsShadowFragment(depthPassMode: FoliageDepthPassMode = 'shadow'): boolean {
-        if (depthPassMode === 'shadowOpaque') return false;
-        return this.isMasked;
-    }
-
     canRenderInPass(passType: FoliageRenderPassType): boolean {
         switch (passType) {
             case 'depthPrepass':
                 return this.isDepthPrepass;
             case 'main':
-            case 'shadow':
                 return this.isMainOpaqueOrMasked;
             default:
                 return false;
@@ -145,17 +139,9 @@ class FoliageSubMesh {
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
 
-
-            let cullMode: GPUCullMode;
-            if (!this.isMasked) {
-                cullMode = 'back';
-            } else if (depthPassMode === 'shadow') {
-                cullMode = material.doubleSided ? 'none' : 'back';
-            } else if (depthPassMode === 'shadowOpaque') {
-                cullMode = 'back';
-            } else {
-                cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'back');
-            }
+            const cullMode: GPUCullMode = (!this.isMasked)
+                ? 'back'
+                : (material.doubleSided ? 'none' : (material.cullMode ?? 'back'));
 
             pipeline = registry.getOrCreatePipeline(
                 material,

@@ -42,6 +42,8 @@ export interface FoliageTypeOptions {
 
     isFoliage?: boolean;
 
+    useDepthPrepass?: boolean;
+
     bottomOffset?: number;
 
     castShadow?: boolean;
@@ -77,6 +79,7 @@ class FoliageType {
     #maxShadowCascadeIndex: number = 3;
     #useImpostor: boolean = true;
     #isFoliage: boolean = true;
+    #useDepthPrepass: boolean = true;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -104,6 +107,7 @@ class FoliageType {
         const useImpostor = options.useImpostor !== false;
         this.#useImpostor = useImpostor;
         this.#isFoliage = options.isFoliage !== false;
+        this.#useDepthPrepass = options.useDepthPrepass !== false;
         this.#cullingDistance = options.cullingDistance ?? 2000.0;
         this.#fadeStartDistance = options.fadeStartDistance ?? 1500.0;
 
@@ -121,6 +125,7 @@ class FoliageType {
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
             isFoliage: this.#isFoliage,
+            useDepthPrepass: this.#useDepthPrepass,
             bottomOffset: options.bottomOffset,
             castShadow: this.#castShadow,
             receiveShadow: this.#receiveShadow,
@@ -355,6 +360,19 @@ class FoliageType {
         }
     }
 
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    set useDepthPrepass(value: boolean) {
+        const boolVal = !!value;
+        if (this.#useDepthPrepass !== boolVal) {
+            this.#useDepthPrepass = boolVal;
+            this.#updatePassBuckets();
+            this.#onDirty?.();
+        }
+    }
+
 
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
@@ -455,6 +473,7 @@ class FoliageType {
     #updatePassBuckets(): void {
         const useImp = this.#useImpostor;
         const isFoliage = this.#isFoliage;
+        const useDepthPrepass = this.#useDepthPrepass;
         const subList = this.#subMeshes;
         const count = subList.length;
 
@@ -464,7 +483,7 @@ class FoliageType {
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
             if (!useImp && sub.isImpostor) continue;
-            if (isFoliage && sub.canRenderInPass('depthPrepass')) {
+            if (isFoliage && useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
                 prepassList.push(sub);
             }
             if (sub.canRenderInPass('main')) {
