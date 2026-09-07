@@ -52,12 +52,6 @@ export interface FoliageTypeOptions {
 
 
     maxShadowCascadeIndex?: number;
-
-
-    shadowCutoffCascadeIndex?: number;
-
-
-    shadowOpaqueLodThreshold?: number;
 }
 
 class FoliageType {
@@ -79,12 +73,9 @@ class FoliageType {
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
-    #numLODs: number = 1;
     #castShadow: boolean = true;
     #receiveShadow: boolean = true;
     #maxShadowCascadeIndex: number = 3;
-    #shadowCutoffCascadeIndex: number = 0;
-    #shadowOpaqueLodThreshold: number = 1;
     #useImpostor: boolean = true;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -104,12 +95,6 @@ class FoliageType {
         this.#castShadow = options.castShadow !== false;
         this.#receiveShadow = options.receiveShadow !== false;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
-        this.#shadowCutoffCascadeIndex = options.shadowCutoffCascadeIndex !== undefined
-            ? Math.max(0, Math.min(3, Math.floor(options.shadowCutoffCascadeIndex)))
-            : 0;
-        this.#shadowOpaqueLodThreshold = options.shadowOpaqueLodThreshold !== undefined
-            ? Math.max(0, Math.floor(options.shadowOpaqueLodThreshold))
-            : 1;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
@@ -139,8 +124,6 @@ class FoliageType {
             castShadow: this.#castShadow,
             receiveShadow: this.#receiveShadow,
             maxShadowCascadeIndex: this.#maxShadowCascadeIndex,
-            shadowCutoffCascadeIndex: this.#shadowCutoffCascadeIndex,
-            shadowOpaqueLodThreshold: this.#shadowOpaqueLodThreshold,
         });
 
         let hash = 0;
@@ -170,8 +153,6 @@ class FoliageType {
         this.#impostorSubMesh = impostorSub;
 
         this.#updatePassBuckets();
-
-        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.#impostorSubMesh ? 2 : 1);
 
         if (this.#megaBuffer) {
             this.#allocation = this.#megaBuffer.allocateTypeSegment(
@@ -356,34 +337,6 @@ class FoliageType {
     }
 
 
-    get shadowCutoffCascadeIndex(): number {
-        return this.#shadowCutoffCascadeIndex;
-    }
-
-
-    set shadowCutoffCascadeIndex(value: number) {
-        validateUintRange(value, 0, 3);
-        if (this.#shadowCutoffCascadeIndex !== value) {
-            this.#shadowCutoffCascadeIndex = value;
-            this.#onDirty?.();
-        }
-    }
-
-
-    get shadowOpaqueLodThreshold(): number {
-        return this.#shadowOpaqueLodThreshold;
-    }
-
-
-    set shadowOpaqueLodThreshold(value: number) {
-        validateUintRange(value, 0, 16);
-        if (this.#shadowOpaqueLodThreshold !== value) {
-            this.#shadowOpaqueLodThreshold = value;
-            this.#onDirty?.();
-        }
-    }
-
-
     get hasImpostor(): boolean {
         return !!this.#impostorSubMesh;
     }
@@ -453,33 +406,12 @@ class FoliageType {
         return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
     }
 
-    getShadowCulledGPUBuffer(cascadeIndex?: number): GPUBuffer | null {
-        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
-    }
-
-    getShadowIndirectGPUBuffer(cascadeIndex?: number): GPUBuffer | null {
-        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
-    }
-
-    getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
-        return this.#megaBuffer?.getOrCreateUnifiedCullingBindGroup(layout, vhtView, vhtSampler) || null;
-    }
-
-    updateCullingUniforms(
-        camX: number, camY: number, camZ: number,
-        worldSizeX: number, heightScale: number, hasVHT: boolean,
-        frustumPlanes: number[][] | null,
-        fovFactor: number
-    ): void {
-        this.#syncTypeParams();
-    }
-
     setInstanceData(
         index: number,
         posX: number, posY: number, posZ: number,
         rotX: number, rotY: number, rotZ: number, rotW: number,
         scaleX: number, scaleY: number, scaleZ: number,
-        fade: number = 1.0, subId: number = 0
+        fade: number = 1.0
     ): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.setInstanceData(this.#allocation, index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade);

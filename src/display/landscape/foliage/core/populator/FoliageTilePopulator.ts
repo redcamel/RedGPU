@@ -162,7 +162,7 @@ class FoliageTilePopulator {
                     rotW = Math.cos(angle * 0.5);
                 }
 
-                foliageType.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0, 0);
+                foliageType.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0);
             }
         }
 

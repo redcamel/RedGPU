@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import type Landscape from "../../../core/Landscape";
-import FoliageType from "../../FoliageType";
+import type FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
@@ -43,7 +43,6 @@ class FoliageCullingDispatcher {
     #cachedHZBView: GPUTextureView | null = null;
     #cachedHZBSampler: GPUSampler | null = null;
 
-    #typeListRef: FoliageType[] = [];
     #landscapeRef: Landscape | null = null;
 
     #lastFOV: number = -1;
@@ -248,7 +247,6 @@ class FoliageCullingDispatcher {
         }
 
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
-            this.#typeListRef = typeList;
             this.#landscapeRef = landscape;
 
 
@@ -335,22 +333,6 @@ class FoliageCullingDispatcher {
             if (unifiedBindGroup) {
                 const workgroupCount = Math.ceil(totalAllocatedRange / 64);
                 computePass.setBindGroup(0, unifiedBindGroup);
-                computePass.dispatchWorkgroups(workgroupCount);
-            }
-            return;
-        }
-
-        const typeList = this.#typeListRef;
-        const count = typeList.length;
-        for (let i = 0; i < count; i++) {
-            const foliageType = typeList[i];
-            const activeCount = foliageType.activeInstanceCount;
-            if (activeCount <= 0 || foliageType.subMeshes.length === 0) continue;
-
-            const cullingBindGroup = foliageType.getCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
-            if (cullingBindGroup) {
-                const workgroupCount = Math.ceil(activeCount / 64);
-                computePass.setBindGroup(0, cullingBindGroup);
                 computePass.dispatchWorkgroups(workgroupCount);
             }
         }
