@@ -62,6 +62,10 @@ class FoliageSubMeshAssembler {
     static readonly #identityMatrix: mat4 = mat4.create();
     static #bufferSeq: number = 0;
 
+    static #sharedShadowUniformBuffer: GPUBuffer | null = null;
+    static #sharedShadowVertexBindGroup: GPUBindGroup | null = null;
+    static #sharedShadowDevice: GPUDevice | null = null;
+
     static assemble(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
@@ -86,6 +90,7 @@ class FoliageSubMeshAssembler {
         const numLODs = Math.min(lodConfigs.length, 8);
 
         const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
+        const subMeshUniformCache = new Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>();
 
         for (let l = 0; l < numLODs; l++) {
             const lodCfg = lodConfigs[l];
@@ -97,7 +102,8 @@ class FoliageSubMeshAssembler {
                 lodMeshes,
                 l,
                 options,
-                subMeshBindGroupLayout
+                subMeshBindGroupLayout,
+                subMeshUniformCache
             );
 
             const assembledSubMeshes = assembled.subMeshes;
@@ -138,7 +144,8 @@ class FoliageSubMeshAssembler {
                 lod0SubMeshes,
                 subList,
                 lodInfoList,
-                impostorLODIndex
+                impostorLODIndex,
+                subMeshUniformCache
             );
         }
 
@@ -184,6 +191,59 @@ class FoliageSubMeshAssembler {
         };
     }
 
+    static #getSharedShadowUniform(
+        gpuDevice: GPUDevice,
+        subMeshBindGroupLayout: GPUBindGroupLayout
+    ): { buffer: GPUBuffer; bindGroup: GPUBindGroup } {
+        if (
+            FoliageSubMeshAssembler.#sharedShadowUniformBuffer &&
+            FoliageSubMeshAssembler.#sharedShadowVertexBindGroup &&
+            FoliageSubMeshAssembler.#sharedShadowDevice === gpuDevice
+        ) {
+            return {
+                buffer: FoliageSubMeshAssembler.#sharedShadowUniformBuffer,
+                bindGroup: FoliageSubMeshAssembler.#sharedShadowVertexBindGroup,
+            };
+        }
+
+        const uniformBuffer = gpuDevice.createBuffer({
+            label: 'FoliageShadowSubMesh_Shared_UniformBuffer',
+            size: 144,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
+        const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
+        const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
+        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
+        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
+        uintView[32] = 0;
+        uintView[33] = 0;
+        uintView[34] = 0;
+        uintView[35] = 0;
+
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+
+        const vertexBindGroup = gpuDevice.createBindGroup({
+            label: 'FoliageShadowSubMesh_Shared_VertexBindGroup',
+            layout: subMeshBindGroupLayout,
+            entries: [
+                {
+                    binding: 0,
+                    resource: {
+                        buffer: uniformBuffer,
+                        size: 144,
+                    },
+                },
+            ],
+        });
+
+        FoliageSubMeshAssembler.#sharedShadowDevice = gpuDevice;
+        FoliageSubMeshAssembler.#sharedShadowUniformBuffer = uniformBuffer;
+        FoliageSubMeshAssembler.#sharedShadowVertexBindGroup = vertexBindGroup;
+
+        return {buffer: uniformBuffer, bindGroup: vertexBindGroup};
+    }
+
     static #buildAndAttachImpostor(
         redGPUContext: RedGPUContext,
         gpuDevice: GPUDevice,
@@ -192,7 +252,8 @@ class FoliageSubMeshAssembler {
         sourceSubMeshes: FoliageSubMesh[],
         subList: FoliageSubMesh[],
         lodInfoList: FoliageLODInfo[],
-        impostorLODIndex: number
+        impostorLODIndex: number,
+        subMeshUniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>
     ): void {
         const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
 
@@ -218,7 +279,8 @@ class FoliageSubMeshAssembler {
             true,
             bbBottomOffset,
             options.receiveShadow !== false,
-            options.isFoliage !== false
+            options.isFoliage !== false,
+            subMeshUniformCache
         );
         subList.push(bbSubMesh);
 
@@ -369,7 +431,8 @@ class FoliageSubMeshAssembler {
         roots: Mesh[],
         lodIndex: number,
         options: FoliageTypeOptions,
-        subMeshBindGroupLayout: GPUBindGroupLayout
+        subMeshBindGroupLayout: GPUBindGroupLayout,
+        subMeshUniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>
     ): {
         subMeshes: FoliageSubMesh[];
         shadowMergedSubMesh: FoliageShadowMergedSubMesh | null;
@@ -645,7 +708,8 @@ class FoliageSubMeshAssembler {
                 false,
                 0,
                 options.receiveShadow !== false,
-                options.isFoliage !== false
+                options.isFoliage !== false,
+                subMeshUniformCache
             );
 
             resultSubMeshes.push(combinedSubMesh);
@@ -660,36 +724,7 @@ class FoliageSubMeshAssembler {
             const combinedIB = new IndexBuffer(redGPUContext, shadowMergedIndices, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
 
-            const uniformBuffer = gpuDevice.createBuffer({
-                label: `FoliageShadowSubMesh_UniformBuffer_${options.name}_LOD${lodIndex}`,
-                size: 144,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-
-            const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
-            const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
-            floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
-            floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
-            uintView[32] = 0;
-            uintView[33] = 0;
-            uintView[34] = 0;
-            uintView[35] = 0;
-
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
-
-            const vertexBindGroup = gpuDevice.createBindGroup({
-                label: `FoliageShadowSubMesh_VertexBindGroup_${options.name}_LOD${lodIndex}`,
-                layout: subMeshBindGroupLayout,
-                entries: [
-                    {
-                        binding: 0,
-                        resource: {
-                            buffer: uniformBuffer,
-                            size: 144,
-                        },
-                    },
-                ],
-            });
+            const sharedShadowUniform = FoliageSubMeshAssembler.#getSharedShadowUniform(gpuDevice, subMeshBindGroupLayout);
 
             shadowMergedSubMesh = new FoliageShadowMergedSubMesh({
                 geometry: combinedGeom,
@@ -698,8 +733,8 @@ class FoliageSubMeshAssembler {
                 isIndexed: true,
                 indexFormat: 'uint32',
                 strideBytes: POSITION_ONLY_STRIDE_BYTES,
-                vertexUniformBuffer: uniformBuffer,
-                vertexUniformBindGroup: vertexBindGroup,
+                vertexUniformBuffer: sharedShadowUniform.buffer,
+                vertexUniformBindGroup: sharedShadowUniform.bindGroup,
                 lodIndex,
                 instanceBufferOffset: 0,
                 indirectOffsetBytes: 0,
@@ -735,47 +770,64 @@ class FoliageSubMeshAssembler {
         isImpostorOverride: boolean = false,
         bottomOffset: number = 0,
         receiveShadow: boolean = true,
-        isFoliage: boolean = true
+        isFoliage: boolean = true,
+        uniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>
     ): FoliageSubMesh {
         const isIndexed = !!geom.indexBuffer;
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
         const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;
 
-        const uniformBuffer = gpuDevice.createBuffer({
-            label: `FoliageSubMesh_UniformBuffer_${meshNode.name || subIndex}`,
-            size: 144,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
+        const globalSlot = (mat as any)?.globalFragmentSlotIndex ?? 0;
+        const cacheKey = `${globalSlot}_${receiveShadow ? 1 : 0}`;
 
-        const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
-        const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
+        let uniformBuffer: GPUBuffer;
+        let vertexBindGroup: GPUBindGroup;
 
-        floatView.set(relMatrix, 0);
-        floatView.set(normMatrix, 16);
-        uintView[32] = (mat as any)?.globalFragmentSlotIndex ?? 0;
+        if (uniformCache && uniformCache.has(cacheKey)) {
+            const cached = uniformCache.get(cacheKey)!;
+            uniformBuffer = cached.buffer;
+            vertexBindGroup = cached.bindGroup;
+        } else {
+            uniformBuffer = gpuDevice.createBuffer({
+                label: `FoliageSubMesh_UniformBuffer_${globalSlot}`,
+                size: 144,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
 
-        const isIdentity = (
-            relMatrix[0] === 1 && relMatrix[1] === 0 && relMatrix[2] === 0 && relMatrix[3] === 0 &&
-            relMatrix[4] === 0 && relMatrix[5] === 1 && relMatrix[6] === 0 && relMatrix[7] === 0 &&
-            relMatrix[8] === 0 && relMatrix[9] === 0 && relMatrix[10] === 1 && relMatrix[11] === 0 &&
-            relMatrix[12] === 0 && relMatrix[13] === 0 && relMatrix[14] === 0 && relMatrix[15] === 1
-        );
-        uintView[33] = isIdentity ? 0 : 1;
-        floatView[34] = receiveShadow ? 1.0 : 0.0;
-        uintView[35] = 0;
+            const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
+            const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+            floatView.set(relMatrix, 0);
+            floatView.set(normMatrix, 16);
+            uintView[32] = globalSlot;
 
-        const vertexBindGroup = gpuDevice.createBindGroup({
-            label: `FoliageSubMesh_VertexBindGroup_${meshNode.name || subIndex}`,
-            layout: subMeshBindGroupLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {buffer: uniformBuffer}
-                }
-            ]
-        });
+            const isIdentity = (
+                relMatrix[0] === 1 && relMatrix[1] === 0 && relMatrix[2] === 0 && relMatrix[3] === 0 &&
+                relMatrix[4] === 0 && relMatrix[5] === 1 && relMatrix[6] === 0 && relMatrix[7] === 0 &&
+                relMatrix[8] === 0 && relMatrix[9] === 0 && relMatrix[10] === 1 && relMatrix[11] === 0 &&
+                relMatrix[12] === 0 && relMatrix[13] === 0 && relMatrix[14] === 0 && relMatrix[15] === 1
+            );
+            uintView[33] = isIdentity ? 0 : 1;
+            floatView[34] = receiveShadow ? 1.0 : 0.0;
+            uintView[35] = 0;
+
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+
+            vertexBindGroup = gpuDevice.createBindGroup({
+                label: `FoliageSubMesh_VertexBindGroup_${globalSlot}`,
+                layout: subMeshBindGroupLayout,
+                entries: [
+                    {
+                        binding: 0,
+                        resource: {buffer: uniformBuffer}
+                    }
+                ]
+            });
+
+            if (uniformCache) {
+                uniformCache.set(cacheKey, {buffer: uniformBuffer, bindGroup: vertexBindGroup});
+            }
+        }
 
         const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
         const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || isImpostor;

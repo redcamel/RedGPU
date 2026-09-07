@@ -90,6 +90,7 @@ class FoliageSubMesh {
     }
 
     updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
+        if (this.receiveShadow === receiveShadow) return;
         this.receiveShadow = receiveShadow;
         if (this.vertexUniformBuffer && gpuDevice) {
             FoliageSubMesh.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
