@@ -144,13 +144,9 @@ class FoliageSubMeshAssembler {
 
         let minOffset = 0;
         let maxDistSq = 0;
-        const maxInstances = options.maxInstances ?? 50000;
 
         for (let i = 0; i < subList.length; i++) {
             const sub = subList[i];
-            sub.instanceBufferOffset = (sub.lodIndex ?? 0) * maxInstances * 32;
-            sub.indirectOffsetBytes = i * 20;
-
             minOffset = Math.min(minOffset, sub.bottomOffset);
 
             const vBuffer = sub.geometry?.vertexBuffer;
@@ -167,20 +163,6 @@ class FoliageSubMeshAssembler {
                     if (dSq > maxDistSq) maxDistSq = dSq;
                 }
             }
-        }
-
-        for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
-            const shadowSub = shadowMergedSubMeshes[i];
-            let lodInfo: any = null;
-            for (let l = 0; l < lodInfoList.length; l++) {
-                if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
-                    lodInfo = lodInfoList[l];
-                    break;
-                }
-            }
-            const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
-            shadowSub.instanceBufferOffset = (shadowSub.lodIndex ?? 0) * maxInstances * 32;
-            shadowSub.indirectOffsetBytes = subOffset * 20;
         }
 
         const boundingRadius = Math.sqrt(maxDistSq);
