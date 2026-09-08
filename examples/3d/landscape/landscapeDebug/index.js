@@ -9,7 +9,7 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 350;
+        controller.y = 1050;
         controller.z = 0;
         controller.moveSpeed = 10000;
 
@@ -25,7 +25,7 @@ RedGPU.init(
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
-        landscape.heightScale = 2500;
+        landscape.heightScale = 1500;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
         landscape.tileUrlResolver = (row, col) => {
             console.log(row, col)

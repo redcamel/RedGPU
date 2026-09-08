@@ -9,9 +9,9 @@ RedGPU.init(
     (redGPUContext) => {
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 350;
+        controller.y = 1050;
         controller.z = 0;
-        controller.moveSpeed = 5000;
+        controller.moveSpeed = 10000;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -26,15 +26,13 @@ RedGPU.init(
         // 그림자 설정 (대규모 16km 오픈월드 지형 스케일에 최적화: 근거리 400m CSM + 원경 Raymarching)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
         directionalShadowManager.maxShadowDistance = 400;
-        directionalShadowManager.pcssLightSize = 0.5;
-        directionalShadowManager.strength = 0.9;
-        directionalShadowManager.cascadeCount = 3;
+
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
+        landscape.heightScale = 1500;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_512.png';
-        landscape.lod0SizeQuads = 64;
-        landscape.castShadow = false;
+
 
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
