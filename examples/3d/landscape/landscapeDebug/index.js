@@ -25,7 +25,10 @@ RedGPU.init(
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
+        landscape.heightScale = 2500;
+        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_512.png';
         landscape.tileUrlResolver = (row, col) => {
+            console.log(row, col)
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const rStr = String(row).padStart(2, '0');
             const cStr = String(col).padStart(2, '0');
@@ -158,7 +161,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
 
             // 4. Display
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
-            folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 3000, step: 25});
+            folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 6000, step: 50});
             folderDisplay.addBinding(landscape, 'wireframe');
             folderDisplay.addBinding(landscape, 'lodColoration');
             const baseColorProxy = {

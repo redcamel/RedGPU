@@ -29,6 +29,7 @@ export class LandscapeTileStreamer {
     #vntGenerator: LandscapeVNTGenerator | null = null;
     #vbtGenerator: LandscapeVBTGenerator | null = null;
     #material: LandscapeMaterial | null = null;
+    #globalHeightTexture: GPUTexture | null = null;
 
     #heightScale: number = 500.0;
 
@@ -142,6 +143,51 @@ export class LandscapeTileStreamer {
 
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileUrlResolver;
+    }
+
+    setGlobalHeightTexture(tex: GPUTexture | null): void {
+        this.#globalHeightTexture = tex;
+    }
+
+    restoreTileToGlobalBase(comp: LandscapeComponent): void {
+        if (!this.#globalHeightTexture || !this.#vhtAtlasTexture || !this.#vhtGenerator || !this.#spatialGrid) return;
+        const TILE_PIXEL_SIZE = 512;
+        const targetX = comp.componentX * TILE_PIXEL_SIZE;
+        const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
+        const compCountX = this.#spatialGrid.tileCountX;
+        const compCountZ = this.#spatialGrid.tileCountZ;
+
+        const uMin = comp.componentX / compCountX;
+        const vMin = comp.componentZ / compCountZ;
+        const uMax = (comp.componentX + 1) / compCountX;
+        const vMax = (comp.componentZ + 1) / compCountZ;
+
+        this.#vhtGenerator.bakeGlobalRegion(
+            this.#globalHeightTexture,
+            this.#vhtAtlasTexture,
+            targetX,
+            targetZ,
+            TILE_PIXEL_SIZE,
+            TILE_PIXEL_SIZE,
+            uMin,
+            vMin,
+            uMax,
+            vMax
+        );
+
+        if (this.#vntAtlasTexture && this.#vntGenerator) {
+            this.#vntGenerator.bakeTileRegion(
+                this.#vhtAtlasTexture,
+                this.#vntAtlasTexture,
+                targetX,
+                targetZ,
+                TILE_PIXEL_SIZE,
+                TILE_PIXEL_SIZE,
+                this.#heightScale,
+                this.#spatialGrid.worldSizeX,
+                compCountX
+            );
+        }
     }
 
     get loadedTileCount(): number {

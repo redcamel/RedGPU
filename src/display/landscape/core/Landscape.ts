@@ -11,6 +11,7 @@ import LandscapeSharedGeometry from "../spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../../../color/ColorRGBA";
 import LandscapeSpatialGrid from "../spatial/LandscapeSpatialGrid";
 import DirectTexture from "../../../resources/texture/DirectTexture";
+import parse16BitPngBuffer from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
@@ -68,6 +69,9 @@ export class Landscape extends Object3DContainer {
     #vntGenerator: LandscapeVNTGenerator;
     #vbtGenerator: LandscapeVBTGenerator;
     #vhtSampler: GPUSampler | null = null;
+    #globalHeightmapUrl: string = '';
+    #globalHeightTexture: GPUTexture | null = null;
+    #isGlobalHeightBaked: boolean = false;
 
     #worldSizeX: number;
     #worldSizeZ: number;
@@ -406,6 +410,88 @@ export class Landscape extends Object3DContainer {
             }
             this.#clearPipelineCaches();
         }
+    }
+
+    get globalHeightmapUrl(): string {
+        return this.#globalHeightmapUrl;
+    }
+
+    set globalHeightmapUrl(val: string) {
+        if (this.#globalHeightmapUrl !== val) {
+            this.#globalHeightmapUrl = val;
+            this.#loadGlobalHeightmapAsync();
+        }
+    }
+
+    get globalHeightTexture(): GPUTexture | null {
+        return this.#globalHeightTexture;
+    }
+
+    async #loadGlobalHeightmapAsync(): Promise<void> {
+        if (!this.#globalHeightmapUrl) return;
+        try {
+            const response = await fetch(this.#globalHeightmapUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const buffer = await response.arrayBuffer();
+            const cpuParsed = await parse16BitPngBuffer(buffer);
+
+            if (cpuParsed) {
+                const {width, height, pixels} = cpuParsed;
+                const gpuDevice = this.#redGPUContext.gpuDevice;
+                const bytesPerRow = width * 2;
+
+                if (this.#globalHeightTexture) {
+                    this.#globalHeightTexture.destroy();
+                }
+
+                this.#globalHeightTexture = gpuDevice.createTexture({
+                    size: [width, height],
+                    format: 'r16unorm',
+                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                    label: 'Landscape_GlobalHeightTexture_r16unorm'
+                });
+
+                gpuDevice.queue.writeTexture(
+                    {texture: this.#globalHeightTexture},
+                    pixels.buffer,
+                    {bytesPerRow},
+                    [width, height]
+                );
+
+                this.#tileStreamer?.setGlobalHeightTexture(this.#globalHeightTexture);
+                this.#bakeGlobalBaseToVHT();
+            }
+        } catch (e) {
+            console.warn('[Landscape ⚠️] Failed to load globalHeightmapUrl:', this.#globalHeightmapUrl, e);
+        }
+    }
+
+    #bakeGlobalBaseToVHT(): void {
+        if (!this.#globalHeightTexture || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
+
+        const atlasW = this.#componentCountX * 512;
+        const atlasH = this.#componentCountZ * 512;
+
+        // 1. VHT Atlas 전체에 글로벌 하이트맵 베이스 베이크
+        this.#vhtGenerator?.bakeGlobalBase(
+            this.#globalHeightTexture,
+            this.#vhtAtlasTexture,
+            this.#componentCountX,
+            this.#componentCountZ
+        );
+
+        // 2. VNT Atlas 전체에 전역 베이스 노멀 일괄 베이크
+        this.#vntGenerator?.bakeTileRegion(
+            this.#vhtAtlasTexture,
+            this.#vntAtlasTexture,
+            0, 0,
+            atlasW, atlasH,
+            this.#heightScale,
+            this.#worldSizeX,
+            this.#componentCountX
+        );
+
+        this.#isGlobalHeightBaked = true;
     }
 
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
@@ -1262,6 +1348,9 @@ export class Landscape extends Object3DContainer {
                 this.#vbtNormalAtlas?.gpuTextureView,
                 this.#vbtORMAtlas?.gpuTextureView
             );
+            if (this.#globalHeightTexture) {
+                this.#bakeGlobalBaseToVHT();
+            }
         }
 
         this.#spatialGrid.setConfig(componentCountX, componentCountZ, tileSizeX, tileSizeZ);

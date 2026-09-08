@@ -32,6 +32,7 @@ RedGPU.init(
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
+        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_512.png';
         landscape.lod0SizeQuads = 64;
         landscape.castShadow = false;
 
