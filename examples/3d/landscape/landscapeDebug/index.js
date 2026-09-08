@@ -11,7 +11,7 @@ RedGPU.init(
         controller.x = 0;
         controller.y = 350;
         controller.z = 0;
-        controller.moveSpeed = 5000;
+        controller.moveSpeed = 10000;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -26,7 +26,7 @@ RedGPU.init(
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 2500;
-        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_512.png';
+        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
         landscape.tileUrlResolver = (row, col) => {
             console.log(row, col)
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -164,6 +164,18 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 6000, step: 50});
             folderDisplay.addBinding(landscape, 'wireframe');
             folderDisplay.addBinding(landscape, 'lodColoration');
+
+            const globalMapProxy = { resolution: '1024' };
+            folderDisplay.addBinding(globalMapProxy, 'resolution', {
+                label: 'Global Fallback Res',
+                options: {
+                    '512 (487KB)': '512',
+                    '1024 (1.9MB)': '1024',
+                    '2048 (7.7MB)': '2048'
+                }
+            }).on('change', (ev) => {
+                landscape.globalHeightmapUrl = `../../../assets/terrain/terrainTest_001/global_heightmap_${ev.value}.png`;
+            });
             const baseColorProxy = {
                 get baseColor() {
                     return landscape.baseColor.hex;

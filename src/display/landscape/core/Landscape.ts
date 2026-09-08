@@ -438,7 +438,13 @@ export class Landscape extends Object3DContainer {
             if (cpuParsed) {
                 const {width, height, pixels} = cpuParsed;
                 const gpuDevice = this.#redGPUContext.gpuDevice;
-                const bytesPerRow = width * 2;
+                const count = width * height;
+                const f32Pixels = new Float32Array(count);
+                const inv65535 = 1.0 / 65535.0;
+                for (let i = 0; i < count; i++) {
+                    f32Pixels[i] = pixels[i] * inv65535;
+                }
+                const bytesPerRow = width * 4;
 
                 if (this.#globalHeightTexture) {
                     this.#globalHeightTexture.destroy();
@@ -446,14 +452,14 @@ export class Landscape extends Object3DContainer {
 
                 this.#globalHeightTexture = gpuDevice.createTexture({
                     size: [width, height],
-                    format: 'r16unorm',
+                    format: 'r32float',
                     usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-                    label: 'Landscape_GlobalHeightTexture_r16unorm'
+                    label: 'Landscape_GlobalHeightTexture_r32float'
                 });
 
                 gpuDevice.queue.writeTexture(
                     {texture: this.#globalHeightTexture},
-                    pixels.buffer,
+                    f32Pixels.buffer,
                     {bytesPerRow},
                     [width, height]
                 );

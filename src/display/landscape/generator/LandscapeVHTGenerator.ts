@@ -13,6 +13,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     // Global Heightmap Bake resources
     #globalComputePipeline: GPUComputePipeline | null = null;
     #globalBindGroupLayout: GPUBindGroupLayout | null = null;
+    #globalSampler: GPUSampler | null = null;
     #globalUniformBuffer: ArrayBuffer;
     #globalUniformU32: Uint32Array;
     #globalUniformF32: Float32Array;
@@ -25,6 +26,14 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.#globalUniformBuffer = new ArrayBuffer(32);
         this.#globalUniformU32 = new Uint32Array(this.#globalUniformBuffer);
         this.#globalUniformF32 = new Float32Array(this.#globalUniformBuffer);
+
+        this.#globalSampler = redGPUContext.gpuDevice.createSampler({
+            magFilter: 'linear',
+            minFilter: 'linear',
+            addressModeU: 'clamp-to-edge',
+            addressModeV: 'clamp-to-edge',
+            label: 'Landscape_VHT_Global_Sampler'
+        });
 
         this.#initComputeResources();
         this.#initGlobalComputeResources();
@@ -147,10 +156,14 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
                 },
                 {
                     binding: 1,
-                    resource: vhtAtlas.gpuTextureView
+                    resource: this.#globalSampler!
                 },
                 {
                     binding: 2,
+                    resource: vhtAtlas.gpuTextureView
+                },
+                {
+                    binding: 3,
                     resource: {buffer: uniformBuffer}
                 }
             ]
@@ -203,14 +216,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         const resourceManager = this.redGPUContext.resourceManager;
         const shaderInfo = resourceManager.wgslParser.parse('LandscapeVHTGlobalBakeComputeShaderModule', vhtGlobalBakeShaderCode);
 
-        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
-            0: {
-                texture: {
-                    sampleType: 'unfilterable-float',
-                    viewDimension: '2d'
-                }
-            }
-        });
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
         this.#globalBindGroupLayout = device.createBindGroupLayout(descriptor);
 
