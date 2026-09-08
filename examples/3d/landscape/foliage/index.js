@@ -14,7 +14,7 @@ RedGPU.init(
         controller.y = 1005;
         controller.z = 0;
         controller.tilt = -10;
-        controller.moveSpeed = 500;
+        controller.moveSpeed = 1500;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -202,11 +202,17 @@ RedGPU.init(
                             name: `Tree_${baseName}`,
                             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
-                            maxInstances: 100000,
-                            minScale: [0.35, 0.35, 0.35],
-                            maxScale: [0.65, 0.65, 0.65],
+                            maxInstances: 500000,
+                            instancesPerTile: 2500,
+                            densityMultiplier: 1.2,
+                            minWeightThreshold: 0.02,
+                            minScale: [1.2, 1.4, 1.2],
+                            maxScale: [2.4, 3.0, 2.4],
                             randomRotationY: true,
                             useImpostor: true,
+                            cullingDistance: 6000,
+                            fadeStartDistance: 4500,
+                            targetLayer: 'Grass'
                         });
                     });
                 }
@@ -265,11 +271,15 @@ RedGPU.init(
                     name: 'RiverRock',
                     type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
                     lods: [{mesh: rockMesh, lodDistance: 300}],
-                    maxInstances: 100000,
-                    minScale: [4.3, 4.3, 4.3],
+                    maxInstances: 200000,
+                    instancesPerTile: 600,
+                    densityMultiplier: 1.0,
+                    minWeightThreshold: 0.05,
+                    minScale: [1, 1, 1],
                     maxScale: [7.2, 7.2, 7.2],
                     randomRotationY: true,
                     bottomOffset: 6.5,
+                    targetLayer: 'Rock'
                 });
             }
         );
@@ -336,6 +346,14 @@ RedGPU.init(
                         });
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
+                        typeFolder.addBinding(type, 'maxInstances', {readonly: true});
+                        typeFolder.addBinding(type, 'enableStreaming', {label: 'Tile Streaming'});
+                        typeFolder.addBinding(type, 'streamingRadius', {
+                            label: 'Streaming Radius (m)',
+                            min: 100,
+                            max: 3000,
+                            step: 50
+                        });
                         typeFolder.addBinding(type, 'useDepthPrepass');
                         typeFolder.addBinding(type, 'castShadow');
                         typeFolder.addBinding(type, 'maxShadowDistance', {
@@ -352,6 +370,103 @@ RedGPU.init(
                             min: 200,
                             max: 8000,
                             step: 50
+                        });
+
+                        const splatFolder = typeFolder.addFolder({
+                            title: '🌿 SplatMap Layer Target',
+                            expanded: true
+                        });
+
+                        const layerBinding = {
+                            get targetLayer() {
+                                return type.targetLayer ?? 'None(All)';
+                            },
+                            set targetLayer(val) {
+                                type.targetLayer = val === 'None(All)' ? undefined : val;
+                                foliageManager.repopulateFoliageType(type);
+                            }
+                        };
+
+                        splatFolder.addBinding(layerBinding, 'targetLayer', {
+                            label: 'Target Layer',
+                            options: {
+                                'None (All Random)': 'None(All)',
+                                'Grass (R Channel)': 'Grass',
+                                'Rock (G Channel)': 'Rock',
+                                'Gravel (B Channel)': 'Gravel',
+                                'Leave (A Channel)': 'Leave'
+                            }
+                        });
+
+                        const thresholdBinding = {
+                            get minWeight() {
+                                return type.minWeightThreshold;
+                            },
+                            set minWeight(val) {
+                                type.minWeightThreshold = val;
+                                foliageManager.repopulateFoliageType(type);
+                            }
+                        };
+
+                        splatFolder.addBinding(thresholdBinding, 'minWeight', {
+                            label: 'Min Weight',
+                            min: 0.0,
+                            max: 0.9,
+                            step: 0.05
+                        });
+
+                        const mulBinding = {
+                            get densityMultiplier() {
+                                return type.densityMultiplier;
+                            },
+                            set densityMultiplier(val) {
+                                type.densityMultiplier = val;
+                                foliageManager.repopulateFoliageType(type);
+                                pane.refresh();
+                            }
+                        };
+                        splatFolder.addBinding(mulBinding, 'densityMultiplier', {
+                            label: 'Density Scale (x)',
+                            min: 0.0,
+                            max: 3.0,
+                            step: 0.05
+                        });
+
+                        const perTileBinding = {
+                            get perTile() {
+                                return type.instancesPerTile ?? 1000;
+                            },
+                            set perTile(val) {
+                                type.instancesPerTile = val;
+                                foliageManager.repopulateFoliageType(type);
+                                pane.refresh();
+                            }
+                        };
+                        splatFolder.addBinding(perTileBinding, 'perTile', {
+                            label: 'Instances / Tile',
+                            min: 50,
+                            max: 5000,
+                            step: 50
+                        });
+
+                        const densityBinding = {
+                            get densityScale() {
+                                return type.densityScaleByWeight;
+                            },
+                            set densityScale(val) {
+                                type.densityScaleByWeight = val;
+                                foliageManager.repopulateFoliageType(type);
+                                pane.refresh();
+                            }
+                        };
+
+                        splatFolder.addBinding(densityBinding, 'densityScale', {
+                            label: 'Weight Density Scale'
+                        });
+
+                        splatFolder.addButton({title: '🔄 Re-populate'}).on('click', () => {
+                            foliageManager.repopulateFoliageType(type);
+                            pane.refresh();
                         });
 
                         const lodInfo = {
@@ -430,7 +545,10 @@ RedGPU.init(
                     }
                 };
 
-                setInterval(updateFoliageTypeGUI, 1000);
+                setInterval(() => {
+                    updateFoliageTypeGUI();
+                    pane.refresh();
+                }, 1000);
                 updateFoliageTypeGUI();
             }
         });

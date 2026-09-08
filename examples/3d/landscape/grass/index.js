@@ -261,14 +261,19 @@ RedGPU.init(
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
-            maxInstances: 1000000,
-            cullingDistance: 2500,
-            fadeStartDistance: 1000,
+            enableStreaming: true,
+            streamingRadius: 700,
+            subCellSize: 100,
+            instancesPerTile: 7000,
+            densityMultiplier: 1.0,
+            cullingDistance: 450,
+            fadeStartDistance: 350,
             minScale: [0.8, 10, 0.8],
             maxScale: [1.3, 20, 1.3],
             randomRotationY: true,
             useOcclusionCulling: false,
-            maxShadowDistance: 35
+            maxShadowDistance: 35,
+            targetLayer: 'Grass'
         });
 
         // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (HUD 모니터, 2D 공간 분할 그리드, VHT 고도 아틀라스, VNT 노멀 아틀라스)
@@ -367,9 +372,57 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     },
                     set useOcclusionCulling(v) {
                         if (grassType) grassType.useOcclusionCulling = v;
+                    },
+                    get maxInstances() {
+                        return grassType ? grassType.maxInstances : 0;
+                    },
+                    get maxCapacity() {
+                        return foliageManager?.megaBuffer?.maxTotalInstances ?? 0;
+                    },
+                    get enableStreaming() {
+                        return grassType ? grassType.enableStreaming : true;
+                    },
+                    set enableStreaming(v) {
+                        if (grassType) {
+                            grassType.enableStreaming = v;
+                            foliageManager.repopulateFoliageType(grassType);
+                        }
+                    },
+                    get streamingRadius() {
+                        return grassType ? grassType.streamingRadius : 700;
+                    },
+                    set streamingRadius(v) {
+                        if (grassType) {
+                            grassType.streamingRadius = v;
+                            foliageManager.repopulateFoliageType(grassType);
+                        }
+                    },
+                    get subCellSize() {
+                        return grassType ? grassType.subCellSize : 100;
+                    },
+                    set subCellSize(v) {
+                        if (grassType) {
+                            grassType.subCellSize = v;
+                            foliageManager.repopulateFoliageType(grassType);
+                        }
                     }
                 };
-                folderFoliage.addBinding(foliageProxy, 'foliageCount', {readonly: true});
+                folderFoliage.addBinding(foliageProxy, 'foliageCount', {label: 'Active Instances', readonly: true});
+                folderFoliage.addBinding(foliageProxy, 'maxInstances', {label: 'Max Instances', readonly: true});
+                folderFoliage.addBinding(foliageProxy, 'maxCapacity', {label: 'MegaBuffer Capacity', readonly: true});
+                folderFoliage.addBinding(foliageProxy, 'enableStreaming', {label: 'Tile Streaming'});
+                folderFoliage.addBinding(foliageProxy, 'streamingRadius', {
+                    label: 'Streaming Radius (m)',
+                    min: 100,
+                    max: 1200,
+                    step: 50
+                });
+                folderFoliage.addBinding(foliageProxy, 'subCellSize', {
+                    label: 'Sub-Cell Size (m)',
+                    min: 50,
+                    max: 500,
+                    step: 50
+                });
                 folderFoliage.addBinding(foliageProxy, 'foliageCullingDist', {
                     min: 100,
                     max: 2000,
@@ -381,6 +434,93 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     step: 20
                 });
                 folderFoliage.addBinding(foliageProxy, 'useOcclusionCulling', {label: 'Occlusion Culling (HZB)'});
+
+                const splatFolder = folderFoliage.addFolder({title: '🌿 SplatMap Layer Target', expanded: true});
+                const layerBinding = {
+                    get targetLayer() {
+                        return grassType.targetLayer ?? 'None(All)';
+                    },
+                    set targetLayer(val) {
+                        grassType.targetLayer = val === 'None(All)' ? undefined : val;
+                        foliageManager.repopulateFoliageType(grassType);
+                    }
+                };
+                splatFolder.addBinding(layerBinding, 'targetLayer', {
+                    label: 'Target Layer',
+                    options: {
+                        'None (All Random)': 'None(All)',
+                        'Grass (R Channel)': 'Grass',
+                        'Rock (G Channel)': 'Rock',
+                        'Gravel (B Channel)': 'Gravel',
+                        'Leave (A Channel)': 'Leave'
+                    }
+                });
+
+                const thresholdBinding = {
+                    get minWeight() {
+                        return grassType.minWeightThreshold;
+                    },
+                    set minWeight(val) {
+                        grassType.minWeightThreshold = val;
+                        foliageManager.repopulateFoliageType(grassType);
+                    }
+                };
+                splatFolder.addBinding(thresholdBinding, 'minWeight', {
+                    label: 'Min Weight',
+                    min: 0.0,
+                    max: 0.9,
+                    step: 0.05
+                });
+
+                const mulBinding = {
+                    get densityMultiplier() {
+                        return grassType.densityMultiplier;
+                    },
+                    set densityMultiplier(val) {
+                        grassType.densityMultiplier = val;
+                        foliageManager.repopulateFoliageType(grassType);
+                    }
+                };
+                splatFolder.addBinding(mulBinding, 'densityMultiplier', {
+                    label: 'Density Scale (x)',
+                    min: 0.0,
+                    max: 2.0,
+                    step: 0.05
+                });
+
+                const perTileBinding = {
+                    get perTile() {
+                        return grassType.instancesPerTile ?? 7000;
+                    },
+                    set perTile(val) {
+                        grassType.instancesPerTile = val;
+                        foliageManager.repopulateFoliageType(grassType);
+                        if (activePane) activePane.refresh();
+                    }
+                };
+                splatFolder.addBinding(perTileBinding, 'perTile', {
+                    label: 'Instances / Tile',
+                    min: 500,
+                    max: 8000,
+                    step: 500
+                });
+
+                const densityBinding = {
+                    get densityScale() {
+                        return grassType.densityScaleByWeight;
+                    },
+                    set densityScale(val) {
+                        grassType.densityScaleByWeight = val;
+                        foliageManager.repopulateFoliageType(grassType);
+                    }
+                };
+                splatFolder.addBinding(densityBinding, 'densityScale', {
+                    label: 'Weight Density Scale'
+                });
+
+                splatFolder.addButton({title: '🔄 Re-populate Grass'}).on('click', () => {
+                    foliageManager.repopulateFoliageType(grassType);
+                });
             }
 
             // Folder 1: Spatial System (Dimensions & LOD)
