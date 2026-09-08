@@ -342,8 +342,8 @@ RedGPU.init(
                                 '250': 250,
                                 '500': 500
                             }
-                        }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
+                        }).on('change', (ev) => {
+                            foliageManager.subCellSize = ev.value;
                         });
                         typeFolder.addBinding(type, 'streamingRadius', {
                             min: 100,

@@ -295,6 +295,30 @@ RedGPU.init(
                 statsFolder.addBinding(globalStats, 'totalInstances', {readonly: true});
                 statsFolder.addBinding(globalStats, 'maxCapacity', {readonly: true});
 
+                const subCellFolder = folderFoliage.addFolder({title: 'subCell', expanded: true});
+                subCellFolder.addBinding(foliageManager, 'debugSubCellColoration');
+                subCellFolder.addBinding(foliageManager, 'subCellSize', {
+                    options: {
+                        '50': 50,
+                        '100': 100,
+                        '200': 200,
+                        '250': 250,
+                        '500': 500,
+                    }
+                });
+                subCellFolder.addBinding(foliageManager, 'streamingRadius', {
+                    min: 100,
+                    max: 3000,
+                    step: 50
+                });
+
+                const subCellStats = {
+                    get activeSubCellCount() {
+                        return foliageManager.spatialGrid?.activeSubCellCount ?? 0;
+                    }
+                };
+                subCellFolder.addBinding(subCellStats, 'activeSubCellCount', {readonly: true});
+
                 const createdTypeFolders = new Set();
                 const updateFoliageTypeGUI = () => {
                     const types = foliageManager.typeList;
@@ -335,8 +359,8 @@ RedGPU.init(
                                 '250': 250,
                                 '500': 500
                             }
-                        }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
+                        }).on('change', (ev) => {
+                            foliageManager.subCellSize = ev.value;
                         });
                         typeFolder.addBinding(type, 'streamingRadius', {
                             min: 100,

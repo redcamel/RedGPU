@@ -128,6 +128,13 @@ class LandscapeFoliageManager {
             this.#subCellSize = clamped;
             this.#spatialGrid.subCellSize = clamped;
             this.#landscape?.updateLandscapeUniforms?.();
+
+            // [Phase 3.2] 등록된 모든 FoliageType의 subCellSize 동기화 및 자동 재생성
+            const count = this.#typeList.length;
+            for (let i = 0; i < count; i++) {
+                this.#typeList[i].subCellSize = clamped;
+            }
+            this.repopulateAll();
         }
     }
 
@@ -194,9 +201,15 @@ class LandscapeFoliageManager {
             return this.#foliageTypes.get(options.name)!;
         }
 
+        const mergedOptions: FoliageTypeOptions = {
+            ...options,
+            subCellSize: options.subCellSize ?? this.#subCellSize,
+            streamingRadius: options.streamingRadius ?? this.#streamingRadius
+        };
+
         const foliageType = new FoliageType(
             this.#redGPUContext,
-            options,
+            mergedOptions,
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty()
