@@ -19,7 +19,7 @@ export class LandscapeSharedGeometry {
     #tileSizeX: number;
     #tileSizeZ: number;
     #componentSizeQuads: number;
-    #lod0SizeQuads: number = 256;
+    #lod0SizeQuads: number;
     #maxLODLevel: number;
 
     #combinedVertexBuffer: VertexBuffer | null = null;

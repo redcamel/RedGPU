@@ -106,7 +106,7 @@ export class Landscape extends Object3DContainer {
         const tileSizeX = worldSizeX / componentCountX;
         const tileSizeZ = worldSizeZ / componentCountZ;
         const componentSizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
-        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
+        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
         const maxLODLevel = 5;
 
         const material = new LandscapeMaterial(redGPUContext);
