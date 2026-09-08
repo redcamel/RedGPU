@@ -306,8 +306,30 @@ fn getLandscapeIndirectLighting(
     }
 }
 
+fn sampleBilinearHeight(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
+    let coord = uv * texSize - vec2<f32>(0.5);
+    let iCoord = floor(coord);
+    let fCoord = fract(coord);
+
+    let maxCoord = texSize - vec2<f32>(1.0);
+    let c0 = vec2<i32>(clamp(iCoord, vec2<f32>(0.0), maxCoord));
+    let c1 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), maxCoord));
+    let c2 = vec2<i32>(clamp(iCoord + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), maxCoord));
+    let c3 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), maxCoord));
+
+    let h0 = textureLoad(heightMapTexture, c0, 0).r;
+    let h1 = textureLoad(heightMapTexture, c1, 0).r;
+    let h2 = textureLoad(heightMapTexture, c2, 0).r;
+    let h3 = textureLoad(heightMapTexture, c3, 0).r;
+
+    let top = mix(h0, h1, fCoord.x);
+    let bot = mix(h2, h3, fCoord.x);
+    return mix(top, bot, fCoord.y);
+}
+
 fn computeLandscapeHeightmapShadow(
     worldPos: vec3<f32>,
+    N: vec3<f32>,
     L: vec3<f32>,
     worldSizeX: f32,
     worldSizeZ: f32,
@@ -319,19 +341,21 @@ fn computeLandscapeHeightmapShadow(
 ) -> f32 {
     let stepCount = u32(clamp(stepsF, 4.0, 48.0));
     let invStepCount = 1.0 / f32(stepCount);
-    let minDistance = 15.0;
+    let minDistance = 25.0;
     let distRange = max(1.0, maxDistance - minDistance);
 
     var shadowFactor: f32 = 1.0;
 
     let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
-    let baseUV = (worldPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
+    // 자가 차폐(Self-Occlusion Acne) 방지를 위한 표면 법선 오프셋
+    let biasedPos = worldPos + N * 2.0;
+    let baseUV = (biasedPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
     let uvDir = L.xz * invWorldSize;
 
     for (var i = 0u; i < stepCount; i = i + 1u) {
         let u = (f32(i) + 0.5) * invStepCount;
         let t = minDistance + distRange * (u * u);
-        let samplePosY = worldPos.y + L.y * t;
+        let samplePosY = biasedPos.y + L.y * t;
 
         if (samplePosY > heightScale) {
             break;
@@ -343,16 +367,18 @@ fn computeLandscapeHeightmapShadow(
             break;
         }
 
-        let texCoord = vec2<i32>(clamp(uv * vhtTexSize, vec2<f32>(0.0), vhtTexSize - vec2<f32>(1.0)));
-        let terrainHeight = textureLoad(heightMapTexture, texCoord, 0).r * heightScale;
-        let diff = samplePosY - terrainHeight;
+        let terrainHeight = sampleBilinearHeight(uv, vhtTexSize) * heightScale;
+        // 거리 비례 적응형 바이어스로 자기 자신 폴리곤에 광선이 걸리는 여드름 현상 차단
+        let bias = max(2.5, t * 0.006);
+        let diff = samplePosY - terrainHeight + bias;
 
         if (diff < 0.0) {
-            return 0.0;
+            let hardPenumbra = clamp(1.0 + diff / max(1.0, bias * 2.0), 0.0, 1.0);
+            shadowFactor = min(shadowFactor, hardPenumbra);
+        } else {
+            let penumbra = clamp(diff * softness / max(1.0, t), 0.0, 1.0);
+            shadowFactor = min(shadowFactor, penumbra);
         }
-
-        let penumbra = clamp(diff * softness / t, 0.0, 1.0);
-        shadowFactor = min(shadowFactor, penumbra);
 
         if (shadowFactor <= 0.001) {
             return 0.0;
@@ -481,6 +507,7 @@ fn main(inputData: InputData) -> OutputFragment {
         if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
             let terrainSelfShadow = computeLandscapeHeightmapShadow(
                 input_vertexPosition,
+                N,
                 L,
                 landscapeInstanceUniforms.worldSizeX,
                 landscapeInstanceUniforms.worldSizeZ,

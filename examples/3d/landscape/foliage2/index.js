@@ -268,6 +268,13 @@ RedGPU.init(
                     step: 1000
                 });
 
+                const folderLandscape = pane.addFolder({title: 'Landscape', expanded: false});
+                folderLandscape.addBinding(landscape, 'enableHeightmapShadow');
+                folderLandscape.addBinding(landscape, 'heightmapShadowSteps', {min: 4, max: 48, step: 1});
+                folderLandscape.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 8000, step: 100});
+                folderLandscape.addBinding(landscape, 'heightmapShadowSoftness', {min: 0.1, max: 20.0, step: 0.5});
+                folderLandscape.addBinding(landscape, 'receiveShadow');
+
                 const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
 

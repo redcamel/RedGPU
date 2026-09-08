@@ -222,16 +222,14 @@ export class LandscapeTileStreamer {
 
             const targetX = col * TILE_PIXEL_SIZE;
             const targetZ = row * TILE_PIXEL_SIZE;
-            const copyW = Math.min(cpuParsed.width || TILE_PIXEL_SIZE, TILE_PIXEL_SIZE);
-            const copyH = Math.min(cpuParsed.height || TILE_PIXEL_SIZE, TILE_PIXEL_SIZE);
 
             vntGen.bakeTileRegion(
                 vhtAtlas,
                 vntAtlas,
                 targetX,
                 targetZ,
-                copyW,
-                copyH,
+                TILE_PIXEL_SIZE,
+                TILE_PIXEL_SIZE,
                 heightScale,
                 worldSizeX,
                 componentCountX
