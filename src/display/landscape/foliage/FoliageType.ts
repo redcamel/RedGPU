@@ -248,6 +248,22 @@ class FoliageType {
         return this.#nameHash;
     }
 
+    get maxInstances(): number {
+        return this.#options.maxInstances;
+    }
+
+    get minScale(): readonly [number, number, number] {
+        return this.#options.minScale;
+    }
+
+    get maxScale(): readonly [number, number, number] {
+        return this.#options.maxScale;
+    }
+
+    get randomRotationY(): boolean {
+        return this.#options.randomRotationY;
+    }
+
     get options(): FoliageTypeOptions {
         return this.#options;
     }
