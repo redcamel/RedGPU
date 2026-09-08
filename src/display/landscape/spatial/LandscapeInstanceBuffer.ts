@@ -20,7 +20,7 @@ export class LandscapeInstanceBuffer {
 
     #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
-    #landscapeUniformByteLength: number = 240;
+    #landscapeUniformByteLength: number = 256;
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
@@ -123,7 +123,10 @@ export class LandscapeInstanceBuffer {
         enableHeightmapShadow: boolean = true,
         heightmapShadowSteps: number = 16,
         heightmapShadowDistance: number = 3000.0,
-        heightmapShadowSoftness: number = 8.0
+        heightmapShadowSoftness: number = 8.0,
+        foliageSubCellColoration: boolean = false,
+        foliageSubCellSize: number = 100.0,
+        foliageStreamingRadius: number = 600.0
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#landscapeUniformBuffer) return;
@@ -176,6 +179,11 @@ export class LandscapeInstanceBuffer {
         f32[57] = heightmapShadowSteps;
         f32[58] = heightmapShadowDistance;
         f32[59] = heightmapShadowSoftness;
+
+        f32[60] = foliageSubCellColoration ? 1.0 : 0.0;
+        f32[61] = foliageSubCellSize;
+        f32[62] = foliageStreamingRadius;
+        f32[63] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,

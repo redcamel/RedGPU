@@ -347,6 +347,37 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
                 }
             });
+
+            // 6. Foliage Manager
+            const foliageManager = landscape.foliageManager;
+            const folderFoliage = pane.addFolder({title: 'foliageManager', expanded: true});
+            const subCellFolder = folderFoliage.addFolder({title: 'subCell', expanded: true});
+            subCellFolder.addBinding(foliageManager, 'debugSubCellColoration');
+            subCellFolder.addBinding(foliageManager, 'subCellSize', {
+                options: {
+                    '50': 50,
+                    '100': 100,
+                    '200': 200,
+                    '250': 250,
+                    '500': 500,
+                }
+            });
+            subCellFolder.addBinding(foliageManager, 'streamingRadius', {
+                min: 100,
+                max: 3000,
+                step: 50
+            });
+
+            const subCellStats = {
+                get activeSubCellCount() {
+                    return foliageManager.spatialGrid?.activeSubCellCount ?? 0;
+                }
+            };
+            subCellFolder.addBinding(subCellStats, 'activeSubCellCount', {readonly: true});
+
+            setInterval(() => {
+                pane.refresh();
+            }, 200);
         }
     });
 };

@@ -148,7 +148,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {min: 0.1, max: 0.99, step: 0.05});
 
             // 3. Tile Streaming
-            const folderStream = pane.addFolder({title: 'Tile Streaming', expanded: false});
+            const folderStream = pane.addFolder({title: 'Tile Streaming', expanded: true});
             folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
             folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
             folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
@@ -196,6 +196,37 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
                     dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
                 }
             });
+
+            // 7. Foliage Manager
+            const foliageManager = landscape.foliageManager;
+            const folderFoliage = pane.addFolder({title: 'foliageManager', expanded: true});
+            const subCellFolder = folderFoliage.addFolder({title: 'subCell', expanded: true});
+            subCellFolder.addBinding(foliageManager, 'debugSubCellColoration');
+            subCellFolder.addBinding(foliageManager, 'subCellSize', {
+                options: {
+                    '50': 50,
+                    '100': 100,
+                    '200': 200,
+                    '250': 250,
+                    '500': 500,
+                }
+            });
+            subCellFolder.addBinding(foliageManager, 'streamingRadius', {
+                min: 100,
+                max: 3000,
+                step: 50
+            });
+
+            const subCellStats = {
+                get activeSubCellCount() {
+                    return foliageManager.spatialGrid?.activeSubCellCount ?? 0;
+                }
+            };
+            subCellFolder.addBinding(subCellStats, 'activeSubCellCount', {readonly: true});
+
+            setInterval(() => {
+                pane.refresh();
+            }, 200);
         }
     });
 };

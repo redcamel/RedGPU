@@ -7,6 +7,7 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
 import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
+import LandscapeFoliageSpatialGrid from "./core/spatial/LandscapeFoliageSpatialGrid";
 
 class LandscapeFoliageManager {
     static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -25,9 +26,15 @@ class LandscapeFoliageManager {
     #cullingDispatcher: FoliageCullingDispatcher;
     #useDepthPrepass: boolean = true;
 
+    #spatialGrid: LandscapeFoliageSpatialGrid;
+    #subCellSize: number = 100.0;
+    #streamingRadius: number = 600.0;
+    #debugSubCellColoration: boolean = false;
+
     constructor(landscape: Landscape) {
         this.#landscape = landscape;
         this.#redGPUContext = landscape.redGPUContext;
+        this.#spatialGrid = new LandscapeFoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
@@ -111,7 +118,53 @@ class LandscapeFoliageManager {
         }
     }
 
+    get subCellSize(): number {
+        return this.#subCellSize;
+    }
+
+    set subCellSize(val: number) {
+        const clamped = Math.max(10.0, val);
+        if (this.#subCellSize !== clamped) {
+            this.#subCellSize = clamped;
+            this.#spatialGrid.subCellSize = clamped;
+            this.#landscape?.updateLandscapeUniforms?.();
+        }
+    }
+
+    get streamingRadius(): number {
+        return this.#streamingRadius;
+    }
+
+    set streamingRadius(val: number) {
+        const clamped = Math.max(10.0, val);
+        if (this.#streamingRadius !== clamped) {
+            this.#streamingRadius = clamped;
+            this.#spatialGrid.streamingRadius = clamped;
+            this.#landscape?.updateLandscapeUniforms?.();
+        }
+    }
+
+    get debugSubCellColoration(): boolean {
+        return this.#debugSubCellColoration;
+    }
+
+    set debugSubCellColoration(val: boolean) {
+        const boolVal = !!val;
+        if (this.#debugSubCellColoration !== boolVal) {
+            this.#debugSubCellColoration = boolVal;
+            this.#landscape?.updateLandscapeUniforms?.();
+        }
+    }
+
+    get spatialGrid(): LandscapeFoliageSpatialGrid {
+        return this.#spatialGrid;
+    }
+
     update(viewOrCamera?: any, stateData?: any): void {
+        const cam = viewOrCamera?.camera || viewOrCamera;
+        if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
+            this.#spatialGrid.update(cam.x, cam.z);
+        }
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
     }
 

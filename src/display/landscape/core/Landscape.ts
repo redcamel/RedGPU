@@ -221,6 +221,7 @@ export class Landscape extends Object3DContainer {
             this.#foliageManager?.handleTileLoaded(comp);
         });
         this.#debuggerManager = new LandscapeDebuggerManager(this);
+        this.#updateLandscapeUniforms();
     }
 
     get redGPUContext(): RedGPUContext {
@@ -702,6 +703,36 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get foliageSubCellColoration(): boolean {
+        return this.#foliageManager?.debugSubCellColoration ?? false;
+    }
+
+    set foliageSubCellColoration(value: boolean) {
+        if (this.#foliageManager) {
+            this.#foliageManager.debugSubCellColoration = value;
+        }
+    }
+
+    get foliageSubCellSize(): number {
+        return this.#foliageManager?.subCellSize ?? 100.0;
+    }
+
+    set foliageSubCellSize(value: number) {
+        if (this.#foliageManager) {
+            this.#foliageManager.subCellSize = value;
+        }
+    }
+
+    get foliageStreamingRadius(): number {
+        return this.#foliageManager?.streamingRadius ?? 600.0;
+    }
+
+    set foliageStreamingRadius(value: number) {
+        if (this.#foliageManager) {
+            this.#foliageManager.streamingRadius = value;
+        }
+    }
+
     set lodMetric(value: 'distance' | 'screenSize') {
         if (this.#lodMetric !== value) {
             this.#lodMetric = value;
@@ -929,6 +960,10 @@ export class Landscape extends Object3DContainer {
         this.#tileSizeTuple[1] = this.#tileSizeZ;
     }
 
+    updateLandscapeUniforms(): void {
+        this.#updateLandscapeUniforms();
+    }
+
     #updateLandscapeUniforms(): void {
         const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
         const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
@@ -955,7 +990,10 @@ export class Landscape extends Object3DContainer {
             this.#enableHeightmapShadow,
             this.#heightmapShadowSteps,
             this.#heightmapShadowDistance,
-            this.#heightmapShadowSoftness
+            this.#heightmapShadowSoftness,
+            this.#foliageManager?.debugSubCellColoration ?? false,
+            this.#foliageManager?.subCellSize ?? 100.0,
+            this.#foliageManager?.streamingRadius ?? 600.0
         );
     }
 

@@ -55,8 +55,6 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 600;
 
 
-
-
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.componentCount = [16, 16];
@@ -144,9 +142,7 @@ RedGPU.init(
         scene.addLandscape(landscape);
 
         const foliageManager = landscape.foliageManager;
-        foliageManager.debugSubCellColoration = true;
-        foliageManager.subCellSize = 100;
-        foliageManager.streamingRadius = 600;
+
 
         // 1. Pine Tree (Multi-LOD) 로드
         new RedGPU.GLTFLoader(
@@ -182,20 +178,11 @@ RedGPU.init(
                 console.log(`🌲 [test.glb] Discovered ${treeGroups.size} tree variants:`, Array.from(treeGroups.keys()));
 
                 if (treeGroups.size > 0) {
-                    console.log('treeGroups', treeGroups);
-                    // 온전한 3D 메시(lod0)를 보유한 대표 나무 1종류만 선택하여 등록
-                    let targetTree = null;
-                    for (const [baseName, lods] of treeGroups.entries()) {
-                        if (lods.lod0) {
-                            targetTree = {baseName, lods};
-                            break;
-                        }
-                    }
-
-                    if (targetTree) {
-                        const {baseName, lods} = targetTree;
+                    console.log('treeGroups', treeGroups)
+                    treeGroups.forEach((lods, baseName) => {
                         const lodConfigs = [];
-                        const lod0 = lods.lod0;
+                        const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
+                        if (!lod0) return;
 
                         lodConfigs.push({mesh: lod0, lodDistance: 50, receiveShadow: true});
                         if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({
@@ -209,7 +196,7 @@ RedGPU.init(
                             receiveShadow: false // 100m 밖 로우폴리는 CSM 샘플링 스킵하여 프레임 최적화
                         });
 
-                        const registered = foliageManager.addFoliageType({
+                        foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
@@ -225,20 +212,75 @@ RedGPU.init(
                             fadeStartDistance: 4500,
                             targetLayer: 'Grass'
                         });
-                        console.log(`🌲 [Foliage] Successfully registered 1 tree: Tree_${baseName}`, registered);
-                    }
+                    });
                 }
             }
         );
-
-        // 2. River Rock (확인 편의를 위해 비활성화)
+        //
+        // // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
         // new RedGPU.GLTFLoader(
         //     redGPUContext,
-        //     '../../../assets/terrain/river_rock.glb',
+        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
         //     (loader) => {
-        //         ...
+        //         const root = loader.resultMesh;
+        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+        //
+        //         foliageManager.addFoliageType({
+        //             name: 'FrangipaniTree',
+        //             lods: [{mesh: root, lodDistance: 120}],
+        //             maxInstances: 10000,
+        //             minScale: [4.2, 4.2, 4.2],
+        //             maxScale: [6.2, 6.2, 6.2],
+        //             randomRotationY: true,
+        //             cullingDistance: 3500,
+        //             fadeStartDistance: 2800,
+        //             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
+        //             useImpostor: true
+        //         });
         //     }
         // );
+
+        // 3. River Rock (Static Opaque Mesh Scatter) 로드
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/river_rock.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                console.log('🪨 [river_rock.glb] Loaded Root:', root);
+
+                // 원점 중심의 RiverRock 노드 탐색 (없으면 root 사용)
+                let rockMesh = root;
+                const findMeshNode = (node) => {
+                    if (node.name === 'RiverRock' || node.name === 'RiverRock_lambert3_0') return node;
+                    if (node.children) {
+                        for (let i = 0; i < node.children.length; i++) {
+                            const found = findMeshNode(node.children[i]);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+                const targetNode = findMeshNode(root);
+                if (targetNode) {
+                    rockMesh = targetNode;
+                }
+
+                foliageManager.addFoliageType({
+                    name: 'RiverRock',
+                    type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
+                    lods: [{mesh: rockMesh, lodDistance: 300}],
+                    maxInstances: 200000,
+                    instancesPerTile: 600,
+                    densityMultiplier: 1.0,
+                    minWeightThreshold: 0.05,
+                    minScale: [1, 1, 1],
+                    maxScale: [7.2, 7.2, 7.2],
+                    randomRotationY: true,
+                    bottomOffset: 6.5,
+                    targetLayer: 'Rock'
+                });
+            }
+        );
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
@@ -267,31 +309,8 @@ RedGPU.init(
                     step: 1000
                 });
 
-                const folderFoliage = pane.addFolder({title: 'foliageManager', expanded: true});
+                const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
-                const subCellFolder = folderFoliage.addFolder({title: 'subCell', expanded: true});
-                subCellFolder.addBinding(foliageManager, 'debugSubCellColoration');
-                subCellFolder.addBinding(foliageManager, 'subCellSize', {
-                    options: {
-                        '50': 50,
-                        '100': 100,
-                        '200': 200,
-                        '250': 250,
-                        '500': 500,
-                    }
-                });
-                subCellFolder.addBinding(foliageManager, 'streamingRadius', {
-                    min: 100,
-                    max: 3000,
-                    step: 50
-                });
-
-                const subCellStats = {
-                    get activeSubCellCount() {
-                        return foliageManager.spatialGrid?.activeSubCellCount ?? 0;
-                    }
-                };
-                subCellFolder.addBinding(subCellStats, 'activeSubCellCount', {readonly: true});
 
                 const globalStats = {
                     get totalTypes() {
@@ -326,8 +345,9 @@ RedGPU.init(
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
                         typeFolder.addBinding(type, 'maxInstances', {readonly: true});
-                        typeFolder.addBinding(type, 'enableStreaming');
+                        typeFolder.addBinding(type, 'enableStreaming', {label: 'Tile Streaming'});
                         typeFolder.addBinding(type, 'streamingRadius', {
+                            label: 'Streaming Radius (m)',
                             min: 100,
                             max: 3000,
                             step: 50
@@ -351,7 +371,7 @@ RedGPU.init(
                         });
 
                         const splatFolder = typeFolder.addFolder({
-                            title: 'splatMap',
+                            title: '🌿 SplatMap Layer Target',
                             expanded: true
                         });
 
@@ -366,26 +386,28 @@ RedGPU.init(
                         };
 
                         splatFolder.addBinding(layerBinding, 'targetLayer', {
+                            label: 'Target Layer',
                             options: {
-                                'None (All)': 'None(All)',
-                                'Grass': 'Grass',
-                                'Rock': 'Rock',
-                                'Gravel': 'Gravel',
-                                'Leave': 'Leave'
+                                'None (All Random)': 'None(All)',
+                                'Grass (R Channel)': 'Grass',
+                                'Rock (G Channel)': 'Rock',
+                                'Gravel (B Channel)': 'Gravel',
+                                'Leave (A Channel)': 'Leave'
                             }
                         });
 
                         const thresholdBinding = {
-                            get minWeightThreshold() {
+                            get minWeight() {
                                 return type.minWeightThreshold;
                             },
-                            set minWeightThreshold(val) {
+                            set minWeight(val) {
                                 type.minWeightThreshold = val;
                                 foliageManager.repopulateFoliageType(type);
                             }
                         };
 
-                        splatFolder.addBinding(thresholdBinding, 'minWeightThreshold', {
+                        splatFolder.addBinding(thresholdBinding, 'minWeight', {
+                            label: 'Min Weight',
                             min: 0.0,
                             max: 0.9,
                             step: 0.05
@@ -402,41 +424,45 @@ RedGPU.init(
                             }
                         };
                         splatFolder.addBinding(mulBinding, 'densityMultiplier', {
+                            label: 'Density Scale (x)',
                             min: 0.0,
                             max: 3.0,
                             step: 0.05
                         });
 
                         const perTileBinding = {
-                            get instancesPerTile() {
+                            get perTile() {
                                 return type.instancesPerTile ?? 1000;
                             },
-                            set instancesPerTile(val) {
+                            set perTile(val) {
                                 type.instancesPerTile = val;
                                 foliageManager.repopulateFoliageType(type);
                                 pane.refresh();
                             }
                         };
-                        splatFolder.addBinding(perTileBinding, 'instancesPerTile', {
+                        splatFolder.addBinding(perTileBinding, 'perTile', {
+                            label: 'Instances / Tile',
                             min: 50,
                             max: 5000,
                             step: 50
                         });
 
                         const densityBinding = {
-                            get densityScaleByWeight() {
+                            get densityScale() {
                                 return type.densityScaleByWeight;
                             },
-                            set densityScaleByWeight(val) {
+                            set densityScale(val) {
                                 type.densityScaleByWeight = val;
                                 foliageManager.repopulateFoliageType(type);
                                 pane.refresh();
                             }
                         };
 
-                        splatFolder.addBinding(densityBinding, 'densityScaleByWeight');
+                        splatFolder.addBinding(densityBinding, 'densityScale', {
+                            label: 'Weight Density Scale'
+                        });
 
-                        splatFolder.addButton({title: 'repopulate'}).on('click', () => {
+                        splatFolder.addButton({title: '🔄 Re-populate'}).on('click', () => {
                             foliageManager.repopulateFoliageType(type);
                             pane.refresh();
                         });
@@ -520,7 +546,7 @@ RedGPU.init(
                 setInterval(() => {
                     updateFoliageTypeGUI();
                     pane.refresh();
-                }, 200);
+                }, 1000);
                 updateFoliageTypeGUI();
             }
         });

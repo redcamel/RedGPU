@@ -65,6 +65,27 @@ export interface FoliageTypeOptions {
      * @default 300.0
      */
     maxShadowDistance?: number;
+
+    /**
+     * [KO] 서브셀 단위 스트리밍 활성화 여부
+     * [EN] Enable sub-cell streaming
+     * @default true
+     */
+    enableStreaming?: boolean;
+
+    /**
+     * [KO] 스트리밍 로드 반경 (m)
+     * [EN] Streaming load radius in meters
+     * @default 600.0
+     */
+    streamingRadius?: number;
+
+    /**
+     * [KO] 서브셀 격자 크기 (m)
+     * [EN] Sub-cell grid size in meters
+     * @default 100.0
+     */
+    subCellSize?: number;
 }
 
 class FoliageType {
@@ -92,6 +113,9 @@ class FoliageType {
     #useImpostor: boolean = true;
     #isFoliage: boolean = true;
     #useDepthPrepass: boolean = true;
+    #enableStreaming: boolean = true;
+    #streamingRadius: number = 600.0;
+    #subCellSize: number = 100.0;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -157,7 +181,14 @@ class FoliageType {
             bottomOffset: options.bottomOffset,
             castShadow: this.#castShadow,
             maxShadowDistance: this.#maxShadowDistance,
+            enableStreaming: options.enableStreaming !== false,
+            streamingRadius: options.streamingRadius ?? 600.0,
+            subCellSize: options.subCellSize ?? 100.0,
         });
+
+        this.#enableStreaming = this.#options.enableStreaming!;
+        this.#streamingRadius = this.#options.streamingRadius!;
+        this.#subCellSize = this.#options.subCellSize!;
 
         let hash = 0;
         const nameStr = this.#options.name || '';
@@ -318,6 +349,30 @@ class FoliageType {
             this.#syncTypeParams();
             this.#onDirty?.();
         }
+    }
+
+    get enableStreaming(): boolean {
+        return this.#enableStreaming;
+    }
+
+    set enableStreaming(value: boolean) {
+        this.#enableStreaming = !!value;
+    }
+
+    get streamingRadius(): number {
+        return this.#streamingRadius;
+    }
+
+    set streamingRadius(value: number) {
+        this.#streamingRadius = Math.max(10.0, Number(value) || 10.0);
+    }
+
+    get subCellSize(): number {
+        return this.#subCellSize;
+    }
+
+    set subCellSize(value: number) {
+        this.#subCellSize = Math.max(10.0, Number(value) || 10.0);
     }
 
 

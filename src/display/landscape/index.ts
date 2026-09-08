@@ -5,6 +5,7 @@ import LandscapeMaterial from "./material/LandscapeMaterial";
 import type {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./material/LandscapeLayer";
 import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
+import LandscapeFoliageSpatialGrid from "./foliage/core/spatial/LandscapeFoliageSpatialGrid";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
 import FOLIAGE_TYPE from "./foliage/FOLIAGE_TYPE";
@@ -22,6 +23,7 @@ export {
     LANDSCAPE_BASE_GRID_SIZE,
     validateLandscapeBaseGridSize,
     LandscapeFoliageManager,
+    LandscapeFoliageSpatialGrid,
     FoliageType,
     FOLIAGE_TYPE,
     FoliageSubMesh,

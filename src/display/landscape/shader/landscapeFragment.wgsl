@@ -67,6 +67,10 @@ struct LandscapeUniforms {
     heightmapShadowSteps: f32,
     heightmapShadowDistance: f32,
     heightmapShadowSoftness: f32,
+    foliageSubCellColoration: f32,
+    foliageSubCellSize: f32,
+    foliageStreamingRadius: f32,
+    foliageDebugPad: f32,
 };
 
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
@@ -358,6 +362,67 @@ fn computeLandscapeHeightmapShadow(
     return shadowFactor;
 }
 
+fn getFoliageSubCellDebugColor(
+    worldPosXZ: vec2<f32>,
+    cameraPosXZ: vec2<f32>,
+    cellSize: f32,
+    streamingRadius: f32,
+    worldSizeX: f32,
+    worldSizeZ: f32
+) -> vec4<f32> {
+    if (landscapeInstanceUniforms.foliageSubCellColoration < 0.5) {
+        return vec4<f32>(0.0);
+    }
+
+    let safeCellSize = max(10.0, cellSize);
+    let halfSize = vec2<f32>(worldSizeX * 0.5, worldSizeZ * 0.5);
+    let shifted = clamp(worldPosXZ + halfSize, vec2<f32>(0.0), vec2<f32>(worldSizeX, worldSizeZ));
+    let cellCoord = floor(shifted / safeCellSize);
+    let cellFract = fract(shifted / safeCellSize);
+
+    // 1. 그리드 와이어프레임 경계선 (안티앨리어싱 fwidth 활용)
+    let gridDist = abs(cellFract - vec2<f32>(0.5));
+    let gridEdge = vec2<f32>(0.5) - gridDist;
+    let fw = fwidth(shifted / safeCellSize);
+    let line = smoothstep(fw * 1.5, vec2<f32>(0.0), gridEdge);
+    let isWireframe = max(line.x, line.y);
+
+    // 2. 절차적 셀 고유 해시 컬러 (Hue 변환)
+    let hash1 = fract(sin(dot(cellCoord, vec2<f32>(12.9898, 78.233))) * 43758.5453);
+    let hash2 = fract(sin(dot(cellCoord, vec2<f32>(93.9898, 67.345))) * 24634.6345);
+    let hash3 = fract(sin(dot(cellCoord, vec2<f32>(45.1234, 19.876))) * 58392.1234);
+    let baseCellColor = vec3<f32>(0.2 + 0.6 * hash1, 0.2 + 0.6 * hash2, 0.2 + 0.6 * hash3);
+
+    // 3. 카메라와의 수평 거리 판정 (원형 링)
+    let distToCam = distance(worldPosXZ, cameraPosXZ);
+    let isInRadius = distToCam <= streamingRadius;
+
+    // 4. 스트리밍 반경 경계 링 (폭 약 4m)
+    let ringDist = abs(distToCam - streamingRadius);
+    let ringIntensity = smoothstep(4.0, 0.0, ringDist);
+
+    var finalColor = vec3<f32>(0.0);
+    var alpha = 0.0;
+
+    if (isInRadius) {
+        // 활성 서브셀: 셀 고유 색상(알파 0.5) + 밝은 황백색 그리드 라인
+        finalColor = mix(baseCellColor, vec3<f32>(1.0, 1.0, 0.9), isWireframe * 0.85);
+        alpha = mix(0.5, 0.9, isWireframe);
+    } else {
+        // 비활성 서브셀: 어둡게 딤드된 회색 그리드만 은은하게 표시
+        finalColor = vec3<f32>(0.1, 0.1, 0.15);
+        alpha = isWireframe * 0.35;
+    }
+
+    // 스트리밍 경계 네온 사이언(Cyan) 링 합성
+    if (ringIntensity > 0.01) {
+        finalColor = mix(finalColor, vec3<f32>(0.0, 1.0, 1.0), ringIntensity * 0.95);
+        alpha = max(alpha, ringIntensity * 0.9);
+    }
+
+    return vec4<f32>(finalColor, alpha);
+}
+
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -382,6 +447,20 @@ fn main(inputData: InputData) -> OutputFragment {
 
     if (inputData.instanceColor.a > 0.0) {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
+    }
+
+    if (landscapeInstanceUniforms.foliageSubCellColoration > 0.5) {
+        let debugSubCell = getFoliageSubCellDebugColor(
+            input_vertexPosition.xz,
+            u_cameraPosition.xz,
+            landscapeInstanceUniforms.foliageSubCellSize,
+            landscapeInstanceUniforms.foliageStreamingRadius,
+            landscapeInstanceUniforms.worldSizeX,
+            landscapeInstanceUniforms.worldSizeZ
+        );
+        if (debugSubCell.a > 0.0) {
+            albedo = mix(albedo, debugSubCell.rgb, debugSubCell.a);
+        }
     }
 
     let NdotV = max(abs(dot(N, V)), 0.04);
