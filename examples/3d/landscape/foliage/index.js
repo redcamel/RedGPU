@@ -221,6 +221,60 @@ RedGPU.init(
             }
         );
 
+        // 2. River Rock (Static Rock Models) 로드
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/river_rock.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                console.log('🪨 [river_rock.glb] Loaded Root:', root);
+                const rockNodes = [];
+
+                const findRocks = (node) => {
+                    if (!node) return;
+                    if (node.name && node.name.startsWith('RiverRock') && !node.name.includes('lambert')) {
+                        rockNodes.push(node);
+                        return;
+                    }
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        findRocks(children[i]);
+                    }
+                };
+
+                findRocks(root);
+
+                console.log(`🪨 [river_rock.glb] Discovered ${rockNodes.length} rock variants:`, rockNodes.map(n => n.name));
+
+                const targetLayers = ['Rock', 'Gravel', 'Rock'];
+                rockNodes.forEach((rockMesh, idx) => {
+                    const variantName = rockMesh.name || `Rock_${idx + 1}`;
+                    foliageManager.addFoliageType({
+                        name: `Rock_${variantName}`,
+                        type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
+                        lods: [
+                            {
+                                mesh: rockMesh,
+                                lodDistance: 350,
+                                receiveShadow: true
+                            }
+                        ],
+                        instancesPerTile: 1200,
+                        densityMultiplier: 1.0,
+                        minWeightThreshold: 0.03,
+                        minScale: [0.8, 0.8, 0.8],
+                        maxScale: [2.5, 2.5, 2.5],
+                        randomRotationY: true,
+                        useImpostor: false,
+                        cullingDistance: 3500,
+                        fadeStartDistance: 2800,
+                        targetLayer: targetLayers[idx % targetLayers.length],
+                        bottomOffset: -0.2
+                    });
+                });
+            }
+        );
+
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
