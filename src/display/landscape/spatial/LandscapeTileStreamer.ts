@@ -2,7 +2,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeComponent from "./LandscapeComponent";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import {parse16BitPngBuffer} from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
-import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
@@ -446,34 +445,20 @@ export class LandscapeTileStreamer {
                     const TILE_PIXEL_SIZE = 512;
                     const targetX = comp.componentX * TILE_PIXEL_SIZE;
                     const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
-                    const copyW = Math.min(width, TILE_PIXEL_SIZE);
-                    const copyH = Math.min(height, TILE_PIXEL_SIZE);
 
                     if (
-                        targetX + copyW <= rawAtlasTexture.width &&
-                        targetZ + copyH <= rawAtlasTexture.height
+                        targetX + TILE_PIXEL_SIZE <= rawAtlasTexture.width &&
+                        targetZ + TILE_PIXEL_SIZE <= rawAtlasTexture.height
                     ) {
                         if (this.#vhtGenerator) {
-
                             this.#vhtGenerator.bakeTileRegion(
                                 gpuTexture,
                                 this.#vhtAtlasTexture,
                                 targetX,
                                 targetZ,
-                                copyW,
-                                copyH
+                                TILE_PIXEL_SIZE,
+                                TILE_PIXEL_SIZE
                             );
-                        } else {
-                            this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
-                                commandEncoder.copyTextureToTexture(
-                                    {texture: gpuTexture},
-                                    {
-                                        texture: rawAtlasTexture,
-                                        origin: [targetX, targetZ, 0]
-                                    },
-                                    [copyW, copyH, 1]
-                                );
-                            });
                         }
                         this.#redGPUContext.commandEncoderManager.addDeferredDestroy(gpuTexture);
 
@@ -483,8 +468,8 @@ export class LandscapeTileStreamer {
                                 this.#vntAtlasTexture,
                                 targetX,
                                 targetZ,
-                                copyW,
-                                copyH,
+                                TILE_PIXEL_SIZE,
+                                TILE_PIXEL_SIZE,
                                 this.#heightScale,
                                 this.#spatialGrid.worldSizeX,
                                 this.#spatialGrid.tileCountX

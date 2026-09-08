@@ -16,7 +16,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
-    let srcCoord = vec2<i32>(i32(localX), i32(localY));
+    let srcDims = vec2<f32>(textureDimensions(srcTileTexture, 0));
+    let srcCoord = clamp(
+        vec2<i32>(vec2<f32>(f32(localX) + 0.5, f32(localY) + 0.5) / vec2<f32>(uniforms.tileSize) * srcDims),
+        vec2<i32>(0),
+        vec2<i32>(srcDims) - vec2<i32>(1)
+    );
     let heightSample = textureLoad(srcTileTexture, srcCoord, 0);
 
     let dstX = uniforms.targetOffset.x + localX;
