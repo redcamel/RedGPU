@@ -13,8 +13,9 @@ class FoliageSubCellStreamer {
     readonly #foliageType: FoliageType;
     readonly #chunks: Map<number, FoliageSubCellChunk> = new Map();
     readonly #mountedChunks: FoliageSubCellChunk[] = [];
-    #mountBudget: number = 8;
-    #unmountBudget: number = 16;
+    #totalInstanceCount: number = 0;
+    #mountBudget: number = 16;
+    #unmountBudget: number = 32;
 
     constructor(foliageType: FoliageType) {
         this.#foliageType = foliageType;
@@ -22,6 +23,10 @@ class FoliageSubCellStreamer {
 
     get totalChunkCount(): number {
         return this.#chunks.size;
+    }
+
+    get totalInstanceCount(): number {
+        return this.#totalInstanceCount;
     }
 
     get mountedChunkCount(): number {
@@ -60,6 +65,7 @@ class FoliageSubCellStreamer {
         newChunks.forEach((chunk, key) => {
             if (!this.#chunks.has(key)) {
                 this.#chunks.set(key, chunk);
+                this.#totalInstanceCount += chunk.instanceCount;
             }
         });
     }
@@ -102,7 +108,7 @@ class FoliageSubCellStreamer {
             const dz = chunk.centerZ - camZ;
             const distSq = dx * dx + dz * dz;
 
-            if (distSq > unmountRadiusSq || !activeSubCellKeys.has(chunk.subCellKey)) {
+            if (distSq > unmountRadiusSq) {
                 this.#unmountChunkAt(i, megaBuffer, allocation);
                 unmountedThisFrame++;
             }
@@ -151,6 +157,7 @@ class FoliageSubCellStreamer {
         });
         this.#mountedChunks.length = 0;
         this.#chunks.clear();
+        this.#totalInstanceCount = 0;
         if (this.#foliageType.allocation) {
             this.#foliageType.allocation.activeCount = 0;
         }

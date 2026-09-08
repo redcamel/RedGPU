@@ -44,10 +44,10 @@ class FoliageSubCellPartitioner {
         const result = new Map<number, FoliageSubCellChunk>();
 
         const compCountX = landscape?.componentCount?.[0] ?? 8;
-        const totalTiles = compCountX * compCountX;
-        const maxInstances = foliageType.options.maxInstances;
-        const countForThisTile = targetCountPerTile ?? Math.floor(maxInstances / totalTiles);
-        if (countForThisTile <= 0) return result;
+        const baseCount = targetCountPerTile ?? foliageType.instancesPerTile ?? 5000;
+        const densityMul = foliageType.densityMultiplier ?? 1.0;
+        const targetCount = Math.max(0, Math.floor(baseCount * densityMul));
+        if (targetCount <= 0) return result;
 
         const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
         const halfTile = tileSizeMeters * 0.5;
@@ -81,6 +81,23 @@ class FoliageSubCellPartitioner {
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
 
+        // 스플랫맵 타겟 레이어 탐색
+        let targetLayerObj: any = null;
+        const targetLayer = foliageType.targetLayer;
+        if (targetLayer !== undefined && landscape?.layers) {
+            if (typeof targetLayer === 'string') {
+                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+            } else if (typeof targetLayer === 'number') {
+                targetLayerObj = landscape.layers[targetLayer];
+            }
+        }
+
+        const minWeightThreshold = foliageType.minWeightThreshold ?? 0.1;
+        const densityScaleByWeight = foliageType.densityScaleByWeight !== false;
+        const minSlope = foliageType.minSlope ?? 0.0;
+        const maxSlope = foliageType.maxSlope ?? 45.0;
+        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
+
         // 1. 임시 인스턴스 데이터를 서브셀 키별로 수집
         const tempBuckets = new Map<number, {
             subCellX: number;
@@ -91,7 +108,10 @@ class FoliageSubCellPartitioner {
 
         const invSubCell = 1.0 / subCellSize;
 
-        for (let i = 0; i < countForThisTile; i++) {
+        const maxAttempts = targetLayerObj ? targetCount * 3 : targetCount;
+        let spawned = 0;
+
+        for (let i = 0; i < maxAttempts && spawned < targetCount; i++) {
             seed ^= seed << 13;
             seed ^= seed >>> 17;
             seed ^= seed << 5;
@@ -102,13 +122,48 @@ class FoliageSubCellPartitioner {
             seed ^= seed << 5;
             const rZ = (seed >>> 0) / 4294967296.0;
 
+            const posX = minX + rX * rangeX;
+            const posZ = minZ + rZ * rangeZ;
+
+            // 1. 스플랫맵 레이어 가중치 검사 (Rejection Sampling)
+            if (targetLayerObj) {
+                const u = (posX + halfWorldX) / worldSizeX;
+                const v = (posZ + halfWorldZ) / worldSizeZ;
+                const weight = targetLayerObj.getWeightAtUV(u, v);
+                if (weight < minWeightThreshold) {
+                    continue;
+                }
+                if (densityScaleByWeight) {
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rReject = (seed >>> 0) / 4294967296.0;
+                    if (rReject > weight) {
+                        continue;
+                    }
+                }
+            }
+
+            // 2. 지형 경사도(Slope) 검사
+            if (hasSlopeFilter) {
+                const step = 1.0;
+                const hL = landscape.getHeightAt(posX - step, posZ);
+                const hR = landscape.getHeightAt(posX + step, posZ);
+                const hD = landscape.getHeightAt(posX, posZ - step);
+                const hU = landscape.getHeightAt(posX, posZ + step);
+                const nx = (hL - hR) / (2 * step);
+                const nz = (hD - hU) / (2 * step);
+                const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+                const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                if (slopeDeg < minSlope || slopeDeg > maxSlope) {
+                    continue;
+                }
+            }
+
             seed ^= seed << 13;
             seed ^= seed >>> 17;
             seed ^= seed << 5;
             const rScale = (seed >>> 0) / 4294967296.0;
-
-            const posX = minX + rX * rangeX;
-            const posZ = minZ + rZ * rangeZ;
 
             const scX = Math.floor((posX + halfWorldX) * invSubCell);
             const scZ = Math.floor((posZ + halfWorldZ) * invSubCell);
@@ -158,6 +213,7 @@ class FoliageSubCellPartitioner {
 
             bucket.floats.push(posX, posY, posZ, scaleY);
             bucket.u32s.push(rotPackedY, rotPackedW, scalePacked, typeId);
+            spawned++;
         }
 
         // 2. 최종 TypedArray 청크 버퍼 구축

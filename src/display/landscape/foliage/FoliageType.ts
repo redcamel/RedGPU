@@ -33,6 +33,17 @@ export interface FoliageTypeOptions {
 
     lods: FoliageLODConfig[];
 
+    /**
+     * [KO] 타일당 목표 스폰 인스턴스 수 (1000m x 1000m 타일 기준, 기본값: 5000)
+     * [EN] Target instance count per tile
+     * @default 5000
+     */
+    instancesPerTile?: number;
+
+    /**
+     * [KO] @deprecated 스트리밍 환경에서는 streamingRadius, instancesPerTile, densityMultiplier를 기반으로 GPU 버퍼 용량이 100% 자동 산출됩니다.
+     * [EN] @deprecated Automatically derived from streamingRadius, instancesPerTile, and densityMultiplier.
+     */
     maxInstances?: number;
 
     cullingDistance?: number;
@@ -87,6 +98,48 @@ export interface FoliageTypeOptions {
      * @default 100.0
      */
     subCellSize?: number;
+
+    /**
+     * [KO] 타겟 지형 스플랫 레이어 명칭 (예: 'Grass', 'Rock') 또는 인덱스. 지정하지 않으면 전역 배치.
+     * [EN] Target landscape splat layer name or index. If undefined, spawns globally.
+     */
+    targetLayer?: string | number;
+
+    /**
+     * [KO] 식생이 스폰되기 위한 최소 스플랫맵 가중치 (0.0 ~ 1.0)
+     * [EN] Minimum splat map weight threshold for spawning
+     * @default 0.1
+     */
+    minWeightThreshold?: number;
+
+    /**
+     * [KO] 식생 스폰 최소 경사각 (도, Degree)
+     * [EN] Minimum terrain slope angle in degrees
+     * @default 0.0
+     */
+    minSlope?: number;
+
+    /**
+     * [KO] 식생 스폰 최대 경사각 (도, Degree)
+     * [EN] Maximum terrain slope angle in degrees
+     * @default 45.0
+     */
+    maxSlope?: number;
+
+    /**
+     * [KO] 가중치 비례 밀도 적용 여부
+     * [EN] Whether to scale spawn density proportional to layer weight
+     * @default true
+     */
+    densityScaleByWeight?: boolean;
+
+
+    /**
+     * [KO] 스폰 밀도 배율 계수
+     * [EN] Density multiplier scale factor
+     * @default 1.0
+     */
+    densityMultiplier?: number;
 }
 
 class FoliageType {
@@ -117,6 +170,13 @@ class FoliageType {
     #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
     #subCellSize: number = 100.0;
+    #targetLayer?: string | number;
+    #minWeightThreshold: number = 0.1;
+    #minSlope: number = 0.0;
+    #maxSlope: number = 45.0;
+    #densityScaleByWeight: boolean = true;
+    #instancesPerTile?: number;
+    #densityMultiplier: number = 1.0;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -168,11 +228,40 @@ class FoliageType {
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
 
+        const instancesPerTile = options.instancesPerTile ?? 5000;
+        const densityMultiplier = options.densityMultiplier ?? 1.0;
+        const streamingRadius = options.streamingRadius ?? 600.0;
+        const subCellSize = options.subCellSize ?? 100.0;
+
+        // 스트리밍 기반 GPU 버퍼 용량 자동 산출 (Phase 3.1)
+        // 1. 유효 스트리밍 반경 (히스테리시스 150m 포함)
+        const effectiveRadius = streamingRadius + 150.0;
+        const cellArea = subCellSize * subCellSize;
+
+        // 2. 최대 동시 활성 서브셀 수 (원형 면적 + 안전 계수 1.25)
+        const maxActiveSubCells = Math.ceil((Math.PI * effectiveRadius * effectiveRadius / cellArea) * 1.25);
+
+        // 3. 서브셀당 평균 인스턴스 수 (1000m 타일 = 10x10 = 100 서브셀)
+        const avgInstancesPerSubCell = (instancesPerTile / 100.0) * densityMultiplier;
+
+        // 4. 안전 버퍼 용량 (30% 여유 마진 및 64 배수 정렬)
+        const calculatedMax = Math.ceil((maxActiveSubCells * avgInstancesPerSubCell * 1.30) / 64) * 64;
+
+        // 최소 안전 용량: 16,384개 (16K 슬롯)
+        // WebGPU 표준 maxBufferSize(256MB) 한도 준수 (5개 타입 등록 시 메가버퍼 ~83MB)
+        // 스트리밍 반경 600m 내 최대 활성 인스턴스(약 4,000~5,000개) 대비 3배 이상의 충분한 버퍼 여유 제공
+        const minSafeCapacity = 16384;
+
+        // 5. 사용자가 명시하지 않은 경우 calculatedMax와 minSafeCapacity 중 큰 값 사용
+        const resolvedMaxInstances = options.maxInstances !== undefined
+            ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
+            : Math.max(calculatedMax, minSafeCapacity);
+
         this.#options = Object.freeze({
             name: options.name,
             type: this.#type,
             lods: options.lods,
-            maxInstances: options.maxInstances ?? 50000,
+            maxInstances: resolvedMaxInstances,
             cullingDistance: this.#cullingDistance,
             fadeStartDistance: this.#fadeStartDistance,
             minScale,
@@ -185,13 +274,27 @@ class FoliageType {
             castShadow: this.#castShadow,
             maxShadowDistance: this.#maxShadowDistance,
             enableStreaming: options.enableStreaming !== false,
-            streamingRadius: options.streamingRadius ?? 600.0,
-            subCellSize: options.subCellSize ?? 100.0,
+            streamingRadius,
+            subCellSize,
+            targetLayer: options.targetLayer,
+            minWeightThreshold: options.minWeightThreshold ?? 0.1,
+            minSlope: options.minSlope ?? 0.0,
+            maxSlope: options.maxSlope ?? 45.0,
+            densityScaleByWeight: options.densityScaleByWeight !== false,
+            instancesPerTile,
+            densityMultiplier
         });
 
         this.#enableStreaming = this.#options.enableStreaming!;
         this.#streamingRadius = this.#options.streamingRadius!;
         this.#subCellSize = this.#options.subCellSize!;
+        this.#targetLayer = this.#options.targetLayer;
+        this.#minWeightThreshold = this.#options.minWeightThreshold!;
+        this.#minSlope = this.#options.minSlope!;
+        this.#maxSlope = this.#options.maxSlope!;
+        this.#densityScaleByWeight = this.#options.densityScaleByWeight!;
+        this.#instancesPerTile = this.#options.instancesPerTile;
+        this.#densityMultiplier = this.#options.densityMultiplier!;
 
         let hash = 0;
         const nameStr = this.#options.name || '';
@@ -251,9 +354,23 @@ class FoliageType {
         return this.#nameHash;
     }
 
+    /**
+     * [KO] @deprecated bufferCapacity를 사용하세요.
+     * [EN] @deprecated Use bufferCapacity instead.
+     */
     get maxInstances(): number {
-        return this.#options.maxInstances;
+        return this.bufferCapacity;
     }
+
+    /**
+     * [KO] GPU 메가버퍼에 할당된 최대 인스턴스 수용 용량 (슬롯 수)
+     * [EN] Allocated maximum instance capacity in GPU MegaBuffer
+     */
+    get bufferCapacity(): number {
+        return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
+    }
+
+
 
     get minScale(): readonly [number, number, number] {
         return this.#options.minScale;
@@ -311,6 +428,14 @@ class FoliageType {
 
     get activeInstanceCount(): number {
         return this.#allocation ? this.#allocation.activeCount : this.#activeInstanceCount;
+    }
+
+    /**
+     * [KO] 로드된 모든 타일에서 분할되어 CPU 캐시에 보관된 총 인스턴스 수
+     * [EN] Total instances partitioned across all loaded tiles and cached on CPU
+     */
+    get totalInstanceCount(): number {
+        return this.#streamer.totalInstanceCount;
     }
 
     get boundingRadius(): number {
@@ -398,6 +523,71 @@ class FoliageType {
         this.#subCellSize = Math.max(10.0, Number(value) || 10.0);
     }
 
+    get targetLayer(): string | number | undefined {
+        return this.#targetLayer;
+    }
+
+    set targetLayer(val: string | number | undefined) {
+        this.#targetLayer = val;
+    }
+
+    get minWeightThreshold(): number {
+        return this.#minWeightThreshold;
+    }
+
+    set minWeightThreshold(val: number) {
+        this.#minWeightThreshold = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
+    }
+
+    get minSlope(): number {
+        return this.#minSlope;
+    }
+
+    set minSlope(val: number) {
+        this.#minSlope = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+    }
+
+    get maxSlope(): number {
+        return this.#maxSlope;
+    }
+
+    set maxSlope(val: number) {
+        this.#maxSlope = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+    }
+
+    get densityScaleByWeight(): boolean {
+        return this.#densityScaleByWeight;
+    }
+
+    set densityScaleByWeight(val: boolean) {
+        this.#densityScaleByWeight = !!val;
+    }
+
+    get instancesPerTile(): number | undefined {
+        return this.#instancesPerTile;
+    }
+
+    set instancesPerTile(val: number | undefined) {
+        this.#instancesPerTile = val !== undefined ? Math.max(1, (val | 0)) : undefined;
+    }
+
+    get densityMultiplier(): number {
+        return this.#densityMultiplier;
+    }
+
+    set densityMultiplier(val: number) {
+        this.#densityMultiplier = Math.max(0.0, Number(val) || 0.0);
+    }
+
+    /**
+     * [KO] 타일 캐시를 비우고 스트리머를 초기화합니다 (재생성용).
+     * [EN] Clears tile cache and resets streamer for repopulation.
+     */
+    clearTileCache(): void {
+        this.#streamer.clear();
+        this.#loadedTileKeys.clear();
+        this.#activeInstanceCount = 0;
+    }
 
     get castShadow(): boolean {
         return this.#castShadow;
@@ -526,10 +716,22 @@ class FoliageType {
     }
 
     populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
+        if (!comp) return;
         const cz = (comp.componentZ ?? 0) & 0xffff;
         const cx = (comp.componentX ?? 0) & 0xffff;
         const key = (cz << 16) | cx;
         if (this.#loadedTileKeys.has(key)) return;
+
+        // [Phase 3.1] 지형 타일 비동기 다운로드 가드:
+        // 타일의 높이맵 이미지 데이터가 아직 CPU 메모리에 파싱되지 않은 경우 조기 리턴합니다.
+        // 이를 통해 고도 0.0(땅속 지하 파묻힘)으로 잘못 구워지거나 loadedTileKeys에 잠겨
+        // 실제 다운로드 후 영구 누락되는 치명적 버그를 완벽하게 차단합니다.
+        if (landscape && typeof landscape.isTileLoaded === 'function') {
+            if (!landscape.isTileLoaded(cz, cx)) {
+                return;
+            }
+        }
+
         this.#loadedTileKeys.add(key);
 
         const chunks = FoliageSubCellPartitioner.partitionTile(

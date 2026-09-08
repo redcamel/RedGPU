@@ -13,8 +13,8 @@ class FoliageTilePopulator {
         const compCountX = landscape?.componentCount?.[0] ?? 8;
         const totalTiles = compCountX * compCountX;
 
-        const maxInstances = foliageType.options.maxInstances;
-        const countForThisTile = targetCountPerTile ?? Math.floor(maxInstances / totalTiles);
+        const capacity = foliageType.bufferCapacity;
+        const countForThisTile = targetCountPerTile ?? foliageType.instancesPerTile ?? 5000;
         if (countForThisTile <= 0) return 0;
 
         const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
@@ -26,7 +26,7 @@ class FoliageTilePopulator {
         const maxZ = comp.worldZ + halfTile;
 
         const startIdx = foliageType.activeInstanceCount;
-        const endIdx = Math.min(startIdx + countForThisTile, maxInstances);
+        const endIdx = Math.min(startIdx + countForThisTile, capacity);
         const actualCount = endIdx - startIdx;
         if (actualCount <= 0) return 0;
 

@@ -1,6 +1,7 @@
 import ColorRGBA from "../../../color/ColorRGBA";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import RedGPUContext from "../../../context/RedGPUContext";
+import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
 
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
 
@@ -351,6 +352,17 @@ export class LandscapeLayer {
         else if (ch === 'B' || ch === '2') this.#weightChannelIndex = 2;
         else if (ch === 'A' || ch === '3') this.#weightChannelIndex = 3;
         else this.#weightChannelIndex = 0;
+    }
+
+    /**
+     * [KO] 특정 UV(0.0 ~ 1.0)에서의 해당 레이어 가중치(0.0 ~ 1.0)를 조회합니다.
+     * [EN] Queries this layer's weight (0.0 ~ 1.0) at specific UV.
+     */
+    getWeightAtUV(u: number, v: number): number {
+        if (!this.#enabled) return 0.0;
+        const src = this.#weightTexture?.src;
+        if (!src) return 1.0;
+        return LandscapeWeightMapCache.getWeight(src, u, v, this.#weightChannelIndex);
     }
 }
 

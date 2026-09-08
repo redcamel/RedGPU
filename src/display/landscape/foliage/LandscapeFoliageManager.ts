@@ -216,6 +216,40 @@ class LandscapeFoliageManager {
         return foliageType;
     }
 
+
+    /**
+     * [KO] 특정 FoliageType의 서브셀 청크를 지우고 현재 지형 컴포넌트들을 기준으로 재스폰합니다.
+     * [EN] Clears sub-cell chunks of a FoliageType and repopulates them based on current landscape components.
+     */
+    repopulateFoliageType(foliageTypeOrName: FoliageType | string): void {
+        const type = typeof foliageTypeOrName === 'string'
+            ? this.#foliageTypes.get(foliageTypeOrName)
+            : foliageTypeOrName;
+        if (!type) return;
+
+        type.clearTileCache();
+
+        const cells = this.#landscape?.landscapeComponents;
+        if (cells && cells.length > 0) {
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                type.populateTile(cells[i], this.#landscape);
+            }
+        }
+        this.#renderer.markShadowBundleDirty();
+    }
+
+    /**
+     * [KO] 모든 FoliageType의 인스턴스를 재스폰합니다.
+     * [EN] Repopulates all foliage types.
+     */
+    repopulateAll(): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.repopulateFoliageType(this.#typeList[i]);
+        }
+    }
+
     removeFoliageType(name: string): boolean {
         const foliageType = this.#foliageTypes.get(name);
         if (foliageType) {

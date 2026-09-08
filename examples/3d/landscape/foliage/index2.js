@@ -193,7 +193,7 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 100000,
+                            instancesPerTile: 2500,
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,

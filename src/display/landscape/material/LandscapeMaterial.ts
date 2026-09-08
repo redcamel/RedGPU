@@ -8,6 +8,7 @@ import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import LandscapeLayer from "./LandscapeLayer";
+import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
@@ -140,6 +141,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         if (this.#layers.includes(layer)) return this;
 
         layer.resolvePendingTextures(this.redGPUContext);
+        if (layer.weightTexture?.src) {
+            LandscapeWeightMapCache.load(layer.weightTexture.src);
+        }
         this.#layers.push(layer);
         layer.onChange = () => {
             this.updateUniformsData();

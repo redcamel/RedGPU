@@ -200,7 +200,6 @@ RedGPU.init(
                             name: `Tree_${baseName}`,
                             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
-                            maxInstances: 500000,
                             instancesPerTile: 2500,
                             densityMultiplier: 1.2,
                             minWeightThreshold: 0.02,
@@ -304,7 +303,22 @@ RedGPU.init(
                         });
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
-                        typeFolder.addBinding(type, 'maxInstances', {readonly: true});
+                        typeFolder.addBinding(type, 'bufferCapacity', {readonly: true});
+                        typeFolder.addBinding(type, 'totalInstanceCount', {readonly: true});
+                        typeFolder.addBinding(type, 'instancesPerTile', {
+                            min: 100,
+                            max: 20000,
+                            step: 100
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
+                        });
+                        typeFolder.addBinding(type, 'densityMultiplier', {
+                            min: 0.1,
+                            max: 3.0,
+                            step: 0.1
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
+                        });
                         typeFolder.addBinding(type, 'enableStreaming');
                         typeFolder.addBinding(type, 'subCellSize', {
                             options: {
@@ -314,6 +328,8 @@ RedGPU.init(
                                 '250': 250,
                                 '500': 500
                             }
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
                         });
                         typeFolder.addBinding(type, 'streamingRadius', {
                             min: 100,
@@ -336,6 +352,59 @@ RedGPU.init(
                             min: 200,
                             max: 8000,
                             step: 50
+                        });
+
+                        const splatFolder = typeFolder.addFolder({
+                            title: 'SplatMap & Slope',
+                            expanded: true
+                        });
+
+                        const layerBinding = {
+                            get targetLayer() {
+                                return type.targetLayer ?? 'None';
+                            },
+                            set targetLayer(val) {
+                                type.targetLayer = val === 'None' ? undefined : val;
+                                foliageManager.repopulateFoliageType(type);
+                            }
+                        };
+                        splatFolder.addBinding(layerBinding, 'targetLayer', {
+                            options: {
+                                'None': 'None',
+                                'Grass': 'Grass',
+                                'Rock': 'Rock',
+                                'Gravel': 'Gravel',
+                                'Leave': 'Leave'
+                            }
+                        });
+
+                        splatFolder.addBinding(type, 'minWeightThreshold', {
+                            min: 0.0,
+                            max: 0.95,
+                            step: 0.05
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
+                        });
+
+                        splatFolder.addBinding(type, 'densityScaleByWeight')
+                            .on('change', () => {
+                                foliageManager.repopulateFoliageType(type);
+                            });
+
+                        splatFolder.addBinding(type, 'minSlope', {
+                            min: 0,
+                            max: 90,
+                            step: 1
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
+                        });
+
+                        splatFolder.addBinding(type, 'maxSlope', {
+                            min: 0,
+                            max: 90,
+                            step: 1
+                        }).on('change', () => {
+                            foliageManager.repopulateFoliageType(type);
                         });
 
 
