@@ -93,38 +93,30 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
 
             // 1. Spatial Dimensions
             const folderSpatial = pane.addFolder({title: 'Spatial Dimensions', expanded: true});
-            folderSpatial.addBinding(config, 'worldSizeX', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
+            folderSpatial.addBinding(config, 'worldSizeX', {
+                min: 1000,
+                max: 60000,
+                step: 500,
+                label: 'worldSizeX (m)'
+            }).on('change', (ev) => {
                 config.worldSizeX = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
             });
-            folderSpatial.addBinding(config, 'worldSizeZ', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
+            folderSpatial.addBinding(config, 'worldSizeZ', {
+                min: 1000,
+                max: 60000,
+                step: 500,
+                label: 'worldSizeZ (m)'
+            }).on('change', (ev) => {
                 config.worldSizeZ = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
             });
-
-            const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
-            folderSpatial.addBinding(config, 'componentCountX', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountX = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-            folderSpatial.addBinding(config, 'componentCountZ', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountZ = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-            folderSpatial.addBinding(config, 'tileSizeStr', {readonly: true});
-            folderSpatial.addBinding(config, 'totalComponents', {readonly: true});
+            folderSpatial.addBinding(config, 'componentCountX', {readonly: true, label: 'componentCountX (Fixed)'});
+            folderSpatial.addBinding(config, 'componentCountZ', {readonly: true, label: 'componentCountZ (Fixed)'});
+            folderSpatial.addBinding(config, 'tileSizeStr', {readonly: true, label: 'tileSize'});
+            folderSpatial.addBinding(config, 'totalComponents', {readonly: true, label: 'totalComponents'});
 
             // 2. LOD Settings
             const folderLOD = pane.addFolder({title: 'LOD', expanded: true});
@@ -165,17 +157,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             folderDisplay.addBinding(landscape, 'wireframe');
             folderDisplay.addBinding(landscape, 'lodColoration');
 
-            const globalMapProxy = { resolution: '1024' };
-            folderDisplay.addBinding(globalMapProxy, 'resolution', {
-                label: 'Global Fallback Res',
-                options: {
-                    '512 (487KB)': '512',
-                    '1024 (1.9MB)': '1024',
-                    '2048 (7.7MB)': '2048'
-                }
-            }).on('change', (ev) => {
-                landscape.globalHeightmapUrl = `../../../assets/terrain/terrainTest_001/global_heightmap_${ev.value}.png`;
-            });
             const baseColorProxy = {
                 get baseColor() {
                     return landscape.baseColor.hex;
