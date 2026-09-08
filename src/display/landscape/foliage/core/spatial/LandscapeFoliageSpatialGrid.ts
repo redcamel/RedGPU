@@ -20,6 +20,7 @@ export class LandscapeFoliageSpatialGrid {
 
     // Zero-GC 재사용 버퍼
     readonly #activeSubCellKeys: Int32Array = new Int32Array(LandscapeFoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
+    readonly #activeSubCellKeySet: Set<number> = new Set();
     #activeSubCellCount: number = 0;
 
     // 히스테리시스 캐싱
@@ -65,6 +66,10 @@ export class LandscapeFoliageSpatialGrid {
 
     get activeSubCellKeys(): Int32Array {
         return this.#activeSubCellKeys;
+    }
+
+    get activeSubCellKeySet(): ReadonlySet<number> {
+        return this.#activeSubCellKeySet;
     }
 
     /**
@@ -156,6 +161,10 @@ export class LandscapeFoliageSpatialGrid {
         }
 
         this.#activeSubCellCount = count;
+        this.#activeSubCellKeySet.clear();
+        for (let i = 0; i < count; i++) {
+            this.#activeSubCellKeySet.add(keys[i]);
+        }
         return true;
     }
 }

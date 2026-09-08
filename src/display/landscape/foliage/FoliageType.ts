@@ -1,7 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../mesh/Mesh";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
-import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
+import FoliageSubCellPartitioner from "./core/spatial/FoliageSubCellPartitioner";
+import FoliageSubCellStreamer from "./core/spatial/FoliageSubCellStreamer";
 
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
@@ -119,6 +120,7 @@ class FoliageType {
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
+    #streamer: FoliageSubCellStreamer;
     #onDirty?: () => void;
 
     constructor(
@@ -128,6 +130,7 @@ class FoliageType {
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void
     ) {
+        this.#streamer = new FoliageSubCellStreamer(this);
         this.#redGPUContext = redGPUContext;
         this.#options = options;
         this.#onDirty = onDirty;
@@ -307,7 +310,7 @@ class FoliageType {
     }
 
     get activeInstanceCount(): number {
-        return this.#activeInstanceCount;
+        return this.#allocation ? this.#allocation.activeCount : this.#activeInstanceCount;
     }
 
     get boundingRadius(): number {
@@ -380,7 +383,11 @@ class FoliageType {
     }
 
     set streamingRadius(value: number) {
-        this.#streamingRadius = Math.max(10.0, Number(value) || 10.0);
+        const numVal = Math.max(10.0, Number(value) || 10.0);
+        if (this.#streamingRadius !== numVal) {
+            this.#streamingRadius = numVal;
+            this.#onDirty?.();
+        }
     }
 
     get subCellSize(): number {
@@ -519,20 +526,36 @@ class FoliageType {
     }
 
     populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
-
         const cz = (comp.componentZ ?? 0) & 0xffff;
         const cx = (comp.componentX ?? 0) & 0xffff;
         const key = (cz << 16) | cx;
         if (this.#loadedTileKeys.has(key)) return;
         this.#loadedTileKeys.add(key);
 
-        const addedCount = FoliageTilePopulator.populateTile(comp, this, landscape, targetCountPerTile);
-        if (addedCount > 0) {
-            this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
-            if (this.#allocation) {
-                this.#allocation.activeCount = this.#activeInstanceCount;
-            }
+        const chunks = FoliageSubCellPartitioner.partitionTile(
+            comp,
+            this,
+            landscape,
+            this.#subCellSize,
+            targetCountPerTile
+        );
+        this.#streamer.addChunks(chunks);
+
+        if (!this.#enableStreaming) {
+            this.#streamer.update(new Set(), new Int32Array(0), 0, 0, 0, false);
+            this.#activeInstanceCount = this.#allocation?.activeCount ?? 0;
         }
+    }
+
+    updateStreaming(
+        activeSubCellKeys: ReadonlySet<number>,
+        activeKeyArray: Int32Array,
+        activeKeyCount: number,
+        camX: number,
+        camZ: number
+    ): void {
+        this.#streamer.update(activeSubCellKeys, activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
+        this.#activeInstanceCount = this.#allocation?.activeCount ?? 0;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
@@ -586,6 +609,7 @@ class FoliageType {
     }
 
     destroy(): void {
+        this.#streamer.clear();
         for (let i = 0; i < this.#subMeshes.length; i++) {
             const sub = this.#subMeshes[i];
             sub.destroy();

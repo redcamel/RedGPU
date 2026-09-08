@@ -163,7 +163,27 @@ class LandscapeFoliageManager {
     update(viewOrCamera?: any, stateData?: any): void {
         const cam = viewOrCamera?.camera || viewOrCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
+            let maxRadius = this.#streamingRadius;
+            const count = this.#typeList.length;
+            for (let i = 0; i < count; i++) {
+                const t = this.#typeList[i];
+                if (t.enableStreaming && t.streamingRadius > maxRadius) {
+                    maxRadius = t.streamingRadius;
+                }
+            }
+            if (this.#spatialGrid.streamingRadius !== maxRadius) {
+                this.#spatialGrid.streamingRadius = maxRadius;
+            }
+
             this.#spatialGrid.update(cam.x, cam.z);
+
+            const activeKeySet = this.#spatialGrid.activeSubCellKeySet;
+            const activeKeys = this.#spatialGrid.activeSubCellKeys;
+            const activeCount = this.#spatialGrid.activeSubCellCount;
+
+            for (let i = 0; i < count; i++) {
+                this.#typeList[i].updateStreaming(activeKeySet, activeKeys, activeCount, cam.x, cam.z);
+            }
         }
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
     }

@@ -240,47 +240,7 @@ RedGPU.init(
         //     }
         // );
 
-        // 3. River Rock (Static Opaque Mesh Scatter) 로드
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/river_rock.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                console.log('🪨 [river_rock.glb] Loaded Root:', root);
 
-                // 원점 중심의 RiverRock 노드 탐색 (없으면 root 사용)
-                let rockMesh = root;
-                const findMeshNode = (node) => {
-                    if (node.name === 'RiverRock' || node.name === 'RiverRock_lambert3_0') return node;
-                    if (node.children) {
-                        for (let i = 0; i < node.children.length; i++) {
-                            const found = findMeshNode(node.children[i]);
-                            if (found) return found;
-                        }
-                    }
-                    return null;
-                };
-                const targetNode = findMeshNode(root);
-                if (targetNode) {
-                    rockMesh = targetNode;
-                }
-
-                foliageManager.addFoliageType({
-                    name: 'RiverRock',
-                    type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
-                    lods: [{mesh: rockMesh, lodDistance: 300}],
-                    maxInstances: 200000,
-                    instancesPerTile: 600,
-                    densityMultiplier: 1.0,
-                    minWeightThreshold: 0.05,
-                    minScale: [1, 1, 1],
-                    maxScale: [7.2, 7.2, 7.2],
-                    randomRotationY: true,
-                    bottomOffset: 6.5,
-                    targetLayer: 'Rock'
-                });
-            }
-        );
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
@@ -345,9 +305,17 @@ RedGPU.init(
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
                         typeFolder.addBinding(type, 'maxInstances', {readonly: true});
-                        typeFolder.addBinding(type, 'enableStreaming', {label: 'Tile Streaming'});
+                        typeFolder.addBinding(type, 'enableStreaming');
+                        typeFolder.addBinding(type, 'subCellSize', {
+                            options: {
+                                '50': 50,
+                                '100': 100,
+                                '200': 200,
+                                '250': 250,
+                                '500': 500
+                            }
+                        });
                         typeFolder.addBinding(type, 'streamingRadius', {
-                            label: 'Streaming Radius (m)',
                             min: 100,
                             max: 3000,
                             step: 50
@@ -370,102 +338,7 @@ RedGPU.init(
                             step: 50
                         });
 
-                        const splatFolder = typeFolder.addFolder({
-                            title: '🌿 SplatMap Layer Target',
-                            expanded: true
-                        });
 
-                        const layerBinding = {
-                            get targetLayer() {
-                                return type.targetLayer ?? 'None(All)';
-                            },
-                            set targetLayer(val) {
-                                type.targetLayer = val === 'None(All)' ? undefined : val;
-                                foliageManager.repopulateFoliageType(type);
-                            }
-                        };
-
-                        splatFolder.addBinding(layerBinding, 'targetLayer', {
-                            label: 'Target Layer',
-                            options: {
-                                'None (All Random)': 'None(All)',
-                                'Grass (R Channel)': 'Grass',
-                                'Rock (G Channel)': 'Rock',
-                                'Gravel (B Channel)': 'Gravel',
-                                'Leave (A Channel)': 'Leave'
-                            }
-                        });
-
-                        const thresholdBinding = {
-                            get minWeight() {
-                                return type.minWeightThreshold;
-                            },
-                            set minWeight(val) {
-                                type.minWeightThreshold = val;
-                                foliageManager.repopulateFoliageType(type);
-                            }
-                        };
-
-                        splatFolder.addBinding(thresholdBinding, 'minWeight', {
-                            label: 'Min Weight',
-                            min: 0.0,
-                            max: 0.9,
-                            step: 0.05
-                        });
-
-                        const mulBinding = {
-                            get densityMultiplier() {
-                                return type.densityMultiplier;
-                            },
-                            set densityMultiplier(val) {
-                                type.densityMultiplier = val;
-                                foliageManager.repopulateFoliageType(type);
-                                pane.refresh();
-                            }
-                        };
-                        splatFolder.addBinding(mulBinding, 'densityMultiplier', {
-                            label: 'Density Scale (x)',
-                            min: 0.0,
-                            max: 3.0,
-                            step: 0.05
-                        });
-
-                        const perTileBinding = {
-                            get perTile() {
-                                return type.instancesPerTile ?? 1000;
-                            },
-                            set perTile(val) {
-                                type.instancesPerTile = val;
-                                foliageManager.repopulateFoliageType(type);
-                                pane.refresh();
-                            }
-                        };
-                        splatFolder.addBinding(perTileBinding, 'perTile', {
-                            label: 'Instances / Tile',
-                            min: 50,
-                            max: 5000,
-                            step: 50
-                        });
-
-                        const densityBinding = {
-                            get densityScale() {
-                                return type.densityScaleByWeight;
-                            },
-                            set densityScale(val) {
-                                type.densityScaleByWeight = val;
-                                foliageManager.repopulateFoliageType(type);
-                                pane.refresh();
-                            }
-                        };
-
-                        splatFolder.addBinding(densityBinding, 'densityScale', {
-                            label: 'Weight Density Scale'
-                        });
-
-                        splatFolder.addButton({title: '🔄 Re-populate'}).on('click', () => {
-                            foliageManager.repopulateFoliageType(type);
-                            pane.refresh();
-                        });
 
                         const lodInfo = {
                             get lodsSummary() {
