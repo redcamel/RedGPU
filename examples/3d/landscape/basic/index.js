@@ -7,33 +7,34 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. Camera & View3D Setup
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
         controller.y = 1050;
         controller.z = 0;
-        controller.moveSpeed = 10000;
+        controller.moveSpeed = 1000;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
+        // 2. Light & Shadow Settings (대규모 16km 오픈월드 지형 스케일 최적화)
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 그림자 설정 (대규모 16km 오픈월드 지형 스케일에 최적화: 근거리 400m CSM + 원경 Raymarching)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
         directionalShadowManager.maxShadowDistance = 400;
 
-
+        // 3. Landscape Core Setup (16km x 16km 오픈월드 & 1024 Fallback 하이트맵)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 1500;
-        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_512.png';
+        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
-
+        // 4. Texture Layers (RGBA 4-Channel SplatMap 멀티 텍스처링 레이어)
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
@@ -97,6 +98,7 @@ RedGPU.init(
             return layer;
         });
 
+        // 5. Tile Streamer URL Resolver (256개 분할 16-bit 타일 스트리밍 경로 해석기)
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const rStr = String(row).padStart(2, '0');
@@ -113,11 +115,12 @@ RedGPU.init(
         scene.addLandscape(landscape);
         landscape.debuggerManager.spatialGrid = false;
 
+        // 6. Renderer Start
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
-        // 리사이즈 이벤트 처리
+        // 7. Resize Event Handler
         /**
          * @param {RedGPU.RedResizeEvent} event [KO] 리사이즈 이벤트 객체 [EN] Resize event object
          */
@@ -125,6 +128,7 @@ RedGPU.init(
             console.log("Canvas resized:", event.width, event.height);
         };
 
+        // 8. Test GUI Pane
         renderTestPane(redGPUContext, landscape, controller, directionalLight, layers, scene);
     }
 );
@@ -165,68 +169,47 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
-        directionalShadow: true,
         ibl: true,
         skybox: true,
         gui: (pane) => {
             activePane = pane;
 
-            const folderShadows = pane.addFolder({title: 'Shadow Controls (P0-2)', expanded: true});
-            const dShadow = scene.shadowManager.directionalShadowManager;
-            folderShadows.addBinding(dShadow, 'cascadeCount', {min: 1, max: 4, step: 1, label: 'Cascade Count'});
-            folderShadows.addBinding(dShadow, 'maxShadowDistance', {
-                min: 500,
-                max: 5000,
-                step: 100,
-                label: 'Max Distance'
-            });
-            folderShadows.addBinding(dShadow, 'pcssLightSize', {min: 0.1, max: 4.0, step: 0.1, label: 'PCSS Softness'});
-            folderShadows.addBinding(dShadow, 'strength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
-            folderShadows.addBinding(landscape, 'castShadow', {label: 'Landscape Cast Shadow'});
-            folderShadows.addBinding(landscape, 'receiveShadow', {label: 'Landscape Receive Shadow'});
+            // 1. Camera Controls
+            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
+            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
 
+            // 2. Spatial Grid, Dimensions & Streaming
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
-            const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
 
-            folderDimensions.addBinding(config, 'worldSizeX', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
+            // 2-1. Dimensions
+            const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: false});
+            folderDimensions.addBinding(config, 'worldSizeX', {
+                min: 1000,
+                max: 16000,
+                step: 500,
+                label: 'worldSizeX (m)'
+            }).on('change', (ev) => {
                 config.worldSizeX = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
             });
-
-            folderDimensions.addBinding(config, 'worldSizeZ', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
+            folderDimensions.addBinding(config, 'worldSizeZ', {
+                min: 1000,
+                max: 16000,
+                step: 500,
+                label: 'worldSizeZ (m)'
+            }).on('change', (ev) => {
                 config.worldSizeZ = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
             });
+            folderDimensions.addBinding(config, 'componentCountX', {readonly: true, label: 'componentCountX (Fixed)'});
+            folderDimensions.addBinding(config, 'componentCountZ', {readonly: true, label: 'componentCountZ (Fixed)'});
+            folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true, label: 'tileSize'});
+            folderDimensions.addBinding(config, 'totalComponents', {readonly: true, label: 'totalComponents'});
 
-            const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
-
-            folderDimensions.addBinding(config, 'componentCountX', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountX = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-
-            folderDimensions.addBinding(config, 'componentCountZ', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountZ = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-
-            folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
-            folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
-
-            const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
-
+            // 2-2. LOD Settings
+            const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: false});
             folderLOD.addBinding(landscape, 'componentSizeQuads', {
                 options: {
                     16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
@@ -262,12 +245,14 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 0.05
             });
 
-            const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
+            // 2-3. Tile Streaming
+            const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: false});
             folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
             folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
             folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
             folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
 
+            // 3. Display & Rendering
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
             folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 3000, step: 25});
             folderDisplay.addBinding(landscape, 'wireframe');
@@ -284,6 +269,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderDisplay.addBinding(baseColorProxy, 'baseColor');
             folderDisplay.addBinding(config, 'textureArraySize', {readonly: true});
 
+            // 4. SplatMap Multi-Texturing Layers
             if (layers?.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
@@ -325,15 +311,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 });
             }
 
-            const folderSun = pane.addFolder({title: 'Sun Light', expanded: false});
-            folderSun.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
-            folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-
-            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
-
+            // 5. Landscape Debuggers
             const dbg = landscape.debuggerManager;
-            const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
+            const folderDebuggers = pane.addFolder({title: 'Debugger Manager', expanded: true});
 
             folderDebuggers.addBinding(dbg, 'hud');
             folderDebuggers.addBinding(dbg, 'spatialGrid');

@@ -91,11 +91,14 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
         gui: (pane) => {
             activePane = pane;
 
+            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
+            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
+
             // 1. Spatial Dimensions
             const folderSpatial = pane.addFolder({title: 'Spatial Dimensions', expanded: true});
             folderSpatial.addBinding(config, 'worldSizeX', {
                 min: 1000,
-                max: 60000,
+                max: 16000,
                 step: 500,
                 label: 'worldSizeX (m)'
             }).on('change', (ev) => {
@@ -105,7 +108,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             });
             folderSpatial.addBinding(config, 'worldSizeZ', {
                 min: 1000,
-                max: 60000,
+                max: 16000,
                 step: 500,
                 label: 'worldSizeZ (m)'
             }).on('change', (ev) => {
@@ -145,7 +148,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {min: 0.1, max: 0.99, step: 0.05});
 
             // 3. Tile Streaming
-            const folderStream = pane.addFolder({title: 'Tile Streaming', expanded: true});
+            const folderStream = pane.addFolder({title: 'Tile Streaming', expanded: false});
             folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
             folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
             folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
