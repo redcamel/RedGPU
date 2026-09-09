@@ -72,20 +72,7 @@ export class LandscapeFoliageSpatialGrid {
         return this.#activeSubCellKeySet;
     }
 
-    /**
-     * 전역 서브셀 (SX, SZ)를 고유한 V8 SMI 32비트 정수 키로 인코딩
-     */
-    static encodeKey(sx: number, sz: number): number {
-        return ((sz << 16) | (sx & 0xFFFF)) | 0;
-    }
 
-    /**
-     * 고유 정수 키를 (SX, SZ) 좌표로 디코딩 (outArray[0] = SX, outArray[1] = SZ)
-     */
-    static decodeKey(key: number, outArray: Int32Array): void {
-        outArray[0] = key & 0xFFFF;
-        outArray[1] = key >> 16;
-    }
 
     /** 캐시 무효화 (다음 update 시 강제 재계산) */
     invalidateCache(): void {

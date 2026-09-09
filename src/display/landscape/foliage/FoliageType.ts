@@ -157,7 +157,6 @@ class FoliageType {
 
     #cullingDistance: number = 2000.0;
     #fadeStartDistance: number = 1500.0;
-    #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
@@ -413,21 +412,12 @@ class FoliageType {
     }
 
 
-    getShadowMergedMesh(lodIndex: number): FoliageShadowMergedSubMesh | null {
-        for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
-            if (this.#shadowMergedSubMeshes[i].lodIndex === lodIndex) {
-                return this.#shadowMergedSubMeshes[i];
-            }
-        }
-        return null;
-    }
-
     get lodInfoList(): readonly FoliageLODInfo[] {
         return this.#lodInfoList;
     }
 
     get activeInstanceCount(): number {
-        return this.#allocation ? this.#allocation.activeCount : this.#activeInstanceCount;
+        return this.#allocation?.activeCount ?? 0;
     }
 
     /**
@@ -586,7 +576,6 @@ class FoliageType {
     clearTileCache(): void {
         this.#streamer.clear();
         this.#loadedTileKeys.clear();
-        this.#activeInstanceCount = 0;
     }
 
     get castShadow(): boolean {
@@ -745,7 +734,6 @@ class FoliageType {
 
         if (!this.#enableStreaming) {
             this.#streamer.update(new Set(), new Int32Array(0), 0, 0, 0, false);
-            this.#activeInstanceCount = this.#allocation?.activeCount ?? 0;
         }
     }
 
@@ -757,7 +745,6 @@ class FoliageType {
         camZ: number
     ): void {
         this.#streamer.update(activeSubCellKeys, activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
-        this.#activeInstanceCount = this.#allocation?.activeCount ?? 0;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
@@ -776,38 +763,10 @@ class FoliageType {
         return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
     }
 
-    setInstanceData(
-        index: number,
-        posX: number, posY: number, posZ: number,
-        rotX: number, rotY: number, rotZ: number, rotW: number,
-        scaleX: number, scaleY: number, scaleZ: number,
-        fade: number = 1.0
-    ): void {
-        if (this.#megaBuffer && this.#allocation) {
-            this.#megaBuffer.setInstanceData(this.#allocation, index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade);
-        }
-    }
-
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
         }
-    }
-
-    resetIndirectBuffer(): void {
-        if (this.#megaBuffer) {
-            this.#megaBuffer.resetMultiIndirectCommands();
-        }
-    }
-
-    setInstancesData(data: Float32Array, count?: number): void {
-        const instanceCount = count !== undefined ? count : Math.floor(data.length / 8);
-        this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
-
-        if (this.#megaBuffer && this.#allocation) {
-            this.#megaBuffer.writeInstancesData(this.#allocation, data, this.#activeInstanceCount);
-        }
-        this.resetIndirectBuffer();
     }
 
     destroy(): void {

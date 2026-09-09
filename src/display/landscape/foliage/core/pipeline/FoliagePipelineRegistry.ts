@@ -43,12 +43,7 @@ class FoliagePipelineRegistry {
         {shaderLocation: 9, offset: 28, format: 'float32'},
     ];
 
-    static readonly #INSTANCE_ATTRIBUTES_SHADOW_OPAQUE: readonly GPUVertexAttribute[] = [
-        {shaderLocation: 6, offset: 0, format: 'float32x4'},
-        {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
-        {shaderLocation: 8, offset: 24, format: 'float16x2'},
-        {shaderLocation: 9, offset: 28, format: 'float32'},
-    ];
+
 
     getOrCreatePipeline(
         material: any,
@@ -234,7 +229,7 @@ class FoliagePipelineRegistry {
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 8 * 4,
             stepMode: 'instance',
-            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_SHADOW_OPAQUE as GPUVertexAttribute[],
+            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL as GPUVertexAttribute[],
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);

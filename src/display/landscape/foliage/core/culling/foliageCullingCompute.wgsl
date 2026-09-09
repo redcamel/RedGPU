@@ -48,7 +48,6 @@ struct UnifiedGlobalCullingUniforms {
     pad2: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,
-    mainProjectionViewMatrix: mat4x4<f32>,
 };
 
 struct FoliageInstanceData {
