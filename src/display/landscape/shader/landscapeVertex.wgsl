@@ -94,7 +94,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         let camPos = systemUniforms.camera.cameraPosition.xyz;
         let dx = worldX - camPos.x;
         let dz = worldZ - camPos.z;
-        let dy = camPos.y;
+        let dy = currentHeight * landscapeUniforms.heightScale - camPos.y;
         let distSq = dx * dx + dz * dz + dy * dy;
 
         let currentPacked = landscapeUniforms.lodDistancesSq[0];

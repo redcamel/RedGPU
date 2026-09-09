@@ -29,6 +29,7 @@ export class LandscapeTileStreamer {
     #vbtGenerator: LandscapeVBTGenerator | null = null;
     #material: LandscapeMaterial | null = null;
     #globalHeightTexture: GPUTexture | null = null;
+    #globalCPUHeightMap: { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null = null;
 
     #heightScale: number = 500.0;
 
@@ -146,6 +147,25 @@ export class LandscapeTileStreamer {
 
     setGlobalHeightTexture(tex: GPUTexture | null): void {
         this.#globalHeightTexture = tex;
+    }
+
+    setGlobalCPUHeightMap(data: {
+        width: number;
+        height: number;
+        pixels: ArrayLike<number>;
+        maxVal?: number
+    } | null): void {
+        if (!data) {
+            this.#globalCPUHeightMap = null;
+            return;
+        }
+        const maxVal = data.maxVal ?? (data.pixels instanceof Uint16Array ? 65535.0 : 255.0);
+        this.#globalCPUHeightMap = {
+            width: data.width,
+            height: data.height,
+            pixels: data.pixels,
+            maxVal
+        };
     }
 
     restoreTileToGlobalBase(comp: LandscapeComponent): void {
@@ -305,6 +325,32 @@ export class LandscapeTileStreamer {
 
         const tileData = this.#cpuHeightMap.get(comp.key);
         if (!tileData) {
+            if (this.#globalCPUHeightMap) {
+                const g = this.#globalCPUHeightMap;
+                const normU = Math.min(1.0, Math.max(0.0, (x + halfWX) / grid.worldSizeX));
+                const normV = Math.min(1.0, Math.max(0.0, (z + halfWZ) / grid.worldSizeZ));
+                const fx = normU * (g.width - 1);
+                const fy = normV * (g.height - 1);
+                const x0 = Math.floor(fx);
+                const x1 = Math.min(x0 + 1, g.width - 1);
+                const y0 = Math.floor(fy);
+                const y1 = Math.min(y0 + 1, g.height - 1);
+                const tx = fx - x0;
+                const ty = fy - y0;
+
+                const pixels = g.pixels;
+                const gw = g.width;
+                const p00 = pixels[y0 * gw + x0] || 0;
+                const p10 = pixels[y0 * gw + x1] || 0;
+                const p01 = pixels[y1 * gw + x0] || 0;
+                const p11 = pixels[y1 * gw + x1] || 0;
+
+                const hTop = p00 * (1.0 - tx) + p10 * tx;
+                const hBottom = p01 * (1.0 - tx) + p11 * tx;
+                const rawVal = hTop * (1.0 - ty) + hBottom * ty;
+
+                return (rawVal / g.maxVal) * this.#heightScale;
+            }
             return 0.0;
         }
 

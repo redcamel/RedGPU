@@ -224,7 +224,12 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderLOD.addBinding(landscape, 'lod0SizeQuads', {
-                options: {64: 64, 128: 128, 256: 256, 512: 512}
+                options: {
+                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                }
             }).on('change', () => {
                 updateConfigValues();
             });

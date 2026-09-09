@@ -62,7 +62,9 @@ RedGPU.init(
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
         landscape.maxLODLevel = 5;
+        landscape.lod0SizeQuads = RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
         landscape.loadingRadius = 4000;
+
         landscape.baseColor.setColorByHEX('#387d42');
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
@@ -215,7 +217,11 @@ RedGPU.init(
                             cullingDistance: 6000,
                             fadeStartDistance: 4500,
                             targetLayer: 'Grass',
-                            bottomOffset: 0.0
+                            bottomOffset: -0.85,
+                            alignToNormal: true,
+                            alignFactor: 0.4,
+                            minSlope: 0.0,
+                            maxSlope: 32.0
                         });
                     });
                 }
@@ -263,13 +269,18 @@ RedGPU.init(
                         densityMultiplier: 1.0,
                         minWeightThreshold: 0.03,
                         minScale: [0.3, 0.3, 0.3],
-                        maxScale: [0.8, 0.8, 0.8],
+                        maxScale: [5.8, 5.8, 5.8],
                         randomRotationY: true,
                         useImpostor: false,
                         cullingDistance: 3500,
                         fadeStartDistance: 2800,
                         targetLayer: 'Rock',
-                        bottomOffset: 0.1
+                        preservePivot: false,
+                        bottomOffset: -2.5,
+                        alignToNormal: true,
+                        alignFactor: 0.85,
+                        minSlope: 0.0,
+                        maxSlope: 45.0
                     });
                 }
             }

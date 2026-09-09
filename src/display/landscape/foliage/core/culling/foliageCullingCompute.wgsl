@@ -128,7 +128,7 @@ fn main(
 
     // 2단계: 대략적 3D 거리 및 서브픽셀(2px 미만) 조기 판정 (VHT 샘플링 및 절두체 내적 전진 배치)
     let effectiveBottomOffset = typeInfo.bottomOffset * scaleY;
-    let approxRealY = instance.posY - effectiveBottomOffset;
+    let approxRealY = instance.posY + effectiveBottomOffset;
     let approxDy = approxRealY - camPos.y;
     let approxDistSq = horizontalDistSq + approxDy * approxDy;
     if (approxDistSq >= effectiveCullingDistSq) {
@@ -182,6 +182,7 @@ fn main(
     }
 
     // 6단계: 지연 VHT 지형 높이 텍스처 샘플링 (실제 렌더링 후보군만 1회 정밀 페치)
+    // GPU 지형 렌더링 메시와 100% 동일한 VHT 하이트맵을 샘플링하여 지표면에 완전 밀착
     var realY = approxRealY;
     if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
@@ -189,7 +190,7 @@ fn main(
         if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
             let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
             let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
-            realY = terrainHeight - effectiveBottomOffset;
+            realY = terrainHeight + effectiveBottomOffset;
         }
     }
 

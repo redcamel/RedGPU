@@ -151,7 +151,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             if (!isOccluded) {
                 let dx = tile.worldX - uniforms.cameraPosition.x;
                 let dz = tile.worldZ - uniforms.cameraPosition.z;
-                let dy = uniforms.cameraPosition.y;
+                let dy = max(0.0, max(-uniforms.cameraPosition.y, uniforms.cameraPosition.y - uniforms.heightScale));
                 let distSq = dx * dx + dz * dz + dy * dy;
 
                 let isScreenSizeMetric = uniforms.lodMetric >= 0.5;

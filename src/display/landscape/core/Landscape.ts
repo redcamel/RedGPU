@@ -54,7 +54,7 @@ export class Landscape extends Object3DContainer {
     #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
-    #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+    #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
     #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
@@ -110,7 +110,7 @@ export class Landscape extends Object3DContainer {
         const tileSizeX = worldSizeX / componentCountX;
         const tileSizeZ = worldSizeZ / componentCountZ;
         const componentSizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
-        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
         const maxLODLevel = 5;
 
         const material = new LandscapeMaterial(redGPUContext);
@@ -466,6 +466,7 @@ export class Landscape extends Object3DContainer {
                 );
 
                 this.#tileStreamer?.setGlobalHeightTexture(this.#globalHeightTexture);
+                this.#tileStreamer?.setGlobalCPUHeightMap(cpuParsed);
                 this.#bakeGlobalBaseToVHT();
             }
         } catch (e) {

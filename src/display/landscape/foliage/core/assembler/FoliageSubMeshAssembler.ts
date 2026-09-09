@@ -496,8 +496,9 @@ class FoliageSubMeshAssembler {
             }
         }
 
+        const preservePivot = options.preservePivot ?? true;
         const offsetX = (isFinite(minX) && isFinite(maxX)) ? (minX + maxX) * 0.5 : 0;
-        const offsetY = isFinite(minY) ? minY : 0;
+        const offsetY = preservePivot ? 0 : (isFinite(minY) ? minY : 0);
         const offsetZ = (isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0;
 
         const materialGroups = new Map<string, { material: any; raws: RawSubMesh[] }>();

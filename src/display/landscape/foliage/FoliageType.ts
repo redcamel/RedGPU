@@ -75,6 +75,13 @@ export interface FoliageTypeOptions {
 
     bottomOffset?: number;
 
+    /**
+     * [KO] 원본 메시의 Y 피벗(원점 Y=0)을 지표면 기준으로 보존할지 여부 (기본값: true). false일 경우 모델의 최하단(minY)을 강제로 0으로 맞춥니다.
+     * [EN] Whether to preserve the original mesh's Y pivot (origin Y=0) as ground level (default: true). If false, forces mesh bottom (minY) to 0.
+     * @default true
+     */
+    preservePivot?: boolean;
+
     castShadow?: boolean;
 
     /**
