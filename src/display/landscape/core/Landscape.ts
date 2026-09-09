@@ -49,7 +49,7 @@ export class Landscape extends Object3DContainer {
     #castShadow: boolean = false;
     #receiveShadow: boolean = true;
     #enableHeightmapShadow: boolean = true;
-    #heightmapShadowSteps: number = 8;
+    #heightmapShadowSteps: number = 10;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;

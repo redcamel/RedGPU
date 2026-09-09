@@ -9,6 +9,7 @@
 #redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibility;
+#redgpu_include math.getInterleavedGradientNoise;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -331,6 +332,7 @@ fn computeLandscapeHeightmapShadow(
     worldPos: vec3<f32>,
     N: vec3<f32>,
     L: vec3<f32>,
+    screenCoord: vec2<f32>,
     worldSizeX: f32,
     worldSizeZ: f32,
     vhtTexSize: vec2<f32>,
@@ -339,22 +341,31 @@ fn computeLandscapeHeightmapShadow(
     stepsF: f32,
     softness: f32
 ) -> f32 {
-    let stepCount = u32(clamp(stepsF, 4.0, 48.0));
+    let stepCount = u32(clamp(stepsF, 4.0, 64.0));
     let invStepCount = 1.0 / f32(stepCount);
-    let minDistance = 25.0;
+    let minDistance = 15.0;
     let distRange = max(1.0, maxDistance - minDistance);
 
     var shadowFactor: f32 = 1.0;
 
     let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
     // 자가 차폐(Self-Occlusion Acne) 방지를 위한 표면 법선 오프셋
-    let biasedPos = worldPos + N * 2.0;
+    let normalBias = 3.5;
+    let biasedPos = worldPos + N * normalBias;
     let baseUV = (biasedPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
     let uvDir = L.xz * invWorldSize;
 
+    // 수신점의 국소 접평면(Tangent Plane) 기울기 산출
+    // 이 접평면 아래에 있는 지형은 수신점의 지평선(Horizon) 아래에 위치하므로 차폐 및 반음영을 유발할 수 없음
+    let ny = max(0.1, N.y);
+    let tangentSlope = -(N.x * L.x + N.z * L.z) / ny;
+
+    let jitter = getInterleavedGradientNoise(screenCoord);
+
     for (var i = 0u; i < stepCount; i = i + 1u) {
-        let u = (f32(i) + 0.5) * invStepCount;
-        let t = minDistance + distRange * (u * u);
+        let u = (f32(i) + jitter) * invStepCount;
+        // 선형과 2차 곡선을 적절히 배합하여 근거리(정밀도)와 원거리(도약 방지) 균형 유지
+        let t = minDistance + distRange * (u * 0.4 + u * u * 0.6);
         let samplePosY = biasedPos.y + L.y * t;
 
         if (samplePosY > heightScale) {
@@ -368,15 +379,23 @@ fn computeLandscapeHeightmapShadow(
         }
 
         let terrainHeight = sampleBilinearHeight(uv, vhtTexSize) * heightScale;
-        // 거리 비례 적응형 바이어스로 자기 자신 폴리곤에 광선이 걸리는 여드름 현상 차단
-        let bias = max(2.5, t * 0.006);
-        let diff = samplePosY - terrainHeight + bias;
 
-        if (diff < 0.0) {
-            let hardPenumbra = clamp(1.0 + diff / max(1.0, bias * 2.0), 0.0, 1.0);
-            shadowFactor = min(shadowFactor, hardPenumbra);
+        // 접평면 기준 상대 고도: 접평면보다 1.5m 이상 높이 솟아오른 산맥/능선만 차폐 후보로 인정
+        // (텍셀 보간 주름 및 평탄/완경사 사면의 자가 음영 여드름/그물망 아티팩트 완전 원천 차단)
+        let tangentHeight = worldPos.y + tangentSlope * t;
+        let ridgeHeight = terrainHeight - tangentHeight;
+        if (ridgeHeight <= 1.5) {
+            continue;
+        }
+
+        let diff = samplePosY - terrainHeight;
+
+        if (diff <= 0.0) {
+            // 산맥에 광선이 완전히 가로막힘 -> 100% 완전 차폐
+            return 0.0;
         } else {
-            let penumbra = clamp(diff * softness / max(1.0, t), 0.0, 1.0);
+            // 능선 정상을 아슬아슬하게 통과하는 광선의 부드러운 반음영(Penumbra) 계산
+            let penumbra = clamp((diff * softness) / max(1.0, t), 0.0, 1.0);
             shadowFactor = min(shadowFactor, penumbra);
         }
 
@@ -509,6 +528,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 input_vertexPosition,
                 N,
                 L,
+                inputData.position.xy,
                 landscapeInstanceUniforms.worldSizeX,
                 landscapeInstanceUniforms.worldSizeZ,
                 landscapeInstanceUniforms.vhtTextureSize,
