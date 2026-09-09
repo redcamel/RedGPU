@@ -197,47 +197,13 @@ RedGPU.init(
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
-                            isFoliage: true,
+                            type: RedGPU.FOLIAGE_TYPE.FOLIAGE,
                             useImpostor: true
                         });
                     });
                 }
             }
         );
-        //
-        // // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
-        //
-        //         foliageManager.addFoliageType({
-        //             name: 'FrangipaniTree',
-        //             lods: [{mesh: root, lodDistance: 120}],
-        //             maxInstances: 50000,
-        //             minScale: [4.2, 4.2, 4.2],
-        //             maxScale: [6.2, 6.2, 6.2],
-        //             randomRotationY: true,
-        //             cullingDistance: 3500,
-        //             fadeStartDistance: 2800,
-        //             isFoliage: true,
-        //             useImpostor: true
-        //         });
-        //     }
-        // );
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //       root.setScale(10)
-        //         root.y = 1000
-        //         scene.addChild(root)
-        //     }
-        // );
-        // landscape.debuggerManager.spatialGrid = true;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
@@ -305,14 +271,11 @@ RedGPU.init(
                         typeFolder.addBinding(type, 'useDepthPrepass', {label: 'Depth Prepass'});
                         typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
                         typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
-                        typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
-                            options: {
-                                'Cascade 0 (Near Only)': 0,
-                                'Cascade 1 (~50m)': 1,
-                                'Cascade 2 (~112m)': 2,
-                                'Cascade 3 (Full Far)': 3,
-                            },
-                            label: 'Max Shadow Cascade'
+                        typeFolder.addBinding(type, 'maxShadowDistance', {
+                            min: 0,
+                            max: 1000,
+                            step: 1,
+                            label: 'Max Shadow Dist'
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
                             min: -5.0,

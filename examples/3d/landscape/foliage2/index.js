@@ -381,17 +381,6 @@ RedGPU.init(
                             foliageManager.repopulateFoliageType(type);
                         });
                         typeFolder.addBinding(type, 'enableStreaming');
-                        typeFolder.addBinding(type, 'subCellSize', {
-                            options: {
-                                '50': 50,
-                                '100': 100,
-                                '200': 200,
-                                '250': 250,
-                                '500': 500
-                            }
-                        }).on('change', (ev) => {
-                            foliageManager.subCellSize = ev.value;
-                        });
                         typeFolder.addBinding(type, 'streamingRadius', {
                             min: 100,
                             max: 3000,
