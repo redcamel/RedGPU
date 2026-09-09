@@ -212,7 +212,8 @@ class LandscapeFoliageManager {
             mergedOptions,
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
             this.#megaBuffer,
-            () => this.#renderer.markShadowBundleDirty()
+            () => this.#renderer.markShadowBundleDirty(),
+            (t) => this.repopulateFoliageType(t)
         );
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);

@@ -200,7 +200,7 @@ RedGPU.init(
                             name: `Tree_${baseName}`,
                             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
-                            instancesPerTile: 2000,
+                            densityPerHectare: 120.0,
                             densityMultiplier: 1.0,
                             minWeightThreshold: 0.02,
                             minScale: [0.4, 0.4, 0.4],
@@ -253,7 +253,7 @@ RedGPU.init(
                                 receiveShadow: true
                             }
                         ],
-                        instancesPerTile: 250,
+                        densityPerHectare: 25.0,
                         densityMultiplier: 1.0,
                         minWeightThreshold: 0.03,
                         minScale: [0.3, 0.3, 0.3],
@@ -366,20 +366,6 @@ RedGPU.init(
                         typeFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
                         typeFolder.addBinding(type, 'bufferCapacity', {readonly: true});
                         typeFolder.addBinding(type, 'totalInstanceCount', {readonly: true});
-                        typeFolder.addBinding(type, 'instancesPerTile', {
-                            min: 100,
-                            max: 20000,
-                            step: 100
-                        }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
-                        });
-                        typeFolder.addBinding(type, 'densityMultiplier', {
-                            min: 0.1,
-                            max: 3.0,
-                            step: 0.1
-                        }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
-                        });
                         typeFolder.addBinding(type, 'enableStreaming');
                         typeFolder.addBinding(type, 'streamingRadius', {
                             min: 100,
@@ -392,6 +378,18 @@ RedGPU.init(
                             min: 0,
                             max: 1000,
                             step: 1
+                        });
+                        typeFolder.addBinding(type, 'densityPerHectare', {
+                            min: 0,
+                            max: 300,
+                            step: 0.5,
+                            label: 'Density (/ha)'
+                        });
+                        typeFolder.addBinding(type, 'densityMultiplier', {
+                            min: 0,
+                            max: 5.0,
+                            step: 0.1,
+                            label: 'Density Multiplier'
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
                             min: -2.0,
@@ -415,7 +413,6 @@ RedGPU.init(
                             },
                             set targetLayer(val) {
                                 type.targetLayer = val === 'None' ? undefined : val;
-                                foliageManager.repopulateFoliageType(type);
                             }
                         };
                         splatFolder.addBinding(layerBinding, 'targetLayer', {

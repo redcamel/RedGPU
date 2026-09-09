@@ -34,15 +34,21 @@ export interface FoliageTypeOptions {
     lods: FoliageLODConfig[];
 
     /**
-     * [KO] 타일당 목표 스폰 인스턴스 수 (1000m x 1000m 타일 기준, 기본값: 5000)
-     * [EN] Target instance count per tile
-     * @default 5000
+     * [KO] 1 헥타르(10,000㎡ = 100m x 100m)당 목표 스폰 인스턴스 수 (기본값: 20.0)
+     * [EN] Target instance count per hectare (10,000 m² = 100m x 100m)
+     * @default 20.0
      */
-    instancesPerTile?: number;
+    densityPerHectare?: number;
 
     /**
-     * [KO] @deprecated 스트리밍 환경에서는 streamingRadius, instancesPerTile, densityMultiplier를 기반으로 GPU 버퍼 용량이 100% 자동 산출됩니다.
-     * [EN] @deprecated Automatically derived from streamingRadius, instancesPerTile, and densityMultiplier.
+     * [KO] densityPerHectare 단축 별칭
+     * [EN] Short alias for densityPerHectare
+     */
+    density?: number;
+
+    /**
+     * [KO] @deprecated 스트리밍 환경에서는 streamingRadius, densityPerHectare, densityMultiplier를 기반으로 GPU 버퍼 용량이 100% 자동 산출됩니다.
+     * [EN] @deprecated Automatically derived from streamingRadius, densityPerHectare, and densityMultiplier.
      */
     maxInstances?: number;
 
@@ -174,25 +180,28 @@ class FoliageType {
     #minSlope: number = 0.0;
     #maxSlope: number = 45.0;
     #densityScaleByWeight: boolean = true;
-    #instancesPerTile?: number;
+    #densityPerHectare: number = 20.0;
     #densityMultiplier: number = 1.0;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
     #streamer: FoliageSubCellStreamer;
     #onDirty?: () => void;
+    #onRepopulateRequired?: (type: FoliageType) => void;
 
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
         megaBuffer?: FoliageMegaBuffer | null,
-        onDirty?: () => void
+        onDirty?: () => void,
+        onRepopulateRequired?: (type: FoliageType) => void
     ) {
         this.#streamer = new FoliageSubCellStreamer(this);
         this.#redGPUContext = redGPUContext;
         this.#options = options;
         this.#onDirty = onDirty;
+        this.#onRepopulateRequired = onRepopulateRequired;
         this.#castShadow = options.castShadow !== false;
 
         const resolvedType: FOLIAGE_TYPE = options.type
@@ -227,31 +236,35 @@ class FoliageType {
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
 
-        const instancesPerTile = options.instancesPerTile ?? 5000;
-        const densityMultiplier = options.densityMultiplier ?? 1.0;
+        let resolvedDensityPerHectare = 20.0;
+        if (options.densityPerHectare !== undefined) {
+            resolvedDensityPerHectare = Math.max(0, Number(options.densityPerHectare) || 0);
+        } else if (options.density !== undefined) {
+            resolvedDensityPerHectare = Math.max(0, Number(options.density) || 0);
+        }
+        this.#densityPerHectare = resolvedDensityPerHectare;
+
+        const densityMultiplier = options.densityMultiplier !== undefined
+            ? Math.max(0.0, Number(options.densityMultiplier) || 0.0)
+            : 1.0;
+        this.#densityMultiplier = densityMultiplier;
         const streamingRadius = options.streamingRadius ?? 600.0;
         const subCellSize = options.subCellSize ?? 100.0;
 
-        // 스트리밍 기반 GPU 버퍼 용량 자동 산출 (Phase 3.1)
-        // 1. 유효 스트리밍 반경 (히스테리시스 150m 포함)
+        // 스트리밍 기반 GPU 버퍼 용량 자동 산출 (Phase 4: 물리 헥타르 단위 면적 기반)
+        // 1. 유효 스트리밍 반경 (히스테리시스 150m 포함) 및 사각 그리드 커버리지 여유율(1.25)
         const effectiveRadius = streamingRadius + 150.0;
-        const cellArea = subCellSize * subCellSize;
+        const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
+        const activeHectares = effectiveAreaMetersSq / 10000.0;
 
-        // 2. 최대 동시 활성 서브셀 수 (원형 면적 + 안전 계수 1.25)
-        const maxActiveSubCells = Math.ceil((Math.PI * effectiveRadius * effectiveRadius / cellArea) * 1.25);
-
-        // 3. 서브셀당 평균 인스턴스 수 (1000m 타일 = 10x10 = 100 서브셀)
-        const avgInstancesPerSubCell = (instancesPerTile / 100.0) * densityMultiplier;
-
-        // 4. 안전 버퍼 용량 (30% 여유 마진 및 64 배수 정렬)
-        const calculatedMax = Math.ceil((maxActiveSubCells * avgInstancesPerSubCell * 1.30) / 64) * 64;
+        // 2. 예상 활성 인스턴스 수 및 30% 여유 마진, 64 배수 정렬
+        const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * densityMultiplier;
+        const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
 
         // 최소 안전 용량: 16,384개 (16K 슬롯)
-        // WebGPU 표준 maxBufferSize(256MB) 한도 준수 (5개 타입 등록 시 메가버퍼 ~83MB)
-        // 스트리밍 반경 600m 내 최대 활성 인스턴스(약 4,000~5,000개) 대비 3배 이상의 충분한 버퍼 여유 제공
         const minSafeCapacity = 16384;
 
-        // 5. 사용자가 명시하지 않은 경우 calculatedMax와 minSafeCapacity 중 큰 값 사용
+        // 3. 최종 GPU 인스턴스 슬롯 용량 결정
         const resolvedMaxInstances = options.maxInstances !== undefined
             ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
@@ -280,7 +293,7 @@ class FoliageType {
             minSlope: options.minSlope ?? 0.0,
             maxSlope: options.maxSlope ?? 45.0,
             densityScaleByWeight: options.densityScaleByWeight !== false,
-            instancesPerTile,
+            densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier
         });
 
@@ -292,7 +305,7 @@ class FoliageType {
         this.#minSlope = this.#options.minSlope!;
         this.#maxSlope = this.#options.maxSlope!;
         this.#densityScaleByWeight = this.#options.densityScaleByWeight!;
-        this.#instancesPerTile = this.#options.instancesPerTile;
+        this.#densityPerHectare = resolvedDensityPerHectare;
         this.#densityMultiplier = this.#options.densityMultiplier!;
 
         let hash = 0;
@@ -518,7 +531,10 @@ class FoliageType {
     }
 
     set targetLayer(val: string | number | undefined) {
-        this.#targetLayer = val;
+        if (this.#targetLayer !== val) {
+            this.#targetLayer = val;
+            this.#onRepopulateRequired?.(this);
+        }
     }
 
     get minWeightThreshold(): number {
@@ -526,7 +542,11 @@ class FoliageType {
     }
 
     set minWeightThreshold(val: number) {
-        this.#minWeightThreshold = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
+        const numVal = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
+        if (this.#minWeightThreshold !== numVal) {
+            this.#minWeightThreshold = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
 
     get minSlope(): number {
@@ -534,7 +554,11 @@ class FoliageType {
     }
 
     set minSlope(val: number) {
-        this.#minSlope = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        if (this.#minSlope !== numVal) {
+            this.#minSlope = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
 
     get maxSlope(): number {
@@ -542,7 +566,11 @@ class FoliageType {
     }
 
     set maxSlope(val: number) {
-        this.#maxSlope = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        if (this.#maxSlope !== numVal) {
+            this.#maxSlope = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
 
     get densityScaleByWeight(): boolean {
@@ -550,24 +578,55 @@ class FoliageType {
     }
 
     set densityScaleByWeight(val: boolean) {
-        this.#densityScaleByWeight = !!val;
+        const boolVal = !!val;
+        if (this.#densityScaleByWeight !== boolVal) {
+            this.#densityScaleByWeight = boolVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
 
-    get instancesPerTile(): number | undefined {
-        return this.#instancesPerTile;
+    /**
+     * [KO] 1 헥타르(10,000㎡ = 100m x 100m)당 목표 스폰 인스턴스 수
+     * [EN] Target instance count per hectare (10,000 m² = 100m x 100m)
+     */
+    get densityPerHectare(): number {
+        return this.#densityPerHectare;
     }
 
-    set instancesPerTile(val: number | undefined) {
-        this.#instancesPerTile = val !== undefined ? Math.max(1, (val | 0)) : undefined;
+    set densityPerHectare(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#densityPerHectare !== numVal) {
+            this.#densityPerHectare = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
+
+    /**
+     * [KO] densityPerHectare 단축 별칭
+     * [EN] Short alias for densityPerHectare
+     */
+    get density(): number {
+        return this.#densityPerHectare;
+    }
+
+    set density(val: number) {
+        this.densityPerHectare = val;
+    }
+
 
     get densityMultiplier(): number {
         return this.#densityMultiplier;
     }
 
     set densityMultiplier(val: number) {
-        this.#densityMultiplier = Math.max(0.0, Number(val) || 0.0);
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#densityMultiplier !== numVal) {
+            this.#densityMultiplier = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
     }
+
+
 
     /**
      * [KO] 타일 캐시를 비우고 스트리머를 초기화합니다 (재생성용).
@@ -704,7 +763,7 @@ class FoliageType {
         }
     }
 
-    populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
+    populateTile(comp: any, landscape?: any): void {
         if (!comp) return;
         const cz = (comp.componentZ ?? 0) & 0xffff;
         const cx = (comp.componentX ?? 0) & 0xffff;
@@ -727,8 +786,7 @@ class FoliageType {
             comp,
             this,
             landscape,
-            this.#subCellSize,
-            targetCountPerTile
+            this.#subCellSize
         );
         this.#streamer.addChunks(chunks);
 

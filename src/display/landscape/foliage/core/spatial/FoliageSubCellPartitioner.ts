@@ -38,17 +38,11 @@ class FoliageSubCellPartitioner {
         comp: any,
         foliageType: any,
         landscape: any,
-        subCellSize: number = 100.0,
-        targetCountPerTile?: number
+        subCellSize: number = 100.0
     ): Map<number, FoliageSubCellChunk> {
         const result = new Map<number, FoliageSubCellChunk>();
 
         const compCountX = landscape?.componentCount?.[0] ?? 8;
-        const baseCount = targetCountPerTile ?? foliageType.instancesPerTile ?? 5000;
-        const densityMul = foliageType.densityMultiplier ?? 1.0;
-        const targetCount = Math.max(0, Math.floor(baseCount * densityMul));
-        if (targetCount <= 0) return result;
-
         const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
         const halfTile = tileSizeMeters * 0.5;
 
@@ -57,10 +51,19 @@ class FoliageSubCellPartitioner {
         const minZ = comp.worldZ - halfTile;
         const maxZ = comp.worldZ + halfTile;
 
-        const {minScale, maxScale, randomRotationY} = foliageType.options;
         const rangeX = maxX - minX;
         const rangeZ = maxZ - minZ;
 
+        // [Phase 4] 타일의 실제 물리 면적 기반 헥타르(ha) 산출 및 목표 인스턴스 계산
+        const tileAreaMetersSq = rangeX * rangeZ;
+        const tileHectares = tileAreaMetersSq / 10000.0;
+        const densityPerHectare = foliageType.densityPerHectare ?? 20.0;
+        const baseCount = Math.floor(densityPerHectare * tileHectares);
+        const densityMul = foliageType.densityMultiplier ?? 1.0;
+        const targetCount = Math.max(0, Math.floor(baseCount * densityMul));
+        if (targetCount <= 0) return result;
+
+        const {minScale, maxScale, randomRotationY} = foliageType.options;
         const scaleDiffX = maxScale[0] - minScale[0];
         const scaleDiffY = maxScale[1] - minScale[1];
         const scaleDiffZ = maxScale[2] - minScale[2];

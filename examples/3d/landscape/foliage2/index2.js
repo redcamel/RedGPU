@@ -193,7 +193,7 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            instancesPerTile: 2000,
+                            densityPerHectare: 120.0,
                             minScale: [0.4, 0.4, 0.4],
                             maxScale: [0.7, 0.75, 0.7],
                             randomRotationY: true,
@@ -277,6 +277,18 @@ RedGPU.init(
                             max: 1000,
                             step: 1,
                             label: 'Max Shadow Dist'
+                        });
+                        typeFolder.addBinding(type, 'densityPerHectare', {
+                            min: 0,
+                            max: 300,
+                            step: 0.5,
+                            label: 'Density (/ha)'
+                        });
+                        typeFolder.addBinding(type, 'densityMultiplier', {
+                            min: 0,
+                            max: 5.0,
+                            step: 0.1,
+                            label: 'Density Multiplier'
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
                             min: -2.0,
