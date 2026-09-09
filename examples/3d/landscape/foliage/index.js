@@ -315,6 +315,34 @@ RedGPU.init(
 
                 const folderFoliage = pane.addFolder({title: 'foliageManager', expanded: true});
 
+                const windFolder = folderFoliage.addFolder({title: '🍃 Wind Simulation', expanded: true});
+                windFolder.addBinding(foliageManager, 'windEnabled', {label: 'Wind Enabled'});
+                windFolder.addBinding(foliageManager, 'windStrength', {
+                    min: 0,
+                    max: 3.0,
+                    step: 0.05,
+                    label: 'Strength'
+                });
+                windFolder.addBinding(foliageManager, 'windSpeed', {min: 0.1, max: 5.0, step: 0.1, label: 'Speed'});
+                windFolder.addBinding(foliageManager, 'windDirectionAngle', {
+                    min: 0,
+                    max: 360,
+                    step: 1,
+                    label: 'Direction (Deg)'
+                });
+                windFolder.addBinding(foliageManager, 'windFlutterStrength', {
+                    min: 0,
+                    max: 1.5,
+                    step: 0.05,
+                    label: 'Leaf Flutter'
+                });
+                windFolder.addBinding(foliageManager, 'windFrequency', {
+                    min: 0.01,
+                    max: 0.5,
+                    step: 0.01,
+                    label: 'Frequency'
+                });
+
                 const subCellFolder = folderFoliage.addFolder({title: 'subCell', expanded: true});
                 subCellFolder.addBinding(foliageManager, 'debugSubCellColoration');
                 subCellFolder.addBinding(foliageManager, 'subCellSize', {
@@ -412,6 +440,28 @@ RedGPU.init(
                             min: 200,
                             max: 8000,
                             step: 50
+                        });
+
+                        const windTypeFolder = typeFolder.addFolder({title: '🍃 Wind & Alignment', expanded: true});
+                        windTypeFolder.addBinding(type, 'windMultiplier', {
+                            min: 0,
+                            max: 3.0,
+                            step: 0.1,
+                            label: 'Wind Multiplier'
+                        });
+                        windTypeFolder.addBinding(type, 'windFlutterMultiplier', {
+                            min: 0,
+                            max: 3.0,
+                            step: 0.1,
+                            label: 'Flutter Multiplier'
+                        });
+                        windTypeFolder.addBinding(type, 'useVertexColorWind', {label: 'VertexColor Wind'});
+                        windTypeFolder.addBinding(type, 'alignToNormal', {label: 'Align To Normal'});
+                        windTypeFolder.addBinding(type, 'alignFactor', {
+                            min: 0,
+                            max: 1.0,
+                            step: 0.05,
+                            label: 'Align Factor'
                         });
 
                         const splatFolder = typeFolder.addFolder({

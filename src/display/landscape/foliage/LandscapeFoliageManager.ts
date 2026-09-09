@@ -31,6 +31,14 @@ class LandscapeFoliageManager {
     #streamingRadius: number = 600.0;
     #debugSubCellColoration: boolean = false;
 
+    // 🍃 [Phase 5] 전역 바람 시뮬레이션 설정
+    #windEnabled: boolean = true;
+    #windDirection: [number, number] = [1.0, 0.5];
+    #windSpeed: number = 1.2;
+    #windStrength: number = 0.5;
+    #windFrequency: number = 0.08;
+    #windFlutterStrength: number = 0.5;
+
     constructor(landscape: Landscape) {
         this.#landscape = landscape;
         this.#redGPUContext = landscape.redGPUContext;
@@ -167,6 +175,150 @@ class LandscapeFoliageManager {
         return this.#spatialGrid;
     }
 
+    // ============================================================================
+    // 🍃 [Phase 5] 전역 바람(Wind) 시뮬레이션 제어 API
+    // ============================================================================
+
+    get windEnabled(): boolean {
+        return this.#windEnabled;
+    }
+
+    set windEnabled(val: boolean) {
+        const boolVal = !!val;
+        if (this.#windEnabled !== boolVal) {
+            this.#windEnabled = boolVal;
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windSpeed(): number {
+        return this.#windSpeed;
+    }
+
+    set windSpeed(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windSpeed !== numVal) {
+            this.#windSpeed = numVal;
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windStrength(): number {
+        return this.#windStrength;
+    }
+
+    set windStrength(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windStrength !== numVal) {
+            this.#windStrength = numVal;
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windFrequency(): number {
+        return this.#windFrequency;
+    }
+
+    set windFrequency(val: number) {
+        const numVal = Math.max(0.001, Number(val) || 0.001);
+        if (this.#windFrequency !== numVal) {
+            this.#windFrequency = numVal;
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windFlutterStrength(): number {
+        return this.#windFlutterStrength;
+    }
+
+    set windFlutterStrength(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windFlutterStrength !== numVal) {
+            this.#windFlutterStrength = numVal;
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windDirection(): [number, number] {
+        return this.#windDirection;
+    }
+
+    set windDirection(val: [number, number]) {
+        if (Array.isArray(val) && val.length >= 2) {
+            const x = Number(val[0]) || 0;
+            const y = Number(val[1]) || 0;
+            const len = Math.sqrt(x * x + y * y);
+            if (len > 0.0001) {
+                this.#windDirection = [x / len, y / len];
+            } else {
+                this.#windDirection = [1.0, 0.0];
+            }
+            this.#syncWindToAllTypes();
+        }
+    }
+
+    get windDirectionAngle(): number {
+        const rad = Math.atan2(this.#windDirection[1], this.#windDirection[0]);
+        let deg = rad * (180.0 / Math.PI);
+        if (deg < 0) deg += 360;
+        return deg;
+    }
+
+    set windDirectionAngle(deg: number) {
+        const rad = deg * (Math.PI / 180.0);
+        this.#windDirection = [Math.cos(rad), Math.sin(rad)];
+        this.#syncWindToAllTypes();
+    }
+
+    addFoliageType(options: FoliageTypeOptions): FoliageType {
+        if (this.#foliageTypes.has(options.name)) {
+            console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
+            return this.#foliageTypes.get(options.name)!;
+        }
+
+        const mergedOptions: FoliageTypeOptions = {
+            ...options,
+            subCellSize: options.subCellSize ?? this.#subCellSize,
+            streamingRadius: options.streamingRadius ?? this.#streamingRadius
+        };
+
+        const foliageType = new FoliageType(
+            this.#redGPUContext,
+            mergedOptions,
+            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
+            this.#megaBuffer,
+            () => this.#renderer.markShadowBundleDirty(),
+            (t) => this.repopulateFoliageType(t)
+        );
+        this.#foliageTypes.set(options.name, foliageType);
+        this.#typeList.push(foliageType);
+        this.#renderer.markShadowBundleDirty();
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            foliageType.syncWindToSubMeshes(
+                gpuDevice,
+                this.#windDirection[0],
+                this.#windDirection[1],
+                this.#windSpeed,
+                this.#windStrength,
+                this.#windFrequency,
+                this.#windFlutterStrength,
+                this.#windEnabled
+            );
+        }
+
+        const cells = this.#landscape?.landscapeComponents;
+        if (cells && cells.length > 0) {
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                foliageType.populateTile(cells[i], this.#landscape);
+            }
+        }
+
+        return foliageType;
+    }
+
     update(viewOrCamera?: any, stateData?: any): void {
         const cam = viewOrCamera?.camera || viewOrCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
@@ -195,39 +347,30 @@ class LandscapeFoliageManager {
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
     }
 
-    addFoliageType(options: FoliageTypeOptions): FoliageType {
-        if (this.#foliageTypes.has(options.name)) {
-            console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
-            return this.#foliageTypes.get(options.name)!;
+    #syncWindToAllTypes(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return;
+        const dirX = this.#windDirection[0];
+        const dirY = this.#windDirection[1];
+        const speed = this.#windSpeed;
+        const strength = this.#windStrength;
+        const freq = this.#windFrequency;
+        const flutter = this.#windFlutterStrength;
+        const enabled = this.#windEnabled;
+
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].syncWindToSubMeshes(
+                gpuDevice,
+                dirX,
+                dirY,
+                speed,
+                strength,
+                freq,
+                flutter,
+                enabled
+            );
         }
-
-        const mergedOptions: FoliageTypeOptions = {
-            ...options,
-            subCellSize: options.subCellSize ?? this.#subCellSize,
-            streamingRadius: options.streamingRadius ?? this.#streamingRadius
-        };
-
-        const foliageType = new FoliageType(
-            this.#redGPUContext,
-            mergedOptions,
-            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
-            this.#megaBuffer,
-            () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.repopulateFoliageType(t)
-        );
-        this.#foliageTypes.set(options.name, foliageType);
-        this.#typeList.push(foliageType);
-        this.#renderer.markShadowBundleDirty();
-
-        const cells = this.#landscape?.landscapeComponents;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                foliageType.populateTile(cells[i], this.#landscape);
-            }
-        }
-
-        return foliageType;
     }
 
 

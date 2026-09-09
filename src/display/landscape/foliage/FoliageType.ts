@@ -138,6 +138,31 @@ export interface FoliageTypeOptions {
      * @default true
      */
     densityScaleByWeight?: boolean;
+    /**
+     * [KO] [Phase 5] 바람 세기 계수 (0.0: 바위처럼 고정, 1.0: 표준 나무, 1.5~2.0: 풀/꽃)
+     * [EN] [Phase 5] Wind strength multiplier (0.0: fixed like rock, 1.0: standard tree, 1.5-2.0: grass/flower)
+     */
+    windMultiplier?: number;
+    /**
+     * [KO] [Phase 5] 잎 미세 떨림 계수 (0.0: 떨림 없음, 1.0: 표준 떨림)
+     * [EN] [Phase 5] Leaf micro-flutter multiplier
+     */
+    windFlutterMultiplier?: number;
+    /**
+     * [KO] [Phase 5] 정점 컬러(Vertex Color) 바람 마스크 활용 여부
+     * [EN] [Phase 5] Whether to use vertex color wind mask
+     */
+    useVertexColorWind?: boolean;
+    /**
+     * [KO] [Phase 5] 지형 경사면 법선 정렬 여부
+     * [EN] [Phase 5] Whether to align instance rotation to terrain normal
+     */
+    alignToNormal?: boolean;
+    /**
+     * [KO] [Phase 5] 경사 정렬 반영 강도 (0.0 = 완전 수직 기립, 1.0 = 지형 경사면 완전 밀착)
+     * [EN] [Phase 5] Slope normal alignment factor (0.0 = vertical, 1.0 = fully aligned to normal)
+     */
+    alignFactor?: number;
 
 
     /**
@@ -182,6 +207,20 @@ class FoliageType {
     #densityScaleByWeight: boolean = true;
     #densityPerHectare: number = 20.0;
     #densityMultiplier: number = 1.0;
+    #windMultiplier: number = 1.0;
+    #windFlutterMultiplier: number = 1.0;
+    #useVertexColorWind: boolean = true;
+    #alignToNormal: boolean = false;
+    #alignFactor: number = 0.0;
+    #lastWindParams: {
+        windDirX: number;
+        windDirY: number;
+        windSpeed: number;
+        windStrength: number;
+        windFreq: number;
+        windFlutterStrength: number;
+        windEnabled: boolean;
+    } | null = null;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -269,6 +308,20 @@ class FoliageType {
             ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
 
+        const defaultWindMul = isBasic ? 0.0 : (isGrass ? 1.5 : 1.0);
+        const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : defaultWindMul;
+        const resolvedWindFlutterMultiplier = options.windFlutterMultiplier !== undefined ? Math.max(0, Number(options.windFlutterMultiplier) || 0) : 1.0;
+        const resolvedUseVertexColorWind = options.useVertexColorWind !== false;
+        const resolvedAlignToNormal = options.alignToNormal ?? (isBasic || isGrass);
+        const defaultAlignFactor = isBasic ? 1.0 : (isGrass ? 0.5 : 0.0);
+        const resolvedAlignFactor = options.alignFactor !== undefined ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0)) : defaultAlignFactor;
+
+        this.#windMultiplier = resolvedWindMultiplier;
+        this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
+        this.#useVertexColorWind = resolvedUseVertexColorWind;
+        this.#alignToNormal = resolvedAlignToNormal;
+        this.#alignFactor = resolvedAlignFactor;
+
         this.#options = Object.freeze({
             name: options.name,
             type: this.#type,
@@ -294,7 +347,12 @@ class FoliageType {
             maxSlope: options.maxSlope ?? 45.0,
             densityScaleByWeight: options.densityScaleByWeight !== false,
             densityPerHectare: resolvedDensityPerHectare,
-            densityMultiplier
+            densityMultiplier,
+            windMultiplier: resolvedWindMultiplier,
+            windFlutterMultiplier: resolvedWindFlutterMultiplier,
+            useVertexColorWind: resolvedUseVertexColorWind,
+            alignToNormal: resolvedAlignToNormal,
+            alignFactor: resolvedAlignFactor
         });
 
         this.#enableStreaming = this.#options.enableStreaming!;
@@ -624,6 +682,156 @@ class FoliageType {
             this.#densityMultiplier = numVal;
             this.#onRepopulateRequired?.(this);
         }
+    }
+
+    // ============================================================================
+    // [Phase 5] 바람 시뮬레이션 및 지형 법선 정렬 프로퍼티
+    // ============================================================================
+
+    get windMultiplier(): number {
+        return this.#windMultiplier;
+    }
+
+    set windMultiplier(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windMultiplier !== numVal) {
+            this.#windMultiplier = numVal;
+            this.#syncInternalWind();
+            this.#onDirty?.();
+        }
+    }
+
+    get windFlutterMultiplier(): number {
+        return this.#windFlutterMultiplier;
+    }
+
+    set windFlutterMultiplier(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windFlutterMultiplier !== numVal) {
+            this.#windFlutterMultiplier = numVal;
+            this.#syncInternalWind();
+            this.#onDirty?.();
+        }
+    }
+
+    get useVertexColorWind(): boolean {
+        return this.#useVertexColorWind;
+    }
+
+    set useVertexColorWind(val: boolean) {
+        const boolVal = !!val;
+        if (this.#useVertexColorWind !== boolVal) {
+            this.#useVertexColorWind = boolVal;
+            this.#syncInternalWind();
+            this.#onDirty?.();
+        }
+    }
+
+    get alignToNormal(): boolean {
+        return this.#alignToNormal;
+    }
+
+    set alignToNormal(val: boolean) {
+        const boolVal = !!val;
+        if (this.#alignToNormal !== boolVal) {
+            this.#alignToNormal = boolVal;
+            this.#onRepopulateRequired?.(this);
+        }
+    }
+
+    get alignFactor(): number {
+        return this.#alignFactor;
+    }
+
+    set alignFactor(val: number) {
+        const numVal = Math.min(1.0, Math.max(0.0, Number(val) || 0.0));
+        if (this.#alignFactor !== numVal) {
+            this.#alignFactor = numVal;
+            this.#onRepopulateRequired?.(this);
+        }
+    }
+
+    syncWindToSubMeshes(
+        gpuDevice: GPUDevice,
+        windDirX: number,
+        windDirY: number,
+        windSpeed: number,
+        windStrength: number,
+        windFreq: number,
+        windFlutterStrength: number,
+        windEnabled: boolean
+    ): void {
+        this.#lastWindParams = {
+            windDirX,
+            windDirY,
+            windSpeed,
+            windStrength,
+            windFreq,
+            windFlutterStrength,
+            windEnabled,
+        };
+        const subList = this.#subMeshes;
+        const count = subList.length;
+        const windMul = this.#windMultiplier;
+        const flutterMul = this.#windFlutterMultiplier;
+        const useVC = this.#useVertexColorWind;
+        const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
+
+        for (let i = 0; i < count; i++) {
+            const sub = subList[i];
+            // 🍃 기둥/가지(Bark, isMasked === false)는 flutter(나뭇잎 살랑거림)를 전혀 받지 않음 (두께 왜곡 원천 차단)
+            // 잎사귀/솔잎 클러스터(isMasked === true)만 flutterMul 적용
+            const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
+            sub.updateWindParams(
+                gpuDevice,
+                windDirX,
+                windDirY,
+                windSpeed,
+                windStrength,
+                windFreq,
+                windFlutterStrength,
+                windEnabled,
+                windMul,
+                effectiveFlutterMul,
+                useVC,
+                treeH
+            );
+        }
+
+        // 🍃 [Phase 5] 그림자 서브메시 버퍼도 함께 완벽 동기화 (Wind Enabled 해제 시 그림자 정지 연동)
+        const shadowList = this.#shadowMergedSubMeshes;
+        const shadowCount = shadowList.length;
+        for (let i = 0; i < shadowCount; i++) {
+            shadowList[i].updateWindParams(
+                gpuDevice,
+                windDirX,
+                windDirY,
+                windSpeed,
+                windStrength,
+                windFreq,
+                windFlutterStrength,
+                windEnabled,
+                windMul,
+                flutterMul * 0.5, // 섀도우 맵 깜빡임 방지를 위해 완만한 flutter 적용
+                useVC,
+                treeH
+            );
+        }
+    }
+
+    #syncInternalWind(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#lastWindParams) return;
+        this.syncWindToSubMeshes(
+            gpuDevice,
+            this.#lastWindParams.windDirX,
+            this.#lastWindParams.windDirY,
+            this.#lastWindParams.windSpeed,
+            this.#lastWindParams.windStrength,
+            this.#lastWindParams.windFreq,
+            this.#lastWindParams.windFlutterStrength,
+            this.#lastWindParams.windEnabled
+        );
     }
 
 

@@ -101,6 +101,11 @@ class FoliageSubCellPartitioner {
         const maxSlope = foliageType.maxSlope ?? 45.0;
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
 
+        // 🍃 [Phase 5] 지형 법선 정렬 옵션
+        const alignToNormal = foliageType.alignToNormal ?? false;
+        const alignFactor = foliageType.alignFactor ?? 0.0;
+        const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
+
         // 1. 임시 인스턴스 데이터를 서브셀 키별로 수집
         const tempBuckets = new Map<number, {
             subCellX: number;
@@ -192,8 +197,11 @@ class FoliageSubCellPartitioner {
                 posY = landscape.getHeightAt(posX, posZ);
             }
 
-            let rotPackedY = 0;
-            let rotPackedW = (32767 << 16) >>> 0;
+            let rotX = 0.0;
+            let rotY = 0.0;
+            let rotZ = 0.0;
+            let rotW = 1.0;
+
             if (randomRotationY) {
                 seed ^= seed << 13;
                 seed ^= seed >>> 17;
@@ -201,14 +209,60 @@ class FoliageSubCellPartitioner {
                 const rAngle = (seed >>> 0) / 4294967296.0;
                 const angle = rAngle * (Math.PI * 2);
                 const halfAngle = angle * 0.5;
-                const rotY = Math.sin(halfAngle);
-                const rotW = Math.cos(halfAngle);
-
-                const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
-                const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
-                rotPackedY = ((iy & 0xFFFF) << 16) >>> 0;
-                rotPackedW = ((iw & 0xFFFF) << 16) >>> 0;
+                rotY = Math.sin(halfAngle);
+                rotW = Math.cos(halfAngle);
             }
+
+            // 🍃 [Phase 5] 지형 경사면 법선 정렬 쿼터니언 합성 (Slerp & Quaternion Multiply)
+            if (needNormalAlign) {
+                const step = 1.0;
+                const hL = landscape.getHeightAt(posX - step, posZ);
+                const hR = landscape.getHeightAt(posX + step, posZ);
+                const hD = landscape.getHeightAt(posX, posZ - step);
+                const hU = landscape.getHeightAt(posX, posZ + step);
+                const nx = (hL - hR) / (2 * step);
+                const nz = (hD - hU) / (2 * step);
+                const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+                const normalX = nx * invLen;
+                const normalY = invLen;
+                const normalZ = nz * invLen;
+
+                // U(0,1,0) x N(normalX, normalY, normalZ) = (normalZ, 0, -normalX)
+                const vx = normalZ;
+                const vz = -normalX;
+                const vw = 1.0 + normalY;
+                const tiltLen = Math.sqrt(vx * vx + vz * vz + vw * vw);
+                if (tiltLen > 0.0001) {
+                    const invTilt = 1.0 / tiltLen;
+                    const tx = (vx * invTilt) * alignFactor;
+                    const tz = (vz * invTilt) * alignFactor;
+                    const tw = (1.0 - alignFactor) + (vw * invTilt) * alignFactor;
+                    const alignLen = Math.sqrt(tx * tx + tz * tz + tw * tw);
+                    const invAlign = 1.0 / (alignLen > 0.0001 ? alignLen : 1.0);
+                    const ax = tx * invAlign;
+                    const az = tz * invAlign;
+                    const aw = tw * invAlign;
+
+                    // q_final = q_align(ax, 0, az, aw) * q_randY(0, rotY, 0, rotW)
+                    const fx = ax * rotW - az * rotY;
+                    const fy = aw * rotY;
+                    const fz = az * rotW + ax * rotY;
+                    const fw = aw * rotW;
+
+                    rotX = fx;
+                    rotY = fy;
+                    rotZ = fz;
+                    rotW = fw;
+                }
+            }
+
+            const ix = Math.max(-32768, Math.min(32767, (rotX * 32767) | 0));
+            const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
+            const iz = Math.max(-32768, Math.min(32767, (rotZ * 32767) | 0));
+            const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
+
+            const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
+            const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
 
             let scalePacked = isUniformXZ
                 ? FoliageSubCellPartitioner.#fastPackUniformScale(scaleX)

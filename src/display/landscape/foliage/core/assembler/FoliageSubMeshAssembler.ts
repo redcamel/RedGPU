@@ -57,15 +57,11 @@ interface RawSubMesh {
 
 class FoliageSubMeshAssembler {
 
-    static readonly #subMeshUniformData: Float32Array = new Float32Array(36);
+    static readonly #subMeshUniformData: Float32Array = new Float32Array(48);
     static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
     static readonly #tempLocalMatrix: mat4 = mat4.create();
     static readonly #identityMatrix: mat4 = mat4.create();
     static #bufferSeq: number = 0;
-
-    static #sharedShadowUniformBuffer: GPUBuffer | null = null;
-    static #sharedShadowVertexBindGroup: GPUBindGroup | null = null;
-    static #sharedShadowDevice: GPUDevice | null = null;
 
     static assemble(
         redGPUContext: RedGPUContext,
@@ -192,24 +188,16 @@ class FoliageSubMeshAssembler {
         };
     }
 
-    static #getSharedShadowUniform(
+    static #createShadowUniform(
         gpuDevice: GPUDevice,
-        subMeshBindGroupLayout: GPUBindGroupLayout
+        subMeshBindGroupLayout: GPUBindGroupLayout,
+        name: string,
+        lodIndex: number,
+        isFoliage: boolean
     ): { buffer: GPUBuffer; bindGroup: GPUBindGroup } {
-        if (
-            FoliageSubMeshAssembler.#sharedShadowUniformBuffer &&
-            FoliageSubMeshAssembler.#sharedShadowVertexBindGroup &&
-            FoliageSubMeshAssembler.#sharedShadowDevice === gpuDevice
-        ) {
-            return {
-                buffer: FoliageSubMeshAssembler.#sharedShadowUniformBuffer,
-                bindGroup: FoliageSubMeshAssembler.#sharedShadowVertexBindGroup,
-            };
-        }
-
         const uniformBuffer = gpuDevice.createBuffer({
-            label: 'FoliageShadowSubMesh_Shared_UniformBuffer',
-            size: 144,
+            label: `FoliageShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
+            size: 192,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
@@ -219,28 +207,38 @@ class FoliageSubMeshAssembler {
         floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
         uintView[32] = 0;
         uintView[33] = 0;
-        uintView[34] = 0;
+        floatView[34] = 0.0;
         uintView[35] = 0;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+        // 🍃 [Phase 5] 바람 파라미터 초기값 (offset 36~47)
+        floatView[36] = 1.0; // windDirection.x
+        floatView[37] = 0.5; // windDirection.y
+        floatView[38] = 1.5; // windSpeed
+        floatView[39] = 0.8; // windStrength
+        floatView[40] = 0.1; // windFrequency
+        floatView[41] = 0.3; // windFlutterStrength
+        uintView[42] = 1;    // windEnabled
+        floatView[43] = isFoliage ? 1.0 : 0.0; // windMultiplier (바위 0.0, 나무 1.0)
+        floatView[44] = isFoliage ? 0.5 : 0.0; // windFlutterMultiplier
+        uintView[45] = 1;    // useVertexColorWind
+        floatView[46] = 5.0; // treeHeight
+        uintView[47] = 0;    // padWind
+
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
 
         const vertexBindGroup = gpuDevice.createBindGroup({
-            label: 'FoliageShadowSubMesh_Shared_VertexBindGroup',
+            label: `FoliageShadowSubMesh_VertexBindGroup_${name}_LOD${lodIndex}`,
             layout: subMeshBindGroupLayout,
             entries: [
                 {
                     binding: 0,
                     resource: {
                         buffer: uniformBuffer,
-                        size: 144,
+                        size: 192,
                     },
                 },
             ],
         });
-
-        FoliageSubMeshAssembler.#sharedShadowDevice = gpuDevice;
-        FoliageSubMeshAssembler.#sharedShadowUniformBuffer = uniformBuffer;
-        FoliageSubMeshAssembler.#sharedShadowVertexBindGroup = vertexBindGroup;
 
         return {buffer: uniformBuffer, bindGroup: vertexBindGroup};
     }
@@ -731,7 +729,13 @@ class FoliageSubMeshAssembler {
             const combinedIB = new IndexBuffer(redGPUContext, shadowMergedIndices, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
 
-            const sharedShadowUniform = FoliageSubMeshAssembler.#getSharedShadowUniform(gpuDevice, subMeshBindGroupLayout);
+            const shadowUniform = FoliageSubMeshAssembler.#createShadowUniform(
+                gpuDevice,
+                subMeshBindGroupLayout,
+                options.name,
+                lodIndex,
+                options.isFoliage !== false
+            );
 
             shadowMergedSubMesh = new FoliageShadowMergedSubMesh({
                 geometry: combinedGeom,
@@ -740,8 +744,8 @@ class FoliageSubMeshAssembler {
                 isIndexed: true,
                 indexFormat: 'uint32',
                 strideBytes: POSITION_ONLY_STRIDE_BYTES,
-                vertexUniformBuffer: sharedShadowUniform.buffer,
-                vertexUniformBindGroup: sharedShadowUniform.bindGroup,
+                vertexUniformBuffer: shadowUniform.buffer,
+                vertexUniformBindGroup: shadowUniform.bindGroup,
                 lodIndex,
                 instanceBufferOffset: 0,
                 indirectOffsetBytes: 0,
@@ -784,8 +788,11 @@ class FoliageSubMeshAssembler {
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
         const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;
 
+        const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
+        const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent || isImpostor;
+
         const globalSlot = (mat as any)?.globalFragmentSlotIndex ?? 0;
-        const cacheKey = `${globalSlot}_${receiveShadow ? 1 : 0}`;
+        const cacheKey = `${globalSlot}_${receiveShadow ? 1 : 0}_${isMasked ? 1 : 0}`;
 
         let uniformBuffer: GPUBuffer;
         let vertexBindGroup: GPUBindGroup;
@@ -797,7 +804,7 @@ class FoliageSubMeshAssembler {
         } else {
             uniformBuffer = gpuDevice.createBuffer({
                 label: `FoliageSubMesh_UniformBuffer_${globalSlot}`,
-                size: 144,
+                size: 192,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
@@ -818,7 +825,21 @@ class FoliageSubMeshAssembler {
             floatView[34] = receiveShadow ? 1.0 : 0.0;
             uintView[35] = 0;
 
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
+            // 🍃 [Phase 5] 바람 파라미터 초기화 (offset 36~47)
+            floatView[36] = 1.0; // windDirection.x
+            floatView[37] = 0.5; // windDirection.y
+            floatView[38] = 1.5; // windSpeed
+            floatView[39] = 0.8; // windStrength
+            floatView[40] = 0.1; // windFrequency
+            floatView[41] = 0.3; // windFlutterStrength
+            uintView[42] = 1;    // windEnabled
+            floatView[43] = isFoliage ? 1.0 : 0.0; // windMultiplier (바위 0.0, 나무 1.0)
+            floatView[44] = (isFoliage && isMasked) ? 1.0 : 0.0; // windFlutterMultiplier (나뭇잎만 1.0, 줄기/가지는 0.0)
+            uintView[45] = 1;    // useVertexColorWind
+            floatView[46] = 5.0; // treeHeight
+            uintView[47] = 0;    // padWind
+
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
 
             vertexBindGroup = gpuDevice.createBindGroup({
                 label: `FoliageSubMesh_VertexBindGroup_${globalSlot}`,
@@ -836,8 +857,6 @@ class FoliageSubMeshAssembler {
             }
         }
 
-        const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
-        const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
         const isDepthPrepass = isFoliage && !isImpostor && (hasBaseColorTexture || isMasked);
