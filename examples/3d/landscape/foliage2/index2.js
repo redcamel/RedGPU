@@ -193,12 +193,13 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            instancesPerTile: 2500,
-                            minScale: [0.85, 0.85, 0.85],
-                            maxScale: [1.35, 1.35, 1.35],
+                            instancesPerTile: 2000,
+                            minScale: [0.4, 0.4, 0.4],
+                            maxScale: [0.7, 0.75, 0.7],
                             randomRotationY: true,
                             type: RedGPU.FOLIAGE_TYPE.FOLIAGE,
-                            useImpostor: true
+                            useImpostor: true,
+                            bottomOffset: 0.0
                         });
                     });
                 }
@@ -278,9 +279,9 @@ RedGPU.init(
                             label: 'Max Shadow Dist'
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
-                            min: -5.0,
-                            max: 5.0,
-                            step: 0.05,
+                            min: -2.0,
+                            max: 2.0,
+                            step: 0.01,
                             label: 'Bottom Offset'
                         });
                         typeFolder.addBinding(type, 'cullingDistance', {

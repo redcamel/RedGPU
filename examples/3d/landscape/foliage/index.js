@@ -205,16 +205,17 @@ RedGPU.init(
                             name: `Tree_${baseName}`,
                             type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
-                            instancesPerTile: 2500,
-                            densityMultiplier: 1.2,
+                            instancesPerTile: 2000,
+                            densityMultiplier: 1.0,
                             minWeightThreshold: 0.02,
-                            minScale: [1.2, 1.4, 1.2],
-                            maxScale: [2.4, 3.0, 2.4],
+                            minScale: [0.4, 0.4, 0.4],
+                            maxScale: [0.7, 0.75, 0.7],
                             randomRotationY: true,
                             useImpostor: true,
                             cullingDistance: 6000,
                             fadeStartDistance: 4500,
-                            targetLayer: 'Grass'
+                            targetLayer: 'Grass',
+                            bottomOffset: 0.0
                         });
                     });
                 }
@@ -246,11 +247,10 @@ RedGPU.init(
 
                 console.log(`🪨 [river_rock.glb] Discovered ${rockNodes.length} rock variants:`, rockNodes.map(n => n.name));
 
-                const targetLayers = ['Rock', 'Gravel', 'Rock'];
-                rockNodes.forEach((rockMesh, idx) => {
-                    const variantName = rockMesh.name || `Rock_${idx + 1}`;
+                if (rockNodes.length > 0) {
+                    const rockMesh = rockNodes[0];
                     foliageManager.addFoliageType({
-                        name: `Rock_${variantName}`,
+                        name: 'Rock_RiverRock',
                         type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
                         lods: [
                             {
@@ -259,19 +259,19 @@ RedGPU.init(
                                 receiveShadow: true
                             }
                         ],
-                        instancesPerTile: 1200,
+                        instancesPerTile: 250,
                         densityMultiplier: 1.0,
                         minWeightThreshold: 0.03,
-                        minScale: [0.8, 0.8, 0.8],
-                        maxScale: [2.5, 2.5, 2.5],
+                        minScale: [0.3, 0.3, 0.3],
+                        maxScale: [0.8, 0.8, 0.8],
                         randomRotationY: true,
                         useImpostor: false,
                         cullingDistance: 3500,
                         fadeStartDistance: 2800,
-                        targetLayer: targetLayers[idx % targetLayers.length],
-                        bottomOffset: -0.2
+                        targetLayer: 'Rock',
+                        bottomOffset: 0.1
                     });
-                });
+                }
             }
         );
 
@@ -401,9 +401,9 @@ RedGPU.init(
                             step: 1
                         });
                         typeFolder.addBinding(type, 'bottomOffset', {
-                            min: -5.0,
-                            max: 5.0,
-                            step: 0.05
+                            min: -2.0,
+                            max: 2.0,
+                            step: 0.01
                         });
                         typeFolder.addBinding(type, 'cullingDistance', {
                             min: 200,

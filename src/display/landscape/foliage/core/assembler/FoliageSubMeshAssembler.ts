@@ -158,12 +158,9 @@ class FoliageSubMeshAssembler {
             );
         }
 
-        let minOffset = 0;
         let maxDistSq = 0;
-
         for (let i = 0; i < subList.length; i++) {
             const sub = subList[i];
-            minOffset = Math.min(minOffset, sub.bottomOffset);
 
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
@@ -183,13 +180,8 @@ class FoliageSubMeshAssembler {
 
         const boundingRadius = Math.sqrt(maxDistSq);
 
-        let finalBottomOffset = minOffset;
         const userOffset = options.bottomOffset;
-        if (userOffset !== undefined) {
-            finalBottomOffset = userOffset;
-        } else if (boundingRadius > 0) {
-            finalBottomOffset = Math.max(minOffset, Math.min(boundingRadius * 0.025, 0.35));
-        }
+        const finalBottomOffset = userOffset !== undefined ? userOffset : 0;
 
         return {
             subMeshes: subList,

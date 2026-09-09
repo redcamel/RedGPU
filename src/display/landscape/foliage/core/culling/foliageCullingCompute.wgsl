@@ -127,7 +127,8 @@ fn main(
     let r = -scaledRadius;
 
     // 2단계: 대략적 3D 거리 및 서브픽셀(2px 미만) 조기 판정 (VHT 샘플링 및 절두체 내적 전진 배치)
-    let approxRealY = instance.posY - typeInfo.bottomOffset;
+    let effectiveBottomOffset = typeInfo.bottomOffset * scaleY;
+    let approxRealY = instance.posY - effectiveBottomOffset;
     let approxDy = approxRealY - camPos.y;
     let approxDistSq = horizontalDistSq + approxDy * approxDy;
     if (approxDistSq >= effectiveCullingDistSq) {
@@ -188,7 +189,7 @@ fn main(
         if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
             let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
             let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
-            realY = terrainHeight - typeInfo.bottomOffset;
+            realY = terrainHeight - effectiveBottomOffset;
         }
     }
 
