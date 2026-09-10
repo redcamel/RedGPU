@@ -15,6 +15,11 @@ import OctahedralImpostorMaterial from "./foliage/core/impostor/octahedral/Octah
 import {createOctahedralImpostorGeometry} from "./foliage/core/impostor/octahedral/createOctahedralImpostorGeometry";
 import type {LandscapeDebuggerManagerOptions} from "./debugger";
 import LandscapeDebuggerManager from "./debugger";
+import LandscapeGrassManager from "./grass/LandscapeGrassManager";
+import type {GrassLODConfig, GrassLODInfo, GrassTypeOptions} from "./grass/GrassType";
+import GrassType from "./grass/GrassType";
+import GrassMegaBuffer from "./grass/core/buffer/GrassMegaBuffer";
+import GrassCuller from "./grass/core/culling/GrassCuller";
 
 export {
     Landscape,
@@ -31,12 +36,19 @@ export {
     OctahedralImpostorMaterial,
     createOctahedralImpostorGeometry,
     LandscapeDebuggerManager,
-    LANDSCAPE_DEFAULT_LOD_COLORS
+    LANDSCAPE_DEFAULT_LOD_COLORS,
+    LandscapeGrassManager,
+    GrassType,
+    GrassMegaBuffer,
+    GrassCuller
 };
 
 export type {
     LandscapeLayerOptions,
     LandscapeWeightMapChannel,
     FoliageTypeOptions,
-    LandscapeDebuggerManagerOptions
+    LandscapeDebuggerManagerOptions,
+    GrassTypeOptions,
+    GrassLODConfig,
+    GrassLODInfo
 };

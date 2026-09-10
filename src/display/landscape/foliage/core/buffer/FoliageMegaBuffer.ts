@@ -78,12 +78,14 @@ class FoliageMegaBuffer {
     #nextIndirectOffset: number = 0;
 
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
-    #cachedVHTView: GPUTextureView | null = null;
-    #cachedVHTSampler: GPUSampler | null = null;
 
 
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
+    }
+
+    get typeParamsGPUBuffer(): GPUBuffer | null {
+        return this.#typeParamsGPUBuffer;
     }
 
     get cpuRawDataBuffer(): Float32Array {
@@ -520,9 +522,7 @@ class FoliageMegaBuffer {
     }
 
     getOrCreateUnifiedCullingBindGroup(
-        layout: GPUBindGroupLayout,
-        vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler
+        layout: GPUBindGroupLayout
     ): GPUBindGroup | null {
         if (!this.#rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer ||
             !this.#culledGPUBuffer || !this.#indirectGPUBuffer ||
@@ -530,11 +530,7 @@ class FoliageMegaBuffer {
             return null;
         }
 
-        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
-        const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-
-        if (this.#unifiedCullingBindGroup &&
-            this.#cachedVHTView === targetVHTView && this.#cachedVHTSampler === targetVHTSampler) {
+        if (this.#unifiedCullingBindGroup) {
             return this.#unifiedCullingBindGroup;
         }
 
@@ -550,13 +546,9 @@ class FoliageMegaBuffer {
                 {binding: 4, resource: {buffer: this.#indirectGPUBuffer}},
                 {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer}},
                 {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
-                {binding: 7, resource: targetVHTView},
-                {binding: 8, resource: targetVHTSampler},
             ],
         });
 
-        this.#cachedVHTView = targetVHTView;
-        this.#cachedVHTSampler = targetVHTSampler;
         return this.#unifiedCullingBindGroup;
     }
 

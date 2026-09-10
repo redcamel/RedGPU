@@ -18,6 +18,7 @@ import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "../foliage/LandscapeFoliageManager";
+import LandscapeGrassManager from "../grass/LandscapeGrassManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import LandscapeDebuggerManager from "../debugger";
@@ -43,6 +44,7 @@ export class Landscape extends Object3DContainer {
     #lodColorsRGBA: [number, number, number, number][] = [];
     #material: LandscapeMaterial;
     #foliageManager: LandscapeFoliageManager;
+    #grassManager: LandscapeGrassManager;
     #debuggerManager: LandscapeDebuggerManager;
 
     #wireframe: boolean = false;
@@ -217,6 +219,7 @@ export class Landscape extends Object3DContainer {
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
+        this.#grassManager = new LandscapeGrassManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
         });
@@ -238,6 +241,18 @@ export class Landscape extends Object3DContainer {
 
     get foliageManager(): LandscapeFoliageManager {
         return this.#foliageManager;
+    }
+
+    get grassManager(): LandscapeGrassManager {
+        return this.#grassManager;
+    }
+
+    get vhtSampler(): GPUSampler | null {
+        return this.#vhtSampler;
+    }
+
+    getTerrainHeightAt(x: number, z: number): number {
+        return this.getHeightAt(x, z);
     }
 
     getHeightAt(x: number, z: number): number {
@@ -1069,6 +1084,7 @@ export class Landscape extends Object3DContainer {
         super.destroy();
         this.#debuggerManager?.destroy();
         this.#foliageManager?.destroy?.();
+        this.#grassManager?.destroy?.();
         this.#sharedGeometry?.destroy();
         this.#gpuCuller?.destroy();
         this.#tileStreamer?.destroy();

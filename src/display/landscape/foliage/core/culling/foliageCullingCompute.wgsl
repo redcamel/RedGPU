@@ -38,7 +38,7 @@ struct UnifiedGlobalCullingUniforms {
     totalInstanceCount: u32,
     invWorldSizeX: f32,
     heightScale: f32,
-    hasVHT: u32,
+    padVHT: u32,
     fovFactor: f32,
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
@@ -76,8 +76,6 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(4) var<storage, read_write> mainIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstanceData>;
 @group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(7) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(8) var vhtSampler: sampler;
 
 @compute @workgroup_size(64)
 fn main(
@@ -126,20 +124,20 @@ fn main(
     let scaledRadius = typeInfo.boundingRadius * maxScale;
     let r = -scaledRadius;
 
-    // 2단계: 대략적 3D 거리 및 서브픽셀(2px 미만) 조기 판정 (VHT 샘플링 및 절두체 내적 전진 배치)
-    let effectiveBottomOffset = typeInfo.bottomOffset * scaleY;
-    let approxRealY = instance.posY + effectiveBottomOffset;
-    let approxDy = approxRealY - camPos.y;
-    let approxDistSq = horizontalDistSq + approxDy * approxDy;
-    if (approxDistSq >= effectiveCullingDistSq) {
+    // 2단계: 3D 거리 및 서브픽셀(2px 미만) 조기 판정
+    // instance.posY에는 이미 마운트 시 1회 베이킹된 정확한 지형 정밀 높이가 저장되어 있음 (순수 ALU)
+    let realY = instance.posY;
+    let dy = realY - camPos.y;
+    let distSq = horizontalDistSq + dy * dy;
+    if (distSq >= effectiveCullingDistSq) {
         return;
     }
 
-    let approxDist = sqrt(approxDistSq);
-    let approxEffectiveDist = approxDist * max(globalUniforms.fovFactor, 0.0001);
+    let dist = sqrt(distSq);
+    let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
 
     let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
-    let isSubpixel = (approxEffectiveDist * 2.0 > scaledRadius * vpHeight);
+    let isSubpixel = (effectiveDist * 2.0 > scaledRadius * vpHeight);
 
     // 3단계: 섀도우 최대 유효 거리 사전 계산 (인스턴스 물리적 거리 기반)
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
@@ -155,7 +153,7 @@ fn main(
     }
     let cascadeGlobalMaxDistSq = cascadeGlobalMaxDist * cascadeGlobalMaxDist;
     let maxShadowDistSq = min(userShadowDistSq, cascadeGlobalMaxDistSq);
-    let canHaveShadow = (userShadowDist > 0.0 && activeCascades > 0u && approxDistSq < maxShadowDistSq);
+    let canHaveShadow = (userShadowDist > 0.0 && activeCascades > 0u && distSq < maxShadowDistSq);
 
     // 4단계: 동시 조기 탈출 (메인 서브픽셀 기각 + 섀도우 범위 초과)
     if (isSubpixel && !canHaveShadow) {
@@ -164,7 +162,7 @@ fn main(
 
     // 5단계: 메인 절두체 검사 (서브픽셀이 아닐 때만 6개 평면 검사)
     var inMainFrustum = false;
-    var spherePos = vec4<f32>(instance.posX, approxRealY, instance.posZ, 1.0);
+    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
 
     if (!isSubpixel) {
         inMainFrustum =
@@ -181,33 +179,10 @@ fn main(
         return;
     }
 
-    // 6단계: 지연 VHT 지형 높이 텍스처 샘플링 (실제 렌더링 후보군만 1회 정밀 페치)
-    // GPU 지형 렌더링 메시와 100% 동일한 VHT 하이트맵을 샘플링하여 지표면에 완전 밀착
-    var realY = approxRealY;
-    if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
-        let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
-        let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
-        if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
-            let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-            let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
-            realY = terrainHeight + effectiveBottomOffset;
-        }
-    }
-
-    let dy = realY - camPos.y;
-    let distSq = horizontalDistSq + dy * dy;
-    if (distSq >= effectiveCullingDistSq) {
-        return;
-    }
-
-    let dist = sqrt(distSq);
-    let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
-    spherePos.y = realY;
-
     let numLODs = typeInfo.lodCount;
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
 
-    // 7단계: 메인 패스 LOD 판정 및 1-Pass Direct Culling 슬롯 할당
+    // 6단계: 메인 패스 LOD 판정 및 1-Pass Direct Culling 슬롯 할당 (순수 ALU)
     if (inMainFrustum) {
         var globalFade: f32 = 1.0;
         let fadeStartDist = typeInfo.fadeStartDistance;
@@ -273,7 +248,7 @@ fn main(
         }
     }
 
-    // 8단계: 섀도우 패스 캐스케이드 컬링 & 1-Pass Direct Culling 슬롯 할당
+    // 7단계: 섀도우 패스 캐스케이드 컬링 & 1-Pass Direct Culling 슬롯 할당 (순수 ALU)
     if (canHaveShadow && distSq < maxShadowDistSq) {
         let shadowFadeRange = clamp(userShadowDist * 0.20, 10.0, 60.0);
         let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);

@@ -85,14 +85,20 @@ class FoliageSubCellPartitioner {
         const halfWorldZ = worldSizeZ * 0.5;
 
         // 스플랫맵 타겟 레이어 탐색
-        let targetLayerObj: any = null;
         const targetLayer = foliageType.targetLayer;
-        if (targetLayer !== undefined && landscape?.layers) {
+        const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
+        let targetLayerObj: any = null;
+        if (hasTargetLayer && landscape?.layers) {
             if (typeof targetLayer === 'string') {
                 targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
             } else if (typeof targetLayer === 'number') {
                 targetLayerObj = landscape.layers[targetLayer];
             }
+        }
+
+        // 타깃 레이어가 지정되었으나 레이어를 찾지 못한 경우 안전 차단 (Fail-Close)
+        if (hasTargetLayer && !targetLayerObj) {
+            return result;
         }
 
         const minWeightThreshold = foliageType.minWeightThreshold ?? 0.1;
@@ -116,7 +122,9 @@ class FoliageSubCellPartitioner {
 
         const invSubCell = 1.0 / subCellSize;
 
-        const maxAttempts = targetLayerObj ? targetCount * 3 : targetCount;
+        // 언리얼 규격: densityScaleByWeight: true 이면 가중치에 정비례하도록 시도 횟수를 targetCount로 1:1 고정
+        // densityScaleByWeight: false 이면 유효 영역에 균일 밀도를 채우기 위해 여유 시도 허용
+        const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
         let spawned = 0;
 
         for (let i = 0; i < maxAttempts && spawned < targetCount; i++) {
@@ -137,7 +145,7 @@ class FoliageSubCellPartitioner {
             if (targetLayerObj) {
                 const u = (posX + halfWorldX) / worldSizeX;
                 const v = (posZ + halfWorldZ) / worldSizeZ;
-                const weight = targetLayerObj.getWeightAtUV(u, v);
+                const weight = FoliageSubCellPartitioner.#getLayerWeight(landscape, targetLayerObj, u, v);
                 if (weight < minWeightThreshold) {
                     continue;
                 }
@@ -312,6 +320,36 @@ class FoliageSubCellPartitioner {
         });
 
         return result;
+    }
+
+    static #getLayerWeight(landscape: any, targetLayer: any, u: number, v: number): number {
+        const layers = landscape?.layers;
+        if (!layers || layers.length <= 1) {
+            return targetLayer.getWeightAtUV(u, v);
+        }
+
+        let activeWeightLayerCount = 0;
+        let totalWeight = 0.0;
+        let targetWeight = 0.0;
+
+        for (let i = 0; i < layers.length; i++) {
+            const layer = layers[i];
+            if (!layer.enabled) continue;
+            if (layer.weightTexture?.src) {
+                activeWeightLayerCount++;
+            }
+            const w = layer.getWeightAtUV(u, v);
+            totalWeight += w;
+            if (layer === targetLayer) {
+                targetWeight = w;
+            }
+        }
+
+        if (activeWeightLayerCount <= 1 || totalWeight <= 0.001) {
+            return targetWeight;
+        }
+
+        return targetWeight / totalWeight;
     }
 
     static #fastFloatToHalf(val: number): number {

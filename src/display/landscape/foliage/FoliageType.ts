@@ -7,6 +7,7 @@ import FoliageSubCellStreamer from "./core/spatial/FoliageSubCellStreamer";
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
+import type FoliageBaker from "./core/baking/FoliageBaker";
 import FOLIAGE_TYPE from "./FOLIAGE_TYPE";
 
 export {FoliageSubMesh, FoliageShadowMergedSubMesh};
@@ -232,6 +233,7 @@ class FoliageType {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
     #streamer: FoliageSubCellStreamer;
+    #baker: FoliageBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: FoliageType) => void;
 
@@ -241,13 +243,15 @@ class FoliageType {
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void,
-        onRepopulateRequired?: (type: FoliageType) => void
+        onRepopulateRequired?: (type: FoliageType) => void,
+        baker?: FoliageBaker | null
     ) {
         this.#streamer = new FoliageSubCellStreamer(this);
         this.#redGPUContext = redGPUContext;
         this.#options = options;
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
+        this.#baker = baker || null;
         this.#castShadow = options.castShadow !== false;
 
         const resolvedType: FOLIAGE_TYPE = options.type
@@ -1039,6 +1043,10 @@ class FoliageType {
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
+            if (this.#baker && count > 0) {
+                const globalIndex = this.#allocation.rawBaseOffset + startIndex;
+                this.#baker.addBakeTasks(globalIndex, count, this.#allocation.typeId);
+            }
         }
     }
 

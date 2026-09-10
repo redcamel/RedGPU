@@ -6,6 +6,7 @@ import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
 import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffer";
+import {FoliageBaker} from "../baking/FoliageBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 class FoliageCullingDispatcher {
@@ -35,11 +36,9 @@ class FoliageCullingDispatcher {
 
     #redGPUContext: RedGPUContext;
     #megaBuffer: FoliageMegaBuffer | null = null;
+    #baker: FoliageBaker;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
-
-    #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
-    #cachedVHTView: GPUTextureView | null = null;
 
     #landscapeRef: Landscape | null = null;
 
@@ -49,7 +48,12 @@ class FoliageCullingDispatcher {
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null) {
         this.#redGPUContext = redGPUContext;
         this.#megaBuffer = megaBuffer || null;
+        this.#baker = new FoliageBaker(this.#redGPUContext);
         this.#initComputePipeline();
+    }
+
+    get baker(): FoliageBaker {
+        return this.#baker;
     }
 
     static #computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
@@ -287,31 +291,47 @@ class FoliageCullingDispatcher {
         this.#megaBuffer?.resetMultiIndirectCommands(encoder);
     };
 
+    destroy(): void {
+        this.#baker.destroy();
+        this.#cullingComputePipeline = null;
+        this.#cullingBindGroupLayout = null;
+        this.#megaBuffer = null;
+        this.#landscapeRef = null;
+    }
+
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         const pipeline = this.#cullingComputePipeline;
         const bindGroupLayout = this.#cullingBindGroupLayout;
         if (!pipeline || !bindGroupLayout) return;
 
-        computePass.setPipeline(pipeline);
+        // 1. 신규 마운트된 식생 인스턴스가 있다면 VHT 1회성 베이크 선행 실행 (마운트 없는 프레임에는 0회)
+        if (this.#baker.hasPendingTasks && this.#megaBuffer) {
+            const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
+            const vhtView = vhtAtlasTexture?.gpuTextureView;
+            const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+            const worldSizeX = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[0] : 8000.0;
+            const worldSizeZ = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[1] : 8000.0;
+            const heightScale = this.#landscapeRef?.heightScale ?? 600.0;
 
-        const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
-        const rawGPUTexture = vhtAtlasTexture?.gpuTexture || null;
-        if (rawGPUTexture && this.#cachedVHTAtlasGPUTexture !== rawGPUTexture) {
-            this.#cachedVHTAtlasGPUTexture = rawGPUTexture;
-            this.#cachedVHTView = rawGPUTexture.createView();
+            this.#baker.dispatchPass(
+                computePass,
+                this.#megaBuffer,
+                vhtView,
+                vhtSampler,
+                worldSizeX,
+                worldSizeZ,
+                heightScale
+            );
         }
-        const vhtView = this.#cachedVHTView || undefined;
-        const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+
+        // 2. 순수 ALU 초고속 프러스텀/LOD 컬링 실행 (VHT 바인딩 0%)
+        computePass.setPipeline(pipeline);
 
         if (this.#megaBuffer) {
             const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
             if (totalAllocatedRange <= 0) return;
 
-            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
-                bindGroupLayout,
-                vhtView,
-                vhtSampler
-            );
+            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(bindGroupLayout);
             if (unifiedBindGroup) {
                 const workgroupCount = Math.ceil(totalAllocatedRange / 64);
                 computePass.setBindGroup(0, unifiedBindGroup);

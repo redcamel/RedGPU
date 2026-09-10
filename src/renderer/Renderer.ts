@@ -13,6 +13,7 @@ import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import renderLandscapeLayer from "./renderLayers/renderLandscapeLayer";
 import renderFoliageLayer from "./renderLayers/renderFoliageLayer";
+import renderGrassLayer from "./renderLayers/renderGrassLayer";
 
 
 /**
@@ -202,15 +203,7 @@ class Renderer {
             if (lightManager.pointLightCount || lightManager.spotLightCount) {
                 view.clusterLightManager.updateClusterLights();
             }
-            {
-                const landscapes = scene.landscapeChildren;
-                const lenL = landscapes.length;
-                for (let i = 0; i < lenL; i++) {
-                    const landscape = landscapes[i];
-                    landscape.update(view.camera, renderViewStateData);
-                    landscape.foliageManager?.update(view.camera, renderViewStateData);
-                }
-            }
+
 
             {
                 const drawBufferManager = redGPUContext.drawBufferManager
@@ -231,7 +224,16 @@ class Renderer {
             }
 
             updateJitter(view)
-
+            {
+                const landscapes = scene.landscapeChildren;
+                const lenL = landscapes.length;
+                for (let i = 0; i < lenL; i++) {
+                    const landscape = landscapes[i];
+                    landscape.update(view.camera, renderViewStateData);
+                    landscape.foliageManager?.update(view.camera, renderViewStateData);
+                    landscape.grassManager?.update(view.camera, renderViewStateData);
+                }
+            }
             // [KO] 쉐도우 패스용 업데이트 및 렌더링 (직사광이 존재할 때만 실행)
             // [EN] Update and render for shadow pass (only executed when directional lights exist)
             if (scene.lightManager.directionalLightCount > 0) {
@@ -296,6 +298,7 @@ class Renderer {
             renderLandscapeLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
             renderFoliageLayer(view, viewRenderPassEncoder)
+            renderGrassLayer(view, viewRenderPassEncoder)
             if (grid) grid.render(renderViewStateData)
             renderAlphaLayer(view, viewRenderPassEncoder)
         });

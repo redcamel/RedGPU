@@ -288,7 +288,8 @@ class LandscapeFoliageManager {
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.repopulateFoliageType(t)
+            (t) => this.repopulateFoliageType(t),
+            this.#cullingDispatcher.baker
         );
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
@@ -440,6 +441,7 @@ class LandscapeFoliageManager {
         this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
+        this.#cullingDispatcher.destroy();
     }
 }
 
