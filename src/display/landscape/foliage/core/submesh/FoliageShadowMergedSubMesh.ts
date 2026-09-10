@@ -14,7 +14,6 @@ export interface FoliageShadowMergedSubMeshInitOptions {
     indirectOffsetBytes?: number;
 }
 
-
 class FoliageShadowMergedSubMesh {
     static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
     static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageShadowMergedSubMesh.#windFloatBuffer.buffer);

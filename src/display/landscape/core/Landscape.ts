@@ -495,7 +495,6 @@ export class Landscape extends Object3DContainer {
         const atlasW = this.#componentCountX * 512;
         const atlasH = this.#componentCountZ * 512;
 
-        // 1. VHT Atlas 전체에 글로벌 하이트맵 베이스 베이크
         this.#vhtGenerator?.bakeGlobalBase(
             this.#globalHeightTexture,
             this.#vhtAtlasTexture,
@@ -503,7 +502,6 @@ export class Landscape extends Object3DContainer {
             this.#componentCountZ
         );
 
-        // 2. VNT Atlas 전체에 전역 베이스 노멀 일괄 베이크
         this.#vntGenerator?.bakeTileRegion(
             this.#vhtAtlasTexture,
             this.#vntAtlasTexture,
@@ -679,7 +677,6 @@ export class Landscape extends Object3DContainer {
 
                     if (indirectDrawBuffer) {
                         const currentCascade = view3D?.currentCascadeIndex ?? 0;
-
 
                         let targetMaxLOD = 0;
                         if (currentCascade === 0) {
@@ -1141,7 +1138,6 @@ export class Landscape extends Object3DContainer {
         const sampleCount = useMSAA ? 4 : 1;
         const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         const fragModule = material.gpuRenderInfo.fragmentShaderModule;
-
 
         if (
             this.#cachedRenderPipeline &&

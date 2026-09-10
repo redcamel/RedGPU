@@ -45,8 +45,6 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-
-
 fn sampleOctahedralAtlas(
     tex: texture_2d<f32>,
     smp: sampler,
@@ -91,8 +89,7 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 }
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    
-    
+
     let f = clamp(1.0 - cosTheta, 0.0, 1.0);
     let f2 = f * f;
     let f5 = f2 * f2 * f;
@@ -123,7 +120,6 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
 
-    
     let fL = clamp(1.0 - NdotL, 0.0, 1.0);
     let fL2 = fL * fL;
     let fL5 = fL2 * fL2 * fL;
@@ -160,8 +156,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
 
-    
-    
     let subUV = inputData.uv;
 
     let ddxUV = dpdx(inputData.uv);
@@ -185,12 +179,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
 
-    
     if (totalCoverage < 0.001) {
         discard;
     }
 
-    
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -203,7 +195,6 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
@@ -222,7 +213,6 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    
     let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
 
     var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
@@ -234,8 +224,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var rawNormalDepth: vec4<f32>;
     var rawORM: vec4<f32>;
 
-    
-    
     if (distSq > 250000.0) {
         var domG = g00;
         var maxCov = cov00;
@@ -282,11 +270,10 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     let NdotL0 = dot(N, L0);
 
-    
     if (receiveShadowYn && NdotL0 > 0.001) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-        
+
         if (distSq < maxCSMDist * maxCSMDist) {
             let rawVis = getDirectionalShadowVisibilityFoliage(
                 directionalShadowMap,
@@ -351,7 +338,6 @@ fn main(inputData: InputData) -> OutputFragment {
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
-        
         var iblMipLevel: f32 = 0.0;
         if (u_usePrefilterTexture) {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);

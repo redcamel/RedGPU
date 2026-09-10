@@ -89,7 +89,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
 
     let currentHeight = textureLoad(heightMapTexture, texCoord, 0).r;
     var finalHeight = currentHeight;
-    
+
     if (lodLevel < 2u) {
         let camPos = systemUniforms.camera.cameraPosition.xyz;
         let dx = worldX - camPos.x;
@@ -116,7 +116,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
             let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
             let effMorphStart = select(morphStartDist, morphStartDist / max(1e-4, landscapeUniforms.tanHalfFOV), isScreenSize);
 
-            
             if (distSq >= effMorphStart * effMorphStart) {
                 let rawDist = sqrt(distSq);
                 let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
@@ -135,7 +134,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
                         currentSegments = lod0Quads;
                         subStep = max(1u, u32(round(lod0Quads / baseQuads)));
                     } else {
-                        
+
                         currentSegments = max(1.0, floor(baseQuads));
                         subStep = 2u;
                     }

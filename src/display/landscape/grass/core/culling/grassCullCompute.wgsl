@@ -54,7 +54,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // 해당 인스턴스가 속한 타입 검색
     var typeId = 0u;
     var found = false;
     for (var t = 0u; t < globalUniforms.typeCount; t = t + 1u) {
@@ -72,7 +71,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let typeInfo = typeParams[typeId];
     let instance = rawInstances[index];
 
-    // 영구 기각된 인스턴스 (경사도 불만족, 미스폰 빈 슬롯 등) 즉시 탈출
     if (instance.posY < -900000.0) {
         return;
     }
@@ -89,7 +87,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let distToCam = sqrt(horizontalDistSq);
 
-    // 🌿 멀티 LOD 레벨 판정 (LOD 0: 근거리, LOD 1: 중거리, LOD 2+: 원거리)
     var targetLod = 0u;
     if (typeInfo.lodCount > 1u) {
         if (distToCam > typeInfo.lodDistance0) { targetLod = 1u; }
@@ -97,11 +94,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         if (typeInfo.lodCount > 3u && distToCam > typeInfo.lodDistance2) { targetLod = 3u; }
     }
 
-    // 스케일 및 바운딩 반경
     let scaleXZ = instance.scaleXZ;
     let radius = max(0.8, scaleXZ * 1.2);
 
-    // 절두체(Frustum) 컬링 (순수 ALU 연산으로 초고속 패스)
     let worldPos = vec3<f32>(instance.posX, instance.posY + radius * 0.5, instance.posZ);
     var inside = true;
     for (var p = 0u; p < 6u; p = p + 1u) {
@@ -119,7 +114,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // 살아남은 인스턴스: 목표 LOD의 인다이렉트 슬롯 증가 및 결과 기록
     let indirectArgIndex = (typeInfo.indirectBaseOffset + targetLod) * 5u + 1u;
     let slot = atomicAdd(&indirectArgs[indirectArgIndex], 1u);
     let culledIndex = typeInfo.culledBaseOffset + (targetLod * typeInfo.maxInstancesPerLod) + slot;

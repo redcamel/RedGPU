@@ -210,19 +210,18 @@ class FoliageSubMeshAssembler {
         floatView[34] = 0.0;
         uintView[35] = 0;
 
-        // 🍃 [Phase 5] 바람 파라미터 초기값 (offset 36~47)
-        floatView[36] = 1.0; // windDirection.x
-        floatView[37] = 0.5; // windDirection.y
-        floatView[38] = 1.5; // windSpeed
-        floatView[39] = 0.8; // windStrength
-        floatView[40] = 0.1; // windFrequency
-        floatView[41] = 0.3; // windFlutterStrength
-        uintView[42] = 1;    // windEnabled
-        floatView[43] = isFoliage ? 1.0 : 0.0; // windMultiplier (바위 0.0, 나무 1.0)
-        floatView[44] = isFoliage ? 0.5 : 0.0; // windFlutterMultiplier
-        uintView[45] = 1;    // useVertexColorWind
-        floatView[46] = 5.0; // treeHeight
-        uintView[47] = 0;    // padWind
+        floatView[36] = 1.0;
+        floatView[37] = 0.5;
+        floatView[38] = 1.5;
+        floatView[39] = 0.8;
+        floatView[40] = 0.1;
+        floatView[41] = 0.3;
+        uintView[42] = 1;
+        floatView[43] = isFoliage ? 1.0 : 0.0;
+        floatView[44] = isFoliage ? 0.5 : 0.0;
+        uintView[45] = 1;
+        floatView[46] = 5.0;
+        uintView[47] = 0;
 
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
 
@@ -377,7 +376,6 @@ class FoliageSubMeshAssembler {
             if (isFoliage) {
                 mat.isFoliage = true;
 
-
                 const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent;
                 if (isMasked) {
                     mat.useCutOff = true;
@@ -515,7 +513,6 @@ class FoliageSubMeshAssembler {
 
         const resultSubMeshes: FoliageSubMesh[] = [];
 
-        // 🌟 단일 순회로 섀도우 Position-Only 버퍼 동시 작성 준비
         const shadowMergedPositions = new Float32Array(lodTotalVertices * POSITION_ONLY_STRIDE);
         const shadowMergedIndices = new Uint32Array(lodTotalIndices);
         let shadowVertexOffset = 0;
@@ -566,12 +563,10 @@ class FoliageSubMeshAssembler {
                         const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
                         const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
 
-                        // 1. 메인 PBR 18-stride 버퍼 기록
                         combinedVertexData[dstIdx + 0] = vx;
                         combinedVertexData[dstIdx + 1] = vy;
                         combinedVertexData[dstIdx + 2] = vz;
 
-                        // 2. 🌟 섀도우 Position-Only 3-stride 버퍼 동시 기록 (재순회 0회!)
                         shadowMergedPositions[dstShadowIdx + 0] = vx;
                         shadowMergedPositions[dstShadowIdx + 1] = vy;
                         shadowMergedPositions[dstShadowIdx + 2] = vz;
@@ -826,19 +821,18 @@ class FoliageSubMeshAssembler {
             floatView[34] = receiveShadow ? 1.0 : 0.0;
             uintView[35] = 0;
 
-            // 🍃 [Phase 5] 바람 파라미터 초기화 (offset 36~47)
-            floatView[36] = 1.0; // windDirection.x
-            floatView[37] = 0.5; // windDirection.y
-            floatView[38] = 1.5; // windSpeed
-            floatView[39] = 0.8; // windStrength
-            floatView[40] = 0.1; // windFrequency
-            floatView[41] = 0.3; // windFlutterStrength
-            uintView[42] = 1;    // windEnabled
-            floatView[43] = isFoliage ? 1.0 : 0.0; // windMultiplier (바위 0.0, 나무 1.0)
-            floatView[44] = (isFoliage && isMasked) ? 1.0 : 0.0; // windFlutterMultiplier (나뭇잎만 1.0, 줄기/가지는 0.0)
-            uintView[45] = 1;    // useVertexColorWind
-            floatView[46] = 5.0; // treeHeight
-            uintView[47] = 0;    // padWind
+            floatView[36] = 1.0;
+            floatView[37] = 0.5;
+            floatView[38] = 1.5;
+            floatView[39] = 0.8;
+            floatView[40] = 0.1;
+            floatView[41] = 0.3;
+            uintView[42] = 1;
+            floatView[43] = isFoliage ? 1.0 : 0.0;
+            floatView[44] = (isFoliage && isMasked) ? 1.0 : 0.0;
+            uintView[45] = 1;
+            floatView[46] = 5.0;
+            uintView[47] = 0;
 
             gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
 

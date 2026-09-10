@@ -24,16 +24,12 @@ export interface GrassTypeAllocation {
     baseVertex: number;
 }
 
-/**
- * [KO] 16바이트 초경량 컴팩트 구조를 사용하는 잔디 전용 메가버퍼 관리자 (LOD 지원)
- * [EN] Grass-dedicated mega buffer manager using 16-byte ultra-compact instance layout with LOD support
- */
 export class GrassMegaBuffer {
     static readonly STRIDE_FLOATS: number = 8;
     static readonly STRIDE_BYTES: number = 32;
     static readonly MAX_TYPES: number = 16;
     static readonly MAX_INDIRECT_CALLS: number = 64;
-    static readonly TYPE_PARAM_FLOATS: number = 20; // 80 bytes (16-byte aligned) per type
+    static readonly TYPE_PARAM_FLOATS: number = 20;
 
     #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
@@ -195,16 +191,6 @@ export class GrassMegaBuffer {
         return alloc;
     }
 
-    /**
-     * [KO] 인스턴스 데이터를 32바이트 표준 정렬 구조(vec4 + vec4)로 기록합니다.
-     * @param globalInstanceIndex 전체 메가버퍼 상의 인덱스
-     * @param x 월드 X 좌표
-     * @param y 월드 Y 좌표
-     * @param z 월드 Z 좌표
-     * @param rotationY Y축 회전각 (라디안, 0 ~ 2*PI)
-     * @param scaleXZ 가로 스케일
-     * @param scaleY 세로 스케일
-     */
     writeInstanceData(
         globalInstanceIndex: number,
         x: number,
@@ -283,7 +269,7 @@ export class GrassMegaBuffer {
         f32[base + 16] = minSlopeTan2;
         f32[base + 17] = maxSlopeTan2;
         u32[base + 18] = hasSlopeFilter ? 1 : 0;
-        f32[base + 19] = 0.0; // padding
+        f32[base + 19] = 0.0;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice && this.#typeParamsGPUBuffer) {
@@ -297,9 +283,6 @@ export class GrassMegaBuffer {
         }
     }
 
-    /**
-     * [KO] 매 프레임 GPU 상에서 간접 드로우 버퍼의 instanceCount를 0으로 리셋합니다 (Zero-GC, CPU Queue 기반).
-     */
     resetIndirectDrawCountsCPU(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#indirectGPUBuffer || this.#totalIndirectDrawCalls === 0) return;
@@ -312,9 +295,6 @@ export class GrassMegaBuffer {
         );
     }
 
-    /**
-     * [KO] 매 프레임 GPU 상에서 간접 드로우 버퍼의 instanceCount를 0으로 리셋합니다 (Zero-GC, CommandEncoder 기반).
-     */
     resetIndirectDrawCounts(commandEncoder: GPUCommandEncoder): void {
         if (!this.#indirectResetTemplateGPUBuffer || !this.#indirectGPUBuffer || this.#totalIndirectDrawCalls === 0) return;
         const byteSize = this.#totalIndirectDrawCalls * 5 * 4;
@@ -351,7 +331,6 @@ export class GrassMegaBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // culledBuffer는 각 타입의 각 LOD마다 독립 영역을 가지므로 충분한 공간 확보 (기본 용량의 4배 또는 maxTotalInstances * 4)
         const culledCapacity = Math.max(this.#maxTotalInstances * 4, this.#totalAllocatedCulledInstances);
         const rawByteSize = this.#maxTotalInstances * GrassMegaBuffer.STRIDE_BYTES;
         const culledByteSize = culledCapacity * GrassMegaBuffer.STRIDE_BYTES;
@@ -398,10 +377,10 @@ export class GrassMegaBuffer {
     #updateIndirectTemplateForLOD(lodAlloc: GrassLODAllocation): void {
         const offset = lodAlloc.indirectOffset * 5;
         this.#indirectResetTemplate[offset] = lodAlloc.indexCount;
-        this.#indirectResetTemplate[offset + 1] = 0; // instanceCount reset to 0
+        this.#indirectResetTemplate[offset + 1] = 0;
         this.#indirectResetTemplate[offset + 2] = lodAlloc.firstIndex;
         this.#indirectResetTemplate[offset + 3] = lodAlloc.baseVertex;
-        this.#indirectResetTemplate[offset + 4] = lodAlloc.culledBaseOffset; // firstInstance
+        this.#indirectResetTemplate[offset + 4] = lodAlloc.culledBaseOffset;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
@@ -437,7 +416,6 @@ export class GrassMegaBuffer {
 
         this.#initBuffers();
 
-        // 템플릿 재전송
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice && this.#indirectResetTemplateGPUBuffer) {
             gpuDevice.queue.writeBuffer(

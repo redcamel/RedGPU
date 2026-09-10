@@ -19,8 +19,7 @@ export class GrassCuller {
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
-        // GrassGlobalUniforms:
-        // cameraPosition(4) + frustumPlanes(24) + totalInstances(1) + typeCount(1) + pad(2) = 32 floats (128 bytes)
+
         this.#globalUniformCPUBuffer = new Float32Array(32);
         this.#globalUniformUintBuffer = new Uint32Array(this.#globalUniformCPUBuffer.buffer);
 
@@ -57,15 +56,10 @@ export class GrassCuller {
         if (frustumPlanes && frustumPlanes.length >= 24) {
             f32.set(frustumPlanes.subarray(0, 24), 4);
         } else {
-            // 평면 정보가 없을 때는 평면 길이를 0으로 비워 컬링 무효화
+
             f32.fill(0, 4, 28);
         }
 
-        // WGSL Layout:
-        // offset 28: totalInstances: u32
-        // offset 29: typeCount: u32
-        // offset 30: pad: u32
-        // offset 31: pad: u32
         u32[28] = totalInstances;
         u32[29] = typeCount;
         u32[30] = 0;

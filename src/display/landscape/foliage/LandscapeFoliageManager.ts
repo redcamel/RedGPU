@@ -31,7 +31,6 @@ class LandscapeFoliageManager {
     #streamingRadius: number = 600.0;
     #debugSubCellColoration: boolean = false;
 
-    // 🍃 [Phase 5] 전역 바람 시뮬레이션 설정
     #windEnabled: boolean = true;
     #windDirection: [number, number] = [1.0, 0.5];
     #windSpeed: number = 1.2;
@@ -137,7 +136,6 @@ class LandscapeFoliageManager {
             this.#spatialGrid.subCellSize = clamped;
             this.#landscape?.updateLandscapeUniforms?.();
 
-            // [Phase 3.2] 등록된 모든 FoliageType의 subCellSize 동기화 및 자동 재생성
             const count = this.#typeList.length;
             for (let i = 0; i < count; i++) {
                 this.#typeList[i].subCellSize = clamped;
@@ -174,10 +172,6 @@ class LandscapeFoliageManager {
     get spatialGrid(): LandscapeFoliageSpatialGrid {
         return this.#spatialGrid;
     }
-
-    // ============================================================================
-    // 🍃 [Phase 5] 전역 바람(Wind) 시뮬레이션 제어 API
-    // ============================================================================
 
     get windEnabled(): boolean {
         return this.#windEnabled;
@@ -374,11 +368,6 @@ class LandscapeFoliageManager {
         }
     }
 
-
-    /**
-     * [KO] 특정 FoliageType의 서브셀 청크를 지우고 현재 지형 컴포넌트들을 기준으로 재스폰합니다.
-     * [EN] Clears sub-cell chunks of a FoliageType and repopulates them based on current landscape components.
-     */
     repopulateFoliageType(foliageTypeOrName: FoliageType | string): void {
         const type = typeof foliageTypeOrName === 'string'
             ? this.#foliageTypes.get(foliageTypeOrName)
@@ -397,10 +386,6 @@ class LandscapeFoliageManager {
         this.#renderer.markShadowBundleDirty();
     }
 
-    /**
-     * [KO] 모든 FoliageType의 인스턴스를 재스폰합니다.
-     * [EN] Repopulates all foliage types.
-     */
     repopulateAll(): void {
         const count = this.#typeList.length;
         for (let i = 0; i < count; i++) {

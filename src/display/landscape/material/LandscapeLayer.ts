@@ -354,10 +354,6 @@ export class LandscapeLayer {
         else this.#weightChannelIndex = 0;
     }
 
-    /**
-     * [KO] 특정 UV(0.0 ~ 1.0)에서의 해당 레이어 가중치(0.0 ~ 1.0)를 조회합니다.
-     * [EN] Queries this layer's weight (0.0 ~ 1.0) at specific UV.
-     */
     getWeightAtUV(u: number, v: number): number {
         if (!this.#enabled) return 0.0;
         const src = this.#weightTexture?.src;

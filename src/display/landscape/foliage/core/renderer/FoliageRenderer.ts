@@ -28,10 +28,8 @@ class FoliageRenderer {
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
 
-
     readonly #validTypesMain: ValidFoliageTypeItem[] = [];
     readonly #validTypesShadow: ValidFoliageTypeItem[] = [];
-
 
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
     #shadowBundleValid: boolean[] = [false, false, false, false];

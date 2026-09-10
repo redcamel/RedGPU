@@ -6,7 +6,7 @@ export const LANDSCAPE_DEFAULT_LOD_COLORS: readonly [number, number, number, num
     [0.94, 0.27, 0.27, 1.0],
     [0.66, 0.33, 0.97, 1.0],
     [0.93, 0.28, 0.60, 1.0],
-    [0.58, 0.64, 0.72, 1.0]  
+    [0.58, 0.64, 0.72, 1.0]
 ]);
 
 export const LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS: readonly string[] = Object.freeze(

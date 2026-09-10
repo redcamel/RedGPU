@@ -19,7 +19,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let srcDims = vec2<f32>(textureDimensions(srcTileTexture, 0));
     let normUV = vec2<f32>(f32(localX) + 0.5, f32(localY) + 0.5) / vec2<f32>(uniforms.tileSize);
 
-    // 바이리니어(Bilinear) 서브픽셀 보간 좌표 계산 (계단식 테라싱/등고선 줄무늬 완벽 제거)
     let srcCoord = normUV * srcDims - vec2<f32>(0.5);
     let iCoord = floor(srcCoord);
     let fCoord = fract(srcCoord);

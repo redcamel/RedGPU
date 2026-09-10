@@ -245,7 +245,7 @@ class FoliageImpostorBaker {
         const gridSize = 8;
         const tileSize = 256;
         const atlasWidth = gridSize * tileSize;
-        const atlasHeight = gridSize * tileSize; 
+        const atlasHeight = gridSize * tileSize;
         const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
 
         const bakedGPUTexture = gpuDevice.createTexture({
@@ -738,7 +738,6 @@ class FoliageImpostorBaker {
             computePass.end();
         }
 
-        // 4회 핑퐁(0:A->B, 1:B->A, 2:A->B, 3:B->A) 후 최종 결과는 pingPongA에 저장됨
         commandEncoder.copyTextureToTexture(
             {texture: pingPongA, mipLevel: 0},
             {texture: targetTexture, mipLevel: 0},

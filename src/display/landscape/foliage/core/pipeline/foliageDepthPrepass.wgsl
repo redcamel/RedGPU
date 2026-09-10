@@ -10,7 +10,6 @@ struct InputData {
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 };
 
-
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;

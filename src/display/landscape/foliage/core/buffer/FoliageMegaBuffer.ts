@@ -9,7 +9,7 @@ export interface FoliageTypeAllocation {
     maxInstances: number;
     rawBaseOffset: number;
     culledBaseOffset: number;
-    indirectBaseOffset: number;  
+    indirectBaseOffset: number;
     subMeshCount: number;
     activeCount: number;
 }
@@ -22,9 +22,9 @@ export interface CascadeCullingParam {
 
 class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 8;
-    static readonly #STRIDE_BYTES: number = 8 * 4; 
+    static readonly #STRIDE_BYTES: number = 8 * 4;
     static readonly #MAX_TYPES: number = 64;
-    static readonly #TYPE_PARAM_FLOATS: number = 76; 
+    static readonly #TYPE_PARAM_FLOATS: number = 76;
 
     #cpuRawDataUint32: Uint32Array;
 
@@ -41,7 +41,6 @@ class FoliageMegaBuffer {
 
         this.#initBuffers();
     }
-
 
     #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
@@ -60,7 +59,6 @@ class FoliageMegaBuffer {
 
     #cpuRawDataBuffer: Float32Array;
 
-
     #cpuTypeParamsData: Float32Array = new Float32Array(FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS);
     #cpuTypeParamsUint32: Uint32Array = new Uint32Array(this.#cpuTypeParamsData.buffer);
 
@@ -78,7 +76,6 @@ class FoliageMegaBuffer {
     #nextIndirectOffset: number = 0;
 
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
-
 
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
@@ -219,7 +216,7 @@ class FoliageMegaBuffer {
         }
 
         const subMeshCount = subMeshes.length;
-        // 🌟 워크그룹(64 스레드) 단위 완전 격리를 위한 64-배수 올림 정렬
+
         const alignedMaxInstances = Math.ceil(maxInstances / 64) * 64;
         this.ensureCapacity(this.#nextRawOffset + alignedMaxInstances);
 
@@ -247,7 +244,7 @@ class FoliageMegaBuffer {
         }
 
         this.#nextRawOffset += alignedMaxInstances;
-        this.#nextCulledOffset += alignedMaxInstances * 8; 
+        this.#nextCulledOffset += alignedMaxInstances * 8;
         this.#nextIndirectOffset += subMeshCount;
 
         for (let s = 0; s < subMeshCount; s++) {
@@ -273,12 +270,10 @@ class FoliageMegaBuffer {
         }
 
         this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset, shadowMergedSubMeshes, lodInfoList);
-        this.#unifiedCullingBindGroup = null; 
+        this.#unifiedCullingBindGroup = null;
 
         return allocation;
     }
-
-
 
     uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
@@ -434,7 +429,7 @@ class FoliageMegaBuffer {
             0,
             gf32.buffer,
             gf32.byteOffset,
-            672 
+            672
         );
 
         if (this.#dirtyTypeParams) {
@@ -594,7 +589,6 @@ class FoliageMegaBuffer {
             }
         }
 
-
         if (shadowMergedSubMeshes && lodInfoList) {
             for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
                 const shadowSub = shadowMergedSubMeshes[i];
@@ -637,7 +631,7 @@ class FoliageMegaBuffer {
     #initBuffers(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const rawByteSize = Math.max(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_BYTES, 64);
-        const culledByteSize = rawByteSize * 8; 
+        const culledByteSize = rawByteSize * 8;
         const indirectByteSize = Math.max(this.#maxSubMeshes * 20, 64);
         const typeParamsByteSize = FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS * 4;
 

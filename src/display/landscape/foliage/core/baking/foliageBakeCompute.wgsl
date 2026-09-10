@@ -81,6 +81,5 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let terrainHeight = sampledHeightNorm * bakeUniforms.heightScale;
     let effectiveBottomOffset = typeInfo.bottomOffset * inst.scaleY;
 
-    // 지형 높이 + 바텀 오프셋을 rawInstances[instIdx].posY에 영구 기록
     rawInstances[instIdx].posY = terrainHeight + effectiveBottomOffset;
 }

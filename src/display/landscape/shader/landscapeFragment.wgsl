@@ -349,14 +349,12 @@ fn computeLandscapeHeightmapShadow(
     var shadowFactor: f32 = 1.0;
 
     let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
-    // 자가 차폐(Self-Occlusion Acne) 방지를 위한 표면 법선 오프셋
+
     let normalBias = 3.5;
     let biasedPos = worldPos + N * normalBias;
     let baseUV = (biasedPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
     let uvDir = L.xz * invWorldSize;
 
-    // 수신점의 국소 접평면(Tangent Plane) 기울기 산출
-    // 이 접평면 아래에 있는 지형은 수신점의 지평선(Horizon) 아래에 위치하므로 차폐 및 반음영을 유발할 수 없음
     let ny = max(0.1, N.y);
     let tangentSlope = -(N.x * L.x + N.z * L.z) / ny;
 
@@ -364,7 +362,7 @@ fn computeLandscapeHeightmapShadow(
 
     for (var i = 0u; i < stepCount; i = i + 1u) {
         let u = (f32(i) + jitter) * invStepCount;
-        // 선형과 2차 곡선을 적절히 배합하여 근거리(정밀도)와 원거리(도약 방지) 균형 유지
+
         let t = minDistance + distRange * (u * 0.4 + u * u * 0.6);
         let samplePosY = biasedPos.y + L.y * t;
 
@@ -380,8 +378,6 @@ fn computeLandscapeHeightmapShadow(
 
         let terrainHeight = sampleBilinearHeight(uv, vhtTexSize) * heightScale;
 
-        // 접평면 기준 상대 고도: 접평면보다 1.5m 이상 높이 솟아오른 산맥/능선만 차폐 후보로 인정
-        // (텍셀 보간 주름 및 평탄/완경사 사면의 자가 음영 여드름/그물망 아티팩트 완전 원천 차단)
         let tangentHeight = worldPos.y + tangentSlope * t;
         let ridgeHeight = terrainHeight - tangentHeight;
         if (ridgeHeight <= 1.5) {
@@ -391,10 +387,10 @@ fn computeLandscapeHeightmapShadow(
         let diff = samplePosY - terrainHeight;
 
         if (diff <= 0.0) {
-            // 산맥에 광선이 완전히 가로막힘 -> 100% 완전 차폐
+
             return 0.0;
         } else {
-            // 능선 정상을 아슬아슬하게 통과하는 광선의 부드러운 반음영(Penumbra) 계산
+
             let penumbra = clamp((diff * softness) / max(1.0, t), 0.0, 1.0);
             shadowFactor = min(shadowFactor, penumbra);
         }
@@ -425,24 +421,20 @@ fn getFoliageSubCellDebugColor(
     let cellCoord = floor(shifted / safeCellSize);
     let cellFract = fract(shifted / safeCellSize);
 
-    // 1. 그리드 와이어프레임 경계선 (안티앨리어싱 fwidth 활용)
     let gridDist = abs(cellFract - vec2<f32>(0.5));
     let gridEdge = vec2<f32>(0.5) - gridDist;
     let fw = fwidth(shifted / safeCellSize);
     let line = smoothstep(fw * 1.5, vec2<f32>(0.0), gridEdge);
     let isWireframe = max(line.x, line.y);
 
-    // 2. 절차적 셀 고유 해시 컬러 (Hue 변환)
     let hash1 = fract(sin(dot(cellCoord, vec2<f32>(12.9898, 78.233))) * 43758.5453);
     let hash2 = fract(sin(dot(cellCoord, vec2<f32>(93.9898, 67.345))) * 24634.6345);
     let hash3 = fract(sin(dot(cellCoord, vec2<f32>(45.1234, 19.876))) * 58392.1234);
     let baseCellColor = vec3<f32>(0.2 + 0.6 * hash1, 0.2 + 0.6 * hash2, 0.2 + 0.6 * hash3);
 
-    // 3. 카메라와의 수평 거리 판정 (원형 링)
     let distToCam = distance(worldPosXZ, cameraPosXZ);
     let isInRadius = distToCam <= streamingRadius;
 
-    // 4. 스트리밍 반경 경계 링 (폭 약 4m)
     let ringDist = abs(distToCam - streamingRadius);
     let ringIntensity = smoothstep(4.0, 0.0, ringDist);
 
@@ -450,16 +442,15 @@ fn getFoliageSubCellDebugColor(
     var alpha = 0.0;
 
     if (isInRadius) {
-        // 활성 서브셀: 셀 고유 색상(알파 0.5) + 밝은 황백색 그리드 라인
+
         finalColor = mix(baseCellColor, vec3<f32>(1.0, 1.0, 0.9), isWireframe * 0.85);
         alpha = mix(0.5, 0.9, isWireframe);
     } else {
-        // 비활성 서브셀: 어둡게 딤드된 회색 그리드만 은은하게 표시
+
         finalColor = vec3<f32>(0.1, 0.1, 0.15);
         alpha = isWireframe * 0.35;
     }
 
-    // 스트리밍 경계 네온 사이언(Cyan) 링 합성
     if (ringIntensity > 0.01) {
         finalColor = mix(finalColor, vec3<f32>(0.0, 1.0, 1.0), ringIntensity * 0.95);
         alpha = max(alpha, ringIntensity * 0.9);

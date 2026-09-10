@@ -1,27 +1,23 @@
-/**
- * [KO] 1,000m 타일 내부의 식생 인스턴스를 100m 서브셀 단위로 공간 분할하는 청크 인터페이스 및 파티셔너
- * [EN] Foliage sub-cell chunk interface and partitioner dividing 1,000m tile instances into 100m sub-cells
- */
+
 
 export interface FoliageSubCellChunk {
-    /** [KO] 전역 서브셀 고유 키 ((SZ << 16) | (SX & 0xFFFF)) [EN] Global sub-cell key */
+
     readonly subCellKey: number;
-    /** [KO] 서브셀 X 인덱스 [EN] Sub-cell X index */
+
     readonly subCellX: number;
-    /** [KO] 서브셀 Z 인덱스 [EN] Sub-cell Z index */
+
     readonly subCellZ: number;
-    /** [KO] 서브셀 중심 월드 X (m) [EN] Sub-cell center world X */
+
     readonly centerX: number;
-    /** [KO] 서브셀 중심 월드 Z (m) [EN] Sub-cell center world Z */
+
     readonly centerZ: number;
-    /** [KO] 인스턴스 데이터 (인스턴스당 8 floats) [EN] Instance data buffer */
+
     readonly instanceData: Float32Array;
-    /** [KO] 해당 서브셀의 인스턴스 개수 [EN] Instance count in this sub-cell */
+
     readonly instanceCount: number;
 
-    /** [KO] 현재 GPU 메가버퍼 마운트 여부 [EN] Whether currently mounted in GPU buffer */
     isMounted: boolean;
-    /** [KO] 메가버퍼 내 할당된 시작 인덱스 (-1: 언마운트) [EN] GPU allocation slot index */
+
     mountedSlotIndex: number;
 }
 
@@ -30,10 +26,6 @@ class FoliageSubCellPartitioner {
     static readonly #tempFloat32: Float32Array = new Float32Array(2);
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
-    /**
-     * [KO] 타일 단위로 인스턴스를 생성하고, 이를 100m 서브셀 단위의 청크 맵으로 분할하여 반환합니다.
-     * [EN] Generates instances for a tile and partitions them into a 100m sub-cell chunk map.
-     */
     static partitionTile(
         comp: any,
         foliageType: any,
@@ -54,7 +46,6 @@ class FoliageSubCellPartitioner {
         const rangeX = maxX - minX;
         const rangeZ = maxZ - minZ;
 
-        // [Phase 4] 타일의 실제 물리 면적 기반 헥타르(ha) 산출 및 목표 인스턴스 계산
         const tileAreaMetersSq = rangeX * rangeZ;
         const tileHectares = tileAreaMetersSq / 10000.0;
         const densityPerHectare = foliageType.densityPerHectare ?? 20.0;
@@ -84,7 +75,6 @@ class FoliageSubCellPartitioner {
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
 
-        // 스플랫맵 타겟 레이어 탐색
         const targetLayer = foliageType.targetLayer;
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
         let targetLayerObj: any = null;
@@ -96,7 +86,6 @@ class FoliageSubCellPartitioner {
             }
         }
 
-        // 타깃 레이어가 지정되었으나 레이어를 찾지 못한 경우 안전 차단 (Fail-Close)
         if (hasTargetLayer && !targetLayerObj) {
             return result;
         }
@@ -107,12 +96,10 @@ class FoliageSubCellPartitioner {
         const maxSlope = foliageType.maxSlope ?? 45.0;
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
 
-        // 🍃 [Phase 5] 지형 법선 정렬 옵션
         const alignToNormal = foliageType.alignToNormal ?? false;
         const alignFactor = foliageType.alignFactor ?? 0.0;
         const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
 
-        // 1. 임시 인스턴스 데이터를 서브셀 키별로 수집
         const tempBuckets = new Map<number, {
             subCellX: number;
             subCellZ: number;
@@ -122,8 +109,6 @@ class FoliageSubCellPartitioner {
 
         const invSubCell = 1.0 / subCellSize;
 
-        // 언리얼 규격: densityScaleByWeight: true 이면 가중치에 정비례하도록 시도 횟수를 targetCount로 1:1 고정
-        // densityScaleByWeight: false 이면 유효 영역에 균일 밀도를 채우기 위해 여유 시도 허용
         const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
         let spawned = 0;
 
@@ -141,7 +126,6 @@ class FoliageSubCellPartitioner {
             const posX = minX + rX * rangeX;
             const posZ = minZ + rZ * rangeZ;
 
-            // 1. 스플랫맵 레이어 가중치 검사 (Rejection Sampling)
             if (targetLayerObj) {
                 const u = (posX + halfWorldX) / worldSizeX;
                 const v = (posZ + halfWorldZ) / worldSizeZ;
@@ -160,7 +144,6 @@ class FoliageSubCellPartitioner {
                 }
             }
 
-            // 2. 지형 경사도(Slope) 검사
             if (hasSlopeFilter) {
                 const step = 1.0;
                 const hL = landscape.getHeightAt(posX - step, posZ);
@@ -221,7 +204,6 @@ class FoliageSubCellPartitioner {
                 rotW = Math.cos(halfAngle);
             }
 
-            // 🍃 [Phase 5] 지형 경사면 법선 정렬 쿼터니언 합성 (Slerp & Quaternion Multiply)
             if (needNormalAlign) {
                 const step = 1.0;
                 const hL = landscape.getHeightAt(posX - step, posZ);
@@ -235,7 +217,6 @@ class FoliageSubCellPartitioner {
                 const normalY = invLen;
                 const normalZ = nz * invLen;
 
-                // U(0,1,0) x N(normalX, normalY, normalZ) = (normalZ, 0, -normalX)
                 const vx = normalZ;
                 const vz = -normalX;
                 const vw = 1.0 + normalY;
@@ -251,7 +232,6 @@ class FoliageSubCellPartitioner {
                     const az = tz * invAlign;
                     const aw = tw * invAlign;
 
-                    // q_final = q_align(ax, 0, az, aw) * q_randY(0, rotY, 0, rotW)
                     const fx = ax * rotW - az * rotY;
                     const fy = aw * rotY;
                     const fz = az * rotW + ax * rotY;
@@ -281,7 +261,6 @@ class FoliageSubCellPartitioner {
             spawned++;
         }
 
-        // 2. 최종 TypedArray 청크 버퍼 구축
         tempBuckets.forEach((bucket, key) => {
             const instCount = bucket.floats.length / 4;
             if (instCount === 0) return;
@@ -300,7 +279,7 @@ class FoliageSubCellPartitioner {
                 u32View[bOffset + 4] = bucket.u32s[fOffset];
                 u32View[bOffset + 5] = bucket.u32s[fOffset + 1];
                 u32View[bOffset + 6] = bucket.u32s[fOffset + 2];
-                buffer[bOffset + 7] = bucket.u32s[fOffset + 3]; // typeId as float
+                buffer[bOffset + 7] = bucket.u32s[fOffset + 3];
             }
 
             const centerX = (bucket.subCellX + 0.5) * subCellSize - halfWorldX;

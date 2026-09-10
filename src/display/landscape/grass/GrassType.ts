@@ -100,7 +100,6 @@ export class GrassType {
             throw new Error(`[GrassType] 'lods' array must be provided with at least one LOD entry!`);
         }
 
-        // 🌿 거리 순으로 정렬 (LOD 0: 가장 가까운 거리)
         const sortedLods = [...options.lods].sort((a, b) => (a.lodDistance ?? 9999) - (b.lodDistance ?? 9999));
         const lod0 = sortedLods[0];
         const lod0Mesh = lod0.mesh;
@@ -118,7 +117,6 @@ export class GrassType {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        // 🌿 Normal Texture PBR 상속 및 설정
         const resolvedNormal = options.normalTexture ?? mat?.normalTexture;
         if (typeof resolvedNormal === 'string') {
             this.#normalTexture = new BitmapTexture(redGPUContext, resolvedNormal);
@@ -131,7 +129,6 @@ export class GrassType {
             this.#normalScale = mat.normalScale;
         }
 
-        // 🌿 ORM / Roughness-Metallic PBR 상속 및 설정
         const resolvedORM = options.ormTexture ?? options.metallicRoughnessTexture ?? options.roughnessTexture ?? mat?.packedORMTexture ?? mat?.metallicRoughnessTexture ?? mat?.roughnessTexture;
         if (typeof resolvedORM === 'string') {
             this.#ormTexture = new BitmapTexture(redGPUContext, resolvedORM);
@@ -190,8 +187,7 @@ export class GrassType {
         if (options.maxScale) this.#maxScale = [...options.maxScale];
         if (options.groundBlendStrength !== undefined) this.#groundBlendStrength = options.groundBlendStrength;
 
-        // PBR 파라미터 자동 상속 및 설정
-        const inheritedCutoff = (mat?.cutOff !== undefined && mat?.cutOff > 0) ? mat.cutOff : mat?.alphaCutoff;
+        const inheritedCutoff = mat?.cutOff !== undefined ? mat.cutOff : mat?.alphaCutoff;
         if (options.alphaCutoff !== undefined) {
             this.#alphaCutoff = options.alphaCutoff;
         } else if (inheritedCutoff !== undefined) {
@@ -205,7 +201,6 @@ export class GrassType {
             this.#roughness = inheritedRoughness;
         }
 
-        // 🌿 식생은 100% 비금속(Dielectric)이므로 외부 GLTF metallicFactor 상속을 원천 차단 (항상 0.0 유지)
         if (options.metallic !== undefined) {
             this.#metallic = options.metallic;
         } else {
@@ -299,6 +294,10 @@ export class GrassType {
         this.#notifyChange();
     }
 
+    get instancesPerCell(): number {
+        return Math.max(1, Math.round((this.#densityPerHectare * 256.0 / 10000.0) * this.#densityMultiplier));
+    }
+
     get minWeightThreshold(): number {
         return this.#minWeightThreshold;
     }
@@ -366,8 +365,18 @@ export class GrassType {
         return this.#minScale;
     }
 
+    set minScale(v: [number, number, number]) {
+        this.#minScale = [v[0], v[1], v[2]];
+        this.#notifyChange();
+    }
+
     get maxScale(): [number, number, number] {
         return this.#maxScale;
+    }
+
+    set maxScale(v: [number, number, number]) {
+        this.#maxScale = [v[0], v[1], v[2]];
+        this.#notifyChange();
     }
 
     get meshHeight(): number {

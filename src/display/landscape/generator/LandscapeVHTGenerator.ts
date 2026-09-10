@@ -10,7 +10,6 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
     #uniformByteLength: number = 16;
 
-    // Global Heightmap Bake resources
     #globalComputePipeline: GPUComputePipeline | null = null;
     #globalBindGroupLayout: GPUBindGroupLayout | null = null;
     #globalSampler: GPUSampler | null = null;
@@ -86,9 +85,6 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.dispatchBakePass(bindGroup, pixelW, pixelH, pixelX, pixelZ);
     }
 
-    /**
-     * 전역 하이트맵(512x512)을 VHT 아틀라스 전체에 일괄 베이크(사전 초기화)합니다.
-     */
     bakeGlobalBase(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -106,9 +102,6 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
-    /**
-     * 전역 하이트맵의 특정 UV 영역을 VHT 아틀라스의 특정 타일 슬롯으로 복원 베이크합니다.
-     */
     bakeGlobalRegion(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -128,14 +121,12 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
 
         const device = this.redGPUContext.gpuDevice;
 
-        // VHTGlobalBakeUniforms 패킹 (32 bytes)
-        // targetOffset: vec2<u32> (offset 0)
         this.#globalUniformU32[0] = pixelX;
         this.#globalUniformU32[1] = pixelZ;
-        // targetSize: vec2<u32> (offset 8)
+
         this.#globalUniformU32[2] = pixelW;
         this.#globalUniformU32[3] = pixelH;
-        // uvBounds: vec4<f32> (offset 16)
+
         this.#globalUniformF32[4] = uMin;
         this.#globalUniformF32[5] = vMin;
         this.#globalUniformF32[6] = uMax;
@@ -169,7 +160,6 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
             ]
         });
 
-        // 글로벌 컴퓨트 파이프라인 디스패치
         const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
         const workgroupCountY = Math.max(1, Math.ceil(pixelH / 16));
 

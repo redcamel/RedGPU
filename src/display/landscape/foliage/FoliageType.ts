@@ -34,23 +34,10 @@ export interface FoliageTypeOptions {
 
     lods: FoliageLODConfig[];
 
-    /**
-     * [KO] 1 헥타르(10,000㎡ = 100m x 100m)당 목표 스폰 인스턴스 수 (기본값: 20.0)
-     * [EN] Target instance count per hectare (10,000 m² = 100m x 100m)
-     * @default 20.0
-     */
     densityPerHectare?: number;
 
-    /**
-     * [KO] densityPerHectare 단축 별칭
-     * [EN] Short alias for densityPerHectare
-     */
     density?: number;
 
-    /**
-     * [KO] @deprecated 스트리밍 환경에서는 streamingRadius, densityPerHectare, densityMultiplier를 기반으로 GPU 버퍼 용량이 100% 자동 산출됩니다.
-     * [EN] @deprecated Automatically derived from streamingRadius, densityPerHectare, and densityMultiplier.
-     */
     maxInstances?: number;
 
     cullingDistance?: number;
@@ -62,122 +49,46 @@ export interface FoliageTypeOptions {
 
     useImpostor?: boolean;
 
-    /**
-     * [KO] 스캐터 인스턴스 분류 타입 ('foliage' | 'grass' | 'basic')
-     * [EN] Scatter instance classification type ('foliage' | 'grass' | 'basic')
-     * @default FOLIAGE_TYPE.FOLIAGE
-     */
     type?: FOLIAGE_TYPE;
 
-    /** @deprecated Use type instead */
     isFoliage?: boolean;
 
     useDepthPrepass?: boolean;
 
     bottomOffset?: number;
 
-    /**
-     * [KO] 원본 메시의 Y 피벗(원점 Y=0)을 지표면 기준으로 보존할지 여부 (기본값: true). false일 경우 모델의 최하단(minY)을 강제로 0으로 맞춥니다.
-     * [EN] Whether to preserve the original mesh's Y pivot (origin Y=0) as ground level (default: true). If false, forces mesh bottom (minY) to 0.
-     * @default true
-     */
     preservePivot?: boolean;
 
     castShadow?: boolean;
 
-    /**
-     * [KO] 해당 식생이 그림자를 투영(Casting)할 최대 물리적 거리 (m)
-     * [EN] Maximum shadow casting distance in meters
-     * @default 300.0
-     */
     maxShadowDistance?: number;
 
-    /**
-     * [KO] 서브셀 단위 스트리밍 활성화 여부
-     * [EN] Enable sub-cell streaming
-     * @default true
-     */
     enableStreaming?: boolean;
 
-    /**
-     * [KO] 스트리밍 로드 반경 (m)
-     * [EN] Streaming load radius in meters
-     * @default 600.0
-     */
     streamingRadius?: number;
 
-    /**
-     * [KO] 서브셀 격자 크기 (m)
-     * [EN] Sub-cell grid size in meters
-     * @default 100.0
-     */
     subCellSize?: number;
 
-    /**
-     * [KO] 타겟 지형 스플랫 레이어 명칭 (예: 'Grass', 'Rock') 또는 인덱스. 지정하지 않으면 전역 배치.
-     * [EN] Target landscape splat layer name or index. If undefined, spawns globally.
-     */
     targetLayer?: string | number;
 
-    /**
-     * [KO] 식생이 스폰되기 위한 최소 스플랫맵 가중치 (0.0 ~ 1.0)
-     * [EN] Minimum splat map weight threshold for spawning
-     * @default 0.1
-     */
     minWeightThreshold?: number;
 
-    /**
-     * [KO] 식생 스폰 최소 경사각 (도, Degree)
-     * [EN] Minimum terrain slope angle in degrees
-     * @default 0.0
-     */
     minSlope?: number;
 
-    /**
-     * [KO] 식생 스폰 최대 경사각 (도, Degree)
-     * [EN] Maximum terrain slope angle in degrees
-     * @default 45.0
-     */
     maxSlope?: number;
 
-    /**
-     * [KO] 가중치 비례 밀도 적용 여부
-     * [EN] Whether to scale spawn density proportional to layer weight
-     * @default true
-     */
     densityScaleByWeight?: boolean;
-    /**
-     * [KO] [Phase 5] 바람 세기 계수 (0.0: 바위처럼 고정, 1.0: 표준 나무, 1.5~2.0: 풀/꽃)
-     * [EN] [Phase 5] Wind strength multiplier (0.0: fixed like rock, 1.0: standard tree, 1.5-2.0: grass/flower)
-     */
+
     windMultiplier?: number;
-    /**
-     * [KO] [Phase 5] 잎 미세 떨림 계수 (0.0: 떨림 없음, 1.0: 표준 떨림)
-     * [EN] [Phase 5] Leaf micro-flutter multiplier
-     */
+
     windFlutterMultiplier?: number;
-    /**
-     * [KO] [Phase 5] 정점 컬러(Vertex Color) 바람 마스크 활용 여부
-     * [EN] [Phase 5] Whether to use vertex color wind mask
-     */
+
     useVertexColorWind?: boolean;
-    /**
-     * [KO] [Phase 5] 지형 경사면 법선 정렬 여부
-     * [EN] [Phase 5] Whether to align instance rotation to terrain normal
-     */
+
     alignToNormal?: boolean;
-    /**
-     * [KO] [Phase 5] 경사 정렬 반영 강도 (0.0 = 완전 수직 기립, 1.0 = 지형 경사면 완전 밀착)
-     * [EN] [Phase 5] Slope normal alignment factor (0.0 = vertical, 1.0 = fully aligned to normal)
-     */
+
     alignFactor?: number;
 
-
-    /**
-     * [KO] 스폰 밀도 배율 계수
-     * [EN] Density multiplier scale factor
-     * @default 1.0
-     */
     densityMultiplier?: number;
 }
 
@@ -301,20 +212,15 @@ class FoliageType {
         const streamingRadius = options.streamingRadius ?? 600.0;
         const subCellSize = options.subCellSize ?? 100.0;
 
-        // 스트리밍 기반 GPU 버퍼 용량 자동 산출 (Phase 4: 물리 헥타르 단위 면적 기반)
-        // 1. 유효 스트리밍 반경 (히스테리시스 150m 포함) 및 사각 그리드 커버리지 여유율(1.25)
         const effectiveRadius = streamingRadius + 150.0;
         const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
         const activeHectares = effectiveAreaMetersSq / 10000.0;
 
-        // 2. 예상 활성 인스턴스 수 및 30% 여유 마진, 64 배수 정렬
         const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * densityMultiplier;
         const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
 
-        // 최소 안전 용량: 16,384개 (16K 슬롯)
         const minSafeCapacity = 16384;
 
-        // 3. 최종 GPU 인스턴스 슬롯 용량 결정
         const resolvedMaxInstances = options.maxInstances !== undefined
             ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
@@ -435,23 +341,13 @@ class FoliageType {
         return this.#nameHash;
     }
 
-    /**
-     * [KO] @deprecated bufferCapacity를 사용하세요.
-     * [EN] @deprecated Use bufferCapacity instead.
-     */
     get maxInstances(): number {
         return this.bufferCapacity;
     }
 
-    /**
-     * [KO] GPU 메가버퍼에 할당된 최대 인스턴스 수용 용량 (슬롯 수)
-     * [EN] Allocated maximum instance capacity in GPU MegaBuffer
-     */
     get bufferCapacity(): number {
         return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
     }
-
-
 
     get minScale(): readonly [number, number, number] {
         return this.#options.minScale;
@@ -493,7 +389,6 @@ class FoliageType {
         return this.#shadowMergedSubMeshes;
     }
 
-
     get lodInfoList(): readonly FoliageLODInfo[] {
         return this.#lodInfoList;
     }
@@ -502,10 +397,6 @@ class FoliageType {
         return this.#allocation?.activeCount ?? 0;
     }
 
-    /**
-     * [KO] 로드된 모든 타일에서 분할되어 CPU 캐시에 보관된 총 인스턴스 수
-     * [EN] Total instances partitioned across all loaded tiles and cached on CPU
-     */
     get totalInstanceCount(): number {
         return this.#streamer.totalInstanceCount;
     }
@@ -549,11 +440,6 @@ class FoliageType {
         }
     }
 
-
-    /**
-     * [KO] 해당 식생이 그림자를 투영(Casting)할 최대 물리적 거리 (m)
-     * [EN] Maximum shadow casting distance in meters
-     */
     get maxShadowDistance(): number {
         return this.#maxShadowDistance;
     }
@@ -654,10 +540,6 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 1 헥타르(10,000㎡ = 100m x 100m)당 목표 스폰 인스턴스 수
-     * [EN] Target instance count per hectare (10,000 m² = 100m x 100m)
-     */
     get densityPerHectare(): number {
         return this.#densityPerHectare;
     }
@@ -670,10 +552,6 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] densityPerHectare 단축 별칭
-     * [EN] Short alias for densityPerHectare
-     */
     get density(): number {
         return this.#densityPerHectare;
     }
@@ -681,7 +559,6 @@ class FoliageType {
     set density(val: number) {
         this.densityPerHectare = val;
     }
-
 
     get densityMultiplier(): number {
         return this.#densityMultiplier;
@@ -694,10 +571,6 @@ class FoliageType {
             this.#onRepopulateRequired?.(this);
         }
     }
-
-    // ============================================================================
-    // [Phase 5] 바람 시뮬레이션 및 지형 법선 정렬 프로퍼티
-    // ============================================================================
 
     get windMultiplier(): number {
         return this.#windMultiplier;
@@ -790,8 +663,7 @@ class FoliageType {
 
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
-            // 🍃 기둥/가지(Bark, isMasked === false)는 flutter(나뭇잎 살랑거림)를 전혀 받지 않음 (두께 왜곡 원천 차단)
-            // 잎사귀/솔잎 클러스터(isMasked === true)만 flutterMul 적용
+
             const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
             sub.updateWindParams(
                 gpuDevice,
@@ -809,7 +681,6 @@ class FoliageType {
             );
         }
 
-        // 🍃 [Phase 5] 그림자 서브메시 버퍼도 함께 완벽 동기화 (Wind Enabled 해제 시 그림자 정지 연동)
         const shadowList = this.#shadowMergedSubMeshes;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
@@ -823,7 +694,7 @@ class FoliageType {
                 windFlutterStrength,
                 windEnabled,
                 windMul,
-                flutterMul * 0.5, // 섀도우 맵 깜빡임 방지를 위해 완만한 flutter 적용
+                flutterMul * 0.5,
                 useVC,
                 treeH
             );
@@ -845,12 +716,6 @@ class FoliageType {
         );
     }
 
-
-
-    /**
-     * [KO] 타일 캐시를 비우고 스트리머를 초기화합니다 (재생성용).
-     * [EN] Clears tile cache and resets streamer for repopulation.
-     */
     clearTileCache(): void {
         this.#streamer.clear();
         this.#loadedTileKeys.clear();
@@ -860,7 +725,6 @@ class FoliageType {
         return this.#castShadow;
     }
 
-
     set castShadow(value: boolean) {
         const boolVal = !!value;
         if (this.#castShadow !== boolVal) {
@@ -869,7 +733,6 @@ class FoliageType {
             this.#onDirty?.();
         }
     }
-
 
     getLODReceiveShadow(lodIndex: number): boolean {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return false;
@@ -897,7 +760,6 @@ class FoliageType {
         this.#onDirty?.();
     }
 
-
     get hasImpostor(): boolean {
         return !!this.#impostorSubMesh;
     }
@@ -905,7 +767,6 @@ class FoliageType {
     get useImpostor(): boolean {
         return this.#useImpostor && !!this.#impostorSubMesh;
     }
-
 
     set useImpostor(value: boolean) {
         if (!this.#impostorSubMesh) return;
@@ -918,10 +779,6 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 스캐터 인스턴스 분류 타입 ('foliage' | 'grass' | 'basic')
-     * [EN] Scatter instance classification type ('foliage' | 'grass' | 'basic')
-     */
     get type(): FOLIAGE_TYPE {
         return this.#type;
     }
@@ -936,12 +793,10 @@ class FoliageType {
         }
     }
 
-    /** @deprecated Use type instead */
     get isFoliage(): boolean {
         return this.#isFoliage;
     }
 
-    /** @deprecated Use type instead */
     set isFoliage(value: boolean) {
         const boolVal = !!value;
         if (this.#isFoliage !== boolVal) {
@@ -966,12 +821,10 @@ class FoliageType {
         }
     }
 
-
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
         return this.#lodInfoList[lodIndex].lodDistance;
     }
-
 
     setLODDistance(lodIndex: number, distance: number): void {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
@@ -989,10 +842,6 @@ class FoliageType {
         const key = (cz << 16) | cx;
         if (this.#loadedTileKeys.has(key)) return;
 
-        // [Phase 3.1] 지형 타일 비동기 다운로드 가드:
-        // 타일의 높이맵 이미지 데이터가 아직 CPU 메모리에 파싱되지 않은 경우 조기 리턴합니다.
-        // 이를 통해 고도 0.0(땅속 지하 파묻힘)으로 잘못 구워지거나 loadedTileKeys에 잠겨
-        // 실제 다운로드 후 영구 누락되는 치명적 버그를 완벽하게 차단합니다.
         if (landscape && typeof landscape.isTileLoaded === 'function') {
             if (!landscape.isTileLoaded(cz, cx)) {
                 return;

@@ -2,12 +2,6 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import grassBakeComputeSource from "./grassBakeCompute.wgsl";
 import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 
-/**
- * 잔디 스폰 전용 GPU 1회성 지형 베이커 (GrassBaker)
- * 신규 셀 스폰 시 생성된 인스턴스에 대해서만 1회성으로 VHT(높이/법선) 및 VBT(지면 베이스컬러) 텍스처를 샘플링하여
- * 지형 높이, 패킹된 법선, 패킹된 지면 색상을 rawInstances에 영구 기록합니다.
- * 평상시 프레임(스폰 없음)에는 GPU 디스패치 0회로 동작합니다.
- */
 export class GrassBaker {
     #redGPUContext: RedGPUContext;
     #bakePipeline: GPUComputePipeline | null = null;
@@ -33,7 +27,7 @@ export class GrassBaker {
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
-        // invWorldSizeX(f32), invWorldSizeZ(f32), heightScale(f32), totalTasks(u32), hasVBT(u32), pad(3) = 32 bytes
+
         this.#uniformCPUBuffer = new Float32Array(8);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
 
@@ -42,9 +36,6 @@ export class GrassBaker {
         this.#init();
     }
 
-    /**
-     * 베이크 대기 중인 태스크가 있는지 여부 반환
-     */
     get hasPendingTasks(): boolean {
         return this.#taskCount > 0;
     }
@@ -60,9 +51,6 @@ export class GrassBaker {
         this.#cachedVBTSampler = null;
     }
 
-    /**
-     * 신규 생성된 인스턴스 슬롯들을 1회성 베이크 큐에 추가 (Zero-GC)
-     */
     addBakeTasks(startIndex: number, count: number, typeId: number): void {
         if (count <= 0) return;
         this.#ensureTaskCapacity(this.#taskCount + count);
@@ -76,9 +64,6 @@ export class GrassBaker {
         this.#taskCount += count;
     }
 
-    /**
-     * GPU 컴퓨트 패스에서 대기 중인 태스크들을 1회 디스패치 (이후 큐 자동 비움)
-     */
     dispatchPass(
         computePass: GPUComputePassEncoder,
         megaBuffer: GrassMegaBuffer,
@@ -104,7 +89,6 @@ export class GrassBaker {
         const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
         const targetVBTSampler = vbtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        // 1. 유니폼 업로드
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
         f32[0] = worldSizeX > 0 ? 1.0 / worldSizeX : 0.0;
@@ -124,7 +108,6 @@ export class GrassBaker {
             32
         );
 
-        // 2. 태스크 인덱스 버퍼 업로드
         const taskBytes = this.#taskCount * 8;
         gpuDevice.queue.writeBuffer(
             this.#tasksGPUBuffer,
@@ -134,7 +117,6 @@ export class GrassBaker {
             taskBytes
         );
 
-        // 3. 바인드 그룹 검사 및 생성
         if (
             !this.#bakeBindGroup ||
             this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
@@ -169,13 +151,11 @@ export class GrassBaker {
             });
         }
 
-        // 4. 디스패치 (신규 인스턴스 개수만큼만 1회 실행)
         const workgroups = Math.ceil(this.#taskCount / 64);
         computePass.setPipeline(this.#bakePipeline);
         computePass.setBindGroup(0, this.#bakeBindGroup);
         computePass.dispatchWorkgroups(workgroups);
 
-        // 5. 완료 후 큐 리셋 (Zero-GC)
         this.#taskCount = 0;
     }
 
@@ -209,7 +189,7 @@ export class GrassBaker {
 
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassBaker_TasksBuffer',
-            size: this.#taskCapacity * 8, // 8 bytes per task (vec2<u32>)
+            size: this.#taskCapacity * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 

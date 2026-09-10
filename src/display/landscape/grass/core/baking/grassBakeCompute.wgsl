@@ -69,7 +69,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let typeInfo = typeParams[task.typeId];
     let inst = rawInstances[instIdx];
 
-    // 영구 기각된 슬롯(스플랫맵 필터 탈락 등)은 즉시 탈출
     if (inst.posY < -900000.0) {
         return;
     }
@@ -93,26 +92,22 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let hL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u - du, v), 0.0).r * bakeUniforms.heightScale;
     let hD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v - dv), 0.0).r * bakeUniforms.heightScale;
 
-    // 경사도 필터 검사 (스폰 시 1회만 판정 후 영구 저장)
     let rawNx = (hL - hR) / (stepWorld * 2.0);
     let rawNz = (hD - hU) / (stepWorld * 2.0);
     let slopeTan2 = rawNx * rawNx + rawNz * rawNz;
     if (typeInfo.hasSlopeFilter != 0u && (slopeTan2 < typeInfo.minSlopeTan2 || slopeTan2 > typeInfo.maxSlopeTan2)) {
-        rawInstances[instIdx].posY = -999999.0; // 경사도 불만족 시 영구 기각 마킹
+        rawInstances[instIdx].posY = -999999.0;
         return;
     }
 
-    // 언리얼 표준 지형 법선 계산 (75% 노멀 블렌드)
     let terrainN = normalize(vec3<f32>(rawNx, 1.0, rawNz));
     let blendedN = normalize(mix(vec3<f32>(0.0, 1.0, 0.0), terrainN, 0.75));
 
     let bakedY = terrainHeight + typeInfo.bottomOffset;
     rawInstances[instIdx].posY = bakedY;
 
-    // 🌿 법선 X, Z 성분을 16비트 정규화 패킹 (정밀도 1/32767 완벽 보존)
     rawInstances[instIdx].packedNormal = pack2x16snorm(vec2<f32>(blendedN.x, blendedN.z));
 
-    // 🌿 밑동 지형 소프트 블렌딩용 지면 컬러 1회성 베이크 (8비트 RGBA 패킹)
     var groundColor = vec3<f32>(0.0);
     if (bakeUniforms.hasVBT != 0u) {
         let groundTex = textureSampleLevel(vbtTexture, vbtSampler, vec2<f32>(u, v), 0.0);

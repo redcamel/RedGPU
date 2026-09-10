@@ -22,7 +22,6 @@ class FoliagePipelineRegistry {
         this.#initShaderModules();
     }
 
-
     static readonly #GEO_ATTRIBUTES_ALL: readonly GPUVertexAttribute[] = [
         {shaderLocation: 0, offset: 0, format: 'float32x3'},
         {shaderLocation: 1, offset: 12, format: 'float32x3'},
@@ -42,8 +41,6 @@ class FoliagePipelineRegistry {
         {shaderLocation: 8, offset: 24, format: 'float16x2'},
         {shaderLocation: 9, offset: 28, format: 'float32'},
     ];
-
-
 
     getOrCreatePipeline(
         material: any,
@@ -205,7 +202,6 @@ class FoliagePipelineRegistry {
         this.#pipelineCache.set(pipelineKey, newPipeline);
         return newPipeline;
     }
-
 
     getOrCreateShadowMergedPipeline(
         strideBytes: number = 12,

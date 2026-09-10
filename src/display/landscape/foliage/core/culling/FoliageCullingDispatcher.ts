@@ -29,7 +29,6 @@ class FoliageCullingDispatcher {
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
 
-
     static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
         label: 'Foliage_GPUCulling_ComputePass'
     });
@@ -191,7 +190,7 @@ class FoliageCullingDispatcher {
             const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
 
             if (stateData && stateData.activeCascadeCount > 0) {
-                // 🌟 RenderViewStateData에서 사전 계산 및 더티 캐싱된 섀도우 평면을 직접 사용 (계산 0회)
+
                 const cCount = stateData.activeCascadeCount;
                 for (let c = 0; c < 4; c++) {
                     const param = cascadeParams[c];
@@ -237,12 +236,10 @@ class FoliageCullingDispatcher {
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
             this.#landscapeRef = landscape;
 
-
             this.#redGPUContext.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
             );
-
 
             this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
                 FoliageCullingDispatcher.#COMPUTE_PASS_DESCRIPTOR,
@@ -304,7 +301,6 @@ class FoliageCullingDispatcher {
         const bindGroupLayout = this.#cullingBindGroupLayout;
         if (!pipeline || !bindGroupLayout) return;
 
-        // 1. 신규 마운트된 식생 인스턴스가 있다면 VHT 1회성 베이크 선행 실행 (마운트 없는 프레임에는 0회)
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
             const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
             const vhtView = vhtAtlasTexture?.gpuTextureView;
@@ -324,7 +320,6 @@ class FoliageCullingDispatcher {
             );
         }
 
-        // 2. 순수 ALU 초고속 프러스텀/LOD 컬링 실행 (VHT 바인딩 0%)
         computePass.setPipeline(pipeline);
 
         if (this.#megaBuffer) {

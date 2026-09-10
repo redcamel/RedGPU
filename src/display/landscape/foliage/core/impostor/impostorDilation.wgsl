@@ -55,7 +55,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let neighbor = textureLoad(inputTexture, clampedCoord, 0);
         if (neighbor.a > 0.05) {
-            bestColor = vec4<f32>(neighbor.rgb, 0.0); 
+            bestColor = vec4<f32>(neighbor.rgb, 0.0);
             foundValid = true;
             break;
         }

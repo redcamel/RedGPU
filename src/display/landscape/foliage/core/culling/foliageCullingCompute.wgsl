@@ -58,7 +58,7 @@ struct FoliageInstanceData {
     packedRotXY: u32,
     packedRotZW: u32,
     packedScaleXZ: u32,
-    fadeOrType: f32, 
+    fadeOrType: f32,
 };
 
 struct DrawIndexedIndirectArgs {
@@ -110,7 +110,6 @@ fn main(
     let cullingDist = typeInfo.cullingDistance;
     let effectiveCullingDistSq = cullingDist * cullingDist;
 
-    // 1단계: 수평 거리 1차 조기 탈출
     if (horizontalDistSq >= effectiveCullingDistSq) {
         return;
     }
@@ -124,8 +123,6 @@ fn main(
     let scaledRadius = typeInfo.boundingRadius * maxScale;
     let r = -scaledRadius;
 
-    // 2단계: 3D 거리 및 서브픽셀(2px 미만) 조기 판정
-    // instance.posY에는 이미 마운트 시 1회 베이킹된 정확한 지형 정밀 높이가 저장되어 있음 (순수 ALU)
     let realY = instance.posY;
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
@@ -139,7 +136,6 @@ fn main(
     let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
     let isSubpixel = (effectiveDist * 2.0 > scaledRadius * vpHeight);
 
-    // 3단계: 섀도우 최대 유효 거리 사전 계산 (인스턴스 물리적 거리 기반)
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
     let userShadowDist = typeInfo.maxShadowDistance;
     let shadowMargin = scaledRadius * 4.0;
@@ -155,12 +151,10 @@ fn main(
     let maxShadowDistSq = min(userShadowDistSq, cascadeGlobalMaxDistSq);
     let canHaveShadow = (userShadowDist > 0.0 && activeCascades > 0u && distSq < maxShadowDistSq);
 
-    // 4단계: 동시 조기 탈출 (메인 서브픽셀 기각 + 섀도우 범위 초과)
     if (isSubpixel && !canHaveShadow) {
         return;
     }
 
-    // 5단계: 메인 절두체 검사 (서브픽셀이 아닐 때만 6개 평면 검사)
     var inMainFrustum = false;
     let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
 
@@ -174,7 +168,6 @@ fn main(
             dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
     }
 
-    // 메인 절두체 밖이고 섀도우도 없으면 즉시 종료
     if (!inMainFrustum && !canHaveShadow) {
         return;
     }
@@ -182,7 +175,6 @@ fn main(
     let numLODs = typeInfo.lodCount;
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
 
-    // 6단계: 메인 패스 LOD 판정 및 1-Pass Direct Culling 슬롯 할당 (순수 ALU)
     if (inMainFrustum) {
         var globalFade: f32 = 1.0;
         let fadeStartDist = typeInfo.fadeStartDistance;
@@ -248,7 +240,6 @@ fn main(
         }
     }
 
-    // 7단계: 섀도우 패스 캐스케이드 컬링 & 1-Pass Direct Culling 슬롯 할당 (순수 ALU)
     if (canHaveShadow && distSq < maxShadowDistSq) {
         let shadowFadeRange = clamp(userShadowDist * 0.20, 10.0, 60.0);
         let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);
@@ -264,7 +255,7 @@ fn main(
                 }
 
                 let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
-                let isOverlapCascade = (c < activeCascades - 1u); 
+                let isOverlapCascade = (c < activeCascades - 1u);
                 let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
                 let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
                 let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;

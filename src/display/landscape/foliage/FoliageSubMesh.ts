@@ -169,7 +169,6 @@ class FoliageSubMesh {
             material.dirtyPipeline = false;
         }
 
-
         let modeMap = this.#pipelineCacheByMode[msaaID];
         if (!modeMap) {
             modeMap = {};

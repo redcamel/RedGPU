@@ -265,7 +265,7 @@ RedGPU.init(
                 camFolder.addBinding(controller, 'tilt', {min: -60, max: 20, step: 1, label: 'Tilt'});
 
                 // 잔디 서브시스템 폴더
-                grassFolder = pane.addFolder({title: '🌿 Grass Subsystem (GLB)', expanded: false});
+                grassFolder = pane.addFolder({title: '🌿 Grass Subsystem (GLB)', expanded: true});
                 grassFolder.addBinding(grassManager, 'enabled', {label: 'Enabled'});
                 grassFolder.addBinding(grassManager, 'streamingRadius', {
                     min: 30,
@@ -292,7 +292,40 @@ RedGPU.init(
         // 7. 잔디 모델 로딩 헬퍼 함수
         const addTypeToUI = (type) => {
             if (!grassFolder) return;
-            const typeFolder = grassFolder.addFolder({title: `${type.name}`, expanded: false});
+            const typeFolder = grassFolder.addFolder({title: `${type.name}`, expanded: true});
+
+            const baseMin = [...type.minScale];
+            const baseMax = [...type.maxScale];
+            const scaleState = {
+                scale: 1.0,
+                scaleY: 1.0
+            };
+
+            const updateScale = () => {
+                type.minScale = [
+                    baseMin[0] * scaleState.scale,
+                    baseMin[1] * scaleState.scale * scaleState.scaleY,
+                    baseMin[2] * scaleState.scale
+                ];
+                type.maxScale = [
+                    baseMax[0] * scaleState.scale,
+                    baseMax[1] * scaleState.scale * scaleState.scaleY,
+                    baseMax[2] * scaleState.scale
+                ];
+            };
+
+            typeFolder.addBinding(scaleState, 'scale', {
+                min: 0.5,
+                max: 4.0,
+                step: 0.1,
+                label: 'Grass Scale'
+            }).on('change', updateScale);
+            typeFolder.addBinding(scaleState, 'scaleY', {
+                min: 0.5,
+                max: 4.0,
+                step: 0.1,
+                label: 'Height Scale'
+            }).on('change', updateScale);
             typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1, label: 'Density Mult'});
             typeFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 80.0, step: 1.0, label: 'Max Slope (°)'});
             typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 0.9, step: 0.05, label: 'Min Weight'});
@@ -350,13 +383,12 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [2.2, 1.8, 2.2],
-                        maxScale: [3.4, 2.8, 3.4],
+                        minScale: [3.8, 3.2, 3.8],
+                        maxScale: [5.6, 4.6, 5.6],
                         groundBlendStrength: 0.55,
-                        alphaCutoff: 0.35,
                         roughness: 0.55,
                         subsurfaceStrength: 1.40,
-                        exposureBoost: 1.85,
+                        exposureBoost: 1,
                         receiveShadow: true,
                         bottomOffset: -0.18
                     });
@@ -473,13 +505,12 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [1.6, 2.0, 1.6],
-                        maxScale: [2.6, 3.2, 2.6],
+                        minScale: [2.8, 3.5, 2.8],
+                        maxScale: [4.4, 5.5, 4.4],
                         groundBlendStrength: 0.45,
-                        alphaCutoff: 0.35,
                         roughness: 0.55,
                         subsurfaceStrength: 1.50,
-                        exposureBoost: 1.95,
+                        exposureBoost: 1,
                         receiveShadow: true,
                         bottomOffset: -0.22
                     });
