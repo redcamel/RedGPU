@@ -53,11 +53,7 @@ fn main(inputData: InputData) -> VertexOutput {
 
 
     // Shadow calculation
-    #redgpu_if receiveShadow
-    {
-        output.receiveShadow = globalVertexData.receiveShadow;
-    }
-    #redgpu_endIf
+    output.receiveShadow = globalVertexData.receiveShadow;
 
     // Motion vector calculation
     {

@@ -105,11 +105,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     // [KO] 그림자 플래그 설정
-    #redgpu_if receiveShadow
-    {
-        output.receiveShadow = globalVertexData.receiveShadow;
-    }
-    #redgpu_endIf
+    output.receiveShadow = globalVertexData.receiveShadow;
 
     // [KO] 모션 벡터 계산을 위한 클립 좌표 저장 (컴퓨트 셰이더에서 구워진 최종 클립 좌표들을 바로 사용)
     // [EN] Store clip coordinates for motion vector calculation

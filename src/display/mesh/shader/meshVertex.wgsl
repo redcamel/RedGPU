@@ -90,11 +90,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.combinedOpacity = gu_combinedOpacity;
 
     // Shadow calculation
-    #redgpu_if receiveShadow
-    {
-        output.receiveShadow = globalVertexData.receiveShadow;
-    }
-    #redgpu_endIf
+    output.receiveShadow = globalVertexData.receiveShadow;
 
     // Motion vector calculation
     {
