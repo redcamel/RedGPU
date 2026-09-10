@@ -1,17 +1,10 @@
 #redgpu_include shadow.getShadowCoord;
 
-const FOLIAGE_SHADOW_CROSS_4 = array<vec2<f32>, 4>(
-    vec2<f32>( 0.0,  0.8),
-    vec2<f32>( 0.0, -0.8),
-    vec2<f32>(-0.8,  0.0),
-    vec2<f32>( 0.8,  0.0)
-);
-
 /**
- * 🌿 [식생(Foliage) 전용 초경량 CSM 섀도우 메인 함수]
+ * 🌿 [식생(Foliage) 전용 초경량 1-Tap CSM 섀도우 메인 함수]
  * - 캐스케이드 전환 블렌딩 스킵 (2중 샘플링 폭풍 차단 및 경계선 스터터링 100% 방지)
- * - Cascade 0: 4-Tap Cross PCF (하드웨어 2x2 바이리니어 PCF와 결합되어 실질적 16텍셀 품질 유지)
- * - Cascade 1+: 1-Tap 하드웨어 Bilinear PCF (초고속 단일 샘플링)
+ * - 전 캐스케이드 초고속 1-Tap 하드웨어 Bilinear PCF 단일화
+ * - 풀잎 자체의 고주파 지오메트리 요철로 인해 1-Tap만으로도 완벽한 소프트 섀도우 구현
  *
  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
  * @param directionalShadowMapSampler 비교 샘플러
@@ -73,34 +66,14 @@ fn getDirectionalShadowVisibilityFoliage(
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
     let cascadeBias = bias * (1.0 + slopeBias * 1.5) * (1.0 + f32(cascadeIndex) * 0.25);
 
-    var finalVis: f32 = 1.0;
-
-    // 5. Cascade 레벨별 가변 샘플링
-    if (cascadeIndex == 0u) {
-        // Cascade 0: 4-Tap Cross PCF
-        let filterRadius = oneOverTextureSize * 2.0;
-        var vis: f32 = 0.0;
-        for (var i = 0u; i < 4u; i++) {
-            let sampleUV = tUV + FOLIAGE_SHADOW_CROSS_4[i] * filterRadius;
-            vis += textureSampleCompareLevel(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                sampleUV,
-                0u,
-                shadowDepth - cascadeBias
-            );
-        }
-        finalVis = vis * 0.25;
-    } else {
-        // Cascade 1, 2, 3: 1-Tap 하드웨어 Bilinear PCF
-        finalVis = textureSampleCompareLevel(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            tUV,
-            cascadeIndex,
-            shadowDepth - cascadeBias
-        );
-    }
+    // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
+    var finalVis = textureSampleCompareLevel(
+        directionalShadowMap,
+        directionalShadowMapSampler,
+        tUV,
+        cascadeIndex,
+        shadowDepth - cascadeBias
+    );
 
     // 6. 최외곽 캐스케이드 부드러운 페이드아웃
     if (cascadeIndex == cascadeCount - 1u) {
