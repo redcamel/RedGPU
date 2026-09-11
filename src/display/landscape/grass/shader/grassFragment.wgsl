@@ -46,14 +46,8 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
 
-    let rgbMax = max(baseTex.r, max(baseTex.g, baseTex.b));
-    let sourceAlpha = select(baseTex.a, min(baseTex.a, smoothstep(0.02, 0.12, rgbMax)), baseTex.a > 0.98 && rgbMax < 0.12);
-
-    let baseCutoff = clamp(materialUniforms.alphaCutoff, 0.0, 1.0);
-    let alphaWidth = max(fwidth(sourceAlpha), 0.0001);
-    let coverageAlpha = clamp((sourceAlpha - baseCutoff) / alphaWidth + 0.5, 0.0, 1.0);
-
-    if (coverageAlpha < 0.5) {
+    let sourceAlpha = baseTex.a;
+    if (sourceAlpha < materialUniforms.alphaCutoff) {
         discard;
     }
 
@@ -68,7 +62,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     var albedo = vibrantAlbedo * edgeTint;
 
     if (materialUniforms.hasGroundTexture != 0u && materialUniforms.groundBlendStrength > 0.01) {
-        let blendFactor = smoothstep(0.40, 0.0, input.heightRatio) * materialUniforms.groundBlendStrength;
+        let blendFactor = clamp((0.40 - input.heightRatio) * 2.5, 0.0, 1.0) * materialUniforms.groundBlendStrength;
         albedo = mix(albedo, input.groundColor, blendFactor);
     }
 
@@ -146,32 +140,21 @@ fn main(input: VertexOutput) -> OutputFragment {
         totalDirectLighting += (totalDiffuse + directSpecular) * dLight;
     }
 
-    let skyOcclusion = mix(0.65, 1.0, smoothstep(0.0, 0.70, input.heightRatio));
+    let skyOcclusion = mix(0.65, 1.0, clamp(input.heightRatio * 1.43, 0.0, 1.0));
     var totalIndirectLighting = vec3<f32>(0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
 
     if (u_usePrefilterTexture) {
-
         let skyN = normalize(mix(N, vec3<f32>(0.0, 1.0, 0.0), 0.40));
-        let iblSkyColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, skyN, 0.0).rgb * preExposure * systemUniforms.iblIntensity;
-
-        let skyLum = dot(iblSkyColor, vec3<f32>(0.2126, 0.7152, 0.0722));
-        let foliarSky = mix(iblSkyColor, vec3<f32>(skyLum * 0.90, skyLum * 1.15, skyLum * 0.70), 0.65);
-
-        let iblGroundColor = foliarSky * 0.40;
-        let envDiffuse = mix(iblGroundColor, foliarSky, skyOcclusion);
-
-        let rimFresnel = pow(1.0 - NdotV, 3.0) * (1.0 - roughness) * 0.15;
-        let foliarSpecular = foliarSky * rimFresnel * skyOcclusion;
-
-        totalIndirectLighting = (albedo * envDiffuse) + foliarSpecular;
+        let iblColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, skyN, 0.0).rgb * (preExposure * systemUniforms.iblIntensity);
+        totalIndirectLighting = albedo * iblColor * skyOcclusion;
     } else {
         let ambLight = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * preExposure);
         let ambSSS = ambLight * sssColor * (subsurfaceStrength * leafThickness * 0.25);
         totalIndirectLighting = (albedo * (ambLight * skyOcclusion)) + ambSSS;
     }
 
-    let contactAO = mix(0.75, 1.0, smoothstep(0.0, 0.15, input.heightRatio));
+    let contactAO = mix(0.75, 1.0, clamp(input.heightRatio * 6.67, 0.0, 1.0));
 
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;
 
