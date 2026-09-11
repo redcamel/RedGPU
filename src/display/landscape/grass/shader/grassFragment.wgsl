@@ -51,15 +51,8 @@ fn main(input: VertexOutput) -> OutputFragment {
         discard;
     }
 
-    let safeAlpha = clamp(sourceAlpha, 0.20, 1.0);
-    let pureLeafAlbedo = baseTex.rgb / safeAlpha;
-
     let exposureBoost = max(0.1, materialUniforms.exposureBoost);
-
-    let vibrantAlbedo = pow(pureLeafAlbedo, vec3<f32>(0.86)) * exposureBoost;
-
-    let edgeTint = mix(vec3<f32>(1.08, 1.15, 0.95), vec3<f32>(1.0), smoothstep(0.20, 0.60, baseTex.a));
-    var albedo = vibrantAlbedo * edgeTint;
+    var albedo = baseTex.rgb * exposureBoost;
 
     if (materialUniforms.hasGroundTexture != 0u && materialUniforms.groundBlendStrength > 0.01) {
         let blendFactor = clamp((0.40 - input.heightRatio) * 2.5, 0.0, 1.0) * materialUniforms.groundBlendStrength;
@@ -77,10 +70,8 @@ fn main(input: VertexOutput) -> OutputFragment {
     let subsurfaceStrength = clamp(materialUniforms.subsurfaceStrength, 0.0, 3.0);
     let preExposure = systemUniforms.preExposure;
 
-    let albedoLum = dot(albedo, vec3<f32>(0.2126, 0.7152, 0.0722));
-    let sssColor = mix(albedo * 1.25, materialUniforms.subsurfaceColor * (albedoLum * 1.6), 0.70);
-
-    let leafThickness = smoothstep(0.05, 0.85, input.heightRatio);
+    let sssColor = mix(albedo * 1.25, materialUniforms.subsurfaceColor, 0.60);
+    let leafThickness = clamp(input.heightRatio, 0.1, 1.0);
 
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -103,7 +94,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
-        let directNdotL = max(dot(N, L), 0.0);
         let currentShadow = select(1.0, shadowFactor, i == 0u);
         var dLight = light.color.rgb * light.intensity * preExposure * currentShadow;
 
@@ -114,30 +104,24 @@ fn main(input: VertexOutput) -> OutputFragment {
             dLight *= atmosphereTransmittance;
         }
 
-        let H = normalize(L + V);
-        let NdotH = max(dot(N, H), 0.0);
-        let specPower = mix(16.0, 64.0, 1.0 - roughness);
-        let specFactor = pow(NdotH, specPower) * (1.0 - roughness) * 0.35;
-        let directSpecular = vec3<f32>(specFactor);
+        let nDotL = dot(N, L);
 
-        let diffuseReflection = albedo * directNdotL;
+        // 🌿 1. 양면 Half-Lambert Wrap Diffuse (부드러운 풀잎 볼륨감)
+        let wrapDiff = max((nDotL + 0.50) / 1.50, 0.0);
 
+        // 🌿 2. 역광 배면 SSS (Backlight Subsurface Scattering - pow 0회 순수 ALU)
         let distortion = materialUniforms.subsurfaceDistortion;
-        let L_scatter = normalize(L + N * distortion);
-        let forwardScatterDot = max(dot(V, -L_scatter), 0.0);
-        let forwardTransmission = pow(forwardScatterDot, 3.0) * 1.50;
+        let backLight = max(-nDotL, 0.0) * 0.50 + max(dot(V, -(L + N * distortion)), 0.0) * 0.50;
+        let sssTransmission = backLight * (subsurfaceStrength * leafThickness);
 
-        let backDot = max(0.0, -dot(N, L));
-        let diffuseBackTransmission = backDot * 0.50;
+        // 🌿 3. 초경량 스펙큘러 (pow 대신 nDotH^4 고속 다항식 - 풀잎 깜빡임 방지)
+        let H = normalize(L + V);
+        let nDotH = max(dot(N, H), 0.0);
+        let nh2 = nDotH * nDotH;
+        let specFactor = nh2 * nh2 * (1.0 - roughness) * 0.25;
 
-        let transmission = (forwardTransmission + diffuseBackTransmission) * (subsurfaceStrength * leafThickness);
-        let diffuseTransmission = sssColor * transmission;
-
-        let wrapNdotL = max((dot(N, L) + 0.50) / 1.50, 0.0);
-        let wrapScatter = albedo * wrapNdotL * 0.65;
-
-        let totalDiffuse = diffuseReflection + diffuseTransmission + wrapScatter;
-        totalDirectLighting += (totalDiffuse + directSpecular) * dLight;
+        let totalLighting = (albedo * wrapDiff) + (sssColor * sssTransmission) + vec3<f32>(specFactor);
+        totalDirectLighting += totalLighting * dLight;
     }
 
     let skyOcclusion = mix(0.65, 1.0, clamp(input.heightRatio * 1.43, 0.0, 1.0));
