@@ -387,59 +387,25 @@ export class LandscapeTileStreamer {
     }
 
     rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
-        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) return;
-
-        this.#rebakeQueue.length = 0;
-        for (const comp of this.#spatialGrid.flatCells) {
-            if (this.#loadedMap.has(comp.key)) {
-                this.#rebakeQueue.push(comp);
-            }
-        }
-
-        if (this.#rebakeQueue.length === 0) return;
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
 
         if (this.#rebakeRafId !== null) {
             cancelAnimationFrame(this.#rebakeRafId);
             this.#rebakeRafId = null;
         }
+        this.#isRebaking = false;
+        this.#rebakeQueue.length = 0;
 
-        this.#isRebaking = true;
-        this.#rebakeBudgetPerFrame = budgetPerFrame;
-        this.#processRebakeQueue();
+        // 전체 아틀라스 단 1회 일괄 베이킹 (0ms 지연, 256개 전체 타일 100% 즉시 완성)
+        this.#vbtGenerator.bakeAtlas(
+            this.#vntAtlasTexture,
+            this.#vbtBaseColorAtlas,
+            this.#vbtNormalAtlas,
+            this.#vbtORMAtlas,
+            this.#material,
+            512
+        );
     }
-
-    #processRebakeQueue = (): void => {
-        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) {
-            this.#isRebaking = false;
-            this.#rebakeQueue.length = 0;
-            this.#rebakeRafId = null;
-            return;
-        }
-
-        const TILE_PIXEL_SIZE = 512;
-        const count = Math.min(this.#rebakeBudgetPerFrame, this.#rebakeQueue.length);
-
-        for (let i = 0; i < count; i++) {
-            const comp = this.#rebakeQueue.shift()!;
-            this.#vbtGenerator.bakeTileRegion(
-                this.#vntAtlasTexture,
-                this.#vbtBaseColorAtlas,
-                this.#vbtNormalAtlas,
-                this.#vbtORMAtlas,
-                this.#material,
-                comp.componentX,
-                comp.componentZ,
-                TILE_PIXEL_SIZE
-            );
-        }
-
-        if (this.#rebakeQueue.length > 0) {
-            this.#rebakeRafId = requestAnimationFrame(this.#processRebakeQueue);
-        } else {
-            this.#isRebaking = false;
-            this.#rebakeRafId = null;
-        }
-    };
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
         const key = comp.key;
@@ -520,18 +486,8 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vntAtlasTexture) {
-                            this.#vbtGenerator.bakeTileRegion(
-                                this.#vntAtlasTexture,
-                                this.#vbtBaseColorAtlas,
-                                this.#vbtNormalAtlas,
-                                this.#vbtORMAtlas,
-                                this.#material,
-                                comp.componentX,
-                                comp.componentZ,
-                                TILE_PIXEL_SIZE
-                            );
-                        }
+                        // VBT(가상 블렌드 텍스처)는 전역 bakeAtlas()로 전체 8192가 완벽하게 일괄 베이킹되므로,
+                        // 타일 스트리밍 시에는 높이맵(VHT) 및 노멀맵(VNT)만 갱신하여 밉맵 오염 및 경쟁 상태(race condition)를 방지합니다.
 
                         const neighborOffsets = LandscapeTileStreamer.#NEIGHBOR_OFFSETS;
                         const tileCountX = this.#spatialGrid.tileCountX;
@@ -558,19 +514,6 @@ export class LandscapeTileStreamer {
                                             this.#heightScale,
                                             this.#spatialGrid.worldSizeX,
                                             tileCountX
-                                        );
-                                    }
-
-                                    if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vntAtlasTexture) {
-                                        this.#vbtGenerator.bakeTileRegion(
-                                            this.#vntAtlasTexture,
-                                            this.#vbtBaseColorAtlas,
-                                            this.#vbtNormalAtlas,
-                                            this.#vbtORMAtlas,
-                                            this.#material,
-                                            nx,
-                                            nz,
-                                            TILE_PIXEL_SIZE
                                         );
                                     }
                                 }

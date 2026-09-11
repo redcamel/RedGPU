@@ -93,63 +93,6 @@ fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
 }
 
-fn computeLandscapeLayersAlbedo(
-    globalUV: vec2<f32>,
-    worldTileUV: vec2<f32>,
-    ddxGlobalUV: vec2<f32>,
-    ddyGlobalUV: vec2<f32>,
-    ddxWorldTileUV: vec2<f32>,
-    ddyWorldTileUV: vec2<f32>
-) -> vec3<f32> {
-    let activeLayerCount = uniforms.activeLayerCount;
-    if (activeLayerCount == 0u) {
-        return uniforms.color.rgb;
-    }
-
-    let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
-
-    var totalLayerWeight = 0.0;
-    var blendedAlbedo = vec3<f32>(0.0);
-
-    for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-        let layerParams = uniforms.layerParams[i];
-        if (layerParams.enabled <= 0.5) { continue; }
-
-        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
-        var weightVal = weightMapSample.r;
-        if (chIdx == 1u) { weightVal = weightMapSample.g; }
-        else if (chIdx == 2u) { weightVal = weightMapSample.b; }
-        else if (chIdx == 3u) {
-            let isAlphaFull = weightMapSample.a >= 0.99;
-            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
-            weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
-        }
-        let layerW = clamp(weightVal, 0.0, 1.0);
-
-        if (layerW <= 0.01) { continue; }
-
-        let layerIdx = i32(i);
-        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
-        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
-        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
-
-        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
-        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
-
-        blendedAlbedo += layerAlbedo * layerW;
-        totalLayerWeight += layerW;
-    }
-
-    if (totalLayerWeight > 0.001) {
-        let invW = 1.0 / totalLayerWeight;
-        let layerBlendAlbedo = blendedAlbedo * invW;
-        let alpha = clamp(totalLayerWeight, 0.0, 1.0);
-        return mix(uniforms.color.rgb, layerBlendAlbedo, alpha);
-    }
-
-    return uniforms.color.rgb;
-}
-
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
@@ -466,20 +409,29 @@ fn main(inputData: InputData) -> OutputFragment {
     let input_vertexPosition = inputData.vertexPosition;
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let globalUV = inputData.uv1;
-    let worldTileUV = inputData.uv;
 
-    let ddxGlobalUV = dpdx(globalUV);
-    let ddyGlobalUV = dpdy(globalUV);
-    let ddxWorldTileUV = dpdx(worldTileUV);
-    let ddyWorldTileUV = dpdy(worldTileUV);
+    // -------------------------------------------------------------
+    // VBT (Virtual Blend Texture / RVT) 직접 샘플링 (1위 병목 완전 해소)
+    // -------------------------------------------------------------
+    let vbtBaseColor = textureSample(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV);
+    let vbtNormalRaw = textureSample(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV).rgb;
+    let vbtORM = textureSample(vbtORMAtlasTexture, baseColorTextureSampler, globalUV);
 
-    var albedo = computeLandscapeLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-    let N = getBaseNormal(globalUV);
+    let baseNormal = getBaseNormal(globalUV);
+    let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
+    let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
+    let N = select(baseNormal, vbtN, isVBTNormalValid);
+
+    let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
+    var albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
+    if (uniforms.activeLayerCount > 0u && dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001) {
+        albedo = vbtBaseColor.rgb;
+    }
+    let roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+    let ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
-
-    let roughnessFactor = 0.85;
-    let ambientOcclusion = 1.0;
 
     if (inputData.instanceColor.a > 0.0) {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
@@ -507,25 +459,32 @@ fn main(inputData: InputData) -> OutputFragment {
     if (systemUniforms.directionalLightCount > 0u) {
         L = -normalize(systemUniforms.directionalLights[0].direction);
     }
-    let NdotL = dot(N, L);
+    // 지형 그림자 수광 판정은 거시적 기하 노멀(baseNormal) 기준 (Shadow Acne 방지)
+    let geoNdotL = dot(baseNormal, L);
 
     var visibility = 1.0;
 
-    if (receiveShadowYn && NdotL > 0.001) {
+    if (receiveShadowYn && geoNdotL > 0.001) {
         var terrainShadowVis = 1.0;
         var isDeepTerrainShadow = false;
-        if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
+        let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
+
+        // 원거리에서는 레이마칭 스텝 수를 거리 비율에 따라 동적으로 축소 (LOD 최적화)
+        if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01 && rawViewDist < shadowMaxDist * 1.5) {
+            let distRatio = clamp(rawViewDist / shadowMaxDist, 0.0, 1.0);
+            let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
+
             let terrainSelfShadow = computeLandscapeHeightmapShadow(
                 input_vertexPosition,
-                N,
+                baseNormal,
                 L,
                 inputData.position.xy,
                 landscapeInstanceUniforms.worldSizeX,
                 landscapeInstanceUniforms.worldSizeZ,
                 landscapeInstanceUniforms.vhtTextureSize,
                 landscapeInstanceUniforms.heightScale,
-                landscapeInstanceUniforms.heightmapShadowDistance,
-                landscapeInstanceUniforms.heightmapShadowSteps,
+                shadowMaxDist,
+                dynamicSteps,
                 landscapeInstanceUniforms.heightmapShadowSoftness
             );
             terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
@@ -540,7 +499,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 input_vertexPosition,
-                N,
+                baseNormal,
                 L
             );
             let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);

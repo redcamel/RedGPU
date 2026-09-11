@@ -21,7 +21,7 @@ struct VBTBakeUniforms {
     tilePixelSize: vec2<f32>,
     atlasSize: vec2<f32>,
     activeLayerCount: u32,
-    pad0: u32,
+    singleTileSize: f32,
     baseColor: vec4<f32>,
     layerParams: array<LandscapeLayerParams, 8>,
 };
@@ -84,9 +84,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var blendedMetallic = 0.0;
     var blendedAO = 0.0;
 
+    let tileSize = select(512.0, uniforms.singleTileSize, uniforms.singleTileSize > 0.0);
+    let tileLocalX = f32(atlasPixelX % i32(tileSize));
+    let tileLocalZ = f32(atlasPixelZ % i32(tileSize));
+
     let worldTileUV = vec2<f32>(
-        (f32(localX) + 0.5) / f32(tileW),
-        (f32(localZ) + 0.5) / f32(tileH)
+        (tileLocalX + 0.5) / tileSize,
+        (tileLocalZ + 0.5) / tileSize
     );
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
@@ -135,28 +139,43 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var finalMetallic = baseMetallic;
     var finalAO = baseAO;
 
-    if (totalLayerWeight > 0.0001) {
-        let invW = 1.0 / totalLayerWeight;
-        let layerBlendAlbedo = blendedAlbedo * invW;
-        let layerBlendNormal = normalize(blendedNormalTangent * invW);
-        let layerBlendRoughness = blendedRoughness * invW;
-        let layerBlendMetallic = blendedMetallic * invW;
-        let layerBlendAO = blendedAO * invW;
+    if (activeLayerCount > 0u) {
+        if (totalLayerWeight > 0.0001) {
+            let invW = 1.0 / totalLayerWeight;
+            finalAlbedo = blendedAlbedo * invW;
+            let layerBlendNormal = normalize(blendedNormalTangent * invW);
+            finalRoughness = blendedRoughness * invW;
+            finalMetallic = blendedMetallic * invW;
+            finalAO = blendedAO * invW;
 
-        let alpha = clamp(totalLayerWeight, 0.0, 1.0);
+            if (length(layerBlendNormal.xy) > 0.001) {
+                let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
+                let tangentZ = normalize(cross(N, tangentX));
+                let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + N * layerBlendNormal.z);
+                N = normalize(perturbedWorldN);
+            }
+        } else {
+            // 스플랫맵 가중치 합이 0인 극단적 영역에서는 인위적인 베이스 컬러 대신 0번 기본 레이어 텍스처 사용
+            let layer0Params = uniforms.layerParams[0];
+            let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
+            let layer0Albedo = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb * layer0Params.tintColor.rgb;
+            let layer0ORM = textureSampleLevel(layerORMArray, vbtTextureSampler, layer0UV, 0, 0.0);
+            let layer0NormalRaw = textureSampleLevel(layerNormalArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb * 2.0 - vec3<f32>(1.0);
+            let layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));
 
-        finalAlbedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
+            finalAlbedo = layer0Albedo;
+            finalRoughness = layer0Params.roughness * layer0ORM.g;
+            finalMetallic = layer0Params.metallic * layer0ORM.b;
+            let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
+            finalAO = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
-        if (length(layerBlendNormal.xy) > 0.001) {
-            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
-            let tangentZ = normalize(cross(N, tangentX));
-            let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + N * layerBlendNormal.z);
-            N = normalize(mix(N, perturbedWorldN, alpha));
+            if (length(layer0Normal.xy) > 0.001) {
+                let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
+                let tangentZ = normalize(cross(N, tangentX));
+                let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + N * layer0Normal.z);
+                N = normalize(perturbedWorldN);
+            }
         }
-
-        finalRoughness = mix(baseRoughness, layerBlendRoughness, alpha);
-        finalMetallic = mix(baseMetallic, layerBlendMetallic, alpha);
-        finalAO = mix(baseAO, layerBlendAO, alpha);
     }
 
     let storeCoord = vec2<i32>(atlasPixelX, atlasPixelZ);

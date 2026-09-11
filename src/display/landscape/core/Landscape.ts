@@ -512,7 +512,22 @@ export class Landscape extends Object3DContainer {
             this.#componentCountX
         );
 
+        this.#bakeGlobalVBT();
+
         this.#isGlobalHeightBaked = true;
+    }
+
+    #bakeGlobalVBT(): void {
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
+
+        this.#vbtGenerator.bakeAtlas(
+            this.#vntAtlasTexture,
+            this.#vbtBaseColorAtlas,
+            this.#vbtNormalAtlas,
+            this.#vbtORMAtlas,
+            this.#material,
+            512
+        );
     }
 
     render(view: any, passEncoder?: GPURenderPassEncoder): void {

@@ -65,7 +65,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const activeLayers = material.layers;
         const activeCount = Math.min(8, activeLayers.length);
         uArr[6] = activeCount;
-        uArr[7] = 0;
+        fArr[7] = tileSizePixels;
 
         const baseColorRGBA = material.baseColor ? material.baseColor.rgbNormalLinear : [0.22, 0.49, 0.26];
         fArr[8] = baseColorRGBA[0];
@@ -139,6 +139,113 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             originX,
             originZ,
             tileSizePixels,
+            6
+        );
+    }
+
+    bakeAtlas(
+        vntAtlas: DirectTexture,
+        vbtBaseColorArray: DirectTexture,
+        vbtNormalArray: DirectTexture,
+        vbtORMArray: DirectTexture,
+        material: LandscapeMaterial,
+        singleTilePixels: number = 512
+    ): void {
+        if (!this.computePipeline || !this.bindGroupLayout) return;
+        if (!vntAtlas?.gpuTexture) return;
+        if (!vbtBaseColorArray?.gpuTexture || !vbtNormalArray?.gpuTexture || !vbtORMArray?.gpuTexture) return;
+
+        const device = this.redGPUContext.gpuDevice;
+        const atlasW = vntAtlas.gpuTexture.width;
+        const atlasH = vntAtlas.gpuTexture.height;
+
+        const fArr = this.#uniformFloatArray;
+        const uArr = this.#uniformUintArray;
+
+        fArr[0] = 0;
+        fArr[1] = 0;
+        fArr[2] = atlasW;
+        fArr[3] = atlasH;
+        fArr[4] = atlasW;
+        fArr[5] = atlasH;
+
+        const activeLayers = material.layers;
+        const activeCount = Math.min(8, activeLayers.length);
+        uArr[6] = activeCount;
+        fArr[7] = singleTilePixels;
+
+        const baseColorRGBA = material.baseColor ? material.baseColor.rgbNormalLinear : [0.22, 0.49, 0.26];
+        fArr[8] = baseColorRGBA[0];
+        fArr[9] = baseColorRGBA[1];
+        fArr[10] = baseColorRGBA[2];
+        fArr[11] = 1.0;
+
+        for (let i = 0; i < 8; i++) {
+            const offset = 12 + i * 16;
+            if (i < activeCount) {
+                const layer = activeLayers[i];
+
+                fArr[offset + 0] = layer.uvOffset[0];
+                fArr[offset + 1] = layer.uvOffset[1];
+                fArr[offset + 2] = layer.uvScale[0];
+                fArr[offset + 3] = layer.uvScale[1];
+
+                const tint = layer.tintColor.rgbNormalLinear;
+                fArr[offset + 4] = tint[0];
+                fArr[offset + 5] = tint[1];
+                fArr[offset + 6] = tint[2];
+                fArr[offset + 7] = 1.0;
+
+                fArr[offset + 8] = layer.roughness;
+                fArr[offset + 9] = layer.metallic;
+                fArr[offset + 10] = layer.normalIntensity;
+                fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
+
+                fArr[offset + 12] = layer.aoIntensity;
+                fArr[offset + 13] = layer.weightChannelIndex;
+                fArr[offset + 14] = 0.0;
+                fArr[offset + 15] = 0.0;
+            } else {
+                for (let j = 0; j < 16; j++) {
+                    fArr[offset + j] = 0.0;
+                }
+            }
+        }
+
+        const uniformBuffer = this.acquireUniformBuffer(this.#vbtUniformByteLength);
+        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, this.#vbtUniformByteLength);
+
+        const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
+        const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
+        const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
+
+        const layerViews = material.getInternalLayerViews();
+        const bindGroup = device.createBindGroup({
+            label: `Landscape_VBT_BindGroup_FullAtlas`,
+            layout: this.bindGroupLayout,
+            entries: [
+                {binding: 0, resource: {buffer: uniformBuffer}},
+                {binding: 1, resource: vntAtlas.gpuTextureView},
+                {binding: 2, resource: material.baseColorTextureSampler.gpuSampler},
+                {binding: 3, resource: layerViews.baseColorView!},
+                {binding: 4, resource: layerViews.normalView!},
+                {binding: 5, resource: layerViews.ormView!},
+                {binding: 6, resource: layerViews.weightMapView!},
+                {binding: 7, resource: vbtBaseColorStorageView},
+                {binding: 8, resource: vbtNormalStorageView},
+                {binding: 9, resource: vbtORMStorageView},
+            ]
+        });
+
+        this.dispatchBakePass(bindGroup, atlasW, atlasH, 0, 0);
+
+        this.#dispatchTileMipmaps(
+            vbtBaseColorArray.gpuTexture,
+            vbtNormalArray.gpuTexture,
+            vbtORMArray.gpuTexture,
+            0,
+            0,
+            atlasW,
             6
         );
     }
@@ -312,11 +419,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const device = this.redGPUContext.gpuDevice;
 
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
-            const pass = commandEncoder.beginComputePass({
-                label: `Landscape_TileMipmap_Pass_[${originX},${originZ}]`
-            });
-            pass.setPipeline(this.#tileMipPipeline!);
-
             for (let m = 1; m < maxMipLevels; m++) {
                 const srcOriginX = originX >> (m - 1);
                 const srcOriginZ = originZ >> (m - 1);
@@ -340,11 +442,14 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 
                 const mipBindGroup = this.#getOrCreateTileMipBindGroup(bcTex, normTex, ormTex, m);
 
+                const pass = commandEncoder.beginComputePass({
+                    label: `Landscape_TileMipmap_Pass_Level_${m}_[${originX},${originZ}]`
+                });
+                pass.setPipeline(this.#tileMipPipeline!);
                 pass.setBindGroup(0, mipBindGroup);
                 pass.dispatchWorkgroups(Math.max(1, Math.ceil(dstW / 16)), Math.max(1, Math.ceil(dstH / 16)));
+                pass.end();
             }
-
-            pass.end();
         });
     }
 }
