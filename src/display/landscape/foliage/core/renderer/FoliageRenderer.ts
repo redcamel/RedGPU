@@ -122,6 +122,7 @@ class FoliageRenderer {
                 const indirectGPU = item.indirectGPU!;
                 const subMeshes = foliageType.depthPrepassSubMeshes;
                 const subCount = subMeshes.length;
+                if (subCount === 0) continue;
 
                 for (let s = 0; s < subCount; s++) {
                     this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');

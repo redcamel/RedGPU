@@ -54,6 +54,7 @@ export interface FoliageTypeOptions {
     isFoliage?: boolean;
 
     useDepthPrepass?: boolean;
+    depthPrepassMaxLOD?: number;
 
     bottomOffset?: number;
 
@@ -287,6 +288,7 @@ class FoliageType {
             useImpostor: this.#useImpostor,
             isFoliage: this.#isFoliage,
             useDepthPrepass: this.#useDepthPrepass,
+            depthPrepassMaxLOD: options.depthPrepassMaxLOD,
             bottomOffset: this.#bottomOffset,
             castShadow: this.#castShadow,
             maxShadowDistance: this.#maxShadowDistance,
