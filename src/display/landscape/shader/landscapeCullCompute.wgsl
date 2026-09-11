@@ -9,7 +9,7 @@ struct CameraFrustumUniforms {
     tileCount: u32,
     tanHalfFOV: f32,
     lodMetric: f32,
-    hasHZB: u32,
+    useHZB: u32,
     pad0: f32,
     pad1: f32,
     pad2: f32,
@@ -140,7 +140,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
-            if (uniforms.hasHZB != 0u) {
+            if (uniforms.useHZB != 0u) {
                 if (!checkAABBInHZB(minPos, maxPos)) {
                     isOccluded = true;
                 }

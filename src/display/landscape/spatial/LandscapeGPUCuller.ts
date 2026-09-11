@@ -61,7 +61,7 @@ export class LandscapeGPUCuller {
         lodDistancesSq: Float32Array,
         tanHalfFOV: number = 1.0,
         lodMetric: number = 0.0,
-        hasHZB: boolean = false,
+        useHZB: boolean = false,
         viewProjectionMatrix: Float32Array | null = null
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -85,7 +85,7 @@ export class LandscapeGPUCuller {
         data[10] = tanHalfFOV;
         data[11] = lodMetric;
 
-        uintData[12] = hasHZB ? 1 : 0;
+        uintData[12] = useHZB ? 1 : 0;
         data[13] = 0.0;
         data[14] = 0.0;
         data[15] = 0.0;

@@ -90,6 +90,7 @@ export class Landscape extends Object3DContainer {
 
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #frustumCullingActive: boolean = false;
+    #useHZB: boolean = true;
 
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -454,6 +455,35 @@ export class Landscape extends Object3DContainer {
 
     set nearDetailFade(val: number) {
         this.#material.nearDetailFade = val;
+    }
+
+    /**
+     * [KO] Hierarchical Z-Buffer (HZB) 기반 GPU 오클루전 컬링 활성화 여부
+     * [EN] Whether to enable Hierarchical Z-Buffer (HZB) based GPU occlusion culling
+     */
+    get useHZB(): boolean {
+        return this.#useHZB;
+    }
+
+    set useHZB(val: boolean) {
+        const nextVal = !!val;
+        if (this.#useHZB !== nextVal) {
+            this.#useHZB = nextVal;
+            this.#lastHZBView = null;
+            this.#lastHZBSampler = null;
+        }
+    }
+
+    /**
+     * [KO] `useHZB`의 별칭 (하위 호환 및 네이밍 통일)
+     * [EN] Alias for `useHZB` (backwards compatibility and naming unification)
+     */
+    get hasHZB(): boolean {
+        return this.#useHZB;
+    }
+
+    set hasHZB(val: boolean) {
+        this.useHZB = val;
     }
 
     get globalHeightmapUrl(): string {
@@ -885,19 +915,19 @@ export class Landscape extends Object3DContainer {
 
         const currentView = renderViewStateData?.view || (camera as any)?.view;
         const hzb = currentView?.hierarchicalZBuffer;
-        const hzbTextureView = hzb?.textureView || null;
-        const hzbSampler = hzb?.sampler || null;
+        const effectiveHZBTextureView = this.#useHZB ? (hzb?.textureView || null) : null;
+        const effectiveHZBSampler = this.#useHZB ? (hzb?.sampler || null) : null;
 
-        if (this.#lastHZBView !== hzbTextureView) {
-            this.#lastHZBView = hzbTextureView;
-            this.#lastHZBSampler = hzbSampler;
+        if (this.#lastHZBView !== effectiveHZBTextureView) {
+            this.#lastHZBView = effectiveHZBTextureView;
+            this.#lastHZBSampler = effectiveHZBSampler;
             if (this.#instanceBuffer?.allInputTilesBuffer && this.#instanceBuffer?.visibleTileIndicesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
                 this.#gpuCuller?.updateBindGroup(
                     this.#instanceBuffer.allInputTilesBuffer,
                     this.#instanceBuffer.visibleTileIndicesBuffer,
                     this.#instanceBuffer.indirectDrawBuffer,
-                    hzbTextureView,
-                    hzbSampler
+                    effectiveHZBTextureView,
+                    effectiveHZBSampler
                 );
             }
         }
@@ -919,7 +949,7 @@ export class Landscape extends Object3DContainer {
             lodDistancesArray,
             tanHalfFOV,
             lodMetricVal,
-            !!hzbTextureView,
+            this.#useHZB && !!effectiveHZBTextureView,
             mainPVMatrix
         );
 
