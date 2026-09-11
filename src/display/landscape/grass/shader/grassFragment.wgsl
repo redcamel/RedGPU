@@ -129,8 +129,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
 
     if (u_usePrefilterTexture) {
-        let skyN = normalize(mix(N, vec3<f32>(0.0, 1.0, 0.0), 0.40));
-        let iblColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, skyN, 0.0).rgb * (preExposure * systemUniforms.iblIntensity);
+        let iblColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0.0).rgb * (preExposure * systemUniforms.iblIntensity);
         totalIndirectLighting = albedo * iblColor * skyOcclusion;
     } else {
         let ambLight = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * preExposure);
