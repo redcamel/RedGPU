@@ -39,7 +39,7 @@ RedGPU.init(
 
         // 2. 태양광 (Directional Light)
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 45;
+        directionalLight.elevation = 38;
         directionalLight.azimuth = 55;
         directionalLight.lux = 90000;
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -286,6 +286,51 @@ RedGPU.init(
                     label: 'Shadow Steps'
                 });
                 folderTerrain.addBinding(landscape, 'receiveShadow', {label: 'Receive Shadow'});
+
+                // ☀️ 태양광 & 그림자 설정 (Directional Light & CSM Shadow)
+                const shadowFolder = pane.addFolder({title: '☀️ Sun & Shadow Settings', expanded: true});
+                shadowFolder.addBinding(directionalLight, 'elevation', {
+                    min: 5,
+                    max: 85,
+                    step: 1,
+                    label: 'Sun Elevation (°)'
+                });
+                shadowFolder.addBinding(directionalLight, 'azimuth', {
+                    min: 0,
+                    max: 360,
+                    step: 1,
+                    label: 'Sun Azimuth (°)'
+                });
+                shadowFolder.addBinding(directionalLight, 'lux', {
+                    min: 10000,
+                    max: 200000,
+                    step: 5000,
+                    label: 'Sun Lux'
+                });
+                shadowFolder.addBinding(directionalShadowManager, 'strength', {
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.05,
+                    label: 'Shadow Strength'
+                });
+                shadowFolder.addBinding(directionalShadowManager, 'bias', {
+                    min: 0.00001,
+                    max: 0.002,
+                    step: 0.00005,
+                    label: 'Shadow Bias'
+                });
+                shadowFolder.addBinding(directionalShadowManager, 'pcssLightSize', {
+                    min: 0.0,
+                    max: 5.0,
+                    step: 0.1,
+                    label: 'Shadow Softness'
+                });
+                shadowFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {
+                    min: 30,
+                    max: 300,
+                    step: 10,
+                    label: 'Max Shadow Dist (m)'
+                });
             }
         });
 
@@ -333,6 +378,7 @@ RedGPU.init(
 
             typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
             typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
+            typeFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
             typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Ground Blend'});
             typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05, label: 'Alpha Cutoff'});
             typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.5, step: 0.05, label: 'Exposure Boost'});
@@ -384,14 +430,15 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [10.0, 9.0, 10.0],
-                        maxScale: [15.0, 13.0, 15.0],
+                        minScale: [7.0, 4.5, 7.0],
+                        maxScale: [11.0, 6.5, 11.0],
                         groundBlendStrength: 0.55,
                         roughness: 0.55,
                         subsurfaceStrength: 1.40,
                         exposureBoost: 1,
+                        castShadow: true,
                         receiveShadow: true,
-                        bottomOffset: -0.45
+                        bottomOffset: -0.25
                     });
 
                     grassManager.addGrassType(baseClumpType);
@@ -506,14 +553,14 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [8.0, 11.0, 8.0],
-                        maxScale: [13.0, 17.0, 13.0],
+                        minScale: [3.0, 3.8, 3.0],
+                        maxScale: [4.8, 6.0, 4.8],
                         groundBlendStrength: 0.45,
                         roughness: 0.55,
                         subsurfaceStrength: 1.50,
                         exposureBoost: 1,
                         receiveShadow: true,
-                        bottomOffset: -0.55
+                        bottomOffset: -0.18
                     });
 
                     grassManager.addGrassType(grassType);
