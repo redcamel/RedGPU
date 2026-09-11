@@ -12,7 +12,7 @@ RedGPU.init(
         controller.x = 0;
         controller.y = 1050;
         controller.z = 0;
-        controller.moveSpeed = 1000;
+        controller.moveSpeed = 5000;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -23,6 +23,7 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
+        directionalLight.intensity = 90000
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
@@ -274,6 +275,21 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderDisplay.addBinding(baseColorProxy, 'baseColor');
             folderDisplay.addBinding(config, 'textureArraySize', {readonly: true});
 
+            // 3-1. Near Detail Hybrid Blending
+            const folderNearDetail = pane.addFolder({title: 'Near Detail (Hybrid)', expanded: true});
+            folderNearDetail.addBinding(landscape, 'nearDetailDistance', {
+                min: 0,
+                max: 500,
+                step: 5,
+                label: 'Near Dist (m)'
+            });
+            folderNearDetail.addBinding(landscape, 'nearDetailFade', {
+                min: 1,
+                max: 200,
+                step: 5,
+                label: 'Fade Range (m)'
+            });
+
             // 4. SplatMap Multi-Texturing Layers
             if (layers?.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
@@ -312,7 +328,27 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                             layer.uvScale = [v, v];
                         }
                     };
-                    subFolder.addBinding(layerScaleObj, 'uvScale', {min: 1, max: 200, step: 1});
+                    subFolder.addBinding(layerScaleObj, 'uvScale', {
+                        min: 1,
+                        max: 200,
+                        step: 1,
+                        label: 'uvScale (Macro)'
+                    });
+
+                    const nearObj = {
+                        get nearUVScaleMultiplier() {
+                            return layer.nearUVScaleMultiplier ?? 2.0;
+                        },
+                        set nearUVScaleMultiplier(v) {
+                            layer.nearUVScaleMultiplier = v;
+                        }
+                    };
+                    subFolder.addBinding(nearObj, 'nearUVScaleMultiplier', {
+                        min: 0.5,
+                        max: 10.0,
+                        step: 0.1,
+                        label: 'Near Multiplier'
+                    });
                 });
             }
 

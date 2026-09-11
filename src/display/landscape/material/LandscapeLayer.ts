@@ -15,6 +15,11 @@ export interface LandscapeLayerOptions {
 
     uvScale?: [number, number];
     uvOffset?: [number, number];
+    /**
+     * [KO] 발밑 근거리(nearDetailDistance)에서 원본 텍스처에 곱해질 마이크로 디테일 타일링 배율 (기본값: 2.0)
+     * [EN] Micro detail tiling scale multiplier applied to original textures near camera (Default: 2.0)
+     */
+    nearUVScaleMultiplier?: number;
     weightChannel?: LandscapeWeightMapChannel;
 
     roughness?: number;
@@ -41,6 +46,7 @@ export class LandscapeLayer {
 
     #uvScale: [number, number] = [20.0, 20.0];
     #uvOffset: [number, number] = [0.0, 0.0];
+    #nearUVScaleMultiplier: number = 2.0;
 
     #weightChannel: LandscapeWeightMapChannel = 'R';
     #weightChannelIndex: number = 0;
@@ -93,6 +99,10 @@ export class LandscapeLayer {
         if (actualOptions.uvOffset) {
             this.#uvOffset[0] = actualOptions.uvOffset[0];
             this.#uvOffset[1] = actualOptions.uvOffset[1];
+        }
+
+        if (actualOptions.nearUVScaleMultiplier !== undefined) {
+            this.#nearUVScaleMultiplier = actualOptions.nearUVScaleMultiplier;
         }
 
         if (actualOptions.weightChannel !== undefined) {
@@ -264,6 +274,22 @@ export class LandscapeLayer {
         if (this.#uvOffset[0] === val[0] && this.#uvOffset[1] === val[1]) return;
         this.#uvOffset[0] = val[0];
         this.#uvOffset[1] = val[1];
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 발밑 근거리(nearDetailDistance)에서 원본 텍스처에 곱해질 마이크로 디테일 타일링 배율 (기본값: 2.0)
+     * [EN] Micro detail tiling scale multiplier applied to original textures near camera (Default: 2.0)
+     */
+    get nearUVScaleMultiplier(): number {
+        return this.#nearUVScaleMultiplier;
+    }
+
+    set nearUVScaleMultiplier(val: number) {
+        const clamped = Math.max(0.1, val);
+        if (this.#nearUVScaleMultiplier === clamped) return;
+        this.#nearUVScaleMultiplier = clamped;
         this.dirty = true;
         this.onChange?.();
     }

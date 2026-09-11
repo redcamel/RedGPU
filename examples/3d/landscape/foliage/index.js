@@ -317,12 +317,52 @@ RedGPU.init(
                     step: 1000
                 });
 
-                const folderLandscape = pane.addFolder({title: 'Landscape', expanded: false});
+                const folderLandscape = pane.addFolder({title: 'Landscape', expanded: true});
+                folderLandscape.addBinding(landscape, 'nearDetailDistance', {
+                    min: 0,
+                    max: 500,
+                    step: 5,
+                    label: 'Near Dist (m)'
+                });
+                folderLandscape.addBinding(landscape, 'nearDetailFade', {
+                    min: 1,
+                    max: 200,
+                    step: 5,
+                    label: 'Fade Range (m)'
+                });
                 folderLandscape.addBinding(landscape, 'enableHeightmapShadow');
                 folderLandscape.addBinding(landscape, 'heightmapShadowSteps', {min: 4, max: 48, step: 1});
                 folderLandscape.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 8000, step: 100});
                 folderLandscape.addBinding(landscape, 'heightmapShadowSoftness', {min: 0.1, max: 20.0, step: 0.5});
                 folderLandscape.addBinding(landscape, 'receiveShadow');
+
+                const folderLayers = folderLandscape.addFolder({title: 'Layers (Micro Detail)', expanded: false});
+                layers.forEach(layer => {
+                    const sub = folderLayers.addFolder({title: layer.name, expanded: false});
+                    const scaleObj = {
+                        get uvScale() {
+                            return layer.uvScale[0];
+                        },
+                        set uvScale(v) {
+                            layer.uvScale = [v, v];
+                        }
+                    };
+                    sub.addBinding(scaleObj, 'uvScale', {min: 1, max: 200, step: 1, label: 'uvScale (Macro)'});
+                    const nearObj = {
+                        get nearUVScaleMultiplier() {
+                            return layer.nearUVScaleMultiplier ?? 2.0;
+                        },
+                        set nearUVScaleMultiplier(v) {
+                            layer.nearUVScaleMultiplier = v;
+                        }
+                    };
+                    sub.addBinding(nearObj, 'nearUVScaleMultiplier', {
+                        min: 0.5,
+                        max: 10.0,
+                        step: 0.1,
+                        label: 'Near Multiplier'
+                    });
+                });
 
                 const folderFoliage = pane.addFolder({title: 'foliageManager', expanded: true});
 

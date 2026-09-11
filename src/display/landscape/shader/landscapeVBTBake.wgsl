@@ -12,7 +12,7 @@ struct LandscapeLayerParams {
     enabled: f32,
     aoIntensity: f32,
     weightChannelIndex: f32,
-    pad0: f32,
+    nearUVScaleMultiplier: f32,
     pad1: f32,
 };
 

@@ -33,7 +33,7 @@ struct LandscapeLayerParams {
     enabled: f32,
     aoIntensity: f32,
     weightChannelIndex: f32,
-    pad0: f32,
+    nearUVScaleMultiplier: f32,
     pad1: f32,
 };
 
@@ -151,9 +151,11 @@ fn computeNearFieldLandscapeLayers(
         if (layerW <= 0.0001) { continue; }
 
         let layerIdx = i32(i);
-        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
-        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
-        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
+        let nearMultiplier = select(1.0, layerParams.nearUVScaleMultiplier, layerParams.nearUVScaleMultiplier > 0.0);
+        let nearScale = layerParams.uvScale * nearMultiplier;
+        let layerUV = worldTileUV * nearScale + layerParams.uvOffset;
+        let ddxLayerUV = ddxWorldTileUV * nearScale;
+        let ddyLayerUV = ddyWorldTileUV * nearScale;
 
         let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
         let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
@@ -545,35 +547,78 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-
-    // -------------------------------------------------------------
-    // 1. 중원거리 VBT (Virtual Blend Texture / RVT) 기본 샘플링 (1회 샘플링으로 빠른 직행)
-    // -------------------------------------------------------------
-    let vbtBaseColor = textureSample(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV);
-    let vbtNormalRaw = textureSample(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV).rgb;
-    let vbtORM = textureSample(vbtORMAtlasTexture, baseColorTextureSampler, globalUV);
-
     let baseNormal = getBaseNormal(globalUV);
-    let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
-    let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
-    var N = select(baseNormal, vbtN, isVBTNormalValid);
+    let baseNdotV = abs(dot(baseNormal, V));
 
-    let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
-    var albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
-    if (uniforms.activeLayerCount > 0u && dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001) {
-        albedo = vbtBaseColor.rgb;
-    }
-    var roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
-    var ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
-
-    // -------------------------------------------------------------
-    // 2. 근거리(Near-field) 실시간 레이어 블렌딩 & 크로스페이드 (발밑 고주파 디테일 복원)
-    // -------------------------------------------------------------
     let nearDist = uniforms.nearDetailDistance;
     let nearFade = uniforms.nearDetailFade;
     let maxNearDist = nearDist + nearFade;
 
-    if (uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist) {
+    // 시선 스침각(Grazing Angle) 및 거리 기준 근거리 디테일 유효성 판정
+    // baseNdotV <= 0.08 인 비스듬한 면은 원근 압축으로 인해 디테일이 보이지 않으므로 VBT 캐시로 직행
+    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist && baseNdotV > 0.08;
+
+    var albedo = uniforms.color.rgb;
+    var N = baseNormal;
+    var roughnessFactor = 0.85;
+    var ambientOcclusion = 1.0;
+
+    if (!isDetailActive) {
+        // -------------------------------------------------------------
+        // [Zone 3. 중원거리 or 극단적 스침각]: VBT 캐시만 1회 단독 샘플링 (8레이어 연산 100% 스킵!)
+        // -------------------------------------------------------------
+        let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+        let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+
+        let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
+        let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
+        N = select(baseNormal, vbtN, isVBTNormalValid);
+
+        let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
+        albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
+        roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+        ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+    } else if (rawViewDist <= nearDist) {
+        // -------------------------------------------------------------
+        // [Zone 1. 완전 근거리 발밑]: 실시간 8레이어만 단독 샘플링 (VBT 3종 샘플링 100% 스킵! 이중 페치 완전 제거!)
+        // -------------------------------------------------------------
+        let nearDetail = computeNearFieldLandscapeLayers(
+            globalUV,
+            worldTileUV,
+            ddxGlobalUV,
+            ddyGlobalUV,
+            ddxWorldTileUV,
+            ddyWorldTileUV,
+            baseNormal
+        );
+
+        if (nearDetail.isValid) {
+            albedo = nearDetail.albedo;
+            N = nearDetail.normal;
+            roughnessFactor = nearDetail.roughness;
+            ambientOcclusion = nearDetail.ao;
+        } else {
+            let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+            albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, vbtBaseColor.a > 0.001);
+        }
+    } else {
+        // -------------------------------------------------------------
+        // [Zone 2. 전이 구간 (nearDist ~ maxNearDist)]: VBT와 실시간 레이어 둘 다 읽어 smoothstep 크로스페이드
+        // -------------------------------------------------------------
+        let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+        let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+
+        let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
+        let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
+        let farN = select(baseNormal, vbtN, isVBTNormalValid);
+
+        let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
+        let farAlbedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
+        let farRoughness = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+        let farAO = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+
         let nearDetail = computeNearFieldLandscapeLayers(
             globalUV,
             worldTileUV,
@@ -588,10 +633,15 @@ fn main(inputData: InputData) -> OutputFragment {
             let blendFactor = clamp((maxNearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
-            albedo = mix(albedo, nearDetail.albedo, smoothBlend);
-            N = normalize(mix(N, nearDetail.normal, smoothBlend));
-            roughnessFactor = mix(roughnessFactor, nearDetail.roughness, smoothBlend);
-            ambientOcclusion = mix(ambientOcclusion, nearDetail.ao, smoothBlend);
+            albedo = mix(farAlbedo, nearDetail.albedo, smoothBlend);
+            N = normalize(mix(farN, nearDetail.normal, smoothBlend));
+            roughnessFactor = mix(farRoughness, nearDetail.roughness, smoothBlend);
+            ambientOcclusion = mix(farAO, nearDetail.ao, smoothBlend);
+        } else {
+            albedo = farAlbedo;
+            N = farN;
+            roughnessFactor = farRoughness;
+            ambientOcclusion = farAO;
         }
     }
 
