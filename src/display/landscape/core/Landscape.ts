@@ -749,16 +749,40 @@ export class Landscape extends Object3DContainer {
                     const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
 
                     if (indirectDrawBuffer) {
-                        const currentCascade = view3D?.currentCascadeIndex ?? 0;
+                        const currentCascade = view3D?.currentCascadeIndex;
+                        let startLOD = 0;
+                        let endLOD = maxLODLevel;
 
-                        let targetMaxLOD = 0;
-                        if (currentCascade === 0) {
-                            targetMaxLOD = Math.min(2, maxLODLevel);
-                        } else if (currentCascade === 1) {
-                            targetMaxLOD = Math.min(3, maxLODLevel);
+                        if (currentCascade !== undefined) {
+                            switch (currentCascade) {
+                                case 0:
+                                    // Cascade 0 (초근거리 0~15m): 발밑 정밀 섀도우 (LOD 0, 1)
+                                    startLOD = 0;
+                                    endLOD = Math.min(2, maxLODLevel);
+                                    break;
+                                case 1:
+                                    // Cascade 1 (근중거리 15~50m): 근중거리 섀도우 (LOD 0, 1, 2)
+                                    startLOD = 0;
+                                    endLOD = Math.min(3, maxLODLevel);
+                                    break;
+                                case 2:
+                                    // Cascade 2 (중원거리 50~120m): 초고밀도 LOD 0(타일당 6.6만 버텍스) 배제하여 버텍스 60% 절감
+                                    startLOD = 1;
+                                    endLOD = Math.min(4, maxLODLevel);
+                                    break;
+                                case 3:
+                                    // Cascade 3 (원거리 120~200m+): 불필요한 근거리 LOD 0, 1 배제, 원거리 산맥 실루엣 초경량 보존
+                                    startLOD = 2;
+                                    endLOD = maxLODLevel;
+                                    break;
+                                default:
+                                    startLOD = 0;
+                                    endLOD = maxLODLevel;
+                                    break;
+                            }
                         }
 
-                        for (let lod = 0; lod < targetMaxLOD; lod++) {
+                        for (let lod = startLOD; lod < endLOD; lod++) {
                             const offset = lod * 20;
                             renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
                         }
