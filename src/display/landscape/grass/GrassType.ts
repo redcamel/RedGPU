@@ -60,9 +60,6 @@ export class GrassType {
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
     #baseColorTexture: BitmapTexture;
-    #normalTexture: BitmapTexture | null = null;
-    #ormTexture: BitmapTexture | null = null;
-    #normalScale: number = 1.0;
     #aoIntensity: number = 1.0;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
@@ -117,24 +114,7 @@ export class GrassType {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        const resolvedNormal = options.normalTexture ?? mat?.normalTexture;
-        if (typeof resolvedNormal === 'string') {
-            this.#normalTexture = new BitmapTexture(redGPUContext, resolvedNormal);
-        } else if (resolvedNormal) {
-            this.#normalTexture = resolvedNormal;
-        }
-        if (options.normalScale !== undefined) {
-            this.#normalScale = options.normalScale;
-        } else if (mat?.normalScale !== undefined) {
-            this.#normalScale = mat.normalScale;
-        }
-
-        const resolvedORM = options.ormTexture ?? options.metallicRoughnessTexture ?? options.roughnessTexture ?? mat?.packedORMTexture ?? mat?.metallicRoughnessTexture ?? mat?.roughnessTexture;
-        if (typeof resolvedORM === 'string') {
-            this.#ormTexture = new BitmapTexture(redGPUContext, resolvedORM);
-        } else if (resolvedORM) {
-            this.#ormTexture = resolvedORM;
-        }
+        // Grass does not use normal or ORM textures (Pure ALU SSS + Upward Normal)
         if (options.aoIntensity !== undefined) {
             this.#aoIntensity = options.aoIntensity;
         } else if (mat?.occlusionStrength !== undefined) {
@@ -243,29 +223,27 @@ export class GrassType {
     }
 
     get normalTexture(): BitmapTexture | null {
-        return this.#normalTexture;
+        return null;
     }
 
-    set normalTexture(v: BitmapTexture | null) {
-        this.#normalTexture = v;
-        this.#notifyChange();
+    set normalTexture(_v: BitmapTexture | null) {
+        // no-op (Grass uses pure ALU Upward Normal)
     }
 
     get ormTexture(): BitmapTexture | null {
-        return this.#ormTexture;
+        return null;
     }
 
-    set ormTexture(v: BitmapTexture | null) {
-        this.#ormTexture = v;
-        this.#notifyChange();
+    set ormTexture(_v: BitmapTexture | null) {
+        // no-op (Grass uses pure ALU SSS & Contact AO)
     }
 
     get normalScale(): number {
-        return this.#normalScale;
+        return 1.0;
     }
 
-    set normalScale(v: number) {
-        this.#normalScale = v;
+    set normalScale(_v: number) {
+        // no-op
     }
 
     get aoIntensity(): number {

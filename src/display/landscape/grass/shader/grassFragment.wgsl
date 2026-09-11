@@ -18,14 +18,10 @@ struct GrassMaterialUniforms {
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceDistortion: f32,
-    hasNormalTexture: u32,
-    hasOrmTexture: u32,
-    normalScale: f32,
     aoIntensity: f32,
     receiveShadow: u32,
     shadowStrength: f32,
     _pad0: f32,
-    _pad1: f32,
 };
 
 struct VertexOutput {
@@ -43,10 +39,6 @@ struct VertexOutput {
 @group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
 @group(2) @binding(1) var baseColorSampler: sampler;
 @group(2) @binding(2) var<uniform> materialUniforms: GrassMaterialUniforms;
-@group(2) @binding(3) var normalTexture: texture_2d<f32>;
-@group(2) @binding(4) var normalSampler: sampler;
-@group(2) @binding(5) var ormTexture: texture_2d<f32>;
-@group(2) @binding(6) var ormSampler: sampler;
 
 @fragment
 fn main(input: VertexOutput) -> OutputFragment {

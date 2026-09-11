@@ -52,8 +52,6 @@ export class LandscapeGrassManager {
         bindGroup: GPUBindGroup | null;
         instanceBindGroup: GPUBindGroup | null;
         cachedColorTexView: GPUTextureView | null;
-        cachedNormalTexView: GPUTextureView | null;
-        cachedOrmTexView: GPUTextureView | null;
     }> = new Map();
 
     #candidateKeys: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
@@ -224,7 +222,7 @@ export class LandscapeGrassManager {
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
-            const cpuBuffer = new Float32Array(20);
+            const cpuBuffer = new Float32Array(16);
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
 
             const uniformBuffer = gpuDevice.createBuffer({
@@ -239,9 +237,7 @@ export class LandscapeGrassManager {
                 uintBuffer,
                 bindGroup: null,
                 instanceBindGroup: null,
-                cachedColorTexView: null,
-                cachedNormalTexView: null,
-                cachedOrmTexView: null
+                cachedColorTexView: null
             });
         }
 
@@ -349,15 +345,10 @@ export class LandscapeGrassManager {
             mf[10] = ssc[2];
             mf[11] = type.subsurfaceDistortion;
 
-            mu[12] = type.normalTexture?.gpuTexture ? 1 : 0;
-            mu[13] = type.ormTexture?.gpuTexture ? 1 : 0;
-            mf[14] = type.normalScale;
-            mf[15] = type.aoIntensity;
-
-            mu[16] = type.receiveShadow ? 1 : 0;
-            mf[17] = type.shadowStrength;
-            mf[18] = 0;
-            mf[19] = 0;
+            mf[12] = type.aoIntensity;
+            mu[13] = type.receiveShadow ? 1 : 0;
+            mf[14] = type.shadowStrength;
+            mf[15] = 0;
 
             gpuDevice.queue.writeBuffer(
                 res.uniformBuffer,
@@ -477,22 +468,7 @@ export class LandscapeGrassManager {
                 ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
                 : null) || fallbackTex;
 
-            const normalRawTex = type.normalTexture?.gpuTexture;
-            const normalTexView = (normalRawTex
-                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.normalTexture) || normalRawTex.createView())
-                : null) || fallbackTex;
-
-            const ormRawTex = type.ormTexture?.gpuTexture;
-            const ormTexView = (ormRawTex
-                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.ormTexture) || ormRawTex.createView())
-                : null) || fallbackTex;
-
-            if (
-                !res.bindGroup ||
-                res.cachedColorTexView !== colorTexView ||
-                res.cachedNormalTexView !== normalTexView ||
-                res.cachedOrmTexView !== ormTexView
-            ) {
+            if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
                 res.bindGroup = gpuDevice.createBindGroup({
                     label: `Grass_MaterialBindGroup_${type.name}`,
                     layout: this.#pipelineBindGroupLayout2,
@@ -500,15 +476,9 @@ export class LandscapeGrassManager {
                         {binding: 0, resource: colorTexView},
                         {binding: 1, resource: basicSampler},
                         {binding: 2, resource: {buffer: res.uniformBuffer}},
-                        {binding: 3, resource: normalTexView},
-                        {binding: 4, resource: basicSampler},
-                        {binding: 5, resource: ormTexView},
-                        {binding: 6, resource: basicSampler},
                     ]
                 });
                 res.cachedColorTexView = colorTexView;
-                res.cachedNormalTexView = normalTexView;
-                res.cachedOrmTexView = ormTexView;
             }
 
             if (!res.instanceBindGroup || !res.bindGroup) continue;
@@ -586,10 +556,6 @@ export class LandscapeGrassManager {
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
                 {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                 {binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
-                {binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 5, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 6, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
             ]
         });
 
