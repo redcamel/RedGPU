@@ -39,11 +39,20 @@ struct LandscapeLayerParams {
 
 struct MaterialUniforms {
     activeLayerCount: u32,
-    pad0: u32,
-    pad1: u32,
+    nearDetailDistance: f32,
+    nearDetailFade: f32,
     pad2: u32,
     color: vec4<f32>,
     layerParams: array<LandscapeLayerParams, 8>,
+};
+
+struct NearDetailLayerResult {
+    albedo: vec3<f32>,
+    normal: vec3<f32>,
+    roughness: f32,
+    metallic: f32,
+    ao: f32,
+    isValid: bool,
 };
 
 struct LandscapeUniforms {
@@ -91,6 +100,123 @@ struct LandscapeUniforms {
 fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
+}
+
+fn computeNearFieldLandscapeLayers(
+    globalUV: vec2<f32>,
+    worldTileUV: vec2<f32>,
+    ddxGlobalUV: vec2<f32>,
+    ddyGlobalUV: vec2<f32>,
+    ddxWorldTileUV: vec2<f32>,
+    ddyWorldTileUV: vec2<f32>,
+    baseNormal: vec3<f32>
+) -> NearDetailLayerResult {
+    var result: NearDetailLayerResult;
+    result.albedo = vec3<f32>(0.0);
+    result.normal = baseNormal;
+    result.roughness = 0.85;
+    result.metallic = 0.0;
+    result.ao = 1.0;
+    result.isValid = false;
+
+    let activeLayerCount = uniforms.activeLayerCount;
+    if (activeLayerCount == 0u) {
+        return result;
+    }
+
+    let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
+
+    var totalLayerWeight = 0.0;
+    var blendedAlbedo = vec3<f32>(0.0);
+    var blendedNormalTangent = vec3<f32>(0.0);
+    var blendedRoughness = 0.0;
+    var blendedMetallic = 0.0;
+    var blendedAO = 0.0;
+
+    for (var i = 0u; i < activeLayerCount; i = i + 1u) {
+        let layerParams = uniforms.layerParams[i];
+        if (layerParams.enabled <= 0.5) { continue; }
+
+        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
+        var weightVal = weightMapSample.r;
+        if (chIdx == 1u) { weightVal = weightMapSample.g; }
+        else if (chIdx == 2u) { weightVal = weightMapSample.b; }
+        else if (chIdx == 3u) {
+            let isAlphaFull = weightMapSample.a >= 0.99;
+            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+            weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
+        }
+        let layerW = clamp(weightVal, 0.0, 1.0);
+
+        if (layerW <= 0.0001) { continue; }
+
+        let layerIdx = i32(i);
+        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
+        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
+        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
+
+        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+        let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
+        let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
+        let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+
+        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
+        let layerRoughness = layerParams.roughness * layerORMSample.g;
+        let layerMetallic = layerParams.metallic * layerORMSample.b;
+        let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
+        let layerAO = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
+
+        blendedAlbedo += layerAlbedo * layerW;
+        blendedNormalTangent += layerNormalSample * layerW;
+        blendedRoughness += layerRoughness * layerW;
+        blendedMetallic += layerMetallic * layerW;
+        blendedAO += layerAO * layerW;
+
+        totalLayerWeight += layerW;
+    }
+
+    if (totalLayerWeight > 0.0001) {
+        let invW = 1.0 / totalLayerWeight;
+        result.albedo = blendedAlbedo * invW;
+        result.roughness = blendedRoughness * invW;
+        result.metallic = blendedMetallic * invW;
+        result.ao = blendedAO * invW;
+
+        let layerBlendNormal = normalize(blendedNormalTangent * invW);
+        if (length(layerBlendNormal.xy) > 0.001) {
+            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseNormal * baseNormal.x);
+            let tangentZ = normalize(cross(baseNormal, tangentX));
+            let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseNormal * layerBlendNormal.z);
+            result.normal = normalize(perturbedWorldN);
+        }
+        result.isValid = true;
+    } else {
+        // 스플랫맵 가중치 합이 0인 영역에서는 0번 기본 레이어로 처리
+        let layer0Params = uniforms.layerParams[0];
+        let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
+        let ddx0UV = ddxWorldTileUV * layer0Params.uvScale;
+        let ddy0UV = ddyWorldTileUV * layer0Params.uvScale;
+        let layer0Albedo = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * layer0Params.tintColor.rgb;
+        let layer0ORM = textureSampleGrad(layerORMArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV);
+        let layer0NormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * 2.0 - vec3<f32>(1.0);
+        let layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));
+
+        result.albedo = layer0Albedo;
+        result.roughness = layer0Params.roughness * layer0ORM.g;
+        result.metallic = layer0Params.metallic * layer0ORM.b;
+        let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
+        result.ao = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
+
+        if (length(layer0Normal.xy) > 0.001) {
+            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseNormal * baseNormal.x);
+            let tangentZ = normalize(cross(baseNormal, tangentX));
+            let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + baseNormal * layer0Normal.z);
+            result.normal = normalize(perturbedWorldN);
+        }
+        result.isValid = true;
+    }
+
+    return result;
 }
 
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
@@ -409,9 +535,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let input_vertexPosition = inputData.vertexPosition;
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let globalUV = inputData.uv1;
+    let worldTileUV = inputData.uv;
+
+    // Uniform Control Flow에서 미분 선계산 (WGSL 제어 흐름 규격 완벽 준수)
+    let ddxGlobalUV = dpdx(globalUV);
+    let ddyGlobalUV = dpdy(globalUV);
+    let ddxWorldTileUV = dpdx(worldTileUV);
+    let ddyWorldTileUV = dpdy(worldTileUV);
+
+    let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
+    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
 
     // -------------------------------------------------------------
-    // VBT (Virtual Blend Texture / RVT) 직접 샘플링 (1위 병목 완전 해소)
+    // 1. 중원거리 VBT (Virtual Blend Texture / RVT) 기본 샘플링 (1회 샘플링으로 빠른 직행)
     // -------------------------------------------------------------
     let vbtBaseColor = textureSample(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV);
     let vbtNormalRaw = textureSample(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV).rgb;
@@ -420,18 +556,44 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseNormal = getBaseNormal(globalUV);
     let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
     let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
-    let N = select(baseNormal, vbtN, isVBTNormalValid);
+    var N = select(baseNormal, vbtN, isVBTNormalValid);
 
     let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
     var albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
     if (uniforms.activeLayerCount > 0u && dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001) {
         albedo = vbtBaseColor.rgb;
     }
-    let roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
-    let ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+    var roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+    var ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
 
-    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-    let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
+    // -------------------------------------------------------------
+    // 2. 근거리(Near-field) 실시간 레이어 블렌딩 & 크로스페이드 (발밑 고주파 디테일 복원)
+    // -------------------------------------------------------------
+    let nearDist = uniforms.nearDetailDistance;
+    let nearFade = uniforms.nearDetailFade;
+    let maxNearDist = nearDist + nearFade;
+
+    if (uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist) {
+        let nearDetail = computeNearFieldLandscapeLayers(
+            globalUV,
+            worldTileUV,
+            ddxGlobalUV,
+            ddyGlobalUV,
+            ddxWorldTileUV,
+            ddyWorldTileUV,
+            baseNormal
+        );
+
+        if (nearDetail.isValid) {
+            let blendFactor = clamp((maxNearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
+            let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
+
+            albedo = mix(albedo, nearDetail.albedo, smoothBlend);
+            N = normalize(mix(N, nearDetail.normal, smoothBlend));
+            roughnessFactor = mix(roughnessFactor, nearDetail.roughness, smoothBlend);
+            ambientOcclusion = mix(ambientOcclusion, nearDetail.ao, smoothBlend);
+        }
+    }
 
     if (inputData.instanceColor.a > 0.0) {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);

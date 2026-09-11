@@ -39,6 +39,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #weightMapArrayView: GPUTextureView | null = null;
 
     #textureArrayVersion: number = 0;
+    #nearDetailDistance: number = 40.0;
+    #nearDetailFade: number = 20.0;
 
     #uniformByteLength: number = 0;
     #uniformFloatArray: Float32Array;
@@ -79,6 +81,32 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     get textureArraySize(): number {
         return this.#textureArraySize;
+    }
+
+    /**
+     * [KO] 발밑 고해상도 실시간 레이어 블렌딩이 100% 적용되는 카메라 반경 (미터 단위)
+     * [EN] Camera radius where high-resolution real-time layer blending is applied 100% (in meters)
+     */
+    get nearDetailDistance(): number {
+        return this.#nearDetailDistance;
+    }
+
+    set nearDetailDistance(val: number) {
+        this.#nearDetailDistance = Math.max(0, val);
+        this.updateUniformsData();
+    }
+
+    /**
+     * [KO] 실시간 레이어에서 VBT 캐시로 점진적 크로스페이드되는 전이 구간 (미터 단위)
+     * [EN] Transition fade range from real-time layer to VBT cache (in meters)
+     */
+    get nearDetailFade(): number {
+        return this.#nearDetailFade;
+    }
+
+    set nearDetailFade(val: number) {
+        this.#nearDetailFade = Math.max(0.1, val);
+        this.updateUniformsData();
     }
 
     #onRebakeVBTRequested?: () => void;
@@ -191,8 +219,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         const activeCount = this.#layers.length;
         uintBuf[0] = activeCount;
-        uintBuf[1] = 0;
-        uintBuf[2] = 0;
+        floatBuf[1] = this.#nearDetailDistance;
+        floatBuf[2] = this.#nearDetailFade;
         uintBuf[3] = 0;
 
         const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : LandscapeMaterial.#DEFAULT_BASE_COLOR;

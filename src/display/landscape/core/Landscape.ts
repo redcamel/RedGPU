@@ -415,6 +415,10 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get material(): LandscapeMaterial {
+        return this.#material;
+    }
+
     set material(val: LandscapeMaterial) {
         if (this.#material !== val) {
             this.#material = val;
@@ -426,6 +430,30 @@ export class Landscape extends Object3DContainer {
             }
             this.#clearPipelineCaches();
         }
+    }
+
+    /**
+     * [KO] 발밑 고해상도 실시간 레이어 블렌딩이 100% 적용되는 카메라 반경 (미터 단위, 기본값: 40m)
+     * [EN] Camera radius where high-resolution real-time layer blending is applied 100% (in meters, default: 40m)
+     */
+    get nearDetailDistance(): number {
+        return this.#material.nearDetailDistance;
+    }
+
+    set nearDetailDistance(val: number) {
+        this.#material.nearDetailDistance = val;
+    }
+
+    /**
+     * [KO] 실시간 레이어에서 VBT 캐시로 점진적 크로스페이드되는 전이 구간 (미터 단위, 기본값: 20m)
+     * [EN] Transition fade range from real-time layer to VBT cache (in meters, default: 20m)
+     */
+    get nearDetailFade(): number {
+        return this.#material.nearDetailFade;
+    }
+
+    set nearDetailFade(val: number) {
+        this.#material.nearDetailFade = val;
     }
 
     get globalHeightmapUrl(): string {
