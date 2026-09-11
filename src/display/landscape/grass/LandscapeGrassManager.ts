@@ -13,6 +13,36 @@ import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
 
+/**
+ * @internal
+ * 0-GC In-place QuickSort for candidate indices sorted by distance ascending.
+ * Eliminates TypedArray.prototype.subarray allocation and arrow closure generation.
+ */
+function sortCandidateIndicesByDistance(
+    indices: Int32Array,
+    dists: Float32Array,
+    left: number,
+    right: number
+): void {
+    if (left >= right) return;
+    const pivotVal = dists[indices[(left + right) >> 1]];
+    let i = left;
+    let j = right;
+    while (i <= j) {
+        while (dists[indices[i]] < pivotVal) i++;
+        while (dists[indices[j]] > pivotVal) j--;
+        if (i <= j) {
+            const temp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = temp;
+            i++;
+            j--;
+        }
+    }
+    if (left < j) sortCandidateIndicesByDistance(indices, dists, left, j);
+    if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
+}
+
 export class LandscapeGrassManager {
     static readonly CELL_SIZE: number = 16.0;
     static readonly DEFAULT_STREAMING_RADIUS: number = 120.0;
@@ -277,7 +307,7 @@ export class LandscapeGrassManager {
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
-            const cpuBuffer = new Float32Array(16);
+            const cpuBuffer = new Float32Array(12);
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
 
             const uniformBuffer = gpuDevice.createBuffer({
@@ -286,10 +316,10 @@ export class LandscapeGrassManager {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
-            const grassUniformCPUBuffer = new Float32Array(8);
+            const grassUniformCPUBuffer = new Float32Array(4);
             const grassUniformGPUBuffer = gpuDevice.createBuffer({
                 label: `Grass_UniformBuffer_${grassType.name}`,
-                size: 32,
+                size: grassUniformCPUBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
@@ -357,13 +387,12 @@ export class LandscapeGrassManager {
             }
         }
 
-        this.#updateCellStreaming(camPos[0], camPos[1], camPos[2], frustumPlanesF32);
+        this.#updateCellStreaming(camPos[0], camPos[2]);
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
         const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
 
         for (const type of this.#grassTypes) {
@@ -372,13 +401,9 @@ export class LandscapeGrassManager {
 
             const gf = res.grassUniformCPUBuffer;
             gf[0] = type.cullingDistance;
-            gf[1] = type.fadeStartDistance;
-            gf[2] = type.shrinkStartDistance;
-            gf[3] = type.bottomOffset;
-            gf[4] = type.meshHeight;
-            gf[5] = type.groundBlendStrength;
-            gf[6] = type.minY;
-            gf[7] = 0.0;
+            gf[1] = type.shrinkStartDistance;
+            gf[2] = type.meshHeight;
+            gf[3] = type.minY;
 
             gpuDevice.queue.writeBuffer(
                 res.grassUniformGPUBuffer,
@@ -391,26 +416,22 @@ export class LandscapeGrassManager {
             const mf = res.cpuBuffer;
             const mu = res.uintBuffer;
 
-            mf[0] = worldSizeX;
-            mf[1] = worldSizeZ;
-            mf[2] = type.groundBlendStrength;
-            mf[3] = type.alphaCutoff;
+            mf[0] = type.groundBlendStrength;
+            mf[1] = type.alphaCutoff;
             const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.loadedTileCount > 0);
-            mu[4] = hasValidVbt ? 1 : 0;
-            mf[5] = type.roughness;
-            mf[6] = type.subsurfaceStrength;
-            mf[7] = type.exposureBoost;
+            mu[2] = hasValidVbt ? 1 : 0;
+            mf[3] = type.exposureBoost;
 
             const ssc = type.subsurfaceColor;
-            mf[8] = ssc[0];
-            mf[9] = ssc[1];
-            mf[10] = ssc[2];
-            mf[11] = type.subsurfaceDistortion;
+            mf[4] = ssc[0];
+            mf[5] = ssc[1];
+            mf[6] = ssc[2];
+            mf[7] = type.subsurfaceDistortion;
 
-            mf[12] = type.aoIntensity;
-            mu[13] = type.receiveShadow ? 1 : 0;
-            mf[14] = type.shadowStrength;
-            mf[15] = 0;
+            mf[8] = type.subsurfaceStrength;
+            mf[9] = type.roughness;
+            mf[10] = type.shadowStrength;
+            mu[11] = type.receiveShadow ? 1 : 0;
 
             gpuDevice.queue.writeBuffer(
                 res.uniformBuffer,
@@ -479,7 +500,7 @@ export class LandscapeGrassManager {
         this.#lastPopulatePos[0] = centerPos[0];
         this.#lastPopulatePos[1] = centerPos[1];
         this.#lastPopulatePos[2] = centerPos[2];
-        this.#updateCellStreaming(centerPos[0], centerPos[1], centerPos[2], null, true);
+        this.#updateCellStreaming(centerPos[0], centerPos[2], true);
     }
 
     render(view: any, passEncoder: GPURenderPassEncoder): void {
@@ -723,9 +744,7 @@ export class LandscapeGrassManager {
 
     #updateCellStreaming(
         camX: number,
-        camY: number,
         camZ: number,
-        frustumPlanes: Float32Array | null = null,
         forceRebuild: boolean = false
     ): void {
         const cellSize = LandscapeGrassManager.CELL_SIZE;
@@ -799,11 +818,9 @@ export class LandscapeGrassManager {
                 }
             }
 
-            // 카메라 거리 기준 정렬 (Near-to-Far)
+            // 카메라 거리 기준 정렬 (Near-to-Far, 0-GC In-place QuickSort)
             if (candidateCount > 1) {
-                const dists = this.#candidateDistancesSq;
-                const indices = this.#candidateIndices;
-                indices.subarray(0, candidateCount).sort((a, b) => dists[a] - dists[b]);
+                sortCandidateIndicesByDistance(this.#candidateIndices, this.#candidateDistancesSq, 0, candidateCount - 1);
             }
 
             // 범위 벗어난 셀 퇴출

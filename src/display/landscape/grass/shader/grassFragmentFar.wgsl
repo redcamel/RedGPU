@@ -1,9 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.PI;
-#redgpu_include math.INV_PI;
-#redgpu_include math.EPSILON;
 
 /**
  * 🌿 RedGPU Landscape Grass Far-LOD Fragment Shader (Phase 2 - LOD 1, 2+)
@@ -16,20 +13,16 @@
  */
 
 struct GrassMaterialUniforms {
-    worldSizeX: f32,
-    worldSizeZ: f32,
     groundBlendStrength: f32,
     alphaCutoff: f32,
     hasGroundTexture: u32,
-    roughness: f32,
-    subsurfaceStrength: f32,
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceDistortion: f32,
-    aoIntensity: f32,
-    receiveShadow: u32,
+    subsurfaceStrength: f32,
+    roughness: f32,
     shadowStrength: f32,
-    _pad0: f32,
+    receiveShadow: u32,
 };
 
 struct VertexOutput {
@@ -78,11 +71,10 @@ fn main(input: VertexOutput) -> OutputFragment {
         albedo = mix(albedo, input.groundColor, blendFactor);
     }
 
-    // 🌿 3. 법선 및 카메라 벡터 (Near와 동일한 하늘 방향 블렌딩으로 톤/광택 완벽 일치)
+    // 🌿 3. 법선 벡터 (Near와 동일한 하늘 방향 블렌딩으로 톤/광택 완벽 일치)
     let upVec = vec3<f32>(0.0, 1.0, 0.0);
     let upwardBlend = mix(0.55, 0.85, input.heightRatio);
     let N = normalize(mix(input.normal, upVec, upwardBlend));
-    let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
     let preExposure = systemUniforms.preExposure;
 
     let subsurfaceStrength = materialUniforms.subsurfaceStrength;

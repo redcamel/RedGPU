@@ -56,7 +56,6 @@ export interface GrassTypeOptions {
 }
 
 export class GrassType {
-    #redGPUContext: RedGPUContext;
     #mesh?: Mesh;
     #name: string;
     #geometry: Geometry | Primitive;
@@ -94,8 +93,6 @@ export class GrassType {
     #onChanged: (() => void) | null = null;
 
     constructor(redGPUContext: RedGPUContext, options: GrassTypeOptions) {
-        this.#redGPUContext = redGPUContext;
-
         if (!options.lods || options.lods.length === 0) {
             throw new Error(`[GrassType] 'lods' array must be provided with at least one LOD entry!`);
         }

@@ -1,27 +1,20 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.PI;
-#redgpu_include math.INV_PI;
-#redgpu_include math.EPSILON;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 
 struct GrassMaterialUniforms {
-    worldSizeX: f32,
-    worldSizeZ: f32,
     groundBlendStrength: f32,
     alphaCutoff: f32,
     hasGroundTexture: u32,
-    roughness: f32,
-    subsurfaceStrength: f32,
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceDistortion: f32,
-    aoIntensity: f32,
-    receiveShadow: u32,
+    subsurfaceStrength: f32,
+    roughness: f32,
     shadowStrength: f32,
-    _pad0: f32,
+    receiveShadow: u32,
 };
 
 struct VertexOutput {
@@ -71,7 +64,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     let N = normalize(mix(input.normal, upVec, upwardBlend));
 
     let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
-    let NdotV = max(abs(dot(N, V)), 0.001);
 
     let roughness = clamp(materialUniforms.roughness, 0.20, 1.0);
     let subsurfaceStrength = clamp(materialUniforms.subsurfaceStrength, 0.0, 3.0);

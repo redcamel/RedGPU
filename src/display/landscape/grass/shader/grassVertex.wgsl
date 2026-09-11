@@ -13,13 +13,9 @@ struct GrassInstance {
 
 struct GrassUniforms {
     cullingDistance: f32,
-    fadeStartDistance: f32,
     shrinkStartDistance: f32,
-    bottomOffset: f32,
     meshHeight: f32,
-    groundBlendStrength: f32,
     minY: f32,
-    _pad0: f32,
 };
 
 struct VertexInput {

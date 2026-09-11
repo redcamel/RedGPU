@@ -45,7 +45,6 @@ export class GrassMegaBuffer {
     #culledGPUBuffer: GPUBuffer | null = null;
     #indirectGPUBuffer: GPUBuffer | null = null;
     #typeParamsGPUBuffer: GPUBuffer | null = null;
-    #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
 
     #allocations: Map<number, GrassTypeAllocation> = new Map();
     #totalAllocatedInstances: number = 0;
@@ -295,18 +294,6 @@ export class GrassMegaBuffer {
         );
     }
 
-    resetIndirectDrawCounts(commandEncoder: GPUCommandEncoder): void {
-        if (!this.#indirectResetTemplateGPUBuffer || !this.#indirectGPUBuffer || this.#totalIndirectDrawCalls === 0) return;
-        const byteSize = this.#totalIndirectDrawCalls * 5 * 4;
-        commandEncoder.copyBufferToBuffer(
-            this.#indirectResetTemplateGPUBuffer,
-            0,
-            this.#indirectGPUBuffer,
-            0,
-            byteSize
-        );
-    }
-
     getAllocation(typeId: number): GrassTypeAllocation | undefined {
         return this.#allocations.get(typeId);
     }
@@ -316,13 +303,11 @@ export class GrassMegaBuffer {
         this.#culledGPUBuffer?.destroy();
         this.#indirectGPUBuffer?.destroy();
         this.#typeParamsGPUBuffer?.destroy();
-        this.#indirectResetTemplateGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = null;
         this.#culledGPUBuffer = null;
         this.#indirectGPUBuffer = null;
         this.#typeParamsGPUBuffer = null;
-        this.#indirectResetTemplateGPUBuffer = null;
 
         this.#allocations.clear();
     }
@@ -341,7 +326,6 @@ export class GrassMegaBuffer {
         this.#culledGPUBuffer?.destroy();
         this.#indirectGPUBuffer?.destroy();
         this.#typeParamsGPUBuffer?.destroy();
-        this.#indirectResetTemplateGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassMegaBuffer_RawInstances',
@@ -366,12 +350,6 @@ export class GrassMegaBuffer {
             size: typeParamsByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
-
-        this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassMegaBuffer_IndirectResetTemplate',
-            size: indirectByteSize,
-            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-        });
     }
 
     #updateIndirectTemplateForLOD(lodAlloc: GrassLODAllocation): void {
@@ -383,25 +361,14 @@ export class GrassMegaBuffer {
         this.#indirectResetTemplate[offset + 4] = lodAlloc.culledBaseOffset;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (gpuDevice) {
-            if (this.#indirectResetTemplateGPUBuffer) {
-                gpuDevice.queue.writeBuffer(
-                    this.#indirectResetTemplateGPUBuffer,
-                    offset * 4,
-                    this.#indirectResetTemplate.buffer,
-                    offset * 4,
-                    20
-                );
-            }
-            if (this.#indirectGPUBuffer) {
-                gpuDevice.queue.writeBuffer(
-                    this.#indirectGPUBuffer,
-                    offset * 4,
-                    this.#indirectResetTemplate.buffer,
-                    offset * 4,
-                    20
-                );
-            }
+        if (gpuDevice && this.#indirectGPUBuffer) {
+            gpuDevice.queue.writeBuffer(
+                this.#indirectGPUBuffer,
+                offset * 4,
+                this.#indirectResetTemplate.buffer,
+                offset * 4,
+                20
+            );
         }
     }
 
@@ -415,17 +382,6 @@ export class GrassMegaBuffer {
         this.#cpuRawDataUint32 = new Uint32Array(newRawBuffer.buffer);
 
         this.#initBuffers();
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (gpuDevice && this.#indirectResetTemplateGPUBuffer) {
-            gpuDevice.queue.writeBuffer(
-                this.#indirectResetTemplateGPUBuffer,
-                0,
-                this.#indirectResetTemplate.buffer,
-                0,
-                this.#totalIndirectDrawCalls * 5 * 4
-            );
-        }
 
         if (this.#onRecreated) {
             this.#onRecreated();
