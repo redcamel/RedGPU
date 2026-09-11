@@ -234,7 +234,7 @@ RedGPU.init(
             skybox: false,
             gui: (pane) => {
                 // 조작 안내 폴더
-                const helpFolder = pane.addFolder({title: '⌨️ Character Controls', expanded: true});
+                const helpFolder = pane.addFolder({title: '⌨️ Character Controls', expanded: false});
                 const config = {
                     move: 'W / A / S / D (Camera-relative)',
                     run: 'Hold  Shift  to Run',
@@ -276,6 +276,24 @@ RedGPU.init(
                     grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
                 });
 
+                // 실시간 잔디 버퍼 통계
+                const grassStats = {
+                    get activeInstances() {
+                        let count = 0;
+                        for (let i = 0; i < grassManager.grassTypes.length; i++) {
+                            const alloc = grassManager.megaBuffer?.getAllocation(grassManager.grassTypes[i].typeId);
+                            if (alloc) count += alloc.activeCount;
+                        }
+                        return count.toLocaleString();
+                    },
+                    get totalCapacity() {
+                        return (grassManager.megaBuffer?.totalAllocatedInstances ?? 0).toLocaleString();
+                    }
+                };
+                const statsFolder = grassFolder.addFolder({title: '📊 Buffer Stats', expanded: true});
+                statsFolder.addBinding(grassStats, 'activeInstances', {readonly: true, label: 'Active Instances'});
+                statsFolder.addBinding(grassStats, 'totalCapacity', {readonly: true, label: 'Buffer Capacity'});
+
                 // 지형 설정
                 const folderTerrain = pane.addFolder({title: 'Landscape Settings', expanded: false});
                 folderTerrain.addBinding(landscape, 'enableHeightmapShadow', {label: 'Shadow Raymarching'});
@@ -288,7 +306,7 @@ RedGPU.init(
                 folderTerrain.addBinding(landscape, 'receiveShadow', {label: 'Receive Shadow'});
 
                 // ☀️ 태양광 & 그림자 설정 (Directional Light & CSM Shadow)
-                const shadowFolder = pane.addFolder({title: '☀️ Sun & Shadow Settings', expanded: true});
+                const shadowFolder = pane.addFolder({title: '☀️ Sun & Shadow Settings', expanded: false});
                 shadowFolder.addBinding(directionalLight, 'elevation', {
                     min: 5,
                     max: 85,
@@ -335,10 +353,12 @@ RedGPU.init(
         });
 
         // 7. 잔디 모델 로딩 헬퍼 함수
-        const addTypeToUI = (type) => {
+        const addTypeToUI = (type, isDefaultExpanded = false) => {
             if (!grassFolder) return;
-            const typeFolder = grassFolder.addFolder({title: `${type.name}`, expanded: true});
+            const typeFolder = grassFolder.addFolder({title: `${type.name}`, expanded: isDefaultExpanded});
 
+            // 1. 스케일 및 스폰 배치 (Placement & Density)
+            const placementFolder = typeFolder.addFolder({title: '🌱 Placement & Density', expanded: true});
             const baseMin = [...type.minScale];
             const baseMax = [...type.maxScale];
             const scaleState = {
@@ -359,39 +379,59 @@ RedGPU.init(
                 ];
             };
 
-            typeFolder.addBinding(scaleState, 'scale', {
+            placementFolder.addBinding(scaleState, 'scale', {
                 min: 0.5,
                 max: 4.0,
                 step: 0.1,
-                label: 'Grass Scale'
+                label: 'Scale (XZ)'
             }).on('change', updateScale);
-            typeFolder.addBinding(scaleState, 'scaleY', {
+            placementFolder.addBinding(scaleState, 'scaleY', {
                 min: 0.5,
                 max: 4.0,
                 step: 0.1,
-                label: 'Height Scale'
+                label: 'Height (Y)'
             }).on('change', updateScale);
-            typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1, label: 'Density Mult'});
-            typeFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 80.0, step: 1.0, label: 'Max Slope (°)'});
-            typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 0.9, step: 0.05, label: 'Min Weight'});
-            typeFolder.addBinding(type, 'densityScaleByWeight', {label: 'Weight Modulate'});
+            placementFolder.addBinding(type, 'densityMultiplier', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.1,
+                label: 'Density Mult'
+            });
+            placementFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 80.0, step: 1.0, label: 'Max Slope (°)'});
+            placementFolder.addBinding(type, 'minWeightThreshold', {
+                min: 0.0,
+                max: 0.9,
+                step: 0.05,
+                label: 'Min Weight'
+            });
+            placementFolder.addBinding(type, 'densityScaleByWeight', {label: 'Weight Modulate'});
+            placementFolder.addBinding(type, 'bottomOffset', {
+                min: -0.8,
+                max: 0.3,
+                step: 0.01,
+                label: 'Bottom Offset (m)'
+            });
 
-            typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
-            typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
-            typeFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
-            typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Ground Blend'});
-            typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05, label: 'Alpha Cutoff'});
-            typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.5, step: 0.05, label: 'Exposure Boost'});
-            typeFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.02, label: 'Roughness'});
-            typeFolder.addBinding(type, 'subsurfaceStrength', {
+            // 2. 머티리얼 및 라이팅 (Material & Shading)
+            const matFolder = typeFolder.addFolder({title: '🎨 Material & Shading', expanded: false});
+            matFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Ground Blend'});
+            matFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05, label: 'Alpha Cutoff'});
+            matFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.5, step: 0.05, label: 'Exposure Boost'});
+            matFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.02, label: 'Roughness'});
+            matFolder.addBinding(type, 'subsurfaceStrength', {
                 min: 0.0,
                 max: 3.0,
                 step: 0.05,
-                label: 'Subsurface Light'
+                label: 'Subsurface SSS'
             });
-            typeFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01, label: 'Bottom Offset (m)'});
-            typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 200, step: 5, label: 'Cull Dist (m)'});
-            typeFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5, label: 'Shrink Dist (m)'});
+
+            // 3. LOD 및 그림자 (LOD & Shadow)
+            const lodFolder = typeFolder.addFolder({title: '👁️ LOD & Shadow', expanded: false});
+            lodFolder.addBinding(type, 'cullingDistance', {min: 20, max: 200, step: 5, label: 'Cull Dist (m)'});
+            lodFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5, label: 'Shrink Dist (m)'});
+            lodFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
+            lodFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
+            lodFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
         };
 
         // 8. 🌿 [Layer 1] 기본 뗏장 덤불 잔디 (grass.glb - 바닥을 빽빽하고 푸르게 메워주는 Base Clump)
@@ -442,7 +482,7 @@ RedGPU.init(
                     });
 
                     grassManager.addGrassType(baseClumpType);
-                    addTypeToUI(baseClumpType);
+                    addTypeToUI(baseClumpType, true);
                     grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
                     console.log('🌿 [Layer 1] Base Ground Clump registered successfully.');
                 }
