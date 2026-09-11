@@ -331,6 +331,7 @@ RedGPU.init(
             typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 0.9, step: 0.05, label: 'Min Weight'});
             typeFolder.addBinding(type, 'densityScaleByWeight', {label: 'Weight Modulate'});
 
+            typeFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
             typeFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
             typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Ground Blend'});
             typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05, label: 'Alpha Cutoff'});
@@ -383,14 +384,14 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [3.8, 3.2, 3.8],
-                        maxScale: [5.6, 4.6, 5.6],
+                        minScale: [10.0, 9.0, 10.0],
+                        maxScale: [15.0, 13.0, 15.0],
                         groundBlendStrength: 0.55,
                         roughness: 0.55,
                         subsurfaceStrength: 1.40,
                         exposureBoost: 1,
                         receiveShadow: true,
-                        bottomOffset: -0.18
+                        bottomOffset: -0.45
                     });
 
                     grassManager.addGrassType(baseClumpType);
@@ -505,14 +506,14 @@ RedGPU.init(
                         cullingDistance: 110,
                         fadeStartDistance: 95,
                         shrinkStartDistance: 80,
-                        minScale: [2.8, 3.5, 2.8],
-                        maxScale: [4.4, 5.5, 4.4],
+                        minScale: [8.0, 11.0, 8.0],
+                        maxScale: [13.0, 17.0, 13.0],
                         groundBlendStrength: 0.45,
                         roughness: 0.55,
                         subsurfaceStrength: 1.50,
                         exposureBoost: 1,
                         receiveShadow: true,
-                        bottomOffset: -0.22
+                        bottomOffset: -0.55
                     });
 
                     grassManager.addGrassType(grassType);

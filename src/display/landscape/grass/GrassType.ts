@@ -52,6 +52,7 @@ export interface GrassTypeOptions {
     bottomOffset?: number;
     receiveShadow?: boolean;
     shadowStrength?: number;
+    castShadow?: boolean;
 }
 
 export class GrassType {
@@ -87,6 +88,7 @@ export class GrassType {
     #bottomOffset: number = 0.0;
     #receiveShadow: boolean = true;
     #shadowStrength: number = 1.0;
+    #castShadow: boolean = true;
 
     #typeId: number = 0;
     #onChanged: (() => void) | null = null;
@@ -217,6 +219,8 @@ export class GrassType {
         if (options.receiveShadow !== undefined) this.#receiveShadow = options.receiveShadow;
         else if (lod0Mesh.receiveShadow !== undefined) this.#receiveShadow = lod0Mesh.receiveShadow;
         if (options.shadowStrength !== undefined) this.#shadowStrength = options.shadowStrength;
+        if (options.castShadow !== undefined) this.#castShadow = options.castShadow;
+        else if (lod0Mesh.castShadow !== undefined) this.#castShadow = lod0Mesh.castShadow;
     }
 
     get name(): string {
@@ -482,6 +486,14 @@ export class GrassType {
 
     set shadowStrength(v: number) {
         this.#shadowStrength = Math.max(0.0, Math.min(1.0, v));
+    }
+
+    get castShadow(): boolean {
+        return this.#castShadow;
+    }
+
+    set castShadow(v: boolean) {
+        this.#castShadow = v;
     }
 
     get typeId(): number {

@@ -10,6 +10,7 @@ import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndSc
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
 import {renderLandscapeShadowLayer} from "../renderer/renderLayers/renderLandscapeLayer";
 import {renderFoliageShadowLayer} from "../renderer/renderLayers/renderFoliageLayer";
+import {renderGrassShadowLayer} from "../renderer/renderLayers/renderGrassLayer";
 import keepLog from "../utils/keepLog";
 
 /**
@@ -103,6 +104,7 @@ class ShadowManager {
                     renderShadowLayer(view, viewShadowRenderPassEncoder);
                 }
                 renderFoliageShadowLayer(view, viewShadowRenderPassEncoder);
+                renderGrassShadowLayer(view, viewShadowRenderPassEncoder);
                 view.currentCascadeIndex = undefined;
             });
         }
@@ -132,6 +134,15 @@ class ShadowManager {
             const foliage = landscape.foliageManager;
             if (foliage) {
                 const types = foliage.typeList;
+                const typeCount = types.length;
+                for (let t = 0; t < typeCount; t++) {
+                    if (types[t].castShadow) return true;
+                }
+            }
+
+            const grass = landscape.grassManager;
+            if (grass && grass.enabled && grass.hasGrassTypes) {
+                const types = grass.grassTypes;
                 const typeCount = types.length;
                 for (let t = 0; t < typeCount; t++) {
                     if (types[t].castShadow) return true;

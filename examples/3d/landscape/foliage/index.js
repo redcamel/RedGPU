@@ -335,6 +335,8 @@ RedGPU.init(
                 folderLandscape.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 8000, step: 100});
                 folderLandscape.addBinding(landscape, 'heightmapShadowSoftness', {min: 0.1, max: 20.0, step: 0.5});
                 folderLandscape.addBinding(landscape, 'receiveShadow');
+                folderLandscape.addBinding(landscape, 'castShadow');
+                folderLandscape.addBinding(landscape, 'useHZB', {label: 'Use HZB (Occlusion)'});
 
                 const folderLayers = folderLandscape.addFolder({title: 'Layers (Micro Detail)', expanded: false});
                 layers.forEach(layer => {

@@ -250,6 +250,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 max: 0.99,
                 step: 0.05
             });
+            folderLOD.addBinding(landscape, 'useHZB', {label: 'Use HZB (Occlusion)'});
 
             // 2-3. Tile Streaming
             const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: false});

@@ -7,6 +7,8 @@ import {GrassCuller} from "./core/culling/GrassCuller";
 import grassVertexSource from "./shader/grassVertex.wgsl";
 import grassFragmentSource from "./shader/grassFragment.wgsl";
 import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
+import grassShadowSource from "./shader/grassShadow.wgsl";
+import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
@@ -36,14 +38,17 @@ export class LandscapeGrassManager {
     #populated: boolean = false;
 
     #vertexModule: GPUShaderModule | null = null;
+    #vertexShadowModule: GPUShaderModule | null = null;
     #fragmentModule: GPUShaderModule | null = null;
     #fragmentFarModule: GPUShaderModule | null = null;
+    #fragmentShadowModule: GPUShaderModule | null = null;
     #pipelineLayout: GPUPipelineLayout | null = null;
     #pipelineBindGroupLayout0: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout1: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout2: GPUBindGroupLayout | null = null;
     #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
     #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
+    #shadowPipeline: GPURenderPipeline | null = null;
 
     #typeMaterialBuffers: Map<number, {
         uniformBuffer: GPUBuffer;
@@ -181,6 +186,52 @@ export class LandscapeGrassManager {
 
         cache.set(sampleCount, pipeline);
         return pipeline;
+    }
+
+    getOrCreateShadowRenderPipeline(): GPURenderPipeline | null {
+        if (this.#shadowPipeline) return this.#shadowPipeline;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
+
+        this.#shadowPipeline = gpuDevice.createRenderPipeline({
+            label: 'Grass_ShadowRenderPipeline',
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexShadowModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: this.#fragmentShadowModule,
+                entryPoint: 'main',
+                targets: []
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: 1
+            }
+        });
+
+        return this.#shadowPipeline;
     }
 
     addGrassType(grassType: GrassType): void {
@@ -521,10 +572,63 @@ export class LandscapeGrassManager {
         }
     }
 
+    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassTypes.length === 0) return;
+
+        const view3D = view?.view || view;
+        const currentCascade = view3D?.currentCascadeIndex;
+
+        // 🌿 초근거리 30m 한정 규칙: Cascade 0 (0~15m), Cascade 1 (15~30m)만 섀도우 맵에 렌더링하고,
+        // 원거리인 Cascade 2, 3은 100% 스킵하여 드로우 콜 및 VRAM 대역폭 절감!
+        if (currentCascade !== undefined && currentCascade > 1) return;
+
+        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        const pipeline = this.getOrCreateShadowRenderPipeline();
+        if (!pipeline) return;
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
+        if (!systemBG) return;
+
+        passEncoder.setPipeline(pipeline);
+        passEncoder.setBindGroup(0, systemBG);
+
+        for (const type of this.#grassTypes) {
+            if (!type.castShadow) continue;
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!alloc || alloc.activeCount === 0) continue;
+
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
+
+            // 🌿 30m 이내이므로 오직 LOD 0 (근거리 인스턴스)만 그림자 맵에 투영!
+            const lod0Alloc = alloc.lods[0];
+            if (!lod0Alloc) continue;
+
+            const lodGeom = type.getGeometryForLOD(0);
+            const lvb = lodGeom?.vertexBuffer;
+            const lib = lodGeom?.indexBuffer;
+            if (!lvb || !lib) continue;
+
+            passEncoder.setBindGroup(1, res.instanceBindGroup);
+            passEncoder.setBindGroup(2, res.bindGroup);
+
+            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const indirectOffsetBytes = lod0Alloc.indirectOffset * 5 * 4;
+            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+        }
+    }
+
     destroy(): void {
         this.#megaBuffer.destroy();
         this.#baker.destroy();
         this.#culler.destroy();
+        this.#shadowPipeline = null;
+        this.#vertexShadowModule = null;
+        this.#fragmentShadowModule = null;
 
         for (const res of this.#typeMaterialBuffers.values()) {
             res.uniformBuffer.destroy();
@@ -554,6 +658,14 @@ export class LandscapeGrassManager {
 
         this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
             code: grassFragmentFarSource
+        });
+
+        this.#vertexShadowModule = resourceManager.createGPUShaderModule('Grass_VertexShadowModule', {
+            code: grassShadowVertexSource
+        });
+
+        this.#fragmentShadowModule = resourceManager.createGPUShaderModule('Grass_FragmentShadowModule', {
+            code: grassShadowSource
         });
 
         this.#pipelineBindGroupLayout0 = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
