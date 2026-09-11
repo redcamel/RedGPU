@@ -548,15 +548,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal = getBaseNormal(globalUV);
-    let baseNdotV = abs(dot(baseNormal, V));
 
     let nearDist = uniforms.nearDetailDistance;
     let nearFade = uniforms.nearDetailFade;
     let maxNearDist = nearDist + nearFade;
 
-    // 시선 스침각(Grazing Angle) 및 거리 기준 근거리 디테일 유효성 판정
-    // baseNdotV <= 0.08 인 비스듬한 면은 원근 압축으로 인해 디테일이 보이지 않으므로 VBT 캐시로 직행
-    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist && baseNdotV > 0.08;
+    // 거리 기준 근거리 디테일 유효성 판정 (카메라 각도 및 경사각에 상관없이 nearDetailDistance 범위 내 온전한 디테일 보장)
+    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist;
 
     var albedo = uniforms.color.rgb;
     var N = baseNormal;
