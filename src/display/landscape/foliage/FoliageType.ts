@@ -109,6 +109,7 @@ class FoliageType {
     #fadeStartDistance: number = 1500.0;
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
+    #boundingHeight: number = 2.0;
     #nameHash: number = 0;
     #type: FOLIAGE_TYPE = FOLIAGE_TYPE.FOLIAGE;
     #castShadow: boolean = true;
@@ -180,14 +181,6 @@ class FoliageType {
             ? options.useDepthPrepass
             : !isBasic;
 
-        let defaultShadowDist = 300.0;
-        if (isGrass) defaultShadowDist = 35.0;
-        else if (isBasic) defaultShadowDist = 150.0;
-
-        this.#maxShadowDistance = options.maxShadowDistance !== undefined
-            ? Math.max(0, Number(options.maxShadowDistance) || 0)
-            : defaultShadowDist;
-
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
 
@@ -239,6 +232,48 @@ class FoliageType {
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
+        let hash = 0;
+        const nameStr = options.name || '';
+        for (let c = 0; c < nameStr.length; c++) {
+            hash = (hash * 31 + nameStr.charCodeAt(c)) | 0;
+        }
+        this.#nameHash = hash;
+
+        const assembleResult = FoliageSubMeshAssembler.assemble(
+            this.#redGPUContext,
+            options,
+            this.#subMeshVertexBindGroupLayout!
+        );
+        this.#subMeshes = assembleResult.subMeshes;
+        this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
+        this.#lodInfoList = assembleResult.lodInfoList || [];
+        const userOffset = options.bottomOffset;
+        this.#bottomOffset = userOffset !== undefined ? userOffset : (assembleResult.bottomOffset ?? 0);
+        this.#boundingRadius = assembleResult.boundingRadius || 10.0;
+        this.#boundingHeight = assembleResult.boundingHeight || 2.0;
+
+        let defaultShadowDist = 300.0;
+        if (isGrass) {
+            defaultShadowDist = 35.0;
+        } else {
+            const effectiveHeight = this.#boundingHeight * maxScale[1];
+            if (effectiveHeight < 0.6) {
+                defaultShadowDist = 35.0;
+            } else if (effectiveHeight < 1.5) {
+                defaultShadowDist = 75.0;
+            } else if (effectiveHeight < 3.5) {
+                defaultShadowDist = 160.0;
+            } else if (isBasic) {
+                defaultShadowDist = 150.0;
+            } else {
+                defaultShadowDist = 350.0;
+            }
+        }
+
+        this.#maxShadowDistance = options.maxShadowDistance !== undefined
+            ? Math.max(0, Number(options.maxShadowDistance) || 0)
+            : defaultShadowDist;
+
         this.#options = Object.freeze({
             name: options.name,
             type: this.#type,
@@ -252,7 +287,7 @@ class FoliageType {
             useImpostor: this.#useImpostor,
             isFoliage: this.#isFoliage,
             useDepthPrepass: this.#useDepthPrepass,
-            bottomOffset: options.bottomOffset,
+            bottomOffset: this.#bottomOffset,
             castShadow: this.#castShadow,
             maxShadowDistance: this.#maxShadowDistance,
             enableStreaming: options.enableStreaming !== false,
@@ -283,24 +318,6 @@ class FoliageType {
         this.#densityPerHectare = resolvedDensityPerHectare;
         this.#densityMultiplier = this.#options.densityMultiplier!;
 
-        let hash = 0;
-        const nameStr = this.#options.name || '';
-        for (let c = 0; c < nameStr.length; c++) {
-            hash = (hash * 31 + nameStr.charCodeAt(c)) | 0;
-        }
-        this.#nameHash = hash;
-
-        const assembleResult = FoliageSubMeshAssembler.assemble(
-            this.#redGPUContext,
-            this.#options,
-            this.#subMeshVertexBindGroupLayout!
-        );
-        this.#subMeshes = assembleResult.subMeshes;
-        this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
-        this.#lodInfoList = assembleResult.lodInfoList || [];
-        const userOffset = options.bottomOffset;
-        this.#bottomOffset = userOffset !== undefined ? userOffset : (assembleResult.bottomOffset ?? 0);
-        this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         let impostorSub: FoliageSubMesh | null = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
             if (this.#subMeshes[i].isImpostor) {
@@ -403,6 +420,10 @@ class FoliageType {
 
     get boundingRadius(): number {
         return this.#boundingRadius;
+    }
+
+    get boundingHeight(): number {
+        return this.#boundingHeight;
     }
 
     get bottomOffset(): number {

@@ -44,6 +44,7 @@ export interface FoliageAssemblyResult {
     lodInfoList: FoliageLODInfo[];
     bottomOffset: number;
     boundingRadius: number;
+    boundingHeight: number;
 }
 
 interface RawSubMesh {
@@ -78,7 +79,8 @@ class FoliageSubMeshAssembler {
                 shadowMergedSubMeshes: [],
                 lodInfoList: [],
                 bottomOffset: 0,
-                boundingRadius: 10.0
+                boundingRadius: 10.0,
+                boundingHeight: 10.0
             };
         }
 
@@ -155,8 +157,11 @@ class FoliageSubMeshAssembler {
         }
 
         let maxDistSq = 0;
+        let minY = Infinity;
+        let maxY = -Infinity;
         for (let i = 0; i < subList.length; i++) {
             const sub = subList[i];
+            if (sub.isImpostor) continue;
 
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
@@ -170,11 +175,16 @@ class FoliageSubMeshAssembler {
                     const vz = vData[idx + 2];
                     const dSq = vx * vx + vy * vy + vz * vz;
                     if (dSq > maxDistSq) maxDistSq = dSq;
+                    if (vy < minY) minY = vy;
+                    if (vy > maxY) maxY = vy;
                 }
             }
         }
 
         const boundingRadius = Math.sqrt(maxDistSq);
+        const boundingHeight = (isFinite(minY) && isFinite(maxY) && maxY > minY)
+            ? (maxY - minY)
+            : (boundingRadius > 0 ? boundingRadius * 2.0 : 1.0);
 
         const userOffset = options.bottomOffset;
         const finalBottomOffset = userOffset !== undefined ? userOffset : 0;
@@ -185,6 +195,7 @@ class FoliageSubMeshAssembler {
             lodInfoList,
             bottomOffset: finalBottomOffset,
             boundingRadius,
+            boundingHeight,
         };
     }
 
