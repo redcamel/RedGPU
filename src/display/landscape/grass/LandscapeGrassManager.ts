@@ -6,6 +6,7 @@ import {GrassBaker} from "./core/baking/GrassBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";
 import grassVertexSource from "./shader/grassVertex.wgsl";
 import grassFragmentSource from "./shader/grassFragment.wgsl";
+import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
@@ -36,11 +37,13 @@ export class LandscapeGrassManager {
 
     #vertexModule: GPUShaderModule | null = null;
     #fragmentModule: GPUShaderModule | null = null;
+    #fragmentFarModule: GPUShaderModule | null = null;
     #pipelineLayout: GPUPipelineLayout | null = null;
     #pipelineBindGroupLayout0: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout1: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout2: GPUBindGroupLayout | null = null;
-    #renderPipelines: Map<number, GPURenderPipeline> = new Map();
+    #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
+    #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
 
     #grassUniformGPUBuffer: GPUBuffer | null = null;
     #grassUniformCPUBuffer: Float32Array = new Float32Array(8);
@@ -125,17 +128,19 @@ export class LandscapeGrassManager {
         return this.#totalInstancesPopulated;
     }
 
-    getOrCreateRenderPipeline(sampleCount: number = 1): GPURenderPipeline | null {
-        let pipeline = this.#renderPipelines.get(sampleCount);
+    getOrCreateRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
+        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
+        let pipeline = cache.get(sampleCount);
         if (pipeline) return pipeline;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !this.#fragmentModule) return null;
+        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
 
         const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
 
         pipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_RenderPipeline_msaa${sampleCount}`,
+            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
             layout: this.#pipelineLayout,
             vertex: {
                 module: this.#vertexModule,
@@ -153,7 +158,7 @@ export class LandscapeGrassManager {
                 ]
             },
             fragment: {
-                module: this.#fragmentModule,
+                module: fragModule,
                 entryPoint: 'main',
                 targets: [
                     {format: 'rgba16float'},
@@ -175,7 +180,7 @@ export class LandscapeGrassManager {
             }
         });
 
-        this.#renderPipelines.set(sampleCount, pipeline);
+        cache.set(sampleCount, pipeline);
         return pipeline;
     }
 
@@ -431,13 +436,15 @@ export class LandscapeGrassManager {
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
         const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
-        const pipeline = this.getOrCreateRenderPipeline(sampleCount);
-        if (!pipeline) return;
+        const nearPipeline = this.getOrCreateRenderPipeline(sampleCount, false);
+        const farPipeline = this.getOrCreateRenderPipeline(sampleCount, true);
+        if (!nearPipeline || !farPipeline) return;
 
         const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
         const basicSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        passEncoder.setPipeline(pipeline);
+        let currentPipeline: GPURenderPipeline | null = nearPipeline;
+        passEncoder.setPipeline(nearPipeline);
         passEncoder.setBindGroup(0, systemBG);
 
         const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
@@ -488,6 +495,12 @@ export class LandscapeGrassManager {
 
             // 각 LOD 레벨별 지오메트리 바인딩 및 인다이렉트 드로우
             for (const lodAlloc of alloc.lods) {
+                const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
+                if (currentPipeline !== targetPipeline) {
+                    passEncoder.setPipeline(targetPipeline);
+                    currentPipeline = targetPipeline;
+                }
+
                 const lodGeom = type.getGeometryForLOD(lodAlloc.lodIndex);
                 const lvb = lodGeom?.vertexBuffer;
                 const lib = lodGeom?.indexBuffer;
@@ -516,7 +529,8 @@ export class LandscapeGrassManager {
         this.#typeCellStates.clear();
         this.#neededCellKeysSet.clear();
         this.#keysToEvict.length = 0;
-        this.#renderPipelines.clear();
+        this.#renderPipelinesNear.clear();
+        this.#renderPipelinesFar.clear();
         this.#grassTypes.length = 0;
     }
 
@@ -531,6 +545,10 @@ export class LandscapeGrassManager {
 
         this.#fragmentModule = resourceManager.createGPUShaderModule('Grass_FragmentModule', {
             code: grassFragmentSource
+        });
+
+        this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
+            code: grassFragmentFarSource
         });
 
         this.#grassUniformGPUBuffer = gpuDevice.createBuffer({
