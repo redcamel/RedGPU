@@ -63,7 +63,9 @@ fn main(input: VertexOutput) -> OutputFragment {
     }
     sourceAlpha *= input.alphaFade;
 
-    if (sourceAlpha < materialUniforms.alphaCutoff) {
+    // 🌿 원거리 Mipmap 알파 희석 및 서브픽셀 커버리지 보존 (Adaptive Alpha Cutoff)
+    let farCutoff = clamp(materialUniforms.alphaCutoff * 0.55, 0.15, 0.30);
+    if (sourceAlpha < farCutoff) {
         discard;
     }
 
@@ -76,8 +78,10 @@ fn main(input: VertexOutput) -> OutputFragment {
         albedo = mix(albedo, input.groundColor, blendFactor);
     }
 
-    // 🌿 3. 법선 및 카메라 벡터
-    let N = normalize(input.normal);
+    // 🌿 3. 법선 및 카메라 벡터 (Near와 동일한 하늘 방향 블렌딩으로 톤/광택 완벽 일치)
+    let upVec = vec3<f32>(0.0, 1.0, 0.0);
+    let upwardBlend = mix(0.55, 0.85, input.heightRatio);
+    let N = normalize(mix(input.normal, upVec, upwardBlend));
     let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
     let preExposure = systemUniforms.preExposure;
 

@@ -45,13 +45,12 @@ export class LandscapeGrassManager {
     #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
     #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
 
-    #grassUniformGPUBuffer: GPUBuffer | null = null;
-    #grassUniformCPUBuffer: Float32Array = new Float32Array(8);
-
     #typeMaterialBuffers: Map<number, {
         uniformBuffer: GPUBuffer;
         cpuBuffer: Float32Array;
         uintBuffer: Uint32Array;
+        grassUniformGPUBuffer: GPUBuffer;
+        grassUniformCPUBuffer: Float32Array;
         bindGroup: GPUBindGroup | null;
         instanceBindGroup: GPUBindGroup | null;
         cachedColorTexView: GPUTextureView | null;
@@ -236,10 +235,19 @@ export class LandscapeGrassManager {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
+            const grassUniformCPUBuffer = new Float32Array(8);
+            const grassUniformGPUBuffer = gpuDevice.createBuffer({
+                label: `Grass_UniformBuffer_${grassType.name}`,
+                size: 32,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+
             this.#typeMaterialBuffers.set(grassType.typeId, {
                 uniformBuffer,
                 cpuBuffer,
                 uintBuffer,
+                grassUniformGPUBuffer,
+                grassUniformCPUBuffer,
                 bindGroup: null,
                 instanceBindGroup: null,
                 cachedColorTexView: null
@@ -302,27 +310,7 @@ export class LandscapeGrassManager {
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#grassUniformGPUBuffer) return;
-
-        const activeType = this.#grassTypes[0];
-        const f32 = this.#grassUniformCPUBuffer;
-
-        f32[0] = activeType.cullingDistance;
-        f32[1] = activeType.fadeStartDistance;
-        f32[2] = activeType.shrinkStartDistance;
-        f32[3] = activeType.bottomOffset;
-        f32[4] = activeType.meshHeight;
-        f32[5] = activeType.groundBlendStrength;
-        f32[6] = activeType.minY;
-        f32[7] = 0.0;
-
-        gpuDevice.queue.writeBuffer(
-            this.#grassUniformGPUBuffer,
-            0,
-            this.#grassUniformCPUBuffer.buffer,
-            0,
-            this.#grassUniformCPUBuffer.byteLength
-        );
+        if (!gpuDevice) return;
 
         const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
         const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
@@ -330,6 +318,24 @@ export class LandscapeGrassManager {
         for (const type of this.#grassTypes) {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res) continue;
+
+            const gf = res.grassUniformCPUBuffer;
+            gf[0] = type.cullingDistance;
+            gf[1] = type.fadeStartDistance;
+            gf[2] = type.shrinkStartDistance;
+            gf[3] = type.bottomOffset;
+            gf[4] = type.meshHeight;
+            gf[5] = type.groundBlendStrength;
+            gf[6] = type.minY;
+            gf[7] = 0.0;
+
+            gpuDevice.queue.writeBuffer(
+                res.grassUniformGPUBuffer,
+                0,
+                res.grassUniformCPUBuffer.buffer,
+                0,
+                res.grassUniformCPUBuffer.byteLength
+            );
 
             const mf = res.cpuBuffer;
             const mu = res.uintBuffer;
@@ -458,13 +464,13 @@ export class LandscapeGrassManager {
             if (!res) continue;
 
             // Group 1: Instances + Grass Uniform
-            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && this.#grassUniformGPUBuffer) {
+            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
                 res.instanceBindGroup = gpuDevice.createBindGroup({
                     label: `Grass_InstanceBindGroup_${type.name}`,
                     layout: this.#pipelineBindGroupLayout1,
                     entries: [
                         {binding: 0, resource: {buffer: this.#megaBuffer.culledGPUBuffer}},
-                        {binding: 1, resource: {buffer: this.#grassUniformGPUBuffer}},
+                        {binding: 1, resource: {buffer: res.grassUniformGPUBuffer}},
                     ]
                 });
             }
@@ -519,11 +525,10 @@ export class LandscapeGrassManager {
         this.#megaBuffer.destroy();
         this.#baker.destroy();
         this.#culler.destroy();
-        this.#grassUniformGPUBuffer?.destroy();
-        this.#grassUniformGPUBuffer = null;
 
         for (const res of this.#typeMaterialBuffers.values()) {
             res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
         }
         this.#typeMaterialBuffers.clear();
         this.#typeCellStates.clear();
@@ -549,12 +554,6 @@ export class LandscapeGrassManager {
 
         this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
             code: grassFragmentFarSource
-        });
-
-        this.#grassUniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'Grass_UniformBuffer',
-            size: 32,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#pipelineBindGroupLayout0 = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');

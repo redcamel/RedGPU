@@ -35,6 +35,7 @@ export interface GrassTypeOptions {
     cullingDistance?: number;
     fadeStartDistance?: number;
     shrinkStartDistance?: number;
+    farDistance?: number;
     minScale?: [number, number, number];
     maxScale?: [number, number, number];
     height?: number;
@@ -144,15 +145,35 @@ export class GrassType {
         }
 
         const defaultCullDist = options.cullingDistance ?? 100.0;
-        this.#lods = sortedLods.map((lodConfig, index) => {
-            const m = lodConfig.mesh;
-            return {
-                lodIndex: index,
-                lodDistance: lodConfig.lodDistance ?? defaultCullDist,
-                geometry: m.geometry,
-                mesh: m
-            };
-        });
+        const farDistance = Math.max(10.0, options.farDistance ?? 35.0);
+
+        if (sortedLods.length === 1 && (sortedLods[0].lodDistance ?? defaultCullDist) > farDistance) {
+            const m = sortedLods[0].mesh;
+            this.#lods = [
+                {
+                    lodIndex: 0,
+                    lodDistance: farDistance,
+                    geometry: m.geometry,
+                    mesh: m
+                },
+                {
+                    lodIndex: 1,
+                    lodDistance: sortedLods[0].lodDistance ?? defaultCullDist,
+                    geometry: m.geometry,
+                    mesh: m
+                }
+            ];
+        } else {
+            this.#lods = sortedLods.map((lodConfig, index) => {
+                const m = lodConfig.mesh;
+                return {
+                    lodIndex: index,
+                    lodDistance: lodConfig.lodDistance ?? defaultCullDist,
+                    geometry: m.geometry,
+                    mesh: m
+                };
+            });
+        }
 
         if (options.densityPerHectare !== undefined) this.#densityPerHectare = options.densityPerHectare;
         if (options.densityMultiplier !== undefined) this.#densityMultiplier = options.densityMultiplier;
