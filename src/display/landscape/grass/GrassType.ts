@@ -82,7 +82,7 @@ export class GrassType {
     #subsurfaceColor: [number, number, number] = [0.45, 0.85, 0.15];
     #subsurfaceDistortion: number = 0.35;
     #groundBlendStrength: number = 0.75;
-    #alphaCutoff: number = 0.45;
+    #alphaCutoff: number = 0.2;
     #roughness: number = 0.55;
     #metallic: number = 0.0;
     #targetLayer: string | number = '';
@@ -190,12 +190,7 @@ export class GrassType {
         if (options.maxScale) this.#maxScale = [options.maxScale[0], options.maxScale[1], options.maxScale[2] ?? options.maxScale[0]];
         if (options.groundBlendStrength !== undefined) this.#groundBlendStrength = options.groundBlendStrength;
 
-        const inheritedCutoff = mat?.cutOff !== undefined ? mat.cutOff : mat?.alphaCutoff;
-        if (options.alphaCutoff !== undefined) {
-            this.#alphaCutoff = options.alphaCutoff;
-        } else if (inheritedCutoff !== undefined) {
-            this.#alphaCutoff = inheritedCutoff;
-        }
+        this.#alphaCutoff = options.alphaCutoff ?? 0.2;
 
         const inheritedRoughness = mat?.roughnessFactor ?? mat?.roughness;
         if (options.roughness !== undefined) {
@@ -216,11 +211,9 @@ export class GrassType {
         if (options.exposureBoost !== undefined) this.#exposureBoost = options.exposureBoost;
         if (options.targetLayer !== undefined) this.#targetLayer = options.targetLayer;
         if (options.bottomOffset !== undefined) this.#bottomOffset = options.bottomOffset;
-        if (options.receiveShadow !== undefined) this.#receiveShadow = options.receiveShadow;
-        else if (lod0Mesh.receiveShadow !== undefined) this.#receiveShadow = lod0Mesh.receiveShadow;
+        this.#receiveShadow = options.receiveShadow ?? true;
         if (options.shadowStrength !== undefined) this.#shadowStrength = options.shadowStrength;
-        if (options.castShadow !== undefined) this.#castShadow = options.castShadow;
-        else if (lod0Mesh.castShadow !== undefined) this.#castShadow = lod0Mesh.castShadow;
+        this.#castShadow = options.castShadow ?? true;
     }
 
     get name(): string {

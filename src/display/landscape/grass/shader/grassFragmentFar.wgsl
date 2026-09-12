@@ -57,7 +57,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     sourceAlpha *= input.alphaFade;
 
     // 🌿 원거리 Mipmap 알파 희석 및 서브픽셀 커버리지 보존 (Adaptive Alpha Cutoff)
-    let farCutoff = clamp(materialUniforms.alphaCutoff * 0.55, 0.15, 0.30);
+    let farCutoff = clamp(materialUniforms.alphaCutoff * 0.55, 0.10, 0.30);
     if (sourceAlpha < farCutoff) {
         discard;
     }
