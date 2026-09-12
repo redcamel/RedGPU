@@ -138,6 +138,7 @@ export class Landscape extends Object3DContainer {
         this.#lodFadeStartRatio = 0.7;
         this.#lodGeomorphStartRatio = 0.85;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
+        this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
         this.#heightScale = 500.0;
         this.#updateTuples();
 
@@ -369,6 +370,7 @@ export class Landscape extends Object3DContainer {
         const clamped = Math.max(this.#componentSizeQuads, Math.round(value));
         if (this.#lod0SizeQuads !== clamped) {
             this.#lod0SizeQuads = clamped;
+            this.#tileStreamer.lod0SizeQuads = clamped;
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
                 this.#tileSizeX,

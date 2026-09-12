@@ -47,6 +47,10 @@ export interface SimpleCharacterControllerOptions {
     useControllerRotationYaw?: boolean;
     /** [KO] 이동 방향으로 캐릭터 회전 정렬 여부 (기본값: true) [EN] Whether to orient character rotation to movement direction (default: true) */
     orientRotationToMovement?: boolean;
+    /** [KO] 지면 안착 시 추가로 적용할 수직 오프셋 (기본값: 0.0, 지형 메시 폴리곤 오차나 모델 발바닥 피벗 보정용) [EN] Additional vertical offset applied when landing on the ground (default: 0.0, for adjusting terrain polygon deviations or model foot pivot) */
+    floorOffset?: number;
+    /** [KO] 동적 지면 고도 산출 콜백 함수 ((x, z) => number). 설정 시 이동 직후 지면 높이를 실시간 동기화하여 1프레임 지연을 제거합니다. [EN] Dynamic floor height callback ((x, z) => number). If set, synchronizes floor height immediately after movement to eliminate 1-frame lag. */
+    getFloorHeight?: (x: number, z: number) => number;
     /** [KO] 사용자 정의 키보드 매핑 [EN] Custom keyboard mapping configuration */
     keyMap?: CharacterKeyMap;
 }
@@ -68,10 +72,14 @@ class SimpleCharacterController extends RedGPUObject {
     public gravity: number;
     public jumpForce: number;
     public floorHeight: number;
+    /** [KO] 지면 안착 시 추가로 적용할 수직 오프셋 (기본값: 0.0, 지형 메시 폴리곤 오차나 모델 발바닥 피벗 보정용) [EN] Additional vertical offset applied when landing on the ground (default: 0.0, for adjusting terrain polygon deviations or model foot pivot) */
+    public floorOffset: number = 0.0;
     public useKeyboard: boolean;
     public modelRotationOffset: number;
     public useControllerRotationYaw: boolean;
     public orientRotationToMovement: boolean;
+    /** [KO] 동적 지면 고도 산출 콜백 함수 ((x, z) => number). 설정 시 이동 직후 지면 높이를 실시간 동기화하여 1프레임 지연을 제거합니다. [EN] Dynamic floor height callback ((x, z) => number). If set, synchronizes floor height immediately after movement to eliminate 1-frame lag. */
+    public getFloorHeight: ((x: number, z: number) => number) | null = null;
     public keyMap: Required<CharacterKeyMap>;
     /** [KO] 조종할 대상 메시 [EN] Target mesh to control */
     #targetMesh: Mesh;
@@ -114,6 +122,8 @@ class SimpleCharacterController extends RedGPUObject {
         this.gravity = options.gravity ?? 9.8;
         this.jumpForce = options.jumpForce ?? 5.0;
         this.floorHeight = options.floorHeight ?? 0.0;
+        this.floorOffset = options.floorOffset ?? 0.0;
+        this.getFloorHeight = options.getFloorHeight ?? null;
         this.useKeyboard = options.useKeyboard ?? true;
         this.modelRotationOffset = options.modelRotationOffset ?? 0.0;
         this.useControllerRotationYaw = options.useControllerRotationYaw ?? false;
@@ -196,6 +206,18 @@ class SimpleCharacterController extends RedGPUObject {
 
         // 2. 이동 및 회전 업데이트
         this.#updateMovementAndRotation(view, dt);
+
+        // 2.1 이동 후 새 위치의 지면 고도를 실시간 갱신 (1프레임 지연 완벽 제거)
+        if (this.getFloorHeight) {
+            const newFloor = this.getFloorHeight(this.#targetMesh.x, this.#targetMesh.z);
+            if (typeof newFloor === 'number' && Number.isFinite(newFloor)) {
+                this.floorHeight = newFloor + this.floorOffset;
+            }
+        }
+
+        // 2.2 상체 수직 유지 (인간형 캐릭터 상용 엔진 표준: Euler 각 X->Y->Z 축 뒤틀림 및 발 허공 들뜸 방지)
+        if (this.#targetMesh.rotationX !== 0) this.#targetMesh.rotationX = 0;
+        if (this.#targetMesh.rotationZ !== 0) this.#targetMesh.rotationZ = 0;
 
         // 3. 중력 및 수직 충돌 업데이트
         this.#updateGravity(view, dt);

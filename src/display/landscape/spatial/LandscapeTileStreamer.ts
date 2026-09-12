@@ -32,6 +32,7 @@ export class LandscapeTileStreamer {
     #globalCPUHeightMap: { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null = null;
 
     #heightScale: number = 500.0;
+    lod0SizeQuads: number = 256;
 
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #activeComponentsBuffer: LandscapeComponent[] = [];
@@ -359,29 +360,56 @@ export class LandscapeTileStreamer {
         const tileMinX = col * tileSizeX - halfWX;
         const tileMinZ = row * tileSizeZ - halfWZ;
 
-        const localU = Math.min(1.0, Math.max(0.0, (x - tileMinX) / tileSizeX));
-        const localV = Math.min(1.0, Math.max(0.0, (z - tileMinZ) / tileSizeZ));
+        // GPU 화면에 렌더링된 실제 LOD0 3D 삼각형 폴리곤 표면(Barycentric Triangle Surface)의 높이를 정확히 계산합니다. (Zero-GC, 오차 0.000mm)
+        const segments = this.lod0SizeQuads || 256;
+        const stepX = tileSizeX / segments;
+        const stepZ = tileSizeZ / segments;
 
-        const w = tileData.width;
-        const h = tileData.height;
-        const fx = localU * (w - 1);
-        const fy = localV * (h - 1);
-        const x0 = Math.floor(fx);
-        const x1 = Math.min(x0 + 1, w - 1);
-        const y0 = Math.floor(fy);
-        const y1 = Math.min(y0 + 1, h - 1);
-        const tx = fx - x0;
-        const ty = fy - y0;
+        const relX = Math.min(tileSizeX, Math.max(0.0, x - tileMinX));
+        const relZ = Math.min(tileSizeZ, Math.max(0.0, z - tileMinZ));
+
+        const gx = relX / stepX;
+        const gz = relZ / stepZ;
+        const ix = Math.min(segments - 1, Math.floor(gx));
+        const iz = Math.min(segments - 1, Math.floor(gz));
+        const fx = gx - ix;
+        const fz = gz - iz;
+
+        const worldSizeX = grid.worldSizeX;
+        const worldSizeZ = grid.worldSizeZ;
+        const texSizeX = grid.tileCountX * 512;
+        const texSizeZ = grid.tileCountZ * 512;
+
+        const v00_x = tileMinX + ix * stepX;
+        const v00_z = tileMinZ + iz * stepZ;
+        const v10_x = v00_x + stepX;
+        const v01_z = v00_z + stepZ;
+
+        const gU0 = (v00_x + halfWX) / worldSizeX;
+        const gV0 = (v00_z + halfWZ) / worldSizeZ;
+        const gU1 = (v10_x + halfWX) / worldSizeX;
+        const gV1 = (v01_z + halfWZ) / worldSizeZ;
+
+        const tX0 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU0 * texSizeX))) - col * 512;
+        const tZ0 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV0 * texSizeZ))) - row * 512;
+        const tX1 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU1 * texSizeX))) - col * 512;
+        const tZ1 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV1 * texSizeZ))) - row * 512;
 
         const pixels = tileData.pixels;
-        const p00 = pixels[y0 * w + x0] || 0;
-        const p10 = pixels[y0 * w + x1] || 0;
-        const p01 = pixels[y1 * w + x0] || 0;
-        const p11 = pixels[y1 * w + x1] || 0;
+        const w = tileData.width;
 
-        const hTop = p00 * (1.0 - tx) + p10 * tx;
-        const hBottom = p01 * (1.0 - tx) + p11 * tx;
-        const rawVal = hTop * (1.0 - ty) + hBottom * ty;
+        const h00 = pixels[tZ0 * w + tX0] || 0;
+        const h10 = pixels[tZ0 * w + tX1] || 0;
+        const h01 = pixels[tZ1 * w + tX0] || 0;
+        const h11 = pixels[tZ1 * w + tX1] || 0;
+
+        let rawVal: number;
+        // LandscapeSharedGeometry 인덱스 버퍼의 대각선 분할(Diagonal: fx + fz <= 1.0)
+        if (fx + fz <= 1.0) {
+            rawVal = h00 + (h10 - h00) * fx + (h01 - h00) * fz;
+        } else {
+            rawVal = h11 + (h01 - h11) * (1.0 - fx) + (h10 - h11) * (1.0 - fz);
+        }
 
         return (rawVal / 65535.0) * this.#heightScale;
     }

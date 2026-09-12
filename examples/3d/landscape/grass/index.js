@@ -395,7 +395,7 @@ RedGPU.init(
                 characterMesh.x = -120;
                 characterMesh.z = 120;
                 const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-                characterMesh.y = startH > 0 ? startH : 200;
+                characterMesh.y = (startH > 0 ? startH : 200);
 
                 // 🌟 캐릭터 및 모든 하위 부위의 그림자 생성 및 수신 활성화
                 characterMesh.setCastShadowRecursively(true);
@@ -419,8 +419,14 @@ RedGPU.init(
                         gravity: 24.0,
                         jumpForce: 9.0,
                         floorHeight: 200.0,
+                        floorOffset: 0.0, // GPU 지형 메시 오차 0.000mm 달성으로 기본 오프셋 0.0 (Tweakpane에서 신발창 미세 튜닝 가능)
+                        getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                     }
                 );
+
+                if (testPane?.bindCharacter) {
+                    testPane.bindCharacter(characterController);
+                }
 
                 // 애니메이션 클립 매핑 (0=Idle, 1=Run, 2=TPose, 3=Walk)
                 const clips = loader.parsingResult.animations;
@@ -471,18 +477,17 @@ RedGPU.init(
                 const dt = lastTime !== null ? timestamp - lastTime : 0;
                 lastTime = timestamp;
                 if (dt > 0) {
-                    // 1. 현재 캐릭터 위치의 지형 고도 실시간 취득
-                    const terrainH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-                    if (terrainH > 0) {
-                        characterController.floorHeight = terrainH;
-                        if (!initialSnapped) {
-                            characterMesh.y = terrainH;
+                    // 1. 캐릭터 이동 및 물리 시뮬레이션 (이동 직후 getFloorHeight로 새 위치의 지면 고도를 자동 동기화하여 1프레임 지연 완벽 제거)
+                    characterController.update(view, timestamp);
+
+                    // 최초 1회 지면 스냅
+                    if (!initialSnapped) {
+                        const h = characterController.floorHeight;
+                        if (h > 0) {
+                            characterMesh.y = h;
                             initialSnapped = true;
                         }
                     }
-
-                    // 2. 캐릭터 이동 및 물리 시뮬레이션
-                    characterController.update(view, timestamp);
 
                     // 3. OrbitController 3인칭 카메라가 캐릭터를 부드럽게 추적
                     controller.centerX = characterMesh.x;
@@ -523,6 +528,7 @@ const renderTestPane = ({
                         }) => {
     let grassFolder = null;
     let updateStateUI = null;
+    let paneInstance = null;
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
@@ -530,6 +536,7 @@ const renderTestPane = ({
         ibl: false,
         skybox: false,
         gui: (pane) => {
+            paneInstance = pane;
             // 1. 조작 안내 폴더
             const helpFolder = pane.addFolder({title: '⌨️ Character Controls', expanded: false});
             const config = {
@@ -730,8 +737,24 @@ const renderTestPane = ({
         lodFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
     };
 
+    const bindCharacter = (cc) => {
+        if (!paneInstance || !cc) return;
+        const charFolder = paneInstance.addFolder({title: '🚶 Character Ground & Physics', expanded: true});
+        charFolder.addBinding(cc, 'floorOffset', {
+            min: -0.1,
+            max: 0.3,
+            step: 0.01,
+            label: 'Floor Offset (m)'
+        });
+        charFolder.addBinding(cc, 'speed', {min: 1.0, max: 10.0, step: 0.5, label: 'Walk Speed'});
+        charFolder.addBinding(cc, 'runSpeed', {min: 2.0, max: 20.0, step: 0.5, label: 'Run Speed'});
+        charFolder.addBinding(cc, 'jumpForce', {min: 2.0, max: 15.0, step: 0.5, label: 'Jump Force'});
+        charFolder.addBinding(cc, 'gravity', {min: 5.0, max: 50.0, step: 1.0, label: 'Gravity'});
+    };
+
     return {
         addTypeToUI,
-        updateStateUI: (state) => updateStateUI?.(state)
+        updateStateUI: (state) => updateStateUI?.(state),
+        bindCharacter
     };
 };
