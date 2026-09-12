@@ -13,6 +13,8 @@ import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
 
+const DEG2RAD: number = 0.017453292519943295;
+
 /**
  * @internal
  * 0-GC In-place QuickSort for candidate indices sorted by distance ascending.
@@ -449,7 +451,6 @@ export class LandscapeGrassManager {
 
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (alloc) {
-                const DEG2RAD = 0.017453292519943295;
                 const minSlope = type.minSlope ?? 0.0;
                 const maxSlope = type.maxSlope ?? 89.0;
                 const hasSlopeFilter = minSlope > 0.0 || maxSlope < 89.0;

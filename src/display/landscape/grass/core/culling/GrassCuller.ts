@@ -54,9 +54,10 @@ export class GrassCuller {
         f32[3] = 1.0;
 
         if (frustumPlanes && frustumPlanes.length >= 24) {
-            f32.set(frustumPlanes.subarray(0, 24), 4);
+            for (let i = 0; i < 24; i++) {
+                f32[4 + i] = frustumPlanes[i];
+            }
         } else {
-
             f32.fill(0, 4, 28);
         }
 

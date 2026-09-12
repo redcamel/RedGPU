@@ -19,9 +19,6 @@ export interface GrassTypeAllocation {
     indirectBaseOffset: number;
     activeCount: number;
     lods: GrassLODAllocation[];
-    indexCount: number;
-    firstIndex: number;
-    baseVertex: number;
 }
 
 export class GrassMegaBuffer {
@@ -177,10 +174,7 @@ export class GrassMegaBuffer {
             culledBaseOffset,
             indirectBaseOffset,
             activeCount: 0,
-            lods: lodAllocations,
-            indexCount: lodAllocations[0].indexCount,
-            firstIndex: lodAllocations[0].firstIndex,
-            baseVertex: lodAllocations[0].baseVertex
+            lods: lodAllocations
         };
 
         this.#allocations.set(typeId, alloc);
