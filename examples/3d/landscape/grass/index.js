@@ -249,7 +249,7 @@ RedGPU.init(
                         minScale: [7.0, 4.5, 7.0],
                         maxScale: [11.0, 6.5, 11.0],
                         groundBlendStrength: 0.55,
-                        subsurfaceStrength: 1.40,
+                        subsurfaceStrength: 0.40,
                         exposureBoost: 1,
                         bottomOffset: -0.25
                     });
@@ -365,7 +365,7 @@ RedGPU.init(
                         minScale: [3.0, 3.8, 3.0],
                         maxScale: [4.8, 6.0, 4.8],
                         groundBlendStrength: 0.45,
-                        subsurfaceStrength: 1.50,
+                        subsurfaceStrength: 0.45,
                         exposureBoost: 1,
                         bottomOffset: -0.18
                     });
