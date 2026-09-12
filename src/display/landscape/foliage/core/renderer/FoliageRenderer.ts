@@ -286,9 +286,20 @@ class FoliageRenderer {
                     if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
                 }
 
-                const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
-                const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
-                this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                if (lodIdx === 0 && foliageType.isFoliage) {
+                    const lod0Subs = foliageType.lod0SubMeshes;
+                    const subCount = lod0Subs.length;
+                    for (let l0 = 0; l0 < subCount; l0++) {
+                        const sub = lod0Subs[l0];
+                        const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
+                        const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                        this.#drawShadowLOD0SubMesh(bundleEncoder, sub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                    }
+                } else {
+                    const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
+                    const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
+                    this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                }
             }
         }
 
@@ -299,6 +310,84 @@ class FoliageRenderer {
         this.#shadowRenderBundles[currentCascade] = bundle;
         this.#lastSystemBGByCascade[currentCascade] = systemBG;
         return bundle;
+    }
+
+    #drawShadowLOD0SubMesh(
+        passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
+        sub: FoliageSubMesh,
+        systemBG: GPUBindGroup | null,
+        indirectGPUBuffer: GPUBuffer,
+        culledGPUBuffer: GPUBuffer,
+        overrideInstanceOffset?: number,
+        overrideIndirectOffset?: number
+    ): void {
+        const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
+        if (!vertexGPUBuffer) return;
+
+        const isMasked = sub.isMasked;
+        let pipeline: GPURenderPipeline | null;
+
+        if (isMasked) {
+            pipeline = this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
+                sub.material,
+                sub.strideBytes,
+                'none',
+                this.#subMeshVertexBindGroupLayout
+            );
+        } else {
+            pipeline = this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
+                sub.strideBytes,
+                'back',
+                this.#subMeshVertexBindGroupLayout
+            );
+        }
+        if (!pipeline) return;
+
+        if (this.#lastBoundPipeline !== pipeline) {
+            passEncoder.setPipeline(pipeline);
+            this.#lastBoundPipeline = pipeline;
+        }
+
+        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
+            passEncoder.setBindGroup(0, systemBG);
+            this.#lastBoundSystemBG = systemBG;
+        }
+
+        const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
+        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
+            passEncoder.setBindGroup(1, vertexUniformBG);
+            this.#lastBoundVertexUniformBG = vertexUniformBG;
+        }
+
+        if (isMasked) {
+            const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
+            if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
+                passEncoder.setBindGroup(2, matUniformBG);
+                this.#lastBoundMatBG = matUniformBG;
+            }
+        }
+
+        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
+            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
+        }
+
+        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : sub.instanceBufferOffset;
+        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
+            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
+            this.#lastBoundInstanceBuffer = culledGPUBuffer;
+            this.#lastBoundInstanceOffset = instanceBufferOffset;
+        }
+
+        if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
+            const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
+            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
+                passEncoder.setIndexBuffer(indexGPUBuffer, sub.indexFormat);
+                this.#lastBoundIndexBuffer = indexGPUBuffer;
+            }
+        }
+
+        sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
     }
 
     #drawShadowMergedSubMesh(

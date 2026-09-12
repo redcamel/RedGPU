@@ -275,3 +275,76 @@ fn entryPointShadowOpaqueFragment(input : FoliageShadowOpaqueOutput) {
     }
 }
 
+struct FoliageShadowMaskedOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) uv: vec2<f32>,
+    @location(1) shadowFade: f32,
+    @location(2) @interpolate(flat) globalFragmentSlotIndex: u32,
+};
+
+@vertex
+fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutput {
+    var output : FoliageShadowMaskedOutput;
+
+    let instancePos = input.instancePos_scaleY.xyz;
+    let scaleY = input.instancePos_scaleY.w;
+
+    let instanceRotQuat = input.instanceRotQuat;
+    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
+
+    var hierarchyPos = input.position;
+    if (subMeshUniforms.hasHierarchyTransform != 0u) {
+        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
+    }
+
+    let safeScale = max(instanceScale, vec3<f32>(0.0001));
+    let scaledPos = hierarchyPos * safeScale;
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
+
+    var worldPos = rotatedPos + instancePos;
+    let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, input.vertexNormal, input.vertexColor_0, instancePos, systemUniforms.time.time);
+    worldPos += windDisp;
+
+    output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
+    output.uv = input.uv;
+    output.shadowFade = input.instanceFade;
+    output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
+    return output;
+}
+
+@group(2) @binding(1) var shadowBaseColorTextureSampler: sampler;
+@group(2) @binding(2) var shadowBaseColorTexture: texture_2d<f32>;
+
+@fragment
+fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
+    // 🌟 WGSL 규격 준수: 미분 연산 및 텍스처 샘플링을 분기문 이전(Uniform Control Flow) 최상단에서 선행 계산
+    let ddxUV = dpdx(input.uv);
+    let ddyUV = dpdy(input.uv);
+    let alpha = textureSample(shadowBaseColorTexture, shadowBaseColorTextureSampler, input.uv).a;
+
+    if (input.shadowFade < 0.999) {
+        let px = u32(input.position.x) & 3u;
+        let py = u32(input.position.y) & 3u;
+        let idx = (py << 2u) | px;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+        if (input.shadowFade < threshold) {
+            discard;
+        }
+    }
+
+    let globalFragmentData = globalFragmentSSBO_PBR[input.globalFragmentSlotIndex];
+    let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
+
+    if (alpha < baseCutOff) {
+        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
+        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+        let effectiveAlpha = alpha * mipAlphaScale;
+        if (effectiveAlpha <= baseCutOff) {
+            discard;
+        }
+    }
+}
+
+

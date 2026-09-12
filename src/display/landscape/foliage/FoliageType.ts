@@ -98,6 +98,7 @@ class FoliageType {
     #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
+    #lod0SubMeshes: FoliageSubMesh[] = [];
     #depthPrepassSubMeshes: FoliageSubMesh[] = [];
     #mainSubMeshes: FoliageSubMesh[] = [];
     #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
@@ -246,6 +247,7 @@ class FoliageType {
             this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
+        this.#lod0SubMeshes = this.#subMeshes.filter(sub => sub.lodIndex === 0);
         this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         const userOffset = options.bottomOffset;
@@ -402,6 +404,10 @@ class FoliageType {
 
     get mainSubMeshes(): readonly FoliageSubMesh[] {
         return this.#mainSubMeshes;
+    }
+
+    get lod0SubMeshes(): readonly FoliageSubMesh[] {
+        return this.#lod0SubMeshes;
     }
 
     get shadowMergedSubMeshes(): readonly FoliageShadowMergedSubMesh[] {
@@ -929,6 +935,7 @@ class FoliageType {
             sub.destroy();
         }
         this.#subMeshes.length = 0;
+        this.#lod0SubMeshes.length = 0;
         for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
             const shadowSub = this.#shadowMergedSubMeshes[i];
             shadowSub.destroy();

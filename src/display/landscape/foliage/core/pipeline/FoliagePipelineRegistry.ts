@@ -268,6 +268,83 @@ class FoliagePipelineRegistry {
         return newPipeline;
     }
 
+    getOrCreateShadowMaskedPipeline(
+        material: any,
+        strideBytes: number = 72,
+        cullMode: GPUCullMode = 'none',
+        subMeshBindGroupLayout?: GPUBindGroupLayout | null
+    ): GPURenderPipeline | null {
+        if (!material) return null;
+
+        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+            material._updateFragmentState?.();
+            material.dirtyPipeline = false;
+        }
+
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+
+        const materialUUID = material.uuid || material.name || 'mat';
+        const pipelineKey = `FoliageShadowMasked_${materialUUID}_stride${strideBytes}_cull${cullMode}`;
+        const cachedPipeline = this.#pipelineCache.get(pipelineKey);
+        if (cachedPipeline) {
+            return cachedPipeline;
+        }
+
+        const geometryBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: strideBytes,
+            attributes: FoliagePipelineRegistry.#GEO_ATTRIBUTES_ALL as GPUVertexAttribute[],
+        };
+
+        const instanceBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: 8 * 4,
+            stepMode: 'instance',
+            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL as GPUVertexAttribute[],
+        };
+
+        const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
+        const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
+            || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
+            || this.#emptyBindGroupLayout;
+
+        const pipelineLayout = gpuDevice.createPipelineLayout({
+            label: `FoliagePipelineLayout_${pipelineKey}`,
+            bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout],
+        });
+
+        const pipelineDescriptor: GPURenderPipelineDescriptor = {
+            label: `FoliageRenderPipeline_${pipelineKey}`,
+            layout: pipelineLayout,
+            vertex: {
+                module: this.#vertexShaderModule!,
+                entryPoint: 'entryPointShadowMaskedVertex',
+                buffers: [geometryBufferLayout, instanceBufferLayout],
+            },
+            fragment: {
+                module: this.#vertexShaderModule!,
+                entryPoint: 'entryPointShadowMaskedFragment',
+                targets: [],
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: cullMode,
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: 1,
+            },
+        };
+
+        const newPipeline = gpuDevice.createRenderPipeline(pipelineDescriptor);
+        this.#pipelineCache.set(pipelineKey, newPipeline);
+        return newPipeline;
+    }
+
     clearCache(): void {
         this.#pipelineCache.clear();
     }
