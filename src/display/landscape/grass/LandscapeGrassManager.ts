@@ -15,6 +15,12 @@ import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
 
 const DEG2RAD: number = 0.017453292519943295;
 
+interface CellSlotRange {
+    start: number;
+    count: number;
+    filledCount: number;
+}
+
 /**
  * @internal
  * 0-GC In-place QuickSort for candidate indices sorted by distance ascending.
@@ -91,15 +97,19 @@ export class LandscapeGrassManager {
         bindGroup: GPUBindGroup | null;
         instanceBindGroup: GPUBindGroup | null;
         cachedColorTexView: GPUTextureView | null;
+        initialized: boolean;
+        cachedHasVbt: boolean;
     }> = new Map();
 
     #candidateKeys: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
     #candidateDistancesSq: Float32Array = new Float32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
     #candidateIndices: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
 
+    #slotRangePool: CellSlotRange[] = [];
+
     #typeCellStates: Map<number, {
-        activeCellRanges: Map<number, { start: number; count: number; filledCount?: number }>;
-        freeSlotRanges: Array<{ start: number; count: number }>;
+        activeCellRanges: Map<number, CellSlotRange>;
+        freeSlotRanges: CellSlotRange[];
         slotHead: number;
         activeCount: number;
     }> = new Map();
@@ -333,7 +343,9 @@ export class LandscapeGrassManager {
                 grassUniformCPUBuffer,
                 bindGroup: null,
                 instanceBindGroup: null,
-                cachedColorTexView: null
+                cachedColorTexView: null,
+                initialized: false,
+                cachedHasVbt: false
             });
         }
 
@@ -396,86 +408,93 @@ export class LandscapeGrassManager {
         if (!gpuDevice) return;
 
         const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
+        const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.loadedTileCount > 0);
 
         for (const type of this.#grassTypes) {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res) continue;
 
-            const gf = res.grassUniformCPUBuffer;
-            gf[0] = type.cullingDistance;
-            gf[1] = type.shrinkStartDistance;
-            gf[2] = type.meshHeight;
-            gf[3] = type.minY;
+            const isDirty = !res.initialized || type.dirty || res.cachedHasVbt !== hasValidVbt;
+            if (isDirty) {
+                res.initialized = true;
+                res.cachedHasVbt = hasValidVbt;
+                type.markClean();
 
-            gpuDevice.queue.writeBuffer(
-                res.grassUniformGPUBuffer,
-                0,
-                res.grassUniformCPUBuffer.buffer,
-                0,
-                res.grassUniformCPUBuffer.byteLength
-            );
+                const gf = res.grassUniformCPUBuffer;
+                gf[0] = type.cullingDistance;
+                gf[1] = type.shrinkStartDistance;
+                gf[2] = type.meshHeight;
+                gf[3] = type.minY;
 
-            const mf = res.cpuBuffer;
-            const mu = res.uintBuffer;
-
-            mf[0] = type.groundBlendStrength;
-            mf[1] = type.alphaCutoff;
-            const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.loadedTileCount > 0);
-            mu[2] = hasValidVbt ? 1 : 0;
-            mf[3] = type.exposureBoost;
-
-            const ssc = type.subsurfaceColor;
-            mf[4] = ssc[0];
-            mf[5] = ssc[1];
-            mf[6] = ssc[2];
-            mf[7] = type.subsurfaceDistortion;
-
-            mf[8] = type.subsurfaceStrength;
-            mf[9] = type.roughness;
-            mf[10] = type.shadowStrength;
-            mu[11] = type.receiveShadow ? 1 : 0;
-
-            gpuDevice.queue.writeBuffer(
-                res.uniformBuffer,
-                0,
-                res.cpuBuffer.buffer,
-                0,
-                res.cpuBuffer.byteLength
-            );
-
-            const lodCount = Math.min(4, type.lodCount);
-            const lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999];
-            for (let i = 0; i < lodCount; i++) {
-                lodDistances[i] = type.lods[i].lodDistance;
-            }
-
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (alloc) {
-                const minSlope = type.minSlope ?? 0.0;
-                const maxSlope = type.maxSlope ?? 89.0;
-                const hasSlopeFilter = minSlope > 0.0 || maxSlope < 89.0;
-                const minSlopeTan2 = minSlope > 0.0 ? Math.tan(minSlope * DEG2RAD) ** 2 : 0.0;
-                const maxSlopeTan2 = maxSlope < 89.0 ? Math.tan(maxSlope * DEG2RAD) ** 2 : 999999.0;
-
-                this.#megaBuffer.updateTypeParams(
-                    type.typeId,
-                    type.cullingDistance,
-                    type.fadeStartDistance,
-                    type.shrinkStartDistance,
-                    type.bottomOffset,
-                    type.groundBlendStrength,
-                    type.meshHeight,
-                    alloc.rawBaseOffset,
-                    alloc.maxInstances,
-                    alloc.culledBaseOffset,
-                    alloc.indirectBaseOffset,
-                    lodCount,
-                    alloc.maxInstances,
-                    lodDistances,
-                    minSlopeTan2,
-                    maxSlopeTan2,
-                    hasSlopeFilter
+                gpuDevice.queue.writeBuffer(
+                    res.grassUniformGPUBuffer,
+                    0,
+                    res.grassUniformCPUBuffer.buffer,
+                    0,
+                    res.grassUniformCPUBuffer.byteLength
                 );
+
+                const mf = res.cpuBuffer;
+                const mu = res.uintBuffer;
+
+                mf[0] = type.groundBlendStrength;
+                mf[1] = type.alphaCutoff;
+                mu[2] = hasValidVbt ? 1 : 0;
+                mf[3] = type.exposureBoost;
+
+                const ssc = type.subsurfaceColor;
+                mf[4] = ssc[0];
+                mf[5] = ssc[1];
+                mf[6] = ssc[2];
+                mf[7] = type.subsurfaceDistortion;
+
+                mf[8] = type.subsurfaceStrength;
+                mf[9] = type.roughness;
+                mf[10] = type.shadowStrength;
+                mu[11] = type.receiveShadow ? 1 : 0;
+
+                gpuDevice.queue.writeBuffer(
+                    res.uniformBuffer,
+                    0,
+                    res.cpuBuffer.buffer,
+                    0,
+                    res.cpuBuffer.byteLength
+                );
+
+                const lodCount = Math.min(4, type.lodCount);
+                const lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999];
+                for (let i = 0; i < lodCount; i++) {
+                    lodDistances[i] = type.lods[i].lodDistance;
+                }
+
+                const alloc = this.#megaBuffer.getAllocation(type.typeId);
+                if (alloc) {
+                    const minSlope = type.minSlope ?? 0.0;
+                    const maxSlope = type.maxSlope ?? 89.0;
+                    const hasSlopeFilter = minSlope > 0.0 || maxSlope < 89.0;
+                    const minSlopeTan2 = minSlope > 0.0 ? Math.tan(minSlope * DEG2RAD) ** 2 : 0.0;
+                    const maxSlopeTan2 = maxSlope < 89.0 ? Math.tan(maxSlope * DEG2RAD) ** 2 : 999999.0;
+
+                    this.#megaBuffer.updateTypeParams(
+                        type.typeId,
+                        type.cullingDistance,
+                        type.fadeStartDistance,
+                        type.shrinkStartDistance,
+                        type.bottomOffset,
+                        type.groundBlendStrength,
+                        type.meshHeight,
+                        alloc.rawBaseOffset,
+                        alloc.maxInstances,
+                        alloc.culledBaseOffset,
+                        alloc.indirectBaseOffset,
+                        lodCount,
+                        alloc.maxInstances,
+                        lodDistances,
+                        minSlopeTan2,
+                        maxSlopeTan2,
+                        hasSlopeFilter
+                    );
+                }
             }
         }
 
@@ -658,6 +677,7 @@ export class LandscapeGrassManager {
         }
         this.#typeMaterialBuffers.clear();
         this.#typeCellStates.clear();
+        this.#slotRangePool.length = 0;
         this.#neededCellKeysSet.clear();
         this.#keysToEvict.length = 0;
         this.#renderPipelinesNear.clear();
@@ -769,6 +789,8 @@ export class LandscapeGrassManager {
             if (!state || !alloc) continue;
 
             if (forceRebuild) {
+                for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
+                for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
                 state.activeCellRanges.clear();
                 state.freeSlotRanges.length = 0;
                 state.slotHead = 0;
@@ -826,11 +848,11 @@ export class LandscapeGrassManager {
 
             // 범위 벗어난 셀 퇴출
             this.#keysToEvict.length = 0;
-            for (const activeKey of state.activeCellRanges.keys()) {
+            state.activeCellRanges.forEach((_range, activeKey) => {
                 if (!this.#neededCellKeysSet.has(activeKey)) {
                     this.#keysToEvict.push(activeKey);
                 }
-            }
+            });
 
             for (let i = 0; i < this.#keysToEvict.length; i++) {
                 const evictKey = this.#keysToEvict[i];
@@ -844,8 +866,9 @@ export class LandscapeGrassManager {
                     );
                 }
                 this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
-                state.freeSlotRanges.push({start: range.start, count: range.count});
-                state.activeCount -= (range.filledCount ?? range.count);
+                // 0-GC: 기존 range 인스턴스를 재사용하여 freeSlotRanges에 보관
+                state.freeSlotRanges.push(range);
+                state.activeCount -= range.filledCount;
             }
 
             // 신규 진입 셀 스폰 (Time-sliced Budget 적용)
@@ -863,9 +886,10 @@ export class LandscapeGrassManager {
                 if (state.activeCellRanges.has(key)) continue;
 
                 let slotBase = -1;
+                let reusedRange: CellSlotRange | null = null;
                 if (state.freeSlotRanges.length > 0) {
-                    const freeRange = state.freeSlotRanges.pop()!;
-                    slotBase = freeRange.start;
+                    reusedRange = state.freeSlotRanges.pop()!;
+                    slotBase = reusedRange.start;
                 } else if (state.slotHead + targetDensity <= alloc.maxInstances) {
                     slotBase = state.slotHead;
                     state.slotHead += targetDensity;
@@ -897,6 +921,7 @@ export class LandscapeGrassManager {
                     }
 
                     const rot = this.#nextPrng() * 6.2831853;
+                    // 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축은 균일 축척(scaleXZ = [0])을 사용하고 높이는 [1]을 사용합니다.
                     const sScale = type.minScale[0] + this.#nextPrng() * (type.maxScale[0] - type.minScale[0]);
                     const hScale = type.minScale[1] + this.#nextPrng() * (type.maxScale[1] - type.minScale[1]);
 
@@ -919,11 +944,23 @@ export class LandscapeGrassManager {
                 if (filledCount > 0) {
                     this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
                     this.#baker.addBakeTasks(alloc.rawBaseOffset + slotBase, filledCount, type.typeId);
-                    state.activeCellRanges.set(key, {start: slotBase, count: targetDensity, filledCount: filledCount});
+                    if (reusedRange) {
+                        reusedRange.count = targetDensity;
+                        reusedRange.filledCount = filledCount;
+                        state.activeCellRanges.set(key, reusedRange);
+                    } else {
+                        state.activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
+                    }
                     state.activeCount += filledCount;
                 } else {
                     this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
-                    state.freeSlotRanges.push({start: slotBase, count: targetDensity});
+                    if (reusedRange) {
+                        reusedRange.count = targetDensity;
+                        reusedRange.filledCount = 0;
+                        state.freeSlotRanges.push(reusedRange);
+                    } else {
+                        state.freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
+                    }
                 }
             }
 
@@ -948,6 +985,21 @@ export class LandscapeGrassManager {
         let t = Math.imul(this.#prngState ^ (this.#prngState >>> 15), 1 | this.#prngState);
         t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    #acquireSlotRange(start: number, count: number, filledCount: number = 0): CellSlotRange {
+        const item = this.#slotRangePool.pop();
+        if (item) {
+            item.start = start;
+            item.count = count;
+            item.filledCount = filledCount;
+            return item;
+        }
+        return {start, count, filledCount};
+    }
+
+    #releaseSlotRange(item: CellSlotRange): void {
+        this.#slotRangePool.push(item);
     }
 }
 

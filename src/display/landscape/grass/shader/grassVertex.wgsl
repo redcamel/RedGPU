@@ -94,7 +94,8 @@ fn main(input: VertexInput) -> VertexOutput {
     let normY = sqrt(max(0.0, 1.0 - normX * normX - normZ * normZ));
     let terrainN = vec3<f32>(normX, normY, normZ);
 
-    let rotAxis = cross(vec3<f32>(0.0, 1.0, 0.0), terrainN);
+    // cross(vec3(0, 1, 0), terrainN)는 수학적으로 vec3(normZ, 0.0, -normX)와 정확히 일치 (곱셈 6회/뺄셈 3회 제거)
+    let rotAxis = vec3<f32>(normZ, 0.0, -normX);
     let axisLen = length(rotAxis);
     if (axisLen > 0.0001) {
         let axis = rotAxis / axisLen;

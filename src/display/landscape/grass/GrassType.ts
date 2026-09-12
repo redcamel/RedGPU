@@ -36,8 +36,10 @@ export interface GrassTypeOptions {
     fadeStartDistance?: number;
     shrinkStartDistance?: number;
     farDistance?: number;
-    minScale?: [number, number, number];
-    maxScale?: [number, number, number];
+    /** [KO] 최소 스케일 비율 [scaleXZ, scaleY] 또는 [scaleXZ, scaleY, scaleXZ] / [EN] Minimum scale ratio [scaleXZ, scaleY] or [scaleXZ, scaleY, scaleXZ] */
+    minScale?: [number, number] | [number, number, number];
+    /** [KO] 최대 스케일 비율 [scaleXZ, scaleY] 또는 [scaleXZ, scaleY, scaleXZ] / [EN] Maximum scale ratio [scaleXZ, scaleY] or [scaleXZ, scaleY, scaleXZ] */
+    maxScale?: [number, number] | [number, number, number];
     height?: number;
     groundBlendStrength?: number;
     alphaCutoff?: number;
@@ -90,6 +92,7 @@ export class GrassType {
     #castShadow: boolean = true;
 
     #typeId: number = 0;
+    #dirty: boolean = true;
     #onChanged: (() => void) | null = null;
 
     constructor(redGPUContext: RedGPUContext, options: GrassTypeOptions) {
@@ -183,8 +186,8 @@ export class GrassType {
         if (options.cullingDistance !== undefined) this.#cullingDistance = options.cullingDistance;
         if (options.fadeStartDistance !== undefined) this.#fadeStartDistance = options.fadeStartDistance;
         if (options.shrinkStartDistance !== undefined) this.#shrinkStartDistance = options.shrinkStartDistance;
-        if (options.minScale) this.#minScale = [...options.minScale];
-        if (options.maxScale) this.#maxScale = [...options.maxScale];
+        if (options.minScale) this.#minScale = [options.minScale[0], options.minScale[1], options.minScale[2] ?? options.minScale[0]];
+        if (options.maxScale) this.#maxScale = [options.maxScale[0], options.maxScale[1], options.maxScale[2] ?? options.maxScale[0]];
         if (options.groundBlendStrength !== undefined) this.#groundBlendStrength = options.groundBlendStrength;
 
         const inheritedCutoff = mat?.cutOff !== undefined ? mat.cutOff : mat?.alphaCutoff;
@@ -274,6 +277,7 @@ export class GrassType {
 
     set aoIntensity(v: number) {
         this.#aoIntensity = Math.max(0.0, Math.min(2.0, v));
+        this.#dirty = true;
     }
 
     get densityPerHectare(): number {
@@ -361,21 +365,33 @@ export class GrassType {
         this.#notifyChange();
     }
 
+    /**
+     * [KO] 잔디 인스턴스 최소 크기 비율 [scaleXZ, scaleY, scaleXZ?].
+     * 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축이 균일 축척(scaleXZ)으로 동작합니다.
+     * [EN] Minimum scale ratio for grass instances [scaleXZ, scaleY, scaleXZ?].
+     * The horizontal axis operates with uniform scaling (scaleXZ) to prevent elliptical distortion during Y-axis rotation.
+     */
     get minScale(): [number, number, number] {
         return this.#minScale;
     }
 
-    set minScale(v: [number, number, number]) {
-        this.#minScale = [v[0], v[1], v[2]];
+    set minScale(v: [number, number] | [number, number, number]) {
+        this.#minScale = [v[0], v[1], v[2] ?? v[0]];
         this.#notifyChange();
     }
 
+    /**
+     * [KO] 잔디 인스턴스 최대 크기 비율 [scaleXZ, scaleY, scaleXZ?].
+     * 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축이 균일 축척(scaleXZ)으로 동작합니다.
+     * [EN] Maximum scale ratio for grass instances [scaleXZ, scaleY, scaleXZ?].
+     * The horizontal axis operates with uniform scaling (scaleXZ) to prevent elliptical distortion during Y-axis rotation.
+     */
     get maxScale(): [number, number, number] {
         return this.#maxScale;
     }
 
-    set maxScale(v: [number, number, number]) {
-        this.#maxScale = [v[0], v[1], v[2]];
+    set maxScale(v: [number, number] | [number, number, number]) {
+        this.#maxScale = [v[0], v[1], v[2] ?? v[0]];
         this.#notifyChange();
     }
 
@@ -393,6 +409,7 @@ export class GrassType {
 
     set exposureBoost(v: number) {
         this.#exposureBoost = Math.max(0.1, v);
+        this.#dirty = true;
     }
 
     get groundBlendStrength(): number {
@@ -401,6 +418,7 @@ export class GrassType {
 
     set groundBlendStrength(v: number) {
         this.#groundBlendStrength = Math.max(0, Math.min(1, v));
+        this.#dirty = true;
     }
 
     get alphaCutoff(): number {
@@ -409,6 +427,7 @@ export class GrassType {
 
     set alphaCutoff(v: number) {
         this.#alphaCutoff = Math.max(0.01, Math.min(1, v));
+        this.#dirty = true;
     }
 
     get roughness(): number {
@@ -417,6 +436,7 @@ export class GrassType {
 
     set roughness(v: number) {
         this.#roughness = Math.max(0.04, Math.min(1, v));
+        this.#dirty = true;
     }
 
     get subsurfaceStrength(): number {
@@ -425,6 +445,7 @@ export class GrassType {
 
     set subsurfaceStrength(v: number) {
         this.#subsurfaceStrength = Math.max(0.0, Math.min(3.0, v));
+        this.#dirty = true;
     }
 
     get subsurfaceColor(): [number, number, number] {
@@ -433,6 +454,7 @@ export class GrassType {
 
     set subsurfaceColor(v: [number, number, number]) {
         this.#subsurfaceColor = [v[0], v[1], v[2]];
+        this.#dirty = true;
     }
 
     get subsurfaceDistortion(): number {
@@ -441,6 +463,7 @@ export class GrassType {
 
     set subsurfaceDistortion(v: number) {
         this.#subsurfaceDistortion = Math.max(0.0, Math.min(1.0, v));
+        this.#dirty = true;
     }
 
     get metallic(): number {
@@ -449,6 +472,7 @@ export class GrassType {
 
     set metallic(v: number) {
         this.#metallic = Math.max(0, Math.min(1, v));
+        this.#dirty = true;
     }
 
     get targetLayer(): string | number {
@@ -475,6 +499,7 @@ export class GrassType {
 
     set receiveShadow(v: boolean) {
         this.#receiveShadow = v;
+        this.#dirty = true;
     }
 
     get shadowStrength(): number {
@@ -483,6 +508,7 @@ export class GrassType {
 
     set shadowStrength(v: number) {
         this.#shadowStrength = Math.max(0.0, Math.min(1.0, v));
+        this.#dirty = true;
     }
 
     get castShadow(): boolean {
@@ -491,6 +517,7 @@ export class GrassType {
 
     set castShadow(v: boolean) {
         this.#castShadow = v;
+        this.#dirty = true;
     }
 
     get typeId(): number {
@@ -505,11 +532,25 @@ export class GrassType {
         this.#onChanged = cb;
     }
 
+    get dirty(): boolean {
+        return this.#dirty;
+    }
+
+    markClean(): void {
+        this.#dirty = false;
+    }
+
+    markDirty(): void {
+        this.#dirty = true;
+        this.#notifyChange();
+    }
+
     getGeometryForLOD(lodIndex: number): Geometry | Primitive | undefined {
         return this.#lods[lodIndex]?.geometry ?? this.#geometry;
     }
 
     #notifyChange(): void {
+        this.#dirty = true;
         if (this.#onChanged) this.#onChanged();
     }
 }
