@@ -77,9 +77,9 @@ export class GrassType {
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
     #meshHeight: number = 1.0;
     #minY: number = 0.0;
-    #exposureBoost: number = 1.45;
-    #subsurfaceStrength: number = 1.0;
-    #subsurfaceColor: [number, number, number] = [0.45, 0.85, 0.15];
+    #exposureBoost: number = 1.0;
+    #subsurfaceStrength: number = 0.45;
+    #subsurfaceColor: [number, number, number] = [0.35, 0.65, 0.15];
     #subsurfaceDistortion: number = 0.35;
     #groundBlendStrength: number = 0.75;
     #alphaCutoff: number = 0.2;

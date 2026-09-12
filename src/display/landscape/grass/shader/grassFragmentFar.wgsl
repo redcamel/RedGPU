@@ -92,14 +92,14 @@ fn main(input: VertexOutput) -> OutputFragment {
         let dLight = light.color.rgb * light.intensity * preExposure;
         let nDotL = dot(N, L);
 
-        // 양면 Half-Lambert Wrap Diffuse
-        let wrapDiff = max((nDotL + 0.50) / 1.50, 0.0);
+        // 정면 Half-Lambert Diffuse
+        let directDiff = clamp((nDotL + 0.20) / 1.20, 0.0, 1.0);
 
-        // 원거리 고속 배면 투과 (초경량 ALU 1줄)
+        // 원거리 고속 배면 투과 (초경량 ALU 1줄, 에너지 보존)
         let backLight = max(-nDotL, 0.0);
-        let sssTransmission = backLight * (subsurfaceStrength * leafThickness * 0.40);
+        let sssTransmission = backLight * (subsurfaceStrength * leafThickness * 0.20);
 
-        totalDirectLighting += (albedo * wrapDiff + sssColor * sssTransmission) * dLight;
+        totalDirectLighting += (albedo * directDiff + sssColor * sssTransmission) * dLight;
     }
 
     // 🌿 5. 원거리 간접광 (IBL 큐브맵 패치 100% 바이패스 -> 유니폼 ambientLight 직결)

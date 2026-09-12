@@ -69,7 +69,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     let subsurfaceStrength = clamp(materialUniforms.subsurfaceStrength, 0.0, 3.0);
     let preExposure = systemUniforms.preExposure;
 
-    let sssColor = mix(albedo * 1.25, materialUniforms.subsurfaceColor, 0.60);
+    let sssColor = mix(albedo * 1.05, materialUniforms.subsurfaceColor, 0.35);
     let leafThickness = clamp(input.heightRatio, 0.1, 1.0);
 
     var totalDirectLighting = vec3<f32>(0.0);
@@ -105,13 +105,16 @@ fn main(input: VertexOutput) -> OutputFragment {
 
         let nDotL = dot(N, L);
 
-        // 🌿 1. 양면 Half-Lambert Wrap Diffuse (부드러운 풀잎 볼륨감)
-        let wrapDiff = max((nDotL + 0.50) / 1.50, 0.0);
+        // 🌿 1. 정면 직사광 Half-Lambert Diffuse (0.0 ~ 1.0 에너지 보존)
+        let directDiff = clamp((nDotL + 0.20) / 1.20, 0.0, 1.0);
 
-        // 🌿 2. 역광 배면 SSS (Backlight Subsurface Scattering - pow 0회 순수 ALU)
+        // 🌿 2. 역광 배면 SSS (Forward-scattering Translucency - 카메라-태양 마주봄 각도에서만 투과)
         let distortion = materialUniforms.subsurfaceDistortion;
-        let backLight = max(-nDotL, 0.0) * 0.50 + max(dot(V, -(L + N * distortion)), 0.0) * 0.50;
-        let sssTransmission = backLight * (subsurfaceStrength * leafThickness);
+        let lightOpposite = -(L + N * distortion);
+        let vDotL = max(dot(V, lightOpposite), 0.0);
+        let forwardPeak = vDotL * vDotL; // 태양을 정면으로 마주볼 때 집중되는 엽록소 투과 피크
+        let backFactor = max(-nDotL, 0.0);
+        let sssTransmission = backFactor * forwardPeak * (subsurfaceStrength * leafThickness * 0.45);
 
         // 🌿 3. 초경량 스펙큘러 (pow 대신 nDotH^4 고속 다항식 - 풀잎 깜빡임 방지)
         let H = normalize(L + V);
@@ -119,7 +122,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         let nh2 = nDotH * nDotH;
         let specFactor = nh2 * nh2 * (1.0 - roughness) * 0.25;
 
-        let totalLighting = (albedo * wrapDiff) + (sssColor * sssTransmission) + vec3<f32>(specFactor);
+        let totalLighting = (albedo * directDiff) + (sssColor * sssTransmission) + vec3<f32>(specFactor);
         totalDirectLighting += totalLighting * dLight;
     }
 
