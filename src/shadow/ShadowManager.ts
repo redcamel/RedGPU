@@ -27,6 +27,8 @@ import keepLog from "../utils/keepLog";
 class ShadowManager {
     #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager();
     #needsClear: boolean = true;
+    #cascadePassDescriptors: GPURenderPassDescriptor[] = [];
+    #clearPassDescriptors: GPURenderPassDescriptor[] = [];
 
     constructor() {
     }
@@ -86,30 +88,69 @@ class ShadowManager {
 
         const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
         for (let c = 0; c < cascadeCount; c++) {
-            const cascadePassDescriptor: GPURenderPassDescriptor = {
-                label: `${view.name} CSM Cascade ${c} Pass`,
-                colorAttachments: [],
-                depthStencilAttachment: {
-                    view: this.#directionalShadowManager.getCascadeLayerView(c),
-                    depthClearValue: 1.0,
-                    depthLoadOp: GPU_LOAD_OP.CLEAR,
-                    depthStoreOp: GPU_STORE_OP.STORE,
-                },
-            };
+            // 💡 Zero-GC: 캐스케이드별 사전 캐싱된 디스크립터 재사용
+            const cascadePassDescriptor = this.#getCascadePassDescriptor(c);
+
             redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, (viewShadowRenderPassEncoder) => {
                 view.currentCascadeIndex = c;
                 updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW');
+
+                // [Step 1: Null-Fragment Opaque Occluders (프래그먼트 없는 순수 뎁스 초고속 기록)]
                 renderLandscapeShadowLayer(view, viewShadowRenderPassEncoder);
                 if (this.#directionalShadowManager.castingList.length) {
                     renderShadowLayer(view, viewShadowRenderPassEncoder);
                 }
+
+                // [Step 2: Masked Alpha-Test Geometry (알파 텍스처 샘플링 & discard)]
                 renderFoliageShadowLayer(view, viewShadowRenderPassEncoder);
-                renderGrassShadowLayer(view, viewShadowRenderPassEncoder);
+
+                // 🌿 Cascade Filtering: 잔디는 초근거리(30m 이내, Cascade 0 및 1)에서만 그림자를 생성
+                if (c <= 1) {
+                    renderGrassShadowLayer(view, viewShadowRenderPassEncoder);
+                }
+
                 view.currentCascadeIndex = undefined;
             });
         }
 
         this.#directionalShadowManager.resetCastingList()
+    }
+
+    /**
+     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use for shadow rendering.
+     */
+    destroy() {
+        if (this.#directionalShadowManager) {
+            this.#directionalShadowManager.destroy();
+            this.#directionalShadowManager = null;
+        }
+        this.#cascadePassDescriptors.length = 0;
+        this.#clearPassDescriptors.length = 0;
+        keepLog("🧹 ShadowManager destroy 완료");
+    }
+
+    /**
+     * [KO] 캐스케이드 인덱스에 해당하는 재사용 렌더 패스 디스크립터를 반환합니다 (Zero-GC).
+     */
+    #getCascadePassDescriptor(c: number): GPURenderPassDescriptor {
+        let descriptor = this.#cascadePassDescriptors[c];
+        if (!descriptor) {
+            const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
+                view: null as any,
+                depthClearValue: 1.0,
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.STORE,
+            };
+            descriptor = {
+                label: `CSM Cascade ${c} Pass`,
+                colorAttachments: [],
+                depthStencilAttachment,
+            };
+            this.#cascadePassDescriptors[c] = descriptor;
+        }
+        descriptor.depthStencilAttachment!.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        return descriptor;
     }
 
     /**
@@ -154,26 +195,26 @@ class ShadowManager {
     }
 
     /**
-     * [KO] 캐스터가 꺼지는 전환 프레임에서 잔상(Ghosting)을 지우기 위해 1회 뎁스 텍스처를 1.0으로 초기화합니다.
-     * [EN] Clears depth textures to 1.0 once in the transition frame when casters turn off to eliminate ghosting.
+     * [KO] 캐스케이드 클리어용 재사용 렌더 패스 디스크립터를 반환합니다 (Zero-GC).
      */
-    #clearShadowDepthTextures(view: View3D): void {
-        const {redGPUContext} = view;
-        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
-        for (let c = 0; c < cascadeCount; c++) {
-            const cascadePassDescriptor: GPURenderPassDescriptor = {
-                label: `${view.name} CSM Cascade ${c} Cleanup Clear Pass`,
-                colorAttachments: [],
-                depthStencilAttachment: {
-                    view: this.#directionalShadowManager.getCascadeLayerView(c),
-                    depthClearValue: 1.0,
-                    depthLoadOp: GPU_LOAD_OP.CLEAR,
-                    depthStoreOp: GPU_STORE_OP.STORE,
-                },
+    #getClearPassDescriptor(c: number): GPURenderPassDescriptor {
+        let descriptor = this.#clearPassDescriptors[c];
+        if (!descriptor) {
+            const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
+                view: null as any,
+                depthClearValue: 1.0,
+                depthLoadOp: GPU_LOAD_OP.CLEAR,
+                depthStoreOp: GPU_STORE_OP.STORE,
             };
-            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, () => {
-            });
+            descriptor = {
+                label: `CSM Cascade ${c} Cleanup Clear Pass`,
+                colorAttachments: [],
+                depthStencilAttachment,
+            };
+            this.#clearPassDescriptors[c] = descriptor;
         }
+        descriptor.depthStencilAttachment!.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        return descriptor;
     }
 
     /**
@@ -191,15 +232,17 @@ class ShadowManager {
     }
 
     /**
-     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
-     * [EN] Releases GPU resources in use for shadow rendering.
+     * [KO] 캐스터가 꺼지는 전환 프레임에서 잔상(Ghosting)을 지우기 위해 1회 뎁스 텍스처를 1.0으로 초기화합니다.
+     * [EN] Clears depth textures to 1.0 once in the transition frame when casters turn off to eliminate ghosting.
      */
-    destroy() {
-        if (this.#directionalShadowManager) {
-            this.#directionalShadowManager.destroy();
-            this.#directionalShadowManager = null;
+    #clearShadowDepthTextures(view: View3D): void {
+        const {redGPUContext} = view;
+        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        for (let c = 0; c < cascadeCount; c++) {
+            const cascadePassDescriptor = this.#getClearPassDescriptor(c);
+            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, () => {
+            });
         }
-        keepLog("🧹 ShadowManager destroy 완료");
     }
 }
 

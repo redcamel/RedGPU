@@ -292,13 +292,21 @@ class Renderer {
             updateViewportAndScissor(view, viewRenderPassEncoder, 'DEFAULT')
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
-            if (skybox) skybox.render(renderViewStateData)
-            if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
-            if (axis) axis.render(renderViewStateData)
+
+            // 1. Opaque Occluders (지형 및 일반 메시로 뎁스 버퍼 선점)
             renderLandscapeLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
+
+            // 2. Alpha-Tested Vegetation (식생 및 잔디 - 가려진 픽셀 Early-Z 자동 기각)
             renderFoliageLayer(view, viewRenderPassEncoder)
             renderGrassLayer(view, viewRenderPassEncoder)
+
+            // 3. Background Environment (Skybox Last: 미채워진 하늘 픽셀에만 실행하여 오버드로우 최소화)
+            if (skybox) skybox.render(renderViewStateData)
+            if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
+
+            // 4. Debug Overlays & Translucency
+            if (axis) axis.render(renderViewStateData)
             if (grid) grid.render(renderViewStateData)
             renderAlphaLayer(view, viewRenderPassEncoder)
         });
