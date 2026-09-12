@@ -753,14 +753,14 @@ fn getDirectDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f
 
 #redgpu_if isFoliage
 fn getDirectFoliageBTDF(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, color: vec3<f32>) -> vec3<f32> {
-    // 🌿 [UE5 Two-Sided Foliage] 전방 산란(Forward-scattering) 피크 투과:
-    // 카메라와 태양이 마주볼 때 잎맥/세포 조직을 통과하는 선명한 투과광 집중
+    // 🌿 [UE5 Two-Sided Foliage] 배면 등방성 랩 투과 + 전방 산란 피크의 이중 결합 (100% 완전 일치)
+    let NORM_225: f32 = 0.44444445;
+    let backWrap = clamp((-dot(N, L) + 0.5) * NORM_225, 0.0, 1.0);
     let distortion = 0.25;
     let lightOpposite = -(L + N * distortion);
     let vDotL = max(dot(V, lightOpposite), 0.0);
-    let forwardPeak = vDotL * vDotL; // 태양 마주봄 각도 피크
-    let backFactor = max(-dot(N, L), 0.0);
-    return color * (backFactor * forwardPeak);
+    let inScatter = vDotL * vDotL;
+    return color * (backWrap * 0.5 + inScatter * 0.5);
 }
 #redgpu_endIf
 

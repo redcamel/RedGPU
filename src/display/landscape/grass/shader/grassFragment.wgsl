@@ -105,16 +105,19 @@ fn main(input: VertexOutput) -> OutputFragment {
 
         let nDotL = dot(N, L);
 
-        // 🌿 1. 정면 직사광 Half-Lambert Diffuse (0.0 ~ 1.0 에너지 보존)
-        let directDiff = clamp((nDotL + 0.20) / 1.20, 0.0, 1.0);
+        // 🌿 [UE5 Two-Sided Foliage] 1. 정면 랩 확산광 (적분 정규화: 1.0 / 2.25 = 0.44444445)
+        let NORM_225: f32 = 0.44444445;
+        let transRatio = clamp(subsurfaceStrength * leafThickness * 0.45, 0.0, 0.85);
+        let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let directDiff = frontWrap * (1.0 - transRatio);
 
-        // 🌿 2. 역광 배면 SSS (Forward-scattering Translucency - 카메라-태양 마주봄 각도에서만 투과)
+        // 🌿 [UE5 Two-Sided Foliage] 2. 배면 투과 (등방성 랩 투과 + 전방 산란 피크의 이중 결합)
+        let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
         let distortion = materialUniforms.subsurfaceDistortion;
-        let lightOpposite = -(L + N * distortion);
+        let lightOpposite = -(L + input.normal * distortion);
         let vDotL = max(dot(V, lightOpposite), 0.0);
-        let forwardPeak = vDotL * vDotL; // 태양을 정면으로 마주볼 때 집중되는 엽록소 투과 피크
-        let backFactor = max(-nDotL, 0.0);
-        let sssTransmission = backFactor * forwardPeak * (subsurfaceStrength * leafThickness * 0.45);
+        let inScatter = vDotL * vDotL;
+        let sssTransmission = (backWrap * 0.5 + inScatter * 0.5) * transRatio;
 
         // 🌿 3. 초경량 스펙큘러 (pow 대신 nDotH^4 고속 다항식 - 풀잎 깜빡임 방지)
         let H = normalize(L + V);

@@ -318,13 +318,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let F = getFresnel(VdotH, F0);
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
+        let NORM_225: f32 = 0.44444445;
+        let backWrap = clamp((-dot(N, L) + 0.5) * NORM_225, 0.0, 1.0);
         let distortion = 0.25;
         let lightOpposite = -(L + N * distortion);
         let vDotL = max(dot(V, lightOpposite), 0.0);
-        let forwardPeak = vDotL * vDotL;
-        let backFactor = max(-dot(N, L), 0.0);
+        let inScatter = vDotL * vDotL;
         let transmissionFactor = 0.45;
-        let diffuseTransmission = albedo * (backFactor * forwardPeak);
+        let diffuseTransmission = albedo * (backWrap * 0.5 + inScatter * 0.5);
         let totalDiffuse = diffuseReflection * (1.0 - transmissionFactor) + diffuseTransmission * transmissionFactor;
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;

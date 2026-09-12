@@ -75,11 +75,13 @@ fn main(input: VertexOutput) -> OutputFragment {
     let upVec = vec3<f32>(0.0, 1.0, 0.0);
     let upwardBlend = mix(0.55, 0.85, input.heightRatio);
     let N = normalize(mix(input.normal, upVec, upwardBlend));
+    let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
     let preExposure = systemUniforms.preExposure;
 
     let subsurfaceStrength = materialUniforms.subsurfaceStrength;
     let sssColor = materialUniforms.subsurfaceColor * albedo;
     let leafThickness = clamp(input.heightRatio * 1.25, 0.20, 1.0);
+    let transRatio = clamp(subsurfaceStrength * leafThickness * 0.35, 0.0, 0.80);
 
     // 🌿 4. 원거리 직사광 (섀도우 맵 패치 100% 바이패스 -> VRAM 대역폭 대폭 절감)
     var totalDirectLighting = vec3<f32>(0.0);
@@ -92,12 +94,18 @@ fn main(input: VertexOutput) -> OutputFragment {
         let dLight = light.color.rgb * light.intensity * preExposure;
         let nDotL = dot(N, L);
 
-        // 정면 Half-Lambert Diffuse
-        let directDiff = clamp((nDotL + 0.20) / 1.20, 0.0, 1.0);
+        // 🌿 [UE5 Two-Sided Foliage] 정면 랩 확산광 (적분 정규화: 1.0 / 2.25 = 0.44444445)
+        let NORM_225: f32 = 0.44444445;
+        let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let directDiff = frontWrap * (1.0 - transRatio);
 
-        // 원거리 고속 배면 투과 (초경량 ALU 1줄, 에너지 보존)
-        let backLight = max(-nDotL, 0.0);
-        let sssTransmission = backLight * (subsurfaceStrength * leafThickness * 0.20);
+        // 🌿 [UE5 Two-Sided Foliage] 원거리 배면 투과 (등방성 랩 + 전방 산란 피크)
+        let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let distortion = materialUniforms.subsurfaceDistortion;
+        let lightOpposite = -(L + input.normal * distortion);
+        let vDotL = max(dot(V, lightOpposite), 0.0);
+        let inScatter = vDotL * vDotL;
+        let sssTransmission = (backWrap * 0.5 + inScatter * 0.5) * transRatio;
 
         totalDirectLighting += (albedo * directDiff + sssColor * sssTransmission) * dLight;
     }
