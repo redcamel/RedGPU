@@ -334,8 +334,18 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     let NdotL0 = dot(N, L0);
 
-    // 🚀 [최적화] 그림자 수신 활성화 + 표면이 빛을 향할 때(NdotL0 > 0.001) + CSM 유효 거리 이내일 때만 섀도우 연산 실행
-    if (receiveShadowYn && NdotL0 > 0.001) {
+    #redgpu_if isFoliage
+    let needShadow = receiveShadowYn;
+    #redgpu_else
+    #redgpu_if useKHR_materials_diffuse_transmission
+    let needShadow = receiveShadowYn;
+    #redgpu_else
+    let needShadow = receiveShadowYn && (NdotL0 > 0.001);
+    #redgpu_endIf
+    #redgpu_endIf
+
+    // 🚀 [최적화] CSM 유효 거리 이내일 때만 섀도우 연산 실행
+    if (needShadow) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         let rawViewDist = distance(systemUniforms.camera.cameraPosition, input_vertexPosition);
@@ -456,9 +466,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
     #redgpu_if isFoliage
         // 🌿 [UE5 Two-Sided Foliage] 식생 전용 Diffuse Transmission (Subsurface 투과광) 자동 활성화:
-        // 🌿 나뭇잎/풀잎의 얇은 엽록체 층을 투과하는 역광(Backlighting) 표현을 위해 albedo 기반 투과광을 기본 적용
+        // 🌿 나뭇잎/풀잎의 얇은 엽록체 층을 투과하는 역광(Backlighting) 표현을 위해 albedo 기반 투과광 기본 적용 (UE5 표준: 0.45)
         if (diffuseTransmissionParameter <= 0.0) {
-            diffuseTransmissionParameter = 0.65;
+            diffuseTransmissionParameter = 0.45;
             diffuseTransmissionColor = albedo;
         }
     #redgpu_endIf
@@ -740,6 +750,19 @@ fn getDirectDiffuseBTDF(N: vec3<f32>, L: vec3<f32>, albedo: vec3<f32>) -> vec3<f
     let cosTheta = max(-dot(N, L), 0.0);
     return albedo * cosTheta;
 }
+
+#redgpu_if isFoliage
+fn getDirectFoliageBTDF(N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, color: vec3<f32>) -> vec3<f32> {
+    // 🌿 [UE5 Two-Sided Foliage] 전방 산란(Forward-scattering) 피크 투과:
+    // 카메라와 태양이 마주볼 때 잎맥/세포 조직을 통과하는 선명한 투과광 집중
+    let distortion = 0.25;
+    let lightOpposite = -(L + N * distortion);
+    let vDotL = max(dot(V, lightOpposite), 0.0);
+    let forwardPeak = vDotL * vDotL; // 태양 마주봄 각도 피크
+    let backFactor = max(-dot(N, L), 0.0);
+    return color * (backFactor * forwardPeak);
+}
+#redgpu_endIf
 
 // =============================================================================
 // KHR Extensions (Sheen, Anisotropy, Clearcoat, Iridescence)
@@ -1190,7 +1213,7 @@ fn getIndirectPbrLighting(
                 backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
             }
             let transmittedIBL = backScatteringColor * diffuseTransmissionColor * (vec3<f32>(1.0) - F_IBL_dielectric_weight);
-            envIBL_DIFFUSE += transmittedIBL * (diffuseTransmissionParameter * 0.35);
+            envIBL_DIFFUSE = envIBL_DIFFUSE * (1.0 - diffuseTransmissionParameter) + transmittedIBL * (diffuseTransmissionParameter * 0.35);
         }
         #redgpu_endIf
         #redgpu_endIf
@@ -1294,13 +1317,13 @@ fn getDirectPbrLight(
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
     var diffuse_transmission = vec3<f32>(0.0);
-    #redgpu_if useKHR_materials_diffuse_transmission
-    if (u_useKHR_materials_diffuse_transmission) {
-        diffuse_transmission = getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
-    }
-    #redgpu_else
     #redgpu_if isFoliage
     if (diffuseTransmissionParameter > 0.0) {
+        diffuse_transmission = getDirectFoliageBTDF(N, V, L, diffuseTransmissionColor);
+    }
+    #redgpu_else
+    #redgpu_if useKHR_materials_diffuse_transmission
+    if (u_useKHR_materials_diffuse_transmission) {
         diffuse_transmission = getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
@@ -1314,11 +1337,12 @@ fn getDirectPbrLight(
     #redgpu_endIf
     let specular_weight = F * specularParameter;
     var total_diffuse = diffuse_reflection;
+    #redgpu_if isFoliage
+        // 🌿 [UE5 Foliage 에너지 보존] 투과량만큼 정면 확산광 감쇄 및 전방 산란 투과광 합성 (Front + Back <= 1.0)
+        total_diffuse = diffuse_reflection * (1.0 - diffuseTransmissionParameter) + diffuse_transmission * diffuseTransmissionParameter;
+    #redgpu_else
     #redgpu_if useKHR_materials_diffuse_transmission
         total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
-    #redgpu_else
-    #redgpu_if isFoliage
-        total_diffuse = diffuse_reflection + diffuse_transmission * diffuseTransmissionParameter;
     #redgpu_endIf
     #redgpu_endIf
     let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);

@@ -270,7 +270,7 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     let NdotL0 = dot(N, L0);
 
-    if (receiveShadowYn && NdotL0 > 0.001) {
+    if (receiveShadowYn) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
@@ -318,8 +318,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let F = getFresnel(VdotH, F0);
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
-        let diffuseTransmission = albedo * max(-dot(N, L), 0.0);
-        let totalDiffuse = diffuseReflection + diffuseTransmission * 0.65;
+        let distortion = 0.25;
+        let lightOpposite = -(L + N * distortion);
+        let vDotL = max(dot(V, lightOpposite), 0.0);
+        let forwardPeak = vDotL * vDotL;
+        let backFactor = max(-dot(N, L), 0.0);
+        let transmissionFactor = 0.45;
+        let diffuseTransmission = albedo * (backFactor * forwardPeak);
+        let totalDiffuse = diffuseReflection * (1.0 - transmissionFactor) + diffuseTransmission * transmissionFactor;
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;
@@ -395,7 +401,7 @@ fn main(inputData: InputData) -> OutputFragment {
             backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
         }
         let transmittedIBL = backScatteringColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric);
-        envIBL_DIFFUSE += transmittedIBL * (0.65 * 0.35);
+        envIBL_DIFFUSE = envIBL_DIFFUSE * (1.0 - 0.45) + transmittedIBL * (0.45 * 0.35);
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
