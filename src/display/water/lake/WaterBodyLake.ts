@@ -8,8 +8,8 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
  * [KO] 언리얼 엔진 5(UE5)의 AWaterBodyLake에 대응하는 호수/연못 수체(Water Body) 클래스입니다.
  * [EN] Water Body class for lakes and ponds corresponding to Unreal Engine 5 (UE5) AWaterBodyLake.
  *
- * [KO] Step 0에서는 가장 단순한 수평 반투명 평면 수면을 제공하며, 지형/오브젝트 위에 수위를 정의하고 점진적으로 파도 및 광학 효과로 확장됩니다.
- * [EN] Step 0 provides a basic horizontal translucent flat water surface, defining the water level above terrain/objects and progressively extending to waves and optical effects.
+ * [KO] Cook-Torrance GGX PBR 물리 조명 모델, 시간(t) 기반 물결 노멀 스크롤링, 수면 투과 및 수위(waterLevel) 제어를 지원하며, 점진적으로 굴절 및 수심 흡수 효과로 확장됩니다.
+ * [EN] Supports Cook-Torrance GGX PBR physical lighting model, time(t)-based wave normal scrolling, water surface transparency, and water level control, progressively extending to refraction and depth extinction effects.
  *
  * ### Example
  * ```typescript

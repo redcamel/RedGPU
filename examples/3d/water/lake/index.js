@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] WaterBodyLake & SingleLayerWaterMaterial Step 0 예제
- * [EN] WaterBodyLake & SingleLayerWaterMaterial Step 0 Example
+ * [KO] WaterBodyLake & SingleLayerWaterMaterial Step 1 예제
+ * [EN] WaterBodyLake & SingleLayerWaterMaterial Step 1 Example
  *
- * [KO] 가장 단순한 수준(MVP)의 정적 반투명 수면 평면 렌더링 및 수위/투명도 제어를 검증합니다.
- * [EN] Verifies the simplest level (MVP) static translucent water plane rendering and water level/opacity control.
+ * [KO] 단일 노멀맵 스크롤링 애니메이션 및 태양 직사광과의 Blinn-Phong 스펙큘러 하이라이트 합성을 시연합니다.
+ * [EN] Demonstrates single normal map scrolling animation and Blinn-Phong specular highlight synthesis with directional sunlight.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,11 +15,11 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정 (수면 위/아래를 자유롭게 탐색)
+        // 1. 카메라 컨트롤러 설정 (수면 위/아래 및 반사광 각도 탐색)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 25;
-        controller.tilt = 30;
-        controller.pan = 45;
+        controller.distance = 28;
+        controller.tilt = -25;
+        controller.pan = 35;
         controller.speedDistance = 0.2;
 
         // 2. 씬 및 뷰3D 구성
@@ -28,26 +28,41 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. 조명 설정
+        // 3. 태양 직사광 (Directional Light) 및 환경광 (Ambient Light) 설정
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.x = 20;
-        directionalLight.y = 30;
-        directionalLight.z = 20;
-        directionalLight.intensity = 1.2;
+        directionalLight.elevation = 40;
+        directionalLight.azimuth = 60;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 물밑 환경 및 수면 관통 오브젝트 구성 (반투명 수면 투과 검증용)
+        const ambientLight = new RedGPU.Light.AmbientLight('#c8e0f8', 800);
+        scene.lightManager.ambientLight = ambientLight;
+
+        // 4. 물밑 환경 및 수면 관통 오브젝트 구성
         const underwaterObjects = createUnderwaterEnvironment(redGPUContext, scene);
 
-        // 5. WaterBodyLake 호수 수체 생성 (Step 0: 단색 반투명 평면)
+        // 5. WaterBodyLake 호수 수체 생성 (Step 1: 단일 노멀 스크롤 & 스펙큘러)
         const lake = new RedGPU.Display.Water.WaterBodyLake(
             redGPUContext,
-            30, // 가로 너비 (waterWidth)
-            30, // 세로 길이 (waterHeight)
+            32, // waterWidth
+            32, // waterHeight
             1,
             1
         );
-        lake.waterLevel = 0.5; // 수위 높이
+        lake.waterLevel = 0.5;
+
+        // 심리스 물결 노멀맵 텍스처 장착
+        const normalTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/water/water_normal.png'
+        );
+        lake.waterMaterial.normalTexture = normalTexture;
+        lake.waterMaterial.normalTiling = 3.5;
+        lake.waterMaterial.normalScale = 0.8;
+        lake.waterMaterial.windSpeed = 0.04;
+        lake.waterMaterial.windDirection = [1.0, 0.3];
+        lake.waterMaterial.roughness = 0.05;
+        lake.waterMaterial.specularFactor = 1.0;
+
         scene.addChild(lake);
 
         // 6. 렌더러 생성 및 렌더 루프 가동
@@ -62,7 +77,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. 실시간 튜닝 GUI 패널
-        renderTestPane(redGPUContext, lake);
+        renderTestPane(redGPUContext, lake, directionalLight);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -80,8 +95,8 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
     const objects = [];
 
     // 바닥 지반 (Lake Basin Bottom)
-    const basinMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#2a3b2a');
-    const basinGeometry = new RedGPU.Primitive.Box(redGPUContext, 32, 2, 32);
+    const basinMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#223322');
+    const basinGeometry = new RedGPU.Primitive.Box(redGPUContext, 34, 2, 34);
     const basinMesh = new RedGPU.Display.Mesh(redGPUContext, basinGeometry, basinMaterial);
     basinMesh.y = -2;
     scene.addChild(basinMesh);
@@ -89,12 +104,12 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
     // 수면을 관통하여 솟아오른 바위/기둥들 (Piercing Rocks & Pillars)
     const colors = ['#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#f1c40f', '#1abc9c'];
     const positions = [
-        [-6, 0, -6],
-        [6, 0.5, -4],
-        [-4, 1.2, 5],
-        [5, -0.2, 6],
+        [-7, 0, -7],
+        [7, 0.5, -5],
+        [-5, 1.2, 6],
+        [6, -0.2, 7],
         [0, 0.8, 0],
-        [-8, -0.5, 2]
+        [-9, -0.5, 3]
     ];
 
     for (let i = 0; i < positions.length; i++) {
@@ -119,66 +134,68 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
  * [KO] WaterBodyLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterBodyLake properties.
  */
-function renderTestPane(redGPUContext, lake) {
+function renderTestPane(redGPUContext, lake, directionalLight) {
     new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        skybox: true,
         gui: (pane) => {
-            const waterFolder = pane.addFolder({title: 'WaterBodyLake (Step 0)', expanded: true});
+            // [폴더 1] 수체 기초 설정 (PBR Base)
+            const basicFolder = pane.addFolder({title: 'WaterBodyLake (Base)', expanded: true});
+            basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
+            basicFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.02});
 
-            // 호수 수위 (Water Level / Y 좌표)
-            waterFolder.addBinding(lake, 'waterLevel', {
-                min: -3,
-                max: 4,
-                step: 0.05,
-                label: 'Water Level (Y)'
-            });
-
-            // 수면 투명도 (Opacity)
-            waterFolder.addBinding(lake.waterMaterial, 'opacity', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.02,
-                label: 'Opacity'
-            });
-
-            // 수면 컬러 (Color Picker)
             const colorParams = {
-                color: {
-                    r: lake.waterMaterial.color.r,
-                    g: lake.waterMaterial.color.g,
-                    b: lake.waterMaterial.color.b
+                baseColor: {
+                    r: lake.waterMaterial.baseColor.r,
+                    g: lake.waterMaterial.baseColor.g,
+                    b: lake.waterMaterial.baseColor.b
                 }
             };
-
-            waterFolder.addBinding(colorParams, 'color', {
-                view: 'color',
-                label: 'Water Color'
-            }).on('change', (ev) => {
+            basicFolder.addBinding(colorParams, 'baseColor', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
-                lake.waterMaterial.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+                lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
 
-            // 빠른 수면 프리셋 버튼
-            const presetFolder = waterFolder.addFolder({title: 'Color Presets', expanded: false});
+            // [폴더 2] Step 1: 물결 노멀 및 바람 애니메이션
+            const waveFolder = pane.addFolder({title: 'Step 1: Waves & Normal', expanded: true});
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 3.0, step: 0.05});
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {min: 1.0, max: 20.0, step: 0.5});
+            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005});
+
+            const windDirection = {
+                x: lake.waterMaterial.windDirection[0],
+                y: lake.waterMaterial.windDirection[1]
+            };
+            waveFolder.addBinding(windDirection, 'x', {min: -1.0, max: 1.0, step: 0.05}).on('change', (ev) => {
+                lake.waterMaterial.windDirection = [ev.value, windDirection.y];
+            });
+            waveFolder.addBinding(windDirection, 'y', {min: -1.0, max: 1.0, step: 0.05}).on('change', (ev) => {
+                lake.waterMaterial.windDirection = [windDirection.x, ev.value];
+            });
+
+            // [폴더 3] Step 1: Cook-Torrance PBR 스펙큘러 하이라이트
+            const specFolder = pane.addFolder({title: 'Step 1: Cook-Torrance PBR Specular', expanded: true});
+            specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 1.0, step: 0.01});
+            specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
+            specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+
+            // [폴더 4] 컬러 프리셋
+            const presetFolder = pane.addFolder({title: 'Color Presets', expanded: false});
             presetFolder.addButton({title: 'Calm Alpine Lake (#1a5b8c)'}).on('click', () => {
-                lake.waterMaterial.color.setColorByHEX('#1a5b8c');
+                lake.waterMaterial.baseColor.setColorByHEX('#1a5b8c');
                 lake.waterMaterial.opacity = 0.65;
                 pane.refresh();
             });
-            presetFolder.addButton({title: 'Tropical Emerald Lagoon (#16a085)'}).on('click', () => {
-                lake.waterMaterial.color.setColorByHEX('#16a085');
+            presetFolder.addButton({title: 'Tropical Turquoise (#0e869c)'}).on('click', () => {
+                lake.waterMaterial.baseColor.setColorByHEX('#0e869c');
                 lake.waterMaterial.opacity = 0.55;
                 pane.refresh();
             });
-            presetFolder.addButton({title: 'Deep Mystic Blue (#0d2040)'}).on('click', () => {
-                lake.waterMaterial.color.setColorByHEX('#0d2040');
-                lake.waterMaterial.opacity = 0.85;
+            presetFolder.addButton({title: 'Emerald Forest Pool (#115e59)'}).on('click', () => {
+                lake.waterMaterial.baseColor.setColorByHEX('#115e59');
+                lake.waterMaterial.opacity = 0.75;
                 pane.refresh();
-            });
-
-            // 렌더 상태 폴더
-            const renderStateFolder = pane.addFolder({title: 'Render States', expanded: false});
-            renderStateFolder.addBinding(lake.depthStencilState, 'depthWriteEnabled', {
-                label: 'Depth Write'
             });
         }
     });
