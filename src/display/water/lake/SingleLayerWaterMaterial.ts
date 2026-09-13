@@ -103,22 +103,13 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
         this.blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
-        this.normalScale = 0.8;
+        this.normalScale = 1.0;
         this.normalTiling = 3.5;
         this.windSpeed = 0.04;
         this.windDirection = [1.0, 0.3];
-        this.roughness = 0.05;
+        this.roughness = 0.1;
         this.specularFactor = 1.0;
     }
-
-    /**
-     * [KO] 하위 호환성을 위한 color getter/setter
-     * [EN] color getter/setter for backwards compatibility
-     */
-    get color(): ColorRGB {
-        return this.baseColor;
-    }
-
 }
 
 defineColorRGB(SingleLayerWaterMaterial, [
@@ -134,10 +125,10 @@ defineSampler(SingleLayerWaterMaterial, [
 ]);
 
 definePositiveNumber(SingleLayerWaterMaterial, [
-    {key: 'normalScale', value: 0.8},
+    {key: 'normalScale', value: 1.0},
     {key: 'normalTiling', value: 3.5},
     {key: 'windSpeed', value: 0.04},
-    {key: 'roughness', value: 0.05},
+    {key: 'roughness', value: 0.1},
     {key: 'specularFactor', value: 1.0},
 ]);
 

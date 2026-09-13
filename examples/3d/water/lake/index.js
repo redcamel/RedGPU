@@ -57,10 +57,10 @@ RedGPU.init(
         );
         lake.waterMaterial.normalTexture = normalTexture;
         lake.waterMaterial.normalTiling = 3.5;
-        lake.waterMaterial.normalScale = 0.8;
+        lake.waterMaterial.normalScale = 1.0;
         lake.waterMaterial.windSpeed = 0.04;
         lake.waterMaterial.windDirection = [1.0, 0.3];
-        lake.waterMaterial.roughness = 0.05;
+        lake.waterMaterial.roughness = 0.1;
         lake.waterMaterial.specularFactor = 1.0;
 
         scene.addChild(lake);

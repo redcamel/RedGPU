@@ -71,9 +71,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
-    // glTF/PBR 표준: roughness 분모 0 나눗셈 방지 하한선 클램핑
-    let safeRoughness = clamp(uniforms.roughness, 0.02, 1.0);
-    let alpha = safeRoughness * safeRoughness;
+    // glTF/UE5 PBR 표준: 태양 시직경(Sun Disk Angular Size ~0.53°)을 반영하여 점광원 하이라이트 소멸 및 에일리어싱 방지
+    let specularRoughness = clamp(max(uniforms.roughness, 0.08), 0.02, 1.0);
+    let alpha = specularRoughness * specularRoughness;
     let alpha2 = alpha * alpha;
     let oneMinusAlpha2 = 1.0 - alpha2;
 
@@ -140,6 +140,7 @@ fn main(inputData: InputData) -> OutputFragment {
     output.color = finalColor;
 
     // 9. RedGPU PBR 표준 G-Buffer Normal & MotionVector 출력
+    let safeRoughness = clamp(uniforms.roughness, 0.0, 1.0);
     let smoothness = 1.0 - safeRoughness;
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     let baseReflectionStrength = smoothnessCurved * 0.02037 * uniforms.specularFactor;
