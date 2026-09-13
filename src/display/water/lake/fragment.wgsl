@@ -120,12 +120,15 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
 
+    // 4. 카메라 시선 벡터 (View Direction) 및 Step 8: 수중 잠수 판별 (월드 Y 수위 기준)
+    let viewDir = normalize(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
+    let isUnderwater = systemUniforms.camera.cameraPosition.y < inputData.vertexPosition.y;
+
     var finalXY = blendedTangent.xy * uniforms.normalScale;
     let finalZ = sqrt(max(0.0, 1.0 - dot(finalXY, finalXY)));
-    let worldNormal = normalize(tbn * vec3<f32>(finalXY, finalZ));
-
-    // 4. 카메라 시선 벡터 (View Direction)
-    let viewDir = normalize(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
+    var worldNormal = normalize(tbn * vec3<f32>(finalXY, finalZ));
+    // 수중에서 올려다볼 때 법선 벡터를 시선 방향을 마주하도록 반전
+    worldNormal = select(worldNormal, -worldNormal, isUnderwater);
     let NdotV = max(dot(worldNormal, viewDir), 0.0001);
 
     // 5. 물의 물리 반사율 (물의 F0 = ((1.333 - 1) / (1.333 + 1))^2 ≈ 0.02037)
@@ -136,7 +139,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
-    // UE5/Frostbite 표준: 태양 시직경(~0.53°) 및 미세 노멀 분산에 따른 스펙큘러 에일리어싱(자글거림) 방지
     let sunRoughness = clamp(max(uniforms.roughness, 0.12), 0.05, 1.0);
     let alpha = sunRoughness * sunRoughness;
     let alpha2 = alpha * alpha;
@@ -145,13 +147,12 @@ fn main(inputData: InputData) -> OutputFragment {
     for (var i = 0u; i < u_directionalLightCount; i++) {
         let dirLight = u_directionalLights[i];
         let lightDir = -normalize(dirLight.direction);
-        let NdotL = max(dot(worldNormal, lightDir), 0.0);
+        // 수중에서는 위에서 내리쬐는 빛이 수면을 뚫고 들어오므로 양방향 투과 조명 고려
+        let NdotL = max(abs(dot(worldNormal, lightDir)), 0.0);
 
         if (NdotL > 0.0) {
-            // pbrMaterial 표준 물리 조명 강도 (intensity * preExposure)
             var lightRadiance = dirLight.color.rgb * (dirLight.intensity * systemUniforms.preExposure);
 
-            // Sky Atmosphere 활성화 시: 태양 고도/각도에 따른 대기 투과율(Transmittance) 감쇄 적용
             if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
                 let u_atmo = systemUniforms.skyAtmosphere;
                 let surfaceHeightKm = max(0.0, inputData.vertexPosition.y / 1000.0);
@@ -163,29 +164,23 @@ fn main(inputData: InputData) -> OutputFragment {
             let NdotH = max(dot(worldNormal, halfDir), 0.0);
             let VdotH = max(dot(viewDir, halfDir), 0.0);
 
-            // 1) Schlick Fresnel
             let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
 
-            // 2) GGX Normal Distribution Function (NDF)
             let NdotH2 = NdotH * NdotH;
             let denom = NdotH2 * (alpha2 - 1.0) + 1.0;
             let D = (alpha2 * INV_PI) / max(EPSILON, denom * denom);
 
-            // 3) Smith Joint GGX Visibility Function
             let safeNdotL = max(NdotL, 0.0001);
             let GGXV = safeNdotL * sqrt(NdotV * NdotV * oneMinusAlpha2 + alpha2);
             let GGXL = NdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
             let V = 0.5 / max(GGXV + GGXL, EPSILON);
 
-            // 4) Specular BRDF = D * V * F
             let specBRDF = D * V * F;
-
-            // pbrMaterial 표준: SPEC_BRDF * specularFactor * NdotL * lightRadiance
             specularLighting += lightRadiance * specBRDF * uniforms.specularFactor * NdotL;
         }
     }
 
-    // 7. 간접광 환경 반사 (IBL Specular & Sky Atmosphere & Sky Gradient Fallback)
+    // 7. 간접광 환경 반사 (IBL Specular & Sky Atmosphere)
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     let preExposure = systemUniforms.preExposure;
@@ -219,28 +214,28 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     if (!hasReflection) {
-        // 스카이박스/대기 모델이 없을 때의 자연스러운 하늘빛 그라데이션 폴백
         let skyGradient = mix(vec3<f32>(0.35, 0.55, 0.75), vec3<f32>(0.65, 0.8, 0.95), clamp(R.y * 0.5 + 0.5, 0.0, 1.0));
         reflectedSky = skyGradient * preExposure * 1.2;
     }
 
-    // BRDF LUT 및 다중 산란 보상 (pbrMaterial 표준)
     let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, iblRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
     let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
     reflectedSky *= energyCompensation;
 
-    // 수평선 아래 폐색 (Horizon Occlusion)
-    let horizonOcclusion = clamp(1.0 + 1.1 * dot(R, worldNormal), 0.0, 1.0);
-    reflectedSky *= horizonOcclusion * horizonOcclusion;
+    // 수평선 아래 폐색 (Horizon Occlusion) - ★수면 위에서만 적용하여 수중 먹물 흑화 결함 차단★
+    if (!isUnderwater) {
+        let horizonOcclusion = clamp(1.0 + 1.1 * dot(R, worldNormal), 0.0, 1.0);
+        reflectedSky *= horizonOcclusion * horizonOcclusion;
+    }
 
-    // 시선 각도에 따른 Schlick-Fresnel 반사율 (수직 2%, 비스듬한 시선 100%)
+    // 시선 각도에 따른 Schlick-Fresnel 반사율
     let fresnelFactor = pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
     let F_dielectric = F0 + (vec3<f32>(1.0) - F0) * fresnelFactor;
     let F_IBL = F_dielectric * envBRDF.x + envBRDF.y;
 
     let iblSpecular = reflectedSky * F_IBL * uniforms.specularFactor;
 
-    // 8. 씬 깊이(Depth) 기반 부드러운 해안선/접촉면 감쇄 (Soft Depth Fade)
+    // 8. 씬 깊이(Depth) 기반 부드러운 해안선 감쇄 및 수중 거리
     let screenCoord = vec2<i32>(inputData.position.xy);
     let rawSceneDepth = textureLoad(renderPath1DepthTexture, screenCoord, 0);
     let cameraNear = systemUniforms.camera.nearClipping;
@@ -248,56 +243,57 @@ fn main(inputData: InputData) -> OutputFragment {
     let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
     let linearWaterDepth = getLinearizeDepth(inputData.position.z, cameraNear, cameraFar);
 
-    let waterDepthDelta = max(linearSceneDepth - linearWaterDepth, 0.0);
+    var effectiveWaterDepthDelta = max(linearSceneDepth - linearWaterDepth, 0.0);
     var depthFade = 1.0;
-    if (uniforms.depthFadeDistance > 0.0) {
-        depthFade = smoothstep(0.0, uniforms.depthFadeDistance, waterDepthDelta);
+    if (isUnderwater) {
+        // 수중에서는 카메라에서 수면까지의 거리가 수중 시선 흡수 거리 (수면 소실 방지를 위해 depthFade 1.0 유지)
+        effectiveWaterDepthDelta = distance(systemUniforms.camera.cameraPosition, inputData.vertexPosition);
+        depthFade = 1.0;
+    } else {
+        if (uniforms.depthFadeDistance > 0.0) {
+            depthFade = smoothstep(0.0, uniforms.depthFadeDistance, effectiveWaterDepthDelta);
+        }
     }
 
     // 9. Step 4: 수중 굴절 왜곡 (Screen-space Refraction & Under-water Distortion)
     let screenUV = inputData.position.xy / systemUniforms.resolution;
-
-    // 뷰 공간 노멀의 XY 방향을 화면 굴절 오프셋으로 사용 (시점 회전과 무관하게 화면 기준 일관된 왜곡 방향 유지)
     let viewNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(worldNormal, 0.0)).xyz;
-    // 수심이 극히 얕은 접촉면에서는 굴절 왜곡을 자연스럽게 0으로 수렴시켜 해안선 칼잘림 방지
-    let effectiveRefractionStrength = uniforms.refractionStrength * min(waterDepthDelta * 2.0, 1.0);
+    let effectiveRefractionStrength = uniforms.refractionStrength * select(min(effectiveWaterDepthDelta * 2.0, 1.0), 0.7, isUnderwater);
     let refractionOffset = viewNormal.xy * effectiveRefractionStrength;
 
-    // 왜곡된 굴절 UV 좌표
     var finalRefractUV = clamp(screenUV + refractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
 
-    // 수면 돌출 물체(물 밖으로 솟은 오브젝트)가 물속 굴절에 딸려 들어오는 아티팩트 방지 검사
-    let distortedScreenCoord = vec2<i32>(finalRefractUV * systemUniforms.resolution);
-    let rawDistortedDepth = textureLoad(renderPath1DepthTexture, distortedScreenCoord, 0);
-    let linearDistortedSceneDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
+    if (!isUnderwater) {
+        // 수면 위에서 볼 때: 물 밖 돌출 오브젝트 침범 방지
+        let distortedScreenCoord = vec2<i32>(finalRefractUV * systemUniforms.resolution);
+        let rawDistortedDepth = textureLoad(renderPath1DepthTexture, distortedScreenCoord, 0);
+        let linearDistortedSceneDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
 
-    if (linearDistortedSceneDepth < linearWaterDepth) {
-        finalRefractUV = screenUV;
+        if (linearDistortedSceneDepth < linearWaterDepth) {
+            finalRefractUV = screenUV;
+        }
     }
 
-    // 1차 렌더 패스 불투명 씬 컬러에서 굴절된 수중 배경 색상 샘플링
+    // 1차 렌더 패스 불투명 씬 컬러 샘플링 (수중에서는 물 밖의 하늘과 오브젝트가 투명하게 보임)
     let backgroundRefractedColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, 0.0).rgb;
 
     // 10. 수체 흡수 및 산란 (Beer-Lambert Absorption & Dual-tone Depth Scattering)
-    // - 얕은 수심: 맑고 투명한 옥색(uniforms.baseColor)을 띠며 왜곡된 물밑 배경이 선명히 비침
-    // - 깊은 수심: 빛의 소멸과 함께 깊고 묵직한 심해 남색(uniforms.deepColor)으로 점진 전이
-    let depthGradient = smoothstep(0.0, 3.5, waterDepthDelta);
+    let depthGradient = smoothstep(0.0, 3.5, effectiveWaterDepthDelta);
     let waterTargetColor = mix(uniforms.baseColor, uniforms.deepColor, depthGradient);
 
     let effectiveOpacity = uniforms.opacity * inputData.combinedOpacity;
-    let extinction = exp(-waterDepthDelta * uniforms.extinctionFactor);
-    let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, 1.0);
+    let extinction = exp(-effectiveWaterDepthDelta * uniforms.extinctionFactor);
+    // 수중에서는 물 밖 풍경이 어둡게 가려지지 않도록 최대 흡수율을 0.45로 제한하여 맑고 청량한 시야 확보
+    let maxAbsorption = select(1.0, 0.45, isUnderwater);
+    let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, maxAbsorption);
     let waterBodyScattering = mix(backgroundRefractedColor, waterTargetColor, absorptionStrength);
 
-    // 11. 물리적 에너지 보존 (반사 vs 투과) 및 최종 수면 합성
-    // - 비스듬히 볼수록(F_IBL 증가): 수체 색상 투과가 0으로 줄어들고 하늘 반사(iblSpecular)가 100% 거울처럼 지배
-    // - 위에서 볼수록(F_IBL 감소): 하늘 반사가 2%로 줄어들고 맑은 물밑 투과광(waterBodyScattering)이 지배
-    let transmissionWeight = max(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0));
+    // 11. 물리적 에너지 보존 및 최종 수면 합성
+    // 수중에서는 물 밖 풍경이 시원하게 들여다보이도록 투과율 가중치 확보
+    let transmissionWeight = select(max(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0)), vec3<f32>(0.85), isUnderwater);
     let transmittedUnderwater = waterBodyScattering * transmissionWeight;
     let totalSpecular = (specularLighting + iblSpecular) * depthFade;
 
-    // 최종 RGB 합성: 수중 투과광 + 수면 반사광/스펙큘러
-    // 접촉면(depthFade가 0에 근접)에서는 왜곡 없는 원본 배경색과 완벽히 블렌딩되어 칼잘림 소거
     let surfaceColor = transmittedUnderwater + totalSpecular;
     let finalRgb = mix(backgroundRefractedColor, surfaceColor, depthFade);
 

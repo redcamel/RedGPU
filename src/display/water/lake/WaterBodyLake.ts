@@ -3,6 +3,29 @@ import Plane from "../../../primitive/Plane";
 import Mesh from "../../mesh/Mesh";
 import SingleLayerWaterMaterial from "./SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
+import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+
+/** WaterBodyLake 전용 버텍스 셰이더 모듈 이름 */
+const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_WATER_BODY_LAKE';
+
+interface WaterBodyLake {
+    /**
+     * [KO] 미세 장파장 너울의 진폭 (단위: m, 기본값: 0.02 = 2cm)
+     * [EN] Amplitude of micro long-wavelength swell (Unit: m, default: 0.02 = 2cm)
+     */
+    waveAmplitude: number;
+    /**
+     * [KO] 미세 너울의 파장 (단위: m, 기본값: 12.0m)
+     * [EN] Wavelength of micro swell (Unit: m, default: 12.0m)
+     */
+    waveWavelength: number;
+    /**
+     * [KO] 미세 너울의 전파 속도 (기본값: 0.8 rad/s)
+     * [EN] Propagation speed of micro swell (default: 0.8 rad/s)
+     */
+    waveSpeed: number;
+}
 
 /**
  * [KO] 언리얼 엔진 5(UE5)의 AWaterBodyLake에 대응하는 호수/연못 수체(Water Body) 클래스입니다.
@@ -32,8 +55,8 @@ class WaterBodyLake extends Mesh {
      * @param redGPUContext - RedGPUContext 인스턴스
      * @param width - 호수의 가로 너비 (기본값: 100)
      * @param height - 호수의 세로 길이 (기본값: 100)
-     * @param widthSegments - 가로 세그먼트 분할 수 (기본값: 1)
-     * @param heightSegments - 세로 세그먼트 분할 수 (기본값: 1)
+     * @param widthSegments - 가로 세그먼트 분할 수 (기본값: 64)
+     * @param heightSegments - 세로 세그먼트 분할 수 (기본값: 64)
      * @param material - SingleLayerWaterMaterial 머티리얼 (선택)
      * @param name - 수체 오브젝트 이름 (기본값: 'WaterBodyLake')
      */
@@ -41,8 +64,8 @@ class WaterBodyLake extends Mesh {
         redGPUContext: RedGPUContext,
         width: number = 100,
         height: number = 100,
-        widthSegments: number = 1,
-        heightSegments: number = 1,
+        widthSegments: number = 64,
+        heightSegments: number = 64,
         material?: SingleLayerWaterMaterial,
         name: string = 'WaterBodyLake'
     ) {
@@ -64,7 +87,21 @@ class WaterBodyLake extends Mesh {
 
         // 수면 위와 물밑 양방향 시야를 위해 cullMode를 NONE으로 기본 구성
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
+
+        this.waveAmplitude = 0.02;
+        this.waveWavelength = 12.0;
+        this.waveSpeed = 0.8;
     }
+
+    /**
+     * [KO] WaterBodyLake 전용 커스텀 버텍스 셰이더 모듈을 생성합니다. (미세 너울 정점 변위 지원)
+     * [EN] Creates a custom vertex shader module dedicated to WaterBodyLake. (Supports micro swell vertex displacement)
+     */
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+        return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+    };
 
     /**
      * [KO] 호수 수위(Y 좌표 높이)를 반환합니다.
@@ -150,4 +187,11 @@ class WaterBodyLake extends Mesh {
     }
 }
 
+definePositiveNumber(WaterBodyLake, [
+    {key: 'waveAmplitude', value: 0.02},
+    {key: 'waveWavelength', value: 12.0},
+    {key: 'waveSpeed', value: 0.8},
+]);
+
+Object.freeze(WaterBodyLake);
 export default WaterBodyLake;
