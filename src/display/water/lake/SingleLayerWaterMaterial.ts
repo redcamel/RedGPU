@@ -9,6 +9,7 @@ import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
+import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
 import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 interface SingleLayerWaterMaterial {
@@ -23,25 +24,45 @@ interface SingleLayerWaterMaterial {
      */
     deepColor: ColorRGB;
     /**
-     * [KO] 수면 노멀 맵 텍스처
-     * [EN] Water surface normal map texture
+     * [KO] 주 수면 노멀 맵 텍스처 (대형/중형 너울)
+     * [EN] Main water surface normal map texture (Large/Mid swells)
      */
     normalTexture: BitmapTexture;
+    /**
+     * [KO] 고주파 마이크로 물결/노이즈를 위한 제2 노멀 맵 텍스처 (선택 사항)
+     * [EN] Second normal map texture for high-frequency micro ripples/noise (optional)
+     */
+    normalTexture2: BitmapTexture;
+    /**
+     * [KO] 제2 노멀 맵 사용 여부 (normalTexture2 지정 시 자동 연동)
+     * [EN] Whether to use second normal map (auto synced when normalTexture2 is set)
+     */
+    useNormalTexture2: boolean;
     /**
      * [KO] 수면 노멀 맵 샘플러
      * [EN] Water surface normal map sampler
      */
     normalTextureSampler: Sampler;
     /**
-     * [KO] 노멀 강도 스케일
-     * [EN] Normal strength scale
+     * [KO] 주 노멀 강도 스케일
+     * [EN] Main normal strength scale
      */
     normalScale: number;
     /**
-     * [KO] 노멀 텍스처 UV 타일링 배수
-     * [EN] Normal texture UV tiling multiplier
+     * [KO] 주 노멀 텍스처 UV 타일링 배수
+     * [EN] Main normal texture UV tiling multiplier
      */
     normalTiling: number;
+    /**
+     * [KO] 제2 노멀 강도 스케일 (기본값: 1.0)
+     * [EN] Second normal strength scale (default: 1.0)
+     */
+    normalScale2: number;
+    /**
+     * [KO] 제2 노멀 텍스처 상대 UV 타일링 배수 (기본값: 2.5)
+     * [EN] Second normal texture relative UV tiling multiplier (default: 2.5)
+     */
+    normalTiling2: number;
     /**
      * [KO] 바람에 의한 물결 스크롤 속도
      * [EN] Wave scrolling speed by wind
@@ -83,8 +104,8 @@ interface SingleLayerWaterMaterial {
  * [KO] 언리얼 엔진 5(UE5)의 SingleLayerWater 셰이딩 모델에 대응하는 PBR 표준 수체 머티리얼 클래스입니다.
  * [EN] Dedicated PBR water rendering material class corresponding to Unreal Engine 5 (UE5) SingleLayerWater shading model.
  *
- * [KO] Cook-Torrance GGX 마이크로패싯 조명 모델과 시간(t) 기반 물결 노멀 스크롤링을 지원합니다.
- * [EN] Supports Cook-Torrance GGX microfacet lighting model and time(t)-based wave normal scrolling.
+ * [KO] Cook-Torrance GGX 마이크로패싯 조명 모델과 시간(t) 기반 물결 노멀 스크롤링 및 듀얼 노멀 RNM 블렌딩을 지원합니다.
+ * [EN] Supports Cook-Torrance GGX microfacet lighting model, time(t)-based wave normal scrolling, and dual normal RNM blending.
  *
  * @category Material
  */
@@ -127,6 +148,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
         this.normalScale = 1.0;
         this.normalTiling = 3.5;
+        this.normalScale2 = 1.0;
+        this.normalTiling2 = 2.5;
+        this.useNormalTexture2 = false;
+
         this.windSpeed = 0.04;
         this.windDirection = [1.0, 0.3];
         this.roughness = 0.1;
@@ -147,6 +172,7 @@ defineColorRGB(SingleLayerWaterMaterial, [
 
 defineTexture(SingleLayerWaterMaterial, [
     {key: 'normalTexture'},
+    {key: 'normalTexture2'},
 ]);
 
 defineSampler(SingleLayerWaterMaterial, [
@@ -156,6 +182,8 @@ defineSampler(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'normalScale', value: 1.0},
     {key: 'normalTiling', value: 3.5},
+    {key: 'normalScale2', value: 1.0},
+    {key: 'normalTiling2', value: 2.5},
     {key: 'windSpeed', value: 0.04},
     {key: 'roughness', value: 0.1},
     {key: 'specularFactor', value: 1.0},
@@ -168,5 +196,10 @@ defineVector2(SingleLayerWaterMaterial, [
     {key: 'windDirection', value: [1.0, 0.3]},
 ]);
 
+defineBoolean(SingleLayerWaterMaterial, [
+    {key: 'useNormalTexture2', value: false},
+]);
+
 Object.freeze(SingleLayerWaterMaterial);
 export default SingleLayerWaterMaterial;
+

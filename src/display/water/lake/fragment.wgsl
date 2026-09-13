@@ -26,14 +26,15 @@ struct WaterUniforms {
     depthFadeDistance: f32,
 
     extinctionFactor: f32,
-    padding1: f32,
-    padding2: f32,
-    padding3: f32,
+    useNormalTexture2: f32,
+    normalScale2: f32,
+    normalTiling2: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
 @group(2) @binding(2) var normalTexture: texture_2d<f32>;
+@group(2) @binding(3) var normalTexture2: texture_2d<f32>;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -93,38 +94,65 @@ fn main(inputData: InputData) -> OutputFragment {
     let windDirLen = length(uniforms.windDirection);
     let baseWindDir = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen, windDirLen > 0.001);
 
-    // 2. Step 2: 3중 노멀 스크롤 UV 구축 (서로 다른 스케일, 속도, 교차 각도)
-    // - Layer 1 (대형 너울): 기본 타일링 0.45x, 속도 0.6x, 주 풍향
+    // 2. Texture 1 (저주파 메인 너울): 주 풍향, 느린 속도
     let uv1 = inputData.uv * (uniforms.normalTiling * 0.45) + baseWindDir * (timeSec * uniforms.windSpeed * 0.6);
-    // - Layer 2 (중형 잔물결): 기본 타일링 1.0x, 속도 1.15x, +37도 교차 풍향
-    let dir2 = rotateVec2(baseWindDir, 0.645);
-    let uv2 = inputData.uv * uniforms.normalTiling + dir2 * (timeSec * uniforms.windSpeed * 1.15);
-    // - Layer 3 (마이크로 바람결): 기본 타일링 2.25x, 속도 1.75x, -49도 역측풍향
-    let dir3 = rotateVec2(baseWindDir, -0.855);
-    let uv3 = inputData.uv * (uniforms.normalTiling * 2.25) + dir3 * (timeSec * uniforms.windSpeed * 1.75);
-
-    // 3. 3중 노멀맵 샘플링 및 언패킹
     let rawN1 = textureSample(normalTexture, normalTextureSampler, uv1).rgb;
-    let rawN2 = textureSample(normalTexture, normalTextureSampler, uv2).rgb;
-    let rawN3 = textureSample(normalTexture, normalTextureSampler, uv3).rgb;
-
     let n1 = unpackTangentNormal(rawN1);
-    let n2 = unpackTangentNormal(rawN2);
-    let n3 = unpackTangentNormal(rawN3);
 
-    // 4. Step 2: RNM(Reoriented Normal Mapping) 무손실 2단계 계층 블렌딩
-    let n12 = blendRNM(n1, n2);
-    let blendedTangent = blendRNM(n12, n3);
+    // 3. 도메인 워핑 (Domain Warping): 메인 너울의 법선 기울기로 고주파 UV를 비틀어 타일링 격자 패턴을 유기적으로 분쇄
+    let warpOffset = n1.xy * 0.035;
 
-    // 5. RedGPU 표준 TBN 행렬 구축 및 최종 월드 노멀 산출 (normalScale 적용)
+    let dir2 = rotateVec2(baseWindDir, 0.645); // +37도 교차 풍향
+    let dir3 = rotateVec2(baseWindDir, -0.855); // -49도 역측 풍향
+
+    var blendedTangent: vec3<f32>;
+
+    // 4. [AAA 듀얼 노멀 시스템]: Texture 2(고주파 마이크로 물결) 바인딩 시 합성
+    if (uniforms.useNormalTexture2 > 0.5) {
+        let uv2 = (inputData.uv + warpOffset) * (uniforms.normalTiling * uniforms.normalTiling2) + dir2 * (timeSec * uniforms.windSpeed * 1.35);
+        let uv3 = (inputData.uv - warpOffset * 0.65) * (uniforms.normalTiling * uniforms.normalTiling2 * 1.75) + dir3 * (timeSec * uniforms.windSpeed * 1.85);
+
+        let rawN2 = textureSample(normalTexture2, normalTextureSampler, uv2).rgb;
+        let rawN3 = textureSample(normalTexture2, normalTextureSampler, uv3).rgb;
+
+        let n2 = unpackTangentNormal(rawN2);
+        let n3 = unpackTangentNormal(rawN3);
+
+        // 고주파 마이크로 텍스처 자체 2중 RNM 합성
+        let microBlended = blendRNM(n2, n3 * vec3<f32>(0.65, 0.65, 1.0));
+
+        // 저주파 대형 너울(n1)과 고주파 마이크로 물결(microBlended)의 최종 무손실 RNM 계층 결합
+        let scaledN1 = vec3<f32>(n1.xy * uniforms.normalScale, n1.z);
+        let scaledMicro = vec3<f32>(microBlended.xy * uniforms.normalScale2, microBlended.z);
+        blendedTangent = blendRNM(scaledN1, scaledMicro);
+    } else {
+        // [단일 텍스처 폴백 + 도메인 워핑]: 1장의 텍스처라도 워핑 왜곡으로 타일링 격자 제거
+        let uv2 = (inputData.uv + warpOffset) * uniforms.normalTiling + dir2 * (timeSec * uniforms.windSpeed * 1.15);
+        let uv3 = (inputData.uv - warpOffset * 0.5) * (uniforms.normalTiling * 2.25) + dir3 * (timeSec * uniforms.windSpeed * 1.75);
+
+        let rawN2 = textureSample(normalTexture, normalTextureSampler, uv2).rgb;
+        let rawN3 = textureSample(normalTexture, normalTextureSampler, uv3).rgb;
+
+        let n2 = unpackTangentNormal(rawN2);
+        let n3 = unpackTangentNormal(rawN3);
+
+        let n12 = blendRNM(n1, n2);
+        blendedTangent = blendRNM(n12, n3);
+    }
+
+    // 5. 원거리 노멀 완화 (Distance Normal Fade / Anti-Aliasing): 수평선 부근의 스펙큘러 노이즈 제거 및 거울 반사 극대화
+    let camDistance = distance(systemUniforms.camera.cameraPosition, inputData.vertexPosition);
+    let distanceFade = clamp(1.0 - smoothstep(600.0, 6000.0, camDistance) * 0.75, 0.25, 1.0);
+
+    // 6. RedGPU 표준 TBN 행렬 구축 및 최종 월드 노멀 산출
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
 
-    // 4. 카메라 시선 벡터 (View Direction) 및 Step 8: 수중 잠수 판별 (월드 Y 수위 기준)
+    // 7. 카메라 시선 벡터 (View Direction) 및 Step 8: 수중 잠수 판별 (월드 Y 수위 기준)
     let viewDir = normalize(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
     let isUnderwater = systemUniforms.camera.cameraPosition.y < inputData.vertexPosition.y;
 
-    var finalXY = blendedTangent.xy * uniforms.normalScale;
+    var finalXY = blendedTangent.xy * (uniforms.normalScale * distanceFade);
     let finalZ = sqrt(max(0.0, 1.0 - dot(finalXY, finalXY)));
     var worldNormal = normalize(tbn * vec3<f32>(finalXY, finalZ));
     // 수중에서 올려다볼 때 법선 벡터를 시선 방향을 마주하도록 반전

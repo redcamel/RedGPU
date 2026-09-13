@@ -50,14 +50,21 @@ RedGPU.init(
         );
         lake.waterLevel = 0.5;
 
-        // 심리스 물결 노멀맵 텍스처 장착
+        // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
         const normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
+        const normalTexture2 = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/water/water_normal_detail.png'
+        );
         lake.waterMaterial.normalTexture = normalTexture;
+        lake.waterMaterial.normalTexture2 = normalTexture2;
         lake.waterMaterial.normalTiling = 3.5;
         lake.waterMaterial.normalScale = 1.0;
+        lake.waterMaterial.normalTiling2 = 2.8;
+        lake.waterMaterial.normalScale2 = 0.85;
         lake.waterMaterial.windSpeed = 0.04;
         lake.waterMaterial.windDirection = [1.0, 0.3];
         lake.waterMaterial.roughness = 0.1;
@@ -215,11 +222,39 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
 
-            // [폴더 2] Step 1: 물결 노멀 및 바람 애니메이션
-            const waveFolder = pane.addFolder({title: 'Step 1: Waves & Normal', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 3.0, step: 0.05});
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {min: 1.0, max: 20.0, step: 0.5});
-            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005});
+            // [폴더 2] Step 1: 물결 노멀 및 듀얼 노멀 애니메이션
+            const waveFolder = pane.addFolder({title: 'Step 1 & 2: Waves & Dual Normal', expanded: true});
+            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: '듀얼 노멀 활성화'});
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: '너울 강도 (Normal 1)'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
+                min: 1.0,
+                max: 20.0,
+                step: 0.5,
+                label: '너울 타일링 (Normal 1)'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: '잔물결 강도 (Normal 2)'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {
+                min: 0.5,
+                max: 10.0,
+                step: 0.1,
+                label: '잔물결 배수 (Tiling 2)'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
+                min: 0.0,
+                max: 0.2,
+                step: 0.005,
+                label: '바람 속도 Wind Speed'
+            });
 
             const windDirection = {
                 x: lake.waterMaterial.windDirection[0],
