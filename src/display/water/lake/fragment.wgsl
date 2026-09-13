@@ -44,21 +44,77 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
+/**
+ * [KO] 2D 벡터를 주어진 라디안 각도로 회전합니다.
+ * [EN] Rotates a 2D vector by a given radian angle.
+ */
+fn rotateVec2(v: vec2<f32>, angleRad: f32) -> vec2<f32> {
+    let s = sin(angleRad);
+    let c = cos(angleRad);
+    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
+}
+
+/**
+ * [KO] 노멀 텍스처에서 샘플링된 색상을 탄젠트 공간 법선 벡터로 언패킹합니다. (G채널 반전 적용)
+ * [EN] Unpacks sampled normal texture color into tangent space normal vector (with inverted G-channel).
+ */
+fn unpackTangentNormal(color: vec3<f32>) -> vec3<f32> {
+    var xy = color.xy * 2.0 - 1.0;
+    xy.y = -xy.y;
+    let z = sqrt(max(0.0, 1.0 - dot(xy, xy)));
+    return vec3<f32>(xy, z);
+}
+
+/**
+ * [KO] 언리얼 엔진 5 및 AAA 표준 RNM(Reoriented Normal Mapping) 블렌딩 함수입니다.
+ * [EN] Unreal Engine 5 & AAA standard Reoriented Normal Mapping (RNM) blending function.
+ * 두 탄젠트 공간 법선의 디테일을 기저 회전 변환으로 손실 없이 합성합니다.
+ */
+fn blendRNM(n1: vec3<f32>, n2: vec3<f32>) -> vec3<f32> {
+    let t = n1 + vec3<f32>(0.0, 0.0, 1.0);
+    let u = vec3<f32>(-n2.x, -n2.y, n2.z);
+    return normalize(t * dot(t, u) - u * t.z);
+}
+
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
 
-    // 1. UV 스크롤 계산 (시간 t 기반 애니메이션, 초 단위)
+    // 1. 바람 방향 정규화 및 시간 계산 (시간 t 기반 애니메이션, 초 단위)
     let timeSec = systemUniforms.time.time;
-    let scrollUV = inputData.uv * uniforms.normalTiling + uniforms.windDirection * (timeSec * uniforms.windSpeed);
+    let windDirLen = length(uniforms.windDirection);
+    let baseWindDir = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen, windDirLen > 0.001);
 
-    // 2. RedGPU 표준 TBN 행렬 구축 (버텍스 탄젠트 기반)
+    // 2. Step 2: 3중 노멀 스크롤 UV 구축 (서로 다른 스케일, 속도, 교차 각도)
+    // - Layer 1 (대형 너울): 기본 타일링 0.45x, 속도 0.6x, 주 풍향
+    let uv1 = inputData.uv * (uniforms.normalTiling * 0.45) + baseWindDir * (timeSec * uniforms.windSpeed * 0.6);
+    // - Layer 2 (중형 잔물결): 기본 타일링 1.0x, 속도 1.15x, +37도 교차 풍향
+    let dir2 = rotateVec2(baseWindDir, 0.645);
+    let uv2 = inputData.uv * uniforms.normalTiling + dir2 * (timeSec * uniforms.windSpeed * 1.15);
+    // - Layer 3 (마이크로 바람결): 기본 타일링 2.25x, 속도 1.75x, -49도 역측풍향
+    let dir3 = rotateVec2(baseWindDir, -0.855);
+    let uv3 = inputData.uv * (uniforms.normalTiling * 2.25) + dir3 * (timeSec * uniforms.windSpeed * 1.75);
+
+    // 3. 3중 노멀맵 샘플링 및 언패킹
+    let rawN1 = textureSample(normalTexture, normalTextureSampler, uv1).rgb;
+    let rawN2 = textureSample(normalTexture, normalTextureSampler, uv2).rgb;
+    let rawN3 = textureSample(normalTexture, normalTextureSampler, uv3).rgb;
+
+    let n1 = unpackTangentNormal(rawN1);
+    let n2 = unpackTangentNormal(rawN2);
+    let n3 = unpackTangentNormal(rawN3);
+
+    // 4. Step 2: RNM(Reoriented Normal Mapping) 무손실 2단계 계층 블렌딩
+    let n12 = blendRNM(n1, n2);
+    let blendedTangent = blendRNM(n12, n3);
+
+    // 5. RedGPU 표준 TBN 행렬 구축 및 최종 월드 노멀 산출 (normalScale 적용)
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
 
-    // 3. 노멀맵 샘플링 및 RedGPU PBR 표준 언패킹 (G채널 반전 적용)
-    let sampledNormal = textureSample(normalTexture, normalTextureSampler, scrollUV).rgb;
-    let worldNormal = getNormalFromNormalMap(vec3<f32>(sampledNormal.r, 1.0 - sampledNormal.g, sampledNormal.b), tbn, uniforms.normalScale);
+    var finalXY = blendedTangent.xy * uniforms.normalScale;
+    let finalZ = sqrt(max(0.0, 1.0 - dot(finalXY, finalXY)));
+    let worldNormal = normalize(tbn * vec3<f32>(finalXY, finalZ));
 
     // 4. 카메라 시선 벡터 (View Direction)
     let viewDir = normalize(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
