@@ -13,10 +13,15 @@ import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 interface SingleLayerWaterMaterial {
     /**
-     * [KO] PBR 표준 수면 기본 알베도 컬러(ColorRGB)
-     * [EN] PBR standard water surface base albedo color (ColorRGB)
+     * [KO] PBR 표준 수면 기본 얕은 물 알베도 컬러(ColorRGB)
+     * [EN] PBR standard water surface base shallow albedo color (ColorRGB)
      */
     baseColor: ColorRGB;
+    /**
+     * [KO] 수심이 깊은 곳의 심해 남색 알베도 컬러(ColorRGB)
+     * [EN] Abyssal deep water albedo color (ColorRGB)
+     */
+    deepColor: ColorRGB;
     /**
      * [KO] 수면 노멀 맵 텍스처
      * [EN] Water surface normal map texture
@@ -62,6 +67,16 @@ interface SingleLayerWaterMaterial {
      * [EN] Shoreline and submerged object boundary soft depth fade distance (Unit: m, default: 0.8)
      */
     depthFadeDistance: number;
+    /**
+     * [KO] 수중 굴절 왜곡 강도 (기본값: 0.02, 0.0일 때 굴절 왜곡 없음)
+     * [EN] Underwater refraction distortion strength (default: 0.02, 0.0 for no distortion)
+     */
+    refractionStrength: number;
+    /**
+     * [KO] 수심에 따른 빛의 수체 흡수/소멸 계수 (Beer-Lambert extinction factor, 기본값: 0.15)
+     * [EN] Light water absorption/extinction factor by water depth (Beer-Lambert extinction factor, default: 0.15)
+     */
+    extinctionFactor: number;
 }
 
 /**
@@ -78,10 +93,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      * [KO] SingleLayerWaterMaterial 생성자
      * [EN] SingleLayerWaterMaterial constructor
      * @param redGPUContext - RedGPUContext 인스턴스
-     * @param baseColor - 기본 수면 HEX 컬러 (기본값: '#1a5b8c')
-     * @param opacity - 기본 수면 불투명도 (기본값: 0.7)
+     * @param baseColor - 기본 얕은 수면 옥색 HEX 컬러 (기본값: '#1fb5a6')
+     * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#061329')
+     * @param opacity - 기본 수면 불투명도 (기본값: 0.75)
      */
-    constructor(redGPUContext: RedGPUContext, baseColor: string = '#1a5b8c', opacity: number = 0.7) {
+    constructor(redGPUContext: RedGPUContext, baseColor: string = '#1fb5a6', deepColor: string = '#061329', opacity: number = 0.85) {
         super(
             redGPUContext,
             'SINGLE_LAYER_WATER_MATERIAL',
@@ -102,6 +118,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
         this.initGPURenderInfos();
         this.baseColor.setColorByHEX(baseColor);
+        this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
 
         // Premultiplied Alpha 블렌딩 설정: 스펙큘러가 opacity에 의해 깎이지 않고 100% 온전하게 빛나도록 보존
@@ -115,6 +132,8 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.roughness = 0.1;
         this.specularFactor = 1.0;
         this.depthFadeDistance = 0.8;
+        this.refractionStrength = 0.02;
+        this.extinctionFactor = 0.35;
 
         // 불투명 씬(Opaque) 렌더링 후의 컬러/뎁스 스냅샷을 사용하는 2Path 렌더 패스로 라우팅
         this.use2PathRender = true;
@@ -123,6 +142,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
 defineColorRGB(SingleLayerWaterMaterial, [
     {key: 'baseColor'},
+    {key: 'deepColor'},
 ]);
 
 defineTexture(SingleLayerWaterMaterial, [
@@ -140,6 +160,8 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'roughness', value: 0.1},
     {key: 'specularFactor', value: 1.0},
     {key: 'depthFadeDistance', value: 0.8},
+    {key: 'refractionStrength', value: 0.02},
+    {key: 'extinctionFactor', value: 0.35},
 ]);
 
 defineVector2(SingleLayerWaterMaterial, [

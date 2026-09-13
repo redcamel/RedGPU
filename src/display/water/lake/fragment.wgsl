@@ -13,6 +13,9 @@ struct WaterUniforms {
     baseColor: vec3<f32>,
     opacity: f32,
 
+    deepColor: vec3<f32>,
+    refractionStrength: f32,
+
     windDirection: vec2<f32>,
     normalScale: f32,
     normalTiling: f32,
@@ -21,6 +24,11 @@ struct WaterUniforms {
     roughness: f32,
     specularFactor: f32,
     depthFadeDistance: f32,
+
+    extinctionFactor: f32,
+    padding1: f32,
+    padding2: f32,
+    padding3: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -246,22 +254,54 @@ fn main(inputData: InputData) -> OutputFragment {
         depthFade = smoothstep(0.0, uniforms.depthFadeDistance, waterDepthDelta);
     }
 
-    // 9. 물리적 에너지 보존 (반사 vs 투과) 및 최종 수면 합성
-    // - 비스듬히 볼수록(F_IBL 증가): 수체 색상 투과가 0으로 줄어들고 하늘 반사(iblSpecular)가 100% 거울처럼 지배
-    // - 위에서 볼수록(F_IBL 감소): 하늘 반사가 2%로 줄어들고 맑은 물밑 투과광(diffusePart)이 100% 지배
-    let finalAlpha = uniforms.opacity * inputData.combinedOpacity * depthFade;
-    let transmissionWeight = max(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0));
-    let diffusePart = uniforms.baseColor * transmissionWeight;
-    let totalSpecular = (specularLighting + iblSpecular) * depthFade;
-    let finalRgb = diffusePart * finalAlpha + totalSpecular;
+    // 9. Step 4: 수중 굴절 왜곡 (Screen-space Refraction & Under-water Distortion)
+    let screenUV = inputData.position.xy / systemUniforms.resolution;
 
-    var finalColor = vec4<f32>(finalRgb, finalAlpha);
+    // 뷰 공간 노멀의 XY 방향을 화면 굴절 오프셋으로 사용 (시점 회전과 무관하게 화면 기준 일관된 왜곡 방향 유지)
+    let viewNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(worldNormal, 0.0)).xyz;
+    // 수심이 극히 얕은 접촉면에서는 굴절 왜곡을 자연스럽게 0으로 수렴시켜 해안선 칼잘림 방지
+    let effectiveRefractionStrength = uniforms.refractionStrength * min(waterDepthDelta * 2.0, 1.0);
+    let refractionOffset = viewNormal.xy * effectiveRefractionStrength;
 
-    if (finalColor.a == 0.0 && all(totalSpecular == vec3<f32>(0.0))) {
-        discard;
+    // 왜곡된 굴절 UV 좌표
+    var finalRefractUV = clamp(screenUV + refractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
+
+    // 수면 돌출 물체(물 밖으로 솟은 오브젝트)가 물속 굴절에 딸려 들어오는 아티팩트 방지 검사
+    let distortedScreenCoord = vec2<i32>(finalRefractUV * systemUniforms.resolution);
+    let rawDistortedDepth = textureLoad(renderPath1DepthTexture, distortedScreenCoord, 0);
+    let linearDistortedSceneDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
+
+    if (linearDistortedSceneDepth < linearWaterDepth) {
+        finalRefractUV = screenUV;
     }
 
-    output.color = finalColor;
+    // 1차 렌더 패스 불투명 씬 컬러에서 굴절된 수중 배경 색상 샘플링
+    let backgroundRefractedColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, 0.0).rgb;
+
+    // 10. 수체 흡수 및 산란 (Beer-Lambert Absorption & Dual-tone Depth Scattering)
+    // - 얕은 수심: 맑고 투명한 옥색(uniforms.baseColor)을 띠며 왜곡된 물밑 배경이 선명히 비침
+    // - 깊은 수심: 빛의 소멸과 함께 깊고 묵직한 심해 남색(uniforms.deepColor)으로 점진 전이
+    let depthGradient = smoothstep(0.0, 3.5, waterDepthDelta);
+    let waterTargetColor = mix(uniforms.baseColor, uniforms.deepColor, depthGradient);
+
+    let effectiveOpacity = uniforms.opacity * inputData.combinedOpacity;
+    let extinction = exp(-waterDepthDelta * uniforms.extinctionFactor);
+    let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, 1.0);
+    let waterBodyScattering = mix(backgroundRefractedColor, waterTargetColor, absorptionStrength);
+
+    // 11. 물리적 에너지 보존 (반사 vs 투과) 및 최종 수면 합성
+    // - 비스듬히 볼수록(F_IBL 증가): 수체 색상 투과가 0으로 줄어들고 하늘 반사(iblSpecular)가 100% 거울처럼 지배
+    // - 위에서 볼수록(F_IBL 감소): 하늘 반사가 2%로 줄어들고 맑은 물밑 투과광(waterBodyScattering)이 지배
+    let transmissionWeight = max(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0));
+    let transmittedUnderwater = waterBodyScattering * transmissionWeight;
+    let totalSpecular = (specularLighting + iblSpecular) * depthFade;
+
+    // 최종 RGB 합성: 수중 투과광 + 수면 반사광/스펙큘러
+    // 접촉면(depthFade가 0에 근접)에서는 왜곡 없는 원본 배경색과 완벽히 블렌딩되어 칼잘림 소거
+    let surfaceColor = transmittedUnderwater + totalSpecular;
+    let finalRgb = mix(backgroundRefractedColor, surfaceColor, depthFade);
+
+    output.color = vec4<f32>(finalRgb, 1.0);
 
     // 9. RedGPU PBR 표준 G-Buffer Normal & MotionVector 출력
     let safeRoughness = clamp(uniforms.roughness, 0.0, 1.0);
