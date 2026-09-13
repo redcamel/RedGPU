@@ -77,7 +77,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. 실시간 튜닝 GUI 패널
-        renderTestPane(redGPUContext, lake, directionalLight);
+        renderTestPane(redGPUContext, lake, directionalLight, view);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -134,10 +134,11 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
  * [KO] WaterBodyLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterBodyLake properties.
  */
-function renderTestPane(redGPUContext, lake, directionalLight) {
+function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
+        ibl: true,
         gui: (pane) => {
             // [폴더 1] 수체 기초 설정 (PBR Base)
             const basicFolder = pane.addFolder({title: 'WaterBodyLake (Base)', expanded: true});
@@ -180,7 +181,24 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
             specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [폴더 4] 컬러 프리셋
+            // [폴더 4] 대기 및 환경광 (Sky Atmosphere & IBL)
+            const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: true});
+            let skyAtmosphereInstance = null;
+            const envState = {
+                skyAtmosphere: false,
+            };
+            envFolder.addBinding(envState, 'skyAtmosphere').on('change', (ev) => {
+                if (ev.value) {
+                    if (!skyAtmosphereInstance) {
+                        skyAtmosphereInstance = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+                    }
+                    view.skyAtmosphere = skyAtmosphereInstance;
+                } else {
+                    view.skyAtmosphere = null;
+                }
+            });
+
+            // [폴더 5] 컬러 프리셋
             const presetFolder = pane.addFolder({title: 'Color Presets', expanded: false});
             presetFolder.addButton({title: 'Calm Alpine Lake (#1a5b8c)'}).on('click', () => {
                 lake.waterMaterial.baseColor.setColorByHEX('#1a5b8c');
