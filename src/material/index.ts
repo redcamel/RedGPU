@@ -12,6 +12,7 @@ import BLEND_MODE from "./BLEND_MODE";
 import ColorMaterial from "./colorMaterial/ColorMaterial";
 import PBRMaterial from "./pbrMaterial/PBRMaterial";
 import PhongMaterial from "./phongMaterial/PhongMaterial";
+import SingleLayerWaterMaterial from "../display/water/lake/SingleLayerWaterMaterial";
 import TINT_BLEND_MODE from "./TINT_BLEND_MODE";
 
 export * as Core from './core'
@@ -21,7 +22,8 @@ export {
     ColorMaterial,
     PhongMaterial,
     BitmapMaterial,
-    PBRMaterial
+    PBRMaterial,
+    SingleLayerWaterMaterial
 }
 
 
