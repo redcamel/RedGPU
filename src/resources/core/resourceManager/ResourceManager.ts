@@ -1068,6 +1068,11 @@ class ResourceManager extends RedGPUObject {
                             visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
                             buffer: {type: 'read-only-storage'}
                         },
+                        {
+                            binding: 20,
+                            visibility: GPUShaderStage.FRAGMENT,
+                            texture: {sampleType: "depth"}
+                        },
                     ],
                 }
             )

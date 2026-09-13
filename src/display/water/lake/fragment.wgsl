@@ -20,7 +20,7 @@ struct WaterUniforms {
     windSpeed: f32,
     roughness: f32,
     specularFactor: f32,
-    padding: f32,
+    depthFadeDistance: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -232,13 +232,27 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let iblSpecular = reflectedSky * F_IBL * uniforms.specularFactor;
 
-    // 8. 물리적 에너지 보존 (반사 vs 투과) 및 최종 수면 합성
+    // 8. 씬 깊이(Depth) 기반 부드러운 해안선/접촉면 감쇄 (Soft Depth Fade)
+    let screenCoord = vec2<i32>(inputData.position.xy);
+    let rawSceneDepth = textureLoad(renderPath1DepthTexture, screenCoord, 0);
+    let cameraNear = systemUniforms.camera.nearClipping;
+    let cameraFar = systemUniforms.camera.farClipping;
+    let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
+    let linearWaterDepth = getLinearizeDepth(inputData.position.z, cameraNear, cameraFar);
+
+    let waterDepthDelta = max(linearSceneDepth - linearWaterDepth, 0.0);
+    var depthFade = 1.0;
+    if (uniforms.depthFadeDistance > 0.0) {
+        depthFade = smoothstep(0.0, uniforms.depthFadeDistance, waterDepthDelta);
+    }
+
+    // 9. 물리적 에너지 보존 (반사 vs 투과) 및 최종 수면 합성
     // - 비스듬히 볼수록(F_IBL 증가): 수체 색상 투과가 0으로 줄어들고 하늘 반사(iblSpecular)가 100% 거울처럼 지배
     // - 위에서 볼수록(F_IBL 감소): 하늘 반사가 2%로 줄어들고 맑은 물밑 투과광(diffusePart)이 100% 지배
-    let finalAlpha = uniforms.opacity * inputData.combinedOpacity;
+    let finalAlpha = uniforms.opacity * inputData.combinedOpacity * depthFade;
     let transmissionWeight = max(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0));
     let diffusePart = uniforms.baseColor * transmissionWeight;
-    let totalSpecular = specularLighting + iblSpecular;
+    let totalSpecular = (specularLighting + iblSpecular) * depthFade;
     let finalRgb = diffusePart * finalAlpha + totalSpecular;
 
     var finalColor = vec4<f32>(finalRgb, finalAlpha);

@@ -127,6 +127,16 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
         objects.push(mesh);
     }
 
+    // 연안 경사 지형 (Depth Fade 시각적 검증용 비스듬한 해변 경사면)
+    const slopeMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#8d6e63');
+    const slopeGeometry = new RedGPU.Primitive.Box(redGPUContext, 12, 1, 14);
+    const slopeMesh = new RedGPU.Display.Mesh(redGPUContext, slopeGeometry, slopeMaterial);
+    slopeMesh.x = 0;
+    slopeMesh.y = 0.1;
+    slopeMesh.z = -9;
+    slopeMesh.rotationX = 18;
+    scene.addChild(slopeMesh);
+
     return objects;
 }
 
@@ -181,7 +191,11 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [폴더 4] 대기 및 환경광 (Sky Atmosphere & IBL)
+            // [폴더 4] Step 3: 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
+            const depthFadeFolder = pane.addFolder({title: 'Step 3: Depth Fade (Soft Water)', expanded: true});
+            depthFadeFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 4.0, step: 0.05});
+
+            // [폴더 5] 대기 및 환경광 (Sky Atmosphere & IBL)
             const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: true});
             let skyAtmosphereInstance = null;
             const envState = {

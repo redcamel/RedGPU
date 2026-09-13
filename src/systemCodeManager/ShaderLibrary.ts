@@ -3010,6 +3010,8 @@ export namespace ShaderLibrary {
      * 
      * #redgpu_include systemStruct.globalFragmentStructBuiltIn;
      * @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
+     *
+     * @group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
      * 
      * #redgpu_include depth.getLinearizeDepth
      * 

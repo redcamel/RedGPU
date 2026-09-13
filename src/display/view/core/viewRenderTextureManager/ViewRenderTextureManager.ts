@@ -4,6 +4,8 @@ import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";
 import GBUFFER_TYPE from "../GBUFFER_TYPE";
 import RedGPUObject from "../../../../base/RedGPUObject";
+import GPU_LOAD_OP from "../../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../../gpuConst/GPU_STORE_OP";
 
 const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
@@ -71,6 +73,12 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
         withResolve: false,
         useMipmap: true
+    },
+    [GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT]: {
+        format: 'depth32float',
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
+        withResolve: false,
+        useMipmap: false
     }
 };
 
@@ -108,6 +116,19 @@ class ViewRenderTextureManager extends RedGPUObject {
     #lastUpdateMSAAID: string
     #targetTextureSize: GPUExtent3DDict
     #targetTextureSizeString: string
+    #depthResolvePipeline: GPURenderPipeline | null = null;
+    #depthResolveBindGroupLayout: GPUBindGroupLayout | null = null;
+    #depthResolveBindGroupMap: Map<GPUTextureView, GPUBindGroup> = new Map();
+    #depthResolveRenderPassDescriptor: GPURenderPassDescriptor = {
+        label: 'DepthResolveMSAA Render Pass',
+        colorAttachments: [],
+        depthStencilAttachment: {
+            view: null as any,
+            depthClearValue: 1.0,
+            depthLoadOp: GPU_LOAD_OP.CLEAR,
+            depthStoreOp: GPU_STORE_OP.STORE,
+        }
+    };
 
     /**
      * [KO] ViewRenderTextureManager 인스턴스를 생성합니다.
@@ -206,6 +227,48 @@ class ViewRenderTextureManager extends RedGPUObject {
         return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
     }
 
+    /**
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰를 반환합니다.
+     * [EN] Returns the render path 1 stage depth result texture view.
+     */
+    get renderPath1DepthResultTextureView(): GPUTextureView {
+        return this.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
+    }
+
+    /**
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처를 반환합니다.
+     * [EN] Returns the render path 1 stage depth result texture.
+     */
+    get renderPath1DepthResultTexture(): GPUTexture {
+        return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
+    }
+
+    /**
+     * [KO] 1차 렌더 패스의 깊이 버퍼를 2차 패스(Water, 굴절 등)에서 읽을 수 있도록 renderPath1DepthResultTexture에 복사합니다.
+     * MSAA 활성화 여부에 따라 직접 복사(1x -> 1x) 또는 풀스크린 렌더 리졸브(4x -> 1x)를 자동으로 선택하여 수행합니다.
+     * [EN] Copies the depth buffer of render path 1 into renderPath1DepthResultTexture for reading in path 2.
+     * Automatically performs direct copy (1x -> 1x) or fullscreen render resolve (4x -> 1x) based on MSAA state.
+     * @param encoder -
+     * [KO] GPUCommandEncoder 인스턴스
+     * [EN] GPUCommandEncoder instance
+     */
+    copyDepthToRenderPath1(encoder: GPUCommandEncoder): void {
+        const sourceDepthTexture = this.depthTexture;
+        const renderPath1DepthResultTexture = this.renderPath1DepthResultTexture;
+        if (!sourceDepthTexture || !renderPath1DepthResultTexture) return;
+
+        const {antialiasingManager} = this;
+        if (antialiasingManager.useMSAA) {
+            this.#resolveDepthMSAA(encoder);
+        } else {
+            encoder.copyTextureToTexture(
+                {texture: sourceDepthTexture},
+                {texture: renderPath1DepthResultTexture},
+                {width: this.#targetTextureSize.width, height: this.#targetTextureSize.height, depthOrArrayLayers: 1}
+            );
+        }
+    }
+
     /* ----------------------------------------
      * G-Buffer 공통 접근 메서드
      * ---------------------------------------- */
@@ -266,6 +329,12 @@ class ViewRenderTextureManager extends RedGPUObject {
             this.#destroyGBuffer(key as any);
         }
         this.#gBuffers.clear();
+        this.#depthResolveBindGroupMap.clear();
+        this.#depthResolvePipeline = null;
+        this.#depthResolveBindGroupLayout = null;
+        if (this.#depthResolveRenderPassDescriptor.depthStencilAttachment) {
+            (this.#depthResolveRenderPassDescriptor.depthStencilAttachment as any).view = null;
+        }
         this.#view = null;
         console.log("🧹 ViewRenderTextureManager destroy 완료");
     }
@@ -296,6 +365,7 @@ class ViewRenderTextureManager extends RedGPUObject {
         if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
             this.#lastUpdateMSAAID = msaaID;
             renderViewStateData.swapBufferIndex = 0
+            this.#depthResolveBindGroupMap.clear();
 
             // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
             // 2. 새로운 리소스 일괄 생성
@@ -367,7 +437,7 @@ class ViewRenderTextureManager extends RedGPUObject {
         }
 
         const {name} = this.#view
-        const sampleCount = useMSAA && mipLevelCount === 1 ? 4 : 1;
+        const sampleCount = (type === GBUFFER_TYPE.RENDER_PATH1_RESULT || type === GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT) ? 1 : (useMSAA && mipLevelCount === 1 ? 4 : 1);
         const textureDescriptor = {
             size: this.#targetTextureSize,
             sampleCount, // 밉맵을 쓸 때는 보통 MSAA를 쓰지 않거나 resolve된 타겟을 씁니다.
@@ -425,6 +495,104 @@ class ViewRenderTextureManager extends RedGPUObject {
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, 'depth32float', usage, false))
     }
 
+    /**
+     * [KO] MSAA 4x 깊이 텍스처를 1x 단일 샘플 텍스처(renderPath1DepthResultTexture)로 리졸브 복사합니다.
+     * @private
+     */
+    #resolveDepthMSAA(encoder: GPUCommandEncoder): void {
+        const sourceDepthView = this.depthTextureView;
+        const targetDepthView = this.renderPath1DepthResultTextureView;
+        if (!sourceDepthView || !targetDepthView) return;
+
+        if (!this.#depthResolvePipeline) {
+            this.#initDepthResolvePipeline();
+        }
+
+        let bindGroup = this.#depthResolveBindGroupMap.get(sourceDepthView);
+        if (!bindGroup) {
+            bindGroup = this.redGPUContext.gpuDevice.createBindGroup({
+                label: 'DepthResolveMSAA BindGroup',
+                layout: this.#depthResolveBindGroupLayout!,
+                entries: [{binding: 0, resource: sourceDepthView}]
+            });
+            this.#depthResolveBindGroupMap.set(sourceDepthView, bindGroup);
+        }
+
+        (this.#depthResolveRenderPassDescriptor.depthStencilAttachment as GPURenderPassDepthStencilAttachment).view = targetDepthView;
+        const passEncoder = encoder.beginRenderPass(this.#depthResolveRenderPassDescriptor);
+        passEncoder.setPipeline(this.#depthResolvePipeline!);
+        passEncoder.setBindGroup(0, bindGroup);
+        passEncoder.draw(3, 1, 0, 0);
+        passEncoder.end();
+    }
+
+    /**
+     * [KO] MSAA 깊이 리졸브용 초경량 렌더 파이프라인을 초기화합니다.
+     * @private
+     */
+    #initDepthResolvePipeline(): void {
+        const gpuDevice = this.redGPUContext.gpuDevice;
+        this.#depthResolveBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: 'DepthResolveMSAA BindGroupLayout',
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {sampleType: 'depth', multisampled: true}
+                }
+            ]
+        });
+
+        const shaderModule = gpuDevice.createShaderModule({
+            label: 'DepthResolveMSAA ShaderModule',
+            code: `
+                @group(0) @binding(0) var srcDepth: texture_depth_multisampled_2d;
+
+                @vertex
+                fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> @builtin(position) vec4<f32> {
+                    var pos = array<vec2<f32>, 3>(
+                        vec2<f32>(-1.0, -1.0),
+                        vec2<f32>( 3.0, -1.0),
+                        vec2<f32>(-1.0,  3.0)
+                    );
+                    return vec4<f32>(pos[vertexIndex], 0.0, 1.0);
+                }
+
+                @fragment
+                fn fs_main(@builtin(position) pos: vec4<f32>) -> @builtin(frag_depth) f32 {
+                    let coord = vec2<i32>(pos.xy);
+                    return textureLoad(srcDepth, coord, 0);
+                }
+            `
+        });
+
+        this.#depthResolvePipeline = gpuDevice.createRenderPipeline({
+            label: 'DepthResolveMSAA RenderPipeline',
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [this.#depthResolveBindGroupLayout]
+            }),
+            vertex: {
+                module: shaderModule,
+                entryPoint: 'vs_main'
+            },
+            fragment: {
+                module: shaderModule,
+                entryPoint: 'fs_main',
+                targets: []
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'always'
+            },
+            primitive: {
+                topology: 'triangle-list'
+            },
+            multisample: {
+                count: 1
+            }
+        });
+    }
 
 }
 

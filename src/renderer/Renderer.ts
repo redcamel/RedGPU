@@ -244,7 +244,8 @@ class Renderer {
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
             const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
-            view.update(false, true, renderPath1ResultTextureView)
+            const renderPath1DepthResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
+            view.update(false, true, renderPath1ResultTextureView, renderPath1DepthResultTextureView)
 
             // 🌿 [Hierarchical Z-Buffer] Depth Texture로부터 8단계 HZB 피라미드 생성 (0.02ms)
             const currentDepthView = view.viewRenderTextureManager.depthTextureView;
@@ -341,6 +342,7 @@ class Renderer {
                     {texture: renderPath1ResultTexture,},
                     {width: view.pixelRectObject.width, height: view.pixelRectObject.height, depthOrArrayLayers: 1},
                 );
+                view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
             mipmapGenerator.generateMipmap(renderPath1ResultTexture, view.viewRenderTextureManager.renderPath1ResultTextureDescriptor, true, COMMAND_ENCODER_TYPE.MAIN)
 

@@ -350,8 +350,11 @@ class View3D extends AView {
      * @param renderPath1ResultTextureView -
      * [KO] 렌더 패스 1단계 결과 텍스처 뷰
      * [EN] Render path 1 stage result texture view
+     * @param renderPath1DepthTextureView -
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰
+     * [EN] Render path 1 stage depth result texture view
      */
-    update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView) {
+    update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView, renderPath1DepthTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
         const {shadowManager,} = scene
         shadowManager.update(redGPUContext)
@@ -361,7 +364,7 @@ class View3D extends AView {
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
         let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
         const index = this.redGPUContext.viewList.indexOf(this)
-        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}`
+        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}_depth${!!renderPath1DepthTextureView}`
 
         if (index > -1) {
             let needResetBindGroup = true
@@ -385,6 +388,7 @@ class View3D extends AView {
                     prevInfo.ibl_prefilterTexture !== ibl_prefilterTexture ||
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
+                    prevInfo.renderPath1DepthTextureView !== renderPath1DepthTextureView ||
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView ||
                     prevInfo.globalSSAOVertexGPUBuffer !== globalSSAOVertexGPUBuffer ||
                     prevInfo.globalSSAOFragmentGPUBuffer !== globalSSAOFragmentGPUBuffer ||
@@ -392,7 +396,7 @@ class View3D extends AView {
                     !this.#clusterLightManager.passClustersLight
                 )
             }
-            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView)
+            if (needResetBindGroup) this.#createVertexUniformBindGroup(key, shadowDepthTextureView, this.ibl, renderPath1ResultTextureView, renderPath1DepthTextureView)
             else this.#systemUniform_Vertex_UniformBindGroup = this.#prevInfoList[key].vertexUniformBindGroup;
 
             this.#prevInfoList[key] = {
@@ -405,6 +409,7 @@ class View3D extends AView {
                 ibl_prefilterTexture,
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
+                renderPath1DepthTextureView,
                 shadowDepthTextureView,
                 globalSSAOVertexGPUBuffer,
                 globalSSAOFragmentGPUBuffer,
@@ -502,7 +507,13 @@ class View3D extends AView {
         }
     }
 
-    #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
+    #createVertexUniformBindGroup(
+        key: string,
+        shadowDepthTextureView: GPUTextureView,
+        ibl: IBL,
+        renderPath1ResultTextureView: GPUTextureView,
+        renderPath1DepthTextureView?: GPUTextureView
+    ) {
 
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
@@ -593,6 +604,10 @@ class View3D extends AView {
                         offset: 0,
                         size: redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer.size
                     }
+                },
+                {
+                    binding: 20,
+                    resource: renderPath1DepthTextureView || resourceManager.emptyDepthTextureView
                 },
             ]
         }

@@ -57,6 +57,11 @@ interface SingleLayerWaterMaterial {
      * [EN] PBR specular reflectance scaling factor (water default: 1.0)
      */
     specularFactor: number;
+    /**
+     * [KO] 연안 및 침수 물체 경계면 소프트 블렌딩 깊이 거리 (단위: m, 기본값: 0.8)
+     * [EN] Shoreline and submerged object boundary soft depth fade distance (Unit: m, default: 0.8)
+     */
+    depthFadeDistance: number;
 }
 
 /**
@@ -109,6 +114,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.windDirection = [1.0, 0.3];
         this.roughness = 0.1;
         this.specularFactor = 1.0;
+        this.depthFadeDistance = 0.8;
+
+        // 불투명 씬(Opaque) 렌더링 후의 컬러/뎁스 스냅샷을 사용하는 2Path 렌더 패스로 라우팅
+        this.use2PathRender = true;
     }
 }
 
@@ -130,6 +139,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'windSpeed', value: 0.04},
     {key: 'roughness', value: 0.1},
     {key: 'specularFactor', value: 1.0},
+    {key: 'depthFadeDistance', value: 0.8},
 ]);
 
 defineVector2(SingleLayerWaterMaterial, [

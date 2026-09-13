@@ -22,7 +22,12 @@ const GBUFFER_TYPE = {
      * [KO] 렌더 패스 1 단계 결과 버퍼
      * [EN] Render Path 1 stage result buffer
      */
-    RENDER_PATH1_RESULT: 'renderPath1ResultTexture'
+    RENDER_PATH1_RESULT: 'renderPath1ResultTexture',
+    /**
+     * [KO] 렌더 패스 1 단계 깊이 결과 버퍼
+     * [EN] Render Path 1 stage depth result buffer
+     */
+    RENDER_PATH1_DEPTH_RESULT: 'renderPath1DepthResultTexture'
 } as const;
 
 /**

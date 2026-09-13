@@ -63,6 +63,8 @@ struct SystemUniform {
 #redgpu_include systemStruct.globalFragmentStructBuiltIn;
 @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
 
+@group(0) @binding(20) var renderPath1DepthTexture: texture_depth_2d;
+
 #redgpu_include depth.getLinearizeDepth
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
