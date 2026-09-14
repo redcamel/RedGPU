@@ -30,6 +30,8 @@ RedGPU.init(
         controller.tilt = -18;
         controller.pan = 0;
         controller.moveSpeed = 4500;
+        // 16km 오픈월드 환경에서 Z-버퍼 정밀도를 20배 향상시켜 원거리 해안선 뎁스파이팅 원천 차단 (0.1m -> 2.0m)
+        controller.camera.nearClipping = 2.0;
 
         // 2. 씬 및 View3D 설정
         const scene = new RedGPU.Display.Scene();
@@ -146,43 +148,25 @@ RedGPU.init(
         lake.z = 0;
         lake.waterLevel = 720; // 산맥과 넓은 호수가 완벽히 조화되는 황금 밸런스 수위
 
-        // 초대형 수체 스케일에 맞춘 장파장 너울 (80cm 파고, 250m 파장)
-        lake.waveAmplitude = 0.8;
-        lake.waveWavelength = 250.0;
-        lake.waveSpeed = 0.7;
-
-        // [AAA 듀얼 노멀 시스템]: Texture 1(대형 너울) + Texture 2(마이크로 잔물결)
-        const normalTexture1 = new RedGPU.Resource.BitmapTexture(
+        // [AAA 듀얼 노멀 시스템]: 대형 너울 + 마이크로 잔물결 텍스처 장착
+        // ※ baseColor, deepColor, opacity, roughness, specularFactor, refractionStrength 등
+        //    모든 핵심 에메랄드 PBR 광학 속성은 코어 기본값을 그대로 활용합니다.
+        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
-        const normalTexture2 = new RedGPU.Resource.BitmapTexture(
+        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal_detail.png'
         );
 
-        lake.waterMaterial.normalTexture = normalTexture1;
-        lake.waterMaterial.normalTexture2 = normalTexture2;
+        // 16km 초대형 지형 스케일에 맞춘 타일링 (250m 장파장 너울과 1:1 대응) 및 해안선 완충 설정
+        lake.waterMaterial.normalTiling = 65.0;      // 16,000m / 65 ≈ 246m 너울 스케일 (에일리어싱 방지)
+        lake.waterMaterial.depthFadeDistance = 25.0; // 16km 초대형 지형 해안선 완충 (25m)
 
-        lake.waterMaterial.normalTiling = 250.0; // 주 노멀 타일링
-        lake.waterMaterial.normalScale = 1.0;
-        lake.waterMaterial.normalTiling2 = 2.8;  // 제2 노멀 상대 타일링 배수 (고주파)
-        lake.waterMaterial.normalScale2 = 0.85; // 제2 노멀 강도 배수
-
-        lake.waterMaterial.windSpeed = 0.035;
-        lake.waterMaterial.windDirection = [1.0, 0.4];
-
-        // 맑고 투명한 알프스 에메랄드 옥색(baseColor)과 깊고 푸른 코발트블루 심해색(deepColor)
-        lake.waterMaterial.baseColor.setColorByHEX('#18a497');
-        lake.waterMaterial.deepColor.setColorByHEX('#0a3158');
-        lake.waterMaterial.opacity = 0.92;
-
-        // 물리 광학 속성 (16km 대형 지형에 최적화된 수치)
-        lake.waterMaterial.roughness = 0.07;
-        lake.waterMaterial.specularFactor = 1.35;
-        lake.waterMaterial.depthFadeDistance = 25.0;  // 25m 부드러운 해안선 완충
-        lake.waterMaterial.refractionStrength = 0.015; // 자연스러운 물밑 지형 일렁임
-        lake.waterMaterial.extinctionFactor = 0.015;   // 대규모 수심 비어-람베르트 감쇄
+        // 초대형 수체 스케일에 맞춘 장파장 너울 (80cm 파고, 250m 파장)
+        lake.waveAmplitude = 0.8;
+        lake.waveWavelength = 250.0;
 
         scene.addChild(lake);
 

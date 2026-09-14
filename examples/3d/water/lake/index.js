@@ -49,41 +49,22 @@ RedGPU.init(
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
-        // 5. WaterLake 에메랄드 수체 생성 (PBR 광학 기본값 적용)
+        // 5. WaterLake 수체 생성 (신규 코어 기본값 '에메랄드 호수' 자동 적용)
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
         lake.waterLevel = 0.5;
 
         // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
-        const normalTexture = new RedGPU.Resource.BitmapTexture(
+        // ※ baseColor(#18d8b6), deepColor(#023d58), opacity(0.88), roughness(0.02),
+        //    extinctionFactor(0.22), depthFade(1.2), waveAmplitude(0.025) 등 모든 핵심
+        //    에메랄드 PBR 광학 속성이 SingleLayerWaterMaterial & WaterLake의 기본값으로 자동 적용됩니다.
+        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
-        const normalTexture2 = new RedGPU.Resource.BitmapTexture(
+        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal_detail.png'
         );
-        lake.waterMaterial.normalTexture = normalTexture;
-        lake.waterMaterial.normalTexture2 = normalTexture2;
-
-        // 에메랄드 해변 특화 광학 파라미터 튜닝
-        lake.waterMaterial.baseColor.setColorByHEX('#18d8b6'); // 청명한 열대 에메랄드 그린
-        lake.waterMaterial.deepColor.setColorByHEX('#023d58'); // 깊은 라군 사파이어 블루
-        lake.waterMaterial.opacity = 0.88;
-        lake.waterMaterial.roughness = 0.02; // 영롱한 다이아몬드 윤슬 최적화
-        lake.waterMaterial.specularFactor = 1.0;
-        lake.waterMaterial.extinctionFactor = 0.22; // 바닥 모래와 암초가 투명하게 들여다보이는 수심 흡수
-        lake.waterMaterial.refractionStrength = 0.026; // 수면 물결에 따라 일렁이는 굴절 왜곡
-        lake.waterMaterial.depthFadeDistance = 1.2; // 백사장과 만나는 부드러운 해안선
-        lake.waterMaterial.windSpeed = 0.045;
-        lake.waterMaterial.windDirection = [1.0, 0.35];
-        lake.waterMaterial.normalTiling = 4.0;
-        lake.waterMaterial.normalScale = 1.0;
-        lake.waterMaterial.normalTiling2 = 2.0;
-        lake.waterMaterial.normalScale2 = 0.8;
-
-        lake.waveAmplitude = 0.025; // 2.5cm 미세 정점 너울
-        lake.waveWavelength = 10.0;
-        lake.waveSpeed = 0.7;
 
         scene.addChild(lake);
 
@@ -128,12 +109,26 @@ function createBeachEnvironment(redGPUContext, scene) {
     const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg');
     const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg');
 
+    // --- 1-1. 지형/해변/암석 UV 타일링을 위한 고화질 반복 샘플러 (Repeat + Anisotropy 16) ---
+    // PBRMaterial의 기본 샘플러는 'clamp-to-edge'이므로, textureScale 타일링 시 텍스처 늘어남/뭉개짐을 방지하고
+    // 원경 경사면에서도 극상의 디테일을 유지하도록 16x 이방성 필터링과 무한 반복 샘플러를 명시 장착합니다.
+    const terrainRepeatSampler = new RedGPU.Resource.Sampler(redGPUContext, {
+        addressModeU: 'repeat',
+        addressModeV: 'repeat',
+        magFilter: 'linear',
+        minFilter: 'linear',
+        mipmapFilter: 'linear',
+        maxAnisotropy: 16
+    });
+
     // --- 2. 해저 모래/자갈 분지 지반 (PBR Seabed Basin: 0m 연안 -> 5.5m 깊은 라군) ---
     const seabedMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     seabedMaterial.baseColorTexture = gravelAlbedo;
     seabedMaterial.normalTexture = gravelNormal;
     seabedMaterial.metallicRoughnessTexture = gravelOrm;
     seabedMaterial.occlusionTexture = gravelOrm;
+    seabedMaterial.baseColorTextureSampler = terrainRepeatSampler;
+    seabedMaterial.normalTextureSampler = terrainRepeatSampler;
     seabedMaterial.textureScale = [16, 16];
     seabedMaterial.baseColorFactor = [1.1, 1.05, 0.95, 1.0]; // 화사한 산호 모래/자갈 톤
     seabedMaterial.roughnessFactor = 0.92;
@@ -154,6 +149,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     beachMaterial.normalTexture = gravelNormal;
     beachMaterial.metallicRoughnessTexture = gravelOrm;
     beachMaterial.occlusionTexture = gravelOrm;
+    beachMaterial.baseColorTextureSampler = terrainRepeatSampler;
+    beachMaterial.normalTextureSampler = terrainRepeatSampler;
     beachMaterial.textureScale = [8, 4];
     beachMaterial.baseColorFactor = [1.28, 1.22, 1.12, 1.0]; // 밝고 따뜻한 백사장 색조
     beachMaterial.roughnessFactor = 0.95;
@@ -173,6 +170,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     rockMaterial.normalTexture = rockNormal;
     rockMaterial.metallicRoughnessTexture = rockOrm;
     rockMaterial.occlusionTexture = rockOrm;
+    rockMaterial.baseColorTextureSampler = terrainRepeatSampler;
+    rockMaterial.normalTextureSampler = terrainRepeatSampler;
     rockMaterial.textureScale = [1.2, 1.2]; // 자연스러운 암석 디테일 스케일
     rockMaterial.baseColorFactor = [1.18, 1.15, 1.1, 1.0]; // 어두운 그늘에서도 자연스러운 채도 유지
     rockMaterial.roughnessFactor = 0.82;
