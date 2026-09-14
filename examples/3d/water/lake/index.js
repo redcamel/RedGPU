@@ -2,11 +2,16 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] WaterBodyLake & SingleLayerWaterMaterial Step 1 예제
- * [EN] WaterBodyLake & SingleLayerWaterMaterial Step 1 Example
+ * [KO] WaterBodyLake & SingleLayerWaterMaterial 호수(Lake) 공식 쇼케이스 예제
+ * [EN] WaterBodyLake & SingleLayerWaterMaterial Lake Official Showcase Example
  *
- * [KO] 단일 노멀맵 스크롤링 애니메이션 및 태양 직사광과의 Blinn-Phong 스펙큘러 하이라이트 합성을 시연합니다.
- * [EN] Demonstrates single normal map scrolling animation and Blinn-Phong specular highlight synthesis with directional sunlight.
+ * [KO] 언리얼 엔진 5(UE5) SingleLayerWater 기반 PBR 광학 수체(WaterBodyLake)의 기본값을 시연합니다:
+ *  - 듀얼 노멀 스크롤 및 RNM 블렌딩 기반 찰랑이는 물결
+ *  - Cook-Torrance GGX 스펙큘러 & 태양 윤슬 기둥(Sun Glitter Column)
+ *  - 비어-람베르트(Beer-Lambert) 물리적 수심 흡수 및 듀얼 톤 그라데이션
+ *  - 노멀 기반 스넬의 굴절 왜곡 및 수면 밖 오브젝트 번짐(Bleeding) 방지
+ *  - Schlick 프레넬 IBL 거울 반사 및 부드러운 해안선(Depth Fade)
+ *  - 정점 셰이더 미세 장파장 너울(Micro Swell) 변위
  */
 
 const canvas = document.createElement('canvas');
@@ -36,15 +41,14 @@ RedGPU.init(
         directionalLight.azimuth = 205;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-
+        const ambientLight = new RedGPU.Light.AmbientLight('#b8dcfa', 1000);
+        scene.lightManager.ambientLight = ambientLight;
 
         // 4. 물밑 환경 및 수면 관통 오브젝트 구성
         const underwaterObjects = createUnderwaterEnvironment(redGPUContext, scene);
 
-        // 5. WaterBodyLake 호수 수체 생성 (Step 1: 단일 노멀 스크롤 & 스펙큘러)
-        const lake = new RedGPU.Display.Water.WaterBodyLake(
-            redGPUContext
-        );
+        // 5. WaterBodyLake 호수 수체 생성 (언리얼 엔진 5 PBR 표준 기본값 적용)
+        const lake = new RedGPU.Display.Water.WaterBodyLake(redGPUContext);
         lake.waterLevel = 0.5;
 
         // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
@@ -58,14 +62,6 @@ RedGPU.init(
         );
         lake.waterMaterial.normalTexture = normalTexture;
         lake.waterMaterial.normalTexture2 = normalTexture2;
-        lake.waterMaterial.normalTiling = 3.5;
-        lake.waterMaterial.normalScale = 1.0;
-        lake.waterMaterial.normalTiling2 = 2.8;
-        lake.waterMaterial.normalScale2 = 0.85;
-        lake.waterMaterial.windSpeed = 0.04;
-        lake.waterMaterial.windDirection = [1.0, 0.3];
-        lake.waterMaterial.roughness = 0.1;
-        lake.waterMaterial.specularFactor = 1.0;
 
         scene.addChild(lake);
 
@@ -206,7 +202,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             };
             basicFolder.addBinding(colorParams, 'baseColor', {
                 view: 'color',
-                label: 'Shallow (연안 옥색)'
+                label: 'Shallow (호수 알베도)'
             }).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
@@ -219,8 +215,8 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
 
-            // [폴더 2] Step 1: 물결 노멀 및 듀얼 노멀 애니메이션
-            const waveFolder = pane.addFolder({title: 'Step 1 & 2: Waves & Dual Normal', expanded: true});
+            // [폴더 2] 물결 노멀 및 듀얼 노멀 애니메이션
+            const waveFolder = pane.addFolder({title: 'Waves & Dual Normal (Ripples)', expanded: true});
             waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: '듀얼 노멀 활성화'});
             waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
                 min: 0.0,
@@ -264,23 +260,29 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 lake.waterMaterial.windDirection = [windDirection.x, ev.value];
             });
 
-            // [폴더 3] Step 1: Cook-Torrance PBR 스펙큘러 하이라이트
-            const specFolder = pane.addFolder({title: 'Step 1: Cook-Torrance PBR Specular', expanded: true});
-            specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 1.0, step: 0.01});
+            // [폴더 3] 미세 정점 너울 (Micro Vertex Swell)
+            const swellFolder = pane.addFolder({title: 'Micro Vertex Swell (정점 변위)', expanded: false});
+            swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005, label: '너울 진폭 (m)'});
+            swellFolder.addBinding(lake, 'waveWavelength', {min: 1.0, max: 50.0, step: 1.0, label: '너울 파장 (m)'});
+            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1, label: '너울 속도'});
+
+            // [폴더 4] Cook-Torrance PBR 스펙큘러 하이라이트 & 조명
+            const specFolder = pane.addFolder({title: 'Cook-Torrance PBR Specular & Light', expanded: true});
+            specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.005, max: 1.0, step: 0.005});
             specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
             specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [폴더 4] Step 3: 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
-            const depthFadeFolder = pane.addFolder({title: 'Step 3: Depth Fade (Soft Water)', expanded: true});
+            // [폴더 5] 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
+            const depthFadeFolder = pane.addFolder({title: 'Depth Fade (Soft Water)', expanded: true});
             depthFadeFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 4.0, step: 0.05});
 
-            // [폴더 5] Step 4: 수중 굴절 및 Beer-Lambert 듀얼 톤 흡수
-            const refractionFolder = pane.addFolder({title: 'Step 4: Refraction & Beer-Lambert', expanded: true});
+            // [폴더 6] 수중 굴절 및 Beer-Lambert 듀얼 톤 흡수
+            const refractionFolder = pane.addFolder({title: 'Refraction & Beer-Lambert', expanded: true});
             refractionFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.1, step: 0.002});
             refractionFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.0, max: 2.0, step: 0.02});
 
-            // [폴더 6] 대기 및 환경광 (Sky Atmosphere & IBL)
+            // [폴더 7] 대기 및 환경광 (Sky Atmosphere & IBL)
             const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: true});
             let skyAtmosphereInstance = null;
             const envState = {
@@ -297,14 +299,14 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 }
             });
 
-            // [폴더 7] 카메라 시점 프리셋 (수심 그라데이션 및 Step 4 집중 조망)
-            const cameraFolder = pane.addFolder({title: 'Camera Presets (Step 4 Focus)', expanded: true});
-            cameraFolder.addButton({title: 'Trench Slope (옥색 ➔ 심해 남색 조망)'}).on('click', () => {
+            // [폴더 8] 카메라 시점 프리셋 (호수 PBR 광학 집중 조망)
+            const cameraFolder = pane.addFolder({title: 'Camera Presets (PBR Optics Focus)', expanded: true});
+            cameraFolder.addButton({title: 'Trench Slope (호수색 ➔ 심해 남색 조망)'}).on('click', () => {
                 view.camera.tilt = -28;
                 view.camera.pan = 32;
                 view.camera.distance = 28;
             });
-            cameraFolder.addButton({title: 'Shallow Coastline (맑은 연안 옥색)'}).on('click', () => {
+            cameraFolder.addButton({title: 'Shallow Coastline (맑은 연안 호수색)'}).on('click', () => {
                 view.camera.tilt = -38;
                 view.camera.pan = 0;
                 view.camera.distance = 15;

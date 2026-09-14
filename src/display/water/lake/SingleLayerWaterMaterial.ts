@@ -74,8 +74,8 @@ interface SingleLayerWaterMaterial {
      */
     windDirection: [number, number];
     /**
-     * [KO] PBR 마이크로패싯 표면 거칠기 (Roughness, 0.0 ~ 1.0, 물 기본값: 0.05)
-     * [EN] PBR microfacet surface roughness (Roughness, 0.0 ~ 1.0, water default: 0.05)
+     * [KO] PBR 마이크로패싯 표면 거칠기 (Roughness, 0.0 ~ 1.0, 물 UE5 기본값: 0.02)
+     * [EN] PBR microfacet surface roughness (Roughness, 0.0 ~ 1.0, water UE5 default: 0.02)
      */
     roughness: number;
     /**
@@ -84,18 +84,18 @@ interface SingleLayerWaterMaterial {
      */
     specularFactor: number;
     /**
-     * [KO] 연안 및 침수 물체 경계면 소프트 블렌딩 깊이 거리 (단위: m, 기본값: 0.8)
-     * [EN] Shoreline and submerged object boundary soft depth fade distance (Unit: m, default: 0.8)
+     * [KO] 연안 및 침수 물체 경계면 소프트 블렌딩 깊이 거리 (단위: m, UE5 기본값: 1.0 = 100cm)
+     * [EN] Shoreline and submerged object boundary soft depth fade distance (Unit: m, UE5 default: 1.0 = 100cm)
      */
     depthFadeDistance: number;
     /**
-     * [KO] 수중 굴절 왜곡 강도 (기본값: 0.02, 0.0일 때 굴절 왜곡 없음)
-     * [EN] Underwater refraction distortion strength (default: 0.02, 0.0 for no distortion)
+     * [KO] 수중 굴절 왜곡 강도 (UE5 기본값: 0.03, 0.0일 때 굴절 왜곡 없음)
+     * [EN] Underwater refraction distortion strength (UE5 default: 0.03, 0.0 for no distortion)
      */
     refractionStrength: number;
     /**
-     * [KO] 수심에 따른 빛의 수체 흡수/소멸 계수 (Beer-Lambert extinction factor, 기본값: 0.15)
-     * [EN] Light water absorption/extinction factor by water depth (Beer-Lambert extinction factor, default: 0.15)
+     * [KO] 수심에 따른 빛의 수체 흡수/소멸 계수 (Beer-Lambert extinction factor, UE5 호수 기본값: 0.28)
+     * [EN] Light water absorption/extinction factor by water depth (Beer-Lambert extinction factor, UE5 lake default: 0.28)
      */
     extinctionFactor: number;
 }
@@ -114,11 +114,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      * [KO] SingleLayerWaterMaterial 생성자
      * [EN] SingleLayerWaterMaterial constructor
      * @param redGPUContext - RedGPUContext 인스턴스
-     * @param baseColor - 기본 얕은 수면 옥색 HEX 컬러 (기본값: '#1fb5a6')
+     * @param baseColor - 기본 얕은 수면 알베도 HEX 컬러 (기본값: '#1a5b8c')
      * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#061329')
-     * @param opacity - 기본 수면 불투명도 (기본값: 0.75)
+     * @param opacity - 기본 수면 불투명도 (기본값: 0.7)
      */
-    constructor(redGPUContext: RedGPUContext, baseColor: string = '#1fb5a6', deepColor: string = '#061329', opacity: number = 0.85) {
+    constructor(redGPUContext: RedGPUContext, baseColor: string = '#1a5b8c', deepColor: string = '#061329', opacity: number = 0.7) {
         super(
             redGPUContext,
             'SINGLE_LAYER_WATER_MATERIAL',
@@ -154,11 +154,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
         this.windSpeed = 0.04;
         this.windDirection = [1.0, 0.3];
-        this.roughness = 0.1;
+        this.roughness = 0.02;
         this.specularFactor = 1.0;
-        this.depthFadeDistance = 0.8;
-        this.refractionStrength = 0.02;
-        this.extinctionFactor = 0.35;
+        this.depthFadeDistance = 1.0;
+        this.refractionStrength = 0.03;
+        this.extinctionFactor = 0.28;
 
         // 불투명 씬(Opaque) 렌더링 후의 컬러/뎁스 스냅샷을 사용하는 2Path 렌더 패스로 라우팅
         this.use2PathRender = true;
@@ -185,11 +185,11 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'normalScale2', value: 1.0},
     {key: 'normalTiling2', value: 2.5},
     {key: 'windSpeed', value: 0.04},
-    {key: 'roughness', value: 0.1},
+    {key: 'roughness', value: 0.02},
     {key: 'specularFactor', value: 1.0},
-    {key: 'depthFadeDistance', value: 0.8},
-    {key: 'refractionStrength', value: 0.02},
-    {key: 'extinctionFactor', value: 0.35},
+    {key: 'depthFadeDistance', value: 1.0},
+    {key: 'refractionStrength', value: 0.03},
+    {key: 'extinctionFactor', value: 0.28},
 ]);
 
 defineVector2(SingleLayerWaterMaterial, [
