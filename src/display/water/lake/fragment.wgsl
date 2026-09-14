@@ -1,10 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include color.getTintBlendMode;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 #redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include math.tnb.getTBNFromVertexTangent;
-#redgpu_include math.tnb.getNormalFromNormalMap;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
@@ -45,12 +43,8 @@ struct InputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(11) combinedOpacity: f32,
-
-    @location(12) motionVector: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
-    @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 fn rotateVec2(v: vec2<f32>, angleRad: f32) -> vec2<f32> {
