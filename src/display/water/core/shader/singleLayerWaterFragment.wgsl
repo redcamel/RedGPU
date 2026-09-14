@@ -123,16 +123,13 @@ fn main(inputData: InputData) -> OutputFragment {
     var worldNormal = normalize(tbn * vec3<f32>(finalXY, finalZ));
     worldNormal = select(worldNormal, -worldNormal, isUnderwater);
 
-    let NdotV_raw = dot(worldNormal, viewDir);
-    if (NdotV_raw < 0.05) {
-        worldNormal = normalize(worldNormal + (0.05 - NdotV_raw) * viewDir);
-    }
     let NdotV = max(dot(worldNormal, viewDir), 0.001);
 
     let F0 = vec3<f32>(0.02037);
 
     var specularLighting = vec3<f32>(0.0);
     var waterDiffuseLighting = vec3<f32>(0.0);
+    var totalDirectReflectance = vec3<f32>(0.0);
     var maxSunRadiance = 0.0;
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
@@ -208,8 +205,15 @@ fn main(inputData: InputData) -> OutputFragment {
             let waveSlopeFactor = 0.5 + 0.8 * clamp(length(finalXY) * 3.0, 0.0, 1.0);
             let diamondGlitter = (glintHigh + glintMid) * waveSlopeFactor + glintColumn;
 
-            let totalSpecBRDF = (specClean + diamondGlitter) * F;
-            specularLighting += lightRadiance * totalSpecBRDF * uniforms.specularFactor * NdotL;
+            // [에너지 보존 정규화]: 윤슬의 반짝임 피크를 유지하되 무한대 발산(Blowout)을 방지하는 에너지 보존 모델
+            let rawSpecBRDF = (specClean + diamondGlitter) * F;
+            let totalSpecBRDF = rawSpecBRDF / (vec3<f32>(1.0) + rawSpecBRDF * 0.01);
+
+            let directLightSpec = lightRadiance * totalSpecBRDF * uniforms.specularFactor * NdotL;
+            specularLighting += directLightSpec;
+
+            let directReflectance = clamp(totalSpecBRDF * uniforms.specularFactor * NdotL, vec3<f32>(0.0), vec3<f32>(1.0));
+            totalDirectReflectance += directReflectance;
         }
     }
 
@@ -220,7 +224,18 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     let preExposure = systemUniforms.preExposure;
 
-    let R = getReflectionVectorFromViewDirection(viewDir, worldNormal);
+    let R_raw = getReflectionVectorFromViewDirection(viewDir, worldNormal);
+    let R_geo = reflect(-viewDir, baseNormal);
+
+    // [기하학적 수평선 리프팅 (Horizon Reflection Lift)]:
+    // 파도 노멀 섭동으로 인해 반사 벡터가 수면 아래(R.y < 0)나 지평선 암부로 떨어지는 결함을 원천 차단.
+    // 기하학적 하늘 반사 벡터(R_geo)를 기준으로 파도 섭동을 인가하고,
+    // 아래쪽을 향하는 성분을 하늘 상공(+Y)으로 부드럽게 꺾어 올려 항상 맑은 하늘 텍셀을 샘플링하도록 보장.
+    let waveOffset = R_raw - R_geo;
+    var R_safe = normalize(R_geo + waveOffset * 0.45);
+    R_safe.y = max(abs(R_safe.y), 0.08);
+    let R = normalize(R_safe);
+
     let NdotV_IBL = max(dot(worldNormal, viewDir), 0.04);
     let iblRoughness = clamp(uniforms.roughness, 0.02, 1.0);
 
@@ -230,7 +245,10 @@ fn main(inputData: InputData) -> OutputFragment {
     if (u_usePrefilterTexture) {
         let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
         let mipLevel = iblRoughness * iblMipmapCount;
-        reflectedSky = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+        let rawSkySample = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+        // HDR의 어두운 지면/밤하늘 영역에서도 맑은 대기광을 유지하도록 스카이 플로어 합성
+        let ambientSkyFloor = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * systemUniforms.preExposure * 0.22);
+        reflectedSky = max(rawSkySample, ambientSkyFloor);
         hasReflection = true;
     }
 
@@ -261,8 +279,8 @@ fn main(inputData: InputData) -> OutputFragment {
     reflectedSky *= energyCompensation;
 
     if (!isUnderwater) {
-        let horizonDot = dot(R, baseNormal);
-        let horizonOcclusion = clamp(horizonDot * 1.5 + 0.7, 0.4, 1.0);
+        let horizonDot = max(dot(R, baseNormal), 0.0);
+        let horizonOcclusion = clamp(horizonDot * 1.5 + 0.7, 0.65, 1.0);
         reflectedSky *= horizonOcclusion;
     }
 
@@ -272,7 +290,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let F_dielectric = F0 + (vec3<f32>(1.0) - F0) * fresnelFactor;
     let F_IBL = F_dielectric * envBRDF.x + envBRDF.y;
 
-    let iblSpecular = reflectedSky * F_IBL * uniforms.specularFactor;
+    // [에너지 분할 차폐]: 직사광 스펙큘러가 강한 영역에서 하늘 IBL 반사광의 중복 가산 방지
+    let sunOcclusion = clamp(vec3<f32>(1.0) - totalDirectReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
+    let rawIblSpecular = reflectedSky * F_IBL * uniforms.specularFactor * sunOcclusion;
+    // 수중에서 올려다볼 때는 공기 중 하늘 IBL 스펙큘러를 차단
+    let iblSpecular = select(rawIblSpecular, vec3<f32>(0.0), isUnderwater);
 
     let screenCoord = vec2<i32>(inputData.position.xy);
     let rawSceneDepth = textureLoad(renderPath1DepthTexture, screenCoord, 0);
@@ -324,7 +346,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let maskedScatterLighting = waterDiffuseLighting * waterScatterTint * scatterDepthMask;
     let waterBodyScattering = mix(backgroundRefractedColor, waterTargetColor, absorptionStrength) + maskedScatterLighting;
 
-    let transmissionWeight = select(clamp(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.2), vec3<f32>(1.0)), vec3<f32>(0.85), isUnderwater);
+    // [반사 + 투과 에너지 보존 법칙]: 
+    // 표면에서 반사된 총 반사율만큼 물밑 투과광을 차감하되, 원경(Grazing angle)에서도 물 분자의 내부 체적 산란광이
+    // 완전히 0으로 소멸하여 수면이 검게 타버리는 현상을 방지하기 위해 최소 투과율(minTransmission) 보장
+    let totalSurfaceReflectance = clamp(totalDirectReflectance + F_IBL * uniforms.specularFactor * sunOcclusion, vec3<f32>(0.0), vec3<f32>(1.0));
+    let minTransmission = vec3<f32>(0.18);
+    let rawTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, minTransmission, vec3<f32>(1.0));
+    let transmissionWeight = select(rawTransmission, vec3<f32>(0.85), isUnderwater);
     let transmittedUnderwater = waterBodyScattering * transmissionWeight;
 
     let totalSpecular = specularLighting + iblSpecular;

@@ -63,27 +63,39 @@ fn main(inputData: InputData) -> VertexOutput {
     let wl = max(vertexUniforms.waveWavelength, 1.0);
     let spd = vertexUniforms.waveSpeed;
 
+    var worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    var worldTangent = normalize(transformedTangentXYZ);
+
     if (amp > 0.0) {
         let k1 = TWO_PI / wl;
-        let phase1 = k1 * (worldPos.x * 0.906 + worldPos.z * 0.423) - timeSec * spd;
-        let swell1 = sin(phase1) * (amp * 0.7);
+        let d1 = vec2<f32>(0.906, 0.423);
+        let phase1 = k1 * (worldPos.x * d1.x + worldPos.z * d1.y) - timeSec * spd;
+        let a1 = amp * 0.7;
+        let swell1 = sin(phase1) * a1;
 
         let k2 = TWO_PI / (wl * 0.55);
-        let phase2 = k2 * (worldPos.x * 0.643 - worldPos.z * 0.766) - timeSec * (spd * 1.35);
-        let swell2 = sin(phase2) * (amp * 0.3);
+        let d2 = vec2<f32>(0.643, -0.766);
+        let phase2 = k2 * (worldPos.x * d2.x + worldPos.z * d2.y) - timeSec * (spd * 1.35);
+        let a2 = amp * 0.3;
+        let swell2 = sin(phase2) * a2;
 
         worldPos.y += (swell1 + swell2);
-    }
 
-    let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+        let cos1 = cos(phase1);
+        let cos2 = cos(phase2);
+        let dydx = a1 * k1 * d1.x * cos1 + a2 * k2 * d2.x * cos2;
+        let dydz = a1 * k1 * d1.y * cos1 + a2 * k2 * d2.y * cos2;
+
+        worldNormal = normalize(vec3<f32>(-dydx, 1.0, -dydz));
+        worldTangent = normalize(vec3<f32>(1.0, dydx, 0.0));
+    }
 
     output.position = su_projectionViewMatrix * worldPos;
     output.vertexPosition = worldPos.xyz;
     output.vertexNormal = worldNormal;
     output.uv = transformedUV;
-
-    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
-    output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
+    output.vertexTangent = vec4<f32>(worldTangent, inputData.vertexTangent.w);
 
     output.combinedOpacity = gu_combinedOpacity;
     output.receiveShadow = globalVertexData.receiveShadow;

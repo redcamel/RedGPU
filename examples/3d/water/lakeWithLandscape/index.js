@@ -257,57 +257,51 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
 
             // [폴더 2] 카메라 비행 속도 (FreeController)
             const camFolder = pane.addFolder({title: '📷 Flight Camera', expanded: false});
-            camFolder.addBinding(controller, 'moveSpeed', {min: 500, max: 30000, step: 500, label: '이동 속도 Speed'});
+            camFolder.addBinding(controller, 'moveSpeed', {min: 500, max: 30000, step: 500});
 
             // [폴더 3] 호수 위치 및 수위 (Water Level & Position)
             const waterPosFolder = pane.addFolder({title: '🌊 Water Position & Level', expanded: true});
-            waterPosFolder.addBinding(lake, 'waterLevel', {min: 100, max: 1400, step: 2, label: '수위 Water Level (m)'});
-            waterPosFolder.addBinding(lake, 'x', {min: -8000, max: 8000, step: 100, label: '호수 X (m)'});
-            waterPosFolder.addBinding(lake, 'z', {min: -8000, max: 8000, step: 100, label: '호수 Z (m)'});
+            waterPosFolder.addBinding(lake, 'waterLevel', {min: 100, max: 1400, step: 2});
+            waterPosFolder.addBinding(lake, 'x', {min: -8000, max: 8000, step: 100});
+            waterPosFolder.addBinding(lake, 'z', {min: -8000, max: 8000, step: 100});
 
             // [폴더 4] 듀얼 노멀 & 도메인 워핑 (Dual Normal Waves)
             const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Warp)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: '듀얼 노멀 활성화'});
+            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2');
             waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
                 min: 0.0,
                 max: 3.0,
-                step: 0.05,
-                label: '너울 강도 (Normal 1)'
+                step: 0.05
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
                 min: 50.0,
                 max: 800.0,
-                step: 25.0,
-                label: '너울 타일링 (Normal 1)'
+                step: 25.0
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {
                 min: 0.0,
                 max: 3.0,
-                step: 0.05,
-                label: '잔물결 강도 (Normal 2)'
+                step: 0.05
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {
                 min: 1.0,
                 max: 10.0,
-                step: 0.2,
-                label: '잔물결 배수 (Tiling 2)'
+                step: 0.2
             });
             waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
                 min: 0.0,
                 max: 0.2,
-                step: 0.005,
-                label: '바람 속도 Wind Speed'
+                step: 0.005
             });
-            waveFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 3.0, step: 0.05, label: '정점 너울 진폭 (m)'});
-            waveFolder.addBinding(lake, 'waveWavelength', {min: 50.0, max: 800.0, step: 10.0, label: '정점 너울 파장 (m)'});
+            waveFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 3.0, step: 0.05});
+            waveFolder.addBinding(lake, 'waveWavelength', {min: 50.0, max: 800.0, step: 10.0});
 
             // [폴더 5] 수체 광학 및 물리 색채 (Water Optics & Colors)
             const colorFolder = pane.addFolder({title: '🎨 Water Optics & Colors', expanded: false});
             colorFolder.addBinding(lake.waterMaterial, 'opacity', {
                 min: 0.0,
                 max: 1.0,
-                step: 0.02,
-                label: '투명도 Opacity'
+                step: 0.02
             });
 
             const colorParams = {
@@ -323,15 +317,13 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
                 }
             };
             colorFolder.addBinding(colorParams, 'baseColor', {
-                view: 'color',
-                label: 'Shallow (연안 옥색)'
+                view: 'color'
             }).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
             colorFolder.addBinding(colorParams, 'deepColor', {
-                view: 'color',
-                label: 'Deep (심해 남색)'
+                view: 'color'
             }).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
@@ -340,20 +332,17 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
                 min: 0.0,
                 max: 100.0,
-                step: 1.0,
-                label: '해안선 감쇄거리 (m)'
+                step: 1.0
             });
             colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {
                 min: 0.001,
                 max: 0.1,
-                step: 0.002,
-                label: '수심 흡수계수 (Beer)'
+                step: 0.002
             });
             colorFolder.addBinding(lake.waterMaterial, 'refractionStrength', {
                 min: 0.0,
                 max: 0.08,
-                step: 0.002,
-                label: '굴절 강도 Refraction'
+                step: 0.002
             });
 
             // [폴더 6] Cook-Torrance PBR 조명 & 태양광
@@ -361,23 +350,21 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             specFolder.addBinding(lake.waterMaterial, 'roughness', {
                 min: 0.01,
                 max: 1.0,
-                step: 0.01,
-                label: '거칠기 Roughness'
+                step: 0.01
             });
             specFolder.addBinding(lake.waterMaterial, 'specularFactor', {
                 min: 0.0,
                 max: 3.0,
-                step: 0.05,
-                label: '스펙큘러 강도'
+                step: 0.05
             });
-            specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1, label: '태양 고도'});
-            specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1, label: '태양 방위각'});
+            specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
             // [폴더 7] 랜드스케이프 지형 제어 (Landscape Settings)
             const landscapeFolder = pane.addFolder({title: '🌄 Landscape Terrain Settings', expanded: false});
-            landscapeFolder.addBinding(landscape, 'heightScale', {min: 500, max: 3000, step: 50, label: '지형 높이 스케일'});
-            landscapeFolder.addBinding(landscape, 'wireframe', {label: '와이어프레임'});
-            landscapeFolder.addBinding(landscape, 'lodColoration', {label: 'LOD 색상화'});
+            landscapeFolder.addBinding(landscape, 'heightScale', {min: 500, max: 3000, step: 50});
+            landscapeFolder.addBinding(landscape, 'wireframe');
+            landscapeFolder.addBinding(landscape, 'lodColoration');
 
             if (layers?.length) {
                 const layerSubFolder = landscapeFolder.addFolder({title: 'Terrain Splat Layers', expanded: false});
@@ -393,7 +380,7 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             const envFolder = pane.addFolder({title: '🌤️ Sky Atmosphere', expanded: false});
             let skyAtmosphereInstance = null;
             const envState = {skyAtmosphere: false};
-            envFolder.addBinding(envState, 'skyAtmosphere', {label: 'Sky Atmosphere'}).on('change', (ev) => {
+            envFolder.addBinding(envState, 'skyAtmosphere').on('change', (ev) => {
                 if (ev.value) {
                     if (!skyAtmosphereInstance) {
                         skyAtmosphereInstance = new RedGPU.Display.SkyAtmosphere(redGPUContext);

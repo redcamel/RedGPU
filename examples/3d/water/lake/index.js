@@ -2,16 +2,17 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] WaterLake & SingleLayerWaterMaterial 호수(Lake) 공식 쇼케이스 예제
- * [EN] WaterLake & SingleLayerWaterMaterial Lake Official Showcase Example
+ * [KO] WaterLake & SingleLayerWaterMaterial: 아름다운 에메랄드 해변(Emerald Beach) 쇼케이스
+ * [EN] WaterLake & SingleLayerWaterMaterial: Beautiful Emerald Beach Showcase
  *
- * [KO] 언리얼 엔진 5(UE5) SingleLayerWater 기반 PBR 광학 수체(WaterLake)의 기본값을 시연합니다:
- *  - 듀얼 노멀 스크롤 및 RNM 블렌딩 기반 찰랑이는 물결
- *  - Cook-Torrance GGX 스펙큘러 & 태양 윤슬 기둥(Sun Glitter Column)
- *  - 비어-람베르트(Beer-Lambert) 물리적 수심 흡수 및 듀얼 톤 그라데이션
- *  - 노멀 기반 스넬의 굴절 왜곡 및 수면 밖 오브젝트 번짐(Bleeding) 방지
- *  - Schlick 프레넬 IBL 거울 반사 및 부드러운 해안선(Depth Fade)
- *  - 정점 셰이더 미세 장파장 너울(Micro Swell) 변위
+ * [KO] PBRMaterial을 활용한 자연스러운 백사장, 해저 자갈 분지, 해안 암초 군락 위에
+ *      SingleLayerWater PBR 광학 수체(WaterLake)를 결합한 몰디브/카리브해 스타일의 에메랄드 해변 데모입니다:
+ *  - 모든 지형 및 암석에 PBRMaterial (Albedo, Normal, ORM) 적용
+ *  - 맑고 청명한 에메랄드 터콰이즈(#18d8b6) ➔ 깊은 라군 사파이어(#023d58) 비어-람베르트 광학 흡수
+ *  - 백사장과 만나는 비단결 같은 부드러운 해안선(Depth Fade)
+ *  - 눈부신 태양광 직사각 아래 쏟아지는 찬란한 다이아몬드 윤슬 기둥(Sun Glitter Column)
+ *  - 수중 암초와 모래바닥의 아지랑이 같은 스넬의 굴절 왜곡(Snell Refraction)
+ *  - 2.5cm 미세 너울(Micro Swell)과 듀얼 노멀(RNM 블렌딩) 찰랑이는 파도
  */
 
 const canvas = document.createElement('canvas');
@@ -20,35 +21,36 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정 (수면 위/아래 및 반사광 각도 탐색)
+        // 1. 카메라 컨트롤러 설정 (해변 전경 및 윤슬 최적 각도)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 28;
-        controller.tilt = -25;
+        controller.distance = 30;
+        controller.tilt = -22;
         controller.pan = 35;
-        controller.speedDistance = 0.2;
+        controller.speedDistance = 0.25;
 
-        // 2. 씬 및 뷰3D 구성
+        // 2. 씬 및 View3D 구성
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
+        view.grid = false; // 자연스러운 자연 경관을 위해 그리드 비활성화
         redGPUContext.addView(view);
 
-        // 3. 태양 직사광 (Directional Light) 및 환경광 (Ambient Light) 설정
-        // 스카이박스의 붉은 석양 위치(azimuth: 205도, elevation: 18도)에 일치시켜
-        // 호수 수면 전체에 카메라를 향해 쏟아지는 찬란한 태양 윤슬 기둥(Sun Glitter Column) 형성
+        // 3. 열대 일광 (Directional Light) 및 맑은 하늘 환경광 (Ambient Light)
+        // 수면과 암초 상단에 풍부한 햇살을 공급하고 윤슬 기둥을 형성하는 태양각
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 18;
+        directionalLight.elevation = 42;
         directionalLight.azimuth = 205;
+        directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const ambientLight = new RedGPU.Light.AmbientLight('#b8dcfa', 1000);
+        // 역광 및 그늘진 암초/수면에서도 자연스러운 하늘빛을 유지하도록 풍부한 환경광 제공
+        const ambientLight = new RedGPU.Light.AmbientLight('#c8e8ff', 1400);
         scene.lightManager.ambientLight = ambientLight;
 
-        // 4. 물밑 환경 및 수면 관통 오브젝트 구성
-        const underwaterObjects = createUnderwaterEnvironment(redGPUContext, scene);
+        // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
+        const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
-        // 5. WaterLake 호수 수체 생성 (언리얼 엔진 5 PBR 표준 기본값 적용)
-        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext);
+        // 5. WaterLake 에메랄드 수체 생성 (PBR 광학 기본값 적용)
+        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
         lake.waterLevel = 0.5;
 
         // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
@@ -63,15 +65,38 @@ RedGPU.init(
         lake.waterMaterial.normalTexture = normalTexture;
         lake.waterMaterial.normalTexture2 = normalTexture2;
 
+        // 에메랄드 해변 특화 광학 파라미터 튜닝
+        lake.waterMaterial.baseColor.setColorByHEX('#18d8b6'); // 청명한 열대 에메랄드 그린
+        lake.waterMaterial.deepColor.setColorByHEX('#023d58'); // 깊은 라군 사파이어 블루
+        lake.waterMaterial.opacity = 0.88;
+        lake.waterMaterial.roughness = 0.02; // 영롱한 다이아몬드 윤슬 최적화
+        lake.waterMaterial.specularFactor = 1.0;
+        lake.waterMaterial.extinctionFactor = 0.22; // 바닥 모래와 암초가 투명하게 들여다보이는 수심 흡수
+        lake.waterMaterial.refractionStrength = 0.026; // 수면 물결에 따라 일렁이는 굴절 왜곡
+        lake.waterMaterial.depthFadeDistance = 1.2; // 백사장과 만나는 부드러운 해안선
+        lake.waterMaterial.windSpeed = 0.045;
+        lake.waterMaterial.windDirection = [1.0, 0.35];
+        lake.waterMaterial.normalTiling = 4.0;
+        lake.waterMaterial.normalScale = 1.0;
+        lake.waterMaterial.normalTiling2 = 2.0;
+        lake.waterMaterial.normalScale2 = 0.8;
+
+        lake.waveAmplitude = 0.025; // 2.5cm 미세 정점 너울
+        lake.waveWavelength = 10.0;
+        lake.waveSpeed = 0.7;
+
         scene.addChild(lake);
 
-        // 6. 렌더러 생성 및 렌더 루프 가동
+        // 6. 렌더러 생성 및 렌더 루프
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // 물밑 오브젝트 천천히 회전 (동적 시각 검증)
-            const count = underwaterObjects.length;
+            // 수중 암초 일부의 미세한 파도 흔들림
+            const floatingRocks = beachEnvironment.floatingRocks;
+            const count = floatingRocks.length;
+            const t = time * 0.001;
             for (let i = 0; i < count; i++) {
-                underwaterObjects[i].rotationY += 0.5;
+                const rock = floatingRocks[i];
+                rock.y = rock.originalY + Math.sin(t * 1.5 + i) * 0.04;
             }
         };
         renderer.start(redGPUContext, render);
@@ -88,89 +113,170 @@ RedGPU.init(
 );
 
 /**
- * [KO] 수면 아래 및 수면을 관통하는 테스트 지형/오브젝트들을 생성합니다.
- * [EN] Creates test terrain/objects beneath and piercing through the water surface.
+ * [KO] PBRMaterial을 활용한 자연스러운 해변 지형 및 암초/바위 환경을 구축합니다.
+ * [EN] Creates a natural beach terrain and coastal rock environment using PBRMaterial.
  */
-function createUnderwaterEnvironment(redGPUContext, scene) {
-    const objects = [];
+function createBeachEnvironment(redGPUContext, scene) {
+    const floatingRocks = [];
 
-    // 1. 연속 수심 경사 지반 (Gradual Deep Trench Basin: 0m 연안 -> 5.5m 심해)
-    const gridTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
-    const basinMaterial = new RedGPU.Material.BitmapMaterial(redGPUContext, gridTexture);
-    const basinGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1, 128);
-    const basinMesh = new RedGPU.Display.Mesh(redGPUContext, basinGeometry, basinMaterial);
-    basinMesh.x = 0;
-    basinMesh.y = -2.2;
-    basinMesh.z = 0;
-    basinMesh.rotationX = 11; // 북쪽(z=-14)은 수심 0.2m, 남쪽(z=+14)은 수심 5.0m로 하강
-    scene.addChild(basinMesh);
+    // --- 1. PBR 텍스처 로딩 ---
+    const gravelAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel.jpg');
+    const gravelNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg');
+    const gravelOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg');
 
-    // 2. 수심 단계별 단차 큐브들 (Stepped Depth Stages: 얕은 연안 옥색 -> 깊은 심해 남색 대비)
-    const depthCubes = [
-        {x: -9, y: 0.2, z: -9, color: '#ffeb3b', desc: 'Shallow (0.3m)'},     // 극천해 (투명 굴절 & 연한 옥색)
-        {x: -9, y: -0.9, z: -3, color: '#ff9800', desc: 'Low-Mid (1.4m)'},     // 얕은 중수심 (맑고 짙은 에메랄드 옥색)
-        {x: -9, y: -2.0, z: 3, color: '#f44336', desc: 'High-Mid (2.5m)'},    // 깊은 중수심 (짙은 청록 -> 심해 남색 전이)
-        {x: -9, y: -3.2, z: 9, color: '#9c27b0', desc: 'Deep (3.7m)'},        // 심해 트렌치 (짙은 심해 남색 지배)
-        {x: -9, y: -4.4, z: 13, color: '#3f51b5', desc: 'Abyss (4.9m)'},       // 최심해 (완전한 심해의 어둠)
+    const rockAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock.jpg');
+    const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg');
+    const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg');
+
+    // --- 2. 해저 모래/자갈 분지 지반 (PBR Seabed Basin: 0m 연안 -> 5.5m 깊은 라군) ---
+    const seabedMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    seabedMaterial.baseColorTexture = gravelAlbedo;
+    seabedMaterial.normalTexture = gravelNormal;
+    seabedMaterial.metallicRoughnessTexture = gravelOrm;
+    seabedMaterial.occlusionTexture = gravelOrm;
+    seabedMaterial.textureScale = [16, 16];
+    seabedMaterial.baseColorFactor = [1.1, 1.05, 0.95, 1.0]; // 화사한 산호 모래/자갈 톤
+    seabedMaterial.roughnessFactor = 0.92;
+    seabedMaterial.metallicFactor = 0.0;
+
+    const seabedGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1.2, 128);
+    const seabedMesh = new RedGPU.Display.Mesh(redGPUContext, seabedGeometry, seabedMaterial);
+    seabedMesh.x = 0;
+    seabedMesh.y = -2.3;
+    seabedMesh.z = 0;
+    seabedMesh.rotationX = 9.5; // 북쪽(z=-14)은 얕은 여울, 남쪽(z=+14)은 깊은 라군으로 완만히 하강
+    scene.addChild(seabedMesh);
+
+    // --- 3. 백사장 해변 경사면 (PBR White Sand Beach Slope) ---
+    // 물과 만나는 경계선에서 부드러운 해안선 감쇄(Depth Fade)를 연출하는 완경사 모래사장
+    const beachMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    beachMaterial.baseColorTexture = gravelAlbedo;
+    beachMaterial.normalTexture = gravelNormal;
+    beachMaterial.metallicRoughnessTexture = gravelOrm;
+    beachMaterial.occlusionTexture = gravelOrm;
+    beachMaterial.textureScale = [8, 4];
+    beachMaterial.baseColorFactor = [1.28, 1.22, 1.12, 1.0]; // 밝고 따뜻한 백사장 색조
+    beachMaterial.roughnessFactor = 0.95;
+    beachMaterial.metallicFactor = 0.0;
+
+    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 42, 1.5, 22);
+    const beachMesh = new RedGPU.Display.Mesh(redGPUContext, beachGeometry, beachMaterial);
+    beachMesh.x = 0;
+    beachMesh.y = 0.3;
+    beachMesh.z = -12;
+    beachMesh.rotationX = 14;
+    scene.addChild(beachMesh);
+
+    // --- 4. 해안 암초 & 기암괴석 군락 (PBR Coastal Reefs & Rocks) ---
+    const rockMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    rockMaterial.baseColorTexture = rockAlbedo;
+    rockMaterial.normalTexture = rockNormal;
+    rockMaterial.metallicRoughnessTexture = rockOrm;
+    rockMaterial.occlusionTexture = rockOrm;
+    rockMaterial.textureScale = [1.2, 1.2]; // 자연스러운 암석 디테일 스케일
+    rockMaterial.baseColorFactor = [1.18, 1.15, 1.1, 1.0]; // 어두운 그늘에서도 자연스러운 채도 유지
+    rockMaterial.roughnessFactor = 0.82;
+    rockMaterial.metallicFactor = 0.04;
+
+    // (A) 수면 밖으로 웅장하게 솟아오른 주상절리 암초 섬 (Piercing Reef Island)
+    const mainReefGeometry = new RedGPU.Primitive.Box(redGPUContext, 6.5, 7.0, 5.5);
+    const mainReef = new RedGPU.Display.Mesh(redGPUContext, mainReefGeometry, rockMaterial);
+    mainReef.x = 9;
+    mainReef.y = 1.2;
+    mainReef.z = -3;
+    mainReef.rotationY = 32;
+    mainReef.rotationZ = 6;
+    scene.addChild(mainReef);
+
+    const subReefGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 2.8, 24, 24);
+    const subReef = new RedGPU.Display.Mesh(redGPUContext, subReefGeometry, rockMaterial);
+    subReef.x = 6.5;
+    subReef.y = 0.6;
+    subReef.z = -5.5;
+    subReef.scaleX = 1.3;
+    subReef.scaleY = 0.9;
+    subReef.scaleZ = 1.2;
+    subReef.rotationX = 45; // 극점 UV 왜곡 분산
+    subReef.rotationY = -20;
+    scene.addChild(subReef);
+
+    // (B) 맑은 에메랄드 물밑에 잠긴 수중 암초들 (Submerged Coral Reefs)
+    // 수심에 따른 굴절 왜곡(Refraction)과 비어-람베르트 수심 흡수를 입증
+    const submergedReefs = [
+        {x: -8, y: -0.2, z: -3, scale: [3.2, 1.8, 2.8], rotX: 35, rotY: 15},   // 얕은 연안 암초 (수심 0.7m, 에메랄드 굴절)
+        {x: -9.5, y: -1.4, z: 3, scale: [3.8, 2.4, 3.4], rotX: -25, rotY: 45},  // 중간 수심 암초 (수심 1.9m, 청록 전이)
+        {x: -7, y: -2.8, z: 9, scale: [4.5, 3.0, 4.0], rotX: 40, rotY: -30},   // 깊은 라군 암초 (수심 3.3m, 사파이어 흡수)
+        {x: 4, y: -1.2, z: 2, scale: [2.5, 1.6, 2.5], rotX: 20, rotY: 60},     // 중앙 얕은 암초
+        {x: 1, y: -2.6, z: 8, scale: [3.6, 2.2, 3.0], rotX: -30, rotY: -15},    // 중앙 깊은 암초
     ];
-    depthCubes.forEach((st) => {
-        const mat = new RedGPU.Material.ColorMaterial(redGPUContext, st.color);
-        const geom = new RedGPU.Primitive.Box(redGPUContext, 3.2, 3.2, 3.2);
-        const mesh = new RedGPU.Display.Mesh(redGPUContext, geom, mat);
-        mesh.x = st.x;
-        mesh.y = st.y;
-        mesh.z = st.z;
-        scene.addChild(mesh);
-        objects.push(mesh);
+
+    submergedReefs.forEach((info) => {
+        const reefGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
+        const reefMesh = new RedGPU.Display.Mesh(redGPUContext, reefGeom, rockMaterial);
+        reefMesh.x = info.x;
+        reefMesh.y = info.y;
+        reefMesh.z = info.z;
+        reefMesh.scaleX = info.scale[0];
+        reefMesh.scaleY = info.scale[1];
+        reefMesh.scaleZ = info.scale[2];
+        reefMesh.rotationX = info.rotX;
+        reefMesh.rotationY = info.rotY;
+        scene.addChild(reefMesh);
     });
 
-    // 3. 수면 비스듬히 관통하는 기둥 (Broken Straw Effect - 굴절 꺾임 극대화)
-    const strawMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff3d00');
-    const strawGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 0.45, 0.45, 14, 24);
-    const strawMesh = new RedGPU.Display.Mesh(redGPUContext, strawGeometry, strawMaterial);
-    strawMesh.x = 2;
-    strawMesh.y = 0.3;
-    strawMesh.z = -1;
-    strawMesh.rotationZ = 35;
-    strawMesh.rotationX = 25;
-    scene.addChild(strawMesh);
-
-    // 4. 수면을 관통하여 솟아오른 바위/구체들 (Piercing Rocks & Spheres)
-    const colors = ['#e67e22', '#e74c3c', '#9b59b6', '#3498db', '#f1c40f', '#1abc9c'];
-    const positions = [
-        [7, 0.2, -7],
-        [7, -0.8, 1],
-        [7, -2.5, 9],
-        [-2, 0.8, -7],
-        [0, -0.6, 5]
+    // (C) 백사장 물가에 걸쳐 파도가 찰랑이는 바위들 (Shoreline Boulders)
+    const shorelineBoulders = [
+        {x: -12, y: 0.5, z: -7, scale: [2.2, 1.8, 2.0], rotX: 30, rotY: 25},
+        {x: -5, y: 0.35, z: -7.5, scale: [1.6, 1.2, 1.5], rotX: -35, rotY: -40},
+        {x: 12, y: 0.45, z: -8, scale: [2.5, 1.6, 2.2], rotX: 45, rotY: 10},
+        {x: 2, y: 0.25, z: -6, scale: [1.8, 1.1, 1.6], rotX: -20, rotY: 55},
     ];
 
-    for (let i = 0; i < positions.length; i++) {
-        const [x, y, z] = positions[i];
-        const mat = new RedGPU.Material.ColorMaterial(redGPUContext, colors[i % colors.length]);
-        const geom = (i % 2 === 0)
-            ? new RedGPU.Primitive.Box(redGPUContext, 2.5, 4, 2.5)
-            : new RedGPU.Primitive.Sphere(redGPUContext, 1.8, 16, 16);
+    shorelineBoulders.forEach((info) => {
+        const boulderGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
+        const boulderMesh = new RedGPU.Display.Mesh(redGPUContext, boulderGeom, rockMaterial);
+        boulderMesh.x = info.x;
+        boulderMesh.y = info.y;
+        boulderMesh.z = info.z;
+        boulderMesh.scaleX = info.scale[0];
+        boulderMesh.scaleY = info.scale[1];
+        boulderMesh.scaleZ = info.scale[2];
+        boulderMesh.rotationX = info.rotX;
+        boulderMesh.rotationY = info.rotY;
+        scene.addChild(boulderMesh);
+    });
 
-        const mesh = new RedGPU.Display.Mesh(redGPUContext, geom, mat);
-        mesh.x = x;
-        mesh.y = y;
-        mesh.z = z;
-        scene.addChild(mesh);
-        objects.push(mesh);
-    }
+    // (D) 수면을 비스듬히 관통하는 천연 해안 석주 (Natural Seastack - Broken Straw 굴절 꺾임 시연)
+    const seastackGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.4, 0.7, 13, 20);
+    const seastackMesh = new RedGPU.Display.Mesh(redGPUContext, seastackGeom, rockMaterial);
+    seastackMesh.x = 3;
+    seastackMesh.y = 0.2;
+    seastackMesh.z = -1;
+    seastackMesh.rotationZ = 30;
+    seastackMesh.rotationX = 22;
+    scene.addChild(seastackMesh);
 
-    // 5. 연안 경사 지형 (Depth Fade 시각적 검증용 비스듬한 해변 경사면)
-    const slopeMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#8d6e63');
-    const slopeGeometry = new RedGPU.Primitive.Box(redGPUContext, 12, 1, 14);
-    const slopeMesh = new RedGPU.Display.Mesh(redGPUContext, slopeGeometry, slopeMaterial);
-    slopeMesh.x = 0;
-    slopeMesh.y = 0.1;
-    slopeMesh.z = -9;
-    slopeMesh.rotationX = 18;
-    scene.addChild(slopeMesh);
+    // (E) 물결에 가볍게 호흡하는 수면 암초 (Floating Coral Heads)
+    const floatReefGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16);
+    const floatReef1 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
+    floatReef1.x = -1;
+    floatReef1.y = 0.45;
+    floatReef1.originalY = 0.45;
+    floatReef1.z = 4;
+    scene.addChild(floatReef1);
+    floatingRocks.push(floatReef1);
 
-    return objects;
+    const floatReef2 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
+    floatReef2.x = 6;
+    floatReef2.y = 0.35;
+    floatReef2.originalY = 0.35;
+    floatReef2.z = 7;
+    floatReef2.scaleX = 0.8;
+    floatReef2.scaleZ = 0.8;
+    scene.addChild(floatReef2);
+    floatingRocks.push(floatReef2);
+
+    return {floatingRocks};
 }
 
 /**
@@ -183,8 +289,8 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         skybox: true,
         ibl: true,
         gui: (pane) => {
-            // [폴더 1] 수체 기초 설정 (PBR Base & Dual-tone Colors)
-            const basicFolder = pane.addFolder({title: 'WaterLake (Base & Dual-tone)', expanded: true});
+            // [폴더 1] 에메랄드 수체 기초 설정 (PBR Base & Dual-tone Colors)
+            const basicFolder = pane.addFolder({title: 'WaterLake (Emerald Beach Base)', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
             basicFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.02});
 
@@ -201,15 +307,13 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 }
             };
             basicFolder.addBinding(colorParams, 'baseColor', {
-                view: 'color',
-                label: 'Shallow (호수 알베도)'
+                view: 'color'
             }).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
             basicFolder.addBinding(colorParams, 'deepColor', {
-                view: 'color',
-                label: 'Deep (심해 남색)'
+                view: 'color'
             }).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
@@ -217,36 +321,31 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // [폴더 2] 물결 노멀 및 듀얼 노멀 애니메이션
             const waveFolder = pane.addFolder({title: 'Waves & Dual Normal (Ripples)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: '듀얼 노멀 활성화'});
+            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2');
             waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
                 min: 0.0,
                 max: 3.0,
-                step: 0.05,
-                label: '너울 강도 (Normal 1)'
+                step: 0.05
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
                 min: 1.0,
                 max: 20.0,
-                step: 0.5,
-                label: '너울 타일링 (Normal 1)'
+                step: 0.5
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {
                 min: 0.0,
                 max: 3.0,
-                step: 0.05,
-                label: '잔물결 강도 (Normal 2)'
+                step: 0.05
             });
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {
                 min: 0.5,
                 max: 10.0,
-                step: 0.1,
-                label: '잔물결 배수 (Tiling 2)'
+                step: 0.1
             });
             waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
                 min: 0.0,
                 max: 0.2,
-                step: 0.005,
-                label: '바람 속도 Wind Speed'
+                step: 0.005
             });
 
             const windDirection = {
@@ -262,11 +361,11 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // [폴더 3] 미세 정점 너울 (Micro Vertex Swell)
             const swellFolder = pane.addFolder({title: 'Micro Vertex Swell (정점 변위)', expanded: false});
-            swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005, label: '너울 진폭 (m)'});
-            swellFolder.addBinding(lake, 'waveWavelength', {min: 1.0, max: 50.0, step: 1.0, label: '너울 파장 (m)'});
-            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1, label: '너울 속도'});
+            swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005});
+            swellFolder.addBinding(lake, 'waveWavelength', {min: 1.0, max: 50.0, step: 1.0});
+            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1});
 
-            // [폴더 4] Cook-Torrance PBR 스펙큘러 하이라이트 & 조명
+            // [폴더 4] Cook-Torrance PBR 스펙큘러 하이라이트 & 조명 (다이아몬드 윤슬)
             const specFolder = pane.addFolder({title: 'Cook-Torrance PBR Specular & Light', expanded: true});
             specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.005, max: 1.0, step: 0.005});
             specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
@@ -274,16 +373,16 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
             // [폴더 5] 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
-            const depthFadeFolder = pane.addFolder({title: 'Depth Fade (Soft Water)', expanded: true});
+            const depthFadeFolder = pane.addFolder({title: 'Depth Fade (Soft Shoreline)', expanded: true});
             depthFadeFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 4.0, step: 0.05});
 
-            // [폴더 6] 수중 굴절 및 Beer-Lambert 듀얼 톤 흡수
+            // [폴더 6] 수중 굴절 및 Beer-Lambert 수심 흡수
             const refractionFolder = pane.addFolder({title: 'Refraction & Beer-Lambert', expanded: true});
             refractionFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.1, step: 0.002});
             refractionFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.0, max: 2.0, step: 0.02});
 
             // [폴더 7] 대기 및 환경광 (Sky Atmosphere & IBL)
-            const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: true});
+            const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: false});
             let skyAtmosphereInstance = null;
             const envState = {
                 skyAtmosphere: false,
@@ -299,38 +398,39 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 }
             });
 
-            // [폴더 8] 카메라 시점 프리셋 (호수 PBR 광학 집중 조망)
-            const cameraFolder = pane.addFolder({title: 'Camera Presets (PBR Optics Focus)', expanded: true});
-            cameraFolder.addButton({title: 'Trench Slope (호수색 ➔ 심해 남색 조망)'}).on('click', () => {
-                view.camera.tilt = -28;
-                view.camera.pan = 32;
-                view.camera.distance = 28;
+            // [폴더 8] 에메랄드 해변 시그니처 카메라 프리셋
+            const cameraFolder = pane.addFolder({title: 'Camera Presets (Emerald Beach)', expanded: true});
+            cameraFolder.addButton({title: '🏖️ Beach Panorama (해변 전경)'}).on('click', () => {
+                view.camera.tilt = -22;
+                view.camera.pan = 35;
+                view.camera.distance = 30;
             });
-            cameraFolder.addButton({title: 'Shallow Coastline (맑은 연안 호수색)'}).on('click', () => {
-                view.camera.tilt = -38;
-                view.camera.pan = 0;
-                view.camera.distance = 15;
+            cameraFolder.addButton({title: '💎 Diamond Glitter (태양 윤슬 기둥)'}).on('click', () => {
+                view.camera.tilt = -24;
+                view.camera.pan = 25;
+                view.camera.distance = 25;
             });
-            cameraFolder.addButton({title: 'Deep Abyss (심해 남색 트렌치)'}).on('click', () => {
-                view.camera.tilt = -34;
-                view.camera.pan = 180;
-                view.camera.distance = 20;
+            cameraFolder.addButton({title: '🏝️ Shoreline Fade (백사장 해안선)'}).on('click', () => {
+                view.camera.tilt = -36;
+                view.camera.pan = 5;
+                view.camera.distance = 18;
             });
-            cameraFolder.addButton({title: 'Top-down (UV Grid Refraction)'}).on('click', () => {
-                view.camera.tilt = -75;
-                view.camera.pan = 0;
-                view.camera.distance = 22;
+            cameraFolder.addButton({title: '🪸 Crystal Reefs (수중 암초 굴절)'}).on('click', () => {
+                view.camera.tilt = -42;
+                view.camera.pan = -45;
+                view.camera.distance = 16;
             });
-            cameraFolder.addButton({title: 'Piercing Rod (Broken Straw Effect)'}).on('click', () => {
+            cameraFolder.addButton({title: '🗿 Seastack Refraction (스넬 굴절 관통석)'}).on('click', () => {
                 view.camera.tilt = -16;
                 view.camera.pan = 48;
                 view.camera.distance = 16;
             });
-            cameraFolder.addButton({title: 'Stepped Depths (수심별 단차 큐브)'}).on('click', () => {
-                view.camera.tilt = -32;
-                view.camera.pan = 180;
-                view.camera.distance = 24;
+            cameraFolder.addButton({title: '🌊 Low Horizon Swell (수평선 너울 시선)'}).on('click', () => {
+                view.camera.tilt = -8;
+                view.camera.pan = 20;
+                view.camera.distance = 22;
             });
         }
     });
 }
+
