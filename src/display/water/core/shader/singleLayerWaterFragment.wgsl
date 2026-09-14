@@ -284,16 +284,18 @@ fn main(inputData: InputData) -> OutputFragment {
         reflectedSky *= horizonOcclusion;
     }
 
-    let iblF1 = clamp(1.0 - NdotV_IBL, 0.0, 1.0);
-    let iblF2 = iblF1 * iblF1;
-    let fresnelFactor = iblF2 * iblF2 * iblF1;
-    let F_dielectric = F0 + (vec3<f32>(1.0) - F0) * fresnelFactor;
+    // 🚀 [PBR 규격 F90 Schlick 프레넬]: 거칠기에 따른 grazing angle 반사율 감쇄 (에너지 보존)
+    let safeRoughnessParam = clamp(uniforms.roughness, 0.0, 1.0);
+    let F90 = max(vec3<f32>(1.0 - safeRoughnessParam * 0.8), F0);
+    let iblF = clamp(1.0 - NdotV_IBL, 0.0, 1.0);
+    let fresnelFactor = iblF * iblF * iblF * iblF * iblF;
+    let F_dielectric = F0 + (F90 - F0) * fresnelFactor;
     let F_IBL = F_dielectric * envBRDF.x + envBRDF.y;
 
     // [에너지 분할 차폐]: 직사광 스펙큘러가 강한 영역에서 하늘 IBL 반사광의 중복 가산 방지
     let sunOcclusion = clamp(vec3<f32>(1.0) - totalDirectReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
     let rawIblSpecular = reflectedSky * F_IBL * uniforms.specularFactor * sunOcclusion;
-    // 수중에서 올려다볼 때는 공기 중 하늘 IBL 스펙큘러를 차단
+    // 수중에서 올려다볼 때는 공기 중 하늘 IBL 스펙큘러 차단
     let iblSpecular = select(rawIblSpecular, vec3<f32>(0.0), isUnderwater);
 
     let screenCoord = vec2<i32>(inputData.position.xy);
@@ -341,23 +343,28 @@ fn main(inputData: InputData) -> OutputFragment {
     let extinction = exp(-effectiveWaterDepthDelta * uniforms.extinctionFactor);
     let maxAbsorption = select(1.0, 0.45, isUnderwater);
     let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, maxAbsorption);
+
+    // [체적 산란광 에너지 보존]: 흡수된 에너지 비율 안에서 산란광이 합성되도록 정규화
     let waterScatterTint = mix(waterTargetColor, vec3<f32>(0.08, 0.55, 0.65), 0.45);
     let scatterDepthMask = smoothstep(0.0, max(uniforms.depthFadeDistance * 0.5, 1.0), effectiveWaterDepthDelta);
     let maskedScatterLighting = waterDiffuseLighting * waterScatterTint * scatterDepthMask;
-    let waterBodyScattering = mix(backgroundRefractedColor, waterTargetColor, absorptionStrength) + maskedScatterLighting;
+    let waterScatteredTarget = waterTargetColor + maskedScatterLighting * 0.8;
+    let waterBodyScattering = mix(backgroundRefractedColor, waterScatteredTarget, absorptionStrength);
 
-    // [반사 + 투과 에너지 보존 법칙]: 
-    // 표면에서 반사된 총 반사율만큼 물밑 투과광을 차감하되, 원경(Grazing angle)에서도 물 분자의 내부 체적 산란광이
-    // 완전히 0으로 소멸하여 수면이 검게 타버리는 현상을 방지하기 위해 최소 투과율(minTransmission) 보장
+    // [물리적 에너지 보존 법칙 (R + T <= 1.0)]:
+    // 표면 총 반사율(직사광 + 간접광 IBL)을 계산하고, 투과율은 정확히 (1.0 - R)로 보장하여
+    // 어떠한 경우에도 에너지가 증폭되거나 생성되지 않도록 엄밀히 분할.
     let totalSurfaceReflectance = clamp(totalDirectReflectance + F_IBL * uniforms.specularFactor * sunOcclusion, vec3<f32>(0.0), vec3<f32>(1.0));
-    let minTransmission = vec3<f32>(0.18);
-    let rawTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, minTransmission, vec3<f32>(1.0));
-    let transmissionWeight = select(rawTransmission, vec3<f32>(0.85), isUnderwater);
-    let transmittedUnderwater = waterBodyScattering * transmissionWeight;
+    let transmissionWeight = select(clamp(vec3<f32>(1.0) - totalSurfaceReflectance, vec3<f32>(0.0), vec3<f32>(1.0)), vec3<f32>(0.85), isUnderwater);
+
+    // [해안선 및 물밑 투과광의 완전한 에너지 보존]:
+    // 해안선(depthFade)과 물밑 체적 산란광 모두에 transmissionWeight를 일관되게 적용하여
+    // 해안가 경계면에서도 표면 반사율과 투과율의 합이 1.0을 초과하지 않도록 보장
+    let effectiveUnderwaterColor = mix(backgroundRefractedColor, waterBodyScattering, depthFade);
+    let transmittedUnderwater = effectiveUnderwaterColor * transmissionWeight;
 
     let totalSpecular = specularLighting + iblSpecular;
-    let blendedWater = mix(backgroundRefractedColor, transmittedUnderwater, depthFade);
-    let finalRgb = blendedWater + totalSpecular;
+    let finalRgb = transmittedUnderwater + totalSpecular;
 
     output.color = vec4<f32>(finalRgb, 1.0);
 
