@@ -114,11 +114,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      * [KO] SingleLayerWaterMaterial 생성자
      * [EN] SingleLayerWaterMaterial constructor
      * @param redGPUContext - RedGPUContext 인스턴스
-     * @param baseColor - 기본 얕은 수면 알베도 HEX 컬러 (기본값: '#1a5b8c')
-     * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#061329')
-     * @param opacity - 기본 수면 불투명도 (기본값: 0.7)
+     * @param baseColor - 기본 얕은 수면 알베도 HEX 컬러 (기본값: '#18d8b6' - 청명한 열대 에메랄드 그린)
+     * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#023d58' - 깊은 라군 사파이어 블루)
+     * @param opacity - 기본 수면 불투명도 (기본값: 0.88)
      */
-    constructor(redGPUContext: RedGPUContext, baseColor: string = '#1a5b8c', deepColor: string = '#061329', opacity: number = 0.7) {
+    constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#023d58', opacity: number = 0.88) {
         super(
             redGPUContext,
             'SINGLE_LAYER_WATER_MATERIAL',
@@ -147,18 +147,18 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
         this.normalScale = 1.0;
-        this.normalTiling = 3.5;
-        this.normalScale2 = 1.0;
-        this.normalTiling2 = 2.5;
+        this.normalTiling = 4.0;
+        this.normalScale2 = 0.8;
+        this.normalTiling2 = 2.0;
         this.useNormalTexture2 = false;
 
-        this.windSpeed = 0.04;
-        this.windDirection = [1.0, 0.3];
+        this.windSpeed = 0.045;
+        this.windDirection = [1.0, 0.35];
         this.roughness = 0.02;
         this.specularFactor = 1.0;
-        this.depthFadeDistance = 1.0;
-        this.refractionStrength = 0.03;
-        this.extinctionFactor = 0.28;
+        this.depthFadeDistance = 1.2;
+        this.refractionStrength = 0.026;
+        this.extinctionFactor = 0.22;
 
         // 불투명 씬(Opaque) 렌더링 후의 컬러/뎁스 스냅샷을 사용하는 2Path 렌더 패스로 라우팅
         this.use2PathRender = true;

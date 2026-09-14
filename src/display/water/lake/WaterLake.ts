@@ -90,9 +90,9 @@ class WaterLake extends Mesh {
         // 수면 위와 물밑 양방향 시야를 위해 cullMode를 NONE으로 기본 구성
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
 
-        this.waveAmplitude = 0.02;
-        this.waveWavelength = 12.0;
-        this.waveSpeed = 0.8;
+        this.waveAmplitude = 0.025;
+        this.waveWavelength = 10.0;
+        this.waveSpeed = 0.7;
     }
 
     /**
