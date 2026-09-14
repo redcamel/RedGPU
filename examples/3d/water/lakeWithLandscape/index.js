@@ -135,7 +135,7 @@ RedGPU.init(
         landscape.debuggerManager.spatialGrid = false;
 
         // 5. [호수 안착] 16km 지형 전역을 덮는 초대형 알프스 내해 (16000m x 16000m, 256x256 분할)
-        const lake = new RedGPU.Display.Water.WaterBodyLake(
+        const lake = new RedGPU.Display.Water.WaterLake(
             redGPUContext,
             16000, // waterWidth (16km 초대형 수체)
             16000, // waterHeight

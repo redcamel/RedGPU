@@ -3,7 +3,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import fragmentModuleSource from './fragment.wgsl';
+import fragmentModuleSource from './shader/singleLayerWaterFragment.wgsl';
 import defineColorRGB from "../../../defineProperty/funcs/color/defineColorRGB";
 import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
@@ -202,4 +202,3 @@ defineBoolean(SingleLayerWaterMaterial, [
 
 Object.freeze(SingleLayerWaterMaterial);
 export default SingleLayerWaterMaterial;
-

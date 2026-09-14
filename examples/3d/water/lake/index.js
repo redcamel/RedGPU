@@ -2,10 +2,10 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] WaterBodyLake & SingleLayerWaterMaterial 호수(Lake) 공식 쇼케이스 예제
- * [EN] WaterBodyLake & SingleLayerWaterMaterial Lake Official Showcase Example
+ * [KO] WaterLake & SingleLayerWaterMaterial 호수(Lake) 공식 쇼케이스 예제
+ * [EN] WaterLake & SingleLayerWaterMaterial Lake Official Showcase Example
  *
- * [KO] 언리얼 엔진 5(UE5) SingleLayerWater 기반 PBR 광학 수체(WaterBodyLake)의 기본값을 시연합니다:
+ * [KO] 언리얼 엔진 5(UE5) SingleLayerWater 기반 PBR 광학 수체(WaterLake)의 기본값을 시연합니다:
  *  - 듀얼 노멀 스크롤 및 RNM 블렌딩 기반 찰랑이는 물결
  *  - Cook-Torrance GGX 스펙큘러 & 태양 윤슬 기둥(Sun Glitter Column)
  *  - 비어-람베르트(Beer-Lambert) 물리적 수심 흡수 및 듀얼 톤 그라데이션
@@ -47,8 +47,8 @@ RedGPU.init(
         // 4. 물밑 환경 및 수면 관통 오브젝트 구성
         const underwaterObjects = createUnderwaterEnvironment(redGPUContext, scene);
 
-        // 5. WaterBodyLake 호수 수체 생성 (언리얼 엔진 5 PBR 표준 기본값 적용)
-        const lake = new RedGPU.Display.Water.WaterBodyLake(redGPUContext);
+        // 5. WaterLake 호수 수체 생성 (언리얼 엔진 5 PBR 표준 기본값 적용)
+        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext);
         lake.waterLevel = 0.5;
 
         // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
@@ -174,8 +174,8 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
 }
 
 /**
- * [KO] WaterBodyLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
- * [EN] Configures Tweakpane GUI for real-time control of WaterBodyLake properties.
+ * [KO] WaterLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
+ * [EN] Configures Tweakpane GUI for real-time control of WaterLake properties.
  */
 function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
@@ -184,7 +184,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         ibl: true,
         gui: (pane) => {
             // [폴더 1] 수체 기초 설정 (PBR Base & Dual-tone Colors)
-            const basicFolder = pane.addFolder({title: 'WaterBodyLake (Base & Dual-tone)', expanded: true});
+            const basicFolder = pane.addFolder({title: 'WaterLake (Base & Dual-tone)', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
             basicFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.02});
 

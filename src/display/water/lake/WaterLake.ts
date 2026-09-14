@@ -1,15 +1,16 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Plane from "../../../primitive/Plane";
 import Mesh from "../../mesh/Mesh";
-import SingleLayerWaterMaterial from "./SingleLayerWaterMaterial";
+import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 
-/** WaterBodyLake 전용 버텍스 셰이더 모듈 이름 */
-const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_WATER_BODY_LAKE';
+/** WaterLake 전용 버텍스 셰이더 모듈 이름 */
+const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_WATER_LAKE';
 
-interface WaterBodyLake {
+interface WaterLake {
     /**
      * [KO] 미세 장파장 너울의 진폭 (단위: m, 기본값: 0.02 = 2cm)
      * [EN] Amplitude of micro long-wavelength swell (Unit: m, default: 0.02 = 2cm)
@@ -28,37 +29,39 @@ interface WaterBodyLake {
 }
 
 /**
- * [KO] 언리얼 엔진 5(UE5)의 AWaterBodyLake에 대응하는 호수/연못 수체(Water Body) 클래스입니다.
- * [EN] Water Body class for lakes and ponds corresponding to Unreal Engine 5 (UE5) AWaterBodyLake.
+ * [KO] 언리얼 엔진 5(UE5)의 AWaterBodyLake에 대응하는 호수/연못 수체(Water) 컴포넌트 클래스입니다.
+ * [EN] Water component class for lakes and ponds corresponding to Unreal Engine 5 (UE5) AWaterBodyLake.
  *
- * [KO] Cook-Torrance GGX PBR 물리 조명 모델, 시간(t) 기반 물결 노멀 스크롤링, 수면 투과 및 수위(waterLevel) 제어를 지원하며, 점진적으로 굴절 및 수심 흡수 효과로 확장됩니다.
- * [EN] Supports Cook-Torrance GGX PBR physical lighting model, time(t)-based wave normal scrolling, water surface transparency, and water level control, progressively extending to refraction and depth extinction effects.
+ * [KO] Cook-Torrance GGX PBR 물리 조명 모델, 듀얼 노멀 스크롤링, 스넬의 굴절 왜곡, 비어-람베르트(Beer-Lambert) 수심 흡수 그라데이션, 수면 미세 정점 너울(Swell)을 기본 제공합니다.
+ * [EN] Provides Cook-Torrance GGX PBR physical lighting model, dual normal scrolling, Snell's law refraction distortion, Beer-Lambert depth extinction gradient, and micro swell vertex displacement out of the box.
+ *
+ * [KO] 파이프라인 안전성을 위해 지오메트리(`Plane`)와 머티리얼(`SingleLayerWaterMaterial`)은 내부에서 자동 생성되며, 외부 교체가 차단(Read-only)됩니다. 크기 변경은 `resize()` 메서드를 이용하십시오.
+ * [EN] For pipeline safety, geometry (`Plane`) and material (`SingleLayerWaterMaterial`) are automatically generated internally and cannot be replaced externally (Read-only). To change dimensions, use the `resize()` method.
  *
  * ### Example
  * ```typescript
- * const lake = new RedGPU.Display.Water.WaterBodyLake(redGPUContext, 1000, 1000);
+ * const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 1000, 1000);
  * lake.waterLevel = 10;
  * scene.addChild(lake);
  * ```
  *
  * @category Display
  */
-class WaterBodyLake extends Mesh {
+class WaterLake extends Mesh {
     #waterWidth: number;
     #waterHeight: number;
     #widthSegments: number;
     #heightSegments: number;
 
     /**
-     * [KO] WaterBodyLake 생성자
-     * [EN] WaterBodyLake constructor
+     * [KO] WaterLake 생성자
+     * [EN] WaterLake constructor
      * @param redGPUContext - RedGPUContext 인스턴스
      * @param width - 호수의 가로 너비 (기본값: 100)
      * @param height - 호수의 세로 길이 (기본값: 100)
      * @param widthSegments - 가로 세그먼트 분할 수 (기본값: 64)
      * @param heightSegments - 세로 세그먼트 분할 수 (기본값: 64)
-     * @param material - SingleLayerWaterMaterial 머티리얼 (선택)
-     * @param name - 수체 오브젝트 이름 (기본값: 'WaterBodyLake')
+     * @param name - 수체 오브젝트 이름 (기본값: 'WaterLake')
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -66,10 +69,9 @@ class WaterBodyLake extends Mesh {
         height: number = 100,
         widthSegments: number = 64,
         heightSegments: number = 64,
-        material?: SingleLayerWaterMaterial,
-        name: string = 'WaterBodyLake'
+        name: string = 'WaterLake'
     ) {
-        const waterMaterial = material || new SingleLayerWaterMaterial(redGPUContext);
+        const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
         const waterGeometry = new Plane(redGPUContext, width, height, widthSegments, heightSegments);
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
@@ -94,8 +96,48 @@ class WaterBodyLake extends Mesh {
     }
 
     /**
-     * [KO] WaterBodyLake 전용 커스텀 버텍스 셰이더 모듈을 생성합니다. (미세 너울 정점 변위 지원)
-     * [EN] Creates a custom vertex shader module dedicated to WaterBodyLake. (Supports micro swell vertex displacement)
+     * [KO] 호수 머티리얼을 반환합니다.
+     * [EN] Returns the lake material.
+     */
+    get material(): SingleLayerWaterMaterial {
+        return this._material as SingleLayerWaterMaterial;
+    }
+
+    /**
+     * [KO] WaterLake의 머티리얼은 교체할 수 없습니다. 대신 기존 material의 속성을 수정하십시오.
+     * [EN] WaterLake material cannot be replaced. Modify properties on the existing material instead.
+     */
+    set material(value: any) {
+        consoleAndThrowError('WaterLake: material is read-only and cannot be replaced. Modify properties on lake.material instead.');
+    }
+
+    /**
+     * [KO] 호수에 적용된 SingleLayerWaterMaterial 인스턴스를 반환합니다. (`lake.material`과 동일)
+     * [EN] Returns the SingleLayerWaterMaterial instance applied to the lake. (Same as `lake.material`)
+     */
+    get waterMaterial(): SingleLayerWaterMaterial {
+        return this._material as SingleLayerWaterMaterial;
+    }
+
+    /**
+     * [KO] 호수 지오메트리(Plane)를 반환합니다.
+     * [EN] Returns the lake geometry (Plane).
+     */
+    get geometry(): Plane {
+        return this._geometry as Plane;
+    }
+
+    /**
+     * [KO] WaterLake의 지오메트리는 직접 교체할 수 없습니다. 크기나 분할 수를 변경하려면 `resize()` 메서드를 사용하십시오.
+     * [EN] WaterLake geometry cannot be replaced directly. Use `resize()` method to change dimensions or segment counts.
+     */
+    set geometry(value: any) {
+        consoleAndThrowError('WaterLake: geometry is read-only and cannot be replaced directly. Use lake.resize(width, height, ...) instead.');
+    }
+
+    /**
+     * [KO] WaterLake 전용 커스텀 버텍스 셰이더 모듈을 생성합니다. (미세 너울 정점 변위 지원)
+     * [EN] Creates a custom vertex shader module dedicated to WaterLake. (Supports micro swell vertex displacement)
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
@@ -152,16 +194,8 @@ class WaterBodyLake extends Mesh {
     }
 
     /**
-     * [KO] 호수에 적용된 SingleLayerWaterMaterial 인스턴스를 반환합니다.
-     * [EN] Returns the SingleLayerWaterMaterial instance applied to the lake.
-     */
-    get waterMaterial(): SingleLayerWaterMaterial {
-        return this.material as SingleLayerWaterMaterial;
-    }
-
-    /**
-     * [KO] 호수의 크기를 재설정합니다.
-     * [EN] Resizes the lake geometry.
+     * [KO] 호수의 크기 및 세그먼트 해상도를 안전하게 재설정합니다.
+     * [EN] Safely resizes the lake geometry dimensions and segment resolution.
      * @param width - 가로 너비
      * @param height - 세로 길이
      * @param widthSegments - 가로 세그먼트 분할 수
@@ -177,7 +211,7 @@ class WaterBodyLake extends Mesh {
         this.#waterHeight = height;
         this.#widthSegments = widthSegments;
         this.#heightSegments = heightSegments;
-        this.geometry = new Plane(
+        super.geometry = new Plane(
             this.redGPUContext,
             width,
             height,
@@ -187,11 +221,11 @@ class WaterBodyLake extends Mesh {
     }
 }
 
-definePositiveNumber(WaterBodyLake, [
+definePositiveNumber(WaterLake, [
     {key: 'waveAmplitude', value: 0.02},
     {key: 'waveWavelength', value: 12.0},
     {key: 'waveSpeed', value: 0.8},
 ]);
 
-Object.freeze(WaterBodyLake);
-export default WaterBodyLake;
+Object.freeze(WaterLake);
+export default WaterLake;
