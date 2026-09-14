@@ -172,17 +172,17 @@ RedGPU.init(
         lake.waterMaterial.windSpeed = 0.035;
         lake.waterMaterial.windDirection = [1.0, 0.4];
 
-        // 맑고 투명한 알프스 에메랄드 옥색(baseColor)과 깊은 심해 남색(deepColor)
-        lake.waterMaterial.baseColor.setColorByHEX('#16988d');
-        lake.waterMaterial.deepColor.setColorByHEX('#041226');
-        lake.waterMaterial.opacity = 0.88;
+        // 맑고 투명한 알프스 에메랄드 옥색(baseColor)과 깊고 푸른 코발트블루 심해색(deepColor)
+        lake.waterMaterial.baseColor.setColorByHEX('#18a497');
+        lake.waterMaterial.deepColor.setColorByHEX('#0a3158');
+        lake.waterMaterial.opacity = 0.92;
 
         // 물리 광학 속성 (16km 대형 지형에 최적화된 수치)
         lake.waterMaterial.roughness = 0.07;
-        lake.waterMaterial.specularFactor = 1.25;
+        lake.waterMaterial.specularFactor = 1.35;
         lake.waterMaterial.depthFadeDistance = 25.0;  // 25m 부드러운 해안선 완충
         lake.waterMaterial.refractionStrength = 0.015; // 자연스러운 물밑 지형 일렁임
-        lake.waterMaterial.extinctionFactor = 0.03;    // 대규모 수심 비어-람베르트 감쇄
+        lake.waterMaterial.extinctionFactor = 0.015;   // 대규모 수심 비어-람베르트 감쇄
 
         scene.addChild(lake);
 

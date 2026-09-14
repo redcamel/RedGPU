@@ -29,24 +29,21 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // 3. 태양 직사광 (Directional Light) 및 환경광 (Ambient Light) 설정
+        // 스카이박스의 붉은 석양 위치(azimuth: 205도, elevation: 18도)에 일치시켜
+        // 호수 수면 전체에 카메라를 향해 쏟아지는 찬란한 태양 윤슬 기둥(Sun Glitter Column) 형성
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 40;
-        directionalLight.azimuth = 60;
+        directionalLight.elevation = 18;
+        directionalLight.azimuth = 205;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const ambientLight = new RedGPU.Light.AmbientLight('#c8e0f8', 800);
-        scene.lightManager.ambientLight = ambientLight;
+
 
         // 4. 물밑 환경 및 수면 관통 오브젝트 구성
         const underwaterObjects = createUnderwaterEnvironment(redGPUContext, scene);
 
         // 5. WaterBodyLake 호수 수체 생성 (Step 1: 단일 노멀 스크롤 & 스펙큘러)
         const lake = new RedGPU.Display.Water.WaterBodyLake(
-            redGPUContext,
-            32, // waterWidth
-            32, // waterHeight
-            1,
-            1
+            redGPUContext
         );
         lake.waterLevel = 0.5;
 
@@ -104,7 +101,7 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
     // 1. 연속 수심 경사 지반 (Gradual Deep Trench Basin: 0m 연안 -> 5.5m 심해)
     const gridTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
     const basinMaterial = new RedGPU.Material.BitmapMaterial(redGPUContext, gridTexture);
-    const basinGeometry = new RedGPU.Primitive.Box(redGPUContext, 32, 1, 32);
+    const basinGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1, 128);
     const basinMesh = new RedGPU.Display.Mesh(redGPUContext, basinGeometry, basinMaterial);
     basinMesh.x = 0;
     basinMesh.y = -2.2;
