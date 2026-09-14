@@ -47,12 +47,6 @@ struct InputData {
     @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
-fn rotateVec2(v: vec2<f32>, angleRad: f32) -> vec2<f32> {
-    let s = sin(angleRad);
-    let c = cos(angleRad);
-    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
-}
-
 fn unpackTangentNormal(color: vec3<f32>) -> vec3<f32> {
     var xy = color.xy * 2.0 - 1.0;
     xy.y = -xy.y;
@@ -80,8 +74,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let warpOffset = n1.xy * 0.035;
 
-    let dir2 = rotateVec2(baseWindDir, 0.645);
-    let dir3 = rotateVec2(baseWindDir, -0.855);
+    let dir2 = vec2<f32>(baseWindDir.x * 0.7990425 - baseWindDir.y * 0.6012759, baseWindDir.x * 0.6012759 + baseWindDir.y * 0.7990425);
+    let dir3 = vec2<f32>(baseWindDir.x * 0.6562413 + baseWindDir.y * 0.7545517, -baseWindDir.x * 0.7545517 + baseWindDir.y * 0.6562413);
 
     var blendedTangent: vec3<f32>;
 
@@ -164,11 +158,15 @@ fn main(inputData: InputData) -> OutputFragment {
                 lightRadiance *= atmosphereTransmittance;
             }
 
-            let sunFresnel = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - max(dot(worldNormal, lightDir), 0.0), 0.0, 1.0), 5.0);
+            let sunF1 = clamp(1.0 - max(dot(worldNormal, lightDir), 0.0), 0.0, 1.0);
+            let sunF2 = sunF1 * sunF1;
+            let sunF5 = sunF2 * sunF2 * sunF1;
+            let sunFresnel = F0 + (vec3<f32>(1.0) - F0) * sunF5;
             let sunTransmittance = vec3<f32>(1.0) - sunFresnel;
             let sunGeoNdotL = clamp(dot(baseNormal, lightDir) * 0.7 + 0.3, 0.0, 1.0);
             let viewSunDot = dot(viewDir, -lightDir);
-            let forwardScatter = pow(clamp(viewSunDot * 0.5 + 0.5, 0.0, 1.0), 2.0) * 0.5 + 0.5;
+            let viewSunFactor = clamp(viewSunDot * 0.5 + 0.5, 0.0, 1.0);
+            let forwardScatter = (viewSunFactor * viewSunFactor) * 0.5 + 0.5;
             let waterScatterContribution = lightRadiance * sunTransmittance * sunGeoNdotL * forwardScatter * 0.35;
             waterDiffuseLighting += waterScatterContribution;
 
@@ -178,7 +176,10 @@ fn main(inputData: InputData) -> OutputFragment {
             let NdotH2 = NdotH * NdotH;
             let safeNdotL = max(NdotL, 0.0001);
 
-            let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
+            let specF1 = clamp(1.0 - VdotH, 0.0, 1.0);
+            let specF2 = specF1 * specF1;
+            let specF5 = specF2 * specF2 * specF1;
+            let F = F0 + (vec3<f32>(1.0) - F0) * specF5;
 
             let denom = NdotH2 * (alpha2 - 1.0) + 1.0;
             let D = alpha2 * INV_PI / max(EPSILON, denom * denom);
@@ -189,11 +190,20 @@ fn main(inputData: InputData) -> OutputFragment {
 
             let sunBaseReflect = reflect(-lightDir, baseNormal);
             let sunPathAlignment = clamp(dot(viewDir, sunBaseReflect), 0.0, 1.0);
-            let sunColumnWeight = pow(sunPathAlignment, 2.0);
+            let sunColumnWeight = sunPathAlignment * sunPathAlignment;
 
-            let glintHigh = pow(NdotH, 256.0) * 120.0;
-            let glintMid = pow(NdotH, 64.0) * 30.0;
-            let glintColumn = pow(NdotH, 16.0) * 8.0 * sunColumnWeight;
+            let nh2 = NdotH * NdotH;
+            let nh4 = nh2 * nh2;
+            let nh8 = nh4 * nh4;
+            let nh16 = nh8 * nh8;
+            let nh32 = nh16 * nh16;
+            let nh64 = nh32 * nh32;
+            let nh128 = nh64 * nh64;
+            let nh256 = nh128 * nh128;
+
+            let glintHigh = nh256 * 120.0;
+            let glintMid = nh64 * 30.0;
+            let glintColumn = nh16 * 8.0 * sunColumnWeight;
 
             let waveSlopeFactor = 0.5 + 0.8 * clamp(length(finalXY) * 3.0, 0.0, 1.0);
             let diamondGlitter = (glintHigh + glintMid) * waveSlopeFactor + glintColumn;
@@ -256,7 +266,9 @@ fn main(inputData: InputData) -> OutputFragment {
         reflectedSky *= horizonOcclusion;
     }
 
-    let fresnelFactor = pow(clamp(1.0 - NdotV_IBL, 0.0, 1.0), 5.0);
+    let iblF1 = clamp(1.0 - NdotV_IBL, 0.0, 1.0);
+    let iblF2 = iblF1 * iblF1;
+    let fresnelFactor = iblF2 * iblF2 * iblF1;
     let F_dielectric = F0 + (vec3<f32>(1.0) - F0) * fresnelFactor;
     let F_IBL = F_dielectric * envBRDF.x + envBRDF.y;
 
