@@ -1,11 +1,9 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include math.tnb.getTBNFromVertexTangent;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
-#redgpu_include skyAtmosphere.skyAtmosphereFn;
 
 struct WaterUniforms {
     baseColor: vec3<f32>,
@@ -148,13 +146,6 @@ fn main(inputData: InputData) -> OutputFragment {
             var lightRadiance = dirLight.color.rgb * (dirLight.intensity * systemUniforms.preExposure);
             maxSunRadiance = max(maxSunRadiance, max(lightRadiance.r, max(lightRadiance.g, lightRadiance.b)));
 
-            if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
-                let u_atmo = systemUniforms.skyAtmosphere;
-                let surfaceHeightKm = max(0.0, inputData.vertexPosition.y / 1000.0);
-                let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, lightDir.y, u_atmo.atmosphereHeight);
-                lightRadiance *= atmosphereTransmittance;
-            }
-
             let sunF1 = clamp(1.0 - max(dot(worldNormal, lightDir), 0.0), 0.0, 1.0);
             let sunF2 = sunF1 * sunF1;
             let sunF5 = sunF2 * sunF2 * sunF1;
@@ -164,7 +155,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let viewSunDot = dot(viewDir, -lightDir);
             let viewSunFactor = clamp(viewSunDot * 0.5 + 0.5, 0.0, 1.0);
             let forwardScatter = (viewSunFactor * viewSunFactor) * 0.5 + 0.5;
-            let waterScatterContribution = lightRadiance * sunTransmittance * sunGeoNdotL * forwardScatter * 0.35;
+            // [물리적 난반사 정규화 (INV_PI)]: 10만 룩스 거대 광량이 수치 폭주를 일으키지 않도록 표준 1/PI 정규화 적용
+            let waterScatterContribution = lightRadiance * sunTransmittance * sunGeoNdotL * forwardScatter * (INV_PI * 0.5);
             waterDiffuseLighting += waterScatterContribution;
 
             // 1. Brian Karis 태양 디스크 대표점 (각반경 약 0.53도 = 0.0092 라디안)
@@ -224,112 +216,22 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
+    // [순수 직사광 PBR 수체 광학: IBL / SkyAtmosphere 전면 제거]:
+    // 외부 큐브맵이나 대기 LUT 샘플링 의존성을 완전히 제거하고,
+    // 오직 직사광(태양)과 기본 앰비언트 라이트만으로 물리적으로 가장 정직하고 투명한 수면 광학을 계산합니다.
     let ambientRadiance = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * systemUniforms.preExposure);
-    waterDiffuseLighting += ambientRadiance * 0.1;
+    waterDiffuseLighting += ambientRadiance * (INV_PI * 0.25);
 
-    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
-    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
-    let preExposure = systemUniforms.preExposure;
-
-    // [정통 PBR 수면 반사 벡터 및 지면 암부 침투 방지 (Geometric Horizon Guard)]:
-    // 파도 요철로 인해 반사광이 수면 아래(R.y < 0)로 파고들어 큐브맵 바닥(지면/암흑)을 샘플링하는 현상을 방지합니다.
-    // 파도가 가파를 때는 기하학적 하늘 반사 방향(R_geo)으로 부드럽게 블렌딩하여 항상 하늘빛을 샘플링하도록 보장합니다.
-    let R_raw = reflect(-viewDir, worldNormal);
-    let R_geo = reflect(-viewDir, baseNormal);
-    let downPenetration = max(-R_raw.y, 0.0);
-    var R = normalize(mix(R_raw, R_geo, clamp(downPenetration * 2.5, 0.0, 1.0)));
-    R.y = max(R.y, 0.008);
-    R = normalize(R);
-
-    // 파도 뒷사면에서 시선 내적이 0으로 떨어져 프레넬 블랙홀이 발생하는 것을 방지하는 안전 가드
+    // 표면 Schlick Fresnel 반사율 계산 (물 기본 반사율 F0 = 0.02037)
     let viewDotGeo = max(dot(baseNormal, viewDir), 0.001);
     let viewDotWave = dot(worldNormal, viewDir);
-    let NdotV_IBL = clamp(mix(viewDotGeo, max(viewDotWave, 0.0), 0.7), 0.06, 1.0);
-    let iblRoughness = clamp(uniforms.roughness, 0.02, 1.0);
+    let safeNdotV = clamp(mix(viewDotGeo, max(viewDotWave, 0.0), 0.7), 0.06, 1.0);
 
-    var reflectedSky = vec3<f32>(0.0);
-    var hasReflection = false;
+    let fresnelFactor = pow(1.0 - safeNdotV, 5.0);
+    let surfaceFresnel = F0 + (vec3<f32>(1.0) - F0) * fresnelFactor;
 
-    if (u_usePrefilterTexture) {
-        let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-        let mipLevel = iblRoughness * iblMipmapCount;
-        let rawSkySample = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-        // [HDR 스펙큘러 소프트 세이프티]: HDR 피크의 영롱함은 보존하되 수면 전체가 하얗고 핑크빛으로 타버리는 과노출 방지
-        let softSkySample = rawSkySample / (vec3<f32>(1.0) + rawSkySample * 0.08);
-        let ambientSkyFloor = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * systemUniforms.preExposure * 0.12);
-        reflectedSky = max(softSkySample, ambientSkyFloor);
-        hasReflection = true;
-    }
-
-    if (u_useSkyAtmosphere) {
-        let u_atmo = systemUniforms.skyAtmosphere;
-        let camH = u_atmo.cameraHeight;
-        let atmH = u_atmo.atmosphereHeight;
-        let skyIntensity = u_atmo.sunIntensity;
-
-        let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-        let atmoMipLevel = iblRoughness * atmoMipCount;
-        let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
-        reflectedSky = (reflectedSky * specTrans) + specSkyScat;
-        hasReflection = true;
-    }
-
-    if (!hasReflection) {
-        let ambRadiance = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * systemUniforms.preExposure);
-        let ambLen = length(ambRadiance);
-
-        let primarySunColor = select(vec3<f32>(1.0), u_directionalLights[0].color.rgb, u_directionalLightCount > 0u);
-        let skyBase = select(vec3<f32>(0.5, 0.7, 1.0) * 0.4, systemUniforms.ambientLight.color.rgb, ambLen > 0.001);
-        let skyZenith = skyBase * 1.15;
-        let skyHorizon = mix(skyBase * 0.85, primarySunColor, 0.2);
-        let skyGrad = mix(skyHorizon, skyZenith, clamp(R.y * 0.6 + 0.4, 0.0, 1.0));
-
-        let safeSkyLum = max(clamp(ambLen * 0.45, 0.0, 1.5), 0.25);
-        reflectedSky = skyGrad * safeSkyLum;
-    }
-
-    let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, iblRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-    let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
-    reflectedSky *= energyCompensation;
-
-
-    // 🚀 [PBR 규격 F90 Schlick 프레넬]: 거칠기에 따른 grazing angle 반사율 감쇄 (에너지 보존)
-    let safeRoughnessParam = clamp(uniforms.roughness, 0.0, 1.0);
-    let F90 = max(vec3<f32>(1.0 - safeRoughnessParam * 0.8), F0);
-    let iblF = clamp(1.0 - NdotV_IBL, 0.0, 1.0);
-    let fresnelFactor = iblF * iblF * iblF * iblF * iblF;
-    let F_dielectric = F0 + (F90 - F0) * fresnelFactor;
-    let F_IBL = F_dielectric * envBRDF.x + envBRDF.y;
-
-    // [에너지 분할 차폐]: 직사광 스펙큘러가 강한 영역에서 하늘 IBL 반사광의 중복 가산 방지
-    let sunOcclusion = clamp(vec3<f32>(1.0) - totalDirectReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    let rawIblSpecular = reflectedSky * F_IBL * uniforms.specularFactor * sunOcclusion;
-    // 수중에서 올려다볼 때는 공기 중 하늘 IBL 스펙큘러 차단
-    let iblSpecular = select(rawIblSpecular, vec3<f32>(0.0), isUnderwater);
-
-    // [하늘 IBL 확산 조도(Sky Irradiance)의 물속 투과 및 체적 산란광 융합]:
-    // 직사광(태양)과 마찬가지로, 하늘 전체에서 쏟아지는 확산광 중
-    // 수면에서 반사되지 않고 물속으로 굴절 진입한 에너지(1.0 - F_IBL)를 추출하여
-    // 물의 고유 색상과 융합되는 수체 확산 산란광(waterDiffuseLighting)에 합산합니다.
-    var iblIrradiance = vec3<f32>(0.0);
-    if (u_usePrefilterTexture) {
-        iblIrradiance = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, baseNormal, 0).rgb * preExposure * systemUniforms.iblIntensity;
-    }
-    if (u_useSkyAtmosphere) {
-        let u_atmo = systemUniforms.skyAtmosphere;
-        let skyIntensity = u_atmo.sunIntensity;
-        let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, baseNormal.y, u_atmo.atmosphereHeight);
-        let skyDiff = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, baseNormal, 0.0).rgb * skyIntensity * preExposure;
-        iblIrradiance = (iblIrradiance * diffTrans) + skyDiff;
-    }
-    if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
-        iblIrradiance = ambientRadiance * 0.5;
-    }
-
-    let iblTransmittance = clamp(vec3<f32>(1.0) - F_IBL, vec3<f32>(0.0), vec3<f32>(1.0));
-    let iblWaterScatterContribution = iblIrradiance * iblTransmittance * 0.15;
-    waterDiffuseLighting += iblWaterScatterContribution;
+    // 앰비언트 라이트의 물리적 표면 반사광 (수중 시 차단)
+    let surfaceAmbientReflection = select(ambientRadiance * surfaceFresnel * (INV_PI * 0.5) * uniforms.specularFactor, vec3<f32>(0.0), isUnderwater);
 
     let screenCoord = vec2<i32>(inputData.position.xy);
     let rawSceneDepth = textureLoad(renderPath1DepthTexture, screenCoord, 0);
@@ -385,31 +287,35 @@ fn main(inputData: InputData) -> OutputFragment {
     let maxAbsorption = select(1.0, 0.45, isUnderwater);
     let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, maxAbsorption);
 
-    // 수심에 따라 얕은 물(baseColor)에서 깊은 물(deepColor)로 자연스럽게 전이
-    let waterTargetColor = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
-    // 물속 체적 산란광(waterDiffuseLighting)을 물 고유의 색상과 결합
-    let waterScatteredTarget = waterTargetColor + waterDiffuseLighting * waterTargetColor;
-    let waterBodyScattering = mix(backgroundRefractedColor, waterScatteredTarget, absorptionStrength);
+    // 수심에 따른 물의 고유 흡수 반사율 (Water Optical Albedo)
+    let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
+
+    // [체적 산란광 물리 결합 (Physical In-scattering)]:
+    // 1) 비물리적 자체 발광(+ waterTargetColor)을 완전히 제거하여 빛이 없으면 산란광도 0이 되도록 교정
+    // 2) 10만 룩스 거대 광량에서도 우유빛 백화 현상이 발생하지 않도록 필믹 소프트 롤오프(Soft saturation) 적용
+    let rawInscatter = waterDiffuseLighting * waterAlbedo;
+    let softInscatter = rawInscatter / (vec3<f32>(1.0) + rawInscatter * 0.12);
 
     // ⑤ [정통 PBR 수체 체적 방출 및 바닥 투과광 에너지 분할 (Subsurface Water-Leaving Radiance)]:
-    // 10만 룩스에 달하는 거대한 태양 직사광은 수면을 뚫고 들어가 물 전체에서 강력한 체적 산란광(waterScatteredTarget)을 방출합니다.
     // 1) 바닥 지형 투과광(backgroundRefractedColor)은 표면 프레넬 반사율(totalSurfaceReflectance)에 의해 (1.0 - R)로 엄격히 차폐됩니다.
     // 2) 반면 물 자체의 체적 산란광은 물속에서 표면 밖으로 뿜어져 나오는 내부 방출광(Water-Leaving Radiance)이므로,
     //    파도 경사면이라 할지라도 최소 방출 마진(Subsurface Escape)을 유지하여 칠흑의 흑색 띠(Black Hole)가 발생하는 결함을 원천 차단합니다.
-    let totalSurfaceReflectance = clamp(totalDirectReflectance + F_IBL * uniforms.specularFactor * sunOcclusion, vec3<f32>(0.0), vec3<f32>(1.0));
+    let safeRoughnessParam = clamp(uniforms.roughness, 0.0, 1.0);
+    let totalSurfaceReflectance = clamp(totalDirectReflectance + surfaceFresnel * uniforms.specularFactor, vec3<f32>(0.0), vec3<f32>(1.0));
     let seabedTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
     let transmittedBackground = backgroundRefractedColor * select(seabedTransmission, vec3<f32>(0.85), isUnderwater);
 
     // 파도 3D 입체 굴곡에 의한 체적광 방출 마진 보장
     let subsurfaceEscapeMargin = 0.28 * (1.0 - safeRoughnessParam * 0.3);
     let waterBodyTransmission = select(max(seabedTransmission, vec3<f32>(subsurfaceEscapeMargin)), vec3<f32>(0.85), isUnderwater);
-    let waterBodyLight = waterScatteredTarget * waterBodyTransmission;
+    let waterBodyLight = softInscatter * waterBodyTransmission;
 
-    // 수심 흡수율에 따른 바닥 투과광과 수체 체적 산란광의 물리적 결합
+    // [정통 비어-람베르트 복사 전달 (RTE)]:
+    // 수심이 얕은 곳에서는 바닥이 100% 맑게 투과되고, 깊어질수록 물속 체적 산란광(softInscatter)이 자연스럽게 차오름
     let waterCompositeColor = mix(transmittedBackground, waterBodyLight, absorptionStrength);
     let transmittedUnderwater = mix(transmittedBackground, waterCompositeColor, depthFade);
 
-    let totalSpecular = specularLighting + iblSpecular;
+    let totalSpecular = specularLighting + surfaceAmbientReflection;
     let finalRgb = transmittedUnderwater + totalSpecular;
 
     output.color = vec4<f32>(finalRgb, 1.0);

@@ -37,13 +37,13 @@ RedGPU.init(
         // 3. 열대 일광 (Directional Light) 및 맑은 하늘 환경광 (Ambient Light)
         // 수면과 암초 상단에 풍부한 햇살을 공급하고 윤슬 기둥을 형성하는 태양각
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 42;
-        directionalLight.azimuth = 205;
+        directionalLight.elevation = 85;
+        directionalLight.azimuth = 145;
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 역광 및 그늘진 암초/수면에서도 자연스러운 하늘빛을 유지하도록 풍부한 환경광 제공
-        const ambientLight = new RedGPU.Light.AmbientLight('#c8e8ff', 1400);
+        // 자연스러운 씬 조화를 위한 중립 백색 환경광 제공
+        const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 1400);
         scene.lightManager.ambientLight = ambientLight;
 
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
@@ -285,8 +285,8 @@ function createBeachEnvironment(redGPUContext, scene) {
 function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
-        skybox: true,
-        ibl: true,
+        skybox: false,
+        ibl: false,
         gui: (pane) => {
             // [폴더 1] 에메랄드 수체 기초 설정 (PBR Base & Dual-tone Colors)
             const basicFolder = pane.addFolder({title: 'WaterLake (Emerald Beach Base)', expanded: true});
@@ -364,18 +364,35 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             swellFolder.addBinding(lake, 'waveWavelength', {min: 1.0, max: 50.0, step: 1.0});
             swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1});
 
-            // [폴더 4] Cook-Torrance PBR 스펙큘러 하이라이트 & 조명 (다이아몬드 윤슬)
-            const specFolder = pane.addFolder({title: 'Cook-Torrance PBR Specular & Light', expanded: true});
+            // [폴더 4] Directional Light (직사광 태양 제어 패널)
+            const sunFolder = pane.addFolder({title: 'Directional Light (직사광)', expanded: true});
+            sunFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            sunFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+            sunFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
+            sunFolder.addBinding(directionalLight, 'intensityMultiplier', {min: 0.0, max: 5.0, step: 0.05});
+
+            const sunColorParams = {
+                color: {
+                    r: directionalLight.color.r,
+                    g: directionalLight.color.g,
+                    b: directionalLight.color.b
+                }
+            };
+            sunFolder.addBinding(sunColorParams, 'color', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                directionalLight.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
+
+            // [폴더 5] Cook-Torrance PBR 스펙큘러 하이라이트 (다이아몬드 윤슬)
+            const specFolder = pane.addFolder({title: 'Cook-Torrance PBR Specular', expanded: true});
             specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.005, max: 1.0, step: 0.005});
             specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
-            specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
-            specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [폴더 5] 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
+            // [폴더 6] 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
             const depthFadeFolder = pane.addFolder({title: 'Depth Fade (Soft Shoreline)', expanded: true});
             depthFadeFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 4.0, step: 0.05});
 
-            // [폴더 6] 수중 굴절 및 Beer-Lambert 수심 흡수
+            // [폴더 7] 수중 굴절 및 Beer-Lambert 수심 흡수
             const refractionFolder = pane.addFolder({title: 'Refraction & Beer-Lambert', expanded: true});
             refractionFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.1, step: 0.002});
             refractionFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.0, max: 2.0, step: 0.02});
