@@ -231,16 +231,20 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     let preExposure = systemUniforms.preExposure;
 
-    // [정통 PBR 수면 반사 벡터]:
-    // 인위적인 waveDamping(35%~12% 억압)과 abs()/0.08 고도각 왜곡을 완전히 걷어내고,
-    // 파도 노멀에 의한 순수 반사 벡터를 계산합니다.
-    // 파도 경사로 인해 수평면 아래(R.y < 0)로 파고드는 경우에만 최소한의 가드(R.y = 0.001)로
-    // 큐브맵 하단 암부 샘플링을 방지하여 지평선과 완벽하게 이어지도록(Seamless) 처리합니다.
-    var R = reflect(-viewDir, worldNormal);
-    R.y = max(R.y, 0.001);
+    // [정통 PBR 수면 반사 벡터 및 지면 암부 침투 방지 (Geometric Horizon Guard)]:
+    // 파도 요철로 인해 반사광이 수면 아래(R.y < 0)로 파고들어 큐브맵 바닥(지면/암흑)을 샘플링하는 현상을 방지합니다.
+    // 파도가 가파를 때는 기하학적 하늘 반사 방향(R_geo)으로 부드럽게 블렌딩하여 항상 하늘빛을 샘플링하도록 보장합니다.
+    let R_raw = reflect(-viewDir, worldNormal);
+    let R_geo = reflect(-viewDir, baseNormal);
+    let downPenetration = max(-R_raw.y, 0.0);
+    var R = normalize(mix(R_raw, R_geo, clamp(downPenetration * 2.5, 0.0, 1.0)));
+    R.y = max(R.y, 0.008);
     R = normalize(R);
 
-    let NdotV_IBL = max(dot(worldNormal, viewDir), 0.04);
+    // 파도 뒷사면에서 시선 내적이 0으로 떨어져 프레넬 블랙홀이 발생하는 것을 방지하는 안전 가드
+    let viewDotGeo = max(dot(baseNormal, viewDir), 0.001);
+    let viewDotWave = dot(worldNormal, viewDir);
+    let NdotV_IBL = clamp(mix(viewDotGeo, max(viewDotWave, 0.0), 0.7), 0.06, 1.0);
     let iblRoughness = clamp(uniforms.roughness, 0.02, 1.0);
 
     var reflectedSky = vec3<f32>(0.0);
@@ -275,19 +279,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let ambRadiance = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * systemUniforms.preExposure);
         let ambLen = length(ambRadiance);
 
-        if (ambLen > 0.001) {
-            let primarySunColor = select(vec3<f32>(1.0), u_directionalLights[0].color.rgb, u_directionalLightCount > 0u);
-            let skyBase = systemUniforms.ambientLight.color.rgb;
-            let skyZenith = skyBase * 1.1;
-            let skyHorizon = mix(skyBase * 0.85, primarySunColor, 0.2);
-            let skyGrad = mix(skyHorizon, skyZenith, clamp(R.y * 0.6 + 0.4, 0.0, 1.0));
+        let primarySunColor = select(vec3<f32>(1.0), u_directionalLights[0].color.rgb, u_directionalLightCount > 0u);
+        let skyBase = select(vec3<f32>(0.5, 0.7, 1.0) * 0.4, systemUniforms.ambientLight.color.rgb, ambLen > 0.001);
+        let skyZenith = skyBase * 1.15;
+        let skyHorizon = mix(skyBase * 0.85, primarySunColor, 0.2);
+        let skyGrad = mix(skyHorizon, skyZenith, clamp(R.y * 0.6 + 0.4, 0.0, 1.0));
 
-            let safeSkyLum = clamp(ambLen * 0.45, 0.0, 1.5);
-            reflectedSky = skyGrad * safeSkyLum;
-        } else {
-            // 앰비언트 라이트가 없으면 가상의 하늘빛을 임의로 생성하지 않고 순수 0으로 유지 (PBR 원칙 준수)
-            reflectedSky = vec3<f32>(0.0);
-        }
+        let safeSkyLum = max(clamp(ambLen * 0.45, 0.0, 1.5), 0.25);
+        reflectedSky = skyGrad * safeSkyLum;
     }
 
     let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, iblRoughness), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
@@ -392,16 +391,23 @@ fn main(inputData: InputData) -> OutputFragment {
     let waterScatteredTarget = waterTargetColor + waterDiffuseLighting * waterTargetColor;
     let waterBodyScattering = mix(backgroundRefractedColor, waterScatteredTarget, absorptionStrength);
 
-    // ⑤ [엄격한 물리적 에너지 보존 (R + T <= 1.0)]:
-    // 비물리적인 18% 강제 투과 주입을 제거하고,
-    // 표면에서 반사되지 않은 에너지(1.0 - R)만이 수면 아래로 투과되도록 분할합니다.
+    // ⑤ [정통 PBR 수체 체적 방출 및 바닥 투과광 에너지 분할 (Subsurface Water-Leaving Radiance)]:
+    // 10만 룩스에 달하는 거대한 태양 직사광은 수면을 뚫고 들어가 물 전체에서 강력한 체적 산란광(waterScatteredTarget)을 방출합니다.
+    // 1) 바닥 지형 투과광(backgroundRefractedColor)은 표면 프레넬 반사율(totalSurfaceReflectance)에 의해 (1.0 - R)로 엄격히 차폐됩니다.
+    // 2) 반면 물 자체의 체적 산란광은 물속에서 표면 밖으로 뿜어져 나오는 내부 방출광(Water-Leaving Radiance)이므로,
+    //    파도 경사면이라 할지라도 최소 방출 마진(Subsurface Escape)을 유지하여 칠흑의 흑색 띠(Black Hole)가 발생하는 결함을 원천 차단합니다.
     let totalSurfaceReflectance = clamp(totalDirectReflectance + F_IBL * uniforms.specularFactor * sunOcclusion, vec3<f32>(0.0), vec3<f32>(1.0));
-    let baseTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    let transmissionWeight = select(baseTransmission, vec3<f32>(0.85), isUnderwater);
+    let seabedTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
+    let transmittedBackground = backgroundRefractedColor * select(seabedTransmission, vec3<f32>(0.85), isUnderwater);
 
-    // 해안선(depthFade)과 물밑 체적 산란광 모두에 transmissionWeight를 일관되게 적용
-    let effectiveUnderwaterColor = mix(backgroundRefractedColor, waterBodyScattering, depthFade);
-    let transmittedUnderwater = effectiveUnderwaterColor * transmissionWeight;
+    // 파도 3D 입체 굴곡에 의한 체적광 방출 마진 보장
+    let subsurfaceEscapeMargin = 0.28 * (1.0 - safeRoughnessParam * 0.3);
+    let waterBodyTransmission = select(max(seabedTransmission, vec3<f32>(subsurfaceEscapeMargin)), vec3<f32>(0.85), isUnderwater);
+    let waterBodyLight = waterScatteredTarget * waterBodyTransmission;
+
+    // 수심 흡수율에 따른 바닥 투과광과 수체 체적 산란광의 물리적 결합
+    let waterCompositeColor = mix(transmittedBackground, waterBodyLight, absorptionStrength);
+    let transmittedUnderwater = mix(transmittedBackground, waterCompositeColor, depthFade);
 
     let totalSpecular = specularLighting + iblSpecular;
     let finalRgb = transmittedUnderwater + totalSpecular;

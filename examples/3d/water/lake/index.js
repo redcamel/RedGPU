@@ -380,55 +380,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             refractionFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.1, step: 0.002});
             refractionFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.0, max: 2.0, step: 0.02});
 
-            // [폴더 7] 대기 및 환경광 (Sky Atmosphere & IBL)
-            const envFolder = pane.addFolder({title: 'Sky Atmosphere & IBL', expanded: false});
-            let skyAtmosphereInstance = null;
-            const envState = {
-                skyAtmosphere: false,
-            };
-            envFolder.addBinding(envState, 'skyAtmosphere').on('change', (ev) => {
-                if (ev.value) {
-                    if (!skyAtmosphereInstance) {
-                        skyAtmosphereInstance = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-                    }
-                    view.skyAtmosphere = skyAtmosphereInstance;
-                } else {
-                    view.skyAtmosphere = null;
-                }
-            });
 
-            // [폴더 8] 에메랄드 해변 시그니처 카메라 프리셋
-            const cameraFolder = pane.addFolder({title: 'Camera Presets (Emerald Beach)', expanded: true});
-            cameraFolder.addButton({title: '🏖️ Beach Panorama (해변 전경)'}).on('click', () => {
-                view.camera.tilt = -22;
-                view.camera.pan = 35;
-                view.camera.distance = 30;
-            });
-            cameraFolder.addButton({title: '💎 Diamond Glitter (태양 윤슬 기둥)'}).on('click', () => {
-                view.camera.tilt = -24;
-                view.camera.pan = 25;
-                view.camera.distance = 25;
-            });
-            cameraFolder.addButton({title: '🏝️ Shoreline Fade (백사장 해안선)'}).on('click', () => {
-                view.camera.tilt = -36;
-                view.camera.pan = 5;
-                view.camera.distance = 18;
-            });
-            cameraFolder.addButton({title: '🪸 Crystal Reefs (수중 암초 굴절)'}).on('click', () => {
-                view.camera.tilt = -42;
-                view.camera.pan = -45;
-                view.camera.distance = 16;
-            });
-            cameraFolder.addButton({title: '🗿 Seastack Refraction (스넬 굴절 관통석)'}).on('click', () => {
-                view.camera.tilt = -16;
-                view.camera.pan = 48;
-                view.camera.distance = 16;
-            });
-            cameraFolder.addButton({title: '🌊 Low Horizon Swell (수평선 너울 시선)'}).on('click', () => {
-                view.camera.tilt = -8;
-                view.camera.pan = 20;
-                view.camera.distance = 22;
-            });
         }
     });
 }
