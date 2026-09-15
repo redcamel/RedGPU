@@ -167,48 +167,54 @@ fn main(inputData: InputData) -> OutputFragment {
             let waterScatterContribution = lightRadiance * sunTransmittance * sunGeoNdotL * forwardScatter * 0.35;
             waterDiffuseLighting += waterScatterContribution;
 
-            let halfDir = normalize(lightDir + viewDir);
-            let NdotH = max(dot(worldNormal, halfDir), 0.0);
-            let VdotH = max(dot(viewDir, halfDir), 0.0);
+            // 1. Brian Karis 태양 디스크 대표점 (각반경 약 0.53도 = 0.0092 라디안)
+            let sunAngularRadius = 0.0092;
+            let R_view = reflect(-viewDir, worldNormal);
+            let RdotL = dot(R_view, lightDir);
+            let safeRdotL = max(0.0, RdotL);
+            let l_proj = lightDir * safeRdotL;
+            let l_diff = R_view - l_proj;
+            let l_diff_len = length(l_diff);
+            let L_rep = select(lightDir, normalize(l_proj + l_diff * min(1.0, sunAngularRadius / max(0.0001, l_diff_len))), l_diff_len > 0.0001 && RdotL > 0.0);
+
+            let halfDir = normalize(L_rep + viewDir);
+            let NdotH = clamp(dot(worldNormal, halfDir), 0.0, 0.9999);
+            let VdotH = clamp(dot(viewDir, halfDir), 0.0, 1.0);
             let NdotH2 = NdotH * NdotH;
             let safeNdotL = max(NdotL, 0.0001);
+            let safeNdotV = max(NdotV, 0.0001);
 
-            let specF1 = clamp(1.0 - VdotH, 0.0, 1.0);
-            let specF2 = specF1 * specF1;
-            let specF5 = specF2 * specF2 * specF1;
-            let F = F0 + (vec3<f32>(1.0) - F0) * specF5;
+            // 2. Schlick Fresnel (물 기본 반사율 F0 = 0.02037, 스침각 1.0)
+            let F = F0 + (vec3<f32>(1.0) - F0) * pow(1.0 - VdotH, 5.0);
 
-            let denom = NdotH2 * (alpha2 - 1.0) + 1.0;
-            let D = alpha2 * INV_PI / max(EPSILON, denom * denom);
-            let GGXV = safeNdotL * sqrt(NdotV * NdotV * oneMinusAlpha2 + alpha2);
-            let GGXL = NdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
-            let V = 0.5 / max(GGXV + GGXL, EPSILON);
-            let specClean = D * V;
+            // 3. 언리얼 엔진(UE5) 스타일 듀얼 로브 GGX (Dual-Lobe Cook-Torrance)
+            // Lobe 1: 베이스 스펙큘러 로브 (부드러운 햇살 길목, r ~ 0.16)
+            let rBase = clamp(uniforms.roughness * 1.5 + 0.12, 0.08, 0.45);
+            let aBase = rBase * rBase;
+            let aBase2 = aBase * aBase;
+            let denomBase = NdotH2 * (aBase2 - 1.0) + 1.0;
+            let dBase = aBase2 * INV_PI / max(0.0001, denomBase * denomBase);
+            let vBase = 0.5 / max(0.0001, safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - aBase2) + aBase2) + safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - aBase2) + aBase2));
+            let specBase = dBase * vBase;
 
-            let sunBaseReflect = reflect(-lightDir, baseNormal);
-            let sunPathAlignment = clamp(dot(viewDir, sunBaseReflect), 0.0, 1.0);
-            let sunColumnWeight = sunPathAlignment * sunPathAlignment;
+            // Lobe 2: 샤프 글린트 로브 (파도 능선 초고해상도 다이아몬드 반짝임, r ~ 0.038)
+            let rGlint = 0.038 + (1.0 - clamp(length(finalXY) * 2.5, 0.0, 1.0)) * 0.025;
+            let aGlint = rGlint * rGlint;
+            let aGlint2 = aGlint * aGlint;
+            let denomGlint = NdotH2 * (aGlint2 - 1.0) + 1.0;
+            let dGlint = aGlint2 * INV_PI / max(0.0001, denomGlint * denomGlint);
+            let vGlint = 0.5 / max(0.0001, safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - aGlint2) + aGlint2) + safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - aGlint2) + aGlint2));
+            let specGlint = dGlint * vGlint;
 
-            let nh2 = NdotH * NdotH;
-            let nh4 = nh2 * nh2;
-            let nh8 = nh4 * nh4;
-            let nh16 = nh8 * nh8;
-            let nh32 = nh16 * nh16;
-            let nh64 = nh32 * nh32;
-            let nh128 = nh64 * nh64;
-            let nh256 = nh128 * nh128;
+            // 4. 물리적 듀얼 로브 결합 및 태양 고휘도 게인 (물 반사율 2% 감쇄 극복)
+            let dualLobe = specBase * 0.45 + specGlint * 0.55;
+            var rawSpecBRDF = dualLobe * F * 18.0;
 
-            let glintHigh = nh256 * 120.0;
-            let glintMid = nh64 * 30.0;
-            let glintColumn = nh16 * 8.0 * sunColumnWeight;
+            // [안전 가드] 부동소수점 오버플로 및 정오 특이점(Infinity/NaN) 원천 차단
+            rawSpecBRDF = min(rawSpecBRDF, vec3<f32>(300.0));
 
-            let waveSlopeFactor = 0.5 + 0.8 * clamp(length(finalXY) * 3.0, 0.0, 1.0);
-            let glitterFade = 1.0 - smoothstep(80.0, 600.0, camDistance);
-            let diamondGlitter = ((glintHigh + glintMid) * waveSlopeFactor * glitterFade) + glintColumn;
-
-            // [에너지 보존 정규화]: 윤슬의 반짝임 피크를 유지하되 무한대 발산(Blowout)을 방지하는 에너지 보존 모델
-            let rawSpecBRDF = (specClean + diamondGlitter) * F;
-            let totalSpecBRDF = rawSpecBRDF / (vec3<f32>(1.0) + rawSpecBRDF * 0.01);
+            // 언리얼 스타일 필름 소프트 롤오프 (모니터 화이트아웃 100% 방지)
+            let totalSpecBRDF = rawSpecBRDF / (vec3<f32>(1.0) + rawSpecBRDF * 0.15);
 
             let directLightSpec = lightRadiance * totalSpecBRDF * uniforms.specularFactor * NdotL;
             specularLighting += directLightSpec;
@@ -225,20 +231,14 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     let preExposure = systemUniforms.preExposure;
 
-    let R_raw = getReflectionVectorFromViewDirection(viewDir, worldNormal);
-    let R_geo = reflect(-viewDir, baseNormal);
-
-    // [기하학적 수평선 리프팅 (Horizon Reflection Lift)]:
-    // 파도 노멀 섭동으로 인해 반사 벡터가 수면 아래(R.y < 0)나 지평선 암부로 떨어지는 결함을 원천 차단.
-    // 기하학적 하늘 반사 벡터(R_geo)를 기준으로 파도 섭동을 인가하고,
-    // 아래쪽을 향하는 성분을 하늘 상공(+Y)으로 부드럽게 꺾어 올려 항상 맑은 하늘 텍셀을 샘플링하도록 보장.
-    let waveOffset = R_raw - R_geo;
-    // [시야각 연동 노멀 섭동 댐핑]: 탑뷰(수직 시야)에서 지평선 노을이 물 표면에 점박이로 맺히는 결함 방지
-    let viewSteepness = clamp(dot(baseNormal, viewDir), 0.0, 1.0);
-    let waveDamping = mix(0.35, 0.12, viewSteepness);
-    var R_safe = normalize(R_geo + waveOffset * waveDamping);
-    R_safe.y = max(abs(R_safe.y), 0.08);
-    let R = normalize(R_safe);
+    // [정통 PBR 수면 반사 벡터]:
+    // 인위적인 waveDamping(35%~12% 억압)과 abs()/0.08 고도각 왜곡을 완전히 걷어내고,
+    // 파도 노멀에 의한 순수 반사 벡터를 계산합니다.
+    // 파도 경사로 인해 수평면 아래(R.y < 0)로 파고드는 경우에만 최소한의 가드(R.y = 0.001)로
+    // 큐브맵 하단 암부 샘플링을 방지하여 지평선과 완벽하게 이어지도록(Seamless) 처리합니다.
+    var R = reflect(-viewDir, worldNormal);
+    R.y = max(R.y, 0.001);
+    R = normalize(R);
 
     let NdotV_IBL = max(dot(worldNormal, viewDir), 0.04);
     let iblRoughness = clamp(uniforms.roughness, 0.02, 1.0);
@@ -294,11 +294,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
     reflectedSky *= energyCompensation;
 
-    if (!isUnderwater) {
-        let horizonDot = max(dot(R, baseNormal), 0.0);
-        let horizonOcclusion = clamp(horizonDot * 1.5 + 0.7, 0.65, 1.0);
-        reflectedSky *= horizonOcclusion;
-    }
 
     // 🚀 [PBR 규격 F90 Schlick 프레넬]: 거칠기에 따른 grazing angle 반사율 감쇄 (에너지 보존)
     let safeRoughnessParam = clamp(uniforms.roughness, 0.0, 1.0);
@@ -354,16 +349,18 @@ fn main(inputData: InputData) -> OutputFragment {
             depthFade = smoothstep(0.0, uniforms.depthFadeDistance, effectiveWaterDepthDelta);
         }
     }
-
     let screenUV = inputData.position.xy / systemUniforms.resolution;
-    let viewNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(worldNormal, 0.0)).xyz;
 
-    // [해안선 굴절 지터링 방지 (Soft Shoreline Refraction)]:
-    // 수심이 극히 얕은 해안선 경계면에서 굴절 오프셋 강도를 부드럽게 0으로 감쇄시켜
-    // 물과 지형이 만나는 경계선에서 픽셀이 튀고 찢어지는 뎁스파이팅/지터링 노이즈 원천 차단
-    let shorelineFade = smoothstep(0.0, max(uniforms.depthFadeDistance * 0.35, 1.5), effectiveWaterDepthDelta);
-    let effectiveRefractionStrength = uniforms.refractionStrength * shorelineFade * select(min(effectiveWaterDepthDelta * 2.0, 1.0), 0.7, isUnderwater);
-    let refractionOffset = viewNormal.xy * effectiveRefractionStrength;
+    // ④ [순수 파도 섭동에 의한 굴절 왜곡 (Pure Perturbation Refraction)]:
+    // 기하 기본 법선(baseNormal)을 제외한 순수 파도 요철 섭동(deltaNormal)만 뷰 공간으로 변환합니다.
+    // 이를 통해 파도가 없는 평평한 수면에서는 왜곡이 정확히 0이 되어 물밑 지형이 한쪽으로 밀리지 않으며,
+    // 파도가 칠 때만 파도의 능선과 골에 의해 자연스러운 일렁임이 발생합니다.
+    let deltaWorldNormal = worldNormal - baseNormal;
+    let viewDeltaNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaWorldNormal, 0.0)).xyz;
+
+    // ⑥ [해안선 감쇄 단일화]: 중복된 shorelineFade를 제거하고 depthFade 하나로 통합 제어
+    let effectiveRefractionStrength = uniforms.refractionStrength * depthFade;
+    let refractionOffset = viewDeltaNormal.xy * effectiveRefractionStrength;
 
     var finalRefractUV = clamp(screenUV + refractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
 
@@ -381,36 +378,28 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let backgroundRefractedColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, 0.0).rgb;
 
-    let depthScale = max(uniforms.depthFadeDistance * 2.5, 6.0);
-    let depthGradient = smoothstep(0.0, depthScale, effectiveWaterDepthDelta);
-    let waterTargetColor = mix(uniforms.baseColor, uniforms.deepColor, depthGradient);
-
-    let effectiveOpacity = uniforms.opacity * inputData.combinedOpacity;
+    // ② [정통 PBR 비어-람베르트(Beer-Lambert) 수중 흡수 및 산란 광학]:
+    // 임의의 청록색 매직넘버 및 5중 믹스를 완전히 제거하고,
+    // 빛이 물을 통과하며 거리에 따라 지수적으로 감쇄하는 비어-람베르트 법칙(exp(-d * sigma))을 적용합니다.
     let extinction = exp(-effectiveWaterDepthDelta * uniforms.extinctionFactor);
+    let effectiveOpacity = uniforms.opacity * inputData.combinedOpacity;
     let maxAbsorption = select(1.0, 0.45, isUnderwater);
     let absorptionStrength = clamp((1.0 - extinction) * effectiveOpacity, 0.0, maxAbsorption);
 
-    // [체적 산란광 에너지 보존]: 흡수된 에너지 비율 안에서 산란광이 합성되도록 정규화
-    let waterScatterTint = mix(waterTargetColor, vec3<f32>(0.08, 0.55, 0.65), 0.45);
-    let scatterDepthMask = smoothstep(0.0, max(uniforms.depthFadeDistance * 0.5, 1.0), effectiveWaterDepthDelta);
-    let maskedScatterLighting = waterDiffuseLighting * waterScatterTint * scatterDepthMask;
-    let waterScatteredTarget = waterTargetColor + maskedScatterLighting * 0.8;
+    // 수심에 따라 얕은 물(baseColor)에서 깊은 물(deepColor)로 자연스럽게 전이
+    let waterTargetColor = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
+    // 물속 체적 산란광(waterDiffuseLighting)을 물 고유의 색상과 결합
+    let waterScatteredTarget = waterTargetColor + waterDiffuseLighting * waterTargetColor;
     let waterBodyScattering = mix(backgroundRefractedColor, waterScatteredTarget, absorptionStrength);
 
-    // [물리적 에너지 보존 법칙 (R + T <= 1.0)]:
-    // 표면 총 반사율(직사광 + 간접광 IBL)을 계산하고, 투과율은 정확히 (1.0 - R)로 보장하여
-    // 어떠한 경우에도 에너지가 증폭되거나 생성되지 않도록 엄밀히 분할.
+    // ⑤ [엄격한 물리적 에너지 보존 (R + T <= 1.0)]:
+    // 비물리적인 18% 강제 투과 주입을 제거하고,
+    // 표면에서 반사되지 않은 에너지(1.0 - R)만이 수면 아래로 투과되도록 분할합니다.
     let totalSurfaceReflectance = clamp(totalDirectReflectance + F_IBL * uniforms.specularFactor * sunOcclusion, vec3<f32>(0.0), vec3<f32>(1.0));
     let baseTransmission = clamp(vec3<f32>(1.0) - totalSurfaceReflectance, vec3<f32>(0.0), vec3<f32>(1.0));
-    // [스침각 수체 발색 보존 (Grazing Angle Color Retention)]:
-    // 파도의 3D 입체 굴곡과 체적 산란광 방출로 인해 수평 시선(N·V -> 0)에서도 에메랄드빛이 완전히 차단되지 않도록 최소 18% 투과 마진 보장
-    let grazingRetention = 0.18 * (1.0 - safeRoughnessParam * 0.4);
-    let effectiveTransmission = max(baseTransmission, vec3<f32>(grazingRetention));
-    let transmissionWeight = select(effectiveTransmission, vec3<f32>(0.85), isUnderwater);
+    let transmissionWeight = select(baseTransmission, vec3<f32>(0.85), isUnderwater);
 
-    // [해안선 및 물밑 투과광의 완전한 에너지 보존]:
-    // 해안선(depthFade)과 물밑 체적 산란광 모두에 transmissionWeight를 일관되게 적용하여
-    // 해안가 경계면에서도 표면 반사율과 투과율의 합이 1.0을 초과하지 않도록 보장
+    // 해안선(depthFade)과 물밑 체적 산란광 모두에 transmissionWeight를 일관되게 적용
     let effectiveUnderwaterColor = mix(backgroundRefractedColor, waterBodyScattering, depthFade);
     let transmittedUnderwater = effectiveUnderwaterColor * transmissionWeight;
 
