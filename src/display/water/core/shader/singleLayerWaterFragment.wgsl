@@ -48,9 +48,8 @@ struct InputData {
 };
 
 fn unpackTangentNormal(color: vec3<f32>) -> vec3<f32> {
-    var xy = color.xy * 2.0 - 1.0;
-    xy.y = -xy.y;
-    let z = sqrt(max(0.0, 1.0 - dot(xy, xy)));
+    let xy = color.xy * 2.0 - 1.0;
+    let z = sqrt(max(0.001, 1.0 - dot(xy, xy)));
     return vec3<f32>(xy, z);
 }
 

@@ -22,7 +22,6 @@ declare class GlobalStorageBufferManager extends RedGPUObject {
      * [EN] Fixed memory byte size to add during linear growth after exceeding the threshold (8MB)
      */
     static readonly RESIZE_LINEAR_ADDITION_BYTES: number;
-    destroy(): void;
     /**
      * [KO] GlobalStorageBufferManager 인스턴스를 생성합니다.
      * [EN] Creates an instance of GlobalStorageBufferManager.
@@ -91,6 +90,7 @@ declare class GlobalStorageBufferManager extends RedGPUObject {
      * [EN] Returns the number of remaining available slots.
      */
     get remainingSlotCount(): number;
+    destroy(): void;
     /**
      * [KO] 리사이즈 콜백을 등록합니다. 버퍼 용량 한도 초과로 동적 리사이징이 실행된 후 호출됩니다.
      * [EN] Registers a resize callback. Called after dynamic resizing is executed due to capacity limit exceedance.

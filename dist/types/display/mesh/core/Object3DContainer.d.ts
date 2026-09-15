@@ -101,5 +101,6 @@ declare class Object3DContainer extends BaseObject {
      * @returns {this} 현재 컨테이너
      */
     removeAllChildren(): this;
+    destroy(): void;
 }
 export default Object3DContainer;

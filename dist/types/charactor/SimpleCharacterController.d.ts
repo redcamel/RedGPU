@@ -42,6 +42,10 @@ export interface SimpleCharacterControllerOptions {
     useControllerRotationYaw?: boolean;
     /** [KO] 이동 방향으로 캐릭터 회전 정렬 여부 (기본값: true) [EN] Whether to orient character rotation to movement direction (default: true) */
     orientRotationToMovement?: boolean;
+    /** [KO] 지면 안착 시 추가로 적용할 수직 오프셋 (기본값: 0.0, 지형 메시 폴리곤 오차나 모델 발바닥 피벗 보정용) [EN] Additional vertical offset applied when landing on the ground (default: 0.0, for adjusting terrain polygon deviations or model foot pivot) */
+    floorOffset?: number;
+    /** [KO] 동적 지면 고도 산출 콜백 함수 ((x, z) => number). 설정 시 이동 직후 지면 높이를 실시간 동기화하여 1프레임 지연을 제거합니다. [EN] Dynamic floor height callback ((x, z) => number). If set, synchronizes floor height immediately after movement to eliminate 1-frame lag. */
+    getFloorHeight?: (x: number, z: number) => number;
     /** [KO] 사용자 정의 키보드 매핑 [EN] Custom keyboard mapping configuration */
     keyMap?: CharacterKeyMap;
 }
@@ -62,10 +66,14 @@ declare class SimpleCharacterController extends RedGPUObject {
     gravity: number;
     jumpForce: number;
     floorHeight: number;
+    /** [KO] 지면 안착 시 추가로 적용할 수직 오프셋 (기본값: 0.0, 지형 메시 폴리곤 오차나 모델 발바닥 피벗 보정용) [EN] Additional vertical offset applied when landing on the ground (default: 0.0, for adjusting terrain polygon deviations or model foot pivot) */
+    floorOffset: number;
     useKeyboard: boolean;
     modelRotationOffset: number;
     useControllerRotationYaw: boolean;
     orientRotationToMovement: boolean;
+    /** [KO] 동적 지면 고도 산출 콜백 함수 ((x, z) => number). 설정 시 이동 직후 지면 높이를 실시간 동기화하여 1프레임 지연을 제거합니다. [EN] Dynamic floor height callback ((x, z) => number). If set, synchronizes floor height immediately after movement to eliminate 1-frame lag. */
+    getFloorHeight: ((x: number, z: number) => number) | null;
     keyMap: Required<CharacterKeyMap>;
     /**
      * [KO] SimpleCharacterController 인스턴스를 생성합니다.

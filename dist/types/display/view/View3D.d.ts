@@ -15,6 +15,7 @@ import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/viewRenderTextureManager/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import ClusterLightManager from "../../light/core/ClusterLightManager";
+import HierarchicalZBuffer from "./hzb/HierarchicalZBuffer";
 /**
  * [KO] 3D 렌더링을 위한 뷰 클래스입니다.
  * [EN] View class for 3D rendering.
@@ -56,6 +57,11 @@ declare class View3D extends AView {
      */
     constructor(redGPUContext: RedGPUContext, scene: Scene, camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D, name?: string);
     /**
+     * [KO] Hierarchical Z-Buffer (HZB) 전역 피라미드 객체를 반환합니다.
+     * [EN] Returns the Hierarchical Z-Buffer (HZB) global pyramid instance.
+     */
+    get hierarchicalZBuffer(): HierarchicalZBuffer;
+    /**
      * [KO] 클러스터 라이트 매니저를 반환합니다.
      * [EN] Returns the cluster light manager.
      */
@@ -71,8 +77,14 @@ declare class View3D extends AView {
      */
     get systemUniform_Vertex_StructInfo(): any;
     /**
-     * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
-     * [EN] Returns the system vertex globalStruct bind group.
+     * [KO] 현재 렌더링 중인 CSM 캐스케이드 인덱스 (0 ~ 3)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the CSM cascade index (0 to 3) currently being rendered.
+     */
+    get currentCascadeIndex(): number | undefined;
+    set currentCascadeIndex(value: number | undefined);
+    /**
+     * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다. (캐스케이드 렌더링 시 해당 캐스케이드 바인드그룹 반환)
+     * [EN] Returns the system vertex globalStruct bind group. (Returns cascade bind group during cascade rendering)
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup;
     /**
@@ -149,6 +161,7 @@ declare class View3D extends AView {
      * [EN] Returns the projection view matrix from the previous frame with jitter excluded.
      */
     get prevNoneJitterProjectionViewMatrix(): mat4;
+    destroy(): void;
     /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.
@@ -161,7 +174,10 @@ declare class View3D extends AView {
      * @param renderPath1ResultTextureView -
      * [KO] 렌더 패스 1단계 결과 텍스처 뷰
      * [EN] Render path 1 stage result texture view
+     * @param renderPath1DepthTextureView -
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰
+     * [EN] Render path 1 stage depth result texture view
      */
-    update(shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView): void;
+    update(shadowRender?: boolean, calcPointLightCluster?: boolean, renderPath1ResultTextureView?: GPUTextureView, renderPath1DepthTextureView?: GPUTextureView): void;
 }
 export default View3D;

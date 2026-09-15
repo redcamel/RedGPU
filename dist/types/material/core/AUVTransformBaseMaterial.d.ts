@@ -42,14 +42,14 @@ declare abstract class AUVTransformBaseMaterial extends ABitmapBaseMaterial {
      * @param moduleName -
      * [KO] 머티리얼 모듈명
      * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 쉐이더 정보
-     * [EN] Parsed WGSL shader info
+     * @param fragmentSource -
+     * [KO] 프래그먼트 셰이더 소스 문자열
+     * [EN] Fragment shader source string
      * @param targetGroupIndex -
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    protected constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    protected constructor(redGPUContext: RedGPUContext, moduleName: string, fragmentSource: string, targetGroupIndex: number);
     /**
      * [KO] 텍스처 오프셋 (u, v)
      * [EN] Texture offset (u, v)

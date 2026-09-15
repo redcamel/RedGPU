@@ -1,9 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import CubeTexture from "../../resources/texture/CubeTexture";
-import HDRTexture from "../../resources/texture/hdr/HDRTexture";
-import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 /**
  * [KO] 비트맵/큐브/노이즈 텍스처 기반 머티리얼의 공통 속성 및 기능을 제공하는 추상 클래스입니다.
@@ -34,14 +30,14 @@ declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
      * @param moduleName -
      * [KO] 머티리얼 모듈명
      * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 셰이더 정보
-     * [EN] Parsed WGSL shader info
+     * @param fragmentSource -
+     * [KO] 프래그먼트 셰이더 소스 문자열
+     * [EN] Fragment shader source string
      * @param targetGroupIndex -
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    protected constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    protected constructor(redGPUContext: RedGPUContext, moduleName: string, fragmentSource: string, targetGroupIndex: number);
     /**
      * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
      * [EN] Manages texture object changes and DirtyPipeline listeners.
@@ -52,7 +48,7 @@ declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
      * [KO] 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      * [EN] New texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      */
-    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture): void;
+    updateTexture(prevTexture: any, texture: any): void;
     /**
      * [KO] 샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
      * [EN] Manages sampler object changes and DirtyPipeline listeners.

@@ -17,5 +17,6 @@ declare class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler);
     get lutTexture(): DirectTexture;
     render(transmittance: DirectTexture): void;
+    destroy(): void;
 }
 export default MultiScatteringGenerator;

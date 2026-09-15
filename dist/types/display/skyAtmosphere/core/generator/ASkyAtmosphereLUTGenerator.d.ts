@@ -23,6 +23,7 @@ declare abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
     abstract get lutTexture(): DirectTexture | DirectCubeTexture;
     executeComputePass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, workgroupSize?: [number, number, number]): void;
     createLUTTexture(is3D?: boolean, format?: GPUTextureFormat): GPUTexture;
+    destroy(): void;
     protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline;
     protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup;
 }

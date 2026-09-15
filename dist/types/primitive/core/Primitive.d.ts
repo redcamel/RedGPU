@@ -4,11 +4,12 @@ import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import AABB from "../../bound/AABB";
+import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] 모든 기본 도형(Primitive)의 기반이 되는 베이스 클래스입니다.
  * [EN] Base class for all primitive geometries.
  */
-declare class Primitive {
+declare class Primitive extends RedGPUObject {
     #private;
     constructor(redGPUContext: RedGPUContext, uniqueKey: string, makeData: () => Geometry);
     /**

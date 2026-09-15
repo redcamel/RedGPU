@@ -220,18 +220,6 @@ declare class LightManager {
      */
     removeAllLight(): void;
     /**
-     * [KO] 방향성 조명의 투영-뷰 행렬을 반환합니다.
-     * [EN] Returns the projection-view matrix of the directional light.
-     *
-     * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @returns
-     * [KO] mat4 투영-뷰 행렬
-     * [EN] mat4 projection-view matrix
-     */
-    getDirectionalLightProjectionViewMatrix(view: View3D): mat4;
-    /**
      * [KO] 방향성 조명의 투영(orthographic) 행렬을 계산하여 반환합니다.
      * [EN] Calculates and returns the projection (orthographic) matrix of the directional light.
      *
@@ -255,5 +243,10 @@ declare class LightManager {
      * [EN] mat4 view matrix
      */
     getDirectionalLightViewMatrix(view: View3D): mat4;
+    /**
+     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
+     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
+     */
+    destroy(): void;
 }
 export default LightManager;

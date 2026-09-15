@@ -60,5 +60,10 @@ declare class ToneMappingManager {
      * @returns [KO] 렌더링 결과 [EN] Rendering result
      */
     render(view: View3D, width: number, height: number, currentTextureView: IPostEffectResult): IPostEffectResult;
+    /**
+     * [KO] ToneMappingManager 인스턴스를 파기하고 톤매핑 자원과 컨텍스트 참조를 해제합니다.
+     * [EN] Destroys the ToneMappingManager instance and releases tone mapping resources and context references.
+     */
+    destroy(): void;
 }
 export default ToneMappingManager;

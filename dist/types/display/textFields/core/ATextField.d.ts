@@ -150,5 +150,10 @@ declare class ATextField extends Mesh {
      * [EN] Current render view state data
      */
     render(renderViewStateData: RenderViewStateData): void;
+    /**
+     * [KO] ATextField 인스턴스를 파괴하고 사용 중인 DOM 엘리먼트와 Object URL 등의 리소스를 해제합니다.
+     * [EN] Destroys the ATextField instance and releases resources such as the DOM elements and Object URLs in use.
+     */
+    destroy(): void;
 }
 export default ATextField;

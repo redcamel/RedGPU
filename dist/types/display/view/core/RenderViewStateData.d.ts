@@ -1,3 +1,4 @@
+import { mat4 } from "gl-matrix";
 import View3D from "../View3D";
 import { CommandBatchStats } from "../../../commandEncoderManager/CommandEncoderManager";
 /**
@@ -178,6 +179,21 @@ declare class RenderViewStateData {
      */
     frustumPlanes: number[][];
     /**
+     * [KO] 4개 캐스케이드 섀도우 프러스텀 평면 캐시 배열 [cascadeIndex][planeIndex][4]
+     * [EN] 4-cascade shadow frustum plane cache array [cascadeIndex][planeIndex][4]
+     */
+    readonly shadowFrustumPlanes: number[][][];
+    /**
+     * [KO] 캐스케이드별 최대 분할 거리 배열
+     * [EN] Max split distance array per cascade
+     */
+    readonly cascadeSplitDepths: Float32Array;
+    /**
+     * [KO] 현재 활성화된 캐스케이드 수 (0~4)
+     * [EN] Currently active cascade count (0~4)
+     */
+    activeCascadeCount: number;
+    /**
      * [KO] 머티리얼로부터 변경된 버텍스 유니폼의 맵
      * [EN] Map of vertex uniforms changed from materials
      */
@@ -229,6 +245,11 @@ declare class RenderViewStateData {
      * @readonly
      */
     get view(): View3D;
+    /**
+     * [KO] 4x4 행렬로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 정규화하여 out 배열에 인플레이스 기입합니다.
+     * [EN] Extracts and normalizes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) from 4x4 matrix in-place.
+     */
+    static computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][];
     /**
      * [KO] 새로운 프레임을 위해 렌더 상태 데이터를 초기화합니다.
      * [EN] Resets render state data for a new frame.

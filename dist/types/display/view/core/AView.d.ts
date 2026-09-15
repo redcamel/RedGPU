@@ -167,5 +167,6 @@ declare abstract class AView extends ViewTransform {
      * [EN] True if the mouse is inside the view bounds, otherwise false
      */
     checkMouseInViewBounds(): boolean;
+    destroy(): void;
 }
 export default AView;

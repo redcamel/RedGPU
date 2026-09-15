@@ -24,5 +24,6 @@ declare class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * @returns [KO] 렌더링 결과 [EN] Render result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
+    destroy(): void;
 }
 export default SkyAtmospherePostEffect;

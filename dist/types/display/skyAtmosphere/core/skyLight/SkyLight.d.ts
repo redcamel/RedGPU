@@ -34,5 +34,6 @@ declare class SkyLight extends RedGPUObject {
      * @param skyAtmosphere - [KO] 소스가 되는 SkyAtmosphere 인스턴스 [EN] Source SkyAtmosphere instance
      */
     update(skyAtmosphere: SkyAtmosphere): Promise<void>;
+    destroy(): void;
 }
 export default SkyLight;

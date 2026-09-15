@@ -6,6 +6,8 @@ import RedGPUContextSizeManager, { IRedGPURectObject, RedResizeEvent } from "./c
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
+import DrawBufferManager from "../renderer/core/DrawBufferManager";
+import Renderer from "../renderer/Renderer";
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
  * [EN] The RedGPUContext class is the top-level context object provided after WebGPU initialization.
@@ -50,6 +52,7 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Current time (frame based, ms)
      */
     currentTime: number;
+    targetRenderer: Renderer;
     /**
      * [KO] RedGPUContext 생성자
      * [EN] RedGPUContext constructor
@@ -68,8 +71,17 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * @param alphaMode -
      * [KO] 캔버스 알파 모드
      * [EN] Canvas alpha mode
+     * @param onDestroy -
+     * [KO] 디바이스 유실 시 호출될 선택적 콜백 함수
+     * [EN] Optional callback function to be called when the device is lost
      */
-    constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
+    constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode, onDestroy?: (info: GPUDeviceLostInfo) => void);
+    get destroyed(): boolean;
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     */
+    get drawBufferManager(): DrawBufferManager;
     /**
      * [KO] 커맨드 인코더 매니저를 반환합니다.
      * [EN] Returns the command encoder manager.
@@ -232,8 +244,11 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      */
     set renderScale(value: number);
     /**
-     * [KO] GPU 디바이스를 파기하고 리소스를 해제합니다.
-     * [EN] Destroys the GPU device and releases resources.
+     * [KO] RedGPUContext 인스턴스를 파기하고 모든 렌더러와 리소스를 해제합니다.
+     * [EN] Destroys the RedGPUContext instance and releases all renderers and resources.
+     * @param isPageHide -
+     * [KO] pagehide 이벤트에 의해 임시로 소멸이 기동되었는지 여부 (bfcache 복원용 pageshow 리스너 보존을 위함)
+     * [EN] Whether the destruction was temporarily triggered by a pagehide event (to preserve pageshow listener for bfcache restoration)
      */
     destroy(): void;
     /**

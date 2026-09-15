@@ -70,14 +70,14 @@ declare abstract class ABaseMaterial extends ResourceBase {
      * @param moduleName -
      * [KO] 머티리얼 모듈명
      * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 셰이더 정보
-     * [EN] Parsed WGSL shader info
+     * @param fragmentSource -
+     * [KO] 프래그먼트 셰이더 소스 문자열
+     * [EN] Fragment shader source string
      * @param targetGroupIndex -
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    protected constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    protected constructor(redGPUContext: RedGPUContext, moduleName: string, fragmentSource: string, targetGroupIndex: number);
     /**
      * [KO] 틴트 블렌드 모드 이름을 반환합니다.
      * [EN] Returns the tint blend mode name.
@@ -114,6 +114,11 @@ declare abstract class ABaseMaterial extends ResourceBase {
      * [EN] Returns the shader storage structure information.
      */
     get STORAGE_STRUCT(): any;
+    /**
+     * [KO] 셰이더 전체 파싱 정보(ShaderInfo)를 반환합니다.
+     * [EN] Returns the parsed shader information.
+     */
+    get SHADER_INFO(): any;
     /**
      * [KO] 셰이더 uniforms 구조 정보를 반환합니다.
      * [EN] Returns the shader uniforms structure information.
@@ -182,5 +187,10 @@ declare abstract class ABaseMaterial extends ResourceBase {
      * [EN] GPUSampler instance
      */
     getGPUResourceSampler(sampler: Sampler): GPUSampler;
+    /**
+     * [KO] ABaseMaterial 인스턴스를 파기하고 할당된 유니폼 버퍼 및 글로벌 프래그먼트 슬롯을 즉시 해제합니다.
+     * [EN] Destroys the ABaseMaterial instance and immediately releases the allocated uniform buffers and global fragment slots.
+     */
+    destroy(): void;
 }
 export default ABaseMaterial;

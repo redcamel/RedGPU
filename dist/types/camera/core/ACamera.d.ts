@@ -9,14 +9,6 @@ import BaseObject from "../../base/BaseObject";
 declare abstract class ACamera extends BaseObject {
     #private;
     /**
-     * [KO] 교정 상수 (Calibration Constant, K)
-     * [EN] Calibration constant (K)
-     * @description
-     * [KO] 언리얼 엔진 5 및 사진학적 표준 (ISO 2720 표준 기준 K = 12.5)
-     * [EN] Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
-     */
-    static readonly CALIBRATION_CONSTANT: number;
-    /**
      * [KO] 자동 노출 사용 여부를 반환합니다.
      * [EN] Returns whether to use auto exposure.
      *

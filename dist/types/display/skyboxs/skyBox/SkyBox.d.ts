@@ -112,5 +112,10 @@ declare class SkyBox extends RedGPUObject {
      * [EN] Current view and render state data
      */
     render(renderViewStateData: RenderViewStateData): void;
+    /**
+     * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
+     * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
+     */
+    destroy(): void;
 }
 export default SkyBox;

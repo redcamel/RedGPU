@@ -17,5 +17,6 @@ declare class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler);
     get lutTexture(): DirectTexture;
     render(): void;
+    destroy(): void;
 }
 export default TransmittanceGenerator;

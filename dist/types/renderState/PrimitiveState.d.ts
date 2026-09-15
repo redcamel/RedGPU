@@ -53,7 +53,7 @@ declare class PrimitiveState {
      * [EN] Current GPUIndexFormat
      */
     get stripIndexFormat(): GPUIndexFormat;
-    set stripIndexFormat(format: GPUIndexFormat);
+    set stripIndexFormat(format: GPUIndexFormat | undefined);
     /**
      * [KO] 앞면(Front Face) 정의 방식을 가져오거나 설정합니다.
      * [EN] Gets or sets the front-face orientation.

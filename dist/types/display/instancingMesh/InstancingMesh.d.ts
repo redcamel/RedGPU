@@ -97,5 +97,10 @@ declare class InstancingMesh extends Mesh {
      * [EN] Whether it is for the shadow map generation pass (default: false)
      */
     render(renderViewStateData: RenderViewStateData, shadowRender?: boolean): void;
+    /**
+     * [KO] InstancingMesh 인스턴스를 파기하고 할당된 인스턴싱 전용 GPU 버퍼 및 파이프라인 자원을 즉시 해제합니다.
+     * [EN] Destroys the InstancingMesh instance and immediately releases the allocated instancing-specific GPU buffers and pipeline resources.
+     */
+    destroy(): void;
 }
 export default InstancingMesh;

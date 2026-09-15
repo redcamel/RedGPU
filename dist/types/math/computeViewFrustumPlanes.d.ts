@@ -17,10 +17,13 @@ import { mat4 } from "gl-matrix";
  * @param viewMatrix -
  * [KO] 카메라 행렬
  * [EN] Camera matrix
+ * @param out -
+ * [KO] 재사용할 프러스텀 평면 버퍼 (Zero-GC)
+ * [EN] Reusable frustum planes buffer (Zero-GC)
  * @returns
  * [KO] 6개 평면의 [A, B, C, D] 배열
  * [EN] Array of [A, B, C, D] for 6 planes
  * @category Math
  */
-declare const computeViewFrustumPlanes: (projectionMatrix: mat4, viewMatrix: mat4) => number[][];
+declare const computeViewFrustumPlanes: (projectionMatrix: mat4, viewMatrix: mat4, out?: number[][]) => number[][];
 export default computeViewFrustumPlanes;

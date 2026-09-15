@@ -24,6 +24,11 @@ export declare const COMMAND_ENCODER_TYPE: {
      * [EN] Post-processing phase (apply post-processing effects like blur, tonemapping)
      */
     readonly POST_PROCESS: "POST_PROCESS";
+    /**
+     * [KO] 즉시 제출 단계 (독립적인 커맨드 인코더로 즉시 queue.submit 실행)
+     * [EN] Immediate submission phase (immediately run queue.submit with an independent command encoder)
+     */
+    readonly IMMEDIATE: "IMMEDIATE";
 };
 /**
  * [KO] GPU 커맨드 인코더의 타입 정의입니다.

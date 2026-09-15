@@ -55,15 +55,6 @@ declare class TAA extends ASinglePassPostEffect {
      */
     get frameIndex(): number;
     /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns the video memory usage.
-     *
-     * @returns
-     * [KO] 비디오 메모리 바이트 수
-     * [EN] Video memory size in bytes
-     */
-    get videoMemorySize(): number;
-    /**
      * [KO] 지터링 강도를 반환합니다.
      * [EN] Returns the jitter strength.
      *
@@ -82,8 +73,17 @@ declare class TAA extends ASinglePassPostEffect {
      */
     set jitterStrength(value: number);
     /**
-     * [KO] TAA 이펙트를 렌더링합니다.
-     * [EN] Renders the TAA effect.
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns the video memory usage.
+     *
+     * @returns
+     * [KO] 비디오 메모리 바이트 수
+     * [EN] Video memory size in bytes
+     */
+    get videoMemorySize(): number;
+    /**
+     * [KO] TAA 이펙트를 렌더링합니다 (Zero-Copy 핑퐁 스왑).
+     * [EN] Renders the TAA effect (Zero-Copy Ping-Pong swap).
      *
      * @param view -
      * [KO] View3D 인스턴스

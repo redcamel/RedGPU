@@ -1,4 +1,4 @@
-import { ConditionalBlock } from "./preprocessWGSL";
+import { ConditionalBlock } from "../WGSLParser";
 /**
  * [KO] 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티 클래스입니다.
  * [EN] Utility class that generates various variant codes for WGSL shaders based on conditional blocks and define strings.
@@ -108,5 +108,10 @@ declare class ShaderVariantGenerator {
      * [EN] Cached variant keys array
      */
     getCachedVariants(): string[];
+    /**
+     * [KO] 캐시된 변형 코드 및 내부 텍스처/샘플러 맵들의 참조를 명시적으로 해제합니다.
+     * [EN] Explicitly releases references to cached variant codes and internal texture/sampler maps.
+     */
+    destroy(): void;
 }
 export default ShaderVariantGenerator;

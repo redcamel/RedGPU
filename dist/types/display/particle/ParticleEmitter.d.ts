@@ -338,5 +338,6 @@ declare class ParticleEmitter extends Mesh {
      * [EN] Compiled GPUShaderModule
      */
     createCustomMeshVertexShaderModule: () => GPUShaderModule;
+    destroy(): void;
 }
 export default ParticleEmitter;

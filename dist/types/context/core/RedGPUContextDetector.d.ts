@@ -95,6 +95,7 @@ declare class RedGPUContextDetector {
      * [EN] Returns the approximate device memory in GB. (default: 4)
      */
     get deviceMemory(): number;
+    destroy(): void;
     /**
      * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
      * [EN] Returns all detected information as a report object.

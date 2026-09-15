@@ -2,6 +2,7 @@ import { Function } from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
+import DrawBufferManager, { DrawCommandSlot } from "../../renderer/core/DrawBufferManager";
 import AABB from "../../bound/AABB";
 import OBB from "../../bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
@@ -87,6 +88,16 @@ declare class Mesh extends MeshBase {
      * [EN] Returns the global buffer slot index.
      */
     get globalVertexSlotIndex(): number;
+    /**
+     * [KO] 드로우 커맨드 슬롯을 반환합니다.
+     * [EN] Returns the draw command slot.
+     */
+    get drawCommandSlot(): DrawCommandSlot | null;
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     */
+    get drawBufferManager(): DrawBufferManager | null;
     /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
@@ -397,8 +408,8 @@ declare class Mesh extends MeshBase {
      */
     get boundingOBB(): OBB;
     /**
-     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
-     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information.
+     * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다. (Zero-GC 인플레이스 재사용)
+     * [EN] Returns the AABB (Axis-Aligned Bounding Box) information. (Zero-GC in-place reuse)
      */
     get boundingAABB(): AABB;
     /**
@@ -406,11 +417,6 @@ declare class Mesh extends MeshBase {
      * [EN] Returns the combined AABB information including child objects.
      */
     get combinedBoundingAABB(): AABB;
-    /**
-     * [KO] 리소스를 해제합니다.
-     * [EN] Disposes of the resources.
-     */
-    dispose(): void;
     /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.
@@ -537,5 +543,10 @@ declare class Mesh extends MeshBase {
     render(renderViewStateData: RenderViewStateData): void;
     initGPURenderInfos(): void;
     createMeshVertexShaderModuleBASIC: (VERTEX_SHADER_MODULE_NAME: any, SHADER_INFO: any, UNIFORM_STRUCT_BASIC: any, vertexModuleSource: any) => GPUShaderModule;
+    /**
+     * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
+     * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
+     */
+    destroy(): void;
 }
 export default Mesh;

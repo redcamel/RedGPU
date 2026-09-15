@@ -80,5 +80,6 @@ declare class FragmentGPURenderInfo {
      * [EN] Fragment render state
      */
     constructor(fragmentShaderModule: GPUShaderModule, fragmentShaderSourceVariant: ShaderVariantGenerator, fragmentShaderVariantConditionalBlocks: string[], fragmentUniformInfo: any, fragmentBindGroupLayout: GPUBindGroupLayout, fragmentUniformBuffer: UniformBuffer, fragmentUniformBindGroup?: GPUBindGroup, fragmentState?: GPUFragmentState);
+    destroy(): void;
 }
 export default FragmentGPURenderInfo;

@@ -9,10 +9,6 @@ declare class DrawBufferManager extends RedGPUObject {
     #private;
     constructor(redGPUContext: RedGPUContext);
     /**
-     * DrawBufferManager 싱글톤 인스턴스를 가져옵니다.
-     */
-    static getInstance(redGPUContext: RedGPUContext): DrawBufferManager;
-    /**
      * 새로운 드로우 커맨드 슬롯을 할당합니다.
      */
     allocateDrawCommand(name: string): DrawCommandSlot;
@@ -38,6 +34,10 @@ declare class DrawBufferManager extends RedGPUObject {
      */
     getMemoryUsage(): DrawBufferMemoryInfo;
     flushAllCommands(renderViewStateData: RenderViewStateData): void;
+    /**
+     * 매니저를 완전히 해제합니다.
+     */
+    destroy(): void;
 }
 /**
  * 드로우 커맨드 슬롯 정보

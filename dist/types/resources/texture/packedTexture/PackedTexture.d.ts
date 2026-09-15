@@ -44,20 +44,6 @@ declare class PackedTexture extends RedGPUObject {
      */
     get gpuTexture(): GPUTexture;
     /**
-     * [KO] 패킹 텍스처 캐시 맵을 반환합니다.
-     * [EN] Returns the packed texture cache map.
-     *
-     * @returns
-     * [KO] 캐시 맵 객체
-     * [EN] Cache map object
-     */
-    static getCacheMap(): Map<string, {
-        gpuTexture: GPUTexture;
-        useNum: number;
-        mappingKey: string;
-        uuid: string;
-    }>;
-    /**
      * [KO] 여러 텍스처의 채널을 조합해 패킹 텍스처를 생성합니다.
      * [EN] Creates a packed texture by combining channels from multiple textures.
      * @param textures -

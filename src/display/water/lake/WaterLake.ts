@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import Plane from "../../../primitive/Plane";
+import Ground from "../../../primitive/Ground";
 import Mesh from "../../mesh/Mesh";
 import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
@@ -35,8 +35,8 @@ interface WaterLake {
  * [KO] Cook-Torrance GGX PBR 물리 조명 모델, 듀얼 노멀 스크롤링, 스넬의 굴절 왜곡, 비어-람베르트(Beer-Lambert) 수심 흡수 그라데이션, 수면 미세 정점 너울(Swell)을 기본 제공합니다.
  * [EN] Provides Cook-Torrance GGX PBR physical lighting model, dual normal scrolling, Snell's law refraction distortion, Beer-Lambert depth extinction gradient, and micro swell vertex displacement out of the box.
  *
- * [KO] 파이프라인 안전성을 위해 지오메트리(`Plane`)와 머티리얼(`SingleLayerWaterMaterial`)은 내부에서 자동 생성되며, 외부 교체가 차단(Read-only)됩니다. 크기 변경은 `resize()` 메서드를 이용하십시오.
- * [EN] For pipeline safety, geometry (`Plane`) and material (`SingleLayerWaterMaterial`) are automatically generated internally and cannot be replaced externally (Read-only). To change dimensions, use the `resize()` method.
+ * [KO] 파이프라인 안전성을 위해 지오메트리(`Ground`)와 머티리얼(`SingleLayerWaterMaterial`)은 내부에서 자동 생성되며, 외부 교체가 차단(Read-only)됩니다. 크기 변경은 `resize()` 메서드를 이용하십시오.
+ * [EN] For pipeline safety, geometry (`Ground`) and material (`SingleLayerWaterMaterial`) are automatically generated internally and cannot be replaced externally (Read-only). To change dimensions, use the `resize()` method.
  *
  * ### Example
  * ```typescript
@@ -72,7 +72,7 @@ class WaterLake extends Mesh {
         name: string = 'WaterLake'
     ) {
         const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
-        const waterGeometry = new Plane(redGPUContext, width, height, widthSegments, heightSegments);
+        const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
 
@@ -80,9 +80,6 @@ class WaterLake extends Mesh {
         this.#waterHeight = height;
         this.#widthSegments = widthSegments;
         this.#heightSegments = heightSegments;
-
-        // XZ 평면(수평 수면)으로 기본 배치
-        this.rotationX = -90;
 
         // 반투명 수면 블렌딩을 위해 뎁스 쓰기 비활성화 (배경 및 물밑 오브젝트 정상 렌더링)
         this.depthStencilState.depthWriteEnabled = false;
@@ -120,11 +117,11 @@ class WaterLake extends Mesh {
     }
 
     /**
-     * [KO] 호수 지오메트리(Plane)를 반환합니다.
-     * [EN] Returns the lake geometry (Plane).
+     * [KO] 호수 지오메트리(Ground)를 반환합니다.
+     * [EN] Returns the lake geometry (Ground).
      */
-    get geometry(): Plane {
-        return this._geometry as Plane;
+    get geometry(): Ground {
+        return this._geometry as Ground;
     }
 
     /**
@@ -211,7 +208,7 @@ class WaterLake extends Mesh {
         this.#waterHeight = height;
         this.#widthSegments = widthSegments;
         this.#heightSegments = heightSegments;
-        super.geometry = new Plane(
+        super.geometry = new Ground(
             this.redGPUContext,
             width,
             height,

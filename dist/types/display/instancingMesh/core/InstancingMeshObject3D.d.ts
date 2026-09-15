@@ -161,5 +161,6 @@ declare class InstancingMeshObject3D {
      * [EN] Rotation angle around the Z-axis (in degrees, optional, default: rotationX)
      */
     setRotation(rotationX: number, rotationY?: number, rotationZ?: number): void;
+    destroy(): void;
 }
 export default InstancingMeshObject3D;

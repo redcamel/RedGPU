@@ -109,6 +109,26 @@ declare class ViewRenderTextureManager extends RedGPUObject {
      */
     get renderPath1ResultTexture(): GPUTexture;
     /**
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰를 반환합니다.
+     * [EN] Returns the render path 1 stage depth result texture view.
+     */
+    get renderPath1DepthResultTextureView(): GPUTextureView;
+    /**
+     * [KO] 렌더 패스 1단계 깊이 결과 텍스처를 반환합니다.
+     * [EN] Returns the render path 1 stage depth result texture.
+     */
+    get renderPath1DepthResultTexture(): GPUTexture;
+    /**
+     * [KO] 1차 렌더 패스의 깊이 버퍼를 2차 패스(Water, 굴절 등)에서 읽을 수 있도록 renderPath1DepthResultTexture에 복사합니다.
+     * MSAA 활성화 여부에 따라 직접 복사(1x -> 1x) 또는 풀스크린 렌더 리졸브(4x -> 1x)를 자동으로 선택하여 수행합니다.
+     * [EN] Copies the depth buffer of render path 1 into renderPath1DepthResultTexture for reading in path 2.
+     * Automatically performs direct copy (1x -> 1x) or fullscreen render resolve (4x -> 1x) based on MSAA state.
+     * @param encoder -
+     * [KO] GPUCommandEncoder 인스턴스
+     * [EN] GPUCommandEncoder instance
+     */
+    copyDepthToRenderPath1(encoder: GPUCommandEncoder): void;
+    /**
      * [KO] 지정된 타입의 G-Buffer 텍스처를 반환합니다.
      * [EN] Returns the G-Buffer texture of the specified type.
      * @param type -
@@ -140,5 +160,10 @@ declare class ViewRenderTextureManager extends RedGPUObject {
      * [EN] G-Buffer type constant
      */
     getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView;
+    /**
+     * [KO] ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던 G-Buffer 및 Depth 텍스처들을 물리적으로 해제합니다.
+     * [EN] Destroys the ViewRenderTextureManager instance and physically releases all G-Buffer and Depth textures held inside.
+     */
+    destroy(): void;
 }
 export default ViewRenderTextureManager;

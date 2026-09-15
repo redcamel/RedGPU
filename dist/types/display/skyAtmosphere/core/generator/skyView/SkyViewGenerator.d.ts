@@ -17,5 +17,6 @@ declare class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler);
     get lutTexture(): DirectTexture;
     render(transmittance: DirectTexture, multiScat: DirectTexture): void;
+    destroy(): void;
 }
 export default SkyViewGenerator;

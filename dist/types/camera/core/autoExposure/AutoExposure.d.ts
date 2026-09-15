@@ -171,8 +171,8 @@ declare class AutoExposure extends RedGPUObject {
      */
     get maxExposureMultiplier(): number;
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0)
-     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0)
+     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 64.0)
+     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 64.0)
      *
      * @param value -
      * [KO] 설정할 최대 노출 증폭 배율
@@ -247,5 +247,10 @@ declare class AutoExposure extends RedGPUObject {
      * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
      */
     resolveReadback(): void;
+    /**
+     * [KO] AutoExposure 인스턴스를 파기하고 할당된 물리 GPU 버퍼들을 모두 소멸시킵니다.
+     * [EN] Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+     */
+    destroy(): void;
 }
 export default AutoExposure;

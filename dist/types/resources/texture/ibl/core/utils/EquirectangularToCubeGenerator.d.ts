@@ -38,5 +38,6 @@ declare class EquirectangularToCubeGenerator extends RedGPUObject {
      * [EN] Generated DirectCubeTexture
      */
     generate(sourceTexture: GPUTexture, size?: number): Promise<DirectCubeTexture>;
+    destroy(): void;
 }
 export default EquirectangularToCubeGenerator;
