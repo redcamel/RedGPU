@@ -281,7 +281,9 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'Soft Surface with Scene Passthrough (0)': 0,
+                    'PBR Water (Beer-Lambert Composite) (0)': 0,
+                    'Water Albedo Only (8)': 8,
+                    'Extinction Absorption Mask (7)': 7,
                     'Scene Passthrough (6)': 6,
                     'Depth Fade Mask (5)': 5,
                     'Delta Depth Water Mask (4)': 4,
@@ -290,20 +292,57 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                     'Raw Scene Depth (1)': 1
                 }
             });
-            basicFolder.addBinding(lake.waterMaterial, 'opacity', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.05
-            });
-            basicFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
-                min: 0.05,
-                max: 10.0,
-                step: 0.05
-            });
             basicFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {
                 min: 0.5,
                 max: 30.0,
                 step: 0.5
+            });
+
+            // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널
+            const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: true});
+            const colorParams = {
+                baseColor: {
+                    r: lake.waterMaterial.baseColor.r,
+                    g: lake.waterMaterial.baseColor.g,
+                    b: lake.waterMaterial.baseColor.b
+                },
+                deepColor: {
+                    r: lake.waterMaterial.deepColor.r,
+                    g: lake.waterMaterial.deepColor.g,
+                    b: lake.waterMaterial.deepColor.b
+                }
+            };
+            colorFolder.addBinding(colorParams, 'baseColor', {
+                view: 'color',
+                label: 'Base Color (Shallow)'
+            }).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
+            colorFolder.addBinding(colorParams, 'deepColor', {
+                view: 'color',
+                label: 'Deep Color (Abyssal)'
+            }).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
+            colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {
+                min: 0.01,
+                max: 2.0,
+                step: 0.01,
+                label: 'Extinction Factor'
+            });
+            colorFolder.addBinding(lake.waterMaterial, 'opacity', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.05,
+                label: 'Base Opacity'
+            });
+            colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
+                min: 0.05,
+                max: 10.0,
+                step: 0.05,
+                label: 'Depth Fade Distance (m)'
             });
 
             // [환경 조명] 직사광 태양 제어 패널

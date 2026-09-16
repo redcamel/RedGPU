@@ -2,10 +2,16 @@
 #redgpu_include systemStruct.OutputFragment;
 
 struct WaterUniforms {
-    debugMode: u32,         // 0u: Soft Surface, 1u: Raw, 2u: Linear Scene, 3u: Linear Water, 4u: Delta Depth, 5u: Fade Mask, 6u: Scene Passthrough
-    debugMaxDepth: f32,     // 수심 마스크 정규화 기준 거리 (1.0m ~ 30.0m)
-    depthFadeDistance: f32, // 해안선 소프트 페이드 거리 (단위: m, 기본값: 1.0m)
-    opacity: f32,           // 수면 기본 불투명도 (0.0 ~ 1.0, 기본값: 0.85)
+    baseColor: vec3<f32>,
+    opacity: f32,
+
+    deepColor: vec3<f32>,
+    extinctionFactor: f32,
+
+    debugMode: u32,
+    debugMaxDepth: f32,
+    depthFadeDistance: f32,
+    padding: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -46,9 +52,34 @@ fn main(inputData: InputData) -> OutputFragment {
     let screenUV = inputData.position.xy / systemUniforms.resolution;
     let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
 
+    // 7. Phase 6: 비어-람베르트(Beer-Lambert) 수심 광학 및 이중 알베도 계산
+    // 빛이 수심을 통과하며 거리에 따라 지수적으로 감쇄하는 물리적 투과율 (1.0: 얕은 물가 -> 0.0: 깊은 수심)
+    let extinction = exp(-deltaDepth * uniforms.extinctionFactor);
+
+    // 수심에 따른 물 고유의 광학 알베도 (Water Optical Albedo)
+    // 얕은 물(baseColor, 에메랄드 그린)에서 깊은 수심(deepColor, 짙은 사파이어 블루)으로 점진적 전이
+    let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
+
+    // 수체 유효 흡수 강도 (Absorption Strength)
+    let absorptionStrength = clamp((1.0 - extinction) * uniforms.opacity, 0.0, 1.0);
+
+    // 8. 복사 전달 방정식(RTE) 기반 바닥 투과광(sceneColor)과 수체 체적 색상의 물리적 결합
+    let waterCompositeColor = mix(sceneColor, waterAlbedo, absorptionStrength);
+
+    // 9. 해안선 소프트 페이드(depthFade)를 결합하여 물가 칼단면 소멸 및 바닥과의 완벽한 융합
+    let finalRgb = mix(sceneColor, waterCompositeColor, depthFade);
+
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 8u: {
+            // Step 6.6: 수심별 물 고유 알베도 (Water Optical Albedo 단독 뷰)
+            output.color = vec4<f32>(waterAlbedo, 1.0);
+        }
+        case 7u: {
+            // Step 6.4: 비어-람베르트 광학 흡수 마스크 (0.0: 얕은 물가 투과 -> 1.0: 깊은 물 완전 흡수)
+            output.color = vec4<f32>(vec3<f32>(1.0 - extinction), 1.0);
+        }
         case 6u: {
             // Step 5.2: Scene Color Passthrough (투명 유리처럼 순수 바닥 씬 컬러 100% 무왜곡 투과)
             output.color = vec4<f32>(sceneColor, 1.0);
@@ -77,12 +108,7 @@ fn main(inputData: InputData) -> OutputFragment {
             output.color = vec4<f32>(vec3<f32>(rawSceneDepth), 1.0);
         }
         default: {
-            // Step 5.3: 바닥 투과광(sceneColor)과 소프트 수면 틴트(Soft Water Tint)의 유기적 결합
-            // 물가(depthFade -> 0)에서는 바닥 지형이 100% 투명하게 드러나 칼단면이 완전히 소멸하고,
-            // 수심이 깊어질수록 opacity와 수면 색상이 점진적으로 결합됩니다.
-            let surfaceTint = vec3<f32>(1.0, 0.0, 1.0);
-            let surfaceAlpha = clamp(uniforms.opacity * depthFade, 0.0, 1.0);
-            let finalRgb = mix(sceneColor, surfaceTint, surfaceAlpha);
+            // Step 6.5: 비어-람베르트 법칙 기반 정통 PBR 수체 물리 렌더링
             output.color = vec4<f32>(finalRgb, 1.0);
         }
     }
