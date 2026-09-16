@@ -149,8 +149,8 @@ RedGPU.init(
         lake.waterLevel = 720; // 산맥과 넓은 호수가 완벽히 조화되는 황금 밸런스 수위
 
         // [AAA 듀얼 노멀 시스템]: 대형 너울 + 마이크로 잔물결 텍스처 장착
-        // ※ baseColor, deepColor, opacity, roughness, specularFactor, refractionStrength 등
-        //    모든 핵심 에메랄드 PBR 광학 속성은 코어 기본값을 그대로 활용합니다.
+        // ※ baseColor, deepColor, roughness, specularFactor, refractionStrength 등
+        //    모든 핵심 UE5 SingleLayerWater PBR 광학 속성은 코어 기본값을 그대로 활용합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'

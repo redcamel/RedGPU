@@ -12,7 +12,7 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  *  - 백사장과 만나는 비단결 같은 부드러운 해안선(Depth Fade)
  *  - 눈부신 태양광 직사각 아래 쏟아지는 찬란한 다이아몬드 윤슬 기둥(Sun Glitter Column)
  *  - 수중 암초와 모래바닥의 아지랑이 같은 스넬의 굴절 왜곡(Snell Refraction)
- *  - 2.5cm 미세 너울(Micro Swell)과 듀얼 노멀(RNM 블렌딩) 찰랑이는 파도
+ *  - 2.0cm 미세 너울(Micro Swell)과 듀얼 노멀(RNM 블렌딩) 찰랑이는 파도
  */
 
 const canvas = document.createElement('canvas');
@@ -42,9 +42,7 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 자연스러운 씬 조화를 위한 중립 백색 환경광 제공
-        const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 1400);
-        scene.lightManager.ambientLight = ambientLight;
+
 
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
@@ -53,19 +51,7 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
         lake.waterLevel = 0.5;
 
-        // 심리스 물결 노멀맵 텍스처 장착 (대형 너울 + 마이크로 잔물결)
-        // ※ baseColor(#18d8b6), deepColor(#023d58), opacity(0.88), roughness(0.02),
-        //    extinctionFactor(0.22), depthFade(1.2), waveAmplitude(0.025) 등 모든 핵심
-        //    에메랄드 PBR 광학 속성이 SingleLayerWaterMaterial & WaterLake의 기본값으로 자동 적용됩니다.
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/water/water_normal.png'
-        );
-        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/water/water_normal_detail.png'
-        );
-
+        // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
 
         // 6. 렌더러 생성 및 렌더 루프
@@ -151,12 +137,12 @@ function createBeachEnvironment(redGPUContext, scene) {
     beachMaterial.occlusionTexture = gravelOrm;
     beachMaterial.baseColorTextureSampler = terrainRepeatSampler;
     beachMaterial.normalTextureSampler = terrainRepeatSampler;
-    beachMaterial.textureScale = [8, 4];
+    beachMaterial.textureScale = [24, 4];
     beachMaterial.baseColorFactor = [1.28, 1.22, 1.12, 1.0]; // 밝고 따뜻한 백사장 색조
     beachMaterial.roughnessFactor = 0.95;
     beachMaterial.metallicFactor = 0.0;
 
-    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 42, 1.5, 22);
+    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1.5, 22);
     const beachMesh = new RedGPU.Display.Mesh(redGPUContext, beachGeometry, beachMaterial);
     beachMesh.x = 0;
     beachMesh.y = 0.3;
@@ -202,11 +188,11 @@ function createBeachEnvironment(redGPUContext, scene) {
     // (B) 맑은 에메랄드 물밑에 잠긴 수중 암초들 (Submerged Coral Reefs)
     // 수심에 따른 굴절 왜곡(Refraction)과 비어-람베르트 수심 흡수를 입증
     const submergedReefs = [
-        {x: -8, y: -0.2, z: -3, scale: [3.2, 1.8, 2.8], rotX: 35, rotY: 15},   // 얕은 연안 암초 (수심 0.7m, 에메랄드 굴절)
-        {x: -9.5, y: -1.4, z: 3, scale: [3.8, 2.4, 3.4], rotX: -25, rotY: 45},  // 중간 수심 암초 (수심 1.9m, 청록 전이)
-        {x: -7, y: -2.8, z: 9, scale: [4.5, 3.0, 4.0], rotX: 40, rotY: -30},   // 깊은 라군 암초 (수심 3.3m, 사파이어 흡수)
-        {x: 4, y: -1.2, z: 2, scale: [2.5, 1.6, 2.5], rotX: 20, rotY: 60},     // 중앙 얕은 암초
-        {x: 1, y: -2.6, z: 8, scale: [3.6, 2.2, 3.0], rotX: -30, rotY: -15},    // 중앙 깊은 암초
+        {x: -8, y: -1.0, z: -3, scale: [3.0, 1.2, 2.6], rotX: 35, rotY: 15},   // 얕은 연안 암초 (수심 0.3m, 에메랄드 굴절)
+        {x: -9.5, y: -1.7, z: 3, scale: [3.6, 1.4, 3.2], rotX: -25, rotY: 45},  // 중간 수심 암초 (수심 0.8m, 청록 전이)
+        {x: -7, y: -2.8, z: 9, scale: [4.2, 1.8, 3.8], rotX: 40, rotY: -30},   // 깊은 라군 암초 (수심 1.5m, 사파이어 흡수)
+        {x: 4, y: -1.3, z: 2, scale: [2.5, 1.1, 2.5], rotX: 20, rotY: 60},     // 중앙 얕은 암초 (수심 0.7m)
+        {x: 1, y: -2.5, z: 8, scale: [3.4, 1.6, 2.8], rotX: -30, rotY: -15},    // 중앙 깊은 암초 (수심 1.4m)
     ];
 
     submergedReefs.forEach((info) => {
@@ -285,119 +271,19 @@ function createBeachEnvironment(redGPUContext, scene) {
 function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
-        skybox: false,
+        skybox: true,
         ibl: false,
         gui: (pane) => {
-            // [폴더 1] 에메랄드 수체 기초 설정 (PBR Base & Dual-tone Colors)
-            const basicFolder = pane.addFolder({title: 'WaterLake (Emerald Beach Base)', expanded: true});
+            // [Phase 1] 기본 WaterLake 평면 제어 패널
+            const basicFolder = pane.addFolder({title: 'WaterLake (Phase 1: Basic Skeleton)', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
-            basicFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.02});
+            basicFolder.addBinding(lake, 'visible');
 
-            const colorParams = {
-                baseColor: {
-                    r: lake.waterMaterial.baseColor.r,
-                    g: lake.waterMaterial.baseColor.g,
-                    b: lake.waterMaterial.baseColor.b
-                },
-                deepColor: {
-                    r: lake.waterMaterial.deepColor.r,
-                    g: lake.waterMaterial.deepColor.g,
-                    b: lake.waterMaterial.deepColor.b
-                }
-            };
-            basicFolder.addBinding(colorParams, 'baseColor', {
-                view: 'color'
-            }).on('change', (ev) => {
-                const {r, g, b} = ev.value;
-                lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-            });
-            basicFolder.addBinding(colorParams, 'deepColor', {
-                view: 'color'
-            }).on('change', (ev) => {
-                const {r, g, b} = ev.value;
-                lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-            });
-
-            // [폴더 2] 물결 노멀 및 듀얼 노멀 애니메이션
-            const waveFolder = pane.addFolder({title: 'Waves & Dual Normal (Ripples)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2');
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
-                min: 1.0,
-                max: 20.0,
-                step: 0.5
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {
-                min: 0.5,
-                max: 10.0,
-                step: 0.1
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
-                min: 0.0,
-                max: 0.2,
-                step: 0.005
-            });
-
-            const windDirection = {
-                x: lake.waterMaterial.windDirection[0],
-                y: lake.waterMaterial.windDirection[1]
-            };
-            waveFolder.addBinding(windDirection, 'x', {min: -1.0, max: 1.0, step: 0.05}).on('change', (ev) => {
-                lake.waterMaterial.windDirection = [ev.value, windDirection.y];
-            });
-            waveFolder.addBinding(windDirection, 'y', {min: -1.0, max: 1.0, step: 0.05}).on('change', (ev) => {
-                lake.waterMaterial.windDirection = [windDirection.x, ev.value];
-            });
-
-            // [폴더 3] 미세 정점 너울 (Micro Vertex Swell)
-            const swellFolder = pane.addFolder({title: 'Micro Vertex Swell (정점 변위)', expanded: false});
-            swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005});
-            swellFolder.addBinding(lake, 'waveWavelength', {min: 1.0, max: 50.0, step: 1.0});
-            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1});
-
-            // [폴더 4] Directional Light (직사광 태양 제어 패널)
-            const sunFolder = pane.addFolder({title: 'Directional Light (직사광)', expanded: true});
+            // [환경 조명] 직사광 태양 제어 패널
+            const sunFolder = pane.addFolder({title: 'Directional Light', expanded: false});
             sunFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             sunFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
             sunFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
-            sunFolder.addBinding(directionalLight, 'intensityMultiplier', {min: 0.0, max: 5.0, step: 0.05});
-
-            const sunColorParams = {
-                color: {
-                    r: directionalLight.color.r,
-                    g: directionalLight.color.g,
-                    b: directionalLight.color.b
-                }
-            };
-            sunFolder.addBinding(sunColorParams, 'color', {view: 'color'}).on('change', (ev) => {
-                const {r, g, b} = ev.value;
-                directionalLight.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-            });
-
-            // [폴더 5] Cook-Torrance PBR 스펙큘러 하이라이트 (다이아몬드 윤슬)
-            const specFolder = pane.addFolder({title: 'Cook-Torrance PBR Specular', expanded: true});
-            specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.005, max: 1.0, step: 0.005});
-            specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
-
-            // [폴더 6] 부드러운 해안선 감쇄 (Depth Fade / Soft Water)
-            const depthFadeFolder = pane.addFolder({title: 'Depth Fade (Soft Shoreline)', expanded: true});
-            depthFadeFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 4.0, step: 0.05});
-
-            // [폴더 7] 수중 굴절 및 Beer-Lambert 수심 흡수
-            const refractionFolder = pane.addFolder({title: 'Refraction & Beer-Lambert', expanded: true});
-            refractionFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.1, step: 0.002});
-            refractionFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.0, max: 2.0, step: 0.02});
-
-
         }
     });
 }
