@@ -51,6 +51,12 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
         lake.waterLevel = 0.5;
 
+        // Phase 7: 파도 노멀 텍스처 장착 (워터 셰이더 내부에서 sRGB 감마 역보정을 자체 완결하므로 표준 2인자 생성자 사용)
+        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/water/water_normal.png'
+        );
+
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
 
@@ -99,11 +105,11 @@ function createBeachEnvironment(redGPUContext, scene) {
     // PBRMaterial의 기본 샘플러는 'clamp-to-edge'이므로, textureScale 타일링 시 텍스처 늘어남/뭉개짐을 방지하고
     // 원경 경사면에서도 극상의 디테일을 유지하도록 16x 이방성 필터링과 무한 반복 샘플러를 명시 장착합니다.
     const terrainRepeatSampler = new RedGPU.Resource.Sampler(redGPUContext, {
-        addressModeU: 'repeat',
-        addressModeV: 'repeat',
-        magFilter: 'linear',
-        minFilter: 'linear',
-        mipmapFilter: 'linear',
+        addressModeU: RedGPU.GPU_ADDRESS_MODE.REPEAT,
+        addressModeV: RedGPU.GPU_ADDRESS_MODE.REPEAT,
+        magFilter: RedGPU.GPU_FILTER_MODE.LINEAR,
+        minFilter: RedGPU.GPU_FILTER_MODE.LINEAR,
+        mipmapFilter: RedGPU.GPU_MIPMAP_FILTER_MODE.LINEAR,
         maxAnisotropy: 16
     });
 
@@ -281,7 +287,9 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Beer-Lambert Composite) (0)': 0,
+                    'PBR Water with Refraction (0)': 0,
+                    'Refraction Offset View (10)': 10,
+                    'Wave Normal Map View (9)': 9,
                     'Water Albedo Only (8)': 8,
                     'Extinction Absorption Mask (7)': 7,
                     'Scene Passthrough (6)': 6,
@@ -298,8 +306,35 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 step: 0.5
             });
 
+            // [Phase 7 & 8] 파도 노멀 및 굴절 왜곡 제어 패널 (소프트 뎁스 블리딩 방지는 상시 내장 가동)
+            const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7 & 8)', expanded: true});
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: 'Normal Scale'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
+                min: 0.5,
+                max: 20.0,
+                step: 0.5,
+                label: 'Normal Tiling'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
+                min: 0.0,
+                max: 0.2,
+                step: 0.005,
+                label: 'Wind Speed'
+            });
+            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {
+                min: 0.0,
+                max: 0.03,
+                step: 0.001,
+                label: 'Refraction Strength'
+            });
+
             // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널
-            const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: true});
+            const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: false});
             const colorParams = {
                 baseColor: {
                     r: lake.waterMaterial.baseColor.r,
