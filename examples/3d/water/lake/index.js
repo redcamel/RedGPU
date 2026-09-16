@@ -34,13 +34,19 @@ RedGPU.init(
         view.grid = false; // 자연스러운 자연 경관을 위해 그리드 비활성화
         redGPUContext.addView(view);
 
-        // 3. 열대 일광 (Directional Light) 및 맑은 하늘 환경광 (Ambient Light)
+        // 3. 열대 일광 (Directional Light) 및 부드러운 천공 환경광 (Ambient Light)
         // 수면과 암초 상단에 풍부한 햇살을 공급하고 윤슬 기둥을 형성하는 태양각
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 25;
         directionalLight.azimuth = 156.5;
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
+
+        // 야외 천공광(Sky Dome Ambient): 메쉬 음영면의 완전 암흑(True Black) 방지
+        const ambientLight = new RedGPU.Light.AmbientLight();
+        ambientLight.color.setColorByHEX('#6888aa');
+        ambientLight.intensity = 0.25;
+        scene.lightManager.ambientLight = ambientLight;
 
 
 
@@ -54,7 +60,7 @@ RedGPU.init(
         // Phase 7: 파도 주 노멀 텍스처 장착
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal.png'
+            '../../../assets/water/water_normal_detail.png'
         );
 
         // Phase 9: 제2 마이크로 잔물결 노멀 텍스처 장착 (RNM 회전 블렌딩 가동)
@@ -82,7 +88,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. 실시간 튜닝 GUI 패널
-        renderTestPane(redGPUContext, lake, directionalLight, view);
+        renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -281,7 +287,7 @@ function createBeachEnvironment(redGPUContext, scene) {
  * [KO] WaterLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterLake properties.
  */
-function renderTestPane(redGPUContext, lake, directionalLight, view) {
+function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
@@ -431,11 +437,19 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 label: 'Fresnel F0 (Water: 0.02)'
             });
 
-            // [환경 조명] 직사광 태양 제어 패널
-            const sunFolder = pane.addFolder({title: 'Directional Light', expanded: false});
+            // [환경 조명] 직사광(태양) 및 천공 환경광 제어 패널
+            const sunFolder = pane.addFolder({title: 'Lighting & Sun (Phase 11)', expanded: false});
             sunFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             sunFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
             sunFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
+            if (ambientLight) {
+                sunFolder.addBinding(ambientLight, 'intensity', {
+                    min: 0.0,
+                    max: 1.0,
+                    step: 0.05,
+                    label: 'Sky Ambient Intensity'
+                });
+            }
         }
     });
 }

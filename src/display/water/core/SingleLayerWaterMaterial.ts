@@ -146,10 +146,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      * [EN] SingleLayerWaterMaterial constructor
      * @param redGPUContext - RedGPUContext 인스턴스
      * @param baseColor - 기본 얕은 수면 알베도 HEX 컬러 (기본값: '#18d8b6' - 청명한 열대 에메랄드 그린)
-     * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#023d58' - 깊은 라군 사파이어 블루)
+     * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#065279' - 깊은 라군 사파이어 블루)
      * @param opacity - 기본 수면 불투명도 (기본값: 1.0)
      */
-    constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#023d58', opacity: number = 1.0) {
+    constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#065279', opacity: number = 1.0) {
         super(
             redGPUContext,
             'SINGLE_LAYER_WATER_MATERIAL',
@@ -182,7 +182,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.opacity = opacity;
         this.refractionStrength = 0.008;
         this.normalScale = 1.0;
-        this.normalScale2 = 1.0;
+        this.normalScale2 = 0.35;
         this.normalTiling = 4.0;
         this.normalTiling2 = 8.0;
         this.windSpeed = 0.04;
@@ -204,7 +204,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
 defineColorRGB(SingleLayerWaterMaterial, [
     {key: 'baseColor', value: '#18d8b6'},
-    {key: 'deepColor', value: '#023d58'},
+    {key: 'deepColor', value: '#065279'},
 ]);
 
 defineTexture(SingleLayerWaterMaterial, [
