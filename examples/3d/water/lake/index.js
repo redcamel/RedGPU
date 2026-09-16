@@ -60,7 +60,7 @@ RedGPU.init(
         // Phase 7: 파도 주 노멀 텍스처 장착
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal_detail.png'
+            '../../../assets/water/water_normal.png'
         );
 
         // Phase 9: 제2 마이크로 잔물결 노멀 텍스처 장착 (RNM 회전 블렌딩 가동)
@@ -346,6 +346,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, vie
                 label: 'Tiling'
             });
             layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005, label: 'Speed'});
+            layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1', {label: 'Invert Y (DirectX: OFF)'});
 
             // 제2 파도 (Layer 2: Micro Ripple with RNM)
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
@@ -368,6 +369,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, vie
                 step: 0.005,
                 label: 'Speed'
             });
+            layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2', {label: 'Invert Y (OpenGL: ON)'});
 
             // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널
             const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: false});

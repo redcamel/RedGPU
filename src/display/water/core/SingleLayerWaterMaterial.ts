@@ -132,6 +132,16 @@ interface SingleLayerWaterMaterial {
      * [EN] Depth mask visualization normalization distance (Unit: m, default: 5.0m)
      */
     debugMaxDepth: number;
+    /**
+     * [KO] 제1 주 노멀 맵의 Y축(Green) 반전 여부 (기본값: false - DirectX 호환)
+     * [EN] Whether to invert Y-axis (Green) of main normal map (default: false - DirectX compatible)
+     */
+    invertNormalY1: boolean;
+    /**
+     * [KO] 제2 디테일 노멀 맵의 Y축(Green) 반전 여부 (기본값: true - OpenGL 호환)
+     * [EN] Whether to invert Y-axis (Green) of secondary normal map (default: true - OpenGL compatible)
+     */
+    invertNormalY2: boolean;
 }
 
 /**
@@ -195,6 +205,8 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.roughness = 0.12;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
+        this.invertNormalY1 = false; // DirectX 노멀 기본 호환
+        this.invertNormalY2 = true;  // OpenGL 노멀 기본 호환
 
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
@@ -225,7 +237,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
     {key: 'normalScale', value: 1.0},
-    {key: 'normalScale2', value: 1.0},
+    {key: 'normalScale2', value: 0.35},
     {key: 'normalTiling', value: 4.0},
     {key: 'normalTiling2', value: 8.0},
     {key: 'windSpeed', value: 0.04},
@@ -244,6 +256,8 @@ defineUint(SingleLayerWaterMaterial, [
 
 defineBoolean(SingleLayerWaterMaterial, [
     {key: 'useNormalTexture2', value: false},
+    {key: 'invertNormalY1', value: false},
+    {key: 'invertNormalY2', value: true},
 ]);
 
 Object.freeze(SingleLayerWaterMaterial);

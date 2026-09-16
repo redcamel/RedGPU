@@ -59,8 +59,8 @@ struct WaterUniforms {
 
     specularFactor: f32,
     fresnelF0: f32,
-    padding1: f32,
-    padding2: f32,
+    invertNormalY1: u32,
+    invertNormalY2: u32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -129,8 +129,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     // [셰이더 자체 완결]: 기본 sRGB 텍스처로 로드된 노멀 맵의 GPU 하드웨어 감마 디코딩(C^2.2)을 선형 벡터로 100% 완벽 복원
     let rawNormal1 = pow(rawSample1, vec3<f32>(1.0 / 2.2));
-    // [Layer 1: DirectX 포맷 노멀맵(-Y Down)] WebGPU Top-Left UV와 상쇄되어 부호 반전 없이 그대로 볼록 능선 유지
+    // [Layer 1: 주 너울 파도]
     var tangentXY1 = (rawNormal1.xy * 2.0 - 1.0) * uniforms.normalScale;
+    if (uniforms.invertNormalY1 == 1u) {
+        tangentXY1.y = -tangentXY1.y;
+    }
     let tangentZ1 = sqrt(max(0.001, 1.0 - dot(tangentXY1, tangentXY1)));
     var combinedTangentNormal = normalize(vec3<f32>(tangentXY1, tangentZ1));
 
@@ -143,7 +146,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let rawSample2 = textureSample(normalTexture2, normalTextureSampler, waveUV2).rgb;
         let rawNormal2 = pow(rawSample2, vec3<f32>(1.0 / 2.2));
         var tangentXY2 = (rawNormal2.xy * 2.0 - 1.0) * uniforms.normalScale2;
-        tangentXY2.y = -tangentXY2.y;
+        if (uniforms.invertNormalY2 == 1u) {
+            tangentXY2.y = -tangentXY2.y;
+        }
         let tangentZ2 = sqrt(max(0.001, 1.0 - dot(tangentXY2, tangentXY2)));
         let tangentNormal2 = normalize(vec3<f32>(tangentXY2, tangentZ2));
 
@@ -213,19 +218,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let NdotV = clamp(dot(N, V), 0.0, 1.0);
     let rawR = reflect(-V, N);
 
-    // [UE5 표준 수면 반사 지평선 클램핑 (Horizon Clamping)]:
-    // 파도의 요동으로 반사 광선이 수평선 아래(지면)로 꺾일 때 스카이박스의 칠흑 땅바닥이 비쳐
-    // 수면에 시커먼 얼룩이 발생하는 현상을 방지하고, 하늘의 화사한 노을 구름층을 풍성하게 반사하도록 R.y를 부드럽게 보정
+    // [물리 기반 지평선 반사 정규화 (Horizon Ray Reflection)]:
+    // 파도의 요동으로 반사 광선이 수평선 아래(지면)로 꺾일 때, 대칭 미러링(abs)으로 하늘을 비추도록 물리적 정규화
     var R = rawR;
-    R.y = max(R.y, 0.12);
+    R.y = max(abs(R.y), 0.001);
     R = normalize(R);
 
     // Schlick 근사 Fresnel 계산 (물 F0 ≈ 0.02)
     let oneMinusNdotV = 1.0 - NdotV;
     let fresnelTerm = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
-    // [UE5/Epic Games 표준]: 파도 미세 거칠기에 따른 최대 프레넬 반사율 상한 클램핑
-    // 원경 글레이징 각도에서 물밑 빛이 100% 차단되어 시커먼 블랙홀로 변하는 현상을 원천 방지 (물빛 최소 20% 투과 유지)
-    let maxFresnel = mix(0.70, 0.82, 1.0 - uniforms.roughness);
+    // [UE5/Smith 미세면 차폐 물리 기반]: 거칠기에 따른 반사광 기하 차폐 (Roughness Shadowing)
+    let maxFresnel = 1.0 / (1.0 + 2.0 * uniforms.roughness);
     let fresnel = clamp(fresnelTerm * uniforms.specularFactor, 0.0, maxFresnel);
 
     // Skybox / IBL 큐브맵 반사광 샘플링 (거칠기 밉맵 블러 포함)
@@ -248,13 +251,10 @@ fn main(inputData: InputData) -> OutputFragment {
         skyReflectionColor = skyReflectionColor + atmoColor;
     }
 
-    // [스카이박스 반사 안전 폴백 (Sky Reflection Safe Fallback)]:
-    // IBL 프리필터 텍스처가 아직 로딩되지 않았거나 비활성화된 환경에서도 수면이 칠흑 같은 암흑(Black)으로
-    // 떨어지지 않도록, 반사 벡터 고도각(R.y)에 따른 대기 천공광 그라데이션 기본값을 제공
+    // [동적 대기 천공광 폴백]: IBL/SkyAtmosphere가 없을 경우 씬의 실제 광원 기반 연동
     if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
-        let skyHorizon = vec3<f32>(0.55, 0.65, 0.78) * preExposure;
-        let skyZenith = vec3<f32>(0.20, 0.40, 0.70) * preExposure;
-        skyReflectionColor = mix(skyHorizon, skyZenith, clamp(R.y, 0.0, 1.0));
+        let ambientSky = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
+        skyReflectionColor = ambientSky * (1.0 + clamp(R.y, 0.0, 1.0));
     }
 
     // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 & 물리 기반 수체 체적 직사 산란광 & 태양광 연동 대기 천공 반사
@@ -264,8 +264,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
-    // [UE5 물리학 기반 태양 직사광 스펙큘러 유효 거칠기 보정]
-    let effectiveRoughness = max(uniforms.roughness, 0.08);
+    // [Karis 2013 / UE5 Area Light]: 태양 각직경(약 0.54도)에 의한 면적 광원 유효 거칠기 물리 보정
+    let effectiveRoughness = clamp(sqrt(uniforms.roughness * uniforms.roughness + 0.005), 0.04, 1.0);
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
@@ -288,25 +288,29 @@ fn main(inputData: InputData) -> OutputFragment {
             directSpecularColor = directSpecularColor + finalLightColor * (specTerm * NdotL);
         }
 
-        // [B] UE5 SingleLayerWater 표준: 물리 기반 수체 체적 직사 산란광 (Physical Volume In-scattering)
-        let sunElevationTransmittance = clamp(L.y, 0.15, 1.0);
-        let waveSubsurfaceWrap = clamp(dot(N, L) * 0.4 + 0.6, 0.35, 1.0);
-        let subsurfaceIlluminance = finalLightColor * (sunElevationTransmittance * waveSubsurfaceWrap);
+        // [B] UE5 SingleLayerWater 표준: 스넬 굴절 법칙(Snell's Law) & 비어-람베르트 체적 산란 적분
+        // 1) 스넬의 굴절 법칙 (n_air=1.0 -> n_water=1.333): 수면 침투 후 수직 굴절각 cosThetaT 계산
+        let cosThetaI = max(L.y, 0.0);
+        let sin2ThetaT = (1.0 - cosThetaI * cosThetaI) * (1.0 / (1.333 * 1.333));
+        let cosThetaT = sqrt(max(0.0, 1.0 - sin2ThetaT));
+        let sunSurfaceTransmittance = 1.0 - getSpecularFresnel(cosThetaI, uniforms.fresnelF0);
 
-        // 깊은 수심일수록 체적 산란광이 풍성해지도록 수심 가중치 결합 (0.6 기본 + 0.6 심해 누적)
-        let depthScatterWeight = 0.6 + 0.6 * (1.0 - extinction);
-        directWaterScattering = directWaterScattering + subsurfaceIlluminance * waterAlbedo * depthScatterWeight;
+        // 2) 국소 파도 굴곡 투과율(Half-Lambert)과 수심별 단일 산란(Single Scattering Albedo) 적분 결합
+        let facetPermeance = max(dot(N, L), 0.0) * 0.5 + 0.5;
+        let volumeInScattering = finalLightColor * (sunSurfaceTransmittance * cosThetaT * facetPermeance);
+        directWaterScattering = directWaterScattering + volumeInScattering * waterAlbedo * (1.0 - extinction);
 
-        // [C] 직사광(태양) 연동 대기 천공 반사광 보강 (Sun-driven Atmospheric Sky Reflection)
-        // 하늘(Sky) 자체가 태양 직사광선에 의해 조명되므로, 수면에 비치는 하늘 반사광에
-        // 태양 직사광의 색상과 광도(Illuminance)를 주입하여 파도 반사면이 검게 죽는 현상을 원천 방지
+        // [C] 대기 Henyey-Greenstein 전방 산란 위상 모델 (g = 0.6)
+        // 태양 직사광선이 대기를 조명하여 형성되는 천공 산란 에너지 주입
         let RdotL = max(dot(R, L), 0.0);
-        let skyAtmosphereScatter = finalLightColor * (0.22 + 0.40 * pow(RdotL, 3.0));
-        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + skyAtmosphereScatter;
+        let hgG = 0.6;
+        let hgG2 = hgG * hgG;
+        let hgPhase = (1.0 - hgG2) / (pow(1.0 + hgG2 - 2.0 * hgG * RdotL, 1.5) * 4.0 * PI);
+        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * (hgPhase * PI);
     }
 
-    // IBL 환경 반사광에 태양 직사광의 천공 산란 에너지를 물리적으로 합성
-    let finalSkyReflection = skyReflectionColor + sunDrivenSkyIlluminance * (1.0 - uniforms.roughness * 0.4);
+    // IBL 환경 반사광에 태양 직사광의 천공 산란 에너지를 에너지 보존에 맞춰 합성
+    let finalSkyReflection = skyReflectionColor + sunDrivenSkyIlluminance * (1.0 - uniforms.roughness);
 
     // 1. 수체 기본 색상: 굴절 투과광(sceneColor) + 물 고유 체적 알베도(waterAlbedo) + 직사 체적 산란광
     let waterBodyColor = mix(sceneColor, waterAlbedo, absorptionStrength) + directWaterScattering;
