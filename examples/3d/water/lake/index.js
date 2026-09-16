@@ -285,7 +285,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
-        ibl: false,
+        ibl: true,
         gui: (pane) => {
             // [Phase 1~3] WaterLake 기본 및 디버그 제어 패널
             const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});
@@ -294,7 +294,9 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water with Refraction (0)': 0,
+                    'PBR Water (Phase 10 Reflection) (0)': 0,
+                    'Sky Reflection Color Only (12)': 12,
+                    'Fresnel Factor Mask (11)': 11,
                     'Refraction Offset View (10)': 10,
                     'Wave Normal Map View (9)': 9,
                     'Water Albedo Only (8)': 8,
@@ -405,6 +407,27 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 max: 10.0,
                 step: 0.05,
                 label: 'Depth Fade Distance (m)'
+            });
+
+            // [Phase 10] Schlick Fresnel & 환경 거울 반사 제어 패널
+            const reflectionFolder = pane.addFolder({title: 'Sky Reflection & Fresnel (Phase 10)', expanded: true});
+            reflectionFolder.addBinding(lake.waterMaterial, 'roughness', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.01,
+                label: 'Roughness (Blur)'
+            });
+            reflectionFolder.addBinding(lake.waterMaterial, 'specularFactor', {
+                min: 0.0,
+                max: 2.0,
+                step: 0.05,
+                label: 'Specular Multiplier'
+            });
+            reflectionFolder.addBinding(lake.waterMaterial, 'fresnelF0', {
+                min: 0.0,
+                max: 0.1,
+                step: 0.005,
+                label: 'Fresnel F0 (Water: 0.02)'
             });
 
             // [환경 조명] 직사광 태양 제어 패널

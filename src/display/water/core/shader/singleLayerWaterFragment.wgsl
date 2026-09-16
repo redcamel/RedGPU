@@ -25,6 +25,11 @@ struct WaterUniforms {
 
     windDirection2: vec2<f32>,
     useNormalTexture2: u32,
+    roughness: f32,
+
+    specularFactor: f32,
+    fresnelF0: f32,
+    padding1: f32,
     padding2: f32,
 };
 
@@ -173,11 +178,55 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // 9. 복사 전달 방정식(RTE) 기반 굴절 투과광(sceneColor)과 수체 체적 색상의 물리적 결합
     let waterCompositeColor = mix(sceneColor, waterAlbedo, absorptionStrength);
-    let finalRgb = waterCompositeColor;
+
+    // 10. Phase 10: Schlick Fresnel & Skybox/IBL 환경 거울 반사 (Mirror Reflection)
+    let worldPos = inputData.vertexPosition;
+    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
+    let N = worldNormal;
+    let NdotV = clamp(dot(N, V), 0.0, 1.0);
+    let R = reflect(-V, N);
+
+    // Schlick 근사 Fresnel 계산 (물 F0 ≈ 0.02)
+    let oneMinusNdotV = 1.0 - NdotV;
+    let fresnelTerm = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
+    let fresnel = clamp(fresnelTerm * uniforms.specularFactor, 0.0, 1.0);
+
+    // Skybox / IBL 큐브맵 반사광 샘플링 (거칠기 밉맵 블러 포함)
+    let preExposure = systemUniforms.preExposure;
+    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
+    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+    var skyReflectionColor = vec3<f32>(0.0);
+
+    if (u_usePrefilterTexture) {
+        let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
+        let mipLevel = uniforms.roughness * iblMipmapCount;
+        skyReflectionColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+    }
+    if (u_useSkyAtmosphere) {
+        let u_atmo = systemUniforms.skyAtmosphere;
+        let skyIntensity = u_atmo.sunIntensity;
+        let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+        let atmoMipLevel = uniforms.roughness * atmoMipCount;
+        let atmoColor = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
+        skyReflectionColor = skyReflectionColor + atmoColor;
+    }
+
+    // 에너지 보존 물리 결합 (Energy Conservation Composition)
+    // 수직 탑뷰(N·V ≈ 1)에서는 2% 반사 + 98% 투과로 물 밑바닥이 훤히 보이고,
+    // 수평선 글레이징 각도(N·V → 0)에서는 100% 반사되어 하늘이 거울처럼 비침
+    let finalRgb = mix(waterCompositeColor, skyReflectionColor, fresnel);
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 12u: {
+            // Step 10.3: Skybox/IBL 환경 반사광 단독 뷰
+            output.color = vec4<f32>(skyReflectionColor, 1.0);
+        }
+        case 11u: {
+            // Step 10.2: Schlick Fresnel 반사율 마스크 (0.02 검정 -> 1.0 흰색)
+            output.color = vec4<f32>(vec3<f32>(fresnel), 1.0);
+        }
         case 10u: {
             // Step 7.5: 굴절 왜곡 오프셋 벡터 시각화 (중앙값 0.5 회색 기준)
             let actualOffset = finalRefractUV - screenUV;
