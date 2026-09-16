@@ -160,7 +160,7 @@ function createBeachEnvironment(redGPUContext, scene) {
     const beachMesh = new RedGPU.Display.Mesh(redGPUContext, beachGeometry, beachMaterial);
     beachMesh.x = 0;
     beachMesh.y = 0.3;
-    beachMesh.z = -12;
+    beachMesh.z = -32;
     beachMesh.rotationX = 14;
     scene.addChild(beachMesh);
 
@@ -282,11 +282,11 @@ function createBeachEnvironment(redGPUContext, scene) {
  * [KO] WaterLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterLake properties.
  */
-function renderTestPane(redGPUContext, lake, directionalLight, view) {
+function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
-        ibl: false,
+        ibl: true,
         gui: (pane) => {
             // [Phase 1~3] WaterLake 기본 및 디버그 제어 패널
             const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});

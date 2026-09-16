@@ -156,6 +156,12 @@ fn main(inputData: InputData) -> OutputFragment {
         combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
     }
 
+    // [원거리 노멀 페이드 (Distance Normal Fade)]:
+    // 원경으로 갈수록 고주파 파도 노멀을 부드럽게 평면으로 페이드아웃하여 수평선 부근의 은박지 노이즈를 완천 차단
+    let camDist = length(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
+    let distNormalFade = clamp((camDist - 20.0) / 70.0, 0.0, 0.85);
+    combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), distNormalFade));
+
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
     let worldNormal = normalize(tbn * combinedTangentNormal);
@@ -214,24 +220,32 @@ fn main(inputData: InputData) -> OutputFragment {
     // 10. Phase 10: Schlick Fresnel & Skybox/IBL 환경 거울 반사 (Mirror Reflection)
     let worldPos = inputData.vertexPosition;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
+    let baseN = normalize(inputData.vertexNormal);
     let N = worldNormal;
-    let NdotV = clamp(dot(N, V), 0.0, 1.0);
+
+    // [에너지 보존 프레넬 (Pure Planar Normal)]:
+    // 프레넬 반사율 F에 파도 노멀을 섞으면 반사율 얼룩이 생겨 기름막(유막)처럼 보임.
+    // 프레넬(반사율 곡선)은 순수 평면 법선(baseN)을 100% 기준으로 삼아 매끄러운 그라데이션 유지
+    let NdotV_planar = clamp(dot(baseN, V), 0.001, 1.0);
+    let NdotV = clamp(dot(N, V), 0.001, 1.0);
+
+    // 반사 벡터 R은 실제 파도의 입체적인 출렁임(worldNormal)을 100% 반영하여 물결 왜곡 형성
     let rawR = reflect(-V, N);
 
-    // [물리 기반 지평선 반사 정규화 (Horizon Ray Reflection)]:
-    // 파도의 요동으로 반사 광선이 수평선 아래(지면)로 꺾일 때, 대칭 미러링(abs)으로 하늘을 비추도록 물리적 정규화
+    // [수면 지평선 반사 정규화 (Smooth Horizon Reflection)]:
     var R = rawR;
-    R.y = max(abs(R.y), 0.001);
+    R.y = max(abs(R.y), 0.02);
     R = normalize(R);
 
-    // Schlick 근사 Fresnel 계산 (물 F0 ≈ 0.02)
-    let oneMinusNdotV = 1.0 - NdotV;
+    // Schlick 근사 Fresnel 계산 (물 물리 상수 F0 ≈ 0.02)
+    let oneMinusNdotV = 1.0 - NdotV_planar;
     let fresnelTerm = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
     // [UE5/Smith 미세면 차폐 물리 기반]: 거칠기에 따른 반사광 기하 차폐 (Roughness Shadowing)
     let maxFresnel = 1.0 / (1.0 + 2.0 * uniforms.roughness);
     let fresnel = clamp(fresnelTerm * uniforms.specularFactor, 0.0, maxFresnel);
 
     // Skybox / IBL 큐브맵 반사광 샘플링 (거칠기 밉맵 블러 포함)
+    // 수면의 자연스러운 액체 질감을 위해 기본 거칠기에 미세 분산(0.08)을 가미하여 유막처럼 칼같이 맺히는 현상 방지
     let preExposure = systemUniforms.preExposure;
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -239,8 +253,10 @@ fn main(inputData: InputData) -> OutputFragment {
 
     if (u_usePrefilterTexture) {
         let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-        let mipLevel = uniforms.roughness * iblMipmapCount;
-        skyReflectionColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+        let effectiveRoughnessIBL = clamp(uniforms.roughness + 0.06, 0.0, 1.0);
+        let mipLevel = clamp(effectiveRoughnessIBL * iblMipmapCount, 0.0, iblMipmapCount);
+        let sampledIBL = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+        skyReflectionColor = sampledIBL;
     }
     if (u_useSkyAtmosphere) {
         let u_atmo = systemUniforms.skyAtmosphere;
@@ -335,10 +351,14 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)의 비어-람베르트 광학 수심 틴트
     // 얕은 물(extinction -> 1.0)에서는 바닥 컬러가 원래 색상 그대로 100% 투과되고,
-    // 깊어질수록(extinction -> 0.0) 물의 알베도에 의해 점진적으로 흡수/감쇄됨
+    // 깊어질수록(extinction -> 0.0) 물 고유의 알베도(에메랄드/사파이어) 체적 산란광이 발색
     let waterTransmissionTint = mix(waterAlbedo, vec3<f32>(1.0), extinction);
     let transmittedSceneColor = sceneColor * extinction * waterTransmissionTint;
-    let waterBodyColor = transmittedSceneColor + directWaterScattering;
+
+    // [UE5 체적 환경 다중 산란]: 수심이 깊어질수록 물 자체의 고유 색채(waterAlbedo)가 앰비언트/환경광을 머금고 화사하게 발현
+    let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
+    let ambientInScattering = (baseAmbient * 1.8 + skyReflectionColor * 0.18) * waterAlbedo * (1.0 - extinction);
+    let waterBodyColor = transmittedSceneColor + directWaterScattering + ambientInScattering;
 
     // [에너지 보존 4]: 수면 반사(Fresnel)와 수체 투과광(1 - Fresnel)의 물리적 융합
     let reflectedWater = waterBodyColor * (1.0 - fresnel) + finalSkyReflection * fresnel;
