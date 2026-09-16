@@ -291,47 +291,63 @@ fn main(inputData: InputData) -> OutputFragment {
             directSpecularColor = directSpecularColor + finalLightColor * (specTerm * NdotL);
         }
 
-        // [B] UE5 SingleLayerWater 표준: 에너지 보존 수체 체적 직사 산란
-        // 1) 스넬의 굴절 법칙 (n_air=1.0 -> n_water=1.333): 수면 침투 후 수직 굴절각 cosThetaT 계산
+        // [B] UE5 SingleLayerWater 표준: 수중 복사 전달 방정식(RTE) 기반 닫힌 해석적 단일 산란 적분 (Analytical Single Scattering Integral)
+        // 1) 스넬의 굴절 법칙에 의한 태양광 수중 굴절각(cosThetaT) 및 카메라 시선 수중 굴절각(cosThetaVt) 계산
         let cosThetaI = max(L.y, 0.0);
         let sin2ThetaT = (1.0 - cosThetaI * cosThetaI) * (1.0 / (1.333 * 1.333));
-        let cosThetaT = sqrt(max(0.0, 1.0 - sin2ThetaT));
+        let cosThetaT = sqrt(max(0.001, 1.0 - sin2ThetaT));
 
-        // [에너지 보존 1]: 수면에서 스펙큘러로 반사된 에너지를 제외한 순수 침투 투과율 (1 - F_spec)
-        let sunSurfaceTransmittance = max(0.0, 1.0 - specularFresnel);
+        let cosThetaV = max(V.y, 0.0);
+        let sin2ThetaVt = (1.0 - cosThetaV * cosThetaV) * (1.0 / (1.333 * 1.333));
+        let cosThetaVt = sqrt(max(0.001, 1.0 - sin2ThetaVt));
 
-        // 2) 국소 파도 굴곡 투과율(Half-Lambert)과 수심별 단일 산란(Single Scattering Albedo) 적분 결합
-        let facetPermeance = max(dot(N, L), 0.0) * 0.5 + 0.5;
-        let volumeInScattering = finalLightColor * (sunSurfaceTransmittance * cosThetaT * facetPermeance);
-        directWaterScattering = directWaterScattering + volumeInScattering * waterAlbedo * (1.0 - extinction);
+        // 2) 태양광 수면 입사면 투과율 (1 - F_light)
+        let lightFresnel = getSpecularFresnel(max(dot(N, L), 0.0), uniforms.fresnelF0);
+        let sunTransmittance = max(0.0, 1.0 - lightFresnel);
 
-        // [C] 대기 Henyey-Greenstein 전방 산란 위상 모델 (g = 0.6)
+        // 3) 입사광로와 시선광로의 결합 계수 K_path = (1 / cosThetaT) + (1 / cosThetaVt)
+        let kPath = (1.0 / cosThetaT) + (1.0 / cosThetaVt);
+
+        // 4) 깊이 0부터 바닥 수심(effectiveDeltaDepth)까지의 단일 산란 지수 적분 해석해
+        // Integral = (1 - exp(-c * K_path * depth)) / K_path
+        let integratedOpticalDepth = effectiveDeltaDepth * uniforms.extinctionFactor * kPath;
+        let integratedScattering = (1.0 - exp(-integratedOpticalDepth)) / kPath;
+        let volumeInScattering = finalLightColor * (sunTransmittance * integratedScattering);
+
+        // 5) 저고도 역광 파도 능선 투과 산란 (Subsurface Wave Translucency - 에너지 보존)
+        let lowSunFactor = clamp(1.0 - max(L.y, 0.0), 0.0, 1.0);
+        let forwardScatter = max(0.0, dot(V, -L));
+        let waveTranslucency = pow(forwardScatter, 3.0) * (1.0 - max(dot(N, L), 0.0) * 0.5);
+        let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance);
+
+        directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
+
+        // [C] 대기 레일리 반구 천공광 및 Henyey-Greenstein 전방 산란 위상 모델 (g = 0.6)
         let RdotL = max(dot(R, L), 0.0);
         let hgG = 0.6;
         let hgG2 = hgG * hgG;
         let hgPhase = (1.0 - hgG2) / (pow(1.0 + hgG2 - 2.0 * hgG * RdotL, 1.5) * 4.0 * PI);
         // IBL 환경광과의 중복 방지를 위한 순수 전방 산란 헤일로 성분 추출
         let haloIntensity = max(0.0, hgPhase * PI - 0.20);
-        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * haloIntensity;
+        // 직사광 기반 대기 레일리 산란 반구 확산광 (진공 우주 암흑 반사 방지)
+        let sunAtmosphereSkylight = finalLightColor * (0.12 * max(L.y, 0.08));
+        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * haloIntensity + sunAtmosphereSkylight;
     }
 
-    // [에너지 보존 2]: IBL 환경 반사광에 직사광 대기 헤일로 에너지를 정규화 합성
+    // [에너지 보존 2]: IBL 환경 반사광에 직사광 대기 헤일로 및 대기 천공광 에너지를 정규화 합성
     let finalSkyReflection = skyReflectionColor + sunDrivenSkyIlluminance * (1.0 - uniforms.roughness);
 
     // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)과 수체 체적 산란광의 완전한 (1 - extinction) 에너지 보존 결합
     // - 바닥 씬 컬러: 수심에 따른 비어-람베르트 감쇄 (sceneColor * extinction)
-    // - 수체 고유 체적광: 물 분자에 의해 흡수/산란된 비율(1 - extinction)만큼의 단일 산란 체적 발광
+    // - 수체 고유 체적광: 물 분자에 의해 흡수/산란된 물리적 체적 발광 + 파도 하부 산란
     let transmittedSceneColor = sceneColor * extinction;
     let waterBodyColor = transmittedSceneColor + directWaterScattering;
 
     // [에너지 보존 4]: 수면 반사(Fresnel)와 수체 투과광(1 - Fresnel)의 엄밀한 에너지 보존 믹싱
     let reflectedWater = mix(waterBodyColor, finalSkyReflection, fresnel);
 
-    // [에너지 보존 5]: 직사광 스펙큘러 하이라이트 번쩍임 지점의 에너지 보존 가산
-    // 스펙큘러 윤슬이 100% 번쩍이는 지점은 밑바탕 반사광을 차폐하여 총합 에너지가 100%를 초과하지 않도록 보존
-    let specLuminance = max(directSpecularColor.r, max(directSpecularColor.g, directSpecularColor.b));
-    let specMask = clamp(specLuminance, 0.0, 1.0);
-    let finalRgb = reflectedWater * (1.0 - specMask) + directSpecularColor;
+    // [에너지 보존 5]: 직사광 스펙큘러 하이라이트 가산 합성 (호수 고유 색상을 지우지 않는 물리 기반 융합)
+    let finalRgb = reflectedWater + directSpecularColor;
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
