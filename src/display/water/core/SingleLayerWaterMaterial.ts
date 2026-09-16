@@ -2,10 +2,18 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import ABitmapBaseMaterial from "../../../material/core/ABitmapBaseMaterial";
 import fragmentModuleSource from './shader/singleLayerWaterFragment.wgsl';
 import ColorRGB from "../../../color/ColorRGB";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import Sampler from "../../../resources/sampler/Sampler";
 import defineUint from "../../../defineProperty/funcs/number/defineUint";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineColorRGB from "../../../defineProperty/funcs/color/defineColorRGB";
+import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
+import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
+import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
 import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
+import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
+import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
+import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
 interface SingleLayerWaterMaterial {
     /**
@@ -18,6 +26,41 @@ interface SingleLayerWaterMaterial {
      * [EN] Abyssal deep water albedo color (ColorRGB)
      */
     deepColor: ColorRGB;
+    /**
+     * [KO] 주 수면 노멀 맵 텍스처
+     * [EN] Main water surface normal map texture
+     */
+    normalTexture: BitmapTexture;
+    /**
+     * [KO] 수면 노멀 맵 샘플러
+     * [EN] Water surface normal map sampler
+     */
+    normalTextureSampler: Sampler;
+    /**
+     * [KO] 주 노멀 강도 스케일
+     * [EN] Main normal strength scale
+     */
+    normalScale: number;
+    /**
+     * [KO] 주 노멀 텍스처 UV 타일링 배수
+     * [EN] Main normal texture UV tiling multiplier
+     */
+    normalTiling: number;
+    /**
+     * [KO] 바람에 의한 물결 스크롤 속도
+     * [EN] Wave scrolling speed by wind
+     */
+    windSpeed: number;
+    /**
+     * [KO] 바람 방향 벡터 [X, Y]
+     * [EN] Wind direction vector [X, Y]
+     */
+    windDirection: [number, number];
+    /**
+     * [KO] 수중 굴절 왜곡 강도 (UE5 기본값: 0.02)
+     * [EN] Underwater refraction distortion strength (UE5 default: 0.02)
+     */
+    refractionStrength: number;
     /**
      * [KO] 수심에 따른 빛의 수체 흡수/소멸 계수 (Beer-Lambert extinction factor, UE5 호수 기본값: 0.28)
      * [EN] Light water absorption/extinction factor by water depth (Beer-Lambert extinction factor, UE5 lake default: 0.28)
@@ -34,8 +77,8 @@ interface SingleLayerWaterMaterial {
      */
     depthFadeDistance: number;
     /**
-     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo)
-     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo)
+     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset)
+     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset)
      */
     debugMode: number;
     /**
@@ -46,8 +89,8 @@ interface SingleLayerWaterMaterial {
 }
 
 /**
- * [KO] 언리얼 엔진 5의 SingleLayerWater (SLW) 셰이딩 모델 기반 PBR 수면 머티리얼 클래스 (Phase 6 - Beer-Lambert Water Optics)
- * [EN] PBR water material class based on Unreal Engine 5 SingleLayerWater (SLW) shading model (Phase 6 - Beer-Lambert Water Optics)
+ * [KO] 언리얼 엔진 5의 SingleLayerWater (SLW) 셰이딩 모델 기반 PBR 수면 머티리얼 클래스 (Phase 8 - Depth Bleeding Fix)
+ * [EN] PBR water material class based on Unreal Engine 5 SingleLayerWater (SLW) shading model (Phase 8 - Depth Bleeding Fix)
  *
  * @category Material
  */
@@ -76,15 +119,30 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
         this.blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
+        // 물결 텍스처 무한 스크롤 반복을 위한 repeat 샘플러 장착
+        this.normalTextureSampler = new Sampler(this.redGPUContext, {
+            magFilter: GPU_FILTER_MODE.LINEAR,
+            minFilter: GPU_FILTER_MODE.LINEAR,
+            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
+            addressModeU: GPU_ADDRESS_MODE.REPEAT,
+            addressModeV: GPU_ADDRESS_MODE.REPEAT,
+            addressModeW: GPU_ADDRESS_MODE.REPEAT,
+        });
+
         this.initGPURenderInfos();
 
         this.baseColor.setColorByHEX(baseColor);
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
+        this.refractionStrength = 0.008;
+        this.normalScale = 1.0;
+        this.normalTiling = 4.0;
+        this.windSpeed = 0.04;
+        this.windDirection = [1.0, 0.3];
         this.extinctionFactor = 0.28;
         this.depthFadeDistance = 1.0;
 
-        // 기본 디버그 모드: Step 6 PBR Water with Beer-Lambert Absorption (0)
+        // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
         this.debugMaxDepth = 5.0;
     }
@@ -95,9 +153,25 @@ defineColorRGB(SingleLayerWaterMaterial, [
     {key: 'deepColor', value: '#023d58'},
 ]);
 
+defineTexture(SingleLayerWaterMaterial, [
+    {key: 'normalTexture'},
+]);
+
+defineSampler(SingleLayerWaterMaterial, [
+    {key: 'normalTextureSampler'},
+]);
+
+defineVector2(SingleLayerWaterMaterial, [
+    {key: 'windDirection', value: [1.0, 0.3]},
+]);
+
 definePositiveNumber(SingleLayerWaterMaterial, [
-    {key: 'extinctionFactor', value: 0.28},
     {key: 'opacity', value: 0.85, min: 0, max: 1},
+    {key: 'refractionStrength', value: 0.008},
+    {key: 'normalScale', value: 1.0},
+    {key: 'normalTiling', value: 4.0},
+    {key: 'windSpeed', value: 0.04},
+    {key: 'extinctionFactor', value: 0.28},
     {key: 'depthFadeDistance', value: 1.0},
     {key: 'debugMaxDepth', value: 5.0},
 ]);
