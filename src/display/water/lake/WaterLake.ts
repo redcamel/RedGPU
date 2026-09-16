@@ -2,10 +2,11 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Ground from "../../../primitive/Ground";
 import Mesh from "../../mesh/Mesh";
 import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
+import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 
 /**
- * [KO] 언리얼 엔진 5의 AWaterBodyLake에 대응하는 호수 수체 컴포넌트 클래스 (Phase 1 기본 스켈레톤)
- * [EN] Lake water body component class corresponding to Unreal Engine 5 AWaterBodyLake (Phase 1 Skeleton)
+ * [KO] 언리얼 엔진 5의 AWaterBodyLake에 대응하는 호수 수체 컴포넌트 클래스 (Phase 2)
+ * [EN] Lake water body component class corresponding to Unreal Engine 5 AWaterBodyLake (Phase 2)
  *
  * @category Display
  */
@@ -42,6 +43,12 @@ class WaterLake extends Mesh {
         this.#waterHeight = height;
         this.#widthSegments = widthSegments;
         this.#heightSegments = heightSegments;
+
+        // 반투명 수면 블렌딩을 위해 뎁스 쓰기 비활성화
+        this.depthStencilState.depthWriteEnabled = false;
+
+        // 수면 위/아래 양면 시야를 위해 cullMode를 NONE으로 구성
+        this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
     }
 
     /**

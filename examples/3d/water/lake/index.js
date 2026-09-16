@@ -274,10 +274,25 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         skybox: true,
         ibl: false,
         gui: (pane) => {
-            // [Phase 1] 기본 WaterLake 평면 제어 패널
-            const basicFolder = pane.addFolder({title: 'WaterLake (Phase 1: Basic Skeleton)', expanded: true});
+            // [Phase 1~3] WaterLake 기본 및 디버그 제어 패널
+            const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
-            basicFolder.addBinding(lake, 'visible');
+
+            // lake.waterMaterial에 직접 연결 (Direct Binding)
+            basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
+                options: {
+                    'Delta Depth Water Mask (4)': 4,
+                    'Linear Scene Depth (2)': 2,
+                    'Linear Water Depth (3)': 3,
+                    'Raw Scene Depth (1)': 1,
+                    'Solid Pink (0)': 0
+                }
+            });
+            basicFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {
+                min: 0.5,
+                max: 30.0,
+                step: 0.5
+            });
 
             // [환경 조명] 직사광 태양 제어 패널
             const sunFolder = pane.addFolder({title: 'Directional Light', expanded: false});
