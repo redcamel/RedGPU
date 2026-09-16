@@ -2,10 +2,10 @@
 #redgpu_include systemStruct.OutputFragment;
 
 struct WaterUniforms {
-    debugMode: u32,         // 0u: Soft Pink (Fade), 1u: Raw, 2u: Linear Scene, 3u: Linear Water, 4u: Delta Depth, 5u: Fade Factor
+    debugMode: u32,         // 0u: Soft Surface, 1u: Raw, 2u: Linear Scene, 3u: Linear Water, 4u: Delta Depth, 5u: Fade Mask, 6u: Scene Passthrough
     debugMaxDepth: f32,     // 수심 마스크 정규화 기준 거리 (1.0m ~ 30.0m)
     depthFadeDistance: f32, // 해안선 소프트 페이드 거리 (단위: m, 기본값: 1.0m)
-    padding: f32,
+    opacity: f32,           // 수면 기본 불투명도 (0.0 ~ 1.0, 기본값: 0.85)
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -42,9 +42,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let fadeDist = max(0.001, uniforms.depthFadeDistance);
     let depthFade = clamp(deltaDepth / fadeDist, 0.0, 1.0);
 
+    // 6. Phase 5: 스크린 UV 기반 2Path 바닥 씬 컬러 (Scene Passthrough) 샘플링
+    let screenUV = inputData.position.xy / systemUniforms.resolution;
+    let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
+
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 6u: {
+            // Step 5.2: Scene Color Passthrough (투명 유리처럼 순수 바닥 씬 컬러 100% 무왜곡 투과)
+            output.color = vec4<f32>(sceneColor, 1.0);
+        }
         case 5u: {
             // Step 4.2: Depth Fade 가중치 마스크 (0.0 검은색 -> 1.0 흰색)
             output.color = vec4<f32>(vec3<f32>(depthFade), 1.0);
@@ -69,11 +77,13 @@ fn main(inputData: InputData) -> OutputFragment {
             output.color = vec4<f32>(vec3<f32>(rawSceneDepth), 1.0);
         }
         default: {
-            // Step 4.3: Soft Fade가 적용된 마젠타 핑크 평면 (Premultiplied Alpha 블렌딩 적용)
-            // 물가(deltaDepth -> 0)에서는 depthFade가 0이 되어 폴리곤 칼단면이 완전히 사라집니다.
-            let baseColor = vec3<f32>(1.0, 0.0, 1.0);
-            let alpha = 0.85 * depthFade;
-            output.color = vec4<f32>(baseColor * alpha, alpha);
+            // Step 5.3: 바닥 투과광(sceneColor)과 소프트 수면 틴트(Soft Water Tint)의 유기적 결합
+            // 물가(depthFade -> 0)에서는 바닥 지형이 100% 투명하게 드러나 칼단면이 완전히 소멸하고,
+            // 수심이 깊어질수록 opacity와 수면 색상이 점진적으로 결합됩니다.
+            let surfaceTint = vec3<f32>(1.0, 0.0, 1.0);
+            let surfaceAlpha = clamp(uniforms.opacity * depthFade, 0.0, 1.0);
+            let finalRgb = mix(sceneColor, surfaceTint, surfaceAlpha);
+            output.color = vec4<f32>(finalRgb, 1.0);
         }
     }
 

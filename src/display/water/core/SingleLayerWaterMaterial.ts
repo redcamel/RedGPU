@@ -7,8 +7,8 @@ import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 interface SingleLayerWaterMaterial {
     /**
-     * [KO] 디버그 뷰 모드 (0: Soft Pink with Fade, 1: Raw Depth, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade Mask)
-     * [EN] Debug view mode (0: Soft Pink with Fade, 1: Raw Depth, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade Mask)
+     * [KO] 디버그 뷰 모드 (0: Soft Pink with Fade, 1: Raw Depth, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade Mask, 6: Scene Passthrough)
+     * [EN] Debug view mode (0: Soft Pink with Fade, 1: Raw Depth, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade Mask, 6: Scene Passthrough)
      */
     debugMode: number;
     /**
@@ -21,11 +21,16 @@ interface SingleLayerWaterMaterial {
      * [EN] Shoreline and terrain boundary soft depth fade distance (Unit: m, default: 1.0m)
      */
     depthFadeDistance: number;
+    /**
+     * [KO] 수면 기본 불투명도 (0.0 ~ 1.0, 기본값: 0.85)
+     * [EN] Water surface base opacity (0.0 ~ 1.0, default: 0.85)
+     */
+    opacity: number;
 }
 
 /**
- * [KO] 언리얼 엔진 5의 SingleLayerWater (SLW) 셰이딩 모델 기반 PBR 수면 머티리얼 클래스 (Phase 4 - Depth Fade)
- * [EN] PBR water material class based on Unreal Engine 5 SingleLayerWater (SLW) shading model (Phase 4 - Depth Fade)
+ * [KO] 언리얼 엔진 5의 SingleLayerWater (SLW) 셰이딩 모델 기반 PBR 수면 머티리얼 클래스 (Phase 5 - Scene Passthrough)
+ * [EN] PBR water material class based on Unreal Engine 5 SingleLayerWater (SLW) shading model (Phase 5 - Scene Passthrough)
  *
  * @category Material
  */
@@ -53,10 +58,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
         this.initGPURenderInfos();
 
-        // 기본 디버그 모드: Step 4 Soft Pink with Depth Fade (0)
+        // 기본 디버그 모드: Step 5 Soft Water Surface (0)
         this.debugMode = 0;
         this.debugMaxDepth = 5.0;
         this.depthFadeDistance = 1.0;
+        this.opacity = 0.85;
     }
 }
 
@@ -67,6 +73,7 @@ defineUint(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'debugMaxDepth', value: 5.0},
     {key: 'depthFadeDistance', value: 1.0},
+    {key: 'opacity', value: 0.85, min: 0, max: 1},
 ]);
 
 Object.freeze(SingleLayerWaterMaterial);
