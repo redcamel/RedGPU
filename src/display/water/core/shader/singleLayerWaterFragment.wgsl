@@ -206,14 +206,22 @@ fn main(inputData: InputData) -> OutputFragment {
     // [정밀 물리 PBR 프레넬 (Lagarde 2014 / UE5 SingleLayerWater)]:
     // 1. 수직으로 내려다볼 때(NdotV -> 1.0)는 물의 물리 상수 F0(0.02, 2%)로 수렴하여
     //    바닥 투과광(98%)이 온전히 보이고 표면 유막 반사를 완벽 차단.
-    // 2. 스침각(NdotV -> 0.0)에서는 거칠기에 따른 감쇄율 f90으로 자연스럽게 전이.
-    // 3. specularFactor는 프레넬 계수가 아닌 반사광 강도에 독립 적용하여 F0 왜곡 원천 방지.
+    // 2. 파도 노멀의 입체 굴곡을 50% 적극 반영하여 파도 능선과 골짜기 사이에 선명한 반사 찰랑임 형성.
+    // 3. 스침각(NdotV -> 0.0)에서는 거칠기에 따른 감쇄율 f90으로 자연스럽게 전이.
     let NdotV_pure = clamp(dot(baseNormal, V), 0.001, 1.0);
     let NdotV_wave = clamp(dot(worldNormal, V), 0.001, 1.0);
-    let NdotV_effective = clamp(mix(NdotV_pure, NdotV_wave, 0.22), 0.001, 1.0);
+    let NdotV_effective = clamp(mix(NdotV_pure, NdotV_wave, 0.50), 0.001, 1.0);
     let oneMinusNdotV = 1.0 - NdotV_effective;
     let f90 = max(1.0 - uniforms.roughness, uniforms.fresnelF0);
     let fresnel = uniforms.fresnelF0 + (f90 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
+
+    // [파도 능선 마이크로 글린트 및 입체 명암 (Wave Crest Glint & Dynamic Contrast)]:
+    // 파도가 출렁이며 일렁이는 능선(Ridge/Crest)에서 하늘 반사광이 맑고 눈부시게 반짝이도록(Glint)
+    // 파도 미세 요철의 경사도(Slope)와 시선 대향각을 결합하여 환하고 또렷한 수면 일렁임 형성!
+    let wavePerturb = length(worldNormal.xz);
+    let crestGlint = 1.0 + clamp(wavePerturb * 2.8, 0.0, 2.0); // 파도 능선 하이라이트 강화
+    let waveFacing = clamp(dot(worldNormal, V) / max(NdotV_pure, 0.001), 0.85, 1.35);
+    let waveDynamicHighlight = waveFacing * crestGlint;
 
     // 반사 벡터 R: 지평선 아래로 꺾인 광선만 수평선 높이로 부드럽게 보정
     var R = reflect(-V, worldNormal);
@@ -248,8 +256,26 @@ fn main(inputData: InputData) -> OutputFragment {
         skyDiffuseIrradiance = skyDiffuseIrradiance + atmoIrradiance;
     }
 
-    // 환경 반사광에 specularFactor 독립 적용
-    let skyReflectionColor = rawSkyReflection * uniforms.specularFactor;
+    // [IBL 역광/순광 방향성 조화 (Directional IBL Forward Glint & View Light Balance)]:
+    // 1. 역광 반사(R이 태양/밝은 하늘을 향할 때: R dot L > 0):
+    //    웹 큐브맵의 압축된 다이내믹 레인지를 보정하여, 파도 능선에 맺히는 하늘 반사를 눈부시게 쨍하게 부스팅.
+    // 2. 순광 반사(태양을 등질 때: V dot L < 0):
+    //    표면 반사를 차분하게 정돈하여 맑고 투명한 바닥 지형(자갈/모래)이 우선 투과되도록 조화.
+    var iblDirectionalModifier = 1.0;
+    if (systemUniforms.directionalLightCount > 0u) {
+        let mainSunDir = -normalize(systemUniforms.directionalLights[0].direction);
+        let RdotL = max(0.0, dot(R, mainSunDir));
+        let VdotL = dot(V, mainSunDir);
+
+        // 태양 및 밝은 하늘 반구 쪽을 향하는 반사광의 화사한 전방 글린트 부스팅
+        let forwardReflectionBoost = 1.0 + pow(RdotL, 3.5) * 1.35;
+        // 시점 역광(반사 강조) vs 순광(바닥 투과 강조) 밸런스
+        let viewBalance = mix(0.88, 1.15, clamp(VdotL * 0.5 + 0.5, 0.0, 1.0));
+        iblDirectionalModifier = forwardReflectionBoost * viewBalance;
+    }
+
+    // 환경 반사광에 파도 능선 글린트(Crest Glint) 및 IBL 역광/순광 방향성 밸런스 적용
+    let skyReflectionColor = rawSkyReflection * (uniforms.specularFactor * waveDynamicHighlight * iblDirectionalModifier);
 
     // -------------------------------------------------------------------------
     // [Step 6] 태양광 직사 조명 (Direct Specular & Volume In-Scattering)
@@ -328,7 +354,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [UE5 표준 결합]:
     // 바닥 투과광과 수체 산란광을 하나의 수체(WaterBody)로 묶은 뒤,
-    // 표면 하늘 반사광과 물리적 프레넬로 정규화 mix() 교차 블렌딩하여 하얀 기름막 원천 차단!
+    // 능선 글린트가 살아있는 하늘 반사광과 물리 프레넬로 정규화 mix() 교차 블렌딩!
     let waterBody = transmittedSceneColor + waterScattering;
     let reflectedWater = mix(waterBody, skyReflectionColor, fresnel);
     let shadedWater = reflectedWater + directSpecularColor;
