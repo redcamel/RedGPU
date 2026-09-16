@@ -37,8 +37,8 @@ RedGPU.init(
         // 3. 열대 일광 (Directional Light) 및 맑은 하늘 환경광 (Ambient Light)
         // 수면과 암초 상단에 풍부한 햇살을 공급하고 윤슬 기둥을 형성하는 태양각
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 85;
-        directionalLight.azimuth = 145;
+        directionalLight.elevation = 25;
+        directionalLight.azimuth = 156.5;
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
@@ -294,7 +294,8 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Phase 10 Reflection) (0)': 0,
+                    'PBR Water (Full Phase 11) (0)': 0,
+                    'Sun Specular Glitter Only (13)': 13,
                     'Sky Reflection Color Only (12)': 12,
                     'Fresnel Factor Mask (11)': 11,
                     'Refraction Offset View (10)': 10,

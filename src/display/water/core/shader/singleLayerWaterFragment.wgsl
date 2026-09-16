@@ -2,6 +2,36 @@
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.tnb.getTBNFromVertexTangent;
 
+#redgpu_include math.PI;
+#redgpu_include math.INV_PI;
+#redgpu_include math.EPSILON;
+
+fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = max(0.002, roughness * roughness);
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    return (alpha2 * INV_PI) / max(EPSILON, denom * denom);
+}
+
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = max(0.002, roughness * roughness);
+    let alpha2 = alpha * alpha;
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+    let oneMinusAlpha2 = 1.0 - alpha2;
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * oneMinusAlpha2 + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getSpecularFresnel(VdotH: f32, F0: f32) -> f32 {
+    let f = clamp(1.0 - VdotH, 0.0, 1.0);
+    let f2 = f * f;
+    let f5 = f2 * f2 * f;
+    return F0 + (1.0 - F0) * f5;
+}
+
 struct WaterUniforms {
     baseColor: vec3<f32>,
     opacity: f32,
@@ -211,14 +241,55 @@ fn main(inputData: InputData) -> OutputFragment {
         skyReflectionColor = skyReflectionColor + atmoColor;
     }
 
-    // 에너지 보존 물리 결합 (Energy Conservation Composition)
+    // 에너지 보존 물리 결합 (Energy Conservation Composition - Phase 10)
     // 수직 탑뷰(N·V ≈ 1)에서는 2% 반사 + 98% 투과로 물 밑바닥이 훤히 보이고,
     // 수평선 글레이징 각도(N·V → 0)에서는 100% 반사되어 하늘이 거울처럼 비침
-    let finalRgb = mix(waterCompositeColor, skyReflectionColor, fresnel);
+    let envCompositeColor = mix(waterCompositeColor, skyReflectionColor, fresnel);
+
+    // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 (Sun Glitter)
+    var directSpecularColor = vec3<f32>(0.0);
+    let u_directionalLightCount = systemUniforms.directionalLightCount;
+    let u_directionalLights = systemUniforms.directionalLights;
+
+    // [UE5 물리학 기반 태양 직사광 스펙큘러]:
+    // 태양은 무한소 점광원이 아니라 0.55도의 각크기(Source Angle)를 지닌 구체 광원입니다.
+    // 수면의 극저 거칠기 환경에서 하이라이트가 단일 픽셀로 실종(Specular Aliasing)되는 현상을 방지하고,
+    // 파도 결을 따라 수평선에서부터 관찰자 시야까지 찬란한 다이아몬드 윤슬 기둥(Sun Road)을 형성하도록
+    // 언리얼 표준 면적 광원 근사 유효 거칠기(min 0.08)를 적용합니다.
+    let effectiveRoughness = max(uniforms.roughness, 0.08);
+
+    for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
+        let light = u_directionalLights[i];
+        let lightIntensity = light.intensity;
+        let L = -normalize(light.direction);
+        let NdotL = max(dot(N, L), 0.0);
+
+        if (NdotL > 0.0) {
+            let H = normalize(L + V);
+            let NdotH = max(dot(N, H), 0.0);
+            let VdotH = max(dot(V, H), 0.0);
+
+            let D = getSpecularNDF(NdotH, effectiveRoughness);
+            let Vis = getSpecularVisibility(NdotV, NdotL, effectiveRoughness);
+            let F = getSpecularFresnel(VdotH, uniforms.fresnelF0);
+
+            let specTerm = D * Vis * F * uniforms.specularFactor;
+            let finalLightColor = light.color * lightIntensity * preExposure;
+
+            directSpecularColor = directSpecularColor + finalLightColor * (specTerm * NdotL);
+        }
+    }
+
+    // 최종 결합: 환경 거울 반사(Phase 10) + 태양광 직사 스펙큘러 다이아몬드 윤슬(Phase 11)
+    let finalRgb = envCompositeColor + directSpecularColor;
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 13u: {
+            // Step 11.4: 태양광 직사 스펙큘러 윤슬(Sun Glitter) 단독 뷰
+            output.color = vec4<f32>(directSpecularColor, 1.0);
+        }
         case 12u: {
             // Step 10.3: Skybox/IBL 환경 반사광 단독 뷰
             output.color = vec4<f32>(skyReflectionColor, 1.0);

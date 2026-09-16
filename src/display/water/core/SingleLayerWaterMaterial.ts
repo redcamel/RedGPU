@@ -123,8 +123,8 @@ interface SingleLayerWaterMaterial {
      */
     fresnelF0: number;
     /**
-     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection)
-     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection)
+     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter)
+     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter)
      */
     debugMode: number;
     /**
@@ -192,7 +192,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.useNormalTexture2 = false;
         this.extinctionFactor = 0.28;
         this.depthFadeDistance = 1.0;
-        this.roughness = 0.05;
+        this.roughness = 0.12;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
 
@@ -232,7 +232,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'windSpeed2', value: 0.06},
     {key: 'extinctionFactor', value: 0.28},
     {key: 'depthFadeDistance', value: 1.0},
-    {key: 'roughness', value: 0.05, min: 0, max: 1},
+    {key: 'roughness', value: 0.12, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
