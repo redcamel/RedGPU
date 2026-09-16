@@ -5,6 +5,7 @@
 #redgpu_include math.PI;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
+#redgpu_include color.linearToSrgbVec3;
 
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = max(0.002, roughness * roughness);
@@ -127,8 +128,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let waveUV1 = inputData.uv * uniforms.normalTiling + baseWindDir1 * (timeSec * uniforms.windSpeed);
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
-    // [셰이더 자체 완결]: 기본 sRGB 텍스처로 로드된 노멀 맵의 GPU 하드웨어 감마 디코딩(C^2.2)을 선형 벡터로 100% 완벽 복원
-    let rawNormal1 = pow(rawSample1, vec3<f32>(1.0 / 2.2));
+    // [sRGB 텍스처 하드웨어 디코딩 완벽 보정]:
+    // RedGPU BitmapTexture는 기본적으로 *-srgb 포맷으로 생성되어 GPU가 샘플링 시 sRGBToLinear(C^2.2) 변환을 수행함.
+    // 선형 벡터 데이터를 100% 무결하게 복원하기 위해 정밀 sRGB 역변환(linearToSrgbVec3)을 거쳐 0.5 원점을 완벽 복원
+    let rawNormal1 = linearToSrgbVec3(rawSample1);
     // [Layer 1: 주 너울 파도]
     var tangentXY1 = (rawNormal1.xy * 2.0 - 1.0) * uniforms.normalScale;
     if (uniforms.invertNormalY1 == 1u) {
@@ -144,7 +147,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let waveUV2 = inputData.uv * uniforms.normalTiling2 + baseWindDir2 * (timeSec * uniforms.windSpeed2);
 
         let rawSample2 = textureSample(normalTexture2, normalTextureSampler, waveUV2).rgb;
-        let rawNormal2 = pow(rawSample2, vec3<f32>(1.0 / 2.2));
+        let rawNormal2 = linearToSrgbVec3(rawSample2);
         var tangentXY2 = (rawNormal2.xy * 2.0 - 1.0) * uniforms.normalScale2;
         if (uniforms.invertNormalY2 == 1u) {
             tangentXY2.y = -tangentXY2.y;
@@ -350,18 +353,18 @@ fn main(inputData: InputData) -> OutputFragment {
     let finalSkyReflection = skyReflectionColor;
 
     // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)의 비어-람베르트 광학 수심 틴트
-    // 얕은 물(extinction -> 1.0)에서는 바닥 컬러가 원래 색상 그대로 100% 투과되고,
-    // 깊어질수록(extinction -> 0.0) 물 고유의 알베도(에메랄드/사파이어) 체적 산란광이 발색
     let waterTransmissionTint = mix(waterAlbedo, vec3<f32>(1.0), extinction);
     let transmittedSceneColor = sceneColor * extinction * waterTransmissionTint;
 
-    // [UE5 체적 환경 다중 산란]: 수심이 깊어질수록 물 자체의 고유 색채(waterAlbedo)가 앰비언트/환경광을 머금고 화사하게 발현
+    // [UE5 체적 환경 산란]: 수심이 깊어질수록 물 고유의 알베도(에메랄드/사파이어)가 앰비언트광을 머금고 화사하게 발색
     let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-    let ambientInScattering = (baseAmbient * 1.8 + skyReflectionColor * 0.18) * waterAlbedo * (1.0 - extinction);
-    let waterBodyColor = transmittedSceneColor + directWaterScattering + ambientInScattering;
+    let ambientInScattering = baseAmbient * 2.0 * waterAlbedo * (1.0 - extinction);
+    let waterScattering = directWaterScattering + ambientInScattering;
 
-    // [에너지 보존 4]: 수면 반사(Fresnel)와 수체 투과광(1 - Fresnel)의 물리적 융합
-    let reflectedWater = waterBodyColor * (1.0 - fresnel) + finalSkyReflection * fresnel;
+    // [UE5 SingleLayerWater 표준 에너지 분리 합성]:
+    // 바닥에서 올라오는 투과광만 수면을 통과할 때 (1 - F)로 감쇄되고,
+    // 물 자체의 체적 산란광(waterScattering)은 수면 아래를 묵직하게 받쳐주어 하늘 반사가 기름막처럼 뜨지 않고 자연스럽게 융합됨
+    let reflectedWater = transmittedSceneColor * (1.0 - fresnel) + waterScattering + finalSkyReflection * fresnel;
 
     // [에너지 보존 5]: 직사광 스펙큘러 하이라이트 가산 합성
     let finalRgb = reflectedWater + directSpecularColor;
