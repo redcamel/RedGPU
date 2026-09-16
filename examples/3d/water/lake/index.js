@@ -281,12 +281,18 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
+                    'Soft Pink with Depth Fade (0)': 0,
+                    'Depth Fade Mask (5)': 5,
                     'Delta Depth Water Mask (4)': 4,
-                    'Linear Scene Depth (2)': 2,
                     'Linear Water Depth (3)': 3,
-                    'Raw Scene Depth (1)': 1,
-                    'Solid Pink (0)': 0
+                    'Linear Scene Depth (2)': 2,
+                    'Raw Scene Depth (1)': 1
                 }
+            });
+            basicFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
+                min: 0.05,
+                max: 10.0,
+                step: 0.05
             });
             basicFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {
                 min: 0.5,
