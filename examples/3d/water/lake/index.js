@@ -42,11 +42,6 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 야외 천공광(Sky Dome Ambient): 메쉬 음영면의 완전 암흑(True Black) 방지
-        const ambientLight = new RedGPU.Light.AmbientLight();
-        ambientLight.color.setColorByHEX('#6888aa');
-        ambientLight.intensity = 0.25;
-        scene.lightManager.ambientLight = ambientLight;
 
 
 
@@ -88,7 +83,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. 실시간 튜닝 GUI 패널
-        renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view);
+        renderTestPane(redGPUContext, lake, directionalLight, view);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -287,7 +282,7 @@ function createBeachEnvironment(redGPUContext, scene) {
  * [KO] WaterLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterLake properties.
  */
-function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view) {
+function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
@@ -444,14 +439,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, vie
             sunFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             sunFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
             sunFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
-            if (ambientLight) {
-                sunFolder.addBinding(ambientLight, 'intensity', {
-                    min: 0.0,
-                    max: 1.0,
-                    step: 0.05,
-                    label: 'Sky Ambient Intensity'
-                });
-            }
+
         }
     });
 }

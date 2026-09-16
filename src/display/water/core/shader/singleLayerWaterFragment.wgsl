@@ -254,8 +254,6 @@ fn main(inputData: InputData) -> OutputFragment {
     // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 & 물리 기반 수체 체적 직사 산란광
     var directSpecularColor = vec3<f32>(0.0);
     var directWaterScattering = vec3<f32>(0.0);
-    var dominantSunDir = vec3<f32>(0.0, 1.0, 0.0);
-    var dominantSunColor = vec3<f32>(1.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
@@ -268,11 +266,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let L = -normalize(light.direction);
         let NdotL = max(dot(N, L), 0.0);
         let finalLightColor = light.color * lightIntensity * preExposure;
-
-        if (i == 0u) {
-            dominantSunDir = L;
-            dominantSunColor = finalLightColor;
-        }
 
         // [A] 직사광 스펙큘러: 일반 표준 PBR 스펙큘러 + 태양광 다이아몬드 윤슬 + 파도 분산 광택 삼중 융합
         if (NdotL > 0.0) {
@@ -337,20 +330,7 @@ fn main(inputData: InputData) -> OutputFragment {
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
     }
 
-    // [동적 물리 대기 천공광 폴백 (IBL 부재 시에도 은은하고 투명한 환경 스펙큘러 반사광 보장)]:
-    // IBL 텍스처가 없을 때 태양광 직사광(dominantSunDir)과 앰비언트광을 결합한 실제 주간 대기 천공 휘도 생성
-    // (물리적 천공 확산 휘도 L_sky ≈ E_sun / π * 0.12 스케일 정규화 적용)
-    if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
-        let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-        let sunElevation = clamp(dominantSunDir.y, 0.0, 1.0);
-        // 야외 주간 대기 분자 산란에 의한 천공 휘도 공급 (반구 적분 π 정규화 반영: 0.04 ~ 0.07)
-        let daylightSkyRadiance = dominantSunColor * (0.04 + 0.03 * sunElevation);
-        let skyGradient = mix(vec3<f32>(0.70, 0.82, 0.95), vec3<f32>(0.35, 0.55, 0.88), clamp(R.y, 0.0, 1.0));
-        let skyIlluminance = (baseAmbient + daylightSkyRadiance) * skyGradient;
-        skyReflectionColor = skyIlluminance;
-    }
-
-    // [에너지 보존 2]: 태양 직사광 스펙큘러와의 이중 계산 방지 (순수 간접 대기/천공 환경광만 유지)
+    // [에너지 보존 2]: 태양 직사광 스펙큘러와의 이중 계산 방지 (IBL/SkyAtmosphere가 있을 때만 해당 실제 환경광 반사)
     let finalSkyReflection = skyReflectionColor;
 
     // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)의 비어-람베르트 광학 수심 틴트
