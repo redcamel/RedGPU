@@ -191,17 +191,17 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
         this.refractionStrength = 0.008;
-        this.normalScale = 1.0;
-        this.normalScale2 = 0.35;
+        this.normalScale = 0.65;
+        this.normalScale2 = 0.30;
         this.normalTiling = 4.0;
         this.normalTiling2 = 8.0;
-        this.windSpeed = 0.04;
-        this.windSpeed2 = 0.06;
+        this.windSpeed = 0.035;
+        this.windSpeed2 = 0.055;
         this.windDirection = [1.0, 0.3];
         this.windDirection2 = [-0.6, 0.8];
-        this.useNormalTexture2 = false;
-        this.extinctionFactor = 0.28;
-        this.depthFadeDistance = 1.0;
+        this.useNormalTexture2 = true;
+        this.extinctionFactor = 0.22;
+        this.depthFadeDistance = 0.8;
         this.roughness = 0.10;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
@@ -236,15 +236,15 @@ defineVector2(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
-    {key: 'normalScale', value: 1.0},
-    {key: 'normalScale2', value: 0.35},
+    {key: 'normalScale', value: 0.65},
+    {key: 'normalScale2', value: 0.30},
     {key: 'normalTiling', value: 4.0},
     {key: 'normalTiling2', value: 8.0},
-    {key: 'windSpeed', value: 0.04},
-    {key: 'windSpeed2', value: 0.06},
-    {key: 'extinctionFactor', value: 0.28},
-    {key: 'depthFadeDistance', value: 1.0},
-    {key: 'roughness', value: 0.12, min: 0, max: 1},
+    {key: 'windSpeed', value: 0.035},
+    {key: 'windSpeed2', value: 0.055},
+    {key: 'extinctionFactor', value: 0.22},
+    {key: 'depthFadeDistance', value: 0.8},
+    {key: 'roughness', value: 0.10, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
@@ -255,7 +255,7 @@ defineUint(SingleLayerWaterMaterial, [
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [
-    {key: 'useNormalTexture2', value: false},
+    {key: 'useNormalTexture2', value: true},
     {key: 'invertNormalY1', value: false},
     {key: 'invertNormalY2', value: true},
 ]);

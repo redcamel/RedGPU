@@ -48,8 +48,8 @@ RedGPU.init(
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
-        // 5. WaterLake 수체 생성 (신규 코어 기본값 '에메랄드 호수' 자동 적용)
-        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
+        // 5. WaterLake 수체 생성 (240x240 대형 에메랄드 라군 수면)
+        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
 
         // Phase 7: 파도 주 노멀 텍스처 장착
@@ -57,6 +57,8 @@ RedGPU.init(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
+        lake.waterMaterial.normalTiling = 8.0;
+        lake.waterMaterial.normalScale = 0.65;
 
         // Phase 9: 제2 마이크로 잔물결 노멀 텍스처 장착 (RNM 회전 블렌딩 가동)
         lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
@@ -64,9 +66,15 @@ RedGPU.init(
             '../../../assets/water/water_normal_detail.png'
         );
         lake.waterMaterial.useNormalTexture2 = true;
+        lake.waterMaterial.normalTiling2 = 16.0;
+        lake.waterMaterial.normalScale2 = 0.30;
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
+
+        window.__testController = controller;
+        window.__testLake = lake;
+        window.__testLight = directionalLight;
 
         // 6. 렌더러 생성 및 렌더 루프
         const renderer = new RedGPU.Renderer();
@@ -134,7 +142,7 @@ function createBeachEnvironment(redGPUContext, scene) {
     seabedMaterial.roughnessFactor = 0.92;
     seabedMaterial.metallicFactor = 0.0;
 
-    const seabedGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1.2, 128);
+    const seabedGeometry = new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 280);
     const seabedMesh = new RedGPU.Display.Mesh(redGPUContext, seabedGeometry, seabedMaterial);
     seabedMesh.x = 0;
     seabedMesh.y = -2.3;
@@ -151,12 +159,12 @@ function createBeachEnvironment(redGPUContext, scene) {
     beachMaterial.occlusionTexture = gravelOrm;
     beachMaterial.baseColorTextureSampler = terrainRepeatSampler;
     beachMaterial.normalTextureSampler = terrainRepeatSampler;
-    beachMaterial.textureScale = [24, 4];
+    beachMaterial.textureScale = [40, 6];
     beachMaterial.baseColorFactor = [1.28, 1.22, 1.12, 1.0]; // 밝고 따뜻한 백사장 색조
     beachMaterial.roughnessFactor = 0.95;
     beachMaterial.metallicFactor = 0.0;
 
-    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 128, 1.5, 22);
+    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 36);
     const beachMesh = new RedGPU.Display.Mesh(redGPUContext, beachGeometry, beachMaterial);
     beachMesh.x = 0;
     beachMesh.y = 0.3;
@@ -282,7 +290,7 @@ function createBeachEnvironment(redGPUContext, scene) {
  * [KO] WaterLake 실시간 속성 제어를 위한 Tweakpane GUI를 구성합니다.
  * [EN] Configures Tweakpane GUI for real-time control of WaterLake properties.
  */
-function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, view) {
+function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
