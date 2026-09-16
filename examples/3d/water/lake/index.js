@@ -51,11 +51,18 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 96, 96, 80, 80);
         lake.waterLevel = 0.5;
 
-        // Phase 7: 파도 노멀 텍스처 장착 (워터 셰이더 내부에서 sRGB 감마 역보정을 자체 완결하므로 표준 2인자 생성자 사용)
+        // Phase 7: 파도 주 노멀 텍스처 장착
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
+
+        // Phase 9: 제2 마이크로 잔물결 노멀 텍스처 장착 (RNM 회전 블렌딩 가동)
+        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/water/water_normal_detail.png'
+        );
+        lake.waterMaterial.useNormalTexture2 = true;
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
@@ -306,31 +313,51 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 step: 0.5
             });
 
-            // [Phase 7 & 8] 파도 노멀 및 굴절 왜곡 제어 패널 (소프트 뎁스 블리딩 방지는 상시 내장 가동)
-            const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7 & 8)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05,
-                label: 'Normal Scale'
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
-                min: 0.5,
-                max: 20.0,
-                step: 0.5,
-                label: 'Normal Tiling'
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
-                min: 0.0,
-                max: 0.2,
-                step: 0.005,
-                label: 'Wind Speed'
-            });
+            // [Phase 7, 8, 9] 파도 노멀 및 굴절 왜곡 제어 패널
+            const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7~9)', expanded: true});
             waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {
                 min: 0.0,
                 max: 0.03,
                 step: 0.001,
                 label: 'Refraction Strength'
+            });
+
+            // 주 파도 (Layer 1: Base Swell)
+            const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
+            layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: 'Scale'
+            });
+            layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {
+                min: 0.5,
+                max: 20.0,
+                step: 0.5,
+                label: 'Tiling'
+            });
+            layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005, label: 'Speed'});
+
+            // 제2 파도 (Layer 2: Micro Ripple with RNM)
+            const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
+            layer2Folder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: 'Enable RNM'});
+            layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: 'Scale'
+            });
+            layer2Folder.addBinding(lake.waterMaterial, 'normalTiling2', {
+                min: 1.0,
+                max: 30.0,
+                step: 0.5,
+                label: 'Tiling'
+            });
+            layer2Folder.addBinding(lake.waterMaterial, 'windSpeed2', {
+                min: 0.0,
+                max: 0.2,
+                step: 0.005,
+                label: 'Speed'
             });
 
             // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널

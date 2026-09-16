@@ -10,6 +10,7 @@ import defineColorRGB from "../../../defineProperty/funcs/color/defineColorRGB";
 import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
 import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
+import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
 import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
@@ -37,25 +38,55 @@ interface SingleLayerWaterMaterial {
      */
     normalTextureSampler: Sampler;
     /**
+     * [KO] 제2 수면 노멀 맵 텍스처 (마이크로 잔물결 / 교차 파도)
+     * [EN] Secondary water surface normal map texture (micro ripples / cross waves)
+     */
+    normalTexture2: BitmapTexture;
+    /**
      * [KO] 주 노멀 강도 스케일
      * [EN] Main normal strength scale
      */
     normalScale: number;
+    /**
+     * [KO] 제2 노멀 강도 스케일
+     * [EN] Secondary normal strength scale
+     */
+    normalScale2: number;
     /**
      * [KO] 주 노멀 텍스처 UV 타일링 배수
      * [EN] Main normal texture UV tiling multiplier
      */
     normalTiling: number;
     /**
+     * [KO] 제2 노멀 텍스처 UV 타일링 배수
+     * [EN] Secondary normal texture UV tiling multiplier
+     */
+    normalTiling2: number;
+    /**
      * [KO] 바람에 의한 물결 스크롤 속도
      * [EN] Wave scrolling speed by wind
      */
     windSpeed: number;
     /**
+     * [KO] 제2 노멀 파도 스크롤 속도
+     * [EN] Secondary normal wave scrolling speed
+     */
+    windSpeed2: number;
+    /**
      * [KO] 바람 방향 벡터 [X, Y]
      * [EN] Wind direction vector [X, Y]
      */
     windDirection: [number, number];
+    /**
+     * [KO] 제2 노멀 파도 진행 방향 벡터 [X, Y]
+     * [EN] Secondary normal wave direction vector [X, Y]
+     */
+    windDirection2: [number, number];
+    /**
+     * [KO] 제2 노멀 텍스처 사용 여부
+     * [EN] Whether to use secondary normal texture
+     */
+    useNormalTexture2: boolean;
     /**
      * [KO] 수중 굴절 왜곡 강도 (UE5 기본값: 0.02)
      * [EN] Underwater refraction distortion strength (UE5 default: 0.02)
@@ -136,9 +167,14 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.opacity = opacity;
         this.refractionStrength = 0.008;
         this.normalScale = 1.0;
+        this.normalScale2 = 1.0;
         this.normalTiling = 4.0;
+        this.normalTiling2 = 8.0;
         this.windSpeed = 0.04;
+        this.windSpeed2 = 0.06;
         this.windDirection = [1.0, 0.3];
+        this.windDirection2 = [-0.6, 0.8];
+        this.useNormalTexture2 = false;
         this.extinctionFactor = 0.28;
         this.depthFadeDistance = 1.0;
 
@@ -155,6 +191,7 @@ defineColorRGB(SingleLayerWaterMaterial, [
 
 defineTexture(SingleLayerWaterMaterial, [
     {key: 'normalTexture'},
+    {key: 'normalTexture2'},
 ]);
 
 defineSampler(SingleLayerWaterMaterial, [
@@ -163,14 +200,18 @@ defineSampler(SingleLayerWaterMaterial, [
 
 defineVector2(SingleLayerWaterMaterial, [
     {key: 'windDirection', value: [1.0, 0.3]},
+    {key: 'windDirection2', value: [-0.6, 0.8]},
 ]);
 
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 0.85, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
     {key: 'normalScale', value: 1.0},
+    {key: 'normalScale2', value: 1.0},
     {key: 'normalTiling', value: 4.0},
+    {key: 'normalTiling2', value: 8.0},
     {key: 'windSpeed', value: 0.04},
+    {key: 'windSpeed2', value: 0.06},
     {key: 'extinctionFactor', value: 0.28},
     {key: 'depthFadeDistance', value: 1.0},
     {key: 'debugMaxDepth', value: 5.0},
@@ -178,6 +219,10 @@ definePositiveNumber(SingleLayerWaterMaterial, [
 
 defineUint(SingleLayerWaterMaterial, [
     {key: 'debugMode', value: 0},
+]);
+
+defineBoolean(SingleLayerWaterMaterial, [
+    {key: 'useNormalTexture2', value: false},
 ]);
 
 Object.freeze(SingleLayerWaterMaterial);

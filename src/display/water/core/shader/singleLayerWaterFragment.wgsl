@@ -19,14 +19,26 @@ struct WaterUniforms {
     debugMaxDepth: f32,
 
     debugMode: u32,
-    padding1: f32,
+    normalScale2: f32,
+    normalTiling2: f32,
+    windSpeed2: f32,
+
+    windDirection2: vec2<f32>,
+    useNormalTexture2: u32,
     padding2: f32,
-    padding3: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
 @group(2) @binding(2) var normalTexture: texture_2d<f32>;
+@group(2) @binding(3) var normalTexture2: texture_2d<f32>;
+
+// Colin Barré-Brisebois & Stephen Hill (2012) Reoriented Normal Mapping
+fn blendRNM(n1: vec3<f32>, n2: vec3<f32>) -> vec3<f32> {
+    let t = n1 + vec3<f32>(0.0, 0.0, 1.0);
+    let u = n2 * vec3<f32>(-1.0, -1.0, 1.0);
+    return normalize(t * dot(t, u) - u * t.z);
+}
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -71,24 +83,42 @@ fn main(inputData: InputData) -> OutputFragment {
     let fadeDist = max(0.001, uniforms.depthFadeDistance);
     let depthFade = clamp(deltaDepth / fadeDist, 0.0, 1.0);
 
-    // 6. Phase 7: 바람 방향 및 시간(t) 기반 물결 노멀 스크롤링 & TBN 월드 법선 산출
+    // 6. Phase 7 & 9: 듀얼 노멀 교차 스크롤링 & RNM(Reoriented Normal Mapping) 블렌딩
     let timeSec = systemUniforms.time.time;
-    let windDirLen = length(uniforms.windDirection);
-    let baseWindDir = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen, windDirLen > 0.001);
-    let waveUV = inputData.uv * uniforms.normalTiling + baseWindDir * (timeSec * uniforms.windSpeed);
 
-    let rawSample = textureSample(normalTexture, normalTextureSampler, waveUV).rgb;
+    // [Layer 1: 주 너울 파도]
+    let windDirLen1 = length(uniforms.windDirection);
+    let baseWindDir1 = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen1, windDirLen1 > 0.001);
+    let waveUV1 = inputData.uv * uniforms.normalTiling + baseWindDir1 * (timeSec * uniforms.windSpeed);
+
+    let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     // [셰이더 자체 완결]: 기본 sRGB 텍스처로 로드된 노멀 맵의 GPU 하드웨어 감마 디코딩(C^2.2)을 선형 벡터로 100% 완벽 복원
-    let rawNormal = pow(rawSample, vec3<f32>(1.0 / 2.2));
-    // RedGPU 표준 탄젠트 공간 노멀 언팩 (V-flip 방향 보정 및 스케일 적용)
-    var tangentXY = (rawNormal.xy * 2.0 - 1.0) * uniforms.normalScale;
-    tangentXY.y = -tangentXY.y;
-    let tangentZ = sqrt(max(0.001, 1.0 - dot(tangentXY, tangentXY)));
-    let scaledTangentNormal = normalize(vec3<f32>(tangentXY, tangentZ));
+    let rawNormal1 = pow(rawSample1, vec3<f32>(1.0 / 2.2));
+    var tangentXY1 = (rawNormal1.xy * 2.0 - 1.0) * uniforms.normalScale;
+    tangentXY1.y = -tangentXY1.y;
+    let tangentZ1 = sqrt(max(0.001, 1.0 - dot(tangentXY1, tangentXY1)));
+    var combinedTangentNormal = normalize(vec3<f32>(tangentXY1, tangentZ1));
+
+    // [Layer 2: 마이크로 잔물결 교차 파도 & RNM 블렌딩]
+    if (uniforms.useNormalTexture2 > 0u) {
+        let windDirLen2 = length(uniforms.windDirection2);
+        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
+        let waveUV2 = inputData.uv * uniforms.normalTiling2 + baseWindDir2 * (timeSec * uniforms.windSpeed2);
+
+        let rawSample2 = textureSample(normalTexture2, normalTextureSampler, waveUV2).rgb;
+        let rawNormal2 = pow(rawSample2, vec3<f32>(1.0 / 2.2));
+        var tangentXY2 = (rawNormal2.xy * 2.0 - 1.0) * uniforms.normalScale2;
+        tangentXY2.y = -tangentXY2.y;
+        let tangentZ2 = sqrt(max(0.001, 1.0 - dot(tangentXY2, tangentXY2)));
+        let tangentNormal2 = normalize(vec3<f32>(tangentXY2, tangentZ2));
+
+        // 주 파도 기저 위에 제2 파도를 회전 얹는 RNM 합성
+        combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
+    }
 
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
-    let worldNormal = normalize(tbn * scaledTangentNormal);
+    let worldNormal = normalize(tbn * combinedTangentNormal);
 
     // 7. Phase 7 & 8: 순수 파도 섭동에 의한 스넬의 굴절 왜곡 (Pure Perturbation Refraction)
     let screenUV = inputData.position.xy / systemUniforms.resolution;
