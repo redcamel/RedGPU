@@ -251,10 +251,9 @@ fn main(inputData: InputData) -> OutputFragment {
         skyReflectionColor = skyReflectionColor + atmoColor;
     }
 
-    // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 & 물리 기반 수체 체적 직사 산란광 & 태양광 연동 대기 천공 반사
+    // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 & 물리 기반 수체 체적 직사 산란광
     var directSpecularColor = vec3<f32>(0.0);
     var directWaterScattering = vec3<f32>(0.0);
-    var sunDrivenSkyIlluminance = vec3<f32>(0.0);
     var dominantSunDir = vec3<f32>(0.0, 1.0, 0.0);
     var dominantSunColor = vec3<f32>(1.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -303,13 +302,13 @@ fn main(inputData: InputData) -> OutputFragment {
             let Vis_wave = getSpecularVisibility(NdotV, NdotL, waveRoughness);
             let waveSpecular = D_wave * Vis_wave;
 
-            // 파도 능선 미세 반짝임 (Micro Facet Crest Shimmer)
+            // 파도 능선 미세 반짝임 (Micro Facet Crest Shimmer: 에너지 보존을 위해 0.9 ~ 1.2 범위로 완화)
             let deltaN = N - baseNormal;
-            let crestFacet = clamp(dot(deltaN, H) * 2.5, -0.2, 0.8);
+            let crestFacet = clamp(dot(deltaN, H) * 1.2, -0.1, 0.2);
             let facetMultiplier = 1.0 + crestFacet;
 
-            // 일반 PBR 스펙큘러와 다이아몬드 윤슬을 균형 있게 결합
-            let combinedSpec = (pbrSpecular * 0.90 + glitterSpecular * 0.65 + waveSpecular * 0.40) * F * uniforms.specularFactor * facetMultiplier;
+            // [에너지 보존 1]: 다중 스펙큘러 로브 가중합 정규화 (합계: 0.50 + 0.35 + 0.15 = 1.00)
+            let combinedSpec = (pbrSpecular * 0.50 + glitterSpecular * 0.35 + waveSpecular * 0.15) * F * uniforms.specularFactor * facetMultiplier;
             directSpecularColor = directSpecularColor + finalLightColor * (combinedSpec * NdotL);
         }
 
@@ -336,30 +335,23 @@ fn main(inputData: InputData) -> OutputFragment {
         let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance * 0.35);
 
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
-
-        // [D] 대기 Henyey-Greenstein 전방 산란 위상 모델 (태양광 대기 헤일로)
-        let RdotL = max(dot(R, L), 0.0);
-        let hgG = 0.65;
-        let hgG2 = hgG * hgG;
-        let hgPhase = (1.0 - hgG2) / (pow(1.0 + hgG2 - 2.0 * hgG * RdotL, 1.5) * 4.0 * PI);
-        let haloIntensity = max(0.0, hgPhase * PI - 0.15);
-        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * haloIntensity;
     }
 
-    // [동적 물리 대기 천공광 폴백 (IBL 부재 시에도 촉촉하고 투명한 환경 스펙큘러 반사광 보장)]:
+    // [동적 물리 대기 천공광 폴백 (IBL 부재 시에도 은은하고 투명한 환경 스펙큘러 반사광 보장)]:
     // IBL 텍스처가 없을 때 태양광 직사광(dominantSunDir)과 앰비언트광을 결합한 실제 주간 대기 천공 휘도 생성
+    // (물리적 천공 확산 휘도 L_sky ≈ E_sun / π * 0.12 스케일 정규화 적용)
     if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
         let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
         let sunElevation = clamp(dominantSunDir.y, 0.0, 1.0);
-        // 야외 주간 대기 분자 산란에 의한 천공 휘도 공급
-        let daylightSkyRadiance = dominantSunColor * (0.22 + 0.18 * sunElevation);
+        // 야외 주간 대기 분자 산란에 의한 천공 휘도 공급 (반구 적분 π 정규화 반영: 0.04 ~ 0.07)
+        let daylightSkyRadiance = dominantSunColor * (0.04 + 0.03 * sunElevation);
         let skyGradient = mix(vec3<f32>(0.70, 0.82, 0.95), vec3<f32>(0.35, 0.55, 0.88), clamp(R.y, 0.0, 1.0));
-        let skyIlluminance = (baseAmbient * 2.0 + daylightSkyRadiance) * skyGradient;
+        let skyIlluminance = (baseAmbient + daylightSkyRadiance) * skyGradient;
         skyReflectionColor = skyIlluminance;
     }
 
-    // [에너지 보존 2]: IBL 환경 반사광에 직사광 대기 헤일로 에너지를 정규화 합성
-    let finalSkyReflection = skyReflectionColor + sunDrivenSkyIlluminance * (1.0 - uniforms.roughness);
+    // [에너지 보존 2]: 태양 직사광 스펙큘러와의 이중 계산 방지 (순수 간접 대기/천공 환경광만 유지)
+    let finalSkyReflection = skyReflectionColor;
 
     // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)의 비어-람베르트 광학 수심 틴트
     // 얕은 물(extinction -> 1.0)에서는 바닥 컬러가 원래 색상 그대로 100% 투과되고,
