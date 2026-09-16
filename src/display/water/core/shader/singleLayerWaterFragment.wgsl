@@ -251,16 +251,12 @@ fn main(inputData: InputData) -> OutputFragment {
         skyReflectionColor = skyReflectionColor + atmoColor;
     }
 
-    // [동적 대기 천공광 폴백]: IBL/SkyAtmosphere가 없을 경우 씬의 실제 광원 기반 연동
-    if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
-        let ambientSky = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-        skyReflectionColor = ambientSky * (1.0 + clamp(R.y, 0.0, 1.0));
-    }
-
     // 11. Phase 11: 태양광 Cook-Torrance GGX 다이아몬드 윤슬 & 물리 기반 수체 체적 직사 산란광 & 태양광 연동 대기 천공 반사
     var directSpecularColor = vec3<f32>(0.0);
     var directWaterScattering = vec3<f32>(0.0);
     var sunDrivenSkyIlluminance = vec3<f32>(0.0);
+    var dominantSunDir = vec3<f32>(0.0, 1.0, 0.0);
+    var dominantSunColor = vec3<f32>(1.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
@@ -274,79 +270,108 @@ fn main(inputData: InputData) -> OutputFragment {
         let NdotL = max(dot(N, L), 0.0);
         let finalLightColor = light.color * lightIntensity * preExposure;
 
-        var specularFresnel = uniforms.fresnelF0;
+        if (i == 0u) {
+            dominantSunDir = L;
+            dominantSunColor = finalLightColor;
+        }
 
-        // [A] 수면 직사광 스펙큘러 다이아몬드 윤슬 (Sun Glitter)
+        // [A] 직사광 스펙큘러: 일반 표준 PBR 스펙큘러 + 태양광 다이아몬드 윤슬 + 파도 분산 광택 삼중 융합
         if (NdotL > 0.0) {
             let H = normalize(L + V);
             let NdotH = max(dot(N, H), 0.0);
             let VdotH = max(dot(V, H), 0.0);
 
-            let D = getSpecularNDF(NdotH, effectiveRoughness);
-            let Vis = getSpecularVisibility(NdotV, NdotL, effectiveRoughness);
             let F = getSpecularFresnel(VdotH, uniforms.fresnelF0);
-            specularFresnel = F;
 
-            let specTerm = D * Vis * F * uniforms.specularFactor;
-            directSpecularColor = directSpecularColor + finalLightColor * (specTerm * NdotL);
+            // 1) 일반 표준 PBR 스펙큘러 (Standard PBR Specular Highlight)
+            // 일반 물체처럼 파도 곡면을 따라 자연스럽고 부드럽게 맺히는 PBR 스펙큘러 하이라이트
+            let pbrRoughness = clamp(uniforms.roughness + 0.16, 0.10, 0.85);
+            let D_pbr = getSpecularNDF(NdotH, pbrRoughness);
+            let Vis_pbr = getSpecularVisibility(NdotV, NdotL, pbrRoughness);
+            let pbrSpecular = D_pbr * Vis_pbr;
+
+            // 2) 샤프한 다이아몬드 코어 윤슬 (Sharp Core Glint)
+            // 파도 능선과 미세 잔물결에서 강렬하게 번쩍이는 다이아몬드 코어 반짝임
+            let D_glitter = getSpecularNDF(NdotH, effectiveRoughness);
+            let Vis_glitter = getSpecularVisibility(NdotV, NdotL, effectiveRoughness);
+            let glitterSpecular = D_glitter * Vis_glitter;
+
+            // 3) 파도 사면 통계 분산 광역 스펙큘러 (Cox-Munk Broad Wave Specular)
+            // 파도 경사면들의 분산에 의해 넓은 각도에서도 수면 전체가 화사하게 빛나는 파도 광택
+            let waveRoughness = clamp(uniforms.roughness + 0.40, 0.28, 0.75);
+            let D_wave = getSpecularNDF(NdotH, waveRoughness);
+            let Vis_wave = getSpecularVisibility(NdotV, NdotL, waveRoughness);
+            let waveSpecular = D_wave * Vis_wave;
+
+            // 파도 능선 미세 반짝임 (Micro Facet Crest Shimmer)
+            let deltaN = N - baseNormal;
+            let crestFacet = clamp(dot(deltaN, H) * 2.5, -0.2, 0.8);
+            let facetMultiplier = 1.0 + crestFacet;
+
+            // 일반 PBR 스펙큘러와 다이아몬드 윤슬을 균형 있게 결합
+            let combinedSpec = (pbrSpecular * 0.90 + glitterSpecular * 0.65 + waveSpecular * 0.40) * F * uniforms.specularFactor * facetMultiplier;
+            directSpecularColor = directSpecularColor + finalLightColor * (combinedSpec * NdotL);
         }
 
-        // [B] UE5 SingleLayerWater 표준: 수중 복사 전달 방정식(RTE) 기반 닫힌 해석적 단일 산란 적분 (Analytical Single Scattering Integral)
-        // 1) 스넬의 굴절 법칙에 의한 태양광 수중 굴절각(cosThetaT) 및 카메라 시선 수중 굴절각(cosThetaVt) 계산
+        // [B] UE5 SingleLayerWater 표준: 수중 복사 전달 및 체적 단일 산란 (Volume In-Scattering)
+        // 수직 입사 굴절각 (스넬의 법칙)
         let cosThetaI = max(L.y, 0.0);
         let sin2ThetaT = (1.0 - cosThetaI * cosThetaI) * (1.0 / (1.333 * 1.333));
         let cosThetaT = sqrt(max(0.001, 1.0 - sin2ThetaT));
 
-        let cosThetaV = max(V.y, 0.0);
-        let sin2ThetaVt = (1.0 - cosThetaV * cosThetaV) * (1.0 / (1.333 * 1.333));
-        let cosThetaVt = sqrt(max(0.001, 1.0 - sin2ThetaVt));
-
-        // 2) 태양광 수면 입사면 투과율 (1 - F_light)
-        let lightFresnel = getSpecularFresnel(max(dot(N, L), 0.0), uniforms.fresnelF0);
+        let lightFresnel = getSpecularFresnel(NdotL, uniforms.fresnelF0);
         let sunTransmittance = max(0.0, 1.0 - lightFresnel);
 
-        // 3) 입사광로와 시선광로의 결합 계수 K_path = (1 / cosThetaT) + (1 / cosThetaVt)
-        let kPath = (1.0 / cosThetaT) + (1.0 / cosThetaVt);
+        // [체적 산란의 물리적 수심 비례]:
+        // 얕은 물가(effectiveDeltaDepth -> 0, extinction -> 1.0)에서는 산란광이 0이 되어 바닥이 100% 맑고 투명하게 유지됨.
+        // 수심이 깊어질수록((1.0 - extinction) 증가) 비로소 물 고유의 알베도 색상으로 화사하게 산란 발현
+        let volumeInScatteringFactor = (1.0 - extinction) * 0.20;
+        let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * volumeInScatteringFactor);
 
-        // 4) 깊이 0부터 바닥 수심(effectiveDeltaDepth)까지의 단일 산란 지수 적분 해석해
-        // Integral = (1 - exp(-c * K_path * depth)) / K_path
-        let integratedOpticalDepth = effectiveDeltaDepth * uniforms.extinctionFactor * kPath;
-        let integratedScattering = (1.0 - exp(-integratedOpticalDepth)) / kPath;
-        let volumeInScattering = finalLightColor * (sunTransmittance * integratedScattering);
-
-        // 5) 저고도 역광 파도 능선 투과 산란 (Subsurface Wave Translucency - 에너지 보존)
+        // [C] 저고도 역광 파도 능선 투과 산란 (Subsurface Wave Translucency)
+        let VdotL = dot(V, L);
         let lowSunFactor = clamp(1.0 - max(L.y, 0.0), 0.0, 1.0);
-        let forwardScatter = max(0.0, dot(V, -L));
-        let waveTranslucency = pow(forwardScatter, 3.0) * (1.0 - max(dot(N, L), 0.0) * 0.5);
-        let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance);
+        let forwardScatter = max(0.0, -VdotL);
+        let waveTranslucency = pow(forwardScatter, 3.0) * (1.0 - NdotL * 0.5) * (1.0 - extinction);
+        let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance * 0.35);
 
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
 
-        // [C] 대기 레일리 반구 천공광 및 Henyey-Greenstein 전방 산란 위상 모델 (g = 0.6)
+        // [D] 대기 Henyey-Greenstein 전방 산란 위상 모델 (태양광 대기 헤일로)
         let RdotL = max(dot(R, L), 0.0);
-        let hgG = 0.6;
+        let hgG = 0.65;
         let hgG2 = hgG * hgG;
         let hgPhase = (1.0 - hgG2) / (pow(1.0 + hgG2 - 2.0 * hgG * RdotL, 1.5) * 4.0 * PI);
-        // IBL 환경광과의 중복 방지를 위한 순수 전방 산란 헤일로 성분 추출
-        let haloIntensity = max(0.0, hgPhase * PI - 0.20);
-        // 직사광 기반 대기 레일리 산란 반구 확산광 (진공 우주 암흑 반사 방지)
-        let sunAtmosphereSkylight = finalLightColor * (0.12 * max(L.y, 0.08));
-        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * haloIntensity + sunAtmosphereSkylight;
+        let haloIntensity = max(0.0, hgPhase * PI - 0.15);
+        sunDrivenSkyIlluminance = sunDrivenSkyIlluminance + finalLightColor * haloIntensity;
     }
 
-    // [에너지 보존 2]: IBL 환경 반사광에 직사광 대기 헤일로 및 대기 천공광 에너지를 정규화 합성
+    // [동적 물리 대기 천공광 폴백 (IBL 부재 시에도 촉촉하고 투명한 환경 스펙큘러 반사광 보장)]:
+    // IBL 텍스처가 없을 때 태양광 직사광(dominantSunDir)과 앰비언트광을 결합한 실제 주간 대기 천공 휘도 생성
+    if (!u_usePrefilterTexture && !u_useSkyAtmosphere) {
+        let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
+        let sunElevation = clamp(dominantSunDir.y, 0.0, 1.0);
+        // 야외 주간 대기 분자 산란에 의한 천공 휘도 공급
+        let daylightSkyRadiance = dominantSunColor * (0.22 + 0.18 * sunElevation);
+        let skyGradient = mix(vec3<f32>(0.70, 0.82, 0.95), vec3<f32>(0.35, 0.55, 0.88), clamp(R.y, 0.0, 1.0));
+        let skyIlluminance = (baseAmbient * 2.0 + daylightSkyRadiance) * skyGradient;
+        skyReflectionColor = skyIlluminance;
+    }
+
+    // [에너지 보존 2]: IBL 환경 반사광에 직사광 대기 헤일로 에너지를 정규화 합성
     let finalSkyReflection = skyReflectionColor + sunDrivenSkyIlluminance * (1.0 - uniforms.roughness);
 
-    // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)과 수체 체적 산란광의 완전한 (1 - extinction) 에너지 보존 결합
-    // - 바닥 씬 컬러: 수심에 따른 비어-람베르트 감쇄 (sceneColor * extinction)
-    // - 수체 고유 체적광: 물 분자에 의해 흡수/산란된 물리적 체적 발광 + 파도 하부 산란
-    let transmittedSceneColor = sceneColor * extinction;
+    // [에너지 보존 3]: 바닥 씬 투과광(Transmitted Scene)의 비어-람베르트 광학 수심 틴트
+    // 얕은 물(extinction -> 1.0)에서는 바닥 컬러가 원래 색상 그대로 100% 투과되고,
+    // 깊어질수록(extinction -> 0.0) 물의 알베도에 의해 점진적으로 흡수/감쇄됨
+    let waterTransmissionTint = mix(waterAlbedo, vec3<f32>(1.0), extinction);
+    let transmittedSceneColor = sceneColor * extinction * waterTransmissionTint;
     let waterBodyColor = transmittedSceneColor + directWaterScattering;
 
-    // [에너지 보존 4]: 수면 반사(Fresnel)와 수체 투과광(1 - Fresnel)의 엄밀한 에너지 보존 믹싱
-    let reflectedWater = mix(waterBodyColor, finalSkyReflection, fresnel);
+    // [에너지 보존 4]: 수면 반사(Fresnel)와 수체 투과광(1 - Fresnel)의 물리적 융합
+    let reflectedWater = waterBodyColor * (1.0 - fresnel) + finalSkyReflection * fresnel;
 
-    // [에너지 보존 5]: 직사광 스펙큘러 하이라이트 가산 합성 (호수 고유 색상을 지우지 않는 물리 기반 융합)
+    // [에너지 보존 5]: 직사광 스펙큘러 하이라이트 가산 합성
     let finalRgb = reflectedWater + directSpecularColor;
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);

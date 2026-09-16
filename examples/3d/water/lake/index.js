@@ -291,7 +291,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, ambientLight, vie
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         skybox: true,
-        ibl: true,
+        ibl: false,
         gui: (pane) => {
             // [Phase 1~3] WaterLake 기본 및 디버그 제어 패널
             const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});

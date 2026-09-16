@@ -202,7 +202,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.useNormalTexture2 = false;
         this.extinctionFactor = 0.28;
         this.depthFadeDistance = 1.0;
-        this.roughness = 0.12;
+        this.roughness = 0.04;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
         this.invertNormalY1 = false; // DirectX 노멀 기본 호환
