@@ -132,9 +132,9 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      * @param redGPUContext - RedGPUContext 인스턴스
      * @param baseColor - 기본 얕은 수면 알베도 HEX 컬러 (기본값: '#18d8b6' - 청명한 열대 에메랄드 그린)
      * @param deepColor - 깊은 수심 심해 남색 HEX 컬러 (기본값: '#023d58' - 깊은 라군 사파이어 블루)
-     * @param opacity - 기본 수면 불투명도 (기본값: 0.85)
+     * @param opacity - 기본 수면 불투명도 (기본값: 1.0)
      */
-    constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#023d58', opacity: number = 0.85) {
+    constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#023d58', opacity: number = 1.0) {
         super(
             redGPUContext,
             'SINGLE_LAYER_WATER_MATERIAL',
@@ -204,7 +204,7 @@ defineVector2(SingleLayerWaterMaterial, [
 ]);
 
 definePositiveNumber(SingleLayerWaterMaterial, [
-    {key: 'opacity', value: 0.85, min: 0, max: 1},
+    {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
     {key: 'normalScale', value: 1.0},
     {key: 'normalScale2', value: 1.0},
