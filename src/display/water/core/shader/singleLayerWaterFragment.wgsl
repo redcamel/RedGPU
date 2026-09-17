@@ -288,11 +288,15 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     var rawXY1 = rawSample1.xy * 2.0 - 1.0;
+    // [KO] WebGPU Top-Left UV(V+가 아래로 향함)와 표준 OpenGL 노멀 맵(Y+가 위로 향함) 사이의 방향성 불일치 해결을 위해 Y 기여도 기본 반전
+    // [EN] Invert Y contribution by default to resolve directional mismatch between WebGPU Top-Left UV (V+ down) and standard OpenGL normal map (Y+ up)
+    rawXY1.y = -rawXY1.y;
     if (uniforms.invertNormalY1 == 1u) {
         rawXY1.y = -rawXY1.y;
     }
-    let rawZ1 = max(0.01, rawSample1.z * 2.0 - 1.0);
-    var combinedTangentNormal = normalize(vec3<f32>(rawXY1 * uniforms.normalScale, rawZ1));
+    var n1 = rawXY1 * uniforms.normalScale;
+    let z1 = sqrt(max(0.0, 1.0 - dot(n1, n1)));
+    var combinedTangentNormal = normalize(vec3<f32>(n1, z1));
 
     // Layer 2: 마이크로 잔물결 교차 파도
     if (uniforms.useNormalTexture2 > 0u) {
@@ -302,11 +306,15 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
+        // [KO] WebGPU Top-Left UV와 표준 OpenGL 노멀 맵 사이의 방향성 불일치 해결을 위해 Y 기여도 기본 반전
+        // [EN] Invert Y contribution by default to resolve directional mismatch between WebGPU Top-Left UV and standard OpenGL normal map
+        rawXY2.y = -rawXY2.y;
         if (uniforms.invertNormalY2 == 1u) {
             rawXY2.y = -rawXY2.y;
         }
-        let rawZ2 = max(0.01, rawSample2.z * 2.0 - 1.0);
-        let tangentNormal2 = normalize(vec3<f32>(rawXY2 * uniforms.normalScale2, rawZ2));
+        var n2 = rawXY2 * uniforms.normalScale2;
+        let z2 = sqrt(max(0.0, 1.0 - dot(n2, n2)));
+        let tangentNormal2 = normalize(vec3<f32>(n2, z2));
 
         combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
     }
@@ -497,7 +505,7 @@ fn main(inputData: InputData) -> OutputFragment {
     if (u_usePrefilterTexture) {
         let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
         let effectiveRoughnessIBL = clamp(uniforms.roughness, 0.0, 1.0);
-        let mipLevel = clamp(effectiveRoughnessIBL * iblMipmapCount, 0.0, iblMipmapCount);
+        let mipLevel = 0.0;
         rawSkyReflection = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
 
         skyDiffuseIrradiance = textureSample(ibl_irradianceTexture, prefilterTextureSampler, worldNormal).rgb * preExposure * systemUniforms.iblIntensity;

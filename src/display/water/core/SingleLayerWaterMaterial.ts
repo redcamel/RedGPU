@@ -133,13 +133,13 @@ interface SingleLayerWaterMaterial {
      */
     debugMaxDepth: number;
     /**
-     * [KO] 제1 주 노멀 맵의 Y축(Green) 반전 여부 (기본값: false - OpenGL 표준)
-     * [EN] Whether to invert Y-axis (Green) of main normal map (default: false - OpenGL standard)
+     * [KO] 제1 주 노멀 맵의 Y축(Green) 추가 반전 여부 (기본값: false - OpenGL 표준에 맞게 기본 반전 적용됨, DirectX 텍스처 사용 시 true로 설정)
+     * [EN] Whether to invert Y-axis (Green) of main normal map (default: false - inverted by default for OpenGL standard, set true for DirectX)
      */
     invertNormalY1: boolean;
     /**
-     * [KO] 제2 디테일 노멀 맵의 Y축(Green) 반전 여부 (기본값: false - OpenGL 표준)
-     * [EN] Whether to invert Y-axis (Green) of secondary normal map (default: false - OpenGL standard)
+     * [KO] 제2 디테일 노멀 맵의 Y축(Green) 추가 반전 여부 (기본값: false - OpenGL 표준에 맞게 기본 반전 적용됨, DirectX 텍스처 사용 시 true로 설정)
+     * [EN] Whether to invert Y-axis (Green) of secondary normal map (default: false - inverted by default for OpenGL standard, set true for DirectX)
      */
     invertNormalY2: boolean;
     /**
@@ -250,8 +250,8 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.roughness = 0.07;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
-        this.invertNormalY1 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
-        this.invertNormalY2 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
+        this.invertNormalY1 = false; // 기본 OpenGL 규격 호환 (DirectX 텍스처 사용 시 true로 설정)
+        this.invertNormalY2 = false; // 기본 OpenGL 규격 호환 (DirectX 텍스처 사용 시 true로 설정)
         this.causticsStrength = 0.25;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
