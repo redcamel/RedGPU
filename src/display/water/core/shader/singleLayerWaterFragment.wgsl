@@ -322,48 +322,48 @@ fn main(inputData: InputData) -> OutputFragment {
     let worldNormal = normalize(tbn * combinedTangentNormal);
 
     // -------------------------------------------------------------------------
-    // [Step 3] SSR 파이프라인 기반 100% 물리 정합 스넬 굴절 (Exact SSR-Coupled Refraction)
+    // [Step 3] UE5 표준 뷰 공간 물리 스넬 굴절 (View-Space Physical Snell Refraction)
     // -------------------------------------------------------------------------
     // 1) 물리 상수: 공기(1.0) -> 물(1.33333) 입사 굴절률 비율
     let etaRatio = 1.0 / 1.33333; // ≈ 0.75006
     let incidentDir = -normalize(V);
-    var refractedDir = refract(incidentDir, worldNormal, etaRatio);
-    if (dot(refractedDir, refractedDir) < 0.01) {
-        refractedDir = incidentDir; // 전반사 방지 폴백
+
+    // 2) 평평한 기준 수면에서의 정적 스넬 굴절 각도 편향 (Broken Straw 기저 꺾임)
+    var flatRefracted = refract(incidentDir, baseNormal, etaRatio);
+    if (dot(flatRefracted, flatRefracted) < 0.01) {
+        flatRefracted = incidentDir;
     }
+    let flatDelta = flatRefracted - incidentDir;
+    let viewSpaceFlatDelta = (systemUniforms.camera.viewMatrix * vec4<f32>(flatDelta, 0.0)).xy;
 
-    // 2) 바닥의 3D 월드 좌표 (Step 1에서 표준 함수로 복원된 좌표 재사용 - 중복 연산 방지)
-    let groundWorldPos = initialGroundWorldPos;
-    let verticalDepth = initialVerticalDepth; // 실제 월드 Y축 수심
-    let directDist = initialOpticalDistance;
+    // 3) 파도 곡률에 의한 동적 스넬 굴절 편향 (물결 일렁임)
+    let deltaN = worldNormal - baseNormal;
+    let viewSpaceDeltaN = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaN, 0.0)).xy;
 
-    // 2) 스넬 굴절 광선이 수중 바닥 평면에 도달하는 실제 3D 월드 위치 계산
-    let hitT = min(initialOpticalDistance * 1.5, initialVerticalDepth / max(0.12, -refractedDir.y));
-    let refractHitWorldPos = worldPos + refractedDir * hitT;
+    // 4) 물리 스넬 광학 결합:
+    //  - 기저 꺾임(Broken Straw): 평면 굴절 편향의 25% (화면 경계 이탈 없는 정밀 단축)
+    //  - 파도 일렁임: 파도 법선 편향의 75%
+    let combinedViewDelta = viewSpaceFlatDelta * 0.25 + viewSpaceDeltaN * 0.75;
 
-    // 3) 스크린 투영 함수(worldToScreen)를 통한 정밀 스크린 UV 투영
-    let projectedRefractUV = worldToScreen(refractHitWorldPos);
-    let physicalRefractUV = select(screenUV, projectedRefractUV, projectedRefractUV.x >= 0.0);
+    // 5) 수심(Depth) 및 카메라 거리(Distance) 기반 무차원 스크린 UV 오프셋 환산:
+    //  - 수심 d를 통과할 때의 물리적 횡변위: Δx = d * (1.0 - 1.0/1.333) = d * 0.25
+    //  - 화면 투영 각도: ΔUV = Δx / camDist
+    let opticalDepth = clamp(initialOpticalDistance, 0.0, 3.5);
+    let depthFactor = opticalDepth / max(1.0, camDist);
+    let snellScale = 0.25 * uniforms.refractionStrength;
 
     // 화면 가장자리 안전 페이드 (화면 외곽 샘플링 아티팩트 방지)
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
-    // 물리적 굴절 편향 오프셋 벡터 (1.0 = 100% 물리 정밀 스넬 굴절)
-    let rawDeltaUV = (physicalRefractUV - screenUV) * (uniforms.refractionStrength * screenEdgeFade);
-
-    // [적응형 소프트 포화 클램프 (Soft Saturation Clamping)]:
-    // 얕은 물가의 기둥 꺾임(Broken Straw)은 선명히 전달하고, 깊은 수심에서 젤리처럼 녹아내리는 극단적 왜곡은 화면의 2.5%로 부드럽게 수렴
-    let deltaUVLen = length(rawDeltaUV);
-    let maxRefractLimit = 0.025;
-    let softRefractionOffset = rawDeltaUV / (1.0 + deltaUVLen / maxRefractLimit);
+    let rawRefractionOffset = vec2<f32>(combinedViewDelta.x, -combinedViewDelta.y) * (depthFactor * snellScale * screenEdgeFade);
 
     // 소프트 블리딩 방지 (물 표면 앞쪽 수면 위 물체 왜곡 감쇄)
-    let testUV = clamp(screenUV + softRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
+    let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
     let linearDistortedDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
     let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
-    let finalRefractUV = clamp(screenUV + softRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
+    let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
     // 굴절된 바닥의 실제 3D 월드 좌표 복원 (RedGPU 표준 함수 getWorldPositionFromDepth 사용)
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);
