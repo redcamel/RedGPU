@@ -334,21 +334,16 @@ fn main(inputData: InputData) -> OutputFragment {
     let waterTint = mix(vec3<f32>(1.0), waterAlbedo * 1.25, depthProgress);
     var transmittedSceneColor = sceneColor * waterTint;
 
-    // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 수면 파도 노멀 100% 연동 & 선명한 집광)
+    // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 카메라 무빙 시 밉맵 블러 방지 & 월드 밀착)
     var causticIntensity = 0.0;
     if (uniforms.causticsStrength > 0.001) {
-        // 굴절된 실제 바닥 깊이를 역투영하여 바닥 지형/암초의 실제 3D 월드 좌표(XZ) 복원
-        let ndcX = finalRefractUV.x * 2.0 - 1.0;
-        let ndcY = (1.0 - finalRefractUV.y) * 2.0 - 1.0;
-        let ndcPos = vec4<f32>(ndcX, ndcY, rawFinalDepth, 1.0);
-        let worldH = systemUniforms.projection.inverseProjectionViewMatrix * ndcPos;
-        let groundWorldPos = worldH.xyz / max(1e-5, worldH.w);
-
-        // 태양광 입사각에 따른 광선 투영 오프셋 (호수 크기 240m 기준)
+        // 태양광 입사각과 수심에 따른 안정적인 바닥 월드 위치 계산
+        // (카메라 굴절 스크린 UV와 역투영에 의한 카메라 회전 슬라이딩 및 미분 폭발/모션블러 원천 방지)
         let primarySun = systemUniforms.directionalLights[0];
         let sunDir = -normalize(primarySun.direction);
-        let lightRayOffset = sunDir.xz * (effectiveDeltaDepth * 0.18);
-        let groundSurfaceUV = (groundWorldPos.xz - lightRayOffset) * (1.0 / 240.0) + vec2<f32>(0.5);
+        let lightRayOffset = sunDir.xz * (effectiveDeltaDepth * 0.22);
+        let groundSurfacePos = worldPos.xz + lightRayOffset;
+        let groundSurfaceUV = groundSurfacePos * (1.0 / 240.0) + vec2<f32>(0.5);
 
         let windDirLen2 = length(uniforms.windDirection2);
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
@@ -360,17 +355,18 @@ fn main(inputData: InputData) -> OutputFragment {
         let cUV1 = groundSurfaceUV * (uniforms.normalTiling * cScale) + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
         let cUV2 = groundSurfaceUV * (uniforms.normalTiling2 * cScale) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
 
-        // 1차 샘플링: 두 파도의 법선 방향 벡터 (순수 선형 rgba8unorm 샘플링)
-        let rawN1 = (textureSample(normalTexture, normalTextureSampler, cUV1).rgb * 2.0 - 1.0).xy;
-        let rawN2 = (textureSample(normalDetailTexture, normalTextureSampler, cUV2).rgb * 2.0 - 1.0).xy;
+        // [핵심 해결] textureSampleLevel을 사용하여 카메라 회전 시 화면 미분(ddx/ddy) 폭발로 인한 밉맵 강제 블러(모션블러 현상) 원천 차단
+        let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
+        let rawN1 = (textureSampleLevel(normalTexture, normalTextureSampler, cUV1, causticMip).rgb * 2.0 - 1.0).xy;
+        let rawN2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, cUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
         // 상호 섭동 왜곡: 제2 노멀로 제1 노멀 UV를 굴절시키고, 제1 노멀로 제2 노멀 UV를 굴절
         let distortUV1 = cUV1 + rawN2 * 0.18;
         let distortUV2 = cUV2 + rawN1 * 0.18;
 
-        // 2차 왜곡 샘플링
-        let s1 = (textureSample(normalTexture, normalTextureSampler, distortUV1).rgb * 2.0 - 1.0).xy;
-        let s2 = (textureSample(normalDetailTexture, normalTextureSampler, distortUV2).rgb * 2.0 - 1.0).xy;
+        // 2차 왜곡 샘플링 (일정하고 날카로운 선명도 보장)
+        let s1 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV1, causticMip).rgb * 2.0 - 1.0).xy;
+        let s2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, distortUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
         // 파도 노멀 텍스처의 실제 진폭(0.03~0.08)에 맞춘 고대비 파형 추출
         let waveA1 = (s1.x + s1.y) * 9.0;
