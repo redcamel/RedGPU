@@ -256,26 +256,33 @@ fn main(inputData: InputData) -> OutputFragment {
     let preExposure = systemUniforms.preExposure;
 
     // -------------------------------------------------------------------------
-    // [Step 1] 기하 및 선형 깊이 (Geometry & Depths)
+    // [Step 1] 기하 및 기준 3D 월드 깊이 복원 (Geometry & World Depths)
     // -------------------------------------------------------------------------
     let screenUV = inputData.position.xy / systemUniforms.resolution;
     let pixelCoord = vec2<i32>(inputData.position.xy);
     let cameraNear = systemUniforms.camera.nearClipping;
     let cameraFar = systemUniforms.camera.farClipping;
+    let worldPos = inputData.vertexPosition;
 
     let rawSceneDepth = textureLoad(renderPath1DepthTexture, pixelCoord, 0);
     let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
     let linearWaterDepth = getLinearizeDepth(inputData.position.z, cameraNear, cameraFar);
-    let deltaDepth = max(0.0, linearSceneDepth - linearWaterDepth);
 
+    // [SSR 파이프라인 100% 일치] 1패스 Depth로부터 원래 바닥의 실제 3D 월드 좌표 복원
+    let initialGroundWorldPos = reconstructSSRWorldPosition(screenUV, rawSceneDepth);
+    // 순수 물리 수직 수심 (카메라 각도/FOV와 무관한 실제 지형 높이차)
+    let initialVerticalDepth = max(0.0, worldPos.y - initialGroundWorldPos.y);
+    // 실제 3D 유클리드 광로 거리 (빛이 수면에서 바닥까지 통과한 실제 유클리드 거리)
+    let initialOpticalDistance = length(initialGroundWorldPos - worldPos);
+
+    // 해안선 소프트 페이드: 카메라 시선 각도 왜곡 없이 실제 3D 광로 거리를 기준으로 균일하게 페이드
     let fadeDist = max(0.001, uniforms.depthFadeDistance);
-    let depthFade = clamp(deltaDepth / fadeDist, 0.0, 1.0);
+    let depthFade = clamp(initialOpticalDistance / fadeDist, 0.0, 1.0);
 
     // -------------------------------------------------------------------------
     // [Step 2] 듀얼 노멀 (RNM + sRGB 역보정 + 원거리 노멀 페이드)
     // -------------------------------------------------------------------------
     let timeSec = systemUniforms.time.time;
-    let worldPos = inputData.vertexPosition;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
     // Layer 1: 주 너울 파도
@@ -321,46 +328,35 @@ fn main(inputData: InputData) -> OutputFragment {
     let worldNormal = normalize(tbn * combinedTangentNormal);
 
     // -------------------------------------------------------------------------
-    // [Step 3] 물리 기반 스넬의 굴절 (PBR Snell's Refraction & Broken Straw)
+    // [Step 3] SSR 파이프라인 기반 100% 물리 정합 스넬 굴절 (Exact SSR-Coupled Refraction)
     // -------------------------------------------------------------------------
-    // 공기(1.0) -> 물(1.3333) 입사 굴절률 비율 eta = 1.0 / 1.3333 ≈ 0.750
-    let etaRatio = 0.750;
-    let incidentRay = -normalize(V);
-    var refractedRay = refract(incidentRay, worldNormal, etaRatio);
-    if (dot(refractedRay, refractedRay) < 0.01) {
-        refractedRay = incidentRay;
+    // 1) 물리 상수: 공기(1.0) -> 물(1.33333) 입사 굴절률 비율
+    let etaRatio = 1.0 / 1.33333; // ≈ 0.75006
+    let incidentDir = -normalize(V);
+    var refractedDir = refract(incidentDir, worldNormal, etaRatio);
+    if (dot(refractedDir, refractedDir) < 0.01) {
+        refractedDir = incidentDir; // 전반사 방지 폴백
     }
 
-    // 1) 스넬 법칙에 의한 월드 광로 편향 벡터 (Snell Angular Deflection)
-    let aspectRatio = systemUniforms.resolution.x / max(1.0, systemUniforms.resolution.y);
-    let snellRayDeflection = refractedRay - incidentRay;
-    let viewSnellDeflection = (systemUniforms.camera.viewMatrix * vec4<f32>(snellRayDeflection, 0.0)).xyz;
-    // 종횡비(aspectRatio)를 반영하여 가로 방향 찢어짐 왜곡을 원천 방지하고 정방형 왜곡 비율 유지
-    let snellScreenDir = vec2<f32>(viewSnellDeflection.x / aspectRatio, -viewSnellDeflection.y);
+    // 2) SSR 월드 복원 함수를 통한 바닥의 3D 월드 좌표 복원 (시선 각도 뎁스 왜곡 0%)
+    let groundWorldPos = reconstructSSRWorldPosition(screenUV, rawSceneDepth);
+    let verticalDepth = max(0.0, worldPos.y - groundWorldPos.y); // 실제 월드 Y축 수심
+    let directDist = length(groundWorldPos - worldPos);
 
-    // 2) 듀얼 파도 노멀에 의한 수면 표면 잔물결 섭동 (Wave Perturbation)
-    let deltaWorldNormal = worldNormal - baseNormal;
-    let viewDeltaNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaWorldNormal, 0.0)).xyz;
-    let waveScreenDir = vec2<f32>(viewDeltaNormal.x / aspectRatio, -viewDeltaNormal.y);
+    // 2) 스넬 굴절 광선이 수중 바닥 평면에 도달하는 실제 3D 월드 위치 계산
+    let hitT = min(initialOpticalDistance * 1.5, initialVerticalDepth / max(0.12, -refractedDir.y));
+    let refractHitWorldPos = worldPos + refractedDir * hitT;
 
-    // 3) 수심(Delta Depth)에 비례하는 물리적 시차 변위 (Depth-dependent Parallax):
-    // 수면 경계(depth=0)에서는 0에서 시작하여 연속성을 보장하고,
-    // 수심이 깊어질수록 광선 굴절각에 비례하여 물속 물체(기둥/바닥)가 꺾여 보이는 Broken Straw 현상 구현
-    let depthFactor = clamp(deltaDepth * 0.5, 0.0, 2.0);
-    // 화면 하단(근경)에서 분모가 작아져 배율이 폭증하지 않도록 안정적인 원근 감쇄 적용
-    let perspectiveScale = 1.0 / (1.0 + linearWaterDepth * 0.06);
+    // 3) SSR 투영 함수(ssrWorldToScreen)를 통한 정밀 스크린 UV 투영
+    let projectedRefractUV = ssrWorldToScreen(refractHitWorldPos);
+    let physicalRefractUV = select(screenUV, projectedRefractUV, projectedRefractUV.x >= 0.0);
 
+    // 화면 가장자리 안전 페이드 (화면 외곽 샘플링 아티팩트 방지)
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
-    // 스넬 기하 꺾임(자연스러운 기둥 꺾임) + 파도 잔물결 굴절의 정밀 밸런싱
-    // (일방향 스넬 쏠림으로 인한 화면 하단 늘어짐/스미어링 원천 방지)
-    let safeSnell = clamp(snellScreenDir, vec2<f32>(-0.6), vec2<f32>(0.6));
-    let combinedRefractScreen = (safeSnell * (depthFactor * 0.10) + waveScreenDir * (depthFactor * 0.35 + 0.65)) * perspectiveScale;
-
-    // 최대 스크린 UV 변위 상한선(0.018)을 적용하여 화면 하단 및 외곽 텍스처 늘어짐 완벽 차단
-    let unclampedOffset = combinedRefractScreen * (uniforms.refractionStrength * screenEdgeFade);
-    let rawRefractionOffset = clamp(unclampedOffset, vec2<f32>(-0.018), vec2<f32>(0.018));
+    // 물리적 굴절 편향 오프셋 벡터 (1.0 = 100% 물리 정밀 스넬 굴절)
+    let rawRefractionOffset = (physicalRefractUV - screenUV) * (uniforms.refractionStrength * screenEdgeFade);
 
     // 소프트 블리딩 방지 (물 표면 앞쪽 수면 위 물체 왜곡 감쇄)
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
@@ -369,11 +365,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
     let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
-    // 굴절된 실제 바닥 씬 컬러 및 실제 광로 수심
+    // 굴절된 실제 바닥 씬 컬러 및 굴절된 바닥의 실제 3D 월드 좌표 복원 (각도 왜곡 0%)
     let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, 0.0).rgb;
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);
-    let linearFinalDepth = getLinearizeDepth(rawFinalDepth, cameraNear, cameraFar);
-    let effectiveDeltaDepth = max(0.0, linearFinalDepth - linearWaterDepth);
+    let refractedGroundWorldPos = reconstructSSRWorldPosition(finalRefractUV, rawFinalDepth);
+    let effectiveVerticalDepth = max(0.0, worldPos.y - refractedGroundWorldPos.y); // 순수 수직 수심 (m)
+    let effectiveOpticalDistance = length(refractedGroundWorldPos - worldPos); // 실제 3D 유클리드 광로 거리 (m)
 
     // -------------------------------------------------------------------------
     // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Wavelength Beer-Lambert & Water Fog)
@@ -390,7 +387,8 @@ fn main(inputData: InputData) -> OutputFragment {
         baseExt * 0.7,
         baseExt * (1.1 + turbidityCoeff * 0.9)
     );
-    let extinctionRGB = exp(-effectiveDeltaDepth * wavelengthExt);
+    // [물리 법칙 100% 일치] 빛이 수체를 실제로 통과한 3D 유클리드 광로 거리(effectiveOpticalDistance)를 기준으로 지수 흡수
+    let extinctionRGB = exp(-effectiveOpticalDistance * wavelengthExt);
     let meanExtinction = dot(extinctionRGB, vec3<f32>(0.299, 0.587, 0.114)); // 인지 휘도 기반 평균 투과율
 
     // 수심에 따른 물의 물리 알베도 전이 (얕은 곳 baseColor -> 심연 deepColor)
@@ -411,11 +409,10 @@ fn main(inputData: InputData) -> OutputFragment {
     // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 카메라 무빙 시 밉맵 블러 방지 & 월드 밀착)
     var causticIntensity = 0.0;
     if (uniforms.causticsStrength > 0.001) {
-        // 태양광 입사각과 수심에 따른 안정적인 바닥 월드 위치 계산
-        // (카메라 굴절 스크린 UV와 역투영에 의한 카메라 회전 슬라이딩 및 미분 폭발/모션블러 원천 방지)
+        // 태양광은 수직으로 바닥에 도달하므로 순수 수직 수심(effectiveVerticalDepth)을 사용하여 정확한 지형 밀착 계산
         let primarySun = systemUniforms.directionalLights[0];
         let sunDir = -normalize(primarySun.direction);
-        let lightRayOffset = sunDir.xz * (effectiveDeltaDepth * 0.22);
+        let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
         let groundSurfacePos = worldPos.xz + lightRayOffset;
         let lakeSize = max(1.0, uniforms.lakeWorldSize);
         let groundSurfaceUV = groundSurfacePos * (1.0 / lakeSize) + vec2<f32>(0.5);
@@ -454,8 +451,8 @@ fn main(inputData: InputData) -> OutputFragment {
         let crest2 = pow(max(0.0, 1.0 - abs(waveB1 - waveB2)), 3.5);
         let causticCrest = max(crest1, crest2) * 2.2;
 
-        // 수심에 따른 자연스러운 물리 감쇄 (물가 경계 클리핑 방지 및 심해 자연 소멸)
-        let causticsDepthFade = exp(-effectiveDeltaDepth * 0.35) * smoothstep(0.01, 0.15, effectiveDeltaDepth);
+        // 수심에 따른 자연스러운 물리 감쇄 (순수 수직 수심 기반)
+        let causticsDepthFade = exp(-effectiveVerticalDepth * 0.35) * smoothstep(0.01, 0.15, effectiveVerticalDepth);
         causticIntensity = causticCrest * uniforms.causticsStrength * causticsDepthFade;
 
         let sunFactor = clamp(sunDir.y * 1.5, 0.35, 1.0);
@@ -652,8 +649,8 @@ fn main(inputData: InputData) -> OutputFragment {
             output.color = vec4<f32>(vec3<f32>(depthFade), 1.0);
         }
         case 4u: {
-            // Step 3.4: Delta Depth 수심 마스크
-            let mask = clamp(deltaDepth / maxDepth, 0.0, 1.0);
+            // Step 3.4: Vertical World Depth 실제 수직 수심 마스크
+            let mask = clamp(effectiveVerticalDepth / maxDepth, 0.0, 1.0);
             output.color = vec4<f32>(vec3<f32>(mask), 1.0);
         }
         case 3u: {

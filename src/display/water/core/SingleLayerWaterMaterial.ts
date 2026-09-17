@@ -88,8 +88,8 @@ interface SingleLayerWaterMaterial {
      */
     useNormalTexture2: boolean;
     /**
-     * [KO] 수중 굴절 왜곡 강도 (UE5 기본값: 0.02)
-     * [EN] Underwater refraction distortion strength (UE5 default: 0.02)
+     * [KO] 물리 기반 스넬 굴절 배율 (1.0: 100% 물리 정확 굴절, 0.0: 굴절 없음, 기본값: 1.0)
+     * [EN] Physically-based Snell refraction multiplier (1.0: 100% physical exact, 0.0: no refraction, default: 1.0)
      */
     refractionStrength: number;
     /**
@@ -235,7 +235,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.baseColor.setColorByHEX(baseColor);
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
-        this.refractionStrength = 0.025;
+        this.refractionStrength = 1.0;
         this.normalScale = 0.22;
         this.normalScale2 = 0.10;
         this.normalTiling = 28.0;
@@ -305,7 +305,7 @@ defineVector2(SingleLayerWaterMaterial, [
 
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
-    {key: 'refractionStrength', value: 0.025},
+    {key: 'refractionStrength', value: 1.0, min: 0, max: 2},
     {key: 'normalScale', value: 0.22},
     {key: 'normalScale2', value: 0.10},
     {key: 'normalTiling', value: 28.0},

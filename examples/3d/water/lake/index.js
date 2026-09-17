@@ -425,7 +425,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // [Phase 7, 8, 9] 파도 노멀 및 굴절 왜곡 제어 패널
             const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7~9)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.08, step: 0.001});
+            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
 
             // 주 파도 (Layer 1: Base Swell)
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
