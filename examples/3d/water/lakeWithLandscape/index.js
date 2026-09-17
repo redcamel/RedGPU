@@ -153,11 +153,11 @@ RedGPU.init(
         //    모든 핵심 UE5 SingleLayerWater PBR 광학 속성은 코어 기본값을 그대로 활용합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal.png'
+            '../../../assets/water/lake_normal.png'
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal_detail.png'
+            '../../../assets/water/lake_normal_detail.png'
         );
 
         // 16km 초대형 지형 스케일에 맞춘 타일링 (250m 장파장 너울과 1:1 대응) 및 해안선 완충 설정

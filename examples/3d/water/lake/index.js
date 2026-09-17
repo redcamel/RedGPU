@@ -52,14 +52,14 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
 
-        // 파도 노멀 텍스처 장착 (머티리얼 기본값이 호수 최적 물결 스케일 48x48 / 96x96 및 물리 파라미터 내장)
+        // 파도 노멀 텍스처 장착 (Tessendorf FFT 호수 전용 트로코이드 파도 텍스처)
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal.png'
+            '../../../assets/water/lake_normal.png'
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/water_normal_detail.png'
+            '../../../assets/water/lake_normal_detail.png'
         );
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
@@ -342,7 +342,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 label: 'Tiling'
             });
             layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005, label: 'Speed'});
-            layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1', {label: 'Invert Y (DirectX: OFF)'});
+            layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1', {label: 'Invert Y (DirectX Mode)'});
 
             // 제2 파도 (Layer 2: Micro Ripple with RNM)
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
@@ -365,7 +365,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 step: 0.005,
                 label: 'Speed'
             });
-            layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2', {label: 'Invert Y (OpenGL: ON)'});
+            layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2', {label: 'Invert Y (DirectX Mode)'});
 
             // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널
             const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: false});
