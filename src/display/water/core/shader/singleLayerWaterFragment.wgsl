@@ -5,6 +5,8 @@
 #redgpu_include math.PI;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
+#redgpu_include math.getInterleavedGradientNoise;
+#redgpu_include math.reconstruct.getViewPositionFromDepth;
 
 // =============================================================================
 // Cook-Torrance GGX 마이크로패싯 함수군 (PBR Specular BRDF)
@@ -88,12 +90,26 @@ struct WaterUniforms {
 // =============================================================================
 // Phase 17: 수면 전용 스크린 공간 반사 (Screen Space Reflection - SSR)
 // =============================================================================
+fn reconstructSSRWorldPosition(uv: vec2<f32>, depth: f32) -> vec3<f32> {
+    let viewPos = getViewPositionFromDepth(uv, depth, systemUniforms.projection.inverseProjectionMatrix);
+    let worldPos4 = systemUniforms.camera.inverseViewMatrix * vec4<f32>(viewPos, 1.0);
+    return worldPos4.xyz;
+}
+
+fn ssrWorldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
+    let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    if (clipPos.w <= 0.001) {
+        return vec2<f32>(-1.0);
+    }
+    let ndc = clipPos.xyz / clipPos.w;
+    return vec2<f32>(ndc.x * 0.5 + 0.5, -ndc.y * 0.5 + 0.5);
+}
+
 fn calculateWaterSSR(
     startWorldPos: vec3<f32>,
     worldNormal: vec3<f32>,
     R: vec3<f32>,
-    cameraNear: f32,
-    cameraFar: f32
+    pixelCoord: vec2<i32>
 ) -> vec4<f32> {
     if (uniforms.enableSSR == 0u || R.y <= 0.001) {
         return vec4<f32>(0.0);
@@ -107,69 +123,74 @@ fn calculateWaterSSR(
     let maxDist = max(1.0, uniforms.ssrMaxDistance);
     let baseStepSize = maxDist / f32(maxSteps);
     let thickness = max(0.05, uniforms.ssrThickness);
+    let cameraWorldPos = systemUniforms.camera.cameraPosition;
 
-    // 수면 자체와의 자가 교차 방지를 위한 최소 오프셋 (수면 법선 방향 1.5cm)
-    var currentPos = startWorldPos + worldNormal * 0.015;
+    // IGN(Interleaved Gradient Noise)을 활용한 레이 마칭 시작점 지터링 (밴딩 제거 및 접촉면 연결)
+    let jitter = getInterleavedGradientNoise(vec2<f32>(pixelCoord));
+
+    // 수면 자체와의 자가 교차 방지를 위한 최소 오프셋 (수면 법선 방향 8mm)
+    var currentWorldPos = startWorldPos + worldNormal * 0.008 + R * (baseStepSize * jitter);
     var currentStepSize = baseStepSize;
     var hitUV = vec2<f32>(0.0);
     var hitFound = false;
+    var hitStep = 0u;
     var refinementLevel = 0u;
     let maxRefinementLevels = 4u;
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
-        currentPos = currentPos + R * currentStepSize;
+        currentWorldPos = currentWorldPos + R * currentStepSize;
 
-        // 월드 좌표 -> 클립 공간 -> NDC -> 스크린 UV
-        let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(currentPos, 1.0);
-        if (clipPos.w <= 0.001) {
+        // 최대 추적 거리 초과 시 종료
+        let travelVec = currentWorldPos - startWorldPos;
+        let travelDist = length(travelVec);
+        if (travelDist > maxDist) {
             break;
         }
-        let ndc = clipPos.xyz / clipPos.w;
-        let uv = vec2<f32>(ndc.x * 0.5 + 0.5, -ndc.y * 0.5 + 0.5);
 
-        // 화면 경계 밖 또는 깊이 버퍼 범위 밖이면 추적 중단
-        if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || ndc.z < 0.0 || ndc.z > 1.0) {
+        // 월드 좌표 -> 스크린 UV 변환
+        let currentScreenUV = ssrWorldToScreen(currentWorldPos);
+        if (currentScreenUV.x < 0.0 || currentScreenUV.x > 1.0 || currentScreenUV.y < 0.0 || currentScreenUV.y > 1.0) {
             break;
         }
 
         // 1패스 불투명 오브젝트 Depth 로드
-        let coord = vec2<i32>(uv * systemUniforms.resolution);
+        let coord = vec2<i32>(currentScreenUV * systemUniforms.resolution);
         let rawSceneDepth = textureLoad(renderPath1DepthTexture, coord, 0);
 
-        // 하늘 영역(깊이 1.0 근처)은 교차 대상이 아니므로 계속 진행
+        // 하늘 영역(깊이 0.9999 이상)은 교차 대상이 아니므로 계속 진행
         if (rawSceneDepth >= 0.9999) {
             continue;
         }
 
-        // 수중 바닥 지형 및 물속에 잠긴 물체 배제:
-        // [RedGPU 표준 역투영] 샘플링된 오브젝트의 실제 월드 Y 고도를 정확히 복원
-        let ndcX = uv.x * 2.0 - 1.0;
-        let ndcY = (1.0 - uv.y) * 2.0 - 1.0;
-        let sceneH = systemUniforms.projection.inverseProjectionViewMatrix * vec4<f32>(ndcX, ndcY, rawSceneDepth, 1.0);
-        let sceneWorldY = sceneH.y / max(1e-5, sceneH.w);
+        // [정밀 월드 좌표 복원] 포스트이펙트 SSR 표준 공식 (WebGPU 깊이 [0, 1] 규격)
+        let sampledWorldPos = reconstructSSRWorldPosition(currentScreenUV, rawSceneDepth);
 
-        // 수면(waterLevel) 아래에 잠겨 있는 해저 바닥, 수중 암초, 잠긴 밑면은 반사 대상에서 100% 완전 배제
-        if (sceneWorldY <= startWorldPos.y + 0.005) {
+        // [핵심 해결 1] 수면(startWorldPos.y) 아래에 있는 모든 해저/호수 바닥 지형 및 수중 물체는 100% 완전 배제!
+        if (sampledWorldPos.y <= startWorldPos.y) {
             continue;
         }
 
-        let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
-        let rayViewZ = -(systemUniforms.camera.viewMatrix * vec4<f32>(currentPos, 1.0)).z;
-        let depthDiff = rayViewZ - linearSceneDepth;
-        let effectiveThickness = max(currentStepSize * 1.5, thickness);
+        // [핵심 해결 2] 유클리드 3D 거리 비교 (카메라와 광선 위치 거리 - 카메라와 샘플링된 표면 거리)
+        let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
+        let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
+        let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        // 교차 판정: 광선이 수면 위 오브젝트의 표면 뒤로 들어갔으며, 오브젝트 두께 허용치 이내일 때
-        if (depthDiff > 0.0 && depthDiff < effectiveThickness) {
-            // 이진 탐색(Binary Refinement)으로 얇은 기둥 및 물체 표면 접촉점 정밀화
+        // 적응형 두께 임계값 (원거리 허공이나 과도하게 두꺼운 배경 둑 관통 방지)
+        let effectiveThickness = max(thickness, currentStepSize * 1.5);
+
+        // 교차 판정: 광선이 수면 위 오브젝트 표면 뒤로 들어갔으며, 허용 두께 이내일 때
+        if (distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
+            // 이진 탐색 기법(Binary Refinement)으로 물체 접촉선 및 얇은 기둥 밀착 반사 정밀화
             if (refinementLevel < maxRefinementLevels) {
-                currentPos = currentPos - R * currentStepSize;
+                currentWorldPos = currentWorldPos - R * currentStepSize;
                 currentStepSize = currentStepSize * 0.5;
                 refinementLevel = refinementLevel + 1u;
                 continue;
             }
 
-            hitUV = uv;
+            hitUV = currentScreenUV;
             hitFound = true;
+            hitStep = i;
             break;
         }
     }
@@ -178,18 +199,22 @@ fn calculateWaterSSR(
         return vec4<f32>(0.0);
     }
 
-    // 화면 가장자리 페이드아웃 (화면 밖으로 나갈수록 부드럽게 감쇄)
+    // 화면 가장자리 페이드아웃 (화면 가장자리로 갈수록 부드럽게 감쇄)
     let edge = min(hitUV, vec2<f32>(1.0) - hitUV);
-    let edgeFade = smoothstep(0.0, 0.05, min(edge.x, edge.y));
+    let edgeFade = smoothstep(0.0, 0.08, min(edge.x, edge.y));
 
-    // 광선 진행 거리에 따른 부드러운 거리 감쇄 (Distance Fade)
-    let travelDist = length(currentPos - startWorldPos);
-    let distFade = 1.0 - smoothstep(maxDist * 0.75, maxDist, travelDist);
+    // 광선 진행 거리(travelDist)에 따른 부드러운 거리 감쇄:
+    // 수면 접촉부와 근거리 반사는 100% 선명하게 유지하고, 과도한 원거리 배경(둑/절벽)은 자연스럽게 페이드
+    let finalTravelDist = length(currentWorldPos - startWorldPos);
+    let distFade = 1.0 - smoothstep(maxDist * 0.35, maxDist * 0.90, finalTravelDist);
+
+    // 스텝 수 감쇄 (스텝이 많이 진행될수록 점진적 감쇄)
+    let stepFade = 1.0 - f32(hitStep) / f32(maxSteps);
 
     // 수평각 페이드 (완만한 반사각에서도 시원하게 뻗어나가도록 허용)
-    let rayFade = clamp(R.y * 10.0, 0.0, 1.0);
+    let rayFade = clamp(R.y * 12.0, 0.0, 1.0);
 
-    let totalWeight = edgeFade * distFade * rayFade;
+    let totalWeight = edgeFade * distFade * stepFade * rayFade;
     if (totalWeight <= 0.001) {
         return vec4<f32>(0.0);
     }
@@ -201,6 +226,7 @@ fn calculateWaterSSR(
 
     return vec4<f32>(hitColor, totalWeight);
 }
+
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
@@ -456,7 +482,7 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     // [Phase 17] 스크린 공간 오브젝트 반사 (SSR) 연산 및 Skybox IBL 하이브리드 폴백 결합
-    let ssrResult = calculateWaterSSR(worldPos, worldNormal, R, cameraNear, cameraFar);
+    let ssrResult = calculateWaterSSR(worldPos, worldNormal, R, pixelCoord);
     let blendedSkyReflection = mix(rawSkyReflection, ssrResult.rgb, ssrResult.a);
     let skyReflectionColor = blendedSkyReflection * uniforms.specularFactor;
 
