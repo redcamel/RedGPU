@@ -269,6 +269,8 @@ fn main(inputData: InputData) -> OutputFragment {
     // [Step 2] 듀얼 노멀 (RNM + sRGB 역보정 + 원거리 노멀 페이드)
     // -------------------------------------------------------------------------
     let timeSec = systemUniforms.time.time;
+    let worldPos = inputData.vertexPosition;
+    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
     // Layer 1: 주 너울 파도
     let windDirLen1 = length(uniforms.windDirection);
@@ -311,9 +313,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
     let worldNormal = normalize(tbn * combinedTangentNormal);
-
-    let worldPos = inputData.vertexPosition;
-    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
     // -------------------------------------------------------------------------
     // [Step 3] 물리 기반 스넬의 굴절 (PBR Snell's Refraction & Broken Straw)

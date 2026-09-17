@@ -248,6 +248,26 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             waterPosFolder.addBinding(lake, 'waterLevel', {min: 100, max: 1400, step: 2});
             waterPosFolder.addBinding(lake, 'x', {min: -8000, max: 8000, step: 100});
             waterPosFolder.addBinding(lake, 'z', {min: -8000, max: 8000, step: 100});
+            waterPosFolder.addBinding(lake.waterMaterial, 'debugMode', {
+                options: {
+                    'PBR Water (Full Phase 17) (0)': 0,
+                    'Screen Space Reflection Only (15)': 15,
+                    'Underwater Caustics Only (14)': 14,
+                    'Sun Specular Glitter Only (13)': 13,
+                    'Sky Reflection Color Only (12)': 12,
+                    'Fresnel Factor Mask (11)': 11,
+                    'Refraction Offset View (10)': 10,
+                    'Wave Normal Map View (9)': 9,
+                    'Water Albedo Only (8)': 8,
+                    'Extinction Absorption Mask (7)': 7,
+                    'Scene Passthrough (6)': 6,
+                    'Depth Fade Mask (5)': 5,
+                    'Delta Depth Water Mask (4)': 4,
+                    'Linear Water Depth (3)': 3,
+                    'Linear Scene Depth (2)': 2,
+                    'Raw Scene Depth (1)': 1
+                }
+            });
 
             // [폴더 4] 듀얼 노멀 & 도메인 워핑 (Dual Normal Waves)
             const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Warp)', expanded: true});
