@@ -274,6 +274,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let initialVerticalDepth = max(0.0, worldPos.y - initialGroundWorldPos.y);
     // 실제 3D 유클리드 광로 거리 (빛이 수면에서 바닥까지 통과한 실제 유클리드 거리)
     let initialOpticalDistance = length(initialGroundWorldPos - worldPos);
+    // 굴절 없는 원본 바닥 씬 컬러 (해안선 소프트 페이드 및 마른 지형 100% 무왜곡 접합용)
+    let originalSceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
 
     // 해안선 소프트 페이드: 카메라 시선 각도 왜곡 없이 실제 3D 광로 거리를 기준으로 균일하게 페이드
     let fadeDist = max(0.001, uniforms.depthFadeDistance);
@@ -365,12 +367,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
     let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
-    // 굴절된 실제 바닥 씬 컬러 및 굴절된 바닥의 실제 3D 월드 좌표 복원 (각도 왜곡 0%)
-    let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, 0.0).rgb;
+    // 굴절된 바닥의 실제 3D 월드 좌표 복원 (각도 왜곡 0%)
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);
     let refractedGroundWorldPos = reconstructSSRWorldPosition(finalRefractUV, rawFinalDepth);
     let effectiveVerticalDepth = max(0.0, worldPos.y - refractedGroundWorldPos.y); // 순수 수직 수심 (m)
     let effectiveOpticalDistance = length(refractedGroundWorldPos - worldPos); // 실제 3D 유클리드 광로 거리 (m)
+
+    // [수심 및 탁도 기반 수중 산란 밉맵 블러 (Forward Multi-Scatter Blur)]
+    // 얕은 물가는 0.0 밉으로 선명하게 투과되고, 깊은 수심 및 탁도가 높을수록 윤곽이 부드럽게 감싸임
+    let maxSceneMip = f32(textureNumLevels(renderPath1ResultTexture) - 1);
+    let scatterBlur = clamp(effectiveOpticalDistance * 0.12 + uniforms.turbidity * 1.2, 0.0, maxSceneMip);
+    let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, scatterBlur).rgb;
 
     // -------------------------------------------------------------------------
     // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Wavelength Beer-Lambert & Water Fog)
@@ -593,9 +600,9 @@ fn main(inputData: InputData) -> OutputFragment {
     // 3) 완전한 PBR 수체 광학 결합 (에너지 보존 합 1.0 보장)
     let fullWaterColor = totalTransmittedLight + totalReflectedLight;
 
-    // 4) 해안선 접합부 소프트 감쇄: 수심이 0(해안선)에 도달할 때 칼단면 없이 원래 씬 지형과 부드럽게 보간
+    // 4) 해안선 접합부 소프트 감쇄: 원본 무왜곡 씬 컬러(originalSceneColor)와 100% 칼단면/지터 없이 부드럽게 융합
     let softDepthFade = pow(depthFade, 0.85);
-    let finalRgb = mix(sceneColor, fullWaterColor, softDepthFade);
+    let finalRgb = mix(originalSceneColor, fullWaterColor, softDepthFade);
 
     // -------------------------------------------------------------------------
     // [Step 8] 디버그 모드 0~15 완벽 일대일 매핑
@@ -642,7 +649,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
         case 6u: {
             // Step 5.2: Scene Color Passthrough (투명 유리처럼 순수 바닥 씬 컬러 100% 무왜곡 투과)
-            output.color = vec4<f32>(sceneColor, 1.0);
+            output.color = vec4<f32>(originalSceneColor, 1.0);
         }
         case 5u: {
             // Step 4.2: Depth Fade 가중치 마스크 (0.0 검은색 -> 1.0 흰색)
