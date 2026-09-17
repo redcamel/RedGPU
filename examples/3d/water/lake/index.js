@@ -465,6 +465,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
             colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.01, max: 2.0, step: 0.01});
+            colorFolder.addBinding(lake.waterMaterial, 'turbidity', {min: 0.0, max: 1.0, step: 0.01});
             colorFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.05});
             colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.05, max: 10.0, step: 0.05});
 

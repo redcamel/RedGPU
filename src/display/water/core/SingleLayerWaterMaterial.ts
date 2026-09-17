@@ -123,8 +123,8 @@ interface SingleLayerWaterMaterial {
      */
     fresnelF0: number;
     /**
-     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter)
-     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter)
+     * [KO] 디버그 뷰 모드 (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter, 14: Caustics, 15: SSR)
+     * [EN] Debug view mode (0: PBR Water, 1: Raw, 2: Linear Scene, 3: Linear Water, 4: Delta Depth, 5: Depth Fade, 6: Passthrough, 7: Extinction, 8: Albedo, 9: Normal Map, 10: Refraction Offset, 11: Fresnel Factor, 12: Sky Reflection, 13: Sun Glitter, 14: Caustics, 15: SSR)
      */
     debugMode: number;
     /**
@@ -182,6 +182,11 @@ interface SingleLayerWaterMaterial {
      * [EN] SSR surface thickness threshold (Unit: m, default: 0.5)
      */
     ssrThickness: number;
+    /**
+     * [KO] 담수 유기물 탁도 (Freshwater Turbidity, 0.0: 완전 청정수 ~ 1.0: 짙은 유기물/부유퇴적물 담수, 기본값: 0.35)
+     * [EN] Freshwater turbidity (0.0: pure clear water ~ 1.0: organic/silt-rich water, default: 0.35)
+     */
+    turbidity: number;
 }
 
 /**
@@ -255,6 +260,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.ssrMaxDistance = 25.0;
         this.ssrStepCount = 32;
         this.ssrThickness = 0.5;
+        this.turbidity = 0.35;
 
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
@@ -318,6 +324,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'lakeWorldSize', value: 100.0, min: 1.0, max: 5000.0},
     {key: 'ssrMaxDistance', value: 25.0, min: 2.0, max: 100.0},
     {key: 'ssrThickness', value: 0.5, min: 0.05, max: 5.0},
+    {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
 ]);
 
 defineUint(SingleLayerWaterMaterial, [

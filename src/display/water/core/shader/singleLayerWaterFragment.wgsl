@@ -85,6 +85,11 @@ struct WaterUniforms {
     ssrMaxDistance: f32,
     ssrStepCount: u32,
     ssrThickness: f32,
+
+    turbidity: f32,
+    _pad_turbidity1: f32,
+    _pad_turbidity2: f32,
+    _pad_turbidity3: f32,
 };
 
 // =============================================================================
@@ -248,6 +253,7 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
+    let preExposure = systemUniforms.preExposure;
 
     // -------------------------------------------------------------------------
     // [Step 1] 기하 및 선형 깊이 (Geometry & Depths)
@@ -370,15 +376,37 @@ fn main(inputData: InputData) -> OutputFragment {
     let effectiveDeltaDepth = max(0.0, linearFinalDepth - linearWaterDepth);
 
     // -------------------------------------------------------------------------
-    // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Beer-Lambert & Caustics)
+    // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Wavelength Beer-Lambert & Water Fog)
     // -------------------------------------------------------------------------
-    // 정통 비어-람베르트 지수 감쇄: 빛이 수심(effectiveDeltaDepth)을 통과하며 파장별로 흡수
-    let extinction = exp(-effectiveDeltaDepth * uniforms.extinctionFactor);
-    let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
+    // [과제 3: 담수 유기물 탁도 및 다중 파장 비어-람베르트 광학 (Jerlov II/III 담수 모델)]
+    // 1) 파장별 차등 흡수 계수:
+    //  - Red(650nm): 물 분자의 진동 흡수로 가장 빠르게 소멸 (기본 배수 2.4)
+    //  - Green(530nm): 담수 미세 조류/식물성 플랑크톤으로 인해 가장 멀리 도달 (기본 배수 0.7)
+    //  - Blue(460nm): 부유 유기물(Gelbstoff/휴믹산) 탁도에 비례하여 흡수율 증가 (기본 배수 1.1 + turbidity * 0.9)
+    let baseExt = max(0.001, uniforms.extinctionFactor);
+    let turbidityCoeff = clamp(uniforms.turbidity, 0.0, 1.0);
+    let wavelengthExt = vec3<f32>(
+        baseExt * 2.4,
+        baseExt * 0.7,
+        baseExt * (1.1 + turbidityCoeff * 0.9)
+    );
+    let extinctionRGB = exp(-effectiveDeltaDepth * wavelengthExt);
+    let meanExtinction = dot(extinctionRGB, vec3<f32>(0.299, 0.587, 0.114)); // 인지 휘도 기반 평균 투과율
 
-    // 바닥 씬 투과율: 얕은 물가에서는 100% 원본 투과, 깊어질수록 물 흡수 스펙트럼(waterAlbedo)에 비례하여 자연 감쇄
-    let transmittedSceneColorFactor = mix(waterAlbedo, vec3<f32>(1.0), extinction) * extinction;
-    var transmittedSceneColor = sceneColor * transmittedSceneColorFactor;
+    // 수심에 따른 물의 물리 알베도 전이 (얕은 곳 baseColor -> 심연 deepColor)
+    let depthProgress = clamp(1.0 - meanExtinction, 0.0, 1.0);
+    let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, depthProgress);
+
+    // [수중 체적 안개 (Underwater Volume Fog)]:
+    // 깊은 곳에 잠긴 바닥과 수중 물체가 단순 검은색으로 꺼지지 않고,
+    // 호수 미립자에 산란된 부드러운 물빛 포그(Water Volume Fog) 속으로 자연스럽게 침잠
+    let fogDensity = clamp(turbidityCoeff * 0.7 + 0.3, 0.1, 1.0);
+    let waterFogFactor = (vec3<f32>(1.0) - extinctionRGB) * fogDensity;
+    let waterFogColor = mix(uniforms.baseColor * 0.8, uniforms.deepColor, depthProgress);
+
+    // 바닥 투과광: 파장별 비어-람베르트 투과 + 수중 체적 포그 융합
+    let directGroundTransmittance = extinctionRGB;
+    var transmittedSceneColor = sceneColor * directGroundTransmittance + waterFogColor * (waterFogFactor * 0.35 * preExposure);
 
     // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 카메라 무빙 시 밉맵 블러 방지 & 월드 밀착)
     var causticIntensity = 0.0;
@@ -455,7 +483,6 @@ fn main(inputData: InputData) -> OutputFragment {
     R = normalize(R);
 
     // Skybox / IBL 큐브맵 반사광 및 확산 조도광
-    let preExposure = systemUniforms.preExposure;
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     var rawSkyReflection = vec3<f32>(0.0);
@@ -532,8 +559,8 @@ fn main(inputData: InputData) -> OutputFragment {
         let cosThetaT = sqrt(max(0.001, 1.0 - sin2ThetaT));
         let sunTransmittance = max(0.0, 1.0 - getSpecularFresnel(NdotL, uniforms.fresnelF0));
 
-        let depthScatterWeight = pow(1.0 - extinction, 2.0); // 얕은 물가에서 0으로 급격히 수렴
-        let scatteringAlbedo = 0.32; // 수체 체적 단일 산란 알베도 (Single Scattering Albedo)
+        let depthScatterWeight = pow(1.0 - meanExtinction, 2.0); // 얕은 물가에서 0으로 급격히 수렴
+        let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20; // 담수 유기물 탁도에 따른 체적 산란 증대
         let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * depthScatterWeight * scatteringAlbedo);
 
         // [C] 저고도 역광 파도 능선 투과 산란 (전방 위상 전파)
@@ -549,10 +576,10 @@ fn main(inputData: InputData) -> OutputFragment {
     // -------------------------------------------------------------------------
     // [Step 7] UE5 SingleLayerWater 표준 물리 믹싱 (Clean PBR Blending)
     // -------------------------------------------------------------------------
-    let depthScatterWeight = pow(1.0 - extinction, 2.0);
+    let depthScatterWeight = pow(1.0 - meanExtinction, 2.0);
     let diffuseFresnel = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * 0.06; // 물(IOR 1.333) 반구 적분 평균 반사율
     let skyTransmittance = max(0.0, 1.0 - diffuseFresnel);
-    let scatteringAlbedo = 0.32;
+    let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20;
     let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * depthScatterWeight * scatteringAlbedo;
 
     let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
@@ -560,25 +587,21 @@ fn main(inputData: InputData) -> OutputFragment {
     let waterScattering = directWaterScattering + ambientInScattering + skyVolumeScatter;
 
     // [UE5 SingleLayerWater 표준 에너지 보존 결합 (PBR Energy Conservation)]:
-    // 1) 바닥 투과광은 물에 잠긴 바닥에 직접 맺히므로, 초미세 해안선(수심 4cm 이내)에서 지형 원본과 부드럽게 융합
-    let groundDepthFade = smoothstep(0.005, 0.04, deltaDepth);
-    let blendedGround = mix(sceneColor, transmittedSceneColor, groundDepthFade);
+    // 1) 수면을 뚫고 밖으로 나오는 총 투과광: (바닥 투과광 + 수체 체적 산란광) × (1.0 - fresnel)
+    let totalTransmittedLight = (transmittedSceneColor + waterScattering) * (1.0 - fresnel);
 
-    // 2) 수면을 뚫고 밖으로 나오는 총 투과광: (바닥 투과광 + 수체 체적 산란광) × (1.0 - fresnel)
-    let totalTransmittedLight = (blendedGround + waterScattering) * (1.0 - fresnel);
-
-    // 3) 수면 표면에서 반사되는 총 반사광: (Skybox/SSR 환경 반사광) × fresnel + 직사 스펙큘러 다이아몬드 윤슬
+    // 2) 수면 표면에서 반사되는 총 반사광: (Skybox/SSR 환경 반사광) × fresnel + 직사 스펙큘러 다이아몬드 윤슬
     let totalReflectedLight = skyReflectionColor * fresnel + directSpecularColor;
 
-    // 4) 완전한 PBR 수체 광학 결합 (에너지 보존 합 1.0 보장)
+    // 3) 완전한 PBR 수체 광학 결합 (에너지 보존 합 1.0 보장)
     let fullWaterColor = totalTransmittedLight + totalReflectedLight;
 
-    // 5) 해안선 접합부 소프트 감쇄: 수심이 0(해안선)에 도달할 때 칼단면 없이 원래 씬 지형과 100% 매끄럽게 보간
+    // 4) 해안선 접합부 소프트 감쇄: 수심이 0(해안선)에 도달할 때 칼단면 없이 원래 씬 지형과 부드럽게 보간
     let softDepthFade = pow(depthFade, 0.85);
     let finalRgb = mix(sceneColor, fullWaterColor, softDepthFade);
 
     // -------------------------------------------------------------------------
-    // [Step 8] 디버그 모드 0~13 완벽 일대일 매핑
+    // [Step 8] 디버그 모드 0~15 완벽 일대일 매핑
     // -------------------------------------------------------------------------
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
@@ -617,8 +640,8 @@ fn main(inputData: InputData) -> OutputFragment {
             output.color = vec4<f32>(waterAlbedo, 1.0);
         }
         case 7u: {
-            // Step 6.4: 비어-람베르트 광학 흡수 마스크 (0.0: 얕은 물가 투과 -> 1.0: 깊은 물 완전 흡수)
-            output.color = vec4<f32>(vec3<f32>(1.0 - extinction), 1.0);
+            // Step 6.4: 비어-람베르트 파장별 광학 흡수 마스크 (RGB 파장별 흡수 시각화)
+            output.color = vec4<f32>(vec3<f32>(1.0) - extinctionRGB, 1.0);
         }
         case 6u: {
             // Step 5.2: Scene Color Passthrough (투명 유리처럼 순수 바닥 씬 컬러 100% 무왜곡 투과)
