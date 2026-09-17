@@ -305,7 +305,7 @@ defineVector2(SingleLayerWaterMaterial, [
 
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
-    {key: 'refractionStrength', value: 1.0, min: 0, max: 2},
+    {key: 'refractionStrength', value: 1.0, min: 0, max: 1},
     {key: 'normalScale', value: 1.0, min: 0.0, max: 1.0},
     {key: 'normalScale2', value: 0.5, min: 0.0, max: 1.0},
     {key: 'normalTiling', value: 18.0},

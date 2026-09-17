@@ -350,14 +350,20 @@ fn main(inputData: InputData) -> OutputFragment {
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
     // 물리적 굴절 편향 오프셋 벡터 (1.0 = 100% 물리 정밀 스넬 굴절)
-    let rawRefractionOffset = (physicalRefractUV - screenUV) * (uniforms.refractionStrength * screenEdgeFade);
+    let rawDeltaUV = (physicalRefractUV - screenUV) * (uniforms.refractionStrength * screenEdgeFade);
+
+    // [적응형 소프트 포화 클램프 (Soft Saturation Clamping)]:
+    // 얕은 물가의 기둥 꺾임(Broken Straw)은 선명히 전달하고, 깊은 수심에서 젤리처럼 녹아내리는 극단적 왜곡은 화면의 2.5%로 부드럽게 수렴
+    let deltaUVLen = length(rawDeltaUV);
+    let maxRefractLimit = 0.025;
+    let softRefractionOffset = rawDeltaUV / (1.0 + deltaUVLen / maxRefractLimit);
 
     // 소프트 블리딩 방지 (물 표면 앞쪽 수면 위 물체 왜곡 감쇄)
-    let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
+    let testUV = clamp(screenUV + softRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
     let linearDistortedDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
     let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
-    let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
+    let finalRefractUV = clamp(screenUV + softRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
     // 굴절된 바닥의 실제 3D 월드 좌표 복원 (RedGPU 표준 함수 getWorldPositionFromDepth 사용)
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);

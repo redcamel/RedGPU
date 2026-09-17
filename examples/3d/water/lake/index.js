@@ -73,7 +73,7 @@ RedGPU.init(
         lake.waterMaterial.normalScale2 = 0.5;         // 표준 50% 표면 미세 잔물결
         lake.waterMaterial.normalTiling = 18.0;        // 240m 호수에 어울리는 자연스러운 너울 주기
         lake.waterMaterial.normalTiling2 = 36.0;
-        lake.waterMaterial.refractionStrength = 0.025; // 물리 스넬 굴절 및 Broken Straw 꺾임
+        lake.waterMaterial.refractionStrength = 1.0;   // 표준 100% 물리 스넬 굴절 (Broken Straw 꺾임)
         lake.waterMaterial.roughness = 0.07;         // 선명하고 아름다운 수면 거울 반사 & 다이아몬드 윤슬
         lake.waterMaterial.causticsStrength = 0.25;   // 얕은 바닥에 춤추는 은은하고 자연스러운 카우스틱스 햇살망
         lake.waterMaterial.enableSSR = true;          // 실시간 스크린 공간 반사(SSR) 기본 활성화
@@ -429,7 +429,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // [Phase 7, 8, 9] 파도 노멀 및 굴절 왜곡 제어 패널
             const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7~9)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
+            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.01});
 
             // 주 파도 (Layer 1: Base Swell)
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
