@@ -38,10 +38,10 @@ interface SingleLayerWaterMaterial {
      */
     normalTextureSampler: Sampler;
     /**
-     * [KO] 제2 수면 노멀 맵 텍스처 (마이크로 잔물결 / 교차 파도)
-     * [EN] Secondary water surface normal map texture (micro ripples / cross waves)
+     * [KO] 디테일 수면 노멀 맵 텍스처 (마이크로 잔물결 / 교차 파도)
+     * [EN] Detail water surface normal map texture (micro ripples / cross waves)
      */
-    normalTexture2: BitmapTexture;
+    normalDetailTexture: BitmapTexture;
     /**
      * [KO] 주 노멀 강도 스케일
      * [EN] Main normal strength scale
@@ -191,18 +191,18 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
         this.refractionStrength = 0.008;
-        this.normalScale = 0.65;
-        this.normalScale2 = 0.30;
-        this.normalTiling = 4.0;
-        this.normalTiling2 = 8.0;
-        this.windSpeed = 0.035;
-        this.windSpeed2 = 0.055;
+        this.normalScale = 0.35;
+        this.normalScale2 = 0.18;
+        this.normalTiling = 48.0;
+        this.normalTiling2 = 96.0;
+        this.windSpeed = 0.025;
+        this.windSpeed2 = 0.040;
         this.windDirection = [1.0, 0.3];
         this.windDirection2 = [-0.6, 0.8];
         this.useNormalTexture2 = true;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
-        this.roughness = 0.10;
+        this.roughness = 0.05;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
         this.invertNormalY1 = false; // DirectX 노멀 기본 호환
@@ -211,6 +211,22 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
         this.debugMaxDepth = 5.0;
+    }
+
+    /**
+     * [KO] 하위 호환성을 위한 normalTexture2 getter
+     * [EN] Backward compatibility getter for normalTexture2
+     */
+    get normalTexture2(): BitmapTexture {
+        return this.normalDetailTexture;
+    }
+
+    /**
+     * [KO] 하위 호환성을 위한 normalTexture2 setter
+     * [EN] Backward compatibility setter for normalTexture2
+     */
+    set normalTexture2(value: BitmapTexture) {
+        this.normalDetailTexture = value;
     }
 }
 
@@ -221,7 +237,7 @@ defineColorRGB(SingleLayerWaterMaterial, [
 
 defineTexture(SingleLayerWaterMaterial, [
     {key: 'normalTexture'},
-    {key: 'normalTexture2'},
+    {key: 'normalDetailTexture'},
 ]);
 
 defineSampler(SingleLayerWaterMaterial, [
@@ -236,15 +252,15 @@ defineVector2(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
-    {key: 'normalScale', value: 0.65},
-    {key: 'normalScale2', value: 0.30},
-    {key: 'normalTiling', value: 4.0},
-    {key: 'normalTiling2', value: 8.0},
-    {key: 'windSpeed', value: 0.035},
-    {key: 'windSpeed2', value: 0.055},
+    {key: 'normalScale', value: 0.35},
+    {key: 'normalScale2', value: 0.18},
+    {key: 'normalTiling', value: 48.0},
+    {key: 'normalTiling2', value: 96.0},
+    {key: 'windSpeed', value: 0.025},
+    {key: 'windSpeed2', value: 0.040},
     {key: 'extinctionFactor', value: 0.22},
     {key: 'depthFadeDistance', value: 0.8},
-    {key: 'roughness', value: 0.10, min: 0, max: 1},
+    {key: 'roughness', value: 0.05, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},

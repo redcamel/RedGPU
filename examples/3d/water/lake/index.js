@@ -52,22 +52,15 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
 
-        // Phase 7: 파도 주 노멀 텍스처 장착
+        // 파도 노멀 텍스처 장착 (머티리얼 기본값이 호수 최적 물결 스케일 48x48 / 96x96 및 물리 파라미터 내장)
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
-        lake.waterMaterial.normalTiling = 8.0;
-        lake.waterMaterial.normalScale = 0.65;
-
-        // Phase 9: 제2 마이크로 잔물결 노멀 텍스처 장착 (RNM 회전 블렌딩 가동)
-        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
+        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal_detail.png'
         );
-        lake.waterMaterial.useNormalTexture2 = true;
-        lake.waterMaterial.normalTiling2 = 16.0;
-        lake.waterMaterial.normalScale2 = 0.30;
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
@@ -338,14 +331,14 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
             layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {
                 min: 0.0,
-                max: 3.0,
-                step: 0.05,
+                max: 1.5,
+                step: 0.01,
                 label: 'Scale'
             });
             layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {
-                min: 0.5,
-                max: 20.0,
-                step: 0.5,
+                min: 1.0,
+                max: 120.0,
+                step: 1.0,
                 label: 'Tiling'
             });
             layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005, label: 'Speed'});
@@ -356,14 +349,14 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             layer2Folder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: 'Enable RNM'});
             layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {
                 min: 0.0,
-                max: 3.0,
-                step: 0.05,
+                max: 1.5,
+                step: 0.01,
                 label: 'Scale'
             });
             layer2Folder.addBinding(lake.waterMaterial, 'normalTiling2', {
                 min: 1.0,
-                max: 30.0,
-                step: 0.5,
+                max: 200.0,
+                step: 1.0,
                 label: 'Tiling'
             });
             layer2Folder.addBinding(lake.waterMaterial, 'windSpeed2', {

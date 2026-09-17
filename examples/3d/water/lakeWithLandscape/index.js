@@ -155,7 +155,7 @@ RedGPU.init(
             redGPUContext,
             '../../../assets/water/water_normal.png'
         );
-        lake.waterMaterial.normalTexture2 = new RedGPU.Resource.BitmapTexture(
+        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/water_normal_detail.png'
         );

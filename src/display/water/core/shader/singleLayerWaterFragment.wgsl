@@ -79,7 +79,7 @@ struct WaterUniforms {
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
 @group(2) @binding(2) var normalTexture: texture_2d<f32>;
-@group(2) @binding(3) var normalTexture2: texture_2d<f32>;
+@group(2) @binding(3) var normalDetailTexture: texture_2d<f32>;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -125,7 +125,12 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     let rawNormal1 = linearToSrgbVec3(rawSample1); // WebGPU sRGB 하드웨어 디코딩 완벽 상쇄
-    var tangentXY1 = (rawNormal1.xy * 2.0 - 1.0) * uniforms.normalScale;
+    var rawXY1 = rawNormal1.xy * 2.0 - 1.0;
+    // [트로코이드 호수 파도 곡률 변환 (Trochoidal Crest Sharpening)]:
+    // 둥글둥글한 젤리 노이즈를 파도 골짜기(Trough)는 넓고 평평하게, 능선(Crest)은 얇고 샤프하게 모아줌
+    let len1 = length(rawXY1);
+    let trochoidXY1 = select(rawXY1, (rawXY1 / max(len1, 0.001)) * pow(len1, 1.35), len1 > 0.001);
+    var tangentXY1 = trochoidXY1 * uniforms.normalScale;
     if (uniforms.invertNormalY1 == 1u) {
         tangentXY1.y = -tangentXY1.y;
     }
@@ -138,9 +143,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
         let waveUV2 = inputData.uv * uniforms.normalTiling2 + baseWindDir2 * (timeSec * uniforms.windSpeed2);
 
-        let rawSample2 = textureSample(normalTexture2, normalTextureSampler, waveUV2).rgb;
+        let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         let rawNormal2 = linearToSrgbVec3(rawSample2);
-        var tangentXY2 = (rawNormal2.xy * 2.0 - 1.0) * uniforms.normalScale2;
+        var rawXY2 = rawNormal2.xy * 2.0 - 1.0;
+        let len2 = length(rawXY2);
+        let trochoidXY2 = select(rawXY2, (rawXY2 / max(len2, 0.001)) * pow(len2, 1.35), len2 > 0.001);
+        var tangentXY2 = trochoidXY2 * uniforms.normalScale2;
         if (uniforms.invertNormalY2 == 1u) {
             tangentXY2.y = -tangentXY2.y;
         }
