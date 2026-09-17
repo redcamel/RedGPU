@@ -148,25 +148,63 @@ RedGPU.init(
         lake.z = 0;
         lake.waterLevel = 720; // 산맥과 넓은 호수가 완벽히 조화되는 황금 밸런스 수위
 
-        // [AAA 듀얼 노멀 시스템]: 대형 너울 + 마이크로 잔물결 텍스처 장착
-        // ※ baseColor, deepColor, roughness, specularFactor, refractionStrength 등
-        //    모든 핵심 UE5 SingleLayerWater PBR 광학 속성은 코어 기본값을 그대로 활용합니다.
+        // 파도 노멀 텍스처 장착 (물리 벡터 데이터이므로 'rgba8unorm' Linear 포맷으로 로딩)
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png'
+            '../../../assets/water/lake_normal.png',
+            true,
+            null,
+            null,
+            'rgba8unorm'
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png'
+            '../../../assets/water/lake_normal_detail.png',
+            true,
+            null,
+            null,
+            'rgba8unorm'
         );
 
-        // 16km 초대형 지형 스케일에 맞춘 타일링 (250m 장파장 너울과 1:1 대응) 및 해안선 완충 설정
-        lake.waterMaterial.normalTiling = 65.0;      // 16,000m / 65 ≈ 246m 너울 스케일 (에일리어싱 방지)
-        lake.waterMaterial.depthFadeDistance = 25.0; // 16km 초대형 지형 해안선 완충 (25m)
+        // 16km 초대형 지형 스케일 및 알프스 고산 호수에 맞춘 정밀 물리 광학 튜닝
+        lake.waterMaterial.lakeWorldSize = 16000.0;
+        lake.waterMaterial.baseColor.setColorByHEX('#1ecdb0'); // 맑고 청명한 알프스 빙하 터콰이즈
+        lake.waterMaterial.deepColor.setColorByHEX('#022438'); // 깊은 알프스 사파이어 블루
+        lake.waterMaterial.refractionStrength = 0.035;          // 물리 스넬 굴절 왜곡
+        lake.waterMaterial.extinctionFactor = 0.015;           // 16km 분지 수심에 최적화된 빛 감쇄 계수
+        lake.waterMaterial.turbidity = 0.15;                   // 맑고 투명한 고산 빙하수 탁도
+        lake.waterMaterial.depthFadeDistance = 35.0;           // 16km 초대형 지형 해안선 완충 페이드 (35m)
+        lake.waterMaterial.roughness = 0.06;                   // 고요하고 매끄러운 수면 거울 반사 & 윤슬
+        lake.waterMaterial.specularFactor = 1.0;
+        lake.waterMaterial.fresnelF0 = 0.02;
 
-        // 초대형 수체 스케일에 맞춘 장파장 너울 (80cm 파고, 250m 파장)
-        lake.waveAmplitude = 0.8;
-        lake.waveWavelength = 250.0;
+        // 듀얼 노멀 시스템 (대형 너울 + 잔물결)
+        lake.waterMaterial.useNormalTexture2 = true;
+        lake.waterMaterial.normalTiling = 120.0;               // 16,000m / 120 ≈ 133m 너울 파도
+        lake.waterMaterial.normalTiling2 = 260.0;              // 16,000m / 260 ≈ 61m 잔물결
+        lake.waterMaterial.normalScale = 0.45;
+        lake.waterMaterial.normalScale2 = 0.25;
+        lake.waterMaterial.windSpeed = 0.015;
+        lake.waterMaterial.windSpeed2 = 0.025;
+
+        // 수중 바닥 카우스틱스 (햇살 일렁임)
+        lake.waterMaterial.causticsStrength = 0.6;
+        lake.waterMaterial.causticsScale = 1.5;
+        lake.waterMaterial.causticsSpeed = 0.8;
+
+        // 스크린 공간 반사 (SSR) - 16km 대형 지형 산맥 반사를 위해 추적 거리 확장
+        lake.waterMaterial.enableSSR = true;
+        lake.waterMaterial.ssrMaxDistance = 1200.0;
+        lake.waterMaterial.ssrStepCount = 48;
+        lake.waterMaterial.ssrThickness = 2.5;
+
+        // 디버그 수심 최대값 (16km 지형 스케일에 맞춤)
+        lake.waterMaterial.debugMaxDepth = 150.0;
+
+        // 초대형 수체 스케일에 맞춘 버텍스 장파장 너울 (60cm 파고, 350m 파장)
+        lake.waveAmplitude = 0.6;
+        lake.waveWavelength = 350.0;
+        lake.waveSpeed = 1.0;
 
         scene.addChild(lake);
 
@@ -243,7 +281,7 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             const camFolder = pane.addFolder({title: '📷 Flight Camera', expanded: false});
             camFolder.addBinding(controller, 'moveSpeed', {min: 500, max: 30000, step: 500});
 
-            // [폴더 3] 호수 위치 및 수위 (Water Level & Position)
+            // [폴더 3] 호수 위치 및 수위 (Water Position & Level)
             const waterPosFolder = pane.addFolder({title: '🌊 Water Position & Level', expanded: true});
             waterPosFolder.addBinding(lake, 'waterLevel', {min: 100, max: 1400, step: 2});
             waterPosFolder.addBinding(lake, 'x', {min: -8000, max: 8000, step: 100});
@@ -268,45 +306,32 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
                     'Raw Scene Depth (1)': 1
                 }
             });
+            waterPosFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {
+                min: 10.0,
+                max: 500.0,
+                step: 10.0
+            });
 
-            // [폴더 4] 듀얼 노멀 & 도메인 워핑 (Dual Normal Waves)
-            const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Warp)', expanded: true});
+            // [폴더 4] 듀얼 노멀 & 파도 (Dual Normal Waves & Swell)
+            const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Swell)', expanded: true});
             waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2');
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {
-                min: 50.0,
-                max: 800.0,
-                step: 25.0
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {
-                min: 1.0,
-                max: 10.0,
-                step: 0.2
-            });
-            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {
-                min: 0.0,
-                max: 0.2,
-                step: 0.005
-            });
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 2.0, step: 0.02});
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {min: 10.0, max: 500.0, step: 10.0});
+            waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.002});
+            waveFolder.addBinding(lake.waterMaterial, 'invertNormalY1');
+
+            waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {min: 0.0, max: 2.0, step: 0.02});
+            waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {min: 20.0, max: 1000.0, step: 20.0});
+            waveFolder.addBinding(lake.waterMaterial, 'windSpeed2', {min: 0.0, max: 0.1, step: 0.002});
+            waveFolder.addBinding(lake.waterMaterial, 'invertNormalY2');
+
             waveFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 3.0, step: 0.05});
-            waveFolder.addBinding(lake, 'waveWavelength', {min: 50.0, max: 800.0, step: 10.0});
+            waveFolder.addBinding(lake, 'waveWavelength', {min: 50.0, max: 1000.0, step: 20.0});
+            waveFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 5.0, step: 0.1});
 
             // [폴더 5] 수체 광학 및 물리 색채 (Water Optics & Colors)
             const colorFolder = pane.addFolder({title: '🎨 Water Optics & Colors', expanded: false});
-            colorFolder.addBinding(lake.waterMaterial, 'opacity', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.02
-            });
+            colorFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.02});
 
             const colorParams = {
                 baseColor: {
@@ -320,51 +345,42 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
                     b: lake.waterMaterial.deepColor.b
                 }
             };
-            colorFolder.addBinding(colorParams, 'baseColor', {
-                view: 'color'
-            }).on('change', (ev) => {
+            colorFolder.addBinding(colorParams, 'baseColor', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
-            colorFolder.addBinding(colorParams, 'deepColor', {
-                view: 'color'
-            }).on('change', (ev) => {
+            colorFolder.addBinding(colorParams, 'deepColor', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
 
-            colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
-                min: 0.0,
-                max: 100.0,
-                step: 1.0
-            });
-            colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {
-                min: 0.001,
-                max: 0.1,
-                step: 0.002
-            });
-            colorFolder.addBinding(lake.waterMaterial, 'refractionStrength', {
-                min: 0.0,
-                max: 0.08,
-                step: 0.002
-            });
+            colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.0, max: 200.0, step: 2.0});
+            colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.001, max: 0.1, step: 0.001});
+            colorFolder.addBinding(lake.waterMaterial, 'turbidity', {min: 0.0, max: 1.0, step: 0.01});
+            colorFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.5, step: 0.005});
 
-            // [폴더 6] Cook-Torrance PBR 조명 & 태양광
-            const specFolder = pane.addFolder({title: '✨ Cook-Torrance PBR Lighting', expanded: false});
-            specFolder.addBinding(lake.waterMaterial, 'roughness', {
-                min: 0.01,
-                max: 1.0,
-                step: 0.01
-            });
-            specFolder.addBinding(lake.waterMaterial, 'specularFactor', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05
-            });
+            // [폴더 6] 수중 바닥 카우스틱스 (Underwater Caustics)
+            const causticsFolder = pane.addFolder({title: '✨ Underwater Caustics', expanded: false});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.1, max: 5.0, step: 0.1});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsSpeed', {min: 0.0, max: 3.0, step: 0.1});
+
+            // [폴더 7] Cook-Torrance PBR 조명 & 프레넬 반사
+            const specFolder = pane.addFolder({title: '🪞 Cook-Torrance PBR & Lighting', expanded: false});
+            specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 1.0, step: 0.01});
+            specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
+            specFolder.addBinding(lake.waterMaterial, 'fresnelF0', {min: 0.0, max: 0.1, step: 0.005});
             specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [폴더 7] 랜드스케이프 지형 제어 (Landscape Settings)
+            // [폴더 8] 스크린 공간 반사 (Screen Space Reflection - SSR)
+            const ssrFolder = pane.addFolder({title: '🏙️ Screen Space Reflection (SSR)', expanded: true});
+            ssrFolder.addBinding(lake.waterMaterial, 'enableSSR');
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {min: 50.0, max: 3000.0, step: 50.0});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {min: 16, max: 96, step: 8});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {min: 0.2, max: 10.0, step: 0.2});
+
+            // [폴더 9] 랜드스케이프 지형 제어 (Landscape Settings)
             const landscapeFolder = pane.addFolder({title: '🌄 Landscape Terrain Settings', expanded: false});
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 500, max: 3000, step: 50});
             landscapeFolder.addBinding(landscape, 'wireframe');
@@ -380,7 +396,7 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
                 });
             }
 
-            // [폴더 8] 대기 및 환경광 (Sky Atmosphere)
+            // [폴더 10] 대기 및 환경광 (Sky Atmosphere)
             const envFolder = pane.addFolder({title: '🌤️ Sky Atmosphere', expanded: false});
             let skyAtmosphereInstance = null;
             const envState = {skyAtmosphere: false};
