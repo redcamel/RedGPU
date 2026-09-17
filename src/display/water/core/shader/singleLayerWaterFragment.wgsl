@@ -5,7 +5,6 @@
 #redgpu_include math.PI;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
-#redgpu_include color.linearToSrgbVec3;
 
 // =============================================================================
 // Cook-Torrance GGX 마이크로패싯 함수군 (PBR Specular BRDF)
@@ -74,6 +73,11 @@ struct WaterUniforms {
     fresnelF0: f32,
     invertNormalY1: u32,
     invertNormalY2: u32,
+
+    causticsStrength: f32,
+    causticsScale: f32,
+    causticsSpeed: f32,
+    causticsPadding: f32,
 };
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
@@ -124,8 +128,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let waveUV1 = inputData.uv * uniforms.normalTiling + baseWindDir1 * (timeSec * uniforms.windSpeed);
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
-    let rawNormal1 = linearToSrgbVec3(rawSample1); // WebGPU sRGB 하드웨어 디코딩 완벽 상쇄
-    var rawXY1 = rawNormal1.xy * 2.0 - 1.0;
+    var rawXY1 = rawSample1.xy * 2.0 - 1.0;
     var tangentXY1 = rawXY1 * uniforms.normalScale;
     if (uniforms.invertNormalY1 == 1u) {
         tangentXY1.y = -tangentXY1.y;
@@ -140,8 +143,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let waveUV2 = inputData.uv * uniforms.normalTiling2 + baseWindDir2 * (timeSec * uniforms.windSpeed2);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
-        let rawNormal2 = linearToSrgbVec3(rawSample2);
-        var rawXY2 = rawNormal2.xy * 2.0 - 1.0;
+        var rawXY2 = rawSample2.xy * 2.0 - 1.0;
         var tangentXY2 = rawXY2 * uniforms.normalScale2;
         if (uniforms.invertNormalY2 == 1u) {
             tangentXY2.y = -tangentXY2.y;
@@ -187,7 +189,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let effectiveDeltaDepth = max(0.0, linearFinalDepth - linearWaterDepth);
 
     // -------------------------------------------------------------------------
-    // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Beer-Lambert)
+    // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Beer-Lambert & Caustics)
     // -------------------------------------------------------------------------
     let extinction = exp(-effectiveDeltaDepth * uniforms.extinctionFactor);
     let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
@@ -195,7 +197,67 @@ fn main(inputData: InputData) -> OutputFragment {
     // 바닥 지형이 수심에 따라 맑은 에메랄드 -> 깊은 남색으로 자연스럽게 착색
     let depthProgress = clamp(effectiveDeltaDepth * 0.30, 0.0, 1.0);
     let waterTint = mix(vec3<f32>(1.0), waterAlbedo * 1.25, depthProgress);
-    let transmittedSceneColor = sceneColor * waterTint;
+    var transmittedSceneColor = sceneColor * waterTint;
+
+    // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 수면 파도 노멀 100% 연동 & 선명한 집광)
+    var causticIntensity = 0.0;
+    if (uniforms.causticsStrength > 0.001) {
+        // 굴절된 실제 바닥 깊이를 역투영하여 바닥 지형/암초의 실제 3D 월드 좌표(XZ) 복원
+        let ndcX = finalRefractUV.x * 2.0 - 1.0;
+        let ndcY = (1.0 - finalRefractUV.y) * 2.0 - 1.0;
+        let ndcPos = vec4<f32>(ndcX, ndcY, rawFinalDepth, 1.0);
+        let worldH = systemUniforms.projection.inverseProjectionViewMatrix * ndcPos;
+        let groundWorldPos = worldH.xyz / max(1e-5, worldH.w);
+
+        // 태양광 입사각에 따른 광선 투영 오프셋 (호수 크기 240m 기준)
+        let primarySun = systemUniforms.directionalLights[0];
+        let sunDir = -normalize(primarySun.direction);
+        let lightRayOffset = sunDir.xz * (effectiveDeltaDepth * 0.18);
+        let groundSurfaceUV = (groundWorldPos.xz - lightRayOffset) * (1.0 / 240.0) + vec2<f32>(0.5);
+
+        let windDirLen2 = length(uniforms.windDirection2);
+        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
+
+        let cSpeed = uniforms.causticsSpeed;
+        let cScale = uniforms.causticsScale;
+
+        // 수면 파도와 100% 동일한 공간 UV 및 바람 위상 매핑
+        let cUV1 = groundSurfaceUV * (uniforms.normalTiling * cScale) + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
+        let cUV2 = groundSurfaceUV * (uniforms.normalTiling2 * cScale) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
+
+        // 1차 샘플링: 두 파도의 법선 방향 벡터 (순수 선형 rgba8unorm 샘플링)
+        let rawN1 = (textureSample(normalTexture, normalTextureSampler, cUV1).rgb * 2.0 - 1.0).xy;
+        let rawN2 = (textureSample(normalDetailTexture, normalTextureSampler, cUV2).rgb * 2.0 - 1.0).xy;
+
+        // 상호 섭동 왜곡: 제2 노멀로 제1 노멀 UV를 굴절시키고, 제1 노멀로 제2 노멀 UV를 굴절
+        let distortUV1 = cUV1 + rawN2 * 0.18;
+        let distortUV2 = cUV2 + rawN1 * 0.18;
+
+        // 2차 왜곡 샘플링
+        let s1 = (textureSample(normalTexture, normalTextureSampler, distortUV1).rgb * 2.0 - 1.0).xy;
+        let s2 = (textureSample(normalDetailTexture, normalTextureSampler, distortUV2).rgb * 2.0 - 1.0).xy;
+
+        // 파도 노멀 텍스처의 실제 진폭(0.03~0.08)에 맞춘 고대비 파형 추출
+        let waveA1 = (s1.x + s1.y) * 9.0;
+        let waveA2 = (s2.x - s2.y) * 9.0;
+        let waveB1 = (s1.x - s1.y) * 9.0;
+        let waveB2 = (s2.x + s2.y) * 9.0;
+
+        // 두 교차 파도의 등고선이 만나는 마루(Crest)에서 날카로운 다이아몬드 햇살 그물망 형성
+        let crest1 = pow(max(0.0, 1.0 - abs(waveA1 - waveA2)), 3.5);
+        let crest2 = pow(max(0.0, 1.0 - abs(waveB1 - waveB2)), 3.5);
+        let causticCrest = max(crest1, crest2) * 2.2;
+
+        // 수심에 따른 자연스러운 물리 감쇄 (물가 경계 클리핑 방지 및 심해 자연 소멸)
+        let causticsDepthFade = exp(-effectiveDeltaDepth * 0.35) * smoothstep(0.01, 0.15, effectiveDeltaDepth);
+        causticIntensity = causticCrest * uniforms.causticsStrength * causticsDepthFade;
+
+        let sunFactor = clamp(sunDir.y * 1.5, 0.35, 1.0);
+        let causticsColor = primarySun.color * (causticIntensity * sunFactor);
+
+        // 바닥 씬 컬러에 곱해져 자연스럽게 바닥 텍스처를 밝혀주는 물리적 가산 합성
+        transmittedSceneColor = transmittedSceneColor + sceneColor * causticsColor;
+    }
 
     // -------------------------------------------------------------------------
     // [Step 5] 프레넬 및 간접 환경 반사 (Pure PBR Fresnel & Sky Reflection)
@@ -322,16 +384,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let ambientInScattering = baseAmbient * 1.5 * waterAlbedo * depthScatterWeight;
     let waterScattering = directWaterScattering + ambientInScattering + skyVolumeScatter;
 
-    // [UE5 표준 결합]:
-    // 바닥 투과광과 수체 산란광을 하나의 수체(WaterBody)로 묶은 뒤,
-    // 능선 글린트가 살아있는 하늘 반사광과 물리 프레넬로 정규화 mix() 교차 블렌딩!
-    let waterBody = transmittedSceneColor + waterScattering;
-    let reflectedWater = mix(waterBody, skyReflectionColor, fresnel);
-    let shadedWater = reflectedWater + directSpecularColor;
+    // [UE5 표준 결합 (수체 분리 믹싱)]:
+    // 1) 바닥 투과광(카우스틱스 및 비어-람베르트 착색)은 물에 잠긴 바닥에 직접 맺히므로, 초미세 해안선(수심 4cm 이내)에서만 지형과 부드럽게 융합
+    let groundDepthFade = smoothstep(0.005, 0.04, deltaDepth);
+    let blendedGround = mix(sceneColor, transmittedSceneColor, groundDepthFade);
 
-    // [해안선 소프트 융합 (Depth Fade)]:
+    // 2) 수면 위의 반사광(하늘 반사광, 태양광 GGX 윤슬, 수체 산란광)은 해안선 폴리곤 칼단면 방지를 위해 depthFade로 소프트 융합
     let softDepthFade = pow(depthFade, 0.85);
-    let finalRgb = mix(sceneColor, shadedWater, softDepthFade);
+    let waterScatteringFresnel = mix(waterScattering, skyReflectionColor, fresnel);
+    let surfaceLighting = (waterScatteringFresnel + directSpecularColor) * softDepthFade;
+
+    let finalRgb = blendedGround + surfaceLighting;
 
     // -------------------------------------------------------------------------
     // [Step 8] 디버그 모드 0~13 완벽 일대일 매핑
@@ -339,6 +402,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 14u: {
+            // Step 14.3: 수중 바닥 햇살 일렁임 카우스틱스(Caustics) 단독 뷰
+            output.color = vec4<f32>(vec3<f32>(causticIntensity), 1.0);
+        }
         case 13u: {
             // Step 11.4: 태양광 직사 스펙큘러 윤슬(Sun Glitter) 단독 뷰
             output.color = vec4<f32>(directSpecularColor, 1.0);

@@ -142,6 +142,21 @@ interface SingleLayerWaterMaterial {
      * [EN] Whether to invert Y-axis (Green) of secondary normal map (default: false - OpenGL standard)
      */
     invertNormalY2: boolean;
+    /**
+     * [KO] 수중 바닥 카우스틱스(햇살 일렁임) 강도 (0.0 ~ 2.0, 기본값: 0.45)
+     * [EN] Underwater caustics (sunlight network) strength (0.0 ~ 2.0, default: 0.45)
+     */
+    causticsStrength: number;
+    /**
+     * [KO] 수중 바닥 카우스틱스 공간 스케일 배율 (기본값: 1.0)
+     * [EN] Underwater caustics spatial scale multiplier (default: 1.0)
+     */
+    causticsScale: number;
+    /**
+     * [KO] 수중 바닥 카우스틱스 일렁임 속도 (기본값: 1.0)
+     * [EN] Underwater caustics animation speed (default: 1.0)
+     */
+    causticsSpeed: number;
 }
 
 /**
@@ -207,6 +222,9 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.fresnelF0 = 0.02;
         this.invertNormalY1 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
         this.invertNormalY2 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
+        this.causticsStrength = 0.65;
+        this.causticsScale = 1.0;
+        this.causticsSpeed = 1.0;
 
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
@@ -264,6 +282,9 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
+    {key: 'causticsStrength', value: 0.65, min: 0, max: 2},
+    {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
+    {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
 ]);
 
 defineUint(SingleLayerWaterMaterial, [

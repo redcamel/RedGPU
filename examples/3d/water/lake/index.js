@@ -53,13 +53,22 @@ RedGPU.init(
         lake.waterLevel = 0.5;
 
         // 파도 노멀 텍스처 장착 (Tessendorf FFT 호수 전용 트로코이드 파도 텍스처)
+        // 노멀 맵은 물리 벡터 데이터이므로 sRGB 자동 감마 변환을 방지하기 위해 'rgba8unorm' (Linear) 포맷으로 로딩
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png'
+            '../../../assets/water/lake_normal.png',
+            true,
+            null,
+            null,
+            'rgba8unorm'
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png'
+            '../../../assets/water/lake_normal_detail.png',
+            true,
+            null,
+            null,
+            'rgba8unorm'
         );
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
@@ -101,14 +110,14 @@ RedGPU.init(
 function createBeachEnvironment(redGPUContext, scene) {
     const floatingRocks = [];
 
-    // --- 1. PBR 텍스처 로딩 ---
+    // --- 1. PBR 텍스처 로딩 (Albedo는 sRGB, Normal/ORM은 Linear 'rgba8unorm') ---
     const gravelAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel.jpg');
-    const gravelNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg');
-    const gravelOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg');
+    const gravelNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg', true, null, null, 'rgba8unorm');
+    const gravelOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg', true, null, null, 'rgba8unorm');
 
     const rockAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock.jpg');
-    const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg');
-    const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg');
+    const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg', true, null, null, 'rgba8unorm');
+    const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg', true, null, null, 'rgba8unorm');
 
     // --- 1-1. 지형/해변/암석 UV 타일링을 위한 고화질 반복 샘플러 (Repeat + Anisotropy 16) ---
     // PBRMaterial의 기본 샘플러는 'clamp-to-edge'이므로, textureScale 타일링 시 텍스처 늘어남/뭉개짐을 방지하고
@@ -296,7 +305,8 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Full Phase 12) (0)': 0,
+                    'PBR Water (Full Phase 14) (0)': 0,
+                    'Underwater Caustics Only (14)': 14,
                     'Sun Specular Glitter Only (13)': 13,
                     'Sky Reflection Color Only (12)': 12,
                     'Fresnel Factor Mask (11)': 11,
@@ -318,8 +328,29 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 step: 0.5
             });
 
+            // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics) 제어 패널
+            const causticsFolder = pane.addFolder({title: 'Underwater Caustics (Phase 14)', expanded: true});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsStrength', {
+                min: 0.0,
+                max: 2.0,
+                step: 0.05,
+                label: 'Strength'
+            });
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsScale', {
+                min: 0.2,
+                max: 3.0,
+                step: 0.05,
+                label: 'Scale'
+            });
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsSpeed', {
+                min: 0.0,
+                max: 3.0,
+                step: 0.05,
+                label: 'Speed'
+            });
+
             // [Phase 12] 버텍스 셰이더 미세 장파장 너울 (Micro Swell) 제어 패널
-            const swellFolder = pane.addFolder({title: 'Micro Swell (Phase 12)', expanded: true});
+            const swellFolder = pane.addFolder({title: 'Micro Swell (Phase 12)', expanded: false});
             swellFolder.addBinding(lake, 'waveAmplitude', {
                 min: 0.0,
                 max: 0.15,
