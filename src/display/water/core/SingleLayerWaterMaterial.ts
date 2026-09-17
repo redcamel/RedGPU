@@ -157,6 +157,26 @@ interface SingleLayerWaterMaterial {
      * [EN] Underwater caustics animation speed (default: 1.0)
      */
     causticsSpeed: number;
+    /**
+     * [KO] 스크린 공간 반사(SSR) 활성화 여부 (기본값: true)
+     * [EN] Whether screen space reflection (SSR) is enabled (default: true)
+     */
+    enableSSR: boolean;
+    /**
+     * [KO] SSR 최대 반사 추적 거리 (단위: m, 기본값: 25.0)
+     * [EN] SSR maximum reflection tracing distance (Unit: m, default: 25.0)
+     */
+    ssrMaxDistance: number;
+    /**
+     * [KO] SSR 레이마칭 샘플링 단계 수 (기본값: 32)
+     * [EN] SSR ray marching step count (default: 32)
+     */
+    ssrStepCount: number;
+    /**
+     * [KO] SSR 표면 두께 허용치 (단위: m, 기본값: 0.5)
+     * [EN] SSR surface thickness threshold (Unit: m, default: 0.5)
+     */
+    ssrThickness: number;
 }
 
 /**
@@ -225,6 +245,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.causticsStrength = 0.65;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
+        this.enableSSR = true;
+        this.ssrMaxDistance = 25.0;
+        this.ssrStepCount = 32;
+        this.ssrThickness = 0.5;
 
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
         this.debugMode = 0;
@@ -285,16 +309,20 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'causticsStrength', value: 0.65, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
+    {key: 'ssrMaxDistance', value: 25.0, min: 2.0, max: 100.0},
+    {key: 'ssrThickness', value: 0.5, min: 0.05, max: 5.0},
 ]);
 
 defineUint(SingleLayerWaterMaterial, [
     {key: 'debugMode', value: 0},
+    {key: 'ssrStepCount', value: 32},
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [
     {key: 'useNormalTexture2', value: true},
     {key: 'invertNormalY1', value: false},
     {key: 'invertNormalY2', value: false},
+    {key: 'enableSSR', value: true},
 ]);
 
 Object.freeze(SingleLayerWaterMaterial);

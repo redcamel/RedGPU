@@ -21,11 +21,11 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정 (해변 전경 및 윤슬 최적 각도)
+        // 1. 카메라 컨트롤러 설정 (SSR 거울 반사 및 전경 최적 뷰)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 30;
-        controller.tilt = -22;
-        controller.pan = 35;
+        controller.distance = 32;
+        controller.tilt = -14;
+        controller.pan = 24;
         controller.speedDistance = 0.25;
 
         // 2. 씬 및 View3D 구성
@@ -282,8 +282,44 @@ function createBeachEnvironment(redGPUContext, scene) {
     floatReef2.z = 7;
     floatReef2.scaleX = 0.8;
     floatReef2.scaleZ = 0.8;
-    scene.addChild(floatReef2);
     floatingRocks.push(floatReef2);
+
+    // --- 5. SSR(스크린 공간 반사) 쇼케이스 랜드마크 & 고대 해안 신전 석주 ---
+    // (A) 선명한 붉은빛 테라코타 오벨리스크 타워 (SSR 시각 검증용 랜드마크)
+    // 수면의 에메랄드 그린과 강렬한 보색 대비를 이루어 물 표면에 비친 상을 1초 만에 확인 가능
+    const towerMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    towerMaterial.baseColorFactor = [1.8, 0.45, 0.25, 1.0]; // 화사하고 짙은 진홍빛/테라코타 톤
+    towerMaterial.roughnessFactor = 0.35;
+    towerMaterial.metallicFactor = 0.05;
+
+    const towerGeom = new RedGPU.Primitive.Box(redGPUContext, 2.6, 14.0, 2.6);
+    const towerMesh = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMaterial);
+    towerMesh.x = -2.5;
+    towerMesh.y = 5.5; // 수면(0.5m) 위로 약 12m 이상 웅장하게 솟아오름
+    towerMesh.z = 2.0;
+    towerMesh.rotationY = 25;
+    scene.addChild(towerMesh);
+
+    // (B) 순백의 고대 해안 신전 대리석 기둥들 (White Marble Columns)
+    // 에메랄드 수면에 거꾸로 선명하게 비치는 거울 반사 시연
+    const pillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    pillarMaterial.baseColorFactor = [1.6, 1.6, 1.65, 1.0]; // 눈부신 백색 대리석
+    pillarMaterial.roughnessFactor = 0.25;
+
+    const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 0.65, 9.5, 24);
+    const pillarCoords = [
+        {x: 4.0, z: 1.0, rotZ: -4},
+        {x: 7.2, z: 3.2, rotZ: 3},
+        {x: 1.0, z: 5.8, rotZ: -6},
+    ];
+    pillarCoords.forEach((p) => {
+        const pillar = new RedGPU.Display.Mesh(redGPUContext, pillarGeom, pillarMaterial);
+        pillar.x = p.x;
+        pillar.y = 3.6;
+        pillar.z = p.z;
+        pillar.rotationZ = p.rotZ;
+        scene.addChild(pillar);
+    });
 
     return {floatingRocks};
 }
@@ -305,7 +341,8 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Full Phase 14) (0)': 0,
+                    'PBR Water (Full Phase 17) (0)': 0,
+                    'Screen Space Reflection Only (15)': 15,
                     'Underwater Caustics Only (14)': 14,
                     'Sun Specular Glitter Only (13)': 13,
                     'Sky Reflection Color Only (12)': 12,
@@ -485,6 +522,28 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 max: 0.1,
                 step: 0.005,
                 label: 'Fresnel F0 (Water: 0.02)'
+            });
+
+            // [Phase 17] 스크린 공간 반사 (SSR - Screen Space Reflection) 제어 패널
+            const ssrFolder = pane.addFolder({title: 'Screen Space Reflection (Phase 17)', expanded: true});
+            ssrFolder.addBinding(lake.waterMaterial, 'enableSSR', {label: 'Enable SSR'});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {
+                min: 5.0,
+                max: 60.0,
+                step: 1.0,
+                label: 'Max Distance (m)'
+            });
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {
+                min: 8,
+                max: 64,
+                step: 8,
+                label: 'Step Count'
+            });
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {
+                min: 0.1,
+                max: 2.0,
+                step: 0.05,
+                label: 'Thickness (m)'
             });
 
             // [환경 조명] 직사광(태양) 및 천공 환경광 제어 패널

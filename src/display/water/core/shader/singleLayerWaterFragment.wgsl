@@ -78,7 +78,116 @@ struct WaterUniforms {
     causticsScale: f32,
     causticsSpeed: f32,
     causticsPadding: f32,
+
+    enableSSR: u32,
+    ssrMaxDistance: f32,
+    ssrStepCount: u32,
+    ssrThickness: f32,
 };
+
+// =============================================================================
+// Phase 17: 수면 전용 스크린 공간 반사 (Screen Space Reflection - SSR)
+// =============================================================================
+fn calculateWaterSSR(
+    startWorldPos: vec3<f32>,
+    worldNormal: vec3<f32>,
+    R: vec3<f32>,
+    cameraNear: f32,
+    cameraFar: f32
+) -> vec4<f32> {
+    if (uniforms.enableSSR == 0u || R.y <= 0.001) {
+        return vec4<f32>(0.0);
+    }
+
+    let maxSteps = uniforms.ssrStepCount;
+    if (maxSteps == 0u) {
+        return vec4<f32>(0.0);
+    }
+
+    let maxDist = max(1.0, uniforms.ssrMaxDistance);
+    let stepSize = maxDist / f32(maxSteps);
+    let thickness = max(0.05, uniforms.ssrThickness);
+
+    // 수면 자체와의 자가 교차(Self-intersection) 방지를 위해 법선 방향으로 미세 오프셋
+    var currentPos = startWorldPos + worldNormal * 0.03;
+    var hitUV = vec2<f32>(0.0);
+    var hitFound = false;
+
+    for (var i = 0u; i < maxSteps; i = i + 1u) {
+        currentPos = currentPos + R * stepSize;
+
+        // 월드 좌표 -> 클립 공간 -> NDC -> 스크린 UV
+        let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(currentPos, 1.0);
+        if (clipPos.w <= 0.001) {
+            break;
+        }
+        let ndc = clipPos.xyz / clipPos.w;
+        let uv = vec2<f32>(ndc.x * 0.5 + 0.5, -ndc.y * 0.5 + 0.5);
+
+        // 화면 경계 밖 또는 깊이 버퍼 범위 밖이면 추적 중단
+        if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 || ndc.z < 0.0 || ndc.z > 1.0) {
+            break;
+        }
+
+        // 1패스 불투명 오브젝트 Depth 로드
+        let coord = vec2<i32>(uv * systemUniforms.resolution);
+        let rawSceneDepth = textureLoad(renderPath1DepthTexture, coord, 0);
+
+        // 하늘 영역(깊이 1.0 근처)은 교차 대상이 아니므로 계속 진행
+        if (rawSceneDepth >= 0.9999) {
+            continue;
+        }
+
+        // 수중 바닥 지형 배제: 샘플링된 오브젝트의 월드 Y 고도가 수면보다 아래이면 반사 대상에서 제외
+        let ndcX = uv.x * 2.0 - 1.0;
+        let ndcY = (1.0 - uv.y) * 2.0 - 1.0;
+        let sceneH = systemUniforms.projection.inverseProjectionViewMatrix * vec4<f32>(ndcX, ndcY, rawSceneDepth, 1.0);
+        let sceneWorldY = sceneH.y / max(1e-5, sceneH.w);
+
+        if (sceneWorldY < startWorldPos.y + 0.05) {
+            continue;
+        }
+
+        let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
+        let rayViewZ = -(systemUniforms.camera.viewMatrix * vec4<f32>(currentPos, 1.0)).z;
+        let depthDiff = rayViewZ - linearSceneDepth;
+        let effectiveThickness = max(stepSize * 1.5, thickness);
+
+        // 교차 판정: 광선이 수면 위 오브젝트의 표면 뒤로 들어갔으며, 오브젝트 두께 허용치 이내일 때
+        if (depthDiff > 0.0 && depthDiff < effectiveThickness) {
+            hitUV = uv;
+            hitFound = true;
+            break;
+        }
+    }
+
+    if (!hitFound) {
+        return vec4<f32>(0.0);
+    }
+
+    // 화면 가장자리 페이드아웃 (화면 밖으로 나갈수록 부드럽게 감쇄)
+    let edge = min(hitUV, vec2<f32>(1.0) - hitUV);
+    let edgeFade = smoothstep(0.0, 0.05, min(edge.x, edge.y));
+
+    // 광선 진행 거리에 따른 부드러운 거리 감쇄 (Distance Fade)
+    let travelDist = length(currentPos - startWorldPos);
+    let distFade = 1.0 - smoothstep(maxDist * 0.75, maxDist, travelDist);
+
+    // 수평각 페이드 (완만한 반사각에서도 시원하게 뻗어나가도록 허용)
+    let rayFade = clamp(R.y * 10.0, 0.0, 1.0);
+
+    let totalWeight = edgeFade * distFade * rayFade;
+    if (totalWeight <= 0.001) {
+        return vec4<f32>(0.0);
+    }
+
+    // 거칠기(Roughness)에 따른 밉맵 블러 샘플링
+    let maxMip = f32(textureNumLevels(renderPath1ResultTexture) - 1);
+    let blurMip = clamp(uniforms.roughness * maxMip * 1.5, 0.0, maxMip);
+    let hitColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, hitUV, blurMip).rgb;
+
+    return vec4<f32>(hitColor, totalWeight);
+}
 
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
@@ -305,9 +414,10 @@ fn main(inputData: InputData) -> OutputFragment {
         skyDiffuseIrradiance = skyDiffuseIrradiance + atmoIrradiance;
     }
 
-    // [순수 물리 PBR 환경 반사광 (과노출 원천 방지)]:
-    // 인위적인 글린트/방향성 뻥튀기 배율을 전면 제거하여, 어떤 HDR 노을/도시 큐브맵에서도 하얗게 타지 않음!
-    let skyReflectionColor = rawSkyReflection * uniforms.specularFactor;
+    // [Phase 17] 스크린 공간 오브젝트 반사 (SSR) 연산 및 Skybox IBL 하이브리드 폴백 결합
+    let ssrResult = calculateWaterSSR(worldPos, worldNormal, R, cameraNear, cameraFar);
+    let blendedSkyReflection = mix(rawSkyReflection, ssrResult.rgb, ssrResult.a);
+    let skyReflectionColor = blendedSkyReflection * uniforms.specularFactor;
 
     // -------------------------------------------------------------------------
     // [Step 6] 태양광 직사 조명 (Direct Specular & Volume In-Scattering)
@@ -402,6 +512,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
 
     switch (uniforms.debugMode) {
+        case 15u: {
+            // Step 17.5: 스크린 공간 반사(SSR) 단독 뷰
+            output.color = vec4<f32>(ssrResult.rgb * ssrResult.a, 1.0);
+        }
         case 14u: {
             // Step 14.3: 수중 바닥 햇살 일렁임 카우스틱스(Caustics) 단독 뷰
             output.color = vec4<f32>(vec3<f32>(causticIntensity), 1.0);
