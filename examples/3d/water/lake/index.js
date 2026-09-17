@@ -42,6 +42,13 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
+        // CSM 캐스케이드 그림자 설정 (에메랄드 해변 및 캐릭터 최적화)
+        const directionalShadowManager = scene.shadowManager.directionalShadowManager;
+        directionalShadowManager.maxShadowDistance = 90;
+        directionalShadowManager.strength = 0.88;
+        directionalShadowManager.bias = 0.00015;
+        directionalShadowManager.pcssLightSize = 1.0;
+
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
@@ -84,6 +91,100 @@ RedGPU.init(
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
 
+        // 5-2. 🚶 3D 캐릭터 로드 및 애니메이션 상태 머신 (Soldier.glb)
+        let characterMesh = null;
+        let characterController = null;
+        let stateMachine = null;
+        let targetStateName = 'Idle';
+        let lastTime = null;
+
+        // 해변 및 해저 지형의 정확한 상단 표면 고도 계산 함수 (GC 0건 보장)
+        const getLakeFloorHeight = (x, z) => {
+            // seabedMesh(rotX=9.0 deg) 상단 평면 방정식 (북쪽 z=-16 얕은 여울 -> 남쪽 z=+16 깊은 라군)
+            return -1.212 - (z - 0.156) * 0.158384;
+        };
+
+        const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            MODEL_URL,
+            (loader) => {
+                characterMesh = loader.resultMesh;
+                // 찰랑이는 물가 (백사장 바로 앞) 시작 좌표
+                characterMesh.x = 0;
+                characterMesh.z = -12;
+                characterMesh.y = getLakeFloorHeight(characterMesh.x, characterMesh.z);
+
+                characterMesh.setCastShadowRecursively(true);
+                characterMesh.setReceiveShadowRecursively(true);
+                scene.addChild(characterMesh);
+
+                // 카메라가 캐릭터를 3인칭 시점으로 추적하도록 초기화
+                controller.centerX = characterMesh.x;
+                controller.centerY = characterMesh.y + 1.2;
+                controller.centerZ = characterMesh.z;
+                controller.distance = 9.0;
+                controller.tilt = -10;
+                controller.pan = 0;
+
+                // SimpleCharacterController 생성
+                characterController = new RedGPU.Charactor.SimpleCharacterController(
+                    redGPUContext,
+                    characterMesh,
+                    view.camera,
+                    {
+                        speed: 3.5,
+                        runSpeed: 7.5,
+                        rotationSpeed: 8.0,
+                        gravity: 24.0,
+                        jumpForce: 8.0,
+                        floorHeight: 0.0,
+                        floorOffset: 0.0,
+                        getFloorHeight: getLakeFloorHeight,
+                    }
+                );
+
+                // 애니메이션 클립 매핑 (0=Idle, 1=Run, 2=TPose, 3=Walk)
+                const clips = loader.parsingResult.animations;
+                if (clips && clips.length > 0) {
+                    const idleState = clips[0];
+                    const runState = clips[1];
+                    const walkState = clips[3] || clips[2];
+
+                    idleState.name = 'Idle';
+                    walkState.name = 'Walk';
+                    runState.name = 'Run';
+
+                    stateMachine = new RedGPU.AnimStateMachine(idleState);
+                    stateMachine.addState(walkState);
+                    stateMachine.addState(runState);
+
+                    const BLEND = 0.25;
+                    const pairs = [
+                        ['Idle', 'Walk'], ['Idle', 'Run'],
+                        ['Walk', 'Idle'], ['Walk', 'Run'],
+                        ['Run', 'Idle'], ['Run', 'Walk'],
+                    ];
+                    pairs.forEach(([from, to]) => {
+                        stateMachine.addTransition({
+                            fromState: from,
+                            toState: to,
+                            duration: BLEND,
+                            conditions: () => targetStateName === to,
+                        });
+                    });
+
+                    loader.stopAnimation();
+                    loader.playAnimation(idleState);
+                    if (loader.activeAnimations.length > 0) {
+                        loader.activeAnimations[0].animStateMachine = stateMachine;
+                    }
+                }
+                console.log('🚶 [Character] Soldier loaded and ready for lake water interaction.');
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
+        );
+
         window.__testController = controller;
         window.__testLake = lake;
         window.__testLight = directionalLight;
@@ -98,6 +199,25 @@ RedGPU.init(
             for (let i = 0; i < count; i++) {
                 const rock = floatingRocks[i];
                 rock.y = rock.originalY + Math.sin(t * 1.5 + i) * 0.04;
+            }
+
+            // 캐릭터 이동 및 카메라 추적 (매 프레임 고빈도 실행: GC 부하 최소화)
+            if (characterMesh && characterController) {
+                const dt = lastTime !== null ? time - lastTime : 0;
+                lastTime = time;
+                if (dt > 0) {
+                    characterController.update(view, time);
+
+                    // 3인칭 카메라 부드러운 중심점 추적
+                    controller.centerX = characterMesh.x;
+                    controller.centerY = characterMesh.y + 1.2;
+                    controller.centerZ = characterMesh.z;
+
+                    // 상태 머신 전이 판단
+                    if (characterController.isRunning) targetStateName = 'Run';
+                    else if (characterController.isMoving) targetStateName = 'Walk';
+                    else targetStateName = 'Idle';
+                }
             }
         };
         renderer.start(redGPUContext, render);
@@ -161,6 +281,7 @@ function createBeachEnvironment(redGPUContext, scene) {
     seabedMesh.y = -2.2;
     seabedMesh.z = 0;
     seabedMesh.rotationX = 9.0; // 북쪽(z=-16)은 얕은 여울, 남쪽(z=+16)은 깊은 라군으로 완만히 하강
+    seabedMesh.receiveShadow = true;
     scene.addChild(seabedMesh);
 
     // --- 3. 백사장 해변 경사면 (PBR White Sand Beach Slope) ---
@@ -183,6 +304,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     beachMesh.y = 0.35;
     beachMesh.z = -30;
     beachMesh.rotationX = 13.5;
+    beachMesh.castShadow = true;
+    beachMesh.receiveShadow = true;
     scene.addChild(beachMesh);
 
     // --- 4. 기암괴석 및 해안 암초 군락 (PBR Coastal Rocks & Cliffs) ---
@@ -207,6 +330,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     rockStack.z = -0.5;
     rockStack.rotationY = 25;
     rockStack.rotationZ = -4;
+    rockStack.castShadow = true;
+    rockStack.receiveShadow = true;
     scene.addChild(rockStack);
 
     const rockStackSubGeom = new RedGPU.Primitive.Sphere(redGPUContext, 2.6, 24, 24);
@@ -219,6 +344,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     rockStackSub.scaleZ = 1.2;
     rockStackSub.rotationX = 40;
     rockStackSub.rotationY = -25;
+    rockStackSub.castShadow = true;
+    rockStackSub.receiveShadow = true;
     scene.addChild(rockStackSub);
 
     // (B) 맑은 에메랄드 물밑에 잠긴 수중 암초들 (Submerged Coral Reefs)
@@ -242,6 +369,8 @@ function createBeachEnvironment(redGPUContext, scene) {
         reefMesh.scaleZ = info.scale[2];
         reefMesh.rotationX = info.rotX;
         reefMesh.rotationY = info.rotY;
+        reefMesh.castShadow = true;
+        reefMesh.receiveShadow = true;
         scene.addChild(reefMesh);
     });
 
@@ -264,6 +393,8 @@ function createBeachEnvironment(redGPUContext, scene) {
         boulderMesh.scaleZ = info.scale[2];
         boulderMesh.rotationX = info.rotX;
         boulderMesh.rotationY = info.rotY;
+        boulderMesh.castShadow = true;
+        boulderMesh.receiveShadow = true;
         scene.addChild(boulderMesh);
     });
 
@@ -274,6 +405,7 @@ function createBeachEnvironment(redGPUContext, scene) {
     floatReef1.y = 0.46;
     floatReef1.originalY = 0.46;
     floatReef1.z = 6;
+    floatReef1.castShadow = true;
     scene.addChild(floatReef1);
     floatingRocks.push(floatReef1);
 
@@ -284,6 +416,7 @@ function createBeachEnvironment(redGPUContext, scene) {
     floatReef2.z = 8;
     floatReef2.scaleX = 0.85;
     floatReef2.scaleZ = 0.85;
+    floatReef2.castShadow = true;
     scene.addChild(floatReef2);
     floatingRocks.push(floatReef2);
 
@@ -310,6 +443,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     platformMesh.y = 0.7; // 수면(0.5m) 살짝 위로 0.2m 노출
     platformMesh.z = 2.0;
     platformMesh.rotationY = 22;
+    platformMesh.castShadow = true;
+    platformMesh.receiveShadow = true;
     scene.addChild(platformMesh);
 
     // (B) 웅장한 중앙 테라코타 오벨리스크 (Central Terracotta Obelisk)
@@ -320,6 +455,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     obeliskMesh.y = 6.8;
     obeliskMesh.z = 2.0;
     obeliskMesh.rotationY = 22;
+    obeliskMesh.castShadow = true;
+    obeliskMesh.receiveShadow = true;
     scene.addChild(obeliskMesh);
 
     // (C) 신전 대리석 열주 군락 (Temple Marble Colonnade - 4개의 기둥과 상단 엔타블러처)
@@ -337,6 +474,8 @@ function createBeachEnvironment(redGPUContext, scene) {
         column.x = p.x;
         column.y = 4.3;
         column.z = p.z;
+        column.castShadow = true;
+        column.receiveShadow = true;
         scene.addChild(column);
 
         // 상단 주두 (Capital)
@@ -345,6 +484,8 @@ function createBeachEnvironment(redGPUContext, scene) {
         cap.x = p.x;
         cap.y = 8.8;
         cap.z = p.z;
+        cap.castShadow = true;
+        cap.receiveShadow = true;
         scene.addChild(cap);
     });
 
@@ -355,6 +496,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     beam.y = 9.3;
     beam.z = 1.9;
     beam.rotationY = 28;
+    beam.castShadow = true;
+    beam.receiveShadow = true;
     scene.addChild(beam);
 
     // (D) 수면 관통 경사 대리석 석주 (The Broken Straw Colonnade Pillar)
@@ -369,6 +512,8 @@ function createBeachEnvironment(redGPUContext, scene) {
     strawMesh.z = -1.2;
     strawMesh.rotationZ = 34; // 수면을 비스듬히 관통
     strawMesh.rotationX = 18;
+    strawMesh.castShadow = true;
+    strawMesh.receiveShadow = true;
     scene.addChild(strawMesh);
 
     return {floatingRocks};
@@ -381,9 +526,23 @@ function createBeachEnvironment(redGPUContext, scene) {
 function renderTestPane(redGPUContext, lake, directionalLight, view) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
+        directionalShadow: true,
         skybox: true,
         ibl: true,
         gui: (pane) => {
+            // 🚶 캐릭터 조작 가이드 패널
+            const charFolder = pane.addFolder({title: '🚶 Character Controls', expanded: true});
+            const charConfig = {
+                move: 'W / A / S / D',
+                run: 'Hold Shift',
+                jump: 'Space',
+                camera: 'Mouse Drag (Rotate)',
+            };
+            charFolder.addBinding(charConfig, 'move', {readonly: true, label: 'Move'});
+            charFolder.addBinding(charConfig, 'run', {readonly: true, label: 'Run'});
+            charFolder.addBinding(charConfig, 'jump', {readonly: true, label: 'Jump'});
+            charFolder.addBinding(charConfig, 'camera', {readonly: true, label: 'Camera'});
+
             // [Phase 1~3] WaterLake 기본 및 디버그 제어 패널
             const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
