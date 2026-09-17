@@ -3,10 +3,11 @@ import Ground from "../../../primitive/Ground";
 import Mesh from "../../mesh/Mesh";
 import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
+import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 
 /**
- * [KO] 언리얼 엔진 5의 AWaterBodyLake에 대응하는 호수 수체 컴포넌트 클래스 (Phase 2)
- * [EN] Lake water body component class corresponding to Unreal Engine 5 AWaterBodyLake (Phase 2)
+ * [KO] 언리얼 엔진 5의 AWaterBodyLake에 대응하는 호수 수체 컴포넌트 클래스 (Phase 12 - Micro Swell)
+ * [EN] Lake water body component class corresponding to Unreal Engine 5 AWaterBodyLake (Phase 12 - Micro Swell)
  *
  * @category Display
  */
@@ -15,6 +16,14 @@ class WaterLake extends Mesh {
     #waterHeight: number;
     #widthSegments: number;
     #heightSegments: number;
+
+    #waveAmplitude: number = 0.025; // 기본 2.5cm 미세 너울
+    #waveWavelength: number = 16.0; // 기본 파장 16m
+    #waveSpeed: number = 1.0; // 기본 전파 속도
+
+    // 고빈도 갱신 시 GC 0건 유지를 위한 정적 크기 재사용 TypedArray 버퍼
+    #singleFloatBuffer: Float32Array = new Float32Array(1);
+    #allUniformBuffer: Float32Array = new Float32Array(4);
 
     /**
      * [KO] WaterLake 생성자
@@ -49,6 +58,112 @@ class WaterLake extends Mesh {
 
         // 수면 위/아래 양면 시야를 위해 cullMode를 NONE으로 구성
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
+
+        // 커스텀 버텍스 셰이더 파이프라인 활성화
+        this.dirtyPipeline = true;
+    }
+
+    /**
+     * [KO] 호수 표면 미세 장파장 너울의 수직 진폭(Amplitude, 단위: m, 기본값: 0.025 = 2.5cm)
+     * [EN] Vertical amplitude of lake surface micro swell (Unit: m, default: 0.025 = 2.5cm)
+     */
+    get waveAmplitude(): number {
+        return this.#waveAmplitude;
+    }
+
+    set waveAmplitude(value: number) {
+        this.#waveAmplitude = Math.max(0.0, value);
+        if (this.gpuRenderInfo?.vertexUniformBuffer && this.gpuRenderInfo?.vertexUniformInfo) {
+            const member = this.gpuRenderInfo.vertexUniformInfo.members.waveAmplitude;
+            if (member) {
+                this.#singleFloatBuffer[0] = this.#waveAmplitude;
+                this.redGPUContext.gpuDevice.queue.writeBuffer(
+                    this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+                    member.uniformOffset,
+                    this.#singleFloatBuffer as BufferSource
+                );
+            }
+        }
+    }
+
+    /**
+     * [KO] 호수 표면 미세 너울의 대표 파장(Wavelength, 단위: m, 기본값: 16.0m)
+     * [EN] Representative wavelength of lake surface micro swell (Unit: m, default: 16.0m)
+     */
+    get waveWavelength(): number {
+        return this.#waveWavelength;
+    }
+
+    set waveWavelength(value: number) {
+        this.#waveWavelength = Math.max(0.1, value);
+        if (this.gpuRenderInfo?.vertexUniformBuffer && this.gpuRenderInfo?.vertexUniformInfo) {
+            const member = this.gpuRenderInfo.vertexUniformInfo.members.waveWavelength;
+            if (member) {
+                this.#singleFloatBuffer[0] = this.#waveWavelength;
+                this.redGPUContext.gpuDevice.queue.writeBuffer(
+                    this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+                    member.uniformOffset,
+                    this.#singleFloatBuffer as BufferSource
+                );
+            }
+        }
+    }
+
+    /**
+     * [KO] 호수 표면 미세 너울의 전파 속도 배율 (Speed, 기본값: 1.0)
+     * [EN] Propagation speed multiplier of lake surface micro swell (Speed, default: 1.0)
+     */
+    get waveSpeed(): number {
+        return this.#waveSpeed;
+    }
+
+    set waveSpeed(value: number) {
+        this.#waveSpeed = value;
+        if (this.gpuRenderInfo?.vertexUniformBuffer && this.gpuRenderInfo?.vertexUniformInfo) {
+            const member = this.gpuRenderInfo.vertexUniformInfo.members.waveSpeed;
+            if (member) {
+                this.#singleFloatBuffer[0] = this.#waveSpeed;
+                this.redGPUContext.gpuDevice.queue.writeBuffer(
+                    this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+                    member.uniformOffset,
+                    this.#singleFloatBuffer as BufferSource
+                );
+            }
+        }
+    }
+
+    /**
+     * [KO] WaterLake 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to WaterLake.
+     *
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
+     */
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
+        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+        this.#updateAllVertexUniforms();
+        return shaderModule;
+    };
+
+    /**
+     * [KO] 모든 버텍스 너울 유니폼 데이터를 GPU 버퍼에 일괄 기록합니다 (GC 0건 보장).
+     * [EN] Writes all vertex swell uniform data to the GPU buffer in batch (Zero-GC guaranteed).
+     */
+    #updateAllVertexUniforms() {
+        if (this.gpuRenderInfo?.vertexUniformBuffer) {
+            this.#allUniformBuffer[0] = this.#waveAmplitude;
+            this.#allUniformBuffer[1] = this.#waveWavelength;
+            this.#allUniformBuffer[2] = this.#waveSpeed;
+            this.#allUniformBuffer[3] = 0.0;
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,
+                0,
+                this.#allUniformBuffer as BufferSource
+            );
+        }
     }
 
     /**

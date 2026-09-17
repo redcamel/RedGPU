@@ -126,11 +126,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     let rawNormal1 = linearToSrgbVec3(rawSample1); // WebGPU sRGB 하드웨어 디코딩 완벽 상쇄
     var rawXY1 = rawNormal1.xy * 2.0 - 1.0;
-    // [트로코이드 호수 파도 곡률 변환 (Trochoidal Crest Sharpening)]:
-    // 둥글둥글한 젤리 노이즈를 파도 골짜기(Trough)는 넓고 평평하게, 능선(Crest)은 얇고 샤프하게 모아줌
-    let len1 = length(rawXY1);
-    let trochoidXY1 = select(rawXY1, (rawXY1 / max(len1, 0.001)) * pow(len1, 1.35), len1 > 0.001);
-    var tangentXY1 = trochoidXY1 * uniforms.normalScale;
+    var tangentXY1 = rawXY1 * uniforms.normalScale;
     if (uniforms.invertNormalY1 == 1u) {
         tangentXY1.y = -tangentXY1.y;
     }
@@ -146,9 +142,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         let rawNormal2 = linearToSrgbVec3(rawSample2);
         var rawXY2 = rawNormal2.xy * 2.0 - 1.0;
-        let len2 = length(rawXY2);
-        let trochoidXY2 = select(rawXY2, (rawXY2 / max(len2, 0.001)) * pow(len2, 1.35), len2 > 0.001);
-        var tangentXY2 = trochoidXY2 * uniforms.normalScale2;
+        var tangentXY2 = rawXY2 * uniforms.normalScale2;
         if (uniforms.invertNormalY2 == 1u) {
             tangentXY2.y = -tangentXY2.y;
         }
@@ -159,9 +153,9 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     // [원거리 노멀 페이드 (Distance Normal Fade)]:
-    // 근/중거리(45m 이내)에서는 생생한 파도 디테일을 100% 유지하고, 초원경(70m 이상)에서만 완만히 감쇄
+    // 근/중거리(35m 이내)에서는 생생한 파도 디테일을 유지하고, 원경(60m 이상)에서 매끄럽게 페이드하여 지글거림 방지
     let camDist = length(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
-    let distNormalFade = clamp((camDist - 45.0) / 60.0, 0.0, 0.75);
+    let distNormalFade = clamp((camDist - 35.0) / 45.0, 0.0, 0.85);
     combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), distNormalFade));
 
     let baseNormal = normalize(inputData.vertexNormal);
@@ -183,7 +177,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
     let linearDistortedDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
-    let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.05, 0.0, 1.0);
+    let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
     let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
     // 굴절된 실제 바닥 씬 컬러 및 실제 광로 수심
@@ -193,45 +187,32 @@ fn main(inputData: InputData) -> OutputFragment {
     let effectiveDeltaDepth = max(0.0, linearFinalDepth - linearWaterDepth);
 
     // -------------------------------------------------------------------------
-    // [Step 4] 맑고 투명한 바닥 투과광 및 수심별 자연스러운 착색 (Transmitted Ground)
+    // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Beer-Lambert)
     // -------------------------------------------------------------------------
     let extinction = exp(-effectiveDeltaDepth * uniforms.extinctionFactor);
     let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
 
-    // [바닥 지형 밝기 온전 보존 및 수심별 광학 착색]:
-    // 바닥 지형이 시커멓게 짓눌리지 않고 본래 밝기와 디테일 그대로 맑게 투과되며,
-    // 수심에 따라 청명한 에메랄드 -> 깊은 라군 사파이어 톤으로 은은하고 화사하게 물듦
-    let depthProgress = clamp(effectiveDeltaDepth * 0.25, 0.0, 1.0);
-    let waterTint = mix(vec3<f32>(1.0), waterAlbedo * 1.35, depthProgress);
+    // 바닥 지형이 수심에 따라 맑은 에메랄드 -> 깊은 남색으로 자연스럽게 착색
+    let depthProgress = clamp(effectiveDeltaDepth * 0.30, 0.0, 1.0);
+    let waterTint = mix(vec3<f32>(1.0), waterAlbedo * 1.25, depthProgress);
     let transmittedSceneColor = sceneColor * waterTint;
 
     // -------------------------------------------------------------------------
-    // [Step 5] 프레넬 및 간접 환경 반사 (Fresnel & Sky Reflection)
+    // [Step 5] 프레넬 및 간접 환경 반사 (Pure PBR Fresnel & Sky Reflection)
     // -------------------------------------------------------------------------
     let worldPos = inputData.vertexPosition;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
     // [정밀 물리 PBR 프레넬 (Lagarde 2014 / UE5 SingleLayerWater)]:
-    // 1. 수직으로 내려다볼 때(NdotV -> 1.0)는 물의 물리 상수 F0(0.02, 2%)로 수렴하여
-    //    바닥 투과광(98%)이 온전히 보이고 표면 유막 반사를 완벽 차단.
-    // 2. 파도 노멀의 입체 굴곡을 50% 적극 반영하여 파도 능선과 골짜기 사이에 선명한 반사 찰랑임 형성.
-    // 3. 스침각(NdotV -> 0.0)에서는 거칠기에 따른 감쇄율 f90으로 자연스럽게 전이.
+    // 수직각 F0(0.02) 엄격 보장 -> 바닥 98% 무왜곡 투과!
     let NdotV_pure = clamp(dot(baseNormal, V), 0.001, 1.0);
     let NdotV_wave = clamp(dot(worldNormal, V), 0.001, 1.0);
-    let NdotV_effective = clamp(mix(NdotV_pure, NdotV_wave, 0.50), 0.001, 1.0);
+    let NdotV_effective = clamp(mix(NdotV_pure, NdotV_wave, 0.35), 0.001, 1.0);
     let oneMinusNdotV = 1.0 - NdotV_effective;
     let f90 = max(1.0 - uniforms.roughness, uniforms.fresnelF0);
     let fresnel = uniforms.fresnelF0 + (f90 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
 
-    // [파도 능선 마이크로 글린트 및 입체 명암 (Wave Crest Glint & Dynamic Contrast)]:
-    // 파도가 출렁이며 일렁이는 능선(Ridge/Crest)에서 하늘 반사광이 맑고 눈부시게 반짝이도록(Glint)
-    // 파도 미세 요철의 경사도(Slope)와 시선 대향각을 결합하여 환하고 또렷한 수면 일렁임 형성!
-    let wavePerturb = length(worldNormal.xz);
-    let crestGlint = 1.0 + clamp(wavePerturb * 2.8, 0.0, 2.0); // 파도 능선 하이라이트 강화
-    let waveFacing = clamp(dot(worldNormal, V) / max(NdotV_pure, 0.001), 0.85, 1.35);
-    let waveDynamicHighlight = waveFacing * crestGlint;
-
-    // 반사 벡터 R: 지평선 아래로 꺾인 광선만 수평선 높이로 부드럽게 보정
+    // 반사 벡터 R
     var R = reflect(-V, worldNormal);
     R.y = max(R.y, 0.005);
     R = normalize(R);
@@ -244,8 +225,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var skyDiffuseIrradiance = vec3<f32>(0.0);
 
     if (u_usePrefilterTexture) {
-        // [하얀 기름막 방지]: 불필요한 인위적 밉맵 블러를 제거하여
-        // 구름이 허연 페인트처럼 뭉개지는 유막 현상을 없애고 맑은 하늘 윤곽이 청명하게 비치도록 정규화
         let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
         let effectiveRoughnessIBL = clamp(uniforms.roughness, 0.0, 1.0);
         let mipLevel = clamp(effectiveRoughnessIBL * iblMipmapCount, 0.0, iblMipmapCount);
@@ -264,26 +243,9 @@ fn main(inputData: InputData) -> OutputFragment {
         skyDiffuseIrradiance = skyDiffuseIrradiance + atmoIrradiance;
     }
 
-    // [IBL 역광/순광 방향성 조화 (Directional IBL Forward Glint & View Light Balance)]:
-    // 1. 역광 반사(R이 태양/밝은 하늘을 향할 때: R dot L > 0):
-    //    웹 큐브맵의 압축된 다이내믹 레인지를 보정하여, 파도 능선에 맺히는 하늘 반사를 눈부시게 쨍하게 부스팅.
-    // 2. 순광 반사(태양을 등질 때: V dot L < 0):
-    //    표면 반사를 차분하게 정돈하여 맑고 투명한 바닥 지형(자갈/모래)이 우선 투과되도록 조화.
-    var iblDirectionalModifier = 1.0;
-    if (systemUniforms.directionalLightCount > 0u) {
-        let mainSunDir = -normalize(systemUniforms.directionalLights[0].direction);
-        let RdotL = max(0.0, dot(R, mainSunDir));
-        let VdotL = dot(V, mainSunDir);
-
-        // 태양 및 밝은 하늘 반구 쪽을 향하는 반사광의 화사한 전방 글린트 부스팅
-        let forwardReflectionBoost = 1.0 + pow(RdotL, 3.5) * 1.35;
-        // 시점 역광(반사 강조) vs 순광(바닥 투과 강조) 밸런스
-        let viewBalance = mix(0.88, 1.15, clamp(VdotL * 0.5 + 0.5, 0.0, 1.0));
-        iblDirectionalModifier = forwardReflectionBoost * viewBalance;
-    }
-
-    // 환경 반사광에 파도 능선 글린트(Crest Glint) 및 IBL 역광/순광 방향성 밸런스 적용
-    let skyReflectionColor = rawSkyReflection * (uniforms.specularFactor * waveDynamicHighlight * iblDirectionalModifier);
+    // [순수 물리 PBR 환경 반사광 (과노출 원천 방지)]:
+    // 인위적인 글린트/방향성 뻥튀기 배율을 전면 제거하여, 어떤 HDR 노을/도시 큐브맵에서도 하얗게 타지 않음!
+    let skyReflectionColor = rawSkyReflection * uniforms.specularFactor;
 
     // -------------------------------------------------------------------------
     // [Step 6] 태양광 직사 조명 (Direct Specular & Volume In-Scattering)

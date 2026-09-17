@@ -296,7 +296,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // lake.waterMaterial에 직접 연결 (Direct Binding)
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Full Phase 11) (0)': 0,
+                    'PBR Water (Full Phase 12) (0)': 0,
                     'Sun Specular Glitter Only (13)': 13,
                     'Sky Reflection Color Only (12)': 12,
                     'Fresnel Factor Mask (11)': 11,
@@ -316,6 +316,27 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                 min: 0.5,
                 max: 30.0,
                 step: 0.5
+            });
+
+            // [Phase 12] 버텍스 셰이더 미세 장파장 너울 (Micro Swell) 제어 패널
+            const swellFolder = pane.addFolder({title: 'Micro Swell (Phase 12)', expanded: true});
+            swellFolder.addBinding(lake, 'waveAmplitude', {
+                min: 0.0,
+                max: 0.15,
+                step: 0.005,
+                label: 'Amplitude (m)'
+            });
+            swellFolder.addBinding(lake, 'waveWavelength', {
+                min: 2.0,
+                max: 60.0,
+                step: 1.0,
+                label: 'Wavelength (m)'
+            });
+            swellFolder.addBinding(lake, 'waveSpeed', {
+                min: 0.0,
+                max: 5.0,
+                step: 0.1,
+                label: 'Wave Speed'
             });
 
             // [Phase 7, 8, 9] 파도 노멀 및 굴절 왜곡 제어 패널

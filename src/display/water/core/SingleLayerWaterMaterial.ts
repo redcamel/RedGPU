@@ -191,10 +191,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
         this.refractionStrength = 0.008;
-        this.normalScale = 0.35;
-        this.normalScale2 = 0.18;
-        this.normalTiling = 48.0;
-        this.normalTiling2 = 96.0;
+        this.normalScale = 0.22;
+        this.normalScale2 = 0.10;
+        this.normalTiling = 28.0;
+        this.normalTiling2 = 56.0;
         this.windSpeed = 0.025;
         this.windSpeed2 = 0.040;
         this.windDirection = [1.0, 0.3];
@@ -252,10 +252,10 @@ defineVector2(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 0.008},
-    {key: 'normalScale', value: 0.35},
-    {key: 'normalScale2', value: 0.18},
-    {key: 'normalTiling', value: 48.0},
-    {key: 'normalTiling2', value: 96.0},
+    {key: 'normalScale', value: 0.22},
+    {key: 'normalScale2', value: 0.10},
+    {key: 'normalTiling', value: 28.0},
+    {key: 'normalTiling2', value: 56.0},
     {key: 'windSpeed', value: 0.025},
     {key: 'windSpeed2', value: 0.040},
     {key: 'extinctionFactor', value: 0.22},
