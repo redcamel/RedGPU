@@ -196,13 +196,13 @@ function createBeachEnvironment(redGPUContext, scene) {
 
     // (A) 우측 전경: 웅장한 주상절리 기암절벽 섬 (Seastack Rock Island)
     // 수면 위 웅장한 바위의 모습과 수면에 비친 바위 질감의 SSR 실시간 반사를 동시 제공
-    const rockStackGeom = new RedGPU.Primitive.Box(redGPUContext, 5.5, 9.0, 5.0);
+    const rockStackGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 2.2, 3.0, 8.5, 18);
     const rockStack = new RedGPU.Display.Mesh(redGPUContext, rockStackGeom, rockMaterial);
-    rockStack.x = 10.5;
-    rockStack.y = 2.4;
-    rockStack.z = -1.5;
-    rockStack.rotationY = 35;
-    rockStack.rotationZ = 5;
+    rockStack.x = 11.5;
+    rockStack.y = 2.2;
+    rockStack.z = -0.5;
+    rockStack.rotationY = 25;
+    rockStack.rotationZ = -4;
     scene.addChild(rockStack);
 
     const rockStackSubGeom = new RedGPU.Primitive.Sphere(redGPUContext, 2.6, 24, 24);

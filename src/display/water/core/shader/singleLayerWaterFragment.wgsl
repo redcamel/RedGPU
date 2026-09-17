@@ -288,27 +288,35 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     // 1) 스넬 법칙에 의한 월드 광로 편향 벡터 (Snell Angular Deflection)
+    let aspectRatio = systemUniforms.resolution.x / max(1.0, systemUniforms.resolution.y);
     let snellRayDeflection = refractedRay - incidentRay;
     let viewSnellDeflection = (systemUniforms.camera.viewMatrix * vec4<f32>(snellRayDeflection, 0.0)).xyz;
-    let snellScreenDir = vec2<f32>(viewSnellDeflection.x, -viewSnellDeflection.y);
+    // 종횡비(aspectRatio)를 반영하여 가로 방향 찢어짐 왜곡을 원천 방지하고 정방형 왜곡 비율 유지
+    let snellScreenDir = vec2<f32>(viewSnellDeflection.x / aspectRatio, -viewSnellDeflection.y);
 
     // 2) 듀얼 파도 노멀에 의한 수면 표면 잔물결 섭동 (Wave Perturbation)
     let deltaWorldNormal = worldNormal - baseNormal;
     let viewDeltaNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaWorldNormal, 0.0)).xyz;
-    let waveScreenDir = vec2<f32>(viewDeltaNormal.x, -viewDeltaNormal.y);
+    let waveScreenDir = vec2<f32>(viewDeltaNormal.x / aspectRatio, -viewDeltaNormal.y);
 
     // 3) 수심(Delta Depth)에 비례하는 물리적 시차 변위 (Depth-dependent Parallax):
     // 수면 경계(depth=0)에서는 0에서 시작하여 연속성을 보장하고,
     // 수심이 깊어질수록 광선 굴절각에 비례하여 물속 물체(기둥/바닥)가 꺾여 보이는 Broken Straw 현상 구현
-    let depthFactor = clamp(deltaDepth * 0.8, 0.0, 3.5);
-    let perspectiveScale = 1.0 / max(0.5, linearWaterDepth * 0.12);
+    let depthFactor = clamp(deltaDepth * 0.5, 0.0, 2.0);
+    // 화면 하단(근경)에서 분모가 작아져 배율이 폭증하지 않도록 안정적인 원근 감쇄 적용
+    let perspectiveScale = 1.0 / (1.0 + linearWaterDepth * 0.06);
 
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
-    // 스넬 기하 굴절(기둥 꺾임) + 파도 잔물결 굴절의 유기적 결합
-    let combinedRefractScreen = (snellScreenDir * (depthFactor * 0.6) + waveScreenDir * (depthFactor * 0.4 + 0.6)) * perspectiveScale;
-    let rawRefractionOffset = combinedRefractScreen * (uniforms.refractionStrength * screenEdgeFade);
+    // 스넬 기하 꺾임(자연스러운 기둥 꺾임) + 파도 잔물결 굴절의 정밀 밸런싱
+    // (일방향 스넬 쏠림으로 인한 화면 하단 늘어짐/스미어링 원천 방지)
+    let safeSnell = clamp(snellScreenDir, vec2<f32>(-0.6), vec2<f32>(0.6));
+    let combinedRefractScreen = (safeSnell * (depthFactor * 0.10) + waveScreenDir * (depthFactor * 0.35 + 0.65)) * perspectiveScale;
+
+    // 최대 스크린 UV 변위 상한선(0.018)을 적용하여 화면 하단 및 외곽 텍스처 늘어짐 완벽 차단
+    let unclampedOffset = combinedRefractScreen * (uniforms.refractionStrength * screenEdgeFade);
+    let rawRefractionOffset = clamp(unclampedOffset, vec2<f32>(-0.018), vec2<f32>(0.018));
 
     // 소프트 블리딩 방지 (물 표면 앞쪽 수면 위 물체 왜곡 감쇄)
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
@@ -326,13 +334,13 @@ fn main(inputData: InputData) -> OutputFragment {
     // -------------------------------------------------------------------------
     // [Step 4] 맑고 투명한 바닥 투과광 (Transmitted Ground with Beer-Lambert & Caustics)
     // -------------------------------------------------------------------------
+    // 정통 비어-람베르트 지수 감쇄: 빛이 수심(effectiveDeltaDepth)을 통과하며 파장별로 흡수
     let extinction = exp(-effectiveDeltaDepth * uniforms.extinctionFactor);
     let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, 1.0 - extinction);
 
-    // 바닥 지형이 수심에 따라 맑은 에메랄드 -> 깊은 남색으로 자연스럽게 착색
-    let depthProgress = clamp(effectiveDeltaDepth * 0.30, 0.0, 1.0);
-    let waterTint = mix(vec3<f32>(1.0), waterAlbedo * 1.25, depthProgress);
-    var transmittedSceneColor = sceneColor * waterTint;
+    // 바닥 씬 투과율: 얕은 물가에서는 100% 원본 투과, 깊어질수록 물 흡수 스펙트럼(waterAlbedo)에 비례하여 자연 감쇄
+    let transmittedSceneColorFactor = mix(waterAlbedo, vec3<f32>(1.0), extinction) * extinction;
+    var transmittedSceneColor = sceneColor * transmittedSceneColorFactor;
 
     // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 카메라 무빙 시 밉맵 블러 방지 & 월드 밀착)
     var causticIntensity = 0.0;
@@ -474,10 +482,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let waveRoughness = clamp(uniforms.roughness + 0.18, 0.12, 0.40);
             let waveSpecular = getSpecularNDF(NdotH, waveRoughness) * getSpecularVisibility(NdotV_effective, NdotL, waveRoughness);
 
-            let deltaN = N - baseNormal;
-            let facetMultiplier = 1.0 + clamp(dot(deltaN, H) * 1.5, -0.15, 0.35);
-
-            let combinedSpec = (glitterSpecular * 0.58 + pbrSpecular * 0.34 + waveSpecular * 0.08) * F * uniforms.specularFactor * facetMultiplier;
+            // 3개 로브(코어 윤슬 58% + 몸체 하이라이트 34% + 잔물결 산란 8% = 정규화 100%)
+            let combinedSpec = (glitterSpecular * 0.58 + pbrSpecular * 0.34 + waveSpecular * 0.08) * F * uniforms.specularFactor;
             directSpecularColor = directSpecularColor + finalLightColor * (combinedSpec * NdotL);
         }
 
@@ -513,17 +519,23 @@ fn main(inputData: InputData) -> OutputFragment {
     let ambientInScattering = baseAmbient * 1.5 * waterAlbedo * depthScatterWeight;
     let waterScattering = directWaterScattering + ambientInScattering + skyVolumeScatter;
 
-    // [UE5 표준 결합 (수체 분리 믹싱)]:
-    // 1) 바닥 투과광(카우스틱스 및 비어-람베르트 착색)은 물에 잠긴 바닥에 직접 맺히므로, 초미세 해안선(수심 4cm 이내)에서만 지형과 부드럽게 융합
+    // [UE5 SingleLayerWater 표준 에너지 보존 결합 (PBR Energy Conservation)]:
+    // 1) 바닥 투과광은 물에 잠긴 바닥에 직접 맺히므로, 초미세 해안선(수심 4cm 이내)에서 지형 원본과 부드럽게 융합
     let groundDepthFade = smoothstep(0.005, 0.04, deltaDepth);
     let blendedGround = mix(sceneColor, transmittedSceneColor, groundDepthFade);
 
-    // 2) 수면 위의 반사광(하늘 반사광, 태양광 GGX 윤슬, 수체 산란광)은 해안선 폴리곤 칼단면 방지를 위해 depthFade로 소프트 융합
-    let softDepthFade = pow(depthFade, 0.85);
-    let waterScatteringFresnel = mix(waterScattering, skyReflectionColor, fresnel);
-    let surfaceLighting = (waterScatteringFresnel + directSpecularColor) * softDepthFade;
+    // 2) 수면을 뚫고 밖으로 나오는 총 투과광: (바닥 투과광 + 수체 체적 산란광) × (1.0 - fresnel)
+    let totalTransmittedLight = (blendedGround + waterScattering) * (1.0 - fresnel);
 
-    let finalRgb = blendedGround + surfaceLighting;
+    // 3) 수면 표면에서 반사되는 총 반사광: (Skybox/SSR 환경 반사광) × fresnel + 직사 스펙큘러 다이아몬드 윤슬
+    let totalReflectedLight = skyReflectionColor * fresnel + directSpecularColor;
+
+    // 4) 완전한 PBR 수체 광학 결합 (에너지 보존 합 1.0 보장)
+    let fullWaterColor = totalTransmittedLight + totalReflectedLight;
+
+    // 5) 해안선 접합부 소프트 감쇄: 수심이 0(해안선)에 도달할 때 칼단면 없이 원래 씬 지형과 100% 매끄럽게 보간
+    let softDepthFade = pow(depthFade, 0.85);
+    let finalRgb = mix(sceneColor, fullWaterColor, softDepthFade);
 
     // -------------------------------------------------------------------------
     // [Step 8] 디버그 모드 0~13 완벽 일대일 매핑
