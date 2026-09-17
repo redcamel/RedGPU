@@ -168,13 +168,13 @@ RedGPU.init(
 
         // 16km 초대형 지형 스케일 및 알프스 고산 호수에 맞춘 정밀 물리 광학 튜닝
         lake.waterMaterial.lakeWorldSize = 16000.0;
-        lake.waterMaterial.baseColor.setColorByHEX('#1ecdb0'); // 맑고 청명한 알프스 빙하 터콰이즈
-        lake.waterMaterial.deepColor.setColorByHEX('#022438'); // 깊은 알프스 사파이어 블루
-        lake.waterMaterial.refractionStrength = 0.035;          // 물리 스넬 굴절 왜곡
-        lake.waterMaterial.extinctionFactor = 0.015;           // 16km 분지 수심에 최적화된 빛 감쇄 계수
-        lake.waterMaterial.turbidity = 0.15;                   // 맑고 투명한 고산 빙하수 탁도
-        lake.waterMaterial.depthFadeDistance = 35.0;           // 16km 초대형 지형 해안선 완충 페이드 (35m)
-        lake.waterMaterial.roughness = 0.06;                   // 고요하고 매끄러운 수면 거울 반사 & 윤슬
+        lake.waterMaterial.baseColor.setColorByHEX('#1d5366'); // 차분하고 투명한 알프스 빙하수 톤 (형광 발광 방지)
+        lake.waterMaterial.deepColor.setColorByHEX('#021422'); // 깊은 알프스 심연 코발트 네이비
+        lake.waterMaterial.refractionStrength = 0.025;         // 물리 스넬 굴절 왜곡
+        lake.waterMaterial.extinctionFactor = 0.008;          // 16km 대형 분지 수심에 최적화된 맑고 투명한 빛 감쇄
+        lake.waterMaterial.turbidity = 0.04;                  // 청정 고산 빙하수 특유의 투명한 수질 (페인트 포그 제거)
+        lake.waterMaterial.depthFadeDistance = 18.0;          // 해안선 완충 페이드 (18m, 맑고 투명한 모래/자갈 노출)
+        lake.waterMaterial.roughness = 0.05;                  // 고요하고 매끄러운 수면 거울 반사 & 윤슬
         lake.waterMaterial.specularFactor = 1.0;
         lake.waterMaterial.fresnelF0 = 0.02;
 

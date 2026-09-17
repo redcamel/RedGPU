@@ -369,8 +369,10 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // [수심 및 탁도 기반 수중 산란 밉맵 블러 (Forward Multi-Scatter Blur)]
     // 얕은 물가는 0.0 밉으로 선명하게 투과되고, 깊은 수심 및 탁도가 높을수록 윤곽이 부드럽게 감싸임
+    // 대형 지형에서 픽셀 계단화 방지를 위해 최대 안전 밉 레벨(3.0) 제한 적용
     let maxSceneMip = f32(textureNumLevels(renderPath1ResultTexture) - 1);
-    let scatterBlur = clamp(effectiveOpticalDistance * 0.12 + uniforms.turbidity * 1.2, 0.0, maxSceneMip);
+    let maxSafeBlurMip = min(3.0, maxSceneMip);
+    let scatterBlur = clamp(effectiveOpticalDistance * 0.02 + uniforms.turbidity * 1.5, 0.0, maxSafeBlurMip);
     let sceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, finalRefractUV, scatterBlur).rgb;
 
     // -------------------------------------------------------------------------
@@ -397,15 +399,14 @@ fn main(inputData: InputData) -> OutputFragment {
     let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, depthProgress);
 
     // [수중 체적 안개 (Underwater Volume Fog)]:
-    // 깊은 곳에 잠긴 바닥과 수중 물체가 단순 검은색으로 꺼지지 않고,
-    // 호수 미립자에 산란된 부드러운 물빛 포그(Water Volume Fog) 속으로 자연스럽게 침잠
-    let fogDensity = clamp(turbidityCoeff * 0.7 + 0.3, 0.1, 1.0);
+    // 청정수(turbidity -> 0)일 때는 맑고 투명하게 바닥이 비치며, 탁도가 존재할 때만 부드럽게 체적 산란 안개 형성
+    let fogDensity = turbidityCoeff * 0.85;
     let waterFogFactor = (vec3<f32>(1.0) - extinctionRGB) * fogDensity;
-    let waterFogColor = mix(uniforms.baseColor * 0.8, uniforms.deepColor, depthProgress);
+    let waterFogColor = mix(uniforms.baseColor * 0.6, uniforms.deepColor, depthProgress);
 
     // 바닥 투과광: 파장별 비어-람베르트 투과 + 수중 체적 포그 융합
     let directGroundTransmittance = extinctionRGB;
-    var transmittedSceneColor = sceneColor * directGroundTransmittance + waterFogColor * (waterFogFactor * 0.35 * preExposure);
+    var transmittedSceneColor = sceneColor * directGroundTransmittance + waterFogColor * (waterFogFactor * 0.15);
 
     // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics - 카메라 무빙 시 밉맵 블러 방지 & 월드 밀착)
     var causticIntensity = 0.0;
@@ -578,11 +579,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let diffuseFresnel = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * 0.06; // 물(IOR 1.333) 반구 적분 평균 반사율
     let skyTransmittance = max(0.0, 1.0 - diffuseFresnel);
     let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20;
-    let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * depthScatterWeight * scatteringAlbedo;
+    let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.15);
 
-    let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-    let ambientInScattering = baseAmbient * waterAlbedo * depthScatterWeight * scatteringAlbedo;
-    let waterScattering = directWaterScattering + ambientInScattering + skyVolumeScatter;
+    let safeAmbientIntensity = min(100.0, systemUniforms.ambientLight.intensity);
+    let baseAmbient = systemUniforms.ambientLight.color * (safeAmbientIntensity * preExposure);
+    let ambientInScattering = baseAmbient * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.03);
+    let waterScattering = directWaterScattering * 0.5 + ambientInScattering + skyVolumeScatter;
 
     // [UE5 SingleLayerWater 표준 에너지 보존 결합 (PBR Energy Conservation)]:
     // 1) 수면을 뚫고 밖으로 나오는 총 투과광: (바닥 투과광 + 수체 체적 산란광) × (1.0 - fresnel)
