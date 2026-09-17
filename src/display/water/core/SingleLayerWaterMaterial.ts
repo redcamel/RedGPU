@@ -158,6 +158,11 @@ interface SingleLayerWaterMaterial {
      */
     causticsSpeed: number;
     /**
+     * [KO] 호수 월드 크기 (단위: m, 기본값: 100.0)
+     * [EN] Lake world size (Unit: m, default: 100.0)
+     */
+    lakeWorldSize: number;
+    /**
      * [KO] 스크린 공간 반사(SSR) 활성화 여부 (기본값: true)
      * [EN] Whether screen space reflection (SSR) is enabled (default: true)
      */
@@ -242,9 +247,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.fresnelF0 = 0.02;
         this.invertNormalY1 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
         this.invertNormalY2 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
-        this.causticsStrength = 0.65;
+        this.causticsStrength = 0.85;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
+        this.lakeWorldSize = 100.0;
         this.enableSSR = true;
         this.ssrMaxDistance = 25.0;
         this.ssrStepCount = 32;
@@ -306,9 +312,10 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
-    {key: 'causticsStrength', value: 0.65, min: 0, max: 2},
+    {key: 'causticsStrength', value: 0.85, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
+    {key: 'lakeWorldSize', value: 100.0, min: 1.0, max: 5000.0},
     {key: 'ssrMaxDistance', value: 25.0, min: 2.0, max: 100.0},
     {key: 'ssrThickness', value: 0.5, min: 0.05, max: 5.0},
 ]);

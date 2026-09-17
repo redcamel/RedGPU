@@ -77,7 +77,7 @@ struct WaterUniforms {
     causticsStrength: f32,
     causticsScale: f32,
     causticsSpeed: f32,
-    causticsPadding: f32,
+    lakeWorldSize: f32,
 
     enableSSR: u32,
     ssrMaxDistance: f32,
@@ -351,17 +351,18 @@ fn main(inputData: InputData) -> OutputFragment {
         let sunDir = -normalize(primarySun.direction);
         let lightRayOffset = sunDir.xz * (effectiveDeltaDepth * 0.22);
         let groundSurfacePos = worldPos.xz + lightRayOffset;
-        let groundSurfaceUV = groundSurfacePos * (1.0 / 240.0) + vec2<f32>(0.5);
+        let lakeSize = max(1.0, uniforms.lakeWorldSize);
+        let groundSurfaceUV = groundSurfacePos * (1.0 / lakeSize) + vec2<f32>(0.5);
 
         let windDirLen2 = length(uniforms.windDirection2);
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
 
         let cSpeed = uniforms.causticsSpeed;
-        let cScale = uniforms.causticsScale;
+        let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
 
-        // 수면 파도와 100% 동일한 공간 UV 및 바람 위상 매핑
-        let cUV1 = groundSurfaceUV * (uniforms.normalTiling * cScale) + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
-        let cUV2 = groundSurfaceUV * (uniforms.normalTiling2 * cScale) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
+        // 수면 파도와 100% 동일한 공간 UV 및 바람 위상 매핑 (causticsScale이 커질수록 무늬가 커지고 작아질수록 촘촘해짐)
+        let cUV1 = groundSurfaceUV * (uniforms.normalTiling * invCScale) + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
+        let cUV2 = groundSurfaceUV * (uniforms.normalTiling2 * invCScale) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
 
         // [핵심 해결] textureSampleLevel을 사용하여 카메라 회전 시 화면 미분(ddx/ddy) 폭발로 인한 밉맵 강제 블러(모션블러 현상) 원천 차단
         let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
@@ -494,14 +495,15 @@ fn main(inputData: InputData) -> OutputFragment {
         let sunTransmittance = max(0.0, 1.0 - getSpecularFresnel(NdotL, uniforms.fresnelF0));
 
         let depthScatterWeight = pow(1.0 - extinction, 2.0); // 얕은 물가에서 0으로 급격히 수렴
-        let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * depthScatterWeight * 0.30);
+        let scatteringAlbedo = 0.32; // 수체 체적 단일 산란 알베도 (Single Scattering Albedo)
+        let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * depthScatterWeight * scatteringAlbedo);
 
-        // [C] 저고도 역광 파도 능선 투과 산란
+        // [C] 저고도 역광 파도 능선 투과 산란 (전방 위상 전파)
         let VdotL = dot(V, L);
         let lowSunFactor = clamp(1.0 - max(L.y, 0.0), 0.0, 1.0);
         let forwardScatter = max(0.0, -VdotL);
         let waveTranslucency = pow(forwardScatter, 3.0) * (1.0 - NdotL * 0.5) * depthScatterWeight;
-        let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance * 0.25);
+        let subsurfaceScattering = finalLightColor * (waveTranslucency * lowSunFactor * sunTransmittance * (scatteringAlbedo * 0.8));
 
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
     }
@@ -509,14 +511,14 @@ fn main(inputData: InputData) -> OutputFragment {
     // -------------------------------------------------------------------------
     // [Step 7] UE5 SingleLayerWater 표준 물리 믹싱 (Clean PBR Blending)
     // -------------------------------------------------------------------------
-    // 얕은 물가에서 허연 안개처럼 끼지 않도록 depthScatterWeight(제곱) 적용
     let depthScatterWeight = pow(1.0 - extinction, 2.0);
     let diffuseFresnel = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * 0.06; // 물(IOR 1.333) 반구 적분 평균 반사율
     let skyTransmittance = max(0.0, 1.0 - diffuseFresnel);
-    let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * depthScatterWeight * 0.35;
+    let scatteringAlbedo = 0.32;
+    let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * depthScatterWeight * scatteringAlbedo;
 
     let baseAmbient = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-    let ambientInScattering = baseAmbient * 1.5 * waterAlbedo * depthScatterWeight;
+    let ambientInScattering = baseAmbient * waterAlbedo * depthScatterWeight * scatteringAlbedo;
     let waterScattering = directWaterScattering + ambientInScattering + skyVolumeScatter;
 
     // [UE5 SingleLayerWater 표준 에너지 보존 결합 (PBR Energy Conservation)]:

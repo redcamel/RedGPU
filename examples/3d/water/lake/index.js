@@ -71,7 +71,7 @@ RedGPU.init(
         // 최상의 호수 쇼케이스 기본 튜닝값 적용
         lake.waterMaterial.refractionStrength = 0.025; // 물리 스넬 굴절 및 Broken Straw 꺾임
         lake.waterMaterial.roughness = 0.05;         // 선명하고 아름다운 수면 거울 반사 & 다이아몬드 윤슬
-        lake.waterMaterial.causticsStrength = 0.9;    // 얕은 바닥에 춤추는 눈부신 카우스틱스 햇살망
+        lake.waterMaterial.causticsStrength = 0.85;   // 얕은 바닥에 춤추는 눈부신 카우스틱스 햇살망
         lake.waterMaterial.enableSSR = true;          // 실시간 스크린 공간 반사(SSR) 기본 활성화
         lake.waterMaterial.ssrStepCount = 48;         // 정밀 레이마칭 스텝수
         lake.waterMaterial.ssrMaxDistance = 50.0;     // 최대 추적 거리
@@ -413,94 +413,34 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // [Phase 14] 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics) 제어 패널
             const causticsFolder = pane.addFolder({title: 'Underwater Caustics (Phase 14)', expanded: true});
-            causticsFolder.addBinding(lake.waterMaterial, 'causticsStrength', {
-                min: 0.0,
-                max: 2.0,
-                step: 0.05,
-                label: 'Strength'
-            });
-            causticsFolder.addBinding(lake.waterMaterial, 'causticsScale', {
-                min: 0.2,
-                max: 3.0,
-                step: 0.05,
-                label: 'Scale'
-            });
-            causticsFolder.addBinding(lake.waterMaterial, 'causticsSpeed', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.05,
-                label: 'Speed'
-            });
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.2, max: 3.0, step: 0.05});
+            causticsFolder.addBinding(lake.waterMaterial, 'causticsSpeed', {min: 0.0, max: 3.0, step: 0.05});
 
             // [Phase 12] 버텍스 셰이더 미세 장파장 너울 (Micro Swell) 제어 패널
             const swellFolder = pane.addFolder({title: 'Micro Swell (Phase 12)', expanded: false});
-            swellFolder.addBinding(lake, 'waveAmplitude', {
-                min: 0.0,
-                max: 0.15,
-                step: 0.005,
-                label: 'Amplitude (m)'
-            });
-            swellFolder.addBinding(lake, 'waveWavelength', {
-                min: 2.0,
-                max: 60.0,
-                step: 1.0,
-                label: 'Wavelength (m)'
-            });
-            swellFolder.addBinding(lake, 'waveSpeed', {
-                min: 0.0,
-                max: 5.0,
-                step: 0.1,
-                label: 'Wave Speed'
-            });
+            swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005});
+            swellFolder.addBinding(lake, 'waveWavelength', {min: 2.0, max: 60.0, step: 1.0});
+            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 5.0, step: 0.1});
 
             // [Phase 7, 8, 9] 파도 노멀 및 굴절 왜곡 제어 패널
             const waveFolder = pane.addFolder({title: 'Waves & Refraction (Phase 7~9)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {
-                min: 0.0,
-                max: 0.08,
-                step: 0.001,
-                label: 'Refraction Strength'
-            });
+            waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 0.08, step: 0.001});
 
             // 주 파도 (Layer 1: Base Swell)
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
-            layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {
-                min: 0.0,
-                max: 1.5,
-                step: 0.01,
-                label: 'Scale'
-            });
-            layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {
-                min: 1.0,
-                max: 120.0,
-                step: 1.0,
-                label: 'Tiling'
-            });
-            layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005, label: 'Speed'});
-            layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1', {label: 'Invert Y (DirectX Mode)'});
+            layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 1.5, step: 0.01});
+            layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {min: 1.0, max: 120.0, step: 1.0});
+            layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005});
+            layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1');
 
             // 제2 파도 (Layer 2: Micro Ripple with RNM)
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
-            layer2Folder.addBinding(lake.waterMaterial, 'useNormalTexture2', {label: 'Enable RNM'});
-            layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {
-                min: 0.0,
-                max: 1.5,
-                step: 0.01,
-                label: 'Scale'
-            });
-            layer2Folder.addBinding(lake.waterMaterial, 'normalTiling2', {
-                min: 1.0,
-                max: 200.0,
-                step: 1.0,
-                label: 'Tiling'
-            });
-            layer2Folder.addBinding(lake.waterMaterial, 'windSpeed2', {
-                min: 0.0,
-                max: 0.2,
-                step: 0.005,
-                label: 'Speed'
-            });
-            layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2', {label: 'Invert Y (DirectX Mode)'});
+            layer2Folder.addBinding(lake.waterMaterial, 'useNormalTexture2');
+            layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {min: 0.0, max: 1.5, step: 0.01});
+            layer2Folder.addBinding(lake.waterMaterial, 'normalTiling2', {min: 1.0, max: 200.0, step: 1.0});
+            layer2Folder.addBinding(lake.waterMaterial, 'windSpeed2', {min: 0.0, max: 0.2, step: 0.005});
+            layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2');
 
             // [Phase 6] 수체 물리 광학 및 이중 알베도 제어 패널
             const colorFolder = pane.addFolder({title: 'Water Color & Optics (Phase 6)', expanded: false});
@@ -516,81 +456,30 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                     b: lake.waterMaterial.deepColor.b
                 }
             };
-            colorFolder.addBinding(colorParams, 'baseColor', {
-                view: 'color',
-                label: 'Base Color (Shallow)'
-            }).on('change', (ev) => {
+            colorFolder.addBinding(colorParams, 'baseColor', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.baseColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
-            colorFolder.addBinding(colorParams, 'deepColor', {
-                view: 'color',
-                label: 'Deep Color (Abyssal)'
-            }).on('change', (ev) => {
+            colorFolder.addBinding(colorParams, 'deepColor', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
                 lake.waterMaterial.deepColor.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
-            colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {
-                min: 0.01,
-                max: 2.0,
-                step: 0.01,
-                label: 'Extinction Factor'
-            });
-            colorFolder.addBinding(lake.waterMaterial, 'opacity', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.05,
-                label: 'Base Opacity'
-            });
-            colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {
-                min: 0.05,
-                max: 10.0,
-                step: 0.05,
-                label: 'Depth Fade Distance (m)'
-            });
+            colorFolder.addBinding(lake.waterMaterial, 'extinctionFactor', {min: 0.01, max: 2.0, step: 0.01});
+            colorFolder.addBinding(lake.waterMaterial, 'opacity', {min: 0.0, max: 1.0, step: 0.05});
+            colorFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.05, max: 10.0, step: 0.05});
 
             // [Phase 10] Schlick Fresnel & 환경 거울 반사 제어 패널
             const reflectionFolder = pane.addFolder({title: 'Sky Reflection & Fresnel (Phase 10)', expanded: true});
-            reflectionFolder.addBinding(lake.waterMaterial, 'roughness', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                label: 'Roughness (Blur)'
-            });
-            reflectionFolder.addBinding(lake.waterMaterial, 'specularFactor', {
-                min: 0.0,
-                max: 2.0,
-                step: 0.05,
-                label: 'Specular Multiplier'
-            });
-            reflectionFolder.addBinding(lake.waterMaterial, 'fresnelF0', {
-                min: 0.0,
-                max: 0.1,
-                step: 0.005,
-                label: 'Fresnel F0 (Water: 0.02)'
-            });
+            reflectionFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.0, max: 1.0, step: 0.01});
+            reflectionFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 2.0, step: 0.05});
+            reflectionFolder.addBinding(lake.waterMaterial, 'fresnelF0', {min: 0.0, max: 0.1, step: 0.005});
 
             // [Phase 17] 스크린 공간 반사 (SSR - Screen Space Reflection) 제어 패널
             const ssrFolder = pane.addFolder({title: 'Screen Space Reflection (Phase 17)', expanded: true});
-            ssrFolder.addBinding(lake.waterMaterial, 'enableSSR', {label: 'Enable SSR'});
-            ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {
-                min: 5.0,
-                max: 60.0,
-                step: 1.0,
-                label: 'Max Distance (m)'
-            });
-            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {
-                min: 8,
-                max: 64,
-                step: 8,
-                label: 'Step Count'
-            });
-            ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {
-                min: 0.1,
-                max: 2.0,
-                step: 0.05,
-                label: 'Thickness (m)'
-            });
+            ssrFolder.addBinding(lake.waterMaterial, 'enableSSR');
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {min: 5.0, max: 60.0, step: 1.0});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {min: 8, max: 64, step: 8});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {min: 0.1, max: 2.0, step: 0.05});
 
             // [환경 조명] 직사광(태양) 및 천공 환경광 제어 패널
             const sunFolder = pane.addFolder({title: 'Lighting & Sun (Phase 11)', expanded: false});
