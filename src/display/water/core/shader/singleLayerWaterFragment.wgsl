@@ -273,18 +273,44 @@ fn main(inputData: InputData) -> OutputFragment {
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
     let worldNormal = normalize(tbn * combinedTangentNormal);
 
+    let worldPos = inputData.vertexPosition;
+    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
+
     // -------------------------------------------------------------------------
-    // [Step 3] 스넬의 굴절 및 수심 블리딩 방지 (Refraction & Depth Bleed Guard)
+    // [Step 3] 물리 기반 스넬의 굴절 (PBR Snell's Refraction & Broken Straw)
     // -------------------------------------------------------------------------
+    // 공기(1.0) -> 물(1.3333) 입사 굴절률 비율 eta = 1.0 / 1.3333 ≈ 0.750
+    let etaRatio = 0.750;
+    let incidentRay = -normalize(V);
+    var refractedRay = refract(incidentRay, worldNormal, etaRatio);
+    if (dot(refractedRay, refractedRay) < 0.01) {
+        refractedRay = incidentRay;
+    }
+
+    // 1) 스넬 법칙에 의한 월드 광로 편향 벡터 (Snell Angular Deflection)
+    let snellRayDeflection = refractedRay - incidentRay;
+    let viewSnellDeflection = (systemUniforms.camera.viewMatrix * vec4<f32>(snellRayDeflection, 0.0)).xyz;
+    let snellScreenDir = vec2<f32>(viewSnellDeflection.x, -viewSnellDeflection.y);
+
+    // 2) 듀얼 파도 노멀에 의한 수면 표면 잔물결 섭동 (Wave Perturbation)
     let deltaWorldNormal = worldNormal - baseNormal;
     let viewDeltaNormal = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaWorldNormal, 0.0)).xyz;
-    let viewScreenPerturb = vec2<f32>(viewDeltaNormal.x, -viewDeltaNormal.y);
+    let waveScreenDir = vec2<f32>(viewDeltaNormal.x, -viewDeltaNormal.y);
+
+    // 3) 수심(Delta Depth)에 비례하는 물리적 시차 변위 (Depth-dependent Parallax):
+    // 수면 경계(depth=0)에서는 0에서 시작하여 연속성을 보장하고,
+    // 수심이 깊어질수록 광선 굴절각에 비례하여 물속 물체(기둥/바닥)가 꺾여 보이는 Broken Straw 현상 구현
+    let depthFactor = clamp(deltaDepth * 0.8, 0.0, 3.5);
+    let perspectiveScale = 1.0 / max(0.5, linearWaterDepth * 0.12);
 
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
-    let rawRefractionOffset = viewScreenPerturb * (uniforms.refractionStrength * screenEdgeFade);
 
-    // 소프트 블리딩 방지 (물 표면 앞쪽 물체 왜곡 감쇄)
+    // 스넬 기하 굴절(기둥 꺾임) + 파도 잔물결 굴절의 유기적 결합
+    let combinedRefractScreen = (snellScreenDir * (depthFactor * 0.6) + waveScreenDir * (depthFactor * 0.4 + 0.6)) * perspectiveScale;
+    let rawRefractionOffset = combinedRefractScreen * (uniforms.refractionStrength * screenEdgeFade);
+
+    // 소프트 블리딩 방지 (물 표면 앞쪽 수면 위 물체 왜곡 감쇄)
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
     let linearDistortedDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
@@ -371,9 +397,6 @@ fn main(inputData: InputData) -> OutputFragment {
     // -------------------------------------------------------------------------
     // [Step 5] 프레넬 및 간접 환경 반사 (Pure PBR Fresnel & Sky Reflection)
     // -------------------------------------------------------------------------
-    let worldPos = inputData.vertexPosition;
-    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
-
     // [정밀 물리 PBR 프레넬 (Lagarde 2014 / UE5 SingleLayerWater)]:
     // 수직각 F0(0.02) 엄격 보장 -> 바닥 98% 무왜곡 투과!
     let NdotV_pure = clamp(dot(baseNormal, V), 0.001, 1.0);

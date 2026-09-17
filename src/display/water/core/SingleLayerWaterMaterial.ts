@@ -225,7 +225,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.baseColor.setColorByHEX(baseColor);
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
-        this.refractionStrength = 0.008;
+        this.refractionStrength = 0.025;
         this.normalScale = 0.22;
         this.normalScale2 = 0.10;
         this.normalTiling = 28.0;
@@ -293,7 +293,7 @@ defineVector2(SingleLayerWaterMaterial, [
 
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
-    {key: 'refractionStrength', value: 0.008},
+    {key: 'refractionStrength', value: 0.025},
     {key: 'normalScale', value: 0.22},
     {key: 'normalScale2', value: 0.10},
     {key: 'normalTiling', value: 28.0},
