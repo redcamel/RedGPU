@@ -105,16 +105,19 @@ fn calculateWaterSSR(
     }
 
     let maxDist = max(1.0, uniforms.ssrMaxDistance);
-    let stepSize = maxDist / f32(maxSteps);
+    let baseStepSize = maxDist / f32(maxSteps);
     let thickness = max(0.05, uniforms.ssrThickness);
 
-    // 수면 자체와의 자가 교차(Self-intersection) 방지를 위해 법선 방향으로 미세 오프셋
-    var currentPos = startWorldPos + worldNormal * 0.03;
+    // 수면 자체와의 자가 교차 방지를 위한 최소 오프셋 (수면 법선 방향 1.5cm)
+    var currentPos = startWorldPos + worldNormal * 0.015;
+    var currentStepSize = baseStepSize;
     var hitUV = vec2<f32>(0.0);
     var hitFound = false;
+    var refinementLevel = 0u;
+    let maxRefinementLevels = 4u;
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
-        currentPos = currentPos + R * stepSize;
+        currentPos = currentPos + R * currentStepSize;
 
         // 월드 좌표 -> 클립 공간 -> NDC -> 스크린 UV
         let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(currentPos, 1.0);
@@ -138,23 +141,33 @@ fn calculateWaterSSR(
             continue;
         }
 
-        // 수중 바닥 지형 배제: 샘플링된 오브젝트의 월드 Y 고도가 수면보다 아래이면 반사 대상에서 제외
+        // 수중 바닥 지형 및 물속에 잠긴 물체 배제:
+        // [RedGPU 표준 역투영] 샘플링된 오브젝트의 실제 월드 Y 고도를 정확히 복원
         let ndcX = uv.x * 2.0 - 1.0;
         let ndcY = (1.0 - uv.y) * 2.0 - 1.0;
         let sceneH = systemUniforms.projection.inverseProjectionViewMatrix * vec4<f32>(ndcX, ndcY, rawSceneDepth, 1.0);
         let sceneWorldY = sceneH.y / max(1e-5, sceneH.w);
 
-        if (sceneWorldY < startWorldPos.y + 0.05) {
+        // 수면(waterLevel) 아래에 잠겨 있는 해저 바닥, 수중 암초, 잠긴 밑면은 반사 대상에서 100% 완전 배제
+        if (sceneWorldY <= startWorldPos.y + 0.005) {
             continue;
         }
 
         let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
         let rayViewZ = -(systemUniforms.camera.viewMatrix * vec4<f32>(currentPos, 1.0)).z;
         let depthDiff = rayViewZ - linearSceneDepth;
-        let effectiveThickness = max(stepSize * 1.5, thickness);
+        let effectiveThickness = max(currentStepSize * 1.5, thickness);
 
         // 교차 판정: 광선이 수면 위 오브젝트의 표면 뒤로 들어갔으며, 오브젝트 두께 허용치 이내일 때
         if (depthDiff > 0.0 && depthDiff < effectiveThickness) {
+            // 이진 탐색(Binary Refinement)으로 얇은 기둥 및 물체 표면 접촉점 정밀화
+            if (refinementLevel < maxRefinementLevels) {
+                currentPos = currentPos - R * currentStepSize;
+                currentStepSize = currentStepSize * 0.5;
+                refinementLevel = refinementLevel + 1u;
+                continue;
+            }
+
             hitUV = uv;
             hitFound = true;
             break;
