@@ -6,7 +6,7 @@
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
 #redgpu_include math.getInterleavedGradientNoise;
-#redgpu_include math.reconstruct.getViewPositionFromDepth;
+#redgpu_include math.reconstruct.getWorldPositionFromDepth;
 
 // =============================================================================
 // Cook-Torrance GGX 마이크로패싯 함수군 (PBR Specular BRDF)
@@ -93,15 +93,9 @@ struct WaterUniforms {
 };
 
 // =============================================================================
-// Phase 17: 수면 전용 스크린 공간 반사 (Screen Space Reflection - SSR)
+// Phase 17: 수면 전용 스크린 공간 반사 (Screen Space Reflection - SSR) 및 투영 유틸리티
 // =============================================================================
-fn reconstructSSRWorldPosition(uv: vec2<f32>, depth: f32) -> vec3<f32> {
-    let viewPos = getViewPositionFromDepth(uv, depth, systemUniforms.projection.inverseProjectionMatrix);
-    let worldPos4 = systemUniforms.camera.inverseViewMatrix * vec4<f32>(viewPos, 1.0);
-    return worldPos4.xyz;
-}
-
-fn ssrWorldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
+fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
     let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
     if (clipPos.w <= 0.001) {
         return vec2<f32>(-1.0);
@@ -153,7 +147,7 @@ fn calculateWaterSSR(
         }
 
         // 월드 좌표 -> 스크린 UV 변환
-        let currentScreenUV = ssrWorldToScreen(currentWorldPos);
+        let currentScreenUV = worldToScreen(currentWorldPos);
         if (currentScreenUV.x < 0.0 || currentScreenUV.x > 1.0 || currentScreenUV.y < 0.0 || currentScreenUV.y > 1.0) {
             break;
         }
@@ -167,8 +161,8 @@ fn calculateWaterSSR(
             continue;
         }
 
-        // [정밀 월드 좌표 복원] 포스트이펙트 SSR 표준 공식 (WebGPU 깊이 [0, 1] 규격)
-        let sampledWorldPos = reconstructSSRWorldPosition(currentScreenUV, rawSceneDepth);
+        // [정밀 월드 좌표 복원] RedGPU 표준 함수 getWorldPositionFromDepth 사용
+        let sampledWorldPos = getWorldPositionFromDepth(currentScreenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
 
         // [핵심 해결 1] 수면(startWorldPos.y) 아래에 있는 모든 해저/호수 바닥 지형 및 수중 물체는 100% 완전 배제!
         if (sampledWorldPos.y <= startWorldPos.y) {
@@ -268,8 +262,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let linearSceneDepth = getLinearizeDepth(rawSceneDepth, cameraNear, cameraFar);
     let linearWaterDepth = getLinearizeDepth(inputData.position.z, cameraNear, cameraFar);
 
-    // [SSR 파이프라인 100% 일치] 1패스 Depth로부터 원래 바닥의 실제 3D 월드 좌표 복원
-    let initialGroundWorldPos = reconstructSSRWorldPosition(screenUV, rawSceneDepth);
+    // [SSR 파이프라인 100% 일치] RedGPU 표준 함수로 1패스 Depth로부터 원래 바닥의 실제 3D 월드 좌표 복원
+    let initialGroundWorldPos = getWorldPositionFromDepth(screenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
     // 순수 물리 수직 수심 (카메라 각도/FOV와 무관한 실제 지형 높이차)
     let initialVerticalDepth = max(0.0, worldPos.y - initialGroundWorldPos.y);
     // 실제 3D 유클리드 광로 거리 (빛이 수면에서 바닥까지 통과한 실제 유클리드 거리)
@@ -340,17 +334,17 @@ fn main(inputData: InputData) -> OutputFragment {
         refractedDir = incidentDir; // 전반사 방지 폴백
     }
 
-    // 2) SSR 월드 복원 함수를 통한 바닥의 3D 월드 좌표 복원 (시선 각도 뎁스 왜곡 0%)
-    let groundWorldPos = reconstructSSRWorldPosition(screenUV, rawSceneDepth);
-    let verticalDepth = max(0.0, worldPos.y - groundWorldPos.y); // 실제 월드 Y축 수심
-    let directDist = length(groundWorldPos - worldPos);
+    // 2) 바닥의 3D 월드 좌표 (Step 1에서 표준 함수로 복원된 좌표 재사용 - 중복 연산 방지)
+    let groundWorldPos = initialGroundWorldPos;
+    let verticalDepth = initialVerticalDepth; // 실제 월드 Y축 수심
+    let directDist = initialOpticalDistance;
 
     // 2) 스넬 굴절 광선이 수중 바닥 평면에 도달하는 실제 3D 월드 위치 계산
     let hitT = min(initialOpticalDistance * 1.5, initialVerticalDepth / max(0.12, -refractedDir.y));
     let refractHitWorldPos = worldPos + refractedDir * hitT;
 
-    // 3) SSR 투영 함수(ssrWorldToScreen)를 통한 정밀 스크린 UV 투영
-    let projectedRefractUV = ssrWorldToScreen(refractHitWorldPos);
+    // 3) 스크린 투영 함수(worldToScreen)를 통한 정밀 스크린 UV 투영
+    let projectedRefractUV = worldToScreen(refractHitWorldPos);
     let physicalRefractUV = select(screenUV, projectedRefractUV, projectedRefractUV.x >= 0.0);
 
     // 화면 가장자리 안전 페이드 (화면 외곽 샘플링 아티팩트 방지)
@@ -367,9 +361,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
     let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
-    // 굴절된 바닥의 실제 3D 월드 좌표 복원 (각도 왜곡 0%)
+    // 굴절된 바닥의 실제 3D 월드 좌표 복원 (RedGPU 표준 함수 getWorldPositionFromDepth 사용)
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);
-    let refractedGroundWorldPos = reconstructSSRWorldPosition(finalRefractUV, rawFinalDepth);
+    let refractedGroundWorldPos = getWorldPositionFromDepth(finalRefractUV, rawFinalDepth, systemUniforms.projection.inverseProjectionViewMatrix);
     let effectiveVerticalDepth = max(0.0, worldPos.y - refractedGroundWorldPos.y); // 순수 수직 수심 (m)
     let effectiveOpticalDistance = length(refractedGroundWorldPos - worldPos); // 실제 3D 유클리드 광로 거리 (m)
 
