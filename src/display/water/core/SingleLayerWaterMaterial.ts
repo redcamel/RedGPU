@@ -43,13 +43,13 @@ interface SingleLayerWaterMaterial {
      */
     normalDetailTexture: BitmapTexture;
     /**
-     * [KO] 주 노멀 강도 스케일
-     * [EN] Main normal strength scale
+     * [KO] 주 노멀 강도 스케일 (0.0: 완전 평면 거울 ~ 1.0: 텍스처 100% 원본 강도, 기본값: 1.0)
+     * [EN] Main normal strength scale (0.0: flat mirror ~ 1.0: 100% original strength, default: 1.0)
      */
     normalScale: number;
     /**
-     * [KO] 제2 노멀 강도 스케일
-     * [EN] Secondary normal strength scale
+     * [KO] 제2 노멀 강도 스케일 (0.0: 완전 평면 거울 ~ 1.0: 텍스처 100% 원본 강도, 기본값: 0.5)
+     * [EN] Secondary normal strength scale (0.0: flat mirror ~ 1.0: 100% original strength, default: 0.5)
      */
     normalScale2: number;
     /**
@@ -236,10 +236,10 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.deepColor.setColorByHEX(deepColor);
         this.opacity = opacity;
         this.refractionStrength = 1.0;
-        this.normalScale = 0.22;
-        this.normalScale2 = 0.10;
-        this.normalTiling = 28.0;
-        this.normalTiling2 = 56.0;
+        this.normalScale = 1.0;
+        this.normalScale2 = 0.5;
+        this.normalTiling = 18.0;
+        this.normalTiling2 = 36.0;
         this.windSpeed = 0.025;
         this.windSpeed2 = 0.040;
         this.windDirection = [1.0, 0.3];
@@ -247,19 +247,19 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.useNormalTexture2 = true;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
-        this.roughness = 0.05;
+        this.roughness = 0.07;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
         this.invertNormalY1 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
         this.invertNormalY2 = false; // 기본 OpenGL 규격 (필요시 DirectX 호환 반전)
-        this.causticsStrength = 0.85;
+        this.causticsStrength = 0.25;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
         this.lakeWorldSize = 100.0;
         this.enableSSR = true;
-        this.ssrMaxDistance = 25.0;
-        this.ssrStepCount = 32;
-        this.ssrThickness = 0.5;
+        this.ssrMaxDistance = 35.0;
+        this.ssrStepCount = 48;
+        this.ssrThickness = 0.8;
         this.turbidity = 0.35;
 
         // 기본 디버그 모드: Step 8 PBR Water without Bleeding (0)
@@ -306,30 +306,30 @@ defineVector2(SingleLayerWaterMaterial, [
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 1.0, min: 0, max: 2},
-    {key: 'normalScale', value: 0.22},
-    {key: 'normalScale2', value: 0.10},
-    {key: 'normalTiling', value: 28.0},
-    {key: 'normalTiling2', value: 56.0},
+    {key: 'normalScale', value: 1.0, min: 0.0, max: 1.0},
+    {key: 'normalScale2', value: 0.5, min: 0.0, max: 1.0},
+    {key: 'normalTiling', value: 18.0},
+    {key: 'normalTiling2', value: 36.0},
     {key: 'windSpeed', value: 0.025},
     {key: 'windSpeed2', value: 0.040},
     {key: 'extinctionFactor', value: 0.22},
     {key: 'depthFadeDistance', value: 0.8},
-    {key: 'roughness', value: 0.05, min: 0, max: 1},
+    {key: 'roughness', value: 0.07, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
-    {key: 'causticsStrength', value: 0.85, min: 0, max: 2},
+    {key: 'causticsStrength', value: 0.25, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
     {key: 'lakeWorldSize', value: 100.0, min: 1.0, max: 5000.0},
-    {key: 'ssrMaxDistance', value: 25.0, min: 2.0, max: 100.0},
-    {key: 'ssrThickness', value: 0.5, min: 0.05, max: 5.0},
+    {key: 'ssrMaxDistance', value: 35.0, min: 2.0, max: 100.0},
+    {key: 'ssrThickness', value: 0.8, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
 ]);
 
 defineUint(SingleLayerWaterMaterial, [
     {key: 'debugMode', value: 0},
-    {key: 'ssrStepCount', value: 32},
+    {key: 'ssrStepCount', value: 48},
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [

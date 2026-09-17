@@ -187,9 +187,9 @@ RedGPU.init(
         lake.waterMaterial.windSpeed = 0.015;
         lake.waterMaterial.windSpeed2 = 0.025;
 
-        // 수중 바닥 카우스틱스 (햇살 일렁임)
-        lake.waterMaterial.causticsStrength = 0.6;
-        lake.waterMaterial.causticsScale = 1.5;
+        // 수중 바닥 카우스틱스 (16km 광활한 호수에서는 기본 0.0으로 빛 찌꺼기 얼룩 원천 방지)
+        lake.waterMaterial.causticsStrength = 0.0;
+        lake.waterMaterial.causticsScale = 1.0;
         lake.waterMaterial.causticsSpeed = 0.8;
 
         // 스크린 공간 반사 (SSR) - 16km 대형 지형 산맥 반사를 위해 추적 거리 확장

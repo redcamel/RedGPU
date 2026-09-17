@@ -68,14 +68,18 @@ RedGPU.init(
             'rgba8unorm'
         );
 
-        // 최상의 호수 쇼케이스 기본 튜닝값 적용
+        // 최상의 호수 쇼케이스 기본 튜닝값 적용 (표준 1.0 / 0.5 스케일)
+        lake.waterMaterial.normalScale = 1.0;          // 표준 100% PBR 주 너울 찰랑임
+        lake.waterMaterial.normalScale2 = 0.5;         // 표준 50% 표면 미세 잔물결
+        lake.waterMaterial.normalTiling = 18.0;        // 240m 호수에 어울리는 자연스러운 너울 주기
+        lake.waterMaterial.normalTiling2 = 36.0;
         lake.waterMaterial.refractionStrength = 0.025; // 물리 스넬 굴절 및 Broken Straw 꺾임
-        lake.waterMaterial.roughness = 0.05;         // 선명하고 아름다운 수면 거울 반사 & 다이아몬드 윤슬
-        lake.waterMaterial.causticsStrength = 0.85;   // 얕은 바닥에 춤추는 눈부신 카우스틱스 햇살망
+        lake.waterMaterial.roughness = 0.07;         // 선명하고 아름다운 수면 거울 반사 & 다이아몬드 윤슬
+        lake.waterMaterial.causticsStrength = 0.25;   // 얕은 바닥에 춤추는 은은하고 자연스러운 카우스틱스 햇살망
         lake.waterMaterial.enableSSR = true;          // 실시간 스크린 공간 반사(SSR) 기본 활성화
-        lake.waterMaterial.ssrStepCount = 48;         // 정밀 레이마칭 스텝수
+        lake.waterMaterial.ssrStepCount = 64;         // 정밀 레이마칭 스텝수 (기둥 관통/홀 방지)
         lake.waterMaterial.ssrMaxDistance = 50.0;     // 최대 추적 거리
-        lake.waterMaterial.ssrThickness = 0.6;        // 교차 허용 두께
+        lake.waterMaterial.ssrThickness = 1.0;        // 교차 허용 두께 (원기둥 교차면 포착)
 
         // Phase 1: 기본 WaterLake 사각 평면 생성 및 씬 추가
         scene.addChild(lake);
@@ -429,7 +433,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // 주 파도 (Layer 1: Base Swell)
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
-            layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 1.5, step: 0.01});
+            layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 1.0, step: 0.01});
             layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {min: 1.0, max: 120.0, step: 1.0});
             layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005});
             layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY1');
@@ -437,7 +441,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             // 제2 파도 (Layer 2: Micro Ripple with RNM)
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
             layer2Folder.addBinding(lake.waterMaterial, 'useNormalTexture2');
-            layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {min: 0.0, max: 1.5, step: 0.01});
+            layer2Folder.addBinding(lake.waterMaterial, 'normalScale2', {min: 0.0, max: 1.0, step: 0.01});
             layer2Folder.addBinding(lake.waterMaterial, 'normalTiling2', {min: 1.0, max: 200.0, step: 1.0});
             layer2Folder.addBinding(lake.waterMaterial, 'windSpeed2', {min: 0.0, max: 0.2, step: 0.005});
             layer2Folder.addBinding(lake.waterMaterial, 'invertNormalY2');
@@ -479,7 +483,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             const ssrFolder = pane.addFolder({title: 'Screen Space Reflection (Phase 17)', expanded: true});
             ssrFolder.addBinding(lake.waterMaterial, 'enableSSR');
             ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {min: 5.0, max: 60.0, step: 1.0});
-            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {min: 8, max: 64, step: 8});
+            ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {min: 8, max: 96, step: 8});
             ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {min: 0.1, max: 2.0, step: 0.05});
 
             // [환경 조명] 직사광(태양) 및 천공 환경광 제어 패널

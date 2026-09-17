@@ -174,8 +174,8 @@ fn calculateWaterSSR(
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        // 적응형 두께 임계값 (원거리 허공이나 과도하게 두꺼운 배경 둑 관통 방지)
-        let effectiveThickness = max(thickness, currentStepSize * 1.5);
+        // 적응형 두께 임계값 (원거리 허공이나 과도하게 두꺼운 배경 둑 관통 방지 및 얇은 기둥 포착)
+        let effectiveThickness = max(thickness, currentStepSize * 2.2);
 
         // 교차 판정: 광선이 수면 위 오브젝트 표면 뒤로 들어갔으며, 허용 두께 이내일 때
         if (distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
@@ -207,8 +207,8 @@ fn calculateWaterSSR(
     let finalTravelDist = length(currentWorldPos - startWorldPos);
     let distFade = 1.0 - smoothstep(maxDist * 0.35, maxDist * 0.90, finalTravelDist);
 
-    // 스텝 수 감쇄 (스텝이 많이 진행될수록 점진적 감쇄)
-    let stepFade = 1.0 - f32(hitStep) / f32(maxSteps);
+    // 스텝 수 감쇄: 마지막 10% 한계 구간에서만 부드럽게 페이드아웃 (스텝 수에 따른 계단식 찌꺼기/밝기 널뛰기 방지)
+    let stepFade = smoothstep(0.0, 0.12, 1.0 - f32(hitStep) / f32(maxSteps));
 
     // 수평각 페이드 (완만한 반사각에서도 시원하게 뻗어나가도록 허용)
     let rayFade = clamp(R.y * 12.0, 0.0, 1.0);
@@ -218,9 +218,9 @@ fn calculateWaterSSR(
         return vec4<f32>(0.0);
     }
 
-    // 거칠기(Roughness)에 따른 밉맵 블러 샘플링
+    // 거칠기(Roughness) 및 수면 미세 분산에 따른 적응형 밉맵 블러 샘플링 (1픽셀 노이즈/파편화 방지)
     let maxMip = f32(textureNumLevels(renderPath1ResultTexture) - 1);
-    let blurMip = clamp(uniforms.roughness * maxMip * 1.5, 0.0, maxMip);
+    let blurMip = clamp((uniforms.roughness * 1.5 + 0.04) * maxMip, 0.0, maxMip);
     let hitColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, hitUV, blurMip).rgb;
 
     return vec4<f32>(hitColor, totalWeight);
@@ -288,12 +288,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     var rawXY1 = rawSample1.xy * 2.0 - 1.0;
-    var tangentXY1 = rawXY1 * uniforms.normalScale;
     if (uniforms.invertNormalY1 == 1u) {
-        tangentXY1.y = -tangentXY1.y;
+        rawXY1.y = -rawXY1.y;
     }
-    let tangentZ1 = sqrt(max(0.001, 1.0 - dot(tangentXY1, tangentXY1)));
-    var combinedTangentNormal = normalize(vec3<f32>(tangentXY1, tangentZ1));
+    let rawZ1 = max(0.01, rawSample1.z * 2.0 - 1.0);
+    var combinedTangentNormal = normalize(vec3<f32>(rawXY1 * uniforms.normalScale, rawZ1));
 
     // Layer 2: 마이크로 잔물결 교차 파도
     if (uniforms.useNormalTexture2 > 0u) {
@@ -303,12 +302,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
-        var tangentXY2 = rawXY2 * uniforms.normalScale2;
         if (uniforms.invertNormalY2 == 1u) {
-            tangentXY2.y = -tangentXY2.y;
+            rawXY2.y = -rawXY2.y;
         }
-        let tangentZ2 = sqrt(max(0.001, 1.0 - dot(tangentXY2, tangentXY2)));
-        let tangentNormal2 = normalize(vec3<f32>(tangentXY2, tangentZ2));
+        let rawZ2 = max(0.01, rawSample2.z * 2.0 - 1.0);
+        let tangentNormal2 = normalize(vec3<f32>(rawXY2 * uniforms.normalScale2, rawZ2));
 
         combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
     }
@@ -422,12 +420,13 @@ fn main(inputData: InputData) -> OutputFragment {
         let windDirLen2 = length(uniforms.windDirection2);
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
 
-        let cSpeed = uniforms.causticsSpeed;
+        // [월드 미터 독립적 카우스틱스 매핑]:
+        // lakeWorldSize와 무관하게 실제 월드 미터(1.5~2.5m) 주기로 촘촘한 다이아몬드 햇살망 형성 (거대 얼룩 찌꺼기 방지)
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
-
-        // 수면 파도와 100% 동일한 공간 UV 및 바람 위상 매핑 (causticsScale이 커질수록 무늬가 커지고 작아질수록 촘촘해짐)
-        let cUV1 = groundSurfaceUV * (uniforms.normalTiling * invCScale) + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
-        let cUV2 = groundSurfaceUV * (uniforms.normalTiling2 * invCScale) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
+        let cWorldScale = 0.35 * invCScale;
+        let cSpeed = uniforms.causticsSpeed;
+        let cUV1 = groundSurfacePos * cWorldScale + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
+        let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
 
         // [핵심 해결] textureSampleLevel을 사용하여 카메라 회전 시 화면 미분(ddx/ddy) 폭발로 인한 밉맵 강제 블러(모션블러 현상) 원천 차단
         let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
@@ -442,19 +441,21 @@ fn main(inputData: InputData) -> OutputFragment {
         let s1 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV1, causticMip).rgb * 2.0 - 1.0).xy;
         let s2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, distortUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
-        // 파도 노멀 텍스처의 실제 진폭(0.03~0.08)에 맞춘 고대비 파형 추출
-        let waveA1 = (s1.x + s1.y) * 9.0;
-        let waveA2 = (s2.x - s2.y) * 9.0;
-        let waveB1 = (s1.x - s1.y) * 9.0;
-        let waveB2 = (s2.x + s2.y) * 9.0;
+        // 파도 노멀 텍스처에서 부드러운 다이아몬드 물결 격자 파형 추출 (지렁이/찌꺼기 선 방지)
+        let waveA1 = (s1.x + s1.y) * 5.0;
+        let waveA2 = (s2.x - s2.y) * 5.0;
+        let waveB1 = (s1.x - s1.y) * 5.0;
+        let waveB2 = (s2.x + s2.y) * 5.0;
 
-        // 두 교차 파도의 등고선이 만나는 마루(Crest)에서 날카로운 다이아몬드 햇살 그물망 형성
-        let crest1 = pow(max(0.0, 1.0 - abs(waveA1 - waveA2)), 3.5);
-        let crest2 = pow(max(0.0, 1.0 - abs(waveB1 - waveB2)), 3.5);
-        let causticCrest = max(crest1, crest2) * 2.2;
+        // 두 교차 파도의 등고선이 만나는 마루(Crest)를 부드러운 smoothstep 곡선으로 생성
+        let dWave1 = clamp(abs(waveA1 - waveA2), 0.0, 1.0);
+        let dWave2 = clamp(abs(waveB1 - waveB2), 0.0, 1.0);
+        let crest1 = smoothstep(0.85, 0.0, dWave1);
+        let crest2 = smoothstep(0.85, 0.0, dWave2);
+        let causticCrest = (crest1 * crest1 + crest2 * crest2) * 0.9;
 
-        // 수심에 따른 자연스러운 물리 감쇄 (순수 수직 수심 기반)
-        let causticsDepthFade = exp(-effectiveVerticalDepth * 0.35) * smoothstep(0.01, 0.15, effectiveVerticalDepth);
+        // 수심에 따른 자연스러운 물리 감쇄 (수심 3m 이상에서는 깨끗하게 소멸하여 심해 얼룩 방지)
+        let causticsDepthFade = exp(-effectiveVerticalDepth * 0.85) * smoothstep(0.02, 0.25, effectiveVerticalDepth);
         causticIntensity = causticCrest * uniforms.causticsStrength * causticsDepthFade;
 
         let sunFactor = clamp(sunDir.y * 1.5, 0.35, 1.0);
@@ -507,7 +508,14 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     // [Phase 17] 스크린 공간 오브젝트 반사 (SSR) 연산 및 Skybox IBL 하이브리드 폴백 결합
-    let ssrResult = calculateWaterSSR(worldPos, worldNormal, R, pixelCoord);
+    // SSR 전용 반사 벡터: 마이크로 노이즈로 인한 1픽셀 광선 발산(Ray Divergence & Speckle Hole)을 방지하고
+    // 우아하고 연속적인 물결 데칼코마니 반사 기둥을 형성하도록 파도 노멀을 적응형 안정화
+    let ssrWaveNormal = normalize(mix(baseNormal, worldNormal, 0.60));
+    var ssrR = reflect(-V, ssrWaveNormal);
+    ssrR.y = max(ssrR.y, 0.005);
+    ssrR = normalize(ssrR);
+
+    let ssrResult = calculateWaterSSR(worldPos, ssrWaveNormal, ssrR, pixelCoord);
     let blendedSkyReflection = mix(rawSkyReflection, ssrResult.rgb, ssrResult.a);
     let skyReflectionColor = blendedSkyReflection * uniforms.specularFactor;
 
@@ -521,7 +529,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let N = worldNormal;
     let NdotL_base = clamp(dot(baseNormal, -normalize(u_directionalLights[0].direction)), 0.0, 1.0);
-    let effectiveRoughness = clamp(sqrt(uniforms.roughness * uniforms.roughness + 0.003), 0.03, 1.0);
+    let effectiveRoughness = clamp(sqrt(uniforms.roughness * uniforms.roughness + 0.003), 0.06, 1.0);
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
