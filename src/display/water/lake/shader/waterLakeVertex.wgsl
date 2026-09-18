@@ -27,10 +27,6 @@ struct VertexOutput {
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @location(3) vertexTangent: vec4<f32>,
-    @location(7) currentClipPos: vec4<f32>,
-    @location(8) prevClipPos: vec4<f32>,
-    @location(11) combinedOpacity: f32,
-    @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
 fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
@@ -84,7 +80,6 @@ fn main(inputData: InputData) -> VertexOutput {
 
     let gu_matrixList = globalVertexData.matrixList;
     let gu_modelMatrix = gu_matrixList.modelMatrix;
-    let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
     let timeSec = systemUniforms.time.time;
@@ -113,11 +108,6 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexNormal = worldNormal;
     output.uv = inputData.uv * globalVertexData.uvTransform.zw + globalVertexData.uvTransform.xy;
     output.vertexTangent = vec4<f32>(worldTangent, inputData.vertexTangent.w);
-
-    output.combinedOpacity = globalVertexData.combinedOpacity;
-    output.receiveShadow = globalVertexData.receiveShadow;
-    output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * worldPos;
-    output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
 
     return output;
 }

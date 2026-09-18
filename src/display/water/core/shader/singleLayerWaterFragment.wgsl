@@ -2,7 +2,6 @@
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.tnb.getTBNFromVertexTangent;
 
-#redgpu_include math.PI;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
 #redgpu_include math.getInterleavedGradientNoise;
@@ -209,10 +208,6 @@ struct InputData {
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @location(3) vertexTangent: vec4<f32>,
-    @location(7) currentClipPos: vec4<f32>,
-    @location(8) prevClipPos: vec4<f32>,
-    @location(11) combinedOpacity: f32,
-    @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
 @fragment
@@ -231,7 +226,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let linearWaterDepth = getLinearizeDepth(inputData.position.z, cameraNear, cameraFar);
 
     let initialGroundWorldPos = getWorldPositionFromDepth(screenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
-    let initialVerticalDepth = max(0.0, worldPos.y - initialGroundWorldPos.y);
     let initialOpticalDistance = length(initialGroundWorldPos - worldPos);
     let originalSceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
 
@@ -355,8 +349,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let sunDir = -normalize(primarySun.direction);
         let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
         let groundSurfacePos = worldPos.xz + lightRayOffset;
-        let lakeSize = max(1.0, uniforms.lakeWorldSize);
-        let groundSurfaceUV = groundSurfacePos * (1.0 / lakeSize) + vec2<f32>(0.5);
 
         let windDirLen2 = length(uniforms.windDirection2);
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
@@ -414,8 +406,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var skyDiffuseIrradiance = vec3<f32>(0.0);
 
     if (u_usePrefilterTexture) {
-        let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-        let effectiveRoughnessIBL = clamp(uniforms.roughness, 0.0, 1.0);
         let mipLevel = 0.0;
         rawSkyReflection = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
 
@@ -447,7 +437,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_directionalLights = systemUniforms.directionalLights;
 
     let N = worldNormal;
-    let NdotL_base = clamp(dot(baseNormal, -normalize(u_directionalLights[0].direction)), 0.0, 1.0);
     let effectiveRoughness = clamp(sqrt(uniforms.roughness * uniforms.roughness + 0.003), 0.06, 1.0);
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
