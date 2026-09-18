@@ -1,5 +1,3 @@
-
-
 export interface FoliageSubCellChunk {
 
     readonly subCellKey: number;

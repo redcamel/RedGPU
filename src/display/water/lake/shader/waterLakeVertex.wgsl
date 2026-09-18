@@ -33,7 +33,6 @@ struct VertexOutput {
     @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
-// 미세 장파장 너울 (Micro Swell) 수직 위치 변위 및 편미분 벡터 산출
 fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     if (vertexUniforms.waveAmplitude <= 0.00001) {
         return vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -44,7 +43,6 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let speed = vertexUniforms.waveSpeed;
     let amp = vertexUniforms.waveAmplitude;
 
-    // 주파 1 (Base Swell: 75% 진폭, 완만한 주풍 방향 [1.0, 0.3])
     let dir1 = normalize(vec2<f32>(1.0, 0.3));
     let k1 = k;
     let omega1 = sqrt(9.8 * k1) * 0.4 + speed * 0.6;
@@ -57,7 +55,6 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let dY1dx = amp1 * k1 * dir1.x * cosP1;
     let dY1dz = amp1 * k1 * dir1.y * cosP1;
 
-    // 부파 2 (Cross Swell: 25% 진폭, 교차 방향 [-0.5, 0.85])
     let dir2 = normalize(vec2<f32>(-0.5, 0.85));
     let k2 = k * 1.65;
     let omega2 = sqrt(9.8 * k2) * 0.4 + speed * 0.8;
@@ -94,7 +91,6 @@ fn main(inputData: InputData) -> VertexOutput {
 
     var localPos = inputData.position;
 
-    // 1. 월드 평면(XZ) 좌표 기준 미세 너울 수직 변위 및 편미분 계산
     let baseWorldPos = gu_modelMatrix * vec4<f32>(localPos, 1.0);
     let waveResult = calculateWaveDisplacement(baseWorldPos.xz, timeSec);
 
@@ -102,10 +98,8 @@ fn main(inputData: InputData) -> VertexOutput {
     let dYdx = waveResult.y;
     let dYdz = waveResult.z;
 
-    // 2. 수직 위치 변위 적용
     localPos.y = localPos.y + dispY;
 
-    // 3. 편미분을 통한 새로운 정점 법선 및 탄젠트 벡터 계산
     let localNormal = normalize(vec3<f32>(-dYdx, 1.0, -dYdz));
     let localTangent = normalize(vec3<f32>(1.0, dYdx, 0.0));
 
@@ -114,7 +108,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
     let worldTangent = normalize((gu_normalModelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-    // Step 12.3 & 12.4: 변위된 월드 좌표 및 정점 노멀/탄젠트 적용
     output.position = su_projectionViewMatrix * worldPos;
     output.vertexPosition = worldPos.xyz;
     output.vertexNormal = worldNormal;

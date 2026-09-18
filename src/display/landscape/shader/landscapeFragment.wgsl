@@ -193,7 +193,6 @@ fn computeNearFieldLandscapeLayers(
         }
         result.isValid = true;
     } else {
-        // 스플랫맵 가중치 합이 0인 영역에서는 0번 기본 레이어로 처리
         let layer0Params = uniforms.layerParams[0];
         let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
         let ddx0UV = ddxWorldTileUV * layer0Params.uvScale;
@@ -539,7 +538,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let globalUV = inputData.uv1;
     let worldTileUV = inputData.uv;
 
-    // Uniform Control Flow에서 미분 선계산 (WGSL 제어 흐름 규격 완벽 준수)
     let ddxGlobalUV = dpdx(globalUV);
     let ddyGlobalUV = dpdy(globalUV);
     let ddxWorldTileUV = dpdx(worldTileUV);
@@ -553,7 +551,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let nearFade = uniforms.nearDetailFade;
     let maxNearDist = nearDist + nearFade;
 
-    // 거리 기준 근거리 디테일 유효성 판정 (카메라 각도 및 경사각에 상관없이 nearDetailDistance 범위 내 온전한 디테일 보장)
     let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist;
 
     var albedo = uniforms.color.rgb;
@@ -562,9 +559,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var ambientOcclusion = 1.0;
 
     if (!isDetailActive) {
-        // -------------------------------------------------------------
-        // [Zone 3. 중원거리 or 극단적 스침각]: VBT 캐시만 1회 단독 샘플링 (8레이어 연산 100% 스킵!)
-        // -------------------------------------------------------------
         let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
         let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
         let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
@@ -578,9 +572,6 @@ fn main(inputData: InputData) -> OutputFragment {
         roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
         ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
     } else if (rawViewDist <= nearDist) {
-        // -------------------------------------------------------------
-        // [Zone 1. 완전 근거리 발밑]: 실시간 8레이어만 단독 샘플링 (VBT 3종 샘플링 100% 스킵! 이중 페치 완전 제거!)
-        // -------------------------------------------------------------
         let nearDetail = computeNearFieldLandscapeLayers(
             globalUV,
             worldTileUV,
@@ -601,9 +592,6 @@ fn main(inputData: InputData) -> OutputFragment {
             albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, vbtBaseColor.a > 0.001);
         }
     } else {
-        // -------------------------------------------------------------
-        // [Zone 2. 전이 구간 (nearDist ~ maxNearDist)]: VBT와 실시간 레이어 둘 다 읽어 smoothstep 크로스페이드
-        // -------------------------------------------------------------
         let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
         let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
         let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
@@ -669,7 +657,6 @@ fn main(inputData: InputData) -> OutputFragment {
     if (systemUniforms.directionalLightCount > 0u) {
         L = -normalize(systemUniforms.directionalLights[0].direction);
     }
-    // 지형 그림자 수광 판정은 거시적 기하 노멀(baseNormal) 기준 (Shadow Acne 방지)
     let geoNdotL = dot(baseNormal, L);
 
     var visibility = 1.0;
@@ -679,7 +666,6 @@ fn main(inputData: InputData) -> OutputFragment {
         var isDeepTerrainShadow = false;
         let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
 
-        // 원거리에서는 레이마칭 스텝 수를 거리 비율에 따라 동적으로 축소 (LOD 최적화)
         if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01 && rawViewDist < shadowMaxDist * 1.5) {
             let distRatio = clamp(rawViewDist / shadowMaxDist, 0.0, 1.0);
             let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));

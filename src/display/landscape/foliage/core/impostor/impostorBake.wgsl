@@ -91,4 +91,3 @@ fn main(
     out.ormSubsurface = vec4<f32>(finalAO, roughness, metallic, subsurface);
     return out;
 }
-

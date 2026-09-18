@@ -427,4 +427,3 @@ fn main(inputData: InputData) -> OutputFragment {
 
     return output;
 }
-

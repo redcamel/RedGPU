@@ -360,7 +360,6 @@ export class LandscapeTileStreamer {
         const tileMinX = col * tileSizeX - halfWX;
         const tileMinZ = row * tileSizeZ - halfWZ;
 
-        // GPU 화면에 렌더링된 실제 LOD0 3D 삼각형 폴리곤 표면(Barycentric Triangle Surface)의 높이를 정확히 계산합니다. (Zero-GC, 오차 0.000mm)
         const segments = this.lod0SizeQuads || 256;
         const stepX = tileSizeX / segments;
         const stepZ = tileSizeZ / segments;
@@ -404,7 +403,6 @@ export class LandscapeTileStreamer {
         const h11 = pixels[tZ1 * w + tX1] || 0;
 
         let rawVal: number;
-        // LandscapeSharedGeometry 인덱스 버퍼의 대각선 분할(Diagonal: fx + fz <= 1.0)
         if (fx + fz <= 1.0) {
             rawVal = h00 + (h10 - h00) * fx + (h01 - h00) * fz;
         } else {
@@ -424,7 +422,6 @@ export class LandscapeTileStreamer {
         this.#isRebaking = false;
         this.#rebakeQueue.length = 0;
 
-        // 전체 아틀라스 단 1회 일괄 베이킹 (0ms 지연, 256개 전체 타일 100% 즉시 완성)
         this.#vbtGenerator.bakeAtlas(
             this.#vntAtlasTexture,
             this.#vbtBaseColorAtlas,
@@ -513,9 +510,6 @@ export class LandscapeTileStreamer {
                                 this.#spatialGrid.tileCountX
                             );
                         }
-
-                        // VBT(가상 블렌드 텍스처)는 전역 bakeAtlas()로 전체 8192가 완벽하게 일괄 베이킹되므로,
-                        // 타일 스트리밍 시에는 높이맵(VHT) 및 노멀맵(VNT)만 갱신하여 밉맵 오염 및 경쟁 상태(race condition)를 방지합니다.
 
                         const neighborOffsets = LandscapeTileStreamer.#NEIGHBOR_OFFSETS;
                         const tileCountX = this.#spatialGrid.tileCountX;

@@ -21,11 +21,6 @@ interface CellSlotRange {
     filledCount: number;
 }
 
-/**
- * @internal
- * 0-GC In-place QuickSort for candidate indices sorted by distance ascending.
- * Eliminates TypedArray.prototype.subarray allocation and arrow closure generation.
- */
 function sortCandidateIndicesByDistance(
     indices: Int32Array,
     dists: Float32Array,
@@ -555,7 +550,6 @@ export class LandscapeGrassManager {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res) continue;
 
-            // Group 1: Instances + Grass Uniform
             if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
                 res.instanceBindGroup = gpuDevice.createBindGroup({
                     label: `Grass_InstanceBindGroup_${type.name}`,
@@ -567,7 +561,6 @@ export class LandscapeGrassManager {
                 });
             }
 
-            // Group 2: Material Textures + Uniform (Zero-VTF: 순수 FRAGMENT 바인딩)
             const rawTex = type.baseColorTexture?.gpuTexture;
             const colorTexView = (rawTex
                 ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
@@ -591,7 +584,6 @@ export class LandscapeGrassManager {
             passEncoder.setBindGroup(1, res.instanceBindGroup);
             passEncoder.setBindGroup(2, res.bindGroup);
 
-            // 각 LOD 레벨별 지오메트리 바인딩 및 인다이렉트 드로우
             for (const lodAlloc of alloc.lods) {
                 const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
                 if (currentPipeline !== targetPipeline) {
@@ -619,8 +611,6 @@ export class LandscapeGrassManager {
         const view3D = view?.view || view;
         const currentCascade = view3D?.currentCascadeIndex;
 
-        // 🌿 초근거리 30m 한정 규칙: Cascade 0 (0~15m), Cascade 1 (15~30m)만 섀도우 맵에 렌더링하고,
-        // 원거리인 Cascade 2, 3은 100% 스킵하여 드로우 콜 및 VRAM 대역폭 절감!
         if (currentCascade !== undefined && currentCascade > 1) return;
 
         const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
@@ -643,7 +633,6 @@ export class LandscapeGrassManager {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
 
-            // 🌿 30m 이내이므로 오직 LOD 0 (근거리 인스턴스)만 그림자 맵에 투영!
             const lod0Alloc = alloc.lods[0];
             if (!lod0Alloc) continue;
 
@@ -720,7 +709,6 @@ export class LandscapeGrassManager {
             ]
         });
 
-        // Group 2: Material Textures + Uniforms (Zero-VTF: 순수 Fragment 전용)
         this.#pipelineBindGroupLayout2 = gpuDevice.createBindGroupLayout({
             label: 'Grass_Pipeline_Group2_Layout',
             entries: [
@@ -741,7 +729,6 @@ export class LandscapeGrassManager {
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        // 1. 신규 스폰된 인스턴스가 있다면 VHT/VBT 1회성 베이킹 선행 실행 (스폰 없는 프레임에는 0회)
         if (this.#baker.hasPendingTasks) {
             const vhtAtlas = this.#landscape.getInternalAtlasTexture('vht');
             const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
@@ -759,7 +746,6 @@ export class LandscapeGrassManager {
             );
         }
 
-        // 2. 순수 ALU 초고속 프러스텀/LOD 컬링 실행 (텍스처 접근 0%)
         this.#culler.dispatchPass(computePass, this.#megaBuffer.totalAllocatedInstances);
     };
 
@@ -841,12 +827,10 @@ export class LandscapeGrassManager {
                 }
             }
 
-            // 카메라 거리 기준 정렬 (Near-to-Far, 0-GC In-place QuickSort)
             if (candidateCount > 1) {
                 sortCandidateIndicesByDistance(this.#candidateIndices, this.#candidateDistancesSq, 0, candidateCount - 1);
             }
 
-            // 범위 벗어난 셀 퇴출
             this.#keysToEvict.length = 0;
             state.activeCellRanges.forEach((_range, activeKey) => {
                 if (!this.#neededCellKeysSet.has(activeKey)) {
@@ -866,12 +850,10 @@ export class LandscapeGrassManager {
                     );
                 }
                 this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
-                // 0-GC: 기존 range 인스턴스를 재사용하여 freeSlotRanges에 보관
                 state.freeSlotRanges.push(range);
                 state.activeCount -= range.filledCount;
             }
 
-            // 신규 진입 셀 스폰 (Time-sliced Budget 적용)
             const maxCellsToPopulate = forceRebuild ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
             const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
             const targetDensity = type.instancesPerCell;
@@ -902,7 +884,6 @@ export class LandscapeGrassManager {
                 const cellMinX = cellX * cellSize;
                 const cellMinZ = cellZ * cellSize;
 
-                // 결정론적 고유 시드 설정
                 this.#setPrngSeed((cellX * 73856093) ^ (cellZ * 19349663) ^ (type.typeId * 83492791));
 
                 let filledCount = 0;
@@ -921,7 +902,6 @@ export class LandscapeGrassManager {
                     }
 
                     const rot = this.#nextPrng() * 6.2831853;
-                    // 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축은 균일 축척(scaleXZ = [0])을 사용하고 높이는 [1]을 사용합니다.
                     const sScale = type.minScale[0] + this.#nextPrng() * (type.maxScale[0] - type.minScale[0]);
                     const hScale = type.minScale[1] + this.#nextPrng() * (type.maxScale[1] - type.minScale[1]);
 

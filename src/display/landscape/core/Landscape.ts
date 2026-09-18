@@ -435,10 +435,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /**
-     * [KO] 발밑 고해상도 실시간 레이어 블렌딩이 100% 적용되는 카메라 반경 (미터 단위, 기본값: 40m)
-     * [EN] Camera radius where high-resolution real-time layer blending is applied 100% (in meters, default: 40m)
-     */
     get nearDetailDistance(): number {
         return this.#material.nearDetailDistance;
     }
@@ -447,10 +443,6 @@ export class Landscape extends Object3DContainer {
         this.#material.nearDetailDistance = val;
     }
 
-    /**
-     * [KO] 실시간 레이어에서 VBT 캐시로 점진적 크로스페이드되는 전이 구간 (미터 단위, 기본값: 20m)
-     * [EN] Transition fade range from real-time layer to VBT cache (in meters, default: 20m)
-     */
     get nearDetailFade(): number {
         return this.#material.nearDetailFade;
     }
@@ -459,10 +451,6 @@ export class Landscape extends Object3DContainer {
         this.#material.nearDetailFade = val;
     }
 
-    /**
-     * [KO] Hierarchical Z-Buffer (HZB) 기반 GPU 오클루전 컬링 활성화 여부
-     * [EN] Whether to enable Hierarchical Z-Buffer (HZB) based GPU occlusion culling
-     */
     get useHZB(): boolean {
         return this.#useHZB;
     }
@@ -476,10 +464,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /**
-     * [KO] `useHZB`의 별칭 (하위 호환 및 네이밍 통일)
-     * [EN] Alias for `useHZB` (backwards compatibility and naming unification)
-     */
     get hasHZB(): boolean {
         return this.#useHZB;
     }
@@ -758,22 +742,18 @@ export class Landscape extends Object3DContainer {
                         if (currentCascade !== undefined) {
                             switch (currentCascade) {
                                 case 0:
-                                    // Cascade 0 (초근거리 0~15m): 발밑 정밀 섀도우 (LOD 0, 1)
                                     startLOD = 0;
                                     endLOD = Math.min(2, maxLODLevel);
                                     break;
                                 case 1:
-                                    // Cascade 1 (근중거리 15~50m): 근중거리 섀도우 (LOD 0, 1, 2)
                                     startLOD = 0;
                                     endLOD = Math.min(3, maxLODLevel);
                                     break;
                                 case 2:
-                                    // Cascade 2 (중원거리 50~120m): 초고밀도 LOD 0(타일당 6.6만 버텍스) 배제하여 버텍스 60% 절감
                                     startLOD = 1;
                                     endLOD = Math.min(4, maxLODLevel);
                                     break;
                                 case 3:
-                                    // Cascade 3 (원거리 120~200m+): 불필요한 근거리 LOD 0, 1 배제, 원거리 산맥 실루엣 초경량 보존
                                     startLOD = 2;
                                     endLOD = maxLODLevel;
                                     break;

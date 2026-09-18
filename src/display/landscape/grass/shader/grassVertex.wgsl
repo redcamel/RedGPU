@@ -53,7 +53,6 @@ fn main(input: VertexInput) -> VertexOutput {
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
     let distToCam = distance(instPos, camPos);
 
-    // 거리 기반 스케일 축소(Shrink-to-Zero) 및 알파 페이드아웃
     let shrinkStart = grassUniforms.shrinkStartDistance;
     let cullDist = grassUniforms.cullingDistance;
     var shrink = 1.0;
@@ -66,11 +65,9 @@ fn main(input: VertexInput) -> VertexOutput {
         alphaFade = smoothstep(0.0, 1.0, shrink);
     }
 
-    // 높이 정규화 비율 (0.0: 밑동, 1.0: 풀 끝)
     let baseHeight = max(0.01, grassUniforms.meshHeight);
     let heightRatio = clamp((input.position.y - grassUniforms.minY) / baseHeight, 0.0, 1.0);
 
-    // 인스턴스 Y축 임의 회전
     let cosR = cos(rotationY);
     let sinR = sin(rotationY);
     let localX = input.position.x * cosR - input.position.z * sinR;
@@ -79,7 +76,6 @@ fn main(input: VertexInput) -> VertexOutput {
     let normRotX = input.normal.x * cosR - input.normal.z * sinR;
     let normRotZ = input.normal.x * sinR + input.normal.z * cosR;
 
-    // 밑동(minY) 기준 0.0 정렬 로컬 위치 (공중부양 방지)
     var localPos = vec3<f32>(
         localX * scaleXZ,
         (input.position.y - grassUniforms.minY) * scaleY,
@@ -87,14 +83,12 @@ fn main(input: VertexInput) -> VertexOutput {
     );
     var localNorm = vec3<f32>(normRotX, input.normal.y, normRotZ);
 
-    // 언리얼 표준 지형 법선 경사면 정렬 (Rodrigues' Rotation Formula - 순수 ALU)
     let unpackedNorm = unpack2x16snorm(instance.packedNormal);
     let normX = unpackedNorm.x;
     let normZ = unpackedNorm.y;
     let normY = sqrt(max(0.0, 1.0 - normX * normX - normZ * normZ));
     let terrainN = vec3<f32>(normX, normY, normZ);
 
-    // cross(vec3(0, 1, 0), terrainN)는 수학적으로 vec3(normZ, 0.0, -normX)와 정확히 일치 (곱셈 6회/뺄셈 3회 제거)
     let rotAxis = vec3<f32>(normZ, 0.0, -normX);
     let axisLen = length(rotAxis);
     if (axisLen > 0.0001) {
@@ -119,7 +113,6 @@ fn main(input: VertexInput) -> VertexOutput {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
 
-    // Zero-VTF: 스폰 시 베이크된 8비트 지면 색상 순수 ALU 언패킹
     output.groundColor = unpack4x8unorm(instance.packedGroundColor).rgb;
 
     return output;

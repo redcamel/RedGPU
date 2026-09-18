@@ -36,9 +36,7 @@ export interface GrassTypeOptions {
     fadeStartDistance?: number;
     shrinkStartDistance?: number;
     farDistance?: number;
-    /** [KO] 최소 스케일 비율 [scaleXZ, scaleY] 또는 [scaleXZ, scaleY, scaleXZ] / [EN] Minimum scale ratio [scaleXZ, scaleY] or [scaleXZ, scaleY, scaleXZ] */
     minScale?: [number, number] | [number, number, number];
-    /** [KO] 최대 스케일 비율 [scaleXZ, scaleY] 또는 [scaleXZ, scaleY, scaleXZ] / [EN] Maximum scale ratio [scaleXZ, scaleY] or [scaleXZ, scaleY, scaleXZ] */
     maxScale?: [number, number] | [number, number, number];
     height?: number;
     groundBlendStrength?: number;
@@ -117,7 +115,6 @@ export class GrassType {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        // Grass does not use normal or ORM textures (Pure ALU SSS + Upward Normal)
         if (options.aoIntensity !== undefined) {
             this.#aoIntensity = options.aoIntensity;
         } else if (mat?.occlusionStrength !== undefined) {
@@ -245,7 +242,6 @@ export class GrassType {
     }
 
     set normalTexture(_v: BitmapTexture | null) {
-        // no-op (Grass uses pure ALU Upward Normal)
     }
 
     get ormTexture(): BitmapTexture | null {
@@ -253,7 +249,6 @@ export class GrassType {
     }
 
     set ormTexture(_v: BitmapTexture | null) {
-        // no-op (Grass uses pure ALU SSS & Contact AO)
     }
 
     get normalScale(): number {
@@ -261,7 +256,6 @@ export class GrassType {
     }
 
     set normalScale(_v: number) {
-        // no-op
     }
 
     get aoIntensity(): number {
@@ -358,12 +352,6 @@ export class GrassType {
         this.#notifyChange();
     }
 
-    /**
-     * [KO] 잔디 인스턴스 최소 크기 비율 [scaleXZ, scaleY, scaleXZ?].
-     * 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축이 균일 축척(scaleXZ)으로 동작합니다.
-     * [EN] Minimum scale ratio for grass instances [scaleXZ, scaleY, scaleXZ?].
-     * The horizontal axis operates with uniform scaling (scaleXZ) to prevent elliptical distortion during Y-axis rotation.
-     */
     get minScale(): [number, number, number] {
         return this.#minScale;
     }
@@ -373,12 +361,6 @@ export class GrassType {
         this.#notifyChange();
     }
 
-    /**
-     * [KO] 잔디 인스턴스 최대 크기 비율 [scaleXZ, scaleY, scaleXZ?].
-     * 잔디는 Y축 임의 회전 시의 타원형 왜곡을 방지하기 위해 가로축이 균일 축척(scaleXZ)으로 동작합니다.
-     * [EN] Maximum scale ratio for grass instances [scaleXZ, scaleY, scaleXZ?].
-     * The horizontal axis operates with uniform scaling (scaleXZ) to prevent elliptical distortion during Y-axis rotation.
-     */
     get maxScale(): [number, number, number] {
         return this.#maxScale;
     }

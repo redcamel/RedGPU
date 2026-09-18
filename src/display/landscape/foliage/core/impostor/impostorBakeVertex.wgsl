@@ -66,4 +66,3 @@ fn main(
     out.cameraDir = trans.cameraDir;
     return out;
 }
-

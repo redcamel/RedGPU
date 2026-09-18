@@ -155,7 +155,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 N = normalize(perturbedWorldN);
             }
         } else {
-            // 스플랫맵 가중치 합이 0인 극단적 영역에서는 인위적인 베이스 컬러 대신 0번 기본 레이어 텍스처 사용
             let layer0Params = uniforms.layerParams[0];
             let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
             let layer0Albedo = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb * layer0Params.tintColor.rgb;

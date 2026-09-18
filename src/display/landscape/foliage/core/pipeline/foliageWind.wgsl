@@ -1,5 +1,3 @@
-
-
 fn calculateFoliageWindDisplacement(
     worldPos: vec3<f32>,
     localPos: vec3<f32>,

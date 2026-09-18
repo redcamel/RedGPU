@@ -317,7 +317,6 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
 
 @fragment
 fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
-    // 🌟 WGSL 규격 준수: 미분 연산 및 텍스처 샘플링을 분기문 이전(Uniform Control Flow) 최상단에서 선행 계산
     let ddxUV = dpdx(input.uv);
     let ddyUV = dpdy(input.uv);
     let alpha = textureSample(shadowBaseColorTexture, shadowBaseColorTextureSampler, input.uv).a;
@@ -346,5 +345,3 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
         }
     }
 }
-
-

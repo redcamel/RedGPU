@@ -1,8 +1,3 @@
-/**
- * 🌿 RedGPU Landscape Grass Shadow Map Depth-Only Fragment Shader
- * - 잎사귀 실루엣을 위한 초경량 알파 컷아웃 전용 (Color Output 0, Pure Depth Write)
- */
-
 struct GrassMaterialUniforms {
     groundBlendStrength: f32,
     alphaCutoff: f32,

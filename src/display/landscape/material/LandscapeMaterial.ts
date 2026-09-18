@@ -83,10 +83,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#textureArraySize;
     }
 
-    /**
-     * [KO] 발밑 고해상도 실시간 레이어 블렌딩이 100% 적용되는 카메라 반경 (미터 단위)
-     * [EN] Camera radius where high-resolution real-time layer blending is applied 100% (in meters)
-     */
     get nearDetailDistance(): number {
         return this.#nearDetailDistance;
     }
@@ -96,10 +92,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.updateUniformsData();
     }
 
-    /**
-     * [KO] 실시간 레이어에서 VBT 캐시로 점진적 크로스페이드되는 전이 구간 (미터 단위)
-     * [EN] Transition fade range from real-time layer to VBT cache (in meters)
-     */
     get nearDetailFade(): number {
         return this.#nearDetailFade;
     }

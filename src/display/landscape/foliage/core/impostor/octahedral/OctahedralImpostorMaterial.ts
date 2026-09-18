@@ -94,4 +94,3 @@ Object.defineProperty(OctahedralImpostorMaterial.prototype, 'isBuiltInMaterial',
 
 Object.freeze(OctahedralImpostorMaterial);
 export default OctahedralImpostorMaterial;
-

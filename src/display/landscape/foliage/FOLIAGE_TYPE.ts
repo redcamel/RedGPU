@@ -1,4 +1,3 @@
-
 const FOLIAGE_TYPE = {
 
     FOLIAGE: 'foliage',

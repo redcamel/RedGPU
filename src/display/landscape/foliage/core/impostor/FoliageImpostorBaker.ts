@@ -755,4 +755,3 @@ class FoliageImpostorBaker {
 }
 
 export default FoliageImpostorBaker;
-

@@ -868,9 +868,6 @@ class FoliageSubMeshAssembler {
 
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 언리얼 엔진 r.EarlyZPass=2 방식:
-        // 1) 알파컷(isMasked)이 있는 나뭇잎/수풀만 프리패스 대상으로 지정 (완전 불투명 기둥/바위는 프리패스 배제)
-        // 2) 오버드로우가 심한 근거리 고밀도 LOD(lodIndex <= maxPrepassLOD, 기본 0)에만 프리패스 집중 적용
         const isMaskedFoliage = isFoliage && !isImpostor && isMasked && hasBaseColorTexture;
         const isDepthPrepass = isMaskedFoliage && (lodIndex <= maxPrepassLOD);
         const isMainOpaqueOrMasked = true;
