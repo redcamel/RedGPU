@@ -15,12 +15,15 @@ import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
+import DirectTexture from "../../../resources/texture/DirectTexture";
+
 interface SingleLayerWaterMaterial {
     baseColor: ColorRGB;
     deepColor: ColorRGB;
     normalTexture: BitmapTexture;
     normalTextureSampler: Sampler;
     normalDetailTexture: BitmapTexture;
+    rippleTexture: DirectTexture | BitmapTexture | GPUTexture;
     normalScale: number;
     normalDetailScale: number;
     normalTiling: number;
@@ -47,6 +50,11 @@ interface SingleLayerWaterMaterial {
     ssrStepCount: number;
     ssrThickness: number;
     turbidity: number;
+    rippleDomainCenter: [number, number];
+    rippleDomainSize: number;
+    rippleWaveHeightScale: number;
+    rippleNormalStrength: number;
+    rippleFoamStrength: number;
 }
 
 class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
@@ -97,6 +105,11 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.ssrStepCount = 48;
         this.ssrThickness = 0.8;
         this.turbidity = 0.35;
+        this.rippleDomainCenter = [0.0, 0.0];
+        this.rippleDomainSize = 16.0;
+        this.rippleWaveHeightScale = 1.0;
+        this.rippleNormalStrength = 1.0;
+        this.rippleFoamStrength = 1.0;
 
         this.debugMode = 0;
         this.debugMaxDepth = 5.0;
@@ -111,6 +124,7 @@ defineColorRGB(SingleLayerWaterMaterial, [
 defineTexture(SingleLayerWaterMaterial, [
     {key: 'normalTexture'},
     {key: 'normalDetailTexture'},
+    {key: 'rippleTexture'},
 ]);
 
 defineSampler(SingleLayerWaterMaterial, [
@@ -120,6 +134,7 @@ defineSampler(SingleLayerWaterMaterial, [
 defineVector2(SingleLayerWaterMaterial, [
     {key: 'windDirection', value: [1.0, 0.3]},
     {key: 'normalDetailWindDirection', value: [-0.6, 0.8]},
+    {key: 'rippleDomainCenter', value: [0.0, 0.0]},
 ]);
 
 definePositiveNumber(SingleLayerWaterMaterial, [
@@ -142,6 +157,10 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'ssrMaxDistance', value: 35.0, min: 2.0, max: 100.0},
     {key: 'ssrThickness', value: 0.8, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
+    {key: 'rippleDomainSize', value: 16.0, min: 1.0},
+    {key: 'rippleWaveHeightScale', value: 1.0, min: 0.0},
+    {key: 'rippleNormalStrength', value: 1.0, min: 0.0},
+    {key: 'rippleFoamStrength', value: 1.0, min: 0.0},
 ]);
 
 defineUint(SingleLayerWaterMaterial, [

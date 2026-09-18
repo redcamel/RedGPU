@@ -82,9 +82,13 @@ struct WaterUniforms {
     ssrThickness: f32,
 
     turbidity: f32,
-    _pad_turbidity1: f32,
-    _pad_turbidity2: f32,
-    _pad_turbidity3: f32,
+    rippleDomainSize: f32,
+    rippleWaveHeightScale: f32,
+    rippleNormalStrength: f32,
+
+    rippleDomainCenter: vec2<f32>,
+    rippleFoamStrength: f32,
+    _pad_ripple: f32,
 };
 
 fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
@@ -206,6 +210,9 @@ fn calculateWaterSSR(
 #redgpu_if normalDetailTexture
 @group(2) @binding(3) var normalDetailTexture: texture_2d<f32>;
 #redgpu_endIf
+#redgpu_if rippleTexture
+@group(2) @binding(4) var rippleTexture: texture_2d<f32>;
+#redgpu_endIf
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -270,6 +277,26 @@ fn main(inputData: InputData) -> OutputFragment {
         let tangentNormal2 = normalize(vec3<f32>(n2, z2));
 
         combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
+    }
+    #redgpu_endIf
+
+    #redgpu_if rippleTexture
+    var rippleFoam: f32 = 0.0;
+    {
+        let simDomainSize = max(1.0, uniforms.rippleDomainSize);
+        let simUV = (worldPos.xz - uniforms.rippleDomainCenter) / simDomainSize + 0.5;
+        if (all(simUV >= vec2<f32>(0.0)) && all(simUV <= vec2<f32>(1.0))) {
+            let simSample = textureSampleLevel(rippleTexture, normalTextureSampler, simUV, 0.0);
+            let edgeDist = min(simUV, vec2<f32>(1.0) - simUV);
+            let edgeFade = smoothstep(0.0, 0.08, min(edgeDist.x, edgeDist.y));
+
+            let rawRippleNormal = vec3<f32>(simSample.x * uniforms.rippleNormalStrength, simSample.y * uniforms.rippleNormalStrength, 1.0);
+            let normalizedRippleNormal = normalize(rawRippleNormal);
+            let finalRippleNormal = normalize(mix(vec3<f32>(0.0, 0.0, 1.0), normalizedRippleNormal, edgeFade));
+
+            combinedTangentNormal = blendRNM(combinedTangentNormal, finalRippleNormal);
+            rippleFoam = simSample.w * edgeFade * uniforms.rippleFoamStrength;
+        }
     }
     #redgpu_endIf
 
@@ -341,7 +368,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let meanExtinction = dot(extinctionRGB, vec3<f32>(0.299, 0.587, 0.114));
 
     let depthProgress = clamp(1.0 - meanExtinction, 0.0, 1.0);
-    let waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, depthProgress);
+    var waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, depthProgress);
+    #redgpu_if rippleTexture
+    let foamFactor = smoothstep(0.12, 0.85, rippleFoam);
+    let foamColor = vec3<f32>(0.95, 0.98, 1.0);
+    waterAlbedo = mix(waterAlbedo, foamColor, clamp(foamFactor * 0.75, 0.0, 0.80));
+    #redgpu_endIf
 
     let fogDensity = turbidityCoeff * 0.85;
     let waterFogFactor = (vec3<f32>(1.0) - extinctionRGB) * fogDensity;
