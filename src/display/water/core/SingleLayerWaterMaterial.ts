@@ -11,7 +11,6 @@ import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
 import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
 import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
-import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
@@ -45,7 +44,6 @@ interface SingleLayerWaterMaterial {
     causticsStrength: number;
     causticsScale: number;
     causticsSpeed: number;
-    lakeWorldSize: number;
     enableSSR: boolean;
     ssrMaxDistance: number;
     ssrStepCount: number;
@@ -63,10 +61,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         );
 
         this.use2PathRender = true;
-        this.transparent = true;
-
-        this.blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
-        this.blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
         this.normalTextureSampler = new Sampler(this.redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
@@ -102,7 +96,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.causticsStrength = 0.25;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
-        this.lakeWorldSize = 100.0;
         this.enableSSR = true;
         this.ssrMaxDistance = 35.0;
         this.ssrStepCount = 48;
@@ -159,7 +152,6 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'causticsStrength', value: 0.25, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
-    {key: 'lakeWorldSize', value: 100.0, min: 1.0, max: 5000.0},
     {key: 'ssrMaxDistance', value: 35.0, min: 2.0, max: 100.0},
     {key: 'ssrThickness', value: 0.8, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},

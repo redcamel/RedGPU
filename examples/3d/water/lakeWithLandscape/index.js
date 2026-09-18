@@ -167,7 +167,6 @@ RedGPU.init(
         );
 
         // 16km 초대형 지형 스케일 및 알프스 고산 호수에 맞춘 정밀 물리 광학 튜닝
-        lake.waterMaterial.lakeWorldSize = 16000.0;
         lake.waterMaterial.baseColor.setColorByHEX('#1d5366'); // 차분하고 투명한 알프스 빙하수 톤 (형광 발광 방지)
         lake.waterMaterial.deepColor.setColorByHEX('#021422'); // 깊은 알프스 심연 코발트 네이비
         lake.waterMaterial.refractionStrength = 0.025;         // 물리 스넬 굴절 왜곡

@@ -27,7 +27,6 @@ class WaterLake extends Mesh {
         name: string = 'WaterLake'
     ) {
         const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
-        waterMaterial.lakeWorldSize = width;
         const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
 
         super(redGPUContext, waterGeometry, waterMaterial, name);

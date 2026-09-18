@@ -71,7 +71,7 @@ struct WaterUniforms {
     causticsStrength: f32,
     causticsScale: f32,
     causticsSpeed: f32,
-    lakeWorldSize: f32,
+    _pad_caustics: f32,
 
     enableSSR: u32,
     ssrMaxDistance: f32,
@@ -438,6 +438,10 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let N = worldNormal;
     let effectiveRoughness = clamp(sqrt(uniforms.roughness * uniforms.roughness + 0.003), 0.06, 1.0);
+    let pbrRoughness = clamp(uniforms.roughness + 0.08, 0.05, 0.60);
+    let waveRoughness = clamp(uniforms.roughness + 0.18, 0.12, 0.40);
+    let depthScatterWeight = pow(1.0 - meanExtinction, 2.0);
+    let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20;
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
@@ -452,11 +456,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let F = getSpecularFresnel(VdotH, uniforms.fresnelF0);
 
             let glitterSpecular = getSpecularNDF(NdotH, effectiveRoughness) * getSpecularVisibility(NdotV_effective, NdotL, effectiveRoughness);
-
-            let pbrRoughness = clamp(uniforms.roughness + 0.08, 0.05, 0.60);
             let pbrSpecular = getSpecularNDF(NdotH, pbrRoughness) * getSpecularVisibility(NdotV_effective, NdotL, pbrRoughness);
-
-            let waveRoughness = clamp(uniforms.roughness + 0.18, 0.12, 0.40);
             let waveSpecular = getSpecularNDF(NdotH, waveRoughness) * getSpecularVisibility(NdotV_effective, NdotL, waveRoughness);
 
             let combinedSpec = (glitterSpecular * 0.58 + pbrSpecular * 0.34 + waveSpecular * 0.08) * F * uniforms.specularFactor;
@@ -468,8 +468,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let cosThetaT = sqrt(max(0.001, 1.0 - sin2ThetaT));
         let sunTransmittance = max(0.0, 1.0 - getSpecularFresnel(NdotL, uniforms.fresnelF0));
 
-        let depthScatterWeight = pow(1.0 - meanExtinction, 2.0);
-        let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20;
         let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * depthScatterWeight * scatteringAlbedo);
 
         let VdotL = dot(V, L);
@@ -481,10 +479,8 @@ fn main(inputData: InputData) -> OutputFragment {
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
     }
 
-    let depthScatterWeight = pow(1.0 - meanExtinction, 2.0);
     let diffuseFresnel = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * 0.06;
     let skyTransmittance = max(0.0, 1.0 - diffuseFresnel);
-    let scatteringAlbedo = 0.26 + turbidityCoeff * 0.20;
     let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.15);
 
     let safeAmbientIntensity = min(100.0, systemUniforms.ambientLight.intensity);
