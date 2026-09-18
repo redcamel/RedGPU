@@ -235,8 +235,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let initialOpticalDistance = length(initialGroundWorldPos - worldPos);
     let originalSceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
 
-    let fadeDist = max(0.001, uniforms.depthFadeDistance);
-    let depthFade = clamp(initialOpticalDistance / fadeDist, 0.0, 1.0);
+
 
     let timeSec = systemUniforms.time.time;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
@@ -280,6 +279,15 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
     let worldNormal = normalize(tbn * combinedTangentNormal);
+
+    let NdotV = clamp(dot(worldNormal, V), 0.001, 1.0);
+    let viewFactor = 1.0 / max(0.12, NdotV);
+    let pixelFootprint = camDist * 0.0035;
+    let adaptiveFadeDist = max(0.001, max(uniforms.depthFadeDistance, pixelFootprint * viewFactor * 3.0));
+    let depthFade = smoothstep(0.0, 1.0, clamp(initialOpticalDistance / adaptiveFadeDist, 0.0, 1.0));
+
+    let meshEdge = min(inputData.uv, vec2<f32>(1.0) - inputData.uv);
+    let meshEdgeFade = smoothstep(0.0, 0.015, min(meshEdge.x, meshEdge.y));
 
     let etaRatio = 1.0 / 1.33333;
     let incidentDir = -normalize(V);
@@ -497,11 +505,12 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let totalTransmittedLight = (transmittedSceneColor + waterScattering) * (1.0 - fresnel);
 
-    let totalReflectedLight = skyReflectionColor * fresnel + directSpecularColor;
+    let reflectionShorelineFade = smoothstep(0.0, 1.0, clamp(initialOpticalDistance / (adaptiveFadeDist * 1.5), 0.0, 1.0));
+    let totalReflectedLight = (skyReflectionColor * fresnel + directSpecularColor) * reflectionShorelineFade;
 
     let fullWaterColor = totalTransmittedLight + totalReflectedLight;
 
-    let softDepthFade = pow(depthFade, 0.85);
+    let softDepthFade = depthFade * meshEdgeFade;
     let finalRgb = mix(originalSceneColor, fullWaterColor, softDepthFade);
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
