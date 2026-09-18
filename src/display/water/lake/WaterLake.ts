@@ -6,11 +6,6 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 
 class WaterLake extends Mesh {
-    #waterWidth: number;
-    #waterHeight: number;
-    #widthSegments: number;
-    #heightSegments: number;
-
     #waveAmplitude: number = 0.025;
     #waveWavelength: number = 16.0;
     #waveSpeed: number = 1.0;
@@ -30,11 +25,6 @@ class WaterLake extends Mesh {
         const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
-
-        this.#waterWidth = width;
-        this.#waterHeight = height;
-        this.#widthSegments = widthSegments;
-        this.#heightSegments = heightSegments;
 
         this.depthStencilState.depthWriteEnabled = false;
 
@@ -136,22 +126,6 @@ class WaterLake extends Mesh {
 
     set waterLevel(value: number) {
         this.y = value;
-    }
-
-    get waterWidth(): number {
-        return this.#waterWidth;
-    }
-
-    get waterHeight(): number {
-        return this.#waterHeight;
-    }
-
-    get widthSegments(): number {
-        return this.#widthSegments;
-    }
-
-    get heightSegments(): number {
-        return this.#heightSegments;
     }
 }
 
