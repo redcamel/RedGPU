@@ -36,7 +36,6 @@ interface SingleLayerWaterMaterial {
     depthFadeDistance: number;
     roughness: number;
     specularFactor: number;
-    fresnelF0: number;
     debugMode: number;
     debugMaxDepth: number;
     invertNormalY: boolean;
@@ -90,7 +89,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.depthFadeDistance = 0.8;
         this.roughness = 0.07;
         this.specularFactor = 1.0;
-        this.fresnelF0 = 0.02;
         this.invertNormalY = false;
         this.invertNormalDetailY = false;
         this.causticsStrength = 0.25;
@@ -139,7 +137,6 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'depthFadeDistance', value: 0.8},
     {key: 'roughness', value: 0.07, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
-    {key: 'fresnelF0', value: 0.02, min: 0, max: 1},
     {key: 'debugMaxDepth', value: 5.0},
     {key: 'causticsStrength', value: 0.25, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},

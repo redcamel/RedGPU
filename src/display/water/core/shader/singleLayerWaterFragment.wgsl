@@ -38,6 +38,8 @@ fn blendRNM(n1: vec3<f32>, n2: vec3<f32>) -> vec3<f32> {
     return normalize(t * dot(t, u) - u * t.z);
 }
 
+const WATER_F0: f32 = 0.02;
+
 struct WaterUniforms {
     baseColor: vec3<f32>,
     opacity: f32,
@@ -64,7 +66,7 @@ struct WaterUniforms {
     roughness: f32,
 
     specularFactor: f32,
-    fresnelF0: f32,
+    _pad_fresnelF0: f32,
     invertNormalY: u32,
     invertNormalDetailY: u32,
 
@@ -393,8 +395,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let NdotV_wave = clamp(dot(worldNormal, V), 0.001, 1.0);
     let NdotV_effective = clamp(mix(NdotV_pure, NdotV_wave, 0.35), 0.001, 1.0);
     let oneMinusNdotV = 1.0 - NdotV_effective;
-    let f90 = max(1.0 - uniforms.roughness, uniforms.fresnelF0);
-    let fresnel = uniforms.fresnelF0 + (f90 - uniforms.fresnelF0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
+    let f90 = max(1.0 - uniforms.roughness, WATER_F0);
+    let fresnel = WATER_F0 + (f90 - WATER_F0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
 
     var R = reflect(-V, worldNormal);
     R.y = max(R.y, 0.005);
@@ -453,7 +455,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let H = normalize(L + V);
             let NdotH = max(dot(N, H), 0.0);
             let VdotH = max(dot(V, H), 0.0);
-            let F = getSpecularFresnel(VdotH, uniforms.fresnelF0);
+            let F = getSpecularFresnel(VdotH, WATER_F0);
 
             let glitterSpecular = getSpecularNDF(NdotH, effectiveRoughness) * getSpecularVisibility(NdotV_effective, NdotL, effectiveRoughness);
             let pbrSpecular = getSpecularNDF(NdotH, pbrRoughness) * getSpecularVisibility(NdotV_effective, NdotL, pbrRoughness);
@@ -466,7 +468,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let cosThetaI = max(L.y, 0.0);
         let sin2ThetaT = (1.0 - cosThetaI * cosThetaI) * (1.0 / (1.333 * 1.333));
         let cosThetaT = sqrt(max(0.001, 1.0 - sin2ThetaT));
-        let sunTransmittance = max(0.0, 1.0 - getSpecularFresnel(NdotL, uniforms.fresnelF0));
+        let sunTransmittance = max(0.0, 1.0 - getSpecularFresnel(NdotL, WATER_F0));
 
         let volumeInScattering = finalLightColor * (sunTransmittance * cosThetaT * depthScatterWeight * scatteringAlbedo);
 
@@ -479,7 +481,7 @@ fn main(inputData: InputData) -> OutputFragment {
         directWaterScattering = directWaterScattering + (volumeInScattering + subsurfaceScattering) * waterAlbedo;
     }
 
-    let diffuseFresnel = uniforms.fresnelF0 + (1.0 - uniforms.fresnelF0) * 0.06;
+    let diffuseFresnel = WATER_F0 + (1.0 - WATER_F0) * 0.06;
     let skyTransmittance = max(0.0, 1.0 - diffuseFresnel);
     let skyVolumeScatter = skyDiffuseIrradiance * skyTransmittance * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.15);
 

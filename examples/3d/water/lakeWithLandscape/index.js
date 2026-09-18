@@ -175,7 +175,6 @@ RedGPU.init(
         lake.waterMaterial.depthFadeDistance = 18.0;          // 해안선 완충 페이드 (18m, 맑고 투명한 모래/자갈 노출)
         lake.waterMaterial.roughness = 0.05;                  // 고요하고 매끄러운 수면 거울 반사 & 윤슬
         lake.waterMaterial.specularFactor = 1.0;
-        lake.waterMaterial.fresnelF0 = 0.02;
 
         // 듀얼 노멀 시스템 (대형 너울 + 잔물결)
         lake.waterMaterial.useNormalDetailTexture = true;
@@ -368,7 +367,6 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             const specFolder = pane.addFolder({title: '🪞 Cook-Torrance PBR & Lighting', expanded: false});
             specFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 1.0, step: 0.01});
             specFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 3.0, step: 0.05});
-            specFolder.addBinding(lake.waterMaterial, 'fresnelF0', {min: 0.0, max: 0.1, step: 0.005});
             specFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             specFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 

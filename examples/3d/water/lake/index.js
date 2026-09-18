@@ -636,7 +636,6 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             const reflectionFolder = pane.addFolder({title: 'Sky Reflection & Fresnel', expanded: true});
             reflectionFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.0, max: 1.0, step: 0.01});
             reflectionFolder.addBinding(lake.waterMaterial, 'specularFactor', {min: 0.0, max: 2.0, step: 0.05});
-            reflectionFolder.addBinding(lake.waterMaterial, 'fresnelF0', {min: 0.0, max: 0.1, step: 0.005});
 
             // 스크린 공간 반사 (SSR - Screen Space Reflection) 제어 패널
             const ssrFolder = pane.addFolder({title: 'Screen Space Reflection', expanded: true});
