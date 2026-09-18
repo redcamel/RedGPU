@@ -62,7 +62,7 @@ struct WaterUniforms {
     normalDetailWindSpeed: f32,
 
     normalDetailWindDirection: vec2<f32>,
-    useNormalDetailTexture: u32,
+    _pad_detailTexture: f32,
     roughness: f32,
 
     specularFactor: f32,
@@ -202,7 +202,9 @@ fn calculateWaterSSR(
 @group(2) @binding(0) var<uniform> uniforms: WaterUniforms;
 @group(2) @binding(1) var normalTextureSampler: sampler;
 @group(2) @binding(2) var normalTexture: texture_2d<f32>;
+#redgpu_if normalDetailTexture
 @group(2) @binding(3) var normalDetailTexture: texture_2d<f32>;
+#redgpu_endIf
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -250,7 +252,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let z1 = sqrt(max(0.0, 1.0 - dot(n1, n1)));
     var combinedTangentNormal = normalize(vec3<f32>(n1, z1));
 
-    if (uniforms.useNormalDetailTexture > 0u) {
+    #redgpu_if normalDetailTexture
+    {
         let windDirLen2 = length(uniforms.normalDetailWindDirection);
         let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
         let waveUV2 = inputData.uv * uniforms.normalDetailTiling + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed);
@@ -267,6 +270,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         combinedTangentNormal = blendRNM(combinedTangentNormal, tangentNormal2);
     }
+    #redgpu_endIf
 
     let camDist = length(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
     let distNormalFade = clamp((camDist - 35.0) / 45.0, 0.0, 0.85);
@@ -359,17 +363,34 @@ fn main(inputData: InputData) -> OutputFragment {
         let cWorldScale = 0.35 * invCScale;
         let cSpeed = uniforms.causticsSpeed;
         let cUV1 = groundSurfacePos * cWorldScale + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
-        let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed * cSpeed);
 
         let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
         let rawN1 = (textureSampleLevel(normalTexture, normalTextureSampler, cUV1, causticMip).rgb * 2.0 - 1.0).xy;
-        let rawN2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, cUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
-        let distortUV1 = cUV1 + rawN2 * 0.18;
-        let distortUV2 = cUV2 + rawN1 * 0.18;
+        var s1: vec2<f32>;
+        var s2: vec2<f32>;
+        #redgpu_if normalDetailTexture
+        {
+            let windDirLen2 = length(uniforms.normalDetailWindDirection);
+            let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
+            let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed * cSpeed);
+            let rawN2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, cUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
-        let s1 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV1, causticMip).rgb * 2.0 - 1.0).xy;
-        let s2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, distortUV2, causticMip).rgb * 2.0 - 1.0).xy;
+            let distortUV1 = cUV1 + rawN2 * 0.18;
+            let distortUV2 = cUV2 + rawN1 * 0.18;
+
+            s1 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV1, causticMip).rgb * 2.0 - 1.0).xy;
+            s2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, distortUV2, causticMip).rgb * 2.0 - 1.0).xy;
+        }
+        #redgpu_else
+        {
+            let distortUV1 = cUV1 + rawN1.yx * 0.18;
+            let distortUV2 = cUV1 * 1.8 - rawN1 * 0.18;
+
+            s1 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV1, causticMip).rgb * 2.0 - 1.0).xy;
+            s2 = (textureSampleLevel(normalTexture, normalTextureSampler, distortUV2, causticMip).rgb * 2.0 - 1.0).xy;
+        }
+        #redgpu_endIf
 
         let waveA1 = (s1.x + s1.y) * 5.0;
         let waveA2 = (s2.x - s2.y) * 5.0;

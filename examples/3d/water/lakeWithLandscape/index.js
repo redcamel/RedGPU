@@ -177,7 +177,6 @@ RedGPU.init(
         lake.waterMaterial.specularFactor = 1.0;
 
         // 듀얼 노멀 시스템 (대형 너울 + 잔물결)
-        lake.waterMaterial.useNormalDetailTexture = true;
         lake.waterMaterial.normalTiling = 120.0;               // 16,000m / 120 ≈ 133m 너울 파도
         lake.waterMaterial.normalDetailTiling = 260.0;         // 16,000m / 260 ≈ 61m 잔물결
         lake.waterMaterial.normalScale = 0.45;
@@ -312,7 +311,6 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
 
             // [폴더 4] 듀얼 노멀 & 파도 (Dual Normal Waves & Swell)
             const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Swell)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'useNormalDetailTexture');
             waveFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 2.0, step: 0.02});
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {min: 10.0, max: 500.0, step: 10.0});
             waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.002});

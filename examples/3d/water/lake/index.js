@@ -599,7 +599,6 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // 제2 파도 (Layer 2: Micro Ripple with RNM)
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
-            layer2Folder.addBinding(lake.waterMaterial, 'useNormalDetailTexture');
             layer2Folder.addBinding(lake.waterMaterial, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.01});
             layer2Folder.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 1.0, max: 200.0, step: 1.0});
             layer2Folder.addBinding(lake.waterMaterial, 'normalDetailWindSpeed', {min: 0.0, max: 0.2, step: 0.005});

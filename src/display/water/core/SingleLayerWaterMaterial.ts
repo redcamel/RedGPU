@@ -29,7 +29,6 @@ interface SingleLayerWaterMaterial {
     normalDetailWindSpeed: number;
     windDirection: [number, number];
     normalDetailWindDirection: [number, number];
-    useNormalDetailTexture: boolean;
     refractionStrength: number;
     extinctionFactor: number;
     opacity: number;
@@ -84,7 +83,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.normalDetailWindSpeed = 0.040;
         this.windDirection = [1.0, 0.3];
         this.normalDetailWindDirection = [-0.6, 0.8];
-        this.useNormalDetailTexture = true;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
         this.roughness = 0.07;
@@ -152,7 +150,6 @@ defineUint(SingleLayerWaterMaterial, [
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [
-    {key: 'useNormalDetailTexture', value: true},
     {key: 'invertNormalY', value: false},
     {key: 'invertNormalDetailY', value: false},
     {key: 'enableSSR', value: true},
