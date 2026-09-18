@@ -530,19 +530,6 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         skybox: true,
         ibl: true,
         gui: (pane) => {
-            // 🚶 캐릭터 조작 가이드 패널
-            const charFolder = pane.addFolder({title: '🚶 Character Controls', expanded: true});
-            const charConfig = {
-                move: 'W / A / S / D',
-                run: 'Hold Shift',
-                jump: 'Space',
-                camera: 'Mouse Drag (Rotate)',
-            };
-            charFolder.addBinding(charConfig, 'move', {readonly: true, label: 'Move'});
-            charFolder.addBinding(charConfig, 'run', {readonly: true, label: 'Run'});
-            charFolder.addBinding(charConfig, 'jump', {readonly: true, label: 'Jump'});
-            charFolder.addBinding(charConfig, 'camera', {readonly: true, label: 'Camera'});
-
             // WaterLake 기본 및 디버그 제어 패널
             const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
@@ -642,13 +629,6 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             ssrFolder.addBinding(lake.waterMaterial, 'ssrMaxDistance', {min: 5.0, max: 60.0, step: 1.0});
             ssrFolder.addBinding(lake.waterMaterial, 'ssrStepCount', {min: 8, max: 96, step: 8});
             ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {min: 0.1, max: 2.0, step: 0.05});
-
-            // 직사광(태양) 및 천공 환경광 제어 패널
-            const sunFolder = pane.addFolder({title: 'Lighting & Sun', expanded: false});
-            sunFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
-            sunFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-            sunFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
-
         }
     });
 }
