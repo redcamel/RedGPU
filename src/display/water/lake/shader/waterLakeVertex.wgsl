@@ -76,7 +76,7 @@ fn main(inputData: InputData) -> VertexOutput {
     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
 
     let su_projection = systemUniforms.projection;
-    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
+    let su_projectionViewMatrix = su_projection.noneJitterProjectionViewMatrix;
 
     let gu_matrixList = globalVertexData.matrixList;
     let gu_modelMatrix = gu_matrixList.modelMatrix;

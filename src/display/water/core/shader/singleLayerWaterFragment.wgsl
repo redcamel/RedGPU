@@ -419,7 +419,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let f90 = max(1.0 - uniforms.roughness, WATER_F0);
     let fresnel = WATER_F0 + (f90 - WATER_F0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
 
-    var R = reflect(-V, worldNormal);
+    let distanceMipFactor = clamp((camDist - 20.0) / 200.0, 0.0, 1.0);
+    let effectiveRoughnessIBL = clamp(uniforms.roughness + distanceMipFactor * 0.10, 0.0, 0.25);
+
+    let reflectionNormal = normalize(mix(worldNormal, baseNormal, distanceMipFactor * 0.20));
+    var R = reflect(-V, reflectionNormal);
     R.y = max(R.y, 0.005);
     R = normalize(R);
 
@@ -429,15 +433,18 @@ fn main(inputData: InputData) -> OutputFragment {
     var skyDiffuseIrradiance = vec3<f32>(0.0);
 
     if (u_usePrefilterTexture) {
-        let mipLevel = 0.0;
-        rawSkyReflection = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+        let maxIblMip = f32(textureNumLevels(ibl_prefilterTexture) - 1);
+        let maxAllowedIblMip = min(maxIblMip * 0.25, 2.0);
+        let iblMipLevel = clamp(effectiveRoughnessIBL * maxIblMip, 0.0, maxAllowedIblMip);
+        rawSkyReflection = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, iblMipLevel).rgb * preExposure * systemUniforms.iblIntensity;
 
         skyDiffuseIrradiance = textureSample(ibl_irradianceTexture, prefilterTextureSampler, worldNormal).rgb * preExposure * systemUniforms.iblIntensity;
     }
     if (u_useSkyAtmosphere) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-        let atmoMipLevel = clamp(uniforms.roughness * atmoMipCount, 0.0, atmoMipCount);
+        let maxAllowedAtmoMip = min(atmoMipCount * 0.25, 2.0);
+        let atmoMipLevel = clamp(effectiveRoughnessIBL * atmoMipCount, 0.0, maxAllowedAtmoMip);
         let atmoColor = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * u_atmo.sunIntensity * preExposure;
         rawSkyReflection = rawSkyReflection + atmoColor;
 
@@ -577,6 +584,9 @@ fn main(inputData: InputData) -> OutputFragment {
             output.color = vec4<f32>(finalRgb, 1.0);
         }
     }
+
+    output.gBufferNormal = vec4<f32>(worldNormal, 1.0);
+    output.gBufferMotionVector = vec4<f32>(0.0, 0.0, 1.0, 1.0);
 
     return output;
 }

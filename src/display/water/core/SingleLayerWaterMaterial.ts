@@ -89,7 +89,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.specularFactor = 1.0;
         this.invertNormalY = false;
         this.invertNormalDetailY = false;
-        this.causticsStrength = 0.25;
+        this.causticsStrength = 1.0;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
         this.enableSSR = true;
@@ -136,7 +136,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'roughness', value: 0.07, min: 0, max: 1},
     {key: 'specularFactor', value: 1.0, min: 0, max: 2},
     {key: 'debugMaxDepth', value: 5.0},
-    {key: 'causticsStrength', value: 0.25, min: 0, max: 2},
+    {key: 'causticsStrength', value: 1.0, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
     {key: 'ssrMaxDistance', value: 35.0, min: 2.0, max: 100.0},

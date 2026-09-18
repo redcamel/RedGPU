@@ -82,7 +82,7 @@ RedGPU.init(
         lake.waterMaterial.normalDetailTiling = 36.0;
         lake.waterMaterial.refractionStrength = 1.0;   // 표준 100% 물리 스넬 굴절 (Broken Straw 꺾임)
         lake.waterMaterial.roughness = 0.07;         // 선명하고 아름다운 수면 거울 반사 & 다이아몬드 윤슬
-        lake.waterMaterial.causticsStrength = 0.25;   // 얕은 바닥에 춤추는 은은하고 자연스러운 카우스틱스 햇살망
+        lake.waterMaterial.causticsStrength = 1.0;    // 얕은 바닥에 춤추는 표준 카우스틱스 햇살망
         lake.waterMaterial.enableSSR = true;          // 실시간 스크린 공간 반사(SSR) 기본 활성화
         lake.waterMaterial.ssrStepCount = 64;         // 정밀 레이마칭 스텝수 (기둥 관통/홀 방지)
         lake.waterMaterial.ssrMaxDistance = 50.0;     // 최대 추적 거리
