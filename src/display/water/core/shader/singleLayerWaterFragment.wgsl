@@ -6,6 +6,7 @@
 #redgpu_include math.EPSILON;
 #redgpu_include math.getInterleavedGradientNoise;
 #redgpu_include math.reconstruct.getWorldPositionFromDepth;
+#redgpu_include math.getMotionVector;
 
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = max(0.002, roughness * roughness);
@@ -419,13 +420,22 @@ fn main(inputData: InputData) -> OutputFragment {
     let f90 = max(1.0 - uniforms.roughness, WATER_F0);
     let fresnel = WATER_F0 + (f90 - WATER_F0) * (oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV * oneMinusNdotV);
 
-    let distanceMipFactor = clamp((camDist - 20.0) / 200.0, 0.0, 1.0);
-    let effectiveRoughnessIBL = clamp(uniforms.roughness + distanceMipFactor * 0.10, 0.0, 0.25);
+    let grazingFactor = 1.0 - NdotV_pure;
+    let horizonAngleFactor = smoothstep(0.65, 0.90, grazingFactor);
+    let distFactor = smoothstep(20.0, 100.0, camDist);
+    let taaFactor = horizonAngleFactor * distFactor;
 
-    let reflectionNormal = normalize(mix(worldNormal, baseNormal, distanceMipFactor * 0.20));
-    var R = reflect(-V, reflectionNormal);
-    R.y = max(R.y, 0.005);
-    R = normalize(R);
+    let effectiveRoughnessIBL = clamp(uniforms.roughness + taaFactor * 0.10, 0.0, 0.25);
+
+    let reflectionNormal = normalize(mix(worldNormal, baseNormal, taaFactor * 0.20));
+    let flatR = reflect(-V, baseNormal);
+    let rawR = reflect(-V, reflectionNormal);
+
+    // 파도 사면에서 반사 벡터가 지평선 아래로 떨어질 때 발생하는 인위적인 황금색 수평선 띠(Horizon Clamping Artifact) 완전 제거
+    // 하드 클램프(R.y = max(R.y, 0.005)) 대신 항상 안전한 상공을 향하는 flatR로 부드럽게 보간(Horizon Pull-up)하여 매끄러운 연속성 보장
+    let horizonPull = 1.0 - smoothstep(-0.02, 0.18, rawR.y);
+    var R = normalize(mix(rawR, flatR, horizonPull));
+    R.y = max(R.y, 0.002);
 
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -453,9 +463,10 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     let ssrWaveNormal = normalize(mix(baseNormal, worldNormal, 0.60));
-    var ssrR = reflect(-V, ssrWaveNormal);
-    ssrR.y = max(ssrR.y, 0.005);
-    ssrR = normalize(ssrR);
+    let rawSsrR = reflect(-V, ssrWaveNormal);
+    let ssrHorizonPull = 1.0 - smoothstep(-0.02, 0.18, rawSsrR.y);
+    var ssrR = normalize(mix(rawSsrR, flatR, ssrHorizonPull));
+    ssrR.y = max(ssrR.y, 0.002);
 
     let ssrResult = calculateWaterSSR(worldPos, ssrWaveNormal, ssrR, pixelCoord);
     let blendedSkyReflection = mix(rawSkyReflection, ssrResult.rgb, ssrResult.a);
@@ -586,7 +597,17 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     output.gBufferNormal = vec4<f32>(worldNormal, 1.0);
-    output.gBufferMotionVector = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+
+    // 시선 각도(N·V 스침각) + 거리 기반 하이브리드 TAA & 카메라 모션 벡터
+    // 내려다볼 때(N·V 높음) 및 근거리: TAA 바이패스(z = 1.0)로 쨍한 스펙큘러/카우스틱스 선명도 극대화
+    // 수평선을 바라볼 때(N·V 스침각) + 원거리: 카메라 모션 벡터를 출력하고 TAA 활성화(z = 0.0)하여 수평선 앨리어싱 및 지터 완벽 억제
+    let currClip = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    let prevClip = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    let cameraMotion = getMotionVector(currClip, prevClip);
+
+    let finalMotion = cameraMotion * taaFactor;
+    let jitterDisableFlag = select(1.0, 0.0, taaFactor > 0.2);
+    output.gBufferMotionVector = vec4<f32>(finalMotion, jitterDisableFlag, 1.0);
 
     return output;
 }
