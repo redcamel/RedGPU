@@ -178,13 +178,13 @@ RedGPU.init(
         lake.waterMaterial.fresnelF0 = 0.02;
 
         // 듀얼 노멀 시스템 (대형 너울 + 잔물결)
-        lake.waterMaterial.useNormalTexture2 = true;
+        lake.waterMaterial.useNormalDetailTexture = true;
         lake.waterMaterial.normalTiling = 120.0;               // 16,000m / 120 ≈ 133m 너울 파도
-        lake.waterMaterial.normalTiling2 = 260.0;              // 16,000m / 260 ≈ 61m 잔물결
+        lake.waterMaterial.normalDetailTiling = 260.0;         // 16,000m / 260 ≈ 61m 잔물결
         lake.waterMaterial.normalScale = 0.45;
-        lake.waterMaterial.normalScale2 = 0.25;
+        lake.waterMaterial.normalDetailScale = 0.25;
         lake.waterMaterial.windSpeed = 0.015;
-        lake.waterMaterial.windSpeed2 = 0.025;
+        lake.waterMaterial.normalDetailWindSpeed = 0.025;
 
         // 수중 바닥 카우스틱스 (16km 광활한 호수에서는 기본 0.0으로 빛 찌꺼기 얼룩 원천 방지)
         lake.waterMaterial.causticsStrength = 0.0;
@@ -287,7 +287,7 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
             waterPosFolder.addBinding(lake, 'z', {min: -8000, max: 8000, step: 100});
             waterPosFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
-                    'PBR Water (Full Phase 17) (0)': 0,
+                    'PBR Water (Full) (0)': 0,
                     'Screen Space Reflection Only (15)': 15,
                     'Underwater Caustics Only (14)': 14,
                     'Sun Specular Glitter Only (13)': 13,
@@ -313,16 +313,16 @@ function renderIntegratedLandscapeLakeGUI(redGPUContext, landscape, lake, contro
 
             // [폴더 4] 듀얼 노멀 & 파도 (Dual Normal Waves & Swell)
             const waveFolder = pane.addFolder({title: '〰️ Dual Normal Waves (RNM & Swell)', expanded: true});
-            waveFolder.addBinding(lake.waterMaterial, 'useNormalTexture2');
+            waveFolder.addBinding(lake.waterMaterial, 'useNormalDetailTexture');
             waveFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 2.0, step: 0.02});
             waveFolder.addBinding(lake.waterMaterial, 'normalTiling', {min: 10.0, max: 500.0, step: 10.0});
             waveFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.002});
-            waveFolder.addBinding(lake.waterMaterial, 'invertNormalY1');
+            waveFolder.addBinding(lake.waterMaterial, 'invertNormalY');
 
-            waveFolder.addBinding(lake.waterMaterial, 'normalScale2', {min: 0.0, max: 2.0, step: 0.02});
-            waveFolder.addBinding(lake.waterMaterial, 'normalTiling2', {min: 20.0, max: 1000.0, step: 20.0});
-            waveFolder.addBinding(lake.waterMaterial, 'windSpeed2', {min: 0.0, max: 0.1, step: 0.002});
-            waveFolder.addBinding(lake.waterMaterial, 'invertNormalY2');
+            waveFolder.addBinding(lake.waterMaterial, 'normalDetailScale', {min: 0.0, max: 2.0, step: 0.02});
+            waveFolder.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 20.0, max: 1000.0, step: 20.0});
+            waveFolder.addBinding(lake.waterMaterial, 'normalDetailWindSpeed', {min: 0.0, max: 0.1, step: 0.002});
+            waveFolder.addBinding(lake.waterMaterial, 'invertNormalDetailY');
 
             waveFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 3.0, step: 0.05});
             waveFolder.addBinding(lake, 'waveWavelength', {min: 50.0, max: 1000.0, step: 20.0});

@@ -55,18 +55,18 @@ struct WaterUniforms {
     debugMaxDepth: f32,
 
     debugMode: u32,
-    normalScale2: f32,
-    normalTiling2: f32,
-    windSpeed2: f32,
+    normalDetailScale: f32,
+    normalDetailTiling: f32,
+    normalDetailWindSpeed: f32,
 
-    windDirection2: vec2<f32>,
-    useNormalTexture2: u32,
+    normalDetailWindDirection: vec2<f32>,
+    useNormalDetailTexture: u32,
     roughness: f32,
 
     specularFactor: f32,
     fresnelF0: f32,
-    invertNormalY1: u32,
-    invertNormalY2: u32,
+    invertNormalY: u32,
+    invertNormalDetailY: u32,
 
     causticsStrength: f32,
     causticsScale: f32,
@@ -241,25 +241,25 @@ fn main(inputData: InputData) -> OutputFragment {
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     var rawXY1 = rawSample1.xy * 2.0 - 1.0;
     rawXY1.y = -rawXY1.y;
-    if (uniforms.invertNormalY1 == 1u) {
+    if (uniforms.invertNormalY == 1u) {
         rawXY1.y = -rawXY1.y;
     }
     var n1 = rawXY1 * uniforms.normalScale;
     let z1 = sqrt(max(0.0, 1.0 - dot(n1, n1)));
     var combinedTangentNormal = normalize(vec3<f32>(n1, z1));
 
-    if (uniforms.useNormalTexture2 > 0u) {
-        let windDirLen2 = length(uniforms.windDirection2);
-        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
-        let waveUV2 = inputData.uv * uniforms.normalTiling2 + baseWindDir2 * (timeSec * uniforms.windSpeed2);
+    if (uniforms.useNormalDetailTexture > 0u) {
+        let windDirLen2 = length(uniforms.normalDetailWindDirection);
+        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
+        let waveUV2 = inputData.uv * uniforms.normalDetailTiling + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
         rawXY2.y = -rawXY2.y;
-        if (uniforms.invertNormalY2 == 1u) {
+        if (uniforms.invertNormalDetailY == 1u) {
             rawXY2.y = -rawXY2.y;
         }
-        var n2 = rawXY2 * uniforms.normalScale2;
+        var n2 = rawXY2 * uniforms.normalDetailScale;
         let z2 = sqrt(max(0.0, 1.0 - dot(n2, n2)));
         let tangentNormal2 = normalize(vec3<f32>(n2, z2));
 
@@ -350,14 +350,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
         let groundSurfacePos = worldPos.xz + lightRayOffset;
 
-        let windDirLen2 = length(uniforms.windDirection2);
-        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.windDirection2 / windDirLen2, windDirLen2 > 0.001);
+        let windDirLen2 = length(uniforms.normalDetailWindDirection);
+        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
 
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
         let cWorldScale = 0.35 * invCScale;
         let cSpeed = uniforms.causticsSpeed;
         let cUV1 = groundSurfacePos * cWorldScale + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
-        let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.windSpeed2 * cSpeed);
+        let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed * cSpeed);
 
         let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
         let rawN1 = (textureSampleLevel(normalTexture, normalTextureSampler, cUV1, causticMip).rgb * 2.0 - 1.0).xy;

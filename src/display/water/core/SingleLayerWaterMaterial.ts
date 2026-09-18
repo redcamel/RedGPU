@@ -22,14 +22,14 @@ interface SingleLayerWaterMaterial {
     normalTextureSampler: Sampler;
     normalDetailTexture: BitmapTexture;
     normalScale: number;
-    normalScale2: number;
+    normalDetailScale: number;
     normalTiling: number;
-    normalTiling2: number;
+    normalDetailTiling: number;
     windSpeed: number;
-    windSpeed2: number;
+    normalDetailWindSpeed: number;
     windDirection: [number, number];
-    windDirection2: [number, number];
-    useNormalTexture2: boolean;
+    normalDetailWindDirection: [number, number];
+    useNormalDetailTexture: boolean;
     refractionStrength: number;
     extinctionFactor: number;
     opacity: number;
@@ -39,8 +39,8 @@ interface SingleLayerWaterMaterial {
     fresnelF0: number;
     debugMode: number;
     debugMaxDepth: number;
-    invertNormalY1: boolean;
-    invertNormalY2: boolean;
+    invertNormalY: boolean;
+    invertNormalDetailY: boolean;
     causticsStrength: number;
     causticsScale: number;
     causticsSpeed: number;
@@ -78,21 +78,21 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.opacity = opacity;
         this.refractionStrength = 1.0;
         this.normalScale = 1.0;
-        this.normalScale2 = 0.5;
+        this.normalDetailScale = 0.5;
         this.normalTiling = 18.0;
-        this.normalTiling2 = 36.0;
+        this.normalDetailTiling = 36.0;
         this.windSpeed = 0.025;
-        this.windSpeed2 = 0.040;
+        this.normalDetailWindSpeed = 0.040;
         this.windDirection = [1.0, 0.3];
-        this.windDirection2 = [-0.6, 0.8];
-        this.useNormalTexture2 = true;
+        this.normalDetailWindDirection = [-0.6, 0.8];
+        this.useNormalDetailTexture = true;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
         this.roughness = 0.07;
         this.specularFactor = 1.0;
         this.fresnelF0 = 0.02;
-        this.invertNormalY1 = false;
-        this.invertNormalY2 = false;
+        this.invertNormalY = false;
+        this.invertNormalDetailY = false;
         this.causticsStrength = 0.25;
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
@@ -104,14 +104,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
 
         this.debugMode = 0;
         this.debugMaxDepth = 5.0;
-    }
-
-    get normalTexture2(): BitmapTexture {
-        return this.normalDetailTexture;
-    }
-
-    set normalTexture2(value: BitmapTexture) {
-        this.normalDetailTexture = value;
     }
 }
 
@@ -131,18 +123,18 @@ defineSampler(SingleLayerWaterMaterial, [
 
 defineVector2(SingleLayerWaterMaterial, [
     {key: 'windDirection', value: [1.0, 0.3]},
-    {key: 'windDirection2', value: [-0.6, 0.8]},
+    {key: 'normalDetailWindDirection', value: [-0.6, 0.8]},
 ]);
 
 definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 1.0, min: 0, max: 1},
     {key: 'normalScale', value: 1.0, min: 0.0, max: 1.0},
-    {key: 'normalScale2', value: 0.5, min: 0.0, max: 1.0},
+    {key: 'normalDetailScale', value: 0.5, min: 0.0, max: 1.0},
     {key: 'normalTiling', value: 18.0},
-    {key: 'normalTiling2', value: 36.0},
+    {key: 'normalDetailTiling', value: 36.0},
     {key: 'windSpeed', value: 0.025},
-    {key: 'windSpeed2', value: 0.040},
+    {key: 'normalDetailWindSpeed', value: 0.040},
     {key: 'extinctionFactor', value: 0.22},
     {key: 'depthFadeDistance', value: 0.8},
     {key: 'roughness', value: 0.07, min: 0, max: 1},
@@ -163,9 +155,9 @@ defineUint(SingleLayerWaterMaterial, [
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [
-    {key: 'useNormalTexture2', value: true},
-    {key: 'invertNormalY1', value: false},
-    {key: 'invertNormalY2', value: false},
+    {key: 'useNormalDetailTexture', value: true},
+    {key: 'invertNormalY', value: false},
+    {key: 'invertNormalDetailY', value: false},
     {key: 'enableSSR', value: true},
 ]);
 
