@@ -11,7 +11,7 @@ struct MeshUniforms {
     waveStrength: f32,
     speed: f32,
     stepPulse: f32,
-    footSide: f32,
+    footSide: f32, // 정적 메시(waterCapturePenetration)와의 80B 유니폼 버퍼 레이아웃 및 16-byte std140 정렬 호환 유지
 };
 
 struct SkinnedVertex {
@@ -28,7 +28,6 @@ struct SkinnedVertex {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) worldY: f32,
-    @location(1) localX: f32,
 };
 
 @vertex
@@ -38,7 +37,6 @@ fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     let worldPos = meshUniforms.modelMatrix * vec4<f32>(skinnedPos, 1.0);
     output.position = globalUniforms.orthoViewProj * worldPos;
     output.worldY = worldPos.y;
-    output.localX = skinnedPos.x;
     return output;
 }
 
