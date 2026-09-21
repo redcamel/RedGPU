@@ -900,7 +900,6 @@ export const ExampleList: ExampleListType = [
                                     }
                                 ]
                             }
-
                         ]
                     }
                 ]
@@ -974,7 +973,7 @@ export const ExampleList: ExampleListType = [
                 ]
             },
             {
-                name: 'VFX & Simulation',
+                name: 'World & Simulation',
                 list: [
                     {
                         name: 'ParticleSystem',
@@ -985,7 +984,7 @@ export const ExampleList: ExampleListType = [
                                 description: {
                                     ko: `기본적인 파티클 시스템을 시연하는 예제입니다.`,
                                     en: `An example demonstrating a basic particle system.`
-                                },
+                                }
                             },
                             {
                                 name: 'Multi Particle Performance',
@@ -993,8 +992,21 @@ export const ExampleList: ExampleListType = [
                                 description: {
                                     ko: `다수의 파티클 시스템을 동시에 렌더링하여 성능을 테스트하는 예제입니다.`,
                                     en: `An example testing performance by rendering multiple particle systems simultaneously.`
-                                },
-                            },
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        name: 'Landscape',
+                        list: [
+                            {
+                                name: 'Basic Terrain',
+                                path: '3d/landscape/basicTerrain',
+                                description: {
+                                    ko: `개별 타일맵 스트리밍을 적용하기 전, 단일 16비트 하이트맵(Global Heightmap)으로 전체적인 랜드스케이프 지형 베이스를 초기화하고 기본 렌더링을 구성하는 기초 예제입니다.`,
+                                    en: `An introductory example demonstrating how to initialize the entire landscape terrain base using a single 16-bit global heightmap before applying tiled map streaming, and configure fundamental rendering.`
+                                }
+                            }
                         ]
                     },
                     {

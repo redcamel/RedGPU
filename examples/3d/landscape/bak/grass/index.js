@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -25,7 +25,7 @@ RedGPU.init(
         // 2. IBL & SkyBox
         const currentIbl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/field.hdr',
+            '../../../../assets/hdr/field.hdr',
             30000
         );
         view.ibl = currentIbl;
@@ -55,10 +55,10 @@ RedGPU.init(
         landscape.heightScale = 300;
         landscape.loadingRadius = 3000;
         landscape.baseColor.setColorByHEX('#2f6834');
-        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
+        landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
-        const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
+        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
         const layerConfigs = [
             {
@@ -138,7 +138,7 @@ RedGPU.init(
         const foliageManager = landscape.foliageManager;
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/test.glb',
+            '../../../../assets/terrain/test.glb',
             (loader) => {
                 const treeGroups = new Map();
 
@@ -217,7 +217,7 @@ RedGPU.init(
         // 8-1. 🌿 기본 뗏장 잔디 (grass.glb - Base Clump)
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/grass.glb',
+            '../../../../assets/terrain/grass.glb',
             (loader) => {
                 let baseMesh = null;
                 const findMesh = (node) => {
@@ -265,7 +265,7 @@ RedGPU.init(
         // 8-2. 🌾 키 큰 야생 들풀 3종 (grassList.glb - Multi-LOD Tall Grass)
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/grassList.glb',
+            '../../../../assets/terrain/grassList.glb',
             (loader) => {
                 const grassGroups = new Map();
                 const allMeshes = [];

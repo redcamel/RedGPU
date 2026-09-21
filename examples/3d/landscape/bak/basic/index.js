@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -33,11 +33,11 @@ RedGPU.init(
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 1500;
-        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
+        landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // 4. Texture Layers (RGBA 4-Channel SplatMap 멀티 텍스처링 레이어)
-        const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
+        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
         const layers = [
             {

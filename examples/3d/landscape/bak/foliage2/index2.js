@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 import FoliageImpostorDebugViewer from "./FoliageImpostorDebugViewer.js";
 
 
@@ -24,13 +24,13 @@ RedGPU.init(
         const iblList = [
             {
                 name: '2K - the sky is on fire',
-                path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
+                path: '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
                 luminance: 30000
             },
-            {name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr', luminance: 35000},
-            {name: 'field', path: '../../../assets/hdr/field.hdr', luminance: 30000},
-            {name: 'neutral', path: '../../../assets/hdr/neutral.37290948.hdr', luminance: 30000},
-            {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', luminance: 25000}
+            {name: 'Cannon_Exterior', path: '../../../../assets/hdr/Cannon_Exterior.hdr', luminance: 35000},
+            {name: 'field', path: '../../../../assets/hdr/field.hdr', luminance: 30000},
+            {name: 'neutral', path: '../../../../assets/hdr/neutral.37290948.hdr', luminance: 30000},
+            {name: 'pisa', path: '../../../../assets/hdr/pisa.hdr', luminance: 25000}
         ];
 
         let currentHdr = iblList[0];
@@ -62,8 +62,8 @@ RedGPU.init(
         landscape.loadingRadius = 4000;
         landscape.baseColor.setColorByHEX('#387d42');
 
-        const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
+        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
         const layers = [
             {
@@ -146,7 +146,7 @@ RedGPU.init(
         // 1. Pine Tree (Multi-LOD) 로드
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/test.glb',
+            '../../../../assets/terrain/test.glb',
             (loader) => {
                 const root = loader.resultMesh;
                 console.log('🌲 [test.glb] Loaded Root:', root);
