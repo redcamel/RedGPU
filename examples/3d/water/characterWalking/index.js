@@ -50,13 +50,15 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 160, 160, 80, 80);
         lake.waterLevel = 0.5;
 
+        // 기본 수면 노멀 및 디테일 노멀 텍스처 바인딩
+        // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 벡터 왜곡을 방지하기 위해 반드시 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/lake_normal.png',
             true,
             null,
             null,
-            'rgba8unorm'
+            'rgba8unorm' // [포맷 명시] sRGB 감마 변환 방지 (Linear Color Space 유지)
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -64,7 +66,7 @@ RedGPU.init(
             true,
             null,
             null,
-            'rgba8unorm'
+            'rgba8unorm' // [포맷 명시] sRGB 감마 변환 방지 (Linear Color Space 유지)
         );
         scene.addWater(lake);
 
@@ -196,10 +198,37 @@ RedGPU.init(
  * [KO] 수심 변화를 체감할 수 있는 완만한 경사 지형을 생성합니다.
  */
 function createBeachEnvironment(redGPUContext, scene) {
+    // 해변 및 호수 바닥용 모래 PBR 텍스처 및 반복 샘플러
+    const sandTexture = new RedGPU.Resource.BitmapTexture(
+        redGPUContext,
+        '../../../assets/water/damp_beach_sand_diff_1k.jpg'
+    );
+    // [중요] 노멀 맵 텍스처는 방향 벡터 데이터를 담고 있으므로 format에 'rgba8unorm'을 명시하여 sRGB 감마 보정을 우회해야 합니다.
+    const sandNormal = new RedGPU.Resource.BitmapTexture(
+        redGPUContext,
+        '../../../assets/water/damp_beach_sand_nor_gl_1k.jpg',
+        true,
+        null,
+        null,
+        'rgba8unorm' // [포맷 명시] 선형(Linear) 색공간 유지로 정확한 법선 벡터(-1.0 ~ +1.0) 보존
+    );
+    const sandSampler = new RedGPU.Resource.Sampler(redGPUContext, {
+        addressModeU: RedGPU.GPU_ADDRESS_MODE.REPEAT,
+        addressModeV: RedGPU.GPU_ADDRESS_MODE.REPEAT,
+        minFilter: RedGPU.GPU_FILTER_MODE.LINEAR,
+        magFilter: RedGPU.GPU_FILTER_MODE.LINEAR,
+        mipmapFilter: RedGPU.GPU_MIPMAP_FILTER_MODE.LINEAR
+    });
+
     // 1. 완만한 경사를 가진 호수 바닥 지형
     const seabedMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    seabedMaterial.baseColorFactor = [0.28, 0.26, 0.22, 1.0];
-    seabedMaterial.roughnessFactor = 0.92;
+    seabedMaterial.baseColorTexture = sandTexture;
+    seabedMaterial.baseColorTextureSampler = sandSampler;
+    seabedMaterial.normalTexture = sandNormal;
+    seabedMaterial.normalTextureSampler = sandSampler;
+    seabedMaterial.textureScale = [40, 40];
+    seabedMaterial.baseColorFactor = [0.55, 0.52, 0.48, 1.0]; // 수중 톤에 맞춰 자연스럽게 틴트
+    seabedMaterial.roughnessFactor = 0.88;
     seabedMaterial.metallicFactor = 0.0;
 
     const seabedGeom = new RedGPU.Primitive.Box(redGPUContext, 200, 2.0, 200);
@@ -213,7 +242,12 @@ function createBeachEnvironment(redGPUContext, scene) {
 
     // 2. 물 밖 해변 모래사장 지형
     const beachMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    beachMaterial.baseColorFactor = [0.65, 0.58, 0.45, 1.0];
+    beachMaterial.baseColorTexture = sandTexture;
+    beachMaterial.baseColorTextureSampler = sandSampler;
+    beachMaterial.normalTexture = sandNormal;
+    beachMaterial.normalTextureSampler = sandSampler;
+    beachMaterial.textureScale = [40, 8];
+    beachMaterial.baseColorFactor = [1.0, 0.98, 0.95, 1.0]; // 밝은 모래사장 톤
     beachMaterial.roughnessFactor = 0.95;
     beachMaterial.metallicFactor = 0.0;
 
