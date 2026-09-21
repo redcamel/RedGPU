@@ -10,7 +10,6 @@ import {WaterInteractionItem, WaterInteractiveTarget} from "./WaterInteractionIt
 export interface WaterActiveMeshEntry {
     mesh: Mesh;
     waveStrength: number;
-    foamGeneration: number;
     speed: number;
     stepPulse: number;
     footSide: number;
@@ -107,11 +106,43 @@ export class WaterInteractionManager {
         for (const item of this._items.values()) {
             const meshes = item.flattenedMeshes;
             const meshCount = meshes.length;
-            const waveStrength = item.options.waveStrength ?? 1.0;
-            const foamGeneration = item.options.foamGeneration ?? 1.0;
+            if (meshCount === 0) continue;
+
+            let waveStrength = item.options.waveStrength ?? 1.0;
             const speed = item.speed;
-            const stepPulse = item.stepPulse;
+            let stepPulse = item.stepPulse;
             const footSide = item.footSide;
+
+            // 1. 객체의 수면 침수(Submersion) 및 수심 판정 (Zero-GC)
+            const rootY = item.currentWorldPos[1];
+            const objectHeight = item.objectHeight;
+            const topY = rootY + objectHeight;
+            const footDepth = waterLevel - rootY;
+
+            // 전신 완전 잠수 판정 (객체 최상단이 수면 아래로 들어간 경우)
+            if (topY < waterLevel) {
+                const headSubmergedDepth = waterLevel - topY;
+                // 머리가 수면 아래로 0.25m 이상 깊이 들어가면 수면 파문 완전 차단 (렌더링 스킵)
+                if (headSubmergedDepth > 0.25) {
+                    continue;
+                }
+                // 0.0 ~ 0.25m 진입 구간에서는 수심에 비례하여 부드럽게 0으로 감쇄
+                const subFade = 1.0 - (headSubmergedDepth / 0.25);
+                waveStrength *= subFade;
+                stepPulse = 0; // 완전 잠수 시 발걸음 첨벙임 펄스는 완전 차단
+            } else if (footDepth > 0.6) {
+                // 허리 이상 깊은 물에 들어갔을 때 발걸음 첨벙임 펄스 점진적 감쇄 (0.6m ~ 1.2m 구간)
+                const footPulseFade = Math.max(0.0, 1.0 - (footDepth - 0.6) / 0.6);
+                stepPulse *= footPulseFade;
+            } else if (footDepth < -0.1) {
+                // 완전히 물 밖(지상)에 있을 때 수면에 펄스 주입 방지
+                stepPulse = 0;
+            }
+
+            // 침수 감쇄로 인해 강도가 0이면 렌더링 스킵
+            if (waveStrength <= 0.0001) {
+                continue;
+            }
 
             for (let i = 0; i < meshCount; i++) {
                 const mesh = meshes[i];
@@ -138,7 +169,6 @@ export class WaterInteractionManager {
                     this._activeMeshBuffer.push({
                         mesh,
                         waveStrength,
-                        foamGeneration,
                         speed,
                         stepPulse,
                         footSide
@@ -147,7 +177,6 @@ export class WaterInteractionManager {
                     const entry = this._activeMeshBuffer[count];
                     entry.mesh = mesh;
                     entry.waveStrength = waveStrength;
-                    entry.foamGeneration = foamGeneration;
                     entry.speed = speed;
                     entry.stepPulse = stepPulse;
                     entry.footSide = footSide;

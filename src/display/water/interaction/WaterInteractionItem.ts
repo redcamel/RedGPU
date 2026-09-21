@@ -39,6 +39,11 @@ export class WaterInteractionItem {
      */
     footSide: number = 1.0;
 
+    /**
+     * [KO] 객체의 높이 (미터 단위, 완전 잠수 판정 및 감쇄에 사용)
+     */
+    objectHeight: number = 1.8;
+
     private _isFirstFrame: boolean = true;
 
     constructor(target: WaterInteractiveTarget, options: WaterInteractionOptions = {}) {
@@ -46,10 +51,11 @@ export class WaterInteractionItem {
         this.options = {
             waveStrength: 1.0,
             radiusScale: 1.0,
-            foamGeneration: 1.0,
             isStatic: false,
+            objectHeight: 1.8,
             ...options
         };
+        this.objectHeight = this.options.objectHeight ?? 1.8;
 
         this.refreshHierarchy();
     }

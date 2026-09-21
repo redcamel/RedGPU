@@ -56,7 +56,7 @@ export class WaterCapturePass {
         domainCenterZ: number,
         domainSize: number,
         waterLevel: number,
-        maxPenetration: number = 1.5
+        maxPenetration: number = 0.35
     ): void {
         const device = this.redGPUContext.gpuDevice;
         const halfSize = domainSize * 0.5;
@@ -122,7 +122,7 @@ export class WaterCapturePass {
                 // 메쉬 유니폼 채우기 (발자국 첨벙임 펄스 및 좌우 발 정보 포함)
                 this._meshUniformData.set(mesh.modelMatrix, 0);
                 this._meshUniformData[16] = entry.waveStrength;
-                this._meshUniformData[17] = entry.foamGeneration;
+                this._meshUniformData[17] = 0;
                 this._meshUniformData[18] = entry.speed;
                 this._meshUniformData[19] = entry.stepPulse;
                 this._meshUniformData[20] = entry.footSide;

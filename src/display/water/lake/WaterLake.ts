@@ -22,6 +22,7 @@ interface WaterLake {
     waveAmplitude: number;
     waveWavelength: number;
     waveSpeed: number;
+    maxPenetration: number;
 }
 
 /**
@@ -66,6 +67,7 @@ class WaterLake extends Mesh {
         this.waveAmplitude = 0.025;
         this.waveWavelength = 16.0;
         this.waveSpeed = 1.0;
+        this.maxPenetration = 0.35;
 
         this.depthStencilState.depthWriteEnabled = false;
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
@@ -204,7 +206,8 @@ class WaterLake extends Mesh {
                 snapX,
                 snapZ,
                 domainSize,
-                this.waterLevel
+                this.waterLevel,
+                this.maxPenetration
             );
             this._waveSimulator.simulate(encoder, shiftX, shiftZ);
         });
@@ -244,6 +247,7 @@ class WaterLake extends Mesh {
 definePositiveNumber(WaterLake, [
     {key: 'waveAmplitude', value: 0.025, min: 0},
     {key: 'waveWavelength', value: 16.0, min: 0.1},
+    {key: 'maxPenetration', value: 0.35, min: 0.05},
 ]);
 
 defineNumber(WaterLake, [

@@ -9,7 +9,7 @@ struct CaptureGlobalUniforms {
 struct MeshUniforms {
     modelMatrix: mat4x4<f32>,
     waveStrength: f32,
-    foamGeneration: f32,
+    _pad_mesh1: f32,
     speed: f32,
     stepPulse: f32,
     footSide: f32,
@@ -44,12 +44,17 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 @fragment
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let depth = globalUniforms.waterLevel - input.worldY;
-    if (depth <= 0.001) {
+    let maxPen = max(0.05, globalUniforms.maxPenetration);
+
+    // 수면 위(depth <= 0.001)이거나 최대 유효 침수 깊이(maxPen)를 초과한 깊은 영역은 완전 배제
+    if (depth <= 0.001 || depth > maxPen) {
         discard;
     }
 
-    // 수면 표면 접촉 층 (Waterline Interface)
-    let surfaceEdge = exp(-depth * 2.5) * smoothstep(0.001, 0.08, depth);
+    // 수면 표면 접촉 층 (Waterline Interface Band)
+    // 수면과 접하는 경계면(0.001 ~ maxPen)에서만 뚜렷한 파문을 형성하고 깊어질수록 부드럽게 감쇄
+    let depthRatio = depth / maxPen;
+    let surfaceEdge = smoothstep(0.0, 0.15, depthRatio) * (1.0 - smoothstep(0.4, 1.0, depthRatio));
 
     // 디디는 발(Left vs Right) 판별
     var footWeight: f32 = 1.0;
@@ -68,8 +73,5 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     // 총 충격량 주입 (발자국에 따른 선명한 첨벙임 고리 생성)
     let impulse = surfaceEdge * meshUniforms.waveStrength * (0.02 + baseMovement * 0.12 + splashImpact);
 
-    // 발을 찰박 치는 순간 거품(Foam/Splash) 트리거 폭발
-    let foamTrigger = surfaceEdge * meshUniforms.foamGeneration * (meshUniforms.stepPulse * footWeight * 1.5 + smoothstep(1.5, 3.5, meshUniforms.speed) * 0.5);
-
-    return vec4<f32>(impulse, foamTrigger, 0.0, 1.0);
+    return vec4<f32>(impulse, 0.0, 0.0, 1.0);
 }

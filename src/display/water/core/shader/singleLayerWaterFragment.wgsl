@@ -87,8 +87,8 @@ struct WaterUniforms {
     rippleNormalStrength: f32,
 
     rippleDomainCenter: vec2<f32>,
-    rippleFoamStrength: f32,
-    _pad_ripple: f32,
+    _pad_ripple1: f32,
+    _pad_ripple2: f32,
 };
 
 fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
@@ -281,7 +281,6 @@ fn main(inputData: InputData) -> OutputFragment {
     #redgpu_endIf
 
     #redgpu_if rippleTexture
-    var rippleFoam: f32 = 0.0;
     {
         let simDomainSize = max(1.0, uniforms.rippleDomainSize);
         let simUV = (worldPos.xz - uniforms.rippleDomainCenter) / simDomainSize + 0.5;
@@ -295,7 +294,6 @@ fn main(inputData: InputData) -> OutputFragment {
             let finalRippleNormal = normalize(mix(vec3<f32>(0.0, 0.0, 1.0), normalizedRippleNormal, edgeFade));
 
             combinedTangentNormal = blendRNM(combinedTangentNormal, finalRippleNormal);
-            rippleFoam = simSample.w * edgeFade * uniforms.rippleFoamStrength;
         }
     }
     #redgpu_endIf
@@ -330,16 +328,21 @@ fn main(inputData: InputData) -> OutputFragment {
     let deltaN = worldNormal - baseNormal;
     let viewSpaceDeltaN = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaN, 0.0)).xy;
 
-    let combinedViewDelta = viewSpaceFlatDelta * 0.25 + viewSpaceDeltaN * 0.75;
+    let combinedViewDelta = viewSpaceFlatDelta * 0.35 + viewSpaceDeltaN * 0.65;
 
     let opticalDepth = clamp(initialOpticalDistance, 0.0, 3.5);
     let depthFactor = opticalDepth / max(1.0, camDist);
-    let snellScale = 0.25 * uniforms.refractionStrength;
+    let snellScale = 0.06 * uniforms.refractionStrength;
 
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
-    let rawRefractionOffset = vec2<f32>(combinedViewDelta.x, -combinedViewDelta.y) * (depthFactor * snellScale * screenEdgeFade);
+    var rawRefractionOffset = vec2<f32>(combinedViewDelta.x, -combinedViewDelta.y) * (depthFactor * snellScale * screenEdgeFade);
+    let maxOffsetLen = 0.008;
+    let offsetLen = length(rawRefractionOffset);
+    if (offsetLen > maxOffsetLen) {
+        rawRefractionOffset = rawRefractionOffset * (maxOffsetLen / offsetLen);
+    }
 
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
@@ -369,11 +372,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let depthProgress = clamp(1.0 - meanExtinction, 0.0, 1.0);
     var waterAlbedo = mix(uniforms.baseColor, uniforms.deepColor, depthProgress);
-    #redgpu_if rippleTexture
-    let foamFactor = smoothstep(0.12, 0.85, rippleFoam);
-    let foamColor = vec3<f32>(0.95, 0.98, 1.0);
-    waterAlbedo = mix(waterAlbedo, foamColor, clamp(foamFactor * 0.75, 0.0, 0.80));
-    #redgpu_endIf
 
     let fogDensity = turbidityCoeff * 0.85;
     let waterFogFactor = (vec3<f32>(1.0) - extinctionRGB) * fogDensity;

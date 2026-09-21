@@ -8,15 +8,14 @@ import computeShaderCode from "./shader/waterWaveSimulation.wgsl";
 export class WaterWaveSimulator {
     readonly redGPUContext: RedGPUContext;
     readonly textureSize: number = 512;
-    // 수면 셰이더 샘플링용 최종 결과물 (RG: N.xz, B: h, A: foam)
+    // 수면 셰이더 샘플링용 최종 결과물 (RG: N.xz, B: h)
     rippleNormalTexture: GPUTexture;
     rippleNormalTextureView: GPUTextureView;
     // 시뮬레이션 파라미터 (발자국 첨벙임 동심원 파문 최적 튜닝)
     waveSpeed: number = 0.19;
     damping: number = 0.024;
-    foamDecay: number = 0.95;
-    normalStrength: number = 1.8;
-    // 핑퐁 시뮬레이션 버퍼 (R: h_curr, G: h_prev, B: foam)
+    normalStrength: number = 1.0;
+    // 핑퐁 시뮬레이션 버퍼 (R: h_curr, G: h_prev)
     private _waveBufferA: GPUTexture;
     private _waveBufferAView: GPUTextureView;
     private _waveBufferB: GPUTexture;
@@ -82,7 +81,7 @@ export class WaterWaveSimulator {
         // 1. 유니폼 버퍼 갱신 (텍셀 스크롤 오프셋 포함)
         this._uniformData[0] = this.waveSpeed;
         this._uniformData[1] = this.damping;
-        this._uniformData[2] = this.foamDecay;
+        this._uniformData[2] = 0;
         this._uniformData[3] = this.normalStrength;
         this._uniformData[4] = shiftX;
         this._uniformData[5] = shiftZ;

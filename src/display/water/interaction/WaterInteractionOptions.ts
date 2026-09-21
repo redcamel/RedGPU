@@ -18,12 +18,6 @@ export interface WaterInteractionOptions {
     radiusScale?: number;
 
     /**
-     * [KO] 이동 시 물거품(Foam) 발생 강도 (기본값: 1.0)
-     * [EN] Foam generation intensity during movement (Default: 1.0)
-     */
-    foamGeneration?: number;
-
-    /**
      * [KO] 정적 객체 여부 (기본값: false, true일 경우 이동 속도 계산 생략)
      * [EN] Whether the object is static (Default: false, skips velocity calculation if true)
      */
@@ -40,4 +34,10 @@ export interface WaterInteractionOptions {
      * [EN] Filter callback to exclude specific child meshes from interaction
      */
     filter?: (mesh: Mesh) => boolean;
+
+    /**
+     * [KO] 객체의 높이 (미터 단위, 수중 완전 잠수 판정 및 감쇄에 사용, 기본값: 1.8m)
+     * [EN] Object height (in meters, used for full submersion detection and attenuation, default: 1.8m)
+     */
+    objectHeight?: number;
 }
