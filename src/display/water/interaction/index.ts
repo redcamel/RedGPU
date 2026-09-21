@@ -1,5 +1,4 @@
-export * from "./WaterInteractionOptions";
-export * from "./WaterInteractionItem";
+export * from "./WaterInteractionRegistry";
 export * from "./WaterInteractionManager";
 export * from "./WaterCapturePass";
 export * from "./WaterWaveSimulator";

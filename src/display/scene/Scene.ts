@@ -5,6 +5,7 @@ import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 import Landscape from "../landscape/core/Landscape";
+import type WaterLake from "../water/lake/WaterLake";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
@@ -19,6 +20,7 @@ class Scene extends Object3DContainer {
     #destroyed: boolean = false
 
     #landscapeChildren: Landscape[] = []
+    #waterChildren: WaterLake[] = []
 
     constructor() {
         super();
@@ -91,6 +93,47 @@ class Scene extends Object3DContainer {
     #checkLandscapeInstance(target: Landscape) {
         if (!(target instanceof Landscape)) {
             consoleAndThrowError('allow only Landscape instance.');
+        }
+    }
+
+    /**
+     * [KO] 씬에 바인딩된 수체(Water) 객체 리스트를 반환합니다.
+     * [EN] Returns the list of Water objects bound to the scene.
+     */
+    get waterChildren(): WaterLake[] {
+        return this.#waterChildren;
+    }
+
+    /**
+     * [KO] 수체 객체(WaterLake 등)를 씬 수체 리스트에 등록하고 자식으로 편입합니다.
+     * [EN] Registers a Water object to the scene water list and adds it as a child.
+     */
+    addWater(water: WaterLake): void {
+        this.#checkWaterInstance(water);
+        if (!this.#waterChildren.includes(water)) {
+            this.#waterChildren.push(water);
+            if (!this.children.includes(water as any)) {
+                this.addChild(water as any);
+            }
+        }
+    }
+
+    /**
+     * [KO] 씬에서 수체 객체를 제거합니다.
+     * [EN] Removes a Water object from the scene.
+     */
+    removeWater(water: WaterLake): void {
+        this.#checkWaterInstance(water);
+        const index = this.#waterChildren.indexOf(water);
+        if (index > -1) {
+            this.#waterChildren.splice(index, 1);
+            this.removeChild(water as any);
+        }
+    }
+
+    #checkWaterInstance(target: WaterLake) {
+        if (!target || !(target as any).isWater) {
+            consoleAndThrowError('allow only WaterLake instance.');
         }
     }
 }

@@ -7,13 +7,7 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
-import {
-    WaterCapturePass,
-    WaterInteractionManager,
-    WaterInteractionOptions,
-    WaterInteractiveTarget,
-    WaterWaveSimulator
-} from "../interaction";
+import {WaterCapturePass, WaterInteractionManager, WaterInteractionRegistry, WaterWaveSimulator} from "../interaction";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
@@ -30,6 +24,7 @@ interface WaterLake {
  * [EN] Real-time PBR Lake water body (supports interactive wave simulation and hierarchical object tracking)
  */
 class WaterLake extends Mesh {
+    readonly isWater: boolean = true;
     /**
      * [KO] 인터랙티브 파동 시뮬레이션 활성화 여부
      */
@@ -114,34 +109,15 @@ class WaterLake extends Mesh {
     }
 
     /**
-     * [KO] 인터랙션 대상 객체를 등록합니다 (하이라키 자식 메쉬 자동 수집).
-     * [EN] Registers interactive target object (automatically collects child hierarchy meshes).
-     */
-    addInteractiveObject(target: WaterInteractiveTarget, options?: WaterInteractionOptions) {
-        return this.#interactionManager.addInteractiveObject(target, options);
-    }
-
-    /**
-     * [KO] 등록된 인터랙션 대상 객체를 제거합니다.
-     * [EN] Removes registered interactive target object.
-     */
-    removeInteractiveObject(target: WaterInteractiveTarget): boolean {
-        return this.#interactionManager.removeInteractiveObject(target);
-    }
-
-    /**
-     * [KO] 등록된 모든 인터랙션 대상 객체를 초기화합니다.
-     * [EN] Clears all registered interactive target objects.
-     */
-    clearInteractiveObjects(): void {
-        this.#interactionManager.clearInteractiveObjects();
-    }
-
-    /**
      * [KO] 매 프레임 인터랙션 캡처 및 파동 시뮬레이션을 실행합니다.
+     *      호수가 카메라 프러스텀 밖에 위치하여 컬링되면 즉각 연산을 건너뜁니다.
+     * [EN] Runs interaction capture and wave simulation each frame.
+     *      Immediately skips computation if the lake is culled outside the camera frustum.
      */
     updateInteraction(deltaTime?: number): void {
-        if (!this.interactionEnabled || this.#interactionManager.count === 0) return;
+        // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
+        if (!this.interactionEnabled || !this.passFrustumCulling) return;
+        if (WaterInteractionRegistry.meshes.size === 0) return;
 
         const currentTime = this.redGPUContext.currentTime || performance.now();
         const dt = deltaTime !== undefined
@@ -158,11 +134,15 @@ class WaterLake extends Mesh {
             if (m) {
                 targetX = m[12];
                 targetZ = m[14];
+            } else {
+                targetX = (this.interactionFollowTarget as any).x ?? 0;
+                targetZ = (this.interactionFollowTarget as any).z ?? 0;
             }
         } else {
-            for (const item of this.#interactionManager.items) {
-                targetX = item.currentWorldPos[0];
-                targetZ = item.currentWorldPos[2];
+            for (const mesh of WaterInteractionRegistry.meshes) {
+                const m = mesh.modelMatrix;
+                targetX = m ? m[12] : mesh.x;
+                targetZ = m ? m[14] : mesh.z;
                 break;
             }
         }
@@ -188,9 +168,9 @@ class WaterLake extends Mesh {
         this.waterMaterial.rippleDomainCenter = [snapX, snapZ];
         this.waterMaterial.rippleDomainSize = domainSize;
 
-        // 객체 속도 갱신 및 가시 영역 메쉬 수집
-        this.#interactionManager.update(dt);
+        // 등록된 선언적 활성 메쉬 자동 수집 (Zero-GC)
         const activeMeshes = this.#interactionManager.collectActiveMeshes(
+            dt,
             snapX,
             snapZ,
             domainSize * 0.75,
@@ -215,7 +195,7 @@ class WaterLake extends Mesh {
 
     override render(renderViewStateData: RenderViewStateData): void {
         if (renderViewStateData.viewIndex === 0) {
-            this.updateInteraction();
+            this.updateInteraction(renderViewStateData.deltaTime);
         }
         super.render(renderViewStateData);
     }
@@ -224,6 +204,7 @@ class WaterLake extends Mesh {
         if (this.#capturePass) this.#capturePass.destroy();
         if (this.#waveSimulator) this.#waveSimulator.destroy();
         if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
+        if (this.#interactionManager) this.#interactionManager.destroy();
         super.destroy();
     }
 

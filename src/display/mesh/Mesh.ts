@@ -27,6 +27,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import {WaterInteractionRegistry} from "../water/interaction/WaterInteractionRegistry";
 
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
@@ -101,6 +102,10 @@ class Mesh extends MeshBase {
     createCustomMeshVertexShaderModule?: () => GPUShaderModule;
 
     #lastUpdateMSAAID: string;
+
+    #enableWaterInteraction: boolean = false;
+    #waterWaveStrength: number = 1.0;
+    #waterInteractionStatic: boolean = false;
 
     /**
      * [KO] 부모 객체
@@ -541,6 +546,62 @@ class Mesh extends MeshBase {
     }
 
     /**
+     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 반환합니다.
+     * [EN] Returns whether real-time wave interaction with water (WaterLake) is enabled.
+     */
+    get enableWaterInteraction(): boolean {
+        return this.#enableWaterInteraction;
+    }
+
+    /**
+     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 설정합니다.
+     * [EN] Sets whether real-time wave interaction with water (WaterLake) is enabled.
+     */
+    set enableWaterInteraction(value: boolean) {
+        const boolVal = !!value;
+        if (this.#enableWaterInteraction !== boolVal) {
+            this.#enableWaterInteraction = boolVal;
+            if (boolVal) {
+                WaterInteractionRegistry.register(this);
+            } else {
+                WaterInteractionRegistry.unregister(this);
+            }
+        }
+    }
+
+    /**
+     * [KO] 물 파동 생성 강도 배율을 반환합니다 (기본값: 1.0).
+     * [EN] Returns the wave generation strength multiplier (default: 1.0).
+     */
+    get waterWaveStrength(): number {
+        return this.#waterWaveStrength;
+    }
+
+    /**
+     * [KO] 물 파동 생성 강도 배율을 설정합니다.
+     * [EN] Sets the wave generation strength multiplier.
+     */
+    set waterWaveStrength(value: number) {
+        this.#waterWaveStrength = Math.max(0, value);
+    }
+
+    /**
+     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 반환합니다.
+     * [EN] Returns whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     */
+    get waterInteractionStatic(): boolean {
+        return this.#waterInteractionStatic;
+    }
+
+    /**
+     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 설정합니다.
+     * [EN] Sets whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     */
+    set waterInteractionStatic(value: boolean) {
+        this.#waterInteractionStatic = !!value;
+    }
+
+    /**
      * [KO] 피벗 X 좌표를 반환합니다.
      * [EN] Returns the pivot X coordinate.
      */
@@ -911,6 +972,32 @@ class Mesh extends MeshBase {
             this.children.forEach(child => {
                 child.setIgnoreFrustumCullingRecursively(value);
             });
+        }
+    }
+
+    /**
+     * [KO] 하위 계층의 모든 객체에 물 인터랙션 활성화 여부 및 파라미터를 재귀적으로 설정합니다.
+     * [EN] Recursively sets water interaction enable status and parameters for all objects in the hierarchy.
+     * @param enable -
+     * [KO] 활성화 여부 (기본값: true)
+     * [EN] Whether to enable (default: true)
+     * @param waveStrength -
+     * [KO] 파동 생성 강도 (기본값: 1.0)
+     * [EN] Wave generation strength (default: 1.0)
+     * @param isStatic -
+     * [KO] 정적 객체 여부 (기본값: false)
+     * [EN] Whether it is a static object (default: false)
+     */
+    setEnableWaterInteractionRecursively(enable: boolean = true, waveStrength: number = 1.0, isStatic: boolean = false): void {
+        this.enableWaterInteraction = enable;
+        this.waterWaveStrength = waveStrength;
+        this.waterInteractionStatic = isStatic;
+        const children = this.children;
+        if (children) {
+            const len = children.length;
+            for (let i = 0; i < len; i++) {
+                children[i].setEnableWaterInteractionRecursively(enable, waveStrength, isStatic);
+            }
         }
     }
 
@@ -1847,6 +1934,12 @@ class Mesh extends MeshBase {
      * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
      */
     destroy() {
+        // 물 인터랙션 등록 해제
+        if (this.#enableWaterInteraction) {
+            WaterInteractionRegistry.unregister(this);
+            this.#enableWaterInteraction = false;
+        }
+
         // 1. 자식 객체들 재귀 소멸
         super.destroy();
 
