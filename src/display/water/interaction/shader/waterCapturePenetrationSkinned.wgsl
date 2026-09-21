@@ -18,12 +18,16 @@ struct MeshUniforms {
     pad3: f32,
 };
 
+struct SkinnedVertex {
+    position: vec3<f32>,
+    normal: vec3<f32>,
+    tangent: vec4<f32>,
+    currentClipPos: vec4<f32>,
+};
+
 @group(0) @binding(0) var<uniform> globalUniforms: CaptureGlobalUniforms;
 @group(1) @binding(0) var<uniform> meshUniforms: MeshUniforms;
-
-struct VertexInput {
-    @location(0) position: vec3<f32>,
-};
+@group(1) @binding(1) var<storage, read> skinnedVertices: array<SkinnedVertex>;
 
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
@@ -32,12 +36,13 @@ struct VertexOutput {
 };
 
 @vertex
-fn vs_main(input: VertexInput) -> VertexOutput {
+fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     var output: VertexOutput;
-    let worldPos = meshUniforms.modelMatrix * vec4<f32>(input.position, 1.0);
+    let skinnedPos = skinnedVertices[vertexIndex].position;
+    let worldPos = meshUniforms.modelMatrix * vec4<f32>(skinnedPos, 1.0);
     output.position = globalUniforms.orthoViewProj * worldPos;
     output.worldY = worldPos.y;
-    output.localX = input.position.x;
+    output.localX = skinnedPos.x;
     return output;
 }
 
@@ -46,7 +51,7 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let depth = globalUniforms.waterLevel - input.worldY;
     let maxPen = max(0.05, globalUniforms.maxPenetration);
 
-    // 수면 위(depth <= 0.001)이거나 최대 유효 침수 깊이(maxPen)를 초과한 깊은 영역은 완전 배제
+    // 수면 위(depth <= 0.001)이거나 최대 유효 침수 깊이(maxPen)를 초과한 깊은 영역은 배제
     if (depth <= 0.001 || depth > maxPen) {
         discard;
     }
@@ -56,18 +61,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let depthRatio = depth / maxPen;
     let surfaceEdge = smoothstep(0.0, 0.15, depthRatio) * (1.0 - smoothstep(0.4, 1.0, depthRatio));
 
-    // 디디는 발(Left vs Right) 판별
-    var footWeight: f32 = 1.0;
-    if (meshUniforms.speed > 0.15) {
-        // footSide: +1.0 (오른발), -1.0 (왼발)
-        // input.localX > 0 (오른쪽 몸체), input.localX < 0 (왼쪽 몸체)
-        let isStrikingFoot = (input.localX * meshUniforms.footSide) > -0.05;
-        footWeight = select(0.15, 2.0, isStrikingFoot);
-    }
-
-    // 발걸음 첨벙임 펄스 (Footstep Splash Impact):
-    // 발을 디디는 순간(stepPulse)에 해당 발 주변으로 충격량 주입
-    let splashImpact = meshUniforms.stepPulse * footWeight * 2.2;
+    // 스키닝 애니메이션이 적용되어 실제 다리와 발이 움직이므로,
+    // 물에 잠긴 실제 발 위치에 물리적 충격량이 주입됩니다.
+    let splashImpact = meshUniforms.stepPulse * 2.5;
     let baseMovement = clamp(meshUniforms.speed * 0.45, 0.0, 2.0);
 
     // 총 충격량 주입 (물리적 이동 파문 및 발자국 첨벙임 고리 생성)

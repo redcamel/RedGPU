@@ -332,13 +332,13 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let opticalDepth = clamp(initialOpticalDistance, 0.0, 3.5);
     let depthFactor = opticalDepth / max(1.0, camDist);
-    let snellScale = 0.06 * uniforms.refractionStrength;
+    let snellScale = 0.08 * uniforms.refractionStrength;
 
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
 
     var rawRefractionOffset = vec2<f32>(combinedViewDelta.x, -combinedViewDelta.y) * (depthFactor * snellScale * screenEdgeFade);
-    let maxOffsetLen = 0.008;
+    let maxOffsetLen = 0.012;
     let offsetLen = length(rawRefractionOffset);
     if (offsetLen > maxOffsetLen) {
         rawRefractionOffset = rawRefractionOffset * (maxOffsetLen / offsetLen);

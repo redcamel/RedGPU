@@ -12,8 +12,8 @@ export class WaterWaveSimulator {
     rippleNormalTexture: GPUTexture;
     rippleNormalTextureView: GPUTextureView;
     // 시뮬레이션 파라미터 (발자국 첨벙임 동심원 파문 최적 튜닝)
-    waveSpeed: number = 0.19;
-    damping: number = 0.024;
+    waveSpeed: number = 0.32;
+    damping: number = 0.012;
     normalStrength: number = 1.0;
     // 핑퐁 시뮬레이션 버퍼 (R: h_curr, G: h_prev)
     private _waveBufferA: GPUTexture;

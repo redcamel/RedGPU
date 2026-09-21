@@ -82,8 +82,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let impulse = captureData.r;
 
     // 충격량 주입 (과도한 충격량 및 파고 클램핑으로 보강 간섭 폭발 방지)
-    let safeImpulse = clamp(impulse, 0.0, 3.0);
-    hNext = clamp(hNext + safeImpulse * 0.18, -1.0, 1.0);
+    let safeImpulse = clamp(impulse, 0.0, 4.0);
+    hNext = clamp(hNext + safeImpulse * 0.25, -1.0, 1.0);
 
     // 도메인 외곽 스무스 페이드아웃 (가장자리 경계선 반사 및 아티팩트 방지)
     let edgeDistX = min(x, maxX - x);
@@ -91,9 +91,11 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let edgeFactor = smoothstep(0.0, 24.0, f32(min(edgeDistX, edgeDistY)));
     hNext = hNext * edgeFactor;
 
-    // 중앙 차분 파문 노멀 계산
-    let dX = (hRight - hLeft) * uniforms.normalStrength;
-    let dZ = (hDown - hUp) * uniforms.normalStrength;
+    // 중앙 차분 기반 물리적 파문 노멀 계산
+    // 텍셀 물리 크기 보정 (16m / 512 = 0.03125m -> 1 / (2 * dx) = 16.0)
+    let invTwoDx = 16.0;
+    let dX = (hRight - hLeft) * invTwoDx * uniforms.normalStrength;
+    let dZ = (hDown - hUp) * invTwoDx * uniforms.normalStrength;
     let rippleNormal = normalize(vec3<f32>(-dX, 1.0, -dZ));
 
     // 1) 핑퐁용 시뮬레이션 상태 기록 (R: h_next, G: h_curr)
