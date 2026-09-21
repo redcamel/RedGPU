@@ -42,12 +42,6 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // CSM 캐스케이드 그림자 설정 (에메랄드 해변 및 캐릭터 최적화)
-        const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 90;
-        directionalShadowManager.strength = 0.88;
-        directionalShadowManager.bias = 0.00015;
-        directionalShadowManager.pcssLightSize = 1.0;
 
         // 4. PBR 기반 해변 환경 (해저 모래/자갈 바닥, 백사장 경사면, 해안 암초 군락)
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
@@ -88,15 +82,13 @@ RedGPU.init(
         lake.waterMaterial.ssrMaxDistance = 50.0;     // 최대 추적 거리
         lake.waterMaterial.ssrThickness = 1.0;        // 교차 허용 두께 (원기둥 교차면 포착)
 
-        // 기본 WaterLake 사각 평면 생성 및 씬 추가
-        scene.addChild(lake);
+        // 기본 WaterLake 사각 평면 생성 및 씬 수체 시스템에 등록
+        scene.addWater(lake);
 
-        // 부유 암석(floatingRocks)을 호수 인터랙션 시스템에 등록 (파도에 흔들리는 바위 주변 잔물결 생성)
+        // 부유 암석(floatingRocks)에 물 인터랙션 활성화 플래그 설정 (선언적 방식: 씬/호수가 자동 감지)
         if (beachEnvironment.floatingRocks && beachEnvironment.floatingRocks.length > 0) {
             beachEnvironment.floatingRocks.forEach((rock) => {
-                lake.addInteractiveObject(rock, {
-                    waveStrength: 1.0,
-                });
+                rock.enableWaterInteraction = true;
             });
         }
 
@@ -128,10 +120,8 @@ RedGPU.init(
                 characterMesh.setReceiveShadowRecursively(true);
                 scene.addChild(characterMesh);
 
-                // 호수 인터랙션 시스템에 캐릭터 등록 (하이라키 하위 메쉬 자동 순회 추적 및 AABB 기반 실시간 잠수 자동 감쇄)
-                lake.addInteractiveObject(characterMesh, {
-                    waveStrength: 1.4,
-                });
+                // 하이라키 하위 메쉬 전체에 물 인터랙션 선언적 플래그 설정 (씬/호수가 자동 수집 및 추적)
+                characterMesh.setEnableWaterInteractionRecursively(true, 1.4);
                 lake.interactionFollowTarget = characterMesh;
 
                 // 카메라가 캐릭터를 3인칭 시점으로 추적하도록 초기화
@@ -200,10 +190,6 @@ RedGPU.init(
             RedGPUExampleHelper.loadingProgressInfoHandler
         );
 
-        window.__testController = controller;
-        window.__testLake = lake;
-        window.__testLight = directionalLight;
-
         // 6. 렌더러 생성 및 렌더 루프
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
@@ -213,7 +199,7 @@ RedGPU.init(
             const t = time * 0.001;
             for (let i = 0; i < count; i++) {
                 const rock = floatingRocks[i];
-                rock.y = rock.originalY + Math.sin(t * 1.5 + i) * 0.04;
+                rock.y = rock.originalY + Math.sin(t * 1.5 + i);
             }
 
             // 캐릭터 이동 및 카메라 추적 (매 프레임 고빈도 실행: GC 부하 최소화)
