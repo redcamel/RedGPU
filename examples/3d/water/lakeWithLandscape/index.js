@@ -27,15 +27,15 @@ RedGPU.init(
         view.ibl = currentIbl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, 35000);
 
-        // 3. 태양광(DirectionalLight) 및 지형 스케일 섀도우 매니저
+        // 3. 태양광(DirectionalLight) 및 지형 스케일 섀도우 매니저 (field.hdr 스카이박스 태양 위치 정밀 동기화)
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 38;
-        directionalLight.azimuth = 45;
+        directionalLight.elevation = 61.6; // [field.hdr 분석 고도각 61.6도]
+        directionalLight.azimuth = 98.0;   // [field.hdr 분석 방위각 98.0도]
         directionalLight.lux = 105000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 1500;
+        directionalShadowManager.maxShadowDistance = 350;
 
         // 4. 10m 높이 랜드스케이프 지형 (Landscape)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
@@ -111,6 +111,19 @@ RedGPU.init(
             landscape.addLayer(layer);
         });
 
+        landscape.tileUrlResolver = (row, col) => {
+            const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
+            const rStr = String(row).padStart(2, '0');
+            const cStr = String(col).padStart(2, '0');
+
+            let sizeStr = '512_512';
+            if (row === 15 && col === 15) sizeStr = '449_449';
+            else if (col === 15) sizeStr = '449_512';
+            else if (row === 15) sizeStr = '512_449';
+
+            return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
+        };
+
         scene.addLandscape(landscape);
 
         // 5. WaterLake (산악 분지와 맞닿는 고품질 호수 수체)
@@ -143,7 +156,6 @@ RedGPU.init(
         lake.waterMaterial.windSpeed = 0.025;
         lake.waterMaterial.normalTiling = 18.0;
         lake.waterMaterial.normalDetailTiling = 36.0;
-
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -164,7 +176,92 @@ RedGPU.init(
 
         scene.addChild(lake);
 
-        // 6. GLTF 스킨드 메시 캐릭터(Soldier) 로딩 및 컨트롤러 초기화
+        // 6. 호숫가 및 산기슭 소나무(Pine Trees) Multi-LOD 식생 시스템 구성
+        const foliageManager = landscape.foliageManager;
+        foliageManager.debugSubCellColoration = false;
+        foliageManager.subCellSize = 50; // 400x400 월드에 최적화된 서브셀 크기
+        foliageManager.streamingRadius = 400;
+
+        // 스플랫맵 픽셀 캐시 비동기 로딩 완료 시 식생 전체 재배치(repopulate) 보장
+        const splatImg = new Image();
+        splatImg.onload = () => {
+            foliageManager.repopulateAll();
+        };
+        splatImg.src = splatMapPath;
+
+        const TREE_MODEL_URL = '../../../assets/terrain/test.glb';
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            TREE_MODEL_URL,
+            (treeLoader) => {
+                const root = treeLoader.resultMesh;
+                const treeGroups = new Map();
+
+                // Multi-LOD 노드(LOD0, LOD1, LOD2) 재귀적 탐색 및 그룹화
+                const traverse = (node) => {
+                    if (!node) return;
+                    if (node.name) {
+                        const lodMatch = node.name.match(/(.*?)(?:_?LOD([0-9]))$/i);
+                        if (lodMatch) {
+                            const baseName = lodMatch[1] || node.name;
+                            const lodLevel = parseInt(lodMatch[2], 10);
+                            if (!treeGroups.has(baseName)) {
+                                treeGroups.set(baseName, {});
+                            }
+                            treeGroups.get(baseName)[`lod${lodLevel}`] = node;
+                            return;
+                        }
+                    }
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        traverse(children[i]);
+                    }
+                };
+
+                traverse(root);
+
+                if (treeGroups.size > 0) {
+                    treeGroups.forEach((lods, baseName) => {
+                        const lodConfigs = [];
+                        const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
+                        if (!lod0) return;
+
+                        // [LOD 설정] 근거리: LOD0 (45m), 중거리: LOD1 (110m), 원거리: LOD2 (220m)
+                        lodConfigs.push({mesh: lod0, lodDistance: 45, receiveShadow: true});
+                        if (lods.lod1 && lods.lod1 !== lod0) {
+                            lodConfigs.push({mesh: lods.lod1, lodDistance: 110, receiveShadow: true});
+                        }
+                        if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) {
+                            lodConfigs.push({mesh: lods.lod2, lodDistance: 220, receiveShadow: false});
+                        }
+
+                        // RedGPU GPU 인스턴스 기반 Multi-LOD 식생 등록 (현실적인 소나무 성목 크기: 8m ~ 17m)
+                        foliageManager.addFoliageType({
+                            name: `Tree_${baseName}`,
+                            type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
+                            lods: lodConfigs,
+                            densityPerHectare: 1200.0, // 400x400 (16헥타르) 분지 지형을 아우르는 빽빽한 소나무 숲
+                            densityMultiplier: 1.0,
+                            minWeightThreshold: 0.01,
+                            minScale: [0.25, 0.25, 0.25], // 높이 약 7.9m (캐릭터 키 1.8m 대비 4.4배)
+                            maxScale: [0.52, 0.56, 0.52], // 높이 약 16.4m~17.6m (캐릭터 키 1.8m 대비 9~10배)
+                            randomRotationY: true,
+                            useImpostor: false,
+                            cullingDistance: 600,
+                            fadeStartDistance: 450,
+                            targetLayer: 'Grass',
+                            bottomOffset: -0.85,
+                            alignToNormal: true,
+                            alignFactor: 0.2, // 산기슭에서도 나무의 수직 직립성을 자연스럽게 보존
+                            minSlope: 0.0,
+                            maxSlope: 35.0
+                        });
+                    });
+                }
+            }
+        );
+
+        // 7. GLTF 스킨드 메시 캐릭터(Soldier) 로딩 및 컨트롤러 초기화
         let characterMesh = null;
         let characterController = null;
         let stateMachine = null;
