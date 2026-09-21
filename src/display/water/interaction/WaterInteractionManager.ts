@@ -21,10 +21,10 @@ export interface WaterActiveMeshEntry {
  */
 export class WaterInteractionManager {
     readonly redGPUContext: RedGPUContext;
-    private readonly _items: Map<WaterInteractiveTarget, WaterInteractionItem> = new Map();
+    readonly #items: Map<WaterInteractiveTarget, WaterInteractionItem> = new Map();
 
     // 활성 메쉬 수집용 풀링 버퍼 (GC 0바이트)
-    private readonly _activeMeshBuffer: WaterActiveMeshEntry[] = [];
+    readonly #activeMeshBuffer: WaterActiveMeshEntry[] = [];
 
     constructor(redGPUContext: RedGPUContext) {
         this.redGPUContext = redGPUContext;
@@ -34,14 +34,14 @@ export class WaterInteractionManager {
      * [KO] 등록된 모든 인터랙션 아이템 목록을 반환합니다.
      */
     get items(): IterableIterator<WaterInteractionItem> {
-        return this._items.values();
+        return this.#items.values();
     }
 
     /**
      * [KO] 등록된 아이템 개수를 반환합니다.
      */
     get count(): number {
-        return this._items.size;
+        return this.#items.size;
     }
 
     /**
@@ -49,11 +49,11 @@ export class WaterInteractionManager {
      * [EN] Registers interactive object (automatically collects child hierarchy meshes).
      */
     addInteractiveObject(target: WaterInteractiveTarget, options?: WaterInteractionOptions): WaterInteractionItem {
-        if (this._items.has(target)) {
-            return this._items.get(target)!;
+        if (this.#items.has(target)) {
+            return this.#items.get(target)!;
         }
         const item = new WaterInteractionItem(target, options);
-        this._items.set(target, item);
+        this.#items.set(target, item);
         return item;
     }
 
@@ -62,7 +62,7 @@ export class WaterInteractionManager {
      * [EN] Removes registered interactive object.
      */
     removeInteractiveObject(target: WaterInteractiveTarget): boolean {
-        return this._items.delete(target);
+        return this.#items.delete(target);
     }
 
     /**
@@ -70,21 +70,21 @@ export class WaterInteractionManager {
      * [EN] Clears all registered interactive objects.
      */
     clearInteractiveObjects(): void {
-        this._items.clear();
+        this.#items.clear();
     }
 
     /**
      * [KO] 등록된 아이템 래퍼를 조회합니다.
      */
     getItem(target: WaterInteractiveTarget): WaterInteractionItem | undefined {
-        return this._items.get(target);
+        return this.#items.get(target);
     }
 
     /**
      * [KO] 매 프레임 등록된 객체들의 위치 및 속도를 갱신합니다.
      */
     update(deltaTime: number): void {
-        for (const item of this._items.values()) {
+        for (const item of this.#items.values()) {
             item.update(deltaTime);
         }
     }
@@ -103,7 +103,7 @@ export class WaterInteractionManager {
         let count = 0;
         const r2 = domainRadius * domainRadius;
 
-        for (const item of this._items.values()) {
+        for (const item of this.#items.values()) {
             const meshes = item.flattenedMeshes;
             const meshCount = meshes.length;
             if (meshCount === 0) continue;
@@ -181,8 +181,8 @@ export class WaterInteractionManager {
                 if (dy > verticalRange) continue;
 
                 // 풀에서 항목 가져오기 또는 새로 할당 (GC 0바이트 유지)
-                if (count >= this._activeMeshBuffer.length) {
-                    this._activeMeshBuffer.push({
+                if (count >= this.#activeMeshBuffer.length) {
+                    this.#activeMeshBuffer.push({
                         mesh,
                         waveStrength,
                         speed,
@@ -190,7 +190,7 @@ export class WaterInteractionManager {
                         footSide
                     });
                 } else {
-                    const entry = this._activeMeshBuffer[count];
+                    const entry = this.#activeMeshBuffer[count];
                     entry.mesh = mesh;
                     entry.waveStrength = waveStrength;
                     entry.speed = speed;
@@ -201,7 +201,7 @@ export class WaterInteractionManager {
             }
         }
 
-        this._activeMeshBuffer.length = count;
-        return this._activeMeshBuffer;
+        this.#activeMeshBuffer.length = count;
+        return this.#activeMeshBuffer;
     }
 }

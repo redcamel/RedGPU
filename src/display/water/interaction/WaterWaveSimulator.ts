@@ -2,37 +2,38 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import computeShaderCode from "./shader/waterWaveSimulation.wgsl";
 
 /**
- * [KO] WebGPU 2D 파동 방정식 FDTD 실시간 시뮬레이터 (Ping-Pong Compute Pass)
- * [EN] WebGPU 2D wave equation FDTD real-time simulator (Ping-Pong Compute Pass)
+ * [KO] 2D 파동 방정식(Wave Equation FDTD) 기반 실시간 물결 시뮬레이터
+ * [EN] Real-time ripple simulator based on 2D wave equation FDTD
  */
 export class WaterWaveSimulator {
     readonly redGPUContext: RedGPUContext;
     readonly textureSize: number = 512;
-    // 수면 셰이더 샘플링용 최종 결과물 (RG: N.xz, B: h)
+
     rippleNormalTexture: GPUTexture;
     rippleNormalTextureView: GPUTextureView;
-    // 시뮬레이션 파라미터 (발자국 첨벙임 동심원 파문 최적 튜닝)
+
     waveSpeed: number = 0.32;
     damping: number = 0.012;
     normalStrength: number = 1.0;
+
     // 핑퐁 시뮬레이션 버퍼 (R: h_curr, G: h_prev)
-    private _waveBufferA: GPUTexture;
-    private _waveBufferAView: GPUTextureView;
-    private _waveBufferB: GPUTexture;
-    private _waveBufferBView: GPUTextureView;
-    private _uniformBuffer: GPUBuffer;
-    private _pipeline: GPUComputePipeline;
-    private _bindGroupA: GPUBindGroup; // Read A, Write B
-    private _bindGroupB: GPUBindGroup; // Read B, Write A
-    private _isBufferAPrimary: boolean = true;
-    private readonly _uniformData: Float32Array = new Float32Array(8);
+    #waveBufferA: GPUTexture;
+    #waveBufferAView: GPUTextureView;
+    #waveBufferB: GPUTexture;
+    #waveBufferBView: GPUTextureView;
+    #uniformBuffer: GPUBuffer;
+    #pipeline: GPUComputePipeline;
+    #bindGroupA: GPUBindGroup; // Read A, Write B
+    #bindGroupB: GPUBindGroup; // Read B, Write A
+    #isBufferAPrimary: boolean = true;
+    readonly #uniformData: Float32Array = new Float32Array(8);
 
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
         this.redGPUContext = redGPUContext;
         this.textureSize = textureSize;
 
-        this._createTextures();
-        this._createPipeline();
+        this.#createTextures();
+        this.#createPipeline();
     }
 
     /**
@@ -40,29 +41,29 @@ export class WaterWaveSimulator {
      */
     updateCaptureBinding(captureTextureView: GPUTextureView): void {
         const device = this.redGPUContext.gpuDevice;
-        const bgl = this._pipeline.getBindGroupLayout(0);
+        const bgl = this.#pipeline.getBindGroupLayout(0);
 
         // BindGroup A: Read A, Write B
-        this._bindGroupA = device.createBindGroup({
+        this.#bindGroupA = device.createBindGroup({
             layout: bgl,
             entries: [
-                {binding: 0, resource: {buffer: this._uniformBuffer}},
-                {binding: 1, resource: this._waveBufferAView},
+                {binding: 0, resource: {buffer: this.#uniformBuffer}},
+                {binding: 1, resource: this.#waveBufferAView},
                 {binding: 2, resource: captureTextureView},
-                {binding: 3, resource: this._waveBufferBView},
+                {binding: 3, resource: this.#waveBufferBView},
                 {binding: 4, resource: this.rippleNormalTextureView}
             ],
             label: 'WaterWave_BindGroupA'
         });
 
         // BindGroup B: Read B, Write A
-        this._bindGroupB = device.createBindGroup({
+        this.#bindGroupB = device.createBindGroup({
             layout: bgl,
             entries: [
-                {binding: 0, resource: {buffer: this._uniformBuffer}},
-                {binding: 1, resource: this._waveBufferBView},
+                {binding: 0, resource: {buffer: this.#uniformBuffer}},
+                {binding: 1, resource: this.#waveBufferBView},
                 {binding: 2, resource: captureTextureView},
-                {binding: 3, resource: this._waveBufferAView},
+                {binding: 3, resource: this.#waveBufferAView},
                 {binding: 4, resource: this.rippleNormalTextureView}
             ],
             label: 'WaterWave_BindGroupB'
@@ -74,28 +75,28 @@ export class WaterWaveSimulator {
      * [EN] Executes 1-step 2D wave equation simulation (supports world texel scroll compensation).
      */
     simulate(commandEncoder: GPUCommandEncoder, shiftX: number = 0, shiftZ: number = 0): void {
-        if (!this._bindGroupA || !this._bindGroupB) return;
+        if (!this.#bindGroupA || !this.#bindGroupB) return;
 
         const device = this.redGPUContext.gpuDevice;
 
         // 1. 유니폼 버퍼 갱신 (텍셀 스크롤 오프셋 포함)
-        this._uniformData[0] = this.waveSpeed;
-        this._uniformData[1] = this.damping;
-        this._uniformData[2] = 0;
-        this._uniformData[3] = this.normalStrength;
-        this._uniformData[4] = shiftX;
-        this._uniformData[5] = shiftZ;
-        this._uniformData[6] = 0;
-        this._uniformData[7] = 0;
-        device.queue.writeBuffer(this._uniformBuffer, 0, this._uniformData as unknown as BufferSource);
+        this.#uniformData[0] = this.waveSpeed;
+        this.#uniformData[1] = this.damping;
+        this.#uniformData[2] = 0;
+        this.#uniformData[3] = this.normalStrength;
+        this.#uniformData[4] = shiftX;
+        this.#uniformData[5] = shiftZ;
+        this.#uniformData[6] = 0;
+        this.#uniformData[7] = 0;
+        device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as unknown as BufferSource);
 
         // 2. 컴퓨트 패스 인코딩
         const passEncoder = commandEncoder.beginComputePass({
             label: 'WaterWave_ComputePass'
         });
 
-        passEncoder.setPipeline(this._pipeline);
-        passEncoder.setBindGroup(0, this._isBufferAPrimary ? this._bindGroupA : this._bindGroupB);
+        passEncoder.setPipeline(this.#pipeline);
+        passEncoder.setBindGroup(0, this.#isBufferAPrimary ? this.#bindGroupA : this.#bindGroupB);
 
         // 512x512 텍스처 -> 16x16 워크그룹 = (32, 32)
         const workgroups = Math.ceil(this.textureSize / 16);
@@ -104,17 +105,17 @@ export class WaterWaveSimulator {
         passEncoder.end();
 
         // 핑퐁 버퍼 전환
-        this._isBufferAPrimary = !this._isBufferAPrimary;
+        this.#isBufferAPrimary = !this.#isBufferAPrimary;
     }
 
     destroy(): void {
-        if (this._waveBufferA) this._waveBufferA.destroy();
-        if (this._waveBufferB) this._waveBufferB.destroy();
+        if (this.#waveBufferA) this.#waveBufferA.destroy();
+        if (this.#waveBufferB) this.#waveBufferB.destroy();
         if (this.rippleNormalTexture) this.rippleNormalTexture.destroy();
-        if (this._uniformBuffer) this._uniformBuffer.destroy();
+        if (this.#uniformBuffer) this.#uniformBuffer.destroy();
     }
 
-    private _createTextures(): void {
+    #createTextures(): void {
         const device = this.redGPUContext.gpuDevice;
 
         const createStorageTexture = (label: string) => {
@@ -126,17 +127,17 @@ export class WaterWaveSimulator {
             });
         };
 
-        this._waveBufferA = createStorageTexture('WaterWave_BufferA');
-        this._waveBufferAView = this._waveBufferA.createView();
+        this.#waveBufferA = createStorageTexture('WaterWave_BufferA');
+        this.#waveBufferAView = this.#waveBufferA.createView();
 
-        this._waveBufferB = createStorageTexture('WaterWave_BufferB');
-        this._waveBufferBView = this._waveBufferB.createView();
+        this.#waveBufferB = createStorageTexture('WaterWave_BufferB');
+        this.#waveBufferBView = this.#waveBufferB.createView();
 
         this.rippleNormalTexture = createStorageTexture('WaterWave_RippleNormalTexture');
         this.rippleNormalTextureView = this.rippleNormalTexture.createView();
     }
 
-    private _createPipeline(): void {
+    #createPipeline(): void {
         const device = this.redGPUContext.gpuDevice;
 
         const shaderModule = device.createShaderModule({
@@ -144,7 +145,7 @@ export class WaterWaveSimulator {
             label: 'WaterWaveSimulationShader'
         });
 
-        this._uniformBuffer = device.createBuffer({
+        this.#uniformBuffer = device.createBuffer({
             size: 32, // 8 floats = 32 bytes (16-byte aligned)
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             label: 'WaterWave_SimUniformBuffer'
@@ -192,7 +193,7 @@ export class WaterWaveSimulator {
             label: 'WaterWave_ComputePipelineLayout'
         });
 
-        this._pipeline = device.createComputePipeline({
+        this.#pipeline = device.createComputePipeline({
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

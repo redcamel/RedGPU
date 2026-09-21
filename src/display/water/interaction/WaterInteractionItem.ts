@@ -51,7 +51,7 @@ export class WaterInteractionItem {
         return this.computedHeight;
     }
 
-    private _isFirstFrame: boolean = true;
+    #isFirstFrame: boolean = true;
 
     constructor(target: WaterInteractiveTarget, options: WaterInteractionOptions = {}) {
         this.target = target;
@@ -122,7 +122,7 @@ export class WaterInteractionItem {
             curr[2] = 0;
         }
 
-        if (this._isFirstFrame) {
+        if (this.#isFirstFrame) {
             last[0] = curr[0];
             last[1] = curr[1];
             last[2] = curr[2];
@@ -130,7 +130,7 @@ export class WaterInteractionItem {
             vel[1] = 0;
             vel[2] = 0;
             this.speed = 0;
-            this._isFirstFrame = false;
+            this.#isFirstFrame = false;
             return;
         }
 
