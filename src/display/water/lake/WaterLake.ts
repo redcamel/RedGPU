@@ -7,6 +7,7 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
+import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import {
     WaterActiveMeshEntry,
     WaterCapturePass,
@@ -35,10 +36,22 @@ class WaterLake extends Mesh {
      * [KO] 인터랙티브 파동 시뮬레이션 활성화 여부
      */
     interactionEnabled: boolean = true;
+    #interactionDomainSize: number = 16.0;
+
     /**
      * [KO] 로컬 인터랙션 시뮬레이션 윈도우 크기 (미터 단위, 기본값: 16.0m)
+     * [EN] Local interaction simulation window size (in meters, default: 16.0m)
      */
-    interactionDomainSize: number = 16.0;
+    get interactionDomainSize(): number {
+        return this.#interactionDomainSize;
+    }
+
+    set interactionDomainSize(value: number) {
+        this.#interactionDomainSize = value;
+        if (this._material) {
+            this.waterMaterial.rippleDomainSize = value;
+        }
+    }
     /**
      * [KO] 시뮬레이션 윈도우가 추적할 중심 대상 객체 (미지정 시 첫 번째 등록 객체 또는 호수 중심)
      */
@@ -184,11 +197,15 @@ class WaterLake extends Mesh {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
         const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
-        this.waveAmplitude = this.waveAmplitude;
-        this.waveWavelength = this.waveWavelength;
-        this.waveSpeed = this.waveSpeed;
+        this.#syncVertexUniforms();
         return shaderModule;
     };
+
+    #syncVertexUniforms(): void {
+        updateTargetUniform(this, 'waveAmplitude', this.waveAmplitude);
+        updateTargetUniform(this, 'waveWavelength', this.waveWavelength);
+        updateTargetUniform(this, 'waveSpeed', this.waveSpeed);
+    }
 
     /**
      * [KO] 인터랙션 매니저 인스턴스를 반환합니다.
