@@ -73,13 +73,92 @@ class WaterLake extends Mesh {
     #currentShiftX: number = 0;
     #currentShiftZ: number = 0;
 
+    override render(renderViewStateData: RenderViewStateData): void {
+        if (renderViewStateData.viewIndex === 0) {
+            this.#updateInteraction(renderViewStateData.deltaTime);
+        }
+        super.render(renderViewStateData);
+    }
+
+    constructor(
+        redGPUContext: RedGPUContext,
+        width: number = 100,
+        height: number = 100,
+        widthSegments: number = 64,
+        heightSegments: number = 64,
+        name: string = 'WaterLake'
+    ) {
+        const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
+        const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
+
+        super(redGPUContext, waterGeometry, waterMaterial, name);
+
+        this.waveAmplitude = 0.025;
+        this.waveWavelength = 16.0;
+        this.waveSpeed = 1.0;
+        this.maxPenetration = 0.35;
+
+        this.depthStencilState.depthWriteEnabled = false;
+        this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
+        this.dirtyPipeline = true;
+
+        // 인터랙션 서브시스템 초기화
+        this.#interactionManager = new WaterInteractionManager(redGPUContext);
+        this.#capturePass = new WaterCapturePass(redGPUContext, 512);
+        this.#waveSimulator = new WaterWaveSimulator(redGPUContext, 512);
+        this.#waveSimulator.updateCaptureBinding(this.#capturePass.captureTextureView);
+
+        // 시뮬레이션 결과물을 DirectTexture로 래핑하여 머티리얼에 바인딩
+        this.#rippleDirectTexture = new DirectTexture(
+            redGPUContext,
+            `WaterLake_Ripple_${this.uuid}`,
+            this.#waveSimulator.rippleNormalTexture
+        );
+        this.waterMaterial.rippleTexture = this.#rippleDirectTexture;
+        this.waterMaterial.rippleDomainSize = this.interactionDomainSize;
+    }
+
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
+        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+        this.#syncVertexUniforms();
+        return shaderModule;
+    };
+
+    #syncVertexUniforms(): void {
+        updateTargetUniform(this, 'waveAmplitude', this.waveAmplitude);
+        updateTargetUniform(this, 'waveWavelength', this.waveWavelength);
+        updateTargetUniform(this, 'waveSpeed', this.waveSpeed);
+    }
+
+    /**
+     * [KO] 파동 시뮬레이터 인스턴스를 반환합니다.
+     */
+    get waveSimulator(): WaterWaveSimulator {
+        return this.#waveSimulator;
+    }
+
+    readonly #encodePass = (encoder: GPUCommandEncoder): void => {
+        this.#capturePass.render(
+            encoder,
+            this.#currentActiveMeshes,
+            this.#currentSnapX,
+            this.#currentSnapZ,
+            this.#currentDomainSize,
+            this.waterLevel,
+            this.maxPenetration
+        );
+        this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
+    };
+
     /**
      * [KO] 매 프레임 인터랙션 캡처 및 파동 시뮬레이션을 실행합니다.
      *      호수가 카메라 프러스텀 밖에 위치하여 컬링되면 즉각 연산을 건너뜁니다.
      * [EN] Runs interaction capture and wave simulation each frame.
      *      Immediately skips computation if the lake is culled outside the camera frustum.
      */
-    updateInteraction(deltaTime?: number): void {
+    #updateInteraction(deltaTime?: number): void {
         // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
         if (!this.interactionEnabled || !this.passFrustumCulling) return;
         if (WaterInteractionRegistry.meshes.size === 0) return;
@@ -153,92 +232,6 @@ class WaterLake extends Mesh {
         this.#currentShiftX = shiftX;
         this.#currentShiftZ = shiftZ;
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodePass);
-    }
-
-    constructor(
-        redGPUContext: RedGPUContext,
-        width: number = 100,
-        height: number = 100,
-        widthSegments: number = 64,
-        heightSegments: number = 64,
-        name: string = 'WaterLake'
-    ) {
-        const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
-        const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
-
-        super(redGPUContext, waterGeometry, waterMaterial, name);
-
-        this.waveAmplitude = 0.025;
-        this.waveWavelength = 16.0;
-        this.waveSpeed = 1.0;
-        this.maxPenetration = 0.35;
-
-        this.depthStencilState.depthWriteEnabled = false;
-        this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
-        this.dirtyPipeline = true;
-
-        // 인터랙션 서브시스템 초기화
-        this.#interactionManager = new WaterInteractionManager(redGPUContext);
-        this.#capturePass = new WaterCapturePass(redGPUContext, 512);
-        this.#waveSimulator = new WaterWaveSimulator(redGPUContext, 512);
-        this.#waveSimulator.updateCaptureBinding(this.#capturePass.captureTextureView);
-
-        // 시뮬레이션 결과물을 DirectTexture로 래핑하여 머티리얼에 바인딩
-        this.#rippleDirectTexture = new DirectTexture(
-            redGPUContext,
-            `WaterLake_Ripple_${this.uuid}`,
-            this.#waveSimulator.rippleNormalTexture
-        );
-        this.waterMaterial.rippleTexture = this.#rippleDirectTexture;
-        this.waterMaterial.rippleDomainSize = this.interactionDomainSize;
-    }
-
-    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
-        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
-        const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
-        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
-        this.#syncVertexUniforms();
-        return shaderModule;
-    };
-
-    #syncVertexUniforms(): void {
-        updateTargetUniform(this, 'waveAmplitude', this.waveAmplitude);
-        updateTargetUniform(this, 'waveWavelength', this.waveWavelength);
-        updateTargetUniform(this, 'waveSpeed', this.waveSpeed);
-    }
-
-    /**
-     * [KO] 인터랙션 매니저 인스턴스를 반환합니다.
-     */
-    get interactionManager(): WaterInteractionManager {
-        return this.#interactionManager;
-    }
-
-    /**
-     * [KO] 파동 시뮬레이터 인스턴스를 반환합니다.
-     */
-    get waveSimulator(): WaterWaveSimulator {
-        return this.#waveSimulator;
-    }
-
-    readonly #encodePass = (encoder: GPUCommandEncoder): void => {
-        this.#capturePass.render(
-            encoder,
-            this.#currentActiveMeshes,
-            this.#currentSnapX,
-            this.#currentSnapZ,
-            this.#currentDomainSize,
-            this.waterLevel,
-            this.maxPenetration
-        );
-        this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
-    };
-
-    override render(renderViewStateData: RenderViewStateData): void {
-        if (renderViewStateData.viewIndex === 0) {
-            this.updateInteraction(renderViewStateData.deltaTime);
-        }
-        super.render(renderViewStateData);
     }
 
     override destroy(): void {
