@@ -1089,6 +1089,19 @@ export const ExampleList: ExampleListType = [
                     }
                 ]
             },
+            {
+                name: 'Water',
+                list: [
+                    {
+                        name: 'Basic Lake',
+                        path: '3d/water/basicLake',
+                        description: {
+                            ko: `최소한의 코드로 호수 수체(WaterLake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
+                            en: `An introductory example creating a WaterLake with minimal code and manipulating waterLevel and PBR properties in real time.`
+                        }
+                    }
+                ]
+            },
 
         ]
     },

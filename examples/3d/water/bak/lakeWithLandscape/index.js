@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist";
 
 /**
  * [KO] RedGPU 16km 오픈월드 랜드스케이프 지형 & 듀얼 노멀 알프스 호수 쇼케이스

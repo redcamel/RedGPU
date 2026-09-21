@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
