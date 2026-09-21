@@ -1093,52 +1093,57 @@ export const ExampleList: ExampleListType = [
                 name: 'Water',
                 list: [
                     {
-                        name: 'Basic Lake',
-                        path: '3d/water/lake/basicLake',
-                        description: {
-                            ko: `최소한의 코드로 호수 수체(WaterLake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
-                            en: `An introductory example creating a WaterLake with minimal code and manipulating waterLevel and PBR properties in real time.`
-                        }
-                    },
-                    {
-                        name: 'Waves & Optics',
-                        path: '3d/water/lake/wavesAndOptics',
-                        description: {
-                            ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
-                            en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`
-                        }
-                    },
-                    {
-                        name: 'Object Interaction',
-                        path: '3d/water/lake/interaction',
-                        description: {
-                            ko: `동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
-                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects and the water body.`
-                        }
-                    },
-                    {
-                        name: 'Character Walking',
-                        path: '3d/water/lake/characterWalking',
-                        description: {
-                            ko: `스킨드 메시(Soldier GLTF) 캐릭터가 호숫가를 걸을 때 발생하는 발걸음 펄스(Footstep Cadence Pulse), AABB 침수 판정 및 실시간 파동 연동을 시연합니다.`,
-                            en: `Demonstrates footstep cadence pulses, AABB submersion detection, and real-time wave interaction as a skinned GLTF character walks in the lake.`
-                        }
-                    },
-                    {
-                        name: 'Lake Settings',
-                        path: '3d/water/lake/lakeSettings',
-                        description: {
-                            ko: `호수 수체(WaterLake) 및 SingleLayerWaterMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.`,
-                            en: `A comprehensive settings example allowing real-time adjustment and testing of all WaterLake and SingleLayerWaterMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.`
-                        }
-                    },
-                    {
-                        name: 'Lake with Landscape',
-                        path: '3d/water/lake/lakeWithLandscape',
-                        description: {
-                            ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
-                            en: `A showcase combining large-scale terrain landscape with an interactive WaterLake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
-                        }
+                        name: 'Lake',
+                        list: [
+                            {
+                                name: 'Basic Lake',
+                                path: '3d/water/lake/basicLake',
+                                description: {
+                                    ko: `최소한의 코드로 호수 수체(WaterLake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
+                                    en: `An introductory example creating a WaterLake with minimal code and manipulating waterLevel and PBR properties in real time.`
+                                }
+                            },
+                            {
+                                name: 'Waves & Optics',
+                                path: '3d/water/lake/wavesAndOptics',
+                                description: {
+                                    ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
+                                    en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`
+                                }
+                            },
+                            {
+                                name: 'Object Interaction',
+                                path: '3d/water/lake/interaction',
+                                description: {
+                                    ko: `동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
+                                    en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects and the water body.`
+                                }
+                            },
+                            {
+                                name: 'Character Walking',
+                                path: '3d/water/lake/characterWalking',
+                                description: {
+                                    ko: `스킨드 메시(Soldier GLTF) 캐릭터가 호숫가를 걸을 때 발생하는 발걸음 펄스(Footstep Cadence Pulse), AABB 침수 판정 및 실시간 파동 연동을 시연합니다.`,
+                                    en: `Demonstrates footstep cadence pulses, AABB submersion detection, and real-time wave interaction as a skinned GLTF character walks in the lake.`
+                                }
+                            },
+                            {
+                                name: 'Lake Settings',
+                                path: '3d/water/lake/lakeSettings',
+                                description: {
+                                    ko: `호수 수체(WaterLake) 및 SingleLayerWaterMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.`,
+                                    en: `A comprehensive settings example allowing real-time adjustment and testing of all WaterLake and SingleLayerWaterMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.`
+                                }
+                            },
+                            {
+                                name: 'Lake with Landscape',
+                                path: '3d/water/lake/lakeWithLandscape',
+                                description: {
+                                    ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
+                                    en: `A showcase combining large-scale terrain landscape with an interactive WaterLake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
+                                }
+                            }
+                        ]
                     }
                 ]
             },
