@@ -27,10 +27,15 @@ export class WaterWaveSimulator {
     #bindGroupB: GPUBindGroup; // Read B, Write A
     #isBufferAPrimary: boolean = true;
     readonly #uniformData: Float32Array = new Float32Array(8);
+    readonly #computePassDescriptor: GPUComputePassDescriptor = {
+        label: 'WaterWave_ComputePass'
+    };
+    readonly #workgroups: number;
 
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
         this.redGPUContext = redGPUContext;
         this.textureSize = textureSize;
+        this.#workgroups = Math.ceil(textureSize / 16);
 
         this.#createTextures();
         this.#createPipeline();
@@ -90,17 +95,14 @@ export class WaterWaveSimulator {
         this.#uniformData[7] = 0;
         device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as unknown as BufferSource);
 
-        // 2. 컴퓨트 패스 인코딩
-        const passEncoder = commandEncoder.beginComputePass({
-            label: 'WaterWave_ComputePass'
-        });
+        // 2. 컴퓨트 패스 인코딩 (Zero-GC: 캐시된 디스크립터 사용)
+        const passEncoder = commandEncoder.beginComputePass(this.#computePassDescriptor);
 
         passEncoder.setPipeline(this.#pipeline);
         passEncoder.setBindGroup(0, this.#isBufferAPrimary ? this.#bindGroupA : this.#bindGroupB);
 
         // 512x512 텍스처 -> 16x16 워크그룹 = (32, 32)
-        const workgroups = Math.ceil(this.textureSize / 16);
-        passEncoder.dispatchWorkgroups(workgroups, workgroups);
+        passEncoder.dispatchWorkgroups(this.#workgroups, this.#workgroups);
 
         passEncoder.end();
 

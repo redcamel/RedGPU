@@ -32,11 +32,27 @@ interface WaterLake {
  */
 class WaterLake extends Mesh {
     readonly isWater: boolean = true;
+    #interactionEnabled: boolean = true;
+    #interactionFollowTarget: Object3DContainer | null = null;
+    #interactionDomainSize: number = 16.0;
+
     /**
      * [KO] 인터랙티브 파동 시뮬레이션 활성화 여부
+     * [EN] Whether interactive wave simulation is enabled
      */
-    interactionEnabled: boolean = true;
-    #interactionDomainSize: number = 16.0;
+    get interactionEnabled(): boolean {
+        return this.#interactionEnabled;
+    }
+
+    set interactionEnabled(value: boolean) {
+        const boolVal = !!value;
+        if (this.#interactionEnabled !== boolVal) {
+            this.#interactionEnabled = boolVal;
+            if (boolVal) {
+                this.#isFirstSnap = true;
+            }
+        }
+    }
 
     /**
      * [KO] 로컬 인터랙션 시뮬레이션 윈도우 크기 (미터 단위, 기본값: 16.0m)
@@ -52,10 +68,21 @@ class WaterLake extends Mesh {
             this.waterMaterial.rippleDomainSize = value;
         }
     }
+
     /**
      * [KO] 시뮬레이션 윈도우가 추적할 중심 대상 객체 (미지정 시 첫 번째 등록 객체 또는 호수 중심)
+     * [EN] Center target object for the simulation window to follow (defaults to first registered object or lake center)
      */
-    interactionFollowTarget: Object3DContainer | null = null;
+    get interactionFollowTarget(): Object3DContainer | null {
+        return this.#interactionFollowTarget;
+    }
+
+    set interactionFollowTarget(value: Object3DContainer | null) {
+        if (this.#interactionFollowTarget !== value) {
+            this.#interactionFollowTarget = value;
+            this.#isFirstSnap = true;
+        }
+    }
     #interactionManager: WaterInteractionManager;
     #capturePass: WaterCapturePass;
     #waveSimulator: WaterWaveSimulator;
@@ -224,11 +251,11 @@ class WaterLake extends Mesh {
                 targetZ = (this.interactionFollowTarget as any).z ?? 0;
             }
         } else if (hasMeshes) {
-            for (const mesh of WaterInteractionRegistry.meshes) {
+            const mesh = WaterInteractionRegistry.meshes.values().next().value;
+            if (mesh) {
                 const m = mesh.modelMatrix;
                 targetX = m ? m[12] : mesh.x;
                 targetZ = m ? m[14] : mesh.z;
-                break;
             }
         }
 
