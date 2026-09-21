@@ -128,10 +128,9 @@ RedGPU.init(
                 characterMesh.setReceiveShadowRecursively(true);
                 scene.addChild(characterMesh);
 
-                // 호수 인터랙션 시스템에 캐릭터 등록 (하이라키 하위 메쉬 자동 순회 추적 및 완전 잠수 자동 감쇄)
+                // 호수 인터랙션 시스템에 캐릭터 등록 (하이라키 하위 메쉬 자동 순회 추적 및 AABB 기반 실시간 잠수 자동 감쇄)
                 lake.addInteractiveObject(characterMesh, {
                     waveStrength: 1.4,
-                    objectHeight: 1.8,
                 });
                 lake.interactionFollowTarget = characterMesh;
 
@@ -579,20 +578,19 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
 
             // 실시간 수면 파동 인터랙션 (Water Interaction & Dynamic Ripples) 제어 패널
             const interactionFolder = pane.addFolder({title: 'Water Interaction (Dynamic Ripples)', expanded: true});
-            interactionFolder.addBinding(lake, 'interactionEnabled', {label: 'Enabled'});
-            interactionFolder.addBinding(lake, 'interactionDomainSize', {min: 16.0, max: 64.0, step: 2.0, label: 'Domain Size (m)'});
+            interactionFolder.addBinding(lake, 'interactionEnabled');
+            interactionFolder.addBinding(lake, 'interactionDomainSize', {min: 16.0, max: 64.0, step: 2.0});
             if (typeof lake.maxPenetration === 'number') {
                 interactionFolder.addBinding(lake, 'maxPenetration', {
                     min: 0.05,
                     max: 1.5,
-                    step: 0.05,
-                    label: 'Max Penetration'
+                    step: 0.05
                 });
             }
-            interactionFolder.addBinding(lake.waveSimulator, 'waveSpeed', {min: 0.1, max: 0.45, step: 0.01, label: 'Propagation Speed'});
-            interactionFolder.addBinding(lake.waveSimulator, 'damping', {min: 0.005, max: 0.08, step: 0.001, label: 'Damping'});
-            interactionFolder.addBinding(lake.waveSimulator, 'normalStrength', {min: 0.5, max: 5.0, step: 0.1, label: 'Normal Strength'});
-            interactionFolder.addBinding(lake.waterMaterial, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1, label: 'Ripple Blend'});
+            interactionFolder.addBinding(lake.waveSimulator, 'waveSpeed', {min: 0.1, max: 0.45, step: 0.01});
+            interactionFolder.addBinding(lake.waveSimulator, 'damping', {min: 0.005, max: 0.08, step: 0.001});
+            interactionFolder.addBinding(lake.waveSimulator, 'normalStrength', {min: 0.5, max: 5.0, step: 0.1});
+            interactionFolder.addBinding(lake.waterMaterial, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
 
             // 수중 바닥 햇살 일렁임 카우스틱스 (Underwater Caustics) 제어 패널
             const causticsFolder = pane.addFolder({title: 'Underwater Caustics', expanded: true});

@@ -113,11 +113,27 @@ export class WaterInteractionManager {
             let stepPulse = item.stepPulse;
             const footSide = item.footSide;
 
-            // 1. 객체의 수면 침수(Submersion) 및 수심 판정 (Zero-GC)
-            const rootY = item.currentWorldPos[1];
-            const objectHeight = item.objectHeight;
-            const topY = rootY + objectHeight;
-            const footDepth = waterLevel - rootY;
+            // 1. 객체의 실시간 지오메트리 AABB 기반 수면 침수(Submersion) 및 수심 판정 (Zero-GC)
+            let topY = -Infinity;
+            let bottomY = Infinity;
+
+            for (let j = 0; j < meshCount; j++) {
+                const aabb = meshes[j].boundingAABB;
+                if (aabb.maxY > topY) topY = aabb.maxY;
+                if (aabb.minY < bottomY) bottomY = aabb.minY;
+            }
+
+            // 바운딩 박스를 취합할 수 없는 예외 상황 fallback
+            if (topY === -Infinity || bottomY === Infinity) {
+                const rootY = item.currentWorldPos[1];
+                bottomY = rootY;
+                topY = rootY + 1.8;
+            }
+
+            item.computedHeight = Math.max(0.05, topY - bottomY);
+
+            // 실제 객체 최하단 바닥면 기준 수심
+            const footDepth = waterLevel - bottomY;
 
             // 전신 완전 잠수 판정 (객체 최상단이 수면 아래로 들어간 경우)
             if (topY < waterLevel) {

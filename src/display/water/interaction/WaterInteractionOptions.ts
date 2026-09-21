@@ -11,11 +11,6 @@ export interface WaterInteractionOptions {
      */
     waveStrength?: number;
 
-    /**
-     * [KO] 수면 접촉 반경 가중치 (기본값: 1.0)
-     * [EN] Radius scale for water surface contact (Default: 1.0)
-     */
-    radiusScale?: number;
 
     /**
      * [KO] 정적 객체 여부 (기본값: false, true일 경우 이동 속도 계산 생략)
@@ -35,9 +30,5 @@ export interface WaterInteractionOptions {
      */
     filter?: (mesh: Mesh) => boolean;
 
-    /**
-     * [KO] 객체의 높이 (미터 단위, 수중 완전 잠수 판정 및 감쇄에 사용, 기본값: 1.8m)
-     * [EN] Object height (in meters, used for full submersion detection and attenuation, default: 1.8m)
-     */
-    objectHeight?: number;
+
 }

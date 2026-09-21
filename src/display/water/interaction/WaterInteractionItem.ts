@@ -40,9 +40,16 @@ export class WaterInteractionItem {
     footSide: number = 1.0;
 
     /**
-     * [KO] 객체의 높이 (미터 단위, 완전 잠수 판정 및 감쇄에 사용)
+     * [KO] 하위 메쉬들의 AABB로부터 자동 계산된 실제 높이
      */
-    objectHeight: number = 1.8;
+    computedHeight: number = 1.8;
+
+    /**
+     * [KO] 객체의 실제 높이 (미터 단위)
+     */
+    get objectHeight(): number {
+        return this.computedHeight;
+    }
 
     private _isFirstFrame: boolean = true;
 
@@ -50,12 +57,9 @@ export class WaterInteractionItem {
         this.target = target;
         this.options = {
             waveStrength: 1.0,
-            radiusScale: 1.0,
             isStatic: false,
-            objectHeight: 1.8,
             ...options
         };
-        this.objectHeight = this.options.objectHeight ?? 1.8;
 
         this.refreshHierarchy();
     }
