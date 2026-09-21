@@ -52,7 +52,6 @@ interface SingleLayerWaterMaterial {
     turbidity: number;
     rippleDomainCenter: [number, number];
     rippleDomainSize: number;
-    rippleWaveHeightScale: number;
     rippleNormalStrength: number;
 }
 
@@ -106,7 +105,6 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.turbidity = 0.35;
         this.rippleDomainCenter = [0.0, 0.0];
         this.rippleDomainSize = 16.0;
-        this.rippleWaveHeightScale = 1.0;
         this.rippleNormalStrength = 1.0;
 
         this.debugMode = 0;
@@ -156,7 +154,6 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'ssrThickness', value: 0.8, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
     {key: 'rippleDomainSize', value: 16.0, min: 1.0},
-    {key: 'rippleWaveHeightScale', value: 1.0, min: 0.0},
     {key: 'rippleNormalStrength', value: 1.0, min: 0.0},
 ]);
 

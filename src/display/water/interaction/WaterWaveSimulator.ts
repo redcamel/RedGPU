@@ -82,10 +82,10 @@ export class WaterWaveSimulator {
         // 1. 유니폼 버퍼 갱신 (텍셀 스크롤 오프셋 포함)
         this.#uniformData[0] = this.waveSpeed;
         this.#uniformData[1] = this.damping;
-        this.#uniformData[2] = 0;
-        this.#uniformData[3] = this.normalStrength;
-        this.#uniformData[4] = shiftX;
-        this.#uniformData[5] = shiftZ;
+        this.#uniformData[2] = this.normalStrength;
+        this.#uniformData[3] = shiftX;
+        this.#uniformData[4] = shiftZ;
+        this.#uniformData[5] = 0;
         this.#uniformData[6] = 0;
         this.#uniformData[7] = 0;
         device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as unknown as BufferSource);

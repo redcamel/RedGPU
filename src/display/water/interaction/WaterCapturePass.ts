@@ -35,7 +35,7 @@ export class WaterCapturePass {
     // 메쉬별 유니폼 버퍼 풀 (GC 0바이트)
     readonly #meshUniformBuffers: GPUBuffer[] = [];
     readonly #meshBindGroups: GPUBindGroup[] = [];
-    readonly #meshUniformData: Float32Array = new Float32Array(24); // 16(mat4) + 8(uniforms) = 96 bytes
+    readonly #meshUniformData: Float32Array = new Float32Array(20); // 16(mat4) + 4(uniforms) = 80 bytes
 
     // 스킨드 바인드 그룹 캐시 (GC 0바이트)
     readonly #skinnedBindGroups: GPUBindGroup[] = [];
@@ -385,7 +385,7 @@ export class WaterCapturePass {
         while (index >= this.#meshUniformBuffers.length) {
             const idx = this.#meshUniformBuffers.length;
             const buffer = device.createBuffer({
-                size: 96, // mat4(64) + 2 vec4s(32) = 96 bytes (16-byte aligned)
+                size: 80, // mat4(64) + vec4(16) = 80 bytes (16-byte aligned)
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
                 label: `WaterCapture_MeshUniformBuffer_${idx}`
             });
@@ -450,12 +450,8 @@ export class WaterCapturePass {
     #fillMeshUniformData(mesh: Mesh, entry: WaterActiveMeshEntry): void {
         this.#meshUniformData.set(mesh.modelMatrix, 0);
         this.#meshUniformData[16] = entry.waveStrength;
-        this.#meshUniformData[17] = 0;
-        this.#meshUniformData[18] = entry.speed;
-        this.#meshUniformData[19] = entry.stepPulse;
-        this.#meshUniformData[20] = entry.footSide;
-        this.#meshUniformData[21] = 0;
-        this.#meshUniformData[22] = 0;
-        this.#meshUniformData[23] = 0;
+        this.#meshUniformData[17] = entry.speed;
+        this.#meshUniformData[18] = entry.stepPulse;
+        this.#meshUniformData[19] = entry.footSide;
     }
 }

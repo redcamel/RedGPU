@@ -6,12 +6,10 @@ struct WaterLakeVertexUniforms {
     waveAmplitude: f32,
     waveWavelength: f32,
     waveSpeed: f32,
-    padding: f32,
+    padding01: f32,
 };
 
 @group(1) @binding(0) var<uniform> vertexUniforms: WaterLakeVertexUniforms;
-@group(1) @binding(1) var displacementTextureSampler: sampler;
-@group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 
 struct InputData {
     @builtin(instance_index) globalVertexSlotIndex: u32,

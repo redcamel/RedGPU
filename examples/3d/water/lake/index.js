@@ -89,7 +89,7 @@ RedGPU.init(
                 controller.centerZ = characterMesh.z;
                 controller.distance = 9.0;
                 controller.tilt = -10;
-                controller.pan = 0;
+                controller.pan = 180;
 
                 characterController = new RedGPU.Charactor.SimpleCharacterController(
                     redGPUContext,
@@ -547,4 +547,4 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         }
     });
 }
-
+

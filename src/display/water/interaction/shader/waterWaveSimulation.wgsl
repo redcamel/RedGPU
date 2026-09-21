@@ -1,12 +1,12 @@
 struct SimUniforms {
     waveSpeed: f32,       // 파동 전파 속도 c (0.1 ~ 0.45)
     damping: f32,         // 감쇄율 gamma (0.02 ~ 0.08)
-    _pad_sim0: f32,
     normalStrength: f32,  // 파문 노멀 강도 (0.5 ~ 2.0)
     shiftX: f32,          // 도메인 X 이동에 따른 텍셀 오프셋 (정수형 텍셀 시프트)
     shiftZ: f32,          // 도메인 Z 이동에 따른 텍셀 오프셋 (정수형 텍셀 시프트)
-    pad1: f32,
-    pad2: f32,
+    padding01: f32,
+    padding02: f32,
+    padding03: f32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: SimUniforms;

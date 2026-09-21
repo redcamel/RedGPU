@@ -2,20 +2,16 @@ struct CaptureGlobalUniforms {
     orthoViewProj: mat4x4<f32>,
     waterLevel: f32,
     maxPenetration: f32,
-    pad1: f32,
-    pad2: f32,
+    padding01: f32,
+    padding02: f32,
 };
 
 struct MeshUniforms {
     modelMatrix: mat4x4<f32>,
     waveStrength: f32,
-    _pad_mesh1: f32,
     speed: f32,
     stepPulse: f32,
     footSide: f32,
-    pad1: f32,
-    pad2: f32,
-    pad3: f32,
 };
 
 @group(0) @binding(0) var<uniform> globalUniforms: CaptureGlobalUniforms;

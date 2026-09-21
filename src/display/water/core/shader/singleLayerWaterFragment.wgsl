@@ -63,32 +63,27 @@ struct WaterUniforms {
     normalDetailWindSpeed: f32,
 
     normalDetailWindDirection: vec2<f32>,
-    _pad_detailTexture: f32,
     roughness: f32,
-
     specularFactor: f32,
-    _pad_fresnelF0: f32,
+
     invertNormalY: u32,
     invertNormalDetailY: u32,
-
     causticsStrength: f32,
     causticsScale: f32,
-    causticsSpeed: f32,
-    _pad_caustics: f32,
 
+    causticsSpeed: f32,
     enableSSR: u32,
     ssrMaxDistance: f32,
     ssrStepCount: u32,
-    ssrThickness: f32,
 
+    ssrThickness: f32,
     turbidity: f32,
     rippleDomainSize: f32,
-    rippleWaveHeightScale: f32,
     rippleNormalStrength: f32,
 
     rippleDomainCenter: vec2<f32>,
-    _pad_ripple1: f32,
-    _pad_ripple2: f32,
+    padding01: f32,
+    padding02: f32,
 };
 
 fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
@@ -566,7 +561,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let fullWaterColor = totalTransmittedLight + totalReflectedLight;
 
-    let softDepthFade = depthFade * meshEdgeFade;
+    let softDepthFade = depthFade * meshEdgeFade * uniforms.opacity;
     let finalRgb = mix(originalSceneColor, fullWaterColor, softDepthFade);
 
     let maxDepth = max(0.001, uniforms.debugMaxDepth);
