@@ -1107,6 +1107,14 @@ export const ExampleList: ExampleListType = [
                             ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
                             en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`
                         }
+                    },
+                    {
+                        name: 'Object Interaction',
+                        path: '3d/water/interaction',
+                        description: {
+                            ko: `동적 객체(구체 및 큐브)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
+                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects (sphere/cube) and the water body.`
+                        }
                     }
                 ]
             },
