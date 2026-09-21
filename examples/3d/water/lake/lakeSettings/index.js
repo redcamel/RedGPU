@@ -32,7 +32,7 @@ RedGPU.init(
 
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png',
+            '../../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -40,7 +40,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png',
+            '../../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,
@@ -186,13 +186,13 @@ RedGPU.init(
 function createBeachEnvironment(redGPUContext, scene) {
     const floatingRocks = [];
 
-    const gravelAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel.jpg');
-    const gravelNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg', true, null, null, 'rgba8unorm');
-    const gravelOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg', true, null, null, 'rgba8unorm');
+    const gravelAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/gravel.jpg');
+    const gravelNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg', true, null, null, 'rgba8unorm');
+    const gravelOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg', true, null, null, 'rgba8unorm');
 
-    const rockAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock.jpg');
-    const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg', true, null, null, 'rgba8unorm');
-    const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg', true, null, null, 'rgba8unorm');
+    const rockAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/rock.jpg');
+    const rockNormal = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg', true, null, null, 'rgba8unorm');
+    const rockOrm = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg', true, null, null, 'rgba8unorm');
 
     const terrainRepeatSampler = new RedGPU.Resource.Sampler(redGPUContext, {
         addressModeU: RedGPU.GPU_ADDRESS_MODE.REPEAT,

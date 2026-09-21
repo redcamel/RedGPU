@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Step 1: Basic Lake 예제
@@ -31,7 +31,7 @@ RedGPU.init(
         // 3. IBL 환경 맵 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+            '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
@@ -54,7 +54,7 @@ RedGPU.init(
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 변환으로 인한 벡터 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png',
+            '../../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -62,7 +62,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png',
+            '../../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,

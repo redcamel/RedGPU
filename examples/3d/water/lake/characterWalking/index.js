@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -25,7 +25,7 @@ RedGPU.init(
         // 3. IBL 환경 맵 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+            '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
@@ -54,7 +54,7 @@ RedGPU.init(
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 벡터 왜곡을 방지하기 위해 반드시 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png',
+            '../../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -62,7 +62,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png',
+            '../../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,
@@ -77,7 +77,7 @@ RedGPU.init(
         let targetStateName = 'Idle';
         let lastTime = null;
 
-        const MODEL_URL = '../../../assets/gltf/Soldier.glb';
+        const MODEL_URL = '../../../../assets/gltf/Soldier.glb';
         new RedGPU.GLTFLoader(
             redGPUContext,
             MODEL_URL,
@@ -201,12 +201,12 @@ function createBeachEnvironment(redGPUContext, scene) {
     // 해변 및 호수 바닥용 모래 PBR 텍스처 및 반복 샘플러
     const sandTexture = new RedGPU.Resource.BitmapTexture(
         redGPUContext,
-        '../../../assets/water/damp_beach_sand_diff_1k.jpg'
+        '../../../../assets/water/damp_beach_sand_diff_1k.jpg'
     );
     // [중요] 노멀 맵 텍스처는 방향 벡터 데이터를 담고 있으므로 format에 'rgba8unorm'을 명시하여 sRGB 감마 보정을 우회해야 합니다.
     const sandNormal = new RedGPU.Resource.BitmapTexture(
         redGPUContext,
-        '../../../assets/water/damp_beach_sand_nor_gl_1k.jpg',
+        '../../../../assets/water/damp_beach_sand_nor_gl_1k.jpg',
         true,
         null,
         null,

@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -22,7 +22,7 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // 2. 환경 맵(IBL) 및 스카이박스 설정
-        const currentHdrPath = '../../../assets/hdr/field.hdr';
+        const currentHdrPath = '../../../../assets/hdr/field.hdr';
         const currentIbl = new RedGPU.Resource.IBL(redGPUContext, currentHdrPath, 35000);
         view.ibl = currentIbl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, 35000);
@@ -44,11 +44,11 @@ RedGPU.init(
         landscape.heightScale = 10.0; // [지형 최대 높이 10m]
         landscape.maxLODLevel = 4;
         landscape.loadingRadius = 300;
-        landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
+        landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // 4-1. PBR 멀티 텍스처링 레이어 (Grass, Gravel, Rock, Leave)
-        const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
+        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
         const layersConfig = [
             {
@@ -159,7 +159,7 @@ RedGPU.init(
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png',
+            '../../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -167,7 +167,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png',
+            '../../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,
@@ -189,7 +189,7 @@ RedGPU.init(
         };
         splatImg.src = splatMapPath;
 
-        const TREE_MODEL_URL = '../../../assets/terrain/test.glb';
+        const TREE_MODEL_URL = '../../../../assets/terrain/test.glb';
         new RedGPU.GLTFLoader(
             redGPUContext,
             TREE_MODEL_URL,
@@ -268,7 +268,7 @@ RedGPU.init(
         let targetStateName = 'Idle';
 
 
-        const MODEL_URL = '../../../assets/gltf/Soldier.glb';
+        const MODEL_URL = '../../../../assets/gltf/Soldier.glb';
 
         new RedGPU.GLTFLoader(
             redGPUContext,

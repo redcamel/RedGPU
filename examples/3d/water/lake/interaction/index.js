@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -25,7 +25,7 @@ RedGPU.init(
         // 3. IBL 환경 맵 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+            '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
@@ -46,7 +46,7 @@ RedGPU.init(
         const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 80, 80, 80, 80);
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal.png',
+            '../../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -54,7 +54,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/lake_normal_detail.png',
+            '../../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,
