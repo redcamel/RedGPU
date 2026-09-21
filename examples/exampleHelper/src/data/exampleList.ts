@@ -1006,6 +1006,14 @@ export const ExampleList: ExampleListType = [
                                     ko: `개별 타일맵 스트리밍을 적용하기 전, 단일 16비트 하이트맵(Global Heightmap)으로 전체적인 랜드스케이프 지형 베이스를 초기화하고 기본 렌더링을 구성하는 기초 예제입니다.`,
                                     en: `An introductory example demonstrating how to initialize the entire landscape terrain base using a single 16-bit global heightmap before applying tiled map streaming, and configure fundamental rendering.`
                                 }
+                            },
+                            {
+                                name: 'Multi-Layer Splatting',
+                                path: '3d/landscape/multiLayerSplatting',
+                                description: {
+                                    ko: `단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵(Splatmap)의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다.`,
+                                    en: `An example demonstrating multi-layer terrain texturing by blending multiple PBR layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps onto the initialized landscape terrain based on RGBA 4-channel Splatmap weights.`
+                                }
                             }
                         ]
                     },

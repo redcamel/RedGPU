@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Landscape Step 2: Multi-Layer Splatting - RedGPU</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다."
+          name="description">
+    <meta content="RedGPU, WebGPU, Landscape, Multi-Layer, Splatting, Texture Blending, PBR, 3D"
+          name="keywords">
+
+    <!-- Assets Preload -->
+    <link as="style" href="../../../assets/css/example.css" rel="preload">
+    <link href="index.js" rel="modulepreload">
+
+    <!-- Assets -->
+    <link href="../../../assets/css/example.css" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000 !important;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+    </style>
+</head>
+<body>
+<script src="index.js" type="module"></script>
+</body>
+</html>
