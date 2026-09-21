@@ -1112,8 +1112,24 @@ export const ExampleList: ExampleListType = [
                         name: 'Object Interaction',
                         path: '3d/water/interaction',
                         description: {
-                            ko: `동적 객체(구체 및 큐브)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
-                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects (sphere/cube) and the water body.`
+                            ko: `동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
+                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects and the water body.`
+                        }
+                    },
+                    {
+                        name: 'Character Walking',
+                        path: '3d/water/characterWalking',
+                        description: {
+                            ko: `스킨드 메시(Soldier GLTF) 캐릭터가 호숫가를 걸을 때 발생하는 발걸음 펄스(Footstep Cadence Pulse), AABB 침수 판정 및 실시간 파동 연동을 시연합니다.`,
+                            en: `Demonstrates footstep cadence pulses, AABB submersion detection, and real-time wave interaction as a skinned GLTF character walks in the lake.`
+                        }
+                    },
+                    {
+                        name: 'Lake with Landscape',
+                        path: '3d/water/lakeWithLandscape',
+                        description: {
+                            ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
+                            en: `A showcase combining large-scale terrain landscape with an interactive WaterLake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
                         }
                     }
                 ]

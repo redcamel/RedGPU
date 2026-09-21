@@ -82,9 +82,6 @@ RedGPU.init(
         sphere.z = 0;
         scene.addChild(sphere);
 
-        // 시뮬레이션 영역 중심이 주 상호작용 구체를 추적하도록 지정
-        lake.interactionFollowTarget = sphere;
-
         // 8. 모션 애니메이션 및 인터랙션 상태 관리 (Zero-GC 변수)
         const motionState = {
             autoMove: true,

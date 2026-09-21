@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Ground from "../../../primitive/Ground";
 import Mesh from "../../mesh/Mesh";
-import Object3DContainer from "../../mesh/core/Object3DContainer";
 import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
@@ -27,13 +26,12 @@ interface WaterLake {
 }
 
 /**
- * [KO] 실시간 PBR 호수 수체 (인터랙티브 파동 시뮬레이션 및 계층 객체 추적 지원)
- * [EN] Real-time PBR Lake water body (supports interactive wave simulation and hierarchical object tracking)
+ * [KO] 실시간 PBR 호수 수체 (인터랙티브 파동 시뮬레이션 및 카메라 시선 기반 자동 추적 지원)
+ * [EN] Real-time PBR Lake water body (supports interactive wave simulation and camera-view tracking)
  */
 class WaterLake extends Mesh {
     readonly isWater: boolean = true;
     #interactionEnabled: boolean = true;
-    #interactionFollowTarget: Object3DContainer | null = null;
     #interactionDomainSize: number = 16.0;
 
     /**
@@ -68,21 +66,6 @@ class WaterLake extends Mesh {
             this.waterMaterial.rippleDomainSize = value;
         }
     }
-
-    /**
-     * [KO] 시뮬레이션 윈도우가 추적할 중심 대상 객체 (미지정 시 첫 번째 등록 객체 또는 호수 중심)
-     * [EN] Center target object for the simulation window to follow (defaults to first registered object or lake center)
-     */
-    get interactionFollowTarget(): Object3DContainer | null {
-        return this.#interactionFollowTarget;
-    }
-
-    set interactionFollowTarget(value: Object3DContainer | null) {
-        if (this.#interactionFollowTarget !== value) {
-            this.#interactionFollowTarget = value;
-            this.#isFirstSnap = true;
-        }
-    }
     #interactionManager: WaterInteractionManager;
     #capturePass: WaterCapturePass;
     #waveSimulator: WaterWaveSimulator;
@@ -103,7 +86,7 @@ class WaterLake extends Mesh {
 
     override render(renderViewStateData: RenderViewStateData): void {
         if (renderViewStateData.viewIndex === 0) {
-            this.#updateInteraction(renderViewStateData.deltaTime);
+            this.#updateInteraction(renderViewStateData);
         }
         super.render(renderViewStateData);
     }
@@ -218,7 +201,7 @@ class WaterLake extends Mesh {
      * [EN] Runs interaction capture and wave simulation each frame.
      *      Immediately skips computation if the lake is culled outside the camera frustum.
      */
-    #updateInteraction(deltaTime?: number): void {
+    #updateInteraction(renderViewStateData?: RenderViewStateData): void {
         // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
         if (!this.interactionEnabled || !this.passFrustumCulling) return;
 
@@ -232,25 +215,60 @@ class WaterLake extends Mesh {
         }
 
         const currentTime = this.redGPUContext.currentTime || performance.now();
-        const dt = deltaTime !== undefined
-            ? deltaTime
+        const dt = renderViewStateData?.deltaTime !== undefined
+            ? renderViewStateData.deltaTime
             : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
         this.#lastInteractionTime = currentTime;
 
-        // 중심 추적 좌표 결정 (월드 좌표 기준, 유예 기간 중에는 이전 스냅 좌표 유지로 도메인 지터링 방지)
+        // 중심 추적 좌표 결정 (카메라 시선과 수면 평면의 교차점 기준 자동 추적)
         let targetX = this.#prevSnapX || this.x;
         let targetZ = this.#prevSnapZ || this.z;
 
-        if (this.interactionFollowTarget) {
-            const m = this.interactionFollowTarget.modelMatrix;
-            if (m) {
-                targetX = m[12];
-                targetZ = m[14];
+        const camera = renderViewStateData?.view?.rawCamera;
+        if (camera) {
+            const camX = camera.x;
+            const camY = camera.y;
+            const camZ = camera.z;
+            const vm = camera.viewMatrix;
+
+            if (vm) {
+                // gl-matrix viewMatrix 기준 전방 시선 벡터: -m[2], -m[6], -m[10]
+                const dirX = -vm[2];
+                const dirY = -vm[6];
+                const dirZ = -vm[10];
+
+                // 수면 평면 Y = this.waterLevel 과의 교차 거리 t 산출 (Zero-GC)
+                if (dirY < -0.01) {
+                    // 카메라가 수면 쪽(아래)을 내려다보고 있는 일반적 시점
+                    const t = (this.waterLevel - camY) / dirY;
+                    if (t > 0 && t < 120.0) {
+                        targetX = camX + t * dirX;
+                        targetZ = camZ + t * dirZ;
+                    } else {
+                        targetX = camX + dirX * 15.0;
+                        targetZ = camZ + dirZ * 15.0;
+                    }
+                } else if (dirY > 0.01 && camY < this.waterLevel) {
+                    // 수중에서 수면 위를 올려다보는 시점
+                    const t = (this.waterLevel - camY) / dirY;
+                    if (t > 0 && t < 120.0) {
+                        targetX = camX + t * dirX;
+                        targetZ = camZ + t * dirZ;
+                    } else {
+                        targetX = camX + dirX * 15.0;
+                        targetZ = camZ + dirZ * 15.0;
+                    }
+                } else {
+                    // 수평이거나 하늘을 올려다볼 때: 전방 15m 지점 클램핑
+                    targetX = camX + dirX * 15.0;
+                    targetZ = camZ + dirZ * 15.0;
+                }
             } else {
-                targetX = (this.interactionFollowTarget as any).x ?? 0;
-                targetZ = (this.interactionFollowTarget as any).z ?? 0;
+                targetX = camX;
+                targetZ = camZ;
             }
         } else if (hasMeshes) {
+            // 카메라 참조가 없을 때의 안전 폴백 (첫 번째 등록 메쉬)
             const mesh = WaterInteractionRegistry.meshes.values().next().value;
             if (mesh) {
                 const m = mesh.modelMatrix;
