@@ -103,8 +103,8 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. 카메라 제어 폴더
-            const cameraFolder = pane.addFolder({title: 'Camera Controls', expanded: true});
+            // 1. 카메라 폴더
+            const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
 
             const cameraModeBinding = cameraFolder.addBinding(params, 'cameraMode', {
                 options: {
@@ -133,10 +133,10 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
                 zoomSpeedBinding.hidden = isFree;
             });
 
-            cameraFolder.addButton({title: 'Reset Camera View'}).on('click', resetView);
+            cameraFolder.addButton({title: 'Reset Camera'}).on('click', resetView);
 
             // 2. 지형 설정 폴더
-            const terrainFolder = pane.addFolder({title: 'Terrain Settings', expanded: true});
+            const terrainFolder = pane.addFolder({title: 'Terrain', expanded: true});
 
             terrainFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
@@ -149,8 +149,8 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
             terrainFolder.addBinding(landscape, 'heightmapShadowSoftness', {min: 1, max: 20, step: 0.5});
             terrainFolder.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 6000, step: 100});
 
-            // 3. 태양광 제어 폴더
-            const lightFolder = pane.addFolder({title: 'Sun Light', expanded: true});
+            // 3. 조명 폴더
+            const lightFolder = pane.addFolder({title: 'Light', expanded: true});
 
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});

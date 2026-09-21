@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Step 2: Multi-Layer Splatting (멀티레이어 텍스처 블렌딩)
- * [EN] Step 2: Multi-Layer Splatting (Multi-Layer Texture Blending)
+ * [KO] Step 3: Tile Streaming & Continuous LOD (대규모 타일 스트리밍 및 연속 LOD)
+ * [EN] Step 3: Tile Streaming & Continuous LOD (Large-Scale Tile Streaming & Continuous LOD)
  *
- * [KO] 단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵(Splatmap)의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다.
- * [EN] An example demonstrating multi-layer terrain texturing by blending multiple PBR layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps onto the initialized landscape terrain based on RGBA 4-channel Splatmap weights.
+ * [KO] 16,000m x 16,000m 광역 오픈월드 지형을 256개(16x16) 타일 그리드로 분할하여, 카메라 위치와 가시거리에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하고 연속 LOD를 제어하는 예제입니다.
+ * [EN] An example demonstrating how to divide a 16,000m x 16,000m open-world terrain into 256 (16x16) tile grids, asynchronously stream 16-bit high-resolution tiles based on camera position, and control continuous LOD.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,20 +15,22 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 구성 (자유 비행 카메라 기본 + 궤도 회전 카메라 준비)
+        // 1. 카메라 컨트롤러 구성 (기본: 전체 궤도 회전 카메라 + 자유 비행 카메라 준비)
+        const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
+        orbitController.distance = 7000;
+        orbitController.tilt = -25;
+        orbitController.pan = 40;
+        orbitController.minDistance = 300;
+        orbitController.maxDistance = 35000;
+        orbitController.speedDistance = 80.0;
+
         const freeController = new RedGPU.Camera.FreeController(redGPUContext);
         freeController.x = 0;
-        freeController.y = 1350;
-        freeController.z = 2800;
+        freeController.y = 1200;
+        freeController.z = 2500;
         freeController.tilt = -18;
         freeController.pan = 0;
         freeController.moveSpeed = 5000;
-
-        const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
-        orbitController.distance = 6000;
-        orbitController.tilt = -22;
-        orbitController.pan = 35;
-        orbitController.speedDistance = 80.0;
 
         // 2. 씬 및 뷰3D 생성 (기본: 전체 궤도 회전 카메라)
         const scene = new RedGPU.Display.Scene();
@@ -45,17 +47,32 @@ RedGPU.init(
 
         // 4. 태양광 (DirectionalLight) 설정
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 36;
-        directionalLight.azimuth = 135;
+        directionalLight.elevation = 45;
+        directionalLight.azimuth = 45;
         directionalLight.color.setColorByHEX('#fff8ea');
-        directionalLight.lux = 85000;
+        directionalLight.lux = 90000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 5. 랜드스케이프 지형 생성 및 글로벌 하이트맵 베이스 초기화
+        // 5. 16km x 16km 대규모 랜드스케이프 지형 및 256개 타일 스트리머 구성
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [8000, 8000];
-        landscape.heightScale = 650;
+        landscape.worldSize = [16000, 16000];
+        landscape.heightScale = 1500;
+        landscape.loadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
+
+        // 256개 분할 16-bit 타일 스트리밍 경로 해석기 (URL Resolver)
+        landscape.tileUrlResolver = (row, col) => {
+            const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
+            const rStr = String(row).padStart(2, '0');
+            const cStr = String(col).padStart(2, '0');
+
+            let sizeStr = '512_512';
+            if (row === 15 && col === 15) sizeStr = '449_449';
+            else if (col === 15) sizeStr = '449_512';
+            else if (row === 15) sizeStr = '512_449';
+
+            return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
+        };
 
         // 6. RGBA 4채널 스플랫맵 기반 멀티레이어 구성
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -122,6 +139,9 @@ RedGPU.init(
             return layer;
         });
 
+        // 타일 스트리밍 공간 분할 그리드 미니맵 활성화
+        landscape.debuggerManager.spatialGrid = true;
+
         scene.addLandscape(landscape);
 
         // 7. GUI 컨트롤 패널 생성
@@ -137,8 +157,8 @@ RedGPU.init(
 );
 
 /**
- * [KO] Tweakpane GUI를 구성하여 카메라 모드, 지형, 조명 및 스플랫 레이어 PBR 속성을 실시간 제어합니다.
- * [EN] Configures the Tweakpane GUI to control camera modes, landscape, lighting, and splat layer PBR properties in real time.
+ * [KO] Tweakpane GUI를 구성하여 카메라 모드, 타일 스트리밍, 지형 물리 속성 및 스플랫 레이어를 실시간 제어합니다.
+ * [EN] Configures the Tweakpane GUI to control camera modes, tile streaming, terrain physical properties, and splat layers in real time.
  */
 function renderTestPane(redGPUContext, view, freeController, orbitController, landscape, directionalLight, layers) {
     const params = {
@@ -148,17 +168,17 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
     const resetView = () => {
         if (params.cameraMode === 'Free Flight') {
             freeController.x = 0;
-            freeController.y = 1350;
-            freeController.z = 2800;
+            freeController.y = 1200;
+            freeController.z = 2500;
             freeController.tilt = -18;
             freeController.pan = 0;
         } else {
             orbitController.centerX = 0;
             orbitController.centerY = 0;
             orbitController.centerZ = 0;
-            orbitController.distance = 6000;
-            orbitController.tilt = -22;
-            orbitController.pan = 35;
+            orbitController.distance = 7000;
+            orbitController.tilt = -25;
+            orbitController.pan = 40;
         }
     };
 
@@ -196,28 +216,35 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
 
             cameraFolder.addButton({title: 'Reset Camera'}).on('click', resetView);
 
-            // 2. 지형 설정 폴더
+            // 2. 스트리밍 폴더
+            const streamFolder = pane.addFolder({title: 'Streaming', expanded: true});
+
+            streamFolder.addBinding(landscape, 'loadingRadius', {min: 1000, max: 8000, step: 250});
+            streamFolder.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 5, step: 1});
+            streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
+
+            // 3. 지형 설정 폴더
             const terrainFolder = pane.addFolder({title: 'Terrain', expanded: true});
 
-            terrainFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
+            terrainFolder.addBinding(landscape, 'heightScale', {min: 0, max: 2500, step: 20});
             terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
             terrainFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
             terrainFolder.addBinding(landscape, 'wireframe');
             terrainFolder.addBinding(landscape, 'lodColoration');
 
-            // 하이트맵 그림자 세부 제어
+            // 하이트맵 그림자 제어
             terrainFolder.addBinding(landscape, 'enableHeightmapShadow');
             terrainFolder.addBinding(landscape, 'heightmapShadowSoftness', {min: 1, max: 20, step: 0.5});
             terrainFolder.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 6000, step: 100});
 
-            // 3. 조명 폴더
+            // 4. 조명 폴더
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
 
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // 4. 레이어 폴더
+            // 5. 레이어 폴더
             const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
 
             layers.forEach((layer) => {

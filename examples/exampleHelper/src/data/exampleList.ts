@@ -1014,6 +1014,46 @@ export const ExampleList: ExampleListType = [
                                     ko: `단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵(Splatmap)의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다.`,
                                     en: `An example demonstrating multi-layer terrain texturing by blending multiple PBR layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps onto the initialized landscape terrain based on RGBA 4-channel Splatmap weights.`
                                 }
+                            },
+                            {
+                                name: 'Tile Streaming',
+                                path: '3d/landscape/tileStreaming',
+                                description: {
+                                    ko: `16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩하고 연속 LOD를 제어하는 예제입니다.`,
+                                    en: `An example demonstrating how to divide a 16km terrain into 256 tile grids, asynchronously stream 16-bit high-resolution tiles based on camera position, and control continuous LOD.`
+                                }
+                            },
+                            {
+                                name: 'Procedural Grass Field',
+                                path: '3d/landscape/proceduralGrass',
+                                description: {
+                                    ko: `지형 스플랫맵 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(Grass)를 필드에 배치하고, 바람 애니메이션 및 거리별 LOD·컬링·수축(Shrink) 시뮬레이션을 구현하는 예제입니다.`,
+                                    en: `An example demonstrating GPU-instanced procedural grass field placement driven by terrain splatmap weights, with wind animation and distance-based LOD, culling, and shrink simulation.`
+                                }
+                            },
+                            {
+                                name: 'Foliage & Impostors',
+                                path: '3d/landscape/foliageAndImpostors',
+                                description: {
+                                    ko: `16km 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 3단계 메쉬 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터(Octahedral Impostor)를 통해 렌더링 부하를 최적화하는 예제입니다.`,
+                                    en: `An example demonstrating large-scale pine tree and rock foliage placement across a 16km terrain, optimizing rendering load with 3-stage mesh LODs and up to 6,000m far-field Octahedral Impostors.`
+                                }
+                            },
+                            {
+                                name: 'Open World Integration',
+                                path: '3d/landscape/openWorldIntegration',
+                                description: {
+                                    ko: `대규모 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 식생 임포스터와 물리 기반 3D 캐릭터 컨트롤러(Soldier)를 결합한 완성형 오픈월드 통합 시뮬레이션입니다.`,
+                                    en: `A complete open-world integration simulation uniting 16km tiled streaming terrain, multi-layer PBR splatting, procedural grass, foliage impostors, and physics-based 3D character controller (Soldier).`
+                                }
+                            },
+                            {
+                                name: 'Landscape & Water System',
+                                path: '3d/landscape/landscapeAndWater',
+                                description: {
+                                    ko: `랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(WaterLake)를 결합하여 수위, 듀얼 노멀 파도 시뮬레이션, 수중 굴절 및 심도 기반 광학 효과를 종합 제어하는 통합 수체 예제입니다.`,
+                                    en: `An integrated simulation uniting landscape terrain valleys with physical lake water (WaterLake), controlling water level, dual normal wave simulation, underwater refraction, and depth optics.`
+                                }
                             }
                         ]
                     },

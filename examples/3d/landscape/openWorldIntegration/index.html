@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Landscape Step 6: Open World Integration - RedGPU</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="대규모 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 식생 임포스터와 3D 캐릭터 컨트롤러를 하나로 결합한 오픈월드 통합 환경 예제입니다."
+          name="description">
+    <meta content="RedGPU, WebGPU, Landscape, Open World, Character Controller, Foliage, Grass, 3D, Integration"
+          name="keywords">
+
+    <!-- Assets Preload -->
+    <link as="style" href="../../../assets/css/example.css" rel="preload">
+    <link href="index.js" rel="modulepreload">
+
+    <!-- Assets -->
+    <link href="../../../assets/css/example.css" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000 !important;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+    </style>
+</head>
+<body>
+<script src="index.js" type="module"></script>
+</body>
+</html>
