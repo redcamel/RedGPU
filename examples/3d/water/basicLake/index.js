@@ -186,8 +186,8 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. Water Lake 설정 폴더
-            const lakeFolder = pane.addFolder({title: 'Water Lake (수면 속성)', expanded: true});
+            // 1. WaterLake 설정 폴더
+            const lakeFolder = pane.addFolder({title: 'WaterLake (수체)', expanded: true});
 
             lakeFolder.addBinding(params, 'waterLevel', {min: -2.0, max: 2.0, step: 0.02})
                 .on('change', (ev) => {
@@ -210,14 +210,14 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
                 });
 
             // 2. Material PBR 재질 폴더
-            const matFolder = pane.addFolder({title: 'Material PBR (수면 재질)', expanded: true});
+            const matFolder = pane.addFolder({title: 'SingleLayerWaterMaterial (수면 재질)', expanded: true});
 
-            matFolder.addBinding(params, 'baseColor', {view: 'color', label: 'baseColor (천해색)'})
+            matFolder.addBinding(params, 'baseColor', {view: 'color'})
                 .on('change', (ev) => {
                     mat.baseColor.setColorByHEX(ev.value);
                 });
 
-            matFolder.addBinding(params, 'deepColor', {view: 'color', label: 'deepColor (심해색)'})
+            matFolder.addBinding(params, 'deepColor', {view: 'color'})
                 .on('change', (ev) => {
                     mat.deepColor.setColorByHEX(ev.value);
                 });
@@ -232,10 +232,10 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
                     mat.opacity = ev.value;
                 });
 
-            // 3. Directional Light 조명 폴더
-            const lightFolder = pane.addFolder({title: 'Directional Light (태양 조명)', expanded: false});
+            // 3. DirectionalLight 조명 폴더
+            const lightFolder = pane.addFolder({title: 'DirectionalLight (직사광)', expanded: false});
 
-            lightFolder.addBinding(params, 'lux', {min: 0, max: 150000, step: 1000, label: '조도 (Lux)'})
+            lightFolder.addBinding(params, 'lux', {min: 0, max: 150000, step: 1000})
                 .on('change', (ev) => {
                     directionalLight.lux = ev.value;
                 });

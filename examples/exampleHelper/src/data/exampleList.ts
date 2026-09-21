@@ -1099,6 +1099,14 @@ export const ExampleList: ExampleListType = [
                             ko: `최소한의 코드로 호수 수체(WaterLake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
                             en: `An introductory example creating a WaterLake with minimal code and manipulating waterLevel and PBR properties in real time.`
                         }
+                    },
+                    {
+                        name: 'Waves & Optics',
+                        path: '3d/water/wavesAndOptics',
+                        description: {
+                            ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
+                            en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`
+                        }
                     }
                 ]
             },
