@@ -243,6 +243,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let windDirLen1 = length(uniforms.windDirection);
     let baseWindDir1 = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen1, windDirLen1 > 0.001);
+    let windDirLen2 = length(uniforms.normalDetailWindDirection);
+    let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
     let waveUV1 = inputData.uv * uniforms.normalTiling + baseWindDir1 * (timeSec * uniforms.windSpeed);
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
@@ -257,8 +259,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     #redgpu_if normalDetailTexture
     {
-        let windDirLen2 = length(uniforms.normalDetailWindDirection);
-        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
         let waveUV2 = inputData.uv * uniforms.normalDetailTiling + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
@@ -382,9 +382,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
         let groundSurfacePos = worldPos.xz + lightRayOffset;
 
-        let windDirLen2 = length(uniforms.normalDetailWindDirection);
-        let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
-
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
         let cWorldScale = 0.35 * invCScale;
         let cSpeed = uniforms.causticsSpeed;
@@ -397,8 +394,6 @@ fn main(inputData: InputData) -> OutputFragment {
         var s2: vec2<f32>;
         #redgpu_if normalDetailTexture
         {
-            let windDirLen2 = length(uniforms.normalDetailWindDirection);
-            let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
             let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed * cSpeed);
             let rawN2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, cUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
