@@ -264,6 +264,8 @@ export class LandscapeTileStreamer {
     }
 
     update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
+        if (!this.#tileUrlResolver) return;
+
         const radius = Math.max(this.#loadingRadius, Math.abs(cameraY) * 2.0);
         const grid = this.#spatialGrid;
         if (!grid) return;
@@ -433,18 +435,14 @@ export class LandscapeTileStreamer {
     }
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
+        if (!this.#tileUrlResolver) return;
+
         const key = comp.key;
         this.#loadingMap.set(key, true);
 
         try {
-            let url: string;
-            if (this.#tileUrlResolver) {
-                url = this.#tileUrlResolver(comp.componentZ, comp.componentX, comp);
-            } else {
-                const rowStr = String(comp.componentZ).padStart(2, '0');
-                const colStr = String(comp.componentX).padStart(2, '0');
-                url = `https://redcamel.github.io/testAsset/terrain/tile_001/28_134_86_730_13_512_512_16bit_tile_${rowStr}_${colStr}.png`;
-            }
+            const url = this.#tileUrlResolver(comp.componentZ, comp.componentX, comp);
+            if (!url) return;
 
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);

@@ -7,13 +7,14 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정 (대규모 풍경 조망에 최적화된 FreeController)
-        const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        controller.x = 0;
-        controller.y = 520;
-        controller.z = 1200;
-        controller.tilt = -16;
-        controller.moveSpeed = 1600;
+        // 1. 카메라 컨트롤러 설정 (3인칭 추적 OrbitController)
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 8.5;
+        controller.tilt = -10;
+        controller.pan = 180;
+        controller.speedDistance = 0.2;
+        controller.minDistance = 3;
+        controller.maxDistance = 25;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -30,19 +31,19 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 38;
         directionalLight.azimuth = 45;
-        directionalLight.lux = 75000;
+        directionalLight.lux = 105000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
         directionalShadowManager.maxShadowDistance = 1500;
 
-        // 4. 대규모 오픈월드 랜드스케이프 지형 (Landscape)
+        // 4. 10m 높이 랜드스케이프 지형 (Landscape)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [8000, 8000];
+        landscape.worldSize = [400, 400];
         landscape.componentCount = [16, 16];
-        landscape.heightScale = 750;
-        landscape.maxLODLevel = 5;
-        landscape.loadingRadius = 4000;
+        landscape.heightScale = 10.0; // [지형 최대 높이 10m]
+        landscape.maxLODLevel = 4;
+        landscape.loadingRadius = 300;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // 4-1. PBR 멀티 텍스처링 레이어 (Grass, Gravel, Rock, Leave)
@@ -54,7 +55,7 @@ RedGPU.init(
                 name: 'Grass',
                 key: 'grass',
                 weightChannel: 'R',
-                uvScale: [40, 40],
+                uvScale: [8, 8],
                 roughness: 0.85,
                 metallic: 0.0,
                 normalIntensity: 1.5,
@@ -64,7 +65,7 @@ RedGPU.init(
                 name: 'Gravel',
                 key: 'gravel',
                 weightChannel: 'B',
-                uvScale: [35, 35],
+                uvScale: [8, 8],
                 roughness: 0.9,
                 metallic: 0.0,
                 normalIntensity: 1.8,
@@ -74,7 +75,7 @@ RedGPU.init(
                 name: 'Rock',
                 key: 'rock',
                 weightChannel: 'G',
-                uvScale: [15, 15],
+                uvScale: [4, 4],
                 roughness: 0.7,
                 metallic: 0.05,
                 normalIntensity: 2.2,
@@ -84,7 +85,7 @@ RedGPU.init(
                 name: 'Leave',
                 key: 'leave',
                 weightChannel: 'A',
-                uvScale: [40, 40],
+                uvScale: [8, 8],
                 roughness: 0.8,
                 metallic: 0.0,
                 normalIntensity: 1.4,
@@ -115,18 +116,18 @@ RedGPU.init(
         // 5. WaterLake (산악 분지와 맞닿는 고품질 호수 수체)
         const lake = new RedGPU.Display.WaterLake(
             redGPUContext,
-            5000,
-            5000,
-            128,
-            128
+            300,
+            300,
+            96,
+            96
         );
-        lake.y = 260; // 지형의 계곡 분지와 맞물리는 수면 고도
+        lake.y = 6.5; // 지형의 계곡 분지와 맞물리는 수면 고도 (지형 높이 0~10m의 약 65% 수위)
 
-        lake.waveAmplitude = 0.07;
-        lake.waveWavelength = 30.0;
+        lake.waveAmplitude = 0.045;
+        lake.waveWavelength = 16.0;
         lake.waveSpeed = 1.0;
-        lake.interactionDomainSize = 80.0;
-        lake.maxPenetration = 0.45;
+        lake.interactionDomainSize = 35.0;
+        lake.maxPenetration = 0.35;
 
         // 5-1. 수면 광학 머티리얼 및 듀얼 노멀 텍스처
         lake.waterMaterial.baseColor.setColorByHEX('#179fa0');
@@ -136,17 +137,17 @@ RedGPU.init(
         lake.waterMaterial.causticsStrength = 1.2;
         lake.waterMaterial.causticsScale = 1.0;
         lake.waterMaterial.causticsSpeed = 1.0;
-        lake.waterMaterial.depthFadeDistance = 2.2;
+        lake.waterMaterial.depthFadeDistance = 1.0;
         lake.waterMaterial.roughness = 0.04;
         lake.waterMaterial.specularFactor = 1.0;
         lake.waterMaterial.windSpeed = 0.025;
-        lake.waterMaterial.normalTiling = 28.0;
-        lake.waterMaterial.normalDetailTiling = 56.0;
+        lake.waterMaterial.normalTiling = 18.0;
+        lake.waterMaterial.normalDetailTiling = 36.0;
 
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/Water_1_M_Normal.jpg',
+            '../../../assets/water/lake_normal.png',
             true,
             null,
             null,
@@ -154,7 +155,7 @@ RedGPU.init(
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/water/Water_2_M_Normal.png',
+            '../../../assets/water/lake_normal_detail.png',
             true,
             null,
             null,
@@ -163,74 +164,121 @@ RedGPU.init(
 
         scene.addChild(lake);
 
-        // 6. 호수 위 인터랙티브 부표 (Interactive Floating Beacon)
-        const beacon = new RedGPU.Display.Mesh(redGPUContext);
-        beacon.x = 0;
-        beacon.z = 400;
-        beacon.y = lake.y;
+        // 6. GLTF 스킨드 메시 캐릭터(Soldier) 로딩 및 컨트롤러 초기화
+        let characterMesh = null;
+        let characterController = null;
+        let stateMachine = null;
+        let targetStateName = 'Idle';
 
-        // 6-1. 부표 베이스 (금빛 실린더)
-        const baseMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        baseMaterial.baseColorFactor = [0.95, 0.75, 0.2, 1.0];
-        baseMaterial.metallicFactor = 0.9;
-        baseMaterial.roughnessFactor = 0.25;
 
-        const baseMesh = new RedGPU.Display.Mesh(
+        const MODEL_URL = '../../../assets/gltf/Soldier.glb';
+
+        new RedGPU.GLTFLoader(
             redGPUContext,
-            new RedGPU.Primitive.Cylinder(redGPUContext, 2.2, 2.2, 0.8, 32),
-            baseMaterial
+            MODEL_URL,
+            (loader) => {
+                characterMesh = loader.resultMesh;
+
+                // 호숫가 물 밖 언덕 위에서 스폰
+                characterMesh.x = 0;
+                characterMesh.z = 32;
+                characterMesh.y = landscape.getHeightAt(characterMesh.x, characterMesh.z);
+
+                characterMesh.setCastShadowRecursively(true);
+                characterMesh.setReceiveShadowRecursively(true);
+                scene.addChild(characterMesh);
+
+                // 스킨드 메시를 물 상호작용 대상으로 재귀 등록
+                characterMesh.setEnableWaterInteractionRecursively(true, 1.4);
+
+                // 카메라 추적 중심점 정렬
+                controller.centerX = characterMesh.x;
+                controller.centerY = characterMesh.y + 1.2;
+                controller.centerZ = characterMesh.z;
+
+                // 캐릭터 이동 컨트롤러 (지형 실시간 높이 바인딩)
+                characterController = new RedGPU.Charactor.SimpleCharacterController(
+                    redGPUContext,
+                    characterMesh,
+                    view.camera,
+                    {
+                        speed: 3.5,
+                        runSpeed: 7.0,
+                        gravity: 24.0,
+                        jumpForce: 8.0,
+                        getFloorHeight: (x, z) => landscape.getHeightAt(x, z)
+                    }
+                );
+
+                // 애니메이션 클립 바인딩 및 상태 머신(AnimStateMachine) 구성
+                const clips = loader.parsingResult?.animations;
+                if (clips && clips.length > 0) {
+                    const idleState = clips[0];
+                    const runState = clips[1];
+                    const walkState = clips[3] || clips[2];
+
+                    idleState.name = 'Idle';
+                    walkState.name = 'Walk';
+                    runState.name = 'Run';
+
+                    stateMachine = new RedGPU.AnimStateMachine(idleState);
+                    stateMachine.addState(walkState);
+                    stateMachine.addState(runState);
+
+                    const BLEND = 0.25;
+                    const pairs = [
+                        ['Idle', 'Walk'], ['Idle', 'Run'],
+                        ['Walk', 'Idle'], ['Walk', 'Run'],
+                        ['Run', 'Idle'], ['Run', 'Walk'],
+                    ];
+                    pairs.forEach(([from, to]) => {
+                        stateMachine.addTransition({
+                            fromState: from,
+                            toState: to,
+                            duration: BLEND,
+                            conditions: () => targetStateName === to,
+                        });
+                    });
+
+                    loader.stopAnimation();
+                    loader.playAnimation(idleState);
+                    if (loader.activeAnimations.length > 0) {
+                        loader.activeAnimations[0].animStateMachine = stateMachine;
+                    }
+                }
+
+                // GUI 구성
+                renderTestPane(redGPUContext, lake, landscape, directionalLight, characterController);
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
         );
-        beacon.addChild(baseMesh);
 
-        // 6-2. 상단 발광 마커 구체 (루비 레드 구체)
-        const markerMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        markerMaterial.baseColorFactor = [0.95, 0.15, 0.15, 1.0];
-        markerMaterial.metallicFactor = 0.2;
-        markerMaterial.roughnessFactor = 0.2;
-
-        const markerMesh = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.Sphere(redGPUContext, 1.1, 32, 32),
-            markerMaterial
-        );
-        markerMesh.y = 1.2;
-        beacon.addChild(markerMesh);
-
-        beacon.setCastShadowRecursively(true);
-        beacon.setReceiveShadowRecursively(true);
-
-        // 부표가 호수 수면에 리플을 발생시키도록 상호작용 등록
-        beacon.setEnableWaterInteractionRecursively(true, 1.2);
-        scene.addChild(beacon);
-
-        // 7. Zero-GC 애니메이션 및 부유 상태
-        const beaconState = {
-            time: 0,
-            autoMove: true,
-            orbitSpeed: 0.35,
-            orbitRadius: 70,
-            bobbingSpeed: 2.2,
-            bobbingAmp: 0.18,
-            centerZ: 400
-        };
-
-        // 8. 렌더 루프 및 리사이즈 등록
+        // 7. 렌더 루프 및 리사이즈 등록
         const renderer = new RedGPU.Renderer();
-        let lastTimestamp = 0;
+        let lastTime = null;
 
-        renderer.start(redGPUContext, (timestamp) => {
-            if (!lastTimestamp) lastTimestamp = timestamp;
-            const delta = (timestamp - lastTimestamp) * 0.001;
-            lastTimestamp = timestamp;
+        renderer.start(redGPUContext, (time) => {
+            const dt = lastTime !== null ? (time - lastTime) * 0.001 : 0;
+            lastTime = time;
 
-            // 부표 궤도 순항 및 상하 부유(Bobbing) 파동 애니메이션 (Zero-GC)
-            if (beaconState.autoMove) {
-                beaconState.time += delta;
+            // 캐릭터 물리 이동, 카메라 추적, 애니메이션 갱신
+            if (characterController && characterMesh) {
+                characterController.update(view, time);
 
-                beacon.x = Math.cos(beaconState.time * beaconState.orbitSpeed) * beaconState.orbitRadius;
-                beacon.z = beaconState.centerZ + Math.sin(beaconState.time * beaconState.orbitSpeed) * beaconState.orbitRadius;
-                beacon.y = lake.y + Math.sin(beaconState.time * beaconState.bobbingSpeed) * beaconState.bobbingAmp;
-                beacon.rotationY += 12.0 * delta;
+                // 카메라가 캐릭터 위치를 부드럽게 추적 (Zero-GC lerp)
+                controller.centerX += (characterMesh.x - controller.centerX) * 0.1;
+                controller.centerY += (characterMesh.y + 1.2 - controller.centerY) * 0.1;
+                controller.centerZ += (characterMesh.z - controller.centerZ) * 0.1;
+
+                // 이동 및 달리기 상태 판정 -> 애니메이션 크로스페이드 전이
+                if (characterController.isRunning) {
+                    targetStateName = 'Run';
+                } else if (characterController.isMoving) {
+                    targetStateName = 'Walk';
+                } else {
+                    targetStateName = 'Idle';
+                }
+
             }
         });
 
@@ -240,51 +288,53 @@ RedGPU.init(
         redGPUContext.onResize = (event) => {
             console.log("Canvas resized:", event.width, event.height);
         };
-
-        // 9. GUI 컨트롤 패널 구성
-        new RedGPUExampleHelper(redGPUContext, {
-            RedGPU,
-            gui: (pane) => {
-                // 9-1. Camera (카메라)
-                const folderCam = pane.addFolder({title: 'Camera (카메라)', expanded: true});
-                folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 6000, step: 100});
-
-                // 9-2. WaterLake (호수 설정)
-                const folderLake = pane.addFolder({title: 'WaterLake (호수 설정)', expanded: true});
-                folderLake.addBinding(lake, 'y', {min: 180, max: 350, step: 1});
-                folderLake.addBinding(lake, 'waveAmplitude', {min: 0, max: 0.25, step: 0.005});
-                folderLake.addBinding(lake, 'waveWavelength', {min: 5, max: 80, step: 1});
-                folderLake.addBinding(lake, 'waveSpeed', {min: 0, max: 4, step: 0.1});
-                folderLake.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.2, step: 0.05});
-                folderLake.addBinding(lake, 'interactionDomainSize', {min: 20, max: 150, step: 5});
-
-                // 9-3. Water Material (수면 광학)
-                const folderMat = pane.addFolder({title: 'Water Material (수면 광학)', expanded: false});
-                folderMat.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
-                folderMat.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
-                folderMat.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.05});
-                folderMat.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.2, max: 3.0, step: 0.1});
-                folderMat.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.2, max: 5.0, step: 0.1});
-                folderMat.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.005});
-                folderMat.addBinding(lake.waterMaterial, 'normalTiling', {min: 5.0, max: 80.0, step: 1.0});
-                folderMat.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 10.0, max: 120.0, step: 2.0});
-
-                // 9-4. Interactive Beacon (인터랙티브 부표)
-                const folderBeacon = pane.addFolder({title: 'Interactive Beacon (인터랙티브 부표)', expanded: false});
-                folderBeacon.addBinding(beaconState, 'autoMove');
-                folderBeacon.addBinding(beaconState, 'orbitSpeed', {min: 0.1, max: 1.5, step: 0.05});
-                folderBeacon.addBinding(beaconState, 'bobbingAmp', {min: 0.05, max: 0.6, step: 0.01});
-
-                // 9-5. Landscape (지형 설정)
-                const folderLandscape = pane.addFolder({title: 'Landscape (지형 설정)', expanded: false});
-                folderLandscape.addBinding(landscape, 'heightScale', {min: 300, max: 1500, step: 25});
-
-                // 9-6. DirectionalLight (태양광)
-                const folderSun = pane.addFolder({title: 'DirectionalLight (태양광)', expanded: false});
-                folderSun.addBinding(directionalLight, 'elevation', {min: 5, max: 89, step: 1});
-                folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-                folderSun.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 2000});
-            }
-        });
     }
 );
+
+/**
+ * [KO] Tweakpane GUI 패널 구성 함수
+ */
+function renderTestPane(redGPUContext, lake, landscape, directionalLight, characterController) {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        gui: (pane) => {
+            // 1. SimpleCharacterController (캐릭터 조작)
+            if (characterController) {
+                const folderChar = pane.addFolder({title: 'SimpleCharacterController (캐릭터 조작)', expanded: true});
+                folderChar.addBinding(characterController, 'speed', {min: 1.0, max: 8.0, step: 0.2});
+                folderChar.addBinding(characterController, 'runSpeed', {min: 3.0, max: 15.0, step: 0.5});
+                folderChar.addBinding(characterController, 'jumpForce', {min: 4.0, max: 16.0, step: 0.5});
+            }
+
+            // 2. WaterLake (호수 설정)
+            const folderLake = pane.addFolder({title: 'WaterLake (호수 설정)', expanded: true});
+            folderLake.addBinding(lake, 'y', {min: -1.0, max: 12.0, step: 0.1});
+            folderLake.addBinding(lake, 'waveAmplitude', {min: 0, max: 0.15, step: 0.002});
+            folderLake.addBinding(lake, 'waveWavelength', {min: 2, max: 40, step: 0.5});
+            folderLake.addBinding(lake, 'waveSpeed', {min: 0, max: 4, step: 0.1});
+            folderLake.addBinding(lake, 'maxPenetration', {min: 0.05, max: 0.8, step: 0.02});
+            folderLake.addBinding(lake, 'interactionDomainSize', {min: 5, max: 60, step: 1});
+
+            // 3. Water Material (수면 광학)
+            const folderMat = pane.addFolder({title: 'Water Material (수면 광학)', expanded: false});
+            folderMat.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
+            folderMat.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
+            folderMat.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.05});
+            folderMat.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.2, max: 3.0, step: 0.1});
+            folderMat.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.1, max: 3.0, step: 0.1});
+            folderMat.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.005});
+            folderMat.addBinding(lake.waterMaterial, 'normalTiling', {min: 2.0, max: 60.0, step: 1.0});
+            folderMat.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 5.0, max: 100.0, step: 1.0});
+
+            // 4. Landscape (지형 설정)
+            const folderLandscape = pane.addFolder({title: 'Landscape (지형 설정)', expanded: false});
+            folderLandscape.addBinding(landscape, 'heightScale', {min: 1.0, max: 30.0, step: 0.5});
+
+            // 5. DirectionalLight (태양광)
+            const folderSun = pane.addFolder({title: 'DirectionalLight (태양광)', expanded: false});
+            folderSun.addBinding(directionalLight, 'elevation', {min: 5, max: 89, step: 1});
+            folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+            folderSun.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 2000});
+        }
+    });
+}

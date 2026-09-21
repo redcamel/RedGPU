@@ -77,7 +77,7 @@ RedGPU.init(
         let targetStateName = 'Idle';
         let lastTime = null;
 
-        const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+        const MODEL_URL = '../../../assets/gltf/Soldier.glb';
         new RedGPU.GLTFLoader(
             redGPUContext,
             MODEL_URL,
