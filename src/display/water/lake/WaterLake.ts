@@ -64,6 +64,7 @@ class WaterLake extends Mesh {
     #prevSnapX: number = 0;
     #prevSnapZ: number = 0;
     #isFirstSnap: boolean = true;
+    #decayFramesRemaining: number = 0;
 
     readonly #domainCenterBuffer: [number, number] = [0, 0];
     #currentActiveMeshes: WaterActiveMeshEntry[] = [];
@@ -193,7 +194,15 @@ class WaterLake extends Mesh {
     #updateInteraction(deltaTime?: number): void {
         // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
         if (!this.interactionEnabled || !this.passFrustumCulling) return;
-        if (WaterInteractionRegistry.meshes.size === 0) return;
+
+        const hasMeshes = WaterInteractionRegistry.meshes.size > 0;
+        if (hasMeshes) {
+            this.#decayFramesRemaining = 90; // 활성 객체가 있으면 감쇄 카운터 리셋 (약 1.5초 유예)
+        } else if (this.#decayFramesRemaining > 0) {
+            this.#decayFramesRemaining--;   // 잔여 파동이 마찰 감쇄로 소멸할 때까지 시뮬레이션 지속
+        } else {
+            return; // 완전히 잔잔해진 후 안전하게 연산 건너뜀 (GPU 0ms 유지)
+        }
 
         const currentTime = this.redGPUContext.currentTime || performance.now();
         const dt = deltaTime !== undefined
@@ -201,9 +210,9 @@ class WaterLake extends Mesh {
             : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
         this.#lastInteractionTime = currentTime;
 
-        // 중심 추적 좌표 결정 (월드 좌표 기준)
-        let targetX = this.x;
-        let targetZ = this.z;
+        // 중심 추적 좌표 결정 (월드 좌표 기준, 유예 기간 중에는 이전 스냅 좌표 유지로 도메인 지터링 방지)
+        let targetX = this.#prevSnapX || this.x;
+        let targetZ = this.#prevSnapZ || this.z;
 
         if (this.interactionFollowTarget) {
             const m = this.interactionFollowTarget.modelMatrix;
@@ -214,7 +223,7 @@ class WaterLake extends Mesh {
                 targetX = (this.interactionFollowTarget as any).x ?? 0;
                 targetZ = (this.interactionFollowTarget as any).z ?? 0;
             }
-        } else {
+        } else if (hasMeshes) {
             for (const mesh of WaterInteractionRegistry.meshes) {
                 const m = mesh.modelMatrix;
                 targetX = m ? m[12] : mesh.x;

@@ -27,6 +27,9 @@ struct VertexOutput {
     @location(3) vertexTangent: vec4<f32>,
 };
 
+const WAVE_DIR1 = vec2<f32>(0.957826285, 0.287347886);
+const WAVE_DIR2 = vec2<f32>(-0.507020087, 0.861934149);
+
 fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     if (vertexUniforms.waveAmplitude <= 0.00001) {
         return vec4<f32>(0.0, 0.0, 0.0, 0.0);
@@ -37,7 +40,7 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let speed = vertexUniforms.waveSpeed;
     let amp = vertexUniforms.waveAmplitude;
 
-    let dir1 = normalize(vec2<f32>(1.0, 0.3));
+    let dir1 = WAVE_DIR1;
     let k1 = k;
     let omega1 = sqrt(9.8 * k1) * 0.4 + speed * 0.6;
     let phase1 = dot(posXZ, dir1) * k1 - timeSec * omega1;
@@ -49,7 +52,7 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let dY1dx = amp1 * k1 * dir1.x * cosP1;
     let dY1dz = amp1 * k1 * dir1.y * cosP1;
 
-    let dir2 = normalize(vec2<f32>(-0.5, 0.85));
+    let dir2 = WAVE_DIR2;
     let k2 = k * 1.65;
     let omega2 = sqrt(9.8 * k2) * 0.4 + speed * 0.8;
     let phase2 = dot(posXZ, dir2) * k2 - timeSec * omega2;
