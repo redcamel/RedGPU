@@ -479,10 +479,9 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                     step: 0.05
                 });
             }
-            interactionFolder.addBinding(lake.waveSimulator, 'waveSpeed', {min: 0.1, max: 0.45, step: 0.01});
-            interactionFolder.addBinding(lake.waveSimulator, 'damping', {min: 0.005, max: 0.08, step: 0.001});
-            interactionFolder.addBinding(lake.waveSimulator, 'normalStrength', {min: 0.5, max: 5.0, step: 0.1});
-            interactionFolder.addBinding(lake.waterMaterial, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
+            interactionFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.1, max: 0.45, step: 0.01});
+            interactionFolder.addBinding(lake, 'rippleDamping', {min: 0.005, max: 0.08, step: 0.001});
+            interactionFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.5, max: 5.0, step: 0.1});
 
             const causticsFolder = pane.addFolder({title: 'Underwater Caustics', expanded: true});
             causticsFolder.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});

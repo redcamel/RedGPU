@@ -133,10 +133,42 @@ class WaterLake extends Mesh {
     }
 
     /**
-     * [KO] 파동 시뮬레이터 인스턴스를 반환합니다.
+     * [KO] 인터랙션 물결 시뮬레이션 전파 속도 (기본값: 0.32)
+     * [EN] Interaction ripple simulation propagation speed (default: 0.32)
      */
-    get waveSimulator(): WaterWaveSimulator {
-        return this.#waveSimulator;
+    get rippleWaveSpeed(): number {
+        return this.#waveSimulator.waveSpeed;
+    }
+
+    set rippleWaveSpeed(value: number) {
+        this.#waveSimulator.waveSpeed = value;
+    }
+
+    /**
+     * [KO] 인터랙션 물결 감쇄율 (기본값: 0.012)
+     * [EN] Interaction ripple damping factor (default: 0.012)
+     */
+    get rippleDamping(): number {
+        return this.#waveSimulator.damping;
+    }
+
+    set rippleDamping(value: number) {
+        this.#waveSimulator.damping = value;
+    }
+
+    /**
+     * [KO] 인터랙션 물결 법선 벡터 강도 (기본값: 1.0)
+     * [EN] Interaction ripple normal vector strength (default: 1.0)
+     */
+    get rippleNormalStrength(): number {
+        return this.#waveSimulator.normalStrength;
+    }
+
+    set rippleNormalStrength(value: number) {
+        this.#waveSimulator.normalStrength = value;
+        if (this.material) {
+            this.waterMaterial.rippleNormalStrength = value;
+        }
     }
 
     readonly #encodePass = (encoder: GPUCommandEncoder): void => {
