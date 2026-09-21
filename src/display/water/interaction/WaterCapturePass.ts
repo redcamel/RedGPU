@@ -47,6 +47,14 @@ export class WaterCapturePass {
     readonly #viewProj: mat4 = mat4.create();
     readonly #globalData: Float32Array = new Float32Array(20);
 
+    // 룩앳 벡터 캐시 (Zero-GC)
+    readonly #lookAtEye: Float32Array = new Float32Array(3);
+    readonly #lookAtCenter: Float32Array = new Float32Array(3);
+    readonly #lookAtUp: Float32Array = new Float32Array([0, 0, -1]);
+
+    // 렌더 패스 디스크립터 캐시 (Zero-GC)
+    #renderPassDescriptor: GPURenderPassDescriptor;
+
     #meshBGL: GPUBindGroupLayout;
     #meshSkinnedBGL: GPUBindGroupLayout;
 
@@ -74,15 +82,20 @@ export class WaterCapturePass {
         const device = this.redGPUContext.gpuDevice;
         const halfSize = domainSize * 0.5;
 
-        // 1. 탑뷰 직교 투영 행렬 구성
+        // 1. 탑뷰 직교 투영 행렬 구성 (Zero-GC 벡터 버퍼 재사용)
         mat4.ortho(this.#orthoProj, -halfSize, halfSize, -halfSize, halfSize, 0.1, 20.0);
         // 위(waterLevel + 10)에서 아래(waterLevel)를 내려다봄
-        mat4.lookAt(
-            this.#topView,
-            [domainCenterX, waterLevel + 10.0, domainCenterZ],
-            [domainCenterX, waterLevel, domainCenterZ],
-            [0, 0, -1] // 상향 벡터: -Z (화면 상단이 북쪽)
-        );
+        const eye = this.#lookAtEye;
+        eye[0] = domainCenterX;
+        eye[1] = waterLevel + 10.0;
+        eye[2] = domainCenterZ;
+
+        const center = this.#lookAtCenter;
+        center[0] = domainCenterX;
+        center[1] = waterLevel;
+        center[2] = domainCenterZ;
+
+        mat4.lookAt(this.#topView, eye, center, this.#lookAtUp);
         mat4.multiply(this.#viewProj, this.#orthoProj, this.#topView);
 
         // 2. 글로벌 유니폼 버퍼 쓰기
@@ -93,22 +106,8 @@ export class WaterCapturePass {
         this.#globalData[19] = 0;
         device.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#globalData as unknown as BufferSource);
 
-        // 3. 렌더 패스 인코딩
-        const passEncoder = commandEncoder.beginRenderPass({
-            colorAttachments: [{
-                view: this.captureTextureView,
-                clearValue: {r: 0, g: 0, b: 0, a: 0},
-                loadOp: 'clear',
-                storeOp: 'store'
-            }],
-            depthStencilAttachment: {
-                view: this.#depthTextureView,
-                depthClearValue: 1.0,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'discard'
-            },
-            label: 'WaterCapture_RenderPass'
-        });
+        // 3. 렌더 패스 인코딩 (Zero-GC 캐싱된 디스크립터 재사용)
+        const passEncoder = commandEncoder.beginRenderPass(this.#renderPassDescriptor);
 
         if (activeMeshes.length > 0) {
             passEncoder.setBindGroup(0, this.#globalBindGroup);
@@ -202,6 +201,22 @@ export class WaterCapturePass {
             label: 'WaterInteraction_CaptureDepthTexture'
         });
         this.#depthTextureView = this.#depthTexture.createView();
+
+        this.#renderPassDescriptor = {
+            colorAttachments: [{
+                view: this.captureTextureView,
+                clearValue: {r: 0, g: 0, b: 0, a: 0},
+                loadOp: 'clear',
+                storeOp: 'store'
+            }],
+            depthStencilAttachment: {
+                view: this.#depthTextureView,
+                depthClearValue: 1.0,
+                depthLoadOp: 'clear',
+                depthStoreOp: 'discard'
+            },
+            label: 'WaterCapture_RenderPass'
+        };
     }
 
     #initPipelineLayout(): void {

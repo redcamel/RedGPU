@@ -7,7 +7,13 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
-import {WaterCapturePass, WaterInteractionManager, WaterInteractionRegistry, WaterWaveSimulator} from "../interaction";
+import {
+    WaterActiveMeshEntry,
+    WaterCapturePass,
+    WaterInteractionManager,
+    WaterInteractionRegistry,
+    WaterWaveSimulator
+} from "../interaction";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
@@ -45,6 +51,96 @@ class WaterLake extends Mesh {
     #prevSnapX: number = 0;
     #prevSnapZ: number = 0;
     #isFirstSnap: boolean = true;
+
+    readonly #domainCenterBuffer: [number, number] = [0, 0];
+    #currentActiveMeshes: WaterActiveMeshEntry[] = [];
+    #currentSnapX: number = 0;
+    #currentSnapZ: number = 0;
+    #currentDomainSize: number = 0;
+    #currentShiftX: number = 0;
+    #currentShiftZ: number = 0;
+
+    /**
+     * [KO] 매 프레임 인터랙션 캡처 및 파동 시뮬레이션을 실행합니다.
+     *      호수가 카메라 프러스텀 밖에 위치하여 컬링되면 즉각 연산을 건너뜁니다.
+     * [EN] Runs interaction capture and wave simulation each frame.
+     *      Immediately skips computation if the lake is culled outside the camera frustum.
+     */
+    updateInteraction(deltaTime?: number): void {
+        // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
+        if (!this.interactionEnabled || !this.passFrustumCulling) return;
+        if (WaterInteractionRegistry.meshes.size === 0) return;
+
+        const currentTime = this.redGPUContext.currentTime || performance.now();
+        const dt = deltaTime !== undefined
+            ? deltaTime
+            : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
+        this.#lastInteractionTime = currentTime;
+
+        // 중심 추적 좌표 결정 (월드 좌표 기준)
+        let targetX = this.x;
+        let targetZ = this.z;
+
+        if (this.interactionFollowTarget) {
+            const m = this.interactionFollowTarget.modelMatrix;
+            if (m) {
+                targetX = m[12];
+                targetZ = m[14];
+            } else {
+                targetX = (this.interactionFollowTarget as any).x ?? 0;
+                targetZ = (this.interactionFollowTarget as any).z ?? 0;
+            }
+        } else {
+            for (const mesh of WaterInteractionRegistry.meshes) {
+                const m = mesh.modelMatrix;
+                targetX = m ? m[12] : mesh.x;
+                targetZ = m ? m[14] : mesh.z;
+                break;
+            }
+        }
+
+        // 텍셀 스냅핑 (Texel Snapping으로 화면 수평 지터 원천 방지)
+        const domainSize = this.interactionDomainSize;
+        const texelSize = domainSize / this.#waveSimulator.textureSize;
+        const snapX = Math.floor(targetX / texelSize) * texelSize;
+        const snapZ = Math.floor(targetZ / texelSize) * texelSize;
+
+        // 도메인 이동에 따른 텍셀 오프셋 계산 (월드 공간 파동 고정 및 발 추적 방지)
+        let shiftX = 0;
+        let shiftZ = 0;
+        if (!this.#isFirstSnap) {
+            shiftX = Math.round((snapX - this.#prevSnapX) / texelSize);
+            shiftZ = Math.round((snapZ - this.#prevSnapZ) / texelSize);
+        } else {
+            this.#isFirstSnap = false;
+        }
+        this.#prevSnapX = snapX;
+        this.#prevSnapZ = snapZ;
+
+        const domainCenter = this.#domainCenterBuffer;
+        domainCenter[0] = snapX;
+        domainCenter[1] = snapZ;
+        this.waterMaterial.rippleDomainCenter = domainCenter;
+
+        // 등록된 선언적 활성 메쉬 자동 수집 (Zero-GC)
+        const activeMeshes = this.#interactionManager.collectActiveMeshes(
+            dt,
+            snapX,
+            snapZ,
+            domainSize * 0.75,
+            this.waterLevel,
+            6.0
+        );
+
+        // PRE_PROCESS 단계에서 캡처 및 컴퓨트 시뮬레이션 일괄 인코딩 (Zero-GC 바운드 콜백 활용)
+        this.#currentActiveMeshes = activeMeshes;
+        this.#currentSnapX = snapX;
+        this.#currentSnapZ = snapZ;
+        this.#currentDomainSize = domainSize;
+        this.#currentShiftX = shiftX;
+        this.#currentShiftZ = shiftZ;
+        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodePass);
+    }
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -108,90 +204,18 @@ class WaterLake extends Mesh {
         return this.#waveSimulator;
     }
 
-    /**
-     * [KO] 매 프레임 인터랙션 캡처 및 파동 시뮬레이션을 실행합니다.
-     *      호수가 카메라 프러스텀 밖에 위치하여 컬링되면 즉각 연산을 건너뜁니다.
-     * [EN] Runs interaction capture and wave simulation each frame.
-     *      Immediately skips computation if the lake is culled outside the camera frustum.
-     */
-    updateInteraction(deltaTime?: number): void {
-        // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
-        if (!this.interactionEnabled || !this.passFrustumCulling) return;
-        if (WaterInteractionRegistry.meshes.size === 0) return;
-
-        const currentTime = this.redGPUContext.currentTime || performance.now();
-        const dt = deltaTime !== undefined
-            ? deltaTime
-            : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
-        this.#lastInteractionTime = currentTime;
-
-        // 중심 추적 좌표 결정 (월드 좌표 기준)
-        let targetX = this.x;
-        let targetZ = this.z;
-
-        if (this.interactionFollowTarget) {
-            const m = this.interactionFollowTarget.modelMatrix;
-            if (m) {
-                targetX = m[12];
-                targetZ = m[14];
-            } else {
-                targetX = (this.interactionFollowTarget as any).x ?? 0;
-                targetZ = (this.interactionFollowTarget as any).z ?? 0;
-            }
-        } else {
-            for (const mesh of WaterInteractionRegistry.meshes) {
-                const m = mesh.modelMatrix;
-                targetX = m ? m[12] : mesh.x;
-                targetZ = m ? m[14] : mesh.z;
-                break;
-            }
-        }
-
-        // 텍셀 스냅핑 (Texel Snapping으로 화면 수평 지터 원천 방지)
-        const domainSize = this.interactionDomainSize;
-        const texelSize = domainSize / this.#waveSimulator.textureSize;
-        const snapX = Math.floor(targetX / texelSize) * texelSize;
-        const snapZ = Math.floor(targetZ / texelSize) * texelSize;
-
-        // 도메인 이동에 따른 텍셀 오프셋 계산 (월드 공간 파동 고정 및 발 추적 방지)
-        let shiftX = 0;
-        let shiftZ = 0;
-        if (!this.#isFirstSnap) {
-            shiftX = Math.round((snapX - this.#prevSnapX) / texelSize);
-            shiftZ = Math.round((snapZ - this.#prevSnapZ) / texelSize);
-        } else {
-            this.#isFirstSnap = false;
-        }
-        this.#prevSnapX = snapX;
-        this.#prevSnapZ = snapZ;
-
-        this.waterMaterial.rippleDomainCenter = [snapX, snapZ];
-        this.waterMaterial.rippleDomainSize = domainSize;
-
-        // 등록된 선언적 활성 메쉬 자동 수집 (Zero-GC)
-        const activeMeshes = this.#interactionManager.collectActiveMeshes(
-            dt,
-            snapX,
-            snapZ,
-            domainSize * 0.75,
+    readonly #encodePass = (encoder: GPUCommandEncoder): void => {
+        this.#capturePass.render(
+            encoder,
+            this.#currentActiveMeshes,
+            this.#currentSnapX,
+            this.#currentSnapZ,
+            this.#currentDomainSize,
             this.waterLevel,
-            6.0
+            this.maxPenetration
         );
-
-        // PRE_PROCESS 단계에서 캡처 및 컴퓨트 시뮬레이션 일괄 인코딩 (월드 텍셀 시프트 전달)
-        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, (encoder) => {
-            this.#capturePass.render(
-                encoder,
-                activeMeshes,
-                snapX,
-                snapZ,
-                domainSize,
-                this.waterLevel,
-                this.maxPenetration
-            );
-            this.#waveSimulator.simulate(encoder, shiftX, shiftZ);
-        });
-    }
+        this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
+    };
 
     override render(renderViewStateData: RenderViewStateData): void {
         if (renderViewStateData.viewIndex === 0) {
