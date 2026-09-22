@@ -1,25 +1,14 @@
 import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
-/**
- * [KO] Step 3: Tile Streaming & Continuous LOD (대규모 타일 스트리밍 및 연속 LOD)
- * [EN] Step 3: Tile Streaming & Continuous LOD (Large-Scale Tile Streaming & Continuous LOD)
- *
- * [KO] 16km x 16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하는 대규모 최적화 예제입니다.
- *      • 공간 분할 미니맵: 좌측 하단의 Spatial Grid 디버거에서 카메라 이동에 따른 실시간 타일 로딩/언로딩 반경을 관찰하세요.
- *      • 스트리밍 반경 조절: Streaming 폴더의 loadingRadius와 maxLoadsPerFrame을 조절하여 프레임 드랍 없는 비동기 로딩 성능을 체감해보세요.
- * [EN] Large-scale terrain optimization dividing a 16km x 16km world into 256 tiles, asynchronously streaming 16-bit tiles based on camera position.
- *      • Spatial Grid Minimap: Watch dynamic tile streaming and unloading around the camera via the bottom-left Spatial Grid mini-map.
- *      • Streaming Tuning: Adjust loadingRadius and maxLoadsPerFrame to fine-tune asynchronous background loading.
- */
-
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 구성 (기본: 전체 궤도 회전 카메라 + 자유 비행 카메라 준비)
+        // [KO] 카메라 컨트롤러 (전체 지형 조망 Orbit + 자유 비행 Free Flight)
+        // [EN] Camera controllers (Overview Orbit + Free Flight)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
         orbitController.distance = 7000;
         orbitController.tilt = -25;
@@ -36,12 +25,14 @@ RedGPU.init(
         freeController.pan = 0;
         freeController.moveSpeed = 5000;
 
-        // 2. 씬 및 뷰3D 생성 (기본: 전체 궤도 회전 카메라)
+        // [KO] 씬 및 뷰 생성
+        // [EN] Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, orbitController);
         redGPUContext.addView(view);
 
-        // 3. IBL 환경광 및 스카이박스 설정
+        // [KO] 환경광(IBL) 및 스카이박스
+        // [EN] Environment light (IBL) and skybox
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -49,36 +40,41 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 35000);
 
-        // 4. 태양광 (DirectionalLight) 설정
+        // [KO] 태양광 (DirectionalLight)
+        // [EN] Sunlight (DirectionalLight)
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
-        directionalLight.color.setColorByHEX('#fff8ea');
         directionalLight.lux = 90000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 5. 16km x 16km 대규모 랜드스케이프 지형 및 256개 타일 스트리머 구성
+        // [KO] 8km x 8km 대규모 랜드스케이프 지형 및 256개 타일 스트리밍 구성
+        // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [16000, 16000];
-        landscape.heightScale = 1500;
+        landscape.worldSize = [8000, 8000];
+        landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
-        // 256개 분할 16-bit 타일 스트리밍 경로 해석기 (URL Resolver)
+        // [KO] 256개 분할 16-bit 타일 URL 해석기
+        // [EN] 256-split 16-bit tile URL resolver
         landscape.tileUrlResolver = (row, col) => {
-            const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
-            const rStr = String(row).padStart(2, '0');
-            const cStr = String(col).padStart(2, '0');
-
-            let sizeStr = '512_512';
-            if (row === 15 && col === 15) sizeStr = '449_449';
-            else if (col === 15) sizeStr = '449_512';
-            else if (row === 15) sizeStr = '512_449';
-
-            return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
+            const host = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
+            const r = String(row).padStart(2, '0');
+            const c = String(col).padStart(2, '0');
+            const size = (row === 15 && col === 15) ? '449_449'
+                : (col === 15) ? '449_512'
+                    : (row === 15) ? '512_449'
+                        : '512_512';
+            return `${host}28_134_86_730_13_${size}_16bit_tile_${r}_${c}.png`;
         };
 
-        // 6. RGBA 4채널 스플랫맵 기반 멀티레이어 구성
+        // [KO] 공간 분할 그리드 미니맵 활성화
+        // [EN] Enable spatial grid minimap
+        landscape.debuggerManager.spatialGrid = true;
+
+        // [KO] RGBA 4채널 스플랫맵 기반 멀티레이어 구성
+        // [EN] Multi-layer setup based on RGBA 4-channel splatmap
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const weightTexturePath = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
@@ -88,40 +84,28 @@ RedGPU.init(
                 key: 'grass',
                 weightChannel: 'R',
                 uvScale: [50, 50],
-                roughness: 0.85,
-                metallic: 0.0,
-                normalIntensity: 1.5,
-                aoIntensity: 1.0
+                roughness: 0.85
             },
             {
                 name: 'Rock',
                 key: 'rock',
                 weightChannel: 'G',
                 uvScale: [15, 15],
-                roughness: 0.7,
-                metallic: 0.05,
-                normalIntensity: 2.2,
-                aoIntensity: 1.5
+                roughness: 0.7
             },
             {
                 name: 'Gravel',
                 key: 'gravel',
                 weightChannel: 'B',
                 uvScale: [40, 40],
-                roughness: 0.9,
-                metallic: 0.0,
-                normalIntensity: 1.8,
-                aoIntensity: 1.2
+                roughness: 0.9
             },
             {
                 name: 'Leave',
                 key: 'leave',
                 weightChannel: 'A',
                 uvScale: [50, 50],
-                roughness: 0.8,
-                metallic: 0.0,
-                normalIntensity: 1.4,
-                aoIntensity: 1.0
+                roughness: 0.8
             }
         ];
 
@@ -134,17 +118,11 @@ RedGPU.init(
                 weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
-                roughness: cfg.roughness,
-                metallic: cfg.metallic,
-                normalIntensity: cfg.normalIntensity,
-                aoIntensity: cfg.aoIntensity
+                roughness: cfg.roughness
             });
             landscape.addLayer(layer);
             return layer;
         });
-
-        // 타일 스트리밍 공간 분할 그리드 미니맵 활성화
-        landscape.debuggerManager.spatialGrid = true;
 
         scene.addLandscape(landscape);
 
@@ -169,13 +147,13 @@ RedGPU.init(
         });
     },
     (error) => {
-        console.error('RedGPU 초기화 실패:', error);
+        console.error('RedGPU 초기화 실패 / Initialization failed:', error);
     }
 );
 
 /**
- * [KO] GUI 컨트롤 패널 및 테스트 인터랙션(카메라 모드, 캐릭터 연동, 스플랫 레이어)을 구성합니다.
- * [EN] Sets up GUI control panel and test interactions (camera modes, character sync, splat layers).
+ * [KO] GUI 컨트롤 패널 및 테스트 인터랙션(카메라 모드, 캐릭터 연동, 스플랫 레이어, 타일 스트리밍)을 구성합니다.
+ * [EN] Sets up GUI control panel and test interactions (camera modes, character sync, splat layers, tile streaming).
  */
 function renderTestPane({
                             redGPUContext,
@@ -194,6 +172,9 @@ function renderTestPane({
     characterOrbitController.tilt = -12;
     characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
+    characterOrbitController.centerX = -500;
+    characterOrbitController.centerY = 302.5 + 1.2;
+    characterOrbitController.centerZ = -2750;
 
     // [KO] 기본 카메라를 캐릭터 시점으로 설정
     // [EN] Set default camera to character follow view
@@ -207,7 +188,6 @@ function renderTestPane({
 
     const params = {
         cameraMode: 'Character',
-        baseColor: landscape.baseColor.hex,
         lodMetric: landscape.lodMetric
     };
 
@@ -234,19 +214,6 @@ function renderTestPane({
             // [EN] Controller settings (Toggle button style)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
-            const cameraModeBinding = controllerFolder.addBinding(params, 'cameraMode', {
-                view: 'radiogrid',
-                groupName: 'cameraMode',
-                size: [3, 1],
-                cells: (x, y) => {
-                    const modes = ['Character', 'Orbit', 'Free Flight'];
-                    return {
-                        title: modes[x],
-                        value: modes[x]
-                    };
-                }
-            });
-
             const speedBinding = controllerFolder.addBinding(freeController, 'moveSpeed', {
                 min: 1000,
                 max: 15000,
@@ -261,7 +228,18 @@ function renderTestPane({
             });
             zoomSpeedBinding.hidden = true;
 
-            cameraModeBinding.on('change', (ev) => {
+            controllerFolder.addBinding(params, 'cameraMode', {
+                view: 'radiogrid',
+                groupName: 'cameraMode',
+                size: [3, 1],
+                cells: (x) => {
+                    const modes = ['Character', 'Orbit', 'Free Flight'];
+                    return {
+                        title: modes[x],
+                        value: modes[x]
+                    };
+                }
+            }).on('change', (ev) => {
                 const mode = ev.value;
 
                 if (mode === 'Character') {
@@ -274,36 +252,60 @@ function renderTestPane({
                     }
                     speedBinding.hidden = true;
                     zoomSpeedBinding.hidden = true;
+
+                    // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 및 페이드 설정
+                    // [EN] Optimized detail distance and fade for character close-up view
+                    landscape.nearDetailDistance = 120;
+                    landscape.nearDetailFade = 80;
                 } else if (mode === 'Orbit') {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;
                     speedBinding.hidden = true;
                     zoomSpeedBinding.hidden = false;
+
+                    // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
+                    // [EN] Extended detail distance and fade for orbit overview
+                    landscape.nearDetailDistance = 1000;
+                    landscape.nearDetailFade = 300;
                 } else if (mode === 'Free Flight') {
                     view.camera = freeController;
                     if (characterController) characterController.useKeyboard = false;
                     speedBinding.hidden = false;
                     zoomSpeedBinding.hidden = true;
+
+                    // [KO] 자유 비행 조망 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
+                    // [EN] Extended detail distance and fade for free flight
+                    landscape.nearDetailDistance = 1000;
+                    landscape.nearDetailFade = 300;
                 }
+
+                // [KO] UI 슬라이더 값 동기화
+                // [EN] Refresh UI sliders
+                pane.refresh();
             });
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
-            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
 
-            landscapeFolder.addBinding(params, 'baseColor')
-                .on('change', (ev) => {
-                    landscape.baseColor.setColorByHEX(ev.value);
-                });
-
-            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 2500, step: 20});
+            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'receiveShadow');
+            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {
+                min: 0,
+                max: 1500,
+                step: 1
+            });
+            landscapeFolder.addBinding(landscape, 'nearDetailFade', {
+                min: 10,
+                max: 1000,
+                step: 1
+            });
 
-            // [KO] Streaming 설정 (타일 스트리밍 전용)
-            // [EN] Streaming settings (Tile streaming controls)
-            const streamFolder = landscapeFolder.addFolder({title: 'Streaming', expanded: false});
+            // [KO] Tile Streaming 설정 (타일 스트리밍 전용)
+            // [EN] Tile Streaming settings (Tile streaming controls)
+            const streamFolder = landscapeFolder.addFolder({title: 'Tile Streaming', expanded: true});
             streamFolder.addBinding(landscape, 'loadingRadius', {min: 1000, max: 8000, step: 250});
-            streamFolder.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 5, step: 1});
+            streamFolder.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 8, step: 1});
             streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
 
             // [KO] LOD 설정
@@ -345,6 +347,7 @@ function renderTestPane({
             // [KO] Heightmap Shadow 설정
             // [EN] Heightmap shadow settings
             const shadowFolder = landscapeFolder.addFolder({title: 'Heightmap Shadow', expanded: false});
+
             shadowFolder.addBinding(landscape, 'castHeightmapShadow');
             shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {
                 min: 4,
@@ -387,6 +390,7 @@ function renderTestPane({
             // [KO] Light 설정
             // [EN] Light settings
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
+
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
@@ -461,7 +465,7 @@ function initCharacter({
             // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
             // [EN] Place at terrain height and configure shadows
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 302);
+            characterMesh.y = (startH > 0 ? startH : 302.5);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
@@ -484,7 +488,7 @@ function initCharacter({
                     gravity: 24.0,
                     jumpForce: 9.0,
                     floorHeight: 0.0,
-                    floorOffset: 0.025,
+                    floorOffset: 0.0,
                     useKeyboard: false,
                     getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                 }

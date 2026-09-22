@@ -1031,12 +1031,12 @@ export const ExampleList: ExampleListType = [
                                 name: 'Tile Streaming',
                                 path: '3d/landscape/tileStreaming',
                                 description: {
-                                    ko: `16km x 16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하는 대규모 최적화 예제입니다.<br/>
+                                    ko: `8km x 8km 대규모 오픈월드 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하는 대규모 최적화 예제입니다.<br/>
                                         • <b>공간 분할 미니맵</b>: 좌측 하단의 Spatial Grid 디버거에서 카메라 이동에 따른 실시간 타일 로딩/언로딩 반경을 관찰하세요.<br/>
-                                        • <b>스트리밍 반경 조절</b>: Streaming 폴더의 loadingRadius와 maxLoadsPerFrame을 조절하여 프레임 드랍 없는 비동기 로딩 성능을 체감해보세요.`,
-                                    en: `Large-scale terrain optimization dividing a 16km x 16km world into 256 tiles, asynchronously streaming 16-bit tiles based on camera position.<br/>
+                                        • <b>스트리밍 및 디테일 거리 조절</b>: Tile Streaming 폴더의 loadingRadius와 Landscape의 nearDetailDistance를 조절하여 프레임 드랍 없는 비동기 로딩과 원근 텍스처 전이를 체감해보세요.`,
+                                    en: `Large-scale terrain optimization dividing an 8km x 8km world into 256 tiles, asynchronously streaming 16-bit tiles based on camera position.<br/>
                                         • <b>Spatial Grid Minimap</b>: Watch dynamic tile streaming and unloading around the camera via the bottom-left Spatial Grid mini-map.<br/>
-                                        • <b>Streaming Tuning</b>: Adjust loadingRadius and maxLoadsPerFrame to fine-tune asynchronous background loading.`
+                                        • <b>Streaming & Detail Tuning</b>: Adjust loadingRadius in Tile Streaming and nearDetailDistance in Landscape to experience seamless background loading and distant texture transitions.`
                                 }
                             },
                             {
