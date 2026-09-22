@@ -398,14 +398,55 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
 
+        // [KO] 밀도 및 스플랫 가중치 연동
+        // [EN] Density & splat weight mapping
         typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 1.0, step: 0.05});
+        typeFolder.addBinding(type, 'densityScaleByWeight');
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 지형 경사도 필터링 (최소/최대 경사각)
+        // [EN] Terrain slope filtering (min/max slope)
+        typeFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
+        typeFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 컬링 및 거리 페이드
+        // [EN] Culling & distance fading
         typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 200, step: 5});
+        typeFolder.addBinding(type, 'fadeStartDistance', {min: 10, max: 200, step: 5});
         typeFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5});
-        typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
-        typeFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
-        typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
-        typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 지면 오프셋
+        // [EN] Ground offset
         typeFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 재질 및 PBR 셰이딩
+        // [EN] Material & PBR shading
+        typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
+        typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
+        typeFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.05});
+        typeFolder.addBinding(type, 'metallic', {min: 0.0, max: 1.0, step: 0.05});
+        typeFolder.addBinding(type, 'aoIntensity', {min: 0.0, max: 2.0, step: 0.1});
+        typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 서브서피스(SSS) 투과광
+        // [EN] Subsurface scattering (SSS)
+        typeFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
+        typeFolder.addBinding(type, 'subsurfaceDistortion', {min: 0.0, max: 1.0, step: 0.05});
+
+        typeFolder.addBlade({view: 'separator'});
+
+        // [KO] 그림자
+        // [EN] Shadow
         typeFolder.addBinding(type, 'castShadow');
         typeFolder.addBinding(type, 'receiveShadow');
         typeFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05});
