@@ -77,8 +77,10 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
     let normalPosition = vec4<f32>(worldNormal, 0.0);
 
-    // Basic output assignments
-    output.position = su_projectionViewMatrix * position;
+    // Basic output assignments (카메라 상대적 고정밀 투영 변환)
+    let relPos = position.xyz - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = transformedUV;
@@ -94,7 +96,7 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // Motion vector calculation
     {
-      output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+      output.currentClipPos = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
       output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 

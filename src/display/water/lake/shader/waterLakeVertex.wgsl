@@ -115,8 +115,10 @@ fn main(inputData: InputData) -> VertexOutput {
     let distFactor = smoothstep(20.0, 100.0, camDist);
     let taaFactor = horizonAngleFactor * distFactor;
 
-    let clipPosNoneJitter = su_projection.noneJitterProjectionViewMatrix * worldPos;
-    let clipPosJittered = su_projection.projectionViewMatrix * worldPos;
+    let relPos = worldPos.xyz - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    let clipPosNoneJitter = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
+    let clipPosJittered = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.position = mix(clipPosNoneJitter, clipPosJittered, taaFactor);
     output.vertexPosition = worldPos.xyz;
     output.vertexNormal = worldNormal;

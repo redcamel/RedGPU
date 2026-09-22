@@ -126,8 +126,9 @@ class ParsedSkinInfo_GLTF {
 			    let jointModelMatrix = globalVertexSSBO[uniforms.jointSlotIndices[localJointIdx >> 2u][localJointIdx & 3u]].matrixList.modelMatrix;
 			    let invBind = uniforms.inverseBindMatrices[i];
 			    
-			    // 합성 행렬 계산하여 공유 메모리에 보존
-			    sharedSkinMatrices[i] = jointModelMatrix * invBind;
+			    // 합성 행렬 계산하여 공유 메모리에 보존 (메시 로컬 공간으로 직접 변환하여 대규모 좌표계 정밀도 소실 방지)
+			    let localJointMatrix = uniforms.invertNodeGlobalTransform * jointModelMatrix;
+			    sharedSkinMatrices[i] = localJointMatrix * invBind;
 			  }
 			  
 			  // 모든 스레드가 공유 메모리 작성을 끝마칠 때까지 동기화 대기!
@@ -175,14 +176,12 @@ class ParsedSkinInfo_GLTF {
 			      originalVertices[tangentIdx + 3u]
 			    );
 			    
-			    let worldTangentVec4 = skinMat * vec4<f32>(rawTangent.xyz, 0.0);
-			    let skinnedTangentVec4 = uniforms.invertNodeGlobalTransform * worldTangentVec4;
+			    let skinnedTangentVec4 = skinMat * vec4<f32>(rawTangent.xyz, 0.0);
 			    skinnedTangent = vec4<f32>(normalize(skinnedTangentVec4.xyz), rawTangent.w);
 			  }
 
-			  // --- 3. 정점 속성 변환 ---
-			  let worldPos = skinMat * vec4<f32>(rawPos, 1.0);
-			  let skinnedPos = uniforms.invertNodeGlobalTransform * worldPos;
+			  // --- 3. 정점 속성 변환 (순수 로컬 공간 연산 - 부동소수점 오차 제로) ---
+			  let skinnedPos = skinMat * vec4<f32>(rawPos, 1.0);
 
 			  // 3. 이전 프레임 결과 보존 (이전 프레임 클립 위치 계산 및 기록)
 			  let prevModelMatrix = globalVertexSSBO[uniforms.meshSlotIndex].matrixList.prevModelMatrix;
@@ -193,8 +192,7 @@ class ParsedSkinInfo_GLTF {
 			  var skinnedOut: SkinnedVertex;
 			  skinnedOut.position = skinnedPos.xyz;
 			  
-			  let worldNormalVec4 = skinMat * vec4<f32>(rawNormal, 0.0);
-			  let skinnedNormalVec4 = uniforms.invertNodeGlobalTransform * worldNormalVec4;
+			  let skinnedNormalVec4 = skinMat * vec4<f32>(rawNormal, 0.0);
 			  skinnedOut.normal = normalize(skinnedNormalVec4.xyz);
 			  
 			  skinnedOut.tangent = skinnedTangent;

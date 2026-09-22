@@ -40,10 +40,12 @@ fn main(inputData: InputData) -> VertexOutput {
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    // [KO] 최종 클립 좌표 계산
-    // [EN] Calculate final clip coordinates
+    // [KO] 최종 클립 좌표 계산 (카메라 상대적 고정밀 변환)
+    // [EN] Calculate final clip coordinates (Camera-relative high-precision transform)
     let worldPositionVec4 = u_instanceGroupModelMatrix * position;
-    output.position = u_projectionViewMatrix * worldPositionVec4;
+    let relPos = worldPositionVec4.xyz - u_cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = worldPositionVec4.xyz;
 
     // [KO] 노말 변환

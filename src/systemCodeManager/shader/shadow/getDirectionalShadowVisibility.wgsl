@@ -38,11 +38,12 @@ fn sampleModernCascadeShadow(
     oneOverTextureSize: f32,
     bias: f32,
     lightSize: f32,
-    slopeFactor: f32
+    slopeFactor: f32,
+    driftBias: f32
 ) -> f32 {
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    // 🌟 [슬로프 스케일 뎁스 바이어스] 경사면에서의 텍셀 깊이 오차 보정
-    let cascadeBias = bias * (1.0 + slopeFactor * 2.0) * (1.0 + f32(cascadeIndex) * 0.25);
+    // 🌟 [슬로프 스케일 뎁스 바이어스 + 대규모 오픈월드 부동소수점 오차 동적 흡수]
+    let cascadeBias = max(bias * (1.0 + slopeFactor * 3.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
     if (invalidDepth) {
@@ -149,14 +150,19 @@ fn getDirectionalShadowVisibility(
     let bias = shadowInfo.directionalShadowBias;
     let lightSize = shadowInfo.pcssLightSize;
 
-    // 2. 뷰 깊이 산출
-    let viewPos = systemUniforms.camera.viewMatrix * vec4<f32>(worldPosition, 1.0);
+    // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+    let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
     let viewDepth = -viewPos.z;
 
     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
         return 1.0;
     }
+
+    // 🌟 [대규모 오픈월드 부동소수점 오차 흡수 바이어스 계수 산출]
+    let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+    let driftBias = max(maxCoord * 0.00000035, 0.0001);
 
     // 3. 캐스케이드 레벨 결정
     var cascadeIndex: u32 = 0u;
@@ -170,7 +176,7 @@ fn getDirectionalShadowVisibility(
     var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     var orthoScale = length(lightVP[0].xyz);
     var worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-    var normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
+    var normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
     var biasedWorldPosition = worldPosition + normalOffset;
 
     var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -181,7 +187,7 @@ fn getDirectionalShadowVisibility(
         lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
         orthoScale = length(lightVP[0].xyz);
         worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-        normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
+        normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
         biasedWorldPosition = worldPosition + normalOffset;
         shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
 
@@ -190,7 +196,7 @@ fn getDirectionalShadowVisibility(
             lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
             orthoScale = length(lightVP[0].xyz);
             worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-            normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
+            normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
             biasedWorldPosition = worldPosition + normalOffset;
             shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
         }
@@ -204,7 +210,8 @@ fn getDirectionalShadowVisibility(
         oneOverTextureSize,
         bias,
         lightSize,
-        slopeBias
+        slopeBias,
+        driftBias
     );
 
     var finalVisibility = visibility;
@@ -223,7 +230,7 @@ fn getDirectionalShadowVisibility(
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);
             let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
-            let nextBiasedPos = worldPosition + N * (0.6 + slopeBias * 2.0) * nextWorldTexelSize;
+            let nextBiasedPos = worldPosition + N * (1.2 + slopeBias * 2.5) * nextWorldTexelSize;
 
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
             let nextVis = sampleModernCascadeShadow(
@@ -234,7 +241,8 @@ fn getDirectionalShadowVisibility(
                 oneOverTextureSize,
                 bias,
                 lightSize,
-                slopeBias
+                slopeBias,
+                driftBias
             );
 
             let blendFactor = smoothstep(0.0, 1.0, clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0));

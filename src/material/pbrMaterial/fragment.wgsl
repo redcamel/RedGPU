@@ -352,9 +352,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
         if (rawViewDist < maxCSMDist) {
             #redgpu_if isFoliage
-                let rawVis = getDirectionalShadowVisibilityFoliage(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+                let rawVis = getDirectionalShadowVisibilityFoliage(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, baseNormal, L0);
             #redgpu_else
-                let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+                let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, baseNormal, L0);
             #redgpu_endIf
             visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
         }

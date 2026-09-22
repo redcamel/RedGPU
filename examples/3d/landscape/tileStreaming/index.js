@@ -463,8 +463,8 @@ function initCharacter({
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
             characterMesh.y = (startH > 0 ? startH : 302);
 
-            // characterMesh.setCastShadowRecursively(true);
-            // characterMesh.setReceiveShadowRecursively(true);
+            characterMesh.setCastShadowRecursively(true);
+            characterMesh.setReceiveShadowRecursively(true);
             scene.addChild(characterMesh);
 
             characterOrbitController.centerX = characterMesh.x;

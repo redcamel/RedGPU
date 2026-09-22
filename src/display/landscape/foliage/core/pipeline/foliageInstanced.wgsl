@@ -195,14 +195,17 @@ fn mainInput(input : VertexInput) -> OutputData {
         worldPos += windDisp;
     }
 
-    let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    // [KO] 카메라 상대적 고정밀 투영 변환 (원거리 나무/수풀 지터링 방지)
+    // [EN] Camera-relative high-precision projection transform
+    let relPos = worldPos - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
 
-    output.position = clipPos;
+    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = worldPos;
     output.vertexNormal = worldNormal;
     output.uv = input.uv;
     output.uv1 = input.uv1;
-    output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
     output.instanceRotQuat = instanceRotQuat;

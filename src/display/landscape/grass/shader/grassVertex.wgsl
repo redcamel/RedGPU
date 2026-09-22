@@ -103,15 +103,19 @@ fn main(input: VertexInput) -> VertexOutput {
     let worldPos = localPos + instPos;
     let worldNormal = normalize(localNorm);
 
-    let worldPos4 = vec4<f32>(worldPos, 1.0);
-    output.clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
+    // [KO] 카메라 상대적 고정밀 투영 변환 (풀 잎 지터링 방지)
+    // [EN] Camera-relative high-precision projection transform
+    let relPos = worldPos - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+
+    output.clipPos = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.worldPos = worldPos;
     output.uv = input.uv;
     output.normal = worldNormal;
     output.heightRatio = heightRatio;
     output.alphaFade = alphaFade;
-    output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
-    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
+    output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
+    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
     output.groundColor = unpack4x8unorm(instance.packedGroundColor).rgb;
 

@@ -31,8 +31,9 @@ fn getDirectionalShadowVisibilityFoliage(
     let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
     let bias = shadowInfo.directionalShadowBias;
 
-    // 2. 뷰 깊이 산출
-    let viewPos = systemUniforms.camera.viewMatrix * vec4<f32>(worldPosition, 1.0);
+    // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
+    let relPos = worldPosition - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
     let viewDepth = -viewPos.z;
 
     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
@@ -51,7 +52,7 @@ fn getDirectionalShadowVisibilityFoliage(
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let orthoScale = length(lightVP[0].xyz);
     let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-    let normalOffset = N * (0.6 + slopeBias * 1.5) * worldTexelSize;
+    let normalOffset = N * (1.0 + slopeBias * 2.0) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -63,8 +64,10 @@ fn getDirectionalShadowVisibilityFoliage(
         return 1.0;
     }
 
+    let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+    let driftBias = max(maxCoord * 0.00000035, 0.0001);
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    let cascadeBias = bias * (1.0 + slopeBias * 1.5) * (1.0 + f32(cascadeIndex) * 0.25);
+    let cascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
     // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
     var finalVis = textureSampleCompareLevel(
