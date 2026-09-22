@@ -100,6 +100,11 @@ fn main(input: VertexInput) -> VertexOutput {
         localNorm = localNorm * cosA + cross(axis, localNorm) * sinA + axis * dot(axis, localNorm) * oneMinusCos;
     }
 
+    // [KO] 경사면 회전으로 인한 밑동 지면 파묻힘 방지 보정
+    // [EN] Compensate base ground penetration caused by slope rotation
+    let sinkDepth = max(0.0, -localPos.y);
+    localPos.y += sinkDepth * (1.0 - heightRatio * 0.7);
+
     let worldPos = localPos + instPos;
     let worldNormal = normalize(localNorm);
 

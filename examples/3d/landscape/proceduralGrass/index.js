@@ -262,9 +262,9 @@ function renderTestPane({
                 pane.refresh();
             });
 
-            // [KO] 절차적 잔디 설정
-            // [EN] Procedural grass settings
-            grassFolder = pane.addFolder({title: 'Grass', expanded: true});
+            // [KO] 절차적 잔디 설정 (GrassManager)
+            // [EN] Procedural grass settings (GrassManager)
+            grassFolder = pane.addFolder({title: 'GrassManager', expanded: true});
 
             grassFolder.addBinding(grassManager, 'enabled');
             grassFolder.addBinding(grassManager, 'streamingRadius', {
@@ -626,43 +626,19 @@ function initGrassField({
         }
     );
 
-    // [KO] 키 큰 야생 들풀 3종 멀티 LOD (grassList.glb - Multi-LOD Wild Tall Grass)
+    // [KO] 키 큰 야생 들풀 멀티 LOD (grassList.glb - Multi-LOD Wild Tall Grass)
     // [EN] Multi-LOD wild tall grass (grassList.glb - Multi-LOD Wild Tall Grass)
     new RedGPU.GLTFLoader(
         redGPUContext,
         '../../../assets/terrain/grassList.glb',
         (loader) => {
-            const grassGroups = new Map();
-            const allMeshes = [];
-
-            const planeMeshMap = {
-                'Plane.043': {type: 'grass_medium_01_tall_a', lod: 0},
-                'Plane.068': {type: 'grass_medium_01_tall_a', lod: 1},
-                'Plane.086': {type: 'grass_medium_01_tall_a', lod: 2},
-                'Plane.042': {type: 'grass_medium_01_tall_b', lod: 0},
-                'Plane.067': {type: 'grass_medium_01_tall_b', lod: 1},
-                'Plane.085': {type: 'grass_medium_01_tall_b', lod: 2},
-                'Plane.045': {type: 'grass_medium_01_tall_c', lod: 0},
-                'Plane.069': {type: 'grass_medium_01_tall_c', lod: 1},
-                'Plane.087': {type: 'grass_medium_01_tall_c', lod: 2},
-            };
+            const allMeshes = new Map();
 
             const traverse = (node) => {
                 if (!node) return;
                 if (node.geometry) {
-                    allMeshes.push(node);
                     const nodeName = node.name || '';
-                    const match = nodeName.match(/(grass_medium_01_tall_[a-z0-9]+).*?LOD([0-2])/i);
-                    if (match) {
-                        const typeKey = match[1].toLowerCase();
-                        const lodLevel = parseInt(match[2], 10);
-                        if (!grassGroups.has(typeKey)) grassGroups.set(typeKey, []);
-                        grassGroups.get(typeKey)[lodLevel] = node;
-                    } else if (planeMeshMap[nodeName]) {
-                        const info = planeMeshMap[nodeName];
-                        if (!grassGroups.has(info.type)) grassGroups.set(info.type, []);
-                        grassGroups.get(info.type)[info.lod] = node;
-                    }
+                    allMeshes.set(nodeName, node);
                 }
                 const children = node.children || [];
                 for (let i = 0; i < children.length; i++) {
@@ -671,56 +647,27 @@ function initGrassField({
             };
             traverse(loader.resultMesh);
 
-            if (grassGroups.size === 0 && allMeshes.length >= 9) {
-                const orderedTypes = ['grass_medium_01_tall_b', 'grass_medium_01_tall_a', 'grass_medium_01_tall_c'];
-                for (let lod = 0; lod < 3; lod++) {
-                    for (let t = 0; t < 3; t++) {
-                        const meshIdx = lod * 3 + t;
-                        const typeKey = orderedTypes[t];
-                        if (!grassGroups.has(typeKey)) grassGroups.set(typeKey, []);
-                        grassGroups.get(typeKey)[lod] = allMeshes[meshIdx];
-                    }
-                }
-            }
+            // [KO] 대표 야생 들풀 A의 LOD 0, 1, 2 메시 추출
+            // [EN] Extract LOD 0, 1, 2 meshes for representative Wild Tall Grass A
+            const lod0Mesh = allMeshes.get('Plane.043') || Array.from(allMeshes.values())[0];
+            const lod1Mesh = allMeshes.get('Plane.068') || lod0Mesh;
+            const lod2Mesh = allMeshes.get('Plane.086') || lod1Mesh;
 
-            if (grassGroups.size === 0) {
-                console.warn('No valid grass LOD meshes found in grassList.glb');
-                return;
-            }
-
-            const displayNames = {
-                'grass_medium_01_tall_a': 'Wild Tall Grass A',
-                'grass_medium_01_tall_b': 'Wild Tall Grass B',
-                'grass_medium_01_tall_c': 'Wild Tall Grass C'
-            };
-
-            const densities = {
-                'grass_medium_01_tall_a': 4000,
-                'grass_medium_01_tall_b': 3500,
-                'grass_medium_01_tall_c': 3500
-            };
-
-            const sortedKeys = Array.from(grassGroups.keys()).sort();
-
-            sortedKeys.forEach((key) => {
-                const lods = grassGroups.get(key);
-                const lod0 = lods[0] || lods[1] || lods[2];
-                if (!lod0) return;
-
+            if (lod0Mesh) {
                 const lodConfigs = [
-                    {mesh: lod0, lodDistance: 35}
+                    {mesh: lod0Mesh, lodDistance: 35}
                 ];
-                if (lods[1] && lods[1] !== lod0) {
-                    lodConfigs.push({mesh: lods[1], lodDistance: 70});
+                if (lod1Mesh && lod1Mesh !== lod0Mesh) {
+                    lodConfigs.push({mesh: lod1Mesh, lodDistance: 70});
                 }
-                if (lods[2] && lods[2] !== lod0 && lods[2] !== lods[1]) {
-                    lodConfigs.push({mesh: lods[2], lodDistance: 110});
+                if (lod2Mesh && lod2Mesh !== lod0Mesh && lod2Mesh !== lod1Mesh) {
+                    lodConfigs.push({mesh: lod2Mesh, lodDistance: 110});
                 }
 
-                const grassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
-                    name: displayNames[key] || key,
+                const wildGrassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
+                    name: 'Wild Tall Grass',
                     lods: lodConfigs,
-                    densityPerHectare: densities[key] || 3500,
+                    densityPerHectare: 6000,
                     targetLayer: 'Grass',
                     minWeightThreshold: 0.02,
                     cullingDistance: 110,
@@ -734,9 +681,9 @@ function initGrassField({
                     bottomOffset: 0.0
                 });
 
-                grassManager.addGrassType(grassType);
-                onGrassTypeAdded?.(grassType, false);
-            });
+                grassManager.addGrassType(wildGrassType);
+                onGrassTypeAdded?.(wildGrassType, false);
+            }
 
             grassManager.populateInstances([-500, 302.5, -2750]);
         }

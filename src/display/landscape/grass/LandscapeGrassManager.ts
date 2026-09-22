@@ -733,6 +733,11 @@ export class LandscapeGrassManager {
             const vhtAtlas = this.#landscape.getInternalAtlasTexture('vht');
             const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
             const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+            const [compCountX, compCountZ] = this.#landscape.componentCount;
+            const lod0Quads = Math.max(1, this.#landscape.lod0SizeQuads);
+            const gridStepX = (worldSizeX / Math.max(1, compCountX)) / lod0Quads;
+            const gridStepZ = (worldSizeZ / Math.max(1, compCountZ)) / lod0Quads;
+
             this.#baker.dispatchPass(
                 computePass,
                 this.#megaBuffer,
@@ -742,7 +747,9 @@ export class LandscapeGrassManager {
                 this.#redGPUContext.resourceManager.basicSampler.gpuSampler,
                 worldSizeX,
                 worldSizeZ,
-                this.#landscape.heightScale
+                this.#landscape.heightScale,
+                gridStepX,
+                gridStepZ
             );
         }
 

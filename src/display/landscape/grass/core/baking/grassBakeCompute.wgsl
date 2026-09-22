@@ -38,9 +38,9 @@ struct BakeUniforms {
     heightScale: f32,
     totalTasks: u32,
     hasVBT: u32,
+    gridStepX: f32,
+    gridStepZ: f32,
     _pad0: u32,
-    _pad1: u32,
-    _pad2: u32,
 };
 
 struct BakeTask {
@@ -80,20 +80,54 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let stepWorld = 2.0;
-    let du = stepWorld * bakeUniforms.invWorldSizeX;
-    let dv = stepWorld * bakeUniforms.invWorldSizeZ;
+    let texDims = vec2<f32>(textureDimensions(vhtTexture, 0));
+    let maxCoord = vec2<i32>(texDims) - vec2<i32>(1);
 
-    let sampledHeight = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-    let terrainHeight = sampledHeight * bakeUniforms.heightScale;
+    // [KO] VHT 텍셀 격자 내 인스턴스의 쿼드 위치 계산 (지형 버텍스 셰이더 매핑과 100% 일치)
+    // [EN] Compute instance quad coordinate within VHT texel grid matching landscape vertex mapping
+    let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
+    let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
 
-    let hR = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u + du, v), 0.0).r * bakeUniforms.heightScale;
-    let hU = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v + dv), 0.0).r * bakeUniforms.heightScale;
-    let hL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u - du, v), 0.0).r * bakeUniforms.heightScale;
-    let hD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v - dv), 0.0).r * bakeUniforms.heightScale;
+    let cellX = i32(floor(fCoordX));
+    let cellZ = i32(floor(fCoordZ));
+    let fracX = fCoordX - f32(cellX);
+    let fracZ = fCoordZ - f32(cellZ);
 
-    let rawNx = (hL - hR) / (stepWorld * 2.0);
-    let rawNz = (hD - hU) / (stepWorld * 2.0);
+    let c00 = vec2<i32>(cellX, cellZ);
+    let c10 = min(c00 + vec2<i32>(1, 0), maxCoord);
+    let c01 = min(c00 + vec2<i32>(0, 1), maxCoord);
+    let c11 = min(c00 + vec2<i32>(1, 1), maxCoord);
+
+    // [KO] 지형 버텍스 셰이더와 동일하게 textureLoad로 4개 꼭짓점 높이 읽기
+    // [EN] Read 4 vertex heights via textureLoad matching landscape vertex shader
+    let h00 = textureLoad(vhtTexture, c00, 0).r * bakeUniforms.heightScale;
+    let h10 = textureLoad(vhtTexture, c10, 0).r * bakeUniforms.heightScale;
+    let h01 = textureLoad(vhtTexture, c01, 0).r * bakeUniforms.heightScale;
+    let h11 = textureLoad(vhtTexture, c11, 0).r * bakeUniforms.heightScale;
+
+    // [KO] 텍셀당 월드 크기 계산
+    // [EN] Compute world size per texel
+    let texStepX = select(1.0, 1.0 / (bakeUniforms.invWorldSizeX * texDims.x), bakeUniforms.invWorldSizeX > 0.0);
+    let texStepZ = select(1.0, 1.0 / (bakeUniforms.invWorldSizeZ * texDims.y), bakeUniforms.invWorldSizeZ > 0.0);
+
+    // [KO] 지형 지오메트리와 일치하는 삼각형 평면 무게중심 좌표(Barycentric) 보간 및 면 기울기 계산
+    // [EN] Barycentric interpolation matching terrain geometry and compute surface slope
+    var terrainHeight: f32;
+    var rawNx: f32;
+    var rawNz: f32;
+
+    if (fracX + fracZ <= 1.0) {
+        // Triangle 1 (c00, c01, c10)
+        terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
+        rawNx = (h00 - h10) / texStepX;
+        rawNz = (h00 - h01) / texStepZ;
+    } else {
+        // Triangle 2 (c10, c01, c11)
+        terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
+        rawNx = (h01 - h11) / texStepX;
+        rawNz = (h10 - h11) / texStepZ;
+    }
+
     let slopeTan2 = rawNx * rawNx + rawNz * rawNz;
     if (typeInfo.hasSlopeFilter != 0u && (slopeTan2 < typeInfo.minSlopeTan2 || slopeTan2 > typeInfo.maxSlopeTan2)) {
         rawInstances[instIdx].posY = -999999.0;
@@ -101,7 +135,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     let terrainN = normalize(vec3<f32>(rawNx, 1.0, rawNz));
-    let blendedN = normalize(mix(vec3<f32>(0.0, 1.0, 0.0), terrainN, 0.75));
+    let blendedN = normalize(mix(vec3<f32>(0.0, 1.0, 0.0), terrainN, 0.25));
 
     let bakedY = terrainHeight + typeInfo.bottomOffset;
     rawInstances[instIdx].posY = bakedY;

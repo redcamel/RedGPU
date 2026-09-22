@@ -87,6 +87,13 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
         localPos = localPos * cosA + cross(axis, localPos) * sinA + axis * dot(axis, localPos) * oneMinusCos;
     }
 
+    // [KO] 경사면 회전으로 인한 밑동 지면 파묻힘 방지 보정
+    // [EN] Compensate base ground penetration caused by slope rotation
+    let baseHeight = max(0.01, grassUniforms.meshHeight);
+    let heightRatio = clamp((input.position.y - grassUniforms.minY) / baseHeight, 0.0, 1.0);
+    let sinkDepth = max(0.0, -localPos.y);
+    localPos.y += sinkDepth * (1.0 - heightRatio * 0.7);
+
     let worldPos = localPos + instPos;
 
     output.clipPos = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);

@@ -73,7 +73,9 @@ export class GrassBaker {
         vbtSampler: GPUSampler | null | undefined,
         worldSizeX: number,
         worldSizeZ: number,
-        heightScale: number
+        heightScale: number,
+        gridStepX: number = 2.0,
+        gridStepZ: number = 2.0
     ): void {
         if (this.#taskCount === 0 || !this.#bakePipeline || !this.#bakeBindGroupLayout || !this.#uniformGPUBuffer || !this.#tasksGPUBuffer) {
             return;
@@ -96,8 +98,8 @@ export class GrassBaker {
         f32[2] = heightScale;
         u32[3] = this.#taskCount;
         u32[4] = vbtTextureView ? 1 : 0;
-        u32[5] = 0;
-        u32[6] = 0;
+        f32[5] = gridStepX > 0 ? gridStepX : 2.0;
+        f32[6] = gridStepZ > 0 ? gridStepZ : 2.0;
         u32[7] = 0;
 
         gpuDevice.queue.writeBuffer(
