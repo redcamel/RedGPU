@@ -158,24 +158,22 @@ function renderTestPane({
                 }
             });
 
-            // [KO] Terrain 설정
-            // [EN] Terrain settings
-            const terrainFolder = pane.addFolder({title: 'Terrain', expanded: true});
+            // [KO] Landscape 설정
+            // [EN] Landscape settings
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
 
-            terrainFolder.addBinding(params, 'baseColor')
+            landscapeFolder.addBinding(params, 'baseColor')
                 .on('change', (ev) => {
                     landscape.baseColor.setColorByHEX(ev.value);
                 });
 
-            terrainFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
-            terrainFolder.addBinding(landscape, 'wireframe');
-            terrainFolder.addBinding(landscape, 'lodColoration');
-            terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
-            terrainFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
+            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
+            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
+            landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
 
             // [KO] LOD 설정
             // [EN] LOD settings
-            const lodFolder = terrainFolder.addFolder({title: 'LOD', expanded: false});
+            const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
             lodFolder.addBinding(params, 'lodMetric', {
                 options: {
                     'screenSize': 'screenSize',
@@ -197,7 +195,7 @@ function renderTestPane({
 
             // [KO] Heightmap Shadow 설정
             // [EN] Heightmap shadow settings
-            const shadowFolder = pane.addFolder({title: 'Heightmap Shadow', expanded: true});
+            const shadowFolder = landscapeFolder.addFolder({title: 'Heightmap Shadow', expanded: false});
 
             shadowFolder.addBinding(landscape, 'enableHeightmapShadow');
             shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {
@@ -215,6 +213,12 @@ function renderTestPane({
                 max: 6000,
                 step: 100
             });
+
+            // [KO] Debug 설정
+            // [EN] Debug settings
+            const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: true});
+            debugFolder.addBinding(landscape, 'wireframe');
+            debugFolder.addBinding(landscape, 'lodColoration');
 
             // [KO] Light 설정
             // [EN] Light settings
