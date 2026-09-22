@@ -1003,14 +1003,16 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
-                                    ko: `단일 16비트 하이트맵을 기반으로 8km x 8km 광역 지형을 렌더링하는 Hello Landscape 기초 예제입니다.<br/>
+                                    ko: `카메라 주변 고해상도 타일이 스트리밍되기 전, 단 한 장의 16비트 글로벌 하이트맵을 기반으로 8km x 8km 대규모 지형의 거시적 전체 윤곽(Macro Base)을 빠르고 가볍게 구축하는 기초 지형 예제입니다.<br/>
+                                        • <b>글로벌 베이스 지형</b>: 원거리까지 끊김 없는 지형 형태를 단일 텍스처로 대략적이면서도 광범위하게 즉시 시각화합니다.<br/>
                                         • <b>카메라 & 캐릭터 연동</b>: cameraMode를 'Character'로 전환하면 3D 캐릭터로 지형 위를 직접 걸어다니며(WASD/Shift/Space) 지형 굴곡을 따라 자연스럽게 이동하는 모습을 체험할 수 있습니다.<br/>
-                                        • <b>연속 LOD 검증</b>: 우측 패널의 wireframe과 lodColoration을 켜서 거리에 따른 Quad 밀도 최적화를 확인하세요.<br/>
-                                        • <b>하이트맵 그림자</b>: enableHeightmapShadow를 켜고 태양 각도(Light)를 돌려 골짜기에 드리워지는 레이마칭 음영을 관찰해보세요.`,
-                                    en: `A Hello Landscape starter demonstrating how to render an 8km x 8km terrain base with a single 16-bit global heightmap.<br/>
+                                        • <b>연속 LOD & 지오모핑</b>: 우측 패널의 wireframe과 lodColoration을 켜서 거리에 따른 Quad 밀도 최적화 및 크랙 없는 지오모핑 전환을 확인하세요.<br/>
+                                        • <b>하이트맵 그림자</b>: castHeightmapShadow를 켜고 태양 각도(Light)를 돌려 골짜기에 드리워지는 레이마칭 음영을 관찰해보세요.`,
+                                    en: `A foundational terrain example demonstrating how to quickly and lightly build the macro base elevation of an 8km x 8km terrain using a single 16-bit global heightmap before high-resolution tile streaming occurs.<br/>
+                                        • <b>Global Base Terrain</b>: Instantly establishes the overall distant terrain contours and elevation using a single lightweight heightmap.<br/>
                                         • <b>Camera & Character Sync</b>: Switch cameraMode to 'Character' to walk across the terrain (WASD/Shift/Space) along the natural contours of the ground.<br/>
-                                        • <b>Continuous LOD</b>: Toggle wireframe and lodColoration to inspect dynamic quad density optimization.<br/>
-                                        • <b>Heightmap Shadow</b>: Enable enableHeightmapShadow and adjust sun angles (Light) to observe raymarched self-shadows in deep valleys.`
+                                        • <b>Continuous LOD & Geomorphing</b>: Toggle wireframe and lodColoration to inspect dynamic quad density optimization and crack-free morph transitions.<br/>
+                                        • <b>Heightmap Shadow</b>: Enable castHeightmapShadow and adjust sun angles (Light) to observe raymarched self-shadows in deep valleys.`
                                 }
                             },
                             {

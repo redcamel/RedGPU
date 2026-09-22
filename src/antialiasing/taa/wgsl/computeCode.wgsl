@@ -118,11 +118,17 @@
         let baseBlend = mix(0.05, 0.25, motionSoft);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
 
-        // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Rejection)
-        var blendFactor = max(baseBlend, (1.0 - depthConfidence) * 0.5);
+        // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Depth Discontinuity Rejection)
+        var blendFactor = max(baseBlend, (1.0 - depthConfidence) * 0.8);
 
-        // 🚀 [정지 화면 떨림 방어] 루마 불일치 가중치는 모션이 있을 때만 블렌딩을 증가시키도록 격리
-        blendFactor = mix(blendFactor, max(blendFactor, lumaWeight * 0.35), motionSoft);
+        // 모션이 있을 때의 루마 불일치 반응
+        let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);
+        blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
+
+        // 🌟 [표준 TAA: 정적 표면 위 동적 그림자/라이팅 고스팅 방어 (Decoupled Shadow Rejection)]
+        // 지형처럼 모션 벡터가 0이어도, 그림자가 지나가며 급격한 명암 차이가 발생하면 히스토리를 즉시 털어내고 현재 프레임을 최대 75%까지 신속 반영
+        let shadowLumaRejection = smoothstep(0.15, 0.85, lumaWeight) * 0.75;
+        blendFactor = max(blendFactor, shadowLumaRejection);
 
         let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);
         let clippedHistoryRGBA = vec4<f32>(clippedHistoryRGB, clippedAlpha);

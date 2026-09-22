@@ -369,13 +369,14 @@ function initCharacter({
         redGPUContext,
         CHARACTER_URL,
         (loader) => {
-            const characterMesh = loader.resultMesh;
-            characterMesh.x = 0;
-            characterMesh.z = 0;
+            // [KO] 지형 중심의 거대 분지 평지 좌표로 배치
+            // [EN] Spawn at the center of the large flat basin
+            characterMesh.x = -875;
+            characterMesh.z = -2800;
             // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
             // [EN] Place at terrain height and configure shadows
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 0);
+            characterMesh.y = (startH > 0 ? startH : 300.5);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);

@@ -38,8 +38,8 @@ RedGPU.init(
         directionalLight.lux = 85000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 랜드스케이프 지형 생성
-        // [EN] Create landscape terrain
+        // [KO] 랜드스케이프 지형 생성 (타일 스트리밍 전 단일 16비트 글로벌 하이트맵 기반 거시 지형 베이스)
+        // [EN] Create landscape terrain (Macro base terrain using a single 16-bit global heightmap before tile streaming)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [8000, 8000];
         landscape.heightScale = 650;
@@ -287,13 +287,14 @@ function initCharacter({
         redGPUContext,
         CHARACTER_URL,
         (loader) => {
-            const characterMesh = loader.resultMesh;
-            characterMesh.x = 0;
-            characterMesh.z = 0;
+            // [KO] 지형 중심의 거대 분지 평지 좌표로 배치
+            // [EN] Spawn at the center of the large flat basin
+            characterMesh.x = -875;
+            characterMesh.z = -2800;
             // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
             // [EN] Place at terrain height and configure shadows
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 0);
+            characterMesh.y = (startH > 0 ? startH : 300.5);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
