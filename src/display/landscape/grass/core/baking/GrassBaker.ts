@@ -86,9 +86,9 @@ export class GrassBaker {
             return;
         }
 
-        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
         const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-        const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
         const targetVBTSampler = vbtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
         const f32 = this.#uniformCPUBuffer;

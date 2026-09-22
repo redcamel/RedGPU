@@ -270,25 +270,6 @@ function renderTestPane({
                 step: 5
             });
 
-            // [KO] 잔디 버퍼 통계
-            // [EN] Grass buffer statistics
-            const grassStats = {
-                get activeInstances() {
-                    let count = 0;
-                    for (let i = 0; i < grassManager.grassTypes.length; i++) {
-                        const alloc = grassManager.megaBuffer?.getAllocation(grassManager.grassTypes[i].typeId);
-                        if (alloc) count += alloc.activeCount;
-                    }
-                    return count.toLocaleString();
-                },
-                get totalCapacity() {
-                    return (grassManager.megaBuffer?.totalAllocatedInstances ?? 0).toLocaleString();
-                }
-            };
-            const statsFolder = grassFolder.addFolder({title: 'Buffer Stats', expanded: true});
-            statsFolder.addBinding(grassStats, 'activeInstances', {readonly: true});
-            statsFolder.addBinding(grassStats, 'totalCapacity', {readonly: true});
-
             // [KO] Landscape 설정
             // [EN] Landscape settings
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});

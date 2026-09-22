@@ -367,9 +367,9 @@ export class LandscapeGrassManager {
         if (!this.#enabled || this.#grassTypes.length === 0) return;
 
         const camPos: [number, number, number] = [
-            camera.x ?? camera.position?.[0] ?? 0,
-            camera.y ?? camera.position?.[1] ?? 0,
-            camera.z ?? camera.position?.[2] ?? 0
+            camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0,
+            camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0,
+            camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0
         ];
 
         this.#lastPopulatePos[0] = camPos[0];
