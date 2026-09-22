@@ -222,6 +222,7 @@ export class Landscape extends Object3DContainer {
         this.#grassManager = new LandscapeGrassManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
+            this.#grassManager?.handleTileLoaded(comp);
         });
         this.#debuggerManager = new LandscapeDebuggerManager(this);
         this.#updateLandscapeUniforms();
@@ -413,6 +414,7 @@ export class Landscape extends Object3DContainer {
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
             this.#tileStreamer?.rebakeAllLoadedVBT();
+            this.#grassManager?.rebakeAll();
         }
     }
 
@@ -536,6 +538,7 @@ export class Landscape extends Object3DContainer {
         this.#bakeGlobalVBT();
 
         this.#isGlobalHeightBaked = true;
+        this.#grassManager?.rebakeAll();
     }
 
     #bakeGlobalVBT(): void {

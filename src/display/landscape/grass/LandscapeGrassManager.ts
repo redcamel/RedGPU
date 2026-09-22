@@ -358,6 +358,9 @@ export class LandscapeGrassManager {
                 });
             }
         }
+
+        this.#lastUpdateGridPos[0] = -999999;
+        this.#lastUpdateGridPos[1] = -999999;
     }
 
     update(camera: any, stateData?: any): void {
@@ -516,6 +519,59 @@ export class LandscapeGrassManager {
         this.#lastPopulatePos[1] = centerPos[1];
         this.#lastPopulatePos[2] = centerPos[2];
         this.#updateCellStreaming(centerPos[0], centerPos[2], true);
+    }
+
+    /**
+     * [KO] 모든 활성 잔디 인스턴스의 높이와 법선을 최신 지형 상태(heightScale, VHT 등)에 맞추어 GPU에서 즉시 재베이킹합니다.
+     * [EN] Immediately rebakes height and normal for all active grass instances on GPU matching latest landscape state.
+     */
+    rebakeAll(): void {
+        if (!this.#enabled || this.#grassTypes.length === 0) return;
+        for (const type of this.#grassTypes) {
+            const state = this.#typeCellStates.get(type.typeId);
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!state || !alloc) continue;
+            for (const range of state.activeCellRanges.values()) {
+                if (range.filledCount > 0) {
+                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                }
+            }
+        }
+    }
+
+    /**
+     * [KO] 새로 로드된 지형 타일 영역 내의 활성 잔디 인스턴스를 찾아 고해상도 VHT 높이로 재베이킹합니다.
+     * [EN] Finds active grass instances within newly loaded landscape tile and rebakes them with high-res VHT.
+     */
+    handleTileLoaded(comp: any): void {
+        if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
+        const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
+        const halfTileX = tileSizeX * 0.5;
+        const halfTileZ = tileSizeZ * 0.5;
+        const minX = comp.worldX - halfTileX;
+        const maxX = comp.worldX + halfTileX;
+        const minZ = comp.worldZ - halfTileZ;
+        const maxZ = comp.worldZ + halfTileZ;
+
+        const cellSize = LandscapeGrassManager.CELL_SIZE;
+
+        for (const type of this.#grassTypes) {
+            const state = this.#typeCellStates.get(type.typeId);
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!state || !alloc) continue;
+
+            for (const [key, range] of state.activeCellRanges.entries()) {
+                if (range.filledCount <= 0) continue;
+                const cellX = (key >> 16);
+                const cellZ = (key << 16) >> 16;
+                const cellCenterX = (cellX + 0.5) * cellSize;
+                const cellCenterZ = (cellZ + 0.5) * cellSize;
+
+                if (cellCenterX >= minX && cellCenterX <= maxX && cellCenterZ >= minZ && cellCenterZ <= maxZ) {
+                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                }
+            }
+        }
     }
 
     render(view: any, passEncoder: GPURenderPassEncoder): void {

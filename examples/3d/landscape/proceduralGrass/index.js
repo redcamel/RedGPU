@@ -271,12 +271,6 @@ function renderTestPane({
                 min: 30,
                 max: 250,
                 step: 5
-            }).on('change', () => {
-                const cam = view.camera;
-                const posX = cam.x ?? cam.centerX ?? 0;
-                const posY = cam.y ?? cam.centerY ?? 0;
-                const posZ = cam.z ?? cam.centerZ ?? 0;
-                grassManager.populateInstances([posX, posY, posZ]);
             });
 
             // [KO] 잔디 버퍼 통계
@@ -621,7 +615,6 @@ function initGrassField({
 
                 grassManager.addGrassType(baseClumpType);
                 onGrassTypeAdded?.(baseClumpType, true);
-                grassManager.populateInstances([-500, 302.5, -2750]);
             }
         }
     );
@@ -684,8 +677,6 @@ function initGrassField({
                 grassManager.addGrassType(wildGrassType);
                 onGrassTypeAdded?.(wildGrassType, false);
             }
-
-            grassManager.populateInstances([-500, 302.5, -2750]);
         }
     );
 }
