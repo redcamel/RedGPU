@@ -170,6 +170,7 @@ function renderTestPane({
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
+            landscapeFolder.addBinding(landscape, 'castShadow');
             landscapeFolder.addBinding(landscape, 'receiveShadow');
 
             // [KO] LOD 설정
@@ -192,6 +193,20 @@ function renderTestPane({
                 min: 0.0,
                 max: 0.99,
                 step: 0.01
+            });
+            const quadOptions = {
+                '16': 16,
+                '32': 32,
+                '64': 64,
+                '128': 128,
+                '256': 256,
+                '512': 512
+            };
+            lodFolder.addBinding(landscape, 'componentSizeQuads', {
+                options: quadOptions
+            });
+            lodFolder.addBinding(landscape, 'lod0SizeQuads', {
+                options: quadOptions
             });
 
             // [KO] Heightmap Shadow 설정

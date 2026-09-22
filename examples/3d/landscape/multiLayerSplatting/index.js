@@ -175,7 +175,8 @@ function renderTestPane({
     let setCharacterState = null;
 
     const params = {
-        cameraMode: 'Orbit'
+        cameraMode: 'Orbit',
+        lodMetric: landscape.lodMetric
     };
 
     // [KO] 3D 캐릭터 로딩 및 바인딩
@@ -231,7 +232,44 @@ function renderTestPane({
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
+            landscapeFolder.addBinding(landscape, 'castShadow');
             landscapeFolder.addBinding(landscape, 'receiveShadow');
+
+            // [KO] LOD 설정
+            // [EN] LOD settings
+            const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
+            lodFolder.addBinding(params, 'lodMetric', {
+                options: {
+                    'screenSize': 'screenSize',
+                    'distance': 'distance'
+                }
+            }).on('change', (ev) => {
+                landscape.lodMetric = ev.value;
+            });
+            lodFolder.addBinding(landscape, 'lodGeomorphStartRatio', {
+                min: 0.0,
+                max: 0.99,
+                step: 0.01
+            });
+            lodFolder.addBinding(landscape, 'lodFadeStartRatio', {
+                min: 0.0,
+                max: 0.99,
+                step: 0.01
+            });
+            const quadOptions = {
+                '16': 16,
+                '32': 32,
+                '64': 64,
+                '128': 128,
+                '256': 256,
+                '512': 512
+            };
+            lodFolder.addBinding(landscape, 'componentSizeQuads', {
+                options: quadOptions
+            });
+            lodFolder.addBinding(landscape, 'lod0SizeQuads', {
+                options: quadOptions
+            });
 
             // [KO] Heightmap Shadow 설정
             // [EN] Heightmap shadow settings
