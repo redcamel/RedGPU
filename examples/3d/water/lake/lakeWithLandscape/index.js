@@ -48,7 +48,7 @@ RedGPU.init(
 
         // 4-1. PBR 멀티 텍스처링 레이어 (Grass, Gravel, Rock, Leave)
         const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const weightTexturePath = '../../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layersConfig = [
             {
@@ -99,7 +99,7 @@ RedGPU.init(
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
                 ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: splatMapPath,
+                weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness,
@@ -187,7 +187,7 @@ RedGPU.init(
         splatImg.onload = () => {
             foliageManager.repopulateAll();
         };
-        splatImg.src = splatMapPath;
+        splatImg.src = weightTexturePath;
 
         const TREE_MODEL_URL = '../../../../assets/terrain/test.glb';
         new RedGPU.GLTFLoader(

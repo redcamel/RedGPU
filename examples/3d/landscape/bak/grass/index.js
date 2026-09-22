@@ -58,7 +58,7 @@ RedGPU.init(
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const weightTexturePath = '../../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layerConfigs = [
             {
@@ -109,7 +109,7 @@ RedGPU.init(
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
                 ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: splatMapPath,
+                weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness,

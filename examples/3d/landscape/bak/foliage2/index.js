@@ -64,7 +64,7 @@ RedGPU.init(
         landscape.baseColor.setColorByHEX('#387d42');
 
         const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const weightTexturePath = '../../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layers = [
             {
@@ -113,7 +113,7 @@ RedGPU.init(
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
                 ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: splatMapPath,
+                weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness,

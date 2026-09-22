@@ -49,7 +49,7 @@ RedGPU.init(
         // [KO] RGBA 4채널 스플랫맵 기반 멀티레이어 구성
         // [EN] Multi-layer setup based on RGBA 4-channel splatmap
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const weightTexturePath = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layerConfigs = [
             {
@@ -57,40 +57,28 @@ RedGPU.init(
                 key: 'grass',
                 weightChannel: 'R',
                 uvScale: [50, 50],
-                roughness: 0.85,
-                metallic: 0.0,
-                normalIntensity: 1.5,
-                aoIntensity: 1.0
+                roughness: 0.85
             },
             {
                 name: 'Rock',
                 key: 'rock',
                 weightChannel: 'G',
                 uvScale: [15, 15],
-                roughness: 0.7,
-                metallic: 0.05,
-                normalIntensity: 2.2,
-                aoIntensity: 1.5
+                roughness: 0.7
             },
             {
                 name: 'Gravel',
                 key: 'gravel',
                 weightChannel: 'B',
                 uvScale: [40, 40],
-                roughness: 0.9,
-                metallic: 0.0,
-                normalIntensity: 1.8,
-                aoIntensity: 1.2
+                roughness: 0.9
             },
             {
                 name: 'Leave',
                 key: 'leave',
                 weightChannel: 'A',
                 uvScale: [50, 50],
-                roughness: 0.8,
-                metallic: 0.0,
-                normalIntensity: 1.4,
-                aoIntensity: 1.0
+                roughness: 0.8
             }
         ];
 
@@ -100,13 +88,10 @@ RedGPU.init(
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
                 ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: splatMapPath,
+                weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
-                roughness: cfg.roughness,
-                metallic: cfg.metallic,
-                normalIntensity: cfg.normalIntensity,
-                aoIntensity: cfg.aoIntensity
+                roughness: cfg.roughness
             });
             landscape.addLayer(layer);
             return layer;
@@ -151,23 +136,20 @@ function renderTestPane({
                             directionalLight,
                             layers
                         }) {
-    // [KO] 자유 비행 카메라 (Free Flight)
-    // [EN] Free Flight camera
-    const freeController = new RedGPU.Camera.FreeController(redGPUContext);
-    freeController.x = 0;
-    freeController.y = 1350;
-    freeController.z = 2800;
-    freeController.tilt = -18;
-    freeController.pan = 0;
-    freeController.moveSpeed = 4000;
-
     // [KO] 캐릭터 추종 궤도 카메라 (Character)
     // [EN] Character orbit follow camera
     const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
     characterOrbitController.distance = 5.5;
     characterOrbitController.tilt = -12;
-    characterOrbitController.pan = 0;
+    characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
+    characterOrbitController.centerX = -500;
+    characterOrbitController.centerY = 302.5 + 1.2;
+    characterOrbitController.centerZ = -2750;
+
+    // [KO] 기본 카메라를 캐릭터 시점으로 설정
+    // [EN] Set default camera to character follow view
+    view.camera = characterOrbitController;
 
     // [KO] 캐릭터 상태 관리
     // [EN] Character state management
@@ -176,7 +158,7 @@ function renderTestPane({
     let setCharacterState = null;
 
     const params = {
-        cameraMode: 'Orbit',
+        cameraMode: 'Character',
         baseColor: landscape.baseColor.hex,
         lodMetric: landscape.lodMetric
     };
@@ -192,21 +174,26 @@ function renderTestPane({
             characterMesh = handle.characterMesh;
             characterController = handle.characterController;
             setCharacterState = handle.setState;
+            if (params.cameraMode === 'Character') {
+                characterController.useKeyboard = true;
+            }
         }
     });
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] Controller 설정
-            // [EN] Controller settings
+            // [KO] Controller 설정 (토글 버튼 방식)
+            // [EN] Controller settings (Toggle button style)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
             controllerFolder.addBinding(params, 'cameraMode', {
-                options: {
-                    'Orbit': 'Orbit',
-                    'Free Flight': 'Free Flight',
-                    'Character': 'Character'
-                }
+                view: 'radiogrid',
+                groupName: 'cameraMode',
+                size: [2, 1],
+                cells: (x, y) => ({
+                    title: x === 0 ? 'Orbit' : 'Character',
+                    value: x === 0 ? 'Orbit' : 'Character'
+                })
             }).on('change', (ev) => {
                 const mode = ev.value;
 
@@ -218,9 +205,6 @@ function renderTestPane({
                         characterOrbitController.centerY = characterMesh.y + 1.2;
                         characterOrbitController.centerZ = characterMesh.z;
                     }
-                } else if (mode === 'Free Flight') {
-                    view.camera = freeController;
-                    if (characterController) characterController.useKeyboard = false;
                 } else {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;
@@ -237,8 +221,6 @@ function renderTestPane({
                 });
 
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
-            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
-            landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
             landscapeFolder.addBinding(landscape, 'receiveShadow');
 
             // [KO] LOD 설정
@@ -338,14 +320,12 @@ function renderTestPane({
                 layerSubFolder.addBinding(layer, 'enabled');
 
                 const uvProxy = {uvScale: layer.uvScale[0]};
-                layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 100, step: 1})
+                layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 150, step: 1})
                     .on('change', (ev) => {
                         layer.uvScale = [ev.value, ev.value];
                     });
 
-                layerSubFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 4, step: 0.1});
                 layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
-                layerSubFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 3, step: 0.1});
             });
         }
     });
@@ -393,14 +373,14 @@ function initCharacter({
         CHARACTER_URL,
         (loader) => {
             const characterMesh = loader.resultMesh;
-            // [KO] 지형 중심의 거대 분지 평지 좌표로 배치
-            // [EN] Spawn at the center of the large flat basin
-            characterMesh.x = -875;
-            characterMesh.z = -2800;
+            // [KO] 언덕 기슭과 인접한 안정적인 평지 좌표로 배치
+            // [EN] Spawn at flat ground adjacent to the hill base
+            characterMesh.x = -500;
+            characterMesh.z = -2750;
             // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
             // [EN] Place at terrain height and configure shadows
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 300.5);
+            characterMesh.y = (startH > 0 ? startH : 302.5);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);

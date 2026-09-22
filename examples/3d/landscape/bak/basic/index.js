@@ -37,7 +37,7 @@ RedGPU.init(
 
         // 4. Texture Layers (RGBA 4-Channel SplatMap 멀티 텍스처링 레이어)
         const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';
-        const splatMapPath = '../../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        const weightTexturePath = '../../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layers = [
             {
@@ -86,7 +86,7 @@ RedGPU.init(
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
                 ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: splatMapPath,
+                weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness,
