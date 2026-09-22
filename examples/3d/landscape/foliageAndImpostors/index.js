@@ -5,8 +5,12 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 5: Foliage & Impostors (대규모 수목 식생 및 옥타헤드럴 임포스터)
  * [EN] Step 5: Foliage & Impostors (Large-Scale Foliage & Octahedral Impostors)
  *
- * [KO] 16,000m x 16,000m 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 근거리 3단계 메쉬 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터(Octahedral Impostor)를 통해 렌더링 부하를 획기적으로 낮추는 예제입니다.
- * [EN] An example demonstrating large-scale pine tree and rock foliage placement across a 16,000m x 16,000m terrain, drastically reducing rendering load with 3-stage mesh LODs and up to 6,000m far-field Octahedral Impostors.
+ * [KO] 16km 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 3단계 메시 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터(Octahedral Impostor)를 결합하여 렌더링 부하를 극적으로 낮추는 예제입니다.
+ *      • 임포스터 블렌딩: 자유 비행(Free Flight) 모드로 원거리 숲에서 근거리 소나무로 급접근할 때 3D 메시와 2D 임포스터 간의 무결점 전환을 관찰하세요.
+ *      • 경사각 식생 제어: minSlope와 maxSlope를 조절하여 급경사 절벽에는 나무가 자라지 않고 바위만 분포하도록 제어할 수 있습니다.
+ * [EN] Large-scale foliage example placing pine trees and rocks across a 16km terrain, combining 3-stage mesh LODs with 6,000m far-field Octahedral Impostors.
+ *      • Impostor Blending: Fly toward distant forests in Free Flight mode to observe seamless transitions between 3D meshes and 2D impostors.
+ *      • Slope-Aware Foliage: Tweak minSlope and maxSlope to restrict tree growth on steep cliffs while allowing rocks.
  */
 
 const canvas = document.createElement('canvas');

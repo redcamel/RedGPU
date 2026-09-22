@@ -5,8 +5,12 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 3: Tile Streaming & Continuous LOD (대규모 타일 스트리밍 및 연속 LOD)
  * [EN] Step 3: Tile Streaming & Continuous LOD (Large-Scale Tile Streaming & Continuous LOD)
  *
- * [KO] 16,000m x 16,000m 광역 오픈월드 지형을 256개(16x16) 타일 그리드로 분할하여, 카메라 위치와 가시거리에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하고 연속 LOD를 제어하는 예제입니다.
- * [EN] An example demonstrating how to divide a 16,000m x 16,000m open-world terrain into 256 (16x16) tile grids, asynchronously stream 16-bit high-resolution tiles based on camera position, and control continuous LOD.
+ * [KO] 16km x 16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하는 대규모 최적화 예제입니다.
+ *      • 공간 분할 미니맵: 좌측 하단의 Spatial Grid 디버거에서 카메라 이동에 따른 실시간 타일 로딩/언로딩 반경을 관찰하세요.
+ *      • 스트리밍 반경 조절: Streaming 폴더의 loadingRadius와 maxLoadsPerFrame을 조절하여 프레임 드랍 없는 비동기 로딩 성능을 체감해보세요.
+ * [EN] Large-scale terrain optimization dividing a 16km x 16km world into 256 tiles, asynchronously streaming 16-bit tiles based on camera position.
+ *      • Spatial Grid Minimap: Watch dynamic tile streaming and unloading around the camera via the bottom-left Spatial Grid mini-map.
+ *      • Streaming Tuning: Adjust loadingRadius and maxLoadsPerFrame to fine-tune asynchronous background loading.
  */
 
 const canvas = document.createElement('canvas');

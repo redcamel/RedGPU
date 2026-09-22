@@ -5,8 +5,12 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 2: Multi-Layer Splatting (멀티레이어 텍스처 블렌딩)
  * [EN] Step 2: Multi-Layer Splatting (Multi-Layer Texture Blending)
  *
- * [KO] 단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵(Splatmap)의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다.
- * [EN] An example demonstrating multi-layer terrain texturing by blending multiple PBR layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps onto the initialized landscape terrain based on RGBA 4-channel Splatmap weights.
+ * [KO] 단일 하이트맵 지형 위에 RGBA 4채널 스플랫맵 가중치를 기반으로 잔디·암석·자갈·낙엽 등 4종의 PBR 텍스처 레이어(알베도, 노멀, ORM)를 매끄럽게 블렌딩하는 예제입니다.
+ *      • 레이어 PBR 튜닝: Layers 폴더에서 각 재질의 uvScale, normalIntensity, roughness를 변경하여 표면 질감 차이를 비교해보세요.
+ *      • 가중치 영역 격리: 특정 레이어의 enabled를 꺼서 각 채널(R/G/B/A)이 지형 어디에 분포하는지 직관적으로 파악할 수 있습니다.
+ * [EN] Demonstrates blending 4 PBR material layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps driven by RGBA splatmap weights.
+ *      • Layer PBR Tuning: Adjust uvScale, normalIntensity, and roughness in the Layers folder to inspect surface material variations.
+ *      • Layer Isolation: Toggle enabled: false on layers to see where individual weight channels (R/G/B/A) are distributed.
  */
 
 const canvas = document.createElement('canvas');

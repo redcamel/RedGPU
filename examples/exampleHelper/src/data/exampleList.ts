@@ -1003,56 +1003,86 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
-                                    ko: `개별 타일맵 스트리밍을 적용하기 전, 단일 16비트 하이트맵(Global Heightmap)으로 전체적인 랜드스케이프 지형 베이스를 초기화하고 기본 렌더링을 구성하는 기초 예제입니다.`,
-                                    en: `An introductory example demonstrating how to initialize the entire landscape terrain base using a single 16-bit global heightmap before applying tiled map streaming, and configure fundamental rendering.`
+                                    ko: `단일 16비트 하이트맵을 기반으로 8km x 8km 광역 지형을 렌더링하는 Hello Landscape 기초 예제입니다.<br/>
+                                        • <b>카메라 & 캐릭터 연동</b>: cameraMode를 'Character'로 전환하면 3D 캐릭터로 지형 위를 직접 걸어다니며(WASD/Shift/Space) 지형 굴곡을 따라 자연스럽게 이동하는 모습을 체험할 수 있습니다.<br/>
+                                        • <b>연속 LOD 검증</b>: 우측 패널의 wireframe과 lodColoration을 켜서 거리에 따른 Quad 밀도 최적화를 확인하세요.<br/>
+                                        • <b>하이트맵 그림자</b>: enableHeightmapShadow를 켜고 태양 각도(Light)를 돌려 골짜기에 드리워지는 레이마칭 음영을 관찰해보세요.`,
+                                    en: `A Hello Landscape starter demonstrating how to render an 8km x 8km terrain base with a single 16-bit global heightmap.<br/>
+                                        • <b>Camera & Character Sync</b>: Switch cameraMode to 'Character' to walk across the terrain (WASD/Shift/Space) along the natural contours of the ground.<br/>
+                                        • <b>Continuous LOD</b>: Toggle wireframe and lodColoration to inspect dynamic quad density optimization.<br/>
+                                        • <b>Heightmap Shadow</b>: Enable enableHeightmapShadow and adjust sun angles (Light) to observe raymarched self-shadows in deep valleys.`
                                 }
                             },
                             {
                                 name: 'Multi-Layer Splatting',
                                 path: '3d/landscape/multiLayerSplatting',
                                 description: {
-                                    ko: `단일 하이트맵으로 초기화된 랜드스케이프 지형 위에, RGBA 4채널 스플랫맵(Splatmap)의 가중치를 기반으로 잔디·암석·자갈·낙엽 등 복수의 PBR 레이어(알베도, 노멀, ORM)를 지표면에 합성/블렌딩하는 멀티레이어 지형 텍스처링 예제입니다.`,
-                                    en: `An example demonstrating multi-layer terrain texturing by blending multiple PBR layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps onto the initialized landscape terrain based on RGBA 4-channel Splatmap weights.`
+                                    ko: `단일 하이트맵 지형 위에 RGBA 4채널 스플랫맵 가중치를 기반으로 잔디·암석·자갈·낙엽 등 4종의 PBR 텍스처 레이어(알베도, 노멀, ORM)를 매끄럽게 블렌딩하는 예제입니다.<br/>
+                                        • <b>레이어 PBR 튜닝</b>: Layers 폴더에서 각 재질의 uvScale, normalIntensity, roughness를 변경하여 표면 질감 차이를 비교해보세요.<br/>
+                                        • <b>가중치 영역 격리</b>: 특정 레이어의 enabled를 꺼서 각 채널(R/G/B/A)이 지형 어디에 분포하는지 직관적으로 파악할 수 있습니다.`,
+                                    en: `Demonstrates blending 4 PBR material layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps driven by RGBA splatmap weights.<br/>
+                                        • <b>Layer PBR Tuning</b>: Adjust uvScale, normalIntensity, and roughness in the Layers folder to inspect surface material variations.<br/>
+                                        • <b>Layer Isolation</b>: Toggle enabled: false on layers to see where individual weight channels (R/G/B/A) are distributed.`
                                 }
                             },
                             {
                                 name: 'Tile Streaming',
                                 path: '3d/landscape/tileStreaming',
                                 description: {
-                                    ko: `16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩하고 연속 LOD를 제어하는 예제입니다.`,
-                                    en: `An example demonstrating how to divide a 16km terrain into 256 tile grids, asynchronously stream 16-bit high-resolution tiles based on camera position, and control continuous LOD.`
+                                    ko: `16km x 16km 대규모 지형을 256개 타일 그리드로 분할하여, 카메라 위치에 따라 16비트 고해상도 타일을 실시간 비동기 스트리밍 로딩/언로딩하는 대규모 최적화 예제입니다.<br/>
+                                        • <b>공간 분할 미니맵</b>: 좌측 하단의 Spatial Grid 디버거에서 카메라 이동에 따른 실시간 타일 로딩/언로딩 반경을 관찰하세요.<br/>
+                                        • <b>스트리밍 반경 조절</b>: Streaming 폴더의 loadingRadius와 maxLoadsPerFrame을 조절하여 프레임 드랍 없는 비동기 로딩 성능을 체감해보세요.`,
+                                    en: `Large-scale terrain optimization dividing a 16km x 16km world into 256 tiles, asynchronously streaming 16-bit tiles based on camera position.<br/>
+                                        • <b>Spatial Grid Minimap</b>: Watch dynamic tile streaming and unloading around the camera via the bottom-left Spatial Grid mini-map.<br/>
+                                        • <b>Streaming Tuning</b>: Adjust loadingRadius and maxLoadsPerFrame to fine-tune asynchronous background loading.`
                                 }
                             },
                             {
                                 name: 'Procedural Grass Field',
                                 path: '3d/landscape/proceduralGrass',
                                 description: {
-                                    ko: `지형 스플랫맵 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(Grass)를 필드에 배치하고, 바람 애니메이션 및 거리별 LOD·컬링·수축(Shrink) 시뮬레이션을 구현하는 예제입니다.`,
-                                    en: `An example demonstrating GPU-instanced procedural grass field placement driven by terrain splatmap weights, with wind animation and distance-based LOD, culling, and shrink simulation.`
+                                    ko: `지형 스플랫맵의 잔디 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(뗏장 + 키 큰 들풀 3종 멀티 LOD)를 필드에 배치하는 대규모 식생 시뮬레이션 예제입니다.<br/>
+                                        • <b>거리별 수축 & 컬링</b>: 카메라를 전후로 이동하며 원거리 잔디가 자연스럽게 수축(shrinkStartDistance)되고 컬링(cullingDistance)되는 것을 확인하세요.<br/>
+                                        • <b>버퍼 통계 확인</b>: Buffer Stats에서 실시간 활성 인스턴스 수(activeInstances)와 메가버퍼 점유 상태를 모니터링할 수 있습니다.`,
+                                    en: `Vegetation simulation scattering tens of thousands of GPU-instanced grass clumps and multi-LOD tall wild grass driven by terrain splatmap weights.<br/>
+                                        • <b>Distance Shrink & Culling</b>: Move camera to watch distant grass smoothly shrink (shrinkStartDistance) and cull (cullingDistance).<br/>
+                                        • <b>Buffer Statistics</b>: Monitor live instance count (activeInstances) and mega-buffer capacity in the Buffer Stats folder.`
                                 }
                             },
                             {
                                 name: 'Foliage & Impostors',
                                 path: '3d/landscape/foliageAndImpostors',
                                 description: {
-                                    ko: `16km 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 3단계 메쉬 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터(Octahedral Impostor)를 통해 렌더링 부하를 최적화하는 예제입니다.`,
-                                    en: `An example demonstrating large-scale pine tree and rock foliage placement across a 16km terrain, optimizing rendering load with 3-stage mesh LODs and up to 6,000m far-field Octahedral Impostors.`
+                                    ko: `16km 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 3단계 메시 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터(Octahedral Impostor)를 결합하여 렌더링 부하를 극적으로 낮추는 예제입니다.<br/>
+                                        • <b>임포스터 블렌딩</b>: 자유 비행(Free Flight) 모드로 원거리 숲에서 근거리 소나무로 급접근할 때 3D 메시와 2D 임포스터 간의 무결점 전환을 관찰하세요.<br/>
+                                        • <b>경사각 식생 제어</b>: minSlope와 maxSlope를 조절하여 급경사 절벽에는 나무가 자라지 않고 바위만 분포하도록 제어할 수 있습니다.`,
+                                    en: `Large-scale foliage example placing pine trees and rocks across a 16km terrain, combining 3-stage mesh LODs with 6,000m far-field Octahedral Impostors.<br/>
+                                        • <b>Impostor Blending</b>: Fly toward distant forests in Free Flight mode to observe seamless transitions between 3D meshes and 2D impostors.<br/>
+                                        • <b>Slope-Aware Foliage</b>: Tweak minSlope and maxSlope to restrict tree growth on steep cliffs while allowing rocks.`
                                 }
                             },
                             {
                                 name: 'Open World Integration',
                                 path: '3d/landscape/openWorldIntegration',
                                 description: {
-                                    ko: `대규모 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 식생 임포스터와 물리 기반 3D 캐릭터 컨트롤러(Soldier)를 결합한 완성형 오픈월드 통합 시뮬레이션입니다.`,
-                                    en: `A complete open-world integration simulation uniting 16km tiled streaming terrain, multi-layer PBR splatting, procedural grass, foliage impostors, and physics-based 3D character controller (Soldier).`
+                                    ko: `16km 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 임포스터와 물리 기반 3D 캐릭터(Soldier)를 유기적으로 결합한 완성형 오픈월드 시뮬레이션입니다.<br/>
+                                        • <b>캐릭터 조작</b>: WASD(이동), Shift(달리기), Space(점프)로 캐릭터를 움직여 지형 굴곡에 맞춘 실시간 높이 동기화(getHeightAt)를 체험하세요.<br/>
+                                        • <b>3인칭 추적 카메라</b>: 마우스 우클릭 드래그로 캐릭터를 중심으로 360도 궤도 시점을 회전하며 광활한 필드를 감상하세요.`,
+                                    en: `A complete open-world integration simulation uniting 16km tiled terrain, multi-layer PBR splatting, procedural grass, foliage impostors, and a 3D character controller (Soldier).<br/>
+                                        • <b>Character Controls</b>: Use WASD (move), Shift (run), and Space (jump) to experience dynamic ground alignment (getHeightAt).<br/>
+                                        • <b>Third-Person Orbit</b>: Orbit around the character with mouse drag to view the seamless 16km open world.`
                                 }
                             },
                             {
                                 name: 'Landscape & Water System',
                                 path: '3d/landscape/landscapeAndWater',
                                 description: {
-                                    ko: `랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(WaterLake)를 결합하여 수위, 듀얼 노멀 파도 시뮬레이션, 수중 굴절 및 심도 기반 광학 효과를 종합 제어하는 통합 수체 예제입니다.`,
-                                    en: `An integrated simulation uniting landscape terrain valleys with physical lake water (WaterLake), controlling water level, dual normal wave simulation, underwater refraction, and depth optics.`
+                                    ko: `랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(WaterLake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.<br/>
+                                        • <b>수위(Water Level) 조절</b>: Water 폴더의 y 값을 조절하여 지형의 골짜기가 호수로 채워지거나 말라붙는 수변 경계를 실시간으로 확인하세요.<br/>
+                                        • <b>수중 광학 효과</b>: causticsStrength, refractionStrength, depthFadeDistance를 조절하여 얕은 여울과 깊은 호수 바닥의 빛 투과를 관찰하세요.`,
+                                    en: `An integrated simulation uniting landscape terrain valleys with physical lake water (WaterLake), controlling water level, dual normal waves, refraction, and depth caustics.<br/>
+                                        • <b>Water Level Control</b>: Adjust lake y in the Water folder to watch terrain valleys flood or drain dynamically.<br/>
+                                        • <b>Underwater Optics</b>: Tune causticsStrength, refractionStrength, and depthFadeDistance to inspect light absorption and caustics.`
                                 }
                             }
                         ]

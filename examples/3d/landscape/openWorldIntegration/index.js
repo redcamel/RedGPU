@@ -5,8 +5,12 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 6: Open World Integration (오픈월드 통합 및 캐릭터 인터랙션)
  * [EN] Step 6: Open World Integration (Open World Integration & Character Interaction)
  *
- * [KO] 16km 대규모 타일 스트리밍 지형, 4채널 멀티레이어 PBR 스플랫, 절차적 잔디 필드, 수목 식생 임포스터와 물리 기반 3D 캐릭터 컨트롤러(Soldier)를 유기적으로 결합한 완성형 오픈월드 통합 시뮬레이션입니다.
- * [EN] A complete open-world integration simulation uniting 16km tiled streaming terrain, 4-channel multi-layer PBR splatting, procedural grass field, foliage impostors, and physics-based 3D character controller (Soldier).
+ * [KO] 16km 타일 스트리밍 지형, 멀티레이어 PBR 스플랫, 절차적 잔디, 수목 임포스터와 물리 기반 3D 캐릭터(Soldier)를 유기적으로 결합한 완성형 오픈월드 시뮬레이션입니다.
+ *      • 캐릭터 조작: WASD(이동), Shift(달리기), Space(점프)로 캐릭터를 움직여 지형 굴곡에 맞춘 실시간 높이 동기화(getHeightAt)를 체험하세요.
+ *      • 3인칭 추적 카메라: 마우스 우클릭 드래그로 캐릭터를 중심으로 360도 궤도 시점을 회전하며 광활한 필드를 감상하세요.
+ * [EN] A complete open-world integration simulation uniting 16km tiled terrain, multi-layer PBR splatting, procedural grass, foliage impostors, and a 3D character controller (Soldier).
+ *      • Character Controls: Use WASD (move), Shift (run), and Space (jump) to experience dynamic ground alignment (getHeightAt).
+ *      • Third-Person Orbit: Orbit around the character with mouse drag to view the seamless 16km open world.
  */
 
 const canvas = document.createElement('canvas');

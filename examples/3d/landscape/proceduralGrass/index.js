@@ -2,11 +2,15 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Step 4: Procedural Grass Field (절차적 잔디 및 바람 시뮬레이션)
- * [EN] Step 4: Procedural Grass Field (Procedural Grass Field & Wind Simulation)
+ * [KO] Step 4: Procedural Grass Field (절차적 잔디 및 대규모 식생 시뮬레이션)
+ * [EN] Step 4: Procedural Grass Field (Procedural Grass Field & Vegetation Simulation)
  *
- * [KO] 지형 스플랫맵 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(Grass)를 필드에 배치하고, 버텍스 셰이더 기반 바람 애니메이션과 거리별 LOD·컬링·수축(Shrink) 시뮬레이션을 구현하는 예제입니다.
- * [EN] An example demonstrating GPU-instanced procedural grass field placement driven by terrain splatmap weights, with vertex shader wind animation and distance-based LOD, culling, and shrink simulation.
+ * [KO] 지형 스플랫맵의 잔디 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(뗏장 + 키 큰 들풀 3종 멀티 LOD)를 필드에 배치하는 대규모 식생 시뮬레이션 예제입니다.
+ *      • 거리별 수축 & 컬링: 카메라를 전후로 이동하며 원거리 잔디가 자연스럽게 수축(shrinkStartDistance)되고 컬링(cullingDistance)되는 것을 확인하세요.
+ *      • 버퍼 통계 확인: Buffer Stats에서 실시간 활성 인스턴스 수(activeInstances)와 메가버퍼 점유 상태를 모니터링할 수 있습니다.
+ * [EN] Vegetation simulation scattering tens of thousands of GPU-instanced grass clumps and multi-LOD tall wild grass driven by terrain splatmap weights.
+ *      • Distance Shrink & Culling: Move camera to watch distant grass smoothly shrink (shrinkStartDistance) and cull (cullingDistance).
+ *      • Buffer Statistics: Monitor live instance count (activeInstances) and mega-buffer capacity in the Buffer Stats folder.
  */
 
 const canvas = document.createElement('canvas');
