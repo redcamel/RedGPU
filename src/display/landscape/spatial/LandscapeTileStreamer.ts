@@ -327,33 +327,7 @@ export class LandscapeTileStreamer {
         if (!comp) return 0.0;
 
         const tileData = this.#cpuHeightMap.get(comp.key);
-        if (!tileData) {
-            if (this.#globalCPUHeightMap) {
-                const g = this.#globalCPUHeightMap;
-                const normU = Math.min(1.0, Math.max(0.0, (x + halfWX) / grid.worldSizeX));
-                const normV = Math.min(1.0, Math.max(0.0, (z + halfWZ) / grid.worldSizeZ));
-                const fx = normU * (g.width - 1);
-                const fy = normV * (g.height - 1);
-                const x0 = Math.floor(fx);
-                const x1 = Math.min(x0 + 1, g.width - 1);
-                const y0 = Math.floor(fy);
-                const y1 = Math.min(y0 + 1, g.height - 1);
-                const tx = fx - x0;
-                const ty = fy - y0;
-
-                const pixels = g.pixels;
-                const gw = g.width;
-                const p00 = pixels[y0 * gw + x0] || 0;
-                const p10 = pixels[y0 * gw + x1] || 0;
-                const p01 = pixels[y1 * gw + x0] || 0;
-                const p11 = pixels[y1 * gw + x1] || 0;
-
-                const hTop = p00 * (1.0 - tx) + p10 * tx;
-                const hBottom = p01 * (1.0 - tx) + p11 * tx;
-                const rawVal = hTop * (1.0 - ty) + hBottom * ty;
-
-                return (rawVal / g.maxVal) * this.#heightScale;
-            }
+        if (!tileData && !this.#globalCPUHeightMap) {
             return 0.0;
         }
 
@@ -391,18 +365,41 @@ export class LandscapeTileStreamer {
         const gU1 = (v10_x + halfWX) / worldSizeX;
         const gV1 = (v01_z + halfWZ) / worldSizeZ;
 
-        const tX0 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU0 * texSizeX))) - col * 512;
-        const tZ0 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV0 * texSizeZ))) - row * 512;
-        const tX1 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU1 * texSizeX))) - col * 512;
-        const tZ1 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV1 * texSizeZ))) - row * 512;
+        const globalTexX0 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU0 * texSizeX)));
+        const globalTexZ0 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV0 * texSizeZ)));
+        const globalTexX1 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU1 * texSizeX)));
+        const globalTexZ1 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV1 * texSizeZ)));
 
-        const pixels = tileData.pixels;
-        const w = tileData.width;
+        let h00 = 0;
+        let h10 = 0;
+        let h01 = 0;
+        let h11 = 0;
 
-        const h00 = pixels[tZ0 * w + tX0] || 0;
-        const h10 = pixels[tZ0 * w + tX1] || 0;
-        const h01 = pixels[tZ1 * w + tX0] || 0;
-        const h11 = pixels[tZ1 * w + tX1] || 0;
+        if (tileData) {
+            const tX0 = Math.min(511, Math.max(0, globalTexX0 - col * 512));
+            const tZ0 = Math.min(511, Math.max(0, globalTexZ0 - row * 512));
+            const tX1 = Math.min(511, Math.max(0, globalTexX1 - col * 512));
+            const tZ1 = Math.min(511, Math.max(0, globalTexZ1 - row * 512));
+
+            const pixels = tileData.pixels;
+            const w = tileData.width;
+
+            h00 = pixels[tZ0 * w + tX0] || 0;
+            h10 = pixels[tZ0 * w + tX1] || 0;
+            h01 = pixels[tZ1 * w + tX0] || 0;
+            h11 = pixels[tZ1 * w + tX1] || 0;
+        } else if (this.#globalCPUHeightMap) {
+            const g = this.#globalCPUHeightMap;
+            const sU0 = (globalTexX0 + 0.5) / texSizeX;
+            const sV0 = (globalTexZ0 + 0.5) / texSizeZ;
+            const sU1 = (globalTexX1 + 0.5) / texSizeX;
+            const sV1 = (globalTexZ1 + 0.5) / texSizeZ;
+
+            h00 = this.#sampleGlobalLinear(g, sU0, sV0);
+            h10 = this.#sampleGlobalLinear(g, sU1, sV0);
+            h01 = this.#sampleGlobalLinear(g, sU0, sV1);
+            h11 = this.#sampleGlobalLinear(g, sU1, sV1);
+        }
 
         let rawVal: number;
         if (fx + fz <= 1.0) {
@@ -412,6 +409,36 @@ export class LandscapeTileStreamer {
         }
 
         return (rawVal / 65535.0) * this.#heightScale;
+    }
+
+    #sampleGlobalLinear(
+        g: { width: number; height: number; pixels: ArrayLike<number>; maxVal: number },
+        u: number,
+        v: number
+    ): number {
+        const W = g.width;
+        const H = g.height;
+        const cx = Math.max(0.0, Math.min(W - 1.0, u * W - 0.5));
+        const cy = Math.max(0.0, Math.min(H - 1.0, v * H - 0.5));
+
+        const x0 = Math.floor(cx);
+        const y0 = Math.floor(cy);
+        const x1 = Math.min(x0 + 1, W - 1);
+        const y1 = Math.min(y0 + 1, H - 1);
+        const tx = cx - x0;
+        const ty = cy - y0;
+
+        const pixels = g.pixels;
+        const p00 = pixels[y0 * W + x0] || 0;
+        const p10 = pixels[y0 * W + x1] || 0;
+        const p01 = pixels[y1 * W + x0] || 0;
+        const p11 = pixels[y1 * W + x1] || 0;
+
+        const top = p00 * (1.0 - tx) + p10 * tx;
+        const bot = p01 * (1.0 - tx) + p11 * tx;
+        const val = top * (1.0 - ty) + bot * ty;
+
+        return (val / g.maxVal) * 65535.0;
     }
 
     rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
