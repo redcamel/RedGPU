@@ -159,7 +159,6 @@ function renderTestPane({
 
     const params = {
         cameraMode: 'Character',
-        baseColor: landscape.baseColor.hex,
         lodMetric: landscape.lodMetric
     };
 
@@ -205,23 +204,40 @@ function renderTestPane({
                         characterOrbitController.centerY = characterMesh.y + 1.2;
                         characterOrbitController.centerZ = characterMesh.z;
                     }
+                    // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 및 페이드 설정
+                    // [EN] Optimized detail distance and fade for character close-up view
+                    landscape.nearDetailDistance = 120;
+                    landscape.nearDetailFade = 80;
                 } else {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;
+                    // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
+                    // [EN] Extended detail distance and fade for orbit overview
+                    landscape.nearDetailDistance = 1000;
+                    landscape.nearDetailFade = 300;
                 }
+
+                // [KO] UI 슬라이더 값 동기화
+                // [EN] Refresh UI sliders
+                pane.refresh();
             });
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
-            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
-
-            landscapeFolder.addBinding(params, 'baseColor')
-                .on('change', (ev) => {
-                    landscape.baseColor.setColorByHEX(ev.value);
-                });
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
 
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'receiveShadow');
+            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {
+                min: 0,
+                max: 1500,
+                step: 1
+            });
+            landscapeFolder.addBinding(landscape, 'nearDetailFade', {
+                min: 10,
+                max: 1000,
+                step: 1
+            });
 
             // [KO] LOD 설정
             // [EN] LOD settings
