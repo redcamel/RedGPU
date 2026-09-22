@@ -188,27 +188,27 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. 카메라 폴더
-            const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
+            // 1. 컨트롤러 폴더
+            const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
-            const cameraModeBinding = cameraFolder.addBinding(params, 'cameraMode', {
+            const cameraModeBinding = controllerFolder.addBinding(params, 'cameraMode', {
                 options: {
                     'Free Flight': 'Free Flight',
                     'Orbit': 'Orbit'
                 }
             });
 
-            const speedBinding = cameraFolder.addBinding(freeController, 'moveSpeed', {
+            const speedBinding = controllerFolder.addBinding(freeController, 'moveSpeed', {
                 min: 1000,
                 max: 12000,
                 step: 200
             });
             speedBinding.hidden = true;
 
-            const zoomSpeedBinding = cameraFolder.addBinding(orbitController, 'speedDistance', {
+            const zoomSpeedBinding = controllerFolder.addBinding(orbitController, 'speedDistance', {
                 min: 10,
                 max: 300,
-                step: 5
+                step: 10
             });
 
             cameraModeBinding.on('change', (ev) => {
@@ -218,7 +218,7 @@ function renderTestPane(redGPUContext, view, freeController, orbitController, la
                 zoomSpeedBinding.hidden = isFree;
             });
 
-            cameraFolder.addButton({title: 'Reset Camera'}).on('click', resetView);
+            controllerFolder.addButton({title: 'Reset Camera'}).on('click', resetView);
 
             // 2. 스트리밍 폴더
             const streamFolder = pane.addFolder({title: 'Streaming', expanded: true});

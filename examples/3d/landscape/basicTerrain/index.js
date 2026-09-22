@@ -128,11 +128,11 @@ function renderTestPane({
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] Camera 설정
-            // [EN] Camera settings
-            const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
+            // [KO] Controller 설정
+            // [EN] Controller settings
+            const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
-            cameraFolder.addBinding(params, 'cameraMode', {
+            controllerFolder.addBinding(params, 'cameraMode', {
                 options: {
                     'Orbit': 'Orbit',
                     'Free Flight': 'Free Flight',

@@ -1020,10 +1020,10 @@ export const ExampleList: ExampleListType = [
                                 path: '3d/landscape/multiLayerSplatting',
                                 description: {
                                     ko: `단일 하이트맵 지형 위에 RGBA 4채널 스플랫맵 가중치를 기반으로 잔디·암석·자갈·낙엽 등 4종의 PBR 텍스처 레이어(알베도, 노멀, ORM)를 매끄럽게 블렌딩하는 예제입니다.<br/>
-                                        • <b>레이어 PBR 튜닝</b>: Layers 폴더에서 각 재질의 uvScale, normalIntensity, roughness를 변경하여 표면 질감 차이를 비교해보세요.<br/>
+                                        • <b>레이어 튜닝</b>: Layers 폴더에서 각 재질의 uvScale, normalIntensity, roughness를 변경하여 표면 질감 차이를 비교해보세요.<br/>
                                         • <b>가중치 영역 격리</b>: 특정 레이어의 enabled를 꺼서 각 채널(R/G/B/A)이 지형 어디에 분포하는지 직관적으로 파악할 수 있습니다.`,
                                     en: `Demonstrates blending 4 PBR material layers (Grass, Rock, Gravel, Leave) with Albedo, Normal, and ORM maps driven by RGBA splatmap weights.<br/>
-                                        • <b>Layer PBR Tuning</b>: Adjust uvScale, normalIntensity, and roughness in the Layers folder to inspect surface material variations.<br/>
+                                        • <b>Layer Tuning</b>: Adjust uvScale, normalIntensity, and roughness in the Layers folder to inspect surface material variations.<br/>
                                         • <b>Layer Isolation</b>: Toggle enabled: false on layers to see where individual weight channels (R/G/B/A) are distributed.`
                                 }
                             },

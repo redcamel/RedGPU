@@ -43,6 +43,7 @@ RedGPU.init(
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [8000, 8000];
         landscape.heightScale = 650;
+        landscape.baseColor.setColorByHEX('#4a7c59');
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // [KO] RGBA 4채널 스플랫맵 기반 멀티레이어 구성
@@ -176,6 +177,7 @@ function renderTestPane({
 
     const params = {
         cameraMode: 'Orbit',
+        baseColor: landscape.baseColor.hex,
         lodMetric: landscape.lodMetric
     };
 
@@ -195,11 +197,11 @@ function renderTestPane({
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] Camera 설정
-            // [EN] Camera settings
-            const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
+            // [KO] Controller 설정
+            // [EN] Controller settings
+            const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
-            cameraFolder.addBinding(params, 'cameraMode', {
+            controllerFolder.addBinding(params, 'cameraMode', {
                 options: {
                     'Orbit': 'Orbit',
                     'Free Flight': 'Free Flight',
@@ -227,7 +229,12 @@ function renderTestPane({
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
-            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
+
+            landscapeFolder.addBinding(params, 'baseColor')
+                .on('change', (ev) => {
+                    landscape.baseColor.setColorByHEX(ev.value);
+                });
 
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
@@ -293,7 +300,7 @@ function renderTestPane({
 
             // [KO] Debug 설정
             // [EN] Debug settings
-            const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: true});
+            const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: false});
             debugFolder.addBinding(landscape, 'wireframe');
             debugFolder.addBinding(landscape, 'lodColoration');
 
@@ -307,7 +314,7 @@ function renderTestPane({
 
             // [KO] Layers 설정 (4종 스플랫 재질)
             // [EN] Layers settings (4 splat materials)
-            const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
+            const splatFolder = pane.addFolder({title: 'Layers', expanded: true});
 
             layers.forEach((layer) => {
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
