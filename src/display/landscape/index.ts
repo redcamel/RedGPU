@@ -1,6 +1,7 @@
 import Landscape from "./core/Landscape";
 import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./core/LANDSCAPE_BASE_GRID_SIZE";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./core/LANDSCAPE_DEFAULT_LOD_COLORS";
+import {LANDSCAPE_DEBUG_MODE} from "./core/LANDSCAPE_DEBUG_MODE";
 import LandscapeMaterial from "./material/LandscapeMaterial";
 import type {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./material/LandscapeLayer";
 import LandscapeLayer from "./material/LandscapeLayer";
@@ -37,6 +38,7 @@ export {
     createOctahedralImpostorGeometry,
     LandscapeDebuggerManager,
     LANDSCAPE_DEFAULT_LOD_COLORS,
+    LANDSCAPE_DEBUG_MODE,
     LandscapeGrassManager,
     GrassType,
     GrassMegaBuffer,

@@ -23,6 +23,7 @@ import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import LandscapeDebuggerManager from "../debugger";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
+import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
 import {mat4} from 'gl-matrix';
 
 export class Landscape extends Object3DContainer {
@@ -43,19 +44,27 @@ export class Landscape extends Object3DContainer {
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
     #material: LandscapeMaterial;
-    #foliageManager: LandscapeFoliageManager;
-    #grassManager: LandscapeGrassManager;
-    #debuggerManager: LandscapeDebuggerManager;
-
-    #wireframe: boolean = false;
+    #debugMode: number = LANDSCAPE_DEBUG_MODE.NONE;
+    #worldSizeX: number = 2048.0;
+    #worldSizeZ: number = 2048.0;
+    #componentCountX: number = 4;
+    #componentCountZ: number = 4;
+    #tileSizeX: number = 512.0;
+    #tileSizeZ: number = 512.0;
+    #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #receiveShadow: boolean = true;
     #castHeightmapShadow: boolean = true;
-    #heightmapShadowSteps: number = 10;
+    #heightmapShadowSteps: number = 16;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
     #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
+    #foliageManager: LandscapeFoliageManager;
+    #grassManager: LandscapeGrassManager;
+    #debuggerManager: LandscapeDebuggerManager;
+
+    #wireframe: boolean = false;
     #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
@@ -74,14 +83,7 @@ export class Landscape extends Object3DContainer {
     #globalHeightTexture: GPUTexture | null = null;
     #isGlobalHeightBaked: boolean = false;
 
-    #worldSizeX: number;
-    #worldSizeZ: number;
-    #componentCountX: number;
-    #componentCountZ: number;
-    #tileSizeX: number;
-    #tileSizeZ: number;
     #maxLODLevel: number;
-    #componentSizeQuads: number;
 
     #worldSizeTuple: [number, number] = [0, 0];
     #componentCountTuple: [number, number] = [0, 0];
@@ -687,6 +689,17 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get debugMode(): number {
+        return this.#debugMode;
+    }
+
+    set debugMode(value: number) {
+        if (this.#debugMode !== value) {
+            this.#debugMode = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     get lodColoration(): boolean {
         return this.#lodColoration;
     }
@@ -988,7 +1001,8 @@ export class Landscape extends Object3DContainer {
             this.#heightmapShadowSoftness,
             this.#foliageManager?.debugSubCellColoration ?? false,
             this.#foliageManager?.subCellSize ?? 100.0,
-            this.#foliageManager?.streamingRadius ?? 600.0
+            this.#foliageManager?.streamingRadius ?? 600.0,
+            this.#debugMode
         );
     }
 

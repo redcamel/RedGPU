@@ -232,6 +232,22 @@ function renderTestPane({
             // [KO] Debug 설정
             // [EN] Debug settings
             const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: true});
+            debugFolder.addBinding(landscape, 'debugMode', {
+                options: {
+                    'None (Full PBR)': RedGPU.LANDSCAPE_DEBUG_MODE.NONE,
+                    'Final Normal': RedGPU.LANDSCAPE_DEBUG_MODE.FINAL_NORMAL,
+                    'Macro Normal': RedGPU.LANDSCAPE_DEBUG_MODE.MACRO_NORMAL,
+                    'Albedo': RedGPU.LANDSCAPE_DEBUG_MODE.ALBEDO,
+                    'Splat Weights': RedGPU.LANDSCAPE_DEBUG_MODE.SPLAT_WEIGHTS,
+                    'Roughness': RedGPU.LANDSCAPE_DEBUG_MODE.ROUGHNESS,
+                    'Ambient Occlusion': RedGPU.LANDSCAPE_DEBUG_MODE.AMBIENT_OCCLUSION,
+                    'Heightmap Shadow Mask': RedGPU.LANDSCAPE_DEBUG_MODE.HEIGHTMAP_SHADOW_MASK,
+                    'CSM Shadow Mask': RedGPU.LANDSCAPE_DEBUG_MODE.CSM_SHADOW_MASK,
+                    'Total Shadow Visibility': RedGPU.LANDSCAPE_DEBUG_MODE.TOTAL_SHADOW_VISIBILITY,
+                    'Elevation Heatmap': RedGPU.LANDSCAPE_DEBUG_MODE.ELEVATION_HEATMAP,
+                    'LOD Level': RedGPU.LANDSCAPE_DEBUG_MODE.LOD_LEVEL
+                }
+            });
             debugFolder.addBinding(landscape, 'wireframe');
             debugFolder.addBinding(landscape, 'lodColoration');
 
@@ -287,6 +303,7 @@ function initCharacter({
         redGPUContext,
         CHARACTER_URL,
         (loader) => {
+            const characterMesh = loader.resultMesh;
             // [KO] 지형 중심의 거대 분지 평지 좌표로 배치
             // [EN] Spawn at the center of the large flat basin
             characterMesh.x = -875;

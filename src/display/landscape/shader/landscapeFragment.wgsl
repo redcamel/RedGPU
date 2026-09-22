@@ -80,7 +80,7 @@ struct LandscapeUniforms {
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
     foliageStreamingRadius: f32,
-    foliageDebugPad: f32,
+    debugMode: u32,
 };
 
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
@@ -660,9 +660,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let geoNdotL = dot(baseNormal, L);
 
     var visibility = 1.0;
+    var terrainShadowVis = 1.0;
+    var csmVisibility = 1.0;
 
     if (receiveShadowYn && geoNdotL > 0.001) {
-        var terrainShadowVis = 1.0;
         var isDeepTerrainShadow = false;
         let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
 
@@ -698,7 +699,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 baseNormal,
                 L
             );
-            let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+            csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
             visibility = min(csmVisibility, terrainShadowVis);
         } else {
             visibility = terrainShadowVis;
@@ -719,8 +720,87 @@ fn main(inputData: InputData) -> OutputFragment {
     );
 
     let finalColor = vec4<f32>(directLighting + indirectLighting, 1.0);
+    var outColor = finalColor;
 
-    output.color = finalColor;
+    switch (landscapeInstanceUniforms.debugMode) {
+        case 1u: {
+            // FINAL_NORMAL
+            outColor = vec4<f32>(N * 0.5 + 0.5, 1.0);
+        }
+        case 2u: {
+            // MACRO_NORMAL
+            outColor = vec4<f32>(baseNormal * 0.5 + 0.5, 1.0);
+        }
+        case 3u: {
+            // ALBEDO
+            outColor = vec4<f32>(albedo, 1.0);
+        }
+        case 4u: {
+            // SPLAT_WEIGHTS
+            if (uniforms.activeLayerCount > 0u) {
+                let weightSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
+                let remainingWeight = clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0);
+                let isAlphaFull = weightSample.a >= 0.99;
+                let weightA = select(weightSample.a, remainingWeight, isAlphaFull);
+                let splatColor = weightSample.r * vec3<f32>(1.0, 0.05, 0.05) +
+                                 weightSample.g * vec3<f32>(0.05, 1.0, 0.05) +
+                                 weightSample.b * vec3<f32>(0.05, 0.3, 1.0) +
+                                 weightA * vec3<f32>(1.0, 0.9, 0.05);
+                outColor = vec4<f32>(splatColor, 1.0);
+            } else {
+                outColor = vec4<f32>(0.2, 0.2, 0.2, 1.0);
+            }
+        }
+        case 5u: {
+            // ROUGHNESS
+            outColor = vec4<f32>(vec3<f32>(roughnessParameter), 1.0);
+        }
+        case 6u: {
+            // AMBIENT_OCCLUSION
+            outColor = vec4<f32>(vec3<f32>(ambientOcclusion), 1.0);
+        }
+        case 7u: {
+            // HEIGHTMAP_SHADOW_MASK
+            outColor = vec4<f32>(vec3<f32>(terrainShadowVis), 1.0);
+        }
+        case 8u: {
+            // CSM_SHADOW_MASK
+            outColor = vec4<f32>(vec3<f32>(csmVisibility), 1.0);
+        }
+        case 9u: {
+            // TOTAL_SHADOW_VISIBILITY
+            outColor = vec4<f32>(vec3<f32>(visibility), 1.0);
+        }
+        case 10u: {
+            // ELEVATION_HEATMAP
+            let heightRatio = clamp(input_vertexPosition.y / max(1.0, landscapeInstanceUniforms.heightScale), 0.0, 1.0);
+            let c0 = vec3<f32>(0.0, 0.1, 0.8);
+            let c1 = vec3<f32>(0.0, 0.8, 0.8);
+            let c2 = vec3<f32>(0.1, 0.8, 0.1);
+            let c3 = vec3<f32>(0.9, 0.8, 0.0);
+            let c4 = vec3<f32>(0.9, 0.1, 0.0);
+            var elevationColor = mix(c0, c1, smoothstep(0.0, 0.25, heightRatio));
+            elevationColor = mix(elevationColor, c2, smoothstep(0.25, 0.5, heightRatio));
+            elevationColor = mix(elevationColor, c3, smoothstep(0.5, 0.75, heightRatio));
+            elevationColor = mix(elevationColor, c4, smoothstep(0.75, 1.0, heightRatio));
+
+            let line25 = abs(fract(input_vertexPosition.y / 25.0 - 0.5) - 0.5) / max(0.001, fwidth(input_vertexPosition.y / 25.0));
+            let line100 = abs(fract(input_vertexPosition.y / 100.0 - 0.5) - 0.5) / max(0.001, fwidth(input_vertexPosition.y / 100.0));
+            let contour = max(smoothstep(1.0, 0.0, line25) * 0.4, smoothstep(1.5, 0.0, line100) * 0.9);
+            elevationColor = mix(elevationColor, vec3<f32>(1.0), contour);
+            outColor = vec4<f32>(elevationColor, 1.0);
+        }
+        case 11u: {
+            // LOD_LEVEL
+            let lodIdx = min(u32(inputData.lodLevel + 0.5), 7u);
+            outColor = vec4<f32>(landscapeInstanceUniforms.lodColors[lodIdx].rgb, 1.0);
+        }
+        default: {
+            outColor = finalColor;
+        }
+    }
+
+    output.color = outColor;
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
     return output;

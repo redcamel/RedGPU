@@ -33,7 +33,7 @@ struct LandscapeUniforms {
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
     foliageStreamingRadius: f32,
-    foliageDebugPad: f32,
+    debugMode: u32,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
