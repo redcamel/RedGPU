@@ -7,8 +7,8 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // [KO] 카메라 컨트롤러 (전체 지형 조망 Orbit + 자유 비행 Free Flight)
-        // [EN] Camera controllers (Overview Orbit + Free Flight)
+        // [KO] 기본 궤도 카메라 (지형 전체 조망)
+        // [EN] Default orbit camera (overview of the entire terrain)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
         orbitController.distance = 7000;
         orbitController.tilt = -25;
@@ -16,14 +16,6 @@ RedGPU.init(
         orbitController.minDistance = 300;
         orbitController.maxDistance = 35000;
         orbitController.speedDistance = 80.0;
-
-        const freeController = new RedGPU.Camera.FreeController(redGPUContext);
-        freeController.x = 0;
-        freeController.y = 1200;
-        freeController.z = 2500;
-        freeController.tilt = -18;
-        freeController.pan = 0;
-        freeController.moveSpeed = 5000;
 
         // [KO] 씬 및 뷰 생성
         // [EN] Create scene and view
@@ -133,7 +125,6 @@ RedGPU.init(
             scene,
             view,
             orbitController,
-            freeController,
             landscape,
             directionalLight,
             layers
@@ -160,7 +151,6 @@ function renderTestPane({
                             scene,
                             view,
                             orbitController,
-                            freeController,
                             landscape,
                             directionalLight,
                             layers
@@ -214,31 +204,14 @@ function renderTestPane({
             // [EN] Controller settings (Toggle button style)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
-            const speedBinding = controllerFolder.addBinding(freeController, 'moveSpeed', {
-                min: 1000,
-                max: 15000,
-                step: 200
-            });
-            speedBinding.hidden = true;
-
-            const zoomSpeedBinding = controllerFolder.addBinding(orbitController, 'speedDistance', {
-                min: 10,
-                max: 300,
-                step: 10
-            });
-            zoomSpeedBinding.hidden = true;
-
             controllerFolder.addBinding(params, 'cameraMode', {
                 view: 'radiogrid',
                 groupName: 'cameraMode',
-                size: [3, 1],
-                cells: (x) => {
-                    const modes = ['Character', 'Orbit', 'Free Flight'];
-                    return {
-                        title: modes[x],
-                        value: modes[x]
-                    };
-                }
+                size: [2, 1],
+                cells: (x, y) => ({
+                    title: x === 0 ? 'Orbit' : 'Character',
+                    value: x === 0 ? 'Orbit' : 'Character'
+                })
             }).on('change', (ev) => {
                 const mode = ev.value;
 
@@ -250,31 +223,15 @@ function renderTestPane({
                         characterOrbitController.centerY = characterMesh.y + 1.2;
                         characterOrbitController.centerZ = characterMesh.z;
                     }
-                    speedBinding.hidden = true;
-                    zoomSpeedBinding.hidden = true;
-
                     // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 및 페이드 설정
                     // [EN] Optimized detail distance and fade for character close-up view
                     landscape.nearDetailDistance = 120;
                     landscape.nearDetailFade = 80;
-                } else if (mode === 'Orbit') {
+                } else {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;
-                    speedBinding.hidden = true;
-                    zoomSpeedBinding.hidden = false;
-
                     // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
                     // [EN] Extended detail distance and fade for orbit overview
-                    landscape.nearDetailDistance = 1000;
-                    landscape.nearDetailFade = 300;
-                } else if (mode === 'Free Flight') {
-                    view.camera = freeController;
-                    if (characterController) characterController.useKeyboard = false;
-                    speedBinding.hidden = false;
-                    zoomSpeedBinding.hidden = true;
-
-                    // [KO] 자유 비행 조망 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
-                    // [EN] Extended detail distance and fade for free flight
                     landscape.nearDetailDistance = 1000;
                     landscape.nearDetailFade = 300;
                 }
