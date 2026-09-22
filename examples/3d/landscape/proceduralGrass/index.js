@@ -70,28 +70,24 @@ RedGPU.init(
         const layerConfigs = [
             {
                 name: 'Grass',
-                key: 'grass',
                 weightChannel: 'R',
                 uvScale: [50, 50],
                 roughness: 0.85
             },
             {
                 name: 'Rock',
-                key: 'rock',
                 weightChannel: 'G',
                 uvScale: [15, 15],
                 roughness: 0.7
             },
             {
                 name: 'Gravel',
-                key: 'gravel',
                 weightChannel: 'B',
                 uvScale: [40, 40],
                 roughness: 0.9
             },
             {
                 name: 'Leave',
-                key: 'leave',
                 weightChannel: 'A',
                 uvScale: [50, 50],
                 roughness: 0.8
@@ -99,11 +95,12 @@ RedGPU.init(
         ];
 
         const layers = layerConfigs.map(cfg => {
+            const fileKey = cfg.name.toLowerCase();
             const layer = new RedGPU.Display.Landscape.LandscapeLayer(redGPUContext, {
                 name: cfg.name,
-                baseColorTexture: `${assetPath}${cfg.key}.jpg`,
-                normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
-                ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
+                baseColorTexture: `${assetPath}${fileKey}.jpg`,
+                normalTexture: `${assetPath}${fileKey}_normal.jpg`,
+                ormTexture: `${assetPath}${fileKey}_orm.jpg`,
                 weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
