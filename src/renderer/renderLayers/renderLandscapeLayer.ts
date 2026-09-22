@@ -1,5 +1,4 @@
 import View3D from "../../display/view/View3D";
-import Landscape from "../../display/landscape/core/Landscape";
 
 /**
  * [KO] Scene 내의 전체 Landscape 지형 시스템을 매 프레임 렌더 패스에 디스패치합니다 (Zero-GC / 1-Call Instancing).
@@ -21,29 +20,6 @@ export function renderLandscapeLayer(view: View3D, passEncoder: GPURenderPassEnc
         if (!landscape) continue;
 
         landscape.render(view, passEncoder);
-    }
-}
-
-/**
- * [KO] Scene 내의 전체 Landscape 지형 시스템 중 그림자 투영이 활성화된 지형을 섀도우 맵 렌더 패스에 디스패치합니다.
- * [EN] Dispatches all Landscape terrain systems in the scene with castShadow enabled to the shadow map render pass.
- *
- * @param view - [KO] 현재 View3D 객체 [EN] Current View3D object
- * @param passEncoder - [KO] 현재 GPURenderPassEncoder 인스턴스 [EN] Current GPURenderPassEncoder instance
- */
-export function renderLandscapeShadowLayer(view: View3D, passEncoder: GPURenderPassEncoder): void {
-    const scene = (view as any).rawScene || view.scene;
-    if (!scene) return;
-
-    const landscapes = scene.landscapeChildren;
-    if (!landscapes || landscapes.length === 0) return;
-
-    const count = landscapes.length;
-    for (let i = 0; i < count; i++) {
-        const landscape: Landscape = landscapes[i];
-        if (!landscape || !landscape.castShadow) continue;
-
-        landscape.renderShadow(view, passEncoder);
     }
 }
 

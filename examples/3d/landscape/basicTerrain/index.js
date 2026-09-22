@@ -170,7 +170,6 @@ function renderTestPane({
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
-            landscapeFolder.addBinding(landscape, 'castShadow');
             landscapeFolder.addBinding(landscape, 'receiveShadow');
 
             // [KO] LOD 설정
@@ -213,7 +212,7 @@ function renderTestPane({
             // [EN] Heightmap shadow settings
             const shadowFolder = landscapeFolder.addFolder({title: 'Heightmap Shadow', expanded: false});
 
-            shadowFolder.addBinding(landscape, 'enableHeightmapShadow');
+            shadowFolder.addBinding(landscape, 'castHeightmapShadow');
             shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {
                 min: 4,
                 max: 32,

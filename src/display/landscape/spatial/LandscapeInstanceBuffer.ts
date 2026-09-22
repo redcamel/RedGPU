@@ -120,7 +120,7 @@ export class LandscapeInstanceBuffer {
         lodMetric: number = 0.0,
         lod0Quads: number = 256,
         receiveShadow: boolean = true,
-        enableHeightmapShadow: boolean = true,
+        castHeightmapShadow: boolean = true,
         heightmapShadowSteps: number = 16,
         heightmapShadowDistance: number = 3000.0,
         heightmapShadowSoftness: number = 8.0,
@@ -175,7 +175,7 @@ export class LandscapeInstanceBuffer {
         f32[53] = lodMetric;
         f32[54] = lod0Quads;
         f32[55] = receiveShadow ? 1.0 : 0.0;
-        f32[56] = enableHeightmapShadow ? 1.0 : 0.0;
+        f32[56] = castHeightmapShadow ? 1.0 : 0.0;
         f32[57] = heightmapShadowSteps;
         f32[58] = heightmapShadowDistance;
         f32[59] = heightmapShadowSoftness;
