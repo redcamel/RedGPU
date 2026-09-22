@@ -259,6 +259,23 @@ function renderTestPane({
                 pane.refresh();
             });
 
+            // [KO] 수목 식생 서브시스템 설정 (FoliageManager)
+            // [EN] Foliage subsystem settings (FoliageManager)
+            const foliageManager = landscape.foliageManager;
+            const foliageFolder = pane.addFolder({title: 'FoliageManager', expanded: false});
+
+            foliageFolder.addBinding(foliageManager, 'streamingRadius', {
+                min: 200,
+                max: 2000,
+                step: 50
+            });
+            foliageFolder.addBinding(foliageManager, 'subCellSize', {
+                min: 50,
+                max: 200,
+                step: 10
+            });
+            foliageFolder.addBinding(foliageManager, 'debugSubCellColoration');
+
             // [KO] 절차적 잔디 설정 (GrassManager)
             // [EN] Procedural grass settings (GrassManager)
             grassFolder = pane.addFolder({title: 'GrassManager', expanded: true});
@@ -269,6 +286,7 @@ function renderTestPane({
                 max: 250,
                 step: 5
             });
+            grassFolder.addBinding(grassManager, 'totalInstancesPopulated', {readonly: true});
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
@@ -398,20 +416,55 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
 
+        // [KO] 대상 스플랫 레이어 연동
+        // [EN] Target splat layer mapping
+        const layerOptions = {'(All / None)': ''};
+        if (landscape?.layers) {
+            landscape.layers.forEach((layer) => {
+                layerOptions[layer.name] = layer.name;
+            });
+        }
+        typeFolder.addBinding(type, 'targetLayer', {options: layerOptions});
+
         // [KO] 밀도 및 스플랫 가중치 연동
         // [EN] Density & splat weight mapping
-        typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        typeFolder.addBinding(type, 'densityPerHectare', {min: 1000, max: 60000, step: 1000})
+            .on('change', () => typeFolder.refresh());
+        typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
+            .on('change', () => typeFolder.refresh());
+        typeFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 1.0, step: 0.05});
         typeFolder.addBinding(type, 'densityScaleByWeight');
 
-        typeFolder.addBlade({view: 'separator'});
+        // [KO] 크기 변량 (최소/최대 스케일)
+        // [EN] Scale variation (min/max scale)
+        const scaleProxy = {
+            minScaleXZ: type.minScale[0],
+            minScaleY: type.minScale[1],
+            maxScaleXZ: type.maxScale[0],
+            maxScaleY: type.maxScale[1]
+        };
+        typeFolder.addBinding(scaleProxy, 'minScaleXZ', {min: 0.1, max: 3.0, step: 0.05})
+            .on('change', (ev) => {
+                type.minScale = [ev.value, type.minScale[1], ev.value];
+            });
+        typeFolder.addBinding(scaleProxy, 'minScaleY', {min: 0.1, max: 3.0, step: 0.05})
+            .on('change', (ev) => {
+                type.minScale = [type.minScale[0], ev.value, type.minScale[2]];
+            });
+        typeFolder.addBinding(scaleProxy, 'maxScaleXZ', {min: 0.1, max: 3.0, step: 0.05})
+            .on('change', (ev) => {
+                type.maxScale = [ev.value, type.maxScale[1], ev.value];
+            });
+        typeFolder.addBinding(scaleProxy, 'maxScaleY', {min: 0.1, max: 3.0, step: 0.05})
+            .on('change', (ev) => {
+                type.maxScale = [type.maxScale[0], ev.value, type.maxScale[2]];
+            });
 
         // [KO] 지형 경사도 필터링 (최소/최대 경사각)
         // [EN] Terrain slope filtering (min/max slope)
         typeFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
         typeFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
-
-        typeFolder.addBlade({view: 'separator'});
 
         // [KO] 컬링 및 거리 페이드
         // [EN] Culling & distance fading
@@ -419,31 +472,22 @@ function renderTestPane({
         typeFolder.addBinding(type, 'fadeStartDistance', {min: 10, max: 200, step: 5});
         typeFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5});
 
-        typeFolder.addBlade({view: 'separator'});
-
         // [KO] 지면 오프셋
         // [EN] Ground offset
         typeFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
-
-        typeFolder.addBlade({view: 'separator'});
 
         // [KO] 재질 및 PBR 셰이딩
         // [EN] Material & PBR shading
         typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
         typeFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.05});
-        typeFolder.addBinding(type, 'metallic', {min: 0.0, max: 1.0, step: 0.05});
         typeFolder.addBinding(type, 'aoIntensity', {min: 0.0, max: 2.0, step: 0.1});
         typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
-
-        typeFolder.addBlade({view: 'separator'});
 
         // [KO] 서브서피스(SSS) 투과광
         // [EN] Subsurface scattering (SSS)
         typeFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
         typeFolder.addBinding(type, 'subsurfaceDistortion', {min: 0.0, max: 1.0, step: 0.05});
-
-        typeFolder.addBlade({view: 'separator'});
 
         // [KO] 그림자
         // [EN] Shadow
