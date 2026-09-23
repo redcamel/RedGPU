@@ -4,7 +4,6 @@ struct GrassMaterialUniforms {
     hasGroundTexture: u32,
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
-    subsurfaceDistortion: f32,
     subsurfaceStrength: f32,
     roughness: f32,
     shadowStrength: f32,

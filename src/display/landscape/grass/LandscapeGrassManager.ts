@@ -114,6 +114,7 @@ export class LandscapeGrassManager {
     #keysToEvict: number[] = [];
     #lastPopulatePos: [number, number, number] = [0, 0, 0];
     #lastUpdateGridPos: [number, number] = [-999999, -999999];
+    #lastLoadedTileCount: number = 0;
     #frustumPlanesF32: Float32Array = new Float32Array(24);
     #viewProjectionMatrixF32: Float32Array = new Float32Array(16);
     #tempWeights4: Float32Array = new Float32Array(4);
@@ -400,8 +401,14 @@ export class LandscapeGrassManager {
             }
         }
 
-        const isInitialStreaming = !this.#populated;
-        this.#updateCellStreaming(camPos[0], camPos[2], isInitialStreaming);
+        const currentLoadedTileCount = this.#landscape.loadedTileCount;
+        const tileCountChanged = currentLoadedTileCount !== this.#lastLoadedTileCount;
+        this.#lastLoadedTileCount = currentLoadedTileCount;
+
+        if (currentLoadedTileCount > 0) {
+            const isInitialStreaming = !this.#populated;
+            this.#updateCellStreaming(camPos[0], camPos[2], isInitialStreaming, tileCountChanged);
+        }
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -446,12 +453,11 @@ export class LandscapeGrassManager {
                 mf[4] = ssc[0];
                 mf[5] = ssc[1];
                 mf[6] = ssc[2];
-                mf[7] = type.subsurfaceDistortion;
+                mf[7] = type.subsurfaceStrength;
 
-                mf[8] = type.subsurfaceStrength;
-                mf[9] = type.roughness;
-                mf[10] = type.shadowStrength;
-                mu[11] = type.receiveShadow ? 1 : 0;
+                mf[8] = type.roughness;
+                mf[9] = type.shadowStrength;
+                mu[10] = type.receiveShadow ? 1 : 0;
 
                 gpuDevice.queue.writeBuffer(
                     res.uniformBuffer,
@@ -564,6 +570,11 @@ export class LandscapeGrassManager {
      */
     handleTileLoaded(comp: any): void {
         if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
+
+        // [KO] 타일 로드 완료 시: 기존 셀은 100% 보존하고, 아직 비어 있는 후보 셀들만 즉시 증분 스폰
+        // [EN] On tile load: preserve existing cells 100%, incrementally populate only missing candidate cells
+        this.#updateCellStreaming(this.#lastPopulatePos[0], this.#lastPopulatePos[2], false, true);
+
         const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
         const halfTileX = tileSizeX * 0.5;
         const halfTileZ = tileSizeZ * 0.5;
@@ -834,13 +845,14 @@ export class LandscapeGrassManager {
     #updateCellStreaming(
         camX: number,
         camZ: number,
-        forceRebuild: boolean = false
+        forceRebuild: boolean = false,
+        populateAllCandidates: boolean = false
     ): void {
         const cellSize = LandscapeGrassManager.CELL_SIZE;
         const curGridX = Math.floor(camX / cellSize);
         const curGridZ = Math.floor(camZ / cellSize);
 
-        if (!forceRebuild && curGridX === this.#lastUpdateGridPos[0] && curGridZ === this.#lastUpdateGridPos[1]) {
+        if (!forceRebuild && !populateAllCandidates && curGridX === this.#lastUpdateGridPos[0] && curGridZ === this.#lastUpdateGridPos[1]) {
             return;
         }
 
@@ -939,7 +951,7 @@ export class LandscapeGrassManager {
                 state.activeCount -= range.filledCount;
             }
 
-            const maxCellsToPopulate = forceRebuild ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
+            const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
             const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
             const targetDensity = type.instancesPerCell;
             const matchedLayer = type.targetLayer ? this.#landscape.layers.find(l => l.name === type.targetLayer || (l as any).key === type.targetLayer) : undefined;

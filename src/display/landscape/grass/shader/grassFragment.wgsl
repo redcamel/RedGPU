@@ -10,12 +10,13 @@ struct GrassMaterialUniforms {
     hasGroundTexture: u32,
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
-    subsurfaceDistortion: f32,
     subsurfaceStrength: f32,
     roughness: f32,
     shadowStrength: f32,
     receiveShadow: u32,
 };
+
+const SSS_DISTORTION: f32 = 0.35;
 
 struct VertexOutput {
     @builtin(position) clipPos: vec4<f32>,
@@ -110,8 +111,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         let directDiff = frontWrap * (1.0 - transRatio);
 
         let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
-        let distortion = materialUniforms.subsurfaceDistortion;
-        let lightOpposite = -(L + input.normal * distortion);
+        let lightOpposite = -(L + input.normal * SSS_DISTORTION);
         let vDotL = max(dot(V, lightOpposite), 0.0);
         let inScatter = vDotL * vDotL;
         let sssTransmission = (backWrap * 0.5 + inScatter * 0.5) * transRatio;

@@ -43,7 +43,6 @@ export interface GrassTypeOptions {
     metallic?: number;
     subsurfaceStrength?: number;
     subsurfaceColor?: [number, number, number];
-    subsurfaceDistortion?: number;
     exposureBoost?: number;
     minY?: number;
     targetLayer?: string | number;
@@ -74,7 +73,6 @@ export class GrassType {
     #exposureBoost: number = 1.0;
     #subsurfaceStrength: number = 0.25;
     #subsurfaceColor: [number, number, number] = [0.35, 0.65, 0.15];
-    #subsurfaceDistortion: number = 0.35;
     #groundBlendStrength: number = 1.0;
     #alphaCutoff: number = 0.2;
     #roughness: number = 0.55;
@@ -198,7 +196,6 @@ export class GrassType {
 
         if (options.subsurfaceStrength !== undefined) this.#subsurfaceStrength = options.subsurfaceStrength;
         if (options.subsurfaceColor) this.#subsurfaceColor = [...options.subsurfaceColor];
-        if (options.subsurfaceDistortion !== undefined) this.#subsurfaceDistortion = options.subsurfaceDistortion;
         if (options.exposureBoost !== undefined) this.#exposureBoost = options.exposureBoost;
         if (options.targetLayer !== undefined) this.#targetLayer = options.targetLayer;
         if (options.bottomOffset !== undefined) this.#bottomOffset = options.bottomOffset;
@@ -413,15 +410,6 @@ export class GrassType {
 
     set subsurfaceColor(v: [number, number, number]) {
         this.#subsurfaceColor = [v[0], v[1], v[2]];
-        this.#dirty = true;
-    }
-
-    get subsurfaceDistortion(): number {
-        return this.#subsurfaceDistortion;
-    }
-
-    set subsurfaceDistortion(v: number) {
-        this.#subsurfaceDistortion = Math.max(0.0, Math.min(1.0, v));
         this.#dirty = true;
     }
 
