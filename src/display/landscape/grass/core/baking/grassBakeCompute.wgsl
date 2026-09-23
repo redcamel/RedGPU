@@ -5,7 +5,7 @@ struct GrassInstance {
     rotationY: f32,
     scaleXZ: f32,
     scaleY: f32,
-    packedNormal: u32,
+    packedQuat: u32,
     packedGroundColor: u32,
 };
 
@@ -56,6 +56,13 @@ struct BakeTask {
 @group(0) @binding(5) var vhtSampler: sampler;
 @group(0) @binding(6) var vbtTexture: texture_2d<f32>;
 @group(0) @binding(7) var vbtSampler: sampler;
+
+fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
+    return vec4<f32>(
+        a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz),
+        a.w * b.w - dot(a.xyz, b.xyz)
+    );
+}
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -140,7 +147,17 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let bakedY = terrainHeight + typeInfo.bottomOffset;
     rawInstances[instIdx].posY = bakedY;
 
-    rawInstances[instIdx].packedNormal = pack2x16snorm(vec2<f32>(blendedN.x, blendedN.z));
+    // [KO] 결합 회전 쿼터니언 합성: Q_final = qTerrain * qY (인스턴스 Y축 회전과 지형 노멀 정렬 회전 결합)
+    // [EN] Combined rotation quaternion: Q_final = qTerrain * qY
+    let halfRotY = inst.rotationY * 0.5;
+    let qY = vec4<f32>(0.0, sin(halfRotY), 0.0, cos(halfRotY));
+
+    let rotAxis = vec3<f32>(blendedN.z, 0.0, -blendedN.x);
+    let qTerrain = normalize(vec4<f32>(rotAxis.x, rotAxis.y, rotAxis.z, 1.0 + blendedN.y));
+
+    let finalQuat = normalize(quatMultiply(qTerrain, qY));
+    let canonicalQuat = select(-finalQuat, finalQuat, finalQuat.w >= 0.0);
+    rawInstances[instIdx].packedQuat = pack4x8snorm(canonicalQuat);
 
     var groundColor = vec3<f32>(0.0);
     if (bakeUniforms.hasVBT != 0u) {

@@ -5,7 +5,7 @@ struct GrassInstance {
     rotationY: f32,
     scaleXZ: f32,
     scaleY: f32,
-    packedNormal: u32,
+    packedQuat: u32,
     packedGroundColor: u32,
 };
 

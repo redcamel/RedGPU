@@ -7,9 +7,13 @@ struct GrassInstance {
     rotationY: f32,
     scaleXZ: f32,
     scaleY: f32,
-    packedNormal: u32,
+    packedQuat: u32,
     packedGroundColor: u32,
 };
+
+fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
 
 struct GrassUniforms {
     cullingDistance: f32,
@@ -45,7 +49,6 @@ fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    let rotationY = instance.rotationY;
     var scaleXZ = instance.scaleXZ;
     var scaleY = instance.scaleY;
 
@@ -68,37 +71,15 @@ fn main(input: VertexInput) -> VertexOutput {
     let baseHeight = max(0.01, grassUniforms.meshHeight);
     let heightRatio = clamp((input.position.y - grassUniforms.minY) / baseHeight, 0.0, 1.0);
 
-    let cosR = cos(rotationY);
-    let sinR = sin(rotationY);
-    let localX = input.position.x * cosR - input.position.z * sinR;
-    let localZ = input.position.x * sinR + input.position.z * cosR;
-
-    let normRotX = input.normal.x * cosR - input.normal.z * sinR;
-    let normRotZ = input.normal.x * sinR + input.normal.z * cosR;
-
-    var localPos = vec3<f32>(
-        localX * scaleXZ,
+    let scaledPos = vec3<f32>(
+        input.position.x * scaleXZ,
         (input.position.y - grassUniforms.minY) * scaleY,
-        localZ * scaleXZ
+        input.position.z * scaleXZ
     );
-    var localNorm = vec3<f32>(normRotX, input.normal.y, normRotZ);
 
-    let unpackedNorm = unpack2x16snorm(instance.packedNormal);
-    let normX = unpackedNorm.x;
-    let normZ = unpackedNorm.y;
-    let normY = sqrt(max(0.0, 1.0 - normX * normX - normZ * normZ));
-    let terrainN = vec3<f32>(normX, normY, normZ);
-
-    let rotAxis = vec3<f32>(normZ, 0.0, -normX);
-    let axisLen = length(rotAxis);
-    if (axisLen > 0.0001) {
-        let axis = rotAxis / axisLen;
-        let cosA = normY;
-        let sinA = axisLen;
-        let oneMinusCos = 1.0 - cosA;
-        localPos = localPos * cosA + cross(axis, localPos) * sinA + axis * dot(axis, localPos) * oneMinusCos;
-        localNorm = localNorm * cosA + cross(axis, localNorm) * sinA + axis * dot(axis, localNorm) * oneMinusCos;
-    }
+    let q = normalize(unpack4x8snorm(instance.packedQuat));
+    var localPos = rotateVectorByQuat(scaledPos, q);
+    var localNorm = rotateVectorByQuat(input.normal, q);
 
     // [KO] 경사면 회전으로 인한 밑동 지면 파묻힘 방지 보정
     // [EN] Compensate base ground penetration caused by slope rotation
