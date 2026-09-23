@@ -26,7 +26,7 @@ export class GrassMegaBuffer {
     static readonly STRIDE_BYTES: number = 32;
     static readonly MAX_TYPES: number = 16;
     static readonly MAX_INDIRECT_CALLS: number = 64;
-    static readonly TYPE_PARAM_FLOATS: number = 20;
+    static readonly TYPE_PARAM_FLOATS: number = 16;
 
     #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
@@ -223,46 +223,42 @@ export class GrassMegaBuffer {
     updateTypeParams(
         typeId: number,
         cullingDistance: number,
-        fadeStartDistance: number,
-        shrinkStartDistance: number,
         bottomOffset: number,
-        groundBlendStrength: number,
         meshHeight: number,
+        minSlopeTan2: number,
+        maxSlopeTan2: number,
+        hasSlopeFilter: boolean,
         rawBaseOffset: number = 0,
         activeCount: number = 0,
         culledBaseOffset: number = 0,
         indirectBaseOffset: number = 0,
         lodCount: number = 1,
         maxInstancesPerLod: number = 0,
-        lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999],
-        minSlopeTan2: number = 0.0,
-        maxSlopeTan2: number = 999999.0,
-        hasSlopeFilter: boolean = false
+        lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999]
     ): void {
         const base = typeId * GrassMegaBuffer.TYPE_PARAM_FLOATS;
         const f32 = this.#cpuTypeParamsBuffer;
         const u32 = this.#cpuTypeParamsUint32;
 
         f32[base] = cullingDistance;
-        f32[base + 1] = fadeStartDistance;
-        f32[base + 2] = shrinkStartDistance;
-        f32[base + 3] = bottomOffset;
-        f32[base + 4] = groundBlendStrength;
-        f32[base + 5] = meshHeight;
+        f32[base + 1] = bottomOffset;
+        f32[base + 2] = meshHeight;
+        f32[base + 3] = minSlopeTan2;
+
+        f32[base + 4] = maxSlopeTan2;
+        u32[base + 5] = hasSlopeFilter ? 1 : 0;
         u32[base + 6] = rawBaseOffset;
         u32[base + 7] = activeCount;
+
         u32[base + 8] = culledBaseOffset;
         u32[base + 9] = indirectBaseOffset;
         u32[base + 10] = lodCount;
         u32[base + 11] = maxInstancesPerLod;
+
         f32[base + 12] = lodDistances[0] ?? 9999;
         f32[base + 13] = lodDistances[1] ?? 9999;
         f32[base + 14] = lodDistances[2] ?? 9999;
-        f32[base + 15] = lodDistances[3] ?? 9999;
-        f32[base + 16] = minSlopeTan2;
-        f32[base + 17] = maxSlopeTan2;
-        u32[base + 18] = hasSlopeFilter ? 1 : 0;
-        f32[base + 19] = 0.0;
+        f32[base + 15] = 0.0;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice && this.#typeParamsGPUBuffer) {

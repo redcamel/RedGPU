@@ -497,21 +497,18 @@ export class LandscapeGrassManager {
                     this.#megaBuffer.updateTypeParams(
                         type.typeId,
                         type.cullingDistance,
-                        type.fadeStartDistance,
-                        type.shrinkStartDistance,
                         type.bottomOffset,
-                        type.groundBlendStrength,
                         type.meshHeight,
+                        minSlopeTan2,
+                        maxSlopeTan2,
+                        hasSlopeFilter,
                         alloc.rawBaseOffset,
                         alloc.maxInstances,
                         alloc.culledBaseOffset,
                         alloc.indirectBaseOffset,
                         lodCount,
                         alloc.maxInstances,
-                        lodDistances,
-                        minSlopeTan2,
-                        maxSlopeTan2,
-                        hasSlopeFilter
+                        lodDistances
                     );
                 }
             }

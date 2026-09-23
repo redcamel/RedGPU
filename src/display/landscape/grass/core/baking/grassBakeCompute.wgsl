@@ -15,11 +15,11 @@ fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 
 struct GrassTypeParam {
     cullingDistance: f32,
-    fadeStartDistance: f32,
-    shrinkStartDistance: f32,
     bottomOffset: f32,
-    groundBlendStrength: f32,
     meshHeight: f32,
+    minSlopeTan2: f32,
+    maxSlopeTan2: f32,
+    hasSlopeFilter: u32,
     rawBaseOffset: u32,
     activeCount: u32,
     culledBaseOffset: u32,
@@ -29,10 +29,6 @@ struct GrassTypeParam {
     lodDistance0: f32,
     lodDistance1: f32,
     lodDistance2: f32,
-    lodDistance3: f32,
-    minSlopeTan2: f32,
-    maxSlopeTan2: f32,
-    hasSlopeFilter: u32,
     _pad0: f32,
 };
 
