@@ -3,11 +3,15 @@ struct GrassInstance {
     posY: f32,
     posZ: f32,
     rotationY: f32,
-    scaleXZ: f32,
-    scaleY: f32,
+    packedScale: u32,
+    packedBounding: u32,
     packedQuat: u32,
     packedGroundColor: u32,
 };
+
+fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
 
 struct GrassTypeParam {
     cullingDistance: f32,
@@ -78,6 +82,22 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     if (inst.posY < -900000.0) {
         return;
+    }
+
+    var scaleXZ: f32;
+    var scaleY: f32;
+
+    if (inst.packedQuat == 0u) {
+        // [KO] 최초 베이킹: CPU에서 float32로 작성한 raw scaleXZ, scaleY 읽기
+        // [EN] Initial bake: Read raw scaleXZ, scaleY written as float32 by CPU
+        scaleXZ = bitcast<f32>(inst.packedScale);
+        scaleY = bitcast<f32>(inst.packedBounding);
+    } else {
+        // [KO] 재베이킹: 기 패킹된 packedScale에서 f16 언패킹 (타일 스트리밍/고도 변경 시 무손실 보존)
+        // [EN] Rebake: Unpack f16 from previously packedScale (lossless preservation across streaming)
+        let scales = unpack2x16float(inst.packedScale);
+        scaleXZ = scales.x;
+        scaleY = scales.y;
     }
 
     let u = inst.posX * bakeUniforms.invWorldSizeX + 0.5;
@@ -158,6 +178,20 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let finalQuat = normalize(quatMultiply(qTerrain, qY));
     let canonicalQuat = select(-finalQuat, finalQuat, finalQuat.w >= 0.0);
     rawInstances[instIdx].packedQuat = pack4x8snorm(canonicalQuat);
+
+    // [KO] Point 2: 월드 바운딩 구 (중심 Y 오프셋 및 반지름) 사전 계산 및 패킹
+    // [EN] Point 2: Precompute world bounding sphere (center Y offset & radius) and pack
+    let baseH = max(0.01, typeInfo.meshHeight) * scaleY;
+    let halfH = baseH * 0.5;
+    let localCenter = rotateVectorByQuat(vec3<f32>(0.0, halfH, 0.0), canonicalQuat);
+    let centerOffsetY = max(0.05, localCenter.y);
+
+    let maxXZ = scaleXZ;
+    let rawRadius = sqrt(halfH * halfH + maxXZ * maxXZ);
+    let boundRadius = rawRadius * 1.25; // 바람 애니메이션 및 회전 여유분 25%
+
+    rawInstances[instIdx].packedScale = pack2x16float(vec2<f32>(scaleXZ, scaleY));
+    rawInstances[instIdx].packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));
 
     var groundColor = vec3<f32>(0.0);
     if (bakeUniforms.hasVBT != 0u) {

@@ -3,8 +3,8 @@ struct GrassInstance {
     posY: f32,
     posZ: f32,
     rotationY: f32,
-    scaleXZ: f32,
-    scaleY: f32,
+    packedScale: u32,
+    packedBounding: u32,
     packedQuat: u32,
     packedGroundColor: u32,
 };
@@ -94,16 +94,19 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         if (typeInfo.lodCount > 3u && distToCam > typeInfo.lodDistance2) { targetLod = 3u; }
     }
 
-    let scaleXZ = instance.scaleXZ;
-    let radius = max(0.8, scaleXZ * 1.2);
+    // [KO] 베이킹된 사전 계산 바운딩 구 (중심 Y 오프셋 및 반지름) 언패킹
+    // [EN] Unpack precomputed bounding sphere (center Y offset & radius) from bake pass
+    let bounds = unpack2x16float(instance.packedBounding);
+    let centerOffsetY = bounds.x;
+    let radius = bounds.y;
 
-    let worldPos = vec3<f32>(instance.posX, instance.posY + radius * 0.5, instance.posZ);
+    let sphereCenter = vec3<f32>(instance.posX, instance.posY + centerOffsetY, instance.posZ);
     var inside = true;
     for (var p = 0u; p < 6u; p = p + 1u) {
         let plane = globalUniforms.frustumPlanes[p];
         let planeLenSq = dot(plane.xyz, plane.xyz);
         if (planeLenSq > 0.1) {
-            let distToPlane = dot(plane.xyz, worldPos) + plane.w;
+            let distToPlane = dot(plane.xyz, sphereCenter) + plane.w;
             if (distToPlane < -radius) {
                 inside = false;
                 break;

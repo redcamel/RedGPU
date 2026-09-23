@@ -6,8 +6,8 @@ struct GrassInstance {
     posY: f32,
     posZ: f32,
     rotationY: f32,
-    scaleXZ: f32,
-    scaleY: f32,
+    packedScale: u32,
+    packedBounding: u32,
     packedQuat: u32,
     packedGroundColor: u32,
 };
@@ -44,8 +44,9 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     var output: ShadowVertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    var scaleXZ = instance.scaleXZ;
-    var scaleY = instance.scaleY;
+    let scales = unpack2x16float(instance.packedScale);
+    var scaleXZ = scales.x;
+    var scaleY = scales.y;
 
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
