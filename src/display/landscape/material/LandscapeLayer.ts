@@ -236,7 +236,7 @@ export class LandscapeLayer {
     }
 
     #resolveLinearFormat(): GPUTextureFormat {
-        return navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
+        return 'rgba8unorm';
     }
 
     get enabled(): boolean {

@@ -316,8 +316,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     #getDataArrayFormat(): GPUTextureFormat {
-        const preferred = navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
-        return preferred as GPUTextureFormat;
+        return 'rgba8unorm';
     }
 
     #initDummyTextureArrays(): void {
