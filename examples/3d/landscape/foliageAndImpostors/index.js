@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 5: Foliage & Impostors (대규모 수목 식생 및 옥타헤드럴 임포스터)
  * [EN] Step 5: Foliage & Impostors (Large-Scale Foliage & Octahedral Impostors)
  *
- * [KO] 8km x 8km 광역 지형에 소나무 및 바위 식생을 대규모 배치하고, 3단계 메시 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터를 결합한 예제입니다.
- * [EN] Large-scale foliage example placing pine trees and rocks across an 8km x 8km terrain with 6,000m Octahedral Impostors.
+ * [KO] 8km x 8km 광역 지형에 소나무 식생을 대규모 배치하고, 3단계 메시 LOD와 최대 6,000m 원거리 옥타헤드럴 임포스터를 결합한 예제입니다.
+ * [EN] Large-scale foliage example placing pine trees across an 8km x 8km terrain with 6,000m Octahedral Impostors.
  */
 
 const canvas = document.createElement('canvas');
@@ -257,10 +257,17 @@ function renderTestPane({
             lightFolder.addBinding(directionalShadowManager, 'strength', {min: 0.0, max: 1.0, step: 0.05});
             lightFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {min: 50, max: 800, step: 25});
 
-            // 5. 스플랫 레이어 (Layers) - 표시 토글만 간결하게 유지
+            // 5. 스플랫 레이어 (4종 스플랫 재질)
             const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
             layers.forEach((layer) => {
-                splatFolder.addBinding(layer, 'enabled', {label: layer.name});
+                const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
+                layerSubFolder.addBinding(layer, 'enabled');
+                const uvProxy = {uvScale: layer.uvScale[0]};
+                layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 150, step: 1})
+                    .on('change', (ev) => {
+                        layer.uvScale = [ev.value, ev.value];
+                    });
+                layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
             });
         }
     });
@@ -285,34 +292,32 @@ function renderTestPane({
         placementFolder.addBinding(type, 'densityPerHectare', {
             min: 1.0,
             max: 500.0,
-            step: 1.0,
-            label: 'Density (/ha)'
+            step: 1.0
         });
-        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1, label: 'Density Mul'});
+        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         placementFolder.addBinding(type, 'minWeightThreshold', {
             min: 0.0,
             max: 0.5,
-            step: 0.01,
-            label: 'Weight Cutoff'
+            step: 0.01
         });
-        placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true, label: 'Active Count'});
+        placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
 
         // 2. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
-        transformFolder.addBinding(type, 'bottomOffset', {min: -3.0, max: 2.0, step: 0.05, label: 'Bottom Offset'});
-        transformFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 90.0, step: 1.0, label: 'Max Slope'});
-        transformFolder.addBinding(type, 'alignToNormal', {label: 'Align Normal'});
-        transformFolder.addBinding(type, 'alignFactor', {min: 0.0, max: 1.0, step: 0.05, label: 'Align Factor'});
+        transformFolder.addBinding(type, 'bottomOffset', {min: -3.0, max: 2.0, step: 0.05});
+        transformFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 90.0, step: 1.0});
+        transformFolder.addBinding(type, 'alignToNormal');
+        transformFolder.addBinding(type, 'alignFactor', {min: 0.0, max: 1.0, step: 0.05});
 
         // 3. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
-        lodFolder.addBinding(type, 'cullingDistance', {min: 500, max: 8000, step: 100, label: 'Cull Dist'});
-        lodFolder.addBinding(type, 'fadeStartDistance', {min: 300, max: 6000, step: 100, label: 'Fade Start'});
+        lodFolder.addBinding(type, 'cullingDistance', {min: 500, max: 8000, step: 100});
+        lodFolder.addBinding(type, 'fadeStartDistance', {min: 300, max: 6000, step: 100});
 
         // 바람 파라미터는 수목(Tree)에만 배치
         if (type.name.includes('Tree')) {
             const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
-            windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1, label: 'Wind Mul'});
+            windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         }
     };
 
@@ -430,11 +435,11 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
 }
 
 /**
- * [KO] 소나무 및 바위 식생 에셋 로딩
- * [EN] Loads tree and rock foliage assets
+ * [KO] 소나무 식생 에셋 로딩 (Multi-LOD Tree + Octahedral Impostor)
+ * [EN] Loads pine tree foliage asset (Multi-LOD Tree + Octahedral Impostor)
  */
 function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) {
-    // 1. 소나무 (test.glb - Multi-LOD Tree + Octahedral Impostor)
+    // 소나무 (test.glb - Multi-LOD Tree + Octahedral Impostor)
     new RedGPU.GLTFLoader(
         redGPUContext,
         '../../../assets/terrain/test.glb',
@@ -489,48 +494,6 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
 
                 onFoliageTypeAdded?.(foliageType);
             });
-        }
-    );
-
-    // 2. 하천 바위 (river_rock.glb - Static Rock)
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        '../../../assets/terrain/river_rock.glb',
-        (loader) => {
-            const root = loader.resultMesh;
-            const rockNodes = [];
-            const findRocks = (node) => {
-                if (!node) return;
-                if (node.name && node.name.startsWith('RiverRock') && !node.name.includes('lambert')) {
-                    rockNodes.push(node);
-                    return;
-                }
-                const children = node.children || [];
-                for (let i = 0; i < children.length; i++) findRocks(children[i]);
-            };
-            findRocks(root);
-
-            if (rockNodes.length > 0) {
-                const rockType = foliageManager.addFoliageType({
-                    name: 'Rock_RiverRock',
-                    type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
-                    lods: [{mesh: rockNodes[0], lodDistance: 150, receiveShadow: true}],
-                    densityPerHectare: 35.0,
-                    minWeightThreshold: 0.03,
-                    minScale: [1.2, 1.0, 1.2],
-                    maxScale: [2.5, 2.0, 2.5],
-                    useImpostor: false,
-                    cullingDistance: 1200,
-                    fadeStartDistance: 900,
-                    targetLayer: 'Rock',
-                    bottomOffset: -0.2,
-                    alignToNormal: true,
-                    alignFactor: 0.6,
-                    maxSlope: 60.0
-                });
-
-                onFoliageTypeAdded?.(rockType);
-            }
         }
     );
 }
