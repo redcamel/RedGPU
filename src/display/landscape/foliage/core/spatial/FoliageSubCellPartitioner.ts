@@ -94,7 +94,7 @@ class FoliageSubCellPartitioner {
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
 
         const alignToNormal = foliageType.alignToNormal ?? false;
-        const alignFactor = foliageType.alignFactor ?? 0.0;
+        const alignFactor = foliageType.alignFactor ?? 1.0;
         const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
 
         const tempBuckets = new Map<number, {

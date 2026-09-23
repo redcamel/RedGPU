@@ -514,12 +514,12 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                 const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
                 if (!lod0) return;
 
-                const lodConfigs = [{mesh: lod0, lodDistance: 50, receiveShadow: true}];
+                const lodConfigs = [{mesh: lod0, lodDistance: 50}];
                 if (lods.lod1 && lods.lod1 !== lod0) {
-                    lodConfigs.push({mesh: lods.lod1, lodDistance: 100, receiveShadow: true});
+                    lodConfigs.push({mesh: lods.lod1, lodDistance: 100});
                 }
                 if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) {
-                    lodConfigs.push({mesh: lods.lod2, lodDistance: 180, receiveShadow: false});
+                    lodConfigs.push({mesh: lods.lod2, lodDistance: 180});
                 }
 
                 const foliageType = foliageManager.addFoliageType({

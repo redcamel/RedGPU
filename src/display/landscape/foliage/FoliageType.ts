@@ -17,6 +17,10 @@ export interface FoliageLODConfig {
 
     lodDistance?: number;
 
+    /**
+     * Whether this LOD receives shadows.
+     * @default true
+     */
     receiveShadow?: boolean;
 }
 
@@ -76,7 +80,10 @@ export interface FoliageTypeOptions {
     useVertexColorWind?: boolean;
 
     alignToNormal?: boolean;
-
+    /**
+     * Normal alignment factor (0.0 to 1.0).
+     * @default 1.0
+     */
     alignFactor?: number;
 
     densityMultiplier?: number;
@@ -120,7 +127,7 @@ class FoliageType {
     #windFlutterMultiplier: number = 1.0;
     #useVertexColorWind: boolean = true;
     #alignToNormal: boolean = false;
-    #alignFactor: number = 0.0;
+    #alignFactor: number = 1.0;
     #lastWindParams: {
         windDirX: number;
         windDirY: number;
@@ -204,7 +211,7 @@ class FoliageType {
         const resolvedAlignToNormal = options.alignToNormal ?? false;
         const resolvedAlignFactor = options.alignFactor !== undefined
             ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0))
-            : 0.0;
+            : 1.0;
 
         this.#windMultiplier = resolvedWindMultiplier;
         this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
