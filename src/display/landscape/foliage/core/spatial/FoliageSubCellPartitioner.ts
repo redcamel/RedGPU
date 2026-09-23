@@ -88,7 +88,6 @@ class FoliageSubCellPartitioner {
             return result;
         }
 
-        const minWeightThreshold = foliageType.minWeightThreshold ?? 0.1;
         const densityScaleByWeight = foliageType.densityScaleByWeight !== false;
         const minSlope = foliageType.minSlope ?? 0.0;
         const maxSlope = foliageType.maxSlope ?? 45.0;
@@ -128,7 +127,7 @@ class FoliageSubCellPartitioner {
                 const u = (posX + halfWorldX) / worldSizeX;
                 const v = (posZ + halfWorldZ) / worldSizeZ;
                 const weight = FoliageSubCellPartitioner.#getLayerWeight(landscape, targetLayerObj, u, v);
-                if (weight < minWeightThreshold) {
+                if (weight < 0.1) {
                     continue;
                 }
                 if (densityScaleByWeight) {

@@ -72,8 +72,6 @@ export interface FoliageTypeOptions {
 
     targetLayer?: string | number;
 
-    minWeightThreshold?: number;
-
     minSlope?: number;
 
     maxSlope?: number;
@@ -123,7 +121,6 @@ class FoliageType {
     #streamingRadius: number = 600.0;
     #subCellSize: number = 100.0;
     #targetLayer?: string | number;
-    #minWeightThreshold: number = 0.1;
     #minSlope: number = 0.0;
     #maxSlope: number = 45.0;
     #densityScaleByWeight: boolean = true;
@@ -298,7 +295,6 @@ class FoliageType {
             streamingRadius,
             subCellSize,
             targetLayer: options.targetLayer,
-            minWeightThreshold: options.minWeightThreshold ?? 0.1,
             minSlope: options.minSlope ?? 0.0,
             maxSlope: options.maxSlope ?? 45.0,
             densityScaleByWeight: options.densityScaleByWeight !== false,
@@ -315,7 +311,6 @@ class FoliageType {
         this.#streamingRadius = this.#options.streamingRadius!;
         this.#subCellSize = this.#options.subCellSize!;
         this.#targetLayer = this.#options.targetLayer;
-        this.#minWeightThreshold = this.#options.minWeightThreshold!;
         this.#minSlope = this.#options.minSlope!;
         this.#maxSlope = this.#options.maxSlope!;
         this.#densityScaleByWeight = this.#options.densityScaleByWeight!;
@@ -517,18 +512,6 @@ class FoliageType {
     set targetLayer(val: string | number | undefined) {
         if (this.#targetLayer !== val) {
             this.#targetLayer = val;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    get minWeightThreshold(): number {
-        return this.#minWeightThreshold;
-    }
-
-    set minWeightThreshold(val: number) {
-        const numVal = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
-        if (this.#minWeightThreshold !== numVal) {
-            this.#minWeightThreshold = numVal;
             this.#onRepopulateRequired?.(this);
         }
     }

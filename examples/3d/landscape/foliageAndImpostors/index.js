@@ -295,11 +295,7 @@ function renderTestPane({
             step: 1.0
         });
         placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-        placementFolder.addBinding(type, 'minWeightThreshold', {
-            min: 0.0,
-            max: 0.5,
-            step: 0.01
-        });
+        placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
 
         // 2. Transform & Slope (스케일 및 경사각)
@@ -480,7 +476,6 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 120.0,
-                    minWeightThreshold: 0.02,
                     minScale: [0.4, 0.4, 0.4],
                     maxScale: [0.7, 0.75, 0.7],
                     cullingDistance: 6000,
