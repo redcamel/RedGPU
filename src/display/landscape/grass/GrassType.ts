@@ -20,11 +20,6 @@ export interface GrassTypeOptions {
     name?: string;
     lods: GrassLODConfig[];
     baseColorTexture?: string | BitmapTexture;
-    normalTexture?: string | BitmapTexture;
-    ormTexture?: string | BitmapTexture;
-    roughnessTexture?: string | BitmapTexture;
-    metallicRoughnessTexture?: string | BitmapTexture;
-    normalScale?: number;
     densityPerHectare?: number;
     densityMultiplier?: number;
     densityScaleByWeight?: boolean;
@@ -55,7 +50,6 @@ export interface GrassTypeOptions {
 }
 
 export class GrassType {
-    #mesh?: Mesh;
     #name: string;
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
@@ -66,7 +60,6 @@ export class GrassType {
     #minSlope: number = 0.0;
     #maxSlope: number = 35.0;
     #cullingDistance: number = 100.0;
-    #fadeStartDistance: number = 75.0;
     #shrinkStartDistance: number = 60.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
@@ -102,7 +95,6 @@ export class GrassType {
         if (!lod0Mesh) {
             throw new Error(`[GrassType] LOD 0 must contain a valid Mesh instance!`);
         }
-        this.#mesh = lod0Mesh;
         this.#name = options.name || lod0Mesh.name || `GrassType_${Math.random().toString(36).substring(2, 7)}`;
 
         const mat = lod0Mesh.material as any;
@@ -223,7 +215,7 @@ export class GrassType {
     }
 
     get mesh(): Mesh | undefined {
-        return this.#mesh;
+        return this.#lods[0]?.mesh;
     }
 
     get geometry(): Geometry | Primitive {
@@ -240,27 +232,6 @@ export class GrassType {
 
     get baseColorTexture(): BitmapTexture {
         return this.#baseColorTexture;
-    }
-
-    get normalTexture(): BitmapTexture | null {
-        return null;
-    }
-
-    set normalTexture(_v: BitmapTexture | null) {
-    }
-
-    get ormTexture(): BitmapTexture | null {
-        return null;
-    }
-
-    set ormTexture(_v: BitmapTexture | null) {
-    }
-
-    get normalScale(): number {
-        return 1.0;
-    }
-
-    set normalScale(_v: number) {
     }
 
     get densityPerHectare(): number {
