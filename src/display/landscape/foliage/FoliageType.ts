@@ -321,7 +321,8 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 this.#lodInfoList,
-                effectiveShadowDist
+                effectiveShadowDist,
+                this.#boundingHeight
             );
         }
     }
@@ -923,7 +924,8 @@ class FoliageType {
                 this.#boundingRadius,
                 this.#bottomOffset,
                 effectiveLodList,
-                effectiveShadowDist
+                effectiveShadowDist,
+                this.#boundingHeight
             );
         }
     }

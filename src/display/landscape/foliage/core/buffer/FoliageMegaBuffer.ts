@@ -24,7 +24,7 @@ class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 8;
     static readonly #STRIDE_BYTES: number = 8 * 4;
     static readonly #MAX_TYPES: number = 64;
-    static readonly #TYPE_PARAM_FLOATS: number = 76;
+    static readonly #TYPE_PARAM_FLOATS: number = 80;
 
     #cpuRawDataUint32: Uint32Array;
 
@@ -76,6 +76,11 @@ class FoliageMegaBuffer {
     #nextIndirectOffset: number = 0;
 
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
+    #fallbackHZBTexture: GPUTexture | null = null;
+    #fallbackHZBTextureView: GPUTextureView | null = null;
+    #fallbackHZBSampler: GPUSampler | null = null;
+    #cachedHZBTextureView: GPUTextureView | null = null;
+    #cachedHZBSampler: GPUSampler | null = null;
 
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
@@ -347,7 +352,12 @@ class FoliageMegaBuffer {
         mainFrustumPlanes: number[][] | null,
         cascades: readonly CascadeCullingParam[],
         activeCascadeCount: number = 4,
-        viewportHeight: number = 1080.0
+        viewportHeight: number = 1080.0,
+        hzbEnabled: boolean = false,
+        viewProjectionMatrix: any = null,
+        hzbWidth: number = 512.0,
+        hzbHeight: number = 256.0,
+        depthBias: number = 0.002
     ): void {
         if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
 
@@ -367,16 +377,27 @@ class FoliageMegaBuffer {
         gu32[8] = this.#maxSubMeshes;
         gu32[9] = this.#maxTotalInstances * 8;
         gu32[10] = activeCascadeCount;
-        gu32[11] = 0;
+        gu32[11] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
         gf32[12] = viewportHeight > 0 ? viewportHeight : 1080.0;
-        gu32[13] = 0;
-        gu32[14] = 0;
-        gu32[15] = 0;
+        gf32[13] = depthBias;
+        gf32[14] = hzbWidth;
+        gf32[15] = hzbHeight;
+
+        gf32[16] = 0;
+        gf32[17] = 0;
+        gf32[18] = 0;
+        gf32[19] = 0;
+
+        if (viewProjectionMatrix) {
+            gf32.set(viewProjectionMatrix, 20);
+        } else {
+            gf32.fill(0, 20, 36);
+        }
 
         if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = mainFrustumPlanes[p];
-                const baseOffset = 16 + p * 4;
+                const baseOffset = 36 + p * 4;
                 gf32[baseOffset] = plane[0];
                 gf32[baseOffset + 1] = plane[1];
                 gf32[baseOffset + 2] = plane[2];
@@ -386,7 +407,7 @@ class FoliageMegaBuffer {
 
         for (let c = 0; c < 4; c++) {
             const cascade = cascades[c];
-            const cascadeBase = 40 + c * 28;
+            const cascadeBase = 60 + c * 28;
             if (cascade && cascade.hasShadow) {
                 gf32[cascadeBase] = cascade.maxDistance;
                 gu32[cascadeBase + 1] = 1;
@@ -429,7 +450,7 @@ class FoliageMegaBuffer {
             0,
             gf32.buffer,
             gf32.byteOffset,
-            672
+            688
         );
 
         if (this.#dirtyTypeParams) {
@@ -451,7 +472,8 @@ class FoliageMegaBuffer {
         boundingRadius: number,
         bottomOffset: number,
         lodInfoList: readonly FoliageLODInfo[],
-        maxShadowDistance: number = 300.0
+        maxShadowDistance: number = 300.0,
+        boundingHeight: number = 2.0
     ): void {
         this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
@@ -476,9 +498,13 @@ class FoliageMegaBuffer {
         f32[baseOffset + 10] = maxShadowDistance;
 
         f32[baseOffset + 11] = 1.0 / fadeRange;
+        f32[baseOffset + 12] = boundingHeight;
+        f32[baseOffset + 13] = 0;
+        f32[baseOffset + 14] = 0;
+        f32[baseOffset + 15] = 0;
 
         for (let l = 0; l < 8; l++) {
-            const lodBase = baseOffset + 12 + l * 8;
+            const lodBase = baseOffset + 16 + l * 8;
             if (l < numLODs) {
                 const info = lodInfoList[l];
                 const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
@@ -517,7 +543,9 @@ class FoliageMegaBuffer {
     }
 
     getOrCreateUnifiedCullingBindGroup(
-        layout: GPUBindGroupLayout
+        layout: GPUBindGroupLayout,
+        hzbTextureView?: GPUTextureView | null,
+        hzbSampler?: GPUSampler | null
     ): GPUBindGroup | null {
         if (!this.#rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer ||
             !this.#culledGPUBuffer || !this.#indirectGPUBuffer ||
@@ -525,11 +553,32 @@ class FoliageMegaBuffer {
             return null;
         }
 
-        if (this.#unifiedCullingBindGroup) {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!this.#fallbackHZBTextureView) {
+            this.#fallbackHZBTexture = gpuDevice.createTexture({
+                label: 'FoliageMegaBuffer_FallbackHZBTexture',
+                size: [1, 1, 1],
+                format: 'r32float',
+                usage: GPUTextureUsage.TEXTURE_BINDING,
+            });
+            this.#fallbackHZBTextureView = this.#fallbackHZBTexture.createView({
+                label: 'FoliageMegaBuffer_FallbackHZBTextureView',
+            });
+            this.#fallbackHZBSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        }
+
+        const targetHZBView = hzbTextureView || this.#fallbackHZBTextureView;
+        const targetHZBSampler = hzbSampler || this.#fallbackHZBSampler!;
+
+        if (this.#unifiedCullingBindGroup &&
+            this.#cachedHZBTextureView === targetHZBView &&
+            this.#cachedHZBSampler === targetHZBSampler) {
             return this.#unifiedCullingBindGroup;
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        this.#cachedHZBTextureView = targetHZBView;
+        this.#cachedHZBSampler = targetHZBSampler;
+
         this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
             label: 'UnifiedFoliageMegaCullingBindGroup',
             layout,
@@ -541,6 +590,8 @@ class FoliageMegaBuffer {
                 {binding: 4, resource: {buffer: this.#indirectGPUBuffer}},
                 {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer}},
                 {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
+                {binding: 7, resource: targetHZBView},
+                {binding: 8, resource: targetHZBSampler},
             ],
         });
 
@@ -548,6 +599,12 @@ class FoliageMegaBuffer {
     }
 
     destroy(): void {
+        this.#fallbackHZBTexture?.destroy();
+        this.#fallbackHZBTexture = null;
+        this.#fallbackHZBTextureView = null;
+        this.#fallbackHZBSampler = null;
+        this.#cachedHZBTextureView = null;
+        this.#cachedHZBSampler = null;
         this.#rawGPUBuffer?.destroy();
         this.#culledGPUBuffer?.destroy();
         this.#indirectGPUBuffer?.destroy();

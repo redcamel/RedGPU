@@ -38,6 +38,8 @@ class FoliageCullingDispatcher {
     #baker: FoliageBaker;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
+    #lastHZBTextureView: GPUTextureView | null = null;
+    #lastHZBSampler: GPUSampler | null = null;
 
     #landscapeRef: Landscape | null = null;
 
@@ -221,6 +223,20 @@ class FoliageCullingDispatcher {
                 }
             }
 
+            const currentView = stateData?.view || (viewOrCamera as any)?.view || (viewOrCamera?.camera ? viewOrCamera : null);
+            const hzb = currentView?.hierarchicalZBuffer;
+            const hzbTextureView = hzb?.textureView || null;
+            const hzbSampler = hzb?.sampler || null;
+            this.#lastHZBTextureView = hzbTextureView;
+            this.#lastHZBSampler = hzbSampler;
+            const hasHZB = !!hzbTextureView;
+
+            let viewProjectionMatrix: mat4 | null = camera?.viewProjectionMatrix || null;
+            if (!viewProjectionMatrix && camera?.projectionMatrix && camera?.viewMatrix) {
+                mat4.multiply(FoliageCullingDispatcher.#tempPVMatrix, camera.projectionMatrix, camera.viewMatrix);
+                viewProjectionMatrix = FoliageCullingDispatcher.#tempPVMatrix;
+            }
+
             const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 camX, camY, camZ,
@@ -229,7 +245,12 @@ class FoliageCullingDispatcher {
                 frustumPlanes,
                 cascadeParams,
                 activeCascadeCount,
-                viewportHeight
+                viewportHeight,
+                hasHZB,
+                viewProjectionMatrix,
+                512.0,
+                256.0,
+                0.002
             );
         }
 
@@ -292,6 +313,8 @@ class FoliageCullingDispatcher {
         this.#baker.destroy();
         this.#cullingComputePipeline = null;
         this.#cullingBindGroupLayout = null;
+        this.#lastHZBTextureView = null;
+        this.#lastHZBSampler = null;
         this.#megaBuffer = null;
         this.#landscapeRef = null;
     }
@@ -326,7 +349,11 @@ class FoliageCullingDispatcher {
             const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
             if (totalAllocatedRange <= 0) return;
 
-            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(bindGroupLayout);
+            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
+                bindGroupLayout,
+                this.#lastHZBTextureView,
+                this.#lastHZBSampler
+            );
             if (unifiedBindGroup) {
                 const workgroupCount = Math.ceil(totalAllocatedRange / 64);
                 computePass.setBindGroup(0, unifiedBindGroup);

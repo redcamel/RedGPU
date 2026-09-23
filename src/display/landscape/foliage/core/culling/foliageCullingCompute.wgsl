@@ -22,6 +22,10 @@ struct FoliageTypeParam {
     activeCount: u32,
     maxShadowDistance: f32,
     invFadeRange: f32,
+    boundingHeight: f32,
+    pad0: f32,
+    pad1: f32,
+    pad2: f32,
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
@@ -43,9 +47,14 @@ struct UnifiedGlobalCullingUniforms {
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
-    padHZB: u32,
+    useHZB: u32,
     viewportHeight: f32,
-    pad2: u32,
+    depthBias: f32,
+    hzbWidth: f32,
+    hzbHeight: f32,
+    pad0: f32,
+    pad1: f32,
+    viewProjectionMatrix: mat4x4<f32>,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,
 };
@@ -76,6 +85,64 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(4) var<storage, read_write> mainIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstanceData>;
 @group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(7) var hzbTexture: texture_2d<f32>;
+@group(0) @binding(8) var hzbSampler: sampler;
+
+fn checkFoliageAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
+    var minNDC = vec2<f32>(1.0, 1.0);
+    var maxNDC = vec2<f32>(-1.0, -1.0);
+    var minDepth = 1.0;
+    var allBehindNearPlane = true;
+
+    let corners = array<vec3<f32>, 8>(
+        vec3<f32>(minPos.x, minPos.y, minPos.z),
+        vec3<f32>(maxPos.x, minPos.y, minPos.z),
+        vec3<f32>(minPos.x, maxPos.y, minPos.z),
+        vec3<f32>(maxPos.x, maxPos.y, minPos.z),
+        vec3<f32>(minPos.x, minPos.y, maxPos.z),
+        vec3<f32>(maxPos.x, minPos.y, maxPos.z),
+        vec3<f32>(minPos.x, maxPos.y, maxPos.z),
+        vec3<f32>(maxPos.x, maxPos.y, maxPos.z),
+    );
+
+    for (var i = 0; i < 8; i = i + 1) {
+        let clip = globalUniforms.viewProjectionMatrix * vec4<f32>(corners[i], 1.0);
+        if (clip.w > 0.01) {
+            allBehindNearPlane = false;
+            let invW = 1.0 / clip.w;
+            let ndc = clip.xy * invW;
+            let d = clip.z * invW;
+            minNDC = min(minNDC, ndc);
+            maxNDC = max(maxNDC, ndc);
+            minDepth = min(minDepth, d);
+        } else {
+            return true;
+        }
+    }
+
+    if (allBehindNearPlane) {
+        return false;
+    }
+
+    let minUV = clamp(vec2<f32>(minNDC.x * 0.5 + 0.5, 1.0 - (maxNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
+    let maxUV = clamp(vec2<f32>(maxNDC.x * 0.5 + 0.5, 1.0 - (minNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
+
+    let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(globalUniforms.hzbWidth, globalUniforms.hzbHeight), vec2<f32>(1.0));
+    let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
+    let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
+
+    let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
+    let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
+    let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
+    let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
+    let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
+
+    if (minDepth > maxHZBDepth + globalUniforms.depthBias) {
+        return false;
+    }
+
+    return true;
+}
 
 @compute @workgroup_size(64)
 fn main(
@@ -166,6 +233,20 @@ fn main(
             dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
             dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
             dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+
+        // 🌿 [Hierarchical Z-Buffer] AABB 오클루전 컬링
+        if (inMainFrustum && globalUniforms.useHZB != 0u) {
+            let halfW = scaledRadius;
+            let baseY = realY + typeInfo.bottomOffset;
+            let effHeight = max(typeInfo.boundingHeight, typeInfo.boundingRadius * 1.5) * scaleY;
+            let topY = baseY + effHeight;
+            let aabbMin = vec3<f32>(instance.posX - halfW, baseY, instance.posZ - halfW);
+            let aabbMax = vec3<f32>(instance.posX + halfW, topY, instance.posZ + halfW);
+
+            if (!checkFoliageAABBInHZB(aabbMin, aabbMax)) {
+                inMainFrustum = false;
+            }
+        }
     }
 
     if (!inMainFrustum && !canHaveShadow) {
