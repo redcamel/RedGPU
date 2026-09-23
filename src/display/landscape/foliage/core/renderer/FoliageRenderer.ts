@@ -117,7 +117,7 @@ class FoliageRenderer {
             for (let t = 0; t < validCount; t++) {
                 const item = this.#validTypesMain[t];
                 const foliageType = item.type!;
-                if (!foliageType.isFoliage || !foliageType.useDepthPrepass) continue;
+                if (!foliageType.useDepthPrepass) continue;
                 const culledGPU = item.culledGPU!;
                 const indirectGPU = item.indirectGPU!;
                 const subMeshes = foliageType.depthPrepassSubMeshes;
@@ -146,12 +146,11 @@ class FoliageRenderer {
             const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.mainSubMeshes;
             const subCount = subMeshes.length;
-            const isFoliage = foliageType.isFoliage;
             const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const depthMode = (isFoliage && effectiveUsePrepass) ? sub.mainDepthMode : 'normal';
+                const depthMode = effectiveUsePrepass ? sub.mainDepthMode : 'normal';
                 this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
         }
@@ -286,7 +285,7 @@ class FoliageRenderer {
                     if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
                 }
 
-                if (lodIdx === 0 && foliageType.isFoliage) {
+                if (lodIdx === 0 && foliageType.hasMaskedLOD0) {
                     const lod0Subs = foliageType.lod0SubMeshes;
                     const subCount = lod0Subs.length;
                     for (let l0 = 0; l0 < subCount; l0++) {

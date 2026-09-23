@@ -47,11 +47,6 @@ export interface FoliageTypeOptions {
 
     useImpostor?: boolean;
 
-    isFoliage?: boolean;
-
-    useDepthPrepass?: boolean;
-    depthPrepassMaxLOD?: number;
-
     bottomOffset?: number;
 
     preservePivot?: boolean;
@@ -110,8 +105,8 @@ class FoliageType {
     #castShadow: boolean = true;
     #maxShadowDistance: number = 300.0;
     #useImpostor: boolean = true;
-    #isFoliage: boolean = true;
     #useDepthPrepass: boolean = true;
+    #hasMaskedLOD0: boolean = false;
     #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
     #subCellSize: number = 100.0;
@@ -160,15 +155,10 @@ class FoliageType {
         this.#baker = baker || null;
         this.#castShadow = options.castShadow !== false;
 
-        const isFoliage = options.isFoliage !== false;
-        this.#isFoliage = isFoliage;
-
         this.#useImpostor = options.useImpostor !== undefined
             ? options.useImpostor
-            : isFoliage;
-        this.#useDepthPrepass = options.useDepthPrepass !== undefined
-            ? options.useDepthPrepass
-            : isFoliage;
+            : true;
+        this.#useDepthPrepass = true;
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
@@ -207,16 +197,14 @@ class FoliageType {
             ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
 
-        const defaultWindMul = isFoliage ? 1.0 : 0.0;
-        const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : defaultWindMul;
+        const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : 1.0;
         const resolvedWindFlutterMultiplier = options.windFlutterMultiplier !== undefined ? Math.max(0, Number(options.windFlutterMultiplier) || 0) : 1.0;
         const resolvedUseVertexColorWind = options.useVertexColorWind !== false;
 
         const resolvedAlignToNormal = options.alignToNormal ?? false;
-        const defaultAlignFactor = isFoliage ? 0.0 : 1.0;
         const resolvedAlignFactor = options.alignFactor !== undefined
             ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0))
-            : defaultAlignFactor;
+            : 0.0;
 
         this.#windMultiplier = resolvedWindMultiplier;
         this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
@@ -238,6 +226,14 @@ class FoliageType {
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#lod0SubMeshes = this.#subMeshes.filter(sub => sub.lodIndex === 0);
+        let hasMaskedLOD0 = false;
+        for (let i = 0; i < this.#lod0SubMeshes.length; i++) {
+            if (this.#lod0SubMeshes[i].isMasked) {
+                hasMaskedLOD0 = true;
+                break;
+            }
+        }
+        this.#hasMaskedLOD0 = hasMaskedLOD0;
         this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#bottomOffset = options.bottomOffset ?? 0;
@@ -252,8 +248,6 @@ class FoliageType {
             defaultShadowDist = 75.0;
         } else if (effectiveHeight < 3.5) {
             defaultShadowDist = 160.0;
-        } else if (!isFoliage) {
-            defaultShadowDist = 150.0;
         } else {
             defaultShadowDist = 350.0;
         }
@@ -271,9 +265,6 @@ class FoliageType {
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
             useImpostor: this.#useImpostor,
-            isFoliage: this.#isFoliage,
-            useDepthPrepass: this.#useDepthPrepass,
-            depthPrepassMaxLOD: options.depthPrepassMaxLOD,
             bottomOffset: this.#bottomOffset,
             castShadow: this.#castShadow,
             maxShadowDistance: this.#maxShadowDistance,
@@ -774,31 +765,19 @@ class FoliageType {
         }
     }
 
-    get isFoliage(): boolean {
-        return this.#isFoliage;
-    }
 
-    set isFoliage(value: boolean) {
-        const boolVal = !!value;
-        if (this.#isFoliage !== boolVal) {
-            this.#isFoliage = boolVal;
-            this.#updatePassBuckets();
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-
+    /**
+     * @internal
+     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
 
-    set useDepthPrepass(value: boolean) {
-        const boolVal = !!value;
-        if (this.#useDepthPrepass !== boolVal) {
-            this.#useDepthPrepass = boolVal;
-            this.#updatePassBuckets();
-            this.#onDirty?.();
-        }
+    /**
+     * @internal
+     */
+    get hasMaskedLOD0(): boolean {
+        return this.#hasMaskedLOD0;
     }
 
     getLODDistance(lodIndex: number): number {
@@ -907,7 +886,6 @@ class FoliageType {
 
     #updatePassBuckets(): void {
         const useImp = this.#useImpostor;
-        const isFoliage = this.#isFoliage;
         const useDepthPrepass = this.#useDepthPrepass;
         const subList = this.#subMeshes;
         const count = subList.length;
@@ -918,7 +896,7 @@ class FoliageType {
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
             if (!useImp && sub.isImpostor) continue;
-            if (isFoliage && useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
+            if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
                 prepassList.push(sub);
             }
             if (sub.canRenderInPass('main')) {

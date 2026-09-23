@@ -83,10 +83,9 @@ class FoliageSubMeshAssembler {
             };
         }
 
-        const isFoliage = options.isFoliage !== false;
         const useImpostor = options.useImpostor !== undefined
             ? options.useImpostor
-            : isFoliage;
+            : true;
         const lodConfigs = options.lods || [];
         const numLODs = Math.min(lodConfigs.length, 8);
 
@@ -201,8 +200,7 @@ class FoliageSubMeshAssembler {
         gpuDevice: GPUDevice,
         subMeshBindGroupLayout: GPUBindGroupLayout,
         name: string,
-        lodIndex: number,
-        isFoliage: boolean
+        lodIndex: number
     ): { buffer: GPUBuffer; bindGroup: GPUBindGroup } {
         const uniformBuffer = gpuDevice.createBuffer({
             label: `FoliageShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
@@ -226,8 +224,8 @@ class FoliageSubMeshAssembler {
         floatView[40] = 0.1;
         floatView[41] = 0.3;
         uintView[42] = 1;
-        floatView[43] = isFoliage ? 1.0 : 0.0;
-        floatView[44] = isFoliage ? 0.5 : 0.0;
+        floatView[43] = 1.0;
+        floatView[44] = 0.5;
         uintView[45] = 1;
         floatView[46] = 5.0;
         uintView[47] = 0;
@@ -286,7 +284,6 @@ class FoliageSubMeshAssembler {
             true,
             bbBottomOffset,
             false,
-            options.isFoliage !== false,
             subMeshUniformCache
         );
         subList.push(bbSubMesh);
@@ -381,25 +378,21 @@ class FoliageSubMeshAssembler {
         if (node.geometry && node.material) {
             const mat = node.material;
 
-            const isFoliage = options.isFoliage !== false;
-            if (isFoliage) {
+            const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent;
+            if (isMasked) {
                 mat.isFoliage = true;
-
-                const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent;
-                if (isMasked) {
-                    mat.useCutOff = true;
-                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
-                    mat.doubleSided = true;
-                    mat.alphaBlend = 1;
-                    mat.transparent = false;
-                } else {
-                    mat.useCutOff = false;
-                    mat.doubleSided = false;
-                    mat.alphaBlend = 0;
-                    mat.transparent = false;
-                }
-                mat.dirtyPipeline = true;
+                mat.useCutOff = true;
+                mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
+                mat.doubleSided = true;
+                mat.alphaBlend = 1;
+                mat.transparent = false;
+            } else {
+                mat.useCutOff = false;
+                mat.doubleSided = false;
+                mat.alphaBlend = 0;
+                mat.transparent = false;
             }
+            mat.dirtyPipeline = true;
 
             if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
                 mat._updateFragmentState();
@@ -704,7 +697,7 @@ class FoliageSubMeshAssembler {
             const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
 
-            const maxPrepassLOD = options.depthPrepassMaxLOD ?? 0;
+            const maxPrepassLOD = 0;
             const combinedSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
                 gpuDevice,
                 subMeshBindGroupLayout,
@@ -719,7 +712,6 @@ class FoliageSubMeshAssembler {
                 false,
                 0,
                 lodReceiveShadow,
-                options.isFoliage !== false,
                 subMeshUniformCache,
                 maxPrepassLOD
             );
@@ -740,8 +732,7 @@ class FoliageSubMeshAssembler {
                 gpuDevice,
                 subMeshBindGroupLayout,
                 options.name,
-                lodIndex,
-                options.isFoliage !== false
+                lodIndex
             );
 
             shadowMergedSubMesh = new FoliageShadowMergedSubMesh({
@@ -788,7 +779,6 @@ class FoliageSubMeshAssembler {
         isImpostorOverride: boolean = false,
         bottomOffset: number = 0,
         receiveShadow: boolean = true,
-        isFoliage: boolean = true,
         uniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>,
         maxPrepassLOD: number = 0
     ): FoliageSubMesh {
@@ -840,8 +830,8 @@ class FoliageSubMeshAssembler {
             floatView[40] = 0.1;
             floatView[41] = 0.3;
             uintView[42] = 1;
-            floatView[43] = isFoliage ? 1.0 : 0.0;
-            floatView[44] = (isFoliage && isMasked) ? 1.0 : 0.0;
+            floatView[43] = 1.0;
+            floatView[44] = isMasked ? 1.0 : 0.0;
             uintView[45] = 1;
             floatView[46] = 5.0;
             uintView[47] = 0;
@@ -866,7 +856,7 @@ class FoliageSubMeshAssembler {
 
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        const isMaskedFoliage = isFoliage && !isImpostor && isMasked && hasBaseColorTexture;
+        const isMaskedFoliage = !isImpostor && isMasked && hasBaseColorTexture;
         const isDepthPrepass = isMaskedFoliage && (lodIndex <= maxPrepassLOD);
         const isMainOpaqueOrMasked = true;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';

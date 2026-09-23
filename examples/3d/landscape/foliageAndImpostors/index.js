@@ -239,7 +239,6 @@ function renderTestPane({
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: true});
             foliageFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
             foliageFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
-            foliageFolder.addBinding(foliageManager, 'useDepthPrepass');
             foliageFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             // 전역 바람 시뮬레이션 설정
@@ -336,17 +335,10 @@ function renderTestPane({
         shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
 
         // 5. Wind & Motion
-        if (type.isFoliage) {
-            const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
-            windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-            windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-            windFolder.addBinding(type, 'useVertexColorWind');
-        }
-
-        // 6. Rendering & Pipeline
-        const pipelineFolder = typeFolder.addFolder({title: 'Rendering & Pipeline', expanded: false});
-        pipelineFolder.addBinding(type, 'useDepthPrepass');
-        pipelineFolder.addBinding(type, 'isFoliage');
+        const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: false});
+        windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        windFolder.addBinding(type, 'useVertexColorWind');
     };
 
     // 렌더 프레임 업데이트
