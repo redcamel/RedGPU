@@ -356,6 +356,15 @@ export class LandscapeGrassManager {
             const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc;
             if (targetSrc) {
                 LandscapeWeightMapCache.load(targetSrc).then(() => {
+                    if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+                        const view = this.#landscape.redGPUContext.viewList?.[0];
+                        const cam = (view as any)?.camera;
+                        if (cam) {
+                            this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
+                            this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
+                            this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+                        }
+                    }
                     this.populateInstances(this.#lastPopulatePos);
                 });
             }
@@ -574,6 +583,16 @@ export class LandscapeGrassManager {
      */
     handleTileLoaded(comp: any): void {
         if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
+
+        if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+            const view = this.#landscape.redGPUContext.viewList?.[0];
+            const cam = (view as any)?.camera;
+            if (cam) {
+                this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
+                this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
+                this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+            }
+        }
 
         // [KO] 타일 로드 완료 시: 기존 셀은 100% 보존하고, 아직 비어 있는 후보 셀들만 즉시 증분 스폰
         // [EN] On tile load: preserve existing cells 100%, incrementally populate only missing candidate cells
@@ -972,7 +991,7 @@ export class LandscapeGrassManager {
             }
 
             const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
-            const hasTileStreaming = this.#landscape.loadedTileCount > 0;
+            const hasTileStreaming = this.#landscape.tileUrlResolver !== null;
 
             for (let i = 0; i < cellsToProcess; i++) {
                 const sortedIdx = this.#candidateIndices[i];
@@ -1022,10 +1041,15 @@ export class LandscapeGrassManager {
                         const u = (gx + halfWorldX) / worldSizeX;
                         const v = (gz + halfWorldZ) / worldSizeZ;
                         LandscapeWeightMapCache.getAllWeights(targetSrc, u, v, this.#tempWeights4);
-                        const w = this.#tempWeights4[channelIdx] || 0.0;
+                        const totalW = this.#tempWeights4[0] + this.#tempWeights4[1] + this.#tempWeights4[2] + this.#tempWeights4[3];
+                        const normW = totalW > 0.001
+                            ? (this.#tempWeights4[channelIdx] / totalW)
+                            : (this.#tempWeights4[channelIdx] || 0.0);
 
-                        if (w < 0.05) continue;
-                        if (type.densityScaleByWeight && this.#nextPrng() > w) continue;
+                        // [KO] 최소 지배 가중치(20%) 미만이거나 낙엽/자갈 등이 지배적인 영역은 스폰 제외
+                        // [EN] Exclude spawn if normalized layer weight < 20% or other layers dominate
+                        if (normW < 0.20) continue;
+                        if (type.densityScaleByWeight && this.#nextPrng() > normW) continue;
                     }
 
                     const rot = this.#nextPrng() * 6.2831853;

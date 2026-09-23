@@ -215,6 +215,7 @@ export class Landscape extends Object3DContainer {
 
         material.setOnRebakeVBTRequested(() => {
             this.#tileStreamer.rebakeAllLoadedVBT();
+            this.#grassManager?.rebakeAll();
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
@@ -429,6 +430,7 @@ export class Landscape extends Object3DContainer {
             if (val) {
                 val.setOnRebakeVBTRequested(() => {
                     this.#tileStreamer?.rebakeAllLoadedVBT();
+                    this.#grassManager?.rebakeAll();
                 });
             }
             this.#clearPipelineCaches();
