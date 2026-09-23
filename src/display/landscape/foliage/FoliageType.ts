@@ -40,7 +40,6 @@ export interface FoliageTypeOptions {
     maxInstances?: number;
 
     cullingDistance?: number;
-    fadeStartDistance?: number;
 
     minScale?: [number, number, number];
     maxScale?: [number, number, number];
@@ -175,7 +174,7 @@ class FoliageType {
         this.#megaBuffer = megaBuffer || null;
 
         this.#cullingDistance = options.cullingDistance ?? 2000.0;
-        this.#fadeStartDistance = options.fadeStartDistance ?? 1500.0;
+        this.#fadeStartDistance = this.#cullingDistance * 0.75;
 
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
@@ -268,7 +267,6 @@ class FoliageType {
             lods: options.lods,
             maxInstances: resolvedMaxInstances,
             cullingDistance: this.#cullingDistance,
-            fadeStartDistance: this.#fadeStartDistance,
             minScale,
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
@@ -437,18 +435,7 @@ class FoliageType {
         const numVal = Math.max(0, val);
         if (this.#cullingDistance !== numVal) {
             this.#cullingDistance = numVal;
-            this.#syncTypeParams();
-        }
-    }
-
-    get fadeStartDistance(): number {
-        return this.#fadeStartDistance;
-    }
-
-    set fadeStartDistance(val: number) {
-        const numVal = Math.max(0, val);
-        if (this.#fadeStartDistance !== numVal) {
-            this.#fadeStartDistance = numVal;
+            this.#fadeStartDistance = numVal * 0.75;
             this.#syncTypeParams();
         }
     }

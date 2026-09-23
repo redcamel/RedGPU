@@ -239,7 +239,17 @@ function renderTestPane({
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: true});
             foliageFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
             foliageFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
+            foliageFolder.addBinding(foliageManager, 'useDepthPrepass');
             foliageFolder.addBinding(foliageManager, 'debugSubCellColoration');
+
+            // 전역 바람 시뮬레이션 설정
+            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind', expanded: false});
+            windGlobalFolder.addBinding(foliageManager, 'windEnabled');
+            windGlobalFolder.addBinding(foliageManager, 'windStrength', {min: 0.0, max: 3.0, step: 0.05});
+            windGlobalFolder.addBinding(foliageManager, 'windSpeed', {min: 0.0, max: 10.0, step: 0.1});
+            windGlobalFolder.addBinding(foliageManager, 'windFrequency', {min: 0.1, max: 5.0, step: 0.1});
+            windGlobalFolder.addBinding(foliageManager, 'windFlutterStrength', {min: 0.0, max: 2.0, step: 0.05});
+            windGlobalFolder.addBinding(foliageManager, 'windDirectionAngle', {min: 0, max: 360, step: 1});
 
             // 3. 지형 설정 (Landscape) - 핵심 설정만 심플하게 유지
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
@@ -299,24 +309,44 @@ function renderTestPane({
         placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
+        placementFolder.addBinding(type, 'totalInstanceCount', {readonly: true});
 
         // 2. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
         transformFolder.addBinding(type, 'bottomOffset', {min: -3.0, max: 2.0, step: 0.05});
-        transformFolder.addBinding(type, 'maxSlope', {min: 10.0, max: 90.0, step: 1.0});
-        transformFolder.addBinding(type, 'alignToNormal');
-        transformFolder.addBinding(type, 'alignFactor', {min: 0.0, max: 1.0, step: 0.05});
+        transformFolder.addBinding(type, 'minSlope', {min: 0.0, max: 89.0, step: 1.0});
+        transformFolder.addBinding(type, 'maxSlope', {min: 1.0, max: 90.0, step: 1.0});
+        const alignBinding = transformFolder.addBinding(type, 'alignToNormal');
+        const alignFactorBinding = transformFolder.addBinding(type, 'alignFactor', {min: 0.0, max: 1.0, step: 0.05});
+        alignFactorBinding.disabled = !type.alignToNormal;
+        alignBinding.on('change', (ev) => {
+            alignFactorBinding.disabled = !ev.value;
+        });
 
         // 3. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
         lodFolder.addBinding(type, 'cullingDistance', {min: 500, max: 8000, step: 100});
-        lodFolder.addBinding(type, 'fadeStartDistance', {min: 300, max: 6000, step: 100});
+        if (type.hasImpostor) {
+            lodFolder.addBinding(type, 'useImpostor');
+        }
 
-        // 바람 파라미터는 수목(Tree)에만 배치
-        if (type.name.includes('Tree')) {
+        // 4. Shadow (그림자)
+        const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: false});
+        shadowFolder.addBinding(type, 'castShadow');
+        shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
+
+        // 5. Wind & Motion
+        if (type.isFoliage) {
             const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
             windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+            windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+            windFolder.addBinding(type, 'useVertexColorWind');
         }
+
+        // 6. Rendering & Pipeline
+        const pipelineFolder = typeFolder.addFolder({title: 'Rendering & Pipeline', expanded: false});
+        pipelineFolder.addBinding(type, 'useDepthPrepass');
+        pipelineFolder.addBinding(type, 'isFoliage');
     };
 
     // 렌더 프레임 업데이트
@@ -481,7 +511,6 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     minScale: [0.4, 0.4, 0.4],
                     maxScale: [0.7, 0.75, 0.7],
                     cullingDistance: 6000,
-                    fadeStartDistance: 4500,
                     targetLayer: 'Grass',
                     maxSlope: 32.0
                 });
