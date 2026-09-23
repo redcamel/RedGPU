@@ -466,13 +466,13 @@ function renderTestPane({
         // [KO] 서브서피스(SSS) 투과광
         // [EN] Subsurface scattering (SSS)
         typeFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
-        typeFolder.addBinding(type, 'subsurfaceDistortion', {min: 0.0, max: 1.0, step: 0.05});
 
         // [KO] 그림자
         // [EN] Shadow
         typeFolder.addBinding(type, 'castShadow');
         typeFolder.addBinding(type, 'receiveShadow');
         typeFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05});
+        typeFolder.addBinding(type, 'shadowCullDistance', {min: 10, max: 100, step: 5});
     };
 
     // [KO] 매 프레임 캐릭터 및 카메라 업데이트

@@ -21,6 +21,10 @@ struct GrassUniforms {
     shrinkStartDistance: f32,
     meshHeight: f32,
     minY: f32,
+    shadowCullDistance: f32,
+    shadowShrinkStartDistance: f32,
+    _pad0: f32,
+    _pad1: f32,
 };
 
 struct VertexInput {
@@ -52,14 +56,23 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
     let distToCam = distance(instPos, camPos);
 
-    let cullDist = grassUniforms.cullingDistance;
-    let shrinkStart = min(grassUniforms.shrinkStartDistance, cullDist);
+    let shadowCullDist = grassUniforms.shadowCullDistance;
+    let shadowShrinkStart = min(grassUniforms.shadowShrinkStartDistance, shadowCullDist);
+
+    // 🌿 [Unreal Engine Shadow Cull] 잔디 그림자 한계 거리 초과 시 즉시 클립하여 래스터라이징 완전 차단
+    if (distToCam >= shadowCullDist) {
+        output.clipPos = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        output.uv = vec2<f32>(0.0, 0.0);
+        output.alphaFade = 0.0;
+        return output;
+    }
+
     var shrink = 1.0;
     var alphaFade = 1.0;
 
-    // 🌿 [Unreal Engine Style] 단일 감쇄 구간([shrinkStart, cullDist])에서 크기 축소와 알파 페이드 통합 연산
-    if (distToCam > shrinkStart) {
-        let fadeRatio = clamp((cullDist - distToCam) / max(0.001, cullDist - shrinkStart), 0.0, 1.0);
+    // 🌿 [Unreal Engine Style] shadowShrinkStart ~ shadowCullDist 감쇄 구간에서 크기 축소와 알파 페이드 통합 연산
+    if (distToCam > shadowShrinkStart) {
+        let fadeRatio = clamp((shadowCullDist - distToCam) / max(0.001, shadowCullDist - shadowShrinkStart), 0.0, 1.0);
         shrink = fadeRatio;
         scaleXZ = scaleXZ * shrink;
         scaleY = scaleY * shrink;

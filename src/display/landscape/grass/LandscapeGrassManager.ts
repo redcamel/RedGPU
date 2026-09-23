@@ -326,7 +326,7 @@ export class LandscapeGrassManager {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
-            const grassUniformCPUBuffer = new Float32Array(4);
+            const grassUniformCPUBuffer = new Float32Array(8);
             const grassUniformGPUBuffer = gpuDevice.createBuffer({
                 label: `Grass_UniformBuffer_${grassType.name}`,
                 size: grassUniformCPUBuffer.byteLength,
@@ -432,6 +432,10 @@ export class LandscapeGrassManager {
                 gf[1] = type.shrinkStartDistance;
                 gf[2] = type.meshHeight;
                 gf[3] = type.minY;
+                gf[4] = type.shadowCullDistance;
+                gf[5] = type.shadowShrinkStartDistance;
+                gf[6] = 0.0;
+                gf[7] = 0.0;
 
                 gpuDevice.queue.writeBuffer(
                     res.grassUniformGPUBuffer,
