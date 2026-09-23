@@ -416,6 +416,7 @@ export class Landscape extends Object3DContainer {
             this.#tileStreamer?.rebakeAllLoadedVNT();
             this.#tileStreamer?.rebakeAllLoadedVBT();
             this.#grassManager?.rebakeAll();
+            this.#foliageManager?.rebakeAll();
         }
     }
 

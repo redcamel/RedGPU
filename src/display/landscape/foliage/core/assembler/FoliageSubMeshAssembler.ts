@@ -12,7 +12,6 @@ import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../../FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageTypeOptions} from "../../FoliageType";
-import FOLIAGE_TYPE from "../../FOLIAGE_TYPE";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
@@ -84,11 +83,10 @@ class FoliageSubMeshAssembler {
             };
         }
 
-        const isBasic = options.type === FOLIAGE_TYPE.BASIC;
-        const isGrass = options.type === FOLIAGE_TYPE.GRASS;
+        const isFoliage = options.isFoliage !== false;
         const useImpostor = options.useImpostor !== undefined
             ? options.useImpostor
-            : (!isBasic && !isGrass);
+            : isFoliage;
         const lodConfigs = options.lods || [];
         const numLODs = Math.min(lodConfigs.length, 8);
 
@@ -383,7 +381,7 @@ class FoliageSubMeshAssembler {
         if (node.geometry && node.material) {
             const mat = node.material;
 
-            const isFoliage = options.type ? (options.type !== FOLIAGE_TYPE.BASIC) : (options.isFoliage !== false);
+            const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
                 mat.isFoliage = true;
 

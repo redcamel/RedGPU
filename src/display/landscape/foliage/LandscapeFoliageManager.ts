@@ -393,6 +393,13 @@ class LandscapeFoliageManager {
         }
     }
 
+    rebakeAll(): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].rebake();
+        }
+    }
+
     removeFoliageType(name: string): boolean {
         const foliageType = this.#foliageTypes.get(name);
         if (foliageType) {

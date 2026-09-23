@@ -197,7 +197,6 @@ RedGPU.init(
                             minScale: [0.4, 0.4, 0.4],
                             maxScale: [0.7, 0.75, 0.7],
                             randomRotationY: true,
-                            type: RedGPU.FOLIAGE_TYPE.FOLIAGE,
                             useImpostor: true,
                             bottomOffset: 0.0
                         });

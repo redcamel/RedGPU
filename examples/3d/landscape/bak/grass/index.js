@@ -177,7 +177,6 @@ RedGPU.init(
 
                     foliageManager.addFoliageType({
                         name: `Tree_${baseName}`,
-                        type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                         lods: lodConfigs,
                         densityPerHectare: 120.0,
                         densityMultiplier: 1.0,

@@ -238,7 +238,6 @@ RedGPU.init(
                         // RedGPU GPU 인스턴스 기반 Multi-LOD 식생 등록 (현실적인 소나무 성목 크기: 8m ~ 17m)
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
-                            type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
                             densityPerHectare: 1200.0, // 400x400 (16헥타르) 분지 지형을 아우르는 빽빽한 소나무 숲
                             densityMultiplier: 1.0,

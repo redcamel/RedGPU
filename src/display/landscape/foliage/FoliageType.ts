@@ -8,7 +8,6 @@ import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
 import type FoliageBaker from "./core/baking/FoliageBaker";
-import FOLIAGE_TYPE from "./FOLIAGE_TYPE";
 
 export {FoliageSubMesh, FoliageShadowMergedSubMesh};
 
@@ -48,8 +47,6 @@ export interface FoliageTypeOptions {
     randomRotationY?: boolean;
 
     useImpostor?: boolean;
-
-    type?: FOLIAGE_TYPE;
 
     isFoliage?: boolean;
 
@@ -111,7 +108,6 @@ class FoliageType {
     #boundingRadius: number = 10.0;
     #boundingHeight: number = 2.0;
     #nameHash: number = 0;
-    #type: FOLIAGE_TYPE = FOLIAGE_TYPE.FOLIAGE;
     #castShadow: boolean = true;
     #maxShadowDistance: number = 300.0;
     #useImpostor: boolean = true;
@@ -165,20 +161,15 @@ class FoliageType {
         this.#baker = baker || null;
         this.#castShadow = options.castShadow !== false;
 
-        const resolvedType: FOLIAGE_TYPE = options.type
-            || (options.isFoliage === false ? FOLIAGE_TYPE.BASIC : FOLIAGE_TYPE.FOLIAGE);
-        this.#type = resolvedType;
+        const isFoliage = options.isFoliage !== false;
+        this.#isFoliage = isFoliage;
 
-        const isBasic = resolvedType === FOLIAGE_TYPE.BASIC;
-        const isGrass = resolvedType === FOLIAGE_TYPE.GRASS;
-
-        this.#isFoliage = !isBasic;
         this.#useImpostor = options.useImpostor !== undefined
             ? options.useImpostor
-            : (!isBasic && !isGrass);
+            : isFoliage;
         this.#useDepthPrepass = options.useDepthPrepass !== undefined
             ? options.useDepthPrepass
-            : !isBasic;
+            : isFoliage;
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
@@ -217,13 +208,16 @@ class FoliageType {
             ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
 
-        const defaultWindMul = isBasic ? 0.0 : (isGrass ? 1.5 : 1.0);
+        const defaultWindMul = isFoliage ? 1.0 : 0.0;
         const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : defaultWindMul;
         const resolvedWindFlutterMultiplier = options.windFlutterMultiplier !== undefined ? Math.max(0, Number(options.windFlutterMultiplier) || 0) : 1.0;
         const resolvedUseVertexColorWind = options.useVertexColorWind !== false;
-        const resolvedAlignToNormal = options.alignToNormal ?? (isBasic || isGrass);
-        const defaultAlignFactor = isBasic ? 1.0 : (isGrass ? 0.5 : 0.0);
-        const resolvedAlignFactor = options.alignFactor !== undefined ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0)) : defaultAlignFactor;
+
+        const resolvedAlignToNormal = options.alignToNormal ?? false;
+        const defaultAlignFactor = isFoliage ? 0.0 : 1.0;
+        const resolvedAlignFactor = options.alignFactor !== undefined
+            ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0))
+            : defaultAlignFactor;
 
         this.#windMultiplier = resolvedWindMultiplier;
         this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
@@ -253,21 +247,17 @@ class FoliageType {
         this.#boundingHeight = assembleResult.boundingHeight || 2.0;
 
         let defaultShadowDist = 300.0;
-        if (isGrass) {
+        const effectiveHeight = this.#boundingHeight * maxScale[1];
+        if (effectiveHeight < 0.6) {
             defaultShadowDist = 35.0;
+        } else if (effectiveHeight < 1.5) {
+            defaultShadowDist = 75.0;
+        } else if (effectiveHeight < 3.5) {
+            defaultShadowDist = 160.0;
+        } else if (!isFoliage) {
+            defaultShadowDist = 150.0;
         } else {
-            const effectiveHeight = this.#boundingHeight * maxScale[1];
-            if (effectiveHeight < 0.6) {
-                defaultShadowDist = 35.0;
-            } else if (effectiveHeight < 1.5) {
-                defaultShadowDist = 75.0;
-            } else if (effectiveHeight < 3.5) {
-                defaultShadowDist = 160.0;
-            } else if (isBasic) {
-                defaultShadowDist = 150.0;
-            } else {
-                defaultShadowDist = 350.0;
-            }
+            defaultShadowDist = 350.0;
         }
 
         this.#maxShadowDistance = options.maxShadowDistance !== undefined
@@ -276,7 +266,6 @@ class FoliageType {
 
         this.#options = Object.freeze({
             name: options.name,
-            type: this.#type,
             lods: options.lods,
             maxInstances: resolvedMaxInstances,
             cullingDistance: this.#cullingDistance,
@@ -437,6 +426,7 @@ class FoliageType {
         if (this.#bottomOffset !== val) {
             this.#bottomOffset = val;
             this.#syncTypeParams();
+            this.rebake();
         }
     }
 
@@ -796,20 +786,6 @@ class FoliageType {
         }
     }
 
-    get type(): FOLIAGE_TYPE {
-        return this.#type;
-    }
-
-    set type(value: FOLIAGE_TYPE) {
-        if (this.#type !== value) {
-            this.#type = value;
-            this.#isFoliage = value !== FOLIAGE_TYPE.BASIC;
-            this.#updatePassBuckets();
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-
     get isFoliage(): boolean {
         return this.#isFoliage;
     }
@@ -818,7 +794,6 @@ class FoliageType {
         const boolVal = !!value;
         if (this.#isFoliage !== boolVal) {
             this.#isFoliage = boolVal;
-            this.#type = boolVal ? FOLIAGE_TYPE.FOLIAGE : FOLIAGE_TYPE.BASIC;
             this.#updatePassBuckets();
             this.#syncTypeParams();
             this.#onDirty?.();
@@ -913,6 +888,16 @@ class FoliageType {
                 const globalIndex = this.#allocation.rawBaseOffset + startIndex;
                 this.#baker.addBakeTasks(globalIndex, count, this.#allocation.typeId);
             }
+        }
+    }
+
+    rebake(): void {
+        if (this.#megaBuffer && this.#allocation && this.#baker && this.#allocation.activeCount > 0) {
+            this.#baker.addBakeTasks(
+                this.#allocation.rawBaseOffset,
+                this.#allocation.activeCount,
+                this.#allocation.typeId
+            );
         }
     }
 

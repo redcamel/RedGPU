@@ -198,7 +198,6 @@ RedGPU.init(
 
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
-                            type: RedGPU.Display.Landscape.FOLIAGE_TYPE.FOLIAGE,
                             lods: lodConfigs,
                             densityPerHectare: 120.0,
                             densityMultiplier: 1.0,
@@ -245,7 +244,7 @@ RedGPU.init(
                     const rockMesh = rockNodes[0];
                     foliageManager.addFoliageType({
                         name: 'Rock_RiverRock',
-                        type: RedGPU.Display.Landscape.FOLIAGE_TYPE.BASIC,
+                        isFoliage: false,
                         lods: [
                             {
                                 mesh: rockMesh,
