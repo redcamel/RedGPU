@@ -329,8 +329,34 @@ function renderTestPane({
             lodFolder.addBinding(type, 'useImpostor');
         }
 
+        const lodList = type.lodInfoList || [];
+        const hasImp = type.hasImpostor;
+        lodList.forEach((lodInfo, idx) => {
+            const isImpostorLOD = hasImp && idx === lodList.length - 1;
+            const subTitle = isImpostorLOD ? `Impostor (LOD ${idx})` : `LOD ${idx}`;
+            const subFolder = lodFolder.addFolder({title: subTitle, expanded: false});
+
+            if (!isImpostorLOD) {
+                const proxy = {
+                    lodDistance: type.getLODDistance(idx),
+                    receiveShadow: type.getLODReceiveShadow(idx)
+                };
+                subFolder.addBinding(proxy, 'lodDistance', {min: 10, max: 2000, step: 5})
+                    .on('change', (ev) => type.setLODDistance(idx, ev.value));
+                subFolder.addBinding(proxy, 'receiveShadow')
+                    .on('change', (ev) => type.setLODReceiveShadow(idx, ev.value));
+            } else {
+                const proxy = {
+                    receiveShadow: type.getLODReceiveShadow(idx)
+                };
+                subFolder.addBinding(proxy, 'receiveShadow')
+                    .on('change', (ev) => type.setLODReceiveShadow(idx, ev.value));
+            }
+            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true});
+        });
+
         // 4. Shadow (그림자)
-        const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: false});
+        const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
         shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
 
