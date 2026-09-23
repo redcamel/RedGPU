@@ -400,7 +400,8 @@ export class LandscapeGrassManager {
             }
         }
 
-        this.#updateCellStreaming(camPos[0], camPos[2]);
+        const isInitialStreaming = !this.#populated;
+        this.#updateCellStreaming(camPos[0], camPos[2], isInitialStreaming);
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -527,6 +528,11 @@ export class LandscapeGrassManager {
         );
     }
 
+    /**
+     * @internal
+     * [KO] 카메라 위치 기반 스트리밍 렌더 루프에서 자동 관리되므로 외부 수동 호출은 권장되지 않습니다.
+     * [EN] Automatically managed in camera streaming render loop. Manual external invocation is not recommended.
+     */
     populateInstances(centerPos: [number, number, number]): void {
         this.#lastPopulatePos[0] = centerPos[0];
         this.#lastPopulatePos[1] = centerPos[1];
@@ -866,7 +872,10 @@ export class LandscapeGrassManager {
                 this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
             }
 
-            const radius = Math.min(type.cullingDistance, this.#streamingRadius);
+            // [KO] 잔디가 cullingDistance에서 완전히 사라진 후 셀이 언로드되도록 안전 마진(1.5셀) 확보
+            // [EN] Ensure safety margin (1.5 cells) so cells only unload after grass fully fades at cullingDistance
+            const safeCullRadius = type.cullingDistance + cellSize * 1.5;
+            const radius = Math.max(safeCullRadius, this.#streamingRadius);
             const radiusSq = radius * radius;
             const cellRadius = Math.ceil(radius / cellSize);
 

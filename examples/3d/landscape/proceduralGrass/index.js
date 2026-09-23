@@ -650,7 +650,7 @@ function initGrassField({
                     cullingDistance: 110,
                     minScale: [12.0, 8.0, 12.0],
                     maxScale: [18.0, 12.0, 18.0],
-                    groundBlendStrength: 0.55,
+                    groundBlendStrength: 1.0,
                     subsurfaceStrength: 0.40,
                     exposureBoost: 1.0,
                     bottomOffset: 0.0

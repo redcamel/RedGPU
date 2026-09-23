@@ -77,7 +77,7 @@ export class GrassType {
     #subsurfaceStrength: number = 0.45;
     #subsurfaceColor: [number, number, number] = [0.35, 0.65, 0.15];
     #subsurfaceDistortion: number = 0.35;
-    #groundBlendStrength: number = 0.75;
+    #groundBlendStrength: number = 1.0;
     #alphaCutoff: number = 0.2;
     #roughness: number = 0.55;
     #metallic: number = 0.0;
