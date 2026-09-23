@@ -567,6 +567,19 @@ export class LandscapeTileStreamer {
                             }
                         }
 
+                        if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vntAtlasTexture) {
+                            this.#vbtGenerator.bakeTileRegion(
+                                this.#vntAtlasTexture,
+                                this.#vbtBaseColorAtlas,
+                                this.#vbtNormalAtlas,
+                                this.#vbtORMAtlas,
+                                this.#material,
+                                comp.componentX,
+                                comp.componentZ,
+                                TILE_PIXEL_SIZE
+                            );
+                        }
+
                         this.#onTileLoaded?.(comp);
                     }
                 }

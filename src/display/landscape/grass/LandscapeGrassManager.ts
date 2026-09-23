@@ -963,10 +963,38 @@ export class LandscapeGrassManager {
             const hasWeightMap = !!(targetSrc && LandscapeWeightMapCache.has(targetSrc));
             const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
 
+            // [KO] targetLayer가 설정되어 있으나 아직 가중치 텍스처가 다운로드 중인 경우:
+            //      가중치 검사 없이 흙/바위 등 전체 영역에 잔디가 무차별 스폰되는 현상을 방지하기 위해 대기
+            // [EN] If targetLayer is set but weight map is still downloading:
+            //      wait for weight map to avoid spawning grass everywhere without layer filtering
+            if (type.targetLayer && !hasWeightMap) {
+                continue;
+            }
+
+            const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
+            const hasTileStreaming = this.#landscape.loadedTileCount > 0;
+
             for (let i = 0; i < cellsToProcess; i++) {
                 const sortedIdx = this.#candidateIndices[i];
                 const key = this.#candidateKeys[sortedIdx];
                 if (state.activeCellRanges.has(key)) continue;
+
+                const cellX = (key >> 16);
+                const cellZ = (key << 16) >> 16;
+                const cellCenterX = (cellX + 0.5) * cellSize;
+                const cellCenterZ = (cellZ + 0.5) * cellSize;
+
+                // [KO] 타일 스트리밍 환경: 해당 셀이 위치한 지형 타일이 실제로 로드 완료되었는지 검증
+                //      아직 로딩 중인 타일 영역은 스폰을 보류하여 높이 0.0 버그 및 부정확한 배치를 원천 방지
+                // [EN] In tile streaming: verify whether the tile covering this cell is fully loaded
+                //      Hold off spawning on loading tiles to prevent height 0.0 bugs and misplaced grass
+                if (hasTileStreaming) {
+                    const tileCol = Math.floor((cellCenterX + halfWorldX) / tileSizeX);
+                    const tileRow = Math.floor((cellCenterZ + halfWorldZ) / tileSizeZ);
+                    if (!this.#landscape.isTileLoaded(tileRow, tileCol)) {
+                        continue;
+                    }
+                }
 
                 let slotBase = -1;
                 let reusedRange: CellSlotRange | null = null;
@@ -980,8 +1008,6 @@ export class LandscapeGrassManager {
                     break;
                 }
 
-                const cellX = (key >> 16);
-                const cellZ = (key << 16) >> 16;
                 const cellMinX = cellX * cellSize;
                 const cellMinZ = cellZ * cellSize;
 
