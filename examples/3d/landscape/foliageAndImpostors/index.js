@@ -17,9 +17,11 @@ RedGPU.init(
     (redGPUContext) => {
         // 1. 카메라 구성 (Orbit 조망 카메라)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
-        orbitController.distance = 7000.0;
+        orbitController.distance = 7000;
         orbitController.tilt = -25;
         orbitController.pan = 40;
+        orbitController.minDistance = 300;
+        orbitController.maxDistance = 35000;
         orbitController.speedDistance = 80.0;
 
         // 2. 씬 & 뷰 생성
@@ -160,6 +162,8 @@ function renderTestPane({
     characterOrbitController.centerZ = -2750;
 
     view.camera = characterOrbitController;
+    landscape.nearDetailDistance = 120;
+    landscape.nearDetailFade = 80;
 
     let characterMesh = null;
     let characterController = null;
@@ -208,8 +212,8 @@ function renderTestPane({
                     characterOrbitController.centerY = characterMesh.y + 1.2;
                     characterOrbitController.centerZ = characterMesh.z;
                 }
-                landscape.nearDetailDistance = isChar ? 150 : 1200;
-                landscape.nearDetailFade = isChar ? 100 : 400;
+                landscape.nearDetailDistance = isChar ? 120 : 1000;
+                landscape.nearDetailFade = isChar ? 80 : 300;
                 pane.refresh();
             });
 
@@ -225,7 +229,7 @@ function renderTestPane({
                     orbitController.centerX = 0;
                     orbitController.centerY = 0;
                     orbitController.centerZ = 0;
-                    orbitController.distance = 7000.0;
+                    orbitController.distance = 7000;
                     orbitController.tilt = -25;
                     orbitController.pan = 40;
                 }
@@ -366,9 +370,13 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
                 characterMesh,
                 characterOrbitController,
                 {
-                    speed: 6.0,
-                    runSpeed: 14.0,
+                    speed: 5.0,
+                    runSpeed: 10.0,
+                    rotationSpeed: 10.0,
+                    gravity: 24.0,
                     jumpForce: 9.0,
+                    floorHeight: 0.0,
+                    floorOffset: 0.0,
                     useKeyboard: false,
                     getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                 }
