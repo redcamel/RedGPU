@@ -982,7 +982,7 @@ export class LandscapeGrassManager {
                         LandscapeWeightMapCache.getAllWeights(targetSrc, u, v, this.#tempWeights4);
                         const w = this.#tempWeights4[channelIdx] || 0.0;
 
-                        if (w < type.minWeightThreshold) continue;
+                        if (w < 0.05) continue;
                         if (type.densityScaleByWeight && this.#nextPrng() > w) continue;
                     }
 

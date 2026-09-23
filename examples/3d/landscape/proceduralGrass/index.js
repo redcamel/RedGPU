@@ -416,7 +416,6 @@ function renderTestPane({
         typeFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
             .on('change', () => typeFolder.refresh());
         typeFolder.addBinding(type, 'instancesPerCell', {readonly: true});
-        typeFolder.addBinding(type, 'minWeightThreshold', {min: 0.0, max: 1.0, step: 0.05});
         typeFolder.addBinding(type, 'densityScaleByWeight');
 
         // [KO] 크기 변량 (최소/최대 스케일)
@@ -646,14 +645,9 @@ function initGrassField({
                     ],
                     densityPerHectare: 20000,
                     targetLayer: 'Grass',
-                    minWeightThreshold: 0.02,
                     cullingDistance: 110,
                     minScale: [12.0, 8.0, 12.0],
-                    maxScale: [18.0, 12.0, 18.0],
-                    groundBlendStrength: 1.0,
-                    subsurfaceStrength: 0.40,
-                    exposureBoost: 1.0,
-                    bottomOffset: 0.0
+                    maxScale: [18.0, 12.0, 18.0]
                 });
 
                 grassManager.addGrassType(grassType);

@@ -184,13 +184,9 @@ RedGPU.init(
                         ],
                         densityPerHectare: 20000,
                         targetLayer: 'Grass',
-                        minWeightThreshold: 0.02,
                         cullingDistance: 110,
                         minScale: [7.0, 4.5, 7.0],
                         maxScale: [11.0, 6.5, 11.0],
-                        groundBlendStrength: 1.0,
-                        subsurfaceStrength: 0.40,
-                        exposureBoost: 1.0,
                         bottomOffset: -0.25
                     });
                     grassManager.addGrassType(baseClumpType);

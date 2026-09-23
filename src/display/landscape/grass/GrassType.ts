@@ -27,7 +27,6 @@ export interface GrassTypeOptions {
     normalScale?: number;
     densityPerHectare?: number;
     densityMultiplier?: number;
-    minWeightThreshold?: number;
     densityScaleByWeight?: boolean;
     minSlope?: number;
     maxSlope?: number;
@@ -62,7 +61,6 @@ export class GrassType {
     #baseColorTexture: BitmapTexture;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
-    #minWeightThreshold: number = 0.05;
     #densityScaleByWeight: boolean = true;
     #minSlope: number = 0.0;
     #maxSlope: number = 35.0;
@@ -74,7 +72,7 @@ export class GrassType {
     #meshHeight: number = 1.0;
     #minY: number = 0.0;
     #exposureBoost: number = 1.0;
-    #subsurfaceStrength: number = 0.45;
+    #subsurfaceStrength: number = 0.25;
     #subsurfaceColor: [number, number, number] = [0.35, 0.65, 0.15];
     #subsurfaceDistortion: number = 0.35;
     #groundBlendStrength: number = 1.0;
@@ -168,7 +166,6 @@ export class GrassType {
 
         if (options.densityPerHectare !== undefined) this.#densityPerHectare = options.densityPerHectare;
         if (options.densityMultiplier !== undefined) this.#densityMultiplier = options.densityMultiplier;
-        if (options.minWeightThreshold !== undefined) this.#minWeightThreshold = options.minWeightThreshold;
         if (options.densityScaleByWeight !== undefined) this.#densityScaleByWeight = options.densityScaleByWeight;
         if (options.minSlope !== undefined) this.#minSlope = options.minSlope;
         if (options.maxSlope !== undefined) this.#maxSlope = options.maxSlope;
@@ -275,15 +272,6 @@ export class GrassType {
 
     get instancesPerCell(): number {
         return Math.max(1, Math.round((this.#densityPerHectare * 256.0 / 10000.0) * this.#densityMultiplier));
-    }
-
-    get minWeightThreshold(): number {
-        return this.#minWeightThreshold;
-    }
-
-    set minWeightThreshold(v: number) {
-        this.#minWeightThreshold = Math.max(0, Math.min(1, v));
-        this.#notifyChange();
     }
 
     get densityScaleByWeight(): boolean {
