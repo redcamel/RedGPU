@@ -949,6 +949,9 @@ export class LandscapeGrassManager {
                 }
             });
 
+            let minEvictSlot = 0x7FFFFFFF;
+            let maxEvictSlot = -1;
+
             for (let i = 0; i < this.#keysToEvict.length; i++) {
                 const evictKey = this.#keysToEvict[i];
                 const range = state.activeCellRanges.get(evictKey)!;
@@ -960,9 +963,19 @@ export class LandscapeGrassManager {
                         0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
                     );
                 }
-                this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
+
+                if (range.start < minEvictSlot) minEvictSlot = range.start;
+                if (range.start + range.count > maxEvictSlot) maxEvictSlot = range.start + range.count;
+
                 state.freeSlotRanges.push(range);
                 state.activeCount -= range.filledCount;
+            }
+
+            if (maxEvictSlot > minEvictSlot) {
+                this.#megaBuffer.uploadInstances(
+                    alloc.rawBaseOffset + minEvictSlot,
+                    maxEvictSlot - minEvictSlot
+                );
             }
 
             const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
@@ -983,6 +996,9 @@ export class LandscapeGrassManager {
 
             const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
             const hasTileStreaming = this.#landscape.tileUrlResolver !== null;
+
+            let minPopulateSlot = 0x7FFFFFFF;
+            let maxPopulateSlot = -1;
 
             for (let i = 0; i < cellsToProcess; i++) {
                 const sortedIdx = this.#candidateIndices[i];
@@ -1064,7 +1080,6 @@ export class LandscapeGrassManager {
                 }
 
                 if (filledCount > 0) {
-                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
                     this.#baker.addBakeTasks(alloc.rawBaseOffset + slotBase, filledCount, type.typeId);
                     if (reusedRange) {
                         reusedRange.count = targetDensity;
@@ -1075,7 +1090,6 @@ export class LandscapeGrassManager {
                     }
                     state.activeCount += filledCount;
                 } else {
-                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
                     if (reusedRange) {
                         reusedRange.count = targetDensity;
                         reusedRange.filledCount = 0;
@@ -1084,6 +1098,16 @@ export class LandscapeGrassManager {
                         state.freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
                     }
                 }
+
+                if (slotBase < minPopulateSlot) minPopulateSlot = slotBase;
+                if (slotBase + targetDensity > maxPopulateSlot) maxPopulateSlot = slotBase + targetDensity;
+            }
+
+            if (maxPopulateSlot > minPopulateSlot) {
+                this.#megaBuffer.uploadInstances(
+                    alloc.rawBaseOffset + minPopulateSlot,
+                    maxPopulateSlot - minPopulateSlot
+                );
             }
 
             alloc.activeCount = state.activeCount;
