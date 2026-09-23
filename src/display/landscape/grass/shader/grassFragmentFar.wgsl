@@ -9,9 +9,9 @@ struct GrassMaterialUniforms {
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceStrength: f32,
-    roughness: f32,
-    shadowStrength: f32,
-    receiveShadow: u32,
+    _unusedRoughness: f32,          // [Near pass only: Far passes skip specular]
+    _unusedShadowStrength: f32,     // [Near pass only: Far passes skip shadow reception]
+    _unusedReceiveShadow: u32,      // [Near pass only: Far passes skip shadow reception]
 };
 
 const SSS_DISTORTION: f32 = 0.35;

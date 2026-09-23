@@ -1,13 +1,13 @@
 struct GrassMaterialUniforms {
-    groundBlendStrength: f32,
-    alphaCutoff: f32,
-    hasGroundTexture: u32,
-    exposureBoost: f32,
-    subsurfaceColor: vec3<f32>,
-    subsurfaceStrength: f32,
-    roughness: f32,
-    shadowStrength: f32,
-    receiveShadow: u32,
+    _unusedGroundBlendStrength: f32, // [Main pass only]
+    alphaCutoff: f32,                // [Shadow active: Alpha testing cutoff]
+    _unusedHasGroundTexture: u32,    // [Main pass only]
+    _unusedExposureBoost: f32,       // [Main pass only]
+    _unusedSubsurfaceColor: vec3<f32>,// [Main pass only]
+    _unusedSubsurfaceStrength: f32,  // [Main pass only]
+    _unusedRoughness: f32,           // [Main pass only]
+    _unusedShadowStrength: f32,      // [Main pass only]
+    _unusedReceiveShadow: u32,       // [Main pass only]
 };
 
 struct ShadowVertexOutput {

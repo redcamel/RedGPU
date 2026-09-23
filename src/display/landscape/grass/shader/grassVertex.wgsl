@@ -20,8 +20,8 @@ struct GrassUniforms {
     shrinkStartDistance: f32,
     meshHeight: f32,
     minY: f32,
-    shadowCullDistance: f32,
-    shadowShrinkStartDistance: f32,
+    _unusedShadowCullDistance: f32,         // [Shadow pass only]
+    _unusedShadowShrinkStartDistance: f32,   // [Shadow pass only]
     _pad0: f32,
     _pad1: f32,
 };
