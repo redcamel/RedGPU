@@ -61,7 +61,7 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
 
     // 🌿 [Unreal Engine Shadow Cull] 잔디 그림자 한계 거리 초과 시 즉시 클립하여 래스터라이징 완전 차단
     if (distToCam >= shadowCullDist) {
-        output.clipPos = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);
         output.alphaFade = 0.0;
         return output;

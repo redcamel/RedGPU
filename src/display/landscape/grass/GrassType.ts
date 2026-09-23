@@ -85,7 +85,7 @@ export class GrassType {
     #shadowStrength: number = 1.0;
     #castShadow: boolean = true;
     #shadowCullDistance: number = 35.0;
-    #shadowShrinkStartDistance: number = 25.0;
+    #shadowShrinkStartDistance: number = 26.25;
 
     #typeId: number = 0;
     #dirty: boolean = true;
@@ -210,9 +210,11 @@ export class GrassType {
             this.#shadowCullDistance = Math.max(0.0, options.shadowCullDistance);
             this.#shadowShrinkStartDistance = options.shadowShrinkStartDistance !== undefined
                 ? Math.max(0.0, options.shadowShrinkStartDistance)
-                : Math.max(0.0, this.#shadowCullDistance * 0.7);
+                : Math.max(0.0, this.#shadowCullDistance * 0.75);
         } else if (options.shadowShrinkStartDistance !== undefined) {
             this.#shadowShrinkStartDistance = Math.max(0.0, options.shadowShrinkStartDistance);
+        } else {
+            this.#shadowShrinkStartDistance = this.#shadowCullDistance * 0.75;
         }
     }
 
@@ -485,6 +487,7 @@ export class GrassType {
 
     set shadowCullDistance(v: number) {
         this.#shadowCullDistance = Math.max(0.0, v);
+        this.#shadowShrinkStartDistance = this.#shadowCullDistance * 0.75;
         this.#dirty = true;
     }
 
