@@ -259,23 +259,6 @@ function renderTestPane({
                 pane.refresh();
             });
 
-            // [KO] 수목 식생 서브시스템 설정 (FoliageManager)
-            // [EN] Foliage subsystem settings (FoliageManager)
-            const foliageManager = landscape.foliageManager;
-            const foliageFolder = pane.addFolder({title: 'FoliageManager', expanded: false});
-
-            foliageFolder.addBinding(foliageManager, 'streamingRadius', {
-                min: 200,
-                max: 2000,
-                step: 50
-            });
-            foliageFolder.addBinding(foliageManager, 'subCellSize', {
-                min: 50,
-                max: 200,
-                step: 10
-            });
-            foliageFolder.addBinding(foliageManager, 'debugSubCellColoration');
-
             // [KO] 절차적 잔디 설정 (GrassManager)
             // [EN] Procedural grass settings (GrassManager)
             grassFolder = pane.addFolder({title: 'GrassManager', expanded: true});
@@ -444,19 +427,19 @@ function renderTestPane({
             maxScaleXZ: type.maxScale[0],
             maxScaleY: type.maxScale[1]
         };
-        typeFolder.addBinding(scaleProxy, 'minScaleXZ', {min: 0.1, max: 3.0, step: 0.05})
+        typeFolder.addBinding(scaleProxy, 'minScaleXZ', {min: 0.1, max: 30.0, step: 0.1})
             .on('change', (ev) => {
                 type.minScale = [ev.value, type.minScale[1], ev.value];
             });
-        typeFolder.addBinding(scaleProxy, 'minScaleY', {min: 0.1, max: 3.0, step: 0.05})
+        typeFolder.addBinding(scaleProxy, 'minScaleY', {min: 0.1, max: 30.0, step: 0.1})
             .on('change', (ev) => {
                 type.minScale = [type.minScale[0], ev.value, type.minScale[2]];
             });
-        typeFolder.addBinding(scaleProxy, 'maxScaleXZ', {min: 0.1, max: 3.0, step: 0.05})
+        typeFolder.addBinding(scaleProxy, 'maxScaleXZ', {min: 0.1, max: 30.0, step: 0.1})
             .on('change', (ev) => {
                 type.maxScale = [ev.value, type.maxScale[1], ev.value];
             });
-        typeFolder.addBinding(scaleProxy, 'maxScaleY', {min: 0.1, max: 3.0, step: 0.05})
+        typeFolder.addBinding(scaleProxy, 'maxScaleY', {min: 0.1, max: 30.0, step: 0.1})
             .on('change', (ev) => {
                 type.maxScale = [type.maxScale[0], ev.value, type.maxScale[2]];
             });
@@ -668,8 +651,8 @@ function initGrassField({
                     cullingDistance: 110,
                     fadeStartDistance: 95,
                     shrinkStartDistance: 80,
-                    minScale: [7.0, 4.5, 7.0],
-                    maxScale: [11.0, 6.5, 11.0],
+                    minScale: [12.0, 7.5, 12.0],
+                    maxScale: [18.0, 11.0, 18.0],
                     groundBlendStrength: 0.55,
                     subsurfaceStrength: 0.40,
                     exposureBoost: 1.0,
@@ -729,8 +712,8 @@ function initGrassField({
                     cullingDistance: 110,
                     fadeStartDistance: 95,
                     shrinkStartDistance: 80,
-                    minScale: [3.0, 3.8, 3.0],
-                    maxScale: [4.8, 6.0, 4.8],
+                    minScale: [6.0, 7.5, 6.0],
+                    maxScale: [10.0, 12.0, 10.0],
                     groundBlendStrength: 0.45,
                     subsurfaceStrength: 0.45,
                     exposureBoost: 1.0,
