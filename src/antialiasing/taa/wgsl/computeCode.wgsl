@@ -114,8 +114,8 @@
 
         // [KO] 6. 최종 블렌딩 및 결과 저장
         // [EN] 6. Final blending and store result
-        // 정지 상태에서는 0.05(95% 히스토리 누적)로 수렴하여 완벽한 화면 안정성을 유지하고, 모션 발생 시에만 0.25로 전환
         let baseBlend = mix(0.05, 0.25, motionSoft);
+        let currLinear = getLinearizeDepth(currentDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
 
         // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Depth Discontinuity Rejection)
@@ -126,8 +126,9 @@
         blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
 
         // 🌟 [표준 TAA: 정적 표면 위 동적 그림자/라이팅 고스팅 방어 (Decoupled Shadow Rejection)]
-        // 지형처럼 모션 벡터가 0이어도, 그림자가 지나가며 급격한 명암 차이가 발생하면 히스토리를 즉시 털어내고 현재 프레임을 최대 75%까지 신속 반영
-        let shadowLumaRejection = smoothstep(0.15, 0.85, lumaWeight) * 0.75;
+        // 원거리(30m~150m)에서는 고주파 서브픽셀 지터링으로 인한 루마 노이즈를 그림자로 오판하지 않도록 감쇄 (Distance Fadeout)
+        let shadowDistFade = 1.0 - smoothstep(30.0, 150.0, currLinear);
+        let shadowLumaRejection = smoothstep(0.15, 0.85, lumaWeight) * 0.75 * shadowDistFade;
         blendFactor = max(blendFactor, shadowLumaRejection);
 
         let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);

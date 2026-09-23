@@ -33,9 +33,10 @@ fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let prevLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let depthDiff = abs(currLinear - prevLinear);
-    // [KO] 선형 거리 차이에 따른 신뢰도 계산 (0.1m 차이부터 감쇄 시작, 0.5m 이상이면 신뢰도 0)
-    // [EN] Depth confidence based on linear distance (Decay starts at 0.1m, 0 confidence if > 0.5m)
-    return 1.0 - clamp((depthDiff - 0.1) / 0.4, 0.0, 1.0);
+    // [KO] 거리에 비례한 상대적 깊이 허용 오차 (원거리 서브픽셀 지터 및 경사면 깊이 흔들림 방어)
+    // [EN] Distance-proportional relative depth tolerance (Defends against far subpixel jitter & slope depth variation)
+    let tolerance = max(0.3, currLinear * 0.05);
+    return 1.0 - clamp((depthDiff - tolerance * 0.5) / (tolerance * 1.5), 0.0, 1.0);
 }
 
 fn fetch_depth_bilinear(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
@@ -167,9 +168,9 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
 }
 
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    // [KO] 언리얼 엔진 / Playdead 표준 Variance Clipping 교집합 박스 (떨림 완전 억제)
-    // [EN] Unreal Engine / Playdead standard Variance Clipping intersection box (Eliminates shimmering)
-    let gamma = mix(1.0, 1.75, motion);
+    // [KO] 언리얼 엔진 / Playdead 표준 Variance Clipping 교집합 박스 (원거리 서브픽셀 디테일 안정화)
+    // [EN] Unreal Engine / Playdead standard Variance Clipping intersection box (Far subpixel detail stabilization)
+    let gamma = mix(1.25, 2.0, motion);
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
     return clamp(historyYCoCg, v_min, v_max);
