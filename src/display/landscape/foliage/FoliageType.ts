@@ -241,8 +241,7 @@ class FoliageType {
         this.#lod0SubMeshes = this.#subMeshes.filter(sub => sub.lodIndex === 0);
         this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
-        const userOffset = options.bottomOffset;
-        this.#bottomOffset = userOffset !== undefined ? userOffset : (assembleResult.bottomOffset ?? 0);
+        this.#bottomOffset = options.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         this.#boundingHeight = assembleResult.boundingHeight || 2.0;
 

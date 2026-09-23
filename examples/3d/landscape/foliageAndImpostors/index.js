@@ -483,9 +483,6 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     cullingDistance: 6000,
                     fadeStartDistance: 4500,
                     targetLayer: 'Grass',
-                    bottomOffset: -0.85,
-                    alignToNormal: true,
-                    alignFactor: 0.4,
                     maxSlope: 32.0
                 });
 
