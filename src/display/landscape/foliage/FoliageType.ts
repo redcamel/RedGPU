@@ -584,6 +584,11 @@ class FoliageType {
         }
     }
 
+    get instancesPerCell(): number {
+        const cellArea = this.#subCellSize * this.#subCellSize;
+        return Math.max(0, Math.round((this.#densityPerHectare * (cellArea / 10000.0)) * this.#densityMultiplier));
+    }
+
     get windMultiplier(): number {
         return this.#windMultiplier;
     }

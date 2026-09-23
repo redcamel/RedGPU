@@ -293,8 +293,10 @@ function renderTestPane({
             min: 1.0,
             max: 500.0,
             step: 1.0
-        });
-        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        }).on('change', () => placementFolder.refresh());
+        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
+            .on('change', () => placementFolder.refresh());
+        placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
 
