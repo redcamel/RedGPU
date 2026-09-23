@@ -449,11 +449,9 @@ function renderTestPane({
         typeFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
         typeFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
 
-        // [KO] 컬링 및 거리 페이드
-        // [EN] Culling & distance fading
-        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 200, step: 5});
-        typeFolder.addBinding(type, 'fadeStartDistance', {min: 10, max: 200, step: 5});
-        typeFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5});
+        // [KO] 컬링 거리 (75% 지점부터 자동 수축/페이드 감쇄)
+        // [EN] Culling distance (auto shrink/fade attenuation starts from 75%)
+        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
 
         // [KO] 지면 오프셋
         // [EN] Ground offset
@@ -610,16 +608,16 @@ function initCharacter({
 }
 
 /**
- * [KO] 절차적 잔디 에셋(기본 뗏장 잔디 및 3종 멀티 LOD 야생 들풀)을 로드하고 잔디 타입을 등록합니다.
- * [EN] Loads procedural grass assets (lawn clump & 3-type multi-LOD wild grass) and registers grass types.
+ * [KO] 절차적 잔디 에셋(Lawn Clump)을 로드하고 잔디 타입을 등록합니다.
+ *      ※ 복수 종류의 잔디(야생 들풀, 꽃 등)를 추가하려면 동일한 방식으로 grassManager.addGrassType()을 추가 호출하면 됩니다.
+ * [EN] Loads procedural grass assets (Lawn Clump) and registers the grass type.
+ *      * To add multiple grass varieties (wild grass, flowers, etc.), call grassManager.addGrassType() as needed.
  */
 function initGrassField({
                             redGPUContext,
                             grassManager,
                             onGrassTypeAdded
                         }) {
-    // [KO] 지면 기본 뗏장 잔디 (grass.glb - Lawn Clump)
-    // [EN] Ground lawn clump grass (grass.glb - Lawn Clump)
     new RedGPU.GLTFLoader(
         redGPUContext,
         '../../../assets/terrain/grass.glb',
@@ -640,88 +638,27 @@ function initGrassField({
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                const baseClumpType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
+                // [KO] 단일 대표 잔디 타입 생성 (Lawn Clump 및 언리얼 표준 단일 감쇄 구간 적용)
+                // [EN] Create single representative grass type (Lawn Clump & Unreal standard single range)
+                const grassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
                     ],
-                    densityPerHectare: 24000,
+                    densityPerHectare: 20000,
                     targetLayer: 'Grass',
                     minWeightThreshold: 0.02,
                     cullingDistance: 110,
-                    fadeStartDistance: 95,
-                    shrinkStartDistance: 80,
-                    minScale: [12.0, 7.5, 12.0],
-                    maxScale: [18.0, 11.0, 18.0],
+                    minScale: [12.0, 8.0, 12.0],
+                    maxScale: [18.0, 12.0, 18.0],
                     groundBlendStrength: 0.55,
                     subsurfaceStrength: 0.40,
                     exposureBoost: 1.0,
                     bottomOffset: 0.0
                 });
 
-                grassManager.addGrassType(baseClumpType);
-                onGrassTypeAdded?.(baseClumpType, true);
-            }
-        }
-    );
-
-    // [KO] 키 큰 야생 들풀 멀티 LOD (grassList.glb - Multi-LOD Wild Tall Grass)
-    // [EN] Multi-LOD wild tall grass (grassList.glb - Multi-LOD Wild Tall Grass)
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        '../../../assets/terrain/grassList.glb',
-        (loader) => {
-            const allMeshes = new Map();
-
-            const traverse = (node) => {
-                if (!node) return;
-                if (node.geometry) {
-                    const nodeName = node.name || '';
-                    allMeshes.set(nodeName, node);
-                }
-                const children = node.children || [];
-                for (let i = 0; i < children.length; i++) {
-                    traverse(children[i]);
-                }
-            };
-            traverse(loader.resultMesh);
-
-            // [KO] 대표 야생 들풀 A의 LOD 0, 1, 2 메시 추출
-            // [EN] Extract LOD 0, 1, 2 meshes for representative Wild Tall Grass A
-            const lod0Mesh = allMeshes.get('Plane.043') || Array.from(allMeshes.values())[0];
-            const lod1Mesh = allMeshes.get('Plane.068') || lod0Mesh;
-            const lod2Mesh = allMeshes.get('Plane.086') || lod1Mesh;
-
-            if (lod0Mesh) {
-                const lodConfigs = [
-                    {mesh: lod0Mesh, lodDistance: 35}
-                ];
-                if (lod1Mesh && lod1Mesh !== lod0Mesh) {
-                    lodConfigs.push({mesh: lod1Mesh, lodDistance: 70});
-                }
-                if (lod2Mesh && lod2Mesh !== lod0Mesh && lod2Mesh !== lod1Mesh) {
-                    lodConfigs.push({mesh: lod2Mesh, lodDistance: 110});
-                }
-
-                const wildGrassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
-                    name: 'Wild Tall Grass',
-                    lods: lodConfigs,
-                    densityPerHectare: 6000,
-                    targetLayer: 'Grass',
-                    minWeightThreshold: 0.02,
-                    cullingDistance: 110,
-                    fadeStartDistance: 95,
-                    shrinkStartDistance: 80,
-                    minScale: [6.0, 7.5, 6.0],
-                    maxScale: [10.0, 12.0, 10.0],
-                    groundBlendStrength: 0.45,
-                    subsurfaceStrength: 0.45,
-                    exposureBoost: 1.0,
-                    bottomOffset: 0.0
-                });
-
-                grassManager.addGrassType(wildGrassType);
-                onGrassTypeAdded?.(wildGrassType, false);
+                grassManager.addGrassType(grassType);
+                onGrassTypeAdded?.(grassType, true);
             }
         }
     );

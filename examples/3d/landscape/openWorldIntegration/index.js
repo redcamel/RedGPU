@@ -186,8 +186,6 @@ RedGPU.init(
                         targetLayer: 'Grass',
                         minWeightThreshold: 0.02,
                         cullingDistance: 110,
-                        fadeStartDistance: 95,
-                        shrinkStartDistance: 80,
                         minScale: [7.0, 4.5, 7.0],
                         maxScale: [11.0, 6.5, 11.0],
                         groundBlendStrength: 0.55,

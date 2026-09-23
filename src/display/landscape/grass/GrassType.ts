@@ -181,8 +181,13 @@ export class GrassType {
         if (options.minSlope !== undefined) this.#minSlope = options.minSlope;
         if (options.maxSlope !== undefined) this.#maxSlope = options.maxSlope;
         if (options.cullingDistance !== undefined) this.#cullingDistance = options.cullingDistance;
-        if (options.fadeStartDistance !== undefined) this.#fadeStartDistance = options.fadeStartDistance;
-        if (options.shrinkStartDistance !== undefined) this.#shrinkStartDistance = options.shrinkStartDistance;
+        if (options.shrinkStartDistance !== undefined) {
+            this.#shrinkStartDistance = options.shrinkStartDistance;
+        } else if (options.fadeStartDistance !== undefined) {
+            this.#shrinkStartDistance = options.fadeStartDistance;
+        } else {
+            this.#shrinkStartDistance = this.#cullingDistance * 0.75;
+        }
         if (options.minScale) this.#minScale = [options.minScale[0], options.minScale[1], options.minScale[2] ?? options.minScale[0]];
         if (options.maxScale) this.#maxScale = [options.maxScale[0], options.maxScale[1], options.maxScale[2] ?? options.maxScale[0]];
         if (options.groundBlendStrength !== undefined) this.#groundBlendStrength = options.groundBlendStrength;
@@ -331,25 +336,33 @@ export class GrassType {
 
     set cullingDistance(v: number) {
         this.#cullingDistance = Math.max(10, v);
-        this.#notifyChange();
+        this.#shrinkStartDistance = this.#cullingDistance * 0.75;
+        this.#dirty = true;
     }
 
-    get fadeStartDistance(): number {
-        return this.#fadeStartDistance;
-    }
-
-    set fadeStartDistance(v: number) {
-        this.#fadeStartDistance = Math.max(0, v);
-        this.#notifyChange();
-    }
-
+    /**
+     * [KO] 언리얼 엔진 표준 수축/페이드 시작 거리 (Cull Distance Min)
+     * [EN] Unreal Engine standard shrink/fade start distance (Cull Distance Min)
+     */
     get shrinkStartDistance(): number {
         return this.#shrinkStartDistance;
     }
 
     set shrinkStartDistance(v: number) {
         this.#shrinkStartDistance = Math.max(0, v);
-        this.#notifyChange();
+        this.#dirty = true;
+    }
+
+    /**
+     * [KO] fadeStartDistance 하위 호환성 별칭 (shrinkStartDistance와 동일)
+     * [EN] Backward compatibility alias for fadeStartDistance (same as shrinkStartDistance)
+     */
+    get fadeStartDistance(): number {
+        return this.#shrinkStartDistance;
+    }
+
+    set fadeStartDistance(v: number) {
+        this.shrinkStartDistance = v;
     }
 
     get minScale(): [number, number, number] {

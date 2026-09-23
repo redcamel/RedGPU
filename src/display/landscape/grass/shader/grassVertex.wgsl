@@ -57,16 +57,18 @@ fn main(input: VertexInput) -> VertexOutput {
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
     let distToCam = distance(instPos, camPos);
 
-    let shrinkStart = grassUniforms.shrinkStartDistance;
     let cullDist = grassUniforms.cullingDistance;
+    let shrinkStart = min(grassUniforms.shrinkStartDistance, cullDist);
     var shrink = 1.0;
     var alphaFade = 1.0;
 
+    // 🌿 [Unreal Engine Style] 단일 감쇄 구간([shrinkStart, cullDist])에서 크기 축소와 알파 페이드 통합 연산
     if (distToCam > shrinkStart) {
-        shrink = clamp((cullDist - distToCam) / max(1.0, cullDist - shrinkStart), 0.0, 1.0);
+        let fadeRatio = clamp((cullDist - distToCam) / max(0.001, cullDist - shrinkStart), 0.0, 1.0);
+        shrink = fadeRatio;
         scaleXZ = scaleXZ * shrink;
         scaleY = scaleY * shrink;
-        alphaFade = smoothstep(0.0, 1.0, shrink);
+        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
     }
 
     let baseHeight = max(0.01, grassUniforms.meshHeight);

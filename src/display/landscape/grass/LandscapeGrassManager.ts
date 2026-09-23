@@ -347,7 +347,6 @@ export class LandscapeGrassManager {
         }
 
         grassType.onChanged = () => {
-            this.#typeCellStates.get(typeId)?.activeCellRanges.clear();
             this.populateInstances(this.#lastPopulatePos);
         };
 
