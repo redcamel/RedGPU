@@ -462,7 +462,6 @@ function renderTestPane({
         typeFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         typeFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
         typeFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.05});
-        typeFolder.addBinding(type, 'aoIntensity', {min: 0.0, max: 2.0, step: 0.1});
         typeFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
 
         // [KO] 서브서피스(SSS) 투과광

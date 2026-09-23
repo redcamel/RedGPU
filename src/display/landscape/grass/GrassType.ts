@@ -25,7 +25,6 @@ export interface GrassTypeOptions {
     roughnessTexture?: string | BitmapTexture;
     metallicRoughnessTexture?: string | BitmapTexture;
     normalScale?: number;
-    aoIntensity?: number;
     densityPerHectare?: number;
     densityMultiplier?: number;
     minWeightThreshold?: number;
@@ -61,7 +60,6 @@ export class GrassType {
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
     #baseColorTexture: BitmapTexture;
-    #aoIntensity: number = 1.0;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
     #minWeightThreshold: number = 0.05;
@@ -113,12 +111,6 @@ export class GrassType {
             this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
         } else if (resolvedTexture) {
             this.#baseColorTexture = resolvedTexture;
-        }
-
-        if (options.aoIntensity !== undefined) {
-            this.#aoIntensity = options.aoIntensity;
-        } else if (mat?.occlusionStrength !== undefined) {
-            this.#aoIntensity = mat.occlusionStrength;
         }
 
         const lod0Geom = lod0Mesh.geometry;
@@ -261,15 +253,6 @@ export class GrassType {
     }
 
     set normalScale(_v: number) {
-    }
-
-    get aoIntensity(): number {
-        return this.#aoIntensity;
-    }
-
-    set aoIntensity(v: number) {
-        this.#aoIntensity = Math.max(0.0, Math.min(2.0, v));
-        this.#dirty = true;
     }
 
     get densityPerHectare(): number {

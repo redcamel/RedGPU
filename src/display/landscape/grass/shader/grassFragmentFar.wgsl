@@ -103,10 +103,9 @@ fn main(input: VertexOutput) -> OutputFragment {
     let ambSSS = ambColor * sssColor * (subsurfaceStrength * leafThickness * 0.25);
     let totalIndirectLighting = (albedo * (ambColor * skyOcclusion)) + ambSSS;
 
-    // [KO] Point 4: 베이킹된 지면 접촉 AO 적용 (밑동은 지형 AO에 밀착, 풀잎 끝은 1.0)
-    // [EN] Point 4: Apply baked ground contact AO (base matches terrain AO, tip reaches 1.0)
-    let bakedGroundAO = input.groundColor.a;
-    let contactAO = mix(bakedGroundAO, 1.0, clamp(input.heightRatio * 5.0, 0.0, 1.0));
+    // [KO] 실시간 지면 접촉 AO 적용 (밑동은 부드러운 접촉 음영 0.40, 풀잎 끝은 1.0)
+    // [EN] Real-time ground contact AO (soft contact shadow 0.40 at base, tip reaches 1.0)
+    let contactAO = mix(0.40, 1.0, clamp(input.heightRatio * 4.0, 0.0, 1.0));
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;
 
     output.color = vec4<f32>(finalColor, 1.0);
