@@ -38,7 +38,7 @@ struct VertexOutput {
     @location(4) alphaFade: f32,
     @location(5) currentClipPos: vec4<f32>,
     @location(6) prevClipPos: vec4<f32>,
-    @location(7) groundColor: vec3<f32>,
+    @location(7) groundColor: vec4<f32>,
 };
 
 @group(1) @binding(0) var<storage, read> culledInstances: array<GrassInstance>;
@@ -104,7 +104,7 @@ fn main(input: VertexInput) -> VertexOutput {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
-    output.groundColor = unpack4x8unorm(instance.packedGroundColor).rgb;
+    output.groundColor = unpack4x8unorm(instance.packedGroundColor);
 
     return output;
 }

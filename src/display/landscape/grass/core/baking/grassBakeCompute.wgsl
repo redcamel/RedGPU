@@ -200,5 +200,13 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             groundColor = groundTex.rgb;
         }
     }
-    rawInstances[instIdx].packedGroundColor = pack4x8unorm(vec4<f32>(groundColor, 1.0));
+
+    // [KO] Point 4: 지면 접촉 그림자 및 지형 AO 계수(0.35 ~ 1.0) 계산 (오목 지형 및 경사 차폐 반영)
+    // [EN] Point 4: Compute ground contact shadow & terrain AO factor (0.35 ~ 1.0) based on concavity & slope
+    let avgH = (h00 + h10 + h01 + h11) * 0.25;
+    let concavity = clamp((avgH - terrainHeight) * 0.4, 0.0, 0.40);
+    let slopeOcclusion = clamp(sqrt(slopeTan2) * 0.25, 0.0, 0.35);
+    let bakedAO = clamp(1.0 - concavity - slopeOcclusion, 0.35, 1.0);
+
+    rawInstances[instIdx].packedGroundColor = pack4x8unorm(vec4<f32>(groundColor, bakedAO));
 }

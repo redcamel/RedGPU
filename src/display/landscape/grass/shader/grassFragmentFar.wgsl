@@ -24,7 +24,7 @@ struct VertexOutput {
     @location(4) alphaFade: f32,
     @location(5) currentClipPos: vec4<f32>,
     @location(6) prevClipPos: vec4<f32>,
-    @location(7) groundColor: vec3<f32>,
+    @location(7) groundColor: vec4<f32>,
 };
 
 @group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
@@ -54,7 +54,7 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     if (materialUniforms.hasGroundTexture != 0u && materialUniforms.groundBlendStrength > 0.01) {
         let blendFactor = clamp((0.40 - input.heightRatio) * 2.5, 0.0, 1.0) * materialUniforms.groundBlendStrength;
-        albedo = mix(albedo, input.groundColor, blendFactor);
+        albedo = mix(albedo, input.groundColor.rgb, blendFactor);
     }
 
     let upVec = vec3<f32>(0.0, 1.0, 0.0);
@@ -103,7 +103,10 @@ fn main(input: VertexOutput) -> OutputFragment {
     let ambSSS = ambColor * sssColor * (subsurfaceStrength * leafThickness * 0.25);
     let totalIndirectLighting = (albedo * (ambColor * skyOcclusion)) + ambSSS;
 
-    let contactAO = mix(0.75, 1.0, clamp(input.heightRatio * 6.67, 0.0, 1.0));
+    // [KO] Point 4: 베이킹된 지면 접촉 AO 적용 (밑동은 지형 AO에 밀착, 풀잎 끝은 1.0)
+    // [EN] Point 4: Apply baked ground contact AO (base matches terrain AO, tip reaches 1.0)
+    let bakedGroundAO = input.groundColor.a;
+    let contactAO = mix(bakedGroundAO, 1.0, clamp(input.heightRatio * 5.0, 0.0, 1.0));
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;
 
     output.color = vec4<f32>(finalColor, 1.0);
