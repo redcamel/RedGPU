@@ -637,7 +637,9 @@ class FoliageType {
         const numVal = Math.min(1.0, Math.max(0.0, Number(val) || 0.0));
         if (this.#alignFactor !== numVal) {
             this.#alignFactor = numVal;
-            this.#onRepopulateRequired?.(this);
+            if (this.#alignToNormal) {
+                this.#onRepopulateRequired?.(this);
+            }
         }
     }
 
