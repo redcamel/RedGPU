@@ -9,6 +9,7 @@ import grassFragmentSource from "./shader/grassFragment.wgsl";
 import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
 import grassShadowSource from "./shader/grassShadow.wgsl";
 import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
+import {mat4} from "gl-matrix";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
@@ -114,6 +115,7 @@ export class LandscapeGrassManager {
     #lastPopulatePos: [number, number, number] = [0, 0, 0];
     #lastUpdateGridPos: [number, number] = [-999999, -999999];
     #frustumPlanesF32: Float32Array = new Float32Array(24);
+    #viewProjectionMatrixF32: Float32Array = new Float32Array(16);
     #tempWeights4: Float32Array = new Float32Array(4);
 
     #prngState: number = 12345;
@@ -496,6 +498,16 @@ export class LandscapeGrassManager {
             }
         }
 
+        const currentView = stateData?.view || (camera as any)?.view;
+        const hzbTextureView = currentView?.hierarchicalZBuffer?.textureView || null;
+        const hasHZB = !!hzbTextureView;
+
+        let viewProjectionMatrixF32: Float32Array | null = null;
+        if (rawCam?.projectionMatrix && rawCam?.viewMatrix) {
+            mat4.multiply(this.#viewProjectionMatrixF32 as any, rawCam.projectionMatrix, rawCam.viewMatrix);
+            viewProjectionMatrixF32 = this.#viewProjectionMatrixF32;
+        }
+
         const totalAllocated = this.#megaBuffer.totalAllocatedInstances;
         this.#culler.updateUniforms(
             camPos[0],
@@ -503,10 +515,12 @@ export class LandscapeGrassManager {
             camPos[2],
             frustumPlanesF32,
             totalAllocated,
-            this.#grassTypes.length
+            this.#grassTypes.length,
+            viewProjectionMatrixF32,
+            hasHZB
         );
 
-        this.#culler.updateBindGroup(this.#megaBuffer);
+        this.#culler.updateBindGroup(this.#megaBuffer, hzbTextureView);
 
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
             LandscapeGrassManager.#COMPUTE_PASS_DESCRIPTOR,

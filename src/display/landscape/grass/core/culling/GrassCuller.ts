@@ -12,15 +12,19 @@ export class GrassCuller {
     #globalUniformCPUBuffer: Float32Array;
     #globalUniformUintBuffer: Uint32Array;
 
+    #fallbackHZBTexture: GPUTexture | null = null;
+    #fallbackHZBTextureView: GPUTextureView | null = null;
+
     #cachedRawBuffer: GPUBuffer | null = null;
     #cachedTypeParamsBuffer: GPUBuffer | null = null;
     #cachedCulledBuffer: GPUBuffer | null = null;
     #cachedIndirectBuffer: GPUBuffer | null = null;
+    #cachedHZBTextureView: GPUTextureView | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
 
-        this.#globalUniformCPUBuffer = new Float32Array(32);
+        this.#globalUniformCPUBuffer = new Float32Array(64);
         this.#globalUniformUintBuffer = new Uint32Array(this.#globalUniformCPUBuffer.buffer);
 
         this.#init();
@@ -32,6 +36,7 @@ export class GrassCuller {
         this.#cachedTypeParamsBuffer = null;
         this.#cachedCulledBuffer = null;
         this.#cachedIndirectBuffer = null;
+        this.#cachedHZBTextureView = null;
     }
 
     updateUniforms(
@@ -40,7 +45,12 @@ export class GrassCuller {
         camZ: number,
         frustumPlanes: Float32Array | null,
         totalInstances: number,
-        typeCount: number = 1
+        typeCount: number = 1,
+        viewProjectionMatrix: Float32Array | null = null,
+        hzbEnabled: boolean = false,
+        depthBias: number = 0.003,
+        hzbWidth: number = 512.0,
+        hzbHeight: number = 256.0
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#globalUniformGPUBuffer) return;
@@ -61,30 +71,57 @@ export class GrassCuller {
             f32.fill(0, 4, 28);
         }
 
-        u32[28] = totalInstances;
-        u32[29] = typeCount;
-        u32[30] = 0;
-        u32[31] = 0;
+        if (viewProjectionMatrix && viewProjectionMatrix.length >= 16) {
+            for (let i = 0; i < 16; i++) {
+                f32[28 + i] = viewProjectionMatrix[i];
+            }
+        } else {
+            f32.fill(0, 28, 44);
+        }
+
+        u32[44] = totalInstances;
+        u32[45] = typeCount;
+        u32[46] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
+        f32[47] = depthBias;
+        f32[48] = hzbWidth;
+        f32[49] = hzbHeight;
+        f32[50] = 0.0;
+        f32[51] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#globalUniformGPUBuffer,
             0,
             this.#globalUniformCPUBuffer.buffer,
             0,
-            32 * 4
+            52 * 4
         );
     }
 
-    updateBindGroup(megaBuffer: GrassMegaBuffer): void {
+    updateBindGroup(megaBuffer: GrassMegaBuffer, hzbTextureView?: GPUTextureView | null): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#cullBindGroupLayout || !this.#globalUniformGPUBuffer) return;
+
+        if (!this.#fallbackHZBTextureView) {
+            this.#fallbackHZBTexture = gpuDevice.createTexture({
+                label: 'GrassCuller_FallbackHZBTexture',
+                size: [1, 1, 1],
+                format: 'r32float',
+                usage: GPUTextureUsage.TEXTURE_BINDING,
+            });
+            this.#fallbackHZBTextureView = this.#fallbackHZBTexture.createView({
+                label: 'GrassCuller_FallbackHZBTextureView',
+            });
+        }
+
+        const targetHZBView = hzbTextureView || this.#fallbackHZBTextureView;
 
         if (
             !this.#cullBindGroup ||
             this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
             this.#cachedTypeParamsBuffer !== megaBuffer.typeParamsGPUBuffer ||
             this.#cachedCulledBuffer !== megaBuffer.culledGPUBuffer ||
-            this.#cachedIndirectBuffer !== megaBuffer.indirectGPUBuffer
+            this.#cachedIndirectBuffer !== megaBuffer.indirectGPUBuffer ||
+            this.#cachedHZBTextureView !== targetHZBView
         ) {
             if (!megaBuffer.rawGPUBuffer || !megaBuffer.typeParamsGPUBuffer ||
                 !megaBuffer.culledGPUBuffer || !megaBuffer.indirectGPUBuffer) {
@@ -95,6 +132,7 @@ export class GrassCuller {
             this.#cachedTypeParamsBuffer = megaBuffer.typeParamsGPUBuffer;
             this.#cachedCulledBuffer = megaBuffer.culledGPUBuffer;
             this.#cachedIndirectBuffer = megaBuffer.indirectGPUBuffer;
+            this.#cachedHZBTextureView = targetHZBView;
 
             this.#cullBindGroup = gpuDevice.createBindGroup({
                 label: 'GrassCuller_BindGroup',
@@ -105,6 +143,7 @@ export class GrassCuller {
                     {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
                     {binding: 3, resource: {buffer: megaBuffer.culledGPUBuffer}},
                     {binding: 4, resource: {buffer: megaBuffer.indirectGPUBuffer}},
+                    {binding: 5, resource: targetHZBView},
                 ],
             });
         }
@@ -122,6 +161,9 @@ export class GrassCuller {
     destroy(): void {
         this.#globalUniformGPUBuffer?.destroy();
         this.#globalUniformGPUBuffer = null;
+        this.#fallbackHZBTexture?.destroy();
+        this.#fallbackHZBTexture = null;
+        this.#fallbackHZBTextureView = null;
         this.#cullPipeline = null;
         this.#cullBindGroupLayout = null;
         this.#cullBindGroup = null;
@@ -129,6 +171,7 @@ export class GrassCuller {
         this.#cachedTypeParamsBuffer = null;
         this.#cachedCulledBuffer = null;
         this.#cachedIndirectBuffer = null;
+        this.#cachedHZBTextureView = null;
     }
 
     #init(): void {
@@ -154,6 +197,7 @@ export class GrassCuller {
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
             ],
         });
 
