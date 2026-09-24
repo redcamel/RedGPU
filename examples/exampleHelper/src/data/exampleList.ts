@@ -1158,6 +1158,15 @@ export const ExampleList: ExampleListType = [
                                             ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
                                             en: `A showcase combining large-scale terrain landscape with an interactive WaterLake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
                                         }
+                                    },
+                                    {
+                                        experimental: true,
+                                        name: 'Multi Lake',
+                                        path: '3d/water/lake/multiLake',
+                                        description: {
+                                            ko: `단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 WaterLake 수체를 동시에 렌더링하고, 다중 수체의 SSR, 굴절, 코스틱스를 종합 테스트하는 예제입니다.`,
+                                            en: `A demonstration rendering 5 independent WaterLake bodies with distinct elevations (waterLevel), locations, and optical properties simultaneously, testing multi-lake SSR, refraction, and caustics.`
+                                        }
                                     }
                                 ]
                             }
