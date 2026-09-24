@@ -197,11 +197,13 @@ class FoliageRenderer {
 
             if (validCount > 0) {
                 this.#shadowRenderBundles[currentCascade] = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
+                this.#shadowBundleValid[currentCascade] = true;
+                this.#lastSystemBGByCascade[currentCascade] = systemBG;
             } else {
                 this.#shadowRenderBundles[currentCascade] = null;
+                this.#shadowBundleValid[currentCascade] = false;
+                this.#lastSystemBGByCascade[currentCascade] = null;
             }
-            this.#shadowBundleValid[currentCascade] = true;
-            this.#lastSystemBGByCascade[currentCascade] = systemBG;
         }
 
         const bundle = this.#shadowRenderBundles[currentCascade];

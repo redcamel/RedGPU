@@ -91,6 +91,7 @@ class LandscapeFoliageManager {
         for (let i = 0; i < count; i++) {
             this.#typeList[i].populateTile(comp, this.#landscape);
         }
+        this.#renderer.markShadowBundleDirty();
     }
 
     get megaBuffer(): FoliageMegaBuffer {
