@@ -535,7 +535,7 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     maxScale: [0.7, 0.75, 0.7],
                     cullingDistance: 6000,
                     targetLayer: 'Grass',
-                    maxSlope: 32.0
+
                 });
 
                 onFoliageTypeAdded?.(foliageType);
