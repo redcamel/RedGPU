@@ -374,8 +374,22 @@ fn main(inputData: InputData) -> OutputFragment {
     if (uniforms.causticsStrength > 0.001) {
         let primarySun = systemUniforms.directionalLights[0];
         let sunDir = -normalize(primarySun.direction);
-        let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
-        let groundSurfacePos = initialGroundWorldPos.xz + lightRayOffset;
+
+        // 1) 수중 지표면의 실제 경사각(법선) 산출을 통한 수직 벽면(박스 옆면, 절벽, 기둥) 코스틱스 마스킹
+        // 실제 태양광은 위에서 아래로 내리쬐므로 수평 바닥에만 맺히고 수직 벽면에는 닿지 않아야 함.
+        // 수직 벽면(groundNormal.y ≈ 0)을 부드럽게 페이드아웃하여 폭포수처럼 세로로 늘어지는 아티팩트를 원천 박멸.
+        let groundDX = dpdx(initialGroundWorldPos);
+        let groundDY = dpdy(initialGroundWorldPos);
+        let groundNormal = normalize(cross(groundDX, groundDY));
+        let groundUpFactor = clamp(abs(groundNormal.y), 0.0, 1.0);
+        let wallMask = smoothstep(0.30, 0.70, groundUpFactor);
+
+        // 2) 수심에 따른 부드러운 시차 오프셋 (수면 그리드 기준)
+        let viewParallaxDir = -V.xz;
+        let parallaxDist = min(effectiveVerticalDepth * 0.45 / max(0.35, V.y), effectiveVerticalDepth * 1.2);
+        let viewParallaxOffset = viewParallaxDir * parallaxDist;
+        let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.25);
+        let groundSurfacePos = worldPos.xz + viewParallaxOffset + lightRayOffset;
 
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
         let cWorldScale = 0.35 * invCScale;
@@ -420,7 +434,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let causticCrest = (crest1 * crest1 + crest2 * crest2) * 0.9;
 
         let causticsDepthFade = exp(-effectiveVerticalDepth * 0.85) * smoothstep(0.02, 0.25, effectiveVerticalDepth);
-        causticIntensity = causticCrest * uniforms.causticsStrength * causticsDepthFade;
+        causticIntensity = causticCrest * uniforms.causticsStrength * causticsDepthFade * wallMask;
 
         let sunFactor = clamp(sunDir.y * 1.5, 0.35, 1.0);
         let causticsColor = primarySun.color * (causticIntensity * sunFactor);
