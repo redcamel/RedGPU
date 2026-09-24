@@ -998,8 +998,10 @@ export const ExampleList: ExampleListType = [
                     },
                     {
                         name: 'Landscape',
+                        experimental: true,
                         list: [
                             {
+                                experimental: true,
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
@@ -1016,6 +1018,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Multi-Layer Splatting',
                                 path: '3d/landscape/multiLayerSplatting',
                                 description: {
@@ -1028,6 +1031,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Tile Streaming',
                                 path: '3d/landscape/tileStreaming',
                                 description: {
@@ -1040,6 +1044,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Procedural Grass Field',
                                 path: '3d/landscape/proceduralGrass',
                                 description: {
@@ -1052,6 +1057,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Foliage & Impostors',
                                 path: '3d/landscape/foliageAndImpostors',
                                 description: {
@@ -1064,6 +1070,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Open World Integration',
                                 path: '3d/landscape/openWorldIntegration',
                                 description: {
@@ -1076,6 +1083,7 @@ export const ExampleList: ExampleListType = [
                                 }
                             },
                             {
+                                experimental: true,
                                 name: 'Landscape & Water System',
                                 path: '3d/landscape/landscapeAndWater',
                                 description: {
@@ -1091,11 +1099,14 @@ export const ExampleList: ExampleListType = [
                     },
                     {
                         name: 'Water',
+                        experimental: true,
                         list: [
                             {
                                 name: 'Lake',
+                                experimental: true,
                                 list: [
                                     {
+                                        experimental: true,
                                         name: 'Basic Lake',
                                         path: '3d/water/lake/basicLake',
                                         description: {
@@ -1104,6 +1115,7 @@ export const ExampleList: ExampleListType = [
                                         }
                                     },
                                     {
+                                        experimental: true,
                                         name: 'Waves & Optics',
                                         path: '3d/water/lake/wavesAndOptics',
                                         description: {
@@ -1112,6 +1124,7 @@ export const ExampleList: ExampleListType = [
                                         }
                                     },
                                     {
+                                        experimental: true,
                                         name: 'Object Interaction',
                                         path: '3d/water/lake/interaction',
                                         description: {
@@ -1120,6 +1133,7 @@ export const ExampleList: ExampleListType = [
                                         }
                                     },
                                     {
+                                        experimental: true,
                                         name: 'Character Walking',
                                         path: '3d/water/lake/characterWalking',
                                         description: {
@@ -1128,6 +1142,7 @@ export const ExampleList: ExampleListType = [
                                         }
                                     },
                                     {
+                                        experimental: true,
                                         name: 'Lake Settings',
                                         path: '3d/water/lake/lakeSettings',
                                         description: {
@@ -1136,6 +1151,7 @@ export const ExampleList: ExampleListType = [
                                         }
                                     },
                                     {
+                                        experimental: true,
                                         name: 'Lake with Landscape',
                                         path: '3d/water/lake/lakeWithLandscape',
                                         description: {
