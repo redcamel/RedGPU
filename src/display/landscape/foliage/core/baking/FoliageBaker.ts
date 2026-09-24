@@ -22,11 +22,13 @@ export class FoliageBaker {
     #cachedTasksBuffer: GPUBuffer | null = null;
     #cachedVHTTextureView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
+    #cachedVBTTextureView: GPUTextureView | null = null;
+    #cachedVBTSampler: GPUSampler | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
 
-        this.#uniformCPUBuffer = new Float32Array(4);
+        this.#uniformCPUBuffer = new Float32Array(8);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
 
         this.#tasksCPUBuffer = new Uint32Array(this.#taskCapacity * 2);
@@ -45,6 +47,8 @@ export class FoliageBaker {
         this.#cachedTasksBuffer = null;
         this.#cachedVHTTextureView = null;
         this.#cachedVHTSampler = null;
+        this.#cachedVBTTextureView = null;
+        this.#cachedVBTSampler = null;
     }
 
     addBakeTasks(startIndex: number, count: number, typeId: number): void {
@@ -65,6 +69,8 @@ export class FoliageBaker {
         megaBuffer: FoliageMegaBuffer,
         vhtTextureView: GPUTextureView | null | undefined,
         vhtSampler: GPUSampler | null | undefined,
+        vbtTextureView: GPUTextureView | null | undefined,
+        vbtSampler: GPUSampler | null | undefined,
         worldSizeX: number,
         worldSizeZ: number,
         heightScale: number
@@ -80,6 +86,8 @@ export class FoliageBaker {
 
         const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
         const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const targetVBTSampler = vbtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
@@ -87,13 +95,17 @@ export class FoliageBaker {
         f32[1] = worldSizeZ > 0 ? 1.0 / worldSizeZ : 0.0;
         f32[2] = heightScale;
         u32[3] = this.#taskCount;
+        u32[4] = vbtTextureView ? 1 : 0;
+        f32[5] = 0.0;
+        f32[6] = 0.0;
+        u32[7] = 0;
 
         gpuDevice.queue.writeBuffer(
             this.#uniformGPUBuffer,
             0,
             this.#uniformCPUBuffer.buffer,
             0,
-            16
+            32
         );
 
         const taskBytes = this.#taskCount * 8;
@@ -111,13 +123,17 @@ export class FoliageBaker {
             this.#cachedTypeParamsBuffer !== megaBuffer.typeParamsGPUBuffer ||
             this.#cachedTasksBuffer !== this.#tasksGPUBuffer ||
             this.#cachedVHTTextureView !== targetVHTView ||
-            this.#cachedVHTSampler !== targetVHTSampler
+            this.#cachedVHTSampler !== targetVHTSampler ||
+            this.#cachedVBTTextureView !== targetVBTView ||
+            this.#cachedVBTSampler !== targetVBTSampler
         ) {
             this.#cachedRawBuffer = megaBuffer.rawGPUBuffer;
             this.#cachedTypeParamsBuffer = megaBuffer.typeParamsGPUBuffer;
             this.#cachedTasksBuffer = this.#tasksGPUBuffer;
             this.#cachedVHTTextureView = targetVHTView;
             this.#cachedVHTSampler = targetVHTSampler;
+            this.#cachedVBTTextureView = targetVBTView;
+            this.#cachedVBTSampler = targetVBTSampler;
 
             this.#bakeBindGroup = gpuDevice.createBindGroup({
                 label: 'FoliageBaker_BindGroup',
@@ -129,6 +145,8 @@ export class FoliageBaker {
                     {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
                     {binding: 4, resource: targetVHTView},
                     {binding: 5, resource: targetVHTSampler},
+                    {binding: 6, resource: targetVBTView},
+                    {binding: 7, resource: targetVBTSampler},
                 ],
             });
         }
@@ -154,6 +172,8 @@ export class FoliageBaker {
         this.#cachedTasksBuffer = null;
         this.#cachedVHTTextureView = null;
         this.#cachedVHTSampler = null;
+        this.#cachedVBTTextureView = null;
+        this.#cachedVBTSampler = null;
         this.#taskCount = 0;
     }
 
@@ -163,7 +183,7 @@ export class FoliageBaker {
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageBaker_UniformBuffer',
-            size: 16,
+            size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
@@ -187,6 +207,8 @@ export class FoliageBaker {
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
                 {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
+                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
             ],
         });
 

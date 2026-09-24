@@ -69,6 +69,9 @@ struct InputData {
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
+    #redgpu_if isFoliage
+    @location(13) groundColor_blendFactor: vec4<f32>,
+    #redgpu_endIf
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
@@ -268,7 +271,10 @@ fn main(inputData:InputData) -> OutputFragment {
 
 
     #redgpu_if isFoliage
-
+        // 🌿 식생 밑동-지형 컬러 블렌딩 (Zero-Texture Fetch 베이킹 기반)
+        if (inputData.groundColor_blendFactor.a > 0.001) {
+            baseColor = vec4<f32>(mix(baseColor.rgb, inputData.groundColor_blendFactor.rgb, inputData.groundColor_blendFactor.a), baseColor.a);
+        }
     #redgpu_else
         #redgpu_if useCutOff
             if (resultAlpha <= u_cutOff) { discard; }

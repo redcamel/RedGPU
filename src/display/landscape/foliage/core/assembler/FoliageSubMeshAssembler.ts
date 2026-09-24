@@ -57,7 +57,7 @@ interface RawSubMesh {
 
 class FoliageSubMeshAssembler {
 
-    static readonly #subMeshUniformData: Float32Array = new Float32Array(48);
+    static readonly #subMeshUniformData: Float32Array = new Float32Array(52);
     static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
     static readonly #tempLocalMatrix: mat4 = mat4.create();
     static readonly #identityMatrix: mat4 = mat4.create();
@@ -204,7 +204,7 @@ class FoliageSubMeshAssembler {
     ): { buffer: GPUBuffer; bindGroup: GPUBindGroup } {
         const uniformBuffer = gpuDevice.createBuffer({
             label: `FoliageShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
-            size: 192,
+            size: 208,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
@@ -230,7 +230,12 @@ class FoliageSubMeshAssembler {
         floatView[46] = 5.0;
         uintView[47] = 0;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
+        floatView[48] = 0.0;
+        floatView[49] = 1.5;
+        floatView[50] = 0.0;
+        floatView[51] = 0.0;
+
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
 
         const vertexBindGroup = gpuDevice.createBindGroup({
             label: `FoliageShadowSubMesh_VertexBindGroup_${name}_LOD${lodIndex}`,
@@ -240,7 +245,6 @@ class FoliageSubMeshAssembler {
                     binding: 0,
                     resource: {
                         buffer: uniformBuffer,
-                        size: 192,
                     },
                 },
             ],
@@ -379,8 +383,8 @@ class FoliageSubMeshAssembler {
             const mat = node.material;
 
             const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent;
+            mat.isFoliage = true;
             if (isMasked) {
-                mat.isFoliage = true;
                 mat.useCutOff = true;
                 mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
                 mat.doubleSided = true;
@@ -713,7 +717,9 @@ class FoliageSubMeshAssembler {
                 0,
                 lodReceiveShadow,
                 subMeshUniformCache,
-                maxPrepassLOD
+                maxPrepassLOD,
+                options.groundBlendStrength,
+                options.groundBlendRange
             );
 
             resultSubMeshes.push(combinedSubMesh);
@@ -780,7 +786,9 @@ class FoliageSubMeshAssembler {
         bottomOffset: number = 0,
         receiveShadow: boolean = true,
         uniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>,
-        maxPrepassLOD: number = 0
+        maxPrepassLOD: number = 0,
+        groundBlendStrength?: number,
+        groundBlendRange?: number
     ): FoliageSubMesh {
         const isIndexed = !!geom.indexBuffer;
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
@@ -802,7 +810,7 @@ class FoliageSubMeshAssembler {
         } else {
             uniformBuffer = gpuDevice.createBuffer({
                 label: `FoliageSubMesh_UniformBuffer_${globalSlot}`,
-                size: 192,
+                size: 208,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
@@ -836,7 +844,13 @@ class FoliageSubMeshAssembler {
             floatView[46] = 5.0;
             uintView[47] = 0;
 
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 192);
+            const applyGroundBlend = !isImpostor;
+            floatView[48] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
+            floatView[49] = groundBlendRange ?? 1.5;
+            floatView[50] = 0.0;
+            floatView[51] = 0.0;
+
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
 
             vertexBindGroup = gpuDevice.createBindGroup({
                 label: `FoliageSubMesh_VertexBindGroup_${globalSlot}`,

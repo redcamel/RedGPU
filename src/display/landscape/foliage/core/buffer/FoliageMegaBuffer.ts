@@ -244,8 +244,9 @@ class FoliageMegaBuffer {
         this.#allocatedTypes.push(allocation);
 
         const baseFloat = rawBaseOffset * FoliageMegaBuffer.#STRIDE_FLOATS;
+        const defaultColorAndType = (((typeId & 0xFF) << 24) | (0x33 << 16) | (0x33 << 8) | 0x33) >>> 0;
         for (let i = 0; i < alignedMaxInstances; i++) {
-            this.#cpuRawDataBuffer[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 7] = typeId;
+            this.#cpuRawDataUint32[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 7] = defaultColorAndType;
         }
 
         this.#nextRawOffset += alignedMaxInstances;

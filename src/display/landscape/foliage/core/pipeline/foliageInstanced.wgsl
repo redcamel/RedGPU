@@ -20,6 +20,11 @@ struct SubMeshUniforms {
     useVertexColorWind: u32,
     treeHeight: f32,
     padWind: u32,
+
+    groundBlendStrength: f32,
+    groundBlendRange: f32,
+    padGB0: f32,
+    padGB1: f32,
 };
 
 @group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
@@ -99,7 +104,7 @@ struct VertexInput {
     @location(6) instancePos_scaleY : vec4<f32>,
     @location(7) instanceRotQuat : vec4<f32>,
     @location(8) instanceScaleXZ : vec2<f32>,
-    @location(9) instanceFade : f32,
+    @location(9) groundColor_fade : vec4<f32>,
 };
 
 struct OutputData {
@@ -120,6 +125,7 @@ struct OutputData {
     @location(11) combinedOpacity: f32,
 
     @location(12) motionVector: vec3<f32>,
+    @location(13) groundColor_blendFactor: vec4<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -138,7 +144,7 @@ fn mainInput(input : VertexInput) -> OutputData {
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
-    let combinedOpacity = input.instanceFade;
+    let combinedOpacity = input.groundColor_fade.a;
 
     var hierarchyPos = input.position;
     var hierarchyNormal = input.vertexNormal;
@@ -219,6 +225,12 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.motionVector = vec3<f32>(0.0);
     output.pickingId = vec4<f32>(0.0);
 
+    let heightAboveGround = max(0.0, worldPos.y - instancePos.y);
+    let blendRange = max(0.1, subMeshUniforms.groundBlendRange);
+    let rawBlend = clamp(1.0 - (heightAboveGround / blendRange), 0.0, 1.0);
+    let groundBlendFactor = rawBlend * subMeshUniforms.groundBlendStrength;
+    output.groundColor_blendFactor = vec4<f32>(input.groundColor_fade.rgb, groundBlendFactor);
+
     return output;
 }
 
@@ -228,7 +240,7 @@ struct ShadowOpaqueVertexInput {
     @location(6) instancePos_scaleY : vec4<f32>,
     @location(7) instanceRotQuat : vec4<f32>,
     @location(8) instanceScaleXZ : vec2<f32>,
-    @location(9) instanceFade : f32,
+    @location(9) groundColor_fade : vec4<f32>,
 };
 
 struct FoliageShadowOpaqueOutput {
@@ -260,7 +272,7 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     worldPos += windDisp;
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
-    output.shadowFade = input.instanceFade;
+    output.shadowFade = input.groundColor_fade.a;
     return output;
 }
 
@@ -310,7 +322,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.uv = input.uv;
-    output.shadowFade = input.instanceFade;
+    output.shadowFade = input.groundColor_fade.a;
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     return output;
 }

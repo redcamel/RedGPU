@@ -67,7 +67,7 @@ struct FoliageInstanceData {
     packedRotXY: u32,
     packedRotZW: u32,
     packedScaleXZ: u32,
-    fadeOrType: f32,
+    packedGroundColorAndType: u32,
 };
 
 struct DrawIndexedIndirectArgs {
@@ -154,7 +154,7 @@ fn main(
     }
 
     var instance = rawInstanceBuffer[idx];
-    let typeIdx = u32(instance.fadeOrType);
+    let typeIdx = (instance.packedGroundColorAndType >> 24u) & 0xFFu;
     if (typeIdx >= 64u) {
         return;
     }
@@ -275,9 +275,11 @@ fn main(
                     atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
                 }
 
+                let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
+                let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
                 var culledInst = instance;
                 culledInst.posY = realY;
-                culledInst.fadeOrType = finalAlpha;
+                culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
 
                 let outIdx = typeInfo.culledBaseOffset + slot;
                 mainCulledInstanceBuffer[outIdx] = culledInst;
@@ -305,9 +307,11 @@ fn main(
                             atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
+                        let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
+                        let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
                         var culledInst = instance;
                         culledInst.posY = realY;
-                        culledInst.fadeOrType = finalAlpha;
+                        culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
 
                         let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
                         mainCulledInstanceBuffer[outIdx] = culledInst;
@@ -374,9 +378,11 @@ fn main(
                             atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
+                        let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
+                        let shadowFadeByte = u32(clamp(shadowFade, 0.0, 1.0) * 255.0);
                         var shadowInst = instance;
                         shadowInst.posY = realY;
-                        shadowInst.fadeOrType = shadowFade;
+                        shadowInst.packedGroundColorAndType = (shadowFadeByte << 24u) | groundRGB;
 
                         let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
                         let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;

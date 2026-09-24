@@ -33,7 +33,7 @@ struct FoliageInstanceData {
     packedRotXY: u32,
     packedRotZW: u32,
     packedScaleXZ: u32,
-    fadeOrType: f32,
+    packedGroundColorAndType: u32,
 };
 
 struct BakeUniforms {
@@ -41,6 +41,10 @@ struct BakeUniforms {
     invWorldSizeZ: f32,
     heightScale: f32,
     totalTasks: u32,
+    hasVBT: u32,
+    _pad0: f32,
+    _pad1: f32,
+    _pad2: f32,
 };
 
 struct BakeTask {
@@ -54,6 +58,8 @@ struct BakeTask {
 @group(0) @binding(3) var<storage, read> bakeTasks: array<BakeTask>;
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(5) var vhtSampler: sampler;
+@group(0) @binding(6) var vbtTexture: texture_2d<f32>;
+@group(0) @binding(7) var vbtSampler: sampler;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -81,5 +87,19 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let terrainHeight = sampledHeightNorm * bakeUniforms.heightScale;
     let effectiveBottomOffset = typeInfo.bottomOffset * inst.scaleY;
 
+    var groundColor = vec3<f32>(0.2, 0.2, 0.2);
+    if (bakeUniforms.hasVBT != 0u) {
+        let groundTex = textureSampleLevel(vbtTexture, vbtSampler, vec2<f32>(u, v), 0.0);
+        if (groundTex.a > 0.05) {
+            groundColor = groundTex.rgb;
+        }
+    }
+
+    let r = u32(clamp(groundColor.r, 0.0, 1.0) * 255.0);
+    let g = u32(clamp(groundColor.g, 0.0, 1.0) * 255.0);
+    let b = u32(clamp(groundColor.b, 0.0, 1.0) * 255.0);
+    let typeId = task.typeId & 0xFFu;
+
     rawInstances[instIdx].posY = terrainHeight + effectiveBottomOffset;
+    rawInstances[instIdx].packedGroundColorAndType = (typeId << 24u) | (b << 16u) | (g << 8u) | r;
 }

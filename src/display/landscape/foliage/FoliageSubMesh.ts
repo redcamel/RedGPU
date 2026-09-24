@@ -37,6 +37,7 @@ class FoliageSubMesh {
     static readonly #singleFloatBuffer: Float32Array = new Float32Array(1);
     static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
     static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageSubMesh.#windFloatBuffer.buffer);
+    static readonly #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
 
     readonly mesh: Mesh;
     readonly geometry: Geometry;
@@ -142,6 +143,27 @@ class FoliageSubMesh {
             fView.buffer,
             fView.byteOffset,
             48
+        );
+    }
+
+    updateGroundBlendParams(
+        gpuDevice: GPUDevice,
+        groundBlendStrength: number,
+        groundBlendRange: number
+    ): void {
+        if (!this.vertexUniformBuffer || !gpuDevice) return;
+        const buf = FoliageSubMesh.#groundBlendFloatBuffer;
+        buf[0] = groundBlendStrength;
+        buf[1] = groundBlendRange;
+        buf[2] = 0;
+        buf[3] = 0;
+
+        gpuDevice.queue.writeBuffer(
+            this.vertexUniformBuffer,
+            48 * 4,
+            buf.buffer,
+            buf.byteOffset,
+            16
         );
     }
 

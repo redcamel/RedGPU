@@ -87,6 +87,18 @@ export interface FoliageTypeOptions {
     alignFactor?: number;
 
     densityMultiplier?: number;
+
+    /**
+     * Ground blend strength (0.0 to 1.0).
+     * @default 0.8
+     */
+    groundBlendStrength?: number;
+
+    /**
+     * Ground blend vertical range above terrain in world meters.
+     * @default 1.5
+     */
+    groundBlendRange?: number;
 }
 
 class FoliageType {
@@ -128,6 +140,8 @@ class FoliageType {
     #useVertexColorWind: boolean = true;
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
+    #groundBlendStrength: number = 0.8;
+    #groundBlendRange: number = 1.5;
     #lastWindParams: {
         windDirX: number;
         windDirY: number;
@@ -219,6 +233,13 @@ class FoliageType {
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
+        this.#groundBlendStrength = options.groundBlendStrength !== undefined
+            ? Math.max(0.0, Math.min(1.0, Number(options.groundBlendStrength) || 0.0))
+            : 0.8;
+        this.#groundBlendRange = options.groundBlendRange !== undefined
+            ? Math.max(0.1, Number(options.groundBlendRange) || 0.1)
+            : 1.5;
+
         let hash = 0;
         const nameStr = options.name || '';
         for (let c = 0; c < nameStr.length; c++) {
@@ -288,7 +309,9 @@ class FoliageType {
             windFlutterMultiplier: resolvedWindFlutterMultiplier,
             useVertexColorWind: resolvedUseVertexColorWind,
             alignToNormal: resolvedAlignToNormal,
-            alignFactor: resolvedAlignFactor
+            alignFactor: resolvedAlignFactor,
+            groundBlendStrength: this.#groundBlendStrength,
+            groundBlendRange: this.#groundBlendRange
         });
 
         this.#enableStreaming = this.#options.enableStreaming!;
@@ -786,6 +809,42 @@ class FoliageType {
      */
     get hasMaskedLOD0(): boolean {
         return this.#hasMaskedLOD0;
+    }
+
+    get groundBlendStrength(): number {
+        return this.#groundBlendStrength;
+    }
+
+    set groundBlendStrength(v: number) {
+        const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
+        if (this.#groundBlendStrength !== val) {
+            this.#groundBlendStrength = val;
+            this.#updateSubMeshGroundBlend();
+        }
+    }
+
+    get groundBlendRange(): number {
+        return this.#groundBlendRange;
+    }
+
+    set groundBlendRange(v: number) {
+        const val = Math.max(0.1, Number(v) || 0.1);
+        if (this.#groundBlendRange !== val) {
+            this.#groundBlendRange = val;
+            this.#updateSubMeshGroundBlend();
+        }
+    }
+
+    #updateSubMeshGroundBlend(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return;
+        const subCount = this.#subMeshes.length;
+        for (let s = 0; s < subCount; s++) {
+            const sub = this.#subMeshes[s];
+            if (!sub.isImpostor) {
+                sub.updateGroundBlendParams(gpuDevice, this.#groundBlendStrength, this.#groundBlendRange);
+            }
+        }
     }
 
     getLODDistance(lodIndex: number): number {
