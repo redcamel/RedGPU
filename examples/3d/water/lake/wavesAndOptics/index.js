@@ -15,11 +15,11 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정
+        // 1. 카메라 컨트롤러 설정 (SSR 파도 반사가 선명하게 보이도록 근접 조망각 설정)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 34;
-        controller.tilt = -16;
-        controller.pan = 25;
+        controller.distance = 20;
+        controller.tilt = -13;
+        controller.pan = 10;
         controller.speedDistance = 0.3;
 
         // 2. 씬 및 뷰 구성
@@ -129,17 +129,17 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
         scene.addChild(box);
     });
 
-    // 3. 굴절 관찰용 수중/수면 랜드마크 기둥 및 구체
+    // 3. 굴절 및 SSR 관찰용 수중/수면 랜드마크 기둥 및 구체 (카메라 전면 배치)
     const columnMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     columnMaterial.baseColorFactor = [0.75, 0.25, 0.25, 1.0];
     columnMaterial.roughnessFactor = 0.3;
     columnMaterial.metallicFactor = 0.1;
 
-    const columnGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 7.0, 24);
+    const columnGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 6.0, 24);
     const colMesh = new RedGPU.Display.Mesh(redGPUContext, columnGeom, columnMaterial);
-    colMesh.x = -6;
-    colMesh.y = 1.0;
-    colMesh.z = 4;
+    colMesh.x = -5.2;
+    colMesh.y = 0.5;
+    colMesh.z = 1.0;
     colMesh.castShadow = true;
     scene.addChild(colMesh);
 
@@ -150,14 +150,83 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
 
     const sphereMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 24, 24),
+        new RedGPU.Primitive.Sphere(redGPUContext, 1.5, 24, 24),
         metalMaterial
     );
-    sphereMesh.x = 0;
-    sphereMesh.y = -0.4;
-    sphereMesh.z = 4;
+    sphereMesh.x = 5.2;
+    sphereMesh.y = 0.3;
+    sphereMesh.z = 1.0;
     sphereMesh.castShadow = true;
     scene.addChild(sphereMesh);
+
+    // 4. 수면 공간 반사(SSR) 관찰용 키 큰 오벨리스크 타워 및 메탈릭 기둥군 (넓은 간격과 수면 근접 배치)
+    // 파도가 출렁일 때 수면에 맺힌 반사상이 실시간으로 일렁이고 왜곡되는 모습을 극적으로 관찰 가능
+    const darkObsidian = new RedGPU.Material.PBRMaterial(redGPUContext);
+    darkObsidian.baseColorFactor = [0.12, 0.14, 0.18, 1.0];
+    darkObsidian.roughnessFactor = 0.18;
+    darkObsidian.metallicFactor = 0.85;
+
+    // 중앙 12m 오벨리스크 타워
+    const towerMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 1.8, 11.0, 1.8),
+        darkObsidian
+    );
+    towerMesh.x = 0.0;
+    towerMesh.y = 3.5;
+    towerMesh.z = -5.5;
+    towerMesh.castShadow = true;
+    scene.addChild(towerMesh);
+
+    // 타워 하단 수면에 가깝게 걸린 비취색 메탈릭 링 (수면 맞닿음으로 선명한 SSR 반사상 형성)
+    const cyanMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
+    cyanMetal.baseColorFactor = [0.10, 0.85, 0.85, 1.0];
+    cyanMetal.roughnessFactor = 0.12;
+    cyanMetal.metallicFactor = 0.95;
+
+    const towerRing = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Torus(redGPUContext, 2.5, 0.65, 32, 32),
+        cyanMetal
+    );
+    towerRing.x = 0.0;
+    towerRing.y = 1.5;
+    towerRing.z = -5.5;
+    towerRing.castShadow = true;
+    scene.addChild(towerRing);
+
+    // 좌/우측 대비용 10m 루비/오렌지색 기둥 타워 (폭넓게 배치)
+    const rubyMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    rubyMaterial.baseColorFactor = [0.95, 0.25, 0.20, 1.0];
+    rubyMaterial.roughnessFactor = 0.2;
+    rubyMaterial.metallicFactor = 0.7;
+
+    const rubyPillar = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 9.0, 24),
+        rubyMaterial
+    );
+    rubyPillar.x = -7.5;
+    rubyPillar.y = 1.5;
+    rubyPillar.z = -5.5;
+    rubyPillar.castShadow = true;
+    scene.addChild(rubyPillar);
+
+    const amberMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    amberMaterial.baseColorFactor = [0.95, 0.65, 0.15, 1.0];
+    amberMaterial.roughnessFactor = 0.2;
+    amberMaterial.metallicFactor = 0.7;
+
+    const amberPillar = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 9.0, 24),
+        amberMaterial
+    );
+    amberPillar.x = 7.5;
+    amberPillar.y = 1.5;
+    amberPillar.z = -5.5;
+    amberPillar.castShadow = true;
+    scene.addChild(amberPillar);
 }
 
 /**

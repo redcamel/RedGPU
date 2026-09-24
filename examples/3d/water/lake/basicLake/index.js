@@ -15,11 +15,11 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정
+        // 1. 카메라 컨트롤러 설정 (SSR이 화면에 가득 차도록 최적 조망각 설정)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 32;
-        controller.tilt = -18;
-        controller.pan = 35;
+        controller.distance = 18;
+        controller.tilt = -12;
+        controller.pan = 8;
         controller.speedDistance = 0.3;
 
         // 2. 씬 및 뷰 구성
@@ -110,9 +110,9 @@ function createEnvironment(redGPUContext, scene) {
 
     const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.7, 0.7, 7.0, 24);
     const pillarPositions = [
-        {x: -6, z: -4},
-        {x: 6, z: -4},
-        {x: 0, z: 6},
+        {x: -8.0, z: -1.0},
+        {x: 8.0, z: -1.0},
+        {x: 0, z: -8.0},
     ];
 
     pillarPositions.forEach(pos => {
@@ -125,7 +125,7 @@ function createEnvironment(redGPUContext, scene) {
         scene.addChild(pillar);
     });
 
-    // 3. 비교용 기하체 (구체 및 큐브)
+    // 3. 비교용 기하체 (구체 및 큐브 - 좌우로 넓게 분산 배치)
     const goldMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     goldMaterial.baseColorFactor = [0.95, 0.75, 0.25, 1.0];
     goldMaterial.roughnessFactor = 0.2;
@@ -133,12 +133,12 @@ function createEnvironment(redGPUContext, scene) {
 
     const sphereMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Sphere(redGPUContext, 1.8, 24, 24),
+        new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 24, 24),
         goldMaterial
     );
-    sphereMesh.x = -4.0;
-    sphereMesh.y = 0.0;
-    sphereMesh.z = 2.0;
+    sphereMesh.x = -5.0;
+    sphereMesh.y = 0.4;
+    sphereMesh.z = 1.0;
     sphereMesh.castShadow = true;
     scene.addChild(sphereMesh);
 
@@ -149,15 +149,65 @@ function createEnvironment(redGPUContext, scene) {
 
     const boxMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 3.5, 3.5, 3.5),
+        new RedGPU.Primitive.Box(redGPUContext, 2.8, 2.8, 2.8),
         tealMaterial
     );
-    boxMesh.x = 4.5;
-    boxMesh.y = -0.5;
-    boxMesh.z = 1.5;
+    boxMesh.x = 5.0;
+    boxMesh.y = 0.2;
+    boxMesh.z = 1.0;
     boxMesh.rotationY = 25;
     boxMesh.castShadow = true;
     scene.addChild(boxMesh);
+
+    // 4. 수면 공간 반사(SSR) 관찰용 고대 신전 아치 게이트 및 공중 황금 링 (넓은 폭과 수면 근접 배치)
+    const marbleWhite = new RedGPU.Material.PBRMaterial(redGPUContext);
+    marbleWhite.baseColorFactor = [0.92, 0.90, 0.88, 1.0];
+    marbleWhite.roughnessFactor = 0.25;
+    marbleWhite.metallicFactor = 0.1;
+
+    const gatePillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 8.5, 24);
+    const leftGatePillar = new RedGPU.Display.Mesh(redGPUContext, gatePillarGeom, marbleWhite);
+    leftGatePillar.x = -6.8;
+    leftGatePillar.y = 1.2;
+    leftGatePillar.z = -4.5;
+    leftGatePillar.castShadow = true;
+    scene.addChild(leftGatePillar);
+
+    const rightGatePillar = new RedGPU.Display.Mesh(redGPUContext, gatePillarGeom, marbleWhite);
+    rightGatePillar.x = 6.8;
+    rightGatePillar.y = 1.2;
+    rightGatePillar.z = -4.5;
+    rightGatePillar.castShadow = true;
+    scene.addChild(rightGatePillar);
+
+    // 기둥 위를 가로지르는 대들보 빔 (확장된 16m 빔)
+    const beamMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 16.0, 1.0, 1.4),
+        marbleWhite
+    );
+    beamMesh.x = 0;
+    beamMesh.y = 5.2;
+    beamMesh.z = -4.5;
+    beamMesh.castShadow = true;
+    scene.addChild(beamMesh);
+
+    // 신전 게이트 중앙 수면에 가깝게 배치된 메탈릭 황금 링 (수면 맞닿음으로 선명한 SSR 반사상 형성)
+    const ringMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    ringMaterial.baseColorFactor = [1.0, 0.78, 0.28, 1.0];
+    ringMaterial.roughnessFactor = 0.15;
+    ringMaterial.metallicFactor = 0.95;
+
+    const ringMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Torus(redGPUContext, 2.5, 0.65, 32, 32),
+        ringMaterial
+    );
+    ringMesh.x = 0;
+    ringMesh.y = 1.4;
+    ringMesh.z = -4.5;
+    ringMesh.castShadow = true;
+    scene.addChild(ringMesh);
 }
 
 /**

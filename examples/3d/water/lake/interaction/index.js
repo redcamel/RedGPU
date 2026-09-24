@@ -10,8 +10,8 @@ RedGPU.init(
         // 1. 카메라 및 컨트롤러 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 18;
-        controller.tilt = -22;
-        controller.pan = 35;
+        controller.tilt = -14;
+        controller.pan = 18;
         controller.minDistance = 4;
         controller.maxDistance = 60;
         controller.speedDistance = 0.2;
@@ -87,7 +87,7 @@ RedGPU.init(
         const motionState = {
             autoMove: true,
             moveSpeed: 1.2,
-            moveRadius: 4.5,
+            moveRadius: 3.8,
             bobbingAmplitude: 0.25,
             time: 0,
         };
@@ -161,6 +161,46 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
         pillar.receiveShadow = true;
         scene.addChild(pillar);
     }
+
+    // 수면 공간 반사(SSR) 관찰용 거대 골든 포털 링 게이트 및 지지 타워 (수면 위 7~8m)
+    // 구체가 회전하며 생성하는 실시간 2D 잔물결 파동(Dynamic Ripples) 위로 게이트의 반사상이 파동치며 일렁이는 모습을 극적으로 체감
+    const gateGold = new RedGPU.Material.PBRMaterial(redGPUContext);
+    gateGold.baseColorFactor = [1.0, 0.75, 0.25, 1.0];
+    gateGold.roughnessFactor = 0.15;
+    gateGold.metallicFactor = 0.95;
+
+    // 거대 원형 토러스 포털 링 (수면 근접 배치: y=1.5)
+    const portalRing = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Torus(redGPUContext, 3.2, 0.70, 32, 32),
+        gateGold
+    );
+    portalRing.x = 0;
+    portalRing.y = 1.5;
+    portalRing.z = -5.2;
+    portalRing.castShadow = true;
+    scene.addChild(portalRing);
+
+    // 좌우측 지지 타워 (넓은 간격: x=±6.5)
+    const towerMat = new RedGPU.Material.PBRMaterial(redGPUContext);
+    towerMat.baseColorFactor = [0.85, 0.88, 0.92, 1.0];
+    towerMat.roughnessFactor = 0.25;
+    towerMat.metallicFactor = 0.3;
+
+    const towerGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 8.5, 24);
+    const leftGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
+    leftGate.x = -6.5;
+    leftGate.y = 1.2;
+    leftGate.z = -5.2;
+    leftGate.castShadow = true;
+    scene.addChild(leftGate);
+
+    const rightGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
+    rightGate.x = 6.5;
+    rightGate.y = 1.2;
+    rightGate.z = -5.2;
+    rightGate.castShadow = true;
+    scene.addChild(rightGate);
 }
 
 /**
