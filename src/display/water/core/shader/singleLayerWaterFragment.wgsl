@@ -126,7 +126,10 @@ fn calculateWaterSSR(
     let maxRefinementLevels = 4u;
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
-        currentWorldPos = currentWorldPos + R * currentStepSize;
+        let progress = f32(i) / f32(maxSteps);
+        let stepScale = 0.25 + progress * 1.5;
+        let actualStep = baseStepSize * stepScale;
+        currentWorldPos = currentWorldPos + R * actualStep;
 
         let travelVec = currentWorldPos - startWorldPos;
         let travelDist = length(travelVec);
@@ -148,7 +151,7 @@ fn calculateWaterSSR(
 
         let sampledWorldPos = getWorldPositionFromDepth(currentScreenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
 
-        if (sampledWorldPos.y <= startWorldPos.y) {
+        if (sampledWorldPos.y < startWorldPos.y - 0.08) {
             continue;
         }
 
@@ -156,12 +159,11 @@ fn calculateWaterSSR(
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        let effectiveThickness = max(thickness, currentStepSize * 2.2);
+        let effectiveThickness = max(thickness, actualStep * 2.2);
 
         if (distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
             if (refinementLevel < maxRefinementLevels) {
-                currentWorldPos = currentWorldPos - R * currentStepSize;
-                currentStepSize = currentStepSize * 0.5;
+                currentWorldPos = currentWorldPos - R * (actualStep * 0.5);
                 refinementLevel = refinementLevel + 1u;
                 continue;
             }
@@ -178,12 +180,13 @@ fn calculateWaterSSR(
     }
 
     let edge = min(hitUV, vec2<f32>(1.0) - hitUV);
-    let edgeFade = smoothstep(0.0, 0.08, min(edge.x, edge.y));
+    let edgeFade = smoothstep(0.0, 0.10, min(edge.x, edge.y));
 
     let finalTravelDist = length(currentWorldPos - startWorldPos);
-    let distFade = 1.0 - smoothstep(maxDist * 0.35, maxDist * 0.90, finalTravelDist);
+    // [언리얼 엔진 표준] 최대 거리의 70%까지 온전한 선명도를 유지하고 70%~95% 구간에서만 부드럽게 감쇠
+    let distFade = 1.0 - smoothstep(maxDist * 0.70, maxDist * 0.95, finalTravelDist);
 
-    let stepFade = smoothstep(0.0, 0.12, 1.0 - f32(hitStep) / f32(maxSteps));
+    let stepFade = smoothstep(0.0, 0.08, 1.0 - f32(hitStep) / f32(maxSteps));
 
     let rayFade = clamp(R.y * 12.0, 0.0, 1.0);
 
@@ -193,7 +196,7 @@ fn calculateWaterSSR(
     }
 
     let maxMip = f32(textureNumLevels(renderPath1ResultTexture) - 1);
-    let blurMip = clamp((uniforms.roughness * 1.5 + 0.04) * maxMip, 0.0, maxMip);
+    let blurMip = clamp(uniforms.roughness * maxMip, 0.0, maxMip);
     let hitColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, hitUV, blurMip).rgb;
 
     return vec4<f32>(hitColor, totalWeight);
@@ -491,14 +494,18 @@ fn main(inputData: InputData) -> OutputFragment {
         skyDiffuseIrradiance = skyDiffuseIrradiance + atmoIrradiance;
     }
 
-    let ssrWaveNormal = normalize(mix(baseNormal, worldNormal, 0.60));
+    let ssrWaveNormal = normalize(mix(baseNormal, worldNormal, 0.35));
     let rawSsrR = reflect(-V, ssrWaveNormal);
     let ssrHorizonPull = 1.0 - smoothstep(-0.02, 0.18, rawSsrR.y);
     var ssrR = normalize(mix(rawSsrR, flatR, ssrHorizonPull));
     ssrR.y = max(ssrR.y, 0.002);
 
+    // IBL 또는 SkyAtmosphere가 없는 환경에서도 수면에 자연스러운 하늘빛이 투영되도록 안전한 하늘 폴백 조명 보장
+    let ambientSkyColor = systemUniforms.ambientLight.color * (min(100.0, systemUniforms.ambientLight.intensity) * preExposure * 0.75);
+    let safeSkyReflection = max(rawSkyReflection, ambientSkyColor);
+
     let ssrResult = calculateWaterSSR(worldPos, ssrWaveNormal, ssrR, pixelCoord);
-    let blendedSkyReflection = mix(rawSkyReflection, ssrResult.rgb, ssrResult.a);
+    let blendedSkyReflection = mix(safeSkyReflection, ssrResult.rgb, ssrResult.a);
     let skyReflectionColor = blendedSkyReflection * uniforms.specularFactor;
 
     var directSpecularColor = vec3<f32>(0.0);
@@ -558,10 +565,16 @@ fn main(inputData: InputData) -> OutputFragment {
     let ambientInScattering = baseAmbient * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.03);
     let waterScattering = directWaterScattering * 0.5 + ambientInScattering + skyVolumeScatter;
 
-    let totalTransmittedLight = (transmittedSceneColor + waterScattering) * (1.0 - fresnel);
+    // [언리얼 엔진 물리 표준: Black Mirror 효과]
+    // 수심이 깊어질수록(depthProgress -> 1.0) 물 밑바닥 투과광이 소광되어 수면이 완전한 흑색 거울로 변하며,
+    // 표면 반사광(SSR 및 환경 하늘빛)이 어두운 바다색에 묻히지 않고 거울처럼 또렷하게 드러납니다.
+    let depthMirrorFactor = depthProgress * 0.40;
+    let effectiveReflectionFresnel = clamp(max(fresnel, max(ssrResult.a * 0.55, depthMirrorFactor)), 0.0, 1.0);
+
+    let totalTransmittedLight = (transmittedSceneColor + waterScattering) * (1.0 - effectiveReflectionFresnel);
 
     let reflectionShorelineFade = smoothstep(0.0, 1.0, clamp(initialOpticalDistance / (adaptiveFadeDist * 1.5), 0.0, 1.0));
-    let totalReflectedLight = (skyReflectionColor * fresnel + directSpecularColor) * reflectionShorelineFade;
+    let totalReflectedLight = (skyReflectionColor * effectiveReflectionFresnel + directSpecularColor) * reflectionShorelineFade;
 
     let fullWaterColor = totalTransmittedLight + totalReflectedLight;
 

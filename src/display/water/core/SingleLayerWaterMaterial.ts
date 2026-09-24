@@ -99,9 +99,9 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.causticsScale = 1.0;
         this.causticsSpeed = 1.0;
         this.enableSSR = true;
-        this.ssrMaxDistance = 35.0;
-        this.ssrStepCount = 48;
-        this.ssrThickness = 0.8;
+        this.ssrMaxDistance = 100.0;
+        this.ssrStepCount = 64;
+        this.ssrThickness = 1.0;
         this.turbidity = 0.35;
         this.rippleDomainCenter = [0.0, 0.0];
         this.rippleDomainSize = 16.0;
@@ -150,8 +150,8 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'causticsStrength', value: 1.0, min: 0, max: 2},
     {key: 'causticsScale', value: 1.0, min: 0.1, max: 5},
     {key: 'causticsSpeed', value: 1.0, min: 0, max: 5},
-    {key: 'ssrMaxDistance', value: 35.0, min: 2.0, max: 100.0},
-    {key: 'ssrThickness', value: 0.8, min: 0.05, max: 5.0},
+    {key: 'ssrMaxDistance', value: 100.0, min: 2.0, max: 300.0},
+    {key: 'ssrThickness', value: 1.0, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
     {key: 'rippleDomainSize', value: 16.0, min: 1.0},
     {key: 'rippleNormalStrength', value: 1.0, min: 0.0},
@@ -159,7 +159,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
 
 defineUint(SingleLayerWaterMaterial, [
     {key: 'debugMode', value: 0},
-    {key: 'ssrStepCount', value: 48},
+    {key: 'ssrStepCount', value: 64},
 ]);
 
 defineBoolean(SingleLayerWaterMaterial, [
