@@ -310,30 +310,25 @@ fn main(inputData: InputData) -> OutputFragment {
     let meshEdge = min(inputData.uv, vec2<f32>(1.0) - inputData.uv);
     let meshEdgeFade = smoothstep(0.0, 0.015, min(meshEdge.x, meshEdge.y));
 
-    let etaRatio = 1.0 / 1.33333;
-    let incidentDir = -normalize(V);
-
-    var flatRefracted = refract(incidentDir, baseNormal, etaRatio);
-    if (dot(flatRefracted, flatRefracted) < 0.01) {
-        flatRefracted = incidentDir;
-    }
-    let flatDelta = flatRefracted - incidentDir;
-    let viewSpaceFlatDelta = (systemUniforms.camera.viewMatrix * vec4<f32>(flatDelta, 0.0)).xy;
-
+    // 1) 순수 파도 및 잔물결의 법선 편차(Wave Perturbation) 산출
     let deltaN = worldNormal - baseNormal;
     let viewSpaceDeltaN = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaN, 0.0)).xy;
 
-    let combinedViewDelta = viewSpaceFlatDelta * 0.35 + viewSpaceDeltaN * 0.65;
+    // 2) 얕은 수변(Shoreline) 경계에서의 부드러운 굴절 페이드 (0cm ~ 35cm 얕은 물가 튀김 방지)
+    let shorelineRefractFade = smoothstep(0.01, 0.35, initialOpticalDistance);
 
-    let opticalDepth = clamp(initialOpticalDistance, 0.0, 3.5);
-    let depthFactor = opticalDepth / max(1.0, camDist);
-    let snellScale = 0.08 * uniforms.refractionStrength;
+    // 3) 원근감 및 수심에 비례한 자연스러운 굴절 스케일 (화면 가장자리 과도 왜곡 방지)
+    let opticalDepth = clamp(initialOpticalDistance, 0.0, 2.5);
+    let depthFactor = opticalDepth / max(2.0, camDist);
+    let snellScale = 0.15 * uniforms.refractionStrength;
 
+    // 4) 화면 가장자리(Screen Edge) 부드러운 페이드 (외곽 샘플링 스트레칭 원천 차단)
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
-    let screenEdgeFade = clamp(min(edgeDist.x, edgeDist.y) / 0.04, 0.0, 1.0);
+    let screenEdgeFade = smoothstep(0.0, 0.06, min(edgeDist.x, edgeDist.y));
 
-    var rawRefractionOffset = vec2<f32>(combinedViewDelta.x, -combinedViewDelta.y) * (depthFactor * snellScale * screenEdgeFade);
-    let maxOffsetLen = 0.012;
+    // 5) 정밀 파도 굴절 오프셋 (평면 왜곡 flatDelta 제거로 좌우/하단 가장자리 찌그러짐 완전 해결)
+    var rawRefractionOffset = vec2<f32>(viewSpaceDeltaN.x, -viewSpaceDeltaN.y) * (depthFactor * snellScale * shorelineRefractFade * screenEdgeFade);
+    let maxOffsetLen = 0.015;
     let offsetLen = length(rawRefractionOffset);
     if (offsetLen > maxOffsetLen) {
         rawRefractionOffset = rawRefractionOffset * (maxOffsetLen / offsetLen);
@@ -342,7 +337,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let testUV = clamp(screenUV + rawRefractionOffset, vec2<f32>(0.001), vec2<f32>(0.999));
     let rawDistortedDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(testUV * systemUniforms.resolution), 0);
     let linearDistortedDepth = getLinearizeDepth(rawDistortedDepth, cameraNear, cameraFar);
-    let bleedWeight = clamp((linearDistortedDepth - linearWaterDepth) / 0.08, 0.0, 1.0);
+    let bleedWeight = smoothstep(0.0, 0.15, linearDistortedDepth - linearWaterDepth);
     let finalRefractUV = clamp(screenUV + rawRefractionOffset * bleedWeight, vec2<f32>(0.001), vec2<f32>(0.999));
 
     let rawFinalDepth = textureLoad(renderPath1DepthTexture, vec2<i32>(finalRefractUV * systemUniforms.resolution), 0);
@@ -380,7 +375,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let primarySun = systemUniforms.directionalLights[0];
         let sunDir = -normalize(primarySun.direction);
         let lightRayOffset = sunDir.xz * (effectiveVerticalDepth * 0.22);
-        let groundSurfacePos = worldPos.xz + lightRayOffset;
+        let groundSurfacePos = initialGroundWorldPos.xz + lightRayOffset;
 
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
         let cWorldScale = 0.35 * invCScale;
