@@ -33,8 +33,8 @@ class LandscapeFoliageManager {
 
     #windEnabled: boolean = true;
     #windDirection: [number, number] = [1.0, 0.5];
-    #windSpeed: number = 1.2;
-    #windStrength: number = 0.5;
+    #windSpeed: number = 1.0;
+    #windStrength: number = 1.0;
     #windFrequency: number = 0.08;
     #windFlutterStrength: number = 0.5;
 

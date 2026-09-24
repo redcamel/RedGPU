@@ -237,12 +237,14 @@ function renderTestPane({
 
             // 2. 수목 식생 매니저 (Foliage)
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: true});
-            foliageFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
-            foliageFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
-            foliageFolder.addBinding(foliageManager, 'debugSubCellColoration');
+
+            const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
+            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
+            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
+            managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             // 전역 바람 시뮬레이션 설정
-            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind', expanded: false});
+            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind', expanded: true});
             windGlobalFolder.addBinding(foliageManager, 'windEnabled');
             windGlobalFolder.addBinding(foliageManager, 'windStrength', {min: 0.0, max: 3.0, step: 0.05});
             windGlobalFolder.addBinding(foliageManager, 'windSpeed', {min: 0.0, max: 10.0, step: 0.1});
@@ -366,7 +368,7 @@ function renderTestPane({
         shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
 
         // 6. Wind & Motion
-        const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: false});
+        const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
         windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         windFolder.addBinding(type, 'useVertexColorWind');
