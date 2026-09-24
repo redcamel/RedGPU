@@ -77,7 +77,6 @@ export interface FoliageTypeOptions {
 
     windFlutterMultiplier?: number;
 
-    useVertexColorWind?: boolean;
 
     alignToNormal?: boolean;
     /**
@@ -137,7 +136,6 @@ class FoliageType {
     #densityMultiplier: number = 1.0;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
-    #useVertexColorWind: boolean = true;
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
     #groundBlendStrength: number = 0.8;
@@ -220,7 +218,6 @@ class FoliageType {
 
         const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : 1.0;
         const resolvedWindFlutterMultiplier = options.windFlutterMultiplier !== undefined ? Math.max(0, Number(options.windFlutterMultiplier) || 0) : 1.0;
-        const resolvedUseVertexColorWind = options.useVertexColorWind !== false;
 
         const resolvedAlignToNormal = options.alignToNormal ?? false;
         const resolvedAlignFactor = options.alignFactor !== undefined
@@ -229,7 +226,6 @@ class FoliageType {
 
         this.#windMultiplier = resolvedWindMultiplier;
         this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
-        this.#useVertexColorWind = resolvedUseVertexColorWind;
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
@@ -307,7 +303,6 @@ class FoliageType {
             densityMultiplier,
             windMultiplier: resolvedWindMultiplier,
             windFlutterMultiplier: resolvedWindFlutterMultiplier,
-            useVertexColorWind: resolvedUseVertexColorWind,
             alignToNormal: resolvedAlignToNormal,
             alignFactor: resolvedAlignFactor,
             groundBlendStrength: this.#groundBlendStrength,
@@ -613,18 +608,6 @@ class FoliageType {
         }
     }
 
-    get useVertexColorWind(): boolean {
-        return this.#useVertexColorWind;
-    }
-
-    set useVertexColorWind(val: boolean) {
-        const boolVal = !!val;
-        if (this.#useVertexColorWind !== boolVal) {
-            this.#useVertexColorWind = boolVal;
-            this.#syncInternalWind();
-            this.#onDirty?.();
-        }
-    }
 
     get alignToNormal(): boolean {
         return this.#alignToNormal;
@@ -675,7 +658,6 @@ class FoliageType {
         const count = subList.length;
         const windMul = this.#windMultiplier;
         const flutterMul = this.#windFlutterMultiplier;
-        const useVC = this.#useVertexColorWind;
         const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
 
         for (let i = 0; i < count; i++) {
@@ -693,7 +675,6 @@ class FoliageType {
                 windEnabled,
                 windMul,
                 effectiveFlutterMul,
-                useVC,
                 treeH
             );
         }
@@ -712,7 +693,6 @@ class FoliageType {
                 windEnabled,
                 windMul,
                 flutterMul * 0.5,
-                useVC,
                 treeH
             );
         }

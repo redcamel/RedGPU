@@ -56,7 +56,6 @@ class FoliageShadowMergedSubMesh {
         windEnabled: boolean,
         windMultiplier: number,
         windFlutterMultiplier: number,
-        useVertexColorWind: boolean,
         treeHeight: number
     ): void {
         if (!this.vertexUniformBuffer || !gpuDevice) return;
@@ -71,7 +70,7 @@ class FoliageShadowMergedSubMesh {
         uView[6] = windEnabled ? 1 : 0;
         fView[7] = windMultiplier;
         fView[8] = windFlutterMultiplier;
-        uView[9] = useVertexColorWind ? 1 : 0;
+        uView[9] = 0;
         fView[10] = treeHeight;
         uView[11] = 0;
 

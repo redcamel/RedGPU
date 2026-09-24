@@ -19,8 +19,7 @@ fn calculateFoliageWindDisplacement(
     let radialDist = length(localPos.xz);
     let branchRadialMask = smoothstep(0.15, 0.55, radialDist);
 
-    let hasValidMask = (subMeshUniforms.useVertexColorWind != 0u) &&
-                       ((vertexColor.r > 0.001 && vertexColor.r < 0.999) || (vertexColor.b > 0.001 && vertexColor.b < 0.999));
+    let hasValidMask = ((vertexColor.r > 0.001 && vertexColor.r < 0.999) || (vertexColor.b > 0.001 && vertexColor.b < 0.999));
 
     let trunkMask = select(
         cubicBend,

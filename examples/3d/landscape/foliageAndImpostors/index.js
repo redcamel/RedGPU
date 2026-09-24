@@ -371,7 +371,6 @@ function renderTestPane({
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
         windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-        windFolder.addBinding(type, 'useVertexColorWind');
     };
 
     // 렌더 프레임 업데이트
