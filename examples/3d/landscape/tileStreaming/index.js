@@ -159,9 +159,9 @@ function renderTestPane({
     characterOrbitController.tilt = -12;
     characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
-    characterOrbitController.centerX = -500;
-    characterOrbitController.centerY = 302.5 + 1.2;
-    characterOrbitController.centerZ = -2750;
+    characterOrbitController.centerX = -543;
+    characterOrbitController.centerY = 300.8 + 1.2;
+    characterOrbitController.centerZ = -2832.5;
 
     // [KO] 기본 카메라를 캐릭터 시점으로 설정
     // [EN] Set default camera to character follow view
@@ -414,12 +414,12 @@ function initCharacter({
             const characterMesh = loader.resultMesh;
             // [KO] 언덕 기슭과 인접한 안정적인 평지 좌표로 배치
             // [EN] Spawn at flat ground adjacent to the hill base
-            characterMesh.x = -500;
-            characterMesh.z = -2750;
+            characterMesh.x = -543;
+            characterMesh.z = -2832.5;
             // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
             // [EN] Place at terrain height and configure shadows
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 302.5);
+            characterMesh.y = (startH > 0 ? startH : 300.8);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);

@@ -157,9 +157,9 @@ function renderTestPane({
     characterOrbitController.tilt = -12;
     characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
-    characterOrbitController.centerX = -500;
-    characterOrbitController.centerY = 302.5 + 1.2;
-    characterOrbitController.centerZ = -2750;
+    characterOrbitController.centerX = -543;
+    characterOrbitController.centerY = 300.8 + 1.2;
+    characterOrbitController.centerZ = -2832.5;
 
     view.camera = characterOrbitController;
     landscape.nearDetailDistance = 120;
@@ -408,11 +408,11 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
         'https://threejs.org/examples/models/gltf/Soldier.glb',
         (loader) => {
             const characterMesh = loader.resultMesh;
-            characterMesh.x = -500;
-            characterMesh.z = -2750;
+            characterMesh.x = -543;
+            characterMesh.z = -2832.5;
 
             const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 302.5);
+            characterMesh.y = (startH > 0 ? startH : 300.8);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
