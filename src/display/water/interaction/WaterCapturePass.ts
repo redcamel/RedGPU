@@ -5,10 +5,6 @@ import vertexShaderCode from "./shader/waterCapturePenetration.wgsl";
 import vertexShaderSkinnedCode from "./shader/waterCapturePenetrationSkinned.wgsl";
 import {WaterActiveMeshEntry} from "./WaterInteractionManager";
 
-/**
- * [KO] 탑뷰(Top-down) 직교 투영 침수 깊이 및 속도 캡처 패스
- * [EN] Top-down orthographic penetration depth and velocity capture pass
- */
 export class WaterCapturePass {
     readonly redGPUContext: RedGPUContext;
     readonly textureSize: number = 512;
@@ -19,12 +15,10 @@ export class WaterCapturePass {
     #depthTexture: GPUTexture;
     #depthTextureView: GPUTextureView;
 
-    // 정적 메시용 셰이더 및 파이프라인
     #shaderModule: GPUShaderModule;
     #pipelineLayout: GPUPipelineLayout;
     readonly #pipelines: Map<number, GPURenderPipeline> = new Map();
 
-    // 스킨드 메시용 셰이더 및 파이프라인
     #shaderModuleSkinned: GPUShaderModule;
     #pipelineSkinnedLayout: GPUPipelineLayout;
     #pipelineSkinned: GPURenderPipeline | null = null;
@@ -32,27 +26,22 @@ export class WaterCapturePass {
     #globalUniformBuffer: GPUBuffer;
     #globalBindGroup: GPUBindGroup;
 
-    // 메쉬별 유니폼 버퍼 풀 (GC 0바이트)
     readonly #meshUniformBuffers: GPUBuffer[] = [];
     readonly #meshBindGroups: GPUBindGroup[] = [];
-    readonly #meshUniformData: Float32Array = new Float32Array(20); // 16(mat4) + 4(uniforms) = 80 bytes
+    readonly #meshUniformData: Float32Array = new Float32Array(20);
 
-    // 스킨드 바인드 그룹 캐시 (GC 0바이트)
     readonly #skinnedBindGroups: GPUBindGroup[] = [];
     readonly #skinnedBoundStorageBuffers: (GPUBuffer | null)[] = [];
 
-    // 행렬 캐시 (GC 0바이트)
     readonly #orthoProj: mat4 = mat4.create();
     readonly #topView: mat4 = mat4.create();
     readonly #viewProj: mat4 = mat4.create();
     readonly #globalData: Float32Array = new Float32Array(20);
 
-    // 룩앳 벡터 캐시 (Zero-GC)
     readonly #lookAtEye: Float32Array = new Float32Array(3);
     readonly #lookAtCenter: Float32Array = new Float32Array(3);
     readonly #lookAtUp: Float32Array = new Float32Array([0, 0, -1]);
 
-    // 렌더 패스 디스크립터 캐시 (Zero-GC)
     #renderPassDescriptor: GPURenderPassDescriptor;
 
     #meshBGL: GPUBindGroupLayout;
@@ -66,10 +55,6 @@ export class WaterCapturePass {
         this.#initPipelineLayout();
     }
 
-    /**
-     * [KO] 활성 메쉬들을 탑뷰 오쏘그래픽으로 렌더링하여 침수 깊이/속도를 캡처합니다.
-     * [EN] Renders active meshes via top-down orthographic view to capture penetration depth/velocity.
-     */
     render(
         commandEncoder: GPUCommandEncoder,
         activeMeshes: WaterActiveMeshEntry[],
@@ -82,9 +67,7 @@ export class WaterCapturePass {
         const device = this.redGPUContext.gpuDevice;
         const halfSize = domainSize * 0.5;
 
-        // 1. 탑뷰 직교 투영 행렬 구성 (Zero-GC 벡터 버퍼 재사용)
         mat4.ortho(this.#orthoProj, -halfSize, halfSize, -halfSize, halfSize, 0.1, 20.0);
-        // 위(waterLevel + 10)에서 아래(waterLevel)를 내려다봄
         const eye = this.#lookAtEye;
         eye[0] = domainCenterX;
         eye[1] = waterLevel + 10.0;
@@ -98,7 +81,6 @@ export class WaterCapturePass {
         mat4.lookAt(this.#topView, eye, center, this.#lookAtUp);
         mat4.multiply(this.#viewProj, this.#orthoProj, this.#topView);
 
-        // 2. 글로벌 유니폼 버퍼 쓰기
         this.#globalData.set(this.#viewProj, 0);
         this.#globalData[16] = waterLevel;
         this.#globalData[17] = maxPenetration;
@@ -106,7 +88,6 @@ export class WaterCapturePass {
         this.#globalData[19] = 0;
         device.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#globalData as unknown as BufferSource);
 
-        // 3. 렌더 패스 인코딩 (Zero-GC 캐싱된 디스크립터 재사용)
         const passEncoder = commandEncoder.beginRenderPass(this.#renderPassDescriptor);
 
         if (activeMeshes.length > 0) {
@@ -130,7 +111,6 @@ export class WaterCapturePass {
                 device.queue.writeBuffer(buf, 0, this.#meshUniformData as unknown as BufferSource);
 
                 if (isSkinned) {
-                    // 스킨드 메시: 실제 본 애니메이션으로 변환된 스토리지 버퍼 인덱싱 렌더링
                     const pipeline = this.#getOrCreateSkinnedPipeline();
                     if (pipeline !== lastPipeline) {
                         passEncoder.setPipeline(pipeline);
@@ -142,7 +122,6 @@ export class WaterCapturePass {
                     passEncoder.setIndexBuffer(geom.indexBuffer.gpuBuffer, geom.indexBuffer.format);
                     passEncoder.drawIndexed(geom.indexBuffer.indexCount);
                 } else {
-                    // 정적 메시: 버텍스 버퍼를 통한 기본 정점 렌더링
                     const stride = geom.vertexBuffer.interleavedStruct?.arrayStride || 32;
                     const pipeline = this.#getOrCreatePipeline(stride);
                     if (pipeline !== lastPipeline) {
@@ -222,20 +201,18 @@ export class WaterCapturePass {
     #initPipelineLayout(): void {
         const device = this.redGPUContext.gpuDevice;
 
-        // 정적 메시 셰이더 모듈
         this.#shaderModule = device.createShaderModule({
             code: vertexShaderCode,
             label: 'WaterCapturePenetrationShader'
         });
 
-        // 스킨드 메시 셰이더 모듈
         this.#shaderModuleSkinned = device.createShaderModule({
             code: vertexShaderSkinnedCode,
             label: 'WaterCapturePenetrationSkinnedShader'
         });
 
         this.#globalUniformBuffer = device.createBuffer({
-            size: 96, // 80 rounded to 16-byte alignment
+            size: 96,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             label: 'WaterCapture_GlobalUniformBuffer'
         });
@@ -258,7 +235,6 @@ export class WaterCapturePass {
             label: 'WaterCapture_GlobalBindGroup'
         });
 
-        // 정적 메시 바인드 그룹 레이아웃
         this.#meshBGL = device.createBindGroupLayout({
             entries: [{
                 binding: 0,
@@ -273,7 +249,6 @@ export class WaterCapturePass {
             label: 'WaterCapture_PipelineLayout'
         });
 
-        // 스킨드 메시 바인드 그룹 레이아웃 (정점 스토리지 버퍼 추가)
         this.#meshSkinnedBGL = device.createBindGroupLayout({
             entries: [
                 {
@@ -359,7 +334,7 @@ export class WaterCapturePass {
             vertex: {
                 module: this.#shaderModuleSkinned,
                 entryPoint: 'vs_main',
-                buffers: [] // 스토리지 버퍼 인덱싱을 사용하므로 버텍스 버퍼 속성이 필요 없음
+                buffers: []
             },
             fragment: {
                 module: this.#shaderModuleSkinned,
@@ -400,7 +375,7 @@ export class WaterCapturePass {
         while (index >= this.#meshUniformBuffers.length) {
             const idx = this.#meshUniformBuffers.length;
             const buffer = device.createBuffer({
-                size: 80, // mat4(64) + vec4(16) = 80 bytes (16-byte aligned)
+                size: 80,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
                 label: `WaterCapture_MeshUniformBuffer_${idx}`
             });

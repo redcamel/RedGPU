@@ -96,8 +96,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         if (typeInfo.lodCount > 3u && distToCam > typeInfo.lodDistance2) { targetLod = 3u; }
     }
 
-    // [KO] 베이킹된 사전 계산 바운딩 구 (중심 Y 오프셋 및 반지름) 언패킹
-    // [EN] Unpack precomputed bounding sphere (center Y offset & radius) from bake pass
     let bounds = unpack2x16float(instance.packedBounding);
     let centerOffsetY = bounds.x;
     let radius = bounds.y;
@@ -119,7 +117,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // 🌿 [Hierarchical Z-Buffer] 지형 차폐 오클루전 컬링 (Conservative Occlusion Culling)
     if (globalUniforms.hzbEnabled != 0u) {
         let clipPos = globalUniforms.viewProjectionMatrix * vec4<f32>(sphereCenter, 1.0);
         let clipW = clipPos.w;
@@ -134,7 +131,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
                 let projRadiusY = (radius * invW) * abs(globalUniforms.viewProjectionMatrix[1][1]);
                 let maxPixelSize = max(projRadiusX * globalUniforms.hzbWidth, projRadiusY * globalUniforms.hzbHeight) * 2.0;
 
-                // 텍셀 커버리지를 안전하게 포괄하도록 Mip Level 계산 (+1u 보수적 확장으로 아티팩트 방지)
                 let mipLevel = clamp(u32(ceil(log2(max(1.0, maxPixelSize)))) + 1u, 0u, 7u);
                 let mipWidth = max(1, i32(globalUniforms.hzbWidth) >> mipLevel);
                 let mipHeight = max(1, i32(globalUniforms.hzbHeight) >> mipLevel);

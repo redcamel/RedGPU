@@ -1,21 +1,20 @@
 struct SimUniforms {
-    waveSpeed: f32,       // 파동 전파 속도 c (0.1 ~ 0.45)
-    damping: f32,         // 감쇄율 gamma (0.02 ~ 0.08)
-    normalStrength: f32,  // 파문 노멀 강도 (0.5 ~ 2.0)
-    shiftX: f32,          // 도메인 X 이동에 따른 텍셀 오프셋 (정수형 텍셀 시프트)
-    shiftZ: f32,          // 도메인 Z 이동에 따른 텍셀 오프셋 (정수형 텍셀 시프트)
+    waveSpeed: f32,
+    damping: f32,
+    normalStrength: f32,
+    shiftX: f32,
+    shiftZ: f32,
     padding01: f32,
     padding02: f32,
     padding03: f32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: SimUniforms;
-@group(0) @binding(1) var currWaveTexture: texture_2d<f32>;       // R: h_curr, G: h_prev
-@group(0) @binding(2) var captureTexture: texture_2d<f32>;        // R: impulse
-@group(0) @binding(3) var nextWaveTexture: texture_storage_2d<rgba16float, write>; // R: h_next, G: h_curr
-@group(0) @binding(4) var rippleNormalTexture: texture_storage_2d<rgba16float, write>; // RG: N.xz, B: h_next
+@group(0) @binding(1) var currWaveTexture: texture_2d<f32>;
+@group(0) @binding(2) var captureTexture: texture_2d<f32>;
+@group(0) @binding(3) var nextWaveTexture: texture_storage_2d<rgba16float, write>;
+@group(0) @binding(4) var rippleNormalTexture: texture_storage_2d<rgba16float, write>;
 
-// 월드 공간 고정을 위한 텍셀 스크롤 보정 샘플링 함수
 fn samplePrevWave(coord: vec2<i32>, dims: vec2<u32>) -> vec4<f32> {
     let shifted = coord + vec2<i32>(i32(uniforms.shiftX), i32(uniforms.shiftZ));
     if (shifted.x < 0 || shifted.x >= i32(dims.x) || shifted.y < 0 || shifted.y >= i32(dims.y)) {
@@ -38,7 +37,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let maxX = i32(dims.x) - 1;
     let maxY = i32(dims.y) - 1;
 
-    // 8방향 이웃 좌표 계산
     let cCoord = coord;
     let lCoord = vec2<i32>(max(0, x - 1), y);
     let rCoord = vec2<i32>(min(maxX, x + 1), y);
@@ -50,7 +48,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dlCoord = vec2<i32>(max(0, x - 1), min(maxY, y + 1));
     let drCoord = vec2<i32>(min(maxX, x + 1), min(maxY, y + 1));
 
-    // 이전 프레임 데이터 (월드 공간 고정 텍셀 시프트 적용)
     let cData = samplePrevWave(cCoord, dims);
     let hCenter = cData.r;
     let hPrev = cData.g;
@@ -65,7 +62,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let hDL = samplePrevWave(dlCoord, dims).r;
     let hDR = samplePrevWave(drCoord, dims).r;
 
-    // 9-Point 등방성 2D 라플라시안 (사각 왜곡 없는 완전한 동심원 형성)
     let laplacian = (
         (hLeft + hRight + hUp + hDown) * 0.5 +
         (hUL + hUR + hDL + hDR) * 0.25 -
@@ -77,30 +73,22 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var hNext = (2.0 - gamma) * hCenter - (1.0 - gamma) * hPrev + (4.0 * c * c) * laplacian;
 
-    // 현재 프레임 캡처 충격량 (현재 프레임 도메인 윈도우 기준)
     let captureData = textureLoad(captureTexture, cCoord, 0);
     let impulse = captureData.r;
 
-    // 충격량 주입 (과도한 충격량 및 파고 클램핑으로 보강 간섭 폭발 방지)
     let safeImpulse = clamp(impulse, 0.0, 4.0);
     hNext = clamp(hNext + safeImpulse * 0.25, -1.0, 1.0);
 
-    // 도메인 외곽 스무스 페이드아웃 (가장자리 경계선 반사 및 아티팩트 방지)
     let edgeDistX = min(x, maxX - x);
     let edgeDistY = min(y, maxY - y);
     let edgeFactor = smoothstep(0.0, 24.0, f32(min(edgeDistX, edgeDistY)));
     hNext = hNext * edgeFactor;
 
-    // 중앙 차분 기반 물리적 파문 노멀 계산
-    // 텍셀 물리 크기 보정 (16m / 512 = 0.03125m -> 1 / (2 * dx) = 16.0)
     let invTwoDx = 16.0;
     let dX = (hRight - hLeft) * invTwoDx * uniforms.normalStrength;
     let dZ = (hDown - hUp) * invTwoDx * uniforms.normalStrength;
     let rippleNormal = normalize(vec3<f32>(-dX, 1.0, -dZ));
 
-    // 1) 핑퐁용 시뮬레이션 상태 기록 (R: h_next, G: h_curr)
     textureStore(nextWaveTexture, coord, vec4<f32>(hNext, hCenter, 0.0, 0.0));
-
-    // 2) 수면 셰이더 샘플링용 최종 텍스처 기록 (RG: N.xz, B: h_next)
     textureStore(rippleNormalTexture, coord, vec4<f32>(rippleNormal.x, rippleNormal.z, hNext, 0.0));
 }

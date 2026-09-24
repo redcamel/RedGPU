@@ -20,8 +20,8 @@ struct GrassUniforms {
     shrinkStartDistance: f32,
     meshHeight: f32,
     minY: f32,
-    _unusedShadowCullDistance: f32,         // [Shadow pass only]
-    _unusedShadowShrinkStartDistance: f32,   // [Shadow pass only]
+    _unusedShadowCullDistance: f32,
+    _unusedShadowShrinkStartDistance: f32,
     _pad0: f32,
     _pad1: f32,
 };
@@ -66,7 +66,6 @@ fn main(input: VertexInput) -> VertexOutput {
     var shrink = 1.0;
     var alphaFade = 1.0;
 
-    // 🌿 [Unreal Engine Style] 단일 감쇄 구간([shrinkStart, cullDist])에서 크기 축소와 알파 페이드 통합 연산
     if (distToCam > shrinkStart) {
         let fadeRatio = clamp((cullDist - distToCam) / max(0.001, cullDist - shrinkStart), 0.0, 1.0);
         shrink = fadeRatio;
@@ -88,16 +87,12 @@ fn main(input: VertexInput) -> VertexOutput {
     var localPos = rotateVectorByQuat(scaledPos, q);
     var localNorm = rotateVectorByQuat(input.normal, q);
 
-    // [KO] 경사면 회전으로 인한 밑동 지면 파묻힘 방지 보정
-    // [EN] Compensate base ground penetration caused by slope rotation
     let sinkDepth = max(0.0, -localPos.y);
     localPos.y += sinkDepth * (1.0 - heightRatio * 0.7);
 
     let worldPos = localPos + instPos;
     let worldNormal = normalize(localNorm);
 
-    // [KO] 카메라 상대적 고정밀 투영 변환 (풀 잎 지터링 방지)
-    // [EN] Camera-relative high-precision projection transform
     let relPos = worldPos - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
 

@@ -103,9 +103,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
     let worldTangent = normalize((gu_normalModelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-    // 시선 각도(N·V 스침각) + 거리 기반 하이브리드 TAA 투영 좌표 보간
-    // 내려다볼 때(N·V 높음) 및 근거리: noneJitter로 래스터라이즈하여 화면 지터 떨림 0% 유지
-    // 수평선을 바라볼 때(N·V 스침각) + 원거리: projectionViewMatrix(정규 지터링)로 TAA 보정과 100% 동기화
     let toCam = systemUniforms.camera.cameraPosition - worldPos.xyz;
     let camDist = length(toCam);
     let V = toCam / max(camDist, 0.001);

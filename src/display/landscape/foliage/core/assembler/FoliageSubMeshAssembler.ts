@@ -226,7 +226,7 @@ class FoliageSubMeshAssembler {
         uintView[42] = 1;
         floatView[43] = 1.0;
         floatView[44] = 0.5;
-        uintView[45] = 0; // padWind0
+        uintView[45] = 0;
         floatView[46] = 5.0;
         uintView[47] = 0;
 
@@ -840,7 +840,7 @@ class FoliageSubMeshAssembler {
             uintView[42] = 1;
             floatView[43] = 1.0;
             floatView[44] = isMasked ? 1.0 : 0.0;
-            uintView[45] = 0; // padWind0
+            uintView[45] = 0;
             floatView[46] = 5.0;
             uintView[47] = 0;
 

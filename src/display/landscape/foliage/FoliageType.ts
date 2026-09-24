@@ -16,11 +16,6 @@ export interface FoliageLODConfig {
     mesh: Mesh | Mesh[];
 
     lodDistance?: number;
-
-    /**
-     * Whether this LOD receives shadows.
-     * @default true
-     */
     receiveShadow?: boolean;
 }
 
@@ -79,24 +74,10 @@ export interface FoliageTypeOptions {
 
 
     alignToNormal?: boolean;
-    /**
-     * Normal alignment factor (0.0 to 1.0).
-     * @default 1.0
-     */
     alignFactor?: number;
 
     densityMultiplier?: number;
-
-    /**
-     * Ground blend strength (0.0 to 1.0).
-     * @default 0.8
-     */
     groundBlendStrength?: number;
-
-    /**
-     * Ground blend vertical range above terrain in world meters.
-     * @default 1.5
-     */
     groundBlendRange?: number;
 }
 
@@ -775,18 +756,9 @@ class FoliageType {
             this.#onDirty?.();
         }
     }
-
-
-    /**
-     * @internal
-     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
-
-    /**
-     * @internal
-     */
     get hasMaskedLOD0(): boolean {
         return this.#hasMaskedLOD0;
     }

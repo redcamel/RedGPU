@@ -234,7 +234,6 @@ fn main(
             dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
             dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
 
-        // 🌿 [Hierarchical Z-Buffer] AABB 오클루전 컬링
         if (inMainFrustum && globalUniforms.useHZB != 0u) {
             let halfW = scaledRadius;
             let baseY = realY + typeInfo.bottomOffset;

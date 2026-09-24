@@ -118,7 +118,6 @@ fn calculateWaterSSR(
     let jitter = getInterleavedGradientNoise(vec2<f32>(pixelCoord));
 
     var currentWorldPos = startWorldPos + worldNormal * 0.008 + R * (baseStepSize * jitter);
-    var currentStepSize = baseStepSize;
     var hitUV = vec2<f32>(0.0);
     var hitFound = false;
     var hitStep = 0u;
@@ -183,7 +182,6 @@ fn calculateWaterSSR(
     let edgeFade = smoothstep(0.0, 0.10, min(edge.x, edge.y));
 
     let finalTravelDist = length(currentWorldPos - startWorldPos);
-    // [언리얼 엔진 표준] 최대 거리의 70%까지 온전한 선명도를 유지하고 70%~95% 구간에서만 부드럽게 감쇠
     let distFade = 1.0 - smoothstep(maxDist * 0.70, maxDist * 0.95, finalTravelDist);
 
     let stepFade = smoothstep(0.0, 0.08, 1.0 - f32(hitStep) / f32(maxSteps));
@@ -238,8 +236,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let initialGroundWorldPos = getWorldPositionFromDepth(screenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
     let initialOpticalDistance = length(initialGroundWorldPos - worldPos);
     let originalSceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
-
-
 
     let timeSec = systemUniforms.time.time;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
@@ -313,23 +309,18 @@ fn main(inputData: InputData) -> OutputFragment {
     let meshEdge = min(inputData.uv, vec2<f32>(1.0) - inputData.uv);
     let meshEdgeFade = smoothstep(0.0, 0.015, min(meshEdge.x, meshEdge.y));
 
-    // 1) 순수 파도 및 잔물결의 법선 편차(Wave Perturbation) 산출
     let deltaN = worldNormal - baseNormal;
     let viewSpaceDeltaN = (systemUniforms.camera.viewMatrix * vec4<f32>(deltaN, 0.0)).xy;
 
-    // 2) 얕은 수변(Shoreline) 경계에서의 부드러운 굴절 페이드 (0cm ~ 35cm 얕은 물가 튀김 방지)
     let shorelineRefractFade = smoothstep(0.01, 0.35, initialOpticalDistance);
 
-    // 3) 원근감 및 수심에 비례한 자연스러운 굴절 스케일 (화면 가장자리 과도 왜곡 방지)
     let opticalDepth = clamp(initialOpticalDistance, 0.0, 2.5);
     let depthFactor = opticalDepth / max(2.0, camDist);
     let snellScale = 0.15 * uniforms.refractionStrength;
 
-    // 4) 화면 가장자리(Screen Edge) 부드러운 페이드 (외곽 샘플링 스트레칭 원천 차단)
     let edgeDist = min(screenUV, vec2<f32>(1.0) - screenUV);
     let screenEdgeFade = smoothstep(0.0, 0.06, min(edgeDist.x, edgeDist.y));
 
-    // 5) 정밀 파도 굴절 오프셋 (평면 왜곡 flatDelta 제거로 좌우/하단 가장자리 찌그러짐 완전 해결)
     var rawRefractionOffset = vec2<f32>(viewSpaceDeltaN.x, -viewSpaceDeltaN.y) * (depthFactor * snellScale * shorelineRefractFade * screenEdgeFade);
     let maxOffsetLen = 0.015;
     let offsetLen = length(rawRefractionOffset);
@@ -378,16 +369,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let primarySun = systemUniforms.directionalLights[0];
         let sunDir = -normalize(primarySun.direction);
 
-        // 1) 수중 지표면의 실제 경사각(법선) 산출을 통한 수직 벽면(박스 옆면, 절벽, 기둥) 코스틱스 마스킹
-        // 실제 태양광은 위에서 아래로 내리쬐므로 수평 바닥에만 맺히고 수직 벽면에는 닿지 않아야 함.
-        // 수직 벽면(groundNormal.y ≈ 0)을 부드럽게 페이드아웃하여 폭포수처럼 세로로 늘어지는 아티팩트를 원천 박멸.
         let groundDX = dpdx(initialGroundWorldPos);
         let groundDY = dpdy(initialGroundWorldPos);
         let groundNormal = normalize(cross(groundDX, groundDY));
         let groundUpFactor = clamp(abs(groundNormal.y), 0.0, 1.0);
         let wallMask = smoothstep(0.30, 0.70, groundUpFactor);
 
-        // 2) 수심에 따른 부드러운 시차 오프셋 (수면 그리드 기준)
         let viewParallaxDir = -V.xz;
         let parallaxDist = min(effectiveVerticalDepth * 0.45 / max(0.35, V.y), effectiveVerticalDepth * 1.2);
         let viewParallaxOffset = viewParallaxDir * parallaxDist;
@@ -463,8 +450,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let flatR = reflect(-V, baseNormal);
     let rawR = reflect(-V, reflectionNormal);
 
-    // 파도 사면에서 반사 벡터가 지평선 아래로 떨어질 때 발생하는 인위적인 황금색 수평선 띠(Horizon Clamping Artifact) 완전 제거
-    // 하드 클램프(R.y = max(R.y, 0.005)) 대신 항상 안전한 상공을 향하는 flatR로 부드럽게 보간(Horizon Pull-up)하여 매끄러운 연속성 보장
     let horizonPull = 1.0 - smoothstep(-0.02, 0.18, rawR.y);
     var R = normalize(mix(rawR, flatR, horizonPull));
     R.y = max(R.y, 0.002);
@@ -500,7 +485,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var ssrR = normalize(mix(rawSsrR, flatR, ssrHorizonPull));
     ssrR.y = max(ssrR.y, 0.002);
 
-    // IBL 또는 SkyAtmosphere가 없는 환경에서도 수면에 자연스러운 하늘빛이 투영되도록 안전한 하늘 폴백 조명 보장
     let ambientSkyColor = systemUniforms.ambientLight.color * (min(100.0, systemUniforms.ambientLight.intensity) * preExposure * 0.75);
     let safeSkyReflection = max(rawSkyReflection, ambientSkyColor);
 
@@ -565,9 +549,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let ambientInScattering = baseAmbient * waterAlbedo * (depthScatterWeight * scatteringAlbedo * 0.03);
     let waterScattering = directWaterScattering * 0.5 + ambientInScattering + skyVolumeScatter;
 
-    // [언리얼 엔진 물리 표준: Black Mirror 효과]
-    // 수심이 깊어질수록(depthProgress -> 1.0) 물 밑바닥 투과광이 소광되어 수면이 완전한 흑색 거울로 변하며,
-    // 표면 반사광(SSR 및 환경 하늘빛)이 어두운 바다색에 묻히지 않고 거울처럼 또렷하게 드러납니다.
     let depthMirrorFactor = depthProgress * 0.40;
     let effectiveReflectionFresnel = clamp(max(fresnel, max(ssrResult.a * 0.55, depthMirrorFactor)), 0.0, 1.0);
 
@@ -640,9 +621,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     output.gBufferNormal = vec4<f32>(worldNormal, 1.0);
 
-    // 시선 각도(N·V 스침각) + 거리 기반 하이브리드 TAA & 카메라 모션 벡터
-    // 내려다볼 때(N·V 높음) 및 근거리: TAA 바이패스(z = 1.0)로 쨍한 스펙큘러/카우스틱스 선명도 극대화
-    // 수평선을 바라볼 때(N·V 스침각) + 원거리: 카메라 모션 벡터를 출력하고 TAA 활성화(z = 0.0)하여 수평선 앨리어싱 및 지터 완벽 억제
     let currClip = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
     let prevClip = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     let cameraMotion = getMotionVector(currClip, prevClip);

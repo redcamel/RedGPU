@@ -9,9 +9,9 @@ struct GrassMaterialUniforms {
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceStrength: f32,
-    _unusedRoughness: f32,          // [Near pass only: Far passes skip specular]
-    _unusedShadowStrength: f32,     // [Near pass only: Far passes skip shadow reception]
-    _unusedReceiveShadow: u32,      // [Near pass only: Far passes skip shadow reception]
+    _unusedRoughness: f32,
+    _unusedShadowStrength: f32,
+    _unusedReceiveShadow: u32,
 };
 
 const SSS_DISTORTION: f32 = 0.35;
@@ -103,8 +103,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     let ambSSS = ambColor * sssColor * (subsurfaceStrength * leafThickness * 0.25);
     let totalIndirectLighting = (albedo * (ambColor * skyOcclusion)) + ambSSS;
 
-    // [KO] 실시간 지면 접촉 AO 적용 (밑동은 부드러운 접촉 음영 0.40, 풀잎 끝은 1.0)
-    // [EN] Real-time ground contact AO (soft contact shadow 0.40 at base, tip reaches 1.0)
     let contactAO = mix(0.40, 1.0, clamp(input.heightRatio * 4.0, 0.0, 1.0));
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;
 

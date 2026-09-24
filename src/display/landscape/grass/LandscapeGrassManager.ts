@@ -544,11 +544,6 @@ export class LandscapeGrassManager {
         );
     }
 
-    /**
-     * @internal
-     * [KO] 카메라 위치 기반 스트리밍 렌더 루프에서 자동 관리되므로 외부 수동 호출은 권장되지 않습니다.
-     * [EN] Automatically managed in camera streaming render loop. Manual external invocation is not recommended.
-     */
     populateInstances(centerPos: [number, number, number]): void {
         this.#lastPopulatePos[0] = centerPos[0];
         this.#lastPopulatePos[1] = centerPos[1];
@@ -556,10 +551,6 @@ export class LandscapeGrassManager {
         this.#updateCellStreaming(centerPos[0], centerPos[2], true);
     }
 
-    /**
-     * [KO] 모든 활성 잔디 인스턴스의 높이와 법선을 최신 지형 상태(heightScale, VHT 등)에 맞추어 GPU에서 즉시 재베이킹합니다.
-     * [EN] Immediately rebakes height and normal for all active grass instances on GPU matching latest landscape state.
-     */
     rebakeAll(): void {
         if (!this.#enabled || this.#grassTypes.length === 0) return;
         for (const type of this.#grassTypes) {
@@ -574,10 +565,6 @@ export class LandscapeGrassManager {
         }
     }
 
-    /**
-     * [KO] 새로 로드된 지형 타일 영역 내의 활성 잔디 인스턴스를 찾아 고해상도 VHT 높이로 재베이킹합니다.
-     * [EN] Finds active grass instances within newly loaded landscape tile and rebakes them with high-res VHT.
-     */
     handleTileLoaded(comp: any): void {
         if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
 
@@ -591,8 +578,6 @@ export class LandscapeGrassManager {
             }
         }
 
-        // [KO] 타일 로드 완료 시: 기존 셀은 100% 보존하고, 아직 비어 있는 후보 셀들만 즉시 증분 스폰
-        // [EN] On tile load: preserve existing cells 100%, incrementally populate only missing candidate cells
         this.#updateCellStreaming(this.#lastPopulatePos[0], this.#lastPopulatePos[2], false, true);
 
         const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
@@ -898,8 +883,6 @@ export class LandscapeGrassManager {
                 this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
             }
 
-            // [KO] 잔디가 cullingDistance에서 완전히 사라진 후 셀이 언로드되도록 안전 마진(1.5셀) 확보
-            // [EN] Ensure safety margin (1.5 cells) so cells only unload after grass fully fades at cullingDistance
             const safeCullRadius = type.cullingDistance + cellSize * 1.5;
             const radius = Math.max(safeCullRadius, this.#streamingRadius);
             const radiusSq = radius * radius;
@@ -974,10 +957,6 @@ export class LandscapeGrassManager {
             const hasWeightMap = !!(targetSrc && LandscapeWeightMapCache.has(targetSrc));
             const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
 
-            // [KO] targetLayer가 설정되어 있으나 아직 가중치 텍스처가 다운로드 중인 경우:
-            //      가중치 검사 없이 흙/바위 등 전체 영역에 잔디가 무차별 스폰되는 현상을 방지하기 위해 대기
-            // [EN] If targetLayer is set but weight map is still downloading:
-            //      wait for weight map to avoid spawning grass everywhere without layer filtering
             if (type.targetLayer && !hasWeightMap) {
                 continue;
             }
@@ -995,10 +974,6 @@ export class LandscapeGrassManager {
                 const cellCenterX = (cellX + 0.5) * cellSize;
                 const cellCenterZ = (cellZ + 0.5) * cellSize;
 
-                // [KO] 타일 스트리밍 환경: 해당 셀이 위치한 지형 타일이 실제로 로드 완료되었는지 검증
-                //      아직 로딩 중인 타일 영역은 스폰을 보류하여 높이 0.0 버그 및 부정확한 배치를 원천 방지
-                // [EN] In tile streaming: verify whether the tile covering this cell is fully loaded
-                //      Hold off spawning on loading tiles to prevent height 0.0 bugs and misplaced grass
                 if (hasTileStreaming) {
                     const tileCol = Math.floor((cellCenterX + halfWorldX) / tileSizeX);
                     const tileRow = Math.floor((cellCenterZ + halfWorldZ) / tileSizeZ);
@@ -1038,8 +1013,6 @@ export class LandscapeGrassManager {
                             ? (this.#tempWeights4[channelIdx] / totalW)
                             : (this.#tempWeights4[channelIdx] || 0.0);
 
-                        // [KO] 최소 지배 가중치(20%) 미만이거나 낙엽/자갈 등이 지배적인 영역은 스폰 제외
-                        // [EN] Exclude spawn if normalized layer weight < 20% or other layers dominate
                         if (normW < 0.20) continue;
                         if (type.densityScaleByWeight && this.#nextPrng() > normW) continue;
                     }

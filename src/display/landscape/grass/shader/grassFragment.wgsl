@@ -138,8 +138,6 @@ fn main(input: VertexOutput) -> OutputFragment {
         totalIndirectLighting = (albedo * (ambLight * skyOcclusion)) + ambSSS;
     }
 
-    // [KO] 실시간 지면 접촉 AO 적용 (밑동은 부드러운 접촉 음영 0.40, 풀잎 끝은 1.0)
-    // [EN] Real-time ground contact AO (soft contact shadow 0.40 at base, tip reaches 1.0)
     let contactAO = mix(0.40, 1.0, clamp(input.heightRatio * 4.0, 0.0, 1.0));
 
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;

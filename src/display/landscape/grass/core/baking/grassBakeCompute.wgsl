@@ -84,13 +84,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     var scaleY: f32;
 
     if (inst.packedQuat == 0u) {
-        // [KO] 최초 베이킹: CPU에서 float32로 작성한 raw scaleXZ, scaleY 읽기
-        // [EN] Initial bake: Read raw scaleXZ, scaleY written as float32 by CPU
         scaleXZ = bitcast<f32>(inst.packedScale);
         scaleY = bitcast<f32>(inst.packedBounding);
     } else {
-        // [KO] 재베이킹: 기 패킹된 packedScale에서 f16 언패킹 (타일 스트리밍/고도 변경 시 무손실 보존)
-        // [EN] Rebake: Unpack f16 from previously packedScale (lossless preservation across streaming)
         let scales = unpack2x16float(inst.packedScale);
         scaleXZ = scales.x;
         scaleY = scales.y;
@@ -106,8 +102,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let texDims = vec2<f32>(textureDimensions(vhtTexture, 0));
     let maxCoord = vec2<i32>(texDims) - vec2<i32>(1);
 
-    // [KO] VHT 텍셀 격자 내 인스턴스의 쿼드 위치 계산 (지형 버텍스 셰이더 매핑과 100% 일치)
-    // [EN] Compute instance quad coordinate within VHT texel grid matching landscape vertex mapping
     let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
     let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
 
@@ -121,31 +115,23 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let c01 = min(c00 + vec2<i32>(0, 1), maxCoord);
     let c11 = min(c00 + vec2<i32>(1, 1), maxCoord);
 
-    // [KO] 지형 버텍스 셰이더와 동일하게 textureLoad로 4개 꼭짓점 높이 읽기
-    // [EN] Read 4 vertex heights via textureLoad matching landscape vertex shader
     let h00 = textureLoad(vhtTexture, c00, 0).r * bakeUniforms.heightScale;
     let h10 = textureLoad(vhtTexture, c10, 0).r * bakeUniforms.heightScale;
     let h01 = textureLoad(vhtTexture, c01, 0).r * bakeUniforms.heightScale;
     let h11 = textureLoad(vhtTexture, c11, 0).r * bakeUniforms.heightScale;
 
-    // [KO] 텍셀당 월드 크기 계산
-    // [EN] Compute world size per texel
     let texStepX = select(1.0, 1.0 / (bakeUniforms.invWorldSizeX * texDims.x), bakeUniforms.invWorldSizeX > 0.0);
     let texStepZ = select(1.0, 1.0 / (bakeUniforms.invWorldSizeZ * texDims.y), bakeUniforms.invWorldSizeZ > 0.0);
 
-    // [KO] 지형 지오메트리와 일치하는 삼각형 평면 무게중심 좌표(Barycentric) 보간 및 면 기울기 계산
-    // [EN] Barycentric interpolation matching terrain geometry and compute surface slope
     var terrainHeight: f32;
     var rawNx: f32;
     var rawNz: f32;
 
     if (fracX + fracZ <= 1.0) {
-        // Triangle 1 (c00, c01, c10)
         terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
         rawNx = (h00 - h10) / texStepX;
         rawNz = (h00 - h01) / texStepZ;
     } else {
-        // Triangle 2 (c10, c01, c11)
         terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
         rawNx = (h01 - h11) / texStepX;
         rawNz = (h10 - h11) / texStepZ;
@@ -163,8 +149,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let bakedY = terrainHeight + typeInfo.bottomOffset;
     rawInstances[instIdx].posY = bakedY;
 
-    // [KO] 결합 회전 쿼터니언 합성: Q_final = qTerrain * qY (인스턴스 Y축 회전과 지형 노멀 정렬 회전 결합)
-    // [EN] Combined rotation quaternion: Q_final = qTerrain * qY
     let halfRotY = inst.rotationY * 0.5;
     let qY = vec4<f32>(0.0, sin(halfRotY), 0.0, cos(halfRotY));
 
@@ -175,8 +159,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let canonicalQuat = select(-finalQuat, finalQuat, finalQuat.w >= 0.0);
     rawInstances[instIdx].packedQuat = pack4x8snorm(canonicalQuat);
 
-    // [KO] Point 2: 월드 바운딩 구 (중심 Y 오프셋 및 반지름) 사전 계산 및 패킹
-    // [EN] Point 2: Precompute world bounding sphere (center Y offset & radius) and pack
     let baseH = max(0.01, typeInfo.meshHeight) * scaleY;
     let halfH = baseH * 0.5;
     let localCenter = rotateVectorByQuat(vec3<f32>(0.0, halfH, 0.0), canonicalQuat);
@@ -184,7 +166,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let maxXZ = scaleXZ;
     let rawRadius = sqrt(halfH * halfH + maxXZ * maxXZ);
-    let boundRadius = rawRadius * 1.25; // 바람 애니메이션 및 회전 여유분 25%
+    let boundRadius = rawRadius * 1.25;
 
     rawInstances[instIdx].packedScale = pack2x16float(vec2<f32>(scaleXZ, scaleY));
     rawInstances[instIdx].packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));

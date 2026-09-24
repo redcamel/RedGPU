@@ -134,7 +134,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
                         currentSegments = lod0Quads;
                         subStep = max(1u, u32(round(lod0Quads / baseQuads)));
                     } else {
-
                         currentSegments = max(1.0, floor(baseQuads));
                         subStep = 2u;
                     }
@@ -211,8 +210,6 @@ fn main(input: InputData) -> OutputData {
     let computed = computeTerrainVertex(input);
     let worldPos4 = computed.worldPos;
 
-    // [KO] 카메라 상대적 고정밀 투영 변환 (대규모 오픈월드 지형 정점 떨림 완벽 제거)
-    // [EN] Camera-relative high-precision projection transform (eliminates large world terrain vertex jitter)
     let relPos = worldPos4.xyz - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
 

@@ -25,19 +25,11 @@ interface WaterLake {
     maxPenetration: number;
 }
 
-/**
- * [KO] 실시간 PBR 호수 수체 (인터랙티브 파동 시뮬레이션 및 카메라 시선 기반 자동 추적 지원)
- * [EN] Real-time PBR Lake water body (supports interactive wave simulation and camera-view tracking)
- */
 class WaterLake extends Mesh {
     readonly isWater: boolean = true;
     #interactionEnabled: boolean = true;
     #interactionDomainSize: number = 16.0;
 
-    /**
-     * [KO] 인터랙티브 파동 시뮬레이션 활성화 여부
-     * [EN] Whether interactive wave simulation is enabled
-     */
     get interactionEnabled(): boolean {
         return this.#interactionEnabled;
     }
@@ -52,10 +44,6 @@ class WaterLake extends Mesh {
         }
     }
 
-    /**
-     * [KO] 로컬 인터랙션 시뮬레이션 윈도우 크기 (미터 단위, 기본값: 16.0m)
-     * [EN] Local interaction simulation window size (in meters, default: 16.0m)
-     */
     get interactionDomainSize(): number {
         return this.#interactionDomainSize;
     }
@@ -113,13 +101,11 @@ class WaterLake extends Mesh {
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         this.dirtyPipeline = true;
 
-        // 인터랙션 서브시스템 초기화
         this.#interactionManager = new WaterInteractionManager(redGPUContext);
         this.#capturePass = new WaterCapturePass(redGPUContext, 512);
         this.#waveSimulator = new WaterWaveSimulator(redGPUContext, 512);
         this.#waveSimulator.updateCaptureBinding(this.#capturePass.captureTextureView);
 
-        // 시뮬레이션 결과물을 DirectTexture로 래핑하여 머티리얼에 바인딩
         this.#rippleDirectTexture = new DirectTexture(
             redGPUContext,
             `WaterLake_Ripple_${this.uuid}`,
@@ -143,10 +129,6 @@ class WaterLake extends Mesh {
         updateTargetUniform(this, 'waveSpeed', this.waveSpeed);
     }
 
-    /**
-     * [KO] 인터랙션 물결 시뮬레이션 전파 속도 (기본값: 0.32)
-     * [EN] Interaction ripple simulation propagation speed (default: 0.32)
-     */
     get rippleWaveSpeed(): number {
         return this.#waveSimulator.waveSpeed;
     }
@@ -155,10 +137,6 @@ class WaterLake extends Mesh {
         this.#waveSimulator.waveSpeed = value;
     }
 
-    /**
-     * [KO] 인터랙션 물결 감쇄율 (기본값: 0.012)
-     * [EN] Interaction ripple damping factor (default: 0.012)
-     */
     get rippleDamping(): number {
         return this.#waveSimulator.damping;
     }
@@ -167,10 +145,6 @@ class WaterLake extends Mesh {
         this.#waveSimulator.damping = value;
     }
 
-    /**
-     * [KO] 인터랙션 물결 법선 벡터 강도 (기본값: 1.0)
-     * [EN] Interaction ripple normal vector strength (default: 1.0)
-     */
     get rippleNormalStrength(): number {
         return this.#waveSimulator.normalStrength;
     }
@@ -195,23 +169,16 @@ class WaterLake extends Mesh {
         this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
     };
 
-    /**
-     * [KO] 매 프레임 인터랙션 캡처 및 파동 시뮬레이션을 실행합니다.
-     *      호수가 카메라 프러스텀 밖에 위치하여 컬링되면 즉각 연산을 건너뜁니다.
-     * [EN] Runs interaction capture and wave simulation each frame.
-     *      Immediately skips computation if the lake is culled outside the camera frustum.
-     */
     #updateInteraction(renderViewStateData?: RenderViewStateData): void {
-        // 호수가 프러스텀 컬링에 의해 화면에 보이지 않거나 인터랙션이 비활성화된 경우 즉각 스킵
         if (!this.interactionEnabled || !this.passFrustumCulling) return;
 
         const hasMeshes = WaterInteractionRegistry.meshes.size > 0;
         if (hasMeshes) {
-            this.#decayFramesRemaining = 90; // 활성 객체가 있으면 감쇄 카운터 리셋 (약 1.5초 유예)
+            this.#decayFramesRemaining = 90;
         } else if (this.#decayFramesRemaining > 0) {
-            this.#decayFramesRemaining--;   // 잔여 파동이 마찰 감쇄로 소멸할 때까지 시뮬레이션 지속
+            this.#decayFramesRemaining--;
         } else {
-            return; // 완전히 잔잔해진 후 안전하게 연산 건너뜀 (GPU 0ms 유지)
+            return;
         }
 
         const currentTime = this.redGPUContext.currentTime || performance.now();
@@ -220,7 +187,6 @@ class WaterLake extends Mesh {
             : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
         this.#lastInteractionTime = currentTime;
 
-        // 중심 추적 좌표 결정 (카메라 시선과 수면 평면의 교차점 기준 자동 추적)
         let targetX = this.#prevSnapX || this.x;
         let targetZ = this.#prevSnapZ || this.z;
 
@@ -232,14 +198,11 @@ class WaterLake extends Mesh {
             const vm = camera.viewMatrix;
 
             if (vm) {
-                // gl-matrix viewMatrix 기준 전방 시선 벡터: -m[2], -m[6], -m[10]
                 const dirX = -vm[2];
                 const dirY = -vm[6];
                 const dirZ = -vm[10];
 
-                // 수면 평면 Y = this.waterLevel 과의 교차 거리 t 산출 (Zero-GC)
                 if (dirY < -0.01) {
-                    // 카메라가 수면 쪽(아래)을 내려다보고 있는 일반적 시점
                     const t = (this.waterLevel - camY) / dirY;
                     if (t > 0 && t < 120.0) {
                         targetX = camX + t * dirX;
@@ -249,7 +212,6 @@ class WaterLake extends Mesh {
                         targetZ = camZ + dirZ * 15.0;
                     }
                 } else if (dirY > 0.01 && camY < this.waterLevel) {
-                    // 수중에서 수면 위를 올려다보는 시점
                     const t = (this.waterLevel - camY) / dirY;
                     if (t > 0 && t < 120.0) {
                         targetX = camX + t * dirX;
@@ -259,7 +221,6 @@ class WaterLake extends Mesh {
                         targetZ = camZ + dirZ * 15.0;
                     }
                 } else {
-                    // 수평이거나 하늘을 올려다볼 때: 전방 15m 지점 클램핑
                     targetX = camX + dirX * 15.0;
                     targetZ = camZ + dirZ * 15.0;
                 }
@@ -268,7 +229,6 @@ class WaterLake extends Mesh {
                 targetZ = camZ;
             }
         } else if (hasMeshes) {
-            // 카메라 참조가 없을 때의 안전 폴백 (첫 번째 등록 메쉬)
             const mesh = WaterInteractionRegistry.meshes.values().next().value;
             if (mesh) {
                 const m = mesh.modelMatrix;
@@ -277,13 +237,11 @@ class WaterLake extends Mesh {
             }
         }
 
-        // 텍셀 스냅핑 (Texel Snapping으로 화면 수평 지터 원천 방지)
         const domainSize = this.interactionDomainSize;
         const texelSize = domainSize / this.#waveSimulator.textureSize;
         const snapX = Math.floor(targetX / texelSize) * texelSize;
         const snapZ = Math.floor(targetZ / texelSize) * texelSize;
 
-        // 도메인 이동에 따른 텍셀 오프셋 계산 (월드 공간 파동 고정 및 발 추적 방지)
         let shiftX = 0;
         let shiftZ = 0;
         if (!this.#isFirstSnap) {
@@ -300,7 +258,6 @@ class WaterLake extends Mesh {
         domainCenter[1] = snapZ;
         this.waterMaterial.rippleDomainCenter = domainCenter;
 
-        // 등록된 선언적 활성 메쉬 자동 수집 (Zero-GC)
         const activeMeshes = this.#interactionManager.collectActiveMeshes(
             dt,
             snapX,
@@ -310,7 +267,6 @@ class WaterLake extends Mesh {
             6.0
         );
 
-        // PRE_PROCESS 단계에서 캡처 및 컴퓨트 시뮬레이션 일괄 인코딩 (Zero-GC 바운드 콜백 활용)
         this.#currentActiveMeshes = activeMeshes;
         this.#currentSnapX = snapX;
         this.#currentSnapZ = snapZ;

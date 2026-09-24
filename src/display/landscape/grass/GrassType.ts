@@ -293,10 +293,6 @@ export class GrassType {
         this.#dirty = true;
     }
 
-    /**
-     * [KO] 언리얼 엔진 표준 수축/페이드 시작 거리 (Cull Distance Min)
-     * [EN] Unreal Engine standard shrink/fade start distance (Cull Distance Min)
-     */
     get shrinkStartDistance(): number {
         return this.#shrinkStartDistance;
     }
@@ -306,10 +302,6 @@ export class GrassType {
         this.#dirty = true;
     }
 
-    /**
-     * [KO] fadeStartDistance 하위 호환성 별칭 (shrinkStartDistance와 동일)
-     * [EN] Backward compatibility alias for fadeStartDistance (same as shrinkStartDistance)
-     */
     get fadeStartDistance(): number {
         return this.#shrinkStartDistance;
     }

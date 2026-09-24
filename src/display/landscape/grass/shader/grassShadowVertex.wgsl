@@ -17,8 +17,8 @@ fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 }
 
 struct GrassUniforms {
-    _unusedCullingDistance: f32,     // [Main pass only]
-    _unusedShrinkStartDistance: f32, // [Main pass only]
+    _unusedCullingDistance: f32,
+    _unusedShrinkStartDistance: f32,
     meshHeight: f32,
     minY: f32,
     shadowCullDistance: f32,
@@ -59,7 +59,6 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     let shadowCullDist = grassUniforms.shadowCullDistance;
     let shadowShrinkStart = min(grassUniforms.shadowShrinkStartDistance, shadowCullDist);
 
-    // 🌿 [Unreal Engine Shadow Cull] 잔디 그림자 한계 거리 초과 시 즉시 클립하여 래스터라이징 완전 차단
     if (distToCam >= shadowCullDist) {
         output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);
@@ -70,7 +69,6 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     var shrink = 1.0;
     var alphaFade = 1.0;
 
-    // 🌿 [Unreal Engine Style] shadowShrinkStart ~ shadowCullDist 감쇄 구간에서 크기 축소와 알파 페이드 통합 연산
     if (distToCam > shadowShrinkStart) {
         let fadeRatio = clamp((shadowCullDist - distToCam) / max(0.001, shadowCullDist - shadowShrinkStart), 0.0, 1.0);
         shrink = fadeRatio;
@@ -88,8 +86,6 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     let q = normalize(unpack4x8snorm(instance.packedQuat));
     var localPos = rotateVectorByQuat(scaledPos, q);
 
-    // [KO] 경사면 회전으로 인한 밑동 지면 파묻힘 방지 보정
-    // [EN] Compensate base ground penetration caused by slope rotation
     let baseHeight = max(0.01, grassUniforms.meshHeight);
     let heightRatio = clamp((input.position.y - grassUniforms.minY) / baseHeight, 0.0, 1.0);
     let sinkDepth = max(0.0, -localPos.y);

@@ -457,10 +457,8 @@ fn computeLandscapeHeightmapShadow(
         let diff = samplePosY - terrainHeight;
 
         if (diff <= 0.0) {
-
             return 0.0;
         } else {
-
             let penumbra = clamp((diff * softness) / max(1.0, t), 0.0, 1.0);
             shadowFactor = min(shadowFactor, penumbra);
         }
@@ -512,11 +510,9 @@ fn getFoliageSubCellDebugColor(
     var alpha = 0.0;
 
     if (isInRadius) {
-
         finalColor = mix(baseCellColor, vec3<f32>(1.0, 1.0, 0.9), isWireframe * 0.85);
         alpha = mix(0.5, 0.9, isWireframe);
     } else {
-
         finalColor = vec3<f32>(0.1, 0.1, 0.15);
         alpha = isWireframe * 0.35;
     }
@@ -724,19 +720,15 @@ fn main(inputData: InputData) -> OutputFragment {
 
     switch (landscapeInstanceUniforms.debugMode) {
         case 1u: {
-            // FINAL_NORMAL
             outColor = vec4<f32>(N * 0.5 + 0.5, 1.0);
         }
         case 2u: {
-            // MACRO_NORMAL
             outColor = vec4<f32>(baseNormal * 0.5 + 0.5, 1.0);
         }
         case 3u: {
-            // ALBEDO
             outColor = vec4<f32>(albedo, 1.0);
         }
         case 4u: {
-            // SPLAT_WEIGHTS
             if (uniforms.activeLayerCount > 0u) {
                 let weightSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
                 let remainingWeight = clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0);
@@ -752,27 +744,21 @@ fn main(inputData: InputData) -> OutputFragment {
             }
         }
         case 5u: {
-            // ROUGHNESS
             outColor = vec4<f32>(vec3<f32>(roughnessParameter), 1.0);
         }
         case 6u: {
-            // AMBIENT_OCCLUSION
             outColor = vec4<f32>(vec3<f32>(ambientOcclusion), 1.0);
         }
         case 7u: {
-            // HEIGHTMAP_SHADOW_MASK
             outColor = vec4<f32>(vec3<f32>(terrainShadowVis), 1.0);
         }
         case 8u: {
-            // CSM_SHADOW_MASK
             outColor = vec4<f32>(vec3<f32>(csmVisibility), 1.0);
         }
         case 9u: {
-            // TOTAL_SHADOW_VISIBILITY
             outColor = vec4<f32>(vec3<f32>(visibility), 1.0);
         }
         case 10u: {
-            // ELEVATION_HEATMAP
             let heightRatio = clamp(input_vertexPosition.y / max(1.0, landscapeInstanceUniforms.heightScale), 0.0, 1.0);
             let c0 = vec3<f32>(0.0, 0.1, 0.8);
             let c1 = vec3<f32>(0.0, 0.8, 0.8);
@@ -791,7 +777,6 @@ fn main(inputData: InputData) -> OutputFragment {
             outColor = vec4<f32>(elevationColor, 1.0);
         }
         case 11u: {
-            // LOD_LEVEL
             let lodIdx = min(u32(inputData.lodLevel + 0.5), 7u);
             outColor = vec4<f32>(landscapeInstanceUniforms.lodColors[lodIdx].rgb, 1.0);
         }
