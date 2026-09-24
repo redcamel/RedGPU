@@ -19,29 +19,32 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 구성 (기본: 호수와 수변 조망 궤도 회전 카메라 + 자유 비행 카메라)
+        // 1. 카메라 컨트롤러 구성 (기본: 캐릭터 3인칭 추종 카메라 & 호수 전체 조망 궤도 회전 카메라)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
         orbitController.centerX = 0;
         orbitController.centerY = 6.5;
         orbitController.centerZ = 0;
-        orbitController.distance = 55.0;
-        orbitController.tilt = -18;
-        orbitController.pan = 45;
-        orbitController.minDistance = 3.0;
-        orbitController.maxDistance = 250.0;
-        orbitController.speedDistance = 0.5;
+        orbitController.distance = 110.0;
+        orbitController.tilt = -20;
+        orbitController.pan = 40;
+        orbitController.minDistance = 5.0;
+        orbitController.maxDistance = 350.0;
+        orbitController.speedDistance = 1.0;
 
-        const freeController = new RedGPU.Camera.FreeController(redGPUContext);
-        freeController.x = 0;
-        freeController.y = 20;
-        freeController.z = 45;
-        freeController.tilt = -18;
-        freeController.pan = 45;
-        freeController.moveSpeed = 15.0;
+        const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
+        characterOrbitController.distance = 5.5;
+        characterOrbitController.tilt = -12;
+        characterOrbitController.pan = 180;
+        characterOrbitController.minDistance = 2.0;
+        characterOrbitController.maxDistance = 25.0;
+        characterOrbitController.speedDistance = 0.5;
+        characterOrbitController.centerX = 0;
+        characterOrbitController.centerY = 6.8 + 1.2;
+        characterOrbitController.centerZ = 60;
 
-        // 2. 씬 및 뷰3D 생성 (기본: 궤도 회전 카메라)
+        // 2. 씬 및 뷰3D 생성 (기본: 캐릭터 3인칭 시점)
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, orbitController);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, characterOrbitController);
         redGPUContext.addView(view);
 
         // 3. IBL 환경광 및 스카이박스 설정
@@ -62,9 +65,7 @@ RedGPU.init(
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 250;
-        directionalShadowManager.strength = 0.95;
-        directionalShadowManager.pcssLightSize = 1.2;
+        directionalShadowManager.maxShadowDistance = 350;
 
         // 5. 랜드스케이프 지형 설정 (수체 연동을 고려한 분지 지형)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
@@ -94,46 +95,10 @@ RedGPU.init(
         const weightTexturePath = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layerConfigs = [
-            {
-                name: 'Grass',
-                key: 'grass',
-                weightChannel: 'R',
-                uvScale: [10, 10],
-                roughness: 0.85,
-                metallic: 0.0,
-                normalIntensity: 1.5,
-                aoIntensity: 1.0
-            },
-            {
-                name: 'Rock',
-                key: 'rock',
-                weightChannel: 'G',
-                uvScale: [5, 5],
-                roughness: 0.7,
-                metallic: 0.05,
-                normalIntensity: 2.2,
-                aoIntensity: 1.5
-            },
-            {
-                name: 'Gravel',
-                key: 'gravel',
-                weightChannel: 'B',
-                uvScale: [10, 10],
-                roughness: 0.9,
-                metallic: 0.0,
-                normalIntensity: 1.8,
-                aoIntensity: 1.2
-            },
-            {
-                name: 'Leave',
-                key: 'leave',
-                weightChannel: 'A',
-                uvScale: [10, 10],
-                roughness: 0.8,
-                metallic: 0.0,
-                normalIntensity: 1.4,
-                aoIntensity: 1.0
-            }
+            {name: 'Grass', key: 'grass', weightChannel: 'R', uvScale: [10, 10], roughness: 0.85},
+            {name: 'Rock', key: 'rock', weightChannel: 'G', uvScale: [5, 5], roughness: 0.7},
+            {name: 'Gravel', key: 'gravel', weightChannel: 'B', uvScale: [10, 10], roughness: 0.9},
+            {name: 'Leave', key: 'leave', weightChannel: 'A', uvScale: [10, 10], roughness: 0.8}
         ];
 
         const layers = layerConfigs.map(cfg => {
@@ -145,10 +110,7 @@ RedGPU.init(
                 weightTexture: weightTexturePath,
                 weightChannel: cfg.weightChannel,
                 uvScale: cfg.uvScale,
-                roughness: cfg.roughness,
-                metallic: cfg.metallic,
-                normalIntensity: cfg.normalIntensity,
-                aoIntensity: cfg.aoIntensity
+                roughness: cfg.roughness
             });
             landscape.addLayer(layer);
             return layer;
@@ -206,11 +168,12 @@ RedGPU.init(
 
         scene.addChild(lake);
 
-        // 8. GUI 컨트롤 패널 생성
-        renderTestPane({
+        // 8. GUI 컨트롤 패널 및 캐릭터 상호작용 초기화
+        const testPane = renderTestPane({
             redGPUContext,
+            scene,
             view,
-            freeController,
+            characterOrbitController,
             orbitController,
             landscape,
             lake,
@@ -221,7 +184,9 @@ RedGPU.init(
 
         // 9. 렌더러 시작
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (timestamp) => {
+            testPane.update(timestamp);
+        });
     },
     (error) => {
         console.error('RedGPU 초기화 실패:', error);
@@ -229,13 +194,14 @@ RedGPU.init(
 );
 
 /**
- * [KO] Tweakpane GUI를 구성하여 카메라, 호수 수체, 지형 및 광원을 제어합니다.
- * [EN] Configures the Tweakpane GUI to control camera, lake water, terrain, and lighting.
+ * [KO] Tweakpane GUI를 구성하여 카메라 모드, 3D 캐릭터, 호수 수체, 지형 및 광원을 제어합니다.
+ * [EN] Configures the Tweakpane GUI to control camera modes, 3D character, lake water, terrain, and lighting.
  */
 function renderTestPane({
                             redGPUContext,
+                            scene,
                             view,
-                            freeController,
+                            characterOrbitController,
                             orbitController,
                             landscape,
                             lake,
@@ -243,60 +209,102 @@ function renderTestPane({
                             directionalShadowManager,
                             layers
                         }) {
+    let characterMesh = null;
+    let characterController = null;
+    let setCharacterState = null;
+
     const params = {
-        cameraMode: 'Orbit'
+        cameraMode: 'Character'
+    };
+
+    let paneInstance = null;
+
+    // 3D 캐릭터 로딩 및 상태 머신 구성
+    initCharacter({
+        redGPUContext,
+        scene,
+        landscape,
+        characterOrbitController,
+        onLoaded: (handle) => {
+            characterMesh = handle.characterMesh;
+            characterController = handle.characterController;
+            setCharacterState = handle.setState;
+
+            if (params.cameraMode === 'Character') {
+                characterController.useKeyboard = true;
+            }
+            if (paneInstance) {
+                bindCharacterFolder(paneInstance, characterController);
+            }
+        }
+    });
+
+    const bindCharacterFolder = (pane, cc) => {
+        if (!pane || !cc) return;
+        const charFolder = pane.addFolder({title: 'Character', expanded: false});
+        charFolder.addBinding(cc, 'floorOffset', {min: -0.2, max: 0.5, step: 0.01});
+        charFolder.addBinding(cc, 'speed', {min: 1.0, max: 15.0, step: 0.5});
+        charFolder.addBinding(cc, 'runSpeed', {min: 2.0, max: 25.0, step: 0.5});
+        charFolder.addBinding(cc, 'jumpForce', {min: 2.0, max: 20.0, step: 0.5});
+        charFolder.addBinding(cc, 'gravity', {min: 5.0, max: 60.0, step: 1.0});
     };
 
     const resetCamera = () => {
-        if (params.cameraMode === 'Free Flight') {
-            freeController.x = 0;
-            freeController.y = 20;
-            freeController.z = 45;
-            freeController.tilt = -18;
-            freeController.pan = 45;
+        if (params.cameraMode === 'Character') {
+            if (characterMesh) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+            characterOrbitController.distance = 5.5;
+            characterOrbitController.tilt = -12;
+            characterOrbitController.pan = 180;
         } else {
             orbitController.centerX = 0;
             orbitController.centerY = 6.5;
             orbitController.centerZ = 0;
-            orbitController.distance = 55.0;
-            orbitController.tilt = -18;
-            orbitController.pan = 45;
+            orbitController.distance = 110.0;
+            orbitController.tilt = -20;
+            orbitController.pan = 40;
         }
     };
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. 카메라 폴더
-            const cameraFolder = pane.addFolder({title: 'Camera', expanded: true});
+            paneInstance = pane;
 
-            const cameraModeBinding = cameraFolder.addBinding(params, 'cameraMode', {
-                options: {
-                    'Orbit': 'Orbit',
-                    'Free Flight': 'Free Flight'
+            // 1. Controller 설정 (Character / Orbit 전환)
+            const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
+
+            controllerFolder.addBinding(params, 'cameraMode', {
+                view: 'radiogrid',
+                groupName: 'cameraMode',
+                size: [2, 1],
+                cells: (x, y) => ({
+                    title: x === 0 ? 'Character' : 'Orbit',
+                    value: x === 0 ? 'Character' : 'Orbit'
+                })
+            }).on('change', (ev) => {
+                const mode = ev.value;
+                if (mode === 'Character') {
+                    view.camera = characterOrbitController;
+                    if (characterController) characterController.useKeyboard = true;
+                    if (characterMesh) {
+                        characterOrbitController.centerX = characterMesh.x;
+                        characterOrbitController.centerY = characterMesh.y + 1.2;
+                        characterOrbitController.centerZ = characterMesh.z;
+                    }
+                } else {
+                    view.camera = orbitController;
+                    if (characterController) characterController.useKeyboard = false;
                 }
             });
 
-            const speedBinding = cameraFolder.addBinding(freeController, 'moveSpeed', {
-                min: 2.0,
-                max: 50.0,
-                step: 1.0
-            });
-            speedBinding.hidden = true;
+            controllerFolder.addButton({title: 'Reset Camera'}).on('click', resetCamera);
 
-            const zoomSpeedBinding = cameraFolder.addBinding(orbitController, 'speedDistance', {
-                min: 0.1,
-                max: 3.0,
-                step: 0.1
-            });
-
-            cameraModeBinding.on('change', (ev) => {
-                const isFree = ev.value === 'Free Flight';
-                view.camera = isFree ? freeController : orbitController;
-                speedBinding.hidden = !isFree;
-                zoomSpeedBinding.hidden = isFree;
-            });
-
-            cameraFolder.addButton({title: 'Reset Camera'}).on('click', resetCamera);
+            if (characterController) {
+                bindCharacterFolder(pane, characterController);
+            }
 
             // 2. 호수 수체 폴더
             const waterFolder = pane.addFolder({title: 'Water', expanded: true});
@@ -325,7 +333,6 @@ function renderTestPane({
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-            lightFolder.addBinding(directionalShadowManager, 'strength', {min: 0.0, max: 1.0, step: 0.05});
             lightFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {min: 30, max: 500, step: 10});
 
             // 5. 스플랫 레이어 폴더
@@ -335,9 +342,121 @@ function renderTestPane({
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
 
                 layerSubFolder.addBinding(layer, 'enabled');
-                layerSubFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 4, step: 0.1});
                 layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
             });
         }
     });
+
+    const update = (timestamp) => {
+        if (characterMesh && characterController) {
+            characterController.update(view, timestamp);
+
+            if (params.cameraMode === 'Character') {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+
+            if (setCharacterState) {
+                if (characterController.isRunning) setCharacterState('Run');
+                else if (characterController.isMoving) setCharacterState('Walk');
+                else setCharacterState('Idle');
+            }
+        }
+    };
+
+    return {
+        update
+    };
+}
+
+/**
+ * [KO] 3D 캐릭터 로딩 및 물리 컨트롤러/애니메이션 상태 머신 구성
+ * [EN] Loads 3D character and configures physics controller and animation state machine
+ */
+function initCharacter({redGPUContext, scene, landscape, characterOrbitController, onLoaded}) {
+    const CHARACTER_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        CHARACTER_URL,
+        (loader) => {
+            const characterMesh = loader.resultMesh;
+            // 호수 수변 앞쪽 완만한 육지 좌표로 배치
+            characterMesh.x = 0;
+            characterMesh.z = 60;
+
+            const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
+            characterMesh.y = (startH > 0 ? startH : 6.8);
+
+            characterMesh.setCastShadowRecursively(true);
+            characterMesh.setReceiveShadowRecursively(true);
+            scene.addChild(characterMesh);
+
+            characterOrbitController.centerX = characterMesh.x;
+            characterOrbitController.centerY = characterMesh.y + 1.2;
+            characterOrbitController.centerZ = characterMesh.z;
+
+            const characterController = new RedGPU.Charactor.SimpleCharacterController(
+                redGPUContext,
+                characterMesh,
+                characterOrbitController,
+                {
+                    speed: 5.0,
+                    runSpeed: 10.0,
+                    rotationSpeed: 10.0,
+                    gravity: 24.0,
+                    jumpForce: 9.0,
+                    floorHeight: 0.0,
+                    floorOffset: 0.0,
+                    useKeyboard: false,
+                    getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
+                }
+            );
+
+            let targetState = 'Idle';
+            const clips = loader.parsingResult.animations;
+            if (clips && clips.length > 0) {
+                const idleState = clips[0];
+                const runState = clips[1];
+                const walkState = clips[3] || clips[2];
+                idleState.name = 'Idle';
+                walkState.name = 'Walk';
+                runState.name = 'Run';
+
+                const stateMachine = new RedGPU.AnimStateMachine(idleState);
+                stateMachine.addState(walkState);
+                stateMachine.addState(runState);
+
+                const BLEND = 0.25;
+                const pairs = [
+                    ['Idle', 'Walk'], ['Idle', 'Run'],
+                    ['Walk', 'Idle'], ['Walk', 'Run'],
+                    ['Run', 'Idle'], ['Run', 'Walk'],
+                ];
+                pairs.forEach(([from, to]) => {
+                    stateMachine.addTransition({
+                        fromState: from,
+                        toState: to,
+                        duration: BLEND,
+                        conditions: () => targetState === to,
+                    });
+                });
+
+                loader.stopAnimation();
+                loader.playAnimation(idleState);
+                if (loader.activeAnimations.length > 0) {
+                    loader.activeAnimations[0].animStateMachine = stateMachine;
+                }
+            }
+
+            onLoaded?.({
+                characterMesh,
+                characterController,
+                setState: (state) => {
+                    targetState = state;
+                }
+            });
+        }
+    );
 }
