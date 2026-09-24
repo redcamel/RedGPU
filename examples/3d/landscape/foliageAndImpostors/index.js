@@ -322,7 +322,12 @@ function renderTestPane({
             alignFactorBinding.disabled = !ev.value;
         });
 
-        // 3. LOD & Impostor (컬링 거리 및 임포스터)
+        // 3. Ground Blend (지형 컬러 블렌딩)
+        const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: true});
+        groundBlendFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
+        groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
+
+        // 4. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
         lodFolder.addBinding(type, 'cullingDistance', {min: 500, max: 8000, step: 100});
         if (type.hasImpostor) {
@@ -355,12 +360,12 @@ function renderTestPane({
             subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true});
         });
 
-        // 4. Shadow (그림자)
+        // 5. Shadow (그림자)
         const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
         shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
 
-        // 5. Wind & Motion
+        // 6. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: false});
         windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
         windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
