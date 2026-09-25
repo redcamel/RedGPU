@@ -1,10 +1,10 @@
-import Landscape from "./core/Landscape";
-import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./core/LANDSCAPE_BASE_GRID_SIZE";
-import LANDSCAPE_DEFAULT_LOD_COLORS from "./core/LANDSCAPE_DEFAULT_LOD_COLORS";
-import {LANDSCAPE_DEBUG_MODE} from "./core/LANDSCAPE_DEBUG_MODE";
-import LandscapeMaterial from "./material/LandscapeMaterial";
-import type {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./material/LandscapeLayer";
-import LandscapeLayer from "./material/LandscapeLayer";
+import Landscape from "./Landscape";
+import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./LANDSCAPE_BASE_GRID_SIZE";
+import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
+import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
+import LandscapeMaterial from "./core/material/LandscapeMaterial";
+import type {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./core/material/LandscapeLayer";
+import LandscapeLayer from "./core/material/LandscapeLayer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import LandscapeFoliageSpatialGrid from "./foliage/core/spatial/LandscapeFoliageSpatialGrid";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";

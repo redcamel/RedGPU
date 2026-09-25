@@ -1,4 +1,4 @@
-import Landscape from "../../core/Landscape";
+import Landscape from "../../Landscape";
 import LandscapeHUDDebugger from "../hud/LandscapeHUDDebugger";
 import LandscapeSpatialGridDebugger from "../spatialGrid/LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "../vht/LandscapeVHTDebugger";

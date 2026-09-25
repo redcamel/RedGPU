@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Landscape from "../core/Landscape";
+import Landscape from "../Landscape";
 import {GrassType} from "./GrassType";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
@@ -12,7 +12,7 @@ import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
 import {mat4} from "gl-matrix";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
+import LandscapeWeightMapCache from "../core/material/LandscapeWeightMapCache";
 
 const DEG2RAD: number = 0.017453292519943295;
 

@@ -1,6 +1,6 @@
-import ColorRGBA from "../../color/ColorRGBA";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import RedGPUContext from "../../context/RedGPUContext";
+import ColorRGBA from "../../../color/ColorRGBA";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
 
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;

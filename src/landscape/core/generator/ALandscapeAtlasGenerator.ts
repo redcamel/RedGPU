@@ -1,5 +1,5 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../../context/RedGPUContext";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export abstract class ALandscapeAtlasGenerator {
     readonly redGPUContext: RedGPUContext;

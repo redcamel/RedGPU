@@ -1,6 +1,6 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
-import Landscape from "../../core/Landscape";
-import {formatLODColorRGBA, LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../core/LANDSCAPE_DEFAULT_LOD_COLORS";
+import Landscape from "../../Landscape";
+import {formatLODColorRGBA, LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../LANDSCAPE_DEFAULT_LOD_COLORS";
 
 const UNLOADED_COLOR = 'rgba(255, 255, 255, 0.08)';
 

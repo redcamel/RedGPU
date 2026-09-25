@@ -1,5 +1,5 @@
 import ALandscapeTextureDebugger from "../core/ALandscapeTextureDebugger";
-import Landscape from "../../core/Landscape";
+import Landscape from "../../Landscape";
 import {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
 import vhtDebuggerWGSL from "./shader/vhtDebugger.wgsl";
 

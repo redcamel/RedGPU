@@ -1,7 +1,7 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUContext from "../../../context/RedGPUContext";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
 import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
-import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../material/core";
+import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
 
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;

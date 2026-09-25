@@ -1,5 +1,5 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
-import Landscape from "../../core/Landscape";
+import Landscape from "../../Landscape";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";

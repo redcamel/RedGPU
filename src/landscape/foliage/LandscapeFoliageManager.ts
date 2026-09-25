@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import type Landscape from "../core/Landscape";
+import type Landscape from "../Landscape";
 import type {FoliageTypeOptions} from "./FoliageType";
 import FoliageType from "./FoliageType";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";

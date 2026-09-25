@@ -1,6 +1,6 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
-import type Landscape from "../../../core/Landscape";
+import type Landscape from "../../../Landscape";
 import type FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";

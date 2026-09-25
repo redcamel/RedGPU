@@ -1,9 +1,9 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
-import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
-import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
-import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import {validateLandscapeBaseGridSize} from "../core/LANDSCAPE_BASE_GRID_SIZE";
+import RedGPUContext from "../../../context/RedGPUContext";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
+import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
+import {validateLandscapeBaseGridSize} from "../../LANDSCAPE_BASE_GRID_SIZE";
 
 export interface LandscapeLODGeometryRange {
     lodLevel: number;

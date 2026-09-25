@@ -1,4 +1,4 @@
-import type Landscape from "../../../core/Landscape";
+import type Landscape from "../../../Landscape";
 
 export class LandscapeFoliageSpatialGrid {
 

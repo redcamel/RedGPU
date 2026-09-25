@@ -4,7 +4,7 @@ import ShadowManager from "../../shadow/ShadowManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
-import Landscape from "../../landscape/core/Landscape";
+import Landscape from "../../landscape/Landscape";
 import type WaterLake from "../../water/lake/WaterLake";
 
 /**

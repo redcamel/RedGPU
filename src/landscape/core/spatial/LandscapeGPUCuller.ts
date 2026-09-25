@@ -1,6 +1,6 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUContext from "../../../context/RedGPUContext";
 import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeGPUCuller {
     #redGPUContext: RedGPUContext;

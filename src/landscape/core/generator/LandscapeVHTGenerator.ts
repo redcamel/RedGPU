@@ -1,10 +1,10 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import DirectTexture from "../../resources/texture/DirectTexture";
+import RedGPUContext from "../../../context/RedGPUContext";
+import DirectTexture from "../../../resources/texture/DirectTexture";
 import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
 import vhtGlobalBakeShaderCode from "../shader/landscapeVHTGlobalBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;

@@ -1,5 +1,5 @@
 import View3D from "../../display/view/View3D";
-import Landscape from "../../landscape/core/Landscape";
+import Landscape from "../../landscape/Landscape";
 import LandscapeGrassManager from "../../landscape/grass/LandscapeGrassManager";
 
 /**

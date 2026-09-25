@@ -1,4 +1,4 @@
-import Landscape from "../../core/Landscape";
+import Landscape from "../../Landscape";
 import RedGPUContext from "../../../context/RedGPUContext";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 

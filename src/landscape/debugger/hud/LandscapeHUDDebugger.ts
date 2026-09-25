@@ -1,7 +1,7 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
-import Landscape from "../../core/Landscape";
+import Landscape from "../../Landscape";
 import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
-import {formatLODColorHex, LANDSCAPE_DEFAULT_LOD_HEX_STRINGS} from "../../core/LANDSCAPE_DEFAULT_LOD_COLORS";
+import {formatLODColorHex, LANDSCAPE_DEFAULT_LOD_HEX_STRINGS} from "../../LANDSCAPE_DEFAULT_LOD_COLORS";
 
 export class LandscapeHUDDebugger extends ALandscapeDebugger {
     #containerEl: HTMLDivElement | null = null;
