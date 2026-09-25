@@ -21,6 +21,8 @@ import GrassType from "./grass/GrassType";
 import GrassMegaBuffer from "./grass/core/buffer/GrassMegaBuffer";
 import GrassCuller from "./grass/core/culling/GrassCuller";
 
+export * as Core from "./core";
+
 export {
     Landscape,
     LandscapeMaterial,
