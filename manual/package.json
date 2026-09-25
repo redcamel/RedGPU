@@ -13,9 +13,9 @@
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
-    "mermaid": "^11.12.2",
+    "mermaid": "^11.17.2",
     "typedoc": "^0.28.20",
-    "typedoc-plugin-markdown": "^4.11.0",
+    "typedoc-plugin-markdown": "^4.13.1",
     "typescript": "^5.9.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
