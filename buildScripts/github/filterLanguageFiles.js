@@ -168,5 +168,6 @@ const filterLanguageFiles = (dir, currentLang) => {
 };
 
 const target = process.argv[2]; // 'ko' 또는 'en'
-filterLanguageFiles(`manual/${target}/api`, target);
+const targetDir = fs.existsSync(`manual/${target}/api`) ? `manual/${target}/api` : `${target}/api`;
+filterLanguageFiles(targetDir, target);
 console.log(`✅ Finished post-processing for ${target}`);

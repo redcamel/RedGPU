@@ -12,12 +12,7 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "rollup watch": "rollup -wc",
-    "gen:api-ko": "node buildScripts/syncShaderDoc.js && cross-env DOC_LANG=ko npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js ko",
-    "gen:api-en": "node buildScripts/syncShaderDoc.js && cross-env DOC_LANG=en npx typedoc --options typedoc.config.js && node buildScripts/github/filterLanguageFiles.js en",
-    "gen:api-all": "npm run gen:api-ko && npm run gen:api-en",
-    "vitePress:dev": "npm run gen:api-all && vitepress dev manual",
-    "vitePress:build": "cross-env NODE_ENV=production npm run gen:api-all && vitepress build manual && node buildScripts/github/deploy-manual.js"
+    "rollup watch": "rollup -wc"
   },
   "author": "RedCamel",
   "license": "MIT",
@@ -30,20 +25,13 @@
     "@rollup/plugin-typescript": "^12.3.0",
     "@rollup/pluginutils": "^5.2.0",
     "@webgpu/types": "^0.1.74",
-    "cross-env": "^10.1.0",
     "fzstd": "^0.1.1",
     "gl-matrix": "^3.4.3",
     "ktx-parse": "^2.0.0",
-    "mermaid": "^11.12.2",
     "rollup": "^4.63.5",
     "sharp": "^0.35.3",
     "tslib": "^2.8.1",
-    "typedoc": "^0.28.20",
-    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.9.3",
-    "vitepress": "^1.6.4",
-    "vitepress-plugin-mermaid": "^2.0.17",
-    "vitepress-sidebar": "^1.33.1",
     "wgsl_reflect": "^1.6.0"
   },
   "overrides": {
