@@ -1,6 +1,6 @@
 {
   "name": "redgpu",
-  "version": "4.3.0-Alpha",
+  "version": "4.4.0-Alpha",
   "description": "RedGPU",
   "repository": {
     "type": "git",
@@ -29,11 +29,13 @@
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@rollup/pluginutils": "^5.2.0",
-    "@webgpu/types": "^0.1.71",
+    "@webgpu/types": "^0.1.74",
     "cross-env": "^10.1.0",
+    "fzstd": "^0.1.1",
     "gl-matrix": "^3.4.3",
+    "ktx-parse": "^1.1.0",
     "mermaid": "^11.12.2",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.28",
     "rollup": "^4.60.4",
     "rollup-plugin-postcss": "^4.0.2",
     "sharp": "^0.35.3",
@@ -43,12 +45,8 @@
     "typescript": "^5.8.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
-    "vitepress-sidebar": "^1.33.1"
-  },
-  "dependencies": {
-    "fzstd": "^0.1.1",
-    "ktx-parse": "^1.1.0",
-    "wgsl_reflect": "^1.5.0"
+    "vitepress-sidebar": "^1.33.1",
+    "wgsl_reflect": "^1.6.0"
   },
   "overrides": {
     "lodash-es": "^4.17.21",
