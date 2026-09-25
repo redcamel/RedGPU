@@ -45,10 +45,13 @@ const languages = [
 // Sidebar Configuration Groups
 // --------------------------------------------------------------------------
 
+const isInsideManual = !fs.existsSync('manual');
+const docRoot = isInsideManual ? '.' : 'manual';
+
 // [Group 1] 일반 매뉴얼 사이드바 설정 (General Manual)
 // API 폴더를 제외한 일반 문서(Getting Started, Core Concepts 등)를 처리합니다.
 const manualSidebarConfigs = languages.map(lang => ({
-    documentRootPath: 'manual',
+    documentRootPath: docRoot,
     scanStartPath: lang.code,
     resolvePath: `/${lang.code}/`,
     useTitleFromFileHeading: true,
@@ -66,7 +69,7 @@ const manualSidebarConfigs = languages.map(lang => ({
 // [Group 2] API 문서 사이드바 설정 (API Reference)
 // TypeDoc으로 생성된 API 문서 폴더를 처리합니다.
 const apiSidebarConfigs = languages.map(lang => ({
-    documentRootPath: 'manual',
+    documentRootPath: docRoot,
     scanStartPath: `${lang.code}/api/RedGPU-API/namespaces/RedGPU`,
     resolvePath: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/`,
     useFolderTitleFromIndexFile: true,
