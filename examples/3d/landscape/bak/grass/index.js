@@ -50,7 +50,7 @@ RedGPU.init(
         directionalShadowManager.pcssLightSize = 1.2;
 
         // 4. 지형 (Landscape)
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 300;
         landscape.loadingRadius = 3000;
@@ -104,7 +104,7 @@ RedGPU.init(
         ];
 
         layerConfigs.forEach((cfg) => {
-            landscape.addLayer(new RedGPU.Display.Landscape.LandscapeLayer({
+            landscape.addLayer(new RedGPU.Landscape.LandscapeLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -234,7 +234,7 @@ RedGPU.init(
                 findMesh(loader.resultMesh);
 
                 if (baseMesh) {
-                    const baseClumpType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
+                    const baseClumpType = new RedGPU.Landscape.GrassType(redGPUContext, {
                         name: '🌱 Ground Lawn Clump (Base)',
                         lods: [
                             {mesh: baseMesh, lodDistance: 110}
@@ -352,7 +352,7 @@ RedGPU.init(
                     }
 
                     // 🌿 현실적인 실측 스케일 (높이 약 50~80cm의 자연스러운 들풀 비례)
-                    const grassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
+                    const grassType = new RedGPU.Landscape.GrassType(redGPUContext, {
                         name: displayNames[key] || key,
                         lods: lodConfigs,
                         densityPerHectare: densities[key] || 3500,
@@ -757,3 +757,4 @@ const renderTestPane = ({
         bindCharacter
     };
 };
+

@@ -48,7 +48,7 @@ RedGPU.init(
         createUnderwaterEnvironment(redGPUContext, scene);
 
         // 6. 호수(WaterLake) 수체 생성 (기본 물성 자동 적용)
-        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 70, 70, 80, 80);
+        const lake = new RedGPU.Water.WaterLake(redGPUContext, 70, 70, 80, 80);
 
         // 듀얼 노멀 텍스처 바인딩 (Layer 1: 기본 파도, Layer 2: 잔물결 디테일)
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 변환으로 인한 벡터 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
@@ -403,3 +403,4 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
         }
     });
 }
+

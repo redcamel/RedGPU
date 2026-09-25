@@ -27,7 +27,7 @@ RedGPU.init(
 
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
-        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
+        const lake = new RedGPU.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
 
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
@@ -546,4 +546,5 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         }
     });
 }
+
 

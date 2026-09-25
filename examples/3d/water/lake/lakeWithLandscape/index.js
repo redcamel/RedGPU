@@ -38,7 +38,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 350;
 
         // 4. 10m 높이 랜드스케이프 지형 (Landscape)
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [400, 400];
         landscape.componentCount = [16, 16];
         landscape.heightScale = 10.0; // [지형 최대 높이 10m]
@@ -94,7 +94,7 @@ RedGPU.init(
         ];
 
         layersConfig.forEach((cfg) => {
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer({
+            const layer = new RedGPU.Landscape.LandscapeLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -127,7 +127,7 @@ RedGPU.init(
         scene.addLandscape(landscape);
 
         // 5. WaterLake (산악 분지와 맞닿는 고품질 호수 수체)
-        const lake = new RedGPU.Display.WaterLake(
+        const lake = new RedGPU.Water.WaterLake(
             redGPUContext,
             300,
             300,
@@ -434,3 +434,4 @@ function renderTestPane(redGPUContext, lake, landscape, directionalLight, charac
         }
     });
 }
+

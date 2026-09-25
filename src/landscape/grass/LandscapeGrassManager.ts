@@ -1,0 +1,1102 @@
+import RedGPUContext from "../../context/RedGPUContext";
+import Landscape from "../core/Landscape";
+import {GrassType} from "./GrassType";
+import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
+import {GrassBaker} from "./core/baking/GrassBaker";
+import {GrassCuller} from "./core/culling/GrassCuller";
+import grassVertexSource from "./shader/grassVertex.wgsl";
+import grassFragmentSource from "./shader/grassFragment.wgsl";
+import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
+import grassShadowSource from "./shader/grassShadow.wgsl";
+import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
+import {mat4} from "gl-matrix";
+import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
+import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
+import LandscapeWeightMapCache from "../material/LandscapeWeightMapCache";
+
+const DEG2RAD: number = 0.017453292519943295;
+
+interface CellSlotRange {
+    start: number;
+    count: number;
+    filledCount: number;
+}
+
+function sortCandidateIndicesByDistance(
+    indices: Int32Array,
+    dists: Float32Array,
+    left: number,
+    right: number
+): void {
+    if (left >= right) return;
+    const pivotVal = dists[indices[(left + right) >> 1]];
+    let i = left;
+    let j = right;
+    while (i <= j) {
+        while (dists[indices[i]] < pivotVal) i++;
+        while (dists[indices[j]] > pivotVal) j--;
+        if (i <= j) {
+            const temp = indices[i];
+            indices[i] = indices[j];
+            indices[j] = temp;
+            i++;
+            j--;
+        }
+    }
+    if (left < j) sortCandidateIndicesByDistance(indices, dists, left, j);
+    if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
+}
+
+export class LandscapeGrassManager {
+    static readonly CELL_SIZE: number = 16.0;
+    static readonly DEFAULT_STREAMING_RADIUS: number = 120.0;
+    static readonly MAX_CANDIDATE_CELLS: number = 2048;
+    static readonly MAX_POPULATE_CELLS_PER_FRAME: number = 8;
+
+    static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = {
+        label: 'LandscapeGrass_ComputePass'
+    };
+
+    #redGPUContext: RedGPUContext;
+    #landscape: Landscape;
+    #enabled: boolean = true;
+    #streamingRadius: number = LandscapeGrassManager.DEFAULT_STREAMING_RADIUS;
+
+    #megaBuffer: GrassMegaBuffer;
+    #baker: GrassBaker;
+    #culler: GrassCuller;
+
+    #grassTypes: GrassType[] = [];
+    #nextTypeId: number = 0;
+    #totalInstancesPopulated: number = 0;
+    #populated: boolean = false;
+
+    #vertexModule: GPUShaderModule | null = null;
+    #vertexShadowModule: GPUShaderModule | null = null;
+    #fragmentModule: GPUShaderModule | null = null;
+    #fragmentFarModule: GPUShaderModule | null = null;
+    #fragmentShadowModule: GPUShaderModule | null = null;
+    #pipelineLayout: GPUPipelineLayout | null = null;
+    #pipelineBindGroupLayout0: GPUBindGroupLayout | null = null;
+    #pipelineBindGroupLayout1: GPUBindGroupLayout | null = null;
+    #pipelineBindGroupLayout2: GPUBindGroupLayout | null = null;
+    #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
+    #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
+    #shadowPipeline: GPURenderPipeline | null = null;
+
+    #typeMaterialBuffers: Map<number, {
+        uniformBuffer: GPUBuffer;
+        cpuBuffer: Float32Array;
+        uintBuffer: Uint32Array;
+        grassUniformGPUBuffer: GPUBuffer;
+        grassUniformCPUBuffer: Float32Array;
+        bindGroup: GPUBindGroup | null;
+        instanceBindGroup: GPUBindGroup | null;
+        cachedColorTexView: GPUTextureView | null;
+        initialized: boolean;
+        cachedHasVbt: boolean;
+    }> = new Map();
+
+    #candidateKeys: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
+    #candidateDistancesSq: Float32Array = new Float32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
+    #candidateIndices: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
+
+    #slotRangePool: CellSlotRange[] = [];
+
+    #typeCellStates: Map<number, {
+        activeCellRanges: Map<number, CellSlotRange>;
+        freeSlotRanges: CellSlotRange[];
+        slotHead: number;
+        activeCount: number;
+    }> = new Map();
+
+    #neededCellKeysSet: Set<number> = new Set();
+    #keysToEvict: number[] = [];
+    #lastPopulatePos: [number, number, number] = [0, 0, 0];
+    #lastUpdateGridPos: [number, number] = [-999999, -999999];
+    #lastLoadedTileCount: number = 0;
+    #frustumPlanesF32: Float32Array = new Float32Array(24);
+    #viewProjectionMatrixF32: Float32Array = new Float32Array(16);
+    #tempWeights4: Float32Array = new Float32Array(4);
+
+    #prngState: number = 12345;
+
+    constructor(landscape: Landscape) {
+        this.#landscape = landscape;
+        this.#redGPUContext = landscape.redGPUContext;
+
+        this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
+        this.#baker = new GrassBaker(this.#redGPUContext);
+        this.#culler = new GrassCuller(this.#redGPUContext);
+
+        this.#megaBuffer.onRecreated = () => {
+            this.#baker.invalidateBindGroup();
+            this.#culler.invalidateBindGroup();
+            for (const res of this.#typeMaterialBuffers.values()) {
+                res.instanceBindGroup = null;
+            }
+        };
+
+        this.#initShadersAndLayouts();
+    }
+
+    get enabled(): boolean {
+        return this.#enabled;
+    }
+
+    set enabled(val: boolean) {
+        this.#enabled = val;
+    }
+
+    get streamingRadius(): number {
+        return this.#streamingRadius;
+    }
+
+    set streamingRadius(val: number) {
+        const clamped = Math.max(16.0, val);
+        if (this.#streamingRadius !== clamped) {
+            this.#streamingRadius = clamped;
+            this.populateInstances(this.#lastPopulatePos);
+        }
+    }
+
+    get grassTypes(): GrassType[] {
+        return this.#grassTypes;
+    }
+
+    get hasGrassTypes(): boolean {
+        return this.#grassTypes.length > 0;
+    }
+
+    get totalInstancesPopulated(): number {
+        return this.#totalInstancesPopulated;
+    }
+
+    getOrCreateRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
+        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
+        let pipeline = cache.get(sampleCount);
+        if (pipeline) return pipeline;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
+
+        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        pipeline = gpuDevice.createRenderPipeline({
+            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: fragModule,
+                entryPoint: 'main',
+                targets: [
+                    {format: 'rgba16float'},
+                    {format: preferredNormalFormat},
+                    {format: 'rgba16float'}
+                ]
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: sampleCount
+            }
+        });
+
+        cache.set(sampleCount, pipeline);
+        return pipeline;
+    }
+
+    getOrCreateShadowRenderPipeline(): GPURenderPipeline | null {
+        if (this.#shadowPipeline) return this.#shadowPipeline;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
+
+        this.#shadowPipeline = gpuDevice.createRenderPipeline({
+            label: 'Grass_ShadowRenderPipeline',
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexShadowModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: this.#fragmentShadowModule,
+                entryPoint: 'main',
+                targets: []
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: 1
+            }
+        });
+
+        return this.#shadowPipeline;
+    }
+
+    addGrassType(grassType: GrassType): void {
+        const typeId = this.#nextTypeId++;
+        grassType.typeId = typeId;
+        this.#grassTypes.push(grassType);
+
+        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+        const targetRadius = Math.max(grassType.cullingDistance, this.#streamingRadius);
+        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (LandscapeGrassManager.CELL_SIZE * LandscapeGrassManager.CELL_SIZE));
+        const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));
+
+        const lodAllocConfigs = grassType.lods.map(l => ({
+            lodIndex: l.lodIndex,
+            lodDistance: l.lodDistance,
+            indexCount: (l.geometry as any)?.indexBuffer?.indexCount ?? 0,
+            firstIndex: 0,
+            baseVertex: 0
+        }));
+
+        const alloc = this.#megaBuffer.allocateType(
+            typeId,
+            grassType.name,
+            maxInstances,
+            lodAllocConfigs
+        );
+
+        const baseOffset = alloc.rawBaseOffset;
+        for (let i = 0; i < maxInstances; i++) {
+            this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
+        }
+        this.#megaBuffer.uploadInstances(baseOffset, maxInstances);
+
+        this.#culler.invalidateBindGroup();
+        this.#baker.invalidateBindGroup();
+
+        this.#typeCellStates.set(typeId, {
+            activeCellRanges: new Map(),
+            freeSlotRanges: [],
+            slotHead: 0,
+            activeCount: 0
+        });
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            const cpuBuffer = new Float32Array(12);
+            const uintBuffer = new Uint32Array(cpuBuffer.buffer);
+
+            const uniformBuffer = gpuDevice.createBuffer({
+                label: `Grass_MaterialUniform_${grassType.name}`,
+                size: cpuBuffer.byteLength,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+
+            const grassUniformCPUBuffer = new Float32Array(8);
+            const grassUniformGPUBuffer = gpuDevice.createBuffer({
+                label: `Grass_UniformBuffer_${grassType.name}`,
+                size: grassUniformCPUBuffer.byteLength,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+
+            this.#typeMaterialBuffers.set(grassType.typeId, {
+                uniformBuffer,
+                cpuBuffer,
+                uintBuffer,
+                grassUniformGPUBuffer,
+                grassUniformCPUBuffer,
+                bindGroup: null,
+                instanceBindGroup: null,
+                cachedColorTexView: null,
+                initialized: false,
+                cachedHasVbt: false
+            });
+        }
+
+        grassType.onChanged = () => {
+            this.populateInstances(this.#lastPopulatePos);
+        };
+
+        if (grassType.targetLayer) {
+            const matchedLayer = this.#landscape.layers.find(l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer);
+            const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc;
+            if (targetSrc) {
+                LandscapeWeightMapCache.load(targetSrc).then(() => {
+                    if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+                        const view = this.#landscape.redGPUContext.viewList?.[0];
+                        const cam = (view as any)?.camera;
+                        if (cam) {
+                            this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
+                            this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
+                            this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+                        }
+                    }
+                    this.populateInstances(this.#lastPopulatePos);
+                });
+            }
+        }
+
+        this.#lastUpdateGridPos[0] = -999999;
+        this.#lastUpdateGridPos[1] = -999999;
+    }
+
+    update(camera: any, stateData?: any): void {
+        if (!this.#enabled || this.#grassTypes.length === 0) return;
+
+        const camPos: [number, number, number] = [
+            camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0,
+            camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0,
+            camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0
+        ];
+
+        this.#lastPopulatePos[0] = camPos[0];
+        this.#lastPopulatePos[1] = camPos[1];
+        this.#lastPopulatePos[2] = camPos[2];
+
+        const rawCam = camera?.camera ?? camera;
+        let frustumPlanes: any = stateData?.frustumPlanes
+            ?? stateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? rawCam?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && rawCam?.projectionMatrix && rawCam?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCam.projectionMatrix, rawCam.viewMatrix);
+        }
+
+        let frustumPlanesF32: Float32Array | null = null;
+        if (frustumPlanes) {
+            if (frustumPlanes instanceof Float32Array) {
+                frustumPlanesF32 = frustumPlanes;
+            } else if (Array.isArray(frustumPlanes) && frustumPlanes.length === 6) {
+                for (let p = 0; p < 6; p++) {
+                    this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
+                }
+                frustumPlanesF32 = this.#frustumPlanesF32;
+            }
+        }
+
+        const currentLoadedTileCount = this.#landscape.loadedTileCount;
+        const tileCountChanged = currentLoadedTileCount !== this.#lastLoadedTileCount;
+        this.#lastLoadedTileCount = currentLoadedTileCount;
+
+        if (currentLoadedTileCount > 0) {
+            const isInitialStreaming = !this.#populated;
+            this.#updateCellStreaming(camPos[0], camPos[2], isInitialStreaming, tileCountChanged);
+        }
+        this.#megaBuffer.resetIndirectDrawCountsCPU();
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return;
+
+        const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
+        const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.loadedTileCount > 0);
+
+        for (const type of this.#grassTypes) {
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res) continue;
+
+            const isDirty = !res.initialized || type.dirty || res.cachedHasVbt !== hasValidVbt;
+            if (isDirty) {
+                res.initialized = true;
+                res.cachedHasVbt = hasValidVbt;
+                type.markClean();
+
+                const gf = res.grassUniformCPUBuffer;
+                gf[0] = type.cullingDistance;
+                gf[1] = type.shrinkStartDistance;
+                gf[2] = type.meshHeight;
+                gf[3] = type.minY;
+                gf[4] = type.shadowCullDistance;
+                gf[5] = type.shadowShrinkStartDistance;
+                gf[6] = 0.0;
+                gf[7] = 0.0;
+
+                gpuDevice.queue.writeBuffer(
+                    res.grassUniformGPUBuffer,
+                    0,
+                    res.grassUniformCPUBuffer.buffer,
+                    0,
+                    res.grassUniformCPUBuffer.byteLength
+                );
+
+                const mf = res.cpuBuffer;
+                const mu = res.uintBuffer;
+
+                mf[0] = type.groundBlendStrength;
+                mf[1] = type.alphaCutoff;
+                mu[2] = hasValidVbt ? 1 : 0;
+                mf[3] = type.exposureBoost;
+
+                const ssc = type.subsurfaceColor;
+                mf[4] = ssc[0];
+                mf[5] = ssc[1];
+                mf[6] = ssc[2];
+                mf[7] = type.subsurfaceStrength;
+
+                mf[8] = type.roughness;
+                mf[9] = type.shadowStrength;
+                mu[10] = type.receiveShadow ? 1 : 0;
+
+                gpuDevice.queue.writeBuffer(
+                    res.uniformBuffer,
+                    0,
+                    res.cpuBuffer.buffer,
+                    0,
+                    res.cpuBuffer.byteLength
+                );
+
+                const lodCount = Math.min(4, type.lodCount);
+                const lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999];
+                for (let i = 0; i < lodCount; i++) {
+                    lodDistances[i] = type.lods[i].lodDistance;
+                }
+
+                const alloc = this.#megaBuffer.getAllocation(type.typeId);
+                if (alloc) {
+                    const minSlope = type.minSlope ?? 0.0;
+                    const maxSlope = type.maxSlope ?? 89.0;
+                    const hasSlopeFilter = minSlope > 0.0 || maxSlope < 89.0;
+                    const minSlopeTan2 = minSlope > 0.0 ? Math.tan(minSlope * DEG2RAD) ** 2 : 0.0;
+                    const maxSlopeTan2 = maxSlope < 89.0 ? Math.tan(maxSlope * DEG2RAD) ** 2 : 999999.0;
+
+                    this.#megaBuffer.updateTypeParams(
+                        type.typeId,
+                        type.cullingDistance,
+                        type.bottomOffset,
+                        type.meshHeight,
+                        minSlopeTan2,
+                        maxSlopeTan2,
+                        hasSlopeFilter,
+                        alloc.rawBaseOffset,
+                        alloc.maxInstances,
+                        alloc.culledBaseOffset,
+                        alloc.indirectBaseOffset,
+                        lodCount,
+                        alloc.maxInstances,
+                        lodDistances
+                    );
+                }
+            }
+        }
+
+        const currentView = stateData?.view || (camera as any)?.view;
+        const hzbTextureView = currentView?.hierarchicalZBuffer?.textureView || null;
+        const hasHZB = !!hzbTextureView;
+
+        let viewProjectionMatrixF32: Float32Array | null = null;
+        if (rawCam?.projectionMatrix && rawCam?.viewMatrix) {
+            mat4.multiply(this.#viewProjectionMatrixF32 as any, rawCam.projectionMatrix, rawCam.viewMatrix);
+            viewProjectionMatrixF32 = this.#viewProjectionMatrixF32;
+        }
+
+        const totalAllocated = this.#megaBuffer.totalAllocatedInstances;
+        this.#culler.updateUniforms(
+            camPos[0],
+            camPos[1],
+            camPos[2],
+            frustumPlanesF32,
+            totalAllocated,
+            this.#grassTypes.length,
+            viewProjectionMatrixF32,
+            hasHZB
+        );
+
+        this.#culler.updateBindGroup(this.#megaBuffer, hzbTextureView);
+
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            LandscapeGrassManager.#COMPUTE_PASS_DESCRIPTOR,
+            this.#onPreProcessComputePass
+        );
+    }
+
+    populateInstances(centerPos: [number, number, number]): void {
+        this.#lastPopulatePos[0] = centerPos[0];
+        this.#lastPopulatePos[1] = centerPos[1];
+        this.#lastPopulatePos[2] = centerPos[2];
+        this.#updateCellStreaming(centerPos[0], centerPos[2], true);
+    }
+
+    rebakeAll(): void {
+        if (!this.#enabled || this.#grassTypes.length === 0) return;
+        for (const type of this.#grassTypes) {
+            const state = this.#typeCellStates.get(type.typeId);
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!state || !alloc) continue;
+            for (const range of state.activeCellRanges.values()) {
+                if (range.filledCount > 0) {
+                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                }
+            }
+        }
+    }
+
+    handleTileLoaded(comp: any): void {
+        if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
+
+        if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+            const view = this.#landscape.redGPUContext.viewList?.[0];
+            const cam = (view as any)?.camera;
+            if (cam) {
+                this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
+                this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
+                this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+            }
+        }
+
+        this.#updateCellStreaming(this.#lastPopulatePos[0], this.#lastPopulatePos[2], false, true);
+
+        const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
+        const halfTileX = tileSizeX * 0.5;
+        const halfTileZ = tileSizeZ * 0.5;
+        const minX = comp.worldX - halfTileX;
+        const maxX = comp.worldX + halfTileX;
+        const minZ = comp.worldZ - halfTileZ;
+        const maxZ = comp.worldZ + halfTileZ;
+
+        const cellSize = LandscapeGrassManager.CELL_SIZE;
+
+        for (const type of this.#grassTypes) {
+            const state = this.#typeCellStates.get(type.typeId);
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!state || !alloc) continue;
+
+            for (const [key, range] of state.activeCellRanges.entries()) {
+                if (range.filledCount <= 0) continue;
+                const cellX = (key >> 16);
+                const cellZ = (key << 16) >> 16;
+                const cellCenterX = (cellX + 0.5) * cellSize;
+                const cellCenterZ = (cellZ + 0.5) * cellSize;
+
+                if (cellCenterX >= minX && cellCenterX <= maxX && cellCenterZ >= minZ && cellCenterZ <= maxZ) {
+                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                }
+            }
+        }
+    }
+
+    render(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassTypes.length === 0 || !this.#populated) return;
+
+        const view3D = view?.view || view;
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        if (!systemBG) return;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
+
+        const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
+        const nearPipeline = this.getOrCreateRenderPipeline(sampleCount, false);
+        const farPipeline = this.getOrCreateRenderPipeline(sampleCount, true);
+        if (!nearPipeline || !farPipeline) return;
+
+        const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const basicSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+
+        let currentPipeline: GPURenderPipeline | null = nearPipeline;
+        passEncoder.setPipeline(nearPipeline);
+        passEncoder.setBindGroup(0, systemBG);
+
+        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        for (const type of this.#grassTypes) {
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!alloc || alloc.activeCount === 0) continue;
+
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res) continue;
+
+            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
+                res.instanceBindGroup = gpuDevice.createBindGroup({
+                    label: `Grass_InstanceBindGroup_${type.name}`,
+                    layout: this.#pipelineBindGroupLayout1,
+                    entries: [
+                        {binding: 0, resource: {buffer: this.#megaBuffer.culledGPUBuffer}},
+                        {binding: 1, resource: {buffer: res.grassUniformGPUBuffer}},
+                    ]
+                });
+            }
+
+            const rawTex = type.baseColorTexture?.gpuTexture;
+            const colorTexView = (rawTex
+                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
+                : null) || fallbackTex;
+
+            if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
+                res.bindGroup = gpuDevice.createBindGroup({
+                    label: `Grass_MaterialBindGroup_${type.name}`,
+                    layout: this.#pipelineBindGroupLayout2,
+                    entries: [
+                        {binding: 0, resource: colorTexView},
+                        {binding: 1, resource: basicSampler},
+                        {binding: 2, resource: {buffer: res.uniformBuffer}},
+                    ]
+                });
+                res.cachedColorTexView = colorTexView;
+            }
+
+            if (!res.instanceBindGroup || !res.bindGroup) continue;
+
+            passEncoder.setBindGroup(1, res.instanceBindGroup);
+            passEncoder.setBindGroup(2, res.bindGroup);
+
+            for (const lodAlloc of alloc.lods) {
+                const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
+                if (currentPipeline !== targetPipeline) {
+                    passEncoder.setPipeline(targetPipeline);
+                    currentPipeline = targetPipeline;
+                }
+
+                const lodGeom = type.getGeometryForLOD(lodAlloc.lodIndex);
+                const lvb = lodGeom?.vertexBuffer;
+                const lib = lodGeom?.indexBuffer;
+                if (!lvb || !lib) continue;
+
+                passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+                passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+                const indirectOffsetBytes = lodAlloc.indirectOffset * 5 * 4;
+                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
+        }
+    }
+
+    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassTypes.length === 0) return;
+
+        const view3D = view?.view || view;
+        const currentCascade = view3D?.currentCascadeIndex;
+
+        if (currentCascade !== undefined && currentCascade > 1) return;
+
+        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        const pipeline = this.getOrCreateShadowRenderPipeline();
+        if (!pipeline) return;
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
+        if (!systemBG) return;
+
+        passEncoder.setPipeline(pipeline);
+        passEncoder.setBindGroup(0, systemBG);
+
+        for (const type of this.#grassTypes) {
+            if (!type.castShadow) continue;
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!alloc || alloc.activeCount === 0) continue;
+
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
+
+            const lod0Alloc = alloc.lods[0];
+            if (!lod0Alloc) continue;
+
+            const lodGeom = type.getGeometryForLOD(0);
+            const lvb = lodGeom?.vertexBuffer;
+            const lib = lodGeom?.indexBuffer;
+            if (!lvb || !lib) continue;
+
+            passEncoder.setBindGroup(1, res.instanceBindGroup);
+            passEncoder.setBindGroup(2, res.bindGroup);
+
+            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const indirectOffsetBytes = lod0Alloc.indirectOffset * 5 * 4;
+            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+        }
+    }
+
+    destroy(): void {
+        this.#megaBuffer.destroy();
+        this.#baker.destroy();
+        this.#culler.destroy();
+        this.#shadowPipeline = null;
+        this.#vertexShadowModule = null;
+        this.#fragmentShadowModule = null;
+
+        for (const res of this.#typeMaterialBuffers.values()) {
+            res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
+        }
+        this.#typeMaterialBuffers.clear();
+        this.#typeCellStates.clear();
+        this.#slotRangePool.length = 0;
+        this.#neededCellKeysSet.clear();
+        this.#keysToEvict.length = 0;
+        this.#renderPipelinesNear.clear();
+        this.#renderPipelinesFar.clear();
+        this.#grassTypes.length = 0;
+    }
+
+    #initShadersAndLayouts(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.#redGPUContext.resourceManager;
+        if (!gpuDevice) return;
+
+        this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {
+            code: grassVertexSource
+        });
+
+        this.#fragmentModule = resourceManager.createGPUShaderModule('Grass_FragmentModule', {
+            code: grassFragmentSource
+        });
+
+        this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
+            code: grassFragmentFarSource
+        });
+
+        this.#vertexShadowModule = resourceManager.createGPUShaderModule('Grass_VertexShadowModule', {
+            code: grassShadowVertexSource
+        });
+
+        this.#fragmentShadowModule = resourceManager.createGPUShaderModule('Grass_FragmentShadowModule', {
+            code: grassShadowSource
+        });
+
+        this.#pipelineBindGroupLayout0 = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
+
+        this.#pipelineBindGroupLayout1 = gpuDevice.createBindGroupLayout({
+            label: 'Grass_Pipeline_Group1_Layout',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
+                {binding: 1, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
+            ]
+        });
+
+        this.#pipelineBindGroupLayout2 = gpuDevice.createBindGroupLayout({
+            label: 'Grass_Pipeline_Group2_Layout',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
+            ]
+        });
+
+        this.#pipelineLayout = gpuDevice.createPipelineLayout({
+            label: 'Grass_PipelineLayout',
+            bindGroupLayouts: [
+                this.#pipelineBindGroupLayout0,
+                this.#pipelineBindGroupLayout1,
+                this.#pipelineBindGroupLayout2,
+            ]
+        });
+    }
+
+    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
+        if (this.#baker.hasPendingTasks) {
+            const vhtAtlas = this.#landscape.getInternalAtlasTexture('vht');
+            const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
+            const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+
+            this.#baker.dispatchPass(
+                computePass,
+                this.#megaBuffer,
+                vhtAtlas?.gpuTextureView,
+                this.#landscape.vhtSampler,
+                vbtAtlas?.gpuTextureView,
+                this.#redGPUContext.resourceManager.basicSampler.gpuSampler,
+                worldSizeX,
+                worldSizeZ,
+                this.#landscape.heightScale
+            );
+        }
+
+        this.#culler.dispatchPass(computePass, this.#megaBuffer.totalAllocatedInstances);
+    };
+
+    #updateCellStreaming(
+        camX: number,
+        camZ: number,
+        forceRebuild: boolean = false,
+        populateAllCandidates: boolean = false
+    ): void {
+        const cellSize = LandscapeGrassManager.CELL_SIZE;
+        const curGridX = Math.floor(camX / cellSize);
+        const curGridZ = Math.floor(camZ / cellSize);
+
+        if (!forceRebuild && !populateAllCandidates && curGridX === this.#lastUpdateGridPos[0] && curGridZ === this.#lastUpdateGridPos[1]) {
+            return;
+        }
+
+        this.#lastUpdateGridPos[0] = curGridX;
+        this.#lastUpdateGridPos[1] = curGridZ;
+
+        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        for (const type of this.#grassTypes) {
+            const state = this.#typeCellStates.get(type.typeId);
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!state || !alloc) continue;
+
+            if (forceRebuild) {
+                for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
+                for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
+                state.activeCellRanges.clear();
+                state.freeSlotRanges.length = 0;
+                state.slotHead = 0;
+                state.activeCount = 0;
+                alloc.activeCount = 0;
+
+                const baseOffset = alloc.rawBaseOffset;
+                for (let i = 0; i < alloc.maxInstances; i++) {
+                    this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
+                }
+                this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
+            }
+
+            const safeCullRadius = type.cullingDistance + cellSize * 1.5;
+            const radius = Math.max(safeCullRadius, this.#streamingRadius);
+            const radiusSq = radius * radius;
+            const cellRadius = Math.ceil(radius / cellSize);
+
+            this.#neededCellKeysSet.clear();
+            let candidateCount = 0;
+            const maxCandidates = LandscapeGrassManager.MAX_CANDIDATE_CELLS;
+
+            for (let dz = -cellRadius; dz <= cellRadius; dz++) {
+                const cz = curGridZ + dz;
+                const cellCenterZ = (cz + 0.5) * cellSize;
+                if (cellCenterZ < -halfWorldZ || cellCenterZ > halfWorldZ) continue;
+
+                const distZ = cellCenterZ - camZ;
+                const distZSq = distZ * distZ;
+
+                for (let dx = -cellRadius; dx <= cellRadius; dx++) {
+                    const cx = curGridX + dx;
+                    const cellCenterX = (cx + 0.5) * cellSize;
+                    if (cellCenterX < -halfWorldX || cellCenterX > halfWorldX) continue;
+
+                    const distX = cellCenterX - camX;
+                    const dSq = distX * distX + distZSq;
+                    if (dSq > radiusSq) continue;
+
+                    const key = ((cx & 0xFFFF) << 16) | (cz & 0xFFFF);
+                    this.#neededCellKeysSet.add(key);
+
+                    if (!state.activeCellRanges.has(key) && candidateCount < maxCandidates) {
+                        this.#candidateKeys[candidateCount] = key;
+                        this.#candidateDistancesSq[candidateCount] = dSq;
+                        this.#candidateIndices[candidateCount] = candidateCount;
+                        candidateCount++;
+                    }
+                }
+            }
+
+            if (candidateCount > 1) {
+                sortCandidateIndicesByDistance(this.#candidateIndices, this.#candidateDistancesSq, 0, candidateCount - 1);
+            }
+
+            this.#keysToEvict.length = 0;
+            state.activeCellRanges.forEach((_range, activeKey) => {
+                if (!this.#neededCellKeysSet.has(activeKey)) {
+                    this.#keysToEvict.push(activeKey);
+                }
+            });
+
+            for (let i = 0; i < this.#keysToEvict.length; i++) {
+                const evictKey = this.#keysToEvict[i];
+                const range = state.activeCellRanges.get(evictKey)!;
+                state.activeCellRanges.delete(evictKey);
+
+                for (let s = 0; s < range.count; s++) {
+                    this.#megaBuffer.writeInstanceData(
+                        alloc.rawBaseOffset + range.start + s,
+                        0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
+                    );
+                }
+
+                this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
+                state.freeSlotRanges.push(range);
+                state.activeCount -= range.filledCount;
+            }
+
+            const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
+            const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
+            const targetDensity = type.instancesPerCell;
+            const matchedLayer = type.targetLayer ? this.#landscape.layers.find(l => l.name === type.targetLayer || (l as any).key === type.targetLayer) : undefined;
+            const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc || null;
+            const hasWeightMap = !!(targetSrc && LandscapeWeightMapCache.has(targetSrc));
+            const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
+
+            if (type.targetLayer && !hasWeightMap) {
+                continue;
+            }
+
+            const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
+            const hasTileStreaming = this.#landscape.tileUrlResolver !== null;
+
+            for (let i = 0; i < cellsToProcess; i++) {
+                const sortedIdx = this.#candidateIndices[i];
+                const key = this.#candidateKeys[sortedIdx];
+                if (state.activeCellRanges.has(key)) continue;
+
+                const cellX = (key >> 16);
+                const cellZ = (key << 16) >> 16;
+                const cellCenterX = (cellX + 0.5) * cellSize;
+                const cellCenterZ = (cellZ + 0.5) * cellSize;
+
+                if (hasTileStreaming) {
+                    const tileCol = Math.floor((cellCenterX + halfWorldX) / tileSizeX);
+                    const tileRow = Math.floor((cellCenterZ + halfWorldZ) / tileSizeZ);
+                    if (!this.#landscape.isTileLoaded(tileRow, tileCol)) {
+                        continue;
+                    }
+                }
+
+                let slotBase = -1;
+                let reusedRange: CellSlotRange | null = null;
+                if (state.freeSlotRanges.length > 0) {
+                    reusedRange = state.freeSlotRanges.pop()!;
+                    slotBase = reusedRange.start;
+                } else if (state.slotHead + targetDensity <= alloc.maxInstances) {
+                    slotBase = state.slotHead;
+                    state.slotHead += targetDensity;
+                } else {
+                    break;
+                }
+
+                const cellMinX = cellX * cellSize;
+                const cellMinZ = cellZ * cellSize;
+
+                this.#setPrngSeed((cellX * 73856093) ^ (cellZ * 19349663) ^ (type.typeId * 83492791));
+
+                let filledCount = 0;
+                for (let inst = 0; inst < targetDensity; inst++) {
+                    const gx = cellMinX + this.#nextPrng() * cellSize;
+                    const gz = cellMinZ + this.#nextPrng() * cellSize;
+
+                    if (hasWeightMap && targetSrc) {
+                        const u = (gx + halfWorldX) / worldSizeX;
+                        const v = (gz + halfWorldZ) / worldSizeZ;
+                        LandscapeWeightMapCache.getAllWeights(targetSrc, u, v, this.#tempWeights4);
+                        const totalW = this.#tempWeights4[0] + this.#tempWeights4[1] + this.#tempWeights4[2] + this.#tempWeights4[3];
+                        const normW = totalW > 0.001
+                            ? (this.#tempWeights4[channelIdx] / totalW)
+                            : (this.#tempWeights4[channelIdx] || 0.0);
+
+                        if (normW < 0.20) continue;
+                        if (type.densityScaleByWeight && this.#nextPrng() > normW) continue;
+                    }
+
+                    const rot = this.#nextPrng() * 6.2831853;
+                    const sScale = type.minScale[0] + this.#nextPrng() * (type.maxScale[0] - type.minScale[0]);
+                    const hScale = type.minScale[1] + this.#nextPrng() * (type.maxScale[1] - type.minScale[1]);
+
+                    const globalInstIdx = alloc.rawBaseOffset + slotBase + filledCount;
+                    this.#megaBuffer.writeInstanceData(
+                        globalInstIdx,
+                        gx, 0.0, gz,
+                        rot, sScale, hScale
+                    );
+                    filledCount++;
+                }
+
+                for (let rem = filledCount; rem < targetDensity; rem++) {
+                    this.#megaBuffer.writeInstanceData(
+                        alloc.rawBaseOffset + slotBase + rem,
+                        0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
+                    );
+                }
+
+                if (filledCount > 0) {
+                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
+                    this.#baker.addBakeTasks(alloc.rawBaseOffset + slotBase, filledCount, type.typeId);
+                    if (reusedRange) {
+                        reusedRange.count = targetDensity;
+                        reusedRange.filledCount = filledCount;
+                        state.activeCellRanges.set(key, reusedRange);
+                    } else {
+                        state.activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
+                    }
+                    state.activeCount += filledCount;
+                } else {
+                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
+                    if (reusedRange) {
+                        reusedRange.count = targetDensity;
+                        reusedRange.filledCount = 0;
+                        state.freeSlotRanges.push(reusedRange);
+                    } else {
+                        state.freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
+                    }
+                }
+            }
+
+            alloc.activeCount = state.activeCount;
+        }
+
+        let totalPop = 0;
+        for (const type of this.#grassTypes) {
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (alloc) totalPop += alloc.activeCount;
+        }
+        this.#totalInstancesPopulated = totalPop;
+        this.#populated = totalPop > 0;
+    }
+
+    #setPrngSeed(seed: number): void {
+        this.#prngState = seed >>> 0;
+    }
+
+    #nextPrng(): number {
+        this.#prngState = (this.#prngState + 0x6D2B79F5) | 0;
+        let t = Math.imul(this.#prngState ^ (this.#prngState >>> 15), 1 | this.#prngState);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+
+    #acquireSlotRange(start: number, count: number, filledCount: number = 0): CellSlotRange {
+        const item = this.#slotRangePool.pop();
+        if (item) {
+            item.start = start;
+            item.count = count;
+            item.filledCount = filledCount;
+            return item;
+        }
+        return {start, count, filledCount};
+    }
+
+    #releaseSlotRange(item: CellSlotRange): void {
+        this.#slotRangePool.push(item);
+    }
+}
+
+export default LandscapeGrassManager;

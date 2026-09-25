@@ -30,7 +30,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 400;
 
         // 3. Landscape Core Setup (16km x 16km 오픈월드 & 1024 Fallback 하이트맵)
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 1500;
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
@@ -81,7 +81,7 @@ RedGPU.init(
                 aoIntensity: 1.0
             }
         ].map(cfg => {
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer({
+            const layer = new RedGPU.Landscape.LandscapeLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -213,12 +213,12 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: false});
             folderLOD.addBinding(landscape, 'componentSizeQuads', {
                 options: {
-                    16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    16: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    32: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    64: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', () => {
                 updateConfigValues();
@@ -226,10 +226,10 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             folderLOD.addBinding(landscape, 'lod0SizeQuads', {
                 options: {
-                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    64: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', () => {
                 updateConfigValues();
@@ -423,3 +423,4 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         }
     });
 };
+

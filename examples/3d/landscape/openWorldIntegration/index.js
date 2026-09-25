@@ -79,7 +79,7 @@ RedGPU.init(
         // -----------------------------------------------------------------
         // 5. 8km x 8km 랜드스케이프 지형 및 256개 타일 스트리밍 설정
         // -----------------------------------------------------------------
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [8000, 8000];
         landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
@@ -113,7 +113,7 @@ RedGPU.init(
         ];
 
         const layers = layerConfigs.map((cfg) => {
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer(redGPUContext, {
+            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -585,7 +585,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                const grassType = new RedGPU.Display.Landscape.GrassType(redGPUContext, {
+                const grassType = new RedGPU.Landscape.GrassType(redGPUContext, {
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
@@ -668,3 +668,4 @@ function initFoliageField({redGPUContext, foliageManager, onFoliageTypeAdded}) {
         }
     );
 }
+

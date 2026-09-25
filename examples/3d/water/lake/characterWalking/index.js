@@ -47,7 +47,7 @@ RedGPU.init(
         };
 
         // 6. 호수 수체(WaterLake) 생성 및 듀얼 노멀 바인딩
-        const lake = new RedGPU.Display.Water.WaterLake(redGPUContext, 160, 160, 80, 80);
+        const lake = new RedGPU.Water.WaterLake(redGPUContext, 160, 160, 80, 80);
         lake.waterLevel = 0.5;
 
         // 기본 수면 노멀 및 디테일 노멀 텍스처 바인딩
@@ -297,3 +297,4 @@ function renderTestPane(redGPUContext, lake, characterController, directionalLig
         }
     });
 }
+

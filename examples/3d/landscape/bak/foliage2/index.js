@@ -55,7 +55,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 600;
 
 
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
@@ -108,7 +108,7 @@ RedGPU.init(
                 aoIntensity: 1.0
             }
         ].map(cfg => {
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer({
+            const layer = new RedGPU.Landscape.LandscapeLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -590,3 +590,4 @@ RedGPU.init(
         });
     }
 );
+

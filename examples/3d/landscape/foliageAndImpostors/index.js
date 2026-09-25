@@ -49,7 +49,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 400;
 
         // 5. 8km x 8km 랜드스케이프 지형 및 256 타일 스트리밍
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [8000, 8000];
         landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
@@ -76,7 +76,7 @@ RedGPU.init(
         ];
 
         const layers = layerConfigs.map(cfg => {
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer(redGPUContext, {
+            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -544,3 +544,4 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
         }
     );
 }
+

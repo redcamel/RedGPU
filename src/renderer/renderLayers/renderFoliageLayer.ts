@@ -1,6 +1,6 @@
 import View3D from "../../display/view/View3D";
-import Landscape from "../../display/landscape/core/Landscape";
-import LandscapeFoliageManager from "../../display/landscape/foliage/LandscapeFoliageManager";
+import Landscape from "../../landscape/core/Landscape";
+import LandscapeFoliageManager from "../../landscape/foliage/LandscapeFoliageManager";
 
 /**
  * [KO] Scene 내의 전체 Landscape가 소유한 Foliage 식생 시스템을 매 프레임 렌더 패스에 디스패치합니다 (Zero-GC / Direct Instancing).

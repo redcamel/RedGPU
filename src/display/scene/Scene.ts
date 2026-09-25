@@ -4,8 +4,8 @@ import ShadowManager from "../../shadow/ShadowManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
-import Landscape from "../landscape/core/Landscape";
-import type WaterLake from "../water/lake/WaterLake";
+import Landscape from "../../landscape/core/Landscape";
+import type WaterLake from "../../water/lake/WaterLake";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.

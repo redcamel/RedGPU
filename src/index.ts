@@ -42,6 +42,6 @@ export * as DefineGPUProperty from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
 export * as Physics from "./physics"
 export * from "./loader/gltf/animationLooper/AnimStateMachine";
-export * from "./display/landscape";
-export * from "./display/water";
+export * as Landscape from "./landscape";
+export * as Water from "./water";
 

@@ -154,7 +154,7 @@ RedGPU.init(
         for (let i = 0; i < poolConfigs.length; i++) {
             const cfg = poolConfigs[i];
             // 수영장 벽 내경에 딱 맞는 크기로 WaterLake 생성 (수영장 내경 = 물 크기)
-            const lake = new RedGPU.Display.Water.WaterLake(
+            const lake = new RedGPU.Water.WaterLake(
                 redGPUContext,
                 cfg.poolWidth,
                 cfg.poolHeight,
@@ -677,3 +677,4 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
         }
     });
 }
+

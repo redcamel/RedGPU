@@ -1,6 +1,6 @@
 import View3D from "../../display/view/View3D";
-import Landscape from "../../display/landscape/core/Landscape";
-import LandscapeGrassManager from "../../display/landscape/grass/LandscapeGrassManager";
+import Landscape from "../../landscape/core/Landscape";
+import LandscapeGrassManager from "../../landscape/grass/LandscapeGrassManager";
 
 /**
  * [KO] Scene 내의 전체 Landscape가 소유한 Grass 잔디 식생 시스템을 매 프레임 렌더 패스에 디스패치합니다 (Zero-GC / Multi-Draw Indirect).

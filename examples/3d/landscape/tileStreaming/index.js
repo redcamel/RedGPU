@@ -42,7 +42,7 @@ RedGPU.init(
 
         // [KO] 8km x 8km 대규모 랜드스케이프 지형 및 256개 타일 스트리밍 구성
         // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [8000, 8000];
         landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
@@ -99,7 +99,7 @@ RedGPU.init(
 
         const layers = layerConfigs.map(cfg => {
             const fileKey = cfg.name.toLowerCase();
-            const layer = new RedGPU.Display.Landscape.LandscapeLayer(redGPUContext, {
+            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${fileKey}.jpg`,
                 normalTexture: `${assetPath}${fileKey}_normal.jpg`,
@@ -497,3 +497,4 @@ function initCharacter({
         }
     );
 }
+

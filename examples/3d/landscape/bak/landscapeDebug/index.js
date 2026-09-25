@@ -23,7 +23,7 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.heightScale = 1500;
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
@@ -125,20 +125,20 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             const folderLOD = pane.addFolder({title: 'LOD', expanded: true});
             folderLOD.addBinding(landscape, 'componentSizeQuads', {
                 options: {
-                    16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    16: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    32: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    64: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', () => updateConfigValues());
             folderLOD.addBinding(landscape, 'lod0SizeQuads', {
                 options: {
-                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    64: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', () => updateConfigValues());
             folderLOD.addBinding(landscape, 'maxLODLevel', {
@@ -235,3 +235,4 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
         }
     });
 };
+
