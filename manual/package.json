@@ -19,6 +19,6 @@
     "typescript": "^5.9.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
-    "vitepress-sidebar": "^1.33.1"
+    "vitepress-sidebar": "^1.40.0"
   }
 }
