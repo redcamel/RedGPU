@@ -745,7 +745,7 @@ export async function createGPUTextureFromKTX2({
             } else {
                 // Raw KTX2 (사전 압축 / 비압축 KTX2) 처리
                 const levelInfo = container.levels[mipLevel];
-                let levelDataView = new Uint8Array(
+                let levelDataView: Uint8Array<any> = new Uint8Array(
                     levelInfo.levelData.buffer,
                     levelInfo.levelData.byteOffset,
                     levelInfo.levelData.byteLength
