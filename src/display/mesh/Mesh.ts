@@ -1,5 +1,4 @@
 import {mat4} from "gl-matrix";
-import {Function} from "wgsl_reflect";
 import {OrthographicCamera} from "../../camera";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
