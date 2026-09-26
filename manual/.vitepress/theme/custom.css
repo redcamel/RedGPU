@@ -525,4 +525,76 @@
     transform: rotate(-90deg); /* 접힘 상태: 오른쪽(>) */
 }
 
+/* ============================================================
+   우측 목차 Accessor 배지 (동일 규격 고정 크기)
+   ============================================================ */
+
+/* 목차 하위 링크 flex 정렬 보장 */
+.VPDocAsideOutline .VPDocOutlineItem li:not(.has-nested) > .outline-link {
+    display: flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0px;
+}
+
+.VPDocAsideOutline .accessor-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* 셋 다 정확히 동일한 고정 너비 */
+    height: 16px; /* 셋 다 정확히 동일한 고정 높이 */
+    font-size: 9px;
+    font-weight: 750;
+    line-height: 1;
+    border-radius: 4px;
+    margin-right: 6px; /* 속성명과의 간격 */
+    padding: 0;
+    flex-shrink: 0;
+    letter-spacing: -0.3px;
+    font-family: var(--vp-font-family-mono, monospace);
+    user-select: none;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+/* g/s : Getter & Setter 둘 다 있음 */
+.VPDocAsideOutline .accessor-badge.badge-gs {
+    background-color: rgba(99, 102, 241, 0.12);
+    color: #4f46e5;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-gs {
+    background-color: rgba(129, 140, 248, 0.18);
+    color: #a5b4fc;
+    border-color: rgba(129, 140, 248, 0.35);
+}
+
+/* get : Getter만 있음 (읽기 전용) */
+.VPDocAsideOutline .accessor-badge.badge-get {
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-get {
+    background-color: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+/* set : Setter만 있음 (쓰기 전용) */
+.VPDocAsideOutline .accessor-badge.badge-set {
+    background-color: rgba(245, 158, 11, 0.12);
+    color: #d97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.dark .VPDocAsideOutline .accessor-badge.badge-set {
+    background-color: rgba(251, 191, 36, 0.18);
+    color: #fde047;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+
+
 

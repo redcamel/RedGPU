@@ -128,6 +128,97 @@ export function updateOutlineElements() {
     } else if (btnAll) {
         btnAll.remove();
     }
+
+    // 3. 프로퍼티(Accessors) 항목들에 g/s, get, set 배지 자동 주입
+    applyAccessorBadges(outlineRoot);
+}
+
+/**
+ * 프로퍼티(Accessors) 항목들에 g/s, get, set 배지 부여 (동일 규격 크기)
+ */
+function applyAccessorBadges(outlineRoot) {
+    const nestedLis = outlineRoot.querySelectorAll('.VPDocOutlineItem li.has-nested');
+    if (!nestedLis.length) return;
+
+    nestedLis.forEach(parentLi => {
+        const parentLink = parentLi.querySelector(':scope > .outline-link');
+        if (!parentLink) return;
+
+        const text = (parentLink.textContent || '').trim().toLowerCase();
+        const href = (parentLink.getAttribute('href') || '').toLowerCase();
+
+        // 'Properties', '속성', 'Accessors', '상속받은 속성' 등 프로퍼티 관련 폴더인지 판별
+        const isPropSection = text.includes('properties') || text.includes('속성') || text.includes('accessors') ||
+            href.includes('properties') || href.includes('accessors');
+
+        if (!isPropSection) return;
+
+        const childLinks = parentLi.querySelectorAll(':scope > ul > li > .outline-link');
+        childLinks.forEach(link => {
+            const rawHref = link.getAttribute('href');
+            if (!rawHref || !rawHref.startsWith('#')) return;
+
+            let badge = link.querySelector('.accessor-badge');
+
+            const targetId = decodeURIComponent(rawHref.slice(1));
+            const targetEl = document.getElementById(targetId);
+            if (!targetEl) return;
+
+            let hasGet = false;
+            let hasSet = false;
+
+            let curr = targetEl.nextElementSibling;
+            while (curr) {
+                const tagName = curr.tagName ? curr.tagName.toUpperCase() : '';
+                // 다음 H2나 H3가 나오면 탐색 종료
+                if (tagName === 'H2' || tagName === 'H3') {
+                    break;
+                }
+
+                if (tagName === 'H4') {
+                    const h4Text = curr.textContent || '';
+                    if (h4Text.includes('Get Signature') || curr.id?.includes('get-signature')) {
+                        hasGet = true;
+                    } else if (h4Text.includes('Set Signature') || curr.id?.includes('set-signature')) {
+                        hasSet = true;
+                    }
+                }
+                curr = curr.nextElementSibling;
+            }
+
+            if (!hasGet && !hasSet) {
+                if (badge) badge.remove();
+                return;
+            }
+
+            let badgeText = '';
+            let badgeClass = '';
+
+            if (hasGet && hasSet) {
+                badgeText = 'G/S';
+                badgeClass = 'badge-gs';
+            } else if (hasGet) {
+                badgeText = 'GET';
+                badgeClass = 'badge-get';
+            } else {
+                badgeText = 'SET';
+                badgeClass = 'badge-set';
+            }
+
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'accessor-badge ' + badgeClass;
+                badge.textContent = badgeText;
+                link.insertBefore(badge, link.firstChild);
+            } else {
+                badge.className = 'accessor-badge ' + badgeClass;
+                badge.textContent = badgeText;
+                if (link.firstChild !== badge) {
+                    link.insertBefore(badge, link.firstChild);
+                }
+            }
+        });
+    });
 }
 
 /**
