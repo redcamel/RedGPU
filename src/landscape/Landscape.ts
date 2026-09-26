@@ -1170,24 +1170,6 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * console.log(landscape.lodColors);
-     * ```
-     *
-     * [KO]
-     * LOD 디버그 렌더링에 사용되는 LOD 레벨별 RGBA 색상 배열을 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets the array of RGBA colors used for LOD debug visualization per LOD level. (Read-only)
-     *
-     * @category Landscape
-     */
-    get lodColors(): readonly (readonly [number, number, number, number])[] {
-        return this.#lodColorsRGBA;
-    }
-
-    /**
-     * @example
-     * ```ts
      * console.log(landscape.lodDistancesSq);
      * ```
      *

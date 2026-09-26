@@ -1,13 +1,11 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
 import Landscape from "../../Landscape";
-import {formatLODColorRGBA, LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../LANDSCAPE_DEFAULT_LOD_COLORS";
+import {LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../LANDSCAPE_DEFAULT_LOD_COLORS";
 
 const UNLOADED_COLOR = 'rgba(255, 255, 255, 0.08)';
 
 export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #ctx: CanvasRenderingContext2D | null;
-    #cachedLODColorStrings: readonly string[] = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
-    #lastLODColorsRef: any = null;
 
     constructor(
         landscape: Landscape,
@@ -22,20 +20,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         this.#ctx = this.canvas.getContext('2d');
     }
 
-    #updateCachedColors(): void {
-        const lodColors = this.landscape?.lodColors;
-        if (!lodColors || lodColors.length === 0) {
-            this.#cachedLODColorStrings = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
-            this.#lastLODColorsRef = null;
-            return;
-        }
-
-        if (this.#lastLODColorsRef !== lodColors) {
-            this.#lastLODColorsRef = lodColors;
-            this.#cachedLODColorStrings = Object.freeze(lodColors.map(c => formatLODColorRGBA(c, 0.75)));
-        }
-    }
-
     update(): void {
         if (!this.visible || !this.#ctx || !this.landscape) return;
 
@@ -47,8 +31,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         this.#ctx.save();
         this.#ctx.scale(dpr, dpr);
 
-        this.#updateCachedColors();
-        const lodColorStrings = this.#cachedLODColorStrings;
+        const lodColorStrings = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
         const maxColorIndex = lodColorStrings.length - 1;
 
         const cameraState = this.getCameraState();
@@ -104,7 +87,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     override destroy(): void {
         super.destroy();
         this.#ctx = null;
-        this.#cachedLODColorStrings = null;
     }
 }
 

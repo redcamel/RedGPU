@@ -127,14 +127,14 @@ class ResourceBase extends RedGPUObject {
      * [EN] Whether adding a listener
      */
     #manageResourceState(isAddingListener: boolean) {
-        const {resourceManager} = this;
-        if (this.constructor.name === 'Sampler') {
-            return
+        if (!this.#resourceManagerKey) {
+            return;
         }
+        const {resourceManager} = this;
         if (resourceManager) {
-            const targetResourceManagedState = resourceManager[this.#resourceManagerKey]
+            const targetResourceManagedState = resourceManager[this.#resourceManagerKey];
             if (!targetResourceManagedState) {
-                consoleAndThrowError('need managedStateKey', this.constructor.name)
+                consoleAndThrowError('need managedStateKey', this.#resourceManagerKey);
             }
             const targetState = targetResourceManagedState?.table.get(this.cacheKey);
             if (targetState) {
