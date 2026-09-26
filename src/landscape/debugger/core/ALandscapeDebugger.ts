@@ -105,34 +105,6 @@ function ensureDebuggerStyles(): void {
             display: block !important;
             z-index: 2 !important;
         }
-        .redgpu-landscape-hud {
-            position: fixed !important;
-            top: auto !important;
-            right: auto !important;
-            box-sizing: border-box !important;
-            margin: 0 !important;
-            z-index: 999999 !important;
-            padding: 12px 14px !important;
-            background-color: rgba(15, 23, 42, 0.92) !important;
-            backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            border-radius: 8px !important;
-            color: #e2e8f0 !important;
-            font-family: monospace, sans-serif !important;
-            font-size: 12px !important;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
-            pointer-events: none !important;
-            display: block !important;
-        }
-        .redgpu-landscape-hud-title {
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            letter-spacing: 0.5px !important;
-            margin-bottom: 8px !important;
-            color: #38bdf8 !important;
-            border-bottom: 1px solid rgba(56, 189, 248, 0.25) !important;
-            padding-bottom: 6px !important;
-        }
     `;
     document.head.appendChild(style);
 }

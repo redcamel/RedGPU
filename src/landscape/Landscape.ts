@@ -135,7 +135,6 @@ export class Landscape extends Object3DContainer {
     #tileSizeTuple: [number, number] = [0, 0];
 
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
-    #frustumCullingActive: boolean = false;
 
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -1053,25 +1052,6 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * landscape.lodDitherStartRatio = 0.8;
-     * ```
-     *
-     * [KO]
-     * {@link RedGPU.Landscape.Landscape.lodFadeStartRatio}의 별칭(Alias) 프로퍼티입니다.
-     *
-     * [EN]
-     * Alias property for {@link RedGPU.Landscape.Landscape.lodFadeStartRatio}.
-     *
-     * @category Landscape
-     */
-    get lodDitherStartRatio(): number {
-        return this.#lodFadeStartRatio;
-    }
-
-
-    /**
-     * @example
-     * ```ts
      * // 타일 스트리밍 로딩 반경을 3000으로 확장
      * landscape.loadingRadius = 3000.0;
      * ```
@@ -1203,28 +1183,6 @@ export class Landscape extends Object3DContainer {
 
     set lodMorphStartRatio(value: number) {
         this.lodGeomorphStartRatio = value;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * console.log(`프러스텀 컬링 활성 여부: ${landscape.frustumCullingActive}`);
-     * ```
-     *
-     * [KO]
-     * 직전 프레임 업데이트 시 뷰 프러스텀 컬링(Frustum Culling)이 활성화되었는지 여부를 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets whether view frustum culling was active during the last frame update. (Read-only)
-     *
-     * @category Landscape
-     */
-    get frustumCullingActive(): boolean {
-        return this.#frustumCullingActive;
-    }
-
-    set lodDitherStartRatio(value: number) {
-        this.lodFadeStartRatio = value;
     }
 
     /**
@@ -1511,7 +1469,6 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.update(camX, camZ, camY);
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
-        this.#frustumCullingActive = !!frustumPlanes;
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
 
@@ -1578,7 +1535,7 @@ export class Landscape extends Object3DContainer {
             this.#onPreProcessComputePass
         );
 
-        this.#debuggerManager.update(camera, renderViewStateData);
+        this.#debuggerManager.update(camera);
     }
 
     /**

@@ -1,15 +1,12 @@
 import Landscape from "../../Landscape";
-import LandscapeHUDDebugger from "../hud/LandscapeHUDDebugger";
 import LandscapeSpatialGridDebugger from "../spatialGrid/LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "../vht/LandscapeVHTDebugger";
 import LandscapeVNTDebugger from "../vnt/LandscapeVNTDebugger";
 import LandscapeVBTDebugger from "../vbt/LandscapeVBTDebugger";
 import LandscapeVBTNormalDebugger from "../vbt/LandscapeVBTNormalDebugger";
 import LandscapeVBTORMDebugger from "../vbt/LandscapeVBTORMDebugger";
-import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
 
 export interface LandscapeDebuggerManagerOptions {
-    hud?: boolean;
     spatialGrid?: boolean;
     vht?: boolean;
     vnt?: boolean;
@@ -22,7 +19,6 @@ export interface LandscapeDebuggerManagerOptions {
 export class LandscapeDebuggerManager {
     #landscape: Landscape;
 
-    #hudDebugger: LandscapeHUDDebugger | null = null;
     #spatialGridDebugger: LandscapeSpatialGridDebugger | null = null;
     #vhtDebugger: LandscapeVHTDebugger | null = null;
     #vntDebugger: LandscapeVNTDebugger | null = null;
@@ -30,7 +26,6 @@ export class LandscapeDebuggerManager {
     #vbtNormalDebugger: LandscapeVBTNormalDebugger | null = null;
     #vbtORMDebugger: LandscapeVBTORMDebugger | null = null;
 
-    #enableHUD: boolean = false;
     #enableSpatialGrid: boolean = false;
     #enableVHT: boolean = false;
     #enableVNT: boolean = false;
@@ -42,7 +37,6 @@ export class LandscapeDebuggerManager {
     constructor(landscape: Landscape, options?: LandscapeDebuggerManagerOptions) {
         this.#landscape = landscape;
 
-        if (options?.hud) this.hud = true;
         if (options?.spatialGrid) this.spatialGrid = true;
         if (options?.vht) this.vht = true;
         if (options?.vnt) this.vnt = true;
@@ -53,24 +47,6 @@ export class LandscapeDebuggerManager {
 
     get landscape(): Landscape {
         return this.#landscape;
-    }
-
-    get hud(): boolean {
-        return this.#enableHUD;
-    }
-
-    set hud(val: boolean) {
-        this.#enableHUD = val;
-        if (val && !this.#hudDebugger) {
-            this.#hudDebugger = new LandscapeHUDDebugger(this.#landscape, null, {
-                width: 320,
-                left: 12,
-                bottom: 120
-            });
-        }
-        if (this.#hudDebugger) {
-            this.#hudDebugger.visible = this.#visible && val;
-        }
     }
 
     get spatialGrid(): boolean {
@@ -195,10 +171,6 @@ export class LandscapeDebuggerManager {
         }
     }
 
-    get hudDebugger(): LandscapeHUDDebugger | null {
-        return this.#hudDebugger;
-    }
-
     get spatialGridDebugger(): LandscapeSpatialGridDebugger | null {
         return this.#spatialGridDebugger;
     }
@@ -233,7 +205,6 @@ export class LandscapeDebuggerManager {
 
     set visible(val: boolean) {
         this.#visible = val;
-        if (this.#hudDebugger) this.#hudDebugger.visible = val && this.#enableHUD;
         if (this.#spatialGridDebugger) this.#spatialGridDebugger.visible = val && this.#enableSpatialGrid;
         if (this.#vhtDebugger) this.#vhtDebugger.visible = val && this.#enableVHT;
         if (this.#vntDebugger) this.#vntDebugger.visible = val && this.#enableVNT;
@@ -250,13 +221,8 @@ export class LandscapeDebuggerManager {
         this.visible = false;
     }
 
-    update(camera?: any, renderViewStateData?: RenderViewStateData): void {
+    update(camera?: any): void {
         if (!this.#visible) return;
-
-        if (this.#enableHUD && this.#hudDebugger && this.#hudDebugger.visible) {
-            if (camera) this.#hudDebugger.camera = camera;
-            this.#hudDebugger.update(renderViewStateData);
-        }
 
         if (this.#enableSpatialGrid && this.#spatialGridDebugger && this.#spatialGridDebugger.visible) {
             if (camera) this.#spatialGridDebugger.camera = camera;
@@ -290,10 +256,6 @@ export class LandscapeDebuggerManager {
     }
 
     destroy(): void {
-        if (this.#hudDebugger) {
-            this.#hudDebugger.destroy();
-            this.#hudDebugger = null;
-        }
         if (this.#spatialGridDebugger) {
             this.#spatialGridDebugger.destroy();
             this.#spatialGridDebugger = null;
