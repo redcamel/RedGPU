@@ -265,7 +265,9 @@ export class Landscape extends Object3DContainer {
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtAtlasTexture, vntAtlasTexture);
-        this.#foliageManager = new LandscapeFoliageManager(this);
+        this.#foliageManager = new LandscapeFoliageManager(this, () => {
+            this.#updateLandscapeUniforms();
+        });
         this.#grassManager = new LandscapeGrassManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
@@ -1518,24 +1520,6 @@ export class Landscape extends Object3DContainer {
         this.#componentCountTuple[1] = this.#componentCountZ;
         this.#tileSizeTuple[0] = this.#tileSizeX;
         this.#tileSizeTuple[1] = this.#tileSizeZ;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // 수동으로 지형 유니폼 버퍼 동기화
-     * landscape.updateLandscapeUniforms();
-     * ```
-     *
-     * [KO]
-     * 지형 인스턴스 버퍼의 유니폼 데이터(월드 크기, 높이 스케일, LOD 파라미터, 그림자 설정 등)를 GPU 버퍼로 강제 갱신합니다.
-     *
-     * [EN]
-     * Manually synchronizes landscape instance uniform data (world size, height scale, LOD parameters, shadow settings, etc.) to the GPU buffer.
-     *
-     */
-    updateLandscapeUniforms(): void {
-        this.#updateLandscapeUniforms();
     }
 
     #updateLandscapeUniforms(): void {

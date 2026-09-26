@@ -30,6 +30,7 @@ class LandscapeFoliageManager {
     #subCellSize: number = 100.0;
     #streamingRadius: number = 600.0;
     #debugSubCellColoration: boolean = false;
+    #onUniformUpdateNeeded: (() => void) | null = null;
 
     #windEnabled: boolean = true;
     #windDirection: [number, number] = [1.0, 0.5];
@@ -38,8 +39,9 @@ class LandscapeFoliageManager {
     #windFrequency: number = 0.08;
     #windFlutterStrength: number = 0.5;
 
-    constructor(landscape: Landscape) {
+    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         this.#landscape = landscape;
+        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
         this.#spatialGrid = new LandscapeFoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
 
@@ -139,7 +141,7 @@ class LandscapeFoliageManager {
         if (this.#subCellSize !== clamped) {
             this.#subCellSize = clamped;
             this.#spatialGrid.subCellSize = clamped;
-            this.#landscape?.updateLandscapeUniforms?.();
+            this.#onUniformUpdateNeeded?.();
 
             const count = this.#typeList.length;
             for (let i = 0; i < count; i++) {
@@ -158,7 +160,7 @@ class LandscapeFoliageManager {
         if (this.#streamingRadius !== clamped) {
             this.#streamingRadius = clamped;
             this.#spatialGrid.streamingRadius = clamped;
-            this.#landscape?.updateLandscapeUniforms?.();
+            this.#onUniformUpdateNeeded?.();
         }
     }
 
@@ -170,7 +172,7 @@ class LandscapeFoliageManager {
         const boolVal = !!val;
         if (this.#debugSubCellColoration !== boolVal) {
             this.#debugSubCellColoration = boolVal;
-            this.#landscape?.updateLandscapeUniforms?.();
+            this.#onUniformUpdateNeeded?.();
         }
     }
 
