@@ -424,3 +424,97 @@
 .VPSidebarItem .api-badge.badge-e {
     background-color: #7d4099;
 }
+
+/* ============================================================
+   우측 목차(Outline) 접기/펼치기(Collapsible Tree) 스타일
+   ============================================================ */
+
+/* 목차 헤더 영역 및 '모두 접기/펼치기' 버튼 */
+.VPDocAsideOutline .content {
+    position: relative;
+}
+
+.VPDocAsideOutline .outline-toggle-all-btn {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0 7px;
+    border-radius: 4px;
+    border: 1px solid var(--vp-c-divider);
+    background-color: var(--vp-c-bg-soft);
+    color: var(--vp-c-text-2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.VPDocAsideOutline .outline-toggle-all-btn:hover {
+    color: var(--vp-c-brand-1);
+    border-color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-default-soft);
+}
+
+/* 하위 목록(ul)을 가진 상위 목차 li */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested {
+    position: relative;
+}
+
+/* 상위 카테고리 링크: 가로 전체 클릭 인터랙션 */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested > .outline-link {
+    padding-right: 44px !important;
+    cursor: pointer;
+    user-select: none;
+    border-radius: 4px;
+}
+
+/* 상위 카테고리 행에 마우스 호버 시 화살표 아이콘도 함께 반응 */
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested:hover > .outline-toggle-btn {
+    color: var(--vp-c-text-1);
+}
+
+/* 개별 접기/펼치기 캐럿 버튼 */
+.VPDocAsideOutline .outline-toggle-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--vp-c-text-3);
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s, background-color 0.2s;
+    z-index: 2;
+}
+
+.VPDocAsideOutline .outline-toggle-btn:hover {
+    color: var(--vp-c-brand-1);
+    background-color: var(--vp-c-default-soft);
+}
+
+.VPDocAsideOutline .outline-toggle-btn svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+    transform: rotate(0deg); /* 펼침 상태: 아래(v) */
+    pointer-events: none; /* 클릭 이벤트가 버튼으로 확실히 전파되도록 설정 */
+}
+
+/* 접힌 상태 (Collapsed) */
+.VPDocAsideOutline .VPDocOutlineItem li.is-collapsed > ul {
+    display: none !important;
+}
+
+.VPDocAsideOutline .VPDocOutlineItem li.is-collapsed > .outline-toggle-btn svg {
+    transform: rotate(-90deg); /* 접힘 상태: 오른쪽(>) */
+}
+
+

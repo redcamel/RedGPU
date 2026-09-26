@@ -203,8 +203,8 @@ const sortSidebar = (sidebar, parentContext = {}) => {
 
 // 지원 언어 설정 (이 배열을 기준으로 모든 설정이 생성됨)
 const languages = [
-    { code: 'en', label: 'English', entry: '/en/introduction/' },
-    { code: 'ko', label: '한국어', entry: '/ko/introduction/' }
+    {code: 'en', label: 'English', entry: '/en/introduction/', outlineTitle: 'On this page'},
+    {code: 'ko', label: '한국어', entry: '/ko/introduction/', outlineTitle: '페이지 목차'}
 ];
 
 // --------------------------------------------------------------------------
@@ -345,6 +345,10 @@ export default withMermaid(defineConfig({
                 link: `/${lang.code}/`, // 언어 전환의 기준점이 되는 경로
                 themeConfig: {
                     logoLink: `/RedGPU/manual/${lang.code}/`,
+                    outline: {
+                        level: [2, 3],
+                        label: lang.outlineTitle || 'On this page'
+                    },
                     // 언어별 네비게이션 바
                     nav: [
                         { text: 'Getting Started', link: lang.entry },
@@ -469,6 +473,7 @@ export default withMermaid(defineConfig({
         },
 
         outline: {
+            level: [2, 3],
             label: 'On this page'
         }
     }

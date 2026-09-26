@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme'
-import { h, watch, nextTick } from 'vue'
-import { useRouter } from 'vitepress'
+import {h, nextTick, onMounted, watch} from 'vue'
+import {useRouter} from 'vitepress'
 import './custom.css'
 import './mermaid.css'
 import HeroVideo from './components/HeroVideo.vue'
@@ -9,7 +9,8 @@ import ExampleFrame from './components/ExampleFrame.vue'
 import CodePen from './components/CodePen.vue'
 import MermaidResponsive from './components/MermaidResponsive.vue'
 import GlobalFooter from './components/GlobalFooter.vue'
-import pkg from '../../../package.json' with { type: 'json' }
+import {scheduleOutlineUpdate, setupOutlineToggle} from './outlineToggle.js'
+import pkg from '../../../package.json' with {type: 'json'}
 
 export default {
     extends: DefaultTheme,
@@ -26,6 +27,10 @@ export default {
     // setup 훅에서 경로 감시 로직 추가
     setup() {
         const { route } = useRouter();
+
+        onMounted(() => {
+            setupOutlineToggle();
+        });
 
         const fixBreadcrumbs = () => {
             if (typeof window === 'undefined') return;
@@ -62,6 +67,9 @@ export default {
             if (route.path.includes('/api/')) {
                 fixBreadcrumbs();
             }
+            nextTick(() => {
+                scheduleOutlineUpdate();
+            });
         }, { immediate: true });
     },
 
