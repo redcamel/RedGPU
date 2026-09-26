@@ -128,42 +128,109 @@ const filterLanguageFiles = (dir, currentLang) => {
                 processed = processed.replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
             }
 
-            // 상속된 속성/메서드를 따로 추출하여 맨 아래 details(드롭다운)로 묶는 로직
-            if (processed.includes('\n### ')) {
-                const parts = processed.split('\n### ');
-                const mainParts = [];
-                const inheritedParts = [];
-                mainParts.push(parts[0]); // 첫 번째 클래스 헤더 정보 파트는 무조건 보존
+            // Constructor 이전의 클래스 대표 Example만 H3로 유지하고,
+            // Constructor 이후(생성자, 프로퍼티, 메서드)의 ### Example은 #### Example로 변환하여 우측 목차(H2, H3)에서 제외
+            if (processed.includes('## Constructors') || processed.includes('## 생성자')) {
+                const linesAfterFilter = processed.split('\n');
+                let pastConstructors = false;
+                for (let i = 0; i < linesAfterFilter.length; i++) {
+                    const l = linesAfterFilter[i].trim();
+                    if (l.startsWith('## Constructors') || l.startsWith('## 생성자')) {
+                        pastConstructors = true;
+                    } else if (pastConstructors && (l === '### Example' || l === '### 예제')) {
+                        linesAfterFilter[i] = '#' + linesAfterFilter[i]; // '### Example' -> '#### Example'
+                    }
+                }
+                processed = linesAfterFilter.join('\n');
+            }
 
-                for (let i = 1; i < parts.length; i++) {
-                    const part = parts[i];
-                    const trimmedPart = part.trim();
+            // 상속된 속성과 메서드를 분리하여 각각 '상속받은 속성', '상속받은 메서드' H2 아래로 배치하는 로직
+            if (processed.includes('Inherited from') || processed.includes('#### Inherited from')) {
+                const lines = processed.split('\n');
+                const mainSections = [];
+                let currentH2 = '';
+                let currentMemberLines = [];
+                let currentMemberIsH3 = false;
+                const inheritedProperties = [];
+                const inheritedMethods = [];
 
-                    // "Inherited from" 또는 "#### Inherited from"이 명시되어 있는 상속받은 멤버인 경우
-                    if (part.includes('Inherited from') || part.includes('#### Inherited from')) {
-                        // 생성자(Constructor) 정보는 지우지 않고 무조건 메인 본문에 보존
-                        if (trimmedPart.startsWith('Constructor')) {
-                            mainParts.push('### ' + part);
+                const finalizeMember = () => {
+                    if (currentMemberLines.length === 0) return;
+                    const memberText = currentMemberLines.join('\n');
+                    const trimmed = memberText.trim();
+
+                    if (currentMemberIsH3) {
+                        const isInherited = (memberText.includes('Inherited from') || memberText.includes('#### Inherited from'))
+                            && !trimmed.startsWith('### Constructor');
+                        if (isInherited) {
+                            const isMethod = currentH2.toLowerCase().includes('method') || currentH2.includes('메서드');
+                            if (isMethod) {
+                                inheritedMethods.push(trimmed);
+                            } else {
+                                inheritedProperties.push(trimmed);
+                            }
                         } else {
-                            // 그 외의 상속 프로퍼티 및 메서드는 따로 모아둡니다.
-                            inheritedParts.push('### ' + part);
+                            if (mainSections.length === 0) {
+                                mainSections.push({h2: currentH2, members: []});
+                            }
+                            mainSections[mainSections.length - 1].members.push(trimmed);
                         }
                     } else {
-                        mainParts.push('### ' + part);
+                        if (mainSections.length === 0) {
+                            mainSections.push({h2: currentH2, members: []});
+                        }
+                        mainSections[mainSections.length - 1].members.push(trimmed);
+                    }
+                    currentMemberLines = [];
+                    currentMemberIsH3 = false;
+                };
+
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    const trimmed = line.trim();
+
+                    if (trimmed.startsWith('## ')) {
+                        finalizeMember();
+                        currentH2 = trimmed;
+                        mainSections.push({h2: currentH2, members: []});
+                    } else if (trimmed.startsWith('### ')) {
+                        finalizeMember();
+                        currentMemberIsH3 = true;
+                        currentMemberLines.push(line);
+                    } else {
+                        currentMemberLines.push(line);
+                    }
+                }
+                finalizeMember();
+
+                // 메인 본문 재구성 (자식이 모두 상속으로 빠져나가 껍데기만 남은 빈 H2 섹션은 제거)
+                const finalMainParts = [];
+                for (const sec of mainSections) {
+                    if (sec.members.length > 0) {
+                        if (sec.h2) finalMainParts.push(sec.h2);
+                        finalMainParts.push(sec.members.join('\n\n***\n\n'));
                     }
                 }
 
-                let finalContent = mainParts.join('\n');
+                let finalContent = finalMainParts.join('\n\n');
+                const isKo = currentLang === 'ko';
 
-                // 모아둔 상속 멤버가 있다면 본문 맨 아래에 접고 펼칠 수 있는 details 태그로 묶어서 추가
-                if (inheritedParts.length > 0) {
-                    const isKo = currentLang === 'ko';
-                    const sectionTitle = isKo ? '상속받은 멤버' : 'Inherited Members';
+                if (inheritedProperties.length > 0) {
+                    const sectionTitle = isKo ? '상속받은 속성' : 'Inherited Properties';
                     const summaryText = isKo
-                        ? '상속받은 속성 및 메서드 보기 (클릭하여 확장)'
-                        : 'View inherited properties and methods (Click to expand)';
+                        ? '상속받은 속성 보기 (클릭하여 확장)'
+                        : 'View inherited properties (Click to expand)';
 
-                    finalContent += `\n\n***\n\n## ${sectionTitle}\n\n<details>\n<summary>${summaryText}</summary>\n\n${inheritedParts.join('\n')}\n\n</details>\n`;
+                    finalContent += `\n\n***\n\n## ${sectionTitle}\n\n<details>\n<summary>${summaryText}</summary>\n\n${inheritedProperties.join('\n\n***\n\n')}\n\n</details>\n`;
+                }
+
+                if (inheritedMethods.length > 0) {
+                    const sectionTitle = isKo ? '상속받은 메서드' : 'Inherited Methods';
+                    const summaryText = isKo
+                        ? '상속받은 메서드 보기 (클릭하여 확장)'
+                        : 'View inherited methods (Click to expand)';
+
+                    finalContent += `\n\n***\n\n## ${sectionTitle}\n\n<details>\n<summary>${summaryText}</summary>\n\n${inheritedMethods.join('\n\n***\n\n')}\n\n</details>\n`;
                 }
 
                 processed = finalContent;
