@@ -1189,37 +1189,19 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.loadingRadius = value;
     }
 
-    /**
-     * [KO] 월드 좌표 `(x, z)` 위치에서의 지형 표면 높이(Y값)를 반환합니다.
-     * [EN] Returns the terrain surface height (Y coordinate) at the specified world `(x, z)` position.
-     *
-     * ### Example
-     * ```typescript
-     * const groundY = landscape.getTerrainHeightAt(100, 250);
-     * character.y = groundY;
-     * ```
-     *
-     * @param x -
-     * [KO] 월드 X 좌표
-     * [EN] World X coordinate
-     * @param z -
-     * [KO] 월드 Z 좌표
-     * [EN] World Z coordinate
-     * @returns
-     * [KO] 보간된 지형 높이값 (Y)
-     * [EN] Interpolated terrain height value (Y)
-     */
-    getTerrainHeightAt(x: number, z: number): number {
-        return this.getHeightAt(x, z);
-    }
-
     set maxLoadsPerFrame(value: number) {
         this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
     /**
-     * [KO] `getTerrainHeightAt`의 별칭으로, 월드 좌표 `(x, z)`에서의 지형 높이를 반환합니다.
-     * [EN] Alias for `getTerrainHeightAt`, returns the terrain height at world coordinates `(x, z)`.
+     * [KO] 월드 좌표 `(x, z)` 위치에서의 보간된 지형 표면 높이(Y값)를 반환합니다.
+     * [EN] Returns the interpolated terrain surface height (Y coordinate) at the specified world `(x, z)` position.
+     *
+     * ### Example
+     * ```typescript
+     * const groundY = landscape.getHeightAt(100, 250);
+     * character.y = groundY;
+     * ```
      *
      * @param x -
      * [KO] 월드 X 좌표
