@@ -124,7 +124,6 @@ export class Landscape extends Object3DContainer {
     #vbtGenerator: LandscapeVBTGenerator;
     #globalHeightmapUrl: string = '';
     #globalHeightTexture: GPUTexture | null = null;
-    #isGlobalHeightBaked: boolean = false;
 
     #maxLODLevel: number;
 
@@ -872,8 +871,6 @@ export class Landscape extends Object3DContainer {
         );
 
         this.#bakeGlobalVBT();
-
-        this.#isGlobalHeightBaked = true;
         this.#grassManager?.rebakeAll();
     }
 
@@ -970,23 +967,6 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * landscape.lodMorphStartRatio = 0.6;
-     * ```
-     *
-     * [KO]
-     * 지오모핑(Geomorphing) 보간이 시작되는 LOD 경계 거리 비율(0.0 ~ 0.99)을 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the start ratio (0.0 to 0.99) of the LOD boundary distance at which geomorphing begins.
-     *
-     */
-    get lodMorphStartRatio(): number {
-        return this.#lodGeomorphStartRatio;
-    }
-
-    /**
-     * @example
-     * ```ts
      * landscape.lodFadeStartRatio = 0.7;
      * ```
      *
@@ -1009,10 +989,10 @@ export class Landscape extends Object3DContainer {
      * ```
      *
      * [KO]
-     * LOD 지오모핑(Geomorphing) 보간 시작 비율(0.0 ~ 0.99)을 설정하거나 가져옵니다. {@link RedGPU.Landscape.Landscape.lodMorphStartRatio}와 동일합니다.
+     * LOD 지오모핑(Geomorphing) 보간 시작 비율(0.0 ~ 0.99)을 설정하거나 가져옵니다.
      *
      * [EN]
-     * Gets or sets the LOD geomorphing interpolation start ratio (0.0 to 0.99). Equivalent to {@link RedGPU.Landscape.Landscape.lodMorphStartRatio}.
+     * Gets or sets the LOD geomorphing interpolation start ratio (0.0 to 0.99).
      *
      * @defaultValue 0.7
      */
@@ -1146,10 +1126,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    set lodMorphStartRatio(value: number) {
-        this.lodGeomorphStartRatio = value;
-    }
-
     /**
      * @example
      * ```ts
@@ -1250,21 +1226,6 @@ export class Landscape extends Object3DContainer {
      */
     clearLayers(): void {
         this.#material.clearLayers();
-    }
-
-    /**
-     * [KO] 가상 베이스 텍스처(VBT) 아틀라스의 재베이킹을 요청합니다.
-     * [EN] Requests re-baking of the Virtual Base Texture (VBT) atlas.
-     *
-     * @param immediate -
-     * [KO] 디바운스 없이 즉시 베이킹할지 여부 (기본값: false)
-     * [EN] Whether to bake immediately without debounce (default: false)
-     * @param debounceDelayMs -
-     * [KO] 디바운스 대기 시간(ms) (기본값: 150)
-     * [EN] Debounce delay in milliseconds (default: 150)
-     */
-    requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
-        this.#material.requestVBTRebake(immediate, debounceDelayMs);
     }
 
     /**
