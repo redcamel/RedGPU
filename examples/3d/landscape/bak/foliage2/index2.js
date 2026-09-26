@@ -107,7 +107,7 @@ RedGPU.init(
                 aoIntensity: 1.0
             }
         ].map(cfg => {
-            const layer = new RedGPU.Landscape.LandscapeLayer({
+            return landscape.addLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -121,8 +121,6 @@ RedGPU.init(
                 aoIntensity: cfg.aoIntensity,
                 tintColor: '#ffffff'
             });
-            landscape.addLayer(layer);
-            return layer;
         });
 
         landscape.tileUrlResolver = (row, col) => {

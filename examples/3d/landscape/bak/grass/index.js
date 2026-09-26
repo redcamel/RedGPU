@@ -104,7 +104,7 @@ RedGPU.init(
         ];
 
         layerConfigs.forEach((cfg) => {
-            landscape.addLayer(new RedGPU.Landscape.LandscapeLayer({
+            landscape.addLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -117,7 +117,7 @@ RedGPU.init(
                 normalIntensity: cfg.normalIntensity,
                 aoIntensity: cfg.aoIntensity,
                 tintColor: '#ffffff'
-            }));
+            });
         });
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -234,7 +234,7 @@ RedGPU.init(
                 findMesh(loader.resultMesh);
 
                 if (baseMesh) {
-                    const baseClumpType = new RedGPU.Landscape.GrassType(redGPUContext, {
+                    const baseClumpType = grassManager.addGrassType({
                         name: '🌱 Ground Lawn Clump (Base)',
                         lods: [
                             {mesh: baseMesh, lodDistance: 110}
@@ -253,7 +253,6 @@ RedGPU.init(
                         bottomOffset: -0.25
                     });
 
-                    grassManager.addGrassType(baseClumpType);
                     testPane.addTypeToUI(baseClumpType, true);
                     grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
                     console.log('🌿 [Layer 1] Base Ground Clump registered successfully.');
@@ -352,7 +351,7 @@ RedGPU.init(
                     }
 
                     // 🌿 현실적인 실측 스케일 (높이 약 50~80cm의 자연스러운 들풀 비례)
-                    const grassType = new RedGPU.Landscape.GrassType(redGPUContext, {
+                    const grassType = grassManager.addGrassType({
                         name: displayNames[key] || key,
                         lods: lodConfigs,
                         densityPerHectare: densities[key] || 3500,
@@ -369,7 +368,6 @@ RedGPU.init(
                         bottomOffset: -0.18
                     });
 
-                    grassManager.addGrassType(grassType);
                     testPane.addTypeToUI(grassType);
                 });
 

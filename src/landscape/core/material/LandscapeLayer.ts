@@ -1,6 +1,6 @@
 import ColorRGBA from "../../../color/ColorRGBA";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import RedGPUContext from "../../../context/RedGPUContext";
+import type RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
 
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
@@ -57,13 +57,19 @@ export class LandscapeLayer {
     dirty: boolean = true;
     onChange?: () => void;
 
+    /**
+     * [KO] 지형 텍스처 레이어 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `Landscape.addLayer(options)` 팩토리 메서드를 사용하십시오.
+     * [EN] Creates a terrain texture layer instance.
+     * @remarks Do not instantiate directly; use the `Landscape.addLayer(options)` factory method instead.
+     */
     constructor(redGPUContextOrOptions: RedGPUContext | LandscapeLayerOptions, options?: LandscapeLayerOptions) {
         let actualOptions: LandscapeLayerOptions;
-        if (redGPUContextOrOptions instanceof RedGPUContext) {
-            this.#redGPUContext = redGPUContextOrOptions;
-            actualOptions = options!;
+        if (options) {
+            this.#redGPUContext = redGPUContextOrOptions as RedGPUContext;
+            actualOptions = options;
         } else {
-            actualOptions = redGPUContextOrOptions;
+            actualOptions = redGPUContextOrOptions as LandscapeLayerOptions;
         }
 
         this.name = actualOptions.name;

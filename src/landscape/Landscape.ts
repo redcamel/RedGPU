@@ -6,7 +6,7 @@ import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCA
 import LandscapeComponent from "./core/spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "./core/spatial/LandscapeInstanceBuffer";
 import LandscapeMaterial from "./core/material/LandscapeMaterial";
-import LandscapeLayer from "./core/material/LandscapeLayer";
+import LandscapeLayer, {LandscapeLayerOptions} from "./core/material/LandscapeLayer";
 import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
@@ -269,9 +269,10 @@ export class Landscape extends Object3DContainer {
         return this.#material.layers;
     }
 
-    addLayer(layer: LandscapeLayer): this {
+    addLayer(options: LandscapeLayerOptions): LandscapeLayer {
+        const layer = new LandscapeLayer(this.#redGPUContext, options);
         this.#material.addLayer(layer);
-        return this;
+        return layer;
     }
 
     removeLayer(layer: LandscapeLayer | string): boolean {

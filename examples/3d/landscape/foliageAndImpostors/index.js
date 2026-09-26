@@ -76,7 +76,7 @@ RedGPU.init(
         ];
 
         const layers = layerConfigs.map(cfg => {
-            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
+            return landscape.addLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -86,8 +86,6 @@ RedGPU.init(
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness
             });
-            landscape.addLayer(layer);
-            return layer;
         });
 
         scene.addLandscape(landscape);

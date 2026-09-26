@@ -113,7 +113,7 @@ RedGPU.init(
         ];
 
         const layers = layerConfigs.map((cfg) => {
-            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
+            return landscape.addLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${cfg.key}.jpg`,
                 normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
@@ -123,8 +123,6 @@ RedGPU.init(
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness
             });
-            landscape.addLayer(layer);
-            return layer;
         });
 
         scene.addLandscape(landscape);
@@ -585,7 +583,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                const grassType = new RedGPU.Landscape.GrassType(redGPUContext, {
+                const grassType = grassManager.addGrassType({
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
@@ -598,7 +596,6 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
                     bottomOffset: -0.25
                 });
 
-                grassManager.addGrassType(grassType);
                 onGrassTypeAdded?.(grassType, true);
             }
         }

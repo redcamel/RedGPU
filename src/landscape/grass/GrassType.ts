@@ -84,6 +84,12 @@ export class GrassType {
     #dirty: boolean = true;
     #onChanged: (() => void) | null = null;
 
+    /**
+     * [KO] 절차적 잔디 타입 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrassType(options)` 팩토리 메서드를 사용하십시오.
+     * [EN] Creates a procedural grass type instance.
+     * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrassType(options)` factory method instead.
+     */
     constructor(redGPUContext: RedGPUContext, options: GrassTypeOptions) {
         if (!options.lods || options.lods.length === 0) {
             throw new Error(`[GrassType] 'lods' array must be provided with at least one LOD entry!`);

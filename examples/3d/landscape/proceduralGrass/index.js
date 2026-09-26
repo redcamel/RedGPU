@@ -96,7 +96,7 @@ RedGPU.init(
 
         const layers = layerConfigs.map(cfg => {
             const fileKey = cfg.name.toLowerCase();
-            const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
+            return landscape.addLayer({
                 name: cfg.name,
                 baseColorTexture: `${assetPath}${fileKey}.jpg`,
                 normalTexture: `${assetPath}${fileKey}_normal.jpg`,
@@ -106,8 +106,6 @@ RedGPU.init(
                 uvScale: cfg.uvScale,
                 roughness: cfg.roughness
             });
-            landscape.addLayer(layer);
-            return layer;
         });
 
         scene.addLandscape(landscape);
@@ -639,7 +637,7 @@ function initGrassField({
             if (baseMesh) {
                 // [KO] 단일 대표 잔디 타입 생성 (Lawn Clump 및 언리얼 표준 단일 감쇄 구간 적용)
                 // [EN] Create single representative grass type (Lawn Clump & Unreal standard single range)
-                const grassType = new RedGPU.Landscape.GrassType(redGPUContext, {
+                const grassType = grassManager.addGrassType({
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
@@ -651,7 +649,6 @@ function initGrassField({
                     maxScale: [18.0, 12.0, 18.0]
                 });
 
-                grassManager.addGrassType(grassType);
                 onGrassTypeAdded?.(grassType, true);
             }
         }
