@@ -197,4 +197,5 @@ export class LandscapeGPUCuller {
     }
 }
 
+Object.freeze(LandscapeGPUCuller);
 export default LandscapeGPUCuller;

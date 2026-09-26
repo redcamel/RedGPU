@@ -177,4 +177,5 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     }
 }
 
+Object.freeze(ALandscapeTextureDebugger);
 export default ALandscapeTextureDebugger;

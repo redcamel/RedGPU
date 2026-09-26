@@ -529,4 +529,5 @@ export abstract class ALandscapeDebugger {
     abstract update(): void;
 }
 
+Object.freeze(ALandscapeDebugger);
 export default ALandscapeDebugger;

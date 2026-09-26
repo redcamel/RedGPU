@@ -252,4 +252,5 @@ export class FoliageBaker {
     }
 }
 
+Object.freeze(FoliageBaker);
 export default FoliageBaker;

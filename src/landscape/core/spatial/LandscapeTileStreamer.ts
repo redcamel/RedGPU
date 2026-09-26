@@ -595,4 +595,5 @@ export class LandscapeTileStreamer {
     }
 }
 
+Object.freeze(LandscapeTileStreamer);
 export default LandscapeTileStreamer;

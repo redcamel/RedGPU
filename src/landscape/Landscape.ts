@@ -1892,4 +1892,5 @@ export class Landscape extends Object3DContainer {
     }
 }
 
+Object.freeze(Landscape);
 export default Landscape;

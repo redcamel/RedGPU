@@ -131,4 +131,5 @@ export abstract class ALandscapeAtlasGenerator {
     }
 }
 
+Object.freeze(ALandscapeAtlasGenerator);
 export default ALandscapeAtlasGenerator;

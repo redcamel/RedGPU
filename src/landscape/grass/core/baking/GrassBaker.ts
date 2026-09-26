@@ -252,4 +252,5 @@ export class GrassBaker {
     }
 }
 
+Object.freeze(GrassBaker);
 export default GrassBaker;

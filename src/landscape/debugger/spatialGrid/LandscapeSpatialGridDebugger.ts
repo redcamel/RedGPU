@@ -90,4 +90,5 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     }
 }
 
+Object.freeze(LandscapeSpatialGridDebugger);
 export default LandscapeSpatialGridDebugger;

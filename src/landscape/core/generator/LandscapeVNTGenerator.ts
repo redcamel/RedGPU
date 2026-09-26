@@ -102,4 +102,5 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     }
 }
 
+Object.freeze(LandscapeVNTGenerator);
 export default LandscapeVNTGenerator;

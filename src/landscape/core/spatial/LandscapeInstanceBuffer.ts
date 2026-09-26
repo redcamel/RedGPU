@@ -357,4 +357,5 @@ export class LandscapeInstanceBuffer {
     }
 }
 
+Object.freeze(LandscapeInstanceBuffer);
 export default LandscapeInstanceBuffer;

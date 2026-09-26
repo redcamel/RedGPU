@@ -754,4 +754,5 @@ class FoliageImpostorBaker {
     }
 }
 
+Object.freeze(FoliageImpostorBaker);
 export default FoliageImpostorBaker;

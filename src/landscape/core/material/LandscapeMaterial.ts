@@ -631,4 +631,5 @@ defineSampler(LandscapeMaterial, [
 ]);
 
 export {LandscapeMaterial};
+Object.freeze(LandscapeMaterial);
 export default LandscapeMaterial;

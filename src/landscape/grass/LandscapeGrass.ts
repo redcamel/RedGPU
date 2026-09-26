@@ -504,4 +504,5 @@ export class LandscapeGrass {
     }
 }
 
+Object.freeze(LandscapeGrass);
 export default LandscapeGrass;

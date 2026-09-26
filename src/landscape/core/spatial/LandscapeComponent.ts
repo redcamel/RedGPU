@@ -39,4 +39,5 @@ export class LandscapeComponent {
     }
 }
 
+Object.freeze(LandscapeComponent);
 export default LandscapeComponent;

@@ -379,4 +379,5 @@ export class GrassMegaBuffer {
     }
 }
 
+Object.freeze(GrassMegaBuffer);
 export default GrassMegaBuffer;

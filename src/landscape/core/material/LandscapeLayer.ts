@@ -386,4 +386,5 @@ export class LandscapeLayer {
     }
 }
 
+Object.freeze(LandscapeLayer);
 export default LandscapeLayer;

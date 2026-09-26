@@ -1115,4 +1115,5 @@ export class LandscapeGrassManager {
     }
 }
 
+Object.freeze(LandscapeGrassManager);
 export default LandscapeGrassManager;

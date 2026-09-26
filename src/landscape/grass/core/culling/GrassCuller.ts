@@ -217,4 +217,5 @@ export class GrassCuller {
     }
 }
 
+Object.freeze(GrassCuller);
 export default GrassCuller;

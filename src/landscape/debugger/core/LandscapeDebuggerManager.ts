@@ -283,4 +283,5 @@ export class LandscapeDebuggerManager {
     }
 }
 
+Object.freeze(LandscapeDebuggerManager);
 export default LandscapeDebuggerManager;

@@ -277,4 +277,5 @@ export class LandscapeSharedGeometry {
     }
 }
 
+Object.freeze(LandscapeSharedGeometry);
 export default LandscapeSharedGeometry;

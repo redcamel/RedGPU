@@ -115,4 +115,5 @@ export class LandscapeSpatialGrid {
     }
 }
 
+Object.freeze(LandscapeSpatialGrid);
 export default LandscapeSpatialGrid;

@@ -25,4 +25,5 @@ export class LandscapeVBTORMDebugger extends ALandscapeTextureDebugger {
     }
 }
 
+Object.freeze(LandscapeVBTORMDebugger);
 export default LandscapeVBTORMDebugger;
