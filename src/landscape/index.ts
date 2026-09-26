@@ -28,16 +28,13 @@ export * as Debugger from "./debugger";
 
 // 2. Main Entry Class & Settings
 import Landscape from "./Landscape";
-import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./LANDSCAPE_BASE_GRID_SIZE";
-import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
+import {LANDSCAPE_BASE_GRID_SIZE} from "./LANDSCAPE_BASE_GRID_SIZE";
 import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
 
 export {
     Landscape,
     LANDSCAPE_BASE_GRID_SIZE,
-    validateLandscapeBaseGridSize,
-    LANDSCAPE_DEBUG_MODE,
-    LANDSCAPE_DEFAULT_LOD_COLORS
+    LANDSCAPE_DEBUG_MODE
 };
 
 // 3. User-facing Configuration Types

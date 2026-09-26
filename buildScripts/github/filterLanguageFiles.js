@@ -57,8 +57,15 @@ const filterLanguageFiles = (dir, currentLang) => {
                     // [KO] 모드
                     if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
                         // 한 줄에 모두 있는 인라인 케이스
-                        tempLine = tempLine.split('[EN]')[0].trimEnd();
-                        tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                        if (trimmed.startsWith('|')) {
+                            // 테이블 행인 경우: [EN]부터 다음 컬럼 구분자('|') 직전까지만 제거하여 이후 컬럼(Defined in 등) 및 테이블 구조 보존
+                            tempLine = tempLine.replace(/\s*\[EN\].*?(?=\s*(?<!\\)\|)/g, '');
+                            tempLine = tempLine.replace(/\[KO\]\s?/g, '');
+                        } else {
+                            // 일반 라인인 경우: [EN] 이후 끝까지 제거
+                            tempLine = tempLine.split('[EN]')[0].trimEnd();
+                            tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                        }
                         currentBlock = 'none';
                     } else if (tempLine.includes('[KO]')) {
                         // [KO] 시작 블록
