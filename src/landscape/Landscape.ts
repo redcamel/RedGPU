@@ -123,7 +123,6 @@ export class Landscape extends Object3DContainer {
     #vhtGenerator: LandscapeVHTGenerator;
     #vntGenerator: LandscapeVNTGenerator;
     #vbtGenerator: LandscapeVBTGenerator;
-    #vhtSampler: GPUSampler | null = null;
     #globalHeightmapUrl: string = '';
     #globalHeightTexture: GPUTexture | null = null;
     #isGlobalHeightBaked: boolean = false;
@@ -242,14 +241,6 @@ export class Landscape extends Object3DContainer {
         });
         const vbtORMAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_ORM_Atlas', rawVbtORM);
 
-        const vhtSampler = redGPUContext.gpuDevice.createSampler({
-            magFilter: 'linear',
-            minFilter: 'linear',
-            addressModeU: 'clamp-to-edge',
-            addressModeV: 'clamp-to-edge',
-            label: 'Landscape_VHT_Sampler'
-        });
-
         this.#vhtAtlasTexture = vhtAtlasTexture;
         this.#vntAtlasTexture = vntAtlasTexture;
         this.#vbtBaseColorAtlas = vbtBaseColorAtlas;
@@ -258,7 +249,6 @@ export class Landscape extends Object3DContainer {
         this.#vhtGenerator = new LandscapeVHTGenerator(redGPUContext);
         this.#vntGenerator = new LandscapeVNTGenerator(redGPUContext);
         this.#vbtGenerator = new LandscapeVBTGenerator(redGPUContext);
-        this.#vhtSampler = vhtSampler;
 
         this.#tileStreamer.setAtlasTextures(
             vhtAtlasTexture,
@@ -275,7 +265,7 @@ export class Landscape extends Object3DContainer {
             this.#grassManager?.rebakeAll();
         });
 
-        this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
+        this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
         this.#grassManager = new LandscapeGrassManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
@@ -351,14 +341,6 @@ export class Landscape extends Object3DContainer {
      */
     get grassManager(): LandscapeGrassManager {
         return this.#grassManager;
-    }
-
-    /**
-     * [KO] 가상 높이맵 텍스처(VHT) 샘플러를 반환합니다.
-     * [EN] Returns the Virtual Heightmap Texture (VHT) sampler.
-     */
-    get vhtSampler(): GPUSampler | null {
-        return this.#vhtSampler;
     }
 
     /**
@@ -1660,7 +1642,6 @@ export class Landscape extends Object3DContainer {
         componentCountX: number,
         componentCountZ: number,
         maxLODLevel: number,
-        vhtSampler: GPUSampler,
         vhtAtlasTexture: DirectTexture,
         vntAtlasTexture: DirectTexture
     ) {
@@ -1677,7 +1658,6 @@ export class Landscape extends Object3DContainer {
 
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
         this.#instanceBuffer.updateBindGroup(
-            vhtSampler,
             vhtAtlasTexture.gpuTextureView,
             vntAtlasTexture.gpuTextureView,
             this.#vbtBaseColorAtlas?.gpuTextureView,
@@ -1750,7 +1730,6 @@ export class Landscape extends Object3DContainer {
             this.#vbtORMAtlas = null;
         }
         this.#clearPipelineCaches();
-        this.#vhtSampler = null;
     }
 
     #rebuildLODStructures(): void {
@@ -1973,9 +1952,8 @@ export class Landscape extends Object3DContainer {
             needRebuildBindGroup = true;
         }
 
-        if (needRebuildBindGroup && this.#vhtSampler && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+        if (needRebuildBindGroup && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
             this.#instanceBuffer.updateBindGroup(
-                this.#vhtSampler,
                 this.#vhtAtlasTexture.gpuTextureView,
                 this.#vntAtlasTexture.gpuTextureView,
                 this.#vbtBaseColorAtlas?.gpuTextureView,

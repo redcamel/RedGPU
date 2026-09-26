@@ -223,7 +223,6 @@ export class LandscapeInstanceBuffer {
     }
 
     updateBindGroup(
-        vhtSampler: GPUSampler,
         vhtTextureView: GPUTextureView,
         vntTextureView?: GPUTextureView,
         vbtBaseColorView?: GPUTextureView,
@@ -250,7 +249,7 @@ export class LandscapeInstanceBuffer {
             },
             {
                 binding: 2,
-                resource: vhtSampler
+                resource: this.#redGPUContext.resourceManager.basicSampler.gpuSampler
             },
             {
                 binding: 3,

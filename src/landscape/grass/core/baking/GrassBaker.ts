@@ -68,9 +68,7 @@ export class GrassBaker {
         computePass: GPUComputePassEncoder,
         megaBuffer: GrassMegaBuffer,
         vhtTextureView: GPUTextureView | null | undefined,
-        vhtSampler: GPUSampler | null | undefined,
         vbtTextureView: GPUTextureView | null | undefined,
-        vbtSampler: GPUSampler | null | undefined,
         worldSizeX: number,
         worldSizeZ: number,
         heightScale: number
@@ -84,10 +82,11 @@ export class GrassBaker {
             return;
         }
 
+        const basicGPUSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
         const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
-        const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetVHTSampler = basicGPUSampler;
         const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
-        const targetVBTSampler = vbtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetVBTSampler = basicGPUSampler;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;

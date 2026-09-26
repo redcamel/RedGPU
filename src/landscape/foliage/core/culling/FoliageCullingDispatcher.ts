@@ -327,10 +327,8 @@ class FoliageCullingDispatcher {
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
             const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
             const vhtView = vhtAtlasTexture?.gpuTextureView;
-            const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
             const vbtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vbtBaseColor');
             const vbtView = vbtAtlasTexture?.gpuTextureView;
-            const vbtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
             const worldSizeX = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[0] : 8000.0;
             const worldSizeZ = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[1] : 8000.0;
             const heightScale = this.#landscapeRef?.heightScale ?? 600.0;
@@ -339,9 +337,7 @@ class FoliageCullingDispatcher {
                 computePass,
                 this.#megaBuffer,
                 vhtView,
-                vhtSampler,
                 vbtView,
-                vbtSampler,
                 worldSizeX,
                 worldSizeZ,
                 heightScale

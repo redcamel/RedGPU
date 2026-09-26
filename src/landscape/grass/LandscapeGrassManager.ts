@@ -847,9 +847,7 @@ export class LandscapeGrassManager {
                 computePass,
                 this.#megaBuffer,
                 vhtAtlas?.gpuTextureView,
-                this.#landscape.vhtSampler,
                 vbtAtlas?.gpuTextureView,
-                this.#redGPUContext.resourceManager.basicSampler.gpuSampler,
                 worldSizeX,
                 worldSizeZ,
                 this.#landscape.heightScale
