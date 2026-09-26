@@ -982,6 +982,14 @@ export class Landscape extends Object3DContainer {
         return this.#lodFadeStartRatio;
     }
 
+    set lodFadeStartRatio(value: number) {
+        const clamped = Math.max(0.0, Math.min(0.99, value));
+        if (this.#lodFadeStartRatio !== clamped) {
+            this.#lodFadeStartRatio = clamped;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     /**
      * @example
      * ```ts
@@ -998,6 +1006,14 @@ export class Landscape extends Object3DContainer {
      */
     get lodGeomorphStartRatio(): number {
         return this.#lodGeomorphStartRatio;
+    }
+
+    set lodGeomorphStartRatio(value: number) {
+        const clamped = Math.max(0.0, Math.min(0.99, value));
+        if (this.#lodGeomorphStartRatio !== clamped) {
+            this.#lodGeomorphStartRatio = clamped;
+            this.#updateLandscapeUniforms();
+        }
     }
 
     /**
@@ -1019,6 +1035,10 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.loadingRadius;
     }
 
+    set loadingRadius(value: number) {
+        this.#tileStreamer.loadingRadius = value;
+    }
+
     /**
      * @example
      * ```ts
@@ -1036,6 +1056,10 @@ export class Landscape extends Object3DContainer {
      */
     get maxLoadsPerFrame(): number {
         return this.#tileStreamer.maxLoadsPerFrame;
+    }
+
+    set maxLoadsPerFrame(value: number) {
+        this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
     /**
@@ -1092,12 +1116,8 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.tileUrlResolver;
     }
 
-    set lodFadeStartRatio(value: number) {
-        const clamped = Math.max(0.0, Math.min(0.99, value));
-        if (this.#lodFadeStartRatio !== clamped) {
-            this.#lodFadeStartRatio = clamped;
-            this.#updateLandscapeUniforms();
-        }
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileStreamer.tileUrlResolver = resolver;
     }
 
     /**
@@ -1118,14 +1138,6 @@ export class Landscape extends Object3DContainer {
         return this.#spatialGrid.flatCells;
     }
 
-    set lodGeomorphStartRatio(value: number) {
-        const clamped = Math.max(0.0, Math.min(0.99, value));
-        if (this.#lodGeomorphStartRatio !== clamped) {
-            this.#lodGeomorphStartRatio = clamped;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
     /**
      * @example
      * ```ts
@@ -1141,14 +1153,6 @@ export class Landscape extends Object3DContainer {
      */
     get lodDistancesSq(): readonly number[] {
         return this.#lodDistancesSq;
-    }
-
-    set loadingRadius(value: number) {
-        this.#tileStreamer.loadingRadius = value;
-    }
-
-    set maxLoadsPerFrame(value: number) {
-        this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
     /**
@@ -1214,10 +1218,6 @@ export class Landscape extends Object3DContainer {
      */
     removeLayer(layer: LandscapeLayer | string): boolean {
         return this.#material.removeLayer(layer);
-    }
-
-    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
-        this.#tileStreamer.tileUrlResolver = resolver;
     }
 
     /**
