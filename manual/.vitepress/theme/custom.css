@@ -351,4 +351,76 @@
     }
 }
 
+/* ============================================================
+   9. 사이드바 API 뱃지 스타일 (본문 API 카드와 100% 일치)
+   ============================================================ */
+.VPSidebarItem .item {
+    min-width: 0 !important;
+}
 
+.VPSidebarItem .link {
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+/* 사이드바 아이템 줄바꿈 방지 및 말줄임표(...) 처리 + 수직 중앙 완벽 일치 */
+.VPSidebarItem .text {
+    display: flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    line-height: 1.5 !important;
+}
+
+.VPSidebarItem .api-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    margin-right: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 4px;
+    color: #ffffff !important;
+    line-height: 1;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.VPSidebarItem .api-badge.badge-folder {
+    background-color: transparent !important;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.VPSidebarItem .api-badge.badge-n {
+    background-color: #ef4444;
+}
+
+.VPSidebarItem .api-badge.badge-c {
+    background-color: #47a047;
+}
+
+.VPSidebarItem .api-badge.badge-i {
+    background-color: #2b7489;
+}
+
+.VPSidebarItem .api-badge.badge-f {
+    background-color: #06b6d4;
+}
+
+.VPSidebarItem .api-badge.badge-v {
+    background-color: #d88e00;
+}
+
+.VPSidebarItem .api-badge.badge-t {
+    background-color: #d88e00;
+}
+
+.VPSidebarItem .api-badge.badge-e {
+    background-color: #7d4099;
+}

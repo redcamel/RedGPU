@@ -16,68 +16,125 @@ const isVariablesFolder = (item) => {
     return text === 'variables' || text.endsWith('variables');
 };
 
+const BADGES = {
+    class: '<span class="api-badge badge-c">C</span>',
+    variable: '<span class="api-badge badge-v">V</span>',
+    namespace: '<span class="api-badge badge-n">N</span>',
+    interface: '<span class="api-badge badge-i">I</span>',
+    function: '<span class="api-badge badge-f">F</span>',
+    typeAlias: '<span class="api-badge badge-t">T</span>',
+    enum: '<span class="api-badge badge-e">E</span>'
+};
+
+const FOLDER_ICON = '<span class="api-badge badge-folder">📁</span>';
+
 const FOLDER_TITLE_MAP = {
-    'interfaces': '📁 Interfaces',
-    'functions': '📁 Functions',
-    'typealiases': '📁 Type Aliases',
-    'namespaces': '📁 Namespaces',
-    'enums': '📁 Enums',
-    'enumerations': '📁 Enumerations'
+    'interfaces': `${FOLDER_ICON} Interfaces`,
+    'functions': `${FOLDER_ICON} Functions`,
+    'typealiases': `${FOLDER_ICON} Type Aliases`,
+    'namespaces': `${FOLDER_ICON} Namespaces`,
+    'enums': `${FOLDER_ICON} Enums`,
+    'enumerations': `${FOLDER_ICON} Enumerations`
 };
 
 const formatFolderTitle = (text) => {
     if (!text) return text;
-    const normalized = text.toLowerCase().replace(/[\s\-_]/g, '');
+    const normalized = text.toLowerCase().replace(/<[^>]*>/g, '').replace(/[\s\-_]/g, '');
     return FOLDER_TITLE_MAP[normalized] || text;
+};
+
+/**
+ * 실제 엔티티 항목에 적절한 뱃지(N, C, I, V, F, T, E)를 부여
+ */
+const applyBadgeToItem = (item, parentContext = {}) => {
+    const rawText = (item.text || '').replace(/<[^>]*>/g, '').trim();
+    if (!rawText || rawText.toLowerCase().includes('readme') || (item.text || '').includes('api-badge')) {
+        return item;
+    }
+
+    const link = item.link || '';
+    let badge = null;
+
+    if (link.includes('/classes/') || link.startsWith('classes/') || item.isClass) {
+        badge = BADGES.class;
+    } else if (link.includes('/variables/') || link.startsWith('variables/') || item.isVariable) {
+        badge = BADGES.variable;
+    } else if (link.includes('/interfaces/') || link.startsWith('interfaces/')) {
+        badge = BADGES.interface;
+    } else if (link.includes('/functions/') || link.startsWith('functions/')) {
+        badge = BADGES.function;
+    } else if (link.includes('/type-aliases/') || link.startsWith('type-aliases/')) {
+        badge = BADGES.typeAlias;
+    } else if (link.includes('/enums/') || link.startsWith('enums/')) {
+        badge = BADGES.enum;
+    } else if (parentContext.isNamespacesGroup || link.includes('/namespaces/')) {
+        // 실제 서브 네임스페이스 (Core, Foliage, Grass 등)
+        if (item.items && !FOLDER_TITLE_MAP[rawText.toLowerCase().replace(/[\s\-_]/g, '')]) {
+            badge = BADGES.namespace;
+        }
+    }
+
+    if (badge) {
+        return {
+            ...item,
+            text: `${badge} ${rawText}`
+        };
+    }
+
+    return item;
 };
 
 /**
  * 1. Sidebar Sorting & Classes/Variables Unwrap Utility
  * - 'classes' 및 'variables' 폴더는 언랩하여 상위 네임스페이스 바로 아래로 승격
- * - 하위 그룹 폴더(interfaces, functions 등)에는 📁 아이콘 및 타이틀 케이스 적용
+ * - 폴더 그룹은 '📁' 아이콘으로 표시하고, 실제 네이밍에 N, C, I, V, F, T 배지 적용
  * - 정렬 순서:
  *   1) README / Index (최상단)
  *   2) 클래스(Class) 문서 목록
  *   3) 변수/상수(Variable) 문서 목록
  *   4) 기타 일반 문서
- *   5) 하위 폴더(📁 Interfaces, 📁 Functions 등)
+ *   5) 하위 폴더(Namespaces ➔ Interfaces, Functions 등)
  */
-const sortSidebar = (sidebar) => {
+const sortSidebar = (sidebar, parentContext = {}) => {
     if (!Array.isArray(sidebar) && typeof sidebar === 'object' && sidebar !== null) {
         return Object.fromEntries(
-            Object.entries(sidebar).map(([key, value]) => [key, sortSidebar(value)])
+            Object.entries(sidebar).map(([key, value]) => [key, sortSidebar(value, parentContext)])
         );
     }
 
     if (Array.isArray(sidebar)) {
         const processed = sidebar.flatMap(item => {
+            const rawNormalized = (item.text || '').toLowerCase().replace(/<[^>]*>/g, '').replace(/[\s\-_]/g, '');
+            const isCurrentNamespacesGroup = rawNormalized === 'namespaces';
+
             const processedItem = {
                 ...item,
-                items: item.items ? sortSidebar(item.items) : undefined
+                items: item.items ? sortSidebar(item.items, {isNamespacesGroup: isCurrentNamespacesGroup}) : undefined
             };
 
-            // classes 폴더인 경우 자식들을 상위로 승격 (isClass 플래그)
+            // classes 폴더인 경우 자식들을 상위로 승격 (isClass 플래그 부착)
             if (isClassesFolder(processedItem)) {
-                return (processedItem.items || []).map(child => ({
+                return (processedItem.items || []).map(child => applyBadgeToItem({
                     ...child,
                     isClass: true
                 }));
             }
 
-            // variables 폴더인 경우 자식들을 상위로 승격 (isVariable 플래그)
+            // variables 폴더인 경우 자식들을 상위로 승격 (isVariable 플래그 부착)
             if (isVariablesFolder(processedItem)) {
-                return (processedItem.items || []).map(child => ({
+                return (processedItem.items || []).map(child => applyBadgeToItem({
                     ...child,
                     isVariable: true
                 }));
             }
 
-            // 하위 폴더(interfaces, functions 등)인 경우 시각적 구분을 위해 📁 아이콘 및 타이틀 케이스 적용
+            // 하위 폴더(interfaces, functions 등)인 경우 📁 폴더 헤더 적용
             if (processedItem.items && !processedItem.link) {
                 processedItem.text = formatFolderTitle(processedItem.text);
             }
 
-            return [processedItem];
+            // 실제 엔티티 아이템(인터페이스, 함수, 네임스페이스 등)에 뱃지 부착
+            return [applyBadgeToItem(processedItem, parentContext)];
         });
 
         const isIndex = (item) => {
@@ -128,14 +185,16 @@ const sortSidebar = (sidebar) => {
             if (!aHasItems && bHasItems) return -1;
             if (aHasItems && !bHasItems) return 1;
 
-            // 5. 폴더 그룹 중에서는 '📁 Namespaces'를 가장 먼저 배치
+            // 5. 폴더 그룹 중에서는 'Namespaces'를 가장 먼저 배치
             const aIsNS = isNamespacesFolder(a);
             const bIsNS = isNamespacesFolder(b);
             if (aIsNS && !bIsNS) return -1;
             if (!aIsNS && bIsNS) return 1;
 
-            // 6. 동일 분류 내에서는 알파벳 순 정렬
-            return (a.text || '').localeCompare(b.text || '');
+            // 6. 동일 분류 내에서는 HTML 태그를 제외한 순수 알파벳 순 정렬
+            const aCleanText = (a.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CV]\]\s*/, '').trim();
+            const bCleanText = (b.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CV]\]\s*/, '').trim();
+            return aCleanText.localeCompare(bCleanText);
         });
     }
 
