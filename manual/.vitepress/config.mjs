@@ -4,9 +4,43 @@ import {withMermaid} from 'vitepress-plugin-mermaid';
 import fs from 'fs';
 import path from 'path';
 
+const isClassesFolder = (item) => {
+    if (!item || !item.items) return false;
+    const text = (item.text || '').toLowerCase().replace(/[\s\-_]/g, '');
+    return text === 'classes' || text.endsWith('classes');
+};
+
+const isVariablesFolder = (item) => {
+    if (!item || !item.items) return false;
+    const text = (item.text || '').toLowerCase().replace(/[\s\-_]/g, '');
+    return text === 'variables' || text.endsWith('variables');
+};
+
+const FOLDER_TITLE_MAP = {
+    'interfaces': '📁 Interfaces',
+    'functions': '📁 Functions',
+    'typealiases': '📁 Type Aliases',
+    'namespaces': '📁 Namespaces',
+    'enums': '📁 Enums',
+    'enumerations': '📁 Enumerations'
+};
+
+const formatFolderTitle = (text) => {
+    if (!text) return text;
+    const normalized = text.toLowerCase().replace(/[\s\-_]/g, '');
+    return FOLDER_TITLE_MAP[normalized] || text;
+};
+
 /**
- * 1. Sidebar Sorting Utility
- * README/Index 파일을 항상 최상단에 배치하고 객체/배열 구조를 재귀적으로 정렬합니다.
+ * 1. Sidebar Sorting & Classes/Variables Unwrap Utility
+ * - 'classes' 및 'variables' 폴더는 언랩하여 상위 네임스페이스 바로 아래로 승격
+ * - 하위 그룹 폴더(interfaces, functions 등)에는 📁 아이콘 및 타이틀 케이스 적용
+ * - 정렬 순서:
+ *   1) README / Index (최상단)
+ *   2) 클래스(Class) 문서 목록
+ *   3) 변수/상수(Variable) 문서 목록
+ *   4) 기타 일반 문서
+ *   5) 하위 폴더(📁 Interfaces, 📁 Functions 등)
  */
 const sortSidebar = (sidebar) => {
     if (!Array.isArray(sidebar) && typeof sidebar === 'object' && sidebar !== null) {
@@ -16,20 +50,93 @@ const sortSidebar = (sidebar) => {
     }
 
     if (Array.isArray(sidebar)) {
-        return sidebar
-            .map(item => ({
+        const processed = sidebar.flatMap(item => {
+            const processedItem = {
                 ...item,
                 items: item.items ? sortSidebar(item.items) : undefined
-            }))
-            .sort((a, b) => {
-                const isIndex = (text = '', link = '') =>
-                    text.toLowerCase().includes('readme') || link.endsWith('/') || link.endsWith('README');
+            };
 
-                const aIsIndex = isIndex(a.text, a.link);
-                const bIsIndex = isIndex(b.text, b.link);
+            // classes 폴더인 경우 자식들을 상위로 승격 (isClass 플래그)
+            if (isClassesFolder(processedItem)) {
+                return (processedItem.items || []).map(child => ({
+                    ...child,
+                    isClass: true
+                }));
+            }
 
-                return aIsIndex && !bIsIndex ? -1 : !aIsIndex && bIsIndex ? 1 : 0;
-            });
+            // variables 폴더인 경우 자식들을 상위로 승격 (isVariable 플래그)
+            if (isVariablesFolder(processedItem)) {
+                return (processedItem.items || []).map(child => ({
+                    ...child,
+                    isVariable: true
+                }));
+            }
+
+            // 하위 폴더(interfaces, functions 등)인 경우 시각적 구분을 위해 📁 아이콘 및 타이틀 케이스 적용
+            if (processedItem.items && !processedItem.link) {
+                processedItem.text = formatFolderTitle(processedItem.text);
+            }
+
+            return [processedItem];
+        });
+
+        const isIndex = (item) => {
+            const text = item.text || '';
+            const link = item.link || '';
+            return text.toLowerCase().includes('readme') || link.endsWith('/') || link.endsWith('README');
+        };
+
+        const isClassItem = (item) => {
+            if (item.isClass) return true;
+            const link = item.link || '';
+            return link.includes('/classes/') || link.startsWith('classes/');
+        };
+
+        const isVariableItem = (item) => {
+            if (item.isVariable) return true;
+            const link = item.link || '';
+            return link.includes('/variables/') || link.startsWith('variables/');
+        };
+
+        const isNamespacesFolder = (item) => {
+            if (!item.items) return false;
+            return (item.text || '').toLowerCase().includes('namespaces');
+        };
+
+        return processed.sort((a, b) => {
+            // 1. README 최우선
+            const aIsIndex = isIndex(a);
+            const bIsIndex = isIndex(b);
+            if (aIsIndex && !bIsIndex) return -1;
+            if (!aIsIndex && bIsIndex) return 1;
+
+            // 2. 클래스(Class) 목록
+            const aIsClass = isClassItem(a);
+            const bIsClass = isClassItem(b);
+            if (aIsClass && !bIsClass) return -1;
+            if (!aIsClass && bIsClass) return 1;
+
+            // 3. 변수/상수(Variable) 목록
+            const aIsVar = isVariableItem(a);
+            const bIsVar = isVariableItem(b);
+            if (aIsVar && !bIsVar) return -1;
+            if (!aIsVar && bIsVar) return 1;
+
+            // 4. 단일 문서를 하위 폴더(그룹)보다 먼저 배치
+            const aHasItems = Boolean(a.items);
+            const bHasItems = Boolean(b.items);
+            if (!aHasItems && bHasItems) return -1;
+            if (aHasItems && !bHasItems) return 1;
+
+            // 5. 폴더 그룹 중에서는 '📁 Namespaces'를 가장 먼저 배치
+            const aIsNS = isNamespacesFolder(a);
+            const bIsNS = isNamespacesFolder(b);
+            if (aIsNS && !bIsNS) return -1;
+            if (!aIsNS && bIsNS) return 1;
+
+            // 6. 동일 분류 내에서는 알파벳 순 정렬
+            return (a.text || '').localeCompare(b.text || '');
+        });
     }
 
     return sidebar;
