@@ -75,7 +75,6 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * @see [Foliage & Impostors](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @see [Landscape & Water System](/RedGPU/examples/3d/landscape/landscapeAndWater/)
  *
- * @category Landscape
  */
 export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
@@ -318,7 +317,6 @@ export class Landscape extends Object3DContainer {
      * - `'screenSize'`: Dynamically determines LOD based on camera FOV and screen-projected size (pixel error).
      *
      * @defaultValue 'distance'
-     * @category Landscape
      */
     set lodMetric(value: 'distance' | 'screenSize') {
         if (this.#lodMetric !== value) {
@@ -685,7 +683,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets whether the terrain surface receives shadows from external shadow maps (e.g. Directional Light).
      *
      * @defaultValue true
-     * @category Landscape
      */
     get receiveShadow(): boolean {
         return this.#receiveShadow;
@@ -713,7 +710,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets whether to calculate terrain self-shadowing by raymarching the Virtual Heightmap Texture (VHT) towards the primary light direction.
      *
      * @defaultValue false
-     * @category Landscape
      */
     get castHeightmapShadow(): boolean {
         return this.#castHeightmapShadow;
@@ -740,7 +736,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the maximum raymarching trace distance (in world units) for heightmap self-shadow calculations. Minimum value is 10.0.
      *
      * @defaultValue 3000.0
-     * @category Landscape
      */
     get heightmapShadowDistance(): number {
         return this.#heightmapShadowDistance;
@@ -767,7 +762,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the number of sampling steps for heightmap self-shadow raymarching. Clamped between 4 and 64.
      *
      * @defaultValue 16
-     * @category Landscape
      */
     get heightmapShadowSteps(): number {
         return this.#heightmapShadowSteps;
@@ -794,7 +788,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the penumbra softness factor for heightmap self-shadows. Minimum value is 0.1.
      *
      * @defaultValue 8.0
-     * @category Landscape
      */
     get heightmapShadowSoftness(): number {
         return this.#heightmapShadowSoftness;
@@ -909,7 +902,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets whether to render the terrain mesh in wireframe mode (Line List topology).
      *
      * @defaultValue false
-     * @category Landscape
      */
     get wireframe(): boolean {
         return this.#wireframe;
@@ -935,7 +927,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the shader debug visualization mode for the landscape. Uses {@link RedGPU.Landscape.LANDSCAPE_DEBUG_MODE} constants.
      *
      * @defaultValue 0 (LANDSCAPE_DEBUG_MODE.NONE)
-     * @category Landscape
      */
     get debugMode(): number {
         return this.#debugMode;
@@ -962,7 +953,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets whether to overlay distinct colors for each LOD level of terrain tiles for debugging.
      *
      * @defaultValue false
-     * @category Landscape
      */
     get lodColoration(): boolean {
         return this.#lodColoration;
@@ -987,7 +977,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets or sets the start ratio (0.0 to 0.99) of the LOD boundary distance at which geomorphing begins.
      *
-     * @category Landscape
      */
     get lodMorphStartRatio(): number {
         return this.#lodGeomorphStartRatio;
@@ -1006,7 +995,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the distance ratio (0.0 to 0.99) at which dithered cross-fade transitions begin between LOD levels.
      *
      * @defaultValue 0.75
-     * @category Landscape
      */
     get lodFadeStartRatio(): number {
         return this.#lodFadeStartRatio;
@@ -1025,7 +1013,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the LOD geomorphing interpolation start ratio (0.0 to 0.99). Equivalent to {@link RedGPU.Landscape.Landscape.lodMorphStartRatio}.
      *
      * @defaultValue 0.7
-     * @category Landscape
      */
     get lodGeomorphStartRatio(): number {
         return this.#lodGeomorphStartRatio;
@@ -1045,7 +1032,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the streaming loading radius (in world units) around the camera within which terrain tiles are actively loaded into memory.
      *
      * @defaultValue 2000.0
-     * @category Landscape
      */
     get loadingRadius(): number {
         return this.#tileStreamer.loadingRadius;
@@ -1065,7 +1051,6 @@ export class Landscape extends Object3DContainer {
      * Gets or sets the maximum number of tile textures that can be asynchronously loaded and uploaded per frame.
      *
      * @defaultValue 2
-     * @category Landscape
      */
     get maxLoadsPerFrame(): number {
         return this.#tileStreamer.maxLoadsPerFrame;
@@ -1083,7 +1068,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets the total number of tiles currently loaded and active in the virtual texture atlas. (Read-only)
      *
-     * @category Landscape
      */
     get loadedTileCount(): number {
         return this.#tileStreamer?.loadedTileCount ?? 0;
@@ -1101,7 +1085,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets the number of tile loading requests currently waiting in the streaming queue. (Read-only)
      *
-     * @category Landscape
      */
     get pendingQueueSize(): number {
         return this.#tileStreamer?.pendingQueueSize ?? 0;
@@ -1122,7 +1105,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets or sets the resolver callback function that returns texture URLs for a tile given its grid coordinates `(row, col)`.
      *
-     * @category Landscape
      */
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileStreamer.tileUrlResolver;
@@ -1149,7 +1131,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets the array of all `LandscapeComponent` instances registered in the landscape spatial grid. (Read-only)
      *
-     * @category Landscape
      */
     get landscapeComponents(): readonly LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
@@ -1179,7 +1160,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets the array of squared distance thresholds used for LOD level transitions. (Read-only)
      *
-     * @category Landscape
      */
     get lodDistancesSq(): readonly number[] {
         return this.#lodDistancesSq;
@@ -1304,7 +1284,6 @@ export class Landscape extends Object3DContainer {
      *
      * @param view - {@link RedGPU.Display.View3D} 또는 렌더 뷰 상태 객체 / {@link RedGPU.Display.View3D} or render view state data.
      * @param passEncoder - 대상 WebGPU 렌더 패스 인코더 (생략 시 view에서 추출) / Optional target WebGPU render pass encoder.
-     * @category Landscape
      */
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
@@ -1388,7 +1367,6 @@ export class Landscape extends Object3DContainer {
      *
      * @param camera - 주 카메라 인스턴스 (예: {@link RedGPU.Camera.PerspectiveCamera}) / Primary camera instance (e.g. {@link RedGPU.Camera.PerspectiveCamera}).
      * @param renderViewStateData - 현재 뷰 상태 및 렌더 데이터 / Current view state and rendering data.
-     * @category Landscape
      */
     update(camera: any, renderViewStateData?: any): void {
         if (!camera) return;
@@ -1501,7 +1479,6 @@ export class Landscape extends Object3DContainer {
      * @param row - 타일 그리드 행 인덱스 / Tile grid row index.
      * @param col - 타일 그리드 열 인덱스 / Tile grid column index.
      * @returns 로드 완료 여부 / Whether the tile is loaded.
-     * @category Landscape
      */
     isTileLoaded(row: number, col: number): boolean {
         return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
@@ -1556,7 +1533,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Manually synchronizes landscape instance uniform data (world size, height scale, LOD parameters, shadow settings, etc.) to the GPU buffer.
      *
-     * @category Landscape
      */
     updateLandscapeUniforms(): void {
         this.#updateLandscapeUniforms();
@@ -1656,7 +1632,6 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Releases and destroys all GPU resources (texture atlases, instance buffer, geometry, pipeline caches) and subsystem managers associated with this landscape instance.
      *
-     * @category Landscape
      */
     override destroy(): void {
         super.destroy();

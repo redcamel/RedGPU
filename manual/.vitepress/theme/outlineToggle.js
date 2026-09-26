@@ -74,10 +74,26 @@ export function updateOutlineElements() {
     const outlineItems = outlineRoot.querySelectorAll('.VPDocOutlineItem li');
     if (!outlineItems.length) return;
 
+    // 0. Constructor 이후에 등장하는 하위 Example 항목은 목차에서 숨김 처리 (Constructor 이전의 클래스 Example만 보존)
+    let pastConstructors = false;
+    outlineItems.forEach(li => {
+        const link = li.querySelector(':scope > .outline-link');
+        if (link) {
+            const text = link.textContent?.trim().toLowerCase();
+            const href = (link.getAttribute('href') || '').toLowerCase();
+            if (text === 'constructors' || text === '생성자' || href === '#constructors') {
+                pastConstructors = true;
+            } else if (pastConstructors && (text === 'example' || text === '예제' || href.includes('example'))) {
+                li.style.display = 'none';
+            }
+        }
+    });
+
     let hasAnyNested = false;
 
     // 1. 하위 목록(ul)을 가진 항목들에 토글 버튼 추가 및 클래스 지정
     outlineItems.forEach(li => {
+        if (li.style.display === 'none') return;
         const hasChildren = !!li.querySelector(':scope > ul');
         if (hasChildren) {
             hasAnyNested = true;

@@ -462,12 +462,20 @@
     position: relative;
 }
 
-/* 상위 카테고리 링크: 가로 전체 클릭 인터랙션 */
+/* 상위 카테고리 링크: 가로 전체 클릭 인터랙션 및 폴더명 강조 (더 진하고 두껍게) */
 .VPDocAsideOutline .VPDocOutlineItem li.has-nested > .outline-link {
     padding-right: 44px !important;
     cursor: pointer;
     user-select: none;
     border-radius: 4px;
+    font-weight: 600 !important;
+    color: var(--vp-c-text-1) !important;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+}
+
+.VPDocAsideOutline .VPDocOutlineItem li.has-nested > .outline-link:hover {
+    color: var(--vp-c-brand-1) !important;
 }
 
 /* 상위 카테고리 행에 마우스 호버 시 화살표 아이콘도 함께 반응 */

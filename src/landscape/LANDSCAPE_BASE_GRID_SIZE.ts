@@ -12,7 +12,6 @@
  * });
  * ```
  *
- * @category Landscape
  */
 export const LANDSCAPE_BASE_GRID_SIZE = {
     /**
@@ -62,7 +61,6 @@ Object.freeze(LANDSCAPE_BASE_GRID_SIZE);
  * }
  * ```
  *
- * @category Landscape
  */
 export type LANDSCAPE_BASE_GRID_SIZE = typeof LANDSCAPE_BASE_GRID_SIZE[keyof typeof LANDSCAPE_BASE_GRID_SIZE];
 

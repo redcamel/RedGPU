@@ -14,7 +14,6 @@
  * landscape.debugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NONE;
  * ```
  *
- * @category Landscape
  */
 export const LANDSCAPE_DEBUG_MODE = {
     NONE: 0,
@@ -45,7 +44,6 @@ export const LANDSCAPE_DEBUG_MODE = {
  * }
  * ```
  *
- * @category Landscape
  */
 export type LANDSCAPE_DEBUG_MODE = typeof LANDSCAPE_DEBUG_MODE[keyof typeof LANDSCAPE_DEBUG_MODE];
 Object.freeze(LANDSCAPE_DEBUG_MODE);
