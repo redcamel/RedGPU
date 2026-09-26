@@ -5,20 +5,16 @@
  * @packageDocumentation
  */
 import LandscapeGrassManager from "./LandscapeGrassManager";
-import type {GrassLODConfig, GrassLODInfo, LandscapeGrassOptions} from "./LandscapeGrass";
+import type {GrassLODConfig, LandscapeGrassOptions} from "./LandscapeGrass";
 import LandscapeGrass from "./LandscapeGrass";
-import GrassMegaBuffer from "./core/buffer/GrassMegaBuffer";
-import GrassCuller from "./core/culling/GrassCuller";
 
 export {
     LandscapeGrassManager,
-    LandscapeGrass,
-    GrassMegaBuffer,
-    GrassCuller
+    LandscapeGrass
 };
 
 export type {
     LandscapeGrassOptions,
-    GrassLODConfig,
-    GrassLODInfo
+    GrassLODConfig
 };
+

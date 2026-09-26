@@ -1,6 +1,6 @@
 import LandscapeDebuggerManager, {LandscapeDebuggerManagerOptions} from "./core/LandscapeDebuggerManager";
-import ALandscapeDebugger, {ALandscapeDebuggerOptions, LandscapeDebuggerCameraState} from "./core/ALandscapeDebugger";
-import ALandscapeTextureDebugger, {LandscapeTextureGetter} from "./core/ALandscapeTextureDebugger";
+import ALandscapeDebugger from "./core/ALandscapeDebugger";
+import ALandscapeTextureDebugger from "./core/ALandscapeTextureDebugger";
 import LandscapeHUDDebugger from "./hud/LandscapeHUDDebugger";
 import LandscapeSpatialGridDebugger from "./spatialGrid/LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "./vht/LandscapeVHTDebugger";
@@ -13,10 +13,7 @@ export {
     LandscapeDebuggerManager,
     type LandscapeDebuggerManagerOptions,
     ALandscapeDebugger,
-    type ALandscapeDebuggerOptions,
-    type LandscapeDebuggerCameraState,
     ALandscapeTextureDebugger,
-    type LandscapeTextureGetter,
     LandscapeHUDDebugger,
     LandscapeSpatialGridDebugger,
     LandscapeVHTDebugger,

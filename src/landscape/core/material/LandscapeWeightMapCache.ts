@@ -1,4 +1,4 @@
-export interface WeightMapPixelData {
+interface WeightMapPixelData {
     width: number;
     height: number;
     data: Uint8ClampedArray;

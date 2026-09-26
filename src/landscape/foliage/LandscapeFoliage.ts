@@ -9,8 +9,6 @@ import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMes
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
 import type FoliageBaker from "./core/baking/FoliageBaker";
 
-export {FoliageSubMesh, FoliageShadowMergedSubMesh};
-
 export interface FoliageLODConfig {
 
     mesh: Mesh | Mesh[];

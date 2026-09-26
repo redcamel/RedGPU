@@ -19,7 +19,7 @@
 // 1. Material Core
 import LandscapeMaterial from "./material/LandscapeMaterial";
 import LandscapeLayer, {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./material/LandscapeLayer";
-import LandscapeWeightMapCache, {WeightMapPixelData} from "./material/LandscapeWeightMapCache";
+import LandscapeWeightMapCache from "./material/LandscapeWeightMapCache";
 
 // 2. Spatial Core
 import LandscapeComponent from "./spatial/LandscapeComponent";
@@ -59,6 +59,5 @@ export {
 export type {
     LandscapeLayerOptions,
     LandscapeWeightMapChannel,
-    WeightMapPixelData,
     LandscapeTileUrlResolver
 };

@@ -4,7 +4,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
-export type LandscapeTextureGetter = (landscape: Landscape) => {
+type TextureGetter = (landscape: Landscape) => {
     gpuTexture?: GPUTexture | null;
     gpuTextureView?: GPUTextureView | null;
 } | null;
@@ -19,7 +19,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
 
     #shaderCode: string;
     #shaderModuleName: string;
-    #textureGetter: LandscapeTextureGetter;
+    #textureGetter: TextureGetter;
     #clearColor: GPUColorDict;
 
     constructor(
@@ -28,7 +28,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         options: ALandscapeDebuggerOptions | undefined,
         shaderCode: string,
         shaderModuleName: string,
-        textureGetter: LandscapeTextureGetter,
+        textureGetter: TextureGetter,
         clearColor: GPUColorDict = {r: 0.06, g: 0.09, b: 0.16, a: 1.0}
     ) {
         super(landscape, cameraOrOptions, options);
