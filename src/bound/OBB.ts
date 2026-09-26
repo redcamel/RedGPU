@@ -197,7 +197,7 @@ export class OBB {
      * @returns
      * [KO] [vec3, vec3, vec3] 각 축 벡터
      * [EN] [vec3, vec3, vec3] axis vectors
-     * @internal
+     * 
      */
     #getAxes(): [vec3, vec3, vec3] {
         return [
@@ -216,7 +216,7 @@ export class OBB {
      * @returns
      * [KO] 투영 반지름
      * [EN] Projection radius
-     * @internal
+     * 
      */
     #getProjectionRadius(axis: vec3): number {
         const axes = this.#getAxes();

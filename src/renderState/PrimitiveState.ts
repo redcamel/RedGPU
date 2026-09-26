@@ -150,7 +150,7 @@ class PrimitiveState {
     /**
      * [KO] 내부 상태를 갱신하고 대상 객체의 파이프라인을 갱신 대상으로 표시합니다.
      * [EN] Updates the internal state and marks the target object's pipeline as dirty.
-     * @internal
+     * 
      */
     #update() {
         this.state = {

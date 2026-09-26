@@ -145,7 +145,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 호버링 중인 View 또는 null
      * [EN] Hovered View or null
-     * @internal
+     * 
      */
     get hoveredView(): View3D | null {
         return this.#hoveredView;
@@ -158,7 +158,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 키보드 활성 View 또는 null
      * [EN] Keyboard active View or null
-     * @internal
+     * 
      */
     get keyboardActiveView(): View3D | null {
         return AController.#globalKeyboardActiveView;
@@ -171,7 +171,7 @@ abstract class AController extends RedGPUObject {
      * @param value -
      * [KO] 설정할 View 또는 null
      * [EN] View to set or null
-     * @internal
+     * 
      */
     set keyboardActiveView(value: View3D | null) {
         AController.#globalKeyboardActiveView = value;
@@ -191,7 +191,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 키보드 활성 컨트롤러 여부
      * [EN] Whether it is the keyboard active controller
-     * @internal
+     * 
      */
     get isKeyboardActiveController(): boolean {
         return AController.#globalKeyboardActiveController === this;
@@ -204,7 +204,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 처리 여부
      * [EN] Processing status
-     * @internal
+     * 
      */
     get keyboardProcessedThisFrame(): boolean {
         return this.#keyboardProcessedThisFrame;
@@ -217,7 +217,7 @@ abstract class AController extends RedGPUObject {
      * @param value -
      * [KO] 설정할 처리 여부
      * [EN] Processing status to set
-     * @internal
+     * 
      */
     set keyboardProcessedThisFrame(value: boolean) {
         this.#keyboardProcessedThisFrame = value;
@@ -343,7 +343,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] {x, y} 좌표 객체
      * [EN] {x, y} coordinate object
-     * @internal
+     * 
      */
     getCanvasEventPoint = (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
 
@@ -379,7 +379,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 해당 View 또는 null
      * [EN] Corresponding View or null
-     * @internal
+     * 
      */
     findTargetViewByInputEvent = (e: MouseEvent | TouchEvent): View3D | null => {
         const {redGPUContext} = this
@@ -412,7 +412,7 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 거리 값
      * [EN] Distance value
-     * @internal
+     * 
      */
     #getTouchDistance = (touches: TouchList): number => {
         if (touches.length < 2) return 0;

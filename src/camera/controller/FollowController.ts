@@ -598,7 +598,7 @@ class FollowController extends AController {
      * @returns
      * [KO] 계산된 카메라 월드 위치
      * [EN] Calculated camera world position
-     * @internal
+     * 
      */
     #calculateCameraPosition(): vec3 {
         const panRad = this.#currentPan * PER_PI;
@@ -647,7 +647,7 @@ class FollowController extends AController {
      * @returns
      * [KO] 카메라가 바라볼 타겟의 월드 위치
      * [EN] World position of the target the camera will look at
-     * @internal
+     * 
      */
     #calculateLookAtTarget(): vec3 {
         vec3.set(tempVec3, this.#targetOffsetX, this.#targetOffsetY, this.#targetOffsetZ);

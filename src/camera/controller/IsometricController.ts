@@ -274,7 +274,7 @@ class IsometricController extends AController {
      * [EN] Updates camera animation.
      * @param view - [KO] 3D 뷰 객체 [EN] 3D View object
      * @param deltaTime - [KO] 경과 시간 [EN] Delta time
-     * @internal
+     * 
      */
     #updateAnimation(view: View3D, deltaTime: number): void {
         this.#handleKeyboardInput(view, deltaTime);
