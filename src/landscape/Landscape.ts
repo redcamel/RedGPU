@@ -33,18 +33,20 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
 });
 
 /**
- * [KO] 대규모 오픈월드 지형(Landscape) 렌더링 및 스트리밍 시스템을 총괄하는 핵심 클래스입니다.
- * [EN] Core class that orchestrates the large-scale open-world Landscape terrain rendering and streaming system.
+ * [KO] 대규모 오픈월드 지형(Landscape) 렌더링, 동적 타일 스트리밍, 복합 생태계 서브시스템을 총괄하는 핵심 클래스입니다.
+ * [EN] Core orchestration class for large-scale open-world landscape terrain rendering, dynamic tile streaming, and ecosystem subsystem integration.
  *
- * [KO]
- * 가상 높이맵 텍스처(VHT), 가상 노멀 텍스처(VNT), 가상 베이스 텍스처(VBT) 기반의 텍스처 아틀라스 시스템을 갖추고 있으며,
- * 쿼드트리 기반의 계층적 연속 LOD(Continuous LOD), 지형 메시 지오모핑(Geomorphing), GPU 하드웨어 인스턴싱 및 컬링(Frustum/HZB Occlusion)을 지원합니다.
- * 또한, 절차적 잔디(`grassManager`), 식생 및 3D 임포스터(`foliageManager`), 통합 디버거(`debuggerManager`)와의 유기적인 연동을 제공합니다.
+ * [KO] 가상 텍스처 아틀라스 파이프라인을 기반으로 고정밀 32비트 높이맵(VHT), 지형 법선(VNT), 다중 스플랫 레이어 머티리얼(VBT)을 효율적으로 결합하고 관리합니다.
+ * [EN] Manages a virtual texture atlas pipeline that efficiently combines high-precision 32-bit heightmaps (VHT), terrain normals (VNT), and multi-layer splat materials (VBT).
  *
- * [EN]
- * Powered by a virtual texture atlas system consisting of Virtual Heightmap Textures (VHT), Virtual Normal Textures (VNT), and Virtual Base Textures (VBT).
- * Supports quadtree-based hierarchical continuous LOD, terrain mesh geomorphing, GPU hardware instancing, and culling (Frustum/HZB Occlusion).
- * Provides seamless integration with procedural grass (`grassManager`), foliage and 3D impostors (`foliageManager`), and an integrated visual debugger (`debuggerManager`).
+ * [KO] 카메라 거리 및 화면 투영 크기에 기반한 쿼드트리 연속 LOD(Continuous LOD)와 메시 전환 시 팝핑 현상을 제거하는 지오모핑(Geomorphing) 및 디더 페이드를 지원합니다.
+ * [EN] Features quadtree-based hierarchical continuous LOD driven by camera distance or screen size, paired with vertex geomorphing and dither cross-fading to eliminate popping artifacts during LOD transitions.
+ *
+ * [KO] GPU 컴퓨트 셰이더 기반의 프러스텀 및 HZB(Hierarchical Z-Buffer) 오클루전 컬링과 인다이렉트 드로우(Indirect Draw), 실시간 높이맵 레이마칭 그림자를 통해 고성능 렌더링을 구현합니다.
+ * [EN] Delivers high-performance rendering powered by GPU compute-based view frustum and HZB (Hierarchical Z-Buffer) occlusion culling, indirect draw calls, and real-time heightmap raymarching self-shadows.
+ *
+ * [KO] 절차적 잔디(`grassManager`), 대규모 식생 및 3D 임포스터(`foliageManager`), 실시간 진단 도구(`debuggerManager`)와 유기적으로 연동되어 풍부한 오픈월드 환경을 구축합니다.
+ * [EN] Seamlessly integrates with procedural grass (`grassManager`), large-scale foliage with 3D impostors (`foliageManager`), and real-time diagnostic tools (`debuggerManager`) to build rich, cohesive open-world environments.
  *
  * <iframe src="/RedGPU/examples/3d/landscape/openWorldIntegration/"></iframe>
  *
@@ -52,14 +54,14 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * ```typescript
  * const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
  *
- * // 지형 레이어(스플랫 텍스처) 추가
+ * // 지형 레이어(스플랫 텍스처) 추가 / Add terrain splat layer
  * landscape.addLayer({
  *     diffuseTexture: grassTexture,
  *     normalTexture: grassNormalTexture,
  *     uvScale: [50, 50]
  * });
  *
- * // 씬에 지형 추가
+ * // 씬에 지형 추가 / Add landscape to scene
  * scene.addLandscape(landscape);
  * ```
  *
@@ -708,6 +710,13 @@ export class Landscape extends Object3DContainer {
         return this.#receiveShadow;
     }
 
+    set receiveShadow(value: boolean) {
+        if (this.#receiveShadow !== value) {
+            this.#receiveShadow = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     /**
      * @example
      * ```ts
@@ -729,6 +738,13 @@ export class Landscape extends Object3DContainer {
         return this.#castHeightmapShadow;
     }
 
+    set castHeightmapShadow(value: boolean) {
+        if (this.#castHeightmapShadow !== value) {
+            this.#castHeightmapShadow = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     /**
      * @example
      * ```ts
@@ -742,11 +758,18 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets or sets the maximum raymarching trace distance (in world units) for heightmap self-shadow calculations. Minimum value is 10.0.
      *
-     * @defaultValue 200.0
+     * @defaultValue 3000.0
      * @category Landscape
      */
     get heightmapShadowDistance(): number {
         return this.#heightmapShadowDistance;
+    }
+
+    set heightmapShadowDistance(value: number) {
+        if (this.#heightmapShadowDistance !== value) {
+            this.#heightmapShadowDistance = Math.max(10.0, value);
+            this.#updateLandscapeUniforms();
+        }
     }
 
     /**
@@ -769,6 +792,13 @@ export class Landscape extends Object3DContainer {
         return this.#heightmapShadowSteps;
     }
 
+    set heightmapShadowSteps(value: number) {
+        if (this.#heightmapShadowSteps !== value) {
+            this.#heightmapShadowSteps = Math.max(4, Math.min(64, Math.round(value)));
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     /**
      * @example
      * ```ts
@@ -782,11 +812,18 @@ export class Landscape extends Object3DContainer {
      * [EN]
      * Gets or sets the penumbra softness factor for heightmap self-shadows. Minimum value is 0.1.
      *
-     * @defaultValue 1.0
+     * @defaultValue 8.0
      * @category Landscape
      */
     get heightmapShadowSoftness(): number {
         return this.#heightmapShadowSoftness;
+    }
+
+    set heightmapShadowSoftness(value: number) {
+        if (this.#heightmapShadowSoftness !== value) {
+            this.#heightmapShadowSoftness = Math.max(0.1, value);
+            this.#updateLandscapeUniforms();
+        }
     }
 
     async #loadGlobalHeightmapAsync(): Promise<void> {
@@ -897,6 +934,12 @@ export class Landscape extends Object3DContainer {
         return this.#wireframe;
     }
 
+    set wireframe(value: boolean) {
+        if (this.#wireframe !== value) {
+            this.#wireframe = value;
+        }
+    }
+
     /**
      * @example
      * ```ts
@@ -917,9 +960,9 @@ export class Landscape extends Object3DContainer {
         return this.#debugMode;
     }
 
-    set receiveShadow(value: boolean) {
-        if (this.#receiveShadow !== value) {
-            this.#receiveShadow = value;
+    set debugMode(value: number) {
+        if (this.#debugMode !== value) {
+            this.#debugMode = value;
             this.#updateLandscapeUniforms();
         }
     }
@@ -944,87 +987,9 @@ export class Landscape extends Object3DContainer {
         return this.#lodColoration;
     }
 
-    set castHeightmapShadow(value: boolean) {
-        if (this.#castHeightmapShadow !== value) {
-            this.#castHeightmapShadow = value;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.foliageSubCellColoration = true;
-     * ```
-     *
-     * [KO]
-     * 폴리지(식생) 공간 분할 서브셀의 경계 및 분포를 디버그 색상으로 시각화할지 여부를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets whether to visualize foliage spatial sub-cell partitions with debug colors.
-     *
-     * @defaultValue false
-     * @category Landscape
-     */
-    get foliageSubCellColoration(): boolean {
-        return this.#foliageManager?.debugSubCellColoration ?? false;
-    }
-
-    set heightmapShadowDistance(value: number) {
-        if (this.#heightmapShadowDistance !== value) {
-            this.#heightmapShadowDistance = Math.max(10.0, value);
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.foliageSubCellSize = 150.0;
-     * ```
-     *
-     * [KO]
-     * 폴리지 시스템의 서브셀 단위 크기(월드 단위)를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the spatial sub-cell size (in world units) for the foliage system.
-     *
-     * @defaultValue 100.0
-     * @category Landscape
-     */
-    get foliageSubCellSize(): number {
-        return this.#foliageManager?.subCellSize ?? 100.0;
-    }
-
-    set heightmapShadowSteps(value: number) {
-        if (this.#heightmapShadowSteps !== value) {
-            this.#heightmapShadowSteps = Math.max(4, Math.min(64, Math.round(value)));
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.foliageStreamingRadius = 800.0;
-     * ```
-     *
-     * [KO]
-     * 카메라 주변에서 폴리지 인스턴스를 동적으로 생성 및 스트리밍할 반경(월드 단위)을 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the radius (in world units) around the camera within which foliage instances are dynamically streamed.
-     *
-     * @defaultValue 600.0
-     * @category Landscape
-     */
-    get foliageStreamingRadius(): number {
-        return this.#foliageManager?.streamingRadius ?? 600.0;
-    }
-
-    set heightmapShadowSoftness(value: number) {
-        if (this.#heightmapShadowSoftness !== value) {
-            this.#heightmapShadowSoftness = Math.max(0.1, value);
+    set lodColoration(value: boolean) {
+        if (this.#lodColoration !== value) {
+            this.#lodColoration = value;
             this.#updateLandscapeUniforms();
         }
     }
@@ -1047,12 +1012,6 @@ export class Landscape extends Object3DContainer {
         return this.#lodGeomorphStartRatio;
     }
 
-    set wireframe(value: boolean) {
-        if (this.#wireframe !== value) {
-            this.#wireframe = value;
-        }
-    }
-
     /**
      * @example
      * ```ts
@@ -1070,13 +1029,6 @@ export class Landscape extends Object3DContainer {
      */
     get lodFadeStartRatio(): number {
         return this.#lodFadeStartRatio;
-    }
-
-    set debugMode(value: number) {
-        if (this.#debugMode !== value) {
-            this.#debugMode = value;
-            this.#updateLandscapeUniforms();
-        }
     }
 
     /**
@@ -1098,13 +1050,6 @@ export class Landscape extends Object3DContainer {
         return this.#lodGeomorphStartRatio;
     }
 
-    set lodColoration(value: boolean) {
-        if (this.#lodColoration !== value) {
-            this.#lodColoration = value;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
     /**
      * @example
      * ```ts
@@ -1123,11 +1068,6 @@ export class Landscape extends Object3DContainer {
         return this.#lodFadeStartRatio;
     }
 
-    set foliageSubCellColoration(value: boolean) {
-        if (this.#foliageManager) {
-            this.#foliageManager.debugSubCellColoration = value;
-        }
-    }
 
     /**
      * @example
@@ -1149,12 +1089,6 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.loadingRadius;
     }
 
-    set foliageSubCellSize(value: number) {
-        if (this.#foliageManager) {
-            this.#foliageManager.subCellSize = value;
-        }
-    }
-
     /**
      * @example
      * ```ts
@@ -1173,12 +1107,6 @@ export class Landscape extends Object3DContainer {
      */
     get maxLoadsPerFrame(): number {
         return this.#tileStreamer.maxLoadsPerFrame;
-    }
-
-    set foliageStreamingRadius(value: number) {
-        if (this.#foliageManager) {
-            this.#foliageManager.streamingRadius = value;
-        }
     }
 
     /**
