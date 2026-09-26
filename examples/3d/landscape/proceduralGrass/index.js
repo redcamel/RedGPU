@@ -605,10 +605,10 @@ function initCharacter({
 }
 
 /**
- * [KO] 절차적 잔디 에셋(Lawn Clump)을 로드하고 잔디 타입을 등록합니다.
- *      ※ 복수 종류의 잔디(야생 들풀, 꽃 등)를 추가하려면 동일한 방식으로 grassManager.addGrassType()을 추가 호출하면 됩니다.
- * [EN] Loads procedural grass assets (Lawn Clump) and registers the grass type.
- *      * To add multiple grass varieties (wild grass, flowers, etc.), call grassManager.addGrassType() as needed.
+ * [KO] 절차적 잔디 에셋(Lawn Clump)을 로드하고 잔디를 등록합니다.
+ *      ※ 복수 종류의 잔디(야생 들풀, 꽃 등)를 추가하려면 동일한 방식으로 grassManager.addGrass()를 추가 호출하면 됩니다.
+ * [EN] Loads procedural grass assets (Lawn Clump) and registers the grass.
+ *      * To add multiple grass varieties (wild grass, flowers, etc.), call grassManager.addGrass() as needed.
  */
 function initGrassField({
                             redGPUContext,
@@ -635,9 +635,9 @@ function initGrassField({
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                // [KO] 단일 대표 잔디 타입 생성 (Lawn Clump 및 언리얼 표준 단일 감쇄 구간 적용)
-                // [EN] Create single representative grass type (Lawn Clump & Unreal standard single range)
-                const grassType = grassManager.addGrassType({
+                // [KO] 단일 대표 잔디 생성 (Lawn Clump 및 언리얼 표준 단일 감쇄 구간 적용)
+                // [EN] Create single representative grass (Lawn Clump & Unreal standard single range)
+                const grass = grassManager.addGrass({
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
@@ -649,7 +649,7 @@ function initGrassField({
                     maxScale: [18.0, 12.0, 18.0]
                 });
 
-                onGrassTypeAdded?.(grassType, true);
+                onGrassTypeAdded?.(grass, true);
             }
         }
     );

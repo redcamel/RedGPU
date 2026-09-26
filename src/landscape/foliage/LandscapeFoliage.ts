@@ -27,7 +27,7 @@ export interface FoliageLODInfo {
     receiveShadow?: boolean;
 }
 
-export interface FoliageTypeOptions {
+export interface LandscapeFoliageOptions {
     name: string;
 
     lods: FoliageLODConfig[];
@@ -81,8 +81,8 @@ export interface FoliageTypeOptions {
     groundBlendRange?: number;
 }
 
-class FoliageType {
-    #options: FoliageTypeOptions;
+export class LandscapeFoliage {
+    #options: LandscapeFoliageOptions;
     #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
@@ -136,21 +136,21 @@ class FoliageType {
     #streamer: FoliageSubCellStreamer;
     #baker: FoliageBaker | null = null;
     #onDirty?: () => void;
-    #onRepopulateRequired?: (type: FoliageType) => void;
+    #onRepopulateRequired?: (type: LandscapeFoliage) => void;
 
     /**
-     * [KO] 식생 타입 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliageType(options)` 팩토리 메서드를 사용하십시오.
-     * [EN] Creates a foliage type instance.
-     * @remarks Do not instantiate directly; use the `landscape.foliageManager.addFoliageType(options)` factory method instead.
+     * [KO] 지형 식생/나무 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliage(options)` 팩토리 메서드를 사용하십시오.
+     * [EN] Creates a landscape foliage instance.
+     * @remarks Do not instantiate directly; use the `landscape.foliageManager.addFoliage(options)` factory method instead.
      */
     constructor(
         redGPUContext: RedGPUContext,
-        options: FoliageTypeOptions,
+        options: LandscapeFoliageOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void,
-        onRepopulateRequired?: (type: FoliageType) => void,
+        onRepopulateRequired?: (type: LandscapeFoliage) => void,
         baker?: FoliageBaker | null
     ) {
         this.#streamer = new FoliageSubCellStreamer(this);
@@ -367,7 +367,7 @@ class FoliageType {
         return this.#options.randomRotationY;
     }
 
-    get options(): FoliageTypeOptions {
+    get options(): LandscapeFoliageOptions {
         return this.#options;
     }
 
@@ -955,5 +955,5 @@ class FoliageType {
     }
 }
 
-Object.freeze(FoliageType);
-export default FoliageType;
+Object.freeze(LandscapeFoliage);
+export default LandscapeFoliage;

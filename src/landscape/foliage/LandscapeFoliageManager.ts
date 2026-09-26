@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import type Landscape from "../Landscape";
-import type {FoliageTypeOptions} from "./FoliageType";
-import FoliageType from "./FoliageType";
+import type {LandscapeFoliageOptions} from "./LandscapeFoliage";
+import LandscapeFoliage from "./LandscapeFoliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
@@ -18,8 +18,8 @@ class LandscapeFoliageManager {
     #landscape: Landscape | null = null;
 
     #megaBuffer: FoliageMegaBuffer;
-    #foliageTypes: Map<string, FoliageType> = new Map();
-    #typeList: FoliageType[] = [];
+    #foliageTypes: Map<string, LandscapeFoliage> = new Map();
+    #typeList: LandscapeFoliage[] = [];
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
@@ -96,6 +96,10 @@ class LandscapeFoliageManager {
 
     get megaBuffer(): FoliageMegaBuffer {
         return this.#megaBuffer;
+    }
+
+    get hasFoliage(): boolean {
+        return this.#typeList.length > 0;
     }
 
     get hasFoliageTypes(): boolean {
@@ -265,54 +269,12 @@ class LandscapeFoliageManager {
         this.#syncWindToAllTypes();
     }
 
-    addFoliageType(options: FoliageTypeOptions): FoliageType {
-        if (this.#foliageTypes.has(options.name)) {
-            console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
-            return this.#foliageTypes.get(options.name)!;
-        }
+    get typeList(): readonly LandscapeFoliage[] {
+        return this.#typeList;
+    }
 
-        const mergedOptions: FoliageTypeOptions = {
-            ...options,
-            subCellSize: options.subCellSize ?? this.#subCellSize,
-            streamingRadius: options.streamingRadius ?? this.#streamingRadius
-        };
-
-        const foliageType = new FoliageType(
-            this.#redGPUContext,
-            mergedOptions,
-            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
-            this.#megaBuffer,
-            () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.repopulateFoliageType(t),
-            this.#cullingDispatcher.baker
-        );
-        this.#foliageTypes.set(options.name, foliageType);
-        this.#typeList.push(foliageType);
-        this.#renderer.markShadowBundleDirty();
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (gpuDevice) {
-            foliageType.syncWindToSubMeshes(
-                gpuDevice,
-                this.#windDirection[0],
-                this.#windDirection[1],
-                this.#windSpeed,
-                this.#windStrength,
-                this.#windFrequency,
-                this.#windFlutterStrength,
-                this.#windEnabled
-            );
-        }
-
-        const cells = this.#landscape?.landscapeComponents;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                foliageType.populateTile(cells[i], this.#landscape);
-            }
-        }
-
-        return foliageType;
+    get foliageList(): readonly LandscapeFoliage[] {
+        return this.#typeList;
     }
 
     update(viewOrCamera?: any, stateData?: any): void {
@@ -369,10 +331,82 @@ class LandscapeFoliageManager {
         }
     }
 
-    repopulateFoliageType(foliageTypeOrName: FoliageType | string): void {
-        const type = typeof foliageTypeOrName === 'string'
-            ? this.#foliageTypes.get(foliageTypeOrName)
-            : foliageTypeOrName;
+    get foliageTypes(): ReadonlyMap<string, LandscapeFoliage> {
+        return this.#foliageTypes;
+    }
+
+    get foliages(): ReadonlyMap<string, LandscapeFoliage> {
+        return this.#foliageTypes;
+    }
+
+    addFoliage(options: LandscapeFoliageOptions): LandscapeFoliage {
+        if (this.#foliageTypes.has(options.name)) {
+            console.warn(`[LandscapeFoliageManager] Foliage with name '${options.name}' already exists.`);
+            return this.#foliageTypes.get(options.name)!;
+        }
+
+        const mergedOptions: LandscapeFoliageOptions = {
+            ...options,
+            subCellSize: options.subCellSize ?? this.#subCellSize,
+            streamingRadius: options.streamingRadius ?? this.#streamingRadius
+        };
+
+        const foliage = new LandscapeFoliage(
+            this.#redGPUContext,
+            mergedOptions,
+            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
+            this.#megaBuffer,
+            () => this.#renderer.markShadowBundleDirty(),
+            (t) => this.repopulateFoliageType(t),
+            this.#cullingDispatcher.baker
+        );
+        this.#foliageTypes.set(options.name, foliage);
+        this.#typeList.push(foliage);
+        this.#renderer.markShadowBundleDirty();
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            foliage.syncWindToSubMeshes(
+                gpuDevice,
+                this.#windDirection[0],
+                this.#windDirection[1],
+                this.#windSpeed,
+                this.#windStrength,
+                this.#windFrequency,
+                this.#windFlutterStrength,
+                this.#windEnabled
+            );
+        }
+
+        const cells = this.#landscape?.landscapeComponents;
+        if (cells && cells.length > 0) {
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                foliage.populateTile(cells[i], this.#landscape);
+            }
+        }
+
+        return foliage;
+    }
+
+    rebakeAll(): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].rebake();
+        }
+    }
+
+    /**
+     * @deprecated Use `addFoliage(options)` instead.
+     */
+    addFoliageType(options: LandscapeFoliageOptions): LandscapeFoliage {
+        return this.addFoliage(options);
+    }
+
+    repopulateFoliage(foliageOrName: LandscapeFoliage | string): void {
+        const type = typeof foliageOrName === 'string'
+            ? this.#foliageTypes.get(foliageOrName)
+            : foliageOrName;
         if (!type) return;
 
         type.clearTileCache();
@@ -387,25 +421,25 @@ class LandscapeFoliageManager {
         this.#renderer.markShadowBundleDirty();
     }
 
+    /**
+     * @deprecated Use `repopulateFoliage(foliageOrName)` instead.
+     */
+    repopulateFoliageType(foliageTypeOrName: LandscapeFoliage | string): void {
+        this.repopulateFoliage(foliageTypeOrName);
+    }
+
     repopulateAll(): void {
         const count = this.#typeList.length;
         for (let i = 0; i < count; i++) {
-            this.repopulateFoliageType(this.#typeList[i]);
+            this.repopulateFoliage(this.#typeList[i]);
         }
     }
 
-    rebakeAll(): void {
-        const count = this.#typeList.length;
-        for (let i = 0; i < count; i++) {
-            this.#typeList[i].rebake();
-        }
-    }
-
-    removeFoliageType(name: string): boolean {
-        const foliageType = this.#foliageTypes.get(name);
-        if (foliageType) {
-            foliageType.destroy();
-            const idx = this.#typeList.indexOf(foliageType);
+    removeFoliage(name: string): boolean {
+        const foliage = this.#foliageTypes.get(name);
+        if (foliage) {
+            foliage.destroy();
+            const idx = this.#typeList.indexOf(foliage);
             if (idx !== -1) {
                 this.#typeList.splice(idx, 1);
             }
@@ -415,16 +449,22 @@ class LandscapeFoliageManager {
         return false;
     }
 
-    get typeList(): readonly FoliageType[] {
-        return this.#typeList;
+    /**
+     * @deprecated Use `removeFoliage(name)` instead.
+     */
+    removeFoliageType(name: string): boolean {
+        return this.removeFoliage(name);
     }
 
-    get foliageTypes(): ReadonlyMap<string, FoliageType> {
-        return this.#foliageTypes;
-    }
-
-    getFoliageType(name: string): FoliageType | undefined {
+    getFoliage(name: string): LandscapeFoliage | undefined {
         return this.#foliageTypes.get(name);
+    }
+
+    /**
+     * @deprecated Use `getFoliage(name)` instead.
+     */
+    getFoliageType(name: string): LandscapeFoliage | undefined {
+        return this.getFoliage(name);
     }
 
     destroy(): void {

@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
-import type {FoliageSubMesh} from "../../FoliageType";
+import type {FoliageSubMesh} from "../../LandscapeFoliage";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
 import impostorDilationWGSL from "./impostorDilation.wgsl";

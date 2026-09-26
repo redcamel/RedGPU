@@ -16,7 +16,7 @@ export interface GrassLODInfo {
     mesh: Mesh;
 }
 
-export interface GrassTypeOptions {
+export interface LandscapeGrassOptions {
     name?: string;
     lods: GrassLODConfig[];
     baseColorTexture?: string | BitmapTexture;
@@ -49,7 +49,7 @@ export interface GrassTypeOptions {
     shadowShrinkStartDistance?: number;
 }
 
-export class GrassType {
+export class LandscapeGrass {
     #name: string;
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
@@ -85,23 +85,23 @@ export class GrassType {
     #onChanged: (() => void) | null = null;
 
     /**
-     * [KO] 절차적 잔디 타입 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrassType(options)` 팩토리 메서드를 사용하십시오.
-     * [EN] Creates a procedural grass type instance.
-     * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrassType(options)` factory method instead.
+     * [KO] 절차적 지형 잔디 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrass(options)` 팩토리 메서드를 사용하십시오.
+     * [EN] Creates a procedural landscape grass instance.
+     * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrass(options)` factory method instead.
      */
-    constructor(redGPUContext: RedGPUContext, options: GrassTypeOptions) {
+    constructor(redGPUContext: RedGPUContext, options: LandscapeGrassOptions) {
         if (!options.lods || options.lods.length === 0) {
-            throw new Error(`[GrassType] 'lods' array must be provided with at least one LOD entry!`);
+            throw new Error(`[LandscapeGrass] 'lods' array must be provided with at least one LOD entry!`);
         }
 
         const sortedLods = [...options.lods].sort((a, b) => (a.lodDistance ?? 9999) - (b.lodDistance ?? 9999));
         const lod0 = sortedLods[0];
         const lod0Mesh = lod0.mesh;
         if (!lod0Mesh) {
-            throw new Error(`[GrassType] LOD 0 must contain a valid Mesh instance!`);
+            throw new Error(`[LandscapeGrass] LOD 0 must contain a valid Mesh instance!`);
         }
-        this.#name = options.name || lod0Mesh.name || `GrassType_${Math.random().toString(36).substring(2, 7)}`;
+        this.#name = options.name || lod0Mesh.name || `Grass_${Math.random().toString(36).substring(2, 7)}`;
 
         const mat = lod0Mesh.material as any;
         const resolvedTexture = options.baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
@@ -113,7 +113,7 @@ export class GrassType {
 
         const lod0Geom = lod0Mesh.geometry;
         if (!lod0Geom) {
-            throw new Error(`[GrassType] LOD 0 mesh must have a valid geometry!`);
+            throw new Error(`[LandscapeGrass] LOD 0 mesh must have a valid geometry!`);
         }
         this.#geometry = lod0Geom;
 
@@ -504,4 +504,4 @@ export class GrassType {
     }
 }
 
-export default GrassType;
+export default LandscapeGrass;

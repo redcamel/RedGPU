@@ -5,7 +5,7 @@
  * @packageDocumentation
  */
 import LandscapeFoliageManager from "./LandscapeFoliageManager";
-import FoliageType, {FoliageTypeOptions} from "./FoliageType";
+import LandscapeFoliage, {LandscapeFoliageOptions} from "./LandscapeFoliage";
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
 import LandscapeFoliageSpatialGrid from "./core/spatial/LandscapeFoliageSpatialGrid";
@@ -14,7 +14,7 @@ import {createOctahedralImpostorGeometry} from "./core/impostor/octahedral/creat
 
 export {
     LandscapeFoliageManager,
-    FoliageType,
+    LandscapeFoliage,
     FoliageSubMesh,
     FoliageMegaBuffer,
     LandscapeFoliageSpatialGrid,
@@ -23,5 +23,5 @@ export {
 };
 
 export type {
-    FoliageTypeOptions
+    LandscapeFoliageOptions
 };

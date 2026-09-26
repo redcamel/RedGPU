@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Landscape from "../Landscape";
-import {GrassType, GrassTypeOptions} from "./GrassType";
+import LandscapeGrass, {LandscapeGrassOptions} from "./LandscapeGrass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";
@@ -66,7 +66,7 @@ export class LandscapeGrassManager {
     #baker: GrassBaker;
     #culler: GrassCuller;
 
-    #grassTypes: GrassType[] = [];
+    #grassTypes: LandscapeGrass[] = [];
     #nextTypeId: number = 0;
     #totalInstancesPopulated: number = 0;
     #populated: boolean = false;
@@ -160,8 +160,16 @@ export class LandscapeGrassManager {
         }
     }
 
-    get grassTypes(): GrassType[] {
+    get grassList(): readonly LandscapeGrass[] {
         return this.#grassTypes;
+    }
+
+    get grassTypes(): LandscapeGrass[] {
+        return this.#grassTypes;
+    }
+
+    get hasGrass(): boolean {
+        return this.#grassTypes.length > 0;
     }
 
     get hasGrassTypes(): boolean {
@@ -274,8 +282,8 @@ export class LandscapeGrassManager {
         return this.#shadowPipeline;
     }
 
-    addGrassType(options: GrassTypeOptions): GrassType {
-        const grassType = new GrassType(this.#redGPUContext, options);
+    addGrass(options: LandscapeGrassOptions): LandscapeGrass {
+        const grassType = new LandscapeGrass(this.#redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
@@ -375,6 +383,13 @@ export class LandscapeGrassManager {
         this.#lastUpdateGridPos[0] = -999999;
         this.#lastUpdateGridPos[1] = -999999;
         return grassType;
+    }
+
+    /**
+     * @deprecated Use `addGrass(options)` instead.
+     */
+    addGrassType(options: LandscapeGrassOptions): LandscapeGrass {
+        return this.addGrass(options);
     }
 
     update(camera: any, stateData?: any): void {

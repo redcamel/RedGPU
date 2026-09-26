@@ -583,7 +583,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                const grassType = grassManager.addGrassType({
+                const grass = grassManager.addGrass({
                     name: 'Lawn Clump',
                     lods: [
                         {mesh: baseMesh, lodDistance: 110}
@@ -596,7 +596,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
                     bottomOffset: -0.25
                 });
 
-                onGrassTypeAdded?.(grassType, true);
+                onGrassTypeAdded?.(grass, true);
             }
         }
     );
@@ -648,7 +648,7 @@ function initFoliageField({redGPUContext, foliageManager, onFoliageTypeAdded}) {
                     lodConfigs.push({mesh: lods.lod2, lodDistance: 180, receiveShadow: false});
                 }
 
-                const foliageType = foliageManager.addFoliageType({
+                const foliage = foliageManager.addFoliage({
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 90.0,
@@ -660,7 +660,7 @@ function initFoliageField({redGPUContext, foliageManager, onFoliageTypeAdded}) {
                     maxSlope: 32.0
                 });
 
-                onFoliageTypeAdded?.(foliageType);
+                onFoliageTypeAdded?.(foliage);
             });
         }
     );

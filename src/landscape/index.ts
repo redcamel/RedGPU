@@ -26,38 +26,36 @@ export * as Foliage from "./foliage";
 export * as Grass from "./grass";
 export * as Debugger from "./debugger";
 
-// 2. Main Entry Classes & Settings (Direct Root Exports)
+// 2. Main Entry Class & Settings
 import Landscape from "./Landscape";
 import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./LANDSCAPE_BASE_GRID_SIZE";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
-
-// Shortcuts for convenience
-import LandscapeLayer, {LandscapeLayerOptions, LandscapeWeightMapChannel} from "./core/material/LandscapeLayer";
-import LandscapeMaterial from "./core/material/LandscapeMaterial";
-import FoliageType, {FoliageTypeOptions} from "./foliage/FoliageType";
-import GrassType, {GrassTypeOptions} from "./grass/GrassType";
-import LandscapeDebuggerManager, {LandscapeDebuggerManagerOptions} from "./debugger";
 
 export {
     Landscape,
     LANDSCAPE_BASE_GRID_SIZE,
     validateLandscapeBaseGridSize,
     LANDSCAPE_DEBUG_MODE,
-    LANDSCAPE_DEFAULT_LOD_COLORS,
-
-    // Shortcuts for convenience
-    LandscapeLayer,
-    LandscapeMaterial,
-    FoliageType,
-    GrassType,
-    LandscapeDebuggerManager
+    LANDSCAPE_DEFAULT_LOD_COLORS
 };
 
+// 3. User-facing Configuration Types
 export type {
     LandscapeLayerOptions,
-    LandscapeWeightMapChannel,
-    FoliageTypeOptions,
-    GrassTypeOptions,
+    LandscapeWeightMapChannel
+} from "./core/material/LandscapeLayer";
+
+export type {
+    LandscapeFoliageOptions,
+    FoliageLODConfig
+} from "./foliage/LandscapeFoliage";
+
+export type {
+    LandscapeGrassOptions,
+    GrassLODConfig
+} from "./grass/LandscapeGrass";
+
+export type {
     LandscapeDebuggerManagerOptions
-};
+} from "./debugger";

@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import type Landscape from "../../../Landscape";
-import type FoliageType from "../../FoliageType";
+import type LandscapeFoliage from "../../LandscapeFoliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
@@ -145,7 +145,7 @@ class FoliageCullingDispatcher {
     }
 
     updateAndDispatch(
-        typeList: FoliageType[],
+        typeList: LandscapeFoliage[],
         viewOrCamera: any,
         landscape?: Landscape | null,
         stateData?: any

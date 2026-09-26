@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import type {FoliageLODInfo} from "../../FoliageType";
+import type {FoliageLODInfo} from "../../LandscapeFoliage";
 import type FoliageSubMesh from "../../FoliageSubMesh";
 import type FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 

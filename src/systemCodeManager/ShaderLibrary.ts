@@ -2680,9 +2680,9 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct DirectionalLight {
-     *      direction:vec3<f32>,
-     *      color:vec3<f32>,
-     *      intensity:f32,
+     * 	  direction:vec3<f32>,
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32,
      * };
      * ```
      */
@@ -2694,8 +2694,8 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct AmbientLight {
-     *      color:vec3<f32>,
-     *      intensity:f32
+     * 	  color:vec3<f32>,
+     * 	  intensity:f32
      * };
      * ```
      */
@@ -2728,33 +2728,33 @@ export namespace SystemStructLibrary {
      *
      * ```wgsl
      * struct SkyAtmosphere {
-     *    rayleighScattering: vec3<f32>,
-     *    rayleighExponentialDistribution: f32,
-     *    mieScattering: vec3<f32>,
-     *    mieAnisotropy: f32,
-     *    mieAbsorption: vec3<f32>,
-     *    mieExponentialDistribution: f32,
-     *    absorptionCoefficient: vec3<f32>,
-     *    absorptionTipAltitude: f32,
-     *    groundAlbedo: vec3<f32>,
-     *    absorptionTentWidth: f32,
-     *    skyLuminanceFactor: vec3<f32>,
-     *    multiScatteringFactor: f32,
-     *    sunDirection: vec3<f32>,
-     *    transmittanceMinLightElevationAngle: f32,
-     *    groundRadius: f32,
-     *    atmosphereHeight: f32,
-     *    aerialPerspectiveDistanceScale: f32,
-     *    aerialPerspectiveStartDepth: f32,
-     *    sunIntensity: f32,
-     *    sunSize: f32,
-     *    sunLimbDarkening: f32,
-     *    cameraHeight: f32,
-     *    cloudTime: f32,
-     *    cloudTimeMultiplier: f32,
-     *    cloudCoverage: f32,
-     *    cloudDensity: f32,
-     *    cloudHeight: f32
+     * 	rayleighScattering: vec3<f32>,
+     * 	rayleighExponentialDistribution: f32,
+     * 	mieScattering: vec3<f32>,
+     * 	mieAnisotropy: f32,
+     * 	mieAbsorption: vec3<f32>,
+     * 	mieExponentialDistribution: f32,
+     * 	absorptionCoefficient: vec3<f32>,
+     * 	absorptionTipAltitude: f32,
+     * 	groundAlbedo: vec3<f32>,
+     * 	absorptionTentWidth: f32,
+     * 	skyLuminanceFactor: vec3<f32>,
+     * 	multiScatteringFactor: f32,
+     * 	sunDirection: vec3<f32>,
+     * 	transmittanceMinLightElevationAngle: f32,
+     * 	groundRadius: f32,
+     * 	atmosphereHeight: f32,
+     * 	aerialPerspectiveDistanceScale: f32,
+     * 	aerialPerspectiveStartDepth: f32,
+     * 	sunIntensity: f32,
+     * 	sunSize: f32,
+     * 	sunLimbDarkening: f32,
+     * 	cameraHeight: f32,
+     * 	cloudTime: f32,
+     * 	cloudTimeMultiplier: f32,
+     * 	cloudCoverage: f32,
+     * 	cloudDensity: f32,
+     * 	cloudHeight: f32
      * };
      * ```
      */
@@ -3141,27 +3141,27 @@ export namespace ShaderLibrary {
      * #redgpu_include systemStruct.SkyAtmosphere
      * 
      * struct SystemUniform {
-     *      projection: Projection,
-     *      time: Time,
-     *      resolution:vec2<f32>,
+     * 	  projection: Projection,
+     * 	  time: Time,
+     * 	  resolution:vec2<f32>,
      *       //
      *       camera:Camera,
-     *      usePrefilterTexture:u32,
-     *      isView3D:u32,
-     *      useSkyAtmosphere:u32,
-     *      preExposure:f32,
-     *      iblIntensity:f32,
-     *      //
-     *      skyAtmosphere:SkyAtmosphere,
-     *      shadow:Shadow,
+     * 	  usePrefilterTexture:u32,
+     * 	  isView3D:u32,
+     * 	  useSkyAtmosphere:u32,
+     * 	  preExposure:f32,
+     * 	  iblIntensity:f32,
+     * 	  //
+     * 	  skyAtmosphere:SkyAtmosphere,
+     * 	  shadow:Shadow,
      *       //
      *       directionalLightCount:u32,
      *       directionalLightProjectionViewMatrix:mat4x4<f32>,
      *       directionalLightProjectionMatrix:mat4x4<f32>,
      *       directionalLightViewMatrix:mat4x4<f32>,
      *       directionalLights:array<DirectionalLight,3>,
-     *      //
-     *      ambientLight:AmbientLight,
+     * 	  //
+     * 	  ambientLight:AmbientLight,
      * 
      * };
      * 

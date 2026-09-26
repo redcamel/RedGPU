@@ -526,7 +526,7 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     lodConfigs.push({mesh: lods.lod2, lodDistance: 180});
                 }
 
-                const foliageType = foliageManager.addFoliageType({
+                const foliage = foliageManager.addFoliage({
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 120.0,
@@ -537,7 +537,7 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
 
                 });
 
-                onFoliageTypeAdded?.(foliageType);
+                onFoliageTypeAdded?.(foliage);
             });
         }
     );

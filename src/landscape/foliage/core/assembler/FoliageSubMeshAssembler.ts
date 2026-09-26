@@ -11,7 +11,7 @@ import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImposto
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../../FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
-import type {FoliageLODInfo, FoliageTypeOptions} from "../../FoliageType";
+import type {FoliageLODInfo, LandscapeFoliageOptions} from "../../LandscapeFoliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
@@ -65,7 +65,7 @@ class FoliageSubMeshAssembler {
 
     static assemble(
         redGPUContext: RedGPUContext,
-        options: FoliageTypeOptions,
+        options: LandscapeFoliageOptions,
         subMeshBindGroupLayout: GPUBindGroupLayout
     ): FoliageAssemblyResult {
         const gpuDevice = redGPUContext.gpuDevice;
@@ -257,7 +257,7 @@ class FoliageSubMeshAssembler {
         redGPUContext: RedGPUContext,
         gpuDevice: GPUDevice,
         subMeshBindGroupLayout: GPUBindGroupLayout,
-        options: FoliageTypeOptions,
+        options: LandscapeFoliageOptions,
         sourceSubMeshes: FoliageSubMesh[],
         subList: FoliageSubMesh[],
         lodInfoList: FoliageLODInfo[],
@@ -356,7 +356,7 @@ class FoliageSubMeshAssembler {
         parentRelativeMatrix: mat4,
         isRoot: boolean,
         rawList: RawSubMesh[],
-        options: FoliageTypeOptions
+        options: LandscapeFoliageOptions
     ): void {
         if (!node) return;
 
@@ -438,7 +438,7 @@ class FoliageSubMeshAssembler {
         redGPUContext: RedGPUContext,
         roots: Mesh[],
         lodIndex: number,
-        options: FoliageTypeOptions,
+        options: LandscapeFoliageOptions,
         subMeshBindGroupLayout: GPUBindGroupLayout,
         subMeshUniformCache?: Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>,
         lodReceiveShadow: boolean = true

@@ -1,4 +1,4 @@
-import type FoliageType from "../../FoliageType";
+import type LandscapeFoliage from "../../LandscapeFoliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
 class FoliageSubCellStreamer {
@@ -6,14 +6,14 @@ class FoliageSubCellStreamer {
     static readonly #tempCandidates: FoliageSubCellChunk[] = [];
     static #sortCamX: number = 0;
     static #sortCamZ: number = 0;
-    readonly #foliageType: FoliageType;
+    readonly #foliageType: LandscapeFoliage;
     readonly #chunks: Map<number, FoliageSubCellChunk> = new Map();
     readonly #mountedChunks: FoliageSubCellChunk[] = [];
     #totalInstanceCount: number = 0;
     #mountBudget: number = 16;
     #unmountBudget: number = 32;
 
-    constructor(foliageType: FoliageType) {
+    constructor(foliageType: LandscapeFoliage) {
         this.#foliageType = foliageType;
     }
 
