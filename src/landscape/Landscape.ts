@@ -75,49 +75,69 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * @category Landscape
  */
 export class Landscape extends Object3DContainer {
+    // =========================================================================
+    // Core Context & Subsystems
+    // =========================================================================
     #redGPUContext: RedGPUContext;
-    #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
+    #sharedGeometry: LandscapeSharedGeometry;
     #instanceBuffer: LandscapeInstanceBuffer;
+    #tileStreamer: LandscapeTileStreamer;
+    #material: LandscapeMaterial;
     #gpuCuller: LandscapeGPUCuller | null = null;
-    #lastHZBView: GPUTextureView | null = null;
-    #lastHZBSampler: GPUSampler | null = null;
+
+    // =========================================================================
+    // Subsystem Managers
+    // =========================================================================
+    #foliageManager: LandscapeFoliageManager;
+    #grassManager: LandscapeGrassManager;
+    #debuggerManager: LandscapeDebuggerManager;
+
+    // =========================================================================
+    // Spatial Dimensions & Grid Configuration
+    // =========================================================================
+    #worldSizeX: number = 2000.0;
+    #worldSizeZ: number = 2000.0;
+    #worldSizeTuple: [number, number] = [0, 0];
+    #componentCountX: number = 16;
+    #componentCountZ: number = 16;
+    #componentCountTuple: [number, number] = [0, 0];
+    #tileSizeX: number = 125.0;
+    #tileSizeZ: number = 125.0;
+    #tileSizeTuple: [number, number] = [0, 0];
+    #heightScale: number = 500.0;
+    #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+    #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
+
+    // =========================================================================
+    // LOD Configuration & Buffers
+    // =========================================================================
+    #lodMetric: 'distance' | 'screenSize' = 'screenSize';
+    #lodMaxLevel: number;
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
-    #material: LandscapeMaterial;
-    #worldSizeX: number = 2000.0;
-    #worldSizeZ: number = 2000.0;
-    #componentCountX: number = 16;
-    #componentCountZ: number = 16;
-    #tileSizeX: number = 125.0;
-    #tileSizeZ: number = 125.0;
-    #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+    #lodDistancesBuffer: Float32Array = new Float32Array(8);
+    #lastTanHalfFOV: number = 1.0;
+
+    // =========================================================================
+    // Global Heightmap
+    // =========================================================================
+    #globalHeightmapUrl: string = '';
+    #globalHeightTexture: GPUTexture | null = null;
+
+    // =========================================================================
+    // Lighting & Heightmap Shadow
+    // =========================================================================
     #receiveShadow: boolean = true;
     #castHeightmapShadow: boolean = true;
     #heightmapShadowSteps: number = 16;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
-    #lodMetric: 'distance' | 'screenSize' = 'screenSize';
-    #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
-    #foliageManager: LandscapeFoliageManager;
-    #grassManager: LandscapeGrassManager;
-    #debuggerManager: LandscapeDebuggerManager;
 
-    #lastTanHalfFOV: number = 1.0;
-    #heightScale: number = 500.0;
-    #tileStreamer: LandscapeTileStreamer;
-    #globalHeightmapUrl: string = '';
-    #globalHeightTexture: GPUTexture | null = null;
-
-    #lodMaxLevel: number;
-
-    #worldSizeTuple: [number, number] = [0, 0];
-    #componentCountTuple: [number, number] = [0, 0];
-    #tileSizeTuple: [number, number] = [0, 0];
-
-    #lodDistancesBuffer: Float32Array = new Float32Array(8);
-
+    // =========================================================================
+    // Rendering Pipeline & Caches
+    // =========================================================================
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #cachedRenderPipeline: GPURenderPipeline | null = null;
@@ -125,6 +145,8 @@ export class Landscape extends Object3DContainer {
     #lastRenderMaterialUUID: string = '';
     #lastRenderVariantModule: any = null;
     #lastRenderMsaaID: string = '';
+    #lastHZBView: GPUTextureView | null = null;
+    #lastHZBSampler: GPUSampler | null = null;
 
     /**
      * [KO] Landscape 인스턴스를 생성하고 가상 텍스처 아틀라스 및 지형 파이프라인을 초기화합니다.
@@ -1204,9 +1226,6 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
     }
 
-    #bakeGlobalVBT(): void {
-        this.#tileStreamer?.rebakeAllLoadedVBT();
-    }
 
     #clampComponentCount(val: number): number {
         const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
