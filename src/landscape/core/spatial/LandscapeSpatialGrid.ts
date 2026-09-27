@@ -8,6 +8,10 @@ export class LandscapeSpatialGrid {
     #halfWorldSizeX: number;
     #halfWorldSizeZ: number;
 
+    #worldSizeTuple: [number, number] = [0, 0];
+    #componentCountTuple: [number, number] = [0, 0];
+    #tileSizeTuple: [number, number] = [0, 0];
+
     #flatCells: LandscapeComponent[] = [];
 
     constructor(tileCountX: number, tileCountZ: number, tileSizeX: number, tileSizeZ: number) {
@@ -17,6 +21,23 @@ export class LandscapeSpatialGrid {
         this.#tileSizeZ = tileSizeZ;
         this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
         this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
+        this.#updateTuples();
+    }
+
+    get worldSize(): readonly [number, number] {
+        return this.#worldSizeTuple;
+    }
+
+    get componentCount(): readonly [number, number] {
+        return this.#componentCountTuple;
+    }
+
+    get tileSize(): readonly [number, number] {
+        return this.#tileSizeTuple;
+    }
+
+    get worldSizeX(): number {
+        return this.#worldSizeTuple[0];
     }
 
     get flatCells(): readonly LandscapeComponent[] {
@@ -39,12 +60,19 @@ export class LandscapeSpatialGrid {
         return this.#tileSizeZ;
     }
 
-    get worldSizeX(): number {
-        return this.#tileCountX * this.#tileSizeX;
+    get worldSizeZ(): number {
+        return this.#worldSizeTuple[1];
     }
 
-    get worldSizeZ(): number {
-        return this.#tileCountZ * this.#tileSizeZ;
+    setConfig(tileCountX: number, tileCountZ: number, tileSizeX: number, tileSizeZ: number): void {
+        this.#tileCountX = tileCountX;
+        this.#tileCountZ = tileCountZ;
+        this.#tileSizeX = tileSizeX;
+        this.#tileSizeZ = tileSizeZ;
+        this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
+        this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
+        this.#updateTuples();
+        this.clearTiles();
     }
 
     get halfWorldSizeX(): number {
@@ -55,18 +83,39 @@ export class LandscapeSpatialGrid {
         return this.#halfWorldSizeZ;
     }
 
-    setConfig(tileCountX: number, tileCountZ: number, tileSizeX: number, tileSizeZ: number): void {
-        this.#tileCountX = tileCountX;
-        this.#tileCountZ = tileCountZ;
-        this.#tileSizeX = tileSizeX;
-        this.#tileSizeZ = tileSizeZ;
-        this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
-        this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
-        this.clearTiles();
+    rebuildTiles(onTileCreated?: (comp: LandscapeComponent, index: number) => void): void {
+        this.#flatCells.length = 0;
+        let index = 0;
+        const countX = this.#tileCountX;
+        const countZ = this.#tileCountZ;
+        const sizeX = this.#tileSizeX;
+        const sizeZ = this.#tileSizeZ;
+        const halfX = this.#halfWorldSizeX;
+        const halfZ = this.#halfWorldSizeZ;
+
+        for (let row = 0; row < countZ; row++) {
+            for (let col = 0; col < countX; col++) {
+                const posX = col * sizeX - halfX + sizeX / 2;
+                const posZ = row * sizeZ - halfZ + sizeZ / 2;
+                const comp = new LandscapeComponent(posX, posZ, col, row);
+                this.#flatCells.push(comp);
+                onTileCreated?.(comp, index);
+                index++;
+            }
+        }
     }
 
     clearTiles(): void {
         this.#flatCells.length = 0;
+    }
+
+    #updateTuples(): void {
+        this.#worldSizeTuple[0] = this.#tileCountX * this.#tileSizeX;
+        this.#worldSizeTuple[1] = this.#tileCountZ * this.#tileSizeZ;
+        this.#componentCountTuple[0] = this.#tileCountX;
+        this.#componentCountTuple[1] = this.#tileCountZ;
+        this.#tileSizeTuple[0] = this.#tileSizeX;
+        this.#tileSizeTuple[1] = this.#tileSizeZ;
     }
 
     registerTile(row: number, col: number, component: LandscapeComponent): void {

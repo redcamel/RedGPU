@@ -95,15 +95,6 @@ export class Landscape extends Object3DContainer {
     // =========================================================================
     // Spatial Dimensions & Grid Configuration
     // =========================================================================
-    #worldSizeX: number = 2000.0;
-    #worldSizeZ: number = 2000.0;
-    #worldSizeTuple: [number, number] = [0, 0];
-    #componentCountX: number = 16;
-    #componentCountZ: number = 16;
-    #componentCountTuple: [number, number] = [0, 0];
-    #tileSizeX: number = 125.0;
-    #tileSizeZ: number = 125.0;
-    #tileSizeTuple: [number, number] = [0, 0];
     #heightScale: number = 500.0;
     #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
@@ -192,13 +183,6 @@ export class Landscape extends Object3DContainer {
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
         this.#material = material;
-        this.#worldSizeX = worldSizeX;
-        this.#worldSizeZ = worldSizeZ;
-        this.#worldSizeTuple = [worldSizeX, worldSizeZ];
-        this.#componentCountX = componentCountX;
-        this.#componentCountZ = componentCountZ;
-        this.#tileSizeX = tileSizeX;
-        this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = lod0SizeQuads;
         this.#lodMaxLevel = lodMaxLevel;
@@ -206,7 +190,6 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
         this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
         this.#heightScale = 500.0;
-        this.#updateTuples();
 
         this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
         this.#tileStreamer.setMaterial(material);
@@ -327,7 +310,7 @@ export class Landscape extends Object3DContainer {
      * @defaultValue [2000, 2000]
      */
     get worldSize(): readonly [number, number] {
-        return this.#worldSizeTuple;
+        return this.#spatialGrid.worldSize;
     }
 
     /**
@@ -339,8 +322,8 @@ export class Landscape extends Object3DContainer {
      * [EN] World size (number or `[sizeX, sizeZ]` array)
      */
     set worldSize(value: number | [number, number]) {
-        let wx = this.#worldSizeX;
-        let wz = this.#worldSizeZ;
+        let wx = this.#spatialGrid.worldSizeX;
+        let wz = this.#spatialGrid.worldSizeZ;
         if (Array.isArray(value)) {
             wx = value[0];
             wz = value[1];
@@ -349,12 +332,10 @@ export class Landscape extends Object3DContainer {
             wz = value;
         }
 
-        if (wx > 0 && wz > 0 && (this.#worldSizeX !== wx || this.#worldSizeZ !== wz)) {
-            this.#worldSizeX = wx;
-            this.#worldSizeZ = wz;
-            this.#tileSizeX = wx / this.#componentCountX;
-            this.#tileSizeZ = wz / this.#componentCountZ;
-            this.#updateTuples();
+        if (wx > 0 && wz > 0 && (this.#spatialGrid.worldSizeX !== wx || this.#spatialGrid.worldSizeZ !== wz)) {
+            const tcX = this.#spatialGrid.tileCountX;
+            const tcZ = this.#spatialGrid.tileCountZ;
+            this.#spatialGrid.setConfig(tcX, tcZ, wx / tcX, wz / tcZ);
             this.#updateLandscapeUniforms();
             this.#rebuildTiles();
         }
@@ -365,7 +346,7 @@ export class Landscape extends Object3DContainer {
      * [EN] Returns the number of component (tile) subdivisions along X and Z axes as `[countX, countZ]`.
      */
     get componentCount(): readonly [number, number] {
-        return this.#componentCountTuple;
+        return this.#spatialGrid.componentCount;
     }
 
     /**
@@ -377,8 +358,8 @@ export class Landscape extends Object3DContainer {
      * [EN] Component count (number or `[countX, countZ]` array)
      */
     set componentCount(value: number | [number, number]) {
-        let tcX = this.#componentCountX;
-        let tcZ = this.#componentCountZ;
+        let tcX = this.#spatialGrid.tileCountX;
+        let tcZ = this.#spatialGrid.tileCountZ;
         if (Array.isArray(value)) {
             tcX = this.#clampComponentCount(value[0]);
             tcZ = this.#clampComponentCount(value[1]);
@@ -388,12 +369,10 @@ export class Landscape extends Object3DContainer {
             tcZ = count;
         }
 
-        if (this.#componentCountX !== tcX || this.#componentCountZ !== tcZ) {
-            this.#componentCountX = tcX;
-            this.#componentCountZ = tcZ;
-            this.#tileSizeX = this.#worldSizeX / tcX;
-            this.#tileSizeZ = this.#worldSizeZ / tcZ;
-            this.#updateTuples();
+        if (this.#spatialGrid.tileCountX !== tcX || this.#spatialGrid.tileCountZ !== tcZ) {
+            const wx = this.#spatialGrid.worldSizeX;
+            const wz = this.#spatialGrid.worldSizeZ;
+            this.#spatialGrid.setConfig(tcX, tcZ, wx / tcX, wz / tcZ);
             this.#rebuildTiles();
         }
     }
@@ -403,7 +382,7 @@ export class Landscape extends Object3DContainer {
      * [EN] Returns the world dimensions `[sizeX, sizeZ]` of a single component tile.
      */
     get tileSize(): readonly [number, number] {
-        return this.#tileSizeTuple;
+        return this.#spatialGrid.tileSize;
     }
 
     /**
@@ -428,8 +407,8 @@ export class Landscape extends Object3DContainer {
             this.#componentSizeQuads = value;
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
+                this.#spatialGrid.tileSizeX,
+                this.#spatialGrid.tileSizeZ,
                 value,
                 this.#lodMaxLevel,
                 this.#lod0SizeQuads
@@ -461,8 +440,8 @@ export class Landscape extends Object3DContainer {
             this.#tileStreamer.lod0SizeQuads = clamped;
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
+                this.#spatialGrid.tileSizeX,
+                this.#spatialGrid.tileSizeZ,
                 this.#componentSizeQuads,
                 this.#lodMaxLevel,
                 clamped
@@ -493,8 +472,8 @@ export class Landscape extends Object3DContainer {
             this.#lodMaxLevel = count;
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
+                this.#spatialGrid.tileSizeX,
+                this.#spatialGrid.tileSizeZ,
                 this.#componentSizeQuads,
                 count,
                 this.#lod0SizeQuads
@@ -742,17 +721,116 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer?.getAtlasTexture(type) ?? null;
     }
 
-    #bakeGlobalBaseToVHT(): void {
-        if (!this.#tileStreamer?.globalHeightTexture) return;
+    /**
+     * @example
+     * ```ts
+     * // 렌더 루프에서 매 프레임 호출
+     * landscape.update(camera, renderViewStateData);
+     * ```
+     *
+     * [KO]
+     * 매 프레임 카메라 위치 및 뷰 프러스텀, HZB(Hierarchical Z-Buffer)를 기반으로 지형 서브시스템을 갱신합니다.
+     * 타일 스트리밍, GPU 인스턴스 인다이렉트 드로우 버퍼 리셋, GPU 컬링 컴퓨트 패스 등록, 디버거 갱신을 일괄 수행합니다.
+     *
+     * [EN]
+     * Updates terrain subsystems every frame based on the camera position, view frustum, and HZB (Hierarchical Z-Buffer).
+     * Performs tile streaming updates, GPU instance indirect draw buffer resets, GPU culling compute pass dispatch registration, and debugger updates.
+     *
+     * @param camera - 주 카메라 인스턴스 (예: {@link RedGPU.Camera.PerspectiveCamera}) / Primary camera instance (e.g. {@link RedGPU.Camera.PerspectiveCamera}).
+     * @param renderViewStateData - 현재 뷰 상태 및 렌더 데이터 / Current view state and rendering data.
+     */
+    update(camera: any, renderViewStateData?: any): void {
+        if (!camera) return;
 
-        this.#tileStreamer.bakeGlobalBase(
-            this.#tileStreamer.globalHeightTexture,
-            this.#componentCountX,
-            this.#componentCountZ,
+        if (this.#material) {
+            this.#material.updateUniformsData();
+        }
+
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        const rawCamera = camera?.camera ?? camera;
+        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? rawCamera?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
+        this.#tileStreamer.update(camX, camZ, camY);
+
+        const totalComponents = this.#spatialGrid.tileCountX * this.#spatialGrid.tileCountZ;
+
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
+        }
+
+        const fovDeg = rawCamera?.fov ?? camera?.fov ?? 60.0;
+        const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
+        if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
+            this.#lastTanHalfFOV = tanHalfFOV;
+            this.#updateLandscapeUniforms();
+        }
+        const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
+
+        const currentView = renderViewStateData?.view || (camera as any)?.view;
+        const hzb = currentView?.hierarchicalZBuffer;
+        const effectiveHZBTextureView = hzb?.textureView || null;
+        const effectiveHZBSampler = hzb?.sampler || null;
+
+        if (this.#lastHZBView !== effectiveHZBTextureView) {
+            this.#lastHZBView = effectiveHZBTextureView;
+            this.#lastHZBSampler = effectiveHZBSampler;
+            if (this.#instanceBuffer?.allInputTilesBuffer && this.#instanceBuffer?.visibleTileIndicesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
+                this.#gpuCuller?.updateBindGroup(
+                    this.#instanceBuffer.allInputTilesBuffer,
+                    this.#instanceBuffer.visibleTileIndicesBuffer,
+                    this.#instanceBuffer.indirectDrawBuffer,
+                    effectiveHZBTextureView,
+                    effectiveHZBSampler
+                );
+            }
+        }
+
+        let mainPVMatrix: Float32Array | null = null;
+        if (rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            mainPVMatrix = tempPVMatrix;
+            mat4.multiply(mainPVMatrix, rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
+        this.#gpuCuller?.updateUniforms(
+            camX, camY, camZ,
+            this.#lodMaxLevel,
+            this.#spatialGrid.worldSizeX, this.#spatialGrid.worldSizeZ,
+            this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ,
             this.#heightScale,
-            this.#worldSizeX
+            totalComponents,
+            frustumPlanes,
+            lodDistancesArray,
+            tanHalfFOV,
+            lodMetricVal,
+            !!effectiveHZBTextureView,
+            mainPVMatrix
         );
-        this.#grassManager?.rebakeAll();
+
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            COMPUTE_PASS_DESCRIPTOR,
+            this.#onPreProcessComputePass
+        );
+
+        this.#debuggerManager.update(camera);
     }
 
     /**
@@ -1035,116 +1113,11 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /**
-     * @example
-     * ```ts
-     * // 렌더 루프에서 매 프레임 호출
-     * landscape.update(camera, renderViewStateData);
-     * ```
-     *
-     * [KO]
-     * 매 프레임 카메라 위치 및 뷰 프러스텀, HZB(Hierarchical Z-Buffer)를 기반으로 지형 서브시스템을 갱신합니다.
-     * 타일 스트리밍, GPU 인스턴스 인다이렉트 드로우 버퍼 리셋, GPU 컬링 컴퓨트 패스 등록, 디버거 갱신을 일괄 수행합니다.
-     *
-     * [EN]
-     * Updates terrain subsystems every frame based on the camera position, view frustum, and HZB (Hierarchical Z-Buffer).
-     * Performs tile streaming updates, GPU instance indirect draw buffer resets, GPU culling compute pass dispatch registration, and debugger updates.
-     *
-     * @param camera - 주 카메라 인스턴스 (예: {@link RedGPU.Camera.PerspectiveCamera}) / Primary camera instance (e.g. {@link RedGPU.Camera.PerspectiveCamera}).
-     * @param renderViewStateData - 현재 뷰 상태 및 렌더 데이터 / Current view state and rendering data.
-     */
-    update(camera: any, renderViewStateData?: any): void {
-        if (!camera) return;
+    #bakeGlobalBaseToVHT(): void {
+        if (!this.#tileStreamer?.globalHeightTexture) return;
 
-        if (this.#material) {
-            this.#material.updateUniformsData();
-        }
-
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-        const rawCamera = camera?.camera ?? camera;
-        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCamera?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        this.#tileStreamer.update(camX, camZ, camY);
-
-        const totalComponents = this.#componentCountX * this.#componentCountZ;
-
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
-
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-
-        const fovDeg = rawCamera?.fov ?? camera?.fov ?? 60.0;
-        const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
-        if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
-            this.#lastTanHalfFOV = tanHalfFOV;
-            this.#updateLandscapeUniforms();
-        }
-        const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
-
-        const currentView = renderViewStateData?.view || (camera as any)?.view;
-        const hzb = currentView?.hierarchicalZBuffer;
-        const effectiveHZBTextureView = hzb?.textureView || null;
-        const effectiveHZBSampler = hzb?.sampler || null;
-
-        if (this.#lastHZBView !== effectiveHZBTextureView) {
-            this.#lastHZBView = effectiveHZBTextureView;
-            this.#lastHZBSampler = effectiveHZBSampler;
-            if (this.#instanceBuffer?.allInputTilesBuffer && this.#instanceBuffer?.visibleTileIndicesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
-                this.#gpuCuller?.updateBindGroup(
-                    this.#instanceBuffer.allInputTilesBuffer,
-                    this.#instanceBuffer.visibleTileIndicesBuffer,
-                    this.#instanceBuffer.indirectDrawBuffer,
-                    effectiveHZBTextureView,
-                    effectiveHZBSampler
-                );
-            }
-        }
-
-        let mainPVMatrix: Float32Array | null = null;
-        if (rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            mainPVMatrix = tempPVMatrix;
-            mat4.multiply(mainPVMatrix, rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        this.#gpuCuller?.updateUniforms(
-            camX, camY, camZ,
-            this.#lodMaxLevel,
-            this.#worldSizeX, this.#worldSizeZ,
-            this.#tileSizeX, this.#tileSizeZ,
-            this.#heightScale,
-            totalComponents,
-            frustumPlanes,
-            lodDistancesArray,
-            tanHalfFOV,
-            lodMetricVal,
-            !!effectiveHZBTextureView,
-            mainPVMatrix
-        );
-
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            COMPUTE_PASS_DESCRIPTOR,
-            this.#onPreProcessComputePass
-        );
-
-        this.#debuggerManager.update(camera);
+        this.#tileStreamer.bakeGlobalBase();
+        this.#grassManager?.rebakeAll();
     }
 
     /**
@@ -1177,27 +1150,21 @@ export class Landscape extends Object3DContainer {
         return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
 
-    #updateTuples(): void {
-        this.#worldSizeTuple[0] = this.#worldSizeX;
-        this.#worldSizeTuple[1] = this.#worldSizeZ;
-        this.#componentCountTuple[0] = this.#componentCountX;
-        this.#componentCountTuple[1] = this.#componentCountZ;
-        this.#tileSizeTuple[0] = this.#tileSizeX;
-        this.#tileSizeTuple[1] = this.#tileSizeZ;
-    }
-
     #updateLandscapeUniforms(): void {
-        const vhtW = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
-        const vhtH = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
+        const grid = this.#spatialGrid;
+        const countX = grid.tileCountX;
+        const countZ = grid.tileCountZ;
+        const vhtW = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.width || (countX * 512);
+        const vhtH = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.height || (countZ * 512);
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
-            this.#worldSizeX,
-            this.#worldSizeZ,
+            grid.worldSizeX,
+            grid.worldSizeZ,
             this.#debuggerManager?.landscapeLodColoration ?? false,
-            this.#componentCountX * this.#componentCountZ,
-            this.#tileSizeX,
-            this.#tileSizeZ,
+            countX * countZ,
+            grid.tileSizeX,
+            grid.tileSizeZ,
             this.#componentSizeQuads,
             vhtW,
             vhtH,
@@ -1219,7 +1186,7 @@ export class Landscape extends Object3DContainer {
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        const totalComponents = this.#componentCountX * this.#componentCountZ;
+        const totalComponents = this.#spatialGrid.tileCountX * this.#spatialGrid.tileCountZ;
         this.#gpuCuller?.dispatchPass(computePass, totalComponents);
     };
 
@@ -1258,7 +1225,7 @@ export class Landscape extends Object3DContainer {
 
     #updateLODDistances(): void {
         this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
+        const tileSizeMax = Math.max(this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ);
         const count = this.#lodMultipliers.length;
 
         for (let i = 0; i < count; i++) {
@@ -1410,21 +1377,18 @@ export class Landscape extends Object3DContainer {
     }
 
     #rebuildTiles(): void {
-        this.#spatialGrid = new LandscapeSpatialGrid(this.#componentCountX, this.#componentCountZ, this.#tileSizeX, this.#tileSizeZ);
+        const componentCountX = this.#spatialGrid.tileCountX;
+        const componentCountZ = this.#spatialGrid.tileCountZ;
+        const tileSizeX = this.#spatialGrid.tileSizeX;
+        const tileSizeZ = this.#spatialGrid.tileSizeZ;
+        const targetCount = componentCountX * componentCountZ;
+
         if (this.#tileStreamer) {
-            this.#tileStreamer.setSpatialGrid(this.#spatialGrid);
+            this.#tileStreamer.resetTileState();
         }
-        this.#sharedGeometry.updateTileSize(this.#tileSizeX, this.#tileSizeZ);
+        this.#sharedGeometry.updateTileSize(tileSizeX, tileSizeZ);
         this.#updateLODDistances();
         this.#clearPipelineCaches();
-
-        const halfSizeX = this.#worldSizeX / 2;
-        const halfSizeZ = this.#worldSizeZ / 2;
-        const componentCountX = this.#componentCountX;
-        const componentCountZ = this.#componentCountZ;
-        const tileSizeX = this.#tileSizeX;
-        const tileSizeZ = this.#tileSizeZ;
-        const targetCount = componentCountX * componentCountZ;
 
         let needRebuildBindGroup = false;
         if (this.#tileStreamer) {
@@ -1435,8 +1399,6 @@ export class Landscape extends Object3DContainer {
                 needRebuildBindGroup = true;
             }
         }
-
-        this.#sharedGeometry?.updateTileSize(tileSizeX, tileSizeZ);
 
         if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.lodMaxLevel !== this.#lodMaxLevel) {
             if (this.#instanceBuffer) {
@@ -1459,31 +1421,16 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        this.#spatialGrid.setConfig(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
 
-        let index = 0;
-        for (let row = 0; row < componentCountZ; row++) {
-            for (let col = 0; col < componentCountX; col++) {
-                const posX = col * tileSizeX - halfSizeX + tileSizeX / 2;
-                const posZ = row * tileSizeZ - halfSizeZ + tileSizeZ / 2;
-
-                const comp = new LandscapeComponent(
-                    posX,
-                    posZ,
-                    col,
-                    row
-                );
-                this.#spatialGrid.registerTile(row, col, comp);
-
-                this.#instanceBuffer.setStaticTileData(
-                    index,
-                    posX, posZ,
-                    0, 0, 0, 0.0
-                );
-                index++;
-            }
-        }
+        this.#spatialGrid.rebuildTiles((comp, index) => {
+            this.#instanceBuffer.setStaticTileData(
+                index,
+                comp.worldX,
+                comp.worldZ,
+                0, 0, 0, 0.0
+            );
+        });
 
         this.#instanceBuffer.uploadStaticTilesToGPU();
         this.#updateLandscapeUniforms();
