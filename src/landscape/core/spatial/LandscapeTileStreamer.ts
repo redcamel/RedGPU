@@ -28,8 +28,10 @@ export class LandscapeTileStreamer {
     #vntGenerator: LandscapeVNTGenerator | null = null;
     #vbtGenerator: LandscapeVBTGenerator | null = null;
     #material: LandscapeMaterial | null = null;
+    #globalHeightmapUrl: string = '';
     #globalHeightTexture: GPUTexture | null = null;
     #globalCPUHeightMap: { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null = null;
+    #onGlobalHeightmapBaked: (() => void) | null = null;
 
     #heightScale: number = 500.0;
     lod0SizeQuads: number = 256;
@@ -203,36 +205,8 @@ export class LandscapeTileStreamer {
         return true;
     }
 
-    bakeGlobalBase(
-        globalHeightTexture: GPUTexture,
-        componentCountX: number,
-        componentCountZ: number,
-        heightScale: number,
-        worldSizeX: number
-    ): void {
-        if (!globalHeightTexture || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
-
-        const atlasW = componentCountX * 512;
-        const atlasH = componentCountZ * 512;
-
-        this.#vhtGenerator?.bakeGlobalBase(
-            globalHeightTexture,
-            this.#vhtAtlasTexture,
-            componentCountX,
-            componentCountZ
-        );
-
-        this.#vntGenerator?.bakeTileRegion(
-            this.#vhtAtlasTexture,
-            this.#vntAtlasTexture,
-            0, 0,
-            atlasW, atlasH,
-            heightScale,
-            worldSizeX,
-            componentCountX
-        );
-
-        this.rebakeAllLoadedVBT();
+    get globalHeightmapUrl(): string {
+        return this.#globalHeightmapUrl;
     }
 
     setMaterial(mat: LandscapeMaterial | null): void {
@@ -246,6 +220,101 @@ export class LandscapeTileStreamer {
 
     setOnTileLoaded(callback: ((comp: LandscapeComponent) => void) | null): void {
         this.#onTileLoaded = callback;
+    }
+
+    set globalHeightmapUrl(val: string) {
+        if (this.#globalHeightmapUrl !== val) {
+            this.#globalHeightmapUrl = val;
+            this.#loadGlobalHeightmapAsync();
+        }
+    }
+
+    get globalHeightTexture(): GPUTexture | null {
+        return this.#globalHeightTexture;
+    }
+
+    bakeGlobalBase(
+        globalHeightTexture?: GPUTexture | null,
+        componentCountX?: number,
+        componentCountZ?: number,
+        heightScale?: number,
+        worldSizeX?: number
+    ): void {
+        const tex = globalHeightTexture || this.#globalHeightTexture;
+        if (!tex || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
+
+        const countX = componentCountX ?? this.#spatialGrid?.tileCountX ?? 16;
+        const countZ = componentCountZ ?? this.#spatialGrid?.tileCountZ ?? 16;
+        const hScale = heightScale ?? this.#heightScale;
+        const wsX = worldSizeX ?? this.#spatialGrid?.worldSizeX ?? (countX * (this.#spatialGrid?.tileSizeX ?? 125));
+
+        const atlasW = countX * 512;
+        const atlasH = countZ * 512;
+
+        this.#vhtGenerator?.bakeGlobalBase(
+            tex,
+            this.#vhtAtlasTexture,
+            countX,
+            countZ
+        );
+
+        this.#vntGenerator?.bakeTileRegion(
+            this.#vhtAtlasTexture,
+            this.#vntAtlasTexture,
+            0, 0,
+            atlasW, atlasH,
+            hScale,
+            wsX,
+            countX
+        );
+
+        this.rebakeAllLoadedVBT();
+    }
+
+    setOnGlobalHeightmapBaked(callback: (() => void) | null): void {
+        this.#onGlobalHeightmapBaked = callback;
+    }
+
+    destroy(): void {
+        this.resetTileState();
+
+        this.#vhtGenerator?.destroy();
+        this.#vhtGenerator = null;
+        this.#vntGenerator?.destroy();
+        this.#vntGenerator = null;
+        this.#vbtGenerator?.destroy();
+        this.#vbtGenerator = null;
+
+        if (this.#globalHeightTexture) {
+            this.#globalHeightTexture.destroy();
+            this.#globalHeightTexture = null;
+        }
+
+        if (this.#vhtAtlasTexture) {
+            this.#vhtAtlasTexture.destroy();
+            this.#vhtAtlasTexture = null;
+        }
+        if (this.#vntAtlasTexture) {
+            this.#vntAtlasTexture.destroy();
+            this.#vntAtlasTexture = null;
+        }
+        if (this.#vbtBaseColorAtlas) {
+            this.#vbtBaseColorAtlas.destroy();
+            this.#vbtBaseColorAtlas = null;
+        }
+        if (this.#vbtNormalAtlas) {
+            this.#vbtNormalAtlas.destroy();
+            this.#vbtNormalAtlas = null;
+        }
+        if (this.#vbtORMAtlas) {
+            this.#vbtORMAtlas.destroy();
+            this.#vbtORMAtlas = null;
+        }
+
+        this.#material = null;
+        this.#tileUrlResolver = null;
+        this.#onTileLoaded = null;
+        this.#onGlobalHeightmapBaked = null;
     }
 
     get tileLoadingRadius(): number {
@@ -702,40 +771,50 @@ export class LandscapeTileStreamer {
         }
     }
 
-    destroy(): void {
-        this.resetTileState();
+    async #loadGlobalHeightmapAsync(): Promise<void> {
+        if (!this.#globalHeightmapUrl) return;
+        try {
+            const response = await fetch(this.#globalHeightmapUrl);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const buffer = await response.arrayBuffer();
+            const cpuParsed = await parse16BitPngBuffer(buffer);
 
-        this.#vhtGenerator?.destroy();
-        this.#vhtGenerator = null;
-        this.#vntGenerator?.destroy();
-        this.#vntGenerator = null;
-        this.#vbtGenerator?.destroy();
-        this.#vbtGenerator = null;
+            if (cpuParsed) {
+                const {width, height, pixels} = cpuParsed;
+                const gpuDevice = this.#redGPUContext.gpuDevice;
+                const count = width * height;
+                const f32Pixels = new Float32Array(count);
+                const inv65535 = 1.0 / 65535.0;
+                for (let i = 0; i < count; i++) {
+                    f32Pixels[i] = pixels[i] * inv65535;
+                }
+                const bytesPerRow = width * 4;
 
-        if (this.#vhtAtlasTexture) {
-            this.#vhtAtlasTexture.destroy();
-            this.#vhtAtlasTexture = null;
-        }
-        if (this.#vntAtlasTexture) {
-            this.#vntAtlasTexture.destroy();
-            this.#vntAtlasTexture = null;
-        }
-        if (this.#vbtBaseColorAtlas) {
-            this.#vbtBaseColorAtlas.destroy();
-            this.#vbtBaseColorAtlas = null;
-        }
-        if (this.#vbtNormalAtlas) {
-            this.#vbtNormalAtlas.destroy();
-            this.#vbtNormalAtlas = null;
-        }
-        if (this.#vbtORMAtlas) {
-            this.#vbtORMAtlas.destroy();
-            this.#vbtORMAtlas = null;
-        }
+                if (this.#globalHeightTexture) {
+                    this.#globalHeightTexture.destroy();
+                }
 
-        this.#material = null;
-        this.#tileUrlResolver = null;
-        this.#onTileLoaded = null;
+                this.#globalHeightTexture = gpuDevice.createTexture({
+                    size: [width, height],
+                    format: 'r32float',
+                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                    label: 'Landscape_GlobalHeightTexture_r32float'
+                });
+
+                gpuDevice.queue.writeTexture(
+                    {texture: this.#globalHeightTexture},
+                    f32Pixels.buffer,
+                    {bytesPerRow},
+                    [width, height]
+                );
+
+                this.setGlobalCPUHeightMap(cpuParsed);
+                this.bakeGlobalBase();
+                this.#onGlobalHeightmapBaked?.();
+            }
+        } catch (e) {
+            console.warn('[LandscapeTileStreamer ⚠️] Failed to load globalHeightmapUrl:', this.#globalHeightmapUrl, e);
+        }
     }
 }
 

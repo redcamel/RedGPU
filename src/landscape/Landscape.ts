@@ -11,7 +11,6 @@ import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import DirectTexture from "../resources/texture/DirectTexture";
-import parse16BitPngBuffer from "../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
 import Object3DContainer from "../display/mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
@@ -120,11 +119,6 @@ export class Landscape extends Object3DContainer {
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #lastTanHalfFOV: number = 1.0;
 
-    // =========================================================================
-    // Global Heightmap
-    // =========================================================================
-    #globalHeightmapUrl: string = '';
-    #globalHeightTexture: GPUTexture | null = null;
 
     // =========================================================================
     // Lighting & Heightmap Shadow
@@ -230,6 +224,9 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
             this.#grassManager?.handleTileLoaded(comp);
+        });
+        this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
+            this.#grassManager?.rebakeAll();
         });
         this.#debuggerManager = new LandscapeDebuggerManager(this, {
             onDebugPropertyChange: (key) => {
@@ -588,7 +585,7 @@ export class Landscape extends Object3DContainer {
      * [EN] Returns the URL of the global 16-bit heightmap image to load asynchronously.
      */
     get globalHeightmapUrl(): string {
-        return this.#globalHeightmapUrl;
+        return this.#tileStreamer?.globalHeightmapUrl ?? '';
     }
 
     /**
@@ -600,19 +597,11 @@ export class Landscape extends Object3DContainer {
      * [EN] Heightmap image file URL
      */
     set globalHeightmapUrl(val: string) {
-        if (this.#globalHeightmapUrl !== val) {
-            this.#globalHeightmapUrl = val;
-            this.#loadGlobalHeightmapAsync();
+        if (this.#tileStreamer) {
+            this.#tileStreamer.globalHeightmapUrl = val;
         }
     }
 
-    /**
-     * [KO] 로드된 전체 지형 원본 GPUTexture 인스턴스를 반환합니다.
-     * [EN] Returns the loaded global raw terrain GPUTexture instance.
-     */
-    get globalHeightTexture(): GPUTexture | null {
-        return this.#globalHeightTexture;
-    }
 
     /**
      * @example
@@ -746,52 +735,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    async #loadGlobalHeightmapAsync(): Promise<void> {
-        if (!this.#globalHeightmapUrl) return;
-        try {
-            const response = await fetch(this.#globalHeightmapUrl);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const buffer = await response.arrayBuffer();
-            const cpuParsed = await parse16BitPngBuffer(buffer);
-
-            if (cpuParsed) {
-                const {width, height, pixels} = cpuParsed;
-                const gpuDevice = this.#redGPUContext.gpuDevice;
-                const count = width * height;
-                const f32Pixels = new Float32Array(count);
-                const inv65535 = 1.0 / 65535.0;
-                for (let i = 0; i < count; i++) {
-                    f32Pixels[i] = pixels[i] * inv65535;
-                }
-                const bytesPerRow = width * 4;
-
-                if (this.#globalHeightTexture) {
-                    this.#globalHeightTexture.destroy();
-                }
-
-                this.#globalHeightTexture = gpuDevice.createTexture({
-                    size: [width, height],
-                    format: 'r32float',
-                    usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-                    label: 'Landscape_GlobalHeightTexture_r32float'
-                });
-
-                gpuDevice.queue.writeTexture(
-                    {texture: this.#globalHeightTexture},
-                    f32Pixels.buffer,
-                    {bytesPerRow},
-                    [width, height]
-                );
-
-                this.#tileStreamer?.setGlobalHeightTexture(this.#globalHeightTexture);
-                this.#tileStreamer?.setGlobalCPUHeightMap(cpuParsed);
-                this.#bakeGlobalBaseToVHT();
-            }
-        } catch (e) {
-            console.warn('[Landscape ⚠️] Failed to load globalHeightmapUrl:', this.#globalHeightmapUrl, e);
-        }
-    }
-
     /**
      * @internal
      */
@@ -800,10 +743,10 @@ export class Landscape extends Object3DContainer {
     }
 
     #bakeGlobalBaseToVHT(): void {
-        if (!this.#globalHeightTexture || !this.#tileStreamer) return;
+        if (!this.#tileStreamer?.globalHeightTexture) return;
 
         this.#tileStreamer.bakeGlobalBase(
-            this.#globalHeightTexture,
+            this.#tileStreamer.globalHeightTexture,
             this.#componentCountX,
             this.#componentCountZ,
             this.#heightScale,
@@ -1511,7 +1454,7 @@ export class Landscape extends Object3DContainer {
                 this.#tileStreamer.vbtNormalAtlas?.gpuTextureView,
                 this.#tileStreamer.vbtORMAtlas?.gpuTextureView
             );
-            if (this.#globalHeightTexture) {
+            if (this.#tileStreamer?.globalHeightTexture) {
                 this.#bakeGlobalBaseToVHT();
             }
         }
