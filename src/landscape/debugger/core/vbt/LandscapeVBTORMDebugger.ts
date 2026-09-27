@@ -22,7 +22,7 @@ export class LandscapeVBTORMDebugger extends ALandscapeTextureDebugger {
             defaultOptions,
             vbtDebuggerWGSL,
             'LandscapeVBTORMDebuggerShaderModule',
-            (l, ts) => ts?.getAtlasTexture('vbtORM') ?? null,
+            (_, ts) => ts?.getAtlasTexture('vbtORM') ?? null,
             {r: 1.0, g: 0.8, b: 0.0, a: 1.0}
         );
     }

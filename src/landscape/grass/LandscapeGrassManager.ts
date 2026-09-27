@@ -292,7 +292,6 @@ export class LandscapeGrassManager {
         grassType.typeId = typeId;
         this.#grassTypes.push(grassType);
 
-        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
         const targetRadius = Math.max(grassType.cullingDistance, this.#streamingRadius);
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (LandscapeGrassManager.CELL_SIZE * LandscapeGrassManager.CELL_SIZE));
         const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));

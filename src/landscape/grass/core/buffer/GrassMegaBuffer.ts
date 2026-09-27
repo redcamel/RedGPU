@@ -33,7 +33,7 @@ export class GrassMegaBuffer {
     #maxTypes: number;
 
     #cpuRawDataBuffer: Float32Array;
-    #cpuRawDataUint32: Uint32Array;
+
     #cpuTypeParamsBuffer: Float32Array;
     #cpuTypeParamsUint32: Uint32Array;
     #indirectResetTemplate: Uint32Array;
@@ -57,7 +57,7 @@ export class GrassMegaBuffer {
         this.#maxTypes = maxTypes;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * GrassMegaBuffer.STRIDE_FLOATS);
-        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * GrassMegaBuffer.TYPE_PARAM_FLOATS);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
         this.#indirectResetTemplate = new Uint32Array(GrassMegaBuffer.MAX_INDIRECT_CALLS * 5);
@@ -363,13 +363,13 @@ export class GrassMegaBuffer {
     }
 
     #resizeBuffer(newCapacity: number): void {
-        const oldCapacity = this.#maxTotalInstances;
+
         this.#maxTotalInstances = Math.ceil(newCapacity / 64) * 64;
 
         const newRawBuffer = new Float32Array(this.#maxTotalInstances * GrassMegaBuffer.STRIDE_FLOATS);
         newRawBuffer.set(this.#cpuRawDataBuffer);
         this.#cpuRawDataBuffer = newRawBuffer;
-        this.#cpuRawDataUint32 = new Uint32Array(newRawBuffer.buffer);
+
 
         this.#initBuffers();
 

@@ -841,18 +841,17 @@ export class LandscapeFoliage {
         this.#streamer.addChunks(chunks);
 
         if (!this.#enableStreaming) {
-            this.#streamer.update(new Set(), new Int32Array(0), 0, 0, 0, false);
+            this.#streamer.update(new Int32Array(0), 0, 0, 0, false);
         }
     }
 
     updateStreaming(
-        activeSubCellKeys: ReadonlySet<number>,
         activeKeyArray: Int32Array,
         activeKeyCount: number,
         camX: number,
         camZ: number
     ): void {
-        this.#streamer.update(activeSubCellKeys, activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
+        this.#streamer.update(activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
     }
 
     get culledGPUBuffer(): GPUBuffer | null {

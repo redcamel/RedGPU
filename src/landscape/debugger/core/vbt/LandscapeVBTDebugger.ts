@@ -22,7 +22,7 @@ export class LandscapeVBTDebugger extends ALandscapeTextureDebugger {
             defaultOptions,
             vbtDebuggerWGSL,
             'LandscapeVBTDebuggerShaderModule',
-            (l, ts) => ts?.getAtlasTexture('vbtBaseColor') ?? null,
+            (_, ts) => ts?.getAtlasTexture('vbtBaseColor') ?? null,
             {r: 0.08, g: 0.08, b: 0.08, a: 1.0}
         );
     }

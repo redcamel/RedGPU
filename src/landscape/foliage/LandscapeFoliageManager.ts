@@ -299,12 +299,11 @@ class LandscapeFoliageManager {
 
             this.#spatialGrid.update(cam.x, cam.z);
 
-            const activeKeySet = this.#spatialGrid.activeSubCellKeySet;
             const activeKeys = this.#spatialGrid.activeSubCellKeys;
             const activeCount = this.#spatialGrid.activeSubCellCount;
 
             for (let i = 0; i < count; i++) {
-                this.#typeList[i].updateStreaming(activeKeySet, activeKeys, activeCount, cam.x, cam.z);
+                this.#typeList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
             }
         }
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);

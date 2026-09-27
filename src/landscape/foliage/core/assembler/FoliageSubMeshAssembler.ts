@@ -277,7 +277,6 @@ class FoliageSubMeshAssembler {
         const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
             gpuDevice,
             subMeshBindGroupLayout,
-            subList.length,
             sourceSubMeshes[0]?.mesh,
             bbGeom,
             bbMat,
@@ -705,7 +704,6 @@ class FoliageSubMeshAssembler {
             const combinedSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
                 gpuDevice,
                 subMeshBindGroupLayout,
-                resultSubMeshes.length,
                 group[0].node,
                 combinedGeom,
                 mat,
@@ -774,7 +772,6 @@ class FoliageSubMeshAssembler {
     static #createSubMeshInstance(
         gpuDevice: GPUDevice,
         subMeshBindGroupLayout: GPUBindGroupLayout,
-        subIndex: number,
         meshNode: Mesh,
         geom: any,
         mat: any,

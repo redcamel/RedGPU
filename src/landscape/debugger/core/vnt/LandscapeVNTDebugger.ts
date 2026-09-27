@@ -22,7 +22,7 @@ export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
             defaultOptions,
             vntDebuggerWGSL,
             'LandscapeVNTDebuggerShaderModule',
-            (l, ts) => ts?.getAtlasTexture('vnt') ?? null,
+            (_, ts) => ts?.getAtlasTexture('vnt') ?? null,
             {r: 0.1, g: 0.1, b: 0.1, a: 1.0}
         );
     }

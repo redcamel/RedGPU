@@ -63,7 +63,6 @@ class FoliageSubCellStreamer {
     }
 
     update(
-        activeSubCellKeys: ReadonlySet<number>,
         activeKeyArray: Int32Array,
         activeKeyCount: number,
         camX: number,

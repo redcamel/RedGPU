@@ -39,10 +39,8 @@ export class LandscapeTileStreamer {
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
-    #rebakeQueue: LandscapeComponent[] = [];
-    #isRebaking: boolean = false;
-    #rebakeRafId: number | null = null;
-    #rebakeBudgetPerFrame: number = 3;
+
+
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, boolean> = new Map();
     #cpuHeightMap: Map<string, any> = new Map();
@@ -81,12 +79,8 @@ export class LandscapeTileStreamer {
         this.#failedMap.clear();
         this.#cpuHeightMap.clear();
         this.#pendingQueue.length = 0;
-        this.#rebakeQueue.length = 0;
-        if (this.#rebakeRafId !== null) {
-            cancelAnimationFrame(this.#rebakeRafId);
-            this.#rebakeRafId = null;
-        }
-        this.#isRebaking = false;
+
+
     }
 
     get vhtAtlasTexture(): DirectTexture | null {
@@ -426,7 +420,7 @@ export class LandscapeTileStreamer {
         const componentCountX = this.#spatialGrid.tileCountX;
         const componentCountZ = this.#spatialGrid.tileCountZ;
 
-        for (const [key, cpuParsed] of this.#cpuHeightMap) {
+        for (const key of this.#cpuHeightMap.keys()) {
             const parts = key.split('_');
             const row = parseInt(parts[0], 10);
             const col = parseInt(parts[1], 10);
@@ -633,15 +627,9 @@ export class LandscapeTileStreamer {
         return (val / g.maxVal) * 65535.0;
     }
 
-    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
+    rebakeAllLoadedVBT(_budgetPerFrame?: number): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
 
-        if (this.#rebakeRafId !== null) {
-            cancelAnimationFrame(this.#rebakeRafId);
-            this.#rebakeRafId = null;
-        }
-        this.#isRebaking = false;
-        this.#rebakeQueue.length = 0;
 
         this.#vbtGenerator.bakeAtlas(
             this.#vntAtlasTexture,
