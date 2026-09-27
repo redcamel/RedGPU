@@ -428,7 +428,7 @@ export class LandscapeGrassManager {
             }
         }
 
-        const currentLoadedTileCount = this.#landscape.loadedTileCount;
+        const currentLoadedTileCount = this.#landscape.tileLoadedCount;
         const tileCountChanged = currentLoadedTileCount !== this.#lastLoadedTileCount;
         this.#lastLoadedTileCount = currentLoadedTileCount;
 
@@ -442,7 +442,7 @@ export class LandscapeGrassManager {
         if (!gpuDevice) return;
 
         const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
-        const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.loadedTileCount > 0);
+        const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
         for (const type of this.#grassTypes) {
             const res = this.#typeMaterialBuffers.get(type.typeId);

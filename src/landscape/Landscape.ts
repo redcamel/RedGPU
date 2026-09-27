@@ -1008,7 +1008,7 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * console.log(`현재 로드된 타일: ${landscape.loadedTileCount}`);
+     * console.log(`현재 로드된 타일: ${landscape.tileLoadedCount}`);
      * ```
      *
      * [KO]
@@ -1018,25 +1018,8 @@ export class Landscape extends Object3DContainer {
      * Gets the total number of tiles currently loaded and active in the virtual texture atlas. (Read-only)
      *
      */
-    get loadedTileCount(): number {
-        return this.#tileStreamer?.loadedTileCount ?? 0;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * console.log(`대기 중인 타일 로드 요청: ${landscape.pendingQueueSize}`);
-     * ```
-     *
-     * [KO]
-     * 현재 로드 대기열(Streaming Queue)에 머물러 있는 타일 요청의 수를 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets the number of tile loading requests currently waiting in the streaming queue. (Read-only)
-     *
-     */
-    get pendingQueueSize(): number {
-        return this.#tileStreamer?.pendingQueueSize ?? 0;
+    get tileLoadedCount(): number {
+        return this.#tileStreamer?.tileLoadedCount ?? 0;
     }
 
     /**

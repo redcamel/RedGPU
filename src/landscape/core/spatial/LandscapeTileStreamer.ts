@@ -210,12 +210,8 @@ export class LandscapeTileStreamer {
         }
     }
 
-    get loadedTileCount(): number {
+    get tileLoadedCount(): number {
         return this.#loadedMap.size;
-    }
-
-    get pendingQueueSize(): number {
-        return this.#pendingQueue.length;
     }
 
     setTerrainConfig(heightScale: number): void {

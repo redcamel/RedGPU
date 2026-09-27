@@ -239,20 +239,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderLOD.addBinding(landscape, 'lodMetric', {
                 options: {distance: 'distance', screenSize: 'screenSize'}
             });
-
-            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {min: 0.1, max: 0.99, step: 0.05});
-
-            folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
-            });
             folderLOD.addBinding(landscape, 'useHZB', {label: 'Use HZB (Occlusion)'});
 
             // 2-3. Tile Streaming
             const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: false});
-            folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
-            folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
+            folderStream.addBinding(landscape, 'tileLoadedCount', {readonly: true});
             folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
             folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
 

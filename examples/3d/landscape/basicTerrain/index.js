@@ -179,16 +179,6 @@ function renderTestPane({
             }).on('change', (ev) => {
                 landscape.lodMetric = ev.value;
             });
-            lodFolder.addBinding(landscape, 'lodGeomorphStartRatio', {
-                min: 0.0,
-                max: 0.99,
-                step: 0.01
-            });
-            lodFolder.addBinding(landscape, 'lodFadeStartRatio', {
-                min: 0.0,
-                max: 0.99,
-                step: 0.01
-            });
             const quadOptions = {
                 '16': 16,
                 '32': 32,
