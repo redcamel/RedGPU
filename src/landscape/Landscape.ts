@@ -767,16 +767,6 @@ export class Landscape extends Object3DContainer {
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
 
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-
         const fovDeg = rawCamera?.fov ?? camera?.fov ?? 60.0;
         const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
         if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
@@ -818,7 +808,7 @@ export class Landscape extends Object3DContainer {
             this.#heightScale,
             totalComponents,
             frustumPlanes,
-            lodDistancesArray,
+            this.#lodDistancesBuffer,
             tanHalfFOV,
             lodMetricVal,
             !!effectiveHZBTextureView,
@@ -1231,6 +1221,16 @@ export class Landscape extends Object3DContainer {
         for (let i = 0; i < count; i++) {
             const dist = tileSizeMax * this.#lodMultipliers[i];
             this.#lodDistancesSq.push(dist * dist);
+        }
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
         }
     }
 
