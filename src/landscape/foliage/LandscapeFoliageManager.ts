@@ -362,7 +362,7 @@ class LandscapeFoliageManager {
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.repopulateFoliageType(t),
+            (t) => this.repopulateFoliage(t),
             this.#cullingDispatcher.baker
         );
         this.#foliageTypes.set(options.name, foliage);
@@ -401,13 +401,6 @@ class LandscapeFoliageManager {
         }
     }
 
-    /**
-     * @deprecated Use `addFoliage(options)` instead.
-     */
-    addFoliageType(options: LandscapeFoliageOptions): LandscapeFoliage {
-        return this.addFoliage(options);
-    }
-
     repopulateFoliage(foliageOrName: LandscapeFoliage | string): void {
         const type = typeof foliageOrName === 'string'
             ? this.#foliageTypes.get(foliageOrName)
@@ -424,13 +417,6 @@ class LandscapeFoliageManager {
             }
         }
         this.#renderer.markShadowBundleDirty();
-    }
-
-    /**
-     * @deprecated Use `repopulateFoliage(foliageOrName)` instead.
-     */
-    repopulateFoliageType(foliageTypeOrName: LandscapeFoliage | string): void {
-        this.repopulateFoliage(foliageTypeOrName);
     }
 
     repopulateAll(): void {
@@ -454,22 +440,8 @@ class LandscapeFoliageManager {
         return false;
     }
 
-    /**
-     * @deprecated Use `removeFoliage(name)` instead.
-     */
-    removeFoliageType(name: string): boolean {
-        return this.removeFoliage(name);
-    }
-
     getFoliage(name: string): LandscapeFoliage | undefined {
         return this.#foliageTypes.get(name);
-    }
-
-    /**
-     * @deprecated Use `getFoliage(name)` instead.
-     */
-    getFoliageType(name: string): LandscapeFoliage | undefined {
-        return this.getFoliage(name);
     }
 
     destroy(): void {

@@ -388,13 +388,6 @@ export class LandscapeGrassManager {
         return grassType;
     }
 
-    /**
-     * @deprecated Use `addGrass(options)` instead.
-     */
-    addGrassType(options: LandscapeGrassOptions): LandscapeGrass {
-        return this.addGrass(options);
-    }
-
     update(camera: any, stateData?: any): void {
         if (!this.#enabled || this.#grassTypes.length === 0) return;
 

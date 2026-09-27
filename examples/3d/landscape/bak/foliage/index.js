@@ -539,12 +539,12 @@ RedGPU.init(
                             max: 0.95,
                             step: 0.05
                         }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
+                            foliageManager.repopulateFoliage(type);
                         });
 
                         splatFolder.addBinding(type, 'densityScaleByWeight')
                             .on('change', () => {
-                                foliageManager.repopulateFoliageType(type);
+                                foliageManager.repopulateFoliage(type);
                             });
 
                         splatFolder.addBinding(type, 'minSlope', {
@@ -552,7 +552,7 @@ RedGPU.init(
                             max: 90,
                             step: 1
                         }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
+                            foliageManager.repopulateFoliage(type);
                         });
 
                         splatFolder.addBinding(type, 'maxSlope', {
@@ -560,7 +560,7 @@ RedGPU.init(
                             max: 90,
                             step: 1
                         }).on('change', () => {
-                            foliageManager.repopulateFoliageType(type);
+                            foliageManager.repopulateFoliage(type);
                         });
 
                         const lodInfo = {

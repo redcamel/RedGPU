@@ -354,7 +354,7 @@ class FoliageImpostorDebugViewer {
         const statusTxt = this.#container.querySelector('#txt-status');
         if (statusTxt) statusTxt.textContent = `Reading GPU texture for ${this.#currentFoliageName} (${this.#currentTab})...`;
 
-        const targetFoliage = this.#foliageManager?.getFoliageType(this.#currentFoliageName);
+        const targetFoliage = this.#foliageManager?.getFoliage(this.#currentFoliageName);
         if (!targetFoliage) {
             if (statusTxt) statusTxt.textContent = `Waiting for '${this.#currentFoliageName}' to finish loading...`;
             return;
