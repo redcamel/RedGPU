@@ -14,6 +14,23 @@ const LABELS = {
     en: {collapseAll: 'Collapse all', expandAll: 'Expand all'}
 };
 
+// 하위 멤버 목록을 담는 대표 카테고리 키워드 (GC 방지용 모듈 상수)
+const CATEGORY_NAMES = new Set([
+    'properties', '속성',
+    'accessors', '액세서',
+    'methods', '메서드',
+    'events', '이벤트',
+    'constructors', '생성자',
+    'variables', '변수',
+    'functions', '함수',
+    'classes', '클래스',
+    'interfaces', '인터페이스',
+    'type-aliases', 'type aliases', '타입 별칭', '타입별칭',
+    'enumerations', '열거형',
+    'namespaces', '네임스페이스',
+    'parameters', '매개변수'
+]);
+
 function getLang() {
     return (typeof document !== 'undefined' && document.documentElement.lang?.startsWith('ko')) ? 'ko' : 'en';
 }
@@ -86,6 +103,81 @@ export function updateOutlineElements() {
             } else if (pastConstructors && (text === 'example' || text === '예제' || href.includes('example'))) {
                 li.style.display = 'none';
             }
+        }
+    });
+
+    // 0-1. 하위 항목이 하나도 없는 카테고리 및 본문에 내용이 없는 빈 섹션 숨김 처리
+    outlineItems.forEach(li => {
+        if (li.style.display === 'none') return;
+        const isTopLevel = !li.parentElement?.closest('li');
+        if (!isTopLevel) return;
+
+        const link = li.querySelector(':scope > .outline-link');
+        if (!link) return;
+
+        const text = (link.textContent || '').trim().toLowerCase();
+        const href = (link.getAttribute('href') || '').toLowerCase();
+        const targetId = href.startsWith('#') ? decodeURIComponent(href.slice(1)) : '';
+        const rawKey = text.replace(/[\s\-_]/g, '');
+
+        // 자식 li 중 표시되는 항목 수 카운트
+        let visibleChildCount = 0;
+        const childLis = li.querySelectorAll(':scope > ul > li');
+        for (let i = 0; i < childLis.length; i++) {
+            if (childLis[i].style.display !== 'none') {
+                visibleChildCount++;
+            }
+        }
+
+        // 자식 항목이 이미 존재하는 카테고리(상속받은 속성/메서드, Accessors 등)는 절대 숨기지 않음
+        if (visibleChildCount > 0) {
+            return;
+        }
+
+        let isKnownCategory = false;
+        for (const cat of CATEGORY_NAMES) {
+            if (text === cat || href === `#${cat}` || rawKey === cat.replace(/[\s\-_]/g, '')) {
+                isKnownCategory = true;
+                break;
+            }
+        }
+
+        // 멤버 카테고리인데 자식 항목이 0개인 경우 즉시 숨김
+        if (isKnownCategory) {
+            li.style.display = 'none';
+            if (targetId) {
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) targetEl.style.display = 'none';
+            }
+            return;
+        }
+
+        // 자식이 없는 일반 섹션(See, Extends 등)의 경우 본문 내용 검사
+        let hasBodyContent = true;
+        if (targetId) {
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                hasBodyContent = false;
+                let curr = targetEl.nextElementSibling;
+                while (curr && curr.tagName !== 'H2') {
+                    const tag = curr.tagName.toUpperCase();
+                    // HR 태그를 제외하고 유의미한 텍스트 또는 자식 요소가 있는 경우 콘텐츠로 인정
+                    if (tag !== 'HR') {
+                        if (curr.textContent.trim().length > 0 || curr.children.length > 0) {
+                            hasBodyContent = true;
+                            break;
+                        }
+                    }
+                    curr = curr.nextElementSibling;
+                }
+                if (!hasBodyContent) {
+                    targetEl.style.display = 'none';
+                }
+            }
+        }
+
+        if (!hasBodyContent) {
+            li.style.display = 'none';
         }
     });
 

@@ -33,20 +33,17 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
 });
 
 /**
- * [KO] 대규모 오픈월드 지형(Landscape) 렌더링, 동적 타일 스트리밍, 복합 생태계 서브시스템을 총괄하는 핵심 클래스입니다.
- * [EN] Core orchestration class for large-scale open-world landscape terrain rendering, dynamic tile streaming, and ecosystem subsystem integration.
+ * [KO] 대규모 오픈월드 지형(Landscape)의 렌더링, 동적 타일 스트리밍, 복합 생태계 서브시스템을 총괄하는 핵심 클래스입니다.
+ * [EN] Core orchestration class for large-scale open-world terrain rendering, dynamic tile streaming, and ecosystem subsystem integration.
  *
- * [KO] 가상 텍스처 아틀라스 파이프라인을 기반으로 고정밀 32비트 높이맵(VHT), 지형 법선(VNT), 다중 스플랫 레이어 머티리얼(VBT)을 효율적으로 결합하고 관리합니다.
- * [EN] Manages a virtual texture atlas pipeline that efficiently combines high-precision 32-bit heightmaps (VHT), terrain normals (VNT), and multi-layer splat materials (VBT).
+ * [KO] 가상 텍스처 아틀라스와 현대적 GPU 컴퓨트 파이프라인을 기반으로 광활한 야외 지형 환경을 실시간 고성능으로 표현합니다.
+ * [EN] Delivers vast, high-fidelity outdoor environments with maximum real-time performance using virtual texture atlases and a modern GPU compute pipeline.
  *
- * [KO] 카메라 거리 및 화면 투영 크기에 기반한 쿼드트리 연속 LOD(Continuous LOD)와 메시 전환 시 팝핑 현상을 제거하는 지오모핑(Geomorphing) 및 디더 페이드를 지원합니다.
- * [EN] Features quadtree-based hierarchical continuous LOD driven by camera distance or screen size, paired with vertex geomorphing and dither cross-fading to eliminate popping artifacts during LOD transitions.
+ * [KO] 다중 텍스처 블렌딩을 위한 스플랫 레이어 시스템(`addLayer`)을 지원하여 다양한 지표면 머티리얼을 유연하게 합성할 수 있습니다.
+ * [EN] Supports a splat layer system (`addLayer`) for multi-texture blending, allowing flexible composition of diverse surface materials.
  *
- * [KO] GPU 컴퓨트 셰이더 기반의 프러스텀 및 HZB(Hierarchical Z-Buffer) 오클루전 컬링과 인다이렉트 드로우(Indirect Draw), 실시간 높이맵 레이마칭 그림자를 통해 고성능 렌더링을 구현합니다.
- * [EN] Delivers high-performance rendering powered by GPU compute-based view frustum and HZB (Hierarchical Z-Buffer) occlusion culling, indirect draw calls, and real-time heightmap raymarching self-shadows.
- *
- * [KO] 절차적 잔디(`grassManager`), 대규모 식생 및 3D 임포스터(`foliageManager`), 실시간 진단 도구(`debuggerManager`)와 유기적으로 연동되어 풍부한 오픈월드 환경을 구축합니다.
- * [EN] Seamlessly integrates with procedural grass (`grassManager`), large-scale foliage with 3D impostors (`foliageManager`), and real-time diagnostic tools (`debuggerManager`) to build rich, cohesive open-world environments.
+ * [KO] 절차적 잔디(`grassManager`), 대규모 식생 및 3D 임포스터(`foliageManager`)와 완벽히 연동되어 풍부한 오픈월드 환경을 구축합니다.
+ * [EN] Seamlessly integrates with procedural grass (`grassManager`) and large-scale foliage with 3D impostors (`foliageManager`) to build rich, cohesive open-world environments.
  *
  * <iframe src="/RedGPU/examples/3d/landscape/openWorldIntegration/"></iframe>
  *
@@ -54,14 +51,21 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * ```typescript
  * const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
  *
- * // 지형 레이어(스플랫 텍스처) 추가 / Add terrain splat layer
+ * // 지형 크기 및 높이 스케일 설정 / Set terrain dimensions and height scale
+ * landscape.worldSize = [8000, 8000];
+ * landscape.heightScale = 600;
+ *
+ * // 글로벌 16비트 높이맵 지정 / Assign 16-bit global heightmap
+ * landscape.globalHeightmapUrl = '/assets/terrain/global_heightmap_1024.png';
+ *
+ * // 스플랫 텍스처 레이어 추가 / Add splat blending layer
  * landscape.addLayer({
  *     diffuseTexture: grassTexture,
  *     normalTexture: grassNormalTexture,
- *     uvScale: [50, 50]
+ *     uvScale: [40, 40]
  * });
  *
- * // 씬에 지형 추가 / Add landscape to scene
+ * // 씬에 지형 등록 / Add landscape to scene
  * scene.addLandscape(landscape);
  * ```
  *
@@ -74,7 +78,6 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * @see [Procedural Grass Field](/RedGPU/examples/3d/landscape/proceduralGrass/)
  * @see [Foliage & Impostors](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @see [Landscape & Water System](/RedGPU/examples/3d/landscape/landscapeAndWater/)
- *
  */
 export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
