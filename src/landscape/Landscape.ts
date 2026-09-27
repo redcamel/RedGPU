@@ -13,9 +13,6 @@ import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import DirectTexture from "../resources/texture/DirectTexture";
 import parse16BitPngBuffer from "../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
-import LandscapeVNTGenerator from "./core/generator/LandscapeVNTGenerator";
-import LandscapeVHTGenerator from "./core/generator/LandscapeVHTGenerator";
-import LandscapeVBTGenerator from "./core/generator/LandscapeVBTGenerator";
 import Object3DContainer from "../display/mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import LandscapeGrassManager from "./grass/LandscapeGrassManager";
@@ -110,14 +107,6 @@ export class Landscape extends Object3DContainer {
     #lastTanHalfFOV: number = 1.0;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
-    #vhtAtlasTexture: DirectTexture | null = null;
-    #vntAtlasTexture: DirectTexture | null = null;
-    #vbtBaseColorAtlas: DirectTexture | null = null;
-    #vbtNormalAtlas: DirectTexture | null = null;
-    #vbtORMAtlas: DirectTexture | null = null;
-    #vhtGenerator: LandscapeVHTGenerator;
-    #vntGenerator: LandscapeVNTGenerator;
-    #vbtGenerator: LandscapeVBTGenerator;
     #globalHeightmapUrl: string = '';
     #globalHeightTexture: GPUTexture | null = null;
 
@@ -203,68 +192,7 @@ export class Landscape extends Object3DContainer {
         this.#heightScale = 500.0;
         this.#updateTuples();
 
-        const atlasWidth = componentCountX * 512;
-        const atlasHeight = componentCountZ * 512;
-        const rawAtlasTexture = redGPUContext.gpuDevice.createTexture({
-            size: [atlasWidth, atlasHeight],
-            format: 'r32float',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_VHT_Atlas_Texture'
-        });
-        const vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_Atlas_Texture', rawAtlasTexture);
-
-        const rawVntTexture = redGPUContext.gpuDevice.createTexture({
-            size: [atlasWidth, atlasHeight],
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VNT_Atlas_Texture'
-        });
-        const vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
-
-        const rawVbtBaseColor = redGPUContext.gpuDevice.createTexture({
-            size: [atlasWidth, atlasHeight],
-            mipLevelCount: 6,
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_BaseColor_Atlas'
-        });
-        const vbtBaseColorAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_BaseColor_Atlas', rawVbtBaseColor);
-
-        const rawVbtNormal = redGPUContext.gpuDevice.createTexture({
-            size: [atlasWidth, atlasHeight],
-            mipLevelCount: 6,
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_Normal_Atlas'
-        });
-        const vbtNormalAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_Normal_Atlas', rawVbtNormal);
-
-        const rawVbtORM = redGPUContext.gpuDevice.createTexture({
-            size: [atlasWidth, atlasHeight],
-            mipLevelCount: 6,
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_ORM_Atlas'
-        });
-        const vbtORMAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_ORM_Atlas', rawVbtORM);
-
-        this.#vhtAtlasTexture = vhtAtlasTexture;
-        this.#vntAtlasTexture = vntAtlasTexture;
-        this.#vbtBaseColorAtlas = vbtBaseColorAtlas;
-        this.#vbtNormalAtlas = vbtNormalAtlas;
-        this.#vbtORMAtlas = vbtORMAtlas;
-        this.#vhtGenerator = new LandscapeVHTGenerator(redGPUContext);
-        this.#vntGenerator = new LandscapeVNTGenerator(redGPUContext);
-        this.#vbtGenerator = new LandscapeVBTGenerator(redGPUContext);
-
-        this.#tileStreamer.setAtlasTextures(
-            vhtAtlasTexture,
-            vntAtlasTexture,
-            vbtBaseColorAtlas,
-            vbtNormalAtlas,
-            vbtORMAtlas
-        );
-        this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
+        this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
         this.#tileStreamer.setMaterial(material);
 
         material.setOnRebakeVBTRequested(() => {
@@ -272,7 +200,7 @@ export class Landscape extends Object3DContainer {
             this.#grassManager?.rebakeAll();
         });
 
-        this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel, vhtAtlasTexture, vntAtlasTexture);
+        this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
         this.#foliageManager = new LandscapeFoliageManager(this, () => {
             this.#updateLandscapeUniforms();
         });
@@ -842,44 +770,24 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    #bakeGlobalBaseToVHT(): void {
-        if (!this.#globalHeightTexture || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
-
-        const atlasW = this.#componentCountX * 512;
-        const atlasH = this.#componentCountZ * 512;
-
-        this.#vhtGenerator?.bakeGlobalBase(
-            this.#globalHeightTexture,
-            this.#vhtAtlasTexture,
-            this.#componentCountX,
-            this.#componentCountZ
-        );
-
-        this.#vntGenerator?.bakeTileRegion(
-            this.#vhtAtlasTexture,
-            this.#vntAtlasTexture,
-            0, 0,
-            atlasW, atlasH,
-            this.#heightScale,
-            this.#worldSizeX,
-            this.#componentCountX
-        );
-
-        this.#bakeGlobalVBT();
-        this.#grassManager?.rebakeAll();
+    /**
+     * @internal
+     */
+    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
+        return this.#tileStreamer?.getAtlasTexture(type) ?? null;
     }
 
-    #bakeGlobalVBT(): void {
-        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
+    #bakeGlobalBaseToVHT(): void {
+        if (!this.#globalHeightTexture || !this.#tileStreamer) return;
 
-        this.#vbtGenerator.bakeAtlas(
-            this.#vntAtlasTexture,
-            this.#vbtBaseColorAtlas,
-            this.#vbtNormalAtlas,
-            this.#vbtORMAtlas,
-            this.#material,
-            512
+        this.#tileStreamer.bakeGlobalBase(
+            this.#globalHeightTexture,
+            this.#componentCountX,
+            this.#componentCountZ,
+            this.#heightScale,
+            this.#worldSizeX
         );
+        this.#grassManager?.rebakeAll();
     }
 
     /**
@@ -1296,24 +1204,8 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
     }
 
-    /**
-     * @internal
-     */
-    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
-        switch (type) {
-            case 'vht':
-                return this.#vhtAtlasTexture;
-            case 'vnt':
-                return this.#vntAtlasTexture;
-            case 'vbtBaseColor':
-                return this.#vbtBaseColorAtlas;
-            case 'vbtNormal':
-                return this.#vbtNormalAtlas;
-            case 'vbtORM':
-                return this.#vbtORMAtlas;
-            default:
-                return null;
-        }
+    #bakeGlobalVBT(): void {
+        this.#tileStreamer?.rebakeAllLoadedVBT();
     }
 
     #clampComponentCount(val: number): number {
@@ -1333,8 +1225,8 @@ export class Landscape extends Object3DContainer {
     }
 
     #updateLandscapeUniforms(): void {
-        const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
-        const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
+        const vhtW = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
+        const vhtH = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
@@ -1373,9 +1265,7 @@ export class Landscape extends Object3DContainer {
         redGPUContext: RedGPUContext,
         componentCountX: number,
         componentCountZ: number,
-        lodMaxLevel: number,
-        vhtAtlasTexture: DirectTexture,
-        vntAtlasTexture: DirectTexture
+        lodMaxLevel: number
     ) {
         this.#tileStreamer.setTerrainConfig(this.#heightScale);
 
@@ -1389,13 +1279,16 @@ export class Landscape extends Object3DContainer {
         this.#vertexShaderModule = vModule;
 
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
-        this.#instanceBuffer.updateBindGroup(
-            vhtAtlasTexture.gpuTextureView,
-            vntAtlasTexture.gpuTextureView,
-            this.#vbtBaseColorAtlas?.gpuTextureView,
-            this.#vbtNormalAtlas?.gpuTextureView,
-            this.#vbtORMAtlas?.gpuTextureView
-        );
+        const tileStreamer = this.#tileStreamer;
+        if (tileStreamer?.vhtAtlasTexture && tileStreamer?.vntAtlasTexture) {
+            this.#instanceBuffer.updateBindGroup(
+                tileStreamer.vhtAtlasTexture.gpuTextureView,
+                tileStreamer.vntAtlasTexture.gpuTextureView,
+                tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
+                tileStreamer.vbtNormalAtlas?.gpuTextureView,
+                tileStreamer.vbtORMAtlas?.gpuTextureView
+            );
+        }
 
         this.#rebuildLODStructures();
         this.#rebuildTiles();
@@ -1433,32 +1326,9 @@ export class Landscape extends Object3DContainer {
         this.#sharedGeometry?.destroy();
         this.#gpuCuller?.destroy();
         this.#tileStreamer?.destroy();
-        this.#vhtGenerator?.destroy();
-        this.#vntGenerator?.destroy();
-        this.#vbtGenerator?.destroy();
 
         if (this.#instanceBuffer) {
             this.#instanceBuffer.destroy();
-        }
-        if (this.#vhtAtlasTexture) {
-            this.#vhtAtlasTexture.destroy();
-            this.#vhtAtlasTexture = null;
-        }
-        if (this.#vntAtlasTexture) {
-            this.#vntAtlasTexture.destroy();
-            this.#vntAtlasTexture = null;
-        }
-        if (this.#vbtBaseColorAtlas) {
-            this.#vbtBaseColorAtlas.destroy();
-            this.#vbtBaseColorAtlas = null;
-        }
-        if (this.#vbtNormalAtlas) {
-            this.#vbtNormalAtlas.destroy();
-            this.#vbtNormalAtlas = null;
-        }
-        if (this.#vbtORMAtlas) {
-            this.#vbtORMAtlas.destroy();
-            this.#vbtORMAtlas = null;
         }
         this.#clearPipelineCaches();
     }
@@ -1594,84 +1464,14 @@ export class Landscape extends Object3DContainer {
         const tileSizeZ = this.#tileSizeZ;
         const targetCount = componentCountX * componentCountZ;
 
-        const targetAtlasW = componentCountX * 512;
-        const targetAtlasH = componentCountZ * 512;
         let needRebuildBindGroup = false;
-
-        if (!this.#vhtAtlasTexture || this.#vhtAtlasTexture.gpuTexture.width !== targetAtlasW || this.#vhtAtlasTexture.gpuTexture.height !== targetAtlasH) {
-            if (this.#vhtAtlasTexture) {
-                this.#vhtAtlasTexture.destroy();
-            }
-            if (this.#vntAtlasTexture) {
-                this.#vntAtlasTexture.destroy();
-            }
-            const rawGpuTexture = this.#redGPUContext.gpuDevice.createTexture({
-                size: [targetAtlasW, targetAtlasH],
-                format: 'r32float',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-                label: 'Landscape_VHT_Atlas_Texture'
-            });
-            this.#vhtAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VHT_Atlas_Texture', rawGpuTexture);
-
-            const rawVntTexture = this.#redGPUContext.gpuDevice.createTexture({
-                size: [targetAtlasW, targetAtlasH],
-                format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-                label: 'Landscape_VNT_Atlas_Texture'
-            });
-            this.#vntAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
-
-            if (this.#vbtBaseColorAtlas) {
-                this.#vbtBaseColorAtlas.destroy();
-            }
-            if (this.#vbtNormalAtlas) {
-                this.#vbtNormalAtlas.destroy();
-            }
-            if (this.#vbtORMAtlas) {
-                this.#vbtORMAtlas.destroy();
-            }
-
-            const rawVbtBaseColor = this.#redGPUContext.gpuDevice.createTexture({
-                size: [targetAtlasW, targetAtlasH],
-                mipLevelCount: 6,
-                format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-                label: 'Landscape_VBT_BaseColor_Atlas'
-            });
-            this.#vbtBaseColorAtlas = new DirectTexture(this.#redGPUContext, 'Landscape_VBT_BaseColor_Atlas', rawVbtBaseColor);
-
-            const rawVbtNormal = this.#redGPUContext.gpuDevice.createTexture({
-                size: [targetAtlasW, targetAtlasH],
-                mipLevelCount: 6,
-                format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-                label: 'Landscape_VBT_Normal_Atlas'
-            });
-            this.#vbtNormalAtlas = new DirectTexture(this.#redGPUContext, 'Landscape_VBT_Normal_Atlas', rawVbtNormal);
-
-            const rawVbtORM = this.#redGPUContext.gpuDevice.createTexture({
-                size: [targetAtlasW, targetAtlasH],
-                mipLevelCount: 6,
-                format: 'rgba8unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-                label: 'Landscape_VBT_ORM_Atlas'
-            });
-            this.#vbtORMAtlas = new DirectTexture(this.#redGPUContext, 'Landscape_VBT_ORM_Atlas', rawVbtORM);
-
-            if (this.#tileStreamer) {
-                this.#tileStreamer.setAtlasTextures(
-                    this.#vhtAtlasTexture,
-                    this.#vntAtlasTexture,
-                    this.#vbtBaseColorAtlas,
-                    this.#vbtNormalAtlas,
-                    this.#vbtORMAtlas
-                );
-                this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
-                this.#tileStreamer.setMaterial(this.#material);
+        if (this.#tileStreamer) {
+            const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
+            if (changed) {
                 this.#tileStreamer.setTerrainConfig(this.#heightScale);
                 this.#tileStreamer.resetTileState();
+                needRebuildBindGroup = true;
             }
-            needRebuildBindGroup = true;
         }
 
         this.#sharedGeometry?.updateTileSize(tileSizeX, tileSizeZ);
@@ -1684,13 +1484,13 @@ export class Landscape extends Object3DContainer {
             needRebuildBindGroup = true;
         }
 
-        if (needRebuildBindGroup && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+        if (needRebuildBindGroup && this.#tileStreamer?.vhtAtlasTexture && this.#tileStreamer?.vntAtlasTexture) {
             this.#instanceBuffer.updateBindGroup(
-                this.#vhtAtlasTexture.gpuTextureView,
-                this.#vntAtlasTexture.gpuTextureView,
-                this.#vbtBaseColorAtlas?.gpuTextureView,
-                this.#vbtNormalAtlas?.gpuTextureView,
-                this.#vbtORMAtlas?.gpuTextureView
+                this.#tileStreamer.vhtAtlasTexture.gpuTextureView,
+                this.#tileStreamer.vntAtlasTexture.gpuTextureView,
+                this.#tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
+                this.#tileStreamer.vbtNormalAtlas?.gpuTextureView,
+                this.#tileStreamer.vbtORMAtlas?.gpuTextureView
             );
             if (this.#globalHeightTexture) {
                 this.#bakeGlobalBaseToVHT();
