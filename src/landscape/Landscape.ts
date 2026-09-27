@@ -1431,8 +1431,7 @@ export class Landscape extends Object3DContainer {
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
             const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 
-            const pipelineLayout = gpuDevice.createPipelineLayout({
-                label: `LandscapePipelineLayout_${key}`,
+            const pipelineLayout = resourceManager.createGPUPipelineLayout(`LandscapePipelineLayout_${key}`, {
                 bindGroupLayouts: [systemBGLayout, storageBGLayout, fragUniformBGLayout]
             });
 

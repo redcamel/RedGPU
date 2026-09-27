@@ -318,11 +318,10 @@ export class LandscapeInstanceBuffer {
             3: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
         });
 
-        this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'LandscapeInstanceStorageBindGroupLayout',
-            ...descriptor
-        });
-
+        this.#instanceStorageBindGroupLayout = resourceManager.createBindGroupLayout(
+            'LandscapeInstanceStorageBindGroupLayout',
+            descriptor
+        );
         this.#allInputTilesBuffer = gpuDevice.createBuffer({
             label: 'LandscapeAllInputTilesStorageBuffer',
             size: this.#maxComponentCount * 32,

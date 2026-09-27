@@ -134,17 +134,18 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
             }
         });
 
-        const bindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: `${this.#shaderModuleName}BindGroupLayout`,
-            entries: descriptor.entries
-        });
+        const bindGroupLayout = resourceManager.createBindGroupLayout(
+            `${this.#shaderModuleName}BindGroupLayout`,
+            descriptor
+        );
         this.#bindGroupLayout = bindGroupLayout;
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `${this.#shaderModuleName}PipelineLayout`,
-            bindGroupLayouts: [bindGroupLayout]
-        });
-
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `${this.#shaderModuleName}PipelineLayout`,
+            {
+                bindGroupLayouts: [bindGroupLayout]
+            }
+        );
         this.#pipeline = gpuDevice.createRenderPipeline({
             label: `${this.#shaderModuleName}RenderPipeline`,
             layout: pipelineLayout,

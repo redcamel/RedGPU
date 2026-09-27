@@ -266,7 +266,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         super._updateFragmentState();
 
-        const {gpuDevice} = this.redGPUContext;
+        const {gpuDevice, resourceManager} = this.redGPUContext;
         if (!gpuDevice || !this.gpuRenderInfo) return;
 
         this.updateUniformsData();
@@ -294,11 +294,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         ];
 
         const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.SHADER_INFO, 2);
-        const bindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'LandscapeMaterial_BindGroupLayout',
-            ...descriptor
-        });
-
+        const bindGroupLayout = resourceManager.createBindGroupLayout(
+            'LandscapeMaterial_BindGroupLayout',
+            descriptor
+        );
         const bindGroup = gpuDevice.createBindGroup({
             label: 'LandscapeMaterial_BindGroup',
             layout: bindGroupLayout,

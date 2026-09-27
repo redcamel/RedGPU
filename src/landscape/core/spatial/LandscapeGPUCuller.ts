@@ -163,16 +163,11 @@ export class LandscapeGPUCuller {
         });
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.#bindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'LandscapeCullBindGroupLayout',
-            ...descriptor
-        });
+        this.#bindGroupLayout = resourceManager.createBindGroupLayout('LandscapeCullBindGroupLayout', descriptor);
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'LandscapeCullPipelineLayout',
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('LandscapeCullPipelineLayout', {
             bindGroupLayouts: [this.#bindGroupLayout]
         });
-
         this.#computePipeline = gpuDevice.createComputePipeline({
             label: 'LandscapeCullComputePipeline',
             layout: pipelineLayout,
