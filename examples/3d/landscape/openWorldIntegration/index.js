@@ -319,8 +319,8 @@ function renderTestPane({
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
-            landscapeFolder.addBinding(landscape, 'wireframe');
-            landscapeFolder.addBinding(landscape, 'lodColoration');
+            landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
+            landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
             landscapeFolder.addBinding(landscape, 'enableHeightmapShadow');
 
             // 5. 조명 및 그림자 (Light & Shadow)

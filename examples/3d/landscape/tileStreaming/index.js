@@ -309,7 +309,7 @@ function renderTestPane({
             // [KO] Debug 설정
             // [EN] Debug settings
             const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: false});
-            debugFolder.addBinding(landscape, 'debugMode', {
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeDebugMode', {
                 options: {
                     'None (Full PBR)': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NONE,
                     'Final Normal': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.FINAL_NORMAL,
@@ -325,8 +325,8 @@ function renderTestPane({
                     'LOD Level': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.LOD_LEVEL
                 }
             });
-            debugFolder.addBinding(landscape, 'wireframe');
-            debugFolder.addBinding(landscape, 'lodColoration');
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
             // [KO] Light 설정
             // [EN] Light settings

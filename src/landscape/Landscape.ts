@@ -287,7 +287,29 @@ export class Landscape extends Object3DContainer {
             this.#foliageManager?.handleTileLoaded(comp);
             this.#grassManager?.handleTileLoaded(comp);
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this);
+        this.#debuggerManager = new LandscapeDebuggerManager(this, {
+            onDebugPropertyChange: (key, value) => {
+                switch (key) {
+                    case 'wireframe':
+                        if (this.#wireframe !== value) {
+                            this.#wireframe = value as boolean;
+                        }
+                        break;
+                    case 'debugMode':
+                        if (this.#debugMode !== value) {
+                            this.#debugMode = value as number;
+                            this.#updateLandscapeUniforms();
+                        }
+                        break;
+                    case 'lodColoration':
+                        if (this.#lodColoration !== value) {
+                            this.#lodColoration = value as boolean;
+                            this.#updateLandscapeUniforms();
+                        }
+                        break;
+                }
+            }
+        });
         this.#updateLandscapeUniforms();
     }
 
@@ -880,83 +902,6 @@ export class Landscape extends Object3DContainer {
             this.#material,
             512
         );
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // 지형 와이어프레임 모드 전환
-     * landscape.wireframe = true;
-     * ```
-     *
-     * [KO]
-     * 지형 메쉬를 와이어프레임(Line List 토폴로지)으로 렌더링할지 여부를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets whether to render the terrain mesh in wireframe mode (Line List topology).
-     *
-     * @defaultValue false
-     */
-    get wireframe(): boolean {
-        return this.#wireframe;
-    }
-
-    set wireframe(value: boolean) {
-        if (this.#wireframe !== value) {
-            this.#wireframe = value;
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // 노멀 벡터 시각화 모드로 변경
-     * landscape.debugMode = RedGPU.LANDSCAPE_DEBUG_MODE.NORMAL;
-     * ```
-     *
-     * [KO]
-     * 지형 셰이더의 디버그 시각화 모드를 설정하거나 가져옵니다. {@link RedGPU.Landscape.LANDSCAPE_DEBUG_MODE} 상수를 사용합니다.
-     *
-     * [EN]
-     * Gets or sets the shader debug visualization mode for the landscape. Uses {@link RedGPU.Landscape.LANDSCAPE_DEBUG_MODE} constants.
-     *
-     * @defaultValue 0 (LANDSCAPE_DEBUG_MODE.NONE)
-     */
-    get debugMode(): number {
-        return this.#debugMode;
-    }
-
-    set debugMode(value: number) {
-        if (this.#debugMode !== value) {
-            this.#debugMode = value;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // LOD 단계별 색상 시각화 켜기
-     * landscape.lodColoration = true;
-     * ```
-     *
-     * [KO]
-     * 지형 타일의 LOD 단계별로 고유 색상을 오버레이하여 시각화할지 여부를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets whether to overlay distinct colors for each LOD level of terrain tiles for debugging.
-     *
-     * @defaultValue false
-     */
-    get lodColoration(): boolean {
-        return this.#lodColoration;
-    }
-
-    set lodColoration(value: boolean) {
-        if (this.#lodColoration !== value) {
-            this.#lodColoration = value;
-            this.#updateLandscapeUniforms();
-        }
     }
 
     /**

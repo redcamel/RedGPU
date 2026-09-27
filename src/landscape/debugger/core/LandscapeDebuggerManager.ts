@@ -6,6 +6,9 @@ import LandscapeVBTDebugger from "../vbt/LandscapeVBTDebugger";
 import LandscapeVBTNormalDebugger from "../vbt/LandscapeVBTNormalDebugger";
 import LandscapeVBTORMDebugger from "../vbt/LandscapeVBTORMDebugger";
 
+export type LandscapeDebugPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
+export type LandscapeDebugPropertyChangeHandler = (key: LandscapeDebugPropertyKey, value: boolean | number) => void;
+
 export interface LandscapeDebuggerManagerOptions {
     spatialGrid?: boolean;
     vht?: boolean;
@@ -14,6 +17,10 @@ export interface LandscapeDebuggerManagerOptions {
     vbtBaseColor?: boolean;
     vbtNormal?: boolean;
     vbtORM?: boolean;
+    landscapeWireframe?: boolean;
+    landscapeLodColoration?: boolean;
+    landscapeDebugMode?: number;
+    onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
 }
 
 export class LandscapeDebuggerManager {
@@ -33,9 +40,14 @@ export class LandscapeDebuggerManager {
     #enableVBTNormal: boolean = false;
     #enableVBTORM: boolean = false;
     #visible: boolean = true;
+    #landscapeWireframe: boolean = false;
+    #landscapeLodColoration: boolean = false;
+    #landscapeDebugMode: number = 0;
+    #onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
 
     constructor(landscape: Landscape, options?: LandscapeDebuggerManagerOptions) {
         this.#landscape = landscape;
+        this.#onDebugPropertyChange = options?.onDebugPropertyChange;
 
         if (options?.spatialGrid) this.spatialGrid = true;
         if (options?.vht) this.vht = true;
@@ -43,10 +55,91 @@ export class LandscapeDebuggerManager {
         if (options?.vbt || options?.vbtBaseColor) this.vbt = true;
         if (options?.vbtNormal) this.vbtNormal = true;
         if (options?.vbtORM) this.vbtORM = true;
+        if (options?.landscapeWireframe !== undefined) this.landscapeWireframe = options.landscapeWireframe;
+        if (options?.landscapeLodColoration !== undefined) this.landscapeLodColoration = options.landscapeLodColoration;
+        if (options?.landscapeDebugMode !== undefined) this.landscapeDebugMode = options.landscapeDebugMode;
     }
 
     get landscape(): Landscape {
         return this.#landscape;
+    }
+
+    /**
+     * @example
+     * ```ts
+     * // 지형 와이어프레임 모드 전환
+     * landscape.debuggerManager.landscapeWireframe = true;
+     * ```
+     *
+     * [KO]
+     * 지형 메쉬를 와이어프레임(Line List 토폴로지)으로 렌더링할지 여부를 설정하거나 가져옵니다.
+     *
+     * [EN]
+     * Gets or sets whether to render the terrain mesh in wireframe mode (Line List topology).
+     *
+     * @defaultValue false
+     */
+    get landscapeWireframe(): boolean {
+        return this.#landscapeWireframe;
+    }
+
+    set landscapeWireframe(value: boolean) {
+        if (this.#landscapeWireframe !== value) {
+            this.#landscapeWireframe = value;
+            this.#onDebugPropertyChange?.('wireframe', value);
+        }
+    }
+
+    /**
+     * @example
+     * ```ts
+     * // 노멀 벡터 시각화 모드로 변경
+     * landscape.debuggerManager.landscapeDebugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NORMAL;
+     * ```
+     *
+     * [KO]
+     * 지형 셰이더의 디버그 시각화 모드를 설정하거나 가져옵니다. {@link RedGPU.Landscape.LANDSCAPE_DEBUG_MODE} 상수를 사용합니다.
+     *
+     * [EN]
+     * Gets or sets the shader debug visualization mode for the landscape. Uses {@link RedGPU.Landscape.LANDSCAPE_DEBUG_MODE} constants.
+     *
+     * @defaultValue 0 (LANDSCAPE_DEBUG_MODE.NONE)
+     */
+    get landscapeDebugMode(): number {
+        return this.#landscapeDebugMode;
+    }
+
+    set landscapeDebugMode(value: number) {
+        if (this.#landscapeDebugMode !== value) {
+            this.#landscapeDebugMode = value;
+            this.#onDebugPropertyChange?.('debugMode', value);
+        }
+    }
+
+    /**
+     * @example
+     * ```ts
+     * // LOD 단계별 색상 시각화 켜기
+     * landscape.debuggerManager.landscapeLodColoration = true;
+     * ```
+     *
+     * [KO]
+     * 지형 타일의 LOD 단계별로 고유 색상을 오버레이하여 시각화할지 여부를 설정하거나 가져옵니다.
+     *
+     * [EN]
+     * Gets or sets whether to overlay distinct colors for each LOD level of terrain tiles for debugging.
+     *
+     * @defaultValue false
+     */
+    get landscapeLodColoration(): boolean {
+        return this.#landscapeLodColoration;
+    }
+
+    set landscapeLodColoration(value: boolean) {
+        if (this.#landscapeLodColoration !== value) {
+            this.#landscapeLodColoration = value;
+            this.#onDebugPropertyChange?.('lodColoration', value);
+        }
     }
 
     get spatialGrid(): boolean {
@@ -256,6 +349,10 @@ export class LandscapeDebuggerManager {
     }
 
     destroy(): void {
+        this.landscapeWireframe = false;
+        this.landscapeLodColoration = false;
+        this.landscapeDebugMode = 0;
+        this.#onDebugPropertyChange = undefined;
         if (this.#spatialGridDebugger) {
             this.#spatialGridDebugger.destroy();
             this.#spatialGridDebugger = null;

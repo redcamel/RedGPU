@@ -158,8 +158,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
             // 4. Display
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
             folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 6000, step: 50});
-            folderDisplay.addBinding(landscape, 'wireframe');
-            folderDisplay.addBinding(landscape, 'lodColoration');
+            folderDisplay.addBinding(landscape.debuggerManager, 'landscapeWireframe');
+            folderDisplay.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
             const baseColorProxy = {
                 get baseColor() {

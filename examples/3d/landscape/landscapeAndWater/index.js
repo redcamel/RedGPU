@@ -303,8 +303,8 @@ function renderTestPane({
             terrainFolder.addBinding(landscape, 'heightScale', {min: 100, max: 1200, step: 10});
             terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 500, step: 5});
             terrainFolder.addBinding(landscape, 'nearDetailFade', {min: 5, max: 200, step: 5});
-            terrainFolder.addBinding(landscape, 'wireframe');
-            terrainFolder.addBinding(landscape, 'lodColoration');
+            terrainFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
+            terrainFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
             // 4. 조명 및 그림자 폴더
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
