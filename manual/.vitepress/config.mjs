@@ -16,6 +16,12 @@ const isVariablesFolder = (item) => {
     return text === 'variables' || text.endsWith('variables');
 };
 
+const isNamespacesFolder = (item) => {
+    if (!item || !item.items) return false;
+    const text = (item.text || '').toLowerCase().replace(/<[^>]*>/g, '').replace(/[\s\-_]/g, '');
+    return text === 'namespaces' || text.endsWith('namespaces');
+};
+
 const BADGES = {
     class: '<span class="api-badge badge-c">C</span>',
     variable: '<span class="api-badge badge-v">V</span>',
@@ -128,6 +134,14 @@ const sortSidebar = (sidebar, parentContext = {}) => {
                 }));
             }
 
+            // namespaces 폴더인 경우 자식들을 상위로 승격 (isNamespace 플래그 부착)
+            if (isNamespacesFolder(processedItem)) {
+                return (processedItem.items || []).map(child => applyBadgeToItem({
+                    ...child,
+                    isNamespace: true
+                }));
+            }
+
             // 하위 폴더(interfaces, functions 등)인 경우 📁 폴더 헤더 적용
             if (processedItem.items && !processedItem.link) {
                 processedItem.text = formatFolderTitle(processedItem.text);
@@ -155,9 +169,11 @@ const sortSidebar = (sidebar, parentContext = {}) => {
             return link.includes('/variables/') || link.startsWith('variables/');
         };
 
-        const isNamespacesFolder = (item) => {
-            if (!item.items) return false;
-            return (item.text || '').toLowerCase().includes('namespaces');
+        const isNamespaceItem = (item) => {
+            if (item.isNamespace) return true;
+            const text = item.text || '';
+            const link = item.link || '';
+            return text.includes('badge-n') || link.includes('/namespaces/');
         };
 
         return processed.sort((a, b) => {
@@ -179,21 +195,21 @@ const sortSidebar = (sidebar, parentContext = {}) => {
             if (aIsVar && !bIsVar) return -1;
             if (!aIsVar && bIsVar) return 1;
 
-            // 4. 단일 문서를 하위 폴더(그룹)보다 먼저 배치
+            // 4. 네임스페이스(Namespace) 목록
+            const aIsNS = isNamespaceItem(a);
+            const bIsNS = isNamespaceItem(b);
+            if (aIsNS && !bIsNS) return -1;
+            if (!aIsNS && bIsNS) return 1;
+
+            // 5. 단일 문서를 하위 폴더(그룹)보다 먼저 배치
             const aHasItems = Boolean(a.items);
             const bHasItems = Boolean(b.items);
             if (!aHasItems && bHasItems) return -1;
             if (aHasItems && !bHasItems) return 1;
 
-            // 5. 폴더 그룹 중에서는 'Namespaces'를 가장 먼저 배치
-            const aIsNS = isNamespacesFolder(a);
-            const bIsNS = isNamespacesFolder(b);
-            if (aIsNS && !bIsNS) return -1;
-            if (!aIsNS && bIsNS) return 1;
-
             // 6. 동일 분류 내에서는 HTML 태그를 제외한 순수 알파벳 순 정렬
-            const aCleanText = (a.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CV]\]\s*/, '').trim();
-            const bCleanText = (b.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CV]\]\s*/, '').trim();
+            const aCleanText = (a.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CVN]\]\s*/, '').trim();
+            const bCleanText = (b.text || '').replace(/<[^>]*>/g, '').replace(/^\[[CVN]\]\s*/, '').trim();
             return aCleanText.localeCompare(bCleanText);
         });
     }

@@ -363,6 +363,12 @@
     overflow: hidden !important;
 }
 
+/* 사이드바 level-0 폴더/네임스페이스 하위 아이템에도 level-1과 동일한 들여쓰기 및 가이드선 부여 */
+.VPSidebarItem.level-0 .items {
+    border-left: 1px solid var(--vp-c-divider);
+    padding-left: 16px;
+}
+
 /* 사이드바 아이템 줄바꿈 방지 및 말줄임표(...) 처리 + 수직 중앙 완벽 일치 */
 .VPSidebarItem .text {
     display: flex !important;
