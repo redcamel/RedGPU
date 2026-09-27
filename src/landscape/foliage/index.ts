@@ -16,11 +16,10 @@
 export * as Core from "./core";
 
 import LandscapeFoliageManager from "./LandscapeFoliageManager";
-import {type FoliageLODConfig, type FoliageLODInfo, LandscapeFoliage, type LandscapeFoliageOptions} from "./core";
+import type {FoliageLODConfig, FoliageLODInfo, LandscapeFoliageOptions} from "./core/LandscapeFoliage";
 
 export {
-    LandscapeFoliageManager,
-    LandscapeFoliage
+    LandscapeFoliageManager
 };
 
 export type {
