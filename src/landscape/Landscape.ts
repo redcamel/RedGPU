@@ -221,6 +221,9 @@ export class Landscape extends Object3DContainer {
         this.#updateLandscapeUniforms();
     }
 
+    // =========================================================================
+    // Properties: Context & Subsystem Managers
+    // =========================================================================
     /**
      * [KO] 지형이 속한 RedGPUContext 인스턴스를 반환합니다.
      * [EN] Returns the RedGPUContext instance this landscape belongs to.
@@ -235,40 +238,6 @@ export class Landscape extends Object3DContainer {
      */
     get debuggerManager(): LandscapeDebuggerManager {
         return this.#debuggerManager;
-    }
-
-    /**
-     * [KO] 현재 적용된 LOD 계산 방식(`'distance'` 또는 `'screenSize'`)을 반환합니다.
-     * [EN] Returns the current LOD calculation metric (`'distance'` or `'screenSize'`).
-     */
-    get lodMetric(): 'distance' | 'screenSize' {
-        return this.#lodMetric;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // 화면 투영 크기 기반 LOD 선택 모드로 전환
-     * landscape.lodMetric = 'screenSize';
-     * ```
-     *
-     * [KO]
-     * LOD 계산 메트릭 방식을 설정합니다.
-     * - `'distance'`: 카메라와 타일 간의 유클리드 거리를 기준으로 LOD를 결정합니다.
-     * - `'screenSize'`: 카메라 FOV 및 화면 투영 크기(픽셀 오차)를 기준으로 LOD를 동적으로 결정합니다.
-     *
-     * [EN]
-     * Sets the LOD metric calculation method.
-     * - `'distance'`: Determines LOD based on Euclidean distance between the camera and tile.
-     * - `'screenSize'`: Dynamically determines LOD based on camera FOV and screen-projected size (pixel error).
-     *
-     * @defaultValue 'distance'
-     */
-    set lodMetric(value: 'distance' | 'screenSize') {
-        if (this.#lodMetric !== value) {
-            this.#lodMetric = value;
-            this.#updateLandscapeUniforms();
-        }
     }
 
     /**
@@ -288,21 +257,17 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
-     * [KO] 지형의 기본 베이스 틴트 색상(`ColorRGBA`)을 반환합니다.
-     * [EN] Returns the base tint color (`ColorRGBA`) of the landscape.
+     * [KO] 지형 렌더링에 사용되는 `LandscapeMaterial` 재질 인스턴스를 반환합니다.
+     * [EN] Returns the `LandscapeMaterial` instance used for terrain rendering.
      */
-    get baseColor(): ColorRGBA {
-        return this.#material.baseColor;
+    get material(): LandscapeMaterial {
+        return this.#material;
     }
 
-    /**
-     * [KO] 지형에 등록된 텍스처 블렌딩 레이어 목록을 읽기 전용 배열로 반환합니다.
-     * [EN] Returns a read-only array of texture blending layers registered on the landscape.
-     */
-    get layers(): readonly LandscapeLayer[] {
-        return this.#material.layers;
-    }
 
+    // =========================================================================
+    // Properties: Spatial & Grid Dimensions
+    // =========================================================================
     /**
      * [KO] 지형의 월드 크기 `[sizeX, sizeZ]`를 튜플로 반환합니다.
      * [EN] Returns the world dimensions `[sizeX, sizeZ]` of the landscape as a tuple.
@@ -386,6 +351,34 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
+     * [KO] 지형의 최대 고도 스케일(높이 비율)을 반환합니다.
+     * [EN] Returns the maximum elevation height scale of the landscape.
+     */
+    get heightScale(): number {
+        return this.#heightScale;
+    }
+
+    /**
+     * [KO] 지형의 고도 스케일을 설정하고, 가상 노멀 및 텍스처 아틀라스를 재베이킹합니다.
+     * [EN] Sets the elevation height scale of the landscape and triggers atlas re-baking.
+     *
+     * @param val -
+     * [KO] 지형 고도 스케일
+     * [EN] Terrain elevation height scale
+     */
+    set heightScale(val: number) {
+        if (this.#heightScale !== val) {
+            this.#heightScale = val;
+            this.#tileStreamer?.setTerrainConfig(val);
+            this.#updateLandscapeUniforms();
+            this.#tileStreamer?.rebakeAllLoadedVNT();
+            this.#tileStreamer?.rebakeAllLoadedVBT();
+            this.#grassManager?.rebakeAll();
+            this.#foliageManager?.rebakeAll();
+        }
+    }
+
+    /**
      * [KO] 각 컴포넌트 메시 타일의 기본 쿼드 그리드 해상도를 반환합니다.
      * [EN] Returns the base quad grid resolution for each component mesh tile.
      */
@@ -451,6 +444,62 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
+     * @example
+     * ```ts
+     * const tiles = landscape.components;
+     * console.log(`총 타일 컴포넌트: ${tiles.length}`);
+     * ```
+     *
+     * [KO]
+     * 지형 공간 그리드에 등록된 모든 `LandscapeComponent` 인스턴스 배열을 가져옵니다. (읽기 전용)
+     *
+     * [EN]
+     * Gets the array of all `LandscapeComponent` instances registered in the landscape spatial grid. (Read-only)
+     *
+     */
+    get components(): readonly LandscapeComponent[] {
+        return this.#spatialGrid.flatCells;
+    }
+
+
+    // =========================================================================
+    // Properties: LOD Configuration
+    // =========================================================================
+    /**
+     * [KO] 현재 적용된 LOD 계산 방식(`'distance'` 또는 `'screenSize'`)을 반환합니다.
+     * [EN] Returns the current LOD calculation metric (`'distance'` or `'screenSize'`).
+     */
+    get lodMetric(): 'distance' | 'screenSize' {
+        return this.#lodMetric;
+    }
+
+    /**
+     * @example
+     * ```ts
+     * // 화면 투영 크기 기반 LOD 선택 모드로 전환
+     * landscape.lodMetric = 'screenSize';
+     * ```
+     *
+     * [KO]
+     * LOD 계산 메트릭 방식을 설정합니다.
+     * - `'distance'`: 카메라와 타일 간의 유클리드 거리를 기준으로 LOD를 결정합니다.
+     * - `'screenSize'`: 카메라 FOV 및 화면 투영 크기(픽셀 오차)를 기준으로 LOD를 동적으로 결정합니다.
+     *
+     * [EN]
+     * Sets the LOD metric calculation method.
+     * - `'distance'`: Determines LOD based on Euclidean distance between the camera and tile.
+     * - `'screenSize'`: Dynamically determines LOD based on camera FOV and screen-projected size (pixel error).
+     *
+     * @defaultValue 'distance'
+     */
+    set lodMetric(value: 'distance' | 'screenSize') {
+        if (this.#lodMetric !== value) {
+            this.#lodMetric = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    /**
      * [KO] 지형의 최대 LOD 단계 수(1~8)를 반환합니다.
      * [EN] Returns the maximum number of LOD levels (1 to 8) for the landscape.
      */
@@ -484,39 +533,40 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
-     * [KO] 지형의 최대 고도 스케일(높이 비율)을 반환합니다.
-     * [EN] Returns the maximum elevation height scale of the landscape.
-     */
-    get heightScale(): number {
-        return this.#heightScale;
-    }
-
-    /**
-     * [KO] 지형의 고도 스케일을 설정하고, 가상 노멀 및 텍스처 아틀라스를 재베이킹합니다.
-     * [EN] Sets the elevation height scale of the landscape and triggers atlas re-baking.
+     * @example
+     * ```ts
+     * console.log(landscape.lodDistancesSq);
+     * ```
      *
-     * @param val -
-     * [KO] 지형 고도 스케일
-     * [EN] Terrain elevation height scale
+     * [KO]
+     * LOD 레벨 전환 기준 거리의 제곱값 배열을 가져옵니다. (읽기 전용)
+     *
+     * [EN]
+     * Gets the array of squared distance thresholds used for LOD level transitions. (Read-only)
+     *
      */
-    set heightScale(val: number) {
-        if (this.#heightScale !== val) {
-            this.#heightScale = val;
-            this.#tileStreamer?.setTerrainConfig(val);
-            this.#updateLandscapeUniforms();
-            this.#tileStreamer?.rebakeAllLoadedVNT();
-            this.#tileStreamer?.rebakeAllLoadedVBT();
-            this.#grassManager?.rebakeAll();
-            this.#foliageManager?.rebakeAll();
-        }
+    get lodDistancesSq(): readonly number[] {
+        return this.#lodDistancesSq;
+    }
+
+
+    // =========================================================================
+    // Properties: Material & Splat Layers
+    // =========================================================================
+    /**
+     * [KO] 지형의 기본 베이스 틴트 색상(`ColorRGBA`)을 반환합니다.
+     * [EN] Returns the base tint color (`ColorRGBA`) of the landscape.
+     */
+    get baseColor(): ColorRGBA {
+        return this.#material.baseColor;
     }
 
     /**
-     * [KO] 지형 렌더링에 사용되는 `LandscapeMaterial` 재질 인스턴스를 반환합니다.
-     * [EN] Returns the `LandscapeMaterial` instance used for terrain rendering.
+     * [KO] 지형에 등록된 텍스처 블렌딩 레이어 목록을 읽기 전용 배열로 반환합니다.
+     * [EN] Returns a read-only array of texture blending layers registered on the landscape.
      */
-    get material(): LandscapeMaterial {
-        return this.#material;
+    get layers(): readonly LandscapeLayer[] {
+        return this.#material.layers;
     }
 
     /**
@@ -559,6 +609,10 @@ export class Landscape extends Object3DContainer {
         this.#material.nearDetailFade = val;
     }
 
+
+    // =========================================================================
+    // Properties: Streaming & Virtual Textures
+    // =========================================================================
     /**
      * [KO] 비동기로 로드할 전체 지형 16비트 높이맵 이미지의 URL을 반환합니다.
      * [EN] Returns the URL of the global 16-bit heightmap image to load asynchronously.
@@ -582,6 +636,97 @@ export class Landscape extends Object3DContainer {
     }
 
 
+    /**
+     * @example
+     * ```ts
+     * // 타일 스트리밍 로딩 반경을 3000으로 확장
+     * landscape.tileLoadingRadius = 3000.0;
+     * ```
+     *
+     * [KO]
+     * 카메라 주변에서 가상 지형 타일을 능동적으로 메모리에 스트리밍할 로딩 반경(월드 단위)을 설정하거나 가져옵니다.
+     *
+     * [EN]
+     * Gets or sets the streaming loading radius (in world units) around the camera within which terrain tiles are actively loaded into memory.
+     *
+     * @defaultValue 2000.0
+     */
+    get tileLoadingRadius(): number {
+        return this.#tileStreamer.tileLoadingRadius;
+    }
+
+    set tileLoadingRadius(value: number) {
+        this.#tileStreamer.tileLoadingRadius = value;
+    }
+
+    /**
+     * @example
+     * ```ts
+     * // 프레임당 최대 4개 타일 비동기 로드
+     * landscape.tileMaxLoadsPerFrame = 4;
+     * ```
+     *
+     * [KO]
+     * 단일 프레임당 비동기로 로드 및 업로드할 수 있는 최대 타일 텍스처 수를 설정하거나 가져옵니다.
+     *
+     * [EN]
+     * Gets or sets the maximum number of tile textures that can be asynchronously loaded and uploaded per frame.
+     *
+     * @defaultValue 2
+     */
+    get tileMaxLoadsPerFrame(): number {
+        return this.#tileStreamer.tileMaxLoadsPerFrame;
+    }
+
+    set tileMaxLoadsPerFrame(value: number) {
+        this.#tileStreamer.tileMaxLoadsPerFrame = value;
+    }
+
+    /**
+     * @example
+     * ```ts
+     * console.log(`현재 로드된 타일: ${landscape.tileLoadedCount}`);
+     * ```
+     *
+     * [KO]
+     * 가상 텍스처 아틀라스에 현재 로드되어 메모리에 유지되고 있는 타일의 총 개수를 가져옵니다. (읽기 전용)
+     *
+     * [EN]
+     * Gets the total number of tiles currently loaded and active in the virtual texture atlas. (Read-only)
+     *
+     */
+    get tileLoadedCount(): number {
+        return this.#tileStreamer?.tileLoadedCount ?? 0;
+    }
+
+    /**
+     * @example
+     * ```ts
+     * landscape.tileUrlResolver = (row, col) => ({
+     *     heightUrl: `/assets/terrain/tiles/tile_${row}_${col}_height.png`,
+     *     normalUrl: `/assets/terrain/tiles/tile_${row}_${col}_normal.png`
+     * });
+     * ```
+     *
+     * [KO]
+     * 타일 그리드의 행/열 좌표 `(row, col)`를 기반으로 해당 타일의 높이맵 및 관련 텍스처 URL을 반환하는 해석 함수를 설정하거나 가져옵니다.
+     *
+     * [EN]
+     * Gets or sets the resolver callback function that returns texture URLs for a tile given its grid coordinates `(row, col)`.
+     *
+     */
+    get tileUrlResolver(): LandscapeTileUrlResolver | null {
+        return this.#tileStreamer.tileUrlResolver;
+    }
+
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileStreamer.tileUrlResolver = resolver;
+    }
+
+
+    // =========================================================================
+    // Properties: Shadow & Lighting
+    // =========================================================================
     /**
      * @example
      * ```ts
@@ -714,13 +859,110 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+
+    // =========================================================================
+    // Public Feature APIs (Terrain Query & Layer Management)
+    // =========================================================================
     /**
-     * @internal
+     * [KO] 월드 좌표 `(x, z)` 위치에서의 보간된 지형 표면 높이(Y값)를 반환합니다.
+     * [EN] Returns the interpolated terrain surface height (Y coordinate) at the specified world `(x, z)` position.
+     *
+     * ### Example
+     * ```typescript
+     * const groundY = landscape.getHeightAt(100, 250);
+     * character.y = groundY;
+     * ```
+     *
+     * @param x -
+     * [KO] 월드 X 좌표
+     * [EN] World X coordinate
+     * @param z -
+     * [KO] 월드 Z 좌표
+     * [EN] World Z coordinate
+     * @returns
+     * [KO] 보간된 지형 높이값 (Y)
+     * [EN] Interpolated terrain height value (Y)
      */
-    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
-        return this.#tileStreamer?.getAtlasTexture(type) ?? null;
+    getHeightAt(x: number, z: number): number {
+        return this.#tileStreamer.getHeightAt(x, z);
     }
 
+    /**
+     * @example
+     * ```ts
+     * if (landscape.isTileLoaded(0, 0)) {
+     *     console.log('타일 (0, 0) 로드 완료');
+     * }
+     * ```
+     *
+     * [KO]
+     * 특정 행(row)과 열(col) 좌표의 지형 타일이 가상 텍스처 아틀라스에 완전히 로드되어 렌더링 가능한 상태인지 확인합니다.
+     *
+     * [EN]
+     * Checks whether the terrain tile at the specified row and column coordinates is fully loaded and ready for rendering in the virtual texture atlas.
+     *
+     * @param row - 타일 그리드 행 인덱스 / Tile grid row index.
+     * @param col - 타일 그리드 열 인덱스 / Tile grid column index.
+     * @returns 로드 완료 여부 / Whether the tile is loaded.
+     */
+    isTileLoaded(row: number, col: number): boolean {
+        return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
+    }
+
+
+    /**
+     * [KO] 새로운 텍스처 블렌딩 레이어(`LandscapeLayer`)를 생성하여 지형에 추가합니다.
+     * [EN] Creates and adds a new texture blending layer (`LandscapeLayer`) to the landscape.
+     *
+     * ### Example
+     * ```typescript
+     * const grassLayer = landscape.addLayer({
+     *     diffuseTexture: grassTexture,
+     *     normalTexture: grassNormalTexture,
+     *     uvScale: [40, 40]
+     * });
+     * ```
+     *
+     * @param options -
+     * [KO] 지형 레이어 생성 옵션
+     * [EN] Terrain layer creation options
+     * @returns
+     * [KO] 생성된 LandscapeLayer 인스턴스
+     * [EN] The created LandscapeLayer instance
+     */
+    addLayer(options: LandscapeLayerOptions): LandscapeLayer {
+        const layer = new LandscapeLayer(this.#redGPUContext, options);
+        this.#material.addLayer(layer);
+        return layer;
+    }
+
+    /**
+     * [KO] 지정된 레이어 인스턴스 또는 레이어 UUID를 전달받아 지형에서 제거합니다.
+     * [EN] Removes the specified layer instance or layer by UUID from the landscape.
+     *
+     * @param layer -
+     * [KO] 제거할 LandscapeLayer 인스턴스 또는 UUID 문자열
+     * [EN] LandscapeLayer instance or UUID string to remove
+     * @returns
+     * [KO] 제거 성공 여부
+     * [EN] Whether removal succeeded
+     */
+    removeLayer(layer: LandscapeLayer | string): boolean {
+        return this.#material.removeLayer(layer);
+    }
+
+    /**
+     * [KO] 지형에 등록된 모든 텍스처 레이어를 제거합니다.
+     * [EN] Clears all texture layers registered on the landscape.
+     */
+    clearLayers(): void {
+        this.#material.clearLayers();
+    }
+
+
+    // =========================================================================
+    // Core Lifecycle & Rendering
+    // =========================================================================
     /**
      * @example
      * ```ts
@@ -826,201 +1068,6 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * // 타일 스트리밍 로딩 반경을 3000으로 확장
-     * landscape.tileLoadingRadius = 3000.0;
-     * ```
-     *
-     * [KO]
-     * 카메라 주변에서 가상 지형 타일을 능동적으로 메모리에 스트리밍할 로딩 반경(월드 단위)을 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the streaming loading radius (in world units) around the camera within which terrain tiles are actively loaded into memory.
-     *
-     * @defaultValue 2000.0
-     */
-    get tileLoadingRadius(): number {
-        return this.#tileStreamer.tileLoadingRadius;
-    }
-
-    set tileLoadingRadius(value: number) {
-        this.#tileStreamer.tileLoadingRadius = value;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * // 프레임당 최대 4개 타일 비동기 로드
-     * landscape.tileMaxLoadsPerFrame = 4;
-     * ```
-     *
-     * [KO]
-     * 단일 프레임당 비동기로 로드 및 업로드할 수 있는 최대 타일 텍스처 수를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the maximum number of tile textures that can be asynchronously loaded and uploaded per frame.
-     *
-     * @defaultValue 2
-     */
-    get tileMaxLoadsPerFrame(): number {
-        return this.#tileStreamer.tileMaxLoadsPerFrame;
-    }
-
-    set tileMaxLoadsPerFrame(value: number) {
-        this.#tileStreamer.tileMaxLoadsPerFrame = value;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * console.log(`현재 로드된 타일: ${landscape.tileLoadedCount}`);
-     * ```
-     *
-     * [KO]
-     * 가상 텍스처 아틀라스에 현재 로드되어 메모리에 유지되고 있는 타일의 총 개수를 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets the total number of tiles currently loaded and active in the virtual texture atlas. (Read-only)
-     *
-     */
-    get tileLoadedCount(): number {
-        return this.#tileStreamer?.tileLoadedCount ?? 0;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.tileUrlResolver = (row, col) => ({
-     *     heightUrl: `/assets/terrain/tiles/tile_${row}_${col}_height.png`,
-     *     normalUrl: `/assets/terrain/tiles/tile_${row}_${col}_normal.png`
-     * });
-     * ```
-     *
-     * [KO]
-     * 타일 그리드의 행/열 좌표 `(row, col)`를 기반으로 해당 타일의 높이맵 및 관련 텍스처 URL을 반환하는 해석 함수를 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the resolver callback function that returns texture URLs for a tile given its grid coordinates `(row, col)`.
-     *
-     */
-    get tileUrlResolver(): LandscapeTileUrlResolver | null {
-        return this.#tileStreamer.tileUrlResolver;
-    }
-
-    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
-        this.#tileStreamer.tileUrlResolver = resolver;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * const tiles = landscape.components;
-     * console.log(`총 타일 컴포넌트: ${tiles.length}`);
-     * ```
-     *
-     * [KO]
-     * 지형 공간 그리드에 등록된 모든 `LandscapeComponent` 인스턴스 배열을 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets the array of all `LandscapeComponent` instances registered in the landscape spatial grid. (Read-only)
-     *
-     */
-    get components(): readonly LandscapeComponent[] {
-        return this.#spatialGrid.flatCells;
-    }
-
-    /**
-     * @example
-     * ```ts
-     * console.log(landscape.lodDistancesSq);
-     * ```
-     *
-     * [KO]
-     * LOD 레벨 전환 기준 거리의 제곱값 배열을 가져옵니다. (읽기 전용)
-     *
-     * [EN]
-     * Gets the array of squared distance thresholds used for LOD level transitions. (Read-only)
-     *
-     */
-    get lodDistancesSq(): readonly number[] {
-        return this.#lodDistancesSq;
-    }
-
-    /**
-     * [KO] 월드 좌표 `(x, z)` 위치에서의 보간된 지형 표면 높이(Y값)를 반환합니다.
-     * [EN] Returns the interpolated terrain surface height (Y coordinate) at the specified world `(x, z)` position.
-     *
-     * ### Example
-     * ```typescript
-     * const groundY = landscape.getHeightAt(100, 250);
-     * character.y = groundY;
-     * ```
-     *
-     * @param x -
-     * [KO] 월드 X 좌표
-     * [EN] World X coordinate
-     * @param z -
-     * [KO] 월드 Z 좌표
-     * [EN] World Z coordinate
-     * @returns
-     * [KO] 보간된 지형 높이값 (Y)
-     * [EN] Interpolated terrain height value (Y)
-     */
-    getHeightAt(x: number, z: number): number {
-        return this.#tileStreamer.getHeightAt(x, z);
-    }
-
-    /**
-     * [KO] 새로운 텍스처 블렌딩 레이어(`LandscapeLayer`)를 생성하여 지형에 추가합니다.
-     * [EN] Creates and adds a new texture blending layer (`LandscapeLayer`) to the landscape.
-     *
-     * ### Example
-     * ```typescript
-     * const grassLayer = landscape.addLayer({
-     *     diffuseTexture: grassTexture,
-     *     normalTexture: grassNormalTexture,
-     *     uvScale: [40, 40]
-     * });
-     * ```
-     *
-     * @param options -
-     * [KO] 지형 레이어 생성 옵션
-     * [EN] Terrain layer creation options
-     * @returns
-     * [KO] 생성된 LandscapeLayer 인스턴스
-     * [EN] The created LandscapeLayer instance
-     */
-    addLayer(options: LandscapeLayerOptions): LandscapeLayer {
-        const layer = new LandscapeLayer(this.#redGPUContext, options);
-        this.#material.addLayer(layer);
-        return layer;
-    }
-
-    /**
-     * [KO] 지정된 레이어 인스턴스 또는 레이어 UUID를 전달받아 지형에서 제거합니다.
-     * [EN] Removes the specified layer instance or layer by UUID from the landscape.
-     *
-     * @param layer -
-     * [KO] 제거할 LandscapeLayer 인스턴스 또는 UUID 문자열
-     * [EN] LandscapeLayer instance or UUID string to remove
-     * @returns
-     * [KO] 제거 성공 여부
-     * [EN] Whether removal succeeded
-     */
-    removeLayer(layer: LandscapeLayer | string): boolean {
-        return this.#material.removeLayer(layer);
-    }
-
-    /**
-     * [KO] 지형에 등록된 모든 텍스처 레이어를 제거합니다.
-     * [EN] Clears all texture layers registered on the landscape.
-     */
-    clearLayers(): void {
-        this.#material.clearLayers();
-    }
-
-    /**
-     * @example
-     * ```ts
      * // 렌더 패스 인코더를 전달하여 지형 드로우 콜 기록
      * landscape.render(view, renderPassEncoder);
      * ```
@@ -1103,41 +1150,190 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    #bakeGlobalBaseToVHT(): void {
-        if (!this.#tileStreamer?.globalHeightTexture) return;
-
-        this.#tileStreamer.bakeGlobalBase();
-        this.#grassManager?.rebakeAll();
-    }
-
     /**
      * @example
      * ```ts
-     * if (landscape.isTileLoaded(0, 0)) {
-     *     console.log('타일 (0, 0) 로드 완료');
-     * }
+     * landscape.destroy();
      * ```
      *
      * [KO]
-     * 특정 행(row)과 열(col) 좌표의 지형 타일이 가상 텍스처 아틀라스에 완전히 로드되어 렌더링 가능한 상태인지 확인합니다.
+     * 지형 인스턴스와 관련된 모든 GPU 리소스(텍스처 아틀라스, 인스턴스 버퍼, 지오메트리, 파이프라인 캐시) 및 서브시스템 매니저를 해제하고 파기합니다.
      *
      * [EN]
-     * Checks whether the terrain tile at the specified row and column coordinates is fully loaded and ready for rendering in the virtual texture atlas.
+     * Releases and destroys all GPU resources (texture atlases, instance buffer, geometry, pipeline caches) and subsystem managers associated with this landscape instance.
      *
-     * @param row - 타일 그리드 행 인덱스 / Tile grid row index.
-     * @param col - 타일 그리드 열 인덱스 / Tile grid column index.
-     * @returns 로드 완료 여부 / Whether the tile is loaded.
      */
-    isTileLoaded(row: number, col: number): boolean {
-        return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
+    override destroy(): void {
+        super.destroy();
+        this.#debuggerManager?.destroy();
+        this.#foliageManager?.destroy?.();
+        this.#grassManager?.destroy?.();
+        this.#sharedGeometry?.destroy();
+        this.#gpuCuller?.destroy();
+        this.#tileStreamer?.destroy();
+
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+        }
+        this.#clearPipelineCaches();
     }
 
 
-    #clampComponentCount(val: number): number {
-        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
-        const maxTilesForHardware = Math.floor(maxTextureDim / 512);
-        const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
-        return Math.min(maxAllowed, Math.max(1, Math.round(val)));
+    // =========================================================================
+    // Internal APIs
+    // =========================================================================
+    /**
+     * @internal
+     */
+    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
+        return this.#tileStreamer?.getAtlasTexture(type) ?? null;
+    }
+
+
+    // =========================================================================
+    // Private Implementation Details
+    // =========================================================================
+    #initSystems(
+        redGPUContext: RedGPUContext,
+        componentCountX: number,
+        componentCountZ: number,
+        lodMaxLevel: number
+    ) {
+        this.#tileStreamer.setTerrainConfig(this.#heightScale);
+
+        const resourceManager = redGPUContext.resourceManager;
+        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
+        if (!vModule) {
+            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
+                code: landscapeVertexSource
+            });
+        }
+        this.#vertexShaderModule = vModule;
+
+        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
+        const tileStreamer = this.#tileStreamer;
+        if (tileStreamer?.vhtAtlasTexture && tileStreamer?.vntAtlasTexture) {
+            this.#instanceBuffer.updateBindGroup(
+                tileStreamer.vhtAtlasTexture.gpuTextureView,
+                tileStreamer.vntAtlasTexture.gpuTextureView,
+                tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
+                tileStreamer.vbtNormalAtlas?.gpuTextureView,
+                tileStreamer.vbtORMAtlas?.gpuTextureView
+            );
+        }
+
+        this.#rebuildLODStructures();
+        this.#rebuildTiles();
+    }
+
+    #rebuildTiles(): void {
+        const componentCountX = this.#spatialGrid.tileCountX;
+        const componentCountZ = this.#spatialGrid.tileCountZ;
+        const tileSizeX = this.#spatialGrid.tileSizeX;
+        const tileSizeZ = this.#spatialGrid.tileSizeZ;
+        const targetCount = componentCountX * componentCountZ;
+
+        if (this.#tileStreamer) {
+            this.#tileStreamer.resetTileState();
+        }
+        this.#sharedGeometry.updateTileSize(tileSizeX, tileSizeZ);
+        this.#updateLODDistances();
+        this.#clearPipelineCaches();
+
+        let needRebuildBindGroup = false;
+        if (this.#tileStreamer) {
+            const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
+            if (changed) {
+                this.#tileStreamer.setTerrainConfig(this.#heightScale);
+                this.#tileStreamer.resetTileState();
+                needRebuildBindGroup = true;
+            }
+        }
+
+        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.lodMaxLevel !== this.#lodMaxLevel) {
+            if (this.#instanceBuffer) {
+                this.#instanceBuffer.destroy();
+            }
+            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#lodMaxLevel);
+            needRebuildBindGroup = true;
+        }
+
+        if (needRebuildBindGroup && this.#tileStreamer?.vhtAtlasTexture && this.#tileStreamer?.vntAtlasTexture) {
+            this.#instanceBuffer.updateBindGroup(
+                this.#tileStreamer.vhtAtlasTexture.gpuTextureView,
+                this.#tileStreamer.vntAtlasTexture.gpuTextureView,
+                this.#tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
+                this.#tileStreamer.vbtNormalAtlas?.gpuTextureView,
+                this.#tileStreamer.vbtORMAtlas?.gpuTextureView
+            );
+            if (this.#tileStreamer?.globalHeightTexture) {
+                this.#bakeGlobalBaseToVHT();
+            }
+        }
+
+        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
+
+        this.#spatialGrid.rebuildTiles((comp, index) => {
+            this.#instanceBuffer.setStaticTileData(
+                index,
+                comp.worldX,
+                comp.worldZ,
+                0, 0, 0, 0.0
+            );
+        });
+
+        this.#instanceBuffer.uploadStaticTilesToGPU();
+        this.#updateLandscapeUniforms();
+
+        if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
+            this.#gpuCuller.updateBindGroup(
+                this.#instanceBuffer.allInputTilesBuffer,
+                this.#instanceBuffer.visibleTileIndicesBuffer,
+                this.#instanceBuffer.indirectDrawBuffer,
+                this.#lastHZBView,
+                this.#lastHZBSampler
+            );
+        }
+
+        this.#material?.requestVBTRebake(true);
+    }
+
+    #rebuildLODStructures(): void {
+        this.#lodColorsRGBA.length = 0;
+        this.#lodMultipliers.length = 0;
+
+        for (let i = 0; i < this.#lodMaxLevel; i++) {
+            this.#lodColorsRGBA.push(LANDSCAPE_DEFAULT_LOD_COLORS[i % LANDSCAPE_DEFAULT_LOD_COLORS.length] as [number, number, number, number]);
+        }
+
+        const multipliers = DEFAULT_LOD_MULTIPLIERS;
+        for (let i = 0; i < this.#lodMaxLevel - 1; i++) {
+            this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
+        }
+
+        this.#updateLODDistances();
+        this.#updateLandscapeUniforms();
+    }
+
+    #updateLODDistances(): void {
+        this.#lodDistancesSq.length = 0;
+        const tileSizeMax = Math.max(this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ);
+        const count = this.#lodMultipliers.length;
+
+        for (let i = 0; i < count; i++) {
+            const dist = tileSizeMax * this.#lodMultipliers[i];
+            this.#lodDistancesSq.push(dist * dist);
+        }
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
+        }
     }
 
     #updateLandscapeUniforms(): void {
@@ -1180,112 +1376,18 @@ export class Landscape extends Object3DContainer {
         this.#gpuCuller?.dispatchPass(computePass, totalComponents);
     };
 
-    #initSystems(
-        redGPUContext: RedGPUContext,
-        componentCountX: number,
-        componentCountZ: number,
-        lodMaxLevel: number
-    ) {
-        this.#tileStreamer.setTerrainConfig(this.#heightScale);
+    #bakeGlobalBaseToVHT(): void {
+        if (!this.#tileStreamer?.globalHeightTexture) return;
 
-        const resourceManager = redGPUContext.resourceManager;
-        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
-        if (!vModule) {
-            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
-                code: landscapeVertexSource
-            });
-        }
-        this.#vertexShaderModule = vModule;
-
-        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
-        const tileStreamer = this.#tileStreamer;
-        if (tileStreamer?.vhtAtlasTexture && tileStreamer?.vntAtlasTexture) {
-            this.#instanceBuffer.updateBindGroup(
-                tileStreamer.vhtAtlasTexture.gpuTextureView,
-                tileStreamer.vntAtlasTexture.gpuTextureView,
-                tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
-                tileStreamer.vbtNormalAtlas?.gpuTextureView,
-                tileStreamer.vbtORMAtlas?.gpuTextureView
-            );
-        }
-
-        this.#rebuildLODStructures();
-        this.#rebuildTiles();
+        this.#tileStreamer.bakeGlobalBase();
+        this.#grassManager?.rebakeAll();
     }
 
-    #updateLODDistances(): void {
-        this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ);
-        const count = this.#lodMultipliers.length;
-
-        for (let i = 0; i < count; i++) {
-            const dist = tileSizeMax * this.#lodMultipliers[i];
-            this.#lodDistancesSq.push(dist * dist);
-        }
-
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.destroy();
-     * ```
-     *
-     * [KO]
-     * 지형 인스턴스와 관련된 모든 GPU 리소스(텍스처 아틀라스, 인스턴스 버퍼, 지오메트리, 파이프라인 캐시) 및 서브시스템 매니저를 해제하고 파기합니다.
-     *
-     * [EN]
-     * Releases and destroys all GPU resources (texture atlases, instance buffer, geometry, pipeline caches) and subsystem managers associated with this landscape instance.
-     *
-     */
-    override destroy(): void {
-        super.destroy();
-        this.#debuggerManager?.destroy();
-        this.#foliageManager?.destroy?.();
-        this.#grassManager?.destroy?.();
-        this.#sharedGeometry?.destroy();
-        this.#gpuCuller?.destroy();
-        this.#tileStreamer?.destroy();
-
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-        }
-        this.#clearPipelineCaches();
-    }
-
-    #rebuildLODStructures(): void {
-        this.#lodColorsRGBA.length = 0;
-        this.#lodMultipliers.length = 0;
-
-        for (let i = 0; i < this.#lodMaxLevel; i++) {
-            this.#lodColorsRGBA.push(LANDSCAPE_DEFAULT_LOD_COLORS[i % LANDSCAPE_DEFAULT_LOD_COLORS.length] as [number, number, number, number]);
-        }
-
-        const multipliers = DEFAULT_LOD_MULTIPLIERS;
-        for (let i = 0; i < this.#lodMaxLevel - 1; i++) {
-            this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
-        }
-
-        this.#updateLODDistances();
-        this.#updateLandscapeUniforms();
-    }
-
-    #clearPipelineCaches(): void {
-        this.#renderPipelineCache.clear();
-        this.#cachedRenderPipeline = null;
-        this.#lastRenderTopology = '';
-        this.#lastRenderMaterialUUID = '';
-        this.#lastRenderVariantModule = null;
-        this.#lastRenderMsaaID = '';
+    #clampComponentCount(val: number): number {
+        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
+        const maxTilesForHardware = Math.floor(maxTextureDim / 512);
+        const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
+        return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
 
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
@@ -1376,77 +1478,16 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    #rebuildTiles(): void {
-        const componentCountX = this.#spatialGrid.tileCountX;
-        const componentCountZ = this.#spatialGrid.tileCountZ;
-        const tileSizeX = this.#spatialGrid.tileSizeX;
-        const tileSizeZ = this.#spatialGrid.tileSizeZ;
-        const targetCount = componentCountX * componentCountZ;
-
-        if (this.#tileStreamer) {
-            this.#tileStreamer.resetTileState();
-        }
-        this.#sharedGeometry.updateTileSize(tileSizeX, tileSizeZ);
-        this.#updateLODDistances();
-        this.#clearPipelineCaches();
-
-        let needRebuildBindGroup = false;
-        if (this.#tileStreamer) {
-            const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
-            if (changed) {
-                this.#tileStreamer.setTerrainConfig(this.#heightScale);
-                this.#tileStreamer.resetTileState();
-                needRebuildBindGroup = true;
-            }
-        }
-
-        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.lodMaxLevel !== this.#lodMaxLevel) {
-            if (this.#instanceBuffer) {
-                this.#instanceBuffer.destroy();
-            }
-            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#lodMaxLevel);
-            needRebuildBindGroup = true;
-        }
-
-        if (needRebuildBindGroup && this.#tileStreamer?.vhtAtlasTexture && this.#tileStreamer?.vntAtlasTexture) {
-            this.#instanceBuffer.updateBindGroup(
-                this.#tileStreamer.vhtAtlasTexture.gpuTextureView,
-                this.#tileStreamer.vntAtlasTexture.gpuTextureView,
-                this.#tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
-                this.#tileStreamer.vbtNormalAtlas?.gpuTextureView,
-                this.#tileStreamer.vbtORMAtlas?.gpuTextureView
-            );
-            if (this.#tileStreamer?.globalHeightTexture) {
-                this.#bakeGlobalBaseToVHT();
-            }
-        }
-
-        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
-
-        this.#spatialGrid.rebuildTiles((comp, index) => {
-            this.#instanceBuffer.setStaticTileData(
-                index,
-                comp.worldX,
-                comp.worldZ,
-                0, 0, 0, 0.0
-            );
-        });
-
-        this.#instanceBuffer.uploadStaticTilesToGPU();
-        this.#updateLandscapeUniforms();
-
-        if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
-            this.#gpuCuller.updateBindGroup(
-                this.#instanceBuffer.allInputTilesBuffer,
-                this.#instanceBuffer.visibleTileIndicesBuffer,
-                this.#instanceBuffer.indirectDrawBuffer,
-                this.#lastHZBView,
-                this.#lastHZBSampler
-            );
-        }
-
-        this.#material?.requestVBTRebake(true);
+    #clearPipelineCaches(): void {
+        this.#renderPipelineCache.clear();
+        this.#cachedRenderPipeline = null;
+        this.#lastRenderTopology = '';
+        this.#lastRenderMaterialUUID = '';
+        this.#lastRenderVariantModule = null;
+        this.#lastRenderMsaaID = '';
     }
+
+
 }
 
 Object.freeze(Landscape);
