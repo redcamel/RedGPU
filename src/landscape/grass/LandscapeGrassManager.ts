@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Landscape from "../Landscape";
+import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeGrass, {LandscapeGrassOptions} from "./LandscapeGrass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
@@ -59,6 +60,7 @@ export class LandscapeGrassManager {
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape;
+    #tileStreamer: LandscapeTileStreamer;
     #enabled: boolean = true;
     #streamingRadius: number = LandscapeGrassManager.DEFAULT_STREAMING_RADIUS;
 
@@ -121,8 +123,9 @@ export class LandscapeGrassManager {
 
     #prngState: number = 12345;
 
-    constructor(landscape: Landscape) {
+    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer) {
         this.#landscape = landscape;
+        this.#tileStreamer = tileStreamer;
         this.#redGPUContext = landscape.redGPUContext;
 
         this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
@@ -441,7 +444,7 @@ export class LandscapeGrassManager {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
+        const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
         for (const type of this.#grassTypes) {
@@ -839,8 +842,8 @@ export class LandscapeGrassManager {
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         if (this.#baker.hasPendingTasks) {
-            const vhtAtlas = this.#landscape.getInternalAtlasTexture('vht');
-            const vbtAtlas = this.#landscape.getInternalAtlasTexture('vbtBaseColor');
+            const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
+            const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
             const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
 
             this.#baker.dispatchPass(

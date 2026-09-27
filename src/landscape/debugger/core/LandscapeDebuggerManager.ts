@@ -1,4 +1,5 @@
 import Landscape from "../../Landscape";
+import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
 import LandscapeSpatialGridDebugger from "../spatialGrid/LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "../vht/LandscapeVHTDebugger";
 import LandscapeVNTDebugger from "../vnt/LandscapeVNTDebugger";
@@ -25,6 +26,7 @@ export interface LandscapeDebuggerManagerOptions {
 
 export class LandscapeDebuggerManager {
     #landscape: Landscape;
+    #tileStreamer: LandscapeTileStreamer;
 
     #spatialGridDebugger: LandscapeSpatialGridDebugger | null = null;
     #vhtDebugger: LandscapeVHTDebugger | null = null;
@@ -45,8 +47,9 @@ export class LandscapeDebuggerManager {
     #landscapeDebugMode: number = 0;
     #onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
 
-    constructor(landscape: Landscape, options?: LandscapeDebuggerManagerOptions) {
+    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: LandscapeDebuggerManagerOptions) {
         this.#landscape = landscape;
+        this.#tileStreamer = tileStreamer;
         this.#onDebugPropertyChange = options?.onDebugPropertyChange;
 
         if (options?.spatialGrid) this.spatialGrid = true;
@@ -168,7 +171,7 @@ export class LandscapeDebuggerManager {
     set vht(val: boolean) {
         this.#enableVHT = val;
         if (val && !this.#vhtDebugger) {
-            this.#vhtDebugger = new LandscapeVHTDebugger(this.#landscape, null, {
+            this.#vhtDebugger = new LandscapeVHTDebugger(this.#landscape, this.#tileStreamer, null, {
                 width: 100,
                 height: 100,
                 left: 122,
@@ -187,7 +190,7 @@ export class LandscapeDebuggerManager {
     set vnt(val: boolean) {
         this.#enableVNT = val;
         if (val && !this.#vntDebugger) {
-            this.#vntDebugger = new LandscapeVNTDebugger(this.#landscape, null, {
+            this.#vntDebugger = new LandscapeVNTDebugger(this.#landscape, this.#tileStreamer, null, {
                 width: 100,
                 height: 100,
                 left: 232,
@@ -206,7 +209,7 @@ export class LandscapeDebuggerManager {
     set vbt(val: boolean) {
         this.#enableVBT = val;
         if (val && !this.#vbtDebugger) {
-            this.#vbtDebugger = new LandscapeVBTDebugger(this.#landscape, null, {
+            this.#vbtDebugger = new LandscapeVBTDebugger(this.#landscape, this.#tileStreamer, null, {
                 width: 100,
                 height: 100,
                 left: 342,
@@ -233,7 +236,7 @@ export class LandscapeDebuggerManager {
     set vbtNormal(val: boolean) {
         this.#enableVBTNormal = val;
         if (val && !this.#vbtNormalDebugger) {
-            this.#vbtNormalDebugger = new LandscapeVBTNormalDebugger(this.#landscape, null, {
+            this.#vbtNormalDebugger = new LandscapeVBTNormalDebugger(this.#landscape, this.#tileStreamer, null, {
                 width: 100,
                 height: 100,
                 left: 452,
@@ -252,7 +255,7 @@ export class LandscapeDebuggerManager {
     set vbtORM(val: boolean) {
         this.#enableVBTORM = val;
         if (val && !this.#vbtORMDebugger) {
-            this.#vbtORMDebugger = new LandscapeVBTORMDebugger(this.#landscape, null, {
+            this.#vbtORMDebugger = new LandscapeVBTORMDebugger(this.#landscape, this.#tileStreamer, null, {
                 width: 100,
                 height: 100,
                 left: 562,

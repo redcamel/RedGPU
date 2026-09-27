@@ -1,11 +1,13 @@
 import ALandscapeTextureDebugger from "../core/ALandscapeTextureDebugger";
 import Landscape from "../../Landscape";
+import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
 import {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
 import vntDebuggerWGSL from "./shader/vntDebugger.wgsl";
 
 export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
     constructor(
         landscape: Landscape,
+        tileStreamer?: LandscapeTileStreamer | null,
         cameraOrOptions?: any,
         options?: ALandscapeDebuggerOptions
     ) {
@@ -15,11 +17,12 @@ export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
         };
         super(
             landscape,
+            tileStreamer,
             cameraOrOptions,
             defaultOptions,
             vntDebuggerWGSL,
             'LandscapeVNTDebuggerShaderModule',
-            (l) => l.getInternalAtlasTexture('vnt'),
+            (l, ts) => ts?.getAtlasTexture('vnt') ?? null,
             {r: 0.1, g: 0.1, b: 0.1, a: 1.0}
         );
     }

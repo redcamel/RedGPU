@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import type Landscape from "../Landscape";
+import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import type {LandscapeFoliageOptions} from "./LandscapeFoliage";
 import LandscapeFoliage from "./LandscapeFoliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
@@ -16,6 +17,7 @@ class LandscapeFoliageManager {
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
+    #tileStreamer: LandscapeTileStreamer;
 
     #megaBuffer: FoliageMegaBuffer;
     #foliageTypes: Map<string, LandscapeFoliage> = new Map();
@@ -39,8 +41,9 @@ class LandscapeFoliageManager {
     #windFrequency: number = 0.08;
     #windFlutterStrength: number = 0.5;
 
-    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
+    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, onUniformUpdateNeeded?: () => void) {
         this.#landscape = landscape;
+        this.#tileStreamer = tileStreamer;
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
         this.#spatialGrid = new LandscapeFoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
@@ -81,7 +84,7 @@ class LandscapeFoliageManager {
         this.#megaBuffer = new FoliageMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
-        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer);
+        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markShadowBundleDirty();

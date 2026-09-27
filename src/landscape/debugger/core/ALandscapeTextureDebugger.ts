@@ -1,10 +1,11 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../../Landscape";
+import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
-type TextureGetter = (landscape: Landscape) => {
+type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileStreamer | null) => {
     gpuTexture?: GPUTexture | null;
     gpuTextureView?: GPUTextureView | null;
 } | null;
@@ -16,6 +17,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
     #lastBoundTexture: GPUTexture | null = null;
+    #tileStreamer: LandscapeTileStreamer | null = null;
 
     #shaderCode: string;
     #shaderModuleName: string;
@@ -24,6 +26,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
 
     constructor(
         landscape: Landscape,
+        tileStreamer: LandscapeTileStreamer | null | undefined,
         cameraOrOptions: any,
         options: ALandscapeDebuggerOptions | undefined,
         shaderCode: string,
@@ -32,7 +35,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         clearColor: GPUColorDict = {r: 0.06, g: 0.09, b: 0.16, a: 1.0}
     ) {
         super(landscape, cameraOrOptions, options);
-
+        this.#tileStreamer = tileStreamer || null;
         this.#shaderCode = shaderCode;
         this.#shaderModuleName = shaderModuleName;
         this.#textureGetter = textureGetter;
@@ -48,7 +51,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         const gpuDevice = redGPUContext?.gpuDevice;
         if (!gpuDevice) return;
 
-        const targetTexture = this.#textureGetter(this.landscape);
+        const targetTexture = this.#textureGetter(this.landscape, this.#tileStreamer);
         if (!targetTexture || !targetTexture.gpuTexture || !targetTexture.gpuTextureView) return;
 
         if ((this.#lastBoundTexture !== targetTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout) {

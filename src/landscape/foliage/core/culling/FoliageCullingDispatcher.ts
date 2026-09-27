@@ -1,6 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import type Landscape from "../../../Landscape";
+import type LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import type LandscapeFoliage from "../../LandscapeFoliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
@@ -42,13 +43,15 @@ class FoliageCullingDispatcher {
     #lastHZBSampler: GPUSampler | null = null;
 
     #landscapeRef: Landscape | null = null;
+    #tileStreamer: LandscapeTileStreamer | null = null;
 
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
 
-    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null) {
+    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
         this.#redGPUContext = redGPUContext;
         this.#megaBuffer = megaBuffer || null;
+        this.#tileStreamer = tileStreamer || null;
         this.#baker = new FoliageBaker(this.#redGPUContext);
         this.#initComputePipeline();
     }
@@ -174,7 +177,7 @@ class FoliageCullingDispatcher {
 
         const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
         const heightScale = landscape?.heightScale ?? 600.0;
-        const hasVHT = !!(landscape?.getInternalAtlasTexture('vht')?.gpuTexture);
+        const hasVHT = !!(this.#tileStreamer?.getAtlasTexture('vht')?.gpuTexture);
 
         const fov = camera?.fov ?? 60.0;
         if (fov !== this.#lastFOV) {
@@ -325,9 +328,9 @@ class FoliageCullingDispatcher {
         if (!pipeline || !bindGroupLayout) return;
 
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
-            const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
+            const vhtAtlasTexture = this.#tileStreamer?.getAtlasTexture('vht');
             const vhtView = vhtAtlasTexture?.gpuTextureView;
-            const vbtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vbtBaseColor');
+            const vbtAtlasTexture = this.#tileStreamer?.getAtlasTexture('vbtBaseColor');
             const vbtView = vbtAtlasTexture?.gpuTextureView;
             const worldSizeX = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[0] : 8000.0;
             const worldSizeZ = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[1] : 8000.0;

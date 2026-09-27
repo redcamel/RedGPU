@@ -10,7 +10,6 @@ import LandscapeLayer, {LandscapeLayerOptions} from "./core/material/LandscapeLa
 import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
-import DirectTexture from "../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
 import Object3DContainer from "../display/mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
@@ -200,10 +199,10 @@ export class Landscape extends Object3DContainer {
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
-        this.#foliageManager = new LandscapeFoliageManager(this, () => {
+        this.#foliageManager = new LandscapeFoliageManager(this, this.#tileStreamer, () => {
             this.#updateLandscapeUniforms();
         });
-        this.#grassManager = new LandscapeGrassManager(this);
+        this.#grassManager = new LandscapeGrassManager(this, this.#tileStreamer);
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
             this.#grassManager?.handleTileLoaded(comp);
@@ -211,7 +210,7 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
             this.#grassManager?.rebakeAll();
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this, {
+        this.#debuggerManager = new LandscapeDebuggerManager(this, this.#tileStreamer, {
             onDebugPropertyChange: (key) => {
                 if (key === 'debugMode' || key === 'lodColoration') {
                     this.#updateLandscapeUniforms();
@@ -1176,17 +1175,6 @@ export class Landscape extends Object3DContainer {
             this.#instanceBuffer.destroy();
         }
         this.#clearPipelineCaches();
-    }
-
-
-    // =========================================================================
-    // Internal APIs
-    // =========================================================================
-    /**
-     * @internal
-     */
-    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
-        return this.#tileStreamer?.getAtlasTexture(type) ?? null;
     }
 
 
