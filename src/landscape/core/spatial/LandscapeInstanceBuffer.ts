@@ -112,8 +112,6 @@ export class LandscapeInstanceBuffer {
         baseQuads: number,
         vhtTextureWidth: number,
         vhtTextureHeight: number,
-        lodFadeStartRatio: number,
-        lodGeomorphStartRatio: number,
         lodColorsRGBA: [number, number, number, number][],
         lodDistancesSq: number[],
         tanHalfFOV: number = 1.0,
@@ -147,8 +145,7 @@ export class LandscapeInstanceBuffer {
 
         f32[8] = vhtTextureWidth;
         f32[9] = vhtTextureHeight;
-        f32[10] = lodFadeStartRatio;
-        f32[11] = lodGeomorphStartRatio;
+        // f32[10], f32[11] are reserved padding for 16-byte alignment of lodColors
 
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {

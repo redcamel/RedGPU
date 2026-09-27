@@ -112,8 +112,6 @@ export class Landscape extends Object3DContainer {
 
     #wireframe: boolean = false;
     #lastTanHalfFOV: number = 1.0;
-    #lodFadeStartRatio: number = 0.7;
-    #lodGeomorphStartRatio: number = 0.85;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
     #vhtAtlasTexture: DirectTexture | null = null;
@@ -206,8 +204,6 @@ export class Landscape extends Object3DContainer {
         this.#wireframe = false;
         this.#lodColoration = false;
         this.#lodMetric = 'screenSize';
-        this.#lodFadeStartRatio = 0.7;
-        this.#lodGeomorphStartRatio = 0.85;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
         this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
         this.#heightScale = 500.0;
@@ -966,58 +962,6 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * landscape.lodFadeStartRatio = 0.7;
-     * ```
-     *
-     * [KO]
-     * LOD 전환 시 디더링(Dithered cross-fade) 보간이 시작되는 거리 비율(0.0 ~ 0.99)을 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the distance ratio (0.0 to 0.99) at which dithered cross-fade transitions begin between LOD levels.
-     *
-     * @defaultValue 0.75
-     */
-    get lodFadeStartRatio(): number {
-        return this.#lodFadeStartRatio;
-    }
-
-    set lodFadeStartRatio(value: number) {
-        const clamped = Math.max(0.0, Math.min(0.99, value));
-        if (this.#lodFadeStartRatio !== clamped) {
-            this.#lodFadeStartRatio = clamped;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
-     * landscape.lodGeomorphStartRatio = 0.7;
-     * ```
-     *
-     * [KO]
-     * LOD 지오모핑(Geomorphing) 보간 시작 비율(0.0 ~ 0.99)을 설정하거나 가져옵니다.
-     *
-     * [EN]
-     * Gets or sets the LOD geomorphing interpolation start ratio (0.0 to 0.99).
-     *
-     * @defaultValue 0.7
-     */
-    get lodGeomorphStartRatio(): number {
-        return this.#lodGeomorphStartRatio;
-    }
-
-    set lodGeomorphStartRatio(value: number) {
-        const clamped = Math.max(0.0, Math.min(0.99, value));
-        if (this.#lodGeomorphStartRatio !== clamped) {
-            this.#lodGeomorphStartRatio = clamped;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /**
-     * @example
-     * ```ts
      * // 타일 스트리밍 로딩 반경을 3000으로 확장
      * landscape.loadingRadius = 3000.0;
      * ```
@@ -1497,8 +1441,6 @@ export class Landscape extends Object3DContainer {
             this.#componentSizeQuads,
             vhtW,
             vhtH,
-            this.#lodFadeStartRatio,
-            this.#lodGeomorphStartRatio,
             this.#lodColorsRGBA,
             this.#lodDistancesSq,
             this.#lastTanHalfFOV,

@@ -18,8 +18,7 @@ struct LandscapeUniforms {
     tileSizeZ: f32,
     baseQuads: f32,
     vhtTextureSize: vec2<f32>,
-    lodFadeStartRatio: f32,
-    lodGeomorphStartRatio: f32,
+    _reserved: vec2<f32>,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
     tanHalfFOV: f32,
@@ -41,6 +40,8 @@ struct LandscapeUniforms {
 @group(1) @binding(2) var heightMapSampler: sampler;
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(5) var<uniform> landscapeUniforms: LandscapeUniforms;
+
+const LOD_GEOMORPH_START_RATIO: f32 = 0.7;
 
 struct InputData {
     @location(0) position: vec3<f32>,
@@ -110,7 +111,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
             let morphEndDist = max(prevDist + 1.0, nextDist - tileRadius);
             let morphRange = max(1.0, morphEndDist - prevDist);
 
-            let morphRatio = clamp(landscapeUniforms.lodGeomorphStartRatio, 0.01, 0.99);
+            let morphRatio = LOD_GEOMORPH_START_RATIO;
             let morphStartDist = prevDist + morphRange * morphRatio;
 
             let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
