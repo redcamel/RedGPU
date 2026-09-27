@@ -23,8 +23,7 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [16000, 16000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [16000, 16000]);
         landscape.heightScale = 1500;
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
         landscape.tileUrlResolver = (row, col) => {

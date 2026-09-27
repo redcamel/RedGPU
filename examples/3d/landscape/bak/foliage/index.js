@@ -55,8 +55,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 600;
 
 
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [16000, 16000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [16000, 16000]);
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
         landscape.maxLODLevel = 5;

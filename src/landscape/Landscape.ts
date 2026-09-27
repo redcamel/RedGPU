@@ -49,10 +49,8 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  *
  * ### Example
  * ```typescript
- * const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
- *
- * // 지형 크기 및 높이 스케일 설정 / Set terrain dimensions and height scale
- * landscape.worldSize = [8000, 8000];
+ * // 지형 크기 지정 생성 (기본값: 2000) / Create landscape with world size (default: 2000)
+ * const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 2000);
  * landscape.heightScale = 600;
  *
  * // 글로벌 16비트 높이맵 지정 / Assign 16-bit global heightmap
@@ -93,12 +91,12 @@ export class Landscape extends Object3DContainer {
     #lodColorsRGBA: [number, number, number, number][] = [];
     #material: LandscapeMaterial;
     #debugMode: number = LANDSCAPE_DEBUG_MODE.NONE;
-    #worldSizeX: number = 2048.0;
-    #worldSizeZ: number = 2048.0;
-    #componentCountX: number = 4;
-    #componentCountZ: number = 4;
-    #tileSizeX: number = 512.0;
-    #tileSizeZ: number = 512.0;
+    #worldSizeX: number = 2000.0;
+    #worldSizeZ: number = 2000.0;
+    #componentCountX: number = 16;
+    #componentCountZ: number = 16;
+    #tileSizeX: number = 125.0;
+    #tileSizeZ: number = 125.0;
     #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #receiveShadow: boolean = true;
     #castHeightmapShadow: boolean = true;
@@ -151,19 +149,36 @@ export class Landscape extends Object3DContainer {
      *
      * ### Example
      * ```typescript
+     * // 기본 2000m x 2000m 크기로 생성 / Create with default 2000m x 2000m dimensions
      * const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
+     *
+     * // 사용자 정의 월드 크기 지정 / Specify custom world dimensions
+     * const landscapeLarge = new RedGPU.Landscape.Landscape(redGPUContext, 8000);
      * ```
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance
+     * @param worldSize -
+     * [KO] 지형의 월드 가로/세로 크기 (단일 숫자 또는 `[sizeX, sizeZ]`, 기본값: 2000)
+     * [EN] World dimensions of the landscape (single number or `[sizeX, sizeZ]`, default: 2000)
      */
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, worldSize: number | [number, number] = 2000) {
         super();
         this.#redGPUContext = redGPUContext;
 
-        const worldSizeX = 8000;
-        const worldSizeZ = 8000;
+        let wsX = 2000;
+        let wsZ = 2000;
+        if (Array.isArray(worldSize)) {
+            wsX = worldSize[0];
+            wsZ = worldSize[1];
+        } else if (typeof worldSize === 'number') {
+            wsX = worldSize;
+            wsZ = worldSize;
+        }
+
+        const worldSizeX = wsX;
+        const worldSizeZ = wsZ;
         const componentCountX = 16;
         const componentCountZ = 16;
         const tileSizeX = worldSizeX / componentCountX;
@@ -365,6 +380,8 @@ export class Landscape extends Object3DContainer {
     /**
      * [KO] 지형의 월드 크기 `[sizeX, sizeZ]`를 튜플로 반환합니다.
      * [EN] Returns the world dimensions `[sizeX, sizeZ]` of the landscape as a tuple.
+     *
+     * @defaultValue [2000, 2000]
      */
     get worldSize(): readonly [number, number] {
         return this.#worldSizeTuple;

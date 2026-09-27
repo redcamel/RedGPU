@@ -50,8 +50,7 @@ RedGPU.init(
         directionalShadowManager.pcssLightSize = 1.2;
 
         // 4. 지형 (Landscape)
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [16000, 16000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [16000, 16000]);
         landscape.heightScale = 300;
         landscape.loadingRadius = 3000;
         landscape.baseColor.setColorByHEX('#2f6834');

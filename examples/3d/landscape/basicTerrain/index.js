@@ -40,8 +40,7 @@ RedGPU.init(
 
         // [KO] 랜드스케이프 지형 생성 (타일 스트리밍 전 단일 16비트 글로벌 하이트맵 기반 거시 지형 베이스)
         // [EN] Create landscape terrain (Macro base terrain using a single 16-bit global heightmap before tile streaming)
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [8000, 8000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
         landscape.baseColor.setColorByHEX('#4a7c59');
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';

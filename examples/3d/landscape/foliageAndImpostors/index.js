@@ -49,8 +49,7 @@ RedGPU.init(
         directionalShadowManager.maxShadowDistance = 400;
 
         // 5. 8km x 8km 랜드스케이프 지형 및 256 타일 스트리밍
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [8000, 8000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';

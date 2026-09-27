@@ -42,8 +42,7 @@ RedGPU.init(
 
         // [KO] 8km x 8km 대규모 랜드스케이프 지형 및 256개 타일 스트리밍 구성
         // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
-        landscape.worldSize = [8000, 8000];
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
         landscape.loadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
