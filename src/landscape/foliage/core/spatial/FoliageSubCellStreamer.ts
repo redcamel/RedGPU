@@ -1,4 +1,4 @@
-import type LandscapeFoliage from "../../LandscapeFoliage";
+import type LandscapeFoliage from "../LandscapeFoliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
 class FoliageSubCellStreamer {

@@ -1,8 +1,8 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import Geometry from "../../geometry/Geometry";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import Mesh from "../../display/mesh/Mesh";
-import Primitive from "../../primitive/core/Primitive";
+import RedGPUContext from "../../../context/RedGPUContext";
+import Geometry from "../../../geometry/Geometry";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import Mesh from "../../../display/mesh/Mesh";
+import Primitive from "../../../primitive/core/Primitive";
 
 export interface GrassLODConfig {
     mesh: Mesh;

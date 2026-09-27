@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import type Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
-import type {LandscapeFoliageOptions} from "./LandscapeFoliage";
-import LandscapeFoliage from "./LandscapeFoliage";
+import type {LandscapeFoliageOptions} from "./core/LandscapeFoliage";
+import LandscapeFoliage from "./core/LandscapeFoliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import FoliageSubMesh from "../../FoliageSubMesh";
-import LandscapeFoliage from "../../LandscapeFoliage";
+import FoliageSubMesh from "../submesh/FoliageSubMesh";
+import LandscapeFoliage from "../LandscapeFoliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";

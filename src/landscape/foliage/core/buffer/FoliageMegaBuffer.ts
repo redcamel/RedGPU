@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import type {FoliageLODInfo} from "../../LandscapeFoliage";
-import type FoliageSubMesh from "../../FoliageSubMesh";
+import type {FoliageLODInfo} from "../LandscapeFoliage";
+import type FoliageSubMesh from "../submesh/FoliageSubMesh";
 import type FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 
 export interface FoliageTypeAllocation {
@@ -20,7 +20,7 @@ export interface CascadeCullingParam {
     frustumPlanes: number[][] | null;
 }
 
-class FoliageMegaBuffer {
+export class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 8;
     static readonly #STRIDE_BYTES: number = 8 * 4;
     static readonly #MAX_TYPES: number = 64;

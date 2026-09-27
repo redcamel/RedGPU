@@ -9,9 +9,9 @@ import VertexInterleaveType from "../../../../resources/buffer/vertexBuffer/Vert
 import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
-import FoliageSubMesh from "../../FoliageSubMesh";
+import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
-import type {FoliageLODInfo, LandscapeFoliageOptions} from "../../LandscapeFoliage";
+import type {FoliageLODInfo, LandscapeFoliageOptions} from "../LandscapeFoliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(

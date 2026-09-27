@@ -1,13 +1,13 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
-import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
-import FoliageSubCellPartitioner from "./core/spatial/FoliageSubCellPartitioner";
-import FoliageSubCellStreamer from "./core/spatial/FoliageSubCellStreamer";
+import RedGPUContext from "../../../context/RedGPUContext";
+import Mesh from "../../../display/mesh/Mesh";
+import FoliageSubMeshAssembler from "./assembler/FoliageSubMeshAssembler";
+import FoliageSubCellPartitioner from "./spatial/FoliageSubCellPartitioner";
+import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
 
-import FoliageSubMesh from "./FoliageSubMesh";
-import FoliageShadowMergedSubMesh from "./core/submesh/FoliageShadowMergedSubMesh";
-import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
-import type FoliageBaker from "./core/baking/FoliageBaker";
+import FoliageSubMesh from "./submesh/FoliageSubMesh";
+import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
+import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
+import type FoliageBaker from "./baking/FoliageBaker";
 
 export interface FoliageLODConfig {
 

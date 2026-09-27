@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
-import LandscapeGrass, {LandscapeGrassOptions} from "./LandscapeGrass";
+import LandscapeGrass, {LandscapeGrassOptions} from "./core/LandscapeGrass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";

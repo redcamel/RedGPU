@@ -5,7 +5,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
-type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileStreamer | null) => {
+export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileStreamer | null) => {
     gpuTexture?: GPUTexture | null;
     gpuTextureView?: GPUTextureView | null;
 } | null;

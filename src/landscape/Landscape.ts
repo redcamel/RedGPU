@@ -16,7 +16,7 @@ import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import LandscapeGrassManager from "./grass/LandscapeGrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../math/computeViewFrustumPlanes";
-import LandscapeDebuggerManager from "./debugger";
+import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
 

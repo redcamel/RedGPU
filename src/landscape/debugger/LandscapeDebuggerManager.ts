@@ -1,11 +1,11 @@
-import Landscape from "../../Landscape";
-import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
-import LandscapeSpatialGridDebugger from "../spatialGrid/LandscapeSpatialGridDebugger";
-import LandscapeVHTDebugger from "../vht/LandscapeVHTDebugger";
-import LandscapeVNTDebugger from "../vnt/LandscapeVNTDebugger";
-import LandscapeVBTDebugger from "../vbt/LandscapeVBTDebugger";
-import LandscapeVBTNormalDebugger from "../vbt/LandscapeVBTNormalDebugger";
-import LandscapeVBTORMDebugger from "../vbt/LandscapeVBTORMDebugger";
+import Landscape from "../Landscape";
+import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
+import LandscapeSpatialGridDebugger from "./core/spatialGrid/LandscapeSpatialGridDebugger";
+import LandscapeVHTDebugger from "./core/vht/LandscapeVHTDebugger";
+import LandscapeVNTDebugger from "./core/vnt/LandscapeVNTDebugger";
+import LandscapeVBTDebugger from "./core/vbt/LandscapeVBTDebugger";
+import LandscapeVBTNormalDebugger from "./core/vbt/LandscapeVBTNormalDebugger";
+import LandscapeVBTORMDebugger from "./core/vbt/LandscapeVBTORMDebugger";
 
 export type LandscapeDebugPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 export type LandscapeDebugPropertyChangeHandler = (key: LandscapeDebugPropertyKey, value: boolean | number) => void;

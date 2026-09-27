@@ -1,7 +1,7 @@
-import ALandscapeTextureDebugger from "../core/ALandscapeTextureDebugger";
-import Landscape from "../../Landscape";
-import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
-import {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
+import ALandscapeTextureDebugger from "../ALandscapeTextureDebugger";
+import Landscape from "../../../Landscape";
+import LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
+import {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
 import vntDebuggerWGSL from "./shader/vntDebugger.wgsl";
 
 export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {

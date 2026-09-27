@@ -37,22 +37,8 @@ export {
     LANDSCAPE_DEBUG_MODE
 };
 
-// 3. User-facing Configuration Types
+// 3. User-facing Configuration Types (Terrain Layer System)
 export type {
     LandscapeLayerOptions,
     LandscapeWeightMapChannel
 } from "./core/material/LandscapeLayer";
-
-export type {
-    LandscapeFoliageOptions,
-    FoliageLODConfig
-} from "./foliage/LandscapeFoliage";
-
-export type {
-    LandscapeGrassOptions,
-    GrassLODConfig
-} from "./grass/LandscapeGrass";
-
-export type {
-    LandscapeDebuggerManagerOptions
-} from "./debugger";

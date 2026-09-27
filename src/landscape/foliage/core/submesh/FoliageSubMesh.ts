@@ -1,8 +1,8 @@
 import {mat4} from "gl-matrix";
-import Mesh from "../../display/mesh/Mesh";
-import Geometry from "../../geometry/Geometry";
-import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
-import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
+import Mesh from "../../../../display/mesh/Mesh";
+import Geometry from "../../../../geometry/Geometry";
+import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
+import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 
 export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
@@ -33,7 +33,7 @@ export interface FoliageSubMeshInitOptions {
     indirectOffsetBytes?: number;
 }
 
-class FoliageSubMesh {
+export class FoliageSubMesh {
     static readonly #singleFloatBuffer: Float32Array = new Float32Array(1);
     static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
     static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageSubMesh.#windFloatBuffer.buffer);
