@@ -21,9 +21,6 @@ const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTE
  *
  * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
  *
- * @see
- * [KO] 아래는 Sampler의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sampler.
  * @see [Sampler Combination example](/RedGPU/examples/3d/texture/samplerCombination/)
  * @see [Sampler AddressMode example](/RedGPU/examples/3d/texture/samplerAddressMode/)
  *

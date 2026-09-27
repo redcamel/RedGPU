@@ -69,15 +69,16 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * scene.addLandscape(landscape);
  * ```
  *
- * @see
- * [KO] 아래는 Landscape의 구조와 동작을 이해하는 데 도움이 되는 공식 예제 목록입니다.
- * [EN] Below is a list of official examples to help understand the structure and operation of Landscape.
+ * [KO] 아래는 Landscape의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of Landscape.
  * @see [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
  * @see [Tile Streaming & Continuous LOD](/RedGPU/examples/3d/landscape/tileStreaming/)
  * @see [Multi-Layer Splatting](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
  * @see [Procedural Grass Field](/RedGPU/examples/3d/landscape/proceduralGrass/)
  * @see [Foliage & Impostors](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @see [Landscape & Water System](/RedGPU/examples/3d/landscape/landscapeAndWater/)
+ *
+ * @category Landscape
  */
 export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
@@ -577,28 +578,6 @@ export class Landscape extends Object3DContainer {
      */
     get material(): LandscapeMaterial {
         return this.#material;
-    }
-
-    /**
-     * [KO] 지형 렌더링 재질을 교체합니다.
-     * [EN] Replaces the terrain rendering material.
-     *
-     * @param val -
-     * [KO] 새 LandscapeMaterial 인스턴스
-     * [EN] New LandscapeMaterial instance
-     */
-    set material(val: LandscapeMaterial) {
-        if (this.#material !== val) {
-            this.#material = val;
-            this.#tileStreamer?.setMaterial(val);
-            if (val) {
-                val.setOnRebakeVBTRequested(() => {
-                    this.#tileStreamer?.rebakeAllLoadedVBT();
-                    this.#grassManager?.rebakeAll();
-                });
-            }
-            this.#clearPipelineCaches();
-        }
     }
 
     /**
