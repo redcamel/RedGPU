@@ -42,7 +42,7 @@ RedGPU.init(
         landscape.worldSize = [400, 400];
         landscape.componentCount = [16, 16];
         landscape.heightScale = 10.0; // [지형 최대 높이 10m]
-        landscape.maxLODLevel = 4;
+        landscape.lodMaxLevel = 4;
         landscape.tileLoadingRadius = 300;
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 

@@ -58,7 +58,7 @@ RedGPU.init(
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [16000, 16000]);
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
-        landscape.maxLODLevel = 5;
+        landscape.lodMaxLevel = 5;
         landscape.lod0SizeQuads = RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
         landscape.tileLoadingRadius = 4000;
 

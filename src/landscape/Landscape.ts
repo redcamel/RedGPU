@@ -125,7 +125,7 @@ export class Landscape extends Object3DContainer {
     #globalHeightmapUrl: string = '';
     #globalHeightTexture: GPUTexture | null = null;
 
-    #maxLODLevel: number;
+    #lodMaxLevel: number;
 
     #worldSizeTuple: [number, number] = [0, 0];
     #componentCountTuple: [number, number] = [0, 0];
@@ -183,10 +183,10 @@ export class Landscape extends Object3DContainer {
         const tileSizeZ = worldSizeZ / componentCountZ;
         const componentSizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
         const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
-        const maxLODLevel = 5;
+        const lodMaxLevel = 5;
 
         const material = new LandscapeMaterial(redGPUContext);
-        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel, lod0SizeQuads);
+        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, lodMaxLevel, lod0SizeQuads);
 
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
@@ -200,7 +200,7 @@ export class Landscape extends Object3DContainer {
         this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = lod0SizeQuads;
-        this.#maxLODLevel = maxLODLevel;
+        this.#lodMaxLevel = lodMaxLevel;
         this.#wireframe = false;
         this.#lodColoration = false;
         this.#lodMetric = 'screenSize';
@@ -278,7 +278,7 @@ export class Landscape extends Object3DContainer {
             this.#grassManager?.rebakeAll();
         });
 
-        this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtAtlasTexture, vntAtlasTexture);
+        this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this, () => {
             this.#updateLandscapeUniforms();
         });
@@ -484,7 +484,7 @@ export class Landscape extends Object3DContainer {
                 this.#tileSizeX,
                 this.#tileSizeZ,
                 value,
-                this.#maxLODLevel,
+                this.#lodMaxLevel,
                 this.#lod0SizeQuads
             );
             this.#rebuildTiles();
@@ -517,7 +517,7 @@ export class Landscape extends Object3DContainer {
                 this.#tileSizeX,
                 this.#tileSizeZ,
                 this.#componentSizeQuads,
-                this.#maxLODLevel,
+                this.#lodMaxLevel,
                 clamped
             );
             this.#rebuildTiles();
@@ -528,8 +528,8 @@ export class Landscape extends Object3DContainer {
      * [KO] 지형의 최대 LOD 단계 수(1~8)를 반환합니다.
      * [EN] Returns the maximum number of LOD levels (1 to 8) for the landscape.
      */
-    get maxLODLevel(): number {
-        return this.#maxLODLevel;
+    get lodMaxLevel(): number {
+        return this.#lodMaxLevel;
     }
 
     /**
@@ -540,10 +540,10 @@ export class Landscape extends Object3DContainer {
      * [KO] 최대 LOD 단계 수 (1 ~ 8)
      * [EN] Maximum LOD levels (1 to 8)
      */
-    set maxLODLevel(value: number) {
+    set lodMaxLevel(value: number) {
         const count = Math.min(8, Math.max(1, Math.round(value)));
-        if (this.#maxLODLevel !== count) {
-            this.#maxLODLevel = count;
+        if (this.#lodMaxLevel !== count) {
+            this.#lodMaxLevel = count;
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
                 this.#tileSizeX,
@@ -1224,11 +1224,11 @@ export class Landscape extends Object3DContainer {
         renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
         renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
 
-        const maxLODLevel = sharedGeometry.maxLODLevel;
+        const lodMaxLevel = sharedGeometry.lodMaxLevel;
         const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
 
         if (indirectDrawBuffer) {
-            for (let lod = 0; lod < maxLODLevel; lod++) {
+            for (let lod = 0; lod < lodMaxLevel; lod++) {
                 const offset = lod * 20;
                 renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
 
@@ -1283,7 +1283,7 @@ export class Landscape extends Object3DContainer {
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
 
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, this.#wireframe);
 
         const lodDistancesArray = this.#lodDistancesBuffer;
         lodDistancesArray.fill(1e15);
@@ -1330,7 +1330,7 @@ export class Landscape extends Object3DContainer {
 
         this.#gpuCuller?.updateUniforms(
             camX, camY, camZ,
-            this.#maxLODLevel,
+            this.#lodMaxLevel,
             this.#worldSizeX, this.#worldSizeZ,
             this.#tileSizeX, this.#tileSizeZ,
             this.#heightScale,
@@ -1450,7 +1450,7 @@ export class Landscape extends Object3DContainer {
         redGPUContext: RedGPUContext,
         componentCountX: number,
         componentCountZ: number,
-        maxLODLevel: number,
+        lodMaxLevel: number,
         vhtAtlasTexture: DirectTexture,
         vntAtlasTexture: DirectTexture
     ) {
@@ -1465,7 +1465,7 @@ export class Landscape extends Object3DContainer {
         }
         this.#vertexShaderModule = vModule;
 
-        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
+        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
         this.#instanceBuffer.updateBindGroup(
             vhtAtlasTexture.gpuTextureView,
             vntAtlasTexture.gpuTextureView,
@@ -1544,12 +1544,12 @@ export class Landscape extends Object3DContainer {
         this.#lodColorsRGBA.length = 0;
         this.#lodMultipliers.length = 0;
 
-        for (let i = 0; i < this.#maxLODLevel; i++) {
+        for (let i = 0; i < this.#lodMaxLevel; i++) {
             this.#lodColorsRGBA.push(LANDSCAPE_DEFAULT_LOD_COLORS[i % LANDSCAPE_DEFAULT_LOD_COLORS.length] as [number, number, number, number]);
         }
 
         const multipliers = DEFAULT_LOD_MULTIPLIERS;
-        for (let i = 0; i < this.#maxLODLevel - 1; i++) {
+        for (let i = 0; i < this.#lodMaxLevel - 1; i++) {
             this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
         }
 
@@ -1752,11 +1752,11 @@ export class Landscape extends Object3DContainer {
 
         this.#sharedGeometry?.updateTileSize(tileSizeX, tileSizeZ);
 
-        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
+        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.lodMaxLevel !== this.#lodMaxLevel) {
             if (this.#instanceBuffer) {
                 this.#instanceBuffer.destroy();
             }
-            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#maxLODLevel);
+            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#lodMaxLevel);
             needRebuildBindGroup = true;
         }
 

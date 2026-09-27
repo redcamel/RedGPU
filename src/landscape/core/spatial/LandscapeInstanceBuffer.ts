@@ -6,7 +6,7 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
     #maxComponentCount: number;
-    #maxLODLevel: number;
+    #lodMaxLevel: number;
 
     #allInputTilesBuffer: GPUBuffer | null = null;
     #visibleTileIndicesBuffer: GPUBuffer | null = null;
@@ -24,10 +24,10 @@ export class LandscapeInstanceBuffer {
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
-    constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
+    constructor(redGPUContext: RedGPUContext, maxComponentCount: number, lodMaxLevel: number) {
         this.#redGPUContext = redGPUContext;
         this.#maxComponentCount = maxComponentCount;
-        this.#maxLODLevel = maxLODLevel;
+        this.#lodMaxLevel = lodMaxLevel;
 
         this.#allInputTilesData = new Float32Array(maxComponentCount * 8);
 
@@ -65,8 +65,8 @@ export class LandscapeInstanceBuffer {
         return this.#maxComponentCount;
     }
 
-    get maxLODLevel(): number {
-        return this.#maxLODLevel;
+    get lodMaxLevel(): number {
+        return this.#lodMaxLevel;
     }
 
     setStaticTileData(
@@ -194,14 +194,14 @@ export class LandscapeInstanceBuffer {
 
     resetIndirectDrawBuffer(
         sharedGeometry: { getLODRange(lod: number): any },
-        maxLODLevel: number,
+        lodMaxLevel: number,
         isWireframe: boolean
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#indirectDrawBuffer) return;
 
         const argsData = this.#indirectArgsBuffer;
-        for (let lod = 0; lod < maxLODLevel; lod++) {
+        for (let lod = 0; lod < lodMaxLevel; lod++) {
             const offset = lod * 5;
             const lodRange = sharedGeometry.getLODRange(lod);
             const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
@@ -215,7 +215,7 @@ export class LandscapeInstanceBuffer {
             argsData[offset + 4] = lod * this.#maxComponentCount;
         }
 
-        const byteLength = maxLODLevel * 5 * 4;
+        const byteLength = lodMaxLevel * 5 * 4;
         gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, byteLength);
     }
 
@@ -331,13 +331,13 @@ export class LandscapeInstanceBuffer {
 
         this.#visibleTileIndicesBuffer = gpuDevice.createBuffer({
             label: 'LandscapeVisibleTileIndicesStorageBuffer',
-            size: this.#maxComponentCount * this.#maxLODLevel * 4,
+            size: this.#maxComponentCount * this.#lodMaxLevel * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
         this.#indirectDrawBuffer = gpuDevice.createBuffer({
             label: 'LandscapeIndirectDrawBuffer',
-            size: this.#maxLODLevel * 20,
+            size: this.#lodMaxLevel * 20,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 

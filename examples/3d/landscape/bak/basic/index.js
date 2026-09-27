@@ -232,7 +232,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 updateConfigValues();
             });
 
-            folderLOD.addBinding(landscape, 'maxLODLevel', {min: 1, max: 8, step: 1}).on('change', () => {
+            folderLOD.addBinding(landscape, 'lodMaxLevel', {min: 1, max: 8, step: 1}).on('change', () => {
                 updateConfigValues();
             });
 

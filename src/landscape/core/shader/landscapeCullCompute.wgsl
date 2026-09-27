@@ -1,6 +1,6 @@
 struct CameraFrustumUniforms {
     cameraPosition: vec3<f32>,
-    maxLODLevel: u32,
+    lodMaxLevel: u32,
     worldSizeX: f32,
     worldSizeZ: f32,
     tileSizeX: f32,
@@ -156,8 +156,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                 let metricFactor = select(1.0, uniforms.tanHalfFOV, isScreenSizeMetric);
                 let effectiveDistSq = distSq * (metricFactor * metricFactor);
 
-                lodLevel = uniforms.maxLODLevel - 1u;
-                for (var lod = 0u; lod < uniforms.maxLODLevel; lod = lod + 1u) {
+                lodLevel = uniforms.lodMaxLevel - 1u;
+                for (var lod = 0u; lod < uniforms.lodMaxLevel; lod = lod + 1u) {
                     let packedVec = uniforms.lodDistancesSq[lod / 4u];
                     let thresholdSq = packedVec[lod % 4u];
                     if (effectiveDistSq < thresholdSq) {
@@ -174,7 +174,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    if (localIdx < uniforms.maxLODLevel) {
+    if (localIdx < uniforms.lodMaxLevel) {
         let count = atomicLoad(&wgCounts[localIdx]);
         if (count > 0u) {
             wgGlobalOffsets[localIdx] = atomicAdd(&indirectDrawArgs[localIdx].instanceCount, count);

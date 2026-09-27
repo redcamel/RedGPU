@@ -140,7 +140,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight) 
                     512: RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', () => updateConfigValues());
-            folderLOD.addBinding(landscape, 'maxLODLevel', {
+            folderLOD.addBinding(landscape, 'lodMaxLevel', {
                 min: 1,
                 max: 8,
                 step: 1

@@ -50,7 +50,7 @@ export class LandscapeGPUCuller {
         camX: number,
         camY: number,
         camZ: number,
-        maxLODLevel: number,
+        lodMaxLevel: number,
         worldSizeX: number,
         worldSizeZ: number,
         tileSizeX: number,
@@ -73,7 +73,7 @@ export class LandscapeGPUCuller {
         data[0] = camX;
         data[1] = camY;
         data[2] = camZ;
-        uintData[3] = maxLODLevel;
+        uintData[3] = lodMaxLevel;
 
         data[4] = worldSizeX;
         data[5] = worldSizeZ;

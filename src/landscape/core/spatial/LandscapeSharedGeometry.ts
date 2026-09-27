@@ -20,21 +20,21 @@ export class LandscapeSharedGeometry {
     #tileSizeZ: number;
     #componentSizeQuads: number;
     #lod0SizeQuads: number;
-    #maxLODLevel: number;
+    #lodMaxLevel: number;
 
     #combinedVertexBuffer: VertexBuffer | null = null;
     #combinedIndexBuffer: IndexBuffer | null = null;
     #combinedWireframeIndexBuffer: IndexBuffer | null = null;
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
-    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number, lod0SizeQuads: number = 256) {
+    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, lodMaxLevel: number, lod0SizeQuads: number = 256) {
         validateLandscapeBaseGridSize(componentSizeQuads);
         this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = Math.max(componentSizeQuads, lod0SizeQuads);
-        this.#maxLODLevel = maxLODLevel;
+        this.#lodMaxLevel = lodMaxLevel;
 
         this.#buildCombinedGeometry();
     }
@@ -51,8 +51,8 @@ export class LandscapeSharedGeometry {
         return this.#combinedWireframeIndexBuffer;
     }
 
-    get maxLODLevel(): number {
-        return this.#maxLODLevel;
+    get lodMaxLevel(): number {
+        return this.#lodMaxLevel;
     }
 
     get componentSizeQuads(): number {
@@ -77,7 +77,7 @@ export class LandscapeSharedGeometry {
     }
 
     #buildCombinedGeometry(): void {
-        const maxLODLevel = this.#maxLODLevel;
+        const lodMaxLevel = this.#lodMaxLevel;
         const lod0Quads = Math.max(this.#componentSizeQuads, this.#lod0SizeQuads);
         const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
@@ -93,7 +93,7 @@ export class LandscapeSharedGeometry {
         let totalIndexOffset = 0;
         let totalWireframeIndexOffset = 0;
 
-        for (let lod = 0; lod < maxLODLevel; lod++) {
+        for (let lod = 0; lod < lodMaxLevel; lod++) {
             let segmentsX: number;
             let segmentsZ: number;
             if (lod === 0) {

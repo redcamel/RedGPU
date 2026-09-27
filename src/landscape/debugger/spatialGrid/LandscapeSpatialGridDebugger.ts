@@ -45,7 +45,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
         const lodDistancesSq = this.landscape.lodDistancesSq || [];
         const lodDistCount = lodDistancesSq.length;
-        const maxLODLevel = this.landscape.maxLODLevel ?? 5;
+        const lodMaxLevel = this.landscape.lodMaxLevel ?? 5;
 
         const activeCount = components.length;
         for (let i = 0; i < activeCount; i++) {
@@ -62,7 +62,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
                 const dz = centerZ - camZ;
                 const distSq = dx * dx + dz * dz;
 
-                let lod = maxLODLevel - 1;
+                let lod = lodMaxLevel - 1;
                 for (let l = 0; l < lodDistCount; l++) {
                     if (distSq <= lodDistancesSq[l]) {
                         lod = l;

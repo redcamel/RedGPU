@@ -57,7 +57,7 @@ RedGPU.init(
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [16000, 16000]);
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
-        landscape.maxLODLevel = 5;
+        landscape.lodMaxLevel = 5;
         landscape.tileLoadingRadius = 4000;
         landscape.baseColor.setColorByHEX('#387d42');
 
