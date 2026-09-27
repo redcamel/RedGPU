@@ -38,7 +38,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         const camX = cameraState?.camX ?? 0;
         const camZ = cameraState?.camZ ?? 0;
 
-        const components = this.landscape.landscapeComponents || [];
+        const components = this.landscape.components || [];
         const [tcX, tcZ] = this.landscape.componentCount;
         const cellW = w / tcX;
         const cellH = h / tcZ;

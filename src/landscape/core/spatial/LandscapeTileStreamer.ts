@@ -14,8 +14,8 @@ export class LandscapeTileStreamer {
     #redGPUContext: RedGPUContext;
     #spatialGrid: LandscapeSpatialGrid;
 
-    #loadingRadius: number = 2500.0;
-    #maxLoadsPerFrame: number = 1;
+    #tileLoadingRadius: number = 2500.0;
+    #tileMaxLoadsPerFrame: number = 1;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
     #onTileLoaded: ((comp: LandscapeComponent) => void) | null = null;
 
@@ -64,10 +64,10 @@ export class LandscapeTileStreamer {
         [0, 1]
     ]);
 
-    constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, loadingRadius: number = 2500.0) {
+    constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, tileLoadingRadius: number = 2500.0) {
         this.#redGPUContext = redGPUContext;
         this.#spatialGrid = spatialGrid;
-        this.#loadingRadius = loadingRadius;
+        this.#tileLoadingRadius = tileLoadingRadius;
     }
 
     resetTileState(): void {
@@ -121,20 +121,20 @@ export class LandscapeTileStreamer {
         this.#onTileLoaded = callback;
     }
 
-    set loadingRadius(val: number) {
-        this.#loadingRadius = Math.max(100, val);
+    get tileLoadingRadius(): number {
+        return this.#tileLoadingRadius;
     }
 
-    get loadingRadius(): number {
-        return this.#loadingRadius;
+    set tileLoadingRadius(val: number) {
+        this.#tileLoadingRadius = Math.max(100, val);
     }
 
-    set maxLoadsPerFrame(val: number) {
-        this.#maxLoadsPerFrame = Math.max(1, val);
+    get tileMaxLoadsPerFrame(): number {
+        return this.#tileMaxLoadsPerFrame;
     }
 
-    get maxLoadsPerFrame(): number {
-        return this.#maxLoadsPerFrame;
+    set tileMaxLoadsPerFrame(val: number) {
+        this.#tileMaxLoadsPerFrame = Math.max(1, val);
     }
 
     set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
@@ -262,7 +262,7 @@ export class LandscapeTileStreamer {
     update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
         if (!this.#tileUrlResolver) return;
 
-        const radius = Math.max(this.#loadingRadius, Math.abs(cameraY) * 2.0);
+        const radius = Math.max(this.#tileLoadingRadius, Math.abs(cameraY) * 2.0);
         const grid = this.#spatialGrid;
         if (!grid) return;
 
@@ -297,7 +297,7 @@ export class LandscapeTileStreamer {
             pending.sort(LandscapeTileStreamer.#sortCompare);
         }
 
-        const loadRate = Math.abs(cameraY) > 1000 ? Math.max(this.#maxLoadsPerFrame, 4) : this.#maxLoadsPerFrame;
+        const loadRate = Math.abs(cameraY) > 1000 ? Math.max(this.#tileMaxLoadsPerFrame, 4) : this.#tileMaxLoadsPerFrame;
         const loadCount = Math.min(pending.length, loadRate);
         for (let i = 0; i < loadCount; i++) {
             const comp = pending[i];

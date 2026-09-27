@@ -44,7 +44,7 @@ RedGPU.init(
         // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
-        landscape.loadingRadius = 2500.0;
+        landscape.tileLoadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // [KO] 256개 분할 16-bit 타일 URL 해석기
@@ -255,8 +255,8 @@ function renderTestPane({
             // [KO] Tile Streaming 설정 (타일 스트리밍 전용)
             // [EN] Tile Streaming settings (Tile streaming controls)
             const streamFolder = landscapeFolder.addFolder({title: 'Tile Streaming', expanded: true});
-            streamFolder.addBinding(landscape, 'loadingRadius', {min: 1000, max: 8000, step: 250});
-            streamFolder.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 8, step: 1});
+            streamFolder.addBinding(landscape, 'tileLoadingRadius', {min: 1000, max: 8000, step: 250});
+            streamFolder.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 8, step: 1});
             streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
 
             // [KO] LOD 설정

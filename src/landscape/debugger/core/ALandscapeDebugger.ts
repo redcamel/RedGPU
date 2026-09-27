@@ -22,7 +22,7 @@ export interface LandscapeDebuggerCameraState {
     dirY: number;
     camNormX: number;
     camNormZ: number;
-    loadingRadiusUV: number;
+    tileLoadingRadiusUV: number;
     worldSizeX: number;
     worldSizeZ: number;
     worldMinX: number;
@@ -139,7 +139,7 @@ export abstract class ALandscapeDebugger {
         dirY: -1,
         camNormX: 0,
         camNormZ: 0,
-        loadingRadiusUV: 0,
+        tileLoadingRadiusUV: 0,
         worldSizeX: 1000,
         worldSizeZ: 1000,
         worldMinX: -500,
@@ -381,8 +381,8 @@ export abstract class ALandscapeDebugger {
         const camNormX = (camX - minX) / wsX;
         const camNormZ = (camZ - minZ) / wsZ;
 
-        const loadingRadius = this.#landscape.loadingRadius || 2500;
-        const loadingRadiusUV = loadingRadius / wsX;
+        const tileLoadingRadius = this.#landscape.tileLoadingRadius || 2500;
+        const tileLoadingRadiusUV = tileLoadingRadius / wsX;
 
         this.#cameraState.camX = camX;
         this.#cameraState.camZ = camZ;
@@ -395,7 +395,7 @@ export abstract class ALandscapeDebugger {
         this.#cameraState.dirY = dirY;
         this.#cameraState.camNormX = camNormX;
         this.#cameraState.camNormZ = camNormZ;
-        this.#cameraState.loadingRadiusUV = loadingRadiusUV;
+        this.#cameraState.tileLoadingRadiusUV = tileLoadingRadiusUV;
         this.#cameraState.worldSizeX = wsX;
         this.#cameraState.worldSizeZ = wsZ;
         this.#cameraState.worldMinX = minX;
@@ -417,10 +417,10 @@ export abstract class ALandscapeDebugger {
         this.#overlayCtx.save();
         this.#overlayCtx.scale(dpr, dpr);
 
-        const {camNormX, camNormZ, lookAngle, halfFovRad, dirX, dirY, loadingRadiusUV} = state;
+        const {camNormX, camNormZ, lookAngle, halfFovRad, dirX, dirY, tileLoadingRadiusUV} = state;
         const camCanvasX = camNormX * w;
         const camCanvasY = camNormZ * h;
-        const radiusPixels = loadingRadiusUV * w;
+        const radiusPixels = tileLoadingRadiusUV * w;
 
         const [tcX, tcZ] = this.#landscape.componentCount;
         if (tcX > 0 && tcZ > 0) {

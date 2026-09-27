@@ -244,8 +244,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             // 2-3. Tile Streaming
             const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: false});
             folderStream.addBinding(landscape, 'tileLoadedCount', {readonly: true});
-            folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
-            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
+            folderStream.addBinding(landscape, 'tileLoadingRadius', {min: 500, max: 20000, step: 100});
+            folderStream.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 10, step: 1});
 
             // 3. Display & Rendering
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});

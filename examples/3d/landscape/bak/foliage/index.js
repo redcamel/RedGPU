@@ -60,7 +60,7 @@ RedGPU.init(
         landscape.heightScale = 1500;
         landscape.maxLODLevel = 5;
         landscape.lod0SizeQuads = RedGPU.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
-        landscape.loadingRadius = 4000;
+        landscape.tileLoadingRadius = 4000;
 
         landscape.baseColor.setColorByHEX('#387d42');
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';

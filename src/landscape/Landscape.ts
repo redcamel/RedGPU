@@ -963,7 +963,7 @@ export class Landscape extends Object3DContainer {
      * @example
      * ```ts
      * // 타일 스트리밍 로딩 반경을 3000으로 확장
-     * landscape.loadingRadius = 3000.0;
+     * landscape.tileLoadingRadius = 3000.0;
      * ```
      *
      * [KO]
@@ -974,19 +974,19 @@ export class Landscape extends Object3DContainer {
      *
      * @defaultValue 2000.0
      */
-    get loadingRadius(): number {
-        return this.#tileStreamer.loadingRadius;
+    get tileLoadingRadius(): number {
+        return this.#tileStreamer.tileLoadingRadius;
     }
 
-    set loadingRadius(value: number) {
-        this.#tileStreamer.loadingRadius = value;
+    set tileLoadingRadius(value: number) {
+        this.#tileStreamer.tileLoadingRadius = value;
     }
 
     /**
      * @example
      * ```ts
      * // 프레임당 최대 4개 타일 비동기 로드
-     * landscape.maxLoadsPerFrame = 4;
+     * landscape.tileMaxLoadsPerFrame = 4;
      * ```
      *
      * [KO]
@@ -997,12 +997,12 @@ export class Landscape extends Object3DContainer {
      *
      * @defaultValue 2
      */
-    get maxLoadsPerFrame(): number {
-        return this.#tileStreamer.maxLoadsPerFrame;
+    get tileMaxLoadsPerFrame(): number {
+        return this.#tileStreamer.tileMaxLoadsPerFrame;
     }
 
-    set maxLoadsPerFrame(value: number) {
-        this.#tileStreamer.maxLoadsPerFrame = value;
+    set tileMaxLoadsPerFrame(value: number) {
+        this.#tileStreamer.tileMaxLoadsPerFrame = value;
     }
 
     /**
@@ -1049,7 +1049,7 @@ export class Landscape extends Object3DContainer {
     /**
      * @example
      * ```ts
-     * const tiles = landscape.landscapeComponents;
+     * const tiles = landscape.components;
      * console.log(`총 타일 컴포넌트: ${tiles.length}`);
      * ```
      *
@@ -1060,7 +1060,7 @@ export class Landscape extends Object3DContainer {
      * Gets the array of all `LandscapeComponent` instances registered in the landscape spatial grid. (Read-only)
      *
      */
-    get landscapeComponents(): readonly LandscapeComponent[] {
+    get components(): readonly LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
     }
 

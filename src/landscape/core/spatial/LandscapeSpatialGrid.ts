@@ -88,15 +88,15 @@ export class LandscapeSpatialGrid {
         outBuffer[1] = Math.min(Math.max(0, row), this.#tileCountZ - 1);
     }
 
-    getActiveComponentsInRadius(camX: number, camZ: number, loadingRadius: number, outArray: LandscapeComponent[]): number {
+    getActiveComponentsInRadius(camX: number, camZ: number, tileLoadingRadius: number, outArray: LandscapeComponent[]): number {
         outArray.length = 0;
-        const radiusSq = loadingRadius * loadingRadius;
+        const radiusSq = tileLoadingRadius * tileLoadingRadius;
 
-        const minCol = Math.max(0, Math.floor((camX - loadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
-        const maxCol = Math.min(this.#tileCountX - 1, Math.floor((camX + loadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
+        const minCol = Math.max(0, Math.floor((camX - tileLoadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
+        const maxCol = Math.min(this.#tileCountX - 1, Math.floor((camX + tileLoadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
 
-        const minRow = Math.max(0, Math.floor((camZ - loadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
-        const maxRow = Math.min(this.#tileCountZ - 1, Math.floor((camZ + loadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
+        const minRow = Math.max(0, Math.floor((camZ - tileLoadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
+        const maxRow = Math.min(this.#tileCountZ - 1, Math.floor((camZ + tileLoadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
 
         for (let r = minRow; r <= maxRow; r++) {
             const rowOffset = r * this.#tileCountX;

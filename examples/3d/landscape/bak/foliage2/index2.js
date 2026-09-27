@@ -58,7 +58,7 @@ RedGPU.init(
         landscape.componentCount = [16, 16];
         landscape.heightScale = 1500;
         landscape.maxLODLevel = 5;
-        landscape.loadingRadius = 4000;
+        landscape.tileLoadingRadius = 4000;
         landscape.baseColor.setColorByHEX('#387d42');
 
         const assetPath = '../../../../assets/terrain/terrainTest_001/layer/';

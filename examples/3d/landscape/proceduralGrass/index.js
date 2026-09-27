@@ -45,7 +45,7 @@ RedGPU.init(
         // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
-        landscape.loadingRadius = 2500.0;
+        landscape.tileLoadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // [KO] 256개 분할 16-bit 타일 URL 해석기

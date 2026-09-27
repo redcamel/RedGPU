@@ -81,7 +81,7 @@ RedGPU.init(
         // -----------------------------------------------------------------
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
         landscape.heightScale = 650;
-        landscape.loadingRadius = 2500.0;
+        landscape.tileLoadingRadius = 2500.0;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
         // 256개 분할 16비트 타일 스트리밍 경로 해석기

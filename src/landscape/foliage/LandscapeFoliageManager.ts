@@ -380,7 +380,7 @@ class LandscapeFoliageManager {
             );
         }
 
-        const cells = this.#landscape?.landscapeComponents;
+        const cells = this.#landscape?.components;
         if (cells && cells.length > 0) {
             const count = cells.length;
             for (let i = 0; i < count; i++) {
@@ -413,7 +413,7 @@ class LandscapeFoliageManager {
 
         type.clearTileCache();
 
-        const cells = this.#landscape?.landscapeComponents;
+        const cells = this.#landscape?.components;
         if (cells && cells.length > 0) {
             const count = cells.length;
             for (let i = 0; i < count; i++) {
