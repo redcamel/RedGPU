@@ -23,7 +23,6 @@ import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../math/computeViewFrustumPlanes";
 import LandscapeDebuggerManager from "./debugger";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
-import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
 import {mat4} from 'gl-matrix';
 
 const DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
@@ -90,7 +89,6 @@ export class Landscape extends Object3DContainer {
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
     #material: LandscapeMaterial;
-    #debugMode: number = LANDSCAPE_DEBUG_MODE.NONE;
     #worldSizeX: number = 2000.0;
     #worldSizeZ: number = 2000.0;
     #componentCountX: number = 16;
@@ -103,14 +101,12 @@ export class Landscape extends Object3DContainer {
     #heightmapShadowSteps: number = 16;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
-    #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
     #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
     #foliageManager: LandscapeFoliageManager;
     #grassManager: LandscapeGrassManager;
     #debuggerManager: LandscapeDebuggerManager;
 
-    #wireframe: boolean = false;
     #lastTanHalfFOV: number = 1.0;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
@@ -201,8 +197,6 @@ export class Landscape extends Object3DContainer {
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = lod0SizeQuads;
         this.#lodMaxLevel = lodMaxLevel;
-        this.#wireframe = false;
-        this.#lodColoration = false;
         this.#lodMetric = 'screenSize';
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
         this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
@@ -288,25 +282,9 @@ export class Landscape extends Object3DContainer {
             this.#grassManager?.handleTileLoaded(comp);
         });
         this.#debuggerManager = new LandscapeDebuggerManager(this, {
-            onDebugPropertyChange: (key, value) => {
-                switch (key) {
-                    case 'wireframe':
-                        if (this.#wireframe !== value) {
-                            this.#wireframe = value as boolean;
-                        }
-                        break;
-                    case 'debugMode':
-                        if (this.#debugMode !== value) {
-                            this.#debugMode = value as number;
-                            this.#updateLandscapeUniforms();
-                        }
-                        break;
-                    case 'lodColoration':
-                        if (this.#lodColoration !== value) {
-                            this.#lodColoration = value as boolean;
-                            this.#updateLandscapeUniforms();
-                        }
-                        break;
+            onDebugPropertyChange: (key) => {
+                if (key === 'debugMode' || key === 'lodColoration') {
+                    this.#updateLandscapeUniforms();
                 }
             }
         });
@@ -1141,7 +1119,7 @@ export class Landscape extends Object3DContainer {
         const instanceBuffer = this.#instanceBuffer;
         const sharedGeometry = this.#sharedGeometry;
         const combinedVB = sharedGeometry?.combinedVertexBuffer;
-        const isWireframe = this.#wireframe;
+        const isWireframe = !!this.#debuggerManager?.landscapeWireframe;
         const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
 
         if (!instanceBuffer || !combinedVB || !combinedIB) return;
@@ -1228,7 +1206,7 @@ export class Landscape extends Object3DContainer {
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
 
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, this.#wireframe);
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
 
         const lodDistancesArray = this.#lodDistancesBuffer;
         lodDistancesArray.fill(1e15);
@@ -1362,7 +1340,7 @@ export class Landscape extends Object3DContainer {
             this.#heightScale,
             this.#worldSizeX,
             this.#worldSizeZ,
-            this.#lodColoration,
+            this.#debuggerManager?.landscapeLodColoration ?? false,
             this.#componentCountX * this.#componentCountZ,
             this.#tileSizeX,
             this.#tileSizeZ,
@@ -1382,7 +1360,7 @@ export class Landscape extends Object3DContainer {
             this.#foliageManager?.debugSubCellColoration ?? false,
             this.#foliageManager?.subCellSize ?? 100.0,
             this.#foliageManager?.streamingRadius ?? 600.0,
-            this.#debugMode
+            this.#debuggerManager?.landscapeDebugMode ?? 0
         );
     }
 
@@ -1520,7 +1498,8 @@ export class Landscape extends Object3DContainer {
         const msaaID = antialiasingManager.msaaID;
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
-        const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        const isWireframe = !!this.#debuggerManager?.landscapeWireframe;
+        const topology = isWireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         const fragModule = material.gpuRenderInfo.fragmentShaderModule;
 
         if (
@@ -1575,7 +1554,7 @@ export class Landscape extends Object3DContainer {
                 fragment: material.gpuRenderInfo.fragmentState,
                 primitive: {
                     topology: topology,
-                    cullMode: this.#wireframe ? 'none' : 'back'
+                    cullMode: isWireframe ? 'none' : 'back'
                 },
                 depthStencil: {
                     format: 'depth32float',

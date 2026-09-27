@@ -8,10 +8,10 @@
  * ### Example
  * ```typescript
  * // LOD 단계 시각화 모드 적용
- * landscape.debugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.LOD_LEVEL;
+ * landscape.debuggerManager.landscapeDebugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.LOD_LEVEL;
  *
  * // 디버그 모드 끄기 (일반 렌더링)
- * landscape.debugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NONE;
+ * landscape.debuggerManager.landscapeDebugMode = RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NONE;
  * ```
  *
  */
