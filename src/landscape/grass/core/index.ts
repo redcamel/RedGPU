@@ -19,7 +19,7 @@
  */
 import LandscapeGrass, {GrassLODInfo} from "./LandscapeGrass";
 import {GrassBaker} from "./baking/GrassBaker";
-import {GrassMegaBuffer} from "./buffer/GrassMegaBuffer";
+import {type GrassLODAllocation, GrassMegaBuffer, type GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
 import {GrassCuller} from "./culling/GrassCuller";
 
 export {
@@ -30,5 +30,7 @@ export {
 };
 
 export type {
-    GrassLODInfo
+    GrassLODInfo,
+    GrassTypeAllocation,
+    GrassLODAllocation
 };
