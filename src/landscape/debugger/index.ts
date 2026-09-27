@@ -20,24 +20,10 @@ import LandscapeDebuggerManager, {
     type LandscapeDebugPropertyChangeHandler,
     type LandscapeDebugPropertyKey
 } from "./LandscapeDebuggerManager";
-import {
-    LandscapeSpatialGridDebugger,
-    LandscapeVBTDebugger,
-    LandscapeVBTNormalDebugger,
-    LandscapeVBTORMDebugger,
-    LandscapeVHTDebugger,
-    LandscapeVNTDebugger
-} from "./core";
 
 export {
     LandscapeDebuggerManager,
     type LandscapeDebuggerManagerOptions,
     type LandscapeDebugPropertyKey,
-    type LandscapeDebugPropertyChangeHandler,
-    LandscapeSpatialGridDebugger,
-    LandscapeVHTDebugger,
-    LandscapeVNTDebugger,
-    LandscapeVBTDebugger,
-    LandscapeVBTNormalDebugger,
-    LandscapeVBTORMDebugger
+    type LandscapeDebugPropertyChangeHandler
 };
