@@ -271,6 +271,7 @@ export abstract class ALandscapeDebugger {
         return this.#canvas;
     }
 
+    // TODO - 제거 대상같은데 추후확인
     static getPreferredCanvasFormat(): GPUTextureFormat {
         return (typeof navigator !== 'undefined' && navigator.gpu?.getPreferredCanvasFormat)
             ? navigator.gpu.getPreferredCanvasFormat()
