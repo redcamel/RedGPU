@@ -273,7 +273,7 @@ export class LandscapeGrassManager {
         const clamped = Math.max(16.0, val);
         if (this.#streamingRadius !== clamped) {
             this.#streamingRadius = clamped;
-            this.populateInstances(this.#lastPopulatePos);
+            this.#populateInstances(this.#lastPopulatePos);
         }
     }
 
@@ -300,130 +300,6 @@ export class LandscapeGrassManager {
      */
     get totalInstancesPopulated(): number {
         return this.#totalInstancesPopulated;
-    }
-
-    /**
-     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
-     *
-     * @param sampleCount -
-     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
-     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
-     * @param isFar -
-     * [KO] 원거리 LOD 전용 간소화 셰이더를 적용할지 여부 (기본값: false)
-     * [EN] Whether to apply the simplified shader dedicated to far LOD (default: false)
-     * @returns
-     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
-     */
-    getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
-        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
-        let pipeline = cache.get(sampleCount);
-        if (pipeline) return pipeline;
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
-
-        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
-
-        pipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
-            layout: this.#pipelineLayout,
-            vertex: {
-                module: this.#vertexModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: 18 * 4,
-                        stepMode: 'vertex',
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: fragModule,
-                entryPoint: 'main',
-                targets: [
-                    {format: 'rgba16float'},
-                    {format: preferredNormalFormat},
-                    {format: 'rgba16float'}
-                ]
-            },
-            primitive: {
-                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            },
-            multisample: {
-                count: sampleCount
-            }
-        });
-
-        cache.set(sampleCount, pipeline);
-        return pipeline;
-    }
-
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
-     *
-     * @returns
-     * [KO] 캐시되거나 생성된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Cached or created shadow GPURenderPipeline instance, or `null` if creation fails
-     */
-    getShadowRenderPipeline(): GPURenderPipeline | null {
-        if (this.#shadowPipeline) return this.#shadowPipeline;
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
-
-        this.#shadowPipeline = gpuDevice.createRenderPipeline({
-            label: 'Grass_ShadowRenderPipeline',
-            layout: this.#pipelineLayout,
-            vertex: {
-                module: this.#vertexShadowModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: 18 * 4,
-                        stepMode: 'vertex',
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: this.#fragmentShadowModule,
-                entryPoint: 'main',
-                targets: []
-            },
-            primitive: {
-                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            },
-            multisample: {
-                count: 1
-            }
-        });
-
-        return this.#shadowPipeline;
     }
 
     /**
@@ -536,7 +412,7 @@ export class LandscapeGrassManager {
         }
 
         grassType.onChanged = () => {
-            this.populateInstances(this.#lastPopulatePos);
+            this.#populateInstances(this.#lastPopulatePos);
         };
 
         if (grassType.targetLayer) {
@@ -553,7 +429,7 @@ export class LandscapeGrassManager {
                             this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
                         }
                     }
-                    this.populateInstances(this.#lastPopulatePos);
+                    this.#populateInstances(this.#lastPopulatePos);
                 });
             }
         }
@@ -561,6 +437,162 @@ export class LandscapeGrassManager {
         this.#lastUpdateGridPos[0] = -999999;
         this.#lastUpdateGridPos[1] = -999999;
         return grassType;
+    }
+
+    /**
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
+     * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
+     *
+     * @param view -
+     * [KO] 현재 렌더링 중인 뷰 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
+     * [EN] View object currently being rendered (used to extract system uniform bind group and MSAA sample count)
+     * @param passEncoder -
+     * [KO] 메인 씬 GPURenderPassEncoder
+     * [EN] Main scene GPURenderPassEncoder
+     */
+    render(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
+
+        const view3D = view?.view || view;
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        if (!systemBG) return;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
+
+        const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
+        const nearPipeline = this.#getRenderPipeline(sampleCount, false);
+        const farPipeline = this.#getRenderPipeline(sampleCount, true);
+        if (!nearPipeline || !farPipeline) return;
+
+        const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const basicSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+
+        let currentPipeline: GPURenderPipeline | null = nearPipeline;
+        passEncoder.setPipeline(nearPipeline);
+        passEncoder.setBindGroup(0, systemBG);
+
+        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        for (const type of this.#grassList) {
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!alloc || alloc.activeCount === 0) continue;
+
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res) continue;
+
+            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
+                res.instanceBindGroup = gpuDevice.createBindGroup({
+                    label: `Grass_InstanceBindGroup_${type.name}`,
+                    layout: this.#pipelineBindGroupLayout1,
+                    entries: [
+                        {binding: 0, resource: {buffer: this.#megaBuffer.culledGPUBuffer}},
+                        {binding: 1, resource: {buffer: res.grassUniformGPUBuffer}},
+                    ]
+                });
+            }
+
+            const rawTex = type.baseColorTexture?.gpuTexture;
+            const colorTexView = (rawTex
+                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
+                : null) || fallbackTex;
+
+            if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
+                res.bindGroup = gpuDevice.createBindGroup({
+                    label: `Grass_MaterialBindGroup_${type.name}`,
+                    layout: this.#pipelineBindGroupLayout2,
+                    entries: [
+                        {binding: 0, resource: colorTexView},
+                        {binding: 1, resource: basicSampler},
+                        {binding: 2, resource: {buffer: res.uniformBuffer}},
+                    ]
+                });
+                res.cachedColorTexView = colorTexView;
+            }
+
+            if (!res.instanceBindGroup || !res.bindGroup) continue;
+
+            passEncoder.setBindGroup(1, res.instanceBindGroup);
+            passEncoder.setBindGroup(2, res.bindGroup);
+
+            for (const lodAlloc of alloc.lods) {
+                const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
+                if (currentPipeline !== targetPipeline) {
+                    passEncoder.setPipeline(targetPipeline);
+                    currentPipeline = targetPipeline;
+                }
+
+                const lodGeom = type.getGeometryForLOD(lodAlloc.lodIndex);
+                const lvb = lodGeom?.vertexBuffer;
+                const lib = lodGeom?.indexBuffer;
+                if (!lvb || !lib) continue;
+
+                passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+                passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+                const indirectOffsetBytes = lodAlloc.indirectOffset * 5 * 4;
+                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
+        }
+    }
+
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
+     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
+     *
+     * @param view -
+     * [KO] 그림자 패스를 렌더링 중인 뷰 객체
+     * [EN] View object rendering the shadow pass
+     * @param passEncoder -
+     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
+     * [EN] GPURenderPassEncoder for shadow map generation
+     */
+    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassList.length === 0) return;
+
+        const view3D = view?.view || view;
+        const currentCascade = view3D?.currentCascadeIndex;
+
+        if (currentCascade !== undefined && currentCascade > 1) return;
+
+        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        const pipeline = this.#getShadowRenderPipeline();
+        if (!pipeline) return;
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
+        if (!systemBG) return;
+
+        passEncoder.setPipeline(pipeline);
+        passEncoder.setBindGroup(0, systemBG);
+
+        for (const type of this.#grassList) {
+            if (!type.castShadow) continue;
+            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            if (!alloc || alloc.activeCount === 0) continue;
+
+            const res = this.#typeMaterialBuffers.get(type.typeId);
+            if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
+
+            const lod0Alloc = alloc.lods[0];
+            if (!lod0Alloc) continue;
+
+            const lodGeom = type.getGeometryForLOD(0);
+            const lvb = lodGeom?.vertexBuffer;
+            const lib = lodGeom?.indexBuffer;
+            if (!lvb || !lib) continue;
+
+            passEncoder.setBindGroup(1, res.instanceBindGroup);
+            passEncoder.setBindGroup(2, res.bindGroup);
+
+            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const indirectOffsetBytes = lod0Alloc.indirectOffset * 5 * 4;
+            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+        }
     }
 
     /**
@@ -745,18 +777,73 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 지정된 3D 월드 좌표를 중심으로 스트리밍 반경 내의 잔디 셀과 인스턴스를 강제로 재생성 및 배치합니다.
-     * [EN] Forces repopulation and placement of grass cells and instances within the streaming radius around the specified 3D world position.
+     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
      *
-     * @param centerPos -
-     * [KO] 스트리밍 중심이 될 월드 좌표 `[x, y, z]`
-     * [EN] World coordinates `[x, y, z]` to act as the streaming center
+     * @param sampleCount -
+     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
+     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
+     * @param isFar -
+     * [KO] 원거리 LOD 전용 간소화 셰이더를 적용할지 여부 (기본값: false)
+     * [EN] Whether to apply the simplified shader dedicated to far LOD (default: false)
+     * @returns
+     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
      */
-    populateInstances(centerPos: [number, number, number]): void {
-        this.#lastPopulatePos[0] = centerPos[0];
-        this.#lastPopulatePos[1] = centerPos[1];
-        this.#lastPopulatePos[2] = centerPos[2];
-        this.#updateCellStreaming(centerPos[0], centerPos[2], true);
+    #getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
+        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
+        let pipeline = cache.get(sampleCount);
+        if (pipeline) return pipeline;
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
+
+        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        pipeline = gpuDevice.createRenderPipeline({
+            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: fragModule,
+                entryPoint: 'main',
+                targets: [
+                    {format: 'rgba16float'},
+                    {format: preferredNormalFormat},
+                    {format: 'rgba16float'}
+                ]
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: sampleCount
+            }
+        });
+
+        cache.set(sampleCount, pipeline);
+        return pipeline;
     }
 
     /**
@@ -830,159 +917,72 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
-     * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
+     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
      *
-     * @param view -
-     * [KO] 현재 렌더링 중인 뷰 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
-     * [EN] View object currently being rendered (used to extract system uniform bind group and MSAA sample count)
-     * @param passEncoder -
-     * [KO] 메인 씬 GPURenderPassEncoder
-     * [EN] Main scene GPURenderPassEncoder
+     * @returns
+     * [KO] 캐시되거나 생성된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Cached or created shadow GPURenderPipeline instance, or `null` if creation fails
      */
-    render(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-
-        const view3D = view?.view || view;
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
-        if (!systemBG) return;
+    #getShadowRenderPipeline(): GPURenderPipeline | null {
+        if (this.#shadowPipeline) return this.#shadowPipeline;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
-        const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
-        const nearPipeline = this.getRenderPipeline(sampleCount, false);
-        const farPipeline = this.getRenderPipeline(sampleCount, true);
-        if (!nearPipeline || !farPipeline) return;
-
-        const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
-        const basicSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-
-        let currentPipeline: GPURenderPipeline | null = nearPipeline;
-        passEncoder.setPipeline(nearPipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
-        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
-        if (!indirectGPUBuffer) return;
-
-        for (const type of this.#grassList) {
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (!alloc || alloc.activeCount === 0) continue;
-
-            const res = this.#typeMaterialBuffers.get(type.typeId);
-            if (!res) continue;
-
-            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
-                res.instanceBindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_InstanceBindGroup_${type.name}`,
-                    layout: this.#pipelineBindGroupLayout1,
-                    entries: [
-                        {binding: 0, resource: {buffer: this.#megaBuffer.culledGPUBuffer}},
-                        {binding: 1, resource: {buffer: res.grassUniformGPUBuffer}},
-                    ]
-                });
+        this.#shadowPipeline = gpuDevice.createRenderPipeline({
+            label: 'Grass_ShadowRenderPipeline',
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexShadowModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: this.#fragmentShadowModule,
+                entryPoint: 'main',
+                targets: []
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: 1
             }
+        });
 
-            const rawTex = type.baseColorTexture?.gpuTexture;
-            const colorTexView = (rawTex
-                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
-                : null) || fallbackTex;
-
-            if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
-                res.bindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_MaterialBindGroup_${type.name}`,
-                    layout: this.#pipelineBindGroupLayout2,
-                    entries: [
-                        {binding: 0, resource: colorTexView},
-                        {binding: 1, resource: basicSampler},
-                        {binding: 2, resource: {buffer: res.uniformBuffer}},
-                    ]
-                });
-                res.cachedColorTexView = colorTexView;
-            }
-
-            if (!res.instanceBindGroup || !res.bindGroup) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setBindGroup(2, res.bindGroup);
-
-            for (const lodAlloc of alloc.lods) {
-                const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
-                if (currentPipeline !== targetPipeline) {
-                    passEncoder.setPipeline(targetPipeline);
-                    currentPipeline = targetPipeline;
-                }
-
-                const lodGeom = type.getGeometryForLOD(lodAlloc.lodIndex);
-                const lvb = lodGeom?.vertexBuffer;
-                const lib = lodGeom?.indexBuffer;
-                if (!lvb || !lib) continue;
-
-                passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-                passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-                const indirectOffsetBytes = lodAlloc.indirectOffset * 5 * 4;
-                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-            }
-        }
+        return this.#shadowPipeline;
     }
 
     /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
-     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
+     * [KO] 지정된 3D 월드 좌표를 중심으로 스트리밍 반경 내의 잔디 셀과 인스턴스를 강제로 재생성 및 배치합니다.
+     * [EN] Forces repopulation and placement of grass cells and instances within the streaming radius around the specified 3D world position.
      *
-     * @param view -
-     * [KO] 그림자 패스를 렌더링 중인 뷰 객체
-     * [EN] View object rendering the shadow pass
-     * @param passEncoder -
-     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     * [EN] GPURenderPassEncoder for shadow map generation
+     * @param centerPos -
+     * [KO] 스트리밍 중심이 될 월드 좌표 `[x, y, z]`
+     * [EN] World coordinates `[x, y, z]` to act as the streaming center
      */
-    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0) return;
-
-        const view3D = view?.view || view;
-        const currentCascade = view3D?.currentCascadeIndex;
-
-        if (currentCascade !== undefined && currentCascade > 1) return;
-
-        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
-        if (!indirectGPUBuffer) return;
-
-        const pipeline = this.getShadowRenderPipeline();
-        if (!pipeline) return;
-
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
-        if (!systemBG) return;
-
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
-        for (const type of this.#grassList) {
-            if (!type.castShadow) continue;
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (!alloc || alloc.activeCount === 0) continue;
-
-            const res = this.#typeMaterialBuffers.get(type.typeId);
-            if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
-
-            const lod0Alloc = alloc.lods[0];
-            if (!lod0Alloc) continue;
-
-            const lodGeom = type.getGeometryForLOD(0);
-            const lvb = lodGeom?.vertexBuffer;
-            const lib = lodGeom?.indexBuffer;
-            if (!lvb || !lib) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setBindGroup(2, res.bindGroup);
-
-            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-            const indirectOffsetBytes = lod0Alloc.indirectOffset * 5 * 4;
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-        }
+    #populateInstances(centerPos: [number, number, number]): void {
+        this.#lastPopulatePos[0] = centerPos[0];
+        this.#lastPopulatePos[1] = centerPos[1];
+        this.#lastPopulatePos[2] = centerPos[2];
+        this.#updateCellStreaming(centerPos[0], centerPos[2], true);
     }
 
     /**
