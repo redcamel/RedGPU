@@ -1,6 +1,6 @@
 import type Landscape from "../../../Landscape";
 
-export class LandscapeFoliageSpatialGrid {
+export class FoliageSpatialGrid {
 
     static readonly MAX_ACTIVE_SUB_CELLS: number = 2048;
 
@@ -8,7 +8,7 @@ export class LandscapeFoliageSpatialGrid {
     #subCellSize: number = 100.0;
     #streamingRadius: number = 600.0;
 
-    readonly #activeSubCellKeys: Int32Array = new Int32Array(LandscapeFoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
+    readonly #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
     #activeSubCellCount: number = 0;
 
     #lastCamX: number = 1e9;
@@ -96,7 +96,7 @@ export class LandscapeFoliageSpatialGrid {
 
         let count = 0;
         const keys = this.#activeSubCellKeys;
-        const maxCapacity = LandscapeFoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS;
+        const maxCapacity = FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS;
 
         for (let sz = minSZ; sz <= maxSZ; sz++) {
             const cellCenterZ = (sz + 0.5) * cellSize - halfWorldZ;
@@ -121,5 +121,5 @@ export class LandscapeFoliageSpatialGrid {
     }
 }
 
-Object.freeze(LandscapeFoliageSpatialGrid);
-export default LandscapeFoliageSpatialGrid;
+Object.freeze(FoliageSpatialGrid);
+export default FoliageSpatialGrid;

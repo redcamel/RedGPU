@@ -27,7 +27,7 @@ export interface FoliageLODInfo {
     receiveShadow?: boolean;
 }
 
-export interface LandscapeFoliageOptions {
+export interface FoliageOptions {
     name: string;
 
     lods: FoliageLODConfig[];
@@ -81,8 +81,8 @@ export interface LandscapeFoliageOptions {
     groundBlendRange?: number;
 }
 
-export class LandscapeFoliage {
-    #options: LandscapeFoliageOptions;
+export class Foliage {
+    #options: FoliageOptions;
     #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
@@ -136,7 +136,7 @@ export class LandscapeFoliage {
     #streamer: FoliageSubCellStreamer;
     #baker: FoliageBaker | null = null;
     #onDirty?: () => void;
-    #onRepopulateRequired?: (type: LandscapeFoliage) => void;
+    #onRepopulateRequired?: (type: Foliage) => void;
 
     /**
      * [KO] 지형 식생/나무 인스턴스를 생성합니다.
@@ -146,11 +146,11 @@ export class LandscapeFoliage {
      */
     constructor(
         redGPUContext: RedGPUContext,
-        options: LandscapeFoliageOptions,
+        options: FoliageOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void,
-        onRepopulateRequired?: (type: LandscapeFoliage) => void,
+        onRepopulateRequired?: (type: Foliage) => void,
         baker?: FoliageBaker | null
     ) {
         this.#streamer = new FoliageSubCellStreamer(this);
@@ -367,7 +367,7 @@ export class LandscapeFoliage {
         return this.#options.randomRotationY;
     }
 
-    get options(): LandscapeFoliageOptions {
+    get options(): FoliageOptions {
         return this.#options;
     }
 
@@ -954,5 +954,5 @@ export class LandscapeFoliage {
     }
 }
 
-Object.freeze(LandscapeFoliage);
-export default LandscapeFoliage;
+Object.freeze(Foliage);
+export default Foliage;

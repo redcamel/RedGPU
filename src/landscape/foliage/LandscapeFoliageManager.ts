@@ -2,14 +2,14 @@ import RedGPUContext from "../../context/RedGPUContext";
 import type Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
-import type {LandscapeFoliageOptions} from "./core/LandscapeFoliage";
-import LandscapeFoliage from "./core/LandscapeFoliage";
+import type {FoliageOptions} from "./core/Foliage";
+import Foliage from "./core/Foliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
 import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
-import LandscapeFoliageSpatialGrid from "./core/spatial/LandscapeFoliageSpatialGrid";
+import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
 
 class LandscapeFoliageManager {
     static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -21,15 +21,15 @@ class LandscapeFoliageManager {
     #tileStreamer: LandscapeTileStreamer;
 
     #megaBuffer: FoliageMegaBuffer;
-    #foliageTypes: Map<string, LandscapeFoliage> = new Map();
-    #typeList: LandscapeFoliage[] = [];
+    #foliageTypes: Map<string, Foliage> = new Map();
+    #typeList: Foliage[] = [];
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
     #cullingDispatcher: FoliageCullingDispatcher;
     #useDepthPrepass: boolean = true;
 
-    #spatialGrid: LandscapeFoliageSpatialGrid;
+    #spatialGrid: FoliageSpatialGrid;
     #subCellSize: number = 100.0;
     #streamingRadius: number = 600.0;
     #debugSubCellColoration: boolean = false;
@@ -47,7 +47,7 @@ class LandscapeFoliageManager {
         this.#tileStreamer = tileStreamer;
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
-        this.#spatialGrid = new LandscapeFoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
+        this.#spatialGrid = new FoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
@@ -188,7 +188,7 @@ class LandscapeFoliageManager {
         }
     }
 
-    get spatialGrid(): LandscapeFoliageSpatialGrid {
+    get spatialGrid(): FoliageSpatialGrid {
         return this.#spatialGrid;
     }
 
@@ -283,11 +283,11 @@ class LandscapeFoliageManager {
         this.#syncWindToAllTypes();
     }
 
-    get typeList(): readonly LandscapeFoliage[] {
+    get typeList(): readonly Foliage[] {
         return this.#typeList;
     }
 
-    get foliageList(): readonly LandscapeFoliage[] {
+    get foliageList(): readonly Foliage[] {
         return this.#typeList;
     }
 
@@ -344,27 +344,27 @@ class LandscapeFoliageManager {
         }
     }
 
-    get foliageTypes(): ReadonlyMap<string, LandscapeFoliage> {
+    get foliageTypes(): ReadonlyMap<string, Foliage> {
         return this.#foliageTypes;
     }
 
-    get foliages(): ReadonlyMap<string, LandscapeFoliage> {
+    get foliages(): ReadonlyMap<string, Foliage> {
         return this.#foliageTypes;
     }
 
-    addFoliage(options: LandscapeFoliageOptions): LandscapeFoliage {
+    addFoliage(options: FoliageOptions): Foliage {
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] Foliage with name '${options.name}' already exists.`);
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const mergedOptions: LandscapeFoliageOptions = {
+        const mergedOptions: FoliageOptions = {
             ...options,
             subCellSize: options.subCellSize ?? this.#subCellSize,
             streamingRadius: options.streamingRadius ?? this.#streamingRadius
         };
 
-        const foliage = new LandscapeFoliage(
+        const foliage = new Foliage(
             this.#redGPUContext,
             mergedOptions,
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
@@ -409,7 +409,7 @@ class LandscapeFoliageManager {
         }
     }
 
-    repopulateFoliage(foliageOrName: LandscapeFoliage | string): void {
+    repopulateFoliage(foliageOrName: Foliage | string): void {
         const type = typeof foliageOrName === 'string'
             ? this.#foliageTypes.get(foliageOrName)
             : foliageOrName;
@@ -448,7 +448,7 @@ class LandscapeFoliageManager {
         return false;
     }
 
-    getFoliage(name: string): LandscapeFoliage | undefined {
+    getFoliage(name: string): Foliage | undefined {
         return this.#foliageTypes.get(name);
     }
 

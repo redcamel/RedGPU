@@ -4,7 +4,7 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
-import LandscapeGrass, {LandscapeGrassOptions} from "./core/LandscapeGrass";
+import Grass, {GrassOptions} from "./core/Grass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";
@@ -156,7 +156,7 @@ export class LandscapeGrassManager {
     #baker: GrassBaker;
     #culler: GrassCuller;
 
-    #grassList: LandscapeGrass[] = [];
+    #grassList: Grass[] = [];
     #nextTypeId: number = 0;
     #totalInstanceCount: number = 0;
     #populated: boolean = false;
@@ -284,7 +284,7 @@ export class LandscapeGrassManager {
      * [KO] 현재 매니저에 등록된 잔디 목록을 가져옵니다.
      * [EN] Gets the list of grass items currently registered to this manager.
      */
-    get grassList(): LandscapeGrass[] {
+    get grassList(): Grass[] {
         return this.#grassList;
     }
 
@@ -336,11 +336,11 @@ export class LandscapeGrassManager {
      * [KO] 잔디 타입의 메시, LOD 단계, 밀도, 경사 필터링, 스케일 범위, 셰이딩 파라미터가 포함된 옵션 객체
      * [EN] Options object containing meshes, LOD stages, density, slope filtering, scale ranges, and shading parameters
      * @returns
-     * [KO] 생성되어 등록된 {@link LandscapeGrass} 인스턴스
-     * [EN] Created and registered {@link LandscapeGrass} instance
+     * [KO] 생성되어 등록된 {@link Grass} 인스턴스
+     * [EN] Created and registered {@link Grass} instance
      */
-    addGrass(options: LandscapeGrassOptions): LandscapeGrass {
-        const grassType = new LandscapeGrass(this.#redGPUContext, options);
+    addGrass(options: GrassOptions): Grass {
+        const grassType = new Grass(this.#redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
@@ -446,13 +446,13 @@ export class LandscapeGrassManager {
      * [EN] Removes a specific registered grass ecosystem type from the manager and safely releases associated GPU resources.
      *
      * @param target -
-     * [KO] 제거할 {@link LandscapeGrass} 인스턴스, 잔디의 고유 이름(`string`), 또는 타입 ID(`number`)
-     * [EN] {@link LandscapeGrass} instance, unique grass name (`string`), or type ID (`number`) to remove
+     * [KO] 제거할 {@link Grass} 인스턴스, 잔디의 고유 이름(`string`), 또는 타입 ID(`number`)
+     * [EN] {@link Grass} instance, unique grass name (`string`), or type ID (`number`) to remove
      * @returns
      * [KO] 제거 성공 여부 (대상을 찾아 정상 제거 시 `true`, 미존재 시 `false`)
      * [EN] Whether removal succeeded (`true` if found and removed, `false` otherwise)
      */
-    removeGrass(target: LandscapeGrass | string | number): boolean {
+    removeGrass(target: Grass | string | number): boolean {
         let idx = -1;
         if (typeof target === 'number') {
             idx = this.#grassList.findIndex(g => g.typeId === target);

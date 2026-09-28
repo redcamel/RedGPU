@@ -1,15 +1,11 @@
-import LandscapeFoliage, {
-    type FoliageLODConfig,
-    type FoliageLODInfo,
-    type LandscapeFoliageOptions
-} from "./LandscapeFoliage";
+import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./Foliage";
 import FoliageSubMesh, {type FoliageRenderPassType, type FoliageSubMeshInitOptions} from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh, {
     type FoliageShadowMergedSubMeshInitOptions
 } from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {type CascadeCullingParam, type FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
 import {FoliageBaker} from "./baking/FoliageBaker";
-import LandscapeFoliageSpatialGrid from "./spatial/LandscapeFoliageSpatialGrid";
+import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./culling/FoliageCullingDispatcher";
@@ -18,10 +14,10 @@ import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
 import FoliageSubMeshAssembler, {type FoliageAssemblyResult} from "./assembler/FoliageSubMeshAssembler";
 
 export {
-    LandscapeFoliage,
+    Foliage,
     type FoliageLODConfig,
     type FoliageLODInfo,
-    type LandscapeFoliageOptions,
+    type FoliageOptions,
     FoliageSubMesh,
     type FoliageSubMeshInitOptions,
     type FoliageRenderPassType,
@@ -31,7 +27,7 @@ export {
     type FoliageTypeAllocation,
     type CascadeCullingParam,
     FoliageBaker,
-    LandscapeFoliageSpatialGrid,
+    FoliageSpatialGrid,
     FoliagePipelineRegistry,
     type FoliageDepthPassMode,
     FoliageRenderer,

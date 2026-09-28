@@ -1,12 +1,12 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
-import LandscapeFoliage from "../LandscapeFoliage";
+import Foliage from "../Foliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 
 export interface ValidFoliageTypeItem {
-    type: LandscapeFoliage | null;
+    type: Foliage | null;
     culledGPU: GPUBuffer | null;
     indirectGPU: GPUBuffer | null;
 }
@@ -72,7 +72,7 @@ class FoliageRenderer {
         }
     }
 
-    render(passEncoder: GPURenderPassEncoder, typeList: readonly LandscapeFoliage[], view: any): void {
+    render(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: any): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
@@ -156,7 +156,7 @@ class FoliageRenderer {
         }
     }
 
-    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly LandscapeFoliage[], view: any): void {
+    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: any): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 

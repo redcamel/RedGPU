@@ -2,7 +2,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import type Landscape from "../../../Landscape";
 import type LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
-import type LandscapeFoliage from "../LandscapeFoliage";
+import type Foliage from "../Foliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
@@ -148,7 +148,7 @@ class FoliageCullingDispatcher {
     }
 
     updateAndDispatch(
-        typeList: LandscapeFoliage[],
+        typeList: Foliage[],
         viewOrCamera: any,
         landscape?: Landscape | null,
         stateData?: any

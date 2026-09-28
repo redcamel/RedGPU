@@ -16,7 +16,7 @@ export interface GrassLODInfo {
     mesh: Mesh;
 }
 
-export interface LandscapeGrassOptions {
+export interface GrassOptions {
     name?: string;
     lods: GrassLODConfig[];
     baseColorTexture?: string | BitmapTexture;
@@ -49,7 +49,7 @@ export interface LandscapeGrassOptions {
     shadowShrinkStartDistance?: number;
 }
 
-export class LandscapeGrass {
+export class Grass {
     #name: string;
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
@@ -90,16 +90,16 @@ export class LandscapeGrass {
      * [EN] Creates a procedural landscape grass instance.
      * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrass(options)` factory method instead.
      */
-    constructor(redGPUContext: RedGPUContext, options: LandscapeGrassOptions) {
+    constructor(redGPUContext: RedGPUContext, options: GrassOptions) {
         if (!options.lods || options.lods.length === 0) {
-            throw new Error(`[LandscapeGrass] 'lods' array must be provided with at least one LOD entry!`);
+            throw new Error(`[Grass] 'lods' array must be provided with at least one LOD entry!`);
         }
 
         const sortedLods = [...options.lods].sort((a, b) => (a.lodDistance ?? 9999) - (b.lodDistance ?? 9999));
         const lod0 = sortedLods[0];
         const lod0Mesh = lod0.mesh;
         if (!lod0Mesh) {
-            throw new Error(`[LandscapeGrass] LOD 0 must contain a valid Mesh instance!`);
+            throw new Error(`[Grass] LOD 0 must contain a valid Mesh instance!`);
         }
         this.#name = options.name || lod0Mesh.name || `Grass_${Math.random().toString(36).substring(2, 7)}`;
 
@@ -113,7 +113,7 @@ export class LandscapeGrass {
 
         const lod0Geom = lod0Mesh.geometry;
         if (!lod0Geom) {
-            throw new Error(`[LandscapeGrass] LOD 0 mesh must have a valid geometry!`);
+            throw new Error(`[Grass] LOD 0 mesh must have a valid geometry!`);
         }
         this.#geometry = lod0Geom;
 
@@ -504,5 +504,5 @@ export class LandscapeGrass {
     }
 }
 
-Object.freeze(LandscapeGrass);
-export default LandscapeGrass;
+Object.freeze(Grass);
+export default Grass;
