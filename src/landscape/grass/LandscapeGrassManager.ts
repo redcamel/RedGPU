@@ -1,6 +1,9 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import View3D from "../../display/view/View3D";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
+import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import LandscapeGrass, {LandscapeGrassOptions} from "./core/LandscapeGrass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassBaker} from "./core/baking/GrassBaker";
@@ -540,23 +543,22 @@ export class LandscapeGrassManager {
      * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
      *
      * @param view -
-     * [KO] 현재 렌더링 중인 뷰 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
-     * [EN] View object currently being rendered (used to extract system uniform bind group and MSAA sample count)
+     * [KO] 현재 렌더링 중인 View3D 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
+     * [EN] Current View3D object being rendered (used to extract system uniform bind group and MSAA sample count)
      * @param passEncoder -
      * [KO] 메인 씬 GPURenderPassEncoder
      * [EN] Main scene GPURenderPassEncoder
      */
-    render(view: any, passEncoder: GPURenderPassEncoder): void {
+    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
 
-        const view3D = view?.view || view;
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
         if (!systemBG) return;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
-        const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
+        const sampleCount = this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1;
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return;
@@ -638,18 +640,16 @@ export class LandscapeGrassManager {
      * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
      *
      * @param view -
-     * [KO] 그림자 패스를 렌더링 중인 뷰 객체
-     * [EN] View object rendering the shadow pass
+     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
+     * [EN] Current View3D object rendering the shadow pass
      * @param passEncoder -
      * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
      * [EN] GPURenderPassEncoder for shadow map generation
      */
-    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
 
-        const view3D = view?.view || view;
-        const currentCascade = view3D?.currentCascadeIndex;
-
+        const currentCascade = view.currentCascadeIndex;
         if (currentCascade !== undefined && currentCascade > 1) return;
 
         const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
@@ -658,7 +658,7 @@ export class LandscapeGrassManager {
         const pipeline = this.#getShadowRenderPipeline();
         if (!pipeline) return;
 
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
         if (!systemBG) return;
 
         passEncoder.setPipeline(pipeline);
@@ -695,44 +695,35 @@ export class LandscapeGrassManager {
      * [KO] 매 프레임 호출되어 카메라 위치에 기반한 잔디 격자 셀 스트리밍을 갱신하고, GPU 컬링 및 베이킹 Compute Pass를 큐에 등록합니다.
      * [EN] Called every frame to update grass grid cell streaming based on camera position and enqueue GPU culling and baking compute passes.
      *
-     * @param camera -
-     * [KO] 현재 뷰를 렌더링 중인 카메라 객체 (위치 및 프러스텀 추출용)
-     * [EN] Camera object currently rendering the view (used to extract position and frustum)
-     * @param stateData -
-     * [KO] 뷰 렌더 상태 데이터 (HZB 텍스처 뷰, 사전 계산된 프러스텀 평면 등 포함)
-     * [EN] View render state data (including HZB texture views, precomputed frustum planes, etc.)
+     * @param renderViewStateData -
+     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 사전 계산된 절두체 평면 등 포함)
+     * [EN] View render state data (including camera, HZB texture views, precomputed frustum planes, etc.)
      */
-    update(camera: any, stateData?: any): void {
+    update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
 
-        const camPos: [number, number, number] = [
-            camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0,
-            camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0,
-            camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0
-        ];
+        const view = renderViewStateData.view;
+        const rawCam = view.rawCamera;
+        const camX = rawCam.x;
+        const camY = rawCam.y;
+        const camZ = rawCam.z;
 
-        this.#lastPopulatePos[0] = camPos[0];
-        this.#lastPopulatePos[1] = camPos[1];
-        this.#lastPopulatePos[2] = camPos[2];
-
-        const rawCam = camera?.camera ?? camera;
-        let frustumPlanes: any = stateData?.frustumPlanes
-            ?? stateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCam?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && rawCam?.projectionMatrix && rawCam?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCam.projectionMatrix, rawCam.viewMatrix);
-        }
+        this.#lastPopulatePos[0] = camX;
+        this.#lastPopulatePos[1] = camY;
+        this.#lastPopulatePos[2] = camZ;
 
         let frustumPlanesF32: Float32Array | null = null;
-        if (frustumPlanes) {
-            if (frustumPlanes instanceof Float32Array) {
-                frustumPlanesF32 = frustumPlanes;
-            } else if (Array.isArray(frustumPlanes) && frustumPlanes.length === 6) {
+        const frustumPlanes = renderViewStateData.frustumPlanes;
+        if (frustumPlanes && frustumPlanes.length === 6) {
+            for (let p = 0; p < 6; p++) {
+                this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
+            }
+            frustumPlanesF32 = this.#frustumPlanesF32;
+        } else if (view.projectionMatrix && rawCam?.viewMatrix) {
+            const computed = computeViewFrustumPlanes(view.projectionMatrix, rawCam.viewMatrix);
+            if (computed) {
                 for (let p = 0; p < 6; p++) {
-                    this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
+                    this.#frustumPlanesF32.set(computed[p], p * 4);
                 }
                 frustumPlanesF32 = this.#frustumPlanesF32;
             }
@@ -744,7 +735,7 @@ export class LandscapeGrassManager {
 
         if (currentLoadedTileCount > 0) {
             const isInitialStreaming = !this.#populated;
-            this.#updateCellStreaming(camPos[0], camPos[2], isInitialStreaming, tileCountChanged);
+            this.#updateCellStreaming(camX, camZ, isInitialStreaming, tileCountChanged);
         }
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
@@ -842,21 +833,20 @@ export class LandscapeGrassManager {
             }
         }
 
-        const currentView = stateData?.view || (camera as any)?.view;
-        const hzbTextureView = currentView?.hierarchicalZBuffer?.textureView || null;
+        const hzbTextureView = view.hierarchicalZBuffer?.textureView || null;
         const hasHZB = !!hzbTextureView;
 
         let viewProjectionMatrixF32: Float32Array | null = null;
-        if (rawCam?.projectionMatrix && rawCam?.viewMatrix) {
-            mat4.multiply(this.#viewProjectionMatrixF32 as any, rawCam.projectionMatrix, rawCam.viewMatrix);
+        if (view.projectionMatrix && rawCam?.viewMatrix) {
+            mat4.multiply(this.#viewProjectionMatrixF32 as any, view.projectionMatrix, rawCam.viewMatrix);
             viewProjectionMatrixF32 = this.#viewProjectionMatrixF32;
         }
 
         const totalAllocated = this.#megaBuffer.totalAllocatedInstances;
         this.#culler.updateUniforms(
-            camPos[0],
-            camPos[1],
-            camPos[2],
+            camX,
+            camY,
+            camZ,
             frustumPlanesF32,
             totalAllocated,
             this.#grassList.length,
@@ -968,16 +958,17 @@ export class LandscapeGrassManager {
      * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
      * [EN] Loaded landscape tile component (`LandscapeComponent`)
      */
-    onTileLoaded(comp: any): void {
+    onTileLoaded(comp: LandscapeComponent): void {
         if (!this.#enabled || this.#grassList.length === 0 || !comp) return;
 
         if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
-            const view = this.#landscape.redGPUContext.viewList?.[0];
-            const cam = (view as any)?.camera;
-            if (cam) {
-                this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
-                this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
-                this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+            // TODO - 이건 나중에 처리해야겠다
+            const view = this.#landscape.redGPUContext.viewList?.[0] as View3D | undefined;
+            const rawCam = view?.rawCamera;
+            if (rawCam) {
+                this.#lastPopulatePos[0] = rawCam.x;
+                this.#lastPopulatePos[1] = rawCam.y;
+                this.#lastPopulatePos[2] = rawCam.z;
             }
         }
 

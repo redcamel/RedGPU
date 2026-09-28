@@ -574,20 +574,15 @@ const renderTestPane = ({
 
             // 실시간 잔디 버퍼 통계
             const grassStats = {
-                get activeInstances() {
-                    let count = 0;
-                    for (let i = 0; i < grassManager.grassList.length; i++) {
-                        const alloc = grassManager.megaBuffer?.getAllocation(grassManager.grassList[i].typeId);
-                        if (alloc) count += alloc.activeCount;
-                    }
-                    return count.toLocaleString();
+                get totalInstances() {
+                    return grassManager.totalInstanceCount.toLocaleString();
                 },
                 get totalCapacity() {
                     return (grassManager.megaBuffer?.totalAllocatedInstances ?? 0).toLocaleString();
                 }
             };
             const statsFolder = grassFolder.addFolder({title: '📊 Buffer Stats', expanded: true});
-            statsFolder.addBinding(grassStats, 'activeInstances', {readonly: true, label: 'Active Instances'});
+            statsFolder.addBinding(grassStats, 'totalInstances', {readonly: true, label: 'Total Instances'});
             statsFolder.addBinding(grassStats, 'totalCapacity', {readonly: true, label: 'Buffer Capacity'});
 
             // 4. 지형 설정

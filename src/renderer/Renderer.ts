@@ -233,7 +233,7 @@ class Renderer {
                     const landscape = landscapes[i];
                     landscape.update(view.camera, renderViewStateData);
                     landscape.foliageManager?.update(view.camera, renderViewStateData);
-                    landscape.grassManager?.update(view.camera, renderViewStateData);
+                    landscape.grassManager?.update(renderViewStateData);
                 }
             }
             // [KO] 쉐도우 패스용 업데이트 및 렌더링 (직사광이 존재할 때만 실행)
