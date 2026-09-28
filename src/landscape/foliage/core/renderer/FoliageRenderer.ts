@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import View3D from "../../../../display/view/View3D";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import Foliage from "../Foliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
@@ -72,7 +73,7 @@ class FoliageRenderer {
         }
     }
 
-    render(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: any): void {
+    render(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
@@ -85,12 +86,11 @@ class FoliageRenderer {
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
 
-        const view3D = view as any;
         const antialiasingManager = this.#redGPUContext.antialiasingManager;
         const msaaID = antialiasingManager.msaaID;
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup ?? null;
 
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
@@ -156,16 +156,15 @@ class FoliageRenderer {
         }
     }
 
-    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: any): void {
+    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
-        const view3D = view as any;
-        const currentCascade = view3D?.currentCascadeIndex ?? 0;
+        const currentCascade = view.currentCascadeIndex ?? 0;
 
         if (currentCascade > 3) return;
 
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup ?? null;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
             this.markShadowBundleDirty();

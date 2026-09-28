@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import GPU_PRIMITIVE_TOPOLOGY from "../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
+import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
 import landscapeVertexSource from "./core/shader/landscapeVertex.wgsl";
 import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeComponent from "./core/spatial/LandscapeComponent";
@@ -986,7 +987,7 @@ export class Landscape extends Object3DContainer {
      * @example
      * ```ts
      * // 렌더 루프에서 매 프레임 호출
-     * landscape.update(camera, renderViewStateData);
+     * landscape.update(renderViewStateData);
      * ```
      *
      * [KO]
@@ -997,29 +998,29 @@ export class Landscape extends Object3DContainer {
      * Updates terrain subsystems every frame based on the camera position, view frustum, and HZB (Hierarchical Z-Buffer).
      * Performs tile streaming updates, GPU instance indirect draw buffer resets, GPU culling compute pass dispatch registration, and debugger updates.
      *
-     * @param camera - 주 카메라 인스턴스 (예: {@link RedGPU.Camera.PerspectiveCamera}) / Primary camera instance (e.g. {@link RedGPU.Camera.PerspectiveCamera}).
      * @param renderViewStateData - 현재 뷰 상태 및 렌더 데이터 / Current view state and rendering data.
      */
-    update(camera: any, renderViewStateData?: any): void {
-        if (!camera) return;
+    update(renderViewStateData: RenderViewStateData): void {
+        if (!renderViewStateData) return;
+
+        const currentView = renderViewStateData.view;
+        const rawCamera = currentView.rawCamera as PerspectiveCamera;
+        if (!rawCamera) return;
 
         if (this.#material) {
             this.#material.updateUniformsData();
         }
 
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+        const camX = rawCamera.x;
+        const camY = rawCamera.y;
+        const camZ = rawCamera.z;
 
-        const rawCamera = camera?.camera ?? camera;
-        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCamera?.frustumPlanes
-            ?? null;
+        const projMatrix = currentView.projectionMatrix;
+        const viewMatrix = rawCamera.viewMatrix;
 
-        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        let frustumPlanes: number[][] | null = renderViewStateData.frustumPlanes ?? null;
+        if (!frustumPlanes && projMatrix && viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(projMatrix, viewMatrix);
         }
 
         this.#tileStreamer.update(camX, camZ, camY);
@@ -1028,7 +1029,7 @@ export class Landscape extends Object3DContainer {
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
 
-        const fovDeg = rawCamera?.fov ?? camera?.fov ?? 60.0;
+        const fovDeg = rawCamera.fieldOfView ?? (rawCamera as any).fov ?? 60.0;
         const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
         if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
             this.#lastTanHalfFOV = tanHalfFOV;
@@ -1036,8 +1037,7 @@ export class Landscape extends Object3DContainer {
         }
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
 
-        const currentView = renderViewStateData?.view || (camera as any)?.view;
-        const hzb = currentView?.hierarchicalZBuffer;
+        const hzb = currentView.hierarchicalZBuffer;
         const effectiveHZBTextureView = hzb?.textureView || null;
         const effectiveHZBSampler = hzb?.sampler || null;
 
@@ -1056,9 +1056,9 @@ export class Landscape extends Object3DContainer {
         }
 
         let mainPVMatrix: Float32Array | null = null;
-        if (rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+        if (projMatrix && viewMatrix) {
             mainPVMatrix = tempPVMatrix;
-            mat4.multiply(mainPVMatrix, rawCamera.projectionMatrix, rawCamera.viewMatrix);
+            mat4.multiply(mainPVMatrix, projMatrix, viewMatrix);
         }
 
         this.#gpuCuller?.updateUniforms(
@@ -1081,7 +1081,7 @@ export class Landscape extends Object3DContainer {
             this.#onPreProcessComputePass
         );
 
-        this.#debuggerManager.update(camera);
+        this.#debuggerManager.update(rawCamera);
     }
 
     /**

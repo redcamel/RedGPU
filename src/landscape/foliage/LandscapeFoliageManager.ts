@@ -1,4 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import View3D from "../../display/view/View3D";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import type Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
@@ -150,12 +152,34 @@ class LandscapeFoliageManager {
         }
     }
 
-    render(view: any, passEncoder: GPURenderPassEncoder): void {
+    /**
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
+     * [EN] Renders culled foliage instances in the main render pass.
+     *
+     * @param view -
+     * [KO] 현재 렌더링 중인 View3D 객체
+     * [EN] Current View3D object being rendered
+     * @param passEncoder -
+     * [KO] 메인 씬 GPURenderPassEncoder
+     * [EN] Main scene GPURenderPassEncoder
+     */
+    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
         this.#renderer.render(passEncoder, this.#typeList, view);
     }
 
-    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사가 설정된 식생 인스턴스들의 그림자를 렌더링합니다.
+     * [EN] Renders shadows for foliage instances in the cascaded shadow map (CSM) pass.
+     *
+     * @param view -
+     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
+     * [EN] Current View3D object rendering the shadow pass
+     * @param passEncoder -
+     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
+     * [EN] GPURenderPassEncoder for shadow map generation
+     */
+    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
         this.#renderer.renderShadow(passEncoder, this.#typeList, view);
     }
@@ -307,9 +331,19 @@ class LandscapeFoliageManager {
         return this.#typeList;
     }
 
-    update(viewOrCamera?: any, stateData?: any): void {
+    /**
+     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 식생 공간 격자 셀 스트리밍을 갱신하고, GPU 컬링 Compute Pass를 디스패치합니다.
+     * [EN] Called every frame to update foliage spatial grid streaming based on camera position and dispatch GPU culling compute passes.
+     *
+     * @param renderViewStateData -
+     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 절두체 평면 등 포함)
+     * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
+     */
+    update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#typeList.length === 0) return;
-        const cam = viewOrCamera?.camera || viewOrCamera;
+
+        const view = renderViewStateData.view;
+        const cam = view.rawCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
             let maxRadius = this.#streamingRadius;
             const count = this.#typeList.length;
@@ -332,7 +366,7 @@ class LandscapeFoliageManager {
                 this.#typeList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
             }
         }
-        this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
+        this.#cullingDispatcher.updateAndDispatch(this.#typeList, view, this.#landscape, renderViewStateData);
     }
 
     #syncWindToAllTypes(): void {

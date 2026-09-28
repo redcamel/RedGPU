@@ -231,8 +231,8 @@ class Renderer {
                 const lenL = landscapes.length;
                 for (let i = 0; i < lenL; i++) {
                     const landscape = landscapes[i];
-                    landscape.update(view.camera, renderViewStateData);
-                    landscape.foliageManager?.update(view.camera, renderViewStateData);
+                    landscape.update(renderViewStateData);
+                    landscape.foliageManager?.update(renderViewStateData);
                     landscape.grassManager?.update(renderViewStateData);
                 }
             }
