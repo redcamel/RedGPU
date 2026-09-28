@@ -425,7 +425,15 @@ function renderTestPane(redGPUContext, lake, landscape, directionalLight, charac
             const folderLandscape = pane.addFolder({title: 'Landscape (지형 설정)', expanded: false});
             folderLandscape.addBinding(landscape, 'heightScale', {min: 1.0, max: 30.0, step: 0.5});
 
-            // 5. DirectionalLight (태양광)
+            // 5. Foliage (식생 설정)
+            const foliageManager = landscape?.foliageManager;
+            if (foliageManager) {
+                const folderFoliage = pane.addFolder({title: 'Foliage (식생 설정)', expanded: false});
+                folderFoliage.addBinding(foliageManager, 'enabled');
+                folderFoliage.addBinding(foliageManager, 'streamingRadius', {min: 100, max: 1000, step: 25});
+            }
+
+            // 6. DirectionalLight (태양광)
             const folderSun = pane.addFolder({title: 'DirectionalLight (태양광)', expanded: false});
             folderSun.addBinding(directionalLight, 'elevation', {min: 5, max: 89, step: 1});
             folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
