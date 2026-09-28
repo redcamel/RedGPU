@@ -44,7 +44,7 @@ RedGPU.init(
         landscape.heightScale = 650;
         landscape.baseColor.setColorByHEX('#4a7c59');
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         // [KO] GUI 패널 및 인터랙션(카메라 모드, 캐릭터) 초기화
         // [EN] Initialize GUI panel and interactions (camera modes, character)

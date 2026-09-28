@@ -123,7 +123,7 @@ RedGPU.init(
             return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
         };
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         // 5. WaterLake (산악 분지와 맞닿는 고품질 호수 수체)
         const lake = new RedGPU.Water.WaterLake(

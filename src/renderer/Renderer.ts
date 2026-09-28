@@ -227,10 +227,8 @@ class Renderer {
 
             updateJitter(view)
             {
-                const landscapes = scene.landscapeChildren;
-                const lenL = landscapes.length;
-                for (let i = 0; i < lenL; i++) {
-                    const landscape = landscapes[i];
+                const landscape = scene.landscape;
+                if (landscape) {
                     landscape.update(renderViewStateData);
                     landscape.foliageManager?.update(renderViewStateData);
                     landscape.grassManager?.update(renderViewStateData);

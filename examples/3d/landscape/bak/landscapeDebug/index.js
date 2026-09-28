@@ -40,7 +40,7 @@ RedGPU.init(
             return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
         };
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {

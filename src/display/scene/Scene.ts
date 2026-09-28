@@ -19,7 +19,7 @@ class Scene extends Object3DContainer {
     #physicsEngine: IPhysicsEngine
     #destroyed: boolean = false
 
-    #landscapeChildren: Landscape[] = []
+    #landscape: Landscape | null = null;
     #waterChildren: WaterLake[] = []
 
     constructor() {
@@ -60,40 +60,22 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * [KO] 씬에 바인딩된 Landscape 지형 객체 리스트를 반환합니다.
-     * [EN] Returns the list of Landscape terrain objects bound to the scene.
+     * [KO] 씬에 바인딩된 지형(Landscape) 객체를 가져옵니다.
+     * [EN] Gets the Landscape terrain object bound to the scene.
      */
-    get landscapeChildren(): Landscape[] {
-        return this.#landscapeChildren;
+    get landscape(): Landscape | null {
+        return this.#landscape;
     }
 
     /**
-     * [KO] Landscape 지형 시스템 객체를 씬 지형 리스트에 추가합니다.
-     * [EN] Adds a Landscape terrain system object to the scene's terrain list.
+     * [KO] 씬에 바인딩할 지형(Landscape) 객체를 설정합니다. `null` 전달 시 지형이 해제됩니다.
+     * [EN] Sets the Landscape terrain object bound to the scene. Passing `null` unbinds the terrain.
      */
-    addLandscape(landscape: Landscape): void {
-        this.#checkLandscapeInstance(landscape);
-        if (!this.#landscapeChildren.includes(landscape)) {
-            this.#landscapeChildren.push(landscape);
+    set landscape(val: Landscape | null) {
+        if (val !== null && !(val instanceof Landscape)) {
+            consoleAndThrowError('allow only Landscape instance or null.');
         }
-    }
-
-    /**
-     * [KO] 씬에서 Landscape 지형 시스템 객체를 제거합니다.
-     * [EN] Removes a Landscape terrain system object from the scene.
-     */
-    removeLandscape(landscape: Landscape): void {
-        this.#checkLandscapeInstance(landscape);
-        const index = this.#landscapeChildren.indexOf(landscape);
-        if (index > -1) {
-            this.#landscapeChildren.splice(index, 1);
-        }
-    }
-
-    #checkLandscapeInstance(target: Landscape) {
-        if (!(target instanceof Landscape)) {
-            consoleAndThrowError('allow only Landscape instance.');
-        }
+        this.#landscape = val;
     }
 
     /**
@@ -135,6 +117,13 @@ class Scene extends Object3DContainer {
         if (!target || !(target as any).isWater) {
             consoleAndThrowError('allow only WaterLake instance.');
         }
+    }
+
+    override destroy(): void {
+        super.destroy();
+        this.#landscape = null;
+        this.#waterChildren.length = 0;
+        this.#destroyed = true;
     }
 }
 

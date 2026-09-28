@@ -79,7 +79,7 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  * landscape.debuggerManager.vbt = true;
  *
  * // 씬에 지형 등록 / Add landscape to scene
- * scene.addLandscape(landscape);
+ * scene.landscape = landscape;
  * ```
  *
  * [KO] 아래는 Landscape의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.

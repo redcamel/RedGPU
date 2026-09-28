@@ -110,7 +110,7 @@ RedGPU.init(
             return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
         };
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
         landscape.debuggerManager.spatialGrid = false;
 
         // 6. Renderer Start

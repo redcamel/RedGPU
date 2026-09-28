@@ -87,7 +87,7 @@ RedGPU.init(
             });
         });
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         // 7. 수목 식생 매니저
         const foliageManager = landscape.foliageManager;

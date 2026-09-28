@@ -161,13 +161,8 @@ class ShadowManager {
         const scene = (view as any).rawScene || view.scene;
         if (!scene) return false;
 
-        const landscapes = scene.landscapeChildren;
-        if (!landscapes || landscapes.length === 0) return false;
-
-        const count = landscapes.length;
-        for (let i = 0; i < count; i++) {
-            const landscape = landscapes[i];
-            if (!landscape) continue;
+        const landscape = scene.landscape;
+        if (landscape) {
             if (landscape.castShadow) return true;
 
             const foliage = landscape.foliageManager;

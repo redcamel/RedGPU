@@ -124,7 +124,7 @@ RedGPU.init(
             });
         });
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         // -----------------------------------------------------------------
         // 7. 잔디 서브시스템 및 수목 식생 매니저

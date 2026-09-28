@@ -111,7 +111,7 @@ RedGPU.init(
             });
         });
 
-        scene.addLandscape(landscape);
+        scene.landscape = landscape;
 
         // 7. 물리 기반 산중 호수 수체 (WaterLake) 생성
         const lake = new RedGPU.Water.WaterLake(
