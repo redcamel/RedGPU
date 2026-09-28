@@ -45,9 +45,9 @@ import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
  * @category Landscape
  */
 class LandscapeFoliageManager {
-    static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
-    static #sharedEmptyBindGroup: GPUBindGroup | null = null;
-    static #sharedSubMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
+    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
+    #emptyBindGroup: GPUBindGroup | null = null;
+    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
@@ -101,36 +101,30 @@ class LandscapeFoliageManager {
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
-            if (!LandscapeFoliageManager.#sharedEmptyBindGroupLayout) {
-                LandscapeFoliageManager.#sharedEmptyBindGroupLayout = gpuDevice.createBindGroupLayout({
-                    label: 'EmptyFoliageBindGroupLayout',
-                    entries: []
-                });
-            }
-            if (!LandscapeFoliageManager.#sharedEmptyBindGroup) {
-                LandscapeFoliageManager.#sharedEmptyBindGroup = gpuDevice.createBindGroup({
-                    label: 'EmptyFoliageBindGroup',
-                    layout: LandscapeFoliageManager.#sharedEmptyBindGroupLayout,
-                    entries: []
-                });
-            }
-            if (!LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout) {
-                LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
-                    label: 'FoliageSubMesh_VertexBindGroupLayout',
-                    entries: [
-                        {
-                            binding: 0,
-                            visibility: GPUShaderStage.VERTEX,
-                            buffer: {type: 'uniform'}
-                        }
-                    ]
-                });
-            }
+            this.#emptyBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'EmptyFoliageBindGroupLayout',
+                entries: []
+            });
+            this.#emptyBindGroup = gpuDevice.createBindGroup({
+                label: 'EmptyFoliageBindGroup',
+                layout: this.#emptyBindGroupLayout,
+                entries: []
+            });
+            this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'FoliageSubMesh_VertexBindGroupLayout',
+                entries: [
+                    {
+                        binding: 0,
+                        visibility: GPUShaderStage.VERTEX,
+                        buffer: {type: 'uniform'}
+                    }
+                ]
+            });
         }
 
-        const emptyBGL = LandscapeFoliageManager.#sharedEmptyBindGroupLayout;
-        const emptyBG = LandscapeFoliageManager.#sharedEmptyBindGroup;
-        const subMeshBGL = LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout;
+        const emptyBGL = this.#emptyBindGroupLayout;
+        const emptyBG = this.#emptyBindGroup;
+        const subMeshBGL = this.#subMeshVertexBindGroupLayout;
 
         this.#megaBuffer = new FoliageMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
@@ -558,7 +552,7 @@ class LandscapeFoliageManager {
         const foliage = new Foliage(
             this.#redGPUContext,
             mergedOptions,
-            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
+            this.#subMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
             (t) => this.#repopulateFoliage(t),
@@ -667,6 +661,9 @@ class LandscapeFoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#cullingDispatcher.destroy();
+        this.#emptyBindGroupLayout = null;
+        this.#emptyBindGroup = null;
+        this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
         this.#tileStreamer = null as any;
         this.#onUniformUpdateNeeded = null;
