@@ -290,14 +290,6 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 등록된 잔디가 하나 이상 존재하는지 여부를 확인합니다.
-     * [EN] Checks whether one or more grass items are registered.
-     */
-    get hasGrass(): boolean {
-        return this.#grassList.length > 0;
-    }
-
-    /**
      * [KO] 현재 스트리밍 반경 내 활성 셀들에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
      */

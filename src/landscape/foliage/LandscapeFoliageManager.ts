@@ -128,18 +128,6 @@ class LandscapeFoliageManager {
         this.#renderer.markShadowBundleDirty();
     }
 
-    get megaBuffer(): FoliageMegaBuffer {
-        return this.#megaBuffer;
-    }
-
-    get hasFoliage(): boolean {
-        return this.#typeList.length > 0;
-    }
-
-    get hasFoliageTypes(): boolean {
-        return this.#typeList.length > 0;
-    }
-
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
@@ -199,7 +187,7 @@ class LandscapeFoliageManager {
             for (let i = 0; i < count; i++) {
                 this.#typeList[i].subCellSize = clamped;
             }
-            this.repopulateAll();
+            this.#repopulateAll();
         }
     }
 
@@ -226,10 +214,6 @@ class LandscapeFoliageManager {
             this.#debugSubCellColoration = boolVal;
             this.#onUniformUpdateNeeded?.();
         }
-    }
-
-    get spatialGrid(): FoliageSpatialGrid {
-        return this.#spatialGrid;
     }
 
     get windEnabled(): boolean {
@@ -323,10 +307,6 @@ class LandscapeFoliageManager {
         this.#syncWindToAllTypes();
     }
 
-    get typeList(): readonly Foliage[] {
-        return this.#typeList;
-    }
-
     get foliageList(): readonly Foliage[] {
         return this.#typeList;
     }
@@ -395,14 +375,6 @@ class LandscapeFoliageManager {
         }
     }
 
-    get foliageTypes(): ReadonlyMap<string, Foliage> {
-        return this.#foliageTypes;
-    }
-
-    get foliages(): ReadonlyMap<string, Foliage> {
-        return this.#foliageTypes;
-    }
-
     addFoliage(options: FoliageOptions): Foliage {
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] Foliage with name '${options.name}' already exists.`);
@@ -421,7 +393,7 @@ class LandscapeFoliageManager {
             LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.repopulateFoliage(t),
+            (t) => this.#repopulateFoliage(t),
             this.#cullingDispatcher.baker
         );
         this.#foliageTypes.set(options.name, foliage);
@@ -460,10 +432,18 @@ class LandscapeFoliageManager {
         }
     }
 
-    repopulateFoliage(foliageOrName: Foliage | string): void {
-        const type = typeof foliageOrName === 'string'
-            ? this.#foliageTypes.get(foliageOrName)
-            : foliageOrName;
+    destroy(): void {
+        this.clearFoliage();
+        this.#megaBuffer.destroy();
+        this.#pipelineRegistry.clearCache();
+        this.#renderer.destroy();
+        this.#cullingDispatcher.destroy();
+        this.#landscape = null;
+        this.#tileStreamer = null as any;
+        this.#onUniformUpdateNeeded = null;
+    }
+
+    #repopulateFoliage(type: Foliage): void {
         if (!type) return;
 
         type.clearTileCache();
@@ -476,13 +456,6 @@ class LandscapeFoliageManager {
             }
         }
         this.#renderer.markShadowBundleDirty();
-    }
-
-    repopulateAll(): void {
-        const count = this.#typeList.length;
-        for (let i = 0; i < count; i++) {
-            this.repopulateFoliage(this.#typeList[i]);
-        }
     }
 
     /**
@@ -538,12 +511,11 @@ class LandscapeFoliageManager {
         }
     }
 
-    destroy(): void {
-        this.clearFoliage();
-        this.#megaBuffer.destroy();
-        this.#pipelineRegistry.clearCache();
-        this.#renderer.destroy();
-        this.#cullingDispatcher.destroy();
+    #repopulateAll(): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#repopulateFoliage(this.#typeList[i]);
+        }
     }
 }
 

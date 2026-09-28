@@ -169,15 +169,15 @@ class ShadowManager {
 
             const foliage = landscape.foliageManager;
             if (foliage && foliage.enabled) {
-                const types = foliage.typeList;
-                const typeCount = types.length;
+                const foliageList = foliage.foliageList;
+                const typeCount = foliageList.length;
                 for (let t = 0; t < typeCount; t++) {
-                    if (types[t].castShadow) return true;
+                    if (foliageList[t].castShadow) return true;
                 }
             }
 
             const grass = landscape.grassManager;
-            if (grass && grass.enabled && grass.hasGrass) {
+            if (grass && grass.enabled) {
                 const grassList = grass.grassList;
                 const typeCount = grassList.length;
                 for (let t = 0; t < typeCount; t++) {
