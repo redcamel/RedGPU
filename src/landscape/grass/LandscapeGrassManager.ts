@@ -114,6 +114,7 @@ function sortCandidateIndicesByDistance(
     if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
 }
 
+//TODO - 잔디도 머지해서 그리면 좋아질것 같은데...
 /**
  * [KO] 대규모 지형(Landscape)의 절차적 잔디(Procedural Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
  * [EN] Manager class that oversees the large-scale procedural grass ecosystem of the landscape.

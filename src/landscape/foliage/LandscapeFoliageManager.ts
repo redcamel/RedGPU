@@ -20,6 +20,7 @@ class LandscapeFoliageManager {
     #landscape: Landscape | null = null;
     #tileStreamer: LandscapeTileStreamer;
 
+    #enabled: boolean = true;
     #megaBuffer: FoliageMegaBuffer;
     #foliageTypes: Map<string, Foliage> = new Map();
     #typeList: Foliage[] = [];
@@ -93,6 +94,22 @@ class LandscapeFoliageManager {
     }
 
     /**
+     * [KO] 식생 시스템의 활성화 여부를 가져옵니다. `false`일 경우 식생 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
+     * [EN] Gets whether the foliage system is enabled. When `false`, foliage streaming, culling, and rendering are suspended.
+     */
+    get enabled(): boolean {
+        return this.#enabled;
+    }
+
+    /**
+     * [KO] 식생 시스템의 활성화 여부를 설정합니다.
+     * [EN] Sets whether the foliage system is enabled.
+     */
+    set enabled(val: boolean) {
+        this.#enabled = !!val;
+    }
+
+    /**
      * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
      * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
      *
@@ -101,6 +118,7 @@ class LandscapeFoliageManager {
      * [EN] Loaded landscape tile component (`LandscapeComponent`)
      */
     onTileLoaded(tileComponent: LandscapeComponent): void {
+        if (!this.#enabled || this.#typeList.length === 0 || !tileComponent) return;
         const count = this.#typeList.length;
         for (let i = 0; i < count; i++) {
             this.#typeList[i].populateTile(tileComponent, this.#landscape);
@@ -133,15 +151,13 @@ class LandscapeFoliageManager {
     }
 
     render(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (passEncoder) {
-            this.#renderer.render(passEncoder, this.#typeList, view);
-        }
+        if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
+        this.#renderer.render(passEncoder, this.#typeList, view);
     }
 
     renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (passEncoder && this.hasFoliageTypes) {
-            this.#renderer.renderShadow(passEncoder, this.#typeList, view);
-        }
+        if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
+        this.#renderer.renderShadow(passEncoder, this.#typeList, view);
     }
 
     get subCellSize(): number {
@@ -292,6 +308,7 @@ class LandscapeFoliageManager {
     }
 
     update(viewOrCamera?: any, stateData?: any): void {
+        if (!this.#enabled || this.#typeList.length === 0) return;
         const cam = viewOrCamera?.camera || viewOrCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
             let maxRadius = this.#streamingRadius;

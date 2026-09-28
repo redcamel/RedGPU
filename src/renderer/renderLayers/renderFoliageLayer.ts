@@ -20,7 +20,7 @@ export function renderFoliageLayer(view: View3D, passEncoder: GPURenderPassEncod
     for (let i = 0; i < count; i++) {
         const landscape = landscapes[i];
         const foliage: LandscapeFoliageManager = landscape?.foliageManager;
-        if (!foliage || !foliage.hasFoliageTypes) continue;
+        if (!foliage || !foliage.hasFoliageTypes || !foliage.enabled) continue;
 
         foliage.render(view, passEncoder);
     }
@@ -44,7 +44,7 @@ export function renderFoliageShadowLayer(view: View3D, passEncoder: GPURenderPas
     for (let i = 0; i < count; i++) {
         const landscape = landscapes[i];
         const foliage: LandscapeFoliageManager = landscape?.foliageManager;
-        if (!foliage || !foliage.hasFoliageTypes) continue;
+        if (!foliage || !foliage.hasFoliageTypes || !foliage.enabled) continue;
 
         foliage.renderShadow(view, passEncoder);
     }

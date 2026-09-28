@@ -171,7 +171,7 @@ class ShadowManager {
             if (landscape.castShadow) return true;
 
             const foliage = landscape.foliageManager;
-            if (foliage) {
+            if (foliage && foliage.enabled) {
                 const types = foliage.typeList;
                 const typeCount = types.length;
                 for (let t = 0; t < typeCount; t++) {
