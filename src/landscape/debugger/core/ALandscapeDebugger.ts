@@ -1,6 +1,5 @@
 import Landscape from "../../Landscape";
 import RedGPUContext from "../../../context/RedGPUContext";
-import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
 export interface ALandscapeDebuggerOptions {
     width?: number;
@@ -112,7 +111,6 @@ function ensureDebuggerStyles(): void {
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #container: HTMLDivElement;
-    static readonly FULLSCREEN_QUAD_VERTEX_WGSL: string = fullscreenQuadVertexWGSL;
     #canvas: HTMLCanvasElement;
     #overlayCanvas: HTMLCanvasElement;
     #headerElement: HTMLDivElement | null = null;
