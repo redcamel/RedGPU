@@ -164,7 +164,6 @@ export class LandscapeGrassManager {
     #fragmentFarModule: GPUShaderModule | null = null;
     #fragmentShadowModule: GPUShaderModule | null = null;
     #pipelineLayout: GPUPipelineLayout | null = null;
-    #pipelineBindGroupLayout0: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout1: GPUBindGroupLayout | null = null;
     #pipelineBindGroupLayout2: GPUBindGroupLayout | null = null;
     #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
@@ -510,28 +509,13 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 등록된 모든 잔디 생태계 타입을 일괄 제거하고 GPU MegaBuffer 및 머티리얼 버퍼를 초기 상태로 리셋합니다.
-     * [EN] Clears all registered grass ecosystem types and resets the GPU MegaBuffer and material buffers to the initial state.
+     * [KO] 등록된 모든 잔디 생태계 타입을 일괄 제거하고 초기 상태로 리셋합니다.
+     * [EN] Clears all registered grass ecosystem types and resets to the initial state.
      */
     clearGrass(): void {
-        for (const grass of this.#grassList) {
-            grass.onChanged = null;
+        while (this.#grassList.length > 0) {
+            this.removeGrass(this.#grassList[this.#grassList.length - 1]);
         }
-        this.#grassList.length = 0;
-
-        for (const res of this.#typeMaterialBuffers.values()) {
-            res.uniformBuffer.destroy();
-            res.grassUniformGPUBuffer.destroy();
-        }
-        this.#typeMaterialBuffers.clear();
-
-        for (const state of this.#typeCellStates.values()) {
-            for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
-            for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
-            state.activeCellRanges.clear();
-            state.freeSlotRanges.length = 0;
-        }
-        this.#typeCellStates.clear();
 
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
@@ -544,8 +528,6 @@ export class LandscapeGrassManager {
         };
 
         this.#nextTypeId = 0;
-        this.#totalInstancesPopulated = 0;
-        this.#populated = false;
         this.#lastLoadedTileCount = 0;
         this.#lastUpdateGridPos[0] = -999999;
         this.#lastUpdateGridPos[1] = -999999;
@@ -1110,6 +1092,12 @@ export class LandscapeGrassManager {
         this.#shadowPipeline = null;
         this.#vertexShadowModule = null;
         this.#fragmentShadowModule = null;
+        this.#vertexModule = null;
+        this.#fragmentModule = null;
+        this.#fragmentFarModule = null;
+        this.#pipelineLayout = null;
+        this.#pipelineBindGroupLayout1 = null;
+        this.#pipelineBindGroupLayout2 = null;
 
         for (const res of this.#typeMaterialBuffers.values()) {
             res.uniformBuffer.destroy();
@@ -1157,7 +1145,7 @@ export class LandscapeGrassManager {
             code: grassShadowSource
         });
 
-        this.#pipelineBindGroupLayout0 = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
+        const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
 
         this.#pipelineBindGroupLayout1 = gpuDevice.createBindGroupLayout({
             label: 'Grass_Pipeline_Group1_Layout',
@@ -1179,7 +1167,7 @@ export class LandscapeGrassManager {
         this.#pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'Grass_PipelineLayout',
             bindGroupLayouts: [
-                this.#pipelineBindGroupLayout0,
+                systemBGLayout,
                 this.#pipelineBindGroupLayout1,
                 this.#pipelineBindGroupLayout2,
             ]
