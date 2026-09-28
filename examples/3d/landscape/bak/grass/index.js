@@ -580,8 +580,8 @@ const renderTestPane = ({
             const grassStats = {
                 get activeInstances() {
                     let count = 0;
-                    for (let i = 0; i < grassManager.grassTypes.length; i++) {
-                        const alloc = grassManager.megaBuffer?.getAllocation(grassManager.grassTypes[i].typeId);
+                    for (let i = 0; i < grassManager.grassList.length; i++) {
+                        const alloc = grassManager.megaBuffer?.getAllocation(grassManager.grassList[i].typeId);
                         if (alloc) count += alloc.activeCount;
                     }
                     return count.toLocaleString();

@@ -20,7 +20,7 @@ export function renderGrassLayer(view: View3D, passEncoder: GPURenderPassEncoder
     for (let i = 0; i < count; i++) {
         const landscape = landscapes[i];
         const grass: LandscapeGrassManager = landscape?.grassManager;
-        if (!grass || !grass.hasGrassTypes || !grass.enabled) continue;
+        if (!grass || !grass.hasGrass || !grass.enabled) continue;
 
         grass.render(view, passEncoder);
     }
@@ -44,7 +44,7 @@ export function renderGrassShadowLayer(view: View3D, passEncoder: GPURenderPassE
     for (let i = 0; i < count; i++) {
         const landscape = landscapes[i];
         const grass: LandscapeGrassManager = landscape?.grassManager;
-        if (!grass || !grass.hasGrassTypes || !grass.enabled) continue;
+        if (!grass || !grass.hasGrass || !grass.enabled) continue;
 
         grass.renderShadow(view, passEncoder);
     }

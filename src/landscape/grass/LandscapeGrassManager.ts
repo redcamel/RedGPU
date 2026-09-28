@@ -17,12 +17,75 @@ import LandscapeWeightMapCache from "../core/material/LandscapeWeightMapCache";
 
 const DEG2RAD: number = 0.017453292519943295;
 
+/**
+ * [KO] 잔디 배치 및 스트리밍을 수행하는 기본 격자 셀의 한 변 크기(미터 단위)입니다. 기본값: `16.0`
+ * [EN] Dimension in meters of a single grid cell used for grass population and streaming. Default: `16.0`
+ */
+const CELL_SIZE: number = 16.0;
+
+/**
+ * [KO] 카메라를 중심으로 잔디를 활성화하고 스트리밍하는 기본 반경(미터 단위)입니다. 기본값: `120.0`
+ * [EN] Default radius in meters around the camera within which grass is activated and streamed. Default: `120.0`
+ */
+const DEFAULT_STREAMING_RADIUS: number = 120.0;
+
+/**
+ * [KO] 한 프레임에 거리순으로 정렬 및 평가 가능한 스트리밍 후보 셀의 최대 개수입니다. 기본값: `2048`
+ * [EN] Maximum number of candidate cells evaluated for streaming in a single frame. Default: `2048`
+ */
+const MAX_CANDIDATE_CELLS: number = 2048;
+
+/**
+ * [KO] 프레임 드랍(스파이크)을 방지하기 위해 한 프레임에 신규 인스턴스를 생성/배치하는 최대 셀 예산입니다. 기본값: `8`
+ * [EN] Maximum cell budget populated with new instances per frame to prevent frame drops. Default: `8`
+ */
+const MAX_POPULATE_CELLS_PER_FRAME: number = 8;
+
+/**
+ * [KO] 특정 격자 셀에 할당된 MegaBuffer 인스턴스 슬롯 범위 정보 인터페이스입니다.
+ * [EN] Interface defining the MegaBuffer instance slot range allocated to a specific grid cell.
+ */
 interface CellSlotRange {
+    /**
+     * [KO] MegaBuffer 내에서 해당 셀의 인스턴스 데이터가 시작되는 슬롯 인덱스입니다.
+     * [EN] Starting slot index of the cell's instance data within the MegaBuffer.
+     */
     start: number;
+
+    /**
+     * [KO] 해당 셀에 할당 예약된 총 슬롯 개수(최대 밀도 기준)입니다.
+     * [EN] Total number of slots reserved for this cell based on target density.
+     */
     count: number;
+
+    /**
+     * [KO] 지형 가중치 맵 및 절차적 배치 필터링을 거쳐 실제로 유효하게 채워진 인스턴스 개수입니다.
+     * [EN] Actual number of valid instances populated after terrain weight map and procedural filtering.
+     */
     filledCount: number;
 }
 
+/**
+ * [KO] 스트리밍 후보 셀들의 인덱스를 카메라와의 거리 제곱값 오름차순으로 정렬하는 퀵 정렬(Quick Sort) 함수입니다.
+ * [EN] Quick-sort function that sorts streaming candidate cell indices in ascending order of squared distance to the camera.
+ *
+ * @remarks
+ * [KO] 매 프레임 고빈도 호출 구간에서 가비지 컬렉션(GC) 부하를 방지하기 위해 추가 힙 메모리 할당 없이 사전 할당된 `Int32Array` 배열 내에서 제자리 스왑(in-place swap)으로 정렬합니다.
+ * [EN] Operates in-place on pre-allocated `Int32Array` index arrays without additional heap allocations to eliminate Garbage Collection (GC) overhead during high-frequency per-frame execution.
+ *
+ * @param indices -
+ * [KO] 정렬할 후보 셀의 인덱스 배열 (`#candidateIndices`)
+ * [EN] Array of candidate cell indices to be sorted (`#candidateIndices`)
+ * @param dists -
+ * [KO] 각 후보 셀의 카메라 상대 거리 제곱값이 저장된 배열 (`#candidateDistancesSq`)
+ * [EN] Array containing squared distances from each candidate cell to the camera (`#candidateDistancesSq`)
+ * @param left -
+ * [KO] 정렬 구간 시작 인덱스
+ * [EN] Starting index of the range to sort
+ * @param right -
+ * [KO] 정렬 구간 끝 인덱스
+ * [EN] Ending index of the range to sort
+ */
 function sortCandidateIndicesByDistance(
     indices: Int32Array,
     dists: Float32Array,
@@ -48,12 +111,34 @@ function sortCandidateIndicesByDistance(
     if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
 }
 
+/**
+ * [KO] 대규모 지형(Landscape)의 절차적 잔디(Procedural Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that oversees the large-scale procedural grass ecosystem of the landscape.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * const grassManager = landscape.grassManager;
+ * grassManager.streamingRadius = 150;
+ *
+ * // 잔디 생태계 타입 등록
+ * const fieldGrass = grassManager.addGrass({
+ *     name: 'FieldGrass',
+ *     lods: [
+ *         { mesh: grassMeshLOD0, lodDistance: 35 },
+ *         { mesh: grassMeshLOD1, lodDistance: 90 }
+ *     ],
+ *     baseColorTexture: grassTexture,
+ *     densityPerHectare: 7500,
+ *     targetLayer: 'GrassLayer'
+ * });
+ * ```
+ */
 export class LandscapeGrassManager {
-    static readonly CELL_SIZE: number = 16.0;
-    static readonly DEFAULT_STREAMING_RADIUS: number = 120.0;
-    static readonly MAX_CANDIDATE_CELLS: number = 2048;
-    static readonly MAX_POPULATE_CELLS_PER_FRAME: number = 8;
-
     static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = {
         label: 'LandscapeGrass_ComputePass'
     };
@@ -62,13 +147,13 @@ export class LandscapeGrassManager {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
     #enabled: boolean = true;
-    #streamingRadius: number = LandscapeGrassManager.DEFAULT_STREAMING_RADIUS;
+    #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassMegaBuffer;
     #baker: GrassBaker;
     #culler: GrassCuller;
 
-    #grassTypes: LandscapeGrass[] = [];
+    #grassList: LandscapeGrass[] = [];
     #nextTypeId: number = 0;
     #totalInstancesPopulated: number = 0;
     #populated: boolean = false;
@@ -99,9 +184,9 @@ export class LandscapeGrassManager {
         cachedHasVbt: boolean;
     }> = new Map();
 
-    #candidateKeys: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
-    #candidateDistancesSq: Float32Array = new Float32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
-    #candidateIndices: Int32Array = new Int32Array(LandscapeGrassManager.MAX_CANDIDATE_CELLS);
+    #candidateKeys: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
+    #candidateDistancesSq: Float32Array = new Float32Array(MAX_CANDIDATE_CELLS);
+    #candidateIndices: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
 
     #slotRangePool: CellSlotRange[] = [];
 
@@ -123,6 +208,19 @@ export class LandscapeGrassManager {
 
     #prngState: number = 12345;
 
+    /**
+     * [KO] LandscapeGrassManager의 새 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.
+     * [EN] Creates a new instance of LandscapeGrassManager.
+     * @remarks Do not instantiate directly; access via the `landscape.grassManager` property.
+     *
+     * @param landscape -
+     * [KO] 잔디 생태계가 바인딩될 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance to which the grass ecosystem is bound
+     * @param tileStreamer -
+     * [KO] 지형의 가상 텍스처(VHT/VNT/VBT)를 제공하는 타일 스트리머
+     * [EN] Tile streamer providing landscape virtual textures (VHT/VNT/VBT)
+     */
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
@@ -143,18 +241,34 @@ export class LandscapeGrassManager {
         this.#initShadersAndLayouts();
     }
 
+    /**
+     * [KO] 잔디 시스템의 활성화 여부를 가져옵니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
+     * [EN] Gets whether the grass system is enabled. When `false`, grass streaming, culling, and rendering are suspended.
+     */
     get enabled(): boolean {
         return this.#enabled;
     }
 
+    /**
+     * [KO] 잔디 시스템의 활성화 여부를 설정합니다.
+     * [EN] Sets whether the grass system is enabled.
+     */
     set enabled(val: boolean) {
         this.#enabled = val;
     }
 
+    /**
+     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(미터 단위)을 가져옵니다.
+     * [EN] Gets the active grass streaming radius (in meters) around the camera.
+     */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
 
+    /**
+     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(미터 단위)을 설정합니다. 값이 변경되면 인스턴스 배치가 즉시 재평가됩니다.
+     * [EN] Sets the active grass streaming radius (in meters) around the camera. Re-evaluates instance placement immediately when changed.
+     */
     set streamingRadius(val: number) {
         const clamped = Math.max(16.0, val);
         if (this.#streamingRadius !== clamped) {
@@ -163,26 +277,45 @@ export class LandscapeGrassManager {
         }
     }
 
-    get grassList(): readonly LandscapeGrass[] {
-        return this.#grassTypes;
+
+    /**
+     * [KO] 현재 매니저에 등록된 잔디 목록을 가져옵니다.
+     * [EN] Gets the list of grass items currently registered to this manager.
+     */
+    get grassList(): LandscapeGrass[] {
+        return this.#grassList;
     }
 
-    get grassTypes(): LandscapeGrass[] {
-        return this.#grassTypes;
-    }
-
+    /**
+     * [KO] 등록된 잔디가 하나 이상 존재하는지 여부를 확인합니다.
+     * [EN] Checks whether one or more grass items are registered.
+     */
     get hasGrass(): boolean {
-        return this.#grassTypes.length > 0;
+        return this.#grassList.length > 0;
     }
 
-    get hasGrassTypes(): boolean {
-        return this.#grassTypes.length > 0;
-    }
-
+    /**
+     * [KO] 현재 스트리밍 반경 내 활성 셀들에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
+     * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
+     */
     get totalInstancesPopulated(): number {
         return this.#totalInstancesPopulated;
     }
 
+    /**
+     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환하거나 캐시 생성합니다.
+     * [EN] Retrieves or creates a cached GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
+     *
+     * @param sampleCount -
+     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
+     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
+     * @param isFar -
+     * [KO] 원거리 LOD 전용 간소화 셰이더를 적용할지 여부 (기본값: false)
+     * [EN] Whether to apply the simplified shader dedicated to far LOD (default: false)
+     * @returns
+     * [KO] 생성되거나 캐시된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Created or cached GPURenderPipeline instance, or `null` if creation fails
+     */
     getOrCreateRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
         const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
         let pipeline = cache.get(sampleCount);
@@ -239,6 +372,14 @@ export class LandscapeGrassManager {
         return pipeline;
     }
 
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환하거나 생성합니다.
+     * [EN] Retrieves or creates the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
+     *
+     * @returns
+     * [KO] 생성되거나 캐시된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Created or cached shadow GPURenderPipeline instance, or `null` if creation fails
+     */
     getOrCreateShadowRenderPipeline(): GPURenderPipeline | null {
         if (this.#shadowPipeline) return this.#shadowPipeline;
 
@@ -285,15 +426,50 @@ export class LandscapeGrassManager {
         return this.#shadowPipeline;
     }
 
+    /**
+     * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
+     * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
+     *
+     * @remarks
+     * [KO] 등록된 잔디는 카메라 스트리밍 반경 및 지형 가중치 맵(WeightMap)에 따라 자동으로 셀 단위 배치 및 인스턴싱이 수행됩니다.
+     * [EN] Registered grass is automatically populated and instanced per cell according to the camera streaming radius and terrain weight map.
+     *
+     * ### Example
+     * ```typescript
+     * const grassType = landscape.grassManager.addGrass({
+     *     name: 'WildGrass',
+     *     lods: [
+     *         { mesh: grassLOD0Mesh, lodDistance: 30 },
+     *         { mesh: grassLOD1Mesh, lodDistance: 70 }
+     *     ],
+     *     baseColorTexture: grassTexture,
+     *     densityPerHectare: 6000,
+     *     minSlope: 0,
+     *     maxSlope: 40,
+     *     minScale: [0.8, 0.8],
+     *     maxScale: [1.2, 1.4],
+     *     groundBlendStrength: 0.85,
+     *     subsurfaceStrength: 0.5,
+     *     targetLayer: 'GrassLayer'
+     * });
+     * ```
+     *
+     * @param options -
+     * [KO] 잔디 타입의 메시, LOD 단계, 밀도, 경사 필터링, 스케일 범위, 셰이딩 파라미터가 포함된 옵션 객체
+     * [EN] Options object containing meshes, LOD stages, density, slope filtering, scale ranges, and shading parameters
+     * @returns
+     * [KO] 생성되어 등록된 {@link LandscapeGrass} 인스턴스
+     * [EN] Created and registered {@link LandscapeGrass} instance
+     */
     addGrass(options: LandscapeGrassOptions): LandscapeGrass {
         const grassType = new LandscapeGrass(this.#redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
-        this.#grassTypes.push(grassType);
+        this.#grassList.push(grassType);
 
         const targetRadius = Math.max(grassType.cullingDistance, this.#streamingRadius);
-        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (LandscapeGrassManager.CELL_SIZE * LandscapeGrassManager.CELL_SIZE));
+        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
         const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));
 
         const lodAllocConfigs = grassType.lods.map(l => ({
@@ -387,8 +563,19 @@ export class LandscapeGrassManager {
         return grassType;
     }
 
+    /**
+     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 잔디 격자 셀 스트리밍을 갱신하고, GPU 컬링 및 베이킹 Compute Pass를 큐에 등록합니다.
+     * [EN] Called every frame to update grass grid cell streaming based on camera position and enqueue GPU culling and baking compute passes.
+     *
+     * @param camera -
+     * [KO] 현재 뷰를 렌더링 중인 카메라 객체 (위치 및 프러스텀 추출용)
+     * [EN] Camera object currently rendering the view (used to extract position and frustum)
+     * @param stateData -
+     * [KO] 뷰 렌더 상태 데이터 (HZB 텍스처 뷰, 사전 계산된 프러스텀 평면 등 포함)
+     * [EN] View render state data (including HZB texture views, precomputed frustum planes, etc.)
+     */
     update(camera: any, stateData?: any): void {
-        if (!this.#enabled || this.#grassTypes.length === 0) return;
+        if (!this.#enabled || this.#grassList.length === 0) return;
 
         const camPos: [number, number, number] = [
             camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0,
@@ -439,7 +626,7 @@ export class LandscapeGrassManager {
         const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res) continue;
 
@@ -544,7 +731,7 @@ export class LandscapeGrassManager {
             camPos[2],
             frustumPlanesF32,
             totalAllocated,
-            this.#grassTypes.length,
+            this.#grassList.length,
             viewProjectionMatrixF32,
             hasHZB
         );
@@ -557,6 +744,14 @@ export class LandscapeGrassManager {
         );
     }
 
+    /**
+     * [KO] 지정된 3D 월드 좌표를 중심으로 스트리밍 반경 내의 잔디 셀과 인스턴스를 강제로 재생성 및 배치합니다.
+     * [EN] Forces repopulation and placement of grass cells and instances within the streaming radius around the specified 3D world position.
+     *
+     * @param centerPos -
+     * [KO] 스트리밍 중심이 될 월드 좌표 `[x, y, z]`
+     * [EN] World coordinates `[x, y, z]` to act as the streaming center
+     */
     populateInstances(centerPos: [number, number, number]): void {
         this.#lastPopulatePos[0] = centerPos[0];
         this.#lastPopulatePos[1] = centerPos[1];
@@ -564,9 +759,13 @@ export class LandscapeGrassManager {
         this.#updateCellStreaming(centerPos[0], centerPos[2], true);
     }
 
+    /**
+     * [KO] 현재 활성화된 모든 잔디 인스턴스에 대해 지형 표면 높이/법선/가중치 스냅 GPU 베이킹 태스크를 재등록합니다.
+     * [EN] Re-enqueues GPU baking tasks for all currently active grass instances to re-snap height, normals, and weights to the terrain surface.
+     */
     rebakeAll(): void {
-        if (!this.#enabled || this.#grassTypes.length === 0) return;
-        for (const type of this.#grassTypes) {
+        if (!this.#enabled || this.#grassList.length === 0) return;
+        for (const type of this.#grassList) {
             const state = this.#typeCellStates.get(type.typeId);
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (!state || !alloc) continue;
@@ -578,8 +777,16 @@ export class LandscapeGrassManager {
         }
     }
 
+    /**
+     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되어, 해당 타일 영역과 교차하는 잔디 인스턴스들의 지형 스냅 베이킹을 실행합니다.
+     * [EN] Called when a new landscape tile component finishes loading to trigger terrain snap baking for grass instances intersecting that tile boundary.
+     *
+     * @param comp -
+     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
+     * [EN] Loaded landscape tile component (`LandscapeComponent`)
+     */
     handleTileLoaded(comp: any): void {
-        if (!this.#enabled || this.#grassTypes.length === 0 || !comp) return;
+        if (!this.#enabled || this.#grassList.length === 0 || !comp) return;
 
         if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
             const view = this.#landscape.redGPUContext.viewList?.[0];
@@ -601,9 +808,9 @@ export class LandscapeGrassManager {
         const minZ = comp.worldZ - halfTileZ;
         const maxZ = comp.worldZ + halfTileZ;
 
-        const cellSize = LandscapeGrassManager.CELL_SIZE;
+        const cellSize = CELL_SIZE;
 
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             const state = this.#typeCellStates.get(type.typeId);
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (!state || !alloc) continue;
@@ -622,8 +829,19 @@ export class LandscapeGrassManager {
         }
     }
 
+    /**
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
+     * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
+     *
+     * @param view -
+     * [KO] 현재 렌더링 중인 뷰 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
+     * [EN] View object currently being rendered (used to extract system uniform bind group and MSAA sample count)
+     * @param passEncoder -
+     * [KO] 메인 씬 GPURenderPassEncoder
+     * [EN] Main scene GPURenderPassEncoder
+     */
     render(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassTypes.length === 0 || !this.#populated) return;
+        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
 
         const view3D = view?.view || view;
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
@@ -647,7 +865,7 @@ export class LandscapeGrassManager {
         const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
         if (!indirectGPUBuffer) return;
 
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (!alloc || alloc.activeCount === 0) continue;
 
@@ -709,8 +927,19 @@ export class LandscapeGrassManager {
         }
     }
 
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
+     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
+     *
+     * @param view -
+     * [KO] 그림자 패스를 렌더링 중인 뷰 객체
+     * [EN] View object rendering the shadow pass
+     * @param passEncoder -
+     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
+     * [EN] GPURenderPassEncoder for shadow map generation
+     */
     renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassTypes.length === 0) return;
+        if (!this.#enabled || this.#grassList.length === 0) return;
 
         const view3D = view?.view || view;
         const currentCascade = view3D?.currentCascadeIndex;
@@ -729,7 +958,7 @@ export class LandscapeGrassManager {
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, systemBG);
 
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             if (!type.castShadow) continue;
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (!alloc || alloc.activeCount === 0) continue;
@@ -756,6 +985,10 @@ export class LandscapeGrassManager {
         }
     }
 
+    /**
+     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼(MegaBuffer, Uniform, Indirect Buffer), 텍스처 뷰, 파이프라인 및 내부 슬롯 풀을 안전하게 해제합니다.
+     * [EN] Safely releases all GPU buffers, texture views, pipelines, slot pools, and internal resources held by the grass manager.
+     */
     destroy(): void {
         this.#megaBuffer.destroy();
         this.#baker.destroy();
@@ -775,9 +1008,13 @@ export class LandscapeGrassManager {
         this.#keysToEvict.length = 0;
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
-        this.#grassTypes.length = 0;
+        this.#grassList.length = 0;
     }
 
+    /**
+     * [KO] 잔디 렌더링 및 그림자 렌더링에 필요한 WebGPU 셰이더 모듈과 파이프라인 레이아웃을 생성 및 초기화합니다.
+     * [EN] Creates and initializes WebGPU shader modules and pipeline layouts required for grass and shadow rendering.
+     */
     #initShadersAndLayouts(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const resourceManager = this.#redGPUContext.resourceManager;
@@ -832,6 +1069,10 @@ export class LandscapeGrassManager {
         });
     }
 
+    /**
+     * [KO] 커맨드 인코더의 사전 컴퓨트 패스(PreProcess Compute Pass) 단계에서 호출되어 지형 스냅 베이킹 및 GPU 컬링을 실행합니다.
+     * [EN] Invoked during the pre-process compute pass of the command encoder to execute terrain snap baking and GPU culling.
+     */
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         if (this.#baker.hasPendingTasks) {
             const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
@@ -852,13 +1093,30 @@ export class LandscapeGrassManager {
         this.#culler.dispatchPass(computePass, this.#megaBuffer.totalAllocatedInstances);
     };
 
+    /**
+     * [KO] 카메라 위치를 기준으로 격자 셀의 유효성을 평가하여 범위를 벗어난 셀을 언마운트(Evict)하고 신규 셀을 배치(Populate)합니다.
+     * [EN] Evaluates grid cell validity based on camera position, evicting out-of-range cells and populating new candidate cells.
+     *
+     * @param camX -
+     * [KO] 카메라의 월드 X 좌표
+     * [EN] World X coordinate of the camera
+     * @param camZ -
+     * [KO] 카메라의 월드 Z 좌표
+     * [EN] World Z coordinate of the camera
+     * @param forceRebuild -
+     * [KO] 기존 활성 셀들을 모두 강제 초기화하고 처음부터 다시 구축할지 여부
+     * [EN] Whether to force reset all active cells and rebuild from scratch
+     * @param populateAllCandidates -
+     * [KO] 프레임당 배치 셀 수 제한을 무시하고 유효 후보 셀을 모두 한 번에 배치할지 여부
+     * [EN] Whether to bypass the per-frame populate budget and populate all candidate cells at once
+     */
     #updateCellStreaming(
         camX: number,
         camZ: number,
         forceRebuild: boolean = false,
         populateAllCandidates: boolean = false
     ): void {
-        const cellSize = LandscapeGrassManager.CELL_SIZE;
+        const cellSize = CELL_SIZE;
         const curGridX = Math.floor(camX / cellSize);
         const curGridZ = Math.floor(camZ / cellSize);
 
@@ -873,7 +1131,7 @@ export class LandscapeGrassManager {
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
 
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             const state = this.#typeCellStates.get(type.typeId);
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (!state || !alloc) continue;
@@ -901,7 +1159,7 @@ export class LandscapeGrassManager {
 
             this.#neededCellKeysSet.clear();
             let candidateCount = 0;
-            const maxCandidates = LandscapeGrassManager.MAX_CANDIDATE_CELLS;
+            const maxCandidates = MAX_CANDIDATE_CELLS;
 
             for (let dz = -cellRadius; dz <= cellRadius; dz++) {
                 const cz = curGridZ + dz;
@@ -960,7 +1218,7 @@ export class LandscapeGrassManager {
                 state.activeCount -= range.filledCount;
             }
 
-            const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : LandscapeGrassManager.MAX_POPULATE_CELLS_PER_FRAME;
+            const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : MAX_POPULATE_CELLS_PER_FRAME;
             const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
             const targetDensity = type.instancesPerCell;
             const matchedLayer = type.targetLayer ? this.#landscape.layers.find(l => l.name === type.targetLayer || (l as any).key === type.targetLayer) : undefined;
@@ -1075,7 +1333,7 @@ export class LandscapeGrassManager {
         }
 
         let totalPop = 0;
-        for (const type of this.#grassTypes) {
+        for (const type of this.#grassList) {
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
             if (alloc) totalPop += alloc.activeCount;
         }
@@ -1083,10 +1341,26 @@ export class LandscapeGrassManager {
         this.#populated = totalPop > 0;
     }
 
+    /**
+     * [KO] 절차적 잔디 배치를 위한 고속 의사난수 생성기(PRNG)의 시드를 설정합니다.
+     * [EN] Sets the seed for the fast pseudo-random number generator (PRNG) used in procedural grass placement.
+     *
+     * @param seed -
+     * [KO] PRNG 초기화 정수 시드
+     * [EN] Integer seed for PRNG initialization
+     */
     #setPrngSeed(seed: number): void {
         this.#prngState = seed >>> 0;
     }
 
+    /**
+     * [KO] 0.0 이상 1.0 미만 범위의 균일 의사난수를 생성합니다. (SplitMix32 기반 고속 연산)
+     * [EN] Generates a uniform pseudo-random number in the range [0.0, 1.0). (Fast computation based on SplitMix32)
+     *
+     * @returns
+     * [KO] 생성된 의사난수 부동소수점 값
+     * [EN] Generated pseudo-random floating-point value
+     */
     #nextPrng(): number {
         this.#prngState = (this.#prngState + 0x6D2B79F5) | 0;
         let t = Math.imul(this.#prngState ^ (this.#prngState >>> 15), 1 | this.#prngState);
@@ -1094,6 +1368,23 @@ export class LandscapeGrassManager {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     }
 
+    /**
+     * [KO] 셀 슬롯 범위 객체 풀에서 인스턴스를 가져오거나 새로 생성합니다. (GC 방지)
+     * [EN] Acquires a cell slot range instance from the pool or creates a new one. (Prevents GC)
+     *
+     * @param start -
+     * [KO] 슬롯 시작 인덱스
+     * [EN] Slot starting index
+     * @param count -
+     * [KO] 할당 슬롯 총 개수
+     * [EN] Total number of allocated slots
+     * @param filledCount -
+     * [KO] 실제 유효하게 채워진 인스턴스 개수 (기본값: 0)
+     * [EN] Actual filled instance count (default: 0)
+     * @returns
+     * [KO] 풀에서 재사용되거나 새로 생성된 {@link CellSlotRange} 객체
+     * [EN] Reused from pool or newly created {@link CellSlotRange} object
+     */
     #acquireSlotRange(start: number, count: number, filledCount: number = 0): CellSlotRange {
         const item = this.#slotRangePool.pop();
         if (item) {
@@ -1105,6 +1396,14 @@ export class LandscapeGrassManager {
         return {start, count, filledCount};
     }
 
+    /**
+     * [KO] 사용이 끝난 셀 슬롯 범위 객체를 재사용 풀로 반환합니다. (GC 방지)
+     * [EN] Returns an unused cell slot range object to the reuse pool. (Prevents GC)
+     *
+     * @param item -
+     * [KO] 반환할 {@link CellSlotRange} 객체
+     * [EN] {@link CellSlotRange} object to release back to the pool
+     */
     #releaseSlotRange(item: CellSlotRange): void {
         this.#slotRangePool.push(item);
     }

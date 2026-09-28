@@ -180,11 +180,11 @@ class ShadowManager {
             }
 
             const grass = landscape.grassManager;
-            if (grass && grass.enabled && grass.hasGrassTypes) {
-                const types = grass.grassTypes;
-                const typeCount = types.length;
+            if (grass && grass.enabled && grass.hasGrass) {
+                const grassList = grass.grassList;
+                const typeCount = grassList.length;
                 for (let t = 0; t < typeCount; t++) {
-                    if (types[t].castShadow) return true;
+                    if (grassList[t].castShadow) return true;
                 }
             }
         }
