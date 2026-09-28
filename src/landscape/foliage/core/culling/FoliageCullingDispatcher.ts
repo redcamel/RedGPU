@@ -30,10 +30,6 @@ class FoliageCullingDispatcher {
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
 
-    static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
-        label: 'Foliage_GPUCulling_ComputePass'
-    });
-
     #redGPUContext: RedGPUContext;
     #megaBuffer: FoliageMegaBuffer | null = null;
     #baker: FoliageBaker;
@@ -266,7 +262,7 @@ class FoliageCullingDispatcher {
             );
 
             this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-                FoliageCullingDispatcher.#COMPUTE_PASS_DESCRIPTOR,
+                'Foliage_GPUCulling_ComputePass',
                 this.#onPreProcessComputePass
             );
         }

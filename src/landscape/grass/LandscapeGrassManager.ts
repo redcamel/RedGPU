@@ -145,9 +145,6 @@ function sortCandidateIndicesByDistance(
  * @category Landscape
  */
 export class LandscapeGrassManager {
-    static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = {
-        label: 'LandscapeGrass_ComputePass'
-    };
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape;
@@ -875,7 +872,7 @@ export class LandscapeGrassManager {
         this.#culler.updateBindGroup(this.#megaBuffer, hzbTextureView);
 
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            LandscapeGrassManager.#COMPUTE_PASS_DESCRIPTOR,
+            'LandscapeGrass_ComputePass',
             this.#onPreProcessComputePass
         );
     }

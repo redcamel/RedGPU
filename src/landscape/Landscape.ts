@@ -23,9 +23,6 @@ import {mat4} from 'gl-matrix';
 
 const DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
 const tempPVMatrix: Float32Array = new Float32Array(16);
-const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
-    label: 'Landscape_GPUCulling_ComputePass'
-});
 
 /**
  * [KO] 대규모 오픈월드 지형(Landscape)의 렌더링, 동적 타일 스트리밍, 복합 생태계 서브시스템을 총괄하는 핵심 클래스입니다.
@@ -1102,7 +1099,7 @@ export class Landscape extends BaseObject {
         );
 
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            COMPUTE_PASS_DESCRIPTOR,
+            'Landscape_GPUCulling_ComputePass',
             this.#onPreProcessComputePass
         );
 
