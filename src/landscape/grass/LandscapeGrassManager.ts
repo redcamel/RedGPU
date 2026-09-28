@@ -447,24 +447,20 @@ export class LandscapeGrassManager {
      * [EN] Removes a specific registered grass ecosystem type from the manager and safely releases associated GPU resources.
      *
      * @param target -
-     * [KO] 제거할 {@link Grass} 인스턴스, 잔디의 고유 이름(`string`), 또는 타입 ID(`number`)
-     * [EN] {@link Grass} instance, unique grass name (`string`), or type ID (`number`) to remove
+     * [KO] 제거할 {@link Grass} 인스턴스 또는 잔디의 고유 이름(`string`)
+     * [EN] {@link Grass} instance or unique grass name (`string`) to remove
      * @returns
      * [KO] 제거 성공 여부 (대상을 찾아 정상 제거 시 `true`, 미존재 시 `false`)
      * [EN] Whether removal succeeded (`true` if found and removed, `false` otherwise)
      */
-    removeGrass(target: Grass | string | number): boolean {
-        let idx = -1;
-        if (typeof target === 'number') {
-            idx = this.#grassList.findIndex(g => g.typeId === target);
-        } else if (typeof target === 'string') {
-            idx = this.#grassList.findIndex(g => g.name === target);
-        } else if (target) {
-            idx = this.#grassList.indexOf(target);
-        }
+    removeGrass(target: Grass | string): boolean {
+        if (!target) return false;
+        const grass = (target instanceof Grass) ? target : this.getGrass(target);
+        if (!grass) return false;
+
+        const idx = this.#grassList.indexOf(grass);
         if (idx === -1) return false;
 
-        const grass = this.#grassList[idx];
         const typeId = grass.typeId;
         grass.onChanged = null;
         this.#grassList.splice(idx, 1);
@@ -510,6 +506,27 @@ export class LandscapeGrassManager {
         this.#populated = totalPop > 0;
 
         return true;
+    }
+
+    /**
+     * [KO] 등록된 잔디 생태계 타입을 이름(`name`)으로 조회합니다.
+     * [EN] Retrieves a registered grass ecosystem type by name.
+     *
+     * @param name -
+     * [KO] 조회할 잔디의 고유 이름(`string`)
+     * [EN] Unique name (`string`) of the grass to retrieve
+     * @returns
+     * [KO] 일치하는 {@link Grass} 인스턴스 (미등록 시 `undefined`)
+     * [EN] Matching {@link Grass} instance (`undefined` if not registered)
+     */
+    getGrass(name: string): Grass | undefined {
+        if (!name) return undefined;
+        const count = this.#grassList.length;
+        for (let i = 0; i < count; i++) {
+            const g = this.#grassList[i];
+            if (g.name === name) return g;
+        }
+        return undefined;
     }
 
     /**

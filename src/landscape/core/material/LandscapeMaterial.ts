@@ -177,9 +177,13 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     removeLayer(layer: LandscapeLayer | string): boolean {
-        const idx = typeof layer === 'string'
-            ? this.#layers.findIndex(l => l.name === layer)
-            : this.#layers.indexOf(layer);
+        if (!layer) return false;
+        const target = typeof layer === 'string'
+            ? this.getLayer(layer)
+            : layer;
+        if (!target) return false;
+
+        const idx = this.#layers.indexOf(target);
         if (idx !== -1) {
             const removed = this.#layers.splice(idx, 1)[0];
             removed.onChange = undefined;
@@ -193,16 +197,30 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     clearLayers(): void {
-        for (const l of this.#layers) {
-            l.onChange = undefined;
+        while (this.#layers.length > 0) {
+            this.removeLayer(this.#layers[this.#layers.length - 1]);
         }
-        this.#layers.length = 0;
-        this.#textureArrayVersion++;
-        this.updateUniformsData();
     }
 
+    /**
+     * [KO] 등록된 지형 텍스처 블렌딩 레이어를 이름으로 조회합니다.
+     * [EN] Retrieves a registered terrain texture blending layer by name.
+     *
+     * @param layerName -
+     * [KO] 조회할 레이어 이름
+     * [EN] Name of the layer to retrieve
+     * @returns
+     * [KO] 일치하는 {@link LandscapeLayer} 인스턴스 (미등록 시 `undefined`)
+     * [EN] Matching {@link LandscapeLayer} instance (`undefined` if not registered)
+     */
     getLayer(layerName: string): LandscapeLayer | undefined {
-        return this.#layers.find(l => l.name === layerName);
+        if (!layerName) return undefined;
+        const count = this.#layers.length;
+        for (let i = 0; i < count; i++) {
+            const l = this.#layers[i];
+            if (l.name === layerName) return l;
+        }
+        return undefined;
     }
 
     updateUniformsData(): void {

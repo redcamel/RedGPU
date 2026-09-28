@@ -485,28 +485,61 @@ class LandscapeFoliageManager {
         }
     }
 
-    removeFoliage(name: string): boolean {
-        const foliage = this.#foliageTypes.get(name);
-        if (foliage) {
-            foliage.destroy();
-            const idx = this.#typeList.indexOf(foliage);
-            if (idx !== -1) {
-                this.#typeList.splice(idx, 1);
-            }
-            this.#renderer.markShadowBundleDirty();
-            return this.#foliageTypes.delete(name);
-        }
-        return false;
+    /**
+     * [KO] 등록된 식생 생태계 타입을 매니저에서 제거하고 관련 리소스를 해제합니다.
+     * [EN] Removes a registered foliage ecosystem type from the manager and releases associated resources.
+     *
+     * @param target -
+     * [KO] 제거할 식생의 고유 이름(`string`) 또는 {@link Foliage} 인스턴스
+     * [EN] Unique name (`string`) or {@link Foliage} instance to remove
+     * @returns
+     * [KO] 대상이 정상적으로 제거되었으면 `true`, 미존재 시 `false`
+     * [EN] `true` if target was found and removed, `false` otherwise
+     */
+    removeFoliage(target: Foliage | string): boolean {
+        if (!target) return false;
+        const foliage = typeof target === 'string'
+            ? this.getFoliage(target)
+            : target;
+        if (!foliage) return false;
+
+        const idx = this.#typeList.indexOf(foliage);
+        if (idx === -1) return false;
+
+        this.#typeList.splice(idx, 1);
+        foliage.destroy();
+        this.#renderer.markShadowBundleDirty();
+        return this.#foliageTypes.delete(foliage.name);
     }
 
+    /**
+     * [KO] 등록된 식생 생태계 타입을 이름(`name`)으로 조회합니다.
+     * [EN] Retrieves a registered foliage ecosystem type by name.
+     *
+     * @param name -
+     * [KO] 조회할 식생 타입의 고유 이름
+     * [EN] Unique name of the foliage type to retrieve
+     * @returns
+     * [KO] 일치하는 {@link Foliage} 인스턴스 (미등록 시 `undefined`)
+     * [EN] Matching {@link Foliage} instance (`undefined` if not registered)
+     */
     getFoliage(name: string): Foliage | undefined {
+        if (!name) return undefined;
         return this.#foliageTypes.get(name);
     }
 
+    /**
+     * [KO] 등록된 모든 식생(Foliage) 생태계 타입을 일괄 제거합니다.
+     * [EN] Clears all registered foliage ecosystem types.
+     */
+    clearFoliage(): void {
+        while (this.#typeList.length > 0) {
+            this.removeFoliage(this.#typeList[this.#typeList.length - 1]);
+        }
+    }
+
     destroy(): void {
-        this.#foliageTypes.forEach((type) => type.destroy());
-        this.#foliageTypes.clear();
-        this.#typeList.length = 0;
+        this.clearFoliage();
         this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();

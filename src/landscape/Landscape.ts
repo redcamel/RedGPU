@@ -968,6 +968,7 @@ export class Landscape extends Object3DContainer {
      * [EN] Whether removal succeeded
      */
     removeLayer(layer: LandscapeLayer | string): boolean {
+        if (!layer) return false;
         return this.#material.removeLayer(layer);
     }
 
@@ -977,6 +978,30 @@ export class Landscape extends Object3DContainer {
      */
     clearLayers(): void {
         this.#material.clearLayers();
+    }
+
+    /**
+     * [KO] 등록된 텍스처 블렌딩 레이어를 이름(`name`)으로 조회합니다.
+     * [EN] Retrieves a registered texture blending layer by name.
+     *
+     * ### Example
+     * ```typescript
+     * const grassLayer = landscape.getLayer('Grass');
+     * if (grassLayer) {
+     *     grassLayer.roughness = 0.8;
+     * }
+     * ```
+     *
+     * @param name -
+     * [KO] 조회할 레이어의 고유 이름
+     * [EN] Unique name of the layer to retrieve
+     * @returns
+     * [KO] 일치하는 {@link LandscapeLayer} 인스턴스 (미등록 시 `undefined`)
+     * [EN] Matching {@link LandscapeLayer} instance (`undefined` if not registered)
+     */
+    getLayer(name: string): LandscapeLayer | undefined {
+        if (!name) return undefined;
+        return this.#material.getLayer(name);
     }
 
 
