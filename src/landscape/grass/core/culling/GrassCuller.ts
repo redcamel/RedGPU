@@ -12,9 +12,6 @@ export class GrassCuller {
     #globalUniformCPUBuffer: Float32Array;
     #globalUniformUintBuffer: Uint32Array;
 
-    #fallbackHZBTexture: GPUTexture | null = null;
-    #fallbackHZBTextureView: GPUTextureView | null = null;
-
     #cachedRawBuffer: GPUBuffer | null = null;
     #cachedTypeParamsBuffer: GPUBuffer | null = null;
     #cachedCulledBuffer: GPUBuffer | null = null;
@@ -101,19 +98,7 @@ export class GrassCuller {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#cullBindGroupLayout || !this.#globalUniformGPUBuffer) return;
 
-        if (!this.#fallbackHZBTextureView) {
-            this.#fallbackHZBTexture = gpuDevice.createTexture({
-                label: 'GrassCuller_FallbackHZBTexture',
-                size: [1, 1, 1],
-                format: 'r32float',
-                usage: GPUTextureUsage.TEXTURE_BINDING,
-            });
-            this.#fallbackHZBTextureView = this.#fallbackHZBTexture.createView({
-                label: 'GrassCuller_FallbackHZBTextureView',
-            });
-        }
-
-        const targetHZBView = hzbTextureView || this.#fallbackHZBTextureView;
+        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyR32FloatTextureView;
 
         if (
             !this.#cullBindGroup ||
@@ -161,9 +146,7 @@ export class GrassCuller {
     destroy(): void {
         this.#globalUniformGPUBuffer?.destroy();
         this.#globalUniformGPUBuffer = null;
-        this.#fallbackHZBTexture?.destroy();
-        this.#fallbackHZBTexture = null;
-        this.#fallbackHZBTextureView = null;
+
         this.#cullPipeline = null;
         this.#cullBindGroupLayout = null;
         this.#cullBindGroup = null;
@@ -184,12 +167,13 @@ export class GrassCuller {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        const shaderModule = gpuDevice.createShaderModule({
-            label: 'GrassCullComputeModule',
+        const resourceManager = this.#redGPUContext.resourceManager;
+
+        const shaderModule = resourceManager.createGPUShaderModule('GrassCullComputeModule', {
             code: grassCullComputeSource,
         });
 
-        this.#cullBindGroupLayout = gpuDevice.createBindGroupLayout({
+        this.#cullBindGroupLayout = resourceManager.createBindGroupLayout('GrassCuller_BindGroupLayout', {
             label: 'GrassCuller_BindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
@@ -201,8 +185,7 @@ export class GrassCuller {
             ],
         });
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'GrassCuller_PipelineLayout',
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('GrassCuller_PipelineLayout', {
             bindGroupLayouts: [this.#cullBindGroupLayout],
         });
 

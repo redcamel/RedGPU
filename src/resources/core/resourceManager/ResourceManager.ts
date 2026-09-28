@@ -102,6 +102,7 @@ class ResourceManager extends RedGPUObject {
     #emptyCubeTextureView: GPUTextureView
     #emptyTexture3DView: GPUTextureView
     #emptyDepthTextureView: GPUTextureView
+    #emptyR32FloatTextureView: GPUTextureView
     #mipmapGenerator: MipmapGenerator
     #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     #brdfGenerator: BRDFGenerator
@@ -371,6 +372,14 @@ class ResourceManager extends RedGPUObject {
      */
     get emptyDepthTextureView(): GPUTextureView {
         return this.#emptyDepthTextureView;
+    }
+
+    /**
+     * [KO] 빈 1x1 R32Float 텍스처 뷰(HZB 폴백 등)를 반환합니다.
+     * [EN] Returns an empty 1x1 R32Float texture view (e.g. for HZB fallback).
+     */
+    get emptyR32FloatTextureView(): GPUTextureView {
+        return this.#emptyR32FloatTextureView;
     }
 
     /**
@@ -657,6 +666,7 @@ class ResourceManager extends RedGPUObject {
         this.#emptyCubeTextureView = null;
         this.#emptyTexture3DView = null;
         this.#emptyDepthTextureView = null;
+        this.#emptyR32FloatTextureView = null;
         this.#wgslParser.destroy()
         this.#wgslParser = null
 
@@ -1001,6 +1011,14 @@ class ResourceManager extends RedGPUObject {
                 label: 'EMPTY_DEPTH_TEXTURE',
             });
             this.#emptyDepthTextureView = emptyDepthTexture.createView({label: emptyDepthTexture.label});
+
+            const emptyR32FloatTexture = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                format: 'r32float',
+                usage: GPUTextureUsage.TEXTURE_BINDING,
+                label: 'EMPTY_R32FLOAT_TEXTURE',
+            });
+            this.#emptyR32FloatTextureView = emptyR32FloatTexture.createView({label: emptyR32FloatTexture.label});
 
             this.#basicSampler = new Sampler(this.redGPUContext)
             this.#basicDisplacementSampler = new Sampler(this.redGPUContext, {

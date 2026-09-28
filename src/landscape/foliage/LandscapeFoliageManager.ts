@@ -100,9 +100,10 @@ class LandscapeFoliageManager {
         this.#spatialGrid = new FoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.#redGPUContext.resourceManager;
         if (gpuDevice) {
-            this.#emptyBindGroupLayout = gpuDevice.createBindGroupLayout({
-                label: 'EmptyFoliageBindGroupLayout',
+            this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_EmptyBindGroupLayout', {
+                label: 'Landscape_EmptyBindGroupLayout',
                 entries: []
             });
             this.#emptyBindGroup = gpuDevice.createBindGroup({
@@ -110,7 +111,7 @@ class LandscapeFoliageManager {
                 layout: this.#emptyBindGroupLayout,
                 entries: []
             });
-            this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
+            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('FoliageSubMesh_VertexBindGroupLayout', {
                 label: 'FoliageSubMesh_VertexBindGroupLayout',
                 entries: [
                     {

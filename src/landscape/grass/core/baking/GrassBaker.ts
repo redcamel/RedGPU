@@ -192,13 +192,14 @@ export class GrassBaker {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        const shaderModule = gpuDevice.createShaderModule({
-            label: 'GrassBakeComputeModule',
+        const resourceManager = this.#redGPUContext.resourceManager;
+
+        const shaderModule = resourceManager.createGPUShaderModule('GrassBakeComputeModule', {
             code: grassBakeComputeSource,
         });
 
-        this.#bakeBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'GrassBaker_BindGroupLayout',
+        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_BakeBindGroupLayout', {
+            label: 'Landscape_BakeBindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
@@ -211,8 +212,7 @@ export class GrassBaker {
             ],
         });
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'GrassBaker_PipelineLayout',
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Landscape_BakePipelineLayout', {
             bindGroupLayouts: [this.#bakeBindGroupLayout],
         });
 

@@ -287,14 +287,13 @@ class FoliageCullingDispatcher {
         }
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        const layout = gpuDevice.createBindGroupLayout({
+        const layout = resourceManager.createBindGroupLayout('FoliageCullingBindGroupLayout', {
             label: 'FoliageCullingBindGroupLayout',
             ...descriptor
         });
         this.#cullingBindGroupLayout = layout;
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'FoliageCullingPipelineLayout',
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('FoliageCullingPipelineLayout', {
             bindGroupLayouts: [layout],
         });
 

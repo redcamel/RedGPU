@@ -76,9 +76,6 @@ export class FoliageMegaBuffer {
     #nextIndirectOffset: number = 0;
 
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
-    #fallbackHZBTexture: GPUTexture | null = null;
-    #fallbackHZBTextureView: GPUTextureView | null = null;
-    #fallbackHZBSampler: GPUSampler | null = null;
     #cachedHZBTextureView: GPUTextureView | null = null;
     #cachedHZBSampler: GPUSampler | null = null;
 
@@ -555,21 +552,8 @@ export class FoliageMegaBuffer {
         }
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!this.#fallbackHZBTextureView) {
-            this.#fallbackHZBTexture = gpuDevice.createTexture({
-                label: 'FoliageMegaBuffer_FallbackHZBTexture',
-                size: [1, 1, 1],
-                format: 'r32float',
-                usage: GPUTextureUsage.TEXTURE_BINDING,
-            });
-            this.#fallbackHZBTextureView = this.#fallbackHZBTexture.createView({
-                label: 'FoliageMegaBuffer_FallbackHZBTextureView',
-            });
-            this.#fallbackHZBSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-        }
-
-        const targetHZBView = hzbTextureView || this.#fallbackHZBTextureView;
-        const targetHZBSampler = hzbSampler || this.#fallbackHZBSampler!;
+        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
             this.#cachedHZBTextureView === targetHZBView &&
@@ -600,10 +584,7 @@ export class FoliageMegaBuffer {
     }
 
     destroy(): void {
-        this.#fallbackHZBTexture?.destroy();
-        this.#fallbackHZBTexture = null;
-        this.#fallbackHZBTextureView = null;
-        this.#fallbackHZBSampler = null;
+
         this.#cachedHZBTextureView = null;
         this.#cachedHZBSampler = null;
         this.#rawGPUBuffer?.destroy();

@@ -1174,7 +1174,7 @@ export class LandscapeGrassManager {
 
         const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
 
-        this.#pipelineBindGroupLayout1 = gpuDevice.createBindGroupLayout({
+        this.#pipelineBindGroupLayout1 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group1_Layout', {
             label: 'Grass_Pipeline_Group1_Layout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
@@ -1182,7 +1182,7 @@ export class LandscapeGrassManager {
             ]
         });
 
-        this.#pipelineBindGroupLayout2 = gpuDevice.createBindGroupLayout({
+        this.#pipelineBindGroupLayout2 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group2_Layout', {
             label: 'Grass_Pipeline_Group2_Layout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
@@ -1191,8 +1191,7 @@ export class LandscapeGrassManager {
             ]
         });
 
-        this.#pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'Grass_PipelineLayout',
+        this.#pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_PipelineLayout', {
             bindGroupLayouts: [
                 systemBGLayout,
                 this.#pipelineBindGroupLayout1,
