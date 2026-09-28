@@ -425,12 +425,11 @@ export class LandscapeGrassManager {
             if (targetSrc) {
                 LandscapeWeightMapCache.load(targetSrc).then(() => {
                     if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
-                        const view = this.#landscape.redGPUContext.viewList?.[0];
-                        const cam = (view as any)?.camera;
-                        if (cam) {
-                            this.#lastPopulatePos[0] = cam.x ?? cam.position?.[0] ?? cam.camera?.x ?? 0;
-                            this.#lastPopulatePos[1] = cam.y ?? cam.position?.[1] ?? cam.camera?.y ?? 0;
-                            this.#lastPopulatePos[2] = cam.z ?? cam.position?.[2] ?? cam.camera?.z ?? 0;
+                        const fallbackCamPos = this.#getFallbackCameraPosition();
+                        if (fallbackCamPos) {
+                            this.#lastPopulatePos[0] = fallbackCamPos[0];
+                            this.#lastPopulatePos[1] = fallbackCamPos[1];
+                            this.#lastPopulatePos[2] = fallbackCamPos[2];
                         }
                     }
                     this.#populateInstances(this.#lastPopulatePos);
@@ -982,12 +981,11 @@ export class LandscapeGrassManager {
 
         if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
             // TODO - 이건 나중에 처리해야겠다
-            const view = this.#landscape.redGPUContext.viewList?.[0] as View3D | undefined;
-            const rawCam = view?.rawCamera;
-            if (rawCam) {
-                this.#lastPopulatePos[0] = rawCam.x;
-                this.#lastPopulatePos[1] = rawCam.y;
-                this.#lastPopulatePos[2] = rawCam.z;
+            const fallbackCamPos = this.#getFallbackCameraPosition();
+            if (fallbackCamPos) {
+                this.#lastPopulatePos[0] = fallbackCamPos[0];
+                this.#lastPopulatePos[1] = fallbackCamPos[1];
+                this.#lastPopulatePos[2] = fallbackCamPos[2];
             }
         }
 
@@ -1020,6 +1018,25 @@ export class LandscapeGrassManager {
                 }
             }
         }
+    }
+
+    #getFallbackCameraPosition(): [number, number, number] | null {
+        const viewList = this.#landscape.redGPUContext?.viewList;
+        if (!viewList || viewList.length === 0) return null;
+
+        for (let i = 0; i < viewList.length; i++) {
+            const v = viewList[i] as any;
+            if (!v) continue;
+            const rawCam = v.rawCamera || v.camera?.rawCamera || v.camera;
+            if (rawCam && typeof rawCam.x === 'number') {
+                return [rawCam.x, rawCam.y, rawCam.z];
+            }
+            const pos = v.camera?.position;
+            if (pos && typeof pos[0] === 'number') {
+                return [pos[0], pos[1], pos[2]];
+            }
+        }
+        return null;
     }
 
     /**

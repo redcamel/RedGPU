@@ -18,9 +18,75 @@ export interface FoliageBakeResult {
     bottomOffset: number;
 }
 
+interface ImpostorBakerContextCache {
+    bakeBindGroupLayout: GPUBindGroupLayout;
+    bakePipelineCache: Map<string, GPURenderPipeline>;
+    dilationBindGroupLayout: GPUBindGroupLayout;
+    dilationPipeline: GPUComputePipeline;
+}
+
+const contextCache: WeakMap<RedGPUContext, ImpostorBakerContextCache> = new WeakMap();
+
+function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerContextCache {
+    let cache = contextCache.get(redGPUContext);
+    if (!cache) {
+        const gpuDevice = redGPUContext.gpuDevice;
+        const resourceManager = redGPUContext.resourceManager;
+
+        const bakeBindGroupLayout = resourceManager.createBindGroupLayout('FoliageImpostorBake_BindGroupLayout', {
+            label: 'FoliageImpostorBake_BindGroupLayout',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+            ]
+        });
+
+        const dilationShader = resourceManager.createGPUShaderModule('ImpostorDilation_Shader', {
+            code: impostorDilationWGSL
+        });
+
+        const dilationBindGroupLayout = resourceManager.createBindGroupLayout('ImpostorDilation_BGL', {
+            label: 'ImpostorDilation_BGL',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm'}
+                },
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
+            ]
+        });
+
+        const dilationPipelineLayout = resourceManager.createGPUPipelineLayout('ImpostorDilation_PipelineLayout', {
+            bindGroupLayouts: [dilationBindGroupLayout]
+        });
+
+        const dilationPipeline = gpuDevice.createComputePipeline({
+            label: 'ImpostorDilation_Pipeline',
+            layout: dilationPipelineLayout,
+            compute: {
+                module: dilationShader,
+                entryPoint: 'main'
+            }
+        });
+
+        cache = {
+            bakeBindGroupLayout,
+            bakePipelineCache: new Map(),
+            dilationBindGroupLayout,
+            dilationPipeline
+        };
+        contextCache.set(redGPUContext, cache);
+    }
+    return cache;
+}
+
 class FoliageImpostorBaker {
-    static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
-    static #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
 
     static calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
         min: [number, number, number];
@@ -108,116 +174,6 @@ class FoliageImpostorBaker {
         };
     }
 
-    static #dilationPipeline: GPUComputePipeline | null = null;
-
-    static #initBindGroupLayouts(redGPUContext: RedGPUContext) {
-        if (!this.#bakeBindGroupLayout) {
-            this.#bakeBindGroupLayout = redGPUContext.gpuDevice.createBindGroupLayout({
-                label: 'FoliageImpostorBake_BindGroupLayout',
-                entries: [
-                    {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                    {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                    {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                ]
-            });
-        }
-    }
-
-    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
-        const gpuDevice = redGPUContext.gpuDevice;
-        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
-        let pipeline = this.#bakePipelineCache.get(key);
-        if (pipeline) return pipeline;
-
-        const resourceManager = redGPUContext.resourceManager;
-
-        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
-            code: impostorBakeVertexWGSL
-        });
-        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
-            code: impostorBakeShaderWGSL
-        });
-
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'BakePipelineLayout',
-            bindGroupLayouts: [this.#bakeBindGroupLayout!]
-        });
-
-        pipeline = gpuDevice.createRenderPipeline({
-            label: key,
-            layout: pipelineLayout,
-            vertex: {
-                module: vModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: Math.max(sub.strideBytes, 72),
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                            {shaderLocation: 3, offset: 32, format: 'float32x2'},
-                            {shaderLocation: 4, offset: 40, format: 'float32x4'},
-                            {shaderLocation: 5, offset: 56, format: 'float32x4'},
-                        ]
-                    },
-                    {
-                        arrayStride: 48 * 4,
-                        stepMode: 'instance',
-                        attributes: [
-                            {shaderLocation: 6, offset: 0, format: 'float32x4'},
-                            {shaderLocation: 7, offset: 16, format: 'float32x4'},
-                            {shaderLocation: 8, offset: 32, format: 'float32x4'},
-                            {shaderLocation: 9, offset: 48, format: 'float32x4'},
-                            {shaderLocation: 10, offset: 64, format: 'float32x4'},
-                            {shaderLocation: 11, offset: 80, format: 'float32x4'},
-                            {shaderLocation: 12, offset: 96, format: 'float32x4'},
-                            {shaderLocation: 13, offset: 112, format: 'float32x4'},
-                            {shaderLocation: 14, offset: 128, format: 'float32x4'},
-                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
-                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
-                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: fModule,
-                entryPoint: 'main',
-                targets: [
-                    {
-                        format: 'rgba8unorm-srgb',
-                        blend: undefined
-                    },
-                    {
-                        format: 'rgba8unorm',
-                        blend: undefined
-                    },
-                    {
-                        format: 'rgba8unorm',
-                        blend: undefined
-                    }
-                ]
-            },
-            primitive: {
-                topology: 'triangle-list',
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth24plus',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            }
-        });
-
-        this.#bakePipelineCache.set(key, pipeline);
-        return pipeline;
-    }
-    static #dilationBindGroupLayout: GPUBindGroupLayout | null = null;
-
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
         subMeshes: FoliageSubMesh[],
@@ -227,6 +183,8 @@ class FoliageImpostorBaker {
         if (!gpuDevice) {
             throw new Error('[FoliageImpostorBaker] GPUDevice is not initialized.');
         }
+
+        const cache = getOrCreateContextCache(redGPUContext);
 
         const aabb = this.calculateAABBFromSubMeshes(subMeshes);
         const centerX = aabb.center[0];
@@ -326,8 +284,6 @@ class FoliageImpostorBaker {
             }
         }
 
-        this.#initBindGroupLayouts(redGPUContext);
-
         const resourceManager = redGPUContext.resourceManager;
         const emptyTexView = resourceManager.emptyBitmapTextureView;
         const basicSampler = resourceManager.basicSampler;
@@ -383,7 +339,7 @@ class FoliageImpostorBaker {
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `BakeBindGroup_${s}`,
-                layout: this.#bakeBindGroupLayout!,
+                layout: cache.bakeBindGroupLayout,
                 entries: [
                     {binding: 0, resource: diffView},
                     {binding: 1, resource: diffSampler.gpuSampler},
@@ -634,6 +590,97 @@ class FoliageImpostorBaker {
 
     }
 
+    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
+        const cache = getOrCreateContextCache(redGPUContext);
+        const gpuDevice = redGPUContext.gpuDevice;
+        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
+        let pipeline = cache.bakePipelineCache.get(key);
+        if (pipeline) return pipeline;
+
+        const resourceManager = redGPUContext.resourceManager;
+
+        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
+            code: impostorBakeVertexWGSL
+        });
+        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
+            code: impostorBakeShaderWGSL
+        });
+
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('BakePipelineLayout', {
+            bindGroupLayouts: [cache.bakeBindGroupLayout]
+        });
+
+        pipeline = gpuDevice.createRenderPipeline({
+            label: key,
+            layout: pipelineLayout,
+            vertex: {
+                module: vModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: Math.max(sub.strideBytes, 72),
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                            {shaderLocation: 3, offset: 32, format: 'float32x2'},
+                            {shaderLocation: 4, offset: 40, format: 'float32x4'},
+                            {shaderLocation: 5, offset: 56, format: 'float32x4'},
+                        ]
+                    },
+                    {
+                        arrayStride: 48 * 4,
+                        stepMode: 'instance',
+                        attributes: [
+                            {shaderLocation: 6, offset: 0, format: 'float32x4'},
+                            {shaderLocation: 7, offset: 16, format: 'float32x4'},
+                            {shaderLocation: 8, offset: 32, format: 'float32x4'},
+                            {shaderLocation: 9, offset: 48, format: 'float32x4'},
+                            {shaderLocation: 10, offset: 64, format: 'float32x4'},
+                            {shaderLocation: 11, offset: 80, format: 'float32x4'},
+                            {shaderLocation: 12, offset: 96, format: 'float32x4'},
+                            {shaderLocation: 13, offset: 112, format: 'float32x4'},
+                            {shaderLocation: 14, offset: 128, format: 'float32x4'},
+                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
+                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
+                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: fModule,
+                entryPoint: 'main',
+                targets: [
+                    {
+                        format: 'rgba8unorm-srgb',
+                        blend: undefined
+                    },
+                    {
+                        format: 'rgba8unorm',
+                        blend: undefined
+                    },
+                    {
+                        format: 'rgba8unorm',
+                        blend: undefined
+                    }
+                ]
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth24plus',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            }
+        });
+
+        cache.bakePipelineCache.set(key, pipeline);
+        return pipeline;
+    }
+
     static #executeDilation(
         redGPUContext: RedGPUContext,
         targetTexture: GPUTexture,
@@ -641,35 +688,8 @@ class FoliageImpostorBaker {
         height: number,
         tileSize: number
     ) {
+        const cache = getOrCreateContextCache(redGPUContext);
         const gpuDevice = redGPUContext.gpuDevice;
-        if (!this.#dilationPipeline) {
-            const shaderModule = gpuDevice.createShaderModule({
-                label: 'ImpostorDilation_Shader',
-                code: impostorDilationWGSL
-            });
-            this.#dilationBindGroupLayout = gpuDevice.createBindGroupLayout({
-                label: 'ImpostorDilation_BGL',
-                entries: [
-                    {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
-                    {
-                        binding: 1,
-                        visibility: GPUShaderStage.COMPUTE,
-                        storageTexture: {access: 'write-only', format: 'rgba8unorm'}
-                    },
-                    {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
-                ]
-            });
-            this.#dilationPipeline = gpuDevice.createComputePipeline({
-                label: 'ImpostorDilation_Pipeline',
-                layout: gpuDevice.createPipelineLayout({
-                    bindGroupLayouts: [this.#dilationBindGroupLayout]
-                }),
-                compute: {
-                    module: shaderModule,
-                    entryPoint: 'main'
-                }
-            });
-        }
 
         const pingPongA = gpuDevice.createTexture({
             label: 'ImpostorDilation_PingPongA',
@@ -710,7 +730,7 @@ class FoliageImpostorBaker {
 
             stepBindGroups.push(gpuDevice.createBindGroup({
                 label: `ImpostorDilation_BG_Step${step}`,
-                layout: this.#dilationBindGroupLayout!,
+                layout: cache.dilationBindGroupLayout,
                 entries: [
                     {binding: 0, resource: srcView},
                     {binding: 1, resource: dstView},
@@ -732,7 +752,7 @@ class FoliageImpostorBaker {
 
         for (let i = 0; i < steps.length; i++) {
             const computePass = commandEncoder.beginComputePass({label: `ImpostorDilation_ComputeStep_${steps[i]}`});
-            computePass.setPipeline(this.#dilationPipeline!);
+            computePass.setPipeline(cache.dilationPipeline);
             computePass.setBindGroup(0, stepBindGroups[i]);
             computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
             computePass.end();

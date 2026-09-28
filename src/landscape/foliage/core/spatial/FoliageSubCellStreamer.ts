@@ -3,9 +3,9 @@ import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
 class FoliageSubCellStreamer {
     static readonly #STRIDE: number = 8;
-    static readonly #tempCandidates: FoliageSubCellChunk[] = [];
-    static #sortCamX: number = 0;
-    static #sortCamZ: number = 0;
+    readonly #tempCandidates: FoliageSubCellChunk[] = [];
+    #sortCamX: number = 0;
+    #sortCamZ: number = 0;
     readonly #foliageType: Foliage;
     readonly #chunks: Map<number, FoliageSubCellChunk> = new Map();
     readonly #mountedChunks: FoliageSubCellChunk[] = [];
@@ -45,23 +45,6 @@ class FoliageSubCellStreamer {
         this.#unmountBudget = Math.max(1, (val | 0) || 1);
     }
 
-    static readonly #compareCandidates = (a: FoliageSubCellChunk, b: FoliageSubCellChunk): number => {
-        const cx = FoliageSubCellStreamer.#sortCamX;
-        const cz = FoliageSubCellStreamer.#sortCamZ;
-        const da = (a.centerX - cx) * (a.centerX - cx) + (a.centerZ - cz) * (a.centerZ - cz);
-        const db = (b.centerX - cx) * (b.centerX - cx) + (b.centerZ - cz) * (b.centerZ - cz);
-        return da - db;
-    };
-
-    addChunks(newChunks: Map<number, FoliageSubCellChunk>): void {
-        newChunks.forEach((chunk, key) => {
-            if (!this.#chunks.has(key)) {
-                this.#chunks.set(key, chunk);
-                this.#totalInstanceCount += chunk.instanceCount;
-            }
-        });
-    }
-
     update(
         activeKeyArray: Int32Array,
         activeKeyCount: number,
@@ -99,7 +82,7 @@ class FoliageSubCellStreamer {
             }
         }
 
-        const candidates = FoliageSubCellStreamer.#tempCandidates;
+        const candidates = this.#tempCandidates;
         candidates.length = 0;
 
         const mountRadiusSq = typeRadius * typeRadius;
@@ -117,9 +100,9 @@ class FoliageSubCellStreamer {
 
         if (candidates.length === 0) return;
 
-        FoliageSubCellStreamer.#sortCamX = camX;
-        FoliageSubCellStreamer.#sortCamZ = camZ;
-        candidates.sort(FoliageSubCellStreamer.#compareCandidates);
+        this.#sortCamX = camX;
+        this.#sortCamZ = camZ;
+        candidates.sort(this.#compareCandidates);
 
         const toMountCount = Math.min(candidates.length, this.#mountBudget);
         for (let i = 0; i < toMountCount; i++) {
@@ -128,7 +111,17 @@ class FoliageSubCellStreamer {
         }
     }
 
+    addChunks(newChunks: Map<number, FoliageSubCellChunk>): void {
+        newChunks.forEach((chunk, key) => {
+            if (!this.#chunks.has(key)) {
+                this.#chunks.set(key, chunk);
+                this.#totalInstanceCount += chunk.instanceCount;
+            }
+        });
+    }
+
     clear(): void {
+        this.#tempCandidates.length = 0;
         this.#mountedChunks.forEach(c => {
             c.isMounted = false;
             c.mountedSlotIndex = -1;
@@ -140,6 +133,14 @@ class FoliageSubCellStreamer {
             this.#foliageType.allocation.activeCount = 0;
         }
     }
+
+    readonly #compareCandidates = (a: FoliageSubCellChunk, b: FoliageSubCellChunk): number => {
+        const cx = this.#sortCamX;
+        const cz = this.#sortCamZ;
+        const da = (a.centerX - cx) * (a.centerX - cx) + (a.centerZ - cz) * (a.centerZ - cz);
+        const db = (b.centerX - cx) * (b.centerX - cx) + (b.centerZ - cz) * (b.centerZ - cz);
+        return da - db;
+    };
 
     #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: any, allocation: any): void {
         if (chunk.isMounted) return;
