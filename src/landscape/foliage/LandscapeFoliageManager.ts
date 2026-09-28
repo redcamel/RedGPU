@@ -13,6 +13,37 @@ import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
 import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
 
+/**
+ * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that oversees the large-scale 3D foliage (trees, bushes, rocks, etc.) and octahedral impostor ecosystem of the landscape.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * const foliageManager = landscape.foliageManager;
+ * foliageManager.streamingRadius = 800;
+ * foliageManager.windStrength = 1.2;
+ *
+ * // 식생 생태계 타입 등록 (다중 LOD 및 옥타헤드럴 임포스터 지원)
+ * const pineTree = foliageManager.addFoliage({
+ *     name: 'PineTree',
+ *     lods: [
+ *         { mesh: treeMeshLOD0, lodDistance: 50 },
+ *         { mesh: treeMeshLOD1, lodDistance: 120 }
+ *     ],
+ *     densityPerHectare: 80,
+ *     useImpostor: true,
+ *     minScale: [0.8, 0.8, 0.8],
+ *     maxScale: [1.3, 1.3, 1.3]
+ * });
+ * ```
+ *
+ * @category Landscape
+ */
 class LandscapeFoliageManager {
     static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
     static #sharedEmptyBindGroup: GPUBindGroup | null = null;
@@ -45,6 +76,22 @@ class LandscapeFoliageManager {
     #windFrequency: number = 0.08;
     #windFlutterStrength: number = 0.5;
 
+    /**
+     * [KO] LandscapeFoliageManager의 새 인스턴스를 생성합니다.
+     * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.
+     * [EN] Creates a new instance of LandscapeFoliageManager.
+     * @remarks Do not instantiate directly; access via the `landscape.foliageManager` property.
+     *
+     * @param landscape -
+     * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance to which the foliage ecosystem is bound
+     * @param tileStreamer -
+     * [KO] 지형 타일 스트리머 인스턴스
+     * [EN] Landscape tile streamer instance
+     * @param onUniformUpdateNeeded -
+     * [KO] 지형 유니폼 버퍼 갱신이 필요할 때 호출되는 내부 콜백 함수
+     * [EN] Internal callback invoked when terrain uniform buffers require updating
+     */
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, onUniformUpdateNeeded?: () => void) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
@@ -128,10 +175,22 @@ class LandscapeFoliageManager {
         this.#renderer.markShadowBundleDirty();
     }
 
+    /**
+     * [KO] 불투명(Opaque) 식생 서브메시에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 반환합니다.
+     * [EN] Gets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage submeshes.
+     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
 
+    /**
+     * [KO] 불투명(Opaque) 식생 서브메시에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 설정합니다.
+     * [EN] Sets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage submeshes.
+     *
+     * @param val -
+     * [KO] 활성화 여부 (`true`일 경우 메인 렌더링 전 Depth Prepass를 선행하여 픽셀 오버드로우 최소화)
+     * [EN] Whether to enable (when `true`, runs Depth Prepass before main rendering to minimize pixel overdraw)
+     */
     set useDepthPrepass(val: boolean) {
         const boolVal = !!val;
         if (this.#useDepthPrepass !== boolVal) {
@@ -172,10 +231,22 @@ class LandscapeFoliageManager {
         this.#renderer.renderShadow(passEncoder, this.#typeList, view);
     }
 
+    /**
+     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 기본값: 100)를 반환합니다.
+     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, default: 100).
+     */
     get subCellSize(): number {
         return this.#subCellSize;
     }
 
+    /**
+     * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 지형 타일별 식생이 자동으로 재배치됩니다.
+     * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage is automatically repopulated across landscape tiles upon change.
+     *
+     * @param val -
+     * [KO] 설정할 서브셀 크기 (최소값: 10.0)
+     * [EN] Subcell size to set (minimum: 10.0)
+     */
     set subCellSize(val: number) {
         const clamped = Math.max(10.0, val);
         if (this.#subCellSize !== clamped) {
@@ -191,10 +262,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 카메라 주변 식생 서브셀의 동적 스트리밍 로드 반경(단위: 월드 유닛, 기본값: 600)을 반환합니다.
+     * [EN] Gets the dynamic streaming load radius of foliage subcells around the camera (unit: world units, default: 600).
+     */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
 
+    /**
+     * [KO] 카메라 주변 식생 서브셀의 동적 스트리밍 로드 반경을 설정합니다.
+     * [EN] Sets the dynamic streaming load radius of foliage subcells around the camera.
+     *
+     * @param val -
+     * [KO] 설정할 스트리밍 반경 (최소값: 10.0)
+     * [EN] Streaming radius to set (minimum: 10.0)
+     */
     set streamingRadius(val: number) {
         const clamped = Math.max(10.0, val);
         if (this.#streamingRadius !== clamped) {
@@ -204,10 +287,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 지형 셰이더에서 식생 공간 서브셀 경계를 온스크린 격자 색상으로 시각화할지 여부를 반환합니다.
+     * [EN] Gets whether to visualize foliage spatial subcell boundaries with on-screen grid colors in the landscape shader.
+     */
     get debugSubCellColoration(): boolean {
         return this.#debugSubCellColoration;
     }
 
+    /**
+     * [KO] 지형 셰이더에서 식생 공간 서브셀 경계의 시각화 여부를 설정합니다.
+     * [EN] Sets whether to visualize foliage spatial subcell boundaries in the landscape shader.
+     *
+     * @param val -
+     * [KO] 디버그 색상화 활성화 여부
+     * [EN] Whether to enable debug coloration
+     */
     set debugSubCellColoration(val: boolean) {
         const boolVal = !!val;
         if (this.#debugSubCellColoration !== boolVal) {
@@ -216,10 +311,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 모든 식생에 적용되는 바람(Wind) 시뮬레이션의 활성화 여부를 반환합니다.
+     * [EN] Gets whether wind simulation applied to all foliage is enabled.
+     */
     get windEnabled(): boolean {
         return this.#windEnabled;
     }
 
+    /**
+     * [KO] 모든 식생에 적용되는 바람 시뮬레이션의 활성화 여부를 설정합니다.
+     * [EN] Sets whether wind simulation applied to all foliage is enabled.
+     *
+     * @param val -
+     * [KO] 바람 시뮬레이션 활성화 여부
+     * [EN] Whether wind simulation is enabled
+     */
     set windEnabled(val: boolean) {
         const boolVal = !!val;
         if (this.#windEnabled !== boolVal) {
@@ -228,10 +335,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 바람의 이동 속도(기본값: 1.0)를 반환합니다.
+     * [EN] Gets the wind movement speed (default: 1.0).
+     */
     get windSpeed(): number {
         return this.#windSpeed;
     }
 
+    /**
+     * [KO] 바람의 이동 속도를 설정합니다.
+     * [EN] Sets the wind movement speed.
+     *
+     * @param val -
+     * [KO] 바람 이동 속도 (최소값: 0.0)
+     * [EN] Wind movement speed (minimum: 0.0)
+     */
     set windSpeed(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#windSpeed !== numVal) {
@@ -240,10 +359,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 바람에 의한 식생 줄기 및 가지의 굽힘 강도(기본값: 0.5)를 반환합니다.
+     * [EN] Gets the bending strength of foliage stems and branches caused by wind (default: 0.5).
+     */
     get windStrength(): number {
         return this.#windStrength;
     }
 
+    /**
+     * [KO] 바람에 의한 식생 줄기 및 가지의 굽힘 강도를 설정합니다.
+     * [EN] Sets the bending strength of foliage stems and branches caused by wind.
+     *
+     * @param val -
+     * [KO] 바람 굽힘 강도 (최소값: 0.0)
+     * [EN] Wind bending strength (minimum: 0.0)
+     */
     set windStrength(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#windStrength !== numVal) {
@@ -252,10 +383,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 바람 파동의 공간적 진동수/주파수(기본값: 0.8)를 반환합니다.
+     * [EN] Gets the spatial wave frequency of the wind (default: 0.8).
+     */
     get windFrequency(): number {
         return this.#windFrequency;
     }
 
+    /**
+     * [KO] 바람 파동의 공간적 진동수/주파수를 설정합니다.
+     * [EN] Sets the spatial wave frequency of the wind.
+     *
+     * @param val -
+     * [KO] 바람 주파수 (최소값: 0.001)
+     * [EN] Wind frequency (minimum: 0.001)
+     */
     set windFrequency(val: number) {
         const numVal = Math.max(0.001, Number(val) || 0.001);
         if (this.#windFrequency !== numVal) {
@@ -264,10 +407,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 나뭇잎이나 잔가지의 고주파 플러터(떨림) 강도(기본값: 0.3)를 반환합니다.
+     * [EN] Gets the high-frequency flutter strength of leaves and twigs (default: 0.3).
+     */
     get windFlutterStrength(): number {
         return this.#windFlutterStrength;
     }
 
+    /**
+     * [KO] 나뭇잎이나 잔가지의 고주파 플러터(떨림) 강도를 설정합니다.
+     * [EN] Sets the high-frequency flutter strength of leaves and twigs.
+     *
+     * @param val -
+     * [KO] 플러터 떨림 강도 (최소값: 0.0)
+     * [EN] Flutter strength (minimum: 0.0)
+     */
     set windFlutterStrength(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#windFlutterStrength !== numVal) {
@@ -276,10 +431,22 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 바람이 불어가는 2D 평면 정규화 방향 벡터 `[x, z]`(기본값: `[1.0, 0.0]`)를 반환합니다.
+     * [EN] Gets the normalized 2D direction vector `[x, z]` of the wind (default: `[1.0, 0.0]`).
+     */
     get windDirection(): [number, number] {
         return this.#windDirection;
     }
 
+    /**
+     * [KO] 바람이 불어가는 2D 평면 방향 벡터를 설정합니다. 자동으로 정규화됩니다.
+     * [EN] Sets the 2D direction vector of the wind. Automatically normalized.
+     *
+     * @param val -
+     * [KO] 바람 2D 방향 벡터 `[x, z]`
+     * [EN] 2D wind direction vector `[x, z]`
+     */
     set windDirection(val: [number, number]) {
         if (Array.isArray(val) && val.length >= 2) {
             const x = Number(val[0]) || 0;
@@ -294,6 +461,10 @@ class LandscapeFoliageManager {
         }
     }
 
+    /**
+     * [KO] 바람의 진행 방향 각도(단위: 도(degree), 0° ~ 360°, 기본값: 0°)를 반환합니다.
+     * [EN] Gets the wind direction angle in degrees (0° to 360°, default: 0°).
+     */
     get windDirectionAngle(): number {
         const rad = Math.atan2(this.#windDirection[1], this.#windDirection[0]);
         let deg = rad * (180.0 / Math.PI);
@@ -301,12 +472,24 @@ class LandscapeFoliageManager {
         return deg;
     }
 
+    /**
+     * [KO] 바람의 진행 방향 각도를 설정합니다 (단위: 도(degree)).
+     * [EN] Sets the wind direction angle in degrees.
+     *
+     * @param deg -
+     * [KO] 설정할 바람 각도 (단위: 도)
+     * [EN] Wind angle to set (in degrees)
+     */
     set windDirectionAngle(deg: number) {
         const rad = deg * (Math.PI / 180.0);
         this.#windDirection = [Math.cos(rad), Math.sin(rad)];
         this.#syncWindToAllTypes();
     }
 
+    /**
+     * [KO] 등록된 모든 {@link Foliage} 생태계 인스턴스의 읽기 전용 배열을 반환합니다.
+     * [EN] Gets the read-only array of all registered {@link Foliage} ecosystem instances.
+     */
     get foliageList(): readonly Foliage[] {
         return this.#typeList;
     }
@@ -349,32 +532,17 @@ class LandscapeFoliageManager {
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, view, this.#landscape, renderViewStateData);
     }
 
-    #syncWindToAllTypes(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice) return;
-        const dirX = this.#windDirection[0];
-        const dirY = this.#windDirection[1];
-        const speed = this.#windSpeed;
-        const strength = this.#windStrength;
-        const freq = this.#windFrequency;
-        const flutter = this.#windFlutterStrength;
-        const enabled = this.#windEnabled;
-
-        const count = this.#typeList.length;
-        for (let i = 0; i < count; i++) {
-            this.#typeList[i].syncWindToSubMeshes(
-                gpuDevice,
-                dirX,
-                dirY,
-                speed,
-                strength,
-                freq,
-                flutter,
-                enabled
-            );
-        }
-    }
-
+    /**
+     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 지형의 기존 타일들에 인스턴스를 즉시 배치합니다.
+     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, immediately populating instances across existing landscape tiles.
+     *
+     * @param options -
+     * [KO] 식생 생성 및 지형 배치 규칙 옵션 {@link FoliageOptions}
+     * [EN] Foliage creation and landscape placement rule options {@link FoliageOptions}
+     * @returns
+     * [KO] 생성되어 등록된 {@link Foliage} 인스턴스
+     * [EN] Newly created and registered {@link Foliage} instance
+     */
     addFoliage(options: FoliageOptions): Foliage {
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] Foliage with name '${options.name}' already exists.`);
@@ -423,39 +591,6 @@ class LandscapeFoliageManager {
         }
 
         return foliage;
-    }
-
-    rebakeAll(): void {
-        const count = this.#typeList.length;
-        for (let i = 0; i < count; i++) {
-            this.#typeList[i].rebake();
-        }
-    }
-
-    destroy(): void {
-        this.clearFoliage();
-        this.#megaBuffer.destroy();
-        this.#pipelineRegistry.clearCache();
-        this.#renderer.destroy();
-        this.#cullingDispatcher.destroy();
-        this.#landscape = null;
-        this.#tileStreamer = null as any;
-        this.#onUniformUpdateNeeded = null;
-    }
-
-    #repopulateFoliage(type: Foliage): void {
-        if (!type) return;
-
-        type.clearTileCache();
-
-        const cells = this.#landscape?.components;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                type.populateTile(cells[i], this.#landscape);
-            }
-        }
-        this.#renderer.markShadowBundleDirty();
     }
 
     /**
@@ -509,6 +644,73 @@ class LandscapeFoliageManager {
         while (this.#typeList.length > 0) {
             this.removeFoliage(this.#typeList[this.#typeList.length - 1]);
         }
+    }
+
+    /**
+     * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
+     * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
+     */
+    rebakeAll(): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].rebake();
+        }
+    }
+
+    /**
+     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
+     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
+     */
+    destroy(): void {
+        this.clearFoliage();
+        this.#megaBuffer.destroy();
+        this.#pipelineRegistry.clearCache();
+        this.#renderer.destroy();
+        this.#cullingDispatcher.destroy();
+        this.#landscape = null;
+        this.#tileStreamer = null as any;
+        this.#onUniformUpdateNeeded = null;
+    }
+
+    #syncWindToAllTypes(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return;
+        const dirX = this.#windDirection[0];
+        const dirY = this.#windDirection[1];
+        const speed = this.#windSpeed;
+        const strength = this.#windStrength;
+        const freq = this.#windFrequency;
+        const flutter = this.#windFlutterStrength;
+        const enabled = this.#windEnabled;
+
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].syncWindToSubMeshes(
+                gpuDevice,
+                dirX,
+                dirY,
+                speed,
+                strength,
+                freq,
+                flutter,
+                enabled
+            );
+        }
+    }
+
+    #repopulateFoliage(type: Foliage): void {
+        if (!type) return;
+
+        type.clearTileCache();
+
+        const cells = this.#landscape?.components;
+        if (cells && cells.length > 0) {
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                type.populateTile(cells[i], this.#landscape);
+            }
+        }
+        this.#renderer.markShadowBundleDirty();
     }
 
     #repopulateAll(): void {

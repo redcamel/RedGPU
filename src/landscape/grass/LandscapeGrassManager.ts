@@ -141,6 +141,8 @@ function sortCandidateIndicesByDistance(
  *     targetLayer: 'GrassLayer'
  * });
  * ```
+ *
+ * @category Landscape
  */
 export class LandscapeGrassManager {
     static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = {
@@ -245,7 +247,7 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 잔디 시스템의 활성화 여부를 가져옵니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
+     * [KO] 잔디 시스템의 활성화 여부를 반환합니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
      * [EN] Gets whether the grass system is enabled. When `false`, grass streaming, culling, and rendering are suspended.
      */
     get enabled(): boolean {
@@ -255,22 +257,30 @@ export class LandscapeGrassManager {
     /**
      * [KO] 잔디 시스템의 활성화 여부를 설정합니다.
      * [EN] Sets whether the grass system is enabled.
+     *
+     * @param val -
+     * [KO] 활성화 여부
+     * [EN] Whether to enable
      */
     set enabled(val: boolean) {
         this.#enabled = val;
     }
 
     /**
-     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(미터 단위)을 가져옵니다.
-     * [EN] Gets the active grass streaming radius (in meters) around the camera.
+     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(단위: 월드 유닛/미터, 기본값: 120.0)을 반환합니다.
+     * [EN] Gets the active grass streaming radius (in world units/meters, default: 120.0) around the camera.
      */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
 
     /**
-     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(미터 단위)을 설정합니다. 값이 변경되면 인스턴스 배치가 즉시 재평가됩니다.
-     * [EN] Sets the active grass streaming radius (in meters) around the camera. Re-evaluates instance placement immediately when changed.
+     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경을 설정합니다. 변경 시 인스턴스 배치가 즉시 재평가됩니다.
+     * [EN] Sets the active grass streaming radius around the camera. Re-evaluates instance placement immediately when changed.
+     *
+     * @param val -
+     * [KO] 설정할 스트리밍 반경 (최소값: 16.0)
+     * [EN] Streaming radius to set (minimum: 16.0)
      */
     set streamingRadius(val: number) {
         const clamped = Math.max(16.0, val);
@@ -280,10 +290,9 @@ export class LandscapeGrassManager {
         }
     }
 
-
     /**
-     * [KO] 현재 매니저에 등록된 잔디 목록을 가져옵니다.
-     * [EN] Gets the list of grass items currently registered to this manager.
+     * [KO] 현재 매니저에 등록된 모든 {@link Grass} 생태계 인스턴스 목록을 반환합니다.
+     * [EN] Gets the list of all {@link Grass} ecosystem instances currently registered to this manager.
      */
     get grassList(): Grass[] {
         return this.#grassList;
