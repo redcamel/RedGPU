@@ -8,7 +8,7 @@ export class FoliageSpatialGrid {
     #subCellSize: number = 100.0;
     #streamingRadius: number = 600.0;
 
-    readonly #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
+    #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
     #activeSubCellCount: number = 0;
 
     #lastCamX: number = 1e9;

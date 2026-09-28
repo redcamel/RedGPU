@@ -29,14 +29,14 @@ class FoliageRenderer {
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
 
-    readonly #validTypesMain: ValidFoliageTypeItem[] = [];
-    readonly #validTypesShadow: ValidFoliageTypeItem[] = [];
+    #validTypesMain: ValidFoliageTypeItem[] = [];
+    #validTypesShadow: ValidFoliageTypeItem[] = [];
 
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
     #shadowBundleValid: boolean[] = [false, false, false, false];
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
     #lastRecordedTypeCount: number = 0;
-    readonly #singleBundleArray: [GPURenderBundle] = [null as any];
+    #singleBundleArray: [GPURenderBundle] = [null as any];
 
     #useDepthPrepass: boolean = true;
 
@@ -73,7 +73,7 @@ class FoliageRenderer {
         }
     }
 
-    render(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: View3D): void {
+    render(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
@@ -156,7 +156,7 @@ class FoliageRenderer {
         }
     }
 
-    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly Foliage[], view: View3D): void {
+    renderShadow(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 

@@ -485,7 +485,7 @@ class LandscapeFoliageManager {
      * [KO] 등록된 모든 {@link Foliage} 생태계 인스턴스의 읽기 전용 배열을 반환합니다.
      * [EN] Gets the read-only array of all registered {@link Foliage} ecosystem instances.
      */
-    get foliageList(): readonly Foliage[] {
+    get foliageList(): Foliage[] {
         return this.#typeList;
     }
 

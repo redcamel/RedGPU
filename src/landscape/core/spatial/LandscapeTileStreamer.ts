@@ -8,12 +8,12 @@ import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 
-const NEIGHBOR_OFFSETS: readonly (readonly [number, number])[] = Object.freeze([
+const NEIGHBOR_OFFSETS: [number, number][] = [
     [-1, 0],
     [1, 0],
     [0, -1],
     [0, 1]
-]);
+];
 
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
@@ -487,7 +487,7 @@ export class LandscapeTileStreamer {
         return comp ? this.#loadedMap.has(comp.key) : false;
     }
 
-    readonly #sortCompare = (a: LandscapeComponent, b: LandscapeComponent): number => {
+    #sortCompare = (a: LandscapeComponent, b: LandscapeComponent): number => {
         const da = (a.worldX - this.#sortCamX) * (a.worldX - this.#sortCamX)
             + (a.worldZ - this.#sortCamZ) * (a.worldZ - this.#sortCamZ);
         const db = (b.worldX - this.#sortCamX) * (b.worldX - this.#sortCamX)

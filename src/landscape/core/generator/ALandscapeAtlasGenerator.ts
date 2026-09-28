@@ -2,9 +2,9 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export abstract class ALandscapeAtlasGenerator {
-    readonly redGPUContext: RedGPUContext;
-    computePipeline: GPUComputePipeline | null = null;
-    bindGroupLayout: GPUBindGroupLayout | null = null;
+    #redGPUContext: RedGPUContext;
+    #computePipeline: GPUComputePipeline | null = null;
+    #bindGroupLayout: GPUBindGroupLayout | null = null;
 
     #uniformBufferPool: GPUBuffer[] = [];
     #poolIndex: number = 0;
@@ -12,13 +12,25 @@ export abstract class ALandscapeAtlasGenerator {
     #generatorLabel: string;
 
     constructor(redGPUContext: RedGPUContext, generatorLabel: string) {
-        this.redGPUContext = redGPUContext;
+        this.#redGPUContext = redGPUContext;
         this.#generatorLabel = generatorLabel;
     }
 
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
+    }
+
+    get computePipeline(): GPUComputePipeline | null {
+        return this.#computePipeline;
+    }
+
+    get bindGroupLayout(): GPUBindGroupLayout | null {
+        return this.#bindGroupLayout;
+    }
+
     acquireUniformBuffer(byteLength: number): GPUBuffer {
-        const device = this.redGPUContext.gpuDevice;
-        const curFrame = this.redGPUContext.currentRequestAnimationFrame;
+        const device = this.#redGPUContext.gpuDevice;
+        const curFrame = this.#redGPUContext.currentRequestAnimationFrame;
 
         if (this.#lastFrameId !== curFrame) {
             this.#lastFrameId = curFrame;
@@ -54,17 +66,17 @@ export abstract class ALandscapeAtlasGenerator {
         pixelX: number,
         pixelZ: number
     ): void {
-        if (!this.computePipeline) return;
+        if (!this.#computePipeline) return;
         if (pixelW <= 0 || pixelH <= 0) return;
 
         const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
         const workgroupCountY = Math.max(1, Math.ceil(pixelH / 16));
 
-        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
             const pass = commandEncoder.beginComputePass({
                 label: `Landscape_${this.#generatorLabel}_ComputePass_[${pixelX},${pixelZ}]`
             });
-            pass.setPipeline(this.computePipeline!);
+            pass.setPipeline(this.#computePipeline!);
             pass.setBindGroup(0, bindGroup);
             pass.dispatchWorkgroups(workgroupCountX, workgroupCountY);
             pass.end();
@@ -77,8 +89,8 @@ export abstract class ALandscapeAtlasGenerator {
         layoutEntries: GPUBindGroupLayoutEntry[],
         defaultUniformByteLength: number = 16
     ): void {
-        const device = this.redGPUContext.gpuDevice;
-        const resourceManager = this.redGPUContext.resourceManager;
+        const device = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.#redGPUContext.resourceManager;
         if (!device) return;
 
         this.#uniformBufferPool = [];
@@ -97,17 +109,17 @@ export abstract class ALandscapeAtlasGenerator {
             });
         }
 
-        this.bindGroupLayout = device.createBindGroupLayout({
+        this.#bindGroupLayout = device.createBindGroupLayout({
             label: `Landscape_${this.#generatorLabel}_BindGroupLayout`,
             entries: layoutEntries
         });
 
         const pipelineLayout = device.createPipelineLayout({
             label: `Landscape_${this.#generatorLabel}_PipelineLayout`,
-            bindGroupLayouts: [this.bindGroupLayout]
+            bindGroupLayouts: [this.#bindGroupLayout]
         });
 
-        this.computePipeline = device.createComputePipeline({
+        this.#computePipeline = device.createComputePipeline({
             label: `Landscape_${this.#generatorLabel}_ComputePipeline`,
             layout: pipelineLayout,
             compute: {
@@ -126,8 +138,8 @@ export abstract class ALandscapeAtlasGenerator {
             }
         }
         this.#uniformBufferPool.length = 0;
-        this.computePipeline = null;
-        this.bindGroupLayout = null;
+        this.#computePipeline = null;
+        this.#bindGroupLayout = null;
     }
 }
 

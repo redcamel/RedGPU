@@ -18,31 +18,83 @@ export class FoliageShadowMergedSubMesh {
     static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
     static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageShadowMergedSubMesh.#windFloatBuffer.buffer);
 
-    readonly lodIndex: number;
-    readonly geometry: Geometry;
-    readonly vertexCount: number;
-    readonly indexCount: number;
-    readonly isIndexed: boolean;
-    readonly indexFormat: GPUIndexFormat;
-    readonly strideBytes: number;
-    readonly vertexUniformBuffer: GPUBuffer;
-    readonly vertexUniformBindGroup: GPUBindGroup;
+    #lodIndex: number;
+    #geometry: Geometry;
+    #vertexCount: number;
+    #indexCount: number;
+    #isIndexed: boolean;
+    #indexFormat: GPUIndexFormat;
+    #strideBytes: number;
+    #vertexUniformBuffer: GPUBuffer;
+    #vertexUniformBindGroup: GPUBindGroup;
 
-    instanceBufferOffset: number;
-    indirectOffsetBytes: number;
+    #instanceBufferOffset: number;
+    #indirectOffsetBytes: number;
 
     constructor(init: FoliageShadowMergedSubMeshInitOptions) {
-        this.lodIndex = init.lodIndex;
-        this.geometry = init.geometry;
-        this.vertexCount = init.vertexCount;
-        this.indexCount = init.indexCount;
-        this.isIndexed = init.isIndexed;
-        this.indexFormat = init.indexFormat || 'uint32';
-        this.strideBytes = init.strideBytes ?? 12;
-        this.vertexUniformBuffer = init.vertexUniformBuffer;
-        this.vertexUniformBindGroup = init.vertexUniformBindGroup;
-        this.instanceBufferOffset = init.instanceBufferOffset ?? 0;
-        this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+        this.#lodIndex = init.lodIndex;
+        this.#geometry = init.geometry;
+        this.#vertexCount = init.vertexCount;
+        this.#indexCount = init.indexCount;
+        this.#isIndexed = init.isIndexed;
+        this.#indexFormat = init.indexFormat || 'uint32';
+        this.#strideBytes = init.strideBytes ?? 12;
+        this.#vertexUniformBuffer = init.vertexUniformBuffer;
+        this.#vertexUniformBindGroup = init.vertexUniformBindGroup;
+        this.#instanceBufferOffset = init.instanceBufferOffset ?? 0;
+        this.#indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+    }
+
+    get lodIndex(): number {
+        return this.#lodIndex;
+    }
+
+    get geometry(): Geometry {
+        return this.#geometry;
+    }
+
+    get vertexCount(): number {
+        return this.#vertexCount;
+    }
+
+    get indexCount(): number {
+        return this.#indexCount;
+    }
+
+    get isIndexed(): boolean {
+        return this.#isIndexed;
+    }
+
+    get indexFormat(): GPUIndexFormat {
+        return this.#indexFormat;
+    }
+
+    get strideBytes(): number {
+        return this.#strideBytes;
+    }
+
+    get vertexUniformBuffer(): GPUBuffer {
+        return this.#vertexUniformBuffer;
+    }
+
+    get vertexUniformBindGroup(): GPUBindGroup {
+        return this.#vertexUniformBindGroup;
+    }
+
+    get instanceBufferOffset(): number {
+        return this.#instanceBufferOffset;
+    }
+
+    set instanceBufferOffset(v: number) {
+        this.#instanceBufferOffset = v;
+    }
+
+    get indirectOffsetBytes(): number {
+        return this.#indirectOffsetBytes;
+    }
+
+    set indirectOffsetBytes(v: number) {
+        this.#indirectOffsetBytes = v;
     }
 
     updateWindParams(
@@ -58,7 +110,7 @@ export class FoliageShadowMergedSubMesh {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (!this.vertexUniformBuffer || !gpuDevice) return;
+        if (!this.#vertexUniformBuffer || !gpuDevice) return;
         const fView = FoliageShadowMergedSubMesh.#windFloatBuffer;
         const uView = FoliageShadowMergedSubMesh.#windUintBuffer;
         fView[0] = windDirX;
@@ -75,7 +127,7 @@ export class FoliageShadowMergedSubMesh {
         uView[11] = 0;
 
         gpuDevice.queue.writeBuffer(
-            this.vertexUniformBuffer,
+            this.#vertexUniformBuffer,
             36 * 4,
             fView.buffer,
             fView.byteOffset,
@@ -84,8 +136,8 @@ export class FoliageShadowMergedSubMesh {
     }
 
     draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
-        const offset = offsetBytes !== undefined ? offsetBytes : this.indirectOffsetBytes;
-        if (this.isIndexed && this.geometry.indexBuffer?.gpuBuffer) {
+        const offset = offsetBytes !== undefined ? offsetBytes : this.#indirectOffsetBytes;
+        if (this.#isIndexed && this.#geometry.indexBuffer?.gpuBuffer) {
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
         } else {
             passEncoder.drawIndirect(indirectGPUBuffer, offset);
@@ -93,8 +145,8 @@ export class FoliageShadowMergedSubMesh {
     }
 
     destroy(): void {
-        this.vertexUniformBuffer?.destroy();
-        this.geometry?.destroy();
+        this.#vertexUniformBuffer?.destroy();
+        this.#geometry?.destroy();
     }
 }
 

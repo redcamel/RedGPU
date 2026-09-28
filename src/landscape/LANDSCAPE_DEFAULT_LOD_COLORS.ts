@@ -24,7 +24,7 @@
  *
  * @internal
  */
-export const LANDSCAPE_DEFAULT_LOD_COLORS: readonly [number, number, number, number][] = Object.freeze([
+export const LANDSCAPE_DEFAULT_LOD_COLORS: [number, number, number, number][] = Object.freeze([
     // LOD 0: Blue (최고 해상도 / 카메라 최근접)
     [0.23, 0.51, 0.96, 1.0],
     // LOD 1: Green
@@ -41,7 +41,7 @@ export const LANDSCAPE_DEFAULT_LOD_COLORS: readonly [number, number, number, num
     [0.93, 0.28, 0.60, 1.0],
     // LOD 7: Slate Gray (최저 해상도 / 최원거리)
     [0.58, 0.64, 0.72, 1.0]
-]);
+]) as [number, number, number, number][];
 
 /**
  * [KO] 지형 기본 LOD 색상의 CSS RGBA 문자열 배열(`rgba(r, g, b, 0.75)`)입니다.
@@ -57,10 +57,10 @@ export const LANDSCAPE_DEFAULT_LOD_COLORS: readonly [number, number, number, num
  *
  * @internal
  */
-export const LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS: readonly string[] = Object.freeze(
+export const LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS: string[] = Object.freeze(
     LANDSCAPE_DEFAULT_LOD_COLORS.map(c =>
         `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, 0.75)`
     )
-);
+) as string[];
 
 export default LANDSCAPE_DEFAULT_LOD_COLORS;

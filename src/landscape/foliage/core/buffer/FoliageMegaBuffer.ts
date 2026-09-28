@@ -204,9 +204,9 @@ export class FoliageMegaBuffer {
     allocateTypeSegment(
         name: string,
         maxInstances: number,
-        subMeshes: readonly FoliageSubMesh[],
-        shadowMergedSubMeshes?: readonly FoliageShadowMergedSubMesh[],
-        lodInfoList?: readonly FoliageLODInfo[]
+        subMeshes: FoliageSubMesh[],
+        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
+        lodInfoList?: FoliageLODInfo[]
     ): FoliageTypeAllocation {
         if (this.#allocations.has(name)) {
             return this.#allocations.get(name)!;
@@ -348,7 +348,7 @@ export class FoliageMegaBuffer {
         worldSizeX: number, heightScale: number, hasVHT: boolean,
         fovFactor: number,
         mainFrustumPlanes: number[][] | null,
-        cascades: readonly CascadeCullingParam[],
+        cascades: CascadeCullingParam[],
         activeCascadeCount: number = 4,
         viewportHeight: number = 1080.0,
         hzbEnabled: boolean = false,
@@ -469,7 +469,7 @@ export class FoliageMegaBuffer {
         fadeStartDistance: number,
         boundingRadius: number,
         bottomOffset: number,
-        lodInfoList: readonly FoliageLODInfo[],
+        lodInfoList: FoliageLODInfo[],
         maxShadowDistance: number = 300.0,
         boundingHeight: number = 2.0
     ): void {
@@ -612,10 +612,10 @@ export class FoliageMegaBuffer {
     }
 
     registerSubMeshesToTemplate(
-        subMeshes: readonly FoliageSubMesh[],
+        subMeshes: FoliageSubMesh[],
         indirectBaseOffset: number,
-        shadowMergedSubMeshes?: readonly FoliageShadowMergedSubMesh[],
-        lodInfoList?: readonly FoliageLODInfo[]
+        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
+        lodInfoList?: FoliageLODInfo[]
     ): void {
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];

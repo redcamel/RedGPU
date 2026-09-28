@@ -21,7 +21,7 @@ interface LandscapeMaterial {
     baseColorTextureSampler: Sampler;
 }
 
-const DEFAULT_BASE_COLOR: readonly number[] = Object.freeze([0.22, 0.49, 0.26, 1.0]);
+const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
 
 class LandscapeMaterial extends AUVTransformBaseMaterial {
 
@@ -75,7 +75,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos();
     }
 
-    get layers(): readonly LandscapeLayer[] {
+    get layers(): LandscapeLayer[] {
         return this.#layers;
     }
 

@@ -1,18 +1,18 @@
 export interface FoliageSubCellChunk {
 
-    readonly subCellKey: number;
+    subCellKey: number;
 
-    readonly subCellX: number;
+    subCellX: number;
 
-    readonly subCellZ: number;
+    subCellZ: number;
 
-    readonly centerX: number;
+    centerX: number;
 
-    readonly centerZ: number;
+    centerZ: number;
 
-    readonly instanceData: Float32Array;
+    instanceData: Float32Array;
 
-    readonly instanceCount: number;
+    instanceCount: number;
 
     isMounted: boolean;
 

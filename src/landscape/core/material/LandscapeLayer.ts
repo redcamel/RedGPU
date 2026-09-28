@@ -24,7 +24,7 @@ export interface LandscapeLayerOptions {
 }
 
 export class LandscapeLayer {
-    readonly name: string;
+    #name: string;
     #enabled: boolean = true;
 
     #redGPUContext?: RedGPUContext;
@@ -68,7 +68,7 @@ export class LandscapeLayer {
             actualOptions = redGPUContextOrOptions as LandscapeLayerOptions;
         }
 
-        this.name = actualOptions.name;
+        this.#name = actualOptions.name;
         if (actualOptions.enabled !== undefined) this.#enabled = actualOptions.enabled;
 
         if (actualOptions.baseColorTexture !== undefined) {
@@ -118,6 +118,10 @@ export class LandscapeLayer {
         if (actualOptions.aoIntensity !== undefined) {
             this.#aoIntensity = actualOptions.aoIntensity;
         }
+    }
+
+    get name(): string {
+        return this.#name;
     }
 
     get baseColorTexture(): BitmapTexture | undefined {
@@ -235,7 +239,7 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get uvScale(): readonly [number, number] {
+    get uvScale(): [number, number] {
         return this.#uvScale;
     }
 
@@ -247,7 +251,7 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get uvOffset(): readonly [number, number] {
+    get uvOffset(): [number, number] {
         return this.#uvOffset;
     }
 

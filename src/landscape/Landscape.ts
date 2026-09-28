@@ -21,7 +21,7 @@ import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
 
-const DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
+const DEFAULT_LOD_MULTIPLIERS: number[] = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
 const tempPVMatrix: Float32Array = new Float32Array(16);
 
 /**
@@ -291,7 +291,7 @@ export class Landscape extends BaseObject {
      *
      * @defaultValue [2000, 2000]
      */
-    get worldSize(): readonly [number, number] {
+    get worldSize(): [number, number] {
         return this.#spatialGrid.worldSize;
     }
 
@@ -327,7 +327,7 @@ export class Landscape extends BaseObject {
      * [KO] 지형을 구성하는 X축 및 Z축 컴포넌트(타일) 분할 개수 `[countX, countZ]`를 반환합니다.
      * [EN] Returns the number of component (tile) subdivisions along X and Z axes as `[countX, countZ]`.
      */
-    get componentCount(): readonly [number, number] {
+    get componentCount(): [number, number] {
         return this.#spatialGrid.componentCount;
     }
 
@@ -363,7 +363,7 @@ export class Landscape extends BaseObject {
      * [KO] 각 컴포넌트 타일 1개의 월드 크기 `[sizeX, sizeZ]`를 반환합니다.
      * [EN] Returns the world dimensions `[sizeX, sizeZ]` of a single component tile.
      */
-    get tileSize(): readonly [number, number] {
+    get tileSize(): [number, number] {
         return this.#spatialGrid.tileSize;
     }
 
@@ -474,7 +474,7 @@ export class Landscape extends BaseObject {
      * Gets the array of all `LandscapeComponent` instances registered in the landscape spatial grid. (Read-only)
      *
      */
-    get components(): readonly LandscapeComponent[] {
+    get components(): LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
     }
 
@@ -562,7 +562,7 @@ export class Landscape extends BaseObject {
      * Gets the array of squared distance thresholds used for LOD level transitions. (Read-only)
      *
      */
-    get lodDistancesSq(): readonly number[] {
+    get lodDistancesSq(): number[] {
         return this.#lodDistancesSq;
     }
 
@@ -582,7 +582,7 @@ export class Landscape extends BaseObject {
      * [KO] 지형에 등록된 텍스처 블렌딩 레이어 목록을 읽기 전용 배열로 반환합니다.
      * [EN] Returns a read-only array of texture blending layers registered on the landscape.
      */
-    get layers(): readonly LandscapeLayer[] {
+    get layers(): LandscapeLayer[] {
         return this.#material.layers;
     }
 

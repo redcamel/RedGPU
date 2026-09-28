@@ -1,8 +1,7 @@
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
-import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
+import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
@@ -39,66 +38,174 @@ export class FoliageSubMesh {
     static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageSubMesh.#windFloatBuffer.buffer);
     static readonly #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
 
-    readonly mesh: Mesh;
-    readonly geometry: Geometry;
-    readonly material: any;
-    readonly indexCount: number;
-    readonly vertexCount: number;
-    readonly isIndexed: boolean;
-    readonly indexFormat: GPUIndexFormat;
-    readonly strideBytes: number;
-    bottomOffset: number;
-    readonly relativeModelMatrix: mat4;
-    readonly relativeNormalMatrix: mat4;
-    readonly vertexUniformBuffer: GPUBuffer;
-    readonly vertexUniformBindGroup: GPUBindGroup;
-    readonly lodIndex: number;
+    #mesh: Mesh;
+    #geometry: Geometry;
+    #material: any;
+    #indexCount: number;
+    #vertexCount: number;
+    #isIndexed: boolean;
+    #indexFormat: GPUIndexFormat;
+    #strideBytes: number;
+    #bottomOffset: number;
+    #relativeModelMatrix: mat4;
+    #relativeNormalMatrix: mat4;
+    #vertexUniformBuffer: GPUBuffer;
+    #vertexUniformBindGroup: GPUBindGroup;
+    #lodIndex: number;
 
-    readonly isDepthPrepass: boolean;
-    readonly isMainOpaqueOrMasked: boolean;
-    readonly isMasked: boolean;
-    readonly mainDepthMode: FoliageDepthPassMode;
-    isImpostor: boolean;
-    receiveShadow: boolean;
+    #isDepthPrepass: boolean;
+    #isMainOpaqueOrMasked: boolean;
+    #isMasked: boolean;
+    #mainDepthMode: FoliageDepthPassMode;
+    #isImpostor: boolean;
+    #receiveShadow: boolean;
 
-    instanceBufferOffset: number;
-    indirectOffsetBytes: number;
+    #instanceBufferOffset: number;
+    #indirectOffsetBytes: number;
     #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
-        this.mesh = init.mesh;
-        this.geometry = init.geometry;
-        this.material = init.material;
-        this.indexCount = init.indexCount;
-        this.vertexCount = init.vertexCount;
-        this.isIndexed = init.isIndexed;
-        this.indexFormat = init.indexFormat || 'uint32';
-        this.strideBytes = init.strideBytes;
-        this.bottomOffset = init.bottomOffset ?? 0;
-        this.relativeModelMatrix = init.relativeModelMatrix;
-        this.relativeNormalMatrix = init.relativeNormalMatrix;
-        this.vertexUniformBuffer = init.vertexUniformBuffer;
-        this.vertexUniformBindGroup = init.vertexUniformBindGroup;
-        this.lodIndex = init.lodIndex;
+        this.#mesh = init.mesh;
+        this.#geometry = init.geometry;
+        this.#material = init.material;
+        this.#indexCount = init.indexCount;
+        this.#vertexCount = init.vertexCount;
+        this.#isIndexed = init.isIndexed;
+        this.#indexFormat = init.indexFormat || 'uint32';
+        this.#strideBytes = init.strideBytes;
+        this.#bottomOffset = init.bottomOffset ?? 0;
+        this.#relativeModelMatrix = init.relativeModelMatrix;
+        this.#relativeNormalMatrix = init.relativeNormalMatrix;
+        this.#vertexUniformBuffer = init.vertexUniformBuffer;
+        this.#vertexUniformBindGroup = init.vertexUniformBindGroup;
+        this.#lodIndex = init.lodIndex;
 
-        this.isDepthPrepass = init.isDepthPrepass;
-        this.isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
-        this.isMasked = init.isMasked ?? true;
-        this.mainDepthMode = init.mainDepthMode;
-        this.isImpostor = init.isImpostor ?? false;
-        this.receiveShadow = init.receiveShadow !== false;
+        this.#isDepthPrepass = init.isDepthPrepass;
+        this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
+        this.#isMasked = init.isMasked ?? true;
+        this.#mainDepthMode = init.mainDepthMode;
+        this.#isImpostor = init.isImpostor ?? false;
+        this.#receiveShadow = init.receiveShadow !== false;
 
-        this.instanceBufferOffset = init.instanceBufferOffset ?? 0;
-        this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+        this.#instanceBufferOffset = init.instanceBufferOffset ?? 0;
+        this.#indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
+    }
+
+    get mesh(): Mesh {
+        return this.#mesh;
+    }
+
+    get geometry(): Geometry {
+        return this.#geometry;
+    }
+
+    get material(): any {
+        return this.#material;
+    }
+
+    get indexCount(): number {
+        return this.#indexCount;
+    }
+
+    get vertexCount(): number {
+        return this.#vertexCount;
+    }
+
+    get isIndexed(): boolean {
+        return this.#isIndexed;
+    }
+
+    get indexFormat(): GPUIndexFormat {
+        return this.#indexFormat;
+    }
+
+    get strideBytes(): number {
+        return this.#strideBytes;
+    }
+
+    get bottomOffset(): number {
+        return this.#bottomOffset;
+    }
+
+    set bottomOffset(val: number) {
+        this.#bottomOffset = val;
+    }
+
+    get relativeModelMatrix(): mat4 {
+        return this.#relativeModelMatrix;
+    }
+
+    get relativeNormalMatrix(): mat4 {
+        return this.#relativeNormalMatrix;
+    }
+
+    get vertexUniformBuffer(): GPUBuffer {
+        return this.#vertexUniformBuffer;
+    }
+
+    get vertexUniformBindGroup(): GPUBindGroup {
+        return this.#vertexUniformBindGroup;
+    }
+
+    get lodIndex(): number {
+        return this.#lodIndex;
+    }
+
+    get isDepthPrepass(): boolean {
+        return this.#isDepthPrepass;
+    }
+
+    get isMainOpaqueOrMasked(): boolean {
+        return this.#isMainOpaqueOrMasked;
+    }
+
+    get isMasked(): boolean {
+        return this.#isMasked;
+    }
+
+    get mainDepthMode(): FoliageDepthPassMode {
+        return this.#mainDepthMode;
+    }
+
+    get isImpostor(): boolean {
+        return this.#isImpostor;
+    }
+
+    set isImpostor(val: boolean) {
+        this.#isImpostor = val;
+    }
+
+    get receiveShadow(): boolean {
+        return this.#receiveShadow;
+    }
+
+    set receiveShadow(val: boolean) {
+        this.#receiveShadow = val;
+    }
+
+    get instanceBufferOffset(): number {
+        return this.#instanceBufferOffset;
+    }
+
+    set instanceBufferOffset(val: number) {
+        this.#instanceBufferOffset = val;
+    }
+
+    get indirectOffsetBytes(): number {
+        return this.#indirectOffsetBytes;
+    }
+
+    set indirectOffsetBytes(val: number) {
+        this.#indirectOffsetBytes = val;
     }
 
     updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
-        if (this.receiveShadow === receiveShadow) return;
-        this.receiveShadow = receiveShadow;
-        if (this.vertexUniformBuffer && gpuDevice) {
+        if (this.#receiveShadow === receiveShadow) return;
+        this.#receiveShadow = receiveShadow;
+        if (this.#vertexUniformBuffer && gpuDevice) {
             FoliageSubMesh.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
             gpuDevice.queue.writeBuffer(
-                this.vertexUniformBuffer,
+                this.#vertexUniformBuffer,
                 34 * 4,
                 FoliageSubMesh.#singleFloatBuffer.buffer,
                 FoliageSubMesh.#singleFloatBuffer.byteOffset,
@@ -120,7 +227,7 @@ export class FoliageSubMesh {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (!this.vertexUniformBuffer || !gpuDevice) return;
+        if (!this.#vertexUniformBuffer || !gpuDevice) return;
         const fView = FoliageSubMesh.#windFloatBuffer;
         const uView = FoliageSubMesh.#windUintBuffer;
         fView[0] = windDirX;
@@ -137,7 +244,7 @@ export class FoliageSubMesh {
         uView[11] = 0;
 
         gpuDevice.queue.writeBuffer(
-            this.vertexUniformBuffer,
+            this.#vertexUniformBuffer,
             36 * 4,
             fView.buffer,
             fView.byteOffset,
@@ -150,7 +257,7 @@ export class FoliageSubMesh {
         groundBlendStrength: number,
         groundBlendRange: number
     ): void {
-        if (!this.vertexUniformBuffer || !gpuDevice) return;
+        if (!this.#vertexUniformBuffer || !gpuDevice) return;
         const buf = FoliageSubMesh.#groundBlendFloatBuffer;
         buf[0] = groundBlendStrength;
         buf[1] = groundBlendRange;
@@ -158,7 +265,7 @@ export class FoliageSubMesh {
         buf[3] = 0;
 
         gpuDevice.queue.writeBuffer(
-            this.vertexUniformBuffer,
+            this.#vertexUniformBuffer,
             48 * 4,
             buf.buffer,
             buf.byteOffset,
@@ -169,9 +276,9 @@ export class FoliageSubMesh {
     canRenderInPass(passType: FoliageRenderPassType): boolean {
         switch (passType) {
             case 'depthPrepass':
-                return this.isDepthPrepass;
+                return this.#isDepthPrepass;
             case 'main':
-                return this.isMainOpaqueOrMasked;
+                return this.#isMainOpaqueOrMasked;
             default:
                 return false;
         }
@@ -184,7 +291,7 @@ export class FoliageSubMesh {
         depthPassMode: FoliageDepthPassMode,
         subMeshBindGroupLayout: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
-        const material = this.material;
+        const material = this.#material;
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
             material._updateFragmentState();
             material.dirtyPipeline = false;
@@ -198,8 +305,7 @@ export class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-
-            const cullMode: GPUCullMode = (!this.isMasked)
+            const cullMode: GPUCullMode = (!this.#isMasked)
                 ? 'back'
                 : (material.doubleSided ? 'none' : (material.cullMode ?? 'back'));
 
@@ -207,7 +313,7 @@ export class FoliageSubMesh {
                 material,
                 sampleCount,
                 msaaID,
-                this.strideBytes,
+                this.#strideBytes,
                 cullMode,
                 depthPassMode,
                 subMeshBindGroupLayout
@@ -221,8 +327,8 @@ export class FoliageSubMesh {
     }
 
     draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
-        const offset = offsetBytes !== undefined ? offsetBytes : this.indirectOffsetBytes;
-        if (this.isIndexed && this.geometry.indexBuffer?.gpuBuffer) {
+        const offset = offsetBytes !== undefined ? offsetBytes : this.#indirectOffsetBytes;
+        if (this.#isIndexed && this.#geometry.indexBuffer?.gpuBuffer) {
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
         } else {
             passEncoder.drawIndirect(indirectGPUBuffer, offset);
@@ -230,7 +336,7 @@ export class FoliageSubMesh {
     }
 
     destroy(): void {
-        this.vertexUniformBuffer?.destroy();
+        this.#vertexUniformBuffer?.destroy();
         this.#pipelineCacheByMode = {};
     }
 }

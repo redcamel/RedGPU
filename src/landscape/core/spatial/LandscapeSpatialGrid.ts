@@ -24,15 +24,15 @@ export class LandscapeSpatialGrid {
         this.#updateTuples();
     }
 
-    get worldSize(): readonly [number, number] {
+    get worldSize(): [number, number] {
         return this.#worldSizeTuple;
     }
 
-    get componentCount(): readonly [number, number] {
+    get componentCount(): [number, number] {
         return this.#componentCountTuple;
     }
 
-    get tileSize(): readonly [number, number] {
+    get tileSize(): [number, number] {
         return this.#tileSizeTuple;
     }
 
@@ -40,7 +40,7 @@ export class LandscapeSpatialGrid {
         return this.#worldSizeTuple[0];
     }
 
-    get flatCells(): readonly LandscapeComponent[] {
+    get flatCells(): LandscapeComponent[] {
         return this.#flatCells;
     }
 

@@ -1,9 +1,9 @@
 export class LandscapeComponent {
-    readonly #worldX: number = 0;
-    readonly #worldZ: number = 0;
-    readonly #componentX: number = 0;
-    readonly #componentZ: number = 0;
-    readonly #key: string = '';
+    #worldX: number = 0;
+    #worldZ: number = 0;
+    #componentX: number = 0;
+    #componentZ: number = 0;
+    #key: string = '';
 
     constructor(
         worldX: number = 0,

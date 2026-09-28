@@ -355,11 +355,11 @@ export class Foliage {
         return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
     }
 
-    get minScale(): readonly [number, number, number] {
+    get minScale(): [number, number, number] {
         return this.#options.minScale;
     }
 
-    get maxScale(): readonly [number, number, number] {
+    get maxScale(): [number, number, number] {
         return this.#options.maxScale;
     }
 
@@ -379,27 +379,27 @@ export class Foliage {
         return this.#megaBuffer;
     }
 
-    get subMeshes(): readonly FoliageSubMesh[] {
+    get subMeshes(): FoliageSubMesh[] {
         return this.#subMeshes;
     }
 
-    get depthPrepassSubMeshes(): readonly FoliageSubMesh[] {
+    get depthPrepassSubMeshes(): FoliageSubMesh[] {
         return this.#depthPrepassSubMeshes;
     }
 
-    get mainSubMeshes(): readonly FoliageSubMesh[] {
+    get mainSubMeshes(): FoliageSubMesh[] {
         return this.#mainSubMeshes;
     }
 
-    get lod0SubMeshes(): readonly FoliageSubMesh[] {
+    get lod0SubMeshes(): FoliageSubMesh[] {
         return this.#lod0SubMeshes;
     }
 
-    get shadowMergedSubMeshes(): readonly FoliageShadowMergedSubMesh[] {
+    get shadowMergedSubMeshes(): FoliageShadowMergedSubMesh[] {
         return this.#shadowMergedSubMeshes;
     }
 
-    get lodInfoList(): readonly FoliageLODInfo[] {
+    get lodInfoList(): FoliageLODInfo[] {
         return this.#lodInfoList;
     }
 

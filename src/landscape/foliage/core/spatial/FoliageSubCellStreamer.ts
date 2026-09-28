@@ -3,12 +3,12 @@ import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
 class FoliageSubCellStreamer {
     static readonly #STRIDE: number = 8;
-    readonly #tempCandidates: FoliageSubCellChunk[] = [];
+    #tempCandidates: FoliageSubCellChunk[] = [];
     #sortCamX: number = 0;
     #sortCamZ: number = 0;
-    readonly #foliageType: Foliage;
-    readonly #chunks: Map<number, FoliageSubCellChunk> = new Map();
-    readonly #mountedChunks: FoliageSubCellChunk[] = [];
+    #foliageType: Foliage;
+    #chunks: Map<number, FoliageSubCellChunk> = new Map();
+    #mountedChunks: FoliageSubCellChunk[] = [];
     #totalInstanceCount: number = 0;
     #mountBudget: number = 16;
     #unmountBudget: number = 32;
@@ -134,7 +134,7 @@ class FoliageSubCellStreamer {
         }
     }
 
-    readonly #compareCandidates = (a: FoliageSubCellChunk, b: FoliageSubCellChunk): number => {
+    #compareCandidates = (a: FoliageSubCellChunk, b: FoliageSubCellChunk): number => {
         const cx = this.#sortCamX;
         const cz = this.#sortCamZ;
         const da = (a.centerX - cx) * (a.centerX - cx) + (a.centerZ - cz) * (a.centerZ - cz);
