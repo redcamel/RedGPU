@@ -253,7 +253,6 @@ RedGPU.init(
                     });
 
                     testPane.addTypeToUI(baseClumpType, true);
-                    grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
                     console.log('🌿 [Layer 1] Base Ground Clump registered successfully.');
                 }
             }
@@ -370,7 +369,6 @@ RedGPU.init(
                     testPane.addTypeToUI(grassType);
                 });
 
-                grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
                 console.log('🌾 [Layer 2] Tall Grass variants registered successfully.');
             }
         );
@@ -572,8 +570,6 @@ const renderTestPane = ({
                 max: 250,
                 step: 5,
                 label: 'Streaming Radius (m)'
-            }).on('change', () => {
-                grassManager.populateInstances([controller.centerX, controller.centerY, controller.centerZ]);
             });
 
             // 실시간 잔디 버퍼 통계

@@ -440,6 +440,120 @@ export class LandscapeGrassManager {
     }
 
     /**
+     * [KO] 등록된 특정 잔디 생태계 타입을 매니저에서 제거하고 관련 GPU 리소스를 안전하게 해제합니다.
+     * [EN] Removes a specific registered grass ecosystem type from the manager and safely releases associated GPU resources.
+     *
+     * @param target -
+     * [KO] 제거할 {@link LandscapeGrass} 인스턴스, 잔디의 고유 이름(`string`), 또는 타입 ID(`number`)
+     * [EN] {@link LandscapeGrass} instance, unique grass name (`string`), or type ID (`number`) to remove
+     * @returns
+     * [KO] 제거 성공 여부 (대상을 찾아 정상 제거 시 `true`, 미존재 시 `false`)
+     * [EN] Whether removal succeeded (`true` if found and removed, `false` otherwise)
+     */
+    removeGrass(target: LandscapeGrass | string | number): boolean {
+        let idx = -1;
+        if (typeof target === 'number') {
+            idx = this.#grassList.findIndex(g => g.typeId === target);
+        } else if (typeof target === 'string') {
+            idx = this.#grassList.findIndex(g => g.name === target);
+        } else if (target) {
+            idx = this.#grassList.indexOf(target);
+        }
+        if (idx === -1) return false;
+
+        const grass = this.#grassList[idx];
+        const typeId = grass.typeId;
+        grass.onChanged = null;
+        this.#grassList.splice(idx, 1);
+
+        const res = this.#typeMaterialBuffers.get(typeId);
+        if (res) {
+            res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
+            this.#typeMaterialBuffers.delete(typeId);
+        }
+
+        const state = this.#typeCellStates.get(typeId);
+        if (state) {
+            for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
+            for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
+            state.activeCellRanges.clear();
+            state.freeSlotRanges.length = 0;
+            this.#typeCellStates.delete(typeId);
+        }
+
+        const alloc = this.#megaBuffer.getAllocation(typeId);
+        if (alloc) {
+            alloc.activeCount = 0;
+            const baseOffset = alloc.rawBaseOffset;
+            for (let i = 0; i < alloc.maxInstances; i++) {
+                this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
+            }
+            this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
+            this.#megaBuffer.updateTypeParams(
+                typeId,
+                0.0, 0.0, 0.0, 0.0, 0.0, false,
+                baseOffset, 0, alloc.culledBaseOffset, alloc.indirectBaseOffset,
+                0, 0, [0, 0, 0, 0]
+            );
+        }
+
+        let totalPop = 0;
+        for (const type of this.#grassList) {
+            const a = this.#megaBuffer.getAllocation(type.typeId);
+            if (a) totalPop += a.activeCount;
+        }
+        this.#totalInstancesPopulated = totalPop;
+        this.#populated = totalPop > 0;
+
+        return true;
+    }
+
+    /**
+     * [KO] 등록된 모든 잔디 생태계 타입을 일괄 제거하고 GPU MegaBuffer 및 머티리얼 버퍼를 초기 상태로 리셋합니다.
+     * [EN] Clears all registered grass ecosystem types and resets the GPU MegaBuffer and material buffers to the initial state.
+     */
+    clearGrass(): void {
+        for (const grass of this.#grassList) {
+            grass.onChanged = null;
+        }
+        this.#grassList.length = 0;
+
+        for (const res of this.#typeMaterialBuffers.values()) {
+            res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
+        }
+        this.#typeMaterialBuffers.clear();
+
+        for (const state of this.#typeCellStates.values()) {
+            for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
+            for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
+            state.activeCellRanges.clear();
+            state.freeSlotRanges.length = 0;
+        }
+        this.#typeCellStates.clear();
+
+        this.#megaBuffer.destroy();
+        this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
+        this.#megaBuffer.onRecreated = () => {
+            this.#baker.invalidateBindGroup();
+            this.#culler.invalidateBindGroup();
+            for (const res of this.#typeMaterialBuffers.values()) {
+                res.instanceBindGroup = null;
+            }
+        };
+
+        this.#nextTypeId = 0;
+        this.#totalInstancesPopulated = 0;
+        this.#populated = false;
+        this.#lastLoadedTileCount = 0;
+        this.#lastUpdateGridPos[0] = -999999;
+        this.#lastUpdateGridPos[1] = -999999;
+        this.#culler.invalidateBindGroup();
+        this.#baker.invalidateBindGroup();
+    }
+
+    /**
      * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
      * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
      *
@@ -1008,6 +1122,9 @@ export class LandscapeGrassManager {
         this.#keysToEvict.length = 0;
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
+        for (const grass of this.#grassList) {
+            grass.onChanged = null;
+        }
         this.#grassList.length = 0;
     }
 
