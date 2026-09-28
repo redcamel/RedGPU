@@ -8,8 +8,6 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
-import {renderFoliageShadowLayer} from "../renderer/renderLayers/renderFoliageLayer";
-import {renderGrassShadowLayer} from "../renderer/renderLayers/renderGrassLayer";
 import keepLog from "../utils/keepLog";
 
 /**
@@ -86,6 +84,10 @@ class ShadowManager {
         }
 
         const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        const {landscape} = scene;
+        const foliageManager = landscape?.foliageManager;
+        const grassManager = landscape?.grassManager;
+
         for (let c = 0; c < cascadeCount; c++) {
             // 💡 Zero-GC: 캐스케이드별 사전 캐싱된 디스크립터 재사용
             const cascadePassDescriptor = this.#getCascadePassDescriptor(c);
@@ -100,11 +102,11 @@ class ShadowManager {
                 }
 
                 // [Step 2: Masked Alpha-Test Geometry (알파 텍스처 샘플링 & discard)]
-                renderFoliageShadowLayer(view, viewShadowRenderPassEncoder);
+                foliageManager?.renderShadow(view, viewShadowRenderPassEncoder);
 
                 // 🌿 Cascade Filtering: 잔디는 초근거리(30m 이내, Cascade 0 및 1)에서만 그림자를 생성
                 if (c <= 1) {
-                    renderGrassShadowLayer(view, viewShadowRenderPassEncoder);
+                    grassManager?.renderShadow(view, viewShadowRenderPassEncoder);
                 }
 
                 view.currentCascadeIndex = undefined;

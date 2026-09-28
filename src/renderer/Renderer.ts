@@ -11,9 +11,6 @@ import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinn
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
-import renderLandscapeLayer from "./renderLayers/renderLandscapeLayer";
-import renderFoliageLayer from "./renderLayers/renderFoliageLayer";
-import renderGrassLayer from "./renderLayers/renderGrassLayer";
 
 
 /**
@@ -285,7 +282,7 @@ class Renderer {
     }
 
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, grid, axis, redGPUContext} = view
+        const {renderViewStateData, skybox, skyAtmosphere, grid, axis, redGPUContext, scene} = view
         if (skyAtmosphere) {
             skyAtmosphere.update(view)
         }
@@ -294,14 +291,18 @@ class Renderer {
 
             renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
 
+            const {landscape} = scene;
+            const foliageManager = landscape?.foliageManager;
+            const grassManager = landscape?.grassManager;
+
             // 1. Opaque Occluders (지형 및 일반 메시로 뎁스 버퍼 선점)
-            renderLandscapeLayer(view, viewRenderPassEncoder)
-            if (axis) axis.render(renderViewStateData)
-            renderBasicLayer(view, viewRenderPassEncoder)
+            landscape?.render(view, viewRenderPassEncoder);
+            if (axis) axis.render(renderViewStateData);
+            renderBasicLayer(view, viewRenderPassEncoder);
 
             // 2. Alpha-Tested Vegetation (식생 및 잔디 - 가려진 픽셀 Early-Z 자동 기각)
-            renderFoliageLayer(view, viewRenderPassEncoder)
-            renderGrassLayer(view, viewRenderPassEncoder)
+            foliageManager?.render(view, viewRenderPassEncoder);
+            grassManager?.render(view, viewRenderPassEncoder);
 
             // 3. Background Environment (Skybox Last: 미채워진 하늘 픽셀에만 실행하여 오버드로우 최소화)
             if (skybox) skybox.render(renderViewStateData)
