@@ -12,7 +12,7 @@ import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
-import Object3DContainer from "../display/mesh/core/Object3DContainer";
+import BaseObject from "../base/BaseObject";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import LandscapeGrassManager from "./grass/LandscapeGrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
@@ -93,7 +93,7 @@ const COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
  *
  * @category Landscape
  */
-export class Landscape extends Object3DContainer {
+export class Landscape extends BaseObject {
     // =========================================================================
     // Core Context & Subsystems
     // =========================================================================
@@ -1207,8 +1207,7 @@ export class Landscape extends Object3DContainer {
      * Releases and destroys all GPU resources (texture atlases, instance buffer, geometry, pipeline caches) and subsystem managers associated with this landscape instance.
      *
      */
-    override destroy(): void {
-        super.destroy();
+    destroy(): void {
         this.#debuggerManager?.destroy();
         this.#foliageManager?.destroy?.();
         this.#grassManager?.destroy?.();
