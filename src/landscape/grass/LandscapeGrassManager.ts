@@ -155,7 +155,7 @@ export class LandscapeGrassManager {
 
     #grassList: LandscapeGrass[] = [];
     #nextTypeId: number = 0;
-    #totalInstancesPopulated: number = 0;
+    #totalInstanceCount: number = 0;
     #populated: boolean = false;
 
     #vertexModule: GPUShaderModule | null = null;
@@ -193,7 +193,7 @@ export class LandscapeGrassManager {
         activeCellRanges: Map<number, CellSlotRange>;
         freeSlotRanges: CellSlotRange[];
         slotHead: number;
-        activeCount: number;
+        instanceCount: number;
     }> = new Map();
 
     #neededCellKeysSet: Set<number> = new Set();
@@ -297,8 +297,8 @@ export class LandscapeGrassManager {
      * [KO] 현재 스트리밍 반경 내 활성 셀들에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
      */
-    get totalInstancesPopulated(): number {
-        return this.#totalInstancesPopulated;
+    get totalInstanceCount(): number {
+        return this.#totalInstanceCount;
     }
 
     /**
@@ -375,7 +375,7 @@ export class LandscapeGrassManager {
             activeCellRanges: new Map(),
             freeSlotRanges: [],
             slotHead: 0,
-            activeCount: 0
+            instanceCount: 0
         });
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -483,7 +483,7 @@ export class LandscapeGrassManager {
 
         const alloc = this.#megaBuffer.getAllocation(typeId);
         if (alloc) {
-            alloc.activeCount = 0;
+            alloc.instanceCount = 0;
             const baseOffset = alloc.rawBaseOffset;
             for (let i = 0; i < alloc.maxInstances; i++) {
                 this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
@@ -500,9 +500,9 @@ export class LandscapeGrassManager {
         let totalPop = 0;
         for (const type of this.#grassList) {
             const a = this.#megaBuffer.getAllocation(type.typeId);
-            if (a) totalPop += a.activeCount;
+            if (a) totalPop += a.instanceCount;
         }
-        this.#totalInstancesPopulated = totalPop;
+        this.#totalInstanceCount = totalPop;
         this.#populated = totalPop > 0;
 
         return true;
@@ -573,7 +573,7 @@ export class LandscapeGrassManager {
 
         for (const type of this.#grassList) {
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (!alloc || alloc.activeCount === 0) continue;
+            if (!alloc || alloc.instanceCount === 0) continue;
 
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res) continue;
@@ -667,7 +667,7 @@ export class LandscapeGrassManager {
         for (const type of this.#grassList) {
             if (!type.castShadow) continue;
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (!alloc || alloc.activeCount === 0) continue;
+            if (!alloc || alloc.instanceCount === 0) continue;
 
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
@@ -1247,8 +1247,8 @@ export class LandscapeGrassManager {
                 state.activeCellRanges.clear();
                 state.freeSlotRanges.length = 0;
                 state.slotHead = 0;
-                state.activeCount = 0;
-                alloc.activeCount = 0;
+                state.instanceCount = 0;
+                alloc.instanceCount = 0;
 
                 const baseOffset = alloc.rawBaseOffset;
                 for (let i = 0; i < alloc.maxInstances; i++) {
@@ -1320,7 +1320,7 @@ export class LandscapeGrassManager {
 
                 this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
                 state.freeSlotRanges.push(range);
-                state.activeCount -= range.filledCount;
+                state.instanceCount -= range.filledCount;
             }
 
             const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : MAX_POPULATE_CELLS_PER_FRAME;
@@ -1421,7 +1421,7 @@ export class LandscapeGrassManager {
                     } else {
                         state.activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
                     }
-                    state.activeCount += filledCount;
+                    state.instanceCount += filledCount;
                 } else {
                     this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
                     if (reusedRange) {
@@ -1434,15 +1434,15 @@ export class LandscapeGrassManager {
                 }
             }
 
-            alloc.activeCount = state.activeCount;
+            alloc.instanceCount = state.instanceCount;
         }
 
         let totalPop = 0;
         for (const type of this.#grassList) {
             const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (alloc) totalPop += alloc.activeCount;
+            if (alloc) totalPop += alloc.instanceCount;
         }
-        this.#totalInstancesPopulated = totalPop;
+        this.#totalInstanceCount = totalPop;
         this.#populated = totalPop > 0;
     }
 

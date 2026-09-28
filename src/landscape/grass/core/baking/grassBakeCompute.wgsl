@@ -21,7 +21,7 @@ struct GrassTypeParam {
     maxSlopeTan2: f32,
     hasSlopeFilter: u32,
     rawBaseOffset: u32,
-    activeCount: u32,
+    instanceCount: u32,
     culledBaseOffset: u32,
     indirectBaseOffset: u32,
     lodCount: u32,

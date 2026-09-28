@@ -17,7 +17,7 @@ export interface GrassTypeAllocation {
     rawBaseOffset: number;
     culledBaseOffset: number;
     indirectBaseOffset: number;
-    activeCount: number;
+    instanceCount: number;
     lods: GrassLODAllocation[];
 }
 
@@ -173,7 +173,7 @@ export class GrassMegaBuffer {
             rawBaseOffset,
             culledBaseOffset,
             indirectBaseOffset,
-            activeCount: 0,
+            instanceCount: 0,
             lods: lodAllocations
         };
 
@@ -229,7 +229,7 @@ export class GrassMegaBuffer {
         maxSlopeTan2: number,
         hasSlopeFilter: boolean,
         rawBaseOffset: number = 0,
-        activeCount: number = 0,
+        instanceCount: number = 0,
         culledBaseOffset: number = 0,
         indirectBaseOffset: number = 0,
         lodCount: number = 1,
@@ -248,7 +248,7 @@ export class GrassMegaBuffer {
         f32[base + 4] = maxSlopeTan2;
         u32[base + 5] = hasSlopeFilter ? 1 : 0;
         u32[base + 6] = rawBaseOffset;
-        u32[base + 7] = activeCount;
+        u32[base + 7] = instanceCount;
 
         u32[base + 8] = culledBaseOffset;
         u32[base + 9] = indirectBaseOffset;

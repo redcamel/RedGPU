@@ -31,7 +31,7 @@ struct GrassTypeParam {
     maxSlopeTan2: f32,
     hasSlopeFilter: u32,
     rawBaseOffset: u32,
-    activeCount: u32,
+    instanceCount: u32,
     culledBaseOffset: u32,
     indirectBaseOffset: u32,
     lodCount: u32,
@@ -60,7 +60,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     var found = false;
     for (var t = 0u; t < globalUniforms.typeCount; t = t + 1u) {
         let tp = typeParams[t];
-        if (index >= tp.rawBaseOffset && index < (tp.rawBaseOffset + tp.activeCount)) {
+        if (index >= tp.rawBaseOffset && index < (tp.rawBaseOffset + tp.instanceCount)) {
             typeId = t;
             found = true;
             break;
