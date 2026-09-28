@@ -26,7 +26,6 @@ struct InputData {
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
     uvScale: vec2<f32>,
-    tintColor: vec4<f32>,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
@@ -161,7 +160,7 @@ fn computeNearFieldLandscapeLayers(
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
         let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
 
-        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
+        let layerAlbedo = layerAlbedoSample.rgb;
         let layerRoughness = layerParams.roughness * layerORMSample.g;
         let layerMetallic = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
@@ -196,7 +195,7 @@ fn computeNearFieldLandscapeLayers(
         let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
         let ddx0UV = ddxWorldTileUV * layer0Params.uvScale;
         let ddy0UV = ddyWorldTileUV * layer0Params.uvScale;
-        let layer0Albedo = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * layer0Params.tintColor.rgb;
+        let layer0Albedo = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb;
         let layer0ORM = textureSampleGrad(layerORMArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV);
         let layer0NormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * 2.0 - vec3<f32>(1.0);
         let layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));

@@ -106,7 +106,6 @@ RedGPU.init(
                 metallic: cfg.metallic,
                 normalIntensity: cfg.normalIntensity,
                 aoIntensity: cfg.aoIntensity,
-                tintColor: '#ffffff'
             });
         });
 

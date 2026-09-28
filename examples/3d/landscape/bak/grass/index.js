@@ -115,7 +115,6 @@ RedGPU.init(
                 metallic: cfg.metallic,
                 normalIntensity: cfg.normalIntensity,
                 aoIntensity: cfg.aoIntensity,
-                tintColor: '#ffffff'
             });
         });
         landscape.tileUrlResolver = (row, col) => {

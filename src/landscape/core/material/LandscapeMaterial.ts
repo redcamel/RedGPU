@@ -21,9 +21,9 @@ interface LandscapeMaterial {
     baseColorTextureSampler: Sampler;
 }
 
+const DEFAULT_BASE_COLOR: readonly number[] = Object.freeze([0.22, 0.49, 0.26, 1.0]);
+
 class LandscapeMaterial extends AUVTransformBaseMaterial {
-    static readonly #DEFAULT_BASE_COLOR: readonly number[] = Object.freeze([0.22, 0.49, 0.26, 1.0]);
-    static readonly #DEFAULT_LAYER_COLOR: readonly number[] = Object.freeze([1, 1, 1, 1]);
 
     #layers: LandscapeLayer[] = [];
     #textureArraySize: number = 1024;
@@ -233,7 +233,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         floatBuf[2] = this.#nearDetailFade;
         uintBuf[3] = 0;
 
-        const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : LandscapeMaterial.#DEFAULT_BASE_COLOR;
+        const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : DEFAULT_BASE_COLOR;
         floatBuf[4] = colorLinear[0];
         floatBuf[5] = colorLinear[1];
         floatBuf[6] = colorLinear[2];
@@ -249,25 +249,19 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 2] = layer.uvScale[0];
                 floatBuf[offset + 3] = layer.uvScale[1];
 
-                const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : LandscapeMaterial.#DEFAULT_LAYER_COLOR;
-                floatBuf[offset + 4] = layerColorLinear[0];
-                floatBuf[offset + 5] = layerColorLinear[1];
-                floatBuf[offset + 6] = layerColorLinear[2];
-                floatBuf[offset + 7] = layerColorLinear[3];
+                floatBuf[offset + 4] = layer.roughness;
+                floatBuf[offset + 5] = layer.metallic;
+                floatBuf[offset + 6] = layer.normalIntensity;
+                floatBuf[offset + 7] = layer.enabled ? 1.0 : 0.0;
 
-                floatBuf[offset + 8] = layer.roughness;
-                floatBuf[offset + 9] = layer.metallic;
-                floatBuf[offset + 10] = layer.normalIntensity;
-                floatBuf[offset + 11] = layer.enabled ? 1.0 : 0.0;
-
-                floatBuf[offset + 12] = layer.aoIntensity;
-                floatBuf[offset + 13] = layer.weightChannelIndex;
-                floatBuf[offset + 14] = layer.nearUVScaleMultiplier;
-                floatBuf[offset + 15] = 0.0;
+                floatBuf[offset + 8] = layer.aoIntensity;
+                floatBuf[offset + 9] = layer.weightChannelIndex;
+                floatBuf[offset + 10] = layer.nearUVScaleMultiplier;
+                floatBuf[offset + 11] = 0.0;
             } else {
-                floatBuf.fill(0, offset, offset + 16);
+                floatBuf.fill(0, offset, offset + 12);
             }
-            offset += 16;
+            offset += 12;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

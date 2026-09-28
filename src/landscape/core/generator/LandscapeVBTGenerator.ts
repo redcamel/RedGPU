@@ -74,7 +74,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 16;
+            const offset = 12 + i * 12;
             if (i < activeCount) {
                 const layer = activeLayers[i];
 
@@ -83,23 +83,17 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 2] = layer.uvScale[0];
                 fArr[offset + 3] = layer.uvScale[1];
 
-                const tint = layer.tintColor.rgbNormalLinear;
-                fArr[offset + 4] = tint[0];
-                fArr[offset + 5] = tint[1];
-                fArr[offset + 6] = tint[2];
-                fArr[offset + 7] = 1.0;
+                fArr[offset + 4] = layer.roughness;
+                fArr[offset + 5] = layer.metallic;
+                fArr[offset + 6] = layer.normalIntensity;
+                fArr[offset + 7] = layer.enabled ? 1.0 : 0.0;
 
-                fArr[offset + 8] = layer.roughness;
-                fArr[offset + 9] = layer.metallic;
-                fArr[offset + 10] = layer.normalIntensity;
-                fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
-
-                fArr[offset + 12] = layer.aoIntensity;
-                fArr[offset + 13] = layer.weightChannelIndex;
-                fArr[offset + 14] = 0.0;
-                fArr[offset + 15] = 0.0;
+                fArr[offset + 8] = layer.aoIntensity;
+                fArr[offset + 9] = layer.weightChannelIndex;
+                fArr[offset + 10] = layer.nearUVScaleMultiplier;
+                fArr[offset + 11] = 0.0;
             } else {
-                for (let j = 0; j < 16; j++) {
+                for (let j = 0; j < 12; j++) {
                     fArr[offset + j] = 0.0;
                 }
             }
@@ -181,7 +175,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 16;
+            const offset = 12 + i * 12;
             if (i < activeCount) {
                 const layer = activeLayers[i];
 
@@ -190,23 +184,17 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 2] = layer.uvScale[0];
                 fArr[offset + 3] = layer.uvScale[1];
 
-                const tint = layer.tintColor.rgbNormalLinear;
-                fArr[offset + 4] = tint[0];
-                fArr[offset + 5] = tint[1];
-                fArr[offset + 6] = tint[2];
-                fArr[offset + 7] = 1.0;
+                fArr[offset + 4] = layer.roughness;
+                fArr[offset + 5] = layer.metallic;
+                fArr[offset + 6] = layer.normalIntensity;
+                fArr[offset + 7] = layer.enabled ? 1.0 : 0.0;
 
-                fArr[offset + 8] = layer.roughness;
-                fArr[offset + 9] = layer.metallic;
-                fArr[offset + 10] = layer.normalIntensity;
-                fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
-
-                fArr[offset + 12] = layer.aoIntensity;
-                fArr[offset + 13] = layer.weightChannelIndex;
-                fArr[offset + 14] = 0.0;
-                fArr[offset + 15] = 0.0;
+                fArr[offset + 8] = layer.aoIntensity;
+                fArr[offset + 9] = layer.weightChannelIndex;
+                fArr[offset + 10] = layer.nearUVScaleMultiplier;
+                fArr[offset + 11] = 0.0;
             } else {
-                for (let j = 0; j < 16; j++) {
+                for (let j = 0; j < 12; j++) {
                     fArr[offset + j] = 0.0;
                 }
             }

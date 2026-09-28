@@ -92,7 +92,6 @@ RedGPU.init(
                 metallic: cfg.metallic,
                 normalIntensity: cfg.normalIntensity,
                 aoIntensity: cfg.aoIntensity,
-                tintColor: '#ffffff'
             });
         });
 
@@ -293,16 +292,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     });
-
-                    const tintObj = {
-                        get tintColor() {
-                            return layer.tintColor ? layer.tintColor.hex : '#ffffff';
-                        },
-                        set tintColor(v) {
-                            layer.tintColor = v;
-                        }
-                    };
-                    subFolder.addBinding(tintObj, 'tintColor');
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
                     subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});

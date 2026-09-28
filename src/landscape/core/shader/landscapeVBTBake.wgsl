@@ -5,7 +5,6 @@
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
     uvScale: vec2<f32>,
-    tintColor: vec4<f32>,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
@@ -119,7 +118,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
         let layerORMSample = textureSampleLevel(layerORMArray, vbtTextureSampler, layerUV, layerIdx, 0.0);
 
-        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
+        let layerAlbedo = layerAlbedoSample.rgb;
         let layerRoughness = layerParams.roughness * layerORMSample.g;
         let layerMetallic = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
@@ -157,7 +156,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         } else {
             let layer0Params = uniforms.layerParams[0];
             let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
-            let layer0Albedo = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb * layer0Params.tintColor.rgb;
+            let layer0Albedo = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb;
             let layer0ORM = textureSampleLevel(layerORMArray, vbtTextureSampler, layer0UV, 0, 0.0);
             let layer0NormalRaw = textureSampleLevel(layerNormalArray, vbtTextureSampler, layer0UV, 0, 0.0).rgb * 2.0 - vec3<f32>(1.0);
             let layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));

@@ -1,4 +1,3 @@
-import ColorRGBA from "../../../color/ColorRGBA";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import type RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
@@ -22,7 +21,6 @@ export interface LandscapeLayerOptions {
     metallic?: number;
     normalIntensity?: number;
     aoIntensity?: number;
-    tintColor?: ColorRGBA | string;
 }
 
 export class LandscapeLayer {
@@ -52,8 +50,6 @@ export class LandscapeLayer {
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
 
-    #tintColor: ColorRGBA;
-
     dirty: boolean = true;
     onChange?: () => void;
 
@@ -74,11 +70,6 @@ export class LandscapeLayer {
 
         this.name = actualOptions.name;
         if (actualOptions.enabled !== undefined) this.#enabled = actualOptions.enabled;
-
-        this.#tintColor = new ColorRGBA(255, 255, 255, 1, () => {
-            this.dirty = true;
-            this.onChange?.();
-        });
 
         if (actualOptions.baseColorTexture !== undefined) {
             this.baseColorTexture = actualOptions.baseColorTexture;
@@ -126,18 +117,6 @@ export class LandscapeLayer {
 
         if (actualOptions.aoIntensity !== undefined) {
             this.#aoIntensity = actualOptions.aoIntensity;
-        }
-
-        if (actualOptions.tintColor) {
-            if (typeof actualOptions.tintColor === 'string') {
-                this.#tintColor.setColorByHEX(actualOptions.tintColor);
-            } else {
-                const src = actualOptions.tintColor.rgba;
-                this.#tintColor.r = src[0];
-                this.#tintColor.g = src[1];
-                this.#tintColor.b = src[2];
-                this.#tintColor.a = src[3];
-            }
         }
     }
 
@@ -351,25 +330,6 @@ export class LandscapeLayer {
         this.dirty = true;
         this.onChange?.();
     }
-
-    get tintColor(): ColorRGBA {
-        return this.#tintColor;
-    }
-
-    set tintColor(val: ColorRGBA | string) {
-        if (typeof val === 'string') {
-            this.#tintColor.setColorByHEX(val);
-        } else {
-            const src = val.rgba;
-            this.#tintColor.r = src[0];
-            this.#tintColor.g = src[1];
-            this.#tintColor.b = src[2];
-            this.#tintColor.a = src[3];
-        }
-        this.dirty = true;
-        this.onChange?.();
-    }
-
     #updateWeightChannelIndex(): void {
         const ch = String(this.#weightChannel).toUpperCase();
         if (ch === 'G' || ch === '1') this.#weightChannelIndex = 1;
