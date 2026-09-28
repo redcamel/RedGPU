@@ -91,7 +91,15 @@ class LandscapeFoliageManager {
         };
     }
 
-    handleTileLoaded(comp: any): void {
+    /**
+     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
+     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
+     *
+     * @param comp -
+     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
+     * [EN] Loaded landscape tile component (`LandscapeComponent`)
+     */
+    onTileLoaded(comp: any): void {
         const count = this.#typeList.length;
         for (let i = 0; i < count; i++) {
             this.#typeList[i].populateTile(comp, this.#landscape);

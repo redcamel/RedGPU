@@ -303,8 +303,8 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환하거나 캐시 생성합니다.
-     * [EN] Retrieves or creates a cached GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
+     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
      *
      * @param sampleCount -
      * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
@@ -313,10 +313,10 @@ export class LandscapeGrassManager {
      * [KO] 원거리 LOD 전용 간소화 셰이더를 적용할지 여부 (기본값: false)
      * [EN] Whether to apply the simplified shader dedicated to far LOD (default: false)
      * @returns
-     * [KO] 생성되거나 캐시된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Created or cached GPURenderPipeline instance, or `null` if creation fails
+     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
      */
-    getOrCreateRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
+    getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
         const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
         let pipeline = cache.get(sampleCount);
         if (pipeline) return pipeline;
@@ -373,14 +373,14 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환하거나 생성합니다.
-     * [EN] Retrieves or creates the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
+     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
      *
      * @returns
-     * [KO] 생성되거나 캐시된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Created or cached shadow GPURenderPipeline instance, or `null` if creation fails
+     * [KO] 캐시되거나 생성된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Cached or created shadow GPURenderPipeline instance, or `null` if creation fails
      */
-    getOrCreateShadowRenderPipeline(): GPURenderPipeline | null {
+    getShadowRenderPipeline(): GPURenderPipeline | null {
         if (this.#shadowPipeline) return this.#shadowPipeline;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -778,14 +778,14 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되어, 해당 타일 영역과 교차하는 잔디 인스턴스들의 지형 스냅 베이킹을 실행합니다.
-     * [EN] Called when a new landscape tile component finishes loading to trigger terrain snap baking for grass instances intersecting that tile boundary.
+     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일 영역과 교차하는 잔디 인스턴스들의 지형 스냅 베이킹을 실행합니다.
+     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, triggering terrain snap baking for grass instances intersecting that tile boundary.
      *
      * @param comp -
      * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
      * [EN] Loaded landscape tile component (`LandscapeComponent`)
      */
-    handleTileLoaded(comp: any): void {
+    onTileLoaded(comp: any): void {
         if (!this.#enabled || this.#grassList.length === 0 || !comp) return;
 
         if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
@@ -851,8 +851,8 @@ export class LandscapeGrassManager {
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
         const sampleCount = view3D?.sampleCount ?? (this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1);
-        const nearPipeline = this.getOrCreateRenderPipeline(sampleCount, false);
-        const farPipeline = this.getOrCreateRenderPipeline(sampleCount, true);
+        const nearPipeline = this.getRenderPipeline(sampleCount, false);
+        const farPipeline = this.getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return;
 
         const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
@@ -949,7 +949,7 @@ export class LandscapeGrassManager {
         const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
         if (!indirectGPUBuffer) return;
 
-        const pipeline = this.getOrCreateShadowRenderPipeline();
+        const pipeline = this.getShadowRenderPipeline();
         if (!pipeline) return;
 
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? view?.systemUniform_Vertex_UniformBindGroup;
