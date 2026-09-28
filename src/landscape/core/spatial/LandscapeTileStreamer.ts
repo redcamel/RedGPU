@@ -212,7 +212,7 @@ export class LandscapeTileStreamer {
         this.resetTileState();
     }
 
-    setOnTileLoaded(callback: ((comp: LandscapeComponent) => void) | null): void {
+    setOnTileLoaded(callback: ((tileComponent: LandscapeComponent) => void) | null): void {
         this.#onTileLoaded = callback;
     }
 

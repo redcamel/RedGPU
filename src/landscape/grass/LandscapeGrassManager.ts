@@ -954,12 +954,12 @@ export class LandscapeGrassManager {
      * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일 영역과 교차하는 잔디 인스턴스들의 지형 스냅 베이킹을 실행합니다.
      * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, triggering terrain snap baking for grass instances intersecting that tile boundary.
      *
-     * @param comp -
+     * @param tileComponent -
      * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
      * [EN] Loaded landscape tile component (`LandscapeComponent`)
      */
-    onTileLoaded(comp: LandscapeComponent): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !comp) return;
+    onTileLoaded(tileComponent: LandscapeComponent): void {
+        if (!this.#enabled || this.#grassList.length === 0 || !tileComponent) return;
 
         if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
             // TODO - 이건 나중에 처리해야겠다
@@ -977,10 +977,10 @@ export class LandscapeGrassManager {
         const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
         const halfTileX = tileSizeX * 0.5;
         const halfTileZ = tileSizeZ * 0.5;
-        const minX = comp.worldX - halfTileX;
-        const maxX = comp.worldX + halfTileX;
-        const minZ = comp.worldZ - halfTileZ;
-        const maxZ = comp.worldZ + halfTileZ;
+        const minX = tileComponent.worldX - halfTileX;
+        const maxX = tileComponent.worldX + halfTileX;
+        const minZ = tileComponent.worldZ - halfTileZ;
+        const maxZ = tileComponent.worldZ + halfTileZ;
 
         const cellSize = CELL_SIZE;
 

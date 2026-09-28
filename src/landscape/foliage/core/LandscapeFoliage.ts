@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
+import type Landscape from "../../Landscape";
+import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import FoliageSubMeshAssembler from "./assembler/FoliageSubMeshAssembler";
 import FoliageSubCellPartitioner from "./spatial/FoliageSubCellPartitioner";
 import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
@@ -817,10 +819,10 @@ export class LandscapeFoliage {
         }
     }
 
-    populateTile(comp: any, landscape?: any): void {
-        if (!comp) return;
-        const cz = (comp.componentZ ?? 0) & 0xffff;
-        const cx = (comp.componentX ?? 0) & 0xffff;
+    populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
+        if (!tileComponent) return;
+        const cz = (tileComponent.componentZ ?? 0) & 0xffff;
+        const cx = (tileComponent.componentX ?? 0) & 0xffff;
         const key = (cz << 16) | cx;
         if (this.#loadedTileKeys.has(key)) return;
 
@@ -833,7 +835,7 @@ export class LandscapeFoliage {
         this.#loadedTileKeys.add(key);
 
         const chunks = FoliageSubCellPartitioner.partitionTile(
-            comp,
+            tileComponent,
             this,
             landscape,
             this.#subCellSize

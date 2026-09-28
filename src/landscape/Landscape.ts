@@ -223,9 +223,9 @@ export class Landscape extends Object3DContainer {
             this.#updateLandscapeUniforms();
         });
         this.#grassManager = new LandscapeGrassManager(this, this.#tileStreamer);
-        this.#tileStreamer.setOnTileLoaded((comp) => {
-            this.#foliageManager?.onTileLoaded(comp);
-            this.#grassManager?.onTileLoaded(comp);
+        this.#tileStreamer.setOnTileLoaded((tileComponent) => {
+            this.#foliageManager?.onTileLoaded(tileComponent);
+            this.#grassManager?.onTileLoaded(tileComponent);
         });
         this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
             this.#grassManager?.rebakeAll();
