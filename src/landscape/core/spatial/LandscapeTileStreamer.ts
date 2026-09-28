@@ -8,6 +8,13 @@ import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 
+const NEIGHBOR_OFFSETS: readonly (readonly [number, number])[] = Object.freeze([
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1]
+]);
+
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
 export class LandscapeTileStreamer {
@@ -46,23 +53,54 @@ export class LandscapeTileStreamer {
     #cpuHeightMap: Map<string, any> = new Map();
     #failedMap: Map<string, number> = new Map();
 
-    static #sortCamX = 0;
-    static #sortCamZ = 0;
+    #sortCamX: number = 0;
+    #sortCamZ: number = 0;
 
-    static #sortCompare(a: LandscapeComponent, b: LandscapeComponent): number {
-        const da = (a.worldX - LandscapeTileStreamer.#sortCamX) * (a.worldX - LandscapeTileStreamer.#sortCamX)
-            + (a.worldZ - LandscapeTileStreamer.#sortCamZ) * (a.worldZ - LandscapeTileStreamer.#sortCamZ);
-        const db = (b.worldX - LandscapeTileStreamer.#sortCamX) * (b.worldX - LandscapeTileStreamer.#sortCamX)
-            + (b.worldZ - LandscapeTileStreamer.#sortCamZ) * (b.worldZ - LandscapeTileStreamer.#sortCamZ);
-        return da - db;
+    update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
+        if (!this.#tileUrlResolver) return;
+
+        const radius = Math.max(this.#tileLoadingRadius, Math.abs(cameraY) * 2.0);
+        const grid = this.#spatialGrid;
+        if (!grid) return;
+
+        const activeBuffer = this.#activeComponentsBuffer;
+        grid.getActiveComponentsInRadius(cameraX, cameraZ, radius, activeBuffer);
+
+        const now = performance.now();
+        const RETRY_INTERVAL_MS = 10000;
+
+        const pending = this.#pendingQueue;
+        pending.length = 0;
+
+        for (let i = 0; i < activeBuffer.length; i++) {
+            const comp = activeBuffer[i];
+            const key = comp.key;
+
+            if (this.#loadedMap.has(key) || this.#loadingMap.has(key)) {
+                continue;
+            }
+
+            const lastFailedTime = this.#failedMap.get(key);
+            if (lastFailedTime !== undefined && now - lastFailedTime < RETRY_INTERVAL_MS) {
+                continue;
+            }
+
+            pending.push(comp);
+        }
+
+        if (pending.length > 1) {
+            this.#sortCamX = cameraX;
+            this.#sortCamZ = cameraZ;
+            pending.sort(this.#sortCompare);
+        }
+
+        const loadRate = Math.abs(cameraY) > 1000 ? Math.max(this.#tileMaxLoadsPerFrame, 4) : this.#tileMaxLoadsPerFrame;
+        const loadCount = Math.min(pending.length, loadRate);
+        for (let i = 0; i < loadCount; i++) {
+            const comp = pending[i];
+            this.#loadTileAsync(comp);
+        }
     }
-
-    static readonly #NEIGHBOR_OFFSETS: readonly (readonly [number, number])[] = Object.freeze([
-        [-1, 0],
-        [1, 0],
-        [0, -1],
-        [0, 1]
-    ]);
 
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, tileLoadingRadius: number = 2500.0) {
         this.#redGPUContext = redGPUContext;
@@ -449,51 +487,13 @@ export class LandscapeTileStreamer {
         return comp ? this.#loadedMap.has(comp.key) : false;
     }
 
-    update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
-        if (!this.#tileUrlResolver) return;
-
-        const radius = Math.max(this.#tileLoadingRadius, Math.abs(cameraY) * 2.0);
-        const grid = this.#spatialGrid;
-        if (!grid) return;
-
-        const activeBuffer = this.#activeComponentsBuffer;
-        grid.getActiveComponentsInRadius(cameraX, cameraZ, radius, activeBuffer);
-
-        const now = performance.now();
-        const RETRY_INTERVAL_MS = 10000;
-
-        const pending = this.#pendingQueue;
-        pending.length = 0;
-
-        for (let i = 0; i < activeBuffer.length; i++) {
-            const comp = activeBuffer[i];
-            const key = comp.key;
-
-            if (this.#loadedMap.has(key) || this.#loadingMap.has(key)) {
-                continue;
-            }
-
-            const lastFailedTime = this.#failedMap.get(key);
-            if (lastFailedTime !== undefined && now - lastFailedTime < RETRY_INTERVAL_MS) {
-                continue;
-            }
-
-            pending.push(comp);
-        }
-
-        if (pending.length > 1) {
-            LandscapeTileStreamer.#sortCamX = cameraX;
-            LandscapeTileStreamer.#sortCamZ = cameraZ;
-            pending.sort(LandscapeTileStreamer.#sortCompare);
-        }
-
-        const loadRate = Math.abs(cameraY) > 1000 ? Math.max(this.#tileMaxLoadsPerFrame, 4) : this.#tileMaxLoadsPerFrame;
-        const loadCount = Math.min(pending.length, loadRate);
-        for (let i = 0; i < loadCount; i++) {
-            const comp = pending[i];
-            this.#loadTileAsync(comp);
-        }
-    }
+    readonly #sortCompare = (a: LandscapeComponent, b: LandscapeComponent): number => {
+        const da = (a.worldX - this.#sortCamX) * (a.worldX - this.#sortCamX)
+            + (a.worldZ - this.#sortCamZ) * (a.worldZ - this.#sortCamZ);
+        const db = (b.worldX - this.#sortCamX) * (b.worldX - this.#sortCamX)
+            + (b.worldZ - this.#sortCamZ) * (b.worldZ - this.#sortCamZ);
+        return da - db;
+    };
 
     getHeightAt(x: number, z: number): number {
         if (!this.#spatialGrid) return 0.0;
@@ -716,7 +716,7 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        const neighborOffsets = LandscapeTileStreamer.#NEIGHBOR_OFFSETS;
+                        const neighborOffsets = NEIGHBOR_OFFSETS;
                         const tileCountX = this.#spatialGrid.tileCountX;
                         const tileCountZ = this.#spatialGrid.tileCountZ;
 
