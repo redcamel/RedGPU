@@ -55,13 +55,13 @@ interface RawSubMesh {
     rawStride: number;
 }
 
-class FoliageSubMeshAssembler {
+const subMeshUniformData: Float32Array = new Float32Array(52);
+const subMeshUniformUint32: Uint32Array = new Uint32Array(subMeshUniformData.buffer);
+const tempLocalMatrix: mat4 = mat4.create();
+const identityMatrix: mat4 = mat4.create();
+let bufferSeq: number = 0;
 
-    static readonly #subMeshUniformData: Float32Array = new Float32Array(52);
-    static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
-    static readonly #tempLocalMatrix: mat4 = mat4.create();
-    static readonly #identityMatrix: mat4 = mat4.create();
-    static #bufferSeq: number = 0;
+class FoliageSubMeshAssembler {
 
     static assemble(
         redGPUContext: RedGPUContext,
@@ -208,10 +208,10 @@ class FoliageSubMeshAssembler {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
-        const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
-        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
-        floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
+        const floatView = subMeshUniformData;
+        const uintView = subMeshUniformUint32;
+        floatView.set(identityMatrix, 0);
+        floatView.set(identityMatrix, 16);
         uintView[32] = 0;
         uintView[33] = 0;
         floatView[34] = 0.0;
@@ -368,14 +368,14 @@ class FoliageSubMeshAssembler {
                 p = p.parent;
             }
             for (let c = 0; c < parentChain.length; c++) {
-                FoliageSubMeshAssembler.#computeMeshLocalMatrix(parentChain[c], FoliageSubMeshAssembler.#tempLocalMatrix);
-                mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
+                FoliageSubMeshAssembler.#computeMeshLocalMatrix(parentChain[c], tempLocalMatrix);
+                mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, tempLocalMatrix);
             }
-            FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, FoliageSubMeshAssembler.#tempLocalMatrix);
-            mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
+            FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, tempLocalMatrix);
+            mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, tempLocalMatrix);
         } else {
-            FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, FoliageSubMeshAssembler.#tempLocalMatrix);
-            mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
+            FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, tempLocalMatrix);
+            mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, tempLocalMatrix);
         }
 
         if (node.geometry && node.material) {
@@ -451,7 +451,7 @@ class FoliageSubMeshAssembler {
         for (let r = 0; r < roots.length; r++) {
             FoliageSubMeshAssembler.#traverseHierarchy(
                 roots[r],
-                FoliageSubMeshAssembler.#identityMatrix,
+                identityMatrix,
                 true,
                 rawList,
                 options
@@ -693,7 +693,7 @@ class FoliageSubMeshAssembler {
                 shadowVertexOffset += vCount;
             }
 
-            const seq = ++FoliageSubMeshAssembler.#bufferSeq;
+            const seq = ++bufferSeq;
             const vKey = `FoliageCombinedVB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
             const iKey = `FoliageCombinedIB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
             const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT, undefined, vKey);
@@ -707,8 +707,8 @@ class FoliageSubMeshAssembler {
                 group[0].node,
                 combinedGeom,
                 mat,
-                FoliageSubMeshAssembler.#identityMatrix,
-                FoliageSubMeshAssembler.#identityMatrix,
+                identityMatrix,
+                identityMatrix,
                 PBR_STRIDE_BYTES,
                 lodIndex,
                 false,
@@ -725,7 +725,7 @@ class FoliageSubMeshAssembler {
 
         let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
         if (lodTotalVertices > 0) {
-            const seq = ++FoliageSubMeshAssembler.#bufferSeq;
+            const seq = ++bufferSeq;
             const vKey = `FoliageShadowVB_${options.name}_LOD${lodIndex}_${seq}`;
             const iKey = `FoliageShadowIB_${options.name}_LOD${lodIndex}_${seq}`;
             const combinedVB = new VertexBuffer(redGPUContext, shadowMergedPositions, POSITION_ONLY_INTERLEAVED_STRUCT, undefined, vKey);
@@ -811,8 +811,8 @@ class FoliageSubMeshAssembler {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
-            const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
-            const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
+            const floatView = subMeshUniformData;
+            const uintView = subMeshUniformUint32;
 
             floatView.set(relMatrix, 0);
             floatView.set(normMatrix, 16);
