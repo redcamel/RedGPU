@@ -11,7 +11,7 @@ import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
-import type FoliageBaker from "./baking/FoliageBaker";
+import type FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 export interface FoliageLODConfig {
 
@@ -135,7 +135,7 @@ export class Foliage extends RedGPUObject {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
     #streamer: FoliageSubCellStreamer;
-    #baker: FoliageBaker | null = null;
+    #baker: FoliageInstanceBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
 
@@ -152,7 +152,7 @@ export class Foliage extends RedGPUObject {
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
-        baker?: FoliageBaker | null
+        baker?: FoliageInstanceBaker | null
     ) {
         super(redGPUContext);
         if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {

@@ -4,7 +4,7 @@ import FoliageShadowMergedSubMesh, {
     type FoliageShadowMergedSubMeshInitOptions
 } from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {type CascadeCullingParam, type FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
-import {FoliageBaker} from "./baking/FoliageBaker";
+import {FoliageInstanceBaker} from "./baking/FoliageInstanceBaker";
 import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
@@ -26,7 +26,7 @@ export {
     FoliageMegaBuffer,
     type FoliageTypeAllocation,
     type CascadeCullingParam,
-    FoliageBaker,
+    FoliageInstanceBaker,
     FoliageSpatialGrid,
     FoliagePipelineRegistry,
     type FoliageDepthPassMode,

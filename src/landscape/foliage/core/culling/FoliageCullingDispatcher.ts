@@ -8,7 +8,7 @@ import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
 import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffer";
-import {FoliageBaker} from "../baking/FoliageBaker";
+import {FoliageInstanceBaker} from "../baking/FoliageInstanceBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 class FoliageCullingDispatcher extends RedGPUObject {
@@ -31,7 +31,7 @@ class FoliageCullingDispatcher extends RedGPUObject {
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
     #megaBuffer: FoliageMegaBuffer | null = null;
-    #baker: FoliageBaker;
+    #baker: FoliageInstanceBaker;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
     #lastHZBTextureView: GPUTextureView | null = null;
@@ -47,11 +47,11 @@ class FoliageCullingDispatcher extends RedGPUObject {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
         this.#tileStreamer = tileStreamer || null;
-        this.#baker = new FoliageBaker(this.redGPUContext);
+        this.#baker = new FoliageInstanceBaker(this.redGPUContext);
         this.#initComputePipeline();
     }
 
-    get baker(): FoliageBaker {
+    get baker(): FoliageInstanceBaker {
         return this.#baker;
     }
 

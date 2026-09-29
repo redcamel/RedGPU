@@ -6,7 +6,7 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
-import {GrassBaker} from "./core/baking/GrassBaker";
+import {GrassInstanceBaker} from "./core/baking/GrassInstanceBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";
 import grassVertexSource from "./shader/grassVertex.wgsl";
 import grassFragmentSource from "./shader/grassFragment.wgsl";
@@ -150,7 +150,7 @@ export class LandscapeGrassManager extends RedGPUObject {
     #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassMegaBuffer;
-    #baker: GrassBaker;
+    #baker: GrassInstanceBaker;
     #culler: GrassCuller;
 
     #grassList: Grass[] = [];
@@ -226,7 +226,7 @@ export class LandscapeGrassManager extends RedGPUObject {
         this.#tileStreamer = tileStreamer;
 
         this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
-        this.#baker = new GrassBaker(this.redGPUContext);
+        this.#baker = new GrassInstanceBaker(this.redGPUContext);
         this.#culler = new GrassCuller(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {

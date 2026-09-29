@@ -3,7 +3,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeComputeSource from "./grassBakeCompute.wgsl";
 import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 
-export class GrassBaker extends RedGPUObject {
+export class GrassInstanceBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -251,5 +251,5 @@ export class GrassBaker extends RedGPUObject {
     }
 }
 
-Object.freeze(GrassBaker);
-export default GrassBaker;
+Object.freeze(GrassInstanceBaker);
+export default GrassInstanceBaker;

@@ -3,7 +3,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
 import foliageBakeComputeSource from "./foliageBakeCompute.wgsl";
 import FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 
-export class FoliageBaker extends RedGPUObject {
+export class FoliageInstanceBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -252,5 +252,5 @@ export class FoliageBaker extends RedGPUObject {
     }
 }
 
-Object.freeze(FoliageBaker);
-export default FoliageBaker;
+Object.freeze(FoliageInstanceBaker);
+export default FoliageInstanceBaker;
