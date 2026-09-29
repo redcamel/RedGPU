@@ -194,12 +194,12 @@ export class GrassBaker extends RedGPUObject {
 
         const resourceManager = this.resourceManager;
 
-        const shaderModule = resourceManager.createGPUShaderModule('GrassBakeComputeModule', {
+        const shaderModule = resourceManager.createGPUShaderModule('Grass_Bake_ComputeModule', {
             code: grassBakeComputeSource,
         });
 
-        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_BakeBindGroupLayout', {
-            label: 'Landscape_BakeBindGroupLayout',
+        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Grass_Bake_BindGroupLayout', {
+            label: 'Grass_Bake_BindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
@@ -212,12 +212,12 @@ export class GrassBaker extends RedGPUObject {
             ],
         });
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Landscape_BakePipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_Bake_PipelineLayout', {
             bindGroupLayouts: [this.#bakeBindGroupLayout],
         });
 
         this.#bakePipeline = gpuDevice.createComputePipeline({
-            label: 'GrassBaker_ComputePipeline',
+            label: 'Grass_Bake_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

@@ -194,12 +194,12 @@ export class FoliageBaker extends RedGPUObject {
 
         const resourceManager = this.resourceManager;
 
-        const shaderModule = resourceManager.createGPUShaderModule('FoliageBakeComputeModule', {
+        const shaderModule = resourceManager.createGPUShaderModule('Foliage_Bake_ComputeModule', {
             code: foliageBakeComputeSource,
         });
 
-        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_BakeBindGroupLayout', {
-            label: 'Landscape_BakeBindGroupLayout',
+        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Bake_BindGroupLayout', {
+            label: 'Foliage_Bake_BindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
@@ -212,12 +212,12 @@ export class FoliageBaker extends RedGPUObject {
             ],
         });
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Landscape_BakePipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Bake_PipelineLayout', {
             bindGroupLayouts: [this.#bakeBindGroupLayout],
         });
 
         this.#bakePipeline = gpuDevice.createComputePipeline({
-            label: 'FoliageBaker_ComputePipeline',
+            label: 'Foliage_Bake_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,
