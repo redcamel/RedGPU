@@ -452,38 +452,40 @@ export class LandscapeGrassManager extends RedGPUObject {
         const idx = this.#grassList.indexOf(grass);
         if (idx === -1) return false;
 
-        const typeId = grass.typeId;
+        const {typeId} = grass;
         grass.onChanged = null;
         this.#grassList.splice(idx, 1);
 
         const res = this.#typeMaterialBuffers.get(typeId);
         if (res) {
-            res.uniformBuffer.destroy();
-            res.grassUniformGPUBuffer.destroy();
+            const {uniformBuffer, grassUniformGPUBuffer} = res;
+            uniformBuffer.destroy();
+            grassUniformGPUBuffer.destroy();
             this.#typeMaterialBuffers.delete(typeId);
         }
 
         const state = this.#typeCellStates.get(typeId);
         if (state) {
-            for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
-            for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
-            state.activeCellRanges.clear();
-            state.freeSlotRanges.length = 0;
+            const {activeCellRanges, freeSlotRanges} = state;
+            for (const r of activeCellRanges.values()) this.#releaseSlotRange(r);
+            for (const r of freeSlotRanges) this.#releaseSlotRange(r);
+            activeCellRanges.clear();
+            freeSlotRanges.length = 0;
             this.#typeCellStates.delete(typeId);
         }
 
         const alloc = this.#megaBuffer.getAllocation(typeId);
         if (alloc) {
             alloc.instanceCount = 0;
-            const baseOffset = alloc.rawBaseOffset;
-            for (let i = 0; i < alloc.maxInstances; i++) {
+            const {rawBaseOffset: baseOffset, maxInstances, culledBaseOffset, indirectBaseOffset} = alloc;
+            for (let i = 0; i < maxInstances; i++) {
                 this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
             }
-            this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
+            this.#megaBuffer.uploadInstances(baseOffset, maxInstances);
             this.#megaBuffer.updateTypeParams(
                 typeId,
                 0.0, 0.0, 0.0, 0.0, 0.0, false,
-                baseOffset, 0, alloc.culledBaseOffset, alloc.indirectBaseOffset,
+                baseOffset, 0, culledBaseOffset, indirectBaseOffset,
                 0, 0, [0, 0, 0, 0]
             );
         }
@@ -561,54 +563,54 @@ export class LandscapeGrassManager extends RedGPUObject {
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
 
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
+        const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (!systemBG) return;
 
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, antialiasingManager, resourceManager} = this;
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
-        const sampleCount = this.antialiasingManager.useMSAA ? 4 : 1;
+        const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return;
-
-        const basicSampler = this.resourceManager.basicSampler.gpuSampler;
 
         let currentPipeline: GPURenderPipeline | null = nearPipeline;
         passEncoder.setPipeline(nearPipeline);
         passEncoder.setBindGroup(0, systemBG);
 
-        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        const {indirectGPUBuffer, culledGPUBuffer} = this.#megaBuffer;
         if (!indirectGPUBuffer) return;
 
         for (const type of this.#grassList) {
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            const {typeId, name, baseColorTextureView: colorTexView, geometry} = type;
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.instanceCount === 0) continue;
 
-            const res = this.#typeMaterialBuffers.get(type.typeId);
+            const res = this.#typeMaterialBuffers.get(typeId);
             if (!res) continue;
 
-            if (!res.instanceBindGroup && this.#megaBuffer.culledGPUBuffer && res.grassUniformGPUBuffer) {
+            const {uniformBuffer, grassUniformGPUBuffer} = res;
+
+            if (!res.instanceBindGroup && culledGPUBuffer && grassUniformGPUBuffer) {
                 res.instanceBindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_InstanceBindGroup_${type.name}`,
+                    label: `Grass_InstanceBindGroup_${name}`,
                     layout: this.#pipelineBindGroupLayout1,
                     entries: [
-                        {binding: 0, resource: {buffer: this.#megaBuffer.culledGPUBuffer}},
-                        {binding: 1, resource: {buffer: res.grassUniformGPUBuffer}},
+                        {binding: 0, resource: {buffer: culledGPUBuffer}},
+                        {binding: 1, resource: {buffer: grassUniformGPUBuffer}},
                     ]
                 });
             }
 
-            const colorTexView = type.baseColorTextureView;
-
             if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
+                const {basicSampler} = resourceManager;
                 res.bindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_MaterialBindGroup_${type.name}`,
+                    label: `Grass_MaterialBindGroup_${name}`,
                     layout: this.#pipelineBindGroupLayout2,
                     entries: [
                         {binding: 0, resource: colorTexView},
-                        {binding: 1, resource: basicSampler},
-                        {binding: 2, resource: {buffer: res.uniformBuffer}},
+                        {binding: 1, resource: basicSampler.gpuSampler},
+                        {binding: 2, resource: {buffer: uniformBuffer}},
                     ]
                 });
                 res.cachedColorTexView = colorTexView;
@@ -616,9 +618,8 @@ export class LandscapeGrassManager extends RedGPUObject {
 
             if (!res.instanceBindGroup || !res.bindGroup) continue;
 
-            const geom = type.geometry;
-            const lvb = geom?.vertexBuffer;
-            const lib = geom?.indexBuffer;
+            if (!geometry) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = geometry;
             if (!lvb || !lib) continue;
 
             passEncoder.setBindGroup(1, res.instanceBindGroup);
@@ -627,13 +628,14 @@ export class LandscapeGrassManager extends RedGPUObject {
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
             for (const slot of alloc.slots) {
-                const targetPipeline = slot.slotIndex === 0 ? nearPipeline : farPipeline;
+                const {slotIndex, indirectOffset} = slot;
+                const targetPipeline = slotIndex === 0 ? nearPipeline : farPipeline;
                 if (currentPipeline !== targetPipeline) {
                     passEncoder.setPipeline(targetPipeline);
                     currentPipeline = targetPipeline;
                 }
 
-                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                const indirectOffsetBytes = indirectOffset * 5 * 4;
                 passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
             }
         }
@@ -653,35 +655,35 @@ export class LandscapeGrassManager extends RedGPUObject {
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
 
-        const currentCascade = view.currentCascadeIndex;
+        const {currentCascadeIndex: currentCascade, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (currentCascade !== undefined && currentCascade > 1) return;
 
-        const indirectGPUBuffer = this.#megaBuffer.indirectGPUBuffer;
+        const {indirectGPUBuffer} = this.#megaBuffer;
         if (!indirectGPUBuffer) return;
 
         const pipeline = this.#getShadowRenderPipeline();
         if (!pipeline) return;
 
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
         if (!systemBG) return;
 
         passEncoder.setPipeline(pipeline);
         passEncoder.setBindGroup(0, systemBG);
 
         for (const type of this.#grassList) {
-            if (!type.castShadow) continue;
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            const {castShadow, typeId, geometry} = type;
+            if (!castShadow) continue;
+
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.instanceCount === 0) continue;
 
-            const res = this.#typeMaterialBuffers.get(type.typeId);
+            const res = this.#typeMaterialBuffers.get(typeId);
             if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
 
             const nearSlot = alloc.slots[0];
             if (!nearSlot) continue;
 
-            const geom = type.geometry;
-            const lvb = geom?.vertexBuffer;
-            const lib = geom?.indexBuffer;
+            if (!geometry) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = geometry;
             if (!lvb || !lib) continue;
 
             passEncoder.setBindGroup(1, res.instanceBindGroup);
@@ -690,7 +692,8 @@ export class LandscapeGrassManager extends RedGPUObject {
             passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
+            const {indirectOffset} = nearSlot;
+            const indirectOffsetBytes = indirectOffset * 5 * 4;
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
         }
     }
@@ -706,25 +709,22 @@ export class LandscapeGrassManager extends RedGPUObject {
     update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
 
-        const view = renderViewStateData.view;
-        const rawCam = view.rawCamera;
-        const camX = rawCam.x;
-        const camY = rawCam.y;
-        const camZ = rawCam.z;
+        const {view, frustumPlanes} = renderViewStateData;
+        const {rawCamera: rawCam, projectionMatrix} = view;
+        const {x: camX, y: camY, z: camZ} = rawCam;
 
         this.#lastPopulatePos[0] = camX;
         this.#lastPopulatePos[1] = camY;
         this.#lastPopulatePos[2] = camZ;
 
         let frustumPlanesF32: Float32Array | null = null;
-        const frustumPlanes = renderViewStateData.frustumPlanes;
         if (frustumPlanes && frustumPlanes.length === 6) {
             for (let p = 0; p < 6; p++) {
                 this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
             }
             frustumPlanesF32 = this.#frustumPlanesF32;
-        } else if (view.projectionMatrix && rawCam?.viewMatrix) {
-            const computed = computeViewFrustumPlanes(view.projectionMatrix, rawCam.viewMatrix);
+        } else if (projectionMatrix && rawCam?.viewMatrix) {
+            const computed = computeViewFrustumPlanes(projectionMatrix, rawCam.viewMatrix);
             if (computed) {
                 for (let p = 0; p < 6; p++) {
                     this.#frustumPlanesF32.set(computed[p], p * 4);
@@ -733,7 +733,7 @@ export class LandscapeGrassManager extends RedGPUObject {
             }
         }
 
-        const currentLoadedTileCount = this.#landscape.tileLoadedCount;
+        const {tileLoadedCount: currentLoadedTileCount} = this.#landscape;
         const tileCountChanged = currentLoadedTileCount !== this.#lastLoadedTileCount;
         this.#lastLoadedTileCount = currentLoadedTileCount;
 
@@ -750,91 +750,117 @@ export class LandscapeGrassManager extends RedGPUObject {
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
         for (const type of this.#grassList) {
-            const res = this.#typeMaterialBuffers.get(type.typeId);
+            const {typeId, dirty} = type;
+            const res = this.#typeMaterialBuffers.get(typeId);
             if (!res) continue;
 
-            const isDirty = !res.initialized || type.dirty || res.cachedHasVbt !== hasValidVbt;
+            const isDirty = !res.initialized || dirty || res.cachedHasVbt !== hasValidVbt;
             if (isDirty) {
                 res.initialized = true;
                 res.cachedHasVbt = hasValidVbt;
                 type.markClean();
 
-                const gf = res.grassUniformCPUBuffer;
-                gf[0] = type.cullingDistance;
-                gf[1] = type.shrinkStartDistance;
-                gf[2] = type.meshHeight;
-                gf[3] = type.minY;
-                gf[4] = type.shadowCullDistance;
-                gf[5] = type.shadowShrinkStartDistance;
+                const {
+                    cullingDistance,
+                    shrinkStartDistance,
+                    meshHeight,
+                    minY,
+                    shadowCullDistance,
+                    shadowShrinkStartDistance,
+                    groundBlendStrength,
+                    alphaCutoff,
+                    exposureBoost,
+                    subsurfaceColor,
+                    subsurfaceStrength,
+                    roughness,
+                    shadowStrength,
+                    receiveShadow,
+                    farDistance,
+                    bottomOffset,
+                    minSlope,
+                    maxSlope
+                } = type;
+
+                const {
+                    grassUniformCPUBuffer: gf,
+                    grassUniformGPUBuffer,
+                    cpuBuffer: mf,
+                    uintBuffer: mu,
+                    uniformBuffer
+                } = res;
+
+                gf[0] = cullingDistance;
+                gf[1] = shrinkStartDistance;
+                gf[2] = meshHeight;
+                gf[3] = minY;
+                gf[4] = shadowCullDistance;
+                gf[5] = shadowShrinkStartDistance;
                 gf[6] = 0.0;
                 gf[7] = 0.0;
 
                 gpuDevice.queue.writeBuffer(
-                    res.grassUniformGPUBuffer,
+                    grassUniformGPUBuffer,
                     0,
-                    res.grassUniformCPUBuffer.buffer,
+                    gf.buffer,
                     0,
-                    res.grassUniformCPUBuffer.byteLength
+                    gf.byteLength
                 );
 
-                const mf = res.cpuBuffer;
-                const mu = res.uintBuffer;
-
-                mf[0] = type.groundBlendStrength;
-                mf[1] = type.alphaCutoff;
+                mf[0] = groundBlendStrength;
+                mf[1] = alphaCutoff;
                 mu[2] = hasValidVbt ? 1 : 0;
-                mf[3] = type.exposureBoost;
+                mf[3] = exposureBoost;
 
-                const ssc = type.subsurfaceColor;
-                mf[4] = ssc[0];
-                mf[5] = ssc[1];
-                mf[6] = ssc[2];
-                mf[7] = type.subsurfaceStrength;
+                mf[4] = subsurfaceColor[0];
+                mf[5] = subsurfaceColor[1];
+                mf[6] = subsurfaceColor[2];
+                mf[7] = subsurfaceStrength;
 
-                mf[8] = type.roughness;
-                mf[9] = type.shadowStrength;
-                mu[10] = type.receiveShadow ? 1 : 0;
+                mf[8] = roughness;
+                mf[9] = shadowStrength;
+                mu[10] = receiveShadow ? 1 : 0;
 
                 gpuDevice.queue.writeBuffer(
-                    res.uniformBuffer,
+                    uniformBuffer,
                     0,
-                    res.cpuBuffer.buffer,
+                    mf.buffer,
                     0,
-                    res.cpuBuffer.byteLength
+                    mf.byteLength
                 );
 
                 const stageCount = 2;
-                const stageDistances: [number, number, number, number] = [type.farDistance, type.cullingDistance, 9999, 9999];
+                const stageDistances: [number, number, number, number] = [farDistance, cullingDistance, 9999, 9999];
 
-                const alloc = this.#megaBuffer.getAllocation(type.typeId);
+                const alloc = this.#megaBuffer.getAllocation(typeId);
                 if (alloc) {
-                    const minSlope = type.minSlope ?? 0.0;
-                    const maxSlope = type.maxSlope ?? 89.0;
-                    const hasSlopeFilter = minSlope > 0.0 || maxSlope < 89.0;
-                    const minSlopeTan2 = minSlope > 0.0 ? Math.tan(minSlope * DEG2RAD) ** 2 : 0.0;
-                    const maxSlopeTan2 = maxSlope < 89.0 ? Math.tan(maxSlope * DEG2RAD) ** 2 : 999999.0;
+                    const {rawBaseOffset, maxInstances, culledBaseOffset, indirectBaseOffset} = alloc;
+                    const slopeMin = minSlope ?? 0.0;
+                    const slopeMax = maxSlope ?? 89.0;
+                    const hasSlopeFilter = slopeMin > 0.0 || slopeMax < 89.0;
+                    const minSlopeTan2 = slopeMin > 0.0 ? Math.tan(slopeMin * DEG2RAD) ** 2 : 0.0;
+                    const maxSlopeTan2 = slopeMax < 89.0 ? Math.tan(slopeMax * DEG2RAD) ** 2 : 999999.0;
 
                     this.#megaBuffer.updateTypeParams(
-                        type.typeId,
-                        type.cullingDistance,
-                        type.bottomOffset,
-                        type.meshHeight,
+                        typeId,
+                        cullingDistance,
+                        bottomOffset,
+                        meshHeight,
                         minSlopeTan2,
                         maxSlopeTan2,
                         hasSlopeFilter,
-                        alloc.rawBaseOffset,
-                        alloc.maxInstances,
-                        alloc.culledBaseOffset,
-                        alloc.indirectBaseOffset,
+                        rawBaseOffset,
+                        maxInstances,
+                        culledBaseOffset,
+                        indirectBaseOffset,
                         stageCount,
-                        alloc.maxInstances,
+                        maxInstances,
                         stageDistances
                     );
                 }
             }
         }
 
-        const totalAllocated = this.#megaBuffer.totalAllocatedInstances;
+        const {totalAllocatedInstances: totalAllocated} = this.#megaBuffer;
         this.#culler.updateUniforms(
             camX,
             camY,
@@ -894,12 +920,15 @@ export class LandscapeGrassManager extends RedGPUObject {
     rebakeAll(): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
         for (const type of this.#grassList) {
-            const state = this.#typeCellStates.get(type.typeId);
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            const {typeId} = type;
+            const state = this.#typeCellStates.get(typeId);
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!state || !alloc) continue;
+            const {rawBaseOffset} = alloc;
             for (const range of state.activeCellRanges.values()) {
-                if (range.filledCount > 0) {
-                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                const {filledCount, start} = range;
+                if (filledCount > 0) {
+                    this.#baker.addBakeTasks(rawBaseOffset + start, filledCount, typeId);
                 }
             }
         }
@@ -928,7 +957,8 @@ export class LandscapeGrassManager extends RedGPUObject {
 
         this.#updateCellStreaming(this.#lastPopulatePos[0], this.#lastPopulatePos[2], false, true);
 
-        const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
+        const {tileSize} = this.#landscape;
+        const [tileSizeX, tileSizeZ] = tileSize;
         const halfTileX = tileSizeX * 0.5;
         const halfTileZ = tileSizeZ * 0.5;
         const {worldX, worldZ} = tileComponent;
@@ -940,19 +970,22 @@ export class LandscapeGrassManager extends RedGPUObject {
         const cellSize = CELL_SIZE;
 
         for (const type of this.#grassList) {
-            const state = this.#typeCellStates.get(type.typeId);
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            const {typeId} = type;
+            const state = this.#typeCellStates.get(typeId);
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!state || !alloc) continue;
 
+            const {rawBaseOffset} = alloc;
             for (const [key, range] of state.activeCellRanges.entries()) {
-                if (range.filledCount <= 0) continue;
+                const {filledCount, start} = range;
+                if (filledCount <= 0) continue;
                 const cellX = (key >> 16);
                 const cellZ = (key << 16) >> 16;
                 const cellCenterX = (cellX + 0.5) * cellSize;
                 const cellCenterZ = (cellZ + 0.5) * cellSize;
 
                 if (cellCenterX >= minX && cellCenterX <= maxX && cellCenterZ >= minZ && cellCenterZ <= maxZ) {
-                    this.#baker.addBakeTasks(alloc.rawBaseOffset + range.start, range.filledCount, type.typeId);
+                    this.#baker.addBakeTasks(rawBaseOffset + start, filledCount, typeId);
                 }
             }
         }
@@ -1181,7 +1214,8 @@ export class LandscapeGrassManager extends RedGPUObject {
         if (this.#baker.hasPendingTasks) {
             const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
             const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
-            const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+            const {worldSize, heightScale} = this.#landscape;
+            const [worldSizeX, worldSizeZ] = worldSize;
 
             this.#baker.dispatchPass(
                 computePass,
@@ -1190,11 +1224,12 @@ export class LandscapeGrassManager extends RedGPUObject {
                 vbtAtlas?.gpuTextureView,
                 worldSizeX,
                 worldSizeZ,
-                this.#landscape.heightScale
+                heightScale
             );
         }
 
-        this.#culler.dispatchPass(computePass, this.#megaBuffer.totalAllocatedInstances);
+        const {totalAllocatedInstances} = this.#megaBuffer;
+        this.#culler.dispatchPass(computePass, totalAllocatedInstances);
     };
 
     /**
@@ -1231,32 +1266,46 @@ export class LandscapeGrassManager extends RedGPUObject {
         this.#lastUpdateGridPos[0] = curGridX;
         this.#lastUpdateGridPos[1] = curGridZ;
 
-        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+        const {worldSize, tileSize, tileUrlResolver, layers} = this.#landscape;
+        const [worldSizeX, worldSizeZ] = worldSize;
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
+        const [tileSizeX, tileSizeZ] = tileSize;
+        const hasTileStreaming = tileUrlResolver !== null;
 
         for (const type of this.#grassList) {
-            const state = this.#typeCellStates.get(type.typeId);
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
+            const {
+                typeId,
+                cullingDistance,
+                instancesPerCell: targetDensity,
+                targetLayer,
+                minScale,
+                maxScale,
+                densityScaleByWeight
+            } = type;
+            const state = this.#typeCellStates.get(typeId);
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!state || !alloc) continue;
 
+            const {rawBaseOffset, maxInstances} = alloc;
+            const {activeCellRanges, freeSlotRanges} = state;
+
             if (forceRebuild) {
-                for (const r of state.activeCellRanges.values()) this.#releaseSlotRange(r);
-                for (const r of state.freeSlotRanges) this.#releaseSlotRange(r);
-                state.activeCellRanges.clear();
-                state.freeSlotRanges.length = 0;
+                for (const r of activeCellRanges.values()) this.#releaseSlotRange(r);
+                for (const r of freeSlotRanges) this.#releaseSlotRange(r);
+                activeCellRanges.clear();
+                freeSlotRanges.length = 0;
                 state.slotHead = 0;
                 state.instanceCount = 0;
                 alloc.instanceCount = 0;
 
-                const baseOffset = alloc.rawBaseOffset;
-                for (let i = 0; i < alloc.maxInstances; i++) {
-                    this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
+                for (let i = 0; i < maxInstances; i++) {
+                    this.#megaBuffer.writeInstanceData(rawBaseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
                 }
-                this.#megaBuffer.uploadInstances(baseOffset, alloc.maxInstances);
+                this.#megaBuffer.uploadInstances(rawBaseOffset, maxInstances);
             }
 
-            const safeCullRadius = type.cullingDistance + cellSize * 1.5;
+            const safeCullRadius = cullingDistance + cellSize * 1.5;
             const radius = Math.max(safeCullRadius, this.#streamingRadius);
             const radiusSq = radius * radius;
             const cellRadius = Math.ceil(radius / cellSize);
@@ -1285,7 +1334,7 @@ export class LandscapeGrassManager extends RedGPUObject {
                     const key = ((cx & 0xFFFF) << 16) | (cz & 0xFFFF);
                     this.#neededCellKeysSet.add(key);
 
-                    if (!state.activeCellRanges.has(key) && candidateCount < maxCandidates) {
+                    if (!activeCellRanges.has(key) && candidateCount < maxCandidates) {
                         this.#candidateKeys[candidateCount] = key;
                         this.#candidateDistancesSq[candidateCount] = dSq;
                         this.#candidateIndices[candidateCount] = candidateCount;
@@ -1299,7 +1348,7 @@ export class LandscapeGrassManager extends RedGPUObject {
             }
 
             this.#keysToEvict.length = 0;
-            for (const activeKey of state.activeCellRanges.keys()) {
+            for (const activeKey of activeCellRanges.keys()) {
                 if (!this.#neededCellKeysSet.has(activeKey)) {
                     this.#keysToEvict.push(activeKey);
                 }
@@ -1307,40 +1356,42 @@ export class LandscapeGrassManager extends RedGPUObject {
 
             for (let i = 0; i < this.#keysToEvict.length; i++) {
                 const evictKey = this.#keysToEvict[i];
-                const range = state.activeCellRanges.get(evictKey)!;
-                state.activeCellRanges.delete(evictKey);
+                const range = activeCellRanges.get(evictKey)!;
+                activeCellRanges.delete(evictKey);
 
-                for (let s = 0; s < range.count; s++) {
+                const {count: rCount, start: rStart, filledCount: rFilled} = range;
+                for (let s = 0; s < rCount; s++) {
                     this.#megaBuffer.writeInstanceData(
-                        alloc.rawBaseOffset + range.start + s,
+                        rawBaseOffset + rStart + s,
                         0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
                     );
                 }
 
-                this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + range.start, range.count);
-                state.freeSlotRanges.push(range);
-                state.instanceCount -= range.filledCount;
+                this.#megaBuffer.uploadInstances(rawBaseOffset + rStart, rCount);
+                freeSlotRanges.push(range);
+                state.instanceCount -= rFilled;
             }
 
             const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : MAX_POPULATE_CELLS_PER_FRAME;
             const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
-            const targetDensity = type.instancesPerCell;
-            const matchedLayer = type.targetLayer ? this.#landscape.layers.find(l => l.name === type.targetLayer || (l as any).key === type.targetLayer) : undefined;
+            const matchedLayer = targetLayer ? layers.find(l => l.name === targetLayer || (l as any).key === targetLayer) : undefined;
             const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc || null;
             const hasWeightMap = !!(targetSrc && LandscapeWeightMapCache.has(targetSrc));
             const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
 
-            if (type.targetLayer && !hasWeightMap) {
+            if (targetLayer && !hasWeightMap) {
                 continue;
             }
 
-            const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
-            const hasTileStreaming = this.#landscape.tileUrlResolver !== null;
+            const [minScaleS, minScaleH] = minScale;
+            const [maxScaleS, maxScaleH] = maxScale;
+            const deltaScaleS = maxScaleS - minScaleS;
+            const deltaScaleH = maxScaleH - minScaleH;
 
             for (let i = 0; i < cellsToProcess; i++) {
                 const sortedIdx = this.#candidateIndices[i];
                 const key = this.#candidateKeys[sortedIdx];
-                if (state.activeCellRanges.has(key)) continue;
+                if (activeCellRanges.has(key)) continue;
 
                 const cellX = (key >> 16);
                 const cellZ = (key << 16) >> 16;
@@ -1357,10 +1408,10 @@ export class LandscapeGrassManager extends RedGPUObject {
 
                 let slotBase = -1;
                 let reusedRange: CellSlotRange | null = null;
-                if (state.freeSlotRanges.length > 0) {
-                    reusedRange = state.freeSlotRanges.pop()!;
+                if (freeSlotRanges.length > 0) {
+                    reusedRange = freeSlotRanges.pop()!;
                     slotBase = reusedRange.start;
-                } else if (state.slotHead + targetDensity <= alloc.maxInstances) {
+                } else if (state.slotHead + targetDensity <= maxInstances) {
                     slotBase = state.slotHead;
                     state.slotHead += targetDensity;
                 } else {
@@ -1370,7 +1421,7 @@ export class LandscapeGrassManager extends RedGPUObject {
                 const cellMinX = cellX * cellSize;
                 const cellMinZ = cellZ * cellSize;
 
-                this.#setPrngSeed((cellX * 73856093) ^ (cellZ * 19349663) ^ (type.typeId * 83492791));
+                this.#setPrngSeed((cellX * 73856093) ^ (cellZ * 19349663) ^ (typeId * 83492791));
 
                 let filledCount = 0;
                 for (let inst = 0; inst < targetDensity; inst++) {
@@ -1387,14 +1438,14 @@ export class LandscapeGrassManager extends RedGPUObject {
                             : (this.#tempWeights4[channelIdx] || 0.0);
 
                         if (normW < 0.20) continue;
-                        if (type.densityScaleByWeight && this.#nextPrng() > normW) continue;
+                        if (densityScaleByWeight && this.#nextPrng() > normW) continue;
                     }
 
                     const rot = this.#nextPrng() * 6.2831853;
-                    const sScale = type.minScale[0] + this.#nextPrng() * (type.maxScale[0] - type.minScale[0]);
-                    const hScale = type.minScale[1] + this.#nextPrng() * (type.maxScale[1] - type.minScale[1]);
+                    const sScale = minScaleS + this.#nextPrng() * deltaScaleS;
+                    const hScale = minScaleH + this.#nextPrng() * deltaScaleH;
 
-                    const globalInstIdx = alloc.rawBaseOffset + slotBase + filledCount;
+                    const globalInstIdx = rawBaseOffset + slotBase + filledCount;
                     this.#megaBuffer.writeInstanceData(
                         globalInstIdx,
                         gx, 0.0, gz,
@@ -1405,30 +1456,30 @@ export class LandscapeGrassManager extends RedGPUObject {
 
                 for (let rem = filledCount; rem < targetDensity; rem++) {
                     this.#megaBuffer.writeInstanceData(
-                        alloc.rawBaseOffset + slotBase + rem,
+                        rawBaseOffset + slotBase + rem,
                         0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
                     );
                 }
 
                 if (filledCount > 0) {
-                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
-                    this.#baker.addBakeTasks(alloc.rawBaseOffset + slotBase, filledCount, type.typeId);
+                    this.#megaBuffer.uploadInstances(rawBaseOffset + slotBase, targetDensity);
+                    this.#baker.addBakeTasks(rawBaseOffset + slotBase, filledCount, typeId);
                     if (reusedRange) {
                         reusedRange.count = targetDensity;
                         reusedRange.filledCount = filledCount;
-                        state.activeCellRanges.set(key, reusedRange);
+                        activeCellRanges.set(key, reusedRange);
                     } else {
-                        state.activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
+                        activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
                     }
                     state.instanceCount += filledCount;
                 } else {
-                    this.#megaBuffer.uploadInstances(alloc.rawBaseOffset + slotBase, targetDensity);
+                    this.#megaBuffer.uploadInstances(rawBaseOffset + slotBase, targetDensity);
                     if (reusedRange) {
                         reusedRange.count = targetDensity;
                         reusedRange.filledCount = 0;
-                        state.freeSlotRanges.push(reusedRange);
+                        freeSlotRanges.push(reusedRange);
                     } else {
-                        state.freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
+                        freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
                     }
                 }
             }

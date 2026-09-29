@@ -142,14 +142,15 @@ export class GrassInstanceBaker extends RedGPUObject {
             return;
         }
 
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !megaBuffer.rawGPUBuffer || !megaBuffer.typeParamsGPUBuffer) {
+        const {gpuDevice, resourceManager} = this;
+        const {rawGPUBuffer, typeParamsGPUBuffer} = megaBuffer;
+        if (!gpuDevice || !rawGPUBuffer || !typeParamsGPUBuffer) {
             return;
         }
 
-        const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
-        const targetVHTView = vhtTextureView || this.resourceManager.emptyBitmapTextureView;
-        const targetVBTView = vbtTextureView || this.resourceManager.emptyBitmapTextureView;
+        const {emptyBitmapTextureView} = resourceManager;
+        const targetVHTView = vhtTextureView || emptyBitmapTextureView;
+        const targetVBTView = vbtTextureView || emptyBitmapTextureView;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
@@ -181,27 +182,28 @@ export class GrassInstanceBaker extends RedGPUObject {
 
         if (
             !this.#bakeBindGroup ||
-            this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
-            this.#cachedTypeParamsBuffer !== megaBuffer.typeParamsGPUBuffer ||
+            this.#cachedRawBuffer !== rawGPUBuffer ||
+            this.#cachedTypeParamsBuffer !== typeParamsGPUBuffer ||
             this.#cachedVHTTextureView !== targetVHTView ||
             this.#cachedVBTTextureView !== targetVBTView
         ) {
-            this.#cachedRawBuffer = megaBuffer.rawGPUBuffer;
-            this.#cachedTypeParamsBuffer = megaBuffer.typeParamsGPUBuffer;
+            this.#cachedRawBuffer = rawGPUBuffer;
+            this.#cachedTypeParamsBuffer = typeParamsGPUBuffer;
             this.#cachedVHTTextureView = targetVHTView;
             this.#cachedVBTTextureView = targetVBTView;
 
+            const {basicSampler} = resourceManager;
             this.#bakeBindGroup = gpuDevice.createBindGroup({
                 label: 'Grass_Bake_BindGroup',
                 layout: this.#bakeBindGroupLayout,
                 entries: [
-                    {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
+                    {binding: 0, resource: {buffer: rawGPUBuffer}},
                     {binding: 1, resource: {buffer: this.#uniformGPUBuffer}},
-                    {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
+                    {binding: 2, resource: {buffer: typeParamsGPUBuffer}},
                     {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
                     {binding: 4, resource: targetVHTView},
                     {binding: 5, resource: targetVBTView},
-                    {binding: 6, resource: basicGPUSampler},
+                    {binding: 6, resource: basicSampler.gpuSampler},
                 ],
             });
         }
