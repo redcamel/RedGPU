@@ -1291,11 +1291,11 @@ export class LandscapeGrassManager extends RedGPUObject {
             }
 
             this.#keysToEvict.length = 0;
-            state.activeCellRanges.forEach((_range, activeKey) => {
+            for (const activeKey of state.activeCellRanges.keys()) {
                 if (!this.#neededCellKeysSet.has(activeKey)) {
                     this.#keysToEvict.push(activeKey);
                 }
-            });
+            }
 
             for (let i = 0; i < this.#keysToEvict.length; i++) {
                 const evictKey = this.#keysToEvict[i];
