@@ -351,7 +351,8 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name || 'GrassType', expanded: isDefaultExpanded});
         typeFolder.addBinding(type, 'densityPerHectare', {min: 1000, max: 50000, step: 1000});
-        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
+        typeFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5, label: 'Far Dist (m)'});
+        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5, label: 'Cull Dist (m)'});
         typeFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
         typeFolder.addBinding(type, 'minSlope', {min: 0, max: 89, step: 1});
         typeFolder.addBinding(type, 'maxSlope', {min: 1, max: 90, step: 1});

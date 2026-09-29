@@ -1048,11 +1048,11 @@ export const ExampleList: ExampleListType = [
                                 name: 'Procedural Grass Field',
                                 path: '3d/landscape/proceduralGrass',
                                 description: {
-                                    ko: `지형 스플랫맵의 잔디 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디(뗏장 + 키 큰 들풀 3종 멀티 LOD)를 필드에 배치하는 대규모 식생 시뮬레이션 예제입니다.<br/>
-                                        • <b>거리별 수축 & 컬링</b>: 카메라를 전후로 이동하며 원거리 잔디가 자연스럽게 수축(shrinkStartDistance)되고 컬링(cullingDistance)되는 것을 확인하세요.<br/>
+                                    ko: `지형 스플랫맵의 잔디 가중치와 연동하여 GPU 인스턴싱 기반 대규모 절차적 잔디를 필드에 배치하고, 고속 Near/Far 렌더링 파이프라인과 거리별 컬링(cullingDistance)을 구현하는 대규모 식생 시뮬레이션 예제입니다.<br/>
+                                        • <b>거리별 파이프라인 & 컬링</b>: 카메라 거리에 따라 고품질(그림자 ON/SSS) Near 파이프라인과 경량 Far 파이프라인이 자동 전환되며 한계 거리에서 컬링되는 것을 확인하세요.<br/>
                                         • <b>버퍼 통계 확인</b>: Buffer Stats에서 실시간 활성 인스턴스 수(activeInstances)와 메가버퍼 점유 상태를 모니터링할 수 있습니다.`,
-                                    en: `Vegetation simulation scattering tens of thousands of GPU-instanced grass clumps and multi-LOD tall wild grass driven by terrain splatmap weights.<br/>
-                                        • <b>Distance Shrink & Culling</b>: Move camera to watch distant grass smoothly shrink (shrinkStartDistance) and cull (cullingDistance).<br/>
+                                    en: `Vegetation simulation scattering tens of thousands of GPU-instanced grass clumps driven by terrain splatmap weights, featuring high-speed Near/Far rendering pipelines and distance culling (cullingDistance).<br/>
+                                        • <b>Distance Pipeline & Culling</b>: Observe automatic transitions between high-quality Near (shadows/SSS) and lightweight Far pipelines, followed by distance culling.<br/>
                                         • <b>Buffer Statistics</b>: Monitor live instance count (activeInstances) and mega-buffer capacity in the Buffer Stats folder.`
                                 }
                             },
