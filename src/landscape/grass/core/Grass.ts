@@ -39,7 +39,6 @@ export interface GrassOptions {
     groundBlendStrength?: number;
     alphaCutoff?: number;
     roughness?: number;
-    metallic?: number;
     subsurfaceStrength?: number;
     subsurfaceColor?: [number, number, number];
     exposureBoost?: number;
@@ -74,7 +73,6 @@ export class Grass extends RedGPUObject {
     #groundBlendStrength: number = 1.0;
     #alphaCutoff: number = 0.2;
     #roughness: number = 0.55;
-    #metallic: number = 0.0;
     #targetLayer: string | number = '';
     #bottomOffset: number = 0.0;
     #receiveShadow: boolean = true;
@@ -202,18 +200,12 @@ export class Grass extends RedGPUObject {
             this.#roughness = inheritedRoughness;
         }
 
-        if (options.metallic !== undefined) {
-            this.#metallic = options.metallic;
-        } else {
-            this.#metallic = 0.0;
-        }
-
         if (options.subsurfaceStrength !== undefined) this.#subsurfaceStrength = options.subsurfaceStrength;
         if (options.subsurfaceColor) this.#subsurfaceColor = [...options.subsurfaceColor];
         if (options.exposureBoost !== undefined) this.#exposureBoost = options.exposureBoost;
         if (options.targetLayer !== undefined) this.#targetLayer = options.targetLayer;
         if (options.bottomOffset !== undefined) this.#bottomOffset = options.bottomOffset;
-        this.#receiveShadow = options.receiveShadow ?? true;
+        this.#receiveShadow = baseReceiveShadow;
         if (options.shadowStrength !== undefined) this.#shadowStrength = options.shadowStrength;
         this.#castShadow = options.castShadow ?? true;
         if (options.shadowCullDistance !== undefined) {
@@ -233,16 +225,8 @@ export class Grass extends RedGPUObject {
         return super.name;
     }
 
-    override set name(value: string) {
+    override set name(_value: string) {
         consoleAndThrowError('[Grass] name property is readonly and cannot be changed.');
-    }
-
-    get mesh(): Mesh | undefined {
-        return this.#lods[0]?.mesh;
-    }
-
-    get geometry(): Geometry | Primitive {
-        return this.#geometry;
     }
 
     get lods(): GrassLODInfo[] {
@@ -413,15 +397,6 @@ export class Grass extends RedGPUObject {
         this.#dirty = true;
     }
 
-    get metallic(): number {
-        return this.#metallic;
-    }
-
-    set metallic(v: number) {
-        this.#metallic = Math.max(0, Math.min(1, v));
-        this.#dirty = true;
-    }
-
     get targetLayer(): string | number {
         return this.#targetLayer;
     }
@@ -505,12 +480,6 @@ export class Grass extends RedGPUObject {
     markClean(): void {
         this.#dirty = false;
     }
-
-    markDirty(): void {
-        this.#dirty = true;
-        this.#notifyChange();
-    }
-
 
     getLODReceiveShadow(lodIndex: number): boolean {
         if (lodIndex < 0 || lodIndex >= this.#lods.length) return false;
