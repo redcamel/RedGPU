@@ -1,7 +1,7 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
+import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeComputeSource from "./grassBakeCompute.wgsl";
-import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
+import type GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 
 export class GrassInstanceBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
@@ -19,11 +19,8 @@ export class GrassInstanceBaker extends RedGPUObject {
 
     #cachedRawBuffer: GPUBuffer | null = null;
     #cachedTypeParamsBuffer: GPUBuffer | null = null;
-    #cachedTasksBuffer: GPUBuffer | null = null;
     #cachedVHTTextureView: GPUTextureView | null = null;
-    #cachedVHTSampler: GPUSampler | null = null;
     #cachedVBTTextureView: GPUTextureView | null = null;
-    #cachedVBTSampler: GPUSampler | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -44,11 +41,8 @@ export class GrassInstanceBaker extends RedGPUObject {
         this.#bakeBindGroup = null;
         this.#cachedRawBuffer = null;
         this.#cachedTypeParamsBuffer = null;
-        this.#cachedTasksBuffer = null;
         this.#cachedVHTTextureView = null;
-        this.#cachedVHTSampler = null;
         this.#cachedVBTTextureView = null;
-        this.#cachedVBTSampler = null;
     }
 
     addBakeTasks(startIndex: number, count: number, typeId: number): void {
@@ -84,9 +78,7 @@ export class GrassInstanceBaker extends RedGPUObject {
 
         const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
         const targetVHTView = vhtTextureView || this.resourceManager.emptyBitmapTextureView;
-        const targetVHTSampler = basicGPUSampler;
         const targetVBTView = vbtTextureView || this.resourceManager.emptyBitmapTextureView;
-        const targetVBTSampler = basicGPUSampler;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
@@ -120,19 +112,13 @@ export class GrassInstanceBaker extends RedGPUObject {
             !this.#bakeBindGroup ||
             this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
             this.#cachedTypeParamsBuffer !== megaBuffer.typeParamsGPUBuffer ||
-            this.#cachedTasksBuffer !== this.#tasksGPUBuffer ||
             this.#cachedVHTTextureView !== targetVHTView ||
-            this.#cachedVHTSampler !== targetVHTSampler ||
-            this.#cachedVBTTextureView !== targetVBTView ||
-            this.#cachedVBTSampler !== targetVBTSampler
+            this.#cachedVBTTextureView !== targetVBTView
         ) {
             this.#cachedRawBuffer = megaBuffer.rawGPUBuffer;
             this.#cachedTypeParamsBuffer = megaBuffer.typeParamsGPUBuffer;
-            this.#cachedTasksBuffer = this.#tasksGPUBuffer;
             this.#cachedVHTTextureView = targetVHTView;
-            this.#cachedVHTSampler = targetVHTSampler;
             this.#cachedVBTTextureView = targetVBTView;
-            this.#cachedVBTSampler = targetVBTSampler;
 
             this.#bakeBindGroup = gpuDevice.createBindGroup({
                 label: 'Grass_Bake_BindGroup',
@@ -143,9 +129,9 @@ export class GrassInstanceBaker extends RedGPUObject {
                     {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
                     {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
                     {binding: 4, resource: targetVHTView},
-                    {binding: 5, resource: targetVHTSampler},
+                    {binding: 5, resource: basicGPUSampler},
                     {binding: 6, resource: targetVBTView},
-                    {binding: 7, resource: targetVBTSampler},
+                    {binding: 7, resource: basicGPUSampler},
                 ],
             });
         }
@@ -165,14 +151,7 @@ export class GrassInstanceBaker extends RedGPUObject {
         this.#tasksGPUBuffer = null;
         this.#bakePipeline = null;
         this.#bakeBindGroupLayout = null;
-        this.#bakeBindGroup = null;
-        this.#cachedRawBuffer = null;
-        this.#cachedTypeParamsBuffer = null;
-        this.#cachedTasksBuffer = null;
-        this.#cachedVHTTextureView = null;
-        this.#cachedVHTSampler = null;
-        this.#cachedVBTTextureView = null;
-        this.#cachedVBTSampler = null;
+        this.invalidateBindGroup();
         this.#taskCount = 0;
     }
 
@@ -191,7 +170,6 @@ export class GrassInstanceBaker extends RedGPUObject {
             size: this.#taskCapacity * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
-
 
         const shaderModule = resourceManager.createGPUShaderModule('Grass_Bake_ComputeModule', {
             code: grassBakeComputeSource,
@@ -252,4 +230,3 @@ export class GrassInstanceBaker extends RedGPUObject {
 }
 
 Object.freeze(GrassInstanceBaker);
-export default GrassInstanceBaker;

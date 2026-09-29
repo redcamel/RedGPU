@@ -11,7 +11,7 @@ import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
-import type FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
+import type {FoliageInstanceBaker} from "./baking/FoliageInstanceBaker";
 
 export interface FoliageLODConfig {
 
