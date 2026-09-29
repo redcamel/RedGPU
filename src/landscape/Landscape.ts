@@ -12,7 +12,7 @@ import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
-import BaseObject from "../base/BaseObject";
+import RedGPUObject from "../base/RedGPUObject";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import LandscapeGrassManager from "./grass/LandscapeGrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
@@ -90,11 +90,10 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  *
  * @category Landscape
  */
-export class Landscape extends BaseObject {
+export class Landscape extends RedGPUObject {
     // =========================================================================
     // Core Context & Subsystems
     // =========================================================================
-    #redGPUContext: RedGPUContext;
     #spatialGrid: LandscapeSpatialGrid;
     #sharedGeometry: LandscapeSharedGeometry;
     #instanceBuffer: LandscapeInstanceBuffer;
@@ -171,8 +170,7 @@ export class Landscape extends BaseObject {
      * [EN] World dimensions of the landscape (single number or `[sizeX, sizeZ]`, default: 2000)
      */
     constructor(redGPUContext: RedGPUContext, worldSize: number | [number, number] = 2000) {
-        super();
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
 
         let wsX = 2000;
         let wsZ = 2000;
@@ -241,14 +239,6 @@ export class Landscape extends BaseObject {
     // =========================================================================
     // Properties: Context & Subsystem Managers
     // =========================================================================
-    /**
-     * [KO] 지형이 속한 RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance this landscape belongs to.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
-
     /**
      * [KO] 지형의 시각화 디버깅(타일 바운드, 노멀, LOD 와이어프레임 등)을 총괄하는 디버거 매니저를 반환합니다.
      * [EN] Returns the debugger manager that coordinates visual debugging (tile bounds, normals, LOD wireframes, etc.).
@@ -416,7 +406,7 @@ export class Landscape extends BaseObject {
         if (value > 0 && this.#componentSizeQuads !== value) {
             this.#componentSizeQuads = value;
             this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
+                this.redGPUContext,
                 this.#spatialGrid.tileSizeX,
                 this.#spatialGrid.tileSizeZ,
                 value,
@@ -449,7 +439,7 @@ export class Landscape extends BaseObject {
             this.#lod0SizeQuads = clamped;
             this.#tileStreamer.lod0SizeQuads = clamped;
             this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
+                this.redGPUContext,
                 this.#spatialGrid.tileSizeX,
                 this.#spatialGrid.tileSizeZ,
                 this.#componentSizeQuads,
@@ -537,7 +527,7 @@ export class Landscape extends BaseObject {
         if (this.#lodMaxLevel !== count) {
             this.#lodMaxLevel = count;
             this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
+                this.redGPUContext,
                 this.#spatialGrid.tileSizeX,
                 this.#spatialGrid.tileSizeZ,
                 this.#componentSizeQuads,
@@ -948,7 +938,7 @@ export class Landscape extends BaseObject {
      * [EN] The created LandscapeLayer instance
      */
     addLayer(options: LandscapeLayerOptions): LandscapeLayer {
-        const layer = new LandscapeLayer(this.#redGPUContext, options);
+        const layer = new LandscapeLayer(this.redGPUContext, options);
         this.#material.addLayer(layer);
         return layer;
     }
@@ -1098,7 +1088,7 @@ export class Landscape extends BaseObject {
             mainPVMatrix
         );
 
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+        this.commandEncoderManager.addPreProcessComputePass(
             'Landscape_GPUCulling_ComputePass',
             this.#onPreProcessComputePass
         );
@@ -1283,7 +1273,7 @@ export class Landscape extends BaseObject {
             if (this.#instanceBuffer) {
                 this.#instanceBuffer.destroy();
             }
-            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#lodMaxLevel);
+            this.#instanceBuffer = new LandscapeInstanceBuffer(this.redGPUContext, targetCount, this.#lodMaxLevel);
             needRebuildBindGroup = true;
         }
 
@@ -1300,7 +1290,7 @@ export class Landscape extends BaseObject {
             }
         }
 
-        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
+        this.#gpuCuller = new LandscapeGPUCuller(this.redGPUContext);
 
         this.#spatialGrid.rebuildTiles((comp, index) => {
             this.#instanceBuffer.setStaticTileData(
@@ -1413,18 +1403,18 @@ export class Landscape extends BaseObject {
     }
 
     #clampComponentCount(val: number): number {
-        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
+        const maxTextureDim = this.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
         const maxTilesForHardware = Math.floor(maxTextureDim / 512);
         const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
         return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
 
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         const material = this.#material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
-        const antialiasingManager = this.#redGPUContext.antialiasingManager;
+        const antialiasingManager = this.antialiasingManager;
         const msaaID = antialiasingManager.msaaID;
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
@@ -1456,7 +1446,7 @@ export class Landscape extends BaseObject {
         }
 
         try {
-            const resourceManager = this.#redGPUContext.resourceManager;
+            const resourceManager = this.resourceManager;
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
             const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 

@@ -1,10 +1,9 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
-export class LandscapeGPUCuller {
-    #redGPUContext: RedGPUContext;
-
+export class LandscapeGPUCuller extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #uniformBuffer: GPUBuffer | null = null;
     #bindGroup: GPUBindGroup | null = null;
@@ -15,7 +14,7 @@ export class LandscapeGPUCuller {
     #uniformUintData: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#initGPUResources();
     }
 
@@ -26,11 +25,11 @@ export class LandscapeGPUCuller {
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#bindGroupLayout || !this.#uniformBuffer) return;
 
-        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
-        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetHZBView = hzbTextureView || this.resourceManager.emptyBitmapTextureView;
+        const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
 
         this.#bindGroup = gpuDevice.createBindGroup({
             label: 'LandscapeCullBindGroup',
@@ -64,7 +63,7 @@ export class LandscapeGPUCuller {
         useHZB: boolean = false,
         viewProjectionMatrix: Float32Array | null = null
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#uniformBuffer) return;
 
         const data = this.#uniformData;
@@ -139,10 +138,10 @@ export class LandscapeGPUCuller {
     }
 
     #initGPUResources(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
         const shaderInfo = resourceManager.wgslParser.parse('LandscapeCullComputeShaderModule', landscapeCullComputeSource);
 
         let shaderModule = resourceManager.getGPUShaderModule('LandscapeCullComputeShaderModule');

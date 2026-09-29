@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
 import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
 
-export class LandscapeInstanceBuffer {
-    #redGPUContext: RedGPUContext;
+export class LandscapeInstanceBuffer extends RedGPUObject {
     #maxComponentCount: number;
     #lodMaxLevel: number;
 
@@ -25,7 +25,7 @@ export class LandscapeInstanceBuffer {
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, lodMaxLevel: number) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#maxComponentCount = maxComponentCount;
         this.#lodMaxLevel = lodMaxLevel;
 
@@ -89,7 +89,7 @@ export class LandscapeInstanceBuffer {
     }
 
     uploadStaticTilesToGPU(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#allInputTilesBuffer) return;
 
         gpuDevice.queue.writeBuffer(
@@ -127,7 +127,7 @@ export class LandscapeInstanceBuffer {
         foliageStreamingRadius: number = 600.0,
         debugMode: number = 0
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#landscapeUniformBuffer) return;
 
         const f32 = this.#landscapeUniformData;
@@ -197,7 +197,7 @@ export class LandscapeInstanceBuffer {
         lodMaxLevel: number,
         isWireframe: boolean
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#indirectDrawBuffer) return;
 
         const argsData = this.#indirectArgsBuffer;
@@ -226,7 +226,7 @@ export class LandscapeInstanceBuffer {
         vbtNormalView?: GPUTextureView,
         vbtORMView?: GPUTextureView
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#allInputTilesBuffer || !this.#visibleTileIndicesBuffer || !this.#landscapeUniformBuffer) return;
 
         const fallbackView = vntTextureView || vhtTextureView;
@@ -246,7 +246,7 @@ export class LandscapeInstanceBuffer {
             },
             {
                 binding: 2,
-                resource: this.#redGPUContext.resourceManager.basicSampler.gpuSampler
+                resource: this.resourceManager.basicSampler.gpuSampler
             },
             {
                 binding: 3,
@@ -303,10 +303,10 @@ export class LandscapeInstanceBuffer {
     }
 
     #createGPUResources(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
         const vertexShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_VERTEX', landscapeVertexSource);
         const fragmentShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_FRAGMENT', landscapeFragmentSource);
 

@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 export interface GrassLODAllocation {
     lodIndex: number;
@@ -21,14 +22,12 @@ export interface GrassTypeAllocation {
     lods: GrassLODAllocation[];
 }
 
-export class GrassMegaBuffer {
+export class GrassMegaBuffer extends RedGPUObject {
     static readonly STRIDE_FLOATS: number = 8;
     static readonly STRIDE_BYTES: number = 32;
     static readonly MAX_TYPES: number = 16;
     static readonly MAX_INDIRECT_CALLS: number = 64;
     static readonly TYPE_PARAM_FLOATS: number = 16;
-
-    #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
     #maxTypes: number;
 
@@ -52,7 +51,7 @@ export class GrassMegaBuffer {
     #onRecreated: (() => void) | null = null;
 
     constructor(redGPUContext: RedGPUContext, initialCapacity: number = 131072, maxTypes: number = 16) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
         this.#maxTypes = maxTypes;
 
@@ -205,7 +204,7 @@ export class GrassMegaBuffer {
     }
 
     uploadInstances(startInstance: number, count: number): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#rawGPUBuffer || count <= 0) return;
 
         const byteOffset = startInstance * GrassMegaBuffer.STRIDE_BYTES;
@@ -260,7 +259,7 @@ export class GrassMegaBuffer {
         f32[base + 14] = lodDistances[2] ?? 9999;
         f32[base + 15] = 0.0;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#typeParamsGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#typeParamsGPUBuffer,
@@ -273,7 +272,7 @@ export class GrassMegaBuffer {
     }
 
     resetIndirectDrawCountsCPU(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#indirectGPUBuffer || this.#totalIndirectDrawCalls === 0) return;
         gpuDevice.queue.writeBuffer(
             this.#indirectGPUBuffer,
@@ -303,7 +302,7 @@ export class GrassMegaBuffer {
     }
 
     #initBuffers(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         const culledCapacity = Math.max(this.#maxTotalInstances * 4, this.#totalAllocatedCulledInstances);
@@ -350,7 +349,7 @@ export class GrassMegaBuffer {
         this.#indirectResetTemplate[offset + 3] = lodAlloc.baseVertex;
         this.#indirectResetTemplate[offset + 4] = lodAlloc.culledBaseOffset;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#indirectGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#indirectGPUBuffer,

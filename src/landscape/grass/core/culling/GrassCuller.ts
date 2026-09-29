@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import grassCullComputeSource from "./grassCullCompute.wgsl";
 import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 
-export class GrassCuller {
-    #redGPUContext: RedGPUContext;
+export class GrassCuller extends RedGPUObject {
     #cullPipeline: GPUComputePipeline | null = null;
     #cullBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullBindGroup: GPUBindGroup | null = null;
@@ -19,7 +19,7 @@ export class GrassCuller {
     #cachedHZBTextureView: GPUTextureView | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
 
         this.#globalUniformCPUBuffer = new Float32Array(64);
         this.#globalUniformUintBuffer = new Uint32Array(this.#globalUniformCPUBuffer.buffer);
@@ -49,7 +49,7 @@ export class GrassCuller {
         hzbWidth: number = 512.0,
         hzbHeight: number = 256.0
     ): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#globalUniformGPUBuffer) return;
 
         const f32 = this.#globalUniformCPUBuffer;
@@ -95,10 +95,10 @@ export class GrassCuller {
     }
 
     updateBindGroup(megaBuffer: GrassMegaBuffer, hzbTextureView?: GPUTextureView | null): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#cullBindGroupLayout || !this.#globalUniformGPUBuffer) return;
 
-        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyR32FloatTextureView;
+        const targetHZBView = hzbTextureView || this.resourceManager.emptyR32FloatTextureView;
 
         if (
             !this.#cullBindGroup ||
@@ -158,7 +158,7 @@ export class GrassCuller {
     }
 
     #init(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         this.#globalUniformGPUBuffer = gpuDevice.createBuffer({
@@ -167,7 +167,7 @@ export class GrassCuller {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
 
         const shaderModule = resourceManager.createGPUShaderModule('GrassCullComputeModule', {
             code: grassCullComputeSource,

@@ -1,4 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
@@ -81,9 +83,8 @@ export interface FoliageOptions {
     groundBlendRange?: number;
 }
 
-export class Foliage {
+export class Foliage extends RedGPUObject {
     #options: FoliageOptions;
-    #redGPUContext: RedGPUContext;
 
     #subMeshes: FoliageSubMesh[] = [];
     #lod0SubMeshes: FoliageSubMesh[] = [];
@@ -153,8 +154,12 @@ export class Foliage {
         onRepopulateRequired?: (type: Foliage) => void,
         baker?: FoliageBaker | null
     ) {
+        super(redGPUContext);
+        if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {
+            consoleAndThrowError('[Foliage] options.name is required and must be a non-empty string!');
+        }
+        super.name = options.name.trim();
         this.#streamer = new FoliageSubCellStreamer(this);
-        this.#redGPUContext = redGPUContext;
         this.#options = options;
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
@@ -231,7 +236,7 @@ export class Foliage {
         this.#nameHash = hash;
 
         const assembleResult = FoliageSubMeshAssembler.assemble(
-            this.#redGPUContext,
+            this.redGPUContext,
             options,
             this.#subMeshVertexBindGroupLayout!
         );
@@ -339,8 +344,13 @@ export class Foliage {
         }
     }
 
-    get name(): string {
-        return this.#options.name;
+
+    override get name(): string {
+        return super.name;
+    }
+
+    override set name(value: string) {
+        consoleAndThrowError('[Foliage] name property is readonly and cannot be changed.');
     }
 
     get nameHash(): number {
@@ -685,19 +695,25 @@ export class Foliage {
         }
     }
 
-    #syncInternalWind(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#lastWindParams) return;
-        this.syncWindToSubMeshes(
-            gpuDevice,
-            this.#lastWindParams.windDirX,
-            this.#lastWindParams.windDirY,
-            this.#lastWindParams.windSpeed,
-            this.#lastWindParams.windStrength,
-            this.#lastWindParams.windFreq,
-            this.#lastWindParams.windFlutterStrength,
-            this.#lastWindParams.windEnabled
-        );
+    setLODReceiveShadow(lodIndex: number, value: boolean): void {
+        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
+        const boolVal = !!value;
+        const lodInfo = this.#lodInfoList[lodIndex];
+        if (lodInfo.receiveShadow === boolVal) return;
+
+        (lodInfo as any).receiveShadow = boolVal;
+
+        const gpuDevice = this.gpuDevice;
+        if (gpuDevice) {
+            const subMeshes = this.#subMeshes;
+            const count = subMeshes.length;
+            for (let i = 0; i < count; i++) {
+                if (subMeshes[i].lodIndex === lodIndex) {
+                    subMeshes[i].updateReceiveShadow(gpuDevice, boolVal);
+                }
+            }
+        }
+        this.#onDirty?.();
     }
 
     clearTileCache(): void {
@@ -723,25 +739,19 @@ export class Foliage {
         return this.#lodInfoList[lodIndex].receiveShadow !== false;
     }
 
-    setLODReceiveShadow(lodIndex: number, value: boolean): void {
-        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
-        const boolVal = !!value;
-        const lodInfo = this.#lodInfoList[lodIndex];
-        if (lodInfo.receiveShadow === boolVal) return;
-
-        (lodInfo as any).receiveShadow = boolVal;
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (gpuDevice) {
-            const subMeshes = this.#subMeshes;
-            const count = subMeshes.length;
-            for (let i = 0; i < count; i++) {
-                if (subMeshes[i].lodIndex === lodIndex) {
-                    subMeshes[i].updateReceiveShadow(gpuDevice, boolVal);
-                }
-            }
-        }
-        this.#onDirty?.();
+    #syncInternalWind(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice || !this.#lastWindParams) return;
+        this.syncWindToSubMeshes(
+            gpuDevice,
+            this.#lastWindParams.windDirX,
+            this.#lastWindParams.windDirY,
+            this.#lastWindParams.windSpeed,
+            this.#lastWindParams.windStrength,
+            this.#lastWindParams.windFreq,
+            this.#lastWindParams.windFlutterStrength,
+            this.#lastWindParams.windEnabled
+        );
     }
 
     get hasImpostor(): boolean {
@@ -794,7 +804,7 @@ export class Foliage {
     }
 
     #updateSubMeshGroundBlend(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
         const subCount = this.#subMeshes.length;
         for (let s = 0; s < subCount; s++) {

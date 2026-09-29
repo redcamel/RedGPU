@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
 import foliageDepthPrepassWGSL from "./foliageDepthPrepass.wgsl";
@@ -6,15 +7,14 @@ import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImposto
 
 export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
 
-class FoliagePipelineRegistry {
-    #redGPUContext: RedGPUContext;
+class FoliagePipelineRegistry extends RedGPUObject {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
     #depthPrepassFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
     constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#emptyBindGroupLayout = emptyBindGroupLayout || redGPUContext.gpuDevice?.createBindGroupLayout({
             label: 'EmptyFoliageBindGroupLayout',
             entries: []
@@ -53,8 +53,8 @@ class FoliagePipelineRegistry {
     ): GPURenderPipeline | null {
         if (!material) return null;
 
-        const resourceManager = this.#redGPUContext.resourceManager;
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.resourceManager;
+        const gpuDevice: GPUDevice = this.gpuDevice;
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
 
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentShaderModule) {
@@ -214,8 +214,8 @@ class FoliagePipelineRegistry {
             return cachedPipeline;
         }
 
-        const resourceManager = this.#redGPUContext.resourceManager;
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.resourceManager;
+        const gpuDevice: GPUDevice = this.gpuDevice;
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: strideBytes,
@@ -281,8 +281,8 @@ class FoliagePipelineRegistry {
             material.dirtyPipeline = false;
         }
 
-        const resourceManager = this.#redGPUContext.resourceManager;
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.resourceManager;
+        const gpuDevice: GPUDevice = this.gpuDevice;
 
         const materialUUID = material.uuid || material.name || 'mat';
         const pipelineKey = `FoliageShadowMasked_${materialUUID}_stride${strideBytes}_cull${cullMode}`;
@@ -350,7 +350,7 @@ class FoliagePipelineRegistry {
     }
 
     #initShaderModules(): void {
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
 
         let vModule = resourceManager.getGPUShaderModule('FoliageInstancedVertexShader_Module');
         if (!vModule) {

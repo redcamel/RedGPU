@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import View3D from "../../../../display/view/View3D";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import Foliage from "../Foliage";
@@ -12,10 +13,8 @@ export interface ValidFoliageTypeItem {
     indirectGPU: GPUBuffer | null;
 }
 
-class FoliageRenderer {
+class FoliageRenderer extends RedGPUObject {
     static readonly #MAX_POOLED_TYPES = 64;
-
-    #redGPUContext: RedGPUContext;
     #pipelineRegistry: FoliagePipelineRegistry;
     #emptyBindGroup: GPUBindGroup | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -46,7 +45,7 @@ class FoliageRenderer {
         emptyBindGroup?: GPUBindGroup | null,
         subMeshVertexBindGroupLayout?: GPUBindGroupLayout | null
     ) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#pipelineRegistry = pipelineRegistry;
         this.#emptyBindGroup = emptyBindGroup || null;
         this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
@@ -86,7 +85,7 @@ class FoliageRenderer {
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
 
-        const antialiasingManager = this.#redGPUContext.antialiasingManager;
+        const antialiasingManager = this.antialiasingManager;
         const msaaID = antialiasingManager.msaaID;
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
@@ -237,7 +236,7 @@ class FoliageRenderer {
         validCount: number,
         systemBG: GPUBindGroup | null
     ): GPURenderBundle | null {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return null;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({

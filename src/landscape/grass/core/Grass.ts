@@ -1,4 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
@@ -17,7 +19,7 @@ export interface GrassLODInfo {
 }
 
 export interface GrassOptions {
-    name?: string;
+    name: string;
     lods: GrassLODConfig[];
     baseColorTexture?: string | BitmapTexture;
     densityPerHectare?: number;
@@ -49,8 +51,7 @@ export interface GrassOptions {
     shadowShrinkStartDistance?: number;
 }
 
-export class Grass {
-    #name: string;
+export class Grass extends RedGPUObject {
     #geometry: Geometry | Primitive;
     #lods: GrassLODInfo[] = [];
     #baseColorTexture: BitmapTexture;
@@ -91,6 +92,11 @@ export class Grass {
      * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrass(options)` factory method instead.
      */
     constructor(redGPUContext: RedGPUContext, options: GrassOptions) {
+        super(redGPUContext);
+        if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {
+            consoleAndThrowError('[Grass] options.name is required and must be a non-empty string!');
+        }
+        super.name = options.name.trim();
         if (!options.lods || options.lods.length === 0) {
             throw new Error(`[Grass] 'lods' array must be provided with at least one LOD entry!`);
         }
@@ -101,7 +107,6 @@ export class Grass {
         if (!lod0Mesh) {
             throw new Error(`[Grass] LOD 0 must contain a valid Mesh instance!`);
         }
-        this.#name = options.name || lod0Mesh.name || `Grass_${Math.random().toString(36).substring(2, 7)}`;
 
         const mat = lod0Mesh.material as any;
         const resolvedTexture = options.baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
@@ -216,8 +221,13 @@ export class Grass {
         }
     }
 
-    get name(): string {
-        return this.#name;
+
+    override get name(): string {
+        return super.name;
+    }
+
+    override set name(value: string) {
+        consoleAndThrowError('[Grass] name property is readonly and cannot be changed.');
     }
 
     get mesh(): Mesh | undefined {

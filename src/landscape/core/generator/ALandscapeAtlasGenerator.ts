@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-export abstract class ALandscapeAtlasGenerator {
-    #redGPUContext: RedGPUContext;
+export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
@@ -12,12 +12,8 @@ export abstract class ALandscapeAtlasGenerator {
     #generatorLabel: string;
 
     constructor(redGPUContext: RedGPUContext, generatorLabel: string) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#generatorLabel = generatorLabel;
-    }
-
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
     }
 
     get computePipeline(): GPUComputePipeline | null {
@@ -29,8 +25,8 @@ export abstract class ALandscapeAtlasGenerator {
     }
 
     acquireUniformBuffer(byteLength: number): GPUBuffer {
-        const device = this.#redGPUContext.gpuDevice;
-        const curFrame = this.#redGPUContext.currentRequestAnimationFrame;
+        const device = this.gpuDevice;
+        const curFrame = this.redGPUContext.currentRequestAnimationFrame;
 
         if (this.#lastFrameId !== curFrame) {
             this.#lastFrameId = curFrame;
@@ -72,7 +68,7 @@ export abstract class ALandscapeAtlasGenerator {
         const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
         const workgroupCountY = Math.max(1, Math.ceil(pixelH / 16));
 
-        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
             const pass = commandEncoder.beginComputePass({
                 label: `Landscape_${this.#generatorLabel}_ComputePass_[${pixelX},${pixelZ}]`
             });
@@ -89,8 +85,8 @@ export abstract class ALandscapeAtlasGenerator {
         layoutEntries: GPUBindGroupLayoutEntry[],
         defaultUniformByteLength: number = 16
     ): void {
-        const device = this.#redGPUContext.gpuDevice;
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const device = this.gpuDevice;
+        const resourceManager = this.resourceManager;
         if (!device) return;
 
         this.#uniformBufferPool = [];

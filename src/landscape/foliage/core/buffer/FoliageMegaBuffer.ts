@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import type {FoliageLODInfo} from "../Foliage";
 import type FoliageSubMesh from "../submesh/FoliageSubMesh";
 import type FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
@@ -20,7 +21,7 @@ export interface CascadeCullingParam {
     frustumPlanes: number[][] | null;
 }
 
-export class FoliageMegaBuffer {
+export class FoliageMegaBuffer extends RedGPUObject {
     static readonly #STRIDE_FLOATS: number = 8;
     static readonly #STRIDE_BYTES: number = 8 * 4;
     static readonly #MAX_TYPES: number = 64;
@@ -31,7 +32,7 @@ export class FoliageMegaBuffer {
     #onRecreated: (() => void) | null = null;
 
     constructor(redGPUContext: RedGPUContext, initialCapacity: number = 65536, maxSubMeshes: number = 256) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
         this.#maxSubMeshes = maxSubMeshes;
         this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
@@ -41,8 +42,6 @@ export class FoliageMegaBuffer {
 
         this.#initBuffers();
     }
-
-    #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
     #maxSubMeshes: number;
 
@@ -144,7 +143,7 @@ export class FoliageMegaBuffer {
         this.#cpuRawDataBuffer.set(oldCpuBuffer);
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
             const rawByteSize = this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_BYTES;
             const culledByteSize = this.#maxTotalInstances * 8 * FoliageMegaBuffer.#STRIDE_BYTES;
@@ -281,7 +280,7 @@ export class FoliageMegaBuffer {
     uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
         allocation.activeCount = Math.max(allocation.activeCount, startIndex + count);
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         const startByteOffset = (allocation.rawBaseOffset + startIndex) * FoliageMegaBuffer.#STRIDE_BYTES;
         const byteCount = count * FoliageMegaBuffer.#STRIDE_BYTES;
 
@@ -321,7 +320,7 @@ export class FoliageMegaBuffer {
             return;
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (this.#indirectGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#indirectGPUBuffer,
@@ -442,7 +441,7 @@ export class FoliageMegaBuffer {
             }
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#unifiedGlobalUniformGPUBuffer,
             0,
@@ -551,9 +550,9 @@ export class FoliageMegaBuffer {
             return null;
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyR32FloatTextureView;
-        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const gpuDevice = this.gpuDevice;
+        const targetHZBView = hzbTextureView || this.resourceManager.emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
             this.#cachedHZBTextureView === targetHZBView &&
@@ -652,7 +651,7 @@ export class FoliageMegaBuffer {
             }
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#indirectResetTemplateGPUBuffer && this.#shadowIndirectResetTemplateGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#indirectResetTemplateGPUBuffer,
@@ -672,7 +671,7 @@ export class FoliageMegaBuffer {
     }
 
     #initBuffers(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         const rawByteSize = Math.max(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_BYTES, 64);
         const culledByteSize = rawByteSize * 8;
         const indirectByteSize = Math.max(this.#maxSubMeshes * 20, 64);

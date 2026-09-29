@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import foliageBakeComputeSource from "./foliageBakeCompute.wgsl";
 import FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 
-export class FoliageBaker {
-    #redGPUContext: RedGPUContext;
+export class FoliageBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -26,7 +26,7 @@ export class FoliageBaker {
     #cachedVBTSampler: GPUSampler | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
 
         this.#uniformCPUBuffer = new Float32Array(8);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
@@ -77,15 +77,15 @@ export class FoliageBaker {
             return;
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !megaBuffer.rawGPUBuffer || !megaBuffer.typeParamsGPUBuffer) {
             return;
         }
 
-        const basicGPUSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
+        const targetVHTView = vhtTextureView || this.resourceManager.emptyTexture2DArrayView;
         const targetVHTSampler = basicGPUSampler;
-        const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const targetVBTView = vbtTextureView || this.resourceManager.emptyBitmapTextureView;
         const targetVBTSampler = basicGPUSampler;
 
         const f32 = this.#uniformCPUBuffer;
@@ -177,7 +177,7 @@ export class FoliageBaker {
     }
 
     #init(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
@@ -192,7 +192,7 @@ export class FoliageBaker {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
 
         const shaderModule = resourceManager.createGPUShaderModule('FoliageBakeComputeModule', {
             code: foliageBakeComputeSource,
@@ -229,7 +229,7 @@ export class FoliageBaker {
     #ensureTaskCapacity(requiredCapacity: number): void {
         if (requiredCapacity <= this.#taskCapacity) return;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         let newCap = this.#taskCapacity;
         while (newCap < requiredCapacity) {
             newCap *= 2;

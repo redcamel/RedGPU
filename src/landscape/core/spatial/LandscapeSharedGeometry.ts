@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
@@ -14,8 +15,7 @@ export interface LandscapeLODGeometryRange {
     baseVertex: number;
 }
 
-export class LandscapeSharedGeometry {
-    #redGPUContext: RedGPUContext;
+export class LandscapeSharedGeometry extends RedGPUObject {
     #tileSizeX: number;
     #tileSizeZ: number;
     #componentSizeQuads: number;
@@ -28,8 +28,8 @@ export class LandscapeSharedGeometry {
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
     constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, lodMaxLevel: number, lod0SizeQuads: number = 256) {
+        super(redGPUContext);
         validateLandscapeBaseGridSize(componentSizeQuads);
-        this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
@@ -244,18 +244,18 @@ export class LandscapeSharedGeometry {
         });
 
         this.#combinedVertexBuffer = new VertexBuffer(
-            this.#redGPUContext,
+            this.redGPUContext,
             new Float32Array(allInterleavedData),
             vertexStruct
         );
 
         this.#combinedIndexBuffer = new IndexBuffer(
-            this.#redGPUContext,
+            this.redGPUContext,
             new Uint32Array(allIndices)
         );
 
         this.#combinedWireframeIndexBuffer = new IndexBuffer(
-            this.#redGPUContext,
+            this.redGPUContext,
             new Uint32Array(allWireframeIndices)
         );
     }

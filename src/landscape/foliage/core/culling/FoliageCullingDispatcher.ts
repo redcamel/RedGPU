@@ -1,5 +1,6 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import type Landscape from "../../../Landscape";
 import type LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import type Foliage from "../Foliage";
@@ -10,7 +11,7 @@ import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffe
 import {FoliageBaker} from "../baking/FoliageBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-class FoliageCullingDispatcher {
+class FoliageCullingDispatcher extends RedGPUObject {
     #tempPVMatrix: mat4 = mat4.create();
     #cachedFrustumPlanes: number[][] = [
         new Array(4), new Array(4), new Array(4),
@@ -29,8 +30,6 @@ class FoliageCullingDispatcher {
         {maxDistance: 85.0, hasShadow: false, frustumPlanes: null},
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
-
-    #redGPUContext: RedGPUContext;
     #megaBuffer: FoliageMegaBuffer | null = null;
     #baker: FoliageBaker;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -45,10 +44,10 @@ class FoliageCullingDispatcher {
     #cachedFovFactor: number = 1.0;
 
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
         this.#tileStreamer = tileStreamer || null;
-        this.#baker = new FoliageBaker(this.#redGPUContext);
+        this.#baker = new FoliageBaker(this.redGPUContext);
         this.#initComputePipeline();
     }
 
@@ -169,12 +168,12 @@ class FoliageCullingDispatcher {
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
             this.#landscapeRef = landscape;
 
-            this.#redGPUContext.commandEncoderManager.useEncoder(
+            this.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
             );
 
-            this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            this.commandEncoderManager.addPreProcessComputePass(
                 'Foliage_GPUCulling_ComputePass',
                 this.#onPreProcessComputePass
             );
@@ -269,10 +268,10 @@ class FoliageCullingDispatcher {
     }
 
     #initComputePipeline(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
         const shaderInfo = resourceManager.wgslParser.parse('FoliageCullingComputeModule', foliageCullingComputeWGSL);
 
         let computeModule = resourceManager.getGPUShaderModule('FoliageCullingComputeModule');

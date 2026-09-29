@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import LandscapeComponent from "./LandscapeComponent";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import {parse16BitPngBuffer} from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
@@ -17,8 +18,7 @@ const NEIGHBOR_OFFSETS: [number, number][] = [
 
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
-export class LandscapeTileStreamer {
-    #redGPUContext: RedGPUContext;
+export class LandscapeTileStreamer extends RedGPUObject {
     #spatialGrid: LandscapeSpatialGrid;
 
     #tileLoadingRadius: number = 2500.0;
@@ -103,7 +103,7 @@ export class LandscapeTileStreamer {
     }
 
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, tileLoadingRadius: number = 2500.0) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#spatialGrid = spatialGrid;
         this.#tileLoadingRadius = tileLoadingRadius;
         this.#vhtGenerator = new LandscapeVHTGenerator(redGPUContext);
@@ -188,7 +188,7 @@ export class LandscapeTileStreamer {
         if (this.#vbtNormalAtlas) this.#vbtNormalAtlas.destroy();
         if (this.#vbtORMAtlas) this.#vbtORMAtlas.destroy();
 
-        const redGPUContext = this.#redGPUContext;
+        const redGPUContext = this.redGPUContext;
         const gpuDevice = redGPUContext.gpuDevice;
 
         const rawVhtTexture = gpuDevice.createTexture({
@@ -659,7 +659,7 @@ export class LandscapeTileStreamer {
 
             if (cpuParsed) {
                 const {width, height, pixels} = cpuParsed;
-                const gpuDevice = this.#redGPUContext.gpuDevice;
+                const gpuDevice = this.gpuDevice;
                 const bytesPerRow = width * 2;
 
                 const gpuTexture = gpuDevice.createTexture({
@@ -700,7 +700,7 @@ export class LandscapeTileStreamer {
                                 TILE_PIXEL_SIZE
                             );
                         }
-                        this.#redGPUContext.commandEncoderManager.addDeferredDestroy(gpuTexture);
+                        this.commandEncoderManager.addDeferredDestroy(gpuTexture);
 
                         if (this.#vntAtlasTexture && this.#vntGenerator) {
                             this.#vntGenerator.bakeTileRegion(
@@ -769,7 +769,7 @@ export class LandscapeTileStreamer {
 
             if (cpuParsed) {
                 const {width, height, pixels} = cpuParsed;
-                const gpuDevice = this.#redGPUContext.gpuDevice;
+                const gpuDevice = this.gpuDevice;
                 const count = width * height;
                 const f32Pixels = new Float32Array(count);
                 const inv65535 = 1.0 / 65535.0;

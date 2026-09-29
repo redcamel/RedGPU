@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeComputeSource from "./grassBakeCompute.wgsl";
 import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 
-export class GrassBaker {
-    #redGPUContext: RedGPUContext;
+export class GrassBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -26,7 +26,7 @@ export class GrassBaker {
     #cachedVBTSampler: GPUSampler | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
 
         this.#uniformCPUBuffer = new Float32Array(8);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
@@ -77,15 +77,15 @@ export class GrassBaker {
             return;
         }
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !megaBuffer.rawGPUBuffer || !megaBuffer.typeParamsGPUBuffer) {
             return;
         }
 
-        const basicGPUSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
+        const targetVHTView = vhtTextureView || this.resourceManager.emptyBitmapTextureView;
         const targetVHTSampler = basicGPUSampler;
-        const targetVBTView = vbtTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const targetVBTView = vbtTextureView || this.resourceManager.emptyBitmapTextureView;
         const targetVBTSampler = basicGPUSampler;
 
         const f32 = this.#uniformCPUBuffer;
@@ -177,7 +177,7 @@ export class GrassBaker {
     }
 
     #init(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
@@ -192,7 +192,7 @@ export class GrassBaker {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const resourceManager = this.resourceManager;
 
         const shaderModule = resourceManager.createGPUShaderModule('GrassBakeComputeModule', {
             code: grassBakeComputeSource,
@@ -229,7 +229,7 @@ export class GrassBaker {
     #ensureTaskCapacity(requiredCapacity: number): void {
         if (requiredCapacity <= this.#taskCapacity) return;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         let newCap = this.#taskCapacity;
         while (newCap < requiredCapacity) {
             newCap *= 2;
