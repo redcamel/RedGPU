@@ -34,11 +34,11 @@ struct GrassTypeParam {
     instanceCount: u32,
     culledBaseOffset: u32,
     indirectBaseOffset: u32,
-    lodCount: u32,
-    maxInstancesPerLod: u32,
-    lodDistance0: f32,
-    lodDistance1: f32,
-    lodDistance2: f32,
+    stageCount: u32,
+    maxInstancesPerStage: u32,
+    farDistance: f32,
+    stageDistance1: f32,
+    stageDistance2: f32,
     _pad0: f32,
 };
 
@@ -89,11 +89,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let distToCam = sqrt(horizontalDistSq);
 
-    var targetLod = 0u;
-    if (typeInfo.lodCount > 1u) {
-        if (distToCam > typeInfo.lodDistance0) { targetLod = 1u; }
-        if (typeInfo.lodCount > 2u && distToCam > typeInfo.lodDistance1) { targetLod = 2u; }
-        if (typeInfo.lodCount > 3u && distToCam > typeInfo.lodDistance2) { targetLod = 3u; }
+    var drawSlot = 0u;
+    if (typeInfo.stageCount > 1u && distToCam > typeInfo.farDistance) {
+        drawSlot = 1u;
     }
 
     let bounds = unpack2x16float(instance.packedBounding);
@@ -151,9 +149,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         }
     }
 
-    let indirectArgIndex = (typeInfo.indirectBaseOffset + targetLod) * 5u + 1u;
+    let indirectArgIndex = (typeInfo.indirectBaseOffset + drawSlot) * 5u + 1u;
     let slot = atomicAdd(&indirectArgs[indirectArgIndex], 1u);
-    let culledIndex = typeInfo.culledBaseOffset + (targetLod * typeInfo.maxInstancesPerLod) + slot;
+    let culledIndex = typeInfo.culledBaseOffset + (drawSlot * typeInfo.maxInstancesPerStage) + slot;
 
     culledInstances[culledIndex] = instance;
 }

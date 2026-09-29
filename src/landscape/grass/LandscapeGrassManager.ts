@@ -132,10 +132,8 @@ function sortCandidateIndicesByDistance(
  * // 잔디 생태계 타입 등록
  * const fieldGrass = grassManager.addGrass({
  *     name: 'FieldGrass',
- *     lods: [
- *         { mesh: grassMeshLOD0, lodDistance: 35 },
- *         { mesh: grassMeshLOD1, lodDistance: 90 }
- *     ],
+ *     mesh: grassMesh,
+ *     cullingDistance: 90,
  *     baseColorTexture: grassTexture,
  *     densityPerHectare: 7500,
  *     targetLayer: 'GrassLayer'
@@ -315,10 +313,8 @@ export class LandscapeGrassManager {
      * ```typescript
      * const grassType = landscape.grassManager.addGrass({
      *     name: 'WildGrass',
-     *     lods: [
-     *         { mesh: grassLOD0Mesh, lodDistance: 30 },
-     *         { mesh: grassLOD1Mesh, lodDistance: 70 }
-     *     ],
+     *     mesh: grassMesh,
+     *     cullingDistance: 70,
      *     baseColorTexture: grassTexture,
      *     densityPerHectare: 6000,
      *     minSlope: 0,
@@ -332,8 +328,8 @@ export class LandscapeGrassManager {
      * ```
      *
      * @param options -
-     * [KO] 잔디 타입의 메시, LOD 단계, 밀도, 경사 필터링, 스케일 범위, 셰이딩 파라미터가 포함된 옵션 객체
-     * [EN] Options object containing meshes, LOD stages, density, slope filtering, scale ranges, and shading parameters
+     * [KO] 잔디 타입의 메시, 컬링 거리, 밀도, 경사 필터링, 스케일 범위, 셰이딩 파라미터가 포함된 옵션 객체
+     * [EN] Options object containing mesh, culling distance, density, slope filtering, scale ranges, and shading parameters
      * @returns
      * [KO] 생성되어 등록된 {@link Grass} 인스턴스
      * [EN] Created and registered {@link Grass} instance
@@ -805,8 +801,8 @@ export class LandscapeGrassManager {
                     res.cpuBuffer.byteLength
                 );
 
-                const lodCount = 2;
-                const lodDistances: [number, number, number, number] = [type.farDistance, type.cullingDistance, 9999, 9999];
+                const stageCount = 2;
+                const stageDistances: [number, number, number, number] = [type.farDistance, type.cullingDistance, 9999, 9999];
 
                 const alloc = this.#megaBuffer.getAllocation(type.typeId);
                 if (alloc) {
@@ -828,9 +824,9 @@ export class LandscapeGrassManager {
                         alloc.maxInstances,
                         alloc.culledBaseOffset,
                         alloc.indirectBaseOffset,
-                        lodCount,
+                        stageCount,
                         alloc.maxInstances,
-                        lodDistances
+                        stageDistances
                     );
                 }
             }
@@ -866,15 +862,15 @@ export class LandscapeGrassManager {
     }
 
     /**
-     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 LOD 거리 모드(근거리/원거리)에 대응하는 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and LOD distance mode (near/far).
+     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 파이프라인 모드(Near: 그림자 수신/고품질, Far: 그림자 미수신/경량)에 대응하는 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and pipeline mode (Near: shadow receive/high quality, Far: no shadow/lightweight).
      *
      * @param sampleCount -
      * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
      * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
      * @param isFar -
-     * [KO] 원거리 LOD 전용 간소화 셰이더를 적용할지 여부 (기본값: false)
-     * [EN] Whether to apply the simplified shader dedicated to far LOD (default: false)
+     * [KO] 원거리(Far) 전용 경량 셰이더를 적용할지 여부 (기본값: false)
+     * [EN] Whether to apply the lightweight shader dedicated to far distance (default: false)
      * @returns
      * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
      * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails

@@ -191,9 +191,9 @@ export class GrassMegaBuffer extends RedGPUObject {
         instanceCount: number = 0,
         culledBaseOffset: number = 0,
         indirectBaseOffset: number = 0,
-        lodCount: number = 1,
-        maxInstancesPerLod: number = 0,
-        lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999]
+        stageCount: number = 2,
+        maxInstancesPerStage: number = 0,
+        stageDistances: [number, number, number, number] = [9999, 9999, 9999, 9999]
     ): void {
         const base = typeId * GrassMegaBuffer.TYPE_PARAM_FLOATS;
         const f32 = this.#cpuTypeParamsBuffer;
@@ -211,12 +211,12 @@ export class GrassMegaBuffer extends RedGPUObject {
 
         u32[base + 8] = culledBaseOffset;
         u32[base + 9] = indirectBaseOffset;
-        u32[base + 10] = lodCount;
-        u32[base + 11] = maxInstancesPerLod;
+        u32[base + 10] = stageCount;
+        u32[base + 11] = maxInstancesPerStage;
 
-        f32[base + 12] = lodDistances[0] ?? 9999;
-        f32[base + 13] = lodDistances[1] ?? 9999;
-        f32[base + 14] = lodDistances[2] ?? 9999;
+        f32[base + 12] = stageDistances[0] ?? 9999;
+        f32[base + 13] = stageDistances[1] ?? 9999;
+        f32[base + 14] = stageDistances[2] ?? 9999;
         f32[base + 15] = 0.0;
 
         const gpuDevice = this.gpuDevice;

@@ -438,10 +438,11 @@ function renderTestPane({
         transformFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
 
         // -----------------------------------------------------------------
-        // 3. Culling & Distance (컬링 거리)
+        // 3. Culling & Distance (거리별 파이프라인 및 컬링)
         // -----------------------------------------------------------------
         const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
-        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
+        cullingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5, label: 'Far Dist (m)'});
+        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5, label: 'Cull Dist (m)'});
 
         // -----------------------------------------------------------------
         // 4. Material & PBR (재질, 알파 및 SSS)

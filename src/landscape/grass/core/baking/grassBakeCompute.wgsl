@@ -24,11 +24,11 @@ struct GrassTypeParam {
     instanceCount: u32,
     culledBaseOffset: u32,
     indirectBaseOffset: u32,
-    lodCount: u32,
-    maxInstancesPerLod: u32,
-    lodDistance0: f32,
-    lodDistance1: f32,
-    lodDistance2: f32,
+    stageCount: u32,
+    maxInstancesPerStage: u32,
+    farDistance: f32,
+    stageDistance1: f32,
+    stageDistance2: f32,
     _pad0: f32,
 };
 
