@@ -22,7 +22,7 @@ class FoliagePipelineRegistry {
         this.#initShaderModules();
     }
 
-    static readonly #GEO_ATTRIBUTES_ALL: GPUVertexAttribute[] = [
+    #geoAttributesAll: GPUVertexAttribute[] = [
         {shaderLocation: 0, offset: 0, format: 'float32x3'},
         {shaderLocation: 1, offset: 12, format: 'float32x3'},
         {shaderLocation: 2, offset: 24, format: 'float32x2'},
@@ -31,11 +31,11 @@ class FoliagePipelineRegistry {
         {shaderLocation: 5, offset: 56, format: 'float32x4'},
     ];
 
-    static readonly #GEO_ATTRIBUTES_SHADOW_OPAQUE: GPUVertexAttribute[] = [
+    #geoAttributesShadowOpaque: GPUVertexAttribute[] = [
         {shaderLocation: 0, offset: 0, format: 'float32x3'},
     ];
 
-    static readonly #INSTANCE_ATTRIBUTES_ALL: GPUVertexAttribute[] = [
+    #instanceAttributesAll: GPUVertexAttribute[] = [
         {shaderLocation: 6, offset: 0, format: 'float32x4'},
         {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
         {shaderLocation: 8, offset: 24, format: 'float16x2'},
@@ -91,13 +91,13 @@ class FoliagePipelineRegistry {
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: validStrideBytes,
-            attributes: FoliagePipelineRegistry.#GEO_ATTRIBUTES_ALL as GPUVertexAttribute[],
+            attributes: this.#geoAttributesAll,
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 8 * 4,
             stepMode: 'instance',
-            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL as GPUVertexAttribute[],
+            attributes: this.#instanceAttributesAll,
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
@@ -219,13 +219,13 @@ class FoliagePipelineRegistry {
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: strideBytes,
-            attributes: FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_OPAQUE as GPUVertexAttribute[],
+            attributes: this.#geoAttributesShadowOpaque,
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 8 * 4,
             stepMode: 'instance',
-            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL as GPUVertexAttribute[],
+            attributes: this.#instanceAttributesAll,
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
@@ -293,13 +293,13 @@ class FoliagePipelineRegistry {
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: strideBytes,
-            attributes: FoliagePipelineRegistry.#GEO_ATTRIBUTES_ALL as GPUVertexAttribute[],
+            attributes: this.#geoAttributesAll,
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 8 * 4,
             stepMode: 'instance',
-            attributes: FoliagePipelineRegistry.#INSTANCE_ATTRIBUTES_ALL as GPUVertexAttribute[],
+            attributes: this.#instanceAttributesAll,
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
