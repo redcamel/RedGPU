@@ -234,14 +234,11 @@ RedGPU.init(
                 if (baseMesh) {
                     const baseClumpType = grassManager.addGrass({
                         name: '🌱 Ground Lawn Clump (Base)',
-                        lods: [
-                            {mesh: baseMesh, lodDistance: 110}
-                        ],
+                        mesh: baseMesh,
                         densityPerHectare: 24000,
                         targetLayer: 'Grass',
                         minWeightThreshold: 0.02,
                         cullingDistance: 110,
-                        fadeStartDistance: 95,
                         shrinkStartDistance: 80,
                         minScale: [7.0, 4.5, 7.0],
                         maxScale: [11.0, 6.5, 11.0],
@@ -350,12 +347,11 @@ RedGPU.init(
                     // 🌿 현실적인 실측 스케일 (높이 약 50~80cm의 자연스러운 들풀 비례)
                     const grassType = grassManager.addGrass({
                         name: displayNames[key] || key,
-                        lods: lodConfigs,
+                        mesh: lod0,
                         densityPerHectare: densities[key] || 3500,
                         targetLayer: 'Grass',
                         minWeightThreshold: 0.02,
                         cullingDistance: 110,
-                        fadeStartDistance: 95,
                         shrinkStartDistance: 80,
                         minScale: [3.0, 3.8, 3.0],
                         maxScale: [4.8, 6.0, 4.8],

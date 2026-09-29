@@ -585,9 +585,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
             if (baseMesh) {
                 const grass = grassManager.addGrass({
                     name: 'Lawn Clump',
-                    lods: [
-                        {mesh: baseMesh, lodDistance: 110}
-                    ],
+                    mesh: baseMesh,
                     densityPerHectare: 20000,
                     targetLayer: 'Grass',
                     cullingDistance: 110,

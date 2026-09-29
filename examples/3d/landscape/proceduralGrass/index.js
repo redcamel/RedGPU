@@ -266,7 +266,7 @@ function renderTestPane({
                 max: 250,
                 step: 5
             });
-            grassFolder.addBinding(grassManager, 'totalInstancesPopulated', {readonly: true});
+            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true, label: 'totalInstances'});
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
@@ -628,9 +628,7 @@ function initGrassField({
                 // [EN] Create single representative grass (Lawn Clump & Unreal standard single range)
                 const grass = grassManager.addGrass({
                     name: 'Lawn Clump',
-                    lods: [
-                        {mesh: baseMesh, lodDistance: 110}
-                    ],
+                    mesh: baseMesh,
                     densityPerHectare: 20000,
                     targetLayer: 'Grass',
                     cullingDistance: 110,
