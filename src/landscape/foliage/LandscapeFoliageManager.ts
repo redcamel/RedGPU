@@ -102,17 +102,17 @@ class LandscapeFoliageManager {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const resourceManager = this.#redGPUContext.resourceManager;
         if (gpuDevice) {
-            this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_EmptyBindGroupLayout', {
-                label: 'Landscape_EmptyBindGroupLayout',
+            this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Empty_BindGroupLayout', {
+                label: 'Landscape_Empty_BindGroupLayout',
                 entries: []
             });
             this.#emptyBindGroup = gpuDevice.createBindGroup({
-                label: 'EmptyFoliageBindGroup',
+                label: 'Foliage_Empty_BindGroup',
                 layout: this.#emptyBindGroupLayout,
                 entries: []
             });
-            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('FoliageSubMesh_VertexBindGroupLayout', {
-                label: 'FoliageSubMesh_VertexBindGroupLayout',
+            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
+                label: 'Foliage_SubMesh_BindGroupLayout',
                 entries: [
                     {
                         binding: 0,

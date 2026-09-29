@@ -374,14 +374,14 @@ export class LandscapeGrassManager {
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
 
             const uniformBuffer = gpuDevice.createBuffer({
-                label: `Grass_MaterialUniform_${grassType.name}`,
+                label: `Grass_MaterialUniformBuffer_${grassType.name}`,
                 size: cpuBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
             const grassUniformCPUBuffer = new Float32Array(8);
             const grassUniformGPUBuffer = gpuDevice.createBuffer({
-                label: `Grass_UniformBuffer_${grassType.name}`,
+                label: `Grass_WindUniformBuffer_${grassType.name}`,
                 size: grassUniformCPUBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
@@ -1035,7 +1035,7 @@ export class LandscapeGrassManager {
         if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
         this.#shadowPipeline = gpuDevice.createRenderPipeline({
-            label: 'Grass_ShadowRenderPipeline',
+            label: 'Grass_Shadow_RenderPipeline',
             layout: this.#pipelineLayout,
             vertex: {
                 module: this.#vertexShadowModule,

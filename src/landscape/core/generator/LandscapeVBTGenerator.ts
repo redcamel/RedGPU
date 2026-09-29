@@ -252,7 +252,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         let buffer = this.#tileMipUniformBuffers[mipLevel];
         if (!buffer) {
             buffer = this.redGPUContext.gpuDevice.createBuffer({
-                label: `Landscape_TileMip_FixedUBO_Mip${mipLevel}`,
+                label: `Landscape_TileMip_UniformBuffer_Mip${mipLevel}`,
                 size: Math.max(16, this.#tileMipUniformByteLength),
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             });
@@ -283,7 +283,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             const dstOrmView = this.#getStorageTextureView(ormTex, mipLevel);
 
             bindGroup = this.redGPUContext.gpuDevice.createBindGroup({
-                label: `Landscape_TileMip_BG_Mip_${mipLevel}`,
+                label: `Landscape_TileMip_BindGroup_Mip${mipLevel}`,
                 layout: this.#tileMipBindGroupLayout!,
                 entries: [
                     {binding: 0, resource: {buffer: mipUniformBuffer}},
@@ -349,7 +349,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
         this.initBaseComputePipeline(
-            'LandscapeVBTBakeComputeShaderModule',
+            'Landscape_VBT_Bake_ShaderModule',
             vbtBakeShaderCode,
             descriptor.entries as GPUBindGroupLayoutEntry[],
             this.#vbtUniformByteLength
@@ -361,31 +361,31 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         if (!device) return;
 
         const resourceManager = this.redGPUContext.resourceManager;
-        const mipShaderInfo = resourceManager.wgslParser.parse('LandscapeTileMipmapComputeShaderModule', tileMipShaderCode);
+        const mipShaderInfo = resourceManager.wgslParser.parse('Landscape_TileMipmap_ShaderModule', tileMipShaderCode);
         this.#tileMipUniformByteLength = mipShaderInfo.uniforms.params?.arrayBufferByteLength || 0;
 
         this.#mipUniformArray = new Uint32Array(this.#tileMipUniformByteLength / Uint32Array.BYTES_PER_ELEMENT);
 
-        let shaderModule = resourceManager.getGPUShaderModule('LandscapeTileMipmapComputeShaderModule');
+        let shaderModule = resourceManager.getGPUShaderModule('Landscape_TileMipmap_ShaderModule');
         if (!shaderModule) {
-            shaderModule = resourceManager.createGPUShaderModule('LandscapeTileMipmapComputeShaderModule', {
+            shaderModule = resourceManager.createGPUShaderModule('Landscape_TileMipmap_ShaderModule', {
                 code: tileMipShaderCode
             });
         }
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(mipShaderInfo, 0);
         this.#tileMipBindGroupLayout = device.createBindGroupLayout({
-            label: 'LandscapeTileMipmap_BindGroupLayout',
+            label: 'Landscape_TileMipmap_BindGroupLayout',
             ...descriptor
         });
 
         const pipelineLayout = device.createPipelineLayout({
-            label: 'LandscapeTileMipmap_PipelineLayout',
+            label: 'Landscape_TileMipmap_PipelineLayout',
             bindGroupLayouts: [this.#tileMipBindGroupLayout]
         });
 
         this.#tileMipPipeline = device.createComputePipeline({
-            label: 'LandscapeTileMipmap_ComputePipeline',
+            label: 'Landscape_TileMipmap_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

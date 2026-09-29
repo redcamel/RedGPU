@@ -79,7 +79,7 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
 
     #initComputeResources(): void {
         const resourceManager = this.redGPUContext.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVNTBakeComputeShaderModule', vntBakeShaderCode);
+        const shaderInfo = resourceManager.wgslParser.parse('Landscape_VNT_Bake_ShaderModule', vntBakeShaderCode);
         const uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 48;
         this.#uniformByteLength = uniformByteLength;
         this.#uniformArray = new Float32Array(uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
@@ -94,7 +94,7 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         });
 
         this.initBaseComputePipeline(
-            'LandscapeVNTBakeComputeShaderModule',
+            'Landscape_VNT_Bake_ShaderModule',
             vntBakeShaderCode,
             descriptor.entries as GPUBindGroupLayoutEntry[],
             uniformByteLength

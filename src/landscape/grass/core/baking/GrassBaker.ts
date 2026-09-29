@@ -135,7 +135,7 @@ export class GrassBaker extends RedGPUObject {
             this.#cachedVBTSampler = targetVBTSampler;
 
             this.#bakeBindGroup = gpuDevice.createBindGroup({
-                label: 'GrassBaker_BindGroup',
+                label: 'Grass_Bake_BindGroup',
                 layout: this.#bakeBindGroupLayout,
                 entries: [
                     {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
@@ -181,13 +181,13 @@ export class GrassBaker extends RedGPUObject {
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassBaker_UniformBuffer',
+            label: 'Grass_Bake_UniformBuffer',
             size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassBaker_TasksBuffer',
+            label: 'Grass_Bake_TasksBuffer',
             size: this.#taskCapacity * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
@@ -243,7 +243,7 @@ export class GrassBaker extends RedGPUObject {
         if (gpuDevice) {
             this.#tasksGPUBuffer?.destroy();
             this.#tasksGPUBuffer = gpuDevice.createBuffer({
-                label: 'GrassBaker_TasksBuffer',
+                label: 'Grass_Bake_TasksBuffer',
                 size: this.#taskCapacity * 8,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });

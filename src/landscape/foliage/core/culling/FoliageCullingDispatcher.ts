@@ -272,28 +272,28 @@ class FoliageCullingDispatcher extends RedGPUObject {
         if (!gpuDevice) return;
 
         const resourceManager = this.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('FoliageCullingComputeModule', foliageCullingComputeWGSL);
+        const shaderInfo = resourceManager.wgslParser.parse('Foliage_Cull_ShaderModule', foliageCullingComputeWGSL);
 
-        let computeModule = resourceManager.getGPUShaderModule('FoliageCullingComputeModule');
+        let computeModule = resourceManager.getGPUShaderModule('Foliage_Cull_ShaderModule');
         if (!computeModule) {
-            computeModule = resourceManager.createGPUShaderModule('FoliageCullingComputeModule', {
+            computeModule = resourceManager.createGPUShaderModule('Foliage_Cull_ShaderModule', {
                 code: foliageCullingComputeWGSL,
             });
         }
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        const layout = resourceManager.createBindGroupLayout('FoliageCullingBindGroupLayout', {
-            label: 'FoliageCullingBindGroupLayout',
+        const layout = resourceManager.createBindGroupLayout('Foliage_Cull_BindGroupLayout', {
+            label: 'Foliage_Cull_BindGroupLayout',
             ...descriptor
         });
         this.#cullingBindGroupLayout = layout;
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('FoliageCullingPipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Cull_PipelineLayout', {
             bindGroupLayouts: [layout],
         });
 
         this.#cullingComputePipeline = gpuDevice.createComputePipeline({
-            label: 'FoliageCullingComputePipeline',
+            label: 'Foliage_Cull_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: computeModule,

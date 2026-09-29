@@ -195,44 +195,44 @@ export class LandscapeTileStreamer extends RedGPUObject {
             size: [targetAtlasW, targetAtlasH],
             format: 'r32float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_VHT_Atlas_Texture'
+            label: 'Landscape_VHT_AtlasTexture'
         });
-        this.#vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_Atlas_Texture', rawVhtTexture);
+        this.#vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_AtlasTexture', rawVhtTexture);
 
         const rawVntTexture = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VNT_Atlas_Texture'
+            label: 'Landscape_VNT_AtlasTexture'
         });
-        this.#vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
+        this.#vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_AtlasTexture', rawVntTexture);
 
         const rawVbtBaseColor = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_BaseColor_Atlas'
+            label: 'Landscape_VBT_BaseColorAtlasTexture'
         });
-        this.#vbtBaseColorAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_BaseColor_Atlas', rawVbtBaseColor);
+        this.#vbtBaseColorAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_BaseColorAtlasTexture', rawVbtBaseColor);
 
         const rawVbtNormal = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_Normal_Atlas'
+            label: 'Landscape_VBT_NormalAtlasTexture'
         });
-        this.#vbtNormalAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_Normal_Atlas', rawVbtNormal);
+        this.#vbtNormalAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_NormalAtlasTexture', rawVbtNormal);
 
         const rawVbtORM = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_VBT_ORM_Atlas'
+            label: 'Landscape_VBT_ORMAtlasTexture'
         });
-        this.#vbtORMAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_ORM_Atlas', rawVbtORM);
+        this.#vbtORMAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_ORMAtlasTexture', rawVbtORM);
 
         return true;
     }
@@ -666,7 +666,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
                     size: [width, height],
                     format: 'r16unorm',
                     usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
-                    label: `16BitPng_GPUTexture_r16unorm_${key}`
+                    label: `Landscape_Tile_16BitPngTexture_r16unorm_${key}`
                 });
 
                 gpuDevice.queue.writeTexture(

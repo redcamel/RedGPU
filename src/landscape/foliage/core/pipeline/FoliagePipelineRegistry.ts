@@ -16,7 +16,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
         super(redGPUContext);
         this.#emptyBindGroupLayout = emptyBindGroupLayout || redGPUContext.gpuDevice?.createBindGroupLayout({
-            label: 'EmptyFoliageBindGroupLayout',
+            label: 'Foliage_Empty_BindGroupLayout',
             entries: []
         }) || null;
         this.#initShaderModules();
@@ -109,7 +109,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `FoliagePipelineLayout_${pipelineKey}`,
+            label: `Foliage_Render_PipelineLayout_${pipelineKey}`,
             bindGroupLayouts: bindGroupLayouts,
         });
 
@@ -176,7 +176,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         }
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: `FoliageRenderPipeline_${pipelineKey}`,
+            label: `Foliage_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
                 module: this.#vertexShaderModule!,
@@ -232,12 +232,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `FoliagePipelineLayout_${pipelineKey}`,
+            label: `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
             bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL],
         });
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: `FoliageRenderPipeline_${pipelineKey}`,
+            label: `Foliage_ShadowMerged_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
                 module: this.#vertexShaderModule!,
@@ -309,12 +309,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
             || this.#emptyBindGroupLayout;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `FoliagePipelineLayout_${pipelineKey}`,
+            label: `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
             bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout],
         });
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: `FoliageRenderPipeline_${pipelineKey}`,
+            label: `Foliage_ShadowMasked_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
                 module: this.#vertexShaderModule!,
@@ -352,17 +352,17 @@ class FoliagePipelineRegistry extends RedGPUObject {
     #initShaderModules(): void {
         const resourceManager = this.resourceManager;
 
-        let vModule = resourceManager.getGPUShaderModule('FoliageInstancedVertexShader_Module');
+        let vModule = resourceManager.getGPUShaderModule('Foliage_Instanced_VertexShaderModule');
         if (!vModule) {
-            vModule = resourceManager.createGPUShaderModule('FoliageInstancedVertexShader_Module', {
+            vModule = resourceManager.createGPUShaderModule('Foliage_Instanced_VertexShaderModule', {
                 code: foliageInstancedWGSL,
             });
         }
         this.#vertexShaderModule = vModule;
 
-        let depthPrepassFModule = resourceManager.getGPUShaderModule('FoliageDepthPrepassFragmentShader_Module');
+        let depthPrepassFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_FragmentShaderModule');
         if (!depthPrepassFModule) {
-            depthPrepassFModule = resourceManager.createGPUShaderModule('FoliageDepthPrepassFragmentShader_Module', {
+            depthPrepassFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_FragmentShaderModule', {
                 code: foliageDepthPrepassWGSL,
             });
         }

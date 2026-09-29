@@ -32,7 +32,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
         const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
 
         this.#bindGroup = gpuDevice.createBindGroup({
-            label: 'LandscapeCullBindGroup',
+            label: 'Landscape_Cull_BindGroup',
             layout: this.#bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
@@ -142,11 +142,11 @@ export class LandscapeGPUCuller extends RedGPUObject {
         if (!gpuDevice) return;
 
         const resourceManager = this.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('LandscapeCullComputeShaderModule', landscapeCullComputeSource);
+        const shaderInfo = resourceManager.wgslParser.parse('Landscape_Cull_ShaderModule', landscapeCullComputeSource);
 
-        let shaderModule = resourceManager.getGPUShaderModule('LandscapeCullComputeShaderModule');
+        let shaderModule = resourceManager.getGPUShaderModule('Landscape_Cull_ShaderModule');
         if (!shaderModule) {
-            shaderModule = resourceManager.createGPUShaderModule('LandscapeCullComputeShaderModule', {
+            shaderModule = resourceManager.createGPUShaderModule('Landscape_Cull_ShaderModule', {
                 code: landscapeCullComputeSource
             });
         }
@@ -156,19 +156,22 @@ export class LandscapeGPUCuller extends RedGPUObject {
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 
         this.#uniformBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeCullUniformBuffer',
+            label: 'Landscape_Cull_UniformBuffer',
             size: this.#uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.#bindGroupLayout = resourceManager.createBindGroupLayout('LandscapeCullBindGroupLayout', descriptor);
+        this.#bindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Cull_BindGroupLayout', {
+            label: 'Landscape_Cull_BindGroupLayout',
+            ...descriptor
+        });
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('LandscapeCullPipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Landscape_Cull_PipelineLayout', {
             bindGroupLayouts: [this.#bindGroupLayout]
         });
         this.#computePipeline = gpuDevice.createComputePipeline({
-            label: 'LandscapeCullComputePipeline',
+            label: 'Landscape_Cull_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

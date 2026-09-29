@@ -277,7 +277,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         ];
 
         this.#instanceStorageBindGroup = gpuDevice.createBindGroup({
-            label: 'LandscapeInstanceStorageBindGroup',
+            label: 'Landscape_Instance_StorageBindGroup',
             layout: this.#instanceStorageBindGroupLayout,
             entries: entries
         });
@@ -307,8 +307,8 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         if (!gpuDevice) return;
 
         const resourceManager = this.resourceManager;
-        const vertexShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_VERTEX', landscapeVertexSource);
-        const fragmentShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_FRAGMENT', landscapeFragmentSource);
+        const vertexShaderInfo = resourceManager.wgslParser.parse('Landscape_VertexShaderInfo', landscapeVertexSource);
+        const fragmentShaderInfo = resourceManager.wgslParser.parse('Landscape_FragmentShaderInfo', landscapeFragmentSource);
 
         const descriptor = getUnionBindGroupLayoutDescriptorFromShaderInfos([
             {shaderInfo: vertexShaderInfo, visibility: GPUShaderStage.VERTEX},
@@ -319,23 +319,26 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         });
 
         this.#instanceStorageBindGroupLayout = resourceManager.createBindGroupLayout(
-            'LandscapeInstanceStorageBindGroupLayout',
-            descriptor
+            'Landscape_Instance_StorageBindGroupLayout',
+            {
+                label: 'Landscape_Instance_StorageBindGroupLayout',
+                ...descriptor
+            }
         );
         this.#allInputTilesBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeAllInputTilesStorageBuffer',
+            label: 'Landscape_Instance_AllInputTilesBuffer',
             size: this.#maxComponentCount * 32,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
         this.#visibleTileIndicesBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeVisibleTileIndicesStorageBuffer',
+            label: 'Landscape_Instance_VisibleTileIndicesBuffer',
             size: this.#maxComponentCount * this.#lodMaxLevel * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
         this.#indirectDrawBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeIndirectDrawBuffer',
+            label: 'Landscape_Instance_IndirectDrawBuffer',
             size: this.#lodMaxLevel * 20,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
@@ -346,7 +349,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         this.#landscapeUniformByteLength = uniformByteLength;
 
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeGlobalUniformBuffer',
+            label: 'Landscape_GlobalUniformBuffer',
             size: uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });

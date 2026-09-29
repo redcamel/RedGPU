@@ -57,7 +57,7 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         if ((this.#lastBoundTexture !== targetTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout) {
             this.#lastBoundTexture = targetTexture.gpuTexture;
             this.#bindGroup = gpuDevice.createBindGroup({
-                label: `${this.#shaderModuleName}BindGroup`,
+                label: `${this.#shaderModuleName}_BindGroup`,
                 layout: this.#bindGroupLayout,
                 entries: [
                     {
@@ -138,19 +138,19 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         });
 
         const bindGroupLayout = resourceManager.createBindGroupLayout(
-            `${this.#shaderModuleName}BindGroupLayout`,
+            `${this.#shaderModuleName}_BindGroupLayout`,
             descriptor
         );
         this.#bindGroupLayout = bindGroupLayout;
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(
-            `${this.#shaderModuleName}PipelineLayout`,
+            `${this.#shaderModuleName}_PipelineLayout`,
             {
                 bindGroupLayouts: [bindGroupLayout]
             }
         );
         this.#pipeline = gpuDevice.createRenderPipeline({
-            label: `${this.#shaderModuleName}RenderPipeline`,
+            label: `${this.#shaderModuleName}_RenderPipeline`,
             layout: pipelineLayout,
             vertex: {
                 module: shaderModule,

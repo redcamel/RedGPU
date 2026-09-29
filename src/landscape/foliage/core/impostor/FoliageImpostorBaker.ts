@@ -33,8 +33,8 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
         const gpuDevice = redGPUContext.gpuDevice;
         const resourceManager = redGPUContext.resourceManager;
 
-        const bakeBindGroupLayout = resourceManager.createBindGroupLayout('FoliageImpostorBake_BindGroupLayout', {
-            label: 'FoliageImpostorBake_BindGroupLayout',
+        const bakeBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Impostor_Bake_BindGroupLayout', {
+            label: 'Foliage_Impostor_Bake_BindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
                 {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
@@ -45,12 +45,12 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
             ]
         });
 
-        const dilationShader = resourceManager.createGPUShaderModule('ImpostorDilation_Shader', {
+        const dilationShader = resourceManager.createGPUShaderModule('Foliage_Impostor_Dilation_ShaderModule', {
             code: impostorDilationWGSL
         });
 
-        const dilationBindGroupLayout = resourceManager.createBindGroupLayout('ImpostorDilation_BGL', {
-            label: 'ImpostorDilation_BGL',
+        const dilationBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Impostor_Dilation_BindGroupLayout', {
+            label: 'Foliage_Impostor_Dilation_BindGroupLayout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
                 {
@@ -62,12 +62,12 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
             ]
         });
 
-        const dilationPipelineLayout = resourceManager.createGPUPipelineLayout('ImpostorDilation_PipelineLayout', {
+        const dilationPipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Impostor_Dilation_PipelineLayout', {
             bindGroupLayouts: [dilationBindGroupLayout]
         });
 
         const dilationPipeline = gpuDevice.createComputePipeline({
-            label: 'ImpostorDilation_Pipeline',
+            label: 'Foliage_Impostor_Dilation_ComputePipeline',
             layout: dilationPipelineLayout,
             compute: {
                 module: dilationShader,
@@ -207,7 +207,7 @@ class FoliageImpostorBaker {
         const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
 
         const bakedGPUTexture = gpuDevice.createTexture({
-            label: `BakedImpostor_BaseColor_${bakeName}`,
+            label: `Foliage_Impostor_BaseColorTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm-srgb',
@@ -215,7 +215,7 @@ class FoliageImpostorBaker {
         });
 
         const bakedNormalGPUTexture = gpuDevice.createTexture({
-            label: `BakedImpostor_Normal_${bakeName}`,
+            label: `Foliage_Impostor_NormalTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm',
@@ -223,7 +223,7 @@ class FoliageImpostorBaker {
         });
 
         const bakedORMGPUTexture = gpuDevice.createTexture({
-            label: `BakedImpostor_ORM_${bakeName}`,
+            label: `Foliage_Impostor_ORMTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm',
@@ -231,7 +231,7 @@ class FoliageImpostorBaker {
         });
 
         const depthGPUTexture = gpuDevice.createTexture({
-            label: `BakedImpostor_Depth_${bakeName}`,
+            label: `Foliage_Impostor_DepthTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
@@ -338,7 +338,7 @@ class FoliageImpostorBaker {
             const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyTexView;
 
             const bindGroup = gpuDevice.createBindGroup({
-                label: `BakeBindGroup_${s}`,
+                label: `Foliage_Impostor_Bake_BindGroup_${s}`,
                 layout: cache.bakeBindGroupLayout,
                 entries: [
                     {binding: 0, resource: diffView},
@@ -457,7 +457,7 @@ class FoliageImpostorBaker {
         }
 
         const sharedTransformGPUBuffer = gpuDevice.createBuffer({
-            label: `BakeSharedInstanceDataBuffer_${bakeName}`,
+            label: `Foliage_Impostor_Bake_SharedInstanceDataBuffer_${bakeName}`,
             size: totalFloats * 4,
             usage: GPUBufferUsage.VERTEX,
             mappedAtCreation: true,
@@ -465,7 +465,7 @@ class FoliageImpostorBaker {
         new Float32Array(sharedTransformGPUBuffer.getMappedRange()).set(allInstanceData);
         sharedTransformGPUBuffer.unmap();
 
-        const commandEncoder = gpuDevice.createCommandEncoder({label: `BakeImpostor_${bakeName}`});
+        const commandEncoder = gpuDevice.createCommandEncoder({label: `Foliage_Impostor_Bake_CommandEncoder_${bakeName}`});
         const renderPass = commandEncoder.beginRenderPass({
             colorAttachments: [
                 {
@@ -593,20 +593,20 @@ class FoliageImpostorBaker {
     static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
         const cache = getOrCreateContextCache(redGPUContext);
         const gpuDevice = redGPUContext.gpuDevice;
-        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
+        const key = `Foliage_Impostor_Bake_RenderPipeline_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
         let pipeline = cache.bakePipelineCache.get(key);
         if (pipeline) return pipeline;
 
         const resourceManager = redGPUContext.resourceManager;
 
-        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
+        const vModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_VertexModule', {
             code: impostorBakeVertexWGSL
         });
-        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
+        const fModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_FragmentModule', {
             code: impostorBakeShaderWGSL
         });
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('BakePipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Impostor_Bake_PipelineLayout', {
             bindGroupLayouts: [cache.bakeBindGroupLayout]
         });
 
@@ -692,14 +692,14 @@ class FoliageImpostorBaker {
         const gpuDevice = redGPUContext.gpuDevice;
 
         const pingPongA = gpuDevice.createTexture({
-            label: 'ImpostorDilation_PingPongA',
+            label: 'Foliage_Impostor_Dilation_PingPongTexture_A',
             size: [width, height, 1],
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
         });
 
         const pingPongB = gpuDevice.createTexture({
-            label: 'ImpostorDilation_PingPongB',
+            label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
             size: [width, height, 1],
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
@@ -715,7 +715,7 @@ class FoliageImpostorBaker {
         for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             const uniformBuffer = gpuDevice.createBuffer({
-                label: `ImpostorDilation_Uniform_Step${step}`,
+                label: `Foliage_Impostor_Dilation_UniformBuffer_Step${step}`,
                 size: 16,
                 usage: GPUBufferUsage.UNIFORM,
                 mappedAtCreation: true
@@ -729,7 +729,7 @@ class FoliageImpostorBaker {
             const dstView = isEven ? viewB : viewA;
 
             stepBindGroups.push(gpuDevice.createBindGroup({
-                label: `ImpostorDilation_BG_Step${step}`,
+                label: `Foliage_Impostor_Dilation_BindGroup_Step${step}`,
                 layout: cache.dilationBindGroupLayout,
                 entries: [
                     {binding: 0, resource: srcView},
@@ -742,7 +742,7 @@ class FoliageImpostorBaker {
         const numWorkgroupsX = Math.ceil(width / 8);
         const numWorkgroupsY = Math.ceil(height / 8);
 
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_BatchCommands'});
+        const commandEncoder = gpuDevice.createCommandEncoder({label: 'Foliage_Impostor_Dilation_CommandEncoder'});
 
         commandEncoder.copyTextureToTexture(
             {texture: targetTexture, mipLevel: 0},
@@ -751,7 +751,7 @@ class FoliageImpostorBaker {
         );
 
         for (let i = 0; i < steps.length; i++) {
-            const computePass = commandEncoder.beginComputePass({label: `ImpostorDilation_ComputeStep_${steps[i]}`});
+            const computePass = commandEncoder.beginComputePass({label: `Foliage_Impostor_Dilation_ComputePass_Step${steps[i]}`});
             computePass.setPipeline(cache.dilationPipeline);
             computePass.setBindGroup(0, stepBindGroups[i]);
             computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);

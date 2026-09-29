@@ -307,11 +307,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.SHADER_INFO, 2);
         const bindGroupLayout = resourceManager.createBindGroupLayout(
-            'LandscapeMaterial_BindGroupLayout',
+            'Landscape_Material_BindGroupLayout',
             descriptor
         );
         const bindGroup = gpuDevice.createBindGroup({
-            label: 'LandscapeMaterial_BindGroup',
+            label: 'Landscape_Material_BindGroup',
             layout: bindGroupLayout,
             entries: entries
         });
@@ -343,25 +343,25 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             size,
             format: baseColorFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_BaseColor_Array_Dummy'
+            label: 'Landscape_Material_BaseColorTexture2DArray_Dummy'
         };
         const normalDesc: GPUTextureDescriptor = {
             size,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Normal_Array_Dummy'
+            label: 'Landscape_Material_NormalTexture2DArray_Dummy'
         };
         const ormDesc: GPUTextureDescriptor = {
             size,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_ORM_Array_Dummy'
+            label: 'Landscape_Material_ORMTexture2DArray_Dummy'
         };
         const weightMapDesc: GPUTextureDescriptor = {
             size,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_WeightMap_Array_Dummy'
+            label: 'Landscape_Material_WeightMapTexture2DArray_Dummy'
         };
 
         this.#gpuBaseColorArrayTexture = gpuDevice.createTexture(baseColorDesc);
@@ -398,28 +398,28 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             mipLevelCount,
             format: baseColorFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_BaseColor_Texture2DArray'
+            label: 'Landscape_Material_BaseColorTexture2DArray'
         });
         this.#gpuNormalArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Normal_Texture2DArray'
+            label: 'Landscape_Material_NormalTexture2DArray'
         });
         this.#gpuORMArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_ORM_Texture2DArray'
+            label: 'Landscape_Material_ORMTexture2DArray'
         });
         this.#gpuWeightMapArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
             format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_WeightMap_Texture2DArray'
+            label: 'Landscape_Material_WeightMapTexture2DArray'
         });
 
         this.#baseColorArrayView = this.#gpuBaseColorArrayTexture.createView({dimension: '2d-array'});
@@ -515,7 +515,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         const isSameSize = (srcTex.width === texSize && srcTex.height === texSize);
 
                         if (isSameSize) {
-                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}_${textureType}`});
+                            const commandEncoder = device.createCommandEncoder({label: `Landscape_Material_LayerCopy_${sliceIndex}_${textureType}`});
                             commandEncoder.copyTextureToTexture(
                                 {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
                                 {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
@@ -531,7 +531,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                                 dimension: '2d',
                                 baseArrayLayer: 0,
                                 arrayLayerCount: 1,
-                                label: `Landscape_LayerSrcView_${srcTex.label || textureType}`
+                                label: `Landscape_Material_LayerSrcView_${srcTex.label || textureType}`
                             });
                             const dstView = dstTexture.createView({
                                 baseMipLevel: 0,
@@ -539,11 +539,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                                 dimension: '2d',
                                 baseArrayLayer: sliceIndex,
                                 arrayLayerCount: 1,
-                                label: `Landscape_LayerDstSliceView_${sliceIndex}_${textureType}`
+                                label: `Landscape_Material_LayerDstSliceView_${sliceIndex}_${textureType}`
                             });
                             const bindGroup = mipmapGenerator.createBindGroup(srcTex, srcView);
 
-                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerBlit_${sliceIndex}_${textureType}`});
+                            const commandEncoder = device.createCommandEncoder({label: `Landscape_Material_LayerBlit_${sliceIndex}_${textureType}`});
                             const passEncoder = commandEncoder.beginRenderPass({
                                 colorAttachments: [{
                                     view: dstView,

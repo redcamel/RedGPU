@@ -203,7 +203,7 @@ class FoliageSubMeshAssembler {
         lodIndex: number
     ): { buffer: GPUBuffer; bindGroup: GPUBindGroup } {
         const uniformBuffer = gpuDevice.createBuffer({
-            label: `FoliageShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
+            label: `Foliage_ShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
             size: 208,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
@@ -238,7 +238,7 @@ class FoliageSubMeshAssembler {
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
 
         const vertexBindGroup = gpuDevice.createBindGroup({
-            label: `FoliageShadowSubMesh_VertexBindGroup_${name}_LOD${lodIndex}`,
+            label: `Foliage_ShadowSubMesh_BindGroup_${name}_LOD${lodIndex}`,
             layout: subMeshBindGroupLayout,
             entries: [
                 {
@@ -694,8 +694,8 @@ class FoliageSubMeshAssembler {
             }
 
             const seq = ++bufferSeq;
-            const vKey = `FoliageCombinedVB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
-            const iKey = `FoliageCombinedIB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
+            const vKey = `Foliage_SubMesh_VertexBuffer_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
+            const iKey = `Foliage_SubMesh_IndexBuffer_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
             const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT, undefined, vKey);
             const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
@@ -726,8 +726,8 @@ class FoliageSubMeshAssembler {
         let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
         if (lodTotalVertices > 0) {
             const seq = ++bufferSeq;
-            const vKey = `FoliageShadowVB_${options.name}_LOD${lodIndex}_${seq}`;
-            const iKey = `FoliageShadowIB_${options.name}_LOD${lodIndex}_${seq}`;
+            const vKey = `Foliage_ShadowSubMesh_VertexBuffer_${options.name}_LOD${lodIndex}_${seq}`;
+            const iKey = `Foliage_ShadowSubMesh_IndexBuffer_${options.name}_LOD${lodIndex}_${seq}`;
             const combinedVB = new VertexBuffer(redGPUContext, shadowMergedPositions, POSITION_ONLY_INTERLEAVED_STRUCT, undefined, vKey);
             const combinedIB = new IndexBuffer(redGPUContext, shadowMergedIndices, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
@@ -806,7 +806,7 @@ class FoliageSubMeshAssembler {
             vertexBindGroup = cached.bindGroup;
         } else {
             uniformBuffer = gpuDevice.createBuffer({
-                label: `FoliageSubMesh_UniformBuffer_${globalSlot}`,
+                label: `Foliage_SubMesh_UniformBuffer_${globalSlot}`,
                 size: 208,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
@@ -850,7 +850,7 @@ class FoliageSubMeshAssembler {
             gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
 
             vertexBindGroup = gpuDevice.createBindGroup({
-                label: `FoliageSubMesh_VertexBindGroup_${globalSlot}`,
+                label: `Foliage_SubMesh_BindGroup_${globalSlot}`,
                 layout: subMeshBindGroupLayout,
                 entries: [
                     {

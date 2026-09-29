@@ -240,7 +240,7 @@ class FoliageRenderer extends RedGPUObject {
         if (!gpuDevice) return null;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
-            label: `FoliageShadowBundleEncoder_Cascade${currentCascade}`,
+            label: `Foliage_ShadowBundleEncoder_Cascade${currentCascade}`,
             colorFormats: [],
             depthStencilFormat: 'depth32float',
             sampleCount: 1,
@@ -323,7 +323,7 @@ class FoliageRenderer extends RedGPUObject {
         }
 
         const bundle = bundleEncoder.finish({
-            label: `FoliageShadowBundle_Cascade${currentCascade}`,
+            label: `Foliage_ShadowBundle_Cascade${currentCascade}`,
         });
 
         this.#shadowRenderBundles[currentCascade] = bundle;

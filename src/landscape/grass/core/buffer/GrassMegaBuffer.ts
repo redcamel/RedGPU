@@ -280,25 +280,25 @@ export class GrassMegaBuffer extends RedGPUObject {
         this.#typeParamsGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassMegaBuffer_RawInstances',
+            label: 'Grass_MegaBuffer_RawInstances',
             size: rawByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassMegaBuffer_CulledInstances',
+            label: 'Grass_MegaBuffer_CulledInstances',
             size: culledByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
         });
 
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassMegaBuffer_IndirectDraw',
+            label: 'Grass_MegaBuffer_IndirectDraw',
             size: indirectByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
         });
 
         this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassMegaBuffer_TypeParams',
+            label: 'Grass_MegaBuffer_TypeParams',
             size: typeParamsByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });

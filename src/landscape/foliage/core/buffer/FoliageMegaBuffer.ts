@@ -153,19 +153,19 @@ export class FoliageMegaBuffer extends RedGPUObject {
             this.#shadowCulledGPUBuffer?.destroy();
 
             this.#rawGPUBuffer = gpuDevice.createBuffer({
-                label: 'FoliageMegaBuffer_Raw',
+                label: 'Foliage_MegaBuffer_Raw',
                 size: rawByteSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });
 
             this.#culledGPUBuffer = gpuDevice.createBuffer({
-                label: 'FoliageMegaBuffer_Culled_Main',
+                label: 'Foliage_MegaBuffer_Culled_Main',
                 size: culledByteSize,
                 usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
             });
 
             this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
-                label: 'FoliageMegaBuffer_Culled_ShadowMega',
+                label: 'Foliage_MegaBuffer_Culled_ShadowMega',
                 size: culledByteSize * 4,
                 usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
             });
@@ -564,7 +564,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
         this.#cachedHZBSampler = targetHZBSampler;
 
         this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
-            label: 'UnifiedFoliageMegaCullingBindGroup',
+            label: 'Foliage_MegaBuffer_Culling_BindGroup',
             layout,
             entries: [
                 {binding: 0, resource: {buffer: this.#rawGPUBuffer}},
@@ -678,55 +678,55 @@ export class FoliageMegaBuffer extends RedGPUObject {
         const typeParamsByteSize = FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS * 4;
 
         this.#rawGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Raw',
+            label: 'Foliage_MegaBuffer_Raw',
             size: rawByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Culled_Main',
+            label: 'Foliage_MegaBuffer_Culled_Main',
             size: culledByteSize,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Indirect_Main',
+            label: 'Foliage_MegaBuffer_Indirect_Main',
             size: indirectByteSize,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Indirect_Template',
+            label: 'Foliage_MegaBuffer_Indirect_Template',
             size: indirectByteSize,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
         });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Culled_ShadowMega',
+            label: 'Foliage_MegaBuffer_Culled_ShadowMega',
             size: culledByteSize * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
         this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Indirect_ShadowMega',
+            label: 'Foliage_MegaBuffer_Indirect_ShadowMega',
             size: indirectByteSize * 4,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#shadowIndirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Indirect_ShadowTemplate',
+            label: 'Foliage_MegaBuffer_Indirect_ShadowTemplate',
             size: indirectByteSize * 4,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
         });
 
         this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_TypeParams',
+            label: 'Foliage_MegaBuffer_TypeParams',
             size: typeParamsByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_UnifiedGlobalUniform',
+            label: 'Foliage_MegaBuffer_GlobalUniformBuffer',
             size: 800,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });

@@ -170,7 +170,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
 
     #initComputeResources(): void {
         const resourceManager = this.redGPUContext.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVHTBakeComputeShaderModule', vhtShaderCode);
+        const shaderInfo = resourceManager.wgslParser.parse('Landscape_VHT_Bake_ShaderModule', vhtShaderCode);
         const uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 16;
         this.#uniformByteLength = uniformByteLength;
         this.#uniformArray = new Uint32Array(uniformByteLength / Uint32Array.BYTES_PER_ELEMENT);
@@ -185,7 +185,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         });
 
         this.initBaseComputePipeline(
-            'LandscapeVHTBakeComputeShaderModule',
+            'Landscape_VHT_Bake_ShaderModule',
             vhtShaderCode,
             descriptor.entries as GPUBindGroupLayoutEntry[],
             uniformByteLength
@@ -195,24 +195,24 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #initGlobalComputeResources(): void {
         const device = this.redGPUContext.gpuDevice;
         const resourceManager = this.redGPUContext.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVHTGlobalBakeComputeShaderModule', vhtGlobalBakeShaderCode);
+        const shaderInfo = resourceManager.wgslParser.parse('Landscape_VHT_GlobalBake_ShaderModule', vhtGlobalBakeShaderCode);
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
         this.#globalBindGroupLayout = device.createBindGroupLayout(descriptor);
 
         const shaderModule = resourceManager.createGPUShaderModule(
-            'LandscapeVHTGlobalBakeComputeShaderModule',
+            'Landscape_VHT_GlobalBake_ShaderModule',
             {code: vhtGlobalBakeShaderCode}
         );
 
         const pipelineLayout = device.createPipelineLayout({
-            label: 'LandscapeVHTGlobalBake_PipelineLayout',
+            label: 'Landscape_VHT_GlobalBake_PipelineLayout',
             bindGroupLayouts: [this.#globalBindGroupLayout]
         });
 
         this.#globalComputePipeline = device.createComputePipeline({
-            label: 'LandscapeVHTGlobalBake_ComputePipeline',
+            label: 'Landscape_VHT_GlobalBake_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

@@ -1221,9 +1221,9 @@ export class Landscape extends RedGPUObject {
         this.#tileStreamer.setTerrainConfig(this.#heightScale);
 
         const resourceManager = redGPUContext.resourceManager;
-        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
+        let vModule = resourceManager.getGPUShaderModule('Landscape_Flat_VertexShaderModule');
         if (!vModule) {
-            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
+            vModule = resourceManager.createGPUShaderModule('Landscape_Flat_VertexShaderModule', {
                 code: landscapeVertexSource
             });
         }
@@ -1450,7 +1450,7 @@ export class Landscape extends RedGPUObject {
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
             const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 
-            const pipelineLayout = resourceManager.createGPUPipelineLayout(`LandscapePipelineLayout_${key}`, {
+            const pipelineLayout = resourceManager.createGPUPipelineLayout(`Landscape_PipelineLayout_${key}`, {
                 bindGroupLayouts: [systemBGLayout, storageBGLayout, fragUniformBGLayout]
             });
 
@@ -1463,7 +1463,7 @@ export class Landscape extends RedGPUObject {
             }];
 
             const pipeline = gpuDevice.createRenderPipeline({
-                label: `LandscapeRenderPipeline_${key}`,
+                label: `Landscape_RenderPipeline_${key}`,
                 layout: pipelineLayout,
                 vertex: {
                     module: this.#vertexShaderModule,
