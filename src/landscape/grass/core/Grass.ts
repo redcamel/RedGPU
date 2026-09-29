@@ -9,6 +9,7 @@ import Primitive from "../../../primitive/core/Primitive";
 export interface GrassLODConfig {
     mesh: Mesh;
     lodDistance?: number;
+    receiveShadow?: boolean;
 }
 
 export interface GrassLODInfo {
@@ -16,6 +17,7 @@ export interface GrassLODInfo {
     lodDistance: number;
     geometry: Geometry | Primitive;
     mesh: Mesh;
+    receiveShadow?: boolean;
 }
 
 export interface GrassOptions {
@@ -141,20 +143,24 @@ export class Grass extends RedGPUObject {
         const defaultCullDist = options.cullingDistance ?? 100.0;
         const farDistance = Math.max(10.0, options.farDistance ?? 35.0);
 
+        const baseReceiveShadow = options.receiveShadow ?? true;
         if (sortedLods.length === 1 && (sortedLods[0].lodDistance ?? defaultCullDist) > farDistance) {
             const m = sortedLods[0].mesh;
+            const lodRecShadow = sortedLods[0].receiveShadow !== undefined ? sortedLods[0].receiveShadow : baseReceiveShadow;
             this.#lods = [
                 {
                     lodIndex: 0,
                     lodDistance: farDistance,
                     geometry: m.geometry,
-                    mesh: m
+                    mesh: m,
+                    receiveShadow: lodRecShadow
                 },
                 {
                     lodIndex: 1,
                     lodDistance: sortedLods[0].lodDistance ?? defaultCullDist,
                     geometry: m.geometry,
-                    mesh: m
+                    mesh: m,
+                    receiveShadow: false
                 }
             ];
         } else {
@@ -164,7 +170,8 @@ export class Grass extends RedGPUObject {
                     lodIndex: index,
                     lodDistance: lodConfig.lodDistance ?? defaultCullDist,
                     geometry: m.geometry,
-                    mesh: m
+                    mesh: m,
+                    receiveShadow: lodConfig.receiveShadow !== undefined ? lodConfig.receiveShadow : baseReceiveShadow
                 };
             });
         }
@@ -501,6 +508,21 @@ export class Grass extends RedGPUObject {
 
     markDirty(): void {
         this.#dirty = true;
+        this.#notifyChange();
+    }
+
+
+    getLODReceiveShadow(lodIndex: number): boolean {
+        if (lodIndex < 0 || lodIndex >= this.#lods.length) return false;
+        return this.#lods[lodIndex].receiveShadow !== false;
+    }
+
+    setLODReceiveShadow(lodIndex: number, value: boolean): void {
+        if (lodIndex < 0 || lodIndex >= this.#lods.length) return;
+        const boolVal = !!value;
+        const lodInfo = this.#lods[lodIndex];
+        if (lodInfo.receiveShadow === boolVal) return;
+        lodInfo.receiveShadow = boolVal;
         this.#notifyChange();
     }
 
