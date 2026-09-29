@@ -200,9 +200,8 @@ export class GrassInstanceBaker extends RedGPUObject {
                     {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
                     {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
                     {binding: 4, resource: targetVHTView},
-                    {binding: 5, resource: basicGPUSampler},
-                    {binding: 6, resource: targetVBTView},
-                    {binding: 7, resource: basicGPUSampler},
+                    {binding: 5, resource: targetVBTView},
+                    {binding: 6, resource: basicGPUSampler},
                 ],
             });
         }
@@ -258,9 +257,8 @@ export class GrassInstanceBaker extends RedGPUObject {
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-                {binding: 6, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
             ],
         });
 

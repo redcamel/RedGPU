@@ -53,9 +53,8 @@ struct BakeTask {
 @group(0) @binding(2) var<storage, read> typeParams: array<GrassTypeParam>;
 @group(0) @binding(3) var<storage, read> bakeTasks: array<BakeTask>;
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(5) var vhtSampler: sampler;
-@group(0) @binding(6) var vbtTexture: texture_2d<f32>;
-@group(0) @binding(7) var vbtSampler: sampler;
+@group(0) @binding(5) var vbtTexture: texture_2d<f32>;
+@group(0) @binding(6) var vbtSampler: sampler;
 
 fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(
