@@ -8,11 +8,11 @@ import Grass, {GrassOptions} from "./core/Grass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
 import {GrassInstanceBaker} from "./core/baking/GrassInstanceBaker";
 import {GrassCuller} from "./core/culling/GrassCuller";
-import grassVertexSource from "./shader/grassVertex.wgsl";
-import grassFragmentSource from "./shader/grassFragment.wgsl";
-import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
-import grassShadowSource from "./shader/grassShadow.wgsl";
-import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
+import grassVertexWGSL from "./shader/grassVertex.wgsl";
+import grassFragmentNearWGSL from "./shader/grassFragmentNear.wgsl";
+import grassFragmentFarWGSL from "./shader/grassFragmentFar.wgsl";
+import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
+import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../core/material/LandscapeWeightMapCache";
@@ -159,7 +159,7 @@ export class LandscapeGrassManager extends RedGPUObject {
 
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
-    #fragmentModule: GPUShaderModule | null = null;
+    #fragmentNearModule: GPUShaderModule | null = null;
     #fragmentFarModule: GPUShaderModule | null = null;
     #fragmentShadowModule: GPUShaderModule | null = null;
     #pipelineLayout: GPUPipelineLayout | null = null;
@@ -845,73 +845,38 @@ export class LandscapeGrassManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 파이프라인 모드(Near: 그림자 수신/고품질, Far: 그림자 미수신/경량)에 대응하는 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and pipeline mode (Near: shadow receive/high quality, Far: no shadow/lightweight).
-     *
-     * @param sampleCount -
-     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
-     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
-     * @param isFar -
-     * [KO] 원거리(Far) 전용 경량 셰이더를 적용할지 여부 (기본값: false)
-     * [EN] Whether to apply the lightweight shader dedicated to far distance (default: false)
-     * @returns
-     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
+     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼(MegaBuffer, Uniform, Indirect Buffer), 텍스처 뷰, 파이프라인 및 내부 슬롯 풀을 안전하게 해제합니다.
+     * [EN] Safely releases all GPU buffers, texture views, pipelines, slot pools, and internal resources held by the grass manager.
      */
-    #getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
-        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
-        let pipeline = cache.get(sampleCount);
-        if (pipeline) return pipeline;
+    destroy(): void {
+        this.#megaBuffer.destroy();
+        this.#baker.destroy();
+        this.#culler.destroy();
+        this.#shadowPipeline = null;
+        this.#vertexShadowModule = null;
+        this.#fragmentShadowModule = null;
+        this.#vertexModule = null;
+        this.#fragmentNearModule = null;
+        this.#fragmentFarModule = null;
+        this.#pipelineLayout = null;
+        this.#pipelineBindGroupLayout1 = null;
+        this.#pipelineBindGroupLayout2 = null;
 
-        const gpuDevice = this.gpuDevice;
-        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
-
-        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
-
-        pipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
-            layout: this.#pipelineLayout,
-            vertex: {
-                module: this.#vertexModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: 18 * 4,
-                        stepMode: 'vertex',
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: fragModule,
-                entryPoint: 'main',
-                targets: [
-                    {format: 'rgba16float'},
-                    {format: preferredNormalFormat},
-                    {format: 'rgba16float'}
-                ]
-            },
-            primitive: {
-                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            },
-            multisample: {
-                count: sampleCount
-            }
-        });
-
-        cache.set(sampleCount, pipeline);
-        return pipeline;
+        for (const res of this.#typeMaterialBuffers.values()) {
+            res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
+        }
+        this.#typeMaterialBuffers.clear();
+        this.#typeCellStates.clear();
+        this.#slotRangePool.length = 0;
+        this.#neededCellKeysSet.clear();
+        this.#keysToEvict.length = 0;
+        this.#renderPipelinesNear.clear();
+        this.#renderPipelinesFar.clear();
+        for (const grass of this.#grassList) {
+            grass.onChanged = null;
+        }
+        this.#grassList.length = 0;
     }
 
     /**
@@ -1074,38 +1039,73 @@ export class LandscapeGrassManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼(MegaBuffer, Uniform, Indirect Buffer), 텍스처 뷰, 파이프라인 및 내부 슬롯 풀을 안전하게 해제합니다.
-     * [EN] Safely releases all GPU buffers, texture views, pipelines, slot pools, and internal resources held by the grass manager.
+     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 파이프라인 모드(Near: 그림자 수신/고품질, Far: 그림자 미수신/경량)에 대응하는 GPURenderPipeline을 반환합니다.
+     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and pipeline mode (Near: shadow receive/high quality, Far: no shadow/lightweight).
+     *
+     * @param sampleCount -
+     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
+     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
+     * @param isFar -
+     * [KO] 원거리(Far) 전용 경량 셰이더를 적용할지 여부 (기본값: false)
+     * [EN] Whether to apply the lightweight shader dedicated to far distance (default: false)
+     * @returns
+     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
+     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
      */
-    destroy(): void {
-        this.#megaBuffer.destroy();
-        this.#baker.destroy();
-        this.#culler.destroy();
-        this.#shadowPipeline = null;
-        this.#vertexShadowModule = null;
-        this.#fragmentShadowModule = null;
-        this.#vertexModule = null;
-        this.#fragmentModule = null;
-        this.#fragmentFarModule = null;
-        this.#pipelineLayout = null;
-        this.#pipelineBindGroupLayout1 = null;
-        this.#pipelineBindGroupLayout2 = null;
+    #getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
+        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
+        let pipeline = cache.get(sampleCount);
+        if (pipeline) return pipeline;
 
-        for (const res of this.#typeMaterialBuffers.values()) {
-            res.uniformBuffer.destroy();
-            res.grassUniformGPUBuffer.destroy();
-        }
-        this.#typeMaterialBuffers.clear();
-        this.#typeCellStates.clear();
-        this.#slotRangePool.length = 0;
-        this.#neededCellKeysSet.clear();
-        this.#keysToEvict.length = 0;
-        this.#renderPipelinesNear.clear();
-        this.#renderPipelinesFar.clear();
-        for (const grass of this.#grassList) {
-            grass.onChanged = null;
-        }
-        this.#grassList.length = 0;
+        const gpuDevice = this.gpuDevice;
+        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentNearModule;
+        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
+
+        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        pipeline = gpuDevice.createRenderPipeline({
+            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
+            layout: this.#pipelineLayout,
+            vertex: {
+                module: this.#vertexModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: 18 * 4,
+                        stepMode: 'vertex',
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: fragModule,
+                entryPoint: 'main',
+                targets: [
+                    {format: 'rgba16float'},
+                    {format: preferredNormalFormat},
+                    {format: 'rgba16float'}
+                ]
+            },
+            primitive: {
+                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            },
+            multisample: {
+                count: sampleCount
+            }
+        });
+
+        cache.set(sampleCount, pipeline);
+        return pipeline;
     }
 
     /**
@@ -1118,23 +1118,23 @@ export class LandscapeGrassManager extends RedGPUObject {
         if (!gpuDevice) return;
 
         this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {
-            code: grassVertexSource
+            code: grassVertexWGSL
         });
 
-        this.#fragmentModule = resourceManager.createGPUShaderModule('Grass_FragmentModule', {
-            code: grassFragmentSource
+        this.#fragmentNearModule = resourceManager.createGPUShaderModule('Grass_FragmentNearModule', {
+            code: grassFragmentNearWGSL
         });
 
         this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
-            code: grassFragmentFarSource
+            code: grassFragmentFarWGSL
         });
 
         this.#vertexShadowModule = resourceManager.createGPUShaderModule('Grass_VertexShadowModule', {
-            code: grassShadowVertexSource
+            code: grassShadowVertexWGSL
         });
 
         this.#fragmentShadowModule = resourceManager.createGPUShaderModule('Grass_FragmentShadowModule', {
-            code: grassShadowSource
+            code: grassShadowFragmentWGSL
         });
 
         const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');

@@ -1,6 +1,6 @@
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
-import grassBakeComputeSource from "./grassBakeCompute.wgsl";
+import grassBakeComputeWGSL from "./grassBakeCompute.wgsl";
 import type {GrassMegaBuffer} from "../buffer/GrassMegaBuffer";
 
 /**
@@ -247,7 +247,7 @@ export class GrassInstanceBaker extends RedGPUObject {
         });
 
         const shaderModule = resourceManager.createGPUShaderModule('Grass_Bake_ComputeModule', {
-            code: grassBakeComputeSource,
+            code: grassBakeComputeWGSL,
         });
 
         this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Grass_Bake_BindGroupLayout', {

@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
-import grassCullComputeSource from "./grassCullCompute.wgsl";
+import grassCullComputeWGSL from "./grassCullCompute.wgsl";
 import type {GrassMegaBuffer} from "../buffer/GrassMegaBuffer";
 
 /**
@@ -192,7 +192,7 @@ export class GrassCuller extends RedGPUObject {
         });
 
         const shaderModule = resourceManager.createGPUShaderModule('Grass_Cull_ComputeModule', {
-            code: grassCullComputeSource,
+            code: grassCullComputeWGSL,
         });
 
         this.#cullBindGroupLayout = resourceManager.createBindGroupLayout('Grass_Cull_BindGroupLayout', {
