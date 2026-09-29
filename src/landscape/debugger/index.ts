@@ -17,16 +17,13 @@ export * as Core from "./core";
 
 import DebuggerManager, {
     type DebuggerManagerOptions,
-    type LandscapeDebuggerManagerOptions,
-    type LandscapeDebugPropertyChangeHandler,
-    type LandscapeDebugPropertyKey
+    type DebuggerPropertyChangeHandler,
+    type DebuggerPropertyKey
 } from "./DebuggerManager";
 
 export {
     DebuggerManager,
-    DebuggerManager as LandscapeDebuggerManager,
     type DebuggerManagerOptions,
-    type LandscapeDebuggerManagerOptions,
-    type LandscapeDebugPropertyKey,
-    type LandscapeDebugPropertyChangeHandler
+    type DebuggerPropertyKey,
+    type DebuggerPropertyChangeHandler
 };

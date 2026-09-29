@@ -19,8 +19,7 @@ import GrassManager from "./GrassManager";
 import type {GrassOptions} from "./core/Grass";
 
 export {
-    GrassManager,
-    GrassManager as LandscapeGrassManager
+    GrassManager
 };
 
 export type {

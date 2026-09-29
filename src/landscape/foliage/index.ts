@@ -19,8 +19,7 @@ import FoliageManager from "./FoliageManager";
 import type {FoliageLODConfig, FoliageLODInfo, FoliageOptions} from "./core/Foliage";
 
 export {
-    FoliageManager,
-    FoliageManager as LandscapeFoliageManager
+    FoliageManager
 };
 
 export type {

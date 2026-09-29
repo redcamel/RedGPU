@@ -196,7 +196,7 @@ RedGPU.init(
             }
         );
 
-        // 6. 잔디 서브시스템 (LandscapeGrassManager) 설정
+        // 6. 잔디 서브시스템 (GrassManager) 설정
         const grassManager = landscape.grassManager;
         grassManager.enabled = true;
         grassManager.streamingRadius = 120;

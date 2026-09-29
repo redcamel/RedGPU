@@ -109,8 +109,8 @@ RedGPU.init(
 
         scene.landscape = landscape;
 
-        // [KO] 절차적 잔디 서브시스템 (LandscapeGrassManager) 구성
-        // [EN] Configure procedural grass subsystem (LandscapeGrassManager)
+        // [KO] 절차적 잔디 서브시스템 (GrassManager) 구성
+        // [EN] Configure procedural grass subsystem (GrassManager)
         const grassManager = landscape.grassManager;
 
         let onGrassTypeAdded = null;

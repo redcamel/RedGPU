@@ -7,8 +7,8 @@ import LandscapeVBTDebugger from "./core/vbt/LandscapeVBTDebugger";
 import LandscapeVBTNormalDebugger from "./core/vbt/LandscapeVBTNormalDebugger";
 import LandscapeVBTORMDebugger from "./core/vbt/LandscapeVBTORMDebugger";
 
-export type LandscapeDebugPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
-export type LandscapeDebugPropertyChangeHandler = (key: LandscapeDebugPropertyKey, value: boolean | number) => void;
+export type DebuggerPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
+export type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean | number) => void;
 
 export interface DebuggerManagerOptions {
     spatialGrid?: boolean;
@@ -21,10 +21,8 @@ export interface DebuggerManagerOptions {
     landscapeWireframe?: boolean;
     landscapeLodColoration?: boolean;
     landscapeDebugMode?: number;
-    onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
+    onDebugPropertyChange?: DebuggerPropertyChangeHandler;
 }
-
-export type LandscapeDebuggerManagerOptions = DebuggerManagerOptions;
 
 export class DebuggerManager {
     #landscape: Landscape;
@@ -47,7 +45,7 @@ export class DebuggerManager {
     #landscapeWireframe: boolean = false;
     #landscapeLodColoration: boolean = false;
     #landscapeDebugMode: number = 0;
-    #onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
+    #onDebugPropertyChange?: DebuggerPropertyChangeHandler;
 
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: DebuggerManagerOptions) {
         this.#landscape = landscape;
