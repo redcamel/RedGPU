@@ -12,15 +12,10 @@ struct GrassInstance {
 struct GrassGlobalUniforms {
     cameraPosition: vec4<f32>,
     frustumPlanes: array<vec4<f32>, 6>,
-    viewProjectionMatrix: mat4x4<f32>,
     totalInstances: u32,
     typeCount: u32,
-    hzbEnabled: u32,
-    depthBias: f32,
-    hzbWidth: f32,
-    hzbHeight: f32,
-    _pad0: f32,
-    _pad1: f32,
+    _pad0: u32,
+    _pad1: u32,
 };
 
 struct GrassTypeParam {
@@ -47,7 +42,6 @@ struct GrassTypeParam {
 @group(0) @binding(2) var<storage, read> typeParams: array<GrassTypeParam>;
 @group(0) @binding(3) var<storage, read_write> culledInstances: array<GrassInstance>;
 @group(0) @binding(4) var<storage, read_write> indirectArgs: array<atomic<u32>>;
-@group(0) @binding(5) var hzbTexture: texture_2d<f32>;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -113,40 +107,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
     if (!inside) {
         return;
-    }
-
-    if (globalUniforms.hzbEnabled != 0u) {
-        let clipPos = globalUniforms.viewProjectionMatrix * vec4<f32>(sphereCenter, 1.0);
-        let clipW = clipPos.w;
-
-        if (clipW > 0.1) {
-            let invW = 1.0 / clipW;
-            let ndc = clipPos.xyz * invW;
-            let screenUV = vec2<f32>(ndc.x * 0.5 + 0.5, 1.0 - (ndc.y * 0.5 + 0.5));
-
-            if (screenUV.x >= 0.0 && screenUV.x <= 1.0 && screenUV.y >= 0.0 && screenUV.y <= 1.0) {
-                let projRadiusX = (radius * invW) * abs(globalUniforms.viewProjectionMatrix[0][0]);
-                let projRadiusY = (radius * invW) * abs(globalUniforms.viewProjectionMatrix[1][1]);
-                let maxPixelSize = max(projRadiusX * globalUniforms.hzbWidth, projRadiusY * globalUniforms.hzbHeight) * 2.0;
-
-                let mipLevel = clamp(u32(ceil(log2(max(1.0, maxPixelSize)))) + 1u, 0u, 7u);
-                let mipWidth = max(1, i32(globalUniforms.hzbWidth) >> mipLevel);
-                let mipHeight = max(1, i32(globalUniforms.hzbHeight) >> mipLevel);
-
-                let coord = clamp(
-                    vec2<i32>(i32(screenUV.x * f32(mipWidth)), i32(screenUV.y * f32(mipHeight))),
-                    vec2<i32>(0, 0),
-                    vec2<i32>(mipWidth - 1, mipHeight - 1)
-                );
-
-                let hzbDepth = textureLoad(hzbTexture, coord, i32(mipLevel)).r;
-                let sphereNearDepth = ndc.z - (radius * invW);
-
-                if (sphereNearDepth > (hzbDepth + globalUniforms.depthBias)) {
-                    return;
-                }
-            }
-        }
     }
 
     let indirectArgIndex = (typeInfo.indirectBaseOffset + drawSlot) * 5u + 1u;

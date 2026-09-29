@@ -140,8 +140,8 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] GPU 프러스텀/HZB 오클루전 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer where instances passing GPU frustum/HZB occlusion culling are recorded.
+     * [KO] GPU 거리 및 프러스텀 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer where instances passing GPU distance and frustum culling are recorded.
      */
     get culledGPUBuffer(): GPUBuffer | null {
         return this.#culledGPUBuffer;

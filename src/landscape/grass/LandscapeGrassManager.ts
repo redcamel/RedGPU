@@ -13,7 +13,6 @@ import grassFragmentSource from "./shader/grassFragment.wgsl";
 import grassFragmentFarSource from "./shader/grassFragmentFar.wgsl";
 import grassShadowSource from "./shader/grassShadow.wgsl";
 import grassShadowVertexSource from "./shader/grassShadowVertex.wgsl";
-import {mat4} from "gl-matrix";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import LandscapeWeightMapCache from "../core/material/LandscapeWeightMapCache";
@@ -202,7 +201,6 @@ export class LandscapeGrassManager extends RedGPUObject {
     #lastUpdateGridPos: [number, number] = [-999999, -999999];
     #lastLoadedTileCount: number = 0;
     #frustumPlanesF32: Float32Array = new Float32Array(24);
-    #viewProjectionMatrixF32: Float32Array = new Float32Array(16);
     #tempWeights4: Float32Array = new Float32Array(4);
 
     #prngState: number = 12345;
@@ -694,8 +692,8 @@ export class LandscapeGrassManager extends RedGPUObject {
      * [EN] Called every frame to update grass grid cell streaming based on camera position and enqueue GPU culling and baking compute passes.
      *
      * @param renderViewStateData -
-     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 사전 계산된 절두체 평면 등 포함)
-     * [EN] View render state data (including camera, HZB texture views, precomputed frustum planes, etc.)
+     * [KO] 뷰 렌더 상태 데이터 (카메라, 사전 계산된 절두체 평면 등 포함)
+     * [EN] View render state data (including camera, precomputed frustum planes, etc.)
      */
     update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
@@ -828,15 +826,6 @@ export class LandscapeGrassManager extends RedGPUObject {
             }
         }
 
-        const hzbTextureView = view.hierarchicalZBuffer?.textureView || null;
-        const hasHZB = !!hzbTextureView;
-
-        let viewProjectionMatrixF32: Float32Array | null = null;
-        if (view.projectionMatrix && rawCam?.viewMatrix) {
-            mat4.multiply(this.#viewProjectionMatrixF32 as any, view.projectionMatrix, rawCam.viewMatrix);
-            viewProjectionMatrixF32 = this.#viewProjectionMatrixF32;
-        }
-
         const totalAllocated = this.#megaBuffer.totalAllocatedInstances;
         this.#culler.updateUniforms(
             camX,
@@ -844,12 +833,10 @@ export class LandscapeGrassManager extends RedGPUObject {
             camZ,
             frustumPlanesF32,
             totalAllocated,
-            this.#grassList.length,
-            viewProjectionMatrixF32,
-            hasHZB
+            this.#grassList.length
         );
 
-        this.#culler.updateBindGroup(this.#megaBuffer, hzbTextureView);
+        this.#culler.updateBindGroup(this.#megaBuffer);
 
         this.commandEncoderManager.addPreProcessComputePass(
             'LandscapeGrass_ComputePass',
