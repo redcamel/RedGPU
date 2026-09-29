@@ -3,17 +3,12 @@ import RedGPUObject from "../../../../base/RedGPUObject";
 
 export interface GrassDrawSlot {
     slotIndex: number;
-    distance: number;
     indirectOffset: number;
     culledBaseOffset: number;
     indexCount: number;
-    firstIndex: number;
-    baseVertex: number;
 }
 
 export interface GrassTypeAllocation {
-    typeId: number;
-    name: string;
     maxInstances: number;
     rawBaseOffset: number;
     culledBaseOffset: number;
@@ -46,7 +41,6 @@ export class GrassMegaBuffer extends RedGPUObject {
     #totalAllocatedInstances: number = 0;
     #totalAllocatedCulledInstances: number = 0;
     #totalIndirectDrawCalls: number = 0;
-    #typeCount: number = 0;
 
     #onRecreated: (() => void) | null = null;
 
@@ -98,20 +92,15 @@ export class GrassMegaBuffer extends RedGPUObject {
 
     allocateType(
         typeId: number,
-        name: string,
         maxInstances: number,
-        farDistance: number,
-        cullingDistance: number,
-        indexCount: number,
-        firstIndex: number = 0,
-        baseVertex: number = 0
+        indexCount: number
     ): GrassTypeAllocation {
         const rounded = Math.ceil(maxInstances / 64) * 64;
         const totalCulledNeeded = rounded * 2;
 
         if (
             this.#totalAllocatedInstances + rounded > this.#maxTotalInstances ||
-            this.#totalAllocatedCulledInstances + totalCulledNeeded > this.#maxTotalInstances * 4
+            this.#totalAllocatedCulledInstances + totalCulledNeeded > this.#maxTotalInstances * 2
         ) {
             this.#resizeBuffer(Math.max(this.#maxTotalInstances * 2, this.#totalAllocatedInstances + rounded));
         }
@@ -122,23 +111,17 @@ export class GrassMegaBuffer extends RedGPUObject {
 
         const nearSlot: GrassDrawSlot = {
             slotIndex: 0,
-            distance: farDistance,
             indirectOffset: this.#totalIndirectDrawCalls++,
             culledBaseOffset: this.#totalAllocatedCulledInstances,
-            indexCount,
-            firstIndex,
-            baseVertex
+            indexCount
         };
         this.#totalAllocatedCulledInstances += rounded;
 
         const farSlot: GrassDrawSlot = {
             slotIndex: 1,
-            distance: cullingDistance,
             indirectOffset: this.#totalIndirectDrawCalls++,
             culledBaseOffset: this.#totalAllocatedCulledInstances,
-            indexCount,
-            firstIndex,
-            baseVertex
+            indexCount
         };
         this.#totalAllocatedCulledInstances += rounded;
 
@@ -146,8 +129,6 @@ export class GrassMegaBuffer extends RedGPUObject {
         this.#updateIndirectTemplateForSlot(farSlot);
 
         const alloc: GrassTypeAllocation = {
-            typeId,
-            name,
             maxInstances: rounded,
             rawBaseOffset,
             culledBaseOffset,
@@ -158,7 +139,6 @@ export class GrassMegaBuffer extends RedGPUObject {
 
         this.#allocations.set(typeId, alloc);
         this.#totalAllocatedInstances += rounded;
-        this.#typeCount++;
 
         return alloc;
     }
@@ -279,13 +259,16 @@ export class GrassMegaBuffer extends RedGPUObject {
         this.#typeParamsGPUBuffer = null;
 
         this.#allocations.clear();
+        this.#totalAllocatedInstances = 0;
+        this.#totalAllocatedCulledInstances = 0;
+        this.#totalIndirectDrawCalls = 0;
     }
 
     #initBuffers(): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const culledCapacity = Math.max(this.#maxTotalInstances * 4, this.#totalAllocatedCulledInstances);
+        const culledCapacity = Math.max(this.#maxTotalInstances * 2, this.#totalAllocatedCulledInstances);
         const rawByteSize = this.#maxTotalInstances * GrassMegaBuffer.STRIDE_BYTES;
         const culledByteSize = culledCapacity * GrassMegaBuffer.STRIDE_BYTES;
         const indirectByteSize = GrassMegaBuffer.MAX_INDIRECT_CALLS * 5 * 4;
@@ -325,8 +308,8 @@ export class GrassMegaBuffer extends RedGPUObject {
         const offset = slot.indirectOffset * 5;
         this.#indirectResetTemplate[offset] = slot.indexCount;
         this.#indirectResetTemplate[offset + 1] = 0;
-        this.#indirectResetTemplate[offset + 2] = slot.firstIndex;
-        this.#indirectResetTemplate[offset + 3] = slot.baseVertex;
+        this.#indirectResetTemplate[offset + 2] = 0;
+        this.#indirectResetTemplate[offset + 3] = 0;
         this.#indirectResetTemplate[offset + 4] = slot.culledBaseOffset;
 
         const gpuDevice = this.gpuDevice;

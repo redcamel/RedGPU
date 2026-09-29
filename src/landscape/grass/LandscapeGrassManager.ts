@@ -352,10 +352,7 @@ export class LandscapeGrassManager {
         const indexCount = (grassType.geometry as any)?.indexBuffer?.indexCount ?? 0;
         const alloc = this.#megaBuffer.allocateType(
             typeId,
-            grassType.name,
             maxInstances,
-            grassType.farDistance,
-            grassType.cullingDistance,
             indexCount
         );
 
