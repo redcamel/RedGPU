@@ -309,14 +309,6 @@ export class Grass extends RedGPUObject {
         this.#dirty = true;
     }
 
-    get fadeStartDistance(): number {
-        return this.#shrinkStartDistance;
-    }
-
-    set fadeStartDistance(v: number) {
-        this.shrinkStartDistance = v;
-    }
-
     get minScale(): [number, number, number] {
         return this.#minScale;
     }
