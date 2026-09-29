@@ -5,6 +5,7 @@ import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
+import LandscapeMeshCombiner from "../../core/geometry/LandscapeMeshCombiner";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -253,34 +254,70 @@ export class Grass extends RedGPUObject {
         }
         this.#mesh = mesh;
 
-        const mat = mesh.material as any;
-        const resolvedTexture = baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
-        if (typeof resolvedTexture === 'string') {
-            this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
-        } else if (resolvedTexture) {
-            this.#baseColorTexture = resolvedTexture;
-        }
+        let targetMaterial: any = mesh.material;
 
-        const geom = mesh.geometry;
-        if (!geom) {
-            consoleAndThrowError(`[Grass] Mesh must have a valid geometry!`);
-        }
-        this.#geometry = geom;
+        const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
+        if (isComposite) {
+            const combineResult = LandscapeMeshCombiner.combine(redGPUContext, mesh, {
+                preservePivot: true,
+                centerXZ: false
+            });
+            if (combineResult.groups.length === 0) {
+                consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
+            }
+            const primaryGroup = combineResult.groups[0];
+            this.#geometry = primaryGroup.geometry;
+            if (primaryGroup.material) {
+                targetMaterial = primaryGroup.material;
+            }
 
-        const vol = this.#geometry.volume;
-        if (minY !== undefined) {
-            this.#minY = minY;
-        } else if (vol && vol.minY !== undefined) {
-            this.#minY = vol.minY;
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture ?? (mesh.material as any)?.baseColorTexture ?? (mesh.material as any)?.diffuseTexture;
+            if (typeof resolvedTexture === 'string') {
+                this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
+            } else if (resolvedTexture) {
+                this.#baseColorTexture = resolvedTexture;
+            }
+
+            if (minY !== undefined) {
+                this.#minY = minY;
+            } else {
+                this.#minY = isFinite(combineResult.minY) ? combineResult.minY : 0.0;
+            }
+
+            if (height !== undefined) {
+                this.#meshHeight = height;
+            } else {
+                this.#meshHeight = combineResult.boundingHeight > 0 ? combineResult.boundingHeight : 1.0;
+            }
         } else {
-            this.#minY = 0.0;
-        }
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
+            if (typeof resolvedTexture === 'string') {
+                this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
+            } else if (resolvedTexture) {
+                this.#baseColorTexture = resolvedTexture;
+            }
 
-        if (height !== undefined) {
-            this.#meshHeight = height;
-        } else {
-            const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
-            this.#meshHeight = computedH > 0 ? computedH : 1.0;
+            const geom = mesh.geometry;
+            if (!geom) {
+                consoleAndThrowError(`[Grass] Mesh must have a valid geometry!`);
+            }
+            this.#geometry = geom;
+
+            const vol = this.#geometry.volume;
+            if (minY !== undefined) {
+                this.#minY = minY;
+            } else if (vol && vol.minY !== undefined) {
+                this.#minY = vol.minY;
+            } else {
+                this.#minY = 0.0;
+            }
+
+            if (height !== undefined) {
+                this.#meshHeight = height;
+            } else {
+                const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
+                this.#meshHeight = computedH > 0 ? computedH : 1.0;
+            }
         }
 
         this.#farDistance = Math.max(10.0, farDistance);
@@ -303,7 +340,7 @@ export class Grass extends RedGPUObject {
 
         this.#alphaCutoff = alphaCutoff;
 
-        const inheritedRoughness = mat?.roughnessFactor ?? mat?.roughness;
+        const inheritedRoughness = targetMaterial?.roughnessFactor ?? targetMaterial?.roughness;
         if (roughness !== undefined) {
             this.#roughness = roughness;
         } else if (inheritedRoughness !== undefined) {

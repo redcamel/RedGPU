@@ -610,36 +610,19 @@ function initGrassField({
         redGPUContext,
         '../../../assets/terrain/grass.glb',
         (loader) => {
-            let baseMesh = null;
-            const findMesh = (node) => {
-                if (!node) return;
-                if (node.geometry) {
-                    baseMesh = node;
-                    return;
-                }
-                const children = node.children || [];
-                for (let i = 0; i < children.length; i++) {
-                    findMesh(children[i]);
-                    if (baseMesh) return;
-                }
-            };
-            findMesh(loader.resultMesh);
+            // [KO] 복합 계층 GLTF 메쉬(loader.resultMesh)를 직접 전달하여 단일 지오메트리로 자동 결합 렌더링
+            // [EN] Directly pass composite hierarchical GLTF mesh (loader.resultMesh) to automatically merge into unified geometry
+            const grass = grassManager.addGrass({
+                name: 'Lawn Clump',
+                mesh: loader.resultMesh,
+                densityPerHectare: 20000,
+                targetLayer: 'Grass',
+                cullingDistance: 110,
+                minScale: [12.0, 8.0, 12.0],
+                maxScale: [18.0, 12.0, 18.0]
+            });
 
-            if (baseMesh) {
-                // [KO] 단일 대표 잔디 생성 (Lawn Clump 및 언리얼 표준 단일 감쇄 구간 적용)
-                // [EN] Create single representative grass (Lawn Clump & Unreal standard single range)
-                const grass = grassManager.addGrass({
-                    name: 'Lawn Clump',
-                    mesh: baseMesh,
-                    densityPerHectare: 20000,
-                    targetLayer: 'Grass',
-                    cullingDistance: 110,
-                    minScale: [12.0, 8.0, 12.0],
-                    maxScale: [18.0, 12.0, 18.0]
-                });
-
-                onGrassTypeAdded?.(grass, true);
-            }
+            onGrassTypeAdded?.(grass, true);
         }
     );
 }

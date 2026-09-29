@@ -1,10 +1,19 @@
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
+import LandscapeGeometryUnit from "../../../core/geometry/LandscapeGeometryUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
+/**
+ * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
+ * [EN] Foliage render pass type ('depthPrepass' or 'main')
+ */
 export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
+/**
+ * [KO] FoliageSubMesh 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for FoliageSubMesh.
+ */
 export interface FoliageSubMeshInitOptions {
     mesh: Mesh;
     geometry: Geometry;
@@ -32,20 +41,18 @@ export interface FoliageSubMeshInitOptions {
     indirectOffsetBytes?: number;
 }
 
-export class FoliageSubMesh {
+/**
+ * [KO] LandscapeGeometryUnit을 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
+ * [EN] Foliage sub-mesh class inheriting LandscapeGeometryUnit to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
+ */
+export class FoliageSubMesh extends LandscapeGeometryUnit {
     #singleFloatBuffer: Float32Array = new Float32Array(1);
     #windFloatBuffer: Float32Array = new Float32Array(12);
     #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
     #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
 
     #mesh: Mesh;
-    #geometry: Geometry;
     #material: any;
-    #indexCount: number;
-    #vertexCount: number;
-    #isIndexed: boolean;
-    #indexFormat: GPUIndexFormat;
-    #strideBytes: number;
     #bottomOffset: number;
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
@@ -60,19 +67,22 @@ export class FoliageSubMesh {
     #isImpostor: boolean;
     #receiveShadow: boolean;
 
-    #instanceBufferOffset: number;
-    #indirectOffsetBytes: number;
     #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
+        super({
+            geometry: init.geometry,
+            vertexCount: init.vertexCount,
+            indexCount: init.indexCount,
+            isIndexed: init.isIndexed,
+            indexFormat: init.indexFormat || 'uint32',
+            strideBytes: init.strideBytes,
+            instanceBufferOffset: init.instanceBufferOffset ?? 0,
+            indirectOffsetBytes: init.indirectOffsetBytes ?? 0,
+        });
+
         this.#mesh = init.mesh;
-        this.#geometry = init.geometry;
         this.#material = init.material;
-        this.#indexCount = init.indexCount;
-        this.#vertexCount = init.vertexCount;
-        this.#isIndexed = init.isIndexed;
-        this.#indexFormat = init.indexFormat || 'uint32';
-        this.#strideBytes = init.strideBytes;
         this.#bottomOffset = init.bottomOffset ?? 0;
         this.#relativeModelMatrix = init.relativeModelMatrix;
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
@@ -86,119 +96,148 @@ export class FoliageSubMesh {
         this.#mainDepthMode = init.mainDepthMode;
         this.#isImpostor = init.isImpostor ?? false;
         this.#receiveShadow = init.receiveShadow !== false;
-
-        this.#instanceBufferOffset = init.instanceBufferOffset ?? 0;
-        this.#indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
     }
 
+    /**
+     * [KO] 원본 메쉬 인스턴스를 반환합니다.
+     * [EN] Returns the original mesh instance.
+     */
     get mesh(): Mesh {
         return this.#mesh;
     }
 
-    get geometry(): Geometry {
-        return this.#geometry;
-    }
-
+    /**
+     * [KO] 서브메쉬의 머티리얼을 반환합니다.
+     * [EN] Returns the material of the sub-mesh.
+     */
     get material(): any {
         return this.#material;
     }
 
-    get indexCount(): number {
-        return this.#indexCount;
-    }
-
-    get vertexCount(): number {
-        return this.#vertexCount;
-    }
-
-    get isIndexed(): boolean {
-        return this.#isIndexed;
-    }
-
-    get indexFormat(): GPUIndexFormat {
-        return this.#indexFormat;
-    }
-
-    get strideBytes(): number {
-        return this.#strideBytes;
-    }
-
+    /**
+     * [KO] 피벗 보정을 위한 밑둥 오프셋을 반환합니다.
+     * [EN] Returns the bottom offset for pivot compensation.
+     */
     get bottomOffset(): number {
         return this.#bottomOffset;
     }
 
+    /**
+     * [KO] 피벗 보정을 위한 밑둥 오프셋을 설정합니다.
+     * [EN] Sets the bottom offset for pivot compensation.
+     */
     set bottomOffset(val: number) {
         this.#bottomOffset = val;
     }
 
+    /**
+     * [KO] 상대 모델 변환 행렬을 반환합니다.
+     * [EN] Returns the relative model transform matrix.
+     */
     get relativeModelMatrix(): mat4 {
         return this.#relativeModelMatrix;
     }
 
+    /**
+     * [KO] 상대 법선 변환 행렬을 반환합니다.
+     * [EN] Returns the relative normal transform matrix.
+     */
     get relativeNormalMatrix(): mat4 {
         return this.#relativeNormalMatrix;
     }
 
+    /**
+     * [KO] 버텍스 셰이더 Uniform 버퍼를 반환합니다.
+     * [EN] Returns the vertex shader uniform buffer.
+     */
     get vertexUniformBuffer(): GPUBuffer {
         return this.#vertexUniformBuffer;
     }
 
+    /**
+     * [KO] 버텍스 셰이더 Uniform 바인드 그룹을 반환합니다.
+     * [EN] Returns the vertex shader uniform bind group.
+     */
     get vertexUniformBindGroup(): GPUBindGroup {
         return this.#vertexUniformBindGroup;
     }
 
+    /**
+     * [KO] 서브메쉬의 LOD 인덱스를 반환합니다.
+     * [EN] Returns the LOD index of the sub-mesh.
+     */
     get lodIndex(): number {
         return this.#lodIndex;
     }
 
+    /**
+     * [KO] 뎁스 프리패스 렌더링 대상 여부를 반환합니다.
+     * [EN] Returns whether this sub-mesh renders in the depth prepass.
+     */
     get isDepthPrepass(): boolean {
         return this.#isDepthPrepass;
     }
 
+    /**
+     * [KO] 메인 불투명/마스크 패스 대상 여부를 반환합니다.
+     * [EN] Returns whether this sub-mesh renders in the main opaque/masked pass.
+     */
     get isMainOpaqueOrMasked(): boolean {
         return this.#isMainOpaqueOrMasked;
     }
 
+    /**
+     * [KO] 알파 마스킹(Cutout) 사용 여부를 반환합니다.
+     * [EN] Returns whether alpha masking (cutout) is used.
+     */
     get isMasked(): boolean {
         return this.#isMasked;
     }
 
+    /**
+     * [KO] 메인 뎁스 패스 모드를 반환합니다.
+     * [EN] Returns the main depth pass mode.
+     */
     get mainDepthMode(): FoliageDepthPassMode {
         return this.#mainDepthMode;
     }
 
+    /**
+     * [KO] 옥타헤드럴 임포스터 메쉬 여부를 반환합니다.
+     * [EN] Returns whether this is an octahedral impostor mesh.
+     */
     get isImpostor(): boolean {
         return this.#isImpostor;
     }
 
+    /**
+     * [KO] 옥타헤드럴 임포스터 메쉬 여부를 설정합니다.
+     * [EN] Sets whether this is an octahedral impostor mesh.
+     */
     set isImpostor(val: boolean) {
         this.#isImpostor = val;
     }
 
+    /**
+     * [KO] 그림자 수신 여부를 반환합니다.
+     * [EN] Returns whether this sub-mesh receives shadows.
+     */
     get receiveShadow(): boolean {
         return this.#receiveShadow;
     }
 
+    /**
+     * [KO] 그림자 수신 여부를 설정합니다.
+     * [EN] Sets whether this sub-mesh receives shadows.
+     */
     set receiveShadow(val: boolean) {
         this.#receiveShadow = val;
     }
 
-    get instanceBufferOffset(): number {
-        return this.#instanceBufferOffset;
-    }
-
-    set instanceBufferOffset(val: number) {
-        this.#instanceBufferOffset = val;
-    }
-
-    get indirectOffsetBytes(): number {
-        return this.#indirectOffsetBytes;
-    }
-
-    set indirectOffsetBytes(val: number) {
-        this.#indirectOffsetBytes = val;
-    }
-
+    /**
+     * [KO] 그림자 수신 상태를 업데이트하고 GPU 유니폼 버퍼에 반영합니다.
+     * [EN] Updates shadow receiving state and reflects it in the GPU uniform buffer.
+     */
     updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
         if (this.#receiveShadow === receiveShadow) return;
         this.#receiveShadow = receiveShadow;
@@ -214,6 +253,10 @@ export class FoliageSubMesh {
         }
     }
 
+    /**
+     * [KO] 바람 시뮬레이션 파라미터를 유니폼 버퍼에 기록합니다.
+     * [EN] Writes wind simulation parameters to the uniform buffer.
+     */
     updateWindParams(
         gpuDevice: GPUDevice,
         windDirX: number,
@@ -252,6 +295,10 @@ export class FoliageSubMesh {
         );
     }
 
+    /**
+     * [KO] 지면 높이 기반 블렌딩 파라미터를 유니폼 버퍼에 기록합니다.
+     * [EN] Writes ground blend parameters to the uniform buffer.
+     */
     updateGroundBlendParams(
         gpuDevice: GPUDevice,
         groundBlendStrength: number,
@@ -273,6 +320,10 @@ export class FoliageSubMesh {
         );
     }
 
+    /**
+     * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 서브메쉬를 렌더링할 수 있는지 여부를 판별합니다.
+     * [EN] Determines whether this sub-mesh can be rendered in a specific render pass (depthPrepass or main).
+     */
     canRenderInPass(passType: FoliageRenderPassType): boolean {
         switch (passType) {
             case 'depthPrepass':
@@ -284,6 +335,10 @@ export class FoliageSubMesh {
         }
     }
 
+    /**
+     * [KO] MSAA 설정 및 뎁스 패스 모드에 대응하는 WebGPU 렌더 파이프라인을 조회하거나 생성하여 캐싱합니다.
+     * [EN] Retrieves or creates and caches the WebGPU render pipeline matching MSAA configuration and depth pass mode.
+     */
     getPipeline(
         registry: FoliagePipelineRegistry,
         sampleCount: number,
@@ -313,7 +368,7 @@ export class FoliageSubMesh {
                 material,
                 sampleCount,
                 msaaID,
-                this.#strideBytes,
+                this.strideBytes,
                 cullMode,
                 depthPassMode,
                 subMeshBindGroupLayout
@@ -326,18 +381,14 @@ export class FoliageSubMesh {
         return pipeline || null;
     }
 
-    draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
-        const offset = offsetBytes !== undefined ? offsetBytes : this.#indirectOffsetBytes;
-        if (this.#isIndexed && this.#geometry.indexBuffer?.gpuBuffer) {
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
-        } else {
-            passEncoder.drawIndirect(indirectGPUBuffer, offset);
-        }
-    }
-
-    destroy(): void {
+    /**
+     * [KO] 서브메쉬 리소스를 해제합니다.
+     * [EN] Destroys sub-mesh resources.
+     */
+    override destroy(): void {
         this.#vertexUniformBuffer?.destroy();
         this.#pipelineCacheByMode = {};
+        super.destroy();
     }
 }
 
