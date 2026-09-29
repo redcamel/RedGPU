@@ -158,42 +158,60 @@ export class Foliage extends RedGPUObject {
         if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {
             consoleAndThrowError('[Foliage] options.name is required and must be a non-empty string!');
         }
-        super.name = options.name.trim();
+
+        const {
+            name,
+            castShadow = true,
+            useImpostor = true,
+            cullingDistance = 2000.0,
+            minScale: optMinScale,
+            maxScale: optMaxScale,
+            densityPerHectare,
+            density,
+            densityMultiplier: optDensityMultiplier,
+            streamingRadius = 600.0,
+            subCellSize = 100.0,
+            maxInstances,
+            windMultiplier,
+            windFlutterMultiplier,
+            alignToNormal = false,
+            alignFactor,
+            groundBlendStrength,
+            groundBlendRange
+        } = options;
+
+        super.name = name.trim();
         this.#streamer = new FoliageSubCellStreamer(this);
         this.#options = options;
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
         this.#baker = baker || null;
-        this.#castShadow = options.castShadow !== false;
+        this.#castShadow = castShadow !== false;
 
-        this.#useImpostor = options.useImpostor !== undefined
-            ? options.useImpostor
-            : true;
+        this.#useImpostor = useImpostor;
         this.#useDepthPrepass = true;
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
 
-        this.#cullingDistance = options.cullingDistance ?? 2000.0;
+        this.#cullingDistance = cullingDistance;
         this.#fadeStartDistance = this.#cullingDistance * 0.75;
 
-        const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
-        const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
+        const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];
+        const maxScale: [number, number, number] = optMaxScale ? [...optMaxScale] : [1.0, 1.0, 1.0];
 
         let resolvedDensityPerHectare = 20.0;
-        if (options.densityPerHectare !== undefined) {
-            resolvedDensityPerHectare = Math.max(0, Number(options.densityPerHectare) || 0);
-        } else if (options.density !== undefined) {
-            resolvedDensityPerHectare = Math.max(0, Number(options.density) || 0);
+        if (densityPerHectare !== undefined) {
+            resolvedDensityPerHectare = Math.max(0, Number(densityPerHectare) || 0);
+        } else if (density !== undefined) {
+            resolvedDensityPerHectare = Math.max(0, Number(density) || 0);
         }
         this.#densityPerHectare = resolvedDensityPerHectare;
 
-        const densityMultiplier = options.densityMultiplier !== undefined
-            ? Math.max(0.0, Number(options.densityMultiplier) || 0.0)
+        const densityMultiplier = optDensityMultiplier !== undefined
+            ? Math.max(0.0, Number(optDensityMultiplier) || 0.0)
             : 1.0;
         this.#densityMultiplier = densityMultiplier;
-        const streamingRadius = options.streamingRadius ?? 600.0;
-        const subCellSize = options.subCellSize ?? 100.0;
 
         const effectiveRadius = streamingRadius + 150.0;
         const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
@@ -204,16 +222,16 @@ export class Foliage extends RedGPUObject {
 
         const minSafeCapacity = 16384;
 
-        const resolvedMaxInstances = options.maxInstances !== undefined
-            ? Math.max(options.maxInstances, calculatedMax, minSafeCapacity)
+        const resolvedMaxInstances = maxInstances !== undefined
+            ? Math.max(maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
 
-        const resolvedWindMultiplier = options.windMultiplier !== undefined ? Math.max(0, Number(options.windMultiplier) || 0) : 1.0;
-        const resolvedWindFlutterMultiplier = options.windFlutterMultiplier !== undefined ? Math.max(0, Number(options.windFlutterMultiplier) || 0) : 1.0;
+        const resolvedWindMultiplier = windMultiplier !== undefined ? Math.max(0, Number(windMultiplier) || 0) : 1.0;
+        const resolvedWindFlutterMultiplier = windFlutterMultiplier !== undefined ? Math.max(0, Number(windFlutterMultiplier) || 0) : 1.0;
 
-        const resolvedAlignToNormal = options.alignToNormal ?? false;
-        const resolvedAlignFactor = options.alignFactor !== undefined
-            ? Math.min(1.0, Math.max(0.0, Number(options.alignFactor) || 0))
+        const resolvedAlignToNormal = alignToNormal;
+        const resolvedAlignFactor = alignFactor !== undefined
+            ? Math.min(1.0, Math.max(0.0, Number(alignFactor) || 0))
             : 1.0;
 
         this.#windMultiplier = resolvedWindMultiplier;
@@ -221,15 +239,15 @@ export class Foliage extends RedGPUObject {
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
-        this.#groundBlendStrength = options.groundBlendStrength !== undefined
-            ? Math.max(0.0, Math.min(1.0, Number(options.groundBlendStrength) || 0.0))
+        this.#groundBlendStrength = groundBlendStrength !== undefined
+            ? Math.max(0.0, Math.min(1.0, Number(groundBlendStrength) || 0.0))
             : 0.8;
-        this.#groundBlendRange = options.groundBlendRange !== undefined
-            ? Math.max(0.1, Number(options.groundBlendRange) || 0.1)
+        this.#groundBlendRange = groundBlendRange !== undefined
+            ? Math.max(0.1, Number(groundBlendRange) || 0.1)
             : 1.5;
 
         let hash = 0;
-        const nameStr = options.name || '';
+        const nameStr = name || '';
         for (let c = 0; c < nameStr.length; c++) {
             hash = (hash * 31 + nameStr.charCodeAt(c)) | 0;
         }

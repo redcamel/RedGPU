@@ -177,7 +177,7 @@ export class GrassBaker extends RedGPUObject {
     }
 
     #init(): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, resourceManager} = this;
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
@@ -192,7 +192,6 @@ export class GrassBaker extends RedGPUObject {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        const resourceManager = this.resourceManager;
 
         const shaderModule = resourceManager.createGPUShaderModule('Grass_Bake_ComputeModule', {
             code: grassBakeComputeSource,

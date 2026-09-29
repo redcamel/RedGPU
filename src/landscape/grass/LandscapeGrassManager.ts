@@ -340,18 +340,19 @@ export class LandscapeGrassManager extends RedGPUObject {
         grassType.typeId = typeId;
         this.#grassList.push(grassType);
 
-        const targetRadius = Math.max(grassType.cullingDistance, this.#streamingRadius);
+        const {cullingDistance, instancesPerCell, geometry, name} = grassType;
+        const targetRadius = Math.max(cullingDistance, this.#streamingRadius);
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
-        const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));
+        const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
 
-        const indexCount = (grassType.geometry as any)?.indexBuffer?.indexCount ?? 0;
+        const indexCount = (geometry as any)?.indexBuffer?.indexCount ?? 0;
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             maxInstances,
             indexCount
         );
 
-        const baseOffset = alloc.rawBaseOffset;
+        const {rawBaseOffset: baseOffset} = alloc;
         for (let i = 0; i < maxInstances; i++) {
             this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
         }
@@ -373,19 +374,19 @@ export class LandscapeGrassManager extends RedGPUObject {
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
 
             const uniformBuffer = gpuDevice.createBuffer({
-                label: `Grass_MaterialUniformBuffer_${grassType.name}`,
+                label: `Grass_MaterialUniformBuffer_${name}`,
                 size: cpuBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
             const grassUniformCPUBuffer = new Float32Array(8);
             const grassUniformGPUBuffer = gpuDevice.createBuffer({
-                label: `Grass_WindUniformBuffer_${grassType.name}`,
+                label: `Grass_WindUniformBuffer_${name}`,
                 size: grassUniformCPUBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
-            this.#typeMaterialBuffers.set(grassType.typeId, {
+            this.#typeMaterialBuffers.set(typeId, {
                 uniformBuffer,
                 cpuBuffer,
                 uintBuffer,
@@ -970,10 +971,11 @@ export class LandscapeGrassManager extends RedGPUObject {
         const [tileSizeX, tileSizeZ] = this.#landscape.tileSize;
         const halfTileX = tileSizeX * 0.5;
         const halfTileZ = tileSizeZ * 0.5;
-        const minX = tileComponent.worldX - halfTileX;
-        const maxX = tileComponent.worldX + halfTileX;
-        const minZ = tileComponent.worldZ - halfTileZ;
-        const maxZ = tileComponent.worldZ + halfTileZ;
+        const {worldX, worldZ} = tileComponent;
+        const minX = worldX - halfTileX;
+        const maxX = worldX + halfTileX;
+        const minZ = worldZ - halfTileZ;
+        const maxZ = worldZ + halfTileZ;
 
         const cellSize = CELL_SIZE;
 
@@ -1124,8 +1126,8 @@ export class LandscapeGrassManager extends RedGPUObject {
      * [EN] Creates and initializes WebGPU shader modules and pipeline layouts required for grass and shadow rendering.
      */
     #initShadersAndLayouts(): void {
-        const gpuDevice = this.gpuDevice;
-        const resourceManager = this.resourceManager;
+        const {gpuDevice, resourceManager} = this;
+
         if (!gpuDevice) return;
 
         this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {

@@ -158,7 +158,7 @@ export class GrassCuller extends RedGPUObject {
     }
 
     #init(): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, resourceManager} = this;
         if (!gpuDevice) return;
 
         this.#globalUniformGPUBuffer = gpuDevice.createBuffer({
@@ -167,7 +167,6 @@ export class GrassCuller extends RedGPUObject {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        const resourceManager = this.resourceManager;
 
         const shaderModule = resourceManager.createGPUShaderModule('Grass_Cull_ComputeModule', {
             code: grassCullComputeSource,

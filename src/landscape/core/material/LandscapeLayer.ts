@@ -68,55 +68,74 @@ export class LandscapeLayer {
             actualOptions = redGPUContextOrOptions as LandscapeLayerOptions;
         }
 
-        this.#name = actualOptions.name;
-        if (actualOptions.enabled !== undefined) this.#enabled = actualOptions.enabled;
+        const {
+            name,
+            enabled,
+            baseColorTexture,
+            normalTexture,
+            ormTexture,
+            weightTexture,
+            uvScale,
+            uvOffset,
+            nearUVScaleMultiplier,
+            weightChannel,
+            roughness,
+            metallic,
+            normalIntensity,
+            aoIntensity
+        } = actualOptions;
 
-        if (actualOptions.baseColorTexture !== undefined) {
-            this.baseColorTexture = actualOptions.baseColorTexture;
+        this.#name = name;
+        if (enabled !== undefined) this.#enabled = enabled;
+
+        if (baseColorTexture !== undefined) {
+            this.baseColorTexture = baseColorTexture;
         }
-        if (actualOptions.normalTexture !== undefined) {
-            this.normalTexture = actualOptions.normalTexture;
+        if (normalTexture !== undefined) {
+            this.normalTexture = normalTexture;
         }
-        if (actualOptions.ormTexture !== undefined) {
-            this.ormTexture = actualOptions.ormTexture;
+        if (ormTexture !== undefined) {
+            this.ormTexture = ormTexture;
         }
-        if (actualOptions.weightTexture !== undefined) {
-            this.weightTexture = actualOptions.weightTexture;
+        if (weightTexture !== undefined) {
+            this.weightTexture = weightTexture;
         }
 
-        if (actualOptions.uvScale) {
-            this.#uvScale[0] = actualOptions.uvScale[0];
-            this.#uvScale[1] = actualOptions.uvScale[1];
+        if (uvScale) {
+            const [u, v] = uvScale;
+            this.#uvScale[0] = u;
+            this.#uvScale[1] = v;
         }
 
-        if (actualOptions.uvOffset) {
-            this.#uvOffset[0] = actualOptions.uvOffset[0];
-            this.#uvOffset[1] = actualOptions.uvOffset[1];
+        if (uvOffset) {
+            const [u, v] = uvOffset;
+            this.#uvOffset[0] = u;
+            this.#uvOffset[1] = v;
         }
 
-        if (actualOptions.nearUVScaleMultiplier !== undefined) {
-            this.#nearUVScaleMultiplier = actualOptions.nearUVScaleMultiplier;
+        if (nearUVScaleMultiplier !== undefined) {
+            this.#nearUVScaleMultiplier = nearUVScaleMultiplier;
         }
 
-        if (actualOptions.weightChannel !== undefined) {
-            this.#weightChannel = actualOptions.weightChannel;
+        if (weightChannel !== undefined) {
+            this.#weightChannel = weightChannel;
         }
         this.#updateWeightChannelIndex();
 
-        if (actualOptions.roughness !== undefined) {
-            this.#roughness = actualOptions.roughness;
+        if (roughness !== undefined) {
+            this.#roughness = roughness;
         }
 
-        if (actualOptions.metallic !== undefined) {
-            this.#metallic = actualOptions.metallic;
+        if (metallic !== undefined) {
+            this.#metallic = metallic;
         }
 
-        if (actualOptions.normalIntensity !== undefined) {
-            this.#normalIntensity = actualOptions.normalIntensity;
+        if (normalIntensity !== undefined) {
+            this.#normalIntensity = normalIntensity;
         }
 
-        if (actualOptions.aoIntensity !== undefined) {
-            this.#aoIntensity = actualOptions.aoIntensity;
+        if (aoIntensity !== undefined) {
+            this.#aoIntensity = aoIntensity;
         }
     }
 

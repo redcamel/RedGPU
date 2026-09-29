@@ -79,88 +79,119 @@ export class Grass extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext, options: GrassOptions) {
         super(redGPUContext);
-        if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {
+
+        const {
+            name,
+            mesh,
+            baseColorTexture,
+            minY,
+            height,
+            farDistance = 35.0,
+            receiveShadow = true,
+            densityPerHectare,
+            densityMultiplier,
+            densityScaleByWeight,
+            minSlope,
+            maxSlope,
+            cullingDistance,
+            shrinkStartDistance,
+            minScale,
+            maxScale,
+            groundBlendStrength,
+            alphaCutoff = 0.2,
+            roughness,
+            subsurfaceStrength,
+            subsurfaceColor,
+            exposureBoost,
+            targetLayer,
+            bottomOffset,
+            shadowStrength,
+            castShadow = true,
+            shadowCullDistance,
+            shadowShrinkStartDistance
+        } = options || {};
+
+        if (!name || typeof name !== 'string' || name.trim() === '') {
             consoleAndThrowError('[Grass] options.name is required and must be a non-empty string!');
         }
-        super.name = options.name.trim();
+        super.name = name.trim();
 
-        if (!options?.mesh) {
+        if (!mesh) {
             consoleAndThrowError(`[Grass] options.mesh is required and must contain a valid Mesh instance!`);
         }
-        this.#mesh = options.mesh;
+        this.#mesh = mesh;
 
-        const mat = options.mesh.material as any;
-        const resolvedTexture = options.baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
+        const mat = mesh.material as any;
+        const resolvedTexture = baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
         if (typeof resolvedTexture === 'string') {
             this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
         } else if (resolvedTexture) {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        const geom = options.mesh.geometry;
+        const geom = mesh.geometry;
         if (!geom) {
             consoleAndThrowError(`[Grass] Mesh must have a valid geometry!`);
         }
         this.#geometry = geom;
 
         const vol = this.#geometry.volume;
-        if (options.minY !== undefined) {
-            this.#minY = options.minY;
+        if (minY !== undefined) {
+            this.#minY = minY;
         } else if (vol && vol.minY !== undefined) {
             this.#minY = vol.minY;
         } else {
             this.#minY = 0.0;
         }
 
-        if (options.height !== undefined) {
-            this.#meshHeight = options.height;
+        if (height !== undefined) {
+            this.#meshHeight = height;
         } else {
             const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
             this.#meshHeight = computedH > 0 ? computedH : 1.0;
         }
 
-        this.#farDistance = Math.max(10.0, options.farDistance ?? 35.0);
-        const baseReceiveShadow = options.receiveShadow ?? true;
+        this.#farDistance = Math.max(10.0, farDistance);
+        this.#receiveShadow = receiveShadow;
 
-        if (options.densityPerHectare !== undefined) this.#densityPerHectare = options.densityPerHectare;
-        if (options.densityMultiplier !== undefined) this.#densityMultiplier = options.densityMultiplier;
-        if (options.densityScaleByWeight !== undefined) this.#densityScaleByWeight = options.densityScaleByWeight;
-        if (options.minSlope !== undefined) this.#minSlope = options.minSlope;
-        if (options.maxSlope !== undefined) this.#maxSlope = options.maxSlope;
-        if (options.cullingDistance !== undefined) this.#cullingDistance = options.cullingDistance;
-        if (options.shrinkStartDistance !== undefined) {
-            this.#shrinkStartDistance = options.shrinkStartDistance;
+        if (densityPerHectare !== undefined) this.#densityPerHectare = densityPerHectare;
+        if (densityMultiplier !== undefined) this.#densityMultiplier = densityMultiplier;
+        if (densityScaleByWeight !== undefined) this.#densityScaleByWeight = densityScaleByWeight;
+        if (minSlope !== undefined) this.#minSlope = minSlope;
+        if (maxSlope !== undefined) this.#maxSlope = maxSlope;
+        if (cullingDistance !== undefined) this.#cullingDistance = cullingDistance;
+        if (shrinkStartDistance !== undefined) {
+            this.#shrinkStartDistance = shrinkStartDistance;
         } else {
             this.#shrinkStartDistance = this.#cullingDistance * 0.75;
         }
-        if (options.minScale) this.#minScale = [options.minScale[0], options.minScale[1], options.minScale[2] ?? options.minScale[0]];
-        if (options.maxScale) this.#maxScale = [options.maxScale[0], options.maxScale[1], options.maxScale[2] ?? options.maxScale[0]];
-        if (options.groundBlendStrength !== undefined) this.#groundBlendStrength = options.groundBlendStrength;
+        if (minScale) this.#minScale = [minScale[0], minScale[1], minScale[2] ?? minScale[0]];
+        if (maxScale) this.#maxScale = [maxScale[0], maxScale[1], maxScale[2] ?? maxScale[0]];
+        if (groundBlendStrength !== undefined) this.#groundBlendStrength = groundBlendStrength;
 
-        this.#alphaCutoff = options.alphaCutoff ?? 0.2;
+        this.#alphaCutoff = alphaCutoff;
 
         const inheritedRoughness = mat?.roughnessFactor ?? mat?.roughness;
-        if (options.roughness !== undefined) {
-            this.#roughness = options.roughness;
+        if (roughness !== undefined) {
+            this.#roughness = roughness;
         } else if (inheritedRoughness !== undefined) {
             this.#roughness = inheritedRoughness;
         }
 
-        if (options.subsurfaceStrength !== undefined) this.#subsurfaceStrength = options.subsurfaceStrength;
-        if (options.subsurfaceColor) this.#subsurfaceColor = [...options.subsurfaceColor];
-        if (options.exposureBoost !== undefined) this.#exposureBoost = options.exposureBoost;
-        if (options.targetLayer !== undefined) this.#targetLayer = options.targetLayer;
-        if (options.bottomOffset !== undefined) this.#bottomOffset = options.bottomOffset;
-        this.#receiveShadow = baseReceiveShadow;
-        if (options.shadowStrength !== undefined) this.#shadowStrength = options.shadowStrength;
-        this.#castShadow = options.castShadow ?? true;
-        if (options.shadowCullDistance !== undefined) {
-            this.#shadowCullDistance = Math.max(0.0, options.shadowCullDistance);
-            this.#shadowShrinkStartDistance = options.shadowShrinkStartDistance !== undefined
-                ? Math.max(0.0, options.shadowShrinkStartDistance)
+        if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
+        if (subsurfaceColor) this.#subsurfaceColor = [...subsurfaceColor];
+        if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
+        if (targetLayer !== undefined) this.#targetLayer = targetLayer;
+        if (bottomOffset !== undefined) this.#bottomOffset = bottomOffset;
+        if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
+        this.#castShadow = castShadow;
+        if (shadowCullDistance !== undefined) {
+            this.#shadowCullDistance = Math.max(0.0, shadowCullDistance);
+            this.#shadowShrinkStartDistance = shadowShrinkStartDistance !== undefined
+                ? Math.max(0.0, shadowShrinkStartDistance)
                 : Math.max(0.0, this.#shadowCullDistance * 0.75);
-        } else if (options.shadowShrinkStartDistance !== undefined) {
-            this.#shadowShrinkStartDistance = Math.max(0.0, options.shadowShrinkStartDistance);
+        } else if (shadowShrinkStartDistance !== undefined) {
+            this.#shadowShrinkStartDistance = Math.max(0.0, shadowShrinkStartDistance);
         } else {
             this.#shadowShrinkStartDistance = this.#shadowCullDistance * 0.75;
         }

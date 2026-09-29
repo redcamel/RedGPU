@@ -99,8 +99,7 @@ class LandscapeFoliageManager {
         this.#redGPUContext = landscape.redGPUContext;
         this.#spatialGrid = new FoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
             this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Empty_BindGroupLayout', {
                 label: 'Landscape_Empty_BindGroupLayout',
@@ -444,8 +443,9 @@ class LandscapeFoliageManager {
      */
     set windDirection(val: [number, number]) {
         if (Array.isArray(val) && val.length >= 2) {
-            const x = Number(val[0]) || 0;
-            const y = Number(val[1]) || 0;
+            const [rawX, rawY] = val;
+            const x = Number(rawX) || 0;
+            const y = Number(rawY) || 0;
             const len = Math.sqrt(x * x + y * y);
             if (len > 0.0001) {
                 this.#windDirection = [x / len, y / len];
@@ -539,15 +539,16 @@ class LandscapeFoliageManager {
      * [EN] Newly created and registered {@link Foliage} instance
      */
     addFoliage(options: FoliageOptions): Foliage {
-        if (this.#foliageTypes.has(options.name)) {
-            console.warn(`[LandscapeFoliageManager] Foliage with name '${options.name}' already exists.`);
-            return this.#foliageTypes.get(options.name)!;
+        const {name, subCellSize, streamingRadius} = options;
+        if (this.#foliageTypes.has(name)) {
+            console.warn(`[LandscapeFoliageManager] Foliage with name '${name}' already exists.`);
+            return this.#foliageTypes.get(name)!;
         }
 
         const mergedOptions: FoliageOptions = {
             ...options,
-            subCellSize: options.subCellSize ?? this.#subCellSize,
-            streamingRadius: options.streamingRadius ?? this.#streamingRadius
+            subCellSize: subCellSize ?? this.#subCellSize,
+            streamingRadius: streamingRadius ?? this.#streamingRadius
         };
 
         const foliage = new Foliage(

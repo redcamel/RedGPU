@@ -85,8 +85,7 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         layoutEntries: GPUBindGroupLayoutEntry[],
         defaultUniformByteLength: number = 16
     ): void {
-        const device = this.gpuDevice;
-        const resourceManager = this.resourceManager;
+        const {gpuDevice: device, resourceManager} = this;
         if (!device) return;
 
         this.#uniformBufferPool = [];

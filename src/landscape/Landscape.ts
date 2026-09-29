@@ -175,11 +175,9 @@ export class Landscape extends RedGPUObject {
         let wsX = 2000;
         let wsZ = 2000;
         if (Array.isArray(worldSize)) {
-            wsX = worldSize[0];
-            wsZ = worldSize[1];
+            [wsX, wsZ] = worldSize;
         } else if (typeof worldSize === 'number') {
-            wsX = worldSize;
-            wsZ = worldSize;
+            wsX = wsZ = worldSize;
         }
 
         const worldSizeX = wsX;
@@ -1356,20 +1354,25 @@ export class Landscape extends RedGPUObject {
     }
 
     #updateLandscapeUniforms(): void {
-        const grid = this.#spatialGrid;
-        const countX = grid.tileCountX;
-        const countZ = grid.tileCountZ;
+        const {
+            tileCountX: countX,
+            tileCountZ: countZ,
+            worldSizeX,
+            worldSizeZ,
+            tileSizeX,
+            tileSizeZ
+        } = this.#spatialGrid;
         const vhtW = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.width || (countX * 512);
         const vhtH = this.#tileStreamer?.vhtAtlasTexture?.gpuTexture?.height || (countZ * 512);
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
-            grid.worldSizeX,
-            grid.worldSizeZ,
+            worldSizeX,
+            worldSizeZ,
             this.#debuggerManager?.landscapeLodColoration ?? false,
             countX * countZ,
-            grid.tileSizeX,
-            grid.tileSizeZ,
+            tileSizeX,
+            tileSizeZ,
             this.#componentSizeQuads,
             vhtW,
             vhtH,
@@ -1414,9 +1417,7 @@ export class Landscape extends RedGPUObject {
         const material = this.#material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
-        const antialiasingManager = this.antialiasingManager;
-        const msaaID = antialiasingManager.msaaID;
-        const useMSAA = antialiasingManager.useMSAA;
+        const {msaaID, useMSAA} = this.antialiasingManager;
         const sampleCount = useMSAA ? 4 : 1;
         const isWireframe = !!this.#debuggerManager?.landscapeWireframe;
         const topology = isWireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
