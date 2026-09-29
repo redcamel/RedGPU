@@ -266,7 +266,8 @@ function renderTestPane({
                 max: 250,
                 step: 5
             });
-            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true, label: 'totalInstances'});
+            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true});
+            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true});
 
             // [KO] Landscape 설정
             // [EN] Landscape settings

@@ -80,7 +80,7 @@ export class GrassMegaBuffer extends RedGPUObject {
     static readonly MAX_TYPES: number = 16;
     static readonly MAX_INDIRECT_CALLS: number = 64;
     static readonly TYPE_PARAM_FLOATS: number = 16;
-    #maxTotalInstances: number;
+    #instanceCapacity: number;
     #maxTypes: number;
 
     #cpuRawDataBuffer: Float32Array;
@@ -119,10 +119,10 @@ export class GrassMegaBuffer extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext, initialCapacity: number = 131072, maxTypes: number = 16) {
         super(redGPUContext);
-        this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
         this.#maxTypes = maxTypes;
 
-        this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * GrassMegaBuffer.STRIDE_FLOATS);
+        this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * GrassMegaBuffer.STRIDE_FLOATS);
 
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * GrassMegaBuffer.TYPE_PARAM_FLOATS);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
@@ -175,8 +175,8 @@ export class GrassMegaBuffer extends RedGPUObject {
      * [KO] 현재 할당된 메가버퍼의 최대 수용 인스턴스 용량을 반환합니다.
      * [EN] Returns the maximum instance capacity of the currently allocated mega-buffer.
      */
-    get maxTotalInstances(): number {
-        return this.#maxTotalInstances;
+    get instanceCapacity(): number {
+        return this.#instanceCapacity;
     }
 
     /**
@@ -221,10 +221,10 @@ export class GrassMegaBuffer extends RedGPUObject {
         const totalCulledNeeded = rounded * 2;
 
         if (
-            this.#totalAllocatedInstances + rounded > this.#maxTotalInstances ||
-            this.#totalAllocatedCulledInstances + totalCulledNeeded > this.#maxTotalInstances * 2
+            this.#totalAllocatedInstances + rounded > this.#instanceCapacity ||
+            this.#totalAllocatedCulledInstances + totalCulledNeeded > this.#instanceCapacity * 2
         ) {
-            this.#resizeBuffer(Math.max(this.#maxTotalInstances * 2, this.#totalAllocatedInstances + rounded));
+            this.#resizeBuffer(Math.max(this.#instanceCapacity * 2, this.#totalAllocatedInstances + rounded));
         }
 
         const rawBaseOffset = this.#totalAllocatedInstances;
@@ -493,8 +493,8 @@ export class GrassMegaBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const culledCapacity = Math.max(this.#maxTotalInstances * 2, this.#totalAllocatedCulledInstances);
-        const rawByteSize = this.#maxTotalInstances * GrassMegaBuffer.STRIDE_BYTES;
+        const culledCapacity = Math.max(this.#instanceCapacity * 2, this.#totalAllocatedCulledInstances);
+        const rawByteSize = this.#instanceCapacity * GrassMegaBuffer.STRIDE_BYTES;
         const culledByteSize = culledCapacity * GrassMegaBuffer.STRIDE_BYTES;
         const indirectByteSize = GrassMegaBuffer.MAX_INDIRECT_CALLS * 5 * 4;
         const typeParamsByteSize = this.#maxTypes * GrassMegaBuffer.TYPE_PARAM_FLOATS * 4;
@@ -550,9 +550,9 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     #resizeBuffer(newCapacity: number): void {
-        this.#maxTotalInstances = Math.ceil(newCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(newCapacity / 64) * 64;
 
-        const newRawBuffer = new Float32Array(this.#maxTotalInstances * GrassMegaBuffer.STRIDE_FLOATS);
+        const newRawBuffer = new Float32Array(this.#instanceCapacity * GrassMegaBuffer.STRIDE_FLOATS);
         newRawBuffer.set(this.#cpuRawDataBuffer);
         this.#cpuRawDataBuffer = newRawBuffer;
 

@@ -299,6 +299,14 @@ export class LandscapeGrassManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 잔디 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다.
+     * [EN] Returns the maximum grass instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer.
+     */
+    get instanceCapacity(): number {
+        return this.#megaBuffer.instanceCapacity;
+    }
+
+    /**
      * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
      * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
      *
