@@ -15,11 +15,12 @@
  */
 export * as Core from "./core";
 
-import LandscapeFoliageManager from "./LandscapeFoliageManager";
+import FoliageManager from "./FoliageManager";
 import type {FoliageLODConfig, FoliageLODInfo, FoliageOptions} from "./core/Foliage";
 
 export {
-    LandscapeFoliageManager
+    FoliageManager,
+    FoliageManager as LandscapeFoliageManager
 };
 
 export type {

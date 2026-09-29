@@ -141,7 +141,7 @@ function sortCandidateIndicesByDistance(
  *
  * @category Landscape
  */
-export class LandscapeGrassManager extends RedGPUObject {
+export class GrassManager extends RedGPUObject {
 
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
@@ -206,9 +206,9 @@ export class LandscapeGrassManager extends RedGPUObject {
     #prngState: number = 12345;
 
     /**
-     * [KO] LandscapeGrassManager의 새 인스턴스를 생성합니다.
+     * [KO] GrassManager의 새 인스턴스를 생성합니다.
      * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a new instance of LandscapeGrassManager.
+     * [EN] Creates a new instance of GrassManager.
      * @remarks Do not instantiate directly; access via the `landscape.grassManager` property.
      *
      * @param landscape -
@@ -380,14 +380,14 @@ export class LandscapeGrassManager extends RedGPUObject {
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
 
             const uniformBuffer = gpuDevice.createBuffer({
-                label: `Grass_MaterialUniformBuffer_${name}`,
+                label: `Grass_MaterialUniformBuffer_${name}_${this.instanceId}`,
                 size: cpuBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
             const grassUniformCPUBuffer = new Float32Array(8);
             const grassUniformGPUBuffer = gpuDevice.createBuffer({
-                label: `Grass_WindUniformBuffer_${name}`,
+                label: `Grass_WindUniformBuffer_${name}_${this.instanceId}`,
                 size: grassUniformCPUBuffer.byteLength,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
@@ -593,7 +593,7 @@ export class LandscapeGrassManager extends RedGPUObject {
 
             if (!res.instanceBindGroup && culledGPUBuffer && grassUniformGPUBuffer) {
                 res.instanceBindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_InstanceBindGroup_${name}`,
+                    label: `Grass_InstanceBindGroup_${name}_${this.instanceId}`,
                     layout: this.#pipelineBindGroupLayout1,
                     entries: [
                         {binding: 0, resource: {buffer: culledGPUBuffer}},
@@ -605,7 +605,7 @@ export class LandscapeGrassManager extends RedGPUObject {
             if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
                 const {basicSampler} = resourceManager;
                 res.bindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_MaterialBindGroup_${name}`,
+                    label: `Grass_MaterialBindGroup_${name}_${this.instanceId}`,
                     layout: this.#pipelineBindGroupLayout2,
                     entries: [
                         {binding: 0, resource: colorTexView},
@@ -1025,7 +1025,7 @@ export class LandscapeGrassManager extends RedGPUObject {
         if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
         this.#shadowPipeline = gpuDevice.createRenderPipeline({
-            label: 'Grass_Shadow_RenderPipeline',
+            label: `Grass_Shadow_RenderPipeline_${this.instanceId}`,
             layout: this.#pipelineLayout,
             vertex: {
                 module: this.#vertexShadowModule,
@@ -1105,7 +1105,7 @@ export class LandscapeGrassManager extends RedGPUObject {
         const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
 
         pipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}`,
+            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}_${this.instanceId}`,
             layout: this.#pipelineLayout,
             vertex: {
                 module: this.#vertexModule,
@@ -1564,5 +1564,5 @@ export class LandscapeGrassManager extends RedGPUObject {
     }
 }
 
-Object.freeze(LandscapeGrassManager);
-export default LandscapeGrassManager;
+Object.freeze(GrassManager);
+export default GrassManager;

@@ -311,7 +311,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             descriptor
         );
         const bindGroup = gpuDevice.createBindGroup({
-            label: 'Landscape_Material_BindGroup',
+            label: `Landscape_Material_BindGroup_${this.instanceId}`,
             layout: bindGroupLayout,
             entries: entries
         });

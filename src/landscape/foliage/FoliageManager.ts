@@ -44,7 +44,7 @@ import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
  *
  * @category Landscape
  */
-class LandscapeFoliageManager {
+class FoliageManager {
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
     #emptyBindGroup: GPUBindGroup | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -77,9 +77,9 @@ class LandscapeFoliageManager {
     #windFlutterStrength: number = 0.5;
 
     /**
-     * [KO] LandscapeFoliageManager의 새 인스턴스를 생성합니다.
+     * [KO] FoliageManager의 새 인스턴스를 생성합니다.
      * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a new instance of LandscapeFoliageManager.
+     * [EN] Creates a new instance of FoliageManager.
      * @remarks Do not instantiate directly; access via the `landscape.foliageManager` property.
      *
      * @param landscape -
@@ -541,7 +541,7 @@ class LandscapeFoliageManager {
     addFoliage(options: FoliageOptions): Foliage {
         const {name, subCellSize, streamingRadius} = options;
         if (this.#foliageTypes.has(name)) {
-            console.warn(`[LandscapeFoliageManager] Foliage with name '${name}' already exists.`);
+            console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
             return this.#foliageTypes.get(name)!;
         }
 
@@ -720,5 +720,5 @@ class LandscapeFoliageManager {
     }
 }
 
-Object.freeze(LandscapeFoliageManager);
-export default LandscapeFoliageManager;
+Object.freeze(FoliageManager);
+export default FoliageManager;

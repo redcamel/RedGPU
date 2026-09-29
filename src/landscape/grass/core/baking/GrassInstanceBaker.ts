@@ -194,7 +194,7 @@ export class GrassInstanceBaker extends RedGPUObject {
 
             const {basicSampler} = resourceManager;
             this.#bakeBindGroup = gpuDevice.createBindGroup({
-                label: 'Grass_Bake_BindGroup',
+                label: `Grass_Bake_BindGroup_${this.instanceId}`,
                 layout: this.#bakeBindGroupLayout,
                 entries: [
                     {binding: 0, resource: {buffer: rawGPUBuffer}},
@@ -236,13 +236,13 @@ export class GrassInstanceBaker extends RedGPUObject {
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'Grass_Bake_UniformBuffer',
+            label: `Grass_Bake_UniformBuffer_${this.instanceId}`,
             size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
-            label: 'Grass_Bake_TasksBuffer',
+            label: `Grass_Bake_TasksBuffer_${this.instanceId}`,
             size: this.#taskCapacity * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
@@ -269,7 +269,7 @@ export class GrassInstanceBaker extends RedGPUObject {
         });
 
         this.#bakePipeline = gpuDevice.createComputePipeline({
-            label: 'Grass_Bake_ComputePipeline',
+            label: `Grass_Bake_ComputePipeline_${this.instanceId}`,
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,
@@ -295,7 +295,7 @@ export class GrassInstanceBaker extends RedGPUObject {
         if (gpuDevice) {
             this.#tasksGPUBuffer?.destroy();
             this.#tasksGPUBuffer = gpuDevice.createBuffer({
-                label: 'Grass_Bake_TasksBuffer',
+                label: `Grass_Bake_TasksBuffer_${this.instanceId}`,
                 size: this.#taskCapacity * 8,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });

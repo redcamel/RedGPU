@@ -15,14 +15,17 @@
  */
 export * as Core from "./core";
 
-import LandscapeDebuggerManager, {
+import DebuggerManager, {
+    type DebuggerManagerOptions,
     type LandscapeDebuggerManagerOptions,
     type LandscapeDebugPropertyChangeHandler,
     type LandscapeDebugPropertyKey
-} from "./LandscapeDebuggerManager";
+} from "./DebuggerManager";
 
 export {
-    LandscapeDebuggerManager,
+    DebuggerManager,
+    DebuggerManager as LandscapeDebuggerManager,
+    type DebuggerManagerOptions,
     type LandscapeDebuggerManagerOptions,
     type LandscapeDebugPropertyKey,
     type LandscapeDebugPropertyChangeHandler

@@ -10,7 +10,7 @@ import LandscapeVBTORMDebugger from "./core/vbt/LandscapeVBTORMDebugger";
 export type LandscapeDebugPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 export type LandscapeDebugPropertyChangeHandler = (key: LandscapeDebugPropertyKey, value: boolean | number) => void;
 
-export interface LandscapeDebuggerManagerOptions {
+export interface DebuggerManagerOptions {
     spatialGrid?: boolean;
     vht?: boolean;
     vnt?: boolean;
@@ -24,7 +24,9 @@ export interface LandscapeDebuggerManagerOptions {
     onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
 }
 
-export class LandscapeDebuggerManager {
+export type LandscapeDebuggerManagerOptions = DebuggerManagerOptions;
+
+export class DebuggerManager {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
 
@@ -47,7 +49,7 @@ export class LandscapeDebuggerManager {
     #landscapeDebugMode: number = 0;
     #onDebugPropertyChange?: LandscapeDebugPropertyChangeHandler;
 
-    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: LandscapeDebuggerManagerOptions) {
+    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: DebuggerManagerOptions) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
         this.#onDebugPropertyChange = options?.onDebugPropertyChange;
@@ -383,5 +385,5 @@ export class LandscapeDebuggerManager {
     }
 }
 
-Object.freeze(LandscapeDebuggerManager);
-export default LandscapeDebuggerManager;
+Object.freeze(DebuggerManager);
+export default DebuggerManager;

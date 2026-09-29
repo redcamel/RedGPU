@@ -13,11 +13,11 @@ import ColorRGBA from "../color/ColorRGBA";
 import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
 import RedGPUObject from "../base/RedGPUObject";
-import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
-import LandscapeGrassManager from "./grass/LandscapeGrassManager";
+import FoliageManager from "./foliage/FoliageManager";
+import GrassManager from "./grass/GrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../math/computeViewFrustumPlanes";
-import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
+import DebuggerManager from "./debugger/DebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
 
@@ -104,9 +104,9 @@ export class Landscape extends RedGPUObject {
     // =========================================================================
     // Subsystem Managers
     // =========================================================================
-    #foliageManager: LandscapeFoliageManager;
-    #grassManager: LandscapeGrassManager;
-    #debuggerManager: LandscapeDebuggerManager;
+    #foliageManager: FoliageManager;
+    #grassManager: GrassManager;
+    #debuggerManager: DebuggerManager;
 
     // =========================================================================
     // Spatial Dimensions & Grid Configuration
@@ -213,10 +213,10 @@ export class Landscape extends RedGPUObject {
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
-        this.#foliageManager = new LandscapeFoliageManager(this, this.#tileStreamer, () => {
+        this.#foliageManager = new FoliageManager(this, this.#tileStreamer, () => {
             this.#updateLandscapeUniforms();
         });
-        this.#grassManager = new LandscapeGrassManager(this, this.#tileStreamer);
+        this.#grassManager = new GrassManager(this, this.#tileStreamer);
         this.#tileStreamer.setOnTileLoaded((tileComponent) => {
             this.#foliageManager?.onTileLoaded(tileComponent);
             this.#grassManager?.onTileLoaded(tileComponent);
@@ -224,7 +224,7 @@ export class Landscape extends RedGPUObject {
         this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
             this.#grassManager?.rebakeAll();
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this, this.#tileStreamer, {
+        this.#debuggerManager = new DebuggerManager(this, this.#tileStreamer, {
             onDebugPropertyChange: (key) => {
                 if (key === 'debugMode' || key === 'lodColoration') {
                     this.#updateLandscapeUniforms();
@@ -241,7 +241,7 @@ export class Landscape extends RedGPUObject {
      * [KO] 지형의 시각화 디버깅(타일 바운드, 노멀, LOD 와이어프레임 등)을 총괄하는 디버거 매니저를 반환합니다.
      * [EN] Returns the debugger manager that coordinates visual debugging (tile bounds, normals, LOD wireframes, etc.).
      */
-    get debuggerManager(): LandscapeDebuggerManager {
+    get debuggerManager(): DebuggerManager {
         return this.#debuggerManager;
     }
 
@@ -249,7 +249,7 @@ export class Landscape extends RedGPUObject {
      * [KO] 지형 상에 배치되는 나무, 바위 등의 3D 식생 및 임포스터 인스턴싱 매니저를 반환합니다.
      * [EN] Returns the foliage manager for 3D vegetation, rocks, and impostor instancing on the terrain.
      */
-    get foliageManager(): LandscapeFoliageManager {
+    get foliageManager(): FoliageManager {
         return this.#foliageManager;
     }
 
@@ -257,7 +257,7 @@ export class Landscape extends RedGPUObject {
      * [KO] 절차적 잔디 필드 및 Multi-Draw Indirect 렌더링 매니저를 반환합니다.
      * [EN] Returns the procedural grass field and Multi-Draw Indirect rendering manager.
      */
-    get grassManager(): LandscapeGrassManager {
+    get grassManager(): GrassManager {
         return this.#grassManager;
     }
 

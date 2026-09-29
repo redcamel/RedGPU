@@ -135,7 +135,7 @@ export class GrassCuller extends RedGPUObject {
             this.#cachedIndirectBuffer = megaBuffer.indirectGPUBuffer;
 
             this.#cullBindGroup = gpuDevice.createBindGroup({
-                label: 'Grass_Cull_BindGroup',
+                label: `Grass_Cull_BindGroup_${this.instanceId}`,
                 layout: this.#cullBindGroupLayout,
                 entries: [
                     {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
@@ -186,7 +186,7 @@ export class GrassCuller extends RedGPUObject {
         if (!gpuDevice) return;
 
         this.#globalUniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'Grass_Cull_GlobalUniformBuffer',
+            label: `Grass_Cull_GlobalUniformBuffer_${this.instanceId}`,
             size: this.#globalUniformCPUBuffer.byteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
@@ -211,7 +211,7 @@ export class GrassCuller extends RedGPUObject {
         });
 
         this.#cullPipeline = gpuDevice.createComputePipeline({
-            label: 'Grass_Cull_ComputePipeline',
+            label: `Grass_Cull_ComputePipeline_${this.instanceId}`,
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,

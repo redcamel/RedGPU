@@ -32,7 +32,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
         const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
 
         this.#bindGroup = gpuDevice.createBindGroup({
-            label: 'Landscape_Cull_BindGroup',
+            label: `Landscape_Cull_BindGroup_${this.instanceId}`,
             layout: this.#bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
@@ -156,7 +156,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 
         this.#uniformBuffer = gpuDevice.createBuffer({
-            label: 'Landscape_Cull_UniformBuffer',
+            label: `Landscape_Cull_UniformBuffer_${this.instanceId}`,
             size: this.#uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
@@ -171,7 +171,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
             bindGroupLayouts: [this.#bindGroupLayout]
         });
         this.#computePipeline = gpuDevice.createComputePipeline({
-            label: 'Landscape_Cull_ComputePipeline',
+            label: `Landscape_Cull_ComputePipeline_${this.instanceId}`,
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,
