@@ -11,19 +11,19 @@ import {FoliageBaker} from "../baking/FoliageBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 class FoliageCullingDispatcher {
-    static readonly #tempPVMatrix: mat4 = mat4.create();
-    static readonly #cachedFrustumPlanes: number[][] = [
+    #tempPVMatrix: mat4 = mat4.create();
+    #cachedFrustumPlanes: number[][] = [
         new Array(4), new Array(4), new Array(4),
         new Array(4), new Array(4), new Array(4)
     ];
-    static readonly #cachedShadowFrustumPlanes: number[][][] = [
+    #cachedShadowFrustumPlanes: number[][][] = [
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)]
     ];
 
-    static readonly #cachedCascadeParams: CascadeCullingParam[] = [
+    #cachedCascadeParams: CascadeCullingParam[] = [
         {maxDistance: 3.2, hasShadow: false, frustumPlanes: null},
         {maxDistance: 25.0, hasShadow: false, frustumPlanes: null},
         {maxDistance: 85.0, hasShadow: false, frustumPlanes: null},
@@ -56,7 +56,132 @@ class FoliageCullingDispatcher {
         return this.#baker;
     }
 
-    static #computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
+    updateAndDispatch(
+        typeList: Foliage[],
+        viewOrCamera: any,
+        landscape?: Landscape | null,
+        stateData?: any
+    ): void {
+        const typeCount = typeList.length;
+        if (typeCount === 0) return;
+
+        const camera = viewOrCamera?.rawCamera || viewOrCamera?.camera || viewOrCamera;
+        const camX = camera?.x ?? camera?.position?.[0] ?? 0;
+        const camY = camera?.y ?? camera?.position?.[1] ?? 0;
+        const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
+
+        let frustumPlanes: number[][] | null = stateData?.frustumPlanes
+            ?? stateData?.view?.frustumPlanes
+            ?? viewOrCamera?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
+            frustumPlanes = this.#computeFrustumPlanesToBuffer(
+                camera.projectionMatrix,
+                camera.viewMatrix,
+                this.#cachedFrustumPlanes
+            );
+        }
+
+        const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
+        const heightScale = landscape?.heightScale ?? 600.0;
+        const hasVHT = !!(this.#tileStreamer?.getAtlasTexture('vht')?.gpuTexture);
+
+        const fov = camera?.fov ?? 60.0;
+        if (fov !== this.#lastFOV) {
+            this.#lastFOV = fov;
+            const fovRad = (fov * Math.PI) / 180.0;
+            this.#cachedFovFactor = Math.tan(fovRad * 0.5);
+        }
+        const fovFactor = this.#cachedFovFactor;
+
+        if (this.#megaBuffer) {
+
+            const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
+            const dirShadow = shadowManager?.directionalShadowManager;
+            const cascadeParams = this.#cachedCascadeParams;
+            const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
+
+            if (stateData && stateData.activeCascadeCount > 0) {
+
+                const cCount = stateData.activeCascadeCount;
+                for (let c = 0; c < 4; c++) {
+                    const param = cascadeParams[c];
+                    param.maxDistance = stateData.cascadeSplitDepths[c];
+                    param.hasShadow = c < cCount;
+                    param.frustumPlanes = (c < cCount) ? stateData.shadowFrustumPlanes[c] : null;
+                }
+            } else if (dirShadow && activeCascadeCount > 0) {
+                const cascadePV = dirShadow.cascadeProjectionViewMatrices;
+                const splitDepths = dirShadow.cascadeSplitDepths;
+                for (let c = 0; c < 4; c++) {
+                    const pv = (c < activeCascadeCount) ? cascadePV[c] : null;
+                    const param = cascadeParams[c];
+                    param.maxDistance = splitDepths[c] ?? 200.0;
+                    param.hasShadow = !!pv;
+                    if (pv) {
+                        param.frustumPlanes = this.#computeFrustumPlanesFromMatrix(
+                            pv,
+                            this.#cachedShadowFrustumPlanes[c]
+                        );
+                    } else {
+                        param.frustumPlanes = null;
+                    }
+                }
+            } else {
+                for (let c = 0; c < 4; c++) {
+                    cascadeParams[c].hasShadow = false;
+                }
+            }
+
+            const currentView = stateData?.view || (viewOrCamera as any)?.view || (viewOrCamera?.camera ? viewOrCamera : null);
+            const hzb = currentView?.hierarchicalZBuffer;
+            const hzbTextureView = hzb?.textureView || null;
+            const hzbSampler = hzb?.sampler || null;
+            this.#lastHZBTextureView = hzbTextureView;
+            this.#lastHZBSampler = hzbSampler;
+            const hasHZB = !!hzbTextureView;
+
+            let viewProjectionMatrix: mat4 | null = camera?.viewProjectionMatrix || null;
+            if (!viewProjectionMatrix && camera?.projectionMatrix && camera?.viewMatrix) {
+                mat4.multiply(this.#tempPVMatrix, camera.projectionMatrix, camera.viewMatrix);
+                viewProjectionMatrix = this.#tempPVMatrix;
+            }
+
+            const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
+            this.#megaBuffer.updateUnifiedGlobalUniforms(
+                camX, camY, camZ,
+                worldSizeX, heightScale, hasVHT,
+                fovFactor,
+                frustumPlanes,
+                cascadeParams,
+                activeCascadeCount,
+                viewportHeight,
+                hasHZB,
+                viewProjectionMatrix,
+                512.0,
+                256.0,
+                0.002
+            );
+        }
+
+        if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
+            this.#landscapeRef = landscape;
+
+            this.#redGPUContext.commandEncoderManager.useEncoder(
+                COMMAND_ENCODER_TYPE.PRE_PROCESS,
+                this.#onResetMultiIndirectCommands
+            );
+
+            this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+                'Foliage_GPUCulling_ComputePass',
+                this.#onPreProcessComputePass
+            );
+        }
+    }
+
+    #computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
         const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
 
         p0[0] = m[3] + m[0];
@@ -98,8 +223,8 @@ class FoliageCullingDispatcher {
         return out;
     }
 
-    static #computeFrustumPlanesToBuffer(projectionMatrix: mat4, viewMatrix: mat4, out: number[][]): number[][] {
-        const m = FoliageCullingDispatcher.#tempPVMatrix;
+    #computeFrustumPlanesToBuffer(projectionMatrix: mat4, viewMatrix: mat4, out: number[][]): number[][] {
+        const m = this.#tempPVMatrix;
         mat4.multiply(m, projectionMatrix, viewMatrix);
 
         const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
@@ -141,131 +266,6 @@ class FoliageCullingDispatcher {
             }
         }
         return out;
-    }
-
-    updateAndDispatch(
-        typeList: Foliage[],
-        viewOrCamera: any,
-        landscape?: Landscape | null,
-        stateData?: any
-    ): void {
-        const typeCount = typeList.length;
-        if (typeCount === 0) return;
-
-        const camera = viewOrCamera?.rawCamera || viewOrCamera?.camera || viewOrCamera;
-        const camX = camera?.x ?? camera?.position?.[0] ?? 0;
-        const camY = camera?.y ?? camera?.position?.[1] ?? 0;
-        const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
-
-        let frustumPlanes: number[][] | null = stateData?.frustumPlanes
-            ?? stateData?.view?.frustumPlanes
-            ?? viewOrCamera?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
-            frustumPlanes = FoliageCullingDispatcher.#computeFrustumPlanesToBuffer(
-                camera.projectionMatrix,
-                camera.viewMatrix,
-                FoliageCullingDispatcher.#cachedFrustumPlanes
-            );
-        }
-
-        const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
-        const heightScale = landscape?.heightScale ?? 600.0;
-        const hasVHT = !!(this.#tileStreamer?.getAtlasTexture('vht')?.gpuTexture);
-
-        const fov = camera?.fov ?? 60.0;
-        if (fov !== this.#lastFOV) {
-            this.#lastFOV = fov;
-            const fovRad = (fov * Math.PI) / 180.0;
-            this.#cachedFovFactor = Math.tan(fovRad * 0.5);
-        }
-        const fovFactor = this.#cachedFovFactor;
-
-        if (this.#megaBuffer) {
-
-            const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
-            const dirShadow = shadowManager?.directionalShadowManager;
-            const cascadeParams = FoliageCullingDispatcher.#cachedCascadeParams;
-            const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
-
-            if (stateData && stateData.activeCascadeCount > 0) {
-
-                const cCount = stateData.activeCascadeCount;
-                for (let c = 0; c < 4; c++) {
-                    const param = cascadeParams[c];
-                    param.maxDistance = stateData.cascadeSplitDepths[c];
-                    param.hasShadow = c < cCount;
-                    param.frustumPlanes = (c < cCount) ? stateData.shadowFrustumPlanes[c] : null;
-                }
-            } else if (dirShadow && activeCascadeCount > 0) {
-                const cascadePV = dirShadow.cascadeProjectionViewMatrices;
-                const splitDepths = dirShadow.cascadeSplitDepths;
-                for (let c = 0; c < 4; c++) {
-                    const pv = (c < activeCascadeCount) ? cascadePV[c] : null;
-                    const param = cascadeParams[c];
-                    param.maxDistance = splitDepths[c] ?? 200.0;
-                    param.hasShadow = !!pv;
-                    if (pv) {
-                        param.frustumPlanes = FoliageCullingDispatcher.#computeFrustumPlanesFromMatrix(
-                            pv,
-                            FoliageCullingDispatcher.#cachedShadowFrustumPlanes[c]
-                        );
-                    } else {
-                        param.frustumPlanes = null;
-                    }
-                }
-            } else {
-                for (let c = 0; c < 4; c++) {
-                    cascadeParams[c].hasShadow = false;
-                }
-            }
-
-            const currentView = stateData?.view || (viewOrCamera as any)?.view || (viewOrCamera?.camera ? viewOrCamera : null);
-            const hzb = currentView?.hierarchicalZBuffer;
-            const hzbTextureView = hzb?.textureView || null;
-            const hzbSampler = hzb?.sampler || null;
-            this.#lastHZBTextureView = hzbTextureView;
-            this.#lastHZBSampler = hzbSampler;
-            const hasHZB = !!hzbTextureView;
-
-            let viewProjectionMatrix: mat4 | null = camera?.viewProjectionMatrix || null;
-            if (!viewProjectionMatrix && camera?.projectionMatrix && camera?.viewMatrix) {
-                mat4.multiply(FoliageCullingDispatcher.#tempPVMatrix, camera.projectionMatrix, camera.viewMatrix);
-                viewProjectionMatrix = FoliageCullingDispatcher.#tempPVMatrix;
-            }
-
-            const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
-            this.#megaBuffer.updateUnifiedGlobalUniforms(
-                camX, camY, camZ,
-                worldSizeX, heightScale, hasVHT,
-                fovFactor,
-                frustumPlanes,
-                cascadeParams,
-                activeCascadeCount,
-                viewportHeight,
-                hasHZB,
-                viewProjectionMatrix,
-                512.0,
-                256.0,
-                0.002
-            );
-        }
-
-        if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
-            this.#landscapeRef = landscape;
-
-            this.#redGPUContext.commandEncoderManager.useEncoder(
-                COMMAND_ENCODER_TYPE.PRE_PROCESS,
-                this.#onResetMultiIndirectCommands
-            );
-
-            this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-                'Foliage_GPUCulling_ComputePass',
-                this.#onPreProcessComputePass
-            );
-        }
     }
 
     #initComputePipeline(): void {
