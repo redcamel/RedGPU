@@ -61,7 +61,7 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  * // 2. 절차적 잔디 제어 (grassManager 인스턴스)
  * landscape.grassManager.addGrass({
  *     name: 'FieldGrass',
- *     lods: [{ mesh: grassMesh, lodDistance: 100 }],
+ *     mesh: grassMesh,
  *     densityPerHectare: 20000
  * });
  *

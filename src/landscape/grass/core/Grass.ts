@@ -6,23 +6,9 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
 
-export interface GrassLODConfig {
-    mesh: Mesh;
-    lodDistance?: number;
-    receiveShadow?: boolean;
-}
-
-export interface GrassLODInfo {
-    lodIndex: number;
-    lodDistance: number;
-    geometry: Geometry | Primitive;
-    mesh: Mesh;
-    receiveShadow?: boolean;
-}
-
 export interface GrassOptions {
     name: string;
-    lods: GrassLODConfig[];
+    mesh: Mesh;
     baseColorTexture?: string | BitmapTexture;
     densityPerHectare?: number;
     densityMultiplier?: number;
@@ -30,7 +16,6 @@ export interface GrassOptions {
     minSlope?: number;
     maxSlope?: number;
     cullingDistance?: number;
-    fadeStartDistance?: number;
     shrinkStartDistance?: number;
     farDistance?: number;
     minScale?: [number, number] | [number, number, number];
@@ -53,8 +38,8 @@ export interface GrassOptions {
 }
 
 export class Grass extends RedGPUObject {
+    #mesh: Mesh;
     #geometry: Geometry | Primitive;
-    #lods: GrassLODInfo[] = [];
     #baseColorTexture: BitmapTexture;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
@@ -63,6 +48,7 @@ export class Grass extends RedGPUObject {
     #maxSlope: number = 35.0;
     #cullingDistance: number = 100.0;
     #shrinkStartDistance: number = 60.0;
+    #farDistance: number = 35.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
     #meshHeight: number = 1.0;
@@ -97,18 +83,13 @@ export class Grass extends RedGPUObject {
             consoleAndThrowError('[Grass] options.name is required and must be a non-empty string!');
         }
         super.name = options.name.trim();
-        if (!options.lods || options.lods.length === 0) {
-            throw new Error(`[Grass] 'lods' array must be provided with at least one LOD entry!`);
-        }
 
-        const sortedLods = [...options.lods].sort((a, b) => (a.lodDistance ?? 9999) - (b.lodDistance ?? 9999));
-        const lod0 = sortedLods[0];
-        const lod0Mesh = lod0.mesh;
-        if (!lod0Mesh) {
-            throw new Error(`[Grass] LOD 0 must contain a valid Mesh instance!`);
+        if (!options?.mesh) {
+            consoleAndThrowError(`[Grass] options.mesh is required and must contain a valid Mesh instance!`);
         }
+        this.#mesh = options.mesh;
 
-        const mat = lod0Mesh.material as any;
+        const mat = options.mesh.material as any;
         const resolvedTexture = options.baseColorTexture ?? mat?.baseColorTexture ?? mat?.diffuseTexture;
         if (typeof resolvedTexture === 'string') {
             this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
@@ -116,11 +97,11 @@ export class Grass extends RedGPUObject {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        const lod0Geom = lod0Mesh.geometry;
-        if (!lod0Geom) {
-            throw new Error(`[Grass] LOD 0 mesh must have a valid geometry!`);
+        const geom = options.mesh.geometry;
+        if (!geom) {
+            consoleAndThrowError(`[Grass] Mesh must have a valid geometry!`);
         }
-        this.#geometry = lod0Geom;
+        this.#geometry = geom;
 
         const vol = this.#geometry.volume;
         if (options.minY !== undefined) {
@@ -138,41 +119,8 @@ export class Grass extends RedGPUObject {
             this.#meshHeight = computedH > 0 ? computedH : 1.0;
         }
 
-        const defaultCullDist = options.cullingDistance ?? 100.0;
-        const farDistance = Math.max(10.0, options.farDistance ?? 35.0);
-
+        this.#farDistance = Math.max(10.0, options.farDistance ?? 35.0);
         const baseReceiveShadow = options.receiveShadow ?? true;
-        if (sortedLods.length === 1 && (sortedLods[0].lodDistance ?? defaultCullDist) > farDistance) {
-            const m = sortedLods[0].mesh;
-            const lodRecShadow = sortedLods[0].receiveShadow !== undefined ? sortedLods[0].receiveShadow : baseReceiveShadow;
-            this.#lods = [
-                {
-                    lodIndex: 0,
-                    lodDistance: farDistance,
-                    geometry: m.geometry,
-                    mesh: m,
-                    receiveShadow: lodRecShadow
-                },
-                {
-                    lodIndex: 1,
-                    lodDistance: sortedLods[0].lodDistance ?? defaultCullDist,
-                    geometry: m.geometry,
-                    mesh: m,
-                    receiveShadow: false
-                }
-            ];
-        } else {
-            this.#lods = sortedLods.map((lodConfig, index) => {
-                const m = lodConfig.mesh;
-                return {
-                    lodIndex: index,
-                    lodDistance: lodConfig.lodDistance ?? defaultCullDist,
-                    geometry: m.geometry,
-                    mesh: m,
-                    receiveShadow: lodConfig.receiveShadow !== undefined ? lodConfig.receiveShadow : baseReceiveShadow
-                };
-            });
-        }
 
         if (options.densityPerHectare !== undefined) this.#densityPerHectare = options.densityPerHectare;
         if (options.densityMultiplier !== undefined) this.#densityMultiplier = options.densityMultiplier;
@@ -182,8 +130,6 @@ export class Grass extends RedGPUObject {
         if (options.cullingDistance !== undefined) this.#cullingDistance = options.cullingDistance;
         if (options.shrinkStartDistance !== undefined) {
             this.#shrinkStartDistance = options.shrinkStartDistance;
-        } else if (options.fadeStartDistance !== undefined) {
-            this.#shrinkStartDistance = options.fadeStartDistance;
         } else {
             this.#shrinkStartDistance = this.#cullingDistance * 0.75;
         }
@@ -229,12 +175,21 @@ export class Grass extends RedGPUObject {
         consoleAndThrowError('[Grass] name property is readonly and cannot be changed.');
     }
 
-    get lods(): GrassLODInfo[] {
-        return this.#lods;
+    get mesh(): Mesh {
+        return this.#mesh;
     }
 
-    get lodCount(): number {
-        return this.#lods.length;
+    get geometry(): Geometry | Primitive {
+        return this.#geometry;
+    }
+
+    get farDistance(): number {
+        return this.#farDistance;
+    }
+
+    set farDistance(v: number) {
+        this.#farDistance = Math.max(10.0, v);
+        this.#dirty = true;
     }
 
     get baseColorTexture(): BitmapTexture {
@@ -471,24 +426,6 @@ export class Grass extends RedGPUObject {
 
     markClean(): void {
         this.#dirty = false;
-    }
-
-    getLODReceiveShadow(lodIndex: number): boolean {
-        if (lodIndex < 0 || lodIndex >= this.#lods.length) return false;
-        return this.#lods[lodIndex].receiveShadow !== false;
-    }
-
-    setLODReceiveShadow(lodIndex: number, value: boolean): void {
-        if (lodIndex < 0 || lodIndex >= this.#lods.length) return;
-        const boolVal = !!value;
-        const lodInfo = this.#lods[lodIndex];
-        if (lodInfo.receiveShadow === boolVal) return;
-        lodInfo.receiveShadow = boolVal;
-        this.#notifyChange();
-    }
-
-    getGeometryForLOD(lodIndex: number): Geometry | Primitive | undefined {
-        return this.#lods[lodIndex]?.geometry ?? this.#geometry;
     }
 
     #notifyChange(): void {

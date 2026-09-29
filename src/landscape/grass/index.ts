@@ -16,13 +16,12 @@
 export * as Core from "./core";
 
 import LandscapeGrassManager from "./LandscapeGrassManager";
-import type {GrassLODConfig, GrassOptions} from "./core/Grass";
+import type {GrassOptions} from "./core/Grass";
 
 export {
     LandscapeGrassManager
 };
 
 export type {
-    GrassOptions,
-    GrassLODConfig
+    GrassOptions
 };

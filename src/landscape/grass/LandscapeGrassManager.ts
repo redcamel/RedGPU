@@ -349,13 +349,24 @@ export class LandscapeGrassManager {
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
         const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));
 
-        const lodAllocConfigs = grassType.lods.map(l => ({
-            lodIndex: l.lodIndex,
-            lodDistance: l.lodDistance,
-            indexCount: (l.geometry as any)?.indexBuffer?.indexCount ?? 0,
-            firstIndex: 0,
-            baseVertex: 0
-        }));
+        const indexCount = (grassType.geometry as any)?.indexBuffer?.indexCount ?? 0;
+        const lodAllocConfigs = [
+            {
+                lodIndex: 0,
+                lodDistance: grassType.farDistance,
+                indexCount,
+                firstIndex: 0,
+                baseVertex: 0
+            },
+            {
+                lodIndex: 1,
+                lodDistance: grassType.cullingDistance,
+                indexCount,
+                firstIndex: 0,
+                baseVertex: 0
+            }
+        ];
+
 
         const alloc = this.#megaBuffer.allocateType(
             typeId,
@@ -626,8 +637,15 @@ export class LandscapeGrassManager {
 
             if (!res.instanceBindGroup || !res.bindGroup) continue;
 
+            const geom = type.geometry;
+            const lvb = geom?.vertexBuffer;
+            const lib = geom?.indexBuffer;
+            if (!lvb || !lib) continue;
+
             passEncoder.setBindGroup(1, res.instanceBindGroup);
             passEncoder.setBindGroup(2, res.bindGroup);
+            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
             for (const lodAlloc of alloc.lods) {
                 const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
@@ -635,14 +653,6 @@ export class LandscapeGrassManager {
                     passEncoder.setPipeline(targetPipeline);
                     currentPipeline = targetPipeline;
                 }
-
-                const lodGeom = type.getGeometryForLOD(lodAlloc.lodIndex);
-                const lvb = lodGeom?.vertexBuffer;
-                const lib = lodGeom?.indexBuffer;
-                if (!lvb || !lib) continue;
-
-                passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-                passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
                 const indirectOffsetBytes = lodAlloc.indirectOffset * 5 * 4;
                 passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
@@ -690,9 +700,9 @@ export class LandscapeGrassManager {
             const lod0Alloc = alloc.lods[0];
             if (!lod0Alloc) continue;
 
-            const lodGeom = type.getGeometryForLOD(0);
-            const lvb = lodGeom?.vertexBuffer;
-            const lib = lodGeom?.indexBuffer;
+            const geom = type.geometry;
+            const lvb = geom?.vertexBuffer;
+            const lib = geom?.indexBuffer;
             if (!lvb || !lib) continue;
 
             passEncoder.setBindGroup(1, res.instanceBindGroup);
@@ -814,11 +824,8 @@ export class LandscapeGrassManager {
                     res.cpuBuffer.byteLength
                 );
 
-                const lodCount = Math.min(4, type.lodCount);
-                const lodDistances: [number, number, number, number] = [9999, 9999, 9999, 9999];
-                for (let i = 0; i < lodCount; i++) {
-                    lodDistances[i] = type.lods[i].lodDistance;
-                }
+                const lodCount = 2;
+                const lodDistances: [number, number, number, number] = [type.farDistance, type.cullingDistance, 9999, 9999];
 
                 const alloc = this.#megaBuffer.getAllocation(type.typeId);
                 if (alloc) {

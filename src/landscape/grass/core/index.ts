@@ -17,7 +17,7 @@
  *
  * @packageDocumentation
  */
-import Grass, {GrassLODInfo, type GrassOptions} from "./Grass";
+import Grass, {type GrassOptions} from "./Grass";
 import {GrassBaker} from "./baking/GrassBaker";
 import {type GrassLODAllocation, GrassMegaBuffer, type GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
 import {GrassCuller} from "./culling/GrassCuller";
@@ -31,7 +31,6 @@ export {
 };
 
 export type {
-    GrassLODInfo,
     GrassTypeAllocation,
     GrassLODAllocation
 };
