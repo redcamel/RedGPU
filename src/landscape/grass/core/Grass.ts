@@ -196,6 +196,18 @@ export class Grass extends RedGPUObject {
         return this.#baseColorTexture;
     }
 
+    /**
+     * [KO] 잔디 렌더링에 사용되는 베이스 컬러 GPUTextureView를 반환합니다. (텍스처 미지정 또는 로딩 전일 경우 emptyBitmapTextureView 반환)
+     * [EN] Returns the base color GPUTextureView used for grass rendering. (Returns emptyBitmapTextureView if texture is unspecified or pre-load)
+     */
+    get baseColorTextureView(): GPUTextureView {
+        if (this.#baseColorTexture) {
+            return this.resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
+                || this.resourceManager.emptyBitmapTextureView;
+        }
+        return this.resourceManager.emptyBitmapTextureView;
+    }
+
     get densityPerHectare(): number {
         return this.#densityPerHectare;
     }

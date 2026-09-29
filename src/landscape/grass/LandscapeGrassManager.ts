@@ -1,4 +1,4 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
@@ -142,9 +142,8 @@ function sortCandidateIndicesByDistance(
  *
  * @category Landscape
  */
-export class LandscapeGrassManager {
+export class LandscapeGrassManager extends RedGPUObject {
 
-    #redGPUContext: RedGPUContext;
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
     #enabled: boolean = true;
@@ -222,13 +221,13 @@ export class LandscapeGrassManager {
      * [EN] Tile streamer providing landscape virtual textures (VHT/VNT/VBT)
      */
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer) {
+        super(landscape.redGPUContext);
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
-        this.#redGPUContext = landscape.redGPUContext;
 
-        this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
-        this.#baker = new GrassBaker(this.#redGPUContext);
-        this.#culler = new GrassCuller(this.#redGPUContext);
+        this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
+        this.#baker = new GrassBaker(this.redGPUContext);
+        this.#culler = new GrassCuller(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
             this.#baker.invalidateBindGroup();
@@ -335,7 +334,7 @@ export class LandscapeGrassManager {
      * [EN] Created and registered {@link Grass} instance
      */
     addGrass(options: GrassOptions): Grass {
-        const grassType = new Grass(this.#redGPUContext, options);
+        const grassType = new Grass(this.redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
@@ -368,7 +367,7 @@ export class LandscapeGrassManager {
             instanceCount: 0
         });
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
             const cpuBuffer = new Float32Array(12);
             const uintBuffer = new Uint32Array(cpuBuffer.buffer);
@@ -524,7 +523,7 @@ export class LandscapeGrassManager {
         }
 
         this.#megaBuffer.destroy();
-        this.#megaBuffer = new GrassMegaBuffer(this.#redGPUContext, 131072);
+        this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
             this.#baker.invalidateBindGroup();
             this.#culler.invalidateBindGroup();
@@ -558,16 +557,15 @@ export class LandscapeGrassManager {
         const systemBG = view.systemUniform_Vertex_UniformBindGroup;
         if (!systemBG) return;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
-        const sampleCount = this.#redGPUContext.antialiasingManager.useMSAA ? 4 : 1;
+        const sampleCount = this.antialiasingManager.useMSAA ? 4 : 1;
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return;
 
-        const fallbackTex = this.#redGPUContext.resourceManager.emptyBitmapTextureView;
-        const basicSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const basicSampler = this.resourceManager.basicSampler.gpuSampler;
 
         let currentPipeline: GPURenderPipeline | null = nearPipeline;
         passEncoder.setPipeline(nearPipeline);
@@ -594,10 +592,7 @@ export class LandscapeGrassManager {
                 });
             }
 
-            const rawTex = type.baseColorTexture?.gpuTexture;
-            const colorTexView = (rawTex
-                ? (this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(type.baseColorTexture) || rawTex.createView())
-                : null) || fallbackTex;
+            const colorTexView = type.baseColorTextureView;
 
             if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
                 res.bindGroup = gpuDevice.createBindGroup({
@@ -741,7 +736,7 @@ export class LandscapeGrassManager {
         }
         this.#megaBuffer.resetIndirectDrawCountsCPU();
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
@@ -855,7 +850,7 @@ export class LandscapeGrassManager {
 
         this.#culler.updateBindGroup(this.#megaBuffer, hzbTextureView);
 
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+        this.commandEncoderManager.addPreProcessComputePass(
             'LandscapeGrass_ComputePass',
             this.#onPreProcessComputePass
         );
@@ -880,7 +875,7 @@ export class LandscapeGrassManager {
         let pipeline = cache.get(sampleCount);
         if (pipeline) return pipeline;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentModule;
         if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
 
@@ -1002,7 +997,7 @@ export class LandscapeGrassManager {
     }
 
     #getFallbackCameraPosition(): [number, number, number] | null {
-        const viewList = this.#landscape.redGPUContext?.viewList;
+        const viewList = this.redGPUContext?.viewList;
         if (!viewList || viewList.length === 0) return null;
 
         for (let i = 0; i < viewList.length; i++) {
@@ -1031,7 +1026,7 @@ export class LandscapeGrassManager {
     #getShadowRenderPipeline(): GPURenderPipeline | null {
         if (this.#shadowPipeline) return this.#shadowPipeline;
 
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
         this.#shadowPipeline = gpuDevice.createRenderPipeline({
@@ -1129,8 +1124,8 @@ export class LandscapeGrassManager {
      * [EN] Creates and initializes WebGPU shader modules and pipeline layouts required for grass and shadow rendering.
      */
     #initShadersAndLayouts(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const resourceManager = this.#redGPUContext.resourceManager;
+        const gpuDevice = this.gpuDevice;
+        const resourceManager = this.resourceManager;
         if (!gpuDevice) return;
 
         this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {
