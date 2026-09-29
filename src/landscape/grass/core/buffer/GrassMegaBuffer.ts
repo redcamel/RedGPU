@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
-export interface GrassLODAllocation {
-    lodIndex: number;
-    lodDistance: number;
+export interface GrassDrawSlot {
+    slotIndex: number;
+    distance: number;
     indirectOffset: number;
     culledBaseOffset: number;
     indexCount: number;
@@ -19,7 +19,7 @@ export interface GrassTypeAllocation {
     culledBaseOffset: number;
     indirectBaseOffset: number;
     instanceCount: number;
-    lods: GrassLODAllocation[];
+    slots: [GrassDrawSlot, GrassDrawSlot];
 }
 
 export class GrassMegaBuffer extends RedGPUObject {
@@ -100,39 +100,14 @@ export class GrassMegaBuffer extends RedGPUObject {
         typeId: number,
         name: string,
         maxInstances: number,
-        lodsOrIndexCount: any,
+        farDistance: number,
+        cullingDistance: number,
+        indexCount: number,
         firstIndex: number = 0,
         baseVertex: number = 0
     ): GrassTypeAllocation {
         const rounded = Math.ceil(maxInstances / 64) * 64;
-
-        let lodConfigs: Array<{
-            lodIndex: number;
-            lodDistance: number;
-            indexCount: number;
-            firstIndex: number;
-            baseVertex: number;
-        }>;
-
-        if (Array.isArray(lodsOrIndexCount) && lodsOrIndexCount.length > 0) {
-            lodConfigs = lodsOrIndexCount.map((l, i) => ({
-                lodIndex: l.lodIndex ?? i,
-                lodDistance: l.lodDistance ?? 9999,
-                indexCount: l.indexCount ?? 0,
-                firstIndex: l.firstIndex ?? 0,
-                baseVertex: l.baseVertex ?? 0
-            }));
-        } else {
-            lodConfigs = [{
-                lodIndex: 0,
-                lodDistance: 9999,
-                indexCount: typeof lodsOrIndexCount === 'number' ? lodsOrIndexCount : 0,
-                firstIndex,
-                baseVertex
-            }];
-        }
-
-        const totalCulledNeeded = rounded * lodConfigs.length;
+        const totalCulledNeeded = rounded * 2;
 
         if (
             this.#totalAllocatedInstances + rounded > this.#maxTotalInstances ||
@@ -145,25 +120,30 @@ export class GrassMegaBuffer extends RedGPUObject {
         const indirectBaseOffset = this.#totalIndirectDrawCalls;
         const culledBaseOffset = this.#totalAllocatedCulledInstances;
 
-        const lodAllocations: GrassLODAllocation[] = [];
-        for (let i = 0; i < lodConfigs.length; i++) {
-            const cfg = lodConfigs[i];
-            const lodIndirectOffset = this.#totalIndirectDrawCalls++;
-            const lodCulledOffset = this.#totalAllocatedCulledInstances;
-            this.#totalAllocatedCulledInstances += rounded;
+        const nearSlot: GrassDrawSlot = {
+            slotIndex: 0,
+            distance: farDistance,
+            indirectOffset: this.#totalIndirectDrawCalls++,
+            culledBaseOffset: this.#totalAllocatedCulledInstances,
+            indexCount,
+            firstIndex,
+            baseVertex
+        };
+        this.#totalAllocatedCulledInstances += rounded;
 
-            const lodAlloc: GrassLODAllocation = {
-                lodIndex: cfg.lodIndex,
-                lodDistance: cfg.lodDistance,
-                indirectOffset: lodIndirectOffset,
-                culledBaseOffset: lodCulledOffset,
-                indexCount: cfg.indexCount,
-                firstIndex: cfg.firstIndex,
-                baseVertex: cfg.baseVertex
-            };
-            lodAllocations.push(lodAlloc);
-            this.#updateIndirectTemplateForLOD(lodAlloc);
-        }
+        const farSlot: GrassDrawSlot = {
+            slotIndex: 1,
+            distance: cullingDistance,
+            indirectOffset: this.#totalIndirectDrawCalls++,
+            culledBaseOffset: this.#totalAllocatedCulledInstances,
+            indexCount,
+            firstIndex,
+            baseVertex
+        };
+        this.#totalAllocatedCulledInstances += rounded;
+
+        this.#updateIndirectTemplateForSlot(nearSlot);
+        this.#updateIndirectTemplateForSlot(farSlot);
 
         const alloc: GrassTypeAllocation = {
             typeId,
@@ -173,7 +153,7 @@ export class GrassMegaBuffer extends RedGPUObject {
             culledBaseOffset,
             indirectBaseOffset,
             instanceCount: 0,
-            lods: lodAllocations
+            slots: [nearSlot, farSlot]
         };
 
         this.#allocations.set(typeId, alloc);
@@ -341,13 +321,13 @@ export class GrassMegaBuffer extends RedGPUObject {
         });
     }
 
-    #updateIndirectTemplateForLOD(lodAlloc: GrassLODAllocation): void {
-        const offset = lodAlloc.indirectOffset * 5;
-        this.#indirectResetTemplate[offset] = lodAlloc.indexCount;
+    #updateIndirectTemplateForSlot(slot: GrassDrawSlot): void {
+        const offset = slot.indirectOffset * 5;
+        this.#indirectResetTemplate[offset] = slot.indexCount;
         this.#indirectResetTemplate[offset + 1] = 0;
-        this.#indirectResetTemplate[offset + 2] = lodAlloc.firstIndex;
-        this.#indirectResetTemplate[offset + 3] = lodAlloc.baseVertex;
-        this.#indirectResetTemplate[offset + 4] = lodAlloc.culledBaseOffset;
+        this.#indirectResetTemplate[offset + 2] = slot.firstIndex;
+        this.#indirectResetTemplate[offset + 3] = slot.baseVertex;
+        this.#indirectResetTemplate[offset + 4] = slot.culledBaseOffset;
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#indirectGPUBuffer) {

@@ -19,7 +19,7 @@
  */
 import Grass, {type GrassOptions} from "./Grass";
 import {GrassBaker} from "./baking/GrassBaker";
-import {type GrassLODAllocation, GrassMegaBuffer, type GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
+import {GrassMegaBuffer} from "./buffer/GrassMegaBuffer";
 import {GrassCuller} from "./culling/GrassCuller";
 
 export {
@@ -28,9 +28,4 @@ export {
     GrassBaker,
     GrassMegaBuffer,
     GrassCuller
-};
-
-export type {
-    GrassTypeAllocation,
-    GrassLODAllocation
 };

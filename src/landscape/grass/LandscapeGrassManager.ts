@@ -350,29 +350,13 @@ export class LandscapeGrassManager {
         const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(grassType.instancesPerCell * 1.3)));
 
         const indexCount = (grassType.geometry as any)?.indexBuffer?.indexCount ?? 0;
-        const lodAllocConfigs = [
-            {
-                lodIndex: 0,
-                lodDistance: grassType.farDistance,
-                indexCount,
-                firstIndex: 0,
-                baseVertex: 0
-            },
-            {
-                lodIndex: 1,
-                lodDistance: grassType.cullingDistance,
-                indexCount,
-                firstIndex: 0,
-                baseVertex: 0
-            }
-        ];
-
-
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             grassType.name,
             maxInstances,
-            lodAllocConfigs
+            grassType.farDistance,
+            grassType.cullingDistance,
+            indexCount
         );
 
         const baseOffset = alloc.rawBaseOffset;
@@ -647,14 +631,14 @@ export class LandscapeGrassManager {
             passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            for (const lodAlloc of alloc.lods) {
-                const targetPipeline = lodAlloc.lodIndex === 0 ? nearPipeline : farPipeline;
+            for (const slot of alloc.slots) {
+                const targetPipeline = slot.slotIndex === 0 ? nearPipeline : farPipeline;
                 if (currentPipeline !== targetPipeline) {
                     passEncoder.setPipeline(targetPipeline);
                     currentPipeline = targetPipeline;
                 }
 
-                const indirectOffsetBytes = lodAlloc.indirectOffset * 5 * 4;
+                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
                 passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
             }
         }
@@ -697,8 +681,8 @@ export class LandscapeGrassManager {
             const res = this.#typeMaterialBuffers.get(type.typeId);
             if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
 
-            const lod0Alloc = alloc.lods[0];
-            if (!lod0Alloc) continue;
+            const nearSlot = alloc.slots[0];
+            if (!nearSlot) continue;
 
             const geom = type.geometry;
             const lvb = geom?.vertexBuffer;
@@ -711,7 +695,7 @@ export class LandscapeGrassManager {
             passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            const indirectOffsetBytes = lod0Alloc.indirectOffset * 5 * 4;
+            const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
         }
     }
