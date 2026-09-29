@@ -33,10 +33,10 @@ export interface FoliageSubMeshInitOptions {
 }
 
 export class FoliageSubMesh {
-    static readonly #singleFloatBuffer: Float32Array = new Float32Array(1);
-    static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
-    static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageSubMesh.#windFloatBuffer.buffer);
-    static readonly #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
+    #singleFloatBuffer: Float32Array = new Float32Array(1);
+    #windFloatBuffer: Float32Array = new Float32Array(12);
+    #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
+    #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
 
     #mesh: Mesh;
     #geometry: Geometry;
@@ -203,12 +203,12 @@ export class FoliageSubMesh {
         if (this.#receiveShadow === receiveShadow) return;
         this.#receiveShadow = receiveShadow;
         if (this.#vertexUniformBuffer && gpuDevice) {
-            FoliageSubMesh.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
+            this.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
             gpuDevice.queue.writeBuffer(
                 this.#vertexUniformBuffer,
                 34 * 4,
-                FoliageSubMesh.#singleFloatBuffer.buffer,
-                FoliageSubMesh.#singleFloatBuffer.byteOffset,
+                this.#singleFloatBuffer.buffer,
+                this.#singleFloatBuffer.byteOffset,
                 4
             );
         }
@@ -228,8 +228,8 @@ export class FoliageSubMesh {
         treeHeight: number
     ): void {
         if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const fView = FoliageSubMesh.#windFloatBuffer;
-        const uView = FoliageSubMesh.#windUintBuffer;
+        const fView = this.#windFloatBuffer;
+        const uView = this.#windUintBuffer;
         fView[0] = windDirX;
         fView[1] = windDirY;
         fView[2] = windSpeed;
@@ -258,7 +258,7 @@ export class FoliageSubMesh {
         groundBlendRange: number
     ): void {
         if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const buf = FoliageSubMesh.#groundBlendFloatBuffer;
+        const buf = this.#groundBlendFloatBuffer;
         buf[0] = groundBlendStrength;
         buf[1] = groundBlendRange;
         buf[2] = 0;

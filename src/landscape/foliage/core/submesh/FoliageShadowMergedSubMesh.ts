@@ -15,8 +15,8 @@ export interface FoliageShadowMergedSubMeshInitOptions {
 }
 
 export class FoliageShadowMergedSubMesh {
-    static readonly #windFloatBuffer: Float32Array = new Float32Array(12);
-    static readonly #windUintBuffer: Uint32Array = new Uint32Array(FoliageShadowMergedSubMesh.#windFloatBuffer.buffer);
+    #windFloatBuffer: Float32Array = new Float32Array(12);
+    #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
 
     #lodIndex: number;
     #geometry: Geometry;
@@ -111,8 +111,8 @@ export class FoliageShadowMergedSubMesh {
         treeHeight: number
     ): void {
         if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const fView = FoliageShadowMergedSubMesh.#windFloatBuffer;
-        const uView = FoliageShadowMergedSubMesh.#windUintBuffer;
+        const fView = this.#windFloatBuffer;
+        const uView = this.#windUintBuffer;
         fView[0] = windDirX;
         fView[1] = windDirY;
         fView[2] = windSpeed;
