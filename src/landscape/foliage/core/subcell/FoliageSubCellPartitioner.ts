@@ -68,7 +68,6 @@ export interface FoliageSubCellChunk {
  * :::
  */
 export default class FoliageSubCellPartitioner {
-    static #STRIDE: number = 8;
     static #tempFloat32: Float32Array = new Float32Array(2);
     static #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
@@ -326,15 +325,16 @@ export default class FoliageSubCellPartitioner {
             spawned++;
         }
 
+        const strideFloats = foliageType?.megaBuffer?.strideFloats || 8;
         tempBuckets.forEach((bucket, key) => {
             const instCount = bucket.floats.length / 4;
             if (instCount === 0) return;
 
-            const buffer = new Float32Array(instCount * FoliageSubCellPartitioner.#STRIDE);
+            const buffer = new Float32Array(instCount * strideFloats);
             const u32View = new Uint32Array(buffer.buffer);
 
             for (let i = 0; i < instCount; i++) {
-                const bOffset = i * FoliageSubCellPartitioner.#STRIDE;
+                const bOffset = i * strideFloats;
                 const fOffset = i * 4;
                 buffer[bOffset] = bucket.floats[fOffset];
                 buffer[bOffset + 1] = bucket.floats[fOffset + 1];

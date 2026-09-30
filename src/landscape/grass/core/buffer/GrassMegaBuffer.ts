@@ -5,6 +5,7 @@
  */
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
+import grassCullComputeWGSL from "../culling/grassCullCompute.wgsl";
 
 /**
  * [KO] 잔디 렌더링 시 거리별(Near/Far) LOD 단계에 대응하는 간접 드로우 슬롯 정보 인터페이스입니다.
@@ -80,11 +81,10 @@ export interface GrassTypeAllocation {
  * :::
  */
 export class GrassMegaBuffer extends RedGPUObject {
-    static readonly STRIDE_FLOATS: number = 8;
-    static readonly STRIDE_BYTES: number = 32;
-    static readonly MAX_TYPES: number = 16;
-    static readonly MAX_INDIRECT_CALLS: number = 64;
-    static readonly TYPE_PARAM_FLOATS: number = 16;
+    #strideFloats: number;
+    #strideBytes: number;
+    #typeParamFloats: number;
+    #maxIndirectCalls: number;
     #instanceCapacity: number;
     #maxTypes: number;
 
@@ -120,18 +120,61 @@ export class GrassMegaBuffer extends RedGPUObject {
      * [KO] 지원할 최대 잔디 타입 개수 (기본값: 16)
      * [EN] Maximum number of grass types supported (default: 16)
      */
-    constructor(redGPUContext: RedGPUContext, initialCapacity: number = 131072, maxTypes: number = 16) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        initialCapacity: number = 131072,
+        maxTypes: number = 16
+    ) {
         super(redGPUContext);
-        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
+
+        const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
+            'Grass_Cull_ShaderModule',
+            grassCullComputeWGSL
+        );
+        const strideBytes =
+            shaderInfo.storage?.['rawInstances']?.stride ||
+            shaderInfo.structs?.['GrassInstance']?.arrayBufferByteLength ||
+            32;
+
+        this.#strideBytes = strideBytes;
+        this.#strideFloats = strideBytes / 4;
+        this.#typeParamFloats =
+            (shaderInfo.structs?.['GrassTypeParam']?.arrayBufferByteLength || 64) / 4;
         this.#maxTypes = maxTypes;
+        this.#maxIndirectCalls = maxTypes * 2;
+        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
 
-        this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * GrassMegaBuffer.STRIDE_FLOATS);
+        this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
 
-        this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * GrassMegaBuffer.TYPE_PARAM_FLOATS);
+        this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
-        this.#indirectResetTemplate = new Uint32Array(GrassMegaBuffer.MAX_INDIRECT_CALLS * 5);
+        this.#indirectResetTemplate = new Uint32Array(this.#maxIndirectCalls * 5);
 
         this.#initBuffers();
+    }
+
+    /**
+     * [KO] 인스턴스 데이터의 바이트 단위 스트라이드 크기를 반환합니다.
+     * [EN] Returns the byte stride size of instance data.
+     */
+    get strideBytes(): number {
+        return this.#strideBytes;
+    }
+
+    /**
+     * [KO] 인스턴스 데이터의 Float32 단위 스트라이드 크기를 반환합니다.
+     * [EN] Returns the Float32 stride size of instance data.
+     */
+    get strideFloats(): number {
+        return this.#strideFloats;
+    }
+
+    /**
+     * [KO] 타입 파라미터 구조체의 Float32 단위 크기를 반환합니다.
+     * [EN] Returns the Float32 size of the type parameter struct.
+     */
+    get typeParamFloats(): number {
+        return this.#typeParamFloats;
     }
 
     /**
@@ -303,7 +346,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         scaleXZ: number,
         scaleY: number
     ): void {
-        const base = globalInstanceIndex * GrassMegaBuffer.STRIDE_FLOATS;
+        const base = globalInstanceIndex * this.#strideFloats;
         this.#cpuRawDataBuffer[base] = x;
         this.#cpuRawDataBuffer[base + 1] = y;
         this.#cpuRawDataBuffer[base + 2] = z;
@@ -329,8 +372,9 @@ export class GrassMegaBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#rawGPUBuffer || count <= 0) return;
 
-        const byteOffset = startInstance * GrassMegaBuffer.STRIDE_BYTES;
-        const byteSize = count * GrassMegaBuffer.STRIDE_BYTES;
+        const strideBytes = this.#strideBytes;
+        const byteOffset = startInstance * strideBytes;
+        const byteSize = count * strideBytes;
 
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
@@ -404,7 +448,8 @@ export class GrassMegaBuffer extends RedGPUObject {
         maxInstancesPerStage: number = 0,
         stageDistances: [number, number, number, number] = [9999, 9999, 9999, 9999]
     ): void {
-        const base = typeId * GrassMegaBuffer.TYPE_PARAM_FLOATS;
+        const typeParamFloats = this.#typeParamFloats;
+        const base = typeId * typeParamFloats;
         const f32 = this.#cpuTypeParamsBuffer;
         const u32 = this.#cpuTypeParamsUint32;
 
@@ -435,7 +480,7 @@ export class GrassMegaBuffer extends RedGPUObject {
                 base * 4,
                 this.#cpuTypeParamsBuffer.buffer,
                 base * 4,
-                GrassMegaBuffer.TYPE_PARAM_FLOATS * 4
+                typeParamFloats * 4
             );
         }
     }
@@ -496,11 +541,12 @@ export class GrassMegaBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
+        const strideBytes = this.#strideBytes;
         const culledCapacity = Math.max(this.#instanceCapacity * 2, this.#totalAllocatedCulledInstances);
-        const rawByteSize = this.#instanceCapacity * GrassMegaBuffer.STRIDE_BYTES;
-        const culledByteSize = culledCapacity * GrassMegaBuffer.STRIDE_BYTES;
-        const indirectByteSize = GrassMegaBuffer.MAX_INDIRECT_CALLS * 5 * 4;
-        const typeParamsByteSize = this.#maxTypes * GrassMegaBuffer.TYPE_PARAM_FLOATS * 4;
+        const rawByteSize = this.#instanceCapacity * strideBytes;
+        const culledByteSize = culledCapacity * strideBytes;
+        const indirectByteSize = this.#maxIndirectCalls * 5 * 4;
+        const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * 4;
 
         this.#rawGPUBuffer?.destroy();
         this.#culledGPUBuffer?.destroy();
@@ -555,7 +601,7 @@ export class GrassMegaBuffer extends RedGPUObject {
     #resizeBuffer(newCapacity: number): void {
         this.#instanceCapacity = Math.ceil(newCapacity / 64) * 64;
 
-        const newRawBuffer = new Float32Array(this.#instanceCapacity * GrassMegaBuffer.STRIDE_FLOATS);
+        const newRawBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         newRawBuffer.set(this.#cpuRawDataBuffer);
         this.#cpuRawDataBuffer = newRawBuffer;
 

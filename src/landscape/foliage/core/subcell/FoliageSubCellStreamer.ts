@@ -6,6 +6,7 @@
 
 import type Foliage from "../Foliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
+import type FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
@@ -17,7 +18,6 @@ import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
  * :::
  */
 export default class FoliageSubCellStreamer {
-    static readonly #STRIDE: number = 8;
     #tempCandidates: FoliageSubCellChunk[] = [];
     #sortCamX: number = 0;
     #sortCamZ: number = 0;
@@ -214,14 +214,15 @@ export default class FoliageSubCellStreamer {
         return da - db;
     };
 
-    #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: any, allocation: any): void {
+    #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageMegaBuffer, allocation: any): void {
         if (chunk.isMounted) return;
         const currentActive = allocation.activeCount;
         const count = chunk.instanceCount;
         if (currentActive + count > allocation.maxInstances) return;
 
         const f32 = megaBuffer.cpuRawDataBuffer;
-        const baseFloat = (allocation.rawBaseOffset + currentActive) * FoliageSubCellStreamer.#STRIDE;
+        const strideFloats = megaBuffer.strideFloats;
+        const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
 
         f32.set(chunk.instanceData, baseFloat);
 
@@ -233,7 +234,7 @@ export default class FoliageSubCellStreamer {
         this.#foliageType.uploadRangeToGPU(currentActive, count);
     }
 
-    #unmountChunkAt(mountedIndex: number, megaBuffer: any, allocation: any): void {
+    #unmountChunkAt(mountedIndex: number, megaBuffer: FoliageMegaBuffer, allocation: any): void {
         const mounted = this.#mountedChunks;
         const targetChunk = mounted[mountedIndex];
         const targetSlot = targetChunk.mountedSlotIndex;
@@ -249,10 +250,11 @@ export default class FoliageSubCellStreamer {
             allocation.activeCount = Math.max(0, currentActive - targetCount);
         } else {
             const f32 = megaBuffer.cpuRawDataBuffer;
+            const strideFloats = megaBuffer.strideFloats;
 
-            const copyStartFloat = (allocation.rawBaseOffset + targetSlot + targetCount) * FoliageSubCellStreamer.#STRIDE;
-            const copyEndFloat = (allocation.rawBaseOffset + currentActive) * FoliageSubCellStreamer.#STRIDE;
-            const destFloat = (allocation.rawBaseOffset + targetSlot) * FoliageSubCellStreamer.#STRIDE;
+            const copyStartFloat = (allocation.rawBaseOffset + targetSlot + targetCount) * strideFloats;
+            const copyEndFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
+            const destFloat = (allocation.rawBaseOffset + targetSlot) * strideFloats;
 
             if (copyEndFloat > copyStartFloat) {
                 f32.copyWithin(destFloat, copyStartFloat, copyEndFloat);
