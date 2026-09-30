@@ -1,9 +1,9 @@
-import LandscapeMeshCombiner, {
+import combineLandscapeMeshes, {
     type CombinedSubMeshGroup,
     type LandscapeMeshCombineOptions,
     type LandscapeMeshCombineResult,
     type RawSubMeshNode
-} from "./LandscapeMeshCombiner";
+} from "./combineLandscapeMeshes";
 import ALandscapeGeometryUnit from "./ALandscapeGeometryUnit";
 import LandscapeSubMesh from "./LandscapeSubMesh";
 import {
@@ -16,8 +16,8 @@ import {
 } from "./LandscapeVertexFormats";
 
 export {
-    // Runtime Classes & Units
-    LandscapeMeshCombiner,
+    // Runtime Classes, Functions & Units
+    combineLandscapeMeshes,
     ALandscapeGeometryUnit,
     LandscapeSubMesh,
 

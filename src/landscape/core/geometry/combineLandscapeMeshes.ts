@@ -64,8 +64,8 @@ export interface LandscapeMeshCombineOptions {
 }
 
 /**
- * [KO] LandscapeMeshCombiner의 최종 지오메트리 결합 결과 객체입니다.
- * [EN] Final geometry combination result object of LandscapeMeshCombiner.
+ * [KO] combineLandscapeMeshes의 최종 지오메트리 결합 결과 객체입니다.
+ * [EN] Final geometry combination result object of combineLandscapeMeshes.
  */
 export interface LandscapeMeshCombineResult {
     groups: CombinedSubMeshGroup[];
@@ -84,77 +84,71 @@ export interface LandscapeMeshCombineResult {
 }
 
 /**
- * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 서브메쉬를 단일 지오메트리로 자동 결합하는 공통 코어 엔진입니다.
- * [EN] Common core engine that recursively traverses composite hierarchical 3D meshes (e.g. GLTF node trees), applies parent-child local transforms, and automatically merges same-material sub-meshes into unified geometries.
+ * [KO] RedGPU Mesh 인스턴스의 위치, 오일러 회전각(Degree), 스케일을 기반으로 로컬 4x4 행렬을 계산합니다.
+ * [EN] Computes the local 4x4 matrix based on position, Euler rotation angles (degrees), and scale of a RedGPU Mesh instance.
  */
-export class LandscapeMeshCombiner {
+function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
+    const x = mesh.x ?? 0;
+    const y = mesh.y ?? 0;
+    const z = mesh.z ?? 0;
+    const radX = (mesh.rotationX ?? 0) * (Math.PI / 180);
+    const radY = (mesh.rotationY ?? 0) * (Math.PI / 180);
+    const radZ = (mesh.rotationZ ?? 0) * (Math.PI / 180);
+    const sX = mesh.scaleX ?? 1;
+    const sY = mesh.scaleY ?? 1;
+    const sZ = mesh.scaleZ ?? 1;
 
-    /**
-     * [KO] RedGPU Mesh 인스턴스의 위치, 오일러 회전각(Degree), 스케일을 기반으로 로컬 4x4 행렬을 계산합니다.
-     * [EN] Computes the local 4x4 matrix based on position, Euler rotation angles (degrees), and scale of a RedGPU Mesh instance.
-     */
-    static computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
-        const x = mesh.x ?? 0;
-        const y = mesh.y ?? 0;
-        const z = mesh.z ?? 0;
-        const radX = (mesh.rotationX ?? 0) * (Math.PI / 180);
-        const radY = (mesh.rotationY ?? 0) * (Math.PI / 180);
-        const radZ = (mesh.rotationZ ?? 0) * (Math.PI / 180);
-        const sX = mesh.scaleX ?? 1;
-        const sY = mesh.scaleY ?? 1;
-        const sZ = mesh.scaleZ ?? 1;
+    out[12] = x;
+    out[13] = y;
+    out[14] = z;
+    out[15] = 1;
 
-        out[12] = x;
-        out[13] = y;
-        out[14] = z;
-        out[15] = 1;
+    const aSx = Math.sin(radX), aCx = Math.cos(radX);
+    const aSy = Math.sin(radY), aCy = Math.cos(radY);
+    const aSz = Math.sin(radZ), aCz = Math.cos(radZ);
 
-        const aSx = Math.sin(radX), aCx = Math.cos(radX);
-        const aSy = Math.sin(radY), aCy = Math.cos(radY);
-        const aSz = Math.sin(radZ), aCz = Math.cos(radZ);
+    const b00 = aCy * aCz;
+    const b01 = aCx * aSz + aSx * aSy * aCz;
+    const b02 = aSx * aSz - aCx * aSy * aCz;
 
-        const b00 = aCy * aCz;
-        const b01 = aCx * aSz + aSx * aSy * aCz;
-        const b02 = aSx * aSz - aCx * aSy * aCz;
+    const b10 = -aCy * aSz;
+    const b11 = aCx * aCz - aSx * aSy * aSz;
+    const b12 = aSx * aCz + aCx * aSy * aSz;
 
-        const b10 = -aCy * aSz;
-        const b11 = aCx * aCz - aSx * aSy * aSz;
-        const b12 = aSx * aCz + aCx * aSy * aSz;
+    const b20 = aSy;
+    const b21 = -aSx * aCy;
+    const b22 = aCx * aCy;
 
-        const b20 = aSy;
-        const b21 = -aSx * aCy;
-        const b22 = aCx * aCy;
+    out[0] = b00 * sX;
+    out[1] = b01 * sX;
+    out[2] = b02 * sX;
+    out[3] = 0;
 
-        out[0] = b00 * sX;
-        out[1] = b01 * sX;
-        out[2] = b02 * sX;
-        out[3] = 0;
+    out[4] = b10 * sY;
+    out[5] = b11 * sY;
+    out[6] = b12 * sY;
+    out[7] = 0;
 
-        out[4] = b10 * sY;
-        out[5] = b11 * sY;
-        out[6] = b12 * sY;
-        out[7] = 0;
+    out[8] = b20 * sZ;
+    out[9] = b21 * sZ;
+    out[10] = b22 * sZ;
+    out[11] = 0;
 
-        out[8] = b20 * sZ;
-        out[9] = b21 * sZ;
-        out[10] = b22 * sZ;
-        out[11] = 0;
+    return out;
+}
 
-        return out;
-    }
-
-    /**
-     * [KO] 단일 메쉬 노드 및 그 자식 노드(`children`)를 재귀 순회하여 유효한 지오메트리를 가진 서브메쉬 목록을 추출합니다.
-     *      루트 노드인 경우 부모 체인(GLTF 상위 노드의 회전/스케일)을 역추적하여 누적 계산합니다.
-     * [EN] Recursively traverses a mesh node and its children to extract sub-mesh nodes with valid geometries.
-     *      For root nodes, traces up the parent chain to accumulate GLTF parent transforms.
-     */
-    static traverseHierarchy(
-        node: Mesh,
-        parentRelativeMatrix: mat4,
-        isRoot: boolean,
-        rawList: RawSubMeshNode[]
-    ): void {
+/**
+ * [KO] 단일 메쉬 노드 및 그 자식 노드(`children`)를 재귀 순회하여 유효한 지오메트리를 가진 서브메쉬 목록을 추출합니다.
+ *      루트 노드인 경우 부모 체인(GLTF 상위 노드의 회전/스케일)을 역추적하여 누적 계산합니다.
+ * [EN] Recursively traverses a mesh node and its children to extract sub-mesh nodes with valid geometries.
+ *      For root nodes, traces up the parent chain to accumulate GLTF parent transforms.
+ */
+function traverseHierarchy(
+    node: Mesh,
+    parentRelativeMatrix: mat4,
+    isRoot: boolean,
+    rawList: RawSubMeshNode[]
+): void {
         if (!node) return;
 
         const currentRelativeMatrix = mat4.create();
@@ -166,13 +160,13 @@ export class LandscapeMeshCombiner {
                 p = p.parent;
             }
             for (let c = 0; c < parentChain.length; c++) {
-                LandscapeMeshCombiner.computeMeshLocalMatrix(parentChain[c], tempLocalMatrix);
+                computeMeshLocalMatrix(parentChain[c], tempLocalMatrix);
                 mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, tempLocalMatrix);
             }
-            LandscapeMeshCombiner.computeMeshLocalMatrix(node, tempLocalMatrix);
+            computeMeshLocalMatrix(node, tempLocalMatrix);
             mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, tempLocalMatrix);
         } else {
-            LandscapeMeshCombiner.computeMeshLocalMatrix(node, tempLocalMatrix);
+            computeMeshLocalMatrix(node, tempLocalMatrix);
             mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, tempLocalMatrix);
         }
 
@@ -203,7 +197,7 @@ export class LandscapeMeshCombiner {
         const children = node.children;
         if (children && children.length > 0) {
             for (let i = 0; i < children.length; i++) {
-                LandscapeMeshCombiner.traverseHierarchy(
+                traverseHierarchy(
                     children[i] as Mesh,
                     currentRelativeMatrix,
                     false,
@@ -213,30 +207,30 @@ export class LandscapeMeshCombiner {
         }
     }
 
-    /**
-     * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 서브메쉬를 병합한 결과를 반환합니다.
-     * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns merged geometry groups per material.
-     *
-     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
-     * @param roots - 결합할 루트 메쉬 또는 메쉬 배열
-     * @param options - 결합 옵션
-     */
-    static combine(
-        redGPUContext: RedGPUContext,
-        roots: Mesh | Mesh[],
-        options?: LandscapeMeshCombineOptions
-    ): LandscapeMeshCombineResult {
-        const rootList = Array.isArray(roots) ? roots : [roots];
-        const rawList: RawSubMeshNode[] = [];
+/**
+ * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 서브메쉬를 병합한 결과를 반환합니다.
+ * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns merged geometry groups per material.
+ *
+ * @param redGPUContext - RedGPU 컨텍스트 인스턴스
+ * @param roots - 결합할 루트 메쉬 또는 메쉬 배열
+ * @param options - 결합 옵션
+ */
+export default function combineLandscapeMeshes(
+    redGPUContext: RedGPUContext,
+    roots: Mesh | Mesh[],
+    options?: LandscapeMeshCombineOptions
+): LandscapeMeshCombineResult {
+    const rootList = Array.isArray(roots) ? roots : [roots];
+    const rawList: RawSubMeshNode[] = [];
 
-        for (let r = 0; r < rootList.length; r++) {
-            LandscapeMeshCombiner.traverseHierarchy(
-                rootList[r],
-                identityMatrix,
-                true,
-                rawList
-            );
-        }
+    for (let r = 0; r < rootList.length; r++) {
+        traverseHierarchy(
+            rootList[r],
+            identityMatrix,
+            true,
+            rawList
+        );
+    }
 
         if (rawList.length === 0) {
             return {
@@ -299,7 +293,7 @@ export class LandscapeMeshCombiner {
         const materialGroups = new Map<string, { material: any; raws: RawSubMeshNode[] }>();
         for (let i = 0; i < rawList.length; i++) {
             const raw = rawList[i];
-            const matKey = LandscapeMeshCombiner.getMaterialKey(raw.material);
+            const matKey = getMaterialKey(raw.material);
             let entry = materialGroups.get(matKey);
             if (!entry) {
                 entry = {material: raw.material, raws: []};
@@ -568,21 +562,17 @@ export class LandscapeMeshCombiner {
             minZ: finalMinZ,
             maxZ: finalMaxZ
         };
-    }
-
-    /**
-     * [KO] 재질 객체로부터 동일 머티리얼 판별을 위한 고유 해시 키를 생성합니다.
-     * [EN] Generates a unique hash key from a material object to identify identical materials.
-     */
-    static getMaterialKey(mat: any): string {
-        if (!mat) return 'default_mat';
-        const matType = mat.constructor?.name || 'Material';
-        const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
-        const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
-        const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
-        return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
-    }
 }
 
-Object.freeze(LandscapeMeshCombiner);
-export default LandscapeMeshCombiner;
+/**
+ * [KO] 재질 객체로부터 동일 머티리얼 판별을 위한 고유 해시 키를 생성합니다.
+ * [EN] Generates a unique hash key from a material object to identify identical materials.
+ */
+function getMaterialKey(mat: any): string {
+    if (!mat) return 'default_mat';
+    const matType = mat.constructor?.name || 'Material';
+    const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
+    const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
+    const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
+    return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
+}

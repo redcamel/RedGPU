@@ -5,7 +5,7 @@ import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
-import LandscapeMeshCombiner from "../../core/geometry/LandscapeMeshCombiner";
+import combineLandscapeMeshes from "../../core/geometry/combineLandscapeMeshes";
 import LandscapeSubMesh from "../../core/geometry/LandscapeSubMesh";
 
 /**
@@ -260,7 +260,7 @@ export class Grass extends RedGPUObject {
 
         const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
         if (isComposite) {
-            const combineResult = LandscapeMeshCombiner.combine(redGPUContext, mesh, {
+            const combineResult = combineLandscapeMeshes(redGPUContext, mesh, {
                 preservePivot: true,
                 centerXZ: false
             });

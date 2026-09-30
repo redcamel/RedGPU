@@ -4,7 +4,7 @@ import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageOptions} from "../../Foliage";
-import LandscapeMeshCombiner from "../../../../core/geometry/LandscapeMeshCombiner";
+import combineLandscapeMeshes from "../../../../core/geometry/combineLandscapeMeshes";
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/geometry/LandscapeVertexFormats";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
@@ -40,7 +40,7 @@ export default function assembleFoliageLODMeshes(
         prepareFoliageMaterials(roots[r]);
     }
 
-    const combineResult = LandscapeMeshCombiner.combine(
+    const combineResult = combineLandscapeMeshes(
         redGPUContext,
         roots,
         {
