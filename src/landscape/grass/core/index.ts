@@ -19,15 +19,16 @@
  */
 import Grass, {type GrassOptions} from "./Grass";
 import {GrassInstanceBaker} from "./baking/GrassInstanceBaker";
-import {type GrassDrawSlot, GrassMegaBuffer, type GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
+import {GrassMegaBuffer} from "./buffer/GrassMegaBuffer";
 import {GrassCuller} from "./culling/GrassCuller";
 
 export {
+    // Runtime Classes
     Grass,
-    type GrassOptions,
     GrassInstanceBaker,
     GrassMegaBuffer,
-    type GrassDrawSlot,
-    type GrassTypeAllocation,
-    GrassCuller
+    GrassCuller,
+
+    // Code Hint Interfaces
+    type GrassOptions
 };

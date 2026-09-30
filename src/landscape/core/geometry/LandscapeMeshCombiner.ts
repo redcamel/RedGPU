@@ -11,15 +11,6 @@ import {
     POSITION_ONLY_STRIDE
 } from "./LandscapeVertexFormats";
 
-export {
-    PBR_INTERLEAVED_STRUCT,
-    PBR_STRIDE,
-    PBR_STRIDE_BYTES,
-    POSITION_ONLY_INTERLEAVED_STRUCT,
-    POSITION_ONLY_STRIDE,
-    POSITION_ONLY_STRIDE_BYTES
-} from "./LandscapeVertexFormats";
-
 const tempLocalMatrix: mat4 = mat4.create();
 const identityMatrix: mat4 = mat4.create();
 

@@ -4,8 +4,9 @@ import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
-import FoliageSubMeshAssembler from "./assembler/FoliageSubMeshAssembler";
-import {FoliageSubCellPartitioner, FoliageSubCellStreamer} from "./subcell";
+import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
+import FoliageSubCellPartitioner from "./subcell/FoliageSubCellPartitioner";
+import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
 
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
@@ -252,7 +253,7 @@ export class Foliage extends RedGPUObject {
         }
         this.#nameHash = hash;
 
-        const assembleResult = FoliageSubMeshAssembler.assemble(
+        const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
             this.#subMeshVertexBindGroupLayout!

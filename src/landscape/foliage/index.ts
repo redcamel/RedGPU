@@ -16,9 +16,10 @@
 export * as Core from "./core";
 
 import FoliageManager from "./FoliageManager";
-import type {FoliageLODConfig, FoliageLODInfo, FoliageOptions} from "./core/Foliage";
+import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./core/Foliage";
 
 export {
+    Foliage,
     FoliageManager
 };
 

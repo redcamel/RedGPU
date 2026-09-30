@@ -16,9 +16,10 @@
 export * as Core from "./core";
 
 import GrassManager from "./GrassManager";
-import type {GrassOptions} from "./core/Grass";
+import Grass, {type GrassOptions} from "./core/Grass";
 
 export {
+    Grass,
     GrassManager
 };
 

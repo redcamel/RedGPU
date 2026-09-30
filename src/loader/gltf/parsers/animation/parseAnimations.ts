@@ -4,9 +4,6 @@ import {ClipAnimState} from "../../animationLooper/AnimStateMachine";
 import parseSingleChannel from "./parseAnimationChannel_GLTF";
 import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
 
-// re-export for backward compatibility
-export {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
-
 /**
  * Parses animation data for a given GLTF scene.
  *
