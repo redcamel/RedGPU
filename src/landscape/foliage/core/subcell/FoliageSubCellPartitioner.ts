@@ -4,6 +4,8 @@
  * @packageDocumentation
  */
 
+import {sampleNormalizedLayerWeight} from "../../../core/scatter";
+
 /**
  * [KO] 식생 서브셀 청크 데이터 인터페이스입니다.
  * [EN] Foliage subcell chunk data interface.
@@ -66,9 +68,9 @@ export interface FoliageSubCellChunk {
  * :::
  */
 export default class FoliageSubCellPartitioner {
-    static readonly #STRIDE: number = 8;
-    static readonly #tempFloat32: Float32Array = new Float32Array(2);
-    static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
+    static #STRIDE: number = 8;
+    static #tempFloat32: Float32Array = new Float32Array(2);
+    static #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
     /**
      * [KO] 지형 컴포넌트 타일을 서브셀 그리드로 분할하고 식생 인스턴스를 밀도 및 레이어/경사도 조건에 따라 생성합니다.
@@ -191,7 +193,7 @@ export default class FoliageSubCellPartitioner {
             if (targetLayerObj) {
                 const u = (posX + halfWorldX) / worldSizeX;
                 const v = (posZ + halfWorldZ) / worldSizeZ;
-                const weight = FoliageSubCellPartitioner.#getLayerWeight(landscape, targetLayerObj, u, v);
+                const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
                 if (weight < 0.1) {
                     continue;
                 }
@@ -361,36 +363,6 @@ export default class FoliageSubCellPartitioner {
         });
 
         return result;
-    }
-
-    static #getLayerWeight(landscape: any, targetLayer: any, u: number, v: number): number {
-        const layers = landscape?.layers;
-        if (!layers || layers.length <= 1) {
-            return targetLayer.getWeightAtUV(u, v);
-        }
-
-        let activeWeightLayerCount = 0;
-        let totalWeight = 0.0;
-        let targetWeight = 0.0;
-
-        for (let i = 0; i < layers.length; i++) {
-            const layer = layers[i];
-            if (!layer.enabled) continue;
-            if (layer.weightTexture?.src) {
-                activeWeightLayerCount++;
-            }
-            const w = layer.getWeightAtUV(u, v);
-            totalWeight += w;
-            if (layer === targetLayer) {
-                targetWeight = w;
-            }
-        }
-
-        if (activeWeightLayerCount <= 1 || totalWeight <= 0.001) {
-            return targetWeight;
-        }
-
-        return targetWeight / totalWeight;
     }
 
     static #fastFloatToHalf(val: number): number {

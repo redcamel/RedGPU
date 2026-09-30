@@ -25,6 +25,7 @@ import combineScatterMeshes, {
 } from "./combineScatterMeshes";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
+import {computeNormalizedChannelWeight, sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
@@ -39,6 +40,8 @@ export {
     combineScatterMeshes,
     AScatterGeometryUnit,
     ScatterSubMesh,
+    computeNormalizedChannelWeight,
+    sampleNormalizedLayerWeight,
 
     // Code Hint Interfaces & Vertex Constants
     type AScatterGeometryUnitInitOptions,

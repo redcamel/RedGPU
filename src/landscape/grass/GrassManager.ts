@@ -20,6 +20,7 @@ import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
+import {computeNormalizedChannelWeight} from "../core/scatter";
 
 const DEG2RAD: number = 0.017453292519943295;
 
@@ -1432,10 +1433,7 @@ export class GrassManager extends RedGPUObject {
                         const u = (gx + halfWorldX) / worldSizeX;
                         const v = (gz + halfWorldZ) / worldSizeZ;
                         this.#landscape.weightMapCPUSampler.getAllWeights(targetSrc, u, v, this.#tempWeights4);
-                        const totalW = this.#tempWeights4[0] + this.#tempWeights4[1] + this.#tempWeights4[2] + this.#tempWeights4[3];
-                        const normW = totalW > 0.001
-                            ? (this.#tempWeights4[channelIdx] / totalW)
-                            : (this.#tempWeights4[channelIdx] || 0.0);
+                        const normW = computeNormalizedChannelWeight(this.#tempWeights4, channelIdx);
 
                         if (normW < 0.20) continue;
                         if (densityScaleByWeight && this.#nextPrng() > normW) continue;
