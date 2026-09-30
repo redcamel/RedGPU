@@ -1,7 +1,11 @@
 import type Foliage from "../Foliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
-class FoliageSubCellStreamer {
+/**
+ * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
+ * [EN] Streamer class that dynamically mounts/unmounts active subcell instances to the GPU buffer according to camera position and streaming budget.
+ */
+export default class FoliageSubCellStreamer {
     static readonly #STRIDE: number = 8;
     #tempCandidates: FoliageSubCellChunk[] = [];
     #sortCamX: number = 0;
@@ -218,4 +222,4 @@ class FoliageSubCellStreamer {
 }
 
 Object.freeze(FoliageSubCellStreamer);
-export default FoliageSubCellStreamer;
+

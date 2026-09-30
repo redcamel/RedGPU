@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
-import LandscapeGeometryUnit from "../../../core/geometry/LandscapeGeometryUnit";
+import LandscapeSubMesh, {type LandscapeSubMeshInitOptions} from "../../../core/geometry/LandscapeSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 /**
@@ -14,7 +14,7 @@ export type FoliageRenderPassType = 'depthPrepass' | 'main';
  * [KO] FoliageSubMesh 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for FoliageSubMesh.
  */
-export interface FoliageSubMeshInitOptions {
+export interface FoliageSubMeshInitOptions extends LandscapeSubMeshInitOptions {
     mesh: Mesh;
     geometry: Geometry;
     material: any;
@@ -42,18 +42,15 @@ export interface FoliageSubMeshInitOptions {
 }
 
 /**
- * [KO] LandscapeGeometryUnit을 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
- * [EN] Foliage sub-mesh class inheriting LandscapeGeometryUnit to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
+ * [KO] LandscapeSubMesh를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
+ * [EN] Foliage sub-mesh class inheriting LandscapeSubMesh to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
  */
-export class FoliageSubMesh extends LandscapeGeometryUnit {
+export class FoliageSubMesh extends LandscapeSubMesh {
     #singleFloatBuffer: Float32Array = new Float32Array(1);
     #windFloatBuffer: Float32Array = new Float32Array(12);
     #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
     #groundBlendFloatBuffer: Float32Array = new Float32Array(4);
 
-    #mesh: Mesh;
-    #material: any;
-    #bottomOffset: number;
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
     #vertexUniformBuffer: GPUBuffer;
@@ -70,20 +67,8 @@ export class FoliageSubMesh extends LandscapeGeometryUnit {
     #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
-        super({
-            geometry: init.geometry,
-            vertexCount: init.vertexCount,
-            indexCount: init.indexCount,
-            isIndexed: init.isIndexed,
-            indexFormat: init.indexFormat || 'uint32',
-            strideBytes: init.strideBytes,
-            instanceBufferOffset: init.instanceBufferOffset ?? 0,
-            indirectOffsetBytes: init.indirectOffsetBytes ?? 0,
-        });
+        super(init);
 
-        this.#mesh = init.mesh;
-        this.#material = init.material;
-        this.#bottomOffset = init.bottomOffset ?? 0;
         this.#relativeModelMatrix = init.relativeModelMatrix;
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
         this.#vertexUniformBuffer = init.vertexUniformBuffer;
@@ -102,32 +87,8 @@ export class FoliageSubMesh extends LandscapeGeometryUnit {
      * [KO] 원본 메쉬 인스턴스를 반환합니다.
      * [EN] Returns the original mesh instance.
      */
-    get mesh(): Mesh {
-        return this.#mesh;
-    }
-
-    /**
-     * [KO] 서브메쉬의 머티리얼을 반환합니다.
-     * [EN] Returns the material of the sub-mesh.
-     */
-    get material(): any {
-        return this.#material;
-    }
-
-    /**
-     * [KO] 피벗 보정을 위한 밑둥 오프셋을 반환합니다.
-     * [EN] Returns the bottom offset for pivot compensation.
-     */
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
-
-    /**
-     * [KO] 피벗 보정을 위한 밑둥 오프셋을 설정합니다.
-     * [EN] Sets the bottom offset for pivot compensation.
-     */
-    set bottomOffset(val: number) {
-        this.#bottomOffset = val;
+    override get mesh(): Mesh {
+        return super.mesh as Mesh;
     }
 
     /**
@@ -346,10 +307,10 @@ export class FoliageSubMesh extends LandscapeGeometryUnit {
         depthPassMode: FoliageDepthPassMode,
         subMeshBindGroupLayout: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
-        const material = this.#material;
-        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
-            material._updateFragmentState();
-            material.dirtyPipeline = false;
+        const material = this.material;
+        if (material?.dirtyPipeline || !material?.gpuRenderInfo?.fragmentUniformBindGroup) {
+            material?._updateFragmentState?.();
+            if (material) material.dirtyPipeline = false;
         }
 
         let modeMap = this.#pipelineCacheByMode[msaaID];
@@ -362,7 +323,7 @@ export class FoliageSubMesh extends LandscapeGeometryUnit {
         if (!pipeline) {
             const cullMode: GPUCullMode = (!this.#isMasked)
                 ? 'back'
-                : (material.doubleSided ? 'none' : (material.cullMode ?? 'back'));
+                : (material?.doubleSided ? 'none' : (material?.cullMode ?? 'back'));
 
             pipeline = registry.getOrCreatePipeline(
                 material,

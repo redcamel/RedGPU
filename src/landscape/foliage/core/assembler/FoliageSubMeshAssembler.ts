@@ -1,7 +1,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Mesh from "../../../../display/mesh/Mesh";
-import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
+import {createOctahedralImpostorGeometry} from "../../../core/geometry/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
@@ -61,6 +61,10 @@ class FoliageSubMeshAssembler {
         const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
         const subMeshUniformCache = new Map<string, { buffer: GPUBuffer; bindGroup: GPUBindGroup }>();
 
+        let maxBoundingRadius = 0;
+        let globalMinY = Infinity;
+        let globalMaxY = -Infinity;
+
         for (let l = 0; l < numLODs; l++) {
             const lodCfg = lodConfigs[l];
             const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
@@ -85,6 +89,16 @@ class FoliageSubMeshAssembler {
 
             if (assembled.shadowMergedSubMesh) {
                 shadowMergedSubMeshes.push(assembled.shadowMergedSubMesh);
+            }
+
+            if (assembled.boundingRadius > maxBoundingRadius) {
+                maxBoundingRadius = assembled.boundingRadius;
+            }
+            if (isFinite(assembled.minY) && assembled.minY < globalMinY) {
+                globalMinY = assembled.minY;
+            }
+            if (isFinite(assembled.maxY) && assembled.maxY > globalMaxY) {
+                globalMaxY = assembled.maxY;
             }
 
             const subCountForThisLOD = subList.length - startSubOffset;
@@ -122,34 +136,9 @@ class FoliageSubMeshAssembler {
             );
         }
 
-        let maxDistSq = 0;
-        let minY = Infinity;
-        let maxY = -Infinity;
-        for (let i = 0; i < subList.length; i++) {
-            const sub = subList[i];
-            if (sub.isImpostor) continue;
-
-            const vBuffer = sub.geometry?.vertexBuffer;
-            const vData = vBuffer?.data;
-            if (vData) {
-                const stride = (vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18));
-                const count = vBuffer.vertexCount ?? 0;
-                for (let v = 0; v < count; v++) {
-                    const idx = v * stride;
-                    const vx = vData[idx];
-                    const vy = vData[idx + 1];
-                    const vz = vData[idx + 2];
-                    const dSq = vx * vx + vy * vy + vz * vz;
-                    if (dSq > maxDistSq) maxDistSq = dSq;
-                    if (vy < minY) minY = vy;
-                    if (vy > maxY) maxY = vy;
-                }
-            }
-        }
-
-        const boundingRadius = Math.sqrt(maxDistSq);
-        const boundingHeight = (isFinite(minY) && isFinite(maxY) && maxY > minY)
-            ? (maxY - minY)
+        const boundingRadius = maxBoundingRadius;
+        const boundingHeight = (isFinite(globalMinY) && isFinite(globalMaxY) && globalMaxY > globalMinY)
+            ? (globalMaxY - globalMinY)
             : (boundingRadius > 0 ? boundingRadius * 2.0 : 1.0);
 
         const userOffset = options.bottomOffset;
@@ -209,6 +198,10 @@ class FoliageSubMeshAssembler {
     ): {
         subMeshes: FoliageSubMesh[];
         shadowMergedSubMesh: FoliageShadowMergedSubMesh | null;
+        boundingRadius: number;
+        boundingHeight: number;
+        minY: number;
+        maxY: number;
     } {
         const gpuDevice = redGPUContext.gpuDevice;
 
@@ -227,7 +220,14 @@ class FoliageSubMeshAssembler {
         );
 
         if (combineResult.groups.length === 0) {
-            return {subMeshes: [], shadowMergedSubMesh: null};
+            return {
+                subMeshes: [],
+                shadowMergedSubMesh: null,
+                boundingRadius: 0,
+                boundingHeight: 0,
+                minY: 0,
+                maxY: 0
+            };
         }
 
         const resultSubMeshes: FoliageSubMesh[] = [];
@@ -284,6 +284,10 @@ class FoliageSubMeshAssembler {
         return {
             subMeshes: resultSubMeshes,
             shadowMergedSubMesh,
+            boundingRadius: combineResult.boundingRadius,
+            boundingHeight: combineResult.boundingHeight,
+            minY: combineResult.minY,
+            maxY: combineResult.maxY,
         };
     }
 

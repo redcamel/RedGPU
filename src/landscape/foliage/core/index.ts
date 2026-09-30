@@ -9,8 +9,6 @@ import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./culling/FoliageCullingDispatcher";
-import FoliageSubCellPartitioner, {type FoliageSubCellChunk} from "./spatial/FoliageSubCellPartitioner";
-import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
 import FoliageSubMeshAssembler, {type FoliageAssemblyResult} from "./assembler/FoliageSubMeshAssembler";
 
 export {
@@ -32,9 +30,6 @@ export {
     type FoliageDepthPassMode,
     FoliageRenderer,
     FoliageCullingDispatcher,
-    FoliageSubCellPartitioner,
-    type FoliageSubCellChunk,
-    FoliageSubCellStreamer,
     FoliageSubMeshAssembler,
     type FoliageAssemblyResult
 };

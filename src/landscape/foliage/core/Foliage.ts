@@ -5,8 +5,7 @@ import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import FoliageSubMeshAssembler from "./assembler/FoliageSubMeshAssembler";
-import FoliageSubCellPartitioner from "./spatial/FoliageSubCellPartitioner";
-import FoliageSubCellStreamer from "./spatial/FoliageSubCellStreamer";
+import {FoliageSubCellPartitioner, FoliageSubCellStreamer} from "./subcell";
 
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";

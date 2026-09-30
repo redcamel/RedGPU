@@ -6,6 +6,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
 import LandscapeMeshCombiner from "../../core/geometry/LandscapeMeshCombiner";
+import LandscapeSubMesh from "../../core/geometry/LandscapeSubMesh";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -166,6 +167,7 @@ export interface GrassOptions {
 export class Grass extends RedGPUObject {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
+    #subMeshes: LandscapeSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
@@ -289,6 +291,22 @@ export class Grass extends RedGPUObject {
             } else {
                 this.#meshHeight = combineResult.boundingHeight > 0 ? combineResult.boundingHeight : 1.0;
             }
+
+            this.#subMeshes = combineResult.groups.map((group, idx) => {
+                const mat = group.material;
+                const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? mat?.diffuseTexture ?? null);
+                return new LandscapeSubMesh({
+                    geometry: group.geometry,
+                    vertexCount: group.vertexCount,
+                    indexCount: group.indexCount,
+                    isIndexed: !!group.geometry.indexBuffer,
+                    strideBytes: group.geometry.vertexBuffer?.stride ? group.geometry.vertexBuffer.stride * 4 : 72,
+                    mesh: group.rawNodes[0]?.node ?? mesh,
+                    material: mat,
+                    baseColorTexture: tex,
+                    bottomOffset: 0
+                });
+            });
         } else {
             const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
             if (typeof resolvedTexture === 'string') {
@@ -318,6 +336,21 @@ export class Grass extends RedGPUObject {
                 const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
                 this.#meshHeight = computedH > 0 ? computedH : 1.0;
             }
+
+            const gGeom = this.#geometry as Geometry;
+            this.#subMeshes = [
+                new LandscapeSubMesh({
+                    geometry: gGeom,
+                    vertexCount: gGeom.vertexBuffer?.vertexCount ?? 0,
+                    indexCount: gGeom.indexBuffer?.indexCount ?? (gGeom.vertexBuffer?.vertexCount ?? 0),
+                    isIndexed: !!gGeom.indexBuffer,
+                    strideBytes: gGeom.vertexBuffer?.stride ? gGeom.vertexBuffer.stride * 4 : 72,
+                    mesh: mesh,
+                    material: targetMaterial,
+                    baseColorTexture: this.#baseColorTexture,
+                    bottomOffset: 0
+                })
+            ];
         }
 
         this.#farDistance = Math.max(10.0, farDistance);
@@ -392,6 +425,14 @@ export class Grass extends RedGPUObject {
      */
     get geometry(): Geometry | Primitive {
         return this.#geometry;
+    }
+
+    /**
+     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(LandscapeSubMesh) 목록을 반환합니다.
+     * [EN] Returns the list of shared sub-meshes (LandscapeSubMesh) composing the grass model.
+     */
+    get subMeshes(): readonly LandscapeSubMesh[] {
+        return this.#subMeshes;
     }
 
     /**
@@ -778,6 +819,15 @@ export class Grass extends RedGPUObject {
     #notifyChange(): void {
         this.#dirty = true;
         if (this.#onChanged) this.#onChanged();
+    }
+
+    /**
+     * [KO] 잔디 인스턴스 및 하위 서브메쉬 리소스를 해제합니다.
+     * [EN] Destroys grass instance and subordinate sub-mesh resources.
+     */
+    destroy(): void {
+        this.#subMeshes.forEach(sub => sub.destroy());
+        this.#subMeshes.length = 0;
     }
 }
 

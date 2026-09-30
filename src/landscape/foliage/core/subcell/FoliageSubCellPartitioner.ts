@@ -1,3 +1,7 @@
+/**
+ * [KO] 식생 서브셀 청크 데이터 인터페이스입니다.
+ * [EN] Foliage subcell chunk data interface.
+ */
 export interface FoliageSubCellChunk {
 
     subCellKey: number;
@@ -19,7 +23,11 @@ export interface FoliageSubCellChunk {
     mountedSlotIndex: number;
 }
 
-class FoliageSubCellPartitioner {
+/**
+ * [KO] 지형 타일을 일정한 크기의 서브셀(SubCell) 그리드로 분할하고 식생 인스턴스를 배치하는 파티셔너 클래스입니다.
+ * [EN] Partitioner class that divides terrain tiles into fixed-size subcell grids and places foliage instances.
+ */
+export default class FoliageSubCellPartitioner {
     static readonly #STRIDE: number = 8;
     static readonly #tempFloat32: Float32Array = new Float32Array(2);
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
@@ -367,4 +375,4 @@ class FoliageSubCellPartitioner {
 }
 
 Object.freeze(FoliageSubCellPartitioner);
-export default FoliageSubCellPartitioner;
+
