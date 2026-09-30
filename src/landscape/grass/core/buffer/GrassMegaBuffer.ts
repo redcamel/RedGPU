@@ -86,6 +86,12 @@ export interface GrassTypeAllocation {
  */
 const DRAW_INDEXED_INDIRECT_ARGS_COUNT = 5;
 
+/**
+ * [KO] GPU 컬링 컴퓨트 셰이더의 1개 워크그룹당 스레드 수 (@workgroup_size(64, 1, 1))
+ * [EN] Number of threads per workgroup in GPU culling compute shader (@workgroup_size(64, 1, 1))
+ */
+const CULLING_WORKGROUP_SIZE = 64;
+
 export class GrassMegaBuffer extends RedGPUObject {
     #strideFloats: number;
     #strideBytes: number;
@@ -155,7 +161,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#maxTypes = maxTypes;
         this.#maxIndirectCalls = maxTypes * 2;
-        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
 
@@ -300,7 +306,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         maxInstances: number,
         indexCount: number
     ): GrassTypeAllocation {
-        const rounded = Math.ceil(maxInstances / 64) * 64;
+        const rounded = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
         const totalCulledNeeded = rounded * 2;
 
         if (
@@ -639,7 +645,7 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     #resizeBuffer(newCapacity: number): void {
-        this.#instanceCapacity = Math.ceil(newCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(newCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
         const newRawBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         newRawBuffer.set(this.#cpuRawDataBuffer);

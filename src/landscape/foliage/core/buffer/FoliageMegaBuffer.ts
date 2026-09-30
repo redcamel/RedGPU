@@ -101,6 +101,12 @@ const DRAW_INDEXED_INDIRECT_ARGS_COUNT = 5;
  */
 const SHADOW_CASCADE_COUNT = 4;
 
+/**
+ * [KO] GPU 컬링 컴퓨트 셰이더의 1개 워크그룹당 스레드 수 (@workgroup_size(64))
+ * [EN] Number of threads per workgroup in GPU culling compute shader (@workgroup_size(64))
+ */
+const CULLING_WORKGROUP_SIZE = 64;
+
 export class FoliageMegaBuffer extends RedGPUObject {
     #strideFloats: number;
     #strideBytes: number;
@@ -108,6 +114,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
     #typeParamFloats: number;
     #instanceCapacity: number;
     #maxSubMeshes: number;
+    #globalUniformBytes: number;
+    #globalUniformFloats: number;
 
     #rawGPUBuffer: GPUBuffer | null = null;
     #culledGPUBuffer: GPUBuffer | null = null;
@@ -126,8 +134,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
     #cpuTypeParamsBuffer: Float32Array;
     #cpuTypeParamsUint32: Uint32Array;
 
-    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(200);
-    #cpuUnifiedGlobalUniformUint32: Uint32Array = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
+    #cpuUnifiedGlobalUniformData: Float32Array;
+    #cpuUnifiedGlobalUniformUint32: Uint32Array;
 
     #indirectResetTemplate: Uint32Array;
     #shadowIndirectResetTemplate: Uint32Array;
@@ -186,7 +194,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
         this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#maxTypes = maxTypes;
-        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
         this.#maxSubMeshes = maxTypes * 8;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
@@ -198,6 +206,18 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
+
+        const globalUniformBytes =
+            shaderInfo.uniforms?.['globalUniforms']?.arrayBufferByteLength ||
+            shaderInfo.structs?.['UnifiedGlobalCullingUniforms']?.arrayBufferByteLength;
+        if (!globalUniformBytes) {
+            throw new Error('[FoliageMegaBuffer] Failed to reflect "UnifiedGlobalCullingUniforms" struct size from foliageCullingComputeWGSL.');
+        }
+
+        this.#globalUniformBytes = globalUniformBytes;
+        this.#globalUniformFloats = globalUniformBytes / Float32Array.BYTES_PER_ELEMENT;
+        this.#cpuUnifiedGlobalUniformData = new Float32Array(this.#globalUniformFloats);
+        this.#cpuUnifiedGlobalUniformUint32 = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
         this.#initBuffers();
     }
@@ -232,6 +252,22 @@ export class FoliageMegaBuffer extends RedGPUObject {
      */
     get typeParamFloats(): number {
         return this.#typeParamFloats;
+    }
+
+    /**
+     * [KO] 통합 글로벌 유니폼 구조체의 바이트 단위 크기를 반환합니다.
+     * [EN] Returns the byte size of the unified global uniform struct.
+     */
+    get globalUniformBytes(): number {
+        return this.#globalUniformBytes;
+    }
+
+    /**
+     * [KO] 통합 글로벌 유니폼 구조체의 Float32 단위 크기를 반환합니다.
+     * [EN] Returns the Float32 size of the unified global uniform struct.
+     */
+    get globalUniformFloats(): number {
+        return this.#globalUniformFloats;
     }
 
     get rawGPUBuffer(): GPUBuffer | null {
@@ -340,7 +376,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         let newCapacity = this.#instanceCapacity;
         while (newCapacity < requiredCapacity) {
-            newCapacity = Math.ceil((newCapacity * 2) / 64) * 64;
+            newCapacity = Math.ceil((newCapacity * 2) / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
         }
 
         this.#instanceCapacity = newCapacity;
@@ -435,7 +471,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         const subMeshCount = subMeshes.length;
 
-        const alignedMaxInstances = Math.ceil(maxInstances / 64) * 64;
+        const alignedMaxInstances = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
         this.ensureCapacity(this.#nextRawOffset + alignedMaxInstances);
 
         const rawBaseOffset = this.#nextRawOffset;
@@ -698,12 +734,13 @@ export class FoliageMegaBuffer extends RedGPUObject {
         }
 
         const gpuDevice = this.gpuDevice;
+        const globalUniformBytes = this.#globalUniformBytes;
         gpuDevice.queue.writeBuffer(
             this.#unifiedGlobalUniformGPUBuffer,
             0,
             gf32.buffer,
             gf32.byteOffset,
-            688
+            globalUniformBytes
         );
 
         if (this.#dirtyTypeParams) {
@@ -986,7 +1023,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
             label: 'Foliage_MegaBuffer_GlobalUniformBuffer',
-            size: 800,
+            size: this.#globalUniformBytes,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }
