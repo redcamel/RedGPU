@@ -8,6 +8,19 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
  * [KO] GPU 컴퓨트 컬링 및 간접 드로우(Indirect Draw)를 지원하기 위한 지형 타일 인스턴스 버퍼 및 유니폼 버퍼 관리자입니다.
  * [EN] Buffer manager handling terrain tile instance buffers, indirect draw arguments, and global landscape uniform buffers for GPU compute culling and multi-LOD indirect rendering.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **타일 인스턴스 스토리지 버퍼 (`allInputTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
+ * - **가시 인덱스 스트림 버퍼 (`visibleTileIndicesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.
+ * - **멀티 LOD 인디렉트 버퍼 (`indirectDrawBuffer`)**: WebGPU의 `drawIndexedIndirect` 스펙에 맞추어 LOD 레벨당 5개의 uint32 필드(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 배치하여 멀티 레벨 간접 드로우를 단일 패스로 처리합니다.
+ * - **전역 유니폼 동기화 (`landscapeUniformBuffer`)**: 카메라 역행렬, 뷰/프로젝션 행렬, 높이 스케일, 안개 파라미터 등을 256바이트 정렬 버퍼로 래핑하여 셰이더와 동기화합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Tile Instance Storage (`allInputTilesBuffer`)**: Houses spatial metadata for all terrain tiles including world coordinates, bounding boxes, height bounds, and atlas UV offsets.
+ * - **Visible Index Stream (`visibleTileIndicesBuffer`)**: Dedicated GPU output buffer sequentially populated with tile indices that passed frustum and occlusion culling tests.
+ * - **Multi-LOD Indirect Buffer (`indirectDrawBuffer`)**: Layouts 5 uint32 fields (`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`) per LOD level conforming to WebGPU `drawIndexedIndirect` specifications.
+ * - **Global Uniform Sync (`landscapeUniformBuffer`)**: Synchronizes view/projection matrices, height scales, and fog parameters via a 256-byte aligned uniform buffer.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.

@@ -15,6 +15,19 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [KO] 타일 단위 높이맵 또는 전역 지형 높이맵 텍스처를 VHT 아틀라스 텍스처로 베이킹하는 제너레이터 클래스입니다.
  * [EN] Generator class that bakes per-tile height maps or global terrain height map textures into the VHT atlas texture.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **가상 높이 텍스처(VHT) 구축**: 지형 지면의 물리적 고도 데이터를 16/32비트 고정밀 부동소수점 포맷으로 VHT 아틀라스에 굽습니다. 이 데이터는 지형 컴포넌트의 버텍스 셰이더 변위(Vertex Displacement) 및 물리 충돌 계산의 원천이 됩니다.
+ * - **듀얼 베이킹 파이프라인**:
+ *   - **개별 타일 베이킹 (`landscapeVHTBake.wgsl`)**: 스트리밍되는 타일별 개별 높이맵 이미지를 아틀라스의 해당 타일 슬롯 위치에 정밀하게 배치합니다.
+ *   - **전역 높이맵 분할 베이킹 (`landscapeVHTGlobalBake.wgsl`)**: 전체 지형을 아우르는 단일 거대 전역 높이맵으로부터 각 타일 영역의 UV를 계산하여 고속 분할 복사합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Virtual Height Texture (VHT) Construction**: Bakes terrain physical elevation data into the VHT atlas in 16/32-bit high-precision floating-point formats, providing the single source of truth for vertex displacement and physics queries.
+ * - **Dual Baking Pipelines**:
+ *   - **Per-tile Baking (`landscapeVHTBake.wgsl`)**: Precisely places streamed individual tile heightmap images into designated atlas tile slots.
+ *   - **Global Heightmap Split Baking (`landscapeVHTGlobalBake.wgsl`)**: Fast-samples and splits localized tile regions from a unified global heightmap texture using UV coordinate transformation.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.

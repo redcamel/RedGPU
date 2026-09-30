@@ -13,6 +13,17 @@ interface WeightMapPixelData {
  * [KO] 스플랫 가중치 텍스처를 CPU 메모리에 디코딩/캐싱하고 임의 UV 좌표에서의 가중치 값을 이중선형 보간으로 샘플링하는 정적 유틸리티 클래스입니다.
  * [EN] Static utility class that decodes/caches splat weight textures in CPU memory and samples weight values at arbitrary UV coordinates using bilinear interpolation.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **CPU 측 픽셀 디코딩 및 캐싱**: 오프스크린 캔버스(`HTMLCanvasElement`)를 이용해 가중치 텍스처를 비동기 디코딩하고 `Uint8ClampedArray` 버퍼로 캐싱합니다. 중복 네트워크 요청은 `Promise` 맵으로 방지합니다.
+ * - **이중 선형 보간 (Bilinear Interpolation)**: 연속적인 UV 좌표에 대해 인접한 4개의 픽셀 값을 보간 계산(`sampleBilinear`)함으로써 서브픽셀 단위의 부드럽고 왜곡 없는 가중치를 도출합니다.
+ * - **식생 및 잔디 분산 배치(Scattering)의 핵심 원천**: 지형 표면에 Foliage나 Grass를 밀도 기반으로 배치할 때, CPU 측에서 특정 레이어(예: 잔디, 흙, 자갈)의 가중치를 고속 조회하여 생성 여부 및 밀도를 결정합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **CPU-side Pixel Decoding & Caching**: Asynchronously decodes weight map textures using offscreen canvases (`HTMLCanvasElement`) and caches them as `Uint8ClampedArray` buffers. Duplicate network requests are deduplicated via a `Promise` map.
+ * - **Bilinear Interpolation**: Samples continuous UV coordinates using 4 neighboring pixels (`sampleBilinear`) to provide smooth subpixel-accurate weight values.
+ * - **Core Foundation for Scattering**: Serves as the high-speed CPU query engine when scattering Foliage or Grass across the terrain based on specific layer distributions (e.g. grass, dirt, gravel).
+ *
  * ::: warning
  * [KO] 이 클래스는 정적 유틸리티 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is a static utility class.<br/>Do not create an instance directly using the 'new' keyword.

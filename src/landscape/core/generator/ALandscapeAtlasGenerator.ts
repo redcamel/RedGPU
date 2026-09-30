@@ -12,6 +12,19 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [KO] 지형 GPU Compute 아틀라스 베이킹을 위한 공통 파이프라인, 유니폼 풀 및 디스패치 루프를 제공하는 추상 기본 클래스입니다.
  * [EN] Abstract base class providing common compute pipelines, uniform pools, and dispatch loops for terrain GPU compute atlas baking.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **GPU Compute 기반 실시간 베이킹**: 지형의 거대한 가상 텍스처 아틀라스(VHT 높이, VNT 노멀, VBT 베이스 재질)를 WebGPU 컴퓨트 파이프라인(`GPUComputePipeline`)을 통해 실시간 병렬 생성합니다.
+ * - **제로 GC 유니폼 버퍼 풀링 (`acquireUniformBuffer`)**: 매 프레임 혹은 매 타일 디스패치 시 발생하는 힙 메모리 할당 및 가비지 컬렉션(GC) 부하를 방지하기 위해, 사전 할당된 유니폼 버퍼 풀(`GPUBuffer[]`)을 프레임 단위로 재사용합니다.
+ * - **타일 단위 2D 컴퓨트 디스패치 (`dispatchBakePass`)**: 16x16 워크그룹(`workgroup_size(16, 16)`)을 기준으로 타일의 픽셀 영역만을 정확하게 타겟팅하여 GPU 부하를 최소화합니다.
+ * - **비동기 리소스 커맨드 엔코딩**: `COMMAND_ENCODER_TYPE.RESOURCE` 인코더를 활용하여 렌더 패스 간섭 없이 백그라운드 텍스처 갱신을 수행합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Real-time GPU Compute Baking**: Generates massive terrain virtual texture atlases (VHT height, VNT normal, VBT base material) in parallel using WebGPU compute pipelines (`GPUComputePipeline`).
+ * - **Zero-GC Uniform Buffer Pooling (`acquireUniformBuffer`)**: Reuses pre-allocated uniform buffer pools (`GPUBuffer[]`) on a per-frame basis to prevent heap memory allocation and garbage collection (GC) overhead during frequent tile dispatches.
+ * - **2D Tile-based Compute Dispatch (`dispatchBakePass`)**: Minimizes GPU workload by targeting only the specific pixel region of a tile based on 16x16 workgroups (`workgroup_size(16, 16)`).
+ * - **Asynchronous Resource Command Encoding**: Utilizes the `COMMAND_ENCODER_TYPE.RESOURCE` encoder to perform background texture updates without interfering with primary render passes.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.

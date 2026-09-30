@@ -4,6 +4,17 @@ import LandscapeComponent from "./LandscapeComponent";
  * [KO] 전체 지형의 2D 타일 그리드 분할, 월드-그리드 좌표 변환 및 반경 기반 타일 쿼리를 담당하는 공간 관리 클래스입니다.
  * [EN] Spatial management class responsible for 2D tile grid partitioning, world-to-grid coordinate conversion, and radius-based tile querying for the landscape.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **2D 공간 그리드 분할**: 거대한 지형 월드를 컬럼(X)과 행(Z)의 2D 타일 배열(`flatCells`)로 평탄화하여 캐싱합니다.
+ * - **O(1) 월드-그리드 고속 투영**: 월드 좌표(X, Z)를 그리드 정규화 수식(`(worldX + halfWorldSizeX) / tileSizeX`)을 통해 연산 오버헤드 없이 즉시 특정 타일 컴포넌트로 변환합니다.
+ * - **반경 및 영역 기반 타일 쿼리 (`getComponentsInRadius`)**: 카메라나 플레이어 위치를 중심으로 일정 거리 내에 존재하는 모든 활성 타일을 수집하여 비동기 타일 스트리머(`LandscapeTileStreamer`)의 로딩 파이프라인에 공급합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **2D Spatial Grid Partitioning**: Partitions extensive landscape worlds into a flattened 2D tile array (`flatCells`) indexed by column (X) and row (Z).
+ * - **O(1) World-to-Grid Projection**: Instantaneously projects world coordinates (X, Z) to tile components via normalized mapping formulas (`(worldX + halfWorldSizeX) / tileSizeX`) with zero query overhead.
+ * - **Radius-based Spatial Querying (`getComponentsInRadius`)**: Gathers all active components within Euclidean distance from camera/player positions to feed the asynchronous streaming pipeline of `LandscapeTileStreamer`.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.

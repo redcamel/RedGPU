@@ -26,6 +26,23 @@ export type LandscapeTileUrlResolver = (row: number, col: number, comp?: Landsca
  * [KO] 카메라 위치 기반 비동기 지형 타일 스트리밍, 가상 텍스처 아틀라스(VHT/VNT/VBT) 베이킹 및 CPU 지형 고도 샘플링을 총괄하는 스트리머 클래스입니다.
  * [EN] Streamer orchestrating distance-based async terrain tile streaming, virtual texture atlas (VHT/VNT/VBT) baking, and CPU height sampling.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **거리 기반 비동기 스트리밍**: 카메라와의 거리를 감시하여 `tileLoadingRadius` 범위 내에 진입한 타일의 높이맵을 비동기 다운로드합니다. 프레임 드랍을 방지하기 위해 `tileMaxLoadsPerFrame`을 통해 프레임당 최대 로딩 개수를 엄격히 제어합니다.
+ * - **가상 텍스처 아틀라스 파이프라인 총괄**:
+ *   - VHT(가상 높이): 16비트 PNG 또는 원시 데이터로부터 타일 높이맵을 아틀라스에 베이킹합니다.
+ *   - VNT(가상 노멀): VHT 높이 데이터를 기반으로 Sobel/중앙 차분 노멀을 실시간 베이킹합니다.
+ *   - VBT(가상 베이스): 스플랫 레이어와 VNT를 융합하여 PBR 베이스컬러/노멀/ORM 아틀라스를 합성하고 타일별 독자 밉체인을 구축합니다.
+ * - **고속 CPU 고도 질의 (`getInterpolatedHeightAt`)**: 캐릭터 컨트롤러나 카메라, 식생/잔디 스캐터 배치가 지형 표면에 정확히 밀착할 수 있도록 CPU 메모리에 캐싱된 16비트 높이맵 픽셀 데이터를 이중 선형 보간하여 지형 높이를 즉시 반환합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Distance-based Async Streaming**: Monitors camera positions to asynchronously stream heightmaps within `tileLoadingRadius`. Strictly regulates frame budget via `tileMaxLoadsPerFrame` to prevent stutter.
+ * - **Virtual Texture Atlas Pipeline Orchestration**:
+ *   - VHT (Height): Bakes tile heightmaps from 16-bit PNG or raw buffers into the VHT atlas.
+ *   - VNT (Normal): Computes and bakes Sobel/central difference normals from VHT height data in real time.
+ *   - VBT (Base): Composites PBR BaseColor/Normal/ORM atlases by blending splat layers with VNT normals and constructs per-tile mip-chains.
+ * - **High-Speed CPU Height Queries (`getInterpolatedHeightAt`)**: Bilinearly interpolates 16-bit cached height pixels to instantly resolve terrain elevation for character controllers, cameras, and foliage/grass placement.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.

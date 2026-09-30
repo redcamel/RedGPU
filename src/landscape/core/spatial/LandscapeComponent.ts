@@ -2,6 +2,17 @@
  * [KO] Landscape를 구성하는 개별 타일(청크) 컴포넌트의 공간 위치 및 인덱스 메타데이터를 저장하는 불변 값 객체입니다.
  * [EN] Immutable value object storing the spatial world coordinates and grid component indices of an individual terrain tile (chunk).
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **공간 분할의 최소 단위**: 전체 거대 지형을 바둑판 형태로 나눈 N x M 그리드 상에서 단일 타일 청크를 표현합니다.
+ * - **불변 값 객체 (Immutable Value Object)**: 생성 시점에 월드 좌표(`worldX`, `worldZ`), 그리드 좌표(`componentX`, `componentZ`), 고유 키(`key`)가 결정되며 변경되지 않으므로, 비동기 스트리밍 및 공간 쿼리 시 완벽한 스레드 안전성과 참조 무결성을 보장합니다.
+ * - **가상 텍스처 및 인스턴싱 인덱싱**: 타일의 고유 식별자 키(`"{componentZ}_{componentX}"`)를 통해 VHT/VNT/VBT 아틀라스 내의 오프셋 계산 및 렌더링 인스턴스 슬롯 매핑의 기준점이 됩니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Atomic Spatial Unit**: Represents an individual tile chunk on an N x M grid partitioning a large-scale landscape terrain.
+ * - **Immutable Value Object**: Coordinates (`worldX`, `worldZ`), grid indices (`componentX`, `componentZ`), and unique key (`key`) are assigned at instantiation, guaranteeing thread-safety and referential integrity across async streaming pipelines.
+ * - **Virtual Texture & Instancing Indexing**: The unique key (`"{componentZ}_{componentX}"`) serves as the lookup basis for calculating VHT/VNT/VBT atlas tile slots and GPU instance buffer indices.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(LandscapeSpatialGrid)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (LandscapeSpatialGrid).<br/>Do not create an instance directly using the 'new' keyword.

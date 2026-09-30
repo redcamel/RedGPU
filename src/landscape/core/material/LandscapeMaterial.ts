@@ -32,6 +32,17 @@ const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
  * [KO] 최대 8개의 스플랫 텍스처 레이어를 Texture2DArray로 패킹하여 고속 블렌딩 셰이딩을 수행하는 지형 머티리얼 클래스입니다.
  * [EN] Terrain material class that packs up to 8 splat texture layers into Texture2DArray for high-speed blending shading.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **Texture2DArray 기반 텍스처 패킹**: 최대 8개의 레이어(`MAX_LANDSCAPE_LAYERS = 8`)를 지원하며, 각 레이어의 BaseColor, Normal, ORM, WeightMap을 개별 2D 텍스처 배열(`GPUTexture` with `texture_2d_array`)로 바인딩하여 셰이더 샘플러 슬롯 낭비 없이 고속 샘플링을 수행합니다.
+ * - **가상 베이스 텍스처(VBT) 리베이킹 조정자**: 레이어 목록 변경, 파라미터 수정, 텍스처 로드 완료 등을 감지하여 지형 전체의 텍스처 배열을 재구성하고, 등록된 콜백(`onRebakeVBTRequested`)을 통해 비동기 VBT 베이킹을 조율합니다.
+ * - **PBR 프래그먼트 셰이딩**: `landscapeFragment.wgsl`을 통해 각 프래그먼트에서 가중치 합계 정규화, 높이 맵 기반 블렌딩 콘트라스트 보정, 물리 기반 셰이딩을 안정적으로 수행합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Texture2DArray Texture Packing**: Supports up to 8 layers (`MAX_LANDSCAPE_LAYERS = 8`), packing each layer's BaseColor, Normal, ORM, and WeightMap into individual 2D texture arrays (`GPUTexture` with `texture_2d_array`) for efficient sampling without consuming individual sampler slots.
+ * - **Virtual Base Texture (VBT) Rebake Coordinator**: Detects layer list changes, parameter adjustments, and image load completions to rebuild GPU texture arrays and orchestrate asynchronous VBT atlas rebaking via `onRebakeVBTRequested`.
+ * - **PBR Fragment Shading**: Executes normalized weight blending, height-based blend contrast enhancement, and physically-based shading via `landscapeFragment.wgsl`.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.

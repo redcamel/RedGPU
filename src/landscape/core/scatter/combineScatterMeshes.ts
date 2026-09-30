@@ -218,6 +218,23 @@ function traverseHierarchy(
  * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 서브메쉬를 단일 버퍼로 병합한 결합 결과 객체를 반환합니다.
  * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns a combination result object with merged sub-meshes per material.
  *
+ * @remarks
+ * **[KO] 알고리즘 및 렌더링 최적화:**
+ * - **계층 구조 평탄화 (Hierarchy Flattening)**: GLTF 노드 트리의 복잡한 부모-자식 트랜스폼(위치, 오일러 회전, 스케일)을 누적 계산하여 모든 정점과 법선, 탄젠트를 전역 모델 공간으로 사전 베이킹합니다.
+ * - **재질별 드로우콜 병합 (Material Grouping)**: 동일한 텍스처와 재질 파라미터를 공유하는 여러 메쉬 노드를 단일 Vertex/Index 버퍼로 결합하여 드로우콜 횟수를 최소화합니다.
+ * - **스캐터 정렬 옵션**:
+ *   - `preservePivot`: 원본 3D 모델의 원점(피벗)을 그대로 보존하거나, 지형 표면에 정확히 맞닿도록 최하단 정점(minY)을 Y=0으로 스냅합니다.
+ *   - `centerXZ`: 나무나 풀과 같은 식생 모델을 회전/배치할 때 비틀림이 없도록 XZ 평면 중심을 원점으로 재정렬합니다.
+ * - **그림자 패스 최적화 (`generateShadowMergedGeometry`)**: 불필요한 노멀/UV/탄젠트를 제외하고 오직 위치값(Position-only, 3 floats)만으로 구성된 단일 섀도우 지오메트리를 생성하여 캐스케이드 그림자 맵 렌더링 대역폭을 획기적으로 절감합니다.
+ *
+ * **[EN] Algorithm & Rendering Optimizations:**
+ * - **Hierarchy Flattening**: Accumulates nested parent-child transforms (position, Euler rotation, scale) across GLTF node trees to pre-bake all vertices, normals, and tangents into unified model space.
+ * - **Material-based Draw Call Batching**: Merges multiple mesh nodes sharing the same textures and material properties into single Vertex/Index buffers to minimize draw calls.
+ * - **Scatter Alignment Options**:
+ *   - `preservePivot`: Preserves the original model pivot or aligns the lowest vertex (minY) to Y=0 for accurate terrain snapping.
+ *   - `centerXZ`: Re-centers the XZ plane geometry to eliminate rotation wobble when instancing trees or vegetation.
+ * - **Shadow Pass Optimization (`generateShadowMergedGeometry`)**: Produces a unified position-only (3 floats) geometry stripped of normals, UVs, and tangents to dramatically cut memory bandwidth during shadow map passes.
+ *
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance

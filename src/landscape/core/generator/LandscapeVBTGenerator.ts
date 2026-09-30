@@ -16,6 +16,17 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [KO] 스플랫 레이어 머티리얼과 VNT 아틀라스를 합성하여 지형 타일별 베이스컬러/노멀/ORM 아틀라스를 베이킹하는 제너레이터 클래스입니다.
  * [EN] Generator class that combines splat layer materials and VNT atlases to bake per-tile base color, normal, and ORM atlases.
  *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **다중 레이어 스플래팅 융합 (VBT Bake)**: 가중치 맵(Weight Map)과 최대 다수의 지형 텍스처 레이어(Diffuse, Normal, ORM)를 VNT 지형 노멀과 조합하여 고해상도 단일 가상 베이스 텍스처(VBT) 아틀라스로 합성합니다.
+ * - **타일 단위 GPU 밉맵 생성 (`Tile Mipmap`)**: 가상 텍스처에서 이웃 타일 간의 샘플링 번짐(Bleeding) 아티팩트를 방지하기 위해, 각 타일의 경계 내에서 독립적인 다운샘플링 밉체인을 GPU Compute 셰이더(`landscapeTileMipmap.wgsl`)로 고속 빌드합니다.
+ * - **리소스 뷰 캐싱 및 무할당 렌더링**: `WeakMap` 기반의 텍스처 뷰 및 바인드 그룹 캐시를 활용하여 매 베이킹 호출 시 GC 압박 없는 극대화된 렌더링 성능을 보장합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Multi-layer Splatting Fusion (VBT Bake)**: Blends weight maps and multiple terrain texture layers (Diffuse, Normal, ORM) with VNT terrain normals to composite high-resolution unified Virtual Base Texture (VBT) atlases.
+ * - **Tile-level GPU Mipmap Generation (`Tile Mipmap`)**: Builds independent downsampled mip-chains within each tile boundary using GPU compute shaders (`landscapeTileMipmap.wgsl`) to prevent cross-tile texture bleeding artifacts in virtual texturing.
+ * - **Resource View Caching & Allocation-free Execution**: Employs `WeakMap`-based caches for texture views and bind groups to ensure maximum baking throughput without GC pressure.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.

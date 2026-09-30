@@ -95,6 +95,17 @@ export interface LandscapeLayerOptions {
 /**
  * [KO] 지형 표면의 개별 스플랫 텍스처 레이어(베이스컬러, 노멀, ORM, 가중치 맵)를 정의하고 관리하는 클래스입니다.
  * [EN] Class that defines and manages an individual splat texture layer (base color, normal, ORM, weight map) on the terrain surface.
+ *
+ * @remarks
+ * **[KO] 아키텍처 및 역할:**
+ * - **지형 레이어 속성 캡슐화**: 풀(Grass), 흙(Dirt), 암석(Rock), 눈(Snow) 등 지형 표면을 구성하는 단일 재질의 Albedo, Normal, ORM(Occlusion, Roughness, Metallic) 텍스처 및 UV 타일링 파라미터를 캡슐화합니다.
+ * - **스플랫 가중치 맵 바인딩**: `weightTexture`와 특정 채널(`weightChannel`: R, G, B, A)을 지정하여 지형 전체에서 해당 레이어가 차지하는 블렌딩 비율을 제어합니다.
+ * - **반응형 리베이킹 통지 (`onLayerDirty`)**: 레이어의 텍스처나 UV 스케일, 거칠기 등의 파라미터가 변경되면 머티리얼과 타일 스트리머에 알림을 전송하여 VBT(가상 베이스 텍스처) 아틀라스의 자동 리베이킹을 유도합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Terrain Layer Property Encapsulation**: Encapsulates Albedo, Normal, ORM (Occlusion, Roughness, Metallic) textures and UV tiling parameters for individual surface materials like grass, dirt, rock, and snow.
+ * - **Splat Weight Map Binding**: Governs the blending distribution across the terrain by associating a `weightTexture` with a dedicated channel (`weightChannel`: R, G, B, A).
+ * - **Reactive Rebake Notifications (`onLayerDirty`)**: Emits dirty events upon modifications to textures, UV scaling, or roughness values to trigger automatic rebaking of the VBT (Virtual Base Texture) atlas.
  */
 export class LandscapeLayer {
     #name: string;
