@@ -20,7 +20,6 @@ import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import LandscapeWeightMapCache from "../core/cache/LandscapeWeightMapCache";
 
 const DEG2RAD: number = 0.017453292519943295;
 
@@ -415,7 +414,7 @@ export class GrassManager extends RedGPUObject {
             const matchedLayer = this.#landscape.layers.find(l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer);
             const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc;
             if (targetSrc) {
-                LandscapeWeightMapCache.load(targetSrc).then(() => {
+                this.#landscape.weightMapCPUSampler.load(targetSrc).then(() => {
                     if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
                         const fallbackCamPos = this.#getFallbackCameraPosition();
                         if (fallbackCamPos) {
@@ -1377,7 +1376,7 @@ export class GrassManager extends RedGPUObject {
             const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
             const matchedLayer = targetLayer ? layers.find(l => l.name === targetLayer || (l as any).key === targetLayer) : undefined;
             const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc || null;
-            const hasWeightMap = !!(targetSrc && LandscapeWeightMapCache.has(targetSrc));
+            const hasWeightMap = !!(targetSrc && this.#landscape.weightMapCPUSampler.has(targetSrc));
             const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
 
             if (targetLayer && !hasWeightMap) {
@@ -1432,7 +1431,7 @@ export class GrassManager extends RedGPUObject {
                     if (hasWeightMap && targetSrc) {
                         const u = (gx + halfWorldX) / worldSizeX;
                         const v = (gz + halfWorldZ) / worldSizeZ;
-                        LandscapeWeightMapCache.getAllWeights(targetSrc, u, v, this.#tempWeights4);
+                        this.#landscape.weightMapCPUSampler.getAllWeights(targetSrc, u, v, this.#tempWeights4);
                         const totalW = this.#tempWeights4[0] + this.#tempWeights4[1] + this.#tempWeights4[2] + this.#tempWeights4[3];
                         const normW = totalW > 0.001
                             ? (this.#tempWeights4[channelIdx] / totalW)

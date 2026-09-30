@@ -4,9 +4,12 @@
  *
  * @packageDocumentation
  */
-import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
+import LandscapeWeightMapCPUSampler, {type WeightMapPixelData} from "./LandscapeWeightMapCPUSampler";
 
 export {
-    LandscapeWeightMapCache
+    LandscapeWeightMapCPUSampler
 };
-export default LandscapeWeightMapCache;
+export type {
+    WeightMapPixelData
+};
+export default LandscapeWeightMapCPUSampler;

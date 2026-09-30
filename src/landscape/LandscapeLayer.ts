@@ -5,7 +5,7 @@
  */
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import type RedGPUContext from "../context/RedGPUContext";
-import LandscapeWeightMapCache from "./core/cache/LandscapeWeightMapCache";
+import LandscapeWeightMapCPUSampler from "./core/cache/LandscapeWeightMapCPUSampler";
 
 /**
  * [KO] 스플랫 가중치 텍스처에서 샘플링할 채널 식별자 ('R' | 'G' | 'B' | 'A' 또는 0 | 1 | 2 | 3)
@@ -138,6 +138,7 @@ export class LandscapeLayer {
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
 
+    #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
     dirty: boolean = true;
     onChange?: () => void;
 
@@ -447,11 +448,19 @@ export class LandscapeLayer {
         else this.#weightChannelIndex = 0;
     }
 
+    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler | undefined {
+        return this.#weightMapCPUSampler;
+    }
+
+    set weightMapCPUSampler(val: LandscapeWeightMapCPUSampler | undefined) {
+        this.#weightMapCPUSampler = val;
+    }
+
     getWeightAtUV(u: number, v: number): number {
         if (!this.#enabled) return 0.0;
         const src = this.#weightTexture?.src;
-        if (!src) return 1.0;
-        return LandscapeWeightMapCache.getWeight(src, u, v, this.#weightChannelIndex);
+        if (!src || !this.#weightMapCPUSampler) return 1.0;
+        return this.#weightMapCPUSampler.getWeight(src, u, v, this.#weightChannelIndex);
     }
 }
 

@@ -434,7 +434,7 @@ export class Grass extends RedGPUObject {
      * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
      * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
      */
-    get subMeshes(): readonly ScatterSubMesh[] {
+    get subMeshes(): ScatterSubMesh[] {
         return this.#subMeshes;
     }
 
