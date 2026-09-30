@@ -8,7 +8,7 @@ import LandscapeMeshCombiner from "../../../../core/geometry/LandscapeMeshCombin
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/geometry/LandscapeVertexFormats";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import {createShadowSubMeshUniform, type SubMeshUniformResult} from "./createSubMeshUniform";
+import {createFoliageShadowSubMeshUniform, type FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -31,7 +31,7 @@ export default function assembleFoliageLODMeshes(
     lodIndex: number,
     options: FoliageOptions,
     subMeshBindGroupLayout: GPUBindGroupLayout,
-    subMeshUniformCache?: Map<string, SubMeshUniformResult>,
+    subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>,
     lodReceiveShadow: boolean = true
 ): AssembledLODResult {
     const gpuDevice = redGPUContext.gpuDevice;
@@ -89,7 +89,7 @@ export default function assembleFoliageLODMeshes(
 
     let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
     if (combineResult.shadowMergedGeometry && combineResult.totalVertexCount > 0) {
-        const shadowUniform = createShadowSubMeshUniform(
+        const shadowUniform = createFoliageShadowSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
             options.name,

@@ -4,16 +4,16 @@ const subMeshUniformData: Float32Array = new Float32Array(52);
 const subMeshUniformUint32: Uint32Array = new Uint32Array(subMeshUniformData.buffer);
 const identityMatrix: mat4 = mat4.create();
 
-export interface SubMeshUniformResult {
+export interface FoliageSubMeshUniformResult {
     buffer: GPUBuffer;
     bindGroup: GPUBindGroup;
 }
 
 /**
- * [KO] PBR 렌더링에 필요한 208바이트 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 208-byte sub-mesh uniform buffer and bind group required for PBR rendering.
+ * [KO] PBR 렌더링에 필요한 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
  */
-export function createPBRSubMeshUniform(
+export function createFoliagePBRSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
     relMatrix: mat4,
@@ -24,7 +24,7 @@ export function createPBRSubMeshUniform(
     applyGroundBlend: boolean,
     groundBlendStrength?: number,
     groundBlendRange?: number
-): SubMeshUniformResult {
+): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_SubMesh_UniformBuffer_${globalSlot}`,
         size: 208,
@@ -83,15 +83,15 @@ export function createPBRSubMeshUniform(
 }
 
 /**
- * [KO] 섀도우 패스 전용 208바이트 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 208-byte sub-mesh uniform buffer and bind group dedicated to the shadow pass.
+ * [KO] 섀도우 패스 전용 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
  */
-export function createShadowSubMeshUniform(
+export function createFoliageShadowSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
     name: string,
     lodIndex: number
-): SubMeshUniformResult {
+): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_ShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
         size: 208,

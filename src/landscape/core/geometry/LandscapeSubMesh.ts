@@ -1,12 +1,12 @@
 import Mesh from "../../../display/mesh/Mesh";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import LandscapeGeometryUnit, {type LandscapeGeometryUnitInitOptions} from "./LandscapeGeometryUnit";
+import ALandscapeGeometryUnit, {type ALandscapeGeometryUnitInitOptions} from "./ALandscapeGeometryUnit";
 
 /**
  * [KO] LandscapeSubMesh 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for LandscapeSubMesh.
  */
-export interface LandscapeSubMeshInitOptions extends LandscapeGeometryUnitInitOptions {
+export interface LandscapeSubMeshInitOptions extends ALandscapeGeometryUnitInitOptions {
     /**
      * [KO] 원본 3D 메쉬 노드
      * [EN] Original 3D mesh node
@@ -33,10 +33,10 @@ export interface LandscapeSubMeshInitOptions extends LandscapeGeometryUnitInitOp
 }
 
 /**
- * [KO] WebGPU 지오메트리 버퍼 단위(LandscapeGeometryUnit)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 랜드스케이프 공용 서브메쉬 기본 클래스입니다.
- * [EN] Common landscape sub-mesh base class combining WebGPU geometry buffer unit (LandscapeGeometryUnit) with material, texture, and original mesh metadata.
+ * [KO] WebGPU 지오메트리 버퍼 단위(ALandscapeGeometryUnit)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 랜드스케이프 공용 서브메쉬 기본 클래스입니다.
+ * [EN] Common landscape sub-mesh base class combining WebGPU geometry buffer unit (ALandscapeGeometryUnit) with material, texture, and original mesh metadata.
  */
-export class LandscapeSubMesh extends LandscapeGeometryUnit {
+export class LandscapeSubMesh extends ALandscapeGeometryUnit {
     #mesh?: Mesh;
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;

@@ -1,10 +1,10 @@
 import Geometry from "../../../geometry/Geometry";
 
 /**
- * [KO] LandscapeGeometryUnit 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for LandscapeGeometryUnit.
+ * [KO] ALandscapeGeometryUnit 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for ALandscapeGeometryUnit.
  */
-export interface LandscapeGeometryUnitInitOptions {
+export interface ALandscapeGeometryUnitInitOptions {
     /**
      * [KO] WebGPU 버텍스 및 인덱스 버퍼를 포함하는 지오메트리 객체
      * [EN] Geometry object containing WebGPU vertex and index buffers
@@ -55,10 +55,12 @@ export interface LandscapeGeometryUnitInitOptions {
 }
 
 /**
- * [KO] 랜드스케이프 시스템(Foliage, FoliageShadow, Grass 등)에서 WebGPU 간접 드로우(Indirect Draw)를 수행하는 공통 지오메트리 렌더 단위 기본 클래스입니다.
- * [EN] Common geometry rendering unit base class executing WebGPU indirect draws across the landscape system (Foliage, FoliageShadow, Grass, etc.).
+ * [KO] 랜드스케이프 시스템(Foliage, FoliageShadow, Grass 등)에서 WebGPU 간접 드로우(Indirect Draw)를 수행하는 공통 지오메트리 렌더 단위 추상 기본 클래스입니다.<br/>
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] Common geometry rendering unit base abstract class executing WebGPU indirect draws across the landscape system (Foliage, FoliageShadow, Grass, etc.).<br/>
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  */
-export class LandscapeGeometryUnit {
+export abstract class ALandscapeGeometryUnit {
     #geometry: Geometry;
     #vertexCount: number;
     #indexCount: number;
@@ -68,7 +70,7 @@ export class LandscapeGeometryUnit {
     #indirectOffsetBytes: number;
     #instanceBufferOffset: number;
 
-    constructor(init: LandscapeGeometryUnitInitOptions) {
+    constructor(init: ALandscapeGeometryUnitInitOptions) {
         this.#geometry = init.geometry;
         this.#vertexCount = init.vertexCount;
         this.#indexCount = init.indexCount;
@@ -185,5 +187,5 @@ export class LandscapeGeometryUnit {
     }
 }
 
-Object.freeze(LandscapeGeometryUnit);
-export default LandscapeGeometryUnit;
+Object.freeze(ALandscapeGeometryUnit);
+export default ALandscapeGeometryUnit;

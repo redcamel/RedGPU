@@ -3,7 +3,7 @@ import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import type {FoliageDepthPassMode} from "../../pipeline/FoliagePipelineRegistry";
-import {createPBRSubMeshUniform, type SubMeshUniformResult} from "./createSubMeshUniform";
+import {createFoliagePBRSubMeshUniform, type FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
 
 export interface CreateSubMeshOptions {
     gpuDevice: GPUDevice;
@@ -18,7 +18,7 @@ export interface CreateSubMeshOptions {
     isImpostorOverride?: boolean;
     bottomOffset?: number;
     receiveShadow?: boolean;
-    uniformCache?: Map<string, SubMeshUniformResult>;
+    uniformCache?: Map<string, FoliageSubMeshUniformResult>;
     maxPrepassLOD?: number;
     groundBlendStrength?: number;
     groundBlendRange?: number;
@@ -68,7 +68,7 @@ export default function createFoliageSubMeshInstance(
         uniformBuffer = cached.buffer;
         vertexBindGroup = cached.bindGroup;
     } else {
-        const uniformResult = createPBRSubMeshUniform(
+        const uniformResult = createFoliagePBRSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
             relMatrix,

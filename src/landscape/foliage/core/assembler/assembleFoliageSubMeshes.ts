@@ -4,7 +4,7 @@ import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./internal/buildFoliageImpostorSubMesh";
-import type {SubMeshUniformResult} from "./internal/createSubMeshUniform";
+import type {FoliageSubMeshUniformResult} from "./internal/createFoliageSubMeshUniform";
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
@@ -44,7 +44,7 @@ export default function assembleFoliageSubMeshes(
     const numLODs = Math.min(lodConfigs.length, 8);
 
     const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
-    const subMeshUniformCache = new Map<string, SubMeshUniformResult>();
+    const subMeshUniformCache = new Map<string, FoliageSubMeshUniformResult>();
 
     let maxBoundingRadius = 0;
     let globalMinY = Infinity;

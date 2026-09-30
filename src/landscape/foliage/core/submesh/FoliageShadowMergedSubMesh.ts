@@ -1,5 +1,5 @@
 import Geometry from "../../../../geometry/Geometry";
-import LandscapeGeometryUnit from "../../../core/geometry/LandscapeGeometryUnit";
+import ALandscapeGeometryUnit from "../../../core/geometry/ALandscapeGeometryUnit";
 
 /**
  * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
@@ -23,7 +23,7 @@ export interface FoliageShadowMergedSubMeshInitOptions {
  * [KO] 그림자 패스(Shadow Pass) 렌더링을 위해 단일 위치 전용(Position-only) 지오메트리로 통합된 식생 서브메쉬 클래스입니다.
  * [EN] Foliage sub-mesh class combined into unified position-only geometry for shadow pass rendering.
  */
-export class FoliageShadowMergedSubMesh extends LandscapeGeometryUnit {
+export class FoliageShadowMergedSubMesh extends ALandscapeGeometryUnit {
     #windFloatBuffer: Float32Array = new Float32Array(12);
     #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
 

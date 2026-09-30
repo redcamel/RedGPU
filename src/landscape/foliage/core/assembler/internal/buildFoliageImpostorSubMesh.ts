@@ -1,13 +1,13 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import {createOctahedralImpostorGeometry} from "../../../../core/geometry/createOctahedralImpostorGeometry";
+import {createOctahedralImpostorGeometry} from "../../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/geometry/LandscapeVertexFormats";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import type {SubMeshUniformResult} from "./createSubMeshUniform";
+import type {FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
 
 /**
  * [KO] LOD 0 서브메쉬를 기반으로 옥타헤드럴 임포스터를 베이킹하고, 마지막 LOD에 단일 임포스터 서브메쉬를 생성 및 부착합니다.
@@ -22,7 +22,7 @@ export default function buildFoliageImpostorSubMesh(
     subList: FoliageSubMesh[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
-    subMeshUniformCache?: Map<string, SubMeshUniformResult>
+    subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>
 ): void {
     const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
 
