@@ -16,7 +16,7 @@ import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
-import type {FoliageInstanceBaker} from "./baking/FoliageInstanceBaker";
+import type {ScatterInstanceBaker} from "../../core/scatter";
 
 /**
  * [KO] 식생 LOD 설정 인터페이스입니다.
@@ -316,7 +316,7 @@ export class Foliage extends RedGPUObject {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
     #streamer: FoliageSubCellStreamer;
-    #baker: FoliageInstanceBaker | null = null;
+    #baker: ScatterInstanceBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
 
@@ -352,7 +352,7 @@ export class Foliage extends RedGPUObject {
         megaBuffer?: FoliageMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
-        baker?: FoliageInstanceBaker | null
+        baker?: ScatterInstanceBaker | null
     ) {
         super(redGPUContext);
         if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {

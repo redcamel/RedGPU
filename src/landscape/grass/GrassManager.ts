@@ -11,7 +11,8 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
-import {GrassInstanceBaker} from "./core/baking/GrassInstanceBaker";
+import {computeNormalizedChannelWeight, ScatterInstanceBaker} from "../core/scatter";
+import grassBakeComputeWGSL from "./core/baking/grassBakeCompute.wgsl";
 import {GrassCuller} from "./core/culling/GrassCuller";
 import grassVertexWGSL from "./shader/grassVertex.wgsl";
 import grassFragmentNearWGSL from "./shader/grassFragmentNear.wgsl";
@@ -20,7 +21,6 @@ import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import {computeNormalizedChannelWeight} from "../core/scatter";
 
 const DEG2RAD: number = 0.017453292519943295;
 
@@ -153,7 +153,7 @@ export class GrassManager extends RedGPUObject {
     #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassMegaBuffer;
-    #baker: GrassInstanceBaker;
+    #baker: ScatterInstanceBaker;
     #culler: GrassCuller;
 
     #grassList: Grass[] = [];
@@ -226,7 +226,11 @@ export class GrassManager extends RedGPUObject {
         this.#tileStreamer = tileStreamer;
 
         this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
-        this.#baker = new GrassInstanceBaker(this.redGPUContext);
+        this.#baker = new ScatterInstanceBaker(this.redGPUContext, {
+            computeShaderCode: grassBakeComputeWGSL,
+            label: 'GrassInstanceBaker',
+            initialTaskCapacity: 65536,
+        });
         this.#culler = new GrassCuller(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {

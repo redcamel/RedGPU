@@ -35,6 +35,12 @@ import {
     POSITION_ONLY_STRIDE_BYTES
 } from "./ScatterVertexFormats";
 
+import {
+    type IScatterBakeMegaBuffer,
+    ScatterInstanceBaker,
+    type ScatterInstanceBakerOptions
+} from "./baking/ScatterInstanceBaker";
+
 export {
     // Runtime Classes, Functions & Units
     combineScatterMeshes,
@@ -42,6 +48,7 @@ export {
     ScatterSubMesh,
     computeNormalizedChannelWeight,
     sampleNormalizedLayerWeight,
+    ScatterInstanceBaker,
 
     // Code Hint Interfaces & Vertex Constants
     type AScatterGeometryUnitInitOptions,
@@ -50,6 +57,8 @@ export {
     type ScatterMeshCombineResult,
     type CombinedSubMeshGroup,
     type RawSubMeshNode,
+    type IScatterBakeMegaBuffer,
+    type ScatterInstanceBakerOptions,
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
     PBR_STRIDE_BYTES,

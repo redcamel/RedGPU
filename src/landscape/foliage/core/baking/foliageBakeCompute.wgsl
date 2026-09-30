@@ -57,9 +57,8 @@ struct BakeTask {
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
 @group(0) @binding(3) var<storage, read> bakeTasks: array<BakeTask>;
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(5) var vhtSampler: sampler;
-@group(0) @binding(6) var vbtTexture: texture_2d<f32>;
-@group(0) @binding(7) var vbtSampler: sampler;
+@group(0) @binding(5) var vbtTexture: texture_2d<f32>;
+@group(0) @binding(6) var basicSampler: sampler;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -83,13 +82,13 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
+    let sampledHeightNorm = textureSampleLevel(vhtTexture, basicSampler, vec2<f32>(u, v), 0.0).r;
     let terrainHeight = sampledHeightNorm * bakeUniforms.heightScale;
     let effectiveBottomOffset = typeInfo.bottomOffset * inst.scaleY;
 
     var groundColor = vec3<f32>(0.2, 0.2, 0.2);
     if (bakeUniforms.hasVBT != 0u) {
-        let groundTex = textureSampleLevel(vbtTexture, vbtSampler, vec2<f32>(u, v), 0.0);
+        let groundTex = textureSampleLevel(vbtTexture, basicSampler, vec2<f32>(u, v), 0.0);
         if (groundTex.a > 0.05) {
             groundColor = groundTex.rgb;
         }

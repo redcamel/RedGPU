@@ -44,7 +44,6 @@ import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageMegaBuffer from "./buffer/FoliageMegaBuffer";
-import {FoliageInstanceBaker} from "./baking/FoliageInstanceBaker";
 import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
@@ -77,7 +76,6 @@ export {
     FoliageSubMesh,
     FoliageShadowMergedSubMesh,
     FoliageMegaBuffer,
-    FoliageInstanceBaker,
     FoliageSpatialGrid,
     FoliagePipelineRegistry,
     FoliageRenderer,

@@ -1,24 +1,56 @@
 /**
- * [KO] 식생 인스턴스 지형 물리 베이커 모듈입니다.
- * [EN] Foliage instance terrain physical baker module.
+ * [KO] 스캐터 인스턴스 지형 물리 베이커 모듈입니다.
+ * [EN] Scatter instance terrain physical baker module.
  * @packageDocumentation
  */
 
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
-import foliageBakeComputeSource from "./foliageBakeCompute.wgsl";
-import type FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 
 /**
- * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착시키는 GPU Compute 기반 식생 인스턴스 베이커 클래스입니다.
- * [EN] GPU compute-based foliage instance baker class that physically conforms foliage instances to the landscape terrain surface.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
+ * [KO] 인스턴스 베이킹에 필요한 최소 GPU 버퍼 프로퍼티를 정의하는 메가버퍼 인터페이스입니다.
+ * [EN] MegaBuffer interface defining the minimum GPU buffer properties required for instance baking.
  */
-export class FoliageInstanceBaker extends RedGPUObject {
+export interface IScatterBakeMegaBuffer {
+    /**
+     * [KO] 원본 인스턴스 데이터가 저장되는 GPU 스토리지 버퍼
+     * [EN] GPU storage buffer storing raw instance data
+     */
+    rawGPUBuffer: GPUBuffer | null;
+    /**
+     * [KO] 타입별 설정 파라미터가 저장되는 GPU 스토리지 버퍼
+     * [EN] GPU storage buffer storing type-specific configuration parameters
+     */
+    typeParamsGPUBuffer: GPUBuffer | null;
+}
+
+/**
+ * [KO] ScatterInstanceBaker 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for ScatterInstanceBaker.
+ */
+export interface ScatterInstanceBakerOptions {
+    /**
+     * [KO] 실행할 WebGPU Compute WGSL 셰이더 소스코드 문자열
+     * [EN] WebGPU Compute WGSL shader source code string to execute
+     */
+    computeShaderCode: string;
+    /**
+     * [KO] 디버깅 및 프로파일링용 베이커 식별 라벨
+     * [EN] Identifier label for debugging and profiling
+     */
+    label: string;
+    /**
+     * [KO] 초기 태스크 큐 수용 용량 (인스턴스 수, 기본값: 32768)
+     * [EN] Initial task queue capacity (number of instances, default: 32768)
+     */
+    initialTaskCapacity?: number;
+}
+
+/**
+ * [KO] 지형(Landscape) 표면에 스캐터 인스턴스(식생, 잔디 등)들을 물리적으로 안착시키는 GPU Compute 기반 베이커 기본 클래스입니다.
+ * [EN] GPU compute-based baker base class that physically conforms scatter instances (foliage, grass, etc.) to the landscape terrain surface.
+ */
+export class ScatterInstanceBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -29,7 +61,7 @@ export class FoliageInstanceBaker extends RedGPUObject {
 
     #tasksGPUBuffer: GPUBuffer | null = null;
     #tasksCPUBuffer: Uint32Array;
-    #taskCapacity: number = 32768;
+    #taskCapacity: number;
     #taskCount: number = 0;
 
     #cachedRawBuffer: GPUBuffer | null = null;
@@ -37,16 +69,26 @@ export class FoliageInstanceBaker extends RedGPUObject {
     #cachedVHTTextureView: GPUTextureView | null = null;
     #cachedVBTTextureView: GPUTextureView | null = null;
 
+    #computeShaderCode: string;
+    #label: string;
+
     /**
-     * [KO] FoliageInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
-     * [EN] Creates a FoliageInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline. (Do not instantiate directly; access via the `landscape.foliageManager` property instead.)
+     * [KO] ScatterInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
+     * [EN] Creates a ScatterInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance
+     * @param options -
+     * [KO] 베이커 초기화 설정 옵션
+     * [EN] Baker initialization configuration options
      */
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, options: ScatterInstanceBakerOptions) {
         super(redGPUContext);
+
+        this.#computeShaderCode = options.computeShaderCode;
+        this.#label = options.label;
+        this.#taskCapacity = options.initialTaskCapacity || 32768;
 
         this.#uniformCPUBuffer = new Float32Array(8);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
@@ -81,18 +123,18 @@ export class FoliageInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] 지정된 식생 타입과 인스턴스 범위에 대한 베이킹 작업을 큐에 추가합니다.
-     * [EN] Adds bake tasks for a specified foliage type and instance range to the task queue.
+     * [KO] 지정된 인스턴스 타입과 인스턴스 범위에 대한 베이킹 작업을 큐에 추가합니다.
+     * [EN] Adds bake tasks for a specified instance type and instance range to the task queue.
      *
      * @param startIndex -
-     * [KO] FoliageMegaBuffer 내 인스턴스 시작 오프셋 인덱스
-     * [EN] Starting offset index of instances within FoliageMegaBuffer
+     * [KO] MegaBuffer 내 인스턴스 시작 오프셋 인덱스
+     * [EN] Starting offset index of instances within MegaBuffer
      * @param count -
      * [KO] 베이킹할 인스턴스 개수
      * [EN] Number of instances to bake
      * @param typeId -
-     * [KO] 식생 종류의 고유 식별자 ID
-     * [EN] Unique identifier ID of the foliage type
+     * [KO] 인스턴스 종류의 고유 식별자 ID
+     * [EN] Unique identifier ID of the instance type
      */
     addBakeTasks(startIndex: number, count: number, typeId: number): void {
         if (count <= 0) return;
@@ -108,15 +150,15 @@ export class FoliageInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] 등록된 베이킹 작업들을 GPU Compute Pass에 전달하여 실제 지형 높이 스냅 및 지면 색상 샘플링을 실행합니다.
+     * [KO] 등록된 베이킹 작업들을 GPU Compute Pass에 전달하여 실제 지형 스냅 및 지면 색상 샘플링을 실행합니다.
      * [EN] Dispatches registered bake tasks to the GPU compute pass to execute physical terrain height snapping and ground color sampling.
      *
      * @param computePass -
      * [KO] 현재 실행 중인 GPUComputePassEncoder
      * [EN] Active GPUComputePassEncoder
      * @param megaBuffer -
-     * [KO] 식생 인스턴스 데이터를 저장하는 FoliageMegaBuffer 인스턴스
-     * [EN] FoliageMegaBuffer instance storing foliage instance data
+     * [KO] 인스턴스 데이터를 저장하는 IScatterBakeMegaBuffer 호환 메가버퍼 인스턴스
+     * [EN] IScatterBakeMegaBuffer-compatible megaBuffer instance storing instance data
      * @param vhtTextureView -
      * [KO] 지형 가상 높이맵(VHT) 텍스처 뷰
      * [EN] Terrain virtual height texture (VHT) texture view
@@ -135,7 +177,7 @@ export class FoliageInstanceBaker extends RedGPUObject {
      */
     dispatchPass(
         computePass: GPUComputePassEncoder,
-        megaBuffer: FoliageMegaBuffer,
+        megaBuffer: IScatterBakeMegaBuffer,
         vhtTextureView: GPUTextureView | null | undefined,
         vbtTextureView: GPUTextureView | null | undefined,
         worldSizeX: number,
@@ -152,8 +194,9 @@ export class FoliageInstanceBaker extends RedGPUObject {
         }
 
         const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
-        const targetVHTView = vhtTextureView || this.resourceManager.emptyTexture2DArrayView;
-        const targetVBTView = vbtTextureView || this.resourceManager.emptyBitmapTextureView;
+        const emptyBitmapView = this.resourceManager.emptyBitmapTextureView;
+        const targetVHTView = vhtTextureView || emptyBitmapView;
+        const targetVBTView = vbtTextureView || emptyBitmapView;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
@@ -196,7 +239,7 @@ export class FoliageInstanceBaker extends RedGPUObject {
             this.#cachedVBTTextureView = targetVBTView;
 
             this.#bakeBindGroup = gpuDevice.createBindGroup({
-                label: 'Foliage_Bake_BindGroup',
+                label: `${this.#label}_BindGroup`,
                 layout: this.#bakeBindGroupLayout,
                 entries: [
                     {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
@@ -204,9 +247,8 @@ export class FoliageInstanceBaker extends RedGPUObject {
                     {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
                     {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
                     {binding: 4, resource: targetVHTView},
-                    {binding: 5, resource: basicGPUSampler},
-                    {binding: 6, resource: targetVBTView},
-                    {binding: 7, resource: basicGPUSampler},
+                    {binding: 5, resource: targetVBTView},
+                    {binding: 6, resource: basicGPUSampler},
                 ],
             });
         }
@@ -220,8 +262,8 @@ export class FoliageInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] FoliageInstanceBaker가 점유하고 있는 내부 GPU 버퍼, 파이프라인 및 바인드그룹 리소스를 완전히 해제합니다.
-     * [EN] Completely releases internal GPU buffers, pipelines, and bind group resources held by FoliageInstanceBaker.
+     * [KO] ScatterInstanceBaker가 점유하고 있는 내부 GPU 버퍼, 파이프라인 및 바인드그룹 리소스를 완전히 해제합니다.
+     * [EN] Completely releases internal GPU buffers, pipelines, and bind group resources held by ScatterInstanceBaker.
      */
     destroy(): void {
         this.#uniformGPUBuffer?.destroy();
@@ -239,41 +281,40 @@ export class FoliageInstanceBaker extends RedGPUObject {
         if (!gpuDevice) return;
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'Foliage_Bake_UniformBuffer',
+            label: `${this.#label}_UniformBuffer`,
             size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
-            label: 'Foliage_Bake_TasksBuffer',
+            label: `${this.#label}_TasksBuffer`,
             size: this.#taskCapacity * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        const shaderModule = resourceManager.createGPUShaderModule('Foliage_Bake_ComputeModule', {
-            code: foliageBakeComputeSource,
+        const shaderModule = resourceManager.createGPUShaderModule(`${this.#label}_ComputeModule`, {
+            code: this.#computeShaderCode,
         });
 
-        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Bake_BindGroupLayout', {
-            label: 'Foliage_Bake_BindGroupLayout',
+        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout(`${this.#label}_BindGroupLayout`, {
+            label: `${this.#label}_BindGroupLayout`,
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-                {binding: 6, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
             ],
         });
 
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Bake_PipelineLayout', {
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(`${this.#label}_PipelineLayout`, {
             bindGroupLayouts: [this.#bakeBindGroupLayout],
         });
 
         this.#bakePipeline = gpuDevice.createComputePipeline({
-            label: 'Foliage_Bake_ComputePipeline',
+            label: `${this.#label}_ComputePipeline`,
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,
@@ -299,7 +340,7 @@ export class FoliageInstanceBaker extends RedGPUObject {
         if (gpuDevice) {
             this.#tasksGPUBuffer?.destroy();
             this.#tasksGPUBuffer = gpuDevice.createBuffer({
-                label: 'Foliage_Bake_TasksBuffer',
+                label: `${this.#label}_TasksBuffer`,
                 size: this.#taskCapacity * 8,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });
@@ -308,4 +349,4 @@ export class FoliageInstanceBaker extends RedGPUObject {
     }
 }
 
-Object.freeze(FoliageInstanceBaker);
+Object.freeze(ScatterInstanceBaker);
