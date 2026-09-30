@@ -7,7 +7,7 @@
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: 식생 전용 메인 및 그림자 렌더 서브메쉬
  * - `FoliageMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
  * - `FoliageCullingDispatcher`: HZB 오클루전 및 프러스텀 컬링 GPU 디스패처
- * - `FoliageImpostorBaker` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
+ * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: 지형 타일 내부 고밀도 서브셀 공간 분할 및 동적 인스턴스 스트리머
  * - `assembleFoliageSubMeshes`: 계층적 식생 3D 모델을 분석·결합하여 단일 서브메쉬로 조립하는 순수 함수
  * - `createOctahedralImpostorGeometry`: 8방향/16방향 3D 옥타헤드럴 임포스터 지오메트리 생성 함수
@@ -23,7 +23,7 @@
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
  * - `FoliageMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCullingDispatcher`: GPU dispatcher for HZB occlusion and view frustum culling
- * - `FoliageImpostorBaker` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
+ * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: High-density subcell spatial partitioner and dynamic streamer
  * - `assembleFoliageSubMeshes`: Pure function assembling hierarchical foliage models into combined sub-meshes
  * - `createOctahedralImpostorGeometry`: Function generating 8-way/16-way 3D octahedral billboard geometries
@@ -51,7 +51,7 @@ import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./culling/FoliageCullingDispatcher";
 
 // 3. Impostors
-import FoliageImpostorBaker from "./impostor/FoliageImpostorBaker";
+import bakeFoliageImpostor, {type FoliageBakeResult} from "./impostor/bakeFoliageImpostor";
 import OctahedralImpostorMaterial from "./impostor/octahedral/OctahedralImpostorMaterial";
 import createOctahedralImpostorGeometry from "./impostor/octahedral/createOctahedralImpostorGeometry";
 
@@ -82,7 +82,6 @@ export {
     FoliagePipelineRegistry,
     FoliageRenderer,
     FoliageCullingDispatcher,
-    FoliageImpostorBaker,
     OctahedralImpostorMaterial,
     FoliageSubCellPartitioner,
     FoliageSubCellStreamer,
@@ -90,6 +89,7 @@ export {
     // Standalone Functions
     assembleFoliageSubMeshes,
     createOctahedralImpostorGeometry,
+    bakeFoliageImpostor,
     assembleFoliageLODMeshes,
     buildFoliageImpostorSubMesh,
     createFoliageSubMeshInstance,
@@ -102,5 +102,6 @@ export {
     type FoliageLODConfig,
     type FoliageLODInfo,
     type FoliageAssemblyResult,
-    type FoliageSubMeshUniformResult
+    type FoliageSubMeshUniformResult,
+    type FoliageBakeResult
 };

@@ -64,6 +64,7 @@ interface ImpostorBakerContextCache {
 }
 
 const contextCache: WeakMap<RedGPUContext, ImpostorBakerContextCache> = new WeakMap();
+const EMPTY_FLOAT32_12: Float32Array = new Float32Array(12);
 
 function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerContextCache {
     let cache = contextCache.get(redGPUContext);
@@ -125,141 +126,131 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
 }
 
 /**
- * [KO] 식생 서브메시로부터 옥타헤드럴 뷰 아틀라스를 베이킹하는 정적 유틸리티 클래스입니다.
- * [EN] Static utility class for baking octahedral view atlases from foliage sub-meshes.
- *
- * ::: warning
- * [KO] 이 클래스는 정적 유틸리티 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is a static utility class.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
+ * [KO] 서브메시 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
+ * [EN] Computes the composite AABB, bounding radius, and center by traversing sub-meshes.
+ * @param subMeshes -
+ * [KO] 대상 서브메시 배열
+ * [EN] Target sub-mesh array
+ * @returns
+ * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius, bottomOffset)
+ * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius, bottomOffset)
  */
-class FoliageImpostorBaker {
+function calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
+    min: [number, number, number];
+    max: [number, number, number];
+    width: number;
+    height: number;
+    depth: number;
+    center: [number, number, number];
+    maxRadius: number;
+    bottomOffset: number;
+} {
+    let minX = Infinity, minY = Infinity, minZ = Infinity;
+    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+    let maxHorizDistSq = 0;
 
-    /**
-     * [KO] 서브메시 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
-     * [EN] Computes the composite AABB, bounding radius, and center by traversing sub-meshes.
-     * @param subMeshes -
-     * [KO] 대상 서브메시 배열
-     * [EN] Target sub-mesh array
-     * @returns
-     * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius, bottomOffset)
-     * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius, bottomOffset)
-     */
-    static calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
-        min: [number, number, number];
-        max: [number, number, number];
-        width: number;
-        height: number;
-        depth: number;
-        center: [number, number, number];
-        maxRadius: number;
-        bottomOffset: number;
-    } {
-        let minX = Infinity, minY = Infinity, minZ = Infinity;
-        let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-        let maxHorizDistSq = 0;
+    for (let s = 0; s < subMeshes.length; s++) {
+        const sub = subMeshes[s];
+        if (sub.isImpostor) continue;
 
-        for (let s = 0; s < subMeshes.length; s++) {
-            const sub = subMeshes[s];
-            if (sub.isImpostor) continue;
+        const vBuffer = sub.geometry?.vertexBuffer;
+        const vData = vBuffer?.data;
+        if (!vData || vData.length === 0) continue;
 
-            const vBuffer = sub.geometry?.vertexBuffer;
-            const vData = vBuffer?.data;
-            if (!vData || vData.length === 0) continue;
+        const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
+        const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
+        const m = sub.relativeModelMatrix;
 
-            const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
-            const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
-            const m = sub.relativeModelMatrix;
+        for (let i = 0; i < vCount; i++) {
+            const idx = i * stride;
+            const x = vData[idx];
+            const y = vData[idx + 1];
+            const z = vData[idx + 2];
 
-            for (let i = 0; i < vCount; i++) {
-                const idx = i * stride;
-                const x = vData[idx];
-                const y = vData[idx + 1];
-                const z = vData[idx + 2];
+            const wx = m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x;
+            const wy = m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y;
+            const wz = m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z;
 
-                const wx = m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x;
-                const wy = m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y;
-                const wz = m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z;
+            if (wx < minX) minX = wx;
+            if (wy < minY) minY = wy;
+            if (wz < minZ) minZ = wz;
+            if (wx > maxX) maxX = wx;
+            if (wy > maxY) maxY = wy;
+            if (wz > maxZ) maxZ = wz;
 
-                if (wx < minX) minX = wx;
-                if (wy < minY) minY = wy;
-                if (wz < minZ) minZ = wz;
-                if (wx > maxX) maxX = wx;
-                if (wy > maxY) maxY = wy;
-                if (wz > maxZ) maxZ = wz;
-
-                const horizDistSq = wx * wx + wz * wz;
-                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
-            }
+            const horizDistSq = wx * wx + wz * wz;
+            if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
         }
+    }
 
-        if (minX === Infinity) {
-            return {
-                min: [-2.0, 0, -2.0],
-                max: [2.0, 6.0, 2.0],
-                width: 4.0,
-                height: 6.0,
-                depth: 4.0,
-                center: [0, 3.0, 0],
-                maxRadius: 4.0,
-                bottomOffset: 0
-            };
-        }
-
-        const width = Math.max(maxX - minX, 0.1);
-        const height = Math.max(maxY - minY, 0.1);
-        const depth = Math.max(maxZ - minZ, 0.1);
-        const centerX = 0.0;
-        const centerY = (minY + maxY) * 0.5;
-        const centerZ = 0.0;
-        const bottomOffset = minY;
-
-        const halfHeight = height * 0.5;
-        const calculatedMaxRadius = Math.sqrt(maxHorizDistSq + halfHeight * halfHeight);
-        const fallbackRadius = Math.hypot(Math.max(Math.abs(minX), Math.abs(maxX)), halfHeight, Math.max(Math.abs(minZ), Math.abs(maxZ)));
-        const maxRadius = (Number.isFinite(calculatedMaxRadius) && calculatedMaxRadius > 0.1) ? calculatedMaxRadius : fallbackRadius;
-
+    if (minX === Infinity) {
         return {
-            min: [minX, minY, minZ],
-            max: [maxX, maxY, maxZ],
-            width,
-            height,
-            depth,
-            center: [centerX, centerY, centerZ],
-            maxRadius,
-            bottomOffset
+            min: [-2.0, 0, -2.0],
+            max: [2.0, 6.0, 2.0],
+            width: 4.0,
+            height: 6.0,
+            depth: 4.0,
+            center: [0, 3.0, 0],
+            maxRadius: 4.0,
+            bottomOffset: 0
         };
     }
 
-    /**
-     * [KO] 주어진 식생 서브메시들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
-     * [EN] Renders foliage sub-meshes across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param subMeshes -
-     * [KO] 베이킹할 소스 서브메시 배열
-     * [EN] Source sub-mesh array to bake
-     * @param bakeName -
-     * [KO] 베이킹 리소스 라벨용 식별자 (기본값: 'Foliage')
-     * [EN] Identifier for resource labels (default: 'Foliage')
-     * @returns
-     * [KO] 생성된 아틀라스 텍스처 및 빌보드 치수 결과
-     * [EN] Resulting atlas textures and billboard dimensions
-     */
-    static bakeSubMeshes(
-        redGPUContext: RedGPUContext,
-        subMeshes: FoliageSubMesh[],
-        bakeName: string = 'Foliage'
-    ): FoliageBakeResult {
-        const gpuDevice = redGPUContext.gpuDevice;
-        if (!gpuDevice) {
-            throw new Error('[FoliageImpostorBaker] GPUDevice is not initialized.');
-        }
+    const width = Math.max(maxX - minX, 0.1);
+    const height = Math.max(maxY - minY, 0.1);
+    const depth = Math.max(maxZ - minZ, 0.1);
+    const centerX = 0.0;
+    const centerY = (minY + maxY) * 0.5;
+    const centerZ = 0.0;
+    const bottomOffset = minY;
+
+    const halfHeight = height * 0.5;
+    const calculatedMaxRadius = Math.sqrt(maxHorizDistSq + halfHeight * halfHeight);
+    const maxRadius = (Number.isFinite(calculatedMaxRadius) && calculatedMaxRadius > 0.1)
+        ? calculatedMaxRadius
+        : Math.hypot(Math.max(Math.abs(minX), Math.abs(maxX)), halfHeight, Math.max(Math.abs(minZ), Math.abs(maxZ)));
+
+    return {
+        min: [minX, minY, minZ],
+        max: [maxX, maxY, maxZ],
+        width,
+        height,
+        depth,
+        center: [centerX, centerY, centerZ],
+        maxRadius,
+        bottomOffset
+    };
+}
+
+/**
+ * [KO] 주어진 식생 서브메시들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
+ * [EN] Renders foliage sub-meshes across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트 인스턴스
+ * [EN] RedGPU context instance
+ * @param subMeshes -
+ * [KO] 베이킹할 소스 서브메시 배열
+ * [EN] Source sub-mesh array to bake
+ * @param bakeName -
+ * [KO] 베이킹 리소스 라벨용 식별자 (기본값: 'Foliage')
+ * [EN] Identifier for resource labels (default: 'Foliage')
+ * @returns
+ * [KO] 생성된 아틀라스 텍스처 및 빌보드 치수 결과
+ * [EN] Resulting atlas textures and billboard dimensions
+ */
+export default function bakeFoliageImpostor(
+    redGPUContext: RedGPUContext,
+    subMeshes: FoliageSubMesh[],
+    bakeName: string = 'Foliage'
+): FoliageBakeResult {
+    const gpuDevice = redGPUContext.gpuDevice;
+    if (!gpuDevice) {
+        throw new Error('[bakeFoliageImpostor] GPUDevice is not initialized.');
+    }
 
         const cache = getOrCreateContextCache(redGPUContext);
 
-        const aabb = this.calculateAABBFromSubMeshes(subMeshes);
+    const aabb = calculateAABBFromSubMeshes(subMeshes);
         const centerX = aabb.center[0];
         const centerY = aabb.center[1];
         const centerZ = aabb.center[2];
@@ -310,7 +301,7 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
 
-        console.log(`[FoliageImpostorBaker 🌲 3-Atlas MRT] Baking '${bakeName}': subMeshes=${subMeshes.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
+    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': subMeshes=${subMeshes.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
         const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
@@ -391,8 +382,8 @@ class FoliageImpostorBaker {
                     indexFormat: 'uint32',
                     vertexCount: 0,
                     relativeModelMatrix: sub.relativeModelMatrix,
-                    matProps: new Float32Array(12),
-                    modelMatProps: new Float32Array(12),
+                    matProps: EMPTY_FLOAT32_12,
+                    modelMatProps: EMPTY_FLOAT32_12,
                     isFoliage: 0,
                 });
                 continue;
@@ -473,7 +464,7 @@ class FoliageImpostorBaker {
 
             cachedSubMeshes.push({
                 isImpostor: false,
-                pipeline: this.#getOrCreateBakePipeline(redGPUContext, sub),
+                pipeline: getOrCreateBakePipeline(redGPUContext, sub),
                 bindGroup,
                 vertexBuffer: sub.geometry.vertexBuffer?.gpuBuffer || null,
                 indexBuffer: sub.geometry.indexBuffer?.gpuBuffer || null,
@@ -605,9 +596,9 @@ class FoliageImpostorBaker {
         depthGPUTexture.destroy();
         sharedTransformGPUBuffer.destroy();
 
-        this.#executeDilation(redGPUContext, bakedGPUTexture, atlasWidth, atlasHeight, tileSize);
-        this.#executeDilation(redGPUContext, bakedNormalGPUTexture, atlasWidth, atlasHeight, tileSize);
-        this.#executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
+    executeDilation(redGPUContext, bakedGPUTexture, atlasWidth, atlasHeight, tileSize);
+    executeDilation(redGPUContext, bakedNormalGPUTexture, atlasWidth, atlasHeight, tileSize);
+    executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
 
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
@@ -657,16 +648,17 @@ class FoliageImpostorBaker {
             packedORMTexture: directORMTexture,
             width: actualQuadWidth,
             height: actualQuadHeight,
-            depth: actualQuadWidth,
+            depth: aabb.depth,
             bottomOffset: actualBottomOffset,
         };
 
     }
 
-    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
+function getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
         const cache = getOrCreateContextCache(redGPUContext);
         const gpuDevice = redGPUContext.gpuDevice;
-        const key = `Foliage_Impostor_Bake_RenderPipeline_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
+    const stride = Math.max(sub.strideBytes, 72);
+    const key = `Foliage_Impostor_Bake_RenderPipeline_${stride}`;
         let pipeline = cache.bakePipelineCache.get(key);
         if (pipeline) return pipeline;
 
@@ -691,7 +683,7 @@ class FoliageImpostorBaker {
                 entryPoint: 'main',
                 buffers: [
                     {
-                        arrayStride: Math.max(sub.strideBytes, 72),
+                        arrayStride: stride,
                         attributes: [
                             {shaderLocation: 0, offset: 0, format: 'float32x3'},
                             {shaderLocation: 1, offset: 12, format: 'float32x3'},
@@ -754,98 +746,98 @@ class FoliageImpostorBaker {
         return pipeline;
     }
 
-    static #executeDilation(
-        redGPUContext: RedGPUContext,
-        targetTexture: GPUTexture,
-        width: number,
-        height: number,
-        tileSize: number
-    ) {
-        const cache = getOrCreateContextCache(redGPUContext);
-        const gpuDevice = redGPUContext.gpuDevice;
+function executeDilation(
+    redGPUContext: RedGPUContext,
+    targetTexture: GPUTexture,
+    width: number,
+    height: number,
+    tileSize: number
+) {
+    const cache = getOrCreateContextCache(redGPUContext);
+    const gpuDevice = redGPUContext.gpuDevice;
 
-        const pingPongA = gpuDevice.createTexture({
-            label: 'Foliage_Impostor_Dilation_PingPongTexture_A',
-            size: [width, height, 1],
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
+    const pingPongA = gpuDevice.createTexture({
+        label: 'Foliage_Impostor_Dilation_PingPongTexture_A',
+        size: [width, height, 1],
+        format: 'rgba8unorm',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
+    });
+
+    const pingPongB = gpuDevice.createTexture({
+        label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
+        size: [width, height, 1],
+        format: 'rgba8unorm',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
+    });
+
+    const steps = [1, 2, 4, 8];
+    const viewA = pingPongA.createView({baseMipLevel: 0, mipLevelCount: 1});
+    const viewB = pingPongB.createView({baseMipLevel: 0, mipLevelCount: 1});
+
+    const uniformBuffers: GPUBuffer[] = [];
+    const stepBindGroups: GPUBindGroup[] = [];
+
+    for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const uniformBuffer = gpuDevice.createBuffer({
+            label: `Foliage_Impostor_Dilation_UniformBuffer_Step${step}`,
+            size: 16,
+            usage: GPUBufferUsage.UNIFORM,
+            mappedAtCreation: true
         });
+        new Uint32Array(uniformBuffer.getMappedRange()).set([width, height, tileSize, step]);
+        uniformBuffer.unmap();
+        uniformBuffers.push(uniformBuffer);
 
-        const pingPongB = gpuDevice.createTexture({
-            label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
-            size: [width, height, 1],
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
-        });
+        const isEven = (i % 2 === 0);
+        const srcView = isEven ? viewA : viewB;
+        const dstView = isEven ? viewB : viewA;
 
-        const steps = [1, 2, 4, 8];
-        const viewA = pingPongA.createView({baseMipLevel: 0, mipLevelCount: 1});
-        const viewB = pingPongB.createView({baseMipLevel: 0, mipLevelCount: 1});
-
-        const uniformBuffers: GPUBuffer[] = [];
-        const stepBindGroups: GPUBindGroup[] = [];
-
-        for (let i = 0; i < steps.length; i++) {
-            const step = steps[i];
-            const uniformBuffer = gpuDevice.createBuffer({
-                label: `Foliage_Impostor_Dilation_UniformBuffer_Step${step}`,
-                size: 16,
-                usage: GPUBufferUsage.UNIFORM,
-                mappedAtCreation: true
-            });
-            new Uint32Array(uniformBuffer.getMappedRange()).set([width, height, tileSize, step]);
-            uniformBuffer.unmap();
-            uniformBuffers.push(uniformBuffer);
-
-            const isEven = (i % 2 === 0);
-            const srcView = isEven ? viewA : viewB;
-            const dstView = isEven ? viewB : viewA;
-
-            stepBindGroups.push(gpuDevice.createBindGroup({
-                label: `Foliage_Impostor_Dilation_BindGroup_Step${step}`,
-                layout: cache.dilationBindGroupLayout,
-                entries: [
-                    {binding: 0, resource: srcView},
-                    {binding: 1, resource: dstView},
-                    {binding: 2, resource: {buffer: uniformBuffer}}
-                ]
-            }));
-        }
-
-        const numWorkgroupsX = Math.ceil(width / 8);
-        const numWorkgroupsY = Math.ceil(height / 8);
-
-        const commandEncoder = gpuDevice.createCommandEncoder({label: 'Foliage_Impostor_Dilation_CommandEncoder'});
-
-        commandEncoder.copyTextureToTexture(
-            {texture: targetTexture, mipLevel: 0},
-            {texture: pingPongA, mipLevel: 0},
-            [width, height, 1]
-        );
-
-        for (let i = 0; i < steps.length; i++) {
-            const computePass = commandEncoder.beginComputePass({label: `Foliage_Impostor_Dilation_ComputePass_Step${steps[i]}`});
-            computePass.setPipeline(cache.dilationPipeline);
-            computePass.setBindGroup(0, stepBindGroups[i]);
-            computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
-            computePass.end();
-        }
-
-        commandEncoder.copyTextureToTexture(
-            {texture: pingPongA, mipLevel: 0},
-            {texture: targetTexture, mipLevel: 0},
-            [width, height, 1]
-        );
-
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-
-        for (let i = 0; i < uniformBuffers.length; i++) {
-            uniformBuffers[i].destroy();
-        }
-        pingPongA.destroy();
-        pingPongB.destroy();
+        stepBindGroups.push(gpuDevice.createBindGroup({
+            label: `Foliage_Impostor_Dilation_BindGroup_Step${step}`,
+            layout: cache.dilationBindGroupLayout,
+            entries: [
+                {binding: 0, resource: srcView},
+                {binding: 1, resource: dstView},
+                {binding: 2, resource: {buffer: uniformBuffer}}
+            ]
+        }));
     }
+
+    const numWorkgroupsX = Math.ceil(width / 8);
+    const numWorkgroupsY = Math.ceil(height / 8);
+
+    const commandEncoder = gpuDevice.createCommandEncoder({label: 'Foliage_Impostor_Dilation_CommandEncoder'});
+
+    commandEncoder.copyTextureToTexture(
+        {texture: targetTexture, mipLevel: 0},
+        {texture: pingPongA, mipLevel: 0},
+        [width, height, 1]
+    );
+
+    for (let i = 0; i < steps.length; i++) {
+        const computePass = commandEncoder.beginComputePass({label: `Foliage_Impostor_Dilation_ComputePass_Step${steps[i]}`});
+        computePass.setPipeline(cache.dilationPipeline);
+        computePass.setBindGroup(0, stepBindGroups[i]);
+        computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
+        computePass.end();
+    }
+
+    commandEncoder.copyTextureToTexture(
+        {texture: pingPongA, mipLevel: 0},
+        {texture: targetTexture, mipLevel: 0},
+        [width, height, 1]
+    );
+
+    gpuDevice.queue.submit([commandEncoder.finish()]);
+
+    for (let i = 0; i < uniformBuffers.length; i++) {
+        uniformBuffers[i].destroy();
+    }
+    pingPongA.destroy();
+    pingPongB.destroy();
 }
 
-Object.freeze(FoliageImpostorBaker);
-export default FoliageImpostorBaker;
+export {
+    bakeFoliageImpostor
+};

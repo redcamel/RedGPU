@@ -8,7 +8,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import {createOctahedralImpostorGeometry} from "../../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
-import FoliageImpostorBaker from "../../impostor/FoliageImpostorBaker";
+import bakeFoliageImpostor from "../../impostor/bakeFoliageImpostor";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
@@ -57,7 +57,7 @@ export default function buildFoliageImpostorSubMesh(
     impostorLODIndex: number,
     subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>
 ): void {
-    const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
+    const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
 
     const bbWidth = bakeResult.width;
     const bbHeight = bakeResult.height;
