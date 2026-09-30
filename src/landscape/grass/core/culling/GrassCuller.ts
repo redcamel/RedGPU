@@ -1,3 +1,8 @@
+/**
+ * [KO] 절차적 잔디 GPU 거리 및 프러스텀 컬링 디스패처 모듈입니다.
+ * [EN] Procedural grass GPU distance and frustum culling dispatcher module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassCullComputeWGSL from "./grassCullCompute.wgsl";

@@ -1,3 +1,8 @@
+/**
+ * [KO] 식생 WebGPU 렌더러 모듈입니다.
+ * [EN] Foliage WebGPU renderer module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import View3D from "../../../../display/view/View3D";
@@ -7,12 +12,25 @@ import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 
+/**
+ * [KO] 렌더링 가능한 유효 식생 타입 항목 인터페이스입니다.
+ * [EN] Interface for valid renderable foliage type items.
+ */
 export interface ValidFoliageTypeItem {
     type: Foliage | null;
     culledGPU: GPUBuffer | null;
     indirectGPU: GPUBuffer | null;
 }
 
+/**
+ * [KO] GPU 컬링된 식생 인스턴스들을 간접 드로우(drawIndexedIndirect / drawIndirect)를 통해 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
+ * [EN] Renderer class that renders GPU-culled foliage instances to main and shadow passes using indirect drawing (drawIndexedIndirect / drawIndirect).
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 class FoliageRenderer extends RedGPUObject {
     static readonly #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
@@ -39,6 +57,22 @@ class FoliageRenderer extends RedGPUObject {
 
     #useDepthPrepass: boolean = true;
 
+    /**
+     * [KO] FoliageRenderer 인스턴스를 생성합니다.
+     * [EN] Creates a FoliageRenderer instance.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param pipelineRegistry -
+     * [KO] 식생 파이프라인 레지스트리
+     * [EN] Foliage pipeline registry
+     * @param emptyBindGroup -
+     * [KO] 빈 바인드 그룹 (선택사항)
+     * [EN] Empty bind group (optional)
+     * @param subMeshVertexBindGroupLayout -
+     * [KO] 서브메시 유니폼 바인드 그룹 레이아웃 (선택사항)
+     * [EN] Sub-mesh uniform bind group layout (optional)
+     */
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
@@ -64,6 +98,10 @@ class FoliageRenderer extends RedGPUObject {
         this.#useDepthPrepass = !!value;
     }
 
+    /**
+     * [KO] 캐시된 모든 그림자 렌더 번들을 무효화하여 다음 그림자 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached shadow render bundles to force regeneration on the next shadow pass.
+     */
     markShadowBundleDirty(): void {
         for (let i = 0; i < 4; i++) {
             this.#shadowRenderBundles[i] = null;
@@ -72,6 +110,19 @@ class FoliageRenderer extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 주어진 식생 타입들의 인스턴스를 메인 렌더 패스(뎁스 프리패스 포함)에 드로우합니다.
+     * [EN] Draws instances of the given foliage types to the main render pass (including depth prepass).
+     * @param passEncoder -
+     * [KO] GPURenderPassEncoder 인스턴스
+     * [EN] GPURenderPassEncoder instance
+     * @param typeList -
+     * [KO] 렌더링할 식생 타입 배열
+     * [EN] Array of foliage types to render
+     * @param view -
+     * [KO] 렌더링 뷰 인스턴스
+     * [EN] Rendering View3D instance
+     */
     render(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
@@ -155,6 +206,19 @@ class FoliageRenderer extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 지정된 캐스케이드 인덱스에 대해 식생 인스턴스를 그림자 맵 패스에 드로우합니다 (렌더 번들 캐싱 지원).
+     * [EN] Draws foliage instances to the shadow map pass for the specified cascade index (supports render bundle caching).
+     * @param passEncoder -
+     * [KO] GPURenderPassEncoder 인스턴스
+     * [EN] GPURenderPassEncoder instance
+     * @param typeList -
+     * [KO] 그림자를 캐스팅할 식생 타입 배열
+     * [EN] Array of shadow-casting foliage types
+     * @param view -
+     * [KO] 렌더링 뷰 인스턴스 (캐스케이드 정보 포함)
+     * [EN] Rendering View3D instance (including cascade info)
+     */
     renderShadow(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;

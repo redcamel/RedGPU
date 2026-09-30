@@ -1,17 +1,68 @@
+/**
+ * [KO] 식생 서브메시 유니폼 버퍼 생성 유틸리티 모듈입니다.
+ * [EN] Utility module for generating foliage sub-mesh uniform buffers.
+ * @packageDocumentation
+ */
+
 import {mat4} from "gl-matrix";
 
 const subMeshUniformData: Float32Array = new Float32Array(52);
 const subMeshUniformUint32: Uint32Array = new Uint32Array(subMeshUniformData.buffer);
 const identityMatrix: mat4 = mat4.create();
 
+/**
+ * [KO] 서브메시 유니폼 생성 결과 인터페이스입니다.
+ * [EN] Interface representing the result of creating sub-mesh uniforms.
+ */
 export interface FoliageSubMeshUniformResult {
+    /**
+     * [KO] 생성된 유니폼 버퍼 (208바이트)
+     * [EN] Created uniform buffer (208 bytes)
+     */
     buffer: GPUBuffer;
+    /**
+     * [KO] 서브메시 유니폼 바인드 그룹
+     * [EN] Sub-mesh uniform bind group
+     */
     bindGroup: GPUBindGroup;
 }
 
 /**
  * [KO] PBR 렌더링에 필요한 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
  * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
+ * @param gpuDevice -
+ * [KO] WebGPU 디바이스 인스턴스
+ * [EN] WebGPU device instance
+ * @param subMeshBindGroupLayout -
+ * [KO] 서브메시 바인드 그룹 레이아웃
+ * [EN] Sub-mesh bind group layout
+ * @param relMatrix -
+ * [KO] 상대 모델 행렬
+ * [EN] Relative model matrix
+ * @param normMatrix -
+ * [KO] 상대 노멀 행렬
+ * [EN] Relative normal matrix
+ * @param globalSlot -
+ * [KO] 글로벌 머티리얼 슬롯 인덱스
+ * [EN] Global material slot index
+ * @param receiveShadow -
+ * [KO] 그림자 수신 여부
+ * [EN] Whether to receive shadows
+ * @param isMasked -
+ * [KO] 알파 마스킹 적용 여부
+ * [EN] Whether alpha masking is applied
+ * @param applyGroundBlend -
+ * [KO] 지면 색상 블렌딩 적용 여부
+ * [EN] Whether ground color blending is applied
+ * @param groundBlendStrength -
+ * [KO] 지면 색상 블렌딩 강도 (기본값: 0.8)
+ * [EN] Ground color blending strength (default: 0.8)
+ * @param groundBlendRange -
+ * [KO] 지면 색상 블렌딩 높이 범위 (기본값: 1.5)
+ * [EN] Ground color blending vertical range (default: 1.5)
+ * @returns
+ * [KO] 생성된 버퍼 및 바인드 그룹
+ * [EN] Created buffer and bind group
  */
 export function createFoliagePBRSubMeshUniform(
     gpuDevice: GPUDevice,
@@ -85,6 +136,21 @@ export function createFoliagePBRSubMeshUniform(
 /**
  * [KO] 섀도우 패스 전용 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
  * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
+ * @param gpuDevice -
+ * [KO] WebGPU 디바이스 인스턴스
+ * [EN] WebGPU device instance
+ * @param subMeshBindGroupLayout -
+ * [KO] 서브메시 바인드 그룹 레이아웃
+ * [EN] Sub-mesh bind group layout
+ * @param name -
+ * [KO] 식생 인스턴스 이름
+ * [EN] Foliage instance name
+ * @param lodIndex -
+ * [KO] 대상 LOD 인덱스
+ * [EN] Target LOD index
+ * @returns
+ * [KO] 생성된 버퍼 및 바인드 그룹
+ * [EN] Created buffer and bind group
  */
 export function createFoliageShadowSubMeshUniform(
     gpuDevice: GPUDevice,

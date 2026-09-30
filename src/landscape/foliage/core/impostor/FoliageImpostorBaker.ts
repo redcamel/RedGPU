@@ -1,3 +1,9 @@
+/**
+ * [KO] 식생 옥타헤드럴 임포스터 베이커 모듈입니다.
+ * [EN] Foliage octahedral impostor baker module.
+ * @packageDocumentation
+ */
+
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
@@ -8,13 +14,45 @@ import impostorDilationWGSL from "./impostorDilation.wgsl";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
+/**
+ * [KO] 식생 임포스터 베이킹 결과 인터페이스입니다.
+ * [EN] Result interface for foliage impostor baking.
+ */
 export interface FoliageBakeResult {
+    /**
+     * [KO] 베이킹된 베이스 컬러 텍스처
+     * [EN] Baked base color texture
+     */
     baseColorTexture: DirectTexture;
+    /**
+     * [KO] 베이킹된 노멀 텍스처
+     * [EN] Baked normal texture
+     */
     normalTexture: DirectTexture;
+    /**
+     * [KO] 베이킹된 패킹 ORM (Occlusion, Roughness, Metallic) 텍스처
+     * [EN] Baked packed ORM (Occlusion, Roughness, Metallic) texture
+     */
     packedORMTexture: DirectTexture;
+    /**
+     * [KO] 빌보드 쿼드 너비
+     * [EN] Billboard quad width
+     */
     width: number;
+    /**
+     * [KO] 빌보드 쿼드 높이
+     * [EN] Billboard quad height
+     */
     height: number;
+    /**
+     * [KO] 빌보드 깊이
+     * [EN] Billboard depth
+     */
     depth: number;
+    /**
+     * [KO] 피벗 기준 바닥 오프셋
+     * [EN] Bottom offset relative to pivot
+     */
     bottomOffset: number;
 }
 
@@ -86,8 +124,27 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
     return cache;
 }
 
+/**
+ * [KO] 식생 서브메시로부터 옥타헤드럴 뷰 아틀라스를 베이킹하는 정적 유틸리티 클래스입니다.
+ * [EN] Static utility class for baking octahedral view atlases from foliage sub-meshes.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 정적 유틸리티 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is a static utility class.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 class FoliageImpostorBaker {
 
+    /**
+     * [KO] 서브메시 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
+     * [EN] Computes the composite AABB, bounding radius, and center by traversing sub-meshes.
+     * @param subMeshes -
+     * [KO] 대상 서브메시 배열
+     * [EN] Target sub-mesh array
+     * @returns
+     * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius, bottomOffset)
+     * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius, bottomOffset)
+     */
     static calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
         min: [number, number, number];
         max: [number, number, number];
@@ -174,6 +231,22 @@ class FoliageImpostorBaker {
         };
     }
 
+    /**
+     * [KO] 주어진 식생 서브메시들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
+     * [EN] Renders foliage sub-meshes across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param subMeshes -
+     * [KO] 베이킹할 소스 서브메시 배열
+     * [EN] Source sub-mesh array to bake
+     * @param bakeName -
+     * [KO] 베이킹 리소스 라벨용 식별자 (기본값: 'Foliage')
+     * [EN] Identifier for resource labels (default: 'Foliage')
+     * @returns
+     * [KO] 생성된 아틀라스 텍스처 및 빌보드 치수 결과
+     * [EN] Resulting atlas textures and billboard dimensions
+     */
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
         subMeshes: FoliageSubMesh[],

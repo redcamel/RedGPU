@@ -1,3 +1,8 @@
+/**
+ * [KO] 단일 잔디(Grass) 타입의 메쉬, 텍스처, 밀도, 셰이딩 파라미터를 관리하는 핵심 엔티티 모듈입니다.
+ * [EN] Core entity module managing mesh, texture, density, and shading parameters for a single grass type.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
@@ -5,8 +10,8 @@ import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
-import combineLandscapeMeshes from "../../core/geometry/combineLandscapeMeshes";
-import LandscapeSubMesh from "../../core/geometry/LandscapeSubMesh";
+import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
+import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -167,7 +172,7 @@ export interface GrassOptions {
 export class Grass extends RedGPUObject {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
-    #subMeshes: LandscapeSubMesh[] = [];
+    #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #densityPerHectare: number = 5000.0;
     #densityMultiplier: number = 1.0;
@@ -260,7 +265,7 @@ export class Grass extends RedGPUObject {
 
         const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
         if (isComposite) {
-            const combineResult = combineLandscapeMeshes(redGPUContext, mesh, {
+            const combineResult = combineScatterMeshes(redGPUContext, mesh, {
                 preservePivot: true,
                 centerXZ: false
             });
@@ -295,7 +300,7 @@ export class Grass extends RedGPUObject {
             this.#subMeshes = combineResult.groups.map((group, idx) => {
                 const mat = group.material;
                 const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? mat?.diffuseTexture ?? null);
-                return new LandscapeSubMesh({
+                return new ScatterSubMesh({
                     geometry: group.geometry,
                     vertexCount: group.vertexCount,
                     indexCount: group.indexCount,
@@ -339,7 +344,7 @@ export class Grass extends RedGPUObject {
 
             const gGeom = this.#geometry as Geometry;
             this.#subMeshes = [
-                new LandscapeSubMesh({
+                new ScatterSubMesh({
                     geometry: gGeom,
                     vertexCount: gGeom.vertexBuffer?.vertexCount ?? 0,
                     indexCount: gGeom.indexBuffer?.indexCount ?? (gGeom.vertexBuffer?.vertexCount ?? 0),
@@ -428,10 +433,10 @@ export class Grass extends RedGPUObject {
     }
 
     /**
-     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(LandscapeSubMesh) 목록을 반환합니다.
-     * [EN] Returns the list of shared sub-meshes (LandscapeSubMesh) composing the grass model.
+     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
+     * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
      */
-    get subMeshes(): readonly LandscapeSubMesh[] {
+    get subMeshes(): readonly ScatterSubMesh[] {
         return this.#subMeshes;
     }
 

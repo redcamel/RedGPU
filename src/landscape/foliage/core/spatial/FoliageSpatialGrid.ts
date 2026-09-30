@@ -1,5 +1,19 @@
+/**
+ * [KO] 식생 공간 분할 서브셀 그리드 모듈입니다.
+ * [EN] Foliage spatial partitioning sub-cell grid module.
+ * @packageDocumentation
+ */
 import type Landscape from "../../../Landscape";
 
+/**
+ * [KO] 카메라 위치와 스트리밍 반경에 따라 활성 서브셀 키 목록을 빠르게 계산하고 갱신하는 공간 분할 그리드 클래스입니다.
+ * [EN] Spatial grid class that rapidly computes and updates active sub-cell keys based on camera position and streaming radius.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export class FoliageSpatialGrid {
 
     static readonly MAX_ACTIVE_SUB_CELLS: number = 2048;
@@ -17,6 +31,19 @@ export class FoliageSpatialGrid {
     #lastCellSize: number = -1;
     #updateThresholdSq: number = 25.0;
 
+    /**
+     * [KO] FoliageSpatialGrid 인스턴스를 생성합니다.
+     * [EN] Creates a FoliageSpatialGrid instance.
+     * @param landscape -
+     * [KO] 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance
+     * @param subCellSize -
+     * [KO] 서브셀 크기(미터, 기본값: 100.0)
+     * [EN] Sub-cell dimension in meters (default: 100.0)
+     * @param streamingRadius -
+     * [KO] 스트리밍 반경(미터, 기본값: 600.0)
+     * [EN] Streaming radius in meters (default: 600.0)
+     */
     constructor(landscape: Landscape, subCellSize: number = 100.0, streamingRadius: number = 600.0) {
         this.#landscape = landscape;
         this.#subCellSize = Math.max(10.0, subCellSize);
@@ -55,11 +82,31 @@ export class FoliageSpatialGrid {
         return this.#activeSubCellKeys;
     }
 
+    /**
+     * [KO] 캐시된 카메라 위치 및 파라미터를 무효화하여 다음 업데이트 시 강제 재계산하도록 합니다.
+     * [EN] Invalidates cached camera positions and parameters to force recalculation on the next update.
+     */
     invalidateCache(): void {
         this.#lastCamX = 1e9;
         this.#lastCamZ = 1e9;
     }
 
+    /**
+     * [KO] 카메라 위치에 따라 활성 서브셀 목록을 갱신합니다.
+     * [EN] Updates the active sub-cell list based on camera position.
+     * @param camX -
+     * [KO] 카메라 월드 X 좌표
+     * [EN] Camera world X coordinate
+     * @param camZ -
+     * [KO] 카메라 월드 Z 좌표
+     * [EN] Camera world Z coordinate
+     * @param force -
+     * [KO] 캐시 무시 강제 갱신 여부 (기본값: false)
+     * [EN] Whether to force update ignoring cache (default: false)
+     * @returns
+     * [KO] 활성 서브셀 목록이 변경되어 갱신되었으면 true, 변동 없으면 false
+     * [EN] True if active sub-cells changed and were updated, false if unchanged
+     */
     update(camX: number, camZ: number, force: boolean = false): boolean {
         const dx = camX - this.#lastCamX;
         const dz = camZ - this.#lastCamZ;

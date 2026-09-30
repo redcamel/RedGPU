@@ -1,3 +1,8 @@
+/**
+ * [KO] 대규모 지형 3D 식생 생태계 및 인스턴스/컬링/렌더링 총괄 매니저 모듈입니다.
+ * [EN] Overall manager module for large-scale terrain 3D foliage ecosystems, instances, culling, and rendering.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";

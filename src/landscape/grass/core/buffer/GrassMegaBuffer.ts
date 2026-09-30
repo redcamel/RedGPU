@@ -1,3 +1,8 @@
+/**
+ * [KO] 잔디 인스턴스/컬링/간접 드로우 통합 VRAM 메가 버퍼 모듈입니다.
+ * [EN] Unified VRAM mega buffer module for grass instances, culling, and indirect draws.
+ * @packageDocumentation
+ */
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 

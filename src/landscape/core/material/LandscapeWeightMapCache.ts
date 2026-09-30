@@ -1,13 +1,37 @@
+/**
+ * [KO] CPU 측 지형 스플랫 가중치 맵(WeightMap) 픽셀 캐시 및 이중 선형 보간 샘플러 모듈입니다.
+ * [EN] CPU-side terrain splat weight map pixel cache and bilinear interpolation sampler module.
+ * @packageDocumentation
+ */
 interface WeightMapPixelData {
     width: number;
     height: number;
     data: Uint8ClampedArray;
 }
 
+/**
+ * [KO] 스플랫 가중치 텍스처를 CPU 메모리에 디코딩/캐싱하고 임의 UV 좌표에서의 가중치 값을 이중선형 보간으로 샘플링하는 정적 유틸리티 클래스입니다.
+ * [EN] Static utility class that decodes/caches splat weight textures in CPU memory and samples weight values at arbitrary UV coordinates using bilinear interpolation.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 정적 유틸리티 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is a static utility class.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 class LandscapeWeightMapCache {
     static readonly #cache: Map<string, WeightMapPixelData> = new Map();
     static readonly #loadingPromises: Map<string, Promise<WeightMapPixelData | null>> = new Map();
 
+    /**
+     * [KO] 이미지 URL로부터 픽셀 데이터를 비동기 로드하여 캐시에 등록합니다.
+     * [EN] Asynchronously loads and decodes pixel data from an image URL into cache.
+     * @param src -
+     * [KO] 이미지 URL 문자열
+     * [EN] Image URL string
+     * @returns
+     * [KO] 디코딩된 픽셀 데이터 또는 실패 시 null
+     * [EN] Decoded pixel data or null on failure
+     */
     static async load(src: string): Promise<WeightMapPixelData | null> {
         if (!src) return null;
         const cached = LandscapeWeightMapCache.#cache.get(src);
@@ -84,6 +108,25 @@ class LandscapeWeightMapCache {
         return LandscapeWeightMapCache.#cache.get(src) || null;
     }
 
+    /**
+     * [KO] 지정된 UV 좌표와 채널 인덱스에서 이중선형 보간을 적용하여 가중치(0.0 ~ 1.0)를 샘플링합니다.
+     * [EN] Samples the weight value (0.0 to 1.0) at the specified UV coordinates and channel index using bilinear interpolation.
+     * @param src -
+     * [KO] 이미지 URL 문자열
+     * [EN] Image URL string
+     * @param u -
+     * [KO] U 텍스처 좌표 (0.0 ~ 1.0)
+     * [EN] U texture coordinate (0.0 to 1.0)
+     * @param v -
+     * [KO] V 텍스처 좌표 (0.0 ~ 1.0)
+     * [EN] V texture coordinate (0.0 to 1.0)
+     * @param channelIndex -
+     * [KO] RGBA 채널 인덱스 (0: R, 1: G, 2: B, 3: A, 기본값: 0)
+     * [EN] RGBA channel index (0: R, 1: G, 2: B, 3: A, default: 0)
+     * @returns
+     * [KO] 정규화된 가중치 값 (0.0 ~ 1.0)
+     * [EN] Normalized weight value (0.0 to 1.0)
+     */
     static getWeight(src: string, u: number, v: number, channelIndex: number = 0): number {
         const entry = LandscapeWeightMapCache.#cache.get(src);
         if (!entry) return 0.0;

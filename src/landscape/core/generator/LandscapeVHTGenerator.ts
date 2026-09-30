@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 가상 높이 텍스처(VHT) 아틀라스 베이킹 제너레이터 모듈입니다.
+ * [EN] Terrain virtual height texture (VHT) atlas baking generator module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
@@ -6,6 +11,15 @@ import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
+/**
+ * [KO] 타일 단위 높이맵 또는 전역 지형 높이맵 텍스처를 VHT 아틀라스 텍스처로 베이킹하는 제너레이터 클래스입니다.
+ * [EN] Generator class that bakes per-tile height maps or global terrain height map textures into the VHT atlas texture.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
     #uniformByteLength: number = 16;
@@ -29,6 +43,28 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.#initGlobalComputeResources();
     }
 
+    /**
+     * [KO] 특정 지형 컴포넌트(타일)의 높이맵 텍스처를 VHT 아틀라스의 지정된 영역으로 베이킹합니다.
+     * [EN] Bakes the heightmap texture of a specific terrain component (tile) into the designated region of the VHT atlas.
+     * @param srcTileTexture -
+     * [KO] 소스 타일 높이맵 GPUTexture
+     * [EN] Source tile heightmap GPUTexture
+     * @param vhtAtlas -
+     * [KO] 대상 VHT 아틀라스 DirectTexture
+     * [EN] Target VHT atlas DirectTexture
+     * @param pixelX -
+     * [KO] 아틀라스 내 베이킹 대상 X 좌표 (픽셀)
+     * [EN] Destination X coordinate in atlas (pixels)
+     * @param pixelZ -
+     * [KO] 아틀라스 내 베이킹 대상 Z 좌표 (픽셀)
+     * [EN] Destination Z coordinate in atlas (pixels)
+     * @param pixelW -
+     * [KO] 베이킹 영역 너비 (픽셀)
+     * [EN] Baking region width (pixels)
+     * @param pixelH -
+     * [KO] 베이킹 영역 높이 (픽셀)
+     * [EN] Baking region height (pixels)
+     */
     bakeTileRegion(
         srcTileTexture: GPUTexture,
         vhtAtlas: DirectTexture,

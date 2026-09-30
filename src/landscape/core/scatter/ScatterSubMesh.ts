@@ -1,12 +1,12 @@
 import Mesh from "../../../display/mesh/Mesh";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import ALandscapeGeometryUnit, {type ALandscapeGeometryUnitInitOptions} from "./ALandscapeGeometryUnit";
+import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 
 /**
- * [KO] LandscapeSubMesh 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for LandscapeSubMesh.
+ * [KO] ScatterSubMesh 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for ScatterSubMesh.
  */
-export interface LandscapeSubMeshInitOptions extends ALandscapeGeometryUnitInitOptions {
+export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptions {
     /**
      * [KO] 원본 3D 메쉬 노드
      * [EN] Original 3D mesh node
@@ -33,16 +33,16 @@ export interface LandscapeSubMeshInitOptions extends ALandscapeGeometryUnitInitO
 }
 
 /**
- * [KO] WebGPU 지오메트리 버퍼 단위(ALandscapeGeometryUnit)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 랜드스케이프 공용 서브메쉬 기본 클래스입니다.
- * [EN] Common landscape sub-mesh base class combining WebGPU geometry buffer unit (ALandscapeGeometryUnit) with material, texture, and original mesh metadata.
+ * [KO] WebGPU 지오메트리 버퍼 단위(AScatterGeometryUnit)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 스캐터 공용 서브메쉬 기본 클래스입니다.
+ * [EN] Common scatter sub-mesh base class combining WebGPU geometry buffer unit (AScatterGeometryUnit) with material, texture, and original mesh metadata.
  */
-export class LandscapeSubMesh extends ALandscapeGeometryUnit {
+export class ScatterSubMesh extends AScatterGeometryUnit {
     #mesh?: Mesh;
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;
     #bottomOffset: number;
 
-    constructor(init: LandscapeSubMeshInitOptions) {
+    constructor(init: ScatterSubMeshInitOptions) {
         super(init);
         this.#mesh = init.mesh;
         this.#material = init.material;
@@ -91,5 +91,5 @@ export class LandscapeSubMesh extends ALandscapeGeometryUnit {
     }
 }
 
-Object.freeze(LandscapeSubMesh);
-export default LandscapeSubMesh;
+Object.freeze(ScatterSubMesh);
+export default ScatterSubMesh;

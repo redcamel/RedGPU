@@ -1,9 +1,23 @@
+/**
+ * [KO] 지형 가상 노멀 텍스처(VNT) 아틀라스 베이킹 제너레이터 모듈입니다.
+ * [EN] Terrain virtual normal texture (VNT) atlas baking generator module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vntBakeShaderCode from "../shader/landscapeVNTBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
+/**
+ * [KO] VHT 높이맵 아틀라스를 중앙 차분(Sobel/Central Difference) 방식으로 분석하여 VNT 노멀 아틀라스를 베이킹하는 제너레이터 클래스입니다.
+ * [EN] Generator class that analyzes VHT height map atlases via central difference to bake VNT normal atlases.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Float32Array;
     #uniformByteLength: number = 48;
@@ -14,6 +28,37 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         this.#initComputeResources();
     }
 
+    /**
+     * [KO] 특정 타일 영역에 대해 VHT 높이맵을 기반으로 노멀 벡터를 계산하여 VNT 아틀라스로 베이킹합니다.
+     * [EN] Computes normal vectors from the VHT height map for a specific tile region and bakes them into the VNT atlas.
+     * @param vhtAtlas -
+     * [KO] 소스 VHT 높이맵 아틀라스
+     * [EN] Source VHT height map atlas
+     * @param vntAtlas -
+     * [KO] 대상 VNT 노멀 아틀라스
+     * [EN] Target VNT normal atlas
+     * @param pixelX -
+     * [KO] 아틀라스 내 베이킹 대상 X 좌표 (픽셀)
+     * [EN] Destination X coordinate in atlas (pixels)
+     * @param pixelZ -
+     * [KO] 아틀라스 내 베이킹 대상 Z 좌표 (픽셀)
+     * [EN] Destination Z coordinate in atlas (pixels)
+     * @param pixelW -
+     * [KO] 베이킹 영역 너비 (픽셀)
+     * [EN] Baking region width (pixels)
+     * @param pixelH -
+     * [KO] 베이킹 영역 높이 (픽셀)
+     * [EN] Baking region height (pixels)
+     * @param heightScale -
+     * [KO] 지형 높이 스케일
+     * [EN] Terrain height scale
+     * @param worldSizeX -
+     * [KO] 지형 월드 X 크기
+     * [EN] Terrain world X size
+     * @param componentCountX -
+     * [KO] X축 컴포넌트(타일) 수
+     * [EN] Component (tile) count along X axis
+     */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
         vntAtlas: DirectTexture,

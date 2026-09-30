@@ -1,8 +1,17 @@
+/**
+ * [KO] 식생 서브메시 머티리얼 전처리 유틸리티 모듈입니다.
+ * [EN] Utility module for pre-processing foliage sub-mesh materials.
+ * @packageDocumentation
+ */
+
 import Mesh from "../../../../../display/mesh/Mesh";
 
 /**
  * [KO] 메쉬 및 하위 자식 노드의 머티리얼을 순회하며 식생 전용 셰이더 상태(CutOff, DoubleSided, AlphaBlend)를 설정합니다.
  * [EN] Traverses materials of a mesh and its children, configuring foliage-specific shader states (CutOff, DoubleSided, AlphaBlend).
+ * @param node -
+ * [KO] 대상 메쉬 노드
+ * [EN] Target mesh node
  */
 export default function prepareFoliageMaterials(node: Mesh): void {
     if (!node) return;

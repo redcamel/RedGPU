@@ -1,29 +1,87 @@
+/**
+ * [KO] 식생 LOD 메쉬 결합 및 서브메시 어셈블 모듈입니다.
+ * [EN] Foliage LOD mesh combination and sub-mesh assembly module.
+ * @packageDocumentation
+ */
+
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageOptions} from "../../Foliage";
-import combineLandscapeMeshes from "../../../../core/geometry/combineLandscapeMeshes";
-import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/geometry/LandscapeVertexFormats";
+import combineScatterMeshes from "../../../../core/scatter/combineScatterMeshes";
+import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
 import {createFoliageShadowSubMeshUniform, type FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
 
 const identityMatrix: mat4 = mat4.create();
 
+/**
+ * [KO] 단일 LOD 레벨 어셈블 결과 인터페이스입니다.
+ * [EN] Result interface for a single assembled LOD level.
+ */
 export interface AssembledLODResult {
+    /**
+     * [KO] 결합되어 생성된 PBR 서브메시 목록
+     * [EN] List of combined PBR sub-meshes
+     */
     subMeshes: FoliageSubMesh[];
+    /**
+     * [KO] 그림자 패스 전용 통합 서브메시 (생성되지 않은 경우 null)
+     * [EN] Unified sub-mesh dedicated to shadow pass (null if not generated)
+     */
     shadowMergedSubMesh: FoliageShadowMergedSubMesh | null;
+    /**
+     * [KO] 바운딩 구 반경
+     * [EN] Bounding sphere radius
+     */
     boundingRadius: number;
+    /**
+     * [KO] 전체 바운딩 높이
+     * [EN] Total bounding height
+     */
     boundingHeight: number;
+    /**
+     * [KO] 로컬 Y 최소값
+     * [EN] Local minimum Y
+     */
     minY: number;
+    /**
+     * [KO] 로컬 Y 최대값
+     * [EN] Local maximum Y
+     */
     maxY: number;
 }
 
 /**
  * [KO] 단일 LOD 레벨의 메쉬들을 결합하고 PBR 서브메쉬 및 섀도우 머지드 서브메쉬를 생성합니다.
  * [EN] Combines meshes for a single LOD level, creating PBR sub-meshes and shadow merged sub-meshes.
+ * @param redGPUContext -
+ * [KO] RedGPU 컨텍스트 인스턴스
+ * [EN] RedGPU context instance
+ * @param roots -
+ * [KO] 해당 LOD에 속한 루트 메쉬 배열
+ * [EN] Array of root meshes belonging to the LOD level
+ * @param lodIndex -
+ * [KO] 대상 LOD 인덱스
+ * [EN] Target LOD index
+ * @param options -
+ * [KO] 식생 설정 옵션
+ * [EN] Foliage configuration options
+ * @param subMeshBindGroupLayout -
+ * [KO] 서브메시 바인드 그룹 레이아웃
+ * [EN] Sub-mesh bind group layout
+ * @param subMeshUniformCache -
+ * [KO] 서브메시 유니폼 캐시 맵 (선택사항)
+ * [EN] Sub-mesh uniform cache map (optional)
+ * @param lodReceiveShadow -
+ * [KO] 해당 LOD의 그림자 수신 여부 (기본값: true)
+ * [EN] Whether the LOD level receives shadows (default: true)
+ * @returns
+ * [KO] 조립 완료된 서브메시 및 바운딩 정보
+ * [EN] Assembled sub-meshes and bounding information
  */
 export default function assembleFoliageLODMeshes(
     redGPUContext: RedGPUContext,
@@ -40,7 +98,7 @@ export default function assembleFoliageLODMeshes(
         prepareFoliageMaterials(roots[r]);
     }
 
-    const combineResult = combineLandscapeMeshes(
+    const combineResult = combineScatterMeshes(
         redGPUContext,
         roots,
         {

@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 전용 텍스처 2D 어레이 스플래팅 PBR 머티리얼 모듈입니다.
+ * [EN] Terrain dedicated 2D texture array splatting PBR material module.
+ * @packageDocumentation
+ */
 import ColorRGBA from "../../../color/ColorRGBA";
 import RedGPUContext from "../../../context/RedGPUContext";
 import AUVTransformBaseMaterial from "../../../material/core/AUVTransformBaseMaterial";
@@ -23,6 +28,20 @@ interface LandscapeMaterial {
 
 const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
 
+/**
+ * [KO] 최대 8개의 스플랫 텍스처 레이어를 Texture2DArray로 패킹하여 고속 블렌딩 셰이딩을 수행하는 지형 머티리얼 클래스입니다.
+ * [EN] Terrain material class that packs up to 8 splat texture layers into Texture2DArray for high-speed blending shading.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * const material = landscape.material;
+ * ```
+ */
 class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     #layers: LandscapeLayer[] = [];
@@ -46,6 +65,19 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
 
+    /**
+     * [KO] LandscapeMaterial 인스턴스를 생성합니다.
+     * [EN] Creates a LandscapeMaterial instance.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param baseColorHex -
+     * [KO] 기본 베이스 컬러 HEX 코드 (기본값: '#387d42')
+     * [EN] Default base color HEX code (default: '#387d42')
+     * @param textureArraySize -
+     * [KO] 텍스처 어레이 레이어 해상도 (기본값: 1024)
+     * [EN] Texture array layer resolution (default: 1024)
+     */
     constructor(redGPUContext: RedGPUContext, baseColorHex: string = '#387d42', textureArraySize: number = 1024) {
         super(
             redGPUContext,

@@ -1,3 +1,9 @@
+/**
+ * [KO] 식생 인스턴스 지형 물리 베이커 모듈입니다.
+ * [EN] Foliage instance terrain physical baker module.
+ * @packageDocumentation
+ */
+
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import foliageBakeComputeSource from "./foliageBakeCompute.wgsl";

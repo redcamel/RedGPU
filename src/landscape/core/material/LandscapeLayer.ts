@@ -1,28 +1,101 @@
+/**
+ * [KO] 지형 스플랫 텍스처 레이어 정의 및 파라미터 관리 모듈입니다.
+ * [EN] Terrain splat texture layer definition and parameter management module.
+ * @packageDocumentation
+ */
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import type RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
 
+/**
+ * [KO] 스플랫 가중치 텍스처에서 샘플링할 채널 식별자 ('R' | 'G' | 'B' | 'A' 또는 0 | 1 | 2 | 3)
+ * [EN] Channel identifier to sample from splat weight texture ('R' | 'G' | 'B' | 'A' or 0 | 1 | 2 | 3)
+ */
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
 
+/**
+ * [KO] 지형 텍스처 레이어 생성 옵션 인터페이스입니다.
+ * [EN] Options interface for creating a landscape texture layer.
+ */
 export interface LandscapeLayerOptions {
+    /**
+     * [KO] 레이어 식별 이름
+     * [EN] Layer identification name
+     */
     name: string;
+    /**
+     * [KO] 레이어 활성화 여부 (기본값: true)
+     * [EN] Whether the layer is enabled (default: true)
+     */
     enabled?: boolean;
+    /**
+     * [KO] 베이스 컬러 텍스처 (BitmapTexture 또는 이미지 URL)
+     * [EN] Base color texture (BitmapTexture or image URL)
+     */
     baseColorTexture?: BitmapTexture | string;
+    /**
+     * [KO] 노멀 텍스처 (BitmapTexture 또는 이미지 URL)
+     * [EN] Normal texture (BitmapTexture or image URL)
+     */
     normalTexture?: BitmapTexture | string;
+    /**
+     * [KO] ORM (Occlusion/Roughness/Metallic) 텍스처 (BitmapTexture 또는 이미지 URL)
+     * [EN] ORM (Occlusion/Roughness/Metallic) texture (BitmapTexture or image URL)
+     */
     ormTexture?: BitmapTexture | string;
+    /**
+     * [KO] 스플랫 가중치 텍스처 (BitmapTexture 또는 이미지 URL)
+     * [EN] Splat weight texture (BitmapTexture or image URL)
+     */
     weightTexture?: BitmapTexture | string;
 
+    /**
+     * [KO] 텍스처 UV 스케일 [u, v] (기본값: [20.0, 20.0])
+     * [EN] Texture UV scale [u, v] (default: [20.0, 20.0])
+     */
     uvScale?: [number, number];
+    /**
+     * [KO] 텍스처 UV 오프셋 [u, v] (기본값: [0.0, 0.0])
+     * [EN] Texture UV offset [u, v] (default: [0.0, 0.0])
+     */
     uvOffset?: [number, number];
+    /**
+     * [KO] 근거리 UV 스케일 배수 (기본값: 2.0)
+     * [EN] Near distance UV scale multiplier (default: 2.0)
+     */
     nearUVScaleMultiplier?: number;
+    /**
+     * [KO] 스플랫 가중치 텍스처에서 참조할 채널 (기본값: 'R')
+     * [EN] Channel referenced in splat weight texture (default: 'R')
+     */
     weightChannel?: LandscapeWeightMapChannel;
 
+    /**
+     * [KO] 표면 거칠기 (0.0~1.0, 기본값: 1.0)
+     * [EN] Surface roughness (0.0-1.0, default: 1.0)
+     */
     roughness?: number;
+    /**
+     * [KO] 금속성 (0.0~1.0, 기본값: 0.0)
+     * [EN] Metallic value (0.0-1.0, default: 0.0)
+     */
     metallic?: number;
+    /**
+     * [KO] 노멀 맵 강도 (기본값: 1.0)
+     * [EN] Normal map intensity (default: 1.0)
+     */
     normalIntensity?: number;
+    /**
+     * [KO] 앰비언트 오클루전 강도 (기본값: 1.0)
+     * [EN] Ambient occlusion intensity (default: 1.0)
+     */
     aoIntensity?: number;
 }
 
+/**
+ * [KO] 지형 표면의 개별 스플랫 텍스처 레이어(베이스컬러, 노멀, ORM, 가중치 맵)를 정의하고 관리하는 클래스입니다.
+ * [EN] Class that defines and manages an individual splat texture layer (base color, normal, ORM, weight map) on the terrain surface.
+ */
 export class LandscapeLayer {
     #name: string;
     #enabled: boolean = true;

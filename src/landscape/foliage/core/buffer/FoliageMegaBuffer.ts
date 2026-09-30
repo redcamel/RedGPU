@@ -1,26 +1,93 @@
+/**
+ * [KO] 전체 식생 인스턴스/컬링/간접 드로우 버퍼를 통합 관리하는 메가 버퍼 모듈입니다.
+ * [EN] Foliage mega buffer module for unified management of instance, culling, and indirect draw buffers.
+ * @packageDocumentation
+ */
+
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import type {FoliageLODInfo} from "../Foliage";
 import type FoliageSubMesh from "../submesh/FoliageSubMesh";
 import type FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 
+/**
+ * [KO] 식생 타입별 메가 버퍼 메모리 할당 정보 인터페이스입니다.
+ * [EN] Allocation info interface for foliage type segments within the mega buffer.
+ */
 export interface FoliageTypeAllocation {
+    /**
+     * [KO] 식생 타입 고유 정수 ID
+     * [EN] Unique integer ID for the foliage type
+     */
     typeId: number;
+    /**
+     * [KO] 식생 타입 이름
+     * [EN] Foliage type name
+     */
     name: string;
+    /**
+     * [KO] 최대 허용 인스턴스 수
+     * [EN] Maximum allowed instances
+     */
     maxInstances: number;
+    /**
+     * [KO] Raw 인스턴스 버퍼 기본 시작 오프셋
+     * [EN] Base start offset in raw instance buffer
+     */
     rawBaseOffset: number;
+    /**
+     * [KO] Culled 인스턴스 버퍼 기본 시작 오프셋
+     * [EN] Base start offset in culled instance buffer
+     */
     culledBaseOffset: number;
+    /**
+     * [KO] Indirect 드로우 버퍼 기본 시작 오프셋
+     * [EN] Base start offset in indirect draw buffer
+     */
     indirectBaseOffset: number;
+    /**
+     * [KO] 해당 타입에 속한 서브메시 개수
+     * [EN] Number of sub-meshes belonging to this type
+     */
     subMeshCount: number;
+    /**
+     * [KO] 현재 활성화(마운트)된 인스턴스 수
+     * [EN] Currently active (mounted) instance count
+     */
     activeCount: number;
 }
 
+/**
+ * [KO] 캐스케이드 그림자 컬링 파라미터 인터페이스입니다.
+ * [EN] Interface for cascade shadow culling parameters.
+ */
 export interface CascadeCullingParam {
+    /**
+     * [KO] 캐스케이드 최대 거리
+     * [EN] Cascade maximum distance
+     */
     maxDistance: number;
+    /**
+     * [KO] 그림자 활성화 여부
+     * [EN] Whether shadow is enabled
+     */
     hasShadow: boolean;
+    /**
+     * [KO] 캐스케이드 프러스텀 평면 방정식 배열
+     * [EN] Cascade frustum plane equations array
+     */
     frustumPlanes: number[][] | null;
 }
 
+/**
+ * [KO] 모든 식생 타입의 인스턴스 원시 데이터, GPU 컬링 결과, 간접 드로우 인다이렉트 버퍼를 단일 대형 GPU 버퍼로 통합 관리하는 클래스입니다.
+ * [EN] Class that unifies raw instance data, GPU culling results, and indirect draw buffers for all foliage types into a single large GPU buffer.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export class FoliageMegaBuffer extends RedGPUObject {
     static readonly #STRIDE_FLOATS: number = 8;
     static readonly #STRIDE_BYTES: number = 8 * 4;
@@ -31,6 +98,19 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
     #onRecreated: (() => void) | null = null;
 
+    /**
+     * [KO] FoliageMegaBuffer 인스턴스를 생성하고 내부 GPU 버퍼들을 초기화합니다.
+     * [EN] Creates a FoliageMegaBuffer instance and initializes internal GPU buffers.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param initialCapacity -
+     * [KO] 초기 인스턴스 수용 용량 (기본값: 65536)
+     * [EN] Initial instance capacity (default: 65536)
+     * @param maxSubMeshes -
+     * [KO] 최대 지원 서브메시 개수 (기본값: 256)
+     * [EN] Maximum supported sub-meshes count (default: 256)
+     */
     constructor(redGPUContext: RedGPUContext, initialCapacity: number = 65536, maxSubMeshes: number = 256) {
         super(redGPUContext);
         this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
@@ -126,6 +206,37 @@ export class FoliageMegaBuffer extends RedGPUObject {
         this.#onRecreated = cb;
     }
 
+    /**
+     * [KO] 현재까지 할당된 총 인스턴스 범위
+     * [EN] Total allocated instance range so far
+     */
+    get totalAllocatedRange(): number {
+        return this.#nextRawOffset;
+    }
+
+    /**
+     * [KO] 등록된 모든 식생 타입의 활성 인스턴스 총합
+     * [EN] Total active instances across all registered foliage types
+     */
+    get totalActiveInstances(): number {
+        let total = 0;
+        const count = this.#allocatedTypes.length;
+        for (let i = 0; i < count; i++) {
+            total += this.#allocatedTypes[i].activeCount;
+        }
+        return total;
+    }
+
+    /**
+     * [KO] 요청된 용량을 수용할 수 있도록 메가 버퍼의 크기를 검사하고 필요한 경우 2배 단위로 확장합니다.
+     * [EN] Checks the mega buffer capacity and expands it in power-of-two increments if necessary to accommodate the requested capacity.
+     * @param requiredCapacity -
+     * [KO] 필요한 총 인스턴스 수용 용량
+     * [EN] Required total instance capacity
+     * @returns
+     * [KO] 버퍼가 재할당되어 확장되었으면 true, 아니면 false
+     * [EN] True if buffers were reallocated/expanded, false otherwise
+     */
     ensureCapacity(requiredCapacity: number): boolean {
         if (requiredCapacity <= this.#maxTotalInstances) {
             return false;
@@ -187,19 +298,28 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return true;
     }
 
-    get totalAllocatedRange(): number {
-        return this.#nextRawOffset;
-    }
-
-    get totalActiveInstances(): number {
-        let total = 0;
-        const count = this.#allocatedTypes.length;
-        for (let i = 0; i < count; i++) {
-            total += this.#allocatedTypes[i].activeCount;
-        }
-        return total;
-    }
-
+    /**
+     * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다.
+     * [EN] Allocates a buffer segment and registers offsets for a new foliage type.
+     * @param name -
+     * [KO] 식생 타입 고유 이름
+     * [EN] Unique foliage type name
+     * @param maxInstances -
+     * [KO] 최대 허용 인스턴스 수
+     * [EN] Maximum allowed instances
+     * @param subMeshes -
+     * [KO] 식생 서브메시 배열
+     * [EN] Foliage sub-meshes array
+     * @param shadowMergedSubMeshes -
+     * [KO] 그림자 패스 통합 서브메시 배열 (선택사항)
+     * [EN] Shadow pass merged sub-meshes array (optional)
+     * @param lodInfoList -
+     * [KO] LOD 정보 목록 (선택사항)
+     * [EN] LOD info list (optional)
+     * @returns
+     * [KO] 할당된 세그먼트 정보 객체
+     * [EN] Allocated segment info object
+     */
     allocateTypeSegment(
         name: string,
         maxInstances: number,

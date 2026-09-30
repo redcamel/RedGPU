@@ -1,30 +1,122 @@
 import Landscape from "../../Landscape";
 import RedGPUContext from "../../../context/RedGPUContext";
 
+/**
+ * [KO] ALandscapeDebugger 초기화 설정 옵션입니다.
+ * [EN] Configuration options for ALandscapeDebugger initialization.
+ */
 export interface ALandscapeDebuggerOptions {
+    /**
+     * [KO] 컨테이너 가로 크기(px, 기본값: 100)
+     * [EN] Container width in px (default: 100)
+     */
     width?: number;
+    /**
+     * [KO] 컨테이너 세로 크기(px, 기본값: 100)
+     * [EN] Container height in px (default: 100)
+     */
     height?: number;
+    /**
+     * [KO] 화면 좌측 여백(px, 기본값: 12)
+     * [EN] Screen left offset in px (default: 12)
+     */
     left?: number;
+    /**
+     * [KO] 화면 하단 여백(px, 기본값: 12)
+     * [EN] Screen bottom offset in px (default: 12)
+     */
     bottom?: number;
+    /**
+     * [KO] 디버거 상단 제목 라벨
+     * [EN] Debugger header title text
+     */
     title?: string;
 }
 
+/**
+ * [KO] 디버거 2D 오버레이 렌더링에 사용되는 카메라 위치 및 시야각 투영 상태 정보입니다.
+ * [EN] Camera position, orientation, and FOV projection state for 2D debugger overlay rendering.
+ */
 export interface LandscapeDebuggerCameraState {
+    /**
+     * [KO] 카메라 월드 X 좌표
+     * [EN] Camera world X position
+     */
     camX: number;
+    /**
+     * [KO] 카메라 월드 Z 좌표
+     * [EN] Camera world Z position
+     */
     camZ: number;
+    /**
+     * [KO] 카메라 수평 회전각(Pan, deg)
+     * [EN] Camera pan angle in degrees
+     */
     pan: number;
+    /**
+     * [KO] 카메라 수직 시야각(FOV, deg)
+     * [EN] Camera field of view in degrees
+     */
     fov: number;
+    /**
+     * [KO] 수평 회전각 라디안
+     * [EN] Camera pan angle in radians
+     */
     panRad: number;
+    /**
+     * [KO] 절반 시야각 라디안
+     * [EN] Half FOV in radians
+     */
     halfFovRad: number;
+    /**
+     * [KO] 시선 방향 2D 각도
+     * [EN] 2D look angle
+     */
     lookAngle: number;
+    /**
+     * [KO] 시선 2D 정규화 방향 벡터 X
+     * [EN] Normalized look direction X
+     */
     dirX: number;
+    /**
+     * [KO] 시선 2D 정규화 방향 벡터 Y (Z축 방향)
+     * [EN] Normalized look direction Y (along Z axis)
+     */
     dirY: number;
+    /**
+     * [KO] 지형 월드 바운딩 대비 정규화된 카메라 X (0~1)
+     * [EN] Normalized camera X across terrain bounds (0~1)
+     */
     camNormX: number;
+    /**
+     * [KO] 지형 월드 바운딩 대비 정규화된 카메라 Z (0~1)
+     * [EN] Normalized camera Z across terrain bounds (0~1)
+     */
     camNormZ: number;
+    /**
+     * [KO] UV 공간 상의 타일 스트리밍 반경 크기
+     * [EN] Tile loading radius mapped to UV space
+     */
     tileLoadingRadiusUV: number;
+    /**
+     * [KO] 전체 지형 월드 X 크기
+     * [EN] Terrain full world X size
+     */
     worldSizeX: number;
+    /**
+     * [KO] 전체 지형 월드 Z 크기
+     * [EN] Terrain full world Z size
+     */
     worldSizeZ: number;
+    /**
+     * [KO] 지형 월드 최소 X 바운딩
+     * [EN] Terrain minimum world X bound
+     */
     worldMinX: number;
+    /**
+     * [KO] 지형 월드 최소 Z 바운딩
+     * [EN] Terrain minimum world Z bound
+     */
     worldMinZ: number;
 }
 
@@ -108,6 +200,10 @@ function ensureDebuggerStyles(): void {
     document.head.appendChild(style);
 }
 
+/**
+ * [KO] 온스크린 2D 디버거 UI 컨테이너(DOM 및 캔버스)와 카메라 시야각/스트리밍 반경 오버레이 렌더링을 제공하는 기반 추상 디버거 클래스입니다.
+ * [EN] Base abstract debugger providing on-screen 2D UI container (DOM & canvas) and camera frustum/streaming radius overlay rendering.
+ */
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #container: HTMLDivElement;
@@ -147,6 +243,15 @@ export abstract class ALandscapeDebugger {
     #dpr: number = 1;
     #title: string = '';
 
+    /**
+     * [KO] ALandscapeDebugger 생성자입니다.
+     * [EN] Constructor for ALandscapeDebugger.
+     *
+     * @param landscape - [KO] 대상 Landscape 인스턴스 / [EN] Target Landscape instance
+     * @param cameraOrOptions - [KO] 카메라 인스턴스 또는 옵션 객체 / [EN] Camera instance or options object
+     * @param options - [KO] 디버거 옵션 / [EN] Debugger options
+     * @param canvasId - [KO] 캔버스 DOM ID (선택 사항) / [EN] Optional canvas DOM ID
+     */
     constructor(
         landscape: Landscape,
         cameraOrOptions?: any,
@@ -233,6 +338,10 @@ export abstract class ALandscapeDebugger {
         this.#overlayCanvas = overlayCanvas;
     }
 
+    /**
+     * [KO] 디버거 상단에 표시되는 제목 텍스트를 반환합니다.
+     * [EN] Returns the title text displayed at the top of the debugger.
+     */
     get title(): string {
         return this.#title;
     }
@@ -251,35 +360,60 @@ export abstract class ALandscapeDebugger {
         }
     }
 
+    /**
+     * [KO] RedGPUContext 인스턴스를 반환합니다.
+     * [EN] Returns the RedGPUContext instance.
+     */
     get redGPUContext(): RedGPUContext {
         return this.#landscape.redGPUContext;
     }
 
+    /**
+     * [KO] 대상 Landscape 인스턴스를 반환합니다.
+     * [EN] Returns the target Landscape instance.
+     */
     get landscape(): Landscape {
         return this.#landscape;
     }
 
+    /**
+     * [KO] 2D 오버레이 캔버스 요소를 반환합니다.
+     * [EN] Returns the 2D overlay canvas element.
+     */
     get overlayCanvas(): HTMLCanvasElement {
         return this.#overlayCanvas;
     }
 
+    /**
+     * [KO] 디버거 최상위 컨테이너 DIV 요소를 반환합니다.
+     * [EN] Returns the root container DIV element of the debugger.
+     */
     get container(): HTMLDivElement {
         return this.#container;
     }
 
+    /**
+     * [KO] 메인 디버거 캔버스 요소를 반환합니다.
+     * [EN] Returns the main debugger canvas element.
+     */
     get canvas(): HTMLCanvasElement {
         return this.#canvas;
     }
 
-    // TODO - 제거 대상같은데 추후확인
-    static getPreferredCanvasFormat(): GPUTextureFormat {
-        return (typeof navigator !== 'undefined' && navigator.gpu?.getPreferredCanvasFormat)
-            ? navigator.gpu.getPreferredCanvasFormat()
-            : 'bgra8unorm';
-    }
-
+    /**
+     * [KO] 디버거의 화면 표시 여부를 설정하거나 가져옵니다.
+     * [EN] Gets or sets the display visibility of the debugger.
+     */
     get visible(): boolean {
         return this.#visible;
+    }
+
+    /**
+     * [KO] 관찰 대상 카메라 인스턴스를 반환합니다.
+     * [EN] Returns the tracked camera instance.
+     */
+    get camera(): any {
+        return this.#camera;
     }
 
     set visible(val: boolean) {
@@ -287,75 +421,133 @@ export abstract class ALandscapeDebugger {
         this.#container.style.setProperty('display', val ? 'block' : 'none', 'important');
     }
 
-    show(): void {
-        this.visible = true;
+    /**
+     * [KO] 디바이스 픽셀 비율(DPR)을 반환합니다.
+     * [EN] Returns the device pixel ratio (DPR).
+     */
+    get dpr(): number {
+        return this.#dpr;
     }
 
-    hide(): void {
-        this.visible = false;
+    /**
+     * [KO] 컨테이너 가로 크기(px)를 설정하거나 가져옵니다.
+     * [EN] Gets or sets the container width in px.
+     */
+    get width(): number {
+        return this.#width;
     }
 
-    toggle(): boolean {
-        this.visible = !this.visible;
-        return this.visible;
+    /**
+     * [KO] 컨테이너 세로 크기(px)를 설정하거나 가져옵니다.
+     * [EN] Gets or sets the container height in px.
+     */
+    get height(): number {
+        return this.#height;
     }
 
-    get camera(): any {
-        return this.#camera;
+    /**
+     * [KO] 내부 렌더링 콘텐츠 가로 크기(px)를 반환합니다.
+     * [EN] Returns the inner render content width in px.
+     */
+    get contentWidth(): number {
+        return this.#contentWidth;
     }
 
     set camera(cam: any) {
         this.#camera = cam;
     }
 
-    get dpr(): number {
-        return this.#dpr;
+    /**
+     * [KO] 내부 렌더링 콘텐츠 세로 크기(px)를 반환합니다.
+     * [EN] Returns the inner render content height in px.
+     */
+    get contentHeight(): number {
+        return this.#contentHeight;
     }
 
-    get width(): number {
-        return this.#width;
+    /**
+     * [KO] 화면 좌측 오프셋(px)을 설정하거나 가져옵니다.
+     * [EN] Gets or sets the screen left offset in px.
+     */
+    get left(): number {
+        return this.#left;
     }
 
     set width(w: number) {
         this.setSize(w, this.#height);
     }
 
-    get height(): number {
-        return this.#height;
+    /**
+     * [KO] 화면 하단 오프셋(px)을 설정하거나 가져옵니다.
+     * [EN] Gets or sets the screen bottom offset in px.
+     */
+    get bottom(): number {
+        return this.#bottom;
     }
 
     set height(h: number) {
         this.setSize(this.#width, h);
     }
 
-    get contentWidth(): number {
-        return this.#contentWidth;
+    /**
+     * [KO] 시스템 선호 캔버스 텍스처 포맷을 반환합니다.
+     * [EN] Returns the preferred canvas texture format.
+     */
+    static getPreferredCanvasFormat(): GPUTextureFormat {
+        return (typeof navigator !== 'undefined' && navigator.gpu?.getPreferredCanvasFormat)
+            ? navigator.gpu.getPreferredCanvasFormat()
+            : 'bgra8unorm';
     }
 
-    get contentHeight(): number {
-        return this.#contentHeight;
+    /**
+     * [KO] 디버거를 화면에 표시합니다.
+     * [EN] Shows the debugger on screen.
+     */
+    show(): void {
+        this.visible = true;
     }
 
-    get left(): number {
-        return this.#left;
+    /**
+     * [KO] 디버거를 화면에서 숨깁니다.
+     * [EN] Hides the debugger from screen.
+     */
+    hide(): void {
+        this.visible = false;
     }
 
     set left(l: number) {
         this.setPosition(l, this.#bottom);
     }
 
-    get bottom(): number {
-        return this.#bottom;
+    /**
+     * [KO] 디버거의 가시성 상태를 반전(토글)합니다.
+     * [EN] Toggles the visibility state of the debugger.
+     *
+     * @returns [KO] 변경된 후의 가시성 상태 / [EN] Visibility state after toggle
+     */
+    toggle(): boolean {
+        this.visible = !this.visible;
+        return this.visible;
     }
 
     set bottom(b: number) {
         this.setPosition(this.#left, b);
     }
 
+    /**
+     * [KO] 추적할 카메라 인스턴스를 지정합니다.
+     * [EN] Assigns the camera instance to track.
+     *
+     * @param cam - [KO] 카메라 인스턴스 / [EN] Camera instance
+     */
     setCamera(cam: any): void {
         this.#camera = cam;
     }
 
+    /**
+     * [KO] 현재 카메라의 위치, 방향, FOV 및 지형 공간 매핑 데이터를 계산하여 반환합니다.
+     * [EN] Computes and returns the camera position, orientation, FOV, and terrain space mappings.
+     */
     getCameraState(): LandscapeDebuggerCameraState | null {
         if (!this.#landscape) return null;
 
@@ -403,6 +595,10 @@ export abstract class ALandscapeDebugger {
         return this.#cameraState;
     }
 
+    /**
+     * [KO] 오버레이 캔버스에 지형 그리드 선, 카메라 위치 및 시야각 원추(FOV wedge), 스트리밍 반경 원을 2D로 그립니다.
+     * [EN] Renders terrain grid lines, camera position, FOV view frustum wedge, and streaming radius circle on the 2D overlay canvas.
+     */
     renderOverlay(): void {
         if (!this.#overlayCtx) return;
         const state = this.getCameraState();
@@ -482,6 +678,13 @@ export abstract class ALandscapeDebugger {
         this.#overlayCtx.restore();
     }
 
+    /**
+     * [KO] 디버거 뷰어의 전체 크기(width, height)를 재조정합니다.
+     * [EN] Resizes the debugger viewer container and its inner canvases.
+     *
+     * @param w - [KO] 새로운 가로 크기(px) / [EN] New width in px
+     * @param h - [KO] 새로운 세로 크기(px) / [EN] New height in px
+     */
     setSize(w: number, h: number): void {
         const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
         this.#dpr = dpr;
@@ -512,6 +715,13 @@ export abstract class ALandscapeDebugger {
         this.#overlayCanvas.height = Math.round(renderHeight * dpr);
     }
 
+    /**
+     * [KO] 디버거 뷰어의 화면 배치 위치(left, bottom)를 설정합니다.
+     * [EN] Sets the screen position (left, bottom) of the debugger viewer.
+     *
+     * @param left - [KO] 화면 좌측 오프셋(px) / [EN] Left offset in px
+     * @param bottom - [KO] 화면 하단 오프셋(px) / [EN] Bottom offset in px
+     */
     setPosition(left: number, bottom: number): void {
         this.#left = left;
         this.#bottom = bottom;
@@ -519,12 +729,20 @@ export abstract class ALandscapeDebugger {
         this.#container.style.setProperty('bottom', `${bottom}px`, 'important');
     }
 
+    /**
+     * [KO] 디버거 DOM 요소를 제거하고 리소스를 해제합니다.
+     * [EN] Removes the debugger DOM element and releases resources.
+     */
     destroy(): void {
         if (this.#container && this.#container.parentNode) {
             this.#container.parentNode.removeChild(this.#container);
         }
     }
 
+    /**
+     * [KO] 매 프레임 디버거 뷰어 콘텐츠를 갱신하는 추상 메서드입니다. 하위 클래스에서 구현됩니다.
+     * [EN] Abstract update method called each frame to refresh debugger contents. Implemented by subclasses.
+     */
     abstract update(): void;
 }
 

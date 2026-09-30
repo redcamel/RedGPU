@@ -1,7 +1,13 @@
+/**
+ * [KO] 식생 개별 서브메시 및 머티리얼 바인딩/유니폼 관리 모듈입니다.
+ * [EN] Foliage individual sub-mesh and material binding/uniform management module.
+ * @packageDocumentation
+ */
+
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
-import LandscapeSubMesh, {type LandscapeSubMeshInitOptions} from "../../../core/geometry/LandscapeSubMesh";
+import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 /**
@@ -14,38 +20,126 @@ export type FoliageRenderPassType = 'depthPrepass' | 'main';
  * [KO] FoliageSubMesh 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for FoliageSubMesh.
  */
-export interface FoliageSubMeshInitOptions extends LandscapeSubMeshInitOptions {
+export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
+    /**
+     * [KO] 소스 메쉬 인스턴스
+     * [EN] Source mesh instance
+     */
     mesh: Mesh;
+    /**
+     * [KO] 서브메시 지오메트리
+     * [EN] Sub-mesh geometry
+     */
     geometry: Geometry;
+    /**
+     * [KO] 서브메시 머티리얼
+     * [EN] Sub-mesh material
+     */
     material: any;
+    /**
+     * [KO] 인덱스 개수
+     * [EN] Index count
+     */
     indexCount: number;
+    /**
+     * [KO] 정점 개수
+     * [EN] Vertex count
+     */
     vertexCount: number;
+    /**
+     * [KO] 인덱스 버퍼 사용 여부
+     * [EN] Whether indexed buffer is used
+     */
     isIndexed: boolean;
+    /**
+     * [KO] 인덱스 포맷 (기본값: 'uint32')
+     * [EN] Index format (default: 'uint32')
+     */
     indexFormat?: GPUIndexFormat;
+    /**
+     * [KO] 정점 스트라이드 바이트 수
+     * [EN] Vertex stride in bytes
+     */
     strideBytes: number;
+    /**
+     * [KO] 밑둥 피벗 보정 바닥 오프셋
+     * [EN] Bottom offset relative to pivot
+     */
     bottomOffset?: number;
+    /**
+     * [KO] 상대 모델 변환 행렬
+     * [EN] Relative model transform matrix
+     */
     relativeModelMatrix: mat4;
+    /**
+     * [KO] 상대 법선 변환 행렬
+     * [EN] Relative normal transform matrix
+     */
     relativeNormalMatrix: mat4;
+    /**
+     * [KO] 버텍스 셰이더 유니폼 버퍼 (208 bytes)
+     * [EN] Vertex shader uniform buffer (208 bytes)
+     */
     vertexUniformBuffer: GPUBuffer;
+    /**
+     * [KO] 버텍스 셰이더 유니폼 바인드 그룹
+     * [EN] Vertex shader uniform bind group
+     */
     vertexUniformBindGroup: GPUBindGroup;
+    /**
+     * [KO] 소속 LOD 레벨 인덱스
+     * [EN] Associated LOD level index
+     */
     lodIndex: number;
 
+    /**
+     * [KO] 뎁스 프리패스 렌더링 대상 여부
+     * [EN] Whether rendering in depth prepass
+     */
     isDepthPrepass: boolean;
+    /**
+     * [KO] 메인 불투명/마스크 패스 렌더링 대상 여부
+     * [EN] Whether rendering in main opaque/masked pass
+     */
     isMainOpaqueOrMasked: boolean;
+    /**
+     * [KO] 알파 마스킹(Cutout) 사용 여부
+     * [EN] Whether alpha masking (cutout) is used
+     */
     isMasked?: boolean;
+    /**
+     * [KO] 메인 뎁스 패스 모드
+     * [EN] Main depth pass mode
+     */
     mainDepthMode: FoliageDepthPassMode;
+    /**
+     * [KO] 옥타헤드럴 임포스터 메쉬 여부
+     * [EN] Whether this is an octahedral impostor mesh
+     */
     isImpostor?: boolean;
+    /**
+     * [KO] 그림자 수신 여부
+     * [EN] Whether this sub-mesh receives shadows
+     */
     receiveShadow?: boolean;
 
+    /**
+     * [KO] 인스턴스 버퍼 시작 오프셋
+     * [EN] Instance buffer start offset
+     */
     instanceBufferOffset?: number;
+    /**
+     * [KO] 간접 드로우 인다이렉트 버퍼 시작 바이트 오프셋
+     * [EN] Indirect draw buffer start byte offset
+     */
     indirectOffsetBytes?: number;
 }
 
 /**
- * [KO] LandscapeSubMesh를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
- * [EN] Foliage sub-mesh class inheriting LandscapeSubMesh to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
+ * [KO] ScatterSubMesh를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
+ * [EN] Foliage sub-mesh class inheriting ScatterSubMesh to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
  */
-export class FoliageSubMesh extends LandscapeSubMesh {
+export class FoliageSubMesh extends ScatterSubMesh {
     #singleFloatBuffer: Float32Array = new Float32Array(1);
     #windFloatBuffer: Float32Array = new Float32Array(12);
     #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
@@ -198,6 +292,12 @@ export class FoliageSubMesh extends LandscapeSubMesh {
     /**
      * [KO] 그림자 수신 상태를 업데이트하고 GPU 유니폼 버퍼에 반영합니다.
      * [EN] Updates shadow receiving state and reflects it in the GPU uniform buffer.
+     * @param gpuDevice -
+     * [KO] WebGPU 디바이스 인스턴스
+     * [EN] WebGPU device instance
+     * @param receiveShadow -
+     * [KO] 그림자 수신 여부
+     * [EN] Whether shadows are received
      */
     updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
         if (this.#receiveShadow === receiveShadow) return;
@@ -217,6 +317,39 @@ export class FoliageSubMesh extends LandscapeSubMesh {
     /**
      * [KO] 바람 시뮬레이션 파라미터를 유니폼 버퍼에 기록합니다.
      * [EN] Writes wind simulation parameters to the uniform buffer.
+     * @param gpuDevice -
+     * [KO] WebGPU 디바이스 인스턴스
+     * [EN] WebGPU device instance
+     * @param windDirX -
+     * [KO] 바람 방향 X
+     * [EN] Wind direction X
+     * @param windDirY -
+     * [KO] 바람 방향 Y (Z축 대응)
+     * [EN] Wind direction Y (maps to Z axis)
+     * @param windSpeed -
+     * [KO] 바람 속도
+     * [EN] Wind speed
+     * @param windStrength -
+     * [KO] 바람 강도
+     * [EN] Wind strength
+     * @param windFreq -
+     * [KO] 바람 주파수
+     * [EN] Wind frequency
+     * @param windFlutterStrength -
+     * [KO] 잔잎 흔들림 강도
+     * [EN] Leaf flutter strength
+     * @param windEnabled -
+     * [KO] 바람 효과 활성화 여부
+     * [EN] Whether wind effect is enabled
+     * @param windMultiplier -
+     * [KO] 인스턴스별 바람 강도 배수
+     * [EN] Per-instance wind strength multiplier
+     * @param windFlutterMultiplier -
+     * [KO] 인스턴스별 잔잎 흔들림 배수
+     * [EN] Per-instance flutter multiplier
+     * @param treeHeight -
+     * [KO] 식생 전체 높이
+     * [EN] Total foliage height
      */
     updateWindParams(
         gpuDevice: GPUDevice,
@@ -259,6 +392,15 @@ export class FoliageSubMesh extends LandscapeSubMesh {
     /**
      * [KO] 지면 높이 기반 블렌딩 파라미터를 유니폼 버퍼에 기록합니다.
      * [EN] Writes ground blend parameters to the uniform buffer.
+     * @param gpuDevice -
+     * [KO] WebGPU 디바이스 인스턴스
+     * [EN] WebGPU device instance
+     * @param groundBlendStrength -
+     * [KO] 지면 블렌드 강도
+     * [EN] Ground blend strength
+     * @param groundBlendRange -
+     * [KO] 지면 블렌드 높이 범위
+     * [EN] Ground blend height range
      */
     updateGroundBlendParams(
         gpuDevice: GPUDevice,
@@ -284,6 +426,12 @@ export class FoliageSubMesh extends LandscapeSubMesh {
     /**
      * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 서브메쉬를 렌더링할 수 있는지 여부를 판별합니다.
      * [EN] Determines whether this sub-mesh can be rendered in a specific render pass (depthPrepass or main).
+     * @param passType -
+     * [KO] 렌더 패스 유형 ('depthPrepass' | 'main')
+     * [EN] Render pass type ('depthPrepass' | 'main')
+     * @returns
+     * [KO] 해당 패스에서 렌더 가능 여부
+     * [EN] Whether rendering is allowed in the pass
      */
     canRenderInPass(passType: FoliageRenderPassType): boolean {
         switch (passType) {
@@ -299,6 +447,24 @@ export class FoliageSubMesh extends LandscapeSubMesh {
     /**
      * [KO] MSAA 설정 및 뎁스 패스 모드에 대응하는 WebGPU 렌더 파이프라인을 조회하거나 생성하여 캐싱합니다.
      * [EN] Retrieves or creates and caches the WebGPU render pipeline matching MSAA configuration and depth pass mode.
+     * @param registry -
+     * [KO] 식생 파이프라인 레지스트리
+     * [EN] Foliage pipeline registry
+     * @param sampleCount -
+     * [KO] MSAA 샘플 수
+     * [EN] MSAA sample count
+     * @param msaaID -
+     * [KO] MSAA 식별자 키
+     * [EN] MSAA identifier key
+     * @param depthPassMode -
+     * [KO] 뎁스 패스 모드
+     * [EN] Depth pass mode
+     * @param subMeshBindGroupLayout -
+     * [KO] 서브메시 바인드 그룹 레이아웃
+     * [EN] Sub-mesh bind group layout
+     * @returns
+     * [KO] 캐시되거나 생성된 렌더 파이프라인 (실패 시 null)
+     * [EN] Cached or created render pipeline (null on failure)
      */
     getPipeline(
         registry: FoliagePipelineRegistry,

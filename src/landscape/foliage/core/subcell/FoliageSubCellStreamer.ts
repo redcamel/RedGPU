@@ -1,9 +1,20 @@
+/**
+ * [KO] 식생 서브셀 인스턴스 GPU 동적 스트리머 모듈입니다.
+ * [EN] Foliage sub-cell instance GPU dynamic streamer module.
+ * @packageDocumentation
+ */
+
 import type Foliage from "../Foliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
  * [EN] Streamer class that dynamically mounts/unmounts active subcell instances to the GPU buffer according to camera position and streaming budget.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export default class FoliageSubCellStreamer {
     static readonly #STRIDE: number = 8;
@@ -17,22 +28,45 @@ export default class FoliageSubCellStreamer {
     #mountBudget: number = 16;
     #unmountBudget: number = 32;
 
+    /**
+     * [KO] FoliageSubCellStreamer 인스턴스를 생성합니다.
+     * [EN] Creates a FoliageSubCellStreamer instance.
+     * @param foliageType -
+     * [KO] 관리 대상 Foliage 인스턴스
+     * [EN] Target Foliage instance to manage
+     */
     constructor(foliageType: Foliage) {
         this.#foliageType = foliageType;
     }
 
+    /**
+     * [KO] 등록된 전체 서브셀 청크 수
+     * [EN] Total number of registered sub-cell chunks
+     */
     get totalChunkCount(): number {
         return this.#chunks.size;
     }
 
+    /**
+     * [KO] 등록된 전체 식생 인스턴스 수
+     * [EN] Total number of registered foliage instances
+     */
     get totalInstanceCount(): number {
         return this.#totalInstanceCount;
     }
 
+    /**
+     * [KO] 현재 GPU 버퍼에 마운트된 서브셀 청크 수
+     * [EN] Number of sub-cell chunks currently mounted to GPU buffer
+     */
     get mountedChunkCount(): number {
         return this.#mountedChunks.length;
     }
 
+    /**
+     * [KO] 프레임당 최대 마운트 허용 청크 수
+     * [EN] Maximum chunks allowed to mount per frame
+     */
     get mountBudget(): number {
         return this.#mountBudget;
     }
@@ -41,6 +75,10 @@ export default class FoliageSubCellStreamer {
         this.#mountBudget = Math.max(1, (val | 0) || 1);
     }
 
+    /**
+     * [KO] 프레임당 최대 언마운트 허용 청크 수
+     * [EN] Maximum chunks allowed to unmount per frame
+     */
     get unmountBudget(): number {
         return this.#unmountBudget;
     }
@@ -49,6 +87,25 @@ export default class FoliageSubCellStreamer {
         this.#unmountBudget = Math.max(1, (val | 0) || 1);
     }
 
+    /**
+     * [KO] 카메라 위치와 활성 서브셀 목록을 기반으로 스트리밍 마운트/언마운트를 갱신합니다.
+     * [EN] Updates streaming mounts/unmounts based on camera position and active sub-cell keys.
+     * @param activeKeyArray -
+     * [KO] 활성 서브셀 키 Int32Array
+     * [EN] Active sub-cell keys Int32Array
+     * @param activeKeyCount -
+     * [KO] 활성 키 개수
+     * [EN] Active key count
+     * @param camX -
+     * [KO] 카메라 월드 X 좌표
+     * [EN] Camera world X coordinate
+     * @param camZ -
+     * [KO] 카메라 월드 Z 좌표
+     * [EN] Camera world Z coordinate
+     * @param enableStreaming -
+     * [KO] 동적 스트리밍 활성화 여부 (false면 전체 마운트)
+     * [EN] Whether dynamic streaming is enabled (mounts all if false)
+     */
     update(
         activeKeyArray: Int32Array,
         activeKeyCount: number,
@@ -115,6 +172,13 @@ export default class FoliageSubCellStreamer {
         }
     }
 
+    /**
+     * [KO] 새로운 서브셀 청크들을 스트리머에 등록합니다.
+     * [EN] Registers new sub-cell chunks to the streamer.
+     * @param newChunks -
+     * [KO] 등록할 청크 맵
+     * [EN] Map of chunks to register
+     */
     addChunks(newChunks: Map<number, FoliageSubCellChunk>): void {
         newChunks.forEach((chunk, key) => {
             if (!this.#chunks.has(key)) {
@@ -124,6 +188,10 @@ export default class FoliageSubCellStreamer {
         });
     }
 
+    /**
+     * [KO] 모든 서브셀 청크 등록 상태를 해제하고 인스턴스 마운트를 초기화합니다.
+     * [EN] Unregisters all sub-cell chunks and resets instance mounts.
+     */
     clear(): void {
         this.#tempCandidates.length = 0;
         this.#mountedChunks.forEach(c => {

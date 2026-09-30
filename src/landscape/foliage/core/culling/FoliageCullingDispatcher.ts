@@ -1,3 +1,8 @@
+/**
+ * [KO] 식생 GPU 프러스텀/거리/HZB 컬링 및 베이킹 디스패처 모듈입니다.
+ * [EN] Foliage GPU frustum/distance/HZB culling and baking dispatcher module.
+ * @packageDocumentation
+ */
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
@@ -11,6 +16,15 @@ import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffe
 import {FoliageInstanceBaker} from "../baking/FoliageInstanceBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
+/**
+ * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 디스패치하는 클래스입니다.
+ * [EN] Class that dispatches GPU compute shader passes for frustum culling, distance LOD selection, HZB occlusion culling, and baking across all foliage instances.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 class FoliageCullingDispatcher extends RedGPUObject {
     #tempPVMatrix: mat4 = mat4.create();
     #cachedFrustumPlanes: number[][] = [
@@ -43,6 +57,19 @@ class FoliageCullingDispatcher extends RedGPUObject {
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
 
+    /**
+     * [KO] FoliageCullingDispatcher 인스턴스를 생성하고 내부 컴퓨트 파이프라인을 초기화합니다.
+     * [EN] Creates a FoliageCullingDispatcher instance and initializes the internal compute pipeline.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param megaBuffer -
+     * [KO] 식생 메가 버퍼 (선택사항)
+     * [EN] Foliage mega buffer (optional)
+     * @param tileStreamer -
+     * [KO] 지형 타일 스트리머 (선택사항)
+     * [EN] Landscape tile streamer (optional)
+     */
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
@@ -51,10 +78,30 @@ class FoliageCullingDispatcher extends RedGPUObject {
         this.#initComputePipeline();
     }
 
+    /**
+     * [KO] 식생 인스턴스 물리 베이커 인스턴스
+     * [EN] Foliage instance physical baker instance
+     */
     get baker(): FoliageInstanceBaker {
         return this.#baker;
     }
 
+    /**
+     * [KO] 카메라 위치와 프러스텀, 그림자 캐스케이드 상태를 기반으로 컬링 파라미터를 갱신하고 GPU 디스패치를 준비합니다.
+     * [EN] Updates culling parameters and prepares GPU compute dispatches based on camera position, frustum, and shadow cascades.
+     * @param typeList -
+     * [KO] 활성 식생 타입 목록
+     * [EN] Active foliage type list
+     * @param viewOrCamera -
+     * [KO] 카메라 또는 뷰 객체
+     * [EN] Camera or view object
+     * @param landscape -
+     * [KO] 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance
+     * @param stateData -
+     * [KO] 렌더 패스 상태 데이터
+     * [EN] Render pass state data
+     */
     updateAndDispatch(
         typeList: Foliage[],
         viewOrCamera: any,
@@ -306,6 +353,10 @@ class FoliageCullingDispatcher extends RedGPUObject {
         this.#megaBuffer?.resetMultiIndirectCommands(encoder);
     };
 
+    /**
+     * [KO] 컬링 디스패처 및 베이커 리소스를 해제합니다.
+     * [EN] Destroys culling dispatcher and baker resources.
+     */
     destroy(): void {
         this.#baker.destroy();
         this.#cullingComputePipeline = null;

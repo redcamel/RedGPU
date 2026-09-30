@@ -1,7 +1,22 @@
+/**
+ * [KO] 지형 가상 텍스처(VBT, VHT, VNT) 아틀라스 베이커 추상 기본 클래스 모듈입니다.
+ * [EN] Abstract base class module for terrain virtual texture (VBT, VHT, VNT) atlas bakers.
+ * @packageDocumentation
+ */
+
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
+/**
+ * [KO] 지형 GPU Compute 아틀라스 베이킹을 위한 공통 파이프라인, 유니폼 풀 및 디스패치 루프를 제공하는 추상 기본 클래스입니다.
+ * [EN] Abstract base class providing common compute pipelines, uniform pools, and dispatch loops for terrain GPU compute atlas baking.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
@@ -24,6 +39,16 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         return this.#bindGroupLayout;
     }
 
+    /**
+     * [KO] 프레임 단위로 유니폼 버퍼를 풀링하여 재사용하고 필요한 경우 확장합니다.
+     * [EN] Pools and reuses uniform buffers per frame, expanding when necessary.
+     * @param byteLength -
+     * [KO] 필요한 바이트 크기
+     * [EN] Required byte size
+     * @returns
+     * [KO] 할당 또는 재사용된 GPUBuffer
+     * [EN] Allocated or reused GPUBuffer
+     */
     acquireUniformBuffer(byteLength: number): GPUBuffer {
         const device = this.gpuDevice;
         const curFrame = this.redGPUContext.currentRequestAnimationFrame;
@@ -55,6 +80,25 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         return buf;
     }
 
+    /**
+     * [KO] 지정된 픽셀 영역에 대해 GPU Compute 베이킹 패스를 실행합니다.
+     * [EN] Dispatches a GPU compute bake pass for the specified pixel region.
+     * @param bindGroup -
+     * [KO] 바인딩할 GPUBindGroup
+     * [EN] GPUBindGroup to bind
+     * @param pixelW -
+     * [KO] 베이킹 가로 픽셀 폭
+     * [EN] Bake pixel width
+     * @param pixelH -
+     * [KO] 베이킹 세로 픽셀 높이
+     * [EN] Bake pixel height
+     * @param pixelX -
+     * [KO] 베이킹 시작 X 픽셀 좌표
+     * [EN] Bake start X pixel coordinate
+     * @param pixelZ -
+     * [KO] 베이킹 시작 Z 픽셀 좌표
+     * [EN] Bake start Z pixel coordinate
+     */
     dispatchBakePass(
         bindGroup: GPUBindGroup,
         pixelW: number,

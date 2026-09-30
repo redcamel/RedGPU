@@ -1,3 +1,8 @@
+/**
+ * [KO] 대규모 지형 절차적 잔디(Grass) 스트리밍, 베이킹 및 렌더링 총괄 매니저 모듈입니다.
+ * [EN] Overall manager module for large-scale procedural grass streaming, baking, and rendering on terrain.
+ * @packageDocumentation
+ */
 import RedGPUObject from "../../base/RedGPUObject";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";

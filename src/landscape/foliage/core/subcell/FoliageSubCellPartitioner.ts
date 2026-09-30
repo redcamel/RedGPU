@@ -1,37 +1,94 @@
 /**
+ * [KO] 지형 컴포넌트 타일 내 식생 인스턴스를 서브셀 단위로 분할 배치하는 파티셔너 모듈입니다.
+ * [EN] Foliage sub-cell partitioner module for dividing and distributing instances into sub-cells within terrain tiles.
+ * @packageDocumentation
+ */
+
+/**
  * [KO] 식생 서브셀 청크 데이터 인터페이스입니다.
  * [EN] Foliage subcell chunk data interface.
  */
 export interface FoliageSubCellChunk {
-
+    /**
+     * [KO] 서브셀 고유 정수 키
+     * [EN] Unique integer key for the sub-cell
+     */
     subCellKey: number;
-
+    /**
+     * [KO] 서브셀 정수 그리드 X 좌표
+     * [EN] Sub-cell integer grid X coordinate
+     */
     subCellX: number;
-
+    /**
+     * [KO] 서브셀 정수 그리드 Z 좌표
+     * [EN] Sub-cell integer grid Z coordinate
+     */
     subCellZ: number;
-
+    /**
+     * [KO] 서브셀 월드 중심 X 좌표
+     * [EN] Sub-cell world center X coordinate
+     */
     centerX: number;
-
+    /**
+     * [KO] 서브셀 월드 중심 Z 좌표
+     * [EN] Sub-cell world center Z coordinate
+     */
     centerZ: number;
-
+    /**
+     * [KO] 생성된 인스턴스 스트라이드 데이터 (8 floats per instance)
+     * [EN] Generated instance stride data (8 floats per instance)
+     */
     instanceData: Float32Array;
-
+    /**
+     * [KO] 청크 내 유효 인스턴스 수
+     * [EN] Number of valid instances in the chunk
+     */
     instanceCount: number;
-
+    /**
+     * [KO] 메가 버퍼에 마운트(업로드)되었는지 여부
+     * [EN] Whether currently mounted (uploaded) into mega buffer
+     */
     isMounted: boolean;
-
+    /**
+     * [KO] 메가 버퍼 내 할당된 슬롯 인덱스 (-1이면 미마운트)
+     * [EN] Allocated slot index in mega buffer (-1 if unmounted)
+     */
     mountedSlotIndex: number;
 }
 
 /**
  * [KO] 지형 타일을 일정한 크기의 서브셀(SubCell) 그리드로 분할하고 식생 인스턴스를 배치하는 파티셔너 클래스입니다.
  * [EN] Partitioner class that divides terrain tiles into fixed-size subcell grids and places foliage instances.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export default class FoliageSubCellPartitioner {
     static readonly #STRIDE: number = 8;
     static readonly #tempFloat32: Float32Array = new Float32Array(2);
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
+    /**
+     * [KO] 지형 컴포넌트 타일을 서브셀 그리드로 분할하고 식생 인스턴스를 밀도 및 레이어/경사도 조건에 따라 생성합니다.
+     * [EN] Partitions a terrain component tile into a sub-cell grid and generates foliage instances according to density, layer, and slope constraints.
+     * @param comp -
+     * [KO] 대상 지형 컴포넌트(타일)
+     * [EN] Target terrain component (tile)
+     * @param foliageType -
+     * [KO] 배치할 식생 타입 객체
+     * [EN] Foliage type object to place
+     * @param landscape -
+     * [KO] 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance
+     * @param subCellSize -
+     * [KO] 서브셀 가로세로 크기(미터, 기본값: 100.0)
+     * [EN] Sub-cell dimension in meters (default: 100.0)
+     * @returns
+     * [KO] 서브셀 키별 생성된 청크 맵
+     * [EN] Map of generated chunks keyed by sub-cell key
+     */
     static partitionTile(
         comp: any,
         foliageType: any,

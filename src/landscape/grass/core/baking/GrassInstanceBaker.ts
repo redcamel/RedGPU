@@ -1,3 +1,8 @@
+/**
+ * [KO] 절차적 잔디 인스턴스 지형 물리 베이커 모듈입니다.
+ * [EN] Procedural grass instance terrain physical baker module.
+ * @packageDocumentation
+ */
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeComputeWGSL from "./grassBakeCompute.wgsl";

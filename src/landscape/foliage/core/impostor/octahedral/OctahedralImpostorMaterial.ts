@@ -1,3 +1,9 @@
+/**
+ * [KO] 옥타헤드럴 임포스터 전용 머티리얼 모듈입니다.
+ * [EN] Dedicated material module for octahedral impostors.
+ * @packageDocumentation
+ */
+
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import type Sampler from "../../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../../resources/texture/BitmapTexture";
@@ -10,6 +16,10 @@ import defineTexture from "../../../../../defineProperty/funcs/texture/defineTex
 import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../../../../defineProperty/funcs/defineBoolean";
 
+/**
+ * [KO] 옥타헤드럴 임포스터 머티리얼 인터페이스입니다.
+ * [EN] Interface for octahedral impostor material properties.
+ */
 interface OctahedralImpostorMaterial {
     baseColorTexture: BitmapTexture | DirectTexture;
     baseColorTextureSampler: Sampler;
@@ -28,7 +38,33 @@ interface OctahedralImpostorMaterial {
     subsurfaceIntensity: number;
 }
 
+/**
+ * [KO] 옥타헤드럴 임포스터 빌보드를 위한 전용 셰이더 및 텍스처를 바인딩하는 머티리얼 클래스입니다.
+ * [EN] Dedicated material class binding shaders and textures for octahedral impostor billboards.
+ */
 class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
+    /**
+     * [KO] OctahedralImpostorMaterial 인스턴스를 생성합니다.
+     * [EN] Creates an OctahedralImpostorMaterial instance.
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param baseColorTexture -
+     * [KO] 베이스 컬러 아틀라스 텍스처
+     * [EN] Base color atlas texture
+     * @param normalTexture -
+     * [KO] 노멀 아틀라스 텍스처
+     * [EN] Normal atlas texture
+     * @param packedORMTexture -
+     * [KO] 패킹 ORM (Occlusion/Roughness/Metallic) 아틀라스 텍스처
+     * [EN] Packed ORM (Occlusion/Roughness/Metallic) atlas texture
+     * @param name -
+     * [KO] 머티리얼 이름
+     * [EN] Material name
+     * @param gridSize -
+     * [KO] 옥타헤드럴 아틀라스 그리드 분할 수 (기본값: 8.0)
+     * [EN] Octahedral atlas grid division count (default: 8.0)
+     */
     constructor(
         redGPUContext: RedGPUContext,
         baseColorTexture?: BitmapTexture | DirectTexture,

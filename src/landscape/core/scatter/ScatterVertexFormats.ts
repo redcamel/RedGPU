@@ -1,9 +1,16 @@
+/**
+ * [KO] Landscape 스캐터(식생 및 잔디 등) 렌더링에 사용되는 정점 버퍼 구조체 및 스트라이드 상수 정의 모듈입니다.
+ * [EN] Vertex buffer interleaved structures and stride constants module for Landscape scatter (foliage, grass, etc.) rendering.
+ *
+ * @packageDocumentation
+ */
+
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 
 /**
- * [KO] 랜드스케이프 PBR 렌더링에 사용되는 표준 18 floats 정점 인터리브 구조체입니다.
- * [EN] Standard 18-float vertex interleaved structure used for Landscape PBR rendering.
+ * [KO] 랜드스케이프 스캐터 PBR 렌더링에 사용되는 표준 18 floats 정점 인터리브 구조체입니다.
+ * [EN] Standard 18-float vertex interleaved structure used for Landscape scatter PBR rendering.
  */
 export const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     {

@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 가상 베이스 텍스처(VBT) 아틀라스 베이킹 제너레이터 모듈입니다.
+ * [EN] Terrain virtual base texture (VBT) atlas baking generator module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vbtBakeShaderCode from "../shader/landscapeVBTBake.wgsl";
@@ -7,6 +12,15 @@ import LandscapeMaterial from "../material/LandscapeMaterial";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
+/**
+ * [KO] 스플랫 레이어 머티리얼과 VNT 아틀라스를 합성하여 지형 타일별 베이스컬러/노멀/ORM 아틀라스를 베이킹하는 제너레이터 클래스입니다.
+ * [EN] Generator class that combines splat layer materials and VNT atlases to bake per-tile base color, normal, and ORM atlases.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ */
 export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
@@ -29,6 +43,34 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         this.#initTileMipComputeResources();
     }
 
+    /**
+     * [KO] 특정 타일 영역에 대해 VNT 노멀 데이터와 스플랫 머티리얼을 기반으로 VBT 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
+     * [EN] Bakes VBT base color, normal, and ORM atlases for a specific tile region based on VNT normals and splat materials.
+     * @param vntAtlas -
+     * [KO] 지형 가상 노멀 텍스처 (VNT) 아틀라스
+     * [EN] Terrain virtual normal texture (VNT) atlas
+     * @param vbtBaseColorArray -
+     * [KO] 베이킹 결과를 저장할 베이스컬러 DirectTexture
+     * [EN] Base color DirectTexture to store bake result
+     * @param vbtNormalArray -
+     * [KO] 베이킹 결과를 저장할 노멀 DirectTexture
+     * [EN] Normal DirectTexture to store bake result
+     * @param vbtORMArray -
+     * [KO] 베이킹 결과를 저장할 ORM DirectTexture
+     * [EN] ORM DirectTexture to store bake result
+     * @param material -
+     * [KO] 지형 머티리얼 인스턴스
+     * [EN] Landscape material instance
+     * @param col -
+     * [KO] 타일 열(X) 인덱스
+     * [EN] Tile column (X) index
+     * @param row -
+     * [KO] 타일 행(Z) 인덱스
+     * [EN] Tile row (Z) index
+     * @param tileSizePixels -
+     * [KO] 타일 해상도 (픽셀, 기본값: 512)
+     * [EN] Tile resolution in pixels (default: 512)
+     */
     bakeTileRegion(
         vntAtlas: DirectTexture,
         vbtBaseColorArray: DirectTexture,
