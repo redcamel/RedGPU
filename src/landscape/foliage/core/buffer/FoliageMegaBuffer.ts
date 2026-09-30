@@ -94,7 +94,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
     #strideBytes: number;
     #maxTypes: number;
     #typeParamFloats: number;
-    #maxTotalInstances: number;
+    #instanceCapacity: number;
     #maxSubMeshes: number;
 
     #rawGPUBuffer: GPUBuffer | null = null;
@@ -111,7 +111,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
     #cpuRawDataBuffer: Float32Array;
     #cpuRawDataUint32: Uint32Array;
 
-    #cpuTypeParamsData: Float32Array;
+    #cpuTypeParamsBuffer: Float32Array;
     #cpuTypeParamsUint32: Uint32Array;
 
     #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(200);
@@ -171,16 +171,16 @@ export class FoliageMegaBuffer extends RedGPUObject {
         this.#typeParamFloats =
             (shaderInfo.structs?.['FoliageTypeParam']?.arrayBufferByteLength || 320) / 4;
         this.#maxTypes = maxTypes;
-        this.#maxTotalInstances = Math.ceil(initialCapacity / 64) * 64;
+        this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
         this.#maxSubMeshes = maxSubMeshes;
 
-        this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * this.#strideFloats);
+        this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
         this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
         this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 4);
 
-        this.#cpuTypeParamsData = new Float32Array(this.#maxTypes * this.#typeParamFloats);
-        this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsData.buffer);
+        this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
+        this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
 
         this.#initBuffers();
     }
@@ -217,7 +217,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#typeParamFloats;
     }
 
-
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
     }
@@ -250,8 +249,28 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#shadowIndirectGPUBuffer;
     }
 
+    /**
+     * [KO] 현재 할당된 메가버퍼의 최대 수용 인스턴스 용량을 반환합니다.
+     * [EN] Returns the maximum instance capacity of the currently allocated mega-buffer.
+     */
+    get instanceCapacity(): number {
+        return this.#instanceCapacity;
+    }
+
+    /**
+     * [KO] 현재 할당된 메가버퍼의 최대 수용 인스턴스 용량을 반환합니다. (호환용)
+     * [EN] Returns the maximum instance capacity of the currently allocated mega-buffer. (Compatibility)
+     */
     get maxTotalInstances(): number {
-        return this.#maxTotalInstances;
+        return this.#instanceCapacity;
+    }
+
+    /**
+     * [KO] 특정 식생 타입 이름에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
+     * [EN] Retrieves the mega-buffer allocation information object for a specific foliage type name.
+     */
+    getAllocation(name: string): FoliageTypeAllocation | undefined {
+        return this.#allocations.get(name);
     }
 
     get maxSubMeshes(): number {
@@ -298,16 +317,16 @@ export class FoliageMegaBuffer extends RedGPUObject {
      * [EN] True if buffers were reallocated/expanded, false otherwise
      */
     ensureCapacity(requiredCapacity: number): boolean {
-        if (requiredCapacity <= this.#maxTotalInstances) {
+        if (requiredCapacity <= this.#instanceCapacity) {
             return false;
         }
 
-        let newCapacity = this.#maxTotalInstances;
+        let newCapacity = this.#instanceCapacity;
         while (newCapacity < requiredCapacity) {
             newCapacity = Math.ceil((newCapacity * 2) / 64) * 64;
         }
 
-        this.#maxTotalInstances = newCapacity;
+        this.#instanceCapacity = newCapacity;
 
         const oldCpuBuffer = this.#cpuRawDataBuffer;
         this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.#strideFloats);
@@ -317,8 +336,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
             const strideBytes = this.#strideBytes;
-            const rawByteSize = this.#maxTotalInstances * strideBytes;
-            const culledByteSize = this.#maxTotalInstances * 8 * strideBytes;
+            const rawByteSize = this.#instanceCapacity * strideBytes;
+            const culledByteSize = this.#instanceCapacity * 8 * strideBytes;
 
             this.#rawGPUBuffer?.destroy();
             this.#culledGPUBuffer?.destroy();
@@ -381,7 +400,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
      * [KO] 할당된 세그먼트 정보 객체
      * [EN] Allocated segment info object
      */
-    allocateTypeSegment(
+    allocateType(
         name: string,
         maxInstances: number,
         subMeshes: FoliageSubMesh[],
@@ -461,12 +480,36 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return allocation;
     }
 
-    uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
-        if (!this.#rawGPUBuffer || count <= 0) return;
-        allocation.activeCount = Math.max(allocation.activeCount, startIndex + count);
+    /**
+     * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다. (하위 호환 래퍼)
+     * [EN] Allocates a buffer segment and registers offsets for a new foliage type. (Compatibility wrapper)
+     */
+    allocateTypeSegment(
+        name: string,
+        maxInstances: number,
+        subMeshes: FoliageSubMesh[],
+        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
+        lodInfoList?: FoliageLODInfo[]
+    ): FoliageTypeAllocation {
+        return this.allocateType(name, maxInstances, subMeshes, shadowMergedSubMeshes, lodInfoList);
+    }
+
+    /**
+     * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
+     * [EN] Batch uploads instance data in CPU staging buffer to GPU raw buffer (rawGPUBuffer).
+     * @param startInstance -
+     * [KO] 시작 인스턴스 인덱스
+     * [EN] Starting instance index
+     * @param count -
+     * [KO] 업로드할 인스턴스 수
+     * [EN] Number of instances to upload
+     */
+    uploadInstances(startInstance: number, count: number): void {
         const gpuDevice = this.gpuDevice;
+        if (!gpuDevice || !this.#rawGPUBuffer || count <= 0) return;
+
         const strideBytes = this.#strideBytes;
-        const startByteOffset = (allocation.rawBaseOffset + startIndex) * strideBytes;
+        const startByteOffset = startInstance * strideBytes;
         const byteCount = count * strideBytes;
 
         gpuDevice.queue.writeBuffer(
@@ -476,6 +519,16 @@ export class FoliageMegaBuffer extends RedGPUObject {
             this.#cpuRawDataBuffer.byteOffset + startByteOffset,
             byteCount
         );
+    }
+
+    /**
+     * [KO] 특정 식생 타입 할당 구간의 인스턴스 데이터를 GPU 원본 버퍼로 업로드합니다.
+     * [EN] Uploads instance data of a specific foliage type allocation range to the GPU raw buffer.
+     */
+    uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
+        if (count <= 0) return;
+        allocation.activeCount = Math.max(allocation.activeCount, startIndex + count);
+        this.uploadInstances(allocation.rawBaseOffset + startIndex, count);
     }
 
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
@@ -557,7 +610,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
         gf32[7] = fovFactor > 0 ? fovFactor : 1.0;
 
         gu32[8] = this.#maxSubMeshes;
-        gu32[9] = this.#maxTotalInstances * 8;
+        gu32[9] = this.#instanceCapacity * 8;
         gu32[10] = activeCascadeCount;
         gu32[11] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
         gf32[12] = viewportHeight > 0 ? viewportHeight : 1080.0;
@@ -641,8 +694,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
             gpuDevice.queue.writeBuffer(
                 this.#typeParamsGPUBuffer,
                 0,
-                this.#cpuTypeParamsData.buffer,
-                this.#cpuTypeParamsData.byteOffset,
+                this.#cpuTypeParamsBuffer.buffer,
+                this.#cpuTypeParamsBuffer.byteOffset,
                 this.#allocatedTypes.length * typeParamFloats * 4
             );
         }
@@ -661,7 +714,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
         this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
         const baseOffset = typeId * this.#typeParamFloats;
-        const f32 = this.#cpuTypeParamsData;
+        const f32 = this.#cpuTypeParamsBuffer;
         const u32 = this.#cpuTypeParamsUint32;
 
         f32[baseOffset] = cullingDistance;
@@ -858,7 +911,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
     #initBuffers(): void {
         const gpuDevice = this.gpuDevice;
-        const rawByteSize = Math.max(this.#maxTotalInstances * this.#strideBytes, 64);
+        const rawByteSize = Math.max(this.#instanceCapacity * this.#strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
         const indirectByteSize = Math.max(this.#maxSubMeshes * 20, 64);
         const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * 4;

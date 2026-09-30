@@ -178,11 +178,27 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     /**
+     * [KO] 지원 가능한 최대 잔디 타입 개수를 반환합니다.
+     * [EN] Returns the maximum supported grass types count.
+     */
+    get maxTypes(): number {
+        return this.#maxTypes;
+    }
+
+    /**
      * [KO] 모든 잔디 인스턴스의 원본 배치 데이터(위치, 스케일, 회전 쿼터니언, 바운딩, 지면색)를 보관하는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer holding raw placement data (position, scale, rotation quaternion, bounding, ground color) for all grass instances.
      */
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
+    }
+
+    /**
+     * [KO] CPU 스테이징 원시 인스턴스 데이터 버퍼를 반환합니다.
+     * [EN] Returns the CPU staging raw instance data buffer.
+     */
+    get cpuRawDataBuffer(): Float32Array {
+        return this.#cpuRawDataBuffer;
     }
 
     /**
@@ -231,6 +247,14 @@ export class GrassMegaBuffer extends RedGPUObject {
      */
     get totalIndirectDrawCalls(): number {
         return this.#totalIndirectDrawCalls;
+    }
+
+    /**
+     * [KO] 잔디 인스턴스 수 증가로 인해 메가버퍼가 확장·재생성되었을 때 호출될 콜백 함수를 반환합니다.
+     * [EN] Returns the callback function to be invoked when the mega-buffer is resized and recreated due to instance count growth.
+     */
+    get onRecreated(): (() => void) | null {
+        return this.#onRecreated;
     }
 
     /**
