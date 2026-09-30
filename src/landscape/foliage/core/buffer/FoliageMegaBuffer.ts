@@ -89,6 +89,18 @@ export interface CascadeCullingParam {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
+/**
+ * [KO] WebGPU DrawIndexedIndirect 호출 1건당 인자 개수 (indexCount, instanceCount, firstIndex, baseVertex, firstInstance)
+ * [EN] Number of arguments per WebGPU DrawIndexedIndirect call (indexCount, instanceCount, firstIndex, baseVertex, firstInstance)
+ */
+const DRAW_INDEXED_INDIRECT_ARGS_COUNT = 5;
+
+/**
+ * [KO] Cascaded Shadow Maps (CSM) 그림자 캐스케이드 분할 단계 수
+ * [EN] Number of Cascaded Shadow Maps (CSM) shadow cascade split levels
+ */
+const SHADOW_CASCADE_COUNT = 4;
+
 export class FoliageMegaBuffer extends RedGPUObject {
     #strideFloats: number;
     #strideBytes: number;
@@ -142,9 +154,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
      * @param initialCapacity -
      * [KO] 초기 인스턴스 수용 용량 (기본값: 65536)
      * [EN] Initial instance capacity (default: 65536)
-     * @param maxSubMeshes -
-     * [KO] 최대 지원 서브메시 개수 (기본값: 256)
-     * [EN] Maximum supported sub-meshes count (default: 256)
      * @param maxTypes -
      * [KO] 최대 지원 식생 타입 개수 (기본값: 64)
      * [EN] Maximum supported foliage types count (default: 64)
@@ -152,7 +161,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
     constructor(
         redGPUContext: RedGPUContext,
         initialCapacity: number = 65536,
-        maxSubMeshes: number = 256,
         maxTypes: number = 64
     ) {
         super(redGPUContext);
@@ -163,21 +171,30 @@ export class FoliageMegaBuffer extends RedGPUObject {
         );
         const strideBytes =
             shaderInfo.storage?.['rawInstanceBuffer']?.stride ||
-            shaderInfo.structs?.['FoliageInstanceData']?.arrayBufferByteLength ||
-            32;
+            shaderInfo.structs?.['FoliageInstanceData']?.arrayBufferByteLength;
+
+        if (!strideBytes) {
+            throw new Error('[FoliageMegaBuffer] Failed to reflect instance stride from foliageCullingComputeWGSL.');
+        }
+
+        const typeParamBytes = shaderInfo.structs?.['FoliageTypeParam']?.arrayBufferByteLength;
+        if (!typeParamBytes) {
+            throw new Error('[FoliageMegaBuffer] Failed to reflect "FoliageTypeParam" struct size from foliageCullingComputeWGSL.');
+        }
 
         this.#strideBytes = strideBytes;
-        this.#strideFloats = strideBytes / 4;
-        this.#typeParamFloats =
-            (shaderInfo.structs?.['FoliageTypeParam']?.arrayBufferByteLength || 320) / 4;
+        this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
+        this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#maxTypes = maxTypes;
         this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
-        this.#maxSubMeshes = maxSubMeshes;
+        this.#maxSubMeshes = maxTypes * 8;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
-        this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
-        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 4);
+        this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT);
+        this.#shadowIndirectResetTemplate = new Uint32Array(
+            this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * SHADOW_CASCADE_COUNT
+        );
 
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
@@ -357,7 +374,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
             this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
                 label: 'Foliage_MegaBuffer_Culled_ShadowMega',
-                size: culledByteSize * 4,
+                size: culledByteSize * SHADOW_CASCADE_COUNT,
                 usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
             });
 
@@ -883,8 +900,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
                 if (!lodInfo) continue;
                 const slotIndex = indirectBaseOffset + lodInfo.subMeshOffset;
                 const count = shadowSub.isIndexed ? shadowSub.indexCount : shadowSub.vertexCount;
-                for (let c = 0; c < 4; c++) {
-                    const shadowSlot = (c * this.#maxSubMeshes + slotIndex) * 5;
+                for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
+                    const shadowSlot = (c * this.#maxSubMeshes + slotIndex) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                     this.#shadowIndirectResetTemplate[shadowSlot] = count;
                 }
             }
@@ -913,8 +930,11 @@ export class FoliageMegaBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         const rawByteSize = Math.max(this.#instanceCapacity * this.#strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
-        const indirectByteSize = Math.max(this.#maxSubMeshes * 20, 64);
-        const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * 4;
+        const indirectByteSize = Math.max(
+            this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
+            64
+        );
+        const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
 
         this.#rawGPUBuffer = gpuDevice.createBuffer({
             label: 'Foliage_MegaBuffer_Raw',
@@ -942,19 +962,19 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'Foliage_MegaBuffer_Culled_ShadowMega',
-            size: culledByteSize * 4,
+            size: culledByteSize * SHADOW_CASCADE_COUNT,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
         this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
             label: 'Foliage_MegaBuffer_Indirect_ShadowMega',
-            size: indirectByteSize * 4,
+            size: indirectByteSize * SHADOW_CASCADE_COUNT,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         this.#shadowIndirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
             label: 'Foliage_MegaBuffer_Indirect_ShadowTemplate',
-            size: indirectByteSize * 4,
+            size: indirectByteSize * SHADOW_CASCADE_COUNT,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
         });
 

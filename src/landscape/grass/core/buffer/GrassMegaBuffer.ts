@@ -80,6 +80,12 @@ export interface GrassTypeAllocation {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
+/**
+ * [KO] WebGPU DrawIndexedIndirect 호출 1건당 인자 개수 (indexCount, instanceCount, firstIndex, baseVertex, firstInstance)
+ * [EN] Number of arguments per WebGPU DrawIndexedIndirect call (indexCount, instanceCount, firstIndex, baseVertex, firstInstance)
+ */
+const DRAW_INDEXED_INDIRECT_ARGS_COUNT = 5;
+
 export class GrassMegaBuffer extends RedGPUObject {
     #strideFloats: number;
     #strideBytes: number;
@@ -133,13 +139,20 @@ export class GrassMegaBuffer extends RedGPUObject {
         );
         const strideBytes =
             shaderInfo.storage?.['rawInstances']?.stride ||
-            shaderInfo.structs?.['GrassInstance']?.arrayBufferByteLength ||
-            32;
+            shaderInfo.structs?.['GrassInstance']?.arrayBufferByteLength;
+
+        if (!strideBytes) {
+            throw new Error('[GrassMegaBuffer] Failed to reflect instance stride from grassCullComputeWGSL.');
+        }
+
+        const typeParamBytes = shaderInfo.structs?.['GrassTypeParam']?.arrayBufferByteLength;
+        if (!typeParamBytes) {
+            throw new Error('[GrassMegaBuffer] Failed to reflect "GrassTypeParam" struct size from grassCullComputeWGSL.');
+        }
 
         this.#strideBytes = strideBytes;
-        this.#strideFloats = strideBytes / 4;
-        this.#typeParamFloats =
-            (shaderInfo.structs?.['GrassTypeParam']?.arrayBufferByteLength || 64) / 4;
+        this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
+        this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#maxTypes = maxTypes;
         this.#maxIndirectCalls = maxTypes * 2;
         this.#instanceCapacity = Math.ceil(initialCapacity / 64) * 64;
@@ -148,7 +161,7 @@ export class GrassMegaBuffer extends RedGPUObject {
 
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
-        this.#indirectResetTemplate = new Uint32Array(this.#maxIndirectCalls * 5);
+        this.#indirectResetTemplate = new Uint32Array(this.#maxIndirectCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT);
 
         this.#initBuffers();
     }
@@ -569,8 +582,10 @@ export class GrassMegaBuffer extends RedGPUObject {
         const culledCapacity = Math.max(this.#instanceCapacity * 2, this.#totalAllocatedCulledInstances);
         const rawByteSize = this.#instanceCapacity * strideBytes;
         const culledByteSize = culledCapacity * strideBytes;
-        const indirectByteSize = this.#maxIndirectCalls * 5 * 4;
-        const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * 4;
+        const indirectByteSize =
+            this.#maxIndirectCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+        const typeParamsByteSize =
+            this.#maxTypes * this.#typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
 
         this.#rawGPUBuffer?.destroy();
         this.#culledGPUBuffer?.destroy();
@@ -603,7 +618,7 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     #updateIndirectTemplateForSlot(slot: GrassDrawSlot): void {
-        const offset = slot.indirectOffset * 5;
+        const offset = slot.indirectOffset * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
         this.#indirectResetTemplate[offset] = slot.indexCount;
         this.#indirectResetTemplate[offset + 1] = 0;
         this.#indirectResetTemplate[offset + 2] = 0;
@@ -612,12 +627,13 @@ export class GrassMegaBuffer extends RedGPUObject {
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#indirectGPUBuffer) {
+            const byteOffset = offset * Uint32Array.BYTES_PER_ELEMENT;
             gpuDevice.queue.writeBuffer(
                 this.#indirectGPUBuffer,
-                offset * 4,
+                byteOffset,
                 this.#indirectResetTemplate.buffer,
-                offset * 4,
-                20
+                byteOffset,
+                DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT
             );
         }
     }
