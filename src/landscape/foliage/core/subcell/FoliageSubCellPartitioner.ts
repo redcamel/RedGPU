@@ -208,7 +208,11 @@ export default class FoliageSubCellPartitioner {
                 }
             }
 
-            if (hasSlopeFilter) {
+            let normalX = 0.0;
+            let normalY = 1.0;
+            let normalZ = 0.0;
+
+            if (hasSlopeFilter || needNormalAlign) {
                 const step = 1.0;
                 const hL = landscape.getHeightAt(posX - step, posZ);
                 const hR = landscape.getHeightAt(posX + step, posZ);
@@ -217,9 +221,18 @@ export default class FoliageSubCellPartitioner {
                 const nx = (hL - hR) / (2 * step);
                 const nz = (hD - hU) / (2 * step);
                 const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
-                const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
-                if (slopeDeg < minSlope || slopeDeg > maxSlope) {
-                    continue;
+
+                if (hasSlopeFilter) {
+                    const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                    if (slopeDeg < minSlope || slopeDeg > maxSlope) {
+                        continue;
+                    }
+                }
+
+                if (needNormalAlign) {
+                    normalX = nx * invLen;
+                    normalY = invLen;
+                    normalZ = nz * invLen;
                 }
             }
 
@@ -269,18 +282,6 @@ export default class FoliageSubCellPartitioner {
             }
 
             if (needNormalAlign) {
-                const step = 1.0;
-                const hL = landscape.getHeightAt(posX - step, posZ);
-                const hR = landscape.getHeightAt(posX + step, posZ);
-                const hD = landscape.getHeightAt(posX, posZ - step);
-                const hU = landscape.getHeightAt(posX, posZ + step);
-                const nx = (hL - hR) / (2 * step);
-                const nz = (hD - hU) / (2 * step);
-                const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
-                const normalX = nx * invLen;
-                const normalY = invLen;
-                const normalZ = nz * invLen;
-
                 const vx = normalZ;
                 const vz = -normalX;
                 const vw = 1.0 + normalY;
