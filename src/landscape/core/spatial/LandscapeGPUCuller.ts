@@ -7,7 +7,6 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [KO] 프러스텀 및 HZB 기반의 GPU 컴퓨트 컬링 및 LOD 선정을 수행하고 간접 드로우 인스턴스 버퍼를 갱신하는 디스패처 클래스입니다.
  * [EN] GPU compute culling dispatcher performing frustum and HZB occlusion culling, selecting tile LODs, and updating indirect draw arguments.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **GPU 주도형(GPU-driven) 지형 컬링**: 카메라 뷰 프러스텀 6개 평면과의 AABB 교차 검사 및 HZB(Hierarchical Z-Buffer) 깊이 피라미드 오클루전 테스트를 WebGPU 컴퓨트 셰이더(`landscapeCullCompute.wgsl`)에서 100% 병렬 처리합니다.
  * - **동적 LOD 레벨 산정**: 카메라와의 유클리드 거리 또는 화면 점유율(Screen Size Metric)을 기반으로 각 타일의 최적 LOD 단계를 GPU 내에서 실시간 결정합니다.

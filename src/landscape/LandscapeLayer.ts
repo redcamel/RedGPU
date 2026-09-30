@@ -3,9 +3,9 @@
  * [EN] Terrain splat texture layer definition and parameter management module.
  * @packageDocumentation
  */
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import type RedGPUContext from "../../../context/RedGPUContext";
-import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
+import BitmapTexture from "../resources/texture/BitmapTexture";
+import type RedGPUContext from "../context/RedGPUContext";
+import LandscapeWeightMapCache from "./core/cache/LandscapeWeightMapCache";
 
 /**
  * [KO] 스플랫 가중치 텍스처에서 샘플링할 채널 식별자 ('R' | 'G' | 'B' | 'A' 또는 0 | 1 | 2 | 3)
@@ -96,7 +96,6 @@ export interface LandscapeLayerOptions {
  * [KO] 지형 표면의 개별 스플랫 텍스처 레이어(베이스컬러, 노멀, ORM, 가중치 맵)를 정의하고 관리하는 클래스입니다.
  * [EN] Class that defines and manages an individual splat texture layer (base color, normal, ORM, weight map) on the terrain surface.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **지형 레이어 속성 캡슐화**: 풀(Grass), 흙(Dirt), 암석(Rock), 눈(Snow) 등 지형 표면을 구성하는 단일 재질의 Albedo, Normal, ORM(Occlusion, Roughness, Metallic) 텍스처 및 UV 타일링 파라미터를 캡슐화합니다.
  * - **스플랫 가중치 맵 바인딩**: `weightTexture`와 특정 채널(`weightChannel`: R, G, B, A)을 지정하여 지형 전체에서 해당 레이어가 차지하는 블렌딩 비율을 제어합니다.
@@ -106,6 +105,11 @@ export interface LandscapeLayerOptions {
  * - **Terrain Layer Property Encapsulation**: Encapsulates Albedo, Normal, ORM (Occlusion, Roughness, Metallic) textures and UV tiling parameters for individual surface materials like grass, dirt, rock, and snow.
  * - **Splat Weight Map Binding**: Governs the blending distribution across the terrain by associating a `weightTexture` with a dedicated channel (`weightChannel`: R, G, B, A).
  * - **Reactive Rebake Notifications (`onLayerDirty`)**: Emits dirty events upon modifications to textures, UV scaling, or roughness values to trigger automatic rebaking of the VBT (Virtual Base Texture) atlas.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(`landscape.addLayer(options)`)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (`landscape.addLayer(options)`).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class LandscapeLayer {
     #name: string;
@@ -138,10 +142,8 @@ export class LandscapeLayer {
     onChange?: () => void;
 
     /**
-     * [KO] 지형 텍스처 레이어 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `Landscape.addLayer(options)` 팩토리 메서드를 사용하십시오.
-     * [EN] Creates a terrain texture layer instance.
-     * @remarks Do not instantiate directly; use the `Landscape.addLayer(options)` factory method instead.
+     * [KO] 지형 텍스처 레이어 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `Landscape.addLayer(options)` 팩토리 메서드를 사용하십시오.)
+     * [EN] Creates a terrain texture layer instance. (Do not instantiate directly; use the `Landscape.addLayer(options)` factory method instead.)
      */
     constructor(redGPUContextOrOptions: RedGPUContext | LandscapeLayerOptions, options?: LandscapeLayerOptions) {
         let actualOptions: LandscapeLayerOptions;

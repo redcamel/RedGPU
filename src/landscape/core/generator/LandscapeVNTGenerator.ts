@@ -13,7 +13,6 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [KO] VHT 높이맵 아틀라스를 중앙 차분(Sobel/Central Difference) 방식으로 분석하여 VNT 노멀 아틀라스를 베이킹하는 제너레이터 클래스입니다.
  * [EN] Generator class that analyzes VHT height map atlases via central difference to bake VNT normal atlases.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **해석적 법선 벡터(Normal) 도출**: 사전에 노멀맵 텍스처를 저장해둘 필요 없이, 이미 베이킹된 VHT 높이맵 픽셀들의 경사도(Gradient)를 Sobel/중앙 차분 필터로 실시간 계산하여 정확한 노멀 벡터를 도출합니다.
  * - **물리적 스케일 동기화**: 지형의 월드 크기(`worldSizeX`), 타일 개수(`componentCountX`), 그리고 실제 높이 배율(`heightScale`)을 반영하여 경사도의 탄젠트 공간 및 월드 공간 법선을 완벽하게 일치시킵니다.

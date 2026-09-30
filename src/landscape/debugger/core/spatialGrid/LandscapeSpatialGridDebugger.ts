@@ -7,6 +7,11 @@ const UNLOADED_COLOR = 'rgba(255, 255, 255, 0.08)';
 /**
  * [KO] 공간 그리드의 각 타일 로딩 여부 및 거리별 LOD 레벨 색상을 2D 캔버스에 실시간으로 시각화하는 디버거 클래스입니다.
  * [EN] Real-time debugger visualizing tile load states and distance-based LOD colors across the spatial grid on a 2D canvas.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(DebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #ctx: CanvasRenderingContext2D | null;

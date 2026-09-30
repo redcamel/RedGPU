@@ -2,7 +2,6 @@
  * [KO] Landscape를 구성하는 개별 타일(청크) 컴포넌트의 공간 위치 및 인덱스 메타데이터를 저장하는 불변 값 객체입니다.
  * [EN] Immutable value object storing the spatial world coordinates and grid component indices of an individual terrain tile (chunk).
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **공간 분할의 최소 단위**: 전체 거대 지형을 바둑판 형태로 나눈 N x M 그리드 상에서 단일 타일 청크를 표현합니다.
  * - **불변 값 객체 (Immutable Value Object)**: 생성 시점에 월드 좌표(`worldX`, `worldZ`), 그리드 좌표(`componentX`, `componentZ`), 고유 키(`key`)가 결정되며 변경되지 않으므로, 비동기 스트리밍 및 공간 쿼리 시 완벽한 스레드 안전성과 참조 무결성을 보장합니다.

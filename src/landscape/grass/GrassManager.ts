@@ -20,7 +20,7 @@ import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import LandscapeWeightMapCache from "../core/material/LandscapeWeightMapCache";
+import LandscapeWeightMapCache from "../core/cache/LandscapeWeightMapCache";
 
 const DEG2RAD: number = 0.017453292519943295;
 
@@ -76,7 +76,6 @@ interface CellSlotRange {
  * [KO] 스트리밍 후보 셀들의 인덱스를 카메라와의 거리 제곱값 오름차순으로 정렬하는 퀵 정렬(Quick Sort) 함수입니다.
  * [EN] Quick-sort function that sorts streaming candidate cell indices in ascending order of squared distance to the camera.
  *
- * @remarks
  * [KO] 매 프레임 고빈도 호출 구간에서 가비지 컬렉션(GC) 부하를 방지하기 위해 추가 힙 메모리 할당 없이 사전 할당된 `Int32Array` 배열 내에서 제자리 스왑(in-place swap)으로 정렬합니다.
  * [EN] Operates in-place on pre-allocated `Int32Array` index arrays without additional heap allocations to eliminate Garbage Collection (GC) overhead during high-frequency per-frame execution.
  *
@@ -211,10 +210,8 @@ export class GrassManager extends RedGPUObject {
     #prngState: number = 12345;
 
     /**
-     * [KO] GrassManager의 새 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a new instance of GrassManager.
-     * @remarks Do not instantiate directly; access via the `landscape.grassManager` property.
+     * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a new instance of GrassManager. (Do not instantiate directly; access via the `landscape.grassManager` property.)
      *
      * @param landscape -
      * [KO] 잔디 생태계가 바인딩될 부모 Landscape 인스턴스
@@ -315,7 +312,6 @@ export class GrassManager extends RedGPUObject {
      * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
      * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
      *
-     * @remarks
      * [KO] 등록된 잔디는 카메라 스트리밍 반경 및 지형 가중치 맵(WeightMap)에 따라 자동으로 셀 단위 배치 및 인스턴싱이 수행됩니다.
      * [EN] Registered grass is automatically populated and instanced per cell according to the camera streaming radius and terrain weight map.
      *

@@ -7,6 +7,11 @@ import vhtDebuggerWGSL from "./shader/vhtDebugger.wgsl";
 /**
  * [KO] 가상 하이트맵(VHT) 텍스처 아틀라스를 온스크린 캔버스에 실시간 렌더링하는 디버거 클래스입니다.
  * [EN] Real-time debugger rendering the virtual heightmap (VHT) texture atlas onto an on-screen canvas.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(DebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class LandscapeVHTDebugger extends ALandscapeTextureDebugger {
     /**

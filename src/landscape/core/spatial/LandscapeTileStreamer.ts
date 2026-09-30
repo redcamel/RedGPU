@@ -7,7 +7,7 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
-import LandscapeMaterial from "../material/LandscapeMaterial";
+import LandscapeMaterial from "../../LandscapeMaterial";
 
 const NEIGHBOR_OFFSETS: [number, number][] = [
     [-1, 0],
@@ -26,7 +26,6 @@ export type LandscapeTileUrlResolver = (row: number, col: number, comp?: Landsca
  * [KO] 카메라 위치 기반 비동기 지형 타일 스트리밍, 가상 텍스처 아틀라스(VHT/VNT/VBT) 베이킹 및 CPU 지형 고도 샘플링을 총괄하는 스트리머 클래스입니다.
  * [EN] Streamer orchestrating distance-based async terrain tile streaming, virtual texture atlas (VHT/VNT/VBT) baking, and CPU height sampling.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **거리 기반 비동기 스트리밍**: 카메라와의 거리를 감시하여 `tileLoadingRadius` 범위 내에 진입한 타일의 높이맵을 비동기 다운로드합니다. 프레임 드랍을 방지하기 위해 `tileMaxLoadsPerFrame`을 통해 프레임당 최대 로딩 개수를 엄격히 제어합니다.
  * - **가상 텍스처 아틀라스 파이프라인 총괄**:

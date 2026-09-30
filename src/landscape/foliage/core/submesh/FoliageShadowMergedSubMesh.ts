@@ -72,6 +72,11 @@ export interface FoliageShadowMergedSubMeshInitOptions {
 /**
  * [KO] 그림자 패스(Shadow Pass) 렌더링을 위해 단일 위치 전용(Position-only) 지오메트리로 통합된 식생 서브메쉬 클래스입니다.
  * [EN] Foliage sub-mesh class combined into unified position-only geometry for shadow pass rendering.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     #windFloatBuffer: Float32Array = new Float32Array(12);

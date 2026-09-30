@@ -46,7 +46,6 @@ export interface LandscapeLODGeometryRange {
  * [KO] 모든 LOD 레벨의 평면 그리드 및 T-Junction 크랙 방지용 스커트(Skirt) 지오메트리를 단일 버텍스/인덱스 버퍼로 통합 관리하는 공유 지오메트리 클래스입니다.
  * [EN] Shared geometry class managing single combined vertex and index buffers across all LOD levels with crack-preventing skirts.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **단일 공유 버퍼 아키텍처**: LOD 0(최고 정밀도)부터 최대 LOD 단계까지의 쿼드 평면 그리드 정점들을 하나의 거대한 Vertex Buffer와 Index Buffer로 패킹하여, 드로우콜마다 버퍼 바인딩을 교체할 필요 없이 오프셋(`LandscapeLODGeometryRange`)만으로 전환합니다.
  * - **T-Junction 크랙 방지용 스커트 (Terrain Skirt)**: LOD 단계가 서로 다른 인접 타일 경계에서 높이 차이로 인해 틈새(Crack/Seam)가 벌어지는 현상을 방지하기 위해, 타일 외곽 가장자리 정점을 아래 방향(Y 음수)으로 돌출시키는 지오메트리 스커트를 자동으로 생성합니다.

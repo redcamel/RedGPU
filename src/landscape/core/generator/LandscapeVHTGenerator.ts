@@ -15,7 +15,6 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [KO] 타일 단위 높이맵 또는 전역 지형 높이맵 텍스처를 VHT 아틀라스 텍스처로 베이킹하는 제너레이터 클래스입니다.
  * [EN] Generator class that bakes per-tile height maps or global terrain height map textures into the VHT atlas texture.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **가상 높이 텍스처(VHT) 구축**: 지형 지면의 물리적 고도 데이터를 16/32비트 고정밀 부동소수점 포맷으로 VHT 아틀라스에 굽습니다. 이 데이터는 지형 컴포넌트의 버텍스 셰이더 변위(Vertex Displacement) 및 물리 충돌 계산의 원천이 됩니다.
  * - **듀얼 베이킹 파이프라인**:

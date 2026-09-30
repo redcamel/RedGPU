@@ -8,7 +8,6 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
  * [KO] GPU 컴퓨트 컬링 및 간접 드로우(Indirect Draw)를 지원하기 위한 지형 타일 인스턴스 버퍼 및 유니폼 버퍼 관리자입니다.
  * [EN] Buffer manager handling terrain tile instance buffers, indirect draw arguments, and global landscape uniform buffers for GPU compute culling and multi-LOD indirect rendering.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **타일 인스턴스 스토리지 버퍼 (`allInputTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
  * - **가시 인덱스 스트림 버퍼 (`visibleTileIndicesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.

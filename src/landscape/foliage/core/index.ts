@@ -2,7 +2,6 @@
  * [KO] Landscape 대규모 식생(Foliage) 시스템의 핵심 렌더링 인프라 및 파이프라인 모듈입니다.
  * [EN] Core rendering infrastructure and pipeline modules for the Landscape foliage system.
  *
- * @remarks
  * **[KO]**
  * - `Foliage`: 단일 식생 타입 정의 및 타일별 인스턴스 라이프사이클 관리 엔티티
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: 식생 전용 메인 및 그림자 렌더 서브메쉬

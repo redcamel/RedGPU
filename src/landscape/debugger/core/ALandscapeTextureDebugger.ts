@@ -17,6 +17,11 @@ export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileS
 /**
  * [KO] WebGPU 풀스크린 쿼드 렌더링 파이프라인을 구축하여 지형 텍스처(VHT/VNT/VBT)를 온스크린 캔버스에 실시간 투영하는 기반 추상 텍스처 디버거 클래스입니다.
  * [EN] Base abstract texture debugger projecting terrain GPU textures (VHT/VNT/VBT) onto on-screen canvases via WebGPU fullscreen quad render pipelines.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;

@@ -36,7 +36,6 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
  * [KO] WebGPU 지오메트리 버퍼 단위(`AScatterGeometryUnit`)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 스캐터 공용 서브메쉬 기본 클래스입니다.
  * [EN] Common scatter sub-mesh base class combining a WebGPU geometry buffer unit (`AScatterGeometryUnit`) with material, texture, and original mesh metadata.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **지오메트리와 셰이딩의 융합**: 순수 GPU 버퍼(버텍스/인덱스 버퍼 및 간접 드로우 오프셋)를 관리하는 `AScatterGeometryUnit` 위에 실제 렌더링에 필요한 머티리얼, 베이스 컬러 텍스처, 원본 메쉬 참조를 바인딩합니다.
  * - **스캐터 파이프라인의 공통 단위**:
@@ -50,6 +49,11 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
  *   - **Grass**: Directly instantiated as the primary rendering unit composing single or composite grass models for Multi-Draw Indirect rendering.
  *   - **Foliage**: Inherited by `FoliageSubMesh` representing individual parts (trunks, foliage leaves) of composite 3D trees and rocks, serving as the foundation for wind simulation and ground blending uniforms.
  * - **Pivot Alignment for Terrain Snapping**: Compensates for the model's ground contact plane (minimum Y) via the `bottomOffset` property, ensuring accurate placement on the landscape surface without floating or sinking.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager 및 Grass)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager and Grass).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class ScatterSubMesh extends AScatterGeometryUnit {
     #mesh?: Mesh;

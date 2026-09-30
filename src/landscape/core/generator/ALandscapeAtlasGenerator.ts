@@ -12,7 +12,6 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [KO] 지형 GPU Compute 아틀라스 베이킹을 위한 공통 파이프라인, 유니폼 풀 및 디스패치 루프를 제공하는 추상 기본 클래스입니다.
  * [EN] Abstract base class providing common compute pipelines, uniform pools, and dispatch loops for terrain GPU compute atlas baking.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **GPU Compute 기반 실시간 베이킹**: 지형의 거대한 가상 텍스처 아틀라스(VHT 높이, VNT 노멀, VBT 베이스 재질)를 WebGPU 컴퓨트 파이프라인(`GPUComputePipeline`)을 통해 실시간 병렬 생성합니다.
  * - **제로 GC 유니폼 버퍼 풀링 (`acquireUniformBuffer`)**: 매 프레임 혹은 매 타일 디스패치 시 발생하는 힙 메모리 할당 및 가비지 컬렉션(GC) 부하를 방지하기 위해, 사전 할당된 유니폼 버퍼 풀(`GPUBuffer[]`)을 프레임 단위로 재사용합니다.

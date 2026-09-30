@@ -321,10 +321,8 @@ export class Foliage extends RedGPUObject {
     #onRepopulateRequired?: (type: Foliage) => void;
 
     /**
-     * [KO] 지형 식생/나무 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliage(options)` 팩토리 메서드를 사용하십시오.
-     * [EN] Creates a landscape foliage instance.
-     * @remarks Do not instantiate directly; use the `landscape.foliageManager.addFoliage(options)` factory method instead.
+     * [KO] 지형 식생/나무 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliage(options)` 팩토리 메서드를 사용하십시오.)
+     * [EN] Creates a landscape foliage instance. (Do not instantiate directly; use the `landscape.foliageManager.addFoliage(options)` factory method instead.)
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance

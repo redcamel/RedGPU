@@ -37,10 +37,8 @@ export class GrassInstanceBaker extends RedGPUObject {
     #cachedVBTTextureView: GPUTextureView | null = null;
 
     /**
-     * [KO] GrassInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a GrassInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
-     * @remarks Do not instantiate directly; access via the `landscape.grassManager` property instead.
+     * [KO] GrassInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a GrassInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline. (Do not instantiate directly; access via the `landscape.grassManager` property instead.)
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스

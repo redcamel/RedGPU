@@ -82,10 +82,8 @@ class FoliageManager {
     #windFlutterStrength: number = 0.5;
 
     /**
-     * [KO] FoliageManager의 새 인스턴스를 생성합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a new instance of FoliageManager.
-     * @remarks Do not instantiate directly; access via the `landscape.foliageManager` property.
+     * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
      *
      * @param landscape -
      * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스

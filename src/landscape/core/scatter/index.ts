@@ -2,7 +2,6 @@
  * [KO] Landscape 스캐터(Foliage, Grass 등) 렌더링에 사용되는 지오메트리 렌더 단위, 메쉬 결합 함수 및 정점 포맷 모듈입니다.
  * [EN] Geometry render units, mesh combination functions, and vertex format modules for Landscape scatter (foliage, grass, etc.) rendering.
  *
- * @remarks
  * **[KO]**
  * - `AScatterGeometryUnit`: WebGPU 간접 드로우(Indirect Draw)를 수행하는 스캐터 공통 추상 기반 클래스
  * - `ScatterSubMesh`: 머티리얼과 텍스처 메타데이터가 결합된 스캐터 공용 서브메쉬 렌더 단위

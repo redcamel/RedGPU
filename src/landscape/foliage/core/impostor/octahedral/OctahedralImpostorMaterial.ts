@@ -41,6 +41,11 @@ interface OctahedralImpostorMaterial {
 /**
  * [KO] 옥타헤드럴 임포스터 빌보드를 위한 전용 셰이더 및 텍스처를 바인딩하는 머티리얼 클래스입니다.
  * [EN] Dedicated material class binding shaders and textures for octahedral impostor billboards.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageImpostorBaker)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageImpostorBaker).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
     /**

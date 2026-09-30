@@ -138,6 +138,11 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
 /**
  * [KO] ScatterSubMesh를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
  * [EN] Foliage sub-mesh class inheriting ScatterSubMesh to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export class FoliageSubMesh extends ScatterSubMesh {
     #singleFloatBuffer: Float32Array = new Float32Array(1);

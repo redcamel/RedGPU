@@ -4,7 +4,6 @@ import LandscapeComponent from "./LandscapeComponent";
  * [KO] 전체 지형의 2D 타일 그리드 분할, 월드-그리드 좌표 변환 및 반경 기반 타일 쿼리를 담당하는 공간 관리 클래스입니다.
  * [EN] Spatial management class responsible for 2D tile grid partitioning, world-to-grid coordinate conversion, and radius-based tile querying for the landscape.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **2D 공간 그리드 분할**: 거대한 지형 월드를 컬럼(X)과 행(Z)의 2D 타일 배열(`flatCells`)로 평탄화하여 캐싱합니다.
  * - **O(1) 월드-그리드 고속 투영**: 월드 좌표(X, Z)를 그리드 정규화 수식(`(worldX + halfWorldSizeX) / tileSizeX`)을 통해 연산 오버헤드 없이 즉시 특정 타일 컴포넌트로 변환합니다.

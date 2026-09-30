@@ -55,12 +55,9 @@ export interface AScatterGeometryUnitInitOptions {
 }
 
 /**
- * [KO] 스캐터 시스템(Foliage, FoliageShadow, Grass 등)에서 WebGPU 간접 드로우(Indirect Draw)를 수행하는 공통 지오메트리 렌더 단위 추상 기본 클래스입니다.<br/>
- * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] Common geometry rendering unit base abstract class executing WebGPU indirect draws across the scatter system (Foliage, FoliageShadow, Grass, etc.).<br/>
- * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 스캐터 시스템(Foliage, FoliageShadow, Grass 등)에서 WebGPU 간접 드로우(Indirect Draw)를 수행하는 공통 지오메트리 렌더 단위 추상 기본 클래스입니다.
+ * [EN] Common geometry rendering unit base abstract class executing WebGPU indirect draws across the scatter system (Foliage, FoliageShadow, Grass, etc.).
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **간접 드로우(Multi-Draw Indirect) 인프라**: GPU 버퍼(`GPUBuffer`) 상에 기록된 드로우 인자(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 기반으로 CPU 개입 없는 초고속 일괄 렌더링을 수행합니다.
  * - **인덱스 및 비인덱스 드로우 자동 분기**: 인덱스 버퍼의 유무와 유효성에 따라 `drawIndexedIndirect` 또는 `drawIndirect` 명령을 자동으로 분기하여 패스 엔코더에 인코딩합니다.
@@ -70,6 +67,11 @@ export interface AScatterGeometryUnitInitOptions {
  * - **Multi-Draw Indirect Infrastructure**: Executes zero-overhead batch rendering driven entirely by draw parameters stored in GPU buffers (`GPUBuffer`), eliminating CPU draw-call bottlenecks.
  * - **Automatic Indexed/Non-indexed Branching**: Intelligently routes commands to `drawIndexedIndirect` or `drawIndirect` depending on the presence and validity of GPU index buffers.
  * - **Offset Management**: Encapsulates both `indirectOffsetBytes` and `instanceBufferOffset`, enabling render dispatchers to draw exact instance ranges with a single `draw()` call.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export abstract class AScatterGeometryUnit {
     #geometry: Geometry;

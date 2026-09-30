@@ -218,7 +218,6 @@ function traverseHierarchy(
  * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 서브메쉬를 단일 버퍼로 병합한 결합 결과 객체를 반환합니다.
  * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns a combination result object with merged sub-meshes per material.
  *
- * @remarks
  * **[KO] 알고리즘 및 렌더링 최적화:**
  * - **계층 구조 평탄화 (Hierarchy Flattening)**: GLTF 노드 트리의 복잡한 부모-자식 트랜스폼(위치, 오일러 회전, 스케일)을 누적 계산하여 모든 정점과 법선, 탄젠트를 전역 모델 공간으로 사전 베이킹합니다.
  * - **재질별 드로우콜 병합 (Material Grouping)**: 동일한 텍스처와 재질 파라미터를 공유하는 여러 메쉬 노드를 단일 Vertex/Index 버퍼로 결합하여 드로우콜 횟수를 최소화합니다.

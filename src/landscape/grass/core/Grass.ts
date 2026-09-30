@@ -205,10 +205,8 @@ export class Grass extends RedGPUObject {
     #onChanged: (() => void) | null = null;
 
     /**
-     * [KO] Grass 인스턴스를 생성하고 초기 속성을 설정합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrass(options)` 메서드를 사용하십시오.
-     * [EN] Creates a Grass instance and initializes properties.
-     * @remarks Do not instantiate directly; use the `landscape.grassManager.addGrass(options)` method instead.
+     * [KO] Grass 인스턴스를 생성하고 초기 속성을 설정합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrass(options)` 메서드를 사용하십시오.)
+     * [EN] Creates a Grass instance and initializes properties. (Do not instantiate directly; use the `landscape.grassManager.addGrass(options)` method instead.)
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스

@@ -2,7 +2,6 @@
  * [KO] Landscape 절차적 잔디(Grass) 렌더링 파이프라인의 핵심 인프라 모듈을 제공합니다.
  * [EN] Provides core infrastructure modules for the Landscape procedural grass rendering pipeline.
  *
- * @remarks
  * **[KO]**
  * - `Grass`: 개별 잔디 타입 정의 및 지형 타일별 인스턴스 배치 객체입니다.
  * - `GrassInstanceBaker`: GPU 컴퓨트 기반 잔디 블레이드 밀도 및 배치 베이킹 엔진입니다.

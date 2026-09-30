@@ -203,6 +203,11 @@ function ensureDebuggerStyles(): void {
 /**
  * [KO] 온스크린 2D 디버거 UI 컨테이너(DOM 및 캔버스)와 카메라 시야각/스트리밍 반경 오버레이 렌더링을 제공하는 기반 추상 디버거 클래스입니다.
  * [EN] Base abstract debugger providing on-screen 2D UI container (DOM & canvas) and camera frustum/streaming radius overlay rendering.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;

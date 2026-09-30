@@ -3,21 +3,21 @@
  * [EN] Terrain dedicated 2D texture array splatting PBR material module.
  * @packageDocumentation
  */
-import ColorRGBA from "../../../color/ColorRGBA";
-import RedGPUContext from "../../../context/RedGPUContext";
-import AUVTransformBaseMaterial from "../../../material/core/AUVTransformBaseMaterial";
-import Sampler from "../../../resources/sampler/Sampler";
-import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
-import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
-import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
+import ColorRGBA from "../color/ColorRGBA";
+import RedGPUContext from "../context/RedGPUContext";
+import AUVTransformBaseMaterial from "../material/core/AUVTransformBaseMaterial";
+import Sampler from "../resources/sampler/Sampler";
+import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
+import GPU_FILTER_MODE from "../gpuConst/GPU_FILTER_MODE";
+import GPU_ADDRESS_MODE from "../gpuConst/GPU_ADDRESS_MODE";
+import GPU_MIPMAP_FILTER_MODE from "../gpuConst/GPU_MIPMAP_FILTER_MODE";
+import landscapeFragmentSource from "./core/shader/landscapeFragment.wgsl";
 import LandscapeLayer from "./LandscapeLayer";
-import LandscapeWeightMapCache from "./LandscapeWeightMapCache";
-import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
-import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
-import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
+import LandscapeWeightMapCache from "./core/cache/LandscapeWeightMapCache";
+import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import defineColorRGBA from "../defineProperty/funcs/color/defineColorRGBA";
+import defineSampler from "../defineProperty/funcs/texture/defineSampler";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../material/core";
 
 const MAX_LANDSCAPE_LAYERS = 8;
 
@@ -32,7 +32,6 @@ const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
  * [KO] 최대 8개의 스플랫 텍스처 레이어를 Texture2DArray로 패킹하여 고속 블렌딩 셰이딩을 수행하는 지형 머티리얼 클래스입니다.
  * [EN] Terrain material class that packs up to 8 splat texture layers into Texture2DArray for high-speed blending shading.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **Texture2DArray 기반 텍스처 패킹**: 최대 8개의 레이어(`MAX_LANDSCAPE_LAYERS = 8`)를 지원하며, 각 레이어의 BaseColor, Normal, ORM, WeightMap을 개별 2D 텍스처 배열(`GPUTexture` with `texture_2d_array`)로 바인딩하여 셰이더 샘플러 슬롯 낭비 없이 고속 샘플링을 수행합니다.
  * - **가상 베이스 텍스처(VBT) 리베이킹 조정자**: 레이어 목록 변경, 파라미터 수정, 텍스처 로드 완료 등을 감지하여 지형 전체의 텍스처 배열을 재구성하고, 등록된 콜백(`onRebakeVBTRequested`)을 통해 비동기 VBT 베이킹을 조율합니다.

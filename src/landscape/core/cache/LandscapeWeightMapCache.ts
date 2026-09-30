@@ -13,7 +13,6 @@ interface WeightMapPixelData {
  * [KO] 스플랫 가중치 텍스처를 CPU 메모리에 디코딩/캐싱하고 임의 UV 좌표에서의 가중치 값을 이중선형 보간으로 샘플링하는 정적 유틸리티 클래스입니다.
  * [EN] Static utility class that decodes/caches splat weight textures in CPU memory and samples weight values at arbitrary UV coordinates using bilinear interpolation.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **CPU 측 픽셀 디코딩 및 캐싱**: 오프스크린 캔버스(`HTMLCanvasElement`)를 이용해 가중치 텍스처를 비동기 디코딩하고 `Uint8ClampedArray` 버퍼로 캐싱합니다. 중복 네트워크 요청은 `Promise` 맵으로 방지합니다.
  * - **이중 선형 보간 (Bilinear Interpolation)**: 연속적인 UV 좌표에 대해 인접한 4개의 픽셀 값을 보간 계산(`sampleBilinear`)함으로써 서브픽셀 단위의 부드럽고 왜곡 없는 가중치를 도출합니다.

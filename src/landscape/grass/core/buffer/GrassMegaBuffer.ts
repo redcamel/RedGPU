@@ -107,10 +107,8 @@ export class GrassMegaBuffer extends RedGPUObject {
     #onRecreated: (() => void) | null = null;
 
     /**
-     * [KO] GrassMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다.
-     * @remarks 사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.
-     * [EN] Creates a GrassMegaBuffer instance and initializes initial VRAM buffers and template memory.
-     * @remarks Do not instantiate directly; access via the `landscape.grassManager` property instead.
+     * [KO] GrassMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a GrassMegaBuffer instance and initializes initial VRAM buffers and template memory. (Do not instantiate directly; access via the `landscape.grassManager` property instead.)
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스

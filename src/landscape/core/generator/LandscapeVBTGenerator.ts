@@ -8,7 +8,7 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 import vbtBakeShaderCode from "../shader/landscapeVBTBake.wgsl";
 import tileMipShaderCode from "../shader/landscapeTileMipmap.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
-import LandscapeMaterial from "../material/LandscapeMaterial";
+import LandscapeMaterial from "../../LandscapeMaterial";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
@@ -16,7 +16,6 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [KO] 스플랫 레이어 머티리얼과 VNT 아틀라스를 합성하여 지형 타일별 베이스컬러/노멀/ORM 아틀라스를 베이킹하는 제너레이터 클래스입니다.
  * [EN] Generator class that combines splat layer materials and VNT atlases to bake per-tile base color, normal, and ORM atlases.
  *
- * @remarks
  * **[KO] 아키텍처 및 역할:**
  * - **다중 레이어 스플래팅 융합 (VBT Bake)**: 가중치 맵(Weight Map)과 최대 다수의 지형 텍스처 레이어(Diffuse, Normal, ORM)를 VNT 지형 노멀과 조합하여 고해상도 단일 가상 베이스 텍스처(VBT) 아틀라스로 합성합니다.
  * - **타일 단위 GPU 밉맵 생성 (`Tile Mipmap`)**: 가상 텍스처에서 이웃 타일 간의 샘플링 번짐(Bleeding) 아티팩트를 방지하기 위해, 각 타일의 경계 내에서 독립적인 다운샘플링 밉체인을 GPU Compute 셰이더(`landscapeTileMipmap.wgsl`)로 고속 빌드합니다.
