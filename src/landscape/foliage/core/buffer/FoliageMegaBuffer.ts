@@ -52,10 +52,10 @@ export interface FoliageTypeAllocation {
      */
     subMeshCount: number;
     /**
-     * [KO] 현재 활성화(마운트)된 인스턴스 수
-     * [EN] Currently active (mounted) instance count
+     * [KO] 현재 활성화된 인스턴스 수
+     * [EN] Current active instance count
      */
-    activeCount: number;
+    instanceCount: number;
 }
 
 /**
@@ -310,13 +310,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#instanceCapacity;
     }
 
-    /**
-     * [KO] 현재 할당된 메가버퍼의 최대 수용 인스턴스 용량을 반환합니다. (호환용)
-     * [EN] Returns the maximum instance capacity of the currently allocated mega-buffer. (Compatibility)
-     */
-    get maxTotalInstances(): number {
-        return this.#instanceCapacity;
-    }
 
     /**
      * [KO] 특정 식생 타입 이름에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
@@ -330,6 +323,22 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#maxSubMeshes;
     }
 
+    /**
+     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수 (maxSubMeshes의 별칭)
+     * [EN] Maximum indirect draw (sub-mesh) slots supported (alias for maxSubMeshes)
+     */
+    get maxIndirectCalls(): number {
+        return this.#maxSubMeshes;
+    }
+
+    /**
+     * [KO] 등록된 총 간접 드로우 슬롯 수를 반환합니다.
+     * [EN] Returns the total number of registered indirect draw slots.
+     */
+    get totalIndirectDrawCalls(): number {
+        return this.#nextIndirectOffset;
+    }
+
     get onRecreated(): (() => void) | null {
         return this.#onRecreated;
     }
@@ -339,10 +348,10 @@ export class FoliageMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재까지 할당된 총 인스턴스 범위
-     * [EN] Total allocated instance range so far
+     * [KO] 현재까지 등록된 모든 식생 타입들의 총 할당 인스턴스 수를 반환합니다.
+     * [EN] Returns the total allocated instance count across all registered foliage types to date.
      */
-    get totalAllocatedRange(): number {
+    get totalAllocatedInstances(): number {
         return this.#nextRawOffset;
     }
 
@@ -354,7 +363,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
         let total = 0;
         const count = this.#allocatedTypes.length;
         for (let i = 0; i < count; i++) {
-            total += this.#allocatedTypes[i].activeCount;
+            total += this.#allocatedTypes[i].instanceCount;
         }
         return total;
     }
@@ -486,7 +495,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
             culledBaseOffset,
             indirectBaseOffset,
             subMeshCount,
-            activeCount: 0
+            instanceCount: 0
         };
 
         this.#allocations.set(name, allocation);
@@ -533,19 +542,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return allocation;
     }
 
-    /**
-     * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다. (하위 호환 래퍼)
-     * [EN] Allocates a buffer segment and registers offsets for a new foliage type. (Compatibility wrapper)
-     */
-    allocateTypeSegment(
-        name: string,
-        maxInstances: number,
-        subMeshes: FoliageSubMesh[],
-        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
-        lodInfoList?: FoliageLODInfo[]
-    ): FoliageTypeAllocation {
-        return this.allocateType(name, maxInstances, subMeshes, shadowMergedSubMeshes, lodInfoList);
-    }
 
     /**
      * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
@@ -580,7 +576,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
      */
     uploadAllocationRangeToGPU(allocation: FoliageTypeAllocation, startIndex: number, count: number): void {
         if (count <= 0) return;
-        allocation.activeCount = Math.max(allocation.activeCount, startIndex + count);
+        allocation.instanceCount = Math.max(allocation.instanceCount, startIndex + count);
         this.uploadInstances(allocation.rawBaseOffset + startIndex, count);
     }
 
@@ -631,6 +627,14 @@ export class FoliageMegaBuffer extends RedGPUObject {
                 shadowResetBytes
             );
         }
+    }
+
+    /**
+     * [KO] CPU 템플릿을 사용하여 간접 드로우 인스턴스 카운트를 0으로 초기화합니다. (GrassMegaBuffer와의 인터페이스 통일 래퍼)
+     * [EN] Resets indirect draw instance counts to zero using the CPU template. (Interface unification wrapper with GrassMegaBuffer)
+     */
+    resetIndirectDrawCountsCPU(): void {
+        this.resetMultiIndirectCommands();
     }
 
     updateUnifiedGlobalUniforms(
@@ -693,7 +697,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
             }
         }
 
-        for (let c = 0; c < 4; c++) {
+        for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
             const cascade = cascades[c];
             const cascadeBase = 60 + c * 28;
             if (cascade && cascade.hasShadow) {
@@ -727,8 +731,8 @@ export class FoliageMegaBuffer extends RedGPUObject {
             const alloc = this.#allocatedTypes[i];
             const baseOffset = alloc.typeId * typeParamFloats;
             const prevCount = this.#cpuTypeParamsUint32[baseOffset + 9];
-            if (prevCount !== alloc.activeCount) {
-                this.#cpuTypeParamsUint32[baseOffset + 9] = alloc.activeCount;
+            if (prevCount !== alloc.instanceCount) {
+                this.#cpuTypeParamsUint32[baseOffset + 9] = alloc.instanceCount;
                 this.#dirtyTypeParams = true;
             }
         }
@@ -784,7 +788,7 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
         const fadeRange = Math.max(cullingDistance - fadeStartDistance, 1.0);
         u32[baseOffset + 8] = allocation.rawBaseOffset;
-        u32[baseOffset + 9] = allocation.activeCount;
+        u32[baseOffset + 9] = allocation.instanceCount;
         f32[baseOffset + 10] = maxShadowDistance;
 
         f32[baseOffset + 11] = 1.0 / fadeRange;
@@ -912,10 +916,10 @@ export class FoliageMegaBuffer extends RedGPUObject {
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
-            this.#indirectResetTemplate[(indirectBaseOffset + s) * 5] = count;
+            this.#indirectResetTemplate[(indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT] = count;
 
-            for (let c = 0; c < 4; c++) {
-                const shadowSlot = (c * this.#maxSubMeshes + indirectBaseOffset + s) * 5;
+            for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
+                const shadowSlot = (c * this.#maxSubMeshes + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
             }
         }

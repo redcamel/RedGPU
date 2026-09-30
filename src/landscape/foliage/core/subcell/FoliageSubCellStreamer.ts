@@ -202,7 +202,7 @@ export default class FoliageSubCellStreamer {
         this.#chunks.clear();
         this.#totalInstanceCount = 0;
         if (this.#foliageType.allocation) {
-            this.#foliageType.allocation.activeCount = 0;
+            this.#foliageType.allocation.instanceCount = 0;
         }
     }
 
@@ -216,7 +216,7 @@ export default class FoliageSubCellStreamer {
 
     #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageMegaBuffer, allocation: any): void {
         if (chunk.isMounted) return;
-        const currentActive = allocation.activeCount;
+        const currentActive = allocation.instanceCount;
         const count = chunk.instanceCount;
         if (currentActive + count > allocation.maxInstances) return;
 
@@ -230,7 +230,7 @@ export default class FoliageSubCellStreamer {
         chunk.mountedSlotIndex = currentActive;
         this.#mountedChunks.push(chunk);
 
-        allocation.activeCount = currentActive + count;
+        allocation.instanceCount = currentActive + count;
         this.#foliageType.uploadRangeToGPU(currentActive, count);
     }
 
@@ -239,7 +239,7 @@ export default class FoliageSubCellStreamer {
         const targetChunk = mounted[mountedIndex];
         const targetSlot = targetChunk.mountedSlotIndex;
         const targetCount = targetChunk.instanceCount;
-        const currentActive = allocation.activeCount;
+        const currentActive = allocation.instanceCount;
 
         const isLastChunk = (mountedIndex === mounted.length - 1);
 
@@ -247,7 +247,7 @@ export default class FoliageSubCellStreamer {
             mounted.pop();
             targetChunk.isMounted = false;
             targetChunk.mountedSlotIndex = -1;
-            allocation.activeCount = Math.max(0, currentActive - targetCount);
+            allocation.instanceCount = Math.max(0, currentActive - targetCount);
         } else {
             const f32 = megaBuffer.cpuRawDataBuffer;
             const strideFloats = megaBuffer.strideFloats;
@@ -271,7 +271,7 @@ export default class FoliageSubCellStreamer {
             targetChunk.mountedSlotIndex = -1;
 
             const newActive = Math.max(0, currentActive - targetCount);
-            allocation.activeCount = newActive;
+            allocation.instanceCount = newActive;
 
             const uploadCount = newActive - targetSlot;
             if (uploadCount > 0) {

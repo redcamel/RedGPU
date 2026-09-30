@@ -240,7 +240,7 @@ RedGPU.init(
                         return foliageManager.megaBuffer?.totalActiveInstances ?? 0;
                     },
                     get maxCapacity() {
-                        return foliageManager.megaBuffer?.maxTotalInstances ?? 0;
+                        return foliageManager.megaBuffer?.instanceCapacity ?? 0;
                     }
                 };
 

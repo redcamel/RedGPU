@@ -101,6 +101,7 @@ export class GrassMegaBuffer extends RedGPUObject {
     #maxTypes: number;
 
     #cpuRawDataBuffer: Float32Array;
+    #cpuRawDataUint32: Uint32Array;
 
     #cpuTypeParamsBuffer: Float32Array;
     #cpuTypeParamsUint32: Uint32Array;
@@ -164,6 +165,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
 
         this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
@@ -221,6 +223,14 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     /**
+     * [KO] CPU 스테이징 원시 인스턴스 데이터의 Uint32 뷰 버퍼를 반환합니다.
+     * [EN] Returns the Uint32 view buffer of the CPU staging raw instance data.
+     */
+    get cpuRawDataUint32(): Uint32Array {
+        return this.#cpuRawDataUint32;
+    }
+
+    /**
      * [KO] GPU 거리 및 프러스텀 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer where instances passing GPU distance and frustum culling are recorded.
      */
@@ -252,12 +262,30 @@ export class GrassMegaBuffer extends RedGPUObject {
         return this.#totalAllocatedInstances;
     }
 
+
     /**
      * [KO] 현재 할당된 메가버퍼의 최대 수용 인스턴스 용량을 반환합니다.
      * [EN] Returns the maximum instance capacity of the currently allocated mega-buffer.
      */
     get instanceCapacity(): number {
         return this.#instanceCapacity;
+    }
+
+
+    /**
+     * [KO] 지원할 최대 간접 드로우 호출 슬롯 수
+     * [EN] Maximum indirect draw call slots supported
+     */
+    get maxIndirectCalls(): number {
+        return this.#maxIndirectCalls;
+    }
+
+    /**
+     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수 (maxIndirectCalls의 별칭)
+     * [EN] Maximum indirect draw (sub-mesh) slots supported (alias for maxIndirectCalls)
+     */
+    get maxSubMeshes(): number {
+        return this.#maxIndirectCalls;
     }
 
     /**
@@ -282,6 +310,28 @@ export class GrassMegaBuffer extends RedGPUObject {
      */
     set onRecreated(cb: (() => void) | null) {
         this.#onRecreated = cb;
+    }
+
+    /**
+     * [KO] 요청된 용량을 수용할 수 있도록 메가 버퍼의 크기를 검사하고 필요한 경우 확장합니다.
+     * [EN] Checks the mega buffer capacity and expands it if necessary to accommodate the requested capacity.
+     * @param requiredCapacity -
+     * [KO] 필요한 총 인스턴스 수용 용량
+     * [EN] Required total instance capacity
+     * @returns
+     * [KO] 버퍼가 재할당되어 확장되었으면 true, 아니면 false
+     * [EN] True if buffers were reallocated/expanded, false otherwise
+     */
+    ensureCapacity(requiredCapacity: number): boolean {
+        if (requiredCapacity <= this.#instanceCapacity) {
+            return false;
+        }
+        let newCapacity = this.#instanceCapacity;
+        while (newCapacity < requiredCapacity) {
+            newCapacity = Math.ceil((newCapacity * 2) / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
+        }
+        this.#resizeBuffer(newCapacity);
+        return true;
     }
 
     /**
@@ -545,6 +595,17 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
     /**
+     * [KO] 간접 드로우 인스턴스 카운트를 초기화합니다. (FoliageMegaBuffer와의 인터페이스 통일 래퍼)
+     * [EN] Resets indirect draw instance counts. (Interface unification wrapper with FoliageMegaBuffer)
+     * @param commandEncoder -
+     * [KO] 선택사항인 GPU 커맨드 인코더
+     * [EN] Optional GPU command encoder
+     */
+    resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
+        this.resetIndirectDrawCountsCPU();
+    }
+
+    /**
      * [KO] 특정 잔디 타입 ID에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
      * [EN] Retrieves the mega-buffer allocation information object for a specific grass type ID.
      *
@@ -650,6 +711,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         const newRawBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         newRawBuffer.set(this.#cpuRawDataBuffer);
         this.#cpuRawDataBuffer = newRawBuffer;
+        this.#cpuRawDataUint32 = new Uint32Array(newRawBuffer.buffer);
 
         this.#initBuffers();
 

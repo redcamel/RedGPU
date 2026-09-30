@@ -400,8 +400,8 @@ class FoliageCullingDispatcher extends RedGPUObject {
         computePass.setPipeline(pipeline);
 
         if (this.#megaBuffer) {
-            const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
-            if (totalAllocatedRange <= 0) return;
+            const totalAllocatedInstances = this.#megaBuffer.totalAllocatedInstances;
+            if (totalAllocatedInstances <= 0) return;
 
             const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
                 bindGroupLayout,
@@ -409,7 +409,7 @@ class FoliageCullingDispatcher extends RedGPUObject {
                 this.#lastHZBSampler
             );
             if (unifiedBindGroup) {
-                const workgroupCount = Math.ceil(totalAllocatedRange / 64);
+                const workgroupCount = Math.ceil(totalAllocatedInstances / 64);
                 computePass.setBindGroup(0, unifiedBindGroup);
                 computePass.dispatchWorkgroups(workgroupCount);
             }

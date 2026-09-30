@@ -541,7 +541,7 @@ export class Foliage extends RedGPUObject {
         this.#updatePassBuckets();
 
         if (this.#megaBuffer) {
-            this.#allocation = this.#megaBuffer.allocateTypeSegment(
+            this.#allocation = this.#megaBuffer.allocateType(
                 this.#options.name,
                 this.#options.maxInstances,
                 this.#subMeshes,
@@ -632,7 +632,7 @@ export class Foliage extends RedGPUObject {
     }
 
     get activeInstanceCount(): number {
-        return this.#allocation?.activeCount ?? 0;
+        return this.#allocation?.instanceCount ?? 0;
     }
 
     get totalInstanceCount(): number {
@@ -1111,10 +1111,10 @@ export class Foliage extends RedGPUObject {
     }
 
     rebake(): void {
-        if (this.#megaBuffer && this.#allocation && this.#baker && this.#allocation.activeCount > 0) {
+        if (this.#megaBuffer && this.#allocation && this.#baker && this.#allocation.instanceCount > 0) {
             this.#baker.addBakeTasks(
                 this.#allocation.rawBaseOffset,
-                this.#allocation.activeCount,
+                this.#allocation.instanceCount,
                 this.#allocation.typeId
             );
         }

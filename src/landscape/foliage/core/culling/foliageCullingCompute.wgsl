@@ -19,7 +19,7 @@ struct FoliageTypeParam {
     culledBaseOffset: u32,
     indirectBaseOffset: u32,
     rawBaseOffset: u32,
-    activeCount: u32,
+    instanceCount: u32,
     maxShadowDistance: f32,
     invFadeRange: f32,
     boundingHeight: f32,
@@ -160,12 +160,12 @@ fn main(
     }
 
     let typeInfo = typeParams[typeIdx];
-    if (typeInfo.activeCount == 0u || idx < typeInfo.rawBaseOffset) {
+    if (typeInfo.instanceCount == 0u || idx < typeInfo.rawBaseOffset) {
         return;
     }
 
     let localSlotIdx = idx - typeInfo.rawBaseOffset;
-    if (localSlotIdx >= typeInfo.activeCount) {
+    if (localSlotIdx >= typeInfo.instanceCount) {
         return;
     }
 

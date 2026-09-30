@@ -322,10 +322,10 @@ class FoliageRenderer extends RedGPUObject {
         const firstType = validCount > 0 ? this.#validTypesShadow[0].type : null;
         const megaBuffer = firstType?.megaBuffer;
         const maxSubMeshes = megaBuffer?.maxSubMeshes ?? 256;
-        const maxTotalInstances = megaBuffer?.maxTotalInstances ?? 65536;
+        const instanceCapacity = megaBuffer?.instanceCapacity ?? 65536;
 
         const cascadeIndirectOffset = currentCascade * maxSubMeshes * 20;
-        const cascadeInstanceOffset = currentCascade * (maxTotalInstances * 8) * 32;
+        const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesShadow[t];
