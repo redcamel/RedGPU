@@ -9,13 +9,13 @@ struct GrassInstance {
     packedGroundColor: u32,
 };
 
-struct GrassGlobalUniforms {
+struct GrassCullingUniforms {
     cameraPosition: vec4<f32>,
     frustumPlanes: array<vec4<f32>, 6>,
-    totalInstances: u32,
+    totalInstanceCount: u32,
     typeCount: u32,
-    _pad0: u32,
-    _pad1: u32,
+    pad0: u32,
+    pad1: u32,
 };
 
 struct GrassTypeParam {
@@ -34,19 +34,19 @@ struct GrassTypeParam {
     farDistance: f32,
     stageDistance1: f32,
     stageDistance2: f32,
-    _pad0: f32,
+    pad0: f32,
 };
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<GrassInstance>;
-@group(0) @binding(1) var<uniform> globalUniforms: GrassGlobalUniforms;
+@group(0) @binding(1) var<uniform> globalUniforms: GrassCullingUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<GrassTypeParam>;
 @group(0) @binding(3) var<storage, read_write> culledInstances: array<GrassInstance>;
-@group(0) @binding(4) var<storage, read_write> indirectArgs: array<atomic<u32>>;
+@group(0) @binding(4) var<storage, read_write> indirectCommands: array<atomic<u32>>;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let index = globalId.x;
-    if (index >= globalUniforms.totalInstances) {
+    if (index >= globalUniforms.totalInstanceCount) {
         return;
     }
 
@@ -110,7 +110,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     let indirectArgIndex = (typeInfo.indirectBaseOffset + drawSlot) * 5u + 1u;
-    let slot = atomicAdd(&indirectArgs[indirectArgIndex], 1u);
+    let slot = atomicAdd(&indirectCommands[indirectArgIndex], 1u);
     let culledIndex = typeInfo.culledBaseOffset + (drawSlot * typeInfo.maxInstancesPerStage) + slot;
 
     culledInstances[culledIndex] = instance;

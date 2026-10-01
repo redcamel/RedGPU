@@ -18,7 +18,7 @@ struct LandscapeUniforms {
     tileSizeZ: f32,
     baseQuads: f32,
     vhtTextureSize: vec2<f32>,
-    _reserved: vec2<f32>,
+    pad0: vec2<f32>,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
     tanHalfFOV: f32,

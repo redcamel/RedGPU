@@ -18,13 +18,13 @@ struct CameraFrustumUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
 };
 
-struct InputTileData {
+struct TileInstance {
     color: vec4<f32>,
     worldX: f32,
     worldZ: f32,
 };
 
-struct IndirectDrawArgs {
+struct DrawIndexedIndirectArgs {
     indexCount: u32,
     instanceCount: atomic<u32>,
     firstIndex: u32,
@@ -33,9 +33,9 @@ struct IndirectDrawArgs {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
-@group(0) @binding(1) var<storage, read> allInputTiles: array<InputTileData>;
+@group(0) @binding(1) var<storage, read> allInputTiles: array<TileInstance>;
 @group(0) @binding(2) var<storage, read_write> visibleTileIndices: array<u32>;
-@group(0) @binding(3) var<storage, read_write> indirectDrawArgs: array<IndirectDrawArgs>;
+@group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(4) var hzbTexture: texture_2d<f32>;
 @group(0) @binding(5) var hzbSampler: sampler;
 
@@ -177,7 +177,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
     if (localIdx < uniforms.lodMaxLevel) {
         let count = atomicLoad(&wgCounts[localIdx]);
         if (count > 0u) {
-            wgGlobalOffsets[localIdx] = atomicAdd(&indirectDrawArgs[localIdx].instanceCount, count);
+            wgGlobalOffsets[localIdx] = atomicAdd(&indirectCommands[localIdx].instanceCount, count);
         }
     }
 

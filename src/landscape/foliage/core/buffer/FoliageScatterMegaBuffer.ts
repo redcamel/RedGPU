@@ -161,9 +161,9 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         const globalUniformBytes =
             shaderInfo.uniforms?.['globalUniforms']?.arrayBufferByteLength ||
-            shaderInfo.structs?.['UnifiedGlobalCullingUniforms']?.arrayBufferByteLength;
+            shaderInfo.structs?.['FoliageCullingUniforms']?.arrayBufferByteLength;
         if (!globalUniformBytes) {
-            throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "UnifiedGlobalCullingUniforms" struct size from foliageCullingComputeWGSL.');
+            throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullingComputeWGSL.');
         }
 
         this.#globalUniformBytes = globalUniformBytes;

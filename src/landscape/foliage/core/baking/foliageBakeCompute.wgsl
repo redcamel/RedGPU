@@ -42,9 +42,9 @@ struct BakeUniforms {
     heightScale: f32,
     totalTasks: u32,
     hasVBT: u32,
-    _pad0: f32,
-    _pad1: f32,
-    _pad2: f32,
+    pad0: f32,
+    pad1: f32,
+    pad2: f32,
 };
 
 struct BakeTask {

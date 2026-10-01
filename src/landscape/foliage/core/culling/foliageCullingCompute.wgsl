@@ -37,7 +37,7 @@ struct CascadeCullingInfo {
     frustumPlanes: array<vec4<f32>, 6>,
 };
 
-struct UnifiedGlobalCullingUniforms {
+struct FoliageCullingUniforms {
     cameraPosition: vec3<f32>,
     totalInstanceCount: u32,
     invWorldSizeX: f32,
@@ -79,12 +79,12 @@ struct DrawIndexedIndirectArgs {
 };
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
-@group(0) @binding(1) var<uniform> globalUniforms: UnifiedGlobalCullingUniforms;
+@group(0) @binding(1) var<uniform> globalUniforms: FoliageCullingUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
-@group(0) @binding(3) var<storage, read_write> mainCulledInstanceBuffer: array<FoliageInstance>;
-@group(0) @binding(4) var<storage, read_write> mainIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstance>;
-@group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(3) var<storage, read_write> mainCulledInstances: array<FoliageInstance>;
+@group(0) @binding(4) var<storage, read_write> mainIndirectCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(5) var<storage, read_write> shadowCulledInstances: array<FoliageInstance>;
+@group(0) @binding(6) var<storage, read_write> shadowIndirectCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(7) var hzbTexture: texture_2d<f32>;
 @group(0) @binding(8) var hzbSampler: sampler;
 
@@ -267,11 +267,11 @@ fn main(
             if (finalAlpha > 0.001) {
                 let lodInfo = typeInfo.lods[0];
                 let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                let slot = atomicAdd(&mainIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
                 let numSubs = lodInfo.subMeshCount;
                 for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                    atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                    atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                 }
 
                 let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
@@ -281,7 +281,7 @@ fn main(
                 culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
 
                 let outIdx = typeInfo.culledBaseOffset + slot;
-                mainCulledInstanceBuffer[outIdx] = culledInst;
+                mainCulledInstances[outIdx] = culledInst;
             }
         } else {
             for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
@@ -299,11 +299,11 @@ fn main(
                     let finalAlpha = alpha * globalFade;
                     if (finalAlpha > 0.001) {
                         let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                        let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                        let slot = atomicAdd(&mainIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
                         let numSubs = lodInfo.subMeshCount;
                         for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                            atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                            atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
                         let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
@@ -313,7 +313,7 @@ fn main(
                         culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
 
                         let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
-                        mainCulledInstanceBuffer[outIdx] = culledInst;
+                        mainCulledInstances[outIdx] = culledInst;
                     }
 
                     if (alpha >= 0.999 && !isLastLOD && effectiveDist < lodInfo.exitStart) {
@@ -370,11 +370,11 @@ fn main(
                         let lodInfo = typeInfo.lods[targetShadowLOD];
                         let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
                         let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                        let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                        let slot = atomicAdd(&shadowIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
                         let numSubs = lodInfo.subMeshCount;
                         for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                            atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                            atomicAdd(&shadowIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
                         let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
@@ -385,7 +385,7 @@ fn main(
 
                         let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
                         let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
-                        shadowCulledInstanceBuffer[outIdx] = shadowInst;
+                        shadowCulledInstances[outIdx] = shadowInst;
                     }
                 }
             }

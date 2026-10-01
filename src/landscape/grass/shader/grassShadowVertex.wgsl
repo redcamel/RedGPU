@@ -17,14 +17,14 @@ fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 }
 
 struct GrassUniforms {
-    _unusedCullingDistance: f32,
-    _unusedShrinkStartDistance: f32,
+    cullingDistance: f32,
+    shrinkStartDistance: f32,
     meshHeight: f32,
     minY: f32,
     shadowCullDistance: f32,
     shadowShrinkStartDistance: f32,
-    _pad0: f32,
-    _pad1: f32,
+    pad0: f32,
+    pad1: f32,
 };
 
 struct VertexInput {

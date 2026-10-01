@@ -9,9 +9,9 @@ struct GrassMaterialUniforms {
     exposureBoost: f32,
     subsurfaceColor: vec3<f32>,
     subsurfaceStrength: f32,
-    _unusedRoughness: f32,
-    _unusedShadowStrength: f32,
-    _unusedReceiveShadow: u32,
+    roughness: f32,
+    shadowStrength: f32,
+    receiveShadow: u32,
 };
 
 const SSS_DISTORTION: f32 = 0.35;

@@ -29,7 +29,7 @@ struct GrassTypeParam {
     farDistance: f32,
     stageDistance1: f32,
     stageDistance2: f32,
-    _pad0: f32,
+    pad0: f32,
 };
 
 struct BakeUniforms {
@@ -38,9 +38,9 @@ struct BakeUniforms {
     heightScale: f32,
     totalTasks: u32,
     hasVBT: u32,
-    _pad0: f32,
-    _pad1: f32,
-    _pad2: u32,
+    pad0: f32,
+    pad1: f32,
+    pad2: u32,
 };
 
 struct BakeTask {
