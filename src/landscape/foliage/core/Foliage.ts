@@ -305,6 +305,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #baker: ScatterInstanceBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
+    #landscape: Landscape | null = null;
 
     /**
      * [KO] 지형 식생/나무 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliage(options)` 팩토리 메서드를 사용하십시오.)
@@ -603,6 +604,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get megaBuffer(): FoliageScatterMegaBuffer | null {
         return this.#megaBuffer;
+    }
+
+    /**
+     * [KO] 연결된 부모 Landscape 인스턴스를 반환합니다.
+     * [EN] Returns the associated parent Landscape instance.
+     */
+    get landscape(): Landscape | null {
+        return this.#landscape;
     }
 
     /**
@@ -1166,6 +1175,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
         if (!tileComponent) return;
+        if (landscape) this.#landscape = landscape;
         const cz = (tileComponent.componentZ ?? 0) & 0xffff;
         const cx = (tileComponent.componentX ?? 0) & 0xffff;
         const key = (cz << 16) | cx;

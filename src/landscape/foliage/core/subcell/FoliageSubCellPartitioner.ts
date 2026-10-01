@@ -7,8 +7,8 @@
 import {sampleNormalizedLayerWeight} from "../../../core/scatter";
 
 /**
- * [KO] 식생 서브셀 청크 데이터 인터페이스입니다.
- * [EN] Foliage subcell chunk data interface.
+ * [KO] 식생 서브셀 청크 데이터 인터페이스입니다. (인스턴스 배열을 상시 보관하지 않는 경량 메타데이터 구조체)
+ * [EN] Foliage subcell chunk data interface. (Lightweight metadata struct without persistent instance array)
  */
 export interface FoliageSubCellChunk {
     /**
@@ -36,11 +36,6 @@ export interface FoliageSubCellChunk {
      * [EN] Sub-cell world center Z coordinate
      */
     centerZ: number;
-    /**
-     * [KO] 생성된 인스턴스 스트라이드 데이터 (8 floats per instance)
-     * [EN] Generated instance stride data (8 floats per instance)
-     */
-    instanceData: Float32Array;
     /**
      * [KO] 청크 내 유효 인스턴스 수
      * [EN] Number of valid instances in the chunk
@@ -72,23 +67,14 @@ export default class FoliageSubCellPartitioner {
     static #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
     /**
-     * [KO] 지형 컴포넌트 타일을 서브셀 그리드로 분할하고 식생 인스턴스를 밀도 및 레이어/경사도 조건에 따라 생성합니다.
-     * [EN] Partitions a terrain component tile into a sub-cell grid and generates foliage instances according to density, layer, and slope constraints.
-     * @param comp -
-     * [KO] 대상 지형 컴포넌트(타일)
-     * [EN] Target terrain component (tile)
-     * @param foliageType -
-     * [KO] 배치할 식생 타입 객체
-     * [EN] Foliage type object to place
-     * @param landscape -
-     * [KO] 부모 Landscape 인스턴스
-     * [EN] Parent Landscape instance
-     * @param subCellSize -
-     * [KO] 서브셀 가로세로 크기(미터, 기본값: 100.0)
-     * [EN] Sub-cell dimension in meters (default: 100.0)
-     * @returns
-     * [KO] 서브셀 키별 생성된 청크 맵
-     * [EN] Map of generated chunks keyed by sub-cell key
+     * [KO] 지형 컴포넌트 타일을 서브셀 그리드로 분할하고 서브셀별 유효 인스턴스 수량을 계산하여 경량 청크 맵을 생성합니다.
+     * [EN] Partitions a terrain component tile into a sub-cell grid and computes valid instance count per sub-cell into a lightweight chunk map.
+     *
+     * @param comp - 대상 지형 컴포넌트(타일)
+     * @param foliageType - 배치할 식생 타입 객체
+     * @param landscape - 부모 Landscape 인스턴스
+     * @param subCellSize - 서브셀 가로세로 크기(미터, 기본값: 100.0)
+     * @returns 서브셀 키별 생성된 경량 청크 맵
      */
     static partitionTile(
         comp: any,
@@ -102,42 +88,176 @@ export default class FoliageSubCellPartitioner {
         const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
         const halfTile = tileSizeMeters * 0.5;
 
-        const minX = comp.worldX - halfTile;
-        const maxX = comp.worldX + halfTile;
-        const minZ = comp.worldZ - halfTile;
-        const maxZ = comp.worldZ + halfTile;
-
-        const rangeX = maxX - minX;
-        const rangeZ = maxZ - minZ;
-
-        const tileAreaMetersSq = rangeX * rangeZ;
-        const tileHectares = tileAreaMetersSq / 10000.0;
-        const densityPerHectare = foliageType.densityPerHectare ?? 20.0;
-        const baseCount = Math.floor(densityPerHectare * tileHectares);
-        const densityMul = foliageType.densityMultiplier ?? 1.0;
-        const targetCount = Math.max(0, Math.floor(baseCount * densityMul));
-        if (targetCount <= 0) return result;
-
-        const {minScale, maxScale, randomRotationY} = foliageType.options;
-        const scaleDiffX = maxScale[0] - minScale[0];
-        const scaleDiffY = maxScale[1] - minScale[1];
-        const scaleDiffZ = maxScale[2] - minScale[2];
-        const isUniformXZ = (scaleDiffX === scaleDiffZ && minScale[0] === minScale[2]);
-
-        const tileX = comp.componentX ?? 0;
-        const tileZ = comp.componentZ ?? 0;
-        const nameHash = foliageType.nameHash;
-
-        let seed = ((tileX * 73856093) ^ (tileZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
-        if (seed === 0) seed = 0x9e3779b9;
-
-        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
-        const typeId = foliageType.allocation?.typeId ?? 0;
+        const tileMinX = comp.worldX - halfTile;
+        const tileMaxX = comp.worldX + halfTile;
+        const tileMinZ = comp.worldZ - halfTile;
+        const tileMaxZ = comp.worldZ + halfTile;
 
         const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
         const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
+
+        const invSubCell = 1.0 / subCellSize;
+
+        const startScX = Math.floor((tileMinX + halfWorldX) * invSubCell);
+        const endScX = Math.floor((tileMaxX + halfWorldX - 0.001) * invSubCell);
+        const startScZ = Math.floor((tileMinZ + halfWorldZ) * invSubCell);
+        const endScZ = Math.floor((tileMaxZ + halfWorldZ - 0.001) * invSubCell);
+
+        const targetCount = foliageType.instancesPerCell ?? 20;
+        if (targetCount <= 0) return result;
+
+        const nameHash = foliageType.nameHash;
+        const targetLayer = foliageType.targetLayer;
+        const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
+        let targetLayerObj: any = null;
+        if (hasTargetLayer && landscape?.layers) {
+            if (typeof targetLayer === 'string') {
+                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+            } else if (typeof targetLayer === 'number') {
+                targetLayerObj = landscape.layers[targetLayer];
+            }
+        }
+        if (hasTargetLayer && !targetLayerObj) {
+            return result;
+        }
+
+        const densityScaleByWeight = foliageType.densityScaleByWeight !== false;
+        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
+        const minSlope = foliageType.minSlope ?? 0.0;
+        const maxSlope = foliageType.maxSlope ?? 45.0;
+        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
+
+        for (let scZ = startScZ; scZ <= endScZ; scZ++) {
+            for (let scX = startScX; scX <= endScX; scX++) {
+                const key = ((scZ << 16) | (scX & 0xFFFF)) | 0;
+                let seed = ((scX * 73856093) ^ (scZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
+                if (seed === 0) seed = 0x9e3779b9;
+
+                const subMinX = scX * subCellSize - halfWorldX;
+                const subMinZ = scZ * subCellSize - halfWorldZ;
+
+                const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
+                let validCount = 0;
+
+                for (let i = 0; i < maxAttempts && validCount < targetCount; i++) {
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rX = (seed >>> 0) / 4294967296.0;
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rZ = (seed >>> 0) / 4294967296.0;
+
+                    const posX = subMinX + rX * subCellSize;
+                    const posZ = subMinZ + rZ * subCellSize;
+
+                    if (targetLayerObj) {
+                        const u = (posX + halfWorldX) / worldSizeX;
+                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
+                        if (weight < 0.1) continue;
+                        if (densityScaleByWeight) {
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5;
+                            const rReject = (seed >>> 0) / 4294967296.0;
+                            if (rReject > weight) continue;
+                        }
+                    }
+
+                    if (hasSlopeFilter) {
+                        const step = 1.0;
+                        const hL = landscape.getHeightAt(posX - step, posZ);
+                        const hR = landscape.getHeightAt(posX + step, posZ);
+                        const hD = landscape.getHeightAt(posX, posZ - step);
+                        const hU = landscape.getHeightAt(posX, posZ + step);
+                        const nx = (hL - hR) / (2 * step);
+                        const nz = (hD - hU) / (2 * step);
+                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+                        const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                        if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
+                    }
+
+                    // 회전/스케일 난수 소비를 동기화하기 위한 난수 전진
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5; // rScale
+
+                    if (foliageType.options?.randomRotationY) {
+                        seed ^= seed << 13;
+                        seed ^= seed >>> 17;
+                        seed ^= seed << 5; // rAngle
+                    }
+
+                    validCount++;
+                }
+
+                if (validCount > 0) {
+                    const centerX = (scX + 0.5) * subCellSize - halfWorldX;
+                    const centerZ = (scZ + 0.5) * subCellSize - halfWorldZ;
+                    result.set(key, {
+                        subCellKey: key,
+                        subCellX: scX,
+                        subCellZ: scZ,
+                        centerX,
+                        centerZ,
+                        instanceCount: validCount,
+                        isMounted: false,
+                        mountedSlotIndex: -1
+                    });
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * [KO] 청크가 GPU 메가버퍼에 마운트되는 시점에 호출되어, 사전 할당된 메가버퍼 스테이징 배열의 해당 슬롯 구간에 인스턴스 데이터를 직접 인라인 기록합니다. (Zero-GC & Zero-CPU-RAM)
+     * [EN] Invoked when a chunk is mounted to the GPU mega-buffer, directly writing instance data inline into the pre-allocated staging buffer slot range. (Zero-GC & Zero-CPU-RAM)
+     *
+     * @param f32 - 메가버퍼의 사전 할당된 CPU 스테이징 Float32Array 뷰
+     * @param u32 - 메가버퍼의 사전 할당된 CPU 스테이징 Uint32Array 뷰
+     * @param baseFloat - 쓰기 시작할 float 오프셋
+     * @param chunk - 마운트할 서브셀 청크 객체
+     * @param foliageType - 식생 타입 객체
+     * @param landscape - 부모 Landscape 인스턴스
+     * @param subCellSize - 서브셀 가로세로 크기(미터, 기본값: 100.0)
+     */
+    static populateChunkInstances(
+        f32: Float32Array,
+        u32: Uint32Array,
+        baseFloat: number,
+        chunk: FoliageSubCellChunk,
+        foliageType: any,
+        landscape: any,
+        subCellSize: number = 100.0
+    ): void {
+        const strideFloats = foliageType?.megaBuffer?.strideFloats || 8;
+        const targetCount = foliageType.instancesPerCell ?? 20;
+
+        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
+        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        const subMinX = chunk.subCellX * subCellSize - halfWorldX;
+        const subMinZ = chunk.subCellZ * subCellSize - halfWorldZ;
+
+        let seed = ((chunk.subCellX * 73856093) ^ (chunk.subCellZ * 19349663) ^ (foliageType.nameHash * 83492791)) >>> 0;
+        if (seed === 0) seed = 0x9e3779b9;
+
+        const {minScale, maxScale, randomRotationY} = foliageType.options || {};
+        const optMinScale = minScale || [1.0, 1.0, 1.0];
+        const optMaxScale = maxScale || [1.0, 1.0, 1.0];
+        const scaleDiffX = optMaxScale[0] - optMinScale[0];
+        const scaleDiffY = optMaxScale[1] - optMinScale[1];
+        const scaleDiffZ = optMaxScale[2] - optMinScale[2];
+        const isUniformXZ = (scaleDiffX === scaleDiffZ && optMinScale[0] === optMinScale[2]);
 
         const targetLayer = foliageType.targetLayer;
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
@@ -150,11 +270,8 @@ export default class FoliageSubCellPartitioner {
             }
         }
 
-        if (hasTargetLayer && !targetLayerObj) {
-            return result;
-        }
-
         const densityScaleByWeight = foliageType.densityScaleByWeight !== false;
+        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
         const minSlope = foliageType.minSlope ?? 0.0;
         const maxSlope = foliageType.maxSlope ?? 45.0;
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
@@ -163,19 +280,11 @@ export default class FoliageSubCellPartitioner {
         const alignFactor = foliageType.alignFactor ?? 1.0;
         const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
 
-        const tempBuckets = new Map<number, {
-            subCellX: number;
-            subCellZ: number;
-            floats: number[];
-            u32s: number[];
-        }>();
-
-        const invSubCell = 1.0 / subCellSize;
-
+        const typeId = foliageType.allocation?.typeId ?? 0;
         const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
-        let spawned = 0;
+        let written = 0;
 
-        for (let i = 0; i < maxAttempts && spawned < targetCount; i++) {
+        for (let i = 0; i < maxAttempts && written < chunk.instanceCount; i++) {
             seed ^= seed << 13;
             seed ^= seed >>> 17;
             seed ^= seed << 5;
@@ -186,24 +295,20 @@ export default class FoliageSubCellPartitioner {
             seed ^= seed << 5;
             const rZ = (seed >>> 0) / 4294967296.0;
 
-            const posX = minX + rX * rangeX;
-            const posZ = minZ + rZ * rangeZ;
+            const posX = subMinX + rX * subCellSize;
+            const posZ = subMinZ + rZ * subCellSize;
 
             if (targetLayerObj) {
                 const u = (posX + halfWorldX) / worldSizeX;
                 const v = (posZ + halfWorldZ) / worldSizeZ;
                 const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
-                if (weight < 0.1) {
-                    continue;
-                }
+                if (weight < 0.1) continue;
                 if (densityScaleByWeight) {
                     seed ^= seed << 13;
                     seed ^= seed >>> 17;
                     seed ^= seed << 5;
                     const rReject = (seed >>> 0) / 4294967296.0;
-                    if (rReject > weight) {
-                        continue;
-                    }
+                    if (rReject > weight) continue;
                 }
             }
 
@@ -223,9 +328,7 @@ export default class FoliageSubCellPartitioner {
 
                 if (hasSlopeFilter) {
                     const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
-                    if (slopeDeg < minSlope || slopeDeg > maxSlope) {
-                        continue;
-                    }
+                    if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
                 }
 
                 if (needNormalAlign) {
@@ -240,24 +343,9 @@ export default class FoliageSubCellPartitioner {
             seed ^= seed << 5;
             const rScale = (seed >>> 0) / 4294967296.0;
 
-            const scX = Math.floor((posX + halfWorldX) * invSubCell);
-            const scZ = Math.floor((posZ + halfWorldZ) * invSubCell);
-            const key = ((scZ << 16) | (scX & 0xFFFF)) | 0;
-
-            let bucket = tempBuckets.get(key);
-            if (!bucket) {
-                bucket = {
-                    subCellX: scX,
-                    subCellZ: scZ,
-                    floats: [],
-                    u32s: []
-                };
-                tempBuckets.set(key, bucket);
-            }
-
-            const scaleX = minScale[0] + rScale * scaleDiffX;
-            const scaleY = minScale[1] + rScale * scaleDiffY;
-            const scaleZ = isUniformXZ ? scaleX : (minScale[2] + rScale * scaleDiffZ);
+            const scaleX = optMinScale[0] + rScale * scaleDiffX;
+            const scaleY = optMinScale[1] + rScale * scaleDiffY;
+            const scaleZ = isUniformXZ ? scaleX : (optMinScale[2] + rScale * scaleDiffZ);
 
             let posY = 0.0;
             if (hasGetHeight) {
@@ -316,54 +404,23 @@ export default class FoliageSubCellPartitioner {
             const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
             const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
 
-            let scalePacked = isUniformXZ
+            const scalePacked = isUniformXZ
                 ? FoliageSubCellPartitioner.#fastPackUniformScale(scaleX)
                 : FoliageSubCellPartitioner.#fastPack2x16float(scaleX, scaleZ);
 
-            bucket.floats.push(posX, posY, posZ, scaleY);
-            bucket.u32s.push(rotPackedY, rotPackedW, scalePacked, typeId);
-            spawned++;
+            const outOffset = baseFloat + written * strideFloats;
+            f32[outOffset + 0] = posX;
+            f32[outOffset + 1] = posY;
+            f32[outOffset + 2] = posZ;
+            f32[outOffset + 3] = scaleY;
+
+            u32[outOffset + 4] = rotPackedY;
+            u32[outOffset + 5] = rotPackedW;
+            u32[outOffset + 6] = scalePacked;
+            u32[outOffset + 7] = typeId;
+
+            written++;
         }
-
-        const strideFloats = foliageType?.megaBuffer?.strideFloats || 8;
-        tempBuckets.forEach((bucket, key) => {
-            const instCount = bucket.floats.length / 4;
-            if (instCount === 0) return;
-
-            const buffer = new Float32Array(instCount * strideFloats);
-            const u32View = new Uint32Array(buffer.buffer);
-
-            for (let i = 0; i < instCount; i++) {
-                const bOffset = i * strideFloats;
-                const fOffset = i * 4;
-                buffer[bOffset] = bucket.floats[fOffset];
-                buffer[bOffset + 1] = bucket.floats[fOffset + 1];
-                buffer[bOffset + 2] = bucket.floats[fOffset + 2];
-                buffer[bOffset + 3] = bucket.floats[fOffset + 3];
-
-                u32View[bOffset + 4] = bucket.u32s[fOffset];
-                u32View[bOffset + 5] = bucket.u32s[fOffset + 1];
-                u32View[bOffset + 6] = bucket.u32s[fOffset + 2];
-                buffer[bOffset + 7] = bucket.u32s[fOffset + 3];
-            }
-
-            const centerX = (bucket.subCellX + 0.5) * subCellSize - halfWorldX;
-            const centerZ = (bucket.subCellZ + 0.5) * subCellSize - halfWorldZ;
-
-            result.set(key, {
-                subCellKey: key,
-                subCellX: bucket.subCellX,
-                subCellZ: bucket.subCellZ,
-                centerX,
-                centerZ,
-                instanceData: buffer,
-                instanceCount: instCount,
-                isMounted: false,
-                mountedSlotIndex: -1
-            });
-        });
-
-        return result;
     }
 
     static #fastFloatToHalf(val: number): number {
@@ -405,4 +462,3 @@ export default class FoliageSubCellPartitioner {
 }
 
 Object.freeze(FoliageSubCellPartitioner);
-

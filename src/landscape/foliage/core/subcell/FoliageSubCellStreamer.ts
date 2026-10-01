@@ -5,7 +5,7 @@
  */
 
 import type Foliage from "../Foliage";
-import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
+import FoliageSubCellPartitioner, {type FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 
 /**
@@ -221,10 +221,18 @@ export default class FoliageSubCellStreamer {
         if (currentActive + count > allocation.maxInstances) return;
 
         const f32 = megaBuffer.cpuRawDataBuffer;
+        const u32 = megaBuffer.cpuRawDataUint32;
         const strideFloats = megaBuffer.strideFloats;
         const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
-
-        f32.set(chunk.instanceData, baseFloat);
+        FoliageSubCellPartitioner.populateChunkInstances(
+            f32,
+            u32,
+            baseFloat,
+            chunk,
+            this.#foliageType,
+            this.#foliageType.landscape,
+            this.#foliageType.subCellSize
+        );
 
         chunk.isMounted = true;
         chunk.mountedSlotIndex = currentActive;
