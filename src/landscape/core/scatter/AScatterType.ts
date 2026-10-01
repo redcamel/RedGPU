@@ -39,7 +39,8 @@ export abstract class AScatterType<
     #drawCallCount: number = 0;
     #allocation: TAllocation | null = null;
 
-    // --- 11종 공통 스캐터 파라미터 (Foliage & Grass 공통) ---
+    // --- 11종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
+    #height: number = 1.0;
     #cullingDistance: number = 200.0;
     #shadowCullDistance: number = 50.0;
     #bottomOffset: number = 0.0;
@@ -174,6 +175,14 @@ export abstract class AScatterType<
     get unifiedGeometry(): Geometry | null {
         const geoms = this.unifiedGeometries;
         return geoms.length > 0 ? geoms[0] : null;
+    }
+
+    /**
+     * [KO] 스캐터 모델의 세로 물리 높이(미터)를 반환합니다.
+     * [EN] Returns the vertical physical height in meters of the scatter model.
+     */
+    get height(): number {
+        return this.#height;
     }
 
     /**
@@ -356,6 +365,7 @@ export abstract class AScatterType<
      * [EN] Safely injects initial unique default values during subclass construction without triggering hooks.
      */
     protected setRawScatterProperties(values: {
+        height?: number;
         cullingDistance?: number;
         shadowCullDistance?: number;
         bottomOffset?: number;
@@ -368,6 +378,7 @@ export abstract class AScatterType<
         castShadow?: boolean;
         groundBlendStrength?: number;
     }): void {
+        if (values.height !== undefined) this.#height = values.height;
         if (values.cullingDistance !== undefined) this.#cullingDistance = values.cullingDistance;
         if (values.shadowCullDistance !== undefined) this.#shadowCullDistance = values.shadowCullDistance;
         if (values.bottomOffset !== undefined) this.#bottomOffset = values.bottomOffset;

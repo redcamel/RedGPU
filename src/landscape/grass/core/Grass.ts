@@ -179,7 +179,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #farDistance: number = 35.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
-    #meshHeight: number = 1.0;
     #minY: number = 0.0;
     #exposureBoost: number = 1.0;
     #subsurfaceStrength: number = 0.25;
@@ -244,6 +243,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
         let targetMaterial: any = mesh.material;
 
+        let resolvedHeight = 1.0;
+
         const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
         if (isComposite) {
             const combineResult = combineScatterMeshes(redGPUContext, mesh, {
@@ -273,9 +274,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             }
 
             if (height !== undefined) {
-                this.#meshHeight = height;
+                resolvedHeight = height;
             } else {
-                this.#meshHeight = combineResult.boundingHeight > 0 ? combineResult.boundingHeight : 1.0;
+                resolvedHeight = combineResult.boundingHeight > 0 ? combineResult.boundingHeight : 1.0;
             }
 
             this.#subMeshes = combineResult.groups.map((group, idx) => {
@@ -325,10 +326,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             }
 
             if (height !== undefined) {
-                this.#meshHeight = height;
+                resolvedHeight = height;
             } else {
                 const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
-                this.#meshHeight = computedH > 0 ? computedH : 1.0;
+                resolvedHeight = computedH > 0 ? computedH : 1.0;
             }
 
             const gGeom = this.#geometry as Geometry;
@@ -366,6 +367,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         const resolvedGroundBlendStrength = groundBlendStrength !== undefined ? groundBlendStrength : 1.0;
 
         this.setRawScatterProperties({
+            height: resolvedHeight,
             bottomOffset: resolvedBottomOffset,
             cullingDistance: resolvedCullingDistance,
             shadowCullDistance: resolvedShadowCullDistance,
@@ -515,13 +517,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#notifyChange();
     }
 
-    /**
-     * [KO] 잔디 메쉬 높이 (미터 단위)
-     * [EN] Height of the grass mesh in meters
-     */
-    get meshHeight(): number {
-        return this.#meshHeight;
-    }
 
     /**
      * [KO] 지오메트리 하단 Y 오프셋 (미터 단위)

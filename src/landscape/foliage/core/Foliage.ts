@@ -137,6 +137,12 @@ export interface FoliageOptions {
     bottomOffset?: number;
 
     /**
+     * [KO] 식생 모델의 물리 높이(미터, 미지정 시 지오메트리 바운딩 높이 자동 측정)
+     * [EN] Physical height in meters of the foliage model (auto-measured from geometry bounding if omitted)
+     */
+    height?: number;
+
+    /**
      * [KO] 서브메시 결합 시 원본 피벗 유지 여부 (기본값: true)
      * [EN] Whether to preserve original pivots when combining sub-meshes (default: true)
      */
@@ -272,7 +278,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #fadeStartDistance: number = 1500.0;
     #boundingRadius: number = 10.0;
-    #boundingHeight: number = 2.0;
     #nameHash: number = 0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
@@ -444,10 +449,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#lodInfoList = assembleResult.lodInfoList || [];
         const resolvedBottomOffset = options.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
-        this.#boundingHeight = assembleResult.boundingHeight || 2.0;
+        const resolvedHeight = options.height !== undefined
+            ? Math.max(0.1, Number(options.height) || 0.1)
+            : (assembleResult.boundingHeight || 2.0);
 
         let defaultShadowDist = 300.0;
-        const effectiveHeight = this.#boundingHeight * maxScale[1];
+        const effectiveHeight = resolvedHeight * maxScale[1];
         if (effectiveHeight < 0.6) {
             defaultShadowDist = 35.0;
         } else if (effectiveHeight < 1.5) {
@@ -463,6 +470,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             : defaultShadowDist;
 
         this.setRawScatterProperties({
+            height: resolvedHeight,
             bottomOffset: resolvedBottomOffset,
             cullingDistance,
             shadowCullDistance: resolvedShadowCullDistance,
@@ -539,7 +547,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.bottomOffset,
                 this.#lodInfoList,
                 effectiveShadowDist,
-                this.#boundingHeight
+                this.height
             );
         }
     }
@@ -700,13 +708,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#boundingRadius;
     }
 
-    /**
-     * [KO] 식생 모델의 바운딩 볼륨 높이(미터)를 반환합니다.
-     * [EN] Returns the bounding volume height in meters of the foliage model.
-     */
-    get boundingHeight(): number {
-        return this.#boundingHeight;
-    }
+
 
 
 
@@ -1332,7 +1334,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.bottomOffset,
                 effectiveLodList,
                 effectiveShadowDist,
-                this.#boundingHeight
+                this.height
             );
         }
     }

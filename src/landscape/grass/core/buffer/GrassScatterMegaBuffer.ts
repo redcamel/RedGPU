@@ -270,9 +270,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param bottomOffset -
      * [KO] 지형 표면 대비 바닥 높이 오프셋
      * [EN] Bottom height offset relative to terrain surface
-     * @param meshHeight -
-     * [KO] 잔디 메시의 높이
-     * [EN] Height of the grass mesh
+     * @param height -
+     * [KO] 잔디 메시의 물리 높이
+     * [EN] Physical height of the grass mesh
      * @param minSlopeTan2 -
      * [KO] 잔디가 자랄 수 있는 최소 경사도 (탄젠트 제곱)
      * [EN] Minimum slope angle allowed for grass (tangent squared)
@@ -311,7 +311,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         typeId: number,
         cullingDistance: number,
         bottomOffset: number,
-        meshHeight: number,
+        height: number,
         minSlopeTan2: number,
         maxSlopeTan2: number,
         hasSlopeFilter: boolean,
@@ -331,7 +331,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         f32[base] = cullingDistance;
         f32[base + 1] = bottomOffset;
-        f32[base + 2] = meshHeight;
+        f32[base + 2] = height;
         f32[base + 3] = minSlopeTan2;
 
         f32[base + 4] = maxSlopeTan2;

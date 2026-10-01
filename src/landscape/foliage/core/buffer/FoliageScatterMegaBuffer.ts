@@ -458,7 +458,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         bottomOffset: number,
         lodInfoList: FoliageLODInfo[],
         shadowCullDistance: number = 300.0,
-        boundingHeight: number = 2.0
+        height: number = 2.0
     ): void {
         this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
@@ -483,7 +483,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         f32[baseOffset + 10] = shadowCullDistance;
 
         f32[baseOffset + 11] = 1.0 / fadeRange;
-        f32[baseOffset + 12] = boundingHeight;
+        f32[baseOffset + 12] = height;
         f32[baseOffset + 13] = 0;
         f32[baseOffset + 14] = 0;
         f32[baseOffset + 15] = 0;
