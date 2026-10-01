@@ -1,3 +1,8 @@
+/**
+ * [KO] 스캐터 시스템(잔디, 식생 등)에서 머티리얼, 텍스처, 원본 메시 참조 및 지형 피벗 오프셋을 결합한 공용 서브메쉬 렌더 단위 모듈입니다.
+ * [EN] Common sub-mesh render unit module combining material, texture, source mesh reference, and terrain pivot offsets across scatter systems (Grass, Foliage, etc.).
+ * @packageDocumentation
+ */
 import Mesh from "../../../display/mesh/Mesh";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
@@ -82,6 +87,14 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     #lodIndex: number;
     #isMasked: boolean;
 
+    /**
+     * [KO] ScatterSubMesh 인스턴스를 생성하고 렌더링 메타데이터를 초기화합니다.
+     * [EN] Creates a ScatterSubMesh instance and initializes rendering metadata.
+     *
+     * @param init -
+     * [KO] 서브메쉬 초기화 옵션 객체
+     * [EN] Sub-mesh initialization options object
+     */
     constructor(init: ScatterSubMeshInitOptions) {
         super(init);
         this.#mesh = init.mesh;

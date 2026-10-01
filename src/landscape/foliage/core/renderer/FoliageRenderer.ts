@@ -90,6 +90,10 @@ class FoliageRenderer extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 메인 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
+     * [EN] Returns whether the depth prepass (Early-Z) is enabled during main rendering.
+     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }

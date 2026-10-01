@@ -39,9 +39,15 @@ export abstract class AScatterType extends RedGPUObject {
      * [KO] AScatterType 인스턴스를 생성합니다.
      * [EN] Creates an AScatterType instance.
      *
-     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
-     * @param name - 스캐터 타입 고유 이름
-     * @param typeId - 스캐터 타입 고유 ID (기본값: 0)
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param name -
+     * [KO] 스캐터 타입 고유 이름
+     * [EN] Unique scatter type name
+     * @param typeId -
+     * [KO] 스캐터 타입 고유 ID (기본값: 0)
+     * [EN] Unique scatter type ID (default: 0)
      */
     constructor(redGPUContext: RedGPUContext, name: string, typeId: number = 0) {
         super(redGPUContext);
@@ -127,8 +133,12 @@ export abstract class AScatterType extends RedGPUObject {
      * [KO] 서브메시 및 간접 드로우콜 통계 수치를 갱신합니다.
      * [EN] Updates sub-mesh and indirect draw-call statistics numbers.
      *
-     * @param subMeshCount - 서브메시 총 개수
-     * @param drawCallCount - 간접 드로우콜 총 개수 (생략 시 subMeshCount와 동일)
+     * @param subMeshCount -
+     * [KO] 서브메시 총 개수
+     * [EN] Total number of sub-meshes
+     * @param drawCallCount -
+     * [KO] 간접 드로우콜 총 개수 (생략 시 subMeshCount와 동일)
+     * [EN] Total number of indirect draw calls (same as subMeshCount if omitted)
      */
     updateSubMeshStats(subMeshCount: number, drawCallCount?: number): void {
         this.#subMeshCount = Math.max(0, subMeshCount);
@@ -139,10 +149,18 @@ export abstract class AScatterType extends RedGPUObject {
      * [KO] 메가버퍼의 기본 세그먼트를 할당하고 할당 정보를 저장합니다.
      * [EN] Allocates a base segment in the mega-buffer and stores the allocation metadata.
      *
-     * @param megaBuffer - 대상 스캐터 메가버퍼
-     * @param maxInstances - 최대 수용 인스턴스 수
-     * @param culledMultiplier - 컬링 결과 버퍼 배율 (기본값: 1)
-     * @returns 할당된 기본 세그먼트 메타데이터
+     * @param megaBuffer -
+     * [KO] 대상 스캐터 메가버퍼 인스턴스
+     * [EN] Target scatter mega-buffer instance
+     * @param maxInstances -
+     * [KO] 최대 수용 인스턴스 수
+     * [EN] Maximum instance capacity
+     * @param culledMultiplier -
+     * [KO] 컬링 결과 버퍼 배율 (기본값: 1)
+     * [EN] Culled instance buffer multiplier (default: 1)
+     * @returns
+     * [KO] 할당된 기본 세그먼트 메타데이터
+     * [EN] Allocated base segment metadata
      */
     allocateBaseSegment(
         megaBuffer: AScatterMegaBuffer,

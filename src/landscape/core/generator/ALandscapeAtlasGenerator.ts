@@ -43,10 +43,18 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         this.#generatorLabel = generatorLabel;
     }
 
+    /**
+     * [KO] 아틀라스 베이킹에 사용되는 GPU 컴퓨트 파이프라인 인스턴스를 반환합니다.
+     * [EN] Returns the GPU compute pipeline instance used for atlas baking.
+     */
     get computePipeline(): GPUComputePipeline | null {
         return this.#computePipeline;
     }
 
+    /**
+     * [KO] 컴퓨트 파이프라인의 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the bind group layout of the compute pipeline.
+     */
     get bindGroupLayout(): GPUBindGroupLayout | null {
         return this.#bindGroupLayout;
     }
@@ -135,6 +143,23 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         });
     }
 
+    /**
+     * [KO] 셰이더 코드 및 바인드 그룹 레이아웃을 기반으로 기본 컴퓨트 파이프라인과 유니폼 버퍼 풀을 초기화합니다.
+     * [EN] Initializes the base compute pipeline and uniform buffer pool based on shader code and bind group layout.
+     *
+     * @param shaderModuleKey -
+     * [KO] 리소스 매니저 셰이더 모듈 키
+     * [EN] Resource manager shader module key
+     * @param shaderCode -
+     * [KO] WGSL 셰이더 소스 코드
+     * [EN] WGSL shader source code
+     * @param layoutEntries -
+     * [KO] 바인드 그룹 레이아웃 엔트리 목록
+     * [EN] Bind group layout entry descriptors
+     * @param defaultUniformByteLength -
+     * [KO] 기본 유니폼 버퍼 바이트 크기 (기본값: 16)
+     * [EN] Default uniform buffer byte size (default: 16)
+     */
     initBaseComputePipeline(
         shaderModuleKey: string,
         shaderCode: string,
@@ -180,6 +205,10 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         });
     }
 
+    /**
+     * [KO] 풀링된 유니폼 버퍼 및 컴퓨트 파이프라인 자원을 해제하고 파기합니다.
+     * [EN] Releases and destroys pooled uniform buffers and compute pipeline resources.
+     */
     destroy(): void {
         const count = this.#uniformBufferPool.length;
         for (let i = 0; i < count; i++) {

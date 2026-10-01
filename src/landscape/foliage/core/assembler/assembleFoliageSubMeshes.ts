@@ -14,13 +14,45 @@ import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./internal/buildFoliageImpostorSubMesh";
 import type {FoliageSubMeshUniformResult} from "./internal/createFoliageSubMeshUniform";
 
+/**
+ * [KO] 식생 서브메쉬 조립 결과 인터페이스입니다.
+ * [EN] Foliage sub-mesh assembly result interface.
+ */
 export interface FoliageAssemblyResult {
+    /**
+     * [KO] 조립된 전체 서브메시 배열
+     * [EN] Array of all assembled sub-meshes
+     */
     subMeshes: FoliageSubMesh[];
+    /**
+     * [KO] LOD 레벨별 단일 통합 지오메트리 배열
+     * [EN] Array of per-LOD unified geometries
+     */
     unifiedGeometries: (Geometry | null)[];
+    /**
+     * [KO] 그림자 패스 전용 통합 서브메시 배열
+     * [EN] Array of shadow pass dedicated merged sub-meshes
+     */
     shadowMergedSubMeshes: FoliageShadowMergedSubMesh[];
+    /**
+     * [KO] LOD 레벨별 메타데이터 목록
+     * [EN] List of per-LOD metadata
+     */
     lodInfoList: FoliageLODInfo[];
+    /**
+     * [KO] 밑둥 피벗 보정 오프셋 (미터)
+     * [EN] Bottom pivot correction offset in meters
+     */
     bottomOffset: number;
+    /**
+     * [KO] 식생 모델의 최대 바운딩 구체 반경 (미터)
+     * [EN] Maximum bounding sphere radius in meters of the foliage model
+     */
     boundingRadius: number;
+    /**
+     * [KO] 식생 모델의 바운딩 높이 (미터)
+     * [EN] Bounding height in meters of the foliage model
+     */
     boundingHeight: number;
 }
 

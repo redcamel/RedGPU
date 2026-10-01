@@ -91,6 +91,18 @@ export interface ScatterBaseSegmentAllocation {
  * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 공통 추상 메가버퍼 기반 클래스입니다.
  * [EN] Common abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
  *
+ * **[KO] 아키텍처 및 역할:**
+ * - **VRAM 통합 관리 (Unified Mega-Buffer)**: 개별 스캐터 인스턴스 버퍼를 분할 생성하지 않고, 단일 원본 스토리지 버퍼(`rawGPUBuffer`)와 컬링 통과 스토리지 버퍼(`culledGPUBuffer`)에서 64바이트 배수로 정렬 할당하여 GPU 메모리 단편화를 제거합니다.
+ * - **간접 드로우(Indirect Draw) 인프라**: WebGPU `drawIndexedIndirect`에 필요한 5개 u32 인자(indexCount, instanceCount, firstIndex, baseVertex, firstInstance) 버퍼를 일괄 생성하고, 사전 기록된 템플릿 버퍼(`COPY_SRC`)를 통해 매 프레임 단 1회의 `copyBufferToBuffer`로 드로우 인스턴스 수를 초고속 리셋(`resetMultiIndirectCommands`)합니다.
+ * - **WGSL 셰이더 리플렉션 연동**: 런타임에 WGSL 셰이더 구조체(`GrassInstance`, `GrassTypeParam` 등)의 스트라이드 바이트 크기를 자동 리플렉션하여 CPU/GPU 메모리 레이아웃 불일치를 원천 방지합니다.
+ * - **Zero-GC 아키텍처**: 매 프레임 렌더 루프 및 리셋 과정에서 일체의 임시 객체 생성을 배제하고 사전 할당된 버퍼를 재사용합니다.
+ *
+ * **[EN] Architecture & Role:**
+ * - **Unified VRAM Management**: Eliminates GPU memory fragmentation by allocating 64-byte aligned segments from single raw storage (`rawGPUBuffer`) and culled storage (`culledGPUBuffer`) buffers instead of fragmenting buffers per scatter species.
+ * - **Multi-Draw Indirect Infrastructure**: Allocates 5-u32 indirect draw arguments (indexCount, instanceCount, firstIndex, baseVertex, firstInstance) in a unified GPU buffer, executing ultra-fast reset of instance counts per frame via a single `copyBufferToBuffer` command (`resetMultiIndirectCommands`).
+ * - **WGSL Shader Reflection Integration**: Automatically reflects byte strides of WGSL shader structs (`GrassInstance`, `GrassTypeParam`, etc.) at runtime to guarantee CPU/GPU memory layout synchronization.
+ * - **Zero-GC Architecture**: Prohibits temporary object allocations during per-frame rendering and reset passes, relying exclusively on pre-allocated buffers.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.

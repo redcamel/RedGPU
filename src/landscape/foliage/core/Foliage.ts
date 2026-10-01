@@ -551,38 +551,74 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 식생 이름 문자열의 32비트 해시 정수값을 반환합니다.
+     * [EN] Returns the 32-bit hash integer of the foliage name string.
+     */
     get nameHash(): number {
         return this.#nameHash;
     }
 
+    /**
+     * [KO] 이 식생 타입에 할당된 최대 인스턴스 수용 용량을 반환합니다.
+     * [EN] Returns the maximum instance capacity allocated for this foliage type.
+     */
     get maxInstances(): number {
         return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
     }
 
+    /**
+     * [KO] 인스턴스 절차적 배치 시 적용되는 최소 스케일 `[x, y, z]`을 반환합니다.
+     * [EN] Returns the minimum scale `[x, y, z]` applied during procedural instance placement.
+     */
     get minScale(): [number, number, number] {
         return this.#options.minScale;
     }
 
+    /**
+     * [KO] 인스턴스 절차적 배치 시 적용되는 최대 스케일 `[x, y, z]`을 반환합니다.
+     * [EN] Returns the maximum scale `[x, y, z]` applied during procedural instance placement.
+     */
     get maxScale(): [number, number, number] {
         return this.#options.maxScale;
     }
 
+    /**
+     * [KO] 인스턴스 배치 시 Y축 360도 무작위 회전 적용 여부를 반환합니다.
+     * [EN] Returns whether random 360-degree Y rotation is applied during placement.
+     */
     get randomRotationY(): boolean {
         return this.#options.randomRotationY;
     }
 
+    /**
+     * [KO] 초기 생성 시 전달된 고정 식생 옵션 객체를 반환합니다.
+     * [EN] Returns the immutable foliage options object provided during initialization.
+     */
     get options(): FoliageOptions {
         return this.#options;
     }
 
+    /**
+     * [KO] 메가버퍼 내에 할당된 식생 타입 세그먼트 메타데이터를 반환합니다.
+     * [EN] Returns the foliage type segment metadata allocated in the mega-buffer.
+     */
     override get allocation(): FoliageTypeAllocation | null {
         return this.#allocation;
     }
 
+    /**
+     * [KO] 인스턴스 데이터 및 간접 드로우 버퍼를 관리하는 연결된 메가버퍼를 반환합니다.
+     * [EN] Returns the associated mega-buffer managing instance data and indirect draw buffers.
+     */
     get megaBuffer(): FoliageScatterMegaBuffer | null {
         return this.#megaBuffer;
     }
 
+    /**
+     * [KO] 모든 LOD 단계를 포함하는 전체 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of all sub-meshes across all LOD levels.
+     */
     get subMeshes(): FoliageSubMesh[] {
         return this.#subMeshes;
     }
@@ -615,42 +651,82 @@ export class Foliage extends AScatterType {
         return this.#subMeshes.length;
     }
 
+    /**
+     * [KO] 뎁스 프리패스(Depth Prepass) 렌더링에 참여하는 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of sub-meshes participating in depth prepass rendering.
+     */
     get depthPrepassSubMeshes(): FoliageSubMesh[] {
         return this.#depthPrepassSubMeshes;
     }
 
+    /**
+     * [KO] 메인 포워드 렌더 패스에서 렌더링되는 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of sub-meshes rendered in the main forward render pass.
+     */
     get mainSubMeshes(): FoliageSubMesh[] {
         return this.#mainSubMeshes;
     }
 
+    /**
+     * [KO] 최상위 디테일 단계(LOD 0)에 속하는 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of sub-meshes belonging to the highest detail level (LOD 0).
+     */
     get lod0SubMeshes(): FoliageSubMesh[] {
         return this.#lod0SubMeshes;
     }
 
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스용으로 병합 최적화된 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of merged sub-meshes optimized for cascaded shadow map (CSM) passes.
+     */
     get shadowMergedSubMeshes(): FoliageShadowMergedSubMesh[] {
         return this.#shadowMergedSubMeshes;
     }
 
+    /**
+     * [KO] 모든 LOD 레벨의 전환 거리 및 서브메시 오프셋 정보를 담은 배열을 반환합니다.
+     * [EN] Returns the array containing transition distances and sub-mesh offsets for all LOD levels.
+     */
     get lodInfoList(): FoliageLODInfo[] {
         return this.#lodInfoList;
     }
 
+    /**
+     * [KO] 현재 스트리밍되어 GPU 버퍼 상에 활성화된 인스턴스 수를 반환합니다.
+     * [EN] Returns the number of instances currently active and streamed into GPU buffers.
+     */
     get activeInstanceCount(): number {
         return this.#allocation?.instanceCount ?? 0;
     }
 
+    /**
+     * [KO] 스트리머에 분할 등록된 모든 서브셀의 누적 인스턴스 총합을 반환합니다.
+     * [EN] Returns the total accumulated instance count across all sub-cells registered in the streamer.
+     */
     get totalInstanceCount(): number {
         return this.#streamer.totalInstanceCount;
     }
 
+    /**
+     * [KO] 프러스텀 및 구체 컬링에 사용되는 바운딩 구체 반경(미터)을 반환합니다.
+     * [EN] Returns the bounding sphere radius in meters used for frustum and sphere culling.
+     */
     get boundingRadius(): number {
         return this.#boundingRadius;
     }
 
+    /**
+     * [KO] 식생 모델의 바운딩 볼륨 높이(미터)를 반환합니다.
+     * [EN] Returns the bounding volume height in meters of the foliage model.
+     */
     get boundingHeight(): number {
         return this.#boundingHeight;
     }
 
+    /**
+     * [KO] 지형 표면 대비 밑둥 피벗 보정 오프셋(미터)을 반환합니다.
+     * [EN] Returns the bottom pivot correction offset in meters relative to terrain surface.
+     */
     get bottomOffset(): number {
         return this.#bottomOffset;
     }
@@ -663,6 +739,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 카메라로부터의 최대 렌더 컬링 거리(미터)를 반환합니다.
+     * [EN] Returns the maximum render culling distance from the camera in meters.
+     */
     get cullingDistance(): number {
         return this.#cullingDistance;
     }
@@ -676,6 +756,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 그림자 캐스팅이 적용되는 최대 거리(미터)를 반환합니다.
+     * [EN] Returns the maximum shadow casting distance in meters.
+     */
     get maxShadowDistance(): number {
         return this.#maxShadowDistance;
     }
@@ -689,6 +773,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 반환합니다.
+     * [EN] Returns whether camera-based dynamic sub-cell streaming is enabled.
+     */
     get enableStreaming(): boolean {
         return this.#enableStreaming;
     }
@@ -697,6 +785,10 @@ export class Foliage extends AScatterType {
         this.#enableStreaming = !!value;
     }
 
+    /**
+     * [KO] 서브셀 스트리밍이 활성화되는 반경(미터)을 반환합니다.
+     * [EN] Returns the active sub-cell streaming radius in meters.
+     */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
@@ -709,6 +801,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 서브셀 공간 분할 그리드의 한 변 크기(미터)를 반환합니다.
+     * [EN] Returns the sub-cell spatial grid division size in meters.
+     */
     get subCellSize(): number {
         return this.#subCellSize;
     }
@@ -717,6 +813,10 @@ export class Foliage extends AScatterType {
         this.#subCellSize = Math.max(10.0, Number(value) || 10.0);
     }
 
+    /**
+     * [KO] 식생이 배치될 대상 지형 스플랫 레이어 식별자(이름 또는 인덱스)를 반환합니다.
+     * [EN] Returns the target terrain splat layer identifier (name or index) where foliage is placed.
+     */
     get targetLayer(): string | number | undefined {
         return this.#targetLayer;
     }
@@ -728,6 +828,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 배치가 허용되는 최소 경사도(각도: 0~90)를 반환합니다.
+     * [EN] Returns the minimum slope constraint in degrees (0-90) allowed for placement.
+     */
     get minSlope(): number {
         return this.#minSlope;
     }
@@ -740,6 +844,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 배치가 허용되는 최대 경사도(각도: 0~90)를 반환합니다.
+     * [EN] Returns the maximum slope constraint in degrees (0-90) allowed for placement.
+     */
     get maxSlope(): number {
         return this.#maxSlope;
     }
@@ -752,6 +860,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 스플랫 레이어 가중치에 비례하여 인스턴스 밀도를 조절할지 여부를 반환합니다.
+     * [EN] Returns whether instance density scales proportionally to splat layer weight.
+     */
     get densityScaleByWeight(): boolean {
         return this.#densityScaleByWeight;
     }
@@ -764,6 +876,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 헥타르(10,000m²)당 인스턴스 기본 밀도를 반환합니다.
+     * [EN] Returns the base instance density per hectare (10,000m²).
+     */
     get densityPerHectare(): number {
         return this.#densityPerHectare;
     }
@@ -776,14 +892,10 @@ export class Foliage extends AScatterType {
         }
     }
 
-    get density(): number {
-        return this.#densityPerHectare;
-    }
-
-    set density(val: number) {
-        this.densityPerHectare = val;
-    }
-
+    /**
+     * [KO] 인스턴스 전체 밀도 배수를 반환합니다.
+     * [EN] Returns the global instance density multiplier.
+     */
     get densityMultiplier(): number {
         return this.#densityMultiplier;
     }
@@ -796,11 +908,19 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 단일 서브셀 격자 영역 당 배치되는 계산된 인스턴스 수량을 반환합니다.
+     * [EN] Returns the calculated number of instances placed per single sub-cell grid area.
+     */
     get instancesPerCell(): number {
         const cellArea = this.#subCellSize * this.#subCellSize;
         return Math.max(0, Math.round((this.#densityPerHectare * (cellArea / 10000.0)) * this.#densityMultiplier));
     }
 
+    /**
+     * [KO] 인스턴스 줄기 바람 흔들림 강도 배수를 반환합니다.
+     * [EN] Returns the trunk wind simulation strength multiplier.
+     */
     get windMultiplier(): number {
         return this.#windMultiplier;
     }
@@ -814,6 +934,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 잎사귀 세부 떨림(Flutter) 강도 배수를 반환합니다.
+     * [EN] Returns the leaf flutter simulation strength multiplier.
+     */
     get windFlutterMultiplier(): number {
         return this.#windFlutterMultiplier;
     }
@@ -827,7 +951,10 @@ export class Foliage extends AScatterType {
         }
     }
 
-
+    /**
+     * [KO] 지형 표면 법선 벡터에 맞추어 인스턴스를 기울일지 여부를 반환합니다.
+     * [EN] Returns whether to align instance orientation to the terrain surface normal.
+     */
     get alignToNormal(): boolean {
         return this.#alignToNormal;
     }
@@ -840,6 +967,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 지형 법선 정렬 강도 (0.0=완전 수직 유지, 1.0=지형 경사면 완전 정렬)를 반환합니다.
+     * [EN] Returns the terrain normal alignment factor (0.0=stay upright, 1.0=full slope alignment).
+     */
     get alignFactor(): number {
         return this.#alignFactor;
     }
@@ -854,6 +985,186 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 식생이 그림자를 투영(캐스팅)할지 여부를 반환합니다.
+     * [EN] Returns whether foliage casts shadows.
+     */
+    get castShadow(): boolean {
+        return this.#castShadow;
+    }
+
+    /**
+     * [KO] 이 식생 타입에 임포스터 서브메시가 생성되어 존재하는지 여부를 반환합니다.
+     * [EN] Returns whether an impostor sub-mesh exists for this foliage type.
+     */
+    get hasImpostor(): boolean {
+        return !!this.#impostorSubMesh;
+    }
+
+    /**
+     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 반환합니다.
+     * [EN] Returns whether octahedral impostor billboards are enabled for distant rendering.
+     */
+    get useImpostor(): boolean {
+        return this.#useImpostor && !!this.#impostorSubMesh;
+    }
+
+    /**
+     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
+     * [EN] Returns whether the depth prepass (Early-Z) is enabled during foliage rendering.
+     */
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    set castShadow(value: boolean) {
+        const boolVal = !!value;
+        if (this.#castShadow !== boolVal) {
+            this.#castShadow = boolVal;
+            this.#syncTypeParams();
+            this.#onDirty?.();
+        }
+    }
+
+    /**
+     * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
+     * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
+     */
+    get hasMaskedLOD0(): boolean {
+        return this.#hasMaskedLOD0;
+    }
+
+    #syncInternalWind(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice || !this.#lastWindParams) return;
+        this.syncWindToSubMeshes(
+            gpuDevice,
+            this.#lastWindParams.windDirX,
+            this.#lastWindParams.windDirY,
+            this.#lastWindParams.windSpeed,
+            this.#lastWindParams.windStrength,
+            this.#lastWindParams.windFreq,
+            this.#lastWindParams.windFlutterStrength,
+            this.#lastWindParams.windEnabled
+        );
+    }
+
+    /**
+     * [KO] 지형 밑둥 표면 색상 블렌딩 강도(0.0~1.0)를 반환합니다.
+     * [EN] Returns the bottom terrain surface color blending strength (0.0-1.0).
+     */
+    get groundBlendStrength(): number {
+        return this.#groundBlendStrength;
+    }
+
+    /**
+     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
+     * [EN] Returns the vertical height range in meters where bottom surface color blending is applied.
+     */
+    get groundBlendRange(): number {
+        return this.#groundBlendRange;
+    }
+
+    set useImpostor(value: boolean) {
+        if (!this.#impostorSubMesh) return;
+        const boolVal = !!value;
+        if (this.#useImpostor !== boolVal) {
+            this.#useImpostor = boolVal;
+            this.#updatePassBuckets();
+            this.#syncTypeParams();
+            this.#onDirty?.();
+        }
+    }
+
+    /**
+     * [KO] 컬링된 인스턴스 데이터가 저장되는 GPU 저장소 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer storing culled instance data.
+     */
+    get culledGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer?.culledGPUBuffer || null;
+    }
+
+    /**
+     * [KO] 메인 렌더 패스용 간접 드로우 인자 버퍼를 반환합니다.
+     * [EN] Returns the indirect draw argument buffer for the main render pass.
+     */
+    get indirectGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer?.indirectGPUBuffer || null;
+    }
+
+    /**
+     * [KO] 그림자 패스 컬링 결과 인스턴스가 저장되는 GPU 저장소 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer storing shadow pass culled instances.
+     */
+    get shadowCulledGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
+    }
+
+    set groundBlendStrength(v: number) {
+        const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
+        if (this.#groundBlendStrength !== val) {
+            this.#groundBlendStrength = val;
+            this.#updateSubMeshGroundBlend();
+        }
+    }
+
+    /**
+     * [KO] 그림자 패스용 간접 드로우 인자 버퍼를 반환합니다.
+     * [EN] Returns the indirect draw argument buffer for the shadow pass.
+     */
+    get shadowIndirectGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
+    }
+
+    set groundBlendRange(v: number) {
+        const val = Math.max(0.1, Number(v) || 0.1);
+        if (this.#groundBlendRange !== val) {
+            this.#groundBlendRange = val;
+            this.#updateSubMeshGroundBlend();
+        }
+    }
+
+    #updateSubMeshGroundBlend(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return;
+        const subCount = this.#subMeshes.length;
+        for (let s = 0; s < subCount; s++) {
+            const sub = this.#subMeshes[s];
+            if (!sub.isImpostor) {
+                sub.updateGroundBlendParams(gpuDevice, this.#groundBlendStrength, this.#groundBlendRange);
+            }
+        }
+    }
+
+    /**
+     * [KO] 바람 물리 시뮬레이션 파라미터를 모든 하위 서브메시 및 그림자 병합 서브메시에 동기화합니다.
+     * [EN] Synchronizes wind physical simulation parameters across all sub-meshes and shadow merged sub-meshes.
+     *
+     * @param gpuDevice -
+     * [KO] GPUDevice 인스턴스
+     * [EN] GPUDevice instance
+     * @param windDirX -
+     * [KO] 바람 진행 방향 X 성분
+     * [EN] Wind direction X component
+     * @param windDirY -
+     * [KO] 바람 진행 방향 Z(Y) 성분
+     * [EN] Wind direction Z(Y) component
+     * @param windSpeed -
+     * [KO] 바람 진행 속도
+     * [EN] Wind travel speed
+     * @param windStrength -
+     * [KO] 바람 기본 강도
+     * [EN] Base wind strength
+     * @param windFreq -
+     * [KO] 바람 주기 주파수
+     * [EN] Wind cycle frequency
+     * @param windFlutterStrength -
+     * [KO] 잎사귀 세부 떨림 강도
+     * [EN] Leaf flutter strength
+     * @param windEnabled -
+     * [KO] 바람 시뮬레이션 활성화 여부
+     * [EN] Whether wind simulation is enabled
+     */
     syncWindToSubMeshes(
         gpuDevice: GPUDevice,
         windDirX: number,
@@ -917,6 +1228,17 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 특정 LOD 단계의 그림자 수신 여부를 동적으로 변경합니다.
+     * [EN] Dynamically sets whether a specific LOD level receives shadows.
+     *
+     * @param lodIndex -
+     * [KO] 대상 LOD 단계 인덱스
+     * [EN] Target LOD level index
+     * @param value -
+     * [KO] 그림자 수신 활성화 여부
+     * [EN] Whether shadow reception is enabled
+     */
     setLODReceiveShadow(lodIndex: number, value: boolean): void {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
         const boolVal = !!value;
@@ -938,110 +1260,58 @@ export class Foliage extends AScatterType {
         this.#onDirty?.();
     }
 
+    /**
+     * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
+     * [EN] Clears the tile cache and loaded component key set in the streamer.
+     */
     clearTileCache(): void {
         this.#streamer.clear();
         this.#loadedTileKeys.clear();
     }
 
-    get castShadow(): boolean {
-        return this.#castShadow;
-    }
-
-    set castShadow(value: boolean) {
-        const boolVal = !!value;
-        if (this.#castShadow !== boolVal) {
-            this.#castShadow = boolVal;
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-
+    /**
+     * [KO] 특정 LOD 단계의 그림자 수신 활성화 여부를 조회합니다.
+     * [EN] Retrieves whether shadow reception is enabled for a specific LOD level.
+     *
+     * @param lodIndex -
+     * [KO] 조회할 LOD 단계 인덱스
+     * [EN] LOD level index to query
+     * @returns
+     * [KO] 그림자 수신 여부
+     * [EN] Whether shadows are received
+     */
     getLODReceiveShadow(lodIndex: number): boolean {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return false;
         return this.#lodInfoList[lodIndex].receiveShadow !== false;
     }
 
-    #syncInternalWind(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#lastWindParams) return;
-        this.syncWindToSubMeshes(
-            gpuDevice,
-            this.#lastWindParams.windDirX,
-            this.#lastWindParams.windDirY,
-            this.#lastWindParams.windSpeed,
-            this.#lastWindParams.windStrength,
-            this.#lastWindParams.windFreq,
-            this.#lastWindParams.windFlutterStrength,
-            this.#lastWindParams.windEnabled
-        );
-    }
-
-    get hasImpostor(): boolean {
-        return !!this.#impostorSubMesh;
-    }
-
-    get useImpostor(): boolean {
-        return this.#useImpostor && !!this.#impostorSubMesh;
-    }
-
-    set useImpostor(value: boolean) {
-        if (!this.#impostorSubMesh) return;
-        const boolVal = !!value;
-        if (this.#useImpostor !== boolVal) {
-            this.#useImpostor = boolVal;
-            this.#updatePassBuckets();
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
-    }
-    get hasMaskedLOD0(): boolean {
-        return this.#hasMaskedLOD0;
-    }
-
-    get groundBlendStrength(): number {
-        return this.#groundBlendStrength;
-    }
-
-    set groundBlendStrength(v: number) {
-        const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
-        if (this.#groundBlendStrength !== val) {
-            this.#groundBlendStrength = val;
-            this.#updateSubMeshGroundBlend();
-        }
-    }
-
-    get groundBlendRange(): number {
-        return this.#groundBlendRange;
-    }
-
-    set groundBlendRange(v: number) {
-        const val = Math.max(0.1, Number(v) || 0.1);
-        if (this.#groundBlendRange !== val) {
-            this.#groundBlendRange = val;
-            this.#updateSubMeshGroundBlend();
-        }
-    }
-
-    #updateSubMeshGroundBlend(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-        const subCount = this.#subMeshes.length;
-        for (let s = 0; s < subCount; s++) {
-            const sub = this.#subMeshes[s];
-            if (!sub.isImpostor) {
-                sub.updateGroundBlendParams(gpuDevice, this.#groundBlendStrength, this.#groundBlendRange);
-            }
-        }
-    }
-
+    /**
+     * [KO] 특정 LOD 단계의 전환 최대 가시 거리(미터)를 반환합니다.
+     * [EN] Returns the transition maximum visible distance in meters for a specific LOD level.
+     *
+     * @param lodIndex -
+     * [KO] 대상 LOD 단계 인덱스
+     * [EN] Target LOD level index
+     * @returns
+     * [KO] LOD 전환 거리 (미터)
+     * [EN] LOD transition distance in meters
+     */
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
         return this.#lodInfoList[lodIndex].lodDistance;
     }
 
+    /**
+     * [KO] 특정 LOD 단계의 전환 최대 가시 거리(미터)를 설정하고 GPU 파라미터 버퍼에 동기화합니다.
+     * [EN] Sets the transition maximum visible distance in meters for a specific LOD level and syncs to GPU.
+     *
+     * @param lodIndex -
+     * [KO] 대상 LOD 단계 인덱스
+     * [EN] Target LOD level index
+     * @param distance -
+     * [KO] 설정할 전환 거리 (미터)
+     * [EN] Transition distance to set in meters
+     */
     setLODDistance(lodIndex: number, distance: number): void {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
         const numVal = Math.max(0, distance);
@@ -1051,6 +1321,17 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 신규 지형 타일 컴포넌트가 로드되었을 때 호출되어 해당 타일의 식생 인스턴스를 서브셀 단위로 분할(Partition) 및 스트리머에 등록합니다.
+     * [EN] Invoked when a new terrain tile component is loaded to partition foliage instances into sub-cells and register them with the streamer.
+     *
+     * @param tileComponent -
+     * [KO] 로드된 지형 타일 컴포넌트 (`LandscapeComponent`)
+     * [EN] Loaded terrain tile component (`LandscapeComponent`)
+     * @param landscape -
+     * [KO] 부모 Landscape 인스턴스 (선택사항)
+     * [EN] Parent Landscape instance (optional)
+     */
     populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
         if (!tileComponent) return;
         const cz = (tileComponent.componentZ ?? 0) & 0xffff;
@@ -1079,6 +1360,23 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 카메라 위치와 활성 서브셀 키 목록을 기반으로 인스턴스 슬롯 스트리밍을 갱신합니다.
+     * [EN] Updates instance slot streaming based on camera position and active sub-cell key list.
+     *
+     * @param activeKeyArray -
+     * [KO] 활성 서브셀 키 배열
+     * [EN] Active sub-cell key array
+     * @param activeKeyCount -
+     * [KO] 활성 서브셀 키 개수
+     * [EN] Active sub-cell key count
+     * @param camX -
+     * [KO] 카메라 월드 X 좌표
+     * [EN] Camera world X coordinate
+     * @param camZ -
+     * [KO] 카메라 월드 Z 좌표
+     * [EN] Camera world Z coordinate
+     */
     updateStreaming(
         activeKeyArray: Int32Array,
         activeKeyCount: number,
@@ -1088,22 +1386,17 @@ export class Foliage extends AScatterType {
         this.#streamer.update(activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
     }
 
-    get culledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.culledGPUBuffer || null;
-    }
-
-    get indirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.indirectGPUBuffer || null;
-    }
-
-    get shadowCulledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
-    }
-
-    get shadowIndirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
-    }
-
+    /**
+     * [KO] 지정된 오프셋 및 개수의 인스턴스 데이터를 CPU 스테이징에서 GPU 원본 인스턴스 버퍼로 업로드하고 베이킹 태스크를 등록합니다.
+     * [EN] Uploads instance data of the specified range from CPU staging to GPU raw buffer and queues baking tasks.
+     *
+     * @param startIndex -
+     * [KO] 타입 할당 내 로컬 시작 오프셋
+     * [EN] Local start offset within type allocation
+     * @param count -
+     * [KO] 업로드할 인스턴스 개수
+     * [EN] Number of instances to upload
+     */
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
@@ -1114,6 +1407,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 현재 활성화된 모든 식생 인스턴스의 지형 스냅 및 물리 배치를 재베이킹합니다.
+     * [EN] Re-bakes terrain snapping and physical placement for all currently active foliage instances.
+     */
     rebake(): void {
         if (this.#megaBuffer && this.#allocation && this.#baker && this.#allocation.instanceCount > 0) {
             this.#baker.addBakeTasks(
@@ -1124,6 +1421,10 @@ export class Foliage extends AScatterType {
         }
     }
 
+    /**
+     * [KO] 식생 인스턴스, 하위 서브메시 및 스트리머 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases foliage instance, child sub-meshes, and streamer resources.
+     */
     override destroy(): void {
         this.#streamer.clear();
         for (let i = 0; i < this.#subMeshes.length; i++) {

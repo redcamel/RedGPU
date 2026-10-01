@@ -1,3 +1,8 @@
+/**
+ * [KO] 스캐터 시스템(Foliage, Grass 등)에서 WebGPU 간접 드로우(Indirect Draw)를 수행하는 공통 지오메트리 렌더 단위 추상 기반 모듈입니다.
+ * [EN] Common abstract geometry render unit module executing WebGPU indirect draws across the scatter system (Foliage, Grass, etc.).
+ * @packageDocumentation
+ */
 import Geometry from "../../../geometry/Geometry";
 
 /**
@@ -90,6 +95,14 @@ export abstract class AScatterGeometryUnit {
     #indirectOffsetBytes: number;
     #instanceBufferOffset: number;
 
+    /**
+     * [KO] AScatterGeometryUnit 인스턴스를 생성하고 버퍼 파라미터를 초기화합니다.
+     * [EN] Creates an AScatterGeometryUnit instance and initializes buffer parameters.
+     *
+     * @param init -
+     * [KO] 지오메트리 유닛 초기화 옵션 객체
+     * [EN] Geometry unit initialization options object
+     */
     constructor(init: AScatterGeometryUnitInitOptions) {
         this.#geometry = init.geometry;
         this.#vertexCount = init.vertexCount;

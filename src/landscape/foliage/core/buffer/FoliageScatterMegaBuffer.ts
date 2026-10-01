@@ -1,3 +1,8 @@
+/**
+ * [KO] 대규모 식생(Foliage) 시스템의 멀티 LOD 인스턴스 데이터, 간접 드로우 및 캐스케이드 그림자 버퍼를 통합 관리하는 메가버퍼 모듈입니다.
+ * [EN] Mega-buffer module integrally managing multi-LOD instance data, indirect draw, and cascade shadow buffers for large-scale foliage systems.
+ * @packageDocumentation
+ */
 import RedGPUContext from '../../../../context/RedGPUContext';
 import {
     AScatterMegaBuffer,
@@ -645,6 +650,14 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
+    /**
+     * [KO] 인스턴스 최대 수용 용량이 증가할 때 호출되어 메인 및 그림자 컬링 GPU 버퍼를 리사이징합니다.
+     * [EN] Invoked when maximum instance capacity expands to resize main and shadow culled GPU buffers.
+     *
+     * @param newCapacity -
+     * [KO] 새로 확장된 인스턴스 수용 용량
+     * [EN] Newly expanded instance capacity
+     */
     onResizeBuffers(newCapacity: number): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
@@ -671,6 +684,10 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#unifiedCullingBindGroup = null;
     }
 
+    /**
+     * [KO] 메가버퍼 인스턴스 해제 시 그림자 버퍼, 유니폼 버퍼, 바인드그룹 및 식생 타입 할당 목록을 파괴합니다.
+     * [EN] Destroys shadow buffers, uniform buffers, bind groups, and foliage type allocations upon mega-buffer release.
+     */
     onDestroy(): void {
         this.#cachedHZBTextureView = null;
         this.#cachedHZBSampler = null;

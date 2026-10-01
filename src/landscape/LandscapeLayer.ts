@@ -226,10 +226,18 @@ export class LandscapeLayer {
         }
     }
 
+    /**
+     * [KO] 레이어의 고유 식별 이름입니다. (읽기 전용)
+     * [EN] Unique identification name of the layer. (Read-only)
+     */
     get name(): string {
         return this.#name;
     }
 
+    /**
+     * [KO] 레이어의 베이스 컬러(알베도) 텍스처를 가져오거나 설정합니다.
+     * [EN] Gets or sets the base color (albedo) texture of the layer.
+     */
     get baseColorTexture(): BitmapTexture | undefined {
         return this.#baseColorTexture;
     }
@@ -250,6 +258,10 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
+    /**
+     * [KO] 레이어의 노멀 맵 텍스처를 가져오거나 설정합니다.
+     * [EN] Gets or sets the normal map texture of the layer.
+     */
     get normalTexture(): BitmapTexture | undefined {
         return this.#normalTexture;
     }
@@ -270,6 +282,10 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
+    /**
+     * [KO] 레이어의 ORM (Occlusion/Roughness/Metallic) 텍스처를 가져오거나 설정합니다.
+     * [EN] Gets or sets the ORM (Occlusion/Roughness/Metallic) texture of the layer.
+     */
     get ormTexture(): BitmapTexture | undefined {
         return this.#ormTexture;
     }
@@ -290,6 +306,10 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
+    /**
+     * [KO] 레이어의 스플랫 가중치(WeightMap) 텍스처를 가져오거나 설정합니다.
+     * [EN] Gets or sets the splat weight texture of the layer.
+     */
     get weightTexture(): BitmapTexture | undefined {
         return this.#weightTexture;
     }
@@ -310,6 +330,180 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
+    /**
+     * [KO] 레이어의 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether the layer is enabled.
+     */
+    get enabled(): boolean {
+        return this.#enabled;
+    }
+
+    #resolveLinearFormat(): GPUTextureFormat {
+        return 'rgba8unorm';
+    }
+
+    /**
+     * [KO] 레이어 텍스처의 월드 UV 타일링 스케일 `[u, v]`를 가져오거나 설정합니다.
+     * [EN] Gets or sets the world UV tiling scale `[u, v]` of the layer textures.
+     */
+    get uvScale(): [number, number] {
+        return this.#uvScale;
+    }
+
+    set enabled(val: boolean) {
+        if (this.#enabled === val) return;
+        this.#enabled = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 레이어 텍스처의 월드 UV 오프셋 `[u, v]`를 가져오거나 설정합니다.
+     * [EN] Gets or sets the world UV offset `[u, v]` of the layer textures.
+     */
+    get uvOffset(): [number, number] {
+        return this.#uvOffset;
+    }
+
+    set uvScale(val: [number, number]) {
+        if (this.#uvScale[0] === val[0] && this.#uvScale[1] === val[1]) return;
+        this.#uvScale[0] = val[0];
+        this.#uvScale[1] = val[1];
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 카메라 근접 거리에서 텍스처 타일링을 세분화하기 위한 근접 UV 스케일 배수를 가져오거나 설정합니다.
+     * [EN] Gets or sets the near UV scale multiplier for refining texture tiling up close to the camera.
+     */
+    get nearUVScaleMultiplier(): number {
+        return this.#nearUVScaleMultiplier;
+    }
+
+    set uvOffset(val: [number, number]) {
+        if (this.#uvOffset[0] === val[0] && this.#uvOffset[1] === val[1]) return;
+        this.#uvOffset[0] = val[0];
+        this.#uvOffset[1] = val[1];
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 스플랫 가중치 텍스처에서 참조할 RGBA 채널 식별자를 가져오거나 설정합니다.
+     * [EN] Gets or sets the RGBA channel identifier referenced in the splat weight texture.
+     */
+    get weightChannel(): LandscapeWeightMapChannel {
+        return this.#weightChannel;
+    }
+
+    set nearUVScaleMultiplier(val: number) {
+        const clamped = Math.max(0.1, val);
+        if (this.#nearUVScaleMultiplier === clamped) return;
+        this.#nearUVScaleMultiplier = clamped;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 스플랫 가중치 채널의 정수 인덱스(0: R, 1: G, 2: B, 3: A)를 반환합니다. (읽기 전용)
+     * [EN] Returns the integer index of the splat weight channel (0: R, 1: G, 2: B, 3: A). (Read-only)
+     */
+    get weightChannelIndex(): number {
+        return this.#weightChannelIndex;
+    }
+
+    set weightChannel(val: LandscapeWeightMapChannel) {
+        if (this.#weightChannel === val) return;
+        this.#weightChannel = val;
+        this.#updateWeightChannelIndex();
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 레이어 표면 거칠기(0.0~1.0)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the layer surface roughness (0.0 to 1.0).
+     */
+    get roughness(): number {
+        return this.#roughness;
+    }
+
+    /**
+     * [KO] 레이어 금속성(0.0~1.0)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the layer metallic value (0.0 to 1.0).
+     */
+    get metallic(): number {
+        return this.#metallic;
+    }
+
+    set roughness(val: number) {
+        if (this.#roughness === val) return;
+        this.#roughness = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 레이어 노멀 맵의 굴곡 강도를 가져오거나 설정합니다.
+     * [EN] Gets or sets the bump intensity of the layer normal map.
+     */
+    get normalIntensity(): number {
+        return this.#normalIntensity;
+    }
+
+    set metallic(val: number) {
+        if (this.#metallic === val) return;
+        this.#metallic = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 레이어 앰비언트 오클루전(AO) 강도를 가져오거나 설정합니다.
+     * [EN] Gets or sets the ambient occlusion (AO) intensity of the layer.
+     */
+    get aoIntensity(): number {
+        return this.#aoIntensity;
+    }
+
+    set normalIntensity(val: number) {
+        if (this.#normalIntensity === val) return;
+        this.#normalIntensity = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 레이어의 가중치 맵을 CPU에서 샘플링하기 위한 `LandscapeWeightMapCPUSampler` 인스턴스를 가져오거나 설정합니다.
+     * [EN] Gets or sets the `LandscapeWeightMapCPUSampler` instance for sampling the layer's weight map on the CPU.
+     */
+    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler | undefined {
+        return this.#weightMapCPUSampler;
+    }
+
+    set aoIntensity(val: number) {
+        if (this.#aoIntensity === val) return;
+        this.#aoIntensity = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+    #updateWeightChannelIndex(): void {
+        const ch = String(this.#weightChannel).toUpperCase();
+        if (ch === 'G' || ch === '1') this.#weightChannelIndex = 1;
+        else if (ch === 'B' || ch === '2') this.#weightChannelIndex = 2;
+        else if (ch === 'A' || ch === '3') this.#weightChannelIndex = 3;
+        else this.#weightChannelIndex = 0;
+    }
+
+    /**
+     * [KO] 문자열 URL로 전달되어 아직 인스턴스화되지 않은 지연 텍스처들을 전달받은 컨텍스트를 사용해 실제 `BitmapTexture`로 인스턴스화합니다.
+     * [EN] Resolves any pending string URL textures into actual `BitmapTexture` instances using the provided RedGPUContext.
+     *
+     * @param context -
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     */
     resolvePendingTextures(context: RedGPUContext): void {
         this.#redGPUContext = context;
         if (this.#pendingBaseColorSrc) {
@@ -330,132 +524,24 @@ export class LandscapeLayer {
         }
     }
 
-    #resolveLinearFormat(): GPUTextureFormat {
-        return 'rgba8unorm';
-    }
-
-    get enabled(): boolean {
-        return this.#enabled;
-    }
-
-    set enabled(val: boolean) {
-        if (this.#enabled === val) return;
-        this.#enabled = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get uvScale(): [number, number] {
-        return this.#uvScale;
-    }
-
-    set uvScale(val: [number, number]) {
-        if (this.#uvScale[0] === val[0] && this.#uvScale[1] === val[1]) return;
-        this.#uvScale[0] = val[0];
-        this.#uvScale[1] = val[1];
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get uvOffset(): [number, number] {
-        return this.#uvOffset;
-    }
-
-    set uvOffset(val: [number, number]) {
-        if (this.#uvOffset[0] === val[0] && this.#uvOffset[1] === val[1]) return;
-        this.#uvOffset[0] = val[0];
-        this.#uvOffset[1] = val[1];
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get nearUVScaleMultiplier(): number {
-        return this.#nearUVScaleMultiplier;
-    }
-
-    set nearUVScaleMultiplier(val: number) {
-        const clamped = Math.max(0.1, val);
-        if (this.#nearUVScaleMultiplier === clamped) return;
-        this.#nearUVScaleMultiplier = clamped;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get weightChannel(): LandscapeWeightMapChannel {
-        return this.#weightChannel;
-    }
-
-    set weightChannel(val: LandscapeWeightMapChannel) {
-        if (this.#weightChannel === val) return;
-        this.#weightChannel = val;
-        this.#updateWeightChannelIndex();
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get weightChannelIndex(): number {
-        return this.#weightChannelIndex;
-    }
-
-    get roughness(): number {
-        return this.#roughness;
-    }
-
-    set roughness(val: number) {
-        if (this.#roughness === val) return;
-        this.#roughness = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get metallic(): number {
-        return this.#metallic;
-    }
-
-    set metallic(val: number) {
-        if (this.#metallic === val) return;
-        this.#metallic = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get normalIntensity(): number {
-        return this.#normalIntensity;
-    }
-
-    set normalIntensity(val: number) {
-        if (this.#normalIntensity === val) return;
-        this.#normalIntensity = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get aoIntensity(): number {
-        return this.#aoIntensity;
-    }
-
-    set aoIntensity(val: number) {
-        if (this.#aoIntensity === val) return;
-        this.#aoIntensity = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-    #updateWeightChannelIndex(): void {
-        const ch = String(this.#weightChannel).toUpperCase();
-        if (ch === 'G' || ch === '1') this.#weightChannelIndex = 1;
-        else if (ch === 'B' || ch === '2') this.#weightChannelIndex = 2;
-        else if (ch === 'A' || ch === '3') this.#weightChannelIndex = 3;
-        else this.#weightChannelIndex = 0;
-    }
-
-    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler | undefined {
-        return this.#weightMapCPUSampler;
-    }
-
     set weightMapCPUSampler(val: LandscapeWeightMapCPUSampler | undefined) {
         this.#weightMapCPUSampler = val;
     }
 
+    /**
+     * [KO] 지정된 UV `(u, v)` 좌표에서 이 레이어의 블렌딩 가중치(0.0~1.0)를 CPU 가중치 샘플러를 통해 조회합니다.
+     * [EN] Queries the blending weight (0.0 to 1.0) of this layer at the specified UV `(u, v)` coordinates via the CPU weight sampler.
+     *
+     * @param u -
+     * [KO] 텍스처 수평 좌표 U (0.0 ~ 1.0)
+     * [EN] Texture horizontal coordinate U (0.0 to 1.0)
+     * @param v -
+     * [KO] 텍스처 수직 좌표 V (0.0 ~ 1.0)
+     * [EN] Texture vertical coordinate V (0.0 to 1.0)
+     * @returns
+     * [KO] 샘플링된 가중치 값 (0.0 ~ 1.0)
+     * [EN] Sampled weight value (0.0 to 1.0)
+     */
     getWeightAtUV(u: number, v: number): number {
         if (!this.#enabled) return 0.0;
         const src = this.#weightTexture?.src;

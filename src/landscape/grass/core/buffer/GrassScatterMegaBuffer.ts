@@ -1,3 +1,8 @@
+/**
+ * [KO] 대규모 지형 잔디 시스템의 인스턴스 데이터, 간접 드로우 버퍼를 통합 관리하는 메가버퍼 모듈입니다.
+ * [EN] Mega-buffer module managing instance data and indirect draw buffers for massive landscape grass systems.
+ * @packageDocumentation
+ */
 import RedGPUContext from '../../../../context/RedGPUContext';
 import {AScatterMegaBuffer} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullComputeWGSL from '../culling/grassCullCompute.wgsl';
@@ -322,6 +327,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param stageDistances -
      * [KO] 스테이지별 전환 거리 배열
      * [EN] Stage transition distance array
+     * @param subMeshCount -
+     * [KO] 단일 잔디 모델을 구성하는 서브메시 총 개수
+     * [EN] Total number of sub-meshes composing a single grass model
      */
     updateTypeParams(
         typeId: number,
@@ -393,6 +401,14 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         return this.#allocations.get(typeId);
     }
 
+    /**
+     * [KO] 인스턴스 최대 수용 용량이 증가할 때 호출되어 GPU 컬링 버퍼를 리사이징합니다.
+     * [EN] Invoked when maximum instance capacity expands to resize the GPU culled buffer.
+     *
+     * @param newCapacity -
+     * [KO] 새로 확장된 인스턴스 수용 용량
+     * [EN] Newly expanded instance capacity
+     */
     onResizeBuffers(newCapacity: number): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
@@ -409,6 +425,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         });
     }
 
+    /**
+     * [KO] 메가버퍼 인스턴스 파괴 시 잔디 타입별 할당 데이터 및 기본 세그먼트를 정리합니다.
+     * [EN] Clears grass type allocations and base segments upon mega-buffer destruction.
+     */
     onDestroy(): void {
         this.#allocations.clear();
         this.clearBaseAllocations();

@@ -189,6 +189,29 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
+    /**
+     * [KO] 전체 VNT 아틀라스 영역에 대해 모든 지형 타일의 VBT 베이스컬러/노멀/ORM 아틀라스를 일괄 베이킹합니다.
+     * [EN] Bakes VBT base color, normal, and ORM atlases for all terrain tiles across the entire VNT atlas region in a single batch.
+     *
+     * @param vntAtlas -
+     * [KO] 지형 가상 노멀 텍스처 (VNT) 아틀라스
+     * [EN] Terrain virtual normal texture (VNT) atlas
+     * @param vbtBaseColorArray -
+     * [KO] 베이킹 결과를 저장할 베이스컬러 DirectTexture
+     * [EN] Base color DirectTexture to store bake result
+     * @param vbtNormalArray -
+     * [KO] 베이킹 결과를 저장할 노멀 DirectTexture
+     * [EN] Normal DirectTexture to store bake result
+     * @param vbtORMArray -
+     * [KO] 베이킹 결과를 저장할 ORM DirectTexture
+     * [EN] ORM DirectTexture to store bake result
+     * @param material -
+     * [KO] 지형 머티리얼 인스턴스
+     * [EN] Landscape material instance
+     * @param singleTilePixels -
+     * [KO] 단일 타일 해상도 (픽셀, 기본값: 512)
+     * [EN] Single tile resolution in pixels (default: 512)
+     */
     bakeAtlas(
         vntAtlas: DirectTexture,
         vbtBaseColorArray: DirectTexture,
@@ -290,6 +313,10 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
+    /**
+     * [KO] 타일 밉맵 유니폼 버퍼 및 컴퓨트 파이프라인 자원을 해제하고 파기합니다.
+     * [EN] Releases and destroys tile mipmap uniform buffers and compute pipeline resources.
+     */
     override destroy(): void {
         super.destroy();
         for (let i = 0; i < this.#tileMipUniformBuffers.length; i++) {

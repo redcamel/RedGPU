@@ -50,6 +50,10 @@ export class FoliageSpatialGrid {
         this.#streamingRadius = Math.max(10.0, streamingRadius);
     }
 
+    /**
+     * [KO] 서브셀 공간 분할 격자 크기(미터)를 반환합니다.
+     * [EN] Returns the sub-cell spatial partitioning grid size in meters.
+     */
     get subCellSize(): number {
         return this.#subCellSize;
     }
@@ -62,6 +66,10 @@ export class FoliageSpatialGrid {
         }
     }
 
+    /**
+     * [KO] 서브셀 스트리밍 활성 반경(미터)을 반환합니다.
+     * [EN] Returns the active sub-cell streaming radius in meters.
+     */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
@@ -74,10 +82,18 @@ export class FoliageSpatialGrid {
         }
     }
 
+    /**
+     * [KO] 현재 활성화된 서브셀의 총 개수를 반환합니다.
+     * [EN] Returns the total count of currently active sub-cells.
+     */
     get activeSubCellCount(): number {
         return this.#activeSubCellCount;
     }
 
+    /**
+     * [KO] 현재 활성화된 서브셀 키(`Int32Array`) 버퍼를 반환합니다.
+     * [EN] Returns the active sub-cell key (`Int32Array`) buffer.
+     */
     get activeSubCellKeys(): Int32Array {
         return this.#activeSubCellKeys;
     }

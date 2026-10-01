@@ -407,7 +407,6 @@ export class Grass extends AScatterType {
     }
 
     /**
-    /**
      * [KO] 잔디 렌더링에 사용되는 기본 메쉬 객체
      * [EN] Base Mesh instance used for grass rendering
      */

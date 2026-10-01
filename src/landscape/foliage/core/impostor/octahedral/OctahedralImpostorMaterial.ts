@@ -21,20 +21,68 @@ import defineBoolean from "../../../../../defineProperty/funcs/defineBoolean";
  * [EN] Interface for octahedral impostor material properties.
  */
 interface OctahedralImpostorMaterial {
+    /**
+     * [KO] 베이스 컬러 아틀라스 텍스처
+     * [EN] Base color atlas texture
+     */
     baseColorTexture: BitmapTexture | DirectTexture;
+    /**
+     * [KO] 베이스 컬러 텍스처 샘플러
+     * [EN] Base color texture sampler
+     */
     baseColorTextureSampler: Sampler;
 
+    /**
+     * [KO] 노멀 아틀라스 텍스처
+     * [EN] Normal atlas texture
+     */
     normalTexture: BitmapTexture | DirectTexture;
+    /**
+     * [KO] 노멀 텍스처 샘플러
+     * [EN] Normal texture sampler
+     */
     normalTextureSampler: Sampler;
 
+    /**
+     * [KO] 패킹 ORM (Occlusion/Roughness/Metallic) 아틀라스 텍스처
+     * [EN] Packed ORM (Occlusion/Roughness/Metallic) atlas texture
+     */
     packedORMTexture: BitmapTexture | DirectTexture;
 
+    /**
+     * [KO] 알파 컷오프(Cutout) 사용 여부
+     * [EN] Whether alpha cutoff is enabled
+     */
     useCutOff: boolean;
+    /**
+     * [KO] 알파 컷오프 임계값
+     * [EN] Alpha cutoff threshold
+     */
     cutOff: number;
+    /**
+     * [KO] 양면 렌더링 활성화 여부
+     * [EN] Whether double-sided rendering is enabled
+     */
     doubleSided: boolean;
+    /**
+     * [KO] 식생 전용 셰이딩 플래그
+     * [EN] Foliage dedicated shading flag
+     */
     isFoliage: boolean;
+    /**
+     * [KO] 옥타헤드럴 아틀라스 분할 그리드 크기
+     * [EN] Octahedral atlas division grid size
+     */
     gridSize: number;
+    /**
+     * [KO] 픽셀 깊이 오프셋(PDO) 스케일
+     * [EN] Pixel Depth Offset (PDO) scale
+     */
     pdoScale: number;
+    /**
+     * [KO] 서브서피스 스캐터링 강도
+     * [EN] Subsurface scattering intensity
+     */
     subsurfaceIntensity: number;
 }
 

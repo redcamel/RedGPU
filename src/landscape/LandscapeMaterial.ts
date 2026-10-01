@@ -116,27 +116,59 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos();
     }
 
+    /**
+     * [KO] 지형 머티리얼에 등록된 텍스처 블렌딩 레이어 목록을 반환합니다. (읽기 전용)
+     * [EN] Returns the list of texture blending layers registered on this terrain material. (Read-only)
+     */
     get layers(): LandscapeLayer[] {
         return this.#layers;
     }
 
+    /**
+     * [KO] 텍스처 2D 어레이 레이어 슬라이스의 가로/세로 해상도를 반환합니다.
+     * [EN] Returns the width/height resolution of the texture 2D array layer slices.
+     */
     get textureArraySize(): number {
         return this.#textureArraySize;
     }
 
+    /**
+     * [KO] 카메라 근접 텍스처 디테일이 최대로 유지되는 시작 거리(월드 단위)를 반환합니다.
+     * [EN] Returns the near-distance threshold (world units) where close-up texture detail remains fully visible.
+     */
     get nearDetailDistance(): number {
         return this.#nearDetailDistance;
     }
 
+    /**
+     * [KO] 카메라 근접 텍스처 디테일 시작 거리를 설정합니다.
+     * [EN] Sets the near-distance threshold for close-up texture detail.
+     *
+     * @param val -
+     * [KO] 근접 디테일 유지 거리
+     * [EN] Near detail distance
+     */
     set nearDetailDistance(val: number) {
         this.#nearDetailDistance = Math.max(0, val);
         this.updateUniformsData();
     }
 
+    /**
+     * [KO] 근접 디테일에서 원거리 텍스처로 페이드 전환되는 구간 길이를 반환합니다.
+     * [EN] Returns the fade transition range from near detail to distant textures.
+     */
     get nearDetailFade(): number {
         return this.#nearDetailFade;
     }
 
+    /**
+     * [KO] 근접 디테일 페이드 전환 구간 길이를 설정합니다.
+     * [EN] Sets the fade transition range from near detail to distant textures.
+     *
+     * @param val -
+     * [KO] 페이드 전환 거리
+     * [EN] Near detail fade range
+     */
     set nearDetailFade(val: number) {
         this.#nearDetailFade = Math.max(0.1, val);
         this.updateUniformsData();
@@ -153,6 +185,12 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         weightMapView: null as GPUTextureView | null,
     };
 
+    /**
+     * [KO] 셰이더 바인딩용 내부 Texture2DArray 뷰 객체들을 반환합니다. (시스템 내부 렌더러용)
+     * [EN] Returns the internal Texture2DArray views for shader bindings. (Internal renderer use)
+     *
+     * @internal
+     */
     getInternalLayerViews(): {
         baseColorView: GPUTextureView | null;
         normalView: GPUTextureView | null;
@@ -166,10 +204,29 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#internalLayerViews;
     }
 
+    /**
+     * [KO] 가상 베이스 텍스처(VBT) 재베이킹 요청 시 호출될 콜백 리스너를 등록합니다.
+     * [EN] Registers the callback listener invoked when a Virtual Base Texture (VBT) rebake is requested.
+     *
+     * @param callback -
+     * [KO] 재베이킹 요청 콜백
+     * [EN] Rebake request callback
+     */
     setOnRebakeVBTRequested(callback?: () => void): void {
         this.#onRebakeVBTRequested = callback;
     }
 
+    /**
+     * [KO] 지형 VBT 아틀라스 재베이킹을 요청합니다. 디바운싱 타이머 또는 즉시 마이크로태스크 실행을 지원합니다.
+     * [EN] Requests rebaking of the terrain VBT atlas. Supports debounced timer or immediate microtask execution.
+     *
+     * @param immediate -
+     * [KO] 지연 없이 즉시 실행 여부 (기본값: false)
+     * [EN] Whether to execute immediately without debounce delay (default: false)
+     * @param debounceDelayMs -
+     * [KO] 디바운스 대기 시간(밀리초, 기본값: 150)
+     * [EN] Debounce delay in milliseconds (default: 150)
+     */
     requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
         if (immediate) {
             if (this.#rebakeDebounceTimer !== null) {
@@ -194,6 +251,17 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }, debounceDelayMs);
     }
 
+    /**
+     * [KO] 지형 스플랫 레이어를 머티리얼에 추가하고 텍스처 2D 어레이를 재구성합니다.
+     * [EN] Adds a terrain splat layer to the material and reconstructs the 2D texture arrays.
+     *
+     * @param layer -
+     * [KO] 추가할 LandscapeLayer 인스턴스
+     * [EN] LandscapeLayer instance to add
+     * @returns
+     * [KO] 체이닝을 위한 LandscapeMaterial 인스턴스 자신
+     * [EN] This LandscapeMaterial instance for chaining
+     */
     addLayer(layer: LandscapeLayer): this {
         if (this.#layers.length >= MAX_LANDSCAPE_LAYERS) {
             console.warn(`[LandscapeMaterial] Maximum layer count (${MAX_LANDSCAPE_LAYERS}) reached.`);
@@ -217,6 +285,17 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this;
     }
 
+    /**
+     * [KO] 지정된 레이어 인스턴스 또는 레이어 이름으로 머티리얼에서 레이어를 제거합니다.
+     * [EN] Removes a layer from the material by instance or layer name.
+     *
+     * @param layer -
+     * [KO] 제거할 LandscapeLayer 인스턴스 또는 레이어 이름 문자열
+     * [EN] LandscapeLayer instance or layer name string to remove
+     * @returns
+     * [KO] 제거 성공 여부
+     * [EN] Whether removal succeeded
+     */
     removeLayer(layer: LandscapeLayer | string): boolean {
         if (!layer) return false;
         const target = typeof layer === 'string'
@@ -237,6 +316,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return false;
     }
 
+    /**
+     * [KO] 등록된 모든 스플랫 텍스처 레이어를 머티리얼에서 제거합니다.
+     * [EN] Clears all registered splat texture layers from the material.
+     */
     clearLayers(): void {
         while (this.#layers.length > 0) {
             this.removeLayer(this.#layers[this.#layers.length - 1]);
@@ -264,6 +347,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return undefined;
     }
 
+    /**
+     * [KO] 등록된 레이어 속성 및 유니폼 파라미터(디테일 거리/페이드, 베이스 컬러, UV 스케일/오프셋 등)를 GPU 유니폼 버퍼에 기록합니다.
+     * [EN] Writes registered layer attributes and uniform parameters (detail distance/fade, base color, UV scale/offset, etc.) to the GPU uniform buffer.
+     */
     updateUniformsData(): void {
         const floatBuf = this.#uniformFloatArray;
         const uintBuf = this.#uniformUintArray;
@@ -314,6 +401,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
     }
 
+    /**
+     * [KO] 프래그먼트 셰이더 상태 및 머티리얼 바인드 그룹(바인딩 0~5: 유니폼, 샘플러, 4개 2D 어레이 뷰)을 재구성합니다.
+     * [EN] Reconstructs fragment shader state and material bind group (bindings 0 to 5: uniform, sampler, four 2D array views).
+     */
     override _updateFragmentState(): void {
         if (this.redGPUContext.destroyed) return;
 
@@ -644,6 +735,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
     }
 
+    /**
+     * [KO] 머티리얼에 할당된 모든 2D 어레이 GPU 텍스처, 텍스처 뷰 및 레이어 목록을 해제하고 파기합니다.
+     * [EN] Releases and destroys all 2D array GPU textures, texture views, and layer collections allocated to this material.
+     */
     override destroy(): void {
         super.destroy();
         if (this.#rebakeDebounceTimer !== null) {

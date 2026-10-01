@@ -124,6 +124,23 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.dispatchBakePass(bindGroup, pixelW, pixelH, pixelX, pixelZ);
     }
 
+    /**
+     * [KO] 전역 지형 높이맵 텍스처 전체를 VHT 아틀라스의 전역 베이스로 일괄 베이킹합니다.
+     * [EN] Bakes the entire global terrain heightmap texture into the VHT atlas base in a single batch.
+     *
+     * @param globalTexture -
+     * [KO] 소스 전역 높이맵 GPUTexture
+     * [EN] Source global heightmap GPUTexture
+     * @param vhtAtlas -
+     * [KO] 대상 VHT 아틀라스 DirectTexture
+     * [EN] Target VHT atlas DirectTexture
+     * @param compCountX -
+     * [KO] X축 컴포넌트 타일 개수
+     * [EN] Number of component tiles along X axis
+     * @param compCountZ -
+     * [KO] Z축 컴포넌트 타일 개수
+     * [EN] Number of component tiles along Z axis
+     */
     bakeGlobalBase(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -141,6 +158,41 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
+    /**
+     * [KO] 전역 지형 높이맵의 특정 UV 서브 영역을 VHT 아틀라스의 지정된 픽셀 영역으로 베이킹합니다.
+     * [EN] Bakes a specific UV sub-region of the global terrain heightmap into the designated pixel area of the VHT atlas.
+     *
+     * @param globalTexture -
+     * [KO] 소스 전역 높이맵 GPUTexture
+     * [EN] Source global heightmap GPUTexture
+     * @param vhtAtlas -
+     * [KO] 대상 VHT 아틀라스 DirectTexture
+     * [EN] Target VHT atlas DirectTexture
+     * @param pixelX -
+     * [KO] 아틀라스 내 베이킹 대상 X 좌표 (픽셀)
+     * [EN] Destination X coordinate in atlas (pixels)
+     * @param pixelZ -
+     * [KO] 아틀라스 내 베이킹 대상 Z 좌표 (픽셀)
+     * [EN] Destination Z coordinate in atlas (pixels)
+     * @param pixelW -
+     * [KO] 베이킹 영역 너비 (픽셀)
+     * [EN] Baking region width (pixels)
+     * @param pixelH -
+     * [KO] 베이킹 영역 높이 (픽셀)
+     * [EN] Baking region height (pixels)
+     * @param uMin -
+     * [KO] 소스 텍스처 시작 U 좌표 (0.0 ~ 1.0)
+     * [EN] Source texture start U coordinate (0.0 to 1.0)
+     * @param vMin -
+     * [KO] 소스 텍스처 시작 V 좌표 (0.0 ~ 1.0)
+     * [EN] Source texture start V coordinate (0.0 to 1.0)
+     * @param uMax -
+     * [KO] 소스 텍스처 종료 U 좌표 (0.0 ~ 1.0)
+     * [EN] Source texture end U coordinate (0.0 to 1.0)
+     * @param vMax -
+     * [KO] 소스 텍스처 종료 V 좌표 (0.0 ~ 1.0)
+     * [EN] Source texture end V coordinate (0.0 to 1.0)
+     */
     bakeGlobalRegion(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
