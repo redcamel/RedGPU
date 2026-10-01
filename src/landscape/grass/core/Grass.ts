@@ -4,7 +4,6 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../context/RedGPUContext";
-import RedGPUObject from "../../../base/RedGPUObject";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
@@ -12,6 +11,7 @@ import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
 import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
 import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
+import AScatterType from "../../core/scatter/AScatterType";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -169,7 +169,7 @@ export interface GrassOptions {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class Grass extends RedGPUObject {
+export class Grass extends AScatterType {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
     #subMeshes: ScatterSubMesh[] = [];
@@ -200,7 +200,6 @@ export class Grass extends RedGPUObject {
     #shadowCullDistance: number = 35.0;
     #shadowShrinkStartDistance: number = 26.25;
 
-    #typeId: number = 0;
     #dirty: boolean = true;
     #onChanged: (() => void) | null = null;
 
@@ -216,10 +215,9 @@ export class Grass extends RedGPUObject {
      * [EN] Grass configuration options object
      */
     constructor(redGPUContext: RedGPUContext, options: GrassOptions) {
-        super(redGPUContext);
+        super(redGPUContext, options?.name || '');
 
         const {
-            name,
             mesh,
             baseColorTexture,
             minY,
@@ -248,11 +246,6 @@ export class Grass extends RedGPUObject {
             shadowCullDistance,
             shadowShrinkStartDistance
         } = options || {};
-
-        if (!name || typeof name !== 'string' || name.trim() === '') {
-            consoleAndThrowError('[Grass] options.name is required and must be a non-empty string!');
-        }
-        super.name = name.trim();
 
         if (!mesh) {
             consoleAndThrowError(`[Grass] options.mesh is required and must contain a valid Mesh instance!`);
@@ -365,6 +358,8 @@ export class Grass extends RedGPUObject {
             ];
         }
 
+        this.updateSubMeshStats(this.#subMeshes.length, this.#subMeshes.length * 2);
+
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
 
@@ -412,17 +407,6 @@ export class Grass extends RedGPUObject {
     }
 
     /**
-     * [KO] 잔디 인스턴스의 고유 식별자 이름 (읽기 전용)
-     * [EN] Unique identifier name of the grass instance (read-only)
-     */
-    override get name(): string {
-        return super.name;
-    }
-
-    override set name(_value: string) {
-        consoleAndThrowError('[Grass] name property is readonly and cannot be changed.');
-    }
-
     /**
      * [KO] 잔디 렌더링에 사용되는 기본 메쉬 객체
      * [EN] Base Mesh instance used for grass rendering
@@ -432,19 +416,11 @@ export class Grass extends RedGPUObject {
     }
 
     /**
-     * [KO] 잔디 메쉬에 연결된 지오메트리 또는 프리미티브 객체
-     * [EN] Geometry or Primitive object associated with the grass mesh
+     * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환합니다. (잔디는 단일 통합 지오메트리를 공유)
+     * [EN] Returns single combined geometry list per LOD level. (Grass shares single unified geometry)
      */
-    get geometry(): Geometry | Primitive {
-        return this.#geometry;
-    }
-
-    /**
-     * [KO] 모든 서브메쉬의 정점과 인덱스가 하나로 머지된 단일 통합 지오메트리 객체
-     * [EN] Single unified geometry object with all sub-mesh vertices and indices merged into one
-     */
-    get unifiedGeometry(): Geometry | Primitive {
-        return this.#geometry;
+    override get unifiedGeometries(): (Geometry | null)[] {
+        return [this.#geometry as Geometry];
     }
 
     /**
@@ -453,22 +429,6 @@ export class Grass extends RedGPUObject {
      */
     get subMeshes(): ScatterSubMesh[] {
         return this.#subMeshes;
-    }
-
-    /**
-     * [KO] 잔디 모델을 구성하는 서브메쉬 총 개수를 반환합니다.
-     * [EN] Returns the total number of sub-meshes composing the grass model.
-     */
-    get subMeshCount(): number {
-        return this.#subMeshes.length;
-    }
-
-    /**
-     * [KO] 해당 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by this grass type in the main render pass (Near + Far).
-     */
-    get drawCallCount(): number {
-        return this.#subMeshes.length * 2;
     }
 
     /**
@@ -817,18 +777,6 @@ export class Grass extends RedGPUObject {
     }
 
     /**
-     * [KO] 잔디 매니저 내부에서 할당하는 고유 타입 식별자 정수 (Type ID)
-     * [EN] Unique type identifier integer (Type ID) assigned internally by grass manager
-     */
-    get typeId(): number {
-        return this.#typeId;
-    }
-
-    set typeId(v: number) {
-        this.#typeId = v;
-    }
-
-    /**
      * [KO] 베이킹 관련 속성 변경 시 호출될 콜백 함수를 등록합니다.
      * [EN] Registers a callback invoked whenever baking-related properties are modified.
      */
@@ -861,9 +809,10 @@ export class Grass extends RedGPUObject {
      * [KO] 잔디 인스턴스 및 하위 서브메쉬 리소스를 해제합니다.
      * [EN] Destroys grass instance and subordinate sub-mesh resources.
      */
-    destroy(): void {
+    override destroy(): void {
         (this.#geometry as any)?.destroy?.();
         this.#subMeshes.length = 0;
+        super.destroy();
     }
 }
 

@@ -154,11 +154,9 @@ export class FoliageSubMesh extends ScatterSubMesh {
     #relativeNormalMatrix: mat4;
     #vertexUniformBuffer: GPUBuffer;
     #vertexUniformBindGroup: GPUBindGroup;
-    #lodIndex: number;
 
     #isDepthPrepass: boolean;
     #isMainOpaqueOrMasked: boolean;
-    #isMasked: boolean;
     #mainDepthMode: FoliageDepthPassMode;
     #isImpostor: boolean;
     #receiveShadow: boolean;
@@ -166,17 +164,18 @@ export class FoliageSubMesh extends ScatterSubMesh {
     #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
-        super(init);
+        super({
+            ...init,
+            isMasked: init.isMasked ?? true
+        });
 
         this.#relativeModelMatrix = init.relativeModelMatrix;
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
         this.#vertexUniformBuffer = init.vertexUniformBuffer;
         this.#vertexUniformBindGroup = init.vertexUniformBindGroup;
-        this.#lodIndex = init.lodIndex;
 
         this.#isDepthPrepass = init.isDepthPrepass;
         this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
-        this.#isMasked = init.isMasked ?? true;
         this.#mainDepthMode = init.mainDepthMode;
         this.#isImpostor = init.isImpostor ?? false;
         this.#receiveShadow = init.receiveShadow !== false;
@@ -223,14 +222,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
     }
 
     /**
-     * [KO] 서브메쉬의 LOD 인덱스를 반환합니다.
-     * [EN] Returns the LOD index of the sub-mesh.
-     */
-    get lodIndex(): number {
-        return this.#lodIndex;
-    }
-
-    /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부를 반환합니다.
      * [EN] Returns whether this sub-mesh renders in the depth prepass.
      */
@@ -244,14 +235,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
      */
     get isMainOpaqueOrMasked(): boolean {
         return this.#isMainOpaqueOrMasked;
-    }
-
-    /**
-     * [KO] 알파 마스킹(Cutout) 사용 여부를 반환합니다.
-     * [EN] Returns whether alpha masking (cutout) is used.
-     */
-    get isMasked(): boolean {
-        return this.#isMasked;
     }
 
     /**
@@ -492,7 +475,7 @@ export class FoliageSubMesh extends ScatterSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            const cullMode: GPUCullMode = (!this.#isMasked)
+            const cullMode: GPUCullMode = (!this.isMasked)
                 ? 'back'
                 : (material?.doubleSided ? 'none' : (material?.cullMode ?? 'back'));
 

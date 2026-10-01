@@ -680,3 +680,4 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 }
 
 Object.freeze(AScatterMegaBuffer);
+export default AScatterMegaBuffer;

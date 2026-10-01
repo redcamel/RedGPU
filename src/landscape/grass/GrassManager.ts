@@ -656,7 +656,7 @@ export class GrassManager extends RedGPUObject {
 
             if (!res.instanceBindGroup) continue;
 
-            const targetGeom = unifiedGeometry || type.geometry;
+            const targetGeom = unifiedGeometry;
             if (!targetGeom) continue;
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
@@ -791,7 +791,7 @@ export class GrassManager extends RedGPUObject {
             const res = this.#typeMaterialBuffers.get(typeId);
             if (!res || !res.instanceBindGroup) continue;
 
-            const targetGeom = unifiedGeometry || type.geometry;
+            const targetGeom = unifiedGeometry;
             if (!targetGeom) continue;
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;

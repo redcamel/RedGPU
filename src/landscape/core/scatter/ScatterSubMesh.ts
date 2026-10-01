@@ -30,6 +30,24 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
      * [EN] Bottom Y offset for pivot compensation (default: 0.0)
      */
     bottomOffset?: number;
+
+    /**
+     * [KO] 서브메쉬 고유 인덱스
+     * [EN] Unique sub-mesh index
+     */
+    subMeshIndex?: number;
+
+    /**
+     * [KO] 소속 LOD 레벨 인덱스
+     * [EN] Associated LOD level index
+     */
+    lodIndex?: number;
+
+    /**
+     * [KO] 알파 마스킹 여부
+     * [EN] Whether alpha masking is applied
+     */
+    isMasked?: boolean;
 }
 
 /**
@@ -60,6 +78,9 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;
     #bottomOffset: number;
+    #subMeshIndex: number;
+    #lodIndex: number;
+    #isMasked: boolean;
 
     constructor(init: ScatterSubMeshInitOptions) {
         super(init);
@@ -67,6 +88,9 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
         this.#material = init.material;
         this.#baseColorTexture = init.baseColorTexture ?? null;
         this.#bottomOffset = init.bottomOffset ?? 0.0;
+        this.#subMeshIndex = init.subMeshIndex ?? 0;
+        this.#lodIndex = init.lodIndex ?? 0;
+        this.#isMasked = init.isMasked ?? false;
     }
 
     /**
@@ -107,6 +131,54 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
      */
     set bottomOffset(val: number) {
         this.#bottomOffset = val;
+    }
+
+    /**
+     * [KO] 서브메쉬 고유 인덱스를 반환합니다.
+     * [EN] Returns the unique sub-mesh index.
+     */
+    get subMeshIndex(): number {
+        return this.#subMeshIndex;
+    }
+
+    /**
+     * [KO] 서브메쉬 고유 인덱스를 설정합니다.
+     * [EN] Sets the unique sub-mesh index.
+     */
+    set subMeshIndex(val: number) {
+        this.#subMeshIndex = val;
+    }
+
+    /**
+     * [KO] 소속 LOD 레벨 인덱스를 반환합니다.
+     * [EN] Returns the associated LOD level index.
+     */
+    get lodIndex(): number {
+        return this.#lodIndex;
+    }
+
+    /**
+     * [KO] 소속 LOD 레벨 인덱스를 설정합니다.
+     * [EN] Sets the associated LOD level index.
+     */
+    set lodIndex(val: number) {
+        this.#lodIndex = val;
+    }
+
+    /**
+     * [KO] 알파 마스킹 적용 여부를 반환합니다.
+     * [EN] Returns whether alpha masking is applied.
+     */
+    get isMasked(): boolean {
+        return this.#isMasked;
+    }
+
+    /**
+     * [KO] 알파 마스킹 적용 여부를 설정합니다.
+     * [EN] Sets whether alpha masking is applied.
+     */
+    set isMasked(val: boolean) {
+        this.#isMasked = val;
     }
 }
 

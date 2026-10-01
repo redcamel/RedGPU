@@ -4,8 +4,6 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../context/RedGPUContext";
-import RedGPUObject from "../../../base/RedGPUObject";
-import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
@@ -17,7 +15,7 @@ import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
-import type {ScatterInstanceBaker} from "../../core/scatter";
+import {AScatterType, ScatterInstanceBaker} from "../../core/scatter";
 
 /**
  * [KO] 식생 LOD 설정 인터페이스입니다.
@@ -95,12 +93,6 @@ export interface FoliageOptions {
      * [EN] Base instance density per hectare (10,000m²) (default: 20.0)
      */
     densityPerHectare?: number;
-
-    /**
-     * [KO] 밀도 축약 옵션 (`densityPerHectare`와 동일)
-     * [EN] Alias for `densityPerHectare`
-     */
-    density?: number;
 
     /**
      * [KO] 이 식생 타입에 할당될 최대 인스턴스 수용 용량 (기본값: 16384)
@@ -265,7 +257,7 @@ export interface FoliageOptions {
  * });
  * ```
  */
-export class Foliage extends RedGPUObject {
+export class Foliage extends AScatterType {
     #options: FoliageOptions;
 
     #subMeshes: FoliageSubMesh[] = [];
@@ -356,10 +348,7 @@ export class Foliage extends RedGPUObject {
         onRepopulateRequired?: (type: Foliage) => void,
         baker?: ScatterInstanceBaker | null
     ) {
-        super(redGPUContext);
-        if (!options?.name || typeof options.name !== 'string' || options.name.trim() === '') {
-            consoleAndThrowError('[Foliage] options.name is required and must be a non-empty string!');
-        }
+        super(redGPUContext, options?.name || '');
 
         const {
             name,
@@ -369,7 +358,6 @@ export class Foliage extends RedGPUObject {
             minScale: optMinScale,
             maxScale: optMaxScale,
             densityPerHectare,
-            density,
             densityMultiplier: optDensityMultiplier,
             streamingRadius = 600.0,
             subCellSize = 100.0,
@@ -382,7 +370,6 @@ export class Foliage extends RedGPUObject {
             groundBlendRange
         } = options;
 
-        super.name = name.trim();
         this.#streamer = new FoliageSubCellStreamer(this);
         this.#options = options;
         this.#onDirty = onDirty;
@@ -405,8 +392,6 @@ export class Foliage extends RedGPUObject {
         let resolvedDensityPerHectare = 20.0;
         if (densityPerHectare !== undefined) {
             resolvedDensityPerHectare = Math.max(0, Number(densityPerHectare) || 0);
-        } else if (density !== undefined) {
-            resolvedDensityPerHectare = Math.max(0, Number(density) || 0);
         }
         this.#densityPerHectare = resolvedDensityPerHectare;
 
@@ -542,6 +527,7 @@ export class Foliage extends RedGPUObject {
         this.#impostorSubMesh = impostorSub;
 
         this.#updatePassBuckets();
+        this.updateSubMeshStats(this.#subMeshes.length, this.drawCallCount);
 
         if (this.#megaBuffer) {
             this.#allocation = this.#megaBuffer.allocateType(
@@ -565,24 +551,11 @@ export class Foliage extends RedGPUObject {
         }
     }
 
-
-    override get name(): string {
-        return super.name;
-    }
-
-    override set name(value: string) {
-        consoleAndThrowError('[Foliage] name property is readonly and cannot be changed.');
-    }
-
     get nameHash(): number {
         return this.#nameHash;
     }
 
     get maxInstances(): number {
-        return this.bufferCapacity;
-    }
-
-    get bufferCapacity(): number {
         return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
     }
 
@@ -602,7 +575,7 @@ export class Foliage extends RedGPUObject {
         return this.#options;
     }
 
-    get allocation(): FoliageTypeAllocation | null {
+    override get allocation(): FoliageTypeAllocation | null {
         return this.#allocation;
     }
 
@@ -618,7 +591,7 @@ export class Foliage extends RedGPUObject {
      * [KO] LOD 레벨별 단일 통합 지오메트리 배열을 반환합니다.
      * [EN] Returns the array of per-LOD unified geometries.
      */
-    get unifiedGeometries(): (Geometry | null)[] {
+    override get unifiedGeometries(): (Geometry | null)[] {
         return this.#unifiedGeometries;
     }
 
@@ -626,7 +599,7 @@ export class Foliage extends RedGPUObject {
      * [KO] 이 식생 타입이 메인 렌더 패스에서 소비하는 간접 드로우콜 개수를 반환합니다.
      * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
      */
-    get drawCallCount(): number {
+    override get drawCallCount(): number {
         let count = this.#mainSubMeshes.length;
         if (this.#useDepthPrepass) {
             count += this.#depthPrepassSubMeshes.length;
@@ -638,7 +611,7 @@ export class Foliage extends RedGPUObject {
      * [KO] 등록된 총 서브메시 개수를 반환합니다.
      * [EN] Returns the total number of registered sub-meshes.
      */
-    get subMeshCount(): number {
+    override get subMeshCount(): number {
         return this.#subMeshes.length;
     }
 
@@ -1151,7 +1124,7 @@ export class Foliage extends RedGPUObject {
         }
     }
 
-    destroy(): void {
+    override destroy(): void {
         this.#streamer.clear();
         for (let i = 0; i < this.#subMeshes.length; i++) {
             const sub = this.#subMeshes[i];
@@ -1166,6 +1139,7 @@ export class Foliage extends RedGPUObject {
         }
         this.#shadowMergedSubMeshes.length = 0;
         this.#loadedTileKeys.clear();
+        super.destroy();
     }
 
     #updatePassBuckets(): void {

@@ -1,5 +1,9 @@
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {AScatterMegaBuffer, DRAW_INDEXED_INDIRECT_ARGS_COUNT} from '../../../core/scatter/AScatterMegaBuffer';
+import {
+    AScatterMegaBuffer,
+    DRAW_INDEXED_INDIRECT_ARGS_COUNT,
+    ScatterBaseSegmentAllocation
+} from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
 import FoliageSubMesh from '../submesh/FoliageSubMesh';
 import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
@@ -15,47 +19,12 @@ export const SHADOW_CASCADE_COUNT = 4;
  * [KO] 메가버퍼 내 단일 식생 타입의 할당 정보 인터페이스입니다.
  * [EN] Interface for single foliage type allocation information in mega-buffer.
  */
-export interface FoliageTypeAllocation {
-    /**
-     * [KO] 식생 타입 고유 정수 ID
-     * [EN] Unique integer ID for foliage type
-     */
-    typeId: number;
+export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
     /**
      * [KO] 식생 타입 고유 이름
      * [EN] Unique foliage type name
      */
     name: string;
-    /**
-     * [KO] 최대 허용 인스턴스 수
-     * [EN] Maximum allowed instances
-     */
-    maxInstances: number;
-    /**
-     * [KO] 원본 인스턴스 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in raw instance buffer
-     */
-    rawBaseOffset: number;
-    /**
-     * [KO] 컬링된 인스턴스 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in culled instance buffer
-     */
-    culledBaseOffset: number;
-    /**
-     * [KO] 간접 드로우 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in indirect draw buffer
-     */
-    indirectBaseOffset: number;
-    /**
-     * [KO] 해당 타입에 속한 서브메시 개수
-     * [EN] Number of sub-meshes belonging to this type
-     */
-    subMeshCount: number;
-    /**
-     * [KO] 현재 활성화된 인스턴스 수
-     * [EN] Current active instance count
-     */
-    instanceCount: number;
 }
 
 /**

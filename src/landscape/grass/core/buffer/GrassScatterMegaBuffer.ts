@@ -153,9 +153,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param maxInstances -
      * [KO] 해당 타입에 배정할 최대 인스턴스 수
      * [EN] Maximum instance count assigned to this type
-     * @param subMeshesOrIndexCount -
-     * [KO] 잔디 서브메시 목록 또는 단일 인덱스 수
-     * [EN] List of grass sub-meshes or single index count
+     * @param subMeshes -
+     * [KO] 잔디 서브메시 목록
+     * [EN] List of grass sub-meshes
      * @returns
      * [KO] 할당된 잔디 타입 메타데이터 객체
      * [EN] Allocated grass type metadata object
@@ -163,17 +163,13 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     allocateType(
         typeId: number,
         maxInstances: number,
-        subMeshesOrIndexCount: { indexCount: number; firstIndex?: number }[] | number
+        subMeshes: { indexCount: number; firstIndex?: number }[]
     ): GrassTypeAllocation {
         if (this.#allocations.has(typeId)) {
             return this.#allocations.get(typeId)!;
         }
 
-        const subMeshes: { indexCount: number; firstIndex: number }[] = Array.isArray(subMeshesOrIndexCount)
-            ? subMeshesOrIndexCount.map(s => ({indexCount: s.indexCount, firstIndex: s.firstIndex ?? 0}))
-            : [{indexCount: subMeshesOrIndexCount, firstIndex: 0}];
         const subMeshCount = Math.max(1, subMeshes.length);
-
         const baseAlloc = this.allocateBaseSegment(typeId, maxInstances, subMeshCount * 2, 2);
 
         const nearCulledOffset = baseAlloc.culledBaseOffset;

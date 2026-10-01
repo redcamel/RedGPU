@@ -40,15 +40,28 @@ import {
     ScatterInstanceBaker,
     type ScatterInstanceBakerOptions
 } from "./baking/ScatterInstanceBaker";
+import AScatterMegaBuffer, {
+    CULLING_WORKGROUP_SIZE,
+    DRAW_INDEXED_INDIRECT_ARGS_COUNT,
+    type ScatterBaseSegmentAllocation,
+    type ScatterShaderReflectionConfig
+} from "./AScatterMegaBuffer";
+import AScatterType from "./AScatterType";
 
 export {
     // Runtime Classes, Functions & Units
     combineScatterMeshes,
     AScatterGeometryUnit,
     ScatterSubMesh,
+    AScatterType,
+    AScatterMegaBuffer,
     computeNormalizedChannelWeight,
     sampleNormalizedLayerWeight,
     ScatterInstanceBaker,
+
+    // Constants
+    CULLING_WORKGROUP_SIZE,
+    DRAW_INDEXED_INDIRECT_ARGS_COUNT,
 
     // Code Hint Interfaces & Vertex Constants
     type AScatterGeometryUnitInitOptions,
@@ -59,6 +72,8 @@ export {
     type RawSubMeshNode,
     type IScatterBakeMegaBuffer,
     type ScatterInstanceBakerOptions,
+    type ScatterShaderReflectionConfig,
+    type ScatterBaseSegmentAllocation,
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
     PBR_STRIDE_BYTES,
