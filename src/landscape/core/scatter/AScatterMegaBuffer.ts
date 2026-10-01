@@ -263,10 +263,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         return this.#rawGPUBuffer;
     }
 
-    set rawGPUBuffer(buffer: GPUBuffer | null) {
-        this.#rawGPUBuffer = buffer;
-    }
-
     /**
      * [KO] GPU 거리 및 프러스텀 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer where instances passing GPU distance and frustum culling are recorded.
@@ -287,20 +283,12 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         return this.#indirectGPUBuffer;
     }
 
-    set indirectGPUBuffer(buffer: GPUBuffer | null) {
-        this.#indirectGPUBuffer = buffer;
-    }
-
     /**
      * [KO] 각 스캐터 타입별 컬링 거리, 오프셋 등의 설정 파라미터가 저장된 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer storing configuration parameters such as culling distances and offsets for each scatter type.
      */
     get typeParamsGPUBuffer(): GPUBuffer | null {
         return this.#typeParamsGPUBuffer;
-    }
-
-    set typeParamsGPUBuffer(buffer: GPUBuffer | null) {
-        this.#typeParamsGPUBuffer = buffer;
     }
 
     /**
@@ -317,14 +305,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     set onRecreated(cb: (() => void) | null) {
         this.#onRecreated = cb;
-    }
-
-    get indirectResetTemplateGPUBuffer(): GPUBuffer | null {
-        return this.#indirectResetTemplateGPUBuffer;
-    }
-
-    set indirectResetTemplateGPUBuffer(buffer: GPUBuffer | null) {
-        this.#indirectResetTemplateGPUBuffer = buffer;
     }
 
     /**
@@ -678,6 +658,23 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             label: `${this.constructor.name}_TypeParams`,
             size: typeParamsByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        const indirectByteSize = Math.max(
+            this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
+            64
+        );
+
+        this.#indirectGPUBuffer = gpuDevice.createBuffer({
+            label: `${this.constructor.name}_Indirect_Main`,
+            size: indirectByteSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
+        });
+
+        this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
+            label: `${this.constructor.name}_Indirect_Template`,
+            size: indirectByteSize,
+            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
         });
     }
 }

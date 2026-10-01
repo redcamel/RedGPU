@@ -352,13 +352,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
-    /**
-     * [KO] CPU 템플릿을 사용하여 간접 드로우 인스턴스 카운트를 0으로 초기화합니다. (GrassScatterMegaBuffer와의 인터페이스 통일 래퍼)
-     * [EN] Resets indirect draw instance counts to zero using the CPU template. (Interface unification wrapper with GrassScatterMegaBuffer)
-     */
-    resetIndirectDrawCountsCPU(): void {
-        this.resetMultiIndirectCommands();
-    }
 
     /**
      * [KO] 유니파이드 GPU 컬링에 필요한 글로벌 유니폼 버퍼를 CPU에서 갱신하고 GPU로 전송합니다.
@@ -746,17 +739,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
-        this.indirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Indirect_Main',
-            size: indirectByteSize,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-        });
 
-        this.indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Indirect_Template',
-            size: indirectByteSize,
-            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-        });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',

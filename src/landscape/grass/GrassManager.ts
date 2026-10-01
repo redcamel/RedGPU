@@ -882,7 +882,7 @@ export class GrassManager extends RedGPUObject {
             const isInitialStreaming = !this.#populated;
             this.#updateCellStreaming(camX, camZ, isInitialStreaming, tileCountChanged);
         }
-        this.#megaBuffer.resetIndirectDrawCountsCPU();
+        this.#megaBuffer.resetMultiIndirectCommands();
 
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;

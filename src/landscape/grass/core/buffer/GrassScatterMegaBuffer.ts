@@ -1,5 +1,5 @@
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {AScatterMegaBuffer, DRAW_INDEXED_INDIRECT_ARGS_COUNT} from '../../../core/scatter/AScatterMegaBuffer';
+import {AScatterMegaBuffer} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullComputeWGSL from '../culling/grassCullCompute.wgsl';
 
 /**
@@ -383,14 +383,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] 매 프레임 GPU 컬링 실행 전, 간접 드로우 인스턴스 카운트를 0으로 초기화합니다.
-     * [EN] Resets the indirect draw instance counts to zero before executing GPU culling every frame.
-     */
-    resetIndirectDrawCountsCPU(): void {
-        super.resetMultiIndirectCommands();
-    }
-
-    /**
      * [KO] 특정 잔디 타입 ID에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
      * [EN] Retrieves the mega-buffer allocation information object for a specific grass type ID.
      *
@@ -433,19 +425,11 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const strideBytes = this.strideBytes;
         const culledCapacity = Math.max(this.instanceCapacity * 2, this.totalAllocatedCulledInstances);
         const culledByteSize = culledCapacity * strideBytes;
-        const indirectByteSize =
-            this.maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
 
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassScatterMegaBuffer_CulledInstances',
             size: culledByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
-        });
-
-        this.indirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassScatterMegaBuffer_IndirectDraw',
-            size: indirectByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
         });
     }
 }
