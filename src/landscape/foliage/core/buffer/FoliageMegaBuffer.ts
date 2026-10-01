@@ -238,37 +238,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#strideFloats;
     }
 
-    /**
-     * [KO] 지원 가능한 최대 식생 타입 개수를 반환합니다.
-     * [EN] Returns the maximum supported foliage types count.
-     */
-    get maxTypes(): number {
-        return this.#maxTypes;
-    }
-
-    /**
-     * [KO] 타입 파라미터 구조체의 Float32 단위 크기를 반환합니다.
-     * [EN] Returns the Float32 size of the type parameter struct.
-     */
-    get typeParamFloats(): number {
-        return this.#typeParamFloats;
-    }
-
-    /**
-     * [KO] 통합 글로벌 유니폼 구조체의 바이트 단위 크기를 반환합니다.
-     * [EN] Returns the byte size of the unified global uniform struct.
-     */
-    get globalUniformBytes(): number {
-        return this.#globalUniformBytes;
-    }
-
-    /**
-     * [KO] 통합 글로벌 유니폼 구조체의 Float32 단위 크기를 반환합니다.
-     * [EN] Returns the Float32 size of the unified global uniform struct.
-     */
-    get globalUniformFloats(): number {
-        return this.#globalUniformFloats;
-    }
 
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
@@ -280,10 +249,6 @@ export class FoliageMegaBuffer extends RedGPUObject {
 
     get cpuRawDataBuffer(): Float32Array {
         return this.#cpuRawDataBuffer;
-    }
-
-    get cpuRawDataUint32(): Uint32Array {
-        return this.#cpuRawDataUint32;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
@@ -319,24 +284,12 @@ export class FoliageMegaBuffer extends RedGPUObject {
         return this.#allocations.get(name);
     }
 
+    /**
+     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수
+     * [EN] Maximum indirect draw (sub-mesh) slots supported
+     */
     get maxSubMeshes(): number {
         return this.#maxSubMeshes;
-    }
-
-    /**
-     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수 (maxSubMeshes의 별칭)
-     * [EN] Maximum indirect draw (sub-mesh) slots supported (alias for maxSubMeshes)
-     */
-    get maxIndirectCalls(): number {
-        return this.#maxSubMeshes;
-    }
-
-    /**
-     * [KO] 등록된 총 간접 드로우 슬롯 수를 반환합니다.
-     * [EN] Returns the total number of registered indirect draw slots.
-     */
-    get totalIndirectDrawCalls(): number {
-        return this.#nextIndirectOffset;
     }
 
     get onRecreated(): (() => void) | null {

@@ -190,21 +190,7 @@ export class GrassMegaBuffer extends RedGPUObject {
         return this.#strideFloats;
     }
 
-    /**
-     * [KO] 타입 파라미터 구조체의 Float32 단위 크기를 반환합니다.
-     * [EN] Returns the Float32 size of the type parameter struct.
-     */
-    get typeParamFloats(): number {
-        return this.#typeParamFloats;
-    }
 
-    /**
-     * [KO] 지원 가능한 최대 잔디 타입 개수를 반환합니다.
-     * [EN] Returns the maximum supported grass types count.
-     */
-    get maxTypes(): number {
-        return this.#maxTypes;
-    }
 
     /**
      * [KO] 모든 잔디 인스턴스의 원본 배치 데이터(위치, 스케일, 회전 쿼터니언, 바운딩, 지면색)를 보관하는 GPU 스토리지 버퍼를 반환합니다.
@@ -222,13 +208,6 @@ export class GrassMegaBuffer extends RedGPUObject {
         return this.#cpuRawDataBuffer;
     }
 
-    /**
-     * [KO] CPU 스테이징 원시 인스턴스 데이터의 Uint32 뷰 버퍼를 반환합니다.
-     * [EN] Returns the Uint32 view buffer of the CPU staging raw instance data.
-     */
-    get cpuRawDataUint32(): Uint32Array {
-        return this.#cpuRawDataUint32;
-    }
 
     /**
      * [KO] GPU 거리 및 프러스텀 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
@@ -272,29 +251,15 @@ export class GrassMegaBuffer extends RedGPUObject {
     }
 
 
-    /**
-     * [KO] 지원할 최대 간접 드로우 호출 슬롯 수
-     * [EN] Maximum indirect draw call slots supported
-     */
-    get maxIndirectCalls(): number {
-        return this.#maxIndirectCalls;
-    }
 
     /**
-     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수 (maxIndirectCalls의 별칭)
-     * [EN] Maximum indirect draw (sub-mesh) slots supported (alias for maxIndirectCalls)
+     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수
+     * [EN] Maximum indirect draw (sub-mesh) slots supported
      */
     get maxSubMeshes(): number {
         return this.#maxIndirectCalls;
     }
 
-    /**
-     * [KO] 등록된 총 간접 드로우 호출 슬롯 수를 반환합니다.
-     * [EN] Returns the total number of registered indirect draw call slots.
-     */
-    get totalIndirectDrawCalls(): number {
-        return this.#totalIndirectDrawCalls;
-    }
 
     /**
      * [KO] 잔디 인스턴스 수 증가로 인해 메가버퍼가 확장·재생성되었을 때 호출될 콜백 함수를 반환합니다.
