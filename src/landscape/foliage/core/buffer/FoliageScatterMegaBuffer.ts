@@ -146,8 +146,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             redGPUContext,
             {
                 shaderInfo,
-                rawStorageName: 'rawInstanceBuffer',
-                instanceStructName: 'FoliageInstanceData',
+                rawStorageName: 'rawInstances',
+                instanceStructName: 'FoliageInstance',
                 typeParamStructName: 'FoliageTypeParam'
             },
             initialCapacity,

@@ -59,7 +59,7 @@ struct UnifiedGlobalCullingUniforms {
     cascades: array<CascadeCullingInfo, 4>,
 };
 
-struct FoliageInstanceData {
+struct FoliageInstance {
     posX: f32,
     posY: f32,
     posZ: f32,
@@ -78,12 +78,12 @@ struct DrawIndexedIndirectArgs {
     firstInstance: u32,
 };
 
-@group(0) @binding(0) var<storage, read> rawInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> globalUniforms: UnifiedGlobalCullingUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
-@group(0) @binding(3) var<storage, read_write> mainCulledInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(3) var<storage, read_write> mainCulledInstanceBuffer: array<FoliageInstance>;
 @group(0) @binding(4) var<storage, read_write> mainIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstance>;
 @group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(7) var hzbTexture: texture_2d<f32>;
 @group(0) @binding(8) var hzbSampler: sampler;
@@ -153,7 +153,7 @@ fn main(
         return;
     }
 
-    var instance = rawInstanceBuffer[idx];
+    var instance = rawInstances[idx];
     let typeIdx = (instance.packedGroundColorAndType >> 24u) & 0xFFu;
     if (typeIdx >= 64u) {
         return;

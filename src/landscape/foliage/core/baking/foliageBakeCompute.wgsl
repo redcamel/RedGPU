@@ -25,7 +25,7 @@ struct FoliageTypeParam {
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
-struct FoliageInstanceData {
+struct FoliageInstance {
     posX: f32,
     posY: f32,
     posZ: f32,
@@ -52,7 +52,7 @@ struct BakeTask {
     typeId: u32,
 };
 
-@group(0) @binding(0) var<storage, read_write> rawInstances: array<FoliageInstanceData>;
+@group(0) @binding(0) var<storage, read_write> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> bakeUniforms: BakeUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
 @group(0) @binding(3) var<storage, read> bakeTasks: array<BakeTask>;
