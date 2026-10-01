@@ -257,7 +257,7 @@ export interface FoliageOptions {
  * });
  * ```
  */
-export class Foliage extends AScatterType {
+export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #options: FoliageOptions;
 
     #subMeshes: FoliageSubMesh[] = [];
@@ -269,7 +269,6 @@ export class Foliage extends AScatterType {
     #lodInfoList: FoliageLODInfo[] = [];
 
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
-    #allocation: FoliageTypeAllocation | null = null;
 
     #cullingDistance: number = 2000.0;
     #fadeStartDistance: number = 1500.0;
@@ -527,19 +526,20 @@ export class Foliage extends AScatterType {
         this.#impostorSubMesh = impostorSub;
 
         this.#updatePassBuckets();
-        this.updateSubMeshStats(this.#subMeshes.length, this.drawCallCount);
+        this.updateDrawCallCount(this.drawCallCount);
 
         if (this.#megaBuffer) {
-            this.#allocation = this.#megaBuffer.allocateType(
+            const alloc = this.#megaBuffer.allocateType(
                 this.#options.name,
                 this.#options.maxInstances,
                 this.#subMeshes,
                 this.#shadowMergedSubMeshes,
                 this.#lodInfoList
             );
+            this.bindAllocation(alloc);
             const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
-                this.#allocation,
+                alloc,
                 this.#cullingDistance,
                 this.#fadeStartDistance,
                 this.#boundingRadius,
@@ -564,7 +564,7 @@ export class Foliage extends AScatterType {
      * [EN] Returns the maximum instance capacity allocated for this foliage type.
      */
     get maxInstances(): number {
-        return this.#allocation ? this.#allocation.maxInstances : (this.#options.maxInstances ?? 0);
+        return this.allocation ? this.allocation.maxInstances : (this.#options.maxInstances ?? 0);
     }
 
     /**
@@ -597,14 +597,6 @@ export class Foliage extends AScatterType {
      */
     get options(): FoliageOptions {
         return this.#options;
-    }
-
-    /**
-     * [KO] 메가버퍼 내에 할당된 식생 타입 세그먼트 메타데이터를 반환합니다.
-     * [EN] Returns the foliage type segment metadata allocated in the mega-buffer.
-     */
-    override get allocation(): FoliageTypeAllocation | null {
-        return this.#allocation;
     }
 
     /**
@@ -696,7 +688,7 @@ export class Foliage extends AScatterType {
      * [EN] Returns the number of instances currently active and streamed into GPU buffers.
      */
     get activeInstanceCount(): number {
-        return this.#allocation?.instanceCount ?? 0;
+        return this.allocation?.instanceCount ?? 0;
     }
 
     /**
@@ -1398,11 +1390,12 @@ export class Foliage extends AScatterType {
      * [EN] Number of instances to upload
      */
     uploadRangeToGPU(startIndex: number, count: number): void {
-        if (this.#megaBuffer && this.#allocation) {
-            this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
+        const alloc = this.allocation;
+        if (this.#megaBuffer && alloc) {
+            this.#megaBuffer.uploadAllocationRangeToGPU(alloc, startIndex, count);
             if (this.#baker && count > 0) {
-                const globalIndex = this.#allocation.rawBaseOffset + startIndex;
-                this.#baker.addBakeTasks(globalIndex, count, this.#allocation.typeId);
+                const globalIndex = alloc.rawBaseOffset + startIndex;
+                this.#baker.addBakeTasks(globalIndex, count, alloc.typeId);
             }
         }
     }
@@ -1412,11 +1405,12 @@ export class Foliage extends AScatterType {
      * [EN] Re-bakes terrain snapping and physical placement for all currently active foliage instances.
      */
     rebake(): void {
-        if (this.#megaBuffer && this.#allocation && this.#baker && this.#allocation.instanceCount > 0) {
+        const alloc = this.allocation;
+        if (this.#megaBuffer && alloc && this.#baker && alloc.instanceCount > 0) {
             this.#baker.addBakeTasks(
-                this.#allocation.rawBaseOffset,
-                this.#allocation.instanceCount,
-                this.#allocation.typeId
+                alloc.rawBaseOffset,
+                alloc.instanceCount,
+                alloc.typeId
             );
         }
     }
@@ -1468,7 +1462,8 @@ export class Foliage extends AScatterType {
     }
 
     #syncTypeParams(): void {
-        if (this.#megaBuffer && this.#allocation) {
+        const alloc = this.allocation;
+        if (this.#megaBuffer && alloc) {
             const hasImp = !!this.#impostorSubMesh;
             const effectiveLodList = (!this.#useImpostor && hasImp && this.#lodInfoList.length > 1)
                 ? this.#lodInfoList.slice(0, -1)
@@ -1476,7 +1471,7 @@ export class Foliage extends AScatterType {
 
             const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
-                this.#allocation,
+                alloc,
                 this.#cullingDistance,
                 this.#fadeStartDistance,
                 this.#boundingRadius,

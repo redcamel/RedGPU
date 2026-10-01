@@ -12,6 +12,7 @@ import Primitive from "../../../primitive/core/Primitive";
 import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
 import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
 import AScatterType from "../../core/scatter/AScatterType";
+import type {GrassTypeAllocation} from "./buffer/GrassScatterMegaBuffer";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -169,7 +170,7 @@ export interface GrassOptions {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class Grass extends AScatterType {
+export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
     #subMeshes: ScatterSubMesh[] = [];
@@ -358,7 +359,7 @@ export class Grass extends AScatterType {
             ];
         }
 
-        this.updateSubMeshStats(this.#subMeshes.length, this.#subMeshes.length * 2);
+        this.updateDrawCallCount(this.#subMeshes.length * 2);
 
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;

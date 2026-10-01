@@ -407,6 +407,7 @@ export class GrassManager extends RedGPUObject {
             maxInstances,
             subMeshes
         );
+        grassType.bindAllocation(alloc);
 
         const {rawBaseOffset: baseOffset} = alloc;
         for (let i = 0; i < maxInstances; i++) {

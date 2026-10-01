@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {AScatterMegaBuffer} from '../../../core/scatter/AScatterMegaBuffer';
+import {AScatterMegaBuffer, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullComputeWGSL from '../culling/grassCullCompute.wgsl';
 
 /**
@@ -48,37 +48,12 @@ export interface GrassDrawSlot {
  * [KO] 메가버퍼 내 단일 잔디 타입의 할당 정보
  * [EN] Allocation info for a single grass type in mega-buffer
  */
-export interface GrassTypeAllocation {
-    /**
-     * [KO] 최대 허용 인스턴스 수
-     * [EN] Maximum allowed instances
-     */
-    maxInstances: number;
-    /**
-     * [KO] 원본 인스턴스 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in raw instance buffer
-     */
-    rawBaseOffset: number;
-    /**
-     * [KO] 컬링된 인스턴스 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in culled instance buffer
-     */
-    culledBaseOffset: number;
-    /**
-     * [KO] 간접 드로우 버퍼 기본 시작 오프셋
-     * [EN] Base start offset in indirect draw buffer
-     */
-    indirectBaseOffset: number;
+export interface GrassTypeAllocation extends ScatterBaseSegmentAllocation {
     /**
      * [KO] 현재 활성화된 인스턴스 수
      * [EN] Current active instance count
      */
     instanceCount: number;
-    /**
-     * [KO] 서브메시 총 개수
-     * [EN] Total number of sub-meshes
-     */
-    subMeshCount: number;
     /**
      * [KO] 모든 간접 드로우 슬롯 목록
      * [EN] List of all indirect draw slots
@@ -219,12 +194,13 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, subMeshCount * 2);
 
         const alloc: GrassTypeAllocation = {
+            typeId: baseAlloc.typeId,
             maxInstances: baseAlloc.maxInstances,
             rawBaseOffset: baseAlloc.rawBaseOffset,
             culledBaseOffset: baseAlloc.culledBaseOffset,
             indirectBaseOffset: baseAlloc.indirectBaseOffset,
-            instanceCount: 0,
             subMeshCount,
+            instanceCount: 0,
             slots,
             nearSlots,
             farSlots
