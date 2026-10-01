@@ -42,6 +42,7 @@ export abstract class AScatterType<
     // --- 11종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
     #height: number = 1.0;
     #cullingDistance: number = 200.0;
+    #fadeStartDistance: number = 150.0;
     #shadowCullDistance: number = 50.0;
     #bottomOffset: number = 0.0;
     #targetLayer: string | number | undefined = '';
@@ -213,8 +214,17 @@ export abstract class AScatterType<
         const numVal = Math.max(0, Number(val) || 0);
         if (this.#cullingDistance !== numVal) {
             this.#cullingDistance = numVal;
+            this.#fadeStartDistance = numVal * 0.75;
             this.onParameterChanged('cullingDistance', numVal);
         }
+    }
+
+    /**
+     * [KO] 카메라 거리에 따라 인스턴스 페이드(스케일 축소)가 시작되는 거리 (미터 단위, cullingDistance * 0.75로 자동 계산)
+     * [EN] Distance in meters where instance fade begins (automatically calculated as cullingDistance * 0.75)
+     */
+    get fadeStartDistance(): number {
+        return this.#fadeStartDistance;
     }
 
     /**
@@ -379,7 +389,10 @@ export abstract class AScatterType<
         groundBlendStrength?: number;
     }): void {
         if (values.height !== undefined) this.#height = values.height;
-        if (values.cullingDistance !== undefined) this.#cullingDistance = values.cullingDistance;
+        if (values.cullingDistance !== undefined) {
+            this.#cullingDistance = values.cullingDistance;
+            this.#fadeStartDistance = values.cullingDistance * 0.75;
+        }
         if (values.shadowCullDistance !== undefined) this.#shadowCullDistance = values.shadowCullDistance;
         if (values.bottomOffset !== undefined) this.#bottomOffset = values.bottomOffset;
         if (values.targetLayer !== undefined) this.#targetLayer = values.targetLayer;

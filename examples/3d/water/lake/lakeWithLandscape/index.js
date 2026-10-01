@@ -245,7 +245,6 @@ RedGPU.init(
                             randomRotationY: true,
                             useImpostor: false,
                             cullingDistance: 600,
-                            fadeStartDistance: 450,
                             targetLayer: 'Grass',
                             bottomOffset: -0.85,
                             alignToNormal: true,

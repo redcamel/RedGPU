@@ -65,11 +65,6 @@ export interface GrassOptions {
      */
     cullingDistance?: number;
     /**
-     * [KO] 카메라 거리에 따라 잔디 페이드(스케일 축소)가 시작되는 거리 (기본값: cullingDistance * 0.75)
-     * [EN] Distance at which grass fade (scale shrinking) begins towards culling boundary (default: cullingDistance * 0.75)
-     */
-    fadeStartDistance?: number;
-    /**
      * [KO] 원거리 간소화 셰이더(Far Grass)로 전환을 시작하는 거리 (기본값: 35.0)
      * [EN] Distance where transition to simplified far-distance grass shader begins (default: 35.0)
      */
@@ -175,7 +170,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #geometry: Geometry | Primitive;
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
-    #fadeStartDistance: number = 60.0;
     #farDistance: number = 35.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
@@ -219,7 +213,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             minSlope,
             maxSlope,
             cullingDistance,
-            fadeStartDistance,
             minScale,
             maxScale,
             groundBlendStrength,
@@ -381,11 +374,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             groundBlendStrength: resolvedGroundBlendStrength
         });
 
-        if (fadeStartDistance !== undefined) {
-            this.#fadeStartDistance = fadeStartDistance;
-        } else {
-            this.#fadeStartDistance = this.cullingDistance * 0.75;
-        }
         if (minScale) this.#minScale = [minScale[0], minScale[1], minScale[2] ?? minScale[0]];
         if (maxScale) this.#maxScale = [maxScale[0], maxScale[1], maxScale[2] ?? maxScale[0]];
 
@@ -478,18 +466,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return Math.max(1, Math.round((this.densityPerHectare * 256.0 / 10000.0) * this.densityMultiplier));
     }
 
-    /**
-     * [KO] 카메라 거리에 따라 잔디 페이드(스케일 축소)가 시작되는 거리 (미터 단위)
-     * [EN] Distance in meters where grass fade (scale shrinking) begins towards culling boundary
-     */
-    get fadeStartDistance(): number {
-        return this.#fadeStartDistance;
-    }
-
-    set fadeStartDistance(v: number) {
-        this.#fadeStartDistance = Math.max(0, v);
-        this.#dirty = true;
-    }
 
     /**
      * [KO] 잔디 인스턴스의 최소 스케일 `[x, y, z]`
@@ -668,7 +644,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     protected override onParameterChanged(prop: string, value: any): void {
         switch (prop) {
             case 'cullingDistance':
-                this.#fadeStartDistance = (value as number) * 0.75;
                 this.#dirty = true;
                 break;
             case 'shadowCullDistance':

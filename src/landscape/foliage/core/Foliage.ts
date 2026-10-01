@@ -276,7 +276,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
 
-    #fadeStartDistance: number = 1500.0;
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #useImpostor: boolean = true;
@@ -374,8 +373,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
-
-        this.#fadeStartDistance = cullingDistance * 0.75;
 
         const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = optMaxScale ? [...optMaxScale] : [1.0, 1.0, 1.0];
@@ -542,7 +539,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 this.cullingDistance,
-                this.#fadeStartDistance,
+                this.fadeStartDistance,
                 this.#boundingRadius,
                 this.bottomOffset,
                 this.#lodInfoList,
@@ -950,7 +947,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.rebake();
                 break;
             case 'cullingDistance':
-                this.#fadeStartDistance = (value as number) * 0.75;
                 this.#syncTypeParams();
                 break;
             case 'shadowCullDistance':
@@ -1329,7 +1325,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 this.cullingDistance,
-                this.#fadeStartDistance,
+                this.fadeStartDistance,
                 this.#boundingRadius,
                 this.bottomOffset,
                 effectiveLodList,
