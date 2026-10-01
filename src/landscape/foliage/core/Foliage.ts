@@ -15,7 +15,7 @@ import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
 
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
-import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
+import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import type {ScatterInstanceBaker} from "../../core/scatter";
 
 /**
@@ -274,7 +274,7 @@ export class Foliage extends RedGPUObject {
     #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
-    #megaBuffer: FoliageMegaBuffer | null = null;
+    #megaBuffer: FoliageScatterMegaBuffer | null = null;
     #allocation: FoliageTypeAllocation | null = null;
 
     #cullingDistance: number = 2000.0;
@@ -349,7 +349,7 @@ export class Foliage extends RedGPUObject {
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
-        megaBuffer?: FoliageMegaBuffer | null,
+        megaBuffer?: FoliageScatterMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
         baker?: ScatterInstanceBaker | null
@@ -603,7 +603,7 @@ export class Foliage extends RedGPUObject {
         return this.#allocation;
     }
 
-    get megaBuffer(): FoliageMegaBuffer | null {
+    get megaBuffer(): FoliageScatterMegaBuffer | null {
         return this.#megaBuffer;
     }
 

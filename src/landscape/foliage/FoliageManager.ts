@@ -15,7 +15,7 @@ import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
-import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
+import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
 
 /**
@@ -59,7 +59,7 @@ class FoliageManager {
     #tileStreamer: LandscapeTileStreamer;
 
     #enabled: boolean = true;
-    #megaBuffer: FoliageMegaBuffer;
+    #megaBuffer: FoliageScatterMegaBuffer;
     #foliageTypes: Map<string, Foliage> = new Map();
     #typeList: Foliage[] = [];
 
@@ -129,7 +129,7 @@ class FoliageManager {
         const emptyBG = this.#emptyBindGroup;
         const subMeshBGL = this.#subMeshVertexBindGroupLayout;
 
-        this.#megaBuffer = new FoliageMegaBuffer(this.#redGPUContext);
+        this.#megaBuffer = new FoliageScatterMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);

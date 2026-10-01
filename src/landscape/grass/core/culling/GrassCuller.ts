@@ -6,7 +6,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassCullComputeWGSL from "./grassCullCompute.wgsl";
-import type {GrassMegaBuffer} from "../buffer/GrassMegaBuffer";
+import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 
 /**
  * [KO] GPU Compute 기반으로 지형 잔디의 거리 및 프러스텀 컬링을 수행하는 컬링 디스패처 클래스입니다.
@@ -118,7 +118,7 @@ export class GrassCuller extends RedGPUObject {
      *
      * @param megaBuffer - [KO] 잔디 메가버퍼 인스턴스 [EN] Grass mega-buffer instance
      */
-    updateBindGroup(megaBuffer: GrassMegaBuffer): void {
+    updateBindGroup(megaBuffer: GrassScatterMegaBuffer): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#cullBindGroupLayout || !this.#globalUniformGPUBuffer) return;
 

@@ -5,7 +5,7 @@
  * **[KO]**
  * - `Foliage`: 단일 식생 타입 정의 및 타일별 인스턴스 라이프사이클 관리 엔티티
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: 식생 전용 메인 및 그림자 렌더 서브메쉬
- * - `FoliageMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
+ * - `FoliageScatterMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
  * - `FoliageCullingDispatcher`: HZB 오클루전 및 프러스텀 컬링 GPU 디스패처
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: 지형 타일 내부 고밀도 서브셀 공간 분할 및 동적 인스턴스 스트리머
@@ -21,7 +21,7 @@
  * **[EN]**
  * - `Foliage`: Entity defining a single foliage type and managing per-tile instance lifecycles
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
- * - `FoliageMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
+ * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCullingDispatcher`: GPU dispatcher for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: High-density subcell spatial partitioner and dynamic streamer
@@ -43,7 +43,7 @@ import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
-import FoliageMegaBuffer from "./buffer/FoliageMegaBuffer";
+import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
 import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
@@ -75,7 +75,7 @@ export {
     Foliage,
     FoliageSubMesh,
     FoliageShadowMergedSubMesh,
-    FoliageMegaBuffer,
+    FoliageScatterMegaBuffer,
     FoliageSpatialGrid,
     FoliagePipelineRegistry,
     FoliageRenderer,

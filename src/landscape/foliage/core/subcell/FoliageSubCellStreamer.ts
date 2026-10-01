@@ -6,7 +6,7 @@
 
 import type Foliage from "../Foliage";
 import type {FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
-import type FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
+import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
@@ -214,7 +214,7 @@ export default class FoliageSubCellStreamer {
         return da - db;
     };
 
-    #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageMegaBuffer, allocation: any): void {
+    #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
         if (chunk.isMounted) return;
         const currentActive = allocation.instanceCount;
         const count = chunk.instanceCount;
@@ -234,7 +234,7 @@ export default class FoliageSubCellStreamer {
         this.#foliageType.uploadRangeToGPU(currentActive, count);
     }
 
-    #unmountChunkAt(mountedIndex: number, megaBuffer: FoliageMegaBuffer, allocation: any): void {
+    #unmountChunkAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
         const mounted = this.#mountedChunks;
         const targetChunk = mounted[mountedIndex];
         const targetSlot = targetChunk.mountedSlotIndex;

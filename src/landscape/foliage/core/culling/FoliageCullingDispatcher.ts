@@ -12,7 +12,7 @@ import type Foliage from "../Foliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
-import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffer";
+import FoliageScatterMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageScatterMegaBuffer";
 import {ScatterInstanceBaker} from "../../../core/scatter";
 import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -45,7 +45,7 @@ class FoliageCullingDispatcher extends RedGPUObject {
         {maxDistance: 85.0, hasShadow: false, frustumPlanes: null},
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
-    #megaBuffer: FoliageMegaBuffer | null = null;
+    #megaBuffer: FoliageScatterMegaBuffer | null = null;
     #baker: ScatterInstanceBaker;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
@@ -71,7 +71,7 @@ class FoliageCullingDispatcher extends RedGPUObject {
      * [KO] 지형 타일 스트리머 (선택사항)
      * [EN] Landscape tile streamer (optional)
      */
-    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
+    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
         this.#tileStreamer = tileStreamer || null;

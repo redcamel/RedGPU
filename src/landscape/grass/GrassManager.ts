@@ -10,7 +10,7 @@ import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
-import {GrassMegaBuffer} from "./core/buffer/GrassMegaBuffer";
+import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {computeNormalizedChannelWeight, ScatterInstanceBaker} from "../core/scatter";
 import grassBakeComputeWGSL from "./core/baking/grassBakeCompute.wgsl";
 import {GrassCuller} from "./core/culling/GrassCuller";
@@ -152,7 +152,7 @@ export class GrassManager extends RedGPUObject {
     #enabled: boolean = true;
     #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
-    #megaBuffer: GrassMegaBuffer;
+    #megaBuffer: GrassScatterMegaBuffer;
     #baker: ScatterInstanceBaker;
     #culler: GrassCuller;
 
@@ -225,7 +225,7 @@ export class GrassManager extends RedGPUObject {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
 
-        this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
+        this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#baker = new ScatterInstanceBaker(this.redGPUContext, {
             computeShaderCode: grassBakeComputeWGSL,
             label: 'GrassInstanceBaker',
@@ -537,7 +537,7 @@ export class GrassManager extends RedGPUObject {
         }
 
         this.#megaBuffer.destroy();
-        this.#megaBuffer = new GrassMegaBuffer(this.redGPUContext, 131072);
+        this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
             this.#baker.invalidateBindGroup();
             this.#culler.invalidateBindGroup();
