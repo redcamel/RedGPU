@@ -1,9 +1,5 @@
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {
-    AScatterMegaBuffer,
-    CULLING_WORKGROUP_SIZE,
-    DRAW_INDEXED_INDIRECT_ARGS_COUNT
-} from '../../../core/scatter/AScatterMegaBuffer';
+import {AScatterMegaBuffer, DRAW_INDEXED_INDIRECT_ARGS_COUNT} from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
 import FoliageSubMesh from '../submesh/FoliageSubMesh';
 import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
@@ -100,7 +96,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
     #shadowIndirectGPUBuffer: GPUBuffer | null = null;
     #unifiedGlobalUniformGPUBuffer: GPUBuffer | null = null;
-    #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
     #shadowIndirectResetTemplateGPUBuffer: GPUBuffer | null = null;
 
     #cpuUnifiedGlobalUniformData: Float32Array;
@@ -111,9 +106,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
     #allocations: Map<string, FoliageTypeAllocation> = new Map();
     #allocatedTypes: FoliageTypeAllocation[] = [];
-    #nextRawOffset: number = 0;
-    #nextCulledOffset: number = 0;
-    #nextIndirectOffset: number = 0;
 
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedHZBTextureView: GPUTextureView | null = null;
@@ -190,13 +182,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         return this.#shadowIndirectGPUBuffer;
     }
 
-    /**
-     * [KO] 현재까지 등록된 모든 식생 타입들의 총 할당 인스턴스 수를 반환합니다.
-     * [EN] Returns the total allocated instance count across all registered foliage types to date.
-     */
-    get totalAllocatedInstances(): number {
-        return this.#nextRawOffset;
-    }
 
     /**
      * [KO] 등록된 모든 식생 타입의 활성 인스턴스 총합
@@ -258,13 +243,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
 
         const subMeshCount = subMeshes.length;
-
-        const alignedMaxInstances = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
-        this.ensureCapacity(this.#nextRawOffset + alignedMaxInstances);
-
-        const rawBaseOffset = this.#nextRawOffset;
-        const culledBaseOffset = this.#nextCulledOffset;
-        const indirectBaseOffset = this.#nextIndirectOffset;
+        const baseSegment = this.allocateBaseSegment(name, maxInstances, subMeshCount, 8);
+        const {rawBaseOffset, culledBaseOffset, indirectBaseOffset, maxInstances: alignedMaxInstances} = baseSegment;
 
         const allocation: FoliageTypeAllocation = {
             typeId,
@@ -289,10 +269,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         for (let i = 0; i < alignedMaxInstances; i++) {
             cpuRawUint32[baseFloat + i * strideFloats + 7] = defaultColorAndType;
         }
-
-        this.#nextRawOffset += alignedMaxInstances;
-        this.#nextCulledOffset += alignedMaxInstances * 8;
-        this.#nextIndirectOffset += subMeshCount;
 
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
@@ -340,51 +316,32 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Optional GPU command encoder (uses GPU copyBufferToBuffer if provided)
      */
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
-        if (this.#nextIndirectOffset === 0) return;
+        const totalIndirect = this.totalIndirectDrawCalls;
+        if (totalIndirect === 0) return;
+
+        super.resetMultiIndirectCommands(commandEncoder);
+
+        if (!this.#shadowIndirectGPUBuffer) return;
 
         const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
-        const mainBytes = this.#nextIndirectOffset * indirectStrideBytes;
         const shadowResetBytes = Math.min(
-            (this.maxSubMeshes * 3 + this.#nextIndirectOffset) * indirectStrideBytes,
+            (this.maxSubMeshes * 3 + totalIndirect) * indirectStrideBytes,
             this.#shadowIndirectResetTemplate.byteLength
         );
 
-        const indirectGPUBuffer = this.indirectGPUBuffer;
-        if (commandEncoder && this.#indirectResetTemplateGPUBuffer && this.#shadowIndirectResetTemplateGPUBuffer) {
-            if (indirectGPUBuffer) {
-                commandEncoder.copyBufferToBuffer(
-                    this.#indirectResetTemplateGPUBuffer,
-                    0,
-                    indirectGPUBuffer,
-                    0,
-                    mainBytes
-                );
-            }
-            if (this.#shadowIndirectGPUBuffer) {
-                commandEncoder.copyBufferToBuffer(
-                    this.#shadowIndirectResetTemplateGPUBuffer,
-                    0,
-                    this.#shadowIndirectGPUBuffer,
-                    0,
-                    shadowResetBytes
-                );
-            }
+        if (commandEncoder && this.#shadowIndirectResetTemplateGPUBuffer) {
+            commandEncoder.copyBufferToBuffer(
+                this.#shadowIndirectResetTemplateGPUBuffer,
+                0,
+                this.#shadowIndirectGPUBuffer,
+                0,
+                shadowResetBytes
+            );
             return;
         }
 
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-
-        if (indirectGPUBuffer) {
-            gpuDevice.queue.writeBuffer(
-                indirectGPUBuffer,
-                0,
-                this.indirectResetTemplate.buffer,
-                this.indirectResetTemplate.byteOffset,
-                mainBytes
-            );
-        }
-        if (this.#shadowIndirectGPUBuffer) {
+        if (gpuDevice) {
             gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectGPUBuffer,
                 0,
@@ -430,7 +387,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         gf32[0] = camX;
         gf32[1] = camY;
         gf32[2] = camZ;
-        gu32[3] = this.#nextRawOffset;
+        gu32[3] = this.totalAllocatedInstances;
 
         gf32[4] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
         gf32[5] = heightScale;
@@ -674,15 +631,12 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
         lodInfoList?: FoliageLODInfo[]
     ): void {
-        const indirectResetTemplate = this.indirectResetTemplate;
         const maxSubMeshes = this.maxSubMeshes;
 
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
-            const mainSlot = (indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
-            indirectResetTemplate[mainSlot] = count;
-            indirectResetTemplate[mainSlot + 2] = sub.firstIndex;
+            this.registerIndirectDrawSlot(indirectBaseOffset + s, count, sub.firstIndex);
 
             for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
                 const shadowSlot = (c * maxSubMeshes + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
@@ -716,15 +670,10 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             }
         }
 
+        this.syncIndirectResetTemplateToGPU(indirectBaseOffset, subMeshes.length);
+
         const gpuDevice = this.gpuDevice;
-        if (gpuDevice && this.#indirectResetTemplateGPUBuffer && this.#shadowIndirectResetTemplateGPUBuffer) {
-            gpuDevice.queue.writeBuffer(
-                this.#indirectResetTemplateGPUBuffer,
-                0,
-                indirectResetTemplate.buffer,
-                0,
-                indirectResetTemplate.byteLength
-            );
+        if (gpuDevice && this.#shadowIndirectResetTemplateGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectResetTemplateGPUBuffer,
                 0,
@@ -767,17 +716,16 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#shadowCulledGPUBuffer?.destroy();
         this.#shadowIndirectGPUBuffer?.destroy();
         this.#unifiedGlobalUniformGPUBuffer?.destroy();
-        this.#indirectResetTemplateGPUBuffer?.destroy();
         this.#shadowIndirectResetTemplateGPUBuffer?.destroy();
 
         this.#shadowCulledGPUBuffer = null;
         this.#shadowIndirectGPUBuffer = null;
         this.#unifiedGlobalUniformGPUBuffer = null;
-        this.#indirectResetTemplateGPUBuffer = null;
         this.#shadowIndirectResetTemplateGPUBuffer = null;
         this.#unifiedCullingBindGroup = null;
         this.#allocations.clear();
         this.#allocatedTypes.length = 0;
+        this.clearBaseAllocations();
     }
 
     #initBuffers(): void {
@@ -804,7 +752,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
+        this.indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Indirect_Template',
             size: indirectByteSize,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,

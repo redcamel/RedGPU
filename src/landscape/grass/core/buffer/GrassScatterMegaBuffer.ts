@@ -1,9 +1,5 @@
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {
-    AScatterMegaBuffer,
-    CULLING_WORKGROUP_SIZE,
-    DRAW_INDEXED_INDIRECT_ARGS_COUNT
-} from '../../../core/scatter/AScatterMegaBuffer';
+import {AScatterMegaBuffer, DRAW_INDEXED_INDIRECT_ARGS_COUNT} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullComputeWGSL from '../culling/grassCullCompute.wgsl';
 
 /**
@@ -106,9 +102,6 @@ export interface GrassTypeAllocation {
  */
 export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     #allocations: Map<number, GrassTypeAllocation> = new Map();
-    #totalAllocatedInstances: number = 0;
-    #totalAllocatedCulledInstances: number = 0;
-    #totalIndirectDrawCalls: number = 0;
 
     /**
      * [KO] GrassScatterMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -151,14 +144,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] 현재까지 등록된 모든 잔디 타입들의 총 할당 인스턴스 수를 반환합니다.
-     * [EN] Returns the total allocated instance count across all registered grass types to date.
-     */
-    get totalAllocatedInstances(): number {
-        return this.#totalAllocatedInstances;
-    }
-
-    /**
      * [KO] 특정 잔디 타입에 대해 필요한 인스턴스 메모리 공간과 Near/Far 간접 드로우 슬롯을 할당합니다.
      * [EN] Allocates required instance memory space and Near/Far indirect draw slots for a specific grass type.
      *
@@ -189,23 +174,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             : [{indexCount: subMeshesOrIndexCount, firstIndex: 0}];
         const subMeshCount = Math.max(1, subMeshes.length);
 
-        const rounded = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
+        const baseAlloc = this.allocateBaseSegment(typeId, maxInstances, subMeshCount * 2, 2);
 
-        if (
-            this.#totalAllocatedInstances + rounded > this.instanceCapacity ||
-            this.#totalAllocatedCulledInstances + rounded * 2 > this.instanceCapacity * 2
-        ) {
-            this.ensureCapacity(Math.max(this.instanceCapacity * 2, this.#totalAllocatedInstances + rounded));
-        }
-
-        const rawBaseOffset = this.#totalAllocatedInstances;
-        const indirectBaseOffset = this.#totalIndirectDrawCalls;
-        const culledBaseOffset = this.#totalAllocatedCulledInstances;
-
-        const nearCulledOffset = this.#totalAllocatedCulledInstances;
-        this.#totalAllocatedCulledInstances += rounded;
-        const farCulledOffset = this.#totalAllocatedCulledInstances;
-        this.#totalAllocatedCulledInstances += rounded;
+        const nearCulledOffset = baseAlloc.culledBaseOffset;
+        const farCulledOffset = baseAlloc.culledBaseOffset + baseAlloc.maxInstances;
 
         const nearSlots: GrassDrawSlot[] = [];
         const farSlots: GrassDrawSlot[] = [];
@@ -213,39 +185,43 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
+            const slotIdx = baseAlloc.indirectBaseOffset + s;
             const nearSlot: GrassDrawSlot = {
                 slotIndex: 0,
                 subMeshIndex: s,
-                indirectOffset: this.#totalIndirectDrawCalls++,
+                indirectOffset: slotIdx,
                 culledBaseOffset: nearCulledOffset,
                 indexCount: sub.indexCount,
                 firstIndex: sub.firstIndex
             };
-            this.#updateIndirectTemplateForSlot(nearSlot);
+            this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, nearCulledOffset);
             nearSlots.push(nearSlot);
             slots.push(nearSlot);
         }
 
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
+            const slotIdx = baseAlloc.indirectBaseOffset + subMeshCount + s;
             const farSlot: GrassDrawSlot = {
                 slotIndex: 1,
                 subMeshIndex: s,
-                indirectOffset: this.#totalIndirectDrawCalls++,
+                indirectOffset: slotIdx,
                 culledBaseOffset: farCulledOffset,
                 indexCount: sub.indexCount,
                 firstIndex: sub.firstIndex
             };
-            this.#updateIndirectTemplateForSlot(farSlot);
+            this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, farCulledOffset);
             farSlots.push(farSlot);
             slots.push(farSlot);
         }
 
+        this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, subMeshCount * 2);
+
         const alloc: GrassTypeAllocation = {
-            maxInstances: rounded,
-            rawBaseOffset,
-            culledBaseOffset,
-            indirectBaseOffset,
+            maxInstances: baseAlloc.maxInstances,
+            rawBaseOffset: baseAlloc.rawBaseOffset,
+            culledBaseOffset: baseAlloc.culledBaseOffset,
+            indirectBaseOffset: baseAlloc.indirectBaseOffset,
             instanceCount: 0,
             subMeshCount,
             slots,
@@ -254,8 +230,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         };
 
         this.#allocations.set(typeId, alloc);
-        this.#totalAllocatedInstances += rounded;
-
         return alloc;
     }
 
@@ -409,31 +383,11 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] 매 프레임 GPU 컬링 실행 전, CPU 템플릿을 사용하여 간접 드로우 인스턴스 카운트를 0으로 초기화합니다.
-     * [EN] Resets the indirect draw instance counts to zero using the CPU template before executing GPU culling every frame.
+     * [KO] 매 프레임 GPU 컬링 실행 전, 간접 드로우 인스턴스 카운트를 0으로 초기화합니다.
+     * [EN] Resets the indirect draw instance counts to zero before executing GPU culling every frame.
      */
     resetIndirectDrawCountsCPU(): void {
-        const gpuDevice = this.gpuDevice;
-        const indirectGPUBuffer = this.indirectGPUBuffer;
-        if (!gpuDevice || !indirectGPUBuffer || this.#totalIndirectDrawCalls === 0) return;
-        gpuDevice.queue.writeBuffer(
-            indirectGPUBuffer,
-            0,
-            this.indirectResetTemplate.buffer,
-            0,
-            this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT
-        );
-    }
-
-    /**
-     * [KO] 간접 드로우 인스턴스 카운트를 초기화합니다. (FoliageScatterMegaBuffer와의 인터페이스 통일 래퍼)
-     * [EN] Resets indirect draw instance counts. (Interface unification wrapper with FoliageScatterMegaBuffer)
-     * @param commandEncoder -
-     * [KO] 선택사항인 GPU 커맨드 인코더
-     * [EN] Optional GPU command encoder
-     */
-    resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
-        this.resetIndirectDrawCountsCPU();
+        super.resetMultiIndirectCommands();
     }
 
     /**
@@ -456,7 +410,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
-        const culledCapacity = Math.max(newCapacity * 2, this.#totalAllocatedCulledInstances);
+        const culledCapacity = Math.max(newCapacity * 2, this.totalAllocatedCulledInstances);
         const culledByteSize = culledCapacity * strideBytes;
 
         this.culledGPUBuffer?.destroy();
@@ -469,9 +423,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
     onDestroy(): void {
         this.#allocations.clear();
-        this.#totalAllocatedInstances = 0;
-        this.#totalAllocatedCulledInstances = 0;
-        this.#totalIndirectDrawCalls = 0;
+        this.clearBaseAllocations();
     }
 
     #initBuffers(): void {
@@ -479,7 +431,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
-        const culledCapacity = Math.max(this.instanceCapacity * 2, this.#totalAllocatedCulledInstances);
+        const culledCapacity = Math.max(this.instanceCapacity * 2, this.totalAllocatedCulledInstances);
         const culledByteSize = culledCapacity * strideBytes;
         const indirectByteSize =
             this.maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
@@ -495,29 +447,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             size: indirectByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
         });
-    }
-
-    #updateIndirectTemplateForSlot(slot: GrassDrawSlot): void {
-        const offset = slot.indirectOffset * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
-        const indirectResetTemplate = this.indirectResetTemplate;
-        indirectResetTemplate[offset] = slot.indexCount;
-        indirectResetTemplate[offset + 1] = 0;
-        indirectResetTemplate[offset + 2] = slot.firstIndex;
-        indirectResetTemplate[offset + 3] = 0;
-        indirectResetTemplate[offset + 4] = slot.culledBaseOffset;
-
-        const gpuDevice = this.gpuDevice;
-        const indirectGPUBuffer = this.indirectGPUBuffer;
-        if (gpuDevice && indirectGPUBuffer) {
-            const byteOffset = offset * Uint32Array.BYTES_PER_ELEMENT;
-            gpuDevice.queue.writeBuffer(
-                indirectGPUBuffer,
-                byteOffset,
-                indirectResetTemplate.buffer,
-                byteOffset,
-                DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT
-            );
-        }
     }
 }
 

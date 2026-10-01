@@ -41,6 +41,53 @@ export interface ScatterShaderReflectionConfig {
 }
 
 /**
+ * [KO] 스캐터 메가버퍼의 기본 세그먼트 할당 정보 인터페이스입니다.
+ * [EN] Interface for base segment allocation info in scatter mega-buffer.
+ */
+export interface ScatterBaseSegmentAllocation {
+    /**
+     * [KO] 할당된 타입 고유 ID
+     * [EN] Allocated unique type ID
+     */
+    typeId: number;
+    /**
+     * [KO] 할당된 타입 이름 (선택사항)
+     * [EN] Allocated type name (optional)
+     */
+    name?: string;
+    /**
+     * [KO] 정렬 보정된 최대 인스턴스 용량
+     * [EN] Aligned maximum instance capacity
+     */
+    maxInstances: number;
+    /**
+     * [KO] GPU 원본 인스턴스 버퍼 시작 오프셋
+     * [EN] Raw instance buffer start offset
+     */
+    rawBaseOffset: number;
+    /**
+     * [KO] GPU 컬링 통과 인스턴스 버퍼 시작 오프셋
+     * [EN] Culled instance buffer start offset
+     */
+    culledBaseOffset: number;
+    /**
+     * [KO] GPU 간접 드로우 인자 버퍼 슬롯 시작 오프셋
+     * [EN] Indirect draw args buffer slot start offset
+     */
+    indirectBaseOffset: number;
+    /**
+     * [KO] 서브메시 개수
+     * [EN] Number of sub-meshes
+     */
+    subMeshCount: number;
+    /**
+     * [KO] 현재 활성화된 인스턴스 수
+     * [EN] Current active instance count
+     */
+    instanceCount: number;
+}
+
+/**
  * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 공통 추상 메가버퍼 기반 클래스입니다.
  * [EN] Common abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
  *
@@ -57,6 +104,10 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     #maxSubMeshes: number;
     #maxTypes: number;
 
+    #totalAllocatedInstances: number = 0;
+    #totalAllocatedCulledInstances: number = 0;
+    #totalIndirectDrawCalls: number = 0;
+
     #cpuRawDataBuffer: Float32Array;
     #cpuRawDataUint32: Uint32Array;
 
@@ -69,6 +120,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     #typeParamsGPUBuffer: GPUBuffer | null = null;
 
     #indirectResetTemplate: Uint32Array;
+    #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
 
     #onRecreated: (() => void) | null = null;
 
@@ -267,11 +319,230 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#onRecreated = cb;
     }
 
+    get indirectResetTemplateGPUBuffer(): GPUBuffer | null {
+        return this.#indirectResetTemplateGPUBuffer;
+    }
+
+    set indirectResetTemplateGPUBuffer(buffer: GPUBuffer | null) {
+        this.#indirectResetTemplateGPUBuffer = buffer;
+    }
+
     /**
      * [KO] 현재까지 등록된 모든 타입들의 총 할당 인스턴스 수를 반환합니다.
      * [EN] Returns the total allocated instance count across all registered types to date.
      */
-    abstract get totalAllocatedInstances(): number;
+    get totalAllocatedInstances(): number {
+        return this.#totalAllocatedInstances;
+    }
+
+    /**
+     * [KO] 현재까지 등록된 모든 타입들의 총 할당 컬링 인스턴스 수를 반환합니다.
+     * [EN] Returns the total allocated culled instance count across all registered types to date.
+     */
+    get totalAllocatedCulledInstances(): number {
+        return this.#totalAllocatedCulledInstances;
+    }
+
+    /**
+     * [KO] 현재까지 등록된 총 간접 드로우 슬롯(호출) 수를 반환합니다.
+     * [EN] Returns the total number of indirect draw slots (calls) registered to date.
+     */
+    get totalIndirectDrawCalls(): number {
+        return this.#totalIndirectDrawCalls;
+    }
+
+    /**
+     * [KO] 새로운 스캐터 타입에 필요한 기본 VRAM 세그먼트를 할당하고 시작 오프셋들을 반환합니다.
+     * [EN] Allocates a base VRAM segment for a new scatter type and returns starting offsets.
+     * @param typeIdOrName -
+     * [KO] 타입 ID 또는 고유 이름
+     * [EN] Type ID or unique name
+     * @param maxInstances -
+     * [KO] 최대 허용 인스턴스 수
+     * [EN] Maximum allowed instances
+     * @param subMeshCount -
+     * [KO] 서브메시(드로우 슬롯) 수
+     * [EN] Number of sub-meshes (draw slots)
+     * @param culledMultiplier -
+     * [KO] 컬링 버퍼 배수 (기본값: 2, Foliage는 8)
+     * [EN] Culled buffer multiplier (default: 2, Foliage is 8)
+     * @returns
+     * [KO] 할당된 기본 세그먼트 메타데이터 객체
+     * [EN] Allocated base segment metadata object
+     */
+    allocateBaseSegment(
+        typeIdOrName: number | string,
+        maxInstances: number,
+        subMeshCount: number,
+        culledMultiplier: number = 2
+    ): ScatterBaseSegmentAllocation {
+        const alignedMax = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
+        this.ensureCapacity(this.#totalAllocatedInstances + alignedMax);
+
+        const rawBaseOffset = this.#totalAllocatedInstances;
+        const culledBaseOffset = this.#totalAllocatedCulledInstances;
+        const indirectBaseOffset = this.#totalIndirectDrawCalls;
+
+        this.#totalAllocatedInstances += alignedMax;
+        this.#totalAllocatedCulledInstances += alignedMax * culledMultiplier;
+        this.#totalIndirectDrawCalls += subMeshCount;
+
+        const typeId = typeof typeIdOrName === 'number' ? typeIdOrName : 0;
+        const name = typeof typeIdOrName === 'string' ? typeIdOrName : undefined;
+
+        return {
+            typeId,
+            name,
+            maxInstances: alignedMax,
+            rawBaseOffset,
+            culledBaseOffset,
+            indirectBaseOffset,
+            subMeshCount,
+            instanceCount: 0
+        };
+    }
+
+    /**
+     * [KO] 단일 간접 드로우 슬롯의 인자들을 리셋 템플릿에 등록합니다.
+     * [EN] Registers arguments of a single indirect draw slot to the reset template.
+     * @param slotIndex -
+     * [KO] 간접 드로우 슬롯 인덱스
+     * [EN] Indirect draw slot index
+     * @param indexCount -
+     * [KO] 인덱스 개수
+     * [EN] Index count
+     * @param firstIndex -
+     * [KO] 인덱스 버퍼 내 시작 오프셋 (기본값: 0)
+     * [EN] Starting offset in index buffer (default: 0)
+     * @param baseVertex -
+     * [KO] 기준 정점 오프셋 (기본값: 0)
+     * [EN] Base vertex offset (default: 0)
+     * @param firstInstance -
+     * [KO] 시작 인스턴스 오프셋 (기본값: 0)
+     * [EN] First instance offset (default: 0)
+     */
+    registerIndirectDrawSlot(
+        slotIndex: number,
+        indexCount: number,
+        firstIndex: number = 0,
+        baseVertex: number = 0,
+        firstInstance: number = 0
+    ): void {
+        const base = slotIndex * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
+        const template = this.#indirectResetTemplate;
+        template[base + 0] = indexCount;
+        template[base + 1] = 0;
+        template[base + 2] = firstIndex;
+        template[base + 3] = baseVertex;
+        template[base + 4] = firstInstance;
+    }
+
+    /**
+     * [KO] CPU 간접 드로우 리셋 템플릿을 GPU 인디렉트 버퍼 및 템플릿 버퍼로 동기화합니다.
+     * [EN] Synchronizes CPU indirect draw reset template to GPU indirect and template buffers.
+     * @param slotIndex -
+     * [KO] 동기화할 시작 슬롯 인덱스 (생략 시 전체 동기화)
+     * [EN] Starting slot index to synchronize (omitted for full sync)
+     * @param slotCount -
+     * [KO] 동기화할 슬롯 개수
+     * [EN] Number of slots to synchronize
+     */
+    syncIndirectResetTemplateToGPU(slotIndex?: number, slotCount?: number): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return;
+
+        const indirectGPUBuffer = this.#indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        if (slotIndex !== undefined && slotCount !== undefined) {
+            const byteOffset = slotIndex * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+            const byteSize = slotCount * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+            gpuDevice.queue.writeBuffer(
+                indirectGPUBuffer,
+                byteOffset,
+                this.#indirectResetTemplate.buffer,
+                byteOffset,
+                byteSize
+            );
+            if (this.#indirectResetTemplateGPUBuffer) {
+                gpuDevice.queue.writeBuffer(
+                    this.#indirectResetTemplateGPUBuffer,
+                    byteOffset,
+                    this.#indirectResetTemplate.buffer,
+                    byteOffset,
+                    byteSize
+                );
+            }
+        } else {
+            const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+            if (byteSize > 0) {
+                gpuDevice.queue.writeBuffer(
+                    indirectGPUBuffer,
+                    0,
+                    this.#indirectResetTemplate.buffer,
+                    0,
+                    byteSize
+                );
+                if (this.#indirectResetTemplateGPUBuffer) {
+                    gpuDevice.queue.writeBuffer(
+                        this.#indirectResetTemplateGPUBuffer,
+                        0,
+                        this.#indirectResetTemplate.buffer,
+                        0,
+                        byteSize
+                    );
+                }
+            }
+        }
+    }
+
+    /**
+     * [KO] 매 프레임 GPU 컬링 실행 전 간접 드로우 인스턴스 카운트를 0으로 리셋합니다.
+     * [EN] Resets indirect draw instance counts to zero before GPU culling executes every frame.
+     * @param commandEncoder -
+     * [KO] 선택사항인 GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
+     * [EN] Optional GPU command encoder (uses copyBufferToBuffer if provided)
+     */
+    resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
+        if (this.#totalIndirectDrawCalls === 0) return;
+
+        const indirectGPUBuffer = this.#indirectGPUBuffer;
+        if (!indirectGPUBuffer) return;
+
+        const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+
+        if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {
+            commandEncoder.copyBufferToBuffer(
+                this.#indirectResetTemplateGPUBuffer,
+                0,
+                indirectGPUBuffer,
+                0,
+                byteSize
+            );
+            return;
+        }
+
+        const gpuDevice = this.gpuDevice;
+        if (gpuDevice) {
+            gpuDevice.queue.writeBuffer(
+                indirectGPUBuffer,
+                0,
+                this.#indirectResetTemplate.buffer,
+                0,
+                byteSize
+            );
+        }
+    }
+
+    /**
+     * [KO] 기본 할당 카운트들을 0으로 리셋합니다.
+     * [EN] Resets base allocation counts to zero.
+     */
+    clearBaseAllocations(): void {
+        this.#totalAllocatedInstances = 0;
+        this.#totalAllocatedCulledInstances = 0;
+        this.#totalIndirectDrawCalls = 0;
+    }
 
     /**
      * [KO] 요청된 용량을 수용할 수 있도록 메가 버퍼의 크기를 검사하고 필요한 경우 2배 단위로 확장합니다.
@@ -362,11 +633,13 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#rawGPUBuffer?.destroy();
         this.#culledGPUBuffer?.destroy();
         this.#indirectGPUBuffer?.destroy();
+        this.#indirectResetTemplateGPUBuffer?.destroy();
         this.#typeParamsGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = null;
         this.#culledGPUBuffer = null;
         this.#indirectGPUBuffer = null;
+        this.#indirectResetTemplateGPUBuffer = null;
         this.#typeParamsGPUBuffer = null;
 
         this.onDestroy();
