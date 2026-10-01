@@ -397,7 +397,7 @@ RedGPU.init(
                         });
                         typeFolder.addBinding(type, 'useDepthPrepass');
                         typeFolder.addBinding(type, 'castShadow');
-                        typeFolder.addBinding(type, 'maxShadowDistance', {
+                        typeFolder.addBinding(type, 'shadowCullDistance', {
                             min: 0,
                             max: 1000,
                             step: 1

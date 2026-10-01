@@ -373,7 +373,7 @@ function renderTestPane({
         // 5. Shadow (그림자)
         const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
-        shadowFolder.addBinding(type, 'maxShadowDistance', {min: 50, max: 1000, step: 25});
+        shadowFolder.addBinding(type, 'shadowCullDistance', {min: 50, max: 1000, step: 25});
 
         // 6. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});

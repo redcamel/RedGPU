@@ -239,7 +239,7 @@ RedGPU.init(
                         targetLayer: 'Grass',
                         minWeightThreshold: 0.02,
                         cullingDistance: 110,
-                        shrinkStartDistance: 80,
+                        fadeStartDistance: 80,
                         minScale: [7.0, 4.5, 7.0],
                         maxScale: [11.0, 6.5, 11.0],
                         groundBlendStrength: 0.55,
@@ -352,7 +352,7 @@ RedGPU.init(
                         targetLayer: 'Grass',
                         minWeightThreshold: 0.02,
                         cullingDistance: 110,
-                        shrinkStartDistance: 80,
+                        fadeStartDistance: 80,
                         minScale: [3.0, 3.8, 3.0],
                         maxScale: [4.8, 6.0, 4.8],
                         groundBlendStrength: 0.45,
@@ -713,7 +713,7 @@ const renderTestPane = ({
         // 3. LOD 및 그림자 (LOD & Shadow)
         const lodFolder = typeFolder.addFolder({title: '👁️ LOD & Shadow', expanded: false});
         lodFolder.addBinding(type, 'cullingDistance', {min: 20, max: 200, step: 5, label: 'Cull Dist (m)'});
-        lodFolder.addBinding(type, 'shrinkStartDistance', {min: 10, max: 150, step: 5, label: 'Shrink Dist (m)'});
+        lodFolder.addBinding(type, 'fadeStartDistance', {min: 10, max: 150, step: 5, label: 'Fade Dist (m)'});
         lodFolder.addBinding(type, 'castShadow', {label: 'Cast Shadow'});
         lodFolder.addBinding(type, 'receiveShadow', {label: 'Receive Shadow'});
         lodFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
