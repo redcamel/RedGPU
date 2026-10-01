@@ -34,7 +34,7 @@ struct GrassTypeParam {
     farDistance: f32,
     stageDistance1: f32,
     stageDistance2: f32,
-    pad0: f32,
+    subMeshCount: u32,
 };
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<GrassInstance>;
@@ -109,9 +109,17 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let indirectArgIndex = (typeInfo.indirectBaseOffset + drawSlot) * 5u + 1u;
-    let slot = atomicAdd(&indirectCommands[indirectArgIndex], 1u);
-    let culledIndex = typeInfo.culledBaseOffset + (drawSlot * typeInfo.maxInstancesPerStage) + slot;
+    let numSubs = max(typeInfo.subMeshCount, 1u);
+    let stageIndirectStart = typeInfo.indirectBaseOffset + (drawSlot * numSubs);
 
+    let firstIndirectArgIndex = stageIndirectStart * 5u + 1u;
+    let slot = atomicAdd(&indirectCommands[firstIndirectArgIndex], 1u);
+
+    for (var s = 1u; s < numSubs; s = s + 1u) {
+        let subIndirectArgIndex = (stageIndirectStart + s) * 5u + 1u;
+        atomicAdd(&indirectCommands[subIndirectArgIndex], 1u);
+    }
+
+    let culledIndex = typeInfo.culledBaseOffset + (drawSlot * typeInfo.maxInstancesPerStage) + slot;
     culledInstances[culledIndex] = instance;
 }

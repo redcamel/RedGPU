@@ -43,6 +43,7 @@ export interface CombinedSubMeshGroup {
     geometry: Geometry;
     vertexCount: number;
     indexCount: number;
+    firstIndex: number;
     rawNodes: RawSubMeshNode[];
 }
 
@@ -76,6 +77,7 @@ export interface ScatterMeshCombineOptions {
  */
 export interface ScatterMeshCombineResult {
     groups: CombinedSubMeshGroup[];
+    unifiedGeometry: Geometry | null;
     totalVertexCount: number;
     totalIndexCount: number;
     boundingRadius: number;
@@ -267,6 +269,7 @@ export default function combineScatterMeshes(
     if (rawList.length === 0) {
         return {
             groups: [],
+            unifiedGeometry: null,
             totalVertexCount: 0,
             totalIndexCount: 0,
             boundingRadius: 0,
@@ -347,6 +350,16 @@ export default function combineScatterMeshes(
         shadowMergedIndices = new Uint32Array(lodTotalIndices);
     }
 
+    let unifiedVertexData: Float32Array | null = null;
+    let unifiedIndexData: Uint32Array | null = null;
+    let unifiedVertexOffset = 0;
+    let unifiedIndexOffset = 0;
+
+    if (lodTotalVertices > 0) {
+        unifiedVertexData = new Float32Array(lodTotalVertices * PBR_STRIDE);
+        unifiedIndexData = new Uint32Array(lodTotalIndices);
+    }
+
     for (const entry of materialGroups.values()) {
         const group = entry.raws;
         const mat = entry.material;
@@ -365,6 +378,8 @@ export default function combineScatterMeshes(
 
         let vertexOffset = 0;
         let indexOffset = 0;
+        const groupFirstIndex = unifiedIndexOffset;
+        const groupStartVertexOffset = unifiedVertexOffset;
 
         for (let g = 0; g < group.length; g++) {
             const raw = group[g];
@@ -498,29 +513,41 @@ export default function combineScatterMeshes(
                 if (srcIData && geom.indexBuffer?.indexCount) {
                     const iCount = geom.indexBuffer.indexCount;
                     for (let idx = 0; idx < iCount; idx++) {
-                        const combinedIdxVal = vertexOffset + srcIData[idx];
-                        combinedIndexData[indexOffset + idx] = combinedIdxVal;
+                        const sVal = srcIData[idx];
+                        combinedIndexData[indexOffset + idx] = vertexOffset + sVal;
+                        if (unifiedIndexData) {
+                            unifiedIndexData[unifiedIndexOffset + idx] = unifiedVertexOffset + sVal;
+                        }
                         if (shadowMergedIndices) {
-                            shadowMergedIndices[shadowIndexOffset + idx] = shadowVertexOffset + srcIData[idx];
+                            shadowMergedIndices[shadowIndexOffset + idx] = shadowVertexOffset + sVal;
                         }
                     }
                     indexOffset += iCount;
+                    if (unifiedIndexData) unifiedIndexOffset += iCount;
                     if (shadowMergedIndices) shadowIndexOffset += iCount;
                 } else {
                     for (let idx = 0; idx < vCount; idx++) {
-                        const combinedIdxVal = vertexOffset + idx;
-                        combinedIndexData[indexOffset + idx] = combinedIdxVal;
+                        combinedIndexData[indexOffset + idx] = vertexOffset + idx;
+                        if (unifiedIndexData) {
+                            unifiedIndexData[unifiedIndexOffset + idx] = unifiedVertexOffset + idx;
+                        }
                         if (shadowMergedIndices) {
                             shadowMergedIndices[shadowIndexOffset + idx] = shadowVertexOffset + idx;
                         }
                     }
                     indexOffset += vCount;
+                    if (unifiedIndexData) unifiedIndexOffset += vCount;
                     if (shadowMergedIndices) shadowIndexOffset += vCount;
                 }
 
                 vertexOffset += vCount;
+                if (unifiedVertexData) unifiedVertexOffset += vCount;
                 if (shadowMergedPositions) shadowVertexOffset += vCount;
             }
+        }
+
+        if (unifiedVertexData) {
+            unifiedVertexData.set(combinedVertexData, groupStartVertexOffset * PBR_STRIDE);
         }
 
         const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT);
@@ -532,8 +559,20 @@ export default function combineScatterMeshes(
             geometry: combinedGeom,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
+            firstIndex: groupFirstIndex,
             rawNodes: group
         });
+    }
+
+    let unifiedGeometry: Geometry | null = null;
+    if (lodTotalVertices > 0) {
+        if (groups.length === 1) {
+            unifiedGeometry = groups[0].geometry;
+        } else if (unifiedVertexData && unifiedIndexData) {
+            const unifiedVB = new VertexBuffer(redGPUContext, unifiedVertexData, PBR_INTERLEAVED_STRUCT);
+            const unifiedIB = new IndexBuffer(redGPUContext, unifiedIndexData);
+            unifiedGeometry = new Geometry(redGPUContext, unifiedVB, unifiedIB);
+        }
     }
 
     let shadowMergedGeometry: Geometry | null = null;
@@ -581,6 +620,7 @@ export default function combineScatterMeshes(
 
     return {
         groups,
+        unifiedGeometry,
         totalVertexCount: lodTotalVertices,
         totalIndexCount: lodTotalIndices,
         boundingRadius,

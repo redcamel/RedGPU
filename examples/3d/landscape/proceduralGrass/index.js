@@ -266,8 +266,10 @@ function renderTestPane({
                 max: 250,
                 step: 5
             });
-            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true});
-            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true});
+            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true, label: 'Instances'});
+            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true, label: 'Capacity'});
+            grassFolder.addBinding(grassManager, 'totalDrawCalls', {readonly: true, label: 'Main Draw Calls'});
+            grassFolder.addBinding(grassManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
@@ -387,6 +389,9 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
 
+        typeFolder.addBinding(type, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
+        typeFolder.addBinding(type, 'drawCallCount', {readonly: true, label: 'Draw Calls'});
+
         // -----------------------------------------------------------------
         // 1. Placement & Density (스폰 배치 및 밀도)
         // -----------------------------------------------------------------
@@ -467,7 +472,13 @@ function renderTestPane({
 
     // [KO] 매 프레임 캐릭터 및 카메라 업데이트
     // [EN] Update character and camera per frame
+    let lastStatsRefreshTime = 0;
     const update = (timestamp) => {
+        if (timestamp - lastStatsRefreshTime > 500) {
+            lastStatsRefreshTime = timestamp;
+            grassFolder?.refresh();
+        }
+
         if (characterMesh && characterController) {
             characterController.update(view, timestamp);
 

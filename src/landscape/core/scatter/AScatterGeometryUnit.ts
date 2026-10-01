@@ -52,6 +52,12 @@ export interface AScatterGeometryUnitInitOptions {
      * [EN] Instance offset within the instance buffer
      */
     instanceBufferOffset?: number;
+
+    /**
+     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋 (기본값: 0)
+     * [EN] Starting index offset within index buffer (default: 0)
+     */
+    firstIndex?: number;
 }
 
 /**
@@ -77,6 +83,7 @@ export abstract class AScatterGeometryUnit {
     #geometry: Geometry;
     #vertexCount: number;
     #indexCount: number;
+    #firstIndex: number;
     #isIndexed: boolean;
     #indexFormat: GPUIndexFormat;
     #strideBytes: number;
@@ -87,6 +94,7 @@ export abstract class AScatterGeometryUnit {
         this.#geometry = init.geometry;
         this.#vertexCount = init.vertexCount;
         this.#indexCount = init.indexCount;
+        this.#firstIndex = init.firstIndex ?? 0;
         this.#isIndexed = init.isIndexed;
         this.#indexFormat = init.indexFormat || 'uint32';
         this.#strideBytes = init.strideBytes;
@@ -116,6 +124,22 @@ export abstract class AScatterGeometryUnit {
      */
     get indexCount(): number {
         return this.#indexCount;
+    }
+
+    /**
+     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋을 반환합니다.
+     * [EN] Returns the starting index offset within the index buffer.
+     */
+    get firstIndex(): number {
+        return this.#firstIndex;
+    }
+
+    /**
+     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋을 설정합니다.
+     * [EN] Sets the starting index offset within the index buffer.
+     */
+    set firstIndex(val: number) {
+        this.#firstIndex = val;
     }
 
     /**

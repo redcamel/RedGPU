@@ -184,6 +184,10 @@ export class GrassManager extends RedGPUObject {
         cachedColorTexView: GPUTextureView | null;
         initialized: boolean;
         cachedHasVbt: boolean;
+        subMeshResources: {
+            bindGroup: GPUBindGroup | null;
+            cachedColorTexView: GPUTextureView | null;
+        }[];
     }> = new Map();
 
     #candidateKeys: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
@@ -238,6 +242,9 @@ export class GrassManager extends RedGPUObject {
             this.#culler.invalidateBindGroup();
             for (const res of this.#typeMaterialBuffers.values()) {
                 res.instanceBindGroup = null;
+                for (let s = 0; s < res.subMeshResources.length; s++) {
+                    res.subMeshResources[s].bindGroup = null;
+                }
             }
         };
 
@@ -313,6 +320,45 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 현재 활성화된 잔디 타입들이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by currently active grass types in the main render pass (Near + Far).
+     */
+    get totalDrawCalls(): number {
+        if (!this.#enabled || !this.#populated) return 0;
+        let count = 0;
+        const list = this.#grassList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const grass = list[i];
+            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+            if (alloc && alloc.instanceCount > 0) {
+                count += alloc.slots.length;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 그림자 투사(castShadow: true)가 설정된 잔디 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting grass types in the cascaded shadow map (CSM) pass.
+     */
+    get shadowDrawCalls(): number {
+        if (!this.#enabled || !this.#populated) return 0;
+        let count = 0;
+        const list = this.#grassList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const grass = list[i];
+            if (!grass.castShadow) continue;
+            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+            if (alloc && alloc.instanceCount > 0) {
+                count += alloc.nearSlots.length;
+            }
+        }
+        return count;
+    }
+
+    /**
      * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
      * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
      *
@@ -351,16 +397,15 @@ export class GrassManager extends RedGPUObject {
         grassType.typeId = typeId;
         this.#grassList.push(grassType);
 
-        const {cullingDistance, instancesPerCell, geometry, name} = grassType;
+        const {cullingDistance, instancesPerCell, name, subMeshes} = grassType;
         const targetRadius = Math.max(cullingDistance, this.#streamingRadius);
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
         const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
 
-        const indexCount = (geometry as any)?.indexBuffer?.indexCount ?? 0;
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             maxInstances,
-            indexCount
+            subMeshes
         );
 
         const {rawBaseOffset: baseOffset} = alloc;
@@ -407,7 +452,8 @@ export class GrassManager extends RedGPUObject {
                 instanceBindGroup: null,
                 cachedColorTexView: null,
                 initialized: false,
-                cachedHasVbt: false
+                cachedHasVbt: false,
+                subMeshResources: []
             });
         }
 
@@ -466,6 +512,7 @@ export class GrassManager extends RedGPUObject {
             const {uniformBuffer, grassUniformGPUBuffer} = res;
             uniformBuffer.destroy();
             grassUniformGPUBuffer.destroy();
+            res.subMeshResources.length = 0;
             this.#typeMaterialBuffers.delete(typeId);
         }
 
@@ -587,7 +634,7 @@ export class GrassManager extends RedGPUObject {
         if (!indirectGPUBuffer) return;
 
         for (const type of this.#grassList) {
-            const {typeId, name, baseColorTextureView: colorTexView, geometry} = type;
+            const {typeId, name, unifiedGeometry, subMeshes} = type;
             const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.instanceCount === 0) continue;
 
@@ -607,41 +654,98 @@ export class GrassManager extends RedGPUObject {
                 });
             }
 
-            if (!res.bindGroup || res.cachedColorTexView !== colorTexView) {
-                const {basicSampler} = resourceManager;
-                res.bindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_MaterialBindGroup_${name}_${this.instanceId}`,
-                    layout: this.#pipelineBindGroupLayout2,
-                    entries: [
-                        {binding: 0, resource: colorTexView},
-                        {binding: 1, resource: basicSampler.gpuSampler},
-                        {binding: 2, resource: {buffer: uniformBuffer}},
-                    ]
-                });
-                res.cachedColorTexView = colorTexView;
-            }
+            if (!res.instanceBindGroup) continue;
 
-            if (!res.instanceBindGroup || !res.bindGroup) continue;
-
-            if (!geometry) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = geometry;
+            const targetGeom = unifiedGeometry || type.geometry;
+            if (!targetGeom) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
 
             passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setBindGroup(2, res.bindGroup);
             passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            for (const slot of alloc.slots) {
-                const {slotIndex, indirectOffset} = slot;
-                const targetPipeline = slotIndex === 0 ? nearPipeline : farPipeline;
-                if (currentPipeline !== targetPipeline) {
-                    passEncoder.setPipeline(targetPipeline);
-                    currentPipeline = targetPipeline;
-                }
+            const subMeshCount = subMeshes.length;
+            const {basicSampler} = resourceManager;
 
-                const indirectOffsetBytes = indirectOffset * 5 * 4;
-                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            if (alloc.nearSlots.length > 0) {
+                if (currentPipeline !== nearPipeline) {
+                    passEncoder.setPipeline(nearPipeline);
+                    currentPipeline = nearPipeline;
+                }
+                for (let s = 0; s < subMeshCount; s++) {
+                    const subMesh = subMeshes[s];
+                    const slot = alloc.nearSlots[s];
+                    if (!slot) continue;
+
+                    let subRes = res.subMeshResources[s];
+                    if (!subRes) {
+                        subRes = {bindGroup: null, cachedColorTexView: null};
+                        res.subMeshResources[s] = subRes;
+                    }
+
+                    const subTex = subMesh.baseColorTexture;
+                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
+                        || type.baseColorTextureView
+                        || resourceManager.emptyBitmapTextureView;
+
+                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
+                        subRes.bindGroup = gpuDevice.createBindGroup({
+                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
+                            layout: this.#pipelineBindGroupLayout2,
+                            entries: [
+                                {binding: 0, resource: subTexView},
+                                {binding: 1, resource: basicSampler.gpuSampler},
+                                {binding: 2, resource: {buffer: uniformBuffer}},
+                            ]
+                        });
+                        subRes.cachedColorTexView = subTexView;
+                    }
+
+                    passEncoder.setBindGroup(2, subRes.bindGroup);
+                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                }
+            }
+
+            if (alloc.farSlots.length > 0) {
+                if (currentPipeline !== farPipeline) {
+                    passEncoder.setPipeline(farPipeline);
+                    currentPipeline = farPipeline;
+                }
+                for (let s = 0; s < subMeshCount; s++) {
+                    const subMesh = subMeshes[s];
+                    const slot = alloc.farSlots[s];
+                    if (!slot) continue;
+
+                    let subRes = res.subMeshResources[s];
+                    if (!subRes) {
+                        subRes = {bindGroup: null, cachedColorTexView: null};
+                        res.subMeshResources[s] = subRes;
+                    }
+
+                    const subTex = subMesh.baseColorTexture;
+                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
+                        || type.baseColorTextureView
+                        || resourceManager.emptyBitmapTextureView;
+
+                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
+                        subRes.bindGroup = gpuDevice.createBindGroup({
+                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
+                            layout: this.#pipelineBindGroupLayout2,
+                            entries: [
+                                {binding: 0, resource: subTexView},
+                                {binding: 1, resource: basicSampler.gpuSampler},
+                                {binding: 2, resource: {buffer: uniformBuffer}},
+                            ]
+                        });
+                        subRes.cachedColorTexView = subTexView;
+                    }
+
+                    passEncoder.setBindGroup(2, subRes.bindGroup);
+                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                }
             }
         }
     }
@@ -663,6 +767,9 @@ export class GrassManager extends RedGPUObject {
         const {currentCascadeIndex: currentCascade, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (currentCascade !== undefined && currentCascade > 1) return;
 
+        const {gpuDevice, resourceManager} = this;
+        if (!gpuDevice) return;
+
         const {indirectGPUBuffer} = this.#megaBuffer;
         if (!indirectGPUBuffer) return;
 
@@ -675,31 +782,60 @@ export class GrassManager extends RedGPUObject {
         passEncoder.setBindGroup(0, systemBG);
 
         for (const type of this.#grassList) {
-            const {castShadow, typeId, geometry} = type;
+            const {castShadow, typeId, name, unifiedGeometry, subMeshes} = type;
             if (!castShadow) continue;
 
             const alloc = this.#megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.instanceCount === 0) continue;
 
             const res = this.#typeMaterialBuffers.get(typeId);
-            if (!res || !res.instanceBindGroup || !res.bindGroup) continue;
+            if (!res || !res.instanceBindGroup) continue;
 
-            const nearSlot = alloc.slots[0];
-            if (!nearSlot) continue;
-
-            if (!geometry) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = geometry;
+            const targetGeom = unifiedGeometry || type.geometry;
+            if (!targetGeom) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
 
             passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setBindGroup(2, res.bindGroup);
-
             passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            const {indirectOffset} = nearSlot;
-            const indirectOffsetBytes = indirectOffset * 5 * 4;
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            const subMeshCount = subMeshes.length;
+            const {basicSampler} = resourceManager;
+
+            for (let s = 0; s < subMeshCount; s++) {
+                const subMesh = subMeshes[s];
+                const nearSlot = alloc.nearSlots[s];
+                if (!nearSlot) continue;
+
+                let subRes = res.subMeshResources[s];
+                if (!subRes) {
+                    subRes = {bindGroup: null, cachedColorTexView: null};
+                    res.subMeshResources[s] = subRes;
+                }
+
+                const subTex = subMesh.baseColorTexture;
+                const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
+                    || type.baseColorTextureView
+                    || resourceManager.emptyBitmapTextureView;
+
+                if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
+                    subRes.bindGroup = gpuDevice.createBindGroup({
+                        label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
+                        layout: this.#pipelineBindGroupLayout2,
+                        entries: [
+                            {binding: 0, resource: subTexView},
+                            {binding: 1, resource: basicSampler.gpuSampler},
+                            {binding: 2, resource: {buffer: res.uniformBuffer}},
+                        ]
+                    });
+                    subRes.cachedColorTexView = subTexView;
+                }
+
+                passEncoder.setBindGroup(2, subRes.bindGroup);
+                const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
+                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
         }
     }
 
@@ -859,7 +995,8 @@ export class GrassManager extends RedGPUObject {
                         indirectBaseOffset,
                         stageCount,
                         maxInstances,
-                        stageDistances
+                        stageDistances,
+                        type.subMeshes.length
                     );
                 }
             }
@@ -904,6 +1041,7 @@ export class GrassManager extends RedGPUObject {
         for (const res of this.#typeMaterialBuffers.values()) {
             res.uniformBuffer.destroy();
             res.grassUniformGPUBuffer.destroy();
+            res.subMeshResources.length = 0;
         }
         this.#typeMaterialBuffers.clear();
         this.#typeCellStates.clear();

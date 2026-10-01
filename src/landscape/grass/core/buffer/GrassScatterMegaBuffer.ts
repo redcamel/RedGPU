@@ -17,6 +17,11 @@ export interface GrassDrawSlot {
      */
     slotIndex: number;
     /**
+     * [KO] 서브메시 인덱스
+     * [EN] Sub-mesh index
+     */
+    subMeshIndex: number;
+    /**
      * [KO] 인디렉트 버퍼 내 슬롯 오프셋 (DrawIndexedIndirect 구조체 단위)
      * [EN] Slot offset in indirect buffer (unit of DrawIndexedIndirect struct)
      */
@@ -31,6 +36,11 @@ export interface GrassDrawSlot {
      * [EN] Index count of corresponding sub-mesh
      */
     indexCount: number;
+    /**
+     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋
+     * [EN] Starting index offset in index buffer
+     */
+    firstIndex: number;
 }
 
 /**
@@ -64,10 +74,25 @@ export interface GrassTypeAllocation {
      */
     instanceCount: number;
     /**
-     * [KO] Near 및 Far 거리 단계별 간접 드로우 슬롯 튜플
-     * [EN] Tuple of indirect draw slots for Near and Far distance stages
+     * [KO] 서브메시 총 개수
+     * [EN] Total number of sub-meshes
      */
-    slots: [GrassDrawSlot, GrassDrawSlot];
+    subMeshCount: number;
+    /**
+     * [KO] 모든 간접 드로우 슬롯 목록
+     * [EN] List of all indirect draw slots
+     */
+    slots: GrassDrawSlot[];
+    /**
+     * [KO] Near 거리 단계 간접 드로우 슬롯 목록
+     * [EN] List of indirect draw slots for Near distance stage
+     */
+    nearSlots: GrassDrawSlot[];
+    /**
+     * [KO] Far 거리 단계 간접 드로우 슬롯 목록
+     * [EN] List of indirect draw slots for Far distance stage
+     */
+    farSlots: GrassDrawSlot[];
 }
 
 /**
@@ -119,7 +144,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             },
             initialCapacity,
             maxTypes,
-            maxTypes * 2
+            maxTypes * 8
         );
 
         this.#initBuffers();
@@ -143,9 +168,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param maxInstances -
      * [KO] 해당 타입에 배정할 최대 인스턴스 수
      * [EN] Maximum instance count assigned to this type
-     * @param indexCount -
-     * [KO] 잔디 지오메트리의 인덱스 수
-     * [EN] Index count of the grass geometry
+     * @param subMeshesOrIndexCount -
+     * [KO] 잔디 서브메시 목록 또는 단일 인덱스 수
+     * [EN] List of grass sub-meshes or single index count
      * @returns
      * [KO] 할당된 잔디 타입 메타데이터 객체
      * [EN] Allocated grass type metadata object
@@ -153,11 +178,16 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     allocateType(
         typeId: number,
         maxInstances: number,
-        indexCount: number
+        subMeshesOrIndexCount: { indexCount: number; firstIndex?: number }[] | number
     ): GrassTypeAllocation {
         if (this.#allocations.has(typeId)) {
             return this.#allocations.get(typeId)!;
         }
+
+        const subMeshes: { indexCount: number; firstIndex: number }[] = Array.isArray(subMeshesOrIndexCount)
+            ? subMeshesOrIndexCount.map(s => ({indexCount: s.indexCount, firstIndex: s.firstIndex ?? 0}))
+            : [{indexCount: subMeshesOrIndexCount, firstIndex: 0}];
+        const subMeshCount = Math.max(1, subMeshes.length);
 
         const rounded = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
@@ -172,24 +202,44 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const indirectBaseOffset = this.#totalIndirectDrawCalls;
         const culledBaseOffset = this.#totalAllocatedCulledInstances;
 
-        const nearSlot: GrassDrawSlot = {
-            slotIndex: 0,
-            indirectOffset: this.#totalIndirectDrawCalls++,
-            culledBaseOffset: this.#totalAllocatedCulledInstances,
-            indexCount
-        };
+        const nearCulledOffset = this.#totalAllocatedCulledInstances;
+        this.#totalAllocatedCulledInstances += rounded;
+        const farCulledOffset = this.#totalAllocatedCulledInstances;
         this.#totalAllocatedCulledInstances += rounded;
 
-        const farSlot: GrassDrawSlot = {
-            slotIndex: 1,
-            indirectOffset: this.#totalIndirectDrawCalls++,
-            culledBaseOffset: this.#totalAllocatedCulledInstances,
-            indexCount
-        };
-        this.#totalAllocatedCulledInstances += rounded;
+        const nearSlots: GrassDrawSlot[] = [];
+        const farSlots: GrassDrawSlot[] = [];
+        const slots: GrassDrawSlot[] = [];
 
-        this.#updateIndirectTemplateForSlot(nearSlot);
-        this.#updateIndirectTemplateForSlot(farSlot);
+        for (let s = 0; s < subMeshCount; s++) {
+            const sub = subMeshes[s];
+            const nearSlot: GrassDrawSlot = {
+                slotIndex: 0,
+                subMeshIndex: s,
+                indirectOffset: this.#totalIndirectDrawCalls++,
+                culledBaseOffset: nearCulledOffset,
+                indexCount: sub.indexCount,
+                firstIndex: sub.firstIndex
+            };
+            this.#updateIndirectTemplateForSlot(nearSlot);
+            nearSlots.push(nearSlot);
+            slots.push(nearSlot);
+        }
+
+        for (let s = 0; s < subMeshCount; s++) {
+            const sub = subMeshes[s];
+            const farSlot: GrassDrawSlot = {
+                slotIndex: 1,
+                subMeshIndex: s,
+                indirectOffset: this.#totalIndirectDrawCalls++,
+                culledBaseOffset: farCulledOffset,
+                indexCount: sub.indexCount,
+                firstIndex: sub.firstIndex
+            };
+            this.#updateIndirectTemplateForSlot(farSlot);
+            farSlots.push(farSlot);
+            slots.push(farSlot);
+        }
 
         const alloc: GrassTypeAllocation = {
             maxInstances: rounded,
@@ -197,7 +247,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             culledBaseOffset,
             indirectBaseOffset,
             instanceCount: 0,
-            slots: [nearSlot, farSlot]
+            subMeshCount,
+            slots,
+            nearSlots,
+            farSlots
         };
 
         this.#allocations.set(typeId, alloc);
@@ -314,7 +367,8 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         indirectBaseOffset: number = 0,
         stageCount: number = 2,
         maxInstancesPerStage: number = 0,
-        stageDistances: [number, number, number, number] = [9999, 9999, 9999, 9999]
+        stageDistances: [number, number, number, number] = [9999, 9999, 9999, 9999],
+        subMeshCount: number = 1
     ): void {
         const typeParamFloats = this.typeParamFloats;
         const base = typeId * typeParamFloats;
@@ -339,7 +393,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         f32[base + 12] = stageDistances[0] ?? 9999;
         f32[base + 13] = stageDistances[1] ?? 9999;
         f32[base + 14] = stageDistances[2] ?? 9999;
-        f32[base + 15] = 0.0;
+        u32[base + 15] = subMeshCount;
 
         const gpuDevice = this.gpuDevice;
         const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
@@ -448,7 +502,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const indirectResetTemplate = this.indirectResetTemplate;
         indirectResetTemplate[offset] = slot.indexCount;
         indirectResetTemplate[offset + 1] = 0;
-        indirectResetTemplate[offset + 2] = 0;
+        indirectResetTemplate[offset + 2] = slot.firstIndex;
         indirectResetTemplate[offset + 3] = 0;
         indirectResetTemplate[offset + 4] = slot.culledBaseOffset;
 

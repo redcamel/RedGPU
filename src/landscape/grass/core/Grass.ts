@@ -267,11 +267,11 @@ export class Grass extends RedGPUObject {
                 preservePivot: true,
                 centerXZ: false
             });
-            if (combineResult.groups.length === 0) {
+            if (combineResult.groups.length === 0 || !combineResult.unifiedGeometry) {
                 consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
             }
+            this.#geometry = combineResult.unifiedGeometry;
             const primaryGroup = combineResult.groups[0];
-            this.#geometry = primaryGroup.geometry;
             if (primaryGroup.material) {
                 targetMaterial = primaryGroup.material;
             }
@@ -299,17 +299,25 @@ export class Grass extends RedGPUObject {
                 const mat = group.material;
                 const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? mat?.diffuseTexture ?? null);
                 return new ScatterSubMesh({
-                    geometry: group.geometry,
+                    geometry: combineResult.unifiedGeometry!,
                     vertexCount: group.vertexCount,
                     indexCount: group.indexCount,
-                    isIndexed: !!group.geometry.indexBuffer,
-                    strideBytes: group.geometry.vertexBuffer?.stride ? group.geometry.vertexBuffer.stride * 4 : 72,
+                    firstIndex: group.firstIndex,
+                    isIndexed: !!combineResult.unifiedGeometry!.indexBuffer,
+                    strideBytes: combineResult.unifiedGeometry!.vertexBuffer?.stride ? combineResult.unifiedGeometry!.vertexBuffer.stride * 4 : 72,
                     mesh: group.rawNodes[0]?.node ?? mesh,
                     material: mat,
                     baseColorTexture: tex,
                     bottomOffset: 0
                 });
             });
+
+            if (this.#subMeshes.length > 1) {
+                console.warn(
+                    `[Grass] "${this.name}" has ${this.#subMeshes.length} sub-meshes with distinct materials. ` +
+                    `For optimal grass rendering performance (millions of blades), merging textures into an atlas and using a single material is strongly recommended.`
+                );
+            }
         } else {
             const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
             if (typeof resolvedTexture === 'string') {
@@ -346,6 +354,7 @@ export class Grass extends RedGPUObject {
                     geometry: gGeom,
                     vertexCount: gGeom.vertexBuffer?.vertexCount ?? 0,
                     indexCount: gGeom.indexBuffer?.indexCount ?? (gGeom.vertexBuffer?.vertexCount ?? 0),
+                    firstIndex: 0,
                     isIndexed: !!gGeom.indexBuffer,
                     strideBytes: gGeom.vertexBuffer?.stride ? gGeom.vertexBuffer.stride * 4 : 72,
                     mesh: mesh,
@@ -431,11 +440,35 @@ export class Grass extends RedGPUObject {
     }
 
     /**
+     * [KO] 모든 서브메쉬의 정점과 인덱스가 하나로 머지된 단일 통합 지오메트리 객체
+     * [EN] Single unified geometry object with all sub-mesh vertices and indices merged into one
+     */
+    get unifiedGeometry(): Geometry | Primitive {
+        return this.#geometry;
+    }
+
+    /**
      * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
      * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
      */
     get subMeshes(): ScatterSubMesh[] {
         return this.#subMeshes;
+    }
+
+    /**
+     * [KO] 잔디 모델을 구성하는 서브메쉬 총 개수를 반환합니다.
+     * [EN] Returns the total number of sub-meshes composing the grass model.
+     */
+    get subMeshCount(): number {
+        return this.#subMeshes.length;
+    }
+
+    /**
+     * [KO] 해당 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by this grass type in the main render pass (Near + Far).
+     */
+    get drawCallCount(): number {
+        return this.#subMeshes.length * 2;
     }
 
     /**
@@ -829,7 +862,7 @@ export class Grass extends RedGPUObject {
      * [EN] Destroys grass instance and subordinate sub-mesh resources.
      */
     destroy(): void {
-        this.#subMeshes.forEach(sub => sub.destroy());
+        (this.#geometry as any)?.destroy?.();
         this.#subMeshes.length = 0;
     }
 }
