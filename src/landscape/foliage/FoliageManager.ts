@@ -260,7 +260,7 @@ class FoliageManager {
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
-            if (!foliage.castShadow || foliage.maxShadowDistance <= 0 || foliage.activeInstanceCount <= 0) continue;
+            if (!foliage.castShadow || foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) continue;
             const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
             if (foliage.hasMaskedLOD0) {
                 count += foliage.lod0SubMeshes.length;

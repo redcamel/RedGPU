@@ -65,10 +65,10 @@ export interface GrassOptions {
      */
     cullingDistance?: number;
     /**
-     * [KO] 카메라 거리에 따라 잔디 스케일 축소가 시작되는 거리 (기본값: cullingDistance * 0.75)
-     * [EN] Distance at which grass scale starts to smoothly shrink towards culling boundary (default: cullingDistance * 0.75)
+     * [KO] 카메라 거리에 따라 잔디 페이드(스케일 축소)가 시작되는 거리 (기본값: cullingDistance * 0.75)
+     * [EN] Distance at which grass fade (scale shrinking) begins towards culling boundary (default: cullingDistance * 0.75)
      */
-    shrinkStartDistance?: number;
+    fadeStartDistance?: number;
     /**
      * [KO] 원거리 간소화 셰이더(Far Grass)로 전환을 시작하는 거리 (기본값: 35.0)
      * [EN] Distance where transition to simplified far-distance grass shader begins (default: 35.0)
@@ -155,10 +155,10 @@ export interface GrassOptions {
      */
     shadowCullDistance?: number;
     /**
-     * [KO] 그림자 렌더링 시 스케일 축소가 시작되는 거리 (기본값: shadowCullDistance * 0.75)
-     * [EN] Distance where shadow-casting scale smoothly shrinks towards shadow culling boundary (default: shadowCullDistance * 0.75)
+     * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (기본값: shadowCullDistance * 0.75)
+     * [EN] Distance where shadow-casting fade smoothly begins towards shadow culling boundary (default: shadowCullDistance * 0.75)
      */
-    shadowShrinkStartDistance?: number;
+    shadowFadeStartDistance?: number;
 }
 
 /**
@@ -181,7 +181,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #minSlope: number = 0.0;
     #maxSlope: number = 35.0;
     #cullingDistance: number = 100.0;
-    #shrinkStartDistance: number = 60.0;
+    #fadeStartDistance: number = 60.0;
     #farDistance: number = 35.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
     #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
@@ -199,7 +199,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #shadowStrength: number = 1.0;
     #castShadow: boolean = true;
     #shadowCullDistance: number = 35.0;
-    #shadowShrinkStartDistance: number = 26.25;
+    #shadowFadeStartDistance: number = 26.25;
 
     #dirty: boolean = true;
     #onRepopulateRequired: (() => void) | null = null;
@@ -231,7 +231,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             minSlope,
             maxSlope,
             cullingDistance,
-            shrinkStartDistance,
+            fadeStartDistance,
             minScale,
             maxScale,
             groundBlendStrength,
@@ -245,7 +245,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             shadowStrength,
             castShadow = true,
             shadowCullDistance,
-            shadowShrinkStartDistance
+            shadowFadeStartDistance
         } = options || {};
 
         if (!mesh) {
@@ -370,10 +370,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (minSlope !== undefined) this.#minSlope = minSlope;
         if (maxSlope !== undefined) this.#maxSlope = maxSlope;
         if (cullingDistance !== undefined) this.#cullingDistance = cullingDistance;
-        if (shrinkStartDistance !== undefined) {
-            this.#shrinkStartDistance = shrinkStartDistance;
+        if (fadeStartDistance !== undefined) {
+            this.#fadeStartDistance = fadeStartDistance;
         } else {
-            this.#shrinkStartDistance = this.#cullingDistance * 0.75;
+            this.#fadeStartDistance = this.#cullingDistance * 0.75;
         }
         if (minScale) this.#minScale = [minScale[0], minScale[1], minScale[2] ?? minScale[0]];
         if (maxScale) this.#maxScale = [maxScale[0], maxScale[1], maxScale[2] ?? maxScale[0]];
@@ -397,13 +397,13 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#castShadow = castShadow;
         if (shadowCullDistance !== undefined) {
             this.#shadowCullDistance = Math.max(0.0, shadowCullDistance);
-            this.#shadowShrinkStartDistance = shadowShrinkStartDistance !== undefined
-                ? Math.max(0.0, shadowShrinkStartDistance)
+            this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
+                ? Math.max(0.0, shadowFadeStartDistance)
                 : Math.max(0.0, this.#shadowCullDistance * 0.75);
-        } else if (shadowShrinkStartDistance !== undefined) {
-            this.#shadowShrinkStartDistance = Math.max(0.0, shadowShrinkStartDistance);
+        } else if (shadowFadeStartDistance !== undefined) {
+            this.#shadowFadeStartDistance = Math.max(0.0, shadowFadeStartDistance);
         } else {
-            this.#shadowShrinkStartDistance = this.#shadowCullDistance * 0.75;
+            this.#shadowFadeStartDistance = this.#shadowCullDistance * 0.75;
         }
     }
 
@@ -547,20 +547,20 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     set cullingDistance(v: number) {
         this.#cullingDistance = Math.max(10, v);
-        this.#shrinkStartDistance = this.#cullingDistance * 0.75;
+        this.#fadeStartDistance = this.#cullingDistance * 0.75;
         this.#dirty = true;
     }
 
     /**
-     * [KO] 카메라 거리에 따라 잔디 스케일 축소가 시작되는 거리 (미터 단위)
-     * [EN] Distance in meters where grass scale begins shrinking towards culling boundary
+     * [KO] 카메라 거리에 따라 잔디 페이드(스케일 축소)가 시작되는 거리 (미터 단위)
+     * [EN] Distance in meters where grass fade (scale shrinking) begins towards culling boundary
      */
-    get shrinkStartDistance(): number {
-        return this.#shrinkStartDistance;
+    get fadeStartDistance(): number {
+        return this.#fadeStartDistance;
     }
 
-    set shrinkStartDistance(v: number) {
-        this.#shrinkStartDistance = Math.max(0, v);
+    set fadeStartDistance(v: number) {
+        this.#fadeStartDistance = Math.max(0, v);
         this.#dirty = true;
     }
 
@@ -759,20 +759,20 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     set shadowCullDistance(v: number) {
         this.#shadowCullDistance = Math.max(0.0, v);
-        this.#shadowShrinkStartDistance = this.#shadowCullDistance * 0.75;
+        this.#shadowFadeStartDistance = this.#shadowCullDistance * 0.75;
         this.#dirty = true;
     }
 
     /**
-     * [KO] 그림자 렌더링 시 스케일 축소가 시작되는 거리 (미터 단위)
-     * [EN] Distance in meters where shadow-casting scale smoothly shrinks towards shadow culling boundary
+     * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (미터 단위)
+     * [EN] Distance in meters where shadow-casting fade smoothly begins towards shadow culling boundary
      */
-    get shadowShrinkStartDistance(): number {
-        return this.#shadowShrinkStartDistance;
+    get shadowFadeStartDistance(): number {
+        return this.#shadowFadeStartDistance;
     }
 
-    set shadowShrinkStartDistance(v: number) {
-        this.#shadowShrinkStartDistance = Math.max(0.0, v);
+    set shadowFadeStartDistance(v: number) {
+        this.#shadowFadeStartDistance = Math.max(0.0, v);
         this.#dirty = true;
     }
 

@@ -904,11 +904,11 @@ export class GrassManager extends RedGPUObject {
 
                 const {
                     cullingDistance,
-                    shrinkStartDistance,
+                    fadeStartDistance,
                     meshHeight,
                     minY,
                     shadowCullDistance,
-                    shadowShrinkStartDistance,
+                    shadowFadeStartDistance,
                     groundBlendStrength,
                     alphaCutoff,
                     exposureBoost,
@@ -932,11 +932,11 @@ export class GrassManager extends RedGPUObject {
                 } = res;
 
                 gf[0] = cullingDistance;
-                gf[1] = shrinkStartDistance;
+                gf[1] = fadeStartDistance;
                 gf[2] = meshHeight;
                 gf[3] = minY;
                 gf[4] = shadowCullDistance;
-                gf[5] = shadowShrinkStartDistance;
+                gf[5] = shadowFadeStartDistance;
                 gf[6] = 0.0;
                 gf[7] = 0.0;
 

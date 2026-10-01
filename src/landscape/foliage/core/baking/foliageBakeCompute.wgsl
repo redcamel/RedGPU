@@ -20,7 +20,7 @@ struct FoliageTypeParam {
     indirectBaseOffset: u32,
     rawBaseOffset: u32,
     instanceCount: u32,
-    maxShadowDistance: f32,
+    shadowCullDistance: f32,
     invFadeRange: f32,
     lods: array<FoliageLODUniformInfo, 8>,
 };

@@ -17,11 +17,11 @@ fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 
 struct GrassUniforms {
     cullingDistance: f32,
-    shrinkStartDistance: f32,
+    fadeStartDistance: f32,
     meshHeight: f32,
     minY: f32,
     shadowCullDistance: f32,
-    shadowShrinkStartDistance: f32,
+    shadowFadeStartDistance: f32,
     pad0: f32,
     pad1: f32,
 };
@@ -62,12 +62,12 @@ fn main(input: VertexInput) -> VertexOutput {
     let distToCam = distance(instPos, camPos);
 
     let cullDist = grassUniforms.cullingDistance;
-    let shrinkStart = min(grassUniforms.shrinkStartDistance, cullDist);
+    let fadeStart = min(grassUniforms.fadeStartDistance, cullDist);
     var shrink = 1.0;
     var alphaFade = 1.0;
 
-    if (distToCam > shrinkStart) {
-        let fadeRatio = clamp((cullDist - distToCam) / max(0.001, cullDist - shrinkStart), 0.0, 1.0);
+    if (distToCam > fadeStart) {
+        let fadeRatio = clamp((cullDist - distToCam) / max(0.001, cullDist - fadeStart), 0.0, 1.0);
         shrink = fadeRatio;
         scaleXZ = scaleXZ * shrink;
         scaleY = scaleY * shrink;

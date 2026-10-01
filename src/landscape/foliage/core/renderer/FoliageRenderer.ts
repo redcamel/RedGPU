@@ -244,7 +244,7 @@ class FoliageRenderer extends RedGPUObject {
             let validCount = 0;
             for (let t = 0; t < typeCount; t++) {
                 const foliageType = typeList[t];
-                if (!foliageType.castShadow || foliageType.maxShadowDistance <= 0) continue;
+                if (!foliageType.castShadow || foliageType.shadowCullDistance <= 0) continue;
                 const culledGPU = foliageType.shadowCulledGPUBuffer;
                 const indirectGPU = foliageType.shadowIndirectGPUBuffer;
                 if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;

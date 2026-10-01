@@ -152,7 +152,7 @@ export interface FoliageOptions {
      * [KO] 그림자 캐스팅 최대 거리 (미터, 기본값: 200.0)
      * [EN] Maximum shadow casting distance in meters (default: 200.0)
      */
-    maxShadowDistance?: number;
+    shadowCullDistance?: number;
 
     /**
      * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부 (기본값: true)
@@ -277,7 +277,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #boundingHeight: number = 2.0;
     #nameHash: number = 0;
     #castShadow: boolean = true;
-    #maxShadowDistance: number = 300.0;
+    #shadowCullDistance: number = 300.0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
     #hasMaskedLOD0: boolean = false;
@@ -473,8 +473,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             defaultShadowDist = 350.0;
         }
 
-        this.#maxShadowDistance = options.maxShadowDistance !== undefined
-            ? Math.max(0, Number(options.maxShadowDistance) || 0)
+        this.#shadowCullDistance = options.shadowCullDistance !== undefined
+            ? Math.max(0, Number(options.shadowCullDistance) || 0)
             : defaultShadowDist;
 
         this.#options = Object.freeze({
@@ -488,7 +488,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             useImpostor: this.#useImpostor,
             bottomOffset: this.#bottomOffset,
             castShadow: this.#castShadow,
-            maxShadowDistance: this.#maxShadowDistance,
+            shadowCullDistance: this.#shadowCullDistance,
             enableStreaming: options.enableStreaming !== false,
             streamingRadius,
             subCellSize,
@@ -537,7 +537,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
-            const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
+            const effectiveShadowDist = this.#castShadow ? this.#shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 this.#cullingDistance,
@@ -752,14 +752,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [KO] 그림자 캐스팅이 적용되는 최대 거리(미터)를 반환합니다.
      * [EN] Returns the maximum shadow casting distance in meters.
      */
-    get maxShadowDistance(): number {
-        return this.#maxShadowDistance;
+    get shadowCullDistance(): number {
+        return this.#shadowCullDistance;
     }
 
-    set maxShadowDistance(value: number) {
+    set shadowCullDistance(value: number) {
         const numVal = Math.max(0, Number(value) || 0);
-        if (this.#maxShadowDistance !== numVal) {
-            this.#maxShadowDistance = numVal;
+        if (this.#shadowCullDistance !== numVal) {
+            this.#shadowCullDistance = numVal;
             this.#syncTypeParams();
             this.#onDirty?.();
         }
@@ -1469,7 +1469,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 ? this.#lodInfoList.slice(0, -1)
                 : this.#lodInfoList;
 
-            const effectiveShadowDist = this.#castShadow ? this.#maxShadowDistance : 0.0;
+            const effectiveShadowDist = this.#castShadow ? this.#shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 this.#cullingDistance,

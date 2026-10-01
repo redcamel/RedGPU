@@ -20,7 +20,7 @@ struct FoliageTypeParam {
     indirectBaseOffset: u32,
     rawBaseOffset: u32,
     instanceCount: u32,
-    maxShadowDistance: f32,
+    shadowCullDistance: f32,
     invFadeRange: f32,
     boundingHeight: f32,
     pad0: f32,
@@ -204,7 +204,7 @@ fn main(
     let isSubpixel = (effectiveDist * 2.0 > scaledRadius * vpHeight);
 
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
-    let userShadowDist = typeInfo.maxShadowDistance;
+    let userShadowDist = typeInfo.shadowCullDistance;
     let shadowMargin = scaledRadius * 4.0;
     let effectiveUserDist = userShadowDist + shadowMargin;
     let userShadowDistSq = effectiveUserDist * effectiveUserDist;
