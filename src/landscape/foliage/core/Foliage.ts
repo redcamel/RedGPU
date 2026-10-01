@@ -270,31 +270,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
 
-    #cullingDistance: number = 2000.0;
     #fadeStartDistance: number = 1500.0;
-    #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
     #boundingHeight: number = 2.0;
     #nameHash: number = 0;
-    #castShadow: boolean = true;
-    #shadowCullDistance: number = 300.0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
     #hasMaskedLOD0: boolean = false;
     #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
     #subCellSize: number = 100.0;
-    #targetLayer?: string | number;
-    #minSlope: number = 0.0;
-    #maxSlope: number = 45.0;
-    #densityScaleByWeight: boolean = true;
-    #densityPerHectare: number = 20.0;
-    #densityMultiplier: number = 1.0;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
-    #groundBlendStrength: number = 0.8;
     #groundBlendRange: number = 1.5;
     #lastWindParams: {
         windDirX: number;
@@ -374,7 +363,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
         this.#baker = baker || null;
-        this.#castShadow = castShadow !== false;
 
         this.#useImpostor = useImpostor;
         this.#useDepthPrepass = true;
@@ -382,8 +370,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
 
-        this.#cullingDistance = cullingDistance;
-        this.#fadeStartDistance = this.#cullingDistance * 0.75;
+        this.#fadeStartDistance = cullingDistance * 0.75;
 
         const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = optMaxScale ? [...optMaxScale] : [1.0, 1.0, 1.0];
@@ -392,12 +379,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (densityPerHectare !== undefined) {
             resolvedDensityPerHectare = Math.max(0, Number(densityPerHectare) || 0);
         }
-        this.#densityPerHectare = resolvedDensityPerHectare;
 
         const densityMultiplier = optDensityMultiplier !== undefined
             ? Math.max(0.0, Number(optDensityMultiplier) || 0.0)
             : 1.0;
-        this.#densityMultiplier = densityMultiplier;
 
         const effectiveRadius = streamingRadius + 150.0;
         const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
@@ -425,7 +410,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
-        this.#groundBlendStrength = groundBlendStrength !== undefined
+        const resolvedGroundBlendStrength = groundBlendStrength !== undefined
             ? Math.max(0.0, Math.min(1.0, Number(groundBlendStrength) || 0.0))
             : 0.8;
         this.#groundBlendRange = groundBlendRange !== undefined
@@ -457,7 +442,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#hasMaskedLOD0 = hasMaskedLOD0;
         this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
-        this.#bottomOffset = options.bottomOffset ?? 0;
+        const resolvedBottomOffset = options.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         this.#boundingHeight = assembleResult.boundingHeight || 2.0;
 
@@ -473,22 +458,36 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             defaultShadowDist = 350.0;
         }
 
-        this.#shadowCullDistance = options.shadowCullDistance !== undefined
+        const resolvedShadowCullDistance = options.shadowCullDistance !== undefined
             ? Math.max(0, Number(options.shadowCullDistance) || 0)
             : defaultShadowDist;
+
+        this.setRawScatterProperties({
+            bottomOffset: resolvedBottomOffset,
+            cullingDistance,
+            shadowCullDistance: resolvedShadowCullDistance,
+            targetLayer: options.targetLayer,
+            minSlope: options.minSlope ?? 0.0,
+            maxSlope: options.maxSlope ?? 45.0,
+            densityScaleByWeight: options.densityScaleByWeight !== false,
+            densityPerHectare: resolvedDensityPerHectare,
+            densityMultiplier,
+            castShadow: castShadow !== false,
+            groundBlendStrength: resolvedGroundBlendStrength
+        });
 
         this.#options = Object.freeze({
             name: options.name,
             lods: options.lods,
             maxInstances: resolvedMaxInstances,
-            cullingDistance: this.#cullingDistance,
+            cullingDistance: this.cullingDistance,
             minScale,
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
             useImpostor: this.#useImpostor,
-            bottomOffset: this.#bottomOffset,
-            castShadow: this.#castShadow,
-            shadowCullDistance: this.#shadowCullDistance,
+            bottomOffset: this.bottomOffset,
+            castShadow: this.castShadow,
+            shadowCullDistance: this.shadowCullDistance,
             enableStreaming: options.enableStreaming !== false,
             streamingRadius,
             subCellSize,
@@ -502,19 +501,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             windFlutterMultiplier: resolvedWindFlutterMultiplier,
             alignToNormal: resolvedAlignToNormal,
             alignFactor: resolvedAlignFactor,
-            groundBlendStrength: this.#groundBlendStrength,
+            groundBlendStrength: this.groundBlendStrength,
             groundBlendRange: this.#groundBlendRange
         });
 
         this.#enableStreaming = this.#options.enableStreaming!;
         this.#streamingRadius = this.#options.streamingRadius!;
         this.#subCellSize = this.#options.subCellSize!;
-        this.#targetLayer = this.#options.targetLayer;
-        this.#minSlope = this.#options.minSlope!;
-        this.#maxSlope = this.#options.maxSlope!;
-        this.#densityScaleByWeight = this.#options.densityScaleByWeight!;
-        this.#densityPerHectare = resolvedDensityPerHectare;
-        this.#densityMultiplier = this.#options.densityMultiplier!;
 
         let impostorSub: FoliageSubMesh | null = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
@@ -537,13 +530,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
-            const effectiveShadowDist = this.#castShadow ? this.#shadowCullDistance : 0.0;
+            const effectiveShadowDist = this.castShadow ? this.shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
-                this.#cullingDistance,
+                this.cullingDistance,
                 this.#fadeStartDistance,
                 this.#boundingRadius,
-                this.#bottomOffset,
+                this.bottomOffset,
                 this.#lodInfoList,
                 effectiveShadowDist,
                 this.#boundingHeight
@@ -715,55 +708,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#boundingHeight;
     }
 
-    /**
-     * [KO] 지형 표면 대비 밑둥 피벗 보정 오프셋(미터)을 반환합니다.
-     * [EN] Returns the bottom pivot correction offset in meters relative to terrain surface.
-     */
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
 
-    set bottomOffset(val: number) {
-        if (this.#bottomOffset !== val) {
-            this.#bottomOffset = val;
-            this.#syncTypeParams();
-            this.rebake();
-        }
-    }
-
-    /**
-     * [KO] 카메라로부터의 최대 렌더 컬링 거리(미터)를 반환합니다.
-     * [EN] Returns the maximum render culling distance from the camera in meters.
-     */
-    get cullingDistance(): number {
-        return this.#cullingDistance;
-    }
-
-    set cullingDistance(val: number) {
-        const numVal = Math.max(0, val);
-        if (this.#cullingDistance !== numVal) {
-            this.#cullingDistance = numVal;
-            this.#fadeStartDistance = numVal * 0.75;
-            this.#syncTypeParams();
-        }
-    }
-
-    /**
-     * [KO] 그림자 캐스팅이 적용되는 최대 거리(미터)를 반환합니다.
-     * [EN] Returns the maximum shadow casting distance in meters.
-     */
-    get shadowCullDistance(): number {
-        return this.#shadowCullDistance;
-    }
-
-    set shadowCullDistance(value: number) {
-        const numVal = Math.max(0, Number(value) || 0);
-        if (this.#shadowCullDistance !== numVal) {
-            this.#shadowCullDistance = numVal;
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
 
     /**
      * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 반환합니다.
@@ -806,107 +751,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 식생이 배치될 대상 지형 스플랫 레이어 식별자(이름 또는 인덱스)를 반환합니다.
-     * [EN] Returns the target terrain splat layer identifier (name or index) where foliage is placed.
-     */
-    get targetLayer(): string | number | undefined {
-        return this.#targetLayer;
-    }
-
-    set targetLayer(val: string | number | undefined) {
-        if (this.#targetLayer !== val) {
-            this.#targetLayer = val;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
-     * [KO] 배치가 허용되는 최소 경사도(각도: 0~90)를 반환합니다.
-     * [EN] Returns the minimum slope constraint in degrees (0-90) allowed for placement.
-     */
-    get minSlope(): number {
-        return this.#minSlope;
-    }
-
-    set minSlope(val: number) {
-        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
-        if (this.#minSlope !== numVal) {
-            this.#minSlope = numVal;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
-     * [KO] 배치가 허용되는 최대 경사도(각도: 0~90)를 반환합니다.
-     * [EN] Returns the maximum slope constraint in degrees (0-90) allowed for placement.
-     */
-    get maxSlope(): number {
-        return this.#maxSlope;
-    }
-
-    set maxSlope(val: number) {
-        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
-        if (this.#maxSlope !== numVal) {
-            this.#maxSlope = numVal;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
-     * [KO] 스플랫 레이어 가중치에 비례하여 인스턴스 밀도를 조절할지 여부를 반환합니다.
-     * [EN] Returns whether instance density scales proportionally to splat layer weight.
-     */
-    get densityScaleByWeight(): boolean {
-        return this.#densityScaleByWeight;
-    }
-
-    set densityScaleByWeight(val: boolean) {
-        const boolVal = !!val;
-        if (this.#densityScaleByWeight !== boolVal) {
-            this.#densityScaleByWeight = boolVal;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
-     * [KO] 헥타르(10,000m²)당 인스턴스 기본 밀도를 반환합니다.
-     * [EN] Returns the base instance density per hectare (10,000m²).
-     */
-    get densityPerHectare(): number {
-        return this.#densityPerHectare;
-    }
-
-    set densityPerHectare(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#densityPerHectare !== numVal) {
-            this.#densityPerHectare = numVal;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
-     * [KO] 인스턴스 전체 밀도 배수를 반환합니다.
-     * [EN] Returns the global instance density multiplier.
-     */
-    get densityMultiplier(): number {
-        return this.#densityMultiplier;
-    }
-
-    set densityMultiplier(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#densityMultiplier !== numVal) {
-            this.#densityMultiplier = numVal;
-            this.#onRepopulateRequired?.(this);
-        }
-    }
-
-    /**
      * [KO] 단일 서브셀 격자 영역 당 배치되는 계산된 인스턴스 수량을 반환합니다.
      * [EN] Returns the calculated number of instances placed per single sub-cell grid area.
      */
     get instancesPerCell(): number {
         const cellArea = this.#subCellSize * this.#subCellSize;
-        return Math.max(0, Math.round((this.#densityPerHectare * (cellArea / 10000.0)) * this.#densityMultiplier));
+        return Math.max(0, Math.round((this.densityPerHectare * (cellArea / 10000.0)) * this.densityMultiplier));
     }
 
     /**
@@ -977,13 +827,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생이 그림자를 투영(캐스팅)할지 여부를 반환합니다.
-     * [EN] Returns whether foliage casts shadows.
-     */
-    get castShadow(): boolean {
-        return this.#castShadow;
-    }
+
 
     /**
      * [KO] 이 식생 타입에 임포스터 서브메시가 생성되어 존재하는지 여부를 반환합니다.
@@ -1009,14 +853,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#useDepthPrepass;
     }
 
-    set castShadow(value: boolean) {
-        const boolVal = !!value;
-        if (this.#castShadow !== boolVal) {
-            this.#castShadow = boolVal;
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
+
 
     /**
      * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
@@ -1041,13 +878,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         );
     }
 
-    /**
-     * [KO] 지형 밑둥 표면 색상 블렌딩 강도(0.0~1.0)를 반환합니다.
-     * [EN] Returns the bottom terrain surface color blending strength (0.0-1.0).
-     */
-    get groundBlendStrength(): number {
-        return this.#groundBlendStrength;
-    }
+
 
     /**
      * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
@@ -1092,13 +923,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#megaBuffer?.shadowCulledGPUBuffer || null;
     }
 
-    set groundBlendStrength(v: number) {
-        const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
-        if (this.#groundBlendStrength !== val) {
-            this.#groundBlendStrength = val;
-            this.#updateSubMeshGroundBlend();
-        }
-    }
+
 
     /**
      * [KO] 그림자 패스용 간접 드로우 인자 버퍼를 반환합니다.
@@ -1116,15 +941,32 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    #updateSubMeshGroundBlend(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-        const subCount = this.#subMeshes.length;
-        for (let s = 0; s < subCount; s++) {
-            const sub = this.#subMeshes[s];
-            if (!sub.isImpostor) {
-                sub.updateGroundBlendParams(gpuDevice, this.#groundBlendStrength, this.#groundBlendRange);
-            }
+    protected override onParameterChanged(prop: string, value: any): void {
+        switch (prop) {
+            case 'bottomOffset':
+                this.#syncTypeParams();
+                this.rebake();
+                break;
+            case 'cullingDistance':
+                this.#fadeStartDistance = (value as number) * 0.75;
+                this.#syncTypeParams();
+                break;
+            case 'shadowCullDistance':
+            case 'castShadow':
+                this.#syncTypeParams();
+                this.#onDirty?.();
+                break;
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#onRepopulateRequired?.(this);
+                break;
+            case 'groundBlendStrength':
+                this.#updateSubMeshGroundBlend();
+                break;
         }
     }
 
@@ -1461,6 +1303,18 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#mainSubMeshes = mainList;
     }
 
+    #updateSubMeshGroundBlend(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return;
+        const subCount = this.#subMeshes.length;
+        for (let s = 0; s < subCount; s++) {
+            const sub = this.#subMeshes[s];
+            if (!sub.isImpostor) {
+                sub.updateGroundBlendParams(gpuDevice, this.groundBlendStrength, this.#groundBlendRange);
+            }
+        }
+    }
+
     #syncTypeParams(): void {
         const alloc = this.allocation;
         if (this.#megaBuffer && alloc) {
@@ -1469,13 +1323,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 ? this.#lodInfoList.slice(0, -1)
                 : this.#lodInfoList;
 
-            const effectiveShadowDist = this.#castShadow ? this.#shadowCullDistance : 0.0;
+            const effectiveShadowDist = this.castShadow ? this.shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
-                this.#cullingDistance,
+                this.cullingDistance,
                 this.#fadeStartDistance,
                 this.#boundingRadius,
-                this.#bottomOffset,
+                this.bottomOffset,
                 effectiveLodList,
                 effectiveShadowDist,
                 this.#boundingHeight

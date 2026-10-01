@@ -39,6 +39,19 @@ export abstract class AScatterType<
     #drawCallCount: number = 0;
     #allocation: TAllocation | null = null;
 
+    // --- 11종 공통 스캐터 파라미터 (Foliage & Grass 공통) ---
+    #cullingDistance: number = 200.0;
+    #shadowCullDistance: number = 50.0;
+    #bottomOffset: number = 0.0;
+    #targetLayer: string | number | undefined = '';
+    #minSlope: number = 0.0;
+    #maxSlope: number = 45.0;
+    #densityScaleByWeight: boolean = true;
+    #densityPerHectare: number = 1000.0;
+    #densityMultiplier: number = 1.0;
+    #castShadow: boolean = true;
+    #groundBlendStrength: number = 1.0;
+
     /**
      * [KO] AScatterType 인스턴스를 생성합니다.
      * [EN] Creates an AScatterType instance.
@@ -162,6 +175,220 @@ export abstract class AScatterType<
         const geoms = this.unifiedGeometries;
         return geoms.length > 0 ? geoms[0] : null;
     }
+
+    /**
+     * [KO] 지형 표면 대비 밑둥/뿌리 피벗 추가 Y 보정 오프셋(미터)을 반환합니다.
+     * [EN] Returns additional bottom pivot correction offset in meters relative to terrain surface.
+     */
+    get bottomOffset(): number {
+        return this.#bottomOffset;
+    }
+
+    set bottomOffset(val: number) {
+        const numVal = Number(val) || 0;
+        if (this.#bottomOffset !== numVal) {
+            this.#bottomOffset = numVal;
+            this.onParameterChanged('bottomOffset', numVal);
+        }
+    }
+
+    /**
+     * [KO] 카메라로부터의 최대 렌더 컬링 거리(미터)를 반환합니다.
+     * [EN] Returns the maximum render culling distance from camera in meters.
+     */
+    get cullingDistance(): number {
+        return this.#cullingDistance;
+    }
+
+    set cullingDistance(val: number) {
+        const numVal = Math.max(0, Number(val) || 0);
+        if (this.#cullingDistance !== numVal) {
+            this.#cullingDistance = numVal;
+            this.onParameterChanged('cullingDistance', numVal);
+        }
+    }
+
+    /**
+     * [KO] 그림자 캐스팅이 적용되는 최대 거리(미터)를 반환합니다.
+     * [EN] Returns the maximum shadow casting distance in meters.
+     */
+    get shadowCullDistance(): number {
+        return this.#shadowCullDistance;
+    }
+
+    set shadowCullDistance(val: number) {
+        const numVal = Math.max(0, Number(val) || 0);
+        if (this.#shadowCullDistance !== numVal) {
+            this.#shadowCullDistance = numVal;
+            this.onParameterChanged('shadowCullDistance', numVal);
+        }
+    }
+
+    /**
+     * [KO] 스캐터 인스턴스가 배치될 대상 지형 스플랫 레이어 식별자(이름 또는 인덱스)를 반환합니다.
+     * [EN] Returns target terrain splat layer identifier (name or index) for placement.
+     */
+    get targetLayer(): string | number | undefined {
+        return this.#targetLayer;
+    }
+
+    set targetLayer(val: string | number | undefined) {
+        if (this.#targetLayer !== val) {
+            this.#targetLayer = val;
+            this.onParameterChanged('targetLayer', val);
+        }
+    }
+
+    /**
+     * [KO] 배치가 허용되는 최소 경사도(각도: 0~90)를 반환합니다.
+     * [EN] Returns minimum slope constraint in degrees (0-90) allowed for placement.
+     */
+    get minSlope(): number {
+        return this.#minSlope;
+    }
+
+    set minSlope(val: number) {
+        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        if (this.#minSlope !== numVal) {
+            this.#minSlope = numVal;
+            this.onParameterChanged('minSlope', numVal);
+        }
+    }
+
+    /**
+     * [KO] 배치가 허용되는 최대 경사도(각도: 0~90)를 반환합니다.
+     * [EN] Returns maximum slope constraint in degrees (0-90) allowed for placement.
+     */
+    get maxSlope(): number {
+        return this.#maxSlope;
+    }
+
+    set maxSlope(val: number) {
+        const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
+        if (this.#maxSlope !== numVal) {
+            this.#maxSlope = numVal;
+            this.onParameterChanged('maxSlope', numVal);
+        }
+    }
+
+    /**
+     * [KO] 스플랫 레이어 가중치에 비례하여 인스턴스 밀도를 조절할지 여부를 반환합니다.
+     * [EN] Returns whether instance density scales proportionally to splat layer weight.
+     */
+    get densityScaleByWeight(): boolean {
+        return this.#densityScaleByWeight;
+    }
+
+    set densityScaleByWeight(val: boolean) {
+        const boolVal = !!val;
+        if (this.#densityScaleByWeight !== boolVal) {
+            this.#densityScaleByWeight = boolVal;
+            this.onParameterChanged('densityScaleByWeight', boolVal);
+        }
+    }
+
+    /**
+     * [KO] 헥타르(10,000m²)당 인스턴스 기본 밀도를 반환합니다.
+     * [EN] Returns base instance density per hectare (10,000m²).
+     */
+    get densityPerHectare(): number {
+        return this.#densityPerHectare;
+    }
+
+    set densityPerHectare(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#densityPerHectare !== numVal) {
+            this.#densityPerHectare = numVal;
+            this.onParameterChanged('densityPerHectare', numVal);
+        }
+    }
+
+    /**
+     * [KO] 인스턴스 전체 밀도 배수를 반환합니다.
+     * [EN] Returns global instance density multiplier.
+     */
+    get densityMultiplier(): number {
+        return this.#densityMultiplier;
+    }
+
+    set densityMultiplier(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#densityMultiplier !== numVal) {
+            this.#densityMultiplier = numVal;
+            this.onParameterChanged('densityMultiplier', numVal);
+        }
+    }
+
+    /**
+     * [KO] 인스턴스가 그림자를 투영(캐스팅)할지 여부를 반환합니다.
+     * [EN] Returns whether instances cast shadows.
+     */
+    get castShadow(): boolean {
+        return this.#castShadow;
+    }
+
+    set castShadow(val: boolean) {
+        const boolVal = !!val;
+        if (this.#castShadow !== boolVal) {
+            this.#castShadow = boolVal;
+            this.onParameterChanged('castShadow', boolVal);
+        }
+    }
+
+    /**
+     * [KO] 지형 밑둥/뿌리 표면 색상 블렌딩 강도(0.0~1.0)를 반환합니다.
+     * [EN] Returns bottom surface ground color blending strength (0.0-1.0).
+     */
+    get groundBlendStrength(): number {
+        return this.#groundBlendStrength;
+    }
+
+    set groundBlendStrength(val: number) {
+        const numVal = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
+        if (this.#groundBlendStrength !== numVal) {
+            this.#groundBlendStrength = numVal;
+            this.onParameterChanged('groundBlendStrength', numVal);
+        }
+    }
+
+    /**
+     * [KO] 서브클래스 생성자 초기화 시 후속 훅 트리거 없이 고유 기본값을 안전하게 주입합니다.
+     * [EN] Safely injects initial unique default values during subclass construction without triggering hooks.
+     */
+    protected setRawScatterProperties(values: {
+        cullingDistance?: number;
+        shadowCullDistance?: number;
+        bottomOffset?: number;
+        targetLayer?: string | number | undefined;
+        minSlope?: number;
+        maxSlope?: number;
+        densityScaleByWeight?: boolean;
+        densityPerHectare?: number;
+        densityMultiplier?: number;
+        castShadow?: boolean;
+        groundBlendStrength?: number;
+    }): void {
+        if (values.cullingDistance !== undefined) this.#cullingDistance = values.cullingDistance;
+        if (values.shadowCullDistance !== undefined) this.#shadowCullDistance = values.shadowCullDistance;
+        if (values.bottomOffset !== undefined) this.#bottomOffset = values.bottomOffset;
+        if (values.targetLayer !== undefined) this.#targetLayer = values.targetLayer;
+        if (values.minSlope !== undefined) this.#minSlope = values.minSlope;
+        if (values.maxSlope !== undefined) this.#maxSlope = values.maxSlope;
+        if (values.densityScaleByWeight !== undefined) this.#densityScaleByWeight = values.densityScaleByWeight;
+        if (values.densityPerHectare !== undefined) this.#densityPerHectare = values.densityPerHectare;
+        if (values.densityMultiplier !== undefined) this.#densityMultiplier = values.densityMultiplier;
+        if (values.castShadow !== undefined) this.#castShadow = values.castShadow;
+        if (values.groundBlendStrength !== undefined) this.#groundBlendStrength = values.groundBlendStrength;
+    }
+
+    /**
+     * [KO] 파라미터 변경 시 서브클래스별 고유 후속 반응(유니폼 동기화, 더티 플래그 등)을 처리하는 추상 훅 메서드입니다.
+     * [EN] Abstract hook method to handle subclass-specific side effects upon parameter change.
+     *
+     * @param prop - [KO] 변경된 속성 식별자 / [EN] Changed property identifier
+     * @param value - [KO] 새로 설정된 유효값 / [EN] Newly set validated value
+     */
+    protected abstract onParameterChanged(prop: string, value: any): void;
 
     /**
      * [KO] 스캐터 타입 리소스를 해제합니다.

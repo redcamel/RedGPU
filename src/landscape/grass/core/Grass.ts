@@ -175,12 +175,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #geometry: Geometry | Primitive;
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
-    #densityPerHectare: number = 5000.0;
-    #densityMultiplier: number = 1.0;
-    #densityScaleByWeight: boolean = true;
-    #minSlope: number = 0.0;
-    #maxSlope: number = 35.0;
-    #cullingDistance: number = 100.0;
     #fadeStartDistance: number = 60.0;
     #farDistance: number = 35.0;
     #minScale: [number, number, number] = [0.7, 0.7, 0.7];
@@ -190,15 +184,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #exposureBoost: number = 1.0;
     #subsurfaceStrength: number = 0.25;
     #subsurfaceColor: [number, number, number] = [0.35, 0.65, 0.15];
-    #groundBlendStrength: number = 1.0;
     #alphaCutoff: number = 0.2;
     #roughness: number = 0.55;
-    #targetLayer: string | number = '';
-    #bottomOffset: number = 0.0;
     #receiveShadow: boolean = true;
     #shadowStrength: number = 1.0;
-    #castShadow: boolean = true;
-    #shadowCullDistance: number = 35.0;
     #shadowFadeStartDistance: number = 26.25;
 
     #dirty: boolean = true;
@@ -364,20 +353,39 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
 
-        if (densityPerHectare !== undefined) this.#densityPerHectare = densityPerHectare;
-        if (densityMultiplier !== undefined) this.#densityMultiplier = densityMultiplier;
-        if (densityScaleByWeight !== undefined) this.#densityScaleByWeight = densityScaleByWeight;
-        if (minSlope !== undefined) this.#minSlope = minSlope;
-        if (maxSlope !== undefined) this.#maxSlope = maxSlope;
-        if (cullingDistance !== undefined) this.#cullingDistance = cullingDistance;
+        const resolvedBottomOffset = bottomOffset !== undefined ? bottomOffset : 0.0;
+        const resolvedCullingDistance = cullingDistance !== undefined ? cullingDistance : 100.0;
+        const resolvedShadowCullDistance = shadowCullDistance !== undefined ? Math.max(0.0, shadowCullDistance) : 35.0;
+        const resolvedTargetLayer = targetLayer !== undefined ? targetLayer : '';
+        const resolvedMinSlope = minSlope !== undefined ? minSlope : 0.0;
+        const resolvedMaxSlope = maxSlope !== undefined ? maxSlope : 35.0;
+        const resolvedDensityScaleByWeight = densityScaleByWeight !== undefined ? densityScaleByWeight : true;
+        const resolvedDensityPerHectare = densityPerHectare !== undefined ? densityPerHectare : 5000.0;
+        const resolvedDensityMultiplier = densityMultiplier !== undefined ? densityMultiplier : 1.0;
+        const resolvedCastShadow = castShadow;
+        const resolvedGroundBlendStrength = groundBlendStrength !== undefined ? groundBlendStrength : 1.0;
+
+        this.setRawScatterProperties({
+            bottomOffset: resolvedBottomOffset,
+            cullingDistance: resolvedCullingDistance,
+            shadowCullDistance: resolvedShadowCullDistance,
+            targetLayer: resolvedTargetLayer,
+            minSlope: resolvedMinSlope,
+            maxSlope: resolvedMaxSlope,
+            densityScaleByWeight: resolvedDensityScaleByWeight,
+            densityPerHectare: resolvedDensityPerHectare,
+            densityMultiplier: resolvedDensityMultiplier,
+            castShadow: resolvedCastShadow,
+            groundBlendStrength: resolvedGroundBlendStrength
+        });
+
         if (fadeStartDistance !== undefined) {
             this.#fadeStartDistance = fadeStartDistance;
         } else {
-            this.#fadeStartDistance = this.#cullingDistance * 0.75;
+            this.#fadeStartDistance = this.cullingDistance * 0.75;
         }
         if (minScale) this.#minScale = [minScale[0], minScale[1], minScale[2] ?? minScale[0]];
         if (maxScale) this.#maxScale = [maxScale[0], maxScale[1], maxScale[2] ?? maxScale[0]];
-        if (groundBlendStrength !== undefined) this.#groundBlendStrength = groundBlendStrength;
 
         this.#alphaCutoff = alphaCutoff;
 
@@ -391,19 +399,15 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
         if (subsurfaceColor) this.#subsurfaceColor = [...subsurfaceColor];
         if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
-        if (targetLayer !== undefined) this.#targetLayer = targetLayer;
-        if (bottomOffset !== undefined) this.#bottomOffset = bottomOffset;
         if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
-        this.#castShadow = castShadow;
         if (shadowCullDistance !== undefined) {
-            this.#shadowCullDistance = Math.max(0.0, shadowCullDistance);
             this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
                 ? Math.max(0.0, shadowFadeStartDistance)
-                : Math.max(0.0, this.#shadowCullDistance * 0.75);
+                : Math.max(0.0, this.shadowCullDistance * 0.75);
         } else if (shadowFadeStartDistance !== undefined) {
             this.#shadowFadeStartDistance = Math.max(0.0, shadowFadeStartDistance);
         } else {
-            this.#shadowFadeStartDistance = this.#shadowCullDistance * 0.75;
+            this.#shadowFadeStartDistance = this.shadowCullDistance * 0.75;
         }
     }
 
@@ -465,90 +469,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 헥타르(10,000m²)당 잔디 인스턴스 수량
-     * [EN] Number of grass instances per hectare (10,000 m²)
-     */
-    get densityPerHectare(): number {
-        return this.#densityPerHectare;
-    }
-
-    set densityPerHectare(v: number) {
-        this.#densityPerHectare = Math.max(0, v);
-        this.#notifyChange();
-    }
-
-    /**
-     * [KO] 잔디 밀도에 적용되는 전체 배율
-     * [EN] Overall multiplier applied to grass density
-     */
-    get densityMultiplier(): number {
-        return this.#densityMultiplier;
-    }
-
-    set densityMultiplier(v: number) {
-        this.#densityMultiplier = Math.max(0, v);
-        this.#notifyChange();
-    }
-
-    /**
      * [KO] 단일 지형 그리드 셀(16m x 16m) 당 생성되는 인스턴스 수량 계산값
      * [EN] Computed number of instances generated per terrain grid cell (16m x 16m)
      */
     get instancesPerCell(): number {
-        return Math.max(1, Math.round((this.#densityPerHectare * 256.0 / 10000.0) * this.#densityMultiplier));
-    }
-
-    /**
-     * [KO] 지형 스플랫 레이어 가중치에 비례하여 밀도를 스케일링할지 여부
-     * [EN] Whether to scale density proportional to terrain splat layer weight
-     */
-    get densityScaleByWeight(): boolean {
-        return this.#densityScaleByWeight;
-    }
-
-    set densityScaleByWeight(v: boolean) {
-        this.#densityScaleByWeight = v;
-        this.#notifyChange();
-    }
-
-    /**
-     * [KO] 잔디가 배치될 수 있는 지형의 최소 경사도 (0~90)
-     * [EN] Minimum terrain slope where grass can spawn (0-90)
-     */
-    get minSlope(): number {
-        return this.#minSlope;
-    }
-
-    set minSlope(v: number) {
-        this.#minSlope = Math.max(0, Math.min(90, v));
-        this.#notifyChange();
-    }
-
-    /**
-     * [KO] 잔디가 배치될 수 있는 지형의 최대 경사도 (0~90)
-     * [EN] Maximum terrain slope where grass can spawn (0-90)
-     */
-    get maxSlope(): number {
-        return this.#maxSlope;
-    }
-
-    set maxSlope(v: number) {
-        this.#maxSlope = Math.max(0, Math.min(90, v));
-        this.#notifyChange();
-    }
-
-    /**
-     * [KO] 카메라로부터 잔디가 렌더링되는 최대 가시거리 (미터 단위)
-     * [EN] Maximum visible distance in meters where grass is rendered
-     */
-    get cullingDistance(): number {
-        return this.#cullingDistance;
-    }
-
-    set cullingDistance(v: number) {
-        this.#cullingDistance = Math.max(10, v);
-        this.#fadeStartDistance = this.#cullingDistance * 0.75;
-        this.#dirty = true;
+        return Math.max(1, Math.round((this.densityPerHectare * 256.0 / 10000.0) * this.densityMultiplier));
     }
 
     /**
@@ -619,18 +544,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#dirty = true;
     }
 
-    /**
-     * [KO] 지면 색상과 잔디 하단 버텍스 컬러 간의 블렌딩 강도 (0.0~1.0)
-     * [EN] Blending strength between terrain ground color and grass base vertex color (0.0-1.0)
-     */
-    get groundBlendStrength(): number {
-        return this.#groundBlendStrength;
-    }
 
-    set groundBlendStrength(v: number) {
-        this.#groundBlendStrength = Math.max(0, Math.min(1, v));
-        this.#dirty = true;
-    }
 
     /**
      * [KO] 알파 테스트 컷오프 임계값 (0.01~1.0)
@@ -684,31 +598,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#dirty = true;
     }
 
-    /**
-     * [KO] 잔디가 배치될 특정 지형 스플랫 레이어 이름 또는 인덱스
-     * [EN] Target terrain splat layer name or index for grass placement
-     */
-    get targetLayer(): string | number {
-        return this.#targetLayer;
-    }
 
-    set targetLayer(v: string | number) {
-        this.#targetLayer = v;
-        this.#notifyChange();
-    }
-
-    /**
-     * [KO] 지형 표면 대비 잔디 하단 접지 추가 Y 오프셋 (미터 단위)
-     * [EN] Additional bottom Y offset in meters relative to terrain surface
-     */
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
-
-    set bottomOffset(v: number) {
-        this.#bottomOffset = v;
-        this.#notifyChange();
-    }
 
     /**
      * [KO] 그림자 수신 여부
@@ -736,32 +626,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#dirty = true;
     }
 
-    /**
-     * [KO] 잔디가 그림자를 투영(캐스팅)할지 여부
-     * [EN] Whether grass casts shadows
-     */
-    get castShadow(): boolean {
-        return this.#castShadow;
-    }
 
-    set castShadow(v: boolean) {
-        this.#castShadow = v;
-        this.#dirty = true;
-    }
-
-    /**
-     * [KO] 그림자 렌더링 패스 시의 최대 컬링 거리 (미터 단위)
-     * [EN] Maximum culling distance in meters applied during shadow pass
-     */
-    get shadowCullDistance(): number {
-        return this.#shadowCullDistance;
-    }
-
-    set shadowCullDistance(v: number) {
-        this.#shadowCullDistance = Math.max(0.0, v);
-        this.#shadowFadeStartDistance = this.#shadowCullDistance * 0.75;
-        this.#dirty = true;
-    }
 
     /**
      * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (미터 단위)
@@ -803,6 +668,32 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #notifyChange(): void {
         this.#dirty = true;
         if (this.#onRepopulateRequired) this.#onRepopulateRequired();
+    }
+
+    protected override onParameterChanged(prop: string, value: any): void {
+        switch (prop) {
+            case 'cullingDistance':
+                this.#fadeStartDistance = (value as number) * 0.75;
+                this.#dirty = true;
+                break;
+            case 'shadowCullDistance':
+                this.#shadowFadeStartDistance = (value as number) * 0.75;
+                this.#dirty = true;
+                break;
+            case 'bottomOffset':
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#notifyChange();
+                break;
+            case 'castShadow':
+            case 'groundBlendStrength':
+                this.#dirty = true;
+                break;
+        }
     }
 
     /**
