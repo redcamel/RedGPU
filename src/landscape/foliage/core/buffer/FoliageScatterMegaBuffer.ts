@@ -91,7 +91,6 @@ export interface CascadeCullingParam {
  */
 export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     #globalUniformBytes: number;
-    #globalUniformFloats: number;
 
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
     #shadowIndirectGPUBuffer: GPUBuffer | null = null;
@@ -159,8 +158,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
 
         this.#globalUniformBytes = globalUniformBytes;
-        this.#globalUniformFloats = globalUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        this.#cpuUnifiedGlobalUniformData = new Float32Array(this.#globalUniformFloats);
+        const globalUniformFloats = globalUniformBytes / Float32Array.BYTES_PER_ELEMENT;
+        this.#cpuUnifiedGlobalUniformData = new Float32Array(globalUniformFloats);
         this.#cpuUnifiedGlobalUniformUint32 = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
         this.#initBuffers();
