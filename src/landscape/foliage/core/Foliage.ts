@@ -7,6 +7,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Mesh from "../../../display/mesh/Mesh";
+import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
@@ -268,6 +269,7 @@ export class Foliage extends RedGPUObject {
     #options: FoliageOptions;
 
     #subMeshes: FoliageSubMesh[] = [];
+    #unifiedGeometries: (Geometry | null)[] = [];
     #lod0SubMeshes: FoliageSubMesh[] = [];
     #depthPrepassSubMeshes: FoliageSubMesh[] = [];
     #mainSubMeshes: FoliageSubMesh[] = [];
@@ -459,6 +461,7 @@ export class Foliage extends RedGPUObject {
             this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
+        this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
         this.#lod0SubMeshes = this.#subMeshes.filter(sub => sub.lodIndex === 0);
         let hasMaskedLOD0 = false;
         for (let i = 0; i < this.#lod0SubMeshes.length; i++) {
@@ -609,6 +612,34 @@ export class Foliage extends RedGPUObject {
 
     get subMeshes(): FoliageSubMesh[] {
         return this.#subMeshes;
+    }
+
+    /**
+     * [KO] LOD 레벨별 단일 통합 지오메트리 배열을 반환합니다.
+     * [EN] Returns the array of per-LOD unified geometries.
+     */
+    get unifiedGeometries(): (Geometry | null)[] {
+        return this.#unifiedGeometries;
+    }
+
+    /**
+     * [KO] 이 식생 타입이 메인 렌더 패스에서 소비하는 간접 드로우콜 개수를 반환합니다.
+     * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
+     */
+    get drawCallCount(): number {
+        let count = this.#mainSubMeshes.length;
+        if (this.#useDepthPrepass) {
+            count += this.#depthPrepassSubMeshes.length;
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 등록된 총 서브메시 개수를 반환합니다.
+     * [EN] Returns the total number of registered sub-meshes.
+     */
+    get subMeshCount(): number {
+        return this.#subMeshes.length;
     }
 
     get depthPrepassSubMeshes(): FoliageSubMesh[] {
@@ -1127,6 +1158,7 @@ export class Foliage extends RedGPUObject {
             sub.destroy();
         }
         this.#subMeshes.length = 0;
+        this.#unifiedGeometries.length = 0;
         this.#lod0SubMeshes.length = 0;
         for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
             const shadowSub = this.#shadowMergedSubMeshes[i];

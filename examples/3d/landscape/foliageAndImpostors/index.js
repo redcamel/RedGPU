@@ -186,9 +186,15 @@ function renderTestPane({
     });
 
     let foliageFolder = null;
+    let paneInstance = null;
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
+            paneInstance = pane;
+            setInterval(() => {
+                paneInstance?.refresh();
+            }, 500);
+
             // 1. Controller 설정 (Orbit / Character)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
 
@@ -237,6 +243,8 @@ function renderTestPane({
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
             managerFolder.addBinding(foliageManager, 'enabled');
+            managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, label: 'Main Draw Calls'});
+            managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
             managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
@@ -305,6 +313,8 @@ function renderTestPane({
         }).on('change', () => placementFolder.refresh());
         placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
             .on('change', () => placementFolder.refresh());
+        placementFolder.addBinding(type, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
+        placementFolder.addBinding(type, 'drawCallCount', {readonly: true, label: 'Draw Calls'});
         placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});

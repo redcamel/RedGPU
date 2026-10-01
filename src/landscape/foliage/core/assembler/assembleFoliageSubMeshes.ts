@@ -6,6 +6,7 @@
  */
 
 import RedGPUContext from "../../../../context/RedGPUContext";
+import Geometry from "../../../../geometry/Geometry";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
@@ -15,6 +16,7 @@ import type {FoliageSubMeshUniformResult} from "./internal/createFoliageSubMeshU
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
+    unifiedGeometries: (Geometry | null)[];
     shadowMergedSubMeshes: FoliageShadowMergedSubMesh[];
     lodInfoList: FoliageLODInfo[];
     bottomOffset: number;
@@ -46,11 +48,13 @@ export default function assembleFoliageSubMeshes(
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subList: FoliageSubMesh[] = [];
+    const unifiedGeometries: (Geometry | null)[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
 
     if (!gpuDevice || !subMeshBindGroupLayout) {
         return {
             subMeshes: subList,
+            unifiedGeometries: [],
             shadowMergedSubMeshes: [],
             lodInfoList: [],
             bottomOffset: 0,
@@ -85,6 +89,8 @@ export default function assembleFoliageSubMeshes(
             subMeshUniformCache,
             lodReceiveShadow
         );
+
+        unifiedGeometries.push(assembled.unifiedGeometry || null);
 
         const assembledSubMeshes = assembled.subMeshes;
         for (let s = 0; s < assembledSubMeshes.length; s++) {
@@ -150,6 +156,7 @@ export default function assembleFoliageSubMeshes(
 
     return {
         subMeshes: subList,
+        unifiedGeometries,
         shadowMergedSubMeshes,
         lodInfoList,
         bottomOffset: finalBottomOffset,

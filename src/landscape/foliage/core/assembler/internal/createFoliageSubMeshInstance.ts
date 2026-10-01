@@ -82,6 +82,16 @@ export interface CreateSubMeshOptions {
      */
     uniformCache?: Map<string, FoliageSubMeshUniformResult>;
     /**
+     * [KO] 서브메시 인덱스 시작 오프셋 (단일 통합 지오메트리 분할용)
+     * [EN] Sub-mesh index start offset (for unified geometry partitioning)
+     */
+    firstIndex?: number;
+    /**
+     * [KO] 서브메시 인덱스 개수
+     * [EN] Sub-mesh index count
+     */
+    indexCount?: number;
+    /**
      * [KO] 뎁스 프리패스를 적용할 최대 LOD 인덱스
      * [EN] Maximum LOD index to apply depth prepass
      */
@@ -125,13 +135,15 @@ export default function createFoliageSubMeshInstance(
         bottomOffset = 0,
         receiveShadow = true,
         uniformCache,
+        firstIndex = 0,
+        indexCount: optIndexCount,
         maxPrepassLOD = 0,
         groundBlendStrength,
         groundBlendRange
     } = options;
 
     const isIndexed = !!geom.indexBuffer;
-    const indexCount = geom.indexBuffer?.indexCount ?? 0;
+    const indexCount = optIndexCount !== undefined ? optIndexCount : (geom.indexBuffer?.indexCount ?? 0);
     const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;
 
     const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
@@ -179,6 +191,7 @@ export default function createFoliageSubMeshInstance(
         mesh: meshNode,
         geometry: geom,
         material: mat,
+        firstIndex,
         indexCount,
         vertexCount,
         isIndexed,

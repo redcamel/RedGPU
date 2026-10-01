@@ -7,6 +7,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Mesh from "../../../../../display/mesh/Mesh";
+import Geometry from "../../../../../geometry/Geometry";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageOptions} from "../../Foliage";
@@ -28,6 +29,11 @@ export interface AssembledLODResult {
      * [EN] List of combined PBR sub-meshes
      */
     subMeshes: FoliageSubMesh[];
+    /**
+     * [KO] 단일 통합 PBR 지오메트리 (버텍스/인덱스 버퍼 재바인딩 제로화용)
+     * [EN] Single unified PBR geometry (for zero-rebinding of vertex/index buffers)
+     */
+    unifiedGeometry?: Geometry | null;
     /**
      * [KO] 그림자 패스 전용 통합 서브메시 (생성되지 않은 경우 null)
      * [EN] Unified sub-mesh dedicated to shadow pass (null if not generated)
@@ -111,6 +117,7 @@ export default function assembleFoliageLODMeshes(
     if (combineResult.groups.length === 0) {
         return {
             subMeshes: [],
+            unifiedGeometry: null,
             shadowMergedSubMesh: null,
             boundingRadius: 0,
             boundingHeight: 0,
@@ -120,6 +127,7 @@ export default function assembleFoliageLODMeshes(
     }
 
     const resultSubMeshes: FoliageSubMesh[] = [];
+    const unifiedGeometry = combineResult.unifiedGeometry;
 
     for (let g = 0; g < combineResult.groups.length; g++) {
         const group = combineResult.groups[g];
@@ -127,7 +135,7 @@ export default function assembleFoliageLODMeshes(
             gpuDevice,
             subMeshBindGroupLayout,
             meshNode: group.rawNodes[0]?.node,
-            geom: group.geometry,
+            geom: unifiedGeometry || group.geometry,
             mat: group.material,
             relMatrix: identityMatrix,
             normMatrix: identityMatrix,
@@ -137,6 +145,8 @@ export default function assembleFoliageLODMeshes(
             bottomOffset: 0,
             receiveShadow: lodReceiveShadow,
             uniformCache: subMeshUniformCache,
+            firstIndex: group.firstIndex,
+            indexCount: group.indexCount,
             maxPrepassLOD: 0,
             groundBlendStrength: options.groundBlendStrength,
             groundBlendRange: options.groundBlendRange
@@ -171,6 +181,7 @@ export default function assembleFoliageLODMeshes(
 
     return {
         subMeshes: resultSubMeshes,
+        unifiedGeometry,
         shadowMergedSubMesh,
         boundingRadius: combineResult.boundingRadius,
         boundingHeight: combineResult.boundingHeight,

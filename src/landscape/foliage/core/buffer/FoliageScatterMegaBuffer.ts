@@ -680,11 +680,14 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
-            indirectResetTemplate[(indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT] = count;
+            const mainSlot = (indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
+            indirectResetTemplate[mainSlot] = count;
+            indirectResetTemplate[mainSlot + 2] = sub.firstIndex;
 
             for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
                 const shadowSlot = (c * maxSubMeshes + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
+                this.#shadowIndirectResetTemplate[shadowSlot + 2] = sub.firstIndex;
             }
         }
 
@@ -708,6 +711,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
                 for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
                     const shadowSlot = (c * maxSubMeshes + slotIndex) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                     this.#shadowIndirectResetTemplate[shadowSlot] = count;
+                    this.#shadowIndirectResetTemplate[shadowSlot + 2] = shadowSub.firstIndex;
                 }
             }
         }
