@@ -7,7 +7,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import AScatterMegaBuffer, {ScatterBaseSegmentAllocation} from "./AScatterMegaBuffer";
+import type {ScatterBaseSegmentAllocation} from "./AScatterMegaBuffer";
 
 /**
  * [KO] 모든 스캐터 타입(잔디 Grass, 식생 Foliage 등)의 최상위 추상 기본 클래스입니다.
@@ -15,12 +15,12 @@ import AScatterMegaBuffer, {ScatterBaseSegmentAllocation} from "./AScatterMegaBu
  *
  * **[KO] 아키텍처 및 역할:**
  * - **식별 및 수명주기 통일**: 모든 스캐터 종의 이름(`name`), 고유 ID(`typeId`), 서브메시 및 간접 드로우콜 통계를 캡슐화합니다.
- * - **VRAM 세그먼트 배정 연동**: 하위 [`AScatterMegaBuffer`](file:///D:/github/RedGPU/src/landscape/core/scatter/AScatterMegaBuffer.ts)의 64바이트 정렬 세그먼트 할당(`allocateBaseSegment`)을 호출하고 배정 정보를 보관합니다.
+ * - **VRAM 세그먼트 배정 정보 보관**: 하위 [`AScatterMegaBuffer`](file:///D:/github/RedGPU/src/landscape/core/scatter/AScatterMegaBuffer.ts)에서 배정받은 세그먼트 할당 메타데이터(`allocation`)를 보관합니다.
  * - **LOD 통합 지오메트리 규격 정의**: 각 LOD 단계별 단일 결합 지오메트리 목록(`unifiedGeometries`)을 추상 게터로 강제하여 상위 렌더 패스가 다형성(Polymorphism)으로 접근할 수 있도록 보장합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Unified Identification & Lifecycle**: Encapsulates name (`name`), unique ID (`typeId`), sub-mesh and indirect draw-call statistics across all scatter species.
- * - **VRAM Segment Allocation Link**: Calls aligned segment allocation (`allocateBaseSegment`) from [`AScatterMegaBuffer`](file:///D:/github/RedGPU/src/landscape/core/scatter/AScatterMegaBuffer.ts) and retains assignment metadata.
+ * - **VRAM Segment Allocation Metadata Retention**: Retains assignment metadata (`allocation`) received from [`AScatterMegaBuffer`](file:///D:/github/RedGPU/src/landscape/core/scatter/AScatterMegaBuffer.ts).
  * - **LOD Unified Geometry Specification**: Mandates single combined geometry list (`unifiedGeometries`) per LOD level via an abstract getter, allowing render passes to interface polymorphically.
  *
  * ::: warning
@@ -143,37 +143,6 @@ export abstract class AScatterType extends RedGPUObject {
     updateSubMeshStats(subMeshCount: number, drawCallCount?: number): void {
         this.#subMeshCount = Math.max(0, subMeshCount);
         this.#drawCallCount = drawCallCount !== undefined ? Math.max(0, drawCallCount) : this.#subMeshCount;
-    }
-
-    /**
-     * [KO] 메가버퍼의 기본 세그먼트를 할당하고 할당 정보를 저장합니다.
-     * [EN] Allocates a base segment in the mega-buffer and stores the allocation metadata.
-     *
-     * @param megaBuffer -
-     * [KO] 대상 스캐터 메가버퍼 인스턴스
-     * [EN] Target scatter mega-buffer instance
-     * @param maxInstances -
-     * [KO] 최대 수용 인스턴스 수
-     * [EN] Maximum instance capacity
-     * @param culledMultiplier -
-     * [KO] 컬링 결과 버퍼 배율 (기본값: 1)
-     * [EN] Culled instance buffer multiplier (default: 1)
-     * @returns
-     * [KO] 할당된 기본 세그먼트 메타데이터
-     * [EN] Allocated base segment metadata
-     */
-    allocateBaseSegment(
-        megaBuffer: AScatterMegaBuffer,
-        maxInstances: number,
-        culledMultiplier: number = 1
-    ): ScatterBaseSegmentAllocation {
-        this.#allocation = megaBuffer.allocateBaseSegment(
-            this.#name || this.#typeId,
-            maxInstances,
-            this.#subMeshCount,
-            culledMultiplier
-        );
-        return this.#allocation;
     }
 
     /**
