@@ -14,13 +14,8 @@ import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {computeNormalizedChannelWeight, ScatterInstanceBaker} from "../core/scatter";
 import grassBakeComputeWGSL from "./core/baking/grassBakeCompute.wgsl";
 import {GrassCuller} from "./core/culling/GrassCuller";
-import grassVertexWGSL from "./shader/grassVertex.wgsl";
-import grassFragmentNearWGSL from "./shader/grassFragmentNear.wgsl";
-import grassFragmentFarWGSL from "./shader/grassFragmentFar.wgsl";
-import grassShadowVertexWGSL from "./shader/grassShadowVertex.wgsl";
-import grassShadowFragmentWGSL from "./shader/grassShadowFragment.wgsl";
+import {GrassRenderer, GrassTypeMaterialBufferResources} from "./core/renderer/GrassRenderer";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
-import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 
 const DEG2RAD: number = 0.017453292519943295;
 
@@ -161,34 +156,9 @@ export class GrassManager extends RedGPUObject {
     #totalInstanceCount: number = 0;
     #populated: boolean = false;
 
-    #vertexModule: GPUShaderModule | null = null;
-    #vertexShadowModule: GPUShaderModule | null = null;
-    #fragmentNearModule: GPUShaderModule | null = null;
-    #fragmentFarModule: GPUShaderModule | null = null;
-    #fragmentShadowModule: GPUShaderModule | null = null;
-    #pipelineLayout: GPUPipelineLayout | null = null;
-    #pipelineBindGroupLayout1: GPUBindGroupLayout | null = null;
-    #pipelineBindGroupLayout2: GPUBindGroupLayout | null = null;
-    #renderPipelinesNear: Map<number, GPURenderPipeline> = new Map();
-    #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
-    #shadowPipeline: GPURenderPipeline | null = null;
+    #renderer: GrassRenderer;
 
-    #typeMaterialBuffers: Map<number, {
-        uniformBuffer: GPUBuffer;
-        cpuBuffer: Float32Array;
-        uintBuffer: Uint32Array;
-        grassUniformGPUBuffer: GPUBuffer;
-        grassUniformCPUBuffer: Float32Array;
-        bindGroup: GPUBindGroup | null;
-        instanceBindGroup: GPUBindGroup | null;
-        cachedColorTexView: GPUTextureView | null;
-        initialized: boolean;
-        cachedHasVbt: boolean;
-        subMeshResources: {
-            bindGroup: GPUBindGroup | null;
-            cachedColorTexView: GPUTextureView | null;
-        }[];
-    }> = new Map();
+    #typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources> = new Map();
 
     #candidateKeys: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
     #candidateDistancesSq: Float32Array = new Float32Array(MAX_CANDIDATE_CELLS);
@@ -248,7 +218,7 @@ export class GrassManager extends RedGPUObject {
             }
         };
 
-        this.#initShadersAndLayouts();
+        this.#renderer = new GrassRenderer(this.redGPUContext);
     }
 
     /**
@@ -615,140 +585,7 @@ export class GrassManager extends RedGPUObject {
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-
-        const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
-        if (!systemBG) return;
-
-        const {gpuDevice, antialiasingManager, resourceManager} = this;
-        if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
-
-        const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
-        const nearPipeline = this.#getRenderPipeline(sampleCount, false);
-        const farPipeline = this.#getRenderPipeline(sampleCount, true);
-        if (!nearPipeline || !farPipeline) return;
-
-        let currentPipeline: GPURenderPipeline | null = nearPipeline;
-        passEncoder.setPipeline(nearPipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
-        const {indirectGPUBuffer, culledGPUBuffer} = this.#megaBuffer;
-        if (!indirectGPUBuffer) return;
-
-        for (const type of this.#grassList) {
-            const {typeId, name, unifiedGeometry, subMeshes} = type;
-            const alloc = this.#megaBuffer.getAllocation(typeId);
-            if (!alloc || alloc.instanceCount === 0) continue;
-
-            const res = this.#typeMaterialBuffers.get(typeId);
-            if (!res) continue;
-
-            const {uniformBuffer, grassUniformGPUBuffer} = res;
-
-            if (!res.instanceBindGroup && culledGPUBuffer && grassUniformGPUBuffer) {
-                res.instanceBindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_InstanceBindGroup_${name}_${this.instanceId}`,
-                    layout: this.#pipelineBindGroupLayout1,
-                    entries: [
-                        {binding: 0, resource: {buffer: culledGPUBuffer}},
-                        {binding: 1, resource: {buffer: grassUniformGPUBuffer}},
-                    ]
-                });
-            }
-
-            if (!res.instanceBindGroup) continue;
-
-            const targetGeom = unifiedGeometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-            const subMeshCount = subMeshes.length;
-            const {basicSampler} = resourceManager;
-
-            if (alloc.nearSlots.length > 0) {
-                if (currentPipeline !== nearPipeline) {
-                    passEncoder.setPipeline(nearPipeline);
-                    currentPipeline = nearPipeline;
-                }
-                for (let s = 0; s < subMeshCount; s++) {
-                    const subMesh = subMeshes[s];
-                    const slot = alloc.nearSlots[s];
-                    if (!slot) continue;
-
-                    let subRes = res.subMeshResources[s];
-                    if (!subRes) {
-                        subRes = {bindGroup: null, cachedColorTexView: null};
-                        res.subMeshResources[s] = subRes;
-                    }
-
-                    const subTex = subMesh.baseColorTexture;
-                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                        || type.baseColorTextureView
-                        || resourceManager.emptyBitmapTextureView;
-
-                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                        subRes.bindGroup = gpuDevice.createBindGroup({
-                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                            layout: this.#pipelineBindGroupLayout2,
-                            entries: [
-                                {binding: 0, resource: subTexView},
-                                {binding: 1, resource: basicSampler.gpuSampler},
-                                {binding: 2, resource: {buffer: uniformBuffer}},
-                            ]
-                        });
-                        subRes.cachedColorTexView = subTexView;
-                    }
-
-                    passEncoder.setBindGroup(2, subRes.bindGroup);
-                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                }
-            }
-
-            if (alloc.farSlots.length > 0) {
-                if (currentPipeline !== farPipeline) {
-                    passEncoder.setPipeline(farPipeline);
-                    currentPipeline = farPipeline;
-                }
-                for (let s = 0; s < subMeshCount; s++) {
-                    const subMesh = subMeshes[s];
-                    const slot = alloc.farSlots[s];
-                    if (!slot) continue;
-
-                    let subRes = res.subMeshResources[s];
-                    if (!subRes) {
-                        subRes = {bindGroup: null, cachedColorTexView: null};
-                        res.subMeshResources[s] = subRes;
-                    }
-
-                    const subTex = subMesh.baseColorTexture;
-                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                        || type.baseColorTextureView
-                        || resourceManager.emptyBitmapTextureView;
-
-                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                        subRes.bindGroup = gpuDevice.createBindGroup({
-                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                            layout: this.#pipelineBindGroupLayout2,
-                            entries: [
-                                {binding: 0, resource: subTexView},
-                                {binding: 1, resource: basicSampler.gpuSampler},
-                                {binding: 2, resource: {buffer: uniformBuffer}},
-                            ]
-                        });
-                        subRes.cachedColorTexView = subTexView;
-                    }
-
-                    passEncoder.setBindGroup(2, subRes.bindGroup);
-                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                }
-            }
-        }
+        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
     }
 
     /**
@@ -764,80 +601,7 @@ export class GrassManager extends RedGPUObject {
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
-
-        const {currentCascadeIndex: currentCascade, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
-        if (currentCascade !== undefined && currentCascade > 1) return;
-
-        const {gpuDevice, resourceManager} = this;
-        if (!gpuDevice) return;
-
-        const {indirectGPUBuffer} = this.#megaBuffer;
-        if (!indirectGPUBuffer) return;
-
-        const pipeline = this.#getShadowRenderPipeline();
-        if (!pipeline) return;
-
-        if (!systemBG) return;
-
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
-        for (const type of this.#grassList) {
-            const {castShadow, typeId, name, unifiedGeometry, subMeshes} = type;
-            if (!castShadow) continue;
-
-            const alloc = this.#megaBuffer.getAllocation(typeId);
-            if (!alloc || alloc.instanceCount === 0) continue;
-
-            const res = this.#typeMaterialBuffers.get(typeId);
-            if (!res || !res.instanceBindGroup) continue;
-
-            const targetGeom = unifiedGeometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-            const subMeshCount = subMeshes.length;
-            const {basicSampler} = resourceManager;
-
-            for (let s = 0; s < subMeshCount; s++) {
-                const subMesh = subMeshes[s];
-                const nearSlot = alloc.nearSlots[s];
-                if (!nearSlot) continue;
-
-                let subRes = res.subMeshResources[s];
-                if (!subRes) {
-                    subRes = {bindGroup: null, cachedColorTexView: null};
-                    res.subMeshResources[s] = subRes;
-                }
-
-                const subTex = subMesh.baseColorTexture;
-                const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                    || type.baseColorTextureView
-                    || resourceManager.emptyBitmapTextureView;
-
-                if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                    subRes.bindGroup = gpuDevice.createBindGroup({
-                        label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                        layout: this.#pipelineBindGroupLayout2,
-                        entries: [
-                            {binding: 0, resource: subTexView},
-                            {binding: 1, resource: basicSampler.gpuSampler},
-                            {binding: 2, resource: {buffer: res.uniformBuffer}},
-                        ]
-                    });
-                    subRes.cachedColorTexView = subTexView;
-                }
-
-                passEncoder.setBindGroup(2, subRes.bindGroup);
-                const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
-                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-            }
-        }
+        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
     }
 
     /**
@@ -1029,15 +793,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.destroy();
         this.#baker.destroy();
         this.#culler.destroy();
-        this.#shadowPipeline = null;
-        this.#vertexShadowModule = null;
-        this.#fragmentShadowModule = null;
-        this.#vertexModule = null;
-        this.#fragmentNearModule = null;
-        this.#fragmentFarModule = null;
-        this.#pipelineLayout = null;
-        this.#pipelineBindGroupLayout1 = null;
-        this.#pipelineBindGroupLayout2 = null;
+        this.#renderer.destroy();
 
         for (const res of this.#typeMaterialBuffers.values()) {
             res.uniformBuffer.destroy();
@@ -1049,8 +805,6 @@ export class GrassManager extends RedGPUObject {
         this.#slotRangePool.length = 0;
         this.#neededCellKeysSet.clear();
         this.#keysToEvict.length = 0;
-        this.#renderPipelinesNear.clear();
-        this.#renderPipelinesFar.clear();
         for (const grass of this.#grassList) {
             grass.onRepopulateRequired = null;
         }
@@ -1154,59 +908,7 @@ export class GrassManager extends RedGPUObject {
         return null;
     }
 
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 렌더링에 사용되는 전용 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the cached GPURenderPipeline used for cascaded shadow map (CSM) rendering.
-     *
-     * @returns
-     * [KO] 캐시되거나 생성된 섀도우 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Cached or created shadow GPURenderPipeline instance, or `null` if creation fails
-     */
-    #getShadowRenderPipeline(): GPURenderPipeline | null {
-        if (this.#shadowPipeline) return this.#shadowPipeline;
 
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
-
-        this.#shadowPipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_Shadow_RenderPipeline_${this.instanceId}`,
-            layout: this.#pipelineLayout,
-            vertex: {
-                module: this.#vertexShadowModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: 18 * 4,
-                        stepMode: 'vertex',
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: this.#fragmentShadowModule,
-                entryPoint: 'main',
-                targets: []
-            },
-            primitive: {
-                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            },
-            multisample: {
-                count: 1
-            }
-        });
-
-        return this.#shadowPipeline;
-    }
 
     /**
      * [KO] 지정된 3D 월드 좌표를 중심으로 스트리밍 반경 내의 잔디 셀과 인스턴스를 강제로 재생성 및 배치합니다.
@@ -1223,132 +925,7 @@ export class GrassManager extends RedGPUObject {
         this.#updateCellStreaming(centerPos[0], centerPos[2], true);
     }
 
-    /**
-     * [KO] 지정된 안티앨리어싱 샘플 수(MSAA)와 파이프라인 모드(Near: 그림자 수신/고품질, Far: 그림자 미수신/경량)에 대응하는 GPURenderPipeline을 반환합니다.
-     * [EN] Retrieves the GPURenderPipeline matching the specified MSAA sample count and pipeline mode (Near: shadow receive/high quality, Far: no shadow/lightweight).
-     *
-     * @param sampleCount -
-     * [KO] 렌더 패스의 멀티샘플링 안티앨리어싱(MSAA) 샘플 수 (기본값: 1)
-     * [EN] Multisampling antialiasing (MSAA) sample count of the render pass (default: 1)
-     * @param isFar -
-     * [KO] 원거리(Far) 전용 경량 셰이더를 적용할지 여부 (기본값: false)
-     * [EN] Whether to apply the lightweight shader dedicated to far distance (default: false)
-     * @returns
-     * [KO] 캐시되거나 생성된 GPURenderPipeline 인스턴스, 또는 생성 실패 시 `null`
-     * [EN] Cached or created GPURenderPipeline instance, or `null` if creation fails
-     */
-    #getRenderPipeline(sampleCount: number = 1, isFar: boolean = false): GPURenderPipeline | null {
-        const cache = isFar ? this.#renderPipelinesFar : this.#renderPipelinesNear;
-        let pipeline = cache.get(sampleCount);
-        if (pipeline) return pipeline;
 
-        const gpuDevice = this.gpuDevice;
-        const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentNearModule;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
-
-        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
-
-        pipeline = gpuDevice.createRenderPipeline({
-            label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}_${this.instanceId}`,
-            layout: this.#pipelineLayout,
-            vertex: {
-                module: this.#vertexModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: 18 * 4,
-                        stepMode: 'vertex',
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                        ]
-                    }
-                ]
-            },
-            fragment: {
-                module: fragModule,
-                entryPoint: 'main',
-                targets: [
-                    {format: 'rgba16float'},
-                    {format: preferredNormalFormat},
-                    {format: 'rgba16float'}
-                ]
-            },
-            primitive: {
-                topology: GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST,
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            },
-            multisample: {
-                count: sampleCount
-            }
-        });
-
-        cache.set(sampleCount, pipeline);
-        return pipeline;
-    }
-
-    /**
-     * [KO] 잔디 렌더링 및 그림자 렌더링에 필요한 WebGPU 셰이더 모듈과 파이프라인 레이아웃을 생성 및 초기화합니다.
-     * [EN] Creates and initializes WebGPU shader modules and pipeline layouts required for grass and shadow rendering.
-     */
-    #initShadersAndLayouts(): void {
-        const {gpuDevice, resourceManager} = this;
-
-        if (!gpuDevice) return;
-
-        this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {
-            code: grassVertexWGSL
-        });
-
-        this.#fragmentNearModule = resourceManager.createGPUShaderModule('Grass_FragmentNearModule', {
-            code: grassFragmentNearWGSL
-        });
-
-        this.#fragmentFarModule = resourceManager.createGPUShaderModule('Grass_FragmentFarModule', {
-            code: grassFragmentFarWGSL
-        });
-
-        this.#vertexShadowModule = resourceManager.createGPUShaderModule('Grass_VertexShadowModule', {
-            code: grassShadowVertexWGSL
-        });
-
-        this.#fragmentShadowModule = resourceManager.createGPUShaderModule('Grass_FragmentShadowModule', {
-            code: grassShadowFragmentWGSL
-        });
-
-        const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
-
-        this.#pipelineBindGroupLayout1 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group1_Layout', {
-            label: 'Grass_Pipeline_Group1_Layout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
-            ]
-        });
-
-        this.#pipelineBindGroupLayout2 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group2_Layout', {
-            label: 'Grass_Pipeline_Group2_Layout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
-            ]
-        });
-
-        this.#pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_PipelineLayout', {
-            bindGroupLayouts: [
-                systemBGLayout,
-                this.#pipelineBindGroupLayout1,
-                this.#pipelineBindGroupLayout2,
-            ]
-        });
-    }
 
     /**
      * [KO] 커맨드 인코더의 사전 컴퓨트 패스(PreProcess Compute Pass) 단계에서 호출되어 지형 스냅 베이킹 및 GPU 컬링을 실행합니다.
