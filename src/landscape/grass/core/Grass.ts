@@ -202,7 +202,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #shadowShrinkStartDistance: number = 26.25;
 
     #dirty: boolean = true;
-    #onChanged: (() => void) | null = null;
+    #onRepopulateRequired: (() => void) | null = null;
 
     /**
      * [KO] Grass 인스턴스를 생성하고 초기 속성을 설정합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrass(options)` 메서드를 사용하십시오.)
@@ -777,11 +777,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 베이킹 관련 속성 변경 시 호출될 콜백 함수를 등록합니다.
-     * [EN] Registers a callback invoked whenever baking-related properties are modified.
+     * [KO] 잔디 배치 관련 속성 변경 시 인스턴스 전체 재스폰(Re-populate)을 요청하는 콜백 함수를 등록합니다.
+     * [EN] Registers a callback invoked whenever placement-related properties change to request full instance re-population.
      */
-    set onChanged(cb: (() => void) | null) {
-        this.#onChanged = cb;
+    set onRepopulateRequired(cb: (() => void) | null) {
+        this.#onRepopulateRequired = cb;
     }
 
     /**
@@ -802,7 +802,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     #notifyChange(): void {
         this.#dirty = true;
-        if (this.#onChanged) this.#onChanged();
+        if (this.#onRepopulateRequired) this.#onRepopulateRequired();
     }
 
     /**

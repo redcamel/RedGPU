@@ -458,7 +458,7 @@ export class GrassManager extends RedGPUObject {
             });
         }
 
-        grassType.onChanged = () => {
+        grassType.onRepopulateRequired = () => {
             this.#populateInstances(this.#lastPopulatePos);
         };
 
@@ -505,7 +505,7 @@ export class GrassManager extends RedGPUObject {
         if (idx === -1) return false;
 
         const {typeId} = grass;
-        grass.onChanged = null;
+        grass.onRepopulateRequired = null;
         this.#grassList.splice(idx, 1);
 
         const res = this.#typeMaterialBuffers.get(typeId);
@@ -1052,7 +1052,7 @@ export class GrassManager extends RedGPUObject {
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
         for (const grass of this.#grassList) {
-            grass.onChanged = null;
+            grass.onRepopulateRequired = null;
         }
         this.#grassList.length = 0;
     }
