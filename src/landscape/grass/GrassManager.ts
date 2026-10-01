@@ -11,7 +11,12 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
-import {computeNormalizedChannelWeight, ScatterInstanceBaker} from "../core/scatter";
+import {
+    computeNormalizedChannelWeight,
+    computeScatterSubCellSeed,
+    ScatterInstanceBaker,
+    sortCandidateIndicesByDistance
+} from "../core/scatter";
 import grassBakeComputeWGSL from "./core/baking/grassBakeCompute.wgsl";
 import {GrassCuller} from "./core/culling/GrassCuller";
 import {GrassRenderer, GrassTypeMaterialBufferResources} from "./core/renderer/GrassRenderer";
@@ -65,51 +70,6 @@ interface CellSlotRange {
      * [EN] Actual number of valid instances populated after terrain weight map and procedural filtering.
      */
     filledCount: number;
-}
-
-/**
- * [KO] 스트리밍 후보 셀들의 인덱스를 카메라와의 거리 제곱값 오름차순으로 정렬하는 퀵 정렬(Quick Sort) 함수입니다.
- * [EN] Quick-sort function that sorts streaming candidate cell indices in ascending order of squared distance to the camera.
- *
- * [KO] 매 프레임 고빈도 호출 구간에서 가비지 컬렉션(GC) 부하를 방지하기 위해 추가 힙 메모리 할당 없이 사전 할당된 `Int32Array` 배열 내에서 제자리 스왑(in-place swap)으로 정렬합니다.
- * [EN] Operates in-place on pre-allocated `Int32Array` index arrays without additional heap allocations to eliminate Garbage Collection (GC) overhead during high-frequency per-frame execution.
- *
- * @param indices -
- * [KO] 정렬할 후보 셀의 인덱스 배열 (`#candidateIndices`)
- * [EN] Array of candidate cell indices to be sorted (`#candidateIndices`)
- * @param dists -
- * [KO] 각 후보 셀의 카메라 상대 거리 제곱값이 저장된 배열 (`#candidateDistancesSq`)
- * [EN] Array containing squared distances from each candidate cell to the camera (`#candidateDistancesSq`)
- * @param left -
- * [KO] 정렬 구간 시작 인덱스
- * [EN] Starting index of the range to sort
- * @param right -
- * [KO] 정렬 구간 끝 인덱스
- * [EN] Ending index of the range to sort
- */
-function sortCandidateIndicesByDistance(
-    indices: Int32Array,
-    dists: Float32Array,
-    left: number,
-    right: number
-): void {
-    if (left >= right) return;
-    const pivotVal = dists[indices[(left + right) >> 1]];
-    let i = left;
-    let j = right;
-    while (i <= j) {
-        while (dists[indices[i]] < pivotVal) i++;
-        while (dists[indices[j]] > pivotVal) j--;
-        if (i <= j) {
-            const temp = indices[i];
-            indices[i] = indices[j];
-            indices[j] = temp;
-            i++;
-            j--;
-        }
-    }
-    if (left < j) sortCandidateIndicesByDistance(indices, dists, left, j);
-    if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
 }
 
 //TODO - 잔디도 머지해서 그리면 좋아질것 같은데...
@@ -1142,7 +1102,7 @@ export class GrassManager extends RedGPUObject {
                 const cellMinX = cellX * cellSize;
                 const cellMinZ = cellZ * cellSize;
 
-                this.#setPrngSeed((cellX * 73856093) ^ (cellZ * 19349663) ^ (typeId * 83492791));
+                this.#setPrngSeed(computeScatterSubCellSeed(cellX, cellZ, typeId));
 
                 let filledCount = 0;
                 for (let inst = 0; inst < targetDensity; inst++) {

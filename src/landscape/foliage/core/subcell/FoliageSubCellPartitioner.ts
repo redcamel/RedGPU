@@ -4,7 +4,13 @@
  * @packageDocumentation
  */
 
-import {sampleNormalizedLayerWeight} from "../../../core/scatter";
+import {
+    computeScatterSubCellSeed,
+    fastPack2x16float,
+    fastPackUniformScale,
+    packSubCellKey,
+    sampleNormalizedLayerWeight
+} from "../../../core/scatter";
 
 /**
  * [KO] 식생 서브셀 청크 데이터 인터페이스입니다. (인스턴스 배열을 상시 보관하지 않는 경량 메타데이터 구조체)
@@ -63,8 +69,6 @@ export interface FoliageSubCellChunk {
  * :::
  */
 export default class FoliageSubCellPartitioner {
-    static #tempFloat32: Float32Array = new Float32Array(2);
-    static #tempUint32: Uint32Array = new Uint32Array(FoliageSubCellPartitioner.#tempFloat32.buffer);
 
     /**
      * [KO] 지형 컴포넌트 타일을 서브셀 그리드로 분할하고 서브셀별 유효 인스턴스 수량을 계산하여 경량 청크 맵을 생성합니다.
@@ -131,9 +135,8 @@ export default class FoliageSubCellPartitioner {
 
         for (let scZ = startScZ; scZ <= endScZ; scZ++) {
             for (let scX = startScX; scX <= endScX; scX++) {
-                const key = ((scZ << 16) | (scX & 0xFFFF)) | 0;
-                let seed = ((scX * 73856093) ^ (scZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
-                if (seed === 0) seed = 0x9e3779b9;
+                const key = packSubCellKey(scX, scZ);
+                let seed = computeScatterSubCellSeed(scX, scZ, nameHash);
 
                 const subMinX = scX * subCellSize - halfWorldX;
                 const subMinZ = scZ * subCellSize - halfWorldZ;
@@ -248,8 +251,7 @@ export default class FoliageSubCellPartitioner {
         const subMinX = chunk.subCellX * subCellSize - halfWorldX;
         const subMinZ = chunk.subCellZ * subCellSize - halfWorldZ;
 
-        let seed = ((chunk.subCellX * 73856093) ^ (chunk.subCellZ * 19349663) ^ (foliageType.nameHash * 83492791)) >>> 0;
-        if (seed === 0) seed = 0x9e3779b9;
+        let seed = computeScatterSubCellSeed(chunk.subCellX, chunk.subCellZ, foliageType.nameHash);
 
         const {minScale, maxScale, randomRotationY} = foliageType.options || {};
         const optMinScale = minScale || [1.0, 1.0, 1.0];
@@ -405,8 +407,8 @@ export default class FoliageSubCellPartitioner {
             const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
 
             const scalePacked = isUniformXZ
-                ? FoliageSubCellPartitioner.#fastPackUniformScale(scaleX)
-                : FoliageSubCellPartitioner.#fastPack2x16float(scaleX, scaleZ);
+                ? fastPackUniformScale(scaleX)
+                : fastPack2x16float(scaleX, scaleZ);
 
             const outOffset = baseFloat + written * strideFloats;
             f32[outOffset + 0] = posX;
@@ -421,43 +423,6 @@ export default class FoliageSubCellPartitioner {
 
             written++;
         }
-    }
-
-    static #fastFloatToHalf(val: number): number {
-        FoliageSubCellPartitioner.#tempFloat32[0] = val;
-        const f = FoliageSubCellPartitioner.#tempUint32[0];
-        const sign = (f >> 16) & 0x8000;
-        let exp = ((f >> 23) & 0xFF) - 127 + 15;
-        let mant = (f >> 13) & 0x03FF;
-        if (exp <= 0) return sign;
-        if (exp >= 31) return sign | 0x7C00;
-        return sign | (exp << 10) | mant;
-    }
-
-    static #fastPack2x16float(x: number, y: number): number {
-        const tf = FoliageSubCellPartitioner.#tempFloat32;
-        const tu = FoliageSubCellPartitioner.#tempUint32;
-        tf[0] = x;
-        tf[1] = y;
-
-        const f0 = tu[0];
-        const sign0 = (f0 >> 16) & 0x8000;
-        let exp0 = ((f0 >> 23) & 0xFF) - 127 + 15;
-        let mant0 = (f0 >> 13) & 0x03FF;
-        const hx = sign0 | (exp0 <= 0 ? 0 : (exp0 >= 31 ? 0x7C00 : (exp0 << 10) | mant0));
-
-        const f1 = tu[1];
-        const sign1 = (f1 >> 16) & 0x8000;
-        let exp1 = ((f1 >> 23) & 0xFF) - 127 + 15;
-        let mant1 = (f1 >> 13) & 0x03FF;
-        const hy = sign1 | (exp1 <= 0 ? 0 : (exp1 >= 31 ? 0x7C00 : (exp1 << 10) | mant1));
-
-        return ((hx & 0xFFFF) | ((hy & 0xFFFF) << 16)) >>> 0;
-    }
-
-    static #fastPackUniformScale(scale: number): number {
-        const h = FoliageSubCellPartitioner.#fastFloatToHalf(scale) & 0xFFFF;
-        return (h | (h << 16)) >>> 0;
     }
 }
 

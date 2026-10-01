@@ -7,6 +7,7 @@
 import type Foliage from "../Foliage";
 import FoliageSubCellPartitioner, {type FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
+import {sortChunksByDistance} from "../../../core/scatter";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
@@ -19,8 +20,7 @@ import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
  */
 export default class FoliageSubCellStreamer {
     #tempCandidates: FoliageSubCellChunk[] = [];
-    #sortCamX: number = 0;
-    #sortCamZ: number = 0;
+    #candidateDists: Float32Array = new Float32Array(512);
     #foliageType: Foliage;
     #chunks: Map<number, FoliageSubCellChunk> = new Map();
     #mountedChunks: FoliageSubCellChunk[] = [];
@@ -159,13 +159,15 @@ export default class FoliageSubCellStreamer {
             }
         }
 
-        if (candidates.length === 0) return;
+        const candidateCount = candidates.length;
+        if (candidateCount === 0) return;
 
-        this.#sortCamX = camX;
-        this.#sortCamZ = camZ;
-        candidates.sort(this.#compareCandidates);
+        if (this.#candidateDists.length < candidateCount) {
+            this.#candidateDists = new Float32Array(Math.max(candidateCount, this.#candidateDists.length * 2));
+        }
+        sortChunksByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
 
-        const toMountCount = Math.min(candidates.length, this.#mountBudget);
+        const toMountCount = Math.min(candidateCount, this.#mountBudget);
         for (let i = 0; i < toMountCount; i++) {
             const chunk = candidates[i];
             this.#mountChunk(chunk, megaBuffer, allocation);
@@ -205,14 +207,6 @@ export default class FoliageSubCellStreamer {
             this.#foliageType.allocation.instanceCount = 0;
         }
     }
-
-    #compareCandidates = (a: FoliageSubCellChunk, b: FoliageSubCellChunk): number => {
-        const cx = this.#sortCamX;
-        const cz = this.#sortCamZ;
-        const da = (a.centerX - cx) * (a.centerX - cx) + (a.centerZ - cz) * (a.centerZ - cz);
-        const db = (b.centerX - cx) * (b.centerX - cx) + (b.centerZ - cz) * (b.centerZ - cz);
-        return da - db;
-    };
 
     #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
         if (chunk.isMounted) return;

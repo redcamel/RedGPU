@@ -33,6 +33,17 @@ import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./ASca
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
 import {computeNormalizedChannelWeight, sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
+    computeScatterSubCellSeed,
+    fastFloatToHalf,
+    fastPack2x16float,
+    fastPackUniformScale,
+    packSubCellKey,
+    sortCandidateIndicesByDistance,
+    sortChunksByDistance,
+    unpackSubCellKeyX,
+    unpackSubCellKeyZ
+} from "./ScatterSpatialUtils";
+import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
     PBR_STRIDE_BYTES,
@@ -64,6 +75,17 @@ export {
     computeNormalizedChannelWeight,
     sampleNormalizedLayerWeight,
     ScatterInstanceBaker,
+
+    // Spatial & Packing Utilities
+    packSubCellKey,
+    unpackSubCellKeyX,
+    unpackSubCellKeyZ,
+    computeScatterSubCellSeed,
+    fastFloatToHalf,
+    fastPack2x16float,
+    fastPackUniformScale,
+    sortCandidateIndicesByDistance,
+    sortChunksByDistance,
 
     // Constants
     CULLING_WORKGROUP_SIZE,
