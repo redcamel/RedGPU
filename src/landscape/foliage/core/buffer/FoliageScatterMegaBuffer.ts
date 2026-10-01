@@ -170,14 +170,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] 특정 식생 타입 이름에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
-     * [EN] Retrieves the mega-buffer allocation information object for a specific foliage type name.
-     */
-    getAllocation(name: string): FoliageTypeAllocation | undefined {
-        return this.#allocations.get(name);
-    }
-
-    /**
      * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다.
      * [EN] Allocates a buffer segment and registers offsets for a new foliage type.
      * @param name -
@@ -663,7 +655,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
-        const instanceCapacity = this.instanceCapacity;
+        const instanceCapacity = newCapacity || this.instanceCapacity;
         const culledByteSize = instanceCapacity * 8 * strideBytes;
 
         this.culledGPUBuffer?.destroy();

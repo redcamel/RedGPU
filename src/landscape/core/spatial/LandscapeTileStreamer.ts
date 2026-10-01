@@ -427,16 +427,6 @@ export class LandscapeTileStreamer extends RedGPUObject {
         this.#material = mat;
     }
 
-    /**
-     * [KO] 새로운 공간 그리드를 연결하고 기존 스트리밍 상태를 리셋합니다.
-     * [EN] Assigns a new spatial grid and resets existing streaming states.
-     *
-     * @param grid - [KO] 새로운 공간 그리드 인스턴스 / [EN] New spatial grid instance
-     */
-    setSpatialGrid(grid: LandscapeSpatialGrid): void {
-        this.#spatialGrid = grid;
-        this.resetTileState();
-    }
 
     /**
      * [KO] 개별 타일의 텍스처 로딩 및 베이킹이 완료되었을 때 실행될 콜백을 설정합니다.
@@ -552,15 +542,6 @@ export class LandscapeTileStreamer extends RedGPUObject {
         this.#onGlobalHeightmapBaked = null;
     }
 
-    /**
-     * [KO] 글로벌 높이맵 GPUTexture를 직접 지정합니다.
-     * [EN] Directly assigns the global heightmap GPUTexture.
-     *
-     * @param tex - [KO] 글로벌 높이맵 GPUTexture / [EN] Global heightmap GPUTexture
-     */
-    setGlobalHeightTexture(tex: GPUTexture | null): void {
-        this.#globalHeightTexture = tex;
-    }
 
     /**
      * [KO] CPU 측 레이캐스팅 및 고도 샘플링에 사용될 글로벌 높이맵 픽셀 데이터를 설정합니다.
@@ -587,52 +568,6 @@ export class LandscapeTileStreamer extends RedGPUObject {
         };
     }
 
-    /**
-     * [KO] 지정된 타일 영역을 고해상도 타일 데이터에서 글로벌 저해상도 베이스 높이 데이터로 복원합니다.
-     * [EN] Restores a tile region in the atlas from high-res tile data back to the global low-res base height.
-     *
-     * @param comp - [KO] 복원할 타일 컴포넌트 / [EN] Tile component to restore
-     */
-    restoreTileToGlobalBase(comp: LandscapeComponent): void {
-        if (!this.#globalHeightTexture || !this.#vhtAtlasTexture || !this.#vhtGenerator || !this.#spatialGrid) return;
-        const TILE_PIXEL_SIZE = 512;
-        const targetX = comp.componentX * TILE_PIXEL_SIZE;
-        const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
-        const compCountX = this.#spatialGrid.tileCountX;
-        const compCountZ = this.#spatialGrid.tileCountZ;
-
-        const uMin = comp.componentX / compCountX;
-        const vMin = comp.componentZ / compCountZ;
-        const uMax = (comp.componentX + 1) / compCountX;
-        const vMax = (comp.componentZ + 1) / compCountZ;
-
-        this.#vhtGenerator.bakeGlobalRegion(
-            this.#globalHeightTexture,
-            this.#vhtAtlasTexture,
-            targetX,
-            targetZ,
-            TILE_PIXEL_SIZE,
-            TILE_PIXEL_SIZE,
-            uMin,
-            vMin,
-            uMax,
-            vMax
-        );
-
-        if (this.#vntAtlasTexture && this.#vntGenerator) {
-            this.#vntGenerator.bakeTileRegion(
-                this.#vhtAtlasTexture,
-                this.#vntAtlasTexture,
-                targetX,
-                targetZ,
-                TILE_PIXEL_SIZE,
-                TILE_PIXEL_SIZE,
-                this.#heightScale,
-                this.#spatialGrid.worldSizeX,
-                compCountX
-            );
-        }
-    }
 
     /**
      * [KO] 지형의 최대 높이 스케일 설정을 갱신합니다.

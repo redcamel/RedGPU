@@ -214,20 +214,6 @@ export class LandscapeSpatialGrid {
     }
 
     /**
-     * [KO] 특정 행과 열 위치에 타일 컴포넌트를 직접 등록합니다.
-     * [EN] Directly registers a tile component at the specified row and column.
-     *
-     * @param row - [KO] 그리드 행 인덱스 / [EN] Grid row index
-     * @param col - [KO] 그리드 컬럼 인덱스 / [EN] Grid column index
-     * @param component - [KO] 등록할 컴포넌트 인스턴스 / [EN] Component instance to register
-     */
-    registerTile(row: number, col: number, component: LandscapeComponent): void {
-        if (row >= 0 && row < this.#tileCountZ && col >= 0 && col < this.#tileCountX) {
-            this.#flatCells.push(component);
-        }
-    }
-
-    /**
      * [KO] 지정된 행과 열에 위치한 타일 컴포넌트를 반환합니다. 범위를 벗어날 경우 null을 반환합니다.
      * [EN] Returns the tile component at the specified row and column, or null if out of bounds.
      *

@@ -227,11 +227,3 @@ fn main(input: InputData) -> OutputData {
 
     return output;
 }
-
-@vertex
-fn entryPointShadowVertex(input: InputData) -> OutputShadowData {
-    var output: OutputShadowData;
-    let computed = computeTerrainVertex(input);
-    output.position = getShadowClipPosition(computed.worldPos.xyz, systemUniforms.directionalLightProjectionViewMatrix);
-    return output;
-}

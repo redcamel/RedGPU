@@ -165,8 +165,6 @@ class ShadowManager {
 
         const landscape = scene.landscape;
         if (landscape) {
-            if (landscape.castShadow) return true;
-
             const foliage = landscape.foliageManager;
             if (foliage && foliage.enabled) {
                 const foliageList = foliage.foliageList;
