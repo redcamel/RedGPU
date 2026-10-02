@@ -33,16 +33,14 @@ import combineScatterMeshes, {
 } from "./combineScatterMeshes";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
-import {computeNormalizedChannelWeight, sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
+import {sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
     computeScatterGridSeed,
     fastFloatToHalf,
     fastPack2x16float,
     fastPackUniformScale,
     packSubCellKey,
-    sortSubCellsByDistance,
-    unpackSubCellKeyX,
-    unpackSubCellKeyZ
+    sortSubCellsByDistance
 } from "./ScatterSpatialUtils";
 import {
     PBR_INTERLEAVED_STRUCT,
@@ -75,14 +73,11 @@ export {
     AScatterType,
     AScatterMegaBuffer,
     ACpuStagedScatterMegaBuffer,
-    computeNormalizedChannelWeight,
     sampleNormalizedLayerWeight,
     ScatterInstanceBaker,
 
     // Spatial & Packing Utilities
     packSubCellKey,
-    unpackSubCellKeyX,
-    unpackSubCellKeyZ,
     computeScatterGridSeed,
     fastFloatToHalf,
     fastPack2x16float,

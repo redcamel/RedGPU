@@ -20,28 +20,6 @@ export function packSubCellKey(scX: number, scZ: number): number {
 }
 
 /**
- * [KO] 32비트 정수 키에서 2D 그리드 정수 X 좌표를 복원합니다. (16비트 부호 복원)
- * [EN] Unpacks 2D grid integer X coordinate from a 32-bit integer key. (16-bit sign preserved)
- *
- * @param key - 32비트 고유 정수 키
- * @returns 정수 X 좌표
- */
-export function unpackSubCellKeyX(key: number): number {
-    return (key << 16) >> 16;
-}
-
-/**
- * [KO] 32비트 정수 키에서 2D 그리드 정수 Z 좌표를 복원합니다. (상위 16비트 부호 복원)
- * [EN] Unpacks 2D grid integer Z coordinate from a 32-bit integer key. (High 16-bit sign preserved)
- *
- * @param key - 32비트 고유 정수 키
- * @returns 정수 Z 좌표
- */
-export function unpackSubCellKeyZ(key: number): number {
-    return key >> 16;
-}
-
-/**
  * [KO] 그리드 정수 좌표와 식생/잔디 타입 이름 해시로부터 결정론적(Deterministic) 32비트 의사난수 시드를 산출합니다.
  * [EN] Computes a deterministic 32-bit PRNG seed from integer grid coordinates and scatter type name hash.
  *
