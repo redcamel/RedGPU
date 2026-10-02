@@ -1189,13 +1189,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#loadedTileKeys.add(key);
 
-        const chunks = FoliageSubCellPartitioner.partitionTile(
+        const subCells = FoliageSubCellPartitioner.partitionTile(
             tileComponent,
             this,
             landscape,
             this.#subCellSize
         );
-        this.#streamer.addChunks(chunks);
+        this.#streamer.addSubCells(subCells);
 
         if (!this.#enableStreaming) {
             this.#streamer.update(new Int32Array(0), 0, 0, 0, false);

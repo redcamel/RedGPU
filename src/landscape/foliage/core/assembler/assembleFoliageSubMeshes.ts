@@ -79,13 +79,13 @@ export default function assembleFoliageSubMeshes(
     subMeshBindGroupLayout: GPUBindGroupLayout
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
-    const subList: FoliageSubMesh[] = [];
+    const subMeshes: FoliageSubMesh[] = [];
     const unifiedGeometries: (Geometry | null)[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
 
     if (!gpuDevice || !subMeshBindGroupLayout) {
         return {
-            subMeshes: subList,
+            subMeshes: subMeshes,
             unifiedGeometries: [],
             shadowMergedSubMeshes: [],
             lodInfoList: [],
@@ -109,7 +109,7 @@ export default function assembleFoliageSubMeshes(
     for (let l = 0; l < numLODs; l++) {
         const lodCfg = lodConfigs[l];
         const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
-        const startSubOffset = subList.length;
+        const startSubOffset = subMeshes.length;
         const lodReceiveShadow = lodCfg.receiveShadow !== false;
 
         const assembled = assembleFoliageLODMeshes(
@@ -126,7 +126,7 @@ export default function assembleFoliageSubMeshes(
 
         const assembledSubMeshes = assembled.subMeshes;
         for (let s = 0; s < assembledSubMeshes.length; s++) {
-            subList.push(assembledSubMeshes[s]);
+            subMeshes.push(assembledSubMeshes[s]);
         }
 
         if (assembled.shadowMergedSubMesh) {
@@ -143,7 +143,7 @@ export default function assembleFoliageSubMeshes(
             globalMaxY = assembled.maxY;
         }
 
-        const subCountForThisLOD = subList.length - startSubOffset;
+        const subCountForThisLOD = subMeshes.length - startSubOffset;
         const defaultDist = (l === 0) ? 80.0 : (80.0 * Math.pow(2.5, l));
         const switchDist = lodCfg.lodDistance ?? defaultDist;
 
@@ -156,12 +156,12 @@ export default function assembleFoliageSubMeshes(
         });
     }
 
-    if (useImpostor && subList.length > 0) {
+    if (useImpostor && subMeshes.length > 0) {
         const impostorLODIndex = lodInfoList.length;
         const lod0SubMeshes: FoliageSubMesh[] = [];
-        for (let i = 0; i < subList.length; i++) {
-            if (subList[i].lodIndex === 0) {
-                lod0SubMeshes.push(subList[i]);
+        for (let i = 0; i < subMeshes.length; i++) {
+            if (subMeshes[i].lodIndex === 0) {
+                lod0SubMeshes.push(subMeshes[i]);
             }
         }
 
@@ -171,7 +171,7 @@ export default function assembleFoliageSubMeshes(
             subMeshBindGroupLayout,
             options,
             lod0SubMeshes,
-            subList,
+            subMeshes,
             lodInfoList,
             impostorLODIndex,
             subMeshUniformCache
@@ -187,7 +187,7 @@ export default function assembleFoliageSubMeshes(
     const finalBottomOffset = userOffset !== undefined ? userOffset : 0;
 
     return {
-        subMeshes: subList,
+        subMeshes: subMeshes,
         unifiedGeometries,
         shadowMergedSubMeshes,
         lodInfoList,

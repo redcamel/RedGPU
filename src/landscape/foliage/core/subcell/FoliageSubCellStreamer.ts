@@ -5,7 +5,7 @@
  */
 
 import type Foliage from "../Foliage";
-import FoliageSubCellPartitioner, {type FoliageSubCellChunk} from "./FoliageSubCellPartitioner";
+import FoliageSubCellPartitioner, {type FoliageSubCell} from "./FoliageSubCellPartitioner";
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 import {sortChunksByDistance} from "../../../core/scatter";
 
@@ -19,11 +19,11 @@ import {sortChunksByDistance} from "../../../core/scatter";
  * :::
  */
 export default class FoliageSubCellStreamer {
-    #tempCandidates: FoliageSubCellChunk[] = [];
+    #tempCandidates: FoliageSubCell[] = [];
     #candidateDists: Float32Array = new Float32Array(512);
-    #foliageType: Foliage;
-    #chunks: Map<number, FoliageSubCellChunk> = new Map();
-    #mountedChunks: FoliageSubCellChunk[] = [];
+    #foliage: Foliage;
+    #subCells: Map<number, FoliageSubCell> = new Map();
+    #mountedSubCells: FoliageSubCell[] = [];
     #totalInstanceCount: number = 0;
     #mountBudget: number = 16;
     #unmountBudget: number = 32;
@@ -31,20 +31,20 @@ export default class FoliageSubCellStreamer {
     /**
      * [KO] FoliageSubCellStreamer 인스턴스를 생성합니다.
      * [EN] Creates a FoliageSubCellStreamer instance.
-     * @param foliageType -
+     * @param foliage -
      * [KO] 관리 대상 Foliage 인스턴스
      * [EN] Target Foliage instance to manage
      */
-    constructor(foliageType: Foliage) {
-        this.#foliageType = foliageType;
+    constructor(foliage: Foliage) {
+        this.#foliage = foliage;
     }
 
     /**
-     * [KO] 등록된 전체 서브셀 청크 수
-     * [EN] Total number of registered sub-cell chunks
+     * [KO] 등록된 전체 서브셀 수
+     * [EN] Total number of registered sub-cells
      */
-    get totalChunkCount(): number {
-        return this.#chunks.size;
+    get totalSubCellCount(): number {
+        return this.#subCells.size;
     }
 
     /**
@@ -56,16 +56,16 @@ export default class FoliageSubCellStreamer {
     }
 
     /**
-     * [KO] 현재 GPU 버퍼에 마운트된 서브셀 청크 수
-     * [EN] Number of sub-cell chunks currently mounted to GPU buffer
+     * [KO] 현재 GPU 버퍼에 마운트된 서브셀 수
+     * [EN] Number of sub-cells currently mounted to GPU buffer
      */
-    get mountedChunkCount(): number {
-        return this.#mountedChunks.length;
+    get mountedSubCellCount(): number {
+        return this.#mountedSubCells.length;
     }
 
     /**
-     * [KO] 프레임당 최대 마운트 허용 청크 수
-     * [EN] Maximum chunks allowed to mount per frame
+     * [KO] 프레임당 최대 마운트 허용 서브셀 수
+     * [EN] Maximum sub-cells allowed to mount per frame
      */
     get mountBudget(): number {
         return this.#mountBudget;
@@ -76,8 +76,8 @@ export default class FoliageSubCellStreamer {
     }
 
     /**
-     * [KO] 프레임당 최대 언마운트 허용 청크 수
-     * [EN] Maximum chunks allowed to unmount per frame
+     * [KO] 프레임당 최대 언마운트 허용 서브셀 수
+     * [EN] Maximum sub-cells allowed to unmount per frame
      */
     get unmountBudget(): number {
         return this.#unmountBudget;
@@ -113,8 +113,8 @@ export default class FoliageSubCellStreamer {
         camZ: number,
         enableStreaming: boolean = true
     ): void {
-        const megaBuffer = this.#foliageType.megaBuffer;
-        const allocation = this.#foliageType.allocation;
+        const megaBuffer = this.#foliage.megaBuffer;
+        const allocation = this.#foliage.allocation;
         if (!megaBuffer || !allocation) return;
 
         if (!enableStreaming) {
@@ -122,23 +122,23 @@ export default class FoliageSubCellStreamer {
             return;
         }
 
-        const typeRadius = this.#foliageType.streamingRadius;
+        const typeRadius = this.#foliage.streamingRadius;
 
         const unmountRadius = typeRadius + 100.0;
         const unmountRadiusSq = unmountRadius * unmountRadius;
 
         let unmountedThisFrame = 0;
-        const mounted = this.#mountedChunks;
+        const mounted = this.#mountedSubCells;
         for (let i = mounted.length - 1; i >= 0; i--) {
             if (unmountedThisFrame >= this.#unmountBudget) break;
 
-            const chunk = mounted[i];
-            const dx = chunk.centerX - camX;
-            const dz = chunk.centerZ - camZ;
+            const subCell = mounted[i];
+            const dx = subCell.centerX - camX;
+            const dz = subCell.centerZ - camZ;
             const distSq = dx * dx + dz * dz;
 
             if (distSq > unmountRadiusSq) {
-                this.#unmountChunkAt(i, megaBuffer, allocation);
+                this.#unmountSubCellAt(i, megaBuffer, allocation);
                 unmountedThisFrame++;
             }
         }
@@ -149,12 +149,12 @@ export default class FoliageSubCellStreamer {
         const mountRadiusSq = typeRadius * typeRadius;
         for (let i = 0; i < activeKeyCount; i++) {
             const key = activeKeyArray[i];
-            const chunk = this.#chunks.get(key);
-            if (chunk && !chunk.isMounted) {
-                const dx = chunk.centerX - camX;
-                const dz = chunk.centerZ - camZ;
+            const subCell = this.#subCells.get(key);
+            if (subCell && !subCell.isMounted) {
+                const dx = subCell.centerX - camX;
+                const dz = subCell.centerZ - camZ;
                 if (dx * dx + dz * dz <= mountRadiusSq) {
-                    candidates.push(chunk);
+                    candidates.push(subCell);
                 }
             }
         }
@@ -169,86 +169,87 @@ export default class FoliageSubCellStreamer {
 
         const toMountCount = Math.min(candidateCount, this.#mountBudget);
         for (let i = 0; i < toMountCount; i++) {
-            const chunk = candidates[i];
-            this.#mountChunk(chunk, megaBuffer, allocation);
+            const subCell = candidates[i];
+            this.#mountSubCell(subCell, megaBuffer, allocation);
         }
     }
 
     /**
-     * [KO] 새로운 서브셀 청크들을 스트리머에 등록합니다.
-     * [EN] Registers new sub-cell chunks to the streamer.
-     * @param newChunks -
-     * [KO] 등록할 청크 맵
-     * [EN] Map of chunks to register
+     * [KO] 새로운 서브셀들을 스트리머에 등록합니다.
+     * [EN] Registers new sub-cells to the streamer.
+     * @param newSubCells -
+     * [KO] 등록할 서브셀 맵
+     * [EN] Map of sub-cells to register
      */
-    addChunks(newChunks: Map<number, FoliageSubCellChunk>): void {
-        newChunks.forEach((chunk, key) => {
-            if (!this.#chunks.has(key)) {
-                this.#chunks.set(key, chunk);
-                this.#totalInstanceCount += chunk.instanceCount;
+    addSubCells(newSubCells: Map<number, FoliageSubCell>): void {
+        newSubCells.forEach((subCell, key) => {
+            if (!this.#subCells.has(key)) {
+                this.#subCells.set(key, subCell);
+                this.#totalInstanceCount += subCell.instanceCount;
             }
         });
     }
 
+
     /**
-     * [KO] 모든 서브셀 청크 등록 상태를 해제하고 인스턴스 마운트를 초기화합니다.
-     * [EN] Unregisters all sub-cell chunks and resets instance mounts.
+     * [KO] 모든 서브셀 등록 상태를 해제하고 인스턴스 마운트를 초기화합니다.
+     * [EN] Unregisters all sub-cells and resets instance mounts.
      */
     clear(): void {
         this.#tempCandidates.length = 0;
-        this.#mountedChunks.forEach(c => {
+        this.#mountedSubCells.forEach(c => {
             c.isMounted = false;
             c.mountedSlotIndex = -1;
         });
-        this.#mountedChunks.length = 0;
-        this.#chunks.clear();
+        this.#mountedSubCells.length = 0;
+        this.#subCells.clear();
         this.#totalInstanceCount = 0;
-        if (this.#foliageType.allocation) {
-            this.#foliageType.allocation.instanceCount = 0;
+        if (this.#foliage.allocation) {
+            this.#foliage.allocation.instanceCount = 0;
         }
     }
 
-    #mountChunk(chunk: FoliageSubCellChunk, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
-        if (chunk.isMounted) return;
+    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
+        if (subCell.isMounted) return;
         const currentActive = allocation.instanceCount;
-        const count = chunk.instanceCount;
+        const count = subCell.instanceCount;
         if (currentActive + count > allocation.maxInstances) return;
 
         const f32 = megaBuffer.cpuRawDataBuffer;
         const u32 = megaBuffer.cpuRawDataUint32;
         const strideFloats = megaBuffer.strideFloats;
         const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
-        FoliageSubCellPartitioner.populateChunkInstances(
+        FoliageSubCellPartitioner.populateSubCellInstances(
             f32,
             u32,
             baseFloat,
-            chunk,
-            this.#foliageType,
-            this.#foliageType.landscape,
-            this.#foliageType.subCellSize
+            subCell,
+            this.#foliage,
+            this.#foliage.landscape,
+            this.#foliage.subCellSize
         );
 
-        chunk.isMounted = true;
-        chunk.mountedSlotIndex = currentActive;
-        this.#mountedChunks.push(chunk);
+        subCell.isMounted = true;
+        subCell.mountedSlotIndex = currentActive;
+        this.#mountedSubCells.push(subCell);
 
         allocation.instanceCount = currentActive + count;
-        this.#foliageType.uploadRangeToGPU(currentActive, count);
+        this.#foliage.uploadRangeToGPU(currentActive, count);
     }
 
-    #unmountChunkAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
-        const mounted = this.#mountedChunks;
-        const targetChunk = mounted[mountedIndex];
-        const targetSlot = targetChunk.mountedSlotIndex;
-        const targetCount = targetChunk.instanceCount;
+    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
+        const mounted = this.#mountedSubCells;
+        const targetSubCell = mounted[mountedIndex];
+        const targetSlot = targetSubCell.mountedSlotIndex;
+        const targetCount = targetSubCell.instanceCount;
         const currentActive = allocation.instanceCount;
 
-        const isLastChunk = (mountedIndex === mounted.length - 1);
+        const isLast = (mountedIndex === mounted.length - 1);
 
-        if (isLastChunk) {
+        if (isLast) {
             mounted.pop();
-            targetChunk.isMounted = false;
-            targetChunk.mountedSlotIndex = -1;
+            targetSubCell.isMounted = false;
+            targetSubCell.mountedSlotIndex = -1;
             allocation.instanceCount = Math.max(0, currentActive - targetCount);
         } else {
             const f32 = megaBuffer.cpuRawDataBuffer;
@@ -269,29 +270,28 @@ export default class FoliageSubCellStreamer {
             }
             mounted.pop();
 
-            targetChunk.isMounted = false;
-            targetChunk.mountedSlotIndex = -1;
+            targetSubCell.isMounted = false;
+            targetSubCell.mountedSlotIndex = -1;
 
             const newActive = Math.max(0, currentActive - targetCount);
             allocation.instanceCount = newActive;
 
             const uploadCount = newActive - targetSlot;
             if (uploadCount > 0) {
-                this.#foliageType.uploadRangeToGPU(targetSlot, uploadCount);
+                this.#foliage.uploadRangeToGPU(targetSlot, uploadCount);
             }
         }
     }
 
     #mountAll(megaBuffer: any, allocation: any): void {
-        if (this.#mountedChunks.length === this.#chunks.size) return;
+        if (this.#mountedSubCells.length === this.#subCells.size) return;
 
-        this.#chunks.forEach(chunk => {
-            if (!chunk.isMounted) {
-                this.#mountChunk(chunk, megaBuffer, allocation);
+        this.#subCells.forEach(subCell => {
+            if (!subCell.isMounted) {
+                this.#mountSubCell(subCell, megaBuffer, allocation);
             }
         });
     }
 }
 
 Object.freeze(FoliageSubCellStreamer);
-

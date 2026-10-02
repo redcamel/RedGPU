@@ -61,7 +61,7 @@ class FoliageManager {
     #enabled: boolean = true;
     #megaBuffer: FoliageScatterMegaBuffer;
     #foliageTypes: Map<string, Foliage> = new Map();
-    #typeList: Foliage[] = [];
+    #foliageList: Foliage[] = [];
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
@@ -100,7 +100,7 @@ class FoliageManager {
         this.#tileStreamer = tileStreamer;
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
-        this.#spatialGrid = new FoliageSpatialGrid(landscape, this.#subCellSize, this.#streamingRadius);
+        this.#spatialGrid = new FoliageSpatialGrid();
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
@@ -156,20 +156,24 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
-     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
-     *
-     * @param tileComponent -
-     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
-     * [EN] Loaded landscape tile component (`LandscapeComponent`)
+     * [KO] 현재 활성화된 식생 타입들이 메인 렌더 패스(뎁스 프리패스 포함)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by currently active foliage types in the main render pass (including depth prepass).
      */
-    onTileLoaded(tileComponent: LandscapeComponent): void {
-        if (!this.#enabled || this.#typeList.length === 0 || !tileComponent) return;
-        const count = this.#typeList.length;
-        for (let i = 0; i < count; i++) {
-            this.#typeList[i].populateTile(tileComponent, this.#landscape);
+    get totalDrawCalls(): number {
+        if (!this.#enabled) return 0;
+        let count = 0;
+        const list = this.#foliageList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const foliage = list[i];
+            if (foliage.activeInstanceCount > 0) {
+                if (this.#useDepthPrepass && foliage.useDepthPrepass) {
+                    count += foliage.depthPrepassSubMeshes.length;
+                }
+                count += foliage.mainSubMeshes.length;
+            }
         }
-        this.#renderer.markShadowBundleDirty();
+        return count;
     }
 
     /**
@@ -197,66 +201,13 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
-     * [EN] Renders culled foliage instances in the main render pass.
-     *
-     * @param view -
-     * [KO] 현재 렌더링 중인 View3D 객체
-     * [EN] Current View3D object being rendered
-     * @param passEncoder -
-     * [KO] 메인 씬 GPURenderPassEncoder
-     * [EN] Main scene GPURenderPassEncoder
-     */
-    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
-        this.#renderer.render(passEncoder, this.#typeList, view);
-    }
-
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사가 설정된 식생 인스턴스들의 그림자를 렌더링합니다.
-     * [EN] Renders shadows for foliage instances in the cascaded shadow map (CSM) pass.
-     *
-     * @param view -
-     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
-     * [EN] Current View3D object rendering the shadow pass
-     * @param passEncoder -
-     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     * [EN] GPURenderPassEncoder for shadow map generation
-     */
-    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || !passEncoder || this.#typeList.length === 0) return;
-        this.#renderer.renderShadow(passEncoder, this.#typeList, view);
-    }
-
-    /**
-     * [KO] 현재 활성화된 식생 타입들이 메인 렌더 패스(뎁스 프리패스 포함)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by currently active foliage types in the main render pass (including depth prepass).
-     */
-    get totalDrawCalls(): number {
-        if (!this.#enabled) return 0;
-        let count = 0;
-        const list = this.#typeList;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const foliage = list[i];
-            if (foliage.activeInstanceCount > 0) {
-                if (this.#useDepthPrepass && foliage.useDepthPrepass) {
-                    count += foliage.depthPrepassSubMeshes.length;
-                }
-                count += foliage.mainSubMeshes.length;
-            }
-        }
-        return count;
-    }
-
-    /**
      * [KO] 그림자 투사(castShadow: true)가 설정된 식생 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
      * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting foliage types in the cascaded shadow map (CSM) pass.
      */
     get shadowDrawCalls(): number {
         if (!this.#enabled) return 0;
         let count = 0;
-        const list = this.#typeList;
+        const list = this.#foliageList;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
@@ -276,14 +227,6 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 기본값: 100)를 반환합니다.
-     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, default: 100).
-     */
-    get subCellSize(): number {
-        return this.#subCellSize;
-    }
-
-    /**
      * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 지형 타일별 식생이 자동으로 재배치됩니다.
      * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage is automatically repopulated across landscape tiles upon change.
      *
@@ -295,15 +238,63 @@ class FoliageManager {
         const clamped = Math.max(10.0, val);
         if (this.#subCellSize !== clamped) {
             this.#subCellSize = clamped;
-            this.#spatialGrid.subCellSize = clamped;
             this.#onUniformUpdateNeeded?.();
 
-            const count = this.#typeList.length;
+            const count = this.#foliageList.length;
             for (let i = 0; i < count; i++) {
-                this.#typeList[i].subCellSize = clamped;
+                this.#foliageList[i].subCellSize = clamped;
             }
             this.#repopulateAll();
         }
+    }
+
+    /**
+     * [KO] 등록된 모든 {@link Foliage} 생태계 인스턴스의 읽기 전용 배열을 반환합니다.
+     * [EN] Gets the read-only array of all registered {@link Foliage} ecosystem instances.
+     */
+    get foliageList(): Foliage[] {
+        return this.#foliageList;
+    }
+
+    /**
+     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
+     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
+     *
+     * @param tileComponent -
+     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
+     * [EN] Loaded landscape tile component (`LandscapeComponent`)
+     */
+    onTileLoaded(tileComponent: LandscapeComponent): void {
+        if (!this.#enabled || this.#foliageList.length === 0 || !tileComponent) return;
+        const count = this.#foliageList.length;
+        for (let i = 0; i < count; i++) {
+            this.#foliageList[i].populateTile(tileComponent, this.#landscape);
+        }
+        this.#renderer.markShadowBundleDirty();
+    }
+
+    /**
+     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 기본값: 100)를 반환합니다.
+     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, default: 100).
+     */
+    get subCellSize(): number {
+        return this.#subCellSize;
+    }
+
+    /**
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
+     * [EN] Renders culled foliage instances in the main render pass.
+     *
+     * @param view -
+     * [KO] 현재 렌더링 중인 View3D 객체
+     * [EN] Current View3D object being rendered
+     * @param passEncoder -
+     * [KO] 메인 씬 GPURenderPassEncoder
+     * [EN] Main scene GPURenderPassEncoder
+     */
+    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
+        this.#renderer.render(passEncoder, this.#foliageList, view);
     }
 
     /**
@@ -326,7 +317,6 @@ class FoliageManager {
         const clamped = Math.max(10.0, val);
         if (this.#streamingRadius !== clamped) {
             this.#streamingRadius = clamped;
-            this.#spatialGrid.streamingRadius = clamped;
             this.#onUniformUpdateNeeded?.();
         }
     }
@@ -532,11 +522,19 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 등록된 모든 {@link Foliage} 생태계 인스턴스의 읽기 전용 배열을 반환합니다.
-     * [EN] Gets the read-only array of all registered {@link Foliage} ecosystem instances.
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사가 설정된 식생 인스턴스들의 그림자를 렌더링합니다.
+     * [EN] Renders shadows for foliage instances in the cascaded shadow map (CSM) pass.
+     *
+     * @param view -
+     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
+     * [EN] Current View3D object rendering the shadow pass
+     * @param passEncoder -
+     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
+     * [EN] GPURenderPassEncoder for shadow map generation
      */
-    get foliageList(): Foliage[] {
-        return this.#typeList;
+    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
+        this.#renderer.renderShadow(passEncoder, this.#foliageList, view);
     }
 
     /**
@@ -548,33 +546,38 @@ class FoliageManager {
      * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
      */
     update(renderViewStateData: RenderViewStateData): void {
-        if (!this.#enabled || this.#typeList.length === 0) return;
+        if (!this.#enabled || this.#foliageList.length === 0) return;
 
         const view = renderViewStateData.view;
         const cam = view.rawCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
             let maxRadius = this.#streamingRadius;
-            const count = this.#typeList.length;
+            const count = this.#foliageList.length;
             for (let i = 0; i < count; i++) {
-                const t = this.#typeList[i];
-                if (t.enableStreaming && t.streamingRadius > maxRadius) {
-                    maxRadius = t.streamingRadius;
+                const foliage = this.#foliageList[i];
+                if (foliage.enableStreaming && foliage.streamingRadius > maxRadius) {
+                    maxRadius = foliage.streamingRadius;
                 }
             }
-            if (this.#spatialGrid.streamingRadius !== maxRadius) {
-                this.#spatialGrid.streamingRadius = maxRadius;
-            }
 
-            this.#spatialGrid.update(cam.x, cam.z);
+            const worldSize = this.#landscape.worldSize;
+            this.#spatialGrid.update(
+                cam.x,
+                cam.z,
+                this.#subCellSize,
+                maxRadius,
+                worldSize[0] || 16000.0,
+                worldSize[1] || 16000.0
+            );
 
             const activeKeys = this.#spatialGrid.activeSubCellKeys;
             const activeCount = this.#spatialGrid.activeSubCellCount;
 
             for (let i = 0; i < count; i++) {
-                this.#typeList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
+                this.#foliageList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
             }
         }
-        this.#cullingDispatcher.updateAndDispatch(this.#typeList, view, this.#landscape, renderViewStateData);
+        this.#cullingDispatcher.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
     }
 
     /**
@@ -611,7 +614,7 @@ class FoliageManager {
             this.#cullingDispatcher.baker
         );
         this.#foliageTypes.set(options.name, foliage);
-        this.#typeList.push(foliage);
+        this.#foliageList.push(foliage);
         this.#renderer.markShadowBundleDirty();
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -657,10 +660,10 @@ class FoliageManager {
             : target;
         if (!foliage) return false;
 
-        const idx = this.#typeList.indexOf(foliage);
+        const idx = this.#foliageList.indexOf(foliage);
         if (idx === -1) return false;
 
-        this.#typeList.splice(idx, 1);
+        this.#foliageList.splice(idx, 1);
         foliage.destroy();
         this.#renderer.markShadowBundleDirty();
         return this.#foliageTypes.delete(foliage.name);
@@ -687,8 +690,8 @@ class FoliageManager {
      * [EN] Clears all registered foliage ecosystem types.
      */
     clearFoliage(): void {
-        while (this.#typeList.length > 0) {
-            this.removeFoliage(this.#typeList[this.#typeList.length - 1]);
+        while (this.#foliageList.length > 0) {
+            this.removeFoliage(this.#foliageList[this.#foliageList.length - 1]);
         }
     }
 
@@ -697,9 +700,9 @@ class FoliageManager {
      * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
      */
     rebakeAll(): void {
-        const count = this.#typeList.length;
+        const count = this.#foliageList.length;
         for (let i = 0; i < count; i++) {
-            this.#typeList[i].rebake();
+            this.#foliageList[i].rebake();
         }
     }
 
@@ -732,9 +735,9 @@ class FoliageManager {
         const flutter = this.#windFlutterStrength;
         const enabled = this.#windEnabled;
 
-        const count = this.#typeList.length;
+        const count = this.#foliageList.length;
         for (let i = 0; i < count; i++) {
-            this.#typeList[i].syncWindToSubMeshes(
+            this.#foliageList[i].syncWindToSubMeshes(
                 gpuDevice,
                 dirX,
                 dirY,
@@ -763,9 +766,9 @@ class FoliageManager {
     }
 
     #repopulateAll(): void {
-        const count = this.#typeList.length;
+        const count = this.#foliageList.length;
         for (let i = 0; i < count; i++) {
-            this.#repopulateFoliage(this.#typeList[i]);
+            this.#repopulateFoliage(this.#foliageList[i]);
         }
     }
 }

@@ -33,7 +33,7 @@ import type {FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
  * @param sourceSubMeshes -
  * [KO] 베이킹 소스로 사용할 LOD 0 서브메시 목록
  * [EN] LOD 0 sub-mesh list used as baking source
- * @param subList -
+ * @param subMeshes -
  * [KO] 서브메시가 추가될 전체 서브메시 배열
  * [EN] Global sub-mesh array to append the impostor sub-mesh to
  * @param lodInfoList -
@@ -52,7 +52,7 @@ export default function buildFoliageImpostorSubMesh(
     subMeshBindGroupLayout: GPUBindGroupLayout,
     options: FoliageOptions,
     sourceSubMeshes: FoliageSubMesh[],
-    subList: FoliageSubMesh[],
+    subMeshes: FoliageSubMesh[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
     subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>
@@ -73,7 +73,7 @@ export default function buildFoliageImpostorSubMesh(
         8.0
     );
 
-    const bbStartOffset = subList.length;
+    const bbStartOffset = subMeshes.length;
     const bbSubMesh = createFoliageSubMeshInstance({
         gpuDevice,
         subMeshBindGroupLayout,
@@ -89,7 +89,7 @@ export default function buildFoliageImpostorSubMesh(
         receiveShadow: false,
         uniformCache: subMeshUniformCache
     });
-    subList.push(bbSubMesh);
+    subMeshes.push(bbSubMesh);
 
     lodInfoList.push({
         lodIndex: impostorLODIndex,

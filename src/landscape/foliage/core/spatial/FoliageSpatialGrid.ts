@@ -3,7 +3,7 @@
  * [EN] Foliage spatial partitioning sub-cell grid module.
  * @packageDocumentation
  */
-import type Landscape from "../../../Landscape";
+import {packSubCellKey} from "../../../core/scatter/ScatterSpatialUtils";
 
 /**
  * [KO] 카메라 위치와 스트리밍 반경에 따라 활성 서브셀 키 목록을 빠르게 계산하고 갱신하는 공간 분할 그리드 클래스입니다.
@@ -18,68 +18,20 @@ export class FoliageSpatialGrid {
 
     static readonly MAX_ACTIVE_SUB_CELLS: number = 2048;
 
-    #landscape: Landscape;
-    #subCellSize: number = 100.0;
-    #streamingRadius: number = 600.0;
-
-    #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
+    readonly #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
     #activeSubCellCount: number = 0;
 
     #lastCamX: number = 1e9;
     #lastCamZ: number = 1e9;
     #lastRadius: number = -1;
     #lastCellSize: number = -1;
-    #updateThresholdSq: number = 25.0;
+    readonly #updateThresholdSq: number = 25.0;
 
     /**
      * [KO] FoliageSpatialGrid 인스턴스를 생성합니다.
      * [EN] Creates a FoliageSpatialGrid instance.
-     * @param landscape -
-     * [KO] 부모 Landscape 인스턴스
-     * [EN] Parent Landscape instance
-     * @param subCellSize -
-     * [KO] 서브셀 크기(미터, 기본값: 100.0)
-     * [EN] Sub-cell dimension in meters (default: 100.0)
-     * @param streamingRadius -
-     * [KO] 스트리밍 반경(미터, 기본값: 600.0)
-     * [EN] Streaming radius in meters (default: 600.0)
      */
-    constructor(landscape: Landscape, subCellSize: number = 100.0, streamingRadius: number = 600.0) {
-        this.#landscape = landscape;
-        this.#subCellSize = Math.max(10.0, subCellSize);
-        this.#streamingRadius = Math.max(10.0, streamingRadius);
-    }
-
-    /**
-     * [KO] 서브셀 공간 분할 격자 크기(미터)를 반환합니다.
-     * [EN] Returns the sub-cell spatial partitioning grid size in meters.
-     */
-    get subCellSize(): number {
-        return this.#subCellSize;
-    }
-
-    set subCellSize(val: number) {
-        const clamped = Math.max(10.0, val);
-        if (this.#subCellSize !== clamped) {
-            this.#subCellSize = clamped;
-            this.invalidateCache();
-        }
-    }
-
-    /**
-     * [KO] 서브셀 스트리밍 활성 반경(미터)을 반환합니다.
-     * [EN] Returns the active sub-cell streaming radius in meters.
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    set streamingRadius(val: number) {
-        const clamped = Math.max(10.0, val);
-        if (this.#streamingRadius !== clamped) {
-            this.#streamingRadius = clamped;
-            this.invalidateCache();
-        }
+    constructor() {
     }
 
     /**
@@ -99,52 +51,43 @@ export class FoliageSpatialGrid {
     }
 
     /**
-     * [KO] 캐시된 카메라 위치 및 파라미터를 무효화하여 다음 업데이트 시 강제 재계산하도록 합니다.
-     * [EN] Invalidates cached camera positions and parameters to force recalculation on the next update.
+     * [KO] 카메라 위치와 스트리밍 파라미터에 따라 활성 서브셀 목록을 갱신합니다.
+     * [EN] Updates the active sub-cell list based on camera position and streaming parameters.
+     * @param camX - 카메라 월드 X 좌표
+     * @param camZ - 카메라 월드 Z 좌표
+     * @param cellSize - 서브셀 크기 (미터)
+     * @param radius - 스트리밍 반경 (미터)
+     * @param worldSizeX - 지형 월드 X 크기 (기본값: 16000.0)
+     * @param worldSizeZ - 지형 월드 Z 크기 (기본값: 16000.0)
+     * @param force - 캐시 무시 강제 갱신 여부 (기본값: false)
+     * @returns 활성 서브셀 목록이 갱신되었으면 true, 변동 없으면 false
      */
-    invalidateCache(): void {
-        this.#lastCamX = 1e9;
-        this.#lastCamZ = 1e9;
-    }
-
-    /**
-     * [KO] 카메라 위치에 따라 활성 서브셀 목록을 갱신합니다.
-     * [EN] Updates the active sub-cell list based on camera position.
-     * @param camX -
-     * [KO] 카메라 월드 X 좌표
-     * [EN] Camera world X coordinate
-     * @param camZ -
-     * [KO] 카메라 월드 Z 좌표
-     * [EN] Camera world Z coordinate
-     * @param force -
-     * [KO] 캐시 무시 강제 갱신 여부 (기본값: false)
-     * [EN] Whether to force update ignoring cache (default: false)
-     * @returns
-     * [KO] 활성 서브셀 목록이 변경되어 갱신되었으면 true, 변동 없으면 false
-     * [EN] True if active sub-cells changed and were updated, false if unchanged
-     */
-    update(camX: number, camZ: number, force: boolean = false): boolean {
+    update(
+        camX: number,
+        camZ: number,
+        cellSize: number,
+        radius: number,
+        worldSizeX: number = 16000.0,
+        worldSizeZ: number = 16000.0,
+        force: boolean = false
+    ): boolean {
         const dx = camX - this.#lastCamX;
         const dz = camZ - this.#lastCamZ;
         const distSq = dx * dx + dz * dz;
 
         if (!force && distSq < this.#updateThresholdSq &&
-            this.#lastRadius === this.#streamingRadius &&
-            this.#lastCellSize === this.#subCellSize) {
+            this.#lastRadius === radius &&
+            this.#lastCellSize === cellSize) {
             return false;
         }
 
         this.#lastCamX = camX;
         this.#lastCamZ = camZ;
-        this.#lastRadius = this.#streamingRadius;
-        this.#lastCellSize = this.#subCellSize;
+        this.#lastRadius = radius;
+        this.#lastCellSize = cellSize;
 
-        const worldSizeX = this.#landscape.worldSize[0] || 16000.0;
-        const worldSizeZ = this.#landscape.worldSize[1] || 16000.0;
         const halfWorldX = worldSizeX * 0.5;
         const halfWorldZ = worldSizeZ * 0.5;
-        const cellSize = this.#subCellSize;
-        const radius = this.#streamingRadius;
 
         const totalCellsX = Math.max(1, Math.floor(worldSizeX / cellSize));
         const totalCellsZ = Math.max(1, Math.floor(worldSizeZ / cellSize));
@@ -172,8 +115,7 @@ export class FoliageSpatialGrid {
 
                 if (diffX * diffX + diffZSq <= effectiveRadiusSq) {
                     if (count < maxCapacity) {
-                        keys[count] = ((sz << 16) | (sx & 0xFFFF)) | 0;
-                        count++;
+                        keys[count++] = packSubCellKey(sx, sz);
                     }
                 }
             }
