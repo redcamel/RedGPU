@@ -1,6 +1,6 @@
 /**
- * [KO] 대규모 지형 절차적 잔디(Grass) 스트리밍, 베이킹 및 렌더링 총괄 매니저 모듈입니다.
- * [EN] Overall manager module for large-scale procedural grass streaming, baking, and rendering on terrain.
+ * [KO] 대규모 지형 절차적 잔디(Grass) 렌더링 총괄 매니저 모듈입니다.
+ * [EN] Overall manager module for large-scale procedural grass rendering on terrain.
  * @packageDocumentation
  */
 import RedGPUObject from "../../base/RedGPUObject";
@@ -11,24 +11,11 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
-import {
-    computeNormalizedChannelWeight,
-    computeScatterSubCellSeed,
-    ScatterInstanceBaker,
-    sortCandidateIndicesByDistance
-} from "../core/scatter";
-import grassBakeComputeWGSL from "./core/baking/grassBakeCompute.wgsl";
-import {GrassCuller} from "./core/culling/GrassCuller";
 import {GrassRenderer, GrassTypeMaterialBufferResources} from "./core/renderer/GrassRenderer";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
+import PureGrassProceduralPipeline from "./procedural/PureGrassProceduralPipeline";
 
 const DEG2RAD: number = 0.017453292519943295;
-
-/**
- * [KO] 잔디 배치 및 스트리밍을 수행하는 기본 격자 셀의 한 변 크기(미터 단위)입니다. 기본값: `16.0`
- * [EN] Dimension in meters of a single grid cell used for grass population and streaming. Default: `16.0`
- */
-const CELL_SIZE: number = 16.0;
 
 /**
  * [KO] 카메라를 중심으로 잔디를 활성화하고 스트리밍하는 기본 반경(미터 단위)입니다. 기본값: `120.0`
@@ -37,66 +24,13 @@ const CELL_SIZE: number = 16.0;
 const DEFAULT_STREAMING_RADIUS: number = 120.0;
 
 /**
- * [KO] 한 프레임에 거리순으로 정렬 및 평가 가능한 스트리밍 후보 셀의 최대 개수입니다. 기본값: `2048`
- * [EN] Maximum number of candidate cells evaluated for streaming in a single frame. Default: `2048`
- */
-const MAX_CANDIDATE_CELLS: number = 2048;
-
-/**
- * [KO] 프레임 드랍(스파이크)을 방지하기 위해 한 프레임에 신규 인스턴스를 생성/배치하는 최대 셀 예산입니다. 기본값: `8`
- * [EN] Maximum cell budget populated with new instances per frame to prevent frame drops. Default: `8`
- */
-const MAX_POPULATE_CELLS_PER_FRAME: number = 8;
-
-/**
- * [KO] 특정 격자 셀에 할당된 MegaBuffer 인스턴스 슬롯 범위 정보 인터페이스입니다.
- * [EN] Interface defining the MegaBuffer instance slot range allocated to a specific grid cell.
- */
-interface CellSlotRange {
-    /**
-     * [KO] MegaBuffer 내에서 해당 셀의 인스턴스 데이터가 시작되는 슬롯 인덱스입니다.
-     * [EN] Starting slot index of the cell's instance data within the MegaBuffer.
-     */
-    start: number;
-
-    /**
-     * [KO] 해당 셀에 할당 예약된 총 슬롯 개수(최대 밀도 기준)입니다.
-     * [EN] Total number of slots reserved for this cell based on target density.
-     */
-    count: number;
-
-    /**
-     * [KO] 지형 가중치 맵 및 절차적 배치 필터링을 거쳐 실제로 유효하게 채워진 인스턴스 개수입니다.
-     * [EN] Actual number of valid instances populated after terrain weight map and procedural filtering.
-     */
-    filledCount: number;
-}
-
-//TODO - 잔디도 머지해서 그리면 좋아질것 같은데...
-/**
- * [KO] 대규모 지형(Landscape)의 절차적 잔디(Procedural Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
- * [EN] Manager class that oversees the large-scale procedural grass ecosystem of the landscape.
+ * [KO] 대규모 지형(Landscape)의 Pure GPU 절차적 잔디(Procedural Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that oversees the large-scale Pure GPU procedural grass ecosystem of the landscape.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
- *
- * ### Example
- * ```typescript
- * const grassManager = landscape.grassManager;
- * grassManager.streamingRadius = 150;
- *
- * // 잔디 생태계 타입 등록
- * const fieldGrass = grassManager.addGrass({
- *     name: 'FieldGrass',
- *     mesh: grassMesh,
- *     cullingDistance: 90,
- *     baseColorTexture: grassTexture,
- *     densityPerHectare: 7500,
- *     targetLayer: 'GrassLayer'
- * });
- * ```
  *
  * @category Landscape
  */
@@ -108,8 +42,7 @@ export class GrassManager extends RedGPUObject {
     #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassScatterMegaBuffer;
-    #baker: ScatterInstanceBaker;
-    #culler: GrassCuller;
+    #proceduralPipeline: PureGrassProceduralPipeline;
 
     #grassList: Grass[] = [];
     #nextTypeId: number = 0;
@@ -117,31 +50,11 @@ export class GrassManager extends RedGPUObject {
     #populated: boolean = false;
 
     #renderer: GrassRenderer;
-
     #typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources> = new Map();
 
-    #candidateKeys: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
-    #candidateDistancesSq: Float32Array = new Float32Array(MAX_CANDIDATE_CELLS);
-    #candidateIndices: Int32Array = new Int32Array(MAX_CANDIDATE_CELLS);
-
-    #slotRangePool: CellSlotRange[] = [];
-
-    #typeCellStates: Map<number, {
-        activeCellRanges: Map<number, CellSlotRange>;
-        freeSlotRanges: CellSlotRange[];
-        slotHead: number;
-        instanceCount: number;
-    }> = new Map();
-
-    #neededCellKeysSet: Set<number> = new Set();
-    #keysToEvict: number[] = [];
     #lastPopulatePos: [number, number, number] = [0, 0, 0];
-    #lastUpdateGridPos: [number, number] = [-999999, -999999];
     #lastLoadedTileCount: number = 0;
     #frustumPlanesF32: Float32Array = new Float32Array(24);
-    #tempWeights4: Float32Array = new Float32Array(4);
-
-    #prngState: number = 12345;
 
     /**
      * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -160,16 +73,10 @@ export class GrassManager extends RedGPUObject {
         this.#tileStreamer = tileStreamer;
 
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
-        this.#baker = new ScatterInstanceBaker(this.redGPUContext, {
-            computeShaderCode: grassBakeComputeWGSL,
-            label: 'GrassInstanceBaker',
-            initialTaskCapacity: 65536,
-        });
-        this.#culler = new GrassCuller(this.redGPUContext);
+        this.#proceduralPipeline = new PureGrassProceduralPipeline(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
-            this.#baker.invalidateBindGroup();
-            this.#culler.invalidateBindGroup();
+            this.#proceduralPipeline.invalidateBindGroups();
             for (const res of this.#typeMaterialBuffers.values()) {
                 res.instanceBindGroup = null;
                 for (let s = 0; s < res.subMeshResources.length; s++) {
@@ -210,23 +117,38 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경을 설정합니다. 변경 시 인스턴스 배치가 즉시 재평가됩니다.
-     * [EN] Sets the active grass streaming radius around the camera. Re-evaluates instance placement immediately when changed.
+     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경을 설정합니다.
+     * [EN] Sets the active grass streaming radius around the camera.
      *
      * @param val -
      * [KO] 설정할 스트리밍 반경 (최소값: 16.0)
      * [EN] Streaming radius to set (minimum: 16.0)
      */
     set streamingRadius(val: number) {
-        const clamped = Math.max(16.0, val);
-        if (this.#streamingRadius !== clamped) {
-            this.#streamingRadius = clamped;
-            this.#populateInstances(this.#lastPopulatePos);
+        const next = Math.max(16.0, val);
+        if (this.#streamingRadius !== next) {
+            this.#streamingRadius = next;
         }
     }
 
     /**
-     * [KO] 현재 매니저에 등록된 모든 {@link Grass} 생태계 인스턴스 목록을 반환합니다.
+     * [KO] 등록된 잔디 타입의 총 개수를 반환합니다.
+     * [EN] Returns the total number of registered grass types.
+     */
+    get count(): number {
+        return this.#grassList.length;
+    }
+
+    /**
+     * [KO] 초기 잔디 인스턴스 배치가 1회 이상 완료되었는지 여부를 반환합니다.
+     * [EN] Returns whether initial grass instance population has been performed at least once.
+     */
+    get populated(): boolean {
+        return this.#populated;
+    }
+
+    /**
+     * [KO] 현재 매니저에 등록된 모든 잔디({@link Grass}) 생태계 인스턴스 배열을 반환합니다.
      * [EN] Gets the list of all {@link Grass} ecosystem instances currently registered to this manager.
      */
     get grassList(): Grass[] {
@@ -234,7 +156,7 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 스트리밍 반경 내 활성 셀들에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
+     * [KO] 현재 스트리밍 반경 내에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
      */
     get totalInstanceCount(): number {
@@ -292,33 +214,8 @@ export class GrassManager extends RedGPUObject {
      * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
      * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
      *
-     * [KO] 등록된 잔디는 카메라 스트리밍 반경 및 지형 가중치 맵(WeightMap)에 따라 자동으로 셀 단위 배치 및 인스턴싱이 수행됩니다.
-     * [EN] Registered grass is automatically populated and instanced per cell according to the camera streaming radius and terrain weight map.
-     *
-     * ### Example
-     * ```typescript
-     * const grassType = landscape.grassManager.addGrass({
-     *     name: 'WildGrass',
-     *     mesh: grassMesh,
-     *     cullingDistance: 70,
-     *     baseColorTexture: grassTexture,
-     *     densityPerHectare: 6000,
-     *     minSlope: 0,
-     *     maxSlope: 40,
-     *     minScale: [0.8, 0.8],
-     *     maxScale: [1.2, 1.4],
-     *     groundBlendStrength: 0.85,
-     *     subsurfaceStrength: 0.5,
-     *     targetLayer: 'GrassLayer'
-     * });
-     * ```
-     *
-     * @param options -
-     * [KO] 잔디 타입의 메시, 컬링 거리, 밀도, 경사 필터링, 스케일 범위, 셰이딩 파라미터가 포함된 옵션 객체
-     * [EN] Options object containing mesh, culling distance, density, slope filtering, scale ranges, and shading parameters
-     * @returns
-     * [KO] 생성되어 등록된 {@link Grass} 인스턴스
-     * [EN] Created and registered {@link Grass} instance
+     * @param options - 잔디 설정 옵션 객체
+     * @returns 생성되어 등록된 {@link Grass} 인스턴스
      */
     addGrass(options: GrassOptions): Grass {
         const grassType = new Grass(this.redGPUContext, options);
@@ -327,33 +224,17 @@ export class GrassManager extends RedGPUObject {
         grassType.typeId = typeId;
         this.#grassList.push(grassType);
 
-        const {cullingDistance, instancesPerCell, name, subMeshes} = grassType;
+        const {cullingDistance, name, subMeshes} = grassType;
         const targetRadius = Math.max(cullingDistance, this.#streamingRadius);
-        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
-        const maxInstances = Math.max(2048, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
+        const maxInstances = Math.max(8192, Math.min(262144, Math.ceil(targetRadius * targetRadius * 2)));
 
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             maxInstances,
             subMeshes
         );
+        alloc.instanceCount = maxInstances;
         grassType.bindAllocation(alloc);
-
-        const {rawBaseOffset: baseOffset} = alloc;
-        for (let i = 0; i < maxInstances; i++) {
-            this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
-        }
-        this.#megaBuffer.uploadInstances(baseOffset, maxInstances);
-
-        this.#culler.invalidateBindGroup();
-        this.#baker.invalidateBindGroup();
-
-        this.#typeCellStates.set(typeId, {
-            activeCellRanges: new Map(),
-            freeSlotRanges: [],
-            slotHead: 0,
-            instanceCount: 0
-        });
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
@@ -388,30 +269,9 @@ export class GrassManager extends RedGPUObject {
             });
         }
 
-        grassType.onRepopulateRequired = () => {
-            this.#populateInstances(this.#lastPopulatePos);
-        };
-
-        if (grassType.targetLayer) {
-            const matchedLayer = this.#landscape.layers.find(l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer);
-            const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc;
-            if (targetSrc) {
-                this.#landscape.weightMapCPUSampler.load(targetSrc).then(() => {
-                    if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
-                        const fallbackCamPos = this.#getFallbackCameraPosition();
-                        if (fallbackCamPos) {
-                            this.#lastPopulatePos[0] = fallbackCamPos[0];
-                            this.#lastPopulatePos[1] = fallbackCamPos[1];
-                            this.#lastPopulatePos[2] = fallbackCamPos[2];
-                        }
-                    }
-                    this.#populateInstances(this.#lastPopulatePos);
-                });
-            }
-        }
-
-        this.#lastUpdateGridPos[0] = -999999;
-        this.#lastUpdateGridPos[1] = -999999;
+        this.#proceduralPipeline.invalidateBindGroups();
+        this.#totalInstanceCount = maxInstances;
+        this.#populated = true;
         return grassType;
     }
 
@@ -419,84 +279,44 @@ export class GrassManager extends RedGPUObject {
      * [KO] 등록된 특정 잔디 생태계 타입을 매니저에서 제거하고 관련 GPU 리소스를 안전하게 해제합니다.
      * [EN] Removes a specific registered grass ecosystem type from the manager and safely releases associated GPU resources.
      *
-     * @param target -
-     * [KO] 제거할 {@link Grass} 인스턴스 또는 잔디의 고유 이름(`string`)
-     * [EN] {@link Grass} instance or unique grass name (`string`) to remove
-     * @returns
-     * [KO] 제거 성공 여부 (대상을 찾아 정상 제거 시 `true`, 미존재 시 `false`)
-     * [EN] Whether removal succeeded (`true` if found and removed, `false` otherwise)
+     * @param target - 제거할 {@link Grass} 인스턴스 또는 잔디의 고유 이름(`string`)
+     * @returns 제거 성공 여부
      */
     removeGrass(target: Grass | string): boolean {
         if (!target) return false;
-        const grass = (target instanceof Grass) ? target : this.getGrass(target);
-        if (!grass) return false;
 
-        const idx = this.#grassList.indexOf(grass);
-        if (idx === -1) return false;
+        const index = typeof target === 'string'
+            ? this.#grassList.findIndex(g => g.name === target)
+            : this.#grassList.indexOf(target);
 
-        const {typeId} = grass;
-        grass.onRepopulateRequired = null;
-        this.#grassList.splice(idx, 1);
+        if (index === -1) return false;
+
+        const [removedGrass] = this.#grassList.splice(index, 1);
+        const {typeId} = removedGrass;
+
+        this.#megaBuffer.freeType(typeId);
 
         const res = this.#typeMaterialBuffers.get(typeId);
         if (res) {
-            const {uniformBuffer, grassUniformGPUBuffer} = res;
-            uniformBuffer.destroy();
-            grassUniformGPUBuffer.destroy();
+            res.uniformBuffer.destroy();
+            res.grassUniformGPUBuffer.destroy();
             res.subMeshResources.length = 0;
             this.#typeMaterialBuffers.delete(typeId);
         }
 
-        const state = this.#typeCellStates.get(typeId);
-        if (state) {
-            const {activeCellRanges, freeSlotRanges} = state;
-            for (const r of activeCellRanges.values()) this.#releaseSlotRange(r);
-            for (const r of freeSlotRanges) this.#releaseSlotRange(r);
-            activeCellRanges.clear();
-            freeSlotRanges.length = 0;
-            this.#typeCellStates.delete(typeId);
-        }
-
-        const alloc = this.#megaBuffer.getAllocation(typeId);
-        if (alloc) {
-            alloc.instanceCount = 0;
-            const {rawBaseOffset: baseOffset, maxInstances, culledBaseOffset, indirectBaseOffset} = alloc;
-            for (let i = 0; i < maxInstances; i++) {
-                this.#megaBuffer.writeInstanceData(baseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
-            }
-            this.#megaBuffer.uploadInstances(baseOffset, maxInstances);
-            this.#megaBuffer.updateTypeParams(
-                typeId,
-                0.0, 0.0, 0.0, 0.0, 0.0, false,
-                baseOffset, 0, culledBaseOffset, indirectBaseOffset,
-                0, 0, [0, 0, 0, 0]
-            );
-        }
-
-        let totalPop = 0;
-        for (const type of this.#grassList) {
-            const a = this.#megaBuffer.getAllocation(type.typeId);
-            if (a) totalPop += a.instanceCount;
-        }
-        this.#totalInstanceCount = totalPop;
-        this.#populated = totalPop > 0;
-
+        removedGrass.bindAllocation(null);
+        this.#proceduralPipeline.invalidateBindGroups();
         return true;
     }
 
     /**
-     * [KO] 등록된 잔디 생태계 타입을 이름(`name`)으로 조회합니다.
-     * [EN] Retrieves a registered grass ecosystem type by name.
+     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다.
+     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name.
      *
-     * @param name -
-     * [KO] 조회할 잔디의 고유 이름(`string`)
-     * [EN] Unique name (`string`) of the grass to retrieve
-     * @returns
-     * [KO] 일치하는 {@link Grass} 인스턴스 (미등록 시 `undefined`)
-     * [EN] Matching {@link Grass} instance (`undefined` if not registered)
+     * @param name - 검색할 잔디의 고유 이름
+     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
      */
-    getGrass(name: string): Grass | undefined {
-        if (!name) return undefined;
+    getGrassByName(name: string): Grass | undefined {
         const count = this.#grassList.length;
         for (let i = 0; i < count; i++) {
             const g = this.#grassList[i];
@@ -517,8 +337,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
-            this.#baker.invalidateBindGroup();
-            this.#culler.invalidateBindGroup();
+            this.#proceduralPipeline.invalidateBindGroups();
             for (const res of this.#typeMaterialBuffers.values()) {
                 res.instanceBindGroup = null;
             }
@@ -526,22 +345,15 @@ export class GrassManager extends RedGPUObject {
 
         this.#nextTypeId = 0;
         this.#lastLoadedTileCount = 0;
-        this.#lastUpdateGridPos[0] = -999999;
-        this.#lastUpdateGridPos[1] = -999999;
-        this.#culler.invalidateBindGroup();
-        this.#baker.invalidateBindGroup();
+        this.#proceduralPipeline.invalidateBindGroups();
     }
 
     /**
      * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
      * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
      *
-     * @param view -
-     * [KO] 현재 렌더링 중인 View3D 객체 (시스템 유니폼 바인드그룹 및 MSAA 샘플 수 추출용)
-     * [EN] Current View3D object being rendered (used to extract system uniform bind group and MSAA sample count)
-     * @param passEncoder -
-     * [KO] 메인 씬 GPURenderPassEncoder
-     * [EN] Main scene GPURenderPassEncoder
+     * @param view - 현재 렌더링 중인 View3D 객체
+     * @param passEncoder - 메인 씬 GPURenderPassEncoder
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
@@ -552,12 +364,8 @@ export class GrassManager extends RedGPUObject {
      * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
      * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
      *
-     * @param view -
-     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
-     * [EN] Current View3D object rendering the shadow pass
-     * @param passEncoder -
-     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     * [EN] GPURenderPassEncoder for shadow map generation
+     * @param view - 그림자 패스를 렌더링 중인 View3D 객체
+     * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
@@ -565,12 +373,10 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 잔디 격자 셀 스트리밍을 갱신하고, GPU 컬링 및 베이킹 Compute Pass를 큐에 등록합니다.
-     * [EN] Called every frame to update grass grid cell streaming based on camera position and enqueue GPU culling and baking compute passes.
+     * [KO] 매 프레임 호출되어 Pure GPU 절차적 인스턴스 생성, 지형 스냅 및 컬링 Compute Pass를 디스패치합니다.
+     * [EN] Called every frame to dispatch Pure GPU procedural instance generation, terrain snapping, and culling compute pass.
      *
-     * @param renderViewStateData -
-     * [KO] 뷰 렌더 상태 데이터 (카메라, 사전 계산된 절두체 평면 등 포함)
-     * [EN] View render state data (including camera, precomputed frustum planes, etc.)
+     * @param renderViewStateData - 뷰 렌더 상태 데이터
      */
     update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
@@ -600,13 +406,8 @@ export class GrassManager extends RedGPUObject {
         }
 
         const {tileLoadedCount: currentLoadedTileCount} = this.#landscape;
-        const tileCountChanged = currentLoadedTileCount !== this.#lastLoadedTileCount;
         this.#lastLoadedTileCount = currentLoadedTileCount;
 
-        if (currentLoadedTileCount > 0) {
-            const isInitialStreaming = !this.#populated;
-            this.#updateCellStreaming(camX, camZ, isInitialStreaming, tileCountChanged);
-        }
         this.#megaBuffer.resetMultiIndirectCommands();
 
         const gpuDevice = this.gpuDevice;
@@ -727,32 +528,42 @@ export class GrassManager extends RedGPUObject {
             }
         }
 
-        const {totalAllocatedInstances: totalAllocated} = this.#megaBuffer;
-        this.#culler.updateUniforms(
-            camX,
-            camY,
-            camZ,
-            frustumPlanesF32,
-            totalAllocated,
-            this.#grassList.length
-        );
-
-        this.#culler.updateBindGroup(this.#megaBuffer);
-
+        // Pure GPU Procedural 단일 패스 디스패치 (CPU 부하 0%)
         this.commandEncoderManager.addPreProcessComputePass(
-            'LandscapeGrass_ComputePass',
-            this.#onPreProcessComputePass
+            'Grass_PureGPU_Procedural_ComputePass',
+            (computePass: GPUComputePassEncoder) => {
+                this.#proceduralPipeline.dispatchPass(
+                    computePass,
+                    this.#megaBuffer,
+                    this.#tileStreamer,
+                    this.#landscape,
+                    this.#grassList,
+                    camX,
+                    camY,
+                    camZ,
+                    frustumPlanesF32
+                );
+            }
         );
     }
 
     /**
-     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼(MegaBuffer, Uniform, Indirect Buffer), 텍스처 뷰, 파이프라인 및 내부 슬롯 풀을 안전하게 해제합니다.
-     * [EN] Safely releases all GPU buffers, texture views, pipelines, slot pools, and internal resources held by the grass manager.
+     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅입니다.
+     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading.
+     *
+     * @param tileComponent - 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
+     */
+    onTileLoaded(tileComponent: LandscapeComponent): void {
+        // Pure GPU Procedural 모드에서는 지형 타일 로드 시 별도의 CPU 베이킹 작업이 불필요합니다.
+    }
+
+    /**
+     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼, 파이프라인 및 자원을 안전하게 해제합니다.
+     * [EN] Safely releases all GPU buffers, pipelines, and resources held by the grass manager.
      */
     destroy(): void {
         this.#megaBuffer.destroy();
-        this.#baker.destroy();
-        this.#culler.destroy();
+        this.#proceduralPipeline.destroy();
         this.#renderer.destroy();
 
         for (const res of this.#typeMaterialBuffers.values()) {
@@ -761,484 +572,10 @@ export class GrassManager extends RedGPUObject {
             res.subMeshResources.length = 0;
         }
         this.#typeMaterialBuffers.clear();
-        this.#typeCellStates.clear();
-        this.#slotRangePool.length = 0;
-        this.#neededCellKeysSet.clear();
-        this.#keysToEvict.length = 0;
         for (const grass of this.#grassList) {
             grass.onRepopulateRequired = null;
         }
         this.#grassList.length = 0;
-    }
-
-    /**
-     * [KO] 현재 활성화된 모든 잔디 인스턴스에 대해 지형 표면 높이/법선/가중치 스냅 GPU 베이킹 태스크를 재등록합니다.
-     * [EN] Re-enqueues GPU baking tasks for all currently active grass instances to re-snap height, normals, and weights to the terrain surface.
-     */
-    rebakeAll(): void {
-        if (!this.#enabled || this.#grassList.length === 0) return;
-        for (const type of this.#grassList) {
-            const {typeId} = type;
-            const state = this.#typeCellStates.get(typeId);
-            const alloc = this.#megaBuffer.getAllocation(typeId);
-            if (!state || !alloc) continue;
-            const {rawBaseOffset} = alloc;
-            for (const range of state.activeCellRanges.values()) {
-                const {filledCount, start} = range;
-                if (filledCount > 0) {
-                    this.#baker.addBakeTasks(rawBaseOffset + start, filledCount, typeId);
-                }
-            }
-        }
-    }
-
-    /**
-     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일 영역과 교차하는 잔디 인스턴스들의 지형 스냅 베이킹을 실행합니다.
-     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, triggering terrain snap baking for grass instances intersecting that tile boundary.
-     *
-     * @param tileComponent -
-     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
-     * [EN] Loaded landscape tile component (`LandscapeComponent`)
-     */
-    onTileLoaded(tileComponent: LandscapeComponent): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !tileComponent) return;
-
-        if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
-            // TODO - 이건 나중에 처리해야겠다
-            const fallbackCamPos = this.#getFallbackCameraPosition();
-            if (fallbackCamPos) {
-                this.#lastPopulatePos[0] = fallbackCamPos[0];
-                this.#lastPopulatePos[1] = fallbackCamPos[1];
-                this.#lastPopulatePos[2] = fallbackCamPos[2];
-            }
-        }
-
-        this.#updateCellStreaming(this.#lastPopulatePos[0], this.#lastPopulatePos[2], false, true);
-
-        const {tileSize} = this.#landscape;
-        const [tileSizeX, tileSizeZ] = tileSize;
-        const halfTileX = tileSizeX * 0.5;
-        const halfTileZ = tileSizeZ * 0.5;
-        const {worldX, worldZ} = tileComponent;
-        const minX = worldX - halfTileX;
-        const maxX = worldX + halfTileX;
-        const minZ = worldZ - halfTileZ;
-        const maxZ = worldZ + halfTileZ;
-
-        const cellSize = CELL_SIZE;
-
-        for (const type of this.#grassList) {
-            const {typeId} = type;
-            const state = this.#typeCellStates.get(typeId);
-            const alloc = this.#megaBuffer.getAllocation(typeId);
-            if (!state || !alloc) continue;
-
-            const {rawBaseOffset} = alloc;
-            for (const [key, range] of state.activeCellRanges.entries()) {
-                const {filledCount, start} = range;
-                if (filledCount <= 0) continue;
-                const cellX = (key >> 16);
-                const cellZ = (key << 16) >> 16;
-                const cellCenterX = (cellX + 0.5) * cellSize;
-                const cellCenterZ = (cellZ + 0.5) * cellSize;
-
-                if (cellCenterX >= minX && cellCenterX <= maxX && cellCenterZ >= minZ && cellCenterZ <= maxZ) {
-                    this.#baker.addBakeTasks(rawBaseOffset + start, filledCount, typeId);
-                }
-            }
-        }
-    }
-
-    #getFallbackCameraPosition(): [number, number, number] | null {
-        const viewList = this.redGPUContext?.viewList;
-        if (!viewList || viewList.length === 0) return null;
-
-        for (let i = 0; i < viewList.length; i++) {
-            const v = viewList[i] as any;
-            if (!v) continue;
-            const rawCam = v.rawCamera || v.camera?.rawCamera || v.camera;
-            if (rawCam && typeof rawCam.x === 'number') {
-                return [rawCam.x, rawCam.y, rawCam.z];
-            }
-            const pos = v.camera?.position;
-            if (pos && typeof pos[0] === 'number') {
-                return [pos[0], pos[1], pos[2]];
-            }
-        }
-        return null;
-    }
-
-
-
-    /**
-     * [KO] 지정된 3D 월드 좌표를 중심으로 스트리밍 반경 내의 잔디 셀과 인스턴스를 강제로 재생성 및 배치합니다.
-     * [EN] Forces repopulation and placement of grass cells and instances within the streaming radius around the specified 3D world position.
-     *
-     * @param centerPos -
-     * [KO] 스트리밍 중심이 될 월드 좌표 `[x, y, z]`
-     * [EN] World coordinates `[x, y, z]` to act as the streaming center
-     */
-    #populateInstances(centerPos: [number, number, number]): void {
-        this.#lastPopulatePos[0] = centerPos[0];
-        this.#lastPopulatePos[1] = centerPos[1];
-        this.#lastPopulatePos[2] = centerPos[2];
-        this.#updateCellStreaming(centerPos[0], centerPos[2], true);
-    }
-
-
-
-    /**
-     * [KO] 커맨드 인코더의 사전 컴퓨트 패스(PreProcess Compute Pass) 단계에서 호출되어 지형 스냅 베이킹 및 GPU 컬링을 실행합니다.
-     * [EN] Invoked during the pre-process compute pass of the command encoder to execute terrain snap baking and GPU culling.
-     */
-    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        if (this.#baker.hasPendingTasks) {
-            const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
-            const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
-            const {worldSize, heightScale} = this.#landscape;
-            const [worldSizeX, worldSizeZ] = worldSize;
-
-            this.#baker.dispatchPass(
-                computePass,
-                this.#megaBuffer,
-                vhtAtlas?.gpuTextureView,
-                vbtAtlas?.gpuTextureView,
-                worldSizeX,
-                worldSizeZ,
-                heightScale
-            );
-        }
-
-        const {totalAllocatedInstances} = this.#megaBuffer;
-        this.#culler.dispatchPass(computePass, totalAllocatedInstances);
-    };
-
-    /**
-     * [KO] 카메라 위치를 기준으로 격자 셀의 유효성을 평가하여 범위를 벗어난 셀을 언마운트(Evict)하고 신규 셀을 배치(Populate)합니다.
-     * [EN] Evaluates grid cell validity based on camera position, evicting out-of-range cells and populating new candidate cells.
-     *
-     * @param camX -
-     * [KO] 카메라의 월드 X 좌표
-     * [EN] World X coordinate of the camera
-     * @param camZ -
-     * [KO] 카메라의 월드 Z 좌표
-     * [EN] World Z coordinate of the camera
-     * @param forceRebuild -
-     * [KO] 기존 활성 셀들을 모두 강제 초기화하고 처음부터 다시 구축할지 여부
-     * [EN] Whether to force reset all active cells and rebuild from scratch
-     * @param populateAllCandidates -
-     * [KO] 프레임당 배치 셀 수 제한을 무시하고 유효 후보 셀을 모두 한 번에 배치할지 여부
-     * [EN] Whether to bypass the per-frame populate budget and populate all candidate cells at once
-     */
-    #updateCellStreaming(
-        camX: number,
-        camZ: number,
-        forceRebuild: boolean = false,
-        populateAllCandidates: boolean = false
-    ): void {
-        const cellSize = CELL_SIZE;
-        const curGridX = Math.floor(camX / cellSize);
-        const curGridZ = Math.floor(camZ / cellSize);
-
-        if (!forceRebuild && !populateAllCandidates && curGridX === this.#lastUpdateGridPos[0] && curGridZ === this.#lastUpdateGridPos[1]) {
-            return;
-        }
-
-        this.#lastUpdateGridPos[0] = curGridX;
-        this.#lastUpdateGridPos[1] = curGridZ;
-
-        const {worldSize, tileSize, tileUrlResolver, layers} = this.#landscape;
-        const [worldSizeX, worldSizeZ] = worldSize;
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
-        const [tileSizeX, tileSizeZ] = tileSize;
-        const hasTileStreaming = tileUrlResolver !== null;
-
-        for (const type of this.#grassList) {
-            const {
-                typeId,
-                cullingDistance,
-                instancesPerCell: targetDensity,
-                targetLayer,
-                minScale,
-                maxScale,
-                densityScaleByWeight
-            } = type;
-            const state = this.#typeCellStates.get(typeId);
-            const alloc = this.#megaBuffer.getAllocation(typeId);
-            if (!state || !alloc) continue;
-
-            const {rawBaseOffset, maxInstances} = alloc;
-            const {activeCellRanges, freeSlotRanges} = state;
-
-            if (forceRebuild) {
-                for (const r of activeCellRanges.values()) this.#releaseSlotRange(r);
-                for (const r of freeSlotRanges) this.#releaseSlotRange(r);
-                activeCellRanges.clear();
-                freeSlotRanges.length = 0;
-                state.slotHead = 0;
-                state.instanceCount = 0;
-                alloc.instanceCount = 0;
-
-                for (let i = 0; i < maxInstances; i++) {
-                    this.#megaBuffer.writeInstanceData(rawBaseOffset + i, 0.0, -999999.0, 0.0, 0.0, 0.0, 0.0);
-                }
-                this.#megaBuffer.uploadInstances(rawBaseOffset, maxInstances);
-            }
-
-            const safeCullRadius = cullingDistance + cellSize * 1.5;
-            const radius = Math.max(safeCullRadius, this.#streamingRadius);
-            const radiusSq = radius * radius;
-            const cellRadius = Math.ceil(radius / cellSize);
-
-            this.#neededCellKeysSet.clear();
-            let candidateCount = 0;
-            const maxCandidates = MAX_CANDIDATE_CELLS;
-
-            for (let dz = -cellRadius; dz <= cellRadius; dz++) {
-                const cz = curGridZ + dz;
-                const cellCenterZ = (cz + 0.5) * cellSize;
-                if (cellCenterZ < -halfWorldZ || cellCenterZ > halfWorldZ) continue;
-
-                const distZ = cellCenterZ - camZ;
-                const distZSq = distZ * distZ;
-
-                for (let dx = -cellRadius; dx <= cellRadius; dx++) {
-                    const cx = curGridX + dx;
-                    const cellCenterX = (cx + 0.5) * cellSize;
-                    if (cellCenterX < -halfWorldX || cellCenterX > halfWorldX) continue;
-
-                    const distX = cellCenterX - camX;
-                    const dSq = distX * distX + distZSq;
-                    if (dSq > radiusSq) continue;
-
-                    const key = ((cx & 0xFFFF) << 16) | (cz & 0xFFFF);
-                    this.#neededCellKeysSet.add(key);
-
-                    if (!activeCellRanges.has(key) && candidateCount < maxCandidates) {
-                        this.#candidateKeys[candidateCount] = key;
-                        this.#candidateDistancesSq[candidateCount] = dSq;
-                        this.#candidateIndices[candidateCount] = candidateCount;
-                        candidateCount++;
-                    }
-                }
-            }
-
-            if (candidateCount > 1) {
-                sortCandidateIndicesByDistance(this.#candidateIndices, this.#candidateDistancesSq, 0, candidateCount - 1);
-            }
-
-            this.#keysToEvict.length = 0;
-            for (const activeKey of activeCellRanges.keys()) {
-                if (!this.#neededCellKeysSet.has(activeKey)) {
-                    this.#keysToEvict.push(activeKey);
-                }
-            }
-
-            for (let i = 0; i < this.#keysToEvict.length; i++) {
-                const evictKey = this.#keysToEvict[i];
-                const range = activeCellRanges.get(evictKey)!;
-                activeCellRanges.delete(evictKey);
-
-                const {count: rCount, start: rStart, filledCount: rFilled} = range;
-                for (let s = 0; s < rCount; s++) {
-                    this.#megaBuffer.writeInstanceData(
-                        rawBaseOffset + rStart + s,
-                        0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
-                    );
-                }
-
-                this.#megaBuffer.uploadInstances(rawBaseOffset + rStart, rCount);
-                freeSlotRanges.push(range);
-                state.instanceCount -= rFilled;
-            }
-
-            const maxCellsToPopulate = (forceRebuild || populateAllCandidates) ? candidateCount : MAX_POPULATE_CELLS_PER_FRAME;
-            const cellsToProcess = Math.min(candidateCount, maxCellsToPopulate);
-            const matchedLayer = targetLayer ? layers.find(l => l.name === targetLayer || (l as any).key === targetLayer) : undefined;
-            const targetSrc = matchedLayer?.weightTexture?.src || (matchedLayer as any)?.pendingWeightSrc || null;
-            const hasWeightMap = !!(targetSrc && this.#landscape.weightMapCPUSampler.has(targetSrc));
-            const channelIdx = matchedLayer?.weightChannelIndex ?? 0;
-
-            if (targetLayer && !hasWeightMap) {
-                continue;
-            }
-
-            const [minScaleS, minScaleH] = minScale;
-            const [maxScaleS, maxScaleH] = maxScale;
-            const deltaScaleS = maxScaleS - minScaleS;
-            const deltaScaleH = maxScaleH - minScaleH;
-
-            for (let i = 0; i < cellsToProcess; i++) {
-                const sortedIdx = this.#candidateIndices[i];
-                const key = this.#candidateKeys[sortedIdx];
-                if (activeCellRanges.has(key)) continue;
-
-                const cellX = (key >> 16);
-                const cellZ = (key << 16) >> 16;
-                const cellCenterX = (cellX + 0.5) * cellSize;
-                const cellCenterZ = (cellZ + 0.5) * cellSize;
-
-                if (hasTileStreaming) {
-                    const tileCol = Math.floor((cellCenterX + halfWorldX) / tileSizeX);
-                    const tileRow = Math.floor((cellCenterZ + halfWorldZ) / tileSizeZ);
-                    if (!this.#landscape.isTileLoaded(tileRow, tileCol)) {
-                        continue;
-                    }
-                }
-
-                let slotBase = -1;
-                let reusedRange: CellSlotRange | null = null;
-                if (freeSlotRanges.length > 0) {
-                    reusedRange = freeSlotRanges.pop()!;
-                    slotBase = reusedRange.start;
-                } else if (state.slotHead + targetDensity <= maxInstances) {
-                    slotBase = state.slotHead;
-                    state.slotHead += targetDensity;
-                } else {
-                    break;
-                }
-
-                const cellMinX = cellX * cellSize;
-                const cellMinZ = cellZ * cellSize;
-
-                this.#setPrngSeed(computeScatterSubCellSeed(cellX, cellZ, typeId));
-
-                let filledCount = 0;
-                for (let inst = 0; inst < targetDensity; inst++) {
-                    const gx = cellMinX + this.#nextPrng() * cellSize;
-                    const gz = cellMinZ + this.#nextPrng() * cellSize;
-
-                    if (hasWeightMap && targetSrc) {
-                        const u = (gx + halfWorldX) / worldSizeX;
-                        const v = (gz + halfWorldZ) / worldSizeZ;
-                        this.#landscape.weightMapCPUSampler.getAllWeights(targetSrc, u, v, this.#tempWeights4);
-                        const normW = computeNormalizedChannelWeight(this.#tempWeights4, channelIdx);
-
-                        if (normW < 0.20) continue;
-                        if (densityScaleByWeight && this.#nextPrng() > normW) continue;
-                    }
-
-                    const rot = this.#nextPrng() * 6.2831853;
-                    const sScale = minScaleS + this.#nextPrng() * deltaScaleS;
-                    const hScale = minScaleH + this.#nextPrng() * deltaScaleH;
-
-                    const globalInstIdx = rawBaseOffset + slotBase + filledCount;
-                    this.#megaBuffer.writeInstanceData(
-                        globalInstIdx,
-                        gx, 0.0, gz,
-                        rot, sScale, hScale
-                    );
-                    filledCount++;
-                }
-
-                for (let rem = filledCount; rem < targetDensity; rem++) {
-                    this.#megaBuffer.writeInstanceData(
-                        rawBaseOffset + slotBase + rem,
-                        0.0, -999999.0, 0.0, 0.0, 0.0, 0.0
-                    );
-                }
-
-                if (filledCount > 0) {
-                    this.#megaBuffer.uploadInstances(rawBaseOffset + slotBase, targetDensity);
-                    this.#baker.addBakeTasks(rawBaseOffset + slotBase, filledCount, typeId);
-                    if (reusedRange) {
-                        reusedRange.count = targetDensity;
-                        reusedRange.filledCount = filledCount;
-                        activeCellRanges.set(key, reusedRange);
-                    } else {
-                        activeCellRanges.set(key, this.#acquireSlotRange(slotBase, targetDensity, filledCount));
-                    }
-                    state.instanceCount += filledCount;
-                } else {
-                    this.#megaBuffer.uploadInstances(rawBaseOffset + slotBase, targetDensity);
-                    if (reusedRange) {
-                        reusedRange.count = targetDensity;
-                        reusedRange.filledCount = 0;
-                        freeSlotRanges.push(reusedRange);
-                    } else {
-                        freeSlotRanges.push(this.#acquireSlotRange(slotBase, targetDensity, 0));
-                    }
-                }
-            }
-
-            alloc.instanceCount = state.instanceCount;
-        }
-
-        let totalPop = 0;
-        for (const type of this.#grassList) {
-            const alloc = this.#megaBuffer.getAllocation(type.typeId);
-            if (alloc) totalPop += alloc.instanceCount;
-        }
-        this.#totalInstanceCount = totalPop;
-        this.#populated = totalPop > 0;
-    }
-
-    /**
-     * [KO] 절차적 잔디 배치를 위한 고속 의사난수 생성기(PRNG)의 시드를 설정합니다.
-     * [EN] Sets the seed for the fast pseudo-random number generator (PRNG) used in procedural grass placement.
-     *
-     * @param seed -
-     * [KO] PRNG 초기화 정수 시드
-     * [EN] Integer seed for PRNG initialization
-     */
-    #setPrngSeed(seed: number): void {
-        this.#prngState = seed >>> 0;
-    }
-
-    /**
-     * [KO] 0.0 이상 1.0 미만 범위의 균일 의사난수를 생성합니다. (SplitMix32 기반 고속 연산)
-     * [EN] Generates a uniform pseudo-random number in the range [0.0, 1.0). (Fast computation based on SplitMix32)
-     *
-     * @returns
-     * [KO] 생성된 의사난수 부동소수점 값
-     * [EN] Generated pseudo-random floating-point value
-     */
-    #nextPrng(): number {
-        this.#prngState = (this.#prngState + 0x6D2B79F5) | 0;
-        let t = Math.imul(this.#prngState ^ (this.#prngState >>> 15), 1 | this.#prngState);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    }
-
-    /**
-     * [KO] 셀 슬롯 범위 객체 풀에서 인스턴스를 가져오거나 새로 생성합니다. (GC 방지)
-     * [EN] Acquires a cell slot range instance from the pool or creates a new one. (Prevents GC)
-     *
-     * @param start -
-     * [KO] 슬롯 시작 인덱스
-     * [EN] Slot starting index
-     * @param count -
-     * [KO] 할당 슬롯 총 개수
-     * [EN] Total number of allocated slots
-     * @param filledCount -
-     * [KO] 실제 유효하게 채워진 인스턴스 개수 (기본값: 0)
-     * [EN] Actual filled instance count (default: 0)
-     * @returns
-     * [KO] 풀에서 재사용되거나 새로 생성된 {@link CellSlotRange} 객체
-     * [EN] Reused from pool or newly created {@link CellSlotRange} object
-     */
-    #acquireSlotRange(start: number, count: number, filledCount: number = 0): CellSlotRange {
-        const item = this.#slotRangePool.pop();
-        if (item) {
-            item.start = start;
-            item.count = count;
-            item.filledCount = filledCount;
-            return item;
-        }
-        return {start, count, filledCount};
-    }
-
-    /**
-     * [KO] 사용이 끝난 셀 슬롯 범위 객체를 재사용 풀로 반환합니다. (GC 방지)
-     * [EN] Returns an unused cell slot range object to the reuse pool. (Prevents GC)
-     *
-     * @param item -
-     * [KO] 반환할 {@link CellSlotRange} 객체
-     * [EN] {@link CellSlotRange} object to release back to the pool
-     */
-    #releaseSlotRange(item: CellSlotRange): void {
-        this.#slotRangePool.push(item);
     }
 }
 

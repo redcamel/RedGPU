@@ -42,15 +42,15 @@ export function unpackSubCellKeyZ(key: number): number {
 }
 
 /**
- * [KO] 서브셀 정수 좌표와 식생/잔디 타입 이름 해시로부터 결정론적(Deterministic) 32비트 Xorshift 의사난수 시드를 산출합니다.
- * [EN] Computes a deterministic 32-bit Xorshift PRNG seed from integer subcell coordinates and scatter type name hash.
+ * [KO] 그리드 정수 좌표와 식생/잔디 타입 이름 해시로부터 결정론적(Deterministic) 32비트 의사난수 시드를 산출합니다.
+ * [EN] Computes a deterministic 32-bit PRNG seed from integer grid coordinates and scatter type name hash.
  *
  * @param gridX - 그리드 정수 X 좌표
  * @param gridZ - 그리드 정수 Z 좌표
  * @param nameHash - 타입 고유 정수 해시
  * @returns 0이 아닌 유효한 32비트 부호 없는 정수 시드
  */
-export function computeScatterSubCellSeed(gridX: number, gridZ: number, nameHash: number): number {
+export function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: number): number {
     let seed = ((gridX * 73856093) ^ (gridZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
     return seed === 0 ? 0x9e3779b9 : seed;
 }
@@ -110,40 +110,6 @@ export function fastPack2x16float(x: number, y: number): number {
 export function fastPackUniformScale(scale: number): number {
     const h = fastFloatToHalf(scale) & 0xFFFF;
     return (h | (h << 16)) >>> 0;
-}
-
-/**
- * [KO] 스트리밍 후보 셀들의 인덱스 배열을 사전 할당된 거리 제곱값 배열을 기준으로 오름차순 제자리 퀵 정렬(In-place Quick Sort)합니다. (Zero-GC)
- * [EN] In-place quick-sorts candidate cell index arrays in ascending order based on pre-allocated squared distance arrays. (Zero-GC)
- *
- * @param indices - 정렬할 인덱스 배열 (Int32Array)
- * @param dists - 인덱스별 거리 제곱값 배열 (Float32Array)
- * @param left - 정렬 시작 인덱스
- * @param right - 정렬 끝 인덱스
- */
-export function sortCandidateIndicesByDistance(
-    indices: Int32Array,
-    dists: Float32Array,
-    left: number,
-    right: number
-): void {
-    if (left >= right) return;
-    const pivotVal = dists[indices[(left + right) >> 1]];
-    let i = left;
-    let j = right;
-    while (i <= j) {
-        while (dists[indices[i]] < pivotVal) i++;
-        while (dists[indices[j]] > pivotVal) j--;
-        if (i <= j) {
-            const temp = indices[i];
-            indices[i] = indices[j];
-            indices[j] = temp;
-            i++;
-            j--;
-        }
-    }
-    if (left < j) sortCandidateIndicesByDistance(indices, dists, left, j);
-    if (i < right) sortCandidateIndicesByDistance(indices, dists, i, right);
 }
 
 /**

@@ -33,12 +33,11 @@ import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./ASca
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
 import {computeNormalizedChannelWeight, sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
-    computeScatterSubCellSeed,
+    computeScatterGridSeed,
     fastFloatToHalf,
     fastPack2x16float,
     fastPackUniformScale,
     packSubCellKey,
-    sortCandidateIndicesByDistance,
     sortSubCellsByDistance,
     unpackSubCellKeyX,
     unpackSubCellKeyZ
@@ -80,11 +79,10 @@ export {
     packSubCellKey,
     unpackSubCellKeyX,
     unpackSubCellKeyZ,
-    computeScatterSubCellSeed,
+    computeScatterGridSeed,
     fastFloatToHalf,
     fastPack2x16float,
     fastPackUniformScale,
-    sortCandidateIndicesByDistance,
     sortSubCellsByDistance,
 
     // Constants

@@ -5,7 +5,7 @@
  */
 
 import {
-    computeScatterSubCellSeed,
+    computeScatterGridSeed,
     fastPack2x16float,
     fastPackUniformScale,
     packSubCellKey,
@@ -137,7 +137,7 @@ export default class FoliageSubCellPartitioner {
         for (let scZ = startScZ; scZ <= endScZ; scZ++) {
             for (let scX = startScX; scX <= endScX; scX++) {
                 const key = packSubCellKey(scX, scZ);
-                let seed = computeScatterSubCellSeed(scX, scZ, nameHash);
+                let seed = computeScatterGridSeed(scX, scZ, nameHash);
 
                 const subMinX = scX * subCellSize - halfWorldX;
                 const subMinZ = scZ * subCellSize - halfWorldZ;
@@ -252,7 +252,7 @@ export default class FoliageSubCellPartitioner {
         const subMinX = subCell.subCellX * subCellSize - halfWorldX;
         const subMinZ = subCell.subCellZ * subCellSize - halfWorldZ;
 
-        let seed = computeScatterSubCellSeed(subCell.subCellX, subCell.subCellZ, foliage.nameHash);
+        let seed = computeScatterGridSeed(subCell.subCellX, subCell.subCellZ, foliage.nameHash);
 
         const {minScale, maxScale, randomRotationY} = foliage.options || {};
         const optMinScale = minScale || [1.0, 1.0, 1.0];
