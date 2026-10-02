@@ -52,7 +52,7 @@ export class GrassManager extends RedGPUObject {
     #renderer: GrassRenderer;
     #typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources> = new Map();
 
-    #lastPopulatePos: [number, number, number] = [0, 0, 0];
+    #lastCamPos: [number, number, number] = [0, 0, 0];
     #lastBakePos: [number, number] = [0, 0];
     #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
@@ -297,14 +297,14 @@ export class GrassManager extends RedGPUObject {
 
             const fallbackCam = this.#getFallbackCameraPosition();
             if (fallbackCam) {
-                this.#lastPopulatePos[0] = fallbackCam[0];
-                this.#lastPopulatePos[1] = fallbackCam[1];
-                this.#lastPopulatePos[2] = fallbackCam[2];
+                this.#lastCamPos[0] = fallbackCam[0];
+                this.#lastCamPos[1] = fallbackCam[1];
+                this.#lastCamPos[2] = fallbackCam[2];
                 this.#lastBakePos[0] = fallbackCam[0];
                 this.#lastBakePos[1] = fallbackCam[2];
             }
 
-            this.#bakeGrassType(grassType, this.#lastPopulatePos[0], this.#lastPopulatePos[2]);
+            this.#bakeGrassType(grassType, this.#lastCamPos[0], this.#lastCamPos[2]);
         }
 
         this.#cullPipeline.invalidateBindGroups();
@@ -385,9 +385,9 @@ export class GrassManager extends RedGPUObject {
         const {rawCamera: rawCam, projectionMatrix} = view;
         const {x: camX, y: camY, z: camZ} = rawCam;
 
-        this.#lastPopulatePos[0] = camX;
-        this.#lastPopulatePos[1] = camY;
-        this.#lastPopulatePos[2] = camZ;
+        this.#lastCamPos[0] = camX;
+        this.#lastCamPos[1] = camY;
+        this.#lastCamPos[2] = camZ;
 
         let frustumPlanesF32: Float32Array | null = null;
         if (frustumPlanes && frustumPlanes.length === 6) {
@@ -553,12 +553,12 @@ export class GrassManager extends RedGPUObject {
     onTileLoaded(tileComponent: LandscapeComponent): void {
         if (!this.#enabled || this.#grassList.length === 0 || !tileComponent) return;
 
-        if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+        if (this.#lastCamPos[0] === 0 && this.#lastCamPos[1] === 0 && this.#lastCamPos[2] === 0) {
             const fallbackCamPos = this.#getFallbackCameraPosition();
             if (fallbackCamPos) {
-                this.#lastPopulatePos[0] = fallbackCamPos[0];
-                this.#lastPopulatePos[1] = fallbackCamPos[1];
-                this.#lastPopulatePos[2] = fallbackCamPos[2];
+                this.#lastCamPos[0] = fallbackCamPos[0];
+                this.#lastCamPos[1] = fallbackCamPos[1];
+                this.#lastCamPos[2] = fallbackCamPos[2];
             }
         }
         this.rebakeAll();
@@ -596,8 +596,8 @@ export class GrassManager extends RedGPUObject {
      * @param centerZ - 베이킹 중심 월드 Z 좌표 (생략 시 마지막 카메라 위치)
      */
     rebakeAll(centerX?: number, centerZ?: number): void {
-        const posX = centerX !== undefined ? centerX : this.#lastPopulatePos[0];
-        const posZ = centerZ !== undefined ? centerZ : this.#lastPopulatePos[2];
+        const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
+        const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];
         const list = this.#grassList;
         const len = list.length;
         for (let i = 0; i < len; i++) {
@@ -655,8 +655,8 @@ export class GrassManager extends RedGPUObject {
         const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
         if (!vhtAtlas?.gpuTextureView || !vbtAtlas?.gpuTextureView) return;
 
-        const posX = centerX !== undefined ? centerX : this.#lastPopulatePos[0];
-        const posZ = centerZ !== undefined ? centerZ : this.#lastPopulatePos[2];
+        const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
+        const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];
 
         this.#bakePipeline.dispatchBake(
             this.#megaBuffer,

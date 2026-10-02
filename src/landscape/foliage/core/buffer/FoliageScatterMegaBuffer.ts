@@ -4,11 +4,8 @@
  * @packageDocumentation
  */
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {
-    AScatterMegaBuffer,
-    DRAW_INDEXED_INDIRECT_ARGS_COUNT,
-    ScatterBaseSegmentAllocation
-} from '../../../core/scatter/AScatterMegaBuffer';
+import {DRAW_INDEXED_INDIRECT_ARGS_COUNT, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
+import ACpuStagedScatterMegaBuffer from '../../../core/scatter/ACpuStagedScatterMegaBuffer';
 import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
 import FoliageSubMesh from '../submesh/FoliageSubMesh';
 import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
@@ -63,7 +60,7 @@ export interface CascadeCullingParam {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
+export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
     #globalUniformBytes: number;
 
     #shadowCulledGPUBuffer: GPUBuffer | null = null;

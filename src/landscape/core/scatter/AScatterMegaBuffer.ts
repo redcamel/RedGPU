@@ -88,8 +88,8 @@ export interface ScatterBaseSegmentAllocation {
 }
 
 /**
- * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 공통 추상 메가버퍼 기반 클래스입니다.
- * [EN] Common abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
+ * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 순수 GPU VRAM 추상 메가버퍼 기반 클래스입니다.
+ * [EN] Pure GPU VRAM abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
  *
  * **[KO] 아키텍처 및 역할:**
  * - **VRAM 통합 관리 (Unified Mega-Buffer)**: 개별 스캐터 인스턴스 버퍼를 분할 생성하지 않고, 단일 원본 스토리지 버퍼(`rawGPUBuffer`)와 컬링 통과 스토리지 버퍼(`culledGPUBuffer`)에서 64바이트 배수로 정렬 할당하여 GPU 메모리 단편화를 제거합니다.
@@ -120,8 +120,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     #totalAllocatedCulledInstances: number = 0;
     #totalIndirectDrawCalls: number = 0;
 
-    #cpuRawDataBuffer: Float32Array;
-    #cpuRawDataUint32: Uint32Array;
 
     #cpuTypeParamsBuffer: Float32Array;
     #cpuTypeParamsUint32: Uint32Array;
@@ -171,8 +169,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
         this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
-        this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
-        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
 
         const typeParamsCount = this.#maxTypes * this.#typeParamFloats;
         this.#cpuTypeParamsBuffer = new Float32Array(typeParamsCount > 0 ? typeParamsCount : 1);
@@ -231,21 +227,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         return this.#instanceCapacity;
     }
 
-    /**
-     * [KO] CPU 스테이징 원시 인스턴스 데이터 버퍼를 반환합니다.
-     * [EN] Returns the CPU staging raw instance data buffer.
-     */
-    get cpuRawDataBuffer(): Float32Array {
-        return this.#cpuRawDataBuffer;
-    }
-
-    /**
-     * [KO] CPU 스테이징 원시 인스턴스 데이터 버퍼(Uint32 뷰)를 반환합니다.
-     * [EN] Returns the CPU staging raw instance data buffer (Uint32 view).
-     */
-    get cpuRawDataUint32(): Uint32Array {
-        return this.#cpuRawDataUint32;
-    }
 
     /**
      * [KO] CPU 스테이징 타입 파라미터 데이터 버퍼를 반환합니다.
@@ -562,11 +543,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
         this.#instanceCapacity = newCapacity;
 
-        const oldCpuBuffer = this.#cpuRawDataBuffer;
-        this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.#strideFloats);
-        this.#cpuRawDataBuffer.set(oldCpuBuffer);
-        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
-
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
             this.#rawGPUBuffer?.destroy();
@@ -576,16 +552,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });
 
-            const totalAllocated = this.totalAllocatedInstances;
-            if (totalAllocated > 0) {
-                gpuDevice.queue.writeBuffer(
-                    this.#rawGPUBuffer,
-                    0,
-                    this.#cpuRawDataBuffer.buffer,
-                    this.#cpuRawDataBuffer.byteOffset,
-                    totalAllocated * this.#strideBytes
-                );
-            }
+            this.onRawBufferCreated(this.#rawGPUBuffer, newCapacity);
         }
 
         this.onResizeBuffers(newCapacity);
@@ -595,30 +562,18 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
-     * [EN] Batch uploads instance data in CPU staging buffer to GPU raw buffer (rawGPUBuffer).
-     * @param startInstance -
-     * [KO] 시작 인스턴스 인덱스
-     * [EN] Starting instance index
-     * @param count -
-     * [KO] 업로드할 인스턴스 수
-     * [EN] Number of instances to upload
+     * [KO] 메가버퍼 확장으로 인해 새 GPU rawGPUBuffer가 생성되었을 때 호출되는 훅 메서드입니다. 하위 클래스에서 데이터 복원 또는 CPU 동기화를 수행할 수 있습니다.
+     * [EN] Hook method invoked when a new GPU rawGPUBuffer is created due to mega-buffer expansion. Subclasses can perform data restoration or CPU synchronization.
+     * @param rawBuffer -
+     * [KO] 새로 생성된 GPU 원본 인스턴스 버퍼
+     * [EN] Newly created GPU raw instance buffer
+     * @param newCapacity -
+     * [KO] 새로 확장된 인스턴스 수용 용량
+     * [EN] Newly expanded instance capacity
      */
-    uploadInstances(startInstance: number, count: number): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#rawGPUBuffer || count <= 0) return;
-
-        const strideBytes = this.#strideBytes;
-        const startByteOffset = startInstance * strideBytes;
-        const byteCount = count * strideBytes;
-
-        gpuDevice.queue.writeBuffer(
-            this.#rawGPUBuffer,
-            startByteOffset,
-            this.#cpuRawDataBuffer.buffer,
-            this.#cpuRawDataBuffer.byteOffset + startByteOffset,
-            byteCount
-        );
+    protected onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
+        // [KO] 순수 GPU 메가버퍼 기본 구현: 별도의 CPU 동기화를 수행하지 않음 (Zero-op)
+        // [EN] Pure GPU mega-buffer default: No CPU synchronization performed (Zero-op)
     }
 
     /**
