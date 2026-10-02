@@ -13,7 +13,7 @@ import type {FoliageOptions} from "./core/Foliage";
 import Foliage from "./core/Foliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
-import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
+import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
@@ -65,7 +65,7 @@ class FoliageManager {
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
-    #cullingDispatcher: FoliageCullingDispatcher;
+    #culler: FoliageCuller;
     #useDepthPrepass: boolean = true;
 
     #spatialGrid: FoliageSpatialGrid;
@@ -132,7 +132,7 @@ class FoliageManager {
         this.#megaBuffer = new FoliageScatterMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
-        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
+        this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markShadowBundleDirty();
@@ -577,7 +577,7 @@ class FoliageManager {
                 this.#foliageList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
             }
         }
-        this.#cullingDispatcher.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
+        this.#culler.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
     }
 
     /**
@@ -611,7 +611,7 @@ class FoliageManager {
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
             (t) => this.#repopulateFoliage(t),
-            this.#cullingDispatcher.baker
+            this.#culler.baker
         );
         this.#foliageTypes.set(options.name, foliage);
         this.#foliageList.push(foliage);
@@ -715,7 +715,7 @@ class FoliageManager {
         this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
-        this.#cullingDispatcher.destroy();
+        this.#culler.destroy();
         this.#emptyBindGroupLayout = null;
         this.#emptyBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;

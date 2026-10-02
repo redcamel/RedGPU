@@ -39,7 +39,7 @@ import {
     fastPackUniformScale,
     packSubCellKey,
     sortCandidateIndicesByDistance,
-    sortChunksByDistance,
+    sortSubCellsByDistance,
     unpackSubCellKeyX,
     unpackSubCellKeyZ
 } from "./ScatterSpatialUtils";
@@ -85,7 +85,7 @@ export {
     fastPack2x16float,
     fastPackUniformScale,
     sortCandidateIndicesByDistance,
-    sortChunksByDistance,
+    sortSubCellsByDistance,
 
     // Constants
     CULLING_WORKGROUP_SIZE,

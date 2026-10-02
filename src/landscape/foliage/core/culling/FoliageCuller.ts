@@ -1,6 +1,6 @@
 /**
- * [KO] 식생 GPU 프러스텀/거리/HZB 컬링 및 베이킹 디스패처 모듈입니다.
- * [EN] Foliage GPU frustum/distance/HZB culling and baking dispatcher module.
+ * [KO] 식생 GPU 프러스텀/거리/HZB 컬링 및 베이킹 컬러 모듈입니다.
+ * [EN] Foliage GPU frustum/distance/HZB culling and baking culler module.
  * @packageDocumentation
  */
 import {mat4} from "gl-matrix";
@@ -18,15 +18,15 @@ import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 디스패치하는 클래스입니다.
- * [EN] Class that dispatches GPU compute shader passes for frustum culling, distance LOD selection, HZB occlusion culling, and baking across all foliage instances.
+ * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 수행하는 클래스입니다.
+ * [EN] Class that executes GPU compute shader passes for frustum culling, distance LOD selection, HZB occlusion culling, and baking across all foliage instances.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageCullingDispatcher extends RedGPUObject {
+class FoliageCuller extends RedGPUObject {
     #tempPVMatrix: mat4 = mat4.create();
     #cachedFrustumPlanes: number[][] = [
         new Array(4), new Array(4), new Array(4),
@@ -59,8 +59,8 @@ class FoliageCullingDispatcher extends RedGPUObject {
     #cachedFovFactor: number = 1.0;
 
     /**
-     * [KO] FoliageCullingDispatcher 인스턴스를 생성하고 내부 컴퓨트 파이프라인을 초기화합니다.
-     * [EN] Creates a FoliageCullingDispatcher instance and initializes the internal compute pipeline.
+     * [KO] FoliageCuller 인스턴스를 생성하고 내부 컴퓨트 파이프라인을 초기화합니다.
+     * [EN] Creates a FoliageCuller instance and initializes the internal compute pipeline.
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance
@@ -94,9 +94,9 @@ class FoliageCullingDispatcher extends RedGPUObject {
     /**
      * [KO] 카메라 위치와 프러스텀, 그림자 캐스케이드 상태를 기반으로 컬링 파라미터를 갱신하고 GPU 디스패치를 준비합니다.
      * [EN] Updates culling parameters and prepares GPU compute dispatches based on camera position, frustum, and shadow cascades.
-     * @param typeList -
-     * [KO] 활성 식생 타입 목록
-     * [EN] Active foliage type list
+     * @param foliageList -
+     * [KO] 활성 식생 목록
+     * [EN] Active foliage list
      * @param viewOrCamera -
      * [KO] 카메라 또는 뷰 객체
      * [EN] Camera or view object
@@ -108,12 +108,12 @@ class FoliageCullingDispatcher extends RedGPUObject {
      * [EN] Render pass state data
      */
     updateAndDispatch(
-        typeList: Foliage[],
+        foliageList: Foliage[],
         viewOrCamera: any,
         landscape?: Landscape | null,
         stateData?: any
     ): void {
-        const typeCount = typeList.length;
+        const typeCount = foliageList.length;
         if (typeCount === 0) return;
 
         const camera = viewOrCamera?.rawCamera || viewOrCamera?.camera || viewOrCamera;
@@ -359,8 +359,8 @@ class FoliageCullingDispatcher extends RedGPUObject {
     };
 
     /**
-     * [KO] 컬링 디스패처 및 베이커 리소스를 해제합니다.
-     * [EN] Destroys culling dispatcher and baker resources.
+     * [KO] 컬링 및 베이커 리소스를 해제합니다.
+     * [EN] Destroys culler and baker resources.
      */
     destroy(): void {
         this.#baker.destroy();
@@ -417,5 +417,5 @@ class FoliageCullingDispatcher extends RedGPUObject {
     };
 }
 
-Object.freeze(FoliageCullingDispatcher);
-export default FoliageCullingDispatcher;
+Object.freeze(FoliageCuller);
+export default FoliageCuller;

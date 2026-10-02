@@ -147,17 +147,17 @@ export function sortCandidateIndicesByDistance(
 }
 
 /**
- * [KO] 중심 좌표(`centerX`, `centerZ`)를 갖는 청크 객체 배열을 카메라 기준 거리 제곱값 오름차순으로 제자리 퀵 정렬합니다. (Zero-GC & 거리 단 1회 계산)
- * [EN] In-place quick-sorts chunk object arrays having `centerX` and `centerZ` in ascending order of squared distance to camera. (Zero-GC & single distance evaluation)
+ * [KO] 중심 좌표(`centerX`, `centerZ`)를 갖는 서브셀 객체 배열을 카메라 기준 거리 제곱값 오름차순으로 제자리 퀵 정렬합니다. (Zero-GC & 거리 단 1회 계산)
+ * [EN] In-place quick-sorts subcell object arrays having `centerX` and `centerZ` in ascending order of squared distance to camera. (Zero-GC & single distance evaluation)
  *
- * @param chunks - 정렬할 청크 객체 배열
- * @param dists - 사전 할당된 거리 버퍼 (최소 chunks.length 이상의 Float32Array)
+ * @param subCells - 정렬할 서브셀 객체 배열
+ * @param dists - 사전 할당된 거리 버퍼 (최소 subCells.length 이상의 Float32Array)
  * @param camX - 카메라 월드 X 좌표
  * @param camZ - 카메라 월드 Z 좌표
- * @param count - 정렬할 청크 개수
+ * @param count - 정렬할 서브셀 개수
  */
-export function sortChunksByDistance<T extends { centerX: number; centerZ: number }>(
-    chunks: T[],
+export function sortSubCellsByDistance<T extends { centerX: number; centerZ: number }>(
+    subCells: T[],
     dists: Float32Array,
     camX: number,
     camZ: number,
@@ -167,18 +167,18 @@ export function sortChunksByDistance<T extends { centerX: number; centerZ: numbe
 
     // 1. 거리 계산 1회 일괄 수행 ($N$회 연산으로 최소화)
     for (let i = 0; i < count; i++) {
-        const c = chunks[i];
+        const c = subCells[i];
         const dx = c.centerX - camX;
         const dz = c.centerZ - camZ;
         dists[i] = dx * dx + dz * dz;
     }
 
     // 2. 동반 제자리 퀵 정렬 수행
-    quickSortChunks(chunks, dists, 0, count - 1);
+    quickSortSubCells(subCells, dists, 0, count - 1);
 }
 
-function quickSortChunks<T>(
-    chunks: T[],
+function quickSortSubCells<T>(
+    subCells: T[],
     dists: Float32Array,
     left: number,
     right: number
@@ -191,9 +191,9 @@ function quickSortChunks<T>(
         while (dists[i] < pivotVal) i++;
         while (dists[j] > pivotVal) j--;
         if (i <= j) {
-            const tempChunk = chunks[i];
-            chunks[i] = chunks[j];
-            chunks[j] = tempChunk;
+            const tempSubCell = subCells[i];
+            subCells[i] = subCells[j];
+            subCells[j] = tempSubCell;
 
             const tempDist = dists[i];
             dists[i] = dists[j];
@@ -203,6 +203,6 @@ function quickSortChunks<T>(
             j--;
         }
     }
-    if (left < j) quickSortChunks(chunks, dists, left, j);
-    if (i < right) quickSortChunks(chunks, dists, i, right);
+    if (left < j) quickSortSubCells(subCells, dists, left, j);
+    if (i < right) quickSortSubCells(subCells, dists, i, right);
 }

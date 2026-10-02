@@ -6,7 +6,7 @@
  * - `Foliage`: 단일 식생 타입 정의 및 타일별 인스턴스 라이프사이클 관리 엔티티
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: 식생 전용 메인 및 그림자 렌더 서브메쉬
  * - `FoliageScatterMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
- * - `FoliageCullingDispatcher`: HZB 오클루전 및 프러스텀 컬링 GPU 디스패처
+ * - `FoliageCuller`: HZB 오클루전 및 프러스텀 컬링 GPU 실행기
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: 지형 타일 내부 고밀도 서브셀 공간 분할 및 동적 인스턴스 스트리머
  * - `assembleFoliageSubMeshes`: 계층적 식생 3D 모델을 분석·결합하여 단일 서브메쉬로 조립하는 순수 함수
@@ -22,7 +22,7 @@
  * - `Foliage`: Entity defining a single foliage type and managing per-tile instance lifecycles
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
  * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
- * - `FoliageCullingDispatcher`: GPU dispatcher for HZB occlusion and view frustum culling
+ * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: High-density subcell spatial partitioner and dynamic streamer
  * - `assembleFoliageSubMeshes`: Pure function assembling hierarchical foliage models into combined sub-meshes
@@ -47,7 +47,7 @@ import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
 import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
-import FoliageCullingDispatcher from "./culling/FoliageCullingDispatcher";
+import FoliageCuller from "./culling/FoliageCuller";
 
 // 3. Impostors
 import bakeFoliageImpostor, {type FoliageBakeResult} from "./impostor/bakeFoliageImpostor";
@@ -79,7 +79,7 @@ export {
     FoliageSpatialGrid,
     FoliagePipelineRegistry,
     FoliageRenderer,
-    FoliageCullingDispatcher,
+    FoliageCuller,
     OctahedralImpostorMaterial,
     FoliageSubCellPartitioner,
     FoliageSubCellStreamer,

@@ -7,7 +7,7 @@
 import type Foliage from "../Foliage";
 import FoliageSubCellPartitioner, {type FoliageSubCell} from "./FoliageSubCellPartitioner";
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
-import {sortChunksByDistance} from "../../../core/scatter";
+import {sortSubCellsByDistance} from "../../../core/scatter";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
@@ -165,7 +165,7 @@ export default class FoliageSubCellStreamer {
         if (this.#candidateDists.length < candidateCount) {
             this.#candidateDists = new Float32Array(Math.max(candidateCount, this.#candidateDists.length * 2));
         }
-        sortChunksByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
+        sortSubCellsByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
 
         const toMountCount = Math.min(candidateCount, this.#mountBudget);
         for (let i = 0; i < toMountCount; i++) {
