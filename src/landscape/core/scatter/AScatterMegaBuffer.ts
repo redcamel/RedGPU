@@ -34,10 +34,10 @@ export interface ScatterShaderReflectionConfig {
      */
     instanceStructName: string;
     /**
-     * [KO] 타입 파라미터 구조체 이름
-     * [EN] Type parameter struct name
+     * [KO] 타입 파라미터 구조체 이름 (선택사항, 불필요한 경우 생략 가능)
+     * [EN] Type parameter struct name (optional, omit if not needed)
      */
-    typeParamStructName: string;
+    typeParamStructName?: string;
 }
 
 /**
@@ -155,8 +155,11 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             throw new Error(`[AScatterMegaBuffer] Failed to reflect instance stride for "${instanceStructName}".`);
         }
 
-        const typeParamBytes = shaderInfo.structs?.[typeParamStructName]?.arrayBufferByteLength;
-        if (!typeParamBytes) {
+        const typeParamBytes = typeParamStructName
+            ? shaderInfo.structs?.[typeParamStructName]?.arrayBufferByteLength
+            : 0;
+
+        if (typeParamStructName && !typeParamBytes) {
             throw new Error(`[AScatterMegaBuffer] Failed to reflect type param struct size for "${typeParamStructName}".`);
         }
 
@@ -164,14 +167,15 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#maxSubMeshes = maxSubMeshes;
         this.#strideBytes = strideBytes;
         this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
-        this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
+        this.#typeParamFloats = typeParamBytes ? typeParamBytes / Float32Array.BYTES_PER_ELEMENT : 0;
 
         this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
         this.#cpuRawDataBuffer = new Float32Array(this.#instanceCapacity * this.#strideFloats);
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
 
-        this.#cpuTypeParamsBuffer = new Float32Array(this.#maxTypes * this.#typeParamFloats);
+        const typeParamsCount = this.#maxTypes * this.#typeParamFloats;
+        this.#cpuTypeParamsBuffer = new Float32Array(typeParamsCount > 0 ? typeParamsCount : 1);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
 
         this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT);
@@ -666,11 +670,13 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.constructor.name}_TypeParams`,
-            size: typeParamsByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-        });
+        if (typeParamsByteSize > 0) {
+            this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
+                label: `${this.constructor.name}_TypeParams`,
+                size: typeParamsByteSize,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            });
+        }
 
         const indirectByteSize = Math.max(
             this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,

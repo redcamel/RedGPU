@@ -13,19 +13,19 @@ import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer, GrassTypeMaterialBufferResources} from "./core/renderer/GrassRenderer";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
-import PureGrassProceduralPipeline from "./procedural/PureGrassProceduralPipeline";
-
-const DEG2RAD: number = 0.017453292519943295;
+import GrassBakePipeline from "./core/baking/GrassBakePipeline";
+import GrassCullPipeline from "./core/culling/GrassCullPipeline";
 
 /**
  * [KO] 카메라를 중심으로 잔디를 활성화하고 스트리밍하는 기본 반경(미터 단위)입니다. 기본값: `120.0`
  * [EN] Default radius in meters around the camera within which grass is activated and streamed. Default: `120.0`
  */
 const DEFAULT_STREAMING_RADIUS: number = 120.0;
+const CELL_SIZE: number = 16.0;
 
 /**
- * [KO] 대규모 지형(Landscape)의 Pure GPU 절차적 잔디(Procedural Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
- * [EN] Manager class that oversees the large-scale Pure GPU procedural grass ecosystem of the landscape.
+ * [KO] 대규모 지형(Landscape)의 GPU 베이킹 & GPU 초고속 컬링 기반 잔디(Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that oversees the large-scale GPU baked & GPU culled grass ecosystem of the landscape.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -42,17 +42,19 @@ export class GrassManager extends RedGPUObject {
     #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassScatterMegaBuffer;
-    #proceduralPipeline: PureGrassProceduralPipeline;
+    #bakePipeline: GrassBakePipeline;
+    #cullPipeline: GrassCullPipeline;
 
     #grassList: Grass[] = [];
     #nextTypeId: number = 0;
-    #totalInstanceCount: number = 0;
     #populated: boolean = false;
 
     #renderer: GrassRenderer;
     #typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources> = new Map();
 
     #lastPopulatePos: [number, number, number] = [0, 0, 0];
+    #lastBakePos: [number, number] = [0, 0];
+    #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
     #frustumPlanesF32: Float32Array = new Float32Array(24);
 
@@ -73,10 +75,11 @@ export class GrassManager extends RedGPUObject {
         this.#tileStreamer = tileStreamer;
 
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
-        this.#proceduralPipeline = new PureGrassProceduralPipeline(this.redGPUContext);
+        this.#bakePipeline = new GrassBakePipeline(this.redGPUContext);
+        this.#cullPipeline = new GrassCullPipeline(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
-            this.#proceduralPipeline.invalidateBindGroups();
+            this.#cullPipeline.invalidateBindGroups();
             for (const res of this.#typeMaterialBuffers.values()) {
                 res.instanceBindGroup = null;
                 for (let s = 0; s < res.subMeshResources.length; s++) {
@@ -128,6 +131,7 @@ export class GrassManager extends RedGPUObject {
         const next = Math.max(16.0, val);
         if (this.#streamingRadius !== next) {
             this.#streamingRadius = next;
+            this.rebakeAll();
         }
     }
 
@@ -160,7 +164,14 @@ export class GrassManager extends RedGPUObject {
      * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
      */
     get totalInstanceCount(): number {
-        return this.#totalInstanceCount;
+        let count = 0;
+        const list = this.#grassList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const alloc = this.#megaBuffer.getAllocation(list[i].typeId);
+            if (alloc) count += alloc.instanceCount;
+        }
+        return count;
     }
 
     /**
@@ -224,17 +235,33 @@ export class GrassManager extends RedGPUObject {
         grassType.typeId = typeId;
         this.#grassList.push(grassType);
 
-        const {cullingDistance, name, subMeshes} = grassType;
+        const {cullingDistance, instancesPerCell, name, subMeshes} = grassType;
         const targetRadius = Math.max(cullingDistance, this.#streamingRadius);
-        const maxInstances = Math.max(8192, Math.min(262144, Math.ceil(targetRadius * targetRadius * 2)));
+        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
+        const maxInstances = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil((instancesPerCell || 64) * 1.3)));
 
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             maxInstances,
             subMeshes
         );
-        alloc.instanceCount = maxInstances;
         grassType.bindAllocation(alloc);
+
+        grassType.onRepopulateRequired = () => {
+            this.rebakeAll();
+        };
+
+        if (grassType.targetLayer && this.#landscape.layers) {
+            const matchedLayer = this.#landscape.layers.find(
+                l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer
+            );
+            const wt = matchedLayer?.weightTexture;
+            if (wt && typeof (wt as any).onLoad === 'function') {
+                (wt as any).onLoad(() => {
+                    this.rebakeAll();
+                });
+            }
+        }
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
@@ -267,10 +294,20 @@ export class GrassManager extends RedGPUObject {
                 cachedHasVbt: false,
                 subMeshResources: []
             });
+
+            const fallbackCam = this.#getFallbackCameraPosition();
+            if (fallbackCam) {
+                this.#lastPopulatePos[0] = fallbackCam[0];
+                this.#lastPopulatePos[1] = fallbackCam[1];
+                this.#lastPopulatePos[2] = fallbackCam[2];
+                this.#lastBakePos[0] = fallbackCam[0];
+                this.#lastBakePos[1] = fallbackCam[2];
+            }
+
+            this.#bakeGrassType(grassType, this.#lastPopulatePos[0], this.#lastPopulatePos[2]);
         }
 
-        this.#proceduralPipeline.invalidateBindGroups();
-        this.#totalInstanceCount = maxInstances;
+        this.#cullPipeline.invalidateBindGroups();
         this.#populated = true;
         return grassType;
     }
@@ -305,24 +342,8 @@ export class GrassManager extends RedGPUObject {
         }
 
         removedGrass.bindAllocation(null);
-        this.#proceduralPipeline.invalidateBindGroups();
+        this.#cullPipeline.invalidateBindGroups();
         return true;
-    }
-
-    /**
-     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다.
-     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name.
-     *
-     * @param name - 검색할 잔디의 고유 이름
-     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
-     */
-    getGrassByName(name: string): Grass | undefined {
-        const count = this.#grassList.length;
-        for (let i = 0; i < count; i++) {
-            const g = this.#grassList[i];
-            if (g.name === name) return g;
-        }
-        return undefined;
     }
 
     /**
@@ -337,7 +358,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
-            this.#proceduralPipeline.invalidateBindGroups();
+            this.#cullPipeline.invalidateBindGroups();
             for (const res of this.#typeMaterialBuffers.values()) {
                 res.instanceBindGroup = null;
             }
@@ -345,36 +366,15 @@ export class GrassManager extends RedGPUObject {
 
         this.#nextTypeId = 0;
         this.#lastLoadedTileCount = 0;
-        this.#proceduralPipeline.invalidateBindGroups();
+        this.#initialBaked = false;
+        this.#lastBakePos[0] = 0;
+        this.#lastBakePos[1] = 0;
+        this.#cullPipeline.invalidateBindGroups();
     }
 
     /**
-     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
-     * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
-     *
-     * @param view - 현재 렌더링 중인 View3D 객체
-     * @param passEncoder - 메인 씬 GPURenderPassEncoder
-     */
-    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
-    }
-
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
-     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
-     *
-     * @param view - 그림자 패스를 렌더링 중인 View3D 객체
-     * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     */
-    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0) return;
-        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
-    }
-
-    /**
-     * [KO] 매 프레임 호출되어 Pure GPU 절차적 인스턴스 생성, 지형 스냅 및 컬링 Compute Pass를 디스패치합니다.
-     * [EN] Called every frame to dispatch Pure GPU procedural instance generation, terrain snapping, and culling compute pass.
+     * [KO] 매 프레임 호출되어 베이킹된 잔디 인스턴스들을 대상으로 초고속 GPU 거리/프러스텀 컬링 Compute Pass를 디스패치합니다.
+     * [EN] Called every frame to dispatch ultra-fast GPU distance/frustum culling compute pass for baked grass instances.
      *
      * @param renderViewStateData - 뷰 렌더 상태 데이터
      */
@@ -406,14 +406,32 @@ export class GrassManager extends RedGPUObject {
         }
 
         const {tileLoadedCount: currentLoadedTileCount} = this.#landscape;
-        this.#lastLoadedTileCount = currentLoadedTileCount;
+        const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
+        const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
+        const hasValidTextures = !!(vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView && currentLoadedTileCount > 0);
+
+        const tileCountChanged = hasValidTextures && this.#lastLoadedTileCount !== currentLoadedTileCount;
+        if (tileCountChanged) {
+            this.#lastLoadedTileCount = currentLoadedTileCount;
+        }
+
+        const dx = camX - this.#lastBakePos[0];
+        const dz = camZ - this.#lastBakePos[1];
+        const distSq = dx * dx + dz * dz;
+        const bakeThreshold = this.#streamingRadius * 0.35;
+
+        if (hasValidTextures && (!this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
+            this.#initialBaked = true;
+            this.#lastBakePos[0] = camX;
+            this.#lastBakePos[1] = camZ;
+            this.rebakeAll(camX, camZ);
+        }
 
         this.#megaBuffer.resetMultiIndirectCommands();
 
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
         for (const type of this.#grassList) {
@@ -441,11 +459,7 @@ export class GrassManager extends RedGPUObject {
                     subsurfaceStrength,
                     roughness,
                     shadowStrength,
-                    receiveShadow,
-                    farDistance,
-                    bottomOffset,
-                    minSlope,
-                    maxSlope
+                    receiveShadow
                 } = type;
 
                 const {
@@ -494,49 +508,16 @@ export class GrassManager extends RedGPUObject {
                     0,
                     mf.byteLength
                 );
-
-                const stageCount = 2;
-                const stageDistances: [number, number, number, number] = [farDistance, cullingDistance, 9999, 9999];
-
-                const alloc = this.#megaBuffer.getAllocation(typeId);
-                if (alloc) {
-                    const {rawBaseOffset, maxInstances, culledBaseOffset, indirectBaseOffset} = alloc;
-                    const slopeMin = minSlope ?? 0.0;
-                    const slopeMax = maxSlope ?? 89.0;
-                    const hasSlopeFilter = slopeMin > 0.0 || slopeMax < 89.0;
-                    const minSlopeTan2 = slopeMin > 0.0 ? Math.tan(slopeMin * DEG2RAD) ** 2 : 0.0;
-                    const maxSlopeTan2 = slopeMax < 89.0 ? Math.tan(slopeMax * DEG2RAD) ** 2 : 999999.0;
-
-                    this.#megaBuffer.updateTypeParams(
-                        typeId,
-                        cullingDistance,
-                        bottomOffset,
-                        height,
-                        minSlopeTan2,
-                        maxSlopeTan2,
-                        hasSlopeFilter,
-                        rawBaseOffset,
-                        maxInstances,
-                        culledBaseOffset,
-                        indirectBaseOffset,
-                        stageCount,
-                        maxInstances,
-                        stageDistances,
-                        type.subMeshes.length
-                    );
-                }
             }
         }
 
-        // Pure GPU Procedural 단일 패스 디스패치 (CPU 부하 0%)
+        // GPU 초고속 컬링 단일 패스 디스패치 (위치/노멀 계산 0%, 거리 및 프러스텀 판정만 초고속 수행)
         this.commandEncoderManager.addPreProcessComputePass(
-            'Grass_PureGPU_Procedural_ComputePass',
+            'Grass_GPU_Culling_ComputePass',
             (computePass: GPUComputePassEncoder) => {
-                this.#proceduralPipeline.dispatchPass(
+                this.#cullPipeline.dispatchPass(
                     computePass,
                     this.#megaBuffer,
-                    this.#tileStreamer,
-                    this.#landscape,
                     this.#grassList,
                     camX,
                     camY,
@@ -548,13 +529,80 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다.
+     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name.
+     *
+     * @param name - 검색할 잔디의 고유 이름
+     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
+     */
+    getGrassByName(name: string): Grass | undefined {
+        const count = this.#grassList.length;
+        for (let i = 0; i < count; i++) {
+            const g = this.#grassList[i];
+            if (g.name === name) return g;
+        }
+        return undefined;
+    }
+
+    /**
      * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅입니다.
      * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading.
      *
      * @param tileComponent - 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
      */
     onTileLoaded(tileComponent: LandscapeComponent): void {
-        // Pure GPU Procedural 모드에서는 지형 타일 로드 시 별도의 CPU 베이킹 작업이 불필요합니다.
+        if (!this.#enabled || this.#grassList.length === 0 || !tileComponent) return;
+
+        if (this.#lastPopulatePos[0] === 0 && this.#lastPopulatePos[1] === 0 && this.#lastPopulatePos[2] === 0) {
+            const fallbackCamPos = this.#getFallbackCameraPosition();
+            if (fallbackCamPos) {
+                this.#lastPopulatePos[0] = fallbackCamPos[0];
+                this.#lastPopulatePos[1] = fallbackCamPos[1];
+                this.#lastPopulatePos[2] = fallbackCamPos[2];
+            }
+        }
+        this.rebakeAll();
+    }
+
+    /**
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
+     * [EN] Renders culled grass instances in the main render pass using fast indirect draw calls (`drawIndexedIndirect`).
+     *
+     * @param view - 현재 렌더링 중인 View3D 객체
+     * @param passEncoder - 메인 씬 GPURenderPassEncoder
+     */
+    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
+        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
+    }
+
+    /**
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
+     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
+     *
+     * @param view - 그림자 패스를 렌더링 중인 View3D 객체
+     * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
+     */
+    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
+        if (!this.#enabled || this.#grassList.length === 0) return;
+        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
+    }
+
+    /**
+     * [KO] 등록된 모든 잔디 타입에 대해 지형 가상 텍스처(VHT/VBT)를 기반으로 GPU 베이킹을 수행합니다.
+     * [EN] Re-executes GPU baking for all registered grass types based on landscape virtual textures (VHT/VBT).
+     *
+     * @param centerX - 베이킹 중심 월드 X 좌표 (생략 시 마지막 카메라 위치)
+     * @param centerZ - 베이킹 중심 월드 Z 좌표 (생략 시 마지막 카메라 위치)
+     */
+    rebakeAll(centerX?: number, centerZ?: number): void {
+        const posX = centerX !== undefined ? centerX : this.#lastPopulatePos[0];
+        const posZ = centerZ !== undefined ? centerZ : this.#lastPopulatePos[2];
+        const list = this.#grassList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            this.#bakeGrassType(list[i], posX, posZ);
+        }
     }
 
     /**
@@ -563,7 +611,8 @@ export class GrassManager extends RedGPUObject {
      */
     destroy(): void {
         this.#megaBuffer.destroy();
-        this.#proceduralPipeline.destroy();
+        this.#bakePipeline.destroy();
+        this.#cullPipeline.destroy();
         this.#renderer.destroy();
 
         for (const res of this.#typeMaterialBuffers.values()) {
@@ -576,6 +625,47 @@ export class GrassManager extends RedGPUObject {
             grass.onRepopulateRequired = null;
         }
         this.#grassList.length = 0;
+    }
+
+    #getFallbackCameraPosition(): [number, number, number] | null {
+        const viewList = this.redGPUContext?.viewList;
+        if (!viewList || viewList.length === 0) return null;
+
+        for (let i = 0; i < viewList.length; i++) {
+            const v = viewList[i] as any;
+            if (!v) continue;
+            const rawCam = v.rawCamera || v.camera?.rawCamera || v.camera;
+            if (rawCam && typeof rawCam.x === 'number') {
+                return [rawCam.x, rawCam.y, rawCam.z];
+            }
+            const pos = v.camera?.position;
+            if (pos && typeof pos[0] === 'number') {
+                return [pos[0], pos[1], pos[2]];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * [KO] 특정 잔디 타입에 대해 GPU 베이킹을 실행하여 VRAM 버퍼에 위치/노멀/색상을 1회 기록합니다.
+     * [EN] Executes GPU baking for a specific grass type to record position/normal/color into the VRAM buffer once.
+     */
+    #bakeGrassType(grass: Grass, centerX?: number, centerZ?: number): void {
+        const vhtAtlas = this.#tileStreamer.getAtlasTexture('vht');
+        const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
+        if (!vhtAtlas?.gpuTextureView || !vbtAtlas?.gpuTextureView) return;
+
+        const posX = centerX !== undefined ? centerX : this.#lastPopulatePos[0];
+        const posZ = centerZ !== undefined ? centerZ : this.#lastPopulatePos[2];
+
+        this.#bakePipeline.dispatchBake(
+            this.#megaBuffer,
+            this.#tileStreamer,
+            this.#landscape,
+            grass,
+            posX,
+            posZ
+        );
     }
 }
 

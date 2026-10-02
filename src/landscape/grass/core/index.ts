@@ -16,14 +16,16 @@
  */
 import Grass, {type GrassOptions} from "./Grass";
 import {GrassScatterMegaBuffer} from "./buffer/GrassScatterMegaBuffer";
-import {GrassCuller} from "./culling/GrassCuller";
+import GrassBakePipeline from "./baking/GrassBakePipeline";
+import GrassCullPipeline from "./culling/GrassCullPipeline";
 import {GrassRenderer, type GrassTypeMaterialBufferResources} from "./renderer/GrassRenderer";
 
 export {
     // Runtime Classes
     Grass,
     GrassScatterMegaBuffer,
-    GrassCuller,
+    GrassBakePipeline,
+    GrassCullPipeline,
     GrassRenderer,
 
     // Code Hint Interfaces

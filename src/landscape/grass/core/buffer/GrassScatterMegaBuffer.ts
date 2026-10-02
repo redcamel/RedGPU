@@ -5,7 +5,7 @@
  */
 import RedGPUContext from '../../../../context/RedGPUContext';
 import {AScatterMegaBuffer, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
-import grassCullComputeWGSL from '../culling/grassCullCompute.wgsl';
+import grassCullWGSL from '../culling/grassCull.wgsl';
 
 /**
  * [KO] 단일 잔디 타입의 거리별(Near/Far) 간접 드로우 슬롯 정보
@@ -104,7 +104,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     ) {
         const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
             'Grass_Cull_ShaderModule',
-            grassCullComputeWGSL
+            grassCullWGSL
         );
 
         super(
@@ -113,7 +113,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
                 shaderInfo,
                 rawStorageName: 'rawInstances',
                 instanceStructName: 'GrassInstance',
-                typeParamStructName: 'GrassTypeParam'
             },
             initialCapacity,
             maxTypes,
@@ -211,156 +210,20 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] CPU 스테이징 버퍼에 단일 잔디 인스턴스의 배치 데이터를 직접 기록합니다.
-     * [EN] Directly writes placement data for a single grass instance into the CPU staging buffer.
+     * [KO] 특정 잔디 타입의 할당 리소스를 해제합니다.
+     * [EN] Releases allocated resources for a specific grass type.
      *
-     * @param globalInstanceIndex -
-     * [KO] 메가버퍼 내 글로벌 인스턴스 인덱스
-     * [EN] Global instance index within the mega-buffer
-     * @param x -
-     * [KO] 월드 X 좌표
-     * [EN] World X coordinate
-     * @param y -
-     * [KO] 월드 Y 좌표
-     * [EN] World Y coordinate
-     * @param z -
-     * [KO] 월드 Z 좌표
-     * [EN] World Z coordinate
-     * @param rotationY -
-     * [KO] Y축 회전 각도 (라디안)
-     * [EN] Y-axis rotation angle (radians)
-     * @param scaleXZ -
-     * [KO] XZ 평면 스케일
-     * [EN] XZ plane scale
-     * @param scaleY -
-     * [KO] Y 수직 스케일
-     * [EN] Y vertical scale
+     * @param typeId - 해제할 잔디 타입 ID
      */
-    writeInstanceData(
-        globalInstanceIndex: number,
-        x: number,
-        y: number,
-        z: number,
-        rotationY: number,
-        scaleXZ: number,
-        scaleY: number
-    ): void {
-        const base = globalInstanceIndex * this.strideFloats;
-        const cpuRaw = this.cpuRawDataBuffer;
-        cpuRaw[base] = x;
-        cpuRaw[base + 1] = y;
-        cpuRaw[base + 2] = z;
-        cpuRaw[base + 3] = rotationY;
-        cpuRaw[base + 4] = scaleXZ;
-        cpuRaw[base + 5] = scaleY;
-        cpuRaw[base + 6] = 0.0;
-        cpuRaw[base + 7] = 0.0;
-    }
-
-    /**
-     * [KO] 특정 잔디 타입의 컬링 및 렌더링 파라미터를 GPU 타입 파라미터 버퍼에 갱신합니다.
-     * [EN] Updates culling and rendering parameters for a specific grass type in the GPU type parameter buffer.
-     *
-     * @param typeId -
-     * [KO] 잔디 타입의 고유 ID
-     * [EN] Unique ID of the grass type
-     * @param cullingDistance -
-     * [KO] 최대 컬링 거리
-     * [EN] Maximum culling distance
-     * @param bottomOffset -
-     * [KO] 지형 표면 대비 바닥 높이 오프셋
-     * [EN] Bottom height offset relative to terrain surface
-     * @param height -
-     * [KO] 잔디 메시의 물리 높이
-     * [EN] Physical height of the grass mesh
-     * @param minSlopeTan2 -
-     * [KO] 잔디가 자랄 수 있는 최소 경사도 (탄젠트 제곱)
-     * [EN] Minimum slope angle allowed for grass (tangent squared)
-     * @param maxSlopeTan2 -
-     * [KO] 잔디가 자랄 수 있는 최대 경사도 (탄젠트 제곱)
-     * [EN] Maximum slope angle allowed for grass (tangent squared)
-     * @param hasSlopeFilter -
-     * [KO] 경사도 필터 적용 여부
-     * [EN] Whether slope filtering is enabled
-     * @param rawBaseOffset -
-     * [KO] 원본 인스턴스 시작 오프셋
-     * [EN] Raw instance base offset
-     * @param instanceCount -
-     * [KO] 현재 인스턴스 개수
-     * [EN] Current instance count
-     * @param culledBaseOffset -
-     * [KO] 컬링된 인스턴스 시작 오프셋
-     * [EN] Culled instance base offset
-     * @param indirectBaseOffset -
-     * [KO] 간접 드로우 슬롯 시작 오프셋
-     * [EN] Indirect draw slot base offset
-     * @param stageCount -
-     * [KO] LOD 스테이지 개수
-     * [EN] Number of LOD stages
-     * @param maxInstancesPerStage -
-     * [KO] 스테이지당 최대 수용 인스턴스 수
-     * [EN] Maximum instances per stage
-     * @param stageDistances -
-     * [KO] 스테이지별 전환 거리 배열
-     * [EN] Stage transition distance array
-     * @param subMeshCount -
-     * [KO] 단일 잔디 모델을 구성하는 서브메시 총 개수
-     * [EN] Total number of sub-meshes composing a single grass model
-     */
-    updateTypeParams(
-        typeId: number,
-        cullingDistance: number,
-        bottomOffset: number,
-        height: number,
-        minSlopeTan2: number,
-        maxSlopeTan2: number,
-        hasSlopeFilter: boolean,
-        rawBaseOffset: number = 0,
-        instanceCount: number = 0,
-        culledBaseOffset: number = 0,
-        indirectBaseOffset: number = 0,
-        stageCount: number = 2,
-        maxInstancesPerStage: number = 0,
-        stageDistances: [number, number, number, number] = [9999, 9999, 9999, 9999],
-        subMeshCount: number = 1
-    ): void {
-        const typeParamFloats = this.typeParamFloats;
-        const base = typeId * typeParamFloats;
-        const f32 = this.cpuTypeParamsBuffer;
-        const u32 = this.cpuTypeParamsUint32;
-
-        f32[base] = cullingDistance;
-        f32[base + 1] = bottomOffset;
-        f32[base + 2] = height;
-        f32[base + 3] = minSlopeTan2;
-
-        f32[base + 4] = maxSlopeTan2;
-        u32[base + 5] = hasSlopeFilter ? 1 : 0;
-        u32[base + 6] = rawBaseOffset;
-        u32[base + 7] = instanceCount;
-
-        u32[base + 8] = culledBaseOffset;
-        u32[base + 9] = indirectBaseOffset;
-        u32[base + 10] = stageCount;
-        u32[base + 11] = maxInstancesPerStage;
-
-        f32[base + 12] = stageDistances[0] ?? 9999;
-        f32[base + 13] = stageDistances[1] ?? 9999;
-        f32[base + 14] = stageDistances[2] ?? 9999;
-        u32[base + 15] = subMeshCount;
-
-        const gpuDevice = this.gpuDevice;
-        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
-        if (gpuDevice && typeParamsGPUBuffer) {
-            gpuDevice.queue.writeBuffer(
-                typeParamsGPUBuffer,
-                base * 4,
-                this.cpuTypeParamsBuffer.buffer,
-                base * 4,
-                typeParamFloats * 4
-            );
+    freeType(typeId: number): void {
+        const alloc = this.#allocations.get(typeId);
+        if (alloc) {
+            alloc.instanceCount = 0;
+            this.#allocations.delete(typeId);
         }
     }
+
+
 
     /**
      * [KO] 특정 잔디 타입 ID에 해당하는 메가버퍼 할당 정보 객체를 조회합니다.
