@@ -251,10 +251,12 @@ export class GrassManager extends RedGPUObject {
             this.rebakeAll();
         };
 
-        if (grassType.targetLayer && this.#landscape.layers) {
-            const matchedLayer = this.#landscape.layers.find(
-                l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer
-            );
+        if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.#landscape.layers) {
+            const matchedLayer = typeof grassType.targetLayer === 'number'
+                ? this.#landscape.layers[grassType.targetLayer]
+                : this.#landscape.layers.find(
+                    l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer
+                );
             const wt = matchedLayer?.weightTexture;
             if (wt && typeof (wt as any).onLoad === 'function') {
                 (wt as any).onLoad(() => {

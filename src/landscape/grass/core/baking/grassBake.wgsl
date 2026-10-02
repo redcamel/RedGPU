@@ -133,10 +133,12 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             continue;
         }
 
-        // WeightMap (SplatMap) evaluation: 1:1 match with computeNormalizedChannelWeight
+        // WeightMap (SplatMap) evaluation: 1:1 match with landscapeFragment.wgsl
         if (uniforms.hasWeightMap != 0u) {
             let weightSample = textureSampleLevel(weightTexture, weightSampler, vec2<f32>(u, v), 0.0);
-            let totalW = weightSample.r + weightSample.g + weightSample.b + weightSample.a;
+            let isAlphaFull = weightSample.a >= 0.99;
+            let effectiveA = select(weightSample.a, clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0), isAlphaFull);
+            let effectiveTotalW = weightSample.r + weightSample.g + weightSample.b + effectiveA;
 
             var rawW = 0.0;
             if (uniforms.weightChannelIndex == 0u) {
@@ -146,14 +148,10 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             } else if (uniforms.weightChannelIndex == 2u) {
                 rawW = weightSample.b;
             } else {
-                if (weightSample.a >= 0.99) {
-                    rawW = max(0.0, 1.0 - (weightSample.r + weightSample.g + weightSample.b));
-                } else {
-                    rawW = weightSample.a;
-                }
+                rawW = effectiveA;
             }
 
-            let normW = select(rawW, rawW / totalW, totalW > 0.001);
+            let normW = select(rawW, rawW / effectiveTotalW, effectiveTotalW > 0.001);
 
             // Exclude non-grass layers (rock, road, gravel < 0.20)
             if (normW < 0.20) {

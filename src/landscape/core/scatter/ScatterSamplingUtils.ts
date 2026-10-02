@@ -20,8 +20,15 @@
  * [EN] Normalized weight value in range [0.0, 1.0]
  */
 export function computeNormalizedChannelWeight(weights4: Float32Array | number[], channelIndex: number): number {
-    const totalW = weights4[0] + weights4[1] + weights4[2] + weights4[3];
-    return totalW > 0.001 ? (weights4[channelIndex] / totalW) : (weights4[channelIndex] || 0.0);
+    const r = weights4[0];
+    const g = weights4[1];
+    const b = weights4[2];
+    const a = weights4[3];
+    const isAlphaFull = a >= 0.99;
+    const effectiveA = isAlphaFull ? Math.max(0.0, Math.min(1.0, 1.0 - (r + g + b))) : a;
+    const effectiveTotalW = r + g + b + effectiveA;
+    const rawW = channelIndex === 0 ? r : (channelIndex === 1 ? g : (channelIndex === 2 ? b : effectiveA));
+    return effectiveTotalW > 0.001 ? (rawW / effectiveTotalW) : (rawW || 0.0);
 }
 
 /**

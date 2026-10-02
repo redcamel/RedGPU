@@ -106,14 +106,17 @@ export default class GrassBakePipeline extends RedGPUObject {
         let hasWeightMap = 0;
         let weightChannelIndex = 0;
 
-        if (grass.targetLayer && landscape.layers) {
-            const matchedLayer = landscape.layers.find(
-                l => l.name === grass.targetLayer || (l as any).key === grass.targetLayer
-            );
+        if (grass.targetLayer !== undefined && grass.targetLayer !== null && grass.targetLayer !== '' && landscape.layers) {
+            const matchedLayer = typeof grass.targetLayer === 'number'
+                ? landscape.layers[grass.targetLayer]
+                : landscape.layers.find(
+                    l => l.name === grass.targetLayer || (l as any).key === grass.targetLayer
+                );
             if (matchedLayer) {
                 const wt = matchedLayer.weightTexture;
                 if (wt && wt.gpuTexture) {
-                    weightView = wt.gpuTexture.createView();
+                    weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(wt)
+                        || wt.gpuTexture.createView();
                     hasWeightMap = 1;
                     weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
                 }
