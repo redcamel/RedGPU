@@ -7,7 +7,6 @@ import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCA
 import LandscapeComponent from "./core/spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "./core/spatial/LandscapeInstanceBuffer";
 import LandscapeMaterial from "./LandscapeMaterial";
-import LandscapeWeightMapCPUSampler from "./core/cache/LandscapeWeightMapCPUSampler";
 import LandscapeLayer, {LandscapeLayerOptions} from "./LandscapeLayer";
 import LandscapeSharedGeometry from "./core/spatial/LandscapeSharedGeometry";
 import ColorRGBA from "../color/ColorRGBA";
@@ -100,7 +99,6 @@ export class Landscape extends RedGPUObject {
     #instanceBuffer: LandscapeInstanceBuffer;
     #tileStreamer: LandscapeTileStreamer;
     #material: LandscapeMaterial;
-    #weightMapCPUSampler: LandscapeWeightMapCPUSampler;
     #gpuCuller: LandscapeGPUCuller | null = null;
 
     // =========================================================================
@@ -198,7 +196,6 @@ export class Landscape extends RedGPUObject {
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
         this.#material = material;
-        this.#weightMapCPUSampler = new LandscapeWeightMapCPUSampler();
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = lod0SizeQuads;
         this.#lodMaxLevel = lodMaxLevel;
@@ -577,13 +574,6 @@ export class Landscape extends RedGPUObject {
         return this.#material.layers;
     }
 
-    /**
-     * [KO] 지형 스플랫 가중치 맵을 CPU 측에서 이중선형 보간으로 샘플링하는 CPU 전용 가중치 샘플러를 반환합니다.
-     * [EN] Returns the CPU-side weight sampler that samples terrain splat weight maps via bilinear interpolation.
-     */
-    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler {
-        return this.#weightMapCPUSampler;
-    }
 
     /**
      * [KO] 카메라 근접 텍스처 디테일이 최대로 유지되는 시작 거리(월드 단위)를 반환합니다.
@@ -948,11 +938,6 @@ export class Landscape extends RedGPUObject {
      */
     addLayer(options: LandscapeLayerOptions): LandscapeLayer {
         const layer = new LandscapeLayer(this.redGPUContext, options);
-        layer.weightMapCPUSampler = this.#weightMapCPUSampler;
-        const weightSrc = layer.weightTexture?.src || (options as any)?.weightTexture?.src;
-        if (weightSrc) {
-            this.#weightMapCPUSampler.load(weightSrc);
-        }
         this.#material.addLayer(layer);
         return layer;
     }
@@ -1210,7 +1195,6 @@ export class Landscape extends RedGPUObject {
      */
     destroy(): void {
         this.#debuggerManager?.destroy();
-        this.#weightMapCPUSampler?.destroy();
         this.#foliageManager?.destroy?.();
         this.#grassManager?.destroy?.();
         this.#sharedGeometry?.destroy();

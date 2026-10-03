@@ -270,9 +270,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         if (this.#layers.includes(layer)) return this;
 
         layer.resolvePendingTextures(this.redGPUContext);
-        if (layer.weightTexture?.src) {
-            layer.weightMapCPUSampler?.load(layer.weightTexture.src);
-        }
         this.#layers.push(layer);
         layer.onChange = () => {
             this.updateUniformsData();

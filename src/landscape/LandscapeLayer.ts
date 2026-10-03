@@ -5,7 +5,6 @@
  */
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import type RedGPUContext from "../context/RedGPUContext";
-import LandscapeWeightMapCPUSampler from "./core/cache/LandscapeWeightMapCPUSampler";
 
 /**
  * [KO] 스플랫 가중치 텍스처에서 샘플링할 채널 식별자 ('R' | 'G' | 'B' | 'A' 또는 0 | 1 | 2 | 3)
@@ -156,7 +155,6 @@ export class LandscapeLayer {
     #stochasticTiling: boolean = true;
     #stochasticScale: number = 1.0;
 
-    #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
     dirty: boolean = true;
     onChange?: () => void;
 
@@ -506,13 +504,6 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어의 가중치 맵을 CPU에서 샘플링하기 위한 `LandscapeWeightMapCPUSampler` 인스턴스를 가져오거나 설정합니다.
-     * [EN] Gets or sets the `LandscapeWeightMapCPUSampler` instance for sampling the layer's weight map on the CPU.
-     */
-    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler | undefined {
-        return this.#weightMapCPUSampler;
-    }
 
     set aoIntensity(val: number) {
         if (this.#aoIntensity === val) return;
@@ -554,10 +545,6 @@ export class LandscapeLayer {
             this.#weightTexture = new BitmapTexture(context, this.#pendingWeightSrc, true, undefined, undefined, this.#resolveLinearFormat());
             this.#pendingWeightSrc = undefined;
         }
-    }
-
-    set weightMapCPUSampler(val: LandscapeWeightMapCPUSampler | undefined) {
-        this.#weightMapCPUSampler = val;
     }
 
     /**
@@ -611,26 +598,7 @@ export class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 지정된 UV `(u, v)` 좌표에서 이 레이어의 블렌딩 가중치(0.0~1.0)를 CPU 가중치 샘플러를 통해 조회합니다.
-     * [EN] Queries the blending weight (0.0 to 1.0) of this layer at the specified UV `(u, v)` coordinates via the CPU weight sampler.
-     *
-     * @param u -
-     * [KO] 텍스처 수평 좌표 U (0.0 ~ 1.0)
-     * [EN] Texture horizontal coordinate U (0.0 to 1.0)
-     * @param v -
-     * [KO] 텍스처 수직 좌표 V (0.0 ~ 1.0)
-     * [EN] Texture vertical coordinate V (0.0 to 1.0)
-     * @returns
-     * [KO] 샘플링된 가중치 값 (0.0 ~ 1.0)
-     * [EN] Sampled weight value (0.0 to 1.0)
-     */
-    getWeightAtUV(u: number, v: number): number {
-        if (!this.#enabled) return 0.0;
-        const src = this.#weightTexture?.src;
-        if (!src || !this.#weightMapCPUSampler) return 1.0;
-        return this.#weightMapCPUSampler.getWeight(src, u, v, this.#weightChannelIndex);
-    }
+
 }
 
 Object.freeze(LandscapeLayer);
