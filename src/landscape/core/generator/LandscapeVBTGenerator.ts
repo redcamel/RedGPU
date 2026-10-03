@@ -132,7 +132,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 8] = layer.aoIntensity;
                 fArr[offset + 9] = layer.weightChannelIndex;
                 fArr[offset + 10] = layer.nearUVScaleMultiplier;
-                fArr[offset + 11] = 0.0;
+                fArr[offset + 11] = layer.heightBlendFactor;
             } else {
                 for (let j = 0; j < 12; j++) {
                     fArr[offset + j] = 0.0;

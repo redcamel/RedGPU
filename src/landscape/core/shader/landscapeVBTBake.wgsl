@@ -12,7 +12,7 @@ struct LandscapeLayerParams {
     aoIntensity: f32,
     weightChannelIndex: f32,
     nearUVScaleMultiplier: f32,
-    pad1: f32,
+    heightBlendFactor: f32,
 };
 
 struct VBTBakeUniforms {
@@ -76,12 +76,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var baseAO = 1.0;
 
     let activeLayerCount = uniforms.activeLayerCount;
-    var totalLayerWeight = 0.0;
-    var blendedAlbedo = vec3<f32>(0.0);
-    var blendedNormalTangent = vec3<f32>(0.0, 0.0, 0.0);
-    var blendedRoughness = 0.0;
-    var blendedMetallic = 0.0;
-    var blendedAO = 0.0;
 
     let tileSize = select(512.0, uniforms.singleTileSize, uniforms.singleTileSize > 0.0);
     let tileLocalX = f32(atlasPixelX % i32(tileSize));
@@ -91,6 +85,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         (tileLocalX + 0.5) / tileSize,
         (tileLocalZ + 0.5) / tileSize
     );
+
+    var layerAlbedoCache: array<vec3<f32>, 8>;
+    var layerNormalCache: array<vec3<f32>, 8>;
+    var layerORMACache: array<vec4<f32>, 8>;
+    var layerScoreCache: array<f32, 8>;
+    var validLayerCount: u32 = 0u;
+    var maxScore: f32 = 0.0;
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
         let layerParams = uniforms.layerParams[i];
@@ -118,19 +119,47 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
         let layerORMSample = textureSampleLevel(layerORMArray, vbtTextureSampler, layerUV, layerIdx, 0.0);
 
-        let layerAlbedo = layerAlbedoSample.rgb;
-        let layerRoughness = layerParams.roughness * layerORMSample.g;
-        let layerMetallic = layerParams.metallic * layerORMSample.b;
+        var heightVal = layerORMSample.a;
+        if (heightVal >= 0.999 || heightVal <= 0.001) {
+            heightVal = dot(layerAlbedoSample.rgb, vec3<f32>(0.299, 0.587, 0.114));
+        }
+
+        let blendFactor = select(1.0, layerParams.heightBlendFactor, layerParams.heightBlendFactor > 0.0);
+        let score = (layerW + heightVal * blendFactor) * saturate(layerW * 8.0);
+        maxScore = max(maxScore, score);
+
+        layerAlbedoCache[validLayerCount] = layerAlbedoSample.rgb;
+        layerNormalCache[validLayerCount] = layerNormalSample;
+        let r = layerParams.roughness * layerORMSample.g;
+        let m = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
-        let layerAO = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
+        let ao = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
+        layerORMACache[validLayerCount] = vec4<f32>(r, m, ao, layerW);
+        layerScoreCache[validLayerCount] = score;
 
-        blendedAlbedo += layerAlbedo * layerW;
-        blendedNormalTangent += layerNormalSample * layerW;
-        blendedRoughness += layerRoughness * layerW;
-        blendedMetallic += layerMetallic * layerW;
-        blendedAO += layerAO * layerW;
+        validLayerCount = validLayerCount + 1u;
+    }
 
-        totalLayerWeight += layerW;
+    var totalLayerWeight = 0.0;
+    var blendedAlbedo = vec3<f32>(0.0);
+    var blendedNormalTangent = vec3<f32>(0.0, 0.0, 0.0);
+    var blendedRoughness = 0.0;
+    var blendedMetallic = 0.0;
+    var blendedAO = 0.0;
+
+    let contrast = 0.25;
+    for (var k = 0u; k < validLayerCount; k = k + 1u) {
+        let score = layerScoreCache[k];
+        let rawW = layerORMACache[k].w;
+        let heightWeighted = max(0.0, score - maxScore + contrast) * rawW;
+
+        blendedAlbedo += layerAlbedoCache[k] * heightWeighted;
+        blendedNormalTangent += layerNormalCache[k] * heightWeighted;
+        blendedRoughness += layerORMACache[k].x * heightWeighted;
+        blendedMetallic += layerORMACache[k].y * heightWeighted;
+        blendedAO += layerORMACache[k].z * heightWeighted;
+
+        totalLayerWeight += heightWeighted;
     }
 
     var finalAlbedo = baseAlbedo;

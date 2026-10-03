@@ -385,7 +385,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 8] = layer.aoIntensity;
                 floatBuf[offset + 9] = layer.weightChannelIndex;
                 floatBuf[offset + 10] = layer.nearUVScaleMultiplier;
-                floatBuf[offset + 11] = 0.0;
+                floatBuf[offset + 11] = layer.heightBlendFactor;
             } else {
                 floatBuf.fill(0, offset, offset + 12);
             }

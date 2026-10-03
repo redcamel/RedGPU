@@ -90,6 +90,11 @@ export interface LandscapeLayerOptions {
      * [EN] Ambient occlusion intensity (default: 1.0)
      */
     aoIntensity?: number;
+    /**
+     * [KO] 높이 기반 스플랫 블렌딩 변위 강도 (0.0~5.0, 기본값: 1.0)
+     * [EN] Height-based splat blending displacement factor (0.0-5.0, default: 1.0)
+     */
+    heightBlendFactor?: number;
 }
 
 /**
@@ -137,6 +142,7 @@ export class LandscapeLayer {
     #metallic: number = 0.0;
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
+    #heightBlendFactor: number = 1.0;
 
     #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
     dirty: boolean = true;
@@ -223,6 +229,10 @@ export class LandscapeLayer {
 
         if (aoIntensity !== undefined) {
             this.#aoIntensity = aoIntensity;
+        }
+
+        if (actualOptions.heightBlendFactor !== undefined) {
+            this.#heightBlendFactor = Math.max(0.0, Math.min(5.0, actualOptions.heightBlendFactor));
         }
     }
 
@@ -526,6 +536,23 @@ export class LandscapeLayer {
 
     set weightMapCPUSampler(val: LandscapeWeightMapCPUSampler | undefined) {
         this.#weightMapCPUSampler = val;
+    }
+
+    /**
+     * [KO] 높이 기반 스플랫 블렌딩 변위 강도를 가져오거나 설정합니다. (0.0~5.0, 기본값: 1.0)
+     * [EN] Gets or sets the height-based splat blending displacement factor. (0.0-5.0, default: 1.0)
+     */
+    get heightBlendFactor(): number {
+        return this.#heightBlendFactor;
+    }
+
+    set heightBlendFactor(val: number) {
+        const clamped = Math.max(0.0, Math.min(5.0, val));
+        if (this.#heightBlendFactor !== clamped) {
+            this.#heightBlendFactor = clamped;
+            this.dirty = true;
+            this.onChange?.();
+        }
     }
 
     /**
