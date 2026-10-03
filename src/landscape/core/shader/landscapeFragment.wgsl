@@ -201,27 +201,17 @@ fn sampleLayerStochasticGrad(
     let ddy2 = rotate2D(ddyUV, ang2);
 
     let alb0 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0).rgb;
-    let rawNorm0 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm0_xy = rotate2D(rawNorm0.xy, ang0);
-    let norm0 = vec3<f32>(rotNorm0_xy * normalIntensity, max(0.01, rawNorm0.z));
-    let orm0 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0);
-
     let alb1 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1).rgb;
-    let rawNorm1 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm1_xy = rotate2D(rawNorm1.xy, ang1);
-    let norm1 = vec3<f32>(rotNorm1_xy * normalIntensity, max(0.01, rawNorm1.z));
-    let orm1 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1);
-
     let alb2 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2).rgb;
-    let rawNorm2 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm2_xy = rotate2D(rawNorm2.xy, ang2);
-    let norm2 = vec3<f32>(rotNorm2_xy * normalIntensity, max(0.01, rawNorm2.z));
-    let orm2 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2);
+
+    let rawNorm = textureSampleGrad(layerNormalArray, baseColorTextureSampler, baseUV, layerIdx, ddxUV, ddyUV).rgb * 2.0 - vec3<f32>(1.0);
+    let norm = vec3<f32>(rawNorm.xy * normalIntensity, max(0.01, rawNorm.z));
+    let orm = textureSampleGrad(layerORMArray, baseColorTextureSampler, baseUV, layerIdx, ddxUV, ddyUV);
 
     var res: StochasticSampleResult;
     res.albedo = alb0 * gridTri.w0 + alb1 * gridTri.w1 + alb2 * gridTri.w2;
-    res.normal = norm0 * gridTri.w0 + norm1 * gridTri.w1 + norm2 * gridTri.w2;
-    res.orm = orm0 * gridTri.w0 + orm1 * gridTri.w1 + orm2 * gridTri.w2;
+    res.normal = norm;
+    res.orm = orm;
     return res;
 }
 

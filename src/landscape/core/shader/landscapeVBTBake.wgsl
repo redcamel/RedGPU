@@ -129,27 +129,17 @@ fn sampleLayerStochasticLevel(
     let uv2 = rotate2D(baseUV, ang2) + r2.xy;
 
     let alb0 = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, uv0, layerIdx, 0.0).rgb;
-    let rawNorm0 = textureSampleLevel(layerNormalArray, vbtTextureSampler, uv0, layerIdx, 0.0).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm0_xy = rotate2D(rawNorm0.xy, ang0);
-    let norm0 = vec3<f32>(rotNorm0_xy * normalIntensity, max(0.01, rawNorm0.z));
-    let orm0 = textureSampleLevel(layerORMArray, vbtTextureSampler, uv0, layerIdx, 0.0);
-
     let alb1 = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, uv1, layerIdx, 0.0).rgb;
-    let rawNorm1 = textureSampleLevel(layerNormalArray, vbtTextureSampler, uv1, layerIdx, 0.0).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm1_xy = rotate2D(rawNorm1.xy, ang1);
-    let norm1 = vec3<f32>(rotNorm1_xy * normalIntensity, max(0.01, rawNorm1.z));
-    let orm1 = textureSampleLevel(layerORMArray, vbtTextureSampler, uv1, layerIdx, 0.0);
-
     let alb2 = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, uv2, layerIdx, 0.0).rgb;
-    let rawNorm2 = textureSampleLevel(layerNormalArray, vbtTextureSampler, uv2, layerIdx, 0.0).rgb * 2.0 - vec3<f32>(1.0);
-    let rotNorm2_xy = rotate2D(rawNorm2.xy, ang2);
-    let norm2 = vec3<f32>(rotNorm2_xy * normalIntensity, max(0.01, rawNorm2.z));
-    let orm2 = textureSampleLevel(layerORMArray, vbtTextureSampler, uv2, layerIdx, 0.0);
+
+    let rawNorm = textureSampleLevel(layerNormalArray, vbtTextureSampler, baseUV, layerIdx, 0.0).rgb * 2.0 - vec3<f32>(1.0);
+    let norm = vec3<f32>(rawNorm.xy * normalIntensity, max(0.01, rawNorm.z));
+    let orm = textureSampleLevel(layerORMArray, vbtTextureSampler, baseUV, layerIdx, 0.0);
 
     var res: StochasticSampleResult;
     res.albedo = alb0 * gridTri.w0 + alb1 * gridTri.w1 + alb2 * gridTri.w2;
-    res.normal = norm0 * gridTri.w0 + norm1 * gridTri.w1 + norm2 * gridTri.w2;
-    res.orm = orm0 * gridTri.w0 + orm1 * gridTri.w1 + orm2 * gridTri.w2;
+    res.normal = norm;
+    res.orm = orm;
     return res;
 }
 
