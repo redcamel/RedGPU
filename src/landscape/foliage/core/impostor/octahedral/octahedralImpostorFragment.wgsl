@@ -7,6 +7,7 @@
 #redgpu_include math.PI;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
+#redgpu_include landscape.math.rotateVectorByQuat;
 
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -62,10 +63,6 @@ fn sampleOctahedralAtlas(
 
     let sampled = textureSampleGrad(tex, smp, atlasUV, ddxAtlas, ddyAtlas);
     return select(vec4<f32>(0.0), sampled, isInside);
-}
-
-fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
 }
 
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
@@ -256,7 +253,7 @@ fn main(inputData: InputData) -> OutputFragment {
     var N = bakedN;
     let quat = inputData.instanceRotQuat;
     if (abs(dot(quat, quat) - 1.0) < 0.2) {
-        N = normalize(rotateVectorByQuaternion(bakedN, quat));
+        N = normalize(rotateVectorByQuat(bakedN, quat));
     }
 
     let NdotV = max(dot(N, V), 0.04);

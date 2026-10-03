@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowClipPosition;
+#redgpu_include landscape.math.rotateVectorByQuat;
 
 struct SubMeshUniforms {
     relativeModelMatrix: mat4x4<f32>,
@@ -137,10 +138,6 @@ struct OutputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
-
 @vertex
 fn mainInput(input : VertexInput) -> OutputData {
     var output : OutputData;
@@ -164,7 +161,7 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let safeScale = max(instanceScale, vec3<f32>(0.0001));
     let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
+    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
 
     var worldPos = rotatedPos + instancePos;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
@@ -185,12 +182,12 @@ fn mainInput(input : VertexInput) -> OutputData {
         worldNormal = vec3<f32>(-billboardRight.z, 0.0, billboardRight.x);
 
         let invQuat = vec4<f32>(-instanceRotQuat.xyz, instanceRotQuat.w);
-        let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
+        let localView = normalize(rotateVectorByQuat(toCam, invQuat));
         output.vertexTangent = vec4<f32>(localView, -999.0);
     } else {
         if (dot(hierarchyNormal, hierarchyNormal) > 0.0001) {
             let scaledNormal = hierarchyNormal / safeScale;
-            worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, instanceRotQuat));
+            worldNormal = normalize(rotateVectorByQuat(scaledNormal, instanceRotQuat));
         }
 
         var inTan = hierarchyTangent;
@@ -200,7 +197,7 @@ fn mainInput(input : VertexInput) -> OutputData {
             inTan = normalize(cross(hierarchyNormal, rawT));
         }
         let scaledTangent = inTan * safeScale;
-        let worldTangent = normalize(rotateVectorByQuaternion(scaledTangent, instanceRotQuat));
+        let worldTangent = normalize(rotateVectorByQuat(scaledTangent, instanceRotQuat));
         let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
         output.vertexTangent = vec4<f32>(worldTangent, tanW);
 
@@ -270,7 +267,7 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
 
     let safeScale = max(instanceScale, vec3<f32>(0.0001));
     let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
+    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
 
     var worldPos = rotatedPos + instancePos;
     let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, vec3<f32>(0.0, 1.0, 0.0), vec4<f32>(1.0), instancePos, systemUniforms.time.time);
@@ -319,7 +316,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
 
     let safeScale = max(instanceScale, vec3<f32>(0.0001));
     let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
+    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
 
     var worldPos = rotatedPos + instancePos;
     let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, input.vertexNormal, input.vertexColor_0, instancePos, systemUniforms.time.time);

@@ -10,6 +10,7 @@ import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
+import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -83,6 +84,22 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const stochasticTiling = stochasticTiling_wgsl;
+    }
+
+    /**
+     * [KO] 지형 및 스캐터 관련 공통 수학(Math) 함수 컬렉션
+     * [EN] Common math function collection for terrain and scatter systems
+     */
+    export namespace math {
+        /**
+         * [KO] 단위 쿼터니언(vec4<f32>)으로 3차원 벡터(vec3<f32>)를 고속 회전하는 함수 (rotateVectorByQuat)
+         * [EN] Fast vector rotation function using unit quaternion (vec4<f32>) (rotateVectorByQuat)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.rotateVectorByQuat;
+         * ```
+         */
+        export const rotateVectorByQuat = rotateVectorByQuat_wgsl;
     }
 
     /**

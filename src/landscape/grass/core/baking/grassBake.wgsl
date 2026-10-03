@@ -11,6 +11,7 @@
 // ============================================================================
 
 #redgpu_include landscape.struct.GrassInstance;
+#redgpu_include landscape.math.rotateVectorByQuat;
 
 
 struct GrassBakeUniforms {
@@ -63,9 +64,6 @@ fn splitMix32(state: ptr<function, u32>) -> f32 {
     return f32((t ^ (t >> 14u)) & 0xFFFFFFFFu) / 4294967296.0;
 }
 
-fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
 
 fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(
