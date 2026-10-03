@@ -44,18 +44,18 @@ export class LandscapeGPUCuller extends RedGPUObject {
     }
 
     /**
-     * [KO] GPU 컬링 연산에 필요한 입력 타일 버퍼, 가시 인덱스 버퍼, 간접 드로우 버퍼 및 HZB 텍스처를 바인드 그룹으로 바인딩합니다.
-     * [EN] Updates the compute bind group with input tiles, visible indices, indirect draw buffers, and optional HZB texture.
+     * [KO] GPU 컬링 연산에 필요한 전체 타일 버퍼, 가시 타일 출력 버퍼, 간접 드로우 버퍼 및 HZB 텍스처를 바인드 그룹으로 바인딩합니다.
+     * [EN] Updates the compute bind group with all tiles, visible tiles, indirect draw buffers, and optional HZB texture.
      *
-     * @param allInputTilesBuffer - [KO] 전체 입력 타일 스토리지 버퍼 / [EN] Storage buffer containing all input tiles
-     * @param visibleTileIndicesBuffer - [KO] 컬링된 가시 타일 인덱스 출력 스토리지 버퍼 / [EN] Output storage buffer for visible tile indices
+     * @param allTilesBuffer - [KO] 전체 타일 스토리지 버퍼 / [EN] Storage buffer containing all tiles
+     * @param visibleTilesBuffer - [KO] 컬링된 가시 타일 데이터 출력 스토리지 버퍼 / [EN] Output storage buffer for visible tiles
      * @param indirectDrawBuffer - [KO] LOD별 간접 인덱스 드로우 인자 버퍼 / [EN] Indirect indexed draw argument buffer
      * @param hzbTextureView - [KO] HZB 텍스처 뷰 (선택 사항) / [EN] Optional HZB texture view
      * @param hzbSampler - [KO] HZB 텍스처 샘플러 (선택 사항) / [EN] Optional HZB sampler
      */
     updateBindGroup(
-        allInputTilesBuffer: GPUBuffer,
-        visibleTileIndicesBuffer: GPUBuffer,
+        allTilesBuffer: GPUBuffer,
+        visibleTilesBuffer: GPUBuffer,
         indirectDrawBuffer: GPUBuffer,
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
@@ -71,8 +71,8 @@ export class LandscapeGPUCuller extends RedGPUObject {
             layout: this.#bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
-                {binding: 1, resource: {buffer: allInputTilesBuffer}},
-                {binding: 2, resource: {buffer: visibleTileIndicesBuffer}},
+                {binding: 1, resource: {buffer: allTilesBuffer}},
+                {binding: 2, resource: {buffer: visibleTilesBuffer}},
                 {binding: 3, resource: {buffer: indirectDrawBuffer}},
                 {binding: 4, resource: targetHZBView},
                 {binding: 5, resource: targetHZBSampler}

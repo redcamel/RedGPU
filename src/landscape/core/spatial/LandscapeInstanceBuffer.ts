@@ -29,15 +29,15 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
     #maxComponentCount: number;
     #lodMaxLevel: number;
 
-    #allInputTilesBuffer: GPUBuffer | null = null;
-    #visibleTileIndicesBuffer: GPUBuffer | null = null;
+    #allTilesBuffer: GPUBuffer | null = null;
+    #visibleTilesBuffer: GPUBuffer | null = null;
     #indirectDrawBuffer: GPUBuffer | null = null;
     #landscapeUniformBuffer: GPUBuffer | null = null;
 
     #instanceStorageBindGroup: GPUBindGroup | null = null;
     #instanceStorageBindGroupLayout: GPUBindGroupLayout | null = null;
 
-    #allInputTilesData: Float32Array;
+    #allTilesData: Float32Array;
 
     #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
@@ -58,7 +58,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         this.#maxComponentCount = maxComponentCount;
         this.#lodMaxLevel = lodMaxLevel;
 
-        this.#allInputTilesData = new Float32Array(maxComponentCount * 2);
+        this.#allTilesData = new Float32Array(maxComponentCount * 2);
 
         this.#createGPUResources();
 
@@ -67,19 +67,35 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 전체 입력 타일의 원본 메타데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer containing raw metadata of all input tiles.
+     * [KO] 전체 타일의 원본 공간 메타데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer containing raw metadata of all tiles.
      */
-    get allInputTilesBuffer(): GPUBuffer | null {
-        return this.#allInputTilesBuffer;
+    get allTilesBuffer(): GPUBuffer | null {
+        return this.#allTilesBuffer;
     }
 
     /**
-     * [KO] GPU 컬링 후 가시적인 타일 인덱스 목록이 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer containing visible tile indices output by GPU culling.
+     * [KO] 하위 호환성을 위한 allTilesBuffer 별칭입니다.
+     * [EN] Alias of allTilesBuffer for backwards compatibility.
+     */
+    get allInputTilesBuffer(): GPUBuffer | null {
+        return this.#allTilesBuffer;
+    }
+
+    /**
+     * [KO] GPU 컬링 후 가시적인 타일 데이터 목록이 저장되는 GPU 스토리지 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer containing visible tile data output by GPU culling.
+     */
+    get visibleTilesBuffer(): GPUBuffer | null {
+        return this.#visibleTilesBuffer;
+    }
+
+    /**
+     * [KO] 하위 호환성을 위한 visibleTilesBuffer 별칭입니다.
+     * [EN] Alias of visibleTilesBuffer for backwards compatibility.
      */
     get visibleTileIndicesBuffer(): GPUBuffer | null {
-        return this.#visibleTileIndicesBuffer;
+        return this.#visibleTilesBuffer;
     }
 
     /**
@@ -144,8 +160,8 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         centerWorldZ: number
     ): void {
         const offset = index * 2;
-        this.#allInputTilesData[offset] = centerWorldX;
-        this.#allInputTilesData[offset + 1] = centerWorldZ;
+        this.#allTilesData[offset] = centerWorldX;
+        this.#allTilesData[offset + 1] = centerWorldZ;
     }
 
     /**
@@ -154,14 +170,14 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
      */
     uploadStaticTilesToGPU(): void {
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#allInputTilesBuffer) return;
+        if (!gpuDevice || !this.#allTilesBuffer) return;
 
         gpuDevice.queue.writeBuffer(
-            this.#allInputTilesBuffer,
+            this.#allTilesBuffer,
             0,
-            this.#allInputTilesData.buffer,
+            this.#allTilesData.buffer,
             0,
-            this.#allInputTilesData.byteLength
+            this.#allTilesData.byteLength
         );
     }
 
@@ -338,7 +354,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         vbtORMView?: GPUTextureView
     ): void {
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#allInputTilesBuffer || !this.#visibleTileIndicesBuffer || !this.#landscapeUniformBuffer) return;
+        if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#visibleTilesBuffer || !this.#landscapeUniformBuffer) return;
 
         const fallbackView = vntTextureView || vhtTextureView;
 
@@ -346,13 +362,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
             {
                 binding: 0,
                 resource: {
-                    buffer: this.#allInputTilesBuffer
-                }
-            },
-            {
-                binding: 1,
-                resource: {
-                    buffer: this.#visibleTileIndicesBuffer
+                    buffer: this.#visibleTilesBuffer
                 }
             },
             {
@@ -399,13 +409,13 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
      * [EN] Destroys all allocated GPU buffer resources.
      */
     destroy(): void {
-        if (this.#allInputTilesBuffer) {
-            this.#allInputTilesBuffer.destroy();
-            this.#allInputTilesBuffer = null;
+        if (this.#allTilesBuffer) {
+            this.#allTilesBuffer.destroy();
+            this.#allTilesBuffer = null;
         }
-        if (this.#visibleTileIndicesBuffer) {
-            this.#visibleTileIndicesBuffer.destroy();
-            this.#visibleTileIndicesBuffer = null;
+        if (this.#visibleTilesBuffer) {
+            this.#visibleTilesBuffer.destroy();
+            this.#visibleTilesBuffer = null;
         }
         if (this.#indirectDrawBuffer) {
             this.#indirectDrawBuffer.destroy();
@@ -439,15 +449,15 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
                 ...descriptor
             }
         );
-        this.#allInputTilesBuffer = gpuDevice.createBuffer({
-            label: 'Landscape_Instance_AllInputTilesBuffer',
+        this.#allTilesBuffer = gpuDevice.createBuffer({
+            label: 'Landscape_Instance_AllTilesBuffer',
             size: this.#maxComponentCount * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
-        this.#visibleTileIndicesBuffer = gpuDevice.createBuffer({
-            label: 'Landscape_Instance_VisibleTileIndicesBuffer',
-            size: this.#maxComponentCount * this.#lodMaxLevel * 4,
+        this.#visibleTilesBuffer = gpuDevice.createBuffer({
+            label: 'Landscape_Instance_VisibleTilesBuffer',
+            size: this.#maxComponentCount * this.#lodMaxLevel * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 

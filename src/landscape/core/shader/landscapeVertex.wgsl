@@ -4,8 +4,7 @@
 #redgpu_include landscape.struct.LandscapeUniforms;
 #redgpu_include landscape.struct.LandscapeTile;
 
-@group(1) @binding(0) var<storage, read> allInputTiles: array<LandscapeTile>;
-@group(1) @binding(1) var<storage, read> visibleTileIndices: array<u32>;
+@group(1) @binding(0) var<storage, read> visibleTiles: array<LandscapeTile>;
 @group(1) @binding(2) var heightMapSampler: sampler;
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(5) var<uniform> landscapeUniforms: LandscapeUniforms;
@@ -64,8 +63,7 @@ struct ComputedTerrainVertex {
 
 fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     var res: ComputedTerrainVertex;
-    let realTileIdx = visibleTileIndices[input.instanceIdx];
-    let instanceData = allInputTiles[realTileIdx];
+    let instanceData = visibleTiles[input.instanceIdx];
 
     let maxCompCount = max(1u, landscapeUniforms.maxComponentCount);
     let lodLevel = input.instanceIdx / maxCompCount;

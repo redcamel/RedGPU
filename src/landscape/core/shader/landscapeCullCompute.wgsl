@@ -23,8 +23,8 @@ struct CameraFrustumUniforms {
 
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
-@group(0) @binding(1) var<storage, read> allInputTiles: array<LandscapeTile>;
-@group(0) @binding(2) var<storage, read_write> visibleTileIndices: array<u32>;
+@group(0) @binding(1) var<storage, read> allTiles: array<LandscapeTile>;
+@group(0) @binding(2) var<storage, read_write> visibleTiles: array<LandscapeTile>;
 @group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(4) var hzbTexture: texture_2d<f32>;
 @group(0) @binding(5) var hzbSampler: sampler;
@@ -118,9 +118,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
     let index = global_id.x;
     var isVisible = false;
     var lodLevel = 0u;
+    var currentTile: LandscapeTile;
 
     if (index < uniforms.tileCount) {
-        let tile = allInputTiles[index];
+        currentTile = allTiles[index];
+        let tile = currentTile;
         let halfTileX = uniforms.tileSizeX * 0.5;
         let halfTileZ = uniforms.tileSizeZ * 0.5;
         let heightScale = uniforms.heightScale;
@@ -177,6 +179,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let localSlot = atomicAdd(&wgLocalSlots[lodLevel], 1u);
         let globalOffset = wgGlobalOffsets[lodLevel];
         let targetIndex = lodLevel * uniforms.tileCount + globalOffset + localSlot;
-        visibleTileIndices[targetIndex] = index;
+        visibleTiles[targetIndex] = currentTile;
     }
 }

@@ -1071,10 +1071,10 @@ export class Landscape extends RedGPUObject {
         if (this.#lastHZBView !== effectiveHZBTextureView) {
             this.#lastHZBView = effectiveHZBTextureView;
             this.#lastHZBSampler = effectiveHZBSampler;
-            if (this.#instanceBuffer?.allInputTilesBuffer && this.#instanceBuffer?.visibleTileIndicesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
+            if (this.#instanceBuffer?.allTilesBuffer && this.#instanceBuffer?.visibleTilesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
                 this.#gpuCuller?.updateBindGroup(
-                    this.#instanceBuffer.allInputTilesBuffer,
-                    this.#instanceBuffer.visibleTileIndicesBuffer,
+                    this.#instanceBuffer.allTilesBuffer,
+                    this.#instanceBuffer.visibleTilesBuffer,
                     this.#instanceBuffer.indirectDrawBuffer,
                     effectiveHZBTextureView,
                     effectiveHZBSampler
@@ -1319,10 +1319,10 @@ export class Landscape extends RedGPUObject {
         this.#instanceBuffer.uploadStaticTilesToGPU();
         this.#updateLandscapeUniforms();
 
-        if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
+        if (this.#instanceBuffer.allTilesBuffer && this.#instanceBuffer.visibleTilesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
             this.#gpuCuller.updateBindGroup(
-                this.#instanceBuffer.allInputTilesBuffer,
-                this.#instanceBuffer.visibleTileIndicesBuffer,
+                this.#instanceBuffer.allTilesBuffer,
+                this.#instanceBuffer.visibleTilesBuffer,
                 this.#instanceBuffer.indirectDrawBuffer,
                 this.#lastHZBView,
                 this.#lastHZBSampler
