@@ -67,8 +67,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #weightMapArrayView: GPUTextureView | null = null;
 
     #textureArrayVersion: number = 0;
-    #nearDetailDistance: number = 120.0;
-    #nearDetailFade: number = 80.0;
+    #nearDetailDistance: number = 250.0;
+    #nearDetailFade: number = 100.0;
 
     #uniformByteLength: number = 0;
     #uniformFloatArray: Float32Array;

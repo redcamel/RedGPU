@@ -219,8 +219,8 @@ function renderTestPane({
                     }
                     // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 및 페이드 설정
                     // [EN] Optimized detail distance and fade for character close-up view
-                    landscape.nearDetailDistance = 120;
-                    landscape.nearDetailFade = 80;
+                    landscape.nearDetailDistance = 250;
+                    landscape.nearDetailFade = 100;
                 } else {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;

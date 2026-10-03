@@ -159,8 +159,8 @@ function renderTestPane({
     characterOrbitController.centerZ = -2832.5;
 
     view.camera = characterOrbitController;
-    landscape.nearDetailDistance = 120;
-    landscape.nearDetailFade = 80;
+    landscape.nearDetailDistance = 250;
+    landscape.nearDetailFade = 100;
 
     let characterMesh = null;
     let characterController = null;
@@ -215,8 +215,8 @@ function renderTestPane({
                     characterOrbitController.centerY = characterMesh.y + 1.2;
                     characterOrbitController.centerZ = characterMesh.z;
                 }
-                landscape.nearDetailDistance = isChar ? 120 : 1000;
-                landscape.nearDetailFade = isChar ? 80 : 300;
+                landscape.nearDetailDistance = isChar ? 250 : 1000;
+                landscape.nearDetailFade = isChar ? 100 : 300;
                 pane.refresh();
             });
 

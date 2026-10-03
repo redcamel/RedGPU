@@ -265,8 +265,8 @@ function renderTestPane({
                     characterOrbitController.centerY = characterMesh.y + 1.2;
                     characterOrbitController.centerZ = characterMesh.z;
                 }
-                landscape.nearDetailDistance = isChar ? 120 : 1000;
-                landscape.nearDetailFade = isChar ? 80 : 300;
+                landscape.nearDetailDistance = isChar ? 250 : 1000;
+                landscape.nearDetailFade = isChar ? 100 : 300;
                 pane.refresh();
             });
 
