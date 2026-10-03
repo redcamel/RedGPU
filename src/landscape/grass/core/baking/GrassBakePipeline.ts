@@ -110,7 +110,7 @@ export default class GrassBakePipeline extends RedGPUObject {
             const matchedLayer = typeof grass.targetLayer === 'number'
                 ? landscape.layers[grass.targetLayer]
                 : landscape.layers.find(
-                    l => l.name === grass.targetLayer || (l as any).key === grass.targetLayer
+                    l => l.name === grass.targetLayer
                 );
             if (matchedLayer) {
                 const wt = matchedLayer.weightTexture;

@@ -255,11 +255,11 @@ export class GrassManager extends RedGPUObject {
             const matchedLayer = typeof grassType.targetLayer === 'number'
                 ? this.#landscape.layers[grassType.targetLayer]
                 : this.#landscape.layers.find(
-                    l => l.name === grassType.targetLayer || (l as any).key === grassType.targetLayer
+                    l => l.name === grassType.targetLayer
                 );
             const wt = matchedLayer?.weightTexture;
-            if (wt && typeof (wt as any).onLoad === 'function') {
-                (wt as any).onLoad(() => {
+            if (wt && typeof (wt as any).addLoadListeners === 'function') {
+                (wt as any).addLoadListeners(() => {
                     this.rebakeAll();
                 });
             }

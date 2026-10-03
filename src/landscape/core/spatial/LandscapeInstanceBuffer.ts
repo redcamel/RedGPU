@@ -9,14 +9,14 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
  * [EN] Buffer manager handling terrain tile instance buffers, indirect draw arguments, and global landscape uniform buffers for GPU compute culling and multi-LOD indirect rendering.
  *
  * **[KO] 아키텍처 및 역할:**
- * - **타일 인스턴스 스토리지 버퍼 (`allInputTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
- * - **가시 인덱스 스트림 버퍼 (`visibleTileIndicesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.
+ * - **타일 인스턴스 스토리지 버퍼 (`allTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
+ * - **가시 인덱스 스트림 버퍼 (`visibleTilesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.
  * - **멀티 LOD 인디렉트 버퍼 (`indirectDrawBuffer`)**: WebGPU의 `drawIndexedIndirect` 스펙에 맞추어 LOD 레벨당 5개의 uint32 필드(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 배치하여 멀티 레벨 간접 드로우를 단일 패스로 처리합니다.
  * - **전역 유니폼 동기화 (`landscapeUniformBuffer`)**: 카메라 역행렬, 뷰/프로젝션 행렬, 높이 스케일, 안개 파라미터 등을 256바이트 정렬 버퍼로 래핑하여 셰이더와 동기화합니다.
  *
  * **[EN] Architecture & Role:**
- * - **Tile Instance Storage (`allInputTilesBuffer`)**: Houses spatial metadata for all terrain tiles including world coordinates, bounding boxes, height bounds, and atlas UV offsets.
- * - **Visible Index Stream (`visibleTileIndicesBuffer`)**: Dedicated GPU output buffer sequentially populated with tile indices that passed frustum and occlusion culling tests.
+ * - **Tile Instance Storage (`allTilesBuffer`)**: Houses spatial metadata for all terrain tiles including world coordinates, bounding boxes, height bounds, and atlas UV offsets.
+ * - **Visible Index Stream (`visibleTilesBuffer`)**: Dedicated GPU output buffer sequentially populated with tile indices that passed frustum and occlusion culling tests.
  * - **Multi-LOD Indirect Buffer (`indirectDrawBuffer`)**: Layouts 5 uint32 fields (`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`) per LOD level conforming to WebGPU `drawIndexedIndirect` specifications.
  * - **Global Uniform Sync (`landscapeUniformBuffer`)**: Synchronizes view/projection matrices, height scales, and fog parameters via a 256-byte aligned uniform buffer.
  *

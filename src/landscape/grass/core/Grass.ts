@@ -253,7 +253,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 targetMaterial = primaryGroup.material;
             }
 
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture ?? (mesh.material as any)?.baseColorTexture ?? (mesh.material as any)?.diffuseTexture;
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? (mesh.material as any)?.baseColorTexture;
             if (typeof resolvedTexture === 'string') {
                 this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
             } else if (resolvedTexture) {

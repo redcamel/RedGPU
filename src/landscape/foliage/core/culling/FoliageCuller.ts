@@ -149,7 +149,7 @@ class FoliageCuller extends RedGPUObject {
 
         if (this.#megaBuffer) {
 
-            const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
+            const shadowManager = stateData?.view?.scene?.shadowManager;
             const dirShadow = shadowManager?.directionalShadowManager;
             const cascadeParams = this.#cachedCascadeParams;
             const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
@@ -186,7 +186,7 @@ class FoliageCuller extends RedGPUObject {
                 }
             }
 
-            const currentView = stateData?.view || (viewOrCamera as any)?.view || (viewOrCamera?.camera ? viewOrCamera : null);
+            const currentView = stateData?.view || (viewOrCamera?.camera ? viewOrCamera : null);
             const hzb = currentView?.hierarchicalZBuffer;
             const hzbTextureView = hzb?.textureView || null;
             const hzbSampler = hzb?.sampler || null;

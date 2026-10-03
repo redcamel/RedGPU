@@ -384,7 +384,6 @@ export class Landscape extends RedGPUObject {
             this.#tileStreamer?.setTerrainConfig(clampedVal);
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
-            this.#tileStreamer?.rebakeAllLoadedVBT();
             this.#grassManager?.rebakeAll();
             this.#foliageManager?.rebakeAll();
         }
@@ -954,7 +953,7 @@ export class Landscape extends RedGPUObject {
     addLayer(options: LandscapeLayerOptions): LandscapeLayer {
         const layer = new LandscapeLayer(this.redGPUContext, options);
         layer.weightMapCPUSampler = this.#weightMapCPUSampler;
-        const weightSrc = layer.weightTexture?.src || (options as any)?.weightTexture?.src;
+        const weightSrc = layer.weightTexture?.src;
         if (weightSrc) {
             this.#weightMapCPUSampler.load(weightSrc);
         }
@@ -1060,7 +1059,7 @@ export class Landscape extends RedGPUObject {
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
 
-        const fovDeg = rawCamera.fieldOfView ?? (rawCamera as any).fov ?? 60.0;
+        const fovDeg = rawCamera.fieldOfView ?? 60.0;
         const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
         if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
             this.#lastTanHalfFOV = tanHalfFOV;
@@ -1518,7 +1517,7 @@ export class Landscape extends RedGPUObject {
             return this.#cachedRenderPipeline;
         }
 
-        const variantKey = (fragModule as any)?.label || 'default';
+        const variantKey = fragModule.label || 'default';
         const key = `${topology}_${material.uuid}_${variantKey}_${msaaID}`;
 
         if (this.#renderPipelineCache.has(key)) {

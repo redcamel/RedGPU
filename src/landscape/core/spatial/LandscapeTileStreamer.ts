@@ -795,10 +795,8 @@ export class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 머티리얼 레이어 정보를 기반으로 전체 VBT(베이스 컬러, 노멀, ORM) 아틀라스를 다시 베이킹합니다.
      * [EN] Rebakes the full VBT (base color, normal, ORM) atlases based on material layer configurations.
-     *
-     * @param _budgetPerFrame - [KO] 프레임당 베이킹 예산 (선택 사항) / [EN] Optional baking budget per frame
      */
-    rebakeAllLoadedVBT(_budgetPerFrame?: number): void {
+    rebakeAllLoadedVBT(): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
 
         this.#vbtGenerator.bakeAtlas(

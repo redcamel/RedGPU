@@ -1086,7 +1086,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const lodInfo = this.#lodInfoList[lodIndex];
         if (lodInfo.receiveShadow === boolVal) return;
 
-        (lodInfo as any).receiveShadow = boolVal;
+        lodInfo.receiveShadow = boolVal;
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
@@ -1157,7 +1157,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
         const numVal = Math.max(0, distance);
         if (this.#lodInfoList[lodIndex].lodDistance !== numVal) {
-            (this.#lodInfoList[lodIndex] as any).lodDistance = numVal;
+            this.#lodInfoList[lodIndex].lodDistance = numVal;
             this.#syncTypeParams();
         }
     }
