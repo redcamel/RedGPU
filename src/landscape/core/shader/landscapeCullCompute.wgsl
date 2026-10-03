@@ -127,8 +127,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let halfTileZ = uniforms.tileSizeZ * 0.5;
         let heightScale = uniforms.heightScale;
 
-        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, -max(50.0, heightScale * 0.1), tile.centerWorldZ - halfTileZ);
-        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, heightScale + max(50.0, heightScale * 0.1), tile.centerWorldZ + halfTileZ);
+        // 타일별 타이트 AABB (버텍스 모핑 및 스커트 기하 마진 10.0m 부여하여 100% 안전 보장)
+        let margin = 10.0;
+        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, tile.minY - margin, tile.centerWorldZ - halfTileZ);
+        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, tile.maxY + margin, tile.centerWorldZ + halfTileZ);
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
@@ -141,7 +143,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             if (!isOccluded) {
                 let dx = tile.centerWorldX - uniforms.cameraPosition.x;
                 let dz = tile.centerWorldZ - uniforms.cameraPosition.z;
-                let dy = max(0.0, max(-uniforms.cameraPosition.y, uniforms.cameraPosition.y - uniforms.heightScale));
+                let tileCenterY = (tile.minY + tile.maxY) * 0.5;
+                let dy = tileCenterY - uniforms.cameraPosition.y;
                 let distSq = dx * dx + dz * dz + dy * dy;
 
                 let isScreenSizeMetric = uniforms.lodMetric >= 0.5;

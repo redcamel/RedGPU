@@ -573,6 +573,14 @@ export class LandscapeTileStreamer extends RedGPUObject {
         };
     }
 
+    /**
+     * [KO] 캐시된 전역 CPU 높이맵 픽셀 데이터 객체를 반환합니다.
+     * [EN] Returns the cached global CPU heightmap pixel data object.
+     */
+    get globalCPUHeightMap(): { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null {
+        return this.#globalCPUHeightMap;
+    }
+
 
     /**
      * [KO] 지형의 최대 높이 스케일 설정을 갱신합니다.
@@ -821,6 +829,20 @@ export class LandscapeTileStreamer extends RedGPUObject {
 
             if (cpuParsed) {
                 const {width, height, pixels} = cpuParsed;
+
+                let minP = pixels[0];
+                let maxP = pixels[0];
+                const count = pixels.length;
+                for (let i = 1; i < count; i++) {
+                    const val = pixels[i];
+                    if (val < minP) minP = val;
+                    if (val > maxP) maxP = val;
+                }
+                const maxNorm = pixels instanceof Uint16Array ? 65535.0 : 255.0;
+                const minY = (minP / maxNorm) * this.#heightScale;
+                const maxY = (maxP / maxNorm) * this.#heightScale;
+                comp.setHeightBounds(minY, maxY);
+
                 const gpuDevice = this.gpuDevice;
                 const bytesPerRow = width * 2;
 

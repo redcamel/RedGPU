@@ -127,6 +127,7 @@ export class Landscape extends RedGPUObject {
     #lodColorsRGBA: [number, number, number, number][] = [];
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #lastTanHalfFOV: number = 1.0;
+    #tileHeightBuffer: Float32Array = new Float32Array(2);
 
 
     // =========================================================================
@@ -221,10 +222,12 @@ export class Landscape extends RedGPUObject {
         });
         this.#grassManager = new GrassManager(this, this.#tileStreamer);
         this.#tileStreamer.setOnTileLoaded((tileComponent) => {
+            this.#onTileHeightBoundsLoaded(tileComponent);
             this.#foliageManager?.onTileLoaded(tileComponent);
             this.#grassManager?.onTileLoaded(tileComponent);
         });
         this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
+            this.#syncAllTileHeightBoundsFromGlobalHeightmap();
             this.#grassManager?.rebakeAll();
         });
         this.#debuggerManager = new DebuggerManager(this, this.#tileStreamer, {
@@ -1309,10 +1312,13 @@ export class Landscape extends RedGPUObject {
         this.#gpuCuller = new LandscapeGPUCuller(this.redGPUContext);
 
         this.#spatialGrid.rebuildTiles((comp, index) => {
+            comp.setHeightBounds(0.0, this.#heightScale);
             this.#instanceBuffer.setStaticTileData(
                 index,
                 comp.worldX,
-                comp.worldZ
+                comp.worldZ,
+                comp.minY,
+                comp.maxY
             );
         });
 
@@ -1414,6 +1420,68 @@ export class Landscape extends RedGPUObject {
         const totalComponents = this.#spatialGrid.tileCountX * this.#spatialGrid.tileCountZ;
         this.#gpuCuller?.dispatchPass(computePass, totalComponents);
     };
+
+    #onTileHeightBoundsLoaded(comp: LandscapeComponent): void {
+        const index = comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX;
+        this.#instanceBuffer.updateTileHeightBounds(index, comp.minY, comp.maxY);
+        const gpuDevice = this.redGPUContext.gpuDevice;
+        const allTilesBuffer = this.#instanceBuffer.allTilesBuffer;
+        if (gpuDevice && allTilesBuffer) {
+            this.#tileHeightBuffer[0] = comp.minY;
+            this.#tileHeightBuffer[1] = comp.maxY;
+            gpuDevice.queue.writeBuffer(
+                allTilesBuffer,
+                index * 16 + 8,
+                this.#tileHeightBuffer.buffer,
+                0,
+                8
+            );
+        }
+    }
+
+    #syncAllTileHeightBoundsFromGlobalHeightmap(): void {
+        const g = this.#tileStreamer?.globalCPUHeightMap;
+        if (!g) return;
+        const {width, height, pixels, maxVal} = g;
+        const tileCountX = this.#spatialGrid.tileCountX;
+        const tileCountZ = this.#spatialGrid.tileCountZ;
+        const maxNorm = maxVal || (pixels instanceof Uint16Array ? 65535.0 : 255.0);
+        const heightScale = this.#heightScale;
+
+        const flatCells = this.#spatialGrid.flatCells;
+        for (let idx = 0; idx < flatCells.length; idx++) {
+            const comp = flatCells[idx];
+            if (!comp) continue;
+            const uMin = comp.componentX / tileCountX;
+            const uMax = (comp.componentX + 1) / tileCountX;
+            const vMin = comp.componentZ / tileCountZ;
+            const vMax = (comp.componentZ + 1) / tileCountZ;
+
+            const pxMinX = Math.floor(uMin * width);
+            const pxMaxX = Math.min(width - 1, Math.ceil(uMax * width));
+            const pxMinZ = Math.floor(vMin * height);
+            const pxMaxZ = Math.min(height - 1, Math.ceil(vMax * height));
+
+            let minP = Infinity;
+            let maxP = -Infinity;
+            for (let z = pxMinZ; z <= pxMaxZ; z++) {
+                const rowOffset = z * width;
+                for (let x = pxMinX; x <= pxMaxX; x++) {
+                    const p = pixels[rowOffset + x];
+                    if (p < minP) minP = p;
+                    if (p > maxP) maxP = p;
+                }
+            }
+
+            if (minP !== Infinity && maxP !== -Infinity) {
+                const minY = (minP / maxNorm) * heightScale;
+                const maxY = (maxP / maxNorm) * heightScale;
+                comp.setHeightBounds(minY, maxY);
+                this.#instanceBuffer.updateTileHeightBounds(idx, minY, maxY);
+            }
+        }
+        this.#instanceBuffer.uploadStaticTilesToGPU();
+    }
 
     #bakeGlobalBaseToVHT(): void {
         if (!this.#tileStreamer?.globalHeightTexture) return;

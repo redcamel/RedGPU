@@ -58,7 +58,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         this.#maxComponentCount = maxComponentCount;
         this.#lodMaxLevel = lodMaxLevel;
 
-        this.#allTilesData = new Float32Array(maxComponentCount * 2);
+        this.#allTilesData = new Float32Array(maxComponentCount * 4);
 
         this.#createGPUResources();
 
@@ -147,21 +147,41 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 특정 타일 인덱스의 정적 중심 공간 좌표 데이터를 CPU 버퍼에 설정합니다.
-     * [EN] Sets the static spatial center world coordinates of a specific tile index in the CPU buffer.
+     * [KO] 특정 타일 인덱스의 정적 공간 좌표 및 높이 범위 데이터를 CPU 버퍼에 설정합니다.
+     * [EN] Sets the static spatial world coordinates and height bounds of a specific tile index in the CPU buffer.
      *
      * @param index - [KO] 타일 인덱스 / [EN] Tile index
      * @param centerWorldX - [KO] 타일 중심 월드 X 좌표 / [EN] Tile center world X coordinate
      * @param centerWorldZ - [KO] 타일 중심 월드 Z 좌표 / [EN] Tile center world Z coordinate
+     * @param minY - [KO] 타일 영역 내 지형의 최소 월드 Y 높이 / [EN] Minimum world Y height
+     * @param maxY - [KO] 타일 영역 내 지형의 최대 월드 Y 높이 / [EN] Maximum world Y height
      */
     setStaticTileData(
         index: number,
         centerWorldX: number,
-        centerWorldZ: number
+        centerWorldZ: number,
+        minY: number = 0.0,
+        maxY: number = 0.0
     ): void {
-        const offset = index * 2;
+        const offset = index * 4;
         this.#allTilesData[offset] = centerWorldX;
         this.#allTilesData[offset + 1] = centerWorldZ;
+        this.#allTilesData[offset + 2] = minY;
+        this.#allTilesData[offset + 3] = maxY;
+    }
+
+    /**
+     * [KO] 특정 타일의 높이 범위(minY, maxY)를 갱신합니다.
+     * [EN] Updates the height bounds (minY, maxY) of a specific tile index.
+     *
+     * @param index - [KO] 타일 인덱스 / [EN] Tile index
+     * @param minY - [KO] 타일 최소 월드 Y 높이 / [EN] Tile minimum world Y height
+     * @param maxY - [KO] 타일 최대 월드 Y 높이 / [EN] Tile maximum world Y height
+     */
+    updateTileHeightBounds(index: number, minY: number, maxY: number): void {
+        const offset = index * 4;
+        this.#allTilesData[offset + 2] = minY;
+        this.#allTilesData[offset + 3] = maxY;
     }
 
     /**
@@ -451,13 +471,13 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         );
         this.#allTilesBuffer = gpuDevice.createBuffer({
             label: 'Landscape_Instance_AllTilesBuffer',
-            size: this.#maxComponentCount * 8,
+            size: this.#maxComponentCount * 16,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
         this.#visibleTilesBuffer = gpuDevice.createBuffer({
             label: 'Landscape_Instance_VisibleTilesBuffer',
-            size: this.#maxComponentCount * this.#lodMaxLevel * 8,
+            size: this.#maxComponentCount * this.#lodMaxLevel * 16,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
