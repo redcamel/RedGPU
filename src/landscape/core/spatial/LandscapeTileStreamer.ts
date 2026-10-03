@@ -353,11 +353,16 @@ export class LandscapeTileStreamer extends RedGPUObject {
     ensureAtlasSize(componentCountX: number, componentCountZ: number): boolean {
         const targetAtlasW = componentCountX * 512;
         const targetAtlasH = componentCountZ * 512;
+        const targetVbtAtlasW = componentCountX * 256;
+        const targetVbtAtlasH = componentCountZ * 256;
 
         if (
             this.#vhtAtlasTexture &&
             this.#vhtAtlasTexture.gpuTexture.width === targetAtlasW &&
-            this.#vhtAtlasTexture.gpuTexture.height === targetAtlasH
+            this.#vhtAtlasTexture.gpuTexture.height === targetAtlasH &&
+            this.#vbtBaseColorAtlas &&
+            this.#vbtBaseColorAtlas.gpuTexture.width === targetVbtAtlasW &&
+            this.#vbtBaseColorAtlas.gpuTexture.height === targetVbtAtlasH
         ) {
             return false;
         }
@@ -388,7 +393,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
         this.#vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_AtlasTexture', rawVntTexture);
 
         const rawVbtBaseColor = gpuDevice.createTexture({
-            size: [targetAtlasW, targetAtlasH],
+            size: [targetVbtAtlasW, targetVbtAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
@@ -397,7 +402,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
         this.#vbtBaseColorAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_BaseColorAtlasTexture', rawVbtBaseColor);
 
         const rawVbtNormal = gpuDevice.createTexture({
-            size: [targetAtlasW, targetAtlasH],
+            size: [targetVbtAtlasW, targetVbtAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
@@ -406,7 +411,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
         this.#vbtNormalAtlas = new DirectTexture(redGPUContext, 'Landscape_VBT_NormalAtlasTexture', rawVbtNormal);
 
         const rawVbtORM = gpuDevice.createTexture({
-            size: [targetAtlasW, targetAtlasH],
+            size: [targetVbtAtlasW, targetVbtAtlasH],
             mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
@@ -794,7 +799,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
             this.#vbtNormalAtlas,
             this.#vbtORMAtlas,
             this.#material,
-            512
+            256
         );
     }
 

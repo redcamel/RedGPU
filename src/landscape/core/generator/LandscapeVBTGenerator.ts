@@ -74,8 +74,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [KO] 지형 머티리얼 인스턴스
      * [EN] Landscape material instance
      * @param singleTilePixels -
-     * [KO] 단일 타일 해상도 (픽셀, 기본값: 512)
-     * [EN] Single tile resolution in pixels (default: 512)
+     * [KO] 단일 타일 해상도 (픽셀, 기본값: 256)
+     * [EN] Single tile resolution in pixels (default: 256)
      */
     bakeAtlas(
         vntAtlas: DirectTexture,
@@ -83,15 +83,15 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         vbtNormalArray: DirectTexture,
         vbtORMArray: DirectTexture,
         material: LandscapeMaterial,
-        singleTilePixels: number = 512
+        singleTilePixels: number = 256
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
         if (!vntAtlas?.gpuTexture) return;
         if (!vbtBaseColorArray?.gpuTexture || !vbtNormalArray?.gpuTexture || !vbtORMArray?.gpuTexture) return;
 
         const device = this.redGPUContext.gpuDevice;
-        const atlasW = vntAtlas.gpuTexture.width;
-        const atlasH = vntAtlas.gpuTexture.height;
+        const atlasW = vbtBaseColorArray.gpuTexture.width;
+        const atlasH = vbtBaseColorArray.gpuTexture.height;
 
         const fArr = this.#uniformFloatArray;
         const uArr = this.#uniformUintArray;

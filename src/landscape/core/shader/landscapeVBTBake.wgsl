@@ -170,10 +170,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         (f32(atlasPixelZ) + 0.5) / atlasH
     );
 
-    let vhtCoord = vec2<i32>(atlasPixelX, atlasPixelZ);
-    let encodedNormal = textureLoad(vntAtlasTexture, vhtCoord, 0).rgb;
-    let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
-    var N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(encodedNormal) <= 0.001);
+    let vntSample = textureSampleLevel(vntAtlasTexture, vbtTextureSampler, globalUV, 0.0).rgb;
+    let sampledNormal = normalize(vntSample * 2.0 - vec3<f32>(1.0));
+    var N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001);
 
     var baseAlbedo = uniforms.baseColor.rgb;
     var baseRoughness = 0.9;
@@ -182,7 +181,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let activeLayerCount = uniforms.activeLayerCount;
 
-    let tileSize = select(512.0, uniforms.singleTileSize, uniforms.singleTileSize > 0.0);
+    let tileSize = select(256.0, uniforms.singleTileSize, uniforms.singleTileSize > 0.0);
     let tileLocalX = f32(atlasPixelX % i32(tileSize));
     let tileLocalZ = f32(atlasPixelZ % i32(tileSize));
 
