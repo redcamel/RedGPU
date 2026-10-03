@@ -11,6 +11,7 @@
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.getInterleavedGradientNoise;
 #redgpu_include landscape.struct.LandscapeLayerParams;
+#redgpu_include landscape.struct.LandscapeUniforms;
 #redgpu_include landscape.tiling.stochasticTiling;
 
 struct InputData {
@@ -41,33 +42,6 @@ struct NearDetailLayerResult {
     metallic: f32,
     ao: f32,
     isValid: bool,
-};
-
-struct LandscapeUniforms {
-    heightScale: f32,
-    worldSizeX: f32,
-    worldSizeZ: f32,
-    lodColoration: f32,
-    maxComponentCount: u32,
-    tileSizeX: f32,
-    tileSizeZ: f32,
-    baseQuads: f32,
-    vhtTextureSize: vec2<f32>,
-    pad0: vec2<f32>,
-    lodColors: array<vec4<f32>, 8>,
-    lodDistancesSq: array<vec4<f32>, 2>,
-    tanHalfFOV: f32,
-    lodMetric: f32,
-    lod0Quads: f32,
-    receiveShadow: f32,
-    heightmapShadow: f32,
-    heightmapShadowSteps: f32,
-    heightmapShadowDistance: f32,
-    heightmapShadowSoftness: f32,
-    foliageSubCellColoration: f32,
-    foliageSubCellSize: f32,
-    foliageStreamingRadius: f32,
-    debugMode: u32,
 };
 
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;

@@ -8,6 +8,7 @@ import DrawIndexedIndirectArgs_wgsl from './struct/DrawIndexedIndirectArgs.wgsl'
 import FoliageInstance_wgsl from './struct/FoliageInstance.wgsl';
 import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
+import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
 import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
@@ -68,6 +69,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const FoliageLODUniformInfo = FoliageLODUniformInfo_wgsl;
+
+        /**
+         * [KO] 지형 버텍스 및 프래그먼트 셰이더 메인 유니폼 버퍼 구조체 (26개 필드)
+         * [EN] Terrain vertex and fragment shader main uniform buffer struct (26 fields)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.LandscapeUniforms;
+         * ```
+         */
+        export const LandscapeUniforms = LandscapeUniforms_wgsl;
     }
 
     /**
