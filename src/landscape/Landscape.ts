@@ -378,10 +378,9 @@ export class Landscape extends RedGPUObject {
      * [EN] Terrain elevation height scale
      */
     set heightScale(val: number) {
-        const clampedVal = Math.max(0, val);
-        if (this.#heightScale !== clampedVal) {
-            this.#heightScale = clampedVal;
-            this.#tileStreamer?.setTerrainConfig(clampedVal);
+        if (this.#heightScale !== val) {
+            this.#heightScale = val;
+            this.#tileStreamer?.setTerrainConfig(val);
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
             this.#grassManager?.rebakeAll();

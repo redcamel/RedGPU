@@ -487,8 +487,6 @@ export class LandscapeTileStreamer extends RedGPUObject {
             wsX,
             countX
         );
-
-        this.rebakeAllLoadedVBT();
     }
 
     /**
