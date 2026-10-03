@@ -58,7 +58,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         this.#maxComponentCount = maxComponentCount;
         this.#lodMaxLevel = lodMaxLevel;
 
-        this.#allInputTilesData = new Float32Array(maxComponentCount * 8);
+        this.#allInputTilesData = new Float32Array(maxComponentCount * 2);
 
         this.#createGPUResources();
 
@@ -131,34 +131,21 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 특정 타일 인덱스의 정적 공간 및 디버그 색상 데이터를 CPU 버퍼에 설정합니다.
-     * [EN] Sets the static spatial and debug color data of a specific tile index in the CPU buffer.
+     * [KO] 특정 타일 인덱스의 정적 중심 공간 좌표 데이터를 CPU 버퍼에 설정합니다.
+     * [EN] Sets the static spatial center world coordinates of a specific tile index in the CPU buffer.
      *
      * @param index - [KO] 타일 인덱스 / [EN] Tile index
-     * @param worldX - [KO] 타일 월드 X 좌표 / [EN] Tile world X coordinate
-     * @param worldZ - [KO] 타일 월드 Z 좌표 / [EN] Tile world Z coordinate
-     * @param r - [KO] 디버그 R 채널 / [EN] Debug R channel
-     * @param g - [KO] 디버그 G 채널 / [EN] Debug G channel
-     * @param b - [KO] 디버그 B 채널 / [EN] Debug B channel
-     * @param a - [KO] 디버그 A 채널 / [EN] Debug A channel
+     * @param centerWorldX - [KO] 타일 중심 월드 X 좌표 / [EN] Tile center world X coordinate
+     * @param centerWorldZ - [KO] 타일 중심 월드 Z 좌표 / [EN] Tile center world Z coordinate
      */
     setStaticTileData(
         index: number,
-        worldX: number,
-        worldZ: number,
-        r: number = 0,
-        g: number = 0,
-        b: number = 0,
-        a: number = 0.0
+        centerWorldX: number,
+        centerWorldZ: number
     ): void {
-        const offset = index * 8;
-        this.#allInputTilesData[offset] = r;
-        this.#allInputTilesData[offset + 1] = g;
-        this.#allInputTilesData[offset + 2] = b;
-        this.#allInputTilesData[offset + 3] = a;
-
-        this.#allInputTilesData[offset + 4] = worldX;
-        this.#allInputTilesData[offset + 5] = worldZ;
+        const offset = index * 2;
+        this.#allInputTilesData[offset] = centerWorldX;
+        this.#allInputTilesData[offset + 1] = centerWorldZ;
     }
 
     /**
@@ -454,7 +441,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         );
         this.#allInputTilesBuffer = gpuDevice.createBuffer({
             label: 'Landscape_Instance_AllInputTilesBuffer',
-            size: this.#maxComponentCount * 32,
+            size: this.#maxComponentCount * 8,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 

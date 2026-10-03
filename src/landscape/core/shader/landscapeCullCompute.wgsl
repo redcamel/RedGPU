@@ -18,17 +18,12 @@ struct CameraFrustumUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
 };
 
-struct TileInstance {
-    color: vec4<f32>,
-    worldX: f32,
-    worldZ: f32,
-};
-
+#redgpu_include landscape.struct.LandscapeTile;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
-@group(0) @binding(1) var<storage, read> allInputTiles: array<TileInstance>;
+@group(0) @binding(1) var<storage, read> allInputTiles: array<LandscapeTile>;
 @group(0) @binding(2) var<storage, read_write> visibleTileIndices: array<u32>;
 @group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(4) var hzbTexture: texture_2d<f32>;
@@ -130,8 +125,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let halfTileZ = uniforms.tileSizeZ * 0.5;
         let heightScale = uniforms.heightScale;
 
-        let minPos = vec3<f32>(tile.worldX - halfTileX, -max(50.0, heightScale * 0.1), tile.worldZ - halfTileZ);
-        let maxPos = vec3<f32>(tile.worldX + halfTileX, heightScale + max(50.0, heightScale * 0.1), tile.worldZ + halfTileZ);
+        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, -max(50.0, heightScale * 0.1), tile.centerWorldZ - halfTileZ);
+        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, heightScale + max(50.0, heightScale * 0.1), tile.centerWorldZ + halfTileZ);
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
@@ -142,8 +137,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             }
 
             if (!isOccluded) {
-                let dx = tile.worldX - uniforms.cameraPosition.x;
-                let dz = tile.worldZ - uniforms.cameraPosition.z;
+                let dx = tile.centerWorldX - uniforms.cameraPosition.x;
+                let dz = tile.centerWorldZ - uniforms.cameraPosition.z;
                 let dy = max(0.0, max(-uniforms.cameraPosition.y, uniforms.cameraPosition.y - uniforms.heightScale));
                 let distSq = dx * dx + dz * dz + dy * dy;
 

@@ -9,6 +9,7 @@ import FoliageInstance_wgsl from './struct/FoliageInstance.wgsl';
 import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
 import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
+import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
 import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
@@ -79,6 +80,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const LandscapeUniforms = LandscapeUniforms_wgsl;
+
+        /**
+         * [KO] 지형 단일 타일 청크 공간 위치 및 디버그 색상 메타데이터 구조체
+         * [EN] Static spatial world position and debug color metadata struct for an individual landscape tile chunk
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.LandscapeTile;
+         * ```
+         */
+        export const LandscapeTile = LandscapeTile_wgsl;
     }
 
     /**

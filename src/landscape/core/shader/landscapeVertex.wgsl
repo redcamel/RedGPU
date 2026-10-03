@@ -2,14 +2,9 @@
 #redgpu_include shadow.getShadowClipPosition;
 #redgpu_include systemStruct.OutputShadowData;
 #redgpu_include landscape.struct.LandscapeUniforms;
+#redgpu_include landscape.struct.LandscapeTile;
 
-struct TileInstance {
-    color: vec4<f32>,
-    worldX: f32,
-    worldZ: f32,
-};
-
-@group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
+@group(1) @binding(0) var<storage, read> allInputTiles: array<LandscapeTile>;
 @group(1) @binding(1) var<storage, read> visibleTileIndices: array<u32>;
 @group(1) @binding(2) var heightMapSampler: sampler;
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
@@ -79,8 +74,8 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
 
     // 1. 초기 원래 정점의 위치 및 UV 계산
-    let initialWorldX = input.position.x + instanceData.worldX;
-    let initialWorldZ = input.position.y + instanceData.worldZ;
+    let initialWorldX = input.position.x + instanceData.centerWorldX;
+    let initialWorldZ = input.position.y + instanceData.centerWorldZ;
 
     let initialGlobalUV = vec2<f32>(
         (initialWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
@@ -150,8 +145,8 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         let morphedLocalX = morphedUV.x * landscapeUniforms.tileSizeX - halfTileX;
         let morphedLocalZ = morphedUV.y * landscapeUniforms.tileSizeZ - halfTileZ;
 
-        morphedWorldX = morphedLocalX + instanceData.worldX;
-        morphedWorldZ = morphedLocalZ + instanceData.worldZ;
+        morphedWorldX = morphedLocalX + instanceData.centerWorldX;
+        morphedWorldZ = morphedLocalZ + instanceData.centerWorldZ;
 
         morphedGlobalUV = vec2<f32>(
             (morphedWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
@@ -175,7 +170,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     if (landscapeUniforms.lodColoration > 0.5) {
         res.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
     } else {
-        res.instanceColor = instanceData.color;
+        res.instanceColor = vec4<f32>(0.0);
     }
     return res;
 }

@@ -1312,8 +1312,7 @@ export class Landscape extends RedGPUObject {
             this.#instanceBuffer.setStaticTileData(
                 index,
                 comp.worldX,
-                comp.worldZ,
-                0, 0, 0, 0.0
+                comp.worldZ
             );
         });
 
