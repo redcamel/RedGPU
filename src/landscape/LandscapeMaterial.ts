@@ -177,6 +177,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
     #rebakeDebounceTimer: any = null;
+    #pendingLayerMipmapUpdate: boolean = false;
 
     #internalLayerViews = {
         baseColorView: null as GPUTextureView | null,
@@ -224,10 +225,13 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
      * [KO] 지연 없이 즉시 실행 여부 (기본값: false)
      * [EN] Whether to execute immediately without debounce delay (default: false)
      * @param debounceDelayMs -
-     * [KO] 디바운스 대기 시간(밀리초, 기본값: 150)
-     * [EN] Debounce delay in milliseconds (default: 150)
+     * [KO] 디바운스 대기 시간(밀리초, 기본값: 200)
+     * [EN] Debounce delay in milliseconds (default: 200)
      */
-    requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
+    requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 200): void {
+        if (this.#layers.length === 0) return;
+        this.#pendingLayerMipmapUpdate = true;
+
         if (immediate) {
             if (this.#rebakeDebounceTimer !== null) {
                 clearTimeout(this.#rebakeDebounceTimer);
@@ -237,6 +241,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             this.#isRebakeScheduled = true;
             queueMicrotask(() => {
                 this.#isRebakeScheduled = false;
+                if (this.#pendingLayerMipmapUpdate) {
+                    this.#pendingLayerMipmapUpdate = false;
+                    this.#updateLayerMipmaps();
+                }
                 this.#onRebakeVBTRequested?.();
             });
             return;
@@ -247,6 +255,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
         this.#rebakeDebounceTimer = setTimeout(() => {
             this.#rebakeDebounceTimer = null;
+            if (this.#pendingLayerMipmapUpdate) {
+                this.#pendingLayerMipmapUpdate = false;
+                this.#updateLayerMipmaps();
+            }
             this.#onRebakeVBTRequested?.();
         }, debounceDelayMs);
     }
@@ -570,7 +582,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     #updateLayerMipmaps(): void {
-        const count = Math.max(1, this.#layers.length);
+        if (!this.#layers.length) return;
+        if (!this.#gpuBaseColorArrayTexture || this.#gpuBaseColorArrayTexture.mipLevelCount <= 1) return;
+
+        const count = this.#layers.length;
         const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
         const baseColorFormat = this.#getBaseColorArrayFormat();
         const dataFormat = this.#getDataArrayFormat();
@@ -693,7 +708,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                             device.queue.submit([commandEncoder.finish()]);
                         }
 
-                        this.#updateLayerMipmaps();
                         this.requestVBTRebake();
                     } catch (e) {
                         console.warn(`[LandscapeMaterial] ⚠️ Texture slice copy/blit failed, applying fallback color [${fallbackColor.join(', ')}]:`, {
