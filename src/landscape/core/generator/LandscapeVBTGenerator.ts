@@ -115,7 +115,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 12;
+            const offset = 12 + i * 16;
             if (i < activeCount) {
                 const layer = activeLayers[i];
 
@@ -133,8 +133,13 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 9] = layer.weightChannelIndex;
                 fArr[offset + 10] = layer.nearUVScaleMultiplier;
                 fArr[offset + 11] = layer.heightBlendFactor;
+
+                fArr[offset + 12] = layer.stochasticTiling ? 1.0 : 0.0;
+                fArr[offset + 13] = layer.stochasticScale;
+                fArr[offset + 14] = 0.0;
+                fArr[offset + 15] = 0.0;
             } else {
-                for (let j = 0; j < 12; j++) {
+                for (let j = 0; j < 16; j++) {
                     fArr[offset + j] = 0.0;
                 }
             }

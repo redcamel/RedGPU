@@ -386,10 +386,15 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 9] = layer.weightChannelIndex;
                 floatBuf[offset + 10] = layer.nearUVScaleMultiplier;
                 floatBuf[offset + 11] = layer.heightBlendFactor;
+
+                floatBuf[offset + 12] = layer.stochasticTiling ? 1.0 : 0.0;
+                floatBuf[offset + 13] = layer.stochasticScale;
+                floatBuf[offset + 14] = 0.0;
+                floatBuf[offset + 15] = 0.0;
             } else {
-                floatBuf.fill(0, offset, offset + 12);
+                floatBuf.fill(0, offset, offset + 16);
             }
-            offset += 12;
+            offset += 16;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

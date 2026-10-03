@@ -95,6 +95,16 @@ export interface LandscapeLayerOptions {
      * [EN] Height-based splat blending displacement factor (0.0-5.0, default: 1.0)
      */
     heightBlendFactor?: number;
+    /**
+     * [KO] 텍스처 타일링 반복 방지(Stochastic Procedural Bombing) 활성화 여부 (기본값: true)
+     * [EN] Whether to enable stochastic tiling repetition suppression (default: true)
+     */
+    stochasticTiling?: boolean;
+    /**
+     * [KO] 절차적 스토캐스틱 셀 스케일 배수 (기본값: 1.0)
+     * [EN] Procedural stochastic cell scale multiplier (default: 1.0)
+     */
+    stochasticScale?: number;
 }
 
 /**
@@ -143,6 +153,8 @@ export class LandscapeLayer {
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
     #heightBlendFactor: number = 1.0;
+    #stochasticTiling: boolean = true;
+    #stochasticScale: number = 1.0;
 
     #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
     dirty: boolean = true;
@@ -233,6 +245,16 @@ export class LandscapeLayer {
 
         if (actualOptions.heightBlendFactor !== undefined) {
             this.#heightBlendFactor = Math.max(0.0, Math.min(5.0, actualOptions.heightBlendFactor));
+        }
+
+        if (actualOptions.stochasticTiling !== undefined) {
+            this.#stochasticTiling = !!actualOptions.stochasticTiling;
+        } else {
+            this.#stochasticTiling = true;
+        }
+
+        if (actualOptions.stochasticScale !== undefined) {
+            this.#stochasticScale = Math.max(0.01, actualOptions.stochasticScale);
         }
     }
 
@@ -550,6 +572,40 @@ export class LandscapeLayer {
         const clamped = Math.max(0.0, Math.min(5.0, val));
         if (this.#heightBlendFactor !== clamped) {
             this.#heightBlendFactor = clamped;
+            this.dirty = true;
+            this.onChange?.();
+        }
+    }
+
+    /**
+     * [KO] 텍스처 타일링 반복 방지(Stochastic Tiling) 활성화 여부를 가져오거나 설정합니다. (기본값: true)
+     * [EN] Gets or sets whether stochastic tiling repetition suppression is enabled. (default: true)
+     */
+    get stochasticTiling(): boolean {
+        return this.#stochasticTiling;
+    }
+
+    set stochasticTiling(val: boolean) {
+        const boolVal = !!val;
+        if (this.#stochasticTiling !== boolVal) {
+            this.#stochasticTiling = boolVal;
+            this.dirty = true;
+            this.onChange?.();
+        }
+    }
+
+    /**
+     * [KO] 절차적 스토캐스틱 셀 스케일 배수를 가져오거나 설정합니다. (기본값: 1.0)
+     * [EN] Gets or sets the procedural stochastic cell scale multiplier. (default: 1.0)
+     */
+    get stochasticScale(): number {
+        return this.#stochasticScale;
+    }
+
+    set stochasticScale(val: number) {
+        const clamped = Math.max(0.01, val);
+        if (this.#stochasticScale !== clamped) {
+            this.#stochasticScale = clamped;
             this.dirty = true;
             this.onChange?.();
         }

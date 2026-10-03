@@ -340,10 +340,43 @@ function renderTestPane({
             // [EN] Layers settings (4 splat materials)
             const splatFolder = pane.addFolder({title: 'Layers', expanded: true});
 
+            const masterBlend = {
+                heightBlendFactor: 1.0,
+                stochasticTiling: true
+            };
+            splatFolder.addBinding(masterBlend, 'stochasticTiling', {
+                label: 'All Anti-Tiling (Stochastic)'
+            }).on('change', (ev) => {
+                layers.forEach(layer => {
+                    layer.stochasticTiling = ev.value;
+                });
+                pane.refresh();
+            });
+
+            splatFolder.addBinding(masterBlend, 'heightBlendFactor', {
+                label: 'All Height Blend',
+                min: 0.0,
+                max: 3.0,
+                step: 0.05
+            }).on('change', (ev) => {
+                layers.forEach(layer => {
+                    layer.heightBlendFactor = ev.value;
+                });
+            });
+
             layers.forEach((layer) => {
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
 
                 layerSubFolder.addBinding(layer, 'enabled');
+                layerSubFolder.addBinding(layer, 'stochasticTiling', {
+                    label: 'Anti-Tiling'
+                });
+                layerSubFolder.addBinding(layer, 'stochasticScale', {
+                    label: 'Stochastic Scale',
+                    min: 0.1,
+                    max: 5.0,
+                    step: 0.1
+                });
 
                 const uvProxy = {uvScale: layer.uvScale[0]};
                 layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 150, step: 1})
@@ -352,6 +385,12 @@ function renderTestPane({
                     });
 
                 layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
+                layerSubFolder.addBinding(layer, 'heightBlendFactor', {
+                    label: 'Height Blend',
+                    min: 0.0,
+                    max: 3.0,
+                    step: 0.05
+                });
             });
         }
     });

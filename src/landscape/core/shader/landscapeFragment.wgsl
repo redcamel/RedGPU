@@ -34,6 +34,10 @@ struct LandscapeLayerParams {
     weightChannelIndex: f32,
     nearUVScaleMultiplier: f32,
     heightBlendFactor: f32,
+    stochasticTiling: f32,
+    stochasticScale: f32,
+    _pad0: f32,
+    _pad1: f32,
 };
 
 struct MaterialUniforms {
@@ -100,6 +104,127 @@ fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
 }
 
+fn stochasticHash2D(p: vec2<f32>) -> vec3<f32> {
+    var p3 = fract(vec3<f32>(p.xyx) * vec3<f32>(0.1031, 0.1030, 0.0973));
+    p3 = p3 + dot(p3, p3.yzx + 33.33);
+    return fract((p3.xxy + p3.yzz) * p3.zyx);
+}
+
+fn rotate2D(v: vec2<f32>, angle: f32) -> vec2<f32> {
+    let c = cos(angle);
+    let s = sin(angle);
+    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
+}
+
+struct StochasticGridTri {
+    v0: vec2<f32>,
+    v1: vec2<f32>,
+    v2: vec2<f32>,
+    w0: f32,
+    w1: f32,
+    w2: f32,
+};
+
+fn getStochasticGridTri(uv: vec2<f32>) -> StochasticGridTri {
+    var res: StochasticGridTri;
+    let skew = vec2<f32>(
+        uv.x - uv.y * 0.57735026919,
+        uv.y * 1.15470053838
+    );
+    let cell = floor(skew);
+    let f = skew - cell;
+
+    var v0 = cell;
+    var v1 = cell + vec2<f32>(1.0, 0.0);
+    var v2 = cell + vec2<f32>(0.0, 1.0);
+    var w0 = 1.0 - f.x - f.y;
+    var w1 = f.x;
+    var w2 = f.y;
+
+    if (w0 < 0.0) {
+        v0 = cell + vec2<f32>(1.0, 1.0);
+        v1 = cell + vec2<f32>(1.0, 0.0);
+        v2 = cell + vec2<f32>(0.0, 1.0);
+        w0 = -w0;
+        w1 = 1.0 - f.y;
+        w2 = 1.0 - f.x;
+    }
+
+    let p = 3.0;
+    let sw0 = pow(w0, p);
+    let sw1 = pow(w1, p);
+    let sw2 = pow(w2, p);
+    let sumW = sw0 + sw1 + sw2;
+
+    res.v0 = v0;
+    res.v1 = v1;
+    res.v2 = v2;
+    res.w0 = sw0 / sumW;
+    res.w1 = sw1 / sumW;
+    res.w2 = sw2 / sumW;
+    return res;
+}
+
+struct StochasticSampleResult {
+    albedo: vec3<f32>,
+    normal: vec3<f32>,
+    orm: vec4<f32>,
+};
+
+fn sampleLayerStochasticGrad(
+    baseUV: vec2<f32>,
+    ddxUV: vec2<f32>,
+    ddyUV: vec2<f32>,
+    layerIdx: i32,
+    scaleMult: f32,
+    normalIntensity: f32
+) -> StochasticSampleResult {
+    let gridTri = getStochasticGridTri(baseUV * scaleMult);
+
+    let r0 = stochasticHash2D(gridTri.v0);
+    let r1 = stochasticHash2D(gridTri.v1);
+    let r2 = stochasticHash2D(gridTri.v2);
+
+    let ang0 = r0.z * PI2;
+    let ang1 = r1.z * PI2;
+    let ang2 = r2.z * PI2;
+
+    let uv0 = rotate2D(baseUV, ang0) + r0.xy;
+    let uv1 = rotate2D(baseUV, ang1) + r1.xy;
+    let uv2 = rotate2D(baseUV, ang2) + r2.xy;
+
+    let ddx0 = rotate2D(ddxUV, ang0);
+    let ddy0 = rotate2D(ddyUV, ang0);
+    let ddx1 = rotate2D(ddxUV, ang1);
+    let ddy1 = rotate2D(ddyUV, ang1);
+    let ddx2 = rotate2D(ddxUV, ang2);
+    let ddy2 = rotate2D(ddyUV, ang2);
+
+    let alb0 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0).rgb;
+    let rawNorm0 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0).rgb * 2.0 - vec3<f32>(1.0);
+    let rotNorm0_xy = rotate2D(rawNorm0.xy, ang0);
+    let norm0 = vec3<f32>(rotNorm0_xy * normalIntensity, max(0.01, rawNorm0.z));
+    let orm0 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0);
+
+    let alb1 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1).rgb;
+    let rawNorm1 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1).rgb * 2.0 - vec3<f32>(1.0);
+    let rotNorm1_xy = rotate2D(rawNorm1.xy, ang1);
+    let norm1 = vec3<f32>(rotNorm1_xy * normalIntensity, max(0.01, rawNorm1.z));
+    let orm1 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1);
+
+    let alb2 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2).rgb;
+    let rawNorm2 = textureSampleGrad(layerNormalArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2).rgb * 2.0 - vec3<f32>(1.0);
+    let rotNorm2_xy = rotate2D(rawNorm2.xy, ang2);
+    let norm2 = vec3<f32>(rotNorm2_xy * normalIntensity, max(0.01, rawNorm2.z));
+    let orm2 = textureSampleGrad(layerORMArray, baseColorTextureSampler, uv2, layerIdx, ddx2, ddy2);
+
+    var res: StochasticSampleResult;
+    res.albedo = alb0 * gridTri.w0 + alb1 * gridTri.w1 + alb2 * gridTri.w2;
+    res.normal = norm0 * gridTri.w0 + norm1 * gridTri.w1 + norm2 * gridTri.w2;
+    res.orm = orm0 * gridTri.w0 + orm1 * gridTri.w1 + orm2 * gridTri.w2;
+    return res;
+}
+
 fn computeNearFieldLandscapeLayers(
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
@@ -155,10 +280,22 @@ fn computeNearFieldLandscapeLayers(
         let ddxLayerUV = ddxWorldTileUV * nearScale;
         let ddyLayerUV = ddyWorldTileUV * nearScale;
 
-        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
-        let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
-        let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
-        let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+        var layerAlbedoSample: vec3<f32>;
+        var layerNormalSample: vec3<f32>;
+        var layerORMSample: vec4<f32>;
+
+        if (layerParams.stochasticTiling > 0.5) {
+            let stScale = select(1.0, layerParams.stochasticScale, layerParams.stochasticScale > 0.0);
+            let stResult = sampleLayerStochasticGrad(layerUV, ddxLayerUV, ddyLayerUV, layerIdx, stScale, layerParams.normalIntensity);
+            layerAlbedoSample = stResult.albedo;
+            layerNormalSample = stResult.normal;
+            layerORMSample = stResult.orm;
+        } else {
+            layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb;
+            let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
+            layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
+            layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+        }
 
         var heightVal = layerORMSample.a;
         if (heightVal >= 0.999 || heightVal <= 0.001) {
@@ -223,10 +360,22 @@ fn computeNearFieldLandscapeLayers(
         let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
         let ddx0UV = ddxWorldTileUV * layer0Params.uvScale;
         let ddy0UV = ddyWorldTileUV * layer0Params.uvScale;
-        let layer0Albedo = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb;
-        let layer0ORM = textureSampleGrad(layerORMArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV);
-        let layer0NormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * 2.0 - vec3<f32>(1.0);
-        let layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));
+        var layer0Albedo: vec3<f32>;
+        var layer0ORM: vec4<f32>;
+        var layer0Normal: vec3<f32>;
+
+        if (layer0Params.stochasticTiling > 0.5) {
+            let stScale = select(1.0, layer0Params.stochasticScale, layer0Params.stochasticScale > 0.0);
+            let stResult = sampleLayerStochasticGrad(layer0UV, ddx0UV, ddy0UV, 0, stScale, layer0Params.normalIntensity);
+            layer0Albedo = stResult.albedo;
+            layer0ORM = stResult.orm;
+            layer0Normal = stResult.normal;
+        } else {
+            layer0Albedo = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb;
+            layer0ORM = textureSampleGrad(layerORMArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV);
+            let layer0NormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layer0UV, 0, ddx0UV, ddy0UV).rgb * 2.0 - vec3<f32>(1.0);
+            layer0Normal = vec3<f32>(layer0NormalRaw.xy * layer0Params.normalIntensity, max(0.01, layer0NormalRaw.z));
+        }
 
         result.albedo = layer0Albedo;
         result.roughness = layer0Params.roughness * layer0ORM.g;
