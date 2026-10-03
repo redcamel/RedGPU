@@ -137,35 +137,35 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
      * @param index - [KO] 타일 인덱스 / [EN] Tile index
      * @param centerWorldX - [KO] 타일 중심 월드 X 좌표 / [EN] Tile center world X coordinate
      * @param centerWorldZ - [KO] 타일 중심 월드 Z 좌표 / [EN] Tile center world Z coordinate
-     * @param minY - [KO] 타일 영역 내 지형의 최소 월드 Y 높이 / [EN] Minimum world Y height
-     * @param maxY - [KO] 타일 영역 내 지형의 최대 월드 Y 높이 / [EN] Maximum world Y height
+     * @param minHeightNorm - [KO] 타일 영역 내 지형의 최소 정규화 높이 비율 (0.0~1.0) / [EN] Minimum normalized height ratio (0.0~1.0)
+     * @param maxHeightNorm - [KO] 타일 영역 내 지형의 최대 정규화 높이 비율 (0.0~1.0) / [EN] Maximum normalized height ratio (0.0~1.0)
      */
     setStaticTileData(
         index: number,
         centerWorldX: number,
         centerWorldZ: number,
-        minY: number = 0.0,
-        maxY: number = 0.0
+        minHeightNorm: number = 0.0,
+        maxHeightNorm: number = 1.0
     ): void {
         const offset = index * 4;
         this.#allTilesData[offset] = centerWorldX;
         this.#allTilesData[offset + 1] = centerWorldZ;
-        this.#allTilesData[offset + 2] = minY;
-        this.#allTilesData[offset + 3] = maxY;
+        this.#allTilesData[offset + 2] = minHeightNorm;
+        this.#allTilesData[offset + 3] = maxHeightNorm;
     }
 
     /**
-     * [KO] 특정 타일의 높이 범위(minY, maxY)를 갱신합니다.
-     * [EN] Updates the height bounds (minY, maxY) of a specific tile index.
+     * [KO] 특정 타일의 정규화 높이 범위(0.0~1.0)를 갱신합니다.
+     * [EN] Updates the normalized height bounds (0.0 to 1.0) of a specific tile index.
      *
      * @param index - [KO] 타일 인덱스 / [EN] Tile index
-     * @param minY - [KO] 타일 최소 월드 Y 높이 / [EN] Tile minimum world Y height
-     * @param maxY - [KO] 타일 최대 월드 Y 높이 / [EN] Tile maximum world Y height
+     * @param minHeightNorm - [KO] 타일 최소 정규화 높이 비율 (0.0~1.0) / [EN] Tile minimum normalized height ratio (0.0~1.0)
+     * @param maxHeightNorm - [KO] 타일 최대 정규화 높이 비율 (0.0~1.0) / [EN] Tile maximum normalized height ratio (0.0~1.0)
      */
-    updateTileHeightBounds(index: number, minY: number, maxY: number): void {
+    updateTileHeightBounds(index: number, minHeightNorm: number, maxHeightNorm: number): void {
         const offset = index * 4;
-        this.#allTilesData[offset + 2] = minY;
-        this.#allTilesData[offset + 3] = maxY;
+        this.#allTilesData[offset + 2] = minHeightNorm;
+        this.#allTilesData[offset + 3] = maxHeightNorm;
     }
 
     /**

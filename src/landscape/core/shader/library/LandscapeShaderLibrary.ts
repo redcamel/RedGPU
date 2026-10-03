@@ -82,8 +82,8 @@ export namespace LandscapeShaderLibrary {
         export const LandscapeUniforms = LandscapeUniforms_wgsl;
 
         /**
-         * [KO] 지형 단일 타일 청크 공간 위치(centerWorldX, centerWorldZ) 및 월드 높이 범위(minY, maxY) 구조체 (16바이트)
-         * [EN] Static spatial world center coordinates and height bounds (minY, maxY) struct for an individual landscape tile chunk (16 bytes)
+         * [KO] 지형 단일 타일 청크 공간 위치(centerWorldX, centerWorldZ) 및 정규화 높이 범위(minHeightNorm, maxHeightNorm) 구조체 (16바이트)
+         * [EN] Static spatial world center coordinates and normalized height bounds (minHeightNorm, maxHeightNorm) struct for an individual landscape tile chunk (16 bytes)
          *
          * ```wgsl
          * #redgpu_include landscape.struct.LandscapeTile;

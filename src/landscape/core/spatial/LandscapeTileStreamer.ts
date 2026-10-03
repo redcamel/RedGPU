@@ -839,9 +839,9 @@ export class LandscapeTileStreamer extends RedGPUObject {
                     if (val > maxP) maxP = val;
                 }
                 const maxNorm = pixels instanceof Uint16Array ? 65535.0 : 255.0;
-                const minY = (minP / maxNorm) * this.#heightScale;
-                const maxY = (maxP / maxNorm) * this.#heightScale;
-                comp.setHeightBounds(minY, maxY);
+                const minHeightNorm = minP / maxNorm;
+                const maxHeightNorm = maxP / maxNorm;
+                comp.setHeightBounds(minHeightNorm, maxHeightNorm);
 
                 const gpuDevice = this.gpuDevice;
                 const bytesPerRow = width * 2;

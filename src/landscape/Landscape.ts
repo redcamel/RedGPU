@@ -378,9 +378,10 @@ export class Landscape extends RedGPUObject {
      * [EN] Terrain elevation height scale
      */
     set heightScale(val: number) {
-        if (this.#heightScale !== val) {
-            this.#heightScale = val;
-            this.#tileStreamer?.setTerrainConfig(val);
+        const clampedVal = Math.max(0, val);
+        if (this.#heightScale !== clampedVal) {
+            this.#heightScale = clampedVal;
+            this.#tileStreamer?.setTerrainConfig(clampedVal);
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
             this.#tileStreamer?.rebakeAllLoadedVBT();
@@ -1312,13 +1313,13 @@ export class Landscape extends RedGPUObject {
         this.#gpuCuller = new LandscapeGPUCuller(this.redGPUContext);
 
         this.#spatialGrid.rebuildTiles((comp, index) => {
-            comp.setHeightBounds(0.0, this.#heightScale);
+            comp.setHeightBounds(0.0, 1.0);
             this.#instanceBuffer.setStaticTileData(
                 index,
                 comp.worldX,
                 comp.worldZ,
-                comp.minY,
-                comp.maxY
+                comp.minHeightNorm,
+                comp.maxHeightNorm
             );
         });
 
@@ -1423,12 +1424,12 @@ export class Landscape extends RedGPUObject {
 
     #onTileHeightBoundsLoaded(comp: LandscapeComponent): void {
         const index = comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX;
-        this.#instanceBuffer.updateTileHeightBounds(index, comp.minY, comp.maxY);
+        this.#instanceBuffer.updateTileHeightBounds(index, comp.minHeightNorm, comp.maxHeightNorm);
         const gpuDevice = this.redGPUContext.gpuDevice;
         const allTilesBuffer = this.#instanceBuffer.allTilesBuffer;
         if (gpuDevice && allTilesBuffer) {
-            this.#tileHeightBuffer[0] = comp.minY;
-            this.#tileHeightBuffer[1] = comp.maxY;
+            this.#tileHeightBuffer[0] = comp.minHeightNorm;
+            this.#tileHeightBuffer[1] = comp.maxHeightNorm;
             gpuDevice.queue.writeBuffer(
                 allTilesBuffer,
                 index * 16 + 8,
@@ -1446,7 +1447,6 @@ export class Landscape extends RedGPUObject {
         const tileCountX = this.#spatialGrid.tileCountX;
         const tileCountZ = this.#spatialGrid.tileCountZ;
         const maxNorm = maxVal || (pixels instanceof Uint16Array ? 65535.0 : 255.0);
-        const heightScale = this.#heightScale;
 
         const flatCells = this.#spatialGrid.flatCells;
         for (let idx = 0; idx < flatCells.length; idx++) {
@@ -1474,10 +1474,10 @@ export class Landscape extends RedGPUObject {
             }
 
             if (minP !== Infinity && maxP !== -Infinity) {
-                const minY = (minP / maxNorm) * heightScale;
-                const maxY = (maxP / maxNorm) * heightScale;
-                comp.setHeightBounds(minY, maxY);
-                this.#instanceBuffer.updateTileHeightBounds(idx, minY, maxY);
+                const minHeightNorm = minP / maxNorm;
+                const maxHeightNorm = maxP / maxNorm;
+                comp.setHeightBounds(minHeightNorm, maxHeightNorm);
+                this.#instanceBuffer.updateTileHeightBounds(idx, minHeightNorm, maxHeightNorm);
             }
         }
         this.#instanceBuffer.uploadStaticTilesToGPU();

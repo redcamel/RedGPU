@@ -127,10 +127,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let halfTileZ = uniforms.tileSizeZ * 0.5;
         let heightScale = uniforms.heightScale;
 
-        // 타일별 타이트 AABB (버텍스 모핑 및 스커트 기하 마진 10.0m 부여하여 100% 안전 보장)
+        // 정규화 높이 비율(0.0~1.0)에 현재 heightScale을 곱하여 실시간 타이트 AABB 계산 (음수 스케일 미허용)
+        let minY = tile.minHeightNorm * heightScale;
+        let maxY = tile.maxHeightNorm * heightScale;
+
+        // 버텍스 모핑 및 스커트 기하 마진 10.0m 부여하여 100% 안전 보장
         let margin = 10.0;
-        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, tile.minY - margin, tile.centerWorldZ - halfTileZ);
-        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, tile.maxY + margin, tile.centerWorldZ + halfTileZ);
+        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, minY - margin, tile.centerWorldZ - halfTileZ);
+        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, maxY + margin, tile.centerWorldZ + halfTileZ);
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
@@ -143,7 +147,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             if (!isOccluded) {
                 let dx = tile.centerWorldX - uniforms.cameraPosition.x;
                 let dz = tile.centerWorldZ - uniforms.cameraPosition.z;
-                let tileCenterY = (tile.minY + tile.maxY) * 0.5;
+                let tileCenterY = (minY + maxY) * 0.5;
                 let dy = tileCenterY - uniforms.cameraPosition.y;
                 let distSq = dx * dx + dz * dz + dy * dy;
 

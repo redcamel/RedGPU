@@ -22,8 +22,8 @@ export class LandscapeComponent {
     #worldZ: number = 0;
     #componentX: number = 0;
     #componentZ: number = 0;
-    #minY: number = 0;
-    #maxY: number = 0;
+    #minHeightNorm: number = 0.0;
+    #maxHeightNorm: number = 1.0;
     #key: string = '';
 
     /**
@@ -34,23 +34,23 @@ export class LandscapeComponent {
      * @param worldZ - [KO] 타일 중심의 월드 Z 좌표 / [EN] World Z coordinate of the tile center
      * @param componentX - [KO] 그리드 컬럼 인덱스 (X축 청크 번호) / [EN] Grid column index (chunk index along X axis)
      * @param componentZ - [KO] 그리드 행 인덱스 (Z축 청크 번호) / [EN] Grid row index (chunk index along Z axis)
-     * @param minY - [KO] 타일 영역 내 지형의 최소 월드 Y 높이 / [EN] Minimum world Y height within tile area
-     * @param maxY - [KO] 타일 영역 내 지형의 최대 월드 Y 높이 / [EN] Maximum world Y height within tile area
+     * @param minHeightNorm - [KO] 타일 영역 내 지형의 최소 정규화 높이 비율 (0.0~1.0) / [EN] Minimum normalized height ratio (0.0~1.0)
+     * @param maxHeightNorm - [KO] 타일 영역 내 지형의 최대 정규화 높이 비율 (0.0~1.0) / [EN] Maximum normalized height ratio (0.0~1.0)
      */
     constructor(
         worldX: number = 0,
         worldZ: number = 0,
         componentX: number = 0,
         componentZ: number = 0,
-        minY: number = 0,
-        maxY: number = 0
+        minHeightNorm: number = 0.0,
+        maxHeightNorm: number = 1.0
     ) {
         this.#worldX = worldX;
         this.#worldZ = worldZ;
         this.#componentX = componentX;
         this.#componentZ = componentZ;
-        this.#minY = minY;
-        this.#maxY = maxY;
+        this.#minHeightNorm = minHeightNorm;
+        this.#maxHeightNorm = maxHeightNorm;
         this.#key = `${componentZ}_${componentX}`;
     }
 
@@ -95,31 +95,31 @@ export class LandscapeComponent {
     }
 
     /**
-     * [KO] 타일 영역 내 지형의 최소 월드 Y 높이를 반환합니다.
-     * [EN] Returns the minimum world Y height of terrain within the tile area.
+     * [KO] 타일 영역 내 지형의 최소 정규화 높이 비율(0.0~1.0)을 반환합니다.
+     * [EN] Returns the minimum normalized height ratio (0.0 to 1.0) of terrain within the tile area.
      */
-    get minY(): number {
-        return this.#minY;
+    get minHeightNorm(): number {
+        return this.#minHeightNorm;
     }
 
     /**
-     * [KO] 타일 영역 내 지형의 최대 월드 Y 높이를 반환합니다.
-     * [EN] Returns the maximum world Y height of terrain within the tile area.
+     * [KO] 타일 영역 내 지형의 최대 정규화 높이 비율(0.0~1.0)을 반환합니다.
+     * [EN] Returns the maximum normalized height ratio (0.0 to 1.0) of terrain within the tile area.
      */
-    get maxY(): number {
-        return this.#maxY;
+    get maxHeightNorm(): number {
+        return this.#maxHeightNorm;
     }
 
     /**
-     * [KO] 타일 영역 내 지형의 최소/최대 월드 Y 높이 범위를 갱신합니다.
-     * [EN] Updates the minimum/maximum world Y height range of terrain within the tile area.
+     * [KO] 타일 영역 내 지형의 최소/최대 정규화 높이 범위(0.0~1.0)를 갱신합니다.
+     * [EN] Updates the minimum/maximum normalized height range (0.0 to 1.0) of terrain within the tile area.
      *
-     * @param minY - [KO] 최소 월드 Y 높이 / [EN] Minimum world Y height
-     * @param maxY - [KO] 최대 월드 Y 높이 / [EN] Maximum world Y height
+     * @param minHeightNorm - [KO] 최소 정규화 높이 비율 (0.0~1.0) / [EN] Minimum normalized height ratio (0.0 to 1.0)
+     * @param maxHeightNorm - [KO] 최대 정규화 높이 비율 (0.0~1.0) / [EN] Maximum normalized height ratio (0.0 to 1.0)
      */
-    setHeightBounds(minY: number, maxY: number): void {
-        this.#minY = minY;
-        this.#maxY = maxY;
+    setHeightBounds(minHeightNorm: number, maxHeightNorm: number): void {
+        this.#minHeightNorm = minHeightNorm;
+        this.#maxHeightNorm = maxHeightNorm;
     }
 }
 
