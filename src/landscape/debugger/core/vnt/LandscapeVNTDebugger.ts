@@ -2,7 +2,7 @@ import ALandscapeTextureDebugger from "../ALandscapeTextureDebugger";
 import Landscape from "../../../Landscape";
 import LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
-import vntDebuggerWGSL from "./shader/vntDebugger.wgsl";
+import LandscapeShaderLibrary from "../../../core/shader/library/LandscapeShaderLibrary";
 
 /**
  * [KO] 가상 노멀맵(VNT) 텍스처 아틀라스를 온스크린 캔버스에 실시간 렌더링하는 디버거 클래스입니다.
@@ -38,7 +38,7 @@ export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
             tileStreamer,
             cameraOrOptions,
             defaultOptions,
-            vntDebuggerWGSL,
+            LandscapeShaderLibrary.debug.textureDebuggerFragment,
             'Landscape_Debugger_VNT_ShaderModule',
             (_, ts) => ts?.getAtlasTexture('vnt') ?? null,
             {r: 0.1, g: 0.1, b: 0.1, a: 1.0}

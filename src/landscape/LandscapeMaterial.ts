@@ -383,31 +383,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         let offset = 8;
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
-                const layer = this.#layers[i];
-
-                floatBuf[offset + 0] = layer.uvOffset[0];
-                floatBuf[offset + 1] = layer.uvOffset[1];
-                floatBuf[offset + 2] = layer.uvScale[0];
-                floatBuf[offset + 3] = layer.uvScale[1];
-
-                floatBuf[offset + 4] = layer.roughness;
-                floatBuf[offset + 5] = layer.metallic;
-                floatBuf[offset + 6] = layer.normalIntensity;
-                floatBuf[offset + 7] = layer.enabled ? 1.0 : 0.0;
-
-                floatBuf[offset + 8] = layer.aoIntensity;
-                floatBuf[offset + 9] = layer.weightChannelIndex;
-                floatBuf[offset + 10] = layer.nearUVScaleMultiplier;
-                floatBuf[offset + 11] = layer.heightBlendFactor;
-
-                floatBuf[offset + 12] = layer.stochasticTiling ? 1.0 : 0.0;
-                floatBuf[offset + 13] = layer.stochasticScale;
-                floatBuf[offset + 14] = 0.0;
-                floatBuf[offset + 15] = 0.0;
+                this.#layers[i].writeUniformData(floatBuf, offset);
             } else {
-                floatBuf.fill(0, offset, offset + 16);
+                LandscapeLayer.writeZeroUniformData(floatBuf, offset);
             }
-            offset += 16;
+            offset += LandscapeLayer.UNIFORM_FLOAT_COUNT;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

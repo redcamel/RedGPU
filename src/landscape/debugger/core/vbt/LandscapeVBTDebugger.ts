@@ -2,7 +2,7 @@ import ALandscapeTextureDebugger from "../ALandscapeTextureDebugger";
 import Landscape from "../../../Landscape";
 import LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
-import vbtDebuggerWGSL from "./shader/vbtDebugger.wgsl";
+import LandscapeShaderLibrary from "../../../core/shader/library/LandscapeShaderLibrary";
 
 /**
  * [KO] 가상 베이크 베이스 컬러(VBT BaseColor) 텍스처 아틀라스를 온스크린 캔버스에 실시간 렌더링하는 디버거 클래스입니다.
@@ -38,7 +38,7 @@ export class LandscapeVBTDebugger extends ALandscapeTextureDebugger {
             tileStreamer,
             cameraOrOptions,
             defaultOptions,
-            vbtDebuggerWGSL,
+            LandscapeShaderLibrary.debug.textureDebuggerFragment,
             'Landscape_Debugger_VBT_BaseColor_ShaderModule',
             (_, ts) => ts?.getAtlasTexture('vbtBaseColor') ?? null,
             {r: 0.08, g: 0.08, b: 0.08, a: 1.0}

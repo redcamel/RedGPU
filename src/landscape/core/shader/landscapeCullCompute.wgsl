@@ -24,13 +24,8 @@ struct TileInstance {
     worldZ: f32,
 };
 
-struct DrawIndexedIndirectArgs {
-    indexCount: u32,
-    instanceCount: atomic<u32>,
-    firstIndex: u32,
-    baseVertex: u32,
-    firstInstance: u32,
-};
+#redgpu_include landscape.struct.DrawIndexedIndirectArgs;
+
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
 @group(0) @binding(1) var<storage, read> allInputTiles: array<TileInstance>;

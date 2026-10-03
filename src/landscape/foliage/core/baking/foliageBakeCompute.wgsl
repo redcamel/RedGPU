@@ -1,13 +1,5 @@
-struct FoliageLODUniformInfo {
-    enterStart: f32,
-    enterEnd: f32,
-    exitStart: f32,
-    exitEnd: f32,
-    invEnterRange: f32,
-    invExitRange: f32,
-    subMeshOffset: u32,
-    subMeshCount: u32,
-};
+#redgpu_include landscape.struct.FoliageLODUniformInfo;
+
 
 struct FoliageTypeParam {
     cullingDistance: f32,
@@ -25,16 +17,8 @@ struct FoliageTypeParam {
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
-struct FoliageInstance {
-    posX: f32,
-    posY: f32,
-    posZ: f32,
-    scaleY: f32,
-    packedRotXY: u32,
-    packedRotZW: u32,
-    packedScaleXZ: u32,
-    packedGroundColorAndType: u32,
-};
+#redgpu_include landscape.struct.FoliageInstance;
+
 
 struct BakeUniforms {
     invWorldSizeX: f32,

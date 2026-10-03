@@ -6,6 +6,7 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 // 매크로 및 전처리용 정규식/상수 정의 (순수 함수 영역)
 const includePattern = /#redgpu_include\s+([\w.]+)/g;
+const extensionLibraries: Map<string, any> = new Map();
 const definePattern = /REDGPU_DEFINE_(?:TILE_COUNT_[XYZ]|TOTAL_TILES|WORKGROUP_SIZE_[XYZ]|MAX_LIGHTS_PER_CLUSTER)/g;
 const defineValues = {
     REDGPU_DEFINE_TILE_COUNT_X: PassClustersLightHelper.TILE_COUNT_X.toString(),
@@ -171,7 +172,7 @@ const generateCodeHash = (code: string): string => {
 /**
  * [KO] 인클루드(#redgpu_include)를 처리합니다.
  */
-const processIncludes = (code: string, sourceName: string = 'Unknown Shader', injectLibrary?: Record<string, string>): string => {
+const processIncludes = (code: string, sourceName: string = 'Unknown Shader'): string => {
     let result = code;
     let iterations = 0;
     const MAX_ITERATIONS = 10;
@@ -182,19 +183,18 @@ const processIncludes = (code: string, sourceName: string = 'Unknown Shader', in
             return '';
         }
 
-        if (injectLibrary && path in injectLibrary) {
-            includedPaths.add(path);
-            return injectLibrary[path];
-        }
-
         const parts = path.split('.');
         let current: any = ShaderLibrary;
+        if (parts.length > 0 && extensionLibraries.has(parts[0])) {
+            current = extensionLibraries.get(parts[0]);
+            parts.shift();
+        }
         for (const part of parts) {
             if (current && typeof current === 'object' && part in current) {
                 current = current[part];
             } else {
                 const lineNumber = currentSource.substring(0, offset).split('\n').length;
-                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in injected library or ShaderLibrary.`);
+                throw new Error(`[preprocessWGSL] Invalid include path in [${sourceName}] at line ${lineNumber}: #redgpu_include ${path}. Path not found in extension libraries or ShaderLibrary.`);
             }
         }
 
@@ -306,81 +306,14 @@ class WGSLParser {
     #activeParseResults: any[] = [];
 
     /**
-     * [KO] WGSL 코드를 전처리하고 리플렉션 정보를 반환합니다.
+     * [KO] 특정 네임스페이스의 서브시스템/확장 WGSL 셰이더 라이브러리를 등록합니다.
+     * [EN] Registers a subsystem/extension WGSL shader library under a specific namespace.
+     * @param namespace - 네임스페이스 키 (예: 'landscape')
+     * @param library - 셰이더 조각 컬렉션 객체
      */
-    public parse(sourceName: string, code: string, injectLibrary?: Record<string, string>): {
-        uniforms: any;
-        storage: any;
-        structs: any;
-        samplers: any;
-        textures: any;
-        vertexEntries: string[];
-        fragmentEntries: string[];
-        computeEntries: string[];
-        defaultSource: string;
-        shaderSourceVariant: any;
-        conditionalBlocks: string[];
-    } {
-        if (!sourceName) {
-            throw new Error(`[WGSLParser] sourceName is required. (provided: ${sourceName})`);
-        }
-
-        const {
-            defaultSource,
-            shaderSourceVariant,
-            conditionalBlocks: uniqueKeys,
-            cacheKey
-        } = this.#preprocess(sourceName, code, injectLibrary);
-
-        const cachedReflect = this.#reflectCache.get(cacheKey);
-        let reflectResult;
-
-        if (cachedReflect) {
-            console.log('🚀 캐시에서 리플렉트 로드:', cacheKey);
-            reflectResult = {...cachedReflect};
-        } else {
-            console.log('🔄 리플렉트 파싱 시작:', cacheKey);
-            const reflect = new WgslReflect(defaultSource);
-
-            reflectResult = {
-                uniforms: {...processUniforms(reflect.uniforms)},
-                storage: {...processStorages(reflect.storage)},
-                structs: {...processStructs(reflect.structs)},
-                samplers: reflect.samplers,
-                textures: reflect.textures,
-                vertexEntries: reflect.entry.vertex.map(v => v.name),
-                fragmentEntries: reflect.entry.fragment.map(v => v.name),
-                computeEntries: reflect.entry.compute.map(v => v.name),
-            };
-
-            shaderSourceVariant.setBaseInfo(reflectResult.textures, reflectResult.samplers);
-
-            uniqueKeys.forEach(key => {
-                const variantSource = shaderSourceVariant.getVariant(key);
-                const variantReflect = new WgslReflect(variantSource);
-                const extraTextures = variantReflect.textures.filter(t =>
-                    !reflectResult.textures.find(bt => bt.name === t.name)
-                );
-                const extraSamplers = variantReflect.samplers.filter(s =>
-                    !reflectResult.samplers.find(bs => bs.name === s.name)
-                );
-                shaderSourceVariant.addConditionalInfo(key, extraTextures, extraSamplers);
-            });
-
-            reflectResult.textures = shaderSourceVariant.getUnionTextures();
-            reflectResult.samplers = shaderSourceVariant.getUnionSamplers();
-
-            this.#reflectCache.set(cacheKey, {...reflectResult});
-        }
-
-        const finalResult = {
-            ...reflectResult,
-            defaultSource,
-            shaderSourceVariant,
-            conditionalBlocks: uniqueKeys
-        };
-        this.#activeParseResults.push(finalResult);
-        return finalResult;
+    static registerLibrary(namespace: string, library: any): void {
+        if (!namespace || !library) return;
+        extensionLibraries.set(namespace, library);
     }
 
     /**
@@ -450,9 +383,87 @@ class WGSLParser {
     }
 
     /**
+     * [KO] WGSL 코드를 전처리하고 리플렉션 정보를 반환합니다.
+     */
+    public parse(sourceName: string, code: string): {
+        uniforms: any;
+        storage: any;
+        structs: any;
+        samplers: any;
+        textures: any;
+        vertexEntries: string[];
+        fragmentEntries: string[];
+        computeEntries: string[];
+        defaultSource: string;
+        shaderSourceVariant: any;
+        conditionalBlocks: string[];
+    } {
+        if (!sourceName) {
+            throw new Error(`[WGSLParser] sourceName is required. (provided: ${sourceName})`);
+        }
+
+        const {
+            defaultSource,
+            shaderSourceVariant,
+            conditionalBlocks: uniqueKeys,
+            cacheKey
+        } = this.#preprocess(sourceName, code);
+
+        const cachedReflect = this.#reflectCache.get(cacheKey);
+        let reflectResult;
+
+        if (cachedReflect) {
+            console.log('🚀 캐시에서 리플렉트 로드:', cacheKey);
+            reflectResult = {...cachedReflect};
+        } else {
+            console.log('🔄 리플렉트 파싱 시작:', cacheKey);
+            const reflect = new WgslReflect(defaultSource);
+
+            reflectResult = {
+                uniforms: {...processUniforms(reflect.uniforms)},
+                storage: {...processStorages(reflect.storage)},
+                structs: {...processStructs(reflect.structs)},
+                samplers: reflect.samplers,
+                textures: reflect.textures,
+                vertexEntries: reflect.entry.vertex.map(v => v.name),
+                fragmentEntries: reflect.entry.fragment.map(v => v.name),
+                computeEntries: reflect.entry.compute.map(v => v.name),
+            };
+
+            shaderSourceVariant.setBaseInfo(reflectResult.textures, reflectResult.samplers);
+
+            uniqueKeys.forEach(key => {
+                const variantSource = shaderSourceVariant.getVariant(key);
+                const variantReflect = new WgslReflect(variantSource);
+                const extraTextures = variantReflect.textures.filter(t =>
+                    !reflectResult.textures.find(bt => bt.name === t.name)
+                );
+                const extraSamplers = variantReflect.samplers.filter(s =>
+                    !reflectResult.samplers.find(bs => bs.name === s.name)
+                );
+                shaderSourceVariant.addConditionalInfo(key, extraTextures, extraSamplers);
+            });
+
+            reflectResult.textures = shaderSourceVariant.getUnionTextures();
+            reflectResult.samplers = shaderSourceVariant.getUnionSamplers();
+
+            this.#reflectCache.set(cacheKey, {...reflectResult});
+        }
+
+        const finalResult = {
+            ...reflectResult,
+            defaultSource,
+            shaderSourceVariant,
+            conditionalBlocks: uniqueKeys
+        };
+        this.#activeParseResults.push(finalResult);
+        return finalResult;
+    }
+
+    /**
      * [KO] WGSL 코드를 전처리합니다. (인스턴스 캐시 사용)
      */
-    #preprocess(sourceName: string, code: string, injectLibrary?: Record<string, string>): PreprocessedWGSLResult {
+    #preprocess(sourceName: string, code: string): PreprocessedWGSLResult {
         const codeHash = generateCodeHash(code);
         const existingHash = this.#sourceNameRegistry.get(sourceName);
         if (existingHash && existingHash !== codeHash) {
@@ -470,7 +481,7 @@ class WGSLParser {
             return cachedResult;
         }
 
-        const withIncludes = processIncludes(code, sourceName, injectLibrary);
+        const withIncludes = processIncludes(code, sourceName);
         const defines = processDefines(withIncludes);
         const conditionalBlocks = findConditionalBlocks(defines);
 

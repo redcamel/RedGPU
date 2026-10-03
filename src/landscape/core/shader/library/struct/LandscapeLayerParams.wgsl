@@ -1,0 +1,16 @@
+struct LandscapeLayerParams {
+    uvOffset: vec2<f32>,
+    uvScale: vec2<f32>,
+    roughness: f32,
+    metallic: f32,
+    normalIntensity: f32,
+    enabled: f32,
+    aoIntensity: f32,
+    weightChannelIndex: f32,
+    nearUVScaleMultiplier: f32,
+    heightBlendFactor: f32,
+    stochasticTiling: f32,
+    stochasticScale: f32,
+    _pad0: f32,
+    _pad1: f32,
+};

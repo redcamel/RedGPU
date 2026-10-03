@@ -2,7 +2,7 @@ import ALandscapeTextureDebugger from "../ALandscapeTextureDebugger";
 import Landscape from "../../../Landscape";
 import LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
-import vbtDebuggerWGSL from "./shader/vbtDebugger.wgsl";
+import LandscapeShaderLibrary from "../../../core/shader/library/LandscapeShaderLibrary";
 
 /**
  * [KO] 가상 베이크 ORM(Occlusion/Roughness/Metalness) 텍스처 아틀라스를 온스크린 캔버스에 실시간 렌더링하는 디버거 클래스입니다.
@@ -38,7 +38,7 @@ export class LandscapeVBTORMDebugger extends ALandscapeTextureDebugger {
             tileStreamer,
             cameraOrOptions,
             defaultOptions,
-            vbtDebuggerWGSL,
+            LandscapeShaderLibrary.debug.textureDebuggerFragment,
             'Landscape_Debugger_VBT_ORM_ShaderModule',
             (_, ts) => ts?.getAtlasTexture('vbtORM') ?? null,
             {r: 1.0, g: 0.8, b: 0.0, a: 1.0}

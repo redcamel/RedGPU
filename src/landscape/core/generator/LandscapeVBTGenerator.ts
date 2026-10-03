@@ -9,6 +9,7 @@ import vbtBakeShaderCode from "../shader/landscapeVBTBake.wgsl";
 import tileMipShaderCode from "../shader/landscapeTileMipmap.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import LandscapeMaterial from "../../LandscapeMaterial";
+import LandscapeLayer from "../../LandscapeLayer";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
@@ -115,33 +116,11 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 16;
+            const offset = 12 + i * LandscapeLayer.UNIFORM_FLOAT_COUNT;
             if (i < activeCount) {
-                const layer = activeLayers[i];
-
-                fArr[offset + 0] = layer.uvOffset[0];
-                fArr[offset + 1] = layer.uvOffset[1];
-                fArr[offset + 2] = layer.uvScale[0];
-                fArr[offset + 3] = layer.uvScale[1];
-
-                fArr[offset + 4] = layer.roughness;
-                fArr[offset + 5] = layer.metallic;
-                fArr[offset + 6] = layer.normalIntensity;
-                fArr[offset + 7] = layer.enabled ? 1.0 : 0.0;
-
-                fArr[offset + 8] = layer.aoIntensity;
-                fArr[offset + 9] = layer.weightChannelIndex;
-                fArr[offset + 10] = layer.nearUVScaleMultiplier;
-                fArr[offset + 11] = layer.heightBlendFactor;
-
-                fArr[offset + 12] = layer.stochasticTiling ? 1.0 : 0.0;
-                fArr[offset + 13] = layer.stochasticScale;
-                fArr[offset + 14] = 0.0;
-                fArr[offset + 15] = 0.0;
+                activeLayers[i].writeUniformData(fArr, offset);
             } else {
-                for (let j = 0; j < 16; j++) {
-                    fArr[offset + j] = 0.0;
-                }
+                LandscapeLayer.writeZeroUniformData(fArr, offset);
             }
         }
 

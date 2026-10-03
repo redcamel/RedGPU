@@ -1,15 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include landscape.struct.GrassInstance;
 
-struct GrassInstance {
-    posX: f32,
-    posY: f32,
-    posZ: f32,
-    rotationY: f32,
-    packedScale: u32,
-    packedBounding: u32,
-    packedQuat: u32,
-    packedGroundColor: u32,
-};
 
 fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
     return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);

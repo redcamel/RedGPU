@@ -35,13 +35,15 @@ import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeLayer, {type LandscapeLayerOptions, type LandscapeWeightMapChannel} from "./LandscapeLayer";
 import {LANDSCAPE_BASE_GRID_SIZE} from "./LANDSCAPE_BASE_GRID_SIZE";
 import {LANDSCAPE_DEBUG_MODE} from "./LANDSCAPE_DEBUG_MODE";
+import LandscapeShaderLibrary from "./core/shader/library/LandscapeShaderLibrary";
 
 export {
     Landscape,
     LandscapeMaterial,
     LandscapeLayer,
     LANDSCAPE_BASE_GRID_SIZE,
-    LANDSCAPE_DEBUG_MODE
+    LANDSCAPE_DEBUG_MODE,
+    LandscapeShaderLibrary
 };
 
 // 3. User-facing Configuration Types (Terrain Layer System)

@@ -640,6 +640,52 @@ export class LandscapeLayer {
         if (!src || !this.#weightMapCPUSampler) return 1.0;
         return this.#weightMapCPUSampler.getWeight(src, u, v, this.#weightChannelIndex);
     }
+
+    /**
+     * [KO] 단일 레이어가 차지하는 유니폼 버퍼 float(f32) 원소 개수 (16 floats = 64 bytes)
+     * [EN] Number of uniform buffer float(f32) elements occupied by a single layer (16 floats = 64 bytes)
+     */
+    static readonly UNIFORM_FLOAT_COUNT = 16;
+
+    /**
+     * [KO] 지정된 Float32Array 버퍼의 특정 offset 위치에 16 floats의 0 데이터를 채웁니다.
+     * [EN] Fills 16 floats of zeros at the specified offset in the target Float32Array buffer.
+     *
+     * @param targetBuffer - [KO] 기록 대상 Float32Array / [EN] Target Float32Array buffer
+     * @param offset - [KO] 기록 시작 인덱스 / [EN] Starting float index
+     */
+    static writeZeroUniformData(targetBuffer: Float32Array, offset: number): void {
+        targetBuffer.fill(0, offset, offset + 16);
+    }
+
+    /**
+     * [KO] 지정된 Float32Array 버퍼의 특정 offset 위치에 레이어 파라미터를 WGSL LandscapeLayerParams 구조체 레이아웃에 맞춰 복사합니다.
+     * [EN] Copies the layer parameters into the specified Float32Array buffer at the offset matching the WGSL LandscapeLayerParams struct layout.
+     *
+     * @param targetBuffer - [KO] 기록 대상 Float32Array / [EN] Target Float32Array buffer
+     * @param offset - [KO] 기록 시작 인덱스 / [EN] Starting float index
+     */
+    writeUniformData(targetBuffer: Float32Array, offset: number): void {
+        targetBuffer[offset + 0] = this.#uvOffset[0];
+        targetBuffer[offset + 1] = this.#uvOffset[1];
+        targetBuffer[offset + 2] = this.#uvScale[0];
+        targetBuffer[offset + 3] = this.#uvScale[1];
+
+        targetBuffer[offset + 4] = this.#roughness;
+        targetBuffer[offset + 5] = this.#metallic;
+        targetBuffer[offset + 6] = this.#normalIntensity;
+        targetBuffer[offset + 7] = this.#enabled ? 1.0 : 0.0;
+
+        targetBuffer[offset + 8] = this.#aoIntensity;
+        targetBuffer[offset + 9] = this.#weightChannelIndex;
+        targetBuffer[offset + 10] = this.#nearUVScaleMultiplier;
+        targetBuffer[offset + 11] = this.#heightBlendFactor;
+
+        targetBuffer[offset + 12] = this.#stochasticTiling ? 1.0 : 0.0;
+        targetBuffer[offset + 13] = this.#stochasticScale;
+        targetBuffer[offset + 14] = 0.0;
+        targetBuffer[offset + 15] = 0.0;
+    }
 }
 
 Object.freeze(LandscapeLayer);
