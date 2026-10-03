@@ -75,26 +75,10 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 하위 호환성을 위한 allTilesBuffer 별칭입니다.
-     * [EN] Alias of allTilesBuffer for backwards compatibility.
-     */
-    get allInputTilesBuffer(): GPUBuffer | null {
-        return this.#allTilesBuffer;
-    }
-
-    /**
      * [KO] GPU 컬링 후 가시적인 타일 데이터 목록이 저장되는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer containing visible tile data output by GPU culling.
      */
     get visibleTilesBuffer(): GPUBuffer | null {
-        return this.#visibleTilesBuffer;
-    }
-
-    /**
-     * [KO] 하위 호환성을 위한 visibleTilesBuffer 별칭입니다.
-     * [EN] Alias of visibleTilesBuffer for backwards compatibility.
-     */
-    get visibleTileIndicesBuffer(): GPUBuffer | null {
         return this.#visibleTilesBuffer;
     }
 
