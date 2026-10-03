@@ -178,6 +178,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #isRebakeScheduled: boolean = false;
     #rebakeDebounceTimer: any = null;
     #pendingLayerMipmapUpdate: boolean = false;
+    #isRebuildTextureArraysScheduled: boolean = false;
 
     #internalLayerViews = {
         baseColorView: null as GPUTextureView | null,
@@ -289,7 +290,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         };
         layer.dirty = true;
         this.dirtyPipeline = true;
-        this.#rebuildTextureArrays();
+        this.#scheduleRebuildTextureArrays();
         this.updateUniformsData();
         return this;
     }
@@ -318,7 +319,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             removed.onChange = undefined;
             this.dirtyPipeline = true;
             this.#textureArrayVersion++;
-            this.#rebuildTextureArrays();
+            this.#scheduleRebuildTextureArrays();
             this.updateUniformsData();
             return true;
         }
@@ -519,6 +520,17 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.#normalArrayView = this.#gpuNormalArrayTexture.createView({dimension: '2d-array'});
         this.#ormArrayView = this.#gpuORMArrayTexture.createView({dimension: '2d-array'});
         this.#weightMapArrayView = this.#gpuWeightMapArrayTexture.createView({dimension: '2d-array'});
+    }
+
+    #scheduleRebuildTextureArrays(): void {
+        if (this.#isRebuildTextureArraysScheduled) return;
+        this.#isRebuildTextureArraysScheduled = true;
+        queueMicrotask(() => {
+            this.#isRebuildTextureArraysScheduled = false;
+            if (this.redGPUContext.destroyed) return;
+            this.#rebuildTextureArrays();
+            this.updateUniformsData();
+        });
     }
 
     #rebuildTextureArrays(): void {

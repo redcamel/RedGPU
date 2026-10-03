@@ -431,7 +431,7 @@ function initCharacter({
                            characterOrbitController,
                            onLoaded
                        }) {
-    const CHARACTER_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+    const CHARACTER_URL = '../../../assets/gltf/Soldier.glb';
 
     new RedGPU.GLTFLoader(
         redGPUContext,
