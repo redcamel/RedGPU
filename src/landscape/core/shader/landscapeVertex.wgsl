@@ -43,6 +43,30 @@ struct LandscapeUniforms {
 
 const LOD_GEOMORPH_START_RATIO: f32 = 0.7;
 
+fn getLodThresholdSq(lod: u32) -> f32 {
+    let packedVec = landscapeUniforms.lodDistancesSq[lod / 4u];
+    return packedVec[lod % 4u];
+}
+
+fn sampleHeightBilinear(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
+    let p = clamp(uv * texSize - vec2<f32>(0.5), vec2<f32>(0.0), texSize - vec2<f32>(1.0));
+    let base = vec2<i32>(floor(p));
+    let f = fract(p);
+
+    let maxCoord = vec2<i32>(texSize - vec2<f32>(1.0));
+    let c00 = base;
+    let c10 = min(base + vec2<i32>(1, 0), maxCoord);
+    let c01 = min(base + vec2<i32>(0, 1), maxCoord);
+    let c11 = min(base + vec2<i32>(1, 1), maxCoord);
+
+    let h00 = textureLoad(heightMapTexture, c00, 0).r;
+    let h10 = textureLoad(heightMapTexture, c10, 0).r;
+    let h01 = textureLoad(heightMapTexture, c01, 0).r;
+    let h11 = textureLoad(heightMapTexture, c11, 0).r;
+
+    return mix(mix(h00, h10, f.x), mix(h01, h11, f.x), f.y);
+}
+
 struct InputData {
     @location(0) position: vec3<f32>,
     @location(1) uv: vec2<f32>,
@@ -77,125 +101,102 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     let maxCompCount = max(1u, landscapeUniforms.maxComponentCount);
     let lodLevel = input.instanceIdx / maxCompCount;
 
-    let worldX = input.position.x + instanceData.worldX;
-    let worldZ = input.position.y + instanceData.worldZ;
+    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
+    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
 
-    let globalUV = vec2<f32>(
-        (worldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-        (worldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+    // 1. 초기 원래 정점의 위치 및 UV 계산
+    let initialWorldX = input.position.x + instanceData.worldX;
+    let initialWorldZ = input.position.y + instanceData.worldZ;
+
+    let initialGlobalUV = vec2<f32>(
+        (initialWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+        (initialWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
 
     let texSize = landscapeUniforms.vhtTextureSize;
-    let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+    let initialTexCoord = vec2<i32>(clamp(initialGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+    let initialHeight = textureLoad(heightMapTexture, initialTexCoord, 0).r;
 
-    let currentHeight = textureLoad(heightMapTexture, texCoord, 0).r;
-    var finalHeight = currentHeight;
+    // 2. 카메라와의 유효 거리 및 연속 모핑 계수 (smoothMorph) 계산
+    let camPos = systemUniforms.camera.cameraPosition.xyz;
+    let dx = initialWorldX - camPos.x;
+    let dz = initialWorldZ - camPos.z;
+    let dy = initialHeight * landscapeUniforms.heightScale - camPos.y;
+    let distSq = dx * dx + dz * dz + dy * dy;
 
-    if (lodLevel < 2u) {
-        let camPos = systemUniforms.camera.cameraPosition.xyz;
-        let dx = worldX - camPos.x;
-        let dz = worldZ - camPos.z;
-        let dy = currentHeight * landscapeUniforms.heightScale - camPos.y;
-        let distSq = dx * dx + dz * dz + dy * dy;
+    let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
+    let metricFactor = select(1.0, landscapeUniforms.tanHalfFOV, isScreenSize);
+    let effectiveDist = sqrt(distSq) * metricFactor;
 
-        let currentPacked = landscapeUniforms.lodDistancesSq[0];
-        let currentThresholdSq = select(currentPacked.x, currentPacked.y, lodLevel == 1u);
+    let nextThresholdSq = getLodThresholdSq(lodLevel);
+    var smoothMorph = 0.0;
 
-        if (currentThresholdSq < 1e14) {
-            let nextDist = sqrt(currentThresholdSq);
-            let prevDist = select(0.0, sqrt(currentPacked.x), lodLevel == 1u);
+    if (nextThresholdSq < 1e14) {
+        let nextDist = sqrt(nextThresholdSq);
+        let prevDist = select(0.0, sqrt(getLodThresholdSq(lodLevel - 1u)), lodLevel > 0u);
 
-            let maxTileDim = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ);
-            let tileRadius = maxTileDim * 0.7071;
+        let morphRange = max(1.0, nextDist - prevDist);
+        let morphStartDist = prevDist + morphRange * LOD_GEOMORPH_START_RATIO;
+        let morphEndDist = nextDist;
 
-            let morphEndDist = max(prevDist + 1.0, nextDist - tileRadius);
-            let morphRange = max(1.0, morphEndDist - prevDist);
-
-            let morphRatio = LOD_GEOMORPH_START_RATIO;
-            let morphStartDist = prevDist + morphRange * morphRatio;
-
-            let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
-            let effMorphStart = select(morphStartDist, morphStartDist / max(1e-4, landscapeUniforms.tanHalfFOV), isScreenSize);
-
-            if (distSq >= effMorphStart * effMorphStart) {
-                let rawDist = sqrt(distSq);
-                let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
-
-                let morphFactor = clamp((dist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
-                let smoothMorph = smoothstep(0.0, 1.0, morphFactor);
-
-                if (smoothMorph > 0.0001) {
-                    let lod0Quads = max(1.0, landscapeUniforms.lod0Quads);
-                    let baseQuads = max(1.0, landscapeUniforms.baseQuads);
-
-                    var currentSegments: f32;
-                    var subStep: u32;
-
-                    if (lodLevel == 0u) {
-                        currentSegments = lod0Quads;
-                        subStep = max(1u, u32(round(lod0Quads / baseQuads)));
-                    } else {
-                        currentSegments = max(1.0, floor(baseQuads));
-                        subStep = 2u;
-                    }
-
-                    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
-                    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
-
-                    let gridStepX = landscapeUniforms.tileSizeX / currentSegments;
-                    let gridStepZ = landscapeUniforms.tileSizeZ / currentSegments;
-
-                    let gridIdxX = u32(round((input.position.x + halfTileX) / gridStepX) + 0.1);
-                    let gridIdxZ = u32(round((input.position.y + halfTileZ) / gridStepZ) + 0.1);
-
-                    let isMorphX = (gridIdxX % subStep) != 0u;
-                    let isMorphZ = (gridIdxZ % subStep) != 0u;
-
-                    if (isMorphX || isMorphZ) {
-                        let fracX = f32(gridIdxX % subStep) / f32(subStep);
-                        let fracZ = f32(gridIdxZ % subStep) / f32(subStep);
-                        let uvBaseX = f32(gridIdxX - (gridIdxX % subStep)) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
-                        let uvBaseZ = f32(gridIdxZ - (gridIdxZ % subStep)) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
-                        let uvSpanX = f32(subStep) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
-                        let uvSpanZ = f32(subStep) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
-
-                        let tileOriginUV = vec2<f32>(
-                            (instanceData.worldX - halfTileX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-                            (instanceData.worldZ - halfTileZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
-                        );
-
-                        let c00 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c10 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c01 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c11 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-
-                        let h00 = textureLoad(heightMapTexture, c00, 0).r;
-                        let h10 = textureLoad(heightMapTexture, c10, 0).r;
-                        let h01 = textureLoad(heightMapTexture, c01, 0).r;
-                        let h11 = textureLoad(heightMapTexture, c11, 0).r;
-
-                        let targetHeight = mix(mix(h00, h10, fracX), mix(h01, h11, fracX), fracZ);
-                        finalHeight = mix(currentHeight, targetHeight, smoothMorph);
-                    }
-                }
-            }
+        if (effectiveDist >= morphStartDist) {
+            let morphFactor = clamp((effectiveDist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
+            smoothMorph = smoothstep(0.0, 1.0, morphFactor);
         }
     }
 
+    // 3. CDLOD 기하학적 정점 모핑 (스커트 정점 포함하여 홀수 정점을 상위 짝수 정점으로 동기화 보간)
+    var currentSegments: f32;
+    var subStep: u32;
+
+    if (lodLevel == 0u) {
+        let lod0Q = max(1.0, landscapeUniforms.lod0Quads);
+        let baseQ = max(1.0, landscapeUniforms.baseQuads);
+        currentSegments = lod0Q;
+        subStep = max(1u, u32(round(lod0Q / baseQ)));
+    } else {
+        let stepShift = min(31u, lodLevel - 1u);
+        let step = f32(1u << stepShift);
+        currentSegments = max(1.0, floor(landscapeUniforms.baseQuads / step));
+        subStep = 2u;
+    }
+
+    var morphedWorldX = initialWorldX;
+    var morphedWorldZ = initialWorldZ;
+    var morphedUV = input.uv;
+    var morphedGlobalUV = initialGlobalUV;
+    var finalHeight = initialHeight;
+
+    if (smoothMorph > 0.0001 && subStep > 1u) {
+        let parentSegments = max(1.0, currentSegments / f32(subStep));
+        let targetUV = round(input.uv * parentSegments) / parentSegments;
+
+        morphedUV = mix(input.uv, targetUV, smoothMorph);
+
+        let morphedLocalX = morphedUV.x * landscapeUniforms.tileSizeX - halfTileX;
+        let morphedLocalZ = morphedUV.y * landscapeUniforms.tileSizeZ - halfTileZ;
+
+        morphedWorldX = morphedLocalX + instanceData.worldX;
+        morphedWorldZ = morphedLocalZ + instanceData.worldZ;
+
+        morphedGlobalUV = vec2<f32>(
+            (morphedWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+            (morphedWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+        );
+
+        finalHeight = sampleHeightBilinear(morphedGlobalUV, texSize);
+    }
+
+    // 4. 스마트 스커트(Smart Skirt) 안전망 깊이 적용 및 최종 월드 Y 계산
     let isSkirt = input.position.z < -0.5;
     let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
     let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * 0.15 * lodMultiplier);
 
     let worldY = finalHeight * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
 
-    res.worldPos = vec4<f32>(worldX, worldY, worldZ, 1.0);
-    res.globalUV = globalUV;
-    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
-    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
-    res.worldTileUV = vec2<f32>(
-        (input.position.x + halfTileX) / landscapeUniforms.tileSizeX,
-        (input.position.y + halfTileZ) / landscapeUniforms.tileSizeZ
-    );
+    res.worldPos = vec4<f32>(morphedWorldX, worldY, morphedWorldZ, 1.0);
+    res.globalUV = morphedGlobalUV;
+    res.worldTileUV = morphedUV;
     res.lodLevel = lodLevel;
     if (landscapeUniforms.lodColoration > 0.5) {
         res.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];

@@ -43,17 +43,17 @@ export interface LandscapeLODGeometryRange {
 }
 
 /**
- * [KO] 모든 LOD 레벨의 평면 그리드 및 T-Junction 크랙 방지용 스커트(Skirt) 지오메트리를 단일 버텍스/인덱스 버퍼로 통합 관리하는 공유 지오메트리 클래스입니다.
- * [EN] Shared geometry class managing single combined vertex and index buffers across all LOD levels with crack-preventing skirts.
+ * [KO] 모든 LOD 레벨의 평면 그리드 및 크랙 방지용 스마트 스커트(Skirt) 지오메트리를 단일 버텍스/인덱스 버퍼로 통합 관리하는 공유 지오메트리 클래스입니다.
+ * [EN] Shared geometry class managing single combined vertex and index buffers across all LOD levels with smart crack-preventing skirts.
  *
  * **[KO] 아키텍처 및 역할:**
  * - **단일 공유 버퍼 아키텍처**: LOD 0(최고 정밀도)부터 최대 LOD 단계까지의 쿼드 평면 그리드 정점들을 하나의 거대한 Vertex Buffer와 Index Buffer로 패킹하여, 드로우콜마다 버퍼 바인딩을 교체할 필요 없이 오프셋(`LandscapeLODGeometryRange`)만으로 전환합니다.
- * - **T-Junction 크랙 방지용 스커트 (Terrain Skirt)**: LOD 단계가 서로 다른 인접 타일 경계에서 높이 차이로 인해 틈새(Crack/Seam)가 벌어지는 현상을 방지하기 위해, 타일 외곽 가장자리 정점을 아래 방향(Y 음수)으로 돌출시키는 지오메트리 스커트를 자동으로 생성합니다.
+ * - **CDLOD 동기화 스마트 스커트 (Smart Skirt)**: UE5 및 AAA 게임 엔진 표준과 동일하게, 버텍스 셰이더 CDLOD 지오모핑을 100% 추종하는 4방 둘레 스커트를 생성하여 부동소수점 오차나 비동기 스트리밍 시차로 인한 찰나의 틈새(Seam/Crack)를 완벽히 차단합니다.
  * - **와이어프레임 디버그 인덱스**: 일반 솔리드 렌더링용 인덱스 버퍼 외에 격자선 시각화를 위한 전용 와이어프레임 인덱스 버퍼를 함께 빌드하여 디버거 시스템을 지원합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Unified Shared Buffer Architecture**: Packs quad planar grids from LOD 0 through maximum LOD into single unified Vertex and Index buffers, switching levels solely via offset ranges (`LandscapeLODGeometryRange`) without buffer rebinds.
- * - **Crack-prevention Skirts (Terrain Skirts)**: Automatically constructs downward-facing geometric skirts along tile perimeter edges to conceal T-junction seams and elevation gaps between adjacent tiles of differing LOD levels.
+ * - **CDLOD-Synchronized Smart Skirt**: Following UE5 and AAA standards, builds perimeter skirts that strictly synchronize with vertex shader CDLOD geomorphing to eliminate any seam gaps.
  * - **Wireframe Debug Indices**: Builds dedicated wireframe index buffers alongside standard solid triangle indices to support real-time grid visualization and debugging tools.
  *
  * ::: warning
@@ -203,6 +203,7 @@ export class LandscapeSharedGeometry extends RedGPUObject {
             const firstIndex = totalIndexOffset;
             const wireframeFirstIndex = totalWireframeIndexOffset;
 
+            // 1. 내부 평면 그리드 정점 생성
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
@@ -216,6 +217,7 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 }
             }
 
+            // 2. 내부 평면 삼각형 및 와이어프레임 인덱스 생성
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
                     const row1 = z * (segmentsX + 1);
@@ -234,8 +236,10 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 }
             }
 
+            // 3. 스마트 스커트(Smart Skirt) 정점 및 인덱스 생성 (안전망)
             let currentSkirtLocalIndex = innerVertexCount;
 
+            // North Skirt (Z 음수 경계)
             const northSkirtStartIndex = currentSkirtLocalIndex;
             for (let x = 0; x <= segmentsX; x++) {
                 const percentX = x / segmentsX;
@@ -255,6 +259,7 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
+            // South Skirt (Z 양수 경계)
             const southSkirtStartIndex = currentSkirtLocalIndex;
             const southInnerRow = segmentsZ * (segmentsX + 1);
             for (let x = 0; x <= segmentsX; x++) {
@@ -275,6 +280,7 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
+            // West Skirt (X 음수 경계)
             const westSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
@@ -294,6 +300,7 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
+            // East Skirt (X 양수 경계)
             const eastSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
