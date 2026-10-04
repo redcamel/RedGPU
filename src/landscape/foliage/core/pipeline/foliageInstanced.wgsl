@@ -104,6 +104,56 @@ fn calculateFoliageWindDisplacement(
     return trunkDisplacement + leafDisplacement;
 }
 
+struct FoliageInstanceData {
+    instancePos: vec3<f32>,
+    instanceScale: vec3<f32>,
+    xform: FoliageVertexTransformResult,
+};
+
+fn unpackAndTransformFoliage(
+    position: vec3<f32>,
+    instancePos_scaleY: vec4<f32>,
+    instanceRotQuat: vec4<f32>,
+    instanceScaleXZ: vec2<f32>
+) -> FoliageInstanceData {
+    var res: FoliageInstanceData;
+    res.instancePos = instancePos_scaleY.xyz;
+    res.instanceScale = vec3<f32>(instanceScaleXZ.x, instancePos_scaleY.w, instanceScaleXZ.y);
+    res.xform = transformFoliagePosition(
+        position,
+        subMeshUniforms.hasHierarchyTransform,
+        subMeshUniforms.relativeModelMatrix,
+        res.instancePos,
+        res.instanceScale,
+        instanceRotQuat
+    );
+    return res;
+}
+
+fn calculateFoliageOpaqueWorldPosition(
+    position: vec3<f32>,
+    instancePos_scaleY: vec4<f32>,
+    instanceRotQuat: vec4<f32>,
+    instanceScaleXZ: vec2<f32>
+) -> vec3<f32> {
+    let instData = unpackAndTransformFoliage(position, instancePos_scaleY, instanceRotQuat, instanceScaleXZ);
+    let windDisp = calculateFoliageWindDisplacement(
+        instData.xform.worldPos,
+        instData.xform.hierarchyPos,
+        vec3<f32>(0.0, 1.0, 0.0),
+        vec4<f32>(1.0),
+        instData.instancePos,
+        systemUniforms.time.time
+    );
+    return instData.xform.worldPos + windDisp;
+}
+
+fn getCameraClipPosition(worldPos: vec3<f32>) -> vec4<f32> {
+    let relPos = worldPos - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    return systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+}
+
 struct VertexInput {
     @location(0) position : vec3<f32>,
     @location(1) vertexNormal : vec3<f32>,
@@ -145,11 +195,13 @@ struct OutputData {
 fn entryPointMainVertex(input : VertexInput) -> OutputData {
     var output : OutputData;
 
-    let instancePos = input.instancePos_scaleY.xyz;
-    let scaleY = input.instancePos_scaleY.w;
-
+    let instData = unpackAndTransformFoliage(input.position, input.instancePos_scaleY, input.instanceRotQuat, input.instanceScaleXZ);
+    let instancePos = instData.instancePos;
     let instanceRotQuat = input.instanceRotQuat;
-    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
+    let hierarchyPos = instData.xform.hierarchyPos;
+    var worldPos = instData.xform.worldPos;
+    let safeScale = instData.xform.safeScale;
+    var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
     let combinedOpacity = input.groundColor_fade.a;
 
@@ -159,19 +211,6 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
         hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexNormal, 0.0)).xyz;
         hierarchyTangent = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexTangent.xyz, 0.0)).xyz;
     }
-
-    let xform = transformFoliagePosition(
-        input.position,
-        subMeshUniforms.hasHierarchyTransform,
-        subMeshUniforms.relativeModelMatrix,
-        instancePos,
-        instanceScale,
-        instanceRotQuat
-    );
-    let hierarchyPos = xform.hierarchyPos;
-    var worldPos = xform.worldPos;
-    let safeScale = xform.safeScale;
-    var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
@@ -259,26 +298,12 @@ struct FoliageShadowOpaqueOutput {
 @vertex
 fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShadowOpaqueOutput {
     var output : FoliageShadowOpaqueOutput;
-
-    let instancePos = input.instancePos_scaleY.xyz;
-    let scaleY = input.instancePos_scaleY.w;
-
-    let instanceRotQuat = input.instanceRotQuat;
-    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
-
-    let xform = transformFoliagePosition(
+    let worldPos = calculateFoliageOpaqueWorldPosition(
         input.position,
-        subMeshUniforms.hasHierarchyTransform,
-        subMeshUniforms.relativeModelMatrix,
-        instancePos,
-        instanceScale,
-        instanceRotQuat
+        input.instancePos_scaleY,
+        input.instanceRotQuat,
+        input.instanceScaleXZ
     );
-    let hierarchyPos = xform.hierarchyPos;
-    var worldPos = xform.worldPos;
-    let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, vec3<f32>(0.0, 1.0, 0.0), vec4<f32>(1.0), instancePos, systemUniforms.time.time);
-    worldPos += windDisp;
-
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     return output;
 }
@@ -290,29 +315,13 @@ struct FoliageDepthPrepassOpaqueOutput {
 @vertex
 fn entryPointDepthPrepassOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageDepthPrepassOpaqueOutput {
     var output : FoliageDepthPrepassOpaqueOutput;
-
-    let instancePos = input.instancePos_scaleY.xyz;
-    let scaleY = input.instancePos_scaleY.w;
-
-    let instanceRotQuat = input.instanceRotQuat;
-    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
-
-    let xform = transformFoliagePosition(
+    let worldPos = calculateFoliageOpaqueWorldPosition(
         input.position,
-        subMeshUniforms.hasHierarchyTransform,
-        subMeshUniforms.relativeModelMatrix,
-        instancePos,
-        instanceScale,
-        instanceRotQuat
+        input.instancePos_scaleY,
+        input.instanceRotQuat,
+        input.instanceScaleXZ
     );
-    let hierarchyPos = xform.hierarchyPos;
-    var worldPos = xform.worldPos;
-    let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, vec3<f32>(0.0, 1.0, 0.0), vec4<f32>(1.0), instancePos, systemUniforms.time.time);
-    worldPos += windDisp;
-
-    let relPos = worldPos - systemUniforms.camera.cameraPosition;
-    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    output.position = getCameraClipPosition(worldPos);
     return output;
 }
 
@@ -326,25 +335,16 @@ struct FoliageShadowMaskedOutput {
 @vertex
 fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutput {
     var output : FoliageShadowMaskedOutput;
-
-    let instancePos = input.instancePos_scaleY.xyz;
-    let scaleY = input.instancePos_scaleY.w;
-
-    let instanceRotQuat = input.instanceRotQuat;
-    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
-
-    let xform = transformFoliagePosition(
-        input.position,
-        subMeshUniforms.hasHierarchyTransform,
-        subMeshUniforms.relativeModelMatrix,
-        instancePos,
-        instanceScale,
-        instanceRotQuat
+    let instData = unpackAndTransformFoliage(input.position, input.instancePos_scaleY, input.instanceRotQuat, input.instanceScaleXZ);
+    let windDisp = calculateFoliageWindDisplacement(
+        instData.xform.worldPos,
+        instData.xform.hierarchyPos,
+        input.vertexNormal,
+        input.vertexColor_0,
+        instData.instancePos,
+        systemUniforms.time.time
     );
-    let hierarchyPos = xform.hierarchyPos;
-    var worldPos = xform.worldPos;
-    let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, input.vertexNormal, input.vertexColor_0, instancePos, systemUniforms.time.time);
-    worldPos += windDisp;
+    let worldPos = instData.xform.worldPos + windDisp;
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.uv = input.uv;
