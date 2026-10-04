@@ -1,7 +1,4 @@
-#redgpu_include landscape.struct.FoliageTypeParam;
-
 #redgpu_include landscape.struct.FoliageInstance;
-
 
 struct BakeUniforms {
     invWorldSizeX: f32,
@@ -12,6 +9,7 @@ struct BakeUniforms {
     pad0: f32,
     pad1: f32,
     pad2: f32,
+    bottomOffsets: array<vec4<f32>, 16>,
 };
 
 struct BakeTask {
@@ -21,11 +19,10 @@ struct BakeTask {
 
 @group(0) @binding(0) var<storage, read_write> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> bakeUniforms: BakeUniforms;
-@group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
-@group(0) @binding(3) var<storage, read> bakeTasks: array<BakeTask>;
-@group(0) @binding(4) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(5) var vbtTexture: texture_2d<f32>;
-@group(0) @binding(6) var basicSampler: sampler;
+@group(0) @binding(2) var<storage, read> bakeTasks: array<BakeTask>;
+@group(0) @binding(3) var vhtTexture: texture_2d<f32>;
+@group(0) @binding(4) var vbtTexture: texture_2d<f32>;
+@group(0) @binding(5) var basicSampler: sampler;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -36,7 +33,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let task = bakeTasks[taskIdx];
     let instIdx = task.instanceIndex;
-    let typeInfo = typeParams[task.typeId];
     let inst = rawInstances[instIdx];
 
     if (bakeUniforms.invWorldSizeX <= 0.0) {
@@ -51,7 +47,11 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let sampledHeightNorm = textureSampleLevel(vhtTexture, basicSampler, vec2<f32>(u, v), 0.0).r;
     let terrainHeight = sampledHeightNorm * bakeUniforms.heightScale;
-    let effectiveBottomOffset = typeInfo.bottomOffset * inst.scaleY;
+
+    let vecIdx = task.typeId >> 2u;
+    let compIdx = task.typeId & 3u;
+    let bottomOffset = bakeUniforms.bottomOffsets[vecIdx][compIdx];
+    let effectiveBottomOffset = bottomOffset * inst.scaleY;
 
     var groundColor = vec3<f32>(0.2, 0.2, 0.2);
     if (bakeUniforms.hasVBT != 0u) {

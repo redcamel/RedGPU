@@ -18,10 +18,25 @@ export interface IScatterBakeMegaBuffer {
      */
     rawGPUBuffer: GPUBuffer | null;
     /**
-     * [KO] 타입별 설정 파라미터가 저장되는 GPU 스토리지 버퍼
-     * [EN] GPU storage buffer storing type-specific configuration parameters
+     * [KO] 타입별 설정 파라미터가 저장되는 GPU 스토리지 버퍼 (선택사항)
+     * [EN] GPU storage buffer storing type-specific configuration parameters (optional)
      */
-    typeParamsGPUBuffer: GPUBuffer | null;
+    typeParamsGPUBuffer?: GPUBuffer | null;
+    /**
+     * [KO] CPU 측 타입 파라미터 버퍼 (bottomOffset 동기화용)
+     * [EN] CPU-side type parameter buffer (for bottomOffset synchronization)
+     */
+    cpuTypeParamsBuffer?: Float32Array;
+    /**
+     * [KO] 단일 타입당 float 요소 수
+     * [EN] Number of float elements per single type
+     */
+    typeParamFloats?: number;
+    /**
+     * [KO] 최대 지원 식생 타입 수
+     * [EN] Maximum supported foliage types
+     */
+    maxTypes?: number;
 }
 
 /**
@@ -65,7 +80,6 @@ export class ScatterInstanceBaker extends RedGPUObject {
     #taskCount: number = 0;
 
     #cachedRawBuffer: GPUBuffer | null = null;
-    #cachedTypeParamsBuffer: GPUBuffer | null = null;
     #cachedVHTTextureView: GPUTextureView | null = null;
     #cachedVBTTextureView: GPUTextureView | null = null;
 
@@ -90,7 +104,7 @@ export class ScatterInstanceBaker extends RedGPUObject {
         this.#label = options.label;
         this.#taskCapacity = options.initialTaskCapacity || 32768;
 
-        this.#uniformCPUBuffer = new Float32Array(8);
+        this.#uniformCPUBuffer = new Float32Array(72);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
 
         this.#tasksCPUBuffer = new Uint32Array(this.#taskCapacity * 2);
@@ -117,7 +131,6 @@ export class ScatterInstanceBaker extends RedGPUObject {
     invalidateBindGroup(): void {
         this.#bakeBindGroup = null;
         this.#cachedRawBuffer = null;
-        this.#cachedTypeParamsBuffer = null;
         this.#cachedVHTTextureView = null;
         this.#cachedVBTTextureView = null;
     }
@@ -189,7 +202,7 @@ export class ScatterInstanceBaker extends RedGPUObject {
         }
 
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !megaBuffer.rawGPUBuffer || !megaBuffer.typeParamsGPUBuffer) {
+        if (!gpuDevice || !megaBuffer.rawGPUBuffer) {
             return;
         }
 
@@ -209,12 +222,21 @@ export class ScatterInstanceBaker extends RedGPUObject {
         f32[6] = 0.0;
         u32[7] = 0;
 
+        const cpuTypeParams = megaBuffer.cpuTypeParamsBuffer;
+        const stride = megaBuffer.typeParamFloats || 80;
+        const maxTypes = Math.min(megaBuffer.maxTypes || 64, 64);
+        if (cpuTypeParams) {
+            for (let t = 0; t < maxTypes; t++) {
+                f32[8 + t] = cpuTypeParams[t * stride + 3];
+            }
+        }
+
         gpuDevice.queue.writeBuffer(
             this.#uniformGPUBuffer,
             0,
             this.#uniformCPUBuffer.buffer,
             0,
-            32
+            288
         );
 
         const taskBytes = this.#taskCount * 8;
@@ -229,12 +251,10 @@ export class ScatterInstanceBaker extends RedGPUObject {
         if (
             !this.#bakeBindGroup ||
             this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
-            this.#cachedTypeParamsBuffer !== megaBuffer.typeParamsGPUBuffer ||
             this.#cachedVHTTextureView !== targetVHTView ||
             this.#cachedVBTTextureView !== targetVBTView
         ) {
             this.#cachedRawBuffer = megaBuffer.rawGPUBuffer;
-            this.#cachedTypeParamsBuffer = megaBuffer.typeParamsGPUBuffer;
             this.#cachedVHTTextureView = targetVHTView;
             this.#cachedVBTTextureView = targetVBTView;
 
@@ -244,11 +264,10 @@ export class ScatterInstanceBaker extends RedGPUObject {
                 entries: [
                     {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
                     {binding: 1, resource: {buffer: this.#uniformGPUBuffer}},
-                    {binding: 2, resource: {buffer: megaBuffer.typeParamsGPUBuffer}},
-                    {binding: 3, resource: {buffer: this.#tasksGPUBuffer}},
-                    {binding: 4, resource: targetVHTView},
-                    {binding: 5, resource: targetVBTView},
-                    {binding: 6, resource: basicGPUSampler},
+                    {binding: 2, resource: {buffer: this.#tasksGPUBuffer}},
+                    {binding: 3, resource: targetVHTView},
+                    {binding: 4, resource: targetVBTView},
+                    {binding: 5, resource: basicGPUSampler},
                 ],
             });
         }
@@ -282,7 +301,7 @@ export class ScatterInstanceBaker extends RedGPUObject {
 
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
             label: `${this.#label}_UniformBuffer`,
-            size: 32,
+            size: 288,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
@@ -302,10 +321,9 @@ export class ScatterInstanceBaker extends RedGPUObject {
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
             ],
         });
 
