@@ -117,7 +117,7 @@ fn main(
         return;
     }
 
-    let typeInfo = typeParams[typeIdx];
+    let typeInfo = &typeParams[typeIdx];
     if (typeInfo.instanceCount == 0u || idx < typeInfo.rawBaseOffset) {
         return;
     }
