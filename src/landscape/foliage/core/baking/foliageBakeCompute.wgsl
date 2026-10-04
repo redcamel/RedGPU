@@ -14,6 +14,10 @@ struct FoliageTypeParam {
     instanceCount: u32,
     shadowCullDistance: f32,
     invFadeRange: f32,
+    boundingHeight: f32,
+    pad0: f32,
+    pad1: f32,
+    pad2: f32,
     lods: array<FoliageLODUniformInfo, 8>,
 };
 

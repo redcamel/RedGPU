@@ -135,10 +135,6 @@ class FoliageCuller extends RedGPUObject {
             );
         }
 
-        const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
-        const heightScale = landscape?.heightScale ?? 600.0;
-        const hasVHT = !!(this.#tileStreamer?.getAtlasTexture('vht')?.gpuTexture);
-
         const fov = camera?.fov ?? 60.0;
         if (fov !== this.#lastFOV) {
             this.#lastFOV = fov;
@@ -203,7 +199,6 @@ class FoliageCuller extends RedGPUObject {
             const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 camX, camY, camZ,
-                worldSizeX, heightScale, hasVHT,
                 fovFactor,
                 frustumPlanes,
                 cascadeParams,

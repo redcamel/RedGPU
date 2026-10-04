@@ -32,20 +32,22 @@ struct CascadeCullingInfo {
 struct FoliageCullingUniforms {
     cameraPosition: vec3<f32>,
     totalInstanceCount: u32,
-    invWorldSizeX: f32,
-    heightScale: f32,
-    padVHT: u32,
+
     fovFactor: f32,
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
+
     useHZB: u32,
     viewportHeight: f32,
     depthBias: f32,
     hzbWidth: f32,
+
     hzbHeight: f32,
     pad0: f32,
     pad1: f32,
+    pad2: f32,
+
     viewProjectionMatrix: mat4x4<f32>,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,

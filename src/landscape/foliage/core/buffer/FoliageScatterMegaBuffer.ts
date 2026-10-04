@@ -321,7 +321,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
      */
     updateUnifiedGlobalUniforms(
         camX: number, camY: number, camZ: number,
-        worldSizeX: number, heightScale: number, hasVHT: boolean,
         fovFactor: number,
         mainFrustumPlanes: number[][] | null,
         cascades: CascadeCullingParam[],
@@ -344,35 +343,31 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         gf32[2] = camZ;
         gu32[3] = this.totalAllocatedInstances;
 
-        gf32[4] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
-        gf32[5] = heightScale;
-        gu32[6] = hasVHT ? 1 : 0;
-        gf32[7] = fovFactor > 0 ? fovFactor : 1.0;
+        gf32[4] = fovFactor > 0 ? fovFactor : 1.0;
+        gu32[5] = this.maxSubMeshes;
+        gu32[6] = this.instanceCapacity * 8;
+        gu32[7] = activeCascadeCount;
 
-        gu32[8] = this.maxSubMeshes;
-        gu32[9] = this.instanceCapacity * 8;
-        gu32[10] = activeCascadeCount;
-        gu32[11] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
-        gf32[12] = viewportHeight > 0 ? viewportHeight : 1080.0;
-        gf32[13] = depthBias;
-        gf32[14] = hzbWidth;
-        gf32[15] = hzbHeight;
+        gu32[8] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
+        gf32[9] = viewportHeight > 0 ? viewportHeight : 1080.0;
+        gf32[10] = depthBias;
+        gf32[11] = hzbWidth;
 
-        gf32[16] = 0;
-        gf32[17] = 0;
-        gf32[18] = 0;
-        gf32[19] = 0;
+        gf32[12] = hzbHeight;
+        gf32[13] = 0;
+        gf32[14] = 0;
+        gf32[15] = 0;
 
         if (viewProjectionMatrix) {
-            gf32.set(viewProjectionMatrix, 20);
+            gf32.set(viewProjectionMatrix, 16);
         } else {
-            gf32.fill(0, 20, 36);
+            gf32.fill(0, 16, 32);
         }
 
         if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = mainFrustumPlanes[p];
-                const baseOffset = 36 + p * 4;
+                const baseOffset = 32 + p * 4;
                 gf32[baseOffset] = plane[0];
                 gf32[baseOffset + 1] = plane[1];
                 gf32[baseOffset + 2] = plane[2];
@@ -382,7 +377,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
 
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
             const cascade = cascades[c];
-            const cascadeBase = 60 + c * 28;
+            const cascadeBase = 56 + c * 28;
             if (cascade && cascade.hasShadow) {
                 gf32[cascadeBase] = cascade.maxDistance;
                 gu32[cascadeBase + 1] = 1;
