@@ -65,26 +65,43 @@ fn main(
     let lz = local_id.y + 1u;
 
     let hCur = s_height[lz][lx];
+    var hTL  = s_height[lz - 1u][lx - 1u];
+    var hT   = s_height[lz - 1u][lx];
+    var hTR  = s_height[lz - 1u][lx + 1u];
     var hL   = s_height[lz][lx - 1u];
     var hR   = s_height[lz][lx + 1u];
-    var hT   = s_height[lz - 1u][lx];
+    var hBL  = s_height[lz + 1u][lx - 1u];
     var hB   = s_height[lz + 1u][lx];
+    var hBR  = s_height[lz + 1u][lx + 1u];
 
     let leftX  = curX - 1;
     let rightX = curX + 1;
     let topZ   = curZ - 1;
     let botZ   = curZ + 1;
 
-    if (leftX < startX && hL <= 0.00001 && hCur > 0.00001) { hL = hCur; }
-    if (rightX >= startX + i32(tileWidth) && hR <= 0.00001 && hCur > 0.00001) { hR = hCur; }
-    if (topZ < startZ && hT <= 0.00001 && hCur > 0.00001) { hT = hCur; }
-    if (botZ >= startZ + i32(tileHeight) && hB <= 0.00001 && hCur > 0.00001) { hB = hCur; }
+    let isLeftOOB = leftX < startX;
+    let isRightOOB = rightX >= startX + i32(tileWidth);
+    let isTopOOB = topZ < startZ;
+    let isBotOOB = botZ >= startZ + i32(tileHeight);
+
+    if (hCur > 0.00001) {
+        if (isLeftOOB && hL <= 0.00001) { hL = hCur; }
+        if (isRightOOB && hR <= 0.00001) { hR = hCur; }
+        if (isTopOOB && hT <= 0.00001) { hT = hCur; }
+        if (isBotOOB && hB <= 0.00001) { hB = hCur; }
+        if ((isLeftOOB || isTopOOB) && hTL <= 0.00001) { hTL = hCur; }
+        if ((isRightOOB || isTopOOB) && hTR <= 0.00001) { hTR = hCur; }
+        if ((isLeftOOB || isBotOOB) && hBL <= 0.00001) { hBL = hCur; }
+        if ((isRightOOB || isBotOOB) && hBR <= 0.00001) { hBR = hCur; }
+    }
 
     let hScale = uniforms.heightScale;
-    let stepDist = max(0.0001, uniforms.texelWorldSize * 2.0);
+    let stepDist = max(0.0001, uniforms.texelWorldSize * 8.0);
 
-    let dX = (hR - hL) * hScale;
-    let dZ = (hB - hT) * hScale;
+    // [KO] 3x3 Sobel 가중치 필터링: 수평/수직 인접에 2.0, 대각선 인접에 1.0 가중치
+    // [EN] 3x3 Sobel weighted filtering: 2.0 weight for orthogonal neighbors, 1.0 for diagonal neighbors
+    let dX = ((hTR + 2.0 * hR + hBR) - (hTL + 2.0 * hL + hBL)) * hScale;
+    let dZ = ((hBL + 2.0 * hB + hBR) - (hTL + 2.0 * hT + hTR)) * hScale;
 
     let worldNormal = normalize(vec3<f32>(-dX, stepDist, -dZ));
     let encodedNormal = worldNormal * 0.5 + vec3<f32>(0.5);
