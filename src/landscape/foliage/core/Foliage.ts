@@ -243,6 +243,12 @@ export interface FoliageOptions {
      * [EN] Bottom ground color blending vertical range in meters (default: 1.5)
      */
     groundBlendRange?: number;
+
+    /**
+     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스 참여 여부 (기본값: true)
+     * [EN] Whether foliage participates in the depth prepass (Early-Z) pass (default: true)
+     */
+    useDepthPrepass?: boolean;
 }
 
 /**
@@ -291,15 +297,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
     #groundBlendRange: number = 1.5;
-    #lastWindParams: {
-        windDirX: number;
-        windDirY: number;
-        windSpeed: number;
-        windStrength: number;
-        windFreq: number;
-        windFlutterStrength: number;
-        windEnabled: boolean;
-    } | null = null;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
@@ -341,7 +338,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         megaBuffer?: FoliageScatterMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
-        baker?: ScatterInstanceBaker | null
+        baker?: ScatterInstanceBaker | null,
+        globalWindBuffer?: GPUBuffer | null
     ) {
         super(redGPUContext, options?.name || '');
 
@@ -362,7 +360,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             alignToNormal = false,
             alignFactor,
             groundBlendStrength,
-            groundBlendRange
+            groundBlendRange,
+            useDepthPrepass = true
         } = options;
 
         this.#streamer = new FoliageSubCellStreamer(this);
@@ -371,7 +370,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#baker = baker || null;
 
         this.#useImpostor = useImpostor;
-        this.#useDepthPrepass = true;
+        this.#useDepthPrepass = useDepthPrepass !== false;
 
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
@@ -431,7 +430,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            this.#subMeshVertexBindGroupLayout!
+            this.#subMeshVertexBindGroupLayout!,
+            globalWindBuffer
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
@@ -549,6 +549,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.height
             );
         }
+
+        this.#syncInternalWind();
     }
 
     /**
@@ -873,6 +875,24 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
+     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 설정합니다.
+     * [EN] Sets whether the depth prepass (Early-Z) is enabled during foliage rendering.
+     *
+     * @param value -
+     * [KO] 뎁스 프리패스 활성화 여부
+     * [EN] Whether depth prepass is enabled
+     */
+    set useDepthPrepass(value: boolean) {
+        const boolVal = !!value;
+        if (this.#useDepthPrepass !== boolVal) {
+            this.#useDepthPrepass = boolVal;
+            this.#updatePassBuckets();
+            this.updateDrawCallCount(this.drawCallCount);
+            this.#onDirty?.();
+        }
+    }
+
+    /**
      * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
      * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
      */
@@ -880,19 +900,46 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#hasMaskedLOD0;
     }
 
-    #syncInternalWind(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#lastWindParams) return;
-        this.syncWindToSubMeshes(
-            gpuDevice,
-            this.#lastWindParams.windDirX,
-            this.#lastWindParams.windDirY,
-            this.#lastWindParams.windSpeed,
-            this.#lastWindParams.windStrength,
-            this.#lastWindParams.windFreq,
-            this.#lastWindParams.windFlutterStrength,
-            this.#lastWindParams.windEnabled
-        );
+    /**
+     * [KO] 바람 물리 시뮬레이션 파라미터를 모든 하위 서브메시 및 그림자 병합 서브메시에 동기화합니다.
+     * [EN] Synchronizes wind physical simulation parameters across all sub-meshes and shadow merged sub-meshes.
+     *
+     * @param gpuDevice -
+     * [KO] GPUDevice 인스턴스
+     * [EN] GPUDevice instance
+     * @param windDirX -
+     * [KO] 바람 진행 방향 X 성분
+     * [EN] Wind direction X component
+     * @param windDirY -
+     * [KO] 바람 진행 방향 Z(Y) 성분
+     * [EN] Wind direction Z(Y) component
+     * @param windSpeed -
+     * [KO] 바람 진행 속도
+     * [EN] Wind travel speed
+     * @param windStrength -
+     * [KO] 바람 기본 강도
+     * [EN] Base wind strength
+     * @param windFreq -
+     * [KO] 바람 주기 주파수
+     * [EN] Wind cycle frequency
+     * @param windFlutterStrength -
+     * [KO] 잎사귀 세부 떨림 강도
+     * [EN] Leaf flutter strength
+     * @param windEnabled -
+     * [KO] 바람 시뮬레이션 활성화 여부
+     * [EN] Whether wind simulation is enabled
+     */
+    syncWindToSubMeshes(
+        _gpuDevice?: GPUDevice,
+        _windDirX?: number,
+        _windDirY?: number,
+        _windSpeed?: number,
+        _windStrength?: number,
+        _windFreq?: number,
+        _windFlutterStrength?: number,
+        _windEnabled?: boolean
+    ): void {
+        this.#syncInternalWind();
     }
 
     /**
@@ -982,54 +1029,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 바람 물리 시뮬레이션 파라미터를 모든 하위 서브메시 및 그림자 병합 서브메시에 동기화합니다.
-     * [EN] Synchronizes wind physical simulation parameters across all sub-meshes and shadow merged sub-meshes.
-     *
-     * @param gpuDevice -
-     * [KO] GPUDevice 인스턴스
-     * [EN] GPUDevice instance
-     * @param windDirX -
-     * [KO] 바람 진행 방향 X 성분
-     * [EN] Wind direction X component
-     * @param windDirY -
-     * [KO] 바람 진행 방향 Z(Y) 성분
-     * [EN] Wind direction Z(Y) component
-     * @param windSpeed -
-     * [KO] 바람 진행 속도
-     * [EN] Wind travel speed
-     * @param windStrength -
-     * [KO] 바람 기본 강도
-     * [EN] Base wind strength
-     * @param windFreq -
-     * [KO] 바람 주기 주파수
-     * [EN] Wind cycle frequency
-     * @param windFlutterStrength -
-     * [KO] 잎사귀 세부 떨림 강도
-     * [EN] Leaf flutter strength
-     * @param windEnabled -
-     * [KO] 바람 시뮬레이션 활성화 여부
-     * [EN] Whether wind simulation is enabled
-     */
-    syncWindToSubMeshes(
-        gpuDevice: GPUDevice,
-        windDirX: number,
-        windDirY: number,
-        windSpeed: number,
-        windStrength: number,
-        windFreq: number,
-        windFlutterStrength: number,
-        windEnabled: boolean
-    ): void {
-        this.#lastWindParams = {
-            windDirX,
-            windDirY,
-            windSpeed,
-            windStrength,
-            windFreq,
-            windFlutterStrength,
-            windEnabled,
-        };
+    #syncInternalWind(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return;
         const subList = this.#subMeshes;
         const count = subList.length;
         const windMul = this.#windMultiplier;
@@ -1038,17 +1040,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
-
             const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
-            sub.updateWindParams(
+            sub.updateWindMultipliers(
                 gpuDevice,
-                windDirX,
-                windDirY,
-                windSpeed,
-                windStrength,
-                windFreq,
-                windFlutterStrength,
-                windEnabled,
                 windMul,
                 effectiveFlutterMul,
                 treeH
@@ -1058,15 +1052,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const shadowList = this.#shadowMergedSubMeshes;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
-            shadowList[i].updateWindParams(
+            shadowList[i].updateWindMultipliers(
                 gpuDevice,
-                windDirX,
-                windDirY,
-                windSpeed,
-                windStrength,
-                windFreq,
-                windFlutterStrength,
-                windEnabled,
                 windMul,
                 flutterMul * 0.5,
                 treeH

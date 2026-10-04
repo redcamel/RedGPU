@@ -95,6 +95,7 @@ export default function assembleFoliageLODMeshes(
     lodIndex: number,
     options: FoliageOptions,
     subMeshBindGroupLayout: GPUBindGroupLayout,
+    globalWindBuffer: GPUBuffer,
     subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>,
     lodReceiveShadow: boolean = true
 ): AssembledLODResult {
@@ -128,12 +129,14 @@ export default function assembleFoliageLODMeshes(
 
     const resultSubMeshes: FoliageSubMesh[] = [];
     const unifiedGeometry = combineResult.unifiedGeometry;
+    const treeH = Math.max(5.0, (combineResult.boundingRadius || 5.0) * 1.8);
 
     for (let g = 0; g < combineResult.groups.length; g++) {
         const group = combineResult.groups[g];
         const combinedSubMesh = createFoliageSubMeshInstance({
             gpuDevice,
             subMeshBindGroupLayout,
+            globalWindBuffer,
             meshNode: group.rawNodes[0]?.node,
             geom: unifiedGeometry || group.geometry,
             mat: group.material,
@@ -149,7 +152,10 @@ export default function assembleFoliageLODMeshes(
             indexCount: group.indexCount,
             maxPrepassLOD: 0,
             groundBlendStrength: options.groundBlendStrength,
-            groundBlendRange: options.groundBlendRange
+            groundBlendRange: options.groundBlendRange,
+            windMultiplier: options.windMultiplier,
+            windFlutterMultiplier: options.windFlutterMultiplier,
+            treeHeight: treeH
         });
 
         resultSubMeshes.push(combinedSubMesh);
@@ -160,8 +166,12 @@ export default function assembleFoliageLODMeshes(
         const shadowUniform = createFoliageShadowSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
+            globalWindBuffer,
             options.name,
-            lodIndex
+            lodIndex,
+            options.windMultiplier,
+            treeH,
+            options.windFlutterMultiplier
         );
 
         shadowMergedSubMesh = new FoliageShadowMergedSubMesh({

@@ -5,25 +5,28 @@
 #redgpu_include landscape.math.ditherFadeDiscard;
 #redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
 
-struct SubMeshUniforms {
-    relativeModelMatrix: mat4x4<f32>,
-    relativeNormalMatrix: mat4x4<f32>,
-    globalFragmentSlotIndex: u32,
-    hasHierarchyTransform: u32,
-    receiveShadow: f32,
-    pad2: u32,
-
+struct FoliageGlobalWind {
     windDirection: vec2<f32>,
     windSpeed: f32,
     windStrength: f32,
     windFrequency: f32,
     windFlutterStrength: f32,
     windEnabled: u32,
+    pad: u32,
+};
+
+struct SubMeshUniforms {
+    relativeModelMatrix: mat4x4<f32>,
+    relativeNormalMatrix: mat4x4<f32>,
+    globalFragmentSlotIndex: u32,
+    hasHierarchyTransform: u32,
+    receiveShadow: f32,
+    pad0: u32,
+
     windMultiplier: f32,
     windFlutterMultiplier: f32,
-    padWind0: u32,
     treeHeight: f32,
-    padWind: u32,
+    pad1: u32,
 
     groundBlendStrength: f32,
     groundBlendRange: f32,
@@ -32,6 +35,7 @@ struct SubMeshUniforms {
 };
 
 @group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
+@group(1) @binding(1) var<uniform> foliageGlobalWind: FoliageGlobalWind;
 
 fn calculateFoliageWindDisplacement(
     worldPos: vec3<f32>,
@@ -41,7 +45,7 @@ fn calculateFoliageWindDisplacement(
     instancePos: vec3<f32>,
     time: f32
 ) -> vec3<f32> {
-    if (subMeshUniforms.windEnabled == 0u || subMeshUniforms.windStrength <= 0.0001 || subMeshUniforms.windMultiplier <= 0.0001) {
+    if (foliageGlobalWind.windEnabled == 0u || foliageGlobalWind.windStrength <= 0.0001 || subMeshUniforms.windMultiplier <= 0.0001) {
         return vec3<f32>(0.0);
     }
 
@@ -74,9 +78,9 @@ fn calculateFoliageWindDisplacement(
         hasValidMask
     );
 
-    let windDir = normalize(subMeshUniforms.windDirection);
-    let windSpeed = subMeshUniforms.windSpeed;
-    let windFreq = subMeshUniforms.windFrequency;
+    let windDir = normalize(foliageGlobalWind.windDirection);
+    let windSpeed = foliageGlobalWind.windSpeed;
+    let windFreq = foliageGlobalWind.windFrequency;
 
     let treeBaseXZ = instancePos.xz;
     let spatialPhase = (treeBaseXZ.x * windDir.x + treeBaseXZ.y * windDir.y) * windFreq;
@@ -86,7 +90,7 @@ fn calculateFoliageWindDisplacement(
 
     let trunkDistFade = clamp(1.0 - (viewDist - 350.0) / 150.0, 0.0, 1.0);
     let trunkDisplacement = vec3<f32>(windDir.x, 0.0, windDir.y) *
-                            (combinedWave * trunkMask * (subMeshUniforms.windStrength * 0.45) * subMeshUniforms.windMultiplier * trunkDistFade);
+                            (combinedWave * trunkMask * (foliageGlobalWind.windStrength * 0.45) * subMeshUniforms.windMultiplier * trunkDistFade);
 
     let leafPhase = dot(localPos, vec3<f32>(0.9, 1.4, 0.9)) + time * (windSpeed * 3.5);
     let leafWaveX = sin(leafPhase);
@@ -94,7 +98,7 @@ fn calculateFoliageWindDisplacement(
     let leafWaveZ = sin(leafPhase * 0.85);
 
     let flutterDistFade = clamp(1.0 - (viewDist - 150.0) / 150.0, 0.0, 1.0);
-    let flutterScale = (subMeshUniforms.windFlutterStrength * 0.45) * subMeshUniforms.windFlutterMultiplier * flutterDistFade;
+    let flutterScale = (foliageGlobalWind.windFlutterStrength * 0.45) * subMeshUniforms.windMultiplier * subMeshUniforms.windFlutterMultiplier * flutterDistFade;
     let leafDisplacement = vec3<f32>(
         windDir.x * leafWaveX * 0.75,
         leafWaveY * 0.5,

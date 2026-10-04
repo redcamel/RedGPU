@@ -241,10 +241,19 @@ function renderTestPane({
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
             managerFolder.addBinding(foliageManager, 'enabled');
-            managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, label: 'Main Draw Calls'});
+            managerFolder.addBinding(foliageManager, 'useDepthPrepass');
+            managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, label: 'Total Draw Calls'});
+            managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {
+                readonly: true,
+                label: 'Depth Prepass Calls'
+            });
+            managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {
+                readonly: true,
+                label: 'Main Forward Calls'
+            });
             managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
-            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 10, max: 2000, step: 1});
-            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 1, max: 200, step: 1});
+            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 100, max: 3000, step: 50});
+            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             // 전역 바람 시뮬레이션 설정
@@ -252,7 +261,7 @@ function renderTestPane({
             windGlobalFolder.addBinding(foliageManager, 'windEnabled');
             windGlobalFolder.addBinding(foliageManager, 'windStrength', {min: 0.0, max: 3.0, step: 0.05});
             windGlobalFolder.addBinding(foliageManager, 'windSpeed', {min: 0.0, max: 10.0, step: 0.1});
-            windGlobalFolder.addBinding(foliageManager, 'windFrequency', {min: 0.1, max: 5.0, step: 0.1});
+            windGlobalFolder.addBinding(foliageManager, 'windFrequency', {min: 0.01, max: 1.0, step: 0.01});
             windGlobalFolder.addBinding(foliageManager, 'windFlutterStrength', {min: 0.0, max: 2.0, step: 0.05});
             windGlobalFolder.addBinding(foliageManager, 'windDirectionAngle', {min: 0, max: 360, step: 1});
 
@@ -319,7 +328,7 @@ function renderTestPane({
 
         // 2. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
-        transformFolder.addBinding(type, 'bottomOffset', {min: -3.0, max: 2.0, step: 0.05});
+        transformFolder.addBinding(type, 'bottomOffset', {min: -5.0, max: 5.0, step: 0.05});
         transformFolder.addBinding(type, 'minSlope', {min: 0.0, max: 89.0, step: 1.0});
         transformFolder.addBinding(type, 'maxSlope', {min: 1.0, max: 90.0, step: 1.0});
         const alignBinding = transformFolder.addBinding(type, 'alignToNormal');
@@ -336,7 +345,8 @@ function renderTestPane({
 
         // 4. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
-        lodFolder.addBinding(type, 'cullingDistance', {min: 1, max: 1000, step: 1});
+        lodFolder.addBinding(type, 'useDepthPrepass');
+        lodFolder.addBinding(type, 'cullingDistance', {min: 100, max: 10000, step: 50});
         if (type.hasImpostor) {
             lodFolder.addBinding(type, 'useImpostor');
         }
@@ -353,7 +363,7 @@ function renderTestPane({
                     lodDistance: type.getLODDistance(idx),
                     receiveShadow: type.getLODReceiveShadow(idx)
                 };
-                subFolder.addBinding(proxy, 'lodDistance', {min: 10, max: 2000, step: 5})
+                subFolder.addBinding(proxy, 'lodDistance', {min: 10, max: 6000, step: 5})
                     .on('change', (ev) => type.setLODDistance(idx, ev.value));
                 subFolder.addBinding(proxy, 'receiveShadow')
                     .on('change', (ev) => type.setLODReceiveShadow(idx, ev.value));
@@ -370,12 +380,12 @@ function renderTestPane({
         // 5. Shadow (그림자)
         const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
-        shadowFolder.addBinding(type, 'shadowCullDistance', {min: 50, max: 1000, step: 25});
+        shadowFolder.addBinding(type, 'shadowCullDistance', {min: 50, max: 3000, step: 25});
 
         // 6. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
-        windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-        windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.05});
+        windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.05});
     };
 
     // 렌더 프레임 업데이트

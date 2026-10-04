@@ -81,6 +81,10 @@ class FoliageManager {
     #windFrequency: number = 0.08;
     #windFlutterStrength: number = 0.5;
 
+    #globalWindBuffer: GPUBuffer | null = null;
+    #globalWindFloatBuffer: Float32Array = new Float32Array(8);
+    #globalWindUintBuffer: Uint32Array = new Uint32Array(this.#globalWindFloatBuffer.buffer);
+
     /**
      * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
      * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
@@ -104,6 +108,12 @@ class FoliageManager {
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
+            this.#globalWindBuffer = gpuDevice.createBuffer({
+                label: 'Foliage_Global_Wind_UniformBuffer',
+                size: 32,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+
             this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Empty_BindGroupLayout', {
                 label: 'Landscape_Empty_BindGroupLayout',
                 entries: []
@@ -120,9 +130,16 @@ class FoliageManager {
                         binding: 0,
                         visibility: GPUShaderStage.VERTEX,
                         buffer: {type: 'uniform'}
+                    },
+                    {
+                        binding: 1,
+                        visibility: GPUShaderStage.VERTEX,
+                        buffer: {type: 'uniform'}
                     }
                 ]
             });
+
+            this.#syncGlobalWindBuffer();
         }
 
         const emptyBGL = this.#emptyBindGroupLayout;
@@ -160,6 +177,32 @@ class FoliageManager {
      * [EN] Returns the total number of indirect draw calls dispatched by currently active foliage types in the main render pass (including depth prepass).
      */
     get totalDrawCalls(): number {
+        return this.depthPrepassDrawCalls + this.mainPassDrawCalls;
+    }
+
+    /**
+     * [KO] 활성화된 식생 타입들이 Depth Prepass에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the depth prepass.
+     */
+    get depthPrepassDrawCalls(): number {
+        if (!this.#enabled || !this.#useDepthPrepass) return 0;
+        let count = 0;
+        const list = this.#foliageList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const foliage = list[i];
+            if (foliage.activeInstanceCount > 0 && foliage.useDepthPrepass) {
+                count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 활성화된 식생 타입들이 순수 메인 렌더 패스(Forward Pass)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the forward main render pass.
+     */
+    get mainPassDrawCalls(): number {
         if (!this.#enabled) return 0;
         let count = 0;
         const list = this.#foliageList;
@@ -167,9 +210,6 @@ class FoliageManager {
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
             if (foliage.activeInstanceCount > 0) {
-                if (this.#useDepthPrepass && foliage.useDepthPrepass) {
-                    count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
-                }
                 count += foliage.mainSubMeshes.length;
             }
         }
@@ -586,65 +626,11 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 지형의 기존 타일들에 인스턴스를 즉시 배치합니다.
-     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, immediately populating instances across existing landscape tiles.
-     *
-     * @param options -
-     * [KO] 식생 생성 및 지형 배치 규칙 옵션 {@link FoliageOptions}
-     * [EN] Foliage creation and landscape placement rule options {@link FoliageOptions}
-     * @returns
-     * [KO] 생성되어 등록된 {@link Foliage} 인스턴스
-     * [EN] Newly created and registered {@link Foliage} instance
+     * [KO] 모든 식생 서브메시가 공유하는 단일 글로벌 바람 WebGPU 버퍼를 반환합니다.
+     * [EN] Returns the single global wind WebGPU buffer shared by all foliage sub-meshes.
      */
-    addFoliage(options: FoliageOptions): Foliage {
-        const {name, subCellSize, streamingRadius} = options;
-        if (this.#foliageTypes.has(name)) {
-            console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
-            return this.#foliageTypes.get(name)!;
-        }
-
-        const mergedOptions: FoliageOptions = {
-            ...options,
-            subCellSize: subCellSize ?? this.#subCellSize,
-            streamingRadius: streamingRadius ?? this.#streamingRadius
-        };
-
-        const foliage = new Foliage(
-            this.#redGPUContext,
-            mergedOptions,
-            this.#subMeshVertexBindGroupLayout,
-            this.#megaBuffer,
-            () => this.#renderer.markShadowBundleDirty(),
-            (t) => this.#repopulateFoliage(t),
-            this.#culler.baker
-        );
-        this.#foliageTypes.set(options.name, foliage);
-        this.#foliageList.push(foliage);
-        this.#renderer.markShadowBundleDirty();
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (gpuDevice) {
-            foliage.syncWindToSubMeshes(
-                gpuDevice,
-                this.#windDirection[0],
-                this.#windDirection[1],
-                this.#windSpeed,
-                this.#windStrength,
-                this.#windFrequency,
-                this.#windFlutterStrength,
-                this.#windEnabled
-            );
-        }
-
-        const cells = this.#landscape?.components;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                foliage.populateTile(cells[i], this.#landscape);
-            }
-        }
-
-        return foliage;
+    get globalWindBuffer(): GPUBuffer | null {
+        return this.#globalWindBuffer;
     }
 
     /**
@@ -712,6 +698,55 @@ class FoliageManager {
     }
 
     /**
+     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 지형의 기존 타일들에 인스턴스를 즉시 배치합니다.
+     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, immediately populating instances across existing landscape tiles.
+     *
+     * @param options -
+     * [KO] 식생 생성 및 지형 배치 규칙 옵션 {@link FoliageOptions}
+     * [EN] Foliage creation and landscape placement rule options {@link FoliageOptions}
+     * @returns
+     * [KO] 생성되어 등록된 {@link Foliage} 인스턴스
+     * [EN] Newly created and registered {@link Foliage} instance
+     */
+    addFoliage(options: FoliageOptions): Foliage {
+        const {name, subCellSize, streamingRadius} = options;
+        if (this.#foliageTypes.has(name)) {
+            console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
+            return this.#foliageTypes.get(name)!;
+        }
+
+        const mergedOptions: FoliageOptions = {
+            ...options,
+            subCellSize: subCellSize ?? this.#subCellSize,
+            streamingRadius: streamingRadius ?? this.#streamingRadius
+        };
+
+        const foliage = new Foliage(
+            this.#redGPUContext,
+            mergedOptions,
+            this.#subMeshVertexBindGroupLayout,
+            this.#megaBuffer,
+            () => this.#renderer.markShadowBundleDirty(),
+            (t) => this.#repopulateFoliage(t),
+            this.#culler.baker,
+            this.#globalWindBuffer
+        );
+        this.#foliageTypes.set(options.name, foliage);
+        this.#foliageList.push(foliage);
+        this.#renderer.markShadowBundleDirty();
+
+        const cells = this.#landscape?.components;
+        if (cells && cells.length > 0) {
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                foliage.populateTile(cells[i], this.#landscape);
+            }
+        }
+
+        return foliage;
+    }
+
+    /**
      * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
      * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
      */
@@ -721,6 +756,8 @@ class FoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#culler.destroy();
+        this.#globalWindBuffer?.destroy();
+        this.#globalWindBuffer = null;
         this.#emptyBindGroupLayout = null;
         this.#emptyBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
@@ -729,30 +766,35 @@ class FoliageManager {
         this.#onUniformUpdateNeeded = null;
     }
 
-    #syncWindToAllTypes(): void {
+    /**
+     * [KO] 단일 글로벌 바람 유니폼 버퍼를 GPU에 1회 기록합니다. (Zero-GC, O(1) 전송)
+     * [EN] Writes to the single global wind uniform buffer on GPU once. (Zero-GC, O(1) transfer)
+     */
+    #syncGlobalWindBuffer(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice) return;
-        const dirX = this.#windDirection[0];
-        const dirY = this.#windDirection[1];
-        const speed = this.#windSpeed;
-        const strength = this.#windStrength;
-        const freq = this.#windFrequency;
-        const flutter = this.#windFlutterStrength;
-        const enabled = this.#windEnabled;
+        if (!gpuDevice || !this.#globalWindBuffer) return;
+        const fView = this.#globalWindFloatBuffer;
+        const uView = this.#globalWindUintBuffer;
+        fView[0] = this.#windDirection[0];
+        fView[1] = this.#windDirection[1];
+        fView[2] = this.#windSpeed;
+        fView[3] = this.#windStrength;
+        fView[4] = this.#windFrequency;
+        fView[5] = this.#windFlutterStrength;
+        uView[6] = this.#windEnabled ? 1 : 0;
+        uView[7] = 0;
 
-        const count = this.#foliageList.length;
-        for (let i = 0; i < count; i++) {
-            this.#foliageList[i].syncWindToSubMeshes(
-                gpuDevice,
-                dirX,
-                dirY,
-                speed,
-                strength,
-                freq,
-                flutter,
-                enabled
-            );
-        }
+        gpuDevice.queue.writeBuffer(
+            this.#globalWindBuffer,
+            0,
+            fView.buffer,
+            fView.byteOffset,
+            32
+        );
+    }
+
+    #syncWindToAllTypes(): void {
+        this.#syncGlobalWindBuffer();
     }
 
     #repopulateFoliage(type: Foliage): void {

@@ -77,6 +77,26 @@ export interface CreateSubMeshOptions {
      */
     receiveShadow?: boolean;
     /**
+     * [KO] 전역 바람 공유 유니폼 버퍼
+     * [EN] Global wind shared uniform buffer
+     */
+    globalWindBuffer: GPUBuffer;
+    /**
+     * [KO] 인스턴스별 바람 강도 배수
+     * [EN] Per-instance wind strength multiplier
+     */
+    windMultiplier?: number;
+    /**
+     * [KO] 인스턴스별 잔잎 흔들림 배수
+     * [EN] Per-instance flutter multiplier
+     */
+    windFlutterMultiplier?: number;
+    /**
+     * [KO] 식생 전체 높이
+     * [EN] Total foliage height
+     */
+    treeHeight?: number;
+    /**
      * [KO] 서브메시 유니폼 캐시 맵
      * [EN] Cache map for sub-mesh uniforms
      */
@@ -124,6 +144,7 @@ export default function createFoliageSubMeshInstance(
     const {
         gpuDevice,
         subMeshBindGroupLayout,
+        globalWindBuffer,
         meshNode,
         geom,
         mat,
@@ -139,7 +160,10 @@ export default function createFoliageSubMeshInstance(
         indexCount: optIndexCount,
         maxPrepassLOD = 0,
         groundBlendStrength,
-        groundBlendRange
+        groundBlendRange,
+        windMultiplier,
+        windFlutterMultiplier,
+        treeHeight
     } = options;
 
     const isIndexed = !!geom.indexBuffer;
@@ -163,6 +187,7 @@ export default function createFoliageSubMeshInstance(
         const uniformResult = createFoliagePBRSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
+            globalWindBuffer,
             relMatrix,
             normMatrix,
             globalSlot,
@@ -170,7 +195,10 @@ export default function createFoliageSubMeshInstance(
             isMasked,
             !isImpostor,
             groundBlendStrength,
-            groundBlendRange
+            groundBlendRange,
+            windMultiplier,
+            treeHeight,
+            windFlutterMultiplier
         );
         uniformBuffer = uniformResult.buffer;
         vertexBindGroup = uniformResult.bindGroup;

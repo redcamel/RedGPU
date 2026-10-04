@@ -76,7 +76,8 @@ export interface FoliageAssemblyResult {
 export default function assembleFoliageSubMeshes(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    subMeshBindGroupLayout: GPUBindGroupLayout
+    subMeshBindGroupLayout: GPUBindGroupLayout,
+    globalWindBuffer?: GPUBuffer | null
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subMeshes: FoliageSubMesh[] = [];
@@ -94,6 +95,12 @@ export default function assembleFoliageSubMeshes(
             boundingHeight: 10.0
         };
     }
+
+    const windBuffer = globalWindBuffer || gpuDevice.createBuffer({
+        label: 'Foliage_Dummy_WindBuffer',
+        size: 32,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
 
     const useImpostor = options.useImpostor !== undefined ? options.useImpostor : true;
     const lodConfigs = options.lods || [];
@@ -118,6 +125,7 @@ export default function assembleFoliageSubMeshes(
             l,
             options,
             subMeshBindGroupLayout,
+            windBuffer,
             subMeshUniformCache,
             lodReceiveShadow
         );
@@ -169,6 +177,7 @@ export default function assembleFoliageSubMeshes(
             redGPUContext,
             gpuDevice,
             subMeshBindGroupLayout,
+            windBuffer,
             options,
             lod0SubMeshes,
             subMeshes,

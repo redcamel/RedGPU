@@ -6,7 +6,7 @@
 
 import {mat4} from "gl-matrix";
 
-const subMeshUniformData: Float32Array = new Float32Array(52);
+const subMeshUniformData: Float32Array = new Float32Array(44);
 const subMeshUniformUint32: Uint32Array = new Uint32Array(subMeshUniformData.buffer);
 const identityMatrix: mat4 = mat4.create();
 
@@ -16,8 +16,8 @@ const identityMatrix: mat4 = mat4.create();
  */
 export interface FoliageSubMeshUniformResult {
     /**
-     * [KO] 생성된 유니폼 버퍼 (208바이트)
-     * [EN] Created uniform buffer (208 bytes)
+     * [KO] 생성된 유니폼 버퍼 (176바이트)
+     * [EN] Created uniform buffer (176 bytes)
      */
     buffer: GPUBuffer;
     /**
@@ -28,14 +28,17 @@ export interface FoliageSubMeshUniformResult {
 }
 
 /**
- * [KO] PBR 렌더링에 필요한 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
+ * [KO] PBR 렌더링에 필요한 176바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 176-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
  * @param gpuDevice -
  * [KO] WebGPU 디바이스 인스턴스
  * [EN] WebGPU device instance
  * @param subMeshBindGroupLayout -
  * [KO] 서브메시 바인드 그룹 레이아웃
  * [EN] Sub-mesh bind group layout
+ * @param globalWindBuffer -
+ * [KO] 전역 바람 공유 유니폼 버퍼
+ * [EN] Global wind shared uniform buffer
  * @param relMatrix -
  * [KO] 상대 모델 행렬
  * [EN] Relative model matrix
@@ -60,6 +63,12 @@ export interface FoliageSubMeshUniformResult {
  * @param groundBlendRange -
  * [KO] 지면 색상 블렌딩 높이 범위 (기본값: 1.5)
  * [EN] Ground color blending vertical range (default: 1.5)
+ * @param windMultiplier -
+ * [KO] 인스턴스별 바람 강도 배수 (기본값: 1.0)
+ * [EN] Per-instance wind strength multiplier (default: 1.0)
+ * @param treeHeight -
+ * [KO] 식생 전체 높이 (기본값: 5.0)
+ * [EN] Total foliage height (default: 5.0)
  * @returns
  * [KO] 생성된 버퍼 및 바인드 그룹
  * [EN] Created buffer and bind group
@@ -67,6 +76,7 @@ export interface FoliageSubMeshUniformResult {
 export function createFoliagePBRSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
+    globalWindBuffer: GPUBuffer,
     relMatrix: mat4,
     normMatrix: mat4,
     globalSlot: number,
@@ -74,11 +84,14 @@ export function createFoliagePBRSubMeshUniform(
     isMasked: boolean,
     applyGroundBlend: boolean,
     groundBlendStrength?: number,
-    groundBlendRange?: number
+    groundBlendRange?: number,
+    windMultiplier?: number,
+    treeHeight?: number,
+    windFlutterMultiplier?: number
 ): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_SubMesh_UniformBuffer_${globalSlot}`,
-        size: 208,
+        size: 176,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -99,25 +112,17 @@ export function createFoliagePBRSubMeshUniform(
     floatView[34] = receiveShadow ? 1.0 : 0.0;
     uintView[35] = 0;
 
-    floatView[36] = 1.0;
-    floatView[37] = 0.5;
-    floatView[38] = 1.5;
-    floatView[39] = 0.8;
-    floatView[40] = 0.1;
-    floatView[41] = 0.3;
-    uintView[42] = 1;
-    floatView[43] = 1.0;
-    floatView[44] = isMasked ? 1.0 : 0.0;
-    uintView[45] = 0;
-    floatView[46] = 5.0;
-    uintView[47] = 0;
+    floatView[36] = windMultiplier ?? 1.0;
+    floatView[37] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
+    floatView[38] = treeHeight ?? 5.0;
+    uintView[39] = 0;
 
-    floatView[48] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
-    floatView[49] = groundBlendRange ?? 1.5;
-    floatView[50] = 0.0;
-    floatView[51] = 0.0;
+    floatView[40] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
+    floatView[41] = groundBlendRange ?? 1.5;
+    floatView[42] = 0.0;
+    floatView[43] = 0.0;
 
-    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
+    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 176);
 
     const vertexBindGroup = gpuDevice.createBindGroup({
         label: `Foliage_SubMesh_BindGroup_${globalSlot}`,
@@ -126,6 +131,10 @@ export function createFoliagePBRSubMeshUniform(
             {
                 binding: 0,
                 resource: {buffer: uniformBuffer}
+            },
+            {
+                binding: 1,
+                resource: {buffer: globalWindBuffer}
             }
         ]
     });
@@ -134,20 +143,32 @@ export function createFoliagePBRSubMeshUniform(
 }
 
 /**
- * [KO] 섀도우 패스 전용 208바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 208-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
+ * [KO] 섀도우 패스 전용 176바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 176-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
  * @param gpuDevice -
  * [KO] WebGPU 디바이스 인스턴스
  * [EN] WebGPU device instance
  * @param subMeshBindGroupLayout -
  * [KO] 서브메시 바인드 그룹 레이아웃
  * [EN] Sub-mesh bind group layout
+ * @param globalWindBuffer -
+ * [KO] 전역 바람 공유 유니폼 버퍼
+ * [EN] Global wind shared uniform buffer
  * @param name -
  * [KO] 식생 인스턴스 이름
  * [EN] Foliage instance name
  * @param lodIndex -
  * [KO] 대상 LOD 인덱스
  * [EN] Target LOD index
+ * @param windMultiplier -
+ * [KO] 인스턴스별 바람 강도 배수 (기본값: 1.0)
+ * [EN] Per-instance wind strength multiplier (default: 1.0)
+ * @param treeHeight -
+ * [KO] 식생 전체 높이 (기본값: 5.0)
+ * [EN] Total foliage height (default: 5.0)
+ * @param windFlutterMultiplier -
+ * [KO] 잔잎 흔들림 배수
+ * [EN] Leaf flutter multiplier
  * @returns
  * [KO] 생성된 버퍼 및 바인드 그룹
  * [EN] Created buffer and bind group
@@ -155,12 +176,16 @@ export function createFoliagePBRSubMeshUniform(
 export function createFoliageShadowSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
+    globalWindBuffer: GPUBuffer,
     name: string,
-    lodIndex: number
+    lodIndex: number,
+    windMultiplier?: number,
+    treeHeight?: number,
+    windFlutterMultiplier?: number
 ): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_ShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
-        size: 208,
+        size: 176,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -173,25 +198,17 @@ export function createFoliageShadowSubMeshUniform(
     floatView[34] = 0.0;
     uintView[35] = 0;
 
-    floatView[36] = 1.0;
-    floatView[37] = 0.5;
-    floatView[38] = 1.5;
-    floatView[39] = 0.8;
-    floatView[40] = 0.1;
-    floatView[41] = 0.3;
-    uintView[42] = 1;
-    floatView[43] = 1.0;
-    floatView[44] = 0.5;
-    uintView[45] = 0;
-    floatView[46] = 5.0;
-    uintView[47] = 0;
+    floatView[36] = windMultiplier ?? 1.0;
+    floatView[37] = (windFlutterMultiplier ?? 1.0) * 0.5;
+    floatView[38] = treeHeight ?? 5.0;
+    uintView[39] = 0;
 
-    floatView[48] = 0.0;
-    floatView[49] = 1.5;
-    floatView[50] = 0.0;
-    floatView[51] = 0.0;
+    floatView[40] = 0.0;
+    floatView[41] = 1.5;
+    floatView[42] = 0.0;
+    floatView[43] = 0.0;
 
-    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 208);
+    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 176);
 
     const vertexBindGroup = gpuDevice.createBindGroup({
         label: `Foliage_ShadowSubMesh_BindGroup_${name}_LOD${lodIndex}`,
@@ -201,6 +218,12 @@ export function createFoliageShadowSubMeshUniform(
                 binding: 0,
                 resource: {
                     buffer: uniformBuffer,
+                },
+            },
+            {
+                binding: 1,
+                resource: {
+                    buffer: globalWindBuffer,
                 },
             },
         ],
