@@ -8,11 +8,15 @@ import DrawIndexedIndirectArgs_wgsl from './struct/DrawIndexedIndirectArgs.wgsl'
 import FoliageInstance_wgsl from './struct/FoliageInstance.wgsl';
 import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
+import FoliageTypeParam_wgsl from './struct/FoliageTypeParam.wgsl';
 import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
 import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
 import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
+import transformFoliagePosition_wgsl from './math/transformFoliagePosition.wgsl';
+import ditherFadeDiscard_wgsl from './math/ditherFadeDiscard.wgsl';
+import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCutoff.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -72,6 +76,16 @@ export namespace LandscapeShaderLibrary {
         export const FoliageLODUniformInfo = FoliageLODUniformInfo_wgsl;
 
         /**
+         * [KO] 식생 타입별 컬링 및 렌더링 파라미터 구조체 (320바이트 / 80 floats)
+         * [EN] Foliage type culling and rendering parameters struct (320 bytes / 80 floats)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.FoliageTypeParam;
+         * ```
+         */
+        export const FoliageTypeParam = FoliageTypeParam_wgsl;
+
+        /**
          * [KO] 지형 버텍스 및 프래그먼트 셰이더 메인 유니폼 버퍼 구조체 (26개 필드)
          * [EN] Terrain vertex and fragment shader main uniform buffer struct (26 fields)
          *
@@ -122,6 +136,36 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const rotateVectorByQuat = rotateVectorByQuat_wgsl;
+
+        /**
+         * [KO] 인스턴스 정점의 서브메시 계층 행렬 변환 및 쿼터니언 회전/스케일/월드 이동 수식 (transformFoliagePosition)
+         * [EN] Submesh hierarchy matrix transform, quaternion rotation, scale and world translation for foliage vertex (transformFoliagePosition)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.transformFoliagePosition;
+         * ```
+         */
+        export const transformFoliagePosition = transformFoliagePosition_wgsl;
+
+        /**
+         * [KO] 4x4 Bayer 매트릭스 디더 페이드 디스카드 함수 (ditherFadeDiscard)
+         * [EN] 4x4 Bayer matrix dither fade discard function (ditherFadeDiscard)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.ditherFadeDiscard;
+         * ```
+         */
+        export const ditherFadeDiscard = ditherFadeDiscard_wgsl;
+
+        /**
+         * [KO] 밉맵 보정 알파 컷오프(Mip-Scaled Cutoff) 디스카드 함수 (evaluateMipScaledAlphaCutoff)
+         * [EN] Mip-scaled alpha cutoff discard function (evaluateMipScaledAlphaCutoff)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
+         * ```
+         */
+        export const evaluateMipScaledAlphaCutoff = evaluateMipScaledAlphaCutoff_wgsl;
     }
 
     /**

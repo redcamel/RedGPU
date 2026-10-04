@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include systemStruct.OutputFragment;
+#redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
 
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -20,15 +21,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
 
-    if (alpha < baseCutOff) {
-        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
-        let effectiveAlpha = alpha * mipAlphaScale;
-        if (effectiveAlpha <= baseCutOff) {
-            discard;
-        }
-    }
+    evaluateMipScaledAlphaCutoff(alpha, ddxUV, ddyUV, baseCutOff);
 
     return output;
 }

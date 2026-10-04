@@ -1,6 +1,9 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowClipPosition;
 #redgpu_include landscape.math.rotateVectorByQuat;
+#redgpu_include landscape.math.transformFoliagePosition;
+#redgpu_include landscape.math.ditherFadeDiscard;
+#redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
 
 struct SubMeshUniforms {
     relativeModelMatrix: mat4x4<f32>,
@@ -150,20 +153,24 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let combinedOpacity = input.groundColor_fade.a;
 
-    var hierarchyPos = input.position;
     var hierarchyNormal = input.vertexNormal;
     var hierarchyTangent = input.vertexTangent.xyz;
     if (subMeshUniforms.hasHierarchyTransform != 0u) {
-        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
         hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexNormal, 0.0)).xyz;
         hierarchyTangent = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexTangent.xyz, 0.0)).xyz;
     }
 
-    let safeScale = max(instanceScale, vec3<f32>(0.0001));
-    let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
-
-    var worldPos = rotatedPos + instancePos;
+    let xform = transformFoliagePosition(
+        input.position,
+        subMeshUniforms.hasHierarchyTransform,
+        subMeshUniforms.relativeModelMatrix,
+        instancePos,
+        instanceScale,
+        instanceRotQuat
+    );
+    let hierarchyPos = xform.hierarchyPos;
+    var worldPos = xform.worldPos;
+    let safeScale = xform.safeScale;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
     let isImpostor = (input.vertexTangent.w < -500.0);
@@ -260,16 +267,16 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
-    var hierarchyPos = input.position;
-    if (subMeshUniforms.hasHierarchyTransform != 0u) {
-        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
-    }
-
-    let safeScale = max(instanceScale, vec3<f32>(0.0001));
-    let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
-
-    var worldPos = rotatedPos + instancePos;
+    let xform = transformFoliagePosition(
+        input.position,
+        subMeshUniforms.hasHierarchyTransform,
+        subMeshUniforms.relativeModelMatrix,
+        instancePos,
+        instanceScale,
+        instanceRotQuat
+    );
+    let hierarchyPos = xform.hierarchyPos;
+    var worldPos = xform.worldPos;
     let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, vec3<f32>(0.0, 1.0, 0.0), vec4<f32>(1.0), instancePos, systemUniforms.time.time);
     worldPos += windDisp;
 
@@ -280,16 +287,7 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
 
 @fragment
 fn entryPointShadowOpaqueFragment(input : FoliageShadowOpaqueOutput) {
-    if (input.shadowFade < 0.999) {
-        let px = u32(input.position.x) & 3u;
-        let py = u32(input.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (input.shadowFade < threshold) {
-            discard;
-        }
-    }
+    ditherFadeDiscard(input.position.xy, input.shadowFade);
 }
 
 struct FoliageShadowMaskedOutput {
@@ -309,16 +307,16 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
-    var hierarchyPos = input.position;
-    if (subMeshUniforms.hasHierarchyTransform != 0u) {
-        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
-    }
-
-    let safeScale = max(instanceScale, vec3<f32>(0.0001));
-    let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
-
-    var worldPos = rotatedPos + instancePos;
+    let xform = transformFoliagePosition(
+        input.position,
+        subMeshUniforms.hasHierarchyTransform,
+        subMeshUniforms.relativeModelMatrix,
+        instancePos,
+        instanceScale,
+        instanceRotQuat
+    );
+    let hierarchyPos = xform.hierarchyPos;
+    var worldPos = xform.worldPos;
     let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, input.vertexNormal, input.vertexColor_0, instancePos, systemUniforms.time.time);
     worldPos += windDisp;
 
@@ -338,27 +336,10 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
     let ddyUV = dpdy(input.uv);
     let alpha = textureSample(shadowBaseColorTexture, shadowBaseColorTextureSampler, input.uv).a;
 
-    if (input.shadowFade < 0.999) {
-        let px = u32(input.position.x) & 3u;
-        let py = u32(input.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (input.shadowFade < threshold) {
-            discard;
-        }
-    }
+    ditherFadeDiscard(input.position.xy, input.shadowFade);
 
     let globalFragmentData = globalFragmentSSBO_PBR[input.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
 
-    if (alpha < baseCutOff) {
-        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
-        let effectiveAlpha = alpha * mipAlphaScale;
-        if (effectiveAlpha <= baseCutOff) {
-            discard;
-        }
-    }
+    evaluateMipScaledAlphaCutoff(alpha, ddxUV, ddyUV, baseCutOff);
 }

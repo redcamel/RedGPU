@@ -7,6 +7,7 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 #redgpu_include landscape.math.rotateVectorByQuat;
+#redgpu_include landscape.math.ditherFadeDiscard;
 
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -179,17 +180,7 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    let fadeOpacity = inputData.combinedOpacity;
-    if (fadeOpacity < 0.999) {
-        let px = u32(inputData.position.x) & 3u;
-        let py = u32(inputData.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (fadeOpacity < threshold) {
-            discard;
-        }
-    }
+    ditherFadeDiscard(inputData.position.xy, inputData.combinedOpacity);
 
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
