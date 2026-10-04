@@ -3,7 +3,6 @@
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.INV_PI;
 #redgpu_include math.PI;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
@@ -265,7 +264,6 @@ fn main(inputData: InputData) -> OutputFragment {
     if (systemUniforms.directionalLightCount > 0u) {
         L0 = -normalize(systemUniforms.directionalLights[0].direction);
     }
-    let NdotL0 = dot(N, L0);
 
     if (receiveShadowYn) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
