@@ -168,7 +168,7 @@ class FoliageManager {
             const foliage = list[i];
             if (foliage.activeInstanceCount > 0) {
                 if (this.#useDepthPrepass && foliage.useDepthPrepass) {
-                    count += foliage.depthPrepassSubMeshes.length;
+                    count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
                 }
                 count += foliage.mainSubMeshes.length;
             }

@@ -157,7 +157,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: validStrideBytes,
-            attributes: this.#geoAttributesAll,
+            attributes: isDepthPrepassOpaque ? this.#geoAttributesShadowOpaque : this.#geoAttributesAll,
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
@@ -243,12 +243,16 @@ class FoliagePipelineRegistry extends RedGPUObject {
             }
         }
 
+        const vertexEntryPoint = isDepthPrepassOpaque
+            ? 'entryPointDepthPrepassOpaqueVertex'
+            : 'mainInput';
+
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `Foliage_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
                 module: this.#vertexShaderModule!,
-                entryPoint: 'mainInput',
+                entryPoint: vertexEntryPoint,
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
             fragment: {

@@ -638,7 +638,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     override get drawCallCount(): number {
         let count = this.#mainSubMeshes.length;
         if (this.#useDepthPrepass) {
-            count += this.#depthPrepassSubMeshes.length;
+            count += this.#depthPrepassOpaqueSubMeshes.length + this.#depthPrepassMaskedSubMeshes.length;
         }
         return count;
     }
@@ -1286,6 +1286,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#depthPrepassSubMeshes.length = 0;
         this.#depthPrepassOpaqueSubMeshes.length = 0;
         this.#depthPrepassMaskedSubMeshes.length = 0;
+        this.#mainSubMeshes.length = 0;
         for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
             const shadowSub = this.#shadowMergedSubMeshes[i];
             shadowSub.destroy();

@@ -283,6 +283,39 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     return output;
 }
 
+struct FoliageDepthPrepassOpaqueOutput {
+    @builtin(position) position: vec4<f32>,
+};
+
+@vertex
+fn entryPointDepthPrepassOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageDepthPrepassOpaqueOutput {
+    var output : FoliageDepthPrepassOpaqueOutput;
+
+    let instancePos = input.instancePos_scaleY.xyz;
+    let scaleY = input.instancePos_scaleY.w;
+
+    let instanceRotQuat = input.instanceRotQuat;
+    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
+
+    let xform = transformFoliagePosition(
+        input.position,
+        subMeshUniforms.hasHierarchyTransform,
+        subMeshUniforms.relativeModelMatrix,
+        instancePos,
+        instanceScale,
+        instanceRotQuat
+    );
+    let hierarchyPos = xform.hierarchyPos;
+    var worldPos = xform.worldPos;
+    let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, vec3<f32>(0.0, 1.0, 0.0), vec4<f32>(1.0), instancePos, systemUniforms.time.time);
+    worldPos += windDisp;
+
+    let relPos = worldPos - systemUniforms.camera.cameraPosition;
+    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
+    return output;
+}
+
 struct FoliageShadowMaskedOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) uv: vec2<f32>,
