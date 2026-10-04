@@ -90,7 +90,16 @@ fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
 
     let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
     let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-    let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
+
+    // [KO] 화면상 4픽셀 미만인 극원거리 타일은 HZB 다운샘플링 오차에 의한 깜빡임을 방지하기 위해 가시화 보장
+    // [EN] Bypass HZB occlusion for distant tiles smaller than 4 pixels to prevent sub-texel flickering
+    if (maxDim < 4.0) {
+        return true;
+    }
+
+    // [KO] 4-tap 샘플링에 적합한 보수적 밉 레벨 선택 (AABB 크기 초과 방지)
+    // [EN] Conservative mip level for 4-tap footprint avoiding over-culling from adjacent foreground occluders
+    let mipLevel = clamp(floor(log2(maxDim)), 0.0, 7.0);
 
     let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
     let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
@@ -98,7 +107,10 @@ fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
     let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
     let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
 
-    if (minDepth > maxHZBDepth + 0.002) {
+    // [KO] 원거리 NDC 깊이 압축을 고려한 거리 적응형 안전 바이어스 (원거리 낮은 언덕 깜빡임 제거)
+    // [EN] Distance-adaptive safety depth bias accounting for non-linear NDC depth precision at distance
+    let adaptiveBias = 0.003 + minDepth * 0.004;
+    if (minDepth > maxHZBDepth + adaptiveBias) {
         return false;
     }
 
@@ -131,10 +143,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let minY = tile.minHeightNorm * heightScale;
         let maxY = tile.maxHeightNorm * heightScale;
 
-        // 버텍스 모핑 및 스커트 기하 마진 10.0m 부여하여 100% 안전 보장
-        let margin = 10.0;
-        let minPos = vec3<f32>(tile.centerWorldX - halfTileX, minY - margin, tile.centerWorldZ - halfTileZ);
-        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX, maxY + margin, tile.centerWorldZ + halfTileZ);
+        // [KO] 버텍스 모핑, 스커트 기하(최대 50m) 및 완만한 저고도 언덕을 위한 충분한 수직/수평 안전 마진 확보
+        // [EN] Ample vertical and horizontal safety margins for vertex geomorphing, skirts, and low-elevation hills
+        let marginY = max(35.0, heightScale * 0.05);
+        let marginXZ = uniforms.tileSizeX * 0.02;
+        let minPos = vec3<f32>(tile.centerWorldX - halfTileX - marginXZ, minY - marginY, tile.centerWorldZ - halfTileZ - marginXZ);
+        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX + marginXZ, maxY + marginY, tile.centerWorldZ + halfTileZ + marginXZ);
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
