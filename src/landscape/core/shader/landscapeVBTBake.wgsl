@@ -212,8 +212,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             finalAO = blendedAO * invW;
 
             if (length(layerBlendNormal.xy) > 0.001) {
-                let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
-                let tangentZ = normalize(cross(N, tangentX));
+                let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.y) > 0.999);
+                let tangentX = normalize(cross(upVec, N));
+                let tangentZ = cross(N, tangentX);
                 let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + N * layerBlendNormal.z);
                 N = normalize(perturbedWorldN);
             }
@@ -244,8 +245,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             finalAO = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
             if (length(layer0Normal.xy) > 0.001) {
-                let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
-                let tangentZ = normalize(cross(N, tangentX));
+                let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.y) > 0.999);
+                let tangentX = normalize(cross(upVec, N));
+                let tangentZ = cross(N, tangentX);
                 let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + N * layer0Normal.z);
                 N = normalize(perturbedWorldN);
             }

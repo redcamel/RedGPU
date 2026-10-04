@@ -231,8 +231,9 @@ fn computeNearFieldLandscapeLayers(
 
         let layerBlendNormal = normalize(blendedNormalTangent * invW);
         if (length(layerBlendNormal.xy) > 0.001) {
-            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseNormal * baseNormal.x);
-            let tangentZ = normalize(cross(baseNormal, tangentX));
+            let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseNormal.y) > 0.999);
+            let tangentX = normalize(cross(upVec, baseNormal));
+            let tangentZ = cross(baseNormal, tangentX);
             let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseNormal * layerBlendNormal.z);
             result.normal = normalize(perturbedWorldN);
         }
@@ -266,8 +267,9 @@ fn computeNearFieldLandscapeLayers(
         result.ao = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
         if (length(layer0Normal.xy) > 0.001) {
-            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseNormal * baseNormal.x);
-            let tangentZ = normalize(cross(baseNormal, tangentX));
+            let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseNormal.y) > 0.999);
+            let tangentX = normalize(cross(upVec, baseNormal));
+            let tangentZ = cross(baseNormal, tangentX);
             let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + baseNormal * layer0Normal.z);
             result.normal = normalize(perturbedWorldN);
         }
@@ -361,7 +363,11 @@ fn getDirectPbrLight(
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
 
-    let directLight = (SPEC_BRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuse_reflection;
+    // [KO] 지형 전용 스펙큘러 감쇄 (흙/바위의 미세 다공성 흡수를 반영하여 언리얼 엔진 표준 0.2 수준으로 정반사 완화)
+    // [EN] Landscape specular attenuation (reflecting micro-porosity of soil/rock, attenuated to UE standard ~0.2)
+    let landscapeSpecularScale = 0.2;
+    let effectiveF = F * landscapeSpecularScale;
+    let directLight = (SPEC_BRDF * NdotL * landscapeSpecularScale) + (vec3<f32>(1.0) - effectiveF) * diffuse_reflection;
     return directLight * lightColor;
 }
 
@@ -622,7 +628,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
         albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
-        roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+        roughnessFactor = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
         ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
     } else if (rawViewDist <= fadeStartDist) {
         let nearDetail = computeNearFieldLandscapeLayers(
@@ -638,7 +644,7 @@ fn main(inputData: InputData) -> OutputFragment {
         if (nearDetail.isValid) {
             albedo = nearDetail.albedo;
             N = nearDetail.normal;
-            roughnessFactor = nearDetail.roughness;
+            roughnessFactor = clamp(nearDetail.roughness, 0.35, 1.0);
             ambientOcclusion = nearDetail.ao;
         } else {
             let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
@@ -655,7 +661,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
         let farAlbedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
-        let farRoughness = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
+        let farRoughness = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
         let farAO = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
 
         let nearDetail = computeNearFieldLandscapeLayers(
