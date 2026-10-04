@@ -1074,7 +1074,6 @@ export class Landscape extends RedGPUObject {
         this.#gpuCuller?.updateUniforms(
             camX, camY, camZ,
             this.#lodMaxLevel,
-            this.#spatialGrid.worldSizeX, this.#spatialGrid.worldSizeZ,
             this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ,
             this.#heightScale,
             totalComponents,

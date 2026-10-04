@@ -106,8 +106,6 @@ export class LandscapeGPUCuller extends RedGPUObject {
         camY: number,
         camZ: number,
         lodMaxLevel: number,
-        worldSizeX: number,
-        worldSizeZ: number,
         tileSizeX: number,
         tileSizeZ: number,
         heightScale: number,
@@ -125,40 +123,22 @@ export class LandscapeGPUCuller extends RedGPUObject {
         const data = this.#uniformData;
         const uintData = this.#uniformUintData;
 
-        data[0] = camX;
-        data[1] = camY;
-        data[2] = camZ;
-        uintData[3] = lodMaxLevel;
-
-        data[4] = worldSizeX;
-        data[5] = worldSizeZ;
-        data[6] = tileSizeX;
-        data[7] = tileSizeZ;
-
-        data[8] = heightScale;
-        uintData[9] = tileCount;
-        data[10] = tanHalfFOV;
-        data[11] = lodMetric;
-
-        uintData[12] = useHZB ? 1 : 0;
-        data[13] = 0.0;
-        data[14] = 0.0;
-        data[15] = 0.0;
-
+        // 1. 16-byte aligned large members: viewProjectionMatrix (offset 0..15)
         if (viewProjectionMatrix && viewProjectionMatrix.length >= 16) {
             for (let i = 0; i < 16; i++) {
-                data[16 + i] = viewProjectionMatrix[i];
+                data[i] = viewProjectionMatrix[i];
             }
         } else {
             for (let i = 0; i < 16; i++) {
-                data[16 + i] = 0.0;
+                data[i] = 0.0;
             }
         }
 
+        // 1. 16-byte aligned large members: frustumPlanes (offset 16..39)
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let i = 0; i < 6; i++) {
                 const plane = frustumPlanes[i];
-                const offset = 32 + i * 4;
+                const offset = 16 + i * 4;
                 data[offset] = plane[0];
                 data[offset + 1] = plane[1];
                 data[offset + 2] = plane[2];
@@ -166,7 +146,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
             }
         } else {
             for (let i = 0; i < 6; i++) {
-                const offset = 32 + i * 4;
+                const offset = 16 + i * 4;
                 data[offset] = 0;
                 data[offset + 1] = 0;
                 data[offset + 2] = 0;
@@ -174,11 +154,34 @@ export class LandscapeGPUCuller extends RedGPUObject {
             }
         }
 
+        // 1. 16-byte aligned large members: lodDistancesSq (offset 40..47)
         const distCount = lodDistancesSq.length;
         for (let i = 0; i < 8; i++) {
             const val = i < distCount ? lodDistancesSq[i] : 0;
-            data[56 + i] = (val && val > 0) ? val : 1e15;
+            data[40 + i] = (val && val > 0) ? val : 1e15;
         }
+
+        // 2. Active scalar & vector members (offset 48..58)
+        data[48] = camX;
+        data[49] = camY;
+        data[50] = camZ;
+        uintData[51] = lodMaxLevel;
+
+        data[52] = tileSizeX;
+        data[53] = tileSizeZ;
+        data[54] = heightScale;
+        uintData[55] = tileCount;
+
+        data[56] = tanHalfFOV;
+        data[57] = lodMetric;
+        uintData[58] = useHZB ? 1 : 0;
+
+        // 3. Consolidated end padding (offset 59..63)
+        data[59] = 0.0;
+        data[60] = 0.0;
+        data[61] = 0.0;
+        data[62] = 0.0;
+        data[63] = 0.0;
 
         gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, data.buffer, 0, data.byteLength);
     }
