@@ -152,7 +152,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.updateUniformsData();
     }
 
-
     #onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
     #rebakeDebounceTimer: any = null;
@@ -354,7 +353,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const activeCount = this.#layers.length;
         uintBuf[0] = activeCount;
         floatBuf[1] = this.#nearDetailDistance;
-        floatBuf[2] = Math.max(5.0, this.#nearDetailDistance * 0.25);
+        floatBuf[2] = Math.max(5.0, this.#nearDetailDistance * 0.12);
         uintBuf[3] = 0;
 
         const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : DEFAULT_BASE_COLOR;
