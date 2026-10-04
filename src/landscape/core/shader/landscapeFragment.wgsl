@@ -6,7 +6,6 @@
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
 #redgpu_include math.direction.getViewDirection;
-#redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.getInterleavedGradientNoise;
@@ -61,6 +60,16 @@ struct NearDetailLayerResult {
 fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
+}
+
+fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> {
+    if (length(tangentN.xy) <= 0.001) {
+        return baseN;
+    }
+    let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseN.y) > 0.999);
+    let tangentX = normalize(cross(upVec, baseN));
+    let tangentZ = cross(baseN, tangentX);
+    return normalize(tangentX * tangentN.x + tangentZ * tangentN.y + baseN * tangentN.z);
 }
 
 fn sampleLayerStochasticGrad(
@@ -230,13 +239,7 @@ fn computeNearFieldLandscapeLayers(
         result.ao = blendedAO * invW;
 
         let layerBlendNormal = normalize(blendedNormalTangent * invW);
-        if (length(layerBlendNormal.xy) > 0.001) {
-            let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseNormal.y) > 0.999);
-            let tangentX = normalize(cross(upVec, baseNormal));
-            let tangentZ = cross(baseNormal, tangentX);
-            let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseNormal * layerBlendNormal.z);
-            result.normal = normalize(perturbedWorldN);
-        }
+        result.normal = perturbNormalOrthonormal(baseNormal, layerBlendNormal);
         result.isValid = true;
     } else {
         let layer0Params = uniforms.layerParams[0];
@@ -266,13 +269,7 @@ fn computeNearFieldLandscapeLayers(
         let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
         result.ao = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
-        if (length(layer0Normal.xy) > 0.001) {
-            let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseNormal.y) > 0.999);
-            let tangentX = normalize(cross(upVec, baseNormal));
-            let tangentZ = cross(baseNormal, tangentX);
-            let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + baseNormal * layer0Normal.z);
-            result.normal = normalize(perturbedWorldN);
-        }
+        result.normal = perturbNormalOrthonormal(baseNormal, layer0Normal);
         result.isValid = true;
     }
 

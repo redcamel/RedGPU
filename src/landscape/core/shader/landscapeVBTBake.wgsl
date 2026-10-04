@@ -1,4 +1,3 @@
-#redgpu_include math.PI;
 #redgpu_include math.PI2;
 #redgpu_include landscape.struct.LandscapeLayerParams;
 #redgpu_include landscape.tiling.stochasticTiling;
@@ -26,6 +25,16 @@ struct VBTBakeUniforms {
 @group(0) @binding(7) var vbtBaseColorOutput: texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(8) var vbtNormalOutput: texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(9) var vbtORMOutput: texture_storage_2d<rgba8unorm, write>;
+
+fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> {
+    if (length(tangentN.xy) <= 0.001) {
+        return baseN;
+    }
+    let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseN.y) > 0.999);
+    let tangentX = normalize(cross(upVec, baseN));
+    let tangentZ = cross(baseN, tangentX);
+    return normalize(tangentX * tangentN.x + tangentZ * tangentN.y + baseN * tangentN.z);
+}
 
 fn sampleLayerStochasticLevel(
     baseUV: vec2<f32>,
@@ -210,14 +219,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             finalRoughness = blendedRoughness * invW;
             finalMetallic = blendedMetallic * invW;
             finalAO = blendedAO * invW;
-
-            if (length(layerBlendNormal.xy) > 0.001) {
-                let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.y) > 0.999);
-                let tangentX = normalize(cross(upVec, N));
-                let tangentZ = cross(N, tangentX);
-                let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + N * layerBlendNormal.z);
-                N = normalize(perturbedWorldN);
-            }
+            N = perturbNormalOrthonormal(N, layerBlendNormal);
         } else {
             let layer0Params = uniforms.layerParams[0];
             let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
@@ -244,13 +246,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
             finalAO = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
-            if (length(layer0Normal.xy) > 0.001) {
-                let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.y) > 0.999);
-                let tangentX = normalize(cross(upVec, N));
-                let tangentZ = cross(N, tangentX);
-                let perturbedWorldN = normalize(tangentX * layer0Normal.x + tangentZ * layer0Normal.y + N * layer0Normal.z);
-                N = normalize(perturbedWorldN);
-            }
+            N = perturbNormalOrthonormal(N, layer0Normal);
         }
     }
 
