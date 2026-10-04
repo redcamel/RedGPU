@@ -85,8 +85,8 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * [KO] MSAA 식별자 키
      * [EN] MSAA identifier key
      * @param strideBytes -
-     * [KO] 정점 스트라이드 바이트 수 (기본값: 48)
-     * [EN] Vertex stride in bytes (default: 48)
+     * [KO] 정점 스트라이드 바이트 수 (기본값: 72)
+     * [EN] Vertex stride in bytes (default: 72)
      * @param cullMode -
      * [KO] 컬링 모드 (기본값: 'none')
      * [EN] Cull mode (default: 'none')
@@ -107,7 +107,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         material: any,
         sampleCount: number,
         msaaID: string,
-        strideBytes: number = 48,
+        strideBytes: number = 72,
         cullMode: GPUCullMode = 'none',
         depthPassMode: FoliageDepthPassMode = 'normal',
         subMeshBindGroupLayout?: GPUBindGroupLayout | null,

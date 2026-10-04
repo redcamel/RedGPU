@@ -708,8 +708,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
-
-
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',
             size: culledByteSize * SHADOW_CASCADE_COUNT,

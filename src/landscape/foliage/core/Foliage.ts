@@ -366,7 +366,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         } = options;
 
         this.#streamer = new FoliageSubCellStreamer(this);
-        this.#options = options;
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
         this.#baker = baker || null;
@@ -732,10 +731,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#boundingRadius;
     }
 
-
-
-
-
     /**
      * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 반환합니다.
      * [EN] Returns whether camera-based dynamic sub-cell streaming is enabled.
@@ -853,8 +848,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-
-
     /**
      * [KO] 이 식생 타입에 임포스터 서브메시가 생성되어 존재하는지 여부를 반환합니다.
      * [EN] Returns whether an impostor sub-mesh exists for this foliage type.
@@ -879,8 +872,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#useDepthPrepass;
     }
 
-
-
     /**
      * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
      * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
@@ -903,8 +894,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             this.#lastWindParams.windEnabled
         );
     }
-
-
 
     /**
      * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
@@ -948,8 +937,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     get shadowCulledGPUBuffer(): GPUBuffer | null {
         return this.#megaBuffer?.shadowCulledGPUBuffer || null;
     }
-
-
 
     /**
      * [KO] 그림자 패스용 간접 드로우 인자 버퍼를 반환합니다.
@@ -1314,10 +1301,15 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const subList = this.#subMeshes;
         const count = subList.length;
 
-        const prepassList: FoliageSubMesh[] = [];
-        const prepassOpaqueList: FoliageSubMesh[] = [];
-        const prepassMaskedList: FoliageSubMesh[] = [];
-        const mainList: FoliageSubMesh[] = [];
+        const prepassList = this.#depthPrepassSubMeshes;
+        const prepassOpaqueList = this.#depthPrepassOpaqueSubMeshes;
+        const prepassMaskedList = this.#depthPrepassMaskedSubMeshes;
+        const mainList = this.#mainSubMeshes;
+
+        prepassList.length = 0;
+        prepassOpaqueList.length = 0;
+        prepassMaskedList.length = 0;
+        mainList.length = 0;
 
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
@@ -1334,11 +1326,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 mainList.push(sub);
             }
         }
-
-        this.#depthPrepassSubMeshes = prepassList;
-        this.#depthPrepassOpaqueSubMeshes = prepassOpaqueList;
-        this.#depthPrepassMaskedSubMeshes = prepassMaskedList;
-        this.#mainSubMeshes = mainList;
     }
 
     #updateSubMeshGroundBlend(): void {

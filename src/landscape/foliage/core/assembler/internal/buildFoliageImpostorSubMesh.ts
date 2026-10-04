@@ -15,6 +15,8 @@ import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
 import type {FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
 
+const identityMatrix: mat4 = mat4.create();
+
 /**
  * [KO] LOD 0 서브메쉬를 기반으로 옥타헤드럴 임포스터를 베이킹하고, 마지막 LOD에 단일 임포스터 서브메쉬를 생성 및 부착합니다.
  * [EN] Bakes octahedral impostors based on LOD 0 sub-meshes and creates/attaches a single impostor sub-mesh to the last LOD.
@@ -80,8 +82,8 @@ export default function buildFoliageImpostorSubMesh(
         meshNode: sourceSubMeshes[0]?.mesh,
         geom: bbGeom,
         mat: bbMat,
-        relMatrix: mat4.create(),
-        normMatrix: mat4.create(),
+        relMatrix: identityMatrix,
+        normMatrix: identityMatrix,
         strideBytes: PBR_STRIDE_BYTES,
         lodIndex: impostorLODIndex,
         isImpostorOverride: true,
