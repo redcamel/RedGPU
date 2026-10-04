@@ -252,34 +252,32 @@ export default class FoliageSubCellStreamer {
             targetSubCell.mountedSlotIndex = -1;
             allocation.instanceCount = Math.max(0, currentActive - targetCount);
         } else {
+            // [KO] Swap-with-Last (O(1)): 맨 마지막 서브셀을 제거할 중간 슬롯 위치로 1회만 이동
+            // [EN] Swap-with-Last (O(1)): Move only the last subcell into the target slot position
+            const lastSubCell = mounted.pop()!;
+            const lastSlot = lastSubCell.mountedSlotIndex;
+            const lastCount = lastSubCell.instanceCount;
+
             const f32 = megaBuffer.cpuRawDataBuffer;
             const strideFloats = megaBuffer.strideFloats;
 
-            const copyStartFloat = (allocation.rawBaseOffset + targetSlot + targetCount) * strideFloats;
-            const copyEndFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
+            const srcStartFloat = (allocation.rawBaseOffset + lastSlot) * strideFloats;
+            const srcEndFloat = srcStartFloat + lastCount * strideFloats;
             const destFloat = (allocation.rawBaseOffset + targetSlot) * strideFloats;
 
-            if (copyEndFloat > copyStartFloat) {
-                f32.copyWithin(destFloat, copyStartFloat, copyEndFloat);
-            }
+            f32.copyWithin(destFloat, srcStartFloat, srcEndFloat);
 
-            for (let i = mountedIndex; i < mounted.length - 1; i++) {
-                const next = mounted[i + 1];
-                next.mountedSlotIndex -= targetCount;
-                mounted[i] = next;
-            }
-            mounted.pop();
+            lastSubCell.mountedSlotIndex = targetSlot;
+            mounted[mountedIndex] = lastSubCell;
 
             targetSubCell.isMounted = false;
             targetSubCell.mountedSlotIndex = -1;
 
-            const newActive = Math.max(0, currentActive - targetCount);
-            allocation.instanceCount = newActive;
+            allocation.instanceCount = Math.max(0, currentActive - targetCount);
 
-            const uploadCount = newActive - targetSlot;
-            if (uploadCount > 0) {
-                this.#foliage.uploadRangeToGPU(targetSlot, uploadCount);
-            }
+            // [KO] 단 1개 서브셀 분량(lastCount)만 GPU 버퍼에 갱신 전송
+            // [EN] Upload only the swapped single subcell range (lastCount) to the GPU buffer
+            this.#foliage.uploadRangeToGPU(targetSlot, lastCount);
         }
     }
 
