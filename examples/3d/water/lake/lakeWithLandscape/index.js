@@ -180,13 +180,6 @@ RedGPU.init(
         foliageManager.subCellSize = 50; // 400x400 월드에 최적화된 서브셀 크기
         foliageManager.streamingRadius = 400;
 
-        // 스플랫맵 픽셀 캐시 비동기 로딩 완료 시 식생 전체 재배치(repopulate) 보장
-        const splatImg = new Image();
-        splatImg.onload = () => {
-            foliageManager.repopulateAll();
-        };
-        splatImg.src = weightTexturePath;
-
         const TREE_MODEL_URL = '../../../../assets/terrain/test.glb';
         new RedGPU.GLTFLoader(
             redGPUContext,
