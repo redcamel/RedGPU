@@ -486,7 +486,8 @@ export class FoliageSubMesh extends ScatterSubMesh {
                 this.strideBytes,
                 cullMode,
                 depthPassMode,
-                subMeshBindGroupLayout
+                subMeshBindGroupLayout,
+                this.isMasked
             ) || undefined;
 
             if (pipeline) {

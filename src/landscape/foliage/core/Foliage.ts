@@ -270,6 +270,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #unifiedGeometries: (Geometry | null)[] = [];
     #lod0SubMeshes: FoliageSubMesh[] = [];
     #depthPrepassSubMeshes: FoliageSubMesh[] = [];
+    #depthPrepassOpaqueSubMeshes: FoliageSubMesh[] = [];
+    #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
     #mainSubMeshes: FoliageSubMesh[] = [];
     #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
@@ -656,6 +658,22 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get depthPrepassSubMeshes(): FoliageSubMesh[] {
         return this.#depthPrepassSubMeshes;
+    }
+
+    /**
+     * [KO] 뎁스 프리패스에서 Fast-Z로 렌더링되는 불투명(Opaque) 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of opaque sub-meshes rendered with Fast-Z in depth prepass.
+     */
+    get depthPrepassOpaqueSubMeshes(): FoliageSubMesh[] {
+        return this.#depthPrepassOpaqueSubMeshes;
+    }
+
+    /**
+     * [KO] 뎁스 프리패스에서 알파 테스트로 렌더링되는 마스크(Masked) 서브메시 목록을 반환합니다.
+     * [EN] Returns the list of masked sub-meshes rendered with alpha testing in depth prepass.
+     */
+    get depthPrepassMaskedSubMeshes(): FoliageSubMesh[] {
+        return this.#depthPrepassMaskedSubMeshes;
     }
 
     /**
@@ -1278,6 +1296,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#subMeshes.length = 0;
         this.#unifiedGeometries.length = 0;
         this.#lod0SubMeshes.length = 0;
+        this.#depthPrepassSubMeshes.length = 0;
+        this.#depthPrepassOpaqueSubMeshes.length = 0;
+        this.#depthPrepassMaskedSubMeshes.length = 0;
         for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
             const shadowSub = this.#shadowMergedSubMeshes[i];
             shadowSub.destroy();
@@ -1294,6 +1315,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const count = subList.length;
 
         const prepassList: FoliageSubMesh[] = [];
+        const prepassOpaqueList: FoliageSubMesh[] = [];
+        const prepassMaskedList: FoliageSubMesh[] = [];
         const mainList: FoliageSubMesh[] = [];
 
         for (let i = 0; i < count; i++) {
@@ -1301,6 +1324,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             if (!useImp && sub.isImpostor) continue;
             if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
                 prepassList.push(sub);
+                if (!sub.isMasked) {
+                    prepassOpaqueList.push(sub);
+                } else {
+                    prepassMaskedList.push(sub);
+                }
             }
             if (sub.canRenderInPass('main')) {
                 mainList.push(sub);
@@ -1308,6 +1336,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
 
         this.#depthPrepassSubMeshes = prepassList;
+        this.#depthPrepassOpaqueSubMeshes = prepassOpaqueList;
+        this.#depthPrepassMaskedSubMeshes = prepassMaskedList;
         this.#mainSubMeshes = mainList;
     }
 

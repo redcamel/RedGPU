@@ -8,6 +8,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
 import foliageDepthPrepassWGSL from "./foliageDepthPrepass.wgsl";
+import foliageDepthPrepassOpaqueWGSL from "./foliageDepthPrepassOpaque.wgsl";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
 /**
@@ -29,6 +30,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
     #depthPrepassFragmentShaderModule: GPUShaderModule | null = null;
+    #depthPrepassOpaqueFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
@@ -94,6 +96,9 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param subMeshBindGroupLayout -
      * [KO] 서브메시 바인드 그룹 레이아웃 (선택사항)
      * [EN] Sub-mesh bind group layout (optional)
+     * @param isMasked -
+     * [KO] 서브메시의 알파 마스킹 여부 (기본값: false)
+     * [EN] Whether sub-mesh uses alpha masking (default: false)
      * @returns
      * [KO] 생성되거나 캐시된 GPURenderPipeline (실패 시 null)
      * [EN] Created or cached GPURenderPipeline (null on failure)
@@ -105,7 +110,8 @@ class FoliagePipelineRegistry extends RedGPUObject {
         strideBytes: number = 48,
         cullMode: GPUCullMode = 'none',
         depthPassMode: FoliageDepthPassMode = 'normal',
-        subMeshBindGroupLayout?: GPUBindGroupLayout | null
+        subMeshBindGroupLayout?: GPUBindGroupLayout | null,
+        isMasked: boolean = false
     ): GPURenderPipeline | null {
         if (!material) return null;
 
@@ -124,19 +130,23 @@ class FoliagePipelineRegistry extends RedGPUObject {
         if (isOctahedral && isDepthPrepass) {
             return null;
         }
-        if (isDepthPrepass && !hasBaseColorTexture) {
+
+        const effectiveIsMasked = isMasked || !!material.useCutOff || material.alphaBlend === 1 || material.alphaBlend === 2 || !!material.transparent;
+        if (isDepthPrepass && effectiveIsMasked && !hasBaseColorTexture) {
             return null;
         }
 
+        const isDepthPrepassOpaque = isDepthPrepass && !effectiveIsMasked;
         const fragmentModule: GPUShaderModule | null = isDepthPrepass
-            ? this.#depthPrepassFragmentShaderModule
+            ? (isDepthPrepassOpaque ? this.#depthPrepassOpaqueFragmentShaderModule : this.#depthPrepassFragmentShaderModule)
             : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
 
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
         const baseKey = material.uuid || material.name || material.constructor.name;
-        const shaderLabel = fragmentModule?.label || 'default';
-        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_topo${topology}_depthMode_${depthPassMode}`;
+        const shaderLabel = fragmentModule?.label || (isDepthPrepassOpaque ? 'depthPrepass_opaque' : 'default');
+        const maskedSuffix = isDepthPrepass ? (isDepthPrepassOpaque ? '_opaque' : '_masked') : '';
+        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_topo${topology}_depthMode_${depthPassMode}${maskedSuffix}`;
 
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
         if (cachedPipeline) {
@@ -158,9 +168,11 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
-        const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
-            || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
-            || this.#emptyBindGroupLayout;
+        const materialBindGroupLayout = isDepthPrepassOpaque
+            ? this.#emptyBindGroupLayout!
+            : (material.gpuRenderInfo?.fragmentBindGroupLayout
+                || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
+                || this.#emptyBindGroupLayout!);
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
@@ -458,6 +470,14 @@ class FoliagePipelineRegistry extends RedGPUObject {
             });
         }
         this.#depthPrepassFragmentShaderModule = depthPrepassFModule;
+
+        let depthPrepassOpaqueFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule');
+        if (!depthPrepassOpaqueFModule) {
+            depthPrepassOpaqueFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule', {
+                code: foliageDepthPrepassOpaqueWGSL,
+            });
+        }
+        this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFModule;
     }
 }
 

@@ -168,13 +168,30 @@ class FoliageRenderer extends RedGPUObject {
         if (validCount === 0) return;
 
         if (this.#useDepthPrepass) {
+            // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
             for (let t = 0; t < validCount; t++) {
                 const item = this.#validTypesMain[t];
                 const foliageType = item.type!;
                 if (!foliageType.useDepthPrepass) continue;
                 const culledGPU = item.culledGPU!;
                 const indirectGPU = item.indirectGPU!;
-                const subMeshes = foliageType.depthPrepassSubMeshes;
+                const subMeshes = foliageType.depthPrepassOpaqueSubMeshes;
+                const subCount = subMeshes.length;
+                if (subCount === 0) continue;
+
+                for (let s = 0; s < subCount; s++) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                }
+            }
+
+            // [2단계] 모든 식생 타입의 Masked 서브메시 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
+            for (let t = 0; t < validCount; t++) {
+                const item = this.#validTypesMain[t];
+                const foliageType = item.type!;
+                if (!foliageType.useDepthPrepass) continue;
+                const culledGPU = item.culledGPU!;
+                const indirectGPU = item.indirectGPU!;
+                const subMeshes = foliageType.depthPrepassMaskedSubMeshes;
                 const subCount = subMeshes.length;
                 if (subCount === 0) continue;
 
@@ -575,7 +592,10 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastBoundVertexUniformBG = vertexUniformBG;
         }
 
-        const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
+        const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !sub.isMasked;
+        const matUniformBG = isDepthPrepassOpaque
+            ? this.#emptyBindGroup
+            : (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || this.#emptyBindGroup);
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
             passEncoder.setBindGroup(2, matUniformBG);
             this.#lastBoundMatBG = matUniformBG;

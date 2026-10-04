@@ -183,7 +183,7 @@ export default function createFoliageSubMeshInstance(
     const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
     const isMaskedFoliage = !isImpostor && isMasked && hasBaseColorTexture;
-    const isDepthPrepass = isMaskedFoliage && (lodIndex <= maxPrepassLOD);
+    const isDepthPrepass = !isImpostor && (lodIndex <= maxPrepassLOD) && (!isMasked || hasBaseColorTexture);
     const isMainOpaqueOrMasked = true;
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
