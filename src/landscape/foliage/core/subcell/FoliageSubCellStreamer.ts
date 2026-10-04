@@ -123,8 +123,8 @@ export default class FoliageSubCellStreamer {
         }
 
         const typeRadius = this.#foliage.streamingRadius;
-
-        const unmountRadius = typeRadius + 100.0;
+        const unmountMargin = Math.max(10.0, this.#foliage.subCellSize * 0.5);
+        const unmountRadius = typeRadius + unmountMargin;
         const unmountRadiusSq = unmountRadius * unmountRadius;
 
         let unmountedThisFrame = 0;

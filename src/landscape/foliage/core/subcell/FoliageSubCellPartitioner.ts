@@ -13,6 +13,14 @@ import {
 } from "../../../core/scatter";
 
 /**
+ * [KO] 식생 인스턴스의 불변 월드 배치 좌표 및 의사난수 시드를 산출하는 고정 스캐터 그리드 크기 (단위: 미터, 100m = 1 헥타르).
+ *      서브셀 스트리밍 크기(subCellSize)가 변경되어도 월드 상의 나무 위치, 회전, 스케일이 100% 불변으로 유지되도록 보장합니다.
+ * [EN] Fixed scatter grid size (100m = 1 hectare) for computing immutable world placement coordinates and PRNG seeds.
+ *      Ensures tree positions, rotations, and scales remain 100% invariant in the world even if subCellSize changes.
+ */
+export const FIXED_SCATTER_GRID_SIZE: number = 100.0;
+
+/**
  * [KO] 식생 서브셀 데이터 인터페이스입니다. (인스턴스 배열을 상시 보관하지 않는 경량 메타데이터 구조체)
  * [EN] Foliage subcell data interface. (Lightweight metadata struct without persistent instance array)
  */
@@ -110,8 +118,12 @@ export default class FoliageSubCellPartitioner {
         const startScZ = Math.floor((tileMinZ + halfWorldZ) * invSubCell);
         const endScZ = Math.floor((tileMaxZ + halfWorldZ - 0.001) * invSubCell);
 
-        const targetCount = foliageType.instancesPerCell ?? 20;
-        if (targetCount <= 0) return result;
+        const densityPerHectare = foliageType.densityPerHectare !== undefined
+            ? foliageType.densityPerHectare
+            : (foliageType.instancesPerCell ?? 20);
+        const densityMultiplier = foliageType.densityMultiplier ?? 1.0;
+        const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
+        if (targetCountPerHectare <= 0) return result;
 
         const nameHash = foliageType.nameHash;
         const targetLayer = foliageType.targetLayer;
@@ -137,67 +149,89 @@ export default class FoliageSubCellPartitioner {
         for (let scZ = startScZ; scZ <= endScZ; scZ++) {
             for (let scX = startScX; scX <= endScX; scX++) {
                 const key = packSubCellKey(scX, scZ);
-                let seed = computeScatterGridSeed(scX, scZ, nameHash);
 
                 const subMinX = scX * subCellSize - halfWorldX;
+                const subMaxX = subMinX + subCellSize;
                 const subMinZ = scZ * subCellSize - halfWorldZ;
+                const subMaxZ = subMinZ + subCellSize;
 
-                const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
+                const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
+                const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
+                const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
+                const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
+
                 let validCount = 0;
 
-                for (let i = 0; i < maxAttempts && validCount < targetCount; i++) {
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rX = (seed >>> 0) / 4294967296.0;
+                for (let gz = startGz; gz <= endGz; gz++) {
+                    const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
+                    for (let gx = startGx; gx <= endGx; gx++) {
+                        const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
+                        let seed = computeScatterGridSeed(gx, gz, nameHash);
 
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rZ = (seed >>> 0) / 4294967296.0;
+                        const maxAttempts = densityScaleByWeight
+                            ? targetCountPerHectare
+                            : ((targetLayerObj || hasSlopeFilter) ? targetCountPerHectare * 2 : targetCountPerHectare);
+                        let generatedInGrid = 0;
 
-                    const posX = subMinX + rX * subCellSize;
-                    const posZ = subMinZ + rZ * subCellSize;
-
-                    if (targetLayerObj) {
-                        const u = (posX + halfWorldX) / worldSizeX;
-                        const v = (posZ + halfWorldZ) / worldSizeZ;
-                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
-                        if (weight < 0.1) continue;
-                        if (densityScaleByWeight) {
+                        for (let i = 0; i < maxAttempts && generatedInGrid < targetCountPerHectare; i++) {
                             seed ^= seed << 13;
                             seed ^= seed >>> 17;
                             seed ^= seed << 5;
-                            const rReject = (seed >>> 0) / 4294967296.0;
-                            if (rReject > weight) continue;
+                            const rX = (seed >>> 0) / 4294967296.0;
+
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5;
+                            const rZ = (seed >>> 0) / 4294967296.0;
+
+                            const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
+                            const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
+
+                            if (targetLayerObj) {
+                                const u = (posX + halfWorldX) / worldSizeX;
+                                const v = (posZ + halfWorldZ) / worldSizeZ;
+                                const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
+                                if (weight < 0.1) continue;
+                                if (densityScaleByWeight) {
+                                    seed ^= seed << 13;
+                                    seed ^= seed >>> 17;
+                                    seed ^= seed << 5;
+                                    const rReject = (seed >>> 0) / 4294967296.0;
+                                    if (rReject > weight) continue;
+                                }
+                            }
+
+                            if (hasSlopeFilter) {
+                                const step = 1.0;
+                                const hL = landscape.getHeightAt(posX - step, posZ);
+                                const hR = landscape.getHeightAt(posX + step, posZ);
+                                const hD = landscape.getHeightAt(posX, posZ - step);
+                                const hU = landscape.getHeightAt(posX, posZ + step);
+                                const nx = (hL - hR) / (2 * step);
+                                const nz = (hD - hU) / (2 * step);
+                                const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+                                const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                                if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
+                            }
+
+                            // 회전/스케일 난수 소비를 동기화하기 위한 난수 전진
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5; // rScale
+
+                            if (foliageType.options?.randomRotationY) {
+                                seed ^= seed << 13;
+                                seed ^= seed >>> 17;
+                                seed ^= seed << 5; // rAngle
+                            }
+
+                            generatedInGrid++;
+
+                            if (posX >= subMinX && posX < subMaxX && posZ >= subMinZ && posZ < subMaxZ) {
+                                validCount++;
+                            }
                         }
                     }
-
-                    if (hasSlopeFilter) {
-                        const step = 1.0;
-                        const hL = landscape.getHeightAt(posX - step, posZ);
-                        const hR = landscape.getHeightAt(posX + step, posZ);
-                        const hD = landscape.getHeightAt(posX, posZ - step);
-                        const hU = landscape.getHeightAt(posX, posZ + step);
-                        const nx = (hL - hR) / (2 * step);
-                        const nz = (hD - hU) / (2 * step);
-                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
-                        const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
-                        if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
-                    }
-
-                    // 회전/스케일 난수 소비를 동기화하기 위한 난수 전진
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5; // rScale
-
-                    if (foliageType.options?.randomRotationY) {
-                        seed ^= seed << 13;
-                        seed ^= seed >>> 17;
-                        seed ^= seed << 5; // rAngle
-                    }
-
-                    validCount++;
                 }
 
                 if (validCount > 0) {
@@ -242,7 +276,13 @@ export default class FoliageSubCellPartitioner {
         subCellSize: number = 100.0
     ): void {
         const strideFloats = foliage?.megaBuffer?.strideFloats || 8;
-        const targetCount = foliage.instancesPerCell ?? 20;
+
+        const densityPerHectare = foliage.densityPerHectare !== undefined
+            ? foliage.densityPerHectare
+            : (foliage.instancesPerCell ?? 20);
+        const densityMultiplier = foliage.densityMultiplier ?? 1.0;
+        const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
+        if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;
 
         const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
         const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
@@ -250,9 +290,14 @@ export default class FoliageSubCellPartitioner {
         const halfWorldZ = worldSizeZ * 0.5;
 
         const subMinX = subCell.subCellX * subCellSize - halfWorldX;
+        const subMaxX = subMinX + subCellSize;
         const subMinZ = subCell.subCellZ * subCellSize - halfWorldZ;
+        const subMaxZ = subMinZ + subCellSize;
 
-        let seed = computeScatterGridSeed(subCell.subCellX, subCell.subCellZ, foliage.nameHash);
+        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
 
         const {minScale, maxScale, randomRotationY} = foliage.options || {};
         const optMinScale = minScale || [1.0, 1.0, 1.0];
@@ -284,145 +329,161 @@ export default class FoliageSubCellPartitioner {
         const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
 
         const typeId = foliage.allocation?.typeId ?? 0;
-        const maxAttempts = densityScaleByWeight ? targetCount : ((targetLayerObj || hasSlopeFilter) ? targetCount * 2 : targetCount);
         let written = 0;
 
-        for (let i = 0; i < maxAttempts && written < subCell.instanceCount; i++) {
-            seed ^= seed << 13;
-            seed ^= seed >>> 17;
-            seed ^= seed << 5;
-            const rX = (seed >>> 0) / 4294967296.0;
+        for (let gz = startGz; gz <= endGz && written < subCell.instanceCount; gz++) {
+            const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
+            for (let gx = startGx; gx <= endGx && written < subCell.instanceCount; gx++) {
+                const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
+                let seed = computeScatterGridSeed(gx, gz, foliage.nameHash);
 
-            seed ^= seed << 13;
-            seed ^= seed >>> 17;
-            seed ^= seed << 5;
-            const rZ = (seed >>> 0) / 4294967296.0;
+                const maxAttempts = densityScaleByWeight
+                    ? targetCountPerHectare
+                    : ((targetLayerObj || hasSlopeFilter) ? targetCountPerHectare * 2 : targetCountPerHectare);
+                let generatedInGrid = 0;
 
-            const posX = subMinX + rX * subCellSize;
-            const posZ = subMinZ + rZ * subCellSize;
-
-            if (targetLayerObj) {
-                const u = (posX + halfWorldX) / worldSizeX;
-                const v = (posZ + halfWorldZ) / worldSizeZ;
-                const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
-                if (weight < 0.1) continue;
-                if (densityScaleByWeight) {
+                for (let i = 0; i < maxAttempts && generatedInGrid < targetCountPerHectare && written < subCell.instanceCount; i++) {
                     seed ^= seed << 13;
                     seed ^= seed >>> 17;
                     seed ^= seed << 5;
-                    const rReject = (seed >>> 0) / 4294967296.0;
-                    if (rReject > weight) continue;
+                    const rX = (seed >>> 0) / 4294967296.0;
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rZ = (seed >>> 0) / 4294967296.0;
+
+                    const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
+                    const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
+
+                    if (targetLayerObj) {
+                        const u = (posX + halfWorldX) / worldSizeX;
+                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
+                        if (weight < 0.1) continue;
+                        if (densityScaleByWeight) {
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5;
+                            const rReject = (seed >>> 0) / 4294967296.0;
+                            if (rReject > weight) continue;
+                        }
+                    }
+
+                    let normalX = 0.0;
+                    let normalY = 1.0;
+                    let normalZ = 0.0;
+
+                    if (hasSlopeFilter || needNormalAlign) {
+                        const step = 1.0;
+                        const hL = landscape.getHeightAt(posX - step, posZ);
+                        const hR = landscape.getHeightAt(posX + step, posZ);
+                        const hD = landscape.getHeightAt(posX, posZ - step);
+                        const hU = landscape.getHeightAt(posX, posZ + step);
+                        const nx = (hL - hR) / (2 * step);
+                        const nz = (hD - hU) / (2 * step);
+                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+
+                        if (hasSlopeFilter) {
+                            const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                            if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
+                        }
+
+                        if (needNormalAlign) {
+                            normalX = nx * invLen;
+                            normalY = invLen;
+                            normalZ = nz * invLen;
+                        }
+                    }
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rScale = (seed >>> 0) / 4294967296.0;
+
+                    const scaleX = optMinScale[0] + rScale * scaleDiffX;
+                    const scaleY = optMinScale[1] + rScale * scaleDiffY;
+                    const scaleZ = isUniformXZ ? scaleX : (optMinScale[2] + rScale * scaleDiffZ);
+
+                    let posY = 0.0;
+                    if (hasGetHeight) {
+                        posY = landscape.getHeightAt(posX, posZ);
+                    }
+
+                    let rotX = 0.0;
+                    let rotY = 0.0;
+                    let rotZ = 0.0;
+                    let rotW = 1.0;
+
+                    if (randomRotationY) {
+                        seed ^= seed << 13;
+                        seed ^= seed >>> 17;
+                        seed ^= seed << 5;
+                        const rAngle = (seed >>> 0) / 4294967296.0;
+                        const angle = rAngle * (Math.PI * 2);
+                        const halfAngle = angle * 0.5;
+                        rotY = Math.sin(halfAngle);
+                        rotW = Math.cos(halfAngle);
+                    }
+
+                    if (needNormalAlign) {
+                        const vx = normalZ;
+                        const vz = -normalX;
+                        const vw = 1.0 + normalY;
+                        const tiltLen = Math.sqrt(vx * vx + vz * vz + vw * vw);
+                        if (tiltLen > 0.0001) {
+                            const invTilt = 1.0 / tiltLen;
+                            const tx = (vx * invTilt) * alignFactor;
+                            const tz = (vz * invTilt) * alignFactor;
+                            const tw = (1.0 - alignFactor) + (vw * invTilt) * alignFactor;
+                            const alignLen = Math.sqrt(tx * tx + tz * tz + tw * tw);
+                            const invAlign = 1.0 / (alignLen > 0.0001 ? alignLen : 1.0);
+                            const ax = tx * invAlign;
+                            const az = tz * invAlign;
+                            const aw = tw * invAlign;
+
+                            const fx = ax * rotW - az * rotY;
+                            const fy = aw * rotY;
+                            const fz = az * rotW + ax * rotY;
+                            const fw = aw * rotW;
+
+                            rotX = fx;
+                            rotY = fy;
+                            rotZ = fz;
+                            rotW = fw;
+                        }
+                    }
+
+                    generatedInGrid++;
+
+                    if (posX >= subMinX && posX < subMaxX && posZ >= subMinZ && posZ < subMaxZ) {
+                        const ix = Math.max(-32768, Math.min(32767, (rotX * 32767) | 0));
+                        const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
+                        const iz = Math.max(-32768, Math.min(32767, (rotZ * 32767) | 0));
+                        const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
+
+                        const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
+                        const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
+
+                        const scalePacked = isUniformXZ
+                            ? fastPackUniformScale(scaleX)
+                            : fastPack2x16float(scaleX, scaleZ);
+
+                        const outOffset = baseFloat + written * strideFloats;
+                        f32[outOffset + 0] = posX;
+                        f32[outOffset + 1] = posY;
+                        f32[outOffset + 2] = posZ;
+                        f32[outOffset + 3] = scaleY;
+
+                        u32[outOffset + 4] = rotPackedY;
+                        u32[outOffset + 5] = rotPackedW;
+                        u32[outOffset + 6] = scalePacked;
+                        u32[outOffset + 7] = typeId;
+
+                        written++;
+                    }
                 }
             }
-
-            let normalX = 0.0;
-            let normalY = 1.0;
-            let normalZ = 0.0;
-
-            if (hasSlopeFilter || needNormalAlign) {
-                const step = 1.0;
-                const hL = landscape.getHeightAt(posX - step, posZ);
-                const hR = landscape.getHeightAt(posX + step, posZ);
-                const hD = landscape.getHeightAt(posX, posZ - step);
-                const hU = landscape.getHeightAt(posX, posZ + step);
-                const nx = (hL - hR) / (2 * step);
-                const nz = (hD - hU) / (2 * step);
-                const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
-
-                if (hasSlopeFilter) {
-                    const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
-                    if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
-                }
-
-                if (needNormalAlign) {
-                    normalX = nx * invLen;
-                    normalY = invLen;
-                    normalZ = nz * invLen;
-                }
-            }
-
-            seed ^= seed << 13;
-            seed ^= seed >>> 17;
-            seed ^= seed << 5;
-            const rScale = (seed >>> 0) / 4294967296.0;
-
-            const scaleX = optMinScale[0] + rScale * scaleDiffX;
-            const scaleY = optMinScale[1] + rScale * scaleDiffY;
-            const scaleZ = isUniformXZ ? scaleX : (optMinScale[2] + rScale * scaleDiffZ);
-
-            let posY = 0.0;
-            if (hasGetHeight) {
-                posY = landscape.getHeightAt(posX, posZ);
-            }
-
-            let rotX = 0.0;
-            let rotY = 0.0;
-            let rotZ = 0.0;
-            let rotW = 1.0;
-
-            if (randomRotationY) {
-                seed ^= seed << 13;
-                seed ^= seed >>> 17;
-                seed ^= seed << 5;
-                const rAngle = (seed >>> 0) / 4294967296.0;
-                const angle = rAngle * (Math.PI * 2);
-                const halfAngle = angle * 0.5;
-                rotY = Math.sin(halfAngle);
-                rotW = Math.cos(halfAngle);
-            }
-
-            if (needNormalAlign) {
-                const vx = normalZ;
-                const vz = -normalX;
-                const vw = 1.0 + normalY;
-                const tiltLen = Math.sqrt(vx * vx + vz * vz + vw * vw);
-                if (tiltLen > 0.0001) {
-                    const invTilt = 1.0 / tiltLen;
-                    const tx = (vx * invTilt) * alignFactor;
-                    const tz = (vz * invTilt) * alignFactor;
-                    const tw = (1.0 - alignFactor) + (vw * invTilt) * alignFactor;
-                    const alignLen = Math.sqrt(tx * tx + tz * tz + tw * tw);
-                    const invAlign = 1.0 / (alignLen > 0.0001 ? alignLen : 1.0);
-                    const ax = tx * invAlign;
-                    const az = tz * invAlign;
-                    const aw = tw * invAlign;
-
-                    const fx = ax * rotW - az * rotY;
-                    const fy = aw * rotY;
-                    const fz = az * rotW + ax * rotY;
-                    const fw = aw * rotW;
-
-                    rotX = fx;
-                    rotY = fy;
-                    rotZ = fz;
-                    rotW = fw;
-                }
-            }
-
-            const ix = Math.max(-32768, Math.min(32767, (rotX * 32767) | 0));
-            const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
-            const iz = Math.max(-32768, Math.min(32767, (rotZ * 32767) | 0));
-            const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
-
-            const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
-            const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
-
-            const scalePacked = isUniformXZ
-                ? fastPackUniformScale(scaleX)
-                : fastPack2x16float(scaleX, scaleZ);
-
-            const outOffset = baseFloat + written * strideFloats;
-            f32[outOffset + 0] = posX;
-            f32[outOffset + 1] = posY;
-            f32[outOffset + 2] = posZ;
-            f32[outOffset + 3] = scaleY;
-
-            u32[outOffset + 4] = rotPackedY;
-            u32[outOffset + 5] = rotPackedW;
-            u32[outOffset + 6] = scalePacked;
-            u32[outOffset + 7] = typeId;
-
-            written++;
         }
     }
 }
