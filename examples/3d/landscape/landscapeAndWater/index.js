@@ -302,7 +302,6 @@ function renderTestPane({
 
             terrainFolder.addBinding(landscape, 'heightScale', {min: 100, max: 1200, step: 10});
             terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 500, step: 5});
-            terrainFolder.addBinding(landscape, 'nearDetailFade', {min: 5, max: 200, step: 5});
             terrainFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
             terrainFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 

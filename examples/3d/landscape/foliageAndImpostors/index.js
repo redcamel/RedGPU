@@ -160,7 +160,6 @@ function renderTestPane({
 
     view.camera = characterOrbitController;
     landscape.nearDetailDistance = 250;
-    landscape.nearDetailFade = 100;
 
     let characterMesh = null;
     let characterController = null;
@@ -216,7 +215,6 @@ function renderTestPane({
                     characterOrbitController.centerZ = characterMesh.z;
                 }
                 landscape.nearDetailDistance = isChar ? 250 : 1000;
-                landscape.nearDetailFade = isChar ? 100 : 300;
                 pane.refresh();
             });
 
@@ -262,7 +260,6 @@ function renderTestPane({
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
-            landscapeFolder.addBinding(landscape, 'nearDetailFade', {min: 10, max: 1000, step: 10});
             landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
             landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 

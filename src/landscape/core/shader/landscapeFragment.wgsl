@@ -602,9 +602,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let nearDist = uniforms.nearDetailDistance;
     let nearFade = uniforms.nearDetailFade;
-    let maxNearDist = nearDist + nearFade;
+    let fadeStartDist = max(0.0, nearDist - nearFade);
 
-    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < maxNearDist;
+    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < nearDist;
 
     var albedo = uniforms.color.rgb;
     var N = baseNormal;
@@ -624,7 +624,7 @@ fn main(inputData: InputData) -> OutputFragment {
         albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
         roughnessFactor = select(0.85, max(0.04, vbtORM.g), isVBTColorValid);
         ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
-    } else if (rawViewDist <= nearDist) {
+    } else if (rawViewDist <= fadeStartDist) {
         let nearDetail = computeNearFieldLandscapeLayers(
             globalUV,
             worldTileUV,
@@ -669,7 +669,7 @@ fn main(inputData: InputData) -> OutputFragment {
         );
 
         if (nearDetail.isValid) {
-            let blendFactor = clamp((maxNearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
+            let blendFactor = clamp((nearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
             albedo = mix(farAlbedo, nearDetail.albedo, smoothBlend);

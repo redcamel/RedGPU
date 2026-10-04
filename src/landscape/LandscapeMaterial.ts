@@ -68,7 +68,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     #textureArrayVersion: number = 0;
     #nearDetailDistance: number = 250.0;
-    #nearDetailFade: number = 100.0;
 
     #uniformByteLength: number = 0;
     #uniformFloatArray: Float32Array;
@@ -153,26 +152,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.updateUniformsData();
     }
 
-    /**
-     * [KO] 근접 디테일에서 원거리 텍스처로 페이드 전환되는 구간 길이를 반환합니다.
-     * [EN] Returns the fade transition range from near detail to distant textures.
-     */
-    get nearDetailFade(): number {
-        return this.#nearDetailFade;
-    }
-
-    /**
-     * [KO] 근접 디테일 페이드 전환 구간 길이를 설정합니다.
-     * [EN] Sets the fade transition range from near detail to distant textures.
-     *
-     * @param val -
-     * [KO] 페이드 전환 거리
-     * [EN] Near detail fade range
-     */
-    set nearDetailFade(val: number) {
-        this.#nearDetailFade = Math.max(0.1, val);
-        this.updateUniformsData();
-    }
 
     #onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
@@ -371,7 +350,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const activeCount = this.#layers.length;
         uintBuf[0] = activeCount;
         floatBuf[1] = this.#nearDetailDistance;
-        floatBuf[2] = this.#nearDetailFade;
+        floatBuf[2] = Math.max(5.0, this.#nearDetailDistance * 0.25);
         uintBuf[3] = 0;
 
         const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : DEFAULT_BASE_COLOR;

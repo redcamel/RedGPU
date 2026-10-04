@@ -238,17 +238,15 @@ function renderTestPane({
                         characterOrbitController.centerY = characterMesh.y + 1.2;
                         characterOrbitController.centerZ = characterMesh.z;
                     }
-                    // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 및 페이드 설정
-                    // [EN] Optimized detail distance and fade for character close-up view
+                    // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 설정
+                    // [EN] Optimized detail distance for character close-up view
                     landscape.nearDetailDistance = 250;
-                    landscape.nearDetailFade = 100;
                 } else {
                     view.camera = orbitController;
                     if (characterController) characterController.useKeyboard = false;
-                    // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 및 페이드 설정
-                    // [EN] Extended detail distance and fade for orbit overview
+                    // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 설정
+                    // [EN] Extended detail distance for orbit overview
                     landscape.nearDetailDistance = 1000;
-                    landscape.nearDetailFade = 300;
                 }
 
                 // [KO] UI 슬라이더 값 동기화
@@ -280,11 +278,6 @@ function renderTestPane({
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {
                 min: 0,
                 max: 1500,
-                step: 1
-            });
-            landscapeFolder.addBinding(landscape, 'nearDetailFade', {
-                min: 10,
-                max: 1000,
                 step: 1
             });
 

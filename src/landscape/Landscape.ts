@@ -608,25 +608,6 @@ export class Landscape extends RedGPUObject {
         this.#material.nearDetailDistance = val;
     }
 
-    /**
-     * [KO] 근접 디테일에서 원거리 텍스처로 페이드 전환되는 구간 길이를 반환합니다.
-     * [EN] Returns the fade transition range from near detail to distant textures.
-     */
-    get nearDetailFade(): number {
-        return this.#material.nearDetailFade;
-    }
-
-    /**
-     * [KO] 근접 디테일 페이드 전환 구간 길이를 설정합니다.
-     * [EN] Sets the fade transition range from near detail to distant textures.
-     *
-     * @param val -
-     * [KO] 페이드 전환 거리
-     * [EN] Near detail fade range
-     */
-    set nearDetailFade(val: number) {
-        this.#material.nearDetailFade = val;
-    }
 
 
     // =========================================================================

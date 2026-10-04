@@ -271,12 +271,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 5,
                 label: 'Near Dist (m)'
             });
-            folderNearDetail.addBinding(landscape, 'nearDetailFade', {
-                min: 1,
-                max: 200,
-                step: 5,
-                label: 'Fade Range (m)'
-            });
 
             // 4. SplatMap Multi-Texturing Layers
             if (layers?.length) {

@@ -317,12 +317,6 @@ RedGPU.init(
                     step: 5,
                     label: 'Near Dist (m)'
                 });
-                folderLandscape.addBinding(landscape, 'nearDetailFade', {
-                    min: 1,
-                    max: 200,
-                    step: 5,
-                    label: 'Fade Range (m)'
-                });
                 folderLandscape.addBinding(landscape, 'enableHeightmapShadow');
                 folderLandscape.addBinding(landscape, 'heightmapShadowSteps', {min: 4, max: 48, step: 1});
                 folderLandscape.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 8000, step: 100});
