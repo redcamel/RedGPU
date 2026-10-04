@@ -370,33 +370,33 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
                 }
             },
             {
-                binding: 2,
+                binding: 1,
                 resource: this.resourceManager.basicSampler.gpuSampler
             },
             {
-                binding: 3,
+                binding: 2,
                 resource: vhtTextureView
             },
             {
-                binding: 4,
+                binding: 3,
                 resource: fallbackView
             },
             {
-                binding: 5,
+                binding: 4,
                 resource: {
                     buffer: this.#landscapeUniformBuffer
                 }
             },
             {
-                binding: 6,
+                binding: 5,
                 resource: vbtBaseColorView || fallbackView
             },
             {
-                binding: 7,
+                binding: 6,
                 resource: vbtNormalView || fallbackView
             },
             {
-                binding: 8,
+                binding: 7,
                 resource: vbtORMView || fallbackView
             }
         ];
@@ -443,7 +443,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
             {shaderInfo: vertexShaderInfo, visibility: GPUShaderStage.VERTEX},
             {shaderInfo: fragmentShaderInfo, visibility: GPUShaderStage.FRAGMENT}
         ], 1, {
-            3: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
+            2: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
         });
 
         this.#instanceStorageBindGroupLayout = resourceManager.createBindGroupLayout(

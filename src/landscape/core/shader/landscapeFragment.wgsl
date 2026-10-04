@@ -43,12 +43,12 @@ struct NearDetailLayerResult {
     isValid: bool,
 };
 
-@group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
-@group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
-@group(1) @binding(5) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
-@group(1) @binding(6) var vbtBaseColorAtlasTexture: texture_2d<f32>;
-@group(1) @binding(7) var vbtNormalAtlasTexture: texture_2d<f32>;
-@group(1) @binding(8) var vbtORMAtlasTexture: texture_2d<f32>;
+@group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
+@group(1) @binding(3) var vntNormalTexture: texture_2d<f32>;
+@group(1) @binding(4) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
+@group(1) @binding(5) var vbtBaseColorAtlasTexture: texture_2d<f32>;
+@group(1) @binding(6) var vbtNormalAtlasTexture: texture_2d<f32>;
+@group(1) @binding(7) var vbtORMAtlasTexture: texture_2d<f32>;
 
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;

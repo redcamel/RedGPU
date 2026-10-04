@@ -390,21 +390,33 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const {gpuDevice, resourceManager} = this.redGPUContext;
         if (!gpuDevice || !this.gpuRenderInfo) return;
 
-        this.updateUniformsData();
+        const requiredByteLength = this.#uniformByteLength;
+        let uniformBuffer = this.gpuRenderInfo.fragmentUniformBuffer;
 
-        const customUniformBuffer = new UniformBuffer(
-            this.redGPUContext,
-            this.#uniformFloatArray.buffer as ArrayBuffer,
-            `LandscapeMaterial_UniformBuffer_${this.uuid}`
-        );
+        if (uniformBuffer && uniformBuffer.size === requiredByteLength) {
+            // [Zero-GC] 기존 버퍼 크기가 동일하므로 재사용하고 데이터만 GPU에 전송
+            this.updateUniformsData();
+        } else {
+            // 기존 버퍼가 존재하지만 크기가 일치하지 않는 경우 GPU 리소스 명시적 해제 (GC 누수 방지)
+            if (uniformBuffer) {
+                uniformBuffer.destroy();
+            }
+            uniformBuffer = new UniformBuffer(
+                this.redGPUContext,
+                this.#uniformFloatArray.buffer as ArrayBuffer,
+                `LandscapeMaterial_UniformBuffer_${this.uuid}`
+            );
+            this.gpuRenderInfo.fragmentUniformBuffer = uniformBuffer;
+            this.updateUniformsData();
+        }
 
         const entries: GPUBindGroupEntry[] = [
             {
                 binding: 0,
                 resource: {
-                    buffer: customUniformBuffer.gpuBuffer,
+                    buffer: uniformBuffer.gpuBuffer,
                     offset: 0,
-                    size: customUniformBuffer.size
+                    size: uniformBuffer.size
                 }
             },
             {binding: 1, resource: this.baseColorTextureSampler.gpuSampler},
@@ -427,7 +439,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.gpuRenderInfo.fragmentBindGroupLayout = bindGroupLayout;
         this.gpuRenderInfo.fragmentUniformBindGroup = bindGroup;
-        this.gpuRenderInfo.fragmentUniformBuffer = customUniformBuffer;
     }
 
     #getBaseColorArrayFormat(): GPUTextureFormat {
