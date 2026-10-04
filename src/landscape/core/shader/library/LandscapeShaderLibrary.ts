@@ -148,11 +148,12 @@ export namespace LandscapeShaderLibrary {
         export const transformFoliagePosition = transformFoliagePosition_wgsl;
 
         /**
-         * [KO] 4x4 Bayer 매트릭스 디더 페이드 디스카드 함수 (ditherFadeDiscard)
-         * [EN] 4x4 Bayer matrix dither fade discard function (ditherFadeDiscard)
+         * [KO] TAA 친화적 시간 축 지터(Temporal Jitter) 4x4 Bayer 매트릭스 디더 페이드 디스카드 함수 (ditherFadeDiscard)
+         * [EN] TAA-friendly temporal jittered 4x4 Bayer matrix dither fade discard function (ditherFadeDiscard)
          *
          * ```wgsl
          * #redgpu_include landscape.math.ditherFadeDiscard;
+         * ditherFadeDiscard(fragCoordXY, fadeValue, frameIndex);
          * ```
          */
         export const ditherFadeDiscard = ditherFadeDiscard_wgsl;

@@ -316,11 +316,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
                 entryPoint: 'entryPointShadowOpaqueVertex',
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
-            fragment: {
-                module: this.#vertexShaderModule!,
-                entryPoint: 'entryPointShadowOpaqueFragment',
-                targets: [],
-            },
+            // [Fast-Z Optimization] Opaque shadow casting is depth-only; omitting the fragment stage enables hardware double-rate Fast-Z rasterization.
             primitive: {
                 topology: 'triangle-list',
                 cullMode: cullMode,

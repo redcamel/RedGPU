@@ -180,7 +180,7 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    ditherFadeDiscard(inputData.position.xy, inputData.combinedOpacity);
+    ditherFadeDiscard(inputData.position.xy, inputData.combinedOpacity, systemUniforms.time.frameIndex);
 
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));

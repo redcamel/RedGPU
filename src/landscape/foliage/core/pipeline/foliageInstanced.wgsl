@@ -254,7 +254,6 @@ struct ShadowOpaqueVertexInput {
 
 struct FoliageShadowOpaqueOutput {
     @builtin(position) position: vec4<f32>,
-    @location(0) shadowFade: f32,
 };
 
 @vertex
@@ -281,13 +280,7 @@ fn entryPointShadowOpaqueVertex(input : ShadowOpaqueVertexInput) -> FoliageShado
     worldPos += windDisp;
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
-    output.shadowFade = input.groundColor_fade.a;
     return output;
-}
-
-@fragment
-fn entryPointShadowOpaqueFragment(input : FoliageShadowOpaqueOutput) {
-    ditherFadeDiscard(input.position.xy, input.shadowFade);
 }
 
 struct FoliageShadowMaskedOutput {
@@ -336,7 +329,7 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
     let ddyUV = dpdy(input.uv);
     let alpha = textureSample(shadowBaseColorTexture, shadowBaseColorTextureSampler, input.uv).a;
 
-    ditherFadeDiscard(input.position.xy, input.shadowFade);
+    ditherFadeDiscard(input.position.xy, input.shadowFade, systemUniforms.time.frameIndex);
 
     let globalFragmentData = globalFragmentSSBO_PBR[input.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
