@@ -243,8 +243,8 @@ function renderTestPane({
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, label: 'Main Draw Calls'});
             managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
-            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
-            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
+            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 10, max: 2000, step: 1});
+            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 1, max: 200, step: 1});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             // 전역 바람 시뮬레이션 설정
@@ -336,7 +336,7 @@ function renderTestPane({
 
         // 4. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
-        lodFolder.addBinding(type, 'cullingDistance', {min: 500, max: 8000, step: 100});
+        lodFolder.addBinding(type, 'cullingDistance', {min: 1, max: 1000, step: 1});
         if (type.hasImpostor) {
             lodFolder.addBinding(type, 'useImpostor');
         }
