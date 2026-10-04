@@ -270,6 +270,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             this.updateUniformsData();
             this.requestVBTRebake(false, 150);
         };
+        layer.onUniformChange = () => {
+            this.updateUniformsData();
+        };
         layer.dirty = true;
         this.dirtyPipeline = true;
         this.#scheduleRebuildTextureArrays();
@@ -299,6 +302,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         if (idx !== -1) {
             const removed = this.#layers.splice(idx, 1)[0];
             removed.onChange = undefined;
+            removed.onUniformChange = undefined;
             this.dirtyPipeline = true;
             this.#textureArrayVersion++;
             this.#scheduleRebuildTextureArrays();

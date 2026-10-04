@@ -91,8 +91,8 @@ export interface LandscapeLayerOptions {
      */
     aoIntensity?: number;
     /**
-     * [KO] 높이 기반 스플랫 블렌딩 변위 강도 (0.0~5.0, 기본값: 1.0)
-     * [EN] Height-based splat blending displacement factor (0.0-5.0, default: 1.0)
+     * [KO] 근경 디테일 렌더링 시 높이 기반 스플랫 블렌딩 변위 강도 (0.0~5.0, 기본값: 1.0, 원경 VBT 베이킹에는 미적용)
+     * [EN] Height-based splat blending displacement factor for near-detail rendering (0.0-5.0, default: 1.0, not applied in far VBT baking)
      */
     heightBlendFactor?: number;
     /**
@@ -159,6 +159,7 @@ export class LandscapeLayer {
     #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
     dirty: boolean = true;
     onChange?: () => void;
+    onUniformChange?: () => void;
 
     /**
      * [KO] 지형 텍스처 레이어 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `Landscape.addLayer(options)` 팩토리 메서드를 사용하십시오.)
@@ -554,8 +555,8 @@ export class LandscapeLayer {
     }
 
     /**
-     * [KO] 높이 기반 스플랫 블렌딩 변위 강도를 가져오거나 설정합니다. (0.0~5.0, 기본값: 1.0)
-     * [EN] Gets or sets the height-based splat blending displacement factor. (0.0-5.0, default: 1.0)
+     * [KO] 근경 디테일 렌더링 시 높이 기반 스플랫 블렌딩 변위 강도를 가져오거나 설정합니다. (0.0~5.0, 기본값: 1.0, 원경 VBT 베이킹에는 미적용)
+     * [EN] Gets or sets the height-based splat blending displacement factor for near-detail rendering. (0.0-5.0, default: 1.0, not applied in far VBT baking)
      */
     get heightBlendFactor(): number {
         return this.#heightBlendFactor;
@@ -566,7 +567,11 @@ export class LandscapeLayer {
         if (this.#heightBlendFactor !== clamped) {
             this.#heightBlendFactor = clamped;
             this.dirty = true;
-            this.onChange?.();
+            if (this.onUniformChange) {
+                this.onUniformChange();
+            } else {
+                this.onChange?.();
+            }
         }
     }
 
