@@ -7,8 +7,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
-import foliageDepthPrepassWGSL from "./foliageDepthPrepass.wgsl";
-import foliageDepthPrepassOpaqueWGSL from "./foliageDepthPrepassOpaque.wgsl";
+import foliageDepthPrepassMaskedFragmentWGSL from "./foliageDepthPrepassMaskedFragment.wgsl";
+import foliageDepthPrepassOpaqueFragmentWGSL from "./foliageDepthPrepassOpaqueFragment.wgsl";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
 /**
@@ -29,7 +29,7 @@ export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfter
 class FoliagePipelineRegistry extends RedGPUObject {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
-    #depthPrepassFragmentShaderModule: GPUShaderModule | null = null;
+    #depthPrepassMaskedFragmentShaderModule: GPUShaderModule | null = null;
     #depthPrepassOpaqueFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
@@ -138,7 +138,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const isDepthPrepassOpaque = isDepthPrepass && !effectiveIsMasked;
         const fragmentModule: GPUShaderModule | null = isDepthPrepass
-            ? (isDepthPrepassOpaque ? this.#depthPrepassOpaqueFragmentShaderModule : this.#depthPrepassFragmentShaderModule)
+            ? (isDepthPrepassOpaque ? this.#depthPrepassOpaqueFragmentShaderModule : this.#depthPrepassMaskedFragmentShaderModule)
             : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
 
         const isWireframe = !!material.wireframe;
@@ -245,7 +245,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const vertexEntryPoint = isDepthPrepassOpaque
             ? 'entryPointDepthPrepassOpaqueVertex'
-            : 'mainInput';
+            : 'entryPointMainVertex';
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `Foliage_RenderPipeline_${pipelineKey}`,
@@ -467,18 +467,18 @@ class FoliagePipelineRegistry extends RedGPUObject {
         }
         this.#vertexShaderModule = vModule;
 
-        let depthPrepassFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_FragmentShaderModule');
-        if (!depthPrepassFModule) {
-            depthPrepassFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_FragmentShaderModule', {
-                code: foliageDepthPrepassWGSL,
+        let depthPrepassMaskedFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule');
+        if (!depthPrepassMaskedFModule) {
+            depthPrepassMaskedFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule', {
+                code: foliageDepthPrepassMaskedFragmentWGSL,
             });
         }
-        this.#depthPrepassFragmentShaderModule = depthPrepassFModule;
+        this.#depthPrepassMaskedFragmentShaderModule = depthPrepassMaskedFModule;
 
         let depthPrepassOpaqueFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule');
         if (!depthPrepassOpaqueFModule) {
             depthPrepassOpaqueFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule', {
-                code: foliageDepthPrepassOpaqueWGSL,
+                code: foliageDepthPrepassOpaqueFragmentWGSL,
             });
         }
         this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFModule;

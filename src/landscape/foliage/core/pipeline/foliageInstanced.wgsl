@@ -142,7 +142,7 @@ struct OutputData {
 };
 
 @vertex
-fn mainInput(input : VertexInput) -> OutputData {
+fn entryPointMainVertex(input : VertexInput) -> OutputData {
     var output : OutputData;
 
     let instancePos = input.instancePos_scaleY.xyz;
