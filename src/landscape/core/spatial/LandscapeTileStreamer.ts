@@ -386,7 +386,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
 
         const rawVntTexture = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
-            format: 'rgba8unorm',
+            format: 'rgba16float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
             label: 'Landscape_VNT_AtlasTexture'
         });

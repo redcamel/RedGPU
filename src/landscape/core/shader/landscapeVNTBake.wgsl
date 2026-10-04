@@ -7,7 +7,7 @@ struct VNTBakeUniforms {
 
 @group(0) @binding(0) var<uniform> uniforms: VNTBakeUniforms;
 @group(0) @binding(1) var heightmapAtlas: texture_2d<f32>;
-@group(0) @binding(2) var vntOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(2) var vntOutput: texture_storage_2d<rgba16float, write>;
 
 var<workgroup> s_height: array<array<f32, 18>, 18>;
 
