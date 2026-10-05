@@ -275,7 +275,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #subMeshes: FoliageSubMesh[] = [];
     #unifiedGeometries: (Geometry | null)[] = [];
     #lod0SubMeshes: FoliageSubMesh[] = [];
-    #depthPrepassSubMeshes: FoliageSubMesh[] = [];
     #depthPrepassOpaqueSubMeshes: FoliageSubMesh[] = [];
     #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
     #mainSubMeshes: FoliageSubMesh[] = [];
@@ -651,13 +650,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#subMeshes.length;
     }
 
-    /**
-     * [KO] 뎁스 프리패스(Depth Prepass) 렌더링에 참여하는 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of sub-meshes participating in depth prepass rendering.
-     */
-    get depthPrepassSubMeshes(): FoliageSubMesh[] {
-        return this.#depthPrepassSubMeshes;
-    }
 
     /**
      * [KO] 뎁스 프리패스에서 Fast-Z로 렌더링되는 불투명(Opaque) 서브메시 목록을 반환합니다.
@@ -1268,7 +1260,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#subMeshes.length = 0;
         this.#unifiedGeometries.length = 0;
         this.#lod0SubMeshes.length = 0;
-        this.#depthPrepassSubMeshes.length = 0;
         this.#depthPrepassOpaqueSubMeshes.length = 0;
         this.#depthPrepassMaskedSubMeshes.length = 0;
         this.#mainSubMeshes.length = 0;
@@ -1287,12 +1278,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const subList = this.#subMeshes;
         const count = subList.length;
 
-        const prepassList = this.#depthPrepassSubMeshes;
         const prepassOpaqueList = this.#depthPrepassOpaqueSubMeshes;
         const prepassMaskedList = this.#depthPrepassMaskedSubMeshes;
         const mainList = this.#mainSubMeshes;
 
-        prepassList.length = 0;
         prepassOpaqueList.length = 0;
         prepassMaskedList.length = 0;
         mainList.length = 0;
@@ -1301,7 +1290,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const sub = subList[i];
             if (!useImp && sub.isImpostor) continue;
             if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
-                prepassList.push(sub);
                 if (!sub.isMasked) {
                     prepassOpaqueList.push(sub);
                 } else {
