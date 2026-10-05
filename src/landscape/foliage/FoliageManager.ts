@@ -17,6 +17,7 @@ import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
+import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler";
 
 /**
  * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -50,6 +51,9 @@ import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
  */
 class FoliageManager {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
+    #subMeshMegaUBO: GPUBuffer | null = null;
+    #subMeshDynamicBindGroup: GPUBindGroup | null = null;
+    #slotPooler: FoliageSubMeshSlotPooler;
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
@@ -94,6 +98,7 @@ class FoliageManager {
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
         this.#spatialGrid = new FoliageSpatialGrid();
+        this.#slotPooler = new FoliageSubMeshSlotPooler();
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
@@ -103,7 +108,33 @@ class FoliageManager {
                     {
                         binding: 0,
                         visibility: GPUShaderStage.VERTEX,
-                        buffer: {type: 'uniform'}
+                        buffer: {
+                            type: 'uniform',
+                            hasDynamicOffset: true,
+                            minBindingSize: 160
+                        }
+                    }
+                ]
+            });
+
+            // 1,024개 슬롯 = 256 KB 고정 메가 UBO 사전 할당 (Zero Re-creation)
+            this.#subMeshMegaUBO = gpuDevice.createBuffer({
+                label: 'Foliage_SubMesh_MegaUBO',
+                size: FoliageSubMeshSlotPooler.MAX_SLOTS * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            });
+
+            this.#subMeshDynamicBindGroup = gpuDevice.createBindGroup({
+                label: 'Foliage_SubMesh_DynamicBindGroup',
+                layout: this.#subMeshVertexBindGroupLayout,
+                entries: [
+                    {
+                        binding: 0,
+                        resource: {
+                            buffer: this.#subMeshMegaUBO,
+                            offset: 0,
+                            size: 160
+                        }
                     }
                 ]
             });
@@ -111,7 +142,12 @@ class FoliageManager {
 
         this.#megaBuffer = new FoliageScatterMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext);
-        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#subMeshVertexBindGroupLayout);
+        this.#renderer = new FoliageRenderer(
+            this.#redGPUContext,
+            this.#pipelineRegistry,
+            this.#subMeshVertexBindGroupLayout,
+            this.#subMeshDynamicBindGroup
+        );
         this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
 
         this.#megaBuffer.onRecreated = () => {
@@ -521,6 +557,30 @@ class FoliageManager {
     }
 
     /**
+     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
+     * [EN] Returns the sub-mesh UBO slot pooler.
+     */
+    get slotPooler(): FoliageSubMeshSlotPooler {
+        return this.#slotPooler;
+    }
+
+    /**
+     * [KO] 1,024개 슬롯(256 KB) 단일 고정 메가 UBO 버퍼를 반환합니다.
+     * [EN] Returns the 1,024-slot (256 KB) single fixed mega UBO buffer.
+     */
+    get subMeshMegaUBO(): GPUBuffer | null {
+        return this.#subMeshMegaUBO;
+    }
+
+    /**
+     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 반환합니다.
+     * [EN] Returns the 256B aligned Dynamic Offset UBO bind group.
+     */
+    get subMeshDynamicBindGroup(): GPUBindGroup | null {
+        return this.#subMeshDynamicBindGroup;
+    }
+
+    /**
      * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 지형의 기존 타일들에 인스턴스를 즉시 배치합니다.
      * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, immediately populating instances across existing landscape tiles.
      *
@@ -550,7 +610,9 @@ class FoliageManager {
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
             (t) => this.#repopulateFoliage(t),
-            this.#culler.baker
+            this.#culler.baker,
+            this.#slotPooler,
+            this.#subMeshMegaUBO
         );
         this.#foliageTypes.set(options.name, foliage);
         this.#foliageList.push(foliage);
@@ -577,6 +639,10 @@ class FoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#culler.destroy();
+        this.#subMeshMegaUBO?.destroy();
+        this.#subMeshMegaUBO = null;
+        this.#subMeshDynamicBindGroup = null;
+        this.#slotPooler.clear();
         this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
         this.#tileStreamer = null as any;

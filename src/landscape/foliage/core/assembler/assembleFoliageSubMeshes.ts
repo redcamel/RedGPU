@@ -12,7 +12,7 @@ import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./internal/buildFoliageImpostorSubMesh";
-import type {FoliageSubMeshUniformResult} from "./internal/createFoliageSubMeshUniform";
+import {FoliageSubMeshSlotPooler} from "../submesh/FoliageSubMeshSlotPooler";
 
 /**
  * [KO] 식생 서브메쉬 조립 결과 인터페이스입니다.
@@ -58,34 +58,41 @@ export interface FoliageAssemblyResult {
 
 /**
  * [KO] Foliage 계층 모델의 서브메쉬들을 LOD별 단일 통합 버퍼로 조립하고, 옥타헤드럴 임포스터 및 섀도우 지오메트리를 생성합니다.
- * [EN] Combines sub-meshes of Foliage hierarchical models into per-LOD unified buffers and generates impostor and shadow geometries.
- *
+ * [EN] Assembles sub-meshes of Foliage models into unified per-LOD buffers, creating octahedral impostors and shadow geometries.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
  * @param options -
- * [KO] 식생 생성 및 LOD 구성 설정 옵션
- * [EN] Foliage creation and LOD configuration options
+ * [KO] 식생 설정 옵션
+ * [EN] Foliage configuration options
  * @param subMeshBindGroupLayout -
- * [KO] 서브메쉬 유니폼 바인드 그룹 레이아웃
+ * [KO] 서브메시 유니폼 바인드 그룹 레이아웃
  * [EN] Sub-mesh uniform bind group layout
+ * @param slotPooler -
+ * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
+ * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
+ * @param megaUBO -
+ * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
+ * [EN] Single fixed mega UBO buffer (optional)
  * @returns
- * [KO] 조립된 서브메쉬, 섀도우 머지드 서브메쉬 및 LOD 정보 구조체
- * [EN] Assembled sub-meshes, shadow merged sub-meshes, and LOD info structure
+ * [KO] 조립 완료된 식생 서브메쉬 및 LOD 정보
+ * [EN] Assembled foliage sub-meshes and LOD information
  */
 export default function assembleFoliageSubMeshes(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    subMeshBindGroupLayout: GPUBindGroupLayout
+    subMeshBindGroupLayout: GPUBindGroupLayout,
+    slotPooler?: FoliageSubMeshSlotPooler | null,
+    megaUBO?: GPUBuffer | null
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subMeshes: FoliageSubMesh[] = [];
     const unifiedGeometries: (Geometry | null)[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
 
-    if (!gpuDevice || !subMeshBindGroupLayout) {
+    if (!gpuDevice) {
         return {
-            subMeshes: subMeshes,
+            subMeshes: [],
             unifiedGeometries: [],
             shadowMergedSubMeshes: [],
             lodInfoList: [],
@@ -100,8 +107,6 @@ export default function assembleFoliageSubMeshes(
     const numLODs = Math.min(lodConfigs.length, 8);
 
     const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
-    const subMeshUniformCache = new Map<string, FoliageSubMeshUniformResult>();
-
     let maxBoundingRadius = 0;
     let globalMinY = Infinity;
     let globalMaxY = -Infinity;
@@ -118,8 +123,9 @@ export default function assembleFoliageSubMeshes(
             l,
             options,
             subMeshBindGroupLayout,
-            subMeshUniformCache,
-            lodReceiveShadow
+            lodReceiveShadow,
+            slotPooler,
+            megaUBO
         );
 
         unifiedGeometries.push(assembled.unifiedGeometry || null);
@@ -174,25 +180,22 @@ export default function assembleFoliageSubMeshes(
             subMeshes,
             lodInfoList,
             impostorLODIndex,
-            subMeshUniformCache
+            slotPooler,
+            megaUBO
         );
     }
 
-    const boundingRadius = maxBoundingRadius;
-    const boundingHeight = (isFinite(globalMinY) && isFinite(globalMaxY) && globalMaxY > globalMinY)
-        ? (globalMaxY - globalMinY)
-        : (boundingRadius > 0 ? boundingRadius * 2.0 : 1.0);
-
-    const userOffset = options.bottomOffset;
-    const finalBottomOffset = userOffset !== undefined ? userOffset : 0;
+    const boundingHeight = (isFinite(globalMinY) && isFinite(globalMaxY))
+        ? Math.max(0.1, globalMaxY - globalMinY)
+        : (options.height || 2.0);
 
     return {
-        subMeshes: subMeshes,
+        subMeshes,
         unifiedGeometries,
         shadowMergedSubMeshes,
         lodInfoList,
-        bottomOffset: finalBottomOffset,
-        boundingRadius,
-        boundingHeight,
+        bottomOffset: options.bottomOffset ?? 0,
+        boundingRadius: maxBoundingRadius || 10.0,
+        boundingHeight
     };
 }

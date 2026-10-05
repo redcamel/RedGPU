@@ -14,13 +14,12 @@
  * - `assembleFoliageLODMeshes`: 식생 LOD별 원본 메시 순회 및 지오메트리 결합 함수
  * - `buildFoliageImpostorSubMesh`: 옥타헤드럴 임포스터 베이킹 및 서브메쉬 빌드 함수
  * - `createFoliageSubMeshInstance`: 식생 서브메쉬 인스턴스 팩토리 함수
- * - `createFoliagePBRSubMeshUniform`: PBR 식생 서브메쉬 유니폼 버퍼 생성 함수
- * - `createFoliageShadowSubMeshUniform`: 섀도우 식생 서브메쉬 유니폼 버퍼 생성 함수
  * - `prepareFoliageMaterials`: 식생 원본 재질 복제 및 파이프라인 준비 함수
  *
  * **[EN]**
  * - `Foliage`: Entity defining a single foliage type and managing per-tile instance lifecycles
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
+ * - `FoliageSubMeshSlotPooler`: 256-byte aligned Dynamic Offset UBO slot allocator
  * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
@@ -30,8 +29,6 @@
  * - `assembleFoliageLODMeshes`: Function traversing and combining source meshes per LOD level
  * - `buildFoliageImpostorSubMesh`: Function baking octahedral impostors and creating impostor sub-meshes
  * - `createFoliageSubMeshInstance`: Sub-mesh instance factory function
- * - `createFoliagePBRSubMeshUniform`: Function creating PBR sub-mesh uniform buffers
- * - `createFoliageShadowSubMeshUniform`: Function creating shadow sub-mesh uniform buffers
  * - `prepareFoliageMaterials`: Function cloning and preparing foliage materials
  *
  * @packageDocumentation
@@ -41,6 +38,7 @@
 import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./Foliage";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
+import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
@@ -63,11 +61,6 @@ import assembleFoliageSubMeshes, {type FoliageAssemblyResult} from "./assembler/
 import assembleFoliageLODMeshes from "./assembler/internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./assembler/internal/buildFoliageImpostorSubMesh";
 import createFoliageSubMeshInstance from "./assembler/internal/createFoliageSubMeshInstance";
-import {
-    createFoliagePBRSubMeshUniform,
-    createFoliageShadowSubMeshUniform,
-    type FoliageSubMeshUniformResult
-} from "./assembler/internal/createFoliageSubMeshUniform";
 import prepareFoliageMaterials from "./assembler/internal/prepareFoliageMaterials";
 
 export {
@@ -75,6 +68,7 @@ export {
     Foliage,
     FoliageSubMesh,
     FoliageShadowMergedSubMesh,
+    FoliageSubMeshSlotPooler,
     FoliageScatterMegaBuffer,
     FoliageSpatialGrid,
     FoliagePipelineRegistry,
@@ -91,8 +85,6 @@ export {
     assembleFoliageLODMeshes,
     buildFoliageImpostorSubMesh,
     createFoliageSubMeshInstance,
-    createFoliagePBRSubMeshUniform,
-    createFoliageShadowSubMeshUniform,
     prepareFoliageMaterials,
 
     // Code Hint Interfaces
@@ -100,6 +92,5 @@ export {
     type FoliageLODConfig,
     type FoliageLODInfo,
     type FoliageAssemblyResult,
-    type FoliageSubMeshUniformResult,
     type FoliageBakeResult
 };

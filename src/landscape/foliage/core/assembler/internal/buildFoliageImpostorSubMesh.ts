@@ -13,7 +13,7 @@ import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import type {FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
+import {FoliageSubMeshSlotPooler} from "../../submesh/FoliageSubMeshSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -44,9 +44,12 @@ const identityMatrix: mat4 = mat4.create();
  * @param impostorLODIndex -
  * [KO] 임포스터가 배치될 LOD 인덱스
  * [EN] LOD index where the impostor will be assigned
- * @param subMeshUniformCache -
- * [KO] 서브메시 유니폼 캐시 맵 (선택사항)
- * [EN] Sub-mesh uniform cache map (optional)
+ * @param slotPooler -
+ * [KO] 서브메시 슬롯 풀러 (선택사항)
+ * [EN] Sub-mesh slot pooler (optional)
+ * @param megaUBO -
+ * [KO] 메가 UBO 버퍼 (선택사항)
+ * [EN] Mega UBO buffer (optional)
  */
 export default function buildFoliageImpostorSubMesh(
     redGPUContext: RedGPUContext,
@@ -57,7 +60,8 @@ export default function buildFoliageImpostorSubMesh(
     subMeshes: FoliageSubMesh[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
-    subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>
+    slotPooler?: FoliageSubMeshSlotPooler | null,
+    megaUBO?: GPUBuffer | null
 ): void {
     const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
 
@@ -89,10 +93,11 @@ export default function buildFoliageImpostorSubMesh(
         isImpostorOverride: true,
         bottomOffset: bbBottomOffset,
         receiveShadow: false,
-        uniformCache: subMeshUniformCache,
         windMultiplier: options.windMultiplier,
         windFlutterMultiplier: options.windFlutterMultiplier,
-        treeHeight: bbHeight
+        treeHeight: bbHeight,
+        slotPooler,
+        megaUBO
     });
     subMeshes.push(bbSubMesh);
 

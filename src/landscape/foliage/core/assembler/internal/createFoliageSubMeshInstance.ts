@@ -9,7 +9,7 @@ import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import type {FoliageDepthPassMode} from "../../pipeline/FoliagePipelineRegistry";
-import {createFoliagePBRSubMeshUniform, type FoliageSubMeshUniformResult} from "./createFoliageSubMeshUniform";
+import {FoliageSubMeshSlotPooler} from "../../submesh/FoliageSubMeshSlotPooler";
 
 /**
  * [KO] 서브메시 인스턴스 생성을 위한 설정 옵션 인터페이스입니다.
@@ -92,11 +92,6 @@ export interface CreateSubMeshOptions {
      */
     treeHeight?: number;
     /**
-     * [KO] 서브메시 유니폼 캐시 맵
-     * [EN] Cache map for sub-mesh uniforms
-     */
-    uniformCache?: Map<string, FoliageSubMeshUniformResult>;
-    /**
      * [KO] 서브메시 인덱스 시작 오프셋 (단일 통합 지오메트리 분할용)
      * [EN] Sub-mesh index start offset (for unified geometry partitioning)
      */
@@ -121,6 +116,16 @@ export interface CreateSubMeshOptions {
      * [EN] Ground color blending vertical range
      */
     groundBlendRange?: number;
+    /**
+     * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러
+     * [EN] 256B aligned Dynamic Offset UBO slot pooler
+     */
+    slotPooler?: FoliageSubMeshSlotPooler | null;
+    /**
+     * [KO] 단일 고정 메가 UBO 버퍼
+     * [EN] Single fixed mega UBO buffer
+     */
+    megaUBO?: GPUBuffer | null;
 }
 
 /**
@@ -149,7 +154,6 @@ export default function createFoliageSubMeshInstance(
         isImpostorOverride = false,
         bottomOffset = 0,
         receiveShadow = true,
-        uniformCache,
         firstIndex = 0,
         indexCount: optIndexCount,
         maxPrepassLOD = 0,
@@ -157,7 +161,9 @@ export default function createFoliageSubMeshInstance(
         groundBlendRange,
         windMultiplier,
         windFlutterMultiplier,
-        treeHeight
+        treeHeight,
+        slotPooler,
+        megaUBO
     } = options;
 
     const isIndexed = !!geom.indexBuffer;
@@ -168,36 +174,27 @@ export default function createFoliageSubMeshInstance(
     const isMasked = !!mat.useCutOff || mat.alphaBlend === 1 || mat.alphaBlend === 2 || !!mat.transparent || isImpostor;
 
     const globalSlot = (mat as any)?.globalFragmentSlotIndex ?? 0;
-    const cacheKey = `${globalSlot}_${receiveShadow ? 1 : 0}_${isMasked ? 1 : 0}`;
 
-    let uniformBuffer: GPUBuffer;
-    let vertexBindGroup: GPUBindGroup;
-
-    if (uniformCache && uniformCache.has(cacheKey)) {
-        const cached = uniformCache.get(cacheKey)!;
-        uniformBuffer = cached.buffer;
-        vertexBindGroup = cached.bindGroup;
-    } else {
-        const uniformResult = createFoliagePBRSubMeshUniform(
-            gpuDevice,
-            subMeshBindGroupLayout,
-            relMatrix,
-            normMatrix,
-            globalSlot,
-            receiveShadow,
-            isMasked,
-            !isImpostor,
-            groundBlendStrength,
-            groundBlendRange,
-            windMultiplier,
-            treeHeight,
-            windFlutterMultiplier
-        );
-        uniformBuffer = uniformResult.buffer;
-        vertexBindGroup = uniformResult.bindGroup;
-
-        if (uniformCache) {
-            uniformCache.set(cacheKey, uniformResult);
+    let slotIndex = -1;
+    if (slotPooler && megaUBO) {
+        slotIndex = slotPooler.allocateSlot();
+        if (slotIndex >= 0) {
+            slotPooler.writePBRSubMeshSlot(
+                gpuDevice,
+                megaUBO,
+                slotIndex,
+                relMatrix,
+                normMatrix,
+                globalSlot,
+                receiveShadow,
+                isMasked,
+                !isImpostor,
+                groundBlendStrength,
+                groundBlendRange,
+                windMultiplier,
+                treeHeight,
+                windFlutterMultiplier
+            );
         }
     }
 
@@ -220,8 +217,9 @@ export default function createFoliageSubMeshInstance(
         bottomOffset,
         relativeModelMatrix: relMatrix,
         relativeNormalMatrix: normMatrix,
-        vertexUniformBuffer: uniformBuffer,
-        vertexUniformBindGroup: vertexBindGroup,
+        slotIndex,
+        slotPooler,
+        megaUBO,
         lodIndex,
         isDepthPrepass,
         isMainOpaqueOrMasked,

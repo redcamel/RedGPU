@@ -6,7 +6,7 @@
 
 import Geometry from "../../../../geometry/Geometry";
 import AScatterGeometryUnit from "../../../core/scatter/AScatterGeometryUnit";
-import {updateSubMeshWindMultipliers} from "./internal/updateSubMeshWindMultipliers";
+import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
 
 /**
  * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
@@ -49,15 +49,20 @@ export interface FoliageShadowMergedSubMeshInitOptions {
      */
     strideBytes?: number;
     /**
-     * [KO] 버텍스 셰이더 유니폼 버퍼 (208 bytes)
-     * [EN] Vertex shader uniform buffer (208 bytes)
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)
+     * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023)
      */
-    vertexUniformBuffer: GPUBuffer;
+    slotIndex?: number;
     /**
-     * [KO] 버텍스 셰이더 유니폼 바인드 그룹
-     * [EN] Vertex shader uniform bind group
+     * [KO] 슬롯 풀러 인스턴스
+     * [EN] Slot pooler instance
      */
-    vertexUniformBindGroup: GPUBindGroup;
+    slotPooler?: FoliageSubMeshSlotPooler | null;
+    /**
+     * [KO] 단일 고정 메가 UBO 버퍼
+     * [EN] Single fixed mega UBO buffer
+     */
+    megaUBO?: GPUBuffer | null;
     /**
      * [KO] 인스턴스 버퍼 시작 오프셋
      * [EN] Instance buffer start offset
@@ -81,8 +86,9 @@ export interface FoliageShadowMergedSubMeshInitOptions {
  */
 export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     #lodIndex: number;
-    #vertexUniformBuffer: GPUBuffer;
-    #vertexUniformBindGroup: GPUBindGroup;
+    #slotIndex: number = -1;
+    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #megaUBO: GPUBuffer | null = null;
 
     constructor(init: FoliageShadowMergedSubMeshInitOptions) {
         super({
@@ -97,8 +103,9 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         });
 
         this.#lodIndex = init.lodIndex;
-        this.#vertexUniformBuffer = init.vertexUniformBuffer;
-        this.#vertexUniformBindGroup = init.vertexUniformBindGroup;
+        this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
+        this.#slotPooler = init.slotPooler || null;
+        this.#megaUBO = init.megaUBO || null;
     }
 
     /**
@@ -110,11 +117,11 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 버텍스 셰이더 Uniform 바인드 그룹을 반환합니다.
-     * [EN] Returns the vertex shader uniform bind group.
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)를 반환합니다.
+     * [EN] Returns the 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023).
      */
-    get vertexUniformBindGroup(): GPUBindGroup {
-        return this.#vertexUniformBindGroup;
+    get slotIndex(): number {
+        return this.#slotIndex;
     }
 
     /**
@@ -131,13 +138,16 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        updateSubMeshWindMultipliers(
-            gpuDevice,
-            this.#vertexUniformBuffer,
-            windMultiplier,
-            windFlutterMultiplier,
-            treeHeight
-        );
+        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+            this.#slotPooler.updateWindParams(
+                gpuDevice,
+                this.#megaUBO,
+                this.#slotIndex,
+                windMultiplier,
+                windFlutterMultiplier * 0.5,
+                treeHeight
+            );
+        }
     }
 
     /**
@@ -145,7 +155,12 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
      * [EN] Destroys sub-mesh resources.
      */
     override destroy(): void {
-        this.#vertexUniformBuffer?.destroy();
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.freeSlot(this.#slotIndex);
+            this.#slotIndex = -1;
+        }
+        this.#slotPooler = null;
+        this.#megaUBO = null;
         super.destroy();
     }
 }

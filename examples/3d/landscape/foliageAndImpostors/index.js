@@ -325,7 +325,6 @@ function renderTestPane({
         placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
-        placementFolder.addBinding(type, 'totalInstanceCount', {readonly: true});
 
         // 2. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
@@ -360,22 +359,9 @@ function renderTestPane({
             const subFolder = lodFolder.addFolder({title: subTitle, expanded: false});
 
             if (!isImpostorLOD) {
-                const proxy = {
-                    lodDistance: type.getLODDistance(idx),
-                    receiveShadow: type.getLODReceiveShadow(idx)
-                };
-                subFolder.addBinding(proxy, 'lodDistance', {min: 10, max: 6000, step: 5})
-                    .on('change', (ev) => type.setLODDistance(idx, ev.value));
-                subFolder.addBinding(proxy, 'receiveShadow')
-                    .on('change', (ev) => type.setLODReceiveShadow(idx, ev.value));
-            } else {
-                const proxy = {
-                    receiveShadow: type.getLODReceiveShadow(idx)
-                };
-                subFolder.addBinding(proxy, 'receiveShadow')
-                    .on('change', (ev) => type.setLODReceiveShadow(idx, ev.value));
+                subFolder.addBinding(lodInfo, 'lodDistance', {readonly: true, label: 'LOD Distance'});
             }
-            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true});
+            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
         });
 
         // 5. Shadow (그림자)

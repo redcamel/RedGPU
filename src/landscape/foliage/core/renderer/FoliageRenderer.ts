@@ -38,7 +38,6 @@ class FoliageRenderer extends RedGPUObject {
 
     #lastBoundPipeline: GPURenderPipeline | null = null;
     #lastBoundSystemBG: GPUBindGroup | null = null;
-    #lastBoundVertexUniformBG: GPUBindGroup | null = null;
     #lastBoundMatBG: GPUBindGroup | null = null;
     #lastBoundGeometryVertexBuffer: GPUBuffer | null = null;
     #lastBoundIndexBuffer: GPUBuffer | null = null;
@@ -55,6 +54,8 @@ class FoliageRenderer extends RedGPUObject {
     #singleBundleArray: [GPURenderBundle] = [null as any];
 
     #useDepthPrepass: boolean = true;
+    #subMeshDynamicBindGroup: GPUBindGroup | null = null;
+    #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
 
     /**
      * [KO] FoliageRenderer 인스턴스를 생성합니다.
@@ -68,20 +69,41 @@ class FoliageRenderer extends RedGPUObject {
      * @param subMeshVertexBindGroupLayout -
      * [KO] 서브메시 유니폼 바인드 그룹 레이아웃 (선택사항)
      * [EN] Sub-mesh uniform bind group layout (optional)
+     * @param subMeshDynamicBindGroup -
+     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹 (선택사항)
+     * [EN] 256B aligned Dynamic Offset UBO bind group (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
-        subMeshVertexBindGroupLayout?: GPUBindGroupLayout | null
+        subMeshVertexBindGroupLayout?: GPUBindGroupLayout | null,
+        subMeshDynamicBindGroup?: GPUBindGroup | null
     ) {
         super(redGPUContext);
         this.#pipelineRegistry = pipelineRegistry;
         this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
+        this.#subMeshDynamicBindGroup = subMeshDynamicBindGroup || null;
 
         for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
             this.#validTypesMain.push({type: null, culledGPU: null, indirectGPU: null});
             this.#validTypesShadow.push({type: null, culledGPU: null, indirectGPU: null});
         }
+    }
+
+    /**
+     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 반환합니다.
+     * [EN] Returns the 256B aligned Dynamic Offset UBO bind group.
+     */
+    get subMeshDynamicBindGroup(): GPUBindGroup | null {
+        return this.#subMeshDynamicBindGroup;
+    }
+
+    /**
+     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 설정합니다.
+     * [EN] Sets the 256B aligned Dynamic Offset UBO bind group.
+     */
+    set subMeshDynamicBindGroup(value: GPUBindGroup | null) {
+        this.#subMeshDynamicBindGroup = value;
     }
 
     /**
@@ -127,7 +149,6 @@ class FoliageRenderer extends RedGPUObject {
 
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
-        this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
         this.#lastBoundGeometryVertexBuffer = null;
         this.#lastBoundIndexBuffer = null;
@@ -198,7 +219,6 @@ class FoliageRenderer extends RedGPUObject {
 
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
-        this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
         this.#lastBoundGeometryVertexBuffer = null;
         this.#lastBoundIndexBuffer = null;
@@ -293,11 +313,12 @@ class FoliageRenderer extends RedGPUObject {
     }
 
     destroy(): void {
+        this.#subMeshDynamicBindGroup = null;
+        this.#subMeshVertexBindGroupLayout = null;
         this.markShadowBundleDirty();
         this.#singleBundleArray[0] = null as any;
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
-        this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
         this.#lastBoundGeometryVertexBuffer = null;
         this.#lastBoundIndexBuffer = null;
@@ -310,6 +331,8 @@ class FoliageRenderer extends RedGPUObject {
             this.#validTypesShadow[i].culledGPU = null;
             this.#validTypesShadow[i].indirectGPU = null;
         }
+        this.#validTypesMain.length = 0;
+        this.#validTypesShadow.length = 0;
     }
 
     #recordShadowRenderBundle(
@@ -329,7 +352,6 @@ class FoliageRenderer extends RedGPUObject {
 
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
-        this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
         this.#lastBoundGeometryVertexBuffer = null;
         this.#lastBoundIndexBuffer = null;
@@ -434,10 +456,9 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastBoundSystemBG = systemBG;
         }
 
-        const vertexUniformBG = unit.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
-        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
-            passEncoder.setBindGroup(1, vertexUniformBG);
-            this.#lastBoundVertexUniformBG = vertexUniformBG;
+        if (this.#subMeshDynamicBindGroup && unit.slotIndex >= 0) {
+            this.#dynamicOffsetArray[0] = unit.slotIndex * 256;
+            passEncoder.setBindGroup(1, this.#subMeshDynamicBindGroup, this.#dynamicOffsetArray, 0, 1);
         }
 
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {

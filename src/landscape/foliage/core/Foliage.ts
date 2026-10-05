@@ -16,6 +16,7 @@ import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, ScatterInstanceBaker} from "../../core/scatter";
+import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
 
 /**
  * [KO] 식생 LOD 설정 인터페이스입니다.
@@ -300,6 +301,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #baker: ScatterInstanceBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
+    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #subMeshMegaUBO: GPUBuffer | null = null;
     #landscape: Landscape | null = null;
 
     /**
@@ -326,6 +329,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param baker -
      * [KO] 식생 인스턴스 물리 베이커 (선택사항)
      * [EN] Foliage instance physical baker (optional)
+     * @param slotPooler -
+     * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
+     * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
+     * @param subMeshMegaUBO -
+     * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
+     * [EN] Single fixed mega UBO buffer (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -334,9 +343,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         megaBuffer?: FoliageScatterMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
-        baker?: ScatterInstanceBaker | null
+        baker?: ScatterInstanceBaker | null,
+        slotPooler?: FoliageSubMeshSlotPooler | null,
+        subMeshMegaUBO?: GPUBuffer | null
     ) {
         super(redGPUContext, options?.name || '');
+        this.#slotPooler = slotPooler || null;
+        this.#subMeshMegaUBO = subMeshMegaUBO || null;
 
         const {
             name,
@@ -424,7 +437,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            this.#subMeshVertexBindGroupLayout!
+            this.#subMeshVertexBindGroupLayout!,
+            this.#slotPooler,
+            this.#subMeshMegaUBO
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
@@ -667,6 +682,22 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get activeInstanceCount(): number {
         return this.allocation?.instanceCount ?? 0;
+    }
+
+    /**
+     * [KO] 서브메시 UBO 슬롯 풀러 인스턴스를 반환합니다.
+     * [EN] Returns the sub-mesh UBO slot pooler instance.
+     */
+    get slotPooler(): FoliageSubMeshSlotPooler | null {
+        return this.#slotPooler;
+    }
+
+    /**
+     * [KO] 단일 고정 메가 UBO 버퍼를 반환합니다.
+     * [EN] Returns the single fixed mega UBO buffer.
+     */
+    get subMeshMegaUBO(): GPUBuffer | null {
+        return this.#subMeshMegaUBO;
     }
 
     /**

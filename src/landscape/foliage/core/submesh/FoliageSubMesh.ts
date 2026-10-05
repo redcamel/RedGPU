@@ -9,7 +9,7 @@ import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import {updateSubMeshWindMultipliers} from "./internal/updateSubMeshWindMultipliers";
+import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -78,15 +78,20 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      */
     relativeNormalMatrix: mat4;
     /**
-     * [KO] 버텍스 셰이더 유니폼 버퍼 (208 bytes)
-     * [EN] Vertex shader uniform buffer (208 bytes)
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)
+     * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023)
      */
-    vertexUniformBuffer: GPUBuffer;
+    slotIndex?: number;
     /**
-     * [KO] 버텍스 셰이더 유니폼 바인드 그룹
-     * [EN] Vertex shader uniform bind group
+     * [KO] 슬롯 풀러 인스턴스
+     * [EN] Slot pooler instance
      */
-    vertexUniformBindGroup: GPUBindGroup;
+    slotPooler?: FoliageSubMeshSlotPooler | null;
+    /**
+     * [KO] 단일 고정 메가 UBO 버퍼
+     * [EN] Single fixed mega UBO buffer
+     */
+    megaUBO?: GPUBuffer | null;
     /**
      * [KO] 소속 LOD 레벨 인덱스
      * [EN] Associated LOD level index
@@ -146,13 +151,11 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
  * :::
  */
 export class FoliageSubMesh extends ScatterSubMesh {
-    #singleFloatBuffer: Float32Array = new Float32Array(1);
-    #groundBlendFloatBuffer: Float32Array = new Float32Array(2);
-
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
-    #vertexUniformBuffer: GPUBuffer;
-    #vertexUniformBindGroup: GPUBindGroup;
+    #slotIndex: number = -1;
+    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #megaUBO: GPUBuffer | null = null;
 
     #isDepthPrepass: boolean;
     #isMainOpaqueOrMasked: boolean;
@@ -170,14 +173,23 @@ export class FoliageSubMesh extends ScatterSubMesh {
 
         this.#relativeModelMatrix = init.relativeModelMatrix;
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
-        this.#vertexUniformBuffer = init.vertexUniformBuffer;
-        this.#vertexUniformBindGroup = init.vertexUniformBindGroup;
+        this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
+        this.#slotPooler = init.slotPooler || null;
+        this.#megaUBO = init.megaUBO || null;
 
         this.#isDepthPrepass = init.isDepthPrepass;
         this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
         this.#mainDepthMode = init.mainDepthMode;
         this.#isImpostor = init.isImpostor ?? false;
         this.#receiveShadow = init.receiveShadow !== false;
+    }
+
+    /**
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)를 반환합니다.
+     * [EN] Returns the 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023).
+     */
+    get slotIndex(): number {
+        return this.#slotIndex;
     }
 
     /**
@@ -202,13 +214,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
      */
     get relativeNormalMatrix(): mat4 {
         return this.#relativeNormalMatrix;
-    }
-    /**
-     * [KO] 버텍스 셰이더 Uniform 바인드 그룹을 반환합니다.
-     * [EN] Returns the vertex shader uniform bind group.
-     */
-    get vertexUniformBindGroup(): GPUBindGroup {
-        return this.#vertexUniformBindGroup;
     }
 
     /**
@@ -248,15 +253,8 @@ export class FoliageSubMesh extends ScatterSubMesh {
     updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
         if (this.#receiveShadow === receiveShadow) return;
         this.#receiveShadow = receiveShadow;
-        if (this.#vertexUniformBuffer && gpuDevice) {
-            this.#singleFloatBuffer[0] = receiveShadow ? 1.0 : 0.0;
-            gpuDevice.queue.writeBuffer(
-                this.#vertexUniformBuffer,
-                34 * 4,
-                this.#singleFloatBuffer.buffer,
-                this.#singleFloatBuffer.byteOffset,
-                4
-            );
+        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+            this.#slotPooler.updateReceiveShadow(gpuDevice, this.#megaUBO, this.#slotIndex, receiveShadow);
         }
     }
 
@@ -274,13 +272,16 @@ export class FoliageSubMesh extends ScatterSubMesh {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        updateSubMeshWindMultipliers(
-            gpuDevice,
-            this.#vertexUniformBuffer,
-            windMultiplier,
-            windFlutterMultiplier,
-            treeHeight
-        );
+        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+            this.#slotPooler.updateWindParams(
+                gpuDevice,
+                this.#megaUBO,
+                this.#slotIndex,
+                windMultiplier,
+                windFlutterMultiplier,
+                treeHeight
+            );
+        }
     }
 
     /**
@@ -301,18 +302,15 @@ export class FoliageSubMesh extends ScatterSubMesh {
         groundBlendStrength: number,
         groundBlendRange: number
     ): void {
-        if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const buf = this.#groundBlendFloatBuffer;
-        buf[0] = groundBlendStrength;
-        buf[1] = groundBlendRange;
-
-        gpuDevice.queue.writeBuffer(
-            this.#vertexUniformBuffer,
-            38 * 4,
-            buf.buffer,
-            buf.byteOffset,
-            8
-        );
+        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+            this.#slotPooler.updateGroundBlendParams(
+                gpuDevice,
+                this.#megaUBO,
+                this.#slotIndex,
+                groundBlendStrength,
+                groundBlendRange
+            );
+        }
     }
 
     /**
@@ -401,12 +399,13 @@ export class FoliageSubMesh extends ScatterSubMesh {
         return pipeline || null;
     }
 
-    /**
-     * [KO] 서브메쉬 리소스를 해제합니다.
-     * [EN] Destroys sub-mesh resources.
-     */
     override destroy(): void {
-        this.#vertexUniformBuffer?.destroy();
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.freeSlot(this.#slotIndex);
+            this.#slotIndex = -1;
+        }
+        this.#slotPooler = null;
+        this.#megaUBO = null;
         this.#pipelineCacheByMode = {};
         super.destroy();
     }
