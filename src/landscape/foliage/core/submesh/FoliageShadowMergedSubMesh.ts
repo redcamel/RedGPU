@@ -6,6 +6,7 @@
 
 import Geometry from "../../../../geometry/Geometry";
 import AScatterGeometryUnit from "../../../core/scatter/AScatterGeometryUnit";
+import {updateSubMeshWindMultipliers} from "./internal/updateSubMeshWindMultipliers";
 
 /**
  * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
@@ -79,8 +80,6 @@ export interface FoliageShadowMergedSubMeshInitOptions {
  * :::
  */
 export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
-    #windMultipliersFloatBuffer: Float32Array = new Float32Array(3);
-
     #lodIndex: number;
     #vertexUniformBuffer: GPUBuffer;
     #vertexUniformBindGroup: GPUBindGroup;
@@ -140,18 +139,12 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const fView = this.#windMultipliersFloatBuffer;
-        fView[0] = windMultiplier;
-        fView[1] = windFlutterMultiplier;
-        fView[2] = treeHeight;
-
-        gpuDevice.queue.writeBuffer(
+        updateSubMeshWindMultipliers(
+            gpuDevice,
             this.#vertexUniformBuffer,
-            35 * 4,
-            fView.buffer,
-            fView.byteOffset,
-            12
+            windMultiplier,
+            windFlutterMultiplier,
+            treeHeight
         );
     }
 

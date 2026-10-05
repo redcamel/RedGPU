@@ -9,6 +9,7 @@ import Mesh from "../../../../display/mesh/Mesh";
 import Geometry from "../../../../geometry/Geometry";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
+import {updateSubMeshWindMultipliers} from "./internal/updateSubMeshWindMultipliers";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -146,7 +147,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
  */
 export class FoliageSubMesh extends ScatterSubMesh {
     #singleFloatBuffer: Float32Array = new Float32Array(1);
-    #windMultipliersFloatBuffer: Float32Array = new Float32Array(3);
     #groundBlendFloatBuffer: Float32Array = new Float32Array(2);
 
     #relativeModelMatrix: mat4;
@@ -315,18 +315,12 @@ export class FoliageSubMesh extends ScatterSubMesh {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const fView = this.#windMultipliersFloatBuffer;
-        fView[0] = windMultiplier;
-        fView[1] = windFlutterMultiplier;
-        fView[2] = treeHeight;
-
-        gpuDevice.queue.writeBuffer(
+        updateSubMeshWindMultipliers(
+            gpuDevice,
             this.#vertexUniformBuffer,
-            35 * 4,
-            fView.buffer,
-            fView.byteOffset,
-            12
+            windMultiplier,
+            windFlutterMultiplier,
+            treeHeight
         );
     }
 
