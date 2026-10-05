@@ -328,7 +328,9 @@ export default class FoliageSubCellPartitioner {
         const alignFactor = foliage.alignFactor ?? 1.0;
         const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
 
+        const bottomOffset = foliage.bottomOffset ?? 0.0;
         const typeId = foliage.allocation?.typeId ?? 0;
+        const packedTypeAndDefaultGround = (((typeId & 0xFF) << 24) | 0x00333333) >>> 0;
         let written = 0;
 
         for (let gz = startGz; gz <= endGz && written < subCell.instanceCount; gz++) {
@@ -407,7 +409,7 @@ export default class FoliageSubCellPartitioner {
 
                     let posY = 0.0;
                     if (hasGetHeight) {
-                        posY = landscape.getHeightAt(posX, posZ);
+                        posY = landscape.getHeightAt(posX, posZ) + bottomOffset * scaleY;
                     }
 
                     let rotX = 0.0;
@@ -478,7 +480,7 @@ export default class FoliageSubCellPartitioner {
                         u32[outOffset + 4] = rotPackedY;
                         u32[outOffset + 5] = rotPackedW;
                         u32[outOffset + 6] = scalePacked;
-                        u32[outOffset + 7] = typeId;
+                        u32[outOffset + 7] = packedTypeAndDefaultGround;
 
                         written++;
                     }
