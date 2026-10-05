@@ -6,6 +6,7 @@
 #redgpu_include systemStruct.Time
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
+#redgpu_include systemStruct.Wind
 
 /**
  * [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
@@ -33,7 +34,8 @@ struct SystemUniform {
       directionalLights:array<DirectionalLight,3>,
 	  //
 	  ambientLight:AmbientLight,
-
+	  //
+	  wind:Wind,
 };
 
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;

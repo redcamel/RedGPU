@@ -130,11 +130,6 @@ class FoliageManager {
                         binding: 0,
                         visibility: GPUShaderStage.VERTEX,
                         buffer: {type: 'uniform'}
-                    },
-                    {
-                        binding: 1,
-                        visibility: GPUShaderStage.VERTEX,
-                        buffer: {type: 'uniform'}
                     }
                 ]
             });

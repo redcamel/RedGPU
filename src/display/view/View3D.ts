@@ -445,6 +445,7 @@ class View3D extends AView {
             SystemUniformUpdater.updateSkyAtmosphere(this.skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateDirectionalLights(lightManager.directionalLights, members.directionalLights.memberList, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateAmbientLight(lightManager.ambientLight, members.ambientLight.members, this.#uniformDataF32, this.#uniformDataU32)
+            SystemUniformUpdater.updateWind(this.scene?.windManager, members.wind, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateTime(this.renderViewStateData, members.time.members, this.#uniformDataF32, this.#uniformDataU32)
             SystemUniformUpdater.updateProjection(
                 {

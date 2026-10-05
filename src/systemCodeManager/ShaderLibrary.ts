@@ -33,6 +33,7 @@ import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
+import Wind_wgsl from './shader/systemStruct/systemStruct.Wind.wgsl';
 import globalVertexStruct_wgsl from './shader/systemStruct/globalStruct/globalVertexStruct.wgsl';
 import globalFragmentStructPBR_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructPBR.wgsl';
 import globalFragmentStructBuiltIn_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructBuiltIn.wgsl';
@@ -2759,6 +2760,22 @@ export namespace SystemStructLibrary {
      * ```
      */
     export const SkyAtmosphere = SkyAtmosphere_wgsl;
+    /**
+     * // [KO] 바람(Wind) 구조체 정의입니다.
+     * // [EN] Definition of the Wind structure.
+     *
+     * ```wgsl
+     * struct Wind {
+     *     direction: vec3<f32>,
+     *     speed: f32,
+     *     strength: f32,
+     *     frequency: f32,
+     *     flutterStrength: f32,
+     *     enabled: u32,
+     * };
+     * ```
+     */
+    export const Wind = Wind_wgsl;
     /**
      * ```wgsl
      * struct MatrixList{

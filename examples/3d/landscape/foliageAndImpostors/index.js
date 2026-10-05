@@ -256,14 +256,15 @@ function renderTestPane({
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
-            // 전역 바람 시뮬레이션 설정
-            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind', expanded: true});
-            windGlobalFolder.addBinding(foliageManager, 'windEnabled');
-            windGlobalFolder.addBinding(foliageManager, 'windStrength', {min: 0.0, max: 3.0, step: 0.05});
-            windGlobalFolder.addBinding(foliageManager, 'windSpeed', {min: 0.0, max: 10.0, step: 0.1});
-            windGlobalFolder.addBinding(foliageManager, 'windFrequency', {min: 0.01, max: 1.0, step: 0.01});
-            windGlobalFolder.addBinding(foliageManager, 'windFlutterStrength', {min: 0.0, max: 2.0, step: 0.05});
-            windGlobalFolder.addBinding(foliageManager, 'windDirectionAngle', {min: 0, max: 360, step: 1});
+            // 전역 바람 시뮬레이션 설정 (씬 레벨 WindManager)
+            const windManager = scene.windManager;
+            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind (Scene)', expanded: true});
+            windGlobalFolder.addBinding(windManager, 'enabled');
+            windGlobalFolder.addBinding(windManager, 'strength', {min: 0.0, max: 3.0, step: 0.05});
+            windGlobalFolder.addBinding(windManager, 'speed', {min: 0.0, max: 10.0, step: 0.1});
+            windGlobalFolder.addBinding(windManager, 'frequency', {min: 0.01, max: 1.0, step: 0.01});
+            windGlobalFolder.addBinding(windManager, 'flutterStrength', {min: 0.0, max: 2.0, step: 0.05});
+            windGlobalFolder.addBinding(windManager, 'directionAngle', {min: 0, max: 360, step: 1});
 
             // 3. 지형 설정 (Landscape) - 핵심 설정만 심플하게 유지
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});

@@ -7,6 +7,7 @@ import DirectionalLight from "../../light/lights/DirectionalLight";
 import AmbientLight from "../../light/lights/AmbientLight";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import SkyAtmosphere from "../../display/skyAtmosphere/SkyAtmosphere";
+import WindManager from "../../wind/WindManager";
 
 let temp3 = mat4.create()
 
@@ -429,6 +430,72 @@ class SystemUniformUpdater {
                 },
             ]
         )
+    }
+
+    /**
+     * [KO] 바람(Wind) 환경 정보를 시스템 유니폼 데이터에 업데이트합니다. (Zero-GC 메모리 직접 복사)
+     * [EN] Updates Wind environmental information to system uniform data. (Zero-GC direct memory copy)
+     *
+     * @param windManager -
+     * [KO] 업데이트할 바람 매니저 인스턴스
+     * [EN] WindManager instance to update
+     * @param windMembers -
+     * [KO] WGSL 바람 구조체 멤버 정보
+     * [EN] WGSL Wind structure member information
+     * @param uniformDataF32 -
+     * [KO] 대상 Float32Array 버퍼
+     * [EN] Target Float32Array buffer
+     * @param uniformDataU32 -
+     * [KO] 대상 Uint32Array 버퍼
+     * [EN] Target Uint32Array buffer
+     */
+    static updateWind(
+        windManager: WindManager,
+        windMembersInfo: any,
+        uniformDataF32: Float32Array,
+        uniformDataU32: Uint32Array
+    ) {
+        if (!windMembersInfo) return;
+        const members = windMembersInfo.members || windMembersInfo;
+        const enabledInfo = members.enabled;
+        if (!enabledInfo) return;
+
+        const enabledIdx = (enabledInfo.uniformOffset ?? enabledInfo.offset) / 4;
+        if (!windManager || !windManager.enabled) {
+            uniformDataU32[enabledIdx] = 0;
+            return;
+        }
+
+        const dirInfo = members.direction;
+        if (dirInfo) {
+            const dir = windManager.direction;
+            const dirIdx = (dirInfo.uniformOffset ?? dirInfo.offset) / 4;
+            uniformDataF32[dirIdx] = dir[0];
+            uniformDataF32[dirIdx + 1] = dir[1];
+            uniformDataF32[dirIdx + 2] = dir[2];
+        }
+
+        const speedInfo = members.speed;
+        if (speedInfo) {
+            uniformDataF32[(speedInfo.uniformOffset ?? speedInfo.offset) / 4] = windManager.speed;
+        }
+
+        const strengthInfo = members.strength;
+        if (strengthInfo) {
+            uniformDataF32[(strengthInfo.uniformOffset ?? strengthInfo.offset) / 4] = windManager.strength;
+        }
+
+        const freqInfo = members.frequency;
+        if (freqInfo) {
+            uniformDataF32[(freqInfo.uniformOffset ?? freqInfo.offset) / 4] = windManager.frequency;
+        }
+
+        const flutterInfo = members.flutterStrength;
+        if (flutterInfo) {
+            uniformDataF32[(flutterInfo.uniformOffset ?? flutterInfo.offset) / 4] = windManager.flutterStrength;
+        }
+
+        uniformDataU32[enabledIdx] = 1;
     }
 }
 

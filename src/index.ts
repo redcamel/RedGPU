@@ -44,4 +44,5 @@ export * as Physics from "./physics"
 export * from "./loader/gltf/animationLooper/AnimStateMachine";
 export * as Landscape from "./landscape";
 export * as Water from "./water";
+export * as Wind from "./wind";
 

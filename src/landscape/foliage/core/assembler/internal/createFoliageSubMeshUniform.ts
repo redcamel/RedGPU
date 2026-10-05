@@ -131,10 +131,6 @@ export function createFoliagePBRSubMeshUniform(
             {
                 binding: 0,
                 resource: {buffer: uniformBuffer}
-            },
-            {
-                binding: 1,
-                resource: {buffer: globalWindBuffer}
             }
         ]
     });
@@ -218,12 +214,6 @@ export function createFoliageShadowSubMeshUniform(
                 binding: 0,
                 resource: {
                     buffer: uniformBuffer,
-                },
-            },
-            {
-                binding: 1,
-                resource: {
-                    buffer: globalWindBuffer,
                 },
             },
         ],

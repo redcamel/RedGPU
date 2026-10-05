@@ -1,6 +1,7 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import LightManager from "../../light/core/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
+import WindManager from "../../wind/WindManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
@@ -16,6 +17,7 @@ class Scene extends Object3DContainer {
     #useBackgroundColor: boolean = false
     #lightManager: LightManager = new LightManager()
     #shadowManager: ShadowManager = new ShadowManager()
+    #windManager: WindManager = new WindManager(this)
     #physicsEngine: IPhysicsEngine
     #destroyed: boolean = false
 
@@ -32,6 +34,14 @@ class Scene extends Object3DContainer {
 
     get shadowManager(): ShadowManager {
         return this.#shadowManager;
+    }
+
+    /**
+     * [KO] 씬의 바람 물리 환경을 총괄하는 WindManager 인스턴스를 반환합니다.
+     * [EN] Returns the WindManager instance governing the scene's atmospheric wind physics.
+     */
+    get windManager(): WindManager {
+        return this.#windManager;
     }
 
     get physicsEngine(): IPhysicsEngine {
@@ -123,6 +133,7 @@ class Scene extends Object3DContainer {
         super.destroy();
         this.#landscape = null;
         this.#waterChildren.length = 0;
+        this.#windManager = null as any;
         this.#destroyed = true;
     }
 }
