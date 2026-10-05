@@ -64,6 +64,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
         {shaderLocation: 9, offset: 28, format: 'unorm8x4'},
     ];
 
+    #instanceBufferLayout: GPUVertexBufferLayout = {
+        arrayStride: 8 * 4,
+        stepMode: 'instance',
+        attributes: this.#instanceAttributesAll,
+    };
+
     /**
      * [KO] 주어진 머티리얼 및 렌더 파라미터에 대응하는 식생 렌더 파이프라인을 조회하거나 새로 생성합니다.
      * [EN] Retrieves or creates a foliage render pipeline corresponding to the given material and render parameters.
@@ -150,12 +156,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: validStrideBytes,
             attributes: isDepthPrepassOpaque ? this.#geoAttributesShadowOpaque : this.#geoAttributesAll,
-        };
-
-        const instanceBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: 8 * 4,
-            stepMode: 'instance',
-            attributes: this.#instanceAttributesAll,
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
@@ -246,7 +246,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             vertex: {
                 module: this.#vertexShaderModule!,
                 entryPoint: vertexEntryPoint,
-                buffers: [geometryBufferLayout, instanceBufferLayout],
+                buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
             fragment: {
                 module: fragmentModule!,
@@ -303,12 +303,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
             attributes: this.#geoAttributesShadowOpaque,
         };
 
-        const instanceBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: 8 * 4,
-            stepMode: 'instance',
-            attributes: this.#instanceAttributesAll,
-        };
-
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const effectiveSubMeshBGL = subMeshBindGroupLayout || resourceManager.emptyBindGroupLayout;
 
@@ -323,7 +317,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             vertex: {
                 module: this.#vertexShaderModule!,
                 entryPoint: 'entryPointShadowOpaqueVertex',
-                buffers: [geometryBufferLayout, instanceBufferLayout],
+                buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
             // [Fast-Z Optimization] Opaque shadow casting is depth-only; omitting the fragment stage enables hardware double-rate Fast-Z rasterization.
             primitive: {
@@ -392,12 +386,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
             attributes: this.#geoAttributesAll,
         };
 
-        const instanceBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: 8 * 4,
-            stepMode: 'instance',
-            attributes: this.#instanceAttributesAll,
-        };
-
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const emptyBindGroupLayout = resourceManager.emptyBindGroupLayout;
         const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
@@ -416,7 +404,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             vertex: {
                 module: this.#vertexShaderModule!,
                 entryPoint: 'entryPointShadowMaskedVertex',
-                buffers: [geometryBufferLayout, instanceBufferLayout],
+                buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
             fragment: {
                 module: this.#vertexShaderModule!,
