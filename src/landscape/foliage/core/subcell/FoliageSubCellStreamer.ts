@@ -123,7 +123,8 @@ export default class FoliageSubCellStreamer {
         }
 
         const typeRadius = this.#foliage.streamingRadius;
-        const unmountMargin = Math.max(10.0, this.#foliage.subCellSize * 0.5);
+        const subCellSize = this.#foliage.landscape?.foliageManager?.subCellSize ?? 100.0;
+        const unmountMargin = Math.max(10.0, subCellSize * 0.5);
         const unmountRadius = typeRadius + unmountMargin;
         const unmountRadiusSq = unmountRadius * unmountRadius;
 
@@ -219,6 +220,7 @@ export default class FoliageSubCellStreamer {
         const u32 = megaBuffer.cpuRawDataUint32;
         const strideFloats = megaBuffer.strideFloats;
         const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
+        const subCellSize = this.#foliage.landscape?.foliageManager?.subCellSize ?? 100.0;
         FoliageSubCellPartitioner.populateSubCellInstances(
             f32,
             u32,
@@ -226,7 +228,7 @@ export default class FoliageSubCellStreamer {
             subCell,
             this.#foliage,
             this.#foliage.landscape,
-            this.#foliage.subCellSize
+            subCellSize
         );
 
         subCell.isMounted = true;

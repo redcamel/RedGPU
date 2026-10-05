@@ -239,11 +239,6 @@ class FoliageManager {
         if (this.#subCellSize !== clamped) {
             this.#subCellSize = clamped;
             this.#onUniformUpdateNeeded?.();
-
-            const count = this.#foliageList.length;
-            for (let i = 0; i < count; i++) {
-                this.#foliageList[i].subCellSize = clamped;
-            }
             this.#repopulateAll();
         }
     }
@@ -488,7 +483,7 @@ class FoliageManager {
      * [EN] Newly created and registered {@link Foliage} instance
      */
     addFoliage(options: FoliageOptions): Foliage {
-        const {name, subCellSize, streamingRadius} = options;
+        const {name, streamingRadius} = options;
         if (this.#foliageTypes.has(name)) {
             console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
             return this.#foliageTypes.get(name)!;
@@ -496,7 +491,6 @@ class FoliageManager {
 
         const mergedOptions: FoliageOptions = {
             ...options,
-            subCellSize: subCellSize ?? this.#subCellSize,
             streamingRadius: streamingRadius ?? this.#streamingRadius
         };
 

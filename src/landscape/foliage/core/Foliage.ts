@@ -172,11 +172,6 @@ export interface FoliageOptions {
      */
     streamingRadius?: number;
 
-    /**
-     * [KO] 서브셀 공간 분할 그리드 크기 (미터, 기본값: 100.0)
-     * [EN] Sub-cell spatial grid division size in meters (default: 100.0)
-     */
-    subCellSize?: number;
 
     /**
      * [KO] 배치 대상 지형 스플랫 레이어 (레이어 이름 또는 인덱스)
@@ -290,7 +285,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #hasMaskedLOD0: boolean = false;
     #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
-    #subCellSize: number = 100.0;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
     #alignToNormal: boolean = false;
@@ -351,7 +345,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             densityPerHectare,
             densityMultiplier: optDensityMultiplier,
             streamingRadius = 600.0,
-            subCellSize = 100.0,
             maxInstances,
             windMultiplier,
             windFlutterMultiplier,
@@ -494,7 +487,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             shadowCullDistance: this.shadowCullDistance,
             enableStreaming: options.enableStreaming !== false,
             streamingRadius,
-            subCellSize,
             targetLayer: options.targetLayer,
             minSlope: options.minSlope ?? 0.0,
             maxSlope: options.maxSlope ?? 45.0,
@@ -511,7 +503,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#enableStreaming = this.#options.enableStreaming!;
         this.#streamingRadius = this.#options.streamingRadius!;
-        this.#subCellSize = this.#options.subCellSize!;
 
         let impostorSub: FoliageSubMesh | null = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
@@ -752,23 +743,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 서브셀 공간 분할 그리드의 한 변 크기(미터)를 반환합니다.
-     * [EN] Returns the sub-cell spatial grid division size in meters.
-     */
-    get subCellSize(): number {
-        return this.#subCellSize;
-    }
-
-    set subCellSize(value: number) {
-        this.#subCellSize = Math.max(10.0, Number(value) || 10.0);
-    }
-
-    /**
      * [KO] 단일 서브셀 격자 영역 당 배치되는 계산된 인스턴스 수량을 반환합니다.
      * [EN] Returns the calculated number of instances placed per single sub-cell grid area.
      */
     get instancesPerCell(): number {
-        const cellArea = this.#subCellSize * this.#subCellSize;
+        const size = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+        const cellArea = size * size;
         return Math.max(0, Math.round((this.densityPerHectare * (cellArea / 10000.0)) * this.densityMultiplier));
     }
 
@@ -1171,11 +1151,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#loadedTileKeys.add(key);
 
+        const subCellSize = landscape?.foliageManager?.subCellSize ?? this.#landscape?.foliageManager?.subCellSize ?? 100.0;
         const subCells = FoliageSubCellPartitioner.partitionTile(
             tileComponent,
             this,
             landscape,
-            this.#subCellSize
+            subCellSize
         );
         this.#streamer.addSubCells(subCells);
 
