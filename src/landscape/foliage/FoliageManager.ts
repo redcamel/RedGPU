@@ -68,6 +68,9 @@ class FoliageManager {
     #spatialGrid: FoliageSpatialGrid;
     #subCellSize: number = 100.0;
     #streamingRadius: number = 600.0;
+    #mountBudget: number = 16;
+    #unmountBudget: number = 32;
+    #roundRobinIndex: number = 0;
     #debugSubCellColoration: boolean = false;
     #onUniformUpdateNeeded: (() => void) | null = null;
 
@@ -340,6 +343,46 @@ class FoliageManager {
         }
     }
 
+    /**
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 반환합니다.
+     * [EN] Returns the global maximum subcell mount budget per frame across all foliage types.
+     */
+    get mountBudget(): number {
+        return this.#mountBudget;
+    }
+
+    /**
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
+     * [EN] Sets the global maximum subcell mount budget per frame across all foliage types.
+     *
+     * @param val -
+     * [KO] 설정할 마운트 예산 (최소값: 1, 기본값: 16)
+     * [EN] Mount budget to set (minimum: 1, default: 16)
+     */
+    set mountBudget(val: number) {
+        this.#mountBudget = Math.max(1, (val | 0) || 1);
+    }
+
+    /**
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 반환합니다.
+     * [EN] Returns the global maximum subcell unmount budget per frame across all foliage types.
+     */
+    get unmountBudget(): number {
+        return this.#unmountBudget;
+    }
+
+    /**
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
+     * [EN] Sets the global maximum subcell unmount budget per frame across all foliage types.
+     *
+     * @param val -
+     * [KO] 설정할 언마운트 예산 (최소값: 1, 기본값: 32)
+     * [EN] Unmount budget to set (minimum: 1, default: 32)
+     */
+    set unmountBudget(val: number) {
+        this.#unmountBudget = Math.max(1, (val | 0) || 1);
+    }
+
 
 
     /**
@@ -394,9 +437,20 @@ class FoliageManager {
             const activeKeys = this.#spatialGrid.activeSubCellKeys;
             const activeCount = this.#spatialGrid.activeSubCellCount;
 
-            for (let i = 0; i < count; i++) {
-                this.#foliageList[i].updateStreaming(activeKeys, activeCount, cam.x, cam.z);
+            let remainingMount = this.#mountBudget;
+            let remainingUnmount = this.#unmountBudget;
+            if (this.#roundRobinIndex >= count) {
+                this.#roundRobinIndex = 0;
             }
+            const startIdx = this.#roundRobinIndex;
+            for (let i = 0; i < count; i++) {
+                const idx = (startIdx + i) % count;
+                const foliage = this.#foliageList[idx];
+                foliage.updateStreaming(activeKeys, activeCount, cam.x, cam.z, remainingMount, remainingUnmount);
+                remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
+                remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
+            }
+            this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
         }
         this.#culler.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
     }

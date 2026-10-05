@@ -219,7 +219,7 @@ export default class FoliageSubCellPartitioner {
                             seed ^= seed >>> 17;
                             seed ^= seed << 5; // rScale
 
-                            if (foliageType.options?.randomRotationY) {
+                            if (foliageType.randomRotationY) {
                                 seed ^= seed << 13;
                                 seed ^= seed >>> 17;
                                 seed ^= seed << 5; // rAngle
@@ -299,9 +299,9 @@ export default class FoliageSubCellPartitioner {
         const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
         const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
 
-        const {minScale, maxScale, randomRotationY} = foliage.options || {};
-        const optMinScale = minScale || [1.0, 1.0, 1.0];
-        const optMaxScale = maxScale || [1.0, 1.0, 1.0];
+        const optMinScale = foliage.minScale;
+        const optMaxScale = foliage.maxScale;
+        const randomRotationY = foliage.randomRotationY;
         const scaleDiffX = optMaxScale[0] - optMinScale[0];
         const scaleDiffY = optMaxScale[1] - optMinScale[1];
         const scaleDiffZ = optMaxScale[2] - optMinScale[2];

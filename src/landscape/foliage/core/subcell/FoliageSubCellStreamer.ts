@@ -25,8 +25,8 @@ export default class FoliageSubCellStreamer {
     #subCells: Map<number, FoliageSubCell> = new Map();
     #mountedSubCells: FoliageSubCell[] = [];
     #totalInstanceCount: number = 0;
-    #mountBudget: number = 16;
-    #unmountBudget: number = 32;
+    #lastMountedCount: number = 0;
+    #lastUnmountedCount: number = 0;
 
     /**
      * [KO] FoliageSubCellStreamer 인스턴스를 생성합니다.
@@ -64,28 +64,22 @@ export default class FoliageSubCellStreamer {
     }
 
     /**
-     * [KO] 프레임당 최대 마운트 허용 서브셀 수
-     * [EN] Maximum sub-cells allowed to mount per frame
+     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually mounted in the last streaming update
      */
-    get mountBudget(): number {
-        return this.#mountBudget;
-    }
-
-    set mountBudget(val: number) {
-        this.#mountBudget = Math.max(1, (val | 0) || 1);
+    get lastMountedCount(): number {
+        return this.#lastMountedCount;
     }
 
     /**
-     * [KO] 프레임당 최대 언마운트 허용 서브셀 수
-     * [EN] Maximum sub-cells allowed to unmount per frame
+     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually unmounted in the last streaming update
      */
-    get unmountBudget(): number {
-        return this.#unmountBudget;
+    get lastUnmountedCount(): number {
+        return this.#lastUnmountedCount;
     }
 
-    set unmountBudget(val: number) {
-        this.#unmountBudget = Math.max(1, (val | 0) || 1);
-    }
+
 
     /**
      * [KO] 카메라 위치와 활성 서브셀 목록을 기반으로 스트리밍 마운트/언마운트를 갱신합니다.
@@ -105,14 +99,25 @@ export default class FoliageSubCellStreamer {
      * @param enableStreaming -
      * [KO] 동적 스트리밍 활성화 여부 (false면 전체 마운트)
      * [EN] Whether dynamic streaming is enabled (mounts all if false)
+     * @param mountBudget -
+     * [KO] 이번 업데이트에서 마운트 가능한 최대 서브셀 수 (기본값: 16)
+     * [EN] Maximum sub-cells allowed to mount in this update (default: 16)
+     * @param unmountBudget -
+     * [KO] 이번 업데이트에서 언마운트 가능한 최대 서브셀 수 (기본값: 32)
+     * [EN] Maximum sub-cells allowed to unmount in this update (default: 32)
      */
     update(
         activeKeyArray: Int32Array,
         activeKeyCount: number,
         camX: number,
         camZ: number,
-        enableStreaming: boolean = true
+        enableStreaming: boolean = true,
+        mountBudget: number = 16,
+        unmountBudget: number = 32
     ): void {
+        this.#lastMountedCount = 0;
+        this.#lastUnmountedCount = 0;
+
         const megaBuffer = this.#foliage.megaBuffer;
         const allocation = this.#foliage.allocation;
         if (!megaBuffer || !allocation) return;
@@ -131,7 +136,7 @@ export default class FoliageSubCellStreamer {
         let unmountedThisFrame = 0;
         const mounted = this.#mountedSubCells;
         for (let i = mounted.length - 1; i >= 0; i--) {
-            if (unmountedThisFrame >= this.#unmountBudget) break;
+            if (unmountedThisFrame >= unmountBudget) break;
 
             const subCell = mounted[i];
             const dx = subCell.centerX - camX;
@@ -143,6 +148,9 @@ export default class FoliageSubCellStreamer {
                 unmountedThisFrame++;
             }
         }
+        this.#lastUnmountedCount = unmountedThisFrame;
+
+        if (mountBudget <= 0) return;
 
         const candidates = this.#tempCandidates;
         candidates.length = 0;
@@ -168,11 +176,12 @@ export default class FoliageSubCellStreamer {
         }
         sortSubCellsByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
 
-        const toMountCount = Math.min(candidateCount, this.#mountBudget);
+        const toMountCount = Math.min(candidateCount, mountBudget);
         for (let i = 0; i < toMountCount; i++) {
             const subCell = candidates[i];
             this.#mountSubCell(subCell, megaBuffer, allocation);
         }
+        this.#lastMountedCount = toMountCount;
     }
 
     /**
@@ -205,6 +214,8 @@ export default class FoliageSubCellStreamer {
         this.#mountedSubCells.length = 0;
         this.#subCells.clear();
         this.#totalInstanceCount = 0;
+        this.#lastMountedCount = 0;
+        this.#lastUnmountedCount = 0;
         if (this.#foliage.allocation) {
             this.#foliage.allocation.instanceCount = 0;
         }

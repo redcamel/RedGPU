@@ -265,7 +265,10 @@ export interface FoliageOptions {
  * ```
  */
 export class Foliage extends AScatterType<FoliageTypeAllocation> {
-    #options: FoliageOptions;
+    #minScale: [number, number, number] = [1.0, 1.0, 1.0];
+    #maxScale: [number, number, number] = [1.0, 1.0, 1.0];
+    #randomRotationY: boolean = true;
+    #maxInstances: number = 0;
 
     #subMeshes: FoliageSubMesh[] = [];
     #unifiedGeometries: (Geometry | null)[] = [];
@@ -473,36 +476,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             groundBlendStrength: resolvedGroundBlendStrength
         });
 
-        this.#options = Object.freeze({
-            name: options.name,
-            lods: options.lods,
-            maxInstances: resolvedMaxInstances,
-            cullingDistance: this.cullingDistance,
-            minScale,
-            maxScale,
-            randomRotationY: options.randomRotationY ?? true,
-            useImpostor: this.#useImpostor,
-            bottomOffset: this.bottomOffset,
-            castShadow: this.castShadow,
-            shadowCullDistance: this.shadowCullDistance,
-            enableStreaming: options.enableStreaming !== false,
-            streamingRadius,
-            targetLayer: options.targetLayer,
-            minSlope: options.minSlope ?? 0.0,
-            maxSlope: options.maxSlope ?? 45.0,
-            densityScaleByWeight: options.densityScaleByWeight !== false,
-            densityPerHectare: resolvedDensityPerHectare,
-            densityMultiplier,
-            windMultiplier: resolvedWindMultiplier,
-            windFlutterMultiplier: resolvedWindFlutterMultiplier,
-            alignToNormal: resolvedAlignToNormal,
-            alignFactor: resolvedAlignFactor,
-            groundBlendStrength: this.groundBlendStrength,
-            groundBlendRange: this.#groundBlendRange
-        });
-
-        this.#enableStreaming = this.#options.enableStreaming!;
-        this.#streamingRadius = this.#options.streamingRadius!;
+        this.#minScale = minScale;
+        this.#maxScale = maxScale;
+        this.#randomRotationY = options.randomRotationY ?? true;
+        this.#maxInstances = resolvedMaxInstances;
+        this.#enableStreaming = options.enableStreaming !== false;
+        this.#streamingRadius = streamingRadius;
 
         let impostorSub: FoliageSubMesh | null = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
@@ -518,8 +497,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         if (this.#megaBuffer) {
             const alloc = this.#megaBuffer.allocateType(
-                this.#options.name,
-                this.#options.maxInstances,
+                this.name,
+                resolvedMaxInstances,
                 this.#subMeshes,
                 this.#shadowMergedSubMeshes,
                 this.#lodInfoList
@@ -554,7 +533,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the maximum instance capacity allocated for this foliage type.
      */
     get maxInstances(): number {
-        return this.allocation ? this.allocation.maxInstances : (this.#options.maxInstances ?? 0);
+        return this.allocation ? this.allocation.maxInstances : this.#maxInstances;
     }
 
     /**
@@ -562,7 +541,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the minimum scale `[x, y, z]` applied during procedural instance placement.
      */
     get minScale(): [number, number, number] {
-        return this.#options.minScale;
+        return this.#minScale;
     }
 
     /**
@@ -570,7 +549,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the maximum scale `[x, y, z]` applied during procedural instance placement.
      */
     get maxScale(): [number, number, number] {
-        return this.#options.maxScale;
+        return this.#maxScale;
     }
 
     /**
@@ -578,15 +557,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns whether random 360-degree Y rotation is applied during placement.
      */
     get randomRotationY(): boolean {
-        return this.#options.randomRotationY;
-    }
-
-    /**
-     * [KO] 초기 생성 시 전달된 고정 식생 옵션 객체를 반환합니다.
-     * [EN] Returns the immutable foliage options object provided during initialization.
-     */
-    get options(): FoliageOptions {
-        return this.#options;
+        return this.#randomRotationY;
     }
 
     /**
@@ -1095,6 +1066,22 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually mounted in the last streaming update
+     */
+    get lastMountedCount(): number {
+        return this.#streamer.lastMountedCount;
+    }
+
+    /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually unmounted in the last streaming update
+     */
+    get lastUnmountedCount(): number {
+        return this.#streamer.lastUnmountedCount;
+    }
+
+    /**
      * [KO] 카메라 위치와 활성 서브셀 키 목록을 기반으로 인스턴스 슬롯 스트리밍을 갱신합니다.
      * [EN] Updates instance slot streaming based on camera position and active sub-cell key list.
      *
@@ -1110,14 +1097,22 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param camZ -
      * [KO] 카메라 월드 Z 좌표
      * [EN] Camera world Z coordinate
+     * @param mountBudget -
+     * [KO] 이번 업데이트에서 마운트 가능한 최대 서브셀 수 (기본값: 16)
+     * [EN] Maximum sub-cells allowed to mount in this update (default: 16)
+     * @param unmountBudget -
+     * [KO] 이번 업데이트에서 언마운트 가능한 최대 서브셀 수 (기본값: 32)
+     * [EN] Maximum sub-cells allowed to unmount in this update (default: 32)
      */
     updateStreaming(
         activeKeyArray: Int32Array,
         activeKeyCount: number,
         camX: number,
-        camZ: number
+        camZ: number,
+        mountBudget: number = 16,
+        unmountBudget: number = 32
     ): void {
-        this.#streamer.update(activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming);
+        this.#streamer.update(activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming, mountBudget, unmountBudget);
     }
 
     /**
