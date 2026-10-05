@@ -9,8 +9,9 @@ import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
-import FoliageSubCellPartitioner from "./subcell/FoliageSubCellPartitioner";
 import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
+import FoliageRenderBucket from "./bucket/FoliageRenderBucket";
+import FoliageTilePopulator from "./populator/FoliageTilePopulator";
 
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
@@ -271,13 +272,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #randomRotationY: boolean = true;
     #maxInstances: number = 0;
 
-    #subMeshes: FoliageSubMesh[] = [];
+    #bucket: FoliageRenderBucket = new FoliageRenderBucket();
+    #populator: FoliageTilePopulator = new FoliageTilePopulator();
     #unifiedGeometries: (Geometry | null)[] = [];
-    #lod0SubMeshes: FoliageSubMesh[] = [];
-    #depthPrepassOpaqueSubMeshes: FoliageSubMesh[] = [];
-    #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
-    #mainSubMeshes: FoliageSubMesh[] = [];
-    #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
@@ -286,7 +283,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #nameHash: number = 0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
-    #hasMaskedLOD0: boolean = false;
     #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
     #windMultiplier: number = 1.0;
@@ -296,7 +292,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #groundBlendRange: number = 1.5;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #loadedTileKeys: Set<number> = new Set();
     #streamer: FoliageSubCellStreamer;
     #baker: ScatterInstanceBaker | null = null;
     #onDirty?: () => void;
@@ -441,24 +436,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             this.#slotPooler,
             this.#subMeshMegaUBO
         );
-        this.#subMeshes = assembleResult.subMeshes;
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
-        this.#lod0SubMeshes = this.#subMeshes.filter(sub => sub.lodIndex === 0);
-        let hasMaskedLOD0 = false;
-        for (let i = 0; i < this.#lod0SubMeshes.length; i++) {
-            if (this.#lod0SubMeshes[i].isMasked) {
-                hasMaskedLOD0 = true;
-                break;
-            }
-        }
-        this.#hasMaskedLOD0 = hasMaskedLOD0;
-        this.#shadowMergedSubMeshes = assembleResult.shadowMergedSubMeshes || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         const resolvedBottomOffset = options.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         const resolvedHeight = options.height !== undefined
             ? Math.max(0.1, Number(options.height) || 0.1)
             : (assembleResult.boundingHeight || 2.0);
+
+        this.#bucket.init(
+            assembleResult.subMeshes,
+            assembleResult.shadowMergedSubMeshes || [],
+            this.#useImpostor,
+            this.#useDepthPrepass
+        );
 
         let defaultShadowDist = 300.0;
         const effectiveHeight = resolvedHeight * maxScale[1];
@@ -499,23 +490,23 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#streamingRadius = streamingRadius;
 
         let impostorSub: FoliageSubMesh | null = null;
-        for (let i = 0; i < this.#subMeshes.length; i++) {
-            if (this.#subMeshes[i].isImpostor) {
-                impostorSub = this.#subMeshes[i];
+        const allSubs = this.#bucket.subMeshes;
+        for (let i = 0; i < allSubs.length; i++) {
+            if (allSubs[i].isImpostor) {
+                impostorSub = allSubs[i];
                 break;
             }
         }
         this.#impostorSubMesh = impostorSub;
 
-        this.#updatePassBuckets();
         this.updateDrawCallCount(this.drawCallCount);
 
         if (this.#megaBuffer) {
             const alloc = this.#megaBuffer.allocateType(
                 this.name,
                 resolvedMaxInstances,
-                this.#subMeshes,
-                this.#shadowMergedSubMeshes,
+                this.#bucket.subMeshes,
+                this.#bucket.shadowMergedSubMeshes,
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
@@ -596,7 +587,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of all sub-meshes across all LOD levels.
      */
     get subMeshes(): FoliageSubMesh[] {
-        return this.#subMeshes;
+        return this.#bucket.subMeshes;
     }
 
     /**
@@ -612,11 +603,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
      */
     override get drawCallCount(): number {
-        let count = this.#mainSubMeshes.length;
-        if (this.#useDepthPrepass) {
-            count += this.#depthPrepassOpaqueSubMeshes.length + this.#depthPrepassMaskedSubMeshes.length;
-        }
-        return count;
+        return this.#bucket.calcDrawCallCount(this.#useDepthPrepass);
     }
 
     /**
@@ -624,7 +611,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the total number of registered sub-meshes.
      */
     override get subMeshCount(): number {
-        return this.#subMeshes.length;
+        return this.#bucket.subMeshCount;
     }
 
 
@@ -633,7 +620,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of opaque sub-meshes rendered with Fast-Z in depth prepass.
      */
     get depthPrepassOpaqueSubMeshes(): FoliageSubMesh[] {
-        return this.#depthPrepassOpaqueSubMeshes;
+        return this.#bucket.depthPrepassOpaqueSubMeshes;
     }
 
     /**
@@ -641,7 +628,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of masked sub-meshes rendered with alpha testing in depth prepass.
      */
     get depthPrepassMaskedSubMeshes(): FoliageSubMesh[] {
-        return this.#depthPrepassMaskedSubMeshes;
+        return this.#bucket.depthPrepassMaskedSubMeshes;
     }
 
     /**
@@ -649,7 +636,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of sub-meshes rendered in the main forward render pass.
      */
     get mainSubMeshes(): FoliageSubMesh[] {
-        return this.#mainSubMeshes;
+        return this.#bucket.mainSubMeshes;
     }
 
     /**
@@ -657,7 +644,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of sub-meshes belonging to the highest detail level (LOD 0).
      */
     get lod0SubMeshes(): FoliageSubMesh[] {
-        return this.#lod0SubMeshes;
+        return this.#bucket.lod0SubMeshes;
     }
 
     /**
@@ -665,7 +652,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of merged sub-meshes optimized for cascaded shadow map (CSM) passes.
      */
     get shadowMergedSubMeshes(): FoliageShadowMergedSubMesh[] {
-        return this.#shadowMergedSubMeshes;
+        return this.#bucket.shadowMergedSubMeshes;
     }
 
     /**
@@ -861,7 +848,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
      */
     get hasMaskedLOD0(): boolean {
-        return this.#hasMaskedLOD0;
+        return this.#bucket.hasMaskedLOD0;
     }
 
 
@@ -922,45 +909,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    #syncInternalWind(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-        const subList = this.#subMeshes;
-        const count = subList.length;
-        const windMul = this.#windMultiplier;
-        const flutterMul = this.#windFlutterMultiplier;
-        const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
-
-        for (let i = 0; i < count; i++) {
-            const sub = subList[i];
-            const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
-            sub.updateWindMultipliers(
-                gpuDevice,
-                windMul,
-                effectiveFlutterMul,
-                treeH
-            );
-        }
-
-        const shadowList = this.#shadowMergedSubMeshes;
-        const shadowCount = shadowList.length;
-        for (let i = 0; i < shadowCount; i++) {
-            shadowList[i].updateWindMultipliers(
-                gpuDevice,
-                windMul,
-                flutterMul * 0.5,
-                treeH
-            );
-        }
-    }
-
     /**
      * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
      * [EN] Clears the tile cache and loaded component key set in the streamer.
      */
     clearTileCache(): void {
         this.#streamer.clear();
-        this.#loadedTileKeys.clear();
+        this.#populator.clear();
     }
 
     /**
@@ -977,31 +932,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
         if (!tileComponent) return;
         if (landscape) this.#landscape = landscape;
-        const cz = (tileComponent.componentZ ?? 0) & 0xffff;
-        const cx = (tileComponent.componentX ?? 0) & 0xffff;
-        const key = (cz << 16) | cx;
-        if (this.#loadedTileKeys.has(key)) return;
-
-        if (landscape && typeof landscape.isTileLoaded === 'function') {
-            if (!landscape.isTileLoaded(cz, cx)) {
-                return;
-            }
-        }
-
-        this.#loadedTileKeys.add(key);
-
-        const subCellSize = landscape?.foliageManager?.subCellSize ?? this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-        const subCells = FoliageSubCellPartitioner.partitionTile(
+        this.#populator.populateTile(
             tileComponent,
             this,
-            landscape,
-            subCellSize
+            landscape || this.#landscape,
+            this.#streamer,
+            this.#enableStreaming
         );
-        this.#streamer.addSubCells(subCells);
+    }
 
-        if (!this.#enableStreaming) {
-            this.#streamer.update(new Int32Array(0), 0, 0, 0, false);
-        }
+    /**
+     * [KO] 식생 인스턴스, 하위 서브메시 및 스트리머 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases foliage instance, child sub-meshes, and streamer resources.
+     */
+    override destroy(): void {
+        this.#streamer.clear();
+        this.#populator.clear();
+        this.#bucket.destroy();
+        this.#unifiedGeometries.length = 0;
+        super.destroy();
     }
 
     /**
@@ -1091,67 +1040,49 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생 인스턴스, 하위 서브메시 및 스트리머 리소스를 안전하게 해제합니다.
-     * [EN] Safely releases foliage instance, child sub-meshes, and streamer resources.
-     */
-    override destroy(): void {
-        this.#streamer.clear();
-        for (let i = 0; i < this.#subMeshes.length; i++) {
-            const sub = this.#subMeshes[i];
-            sub.destroy();
-        }
-        this.#subMeshes.length = 0;
-        this.#unifiedGeometries.length = 0;
-        this.#lod0SubMeshes.length = 0;
-        this.#depthPrepassOpaqueSubMeshes.length = 0;
-        this.#depthPrepassMaskedSubMeshes.length = 0;
-        this.#mainSubMeshes.length = 0;
-        for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
-            const shadowSub = this.#shadowMergedSubMeshes[i];
-            shadowSub.destroy();
-        }
-        this.#shadowMergedSubMeshes.length = 0;
-        this.#loadedTileKeys.clear();
-        super.destroy();
-    }
-
-    #updatePassBuckets(): void {
-        const useImp = this.#useImpostor;
-        const useDepthPrepass = this.#useDepthPrepass;
-        const subList = this.#subMeshes;
+    #syncInternalWind(): void {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return;
+        const subList = this.#bucket.subMeshes;
         const count = subList.length;
-
-        const prepassOpaqueList = this.#depthPrepassOpaqueSubMeshes;
-        const prepassMaskedList = this.#depthPrepassMaskedSubMeshes;
-        const mainList = this.#mainSubMeshes;
-
-        prepassOpaqueList.length = 0;
-        prepassMaskedList.length = 0;
-        mainList.length = 0;
+        const windMul = this.#windMultiplier;
+        const flutterMul = this.#windFlutterMultiplier;
+        const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
 
         for (let i = 0; i < count; i++) {
             const sub = subList[i];
-            if (!useImp && sub.isImpostor) continue;
-            if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
-                if (!sub.isMasked) {
-                    prepassOpaqueList.push(sub);
-                } else {
-                    prepassMaskedList.push(sub);
-                }
-            }
-            if (sub.canRenderInPass('main')) {
-                mainList.push(sub);
-            }
+            const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
+            sub.updateWindMultipliers(
+                gpuDevice,
+                windMul,
+                effectiveFlutterMul,
+                treeH
+            );
         }
+
+        const shadowList = this.#bucket.shadowMergedSubMeshes;
+        const shadowCount = shadowList.length;
+        for (let i = 0; i < shadowCount; i++) {
+            shadowList[i].updateWindMultipliers(
+                gpuDevice,
+                windMul,
+                flutterMul * 0.5,
+                treeH
+            );
+        }
+    }
+
+    #updatePassBuckets(): void {
+        this.#bucket.updatePassBuckets(this.#useImpostor, this.#useDepthPrepass);
     }
 
     #updateSubMeshGroundBlend(): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
-        const subCount = this.#subMeshes.length;
+        const subList = this.#bucket.subMeshes;
+        const subCount = subList.length;
         for (let s = 0; s < subCount; s++) {
-            const sub = this.#subMeshes[s];
+            const sub = subList[s];
             if (!sub.isImpostor) {
                 sub.updateGroundBlendParams(gpuDevice, this.groundBlendStrength, this.#groundBlendRange);
             }
