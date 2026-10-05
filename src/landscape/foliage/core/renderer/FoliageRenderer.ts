@@ -410,6 +410,62 @@ class FoliageRenderer extends RedGPUObject {
         return bundle;
     }
 
+    #bindAndDrawUnit(
+        passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
+        unit: FoliageSubMesh | FoliageShadowMergedSubMesh,
+        pipeline: GPURenderPipeline,
+        systemBG: GPUBindGroup | null,
+        matUniformBG: GPUBindGroup | null,
+        vertexGPUBuffer: GPUBuffer,
+        culledGPUBuffer: GPUBuffer,
+        indirectGPUBuffer: GPUBuffer,
+        overrideInstanceOffset?: number,
+        overrideIndirectOffset?: number
+    ): void {
+        if (this.#lastBoundPipeline !== pipeline) {
+            passEncoder.setPipeline(pipeline);
+            this.#lastBoundPipeline = pipeline;
+        }
+
+        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
+            passEncoder.setBindGroup(0, systemBG);
+            this.#lastBoundSystemBG = systemBG;
+        }
+
+        const vertexUniformBG = unit.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
+        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
+            passEncoder.setBindGroup(1, vertexUniformBG);
+            this.#lastBoundVertexUniformBG = vertexUniformBG;
+        }
+
+        if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
+            passEncoder.setBindGroup(2, matUniformBG);
+            this.#lastBoundMatBG = matUniformBG;
+        }
+
+        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
+            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
+        }
+
+        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : unit.instanceBufferOffset;
+        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
+            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
+            this.#lastBoundInstanceBuffer = culledGPUBuffer;
+            this.#lastBoundInstanceOffset = instanceBufferOffset;
+        }
+
+        if (unit.isIndexed && unit.geometry.indexBuffer?.gpuBuffer) {
+            const indexGPUBuffer = unit.geometry.indexBuffer.gpuBuffer;
+            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
+                passEncoder.setIndexBuffer(indexGPUBuffer, unit.indexFormat);
+                this.#lastBoundIndexBuffer = indexGPUBuffer;
+            }
+        }
+
+        unit.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
+    }
+
     #drawShadowMergedSubMesh(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
         shadowSub: FoliageShadowMergedSubMesh,
@@ -429,43 +485,18 @@ class FoliageRenderer extends RedGPUObject {
         );
         if (!pipeline) return;
 
-        if (this.#lastBoundPipeline !== pipeline) {
-            passEncoder.setPipeline(pipeline);
-            this.#lastBoundPipeline = pipeline;
-        }
-
-        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
-            passEncoder.setBindGroup(0, systemBG);
-            this.#lastBoundSystemBG = systemBG;
-        }
-
-        const vertexUniformBG = shadowSub.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
-        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
-            passEncoder.setBindGroup(1, vertexUniformBG);
-            this.#lastBoundVertexUniformBG = vertexUniformBG;
-        }
-
-        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
-            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
-            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
-        }
-
-        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : shadowSub.instanceBufferOffset;
-        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
-            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
-            this.#lastBoundInstanceBuffer = culledGPUBuffer;
-            this.#lastBoundInstanceOffset = instanceBufferOffset;
-        }
-
-        if (shadowSub.isIndexed && shadowSub.geometry.indexBuffer?.gpuBuffer) {
-            const indexGPUBuffer = shadowSub.geometry.indexBuffer.gpuBuffer;
-            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
-                passEncoder.setIndexBuffer(indexGPUBuffer, shadowSub.indexFormat);
-                this.#lastBoundIndexBuffer = indexGPUBuffer;
-            }
-        }
-
-        shadowSub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
+        this.#bindAndDrawUnit(
+            passEncoder,
+            shadowSub,
+            pipeline,
+            systemBG,
+            null,
+            vertexGPUBuffer,
+            culledGPUBuffer,
+            indirectGPUBuffer,
+            overrideInstanceOffset,
+            overrideIndirectOffset
+        );
     }
 
     #drawShadowSubMesh(
@@ -481,69 +512,34 @@ class FoliageRenderer extends RedGPUObject {
         if (!vertexGPUBuffer) return;
 
         const useMasked = (sub.lodIndex === 0) && sub.isMasked;
-        let pipeline: GPURenderPipeline | null;
-
-        if (useMasked) {
-            pipeline = this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
+        const pipeline = useMasked
+            ? this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
                 sub.material,
                 sub.strideBytes,
                 'none',
                 this.#subMeshVertexBindGroupLayout
-            );
-        } else {
-            pipeline = this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
+            )
+            : this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
                 sub.strideBytes,
                 'none',
                 this.#subMeshVertexBindGroupLayout
             );
-        }
         if (!pipeline) return;
 
-        if (this.#lastBoundPipeline !== pipeline) {
-            passEncoder.setPipeline(pipeline);
-            this.#lastBoundPipeline = pipeline;
-        }
+        const matUniformBG = useMasked ? (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || null) : null;
 
-        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
-            passEncoder.setBindGroup(0, systemBG);
-            this.#lastBoundSystemBG = systemBG;
-        }
-
-        const vertexUniformBG = sub.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
-        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
-            passEncoder.setBindGroup(1, vertexUniformBG);
-            this.#lastBoundVertexUniformBG = vertexUniformBG;
-        }
-
-        if (useMasked) {
-            const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
-            if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
-                passEncoder.setBindGroup(2, matUniformBG);
-                this.#lastBoundMatBG = matUniformBG;
-            }
-        }
-
-        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
-            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
-            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
-        }
-
-        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : sub.instanceBufferOffset;
-        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
-            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
-            this.#lastBoundInstanceBuffer = culledGPUBuffer;
-            this.#lastBoundInstanceOffset = instanceBufferOffset;
-        }
-
-        if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-            const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
-            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
-                passEncoder.setIndexBuffer(indexGPUBuffer, sub.indexFormat);
-                this.#lastBoundIndexBuffer = indexGPUBuffer;
-            }
-        }
-
-        sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
+        this.#bindAndDrawUnit(
+            passEncoder,
+            sub,
+            pipeline,
+            systemBG,
+            matUniformBG,
+            vertexGPUBuffer,
+            culledGPUBuffer,
+            indirectGPUBuffer,
+            overrideInstanceOffset,
+            overrideIndirectOffset
+        );
     }
 
     #drawSubMesh(
@@ -570,53 +566,24 @@ class FoliageRenderer extends RedGPUObject {
         );
         if (!pipeline) return;
 
-        if (this.#lastBoundPipeline !== pipeline) {
-            passEncoder.setPipeline(pipeline);
-            this.#lastBoundPipeline = pipeline;
-        }
-
-        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
-            passEncoder.setBindGroup(0, systemBG);
-            this.#lastBoundSystemBG = systemBG;
-        }
-
         const emptyBG = this.resourceManager.emptyBindGroup;
-        const vertexUniformBG = sub.vertexUniformBindGroup || emptyBG;
-        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
-            passEncoder.setBindGroup(1, vertexUniformBG);
-            this.#lastBoundVertexUniformBG = vertexUniformBG;
-        }
-
         const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !sub.isMasked;
         const matUniformBG = isDepthPrepassOpaque
             ? emptyBG
             : (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
-        if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
-            passEncoder.setBindGroup(2, matUniformBG);
-            this.#lastBoundMatBG = matUniformBG;
-        }
 
-        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
-            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
-            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
-        }
-
-        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : sub.instanceBufferOffset;
-        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
-            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
-            this.#lastBoundInstanceBuffer = culledGPUBuffer;
-            this.#lastBoundInstanceOffset = instanceBufferOffset;
-        }
-
-        if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-            const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
-            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
-                passEncoder.setIndexBuffer(indexGPUBuffer, sub.indexFormat);
-                this.#lastBoundIndexBuffer = indexGPUBuffer;
-            }
-        }
-
-        sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
+        this.#bindAndDrawUnit(
+            passEncoder,
+            sub,
+            pipeline,
+            systemBG,
+            matUniformBG,
+            vertexGPUBuffer,
+            culledGPUBuffer,
+            indirectGPUBuffer,
+            overrideInstanceOffset,
+            overrideIndirectOffset
+        );
     }
 }
 
