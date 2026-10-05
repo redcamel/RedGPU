@@ -313,11 +313,6 @@ class FoliageManager {
         if (this.#streamingRadius !== clamped) {
             this.#streamingRadius = clamped;
             this.#onUniformUpdateNeeded?.();
-
-            const count = this.#foliageList.length;
-            for (let i = 0; i < count; i++) {
-                this.#foliageList[i].streamingRadius = clamped;
-            }
         }
     }
 

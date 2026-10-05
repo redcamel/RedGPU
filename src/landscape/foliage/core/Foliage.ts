@@ -870,47 +870,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#hasMaskedLOD0;
     }
 
-    /**
-     * [KO] 바람 물리 시뮬레이션 파라미터를 모든 하위 서브메시 및 그림자 병합 서브메시에 동기화합니다.
-     * [EN] Synchronizes wind physical simulation parameters across all sub-meshes and shadow merged sub-meshes.
-     *
-     * @param gpuDevice -
-     * [KO] GPUDevice 인스턴스
-     * [EN] GPUDevice instance
-     * @param windDirX -
-     * [KO] 바람 진행 방향 X 성분
-     * [EN] Wind direction X component
-     * @param windDirY -
-     * [KO] 바람 진행 방향 Z(Y) 성분
-     * [EN] Wind direction Z(Y) component
-     * @param windSpeed -
-     * [KO] 바람 진행 속도
-     * [EN] Wind travel speed
-     * @param windStrength -
-     * [KO] 바람 기본 강도
-     * [EN] Base wind strength
-     * @param windFreq -
-     * [KO] 바람 주기 주파수
-     * [EN] Wind cycle frequency
-     * @param windFlutterStrength -
-     * [KO] 잎사귀 세부 떨림 강도
-     * [EN] Leaf flutter strength
-     * @param windEnabled -
-     * [KO] 바람 시뮬레이션 활성화 여부
-     * [EN] Whether wind simulation is enabled
-     */
-    syncWindToSubMeshes(
-        _gpuDevice?: GPUDevice,
-        _windDirX?: number,
-        _windDirY?: number,
-        _windSpeed?: number,
-        _windStrength?: number,
-        _windFreq?: number,
-        _windFlutterStrength?: number,
-        _windEnabled?: boolean
-    ): void {
-        this.#syncInternalWind();
-    }
 
     /**
      * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
@@ -931,37 +890,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 컬링된 인스턴스 데이터가 저장되는 GPU 저장소 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer storing culled instance data.
-     */
-    get culledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.culledGPUBuffer || null;
-    }
 
-    /**
-     * [KO] 메인 렌더 패스용 간접 드로우 인자 버퍼를 반환합니다.
-     * [EN] Returns the indirect draw argument buffer for the main render pass.
-     */
-    get indirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.indirectGPUBuffer || null;
-    }
-
-    /**
-     * [KO] 그림자 패스 컬링 결과 인스턴스가 저장되는 GPU 저장소 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer storing shadow pass culled instances.
-     */
-    get shadowCulledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
-    }
-
-    /**
-     * [KO] 그림자 패스용 간접 드로우 인자 버퍼를 반환합니다.
-     * [EN] Returns the indirect draw argument buffer for the shadow pass.
-     */
-    get shadowIndirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
-    }
 
     set groundBlendRange(v: number) {
         const val = Math.max(0.1, Number(v) || 0.1);

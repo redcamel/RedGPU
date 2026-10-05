@@ -144,8 +144,9 @@ class FoliageRenderer extends RedGPUObject {
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
-            const culledGPU = foliageType.culledGPUBuffer;
-            const indirectGPU = foliageType.indirectGPUBuffer;
+            const megaBuffer = foliageType.megaBuffer;
+            const culledGPU = megaBuffer?.culledGPUBuffer;
+            const indirectGPU = megaBuffer?.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
             let item = this.#validTypesMain[validCount];
@@ -256,8 +257,9 @@ class FoliageRenderer extends RedGPUObject {
             for (let t = 0; t < typeCount; t++) {
                 const foliageType = typeList[t];
                 if (!foliageType.castShadow || foliageType.shadowCullDistance <= 0) continue;
-                const culledGPU = foliageType.shadowCulledGPUBuffer;
-                const indirectGPU = foliageType.shadowIndirectGPUBuffer;
+                const megaBuffer = foliageType.megaBuffer;
+                const culledGPU = megaBuffer?.shadowCulledGPUBuffer;
+                const indirectGPU = megaBuffer?.shadowIndirectGPUBuffer;
                 if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
                 let item = this.#validTypesShadow[validCount];
