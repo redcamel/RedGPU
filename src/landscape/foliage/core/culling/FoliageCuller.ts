@@ -16,6 +16,8 @@ import FoliageScatterMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageSc
 import {ScatterInstanceBaker} from "../../../core/scatter";
 import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import computeViewFrustumPlanes from "../../../../math/computeViewFrustumPlanes";
+import RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
 /**
  * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 수행하는 클래스입니다.
@@ -128,7 +130,7 @@ class FoliageCuller extends RedGPUObject {
             ?? null;
 
         if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
-            frustumPlanes = this.#computeFrustumPlanesToBuffer(
+            frustumPlanes = computeViewFrustumPlanes(
                 camera.projectionMatrix,
                 camera.viewMatrix,
                 this.#cachedFrustumPlanes
@@ -168,7 +170,7 @@ class FoliageCuller extends RedGPUObject {
                     param.maxDistance = splitDepths[c] ?? 200.0;
                     param.hasShadow = !!pv;
                     if (pv) {
-                        param.frustumPlanes = this.#computeFrustumPlanesFromMatrix(
+                        param.frustumPlanes = RenderViewStateData.computeFrustumPlanesFromMatrix(
                             pv,
                             this.#cachedShadowFrustumPlanes[c]
                         );
@@ -225,93 +227,6 @@ class FoliageCuller extends RedGPUObject {
                 this.#onPreProcessComputePass
             );
         }
-    }
-
-    #computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
-        const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
-
-        p0[0] = m[3] + m[0];
-        p0[1] = m[7] + m[4];
-        p0[2] = m[11] + m[8];
-        p0[3] = m[15] + m[12];
-        p1[0] = m[3] - m[0];
-        p1[1] = m[7] - m[4];
-        p1[2] = m[11] - m[8];
-        p1[3] = m[15] - m[12];
-        p2[0] = m[3] + m[1];
-        p2[1] = m[7] + m[5];
-        p2[2] = m[11] + m[9];
-        p2[3] = m[15] + m[13];
-        p3[0] = m[3] - m[1];
-        p3[1] = m[7] - m[5];
-        p3[2] = m[11] - m[9];
-        p3[3] = m[15] - m[13];
-        p4[0] = m[2];
-        p4[1] = m[6];
-        p4[2] = m[10];
-        p4[3] = m[14];
-        p5[0] = m[3] - m[2];
-        p5[1] = m[7] - m[6];
-        p5[2] = m[11] - m[10];
-        p5[3] = m[15] - m[14];
-
-        for (let i = 0; i < 6; i++) {
-            const plane = out[i];
-            const norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
-            if (norm > 0.000001) {
-                const invNorm = 1.0 / norm;
-                plane[0] *= invNorm;
-                plane[1] *= invNorm;
-                plane[2] *= invNorm;
-                plane[3] *= invNorm;
-            }
-        }
-        return out;
-    }
-
-    #computeFrustumPlanesToBuffer(projectionMatrix: mat4, viewMatrix: mat4, out: number[][]): number[][] {
-        const m = this.#tempPVMatrix;
-        mat4.multiply(m, projectionMatrix, viewMatrix);
-
-        const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
-
-        p0[0] = m[3] - m[0];
-        p0[1] = m[7] - m[4];
-        p0[2] = m[11] - m[8];
-        p0[3] = m[15] - m[12];
-        p1[0] = m[3] + m[0];
-        p1[1] = m[7] + m[4];
-        p1[2] = m[11] + m[8];
-        p1[3] = m[15] + m[12];
-        p2[0] = m[3] + m[1];
-        p2[1] = m[7] + m[5];
-        p2[2] = m[11] + m[9];
-        p2[3] = m[15] + m[13];
-        p3[0] = m[3] - m[1];
-        p3[1] = m[7] - m[5];
-        p3[2] = m[11] - m[9];
-        p3[3] = m[15] - m[13];
-        p4[0] = m[3] - m[2];
-        p4[1] = m[7] - m[6];
-        p4[2] = m[11] - m[10];
-        p4[3] = m[15] - m[14];
-        p5[0] = m[3] + m[2];
-        p5[1] = m[7] + m[6];
-        p5[2] = m[11] + m[10];
-        p5[3] = m[15] + m[14];
-
-        for (let i = 0; i < 6; i++) {
-            const plane = out[i];
-            const norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
-            if (norm > 0.000001) {
-                const invNorm = 1.0 / norm;
-                plane[0] *= invNorm;
-                plane[1] *= invNorm;
-                plane[2] *= invNorm;
-                plane[3] *= invNorm;
-            }
-        }
-        return out;
     }
 
     #initComputePipeline(): void {
