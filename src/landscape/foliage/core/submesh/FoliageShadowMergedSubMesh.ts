@@ -79,8 +79,7 @@ export interface FoliageShadowMergedSubMeshInitOptions {
  * :::
  */
 export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
-    #windFloatBuffer: Float32Array = new Float32Array(4);
-    #windUintBuffer: Uint32Array = new Uint32Array(this.#windFloatBuffer.buffer);
+    #windMultipliersFloatBuffer: Float32Array = new Float32Array(3);
 
     #lodIndex: number;
     #vertexUniformBuffer: GPUBuffer;
@@ -128,43 +127,6 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 바람 시뮬레이션 파라미터를 유니폼 버퍼에 기록합니다.
-     * [EN] Writes wind simulation parameters to the uniform buffer.
-     * @param gpuDevice -
-     * [KO] WebGPU 디바이스 인스턴스
-     * [EN] WebGPU device instance
-     * @param windDirX -
-     * [KO] 바람 방향 X
-     * [EN] Wind direction X
-     * @param windDirY -
-     * [KO] 바람 방향 Y (Z축 대응)
-     * [EN] Wind direction Y (maps to Z axis)
-     * @param windSpeed -
-     * [KO] 바람 속도
-     * [EN] Wind speed
-     * @param windStrength -
-     * [KO] 바람 강도
-     * [EN] Wind strength
-     * @param windFreq -
-     * [KO] 바람 주파수
-     * [EN] Wind frequency
-     * @param windFlutterStrength -
-     * [KO] 잔잎 흔들림 강도
-     * [EN] Leaf flutter strength
-     * @param windEnabled -
-     * [KO] 바람 효과 활성화 여부
-     * [EN] Whether wind effect is enabled
-     * @param windMultiplier -
-     * [KO] 인스턴스별 바람 강도 배수
-     * [EN] Per-instance wind strength multiplier
-     * @param windFlutterMultiplier -
-     * [KO] 인스턴스별 잔잎 흔들림 배수
-     * [EN] Per-instance flutter multiplier
-     * @param treeHeight -
-     * [KO] 식생 전체 높이
-     * [EN] Total foliage height
-     */
-    /**
      * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (16 bytes, Zero-GC)
      * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (16 bytes, Zero-GC)
      * @param gpuDevice - WebGPU 디바이스 인스턴스
@@ -179,40 +141,18 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         treeHeight: number
     ): void {
         if (!this.#vertexUniformBuffer || !gpuDevice) return;
-        const fView = this.#windFloatBuffer;
-        const uView = this.#windUintBuffer;
+        const fView = this.#windMultipliersFloatBuffer;
         fView[0] = windMultiplier;
         fView[1] = windFlutterMultiplier;
         fView[2] = treeHeight;
-        uView[3] = 0;
 
         gpuDevice.queue.writeBuffer(
             this.#vertexUniformBuffer,
-            36 * 4,
+            35 * 4,
             fView.buffer,
             fView.byteOffset,
-            16
+            12
         );
-    }
-
-    /**
-     * [KO] 바람 시뮬레이션 파라미터를 유니폼 버퍼에 기록합니다. (하위 호환성 유지)
-     * [EN] Writes wind simulation parameters to the uniform buffer. (Maintains backwards compatibility)
-     */
-    updateWindParams(
-        gpuDevice: GPUDevice,
-        _windDirX: number,
-        _windDirY: number,
-        _windSpeed: number,
-        _windStrength: number,
-        _windFreq: number,
-        _windFlutterStrength: number,
-        _windEnabled: boolean,
-        windMultiplier: number,
-        windFlutterMultiplier: number,
-        treeHeight: number
-    ): void {
-        this.updateWindMultipliers(gpuDevice, windMultiplier, windFlutterMultiplier, treeHeight);
     }
 
     /**

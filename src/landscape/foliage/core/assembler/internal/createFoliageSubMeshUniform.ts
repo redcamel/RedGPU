@@ -6,7 +6,7 @@
 
 import {mat4} from "gl-matrix";
 
-const subMeshUniformData: Float32Array = new Float32Array(44);
+const subMeshUniformData: Float32Array = new Float32Array(40);
 const subMeshUniformUint32: Uint32Array = new Uint32Array(subMeshUniformData.buffer);
 const identityMatrix: mat4 = mat4.create();
 
@@ -16,8 +16,8 @@ const identityMatrix: mat4 = mat4.create();
  */
 export interface FoliageSubMeshUniformResult {
     /**
-     * [KO] 생성된 유니폼 버퍼 (176바이트)
-     * [EN] Created uniform buffer (176 bytes)
+     * [KO] 생성된 유니폼 버퍼 (160바이트)
+     * [EN] Created uniform buffer (160 bytes)
      */
     buffer: GPUBuffer;
     /**
@@ -28,8 +28,8 @@ export interface FoliageSubMeshUniformResult {
 }
 
 /**
- * [KO] PBR 렌더링에 필요한 176바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 176-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
+ * [KO] PBR 렌더링에 필요한 160바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 160-byte foliage sub-mesh uniform buffer and bind group required for PBR rendering.
  * @param gpuDevice -
  * [KO] WebGPU 디바이스 인스턴스
  * [EN] WebGPU device instance
@@ -87,7 +87,7 @@ export function createFoliagePBRSubMeshUniform(
 ): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_SubMesh_UniformBuffer_${globalSlot}`,
-        size: 176,
+        size: 160,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -106,19 +106,15 @@ export function createFoliagePBRSubMeshUniform(
     );
     uintView[33] = isIdentity ? 0 : 1;
     floatView[34] = receiveShadow ? 1.0 : 0.0;
-    uintView[35] = 0;
 
-    floatView[36] = windMultiplier ?? 1.0;
-    floatView[37] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
-    floatView[38] = treeHeight ?? 5.0;
-    uintView[39] = 0;
+    floatView[35] = windMultiplier ?? 1.0;
+    floatView[36] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
+    floatView[37] = treeHeight ?? 5.0;
 
-    floatView[40] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
-    floatView[41] = groundBlendRange ?? 1.5;
-    floatView[42] = 0.0;
-    floatView[43] = 0.0;
+    floatView[38] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
+    floatView[39] = groundBlendRange ?? 1.5;
 
-    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 176);
+    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 160);
 
     const vertexBindGroup = gpuDevice.createBindGroup({
         label: `Foliage_SubMesh_BindGroup_${globalSlot}`,
@@ -135,8 +131,8 @@ export function createFoliagePBRSubMeshUniform(
 }
 
 /**
- * [KO] 섀도우 패스 전용 176바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
- * [EN] Creates a 176-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
+ * [KO] 섀도우 패스 전용 160바이트 식생 서브메쉬 유니폼 버퍼 및 바인드 그룹을 생성합니다.
+ * [EN] Creates a 160-byte foliage sub-mesh uniform buffer and bind group dedicated to the shadow pass.
  * @param gpuDevice -
  * [KO] WebGPU 디바이스 인스턴스
  * [EN] WebGPU device instance
@@ -173,7 +169,7 @@ export function createFoliageShadowSubMeshUniform(
 ): FoliageSubMeshUniformResult {
     const uniformBuffer = gpuDevice.createBuffer({
         label: `Foliage_ShadowSubMesh_UniformBuffer_${name}_LOD${lodIndex}`,
-        size: 176,
+        size: 160,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
@@ -184,19 +180,15 @@ export function createFoliageShadowSubMeshUniform(
     uintView[32] = 0;
     uintView[33] = 0;
     floatView[34] = 0.0;
-    uintView[35] = 0;
 
-    floatView[36] = windMultiplier ?? 1.0;
-    floatView[37] = (windFlutterMultiplier ?? 1.0) * 0.5;
-    floatView[38] = treeHeight ?? 5.0;
-    uintView[39] = 0;
+    floatView[35] = windMultiplier ?? 1.0;
+    floatView[36] = (windFlutterMultiplier ?? 1.0) * 0.5;
+    floatView[37] = treeHeight ?? 5.0;
 
-    floatView[40] = 0.0;
-    floatView[41] = 1.5;
-    floatView[42] = 0.0;
-    floatView[43] = 0.0;
+    floatView[38] = 0.0;
+    floatView[39] = 1.5;
 
-    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 176);
+    gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 160);
 
     const vertexBindGroup = gpuDevice.createBindGroup({
         label: `Foliage_ShadowSubMesh_BindGroup_${name}_LOD${lodIndex}`,

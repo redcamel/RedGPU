@@ -11,17 +11,11 @@ struct SubMeshUniforms {
     globalFragmentSlotIndex: u32,
     hasHierarchyTransform: u32,
     receiveShadow: f32,
-    pad0: u32,
-
     windMultiplier: f32,
     windFlutterMultiplier: f32,
     treeHeight: f32,
-    pad1: u32,
-
     groundBlendStrength: f32,
     groundBlendRange: f32,
-    padGB0: f32,
-    padGB1: f32,
 };
 
 @group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
