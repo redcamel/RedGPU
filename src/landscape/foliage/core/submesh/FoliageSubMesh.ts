@@ -203,37 +203,12 @@ export class FoliageSubMesh extends ScatterSubMesh {
     get relativeNormalMatrix(): mat4 {
         return this.#relativeNormalMatrix;
     }
-
-    /**
-     * [KO] 버텍스 셰이더 Uniform 버퍼를 반환합니다.
-     * [EN] Returns the vertex shader uniform buffer.
-     */
-    get vertexUniformBuffer(): GPUBuffer {
-        return this.#vertexUniformBuffer;
-    }
-
     /**
      * [KO] 버텍스 셰이더 Uniform 바인드 그룹을 반환합니다.
      * [EN] Returns the vertex shader uniform bind group.
      */
     get vertexUniformBindGroup(): GPUBindGroup {
         return this.#vertexUniformBindGroup;
-    }
-
-    /**
-     * [KO] 뎁스 프리패스 렌더링 대상 여부를 반환합니다.
-     * [EN] Returns whether this sub-mesh renders in the depth prepass.
-     */
-    get isDepthPrepass(): boolean {
-        return this.#isDepthPrepass;
-    }
-
-    /**
-     * [KO] 메인 불투명/마스크 패스 대상 여부를 반환합니다.
-     * [EN] Returns whether this sub-mesh renders in the main opaque/masked pass.
-     */
-    get isMainOpaqueOrMasked(): boolean {
-        return this.#isMainOpaqueOrMasked;
     }
 
     /**
@@ -253,27 +228,11 @@ export class FoliageSubMesh extends ScatterSubMesh {
     }
 
     /**
-     * [KO] 옥타헤드럴 임포스터 메쉬 여부를 설정합니다.
-     * [EN] Sets whether this is an octahedral impostor mesh.
-     */
-    set isImpostor(val: boolean) {
-        this.#isImpostor = val;
-    }
-
-    /**
      * [KO] 그림자 수신 여부를 반환합니다.
      * [EN] Returns whether this sub-mesh receives shadows.
      */
     get receiveShadow(): boolean {
         return this.#receiveShadow;
-    }
-
-    /**
-     * [KO] 그림자 수신 여부를 설정합니다.
-     * [EN] Sets whether this sub-mesh receives shadows.
-     */
-    set receiveShadow(val: boolean) {
-        this.#receiveShadow = val;
     }
 
     /**

@@ -670,14 +670,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 스트리머에 분할 등록된 모든 서브셀의 누적 인스턴스 총합을 반환합니다.
-     * [EN] Returns the total accumulated instance count across all sub-cells registered in the streamer.
-     */
-    get totalInstanceCount(): number {
-        return this.#streamer.totalInstanceCount;
-    }
-
-    /**
      * [KO] 프러스텀 및 구체 컬링에 사용되는 바운딩 구체 반경(미터)을 반환합니다.
      * [EN] Returns the bounding sphere radius in meters used for frustum and sphere culling.
      */
@@ -932,96 +924,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 특정 LOD 단계의 그림자 수신 여부를 동적으로 변경합니다.
-     * [EN] Dynamically sets whether a specific LOD level receives shadows.
-     *
-     * @param lodIndex -
-     * [KO] 대상 LOD 단계 인덱스
-     * [EN] Target LOD level index
-     * @param value -
-     * [KO] 그림자 수신 활성화 여부
-     * [EN] Whether shadow reception is enabled
-     */
-    setLODReceiveShadow(lodIndex: number, value: boolean): void {
-        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
-        const boolVal = !!value;
-        const lodInfo = this.#lodInfoList[lodIndex];
-        if (lodInfo.receiveShadow === boolVal) return;
-
-        lodInfo.receiveShadow = boolVal;
-
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            const subMeshes = this.#subMeshes;
-            const count = subMeshes.length;
-            for (let i = 0; i < count; i++) {
-                if (subMeshes[i].lodIndex === lodIndex) {
-                    subMeshes[i].updateReceiveShadow(gpuDevice, boolVal);
-                }
-            }
-        }
-        this.#onDirty?.();
-    }
-
-    /**
      * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
      * [EN] Clears the tile cache and loaded component key set in the streamer.
      */
     clearTileCache(): void {
         this.#streamer.clear();
         this.#loadedTileKeys.clear();
-    }
-
-    /**
-     * [KO] 특정 LOD 단계의 그림자 수신 활성화 여부를 조회합니다.
-     * [EN] Retrieves whether shadow reception is enabled for a specific LOD level.
-     *
-     * @param lodIndex -
-     * [KO] 조회할 LOD 단계 인덱스
-     * [EN] LOD level index to query
-     * @returns
-     * [KO] 그림자 수신 여부
-     * [EN] Whether shadows are received
-     */
-    getLODReceiveShadow(lodIndex: number): boolean {
-        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return false;
-        return this.#lodInfoList[lodIndex].receiveShadow !== false;
-    }
-
-    /**
-     * [KO] 특정 LOD 단계의 전환 최대 가시 거리(미터)를 반환합니다.
-     * [EN] Returns the transition maximum visible distance in meters for a specific LOD level.
-     *
-     * @param lodIndex -
-     * [KO] 대상 LOD 단계 인덱스
-     * [EN] Target LOD level index
-     * @returns
-     * [KO] LOD 전환 거리 (미터)
-     * [EN] LOD transition distance in meters
-     */
-    getLODDistance(lodIndex: number): number {
-        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
-        return this.#lodInfoList[lodIndex].lodDistance;
-    }
-
-    /**
-     * [KO] 특정 LOD 단계의 전환 최대 가시 거리(미터)를 설정하고 GPU 파라미터 버퍼에 동기화합니다.
-     * [EN] Sets the transition maximum visible distance in meters for a specific LOD level and syncs to GPU.
-     *
-     * @param lodIndex -
-     * [KO] 대상 LOD 단계 인덱스
-     * [EN] Target LOD level index
-     * @param distance -
-     * [KO] 설정할 전환 거리 (미터)
-     * [EN] Transition distance to set in meters
-     */
-    setLODDistance(lodIndex: number, distance: number): void {
-        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
-        const numVal = Math.max(0, distance);
-        if (this.#lodInfoList[lodIndex].lodDistance !== numVal) {
-            this.#lodInfoList[lodIndex].lodDistance = numVal;
-            this.#syncTypeParams();
-        }
     }
 
     /**

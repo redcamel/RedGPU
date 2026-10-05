@@ -110,14 +110,6 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 버텍스 셰이더 Uniform 버퍼를 반환합니다.
-     * [EN] Returns the vertex shader uniform buffer.
-     */
-    get vertexUniformBuffer(): GPUBuffer {
-        return this.#vertexUniformBuffer;
-    }
-
-    /**
      * [KO] 버텍스 셰이더 Uniform 바인드 그룹을 반환합니다.
      * [EN] Returns the vertex shader uniform bind group.
      */

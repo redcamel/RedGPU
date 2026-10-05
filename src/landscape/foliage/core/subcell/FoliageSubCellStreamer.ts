@@ -24,7 +24,6 @@ export default class FoliageSubCellStreamer {
     #foliage: Foliage;
     #subCells: Map<number, FoliageSubCell> = new Map();
     #mountedSubCells: FoliageSubCell[] = [];
-    #totalInstanceCount: number = 0;
     #lastMountedCount: number = 0;
     #lastUnmountedCount: number = 0;
 
@@ -37,30 +36,6 @@ export default class FoliageSubCellStreamer {
      */
     constructor(foliage: Foliage) {
         this.#foliage = foliage;
-    }
-
-    /**
-     * [KO] 등록된 전체 서브셀 수
-     * [EN] Total number of registered sub-cells
-     */
-    get totalSubCellCount(): number {
-        return this.#subCells.size;
-    }
-
-    /**
-     * [KO] 등록된 전체 식생 인스턴스 수
-     * [EN] Total number of registered foliage instances
-     */
-    get totalInstanceCount(): number {
-        return this.#totalInstanceCount;
-    }
-
-    /**
-     * [KO] 현재 GPU 버퍼에 마운트된 서브셀 수
-     * [EN] Number of sub-cells currently mounted to GPU buffer
-     */
-    get mountedSubCellCount(): number {
-        return this.#mountedSubCells.length;
     }
 
     /**
@@ -195,7 +170,6 @@ export default class FoliageSubCellStreamer {
         newSubCells.forEach((subCell, key) => {
             if (!this.#subCells.has(key)) {
                 this.#subCells.set(key, subCell);
-                this.#totalInstanceCount += subCell.instanceCount;
             }
         });
     }
@@ -213,7 +187,6 @@ export default class FoliageSubCellStreamer {
         });
         this.#mountedSubCells.length = 0;
         this.#subCells.clear();
-        this.#totalInstanceCount = 0;
         this.#lastMountedCount = 0;
         this.#lastUnmountedCount = 0;
         if (this.#foliage.allocation) {

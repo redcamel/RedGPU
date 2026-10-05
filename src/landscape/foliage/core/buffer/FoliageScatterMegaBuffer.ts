@@ -152,20 +152,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         return this.#shadowIndirectGPUBuffer;
     }
 
-
-    /**
-     * [KO] 등록된 모든 식생 타입의 활성 인스턴스 총합
-     * [EN] Total active instances across all registered foliage types
-     */
-    get totalActiveInstances(): number {
-        let total = 0;
-        const count = this.#allocatedTypes.length;
-        for (let i = 0; i < count; i++) {
-            total += this.#allocatedTypes[i].instanceCount;
-        }
-        return total;
-    }
-
     /**
      * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다.
      * [EN] Allocates a buffer segment and registers offsets for a new foliage type.
