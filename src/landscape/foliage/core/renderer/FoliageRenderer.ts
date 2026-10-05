@@ -54,6 +54,14 @@ class FoliageRenderer extends RedGPUObject {
     #singleBundleArray: [GPURenderBundle] = [null as any];
 
     #useDepthPrepass: boolean = true;
+    #depthPrepassBundlesByView: WeakMap<View3D, {
+        bundle: GPURenderBundle;
+        systemBG: GPUBindGroup;
+        sampleCount: number;
+        validTypeCount: number;
+    }> = new WeakMap();
+    #singlePrepassBundleArray: [GPURenderBundle] = [null as any];
+
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
     #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
 
@@ -115,7 +123,11 @@ class FoliageRenderer extends RedGPUObject {
     }
 
     set useDepthPrepass(value: boolean) {
-        this.#useDepthPrepass = !!value;
+        const boolVal = !!value;
+        if (this.#useDepthPrepass !== boolVal) {
+            this.#useDepthPrepass = boolVal;
+            this.markDepthPrepassBundleDirty();
+        }
     }
 
     /**
@@ -128,6 +140,15 @@ class FoliageRenderer extends RedGPUObject {
             this.#shadowBundleValid[i] = false;
             this.#lastSystemBGByCascade[i] = null;
         }
+    }
+
+    /**
+     * [KO] 캐시된 모든 메인 뎁스 프리패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached main depth prepass render bundles to force regeneration on the next render.
+     */
+    markDepthPrepassBundleDirty(): void {
+        this.#depthPrepassBundlesByView = new WeakMap();
+        this.#singlePrepassBundleArray[0] = null as any;
     }
 
     /**
@@ -184,36 +205,31 @@ class FoliageRenderer extends RedGPUObject {
         if (validCount === 0) return;
 
         if (this.#useDepthPrepass) {
-            // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
-            for (let t = 0; t < validCount; t++) {
-                const item = this.#validTypesMain[t];
-                const foliageType = item.type!;
-                if (!foliageType.useDepthPrepass) continue;
-                const culledGPU = item.culledGPU!;
-                const indirectGPU = item.indirectGPU!;
-                const subMeshes = foliageType.depthPrepassOpaqueSubMeshes;
-                const subCount = subMeshes.length;
-                if (subCount === 0) continue;
+            let viewCache = this.#depthPrepassBundlesByView.get(view);
+            const needsRebuild = !viewCache
+                || viewCache.systemBG !== systemBG
+                || viewCache.sampleCount !== sampleCount
+                || viewCache.validTypeCount !== validCount;
 
-                for (let s = 0; s < subCount; s++) {
-                    this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+            if (needsRebuild) {
+                const bundle = this.#recordDepthPrepassRenderBundle(validCount, systemBG, sampleCount, msaaID, view);
+                if (bundle) {
+                    viewCache = {
+                        bundle,
+                        systemBG: systemBG!,
+                        sampleCount,
+                        validTypeCount: validCount
+                    };
+                    this.#depthPrepassBundlesByView.set(view, viewCache);
+                } else {
+                    viewCache = undefined;
+                    this.#depthPrepassBundlesByView.delete(view);
                 }
             }
 
-            // [2단계] 모든 식생 타입의 Masked 서브메시 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
-            for (let t = 0; t < validCount; t++) {
-                const item = this.#validTypesMain[t];
-                const foliageType = item.type!;
-                if (!foliageType.useDepthPrepass) continue;
-                const culledGPU = item.culledGPU!;
-                const indirectGPU = item.indirectGPU!;
-                const subMeshes = foliageType.depthPrepassMaskedSubMeshes;
-                const subCount = subMeshes.length;
-                if (subCount === 0) continue;
-
-                for (let s = 0; s < subCount; s++) {
-                    this.#drawSubMesh(passEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
-                }
+            if (viewCache?.bundle) {
+                this.#singlePrepassBundleArray[0] = viewCache.bundle;
+                passEncoder.executeBundles(this.#singlePrepassBundleArray);
             }
         }
 
@@ -316,7 +332,9 @@ class FoliageRenderer extends RedGPUObject {
         this.#subMeshDynamicBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
         this.markShadowBundleDirty();
+        this.markDepthPrepassBundleDirty();
         this.#singleBundleArray[0] = null as any;
+        this.#singlePrepassBundleArray[0] = null as any;
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
         this.#lastBoundMatBG = null;
@@ -333,6 +351,87 @@ class FoliageRenderer extends RedGPUObject {
         }
         this.#validTypesMain.length = 0;
         this.#validTypesShadow.length = 0;
+    }
+
+    #recordDepthPrepassRenderBundle(
+        validCount: number,
+        systemBG: GPUBindGroup | null,
+        sampleCount: number,
+        msaaID: string,
+        view: View3D
+    ): GPURenderBundle | null {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return null;
+
+        let hasPrepassSubMeshes = false;
+        for (let t = 0; t < validCount; t++) {
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type;
+            if (foliageType && foliageType.useDepthPrepass) {
+                if (foliageType.depthPrepassOpaqueSubMeshes.length > 0 || foliageType.depthPrepassMaskedSubMeshes.length > 0) {
+                    hasPrepassSubMeshes = true;
+                    break;
+                }
+            }
+        }
+        if (!hasPrepassSubMeshes) return null;
+
+        const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            label: `Foliage_DepthPrepassBundleEncoder_${view.name}`,
+            colorFormats: [
+                'rgba16float',
+                navigator.gpu.getPreferredCanvasFormat(),
+                'rgba16float'
+            ],
+            depthStencilFormat: 'depth32float',
+            sampleCount: sampleCount,
+        });
+
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        this.#lastBoundInstanceOffset = -1;
+
+        // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
+        for (let t = 0; t < validCount; t++) {
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            if (!foliageType.useDepthPrepass) continue;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
+            const subMeshes = foliageType.depthPrepassOpaqueSubMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            for (let s = 0; s < subCount; s++) {
+                this.#drawSubMesh(bundleEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+            }
+        }
+
+        // [2단계] 모든 식생 타입의 Masked 서브메시 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
+        for (let t = 0; t < validCount; t++) {
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            if (!foliageType.useDepthPrepass) continue;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
+            const subMeshes = foliageType.depthPrepassMaskedSubMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            for (let s = 0; s < subCount; s++) {
+                this.#drawSubMesh(bundleEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+            }
+        }
+
+        const bundle = bundleEncoder.finish({
+            label: `Foliage_DepthPrepassBundle_${view.name}`,
+        });
+
+        return bundle;
     }
 
     #recordShadowRenderBundle(

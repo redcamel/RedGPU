@@ -152,6 +152,7 @@ class FoliageManager {
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markShadowBundleDirty();
+            this.#renderer.markDepthPrepassBundleDirty();
         };
     }
 
@@ -305,6 +306,7 @@ class FoliageManager {
             this.#foliageList[i].populateTile(tileComponent, this.#landscape);
         }
         this.#renderer.markShadowBundleDirty();
+        this.#renderer.markDepthPrepassBundleDirty();
     }
 
     /**
@@ -516,6 +518,7 @@ class FoliageManager {
         this.#foliageList.splice(idx, 1);
         foliage.destroy();
         this.#renderer.markShadowBundleDirty();
+        this.#renderer.markDepthPrepassBundleDirty();
         return this.#foliageTypes.delete(foliage.name);
     }
 
@@ -554,6 +557,8 @@ class FoliageManager {
         for (let i = 0; i < count; i++) {
             this.#foliageList[i].rebake();
         }
+        this.#renderer.markShadowBundleDirty();
+        this.#renderer.markDepthPrepassBundleDirty();
     }
 
     /**
@@ -608,7 +613,10 @@ class FoliageManager {
             mergedOptions,
             this.#subMeshVertexBindGroupLayout,
             this.#megaBuffer,
-            () => this.#renderer.markShadowBundleDirty(),
+            () => {
+                this.#renderer.markShadowBundleDirty();
+                this.#renderer.markDepthPrepassBundleDirty();
+            },
             (t) => this.#repopulateFoliage(t),
             this.#culler.baker,
             this.#slotPooler,
@@ -617,6 +625,7 @@ class FoliageManager {
         this.#foliageTypes.set(options.name, foliage);
         this.#foliageList.push(foliage);
         this.#renderer.markShadowBundleDirty();
+        this.#renderer.markDepthPrepassBundleDirty();
 
         const cells = this.#landscape?.components;
         if (cells && cells.length > 0) {
