@@ -49,8 +49,6 @@ import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
  * @category Landscape
  */
 class FoliageManager {
-    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
-    #emptyBindGroup: GPUBindGroup | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #redGPUContext: RedGPUContext;
@@ -96,15 +94,6 @@ class FoliageManager {
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
-            this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Empty_BindGroupLayout', {
-                label: 'Landscape_Empty_BindGroupLayout',
-                entries: []
-            });
-            this.#emptyBindGroup = gpuDevice.createBindGroup({
-                label: 'Foliage_Empty_BindGroup',
-                layout: this.#emptyBindGroupLayout,
-                entries: []
-            });
             this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
                 label: 'Foliage_SubMesh_BindGroupLayout',
                 entries: [
@@ -117,13 +106,9 @@ class FoliageManager {
             });
         }
 
-        const emptyBGL = this.#emptyBindGroupLayout;
-        const emptyBG = this.#emptyBindGroup;
-        const subMeshBGL = this.#subMeshVertexBindGroupLayout;
-
         this.#megaBuffer = new FoliageScatterMegaBuffer(this.#redGPUContext);
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
-        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
+        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext);
+        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#subMeshVertexBindGroupLayout);
         this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
 
         this.#megaBuffer.onRecreated = () => {
@@ -549,8 +534,6 @@ class FoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#culler.destroy();
-        this.#emptyBindGroupLayout = null;
-        this.#emptyBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
         this.#tileStreamer = null as any;

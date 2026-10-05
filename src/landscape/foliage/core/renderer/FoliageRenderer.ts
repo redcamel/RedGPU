@@ -34,7 +34,6 @@ export interface ValidFoliageTypeItem {
 class FoliageRenderer extends RedGPUObject {
     static readonly #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
-    #emptyBindGroup: GPUBindGroup | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #lastBoundPipeline: GPURenderPipeline | null = null;
@@ -66,9 +65,6 @@ class FoliageRenderer extends RedGPUObject {
      * @param pipelineRegistry -
      * [KO] 식생 파이프라인 레지스트리
      * [EN] Foliage pipeline registry
-     * @param emptyBindGroup -
-     * [KO] 빈 바인드 그룹 (선택사항)
-     * [EN] Empty bind group (optional)
      * @param subMeshVertexBindGroupLayout -
      * [KO] 서브메시 유니폼 바인드 그룹 레이아웃 (선택사항)
      * [EN] Sub-mesh uniform bind group layout (optional)
@@ -76,12 +72,10 @@ class FoliageRenderer extends RedGPUObject {
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
-        emptyBindGroup?: GPUBindGroup | null,
         subMeshVertexBindGroupLayout?: GPUBindGroupLayout | null
     ) {
         super(redGPUContext);
         this.#pipelineRegistry = pipelineRegistry;
-        this.#emptyBindGroup = emptyBindGroup || null;
         this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
 
         for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
@@ -445,7 +439,7 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastBoundSystemBG = systemBG;
         }
 
-        const vertexUniformBG = shadowSub.vertexUniformBindGroup || this.#emptyBindGroup;
+        const vertexUniformBG = shadowSub.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
         if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
             passEncoder.setBindGroup(1, vertexUniformBG);
             this.#lastBoundVertexUniformBG = vertexUniformBG;
@@ -515,7 +509,7 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastBoundSystemBG = systemBG;
         }
 
-        const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
+        const vertexUniformBG = sub.vertexUniformBindGroup || this.resourceManager.emptyBindGroup;
         if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
             passEncoder.setBindGroup(1, vertexUniformBG);
             this.#lastBoundVertexUniformBG = vertexUniformBG;
@@ -586,7 +580,8 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastBoundSystemBG = systemBG;
         }
 
-        const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
+        const emptyBG = this.resourceManager.emptyBindGroup;
+        const vertexUniformBG = sub.vertexUniformBindGroup || emptyBG;
         if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
             passEncoder.setBindGroup(1, vertexUniformBG);
             this.#lastBoundVertexUniformBG = vertexUniformBG;
@@ -594,8 +589,8 @@ class FoliageRenderer extends RedGPUObject {
 
         const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !sub.isMasked;
         const matUniformBG = isDepthPrepassOpaque
-            ? this.#emptyBindGroup
-            : (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || this.#emptyBindGroup);
+            ? emptyBG
+            : (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
             passEncoder.setBindGroup(2, matUniformBG);
             this.#lastBoundMatBG = matUniformBG;

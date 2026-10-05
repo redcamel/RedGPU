@@ -31,7 +31,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
     #vertexShaderModule: GPUShaderModule | null = null;
     #depthPrepassMaskedFragmentShaderModule: GPUShaderModule | null = null;
     #depthPrepassOpaqueFragmentShaderModule: GPUShaderModule | null = null;
-    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
      * [KO] FoliagePipelineRegistry 인스턴스를 생성하고 공용 셰이더 모듈을 컴파일합니다.
@@ -39,16 +38,9 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance
-     * @param emptyBindGroupLayout -
-     * [KO] 빈 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Empty bind group layout (optional)
      */
-    constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
+    constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.#emptyBindGroupLayout = emptyBindGroupLayout || redGPUContext.gpuDevice?.createBindGroupLayout({
-            label: 'Foliage_Empty_BindGroupLayout',
-            entries: []
-        }) || null;
         this.#initShaderModules();
     }
 
@@ -167,12 +159,13 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
+        const emptyBindGroupLayout = resourceManager.emptyBindGroupLayout;
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = isDepthPrepassOpaque
-            ? this.#emptyBindGroupLayout!
+            ? emptyBindGroupLayout
             : (material.gpuRenderInfo?.fragmentBindGroupLayout
                 || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
-                || this.#emptyBindGroupLayout!);
+                || emptyBindGroupLayout);
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
@@ -317,7 +310,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || resourceManager.emptyBindGroupLayout;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
@@ -406,10 +399,11 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
+        const emptyBindGroupLayout = resourceManager.emptyBindGroupLayout;
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
-            || this.#emptyBindGroupLayout;
+            || emptyBindGroupLayout;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,

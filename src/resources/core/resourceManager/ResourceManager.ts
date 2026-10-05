@@ -103,6 +103,8 @@ class ResourceManager extends RedGPUObject {
     #emptyTexture3DView: GPUTextureView
     #emptyDepthTextureView: GPUTextureView
     #emptyR32FloatTextureView: GPUTextureView
+    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
+    #emptyBindGroup: GPUBindGroup | null = null;
     #mipmapGenerator: MipmapGenerator
     #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     #brdfGenerator: BRDFGenerator
@@ -380,6 +382,35 @@ class ResourceManager extends RedGPUObject {
      */
     get emptyR32FloatTextureView(): GPUTextureView {
         return this.#emptyR32FloatTextureView;
+    }
+
+    /**
+     * [KO] WebGPU 전역 공용 빈 바인드그룹 레이아웃 (entries: [])을 반환합니다. 파이프라인 레이아웃 구성 시 미사용 바인딩 슬롯 정합성 유지에 사용됩니다.
+     * [EN] Returns the WebGPU global empty bind group layout (entries: []). Used to satisfy binding slot requirements when configuring pipeline layouts.
+     */
+    get emptyBindGroupLayout(): GPUBindGroupLayout {
+        if (!this.#emptyBindGroupLayout) {
+            this.#emptyBindGroupLayout = this.createBindGroupLayout(
+                'RedGPU_ResourceManager_EmptyBindGroupLayout',
+                {entries: []}
+            );
+        }
+        return this.#emptyBindGroupLayout;
+    }
+
+    /**
+     * [KO] WebGPU 전역 공용 빈 바인드그룹 (entries: [])을 반환합니다. 섀도우 패스, 뎁스 프리패스 등 바인딩 슬롯 정합성 유지를 위한 더미 바인드그룹으로 공용 사용됩니다.
+     * [EN] Returns the WebGPU global empty bind group (entries: []). Used as a dummy bind group across shadow passes, depth prepasses, etc.
+     */
+    get emptyBindGroup(): GPUBindGroup {
+        if (!this.#emptyBindGroup) {
+            this.#emptyBindGroup = this.redGPUContext.gpuDevice.createBindGroup({
+                label: 'RedGPU_ResourceManager_EmptyBindGroup',
+                layout: this.emptyBindGroupLayout,
+                entries: [],
+            });
+        }
+        return this.#emptyBindGroup;
     }
 
     /**
@@ -667,6 +698,8 @@ class ResourceManager extends RedGPUObject {
         this.#emptyTexture3DView = null;
         this.#emptyDepthTextureView = null;
         this.#emptyR32FloatTextureView = null;
+        this.#emptyBindGroupLayout = null;
+        this.#emptyBindGroup = null;
         this.#wgslParser.destroy()
         this.#wgslParser = null
 
