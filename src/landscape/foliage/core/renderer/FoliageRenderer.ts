@@ -32,7 +32,7 @@ export interface ValidFoliageTypeItem {
  * :::
  */
 class FoliageRenderer extends RedGPUObject {
-    static readonly #MAX_POOLED_TYPES = 64;
+    static #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 

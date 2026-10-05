@@ -16,16 +16,16 @@ import {packSubCellKey} from "../../../core/scatter/ScatterSpatialUtils";
  */
 export class FoliageSpatialGrid {
 
-    static readonly MAX_ACTIVE_SUB_CELLS: number = 2048;
+    static MAX_ACTIVE_SUB_CELLS: number = 2048;
 
-    readonly #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
+    #activeSubCellKeys: Int32Array = new Int32Array(FoliageSpatialGrid.MAX_ACTIVE_SUB_CELLS);
     #activeSubCellCount: number = 0;
 
     #lastCamX: number = 1e9;
     #lastCamZ: number = 1e9;
     #lastRadius: number = -1;
     #lastCellSize: number = -1;
-    readonly #updateThresholdSq: number = 25.0;
+    #updateThresholdSq: number = 25.0;
 
     /**
      * [KO] FoliageSpatialGrid 인스턴스를 생성합니다.
