@@ -338,8 +338,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         megaBuffer?: FoliageScatterMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
-        baker?: ScatterInstanceBaker | null,
-        globalWindBuffer?: GPUBuffer | null
+        baker?: ScatterInstanceBaker | null
     ) {
         super(redGPUContext, options?.name || '');
 
@@ -430,8 +429,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            this.#subMeshVertexBindGroupLayout!,
-            globalWindBuffer
+            this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];

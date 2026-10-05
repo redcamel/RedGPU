@@ -52,7 +52,6 @@ export default function buildFoliageImpostorSubMesh(
     redGPUContext: RedGPUContext,
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
-    globalWindBuffer: GPUBuffer,
     options: FoliageOptions,
     sourceSubMeshes: FoliageSubMesh[],
     subMeshes: FoliageSubMesh[],
@@ -80,7 +79,6 @@ export default function buildFoliageImpostorSubMesh(
     const bbSubMesh = createFoliageSubMeshInstance({
         gpuDevice,
         subMeshBindGroupLayout,
-        globalWindBuffer,
         meshNode: sourceSubMeshes[0]?.mesh,
         geom: bbGeom,
         mat: bbMat,

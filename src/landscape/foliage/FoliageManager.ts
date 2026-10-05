@@ -31,7 +31,6 @@ import FoliageSpatialGrid from "./core/spatial/FoliageSpatialGrid";
  * ```typescript
  * const foliageManager = landscape.foliageManager;
  * foliageManager.streamingRadius = 800;
- * foliageManager.windStrength = 1.2;
  *
  * // 식생 생태계 타입 등록 (다중 LOD 및 옥타헤드럴 임포스터 지원)
  * const pineTree = foliageManager.addFoliage({
@@ -74,17 +73,6 @@ class FoliageManager {
     #debugSubCellColoration: boolean = false;
     #onUniformUpdateNeeded: (() => void) | null = null;
 
-    #windEnabled: boolean = true;
-    #windDirection: [number, number] = [1.0, 0.5];
-    #windSpeed: number = 1.0;
-    #windStrength: number = 1.0;
-    #windFrequency: number = 0.08;
-    #windFlutterStrength: number = 0.5;
-
-    #globalWindBuffer: GPUBuffer | null = null;
-    #globalWindFloatBuffer: Float32Array = new Float32Array(8);
-    #globalWindUintBuffer: Uint32Array = new Uint32Array(this.#globalWindFloatBuffer.buffer);
-
     /**
      * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
      * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
@@ -108,12 +96,6 @@ class FoliageManager {
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         if (gpuDevice) {
-            this.#globalWindBuffer = gpuDevice.createBuffer({
-                label: 'Foliage_Global_Wind_UniformBuffer',
-                size: 32,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-
             this.#emptyBindGroupLayout = resourceManager.createBindGroupLayout('Landscape_Empty_BindGroupLayout', {
                 label: 'Landscape_Empty_BindGroupLayout',
                 entries: []
@@ -133,8 +115,6 @@ class FoliageManager {
                     }
                 ]
             });
-
-            this.#syncGlobalWindBuffer();
         }
 
         const emptyBGL = this.#emptyBindGroupLayout;
@@ -385,181 +365,7 @@ class FoliageManager {
         }
     }
 
-    /**
-     * [KO] 모든 식생에 적용되는 바람(Wind) 시뮬레이션의 활성화 여부를 반환합니다.
-     * [EN] Gets whether wind simulation applied to all foliage is enabled.
-     */
-    get windEnabled(): boolean {
-        return this.#windEnabled;
-    }
 
-    /**
-     * [KO] 모든 식생에 적용되는 바람 시뮬레이션의 활성화 여부를 설정합니다.
-     * [EN] Sets whether wind simulation applied to all foliage is enabled.
-     *
-     * @param val -
-     * [KO] 바람 시뮬레이션 활성화 여부
-     * [EN] Whether wind simulation is enabled
-     */
-    set windEnabled(val: boolean) {
-        const boolVal = !!val;
-        if (this.#windEnabled !== boolVal) {
-            this.#windEnabled = boolVal;
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 바람의 이동 속도(기본값: 1.0)를 반환합니다.
-     * [EN] Gets the wind movement speed (default: 1.0).
-     */
-    get windSpeed(): number {
-        return this.#windSpeed;
-    }
-
-    /**
-     * [KO] 바람의 이동 속도를 설정합니다.
-     * [EN] Sets the wind movement speed.
-     *
-     * @param val -
-     * [KO] 바람 이동 속도 (최소값: 0.0)
-     * [EN] Wind movement speed (minimum: 0.0)
-     */
-    set windSpeed(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windSpeed !== numVal) {
-            this.#windSpeed = numVal;
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 바람에 의한 식생 줄기 및 가지의 굽힘 강도(기본값: 0.5)를 반환합니다.
-     * [EN] Gets the bending strength of foliage stems and branches caused by wind (default: 0.5).
-     */
-    get windStrength(): number {
-        return this.#windStrength;
-    }
-
-    /**
-     * [KO] 바람에 의한 식생 줄기 및 가지의 굽힘 강도를 설정합니다.
-     * [EN] Sets the bending strength of foliage stems and branches caused by wind.
-     *
-     * @param val -
-     * [KO] 바람 굽힘 강도 (최소값: 0.0)
-     * [EN] Wind bending strength (minimum: 0.0)
-     */
-    set windStrength(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windStrength !== numVal) {
-            this.#windStrength = numVal;
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 바람 파동의 공간적 진동수/주파수(기본값: 0.8)를 반환합니다.
-     * [EN] Gets the spatial wave frequency of the wind (default: 0.8).
-     */
-    get windFrequency(): number {
-        return this.#windFrequency;
-    }
-
-    /**
-     * [KO] 바람 파동의 공간적 진동수/주파수를 설정합니다.
-     * [EN] Sets the spatial wave frequency of the wind.
-     *
-     * @param val -
-     * [KO] 바람 주파수 (최소값: 0.001)
-     * [EN] Wind frequency (minimum: 0.001)
-     */
-    set windFrequency(val: number) {
-        const numVal = Math.max(0.001, Number(val) || 0.001);
-        if (this.#windFrequency !== numVal) {
-            this.#windFrequency = numVal;
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 나뭇잎이나 잔가지의 고주파 플러터(떨림) 강도(기본값: 0.3)를 반환합니다.
-     * [EN] Gets the high-frequency flutter strength of leaves and twigs (default: 0.3).
-     */
-    get windFlutterStrength(): number {
-        return this.#windFlutterStrength;
-    }
-
-    /**
-     * [KO] 나뭇잎이나 잔가지의 고주파 플러터(떨림) 강도를 설정합니다.
-     * [EN] Sets the high-frequency flutter strength of leaves and twigs.
-     *
-     * @param val -
-     * [KO] 플러터 떨림 강도 (최소값: 0.0)
-     * [EN] Flutter strength (minimum: 0.0)
-     */
-    set windFlutterStrength(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windFlutterStrength !== numVal) {
-            this.#windFlutterStrength = numVal;
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 바람이 불어가는 2D 평면 정규화 방향 벡터 `[x, z]`(기본값: `[1.0, 0.0]`)를 반환합니다.
-     * [EN] Gets the normalized 2D direction vector `[x, z]` of the wind (default: `[1.0, 0.0]`).
-     */
-    get windDirection(): [number, number] {
-        return this.#windDirection;
-    }
-
-    /**
-     * [KO] 바람이 불어가는 2D 평면 방향 벡터를 설정합니다. 자동으로 정규화됩니다.
-     * [EN] Sets the 2D direction vector of the wind. Automatically normalized.
-     *
-     * @param val -
-     * [KO] 바람 2D 방향 벡터 `[x, z]`
-     * [EN] 2D wind direction vector `[x, z]`
-     */
-    set windDirection(val: [number, number]) {
-        if (Array.isArray(val) && val.length >= 2) {
-            const [rawX, rawY] = val;
-            const x = Number(rawX) || 0;
-            const y = Number(rawY) || 0;
-            const len = Math.sqrt(x * x + y * y);
-            if (len > 0.0001) {
-                this.#windDirection = [x / len, y / len];
-            } else {
-                this.#windDirection = [1.0, 0.0];
-            }
-            this.#syncWindToAllTypes();
-        }
-    }
-
-    /**
-     * [KO] 바람의 진행 방향 각도(단위: 도(degree), 0° ~ 360°, 기본값: 0°)를 반환합니다.
-     * [EN] Gets the wind direction angle in degrees (0° to 360°, default: 0°).
-     */
-    get windDirectionAngle(): number {
-        const rad = Math.atan2(this.#windDirection[1], this.#windDirection[0]);
-        let deg = rad * (180.0 / Math.PI);
-        if (deg < 0) deg += 360;
-        return deg;
-    }
-
-    /**
-     * [KO] 바람의 진행 방향 각도를 설정합니다 (단위: 도(degree)).
-     * [EN] Sets the wind direction angle in degrees.
-     *
-     * @param deg -
-     * [KO] 설정할 바람 각도 (단위: 도)
-     * [EN] Wind angle to set (in degrees)
-     */
-    set windDirectionAngle(deg: number) {
-        const rad = deg * (Math.PI / 180.0);
-        this.#windDirection = [Math.cos(rad), Math.sin(rad)];
-        this.#syncWindToAllTypes();
-    }
 
     /**
      * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사가 설정된 식생 인스턴스들의 그림자를 렌더링합니다.
@@ -620,13 +426,6 @@ class FoliageManager {
         this.#culler.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
     }
 
-    /**
-     * [KO] 모든 식생 서브메시가 공유하는 단일 글로벌 바람 WebGPU 버퍼를 반환합니다.
-     * [EN] Returns the single global wind WebGPU buffer shared by all foliage sub-meshes.
-     */
-    get globalWindBuffer(): GPUBuffer | null {
-        return this.#globalWindBuffer;
-    }
 
     /**
      * [KO] 등록된 식생 생태계 타입을 매니저에서 제거하고 관련 리소스를 해제합니다.
@@ -723,8 +522,7 @@ class FoliageManager {
             this.#megaBuffer,
             () => this.#renderer.markShadowBundleDirty(),
             (t) => this.#repopulateFoliage(t),
-            this.#culler.baker,
-            this.#globalWindBuffer
+            this.#culler.baker
         );
         this.#foliageTypes.set(options.name, foliage);
         this.#foliageList.push(foliage);
@@ -751,45 +549,12 @@ class FoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#culler.destroy();
-        this.#globalWindBuffer?.destroy();
-        this.#globalWindBuffer = null;
         this.#emptyBindGroupLayout = null;
         this.#emptyBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
         this.#tileStreamer = null as any;
         this.#onUniformUpdateNeeded = null;
-    }
-
-    /**
-     * [KO] 단일 글로벌 바람 유니폼 버퍼를 GPU에 1회 기록합니다. (Zero-GC, O(1) 전송)
-     * [EN] Writes to the single global wind uniform buffer on GPU once. (Zero-GC, O(1) transfer)
-     */
-    #syncGlobalWindBuffer(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#globalWindBuffer) return;
-        const fView = this.#globalWindFloatBuffer;
-        const uView = this.#globalWindUintBuffer;
-        fView[0] = this.#windDirection[0];
-        fView[1] = this.#windDirection[1];
-        fView[2] = this.#windSpeed;
-        fView[3] = this.#windStrength;
-        fView[4] = this.#windFrequency;
-        fView[5] = this.#windFlutterStrength;
-        uView[6] = this.#windEnabled ? 1 : 0;
-        uView[7] = 0;
-
-        gpuDevice.queue.writeBuffer(
-            this.#globalWindBuffer,
-            0,
-            fView.buffer,
-            fView.byteOffset,
-            32
-        );
-    }
-
-    #syncWindToAllTypes(): void {
-        this.#syncGlobalWindBuffer();
     }
 
     #repopulateFoliage(type: Foliage): void {

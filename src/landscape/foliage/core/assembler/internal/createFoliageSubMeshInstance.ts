@@ -77,11 +77,6 @@ export interface CreateSubMeshOptions {
      */
     receiveShadow?: boolean;
     /**
-     * [KO] 전역 바람 공유 유니폼 버퍼
-     * [EN] Global wind shared uniform buffer
-     */
-    globalWindBuffer: GPUBuffer;
-    /**
      * [KO] 인스턴스별 바람 강도 배수
      * [EN] Per-instance wind strength multiplier
      */
@@ -144,7 +139,6 @@ export default function createFoliageSubMeshInstance(
     const {
         gpuDevice,
         subMeshBindGroupLayout,
-        globalWindBuffer,
         meshNode,
         geom,
         mat,
@@ -187,7 +181,6 @@ export default function createFoliageSubMeshInstance(
         const uniformResult = createFoliagePBRSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
-            globalWindBuffer,
             relMatrix,
             normMatrix,
             globalSlot,

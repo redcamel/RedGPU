@@ -95,7 +95,6 @@ export default function assembleFoliageLODMeshes(
     lodIndex: number,
     options: FoliageOptions,
     subMeshBindGroupLayout: GPUBindGroupLayout,
-    globalWindBuffer: GPUBuffer,
     subMeshUniformCache?: Map<string, FoliageSubMeshUniformResult>,
     lodReceiveShadow: boolean = true
 ): AssembledLODResult {
@@ -136,7 +135,6 @@ export default function assembleFoliageLODMeshes(
         const combinedSubMesh = createFoliageSubMeshInstance({
             gpuDevice,
             subMeshBindGroupLayout,
-            globalWindBuffer,
             meshNode: group.rawNodes[0]?.node,
             geom: unifiedGeometry || group.geometry,
             mat: group.material,
@@ -166,7 +164,6 @@ export default function assembleFoliageLODMeshes(
         const shadowUniform = createFoliageShadowSubMeshUniform(
             gpuDevice,
             subMeshBindGroupLayout,
-            globalWindBuffer,
             options.name,
             lodIndex,
             options.windMultiplier,

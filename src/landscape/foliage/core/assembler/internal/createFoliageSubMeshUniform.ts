@@ -36,9 +36,6 @@ export interface FoliageSubMeshUniformResult {
  * @param subMeshBindGroupLayout -
  * [KO] 서브메시 바인드 그룹 레이아웃
  * [EN] Sub-mesh bind group layout
- * @param globalWindBuffer -
- * [KO] 전역 바람 공유 유니폼 버퍼
- * [EN] Global wind shared uniform buffer
  * @param relMatrix -
  * [KO] 상대 모델 행렬
  * [EN] Relative model matrix
@@ -76,7 +73,6 @@ export interface FoliageSubMeshUniformResult {
 export function createFoliagePBRSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
-    globalWindBuffer: GPUBuffer,
     relMatrix: mat4,
     normMatrix: mat4,
     globalSlot: number,
@@ -147,9 +143,6 @@ export function createFoliagePBRSubMeshUniform(
  * @param subMeshBindGroupLayout -
  * [KO] 서브메시 바인드 그룹 레이아웃
  * [EN] Sub-mesh bind group layout
- * @param globalWindBuffer -
- * [KO] 전역 바람 공유 유니폼 버퍼
- * [EN] Global wind shared uniform buffer
  * @param name -
  * [KO] 식생 인스턴스 이름
  * [EN] Foliage instance name
@@ -172,7 +165,6 @@ export function createFoliagePBRSubMeshUniform(
 export function createFoliageShadowSubMeshUniform(
     gpuDevice: GPUDevice,
     subMeshBindGroupLayout: GPUBindGroupLayout,
-    globalWindBuffer: GPUBuffer,
     name: string,
     lodIndex: number,
     windMultiplier?: number,
