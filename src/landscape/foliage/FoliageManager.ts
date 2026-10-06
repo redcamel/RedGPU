@@ -268,7 +268,7 @@ class FoliageManager {
         if (this.#subCellSize !== clamped) {
             this.#subCellSize = clamped;
             this.#onUniformUpdateNeeded?.();
-            this.#repopulateAll();
+            this.repopulateAll();
         }
     }
 
@@ -587,7 +587,11 @@ class FoliageManager {
         this.#renderer.markShadowBundleDirty();
     }
 
-    #repopulateAll(): void {
+    /**
+     * [KO] 등록된 모든 식생 인스턴스의 서브셀 캐시를 초기화하고 온디맨드 재배치를 트리거합니다.
+     * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
+     */
+    repopulateAll(): void {
         const count = this.#foliageList.length;
         for (let i = 0; i < count; i++) {
             this.#repopulateFoliage(this.#foliageList[i]);

@@ -45,14 +45,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let sampledHeightNorm = textureSampleLevel(vhtTexture, basicSampler, vec2<f32>(u, v), 0.0).r;
-    let terrainHeight = sampledHeightNorm * bakeUniforms.heightScale;
-
-    let vecIdx = task.typeId >> 2u;
-    let compIdx = task.typeId & 3u;
-    let bottomOffset = bakeUniforms.bottomOffsets[vecIdx][compIdx];
-    let effectiveBottomOffset = bottomOffset * inst.scaleY;
-
     var groundColor = vec3<f32>(0.2, 0.2, 0.2);
     if (bakeUniforms.hasVBT != 0u) {
         let groundTex = textureSampleLevel(vbtTexture, basicSampler, vec2<f32>(u, v), 0.0);
@@ -66,6 +58,5 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let b = u32(clamp(groundColor.b, 0.0, 1.0) * 255.0);
     let typeId = task.typeId & 0xFFu;
 
-    rawInstances[instIdx].posY = terrainHeight + effectiveBottomOffset;
     rawInstances[instIdx].packedGroundColorAndType = (typeId << 24u) | (b << 16u) | (g << 8u) | r;
 }

@@ -956,32 +956,27 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#lastUnmountedCount;
     }
 
-    protected override onParameterChanged(prop: string, value: any): void {
-        switch (prop) {
-            case 'bottomOffset':
-                this.#syncTypeParams();
-                this.rebake();
-                break;
-            case 'cullingDistance':
-            case 'fadeStartDistance':
-                this.#syncTypeParams();
-                break;
-            case 'shadowCullDistance':
-            case 'castShadow':
-                this.#syncTypeParams();
-                this.#onDirty?.();
-                break;
-            case 'targetLayer':
-            case 'minSlope':
-            case 'maxSlope':
-            case 'densityScaleByWeight':
-            case 'densityPerHectare':
-            case 'densityMultiplier':
-                this.#onRepopulateRequired?.(this);
-                break;
-            case 'groundBlendStrength':
-                this.#updateSubMeshGroundBlend();
-                break;
+    /**
+     * [KO] 지정된 오프셋 및 개수의 인스턴스 데이터를 CPU 스테이징에서 GPU 원본 인스턴스 버퍼로 업로드하고 베이킹 태스크를 등록합니다.
+     * [EN] Uploads instance data of the specified range from CPU staging to GPU raw buffer and queues baking tasks.
+     *
+     * @param startIndex -
+     * [KO] 타입 할당 내 로컬 시작 오프셋
+     * [EN] Local start offset within type allocation
+     * @param count -
+     * [KO] 업로드할 인스턴스 개수
+     * [EN] Number of instances to upload
+     */
+    uploadRangeToGPU(startIndex: number, count: number): void {
+        const alloc = this.allocation;
+        if (this.#megaBuffer && alloc) {
+            this.#megaBuffer.uploadAllocationRangeToGPU(alloc, startIndex, count);
+            const hasVBT = !!this.#landscape?.vbtBaseColorAtlas;
+            const needGroundBlend = this.groundBlendStrength > 0.001;
+            if (this.#baker && count > 0 && hasVBT && needGroundBlend) {
+                const globalIndex = alloc.rawBaseOffset + startIndex;
+                this.#baker.addBakeTasks(globalIndex, count, alloc.typeId);
+            }
         }
     }
 
@@ -1181,39 +1176,48 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 지정된 오프셋 및 개수의 인스턴스 데이터를 CPU 스테이징에서 GPU 원본 인스턴스 버퍼로 업로드하고 베이킹 태스크를 등록합니다.
-     * [EN] Uploads instance data of the specified range from CPU staging to GPU raw buffer and queues baking tasks.
-     *
-     * @param startIndex -
-     * [KO] 타입 할당 내 로컬 시작 오프셋
-     * [EN] Local start offset within type allocation
-     * @param count -
-     * [KO] 업로드할 인스턴스 개수
-     * [EN] Number of instances to upload
-     */
-    uploadRangeToGPU(startIndex: number, count: number): void {
-        const alloc = this.allocation;
-        if (this.#megaBuffer && alloc) {
-            this.#megaBuffer.uploadAllocationRangeToGPU(alloc, startIndex, count);
-            if (this.#baker && count > 0) {
-                const globalIndex = alloc.rawBaseOffset + startIndex;
-                this.#baker.addBakeTasks(globalIndex, count, alloc.typeId);
-            }
-        }
-    }
-
-    /**
      * [KO] 현재 활성화된 모든 식생 인스턴스의 지형 스냅 및 물리 배치를 재베이킹합니다.
      * [EN] Re-bakes terrain snapping and physical placement for all currently active foliage instances.
      */
     rebake(): void {
         const alloc = this.allocation;
-        if (this.#megaBuffer && alloc && this.#baker && alloc.instanceCount > 0) {
+        const hasVBT = !!this.#landscape?.vbtBaseColorAtlas;
+        const needGroundBlend = this.groundBlendStrength > 0.001;
+        if (this.#megaBuffer && alloc && this.#baker && alloc.instanceCount > 0 && hasVBT && needGroundBlend) {
             this.#baker.addBakeTasks(
                 alloc.rawBaseOffset,
                 alloc.instanceCount,
                 alloc.typeId
             );
+        }
+    }
+
+    protected override onParameterChanged(prop: string, value: any): void {
+        switch (prop) {
+            case 'bottomOffset':
+                this.#syncTypeParams();
+                this.#onRepopulateRequired?.(this);
+                break;
+            case 'cullingDistance':
+            case 'fadeStartDistance':
+                this.#syncTypeParams();
+                break;
+            case 'shadowCullDistance':
+            case 'castShadow':
+                this.#syncTypeParams();
+                this.#onDirty?.();
+                break;
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#onRepopulateRequired?.(this);
+                break;
+            case 'groundBlendStrength':
+                this.#updateSubMeshGroundBlend();
+                break;
         }
     }
 

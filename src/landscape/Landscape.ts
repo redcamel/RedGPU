@@ -228,6 +228,7 @@ export class Landscape extends RedGPUObject {
         this.#tileStreamer.setOnGlobalHeightmapBaked(() => {
             this.#syncAllTileHeightBoundsFromGlobalHeightmap();
             this.#grassManager?.rebakeAll();
+            this.#foliageManager?.repopulateAll();
         });
         this.#debuggerManager = new DebuggerManager(this, this.#tileStreamer, {
             onDebugPropertyChange: (key) => {
@@ -383,7 +384,7 @@ export class Landscape extends RedGPUObject {
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
             this.#grassManager?.rebakeAll();
-            this.#foliageManager?.rebakeAll();
+            this.#foliageManager?.repopulateAll();
         }
     }
 
