@@ -76,7 +76,6 @@ export class GrassRenderer extends RedGPUObject {
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null];
     #shadowBundleValid: boolean[] = [false, false];
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null];
-    #lastShadowGrassCount: number = 0;
     #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
     #lastShadowMaskHigh: number = -1;
@@ -123,7 +122,6 @@ export class GrassRenderer extends RedGPUObject {
             this.#shadowBundleValid[i] = false;
             this.#lastSystemBGByCascade[i] = null;
         }
-        this.#lastShadowGrassCount = 0;
         this.#lastShadowMegaBuffer = null;
         this.#lastShadowMaskLow = -1;
         this.#lastShadowMaskHigh = -1;
@@ -258,7 +256,6 @@ export class GrassRenderer extends RedGPUObject {
 
         const needsRebuild = !this.#shadowBundleValid[currentCascade]
             || this.#lastSystemBGByCascade[currentCascade] !== systemBG
-            || this.#lastShadowGrassCount !== count
             || this.#lastShadowMegaBuffer !== megaBuffer
             || this.#lastShadowMaskLow !== shadowMaskLow
             || this.#lastShadowMaskHigh !== shadowMaskHigh;
@@ -271,7 +268,6 @@ export class GrassRenderer extends RedGPUObject {
                 this.#shadowRenderBundles[currentCascade] = bundle;
                 this.#shadowBundleValid[currentCascade] = true;
                 this.#lastSystemBGByCascade[currentCascade] = systemBG;
-                this.#lastShadowGrassCount = count;
                 this.#lastShadowMegaBuffer = megaBuffer;
             } else {
                 this.#shadowRenderBundles[currentCascade] = null;
@@ -555,7 +551,6 @@ export class GrassRenderer extends RedGPUObject {
                         stepMode: 'vertex',
                         attributes: [
                             {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
                             {shaderLocation: 2, offset: 24, format: 'float32x2'},
                         ]
                     }

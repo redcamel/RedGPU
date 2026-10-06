@@ -159,19 +159,17 @@ export default class GrassBakePipeline extends RedGPUObject {
 
         uu[12] = (grass.minSlope > 0 || grass.maxSlope < 90) ? 1 : 0;
         uf[13] = minScaleS;
-        // uf[14]: _padScale1
-        uf[15] = minScaleH;
-        // uf[16]: _padScale2
-        uf[17] = maxScaleS - minScaleS;
-        uf[18] = maxScaleH - minScaleH;
-        uu[19] = grass.typeId;
+        uf[14] = minScaleH;
+        uf[15] = maxScaleS - minScaleS;
+        uf[16] = maxScaleH - minScaleH;
+        uu[17] = grass.typeId;
 
-        uu[20] = alloc.rawBaseOffset;
-        uu[21] = hasWeightMap;
-        uu[22] = weightChannelIndex;
-        uu[23] = grass.densityScaleByWeight ? 1 : 0;
+        uu[18] = alloc.rawBaseOffset;
+        uu[19] = hasWeightMap;
+        uu[20] = weightChannelIndex;
+        uu[21] = grass.densityScaleByWeight ? 1 : 0;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#uniformArrayBuffer);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 
         const bindGroup = gpuDevice.createBindGroup({
             label: `Grass_Bake_BG_Type_${grass.typeId}`,

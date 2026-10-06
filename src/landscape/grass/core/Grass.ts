@@ -129,6 +129,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #shadowFadeStartDistance: number = 26.25;
     #streamingRadius: number = 120.0;
     #maxInstances?: number;
+    #instancesPerCell: number = 1;
 
     #dirty: boolean = true;
     #slotIndex: number = -1;
@@ -355,6 +356,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (maxInstances !== undefined) {
             this.#maxInstances = Math.max(1, Number(maxInstances) || 1);
         }
+
+        this.#updateInstancesPerCell();
     }
 
     /**
@@ -427,7 +430,42 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Computed number of instances generated per terrain grid cell (16m x 16m)
      */
     get instancesPerCell(): number {
-        return Math.max(1, Math.round((this.densityPerHectare * 256.0 / 10000.0) * this.densityMultiplier));
+        return this.#instancesPerCell;
+    }
+
+    protected override onParameterChanged(prop: string, value: any): void {
+        switch (prop) {
+            case 'cullingDistance': {
+                const cDist = value as number;
+                if (cDist * 1.15 > this.#streamingRadius) {
+                    this.#streamingRadius = cDist * 1.15;
+                    this.#notifyChange();
+                } else {
+                    this.#dirty = true;
+                }
+                break;
+            }
+            case 'shadowCullDistance':
+                this.#shadowFadeStartDistance = (value as number) * 0.75;
+                this.#dirty = true;
+                break;
+            case 'bottomOffset':
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+                this.#notifyChange();
+                break;
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#updateInstancesPerCell();
+                this.#notifyChange();
+                break;
+            case 'castShadow':
+            case 'groundBlendStrength':
+                this.#dirty = true;
+                break;
+        }
     }
 
 
@@ -637,36 +675,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (this.#onRepopulateRequired) this.#onRepopulateRequired();
     }
 
-    protected override onParameterChanged(prop: string, value: any): void {
-        switch (prop) {
-            case 'cullingDistance': {
-                const cDist = value as number;
-                if (cDist * 1.15 > this.#streamingRadius) {
-                    this.#streamingRadius = cDist * 1.15;
-                    this.#notifyChange();
-                } else {
-                    this.#dirty = true;
-                }
-                break;
-            }
-            case 'shadowCullDistance':
-                this.#shadowFadeStartDistance = (value as number) * 0.75;
-                this.#dirty = true;
-                break;
-            case 'bottomOffset':
-            case 'targetLayer':
-            case 'minSlope':
-            case 'maxSlope':
-            case 'densityScaleByWeight':
-            case 'densityPerHectare':
-            case 'densityMultiplier':
-                this.#notifyChange();
-                break;
-            case 'castShadow':
-            case 'groundBlendStrength':
-                this.#dirty = true;
-                break;
-        }
+    #updateInstancesPerCell(): void {
+        this.#instancesPerCell = Math.max(1, Math.round((this.densityPerHectare * 256.0 / 10000.0) * this.densityMultiplier));
     }
 
     /**

@@ -69,7 +69,8 @@ export default class GrassCullPipeline extends RedGPUObject {
             for (let p = 0; p < 24; p++) uf[4 + p] = 0;
         }
 
-        gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#uniformArrayBuffer);
+        // 28 floats (112 bytes) 정확한 바이트 크기 전송으로 버스 대역폭 낭비 방지
+        gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#uniformArrayBuffer, 0, 112);
 
         const unifiedBG = megaBuffer.getOrCreateUnifiedCullingBindGroup(
             bindGroupLayout,

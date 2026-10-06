@@ -47,7 +47,7 @@ export class GrassManager extends RedGPUObject {
     #lastBakePos: [number, number] = [0, 0];
     #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
-    #frustumPlanesF32: Float32Array = new Float32Array(24);
+    #frustumPlanesF32: Float32Array | null = new Float32Array(24);
 
     /**
      * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -272,15 +272,17 @@ export class GrassManager extends RedGPUObject {
         this.#lastCamPos[1] = camY;
         this.#lastCamPos[2] = camZ;
 
-        if (frustumPlanes && frustumPlanes.length === 6) {
-            for (let p = 0; p < 6; p++) {
-                this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
-            }
-        } else if (projectionMatrix && rawCam?.viewMatrix) {
-            const computed = computeViewFrustumPlanes(projectionMatrix, rawCam.viewMatrix);
-            if (computed) {
+        if (this.#frustumPlanesF32) {
+            if (frustumPlanes && frustumPlanes.length === 6) {
                 for (let p = 0; p < 6; p++) {
-                    this.#frustumPlanesF32.set(computed[p], p * 4);
+                    this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
+                }
+            } else if (projectionMatrix && rawCam?.viewMatrix) {
+                const computed = computeViewFrustumPlanes(projectionMatrix, rawCam.viewMatrix);
+                if (computed) {
+                    for (let p = 0; p < 6; p++) {
+                        this.#frustumPlanesF32.set(computed[p], p * 4);
+                    }
                 }
             }
         }
@@ -440,6 +442,8 @@ export class GrassManager extends RedGPUObject {
             list[i].destroy();
         }
         list.length = 0;
+
+        this.#frustumPlanesF32 = null;
     }
 
     // Zero-GC: VRAM 간접 드로우 템플릿 복사를 위한 바인딩 콜백
