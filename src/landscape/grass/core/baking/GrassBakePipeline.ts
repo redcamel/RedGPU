@@ -159,10 +159,9 @@ export default class GrassBakePipeline extends RedGPUObject {
 
         uu[12] = (grass.minSlope > 0 || grass.maxSlope < 90) ? 1 : 0;
         uf[13] = minScaleS;
-        uf[14] = maxScaleS;
+        // uf[14]: _padScale1
         uf[15] = minScaleH;
-
-        uf[16] = maxScaleH;
+        // uf[16]: _padScale2
         uf[17] = maxScaleS - minScaleS;
         uf[18] = maxScaleH - minScaleH;
         uu[19] = grass.typeId;

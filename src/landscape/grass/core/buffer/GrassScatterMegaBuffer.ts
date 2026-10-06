@@ -14,35 +14,10 @@ import type Grass from '../Grass';
  */
 export interface GrassDrawSlot {
     /**
-     * [KO] 슬롯 인덱스 (0: Near, 1: Far)
-     * [EN] Slot index (0: Near, 1: Far)
-     */
-    slotIndex: number;
-    /**
-     * [KO] 서브메시 인덱스
-     * [EN] Sub-mesh index
-     */
-    subMeshIndex: number;
-    /**
      * [KO] 인디렉트 버퍼 내 슬롯 오프셋 (DrawIndexedIndirect 구조체 단위)
      * [EN] Slot offset in indirect buffer (unit of DrawIndexedIndirect struct)
      */
-    indirectOffset: number;
-    /**
-     * [KO] 컬링된 인스턴스 버퍼 내 슬롯 기본 오프셋
-     * [EN] Base offset of slot in culled instance buffer
-     */
-    culledBaseOffset: number;
-    /**
-     * [KO] 해당 서브메시의 인덱스 수
-     * [EN] Index count of corresponding sub-mesh
-     */
-    indexCount: number;
-    /**
-     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋
-     * [EN] Starting index offset in index buffer
-     */
-    firstIndex: number;
+    readonly indirectOffset: number;
 }
 
 /**
@@ -161,12 +136,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             const sub = subMeshes[s];
             const slotIdx = baseAlloc.indirectBaseOffset + s;
             const nearSlot: GrassDrawSlot = {
-                slotIndex: 0,
-                subMeshIndex: s,
-                indirectOffset: slotIdx,
-                culledBaseOffset: nearCulledOffset,
-                indexCount: sub.indexCount,
-                firstIndex: sub.firstIndex
+                indirectOffset: slotIdx
             };
             this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, nearCulledOffset);
             nearSlots.push(nearSlot);
@@ -176,12 +146,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             const sub = subMeshes[s];
             const slotIdx = baseAlloc.indirectBaseOffset + subMeshCount + s;
             const farSlot: GrassDrawSlot = {
-                slotIndex: 1,
-                subMeshIndex: s,
-                indirectOffset: slotIdx,
-                culledBaseOffset: farCulledOffset,
-                indexCount: sub.indexCount,
-                firstIndex: sub.firstIndex
+                indirectOffset: slotIdx
             };
             this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, farCulledOffset);
             farSlots.push(farSlot);
@@ -286,23 +251,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
                 byteSize
             );
         }
-    }
-
-    /**
-     * [KO] 모든 잔디 타입의 파라미터를 GPU 스토리지 버퍼로 일괄 동기화합니다.
-     * [EN] Batch synchronizes parameters of all grass types to the GPU storage buffer.
-     */
-    syncAllTypeParamsToGPU(): void {
-        const gpuDevice = this.gpuDevice;
-        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
-        if (!gpuDevice || !typeParamsGPUBuffer) return;
-        gpuDevice.queue.writeBuffer(
-            typeParamsGPUBuffer,
-            0,
-            this.cpuTypeParamsBuffer.buffer,
-            0,
-            this.cpuTypeParamsBuffer.byteLength
-        );
     }
 
     /**

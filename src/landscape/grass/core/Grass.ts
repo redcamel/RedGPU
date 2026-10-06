@@ -8,7 +8,7 @@ import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
-import Primitive from "../../../primitive/core/Primitive";
+import type Primitive from "../../../primitive/core/Primitive";
 import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
 import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
 import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";

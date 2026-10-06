@@ -90,7 +90,6 @@ export class GrassManager extends RedGPUObject {
         const {
             cullingDistance,
             instancesPerCell,
-            name,
             subMeshes,
             streamingRadius,
             maxInstances: userMaxInstances
