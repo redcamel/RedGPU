@@ -45,10 +45,9 @@ struct GrassBakeUniforms {
 @group(0) @binding(1) var<storage, read_write> rawInstances: array<GrassInstance>;
 @group(0) @binding(2) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(3) var vbtTexture: texture_2d<f32>;
-@group(0) @binding(4) var vbtSampler: sampler;
+@group(0) @binding(4) var landscapeSampler: sampler;
 @group(0) @binding(5) var weightTexture: texture_2d<f32>;
-@group(0) @binding(6) var weightSampler: sampler;
-@group(0) @binding(7) var<storage, read> cellOffsets: array<vec2<i32>>;
+@group(0) @binding(6) var<storage, read> cellOffsets: array<vec2<i32>>;
 
 // Deterministic 32-bit PRNG seed (1:1 with computeScatterGridSeed in ScatterSpatialUtils.ts)
 fn computeScatterGridSeed(gridX: i32, gridZ: i32, typeId: u32) -> u32 {
@@ -125,7 +124,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         // WeightMap (SplatMap) evaluation: 1:1 match with landscapeFragment.wgsl
         if (uniforms.hasWeightMap != 0u) {
-            let weightSample = textureSampleLevel(weightTexture, weightSampler, vec2<f32>(u, v), 0.0);
+            let weightSample = textureSampleLevel(weightTexture, landscapeSampler, vec2<f32>(u, v), 0.0);
             let isAlphaFull = weightSample.a >= 0.99;
             let effectiveA = select(weightSample.a, clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0), isAlphaFull);
             let effectiveTotalW = weightSample.r + weightSample.g + weightSample.b + effectiveA;
@@ -221,7 +220,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         // Ground color sampling from VBT
         var groundColor = vec3<f32>(0.15, 0.35, 0.1);
-        let groundTex = textureSampleLevel(vbtTexture, vbtSampler, vec2<f32>(u, v), 0.0);
+        let groundTex = textureSampleLevel(vbtTexture, landscapeSampler, vec2<f32>(u, v), 0.0);
         if (groundTex.a > 0.01) {
             groundColor = groundTex.rgb;
         }

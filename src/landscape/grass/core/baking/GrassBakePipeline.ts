@@ -183,8 +183,7 @@ export default class GrassBakePipeline extends RedGPUObject {
                 {binding: 3, resource: vbtView},
                 {binding: 4, resource: this.#defaultSampler!},
                 {binding: 5, resource: weightView},
-                {binding: 6, resource: this.#defaultSampler!},
-                {binding: 7, resource: {buffer: activeOffsetsBuffer}},
+                {binding: 6, resource: {buffer: activeOffsetsBuffer}},
             ]
         });
 

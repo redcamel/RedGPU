@@ -353,7 +353,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassScatterMegaBuffer_CulledInstances',
             size: culledByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+            usage: GPUBufferUsage.STORAGE,
         });
     }
 
@@ -378,7 +378,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassScatterMegaBuffer_CulledInstances',
             size: culledByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+            usage: GPUBufferUsage.STORAGE,
         });
     }
 }

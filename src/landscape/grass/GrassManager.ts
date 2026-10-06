@@ -14,6 +14,7 @@ import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 대규모 지형(Landscape)의 GPU 베이킹 & GPU 초고속 컬링 기반 잔디(Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -271,19 +272,16 @@ export class GrassManager extends RedGPUObject {
         this.#lastCamPos[1] = camY;
         this.#lastCamPos[2] = camZ;
 
-        let frustumPlanesF32: Float32Array | null = null;
         if (frustumPlanes && frustumPlanes.length === 6) {
             for (let p = 0; p < 6; p++) {
                 this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
             }
-            frustumPlanesF32 = this.#frustumPlanesF32;
         } else if (projectionMatrix && rawCam?.viewMatrix) {
             const computed = computeViewFrustumPlanes(projectionMatrix, rawCam.viewMatrix);
             if (computed) {
                 for (let p = 0; p < 6; p++) {
                     this.#frustumPlanesF32.set(computed[p], p * 4);
                 }
-                frustumPlanesF32 = this.#frustumPlanesF32;
             }
         }
 
@@ -320,8 +318,6 @@ export class GrassManager extends RedGPUObject {
             this.rebakeAll(camX, camZ);
         }
 
-        this.#megaBuffer.resetMultiIndirectCommands();
-
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
@@ -353,6 +349,12 @@ export class GrassManager extends RedGPUObject {
                 }
             }
         }
+
+        // VRAM 초고속 템플릿 복사 리셋 (Zero-GC: PRE_PROCESS 인코더 활용)
+        this.commandEncoderManager.useEncoder(
+            COMMAND_ENCODER_TYPE.PRE_PROCESS,
+            this.#onResetMultiIndirectCommands
+        );
 
         // GPU 초고속 컬링 단일 패스 디스패치 (Zero-GC: 재사용 인스턴스 콜백 바인딩)
         this.commandEncoderManager.addPreProcessComputePass(
@@ -419,8 +421,6 @@ export class GrassManager extends RedGPUObject {
         this.#populated = false;
         this.#lastBakePos[0] = 0;
         this.#lastBakePos[1] = 0;
-        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
-        this.#renderer.markAllBundlesDirty();
     }
 
     /**
@@ -441,6 +441,11 @@ export class GrassManager extends RedGPUObject {
         }
         list.length = 0;
     }
+
+    // Zero-GC: VRAM 간접 드로우 템플릿 복사를 위한 바인딩 콜백
+    #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
+        this.#megaBuffer.resetMultiIndirectCommands(encoder);
+    };
 
     // Zero-GC: 매 프레임 임시 클로저 생성 방지를 위한 바인딩 콜백
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {

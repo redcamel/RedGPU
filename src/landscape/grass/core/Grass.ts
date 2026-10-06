@@ -113,7 +113,6 @@ export interface GrassOptions extends AScatterTypeInitOptions {
 export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
-    #unifiedGeometries: (Geometry | null)[] = [];
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #farDistance: number = 35.0;
@@ -291,7 +290,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             ];
         }
 
-        this.#unifiedGeometries = [this.#geometry as Geometry];
         this.updateDrawCallCount(this.#subMeshes.length * 2);
 
         this.#farDistance = Math.max(10.0, farDistance);
@@ -368,11 +366,19 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
+     * [KO] 잔디 렌더링에 사용되는 단일 결합 지오메트리를 직접 반환합니다 (힙 배열 생성 0%).
+     * [EN] Directly returns single combined geometry used for grass rendering (0% heap array allocations).
+     */
+    override get unifiedGeometry(): Geometry | null {
+        return (this.#geometry as Geometry) || null;
+    }
+
+    /**
      * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환합니다. (잔디는 단일 통합 지오메트리를 공유)
      * [EN] Returns single combined geometry list per LOD level. (Grass shares single unified geometry)
      */
     override get unifiedGeometries(): (Geometry | null)[] {
-        return this.#unifiedGeometries;
+        return [this.unifiedGeometry];
     }
 
     /**
@@ -683,7 +689,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#slotIndex = -1;
         (this.#geometry as any)?.destroy?.();
         this.#geometry = null as any;
-        this.#unifiedGeometries.length = 0;
         this.#subMeshes.length = 0;
         this.#baseColorTexture = null as any;
         this.#mesh = null as any;
