@@ -69,6 +69,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.onRecreated = () => {
             this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();
+            this.rebakeAll();
         };
     }
 
@@ -386,6 +387,9 @@ export class GrassManager extends RedGPUObject {
         }
 
         removedGrass.bindAllocation(null);
+        if (this.#grassList.length === 0) {
+            this.#populated = false;
+        }
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
         return true;
@@ -406,6 +410,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.onRecreated = () => {
             this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();
+            this.rebakeAll();
         };
 
         this.#nextTypeId = 0;
@@ -550,6 +555,11 @@ export class GrassManager extends RedGPUObject {
             posX,
             posZ
         );
+
+        const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+        if (alloc) {
+            this.#megaBuffer.updateTypeParam(grass.typeId, grass, alloc);
+        }
     }
 }
 

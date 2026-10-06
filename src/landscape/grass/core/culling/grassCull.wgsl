@@ -88,6 +88,10 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let culledBase = select(typeInfo.culledNearBaseOffset, typeInfo.culledFarBaseOffset, isFar);
 
     let writeSlot = atomicAdd(&indirectCommands[targetStageSlot].instanceCount, 1u);
+    if (writeSlot >= typeInfo.maxInstances) {
+        atomicSub(&indirectCommands[targetStageSlot].instanceCount, 1u);
+        return;
+    }
 
     // Sync all sub-mesh draw calls for this stage
     let numSubs = max(typeInfo.subMeshCount, 1u);
