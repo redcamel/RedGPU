@@ -189,12 +189,6 @@ export interface FoliageOptions {
     shadowCullDistance?: number;
 
     /**
-     * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부 (기본값: true)
-     * [EN] Whether camera-based dynamic sub-cell streaming is enabled (default: true)
-     */
-    enableStreaming?: boolean;
-
-    /**
      * [KO] 서브셀 스트리밍 활성 반경 (미터, 기본값: 600.0)
      * [EN] Active sub-cell streaming radius in meters (default: 600.0)
      */
@@ -314,7 +308,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #nameHash: number = 0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
-    #enableStreaming: boolean = true;
     #streamingRadius: number = 600.0;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
@@ -529,7 +522,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#maxScale = maxScale;
         this.#randomRotationY = options.randomRotationY ?? true;
         this.#maxInstances = resolvedMaxInstances;
-        this.#enableStreaming = options.enableStreaming !== false;
         this.#streamingRadius = streamingRadius;
 
         this.updateDrawCallCount(this.drawCallCount);
@@ -732,25 +724,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#boundingRadius;
     }
 
-    /**
-     * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 반환합니다.
-     * [EN] Returns whether camera-based dynamic sub-cell streaming is enabled.
-     */
-    get enableStreaming(): boolean {
-        return this.#enableStreaming;
-    }
 
-    /**
-     * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 설정합니다.
-     * [EN] Sets whether camera-based dynamic sub-cell streaming is enabled.
-     *
-     * @param value -
-     * [KO] 스트리밍 활성화 여부
-     * [EN] Whether to enable streaming
-     */
-    set enableStreaming(value: boolean) {
-        this.#enableStreaming = !!value;
-    }
 
     /**
      * [KO] 서브셀 스트리밍이 활성화되는 반경(미터)을 반환합니다.
@@ -1085,18 +1059,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const key = (cz << 16) | cx;
         if (this.#loadedTileKeys.has(key)) return;
 
-        const effectiveLandscape = landscape || this.#landscape;
         this.#loadedTileKeys.add(key);
-
-        if (!this.#enableStreaming) {
-            const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-            this.#partitionTileSync(tileComponent, effectiveLandscape, subCellSize);
-            const megaBuffer = this.#megaBuffer;
-            const allocation = this.allocation;
-            if (megaBuffer && allocation) {
-                this.#mountAllSubCells(megaBuffer, allocation, subCellSize);
-            }
-        }
     }
 
     /**
@@ -1159,12 +1122,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (!megaBuffer || !allocation) return;
 
         const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-
-        if (!this.#enableStreaming) {
-            this.#mountAllSubCells(megaBuffer, allocation, subCellSize);
-            return;
-        }
-
         const typeRadius = this.#streamingRadius;
         const unmountMargin = Math.max(10.0, subCellSize * 0.5);
         const unmountRadius = typeRadius + unmountMargin;
@@ -1477,46 +1434,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    #mountAllSubCells(megaBuffer: FoliageScatterMegaBuffer, allocation: any, subCellSize: number): void {
-        if (this.#mountedSubCells.length === this.#subCells.size) return;
-        this.#subCells.forEach(subCell => {
-            if (!subCell.isMounted) {
-                this.#mountSubCell(subCell, megaBuffer, allocation, subCellSize);
-            }
-        });
-    }
-
-    #partitionTileSync(comp: any, landscape: any, subCellSize: number): void {
-        const compCountX = landscape?.componentCount?.[0] ?? 8;
-        const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
-        const halfTile = tileSizeMeters * 0.5;
-
-        const tileMinX = comp.worldX - halfTile;
-        const tileMaxX = comp.worldX + halfTile;
-        const tileMinZ = comp.worldZ - halfTile;
-        const tileMaxZ = comp.worldZ + halfTile;
-
-        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
-        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
-
-        const invSubCell = 1.0 / subCellSize;
-        const startScX = Math.floor((tileMinX + halfWorldX) * invSubCell);
-        const endScX = Math.floor((tileMaxX + halfWorldX - 0.001) * invSubCell);
-        const startScZ = Math.floor((tileMinZ + halfWorldZ) * invSubCell);
-        const endScZ = Math.floor((tileMaxZ + halfWorldZ - 0.001) * invSubCell);
-
-        for (let scZ = startScZ; scZ <= endScZ; scZ++) {
-            for (let scX = startScX; scX <= endScX; scX++) {
-                const key = packSubCellKey(scX, scZ);
-                if (!this.#subCells.has(key)) {
-                    const subCell = this.#populateSingleSubCell(scX, scZ, subCellSize);
-                    this.#subCells.set(key, subCell);
-                }
-            }
-        }
-    }
 
     #populateSingleSubCell(scX: number, scZ: number, subCellSize: number): FoliageSubCell {
         const key = packSubCellKey(scX, scZ);

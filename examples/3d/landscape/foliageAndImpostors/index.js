@@ -390,7 +390,6 @@ function renderTestPane({
 
         // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
         const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: true});
-        streamingStatsFolder.addBinding(type, 'enableStreaming');
         streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 5000, step: 50});
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
