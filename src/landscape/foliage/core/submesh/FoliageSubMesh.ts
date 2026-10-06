@@ -6,7 +6,6 @@
 
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
-import Geometry from "../../../../geometry/Geometry";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
@@ -23,50 +22,15 @@ export type FoliageRenderPassType = 'depthPrepass' | 'main';
  */
 export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
     /**
-     * [KO] 소스 메쉬 인스턴스
-     * [EN] Source mesh instance
+     * [KO] 소스 메쉬 인스턴스 (필수)
+     * [EN] Source mesh instance (required)
      */
     mesh: Mesh;
     /**
-     * [KO] 서브메시 지오메트리
-     * [EN] Sub-mesh geometry
+     * [KO] 소속 LOD 레벨 인덱스 (필수)
+     * [EN] Associated LOD level index (required)
      */
-    geometry: Geometry;
-    /**
-     * [KO] 서브메시 머티리얼
-     * [EN] Sub-mesh material
-     */
-    material: any;
-    /**
-     * [KO] 인덱스 개수
-     * [EN] Index count
-     */
-    indexCount: number;
-    /**
-     * [KO] 정점 개수
-     * [EN] Vertex count
-     */
-    vertexCount: number;
-    /**
-     * [KO] 인덱스 버퍼 사용 여부
-     * [EN] Whether indexed buffer is used
-     */
-    isIndexed: boolean;
-    /**
-     * [KO] 인덱스 포맷 (기본값: 'uint32')
-     * [EN] Index format (default: 'uint32')
-     */
-    indexFormat?: GPUIndexFormat;
-    /**
-     * [KO] 정점 스트라이드 바이트 수
-     * [EN] Vertex stride in bytes
-     */
-    strideBytes: number;
-    /**
-     * [KO] 밑둥 피벗 보정 바닥 오프셋
-     * [EN] Bottom offset relative to pivot
-     */
-    bottomOffset?: number;
+    lodIndex: number;
     /**
      * [KO] 상대 모델 변환 행렬
      * [EN] Relative model transform matrix
@@ -92,11 +56,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [EN] Single fixed mega UBO buffer
      */
     megaUBO?: GPUBuffer | null;
-    /**
-     * [KO] 소속 LOD 레벨 인덱스
-     * [EN] Associated LOD level index
-     */
-    lodIndex: number;
 
     /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
@@ -108,11 +67,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [EN] Whether rendering in main opaque/masked pass
      */
     isMainOpaqueOrMasked: boolean;
-    /**
-     * [KO] 알파 마스킹(Cutout) 사용 여부
-     * [EN] Whether alpha masking (cutout) is used
-     */
-    isMasked?: boolean;
     /**
      * [KO] 메인 뎁스 패스 모드
      * [EN] Main depth pass mode

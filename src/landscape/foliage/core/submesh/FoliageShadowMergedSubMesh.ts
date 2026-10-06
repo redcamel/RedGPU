@@ -4,45 +4,19 @@
  * @packageDocumentation
  */
 
-import Geometry from "../../../../geometry/Geometry";
-import AScatterGeometryUnit from "../../../core/scatter/AScatterGeometryUnit";
+import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "../../../core/scatter/AScatterGeometryUnit";
 import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
 
 /**
  * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for FoliageShadowMergedSubMesh.
  */
-export interface FoliageShadowMergedSubMeshInitOptions {
+export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AScatterGeometryUnitInitOptions, 'strideBytes'> {
     /**
      * [KO] 소속 LOD 인덱스
      * [EN] Associated LOD index
      */
     lodIndex: number;
-    /**
-     * [KO] 통합된 위치 전용 지오메트리
-     * [EN] Merged position-only geometry
-     */
-    geometry: Geometry;
-    /**
-     * [KO] 정점 개수
-     * [EN] Vertex count
-     */
-    vertexCount: number;
-    /**
-     * [KO] 인덱스 개수
-     * [EN] Index count
-     */
-    indexCount: number;
-    /**
-     * [KO] 인덱스 버퍼 사용 여부
-     * [EN] Whether indexed buffer is used
-     */
-    isIndexed: boolean;
-    /**
-     * [KO] 인덱스 포맷 (기본값: 'uint32')
-     * [EN] Index format (default: 'uint32')
-     */
-    indexFormat?: GPUIndexFormat;
     /**
      * [KO] 정점 스트라이드 바이트 수 (기본값: 12)
      * [EN] Vertex stride in bytes (default: 12)
@@ -63,16 +37,6 @@ export interface FoliageShadowMergedSubMeshInitOptions {
      * [EN] Single fixed mega UBO buffer
      */
     megaUBO?: GPUBuffer | null;
-    /**
-     * [KO] 인스턴스 버퍼 시작 오프셋
-     * [EN] Instance buffer start offset
-     */
-    instanceBufferOffset?: number;
-    /**
-     * [KO] 간접 드로우 인다이렉트 버퍼 시작 바이트 오프셋
-     * [EN] Indirect draw buffer start byte offset
-     */
-    indirectOffsetBytes?: number;
 }
 
 /**
@@ -92,10 +56,7 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
 
     constructor(init: FoliageShadowMergedSubMeshInitOptions) {
         super({
-            geometry: init.geometry,
-            vertexCount: init.vertexCount,
-            indexCount: init.indexCount,
-            isIndexed: init.isIndexed,
+            ...init,
             indexFormat: init.indexFormat || 'uint32',
             strideBytes: init.strideBytes ?? 12,
             instanceBufferOffset: init.instanceBufferOffset ?? 0,

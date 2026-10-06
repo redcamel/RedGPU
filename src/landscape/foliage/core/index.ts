@@ -3,7 +3,7 @@
  * [EN] Core rendering infrastructure and pipeline modules for the Landscape foliage system.
  *
  * **[KO]**
- * - `Foliage`: 단일 식생 타입 정의 및 타일별 인스턴스 라이프사이클 관리 엔티티
+ * - `Foliage`: 단일 식생 타입 정의 및 서브셀별 인스턴스 라이프사이클 관리 엔티티
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: 식생 전용 메인 및 그림자 렌더 서브메쉬
  * - `FoliageScatterMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
  * - `FoliageCuller`: HZB 오클루전 및 프러스텀 컬링 GPU 실행기
@@ -16,7 +16,7 @@
  * - `prepareFoliageMaterials`: 식생 원본 재질 복제 및 파이프라인 준비 함수
  *
  * **[EN]**
- * - `Foliage`: Entity defining a single foliage type and managing per-tile instance lifecycles
+ * - `Foliage`: Entity defining a single foliage type and managing per-subcell instance lifecycles
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
  * - `FoliageSubMeshSlotPooler`: 256-byte aligned Dynamic Offset UBO slot allocator
  * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data

@@ -256,8 +256,8 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 지형 타일별 식생이 자동으로 재배치됩니다.
-     * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage is automatically repopulated across landscape tiles upon change.
+     * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 식생 서브셀 캐시가 초기화되고 온디맨드 재배치가 수행됩니다.
+     * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage subcell caches are cleared and repopulated on-demand across cells upon change.
      *
      * @param val -
      * [KO] 설정할 서브셀 크기 (최소값: 10.0)
@@ -521,8 +521,8 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 지형의 기존 타일들에 인스턴스를 즉시 배치합니다.
-     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, immediately populating instances across existing landscape tiles.
+     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 카메라 기반 온디맨드 스트리밍을 준비합니다.
+     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, preparing camera-based on-demand streaming.
      *
      * @param options -
      * [KO] 식생 생성 및 지형 배치 규칙 옵션 {@link FoliageOptions}

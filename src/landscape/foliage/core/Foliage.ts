@@ -522,8 +522,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#maxInstances = resolvedMaxInstances;
         this.#streamingRadius = streamingRadius;
 
-        this.updateDrawCallCount(this.drawCallCount);
-
         if (this.#megaBuffer) {
             const alloc = this.#megaBuffer.allocateType(
                 this.name,
@@ -902,7 +900,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#useDepthPrepass !== boolVal) {
             this.#useDepthPrepass = boolVal;
             this.#updatePassBuckets();
-            this.updateDrawCallCount(this.drawCallCount);
             this.#onDirty?.();
         }
     }
@@ -1022,15 +1019,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.allocation) {
             this.allocation.instanceCount = 0;
         }
-    }
-
-    /**
-     * @deprecated
-     * [KO] `clearSubCellCache()`를 사용하십시오.
-     * [EN] Use `clearSubCellCache()` instead.
-     */
-    clearTileCache(): void {
-        this.clearSubCellCache();
     }
 
     /**
