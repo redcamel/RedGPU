@@ -805,15 +805,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#hasMaskedLOD0;
     }
 
-    /**
-     * [KO] 단일 서브셀 격자 영역 당 배치되는 계산된 인스턴스 수량을 반환합니다.
-     * [EN] Returns the calculated number of instances placed per single sub-cell grid area.
-     */
-    get instancesPerCell(): number {
-        const size = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-        const cellArea = size * size;
-        return Math.max(0, Math.round((this.densityPerHectare * (cellArea / 10000.0)) * this.densityMultiplier));
-    }
 
     /**
      * [KO] 인스턴스 줄기 바람 흔들림 강도 배수를 반환합니다.
@@ -1043,16 +1034,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 특정 그리드 좌표의 타일이 이미 로드 및 배치 완료되었는지 여부를 확인합니다.
-     * [EN] Checks whether the tile at the specified grid coordinate has already been loaded and populated.
-     */
-    isTileLoaded(componentX: number, componentZ: number): boolean {
-        const cz = componentZ & 0xffff;
-        const cx = componentX & 0xffff;
-        const key = (cz << 16) | cx;
-        return this.#loadedTileKeys.has(key);
-    }
 
     /**
      * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
@@ -1137,15 +1118,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 카메라 위치와 활성 서브셀 키 목록을 기반으로 인스턴스 슬롯 스트리밍을 갱신합니다.
-     * [EN] Updates instance slot streaming based on camera position and active sub-cell key list.
+     * [KO] 카메라 위치에 기반하여 이 식생 고유의 스트리밍 반경(streamingRadius) 내 서브셀을 온디맨드로 생성하고 GPU 메가버퍼에 점진적으로 마운트/언마운트합니다.
+     * [EN] Populates sub-cells on-demand within this foliage's streamingRadius based on camera position and incrementally mounts/unmounts to the GPU mega-buffer.
      *
-     * @param activeKeyArray -
-     * [KO] 활성 서브셀 키 배열
-     * [EN] Active sub-cell key array
-     * @param activeKeyCount -
-     * [KO] 활성 서브셀 키 개수
-     * [EN] Active sub-cell key count
      * @param camX -
      * [KO] 카메라 월드 X 좌표
      * [EN] Camera world X coordinate
@@ -1160,8 +1135,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Maximum sub-cells allowed to unmount in this update (default: 32)
      */
     updateStreaming(
-        activeKeyArray: Int32Array,
-        activeKeyCount: number,
         camX: number,
         camZ: number,
         mountBudget: number = 16,
@@ -1210,21 +1183,41 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const candidates = this.#tempCandidates;
         candidates.length = 0;
 
+        const landscape = this.#landscape;
+        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
+        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        const totalCellsX = Math.max(1, Math.floor(worldSizeX / subCellSize));
+        const totalCellsZ = Math.max(1, Math.floor(worldSizeZ / subCellSize));
+
+        const minSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX - typeRadius + halfWorldX) / subCellSize)));
+        const maxSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX + typeRadius + halfWorldX) / subCellSize)));
+        const minSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ - typeRadius + halfWorldZ) / subCellSize)));
+        const maxSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ + typeRadius + halfWorldZ) / subCellSize)));
+
         const mountRadiusSq = typeRadius * typeRadius;
-        for (let i = 0; i < activeKeyCount; i++) {
-            const key = activeKeyArray[i];
-            let subCell = this.#subCells.get(key);
-            if (!subCell) {
-                const scX = (key << 16) >> 16;
-                const scZ = key >> 16;
-                subCell = this.#populateSingleSubCell(scX, scZ, subCellSize);
-                this.#subCells.set(key, subCell);
-            }
-            if (subCell && !subCell.isMounted && subCell.instanceCount > 0) {
-                const dx = subCell.centerX - camX;
-                const dz = subCell.centerZ - camZ;
-                if (dx * dx + dz * dz <= mountRadiusSq) {
-                    candidates.push(subCell);
+
+        for (let sz = minSZ; sz <= maxSZ; sz++) {
+            const cellCenterZ = (sz + 0.5) * subCellSize - halfWorldZ;
+            const diffZ = cellCenterZ - camZ;
+            const diffZSq = diffZ * diffZ;
+
+            for (let sx = minSX; sx <= maxSX; sx++) {
+                const cellCenterX = (sx + 0.5) * subCellSize - halfWorldX;
+                const diffX = cellCenterX - camX;
+
+                if (diffX * diffX + diffZSq <= mountRadiusSq) {
+                    const key = packSubCellKey(sx, sz);
+                    let subCell = this.#subCells.get(key);
+                    if (!subCell) {
+                        subCell = this.#populateSingleSubCell(sx, sz, subCellSize);
+                        this.#subCells.set(key, subCell);
+                    }
+                    if (subCell && !subCell.isMounted && subCell.instanceCount > 0) {
+                        candidates.push(subCell);
+                    }
                 }
             }
         }

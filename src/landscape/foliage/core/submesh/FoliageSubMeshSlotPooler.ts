@@ -189,33 +189,6 @@ export class FoliageSubMeshSlotPooler {
         );
     }
 
-    /**
-     * [KO] 특정 서브메시 슬롯의 그림자 수신 플래그를 업데이트하고 GPU에 즉시 반영합니다 (Zero-GC).
-     * [EN] Updates shadow receiving flag for a specific sub-mesh slot and reflects to GPU immediately (Zero-GC).
-     */
-    updateReceiveShadow(
-        gpuDevice: GPUDevice,
-        gpuBuffer: GPUBuffer,
-        slot: number,
-        receiveShadow: boolean
-    ): void {
-        if (slot < 0 || slot >= FoliageSubMeshSlotPooler.MAX_SLOTS) return;
-        const baseFloat = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
-        const f32 = this.#cpuBuffer;
-        const val = receiveShadow ? 1.0 : 0.0;
-        if (f32[baseFloat + 34] === val) return;
-
-        f32[baseFloat + 34] = val;
-
-        const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES + 34 * 4;
-        gpuDevice.queue.writeBuffer(
-            gpuBuffer,
-            offsetBytes,
-            f32.buffer,
-            f32.byteOffset + (baseFloat + 34) * 4,
-            4
-        );
-    }
 
     /**
      * [KO] 특정 서브메시 슬롯의 바람 파라미터를 업데이트하고 GPU에 즉시 반영합니다 (Zero-GC).

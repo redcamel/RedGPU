@@ -17,7 +17,6 @@ import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler";
-import {packSubCellKey} from "../core/scatter";
 
 /**
  * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -50,8 +49,6 @@ import {packSubCellKey} from "../core/scatter";
  * @category Landscape
  */
 class FoliageManager {
-    static readonly MAX_ACTIVE_SUB_CELLS: number = 2048;
-
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #subMeshMegaUBO: GPUBuffer | null = null;
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
@@ -70,14 +67,6 @@ class FoliageManager {
     #renderer: FoliageRenderer;
     #culler: FoliageCuller;
     #useDepthPrepass: boolean = true;
-
-    #activeSubCellKeys: Int32Array = new Int32Array(FoliageManager.MAX_ACTIVE_SUB_CELLS);
-    #activeSubCellCount: number = 0;
-    #lastGridCamX: number = 1e9;
-    #lastGridCamZ: number = 1e9;
-    #lastGridRadius: number = -1;
-    #lastGridCellSize: number = -1;
-    #gridUpdateThresholdSq: number = 25.0;
 
     #subCellSize: number = 100.0;
     #mountBudget: number = 16;
@@ -435,31 +424,9 @@ class FoliageManager {
         if (!this.#enabled || this.#foliageList.length === 0) return;
 
         const view = renderViewStateData.view;
+        const count = this.#foliageList.length;
         const cam = view.rawCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
-            let maxRadius = 0;
-            const count = this.#foliageList.length;
-            for (let i = 0; i < count; i++) {
-                const foliage = this.#foliageList[i];
-                if (foliage.enableStreaming && foliage.streamingRadius > maxRadius) {
-                    maxRadius = foliage.streamingRadius;
-                }
-            }
-            if (maxRadius <= 0) maxRadius = 600.0;
-
-            const worldSize = this.#landscape.worldSize;
-            this.#updateSpatialGrid(
-                cam.x,
-                cam.z,
-                this.#subCellSize,
-                maxRadius,
-                worldSize[0] || 16000.0,
-                worldSize[1] || 16000.0
-            );
-
-            const activeKeys = this.#activeSubCellKeys;
-            const activeCount = this.#activeSubCellCount;
-
             let remainingMount = this.#mountBudget;
             let remainingUnmount = this.#unmountBudget;
             if (this.#roundRobinIndex >= count) {
@@ -469,7 +436,7 @@ class FoliageManager {
             for (let i = 0; i < count; i++) {
                 const idx = (startIdx + i) % count;
                 const foliage = this.#foliageList[idx];
-                foliage.updateStreaming(activeKeys, activeCount, cam.x, cam.z, remainingMount, remainingUnmount);
+                foliage.updateStreaming(cam.x, cam.z, remainingMount, remainingUnmount);
                 remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
                 remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
             }
@@ -661,68 +628,6 @@ class FoliageManager {
         }
     }
 
-    #updateSpatialGrid(
-        camX: number,
-        camZ: number,
-        cellSize: number,
-        radius: number,
-        worldSizeX: number = 16000.0,
-        worldSizeZ: number = 16000.0,
-        force: boolean = false
-    ): boolean {
-        const dx = camX - this.#lastGridCamX;
-        const dz = camZ - this.#lastGridCamZ;
-        const distSq = dx * dx + dz * dz;
-
-        if (!force && distSq < this.#gridUpdateThresholdSq &&
-            this.#lastGridRadius === radius &&
-            this.#lastGridCellSize === cellSize) {
-            return false;
-        }
-
-        this.#lastGridCamX = camX;
-        this.#lastGridCamZ = camZ;
-        this.#lastGridRadius = radius;
-        this.#lastGridCellSize = cellSize;
-
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
-
-        const totalCellsX = Math.max(1, Math.floor(worldSizeX / cellSize));
-        const totalCellsZ = Math.max(1, Math.floor(worldSizeZ / cellSize));
-
-        const minSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX - radius + halfWorldX) / cellSize)));
-        const maxSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX + radius + halfWorldX) / cellSize)));
-        const minSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ - radius + halfWorldZ) / cellSize)));
-        const maxSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ + radius + halfWorldZ) / cellSize)));
-
-        const effectiveRadius = radius + cellSize * 0.70710678;
-        const effectiveRadiusSq = effectiveRadius * effectiveRadius;
-
-        let count = 0;
-        const keys = this.#activeSubCellKeys;
-        const maxCapacity = FoliageManager.MAX_ACTIVE_SUB_CELLS;
-
-        for (let sz = minSZ; sz <= maxSZ; sz++) {
-            const cellCenterZ = (sz + 0.5) * cellSize - halfWorldZ;
-            const diffZ = cellCenterZ - camZ;
-            const diffZSq = diffZ * diffZ;
-
-            for (let sx = minSX; sx <= maxSX; sx++) {
-                const cellCenterX = (sx + 0.5) * cellSize - halfWorldX;
-                const diffX = cellCenterX - camX;
-
-                if (diffX * diffX + diffZSq <= effectiveRadiusSq) {
-                    if (count < maxCapacity) {
-                        keys[count++] = packSubCellKey(sx, sz);
-                    }
-                }
-            }
-        }
-
-        this.#activeSubCellCount = count;
-        return true;
-    }
 }
 
 Object.freeze(FoliageManager);

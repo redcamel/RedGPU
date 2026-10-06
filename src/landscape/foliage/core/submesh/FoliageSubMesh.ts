@@ -240,23 +240,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
         return this.#receiveShadow;
     }
 
-    /**
-     * [KO] 그림자 수신 상태를 업데이트하고 GPU 유니폼 버퍼에 반영합니다.
-     * [EN] Updates shadow receiving state and reflects it in the GPU uniform buffer.
-     * @param gpuDevice -
-     * [KO] WebGPU 디바이스 인스턴스
-     * [EN] WebGPU device instance
-     * @param receiveShadow -
-     * [KO] 그림자 수신 여부
-     * [EN] Whether shadows are received
-     */
-    updateReceiveShadow(gpuDevice: GPUDevice, receiveShadow: boolean): void {
-        if (this.#receiveShadow === receiveShadow) return;
-        this.#receiveShadow = receiveShadow;
-        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
-            this.#slotPooler.updateReceiveShadow(gpuDevice, this.#megaUBO, this.#slotIndex, receiveShadow);
-        }
-    }
 
     /**
      * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (16 bytes, Zero-GC)
