@@ -8,7 +8,6 @@ import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import type Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
-import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import type {FoliageOptions} from "./core/Foliage";
 import Foliage from "./core/Foliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
@@ -296,24 +295,6 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
-     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
-     *
-     * @param tileComponent -
-     * [KO] 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
-     * [EN] Loaded landscape tile component (`LandscapeComponent`)
-     */
-    onTileLoaded(tileComponent: LandscapeComponent): void {
-        if (!this.#enabled || this.#foliageList.length === 0 || !tileComponent) return;
-        const count = this.#foliageList.length;
-        for (let i = 0; i < count; i++) {
-            this.#foliageList[i].populateTile(tileComponent, this.#landscape);
-        }
-        this.#renderer.markShadowBundleDirty();
-        this.#renderer.markDepthPrepassBundleDirty();
-    }
-
-    /**
      * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 기본값: 100)를 반환합니다.
      * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, default: 100).
      */
@@ -583,14 +564,6 @@ class FoliageManager {
         this.#renderer.markShadowBundleDirty();
         this.#renderer.markDepthPrepassBundleDirty();
 
-        const cells = this.#landscape?.components;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                foliage.populateTile(cells[i], this.#landscape);
-            }
-        }
-
         return foliage;
     }
 
@@ -618,14 +591,6 @@ class FoliageManager {
         if (!type) return;
 
         type.clearTileCache();
-
-        const cells = this.#landscape?.components;
-        if (cells && cells.length > 0) {
-            const count = cells.length;
-            for (let i = 0; i < count; i++) {
-                type.populateTile(cells[i], this.#landscape);
-            }
-        }
         this.#renderer.markShadowBundleDirty();
     }
 

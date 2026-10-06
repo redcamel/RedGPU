@@ -7,7 +7,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
-import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
@@ -317,7 +316,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
-    #loadedTileKeys: Set<number> = new Set();
     #subCells: Map<number, FoliageSubCell> = new Map();
     #mountedSubCells: FoliageSubCell[] = [];
     #tempCandidates: FoliageSubCell[] = [];
@@ -909,13 +907,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 현재 로드되어 인스턴스가 등록된 타일의 총 개수를 반환합니다.
-     * [EN] Returns the total number of currently loaded tiles with populated instances.
-     */
-    get loadedTileCount(): number {
-        return this.#loadedTileKeys.size;
-    }
 
     /**
      * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
@@ -1023,7 +1014,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Clears the tile cache and loaded component key set in the streamer.
      */
     clearTileCache(): void {
-        this.#loadedTileKeys.clear();
         this.#tempCandidates.length = 0;
         const mounted = this.#mountedSubCells;
         for (let i = 0; i < mounted.length; i++) {
@@ -1037,29 +1027,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.allocation) {
             this.allocation.instanceCount = 0;
         }
-    }
-
-    /**
-     * [KO] 신규 지형 타일 컴포넌트가 로드되었을 때 호출되는 타일 라이프사이클 훅입니다. (온디맨드 모드에서는 CPU 스파이크 없이 타일 키만 기록)
-     * [EN] Terrain tile lifecycle hook invoked when a new tile component finishes loading. (In on-demand mode, records tile key with zero CPU spike)
-     *
-     * @param tileComponent -
-     * [KO] 로드된 지형 타일 컴포넌트 (`LandscapeComponent`)
-     * [EN] Loaded terrain tile component (`LandscapeComponent`)
-     * @param landscape -
-     * [KO] 부모 Landscape 인스턴스 (선택사항)
-     * [EN] Parent Landscape instance (optional)
-     */
-    populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
-        if (!tileComponent) return;
-        if (landscape) this.#landscape = landscape;
-
-        const cz = (tileComponent.componentZ ?? 0) & 0xffff;
-        const cx = (tileComponent.componentX ?? 0) & 0xffff;
-        const key = (cz << 16) | cx;
-        if (this.#loadedTileKeys.has(key)) return;
-
-        this.#loadedTileKeys.add(key);
     }
 
     /**

@@ -394,7 +394,6 @@ function renderTestPane({
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'maxInstances', {readonly: true});
-        streamingStatsFolder.addBinding(type, 'loadedTileCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastMountedCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastUnmountedCount', {readonly: true});
         streamingStatsFolder.addButton({title: 'clearTileCache'}).on('click', () => {
