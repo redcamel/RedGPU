@@ -18,7 +18,8 @@ import Grass, {type GrassOptions} from "./Grass";
 import {GrassScatterMegaBuffer} from "./buffer/GrassScatterMegaBuffer";
 import GrassBakePipeline from "./baking/GrassBakePipeline";
 import GrassCullPipeline from "./culling/GrassCullPipeline";
-import {GrassRenderer, type GrassTypeMaterialBufferResources} from "./renderer/GrassRenderer";
+import {GrassRenderer} from "./renderer/GrassRenderer";
+import {GrassSubMeshSlotPooler} from "./submesh/GrassSubMeshSlotPooler";
 
 export {
     // Runtime Classes
@@ -27,8 +28,8 @@ export {
     GrassBakePipeline,
     GrassCullPipeline,
     GrassRenderer,
+    GrassSubMeshSlotPooler,
 
     // Code Hint Interfaces
-    type GrassOptions,
-    type GrassTypeMaterialBufferResources
+    type GrassOptions
 };

@@ -1,5 +1,6 @@
 // ============================================================================
 // RedGPU Landscape Grass Ultra-Fast GPU Culling Compute Shader
+// - Single-pass unified dispatch across all registered grass types
 // - Zero texture sampling, Zero procedural calculations
 // - Distance + Frustum 6-plane culling only
 // - Updates culledInstances buffer and indirect draw indexed commands atomically
@@ -7,8 +8,6 @@
 
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassTypeParam;
-
-
 
 struct DrawIndexedIndirectCommand {
     indexCount: u32,
@@ -18,41 +17,45 @@ struct DrawIndexedIndirectCommand {
     firstInstance: u32,
 };
 
-struct CullUniforms {
+struct GlobalCullUniforms {
     cameraPos: vec3<f32>,
-    cullingDistanceSq: f32,
-    farDistanceSq: f32,
-    totalInstances: u32,
-    rawBaseOffset: u32,
-    culledNearBaseOffset: u32,
-    culledFarBaseOffset: u32,
-    nearIndirectSlot: u32,
-    farIndirectSlot: u32,
-    subMeshCount: u32,
-    hasFarStage: u32,
-    pad0: u32,
-    pad1: u32,
-    pad2: u32,
+    totalInstanceCount: u32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
 
-@group(0) @binding(0) var<uniform> uniforms: CullUniforms;
+@group(0) @binding(0) var<uniform> uniforms: GlobalCullUniforms;
 @group(0) @binding(1) var<storage, read> rawInstances: array<GrassInstance>;
 @group(0) @binding(2) var<storage, read_write> culledInstances: array<GrassInstance>;
 @group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectCommand>;
+@group(0) @binding(4) var<storage, read> typeParams: array<GrassTypeParam>;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let index = globalId.x;
-    if (index >= uniforms.totalInstances) {
+    if (index >= uniforms.totalInstanceCount) {
         return;
     }
 
-    let rawIdx = uniforms.rawBaseOffset + index;
-    let inst = rawInstances[rawIdx];
+    let inst = rawInstances[index];
 
     // Filter out invalid/masked instances
     if (inst.posY < -900000.0) {
+        return;
+    }
+
+    // Extract typeId from upper 8 bits of packedGroundColor
+    let typeIdx = (inst.packedGroundColor >> 24u) & 0xFFu;
+    if (typeIdx >= 64u) {
+        return;
+    }
+
+    let typeInfo = typeParams[typeIdx];
+    if (typeInfo.instanceCount == 0u || index < typeInfo.rawBaseOffset) {
+        return;
+    }
+
+    let localSlotIdx = index - typeInfo.rawBaseOffset;
+    if (localSlotIdx >= typeInfo.instanceCount) {
         return;
     }
 
@@ -61,7 +64,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let distSq = dot(delta, delta);
 
     // Distance Cull
-    if (distSq > uniforms.cullingDistanceSq) {
+    if (distSq > typeInfo.cullingDistanceSq) {
         return;
     }
 
@@ -80,14 +83,14 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     // Stage allocation (Near vs Far)
-    let isFar = uniforms.hasFarStage != 0u && distSq > uniforms.farDistanceSq;
-    let targetStageSlot = select(uniforms.nearIndirectSlot, uniforms.farIndirectSlot, isFar);
-    let culledBase = select(uniforms.culledNearBaseOffset, uniforms.culledFarBaseOffset, isFar);
+    let isFar = typeInfo.hasFarStage != 0u && distSq > typeInfo.farDistanceSq;
+    let targetStageSlot = select(typeInfo.nearIndirectSlot, typeInfo.farIndirectSlot, isFar);
+    let culledBase = select(typeInfo.culledNearBaseOffset, typeInfo.culledFarBaseOffset, isFar);
 
     let writeSlot = atomicAdd(&indirectCommands[targetStageSlot].instanceCount, 1u);
 
     // Sync all sub-mesh draw calls for this stage
-    let numSubs = max(uniforms.subMeshCount, 1u);
+    let numSubs = max(typeInfo.subMeshCount, 1u);
     for (var s = 1u; s < numSubs; s = s + 1u) {
         atomicAdd(&indirectCommands[targetStageSlot + s].instanceCount, 1u);
     }

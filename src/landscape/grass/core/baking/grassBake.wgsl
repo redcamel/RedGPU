@@ -235,7 +235,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         outInst.packedScale = pack2x16float(vec2<f32>(sScale, hScale));
         outInst.packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));
         outInst.packedQuat = pack4x8snorm(canonicalQuat);
-        outInst.packedGroundColor = pack4x8unorm(vec4<f32>(groundColor, 1.0));
+        let colorPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0)) & 0x00FFFFFFu;
+        outInst.packedGroundColor = colorPacked | (uniforms.typeId << 24u);
 
         rawInstances[currentTargetIdx] = outInst;
     }

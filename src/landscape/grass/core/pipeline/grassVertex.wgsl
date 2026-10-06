@@ -1,17 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include landscape.struct.GrassInstance;
+#redgpu_include landscape.struct.GrassParams;
 #redgpu_include landscape.math.rotateVectorByQuat;
-
-struct GrassUniforms {
-    cullingDistance: f32,
-    fadeStartDistance: f32,
-    meshHeight: f32,
-    minY: f32,
-    shadowCullDistance: f32,
-    shadowFadeStartDistance: f32,
-    pad0: f32,
-    pad1: f32,
-};
 
 struct VertexInput {
     @location(0) position: vec3<f32>,
@@ -33,7 +23,7 @@ struct VertexOutput {
 };
 
 @group(1) @binding(0) var<storage, read> culledInstances: array<GrassInstance>;
-@group(1) @binding(1) var<uniform> grassUniforms: GrassUniforms;
+@group(1) @binding(1) var<uniform> grassUniforms: GrassParams;
 
 @vertex
 fn main(input: VertexInput) -> VertexOutput {

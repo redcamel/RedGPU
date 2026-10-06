@@ -119,6 +119,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #shadowFadeStartDistance: number = 26.25;
 
     #dirty: boolean = true;
+    #slotIndex: number = -1;
     #onRepopulateRequired: (() => void) | null = null;
 
     /**
@@ -602,10 +603,23 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 255)
+     * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 255)
+     */
+    get slotIndex(): number {
+        return this.#slotIndex;
+    }
+
+    set slotIndex(val: number) {
+        this.#slotIndex = val;
+    }
+
+    /**
      * [KO] 잔디 인스턴스 및 하위 서브메쉬 리소스를 해제합니다.
      * [EN] Destroys grass instance and subordinate sub-mesh resources.
      */
     override destroy(): void {
+        this.#slotIndex = -1;
         (this.#geometry as any)?.destroy?.();
         this.#geometry = null as any;
         this.#subMeshes.length = 0;

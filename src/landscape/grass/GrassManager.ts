@@ -11,7 +11,8 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
-import {GrassRenderer, GrassTypeMaterialBufferResources} from "./core/renderer/GrassRenderer";
+import {GrassRenderer} from "./core/renderer/GrassRenderer";
+import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GrassBakePipeline from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
@@ -44,13 +45,13 @@ export class GrassManager extends RedGPUObject {
     #megaBuffer: GrassScatterMegaBuffer;
     #bakePipeline: GrassBakePipeline;
     #cullPipeline: GrassCullPipeline;
+    #slotPooler: GrassSubMeshSlotPooler;
 
     #grassList: Grass[] = [];
     #nextTypeId: number = 0;
     #populated: boolean = false;
 
     #renderer: GrassRenderer;
-    #typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources> = new Map();
 
     #lastCamPos: [number, number, number] = [0, 0, 0];
     #lastBakePos: [number, number] = [0, 0];
@@ -77,18 +78,13 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#bakePipeline = new GrassBakePipeline(this.redGPUContext);
         this.#cullPipeline = new GrassCullPipeline(this.redGPUContext);
+        this.#slotPooler = new GrassSubMeshSlotPooler(this.redGPUContext);
+        this.#renderer = new GrassRenderer(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
             this.#cullPipeline.invalidateBindGroups();
-            for (const res of this.#typeMaterialBuffers.values()) {
-                res.instanceBindGroup = null;
-                for (let s = 0; s < res.subMeshResources.length; s++) {
-                    res.subMeshResources[s].bindGroup = null;
-                }
-            }
+            this.#renderer.markAllBundlesDirty();
         };
-
-        this.#renderer = new GrassRenderer(this.redGPUContext);
     }
 
     /**
@@ -246,6 +242,7 @@ export class GrassManager extends RedGPUObject {
             subMeshes
         );
         grassType.bindAllocation(alloc);
+        this.#megaBuffer.updateTypeParam(typeId, grassType, alloc);
 
         grassType.onRepopulateRequired = () => {
             this.rebakeAll();
@@ -267,35 +264,12 @@ export class GrassManager extends RedGPUObject {
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
-            const cpuBuffer = new Float32Array(12);
-            const uintBuffer = new Uint32Array(cpuBuffer.buffer);
+            const slotIndex = this.#slotPooler.allocateSlot();
+            grassType.slotIndex = slotIndex;
 
-            const uniformBuffer = gpuDevice.createBuffer({
-                label: `Grass_MaterialUniformBuffer_${name}_${this.instanceId}`,
-                size: cpuBuffer.byteLength,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-
-            const grassUniformCPUBuffer = new Float32Array(8);
-            const grassUniformGPUBuffer = gpuDevice.createBuffer({
-                label: `Grass_WindUniformBuffer_${name}_${this.instanceId}`,
-                size: grassUniformCPUBuffer.byteLength,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-
-            this.#typeMaterialBuffers.set(typeId, {
-                uniformBuffer,
-                cpuBuffer,
-                uintBuffer,
-                grassUniformGPUBuffer,
-                grassUniformCPUBuffer,
-                bindGroup: null,
-                instanceBindGroup: null,
-                cachedColorTexView: null,
-                initialized: false,
-                cachedHasVbt: false,
-                subMeshResources: []
-            });
+            const vbtAtlas = this.#tileStreamer.getAtlasTexture('vbtBaseColor');
+            const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.tileLoadedCount > 0);
+            this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
             const fallbackCam = this.#getFallbackCameraPosition();
             if (fallbackCam) {
@@ -310,6 +284,7 @@ export class GrassManager extends RedGPUObject {
         }
 
         this.#cullPipeline.invalidateBindGroups();
+        this.#renderer.markAllBundlesDirty();
         this.#populated = true;
         return grassType;
     }
@@ -331,20 +306,17 @@ export class GrassManager extends RedGPUObject {
         if (index === -1) return false;
 
         const [removedGrass] = this.#grassList.splice(index, 1);
-        const {typeId} = removedGrass;
+        const {typeId, slotIndex} = removedGrass;
 
         this.#megaBuffer.freeType(typeId);
-
-        const res = this.#typeMaterialBuffers.get(typeId);
-        if (res) {
-            res.uniformBuffer.destroy();
-            res.grassUniformGPUBuffer.destroy();
-            res.subMeshResources.length = 0;
-            this.#typeMaterialBuffers.delete(typeId);
+        if (slotIndex >= 0) {
+            this.#slotPooler.freeSlot(slotIndex);
+            removedGrass.slotIndex = -1;
         }
 
         removedGrass.bindAllocation(null);
         this.#cullPipeline.invalidateBindGroups();
+        this.#renderer.markAllBundlesDirty();
         return true;
     }
 
@@ -357,13 +329,12 @@ export class GrassManager extends RedGPUObject {
             this.removeGrass(this.#grassList[this.#grassList.length - 1]);
         }
 
+        this.#slotPooler.clear();
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
             this.#cullPipeline.invalidateBindGroups();
-            for (const res of this.#typeMaterialBuffers.values()) {
-                res.instanceBindGroup = null;
-            }
+            this.#renderer.markAllBundlesDirty();
         };
 
         this.#nextTypeId = 0;
@@ -372,6 +343,7 @@ export class GrassManager extends RedGPUObject {
         this.#lastBakePos[0] = 0;
         this.#lastBakePos[1] = 0;
         this.#cullPipeline.invalidateBindGroups();
+        this.#renderer.markAllBundlesDirty();
     }
 
     /**
@@ -437,79 +409,18 @@ export class GrassManager extends RedGPUObject {
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
         for (const type of this.#grassList) {
-            const {typeId, dirty} = type;
-            const res = this.#typeMaterialBuffers.get(typeId);
-            if (!res) continue;
+            const {typeId, dirty, slotIndex} = type;
+            if (slotIndex < 0) continue;
 
-            const isDirty = !res.initialized || dirty || res.cachedHasVbt !== hasValidVbt;
+            const isDirty = dirty || tileCountChanged;
             if (isDirty) {
-                res.initialized = true;
-                res.cachedHasVbt = hasValidVbt;
                 type.markClean();
+                this.#slotPooler.writeGrassSlot(slotIndex, type, hasValidVbt);
 
-                const {
-                    cullingDistance,
-                    fadeStartDistance,
-                    height,
-                    minY,
-                    shadowCullDistance,
-                    shadowFadeStartDistance,
-                    groundBlendStrength,
-                    alphaCutoff,
-                    exposureBoost,
-                    subsurfaceColor,
-                    subsurfaceStrength,
-                    roughness,
-                    shadowStrength,
-                    receiveShadow
-                } = type;
-
-                const {
-                    grassUniformCPUBuffer: gf,
-                    grassUniformGPUBuffer,
-                    cpuBuffer: mf,
-                    uintBuffer: mu,
-                    uniformBuffer
-                } = res;
-
-                gf[0] = cullingDistance;
-                gf[1] = fadeStartDistance;
-                gf[2] = height;
-                gf[3] = minY;
-                gf[4] = shadowCullDistance;
-                gf[5] = shadowFadeStartDistance;
-                gf[6] = 0.0;
-                gf[7] = 0.0;
-
-                gpuDevice.queue.writeBuffer(
-                    grassUniformGPUBuffer,
-                    0,
-                    gf.buffer,
-                    0,
-                    gf.byteLength
-                );
-
-                mf[0] = groundBlendStrength;
-                mf[1] = alphaCutoff;
-                mu[2] = hasValidVbt ? 1 : 0;
-                mf[3] = exposureBoost;
-
-                mf[4] = subsurfaceColor[0];
-                mf[5] = subsurfaceColor[1];
-                mf[6] = subsurfaceColor[2];
-                mf[7] = subsurfaceStrength;
-
-                mf[8] = roughness;
-                mf[9] = shadowStrength;
-                mu[10] = receiveShadow ? 1 : 0;
-
-                gpuDevice.queue.writeBuffer(
-                    uniformBuffer,
-                    0,
-                    mf.buffer,
-                    0,
-                    mf.byteLength
-                );
+                const alloc = this.#megaBuffer.getAllocation(typeId);
+                if (alloc) {
+                    this.#megaBuffer.updateTypeParam(typeId, type, alloc);
+                }
             }
         }
 
@@ -575,7 +486,7 @@ export class GrassManager extends RedGPUObject {
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
+        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#slotPooler);
     }
 
     /**
@@ -587,7 +498,7 @@ export class GrassManager extends RedGPUObject {
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
-        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#typeMaterialBuffers);
+        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#slotPooler);
     }
 
     /**
@@ -616,13 +527,8 @@ export class GrassManager extends RedGPUObject {
         this.#bakePipeline.destroy();
         this.#cullPipeline.destroy();
         this.#renderer.destroy();
+        this.#slotPooler.destroy();
 
-        for (const res of this.#typeMaterialBuffers.values()) {
-            res.uniformBuffer.destroy();
-            res.grassUniformGPUBuffer.destroy();
-            res.subMeshResources.length = 0;
-        }
-        this.#typeMaterialBuffers.clear();
         for (const grass of this.#grassList) {
             grass.onRepopulateRequired = null;
         }

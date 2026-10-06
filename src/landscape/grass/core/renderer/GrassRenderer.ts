@@ -1,6 +1,6 @@
 /**
- * [KO] 잔디 WebGPU 렌더러 모듈입니다.
- * [EN] Grass WebGPU renderer module.
+ * [KO] 잔디 WebGPU 렌더러 모듈입니다. GPURenderBundle 캐싱 엔진을 통해 매 프레임 단 1회의 executeBundles로 대규모 간접 드로우를 수행합니다.
+ * [EN] Grass WebGPU renderer module. Executes large-scale indirect drawing with a single executeBundles call per frame via GPURenderBundle caching engine.
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
@@ -9,6 +9,8 @@ import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
+import {GrassSubMeshSlotPooler} from "../submesh/GrassSubMeshSlotPooler";
+import ScatterSubMesh from "../../../core/scatter/ScatterSubMesh";
 import grassVertexWGSL from "../pipeline/grassVertex.wgsl";
 import grassFragmentNearWGSL from "../pipeline/grassFragmentNear.wgsl";
 import grassFragmentFarWGSL from "../pipeline/grassFragmentFar.wgsl";
@@ -16,29 +18,29 @@ import grassShadowVertexWGSL from "../pipeline/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 
 /**
- * [KO] 잔디 타입별 런타임 머티리얼 버퍼 및 바인드 그룹 자원 인터페이스입니다.
- * [EN] Interface for runtime material buffer and bind group resources per grass type.
+ * [KO] 서브메시 머티리얼 바인드 그룹(Group 2) 캐시 엔트리 인터페이스입니다.
+ * [EN] Interface for submesh material bind group (Group 2) cache entry.
  */
-export interface GrassTypeMaterialBufferResources {
-    uniformBuffer: GPUBuffer;
-    cpuBuffer: Float32Array;
-    uintBuffer: Uint32Array;
-    grassUniformGPUBuffer: GPUBuffer;
-    grassUniformCPUBuffer: Float32Array;
-    bindGroup: GPUBindGroup | null;
-    instanceBindGroup: GPUBindGroup | null;
-    cachedColorTexView: GPUTextureView | null;
-    initialized: boolean;
-    cachedHasVbt: boolean;
-    subMeshResources: {
-        bindGroup: GPUBindGroup | null;
-        cachedColorTexView: GPUTextureView | null;
-    }[];
+interface MaterialBindGroupCacheEntry {
+    bindGroup: GPUBindGroup;
+    cachedColorTexView: GPUTextureView;
 }
 
 /**
- * [KO] GPU 컬링된 대규모 잔디 인스턴스들을 간접 드로우(drawIndexedIndirect)를 통해 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
- * [EN] Renderer class that renders GPU-culled large-scale grass instances to main and shadow passes using indirect drawing (drawIndexedIndirect).
+ * [KO] View3D별 메인 GPURenderBundle 캐시 엔트리 인터페이스입니다.
+ * [EN] Interface for main GPURenderBundle cache entry per View3D.
+ */
+interface MainBundleCacheEntry {
+    bundle: GPURenderBundle;
+    systemBG: GPUBindGroup;
+    sampleCount: number;
+    grassCount: number;
+    megaBufferInstance: GrassScatterMegaBuffer;
+}
+
+/**
+ * [KO] GPU 컬링된 대규모 잔디 인스턴스들을 GPURenderBundle 기반 단일 executeBundles 호출로 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
+ * [EN] Renderer class that renders GPU-culled large-scale grass instances to main and shadow passes using single executeBundles calls based on GPURenderBundle.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(GrassManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -60,6 +62,29 @@ export class GrassRenderer extends RedGPUObject {
     #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
     #shadowPipeline: GPURenderPipeline | null = null;
 
+    // 256B 정렬 Dynamic Offset 단일 Group 1 바인드그룹 및 캐시
+    #unifiedGroup1BindGroup: GPUBindGroup | null = null;
+    #lastCulledBuffer: GPUBuffer | null = null;
+    #lastSlotPoolerBuffer: GPUBuffer | null = null;
+    #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
+
+    // Group 2 (텍스처/샘플러) 캐시
+    #materialBindGroupCache: Map<string, MaterialBindGroupCacheEntry> = new Map();
+
+    // GPURenderBundle 캐싱 엔진
+    #mainBundlesByView: WeakMap<View3D, MainBundleCacheEntry> = new WeakMap();
+    #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null];
+    #shadowBundleValid: boolean[] = [false, false];
+    #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null];
+    #lastShadowGrassCount: number = 0;
+    #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
+    #lastShadowMaskLow: number = -1;
+    #lastShadowMaskHigh: number = -1;
+    #materialBindGroupDirty: boolean = false;
+
+    // Zero-GC executeBundles 단일 배열 재사용
+    #singleBundleArray: [GPURenderBundle] = [null as any];
+
     /**
      * [KO] GrassRenderer 인스턴스를 생성하고 셰이더 모듈 및 파이프라인 레이아웃을 초기화합니다.
      * [EN] Creates a GrassRenderer instance and initializes shader modules and pipeline layouts.
@@ -79,269 +104,222 @@ export class GrassRenderer extends RedGPUObject {
     }
 
     /**
-     * [KO] 머티리얼 텍스처 및 개별 잔디 유니폼용 GPUBindGroupLayout(Group 2)을 반환합니다.
-     * [EN] Returns the GPUBindGroupLayout (Group 2) for material textures and individual grass uniforms.
+     * [KO] 머티리얼 텍스처 및 샘플러용 GPUBindGroupLayout(Group 2)을 반환합니다.
+     * [EN] Returns the GPUBindGroupLayout (Group 2) for material textures and samplers.
      */
     get pipelineBindGroupLayout2(): GPUBindGroupLayout | null {
         return this.#pipelineBindGroupLayout2;
     }
 
     /**
-     * [KO] 주어진 잔디 타입들의 인스턴스를 메인 렌더 패스(Near/Far 파이프라인)에 드로우합니다.
-     * [EN] Draws instances of the given grass types to the main render pass (Near/Far pipelines).
+     * [KO] 캐시된 Group 1 바인드그룹을 무효화합니다 (메가버퍼 재생성 시 호출).
+     * [EN] Invalidates the cached Group 1 bind group (invoked when mega-buffer is recreated).
+     */
+    invalidateGroup1BindGroup(): void {
+        this.#unifiedGroup1BindGroup = null;
+        this.#lastCulledBuffer = null;
+        this.#lastSlotPoolerBuffer = null;
+    }
+
+    /**
+     * [KO] 캐시된 모든 메인 패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached main pass render bundles to force regeneration on next render.
+     */
+    markMainBundleDirty(): void {
+        this.#mainBundlesByView = new WeakMap();
+    }
+
+    /**
+     * [KO] 캐시된 모든 그림자 패스 렌더 번들을 무효화하여 다음 그림자 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached shadow pass render bundles to force regeneration on next shadow render.
+     */
+    markShadowBundleDirty(): void {
+        for (let i = 0; i < 2; i++) {
+            this.#shadowRenderBundles[i] = null;
+            this.#shadowBundleValid[i] = false;
+            this.#lastSystemBGByCascade[i] = null;
+        }
+        this.#lastShadowGrassCount = 0;
+        this.#lastShadowMegaBuffer = null;
+        this.#lastShadowMaskLow = -1;
+        this.#lastShadowMaskHigh = -1;
+    }
+
+    /**
+     * [KO] 잔디 생태계 변경(타입 추가/삭제/메가버퍼 재생성) 시 모든 렌더 번들 및 바인드그룹을 일괄 무효화합니다.
+     * [EN] Invalidates all render bundles and bind groups at once on grass ecosystem changes.
+     */
+    markAllBundlesDirty(): void {
+        this.markMainBundleDirty();
+        this.markShadowBundleDirty();
+        this.invalidateGroup1BindGroup();
+    }
+
+    /**
+     * [KO] 주어진 잔디 타입들의 인스턴스를 메인 렌더 패스에 드로우합니다 (GPURenderBundle 캐싱 지원).
+     * [EN] Draws instances of the given grass types to the main render pass (supports GPURenderBundle caching).
      *
      * @param view - 현재 렌더링 중인 View3D 객체
      * @param passEncoder - 메인 씬 GPURenderPassEncoder
      * @param grassList - 렌더링할 잔디 타입 목록
      * @param megaBuffer - 잔디 스캐터 메가버퍼 인스턴스
-     * @param typeMaterialBuffers - 잔디 타입별 머티리얼 버퍼 맵
+     * @param slotPooler - 잔디 256B Dynamic Offset UBO 슬롯 풀러
      */
     render(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
         grassList: readonly Grass[],
         megaBuffer: GrassScatterMegaBuffer,
-        typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources>
+        slotPooler: GrassSubMeshSlotPooler
     ): void {
         const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (!systemBG) return;
 
-        const {gpuDevice, antialiasingManager, resourceManager} = this;
+        const count = grassList.length;
+        if (count === 0) return;
+
+        const {gpuDevice, antialiasingManager} = this;
         if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
-        const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
-        const nearPipeline = this.#getRenderPipeline(sampleCount, false);
-        const farPipeline = this.#getRenderPipeline(sampleCount, true);
-        if (!nearPipeline || !farPipeline) return;
-
-        let currentPipeline: GPURenderPipeline | null = nearPipeline;
-        passEncoder.setPipeline(nearPipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
-        if (!indirectGPUBuffer) return;
+        const slotGPUBuffer = slotPooler.gpuBuffer;
+        if (!indirectGPUBuffer || !culledGPUBuffer || !slotGPUBuffer) return;
 
-        const count = grassList.length;
-        for (let i = 0; i < count; i++) {
-            const type = grassList[i];
-            const {typeId, name, unifiedGeometry, subMeshes} = type;
-            const alloc = megaBuffer.getAllocation(typeId);
-            if (!alloc || alloc.instanceCount === 0) continue;
+        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, slotGPUBuffer);
+        if (!unifiedGroup1) return;
 
-            const res = typeMaterialBuffers.get(typeId);
-            if (!res) continue;
+        const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
 
-            const {uniformBuffer, grassUniformGPUBuffer} = res;
+        let cacheEntry = this.#mainBundlesByView.get(view);
+        const needsRebuild = !cacheEntry
+            || cacheEntry.systemBG !== systemBG
+            || cacheEntry.sampleCount !== sampleCount
+            || cacheEntry.grassCount !== count
+            || cacheEntry.megaBufferInstance !== megaBuffer
+            || this.#materialBindGroupDirty;
 
-            if (!res.instanceBindGroup && culledGPUBuffer && grassUniformGPUBuffer) {
-                res.instanceBindGroup = gpuDevice.createBindGroup({
-                    label: `Grass_InstanceBindGroup_${name}_${this.instanceId}`,
-                    layout: this.#pipelineBindGroupLayout1,
-                    entries: [
-                        {binding: 0, resource: {buffer: culledGPUBuffer}},
-                        {binding: 1, resource: {buffer: grassUniformGPUBuffer}},
-                    ]
-                });
+        if (needsRebuild) {
+            this.#materialBindGroupDirty = false;
+            const bundle = this.#recordMainRenderBundle(sampleCount, systemBG, grassList, megaBuffer, unifiedGroup1);
+            if (bundle) {
+                cacheEntry = {
+                    bundle,
+                    systemBG,
+                    sampleCount,
+                    grassCount: count,
+                    megaBufferInstance: megaBuffer
+                };
+                this.#mainBundlesByView.set(view, cacheEntry);
+            } else {
+                this.#mainBundlesByView.delete(view);
+                return;
             }
+        }
 
-            if (!res.instanceBindGroup) continue;
-
-            const targetGeom = unifiedGeometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-            const subMeshCount = subMeshes.length;
-            const {basicSampler} = resourceManager;
-
-            if (alloc.nearSlots.length > 0) {
-                if (currentPipeline !== nearPipeline) {
-                    passEncoder.setPipeline(nearPipeline);
-                    currentPipeline = nearPipeline;
-                }
-                for (let s = 0; s < subMeshCount; s++) {
-                    const subMesh = subMeshes[s];
-                    const slot = alloc.nearSlots[s];
-                    if (!slot) continue;
-
-                    let subRes = res.subMeshResources[s];
-                    if (!subRes) {
-                        subRes = {bindGroup: null, cachedColorTexView: null};
-                        res.subMeshResources[s] = subRes;
-                    }
-
-                    const subTex = subMesh.baseColorTexture;
-                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                        || type.baseColorTextureView
-                        || resourceManager.emptyBitmapTextureView;
-
-                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                        subRes.bindGroup = gpuDevice.createBindGroup({
-                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                            layout: this.#pipelineBindGroupLayout2,
-                            entries: [
-                                {binding: 0, resource: subTexView},
-                                {binding: 1, resource: basicSampler.gpuSampler},
-                                {binding: 2, resource: {buffer: uniformBuffer}},
-                            ]
-                        });
-                        subRes.cachedColorTexView = subTexView;
-                    }
-
-                    passEncoder.setBindGroup(2, subRes.bindGroup);
-                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                }
-            }
-
-            if (alloc.farSlots.length > 0) {
-                if (currentPipeline !== farPipeline) {
-                    passEncoder.setPipeline(farPipeline);
-                    currentPipeline = farPipeline;
-                }
-                for (let s = 0; s < subMeshCount; s++) {
-                    const subMesh = subMeshes[s];
-                    const slot = alloc.farSlots[s];
-                    if (!slot) continue;
-
-                    let subRes = res.subMeshResources[s];
-                    if (!subRes) {
-                        subRes = {bindGroup: null, cachedColorTexView: null};
-                        res.subMeshResources[s] = subRes;
-                    }
-
-                    const subTex = subMesh.baseColorTexture;
-                    const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                        || type.baseColorTextureView
-                        || resourceManager.emptyBitmapTextureView;
-
-                    if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                        subRes.bindGroup = gpuDevice.createBindGroup({
-                            label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                            layout: this.#pipelineBindGroupLayout2,
-                            entries: [
-                                {binding: 0, resource: subTexView},
-                                {binding: 1, resource: basicSampler.gpuSampler},
-                                {binding: 2, resource: {buffer: uniformBuffer}},
-                            ]
-                        });
-                        subRes.cachedColorTexView = subTexView;
-                    }
-
-                    passEncoder.setBindGroup(2, subRes.bindGroup);
-                    const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                }
-            }
+        if (cacheEntry?.bundle) {
+            this.#singleBundleArray[0] = cacheEntry.bundle;
+            passEncoder.executeBundles(this.#singleBundleArray);
         }
     }
 
     /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사(`castShadow: true`)가 설정된 잔디 인스턴스들의 그림자를 렌더링합니다.
-     * [EN] Renders shadows for grass instances configured with `castShadow: true` in the cascaded shadow map (CSM) pass.
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 잔디 그림자를 렌더링합니다 (GPURenderBundle 캐싱 지원).
+     * [EN] Renders grass shadows in the cascaded shadow map (CSM) pass (supports GPURenderBundle caching).
      *
      * @param view - 그림자 패스를 렌더링 중인 View3D 객체
      * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
      * @param grassList - 렌더링할 잔디 타입 목록
      * @param megaBuffer - 잔디 스캐터 메가버퍼 인스턴스
-     * @param typeMaterialBuffers - 잔디 타입별 머티리얼 버퍼 맵
+     * @param slotPooler - 잔디 256B Dynamic Offset UBO 슬롯 풀러
      */
     renderShadow(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
         grassList: readonly Grass[],
         megaBuffer: GrassScatterMegaBuffer,
-        typeMaterialBuffers: Map<number, GrassTypeMaterialBufferResources>
+        slotPooler: GrassSubMeshSlotPooler
     ): void {
-        const {currentCascadeIndex: currentCascade, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
-        if (currentCascade !== undefined && currentCascade > 1) return;
+        const currentCascade = view.currentCascadeIndex ?? 0;
+        if (currentCascade > 1) return;
 
-        const {gpuDevice, resourceManager} = this;
-        if (!gpuDevice) return;
-
-        const {indirectGPUBuffer} = megaBuffer;
-        if (!indirectGPUBuffer) return;
-
-        const pipeline = this.#getShadowRenderPipeline();
-        if (!pipeline) return;
-
+        const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (!systemBG) return;
 
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, systemBG);
-
         const count = grassList.length;
+        if (count === 0) return;
+
+        const {gpuDevice} = this;
+        if (!gpuDevice) return;
+
+        const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
+        const slotGPUBuffer = slotPooler.gpuBuffer;
+        if (!indirectGPUBuffer || !culledGPUBuffer || !slotGPUBuffer) return;
+
+        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, slotGPUBuffer);
+        if (!unifiedGroup1) return;
+
+        let shadowMaskLow = 0;
+        let shadowMaskHigh = 0;
         for (let i = 0; i < count; i++) {
-            const type = grassList[i];
-            const {castShadow, typeId, name, unifiedGeometry, subMeshes} = type;
-            if (!castShadow) continue;
-
-            const alloc = megaBuffer.getAllocation(typeId);
-            if (!alloc || alloc.instanceCount === 0) continue;
-
-            const res = typeMaterialBuffers.get(typeId);
-            if (!res || !res.instanceBindGroup) continue;
-
-            const targetGeom = unifiedGeometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
-
-            passEncoder.setBindGroup(1, res.instanceBindGroup);
-            passEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            passEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
-
-            const subMeshCount = subMeshes.length;
-            const {basicSampler} = resourceManager;
-
-            for (let s = 0; s < subMeshCount; s++) {
-                const subMesh = subMeshes[s];
-                const nearSlot = alloc.nearSlots[s];
-                if (!nearSlot) continue;
-
-                let subRes = res.subMeshResources[s];
-                if (!subRes) {
-                    subRes = {bindGroup: null, cachedColorTexView: null};
-                    res.subMeshResources[s] = subRes;
+            const g = grassList[i];
+            if (g.castShadow && g.slotIndex >= 0) {
+                const bit = g.typeId;
+                if (bit < 32) {
+                    shadowMaskLow |= (1 << bit);
+                } else {
+                    shadowMaskHigh |= (1 << (bit - 32));
                 }
-
-                const subTex = subMesh.baseColorTexture;
-                const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-                    || type.baseColorTextureView
-                    || resourceManager.emptyBitmapTextureView;
-
-                if (!subRes.bindGroup || subRes.cachedColorTexView !== subTexView) {
-                    subRes.bindGroup = gpuDevice.createBindGroup({
-                        label: `Grass_MaterialBindGroup_${name}_sub${s}_${this.instanceId}`,
-                        layout: this.#pipelineBindGroupLayout2,
-                        entries: [
-                            {binding: 0, resource: subTexView},
-                            {binding: 1, resource: basicSampler.gpuSampler},
-                            {binding: 2, resource: {buffer: res.uniformBuffer}},
-                        ]
-                    });
-                    subRes.cachedColorTexView = subTexView;
-                }
-
-                passEncoder.setBindGroup(2, subRes.bindGroup);
-                const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
-                passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
             }
+        }
+
+        const needsRebuild = !this.#shadowBundleValid[currentCascade]
+            || this.#lastSystemBGByCascade[currentCascade] !== systemBG
+            || this.#lastShadowGrassCount !== count
+            || this.#lastShadowMegaBuffer !== megaBuffer
+            || this.#lastShadowMaskLow !== shadowMaskLow
+            || this.#lastShadowMaskHigh !== shadowMaskHigh
+            || this.#materialBindGroupDirty;
+
+        if (needsRebuild) {
+            this.#lastShadowMaskLow = shadowMaskLow;
+            this.#lastShadowMaskHigh = shadowMaskHigh;
+            this.#materialBindGroupDirty = false;
+            const bundle = this.#recordShadowRenderBundle(currentCascade, systemBG, grassList, megaBuffer, unifiedGroup1);
+            if (bundle) {
+                this.#shadowRenderBundles[currentCascade] = bundle;
+                this.#shadowBundleValid[currentCascade] = true;
+                this.#lastSystemBGByCascade[currentCascade] = systemBG;
+                this.#lastShadowGrassCount = count;
+                this.#lastShadowMegaBuffer = megaBuffer;
+            } else {
+                this.#shadowRenderBundles[currentCascade] = null;
+                this.#shadowBundleValid[currentCascade] = false;
+                this.#lastSystemBGByCascade[currentCascade] = null;
+                return;
+            }
+        }
+
+        const bundle = this.#shadowRenderBundles[currentCascade];
+        if (bundle) {
+            this.#singleBundleArray[0] = bundle;
+            passEncoder.executeBundles(this.#singleBundleArray);
         }
     }
 
     /**
-     * [KO] 렌더러의 내부 리소스(파이프라인 캐시 및 셰이더 참조)를 해제합니다.
-     * [EN] Releases internal resources (pipeline caches and shader references) of the renderer.
+     * [KO] 렌더러의 내부 리소스(파이프라인 캐시, 렌더 번들 및 셰이더 참조)를 해제합니다.
+     * [EN] Releases internal resources (pipeline caches, render bundles, and shader references) of the renderer.
      */
     destroy(): void {
+        this.markAllBundlesDirty();
+        this.#singleBundleArray[0] = null as any;
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
+        this.#materialBindGroupCache.clear();
         this.#shadowPipeline = null;
+        this.#unifiedGroup1BindGroup = null;
+        this.#lastCulledBuffer = null;
+        this.#lastSlotPoolerBuffer = null;
         this.#vertexModule = null;
         this.#vertexShadowModule = null;
         this.#fragmentNearModule = null;
@@ -350,6 +328,230 @@ export class GrassRenderer extends RedGPUObject {
         this.#pipelineLayout = null;
         this.#pipelineBindGroupLayout1 = null;
         this.#pipelineBindGroupLayout2 = null;
+    }
+
+    #recordMainRenderBundle(
+        sampleCount: number,
+        systemBG: GPUBindGroup,
+        grassList: readonly Grass[],
+        megaBuffer: GrassScatterMegaBuffer,
+        unifiedGroup1: GPUBindGroup
+    ): GPURenderBundle | null {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return null;
+
+        const nearPipeline = this.#getRenderPipeline(sampleCount, false);
+        const farPipeline = this.#getRenderPipeline(sampleCount, true);
+        if (!nearPipeline || !farPipeline) return null;
+
+        const {indirectGPUBuffer} = megaBuffer;
+        if (!indirectGPUBuffer) return null;
+
+        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+        const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            label: `Grass_Main_RenderBundle_msaa${sampleCount}_${this.instanceId}`,
+            colorFormats: ['rgba16float', preferredNormalFormat, 'rgba16float'],
+            depthStencilFormat: 'depth32float',
+            sampleCount
+        });
+
+        bundleEncoder.setBindGroup(0, systemBG);
+
+        const count = grassList.length;
+
+        // 1단계: Near 패스 일괄 기록
+        bundleEncoder.setPipeline(nearPipeline);
+        for (let i = 0; i < count; i++) {
+            const type = grassList[i];
+            const {slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            if (slotIndex < 0) continue;
+
+            const alloc = megaBuffer.getAllocation(typeId);
+            if (!alloc || alloc.nearSlots.length === 0) continue;
+
+            const targetGeom = unifiedGeometry;
+            if (!targetGeom) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
+            if (!lvb || !lib) continue;
+
+            this.#dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const subMeshCount = subMeshes.length;
+            for (let s = 0; s < subMeshCount; s++) {
+                const subMesh = subMeshes[s];
+                const slot = alloc.nearSlots[s];
+                if (!slot) continue;
+
+                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                if (matBG) {
+                    bundleEncoder.setBindGroup(2, matBG);
+                }
+                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
+        }
+
+        // 2단계: Far 패스 일괄 기록
+        bundleEncoder.setPipeline(farPipeline);
+        for (let i = 0; i < count; i++) {
+            const type = grassList[i];
+            const {slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            if (slotIndex < 0) continue;
+
+            const alloc = megaBuffer.getAllocation(typeId);
+            if (!alloc || alloc.farSlots.length === 0) continue;
+
+            const targetGeom = unifiedGeometry;
+            if (!targetGeom) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
+            if (!lvb || !lib) continue;
+
+            this.#dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const subMeshCount = subMeshes.length;
+            for (let s = 0; s < subMeshCount; s++) {
+                const subMesh = subMeshes[s];
+                const slot = alloc.farSlots[s];
+                if (!slot) continue;
+
+                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                if (matBG) {
+                    bundleEncoder.setBindGroup(2, matBG);
+                }
+                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
+        }
+
+        return bundleEncoder.finish({
+            label: `Grass_Main_RenderBundle_msaa${sampleCount}_finished_${this.instanceId}`
+        });
+    }
+
+    #recordShadowRenderBundle(
+        cascadeIndex: number,
+        systemBG: GPUBindGroup,
+        grassList: readonly Grass[],
+        megaBuffer: GrassScatterMegaBuffer,
+        unifiedGroup1: GPUBindGroup
+    ): GPURenderBundle | null {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return null;
+
+        const shadowPipeline = this.#getShadowRenderPipeline();
+        if (!shadowPipeline) return null;
+
+        const {indirectGPUBuffer} = megaBuffer;
+        if (!indirectGPUBuffer) return null;
+
+        const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            label: `Grass_Shadow_RenderBundle_c${cascadeIndex}_${this.instanceId}`,
+            colorFormats: [],
+            depthStencilFormat: 'depth32float',
+            sampleCount: 1
+        });
+
+        bundleEncoder.setPipeline(shadowPipeline);
+        bundleEncoder.setBindGroup(0, systemBG);
+
+        const count = grassList.length;
+        for (let i = 0; i < count; i++) {
+            const type = grassList[i];
+            const {castShadow, slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            if (!castShadow || slotIndex < 0) continue;
+
+            const alloc = megaBuffer.getAllocation(typeId);
+            if (!alloc || alloc.nearSlots.length === 0) continue;
+
+            const targetGeom = unifiedGeometry;
+            if (!targetGeom) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
+            if (!lvb || !lib) continue;
+
+            this.#dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
+            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+
+            const subMeshCount = subMeshes.length;
+            for (let s = 0; s < subMeshCount; s++) {
+                const subMesh = subMeshes[s];
+                const nearSlot = alloc.nearSlots[s];
+                if (!nearSlot) continue;
+
+                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                if (matBG) {
+                    bundleEncoder.setBindGroup(2, matBG);
+                }
+                const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
+                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+            }
+        }
+
+        return bundleEncoder.finish({
+            label: `Grass_Shadow_RenderBundle_c${cascadeIndex}_finished_${this.instanceId}`
+        });
+    }
+
+    #getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer: GPUBuffer, slotPoolerBuffer: GPUBuffer): GPUBindGroup | null {
+        if (this.#unifiedGroup1BindGroup && this.#lastCulledBuffer === culledGPUBuffer && this.#lastSlotPoolerBuffer === slotPoolerBuffer) {
+            return this.#unifiedGroup1BindGroup;
+        }
+
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice || !this.#pipelineBindGroupLayout1) return null;
+
+        this.#unifiedGroup1BindGroup = gpuDevice.createBindGroup({
+            label: `Grass_Unified_Group1_BindGroup_${this.instanceId}`,
+            layout: this.#pipelineBindGroupLayout1,
+            entries: [
+                {binding: 0, resource: {buffer: culledGPUBuffer}},
+                {
+                    binding: 1,
+                    resource: {buffer: slotPoolerBuffer, offset: 0, size: GrassSubMeshSlotPooler.PARAMS_SIZE_BYTES}
+                },
+            ]
+        });
+
+        this.#lastCulledBuffer = culledGPUBuffer;
+        this.#lastSlotPoolerBuffer = slotPoolerBuffer;
+        return this.#unifiedGroup1BindGroup;
+    }
+
+    #getOrCreateMaterialBindGroup(subMesh: ScatterSubMesh, type: Grass, subIndex: number): GPUBindGroup | null {
+        const {gpuDevice, resourceManager} = this;
+        if (!gpuDevice || !this.#pipelineBindGroupLayout2) return null;
+
+        const subTex = subMesh.baseColorTexture;
+        const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
+            || type.baseColorTextureView
+            || resourceManager.emptyBitmapTextureView;
+
+        const cacheKey = `${type.typeId}_${subIndex}`;
+        let entry = this.#materialBindGroupCache.get(cacheKey);
+
+        if (!entry || entry.cachedColorTexView !== subTexView) {
+            const {basicSampler} = resourceManager;
+            const bindGroup = gpuDevice.createBindGroup({
+                label: `Grass_MaterialBindGroup_${type.name}_sub${subIndex}_${this.instanceId}`,
+                layout: this.#pipelineBindGroupLayout2,
+                entries: [
+                    {binding: 0, resource: subTexView},
+                    {binding: 1, resource: basicSampler.gpuSampler},
+                ]
+            });
+            entry = {bindGroup, cachedColorTexView: subTexView};
+            this.#materialBindGroupCache.set(cacheKey, entry);
+            this.#materialBindGroupDirty = true;
+        }
+
+        return entry.bindGroup;
     }
 
     #getShadowRenderPipeline(): GPURenderPipeline | null {
@@ -485,7 +687,15 @@ export class GrassRenderer extends RedGPUObject {
             label: 'Grass_Pipeline_Group1_Layout',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: 'uniform',
+                        hasDynamicOffset: true,
+                        minBindingSize: GrassSubMeshSlotPooler.PARAMS_SIZE_BYTES
+                    }
+                },
             ]
         });
 
@@ -494,7 +704,6 @@ export class GrassRenderer extends RedGPUObject {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
                 {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 2, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
             ]
         });
 
@@ -509,4 +718,5 @@ export class GrassRenderer extends RedGPUObject {
     }
 }
 
+Object.freeze(GrassRenderer);
 export default GrassRenderer;

@@ -1,14 +1,4 @@
-struct GrassMaterialUniforms {
-    groundBlendStrength: f32,
-    alphaCutoff: f32,
-    hasGroundTexture: u32,
-    exposureBoost: f32,
-    subsurfaceColor: vec3<f32>,
-    subsurfaceStrength: f32,
-    roughness: f32,
-    shadowStrength: f32,
-    receiveShadow: u32,
-};
+#redgpu_include landscape.struct.GrassParams;
 
 struct ShadowVertexOutput {
     @builtin(position) clipPos: vec4<f32>,
@@ -16,9 +6,10 @@ struct ShadowVertexOutput {
     @location(1) alphaFade: f32,
 };
 
+@group(1) @binding(1) var<uniform> materialUniforms: GrassParams;
+
 @group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
 @group(2) @binding(1) var baseColorSampler: sampler;
-@group(2) @binding(2) var<uniform> materialUniforms: GrassMaterialUniforms;
 
 @fragment
 fn main(input: ShadowVertexOutput) {
