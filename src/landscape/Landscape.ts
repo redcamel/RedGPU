@@ -217,7 +217,7 @@ export class Landscape extends RedGPUObject {
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
-        this.#foliageManager = new FoliageManager(this, this.#tileStreamer, () => {
+        this.#foliageManager = new FoliageManager(this, () => {
             this.#updateLandscapeUniforms();
         });
         this.#grassManager = new GrassManager(this, this.#tileStreamer);
@@ -679,6 +679,22 @@ export class Landscape extends RedGPUObject {
 
     set tileMaxLoadsPerFrame(value: number) {
         this.#tileStreamer.tileMaxLoadsPerFrame = value;
+    }
+
+    /**
+     * [KO] 지형 가상 높이 텍스처(VHT) 아틀라스 텍스처 객체를 반환합니다.
+     * [EN] Returns the landscape virtual height texture (VHT) atlas texture object.
+     */
+    get vhtAtlasTexture(): any {
+        return this.#tileStreamer?.vhtAtlasTexture ?? null;
+    }
+
+    /**
+     * [KO] 지형 가상 베이스 컬러(VBT) 아틀라스 텍스처 객체를 반환합니다.
+     * [EN] Returns the landscape virtual base color (VBT) atlas texture object.
+     */
+    get vbtBaseColorAtlas(): any {
+        return this.#tileStreamer?.vbtBaseColorAtlas ?? null;
     }
 
     /**

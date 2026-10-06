@@ -7,7 +7,6 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import type Landscape from "../Landscape";
-import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import type {FoliageOptions} from "./core/Foliage";
 import Foliage from "./core/Foliage";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
@@ -55,7 +54,6 @@ class FoliageManager {
 
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
-    #tileStreamer: LandscapeTileStreamer;
 
     #enabled: boolean = true;
     #megaBuffer: FoliageScatterMegaBuffer;
@@ -81,16 +79,12 @@ class FoliageManager {
      * @param landscape -
      * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스
      * [EN] Parent Landscape instance to which the foliage ecosystem is bound
-     * @param tileStreamer -
-     * [KO] 지형 타일 스트리머 인스턴스
-     * [EN] Landscape tile streamer instance
      * @param onUniformUpdateNeeded -
      * [KO] 지형 유니폼 버퍼 갱신이 필요할 때 호출되는 내부 콜백 함수
      * [EN] Internal callback invoked when terrain uniform buffers require updating
      */
-    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, onUniformUpdateNeeded?: () => void) {
+    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         this.#landscape = landscape;
-        this.#tileStreamer = tileStreamer;
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
         this.#slotPooler = new FoliageSubMeshSlotPooler();
@@ -143,7 +137,7 @@ class FoliageManager {
             this.#subMeshVertexBindGroupLayout,
             this.#subMeshDynamicBindGroup
         );
-        this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer, this.#tileStreamer);
+        this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markShadowBundleDirty();
@@ -583,7 +577,6 @@ class FoliageManager {
         this.#slotPooler.clear();
         this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
-        this.#tileStreamer = null as any;
         this.#onUniformUpdateNeeded = null;
     }
 

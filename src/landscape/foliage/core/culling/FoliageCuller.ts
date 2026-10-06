@@ -7,7 +7,6 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import type Landscape from "../../../Landscape";
-import type LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import type Foliage from "../Foliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
@@ -55,7 +54,6 @@ class FoliageCuller extends RedGPUObject {
     #lastHZBSampler: GPUSampler | null = null;
 
     #landscapeRef: Landscape | null = null;
-    #tileStreamer: LandscapeTileStreamer | null = null;
 
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
@@ -69,14 +67,10 @@ class FoliageCuller extends RedGPUObject {
      * @param megaBuffer -
      * [KO] 식생 메가 버퍼 (선택사항)
      * [EN] Foliage mega buffer (optional)
-     * @param tileStreamer -
-     * [KO] 지형 타일 스트리머 (선택사항)
-     * [EN] Landscape tile streamer (optional)
      */
-    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null, tileStreamer?: LandscapeTileStreamer | null) {
+    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
-        this.#tileStreamer = tileStreamer || null;
         this.#baker = new ScatterInstanceBaker(this.redGPUContext, {
             computeShaderCode: foliageBakeComputeSource,
             label: 'FoliageInstanceBaker',
@@ -288,9 +282,9 @@ class FoliageCuller extends RedGPUObject {
         if (!pipeline || !bindGroupLayout) return;
 
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
-            const vhtAtlasTexture = this.#tileStreamer?.getAtlasTexture('vht');
+            const vhtAtlasTexture = this.#landscapeRef?.vhtAtlasTexture;
             const vhtView = vhtAtlasTexture?.gpuTextureView;
-            const vbtAtlasTexture = this.#tileStreamer?.getAtlasTexture('vbtBaseColor');
+            const vbtAtlasTexture = this.#landscapeRef?.vbtBaseColorAtlas;
             const vbtView = vbtAtlasTexture?.gpuTextureView;
             const worldSizeX = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[0] : 8000.0;
             const worldSizeZ = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[1] : 8000.0;
