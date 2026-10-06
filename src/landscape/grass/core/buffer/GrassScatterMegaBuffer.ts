@@ -56,11 +56,6 @@ export interface GrassTypeAllocation extends ScatterBaseSegmentAllocation {
      */
     instanceCount: number;
     /**
-     * [KO] 모든 간접 드로우 슬롯 목록
-     * [EN] List of all indirect draw slots
-     */
-    slots: GrassDrawSlot[];
-    /**
      * [KO] Near 거리 단계 간접 드로우 슬롯 목록
      * [EN] List of indirect draw slots for Near distance stage
      */
@@ -98,13 +93,13 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * [KO] 초기 최대 수용 인스턴스 수 (기본값: 131,072)
      * [EN] Initial maximum instance capacity (default: 131,072)
      * @param maxTypes -
-     * [KO] 지원할 최대 잔디 타입 개수 (기본값: 16)
-     * [EN] Maximum number of grass types supported (default: 16)
+     * [KO] 지원할 최대 잔디 타입 개수 (기본값: 64)
+     * [EN] Maximum number of grass types supported (default: 64)
      */
     constructor(
         redGPUContext: RedGPUContext,
         initialCapacity: number = 131072,
-        maxTypes: number = 16
+        maxTypes: number = 64
     ) {
         const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
             'Grass_Cull_ShaderModule',
@@ -161,7 +156,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         const nearSlots: GrassDrawSlot[] = [];
         const farSlots: GrassDrawSlot[] = [];
-        const slots: GrassDrawSlot[] = [];
 
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
@@ -176,7 +170,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             };
             this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, nearCulledOffset);
             nearSlots.push(nearSlot);
-            slots.push(nearSlot);
         }
 
         for (let s = 0; s < subMeshCount; s++) {
@@ -192,7 +185,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             };
             this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, farCulledOffset);
             farSlots.push(farSlot);
-            slots.push(farSlot);
         }
 
         this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, subMeshCount * 2);
@@ -205,7 +197,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             indirectBaseOffset: baseAlloc.indirectBaseOffset,
             subMeshCount,
             instanceCount: 0,
-            slots,
             nearSlots,
             farSlots
         };

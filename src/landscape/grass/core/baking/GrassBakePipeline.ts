@@ -23,8 +23,6 @@ export default class GrassBakePipeline extends RedGPUObject {
     #uniformUint32View: Uint32Array;
     #uniformInt32View: Int32Array;
     #defaultSampler: GPUSampler | null = null;
-    #dummyTexture: GPUTexture | null = null;
-    #dummyTextureView: GPUTextureView | null = null;
 
     #cellOffsetsCache: Map<number, Int32Array> = new Map();
     #cellOffsetsGPUBuffer: GPUBuffer | null = null;
@@ -114,7 +112,7 @@ export default class GrassBakePipeline extends RedGPUObject {
         alloc.instanceCount = totalCells * targetDensity;
 
         // TargetLayer WeightMap 찾기
-        let weightView: GPUTextureView = this.#dummyTextureView!;
+        let weightView: GPUTextureView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
         let hasWeightMap = 0;
         let weightChannelIndex = 0;
 
@@ -213,9 +211,6 @@ export default class GrassBakePipeline extends RedGPUObject {
         this.#uniformBuffer = null;
         this.#cellOffsetsGPUBuffer?.destroy();
         this.#cellOffsetsGPUBuffer = null;
-        this.#dummyTexture?.destroy();
-        this.#dummyTexture = null;
-        this.#dummyTextureView = null;
         this.#computePipeline = null;
         this.#bindGroupLayout = null;
         this.#cellOffsetsCache.clear();
@@ -266,21 +261,6 @@ export default class GrassBakePipeline extends RedGPUObject {
             addressModeU: 'clamp-to-edge',
             addressModeV: 'clamp-to-edge',
         });
-
-        // 1x1 White dummy texture for fallback
-        this.#dummyTexture = gpuDevice.createTexture({
-            label: 'Grass_Bake_Dummy_WeightTexture',
-            size: [1, 1, 1],
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST
-        });
-        gpuDevice.queue.writeTexture(
-            {texture: this.#dummyTexture},
-            new Uint8Array([255, 255, 255, 255]),
-            {bytesPerRow: 4, rowsPerImage: 1},
-            {width: 1, height: 1}
-        );
-        this.#dummyTextureView = this.#dummyTexture.createView();
 
         // 2048개 셀 오프셋을 저장할 수 있는 GPU 버퍼 (vec2<i32> * 2048 = 16384 bytes)
         this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({

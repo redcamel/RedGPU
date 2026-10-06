@@ -77,7 +77,7 @@ fn writeInvalidInstance(targetIdx: u32, posX: f32, posZ: f32) {
     inv.posX = posX;
     inv.posY = -999999.0;
     inv.posZ = posZ;
-    inv.rotationY = 0.0;
+    inv.scaleY = 0.0;
     inv.packedScale = 0u;
     inv.packedBounding = 0u;
     inv.packedQuat = 0u;
@@ -231,7 +231,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         outInst.posX = gx;
         outInst.posY = terrainHeight + uniforms.bottomOffset;
         outInst.posZ = gz;
-        outInst.rotationY = rot;
+        outInst.scaleY = hScale;
         outInst.packedScale = pack2x16float(vec2<f32>(sScale, hScale));
         outInst.packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));
         outInst.packedQuat = pack4x8snorm(canonicalQuat);

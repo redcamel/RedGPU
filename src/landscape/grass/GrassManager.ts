@@ -161,7 +161,7 @@ export class GrassManager extends RedGPUObject {
             const grass = list[i];
             const alloc = this.#megaBuffer.getAllocation(grass.typeId);
             if (alloc && alloc.instanceCount > 0) {
-                count += alloc.slots.length;
+                count += alloc.nearSlots.length + alloc.farSlots.length;
             }
         }
         return count;

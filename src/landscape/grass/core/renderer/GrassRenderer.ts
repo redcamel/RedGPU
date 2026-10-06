@@ -95,21 +95,6 @@ export class GrassRenderer extends RedGPUObject {
         this.#initShadersAndLayouts();
     }
 
-    /**
-     * [KO] 인스턴스 버퍼 및 전역 잔디 유니폼용 GPUBindGroupLayout(Group 1)을 반환합니다.
-     * [EN] Returns the GPUBindGroupLayout (Group 1) for instance buffer and global grass uniforms.
-     */
-    get pipelineBindGroupLayout1(): GPUBindGroupLayout | null {
-        return this.#pipelineBindGroupLayout1;
-    }
-
-    /**
-     * [KO] 머티리얼 텍스처 및 샘플러용 GPUBindGroupLayout(Group 2)을 반환합니다.
-     * [EN] Returns the GPUBindGroupLayout (Group 2) for material textures and samplers.
-     */
-    get pipelineBindGroupLayout2(): GPUBindGroupLayout | null {
-        return this.#pipelineBindGroupLayout2;
-    }
 
     /**
      * [KO] 캐시된 Group 1 바인드그룹을 무효화합니다 (메가버퍼 재생성 시 호출).

@@ -234,8 +234,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                     strideBytes: combineResult.unifiedGeometry!.vertexBuffer?.stride ? combineResult.unifiedGeometry!.vertexBuffer.stride * 4 : 72,
                     mesh: group.rawNodes[0]?.node ?? mesh,
                     material: mat,
-                    baseColorTexture: tex,
-                    bottomOffset: 0
+                    baseColorTexture: tex
                 });
             });
 
@@ -286,8 +285,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                     strideBytes: gGeom.vertexBuffer?.stride ? gGeom.vertexBuffer.stride * 4 : 72,
                     mesh: mesh,
                     material: targetMaterial,
-                    baseColorTexture: this.#baseColorTexture,
-                    bottomOffset: 0
+                    baseColorTexture: this.#baseColorTexture
                 })
             ];
         }
