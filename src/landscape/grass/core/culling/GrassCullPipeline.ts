@@ -6,7 +6,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassCullWGSL from "./grassCull.wgsl";
-import type Grass from "../Grass";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
@@ -35,7 +34,6 @@ export default class GrassCullPipeline extends RedGPUObject {
     dispatchPass(
         computePass: GPUComputePassEncoder,
         megaBuffer: GrassScatterMegaBuffer,
-        grassList: Grass[],
         camX: number,
         camY: number,
         camZ: number,

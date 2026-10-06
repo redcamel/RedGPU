@@ -24,7 +24,6 @@ export class GrassSubMeshSlotPooler {
     #cpuUint32View: Uint32Array;
     #freeSlotStack: Int32Array;
     #freeTop: number = 0;
-    #allocatedCount: number = 0;
 
     /**
      * [KO] GrassSubMeshSlotPooler 인스턴스를 생성하고 64KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
@@ -74,14 +73,6 @@ export class GrassSubMeshSlotPooler {
     }
 
     /**
-     * [KO] 현재 할당된 활성 슬롯 개수를 반환합니다.
-     * [EN] Returns the number of currently allocated active slots.
-     */
-    get allocatedCount(): number {
-        return this.#allocatedCount;
-    }
-
-    /**
      * [KO] 새 잔디 타입용 슬롯 인덱스를 할당합니다 (0 ~ 255).
      * [EN] Allocates a slot index for a new grass type (0 ~ 255).
      * @returns 할당된 슬롯 번호 (슬롯 고갈 시 -1)
@@ -93,7 +84,6 @@ export class GrassSubMeshSlotPooler {
         }
         this.#freeTop--;
         const slot = this.#freeSlotStack[this.#freeTop];
-        this.#allocatedCount++;
         return slot;
     }
 
@@ -123,7 +113,6 @@ export class GrassSubMeshSlotPooler {
 
         this.#freeSlotStack[this.#freeTop] = slot;
         this.#freeTop++;
-        this.#allocatedCount = Math.max(0, this.#allocatedCount - 1);
     }
 
     /**
@@ -208,7 +197,6 @@ export class GrassSubMeshSlotPooler {
             this.#freeSlotStack[i] = maxSlots - 1 - i;
         }
         this.#freeTop = maxSlots;
-        this.#allocatedCount = 0;
     }
 
     /**
@@ -220,7 +208,6 @@ export class GrassSubMeshSlotPooler {
         this.#gpuBuffer = null;
         this.#cpuBuffer.fill(0);
         this.#freeTop = 0;
-        this.#allocatedCount = 0;
     }
 }
 

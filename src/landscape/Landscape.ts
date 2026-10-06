@@ -220,7 +220,7 @@ export class Landscape extends RedGPUObject {
         this.#foliageManager = new FoliageManager(this, () => {
             this.#updateLandscapeUniforms();
         });
-        this.#grassManager = new GrassManager(this, this.#tileStreamer);
+        this.#grassManager = new GrassManager(this);
         this.#tileStreamer.setOnTileLoaded((tileComponent) => {
             this.#onTileHeightBoundsLoaded(tileComponent);
             this.#grassManager?.onTileLoaded(tileComponent);

@@ -7,7 +7,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeWGSL from "./grassBake.wgsl";
 import type Landscape from "../../../Landscape";
-import type LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";
 import type Grass from "../Grass";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
@@ -42,7 +41,6 @@ export default class GrassBakePipeline extends RedGPUObject {
      */
     dispatchBake(
         megaBuffer: GrassScatterMegaBuffer,
-        tileStreamer: LandscapeTileStreamer,
         landscape: Landscape,
         grass: Grass,
         centerX: number = 0,
@@ -58,8 +56,8 @@ export default class GrassBakePipeline extends RedGPUObject {
         const rawBuffer = megaBuffer.rawGPUBuffer;
         if (!rawBuffer) return;
 
-        const vhtAtlas = tileStreamer.getAtlasTexture('vht');
-        const vbtAtlas = tileStreamer.getAtlasTexture('vbtBaseColor');
+        const vhtAtlas = landscape.vhtAtlasTexture;
+        const vbtAtlas = landscape.vbtBaseColorAtlas;
         const vhtView = vhtAtlas?.gpuTextureView;
         const vbtView = vbtAtlas?.gpuTextureView;
         if (!vhtView || !vbtView) return;

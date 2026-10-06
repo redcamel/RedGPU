@@ -30,9 +30,8 @@ fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    let scales = unpack2x16float(instance.packedScale);
-    var scaleXZ = scales.x;
-    var scaleY = scales.y;
+    var scaleXZ = unpack2x16float(instance.packedScale).x;
+    var scaleY = instance.scaleY;
 
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
