@@ -17,11 +17,6 @@ import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GrassBakePipeline from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
 
-/**
- * [KO] 카메라를 중심으로 잔디를 활성화하고 스트리밍하는 기본 반경(미터 단위)입니다. 기본값: `120.0`
- * [EN] Default radius in meters around the camera within which grass is activated and streamed. Default: `120.0`
- */
-const DEFAULT_STREAMING_RADIUS: number = 120.0;
 const CELL_SIZE: number = 16.0;
 
 /**
@@ -40,7 +35,6 @@ export class GrassManager extends RedGPUObject {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
     #enabled: boolean = true;
-    #streamingRadius: number = DEFAULT_STREAMING_RADIUS;
 
     #megaBuffer: GrassScatterMegaBuffer;
     #bakePipeline: GrassBakePipeline;
@@ -105,30 +99,6 @@ export class GrassManager extends RedGPUObject {
      */
     set enabled(val: boolean) {
         this.#enabled = val;
-    }
-
-    /**
-     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경(단위: 월드 유닛/미터, 기본값: 120.0)을 반환합니다.
-     * [EN] Gets the active grass streaming radius (in world units/meters, default: 120.0) around the camera.
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    /**
-     * [KO] 카메라 중심의 잔디 스트리밍 유효 반경을 설정합니다.
-     * [EN] Sets the active grass streaming radius around the camera.
-     *
-     * @param val -
-     * [KO] 설정할 스트리밍 반경 (최소값: 16.0)
-     * [EN] Streaming radius to set (minimum: 16.0)
-     */
-    set streamingRadius(val: number) {
-        const next = Math.max(16.0, val);
-        if (this.#streamingRadius !== next) {
-            this.#streamingRadius = next;
-            this.rebakeAll();
-        }
     }
 
     /**
@@ -231,10 +201,18 @@ export class GrassManager extends RedGPUObject {
         grassType.typeId = typeId;
         this.#grassList.push(grassType);
 
-        const {cullingDistance, instancesPerCell, name, subMeshes} = grassType;
-        const targetRadius = Math.max(cullingDistance, this.#streamingRadius);
+        const {
+            cullingDistance,
+            instancesPerCell,
+            name,
+            subMeshes,
+            streamingRadius,
+            maxInstances: userMaxInstances
+        } = grassType;
+        const targetRadius = Math.max(cullingDistance, streamingRadius);
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
-        const maxInstances = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil((instancesPerCell || 64) * 1.3)));
+        const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil((instancesPerCell || 64) * 1.3)));
+        const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;
 
         const alloc = this.#megaBuffer.allocateType(
             typeId,
@@ -392,7 +370,18 @@ export class GrassManager extends RedGPUObject {
         const dx = camX - this.#lastBakePos[0];
         const dz = camZ - this.#lastBakePos[1];
         const distSq = dx * dx + dz * dz;
-        const bakeThreshold = this.#streamingRadius * 0.35;
+
+        let minRadius = 120.0;
+        const grassList = this.#grassList;
+        const grassLen = grassList.length;
+        if (grassLen > 0) {
+            minRadius = grassList[0].streamingRadius;
+            for (let i = 1; i < grassLen; i++) {
+                const r = grassList[i].streamingRadius;
+                if (r < minRadius) minRadius = r;
+            }
+        }
+        const bakeThreshold = Math.max(16.0, minRadius * 0.35);
 
         if (hasValidTextures && (!this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
             this.#initialBaked = true;

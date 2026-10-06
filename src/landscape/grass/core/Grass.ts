@@ -89,6 +89,16 @@ export interface GrassOptions extends AScatterTypeInitOptions {
      * [EN] Distance where shadow-casting fade smoothly begins towards shadow culling boundary (default: shadowCullDistance * 0.75)
      */
     shadowFadeStartDistance?: number;
+    /**
+     * [KO] 서브셀 스트리밍 활성 반경 (미터, 미지정 시 cullingDistance * 1.15 또는 매니저 기본값 사용)
+     * [EN] Active sub-cell streaming radius in meters (falls back to cullingDistance * 1.15 or manager default if omitted)
+     */
+    streamingRadius?: number;
+    /**
+     * [KO] 이 잔디 타입에 할당될 최대 인스턴스 수용 용량 (미지정 시 스트리밍 반경 및 밀도로 자동 계산)
+     * [EN] Maximum instance capacity allocated for this grass type (auto-calculated from streaming radius and density if omitted)
+     */
+    maxInstances?: number;
 }
 
 /**
@@ -117,6 +127,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #receiveShadow: boolean = true;
     #shadowStrength: number = 1.0;
     #shadowFadeStartDistance: number = 26.25;
+    #streamingRadius: number = 120.0;
+    #maxInstances?: number;
 
     #dirty: boolean = true;
     #slotIndex: number = -1;
@@ -162,7 +174,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             shadowStrength,
             castShadow = true,
             shadowCullDistance,
-            shadowFadeStartDistance
+            shadowFadeStartDistance,
+            streamingRadius,
+            maxInstances
         } = options || {};
 
         if (!mesh) {
@@ -334,6 +348,14 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             this.#shadowFadeStartDistance = Math.max(0.0, shadowFadeStartDistance);
         } else {
             this.#shadowFadeStartDistance = this.shadowCullDistance * 0.75;
+        }
+
+        this.#streamingRadius = streamingRadius !== undefined
+            ? Math.max(16.0, Number(streamingRadius) || 16.0)
+            : Math.max(120.0, this.cullingDistance * 1.15);
+
+        if (maxInstances !== undefined) {
+            this.#maxInstances = Math.max(1, Number(maxInstances) || 1);
         }
     }
 
@@ -557,6 +579,38 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
+     * [KO] 이 잔디 타입의 서브셀 스트리밍 활성 반경(미터)을 반환합니다.
+     * [EN] Returns active sub-cell streaming radius in meters for this grass type.
+     */
+    get streamingRadius(): number {
+        return this.#streamingRadius;
+    }
+
+    /**
+     * [KO] 이 잔디 타입의 서브셀 스트리밍 활성 반경(미터)을 설정합니다.
+     * [EN] Sets active sub-cell streaming radius in meters for this grass type.
+     *
+     * @param val -
+     * [KO] 설정할 스트리밍 반경 (최소값: 16.0)
+     * [EN] Streaming radius to set (minimum: 16.0)
+     */
+    set streamingRadius(val: number) {
+        const numVal = Math.max(16.0, Number(val) || 16.0);
+        if (this.#streamingRadius !== numVal) {
+            this.#streamingRadius = numVal;
+            this.#notifyChange();
+        }
+    }
+
+    /**
+     * [KO] 사용자가 지정한 최대 인스턴스 수용 용량(미지정 시 undefined)을 반환합니다.
+     * [EN] Returns explicitly configured max instance capacity (undefined if omitted).
+     */
+    get maxInstances(): number | undefined {
+        return this.#maxInstances;
+    }
+
+    /**
      * [KO] 렌더링 또는 유니폼 버퍼 갱신이 필요한지 여부를 나타내는 더티 플래그
      * [EN] Dirty flag indicating whether rendering or uniform buffer update is required
      */
@@ -579,9 +633,16 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     protected override onParameterChanged(prop: string, value: any): void {
         switch (prop) {
-            case 'cullingDistance':
-                this.#dirty = true;
+            case 'cullingDistance': {
+                const cDist = value as number;
+                if (cDist * 1.15 > this.#streamingRadius) {
+                    this.#streamingRadius = cDist * 1.15;
+                    this.#notifyChange();
+                } else {
+                    this.#dirty = true;
+                }
                 break;
+            }
             case 'shadowCullDistance':
                 this.#shadowFadeStartDistance = (value as number) * 0.75;
                 this.#dirty = true;

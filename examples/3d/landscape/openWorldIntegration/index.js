@@ -294,7 +294,6 @@ function renderTestPane({
             // 2. 절차적 잔디 매니저 (Grass)
             grassFolder = pane.addFolder({title: 'Grass', expanded: false});
             grassFolder.addBinding(grassManager, 'enabled');
-            grassFolder.addBinding(grassManager, 'streamingRadius', {min: 30, max: 250, step: 5});
 
             // 3. 수목 식생 매니저 (Foliage)
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: false});
@@ -349,9 +348,10 @@ function renderTestPane({
     const addGrassTypeToUI = (type, isDefaultExpanded = false) => {
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name || 'GrassType', expanded: isDefaultExpanded});
+        typeFolder.addBinding(type, 'streamingRadius', {min: 20, max: 300, step: 5});
         typeFolder.addBinding(type, 'densityPerHectare', {min: 1000, max: 50000, step: 1000});
-        typeFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5, label: 'Far Dist (m)'});
-        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5, label: 'Cull Dist (m)'});
+        typeFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5});
+        typeFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
         typeFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
         typeFolder.addBinding(type, 'minSlope', {min: 0, max: 89, step: 1});
         typeFolder.addBinding(type, 'maxSlope', {min: 1, max: 90, step: 1});

@@ -259,15 +259,10 @@ function renderTestPane({
             grassFolder = pane.addFolder({title: 'GrassManager', expanded: true});
 
             grassFolder.addBinding(grassManager, 'enabled');
-            grassFolder.addBinding(grassManager, 'streamingRadius', {
-                min: 30,
-                max: 250,
-                step: 5
-            });
-            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true, label: 'Instances'});
-            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true, label: 'Capacity'});
-            grassFolder.addBinding(grassManager, 'totalDrawCalls', {readonly: true, label: 'Main Draw Calls'});
-            grassFolder.addBinding(grassManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
+            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true});
+            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true});
+            grassFolder.addBinding(grassManager, 'totalDrawCalls', {readonly: true});
+            grassFolder.addBinding(grassManager, 'shadowDrawCalls', {readonly: true});
 
             // [KO] Landscape 설정
             // [EN] Landscape settings
@@ -382,11 +377,19 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
 
-        typeFolder.addBinding(type, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
-        typeFolder.addBinding(type, 'drawCallCount', {readonly: true, label: 'Draw Calls'});
+        typeFolder.addBinding(type, 'subMeshCount', {readonly: true});
+        typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
 
         // -----------------------------------------------------------------
-        // 1. Placement & Density (스폰 배치 및 밀도)
+        // 1. Streaming & Culling (스트리밍 및 컬링 거리)
+        // -----------------------------------------------------------------
+        const streamingFolder = typeFolder.addFolder({title: 'Streaming & Culling', expanded: true});
+        streamingFolder.addBinding(type, 'streamingRadius', {min: 20, max: 300, step: 5});
+        streamingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5});
+        streamingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
+
+        // -----------------------------------------------------------------
+        // 2. Placement & Density (스폰 배치 및 밀도)
         // -----------------------------------------------------------------
         const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
 
@@ -405,7 +408,7 @@ function renderTestPane({
         placementFolder.addBinding(type, 'densityScaleByWeight');
 
         // -----------------------------------------------------------------
-        // 2. Transform & Slope (스케일 및 지형 경사각)
+        // 3. Transform & Slope (스케일 및 지형 경사각)
         // -----------------------------------------------------------------
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
 
@@ -435,13 +438,6 @@ function renderTestPane({
         transformFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
         transformFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
         transformFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
-
-        // -----------------------------------------------------------------
-        // 3. Culling & Distance (거리별 파이프라인 및 컬링)
-        // -----------------------------------------------------------------
-        const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
-        cullingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5, label: 'Far Dist (m)'});
-        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5, label: 'Cull Dist (m)'});
 
         // -----------------------------------------------------------------
         // 4. Material & PBR (재질, 알파 및 SSS)

@@ -78,8 +78,8 @@ export default class GrassBakePipeline extends RedGPUObject {
 
         // 16m 서브셀 단위 계산
         const cellSize = CELL_SIZE;
-        const cullingDist = Math.max(grass.cullingDistance || 80.0, 120.0);
-        const cellRadius = Math.ceil(cullingDist / cellSize);
+        const effectiveRadius = Math.max(grass.streamingRadius || grass.cullingDistance || 80.0, 16.0);
+        const cellRadius = Math.ceil(effectiveRadius / cellSize);
 
         const centerCellX = Math.floor(centerX / cellSize);
         const centerCellZ = Math.floor(centerZ / cellSize);
@@ -88,9 +88,21 @@ export default class GrassBakePipeline extends RedGPUObject {
         const spiralOffsets = this.#getSpiralOffsets(cellRadius);
         const totalCircularCells = spiralOffsets.length / 2;
 
+        if (offsetsBuffer.size < spiralOffsets.byteLength) {
+            offsetsBuffer.destroy();
+            const newSize = Math.max(2048 * 8, Math.ceil(spiralOffsets.byteLength / 256) * 256);
+            this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
+                label: 'Grass_Bake_CellOffsets_Buffer',
+                size: newSize,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+            });
+            this.#currentUploadedRadius = -1;
+        }
+
+        const activeOffsetsBuffer = this.#cellOffsetsGPUBuffer!;
         if (this.#currentUploadedRadius !== cellRadius) {
             this.#currentUploadedRadius = cellRadius;
-            gpuDevice.queue.writeBuffer(offsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
+            gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
         }
 
         // 셀당 인스턴스 수 계산 (16m x 16m = 256m²)
@@ -177,7 +189,7 @@ export default class GrassBakePipeline extends RedGPUObject {
                 {binding: 4, resource: this.#defaultSampler!},
                 {binding: 5, resource: weightView},
                 {binding: 6, resource: this.#defaultSampler!},
-                {binding: 7, resource: {buffer: offsetsBuffer}},
+                {binding: 7, resource: {buffer: activeOffsetsBuffer}},
             ]
         });
 
