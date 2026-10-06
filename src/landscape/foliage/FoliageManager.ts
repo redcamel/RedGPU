@@ -583,7 +583,7 @@ class FoliageManager {
     #repopulateFoliage(type: Foliage): void {
         if (!type) return;
 
-        type.clearTileCache();
+        type.clearSubCellCache();
         this.#renderer.markShadowBundleDirty();
     }
 

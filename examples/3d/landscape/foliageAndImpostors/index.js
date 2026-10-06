@@ -396,8 +396,8 @@ function renderTestPane({
         streamingStatsFolder.addBinding(type, 'maxInstances', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastMountedCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastUnmountedCount', {readonly: true});
-        streamingStatsFolder.addButton({title: 'clearTileCache'}).on('click', () => {
-            type.clearTileCache();
+        streamingStatsFolder.addButton({title: 'clearSubCellCache'}).on('click', () => {
+            type.clearSubCellCache();
         });
 
         // 2. Placement & Density (배치 및 밀도)

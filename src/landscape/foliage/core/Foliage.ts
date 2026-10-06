@@ -1010,10 +1010,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
 
     /**
-     * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
-     * [EN] Clears the tile cache and loaded component key set in the streamer.
+     * [KO] 스트리밍된 서브셀 캐시 및 GPU 마운트 인스턴스를 완전히 비우고 초기화합니다.
+     * [EN] Completely clears and resets the streamed sub-cell cache and GPU mounted instances.
      */
-    clearTileCache(): void {
+    clearSubCellCache(): void {
         this.#tempCandidates.length = 0;
         const mounted = this.#mountedSubCells;
         for (let i = 0; i < mounted.length; i++) {
@@ -1030,11 +1030,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 식생 인스턴스, 하위 서브메시 및 스트리머 리소스를 안전하게 해제합니다.
-     * [EN] Safely releases foliage instance, child sub-meshes, and streamer resources.
+     * @deprecated
+     * [KO] `clearSubCellCache()`를 사용하십시오.
+     * [EN] Use `clearSubCellCache()` instead.
+     */
+    clearTileCache(): void {
+        this.clearSubCellCache();
+    }
+
+    /**
+     * [KO] 식생 인스턴스, 하위 서브메시 및 서브셀 스트리밍 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases foliage instance, child sub-meshes, and sub-cell streaming resources.
      */
     override destroy(): void {
-        this.clearTileCache();
+        this.clearSubCellCache();
 
         const subCount = this.#subMeshes.length;
         for (let i = 0; i < subCount; i++) {
