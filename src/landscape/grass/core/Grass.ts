@@ -11,19 +11,14 @@ import Mesh from "../../../display/mesh/Mesh";
 import Primitive from "../../../primitive/core/Primitive";
 import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
 import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
-import AScatterType from "../../core/scatter/AScatterType";
+import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";
 import type {GrassTypeAllocation} from "./buffer/GrassScatterMegaBuffer";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
  * [EN] Configuration options interface passed when creating a Grass instance.
  */
-export interface GrassOptions {
-    /**
-     * [KO] 잔디 인스턴스의 고유 식별자 이름
-     * [EN] Unique identifier name for the grass instance
-     */
-    name: string;
+export interface GrassOptions extends AScatterTypeInitOptions {
     /**
      * [KO] 잔디 렌더링에 사용되는 기본 메쉬 객체
      * [EN] Base Mesh instance used for rendering grass
@@ -34,36 +29,6 @@ export interface GrassOptions {
      * [EN] Base color texture for grass (image URL or BitmapTexture instance)
      */
     baseColorTexture?: string | BitmapTexture;
-    /**
-     * [KO] 헥타르(10,000m²)당 생성할 잔디 인스턴스 기본 수량 (기본값: 5000.0)
-     * [EN] Base number of grass instances to spawn per hectare (10,000 m²) (default: 5000.0)
-     */
-    densityPerHectare?: number;
-    /**
-     * [KO] 잔디 밀도에 적용되는 전체 배율 (기본값: 1.0)
-     * [EN] Overall multiplier applied to grass density (default: 1.0)
-     */
-    densityMultiplier?: number;
-    /**
-     * [KO] 지형 스플랫 레이어 가중치에 비례하여 밀도를 스케일링할지 여부 (기본값: true)
-     * [EN] Whether to scale density proportional to the terrain splat layer weight (default: true)
-     */
-    densityScaleByWeight?: boolean;
-    /**
-     * [KO] 잔디가 배치될 수 있는 지형의 최소 경사도 (0~90, 기본값: 0.0)
-     * [EN] Minimum terrain slope where grass can be spawned (0-90, default: 0.0)
-     */
-    minSlope?: number;
-    /**
-     * [KO] 잔디가 배치될 수 있는 지형의 최대 경사도 (0~90, 기본값: 35.0)
-     * [EN] Maximum terrain slope where grass can be spawned (0-90, default: 35.0)
-     */
-    maxSlope?: number;
-    /**
-     * [KO] 카메라로부터 잔디가 렌더링되는 최대 가시거리 (기본값: 100.0)
-     * [EN] Maximum visible distance from camera where grass is rendered (default: 100.0)
-     */
-    cullingDistance?: number;
     /**
      * [KO] 원거리 간소화 셰이더(Far Grass)로 전환을 시작하는 거리 (기본값: 35.0)
      * [EN] Distance where transition to simplified far-distance grass shader begins (default: 35.0)
@@ -79,16 +44,6 @@ export interface GrassOptions {
      * [EN] Maximum random scale `[x, y, z]` or `[x, y]` applied during procedural placement
      */
     maxScale?: [number, number] | [number, number, number];
-    /**
-     * [KO] 잔디 메쉬 높이 (미지정 시 지오메트리 바운딩 볼륨에서 자동 계산)
-     * [EN] Height of the grass mesh (auto-calculated from geometry volume if omitted)
-     */
-    height?: number;
-    /**
-     * [KO] 지면 색상과 잔디 하단 블렌딩 강도 (0.0~1.0, 기본값: 1.0)
-     * [EN] Blending strength between terrain ground color and grass base (0.0-1.0, default: 1.0)
-     */
-    groundBlendStrength?: number;
     /**
      * [KO] 알파 테스트 컷오프 임계값 (0.01~1.0, 기본값: 0.2)
      * [EN] Alpha test cutoff threshold (0.01-1.0, default: 0.2)
@@ -120,16 +75,6 @@ export interface GrassOptions {
      */
     minY?: number;
     /**
-     * [KO] 잔디가 배치될 특정 지형 스플랫 레이어의 이름 또는 인덱스 (빈 문자열이면 전체 배치)
-     * [EN] Target terrain splat layer name or index where grass spawns (empty string spawns on all)
-     */
-    targetLayer?: string | number;
-    /**
-     * [KO] 지형 표면 대비 잔디 하단 접지 추가 Y 오프셋 (기본값: 0.0)
-     * [EN] Additional bottom Y offset relative to terrain surface (default: 0.0)
-     */
-    bottomOffset?: number;
-    /**
      * [KO] 그림자 수신 여부 (기본값: true)
      * [EN] Whether grass receives shadows (default: true)
      */
@@ -139,16 +84,6 @@ export interface GrassOptions {
      * [EN] Received shadow intensity (0.0-1.0, default: 1.0)
      */
     shadowStrength?: number;
-    /**
-     * [KO] 잔디가 그림자를 투영(캐스팅)할지 여부 (기본값: true)
-     * [EN] Whether grass casts shadows (default: true)
-     */
-    castShadow?: boolean;
-    /**
-     * [KO] 그림자 렌더링 패스 시의 최대 컬링 거리 (기본값: 35.0)
-     * [EN] Maximum culling distance applied during the shadow pass (default: 35.0)
-     */
-    shadowCullDistance?: number;
     /**
      * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (기본값: shadowCullDistance * 0.75)
      * [EN] Distance where shadow-casting fade smoothly begins towards shadow culling boundary (default: shadowCullDistance * 0.75)
@@ -672,7 +607,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      */
     override destroy(): void {
         (this.#geometry as any)?.destroy?.();
+        this.#geometry = null as any;
         this.#subMeshes.length = 0;
+        this.#baseColorTexture = null as any;
+        this.#mesh = null as any;
+        this.#onRepopulateRequired = null;
         super.destroy();
     }
 }
