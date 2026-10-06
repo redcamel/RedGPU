@@ -331,7 +331,8 @@ export class GrassManager extends RedGPUObject {
 
         const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
 
-        for (const type of this.#grassList) {
+        for (let i = 0; i < grassLen; i++) {
+            const type = grassList[i];
             const {typeId, dirty, slotIndex} = type;
             if (slotIndex < 0) continue;
 
@@ -405,6 +406,7 @@ export class GrassManager extends RedGPUObject {
         this.#nextTypeId = 0;
         this.#lastLoadedTileCount = 0;
         this.#initialBaked = false;
+        this.#populated = false;
         this.#lastBakePos[0] = 0;
         this.#lastBakePos[1] = 0;
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
