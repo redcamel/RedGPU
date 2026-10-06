@@ -21,6 +21,6 @@ struct LandscapeUniforms {
     heightmapShadowSoftness: f32,
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
-    foliageStreamingRadius: f32,
+    _padFoliage: f32,
     debugMode: u32,
 };

@@ -533,9 +533,7 @@ fn computeLandscapeHeightmapShadow(
 
 fn getFoliageSubCellDebugColor(
     worldPosXZ: vec2<f32>,
-    cameraPosXZ: vec2<f32>,
     cellSize: f32,
-    streamingRadius: f32,
     worldSizeX: f32,
     worldSizeZ: f32
 ) -> vec4<f32> {
@@ -560,27 +558,8 @@ fn getFoliageSubCellDebugColor(
     let hash3 = fract(sin(dot(cellCoord, vec2<f32>(45.1234, 19.876))) * 58392.1234);
     let baseCellColor = vec3<f32>(0.2 + 0.6 * hash1, 0.2 + 0.6 * hash2, 0.2 + 0.6 * hash3);
 
-    let distToCam = distance(worldPosXZ, cameraPosXZ);
-    let isInRadius = distToCam <= streamingRadius;
-
-    let ringDist = abs(distToCam - streamingRadius);
-    let ringIntensity = smoothstep(4.0, 0.0, ringDist);
-
-    var finalColor = vec3<f32>(0.0);
-    var alpha = 0.0;
-
-    if (isInRadius) {
-        finalColor = mix(baseCellColor, vec3<f32>(1.0, 1.0, 0.9), isWireframe * 0.85);
-        alpha = mix(0.5, 0.9, isWireframe);
-    } else {
-        finalColor = vec3<f32>(0.1, 0.1, 0.15);
-        alpha = isWireframe * 0.35;
-    }
-
-    if (ringIntensity > 0.01) {
-        finalColor = mix(finalColor, vec3<f32>(0.0, 1.0, 1.0), ringIntensity * 0.95);
-        alpha = max(alpha, ringIntensity * 0.9);
-    }
+    let finalColor = mix(baseCellColor, vec3<f32>(1.0, 1.0, 0.9), isWireframe * 0.85);
+    let alpha = mix(0.5, 0.9, isWireframe);
 
     return vec4<f32>(finalColor, alpha);
 }
@@ -694,9 +673,7 @@ fn main(inputData: InputData) -> OutputFragment {
     if (landscapeInstanceUniforms.foliageSubCellColoration > 0.5) {
         let debugSubCell = getFoliageSubCellDebugColor(
             input_vertexPosition.xz,
-            u_cameraPosition.xz,
             landscapeInstanceUniforms.foliageSubCellSize,
-            landscapeInstanceUniforms.foliageStreamingRadius,
             landscapeInstanceUniforms.worldSizeX,
             landscapeInstanceUniforms.worldSizeZ
         );

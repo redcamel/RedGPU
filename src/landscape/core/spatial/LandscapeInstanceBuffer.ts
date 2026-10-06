@@ -237,7 +237,6 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         heightmapShadowSoftness: number = 8.0,
         foliageSubCellColoration: boolean = false,
         foliageSubCellSize: number = 100.0,
-        foliageStreamingRadius: number = 600.0,
         debugMode: number = 0
     ): void {
         const gpuDevice = this.gpuDevice;
@@ -293,7 +292,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
 
         f32[60] = foliageSubCellColoration ? 1.0 : 0.0;
         f32[61] = foliageSubCellSize;
-        f32[62] = foliageStreamingRadius;
+        f32[62] = 0.0; // _padFoliage (16-byte alignment padding for debugMode)
         u32[63] = debugMode;
 
         gpuDevice.queue.writeBuffer(
