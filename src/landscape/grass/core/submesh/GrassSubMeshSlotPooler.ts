@@ -197,6 +197,15 @@ export class GrassSubMeshSlotPooler {
             this.#freeSlotStack[i] = maxSlots - 1 - i;
         }
         this.#freeTop = maxSlots;
+
+        const {gpuDevice} = this.#redGPUContext;
+        if (gpuDevice && this.#gpuBuffer) {
+            gpuDevice.queue.writeBuffer(
+                this.#gpuBuffer,
+                0,
+                this.#cpuBuffer.buffer
+            );
+        }
     }
 
     /**

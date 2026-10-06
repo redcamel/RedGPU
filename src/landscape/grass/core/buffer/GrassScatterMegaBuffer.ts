@@ -182,6 +182,27 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             alloc.instanceCount = 0;
             this.#allocations.delete(typeId);
         }
+
+        const typeParamFloats = this.typeParamFloats;
+        if (typeParamFloats > 0) {
+            const baseFloat = typeId * typeParamFloats;
+            const cf = this.cpuTypeParamsBuffer;
+            cf.fill(0, baseFloat, baseFloat + typeParamFloats);
+
+            const gpuDevice = this.gpuDevice;
+            const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+            if (gpuDevice && typeParamsGPUBuffer) {
+                const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
+                const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
+                gpuDevice.queue.writeBuffer(
+                    typeParamsGPUBuffer,
+                    byteOffset,
+                    cf.buffer,
+                    byteOffset,
+                    byteSize
+                );
+            }
+        }
     }
 
 

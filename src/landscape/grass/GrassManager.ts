@@ -7,7 +7,6 @@ import RedGPUObject from "../../base/RedGPUObject";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
-import type LandscapeComponent from "../core/spatial/LandscapeComponent";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
@@ -466,16 +465,6 @@ export class GrassManager extends RedGPUObject {
         return undefined;
     }
 
-    /**
-     * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅입니다.
-     * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading.
-     *
-     * @param tileComponent - 로드 완료된 지형 타일 컴포넌트 (`LandscapeComponent`)
-     */
-    onTileLoaded(tileComponent: LandscapeComponent): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !tileComponent) return;
-        this.rebakeAll();
-    }
 
     /**
      * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.

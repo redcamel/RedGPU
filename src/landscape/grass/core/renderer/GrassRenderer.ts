@@ -80,7 +80,6 @@ export class GrassRenderer extends RedGPUObject {
     #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
     #lastShadowMaskHigh: number = -1;
-    #materialBindGroupDirty: boolean = false;
 
     // Zero-GC executeBundles 단일 배열 재사용
     #singleBundleArray: [GPURenderBundle] = [null as any];
@@ -138,6 +137,7 @@ export class GrassRenderer extends RedGPUObject {
         this.markMainBundleDirty();
         this.markShadowBundleDirty();
         this.invalidateGroup1BindGroup();
+        this.#materialBindGroupCache.clear();
     }
 
     /**
@@ -180,11 +180,9 @@ export class GrassRenderer extends RedGPUObject {
             || cacheEntry.systemBG !== systemBG
             || cacheEntry.sampleCount !== sampleCount
             || cacheEntry.grassCount !== count
-            || cacheEntry.megaBufferInstance !== megaBuffer
-            || this.#materialBindGroupDirty;
+            || cacheEntry.megaBufferInstance !== megaBuffer;
 
         if (needsRebuild) {
-            this.#materialBindGroupDirty = false;
             const bundle = this.#recordMainRenderBundle(sampleCount, systemBG, grassList, megaBuffer, unifiedGroup1);
             if (bundle) {
                 cacheEntry = {
@@ -249,6 +247,7 @@ export class GrassRenderer extends RedGPUObject {
             const g = grassList[i];
             if (g.castShadow && g.slotIndex >= 0) {
                 const bit = g.typeId;
+                if (bit >= 64) continue;
                 if (bit < 32) {
                     shadowMaskLow |= (1 << bit);
                 } else {
@@ -262,13 +261,11 @@ export class GrassRenderer extends RedGPUObject {
             || this.#lastShadowGrassCount !== count
             || this.#lastShadowMegaBuffer !== megaBuffer
             || this.#lastShadowMaskLow !== shadowMaskLow
-            || this.#lastShadowMaskHigh !== shadowMaskHigh
-            || this.#materialBindGroupDirty;
+            || this.#lastShadowMaskHigh !== shadowMaskHigh;
 
         if (needsRebuild) {
             this.#lastShadowMaskLow = shadowMaskLow;
             this.#lastShadowMaskHigh = shadowMaskHigh;
-            this.#materialBindGroupDirty = false;
             const bundle = this.#recordShadowRenderBundle(currentCascade, systemBG, grassList, megaBuffer, unifiedGroup1);
             if (bundle) {
                 this.#shadowRenderBundles[currentCascade] = bundle;
@@ -533,7 +530,8 @@ export class GrassRenderer extends RedGPUObject {
             });
             entry = {bindGroup, cachedColorTexView: subTexView};
             this.#materialBindGroupCache.set(cacheKey, entry);
-            this.#materialBindGroupDirty = true;
+            this.markMainBundleDirty();
+            this.markShadowBundleDirty();
         }
 
         return entry.bindGroup;
