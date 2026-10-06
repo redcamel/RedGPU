@@ -107,9 +107,7 @@ export class GrassManager extends RedGPUObject {
         grassType.bindAllocation(alloc);
         this.#megaBuffer.updateTypeParam(typeId, grassType, alloc);
 
-        grassType.onRepopulateRequired = () => {
-            this.rebakeAll();
-        };
+        grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
         if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.#landscape.layers) {
             const matchedLayer = typeof grassType.targetLayer === 'number'
@@ -119,9 +117,7 @@ export class GrassManager extends RedGPUObject {
                 );
             const wt = matchedLayer?.weightTexture;
             if (wt && typeof (wt as any).addLoadListeners === 'function') {
-                (wt as any).addLoadListeners(() => {
-                    this.rebakeAll();
-                });
+                (wt as any).addLoadListeners(this.#onGrassRepopulateRequired);
             }
         }
 
@@ -334,12 +330,22 @@ export class GrassManager extends RedGPUObject {
         for (let i = 0; i < grassLen; i++) {
             const type = grassList[i];
             const {typeId, dirty, slotIndex} = type;
-            if (slotIndex < 0) continue;
+
+            let activeSlot = slotIndex;
+            if (activeSlot < 0) {
+                activeSlot = this.#slotPooler.allocateSlot();
+                if (activeSlot >= 0) {
+                    type.slotIndex = activeSlot;
+                    this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
+                } else {
+                    continue;
+                }
+            }
 
             const isDirty = dirty || tileCountChanged;
             if (isDirty) {
                 type.markClean();
-                this.#slotPooler.writeGrassSlot(slotIndex, type, hasValidVbt);
+                this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
 
                 const alloc = this.#megaBuffer.getAllocation(typeId);
                 if (alloc) {
@@ -411,6 +417,25 @@ export class GrassManager extends RedGPUObject {
         this.#lastBakePos[1] = 0;
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
+    }
+
+    /**
+     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼, 파이프라인 및 자원을 안전하게 해제합니다.
+     * [EN] Safely releases all GPU buffers, pipelines, and resources held by the grass manager.
+     */
+    destroy(): void {
+        this.#megaBuffer.destroy();
+        this.#bakePipeline.destroy();
+        this.#cullPipeline.destroy();
+        this.#renderer.destroy();
+        this.#slotPooler.destroy();
+
+        const list = this.#grassList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            list[i].destroy();
+        }
+        list.length = 0;
     }
 
     // Zero-GC: 매 프레임 임시 클로저 생성 방지를 위한 바인딩 콜백
@@ -493,22 +518,10 @@ export class GrassManager extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼, 파이프라인 및 자원을 안전하게 해제합니다.
-     * [EN] Safely releases all GPU buffers, pipelines, and resources held by the grass manager.
-     */
-    destroy(): void {
-        this.#megaBuffer.destroy();
-        this.#bakePipeline.destroy();
-        this.#cullPipeline.destroy();
-        this.#renderer.destroy();
-        this.#slotPooler.destroy();
-
-        for (const grass of this.#grassList) {
-            grass.onRepopulateRequired = null;
-        }
-        this.#grassList.length = 0;
-    }
+    // Zero-GC: 잔디 리베이크 요청 공용 재사용 콜백
+    #onGrassRepopulateRequired = (): void => {
+        this.rebakeAll();
+    };
 
     #getFallbackCameraPosition(): [number, number, number] | null {
         const viewList = this.redGPUContext?.viewList;

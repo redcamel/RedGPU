@@ -210,6 +210,7 @@ export default class GrassBakePipeline extends RedGPUObject {
         this.#cellOffsetsGPUBuffer = null;
         this.#computePipeline = null;
         this.#bindGroupLayout = null;
+        this.#defaultSampler = null;
         this.#cellOffsetsCache.clear();
     }
 
