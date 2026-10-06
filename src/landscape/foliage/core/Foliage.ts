@@ -967,6 +967,30 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
+    /**
+     * [KO] 현재 GPU 버퍼에 마운트되어 활성화된 서브셀의 총 개수를 반환합니다.
+     * [EN] Returns the total number of sub-cells currently mounted and active in the GPU buffer.
+     */
+    get mountedSubCellCount(): number {
+        return this.#mountedSubCells.length;
+    }
+
+    /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually mounted in the last streaming update
+     */
+    get lastMountedCount(): number {
+        return this.#lastMountedCount;
+    }
+
+    /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually unmounted in the last streaming update
+     */
+    get lastUnmountedCount(): number {
+        return this.#lastUnmountedCount;
+    }
+
     protected override onParameterChanged(prop: string, value: any): void {
         switch (prop) {
             case 'bottomOffset':
@@ -974,6 +998,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.rebake();
                 break;
             case 'cullingDistance':
+            case 'fadeStartDistance':
                 this.#syncTypeParams();
                 break;
             case 'shadowCullDistance':
@@ -993,22 +1018,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#updateSubMeshGroundBlend();
                 break;
         }
-    }
-
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually mounted in the last streaming update
-     */
-    get lastMountedCount(): number {
-        return this.#lastMountedCount;
-    }
-
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually unmounted in the last streaming update
-     */
-    get lastUnmountedCount(): number {
-        return this.#lastUnmountedCount;
     }
 
     /**

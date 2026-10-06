@@ -92,7 +92,6 @@ RedGPU.init(
         // 7. 수목 식생 매니저
         const foliageManager = landscape.foliageManager;
         foliageManager.subCellSize = 100;
-        foliageManager.streamingRadius = 800;
 
         let onFoliageTypeAdded = null;
 
@@ -267,6 +266,7 @@ function renderTestPane({
             managerFolder.addBinding(foliageManager, 'unmountBudget', {min: 1, max: 128, step: 1});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
+            managerFolder.addBinding(foliageManager, 'foliageCount', {readonly: true});
             managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true});
             managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {readonly: true});
             managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {readonly: true});
@@ -391,13 +391,16 @@ function renderTestPane({
         // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
         const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: true});
         streamingStatsFolder.addBinding(type, 'enableStreaming');
-        streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 3000, step: 50});
+        streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 5000, step: 50});
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'maxInstances', {readonly: true});
-        streamingStatsFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         streamingStatsFolder.addBinding(type, 'loadedTileCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastMountedCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'lastUnmountedCount', {readonly: true});
+        streamingStatsFolder.addButton({title: 'clearTileCache'}).on('click', () => {
+            type.clearTileCache();
+        });
 
         // 2. Placement & Density (배치 및 밀도)
         const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
@@ -418,6 +421,9 @@ function renderTestPane({
         placementFolder.addBinding(type, 'densityScaleByWeight');
         placementFolder.addBinding(type, 'subMeshCount', {readonly: true});
         placementFolder.addBinding(type, 'drawCallCount', {readonly: true});
+        placementFolder.addButton({title: 'rebake'}).on('click', () => {
+            type.rebake();
+        });
 
         // 3. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
@@ -635,11 +641,11 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 120.0,
+                    streamingRadius: 1000,
                     minScale: [0.4, 0.4, 0.4],
                     maxScale: [0.7, 0.75, 0.7],
                     cullingDistance: 6000,
                     targetLayer: 'Grass',
-
                 });
 
                 onFoliageTypeAdded?.(foliage);

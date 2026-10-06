@@ -288,6 +288,14 @@ class FoliageManager {
     }
 
     /**
+     * [KO] 등록된 총 식생 타입(Foliage) 개수를 반환합니다.
+     * [EN] Returns the total number of registered foliage types.
+     */
+    get foliageCount(): number {
+        return this.#foliageList.length;
+    }
+
+    /**
      * [KO] 지형의 새로운 타일 컴포넌트가 로드되었을 때 호출되는 라이프사이클 훅으로, 해당 타일에 등록된 식생 인스턴스를 배치합니다.
      * [EN] Lifecycle hook invoked when a new landscape tile component finishes loading, populating registered foliage instances on that tile.
      *
