@@ -113,6 +113,7 @@ export interface GrassOptions extends AScatterTypeInitOptions {
 export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
+    #unifiedGeometries: (Geometry | null)[] = [];
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #farDistance: number = 35.0;
@@ -291,6 +292,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             ];
         }
 
+        this.#unifiedGeometries = [(this.#geometry as Geometry) || null];
         this.updateDrawCallCount(this.#subMeshes.length * 2);
 
         this.#farDistance = Math.max(10.0, farDistance);
@@ -377,11 +379,23 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환합니다. (잔디는 단일 통합 지오메트리를 공유)
-     * [EN] Returns single combined geometry list per LOD level. (Grass shares single unified geometry)
+     * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환합니다. (Zero-GC 캐시 배열 반환)
+     * [EN] Returns single combined geometry list per LOD level. (Returns Zero-GC cached array)
      */
     override get unifiedGeometries(): (Geometry | null)[] {
-        return [this.unifiedGeometry];
+        return this.#unifiedGeometries;
+    }
+
+    /**
+     * [KO] 이 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 실제 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the actual number of indirect draw calls dispatched by this grass type in the main render pass.
+     */
+    override get drawCallCount(): number {
+        const alloc = this.allocation;
+        if (alloc && alloc.instanceCount > 0) {
+            return alloc.nearSlots.length + alloc.farSlots.length;
+        }
+        return this.#subMeshes.length * 2;
     }
 
     /**
@@ -699,6 +713,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#slotIndex = -1;
         (this.#geometry as any)?.destroy?.();
         this.#geometry = null as any;
+        this.#unifiedGeometries.length = 0;
         this.#subMeshes.length = 0;
         this.#baseColorTexture = null as any;
         this.#mesh = null as any;

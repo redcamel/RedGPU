@@ -13,6 +13,15 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../mat
 
 export const GRASS_CELL_SIZE: number = 16.0;
 
+interface BakeBindGroupCacheEntry {
+    bindGroup: GPUBindGroup;
+    rawBuffer: GPUBuffer;
+    vhtView: GPUTextureView;
+    vbtView: GPUTextureView;
+    weightView: GPUTextureView;
+    offsetsBuffer: GPUBuffer;
+}
+
 export default class GrassBakePipeline extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
@@ -26,6 +35,7 @@ export default class GrassBakePipeline extends RedGPUObject {
     #cellOffsetsCache: Map<number, Int32Array> = new Map();
     #cellOffsetsGPUBuffer: GPUBuffer | null = null;
     #currentUploadedRadius: number = -1;
+    #bakeBindGroupCache: Map<number, BakeBindGroupCacheEntry> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -171,19 +181,40 @@ export default class GrassBakePipeline extends RedGPUObject {
 
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 
-        const bindGroup = gpuDevice.createBindGroup({
-            label: `Grass_Bake_BG_Type_${grass.typeId}`,
-            layout: bindGroupLayout,
-            entries: [
-                {binding: 0, resource: {buffer: uniformBuffer}},
-                {binding: 1, resource: {buffer: rawBuffer}},
-                {binding: 2, resource: vhtView},
-                {binding: 3, resource: vbtView},
-                {binding: 4, resource: this.#defaultSampler!},
-                {binding: 5, resource: weightView},
-                {binding: 6, resource: {buffer: activeOffsetsBuffer}},
-            ]
-        });
+        let cacheEntry = this.#bakeBindGroupCache.get(grass.typeId);
+        const needsNewBindGroup = !cacheEntry
+            || cacheEntry.rawBuffer !== rawBuffer
+            || cacheEntry.vhtView !== vhtView
+            || cacheEntry.vbtView !== vbtView
+            || cacheEntry.weightView !== weightView
+            || cacheEntry.offsetsBuffer !== activeOffsetsBuffer;
+
+        if (needsNewBindGroup) {
+            const bindGroup = gpuDevice.createBindGroup({
+                label: `Grass_Bake_BG_Type_${grass.typeId}`,
+                layout: bindGroupLayout,
+                entries: [
+                    {binding: 0, resource: {buffer: uniformBuffer}},
+                    {binding: 1, resource: {buffer: rawBuffer}},
+                    {binding: 2, resource: vhtView},
+                    {binding: 3, resource: vbtView},
+                    {binding: 4, resource: this.#defaultSampler!},
+                    {binding: 5, resource: weightView},
+                    {binding: 6, resource: {buffer: activeOffsetsBuffer}},
+                ]
+            });
+            cacheEntry = {
+                bindGroup,
+                rawBuffer,
+                vhtView,
+                vbtView,
+                weightView,
+                offsetsBuffer: activeOffsetsBuffer
+            };
+            this.#bakeBindGroupCache.set(grass.typeId, cacheEntry);
+        }
+
+        const bindGroup = cacheEntry.bindGroup;
 
         const commandEncoder = gpuDevice.createCommandEncoder({
             label: `Grass_Bake_CommandEncoder_Type_${grass.typeId}`
@@ -209,6 +240,7 @@ export default class GrassBakePipeline extends RedGPUObject {
         this.#bindGroupLayout = null;
         this.#defaultSampler = null;
         this.#cellOffsetsCache.clear();
+        this.#bakeBindGroupCache.clear();
     }
 
     /**

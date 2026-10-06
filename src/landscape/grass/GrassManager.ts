@@ -313,11 +313,13 @@ export class GrassManager extends RedGPUObject {
         }
         const bakeThreshold = Math.max(16.0, minRadius * 0.35);
 
+        let rebakedThisFrame = false;
         if (hasValidTextures && (!this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
             this.#initialBaked = true;
             this.#lastBakePos[0] = camX;
             this.#lastBakePos[1] = camZ;
             this.rebakeAll(camX, camZ);
+            rebakedThisFrame = true;
         }
 
         const gpuDevice = this.gpuDevice;
@@ -345,9 +347,12 @@ export class GrassManager extends RedGPUObject {
                 type.markClean();
                 this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
 
-                const alloc = this.#megaBuffer.getAllocation(typeId);
-                if (alloc) {
-                    this.#megaBuffer.updateTypeParam(typeId, type, alloc);
+                // rebakeAll 실행 시 이미 각 잔디 타입별 updateTypeParam이 전송되었으므로 중복 전송 방지
+                if (!rebakedThisFrame) {
+                    const alloc = this.#megaBuffer.getAllocation(typeId);
+                    if (alloc) {
+                        this.#megaBuffer.updateTypeParam(typeId, type, alloc);
+                    }
                 }
             }
         }
@@ -500,7 +505,7 @@ export class GrassManager extends RedGPUObject {
      * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0) return;
+        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
         this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#slotPooler);
     }
 

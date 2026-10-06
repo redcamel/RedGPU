@@ -243,8 +243,8 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         cf[baseFloat + 0] = cullingDist * cullingDist;
         cf[baseFloat + 1] = farDist * farDist;
-        cf[baseFloat + 2] = cullingDist;
-        cf[baseFloat + 3] = farDist;
+        cf[baseFloat + 2] = 0.0; // reserved0 (64B struct alignment)
+        cf[baseFloat + 3] = 0.0; // reserved1 (64B struct alignment)
 
         cu[baseFloat + 4] = alloc.rawBaseOffset;
         cu[baseFloat + 5] = alloc.culledBaseOffset;
