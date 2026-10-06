@@ -700,35 +700,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#lodInfoList;
     }
 
-    set streamingRadius(value: number) {
-        const numVal = Math.max(10.0, Number(value) || 10.0);
-        if (this.#streamingRadius !== numVal) {
-            const oldRadius = this.#streamingRadius;
-            this.#streamingRadius = numVal;
-
-            if (numVal < oldRadius && this.#mountedSubCells.length > 0) {
-                const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-                const unmountMargin = Math.max(10.0, subCellSize * 0.5);
-                const unmountRadiusSq = (numVal + unmountMargin) * (numVal + unmountMargin);
-                const megaBuffer = this.#megaBuffer;
-                const allocation = this.allocation;
-                if (megaBuffer && allocation) {
-                    const mounted = this.#mountedSubCells;
-                    for (let i = mounted.length - 1; i >= 0; i--) {
-                        const sc = mounted[i];
-                        const dx = sc.centerX - this.#lastCamX;
-                        const dz = sc.centerZ - this.#lastCamZ;
-                        if (dx * dx + dz * dz > unmountRadiusSq) {
-                            this.#unmountSubCellAt(i, megaBuffer, allocation);
-                        }
-                    }
-                }
-            }
-
-            this.#onDirty?.();
-        }
-    }
-
     /**
      * [KO] 현재 스트리밍되어 GPU 버퍼 상에 활성화된 인스턴스 수를 반환합니다.
      * [EN] Returns the number of instances currently active and streamed into GPU buffers.
@@ -769,6 +740,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#enableStreaming;
     }
 
+    /**
+     * [KO] 카메라 위치 기반 서브셀 동적 스트리밍 활성화 여부를 설정합니다.
+     * [EN] Sets whether camera-based dynamic sub-cell streaming is enabled.
+     *
+     * @param value -
+     * [KO] 스트리밍 활성화 여부
+     * [EN] Whether to enable streaming
+     */
     set enableStreaming(value: boolean) {
         this.#enableStreaming = !!value;
     }
@@ -779,6 +758,43 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get streamingRadius(): number {
         return this.#streamingRadius;
+    }
+
+    /**
+     * [KO] 서브셀 스트리밍이 활성화되는 반경(미터)을 설정합니다. 값이 축소될 경우 반경을 벗어난 서브셀을 즉시 언마운트합니다.
+     * [EN] Sets active sub-cell streaming radius in meters. When reduced, sub-cells outside the radius are immediately unmounted.
+     *
+     * @param value -
+     * [KO] 설정할 스트리밍 반경 (최소값: 10.0)
+     * [EN] Streaming radius to set (minimum: 10.0)
+     */
+    set streamingRadius(value: number) {
+        const numVal = Math.max(10.0, Number(value) || 10.0);
+        if (this.#streamingRadius !== numVal) {
+            const oldRadius = this.#streamingRadius;
+            this.#streamingRadius = numVal;
+
+            if (numVal < oldRadius && this.#mountedSubCells.length > 0) {
+                const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+                const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+                const unmountRadiusSq = (numVal + unmountMargin) * (numVal + unmountMargin);
+                const megaBuffer = this.#megaBuffer;
+                const allocation = this.allocation;
+                if (megaBuffer && allocation) {
+                    const mounted = this.#mountedSubCells;
+                    for (let i = mounted.length - 1; i >= 0; i--) {
+                        const sc = mounted[i];
+                        const dx = sc.centerX - this.#lastCamX;
+                        const dz = sc.centerZ - this.#lastCamZ;
+                        if (dx * dx + dz * dz > unmountRadiusSq) {
+                            this.#unmountSubCellAt(i, megaBuffer, allocation);
+                        }
+                    }
+                }
+            }
+
+            this.#onDirty?.();
+        }
     }
 
     /**
@@ -884,6 +900,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
+     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
+     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
+     *
+     * @param value -
+     * [KO] 임포스터 빌보드 활성화 여부
+     * [EN] Whether to enable octahedral impostor billboards
+     */
+    set useImpostor(value: boolean) {
+        if (!this.#impostorSubMesh) return;
+        const boolVal = !!value;
+        if (this.#useImpostor !== boolVal) {
+            this.#useImpostor = boolVal;
+            this.#updatePassBuckets();
+            this.#syncTypeParams();
+            this.#onDirty?.();
+        }
+    }
+
+    /**
      * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
      * [EN] Returns whether the depth prepass (Early-Z) is enabled during foliage rendering.
      */
@@ -917,7 +952,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#loadedTileKeys.size;
     }
 
-
     /**
      * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
      * [EN] Returns the vertical height range in meters where bottom surface color blending is applied.
@@ -926,19 +960,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#groundBlendRange;
     }
 
-    set useImpostor(value: boolean) {
-        if (!this.#impostorSubMesh) return;
-        const boolVal = !!value;
-        if (this.#useImpostor !== boolVal) {
-            this.#useImpostor = boolVal;
-            this.#updatePassBuckets();
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-
-
-
+    /**
+     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
+     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
+     *
+     * @param v -
+     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
+     * [EN] Terrain blending vertical range to set (minimum: 0.1)
+     */
     set groundBlendRange(v: number) {
         const val = Math.max(0.1, Number(v) || 0.1);
         if (this.#groundBlendRange !== val) {
@@ -1067,12 +1096,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#loadedTileKeys.has(key)) return;
 
         const effectiveLandscape = landscape || this.#landscape;
-        if (effectiveLandscape && typeof (effectiveLandscape as any).isTileLoaded === 'function') {
-            if (!(effectiveLandscape as any).isTileLoaded(cz, cx)) {
-                return;
-            }
-        }
-
         this.#loadedTileKeys.add(key);
 
         if (!this.#enableStreaming) {
@@ -1515,9 +1538,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             mountedSlotIndex: -1
         };
 
-        const densityPerHectare = this.densityPerHectare !== undefined
-            ? this.densityPerHectare
-            : (this.instancesPerCell ?? 20);
+        const densityPerHectare = this.densityPerHectare;
         const densityMultiplier = this.densityMultiplier ?? 1.0;
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
         if (targetCountPerHectare <= 0) return cell;
@@ -1640,9 +1661,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const strideFloats = this.#megaBuffer?.strideFloats || 8;
         const landscape = this.#landscape;
 
-        const densityPerHectare = this.densityPerHectare !== undefined
-            ? this.densityPerHectare
-            : (this.instancesPerCell ?? 20);
+        const densityPerHectare = this.densityPerHectare;
         const densityMultiplier = this.densityMultiplier ?? 1.0;
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
         if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;

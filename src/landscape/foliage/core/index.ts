@@ -8,7 +8,6 @@
  * - `FoliageScatterMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
  * - `FoliageCuller`: HZB 오클루전 및 프러스텀 컬링 GPU 실행기
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
- * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: 지형 타일 내부 고밀도 서브셀 공간 분할 및 동적 인스턴스 스트리머
  * - `assembleFoliageSubMeshes`: 계층적 식생 3D 모델을 분석·결합하여 단일 서브메쉬로 조립하는 순수 함수
  * - `createOctahedralImpostorGeometry`: 8방향/16방향 3D 옥타헤드럴 임포스터 지오메트리 생성 함수
  * - `assembleFoliageLODMeshes`: 식생 LOD별 원본 메시 순회 및 지오메트리 결합 함수
@@ -23,7 +22,6 @@
  * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
- * - `FoliageSubCellPartitioner` / `FoliageSubCellStreamer`: High-density subcell spatial partitioner and dynamic streamer
  * - `assembleFoliageSubMeshes`: Pure function assembling hierarchical foliage models into combined sub-meshes
  * - `createOctahedralImpostorGeometry`: Function generating 8-way/16-way 3D octahedral billboard geometries
  * - `assembleFoliageLODMeshes`: Function traversing and combining source meshes per LOD level

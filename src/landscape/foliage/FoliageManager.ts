@@ -346,9 +346,6 @@ class FoliageManager {
      * [EN] Gets the dynamic streaming load radius of foliage subcells around the camera (unit: world units, default: 600).
      */
     get streamingRadius(): number {
-        if (this.#foliageList.length > 0) {
-            return this.#foliageList[0].streamingRadius;
-        }
         return this.#streamingRadius;
     }
 
