@@ -23,12 +23,6 @@ const identityMatrix: mat4 = mat4.create();
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
- * @param gpuDevice -
- * [KO] WebGPU 디바이스 인스턴스
- * [EN] WebGPU device instance
- * @param subMeshBindGroupLayout -
- * [KO] 서브메시 바인드 그룹 레이아웃
- * [EN] Sub-mesh bind group layout
  * @param options -
  * [KO] 식생 설정 옵션
  * [EN] Foliage configuration options
@@ -53,8 +47,6 @@ const identityMatrix: mat4 = mat4.create();
  */
 export default function buildFoliageImpostorSubMesh(
     redGPUContext: RedGPUContext,
-    gpuDevice: GPUDevice,
-    subMeshBindGroupLayout: GPUBindGroupLayout,
     options: FoliageOptions,
     sourceSubMeshes: FoliageSubMesh[],
     subMeshes: FoliageSubMesh[],
@@ -63,6 +55,7 @@ export default function buildFoliageImpostorSubMesh(
     slotPooler?: FoliageSubMeshSlotPooler | null,
     megaUBO?: GPUBuffer | null
 ): void {
+    const gpuDevice = redGPUContext.gpuDevice;
     const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
 
     const bbWidth = bakeResult.width;
@@ -75,14 +68,12 @@ export default function buildFoliageImpostorSubMesh(
         bakeResult.baseColorTexture,
         bakeResult.normalTexture,
         bakeResult.packedORMTexture,
-        `${options.name}_OctahedralMat`,
-        8.0
+        `${options.name}_OctahedralMat`
     );
 
     const bbStartOffset = subMeshes.length;
     const bbSubMesh = createFoliageSubMeshInstance({
         gpuDevice,
-        subMeshBindGroupLayout,
         meshNode: sourceSubMeshes[0]?.mesh,
         geom: bbGeom,
         mat: bbMat,

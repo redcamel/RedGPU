@@ -65,9 +65,6 @@ export interface FoliageAssemblyResult {
  * @param options -
  * [KO] 식생 설정 옵션
  * [EN] Foliage configuration options
- * @param subMeshBindGroupLayout -
- * [KO] 서브메시 유니폼 바인드 그룹 레이아웃
- * [EN] Sub-mesh uniform bind group layout
  * @param slotPooler -
  * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
  * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
@@ -81,7 +78,6 @@ export interface FoliageAssemblyResult {
 export default function assembleFoliageSubMeshes(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    subMeshBindGroupLayout: GPUBindGroupLayout,
     slotPooler?: FoliageSubMeshSlotPooler | null,
     megaUBO?: GPUBuffer | null
 ): FoliageAssemblyResult {
@@ -122,7 +118,6 @@ export default function assembleFoliageSubMeshes(
             lodMeshes,
             l,
             options,
-            subMeshBindGroupLayout,
             lodReceiveShadow,
             slotPooler,
             megaUBO
@@ -173,8 +168,6 @@ export default function assembleFoliageSubMeshes(
 
         buildFoliageImpostorSubMesh(
             redGPUContext,
-            gpuDevice,
-            subMeshBindGroupLayout,
             options,
             lod0SubMeshes,
             subMeshes,

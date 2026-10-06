@@ -22,11 +22,6 @@ export interface CreateSubMeshOptions {
      */
     gpuDevice: GPUDevice;
     /**
-     * [KO] 서브메시 유니폼 바인드 그룹 레이아웃
-     * [EN] Sub-mesh uniform bind group layout
-     */
-    subMeshBindGroupLayout: GPUBindGroupLayout;
-    /**
      * [KO] 소스 메쉬 노드
      * [EN] Source mesh node
      */
@@ -143,7 +138,6 @@ export default function createFoliageSubMeshInstance(
 ): FoliageSubMesh {
     const {
         gpuDevice,
-        subMeshBindGroupLayout,
         meshNode,
         geom,
         mat,

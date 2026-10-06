@@ -76,9 +76,6 @@ export interface AssembledLODResult {
  * @param options -
  * [KO] 식생 설정 옵션
  * [EN] Foliage configuration options
- * @param subMeshBindGroupLayout -
- * [KO] 서브메시 바인드 그룹 레이아웃
- * [EN] Sub-mesh bind group layout
  * @param lodReceiveShadow -
  * [KO] 해당 LOD의 그림자 수신 여부 (기본값: true)
  * [EN] Whether the LOD level receives shadows (default: true)
@@ -97,7 +94,6 @@ export default function assembleFoliageLODMeshes(
     roots: Mesh[],
     lodIndex: number,
     options: FoliageOptions,
-    subMeshBindGroupLayout: GPUBindGroupLayout,
     lodReceiveShadow: boolean = true,
     slotPooler?: FoliageSubMeshSlotPooler | null,
     megaUBO?: GPUBuffer | null
@@ -138,7 +134,6 @@ export default function assembleFoliageLODMeshes(
         const group = combineResult.groups[g];
         const combinedSubMesh = createFoliageSubMeshInstance({
             gpuDevice,
-            subMeshBindGroupLayout,
             meshNode: group.rawNodes[0]?.node,
             geom: unifiedGeometry || group.geometry,
             mat: group.material,

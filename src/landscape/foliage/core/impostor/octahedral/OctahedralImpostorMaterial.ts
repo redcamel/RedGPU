@@ -99,17 +99,13 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
      * @param name -
      * [KO] 머티리얼 이름
      * [EN] Material name
-     * @param gridSize -
-     * [KO] 옥타헤드럴 아틀라스 그리드 분할 수 (기본값: 8.0)
-     * [EN] Octahedral atlas grid division count (default: 8.0)
      */
     constructor(
         redGPUContext: RedGPUContext,
         baseColorTexture?: BitmapTexture | DirectTexture,
         normalTexture?: BitmapTexture | DirectTexture,
         packedORMTexture?: BitmapTexture | DirectTexture,
-        name?: string,
-        gridSize: number = 8.0
+        name?: string
     ) {
         super(
             redGPUContext,

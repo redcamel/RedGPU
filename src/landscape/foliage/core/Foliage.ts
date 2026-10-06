@@ -262,9 +262,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param options -
      * [KO] 식생 설정 옵션
      * [EN] Foliage configuration options
-     * @param sharedSubMeshBindGroupLayout -
-     * [KO] 공유 서브메시 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Shared sub-mesh bind group layout (optional)
      * @param megaBuffer -
      * [KO] 식생 메가 버퍼 (선택사항)
      * [EN] Foliage mega buffer (optional)
@@ -290,7 +287,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
-        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
         megaBuffer?: FoliageScatterMegaBuffer | null,
         onDirty?: () => void,
         onRepopulateRequired?: (type: Foliage) => void,
@@ -387,7 +383,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            sharedSubMeshBindGroupLayout!,
             this.#slotPooler,
             this.#subMeshMegaUBO
         );

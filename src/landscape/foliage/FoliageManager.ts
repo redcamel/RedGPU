@@ -541,7 +541,6 @@ class FoliageManager {
         const foliage = new Foliage(
             this.#redGPUContext,
             options,
-            this.#subMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => {
                 this.#renderer.markShadowBundleDirty();
