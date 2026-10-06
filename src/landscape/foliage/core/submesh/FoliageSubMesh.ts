@@ -128,17 +128,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [EN] Whether this sub-mesh receives shadows
      */
     receiveShadow?: boolean;
-
-    /**
-     * [KO] 인스턴스 버퍼 시작 오프셋
-     * [EN] Instance buffer start offset
-     */
-    instanceBufferOffset?: number;
-    /**
-     * [KO] 간접 드로우 인다이렉트 버퍼 시작 바이트 오프셋
-     * [EN] Indirect draw buffer start byte offset
-     */
-    indirectOffsetBytes?: number;
 }
 
 /**

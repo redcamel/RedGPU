@@ -3,13 +3,8 @@
 struct BakeUniforms {
     invWorldSizeX: f32,
     invWorldSizeZ: f32,
-    heightScale: f32,
     totalTasks: u32,
     hasVBT: u32,
-    pad0: f32,
-    pad1: f32,
-    pad2: f32,
-    bottomOffsets: array<vec4<f32>, 16>,
 };
 
 struct BakeTask {
@@ -20,9 +15,8 @@ struct BakeTask {
 @group(0) @binding(0) var<storage, read_write> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> bakeUniforms: BakeUniforms;
 @group(0) @binding(2) var<storage, read> bakeTasks: array<BakeTask>;
-@group(0) @binding(3) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(4) var vbtTexture: texture_2d<f32>;
-@group(0) @binding(5) var basicSampler: sampler;
+@group(0) @binding(3) var vbtTexture: texture_2d<f32>;
+@group(0) @binding(4) var basicSampler: sampler;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
