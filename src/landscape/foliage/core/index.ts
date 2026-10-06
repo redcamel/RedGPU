@@ -35,14 +35,19 @@
  */
 
 // 1. Entities & SubMeshes
-import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./Foliage";
+import Foliage, {
+    FIXED_SCATTER_GRID_SIZE,
+    type FoliageLODConfig,
+    type FoliageLODInfo,
+    type FoliageOptions,
+    type FoliageSubCell
+} from "./Foliage";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
-import FoliageSpatialGrid from "./spatial/FoliageSpatialGrid";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCuller from "./culling/FoliageCuller";
@@ -52,11 +57,7 @@ import bakeFoliageImpostor, {type FoliageBakeResult} from "./impostor/bakeFoliag
 import OctahedralImpostorMaterial from "./impostor/octahedral/OctahedralImpostorMaterial";
 import createOctahedralImpostorGeometry from "./impostor/octahedral/createOctahedralImpostorGeometry";
 
-// 4. SubCell Partitioning & Streaming
-import FoliageSubCellPartitioner from "./subcell/FoliageSubCellPartitioner";
-import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
-
-// 5. Assembler & Internal Helpers
+// 4. Assembler & Internal Helpers
 import assembleFoliageSubMeshes, {type FoliageAssemblyResult} from "./assembler/assembleFoliageSubMeshes";
 import assembleFoliageLODMeshes from "./assembler/internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./assembler/internal/buildFoliageImpostorSubMesh";
@@ -70,13 +71,11 @@ export {
     FoliageShadowMergedSubMesh,
     FoliageSubMeshSlotPooler,
     FoliageScatterMegaBuffer,
-    FoliageSpatialGrid,
     FoliagePipelineRegistry,
     FoliageRenderer,
     FoliageCuller,
     OctahedralImpostorMaterial,
-    FoliageSubCellPartitioner,
-    FoliageSubCellStreamer,
+    FIXED_SCATTER_GRID_SIZE,
 
     // Standalone Functions
     assembleFoliageSubMeshes,
@@ -91,6 +90,7 @@ export {
     type FoliageOptions,
     type FoliageLODConfig,
     type FoliageLODInfo,
+    type FoliageSubCell,
     type FoliageAssemblyResult,
     type FoliageBakeResult
 };

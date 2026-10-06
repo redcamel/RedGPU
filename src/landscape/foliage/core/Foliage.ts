@@ -9,14 +9,41 @@ import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
 import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
-import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
-import FoliageRenderBucket from "./bucket/FoliageRenderBucket";
-
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
-import {AScatterType, ScatterInstanceBaker} from "../../core/scatter";
+import {
+    AScatterType,
+    computeScatterGridSeed,
+    fastPack2x16float,
+    fastPackUniformScale,
+    packSubCellKey,
+    sampleNormalizedLayerWeight,
+    ScatterInstanceBaker,
+    sortSubCellsByDistance
+} from "../../core/scatter";
 import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
+
+/**
+ * [KO] 식생 인스턴스의 불변 월드 배치 좌표 및 의사난수 시드를 산출하는 고정 스캐터 그리드 크기 (단위: 미터, 100m).
+ * [EN] Fixed scatter grid size (100m) for computing immutable world placement coordinates and PRNG seeds.
+ */
+export const FIXED_SCATTER_GRID_SIZE: number = 100.0;
+
+/**
+ * [KO] 식생 서브셀 데이터 인터페이스입니다. (경량 메타데이터 구조체)
+ * [EN] Foliage subcell data interface. (Lightweight metadata struct)
+ */
+export interface FoliageSubCell {
+    subCellKey: number;
+    subCellX: number;
+    subCellZ: number;
+    centerX: number;
+    centerZ: number;
+    instanceCount: number;
+    isMounted: boolean;
+    mountedSlotIndex: number;
+}
 
 /**
  * [KO] 식생 LOD 설정 인터페이스입니다.
@@ -271,7 +298,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #randomRotationY: boolean = true;
     #maxInstances: number = 0;
 
-    #bucket: FoliageRenderBucket = new FoliageRenderBucket();
+    #subMeshes: FoliageSubMesh[] = [];
+    #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
+    #lod0SubMeshes: FoliageSubMesh[] = [];
+    #depthPrepassOpaqueSubMeshes: FoliageSubMesh[] = [];
+    #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
+    #mainSubMeshes: FoliageSubMesh[] = [];
+    #hasMaskedLOD0: boolean = false;
     #unifiedGeometries: (Geometry | null)[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
@@ -290,7 +323,17 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #groundBlendRange: number = 1.5;
     #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #streamer: FoliageSubCellStreamer;
+
+    #loadedTileKeys: Set<number> = new Set();
+    #subCells: Map<number, FoliageSubCell> = new Map();
+    #mountedSubCells: FoliageSubCell[] = [];
+    #tempCandidates: FoliageSubCell[] = [];
+    #candidateDists: Float32Array = new Float32Array(512);
+    #lastMountedCount: number = 0;
+    #lastUnmountedCount: number = 0;
+    #lastCamX: number = 0;
+    #lastCamZ: number = 0;
+
     #baker: ScatterInstanceBaker | null = null;
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
@@ -328,6 +371,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param subMeshMegaUBO -
      * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
      * [EN] Single fixed mega UBO buffer (optional)
+     * @param landscape -
+     * [KO] 부모 Landscape 인스턴스 (선택사항)
+     * [EN] Parent Landscape instance (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -338,9 +384,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         onRepopulateRequired?: (type: Foliage) => void,
         baker?: ScatterInstanceBaker | null,
         slotPooler?: FoliageSubMeshSlotPooler | null,
-        subMeshMegaUBO?: GPUBuffer | null
+        subMeshMegaUBO?: GPUBuffer | null,
+        landscape?: Landscape | null
     ) {
         super(redGPUContext, options?.name || '');
+        this.#landscape = landscape || null;
         this.#slotPooler = slotPooler || null;
         this.#subMeshMegaUBO = subMeshMegaUBO || null;
 
@@ -364,7 +412,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             useDepthPrepass = true
         } = options;
 
-        this.#streamer = new FoliageSubCellStreamer(this);
         this.#onDirty = onDirty;
         this.#onRepopulateRequired = onRepopulateRequired;
         this.#baker = baker || null;
@@ -442,11 +489,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             ? Math.max(0.1, Number(options.height) || 0.1)
             : (assembleResult.boundingHeight || 2.0);
 
-        this.#bucket.init(
+        this.#initBuckets(
             assembleResult.subMeshes,
-            assembleResult.shadowMergedSubMeshes || [],
-            this.#useImpostor,
-            this.#useDepthPrepass
+            assembleResult.shadowMergedSubMeshes || []
         );
 
         let defaultShadowDist = 300.0;
@@ -488,7 +533,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#streamingRadius = streamingRadius;
 
         let impostorSub: FoliageSubMesh | null = null;
-        const allSubs = this.#bucket.subMeshes;
+        const allSubs = this.#subMeshes;
         for (let i = 0; i < allSubs.length; i++) {
             if (allSubs[i].isImpostor) {
                 impostorSub = allSubs[i];
@@ -503,8 +548,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const alloc = this.#megaBuffer.allocateType(
                 this.name,
                 resolvedMaxInstances,
-                this.#bucket.subMeshes,
-                this.#bucket.shadowMergedSubMeshes,
+                this.#subMeshes,
+                this.#shadowMergedSubMeshes,
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
@@ -585,7 +630,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of all sub-meshes across all LOD levels.
      */
     get subMeshes(): FoliageSubMesh[] {
-        return this.#bucket.subMeshes;
+        return this.#subMeshes;
     }
 
     /**
@@ -601,7 +646,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
      */
     override get drawCallCount(): number {
-        return this.#bucket.calcDrawCallCount(this.#useDepthPrepass);
+        let count = this.#mainSubMeshes.length;
+        if (this.#useDepthPrepass) {
+            count += this.#depthPrepassOpaqueSubMeshes.length + this.#depthPrepassMaskedSubMeshes.length;
+        }
+        return count;
     }
 
     /**
@@ -609,7 +658,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the total number of registered sub-meshes.
      */
     override get subMeshCount(): number {
-        return this.#bucket.subMeshCount;
+        return this.#subMeshes.length;
     }
 
 
@@ -618,7 +667,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of opaque sub-meshes rendered with Fast-Z in depth prepass.
      */
     get depthPrepassOpaqueSubMeshes(): FoliageSubMesh[] {
-        return this.#bucket.depthPrepassOpaqueSubMeshes;
+        return this.#depthPrepassOpaqueSubMeshes;
     }
 
     /**
@@ -626,7 +675,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of masked sub-meshes rendered with alpha testing in depth prepass.
      */
     get depthPrepassMaskedSubMeshes(): FoliageSubMesh[] {
-        return this.#bucket.depthPrepassMaskedSubMeshes;
+        return this.#depthPrepassMaskedSubMeshes;
     }
 
     /**
@@ -634,7 +683,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of sub-meshes rendered in the main forward render pass.
      */
     get mainSubMeshes(): FoliageSubMesh[] {
-        return this.#bucket.mainSubMeshes;
+        return this.#mainSubMeshes;
     }
 
     /**
@@ -642,7 +691,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of sub-meshes belonging to the highest detail level (LOD 0).
      */
     get lod0SubMeshes(): FoliageSubMesh[] {
-        return this.#bucket.lod0SubMeshes;
+        return this.#lod0SubMeshes;
     }
 
     /**
@@ -650,7 +699,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the list of merged sub-meshes optimized for cascaded shadow map (CSM) passes.
      */
     get shadowMergedSubMeshes(): FoliageShadowMergedSubMesh[] {
-        return this.#bucket.shadowMergedSubMeshes;
+        return this.#shadowMergedSubMeshes;
     }
 
     /**
@@ -659,6 +708,35 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get lodInfoList(): FoliageLODInfo[] {
         return this.#lodInfoList;
+    }
+
+    set streamingRadius(value: number) {
+        const numVal = Math.max(10.0, Number(value) || 10.0);
+        if (this.#streamingRadius !== numVal) {
+            const oldRadius = this.#streamingRadius;
+            this.#streamingRadius = numVal;
+
+            if (numVal < oldRadius && this.#mountedSubCells.length > 0) {
+                const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+                const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+                const unmountRadiusSq = (numVal + unmountMargin) * (numVal + unmountMargin);
+                const megaBuffer = this.#megaBuffer;
+                const allocation = this.allocation;
+                if (megaBuffer && allocation) {
+                    const mounted = this.#mountedSubCells;
+                    for (let i = mounted.length - 1; i >= 0; i--) {
+                        const sc = mounted[i];
+                        const dx = sc.centerX - this.#lastCamX;
+                        const dz = sc.centerZ - this.#lastCamZ;
+                        if (dx * dx + dz * dz > unmountRadiusSq) {
+                            this.#unmountSubCellAt(i, megaBuffer, allocation);
+                        }
+                    }
+                }
+            }
+
+            this.#onDirty?.();
+        }
     }
 
     /**
@@ -713,12 +791,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#streamingRadius;
     }
 
-    set streamingRadius(value: number) {
-        const numVal = Math.max(10.0, Number(value) || 10.0);
-        if (this.#streamingRadius !== numVal) {
-            this.#streamingRadius = numVal;
-            this.#onDirty?.();
-        }
+    /**
+     * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
+     * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
+     */
+    get hasMaskedLOD0(): boolean {
+        return this.#hasMaskedLOD0;
     }
 
     /**
@@ -842,11 +920,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
-     * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
+     * [KO] 현재 로드되어 인스턴스가 등록된 타일의 총 개수를 반환합니다.
+     * [EN] Returns the total number of currently loaded tiles with populated instances.
      */
-    get hasMaskedLOD0(): boolean {
-        return this.#bucket.hasMaskedLOD0;
+    get loadedTileCount(): number {
+        return this.#loadedTileKeys.size;
     }
 
 
@@ -908,16 +986,79 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually mounted in the last streaming update
+     */
+    get lastMountedCount(): number {
+        return this.#lastMountedCount;
+    }
+
+    /**
+     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
+     * [EN] Number of sub-cells actually unmounted in the last streaming update
+     */
+    get lastUnmountedCount(): number {
+        return this.#lastUnmountedCount;
+    }
+
+    /**
+     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다.
+     * [EN] Dynamically changes the maximum visible/transition distance (meters) for a specific LOD level.
+     *
+     * @param lodIndex -
+     * [KO] 변경할 LOD 레벨 인덱스
+     * [EN] LOD level index to modify
+     * @param distance -
+     * [KO] 새로운 LOD 전환 거리 (미터)
+     * [EN] New LOD transition distance (meters)
+     */
+    setLODDistance(lodIndex: number, distance: number): void {
+        const info = this.#lodInfoList[lodIndex];
+        if (info) {
+            const val = Math.max(0, Number(distance) || 0);
+            if (info.lodDistance !== val) {
+                info.lodDistance = val;
+                this.#syncTypeParams();
+                this.#onDirty?.();
+            }
+        }
+    }
+
+    /**
+     * [KO] 특정 그리드 좌표의 타일이 이미 로드 및 배치 완료되었는지 여부를 확인합니다.
+     * [EN] Checks whether the tile at the specified grid coordinate has already been loaded and populated.
+     */
+    isTileLoaded(componentX: number, componentZ: number): boolean {
+        const cz = componentZ & 0xffff;
+        const cx = componentX & 0xffff;
+        const key = (cz << 16) | cx;
+        return this.#loadedTileKeys.has(key);
+    }
+
+    /**
      * [KO] 스트리머의 타일 캐시 및 로드된 컴포넌트 키 목록을 완전히 비웁니다.
      * [EN] Clears the tile cache and loaded component key set in the streamer.
      */
     clearTileCache(): void {
-        this.#streamer.clear();
+        this.#loadedTileKeys.clear();
+        this.#tempCandidates.length = 0;
+        const mounted = this.#mountedSubCells;
+        for (let i = 0; i < mounted.length; i++) {
+            mounted[i].isMounted = false;
+            mounted[i].mountedSlotIndex = -1;
+        }
+        mounted.length = 0;
+        this.#subCells.clear();
+        this.#lastMountedCount = 0;
+        this.#lastUnmountedCount = 0;
+        if (this.allocation) {
+            this.allocation.instanceCount = 0;
+        }
     }
 
     /**
-     * [KO] 신규 지형 타일 컴포넌트가 로드되었을 때 호출되어 해당 타일의 식생 인스턴스를 서브셀 단위로 분할(Partition) 및 스트리머에 등록합니다.
-     * [EN] Invoked when a new terrain tile component is loaded to partition foliage instances into sub-cells and register them with the streamer.
+     * [KO] 신규 지형 타일 컴포넌트가 로드되었을 때 호출되는 타일 라이프사이클 훅입니다. (온디맨드 모드에서는 CPU 스파이크 없이 타일 키만 기록)
+     * [EN] Terrain tile lifecycle hook invoked when a new tile component finishes loading. (In on-demand mode, records tile key with zero CPU spike)
      *
      * @param tileComponent -
      * [KO] 로드된 지형 타일 컴포넌트 (`LandscapeComponent`)
@@ -929,11 +1070,30 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
         if (!tileComponent) return;
         if (landscape) this.#landscape = landscape;
-        this.#streamer.populateTile(
-            tileComponent,
-            landscape || this.#landscape,
-            this.#enableStreaming
-        );
+
+        const cz = (tileComponent.componentZ ?? 0) & 0xffff;
+        const cx = (tileComponent.componentX ?? 0) & 0xffff;
+        const key = (cz << 16) | cx;
+        if (this.#loadedTileKeys.has(key)) return;
+
+        const effectiveLandscape = landscape || this.#landscape;
+        if (effectiveLandscape && typeof (effectiveLandscape as any).isTileLoaded === 'function') {
+            if (!(effectiveLandscape as any).isTileLoaded(cz, cx)) {
+                return;
+            }
+        }
+
+        this.#loadedTileKeys.add(key);
+
+        if (!this.#enableStreaming) {
+            const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+            this.#partitionTileSync(tileComponent, effectiveLandscape, subCellSize);
+            const megaBuffer = this.#megaBuffer;
+            const allocation = this.allocation;
+            if (megaBuffer && allocation) {
+                this.#mountAllSubCells(megaBuffer, allocation, subCellSize);
+            }
+        }
     }
 
     /**
@@ -941,26 +1101,26 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Safely releases foliage instance, child sub-meshes, and streamer resources.
      */
     override destroy(): void {
-        this.#streamer.clear();
-        this.#bucket.destroy();
+        this.clearTileCache();
+
+        const subCount = this.#subMeshes.length;
+        for (let i = 0; i < subCount; i++) {
+            this.#subMeshes[i].destroy();
+        }
+        this.#subMeshes.length = 0;
+        this.#lod0SubMeshes.length = 0;
+        this.#depthPrepassOpaqueSubMeshes.length = 0;
+        this.#depthPrepassMaskedSubMeshes.length = 0;
+        this.#mainSubMeshes.length = 0;
+
+        const shadowCount = this.#shadowMergedSubMeshes.length;
+        for (let i = 0; i < shadowCount; i++) {
+            this.#shadowMergedSubMeshes[i].destroy();
+        }
+        this.#shadowMergedSubMeshes.length = 0;
+
         this.#unifiedGeometries.length = 0;
         super.destroy();
-    }
-
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually mounted in the last streaming update
-     */
-    get lastMountedCount(): number {
-        return this.#streamer.lastMountedCount;
-    }
-
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually unmounted in the last streaming update
-     */
-    get lastUnmountedCount(): number {
-        return this.#streamer.lastUnmountedCount;
     }
 
     /**
@@ -994,7 +1154,82 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         mountBudget: number = 16,
         unmountBudget: number = 32
     ): void {
-        this.#streamer.update(activeKeyArray, activeKeyCount, camX, camZ, this.#enableStreaming, mountBudget, unmountBudget);
+        this.#lastMountedCount = 0;
+        this.#lastUnmountedCount = 0;
+        this.#lastCamX = camX;
+        this.#lastCamZ = camZ;
+
+        const megaBuffer = this.#megaBuffer;
+        const allocation = this.allocation;
+        if (!megaBuffer || !allocation) return;
+
+        const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+
+        if (!this.#enableStreaming) {
+            this.#mountAllSubCells(megaBuffer, allocation, subCellSize);
+            return;
+        }
+
+        const typeRadius = this.#streamingRadius;
+        const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+        const unmountRadius = typeRadius + unmountMargin;
+        const unmountRadiusSq = unmountRadius * unmountRadius;
+
+        let unmountedThisFrame = 0;
+        const mounted = this.#mountedSubCells;
+        for (let i = mounted.length - 1; i >= 0; i--) {
+            if (unmountedThisFrame >= unmountBudget) break;
+
+            const subCell = mounted[i];
+            const dx = subCell.centerX - camX;
+            const dz = subCell.centerZ - camZ;
+            const distSq = dx * dx + dz * dz;
+
+            if (distSq > unmountRadiusSq) {
+                this.#unmountSubCellAt(i, megaBuffer, allocation);
+                unmountedThisFrame++;
+            }
+        }
+        this.#lastUnmountedCount = unmountedThisFrame;
+
+        if (mountBudget <= 0) return;
+
+        const candidates = this.#tempCandidates;
+        candidates.length = 0;
+
+        const mountRadiusSq = typeRadius * typeRadius;
+        for (let i = 0; i < activeKeyCount; i++) {
+            const key = activeKeyArray[i];
+            let subCell = this.#subCells.get(key);
+            if (!subCell) {
+                const scX = (key << 16) >> 16;
+                const scZ = key >> 16;
+                subCell = this.#populateSingleSubCell(scX, scZ, subCellSize);
+                this.#subCells.set(key, subCell);
+            }
+            if (subCell && !subCell.isMounted && subCell.instanceCount > 0) {
+                const dx = subCell.centerX - camX;
+                const dz = subCell.centerZ - camZ;
+                if (dx * dx + dz * dz <= mountRadiusSq) {
+                    candidates.push(subCell);
+                }
+            }
+        }
+
+        const candidateCount = candidates.length;
+        if (candidateCount === 0) return;
+
+        if (this.#candidateDists.length < candidateCount) {
+            this.#candidateDists = new Float32Array(Math.max(candidateCount, this.#candidateDists.length * 2));
+        }
+        sortSubCellsByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
+
+        const toMountCount = Math.min(candidateCount, mountBudget);
+        for (let i = 0; i < toMountCount; i++) {
+            const subCell = candidates[i];
+            this.#mountSubCell(subCell, megaBuffer, allocation, subCellSize);
+        }
+        this.#lastMountedCount = toMountCount;
     }
 
     /**
@@ -1037,7 +1272,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #syncInternalWind(): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
-        const subList = this.#bucket.subMeshes;
+        const subList = this.#subMeshes;
         const count = subList.length;
         const windMul = this.#windMultiplier;
         const flutterMul = this.#windFlutterMultiplier;
@@ -1054,7 +1289,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             );
         }
 
-        const shadowList = this.#bucket.shadowMergedSubMeshes;
+        const shadowList = this.#shadowMergedSubMeshes;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
             shadowList[i].updateWindMultipliers(
@@ -1066,14 +1301,66 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
+    #initBuckets(
+        subMeshes: FoliageSubMesh[],
+        shadowMergedSubMeshes: FoliageShadowMergedSubMesh[]
+    ): void {
+        this.#subMeshes = subMeshes;
+        this.#shadowMergedSubMeshes = shadowMergedSubMeshes;
+
+        const lod0List = this.#lod0SubMeshes;
+        lod0List.length = 0;
+        let hasMaskedLOD0 = false;
+        const subCount = subMeshes.length;
+        for (let i = 0; i < subCount; i++) {
+            const sub = subMeshes[i];
+            if (sub.lodIndex === 0) {
+                lod0List.push(sub);
+                if (sub.isMasked) {
+                    hasMaskedLOD0 = true;
+                }
+            }
+        }
+        this.#hasMaskedLOD0 = hasMaskedLOD0;
+
+        this.#updatePassBuckets();
+    }
+
     #updatePassBuckets(): void {
-        this.#bucket.updatePassBuckets(this.#useImpostor, this.#useDepthPrepass);
+        const subList = this.#subMeshes;
+        const count = subList.length;
+
+        const prepassOpaqueList = this.#depthPrepassOpaqueSubMeshes;
+        const prepassMaskedList = this.#depthPrepassMaskedSubMeshes;
+        const mainList = this.#mainSubMeshes;
+
+        prepassOpaqueList.length = 0;
+        prepassMaskedList.length = 0;
+        mainList.length = 0;
+
+        const useImpostor = this.#useImpostor && !!this.#impostorSubMesh;
+        const useDepthPrepass = this.#useDepthPrepass;
+
+        for (let i = 0; i < count; i++) {
+            const sub = subList[i];
+            if (!useImpostor && sub.isImpostor) continue;
+            if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
+                if (!sub.isMasked) {
+                    prepassOpaqueList.push(sub);
+                } else {
+                    prepassMaskedList.push(sub);
+                }
+            }
+            if (sub.canRenderInPass('main')) {
+                mainList.push(sub);
+            }
+        }
     }
 
     #updateSubMeshGroundBlend(): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
-        const subList = this.#bucket.subMeshes;
+        const subList = this.#subMeshes;
         const subCount = subList.length;
         for (let s = 0; s < subCount; s++) {
             const sub = subList[s];
@@ -1102,6 +1389,466 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 effectiveShadowDist,
                 this.height
             );
+        }
+    }
+
+    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: any, subCellSize: number): void {
+        if (subCell.isMounted) return;
+        const currentActive = allocation.instanceCount;
+        const count = subCell.instanceCount;
+        if (currentActive + count > allocation.maxInstances) return;
+
+        const f32 = megaBuffer.cpuRawDataBuffer;
+        const u32 = megaBuffer.cpuRawDataUint32;
+        const strideFloats = megaBuffer.strideFloats;
+        const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
+
+        this.#populateSubCellInstances(f32, u32, baseFloat, subCell, subCellSize);
+
+        subCell.isMounted = true;
+        subCell.mountedSlotIndex = currentActive;
+        this.#mountedSubCells.push(subCell);
+
+        allocation.instanceCount = currentActive + count;
+        this.uploadRangeToGPU(currentActive, count);
+    }
+
+    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
+        const mounted = this.#mountedSubCells;
+        const targetSubCell = mounted[mountedIndex];
+        const targetSlot = targetSubCell.mountedSlotIndex;
+        const targetCount = targetSubCell.instanceCount;
+        const currentActive = allocation.instanceCount;
+
+        const isLast = (mountedIndex === mounted.length - 1);
+
+        if (isLast) {
+            mounted.pop();
+            targetSubCell.isMounted = false;
+            targetSubCell.mountedSlotIndex = -1;
+            allocation.instanceCount = Math.max(0, currentActive - targetCount);
+        } else {
+            const lastSubCell = mounted.pop()!;
+            const lastSlot = lastSubCell.mountedSlotIndex;
+            const lastCount = lastSubCell.instanceCount;
+
+            const f32 = megaBuffer.cpuRawDataBuffer;
+            const strideFloats = megaBuffer.strideFloats;
+
+            const srcStartFloat = (allocation.rawBaseOffset + lastSlot) * strideFloats;
+            const srcEndFloat = srcStartFloat + lastCount * strideFloats;
+            const destFloat = (allocation.rawBaseOffset + targetSlot) * strideFloats;
+
+            f32.copyWithin(destFloat, srcStartFloat, srcEndFloat);
+
+            lastSubCell.mountedSlotIndex = targetSlot;
+            mounted[mountedIndex] = lastSubCell;
+
+            targetSubCell.isMounted = false;
+            targetSubCell.mountedSlotIndex = -1;
+
+            allocation.instanceCount = Math.max(0, currentActive - targetCount);
+            this.uploadRangeToGPU(targetSlot, lastCount);
+        }
+    }
+
+    #mountAllSubCells(megaBuffer: FoliageScatterMegaBuffer, allocation: any, subCellSize: number): void {
+        if (this.#mountedSubCells.length === this.#subCells.size) return;
+        this.#subCells.forEach(subCell => {
+            if (!subCell.isMounted) {
+                this.#mountSubCell(subCell, megaBuffer, allocation, subCellSize);
+            }
+        });
+    }
+
+    #partitionTileSync(comp: any, landscape: any, subCellSize: number): void {
+        const compCountX = landscape?.componentCount?.[0] ?? 8;
+        const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
+        const halfTile = tileSizeMeters * 0.5;
+
+        const tileMinX = comp.worldX - halfTile;
+        const tileMaxX = comp.worldX + halfTile;
+        const tileMinZ = comp.worldZ - halfTile;
+        const tileMaxZ = comp.worldZ + halfTile;
+
+        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
+        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        const invSubCell = 1.0 / subCellSize;
+        const startScX = Math.floor((tileMinX + halfWorldX) * invSubCell);
+        const endScX = Math.floor((tileMaxX + halfWorldX - 0.001) * invSubCell);
+        const startScZ = Math.floor((tileMinZ + halfWorldZ) * invSubCell);
+        const endScZ = Math.floor((tileMaxZ + halfWorldZ - 0.001) * invSubCell);
+
+        for (let scZ = startScZ; scZ <= endScZ; scZ++) {
+            for (let scX = startScX; scX <= endScX; scX++) {
+                const key = packSubCellKey(scX, scZ);
+                if (!this.#subCells.has(key)) {
+                    const subCell = this.#populateSingleSubCell(scX, scZ, subCellSize);
+                    this.#subCells.set(key, subCell);
+                }
+            }
+        }
+    }
+
+    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number): FoliageSubCell {
+        const key = packSubCellKey(scX, scZ);
+        const landscape = this.#landscape;
+        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
+        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        const centerX = (scX + 0.5) * subCellSize - halfWorldX;
+        const centerZ = (scZ + 0.5) * subCellSize - halfWorldZ;
+
+        const cell: FoliageSubCell = {
+            subCellKey: key,
+            subCellX: scX,
+            subCellZ: scZ,
+            centerX,
+            centerZ,
+            instanceCount: 0,
+            isMounted: false,
+            mountedSlotIndex: -1
+        };
+
+        const densityPerHectare = this.densityPerHectare !== undefined
+            ? this.densityPerHectare
+            : (this.instancesPerCell ?? 20);
+        const densityMultiplier = this.densityMultiplier ?? 1.0;
+        const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
+        if (targetCountPerHectare <= 0) return cell;
+
+        const targetLayer = this.targetLayer;
+        const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
+        let targetLayerObj: any = null;
+        if (hasTargetLayer && landscape?.layers) {
+            if (typeof targetLayer === 'string') {
+                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+            } else if (typeof targetLayer === 'number') {
+                targetLayerObj = landscape.layers[targetLayer];
+            }
+        }
+        if (hasTargetLayer && !targetLayerObj) {
+            return cell;
+        }
+
+        const densityScaleByWeight = this.densityScaleByWeight !== false;
+        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
+        const minSlope = this.minSlope ?? 0.0;
+        const maxSlope = this.maxSlope ?? 45.0;
+        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
+
+        const subMinX = scX * subCellSize - halfWorldX;
+        const subMaxX = subMinX + subCellSize;
+        const subMinZ = scZ * subCellSize - halfWorldZ;
+        const subMaxZ = subMinZ + subCellSize;
+
+        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
+
+        const nameHash = this.#nameHash;
+        let validCount = 0;
+
+        for (let gz = startGz; gz <= endGz; gz++) {
+            const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
+            for (let gx = startGx; gx <= endGx; gx++) {
+                const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
+                let seed = computeScatterGridSeed(gx, gz, nameHash);
+
+                const maxAttempts = densityScaleByWeight
+                    ? targetCountPerHectare
+                    : ((targetLayerObj || hasSlopeFilter) ? targetCountPerHectare * 2 : targetCountPerHectare);
+                let generatedInGrid = 0;
+
+                for (let i = 0; i < maxAttempts && generatedInGrid < targetCountPerHectare; i++) {
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rX = (seed >>> 0) / 4294967296.0;
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rZ = (seed >>> 0) / 4294967296.0;
+
+                    const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
+                    const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
+
+                    if (targetLayerObj) {
+                        const u = (posX + halfWorldX) / worldSizeX;
+                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
+                        if (weight < 0.1) continue;
+                        if (densityScaleByWeight) {
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5;
+                            const rReject = (seed >>> 0) / 4294967296.0;
+                            if (rReject > weight) continue;
+                        }
+                    }
+
+                    if (hasSlopeFilter) {
+                        const step = 1.0;
+                        const hL = landscape.getHeightAt(posX - step, posZ);
+                        const hR = landscape.getHeightAt(posX + step, posZ);
+                        const hD = landscape.getHeightAt(posX, posZ - step);
+                        const hU = landscape.getHeightAt(posX, posZ + step);
+                        const nx = (hL - hR) / (2 * step);
+                        const nz = (hD - hU) / (2 * step);
+                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+                        const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                        if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
+                    }
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+
+                    if (this.randomRotationY) {
+                        seed ^= seed << 13;
+                        seed ^= seed >>> 17;
+                        seed ^= seed << 5;
+                    }
+
+                    generatedInGrid++;
+
+                    if (posX >= subMinX && posX < subMaxX && posZ >= subMinZ && posZ < subMaxZ) {
+                        validCount++;
+                    }
+                }
+            }
+        }
+
+        cell.instanceCount = validCount;
+        return cell;
+    }
+
+    #populateSubCellInstances(
+        f32: Float32Array,
+        u32: Uint32Array,
+        baseFloat: number,
+        subCell: FoliageSubCell,
+        subCellSize: number
+    ): void {
+        const strideFloats = this.#megaBuffer?.strideFloats || 8;
+        const landscape = this.#landscape;
+
+        const densityPerHectare = this.densityPerHectare !== undefined
+            ? this.densityPerHectare
+            : (this.instancesPerCell ?? 20);
+        const densityMultiplier = this.densityMultiplier ?? 1.0;
+        const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
+        if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;
+
+        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
+        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
+        const halfWorldX = worldSizeX * 0.5;
+        const halfWorldZ = worldSizeZ * 0.5;
+
+        const subMinX = subCell.subCellX * subCellSize - halfWorldX;
+        const subMaxX = subMinX + subCellSize;
+        const subMinZ = subCell.subCellZ * subCellSize - halfWorldZ;
+        const subMaxZ = subMinZ + subCellSize;
+
+        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
+
+        const optMinScale = this.minScale;
+        const optMaxScale = this.maxScale;
+        const randomRotationY = this.randomRotationY;
+        const scaleDiffX = optMaxScale[0] - optMinScale[0];
+        const scaleDiffY = optMaxScale[1] - optMinScale[1];
+        const scaleDiffZ = optMaxScale[2] - optMinScale[2];
+        const isUniformXZ = (scaleDiffX === scaleDiffZ && optMinScale[0] === optMinScale[2]);
+
+        const targetLayer = this.targetLayer;
+        const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
+        let targetLayerObj: any = null;
+        if (hasTargetLayer && landscape?.layers) {
+            if (typeof targetLayer === 'string') {
+                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+            } else if (typeof targetLayer === 'number') {
+                targetLayerObj = landscape.layers[targetLayer];
+            }
+        }
+
+        const densityScaleByWeight = this.densityScaleByWeight !== false;
+        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
+        const minSlope = this.minSlope ?? 0.0;
+        const maxSlope = this.maxSlope ?? 45.0;
+        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
+
+        const alignToNormal = this.#alignToNormal;
+        const alignFactor = this.#alignFactor;
+        const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
+
+        const bottomOffset = this.bottomOffset ?? 0.0;
+        const typeId = this.allocation?.typeId ?? 0;
+        const packedTypeAndDefaultGround = (((typeId & 0xFF) << 24) | 0x00333333) >>> 0;
+        let written = 0;
+
+        for (let gz = startGz; gz <= endGz && written < subCell.instanceCount; gz++) {
+            const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
+            for (let gx = startGx; gx <= endGx && written < subCell.instanceCount; gx++) {
+                const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
+                let seed = computeScatterGridSeed(gx, gz, this.#nameHash);
+
+                const maxAttempts = densityScaleByWeight
+                    ? targetCountPerHectare
+                    : ((targetLayerObj || hasSlopeFilter) ? targetCountPerHectare * 2 : targetCountPerHectare);
+                let generatedInGrid = 0;
+
+                for (let i = 0; i < maxAttempts && generatedInGrid < targetCountPerHectare && written < subCell.instanceCount; i++) {
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rX = (seed >>> 0) / 4294967296.0;
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rZ = (seed >>> 0) / 4294967296.0;
+
+                    const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
+                    const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
+
+                    if (targetLayerObj) {
+                        const u = (posX + halfWorldX) / worldSizeX;
+                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
+                        if (weight < 0.1) continue;
+                        if (densityScaleByWeight) {
+                            seed ^= seed << 13;
+                            seed ^= seed >>> 17;
+                            seed ^= seed << 5;
+                            const rReject = (seed >>> 0) / 4294967296.0;
+                            if (rReject > weight) continue;
+                        }
+                    }
+
+                    let normalX = 0.0;
+                    let normalY = 1.0;
+                    let normalZ = 0.0;
+
+                    if (hasSlopeFilter || needNormalAlign) {
+                        const step = 1.0;
+                        const hL = landscape.getHeightAt(posX - step, posZ);
+                        const hR = landscape.getHeightAt(posX + step, posZ);
+                        const hD = landscape.getHeightAt(posX, posZ - step);
+                        const hU = landscape.getHeightAt(posX, posZ + step);
+                        const nx = (hL - hR) / (2 * step);
+                        const nz = (hD - hU) / (2 * step);
+                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
+
+                        if (hasSlopeFilter) {
+                            const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
+                            if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
+                        }
+
+                        if (needNormalAlign) {
+                            normalX = nx * invLen;
+                            normalY = invLen;
+                            normalZ = nz * invLen;
+                        }
+                    }
+
+                    seed ^= seed << 13;
+                    seed ^= seed >>> 17;
+                    seed ^= seed << 5;
+                    const rScale = (seed >>> 0) / 4294967296.0;
+
+                    const scaleX = optMinScale[0] + rScale * scaleDiffX;
+                    const scaleY = optMinScale[1] + rScale * scaleDiffY;
+                    const scaleZ = isUniformXZ ? scaleX : (optMinScale[2] + rScale * scaleDiffZ);
+
+                    let posY = 0.0;
+                    if (hasGetHeight) {
+                        posY = landscape.getHeightAt(posX, posZ) + bottomOffset * scaleY;
+                    }
+
+                    let rotX = 0.0;
+                    let rotY = 0.0;
+                    let rotZ = 0.0;
+                    let rotW = 1.0;
+
+                    if (randomRotationY) {
+                        seed ^= seed << 13;
+                        seed ^= seed >>> 17;
+                        seed ^= seed << 5;
+                        const rAngle = (seed >>> 0) / 4294967296.0;
+                        const angle = rAngle * (Math.PI * 2);
+                        const halfAngle = angle * 0.5;
+                        rotY = Math.sin(halfAngle);
+                        rotW = Math.cos(halfAngle);
+                    }
+
+                    if (needNormalAlign) {
+                        const vx = normalZ;
+                        const vz = -normalX;
+                        const vw = 1.0 + normalY;
+                        const tiltLen = Math.sqrt(vx * vx + vz * vz + vw * vw);
+                        if (tiltLen > 0.0001) {
+                            const invTilt = 1.0 / tiltLen;
+                            const tx = (vx * invTilt) * alignFactor;
+                            const tz = (vz * invTilt) * alignFactor;
+                            const tw = (1.0 - alignFactor) + (vw * invTilt) * alignFactor;
+                            const alignLen = Math.sqrt(tx * tx + tz * tz + tw * tw);
+                            const invAlign = 1.0 / (alignLen > 0.0001 ? alignLen : 1.0);
+                            const ax = tx * invAlign;
+                            const az = tz * invAlign;
+                            const aw = tw * invAlign;
+
+                            const fx = ax * rotW - az * rotY;
+                            const fy = aw * rotY;
+                            const fz = az * rotW + ax * rotY;
+                            const fw = aw * rotW;
+
+                            rotX = fx;
+                            rotY = fy;
+                            rotZ = fz;
+                            rotW = fw;
+                        }
+                    }
+
+                    generatedInGrid++;
+
+                    if (posX >= subMinX && posX < subMaxX && posZ >= subMinZ && posZ < subMaxZ) {
+                        const ix = Math.max(-32768, Math.min(32767, (rotX * 32767) | 0));
+                        const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
+                        const iz = Math.max(-32768, Math.min(32767, (rotZ * 32767) | 0));
+                        const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
+
+                        const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
+                        const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
+
+                        const scalePacked = isUniformXZ
+                            ? fastPackUniformScale(scaleX)
+                            : fastPack2x16float(scaleX, scaleZ);
+
+                        const outOffset = baseFloat + written * strideFloats;
+                        f32[outOffset + 0] = posX;
+                        f32[outOffset + 1] = posY;
+                        f32[outOffset + 2] = posZ;
+                        f32[outOffset + 3] = scaleY;
+
+                        u32[outOffset + 4] = rotPackedY;
+                        u32[outOffset + 5] = rotPackedW;
+                        u32[outOffset + 6] = scalePacked;
+                        u32[outOffset + 7] = packedTypeAndDefaultGround;
+
+                        written++;
+                    }
+                }
+            }
         }
     }
 }

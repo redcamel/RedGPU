@@ -166,7 +166,23 @@ function renderTestPane({
     let setCharacterState = null;
 
     const params = {
-        cameraMode: 'Character'
+        cameraMode: 'Character',
+        lodMetric: landscape.lodMetric
+    };
+
+    let paneInstance = null;
+    let foliageFolder = null;
+    let characterFolder = null;
+    const pendingFoliageTypes = [];
+
+    const bindCharacterFolder = (pane, cc) => {
+        if (!pane || !cc || characterFolder) return;
+        characterFolder = pane.addFolder({title: 'Character', expanded: false});
+        characterFolder.addBinding(cc, 'floorOffset', {min: -0.2, max: 0.5, step: 0.01});
+        characterFolder.addBinding(cc, 'speed', {min: 1.0, max: 15.0, step: 0.5});
+        characterFolder.addBinding(cc, 'runSpeed', {min: 2.0, max: 25.0, step: 0.5});
+        characterFolder.addBinding(cc, 'jumpForce', {min: 2.0, max: 20.0, step: 0.5});
+        characterFolder.addBinding(cc, 'gravity', {min: 5.0, max: 60.0, step: 1.0});
     };
 
     initCharacter({
@@ -181,11 +197,11 @@ function renderTestPane({
             if (params.cameraMode === 'Character') {
                 characterController.useKeyboard = true;
             }
+            if (paneInstance) {
+                bindCharacterFolder(paneInstance, characterController);
+            }
         }
     });
-
-    let foliageFolder = null;
-    let paneInstance = null;
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
@@ -236,25 +252,25 @@ function renderTestPane({
                 }
             });
 
+            if (characterController) {
+                bindCharacterFolder(pane, characterController);
+            }
+
             // 2. 수목 식생 매니저 (Foliage)
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: true});
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'useDepthPrepass');
-            managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, label: 'Total Draw Calls'});
-            managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {
-                readonly: true,
-                label: 'Depth Prepass Calls'
-            });
-            managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {
-                readonly: true,
-                label: 'Main Forward Calls'
-            });
-            managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true, label: 'Shadow Draw Calls'});
-            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 100, max: 3000, step: 50});
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
+            managerFolder.addBinding(foliageManager, 'mountBudget', {min: 1, max: 64, step: 1});
+            managerFolder.addBinding(foliageManager, 'unmountBudget', {min: 1, max: 128, step: 1});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
+
+            managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true});
+            managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {readonly: true});
+            managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {readonly: true});
+            managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true});
 
             // 전역 바람 시뮬레이션 설정 (씬 레벨 WindManager)
             const windManager = scene.windManager;
@@ -266,26 +282,91 @@ function renderTestPane({
             windGlobalFolder.addBinding(windManager, 'flutterStrength', {min: 0.0, max: 2.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'directionAngle', {min: 0, max: 360, step: 1});
 
-            // 3. 지형 설정 (Landscape) - 핵심 설정만 심플하게 유지
+            // 대기 중이던 식생 타입들 일괄 등록
+            while (pendingFoliageTypes.length > 0) {
+                addFoliageTypeToUI(pendingFoliageTypes.shift());
+            }
+
+            // 3. 지형 설정 (Landscape)
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
             landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
+            landscapeFolder.addBinding(landscape, 'receiveShadow');
             landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 2000, step: 10});
-            landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
-            landscapeFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
-            // 4. 조명 및 그림자 (Light)
-            const lightFolder = pane.addFolder({title: 'Light', expanded: false});
+            // 타일 스트리밍 설정
+            const streamFolder = landscapeFolder.addFolder({title: 'Tile Streaming', expanded: false});
+            streamFolder.addBinding(landscape, 'tileLoadingRadius', {min: 1000, max: 8000, step: 250});
+            streamFolder.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 8, step: 1});
+            streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
+
+            // LOD 설정
+            const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
+            lodFolder.addBinding(params, 'lodMetric', {
+                options: {
+                    'screenSize': 'screenSize',
+                    'distance': 'distance'
+                }
+            }).on('change', (ev) => {
+                landscape.lodMetric = ev.value;
+            });
+            const quadOptions = {
+                '16': 16,
+                '32': 32,
+                '64': 64,
+                '128': 128,
+                '256': 256,
+                '512': 512
+            };
+            lodFolder.addBinding(landscape, 'componentSizeQuads', {
+                options: quadOptions
+            });
+            lodFolder.addBinding(landscape, 'lod0SizeQuads', {
+                options: quadOptions
+            });
+
+            // Heightmap Shadow 설정
+            const shadowFolder = landscapeFolder.addFolder({title: 'Heightmap Shadow', expanded: false});
+            shadowFolder.addBinding(landscape, 'castHeightmapShadow');
+            shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {min: 4, max: 32, step: 1});
+            shadowFolder.addBinding(landscape, 'heightmapShadowSoftness', {min: 1, max: 20, step: 0.5});
+            shadowFolder.addBinding(landscape, 'heightmapShadowDistance', {min: 500, max: 6000, step: 100});
+
+            // Debug 설정
+            const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: false});
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeDebugMode', {
+                options: {
+                    'None (Full PBR)': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.NONE,
+                    'Final Normal': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.FINAL_NORMAL,
+                    'Macro Normal': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.MACRO_NORMAL,
+                    'Albedo': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.ALBEDO,
+                    'Splat Weights': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.SPLAT_WEIGHTS,
+                    'Roughness': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.ROUGHNESS,
+                    'Ambient Occlusion': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.AMBIENT_OCCLUSION,
+                    'Heightmap Shadow Mask': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.HEIGHTMAP_SHADOW_MASK,
+                    'CSM Shadow Mask': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.CSM_SHADOW_MASK,
+                    'Total Shadow Visibility': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.TOTAL_SHADOW_VISIBILITY,
+                    'Elevation Heatmap': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.ELEVATION_HEATMAP,
+                    'LOD Level': RedGPU.Landscape.LANDSCAPE_DEBUG_MODE.LOD_LEVEL
+                }
+            });
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
+            debugFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
+
+            // 4. 조명 및 그림자 (Light & Shadow)
+            const lightFolder = pane.addFolder({title: 'Light & Shadow', expanded: false});
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
             lightFolder.addBinding(directionalShadowManager, 'strength', {min: 0.0, max: 1.0, step: 0.05});
             lightFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {min: 50, max: 800, step: 25});
 
-            // 5. 스플랫 레이어 (4종 스플랫 재질)
+            // 5. 스플랫 레이어 (Layers)
             const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
             layers.forEach((layer) => {
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
                 layerSubFolder.addBinding(layer, 'enabled');
+                layerSubFolder.addBinding(layer, 'stochasticTiling');
+                layerSubFolder.addBinding(layer, 'stochasticScale', {min: 0.1, max: 5.0, step: 0.1});
                 const uvProxy = {uvScale: layer.uvScale[0]};
                 layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 150, step: 1})
                     .on('change', (ev) => {
@@ -301,10 +382,24 @@ function renderTestPane({
      * [EN] Adds individual controls for a registered FoliageType
      */
     const addFoliageTypeToUI = (type) => {
-        if (!foliageFolder) return;
+        if (!foliageFolder) {
+            pendingFoliageTypes.push(type);
+            return;
+        }
         const typeFolder = foliageFolder.addFolder({title: type.name, expanded: true});
 
-        // 1. Placement & Density (배치 및 밀도)
+        // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
+        const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: true});
+        streamingStatsFolder.addBinding(type, 'enableStreaming');
+        streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 3000, step: 50});
+        streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'maxInstances', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'instancesPerCell', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'loadedTileCount', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'lastMountedCount', {readonly: true});
+        streamingStatsFolder.addBinding(type, 'lastUnmountedCount', {readonly: true});
+
+        // 2. Placement & Density (배치 및 밀도)
         const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
         const layerOptions = {'(All / None)': ''};
         if (landscape?.layers) {
@@ -320,13 +415,11 @@ function renderTestPane({
         }).on('change', () => placementFolder.refresh());
         placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
             .on('change', () => placementFolder.refresh());
-        placementFolder.addBinding(type, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
-        placementFolder.addBinding(type, 'drawCallCount', {readonly: true, label: 'Draw Calls'});
-        placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
-        placementFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
+        placementFolder.addBinding(type, 'subMeshCount', {readonly: true});
+        placementFolder.addBinding(type, 'drawCallCount', {readonly: true});
 
-        // 2. Transform & Slope (스케일 및 경사각)
+        // 3. Transform & Slope (스케일 및 경사각)
         const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
         transformFolder.addBinding(type, 'bottomOffset', {min: -5.0, max: 5.0, step: 0.05});
         transformFolder.addBinding(type, 'minSlope', {min: 0.0, max: 89.0, step: 1.0});
@@ -338,14 +431,15 @@ function renderTestPane({
             alignFactorBinding.disabled = !ev.value;
         });
 
-        // 3. Ground Blend (지형 컬러 블렌딩)
+        // 4. Ground Blend (지형 컬러 블렌딩)
         const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: true});
         groundBlendFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
 
-        // 4. LOD & Impostor (컬링 거리 및 임포스터)
+        // 5. LOD & Impostor (컬링 거리 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
         lodFolder.addBinding(type, 'useDepthPrepass');
+        lodFolder.addBinding(type, 'fadeStartDistance', {min: 50, max: 8000, step: 50});
         lodFolder.addBinding(type, 'cullingDistance', {min: 100, max: 10000, step: 50});
         if (type.hasImpostor) {
             lodFolder.addBinding(type, 'useImpostor');
@@ -359,17 +453,24 @@ function renderTestPane({
             const subFolder = lodFolder.addFolder({title: subTitle, expanded: false});
 
             if (!isImpostorLOD) {
-                subFolder.addBinding(lodInfo, 'lodDistance', {readonly: true, label: 'LOD Distance'});
+                const lodProxy = {lodDistance: lodInfo.lodDistance};
+                subFolder.addBinding(lodProxy, 'lodDistance', {
+                    min: 10,
+                    max: 1000,
+                    step: 5
+                }).on('change', (ev) => {
+                    type.setLODDistance(idx, ev.value);
+                });
             }
-            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
+            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true});
         });
 
-        // 5. Shadow (그림자)
+        // 6. Shadow (그림자)
         const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
         shadowFolder.addBinding(type, 'shadowCullDistance', {min: 50, max: 3000, step: 25});
 
-        // 6. Wind & Motion
+        // 7. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
         windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.05});
         windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.05});
