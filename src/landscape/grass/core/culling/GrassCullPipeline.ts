@@ -27,13 +27,6 @@ export default class GrassCullPipeline extends RedGPUObject {
         this.#initPipeline();
     }
 
-    /**
-     * [KO] 캐시된 바인드그룹을 무효화합니다 (메가버퍼 재생성 시 호출).
-     * [EN] Invalidates cached bind groups (called when mega-buffers are recreated).
-     */
-    invalidateBindGroups(): void {
-        // 메가버퍼의 통합 바인드그룹 무효화 메서드가 자체 관리
-    }
 
     /**
      * [KO] 매 프레임 GPU 컴퓨트 패스를 통해 등록된 모든 잔디 타입의 거리 및 프러스텀 컬링을 단 1회의 디스패치로 초고속 수행합니다 (위치 계산 0%).

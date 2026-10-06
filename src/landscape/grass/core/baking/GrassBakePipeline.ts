@@ -12,7 +12,7 @@ import type Grass from "../Grass";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
-const CELL_SIZE: number = 16.0;
+export const GRASS_CELL_SIZE: number = 16.0;
 
 export default class GrassBakePipeline extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
@@ -75,7 +75,7 @@ export default class GrassBakePipeline extends RedGPUObject {
         const heightScale = landscape.heightScale ?? 600.0;
 
         // 16m 서브셀 단위 계산
-        const cellSize = CELL_SIZE;
+        const cellSize = GRASS_CELL_SIZE;
         const effectiveRadius = Math.max(grass.streamingRadius || grass.cullingDistance || 80.0, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
 

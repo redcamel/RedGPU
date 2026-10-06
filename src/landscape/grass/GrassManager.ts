@@ -14,10 +14,8 @@ import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
 import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
 import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
-import GrassBakePipeline from "./core/baking/GrassBakePipeline";
+import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
-
-const CELL_SIZE: number = 16.0;
 
 /**
  * [KO] 대규모 지형(Landscape)의 GPU 베이킹 & GPU 초고속 컬링 기반 잔디(Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -76,7 +74,7 @@ export class GrassManager extends RedGPUObject {
         this.#renderer = new GrassRenderer(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
-            this.#cullPipeline.invalidateBindGroups();
+            this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();
         };
     }
@@ -210,7 +208,7 @@ export class GrassManager extends RedGPUObject {
             maxInstances: userMaxInstances
         } = grassType;
         const targetRadius = Math.max(cullingDistance, streamingRadius);
-        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (CELL_SIZE * CELL_SIZE));
+        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (GRASS_CELL_SIZE * GRASS_CELL_SIZE));
         const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil((instancesPerCell || 64) * 1.3)));
         const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;
 
@@ -261,7 +259,7 @@ export class GrassManager extends RedGPUObject {
             this.#bakeGrassType(grassType, this.#lastCamPos[0], this.#lastCamPos[2]);
         }
 
-        this.#cullPipeline.invalidateBindGroups();
+        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
         this.#populated = true;
         return grassType;
@@ -293,7 +291,7 @@ export class GrassManager extends RedGPUObject {
         }
 
         removedGrass.bindAllocation(null);
-        this.#cullPipeline.invalidateBindGroups();
+        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
         return true;
     }
@@ -311,7 +309,7 @@ export class GrassManager extends RedGPUObject {
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
-            this.#cullPipeline.invalidateBindGroups();
+            this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();
         };
 
@@ -320,7 +318,7 @@ export class GrassManager extends RedGPUObject {
         this.#initialBaked = false;
         this.#lastBakePos[0] = 0;
         this.#lastBakePos[1] = 0;
-        this.#cullPipeline.invalidateBindGroups();
+        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
     }
 

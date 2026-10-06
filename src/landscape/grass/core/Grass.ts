@@ -113,11 +113,12 @@ export interface GrassOptions extends AScatterTypeInitOptions {
 export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
+    #unifiedGeometries: (Geometry | null)[] = [];
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #farDistance: number = 35.0;
-    #minScale: [number, number, number] = [0.7, 0.7, 0.7];
-    #maxScale: [number, number, number] = [1.3, 1.4, 1.3];
+    #minScale: [number, number] = [0.7, 0.7];
+    #maxScale: [number, number] = [1.3, 1.4];
     #minY: number = 0.0;
     #exposureBoost: number = 1.0;
     #subsurfaceStrength: number = 0.25;
@@ -290,6 +291,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             ];
         }
 
+        this.#unifiedGeometries = [this.#geometry as Geometry];
         this.updateDrawCallCount(this.#subMeshes.length * 2);
 
         this.#farDistance = Math.max(10.0, farDistance);
@@ -322,8 +324,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             groundBlendStrength: resolvedGroundBlendStrength
         });
 
-        if (minScale) this.#minScale = [minScale[0], minScale[1], minScale[2] ?? minScale[0]];
-        if (maxScale) this.#maxScale = [maxScale[0], maxScale[1], maxScale[2] ?? maxScale[0]];
+        if (minScale) this.#minScale = [minScale[0], minScale[1]];
+        if (maxScale) this.#maxScale = [maxScale[0], maxScale[1]];
 
         this.#alphaCutoff = alphaCutoff;
 
@@ -370,7 +372,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Returns single combined geometry list per LOD level. (Grass shares single unified geometry)
      */
     override get unifiedGeometries(): (Geometry | null)[] {
-        return [this.#geometry as Geometry];
+        return this.#unifiedGeometries;
     }
 
     /**
@@ -424,28 +426,28 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
 
     /**
-     * [KO] 잔디 인스턴스의 최소 스케일 `[x, y, z]`
-     * [EN] Minimum scale `[x, y, z]` for grass instances
+     * [KO] 잔디 인스턴스의 최소 스케일 [수평(XZ), 수직(Y)]
+     * [EN] Minimum scale [horizontal(XZ), vertical(Y)] for grass instances
      */
-    get minScale(): [number, number, number] {
+    get minScale(): [number, number] {
         return this.#minScale;
     }
 
     set minScale(v: [number, number] | [number, number, number]) {
-        this.#minScale = [v[0], v[1], v[2] ?? v[0]];
+        this.#minScale = [v[0], v[1]];
         this.#notifyChange();
     }
 
     /**
-     * [KO] 잔디 인스턴스의 최대 스케일 `[x, y, z]`
-     * [EN] Maximum scale `[x, y, z]` for grass instances
+     * [KO] 잔디 인스턴스의 최대 스케일 [수평(XZ), 수직(Y)]
+     * [EN] Maximum scale [horizontal(XZ), vertical(Y)] for grass instances
      */
-    get maxScale(): [number, number, number] {
+    get maxScale(): [number, number] {
         return this.#maxScale;
     }
 
     set maxScale(v: [number, number] | [number, number, number]) {
-        this.#maxScale = [v[0], v[1], v[2] ?? v[0]];
+        this.#maxScale = [v[0], v[1]];
         this.#notifyChange();
     }
 
@@ -601,11 +603,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 사용자가 지정한 최대 인스턴스 수용 용량(미지정 시 undefined)을 반환합니다.
-     * [EN] Returns explicitly configured max instance capacity (undefined if omitted).
+     * [KO] 이 잔디 타입에 할당된 최대 인스턴스 수용 용량을 반환합니다. (메가버퍼 세그먼트 할당 용량이 우선 적용됨)
+     * [EN] Returns the maximum instance capacity allocated for this grass type. (Mega-buffer segment capacity takes precedence)
      */
     get maxInstances(): number | undefined {
-        return this.#maxInstances;
+        return this.allocation ? this.allocation.maxInstances : this.#maxInstances;
     }
 
     /**
@@ -681,6 +683,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#slotIndex = -1;
         (this.#geometry as any)?.destroy?.();
         this.#geometry = null as any;
+        this.#unifiedGeometries.length = 0;
         this.#subMeshes.length = 0;
         this.#baseColorTexture = null as any;
         this.#mesh = null as any;
