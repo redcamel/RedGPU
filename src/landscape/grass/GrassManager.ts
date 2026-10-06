@@ -97,7 +97,7 @@ export class GrassManager extends RedGPUObject {
         } = grassType;
         const targetRadius = Math.max(cullingDistance, streamingRadius);
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (GRASS_CELL_SIZE * GRASS_CELL_SIZE));
-        const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil((instancesPerCell || 64) * 1.3)));
+        const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
         const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;
 
         const alloc = this.#megaBuffer.allocateType(
@@ -106,7 +106,15 @@ export class GrassManager extends RedGPUObject {
             subMeshes
         );
         grassType.bindAllocation(alloc);
-        this.#megaBuffer.updateTypeParam(typeId, grassType, alloc);
+
+        const vhtAtlas = this.#landscape.vhtAtlasTexture;
+        const vbtAtlas = this.#landscape.vbtBaseColorAtlas;
+        const canBakeImmediately = !!(this.gpuDevice && vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView);
+
+        // 즉시 베이킹이 가능한 경우, #bakeGrassType 완료 시 최신 instanceCount로 단 1회 기록되므로 중복 VRAM 전송 방지
+        if (!canBakeImmediately) {
+            this.#megaBuffer.updateTypeParam(typeId, grassType, alloc);
+        }
 
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
@@ -127,7 +135,6 @@ export class GrassManager extends RedGPUObject {
             const slotIndex = this.#slotPooler.allocateSlot();
             grassType.slotIndex = slotIndex;
 
-            const vbtAtlas = this.#landscape.vbtBaseColorAtlas;
             const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.tileLoadedCount > 0);
             this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
@@ -396,6 +403,7 @@ export class GrassManager extends RedGPUObject {
         }
 
         removedGrass.bindAllocation(null);
+        removedGrass.onRepopulateRequired = null;
         if (this.#grassList.length === 0) {
             this.#populated = false;
         }

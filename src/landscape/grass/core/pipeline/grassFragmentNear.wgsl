@@ -6,6 +6,7 @@
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 
 const SSS_DISTORTION: f32 = 0.35;
+const NORM_225: f32 = 0.44444445;
 
 struct VertexOutput {
     @builtin(position) clipPos: vec4<f32>,
@@ -94,8 +95,6 @@ fn main(input: VertexOutput) -> OutputFragment {
         }
 
         let nDotL = dot(N, L);
-
-        let NORM_225: f32 = 0.44444445;
         let transRatio = clamp(subsurfaceStrength * leafThickness * 0.45, 0.0, 0.85);
         let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
         let directDiff = frontWrap * (1.0 - transRatio);
