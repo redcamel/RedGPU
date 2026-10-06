@@ -1390,7 +1390,7 @@ export class Landscape extends RedGPUObject {
             this.#heightmapShadowSoftness,
             this.#foliageManager?.debugSubCellColoration ?? false,
             this.#foliageManager?.subCellSize ?? 100.0,
-            this.#foliageManager?.streamingRadius ?? 600.0,
+            0.0,
             this.#debuggerManager?.landscapeDebugMode ?? 0
         );
     }

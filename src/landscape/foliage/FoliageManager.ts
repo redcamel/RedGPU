@@ -31,7 +31,6 @@ import {packSubCellKey} from "../core/scatter";
  * ### Example
  * ```typescript
  * const foliageManager = landscape.foliageManager;
- * foliageManager.streamingRadius = 800;
  *
  * // 식생 생태계 타입 등록 (다중 LOD 및 옥타헤드럴 임포스터 지원)
  * const pineTree = foliageManager.addFoliage({
@@ -41,6 +40,7 @@ import {packSubCellKey} from "../core/scatter";
  *         { mesh: treeMeshLOD1, lodDistance: 120 }
  *     ],
  *     densityPerHectare: 80,
+ *     streamingRadius: 800,
  *     useImpostor: true,
  *     minScale: [0.8, 0.8, 0.8],
  *     maxScale: [1.3, 1.3, 1.3]
@@ -80,7 +80,6 @@ class FoliageManager {
     #gridUpdateThresholdSq: number = 25.0;
 
     #subCellSize: number = 100.0;
-    #streamingRadius: number = 600.0;
     #mountBudget: number = 16;
     #unmountBudget: number = 32;
     #roundRobinIndex: number = 0;
@@ -341,33 +340,6 @@ class FoliageManager {
         this.#renderer.render(passEncoder, this.#foliageList, view);
     }
 
-    /**
-     * [KO] 카메라 주변 식생 서브셀의 동적 스트리밍 로드 반경(단위: 월드 유닛, 기본값: 600)을 반환합니다.
-     * [EN] Gets the dynamic streaming load radius of foliage subcells around the camera (unit: world units, default: 600).
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    /**
-     * [KO] 카메라 주변 식생 서브셀의 동적 스트리밍 로드 반경을 설정합니다. 등록된 모든 식생 타입에 즉시 동기화됩니다.
-     * [EN] Sets dynamic streaming load radius of foliage subcells around camera. Immediately synchronized across all registered foliage types.
-     *
-     * @param val -
-     * [KO] 설정할 스트리밍 반경 (최소값: 10.0)
-     * [EN] Streaming radius to set (minimum: 10.0)
-     */
-    set streamingRadius(val: number) {
-        const clamped = Math.max(10.0, val);
-        this.#streamingRadius = clamped;
-        const list = this.#foliageList;
-        const count = list.length;
-        for (let i = 0; i < count; i++) {
-            list[i].streamingRadius = clamped;
-        }
-        this.#lastGridRadius = -1;
-        this.#onUniformUpdateNeeded?.();
-    }
 
     /**
      * [KO] 지형 셰이더에서 식생 공간 서브셀 경계를 온스크린 격자 색상으로 시각화할지 여부를 반환합니다.
@@ -473,7 +445,7 @@ class FoliageManager {
                     maxRadius = foliage.streamingRadius;
                 }
             }
-            if (maxRadius <= 0) maxRadius = this.#streamingRadius;
+            if (maxRadius <= 0) maxRadius = 600.0;
 
             const worldSize = this.#landscape.worldSize;
             this.#updateSpatialGrid(
@@ -610,20 +582,15 @@ class FoliageManager {
      * [EN] Newly created and registered {@link Foliage} instance
      */
     addFoliage(options: FoliageOptions): Foliage {
-        const {name, streamingRadius} = options;
+        const {name} = options;
         if (this.#foliageTypes.has(name)) {
             console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
             return this.#foliageTypes.get(name)!;
         }
 
-        const mergedOptions: FoliageOptions = {
-            ...options,
-            streamingRadius: streamingRadius ?? this.#streamingRadius
-        };
-
         const foliage = new Foliage(
             this.#redGPUContext,
-            mergedOptions,
+            options,
             this.#subMeshVertexBindGroupLayout,
             this.#megaBuffer,
             () => {
