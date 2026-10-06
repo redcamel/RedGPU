@@ -63,7 +63,7 @@ import AScatterMegaBuffer, {
     type ScatterShaderReflectionConfig
 } from "./AScatterMegaBuffer";
 import ACpuStagedScatterMegaBuffer from "./ACpuStagedScatterMegaBuffer";
-import AScatterType from "./AScatterType";
+import AScatterType, {type AScatterTypeInitOptions} from "./AScatterType";
 
 export {
     // Runtime Classes, Functions & Units
@@ -89,6 +89,7 @@ export {
     DRAW_INDEXED_INDIRECT_ARGS_COUNT,
 
     // Code Hint Interfaces & Vertex Constants
+    type AScatterTypeInitOptions,
     type AScatterGeometryUnitInitOptions,
     type ScatterSubMeshInitOptions,
     type ScatterMeshCombineOptions,

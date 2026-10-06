@@ -13,6 +13,7 @@ import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {
     AScatterType,
+    AScatterTypeInitOptions,
     computeScatterGridSeed,
     fastPack2x16float,
     fastPackUniformScale,
@@ -102,13 +103,7 @@ export interface FoliageLODInfo {
  * [KO] Foliage 인스턴스 생성 및 배치 설정을 위한 옵션 인터페이스입니다.
  * [EN] Configuration options interface for creating and scattering Foliage instances.
  */
-export interface FoliageOptions {
-    /**
-     * [KO] 식생 종(Type)의 고유 식별 이름
-     * [EN] Unique identification name of the foliage type
-     */
-    name: string;
-
+export interface FoliageOptions extends AScatterTypeInitOptions {
     /**
      * [KO] LOD 레벨별 메쉬 및 가시 거리 구성 배열
      * [EN] Array of mesh and visibility distance configurations per LOD level
@@ -116,22 +111,10 @@ export interface FoliageOptions {
     lods: FoliageLODConfig[];
 
     /**
-     * [KO] 헥타르(10,000m²)당 기본 인스턴스 밀도 (기본값: 20.0)
-     * [EN] Base instance density per hectare (10,000m²) (default: 20.0)
-     */
-    densityPerHectare?: number;
-
-    /**
      * [KO] 이 식생 타입에 할당될 최대 인스턴스 수용 용량 (기본값: 16384)
      * [EN] Maximum instance capacity allocated for this foliage type (default: 16384)
      */
     maxInstances?: number;
-
-    /**
-     * [KO] 카메라로부터의 최대 렌더 컬링 거리 (미터, 기본값: 2000.0)
-     * [EN] Maximum render culling distance from camera in meters (default: 2000.0)
-     */
-    cullingDistance?: number;
 
     /**
      * [KO] 인스턴스 랜덤 스케일 최소값 [x, y, z] (기본값: [1, 1, 1])
@@ -158,65 +141,16 @@ export interface FoliageOptions {
     useImpostor?: boolean;
 
     /**
-     * [KO] 밑둥 피벗 보정 오프셋 (미터)
-     * [EN] Bottom pivot correction offset in meters
-     */
-    bottomOffset?: number;
-
-    /**
-     * [KO] 식생 모델의 물리 높이(미터, 미지정 시 지오메트리 바운딩 높이 자동 측정)
-     * [EN] Physical height in meters of the foliage model (auto-measured from geometry bounding if omitted)
-     */
-    height?: number;
-
-    /**
      * [KO] 서브메시 결합 시 원본 피벗 유지 여부 (기본값: true)
      * [EN] Whether to preserve original pivots when combining sub-meshes (default: true)
      */
     preservePivot?: boolean;
 
     /**
-     * [KO] 그림자 캐스팅 활성화 여부 (기본값: true)
-     * [EN] Whether shadow casting is enabled (default: true)
-     */
-    castShadow?: boolean;
-
-    /**
-     * [KO] 그림자 캐스팅 최대 거리 (미터, 기본값: 200.0)
-     * [EN] Maximum shadow casting distance in meters (default: 200.0)
-     */
-    shadowCullDistance?: number;
-
-    /**
      * [KO] 서브셀 스트리밍 활성 반경 (미터, 기본값: 600.0)
      * [EN] Active sub-cell streaming radius in meters (default: 600.0)
      */
     streamingRadius?: number;
-
-
-    /**
-     * [KO] 배치 대상 지형 스플랫 레이어 (레이어 이름 또는 인덱스)
-     * [EN] Target terrain splat layer for placement (layer name or index)
-     */
-    targetLayer?: string | number;
-
-    /**
-     * [KO] 배치 허용 최소 경사도 (0.0=평지, 1.0=수직 절벽)
-     * [EN] Minimum slope constraint for placement (0.0=flat, 1.0=vertical)
-     */
-    minSlope?: number;
-
-    /**
-     * [KO] 배치 허용 최대 경사도 (0.0=평지, 1.0=수직 절벽)
-     * [EN] Maximum slope constraint for placement (0.0=flat, 1.0=vertical)
-     */
-    maxSlope?: number;
-
-    /**
-     * [KO] 스플랫 레이어 가중치에 비례하여 인스턴스 밀도를 조절할지 여부 (기본값: true)
-     * [EN] Whether instance density scales proportionally to splat layer weight (default: true)
-     */
-    densityScaleByWeight?: boolean;
 
     /**
      * [KO] 인스턴스 바람 시뮬레이션 기본 강도 배수 (기본값: 1.0)
@@ -241,18 +175,6 @@ export interface FoliageOptions {
      * [EN] Terrain normal alignment factor (0.0=stay upright, 1.0=full slope alignment)
      */
     alignFactor?: number;
-
-    /**
-     * [KO] 전체 밀도 배수 (기본값: 1.0)
-     * [EN] Global density multiplier (default: 1.0)
-     */
-    densityMultiplier?: number;
-
-    /**
-     * [KO] 밑둥 지면 색상 블렌딩 강도 (기본값: 0.8)
-     * [EN] Bottom ground color blending strength (default: 0.8)
-     */
-    groundBlendStrength?: number;
 
     /**
      * [KO] 밑둥 지면 색상 블렌딩 높이 범위 (미터, 기본값: 1.5)
@@ -314,7 +236,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #alignFactor: number = 1.0;
     #groundBlendRange: number = 1.5;
     #impostorSubMesh: FoliageSubMesh | null = null;
-    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #subCells: Map<number, FoliageSubCell> = new Map();
     #mountedSubCells: FoliageSubCell[] = [];
@@ -409,8 +330,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#useImpostor = useImpostor;
         this.#useDepthPrepass = useDepthPrepass !== false;
-
-        this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
 
         const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];
@@ -468,7 +387,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            this.#subMeshVertexBindGroupLayout!,
+            sharedSubMeshBindGroupLayout!,
             this.#slotPooler,
             this.#subMeshMegaUBO
         );
@@ -1045,6 +964,19 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#shadowMergedSubMeshes.length = 0;
 
         this.#unifiedGeometries.length = 0;
+        this.#lodInfoList.length = 0;
+        this.#mountedSubCells.length = 0;
+        this.#tempCandidates.length = 0;
+
+        this.#impostorSubMesh = null;
+        this.#landscape = null;
+        this.#slotPooler = null;
+        this.#subMeshMegaUBO = null;
+        this.#baker = null;
+        this.#megaBuffer = null;
+        this.#onDirty = undefined;
+        this.#onRepopulateRequired = undefined;
+
         super.destroy();
     }
 

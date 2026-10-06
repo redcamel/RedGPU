@@ -11,6 +11,90 @@ import type {ScatterBaseSegmentAllocation} from "./AScatterMegaBuffer";
 import type ScatterSubMesh from "./ScatterSubMesh";
 
 /**
+ * [KO] 모든 스캐터 타입(잔디 Grass, 식생 Foliage 등)의 공통 초기화 옵션 인터페이스입니다.
+ * [EN] Common initialization options interface for all scatter types (Grass, Foliage, etc.).
+ */
+export interface AScatterTypeInitOptions {
+    /**
+     * [KO] 스캐터 종(Type)의 고유 식별 이름
+     * [EN] Unique identification name of the scatter type
+     */
+    name: string;
+
+    /**
+     * [KO] 카메라로부터의 최대 렌더 컬링 거리 (미터)
+     * [EN] Maximum render culling distance from camera in meters
+     */
+    cullingDistance?: number;
+
+    /**
+     * [KO] 그림자 캐스팅 최대 거리 (미터)
+     * [EN] Maximum shadow casting distance in meters
+     */
+    shadowCullDistance?: number;
+
+    /**
+     * [KO] 밑둥/뿌리 피벗 보정 오프셋 (미터)
+     * [EN] Bottom pivot correction offset in meters
+     */
+    bottomOffset?: number;
+
+    /**
+     * [KO] 스캐터 모델의 물리 높이 (미터)
+     * [EN] Physical height in meters of the scatter model
+     */
+    height?: number;
+
+    /**
+     * [KO] 그림자 캐스팅 활성화 여부
+     * [EN] Whether shadow casting is enabled
+     */
+    castShadow?: boolean;
+
+    /**
+     * [KO] 배치 대상 지형 스플랫 레이어 (레이어 이름 또는 인덱스)
+     * [EN] Target terrain splat layer for placement (layer name or index)
+     */
+    targetLayer?: string | number;
+
+    /**
+     * [KO] 배치 허용 최소 경사도 (각도: 0~90)
+     * [EN] Minimum slope constraint in degrees (0-90) allowed for placement
+     */
+    minSlope?: number;
+
+    /**
+     * [KO] 배치 허용 최대 경사도 (각도: 0~90)
+     * [EN] Maximum slope constraint in degrees (0-90) allowed for placement
+     */
+    maxSlope?: number;
+
+    /**
+     * [KO] 스플랫 레이어 가중치에 비례하여 인스턴스 밀도를 조절할지 여부
+     * [EN] Whether instance density scales proportionally to splat layer weight
+     */
+    densityScaleByWeight?: boolean;
+
+    /**
+     * [KO] 헥타르(10,000m²)당 기본 인스턴스 밀도
+     * [EN] Base instance density per hectare (10,000m²)
+     */
+    densityPerHectare?: number;
+
+    /**
+     * [KO] 전체 밀도 배수
+     * [EN] Global density multiplier
+     */
+    densityMultiplier?: number;
+
+    /**
+     * [KO] 밑둥 지면 색상 블렌딩 강도 (0.0~1.0)
+     * [EN] Bottom ground color blending strength (0.0-1.0)
+     */
+    groundBlendStrength?: number;
+}
+
+/**
  * [KO] 모든 스캐터 타입(잔디 Grass, 식생 Foliage 등)의 최상위 추상 기본 클래스입니다.
  * [EN] Top-level abstract base class for all scatter types (Grass, Foliage, etc.).
  *

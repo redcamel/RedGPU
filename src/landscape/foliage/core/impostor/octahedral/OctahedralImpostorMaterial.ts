@@ -69,21 +69,6 @@ interface OctahedralImpostorMaterial {
      * [EN] Foliage dedicated shading flag
      */
     isFoliage: boolean;
-    /**
-     * [KO] 옥타헤드럴 아틀라스 분할 그리드 크기
-     * [EN] Octahedral atlas division grid size
-     */
-    gridSize: number;
-    /**
-     * [KO] 픽셀 깊이 오프셋(PDO) 스케일
-     * [EN] Pixel Depth Offset (PDO) scale
-     */
-    pdoScale: number;
-    /**
-     * [KO] 서브서피스 스캐터링 강도
-     * [EN] Subsurface scattering intensity
-     */
-    subsurfaceIntensity: number;
 }
 
 /**
@@ -148,10 +133,6 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         this.isFoliage = true;
         this.transparent = false;
 
-        this.gridSize = gridSize;
-        this.pdoScale = 1.0;
-        this.subsurfaceIntensity = 1.0;
-
         this.initGPURenderInfos();
 
     }
@@ -168,10 +149,7 @@ defineTexture(OctahedralImpostorMaterial, [
 ]);
 
 definePositiveNumber(OctahedralImpostorMaterial, [
-    {key: 'gridSize', value: 8.0},
-    {key: 'cutOff', value: 0.35},
-    {key: 'pdoScale', value: 1.0},
-    {key: 'subsurfaceIntensity', value: 1.0}
+    {key: 'cutOff', value: 0.35}
 ]);
 defineBoolean(OctahedralImpostorMaterial, [
     {key: 'isFoliage', value: true}
