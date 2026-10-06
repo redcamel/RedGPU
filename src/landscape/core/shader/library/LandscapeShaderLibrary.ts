@@ -9,6 +9,7 @@ import FoliageInstance_wgsl from './struct/FoliageInstance.wgsl';
 import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
 import FoliageTypeParam_wgsl from './struct/FoliageTypeParam.wgsl';
+import GrassTypeParam_wgsl from './struct/GrassTypeParam.wgsl';
 import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
 import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
@@ -84,6 +85,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const FoliageTypeParam = FoliageTypeParam_wgsl;
+
+        /**
+         * [KO] 잔디 타입별 컬링 및 렌더링 파라미터 구조체 (64바이트 / 16 floats)
+         * [EN] Grass type culling and rendering parameters struct (64 bytes / 16 floats)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.GrassTypeParam;
+         * ```
+         */
+        export const GrassTypeParam = GrassTypeParam_wgsl;
 
         /**
          * [KO] 지형 버텍스 및 프래그먼트 셰이더 메인 유니폼 버퍼 구조체 (26개 필드)

@@ -1,0 +1,18 @@
+struct GrassTypeParam {
+    cullingDistanceSq: f32,
+    farDistanceSq: f32,
+    cullingDistance: f32,
+    farDistance: f32,
+    rawBaseOffset: u32,
+    culledNearBaseOffset: u32,
+    culledFarBaseOffset: u32,
+    nearIndirectSlot: u32,
+    farIndirectSlot: u32,
+    subMeshCount: u32,
+    hasFarStage: u32,
+    instanceCount: u32,
+    maxInstances: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
+};

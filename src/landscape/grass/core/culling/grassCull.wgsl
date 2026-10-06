@@ -6,6 +6,7 @@
 // ============================================================================
 
 #redgpu_include landscape.struct.GrassInstance;
+#redgpu_include landscape.struct.GrassTypeParam;
 
 
 

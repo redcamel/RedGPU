@@ -6,6 +6,7 @@
 import RedGPUContext from '../../../../context/RedGPUContext';
 import {AScatterMegaBuffer, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullWGSL from '../culling/grassCull.wgsl';
+import type Grass from '../Grass';
 
 /**
  * [KO] 단일 잔디 타입의 거리별(Near/Far) 간접 드로우 슬롯 정보
@@ -82,6 +83,9 @@ export interface GrassTypeAllocation extends ScatterBaseSegmentAllocation {
  */
 export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     #allocations: Map<number, GrassTypeAllocation> = new Map();
+    #unifiedCullingBindGroup: GPUBindGroup | null = null;
+    #cachedGlobalUniformBuffer: GPUBuffer | null = null;
+    #cachedCullBindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
      * [KO] GrassScatterMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -113,6 +117,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
                 shaderInfo,
                 rawStorageName: 'rawInstances',
                 instanceStructName: 'GrassInstance',
+                typeParamStructName: 'GrassTypeParam',
             },
             initialCapacity,
             maxTypes,
@@ -241,6 +246,133 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
+     * [KO] 특정 잔디 타입의 컬링 및 렌더링 파라미터를 메가버퍼의 타입 파라미터 버퍼에 갱신하고 GPU로 동기화합니다.
+     * [EN] Updates culling and rendering parameters of a specific grass type into the mega-buffer type parameters buffer and syncs to GPU.
+     *
+     * @param typeId - 잔디 타입 고유 ID
+     * @param grass - 잔디 생태계 인스턴스
+     * @param alloc - 메가버퍼 할당 정보 객체
+     */
+    updateTypeParam(typeId: number, grass: Grass, alloc: GrassTypeAllocation): void {
+        const typeParamFloats = this.typeParamFloats;
+        if (typeParamFloats === 0) return;
+
+        const baseFloat = typeId * typeParamFloats;
+        const cf = this.cpuTypeParamsBuffer;
+        const cu = this.cpuTypeParamsUint32;
+
+        const cullingDist = grass.cullingDistance || 80.0;
+        const farDist = grass.farDistance || (cullingDist * 0.5);
+
+        cf[baseFloat + 0] = cullingDist * cullingDist;
+        cf[baseFloat + 1] = farDist * farDist;
+        cf[baseFloat + 2] = cullingDist;
+        cf[baseFloat + 3] = farDist;
+
+        cu[baseFloat + 4] = alloc.rawBaseOffset;
+        cu[baseFloat + 5] = alloc.culledBaseOffset;
+        cu[baseFloat + 6] = alloc.culledBaseOffset + alloc.maxInstances;
+        cu[baseFloat + 7] = alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0;
+        cu[baseFloat + 8] = alloc.farSlots.length > 0 ? alloc.farSlots[0].indirectOffset : (alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0);
+        cu[baseFloat + 9] = alloc.subMeshCount;
+        cu[baseFloat + 10] = alloc.farSlots.length > 0 ? 1 : 0;
+        cu[baseFloat + 11] = alloc.instanceCount;
+        cu[baseFloat + 12] = alloc.maxInstances;
+        cu[baseFloat + 13] = 0;
+        cu[baseFloat + 14] = 0;
+        cu[baseFloat + 15] = 0;
+
+        const gpuDevice = this.gpuDevice;
+        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+        if (gpuDevice && typeParamsGPUBuffer) {
+            const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
+            const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
+            gpuDevice.queue.writeBuffer(
+                typeParamsGPUBuffer,
+                byteOffset,
+                cf.buffer,
+                byteOffset,
+                byteSize
+            );
+        }
+    }
+
+    /**
+     * [KO] 모든 잔디 타입의 파라미터를 GPU 스토리지 버퍼로 일괄 동기화합니다.
+     * [EN] Batch synchronizes parameters of all grass types to the GPU storage buffer.
+     */
+    syncAllTypeParamsToGPU(): void {
+        const gpuDevice = this.gpuDevice;
+        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+        if (!gpuDevice || !typeParamsGPUBuffer) return;
+        gpuDevice.queue.writeBuffer(
+            typeParamsGPUBuffer,
+            0,
+            this.cpuTypeParamsBuffer.buffer,
+            0,
+            this.cpuTypeParamsBuffer.byteLength
+        );
+    }
+
+    /**
+     * [KO] 캐시된 단일 일괄 컬링 바인드그룹을 무효화합니다.
+     * [EN] Invalidates the cached unified culling bind group.
+     */
+    invalidateUnifiedCullingBindGroup(): void {
+        this.#unifiedCullingBindGroup = null;
+        this.#cachedGlobalUniformBuffer = null;
+        this.#cachedCullBindGroupLayout = null;
+    }
+
+    /**
+     * [KO] 단일 1회 일괄 컴퓨트 컬링 디스패치에 사용되는 통합 바인드그룹(Group 0)을 반환하거나 생성합니다.
+     * [EN] Retrieves or creates the unified bind group (Group 0) used for single batch compute culling dispatch.
+     *
+     * @param bindGroupLayout - 컬링 파이프라인의 바인드그룹 레이아웃
+     * @param globalUniformBuffer - 전역 컬링 유니폼 버퍼 (카메라 위치, 프러스텀 평면 등)
+     * @returns 생성되거나 캐시된 GPUBindGroup 객체 (버퍼 미준비 시 null)
+     */
+    getOrCreateUnifiedCullingBindGroup(
+        bindGroupLayout: GPUBindGroupLayout,
+        globalUniformBuffer: GPUBuffer
+    ): GPUBindGroup | null {
+        const gpuDevice = this.gpuDevice;
+        const rawBuffer = this.rawGPUBuffer;
+        const culledBuffer = this.culledGPUBuffer;
+        const indirectBuffer = this.indirectGPUBuffer;
+        const typeParamsBuffer = this.typeParamsGPUBuffer;
+
+        if (!gpuDevice || !rawBuffer || !culledBuffer || !indirectBuffer || !typeParamsBuffer) {
+            return null;
+        }
+
+        if (
+            this.#unifiedCullingBindGroup &&
+            this.#cachedCullBindGroupLayout === bindGroupLayout &&
+            this.#cachedGlobalUniformBuffer === globalUniformBuffer
+        ) {
+            return this.#unifiedCullingBindGroup;
+        }
+
+        this.#cachedCullBindGroupLayout = bindGroupLayout;
+        this.#cachedGlobalUniformBuffer = globalUniformBuffer;
+
+        this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
+            label: 'Grass_UnifiedCullingBindGroup',
+            layout: bindGroupLayout,
+            entries: [
+                {binding: 0, resource: {buffer: globalUniformBuffer}},
+                {binding: 1, resource: {buffer: rawBuffer}},
+                {binding: 2, resource: {buffer: culledBuffer}},
+                {binding: 3, resource: {buffer: indirectBuffer}},
+                {binding: 4, resource: {buffer: typeParamsBuffer}},
+            ]
+        });
+
+        return this.#unifiedCullingBindGroup;
+    }
+
+    /**
      * [KO] 인스턴스 최대 수용 용량이 증가할 때 호출되어 GPU 컬링 버퍼를 리사이징합니다.
      * [EN] Invoked when maximum instance capacity expands to resize the GPU culled buffer.
      *
@@ -249,6 +381,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Newly expanded instance capacity
      */
     onResizeBuffers(newCapacity: number): void {
+        this.invalidateUnifiedCullingBindGroup();
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
@@ -269,6 +402,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Clears grass type allocations and base segments upon mega-buffer destruction.
      */
     onDestroy(): void {
+        this.invalidateUnifiedCullingBindGroup();
         this.#allocations.clear();
         this.clearBaseAllocations();
     }
