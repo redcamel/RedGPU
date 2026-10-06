@@ -27,7 +27,11 @@ struct GlobalCullUniforms {
 @group(0) @binding(1) var<storage, read> rawInstances: array<GrassInstance>;
 @group(0) @binding(2) var<storage, read_write> culledInstances: array<GrassInstance>;
 @group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectCommand>;
-@group(0) @binding(4) var<storage, read> typeParams: array<GrassTypeParam>;
+
+struct GrassTypeParamsBlock {
+    types: array<GrassTypeParam, 64>,
+};
+@group(0) @binding(4) var<uniform> typeParamsBlock: GrassTypeParamsBlock;
 
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
@@ -49,7 +53,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let typeInfo = typeParams[typeIdx];
+    let typeInfo = typeParamsBlock.types[typeIdx];
     if (typeInfo.instanceCount == 0u || index < typeInfo.rawBaseOffset) {
         return;
     }

@@ -629,7 +629,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
                 label: `${this.constructor.name}_TypeParams`,
                 size: typeParamsByteSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
         }
 
