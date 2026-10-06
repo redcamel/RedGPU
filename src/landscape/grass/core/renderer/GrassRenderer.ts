@@ -83,6 +83,8 @@ export class GrassRenderer extends RedGPUObject {
     // Zero-GC executeBundles 단일 배열 재사용
     #singleBundleArray: [GPURenderBundle] = [null as any];
 
+    #preferredCanvasFormat: GPUTextureFormat;
+
     /**
      * [KO] GrassRenderer 인스턴스를 생성하고 셰이더 모듈 및 파이프라인 레이아웃을 초기화합니다.
      * [EN] Creates a GrassRenderer instance and initializes shader modules and pipeline layouts.
@@ -90,6 +92,7 @@ export class GrassRenderer extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.#preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
         this.#initShadersAndLayouts();
     }
 
@@ -325,7 +328,7 @@ export class GrassRenderer extends RedGPUObject {
         const {indirectGPUBuffer} = megaBuffer;
         if (!indirectGPUBuffer) return null;
 
-        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+        const preferredNormalFormat = this.#preferredCanvasFormat;
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Grass_Main_RenderBundle_msaa${sampleCount}_${this.instanceId}`,
             colorFormats: ['rgba16float', preferredNormalFormat, 'rgba16float'],
@@ -587,7 +590,7 @@ export class GrassRenderer extends RedGPUObject {
         const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentNearModule;
         if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
 
-        const preferredNormalFormat = navigator.gpu.getPreferredCanvasFormat();
+        const preferredNormalFormat = this.#preferredCanvasFormat;
 
         pipeline = gpuDevice.createRenderPipeline({
             label: `Grass_RenderPipeline_${isFar ? 'Far' : 'Near'}_msaa${sampleCount}_${this.instanceId}`,

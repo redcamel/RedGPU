@@ -58,8 +58,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    let localSlotIdx = index - typeInfo.rawBaseOffset;
-    if (localSlotIdx >= typeInfo.instanceCount) {
+    if (index - typeInfo.rawBaseOffset >= typeInfo.instanceCount) {
         return;
     }
 

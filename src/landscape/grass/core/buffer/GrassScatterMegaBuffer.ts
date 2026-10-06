@@ -346,7 +346,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
-        const culledCapacity = Math.max(newCapacity * 2, this.totalAllocatedCulledInstances);
+        const culledCapacity = newCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
 
         this.culledGPUBuffer?.destroy();
@@ -372,7 +372,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
-        const culledCapacity = Math.max(this.instanceCapacity * 2, this.totalAllocatedCulledInstances);
+        const culledCapacity = this.instanceCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
 
         this.culledGPUBuffer = gpuDevice.createBuffer({

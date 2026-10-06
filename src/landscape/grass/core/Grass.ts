@@ -135,6 +135,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #dirty: boolean = true;
     #slotIndex: number = -1;
     #onRepopulateRequired: (() => void) | null = null;
+    #isUnifiedGeometryOwned: boolean = false;
 
     /**
      * [KO] Grass 인스턴스를 생성하고 초기 속성을 설정합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager.addGrass(options)` 메서드를 사용하십시오.)
@@ -200,6 +201,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
             }
             this.#geometry = combineResult.unifiedGeometry;
+            this.#isUnifiedGeometryOwned = true;
             const primaryGroup = combineResult.groups[0];
             if (primaryGroup.material) {
                 targetMaterial = primaryGroup.material;
@@ -293,8 +295,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         }
 
         this.#unifiedGeometries = [(this.#geometry as Geometry) || null];
-        this.updateDrawCallCount(this.#subMeshes.length * 2);
-
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
 
@@ -711,7 +711,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      */
     override destroy(): void {
         this.#slotIndex = -1;
-        (this.#geometry as any)?.destroy?.();
+        if (this.#isUnifiedGeometryOwned) {
+            (this.#geometry as any)?.destroy?.();
+        }
+        this.#isUnifiedGeometryOwned = false;
         this.#geometry = null as any;
         this.#unifiedGeometries.length = 0;
         this.#subMeshes.length = 0;
