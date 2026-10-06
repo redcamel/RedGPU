@@ -532,16 +532,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#enableStreaming = options.enableStreaming !== false;
         this.#streamingRadius = streamingRadius;
 
-        let impostorSub: FoliageSubMesh | null = null;
-        const allSubs = this.#subMeshes;
-        for (let i = 0; i < allSubs.length; i++) {
-            if (allSubs[i].isImpostor) {
-                impostorSub = allSubs[i];
-                break;
-            }
-        }
-        this.#impostorSubMesh = impostorSub;
-
         this.updateDrawCallCount(this.drawCallCount);
 
         if (this.#megaBuffer) {
@@ -1308,10 +1298,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#subMeshes = subMeshes;
         this.#shadowMergedSubMeshes = shadowMergedSubMeshes;
 
+        let impostorSub: FoliageSubMesh | null = null;
+        const subCount = subMeshes.length;
+        for (let i = 0; i < subCount; i++) {
+            const sub = subMeshes[i];
+            if (sub.isImpostor) {
+                impostorSub = sub;
+                break;
+            }
+        }
+        this.#impostorSubMesh = impostorSub;
+
         const lod0List = this.#lod0SubMeshes;
         lod0List.length = 0;
         let hasMaskedLOD0 = false;
-        const subCount = subMeshes.length;
         for (let i = 0; i < subCount; i++) {
             const sub = subMeshes[i];
             if (sub.lodIndex === 0) {
