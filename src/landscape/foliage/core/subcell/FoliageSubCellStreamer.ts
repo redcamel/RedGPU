@@ -8,6 +8,8 @@ import type Foliage from "../Foliage";
 import FoliageSubCellPartitioner, {type FoliageSubCell} from "./FoliageSubCellPartitioner";
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 import {sortSubCellsByDistance} from "../../../core/scatter";
+import LandscapeComponent from "../../../core/spatial/LandscapeComponent";
+import type Landscape from "../../../Landscape";
 
 /**
  * [KO] 카메라 위치와 뷰 프러스텀, 스트리밍 버짓에 따라 활성 서브셀의 인스턴스를 GPU 버퍼에 동적으로 마운트/언마운트하는 스트리머 클래스입니다.
@@ -19,6 +21,7 @@ import {sortSubCellsByDistance} from "../../../core/scatter";
  * :::
  */
 export default class FoliageSubCellStreamer {
+    #loadedTileKeys: Set<number> = new Set();
     #tempCandidates: FoliageSubCell[] = [];
     #candidateDists: Float32Array = new Float32Array(512);
     #foliage: Foliage;
@@ -164,6 +167,70 @@ export default class FoliageSubCellStreamer {
      * [EN] Registers new sub-cells to the streamer.
      * @param newSubCells -
      * [KO] 등록할 서브셀 맵
+     /**
+     * [KO] 현재 로드되어 인스턴스가 등록된 타일의 총 개수를 반환합니다.
+     * [EN] Returns the total number of currently loaded tiles with populated instances.
+     */
+    get loadedTileCount(): number {
+        return this.#loadedTileKeys.size;
+    }
+
+    /**
+     * [KO] 특정 그리드 좌표의 타일이 이미 로드 및 배치 완료되었는지 여부를 확인합니다.
+     * [EN] Checks whether the tile at the specified grid coordinate has already been loaded and populated.
+     */
+    isTileLoaded(componentX: number, componentZ: number): boolean {
+        const cz = componentZ & 0xffff;
+        const cx = componentX & 0xffff;
+        const key = (cz << 16) | cx;
+        return this.#loadedTileKeys.has(key);
+    }
+
+    /**
+     * [KO] 신규 지형 타일 컴포넌트가 로드되었을 때 호출되어 해당 타일의 식생 인스턴스를 서브셀 단위로 분할(Partition) 및 스트리머에 등록합니다.
+     * [EN] Invoked when a new terrain tile component is loaded to partition foliage instances into sub-cells and register them with the streamer.
+     */
+    populateTile(
+        tileComponent: LandscapeComponent,
+        landscape: Landscape | null,
+        enableStreaming: boolean
+    ): boolean {
+        if (!tileComponent) return false;
+
+        const cz = (tileComponent.componentZ ?? 0) & 0xffff;
+        const cx = (tileComponent.componentX ?? 0) & 0xffff;
+        const key = (cz << 16) | cx;
+        if (this.#loadedTileKeys.has(key)) return false;
+
+        if (landscape && typeof landscape.isTileLoaded === 'function') {
+            if (!landscape.isTileLoaded(cz, cx)) {
+                return false;
+            }
+        }
+
+        this.#loadedTileKeys.add(key);
+
+        const subCellSize = landscape?.foliageManager?.subCellSize ?? 100.0;
+        const subCells = FoliageSubCellPartitioner.partitionTile(
+            tileComponent,
+            this.#foliage,
+            landscape,
+            subCellSize
+        );
+        this.addSubCells(subCells);
+
+        if (!enableStreaming) {
+            this.update(new Int32Array(0), 0, 0, 0, false);
+        }
+
+        return true;
+    }
+
+    /**
+     * [KO] 새로운 서브셀들을 스트리머에 등록합니다.
+     * [EN] Registers new sub-cells to the streamer.
+     * @param newSubCells -
+     * [KO] 등록할 서브셀 맵
      * [EN] Map of sub-cells to register
      */
     addSubCells(newSubCells: Map<number, FoliageSubCell>): void {
@@ -180,6 +247,7 @@ export default class FoliageSubCellStreamer {
      * [EN] Unregisters all sub-cells and resets instance mounts.
      */
     clear(): void {
+        this.#loadedTileKeys.clear();
         this.#tempCandidates.length = 0;
         this.#mountedSubCells.forEach(c => {
             c.isMounted = false;

@@ -11,7 +11,6 @@ import LandscapeComponent from "../../core/spatial/LandscapeComponent";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
 import FoliageSubCellStreamer from "./subcell/FoliageSubCellStreamer";
 import FoliageRenderBucket from "./bucket/FoliageRenderBucket";
-import FoliageTilePopulator from "./populator/FoliageTilePopulator";
 
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
@@ -273,7 +272,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #maxInstances: number = 0;
 
     #bucket: FoliageRenderBucket = new FoliageRenderBucket();
-    #populator: FoliageTilePopulator = new FoliageTilePopulator();
     #unifiedGeometries: (Geometry | null)[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
@@ -915,7 +913,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     clearTileCache(): void {
         this.#streamer.clear();
-        this.#populator.clear();
     }
 
     /**
@@ -932,11 +929,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     populateTile(tileComponent: LandscapeComponent, landscape?: Landscape): void {
         if (!tileComponent) return;
         if (landscape) this.#landscape = landscape;
-        this.#populator.populateTile(
+        this.#streamer.populateTile(
             tileComponent,
-            this,
             landscape || this.#landscape,
-            this.#streamer,
             this.#enableStreaming
         );
     }
@@ -947,7 +942,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     override destroy(): void {
         this.#streamer.clear();
-        this.#populator.clear();
         this.#bucket.destroy();
         this.#unifiedGeometries.length = 0;
         super.destroy();

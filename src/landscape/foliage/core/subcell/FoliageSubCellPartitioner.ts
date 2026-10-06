@@ -69,12 +69,12 @@ export interface FoliageSubCell {
 
 
 /**
- * [KO] 지형 타일을 일정한 크기의 서브셀(SubCell) 그리드로 분할하고 식생 인스턴스를 배치하는 파티셔너 클래스입니다.
- * [EN] Partitioner class that divides terrain tiles into fixed-size subcell grids and places foliage instances.
+ * [KO] 지형 타일을 일정한 크기의 서브셀(SubCell) 그리드로 분할하고 식생 인스턴스를 배치하는 순수 정적 유틸리티 클래스입니다.
+ * [EN] Pure static utility class that divides terrain tiles into fixed-size subcell grids and places foliage instances.
  *
- * ::: warning
- * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * ::: note
+ * [KO] 이 클래스는 상태를 가지지 않는 정적 메서드(`partitionTile`, `populateSubCellInstances`)만 제공하므로 인스턴스화할 필요가 없습니다.
+ * [EN] This class provides only stateless static methods (`partitionTile`, `populateSubCellInstances`) and does not require instantiation.
  * :::
  */
 export default class FoliageSubCellPartitioner {
