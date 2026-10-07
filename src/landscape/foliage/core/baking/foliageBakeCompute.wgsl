@@ -1,4 +1,5 @@
 #redgpu_include landscape.struct.FoliageInstance;
+#redgpu_include landscape.math.scatterColorPack;
 
 struct BakeUniforms {
     invWorldSizeX: f32,
@@ -47,10 +48,5 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         }
     }
 
-    let r = u32(clamp(groundColor.r, 0.0, 1.0) * 255.0);
-    let g = u32(clamp(groundColor.g, 0.0, 1.0) * 255.0);
-    let b = u32(clamp(groundColor.b, 0.0, 1.0) * 255.0);
-    let typeId = task.typeId & 0xFFu;
-
-    rawInstances[instIdx].packedGroundColorAndType = (typeId << 24u) | (b << 16u) | (g << 8u) | r;
+    rawInstances[instIdx].packedGroundColorAndType = packGroundColorAndType(groundColor, task.typeId);
 }

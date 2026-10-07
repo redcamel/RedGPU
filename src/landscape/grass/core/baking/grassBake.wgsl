@@ -12,6 +12,9 @@
 
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.math.rotateVectorByQuat;
+#redgpu_include landscape.math.quatMultiply;
+#redgpu_include landscape.math.scatterColorPack;
+#redgpu_include landscape.math.scatterSpatialPrng;
 
 
 struct GrassBakeUniforms {
@@ -47,27 +50,7 @@ struct GrassBakeUniforms {
 @group(0) @binding(5) var weightTexture: texture_2d<f32>;
 @group(0) @binding(6) var<storage, read> cellOffsets: array<vec2<i32>>;
 
-// Deterministic 32-bit PRNG seed (1:1 with computeScatterGridSeed in ScatterSpatialUtils.ts)
-fn computeScatterGridSeed(gridX: i32, gridZ: i32, typeId: u32) -> u32 {
-    let seed = ((u32(gridX) * 73856093u) ^ (u32(gridZ) * 19349663u) ^ (typeId * 83492791u));
-    return select(seed, 0x9e3779b9u, seed == 0u);
-}
 
-// SplitMix32 PRNG (1:1 with JavaScript nextPrng implementation)
-fn splitMix32(state: ptr<function, u32>) -> f32 {
-    *state = (*state + 0x6D2B79F5u);
-    var t = (*state ^ (*state >> 15u)) * (1u | *state);
-    t = (t + ((t ^ (t >> 7u)) * (61u | t))) ^ t;
-    return f32((t ^ (t >> 14u)) & 0xFFFFFFFFu) / 4294967296.0;
-}
-
-
-fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
-    return vec4<f32>(
-        a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz),
-        a.w * b.w - dot(a.xyz, b.xyz)
-    );
-}
 
 fn writeInvalidInstance(targetIdx: u32, posX: f32, posZ: f32) {
     var inv: GrassInstance;
@@ -232,8 +215,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         outInst.scaleXZ = sScale;
         outInst.packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));
         outInst.packedQuat = pack4x8snorm(canonicalQuat);
-        let colorPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0)) & 0x00FFFFFFu;
-        outInst.packedGroundColorAndType = colorPacked | (uniforms.typeId << 24u);
+        outInst.packedGroundColorAndType = packGroundColorAndType(groundColor, uniforms.typeId);
 
         rawInstances[currentTargetIdx] = outInst;
     }

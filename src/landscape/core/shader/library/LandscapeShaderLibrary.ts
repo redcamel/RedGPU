@@ -16,6 +16,9 @@ import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
 import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
+import quatMultiply_wgsl from './math/quatMultiply.wgsl';
+import scatterColorPack_wgsl from './math/scatterColorPack.wgsl';
+import scatterSpatialPrng_wgsl from './math/scatterSpatialPrng.wgsl';
 import transformFoliagePosition_wgsl from './math/transformFoliagePosition.wgsl';
 import ditherFadeDiscard_wgsl from './math/ditherFadeDiscard.wgsl';
 import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCutoff.wgsl';
@@ -158,6 +161,36 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const rotateVectorByQuat = rotateVectorByQuat_wgsl;
+
+        /**
+         * [KO] 두 쿼터니언(vec4<f32>)의 곱셈을 수행하여 합성 회전을 계산하는 함수 (quatMultiply)
+         * [EN] Multiplies two quaternions (vec4<f32>) to compute composite rotation (quatMultiply)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.quatMultiply;
+         * ```
+         */
+        export const quatMultiply = quatMultiply_wgsl;
+
+        /**
+         * [KO] 스캐터 인스턴스 지면 색상(RGB) 및 식생/잔디 타입 ID(또는 알파) 패킹/언패킹 함수 모음 (packGroundColorAndType, unpackTypeId, unpackGroundColor, replacePackedAlpha)
+         * [EN] Scatter instance ground color (RGB) and type ID (or alpha) bit packing/unpacking functions (packGroundColorAndType, unpackTypeId, unpackGroundColor, replacePackedAlpha)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.scatterColorPack;
+         * ```
+         */
+        export const scatterColorPack = scatterColorPack_wgsl;
+
+        /**
+         * [KO] 절차적 스캐터링 그리드 시드 생성 및 SplitMix32 고속 의사난수(PRNG) 생성 함수 (computeScatterGridSeed, splitMix32)
+         * [EN] Procedural scattering grid seed generation and SplitMix32 fast PRNG functions (computeScatterGridSeed, splitMix32)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.scatterSpatialPrng;
+         * ```
+         */
+        export const scatterSpatialPrng = scatterSpatialPrng_wgsl;
 
         /**
          * [KO] 인스턴스 정점의 서브메시 계층 행렬 변환 및 쿼터니언 회전/스케일/월드 이동 수식 (transformFoliagePosition)

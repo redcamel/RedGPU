@@ -9,6 +9,7 @@
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassTypeParam;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
+#redgpu_include landscape.math.scatterColorPack;
 
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,
@@ -41,7 +42,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     // Extract typeId from upper 8 bits of packedGroundColorAndType
-    let typeIdx = (inst.packedGroundColorAndType >> 24u) & 0xFFu;
+    let typeIdx = unpackTypeId(inst.packedGroundColorAndType);
     if (typeIdx >= 64u) {
         return;
     }

@@ -34,6 +34,7 @@ struct FoliageCullingUniforms {
 
 #redgpu_include landscape.struct.FoliageInstance;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
+#redgpu_include landscape.math.scatterColorPack;
 
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
@@ -112,7 +113,7 @@ fn main(
     }
 
     var instance = rawInstances[idx];
-    let typeIdx = (instance.packedGroundColorAndType >> 24u) & 0xFFu;
+    let typeIdx = unpackTypeId(instance.packedGroundColorAndType);
     if (typeIdx >= 64u) {
         return;
     }
@@ -232,11 +233,10 @@ fn main(
                     atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                 }
 
-                let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
                 let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
                 var culledInst = instance;
                 culledInst.posY = realY;
-                culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
+                culledInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, alphaByte);
 
                 let outIdx = typeInfo.culledBaseOffset + slot;
                 mainCulledInstances[outIdx] = culledInst;
@@ -264,11 +264,10 @@ fn main(
                             atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
-                        let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
                         let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
                         var culledInst = instance;
                         culledInst.posY = realY;
-                        culledInst.packedGroundColorAndType = (alphaByte << 24u) | groundRGB;
+                        culledInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, alphaByte);
 
                         let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
                         mainCulledInstances[outIdx] = culledInst;
@@ -335,11 +334,10 @@ fn main(
                             atomicAdd(&shadowIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
-                        let groundRGB = instance.packedGroundColorAndType & 0x00FFFFFFu;
                         let shadowFadeByte = u32(clamp(shadowFade, 0.0, 1.0) * 255.0);
                         var shadowInst = instance;
                         shadowInst.posY = realY;
-                        shadowInst.packedGroundColorAndType = (shadowFadeByte << 24u) | groundRGB;
+                        shadowInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, shadowFadeByte);
 
                         let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
                         let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
