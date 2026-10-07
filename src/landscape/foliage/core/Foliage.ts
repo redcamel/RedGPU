@@ -960,9 +960,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         const megaBuffer = this.#megaBuffer;
         const allocation = this.allocation;
-        if (!megaBuffer || !allocation) return;
+        const landscape = this.#landscape;
+        if (!megaBuffer || !allocation || !landscape) return;
 
-        const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+        const subCellSize = landscape.foliageManager.subCellSize;
         const typeRadius = this.streamingRadius;
         const unmountMargin = Math.max(10.0, subCellSize * 0.5);
         const unmountRadius = typeRadius + unmountMargin;
@@ -990,19 +991,19 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const candidates = this.#tempCandidates;
         candidates.length = 0;
 
-        const landscape = this.#landscape;
-        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
-        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
+        const worldSizeX = landscape.worldSizeX;
+        const worldSizeZ = landscape.worldSizeZ;
+        const halfWorldX = landscape.halfWorldSizeX;
+        const halfWorldZ = landscape.halfWorldSizeZ;
 
-        const totalCellsX = Math.max(1, Math.floor(worldSizeX / subCellSize));
-        const totalCellsZ = Math.max(1, Math.floor(worldSizeZ / subCellSize));
+        const invSubCellSize = 1.0 / subCellSize;
+        const totalCellsX = Math.max(1, Math.floor(worldSizeX * invSubCellSize));
+        const totalCellsZ = Math.max(1, Math.floor(worldSizeZ * invSubCellSize));
 
-        const minSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX - typeRadius + halfWorldX) / subCellSize)));
-        const maxSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX + typeRadius + halfWorldX) / subCellSize)));
-        const minSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ - typeRadius + halfWorldZ) / subCellSize)));
-        const maxSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ + typeRadius + halfWorldZ) / subCellSize)));
+        const minSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX - typeRadius + halfWorldX) * invSubCellSize)));
+        const maxSX = Math.max(0, Math.min(totalCellsX - 1, Math.floor((camX + typeRadius + halfWorldX) * invSubCellSize)));
+        const minSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ - typeRadius + halfWorldZ) * invSubCellSize)));
+        const maxSZ = Math.max(0, Math.min(totalCellsZ - 1, Math.floor((camZ + typeRadius + halfWorldZ) * invSubCellSize)));
 
         const mountRadiusSq = typeRadius * typeRadius;
 
@@ -1309,11 +1310,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #populateSingleSubCell(scX: number, scZ: number, subCellSize: number): FoliageSubCell {
         const key = packSubCellKey(scX, scZ);
-        const landscape = this.#landscape;
-        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
-        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
+        const landscape = this.#landscape!;
+        const worldSizeX = landscape.worldSizeX;
+        const worldSizeZ = landscape.worldSizeZ;
+        const invWorldSizeX = landscape.invWorldSizeX;
+        const invWorldSizeZ = landscape.invWorldSizeZ;
+        const halfWorldX = landscape.halfWorldSizeX;
+        const halfWorldZ = landscape.halfWorldSizeZ;
 
         const centerX = (scX + 0.5) * subCellSize - halfWorldX;
         const centerZ = (scZ + 0.5) * subCellSize - halfWorldZ;
@@ -1393,8 +1396,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
 
                     if (targetLayerObj) {
-                        const u = (posX + halfWorldX) / worldSizeX;
-                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const u = (posX + halfWorldX) * invWorldSizeX;
+                        const v = (posZ + halfWorldZ) * invWorldSizeZ;
                         const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
                         if (weight < 0.1) continue;
                         if (densityScaleByWeight) {
@@ -1457,10 +1460,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
         if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;
 
-        const worldSizeX = landscape?.worldSize?.[0] ?? 16000.0;
-        const worldSizeZ = landscape?.worldSize?.[1] ?? 16000.0;
-        const halfWorldX = worldSizeX * 0.5;
-        const halfWorldZ = worldSizeZ * 0.5;
+        const worldSizeX = landscape!.worldSizeX;
+        const worldSizeZ = landscape!.worldSizeZ;
+        const invWorldSizeX = landscape!.invWorldSizeX;
+        const invWorldSizeZ = landscape!.invWorldSizeZ;
+        const halfWorldX = landscape!.halfWorldSizeX;
+        const halfWorldZ = landscape!.halfWorldSizeZ;
 
         const subMinX = subCell.subCellX * subCellSize - halfWorldX;
         const subMaxX = subMinX + subCellSize;
@@ -1532,8 +1537,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
 
                     if (targetLayerObj) {
-                        const u = (posX + halfWorldX) / worldSizeX;
-                        const v = (posZ + halfWorldZ) / worldSizeZ;
+                        const u = (posX + halfWorldX) * invWorldSizeX;
+                        const v = (posZ + halfWorldZ) * invWorldSizeZ;
                         const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
                         if (weight < 0.1) continue;
                         if (densityScaleByWeight) {

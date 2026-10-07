@@ -316,6 +316,54 @@ export class Landscape extends RedGPUObject {
     }
 
     /**
+     * [KO] 전체 월드의 X축 크기를 반환합니다.
+     * [EN] Returns the full world size along X axis.
+     */
+    get worldSizeX(): number {
+        return this.#spatialGrid.worldSizeX;
+    }
+
+    /**
+     * [KO] 전체 월드의 Z축 크기를 반환합니다.
+     * [EN] Returns the full world size along Z axis.
+     */
+    get worldSizeZ(): number {
+        return this.#spatialGrid.worldSizeZ;
+    }
+
+    /**
+     * [KO] 전체 월드의 X축 크기의 역수(1.0 / worldSizeX)를 반환합니다. (Zero-GC 캐싱)
+     * [EN] Returns the reciprocal of full world size along X axis (1.0 / worldSizeX). (Zero-GC cached)
+     */
+    get invWorldSizeX(): number {
+        return this.#spatialGrid.invWorldSizeX;
+    }
+
+    /**
+     * [KO] 전체 월드의 Z축 크기의 역수(1.0 / worldSizeZ)를 반환합니다. (Zero-GC 캐싱)
+     * [EN] Returns the reciprocal of full world size along Z axis (1.0 / worldSizeZ). (Zero-GC cached)
+     */
+    get invWorldSizeZ(): number {
+        return this.#spatialGrid.invWorldSizeZ;
+    }
+
+    /**
+     * [KO] X축 월드 반폭(Half World Size)을 반환합니다.
+     * [EN] Returns the half world size along X axis.
+     */
+    get halfWorldSizeX(): number {
+        return this.#spatialGrid.halfWorldSizeX;
+    }
+
+    /**
+     * [KO] Z축 월드 반폭(Half World Size)을 반환합니다.
+     * [EN] Returns the half world size along Z axis.
+     */
+    get halfWorldSizeZ(): number {
+        return this.#spatialGrid.halfWorldSizeZ;
+    }
+
+    /**
      * [KO] 지형을 구성하는 X축 및 Z축 컴포넌트(타일) 분할 개수 `[countX, countZ]`를 반환합니다.
      * [EN] Returns the number of component (tile) subdivisions along X and Z axes as `[countX, countZ]`.
      */

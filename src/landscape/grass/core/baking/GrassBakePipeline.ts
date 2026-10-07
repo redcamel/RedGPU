@@ -74,11 +74,10 @@ export default class GrassBakePipeline extends RedGPUObject {
         const alloc = megaBuffer.getAllocation(grass.typeId);
         if (!alloc) return;
 
-        const worldSize = landscape.worldSize;
-        const worldSizeX = worldSize ? worldSize[0] : 8000.0;
-        const worldSizeZ = worldSize ? worldSize[1] : 8000.0;
-        const invWorldSizeX = worldSizeX > 0 ? 1.0 / worldSizeX : 0.000125;
-        const invWorldSizeZ = worldSizeZ > 0 ? 1.0 / worldSizeZ : 0.000125;
+        const worldSizeX = landscape.worldSizeX;
+        const worldSizeZ = landscape.worldSizeZ;
+        const invWorldSizeX = landscape.invWorldSizeX;
+        const invWorldSizeZ = landscape.invWorldSizeZ;
         const heightScale = landscape.heightScale ?? 600.0;
 
         // 16m 서브셀 단위 계산

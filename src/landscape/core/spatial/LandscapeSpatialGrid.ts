@@ -28,6 +28,8 @@ export class LandscapeSpatialGrid {
     #halfWorldSizeZ: number;
 
     #worldSizeTuple: [number, number] = [0, 0];
+    #invWorldSizeX: number = 0;
+    #invWorldSizeZ: number = 0;
     #componentCountTuple: [number, number] = [0, 0];
     #tileSizeTuple: [number, number] = [0, 0];
 
@@ -90,6 +92,22 @@ export class LandscapeSpatialGrid {
      */
     get worldSizeZ(): number {
         return this.#worldSizeTuple[1];
+    }
+
+    /**
+     * [KO] 전체 월드 X축 크기의 역수(1.0 / worldSizeX)를 반환합니다. (Zero-GC 캐싱)
+     * [EN] Returns the reciprocal of full world size along X axis (1.0 / worldSizeX). (Zero-GC cached)
+     */
+    get invWorldSizeX(): number {
+        return this.#invWorldSizeX;
+    }
+
+    /**
+     * [KO] 전체 월드 Z축 크기의 역수(1.0 / worldSizeZ)를 반환합니다. (Zero-GC 캐싱)
+     * [EN] Returns the reciprocal of full world size along Z axis (1.0 / worldSizeZ). (Zero-GC cached)
+     */
+    get invWorldSizeZ(): number {
+        return this.#invWorldSizeZ;
     }
 
     /**
@@ -205,8 +223,12 @@ export class LandscapeSpatialGrid {
     }
 
     #updateTuples(): void {
-        this.#worldSizeTuple[0] = this.#tileCountX * this.#tileSizeX;
-        this.#worldSizeTuple[1] = this.#tileCountZ * this.#tileSizeZ;
+        const wx = this.#tileCountX * this.#tileSizeX;
+        const wz = this.#tileCountZ * this.#tileSizeZ;
+        this.#worldSizeTuple[0] = wx;
+        this.#worldSizeTuple[1] = wz;
+        this.#invWorldSizeX = wx > 0 ? 1.0 / wx : 0;
+        this.#invWorldSizeZ = wz > 0 ? 1.0 / wz : 0;
         this.#componentCountTuple[0] = this.#tileCountX;
         this.#componentCountTuple[1] = this.#tileCountZ;
         this.#tileSizeTuple[0] = this.#tileSizeX;
