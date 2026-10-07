@@ -1101,7 +1101,7 @@ export class Landscape extends RedGPUObject {
     update(renderViewStateData: RenderViewStateData): void {
         if (!renderViewStateData) return;
 
-        const currentView = renderViewStateData.view;
+        const {view: currentView, frustumPlanesFlat} = renderViewStateData;
         const rawCamera = currentView.rawCamera as PerspectiveCamera;
         if (!rawCamera) return;
 
@@ -1109,21 +1109,17 @@ export class Landscape extends RedGPUObject {
             this.#material.updateUniformsData();
         }
 
-        const camX = rawCamera.x;
-        const camY = rawCamera.y;
-        const camZ = rawCamera.z;
-
-        const projMatrix = currentView.projectionMatrix;
-        const viewMatrix = rawCamera.viewMatrix;
-
+        const {x: camX, y: camY, z: camZ, viewMatrix, fieldOfView} = rawCamera;
+        const {projectionMatrix: projMatrix, hierarchicalZBuffer: hzb} = currentView;
 
         this.#tileStreamer.update(camX, camZ, camY);
 
-        const totalComponents = this.#spatialGrid.tileCountX * this.#spatialGrid.tileCountZ;
+        const {tileCountX, tileCountZ, tileSizeX, tileSizeZ} = this.#spatialGrid;
+        const totalComponents = tileCountX * tileCountZ;
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#lodMaxLevel, !!this.#debuggerManager?.landscapeWireframe);
 
-        const fovDeg = rawCamera.fieldOfView ?? 60.0;
+        const fovDeg = fieldOfView ?? 60.0;
         const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
         if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
             this.#lastTanHalfFOV = tanHalfFOV;
@@ -1131,21 +1127,24 @@ export class Landscape extends RedGPUObject {
         }
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
 
-        const hzb = currentView.hierarchicalZBuffer;
         const effectiveHZBTextureView = hzb?.textureView || null;
         const effectiveHZBSampler = hzb?.sampler || null;
 
         if (this.#lastHZBView !== effectiveHZBTextureView) {
             this.#lastHZBView = effectiveHZBTextureView;
             this.#lastHZBSampler = effectiveHZBSampler;
-            if (this.#instanceBuffer?.allTilesBuffer && this.#instanceBuffer?.visibleTilesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
-                this.#gpuCuller?.updateBindGroup(
-                    this.#instanceBuffer.allTilesBuffer,
-                    this.#instanceBuffer.visibleTilesBuffer,
-                    this.#instanceBuffer.indirectDrawBuffer,
-                    effectiveHZBTextureView,
-                    effectiveHZBSampler
-                );
+            const instanceBuffer = this.#instanceBuffer;
+            if (instanceBuffer) {
+                const {allTilesBuffer, visibleTilesBuffer, indirectDrawBuffer} = instanceBuffer;
+                if (allTilesBuffer && visibleTilesBuffer && indirectDrawBuffer) {
+                    this.#gpuCuller?.updateBindGroup(
+                        allTilesBuffer,
+                        visibleTilesBuffer,
+                        indirectDrawBuffer,
+                        effectiveHZBTextureView,
+                        effectiveHZBSampler
+                    );
+                }
             }
         }
 
@@ -1158,10 +1157,10 @@ export class Landscape extends RedGPUObject {
         this.#gpuCuller?.updateUniforms(
             camX, camY, camZ,
             this.#lodMaxLevel,
-            this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ,
+            tileSizeX, tileSizeZ,
             this.#heightScale,
             totalComponents,
-            renderViewStateData.frustumPlanesFlat,
+            frustumPlanesFlat,
             this.#lodDistancesBuffer,
             tanHalfFOV,
             lodMetricVal,
@@ -1224,8 +1223,7 @@ export class Landscape extends RedGPUObject {
 
         if (!instanceBuffer || !combinedVB || !combinedIB) return;
 
-        const storageBG = instanceBuffer.instanceStorageBindGroup;
-        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+        const {instanceStorageBindGroup: storageBG, instanceStorageBindGroupLayout: storageBGLayout} = instanceBuffer;
         if (!storageBG || !storageBGLayout) return;
 
         const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
@@ -1388,14 +1386,18 @@ export class Landscape extends RedGPUObject {
         this.#instanceBuffer.uploadStaticTilesToGPU();
         this.#updateLandscapeUniforms();
 
-        if (this.#instanceBuffer.allTilesBuffer && this.#instanceBuffer.visibleTilesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
-            this.#gpuCuller.updateBindGroup(
-                this.#instanceBuffer.allTilesBuffer,
-                this.#instanceBuffer.visibleTilesBuffer,
-                this.#instanceBuffer.indirectDrawBuffer,
-                this.#lastHZBView,
-                this.#lastHZBSampler
-            );
+        const instanceBuffer = this.#instanceBuffer;
+        if (instanceBuffer) {
+            const {allTilesBuffer, visibleTilesBuffer, indirectDrawBuffer} = instanceBuffer;
+            if (allTilesBuffer && visibleTilesBuffer && indirectDrawBuffer) {
+                this.#gpuCuller.updateBindGroup(
+                    allTilesBuffer,
+                    visibleTilesBuffer,
+                    indirectDrawBuffer,
+                    this.#lastHZBView,
+                    this.#lastHZBSampler
+                );
+            }
         }
 
         this.#material?.requestVBTRebake(true);

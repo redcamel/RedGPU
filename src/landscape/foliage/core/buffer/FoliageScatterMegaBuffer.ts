@@ -263,18 +263,18 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
         if (!this.#unifiedGlobalUniformGPUBuffer || !typeParamsGPUBuffer) return;
 
-        const {view} = renderViewStateData;
+        const {
+            view,
+            activeCascadeCount,
+            cascadeSplitDepths,
+            cascadeShadowFrustumPlanesByCascade,
+            frustumPlanesFlat: mainFrustumPlanes
+        } = renderViewStateData;
         const camera = view.rawCamera;
-        const camX = camera.x;
-        const camY = camera.y;
-        const camZ = camera.z;
-
-        const activeCascadeCount = renderViewStateData.activeCascadeCount;
-        const cascadeSplitDepths = renderViewStateData.cascadeSplitDepths;
-        const cascadeShadowFrustumPlanesByCascade = renderViewStateData.cascadeShadowFrustumPlanesByCascade;
-        const mainFrustumPlanes = renderViewStateData.frustumPlanesFlat;
-        const viewportHeight = view.pixelRectArray[3];
-        const hzbEnabled = !!view.hierarchicalZBuffer?.textureView;
+        const {x: camX, y: camY, z: camZ} = camera;
+        const {pixelRectArray, hierarchicalZBuffer} = view;
+        const viewportHeight = pixelRectArray[3];
+        const hzbEnabled = !!hierarchicalZBuffer?.textureView;
 
         const gf32 = this.#cpuUnifiedGlobalUniformData;
         const gu32 = this.#cpuUnifiedGlobalUniformUint32;
@@ -464,10 +464,14 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
     ): GPUBindGroup | null {
-        const rawGPUBuffer = this.rawGPUBuffer;
-        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
-        const culledGPUBuffer = this.culledGPUBuffer;
-        const indirectGPUBuffer = this.indirectGPUBuffer;
+        const {
+            rawGPUBuffer,
+            typeParamsGPUBuffer,
+            culledGPUBuffer,
+            indirectGPUBuffer,
+            gpuDevice,
+            resourceManager
+        } = this;
 
         if (!rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !typeParamsGPUBuffer ||
             !culledGPUBuffer || !indirectGPUBuffer ||
@@ -475,9 +479,8 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             return null;
         }
 
-        const gpuDevice = this.gpuDevice;
-        const targetHZBView = hzbTextureView || this.resourceManager.emptyR32FloatTextureView;
-        const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
+        const targetHZBView = hzbTextureView || resourceManager.emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler || resourceManager.basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
             this.#cachedHZBTextureView === targetHZBView &&

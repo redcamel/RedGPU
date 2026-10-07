@@ -160,9 +160,7 @@ class FoliageRenderer extends AScatterRenderer {
 
         this.#resetBoundState();
 
-        const antialiasingManager = this.antialiasingManager;
-        const msaaID = antialiasingManager.msaaID;
-        const useMSAA = antialiasingManager.useMSAA;
+        const {msaaID, useMSAA} = this.antialiasingManager;
         const sampleCount = useMSAA ? 4 : 1;
         const systemBG = view.systemUniform_Vertex_UniformBindGroup ?? null;
 
@@ -171,8 +169,8 @@ class FoliageRenderer extends AScatterRenderer {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
             const megaBuffer = foliageType.megaBuffer;
-            const culledGPU = megaBuffer?.culledGPUBuffer;
-            const indirectGPU = megaBuffer?.indirectGPUBuffer;
+            if (!megaBuffer) continue;
+            const {culledGPUBuffer: culledGPU, indirectGPUBuffer: indirectGPU} = megaBuffer;
             if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
             let item = this.#validTypesMain[validCount];

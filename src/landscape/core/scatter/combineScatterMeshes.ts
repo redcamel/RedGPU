@@ -289,13 +289,10 @@ export default function combineScatterMeshes(
 
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
-        const geom = raw.geometry;
-        const srcVB = geom.vertexBuffer;
-        const srcIB = geom.indexBuffer;
+        const {geometry: geom, rawStride, currentRelativeMatrix: m} = raw;
+        const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
         const srcVData = srcVB?.data;
         const vCount = srcVB?.vertexCount ?? 0;
-        const rawStride = raw.rawStride;
-        const m = raw.currentRelativeMatrix;
 
         lodTotalVertices += vCount;
         lodTotalIndices += srcIB?.indexCount ?? vCount;
@@ -384,17 +381,13 @@ export default function combineScatterMeshes(
 
         for (let g = 0; g < group.length; g++) {
             const raw = group[g];
-            const geom = raw.geometry;
-            const srcVB = geom.vertexBuffer;
-            const srcIB = geom.indexBuffer;
+            const {geometry: geom, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
+            const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
             const srcVData = srcVB?.data;
             const srcIData = srcIB?.data;
             const vCount = srcVB?.vertexCount ?? 0;
-            const rawStride = raw.rawStride;
 
             if (srcVData && vCount > 0) {
-                const m = raw.currentRelativeMatrix;
-                const n = raw.normalMatrix;
 
                 for (let v = 0; v < vCount; v++) {
                     const srcIdx = v * rawStride;
@@ -586,12 +579,10 @@ export default function combineScatterMeshes(
     let maxDistSq = 0;
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
-        const geom = raw.geometry;
-        const srcVB = geom.vertexBuffer;
+        const {geometry: geom, rawStride, currentRelativeMatrix: m} = raw;
+        const {vertexBuffer: srcVB} = geom;
         const srcVData = srcVB?.data;
         const vCount = srcVB?.vertexCount ?? 0;
-        const rawStride = raw.rawStride;
-        const m = raw.currentRelativeMatrix;
 
         if (srcVData && vCount > 0) {
             for (let v = 0; v < vCount; v++) {

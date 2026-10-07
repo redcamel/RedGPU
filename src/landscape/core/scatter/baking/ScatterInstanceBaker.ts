@@ -79,9 +79,10 @@ export class ScatterInstanceBaker extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext, options: ScatterInstanceBakerOptions) {
         super(redGPUContext);
 
-        this.#computeShaderCode = options.computeShaderCode;
-        this.#label = options.label;
-        this.#taskCapacity = options.initialTaskCapacity || 8192;
+        const {computeShaderCode, label, initialTaskCapacity} = options;
+        this.#computeShaderCode = computeShaderCode;
+        this.#label = label;
+        this.#taskCapacity = initialTaskCapacity || 8192;
 
         this.#uniformCPUBuffer = new Float32Array(4);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);

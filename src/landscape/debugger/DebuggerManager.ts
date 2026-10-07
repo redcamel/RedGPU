@@ -130,17 +130,31 @@ export class DebuggerManager {
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: DebuggerManagerOptions) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
-        this.#onDebugPropertyChange = options?.onDebugPropertyChange;
-
-        if (options?.spatialGrid) this.spatialGrid = true;
-        if (options?.vht) this.vht = true;
-        if (options?.vnt) this.vnt = true;
-        if (options?.vbt || options?.vbtBaseColor) this.vbt = true;
-        if (options?.vbtNormal) this.vbtNormal = true;
-        if (options?.vbtORM) this.vbtORM = true;
-        if (options?.landscapeWireframe !== undefined) this.landscapeWireframe = options.landscapeWireframe;
-        if (options?.landscapeLodColoration !== undefined) this.landscapeLodColoration = options.landscapeLodColoration;
-        if (options?.landscapeDebugMode !== undefined) this.landscapeDebugMode = options.landscapeDebugMode;
+        if (options) {
+            const {
+                onDebugPropertyChange,
+                spatialGrid,
+                vht,
+                vnt,
+                vbt,
+                vbtBaseColor,
+                vbtNormal,
+                vbtORM,
+                landscapeWireframe,
+                landscapeLodColoration,
+                landscapeDebugMode
+            } = options;
+            this.#onDebugPropertyChange = onDebugPropertyChange;
+            if (spatialGrid) this.spatialGrid = true;
+            if (vht) this.vht = true;
+            if (vnt) this.vnt = true;
+            if (vbt || vbtBaseColor) this.vbt = true;
+            if (vbtNormal) this.vbtNormal = true;
+            if (vbtORM) this.vbtORM = true;
+            if (landscapeWireframe !== undefined) this.landscapeWireframe = landscapeWireframe;
+            if (landscapeLodColoration !== undefined) this.landscapeLodColoration = landscapeLodColoration;
+            if (landscapeDebugMode !== undefined) this.landscapeDebugMode = landscapeDebugMode;
+        }
     }
 
     /**

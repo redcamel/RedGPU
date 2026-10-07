@@ -44,8 +44,7 @@ export class GrassSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
         if (slot < 0 || slot >= this.maxSlots) return;
 
         const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
-        const f32 = this.cpuBuffer;
-        const u32 = this.cpuUint32View;
+        const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         const {
             cullingDistance,

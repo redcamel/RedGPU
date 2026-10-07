@@ -568,17 +568,22 @@ export abstract class ALandscapeDebugger {
         const dirY = -Math.cos(panRad);
         const lookAngle = Math.atan2(dirY, dirX);
 
-        const wsX = this.#landscape.worldSizeX;
-        const wsZ = this.#landscape.worldSizeZ;
-        const halfWsX = this.#landscape.halfWorldSizeX;
-        const halfWsZ = this.#landscape.halfWorldSizeZ;
+        const {
+            worldSizeX: wsX,
+            worldSizeZ: wsZ,
+            halfWorldSizeX: halfWsX,
+            halfWorldSizeZ: halfWsZ,
+            invWorldSizeX,
+            invWorldSizeZ,
+            tileLoadingRadius: landscapeTileLoadingRadius
+        } = this.#landscape;
         const minX = -halfWsX;
         const minZ = -halfWsZ;
 
-        const camNormX = (camX - minX) * this.#landscape.invWorldSizeX;
-        const camNormZ = (camZ - minZ) * this.#landscape.invWorldSizeZ;
+        const camNormX = (camX - minX) * invWorldSizeX;
+        const camNormZ = (camZ - minZ) * invWorldSizeZ;
 
-        const tileLoadingRadius = this.#landscape.tileLoadingRadius || 2500;
+        const tileLoadingRadius = landscapeTileLoadingRadius || 2500;
         const tileLoadingRadiusUV = tileLoadingRadius / wsX;
 
         this.#cameraState.camX = camX;

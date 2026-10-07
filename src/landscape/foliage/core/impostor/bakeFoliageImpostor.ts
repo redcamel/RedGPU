@@ -69,8 +69,7 @@ const EMPTY_FLOAT32_12: Float32Array = new Float32Array(12);
 function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerContextCache {
     let cache = contextCache.get(redGPUContext);
     if (!cache) {
-        const gpuDevice = redGPUContext.gpuDevice;
-        const resourceManager = redGPUContext.resourceManager;
+        const {gpuDevice, resourceManager} = redGPUContext;
 
         const bakeBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Impostor_Bake_BindGroupLayout', {
             label: 'Foliage_Impostor_Bake_BindGroupLayout',
@@ -348,9 +347,8 @@ export default function bakeFoliageImpostor(
             }
         }
 
-        const resourceManager = redGPUContext.resourceManager;
-        const emptyTexView = resourceManager.emptyBitmapTextureView;
-        const basicSampler = resourceManager.basicSampler;
+    const {resourceManager} = redGPUContext;
+    const {emptyBitmapTextureView: emptyTexView, basicSampler} = resourceManager;
 
         const cachedSubMeshes: {
             isImpostor: boolean;
@@ -491,9 +489,7 @@ export default function bakeFoliageImpostor(
         let drawSlot = 0;
         for (let v = 0; v < totalViews; v++) {
             const vpInfo = renderPassViews[v];
-            const normX = vpInfo.normX;
-            const normY = vpInfo.normY;
-            const normZ = vpInfo.normZ;
+            const {normX, normY, normZ} = vpInfo;
 
             for (let s = 0; s < totalSub; s++) {
                 const cached = cachedSubMeshes[s];

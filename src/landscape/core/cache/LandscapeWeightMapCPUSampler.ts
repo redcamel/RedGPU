@@ -153,9 +153,7 @@ export class LandscapeWeightMapCPUSampler {
         const entry = this.#cache.get(src);
         if (!entry) return 0.0;
 
-        const width = entry.width;
-        const height = entry.height;
-        const data = entry.data;
+        const {width, height, data} = entry;
 
         const cu = u < 0.0 ? 0.0 : (u > 1.0 ? 1.0 : u);
         const cv = v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);
@@ -204,9 +202,7 @@ export class LandscapeWeightMapCPUSampler {
             return;
         }
 
-        const width = entry.width;
-        const height = entry.height;
-        const data = entry.data;
+        const {width, height, data} = entry;
 
         const cu = u < 0.0 ? 0.0 : (u > 1.0 ? 1.0 : u);
         const cv = v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);

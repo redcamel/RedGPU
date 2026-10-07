@@ -129,6 +129,7 @@ export default function assembleFoliageLODMeshes(
     const resultSubMeshes: FoliageSubMesh[] = [];
     const unifiedGeometry = combineResult.unifiedGeometry;
     const treeH = Math.max(5.0, (combineResult.boundingRadius || 5.0) * 1.8);
+    const {groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = options;
 
     for (let g = 0; g < combineResult.groups.length; g++) {
         const group = combineResult.groups[g];
@@ -147,10 +148,10 @@ export default function assembleFoliageLODMeshes(
             firstIndex: group.firstIndex,
             indexCount: group.indexCount,
             maxPrepassLOD: 0,
-            groundBlendStrength: options.groundBlendStrength,
-            groundBlendRange: options.groundBlendRange,
-            windMultiplier: options.windMultiplier,
-            windFlutterMultiplier: options.windFlutterMultiplier,
+            groundBlendStrength,
+            groundBlendRange,
+            windMultiplier,
+            windFlutterMultiplier,
             treeHeight: treeH,
             slotPooler,
             megaUBO

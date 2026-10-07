@@ -296,11 +296,13 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         bindGroupLayout: GPUBindGroupLayout,
         globalUniformBuffer: GPUBuffer
     ): GPUBindGroup | null {
-        const gpuDevice = this.gpuDevice;
-        const rawBuffer = this.rawGPUBuffer;
-        const culledBuffer = this.culledGPUBuffer;
-        const indirectBuffer = this.indirectGPUBuffer;
-        const typeParamsBuffer = this.typeParamsGPUBuffer;
+        const {
+            gpuDevice,
+            rawGPUBuffer: rawBuffer,
+            culledGPUBuffer: culledBuffer,
+            indirectGPUBuffer: indirectBuffer,
+            typeParamsGPUBuffer: typeParamsBuffer
+        } = this;
 
         if (!gpuDevice || !rawBuffer || !culledBuffer || !indirectBuffer || !typeParamsBuffer) {
             return null;

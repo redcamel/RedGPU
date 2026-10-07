@@ -100,11 +100,11 @@ class FoliageCuller extends AScatterCullPipeline {
         const fovFactor = this.#cachedFovFactor;
 
         if (this.#megaBuffer) {
-            const hzb = view.hierarchicalZBuffer;
+            const {hierarchicalZBuffer: hzb, projectionMatrix} = view;
             this.#lastHZBTextureView = hzb?.textureView || null;
             this.#lastHZBSampler = hzb?.sampler || null;
 
-            mat4.multiply(this.#tempPVMatrix, view.projectionMatrix, cam3D.viewMatrix);
+            mat4.multiply(this.#tempPVMatrix, projectionMatrix, cam3D.viewMatrix);
 
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 renderViewStateData,
@@ -146,17 +146,14 @@ class FoliageCuller extends AScatterCullPipeline {
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        const pipeline = this.computePipeline;
-        const bindGroupLayout = this.bindGroupLayout;
+        const {computePipeline: pipeline, bindGroupLayout} = this;
         if (!pipeline || !bindGroupLayout) return;
 
         if (this.#baker.hasPendingTasks && this.#megaBuffer && this.#landscapeRef) {
-            const landscape = this.#landscapeRef;
-            const vbtView = landscape.hasValidVbtAtlas
-                ? landscape.vbtBaseColorAtlas?.gpuTextureView
+            const {hasValidVbtAtlas, vbtBaseColorAtlas, worldSizeX, worldSizeZ} = this.#landscapeRef;
+            const vbtView = hasValidVbtAtlas
+                ? vbtBaseColorAtlas?.gpuTextureView
                 : undefined;
-            const worldSizeX = landscape.worldSizeX;
-            const worldSizeZ = landscape.worldSizeZ;
 
             this.#baker.dispatchPass(
                 computePass,

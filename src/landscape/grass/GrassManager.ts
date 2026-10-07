@@ -324,8 +324,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Clears all registered scatter grass types and resets to the initial state.
      */
     clearTypes(): void {
-        while (this.types.length > 0) {
-            this.removeType(this.types[this.types.length - 1]);
+        const {types} = this;
+        while (types.length > 0) {
+            this.removeType(types[types.length - 1]);
         }
 
         this.#slotPooler.clear();

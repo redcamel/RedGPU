@@ -662,8 +662,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
         if (!this.#spatialGrid) return 0.0;
 
         const grid = this.#spatialGrid;
-        const halfWX = grid.halfWorldSizeX;
-        const halfWZ = grid.halfWorldSizeZ;
+        const {halfWorldSizeX: halfWX, halfWorldSizeZ: halfWZ} = grid;
 
         if (x < -halfWX || x > halfWX || z < -halfWZ || z > halfWZ) {
             return 0.0;
@@ -680,8 +679,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
             return 0.0;
         }
 
-        const tileSizeX = grid.tileSizeX;
-        const tileSizeZ = grid.tileSizeZ;
+        const {tileSizeX, tileSizeZ} = grid;
         const tileMinX = col * tileSizeX - halfWX;
         const tileMinZ = row * tileSizeZ - halfWZ;
 
@@ -699,10 +697,9 @@ export class LandscapeTileStreamer extends RedGPUObject {
         const fx = gx - ix;
         const fz = gz - iz;
 
-        const worldSizeX = grid.worldSizeX;
-        const worldSizeZ = grid.worldSizeZ;
-        const texSizeX = grid.tileCountX * 512;
-        const texSizeZ = grid.tileCountZ * 512;
+        const {worldSizeX, worldSizeZ, tileCountX, tileCountZ} = grid;
+        const texSizeX = tileCountX * 512;
+        const texSizeZ = tileCountZ * 512;
 
         const v00_x = tileMinX + ix * stepX;
         const v00_z = tileMinZ + iz * stepZ;

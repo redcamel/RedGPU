@@ -317,7 +317,15 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             alignFactor,
             groundBlendStrength,
             groundBlendRange,
-            useDepthPrepass = true
+            useDepthPrepass = true,
+            shadowCullDistance: optShadowCullDistance,
+            targetLayer,
+            minSlope,
+            maxSlope,
+            densityScaleByWeight,
+            randomRotationY,
+            bottomOffset,
+            height: optHeight
         } = options;
 
         this.#onDirty = onDirty;
@@ -389,10 +397,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
-        const resolvedBottomOffset = options.bottomOffset ?? 0;
+        const resolvedBottomOffset = bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
-        const resolvedHeight = options.height !== undefined
-            ? Math.max(0.1, Number(options.height) || 0.1)
+        const resolvedHeight = optHeight !== undefined
+            ? Math.max(0.1, Number(optHeight) || 0.1)
             : (assembleResult.boundingHeight || 2.0);
 
         this.#initBuckets(
@@ -412,8 +420,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             defaultShadowDist = 350.0;
         }
 
-        const resolvedShadowCullDistance = options.shadowCullDistance !== undefined
-            ? Math.max(0, Number(options.shadowCullDistance) || 0)
+        const resolvedShadowCullDistance = optShadowCullDistance !== undefined
+            ? Math.max(0, Number(optShadowCullDistance) || 0)
             : defaultShadowDist;
 
         this.setRawScatterProperties({
@@ -421,10 +429,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             bottomOffset: resolvedBottomOffset,
             cullingDistance,
             shadowCullDistance: resolvedShadowCullDistance,
-            targetLayer: options.targetLayer,
-            minSlope: options.minSlope ?? 0.0,
-            maxSlope: options.maxSlope ?? 45.0,
-            densityScaleByWeight: options.densityScaleByWeight !== false,
+            targetLayer,
+            minSlope: minSlope ?? 0.0,
+            maxSlope: maxSlope ?? 45.0,
+            densityScaleByWeight: densityScaleByWeight !== false,
             densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier,
             castShadow: castShadow !== false,
@@ -434,7 +442,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#minScale = minScale;
         this.#maxScale = maxScale;
-        this.#randomRotationY = options.randomRotationY ?? true;
+        this.#randomRotationY = randomRotationY ?? true;
         this.#maxInstances = resolvedMaxInstances;
 
         if (this.#megaBuffer) {
@@ -1027,8 +1035,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                         subCell = this.#populateSingleSubCell(sx, sz, subCellSize);
                         this.#subCells.set(key, subCell);
                     }
-                    if (subCell && !subCell.isMounted && subCell.instanceCount > 0) {
-                        candidates.push(subCell);
+                    if (subCell) {
+                        const {isMounted, instanceCount} = subCell;
+                        if (!isMounted && instanceCount > 0) {
+                            candidates.push(subCell);
+                        }
                     }
                 }
             }
@@ -1257,9 +1268,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const count = subCell.instanceCount;
         if (currentActive + count > allocation.maxInstances) return;
 
-        const f32 = megaBuffer.cpuRawDataBuffer;
-        const u32 = megaBuffer.cpuRawDataUint32;
-        const strideFloats = megaBuffer.strideFloats;
+        const {cpuRawDataBuffer: f32, cpuRawDataUint32: u32, strideFloats} = megaBuffer;
         const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
 
         this.#populateSubCellInstances(f32, u32, baseFloat, subCell, subCellSize);
@@ -1275,8 +1284,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation): void {
         const mounted = this.#mountedSubCells;
         const targetSubCell = mounted[mountedIndex];
-        const targetSlot = targetSubCell.mountedSlotIndex;
-        const targetCount = targetSubCell.instanceCount;
+        const {mountedSlotIndex: targetSlot, instanceCount: targetCount} = targetSubCell;
         const currentActive = allocation.instanceCount;
 
         const isLast = (mountedIndex === mounted.length - 1);
@@ -1288,11 +1296,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             allocation.instanceCount = Math.max(0, currentActive - targetCount);
         } else {
             const lastSubCell = mounted.pop()!;
-            const lastSlot = lastSubCell.mountedSlotIndex;
-            const lastCount = lastSubCell.instanceCount;
+            const {mountedSlotIndex: lastSlot, instanceCount: lastCount} = lastSubCell;
 
-            const f32 = megaBuffer.cpuRawDataBuffer;
-            const strideFloats = megaBuffer.strideFloats;
+            const {cpuRawDataBuffer: f32, strideFloats} = megaBuffer;
 
             const srcStartFloat = (allocation.rawBaseOffset + lastSlot) * strideFloats;
             const srcEndFloat = srcStartFloat + lastCount * strideFloats;
@@ -1461,21 +1467,23 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const strideFloats = this.#megaBuffer?.strideFloats || 8;
         const landscape = this.#landscape;
 
-        const densityPerHectare = this.densityPerHectare;
-        const densityMultiplier = this.densityMultiplier ?? 1.0;
+        const {densityPerHectare, densityMultiplier = 1.0} = this;
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
         if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;
 
-        const worldSizeX = landscape!.worldSizeX;
-        const worldSizeZ = landscape!.worldSizeZ;
-        const invWorldSizeX = landscape!.invWorldSizeX;
-        const invWorldSizeZ = landscape!.invWorldSizeZ;
-        const halfWorldX = landscape!.halfWorldSizeX;
-        const halfWorldZ = landscape!.halfWorldSizeZ;
+        const {
+            worldSizeX,
+            worldSizeZ,
+            invWorldSizeX,
+            invWorldSizeZ,
+            halfWorldSizeX: halfWorldX,
+            halfWorldSizeZ: halfWorldZ
+        } = landscape!;
+        const {subCellX, subCellZ} = subCell;
 
-        const subMinX = subCell.subCellX * subCellSize - halfWorldX;
+        const subMinX = subCellX * subCellSize - halfWorldX;
         const subMaxX = subMinX + subCellSize;
-        const subMinZ = subCell.subCellZ * subCellSize - halfWorldZ;
+        const subMinZ = subCellZ * subCellSize - halfWorldZ;
         const subMaxZ = subMinZ + subCellSize;
 
         const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
@@ -1483,15 +1491,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
         const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
 
-        const optMinScale = this.minScale;
-        const optMaxScale = this.maxScale;
-        const randomRotationY = this.randomRotationY;
+        const {
+            minScale: optMinScale,
+            maxScale: optMaxScale,
+            randomRotationY,
+            targetLayer,
+            densityScaleByWeight: optDensityScaleByWeight,
+            minSlope: optMinSlope,
+            maxSlope: optMaxSlope
+        } = this;
         const scaleDiffX = optMaxScale[0] - optMinScale[0];
         const scaleDiffY = optMaxScale[1] - optMinScale[1];
         const scaleDiffZ = optMaxScale[2] - optMinScale[2];
         const isUniformXZ = (scaleDiffX === scaleDiffZ && optMinScale[0] === optMinScale[2]);
 
-        const targetLayer = this.targetLayer;
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
         let targetLayerObj: any = null;
         if (hasTargetLayer && landscape?.layers) {
@@ -1502,10 +1515,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             }
         }
 
-        const densityScaleByWeight = this.densityScaleByWeight !== false;
+        const densityScaleByWeight = optDensityScaleByWeight !== false;
         const hasGetHeight = typeof landscape?.getHeightAt === 'function';
-        const minSlope = this.minSlope ?? 0.0;
-        const maxSlope = this.maxSlope ?? 45.0;
+        const minSlope = optMinSlope ?? 0.0;
+        const maxSlope = optMaxSlope ?? 45.0;
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
 
         const alignToNormal = this.#alignToNormal;
