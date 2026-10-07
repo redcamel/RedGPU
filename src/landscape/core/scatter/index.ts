@@ -68,12 +68,14 @@ import AScatterType, {type AScatterTypeInitOptions} from "./AScatterType";
 import AScatterSubMeshSlotPooler from "./AScatterSubMeshSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
+import AScatterCullPipeline from "./AScatterCullPipeline";
 import type {IScatterManager} from "./IScatterManager";
 
 export {
     // Runtime Classes, Functions & Units
     type IScatterManager,
     AScatterManager,
+    AScatterCullPipeline,
     combineScatterMeshes,
     AScatterGeometryUnit,
     ScatterSubMesh,

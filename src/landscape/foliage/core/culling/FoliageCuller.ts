@@ -5,12 +5,10 @@
  */
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
 import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
-
+import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
 import FoliageScatterMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageScatterMegaBuffer";
 import {ScatterInstanceBaker} from "../../../core/scatter";
 import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
@@ -26,7 +24,7 @@ import {computeFrustumPlanes, computeFrustumPlanesFromPVMatrix} from "../../../.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageCuller extends RedGPUObject {
+class FoliageCuller extends AScatterCullPipeline {
     #tempPVMatrix: mat4 = mat4.create();
     #cachedFrustumPlanes: number[][] = [
         new Array(4), new Array(4), new Array(4),
@@ -47,8 +45,6 @@ class FoliageCuller extends RedGPUObject {
     ];
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
     #baker: ScatterInstanceBaker;
-    #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
-    #cullingComputePipeline: GPUComputePipeline | null = null;
     #lastHZBTextureView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
 
@@ -75,7 +71,7 @@ class FoliageCuller extends RedGPUObject {
             label: 'FoliageInstanceBaker',
             initialTaskCapacity: 8192,
         });
-        this.#initComputePipeline();
+        this.initComputePipeline('Foliage_Cull_ShaderModule', foliageCullingComputeWGSL, 'Foliage_Cull');
     }
 
     /**
@@ -205,7 +201,7 @@ class FoliageCuller extends RedGPUObject {
             );
         }
 
-        if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
+        if (this.computePipeline && this.bindGroupLayout) {
             this.#landscapeRef = landscape;
 
             this.commandEncoderManager.useEncoder(
@@ -220,41 +216,6 @@ class FoliageCuller extends RedGPUObject {
         }
     }
 
-    #initComputePipeline(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-
-        const resourceManager = this.resourceManager;
-        const shaderInfo = resourceManager.wgslParser.parse('Foliage_Cull_ShaderModule', foliageCullingComputeWGSL);
-
-        let computeModule = resourceManager.getGPUShaderModule('Foliage_Cull_ShaderModule');
-        if (!computeModule) {
-            computeModule = resourceManager.createGPUShaderModule('Foliage_Cull_ShaderModule', {
-                code: foliageCullingComputeWGSL,
-            });
-        }
-
-        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        const layout = resourceManager.createBindGroupLayout('Foliage_Cull_BindGroupLayout', {
-            label: 'Foliage_Cull_BindGroupLayout',
-            ...descriptor
-        });
-        this.#cullingBindGroupLayout = layout;
-
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Cull_PipelineLayout', {
-            bindGroupLayouts: [layout],
-        });
-
-        this.#cullingComputePipeline = gpuDevice.createComputePipeline({
-            label: 'Foliage_Cull_ComputePipeline',
-            layout: pipelineLayout,
-            compute: {
-                module: computeModule,
-                entryPoint: 'main',
-            },
-        });
-    }
-
     #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
         this.#megaBuffer?.resetMultiIndirectCommands(encoder);
     };
@@ -263,10 +224,9 @@ class FoliageCuller extends RedGPUObject {
      * [KO] 컬링 및 베이커 리소스를 해제합니다.
      * [EN] Destroys culler and baker resources.
      */
-    destroy(): void {
+    override destroy(): void {
+        super.destroy();
         this.#baker.destroy();
-        this.#cullingComputePipeline = null;
-        this.#cullingBindGroupLayout = null;
         this.#lastHZBTextureView = null;
         this.#lastHZBSampler = null;
         this.#megaBuffer = null;
@@ -274,8 +234,8 @@ class FoliageCuller extends RedGPUObject {
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        const pipeline = this.#cullingComputePipeline;
-        const bindGroupLayout = this.#cullingBindGroupLayout;
+        const pipeline = this.computePipeline;
+        const bindGroupLayout = this.bindGroupLayout;
         if (!pipeline || !bindGroupLayout) return;
 
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
@@ -293,8 +253,6 @@ class FoliageCuller extends RedGPUObject {
             );
         }
 
-        computePass.setPipeline(pipeline);
-
         if (this.#megaBuffer) {
             const totalAllocatedInstances = this.#megaBuffer.totalAllocatedInstances;
             if (totalAllocatedInstances <= 0) return;
@@ -305,9 +263,7 @@ class FoliageCuller extends RedGPUObject {
                 this.#lastHZBSampler
             );
             if (unifiedBindGroup) {
-                const workgroupCount = Math.ceil(totalAllocatedInstances / 64);
-                computePass.setBindGroup(0, unifiedBindGroup);
-                computePass.dispatchWorkgroups(workgroupCount);
+                this.dispatchCompute(computePass, unifiedBindGroup, totalAllocatedInstances, 64);
             }
         }
     };

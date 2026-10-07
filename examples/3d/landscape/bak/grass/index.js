@@ -173,7 +173,7 @@ RedGPU.init(
                         lodConfigs.push({mesh: lods.lod2, lodDistance: 180, receiveShadow: false});
                     }
 
-                    foliageManager.addFoliage({
+                    foliageManager.addType({
                         name: `Tree_${baseName}`,
                         lods: lodConfigs,
                         densityPerHectare: 120.0,
@@ -232,7 +232,7 @@ RedGPU.init(
                 findMesh(loader.resultMesh);
 
                 if (baseMesh) {
-                    const baseClumpType = grassManager.addGrass({
+                    const baseClumpType = grassManager.addType({
                         name: '🌱 Ground Lawn Clump (Base)',
                         mesh: baseMesh,
                         densityPerHectare: 24000,
@@ -345,7 +345,7 @@ RedGPU.init(
                     }
 
                     // 🌿 현실적인 실측 스케일 (높이 약 50~80cm의 자연스러운 들풀 비례)
-                    const grassType = grassManager.addGrass({
+                    const grassType = grassManager.addType({
                         name: displayNames[key] || key,
                         mesh: lod0,
                         densityPerHectare: densities[key] || 3500,

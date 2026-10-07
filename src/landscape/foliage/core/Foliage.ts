@@ -201,7 +201,7 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * ### Example
  * ```typescript
  * // FoliageManager를 통해 인스턴스를 등록하고 참조를 얻습니다.
- * const tree = landscape.foliageManager.addFoliage({
+ * const tree = landscape.foliageManager.addType({
  *     name: 'PineTree',
  *     lods: [{ mesh: treeMesh }]
  * });
@@ -254,8 +254,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #landscape: Landscape | null = null;
 
     /**
-     * [KO] 지형 식생/나무 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager.addFoliage(options)` 팩토리 메서드를 사용하십시오.)
-     * [EN] Creates a landscape foliage instance. (Do not instantiate directly; use the `landscape.foliageManager.addFoliage(options)` factory method instead.)
+     * [KO] 지형 식생/나무 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager.addType(options)` 팩토리 메서드를 사용하십시오.)
+     * [EN] Creates a landscape foliage instance. (Do not instantiate directly; use the `landscape.foliageManager.addType(options)` factory method instead.)
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance

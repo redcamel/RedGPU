@@ -186,7 +186,7 @@ RedGPU.init(
                             lodDistance: 320
                         });
 
-                        foliageManager.addFoliage({
+                        foliageManager.addType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
                             densityPerHectare: 120.0,

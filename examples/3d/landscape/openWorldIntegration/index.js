@@ -569,7 +569,7 @@ function initGrassField({redGPUContext, grassManager, onGrassTypeAdded}) {
             findMesh(loader.resultMesh);
 
             if (baseMesh) {
-                const grass = grassManager.addGrass({
+                const grass = grassManager.addType({
                     name: 'Lawn Clump',
                     mesh: baseMesh,
                     densityPerHectare: 20000,
@@ -632,7 +632,7 @@ function initFoliageField({redGPUContext, foliageManager, onFoliageTypeAdded}) {
                     lodConfigs.push({mesh: lods.lod2, lodDistance: 180, receiveShadow: false});
                 }
 
-                const foliage = foliageManager.addFoliage({
+                const foliage = foliageManager.addType({
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 90.0,

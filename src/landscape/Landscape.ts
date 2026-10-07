@@ -60,14 +60,14 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  * });
  *
  * // 2. 절차적 잔디 제어 (grassManager 인스턴스)
- * landscape.grassManager.addGrass({
+ * landscape.grassManager.addType({
  *     name: 'FieldGrass',
  *     mesh: grassMesh,
  *     densityPerHectare: 20000
  * });
  *
  * // 3. 식생 및 수목 제어 (foliageManager 인스턴스)
- * landscape.foliageManager.addFoliage({
+ * landscape.foliageManager.addType({
  *     name: 'PineTree',
  *     lods: [{ mesh: treeMesh, lodDistance: 150 }],
  *     densityPerHectare: 90

@@ -30,7 +30,7 @@ import {AScatterManager} from "../core/scatter";
  * const foliageManager = landscape.foliageManager;
  *
  * // 식생 생태계 타입 등록 (다중 LOD 및 옥타헤드럴 임포스터 지원)
- * const pineTree = foliageManager.addFoliage({
+ * const pineTree = foliageManager.addType({
  *     name: 'PineTree',
  *     lods: [
  *         { mesh: treeMeshLOD0, lodDistance: 50 },
@@ -417,7 +417,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [KO] 대상이 정상적으로 제거되었으면 `true`, 미존재 시 `false`
      * [EN] `true` if target was found and removed, `false` otherwise
      */
-    removeFoliage(target: Foliage | string): boolean {
+    removeType(target: Foliage | string): boolean {
         if (!target) return false;
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
@@ -425,29 +425,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         removed.destroy();
         this.#renderer.markAllBundlesDirty();
         return true;
-    }
-
-
-    /**
-     * [KO] 새로운 스캐터 식생 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Creates and registers a new scatter foliage type into the manager. (IScatterManager standard symmetric method)
-     *
-     * @param options - 식생 생성 옵션
-     * @returns 생성된 {@link Foliage} 인스턴스
-     */
-    addType(options: FoliageOptions): Foliage {
-        return this.addFoliage(options);
-    }
-
-    /**
-     * [KO] 등록된 특정 스캐터 식생 타입을 매니저에서 제거합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Removes a specific registered scatter foliage type from the manager. (IScatterManager standard symmetric method)
-     *
-     * @param target - 제거할 {@link Foliage} 인스턴스 또는 고유 이름
-     * @returns 제거 성공 여부
-     */
-    removeType(target: Foliage | string): boolean {
-        return this.removeFoliage(target);
     }
 
     /**
@@ -497,7 +474,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [KO] 생성되어 등록된 {@link Foliage} 인스턴스
      * [EN] Newly created and registered {@link Foliage} instance
      */
-    addFoliage(options: FoliageOptions): Foliage {
+    addType(options: FoliageOptions): Foliage {
         const {name} = options;
         const existing = this.getTypeByName(name);
         if (existing) {

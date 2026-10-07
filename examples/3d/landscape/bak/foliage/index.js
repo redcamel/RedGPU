@@ -197,7 +197,7 @@ RedGPU.init(
                             receiveShadow: false // 100m 밖 로우폴리는 CSM 샘플링 스킵하여 프레임 최적화
                         });
 
-                        foliageManager.addFoliage({
+                        foliageManager.addType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
                             densityPerHectare: 120.0,
@@ -248,7 +248,7 @@ RedGPU.init(
 
                 if (rockNodes.length > 0) {
                     const rockMesh = rockNodes[0];
-                    foliageManager.addFoliage({
+                    foliageManager.addType({
                         name: 'Rock_RiverRock',
                         isFoliage: false,
                         lods: [

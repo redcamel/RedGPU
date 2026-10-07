@@ -4,14 +4,11 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
 import grassCullWGSL from "./grassCull.wgsl";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
+import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
 
-export default class GrassCullPipeline extends RedGPUObject {
-    #computePipeline: GPUComputePipeline | null = null;
-    #bindGroupLayout: GPUBindGroupLayout | null = null;
+export default class GrassCullPipeline extends AScatterCullPipeline {
     #globalUniformBuffer: GPUBuffer | null = null;
 
     // Zero-GC: 256B ArrayBuffer 및 뷰 재사용
@@ -23,9 +20,8 @@ export default class GrassCullPipeline extends RedGPUObject {
         super(redGPUContext);
         this.#uniformFloat32View = new Float32Array(this.#uniformArrayBuffer);
         this.#uniformUint32View = new Uint32Array(this.#uniformArrayBuffer);
-        this.#initPipeline();
+        this.initComputePipeline('Grass_Cull_ShaderModule', grassCullWGSL, 'Grass_Cull');
     }
-
 
     /**
      * [KO] 매 프레임 GPU 컴퓨트 패스를 통해 등록된 모든 잔디 타입의 거리 및 프러스텀 컬링을 단 1회의 디스패치로 초고속 수행합니다 (위치 계산 0%).
@@ -39,10 +35,9 @@ export default class GrassCullPipeline extends RedGPUObject {
         camZ: number,
         frustumPlanesF32: Float32Array | null
     ): void {
-        const pipeline = this.#computePipeline;
-        const bindGroupLayout = this.#bindGroupLayout;
+        const bindGroupLayout = this.bindGroupLayout;
         const gpuDevice = this.gpuDevice;
-        if (!pipeline || !bindGroupLayout || !gpuDevice) return;
+        if (!this.computePipeline || !bindGroupLayout || !gpuDevice) return;
 
         const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
         if (totalAllocatedInstances <= 0) return;
@@ -78,48 +73,14 @@ export default class GrassCullPipeline extends RedGPUObject {
         );
         if (!unifiedBG) return;
 
-        computePass.setPipeline(pipeline);
-        computePass.setBindGroup(0, unifiedBG);
-        const workgroups = Math.ceil(totalAllocatedInstances / 64);
-        computePass.dispatchWorkgroups(workgroups);
+        this.dispatchCompute(computePass, unifiedBG, totalAllocatedInstances, 64);
     }
 
-    destroy(): void {
+    override destroy(): void {
+        super.destroy();
         this.#globalUniformBuffer?.destroy();
         this.#globalUniformBuffer = null;
-        this.#computePipeline = null;
-        this.#bindGroupLayout = null;
-    }
-
-    #initPipeline(): void {
-        const {resourceManager, gpuDevice} = this.redGPUContext;
-        if (!gpuDevice) return;
-
-        const shaderInfo = resourceManager.wgslParser.parse('Grass_Cull_ShaderModule', grassCullWGSL);
-        let computeModule = resourceManager.getGPUShaderModule('Grass_Cull_ShaderModule');
-        if (!computeModule) {
-            computeModule = resourceManager.createGPUShaderModule('Grass_Cull_ShaderModule', {
-                code: grassCullWGSL
-            });
-        }
-
-        const bglDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.#bindGroupLayout = resourceManager.createBindGroupLayout('Grass_Cull_BindGroupLayout', bglDesc);
-
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_Cull_PipelineLayout', {
-            bindGroupLayouts: [this.#bindGroupLayout]
-        });
-
-        this.#computePipeline = gpuDevice.createComputePipeline({
-            label: 'Grass_Cull_ComputePipeline',
-            layout: pipelineLayout,
-            compute: {
-                module: computeModule,
-                entryPoint: 'main'
-            }
-        });
     }
 }
 
 Object.freeze(GrassCullPipeline);
-export {GrassCullPipeline as GrassCuller};

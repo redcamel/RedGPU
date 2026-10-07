@@ -145,7 +145,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param options - 잔디 설정 옵션 객체
      * @returns 생성되어 등록된 {@link Grass} 인스턴스
      */
-    addGrass(options: GrassOptions): Grass {
+    addType(options: GrassOptions): Grass {
         const grassType = new Grass(this.redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
@@ -331,7 +331,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param target - 제거할 {@link Grass} 인스턴스 또는 잔디의 고유 이름(`string`)
      * @returns 제거 성공 여부
      */
-    removeGrass(target: Grass | string): boolean {
+    removeType(target: Grass | string): boolean {
         if (!target) return false;
 
         const removedGrass = this.unregisterTypeInternal(target);
@@ -353,28 +353,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();
         return true;
-    }
-
-    /**
-     * [KO] 새로운 스캐터 잔디 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 메서드)
-     * [EN] Creates and registers a new scatter grass type into the manager. (IScatterManager standard method)
-     *
-     * @param options - 잔디 생성 옵션
-     * @returns 생성된 {@link Grass} 인스턴스
-     */
-    addType(options: GrassOptions): Grass {
-        return this.addGrass(options);
-    }
-
-    /**
-     * [KO] 등록된 특정 스캐터 잔디 타입을 매니저에서 제거합니다. (IScatterManager 표준 메서드)
-     * [EN] Removes a specific registered scatter grass type from the manager. (IScatterManager standard method)
-     *
-     * @param target - 제거할 {@link Grass} 인스턴스 또는 고유 이름
-     * @returns 제거 성공 여부
-     */
-    removeType(target: Grass | string): boolean {
-        return this.removeGrass(target);
     }
 
     /**
