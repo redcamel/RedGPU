@@ -3,7 +3,6 @@
  * [EN] Overall manager module for large-scale terrain 3D foliage ecosystems, instances, culling, and rendering.
  * @packageDocumentation
  */
-import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import type Landscape from "../Landscape";
@@ -15,7 +14,7 @@ import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler";
-import type {IScatterManager} from "../core/scatter/IScatterManager";
+import {AScatterManager} from "../core/scatter";
 
 /**
  * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -47,19 +46,13 @@ import type {IScatterManager} from "../core/scatter/IScatterManager";
  *
  * @category Landscape
  */
-class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
+class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #subMeshMegaUBO: GPUBuffer | null = null;
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
     #slotPooler: FoliageSubMeshSlotPooler;
 
-    #redGPUContext: RedGPUContext;
-    #landscape: Landscape | null = null;
-
-    #enabled: boolean = true;
     #megaBuffer: FoliageScatterMegaBuffer;
-    #foliageTypes: Map<string, Foliage> = new Map();
-    #foliageList: Foliage[] = [];
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
@@ -85,13 +78,12 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Internal callback invoked when terrain uniform buffers require updating
      */
     constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
-        this.#landscape = landscape;
+        super(landscape);
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
-        this.#redGPUContext = landscape.redGPUContext;
-        this.#slotPooler = new FoliageSubMeshSlotPooler(this.#redGPUContext);
+        this.#slotPooler = new FoliageSubMeshSlotPooler(this.redGPUContext);
         this.#subMeshMegaUBO = this.#slotPooler.gpuBuffer;
 
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+        const {gpuDevice, resourceManager} = this.redGPUContext;
         if (gpuDevice && this.#subMeshMegaUBO) {
             this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
                 label: 'Foliage_SubMesh_BindGroupLayout',
@@ -124,35 +116,19 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
             });
         }
 
-        this.#megaBuffer = new FoliageScatterMegaBuffer(this.#redGPUContext);
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext);
+        this.#megaBuffer = new FoliageScatterMegaBuffer(this.redGPUContext);
+        this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext);
         this.#renderer = new FoliageRenderer(
-            this.#redGPUContext,
+            this.redGPUContext,
             this.#pipelineRegistry,
             this.#subMeshVertexBindGroupLayout,
             this.#subMeshDynamicBindGroup
         );
-        this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer);
+        this.#culler = new FoliageCuller(this.redGPUContext, this.#megaBuffer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markAllBundlesDirty();
         };
-    }
-
-    /**
-     * [KO] 식생 시스템의 활성화 여부를 가져옵니다. `false`일 경우 식생 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
-     * [EN] Gets whether the foliage system is enabled. When `false`, foliage streaming, culling, and rendering are suspended.
-     */
-    get enabled(): boolean {
-        return this.#enabled;
-    }
-
-    /**
-     * [KO] 식생 시스템의 활성화 여부를 설정합니다.
-     * [EN] Sets whether the foliage system is enabled.
-     */
-    set enabled(val: boolean) {
-        this.#enabled = !!val;
     }
 
     /**
@@ -168,9 +144,9 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the depth prepass.
      */
     get depthPrepassDrawCalls(): number {
-        if (!this.#enabled || !this.#useDepthPrepass) return 0;
+        if (!this.enabled || !this.#useDepthPrepass) return 0;
         let count = 0;
-        const list = this.#foliageList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
@@ -186,9 +162,9 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the forward main render pass.
      */
     get mainPassDrawCalls(): number {
-        if (!this.#enabled) return 0;
+        if (!this.enabled) return 0;
         let count = 0;
-        const list = this.#foliageList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
@@ -228,9 +204,9 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting foliage types in the cascaded shadow map (CSM) pass.
      */
     get shadowDrawCalls(): number {
-        if (!this.#enabled) return 0;
+        if (!this.enabled) return 0;
         let count = 0;
-        const list = this.#foliageList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const foliage = list[i];
@@ -266,29 +242,6 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-    /**
-     * [KO] 등록된 모든 Foliage 생태계 인스턴스 배열을 반환합니다.
-     * [EN] Gets the array of all registered Foliage ecosystem instances.
-     */
-    get foliageList(): Foliage[] {
-        return this.#foliageList;
-    }
-
-    /**
-     * [KO] 등록된 모든 스캐터 타입 목록을 반환합니다. (IScatterManager 표준 대칭 프로퍼티)
-     * [EN] Returns the list of all registered scatter types. (IScatterManager standard symmetric property)
-     */
-    get types(): Foliage[] {
-        return this.#foliageList;
-    }
-
-    /**
-     * [KO] 등록된 총 식생 타입(Foliage) 개수를 반환합니다.
-     * [EN] Returns the total number of registered foliage types.
-     */
-    get typeCount(): number {
-        return this.#foliageList.length;
-    }
 
     /**
      * [KO] 현재 스트리밍되어 메모리에 로드된 총 식생 인스턴스 수를 반환합니다. (GrassManager 대칭 프로퍼티)
@@ -296,7 +249,7 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      */
     get totalInstanceCount(): number {
         let count = 0;
-        const list = this.#foliageList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             count += list[i].activeInstanceCount;
@@ -332,8 +285,8 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Main scene GPURenderPassEncoder
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
-        this.#renderer.render(view, passEncoder, this.#foliageList);
+        if (!this.enabled || !passEncoder || this.types.length === 0) return;
+        this.#renderer.render(view, passEncoder, this.types);
     }
 
 
@@ -415,8 +368,8 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] GPURenderPassEncoder for shadow map generation
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
-        this.#renderer.renderShadow(view, passEncoder, this.#foliageList);
+        if (!this.enabled || !passEncoder || this.types.length === 0) return;
+        this.#renderer.renderShadow(view, passEncoder, this.types);
     }
 
     /**
@@ -428,10 +381,10 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
      */
     update(renderViewStateData: RenderViewStateData): void {
-        if (!this.#enabled || this.#foliageList.length === 0) return;
+        if (!this.enabled || this.types.length === 0) return;
 
         const view = renderViewStateData.view;
-        const count = this.#foliageList.length;
+        const count = this.types.length;
         const cam = view.rawCamera;
         if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
             let remainingMount = this.#mountBudget;
@@ -442,14 +395,14 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
             const startIdx = this.#roundRobinIndex;
             for (let i = 0; i < count; i++) {
                 const idx = (startIdx + i) % count;
-                const foliage = this.#foliageList[idx];
+                const foliage = this.types[idx];
                 foliage.updateStreaming(cam.x, cam.z, remainingMount, remainingUnmount);
                 remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
                 remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
             }
             this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
         }
-        this.#culler.updateAndDispatch(this.#foliageList, view, this.#landscape, renderViewStateData);
+        this.#culler.updateAndDispatch(this.types, view, this.landscape, renderViewStateData);
     }
 
 
@@ -466,56 +419,14 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      */
     removeFoliage(target: Foliage | string): boolean {
         if (!target) return false;
-        const foliage = typeof target === 'string'
-            ? this.getFoliage(target)
-            : target;
-        if (!foliage) return false;
+        const removed = this.unregisterTypeInternal(target);
+        if (!removed) return false;
 
-        const idx = this.#foliageList.indexOf(foliage);
-        if (idx === -1) return false;
-
-        this.#foliageList.splice(idx, 1);
-        foliage.destroy();
+        removed.destroy();
         this.#renderer.markAllBundlesDirty();
-        return this.#foliageTypes.delete(foliage.name);
+        return true;
     }
 
-    /**
-     * [KO] 등록된 식생 생태계 타입을 이름(`name`)으로 조회합니다.
-     * [EN] Retrieves a registered foliage ecosystem type by name.
-     *
-     * @param name -
-     * [KO] 조회할 식생 타입의 고유 이름
-     * [EN] Unique name of the foliage type to retrieve
-     * @returns
-     * [KO] 일치하는 {@link Foliage} 인스턴스 (미등록 시 `undefined`)
-     * [EN] Matching {@link Foliage} instance (`undefined` if not registered)
-     */
-    getFoliage(name: string): Foliage | undefined {
-        if (!name) return undefined;
-        return this.#foliageTypes.get(name);
-    }
-
-    /**
-     * [KO] 등록된 식생 생태계 타입을 이름(`name`)으로 조회합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Retrieves a registered foliage ecosystem type by name. (IScatterManager standard symmetric method)
-     *
-     * @param name - 조회할 식생 타입의 고유 이름
-     * @returns 일치하는 {@link Foliage} 인스턴스 (미등록 시 `undefined`)
-     */
-    getTypeByName(name: string): Foliage | undefined {
-        return this.getFoliage(name);
-    }
-
-    /**
-     * [KO] 등록된 모든 식생(Foliage) 생태계 타입을 일괄 제거합니다.
-     * [EN] Clears all registered foliage ecosystem types.
-     */
-    clearFoliage(): void {
-        while (this.#foliageList.length > 0) {
-            this.removeFoliage(this.#foliageList[this.#foliageList.length - 1]);
-        }
-    }
 
     /**
      * [KO] 새로운 스캐터 식생 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 대칭 메서드)
@@ -540,21 +451,13 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 등록된 모든 스캐터 식생 타입을 일괄 제거합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Clears all registered scatter foliage types. (IScatterManager standard symmetric method)
-     */
-    clearTypes(): void {
-        this.clearFoliage();
-    }
-
-    /**
      * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
      * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
      */
-    rebakeAll(): void {
-        const count = this.#foliageList.length;
+    rebakeAll(centerX?: number, centerZ?: number): void {
+        const count = this.types.length;
         for (let i = 0; i < count; i++) {
-            this.#foliageList[i].rebake();
+            this.types[i].rebake();
         }
         this.#renderer.markAllBundlesDirty();
     }
@@ -596,13 +499,14 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      */
     addFoliage(options: FoliageOptions): Foliage {
         const {name} = options;
-        if (this.#foliageTypes.has(name)) {
+        const existing = this.getTypeByName(name);
+        if (existing) {
             console.warn(`[FoliageManager] Foliage with name '${name}' already exists.`);
-            return this.#foliageTypes.get(name)!;
+            return existing;
         }
 
         const foliage = new Foliage(
-            this.#redGPUContext,
+            this.redGPUContext,
             options,
             this.#megaBuffer,
             () => {
@@ -612,10 +516,9 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
             this.#culler.baker,
             this.#slotPooler,
             this.#subMeshMegaUBO,
-            this.#landscape
+            this.landscape
         );
-        this.#foliageTypes.set(options.name, foliage);
-        this.#foliageList.push(foliage);
+        this.registerTypeInternal(foliage);
         this.#renderer.markAllBundlesDirty();
 
         return foliage;
@@ -626,7 +529,7 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
      */
     destroy(): void {
-        this.clearFoliage();
+        this.clearTypes();
         this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
@@ -635,7 +538,6 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
         this.#subMeshMegaUBO = null;
         this.#subMeshDynamicBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
-        this.#landscape = null;
         this.#onUniformUpdateNeeded = null;
     }
 
@@ -651,9 +553,9 @@ class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
      * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
      */
     repopulateAll(): void {
-        const count = this.#foliageList.length;
+        const count = this.types.length;
         for (let i = 0; i < count; i++) {
-            this.#repopulateFoliage(this.#foliageList[i]);
+            this.#repopulateFoliage(this.types[i]);
         }
     }
 

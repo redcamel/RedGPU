@@ -3,7 +3,6 @@
  * [EN] Overall manager module for large-scale procedural grass rendering on terrain.
  * @packageDocumentation
  */
-import RedGPUObject from "../../base/RedGPUObject";
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
@@ -14,7 +13,7 @@ import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
 import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import type {IScatterManager} from "../core/scatter/IScatterManager";
+import {AScatterManager} from "../core/scatter";
 
 /**
  * [KO] 대규모 지형(Landscape)의 GPU 베이킹 & GPU 초고속 컬링 기반 잔디(Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -27,17 +26,13 @@ import type {IScatterManager} from "../core/scatter/IScatterManager";
  *
  * @category Landscape
  */
-export class GrassManager extends RedGPUObject implements IScatterManager<Grass, GrassOptions> {
-
-    #landscape: Landscape;
-    #enabled: boolean = true;
+export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
     #megaBuffer: GrassScatterMegaBuffer;
     #bakePipeline: GrassBakePipeline;
     #cullPipeline: GrassCullPipeline;
     #slotPooler: GrassSubMeshSlotPooler;
 
-    #grassList: Grass[] = [];
     #nextTypeId: number = 0;
     #populated: boolean = false;
 
@@ -58,8 +53,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
      * [EN] Parent Landscape instance to which the grass ecosystem is bound
      */
     constructor(landscape: Landscape) {
-        super(landscape.redGPUContext);
-        this.#landscape = landscape;
+        super(landscape);
 
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#bakePipeline = new GrassBakePipeline(this.redGPUContext);
@@ -75,31 +69,73 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     }
 
     /**
-     * [KO] 등록된 잔디 타입의 총 개수를 반환합니다.
-     * [EN] Returns the total number of registered grass types.
+     * [KO] 현재 스트리밍 반경 내에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
+     * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
      */
-    get typeCount(): number {
-        return this.#grassList.length;
+    get totalInstanceCount(): number {
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const alloc = this.#megaBuffer.getAllocation(list[i].typeId);
+            if (alloc) count += alloc.instanceCount;
+        }
+        return count;
     }
 
     /**
-     * [KO] 잔디 시스템의 활성화 여부를 반환합니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
-     * [EN] Gets whether the grass system is enabled. When `false`, grass streaming, culling, and rendering are suspended.
+     * [KO] 초기 잔디 인스턴스 배치가 1회 이상 완료되었는지 여부를 반환합니다.
+     * [EN] Returns whether initial grass instance population has been performed at least once.
      */
-    get enabled(): boolean {
-        return this.#enabled;
+    get populated(): boolean {
+        return this.#populated;
     }
 
     /**
-     * [KO] 잔디 시스템의 활성화 여부를 설정합니다.
-     * [EN] Sets whether the grass system is enabled.
-     *
-     * @param val -
-     * [KO] 활성화 여부
-     * [EN] Whether to enable
+     * [KO] 현재 활성화된 잔디 타입들이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by currently active grass types in the main render pass (Near + Far).
      */
-    set enabled(val: boolean) {
-        this.#enabled = val;
+    get totalDrawCalls(): number {
+        if (!this.enabled || !this.#populated) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const grass = list[i];
+            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+            if (alloc && alloc.instanceCount > 0) {
+                count += alloc.nearSlots.length + alloc.farSlots.length;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 잔디 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다.
+     * [EN] Returns the maximum grass instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer.
+     */
+    get instanceCapacity(): number {
+        return this.#megaBuffer.instanceCapacity;
+    }
+
+    /**
+     * [KO] 그림자 투사(castShadow: true)가 설정된 잔디 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting grass types in the cascaded shadow map (CSM) pass.
+     */
+    get shadowDrawCalls(): number {
+        if (!this.enabled || !this.#populated) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const grass = list[i];
+            if (!grass.castShadow) continue;
+            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+            if (alloc && alloc.instanceCount > 0) {
+                count += alloc.nearSlots.length;
+            }
+        }
+        return count;
     }
 
     /**
@@ -114,7 +150,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
-        this.#grassList.push(grassType);
+        this.registerTypeInternal(grassType);
 
         const {
             cullingDistance,
@@ -135,8 +171,8 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
         );
         grassType.bindAllocation(alloc);
 
-        const vhtAtlas = this.#landscape.vhtAtlasTexture;
-        const vbtAtlas = this.#landscape.vbtBaseColorAtlas;
+        const vhtAtlas = this.landscape.vhtAtlasTexture;
+        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
         const canBakeImmediately = !!(this.gpuDevice && vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView);
 
         // 즉시 베이킹이 가능한 경우, #bakeGrassType 완료 시 최신 instanceCount로 단 1회 기록되므로 중복 VRAM 전송 방지
@@ -146,10 +182,10 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
 
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
-        if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.#landscape.layers) {
+        if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.landscape.layers) {
             const matchedLayer = typeof grassType.targetLayer === 'number'
-                ? this.#landscape.layers[grassType.targetLayer]
-                : this.#landscape.layers.find(
+                ? this.landscape.layers[grassType.targetLayer]
+                : this.landscape.layers.find(
                     l => l.name === grassType.targetLayer
                 );
             const wt = matchedLayer?.weightTexture;
@@ -163,7 +199,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
             const slotIndex = this.#slotPooler.allocateSlot();
             grassType.slotIndex = slotIndex;
 
-            const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.#landscape.tileLoadedCount > 0);
+            const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.landscape.tileLoadedCount > 0);
             this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
             const fallbackCam = this.#getFallbackCameraPosition();
@@ -185,99 +221,13 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     }
 
     /**
-     * [KO] 초기 잔디 인스턴스 배치가 1회 이상 완료되었는지 여부를 반환합니다.
-     * [EN] Returns whether initial grass instance population has been performed at least once.
-     */
-    get populated(): boolean {
-        return this.#populated;
-    }
-
-    /**
-     * [KO] 현재 매니저에 등록된 모든 잔디({@link Grass}) 생태계 인스턴스 배열을 반환합니다.
-     * [EN] Gets the list of all {@link Grass} ecosystem instances currently registered to this manager.
-     */
-    get grassList(): Grass[] {
-        return this.#grassList;
-    }
-
-    /**
-     * [KO] 등록된 모든 스캐터 타입 목록을 반환합니다. (IScatterManager 표준 대칭 프로퍼티)
-     * [EN] Returns the list of all registered scatter types. (IScatterManager standard symmetric property)
-     */
-    get types(): Grass[] {
-        return this.#grassList;
-    }
-
-    /**
-     * [KO] 현재 스트리밍 반경 내에 생성되어 메모리에 로드된 총 잔디 인스턴스 수를 반환합니다.
-     * [EN] Returns the total number of grass instances currently populated and loaded in memory within the streaming radius.
-     */
-    get totalInstanceCount(): number {
-        let count = 0;
-        const list = this.#grassList;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const alloc = this.#megaBuffer.getAllocation(list[i].typeId);
-            if (alloc) count += alloc.instanceCount;
-        }
-        return count;
-    }
-
-    /**
-     * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 잔디 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다.
-     * [EN] Returns the maximum grass instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer.
-     */
-    get instanceCapacity(): number {
-        return this.#megaBuffer.instanceCapacity;
-    }
-
-    /**
-     * [KO] 현재 활성화된 잔디 타입들이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by currently active grass types in the main render pass (Near + Far).
-     */
-    get totalDrawCalls(): number {
-        if (!this.#enabled || !this.#populated) return 0;
-        let count = 0;
-        const list = this.#grassList;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const grass = list[i];
-            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-            if (alloc && alloc.instanceCount > 0) {
-                count += alloc.nearSlots.length + alloc.farSlots.length;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * [KO] 그림자 투사(castShadow: true)가 설정된 잔디 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting grass types in the cascaded shadow map (CSM) pass.
-     */
-    get shadowDrawCalls(): number {
-        if (!this.#enabled || !this.#populated) return 0;
-        let count = 0;
-        const list = this.#grassList;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const grass = list[i];
-            if (!grass.castShadow) continue;
-            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-            if (alloc && alloc.instanceCount > 0) {
-                count += alloc.nearSlots.length;
-            }
-        }
-        return count;
-    }
-
-    /**
      * [KO] 매 프레임 호출되어 베이킹된 잔디 인스턴스들을 대상으로 초고속 GPU 거리/프러스텀 컬링 Compute Pass를 디스패치합니다.
      * [EN] Called every frame to dispatch ultra-fast GPU distance/frustum culling compute pass for baked grass instances.
      *
      * @param renderViewStateData - 뷰 렌더 상태 데이터
      */
     update(renderViewStateData: RenderViewStateData): void {
-        if (!this.#enabled || this.#grassList.length === 0) return;
+        if (!this.enabled || this.types.length === 0) return;
 
         const {view} = renderViewStateData;
         const {rawCamera: rawCam} = view;
@@ -291,9 +241,9 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
             this.#frustumPlanesF32.set(renderViewStateData.frustumPlanesFlat);
         }
 
-        const {tileLoadedCount: currentLoadedTileCount} = this.#landscape;
-        const vhtAtlas = this.#landscape.vhtAtlasTexture;
-        const vbtAtlas = this.#landscape.vbtBaseColorAtlas;
+        const {tileLoadedCount: currentLoadedTileCount} = this.landscape;
+        const vhtAtlas = this.landscape.vhtAtlasTexture;
+        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
         const hasValidTextures = !!(vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView && currentLoadedTileCount > 0);
 
         const tileCountChanged = hasValidTextures && this.#lastLoadedTileCount !== currentLoadedTileCount;
@@ -306,7 +256,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
         const distSq = dx * dx + dz * dz;
 
         let minRadius = 120.0;
-        const grassList = this.#grassList;
+        const grassList = this.types;
         const grassLen = grassList.length;
         if (grassLen > 0) {
             minRadius = grassList[0].streamingRadius;
@@ -384,13 +334,9 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     removeGrass(target: Grass | string): boolean {
         if (!target) return false;
 
-        const index = typeof target === 'string'
-            ? this.#grassList.findIndex(g => g.name === target)
-            : this.#grassList.indexOf(target);
+        const removedGrass = this.unregisterTypeInternal(target);
+        if (!removedGrass) return false;
 
-        if (index === -1) return false;
-
-        const [removedGrass] = this.#grassList.splice(index, 1);
         const {typeId, slotIndex} = removedGrass;
 
         this.#megaBuffer.freeType(typeId);
@@ -401,7 +347,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
 
         removedGrass.bindAllocation(null);
         removedGrass.onRepopulateRequired = null;
-        if (this.#grassList.length === 0) {
+        if (this.types.length === 0) {
             this.#populated = false;
         }
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
@@ -410,12 +356,34 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     }
 
     /**
-     * [KO] 등록된 모든 잔디 생태계 타입을 일괄 제거하고 초기 상태로 리셋합니다.
-     * [EN] Clears all registered grass ecosystem types and resets to the initial state.
+     * [KO] 새로운 스캐터 잔디 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 메서드)
+     * [EN] Creates and registers a new scatter grass type into the manager. (IScatterManager standard method)
+     *
+     * @param options - 잔디 생성 옵션
+     * @returns 생성된 {@link Grass} 인스턴스
      */
-    clearGrass(): void {
-        while (this.#grassList.length > 0) {
-            this.removeGrass(this.#grassList[this.#grassList.length - 1]);
+    addType(options: GrassOptions): Grass {
+        return this.addGrass(options);
+    }
+
+    /**
+     * [KO] 등록된 특정 스캐터 잔디 타입을 매니저에서 제거합니다. (IScatterManager 표준 메서드)
+     * [EN] Removes a specific registered scatter grass type from the manager. (IScatterManager standard method)
+     *
+     * @param target - 제거할 {@link Grass} 인스턴스 또는 고유 이름
+     * @returns 제거 성공 여부
+     */
+    removeType(target: Grass | string): boolean {
+        return this.removeGrass(target);
+    }
+
+    /**
+     * [KO] 등록된 모든 스캐터 잔디 타입을 일괄 제거하고 초기 상태로 리셋합니다.
+     * [EN] Clears all registered scatter grass types and resets to the initial state.
+     */
+    clearTypes(): void {
+        while (this.types.length > 0) {
+            this.removeType(this.types[this.types.length - 1]);
         }
 
         this.#slotPooler.clear();
@@ -436,36 +404,6 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     }
 
     /**
-     * [KO] 새로운 스캐터 잔디 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Creates and registers a new scatter grass type into the manager. (IScatterManager standard symmetric method)
-     *
-     * @param options - 잔디 생성 옵션
-     * @returns 생성된 {@link Grass} 인스턴스
-     */
-    addType(options: GrassOptions): Grass {
-        return this.addGrass(options);
-    }
-
-    /**
-     * [KO] 등록된 특정 스캐터 잔디 타입을 매니저에서 제거합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Removes a specific registered scatter grass type from the manager. (IScatterManager standard symmetric method)
-     *
-     * @param target - 제거할 {@link Grass} 인스턴스 또는 고유 이름
-     * @returns 제거 성공 여부
-     */
-    removeType(target: Grass | string): boolean {
-        return this.removeGrass(target);
-    }
-
-    /**
-     * [KO] 등록된 모든 스캐터 잔디 타입을 일괄 제거합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Clears all registered scatter grass types. (IScatterManager standard symmetric method)
-     */
-    clearTypes(): void {
-        this.clearGrass();
-    }
-
-    /**
      * [KO] 잔디 매니저가 소유한 모든 GPU 버퍼, 파이프라인 및 자원을 안전하게 해제합니다.
      * [EN] Safely releases all GPU buffers, pipelines, and resources held by the grass manager.
      */
@@ -476,12 +414,12 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
         this.#renderer.destroy();
         this.#slotPooler.destroy();
 
-        const list = this.#grassList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             list[i].destroy();
         }
-        list.length = 0;
+        this.clearTypes();
 
         this.#frustumPlanesF32 = null;
     }
@@ -503,33 +441,6 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
         );
     };
 
-    /**
-     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다.
-     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name.
-     *
-     * @param name - 검색할 잔디의 고유 이름
-     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
-     */
-    getGrass(name: string): Grass | undefined {
-        const count = this.#grassList.length;
-        for (let i = 0; i < count; i++) {
-            const g = this.#grassList[i];
-            if (g.name === name) return g;
-        }
-        return undefined;
-    }
-
-    /**
-     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다. (IScatterManager 표준 대칭 메서드)
-     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name. (IScatterManager standard symmetric method)
-     *
-     * @param name - 검색할 잔디의 고유 이름
-     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
-     */
-    getTypeByName(name: string): Grass | undefined {
-        return this.getGrass(name);
-    }
-
 
     /**
      * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 잔디 인스턴스들을 간접 드로우(`drawIndexedIndirect`) 방식으로 고속 일괄 렌더링합니다.
@@ -539,8 +450,8 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
      * @param passEncoder - 메인 씬 GPURenderPassEncoder
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-        this.#renderer.render(view, passEncoder, this.#grassList, this.#megaBuffer, this.#slotPooler);
+        if (!this.enabled || this.types.length === 0 || !this.#populated) return;
+        this.#renderer.render(view, passEncoder, this.types, this.#megaBuffer, this.#slotPooler);
     }
 
     /**
@@ -551,8 +462,8 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
      * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.#enabled || this.#grassList.length === 0 || !this.#populated) return;
-        this.#renderer.renderShadow(view, passEncoder, this.#grassList, this.#megaBuffer, this.#slotPooler);
+        if (!this.enabled || this.types.length === 0 || !this.#populated) return;
+        this.#renderer.renderShadow(view, passEncoder, this.types, this.#megaBuffer, this.#slotPooler);
     }
 
     /**
@@ -565,7 +476,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     rebakeAll(centerX?: number, centerZ?: number): void {
         const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
         const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];
-        const list = this.#grassList;
+        const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             this.#bakeGrassType(list[i], posX, posZ);
@@ -601,8 +512,8 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
      * [EN] Executes GPU baking for a specific grass type to record position/normal/color into the VRAM buffer once.
      */
     #bakeGrassType(grass: Grass, centerX?: number, centerZ?: number): void {
-        const vhtAtlas = this.#landscape.vhtAtlasTexture;
-        const vbtAtlas = this.#landscape.vbtBaseColorAtlas;
+        const vhtAtlas = this.landscape.vhtAtlasTexture;
+        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
         if (!vhtAtlas?.gpuTextureView || !vbtAtlas?.gpuTextureView) return;
 
         const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
@@ -610,7 +521,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
 
         this.#bakePipeline.dispatchBake(
             this.#megaBuffer,
-            this.#landscape,
+            this.landscape,
             grass,
             posX,
             posZ
