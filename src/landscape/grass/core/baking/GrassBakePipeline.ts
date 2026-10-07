@@ -78,7 +78,7 @@ export default class GrassBakePipeline extends RedGPUObject {
         const worldSizeZ = landscape.worldSizeZ;
         const invWorldSizeX = landscape.invWorldSizeX;
         const invWorldSizeZ = landscape.invWorldSizeZ;
-        const heightScale = landscape.heightScale ?? 600.0;
+        const heightScale = landscape.heightScale;
 
         // 16m 서브셀 단위 계산
         const cellSize = GRASS_CELL_SIZE;
