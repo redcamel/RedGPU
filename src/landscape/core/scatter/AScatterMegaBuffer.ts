@@ -571,7 +571,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [KO] 새로 확장된 인스턴스 수용 용량
      * [EN] Newly expanded instance capacity
      */
-    protected onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
+    onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
         // [KO] 순수 GPU 메가버퍼 기본 구현: 별도의 CPU 동기화를 수행하지 않음 (Zero-op)
         // [EN] Pure GPU mega-buffer default: No CPU synchronization performed (Zero-op)
     }

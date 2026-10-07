@@ -447,7 +447,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#instancesPerCell;
     }
 
-    protected override onParameterChanged(prop: string, value: any): void {
+    override onParameterChanged(prop: string, value: any): void {
         switch (prop) {
             case 'cullingDistance': {
                 const cDist = value as number;

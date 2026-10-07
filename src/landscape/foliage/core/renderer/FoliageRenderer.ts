@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import Foliage from "../Foliage";
@@ -31,7 +31,7 @@ export interface ValidFoliageTypeItem {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageRenderer extends RedGPUObject {
+class FoliageRenderer extends AScatterRenderer {
     static #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -47,11 +47,7 @@ class FoliageRenderer extends RedGPUObject {
     #validTypesMain: ValidFoliageTypeItem[] = [];
     #validTypesShadow: ValidFoliageTypeItem[] = [];
 
-    #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
-    #shadowBundleValid: boolean[] = [false, false, false, false];
-    #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
     #lastRecordedTypeCount: number = 0;
-    #singleBundleArray: [GPURenderBundle] = [null as any];
 
     #useDepthPrepass: boolean = true;
     #depthPrepassBundlesByView: WeakMap<View3D, {
@@ -60,10 +56,8 @@ class FoliageRenderer extends RedGPUObject {
         sampleCount: number;
         validTypeCount: number;
     }> = new WeakMap();
-    #singlePrepassBundleArray: [GPURenderBundle] = [null as any];
 
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
-    #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
 
     /**
      * [KO] FoliageRenderer 인스턴스를 생성합니다.
@@ -131,31 +125,18 @@ class FoliageRenderer extends RedGPUObject {
     }
 
     /**
-     * [KO] 캐시된 모든 그림자 렌더 번들을 무효화하여 다음 그림자 렌더링 시 재생성하도록 합니다.
-     * [EN] Invalidates all cached shadow render bundles to force regeneration on the next shadow pass.
-     */
-    markShadowBundleDirty(): void {
-        for (let i = 0; i < 4; i++) {
-            this.#shadowRenderBundles[i] = null;
-            this.#shadowBundleValid[i] = false;
-            this.#lastSystemBGByCascade[i] = null;
-        }
-    }
-
-    /**
      * [KO] 캐시된 모든 메인 뎁스 프리패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
      * [EN] Invalidates all cached main depth prepass render bundles to force regeneration on the next render.
      */
     markDepthPrepassBundleDirty(): void {
         this.#depthPrepassBundlesByView = new WeakMap();
-        this.#singlePrepassBundleArray[0] = null as any;
     }
 
     /**
      * [KO] 식생 생태계 변경 시 모든 렌더 번들(섀도우 및 뎁스 프리패스)을 일괄 무효화합니다. (GrassRenderer 대칭 메서드)
      * [EN] Invalidates all render bundles (shadow and depth prepass) at once on foliage ecosystem changes. (Symmetric to GrassRenderer)
      */
-    markAllBundlesDirty(): void {
+    override markAllBundlesDirty(): void {
         this.markShadowBundleDirty();
         this.markDepthPrepassBundleDirty();
     }
@@ -237,8 +218,7 @@ class FoliageRenderer extends RedGPUObject {
             }
 
             if (viewCache?.bundle) {
-                this.#singlePrepassBundleArray[0] = viewCache.bundle;
-                passEncoder.executeBundles(this.#singlePrepassBundleArray);
+                this.executeSingleBundle(passEncoder, viewCache.bundle);
             }
         }
 
@@ -295,7 +275,7 @@ class FoliageRenderer extends RedGPUObject {
             this.#lastRecordedTypeCount = typeCount;
         }
 
-        const needsRebuild = !this.#shadowBundleValid[currentCascade] || this.#lastSystemBGByCascade[currentCascade] !== systemBG;
+        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG);
 
         if (needsRebuild) {
             let validCount = 0;
@@ -320,30 +300,24 @@ class FoliageRenderer extends RedGPUObject {
             }
 
             if (validCount > 0) {
-                this.#shadowRenderBundles[currentCascade] = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
-                this.#shadowBundleValid[currentCascade] = true;
-                this.#lastSystemBGByCascade[currentCascade] = systemBG;
+                const bundle = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
+                this.setShadowBundle(currentCascade, bundle, systemBG);
             } else {
-                this.#shadowRenderBundles[currentCascade] = null;
-                this.#shadowBundleValid[currentCascade] = false;
-                this.#lastSystemBGByCascade[currentCascade] = null;
+                this.setShadowBundle(currentCascade, null, null);
             }
         }
 
-        const bundle = this.#shadowRenderBundles[currentCascade];
+        const bundle = this.getShadowBundle(currentCascade);
         if (bundle) {
-            this.#singleBundleArray[0] = bundle;
-            passEncoder.executeBundles(this.#singleBundleArray);
+            this.executeSingleBundle(passEncoder, bundle);
         }
     }
 
-    destroy(): void {
+    override destroy(): void {
+        super.destroy();
         this.#subMeshDynamicBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
-        this.markShadowBundleDirty();
         this.markDepthPrepassBundleDirty();
-        this.#singleBundleArray[0] = null as any;
-        this.#singlePrepassBundleArray[0] = null as any;
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
         this.#lastBoundMatBG = null;
@@ -537,8 +511,6 @@ class FoliageRenderer extends RedGPUObject {
             label: `Foliage_ShadowBundle_Cascade${currentCascade}`,
         });
 
-        this.#shadowRenderBundles[currentCascade] = bundle;
-        this.#lastSystemBGByCascade[currentCascade] = systemBG;
         return bundle;
     }
 
@@ -565,8 +537,8 @@ class FoliageRenderer extends RedGPUObject {
         }
 
         if (this.#subMeshDynamicBindGroup && unit.slotIndex >= 0) {
-            this.#dynamicOffsetArray[0] = unit.slotIndex * 256;
-            passEncoder.setBindGroup(1, this.#subMeshDynamicBindGroup, this.#dynamicOffsetArray, 0, 1);
+            this.dynamicOffsetArray[0] = unit.slotIndex * 256;
+            passEncoder.setBindGroup(1, this.#subMeshDynamicBindGroup, this.dynamicOffsetArray, 0, 1);
         }
 
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {

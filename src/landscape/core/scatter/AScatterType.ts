@@ -458,7 +458,7 @@ export abstract class AScatterType<
      * [KO] 서브클래스 생성자 초기화 시 후속 훅 트리거 없이 고유 기본값을 안전하게 주입합니다.
      * [EN] Safely injects initial unique default values during subclass construction without triggering hooks.
      */
-    protected setRawScatterProperties(values: {
+    setRawScatterProperties(values: {
         height?: number;
         cullingDistance?: number;
         shadowCullDistance?: number;
@@ -496,7 +496,7 @@ export abstract class AScatterType<
      * @param prop - [KO] 변경된 속성 식별자 / [EN] Changed property identifier
      * @param value - [KO] 새로 설정된 유효값 / [EN] Newly set validated value
      */
-    protected abstract onParameterChanged(prop: string, value: any): void;
+    abstract onParameterChanged(prop: string, value: any): void;
 
     /**
      * [KO] 스캐터 타입 리소스를 해제합니다.

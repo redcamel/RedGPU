@@ -13,7 +13,7 @@ import RedGPUObject from '../../../base/RedGPUObject';
  * [EN] Abstract base class managing Dynamic Offset UBO slots conforming to WebGPU 256-byte alignment requirements.
  * Encapsulates LIFO stack O(1) pooling, CPU Float32Array/Uint32Array mirror buffers, and fixed mega UBO GPUBuffer ensuring zero-GC.
  */
-export abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
+abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
     /**
      * [KO] WebGPU UBO 동적 오프셋 최소 정렬 바이트 규격 (256바이트)
      * [EN] WebGPU minimum dynamic UBO offset alignment in bytes (256 bytes)
@@ -198,7 +198,7 @@ export abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
      * @param slot - 슬롯 인덱스
      * @param byteLength - 전송할 바이트 크기
      */
-    protected uploadSlotBytes(slot: number, byteLength: number): void {
+    uploadSlotBytes(slot: number, byteLength: number): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#gpuBuffer) return;
 
@@ -221,7 +221,7 @@ export abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
      * @param startByteOffsetInSlot - 슬롯 내부 시작 바이트 오프셋
      * @param byteLength - 전송할 바이트 크기
      */
-    protected uploadSlotRange(slot: number, startByteOffsetInSlot: number, byteLength: number): void {
+    uploadSlotRange(slot: number, startByteOffsetInSlot: number, byteLength: number): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#gpuBuffer) return;
 
@@ -238,4 +238,5 @@ export abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
     }
 }
 
+Object.freeze(AScatterSubMeshSlotPooler);
 export default AScatterSubMeshSlotPooler;

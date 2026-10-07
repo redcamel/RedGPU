@@ -1107,7 +1107,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    protected override onParameterChanged(prop: string, value: any): void {
+    override onParameterChanged(prop: string, value: any): void {
         switch (prop) {
             case 'bottomOffset':
                 this.#syncTypeParams();

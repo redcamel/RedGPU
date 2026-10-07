@@ -111,7 +111,7 @@ export abstract class ACpuStagedScatterMegaBuffer extends AScatterMegaBuffer {
      * [KO] 새로 확장된 인스턴스 수용 용량
      * [EN] Newly expanded instance capacity
      */
-    protected override onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
+    override onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
         const oldCpuBuffer = this.#cpuRawDataBuffer;
         this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.strideFloats);
         if (oldCpuBuffer) {

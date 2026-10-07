@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import {Grass} from "../Grass";
@@ -47,7 +47,7 @@ interface MainBundleCacheEntry {
  * [EN] This class is automatically created by the system (GrassManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class GrassRenderer extends RedGPUObject {
+export class GrassRenderer extends AScatterRenderer {
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
     #fragmentNearModule: GPUShaderModule | null = null;
@@ -66,22 +66,15 @@ export class GrassRenderer extends RedGPUObject {
     #unifiedGroup1BindGroup: GPUBindGroup | null = null;
     #lastCulledBuffer: GPUBuffer | null = null;
     #lastSlotPoolerBuffer: GPUBuffer | null = null;
-    #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
 
     // Group 2 (텍스처/샘플러) 캐시
     #materialBindGroupCache: Map<string, MaterialBindGroupCacheEntry> = new Map();
 
     // GPURenderBundle 캐싱 엔진
     #mainBundlesByView: WeakMap<View3D, MainBundleCacheEntry> = new WeakMap();
-    #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null];
-    #shadowBundleValid: boolean[] = [false, false];
-    #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null];
     #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
     #lastShadowMaskHigh: number = -1;
-
-    // Zero-GC executeBundles 단일 배열 재사용
-    #singleBundleArray: [GPURenderBundle] = [null as any];
 
     #preferredCanvasFormat: GPUTextureFormat;
 
@@ -116,15 +109,10 @@ export class GrassRenderer extends RedGPUObject {
     }
 
     /**
-     * [KO] 캐시된 모든 그림자 패스 렌더 번들을 무효화하여 다음 그림자 렌더링 시 재생성하도록 합니다.
-     * [EN] Invalidates all cached shadow pass render bundles to force regeneration on next shadow render.
+     * [KO] 그림자 번들이 무효화될 때 잔디 도메인 고유 캐시를 정리합니다.
+     * [EN] Cleans up grass domain-specific cache when shadow bundles are invalidated.
      */
-    markShadowBundleDirty(): void {
-        for (let i = 0; i < 2; i++) {
-            this.#shadowRenderBundles[i] = null;
-            this.#shadowBundleValid[i] = false;
-            this.#lastSystemBGByCascade[i] = null;
-        }
+    override onShadowBundleDirty(): void {
         this.#lastShadowMegaBuffer = null;
         this.#lastShadowMaskLow = -1;
         this.#lastShadowMaskHigh = -1;
@@ -134,7 +122,7 @@ export class GrassRenderer extends RedGPUObject {
      * [KO] 잔디 생태계 변경(타입 추가/삭제/메가버퍼 재생성) 시 모든 렌더 번들 및 바인드그룹을 일괄 무효화합니다.
      * [EN] Invalidates all render bundles and bind groups at once on grass ecosystem changes.
      */
-    markAllBundlesDirty(): void {
+    override markAllBundlesDirty(): void {
         this.markMainBundleDirty();
         this.markShadowBundleDirty();
         this.invalidateGroup1BindGroup();
@@ -201,8 +189,7 @@ export class GrassRenderer extends RedGPUObject {
         }
 
         if (cacheEntry?.bundle) {
-            this.#singleBundleArray[0] = cacheEntry.bundle;
-            passEncoder.executeBundles(this.#singleBundleArray);
+            this.executeSingleBundle(passEncoder, cacheEntry.bundle);
         }
     }
 
@@ -257,8 +244,7 @@ export class GrassRenderer extends RedGPUObject {
             }
         }
 
-        const needsRebuild = !this.#shadowBundleValid[currentCascade]
-            || this.#lastSystemBGByCascade[currentCascade] !== systemBG
+        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG)
             || this.#lastShadowMegaBuffer !== megaBuffer
             || this.#lastShadowMaskLow !== shadowMaskLow
             || this.#lastShadowMaskHigh !== shadowMaskHigh;
@@ -268,22 +254,17 @@ export class GrassRenderer extends RedGPUObject {
             this.#lastShadowMaskHigh = shadowMaskHigh;
             const bundle = this.#recordShadowRenderBundle(currentCascade, systemBG, grassList, megaBuffer, unifiedGroup1);
             if (bundle) {
-                this.#shadowRenderBundles[currentCascade] = bundle;
-                this.#shadowBundleValid[currentCascade] = true;
-                this.#lastSystemBGByCascade[currentCascade] = systemBG;
+                this.setShadowBundle(currentCascade, bundle, systemBG);
                 this.#lastShadowMegaBuffer = megaBuffer;
             } else {
-                this.#shadowRenderBundles[currentCascade] = null;
-                this.#shadowBundleValid[currentCascade] = false;
-                this.#lastSystemBGByCascade[currentCascade] = null;
+                this.setShadowBundle(currentCascade, null, null);
                 return;
             }
         }
 
-        const bundle = this.#shadowRenderBundles[currentCascade];
+        const bundle = this.getShadowBundle(currentCascade);
         if (bundle) {
-            this.#singleBundleArray[0] = bundle;
-            passEncoder.executeBundles(this.#singleBundleArray);
+            this.executeSingleBundle(passEncoder, bundle);
         }
     }
 
@@ -291,9 +272,10 @@ export class GrassRenderer extends RedGPUObject {
      * [KO] 렌더러의 내부 리소스(파이프라인 캐시, 렌더 번들 및 셰이더 참조)를 해제합니다.
      * [EN] Releases internal resources (pipeline caches, render bundles, and shader references) of the renderer.
      */
-    destroy(): void {
-        this.markAllBundlesDirty();
-        this.#singleBundleArray[0] = null as any;
+    override destroy(): void {
+        super.destroy();
+        this.markMainBundleDirty();
+        this.invalidateGroup1BindGroup();
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
         this.#materialBindGroupCache.clear();
@@ -355,8 +337,8 @@ export class GrassRenderer extends RedGPUObject {
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
 
-            this.#dynamicOffsetArray[0] = slotIndex * 256;
-            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            this.dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
             bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
@@ -390,8 +372,8 @@ export class GrassRenderer extends RedGPUObject {
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
 
-            this.#dynamicOffsetArray[0] = slotIndex * 256;
-            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            this.dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
             bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
@@ -455,8 +437,8 @@ export class GrassRenderer extends RedGPUObject {
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
 
-            this.#dynamicOffsetArray[0] = slotIndex * 256;
-            bundleEncoder.setBindGroup(1, unifiedGroup1, this.#dynamicOffsetArray, 0, 1);
+            this.dynamicOffsetArray[0] = slotIndex * 256;
+            bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
             bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
