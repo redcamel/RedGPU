@@ -243,7 +243,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         }
 
         this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset, shadowMergedSubMeshes, lodInfoList);
-        this.#unifiedCullingBindGroup = null;
+        this.invalidateUnifiedCullingBindGroup();
 
         return allocation;
     }
@@ -519,6 +519,16 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
     }
 
     /**
+     * [KO] 캐시된 단일 일괄 컬링 바인드그룹 및 HZB 텍스처/샘플러 캐시를 무효화합니다.
+     * [EN] Invalidates the cached unified culling bind group and HZB texture/sampler caches.
+     */
+    override invalidateUnifiedCullingBindGroup(): void {
+        this.#unifiedCullingBindGroup = null;
+        this.#cachedHZBTextureView = null;
+        this.#cachedHZBSampler = null;
+    }
+
+    /**
      * [KO] 서브메시 및 그림자 통합 서브메시의 드로우 인자들을 인디렉트 템플릿 버퍼에 등록합니다.
      * [EN] Registers draw arguments of sub-meshes and shadow merged sub-meshes to indirect template buffer.
      */
@@ -612,7 +622,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
-        this.#unifiedCullingBindGroup = null;
+        this.invalidateUnifiedCullingBindGroup();
     }
 
     /**
@@ -621,8 +631,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
      */
     onDestroy(): void {
         this.unregisterAuxiliaryIndirectBuffer('shadow');
-        this.#cachedHZBTextureView = null;
-        this.#cachedHZBSampler = null;
+        this.invalidateUnifiedCullingBindGroup();
         this.#shadowCulledGPUBuffer?.destroy();
         this.#shadowIndirectGPUBuffer?.destroy();
         this.#unifiedGlobalUniformGPUBuffer?.destroy();
@@ -632,7 +641,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         this.#shadowIndirectGPUBuffer = null;
         this.#unifiedGlobalUniformGPUBuffer = null;
         this.#shadowIndirectResetTemplateGPUBuffer = null;
-        this.#unifiedCullingBindGroup = null;
         this.#allocations.clear();
         this.#allocatedTypes.length = 0;
         this.clearBaseAllocations();

@@ -278,7 +278,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * [KO] 캐시된 단일 일괄 컬링 바인드그룹을 무효화합니다.
      * [EN] Invalidates the cached unified culling bind group.
      */
-    invalidateUnifiedCullingBindGroup(): void {
+    override invalidateUnifiedCullingBindGroup(): void {
         this.#unifiedCullingBindGroup = null;
         this.#cachedGlobalUniformBuffer = null;
         this.#cachedCullBindGroupLayout = null;

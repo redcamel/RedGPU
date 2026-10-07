@@ -702,9 +702,16 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#typeParamsGPUBuffer = null;
 
         this.clearAuxiliaryIndirectBuffers();
+        this.invalidateUnifiedCullingBindGroup();
 
         this.onDestroy();
     }
+
+    /**
+     * [KO] 캐시된 단일 일괄 컬링 바인드그룹을 무효화합니다 (메가버퍼 재생성, 타입 등록, 해제 시 호출).
+     * [EN] Invalidates the cached unified culling bind group (called on buffer recreation, type registration, destruction).
+     */
+    abstract invalidateUnifiedCullingBindGroup(): void;
 
     /**
      * [KO] 버퍼 확장 발생 시 서브클래스별 특화 GPU 버퍼(컬링 버퍼, 그림자 버퍼 등)를 재할당하는 훅 메서드입니다.
