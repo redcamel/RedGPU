@@ -206,7 +206,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 targetMaterial = primaryGroup.material;
             }
 
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? (mesh.material as any)?.baseColorTexture;
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
             if (typeof resolvedTexture === 'string') {
                 this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
             } else if (resolvedTexture) {
@@ -697,8 +697,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      */
     override destroy(): void {
         this.#slotIndex = -1;
-        if (this.#isUnifiedGeometryOwned) {
-            (this.#geometry as any)?.destroy?.();
+        if (this.#isUnifiedGeometryOwned && this.#geometry instanceof Geometry) {
+            this.#geometry.destroy();
         }
         this.#isUnifiedGeometryOwned = false;
         this.#geometry = null as any;

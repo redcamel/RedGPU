@@ -7,6 +7,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import grassCullWGSL from "./grassCull.wgsl";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
+import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
 export default class GrassCullPipeline extends AScatterCullPipeline {
     #globalUniformBuffer: GPUBuffer | null = null;
@@ -26,14 +27,15 @@ export default class GrassCullPipeline extends AScatterCullPipeline {
     /**
      * [KO] 매 프레임 GPU 컴퓨트 패스를 통해 등록된 모든 잔디 타입의 거리 및 프러스텀 컬링을 단 1회의 디스패치로 초고속 수행합니다 (위치 계산 0%).
      * [EN] Dispatches ultra-fast GPU distance and frustum culling across all registered grass types in a single dispatch every frame (0% position calculations).
+     *
+     * @param computePass - GPU 컴퓨트 패스 인코더
+     * @param megaBuffer - 잔디 스캐터 메가버퍼
+     * @param renderViewStateData - 렌더 뷰 상태 데이터 SSOT
      */
     dispatchPass(
         computePass: GPUComputePassEncoder,
         megaBuffer: GrassScatterMegaBuffer,
-        camX: number,
-        camY: number,
-        camZ: number,
-        frustumPlanesF32: Float32Array | null
+        renderViewStateData: RenderViewStateData
     ): void {
         const bindGroupLayout = this.bindGroupLayout;
         const gpuDevice = this.gpuDevice;
@@ -50,14 +52,17 @@ export default class GrassCullPipeline extends AScatterCullPipeline {
             });
         }
 
+        const {view} = renderViewStateData;
+        const camera = view.rawCamera;
         const uf = this.#uniformFloat32View;
         const uu = this.#uniformUint32View;
 
-        uf[0] = camX;
-        uf[1] = camY;
-        uf[2] = camZ;
+        uf[0] = camera.x;
+        uf[1] = camera.y;
+        uf[2] = camera.z;
         uu[3] = totalAllocatedInstances;
 
+        const frustumPlanesF32 = renderViewStateData.frustumPlanesFlat;
         if (frustumPlanesF32 && frustumPlanesF32.length === 24) {
             uf.set(frustumPlanesF32, 4);
         } else {
