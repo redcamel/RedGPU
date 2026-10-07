@@ -229,7 +229,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #nameHash: number = 0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
-    #streamingRadius: number = 600.0;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
     #alignToNormal: boolean = false;
@@ -427,14 +426,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier,
             castShadow: castShadow !== false,
-            groundBlendStrength: resolvedGroundBlendStrength
+            groundBlendStrength: resolvedGroundBlendStrength,
+            streamingRadius
         });
 
         this.#minScale = minScale;
         this.#maxScale = maxScale;
         this.#randomRotationY = options.randomRotationY ?? true;
         this.#maxInstances = resolvedMaxInstances;
-        this.#streamingRadius = streamingRadius;
 
         if (this.#megaBuffer) {
             const alloc = this.#megaBuffer.allocateType(
@@ -636,50 +635,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
 
 
-    /**
-     * [KO] 서브셀 스트리밍이 활성화되는 반경(미터)을 반환합니다.
-     * [EN] Returns the active sub-cell streaming radius in meters.
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    /**
-     * [KO] 서브셀 스트리밍이 활성화되는 반경(미터)을 설정합니다. 값이 축소될 경우 반경을 벗어난 서브셀을 즉시 언마운트합니다.
-     * [EN] Sets active sub-cell streaming radius in meters. When reduced, sub-cells outside the radius are immediately unmounted.
-     *
-     * @param value -
-     * [KO] 설정할 스트리밍 반경 (최소값: 10.0)
-     * [EN] Streaming radius to set (minimum: 10.0)
-     */
-    set streamingRadius(value: number) {
-        const numVal = Math.max(10.0, Number(value) || 10.0);
-        if (this.#streamingRadius !== numVal) {
-            const oldRadius = this.#streamingRadius;
-            this.#streamingRadius = numVal;
-
-            if (numVal < oldRadius && this.#mountedSubCells.length > 0) {
-                const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-                const unmountMargin = Math.max(10.0, subCellSize * 0.5);
-                const unmountRadiusSq = (numVal + unmountMargin) * (numVal + unmountMargin);
-                const megaBuffer = this.#megaBuffer;
-                const allocation = this.allocation;
-                if (megaBuffer && allocation) {
-                    const mounted = this.#mountedSubCells;
-                    for (let i = mounted.length - 1; i >= 0; i--) {
-                        const sc = mounted[i];
-                        const dx = sc.centerX - this.#lastCamX;
-                        const dz = sc.centerZ - this.#lastCamZ;
-                        if (dx * dx + dz * dz > unmountRadiusSq) {
-                            this.#unmountSubCellAt(i, megaBuffer, allocation);
-                        }
-                    }
-                }
-            }
-
-            this.#onDirty?.();
-        }
-    }
 
     /**
      * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
@@ -1008,7 +963,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (!megaBuffer || !allocation) return;
 
         const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-        const typeRadius = this.#streamingRadius;
+        const typeRadius = this.streamingRadius;
         const unmountMargin = Math.max(10.0, subCellSize * 0.5);
         const unmountRadius = typeRadius + unmountMargin;
         const unmountRadiusSq = unmountRadius * unmountRadius;
@@ -1107,7 +1062,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    override onParameterChanged(prop: string, value: any): void {
+    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
         switch (prop) {
             case 'bottomOffset':
                 this.#syncTypeParams();
@@ -1122,6 +1077,28 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#syncTypeParams();
                 this.#onDirty?.();
                 break;
+            case 'streamingRadius': {
+                if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
+                    const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+                    const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+                    const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
+                    const megaBuffer = this.#megaBuffer;
+                    const allocation = this.allocation;
+                    if (megaBuffer && allocation) {
+                        const mounted = this.#mountedSubCells;
+                        for (let i = mounted.length - 1; i >= 0; i--) {
+                            const sc = mounted[i];
+                            const dx = sc.centerX - this.#lastCamX;
+                            const dz = sc.centerZ - this.#lastCamZ;
+                            if (dx * dx + dz * dz > unmountRadiusSq) {
+                                this.#unmountSubCellAt(i, megaBuffer, allocation);
+                            }
+                        }
+                    }
+                }
+                this.#onDirty?.();
+                break;
+            }
             case 'targetLayer':
             case 'minSlope':
             case 'maxSlope':

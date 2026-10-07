@@ -128,7 +128,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #receiveShadow: boolean = true;
     #shadowStrength: number = 1.0;
     #shadowFadeStartDistance: number = 26.25;
-    #streamingRadius: number = 120.0;
     #maxInstances?: number;
     #instancesPerCell: number = 1;
 
@@ -309,6 +308,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         const resolvedDensityMultiplier = densityMultiplier !== undefined ? densityMultiplier : 1.0;
         const resolvedCastShadow = castShadow;
         const resolvedGroundBlendStrength = groundBlendStrength !== undefined ? groundBlendStrength : 1.0;
+        const resolvedStreamingRadius = streamingRadius !== undefined
+            ? Math.max(16.0, Number(streamingRadius) || 16.0)
+            : Math.max(120.0, resolvedCullingDistance * 1.15);
 
         this.setRawScatterProperties({
             height: resolvedHeight,
@@ -322,7 +324,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier: resolvedDensityMultiplier,
             castShadow: resolvedCastShadow,
-            groundBlendStrength: resolvedGroundBlendStrength
+            groundBlendStrength: resolvedGroundBlendStrength,
+            streamingRadius: resolvedStreamingRadius
         });
 
         if (minScale) this.#minScale = [minScale[0], minScale[1]];
@@ -350,10 +353,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         } else {
             this.#shadowFadeStartDistance = this.shadowCullDistance * 0.75;
         }
-
-        this.#streamingRadius = streamingRadius !== undefined
-            ? Math.max(16.0, Number(streamingRadius) || 16.0)
-            : Math.max(120.0, this.cullingDistance * 1.15);
 
         if (maxInstances !== undefined) {
             this.#maxInstances = Math.max(1, Number(maxInstances) || 1);
@@ -447,18 +446,21 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#instancesPerCell;
     }
 
-    override onParameterChanged(prop: string, value: any): void {
+    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
         switch (prop) {
             case 'cullingDistance': {
                 const cDist = value as number;
-                if (cDist * 1.15 > this.#streamingRadius) {
-                    this.#streamingRadius = cDist * 1.15;
+                if (cDist * 1.15 > this.streamingRadius) {
+                    this.streamingRadius = cDist * 1.15;
                     this.#notifyChange();
                 } else {
                     this.#dirty = true;
                 }
                 break;
             }
+            case 'streamingRadius':
+                this.#notifyChange();
+                break;
             case 'shadowCullDistance':
                 this.#shadowFadeStartDistance = (value as number) * 0.75;
                 this.#dirty = true;
@@ -634,30 +636,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      */
     set onRepopulateRequired(cb: (() => void) | null) {
         this.#onRepopulateRequired = cb;
-    }
-
-    /**
-     * [KO] 이 잔디 타입의 서브셀 스트리밍 활성 반경(미터)을 반환합니다.
-     * [EN] Returns active sub-cell streaming radius in meters for this grass type.
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    /**
-     * [KO] 이 잔디 타입의 서브셀 스트리밍 활성 반경(미터)을 설정합니다.
-     * [EN] Sets active sub-cell streaming radius in meters for this grass type.
-     *
-     * @param val -
-     * [KO] 설정할 스트리밍 반경 (최소값: 16.0)
-     * [EN] Streaming radius to set (minimum: 16.0)
-     */
-    set streamingRadius(val: number) {
-        const numVal = Math.max(16.0, Number(val) || 16.0);
-        if (this.#streamingRadius !== numVal) {
-            this.#streamingRadius = numVal;
-            this.#notifyChange();
-        }
     }
 
     /**

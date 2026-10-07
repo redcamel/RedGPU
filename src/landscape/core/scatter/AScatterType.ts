@@ -92,6 +92,12 @@ export interface AScatterTypeInitOptions {
      * [EN] Bottom ground color blending strength (0.0-1.0)
      */
     groundBlendStrength?: number;
+
+    /**
+     * [KO] 카메라 중심 서브셀 스트리밍 활성 반경 (미터 단위)
+     * [EN] Active sub-cell streaming radius around camera in meters
+     */
+    streamingRadius?: number;
 }
 
 /**
@@ -123,7 +129,7 @@ export abstract class AScatterType<
     #drawCallCount: number = 0;
     #allocation: TAllocation | null = null;
 
-    // --- 11종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
+    // --- 12종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
     #height: number = 1.0;
     #cullingDistance: number = 200.0;
     #fadeStartDistance: number = 150.0;
@@ -137,6 +143,7 @@ export abstract class AScatterType<
     #densityMultiplier: number = 1.0;
     #castShadow: boolean = true;
     #groundBlendStrength: number = 1.0;
+    #streamingRadius: number = 200.0;
 
     /**
      * [KO] AScatterType 인스턴스를 생성합니다.
@@ -455,6 +462,23 @@ export abstract class AScatterType<
     }
 
     /**
+     * [KO] 카메라 중심 서브셀 스트리밍 활성 반경(미터 단위)을 반환합니다.
+     * [EN] Returns active sub-cell streaming radius around camera in meters.
+     */
+    get streamingRadius(): number {
+        return this.#streamingRadius;
+    }
+
+    set streamingRadius(val: number) {
+        const numVal = Math.max(10.0, Number(val) || 10.0);
+        if (this.#streamingRadius !== numVal) {
+            const oldRadius = this.#streamingRadius;
+            this.#streamingRadius = numVal;
+            this.onParameterChanged('streamingRadius', numVal, oldRadius);
+        }
+    }
+
+    /**
      * [KO] 서브클래스 생성자 초기화 시 후속 훅 트리거 없이 고유 기본값을 안전하게 주입합니다.
      * [EN] Safely injects initial unique default values during subclass construction without triggering hooks.
      */
@@ -471,6 +495,7 @@ export abstract class AScatterType<
         densityMultiplier?: number;
         castShadow?: boolean;
         groundBlendStrength?: number;
+        streamingRadius?: number;
     }): void {
         if (values.height !== undefined) this.#height = values.height;
         if (values.cullingDistance !== undefined) {
@@ -487,6 +512,7 @@ export abstract class AScatterType<
         if (values.densityMultiplier !== undefined) this.#densityMultiplier = values.densityMultiplier;
         if (values.castShadow !== undefined) this.#castShadow = values.castShadow;
         if (values.groundBlendStrength !== undefined) this.#groundBlendStrength = values.groundBlendStrength;
+        if (values.streamingRadius !== undefined) this.#streamingRadius = Math.max(10.0, Number(values.streamingRadius) || 10.0);
     }
 
     /**
@@ -495,8 +521,9 @@ export abstract class AScatterType<
      *
      * @param prop - [KO] 변경된 속성 식별자 / [EN] Changed property identifier
      * @param value - [KO] 새로 설정된 유효값 / [EN] Newly set validated value
+     * @param prevValue - [KO] 변경 전 이전 값 (선택사항) / [EN] Previous value before change (optional)
      */
-    abstract onParameterChanged(prop: string, value: any): void;
+    abstract onParameterChanged(prop: string, value: any, prevValue?: any): void;
 
     /**
      * [KO] 스캐터 타입 리소스를 해제합니다.
