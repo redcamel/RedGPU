@@ -92,25 +92,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     }
 
     /**
-     * [KO] 현재 활성화된 잔디 타입들이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by currently active grass types in the main render pass (Near + Far).
-     */
-    get totalDrawCalls(): number {
-        if (!this.enabled || !this.#populated) return 0;
-        let count = 0;
-        const list = this.types;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const grass = list[i];
-            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-            if (alloc && alloc.instanceCount > 0) {
-                count += alloc.nearSlots.length + alloc.farSlots.length;
-            }
-        }
-        return count;
-    }
-
-    /**
      * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 잔디 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다.
      * [EN] Returns the maximum grass instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer.
      */
@@ -119,23 +100,29 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     }
 
     /**
-     * [KO] 그림자 투사(castShadow: true)가 설정된 잔디 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting grass types in the cascaded shadow map (CSM) pass.
+     * [KO] 특정 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a specific grass type in the main pass (Near + Far).
      */
-    get shadowDrawCalls(): number {
-        if (!this.enabled || !this.#populated) return 0;
-        let count = 0;
-        const list = this.types;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const grass = list[i];
-            if (!grass.castShadow) continue;
-            const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-            if (alloc && alloc.instanceCount > 0) {
-                count += alloc.nearSlots.length;
-            }
+    protected override computeTypeDrawCalls(grass: Grass): number {
+        if (!this.#populated) return 0;
+        const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+        if (alloc && alloc.instanceCount > 0) {
+            return alloc.nearSlots.length + alloc.farSlots.length;
         }
-        return count;
+        return 0;
+    }
+
+    /**
+     * [KO] 그림자를 투사하는 특정 잔디 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting grass type in the CSM shadow pass.
+     */
+    protected override computeTypeShadowDrawCalls(grass: Grass): number {
+        if (!this.#populated) return 0;
+        const alloc = this.#megaBuffer.getAllocation(grass.typeId);
+        if (alloc && alloc.instanceCount > 0) {
+            return alloc.nearSlots.length;
+        }
+        return 0;
     }
 
     /**

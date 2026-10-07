@@ -100,16 +100,52 @@ export abstract class AScatterManager<
     abstract get instanceCapacity(): number;
 
     /**
-     * [KO] 메인 렌더 패스 간접 드로우콜 총 개수
-     * [EN] Total number of indirect draw calls in the main render pass
+     * [KO] 메인 렌더 패스 간접 드로우콜 총 개수를 반환합니다. 활성화된 모든 스캐터 타입의 드로우콜을 단일 루프로 집계합니다.
+     * [EN] Returns total number of indirect draw calls in the main render pass, aggregated across all active scatter types in a single loop.
      */
-    abstract get totalDrawCalls(): number;
+    get totalDrawCalls(): number {
+        if (!this.enabled) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            count += this.computeTypeDrawCalls(list[i]);
+        }
+        return count;
+    }
 
     /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스 간접 드로우콜 총 개수
-     * [EN] Total number of indirect draw calls in the cascaded shadow map (CSM) pass
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스 간접 드로우콜 총 개수를 반환합니다. 그림자를 투사하는(castShadow: true) 스캐터 타입을 단일 루프로 집계합니다.
+     * [EN] Returns total number of indirect draw calls in the CSM shadow map pass, aggregated across shadow-casting types in a single loop.
      */
-    abstract get shadowDrawCalls(): number;
+    get shadowDrawCalls(): number {
+        if (!this.enabled) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const type = list[i];
+            if (!type.castShadow) continue;
+            count += this.computeTypeShadowDrawCalls(type);
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 특정 스캐터 타입이 메인 렌더 패스(서브클래스에 따라 Depth Prepass 포함)에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a specific scatter type in the main render pass (including depth prepass depending on subclass).
+     *
+     * @param type - 대상 스캐터 타입 인스턴스
+     */
+    protected abstract computeTypeDrawCalls(type: TType): number;
+
+    /**
+     * [KO] 그림자를 투사하는 특정 스캐터 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting scatter type in the CSM shadow pass.
+     *
+     * @param type - 대상 스캐터 타입 인스턴스
+     */
+    protected abstract computeTypeShadowDrawCalls(type: TType): number;
 
     /**
      * [KO] 고유 이름을 통해 등록된 스캐터 타입 인스턴스를 조회합니다.

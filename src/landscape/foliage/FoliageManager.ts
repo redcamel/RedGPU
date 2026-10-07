@@ -132,11 +132,16 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 현재 활성화된 식생 타입들이 메인 렌더 패스(뎁스 프리패스 포함)에서 발행하는 간접 드로우콜(Indirect Draw Call) 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by currently active foliage types in the main render pass (including depth prepass).
+     * [KO] 특정 식생 타입이 메인 렌더 패스(Depth Prepass 활성화 시 포함)에서 발행하는 간접 드로우콜 수를 단일 패스로 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
      */
-    get totalDrawCalls(): number {
-        return this.depthPrepassDrawCalls + this.mainPassDrawCalls;
+    protected override computeTypeDrawCalls(foliage: Foliage): number {
+        if (foliage.activeInstanceCount <= 0) return 0;
+        let count = foliage.mainSubMeshes.length;
+        if (this.#useDepthPrepass && foliage.useDepthPrepass) {
+            count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
+        }
+        return count;
     }
 
     /**
@@ -200,28 +205,16 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 그림자 투사(castShadow: true)가 설정된 식생 타입들이 캐스케이드 그림자 맵(CSM) 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by shadow-casting foliage types in the cascaded shadow map (CSM) pass.
+     * [KO] 그림자를 투사하는 특정 식생 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
      */
-    get shadowDrawCalls(): number {
-        if (!this.enabled) return 0;
-        let count = 0;
-        const list = this.types;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const foliage = list[i];
-            if (!foliage.castShadow || foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) continue;
-            const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
-            if (foliage.hasMaskedLOD0) {
-                count += foliage.lod0SubMeshes.length;
-                if (num3DLODs > 1) {
-                    count += 1;
-                }
-            } else {
-                count += 1;
-            }
-            count += 3;
-        }
+    protected override computeTypeShadowDrawCalls(foliage: Foliage): number {
+        if (foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) return 0;
+        const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
+        let count = foliage.hasMaskedLOD0
+            ? foliage.lod0SubMeshes.length + (num3DLODs > 1 ? 1 : 0)
+            : 1;
+        count += 3;
         return count;
     }
 
