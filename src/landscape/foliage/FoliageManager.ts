@@ -376,25 +376,26 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     update(renderViewStateData: RenderViewStateData): void {
         if (!this.enabled || this.types.length === 0) return;
 
-        const view = renderViewStateData.view;
+        const {view} = renderViewStateData;
+        const {rawCamera: cam} = view;
+        const {x: camX, z: camZ} = cam;
         const count = this.types.length;
-        const cam = view.rawCamera;
-        if (cam && typeof cam.x === 'number' && typeof cam.z === 'number') {
-            let remainingMount = this.#mountBudget;
-            let remainingUnmount = this.#unmountBudget;
-            if (this.#roundRobinIndex >= count) {
-                this.#roundRobinIndex = 0;
-            }
-            const startIdx = this.#roundRobinIndex;
-            for (let i = 0; i < count; i++) {
-                const idx = (startIdx + i) % count;
-                const foliage = this.types[idx];
-                foliage.updateStreaming(cam.x, cam.z, remainingMount, remainingUnmount);
-                remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
-                remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
-            }
-            this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
+
+        let remainingMount = this.#mountBudget;
+        let remainingUnmount = this.#unmountBudget;
+        if (this.#roundRobinIndex >= count) {
+            this.#roundRobinIndex = 0;
         }
+        const startIdx = this.#roundRobinIndex;
+        for (let i = 0; i < count; i++) {
+            const idx = (startIdx + i) % count;
+            const foliage = this.types[idx];
+            foliage.updateStreaming(camX, camZ, remainingMount, remainingUnmount);
+            remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
+            remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
+        }
+        this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
+
         this.#culler.updateAndDispatch(this.types, view, this.landscape, renderViewStateData);
     }
 

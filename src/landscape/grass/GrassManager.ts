@@ -158,12 +158,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         );
         grassType.bindAllocation(alloc);
 
-        const canBakeImmediately = !!(this.gpuDevice && this.landscape.hasValidScatterAtlas);
-
-        // 즉시 베이킹이 가능한 경우, #bakeGrassType 완료 시 최신 instanceCount로 단 1회 기록되므로 중복 VRAM 전송 방지
-        if (!canBakeImmediately) {
-            this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
-        }
+        this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
 
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
@@ -186,17 +181,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
             const hasValidVbt = this.landscape.hasValidVbtAtlas;
             this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
-
-            const fallbackCam = this.#getFallbackCameraPosition();
-            if (fallbackCam) {
-                this.#lastCamPos[0] = fallbackCam[0];
-                this.#lastCamPos[1] = fallbackCam[1];
-                this.#lastCamPos[2] = fallbackCam[2];
-                this.#lastBakePos[0] = fallbackCam[0];
-                this.#lastBakePos[1] = fallbackCam[2];
-            }
-
-            this.#bakeGrassType(grassType, this.#lastCamPos[0], this.#lastCamPos[2]);
         }
 
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
@@ -447,24 +431,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.rebakeAll();
     };
 
-    #getFallbackCameraPosition(): [number, number, number] | null {
-        const viewList = this.redGPUContext?.viewList;
-        if (!viewList || viewList.length === 0) return null;
-
-        for (let i = 0; i < viewList.length; i++) {
-            const v = viewList[i] as any;
-            if (!v) continue;
-            const rawCam = v.rawCamera || v.camera?.rawCamera || v.camera;
-            if (rawCam && typeof rawCam.x === 'number') {
-                return [rawCam.x, rawCam.y, rawCam.z];
-            }
-            const pos = v.camera?.position;
-            if (pos && typeof pos[0] === 'number') {
-                return [pos[0], pos[1], pos[2]];
-            }
-        }
-        return null;
-    }
 
     /**
      * [KO] 특정 잔디 타입에 대해 GPU 베이킹을 실행하여 VRAM 버퍼에 위치/노멀/색상을 1회 기록합니다.
