@@ -7,6 +7,8 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
+import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
+import type PerspectiveCamera from "../../../../camera/camera/PerspectiveCamera";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
 import FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
@@ -70,35 +72,28 @@ class FoliageCuller extends AScatterCullPipeline {
      * @param foliageList -
      * [KO] 활성 식생 목록
      * [EN] Active foliage list
-     * @param viewOrCamera -
-     * [KO] 카메라 또는 뷰 객체
-     * [EN] Camera or view object
      * @param landscape -
      * [KO] 부모 Landscape 인스턴스
      * [EN] Parent Landscape instance
-     * @param stateData -
+     * @param renderViewStateData -
      * [KO] 렌더 패스 상태 데이터
      * [EN] Render pass state data
      */
     updateAndDispatch(
         foliageList: Foliage[],
-        viewOrCamera: any,
-        landscape?: Landscape | null,
-        stateData?: any
+        landscape: Landscape,
+        renderViewStateData: RenderViewStateData
     ): void {
         const typeCount = foliageList.length;
         if (typeCount === 0) return;
 
-        const camera = viewOrCamera?.rawCamera || viewOrCamera?.camera || viewOrCamera;
-        const camX = camera?.x ?? camera?.position?.[0] ?? 0;
-        const camY = camera?.y ?? camera?.position?.[1] ?? 0;
-        const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
+        const {view} = renderViewStateData;
+        const camera = view.rawCamera;
+        const cam3D = camera as PerspectiveCamera;
+        const {x: camX, y: camY, z: camZ} = cam3D;
+        const frustumPlanes = renderViewStateData.frustumPlanesFlat;
 
-        const frustumPlanes: Float32Array | null = stateData?.frustumPlanesFlat
-            ?? viewOrCamera?.frustumPlanesFlat
-            ?? null;
-
-        const fov = camera?.fov ?? 60.0;
+        const fov = cam3D.fieldOfView ?? 60.0;
         if (fov !== this.#lastFOV) {
             this.#lastFOV = fov;
             const fovRad = (fov * Math.PI) / 180.0;
@@ -107,24 +102,20 @@ class FoliageCuller extends AScatterCullPipeline {
         const fovFactor = this.#cachedFovFactor;
 
         if (this.#megaBuffer) {
-            const currentView = stateData?.view || (viewOrCamera?.camera ? viewOrCamera : null);
-            const hzb = currentView?.hierarchicalZBuffer;
+            const hzb = view.hierarchicalZBuffer;
             const hzbTextureView = hzb?.textureView || null;
             const hzbSampler = hzb?.sampler || null;
             this.#lastHZBTextureView = hzbTextureView;
             this.#lastHZBSampler = hzbSampler;
             const hasHZB = !!hzbTextureView;
 
-            let viewProjectionMatrix: mat4 | null = camera?.viewProjectionMatrix || null;
-            if (!viewProjectionMatrix && camera?.projectionMatrix && camera?.viewMatrix) {
-                mat4.multiply(this.#tempPVMatrix, camera.projectionMatrix, camera.viewMatrix);
-                viewProjectionMatrix = this.#tempPVMatrix;
-            }
+            mat4.multiply(this.#tempPVMatrix, view.projectionMatrix, cam3D.viewMatrix);
+            const viewProjectionMatrix = this.#tempPVMatrix;
 
-            const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
-            const activeCascadeCount = stateData?.activeCascadeCount ?? 0;
-            const cascadeSplitDepths = stateData?.cascadeSplitDepths ?? null;
-            const cascadeShadowFrustumPlanesByCascade = stateData?.cascadeShadowFrustumPlanesByCascade ?? null;
+            const viewportHeight = view.pixelRectArray[3];
+            const activeCascadeCount = renderViewStateData.activeCascadeCount;
+            const cascadeSplitDepths = renderViewStateData.cascadeSplitDepths;
+            const cascadeShadowFrustumPlanesByCascade = renderViewStateData.cascadeShadowFrustumPlanesByCascade;
 
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 camX, camY, camZ,
