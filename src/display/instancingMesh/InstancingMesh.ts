@@ -680,7 +680,7 @@ class InstancingMesh extends Mesh {
         dataViewU32.set([this.#visibilityStrideU32], 1);
         dataViewU32.set([this.LODManager.LODList.length], 2);
         dataViewF32.set(view.rawCamera.position, 4);
-        dataViewF32.set(view.frustumPlanes.flat(), 8);
+        dataViewF32.set(renderViewStateData.frustumPlanesFlat, 8);
         dataViewF32.set([...this.LODManager.LODList.map(lod => lod.distance)], 32);
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer.gpuBuffer,

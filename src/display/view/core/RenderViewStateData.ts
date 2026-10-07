@@ -3,6 +3,7 @@ import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
 import {CommandBatchStats} from "../../../commandEncoderManager/CommandEncoderManager";
 import GBUFFER_TYPE from "./GBUFFER_TYPE";
+import {computeFrustumPlanesFromPVMatrix} from "../../../math/computeFrustumPlanes";
 
 
 /**
@@ -189,6 +190,11 @@ class RenderViewStateData {
      */
     frustumPlanes: number[][];
     /**
+     * [KO] GPU 버퍼 전송 및 초고속 컬링을 위한 1차원 평탄 프러스텀 평면 버퍼 (Float32Array(24))
+     * [EN] 1D flattened frustum planes buffer for GPU buffer upload and fast culling (Float32Array(24))
+     */
+    readonly frustumPlanesFlat: Float32Array = new Float32Array(24);
+    /**
      * [KO] 4개 캐스케이드 섀도우 프러스텀 평면 캐시 배열 [cascadeIndex][planeIndex][4]
      * [EN] 4-cascade shadow frustum plane cache array [cascadeIndex][planeIndex][4]
      */
@@ -249,10 +255,10 @@ class RenderViewStateData {
      */
     commandBatchStats: CommandBatchStats | null = null;
     /**
-     * [KO] 연결된 View3D 인스턴스 (private)
-     * [EN] Connected View3D instance (private)
+     * [KO] 연결된 View3D 인스턴스
+     * [EN] Connected View3D instance
      */
-    readonly #view: View3D;
+    readonly view: View3D;
 
 
     /**
@@ -264,74 +270,7 @@ class RenderViewStateData {
      * [EN] View3D instance this state data will link to
      */
     constructor(view: View3D) {
-        this.#view = view;
-    }
-
-    /**
-     * [KO] 연결된 View3D 인스턴스를 가져옵니다.
-     * [EN] Returns the connected View3D instance.
-     *
-     * @readonly
-     */
-    get view(): View3D {
-        return this.#view;
-    }
-
-    /**
-     * [KO] 4x4 행렬로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 정규화하여 out 배열에 인플레이스 기입합니다.
-     * [EN] Extracts and normalizes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) from 4x4 matrix in-place.
-     */
-    static computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
-        const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
-
-        // Left plane (m3 + m0)
-        p0[0] = m[3] + m[0];
-        p0[1] = m[7] + m[4];
-        p0[2] = m[11] + m[8];
-        p0[3] = m[15] + m[12];
-
-        // Right plane (m3 - m0)
-        p1[0] = m[3] - m[0];
-        p1[1] = m[7] - m[4];
-        p1[2] = m[11] - m[8];
-        p1[3] = m[15] - m[12];
-
-        // Bottom plane (m3 + m1)
-        p2[0] = m[3] + m[1];
-        p2[1] = m[7] + m[5];
-        p2[2] = m[11] + m[9];
-        p2[3] = m[15] + m[13];
-
-        // Top plane (m3 - m1)
-        p3[0] = m[3] - m[1];
-        p3[1] = m[7] - m[5];
-        p3[2] = m[11] - m[9];
-        p3[3] = m[15] - m[13];
-
-        // Near plane (m2) - WebGPU [0, 1] depth
-        p4[0] = m[2];
-        p4[1] = m[6];
-        p4[2] = m[10];
-        p4[3] = m[14];
-
-        // Far plane (m3 - m2) - WebGPU [0, 1] depth
-        p5[0] = m[3] - m[2];
-        p5[1] = m[7] - m[6];
-        p5[2] = m[11] - m[10];
-        p5[3] = m[15] - m[14];
-
-        for (let i = 0; i < 6; i++) {
-            const plane = out[i];
-            const norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
-            if (norm > 0.000001) {
-                const invNorm = 1.0 / norm;
-                plane[0] *= invNorm;
-                plane[1] *= invNorm;
-                plane[2] *= invNorm;
-                plane[3] *= invNorm;
-            }
-        }
-        return out;
+        this.view = view;
     }
 
     /**
@@ -346,10 +285,10 @@ class RenderViewStateData {
      * [EN] Throws an error if invalid parameters are provided, required view properties are missing, or texture size calculation fails.
      */
     reset() {
-        if (!this.#view) {
+        if (!this.view) {
             throw new Error('Invalid parameters provided');
         }
-        const view = this.#view;
+        const view = this.view;
         const {
             useFrustumCulling,
             frustumPlanes,
@@ -410,6 +349,7 @@ class RenderViewStateData {
             throw new Error('Could not calculate texture size: ' + e.message);
         }
         this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
+        this.frustumPlanesFlat.set(view.frustumPlanesFlat);
         this.#updateInterleavedCullingInfo(view);
         this.#updateShadowFrustumPlanes(view);
     }
@@ -450,7 +390,7 @@ class RenderViewStateData {
                 this.#lastCascadePVArray[c] = pv;
                 this.cascadeSplitDepths[c] = splitDepths[c] ?? 200.0;
                 if (pv) {
-                    RenderViewStateData.computeFrustumPlanesFromMatrix(pv, this.shadowFrustumPlanes[c]);
+                    computeFrustumPlanesFromPVMatrix(pv, this.shadowFrustumPlanes[c]);
                 }
             }
         }

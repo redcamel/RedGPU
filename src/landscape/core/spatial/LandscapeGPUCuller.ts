@@ -110,7 +110,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
         tileSizeZ: number,
         heightScale: number,
         tileCount: number,
-        frustumPlanes: number[][] | Float32Array[] | null,
+        frustumPlanes: number[][] | Float32Array[] | Float32Array | null,
         lodDistancesSq: Float32Array,
         tanHalfFOV: number = 1.0,
         lodMetric: number = 0.0,
@@ -135,7 +135,9 @@ export class LandscapeGPUCuller extends RedGPUObject {
         }
 
         // 1. 16-byte aligned large members: frustumPlanes (offset 16..39)
-        if (frustumPlanes && frustumPlanes.length >= 6) {
+        if (frustumPlanes instanceof Float32Array && frustumPlanes.length >= 24) {
+            data.set(frustumPlanes.subarray(0, 24), 16);
+        } else if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let i = 0; i < 6; i++) {
                 const plane = frustumPlanes[i];
                 const offset = 16 + i * 4;

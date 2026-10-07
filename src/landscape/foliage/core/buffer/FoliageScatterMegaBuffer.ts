@@ -308,7 +308,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
     updateUnifiedGlobalUniforms(
         camX: number, camY: number, camZ: number,
         fovFactor: number,
-        mainFrustumPlanes: number[][] | null,
+        mainFrustumPlanes: Float32Array | number[][] | null,
         cascades: CascadeCullingParam[],
         activeCascadeCount: number = 4,
         viewportHeight: number = 1080.0,
@@ -350,7 +350,9 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             gf32.fill(0, 16, 32);
         }
 
-        if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
+        if (mainFrustumPlanes instanceof Float32Array && mainFrustumPlanes.length >= 24) {
+            gf32.set(mainFrustumPlanes.subarray(0, 24), 32);
+        } else if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = mainFrustumPlanes[p];
                 const baseOffset = 32 + p * 4;

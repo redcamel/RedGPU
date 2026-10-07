@@ -17,7 +17,7 @@ import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
 import GrassManager from "./grass/GrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
-import computeViewFrustumPlanes from "../math/computeViewFrustumPlanes";
+import {computeFrustumPlanes} from "../math/computeFrustumPlanes";
 import DebuggerManager from "./debugger/DebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
@@ -128,6 +128,10 @@ export class Landscape extends RedGPUObject {
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #lastTanHalfFOV: number = 1.0;
     #tileHeightBuffer: Float32Array = new Float32Array(2);
+    #cachedFrustumPlanes: number[][] = [
+        new Array(4), new Array(4), new Array(4),
+        new Array(4), new Array(4), new Array(4)
+    ];
 
 
     // =========================================================================
@@ -1043,9 +1047,11 @@ export class Landscape extends RedGPUObject {
         const projMatrix = currentView.projectionMatrix;
         const viewMatrix = rawCamera.viewMatrix;
 
-        let frustumPlanes: number[][] | null = renderViewStateData.frustumPlanes ?? null;
+        let frustumPlanes: Float32Array | number[][] | null = renderViewStateData.frustumPlanesFlat
+            ?? renderViewStateData.frustumPlanes
+            ?? null;
         if (!frustumPlanes && projMatrix && viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(projMatrix, viewMatrix);
+            frustumPlanes = computeFrustumPlanes(projMatrix, viewMatrix, this.#cachedFrustumPlanes);
         }
 
         this.#tileStreamer.update(camX, camZ, camY);

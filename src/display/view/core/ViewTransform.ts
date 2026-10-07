@@ -6,7 +6,7 @@ import AController from "../../../camera/core/AController";
 import RedGPUContextSizeManager, {RedResizeEvent} from "../../../context/core/RedGPUContextSizeManager";
 import RedGPUContext from "../../../context/RedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
-import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
+import {computeFrustumPlanes, computeFrustumPlanesFlat} from "../../../math/computeFrustumPlanes";
 import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
@@ -47,6 +47,11 @@ class ViewTransform extends RedGPUObject {
         new Array(4), new Array(4), new Array(4),
         new Array(4), new Array(4), new Array(4)
     ];
+    /**
+     * [KO] 1차원 평탄 프러스텀 평면 캐시 버퍼 (Float32Array(24), Zero-GC)
+     * [EN] 1D flattened frustum planes cache buffer (Float32Array(24), Zero-GC)
+     */
+    readonly #frustumPlanesFlatBuffer: Float32Array = new Float32Array(24);
     /**
      * [KO] 이 뷰에 연결된 카메라 인스턴스
      * [EN] Camera instance connected to this view
@@ -254,7 +259,19 @@ class ViewTransform extends RedGPUObject {
      */
     get frustumPlanes(): number[][] {
         const viewMatrix = this.#camera instanceof AController ? this.#camera.camera.viewMatrix : this.#camera.viewMatrix;
-        return computeViewFrustumPlanes(this.projectionMatrix, viewMatrix, this.#frustumPlanesBuffer);
+        return computeFrustumPlanes(this.projectionMatrix, viewMatrix, this.#frustumPlanesBuffer);
+    }
+
+    /**
+     * [KO] 현재 투영(projection) 및 카메라 뷰(view) 행렬을 기반으로 뷰 프러스텀 평면을 1차원 Float32Array(24)로 계산하여 반환합니다.
+     * [EN] Calculates and returns the view frustum planes as 1D Float32Array(24) based on current projection and view matrices.
+     * @returns
+     * [KO] 24개 float으로 구성된 1차원 평탄 프러스텀 평면 버퍼
+     * [EN] 1D flattened frustum planes buffer of 24 floats
+     */
+    get frustumPlanesFlat(): Float32Array {
+        const viewMatrix = this.#camera instanceof AController ? this.#camera.camera.viewMatrix : this.#camera.viewMatrix;
+        return computeFrustumPlanesFlat(this.projectionMatrix, viewMatrix, this.#frustumPlanesFlatBuffer);
     }
 
     /**

@@ -15,8 +15,7 @@ import FoliageScatterMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageSc
 import {ScatterInstanceBaker} from "../../../core/scatter";
 import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import computeViewFrustumPlanes from "../../../../math/computeViewFrustumPlanes";
-import RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
+import {computeFrustumPlanes, computeFrustumPlanesFromPVMatrix} from "../../../../math/computeFrustumPlanes";
 
 /**
  * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 수행하는 클래스입니다.
@@ -117,14 +116,12 @@ class FoliageCuller extends RedGPUObject {
         const camY = camera?.y ?? camera?.position?.[1] ?? 0;
         const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
 
-        let frustumPlanes: number[][] | null = stateData?.frustumPlanes
-            ?? stateData?.view?.frustumPlanes
-            ?? viewOrCamera?.frustumPlanes
-            ?? camera?.frustumPlanes
+        let frustumPlanes: Float32Array | number[][] | null = stateData?.frustumPlanesFlat
+            ?? viewOrCamera?.frustumPlanesFlat
             ?? null;
 
         if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(
+            frustumPlanes = computeFrustumPlanes(
                 camera.projectionMatrix,
                 camera.viewMatrix,
                 this.#cachedFrustumPlanes
@@ -164,7 +161,7 @@ class FoliageCuller extends RedGPUObject {
                     param.maxDistance = splitDepths[c] ?? 200.0;
                     param.hasShadow = !!pv;
                     if (pv) {
-                        param.frustumPlanes = RenderViewStateData.computeFrustumPlanesFromMatrix(
+                        param.frustumPlanes = computeFrustumPlanesFromPVMatrix(
                             pv,
                             this.#cachedShadowFrustumPlanes[c]
                         );

@@ -11,7 +11,6 @@ import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
 import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
-import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -280,8 +279,8 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
     update(renderViewStateData: RenderViewStateData): void {
         if (!this.#enabled || this.#grassList.length === 0) return;
 
-        const {view, frustumPlanes} = renderViewStateData;
-        const {rawCamera: rawCam, projectionMatrix} = view;
+        const {view} = renderViewStateData;
+        const {rawCamera: rawCam} = view;
         const {x: camX, y: camY, z: camZ} = rawCam;
 
         this.#lastCamPos[0] = camX;
@@ -289,18 +288,7 @@ export class GrassManager extends RedGPUObject implements IScatterManager<Grass,
         this.#lastCamPos[2] = camZ;
 
         if (this.#frustumPlanesF32) {
-            if (frustumPlanes && frustumPlanes.length === 6) {
-                for (let p = 0; p < 6; p++) {
-                    this.#frustumPlanesF32.set(frustumPlanes[p], p * 4);
-                }
-            } else if (projectionMatrix && rawCam?.viewMatrix) {
-                const computed = computeViewFrustumPlanes(projectionMatrix, rawCam.viewMatrix);
-                if (computed) {
-                    for (let p = 0; p < 6; p++) {
-                        this.#frustumPlanesF32.set(computed[p], p * 4);
-                    }
-                }
-            }
+            this.#frustumPlanesF32.set(renderViewStateData.frustumPlanesFlat);
         }
 
         const {tileLoadedCount: currentLoadedTileCount} = this.#landscape;
