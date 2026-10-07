@@ -10,6 +10,7 @@
 #redgpu_include landscape.struct.GrassTypeParam;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 #redgpu_include landscape.math.scatterColorPack;
+#redgpu_include landscape.math.testSphereInFrustum;
 
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,
@@ -72,11 +73,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let sphereCenter = pos + vec3<f32>(0.0, centerOffsetY, 0.0);
 
     // Frustum 6-plane Cull
-    for (var i = 0u; i < 6u; i = i + 1u) {
-        let plane = uniforms.frustumPlanes[i];
-        if (dot(plane.xyz, sphereCenter) + plane.w < -boundRadius) {
-            return;
-        }
+    if (!testSphereInFrustum(sphereCenter, boundRadius, uniforms.frustumPlanes)) {
+        return;
     }
 
     // Stage allocation (Near vs Far)

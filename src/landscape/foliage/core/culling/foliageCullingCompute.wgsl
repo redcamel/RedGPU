@@ -35,6 +35,7 @@ struct FoliageCullingUniforms {
 #redgpu_include landscape.struct.FoliageInstance;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 #redgpu_include landscape.math.scatterColorPack;
+#redgpu_include landscape.math.testSphereInFrustum;
 
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
@@ -147,8 +148,6 @@ fn main(
 
     let maxScale = max(max(scaleX, scaleY), scaleZ);
     let scaledRadius = typeInfo.boundingRadius * maxScale;
-    let r = -scaledRadius;
-
     let realY = instance.posY;
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
@@ -182,16 +181,10 @@ fn main(
     }
 
     var inMainFrustum = false;
-    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
+    let sphereCenter = vec3<f32>(instance.posX, realY, instance.posZ);
 
     if (!isSubpixel) {
-        inMainFrustum =
-            dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
-            dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
-            dot(spherePos, globalUniforms.mainFrustumPlanes[2]) >= r &&
-            dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
-            dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
-            dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+        inMainFrustum = testSphereInFrustum(sphereCenter, scaledRadius, globalUniforms.mainFrustumPlanes);
 
         if (inMainFrustum && globalUniforms.useHZB != 0u) {
             let halfW = scaledRadius;
@@ -303,13 +296,7 @@ fn main(
 
                 if (distSq < shadowEffectiveDistSq) {
                     let cascadeInfo = globalUniforms.cascades[c];
-                    let inShadowFrustum =
-                        dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-                        dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-                        dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-                        dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-                        dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-                        dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+                    let inShadowFrustum = testSphereInFrustum(sphereCenter, scaledRadius, cascadeInfo.frustumPlanes);
 
                     if (inShadowFrustum) {
                         var targetShadowLOD: u32 = 0u;

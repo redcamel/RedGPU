@@ -22,6 +22,7 @@ import scatterSpatialPrng_wgsl from './math/scatterSpatialPrng.wgsl';
 import transformFoliagePosition_wgsl from './math/transformFoliagePosition.wgsl';
 import ditherFadeDiscard_wgsl from './math/ditherFadeDiscard.wgsl';
 import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCutoff.wgsl';
+import testSphereInFrustum_wgsl from './math/testSphereInFrustum.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -222,6 +223,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const evaluateMipScaledAlphaCutoff = evaluateMipScaledAlphaCutoff_wgsl;
+
+        /**
+         * [KO] 3D 구체와 6개 평면 절두체(Frustum) 간의 교차 판정 함수 (testSphereInFrustum)
+         * [EN] 3D bounding sphere and 6-plane frustum intersection test function (testSphereInFrustum)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.testSphereInFrustum;
+         * ```
+         */
+        export const testSphereInFrustum = testSphereInFrustum_wgsl;
     }
 
     /**
