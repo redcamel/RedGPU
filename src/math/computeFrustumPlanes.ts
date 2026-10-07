@@ -1,10 +1,6 @@
 import {mat4} from "gl-matrix";
 
 const tempMTX = mat4.create();
-const tempPlanes2D: number[][] = [
-    new Array(4), new Array(4), new Array(4),
-    new Array(4), new Array(4), new Array(4)
-];
 
 /**
  * [KO] 프로젝션 및 카메라 행렬로부터 6개의 뷰 프러스텀 평면을 계산합니다.
@@ -119,35 +115,55 @@ const computeFrustumPlanesFlat = (
     if (!out) {
         out = new Float32Array(24);
     }
-    computeFrustumPlanes(projectionMatrix, viewMatrix, tempPlanes2D);
-    const p0 = tempPlanes2D[0], p1 = tempPlanes2D[1], p2 = tempPlanes2D[2],
-        p3 = tempPlanes2D[3], p4 = tempPlanes2D[4], p5 = tempPlanes2D[5];
+    mat4.multiply(tempMTX, projectionMatrix, viewMatrix);
+    const m = tempMTX;
 
-    out[0] = p0[0];
-    out[1] = p0[1];
-    out[2] = p0[2];
-    out[3] = p0[3];
-    out[4] = p1[0];
-    out[5] = p1[1];
-    out[6] = p1[2];
-    out[7] = p1[3];
-    out[8] = p2[0];
-    out[9] = p2[1];
-    out[10] = p2[2];
-    out[11] = p2[3];
-    out[12] = p3[0];
-    out[13] = p3[1];
-    out[14] = p3[2];
-    out[15] = p3[3];
-    out[16] = p4[0];
-    out[17] = p4[1];
-    out[18] = p4[2];
-    out[19] = p4[3];
-    out[20] = p5[0];
-    out[21] = p5[1];
-    out[22] = p5[2];
-    out[23] = p5[3];
+    // Plane 0 (m3 - m0)
+    out[0] = m[3] - m[0];
+    out[1] = m[7] - m[4];
+    out[2] = m[11] - m[8];
+    out[3] = m[15] - m[12];
 
+    // Plane 1 (m3 + m0)
+    out[4] = m[3] + m[0];
+    out[5] = m[7] + m[4];
+    out[6] = m[11] + m[8];
+    out[7] = m[15] + m[12];
+
+    // Plane 2 (m3 + m1)
+    out[8] = m[3] + m[1];
+    out[9] = m[7] + m[5];
+    out[10] = m[11] + m[9];
+    out[11] = m[15] + m[13];
+
+    // Plane 3 (m3 - m1)
+    out[12] = m[3] - m[1];
+    out[13] = m[7] - m[5];
+    out[14] = m[11] - m[9];
+    out[15] = m[15] - m[13];
+
+    // Plane 4 (m3 - m2)
+    out[16] = m[3] - m[2];
+    out[17] = m[7] - m[6];
+    out[18] = m[11] - m[10];
+    out[19] = m[15] - m[14];
+
+    // Plane 5 (m3 + m2)
+    out[20] = m[3] + m[2];
+    out[21] = m[7] + m[6];
+    out[22] = m[11] + m[10];
+    out[23] = m[15] + m[14];
+
+    for (let i = 0; i < 6; i++) {
+        const offset = i * 4;
+        const x = out[offset], y = out[offset + 1], z = out[offset + 2];
+        const lenSq = x * x + y * y + z * z;
+        const norm = lenSq > 0 ? 1.0 / Math.sqrt(lenSq) : 1.0;
+        out[offset] *= norm;
+        out[offset + 1] *= norm;
+        out[offset + 2] *= norm;
+        out[offset + 3] *= norm;
+    }
     return out;
 };
 
@@ -247,34 +263,55 @@ const computeFrustumPlanesFromPVMatrixFlat = (
     if (!out) {
         out = new Float32Array(24);
     }
-    computeFrustumPlanesFromPVMatrix(m, tempPlanes2D);
-    const p0 = tempPlanes2D[0], p1 = tempPlanes2D[1], p2 = tempPlanes2D[2],
-        p3 = tempPlanes2D[3], p4 = tempPlanes2D[4], p5 = tempPlanes2D[5];
 
-    out[0] = p0[0];
-    out[1] = p0[1];
-    out[2] = p0[2];
-    out[3] = p0[3];
-    out[4] = p1[0];
-    out[5] = p1[1];
-    out[6] = p1[2];
-    out[7] = p1[3];
-    out[8] = p2[0];
-    out[9] = p2[1];
-    out[10] = p2[2];
-    out[11] = p2[3];
-    out[12] = p3[0];
-    out[13] = p3[1];
-    out[14] = p3[2];
-    out[15] = p3[3];
-    out[16] = p4[0];
-    out[17] = p4[1];
-    out[18] = p4[2];
-    out[19] = p4[3];
-    out[20] = p5[0];
-    out[21] = p5[1];
-    out[22] = p5[2];
-    out[23] = p5[3];
+    // Left plane (m3 + m0)
+    out[0] = m[3] + m[0];
+    out[1] = m[7] + m[4];
+    out[2] = m[11] + m[8];
+    out[3] = m[15] + m[12];
+
+    // Right plane (m3 - m0)
+    out[4] = m[3] - m[0];
+    out[5] = m[7] - m[4];
+    out[6] = m[11] - m[8];
+    out[7] = m[15] - m[12];
+
+    // Bottom plane (m3 + m1)
+    out[8] = m[3] + m[1];
+    out[9] = m[7] + m[5];
+    out[10] = m[11] + m[9];
+    out[11] = m[15] + m[13];
+
+    // Top plane (m3 - m1)
+    out[12] = m[3] - m[1];
+    out[13] = m[7] - m[5];
+    out[14] = m[11] - m[9];
+    out[15] = m[15] - m[13];
+
+    // Near plane (m2) - WebGPU [0, 1] depth
+    out[16] = m[2];
+    out[17] = m[6];
+    out[18] = m[10];
+    out[19] = m[14];
+
+    // Far plane (m3 - m2) - WebGPU [0, 1] depth
+    out[20] = m[3] - m[2];
+    out[21] = m[7] - m[6];
+    out[22] = m[11] - m[10];
+    out[23] = m[15] - m[14];
+
+    for (let i = 0; i < 6; i++) {
+        const offset = i * 4;
+        const x = out[offset], y = out[offset + 1], z = out[offset + 2];
+        const norm = Math.sqrt(x * x + y * y + z * z);
+        if (norm > 0.000001) {
+            const invNorm = 1.0 / norm;
+            out[offset] *= invNorm;
+            out[offset + 1] *= invNorm;
+            out[offset + 2] *= invNorm;
+            out[offset + 3] *= invNorm;
+        }
+    }
 
     return out;
 };

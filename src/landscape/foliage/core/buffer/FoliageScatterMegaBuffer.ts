@@ -29,27 +29,6 @@ export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
     name: string;
 }
 
-/**
- * [KO] 캐스케이드 그림자 컬링 파라미터 인터페이스입니다.
- * [EN] Interface for cascade shadow culling parameters.
- */
-export interface CascadeCullingParam {
-    /**
-     * [KO] 캐스케이드 최대 거리
-     * [EN] Cascade maximum distance
-     */
-    maxDistance: number;
-    /**
-     * [KO] 그림자 활성화 여부
-     * [EN] Whether shadow is enabled
-     */
-    hasShadow: boolean;
-    /**
-     * [KO] 캐스케이드 프러스텀 평면 방정식 배열
-     * [EN] Cascade frustum plane equations array
-     */
-    frustumPlanes: number[][] | null;
-}
 
 /**
  * [KO] 모든 식생 타입의 인스턴스 원시 데이터, GPU 컬링 결과, 간접 드로우 버퍼, 캐스케이드 그림자 버퍼를 단일 대형 GPU 버퍼로 통합 관리하는 클래스입니다.
@@ -267,9 +246,10 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
     updateUnifiedGlobalUniforms(
         camX: number, camY: number, camZ: number,
         fovFactor: number,
-        mainFrustumPlanes: Float32Array | number[][] | null,
-        cascades: CascadeCullingParam[],
-        activeCascadeCount: number = 4,
+        mainFrustumPlanes: Float32Array | null,
+        activeCascadeCount: number = 0,
+        cascadeSplitDepths?: number[] | Float32Array | null,
+        cascadeShadowFrustumPlanesByCascade?: Float32Array[] | null,
         viewportHeight: number = 1080.0,
         hzbEnabled: boolean = false,
         viewProjectionMatrix: any = null,
@@ -309,39 +289,21 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             gf32.fill(0, 16, 32);
         }
 
-        if (mainFrustumPlanes instanceof Float32Array && mainFrustumPlanes.length >= 24) {
-            gf32.set(mainFrustumPlanes.subarray(0, 24), 32);
-        } else if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
-            for (let p = 0; p < 6; p++) {
-                const plane = mainFrustumPlanes[p];
-                const baseOffset = 32 + p * 4;
-                gf32[baseOffset] = plane[0];
-                gf32[baseOffset + 1] = plane[1];
-                gf32[baseOffset + 2] = plane[2];
-                gf32[baseOffset + 3] = plane[3];
-            }
+        if (mainFrustumPlanes && mainFrustumPlanes.length >= 24) {
+            gf32.set(mainFrustumPlanes.length === 24 ? mainFrustumPlanes : mainFrustumPlanes.subarray(0, 24), 32);
         }
 
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
-            const cascade = cascades[c];
             const cascadeBase = 56 + c * 28;
-            if (cascade && cascade.hasShadow) {
-                gf32[cascadeBase] = cascade.maxDistance;
+            if (c < activeCascadeCount && cascadeShadowFrustumPlanesByCascade && cascadeShadowFrustumPlanesByCascade[c]) {
+                const maxDist = cascadeSplitDepths ? cascadeSplitDepths[c] : 0.0;
+                gf32[cascadeBase] = maxDist ?? 0.0;
                 gu32[cascadeBase + 1] = 1;
                 gu32[cascadeBase + 2] = 0;
                 gu32[cascadeBase + 3] = 0;
 
-                const planes = cascade.frustumPlanes;
-                if (planes && planes.length >= 6) {
-                    for (let p = 0; p < 6; p++) {
-                        const plane = planes[p];
-                        const pOffset = cascadeBase + 4 + p * 4;
-                        gf32[pOffset] = plane[0];
-                        gf32[pOffset + 1] = plane[1];
-                        gf32[pOffset + 2] = plane[2];
-                        gf32[pOffset + 3] = plane[3];
-                    }
-                }
+                const planes = cascadeShadowFrustumPlanesByCascade[c];
+                gf32.set(planes.length === 24 ? planes : planes.subarray(0, 24), cascadeBase + 4);
             } else {
                 gf32[cascadeBase] = 0.0;
                 gu32[cascadeBase + 1] = 0;

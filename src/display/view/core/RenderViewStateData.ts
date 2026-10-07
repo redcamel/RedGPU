@@ -3,7 +3,7 @@ import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
 import {CommandBatchStats} from "../../../commandEncoderManager/CommandEncoderManager";
 import GBUFFER_TYPE from "./GBUFFER_TYPE";
-import {computeFrustumPlanesFromPVMatrix} from "../../../math/computeFrustumPlanes";
+import {computeFrustumPlanesFromPVMatrixFlat} from "../../../math/computeFrustumPlanes";
 
 
 /**
@@ -195,14 +195,19 @@ class RenderViewStateData {
      */
     readonly frustumPlanesFlat: Float32Array = new Float32Array(24);
     /**
-     * [KO] 4개 캐스케이드 섀도우 프러스텀 평면 캐시 배열 [cascadeIndex][planeIndex][4]
-     * [EN] 4-cascade shadow frustum plane cache array [cascadeIndex][planeIndex][4]
+     * [KO] 4개 캐스케이드 통합 1차원 평탄 섀도우 프러스텀 평면 버퍼 (Float32Array(96) = 24 floats * 4 cascades)
+     * [EN] 1D flattened cascade shadow frustum planes buffer for 4 cascades (Float32Array(96) = 24 floats * 4 cascades)
      */
-    readonly shadowFrustumPlanes: number[][][] = [
-        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
-        [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+    readonly cascadeShadowFrustumPlanesFlat: Float32Array = new Float32Array(96);
+    /**
+     * [KO] 캐스케이드별 24-float 서브어레이 뷰 캐시 배열 (Zero-GC 참조용)
+     * [EN] Per-cascade 24-float subarray view cache array (for Zero-GC reference)
+     */
+    readonly cascadeShadowFrustumPlanesByCascade: Float32Array[] = [
+        this.cascadeShadowFrustumPlanesFlat.subarray(0, 24),
+        this.cascadeShadowFrustumPlanesFlat.subarray(24, 48),
+        this.cascadeShadowFrustumPlanesFlat.subarray(48, 72),
+        this.cascadeShadowFrustumPlanesFlat.subarray(72, 96)
     ];
     /**
      * [KO] 캐스케이드별 최대 분할 거리 배열
@@ -390,7 +395,7 @@ class RenderViewStateData {
                 this.#lastCascadePVArray[c] = pv;
                 this.cascadeSplitDepths[c] = splitDepths[c] ?? 200.0;
                 if (pv) {
-                    computeFrustumPlanesFromPVMatrix(pv, this.shadowFrustumPlanes[c]);
+                    computeFrustumPlanesFromPVMatrixFlat(pv, this.cascadeShadowFrustumPlanesByCascade[c]);
                 }
             }
         }

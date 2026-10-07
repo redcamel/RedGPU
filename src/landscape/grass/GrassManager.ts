@@ -42,7 +42,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #lastBakePos: [number, number] = [0, 0];
     #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
-    #frustumPlanesF32: Float32Array | null = new Float32Array(24);
+    #frustumPlanesF32: Float32Array | null = null;
 
     /**
      * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -222,9 +222,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#lastCamPos[1] = camY;
         this.#lastCamPos[2] = camZ;
 
-        if (this.#frustumPlanesF32) {
-            this.#frustumPlanesF32.set(renderViewStateData.frustumPlanesFlat);
-        }
+        this.#frustumPlanesF32 = renderViewStateData.frustumPlanesFlat;
 
         const currentLoadedTileCount = this.landscape.tileLoadedCount;
         const hasValidTextures = this.landscape.hasValidScatterAtlas;

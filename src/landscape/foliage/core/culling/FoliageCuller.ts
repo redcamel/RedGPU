@@ -9,11 +9,10 @@ import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
-import FoliageScatterMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageScatterMegaBuffer";
+import FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 import {ScatterInstanceBaker} from "../../../core/scatter";
 import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import {computeFrustumPlanes, computeFrustumPlanesFromPVMatrix} from "../../../../math/computeFrustumPlanes";
 
 /**
  * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 수행하는 클래스입니다.
@@ -26,23 +25,6 @@ import {computeFrustumPlanes, computeFrustumPlanesFromPVMatrix} from "../../../.
  */
 class FoliageCuller extends AScatterCullPipeline {
     #tempPVMatrix: mat4 = mat4.create();
-    #cachedFrustumPlanes: number[][] = [
-        new Array(4), new Array(4), new Array(4),
-        new Array(4), new Array(4), new Array(4)
-    ];
-    #cachedShadowFrustumPlanes: number[][][] = [
-        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
-        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
-        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
-        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)]
-    ];
-
-    #cachedCascadeParams: CascadeCullingParam[] = [
-        {maxDistance: 3.2, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 25.0, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 85.0, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
-    ];
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
     #baker: ScatterInstanceBaker;
     #lastHZBTextureView: GPUTextureView | null = null;
@@ -112,17 +94,9 @@ class FoliageCuller extends AScatterCullPipeline {
         const camY = camera?.y ?? camera?.position?.[1] ?? 0;
         const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
 
-        let frustumPlanes: Float32Array | number[][] | null = stateData?.frustumPlanesFlat
+        const frustumPlanes: Float32Array | null = stateData?.frustumPlanesFlat
             ?? viewOrCamera?.frustumPlanesFlat
             ?? null;
-
-        if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
-            frustumPlanes = computeFrustumPlanes(
-                camera.projectionMatrix,
-                camera.viewMatrix,
-                this.#cachedFrustumPlanes
-            );
-        }
 
         const fov = camera?.fov ?? 60.0;
         if (fov !== this.#lastFOV) {
@@ -133,44 +107,6 @@ class FoliageCuller extends AScatterCullPipeline {
         const fovFactor = this.#cachedFovFactor;
 
         if (this.#megaBuffer) {
-
-            const shadowManager = stateData?.view?.scene?.shadowManager;
-            const dirShadow = shadowManager?.directionalShadowManager;
-            const cascadeParams = this.#cachedCascadeParams;
-            const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
-
-            if (stateData && stateData.activeCascadeCount > 0) {
-
-                const cCount = stateData.activeCascadeCount;
-                for (let c = 0; c < 4; c++) {
-                    const param = cascadeParams[c];
-                    param.maxDistance = stateData.cascadeSplitDepths[c];
-                    param.hasShadow = c < cCount;
-                    param.frustumPlanes = (c < cCount) ? stateData.shadowFrustumPlanes[c] : null;
-                }
-            } else if (dirShadow && activeCascadeCount > 0) {
-                const cascadePV = dirShadow.cascadeProjectionViewMatrices;
-                const splitDepths = dirShadow.cascadeSplitDepths;
-                for (let c = 0; c < 4; c++) {
-                    const pv = (c < activeCascadeCount) ? cascadePV[c] : null;
-                    const param = cascadeParams[c];
-                    param.maxDistance = splitDepths[c] ?? 200.0;
-                    param.hasShadow = !!pv;
-                    if (pv) {
-                        param.frustumPlanes = computeFrustumPlanesFromPVMatrix(
-                            pv,
-                            this.#cachedShadowFrustumPlanes[c]
-                        );
-                    } else {
-                        param.frustumPlanes = null;
-                    }
-                }
-            } else {
-                for (let c = 0; c < 4; c++) {
-                    cascadeParams[c].hasShadow = false;
-                }
-            }
-
             const currentView = stateData?.view || (viewOrCamera?.camera ? viewOrCamera : null);
             const hzb = currentView?.hierarchicalZBuffer;
             const hzbTextureView = hzb?.textureView || null;
@@ -186,12 +122,17 @@ class FoliageCuller extends AScatterCullPipeline {
             }
 
             const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
+            const activeCascadeCount = stateData?.activeCascadeCount ?? 0;
+            const cascadeSplitDepths = stateData?.cascadeSplitDepths ?? null;
+            const cascadeShadowFrustumPlanesByCascade = stateData?.cascadeShadowFrustumPlanesByCascade ?? null;
+
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 camX, camY, camZ,
                 fovFactor,
                 frustumPlanes,
-                cascadeParams,
                 activeCascadeCount,
+                cascadeSplitDepths,
+                cascadeShadowFrustumPlanesByCascade,
                 viewportHeight,
                 hasHZB,
                 viewProjectionMatrix,

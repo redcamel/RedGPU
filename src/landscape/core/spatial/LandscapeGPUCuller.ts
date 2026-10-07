@@ -94,7 +94,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
      * @param tileSizeZ - [KO] 단일 타일 Z 크기 / [EN] Single tile Z size
      * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale
      * @param tileCount - [KO] 전체 활성 타일 수 / [EN] Total active tile count
-     * @param frustumPlanes - [KO] 카메라 뷰 프러스텀 6개 평면 배열 / [EN] Array of 6 camera view frustum planes
+     * @param frustumPlanes - [KO] 카메라 뷰 프러스텀 1차원 평탄 버퍼 (Float32Array(24)) / [EN] Flattened camera view frustum planes buffer (Float32Array(24))
      * @param lodDistancesSq - [KO] LOD 레벨 전환 제곱 거리 배열 / [EN] Squared distance thresholds per LOD
      * @param tanHalfFOV - [KO] tan(halfFOV) 값 / [EN] tan(halfFOV) factor
      * @param lodMetric - [KO] 화면 투영 오차 LOD 계수 / [EN] Screen space error metric
@@ -110,7 +110,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
         tileSizeZ: number,
         heightScale: number,
         tileCount: number,
-        frustumPlanes: number[][] | Float32Array[] | Float32Array | null,
+        frustumPlanes: Float32Array | null,
         lodDistancesSq: Float32Array,
         tanHalfFOV: number = 1.0,
         lodMetric: number = 0.0,
@@ -135,17 +135,8 @@ export class LandscapeGPUCuller extends RedGPUObject {
         }
 
         // 1. 16-byte aligned large members: frustumPlanes (offset 16..39)
-        if (frustumPlanes instanceof Float32Array && frustumPlanes.length >= 24) {
-            data.set(frustumPlanes.subarray(0, 24), 16);
-        } else if (frustumPlanes && frustumPlanes.length >= 6) {
-            for (let i = 0; i < 6; i++) {
-                const plane = frustumPlanes[i];
-                const offset = 16 + i * 4;
-                data[offset] = plane[0];
-                data[offset + 1] = plane[1];
-                data[offset + 2] = plane[2];
-                data[offset + 3] = plane[3];
-            }
+        if (frustumPlanes && frustumPlanes.length >= 24) {
+            data.set(frustumPlanes.length === 24 ? frustumPlanes : frustumPlanes.subarray(0, 24), 16);
         } else {
             for (let i = 0; i < 6; i++) {
                 const offset = 16 + i * 4;

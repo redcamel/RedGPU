@@ -17,7 +17,6 @@ import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
 import GrassManager from "./grass/GrassManager";
 import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
-import {computeFrustumPlanes} from "../math/computeFrustumPlanes";
 import DebuggerManager from "./debugger/DebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
@@ -31,15 +30,15 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  *
  * [KO] 가상 텍스처 아틀라스(VHT/VNT/VBT)와 GPU 컴퓨트 파이프라인을 기반으로 광활한 야외 지형을 실시간 고성능으로 표현하며, 주요 생태계 기능들은 전용 서브시스템을 통해 명확히 분리 관리됩니다:
  * [KO] - **지면 텍스처 블렌딩 (Texture Blending)**: 지형의 지표면 다중 텍스처 블렌딩은 Landscape 자체의 **레이어 시스템**(`addLayer()`, `layers`, `LandscapeLayer`)으로 관리됩니다. 각 레이어별 베이스 컬러, 노멀, ORM 및 스플랫 가중치 맵(WeightMap)을 유연하게 합성합니다.
- * [KO] - **절차적 잔디 생태계 (Procedural Grass)**: 지형 표면에 대규모로 배치되는 잔디는 {@link Landscape.grassManager | `landscape.grassManager`} 인스턴스로 독립 관리됩니다. GPU 컴퓨트 기반 밀도 베이킹, 거리별 스트리밍, 바람 시뮬레이션을 수행합니다.
- * [KO] - **대규모 식생 및 3D 임포스터 (Foliage & Impostors)**: 나무, 수풀, 바위 등 3D 식생 오브젝트는 {@link Landscape.foliageManager | `landscape.foliageManager`} 인스턴스로 독립 관리됩니다. 자동 HZB 오클루전 컬링, 계층적 LOD 및 원거리 3D 옥타헤드럴 임포스터 베이킹을 지원합니다.
- * [KO] - **실시간 시각 디버깅 (Visual Debugging)**: 가상 하이트맵(VHT), 가상 노멀(VNT), 베이킹 텍스처(VBT) 및 공간 그리드는 {@link Landscape.debuggerManager | `landscape.debuggerManager`} 인스턴스를 통해 실시간 온스크린 뷰어로 모니터링할 수 있습니다.
+ * [KO] - **절차적 잔디 생태계 (Procedural Grass)**: 지형 표면에 대규모로 배치되는 잔디는 {@link grassManager | landscape.grassManager} 인스턴스로 독립 관리됩니다. GPU 컴퓨트 기반 밀도 베이킹, 거리별 스트리밍, 바람 시뮬레이션을 수행합니다.
+ * [KO] - **대규모 식생 및 3D 임포스터 (Foliage & Impostors)**: 나무, 수풀, 바위 등 3D 식생 오브젝트는 {@link foliageManager | landscape.foliageManager} 인스턴스로 독립 관리됩니다. 자동 HZB 오클루전 컬링, 계층적 LOD 및 원거리 3D 옥타헤드럴 임포스터 베이킹을 지원합니다.
+ * [KO] - **실시간 시각 디버깅 (Visual Debugging)**: 가상 하이트맵(VHT), 가상 노멀(VNT), 베이킹 텍스처(VBT) 및 공간 그리드는 {@link debuggerManager | landscape.debuggerManager} 인스턴스를 통해 실시간 온스크린 뷰어로 모니터링할 수 있습니다.
  *
  * [EN] Delivers vast outdoor terrain with real-time performance using virtual texture atlases (VHT/VNT/VBT) and a GPU compute pipeline, with key features managed through dedicated subsystems:
  * [EN] - **Texture Blending**: Multi-texture surface blending is managed by Landscape's own **layer system** (`addLayer()`, `layers`, `LandscapeLayer`), flexibly compositing base color, normal, ORM, and weight maps per layer.
- * [EN] - **Procedural Grass**: Large-scale grass populating the terrain surface is independently managed via the {@link Landscape.grassManager | `landscape.grassManager`} instance, handling GPU compute-based density baking, distance streaming, and wind simulation.
- * [EN] - **Foliage & Impostors**: 3D vegetation objects such as trees, bushes, and rocks are independently managed via the {@link Landscape.foliageManager | `landscape.foliageManager`} instance, supporting automatic HZB occlusion culling, hierarchical LOD, and distant 3D octahedral impostor baking.
- * [EN] - **Visual Debugging**: Virtual heightmaps (VHT), normals (VNT), baked textures (VBT), and spatial grids can be monitored via on-screen viewers using the {@link Landscape.debuggerManager | `landscape.debuggerManager`} instance.
+ * [EN] - **Procedural Grass**: Large-scale grass populating the terrain surface is independently managed via the {@link grassManager | landscape.grassManager} instance, handling GPU compute-based density baking, distance streaming, and wind simulation.
+ * [EN] - **Foliage & Impostors**: 3D vegetation objects such as trees, bushes, and rocks are independently managed via the {@link foliageManager | landscape.foliageManager} instance, supporting automatic HZB occlusion culling, hierarchical LOD, and distant 3D octahedral impostor baking.
+ * [EN] - **Visual Debugging**: Virtual heightmaps (VHT), normals (VNT), baked textures (VBT), and spatial grids can be monitored via on-screen viewers using the {@link debuggerManager | landscape.debuggerManager} instance.
  *
  * <iframe src="/RedGPU/examples/3d/landscape/openWorldIntegration/"></iframe>
  *
@@ -128,10 +127,6 @@ export class Landscape extends RedGPUObject {
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #lastTanHalfFOV: number = 1.0;
     #tileHeightBuffer: Float32Array = new Float32Array(2);
-    #cachedFrustumPlanes: number[][] = [
-        new Array(4), new Array(4), new Array(4),
-        new Array(4), new Array(4), new Array(4)
-    ];
 
 
     // =========================================================================
@@ -1073,12 +1068,6 @@ export class Landscape extends RedGPUObject {
         const projMatrix = currentView.projectionMatrix;
         const viewMatrix = rawCamera.viewMatrix;
 
-        let frustumPlanes: Float32Array | number[][] | null = renderViewStateData.frustumPlanesFlat
-            ?? renderViewStateData.frustumPlanes
-            ?? null;
-        if (!frustumPlanes && projMatrix && viewMatrix) {
-            frustumPlanes = computeFrustumPlanes(projMatrix, viewMatrix, this.#cachedFrustumPlanes);
-        }
 
         this.#tileStreamer.update(camX, camZ, camY);
 
@@ -1124,7 +1113,7 @@ export class Landscape extends RedGPUObject {
             this.#spatialGrid.tileSizeX, this.#spatialGrid.tileSizeZ,
             this.#heightScale,
             totalComponents,
-            frustumPlanes,
+            renderViewStateData.frustumPlanesFlat,
             this.#lodDistancesBuffer,
             tanHalfFOV,
             lodMetricVal,
