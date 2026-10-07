@@ -24,6 +24,7 @@ import ditherFadeDiscard_wgsl from './math/ditherFadeDiscard.wgsl';
 import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCutoff.wgsl';
 import testSphereInFrustum_wgsl from './math/testSphereInFrustum.wgsl';
 import blendGrassGround_wgsl from './math/blendGrassGround.wgsl';
+import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -244,6 +245,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const blendGrassGround = blendGrassGround_wgsl;
+
+        /**
+         * [KO] 잔디 인스턴스 정점 변환, 쿼터니언 회전, 지면 침하 보정 및 거리 페이드 모듈
+         * [EN] Grass instance vertex transformation, quaternion rotation, ground sink compensation, and distance fade module
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.transformGrassPosition;
+         * ```
+         */
+        export const transformGrassPosition = transformGrassPosition_wgsl;
     }
 
     /**

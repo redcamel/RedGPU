@@ -2,7 +2,7 @@
 #redgpu_include shadow.getShadowClipPosition;
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassParams;
-#redgpu_include landscape.math.rotateVectorByQuat;
+#redgpu_include landscape.math.transformGrassPosition;
 
 struct VertexInput {
     @location(0) position: vec3<f32>,
@@ -24,9 +24,6 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     var output: ShadowVertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    var scaleXZ = instance.scaleXZ;
-    var scaleY = instance.scaleY;
-
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
     let distToCam = distance(instPos, camPos);
@@ -41,36 +38,21 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
         return output;
     }
 
-    var shrink = 1.0;
-    var alphaFade = 1.0;
+    let fade = computeGrassDistanceFade(distToCam, shadowCullDist, shadowFadeStart, instance.scaleXZ, instance.scaleY);
 
-    if (distToCam > shadowFadeStart) {
-        let fadeRatio = clamp((shadowCullDist - distToCam) / max(0.001, shadowCullDist - shadowFadeStart), 0.0, 1.0);
-        shrink = fadeRatio;
-        scaleXZ = scaleXZ * shrink;
-        scaleY = scaleY * shrink;
-        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
-    }
-
-    let scaledPos = vec3<f32>(
-        input.position.x * scaleXZ,
-        (input.position.y - grassUniforms.minY) * scaleY,
-        input.position.z * scaleXZ
+    let xform = transformGrassPosition(
+        input.position,
+        instPos,
+        fade.scaleXZ,
+        fade.scaleY,
+        instance.packedQuat,
+        grassUniforms.minY,
+        grassUniforms.meshHeight
     );
 
-    let q = normalize(unpack4x8snorm(instance.packedQuat));
-    var localPos = rotateVectorByQuat(scaledPos, q);
-
-    let baseHeight = max(0.01, grassUniforms.meshHeight);
-    let heightRatio = clamp((input.position.y - grassUniforms.minY) / baseHeight, 0.0, 1.0);
-    let sinkDepth = max(0.0, -localPos.y);
-    localPos.y += sinkDepth * (1.0 - heightRatio * 0.7);
-
-    let worldPos = localPos + instPos;
-
-    output.clipPos = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
+    output.clipPos = getShadowClipPosition(xform.worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.uv = input.uv;
-    output.alphaFade = alphaFade;
+    output.alphaFade = fade.alphaFade;
 
     return output;
 }
