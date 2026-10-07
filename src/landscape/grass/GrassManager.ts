@@ -75,6 +75,34 @@ export class GrassManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 등록된 잔디 타입의 총 개수를 반환합니다.
+     * [EN] Returns the total number of registered grass types.
+     */
+    get typeCount(): number {
+        return this.#grassList.length;
+    }
+
+    /**
+     * [KO] 잔디 시스템의 활성화 여부를 반환합니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
+     * [EN] Gets whether the grass system is enabled. When `false`, grass streaming, culling, and rendering are suspended.
+     */
+    get enabled(): boolean {
+        return this.#enabled;
+    }
+
+    /**
+     * [KO] 잔디 시스템의 활성화 여부를 설정합니다.
+     * [EN] Sets whether the grass system is enabled.
+     *
+     * @param val -
+     * [KO] 활성화 여부
+     * [EN] Whether to enable
+     */
+    set enabled(val: boolean) {
+        this.#enabled = val;
+    }
+
+    /**
      * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
      * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
      *
@@ -113,7 +141,7 @@ export class GrassManager extends RedGPUObject {
 
         // 즉시 베이킹이 가능한 경우, #bakeGrassType 완료 시 최신 instanceCount로 단 1회 기록되므로 중복 VRAM 전송 방지
         if (!canBakeImmediately) {
-            this.#megaBuffer.updateTypeParam(typeId, grassType, alloc);
+            this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
         }
 
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
@@ -154,34 +182,6 @@ export class GrassManager extends RedGPUObject {
         this.#renderer.markAllBundlesDirty();
         this.#populated = true;
         return grassType;
-    }
-
-    /**
-     * [KO] 잔디 시스템의 활성화 여부를 반환합니다. `false`일 경우 잔디 스트리밍, 컬링, 렌더링이 일시 중단됩니다.
-     * [EN] Gets whether the grass system is enabled. When `false`, grass streaming, culling, and rendering are suspended.
-     */
-    get enabled(): boolean {
-        return this.#enabled;
-    }
-
-    /**
-     * [KO] 잔디 시스템의 활성화 여부를 설정합니다.
-     * [EN] Sets whether the grass system is enabled.
-     *
-     * @param val -
-     * [KO] 활성화 여부
-     * [EN] Whether to enable
-     */
-    set enabled(val: boolean) {
-        this.#enabled = val;
-    }
-
-    /**
-     * [KO] 등록된 잔디 타입의 총 개수를 반환합니다.
-     * [EN] Returns the total number of registered grass types.
-     */
-    get count(): number {
-        return this.#grassList.length;
     }
 
     /**
@@ -354,11 +354,11 @@ export class GrassManager extends RedGPUObject {
                 type.markClean();
                 this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
 
-                // rebakeAll 실행 시 이미 각 잔디 타입별 updateTypeParam이 전송되었으므로 중복 전송 방지
+                // rebakeAll 실행 시 이미 각 잔디 타입별 updateTypeParams가 전송되었으므로 중복 전송 방지
                 if (!rebakedThisFrame) {
                     const alloc = this.#megaBuffer.getAllocation(typeId);
                     if (alloc) {
-                        this.#megaBuffer.updateTypeParam(typeId, type, alloc);
+                        this.#megaBuffer.updateTypeParams(typeId, type, alloc);
                     }
                 }
             }
@@ -483,13 +483,24 @@ export class GrassManager extends RedGPUObject {
      * @param name - 검색할 잔디의 고유 이름
      * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
      */
-    getGrassByName(name: string): Grass | undefined {
+    getGrass(name: string): Grass | undefined {
         const count = this.#grassList.length;
         for (let i = 0; i < count; i++) {
             const g = this.#grassList[i];
             if (g.name === name) return g;
         }
         return undefined;
+    }
+
+    /**
+     * [KO] 등록된 잔디의 고유 이름을 통해 해당 {@link Grass} 생태계 인스턴스를 검색합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Finds and retrieves the corresponding {@link Grass} ecosystem instance by its registered unique name. (IScatterManager standard symmetric method)
+     *
+     * @param name - 검색할 잔디의 고유 이름
+     * @returns 일치하는 {@link Grass} 인스턴스 (미발견 시 `undefined`)
+     */
+    getTypeByName(name: string): Grass | undefined {
+        return this.getGrass(name);
     }
 
 
@@ -580,7 +591,7 @@ export class GrassManager extends RedGPUObject {
 
         const alloc = this.#megaBuffer.getAllocation(grass.typeId);
         if (alloc) {
-            this.#megaBuffer.updateTypeParam(grass.typeId, grass, alloc);
+            this.#megaBuffer.updateTypeParams(grass.typeId, grass, alloc);
         }
     }
 }

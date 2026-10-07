@@ -152,19 +152,28 @@ class FoliageRenderer extends RedGPUObject {
     }
 
     /**
+     * [KO] 식생 생태계 변경 시 모든 렌더 번들(섀도우 및 뎁스 프리패스)을 일괄 무효화합니다. (GrassRenderer 대칭 메서드)
+     * [EN] Invalidates all render bundles (shadow and depth prepass) at once on foliage ecosystem changes. (Symmetric to GrassRenderer)
+     */
+    markAllBundlesDirty(): void {
+        this.markShadowBundleDirty();
+        this.markDepthPrepassBundleDirty();
+    }
+
+    /**
      * [KO] 주어진 식생 타입들의 인스턴스를 메인 렌더 패스(뎁스 프리패스 포함)에 드로우합니다.
      * [EN] Draws instances of the given foliage types to the main render pass (including depth prepass).
+     * @param view -
+     * [KO] 렌더링 뷰 인스턴스
+     * [EN] Rendering View3D instance
      * @param passEncoder -
      * [KO] GPURenderPassEncoder 인스턴스
      * [EN] GPURenderPassEncoder instance
      * @param typeList -
      * [KO] 렌더링할 식생 타입 배열
      * [EN] Array of foliage types to render
-     * @param view -
-     * [KO] 렌더링 뷰 인스턴스
-     * [EN] Rendering View3D instance
      */
-    render(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
+    render(view: View3D, passEncoder: GPURenderPassEncoder, typeList: Foliage[]): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
@@ -261,17 +270,17 @@ class FoliageRenderer extends RedGPUObject {
     /**
      * [KO] 지정된 캐스케이드 인덱스에 대해 식생 인스턴스를 그림자 맵 패스에 드로우합니다 (렌더 번들 캐싱 지원).
      * [EN] Draws foliage instances to the shadow map pass for the specified cascade index (supports render bundle caching).
+     * @param view -
+     * [KO] 렌더링 뷰 인스턴스 (캐스케이드 정보 포함)
+     * [EN] Rendering View3D instance (including cascade info)
      * @param passEncoder -
      * [KO] GPURenderPassEncoder 인스턴스
      * [EN] GPURenderPassEncoder instance
      * @param typeList -
      * [KO] 그림자를 캐스팅할 식생 타입 배열
      * [EN] Array of shadow-casting foliage types
-     * @param view -
-     * [KO] 렌더링 뷰 인스턴스 (캐스케이드 정보 포함)
-     * [EN] Rendering View3D instance (including cascade info)
      */
-    renderShadow(passEncoder: GPURenderPassEncoder, typeList: Foliage[], view: View3D): void {
+    renderShadow(view: View3D, passEncoder: GPURenderPassEncoder, typeList: Foliage[]): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 

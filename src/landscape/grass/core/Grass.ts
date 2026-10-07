@@ -669,6 +669,14 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
+     * [KO] 현재 스트리밍되어 GPU 버퍼 상에 활성화된 인스턴스 수를 반환합니다.
+     * [EN] Returns the number of instances currently active and loaded into GPU buffers.
+     */
+    get activeInstanceCount(): number {
+        return this.allocation ? this.allocation.instanceCount : 0;
+    }
+
+    /**
      * [KO] 렌더링 또는 유니폼 버퍼 갱신이 필요한지 여부를 나타내는 더티 플래그
      * [EN] Dirty flag indicating whether rendering or uniform buffer update is required
      */

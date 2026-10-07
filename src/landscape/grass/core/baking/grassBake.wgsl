@@ -78,7 +78,7 @@ fn writeInvalidInstance(targetIdx: u32, posX: f32, posZ: f32) {
     inv.scaleXZ = 0.0;
     inv.packedBounding = 0u;
     inv.packedQuat = 0u;
-    inv.packedGroundColor = 0u;
+    inv.packedGroundColorAndType = 0u;
     rawInstances[targetIdx] = inv;
 }
 
@@ -233,7 +233,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         outInst.packedBounding = pack2x16float(vec2<f32>(centerOffsetY, boundRadius));
         outInst.packedQuat = pack4x8snorm(canonicalQuat);
         let colorPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0)) & 0x00FFFFFFu;
-        outInst.packedGroundColor = colorPacked | (uniforms.typeId << 24u);
+        outInst.packedGroundColorAndType = colorPacked | (uniforms.typeId << 24u);
 
         rawInstances[currentTargetIdx] = outInst;
     }

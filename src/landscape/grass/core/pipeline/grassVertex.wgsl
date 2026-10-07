@@ -81,7 +81,7 @@ fn main(input: VertexInput) -> VertexOutput {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
-    output.groundColor = unpack4x8unorm(instance.packedGroundColor);
+    output.groundColor = unpack4x8unorm(instance.packedGroundColorAndType);
 
     return output;
 }

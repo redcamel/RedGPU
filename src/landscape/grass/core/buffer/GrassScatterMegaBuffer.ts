@@ -230,7 +230,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param grass - 잔디 생태계 인스턴스
      * @param alloc - 메가버퍼 할당 정보 객체
      */
-    updateTypeParam(typeId: number, grass: Grass, alloc: GrassTypeAllocation): void {
+    updateTypeParams(typeId: number, grass: Grass, alloc: GrassTypeAllocation): void {
         const typeParamFloats = this.typeParamFloats;
         if (typeParamFloats === 0) return;
 

@@ -140,8 +140,7 @@ class FoliageManager {
         this.#culler = new FoliageCuller(this.#redGPUContext, this.#megaBuffer);
 
         this.#megaBuffer.onRecreated = () => {
-            this.#renderer.markShadowBundleDirty();
-            this.#renderer.markDepthPrepassBundleDirty();
+            this.#renderer.markAllBundlesDirty();
         };
     }
 
@@ -284,8 +283,30 @@ class FoliageManager {
      * [KO] 등록된 총 식생 타입(Foliage) 개수를 반환합니다.
      * [EN] Returns the total number of registered foliage types.
      */
-    get foliageCount(): number {
+    get typeCount(): number {
         return this.#foliageList.length;
+    }
+
+    /**
+     * [KO] 현재 스트리밍되어 메모리에 로드된 총 식생 인스턴스 수를 반환합니다. (GrassManager 대칭 프로퍼티)
+     * [EN] Returns the total number of foliage instances currently populated and loaded in memory. (Symmetric to GrassManager)
+     */
+    get totalInstanceCount(): number {
+        let count = 0;
+        const list = this.#foliageList;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            count += list[i].activeInstanceCount;
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 식생 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다. (GrassManager 대칭 프로퍼티)
+     * [EN] Returns the maximum foliage instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer. (Symmetric to GrassManager)
+     */
+    get instanceCapacity(): number {
+        return this.#megaBuffer.instanceCapacity;
     }
 
     /**
@@ -309,7 +330,7 @@ class FoliageManager {
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
-        this.#renderer.render(passEncoder, this.#foliageList, view);
+        this.#renderer.render(view, passEncoder, this.#foliageList);
     }
 
 
@@ -392,7 +413,7 @@ class FoliageManager {
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         if (!this.#enabled || !passEncoder || this.#foliageList.length === 0) return;
-        this.#renderer.renderShadow(passEncoder, this.#foliageList, view);
+        this.#renderer.renderShadow(view, passEncoder, this.#foliageList);
     }
 
     /**
@@ -452,8 +473,7 @@ class FoliageManager {
 
         this.#foliageList.splice(idx, 1);
         foliage.destroy();
-        this.#renderer.markShadowBundleDirty();
-        this.#renderer.markDepthPrepassBundleDirty();
+        this.#renderer.markAllBundlesDirty();
         return this.#foliageTypes.delete(foliage.name);
     }
 
@@ -471,6 +491,17 @@ class FoliageManager {
     getFoliage(name: string): Foliage | undefined {
         if (!name) return undefined;
         return this.#foliageTypes.get(name);
+    }
+
+    /**
+     * [KO] 등록된 식생 생태계 타입을 이름(`name`)으로 조회합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Retrieves a registered foliage ecosystem type by name. (IScatterManager standard symmetric method)
+     *
+     * @param name - 조회할 식생 타입의 고유 이름
+     * @returns 일치하는 {@link Foliage} 인스턴스 (미등록 시 `undefined`)
+     */
+    getTypeByName(name: string): Foliage | undefined {
+        return this.getFoliage(name);
     }
 
     /**
@@ -492,8 +523,7 @@ class FoliageManager {
         for (let i = 0; i < count; i++) {
             this.#foliageList[i].rebake();
         }
-        this.#renderer.markShadowBundleDirty();
-        this.#renderer.markDepthPrepassBundleDirty();
+        this.#renderer.markAllBundlesDirty();
     }
 
     /**
@@ -543,8 +573,7 @@ class FoliageManager {
             options,
             this.#megaBuffer,
             () => {
-                this.#renderer.markShadowBundleDirty();
-                this.#renderer.markDepthPrepassBundleDirty();
+                this.#renderer.markAllBundlesDirty();
             },
             (t) => this.#repopulateFoliage(t),
             this.#culler.baker,
@@ -554,8 +583,7 @@ class FoliageManager {
         );
         this.#foliageTypes.set(options.name, foliage);
         this.#foliageList.push(foliage);
-        this.#renderer.markShadowBundleDirty();
-        this.#renderer.markDepthPrepassBundleDirty();
+        this.#renderer.markAllBundlesDirty();
 
         return foliage;
     }

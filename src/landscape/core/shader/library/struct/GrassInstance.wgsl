@@ -6,5 +6,5 @@ struct GrassInstance {
     scaleXZ: f32,
     packedBounding: u32,
     packedQuat: u32,
-    packedGroundColor: u32,
+    packedGroundColorAndType: u32,
 };

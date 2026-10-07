@@ -104,14 +104,14 @@ export default class GrassCullPipeline extends RedGPUObject {
         }
 
         const bglDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.#bindGroupLayout = resourceManager.createBindGroupLayout('Grass_Cull_BGL', bglDesc);
+        this.#bindGroupLayout = resourceManager.createBindGroupLayout('Grass_Cull_BindGroupLayout', bglDesc);
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_Cull_PipelineLayout', {
             bindGroupLayouts: [this.#bindGroupLayout]
         });
 
         this.#computePipeline = gpuDevice.createComputePipeline({
-            label: 'Grass_Cull_Pipeline',
+            label: 'Grass_Cull_ComputePipeline',
             layout: pipelineLayout,
             compute: {
                 module: computeModule,
@@ -122,3 +122,4 @@ export default class GrassCullPipeline extends RedGPUObject {
 }
 
 Object.freeze(GrassCullPipeline);
+export {GrassCullPipeline as GrassCuller};

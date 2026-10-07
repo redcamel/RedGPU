@@ -27,6 +27,7 @@ export {
     GrassScatterMegaBuffer,
     GrassBakePipeline,
     GrassCullPipeline,
+    GrassCullPipeline as GrassCuller,
     GrassRenderer,
     GrassSubMeshSlotPooler,
 

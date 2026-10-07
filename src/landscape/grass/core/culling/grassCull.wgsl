@@ -8,17 +8,10 @@
 
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassTypeParam;
-
-struct DrawIndexedIndirectCommand {
-    indexCount: u32,
-    instanceCount: atomic<u32>,
-    firstIndex: u32,
-    baseVertex: i32,
-    firstInstance: u32,
-};
+#redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 
 struct GlobalCullUniforms {
-    cameraPos: vec3<f32>,
+    cameraPosition: vec3<f32>,
     totalInstanceCount: u32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
@@ -26,7 +19,7 @@ struct GlobalCullUniforms {
 @group(0) @binding(0) var<uniform> uniforms: GlobalCullUniforms;
 @group(0) @binding(1) var<storage, read> rawInstances: array<GrassInstance>;
 @group(0) @binding(2) var<storage, read_write> culledInstances: array<GrassInstance>;
-@group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectCommand>;
+@group(0) @binding(3) var<storage, read_write> indirectCommands: array<DrawIndexedIndirectArgs>;
 
 struct GrassTypeParamsBlock {
     types: array<GrassTypeParam, 64>,
@@ -47,8 +40,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // Extract typeId from upper 8 bits of packedGroundColor
-    let typeIdx = (inst.packedGroundColor >> 24u) & 0xFFu;
+    // Extract typeId from upper 8 bits of packedGroundColorAndType
+    let typeIdx = (inst.packedGroundColorAndType >> 24u) & 0xFFu;
     if (typeIdx >= 64u) {
         return;
     }
@@ -63,7 +56,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     let pos = vec3<f32>(inst.posX, inst.posY, inst.posZ);
-    let delta = pos - uniforms.cameraPos;
+    let delta = pos - uniforms.cameraPosition;
     let distSq = dot(delta, delta);
 
     // Distance Cull
