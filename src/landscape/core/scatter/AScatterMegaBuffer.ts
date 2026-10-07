@@ -125,13 +125,13 @@ export interface AuxiliaryIndirectBufferEntry {
  *
  * **[KO] 아키텍처 및 역할:**
  * - **VRAM 통합 관리 (Unified Mega-Buffer)**: 개별 스캐터 인스턴스 버퍼를 분할 생성하지 않고, 단일 원본 스토리지 버퍼(`rawGPUBuffer`)와 컬링 통과 스토리지 버퍼(`culledGPUBuffer`)에서 64바이트 배수로 정렬 할당하여 GPU 메모리 단편화를 제거합니다.
- * - **간접 드로우(Indirect Draw) 인프라**: WebGPU `drawIndexedIndirect`에 필요한 5개 u32 인자(indexCount, instanceCount, firstIndex, baseVertex, firstInstance) 버퍼를 일괄 생성하고, 사전 기록된 템플릿 버퍼(`COPY_SRC`)를 통해 매 프레임 단 1회의 `copyBufferToBuffer`로 드로우 인스턴스 수를 초고속 리셋(`resetMultiIndirectCommands`)합니다.
+ * - **간접 드로우(Indirect Draw) 인프라 및 다중 버퍼 일괄 리셋**: WebGPU `drawIndexedIndirect`에 필요한 5개 u32 인자(indexCount, instanceCount, firstIndex, baseVertex, firstInstance) 버퍼를 일괄 생성하고, 사전 기록된 템플릿 버퍼(`COPY_SRC`)를 통해 매 프레임 단 1회의 `copyBufferToBuffer`로 드로우 인스턴스 수를 초고속 리셋(`resetMultiIndirectCommands`)합니다. 그림자(CSM) 등 추가 패스용 보조 버퍼(`registerAuxiliaryIndirectBuffer`)도 레지스트리에 등록하여 단일 파이프라인에서 일괄 초기화됩니다.
  * - **WGSL 셰이더 리플렉션 연동**: 런타임에 WGSL 셰이더 구조체(`GrassInstance`, `GrassTypeParam` 등)의 스트라이드 바이트 크기를 자동 리플렉션하여 CPU/GPU 메모리 레이아웃 불일치를 원천 방지합니다.
  * - **Zero-GC 아키텍처**: 매 프레임 렌더 루프 및 리셋 과정에서 일체의 임시 객체 생성을 배제하고 사전 할당된 버퍼를 재사용합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Unified VRAM Management**: Eliminates GPU memory fragmentation by allocating 64-byte aligned segments from single raw storage (`rawGPUBuffer`) and culled storage (`culledGPUBuffer`) buffers instead of fragmenting buffers per scatter species.
- * - **Multi-Draw Indirect Infrastructure**: Allocates 5-u32 indirect draw arguments (indexCount, instanceCount, firstIndex, baseVertex, firstInstance) in a unified GPU buffer, executing ultra-fast reset of instance counts per frame via a single `copyBufferToBuffer` command (`resetMultiIndirectCommands`).
+ * - **Multi-Draw Indirect Infrastructure & Batch Reset**: Allocates 5-u32 indirect draw arguments (indexCount, instanceCount, firstIndex, baseVertex, firstInstance) in a unified GPU buffer, executing ultra-fast reset of instance counts per frame via a single `copyBufferToBuffer` command (`resetMultiIndirectCommands`). Auxiliary indirect buffers for shadow cascades and additional passes (`registerAuxiliaryIndirectBuffer`) are registered and batch-reset in the same pipeline.
  * - **WGSL Shader Reflection Integration**: Automatically reflects byte strides of WGSL shader structs (`GrassInstance`, `GrassTypeParam`, etc.) at runtime to guarantee CPU/GPU memory layout synchronization.
  * - **Zero-GC Architecture**: Prohibits temporary object allocations during per-frame rendering and reset passes, relying exclusively on pre-allocated buffers.
  *

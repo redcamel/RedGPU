@@ -3187,8 +3187,8 @@ export namespace ShaderLibrary {
      *       directionalLights:array<DirectionalLight,3>,
      * 	  //
      * 	  ambientLight:AmbientLight,
-     *      //
-     *      wind:Wind,
+     * 	  //
+     * 	  wind:Wind,
      * };
      * 
      * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;

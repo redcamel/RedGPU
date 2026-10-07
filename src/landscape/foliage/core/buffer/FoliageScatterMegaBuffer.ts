@@ -53,7 +53,9 @@ export interface CascadeCullingParam {
 
 /**
  * [KO] 모든 식생 타입의 인스턴스 원시 데이터, GPU 컬링 결과, 간접 드로우 버퍼, 캐스케이드 그림자 버퍼를 단일 대형 GPU 버퍼로 통합 관리하는 클래스입니다.
+ * 그림자 간접 버퍼는 베이스 클래스(`AScatterMegaBuffer`)의 보조 간접 버퍼 레지스트리에 등록되어 매 프레임 단일 GPU 커맨드 인코더 파이프라인에서 일괄 리셋됩니다.
  * [EN] Class that integrally manages raw instance data, GPU culling results, indirect draw buffers, and cascade shadow buffers for all foliage types in a single large GPU buffer.
+ * Shadow indirect draw buffers are registered into the base class (`AScatterMegaBuffer`) auxiliary indirect registry to be batch-reset within a single GPU command encoder pipeline per frame.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
