@@ -23,6 +23,7 @@ import transformFoliagePosition_wgsl from './math/transformFoliagePosition.wgsl'
 import ditherFadeDiscard_wgsl from './math/ditherFadeDiscard.wgsl';
 import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCutoff.wgsl';
 import testSphereInFrustum_wgsl from './math/testSphereInFrustum.wgsl';
+import blendGrassGround_wgsl from './math/blendGrassGround.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -233,6 +234,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const testSphereInFrustum = testSphereInFrustum_wgsl;
+
+        /**
+         * [KO] 잔디 지면 색상 블렌딩, 알파 림 필터링 및 상향 노멀 연산 모듈
+         * [EN] Grass ground color blending, alpha rim filtering, and upward normal calculation module
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.blendGrassGround;
+         * ```
+         */
+        export const blendGrassGround = blendGrassGround_wgsl;
     }
 
     /**

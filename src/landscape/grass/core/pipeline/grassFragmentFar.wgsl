@@ -1,10 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include landscape.struct.GrassParams;
+#redgpu_include landscape.math.blendGrassGround;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-
-const SSS_DISTORTION: f32 = 0.35;
-const NORM_225: f32 = 0.44444445;
 
 struct VertexOutput {
     @builtin(position) clipPos: vec4<f32>,
@@ -28,30 +26,23 @@ fn main(input: VertexOutput) -> OutputFragment {
     var output: OutputFragment;
 
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
-
-    let rgbMax = max(baseTex.r, max(baseTex.g, baseTex.b));
-    var sourceAlpha = baseTex.a;
-    if (sourceAlpha > 0.85 && rgbMax < 0.15) {
-        sourceAlpha = clamp((rgbMax - 0.02) / 0.10, 0.0, 1.0);
-    }
-    sourceAlpha *= input.alphaFade;
+    let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
     let farCutoff = clamp(materialUniforms.alphaCutoff * 0.55, 0.10, 0.30);
     if (sourceAlpha < farCutoff) {
         discard;
     }
 
-    let exposureBoost = max(0.1, materialUniforms.exposureBoost);
-    var albedo = baseTex.rgb * exposureBoost;
+    let albedo = blendGrassGroundColor(
+        baseTex.rgb,
+        materialUniforms.exposureBoost,
+        materialUniforms.hasGroundTexture,
+        materialUniforms.groundBlendStrength,
+        input.heightRatio,
+        input.groundColor.rgb
+    );
 
-    if (materialUniforms.hasGroundTexture != 0u && materialUniforms.groundBlendStrength > 0.01) {
-        let blendFactor = clamp((0.40 - input.heightRatio) * 2.5, 0.0, 1.0) * materialUniforms.groundBlendStrength;
-        albedo = mix(albedo, input.groundColor.rgb, blendFactor);
-    }
-
-    let upVec = vec3<f32>(0.0, 1.0, 0.0);
-    let upwardBlend = mix(0.55, 0.85, input.heightRatio);
-    let N = normalize(mix(input.normal, upVec, upwardBlend));
+    let N = computeGrassUpwardNormal(input.normal, input.heightRatio);
     let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
     let preExposure = systemUniforms.preExposure;
 
@@ -81,7 +72,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         totalDirectLighting += (albedo * directDiff + sssColor * sssTransmission) * dLight;
     }
 
-    let skyOcclusion = mix(0.65, 1.0, clamp(input.heightRatio * 1.43, 0.0, 1.0));
+    let skyOcclusion = computeGrassSkyOcclusion(input.heightRatio);
     var ambColor = systemUniforms.ambientLight.color.rgb * (systemUniforms.ambientLight.intensity * preExposure);
 
     if (systemUniforms.usePrefilterTexture == 1u) {
@@ -92,7 +83,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     let ambSSS = ambColor * sssColor * (subsurfaceStrength * leafThickness * 0.25);
     let totalIndirectLighting = (albedo * (ambColor * skyOcclusion)) + ambSSS;
 
-    let contactAO = mix(0.40, 1.0, clamp(input.heightRatio * 4.0, 0.0, 1.0));
+    let contactAO = computeGrassContactAO(input.heightRatio);
     let finalColor = (totalDirectLighting + totalIndirectLighting) * contactAO;
 
     output.color = vec4<f32>(finalColor, 1.0);
