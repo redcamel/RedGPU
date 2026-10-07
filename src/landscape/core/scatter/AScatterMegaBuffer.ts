@@ -24,11 +24,6 @@ export interface ScatterShaderReflectionConfig {
      */
     shaderInfo: any;
     /**
-     * [KO] 인스턴스 스토리지 버퍼 이름 (선택사항)
-     * [EN] Instance storage buffer name (optional)
-     */
-    rawStorageName?: string;
-    /**
      * [KO] 인스턴스 데이터 구조체 이름
      * [EN] Instance data struct name
      */
@@ -177,11 +172,9 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     ) {
         super(redGPUContext);
 
-        const {shaderInfo, rawStorageName, instanceStructName, typeParamStructName} = reflectionConfig;
+        const {shaderInfo, instanceStructName, typeParamStructName} = reflectionConfig;
 
-        const strideBytes =
-            (rawStorageName ? shaderInfo.storage?.[rawStorageName]?.stride : undefined) ||
-            shaderInfo.structs?.[instanceStructName]?.arrayBufferByteLength;
+        const strideBytes = shaderInfo.structs?.[instanceStructName]?.arrayBufferByteLength;
 
         if (!strideBytes) {
             throw new Error(`[AScatterMegaBuffer] Failed to reflect instance stride for "${instanceStructName}".`);

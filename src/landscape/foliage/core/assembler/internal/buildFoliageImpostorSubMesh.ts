@@ -41,9 +41,6 @@ const identityMatrix: mat4 = mat4.create();
  * @param slotPooler -
  * [KO] 서브메시 슬롯 풀러 (선택사항)
  * [EN] Sub-mesh slot pooler (optional)
- * @param megaUBO -
- * [KO] 메가 UBO 버퍼 (선택사항)
- * [EN] Mega UBO buffer (optional)
  */
 export default function buildFoliageImpostorSubMesh(
     redGPUContext: RedGPUContext,
@@ -52,8 +49,7 @@ export default function buildFoliageImpostorSubMesh(
     subMeshes: FoliageSubMesh[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
-    slotPooler?: FoliageSubMeshSlotPooler | null,
-    megaUBO?: GPUBuffer | null
+    slotPooler?: FoliageSubMeshSlotPooler | null
 ): void {
     const gpuDevice = redGPUContext.gpuDevice;
     const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
@@ -87,8 +83,7 @@ export default function buildFoliageImpostorSubMesh(
         windMultiplier: options.windMultiplier,
         windFlutterMultiplier: options.windFlutterMultiplier,
         treeHeight: bbHeight,
-        slotPooler,
-        megaUBO
+        slotPooler
     });
     subMeshes.push(bbSubMesh);
 

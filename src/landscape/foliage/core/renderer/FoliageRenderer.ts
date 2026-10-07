@@ -93,22 +93,6 @@ class FoliageRenderer extends AScatterRenderer {
     }
 
     /**
-     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 반환합니다.
-     * [EN] Returns the 256B aligned Dynamic Offset UBO bind group.
-     */
-    get subMeshDynamicBindGroup(): GPUBindGroup | null {
-        return this.#subMeshDynamicBindGroup;
-    }
-
-    /**
-     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 설정합니다.
-     * [EN] Sets the 256B aligned Dynamic Offset UBO bind group.
-     */
-    set subMeshDynamicBindGroup(value: GPUBindGroup | null) {
-        this.#subMeshDynamicBindGroup = value;
-    }
-
-    /**
      * [KO] 메인 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
      * [EN] Returns whether the depth prepass (Early-Z) is enabled during main rendering.
      */

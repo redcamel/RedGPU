@@ -116,11 +116,6 @@ export interface CreateSubMeshOptions {
      * [EN] 256B aligned Dynamic Offset UBO slot pooler
      */
     slotPooler?: FoliageSubMeshSlotPooler | null;
-    /**
-     * [KO] 단일 고정 메가 UBO 버퍼
-     * [EN] Single fixed mega UBO buffer
-     */
-    megaUBO?: GPUBuffer | null;
 }
 
 /**
@@ -156,8 +151,7 @@ export default function createFoliageSubMeshInstance(
         windMultiplier,
         windFlutterMultiplier,
         treeHeight,
-        slotPooler,
-        megaUBO
+        slotPooler
     } = options;
 
     const isIndexed = !!geom.indexBuffer;
@@ -170,7 +164,7 @@ export default function createFoliageSubMeshInstance(
     const globalSlot = (mat as any)?.globalFragmentSlotIndex ?? 0;
 
     let slotIndex = -1;
-    if (slotPooler && megaUBO) {
+    if (slotPooler) {
         slotIndex = slotPooler.allocateSlot();
         if (slotIndex >= 0) {
             slotPooler.writePBRSubMeshSlot(
@@ -209,7 +203,6 @@ export default function createFoliageSubMeshInstance(
         relativeNormalMatrix: normMatrix,
         slotIndex,
         slotPooler,
-        megaUBO,
         lodIndex,
         isDepthPrepass,
         isMainOpaqueOrMasked,

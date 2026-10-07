@@ -82,9 +82,6 @@ export interface AssembledLODResult {
  * @param slotPooler -
  * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
  * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
- * @param megaUBO -
- * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
- * [EN] Single fixed mega UBO buffer (optional)
  * @returns
  * [KO] 조립 완료된 서브메시 및 바운딩 정보
  * [EN] Assembled sub-meshes and bounding information
@@ -95,8 +92,7 @@ export default function assembleFoliageLODMeshes(
     lodIndex: number,
     options: FoliageOptions,
     lodReceiveShadow: boolean = true,
-    slotPooler?: FoliageSubMeshSlotPooler | null,
-    megaUBO?: GPUBuffer | null
+    slotPooler?: FoliageSubMeshSlotPooler | null
 ): AssembledLODResult {
     const gpuDevice = redGPUContext.gpuDevice;
 
@@ -153,8 +149,7 @@ export default function assembleFoliageLODMeshes(
             windMultiplier,
             windFlutterMultiplier,
             treeHeight: treeH,
-            slotPooler,
-            megaUBO
+            slotPooler
         });
 
         resultSubMeshes.push(combinedSubMesh);
@@ -163,7 +158,7 @@ export default function assembleFoliageLODMeshes(
     let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
     if (combineResult.shadowMergedGeometry && combineResult.totalVertexCount > 0) {
         let shadowSlotIndex = -1;
-        if (slotPooler && megaUBO) {
+        if (slotPooler) {
             shadowSlotIndex = slotPooler.allocateSlot();
             if (shadowSlotIndex >= 0) {
                 slotPooler.writeShadowSubMeshSlot(
@@ -184,7 +179,6 @@ export default function assembleFoliageLODMeshes(
             strideBytes: POSITION_ONLY_STRIDE_BYTES,
             slotIndex: shadowSlotIndex,
             slotPooler,
-            megaUBO,
             lodIndex,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,

@@ -91,7 +91,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             redGPUContext,
             {
                 shaderInfo,
-                rawStorageName: 'rawInstances',
                 instanceStructName: 'FoliageInstance',
                 typeParamStructName: 'FoliageTypeParam'
             },

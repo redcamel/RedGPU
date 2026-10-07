@@ -11,6 +11,7 @@ import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {GrassSubMeshSlotPooler} from "../submesh/GrassSubMeshSlotPooler";
 import ScatterSubMesh from "../../../core/scatter/ScatterSubMesh";
+import type Geometry from "../../../../geometry/Geometry";
 import type BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import grassVertexWGSL from "../pipeline/grassVertex.wgsl";
 import grassFragmentNearWGSL from "../pipeline/grassFragmentNear.wgsl";
@@ -329,13 +330,13 @@ export class GrassRenderer extends AScatterRenderer {
         bundleEncoder.setPipeline(nearPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            const {slotIndex, typeId, geometry, subMeshes} = type;
             if (slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.nearSlots.length === 0) continue;
 
-            const targetGeom = unifiedGeometry;
+            const targetGeom = geometry as Geometry;
             if (!targetGeom) continue;
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
@@ -364,13 +365,13 @@ export class GrassRenderer extends AScatterRenderer {
         bundleEncoder.setPipeline(farPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            const {slotIndex, typeId, geometry, subMeshes} = type;
             if (slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.farSlots.length === 0) continue;
 
-            const targetGeom = unifiedGeometry;
+            const targetGeom = geometry as Geometry;
             if (!targetGeom) continue;
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;
@@ -429,13 +430,13 @@ export class GrassRenderer extends AScatterRenderer {
         const count = grassList.length;
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {castShadow, slotIndex, typeId, unifiedGeometry, subMeshes} = type;
+            const {castShadow, slotIndex, typeId, geometry, subMeshes} = type;
             if (!castShadow || slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.nearSlots.length === 0) continue;
 
-            const targetGeom = unifiedGeometry;
+            const targetGeom = geometry as Geometry;
             if (!targetGeom) continue;
             const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
             if (!lvb || !lib) continue;

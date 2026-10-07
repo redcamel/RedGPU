@@ -148,14 +148,6 @@ export abstract class AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 인덱스 버퍼 내 시작 인덱스 오프셋을 설정합니다.
-     * [EN] Sets the starting index offset within the index buffer.
-     */
-    set firstIndex(val: number) {
-        this.#firstIndex = val;
-    }
-
-    /**
      * [KO] 인덱스 버퍼 사용 여부를 반환합니다.
      * [EN] Returns whether an index buffer is used.
      */

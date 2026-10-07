@@ -85,7 +85,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             redGPUContext,
             {
                 shaderInfo,
-                rawStorageName: 'rawInstances',
                 instanceStructName: 'GrassInstance',
                 typeParamStructName: 'GrassTypeParam',
             },

@@ -32,11 +32,6 @@ export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AScatterGeom
      * [EN] Slot pooler instance
      */
     slotPooler?: FoliageSubMeshSlotPooler | null;
-    /**
-     * [KO] 단일 고정 메가 UBO 버퍼
-     * [EN] Single fixed mega UBO buffer
-     */
-    megaUBO?: GPUBuffer | null;
 }
 
 /**
@@ -52,7 +47,6 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     #lodIndex: number;
     #slotIndex: number = -1;
     #slotPooler: FoliageSubMeshSlotPooler | null = null;
-    #megaUBO: GPUBuffer | null = null;
 
     constructor(init: FoliageShadowMergedSubMeshInitOptions) {
         super({
@@ -66,7 +60,6 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         this.#lodIndex = init.lodIndex;
         this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
         this.#slotPooler = init.slotPooler || null;
-        this.#megaUBO = init.megaUBO || null;
     }
 
     /**
@@ -88,13 +81,11 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     /**
      * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (16 bytes, Zero-GC)
      * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (16 bytes, Zero-GC)
-     * @param gpuDevice - WebGPU 디바이스 인스턴스
      * @param windMultiplier - 인스턴스별 바람 강도 배수
      * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
      * @param treeHeight - 식생 전체 높이
      */
     updateWindMultipliers(
-        gpuDevice: GPUDevice,
         windMultiplier: number,
         windFlutterMultiplier: number,
         treeHeight: number
@@ -119,7 +110,6 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
             this.#slotIndex = -1;
         }
         this.#slotPooler = null;
-        this.#megaUBO = null;
         super.destroy();
     }
 }

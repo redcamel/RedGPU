@@ -36,7 +36,6 @@ import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
 import {sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
     computeScatterGridSeed,
-    fastFloatToHalf,
     fastPack2x16float,
     fastPackUniformScale,
     packSubCellKey,
@@ -91,7 +90,6 @@ export {
     // Spatial & Packing Utilities
     packSubCellKey,
     computeScatterGridSeed,
-    fastFloatToHalf,
     fastPack2x16float,
     fastPackUniformScale,
     sortSubCellsByDistance,

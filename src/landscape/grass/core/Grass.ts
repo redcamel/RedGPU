@@ -113,7 +113,6 @@ export interface GrassOptions extends AScatterTypeInitOptions {
 export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
-    #unifiedGeometries: (Geometry | null)[] = [];
     #subMeshes: ScatterSubMesh[] = [];
     #baseColorTexture: BitmapTexture;
     #farDistance: number = 35.0;
@@ -293,7 +292,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             ];
         }
 
-        this.#unifiedGeometries = [(this.#geometry as Geometry) || null];
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
 
@@ -362,6 +360,14 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
+     * [KO] 잔디 렌더링에 사용되는 지오메트리 객체
+     * [EN] Geometry instance used for grass rendering
+     */
+    get geometry(): Geometry | Primitive {
+        return this.#geometry;
+    }
+
+    /**
      * [KO] 잔디 렌더링에 사용되는 기본 메쉬 객체
      * [EN] Base Mesh instance used for grass rendering
      */
@@ -370,19 +376,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 잔디 렌더링에 사용되는 단일 결합 지오메트리를 직접 반환합니다 (힙 배열 생성 0%).
-     * [EN] Directly returns single combined geometry used for grass rendering (0% heap array allocations).
+     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
+     * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
      */
-    override get unifiedGeometry(): Geometry | null {
-        return (this.#geometry as Geometry) || null;
-    }
-
-    /**
-     * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환합니다. (Zero-GC 캐시 배열 반환)
-     * [EN] Returns single combined geometry list per LOD level. (Returns Zero-GC cached array)
-     */
-    override get unifiedGeometries(): (Geometry | null)[] {
-        return this.#unifiedGeometries;
+    get subMeshes(): ScatterSubMesh[] {
+        return this.#subMeshes;
     }
 
     /**
@@ -395,14 +393,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             return alloc.nearSlots.length + alloc.farSlots.length;
         }
         return this.#subMeshes.length * 2;
-    }
-
-    /**
-     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
-     * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
-     */
-    get subMeshes(): ScatterSubMesh[] {
-        return this.#subMeshes;
     }
 
     /**
@@ -702,7 +692,6 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         }
         this.#isUnifiedGeometryOwned = false;
         this.#geometry = null as any;
-        this.#unifiedGeometries.length = 0;
         this.#subMeshes.length = 0;
         this.#baseColorTexture = null as any;
         this.#mesh = null as any;

@@ -51,11 +51,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [EN] Slot pooler instance
      */
     slotPooler?: FoliageSubMeshSlotPooler | null;
-    /**
-     * [KO] 단일 고정 메가 UBO 버퍼
-     * [EN] Single fixed mega UBO buffer
-     */
-    megaUBO?: GPUBuffer | null;
 
     /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
@@ -98,15 +93,12 @@ export class FoliageSubMesh extends ScatterSubMesh {
     #relativeNormalMatrix: mat4;
     #slotIndex: number = -1;
     #slotPooler: FoliageSubMeshSlotPooler | null = null;
-    #megaUBO: GPUBuffer | null = null;
 
     #isDepthPrepass: boolean;
     #isMainOpaqueOrMasked: boolean;
     #mainDepthMode: FoliageDepthPassMode;
     #isImpostor: boolean;
     #receiveShadow: boolean;
-
-    #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
         super({
@@ -118,7 +110,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
         this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
         this.#slotPooler = init.slotPooler || null;
-        this.#megaUBO = init.megaUBO || null;
 
         this.#isDepthPrepass = init.isDepthPrepass;
         this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
@@ -187,13 +178,11 @@ export class FoliageSubMesh extends ScatterSubMesh {
     /**
      * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (16 bytes, Zero-GC)
      * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (16 bytes, Zero-GC)
-     * @param gpuDevice - WebGPU 디바이스 인스턴스
      * @param windMultiplier - 인스턴스별 바람 강도 배수
      * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
      * @param treeHeight - 식생 전체 높이
      */
     updateWindMultipliers(
-        gpuDevice: GPUDevice,
         windMultiplier: number,
         windFlutterMultiplier: number,
         treeHeight: number
@@ -211,9 +200,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
     /**
      * [KO] 지면 높이 기반 블렌딩 파라미터를 유니폼 버퍼에 기록합니다.
      * [EN] Writes ground blend parameters to the uniform buffer.
-     * @param gpuDevice -
-     * [KO] WebGPU 디바이스 인스턴스
-     * [EN] WebGPU device instance
      * @param groundBlendStrength -
      * [KO] 지면 블렌드 강도
      * [EN] Ground blend strength
@@ -222,7 +208,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
      * [EN] Ground blend height range
      */
     updateGroundBlendParams(
-        gpuDevice: GPUDevice,
         groundBlendStrength: number,
         groundBlendRange: number
     ): void {
@@ -291,34 +276,20 @@ export class FoliageSubMesh extends ScatterSubMesh {
             if (material) material.dirtyPipeline = false;
         }
 
-        let modeMap = this.#pipelineCacheByMode[msaaID];
-        if (!modeMap) {
-            modeMap = {};
-            this.#pipelineCacheByMode[msaaID] = modeMap;
-        }
+        const cullMode: GPUCullMode = (!this.isMasked)
+            ? 'back'
+            : (material?.doubleSided ? 'none' : (material?.cullMode ?? 'back'));
 
-        let pipeline = modeMap[depthPassMode];
-        if (!pipeline) {
-            const cullMode: GPUCullMode = (!this.isMasked)
-                ? 'back'
-                : (material?.doubleSided ? 'none' : (material?.cullMode ?? 'back'));
-
-            pipeline = registry.getOrCreatePipeline(
-                material,
-                sampleCount,
-                msaaID,
-                this.strideBytes,
-                cullMode,
-                depthPassMode,
-                subMeshBindGroupLayout,
-                this.isMasked
-            ) || undefined;
-
-            if (pipeline) {
-                modeMap[depthPassMode] = pipeline;
-            }
-        }
-        return pipeline || null;
+        return registry.getOrCreatePipeline(
+            material,
+            sampleCount,
+            msaaID,
+            this.strideBytes,
+            cullMode,
+            depthPassMode,
+            subMeshBindGroupLayout,
+            this.isMasked
+        ) || null;
     }
 
     override destroy(): void {
@@ -327,8 +298,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
             this.#slotIndex = -1;
         }
         this.#slotPooler = null;
-        this.#megaUBO = null;
-        this.#pipelineCacheByMode = {};
         super.destroy();
     }
 }

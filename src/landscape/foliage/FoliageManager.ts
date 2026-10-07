@@ -48,7 +48,6 @@ import {AScatterManager} from "../core/scatter";
  */
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #subMeshMegaUBO: GPUBuffer | null = null;
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
     #slotPooler: FoliageSubMeshSlotPooler;
 
@@ -81,10 +80,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         super(landscape);
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#slotPooler = new FoliageSubMeshSlotPooler(this.redGPUContext);
-        this.#subMeshMegaUBO = this.#slotPooler.gpuBuffer;
+        const subMeshMegaUBO = this.#slotPooler.gpuBuffer;
 
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        if (gpuDevice && this.#subMeshMegaUBO) {
+        if (gpuDevice && subMeshMegaUBO) {
             this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
                 label: 'Foliage_SubMesh_BindGroupLayout',
                 entries: [
@@ -107,7 +106,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                     {
                         binding: 0,
                         resource: {
-                            buffer: this.#subMeshMegaUBO,
+                            buffer: subMeshMegaUBO,
                             offset: 0,
                             size: 32
                         }
@@ -446,22 +445,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 1,024개 슬롯(256 KB) 단일 고정 메가 UBO 버퍼를 반환합니다.
-     * [EN] Returns the 1,024-slot (256 KB) single fixed mega UBO buffer.
-     */
-    get subMeshMegaUBO(): GPUBuffer | null {
-        return this.#subMeshMegaUBO;
-    }
-
-    /**
-     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹을 반환합니다.
-     * [EN] Returns the 256B aligned Dynamic Offset UBO bind group.
-     */
-    get subMeshDynamicBindGroup(): GPUBindGroup | null {
-        return this.#subMeshDynamicBindGroup;
-    }
-
-    /**
      * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 카메라 기반 온디맨드 스트리밍을 준비합니다.
      * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, preparing camera-based on-demand streaming.
      *
@@ -490,7 +473,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             (t) => this.#repopulateFoliage(t),
             this.#culler.baker,
             this.#slotPooler,
-            this.#subMeshMegaUBO,
             this.landscape
         );
         this.registerTypeInternal(foliage);
@@ -510,7 +492,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#renderer.destroy();
         this.#culler.destroy();
         this.#slotPooler.destroy();
-        this.#subMeshMegaUBO = null;
         this.#subMeshDynamicBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
         this.#onUniformUpdateNeeded = null;

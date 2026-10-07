@@ -5,7 +5,6 @@
  */
 import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
-import Geometry from "../../../geometry/Geometry";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import type {ScatterBaseSegmentAllocation} from "./AScatterMegaBuffer";
 import type ScatterSubMesh from "./ScatterSubMesh";
@@ -105,16 +104,14 @@ export interface AScatterTypeInitOptions {
  * [EN] Top-level abstract base class for all scatter types (Grass, Foliage, etc.).
  *
  * **[KO] 아키텍처 및 역할:**
- * - **식별 및 수명주기 통일**: 모든 스캐터 종의 이름(`name`), 고유 ID(`typeId`), 간접 드로우콜 통계를 캡슐화합니다.
+ * - **식별 및 수명주기 통일**: 모든 스캐터 종의 이름(`name`), 고유 ID(`typeId`)를 캡슐화합니다.
  * - **VRAM 세그먼트 메타데이터 바인딩**: 메가버퍼에서 배정된 세그먼트 할당 메타데이터(`allocation`)를 제네릭 타입으로 보관합니다.
  * - **서브메시 다형성 및 단일 진실 공급원**: 각 스캐터 종의 서브메시 컬렉션(`subMeshes`)을 추상 게터로 강제하며, 서브메시 개수(`subMeshCount`)는 항상 `subMeshes.length`와 일치하도록 보장합니다.
- * - **LOD 통합 지오메트리 규격 정의**: 각 LOD 단계별 단일 결합 지오메트리 목록(`unifiedGeometries`)을 추상 게터로 강제합니다.
  *
  * **[EN] Architecture & Role:**
- * - **Unified Identification & Lifecycle**: Encapsulates name (`name`), unique ID (`typeId`), and indirect draw-call statistics across all scatter species.
+ * - **Unified Identification & Lifecycle**: Encapsulates name (`name`) and unique ID (`typeId`) across all scatter species.
  * - **VRAM Segment Metadata Binding**: Retains segment allocation metadata (`allocation`) assigned by mega-buffers as a generic type.
  * - **Sub-mesh Polymorphism & Single Source of Truth**: Mandates sub-mesh collection (`subMeshes`) via an abstract getter, guaranteeing `subMeshCount` always equals `subMeshes.length`.
- * - **LOD Unified Geometry Specification**: Mandates single combined geometry list (`unifiedGeometries`) per LOD level via an abstract getter.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스화할 수 없습니다. 서브클래스(Grass, Foliage)를 통해 사용하십시오.
@@ -252,21 +249,6 @@ export abstract class AScatterType<
      */
     bindAllocation(allocation: TAllocation): void {
         this.#allocation = allocation;
-    }
-
-    /**
-     * [KO] 각 LOD 단계별 단일 결합 지오메트리 목록을 반환하는 추상 게터입니다.
-     * [EN] Abstract getter returning single combined geometry list per LOD level.
-     */
-    abstract get unifiedGeometries(): (Geometry | null)[];
-
-    /**
-     * [KO] 기본 LOD 0 단계의 단일 결합 지오메트리를 반환합니다.
-     * [EN] Returns the single combined geometry of base LOD 0.
-     */
-    get unifiedGeometry(): Geometry | null {
-        const geoms = this.unifiedGeometries;
-        return geoms.length > 0 ? geoms[0] : null;
     }
 
     /**

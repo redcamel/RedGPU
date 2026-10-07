@@ -68,9 +68,6 @@ export interface FoliageAssemblyResult {
  * @param slotPooler -
  * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
  * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
- * @param megaUBO -
- * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
- * [EN] Single fixed mega UBO buffer (optional)
  * @returns
  * [KO] 조립 완료된 식생 서브메쉬 및 LOD 정보
  * [EN] Assembled foliage sub-meshes and LOD information
@@ -78,8 +75,7 @@ export interface FoliageAssemblyResult {
 export default function assembleFoliageSubMeshes(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    slotPooler?: FoliageSubMeshSlotPooler | null,
-    megaUBO?: GPUBuffer | null
+    slotPooler?: FoliageSubMeshSlotPooler | null
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subMeshes: FoliageSubMesh[] = [];
@@ -119,8 +115,7 @@ export default function assembleFoliageSubMeshes(
             l,
             options,
             lodReceiveShadow,
-            slotPooler,
-            megaUBO
+            slotPooler
         );
 
         unifiedGeometries.push(assembled.unifiedGeometry || null);
@@ -173,8 +168,7 @@ export default function assembleFoliageSubMeshes(
             subMeshes,
             lodInfoList,
             impostorLODIndex,
-            slotPooler,
-            megaUBO
+            slotPooler
         );
     }
 

@@ -37,12 +37,6 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
     bottomOffset?: number;
 
     /**
-     * [KO] 서브메쉬 고유 인덱스
-     * [EN] Unique sub-mesh index
-     */
-    subMeshIndex?: number;
-
-    /**
      * [KO] 소속 LOD 레벨 인덱스
      * [EN] Associated LOD level index
      */
@@ -64,14 +58,12 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
  * - **스캐터 파이프라인의 공통 단위**:
  *   - **잔디(Grass)**: 단일 또는 복합 잔디 모델을 구성하는 기본 렌더 단위로 직접 인스턴스화되어 Multi-Draw Indirect 렌더링에 사용됩니다.
  *   - **식생(Foliage)**: 복합 3D 수목/바위의 파트별 서브메시(`FoliageSubMesh`)의 부모 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 지면 블렌딩 유니폼을 확장하는 기반이 됩니다.
- * - **지형 밀착을 위한 피벗 보정**: `bottomOffset` 속성을 통해 모델의 지면 접촉면(최하단 Y)을 정밀하게 보정하여 지형 표면에 부유하거나 묻히지 않도록 배치합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Fusion of Geometry and Shading**: Binds the rendering materials, base color textures, and source mesh references on top of `AScatterGeometryUnit`, which manages raw GPU vertex/index buffers and indirect draw offsets.
  * - **Common Unit for Scatter Pipelines**:
  *   - **Grass**: Directly instantiated as the primary rendering unit composing single or composite grass models for Multi-Draw Indirect rendering.
  *   - **Foliage**: Inherited by `FoliageSubMesh` representing individual parts (trunks, foliage leaves) of composite 3D trees and rocks, serving as the foundation for wind simulation and ground blending uniforms.
- * - **Pivot Alignment for Terrain Snapping**: Compensates for the model's ground contact plane (minimum Y) via the `bottomOffset` property, ensuring accurate placement on the landscape surface without floating or sinking.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager 및 Grass)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -82,8 +74,6 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     #mesh?: Mesh;
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;
-    #bottomOffset: number;
-    #subMeshIndex: number;
     #lodIndex: number;
     #isMasked: boolean;
 
@@ -100,8 +90,6 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
         this.#mesh = init.mesh;
         this.#material = init.material;
         this.#baseColorTexture = init.baseColorTexture ?? null;
-        this.#bottomOffset = init.bottomOffset ?? 0.0;
-        this.#subMeshIndex = init.subMeshIndex ?? 0;
         this.#lodIndex = init.lodIndex ?? 0;
         this.#isMasked = init.isMasked ?? false;
     }
@@ -131,38 +119,6 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 피벗 보정을 위한 밑둥 Y 오프셋을 반환합니다.
-     * [EN] Returns the bottom Y offset for pivot compensation.
-     */
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
-
-    /**
-     * [KO] 피벗 보정을 위한 밑둥 Y 오프셋을 설정합니다.
-     * [EN] Sets the bottom Y offset for pivot compensation.
-     */
-    set bottomOffset(val: number) {
-        this.#bottomOffset = val;
-    }
-
-    /**
-     * [KO] 서브메쉬 고유 인덱스를 반환합니다.
-     * [EN] Returns the unique sub-mesh index.
-     */
-    get subMeshIndex(): number {
-        return this.#subMeshIndex;
-    }
-
-    /**
-     * [KO] 서브메쉬 고유 인덱스를 설정합니다.
-     * [EN] Sets the unique sub-mesh index.
-     */
-    set subMeshIndex(val: number) {
-        this.#subMeshIndex = val;
-    }
-
-    /**
      * [KO] 소속 LOD 레벨 인덱스를 반환합니다.
      * [EN] Returns the associated LOD level index.
      */
@@ -171,27 +127,11 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 소속 LOD 레벨 인덱스를 설정합니다.
-     * [EN] Sets the associated LOD level index.
-     */
-    set lodIndex(val: number) {
-        this.#lodIndex = val;
-    }
-
-    /**
      * [KO] 알파 마스킹 적용 여부를 반환합니다.
      * [EN] Returns whether alpha masking is applied.
      */
     get isMasked(): boolean {
         return this.#isMasked;
-    }
-
-    /**
-     * [KO] 알파 마스킹 적용 여부를 설정합니다.
-     * [EN] Sets whether alpha masking is applied.
-     */
-    set isMasked(val: boolean) {
-        this.#isMasked = val;
     }
 }
 

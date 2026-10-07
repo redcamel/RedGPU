@@ -5,7 +5,6 @@
  */
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
-import Geometry from "../../../geometry/Geometry";
 import type Landscape from "../../Landscape";
 import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
@@ -220,7 +219,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
     #mainSubMeshes: FoliageSubMesh[] = [];
     #hasMaskedLOD0: boolean = false;
-    #unifiedGeometries: (Geometry | null)[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
     #lodInfoListWithoutImpostor: FoliageLODInfo[] | null = null;
 
@@ -250,7 +248,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #onDirty?: () => void;
     #onRepopulateRequired?: (type: Foliage) => void;
     #slotPooler: FoliageSubMeshSlotPooler | null = null;
-    #subMeshMegaUBO: GPUBuffer | null = null;
     #landscape: Landscape | null = null;
 
     /**
@@ -277,9 +274,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param slotPooler -
      * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
      * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
-     * @param subMeshMegaUBO -
-     * [KO] 단일 고정 메가 UBO 버퍼 (선택사항)
-     * [EN] Single fixed mega UBO buffer (optional)
      * @param landscape -
      * [KO] 부모 Landscape 인스턴스 (선택사항)
      * [EN] Parent Landscape instance (optional)
@@ -292,13 +286,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         onRepopulateRequired?: (type: Foliage) => void,
         baker?: ScatterInstanceBaker | null,
         slotPooler?: FoliageSubMeshSlotPooler | null,
-        subMeshMegaUBO?: GPUBuffer | null,
         landscape?: Landscape | null
     ) {
         super(redGPUContext, options?.name || '');
         this.#landscape = landscape || null;
         this.#slotPooler = slotPooler || null;
-        this.#subMeshMegaUBO = subMeshMegaUBO || null;
 
         const {
             name,
@@ -391,10 +383,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const assembleResult = assembleFoliageSubMeshes(
             this.redGPUContext,
             options,
-            this.#slotPooler,
-            this.#subMeshMegaUBO
+            this.#slotPooler
         );
-        this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
         const resolvedBottomOffset = bottomOffset ?? 0;
@@ -535,11 +525,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] LOD 레벨별 단일 통합 지오메트리 배열을 반환합니다.
-     * [EN] Returns the array of per-LOD unified geometries.
+     * [KO] 등록된 총 서브메시 개수를 반환합니다.
+     * [EN] Returns the total number of registered sub-meshes.
      */
-    override get unifiedGeometries(): (Geometry | null)[] {
-        return this.#unifiedGeometries;
+    override get subMeshCount(): number {
+        return this.#subMeshes.length;
     }
 
     /**
@@ -552,14 +542,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             count += this.#depthPrepassOpaqueSubMeshes.length + this.#depthPrepassMaskedSubMeshes.length;
         }
         return count;
-    }
-
-    /**
-     * [KO] 등록된 총 서브메시 개수를 반환합니다.
-     * [EN] Returns the total number of registered sub-meshes.
-     */
-    override get subMeshCount(): number {
-        return this.#subMeshes.length;
     }
 
 
@@ -625,14 +607,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get slotPooler(): FoliageSubMeshSlotPooler | null {
         return this.#slotPooler;
-    }
-
-    /**
-     * [KO] 단일 고정 메가 UBO 버퍼를 반환합니다.
-     * [EN] Returns the single fixed mega UBO buffer.
-     */
-    get subMeshMegaUBO(): GPUBuffer | null {
-        return this.#subMeshMegaUBO;
     }
 
     /**
@@ -923,7 +897,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
         this.#shadowMergedSubMeshes.length = 0;
 
-        this.#unifiedGeometries.length = 0;
         this.#lodInfoList.length = 0;
         this.#mountedSubCells.length = 0;
         this.#tempCandidates.length = 0;
@@ -931,7 +904,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#impostorSubMesh = null;
         this.#landscape = null;
         this.#slotPooler = null;
-        this.#subMeshMegaUBO = null;
         this.#baker = null;
         this.#megaBuffer = null;
         this.#onDirty = undefined;
@@ -1130,8 +1102,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #syncInternalWind(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
         const subList = this.#subMeshes;
         const count = subList.length;
         const windMul = this.#windMultiplier;
@@ -1142,7 +1112,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const sub = subList[i];
             const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
             sub.updateWindMultipliers(
-                gpuDevice,
                 windMul,
                 effectiveFlutterMul,
                 treeH
@@ -1153,7 +1122,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
             shadowList[i].updateWindMultipliers(
-                gpuDevice,
                 windMul,
                 flutterMul * 0.5,
                 treeH
@@ -1228,14 +1196,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #updateSubMeshGroundBlend(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
         const subList = this.#subMeshes;
         const subCount = subList.length;
         for (let s = 0; s < subCount; s++) {
             const sub = subList[s];
             if (!sub.isImpostor) {
-                sub.updateGroundBlendParams(gpuDevice, this.groundBlendStrength, this.#groundBlendRange);
+                sub.updateGroundBlendParams(this.groundBlendStrength, this.#groundBlendRange);
             }
         }
     }

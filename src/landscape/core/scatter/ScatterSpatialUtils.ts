@@ -40,7 +40,7 @@ export function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: n
  * @param val - 변환할 부동소수점 값
  * @returns 16비트 uint 값
  */
-export function fastFloatToHalf(val: number): number {
+function fastFloatToHalf(val: number): number {
     tempFloat32[0] = val;
     const f = tempUint32[0];
     const sign = (f >> 16) & 0x8000;

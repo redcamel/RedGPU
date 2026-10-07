@@ -119,14 +119,6 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 할당된 활성 슬롯 개수를 반환합니다.
-     * [EN] Returns the number of currently allocated active slots.
-     */
-    get allocatedCount(): number {
-        return this.#allocatedCount;
-    }
-
-    /**
      * [KO] 새 서브메시/스캐터 타입용 슬롯 인덱스를 할당합니다 (0 ~ maxSlots - 1).
      * [EN] Allocates a slot index for a new sub-mesh or scatter type (0 ~ maxSlots - 1).
      * @returns 할당된 슬롯 번호 (슬롯 고갈 시 -1)
