@@ -11,9 +11,9 @@ import AScatterSubMeshSlotPooler from "../../../core/scatter/AScatterSubMeshSlot
  * [EN] Foliage-dedicated slot pooler class managing UBO slots for up to 1,024 sub-meshes (256 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
 export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
-    static readonly MAX_SLOTS: number = 1024;
-    static readonly PARAMS_SIZE_BYTES: number = 32;
-    static readonly PARAMS_SIZE_FLOATS: number = 8; // 32 / 4
+    static MAX_SLOTS: number = 1024;
+    static PARAMS_SIZE_BYTES: number = 32;
+    static PARAMS_SIZE_FLOATS: number = 8; // 32 / 4
 
     /**
      * [KO] FoliageSubMeshSlotPooler 인스턴스를 생성하고 256KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.

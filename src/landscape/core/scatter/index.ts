@@ -65,9 +65,11 @@ import AScatterMegaBuffer, {
 import ACpuStagedScatterMegaBuffer from "./ACpuStagedScatterMegaBuffer";
 import AScatterType, {type AScatterTypeInitOptions} from "./AScatterType";
 import AScatterSubMeshSlotPooler from "./AScatterSubMeshSlotPooler";
+import type {IScatterManager} from "./IScatterManager";
 
 export {
     // Runtime Classes, Functions & Units
+    type IScatterManager,
     combineScatterMeshes,
     AScatterGeometryUnit,
     ScatterSubMesh,

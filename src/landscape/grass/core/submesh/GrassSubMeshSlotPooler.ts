@@ -13,9 +13,9 @@ import AScatterSubMeshSlotPooler from "../../../core/scatter/AScatterSubMeshSlot
  * [EN] Grass-dedicated slot pooler class managing UBO slots for up to 256 grass slots (64 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
 export class GrassSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
-    static readonly MAX_SLOTS: number = 256;
-    static readonly PARAMS_SIZE_BYTES: number = 80;
-    static readonly PARAMS_SIZE_FLOATS: number = 20; // 80 / 4
+    static MAX_SLOTS: number = 256;
+    static PARAMS_SIZE_BYTES: number = 80;
+    static PARAMS_SIZE_FLOATS: number = 20; // 80 / 4
 
     /**
      * [KO] GrassSubMeshSlotPooler 인스턴스를 생성하고 64KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.

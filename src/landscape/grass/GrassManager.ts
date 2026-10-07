@@ -15,6 +15,7 @@ import computeViewFrustumPlanes from "../../math/computeViewFrustumPlanes";
 import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
 import GrassCullPipeline from "./core/culling/GrassCullPipeline";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import type {IScatterManager} from "../core/scatter/IScatterManager";
 
 /**
  * [KO] 대규모 지형(Landscape)의 GPU 베이킹 & GPU 초고속 컬링 기반 잔디(Grass) 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -27,7 +28,7 @@ import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_
  *
  * @category Landscape
  */
-export class GrassManager extends RedGPUObject {
+export class GrassManager extends RedGPUObject implements IScatterManager<Grass, GrassOptions> {
 
     #landscape: Landscape;
     #enabled: boolean = true;
@@ -197,6 +198,14 @@ export class GrassManager extends RedGPUObject {
      * [EN] Gets the list of all {@link Grass} ecosystem instances currently registered to this manager.
      */
     get grassList(): Grass[] {
+        return this.#grassList;
+    }
+
+    /**
+     * [KO] 등록된 모든 스캐터 타입 목록을 반환합니다. (IScatterManager 표준 대칭 프로퍼티)
+     * [EN] Returns the list of all registered scatter types. (IScatterManager standard symmetric property)
+     */
+    get types(): Grass[] {
         return this.#grassList;
     }
 
@@ -436,6 +445,36 @@ export class GrassManager extends RedGPUObject {
         this.#populated = false;
         this.#lastBakePos[0] = 0;
         this.#lastBakePos[1] = 0;
+    }
+
+    /**
+     * [KO] 새로운 스캐터 잔디 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Creates and registers a new scatter grass type into the manager. (IScatterManager standard symmetric method)
+     *
+     * @param options - 잔디 생성 옵션
+     * @returns 생성된 {@link Grass} 인스턴스
+     */
+    addType(options: GrassOptions): Grass {
+        return this.addGrass(options);
+    }
+
+    /**
+     * [KO] 등록된 특정 스캐터 잔디 타입을 매니저에서 제거합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Removes a specific registered scatter grass type from the manager. (IScatterManager standard symmetric method)
+     *
+     * @param target - 제거할 {@link Grass} 인스턴스 또는 고유 이름
+     * @returns 제거 성공 여부
+     */
+    removeType(target: Grass | string): boolean {
+        return this.removeGrass(target);
+    }
+
+    /**
+     * [KO] 등록된 모든 스캐터 잔디 타입을 일괄 제거합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Clears all registered scatter grass types. (IScatterManager standard symmetric method)
+     */
+    clearTypes(): void {
+        this.clearGrass();
     }
 
     /**

@@ -15,6 +15,7 @@ import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
 import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler";
+import type {IScatterManager} from "../core/scatter/IScatterManager";
 
 /**
  * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -46,7 +47,7 @@ import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler"
  *
  * @category Landscape
  */
-class FoliageManager {
+class FoliageManager implements IScatterManager<Foliage, FoliageOptions> {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #subMeshMegaUBO: GPUBuffer | null = null;
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
@@ -266,10 +267,18 @@ class FoliageManager {
     }
 
     /**
-     * [KO] 등록된 모든 {@link Foliage} 생태계 인스턴스의 읽기 전용 배열을 반환합니다.
-     * [EN] Gets the read-only array of all registered {@link Foliage} ecosystem instances.
+     * [KO] 등록된 모든 Foliage 생태계 인스턴스 배열을 반환합니다.
+     * [EN] Gets the array of all registered Foliage ecosystem instances.
      */
     get foliageList(): Foliage[] {
+        return this.#foliageList;
+    }
+
+    /**
+     * [KO] 등록된 모든 스캐터 타입 목록을 반환합니다. (IScatterManager 표준 대칭 프로퍼티)
+     * [EN] Returns the list of all registered scatter types. (IScatterManager standard symmetric property)
+     */
+    get types(): Foliage[] {
         return this.#foliageList;
     }
 
@@ -506,6 +515,36 @@ class FoliageManager {
         while (this.#foliageList.length > 0) {
             this.removeFoliage(this.#foliageList[this.#foliageList.length - 1]);
         }
+    }
+
+    /**
+     * [KO] 새로운 스캐터 식생 타입을 생성하여 매니저에 등록합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Creates and registers a new scatter foliage type into the manager. (IScatterManager standard symmetric method)
+     *
+     * @param options - 식생 생성 옵션
+     * @returns 생성된 {@link Foliage} 인스턴스
+     */
+    addType(options: FoliageOptions): Foliage {
+        return this.addFoliage(options);
+    }
+
+    /**
+     * [KO] 등록된 특정 스캐터 식생 타입을 매니저에서 제거합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Removes a specific registered scatter foliage type from the manager. (IScatterManager standard symmetric method)
+     *
+     * @param target - 제거할 {@link Foliage} 인스턴스 또는 고유 이름
+     * @returns 제거 성공 여부
+     */
+    removeType(target: Foliage | string): boolean {
+        return this.removeFoliage(target);
+    }
+
+    /**
+     * [KO] 등록된 모든 스캐터 식생 타입을 일괄 제거합니다. (IScatterManager 표준 대칭 메서드)
+     * [EN] Clears all registered scatter foliage types. (IScatterManager standard symmetric method)
+     */
+    clearTypes(): void {
+        this.clearFoliage();
     }
 
     /**

@@ -18,31 +18,31 @@ export abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
      * [KO] WebGPU UBO 동적 오프셋 최소 정렬 바이트 규격 (256바이트)
      * [EN] WebGPU minimum dynamic UBO offset alignment in bytes (256 bytes)
      */
-    static readonly SLOT_STRIDE_BYTES: number = 256;
+    static SLOT_STRIDE_BYTES: number = 256;
 
     /**
      * [KO] 슬롯 1개당 32비트 Float 요소 개수 (256 / 4 = 64 floats)
      * [EN] Number of 32-bit float elements per slot (256 / 4 = 64 floats)
      */
-    static readonly SLOT_STRIDE_FLOATS: number = 64;
+    static SLOT_STRIDE_FLOATS: number = 64;
 
     /**
      * [KO] 풀러가 수용 가능한 최대 슬롯 개수
      * [EN] Maximum number of slots supported by this pooler
      */
-    readonly maxSlots: number;
+    maxSlots: number;
 
     /**
      * [KO] 슬롯당 실제 유효 파라미터 바이트 크기
      * [EN] Actual valid parameter byte size per slot
      */
-    readonly paramsSizeBytes: number;
+    paramsSizeBytes: number;
 
     /**
      * [KO] 슬롯당 실제 유효 파라미터 Float 요소 개수
      * [EN] Actual valid parameter float count per slot
      */
-    readonly paramsSizeFloats: number;
+    paramsSizeFloats: number;
 
     #gpuBuffer: GPUBuffer | null = null;
     #cpuBuffer: Float32Array;
