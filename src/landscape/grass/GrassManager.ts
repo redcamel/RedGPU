@@ -196,7 +196,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param renderViewStateData - 뷰 렌더 상태 데이터
      */
     update(renderViewStateData: RenderViewStateData): void {
-        if (!this.enabled || this.types.length === 0) return;
+        const {enabled, types, landscape} = this;
+        const grassLen = types.length;
+        if (!enabled || grassLen === 0) return;
         this.#currentRenderViewStateData = renderViewStateData;
 
         const {view} = renderViewStateData;
@@ -207,8 +209,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#lastCamPos[1] = camY;
         this.#lastCamPos[2] = camZ;
 
-        const currentLoadedTileCount = this.landscape.tileLoadedCount;
-        const hasValidTextures = this.landscape.hasValidScatterAtlas;
+        const currentLoadedTileCount = landscape.tileLoadedCount;
+        const hasValidTextures = landscape.hasValidScatterAtlas;
 
         const tileCountChanged = hasValidTextures && this.#lastLoadedTileCount !== currentLoadedTileCount;
         if (tileCountChanged) {
@@ -220,12 +222,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const distSq = dx * dx + dz * dz;
 
         let minRadius = 120.0;
-        const grassList = this.types;
-        const grassLen = grassList.length;
         if (grassLen > 0) {
-            minRadius = grassList[0].streamingRadius;
+            minRadius = types[0].streamingRadius;
             for (let i = 1; i < grassLen; i++) {
-                const r = grassList[i].streamingRadius;
+                const r = types[i].streamingRadius;
                 if (r < minRadius) minRadius = r;
             }
         }
@@ -243,10 +243,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const hasValidVbt = this.landscape.hasValidVbtAtlas;
+        const hasValidVbt = landscape.hasValidVbtAtlas;
 
         for (let i = 0; i < grassLen; i++) {
-            const type = grassList[i];
+            const type = types[i];
             const {typeId, dirty, slotIndex} = type;
 
             let activeSlot = slotIndex;
@@ -390,8 +390,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param passEncoder - 메인 씬 GPURenderPassEncoder
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.enabled || this.types.length === 0 || !this.#populated) return;
-        this.#renderer.render(view, passEncoder, this.types, this.#megaBuffer, this.#slotPooler);
+        const {enabled, types} = this;
+        if (!enabled || types.length === 0 || !this.#populated) return;
+        this.#renderer.render(view, passEncoder, types, this.#megaBuffer, this.#slotPooler);
     }
 
     /**
@@ -402,8 +403,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.enabled || this.types.length === 0 || !this.#populated) return;
-        this.#renderer.renderShadow(view, passEncoder, this.types, this.#megaBuffer, this.#slotPooler);
+        const {enabled, types} = this;
+        if (!enabled || types.length === 0 || !this.#populated) return;
+        this.#renderer.renderShadow(view, passEncoder, types, this.#megaBuffer, this.#slotPooler);
     }
 
     /**

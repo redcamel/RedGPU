@@ -11,6 +11,7 @@ import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {GrassSubMeshSlotPooler} from "../submesh/GrassSubMeshSlotPooler";
 import ScatterSubMesh from "../../../core/scatter/ScatterSubMesh";
+import type BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import grassVertexWGSL from "../pipeline/grassVertex.wgsl";
 import grassFragmentNearWGSL from "../pipeline/grassFragmentNear.wgsl";
 import grassFragmentFarWGSL from "../pipeline/grassFragmentFar.wgsl";
@@ -24,7 +25,7 @@ import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 interface MaterialBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
     cachedColorTexView: GPUTextureView;
-    cachedSubTex: any;
+    cachedSubTex: BitmapTexture | null | undefined;
     cachedTypeTexView: GPUTextureView | null;
 }
 

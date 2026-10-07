@@ -993,10 +993,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const candidates = this.#tempCandidates;
         candidates.length = 0;
 
-        const worldSizeX = landscape.worldSizeX;
-        const worldSizeZ = landscape.worldSizeZ;
-        const halfWorldX = landscape.halfWorldSizeX;
-        const halfWorldZ = landscape.halfWorldSizeZ;
+        const {
+            worldSizeX,
+            worldSizeZ,
+            halfWorldSizeX: halfWorldX,
+            halfWorldSizeZ: halfWorldZ
+        } = landscape;
 
         const invSubCellSize = 1.0 / subCellSize;
         const totalCellsX = Math.max(1, Math.floor(worldSizeX * invSubCellSize));
@@ -1313,12 +1315,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #populateSingleSubCell(scX: number, scZ: number, subCellSize: number): FoliageSubCell {
         const key = packSubCellKey(scX, scZ);
         const landscape = this.#landscape!;
-        const worldSizeX = landscape.worldSizeX;
-        const worldSizeZ = landscape.worldSizeZ;
-        const invWorldSizeX = landscape.invWorldSizeX;
-        const invWorldSizeZ = landscape.invWorldSizeZ;
-        const halfWorldX = landscape.halfWorldSizeX;
-        const halfWorldZ = landscape.halfWorldSizeZ;
+        const {
+            worldSizeX,
+            worldSizeZ,
+            invWorldSizeX,
+            invWorldSizeZ,
+            halfWorldSizeX: halfWorldX,
+            halfWorldSizeZ: halfWorldZ
+        } = landscape;
 
         const centerX = (scX + 0.5) * subCellSize - halfWorldX;
         const centerZ = (scZ + 0.5) * subCellSize - halfWorldZ;

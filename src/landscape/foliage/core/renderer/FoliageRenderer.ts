@@ -158,13 +158,7 @@ class FoliageRenderer extends AScatterRenderer {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
-        this.#lastBoundInstanceOffset = -1;
+        this.#resetBoundState();
 
         const antialiasingManager = this.antialiasingManager;
         const msaaID = antialiasingManager.msaaID;
