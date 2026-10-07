@@ -12,6 +12,8 @@ import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 
 export const GRASS_CELL_SIZE: number = 16.0;
+const DEFAULT_GRASS_MIN_SCALE = Object.freeze([0.8, 0.8] as const);
+const DEFAULT_GRASS_MAX_SCALE = Object.freeze([1.2, 1.2] as const);
 
 interface BakeBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
@@ -139,8 +141,8 @@ export default class GrassBakePipeline extends RedGPUObject {
             }
         }
 
-        const minScale = grass.minScale || [0.8, 0.8];
-        const maxScale = grass.maxScale || [1.2, 1.2];
+        const minScale = grass.minScale || DEFAULT_GRASS_MIN_SCALE;
+        const maxScale = grass.maxScale || DEFAULT_GRASS_MAX_SCALE;
         const minScaleS = minScale[0];
         const maxScaleS = maxScale[0];
         const minScaleH = minScale[1];

@@ -24,6 +24,8 @@ import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 interface MaterialBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
     cachedColorTexView: GPUTextureView;
+    cachedSubTex: any;
+    cachedTypeTexView: GPUTextureView | null;
 }
 
 /**
@@ -491,13 +493,20 @@ export class GrassRenderer extends AScatterRenderer {
         const {gpuDevice, resourceManager} = this;
         if (!gpuDevice || !this.#pipelineBindGroupLayout2) return null;
 
-        const subTex = subMesh.baseColorTexture;
-        const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
-            || type.baseColorTextureView
-            || resourceManager.emptyBitmapTextureView;
-
         const cacheKey = (type.typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
+
+        const subTex = subMesh.baseColorTexture;
+        const typeTexView = type.baseColorTextureView;
+
+        // Fast-Path: 텍스처 참조 2개만 단순 동치 비교(===)하여 일치 시 getGPUResourceBitmapTextureView 호출 없이 즉시 리턴
+        if (entry && entry.cachedSubTex === subTex && entry.cachedTypeTexView === typeTexView) {
+            return entry.bindGroup;
+        }
+
+        const subTexView = (subTex ? resourceManager.getGPUResourceBitmapTextureView(subTex) : null)
+            || typeTexView
+            || resourceManager.emptyBitmapTextureView;
 
         if (!entry || entry.cachedColorTexView !== subTexView) {
             const {basicSampler} = resourceManager;
@@ -509,10 +518,13 @@ export class GrassRenderer extends AScatterRenderer {
                     {binding: 1, resource: basicSampler.gpuSampler},
                 ]
             });
-            entry = {bindGroup, cachedColorTexView: subTexView};
+            entry = {bindGroup, cachedColorTexView: subTexView, cachedSubTex: subTex, cachedTypeTexView: typeTexView};
             this.#materialBindGroupCache.set(cacheKey, entry);
             this.markMainBundleDirty();
             this.markShadowBundleDirty();
+        } else {
+            entry.cachedSubTex = subTex;
+            entry.cachedTypeTexView = typeTexView;
         }
 
         return entry.bindGroup;

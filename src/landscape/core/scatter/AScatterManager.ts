@@ -107,7 +107,7 @@ export abstract class AScatterManager<
     get totalDrawCalls(): number {
         if (!this.enabled) return 0;
         let count = 0;
-        const list = this.types;
+        const list = this.#types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             count += this.computeTypeDrawCalls(list[i]);
@@ -122,7 +122,7 @@ export abstract class AScatterManager<
     get shadowDrawCalls(): number {
         if (!this.enabled) return 0;
         let count = 0;
-        const list = this.types;
+        const list = this.#types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const type = list[i];

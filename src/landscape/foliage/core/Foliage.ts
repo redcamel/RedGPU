@@ -222,6 +222,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #hasMaskedLOD0: boolean = false;
     #unifiedGeometries: (Geometry | null)[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
+    #lodInfoListWithoutImpostor: FoliageLODInfo[] | null = null;
 
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
 
@@ -387,6 +388,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         );
         this.#unifiedGeometries = assembleResult.unifiedGeometries || [];
         this.#lodInfoList = assembleResult.lodInfoList || [];
+        this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
         const resolvedBottomOffset = options.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         const resolvedHeight = options.height !== undefined
@@ -1229,8 +1231,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const alloc = this.allocation;
         if (this.#megaBuffer && alloc) {
             const hasImp = !!this.#impostorSubMesh;
-            const effectiveLodList = (!this.#useImpostor && hasImp && this.#lodInfoList.length > 1)
-                ? this.#lodInfoList.slice(0, -1)
+            const effectiveLodList = (!this.#useImpostor && hasImp && this.#lodInfoListWithoutImpostor)
+                ? this.#lodInfoListWithoutImpostor
                 : this.#lodInfoList;
 
             const effectiveShadowDist = this.castShadow ? this.shadowCullDistance : 0.0;
@@ -1247,7 +1249,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: any, subCellSize: number): void {
+    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         if (subCell.isMounted) return;
         const currentActive = allocation.instanceCount;
         const count = subCell.instanceCount;
@@ -1268,7 +1270,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.uploadRangeToGPU(currentActive, count);
     }
 
-    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: any): void {
+    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation): void {
         const mounted = this.#mountedSubCells;
         const targetSubCell = mounted[mountedIndex];
         const targetSlot = targetSubCell.mountedSlotIndex;
