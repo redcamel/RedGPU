@@ -99,10 +99,8 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
             this.#slotPooler.updateWindParams(
-                gpuDevice,
-                this.#megaUBO,
                 this.#slotIndex,
                 windMultiplier,
                 windFlutterMultiplier * 0.5,

@@ -174,8 +174,6 @@ export default function createFoliageSubMeshInstance(
         slotIndex = slotPooler.allocateSlot();
         if (slotIndex >= 0) {
             slotPooler.writePBRSubMeshSlot(
-                gpuDevice,
-                megaUBO,
                 slotIndex,
                 globalSlot,
                 receiveShadow,

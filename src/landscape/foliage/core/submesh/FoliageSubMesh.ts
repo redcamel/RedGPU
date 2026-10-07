@@ -198,10 +198,8 @@ export class FoliageSubMesh extends ScatterSubMesh {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
             this.#slotPooler.updateWindParams(
-                gpuDevice,
-                this.#megaUBO,
                 this.#slotIndex,
                 windMultiplier,
                 windFlutterMultiplier,
@@ -228,10 +226,8 @@ export class FoliageSubMesh extends ScatterSubMesh {
         groundBlendStrength: number,
         groundBlendRange: number
     ): void {
-        if (this.#slotPooler && this.#megaUBO && this.#slotIndex >= 0) {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
             this.#slotPooler.updateGroundBlendParams(
-                gpuDevice,
-                this.#megaUBO,
                 this.#slotIndex,
                 groundBlendStrength,
                 groundBlendRange

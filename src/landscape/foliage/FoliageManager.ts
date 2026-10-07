@@ -87,10 +87,11 @@ class FoliageManager {
         this.#landscape = landscape;
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#redGPUContext = landscape.redGPUContext;
-        this.#slotPooler = new FoliageSubMeshSlotPooler();
+        this.#slotPooler = new FoliageSubMeshSlotPooler(this.#redGPUContext);
+        this.#subMeshMegaUBO = this.#slotPooler.gpuBuffer;
 
         const {gpuDevice, resourceManager} = this.#redGPUContext;
-        if (gpuDevice) {
+        if (gpuDevice && this.#subMeshMegaUBO) {
             this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
                 label: 'Foliage_SubMesh_BindGroupLayout',
                 entries: [
@@ -104,13 +105,6 @@ class FoliageManager {
                         }
                     }
                 ]
-            });
-
-            // 1,024개 슬롯 = 256 KB 고정 메가 UBO 사전 할당 (Zero Re-creation)
-            this.#subMeshMegaUBO = gpuDevice.createBuffer({
-                label: 'Foliage_SubMesh_MegaUBO',
-                size: FoliageSubMeshSlotPooler.MAX_SLOTS * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             });
 
             this.#subMeshDynamicBindGroup = gpuDevice.createBindGroup({
@@ -598,10 +592,9 @@ class FoliageManager {
         this.#pipelineRegistry.clearCache();
         this.#renderer.destroy();
         this.#culler.destroy();
-        this.#subMeshMegaUBO?.destroy();
+        this.#slotPooler.destroy();
         this.#subMeshMegaUBO = null;
         this.#subMeshDynamicBindGroup = null;
-        this.#slotPooler.clear();
         this.#subMeshVertexBindGroupLayout = null;
         this.#landscape = null;
         this.#onUniformUpdateNeeded = null;

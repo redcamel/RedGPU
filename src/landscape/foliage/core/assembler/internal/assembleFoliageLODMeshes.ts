@@ -166,8 +166,6 @@ export default function assembleFoliageLODMeshes(
             shadowSlotIndex = slotPooler.allocateSlot();
             if (shadowSlotIndex >= 0) {
                 slotPooler.writeShadowSubMeshSlot(
-                    gpuDevice,
-                    megaUBO,
                     shadowSlotIndex,
                     options.windMultiplier,
                     treeH,
