@@ -4,9 +4,6 @@
  * @packageDocumentation
  */
 
-import {mat4} from "gl-matrix";
-
-const identityMatrix: mat4 = mat4.create();
 
 /**
  * [KO] 최대 1,024개 서브메시(256 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 슬롯 풀러 클래스입니다.
@@ -16,8 +13,8 @@ export class FoliageSubMeshSlotPooler {
     static MAX_SLOTS: number = 1024;
     static SLOT_STRIDE_BYTES: number = 256;
     static SLOT_STRIDE_FLOATS: number = 64; // 256 / 4
-    static PARAMS_SIZE_BYTES: number = 160;
-    static PARAMS_SIZE_FLOATS: number = 40;  // 160 / 4
+    static PARAMS_SIZE_BYTES: number = 32;
+    static PARAMS_SIZE_FLOATS: number = 8;  // 32 / 4
 
     #cpuBuffer: Float32Array;
     #cpuUint32View: Uint32Array;
@@ -80,7 +77,7 @@ export class FoliageSubMeshSlotPooler {
         if (slot < 0 || slot >= FoliageSubMeshSlotPooler.MAX_SLOTS) return;
         if (this.#freeTop >= FoliageSubMeshSlotPooler.MAX_SLOTS) return;
 
-        // 슬롯 메모리 0 초기화 (160B / 40 floats)
+        // 슬롯 메모리 0 초기화 (32B / 8 floats)
         const baseFloat = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer.fill(0, baseFloat, baseFloat + FoliageSubMeshSlotPooler.PARAMS_SIZE_FLOATS);
 
@@ -90,15 +87,13 @@ export class FoliageSubMeshSlotPooler {
     }
 
     /**
-     * [KO] PBR 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 즉시 전송합니다.
-     * [EN] Writes PBR sub-mesh parameter data to the specified slot and uploads immediately to GPU.
+     * [KO] PBR 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
+     * [EN] Writes PBR sub-mesh parameter data to the specified slot and uploads 32 bytes precisely to GPU.
      */
     writePBRSubMeshSlot(
         gpuDevice: GPUDevice,
         gpuBuffer: GPUBuffer,
         slot: number,
-        relMatrix: mat4,
-        normMatrix: mat4,
         globalSlot: number,
         receiveShadow: boolean,
         isMasked: boolean,
@@ -115,27 +110,16 @@ export class FoliageSubMeshSlotPooler {
         const f32 = this.#cpuBuffer;
         const u32 = this.#cpuUint32View;
 
-        f32.set(relMatrix, baseFloat);
-        f32.set(normMatrix, baseFloat + 16);
-        u32[baseFloat + 32] = globalSlot;
+        u32[baseFloat + 0] = globalSlot;
+        f32[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
+        f32[baseFloat + 2] = windMultiplier ?? 1.0;
+        f32[baseFloat + 3] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
+        f32[baseFloat + 4] = treeHeight ?? 5.0;
+        f32[baseFloat + 5] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
+        f32[baseFloat + 6] = groundBlendRange ?? 1.5;
+        u32[baseFloat + 7] = 0; // pad0
 
-        const isIdentity = (
-            relMatrix[0] === 1 && relMatrix[1] === 0 && relMatrix[2] === 0 && relMatrix[3] === 0 &&
-            relMatrix[4] === 0 && relMatrix[5] === 1 && relMatrix[6] === 0 && relMatrix[7] === 0 &&
-            relMatrix[8] === 0 && relMatrix[9] === 0 && relMatrix[10] === 1 && relMatrix[11] === 0 &&
-            relMatrix[12] === 0 && relMatrix[13] === 0 && relMatrix[14] === 0 && relMatrix[15] === 1
-        );
-        u32[baseFloat + 33] = isIdentity ? 0 : 1;
-        f32[baseFloat + 34] = receiveShadow ? 1.0 : 0.0;
-
-        f32[baseFloat + 35] = windMultiplier ?? 1.0;
-        f32[baseFloat + 36] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
-        f32[baseFloat + 37] = treeHeight ?? 5.0;
-
-        f32[baseFloat + 38] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
-        f32[baseFloat + 39] = groundBlendRange ?? 1.5;
-
-        // GPU 버퍼의 해당 슬롯 위치(slot * 256 바이트)에 160바이트만 정확히 전송
+        // GPU 버퍼의 해당 슬롯 위치(slot * 256 바이트)에 32바이트만 정확히 전송
         const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES;
         const offsetElements = baseFloat;
         gpuDevice.queue.writeBuffer(
@@ -148,8 +132,8 @@ export class FoliageSubMeshSlotPooler {
     }
 
     /**
-     * [KO] 그림자 병합 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 즉시 전송합니다.
-     * [EN] Writes shadow merged sub-mesh parameter data to the specified slot and uploads immediately to GPU.
+     * [KO] 그림자 병합 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
+     * [EN] Writes shadow merged sub-mesh parameter data to the specified slot and uploads 32 bytes precisely to GPU.
      */
     writeShadowSubMeshSlot(
         gpuDevice: GPUDevice,
@@ -165,18 +149,14 @@ export class FoliageSubMeshSlotPooler {
         const f32 = this.#cpuBuffer;
         const u32 = this.#cpuUint32View;
 
-        f32.set(identityMatrix, baseFloat);
-        f32.set(identityMatrix, baseFloat + 16);
-        u32[baseFloat + 32] = 0;
-        u32[baseFloat + 33] = 0;
-        f32[baseFloat + 34] = 0.0;
-
-        f32[baseFloat + 35] = windMultiplier ?? 1.0;
-        f32[baseFloat + 36] = (windFlutterMultiplier ?? 1.0) * 0.5;
-        f32[baseFloat + 37] = treeHeight ?? 5.0;
-
-        f32[baseFloat + 38] = 0.0;
-        f32[baseFloat + 39] = 1.5;
+        u32[baseFloat + 0] = 0; // globalSlot
+        f32[baseFloat + 1] = 0.0; // receiveShadow
+        f32[baseFloat + 2] = windMultiplier ?? 1.0;
+        f32[baseFloat + 3] = (windFlutterMultiplier ?? 1.0) * 0.5;
+        f32[baseFloat + 4] = treeHeight ?? 5.0;
+        f32[baseFloat + 5] = 0.0; // groundBlendStrength
+        f32[baseFloat + 6] = 1.5; // groundBlendRange
+        u32[baseFloat + 7] = 0; // pad0
 
         const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES;
         const offsetElements = baseFloat;
@@ -188,7 +168,6 @@ export class FoliageSubMeshSlotPooler {
             FoliageSubMeshSlotPooler.PARAMS_SIZE_BYTES
         );
     }
-
 
     /**
      * [KO] 특정 서브메시 슬롯의 바람 파라미터를 업데이트하고 GPU에 즉시 반영합니다 (Zero-GC).
@@ -206,17 +185,17 @@ export class FoliageSubMeshSlotPooler {
         const baseFloat = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
         const f32 = this.#cpuBuffer;
 
-        f32[baseFloat + 35] = windMultiplier;
-        f32[baseFloat + 36] = windFlutterMultiplier;
-        f32[baseFloat + 37] = treeHeight;
+        f32[baseFloat + 2] = windMultiplier;
+        f32[baseFloat + 3] = windFlutterMultiplier;
+        f32[baseFloat + 4] = treeHeight;
 
-        // 35, 36, 37번 인덱스 (12바이트)만 정밀 업로드
-        const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES + 35 * 4;
+        // 2, 3, 4번 인덱스 (12바이트)만 정밀 업로드
+        const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES + 2 * 4;
         gpuDevice.queue.writeBuffer(
             gpuBuffer,
             offsetBytes,
             f32.buffer,
-            f32.byteOffset + (baseFloat + 35) * 4,
+            f32.byteOffset + (baseFloat + 2) * 4,
             12
         );
     }
@@ -236,16 +215,16 @@ export class FoliageSubMeshSlotPooler {
         const baseFloat = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
         const f32 = this.#cpuBuffer;
 
-        f32[baseFloat + 38] = strength;
-        f32[baseFloat + 39] = range;
+        f32[baseFloat + 5] = strength;
+        f32[baseFloat + 6] = range;
 
-        // 38, 39번 인덱스 (8바이트)만 정밀 업로드
-        const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES + 38 * 4;
+        // 5, 6번 인덱스 (8바이트)만 정밀 업로드
+        const offsetBytes = slot * FoliageSubMeshSlotPooler.SLOT_STRIDE_BYTES + 5 * 4;
         gpuDevice.queue.writeBuffer(
             gpuBuffer,
             offsetBytes,
             f32.buffer,
-            f32.byteOffset + (baseFloat + 38) * 4,
+            f32.byteOffset + (baseFloat + 5) * 4,
             8
         );
     }

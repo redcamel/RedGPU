@@ -100,7 +100,7 @@ class FoliageManager {
                         buffer: {
                             type: 'uniform',
                             hasDynamicOffset: true,
-                            minBindingSize: 160
+                            minBindingSize: 32
                         }
                     }
                 ]
@@ -122,7 +122,7 @@ class FoliageManager {
                         resource: {
                             buffer: this.#subMeshMegaUBO,
                             offset: 0,
-                            size: 160
+                            size: 32
                         }
                     }
                 ]

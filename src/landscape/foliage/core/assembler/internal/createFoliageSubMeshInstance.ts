@@ -177,8 +177,6 @@ export default function createFoliageSubMeshInstance(
                 gpuDevice,
                 megaUBO,
                 slotIndex,
-                relMatrix,
-                normMatrix,
                 globalSlot,
                 receiveShadow,
                 isMasked,

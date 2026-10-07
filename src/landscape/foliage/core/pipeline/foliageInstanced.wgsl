@@ -6,16 +6,14 @@
 #redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
 
 struct SubMeshUniforms {
-    relativeModelMatrix: mat4x4<f32>,
-    relativeNormalMatrix: mat4x4<f32>,
     globalFragmentSlotIndex: u32,
-    hasHierarchyTransform: u32,
     receiveShadow: f32,
     windMultiplier: f32,
     windFlutterMultiplier: f32,
     treeHeight: f32,
     groundBlendStrength: f32,
     groundBlendRange: f32,
+    pad0: u32,
 };
 
 @group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
@@ -109,8 +107,6 @@ fn unpackAndTransformFoliage(
     res.instanceScale = vec3<f32>(instanceScaleXZ.x, instancePos_scaleY.w, instanceScaleXZ.y);
     res.xform = transformFoliagePosition(
         position,
-        subMeshUniforms.hasHierarchyTransform,
-        subMeshUniforms.relativeModelMatrix,
         res.instancePos,
         res.instanceScale,
         instanceRotQuat
@@ -193,12 +189,8 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
 
     let combinedOpacity = input.groundColor_fade.a;
 
-    var hierarchyNormal = input.vertexNormal;
-    var hierarchyTangent = input.vertexTangent.xyz;
-    if (subMeshUniforms.hasHierarchyTransform != 0u) {
-        hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexNormal, 0.0)).xyz;
-        hierarchyTangent = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexTangent.xyz, 0.0)).xyz;
-    }
+    let hierarchyNormal = input.vertexNormal;
+    let hierarchyTangent = input.vertexTangent.xyz;
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
