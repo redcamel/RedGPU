@@ -222,13 +222,7 @@ class FoliageRenderer extends AScatterRenderer {
             }
         }
 
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
-        this.#lastBoundInstanceOffset = -1;
+        this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesMain[t];
@@ -318,12 +312,7 @@ class FoliageRenderer extends AScatterRenderer {
         this.#subMeshDynamicBindGroup = null;
         this.#subMeshVertexBindGroupLayout = null;
         this.markDepthPrepassBundleDirty();
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
+        this.#resetBoundState();
         for (let i = 0; i < this.#validTypesMain.length; i++) {
             this.#validTypesMain[i].type = null;
             this.#validTypesMain[i].culledGPU = null;
@@ -334,6 +323,16 @@ class FoliageRenderer extends AScatterRenderer {
         }
         this.#validTypesMain.length = 0;
         this.#validTypesShadow.length = 0;
+    }
+
+    #resetBoundState(): void {
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        this.#lastBoundInstanceOffset = -1;
     }
 
     #recordDepthPrepassRenderBundle(
@@ -370,13 +369,7 @@ class FoliageRenderer extends AScatterRenderer {
             sampleCount: sampleCount,
         });
 
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
-        this.#lastBoundInstanceOffset = -1;
+        this.#resetBoundState();
 
         // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
         for (let t = 0; t < validCount; t++) {
@@ -432,13 +425,7 @@ class FoliageRenderer extends AScatterRenderer {
             sampleCount: 1,
         });
 
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
-        this.#lastBoundInstanceOffset = -1;
+        this.#resetBoundState();
 
         const firstType = validCount > 0 ? this.#validTypesShadow[0].type : null;
         const megaBuffer = firstType?.megaBuffer;

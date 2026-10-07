@@ -67,8 +67,8 @@ export class GrassRenderer extends AScatterRenderer {
     #lastCulledBuffer: GPUBuffer | null = null;
     #lastSlotPoolerBuffer: GPUBuffer | null = null;
 
-    // Group 2 (텍스처/샘플러) 캐시
-    #materialBindGroupCache: Map<string, MaterialBindGroupCacheEntry> = new Map();
+    // Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: (typeId << 16) | subIndex)
+    #materialBindGroupCache: Map<number, MaterialBindGroupCacheEntry> = new Map();
 
     // GPURenderBundle 캐싱 엔진
     #mainBundlesByView: WeakMap<View3D, MainBundleCacheEntry> = new WeakMap();
@@ -496,7 +496,7 @@ export class GrassRenderer extends AScatterRenderer {
             || type.baseColorTextureView
             || resourceManager.emptyBitmapTextureView;
 
-        const cacheKey = `${type.typeId}_${subIndex}`;
+        const cacheKey = (type.typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
 
         if (!entry || entry.cachedColorTexView !== subTexView) {

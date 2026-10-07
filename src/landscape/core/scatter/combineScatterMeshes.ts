@@ -9,6 +9,7 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
+import Primitive from "../../../primitive/core/Primitive";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import {
@@ -27,7 +28,7 @@ const identityMatrix: mat4 = mat4.create();
  */
 export interface RawSubMeshNode {
     node: Mesh;
-    geometry: any;
+    geometry: Geometry | Primitive;
     material: any;
     currentRelativeMatrix: mat4;
     normalMatrix: mat4;
