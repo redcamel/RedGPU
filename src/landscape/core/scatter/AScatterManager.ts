@@ -7,7 +7,8 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import View3D from "../../../display/view/View3D";
 import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
 import type Landscape from "../../Landscape";
-import type AScatterType, {AScatterTypeInitOptions} from "./AScatterType";
+import type AScatterType from "./AScatterType";
+import {AScatterTypeInitOptions} from "./AScatterType";
 import type {IScatterManager} from "./IScatterManager";
 
 /**

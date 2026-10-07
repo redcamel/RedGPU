@@ -1,4 +1,3 @@
-import { Function } from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
@@ -34,9 +33,6 @@ interface Mesh {
  *
  * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
  *
- * @see
- * [KO] 아래는 Mesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Mesh.
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)
  * @see [Mesh Child Methods example](/RedGPU/examples/3d/mesh/childMethod/)
@@ -228,6 +224,36 @@ declare class Mesh extends MeshBase {
      * [EN] Parent container
      */
     set parent(value: Object3DContainer);
+    /**
+     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 반환합니다.
+     * [EN] Returns whether real-time wave interaction with water (WaterLake) is enabled.
+     */
+    get enableWaterInteraction(): boolean;
+    /**
+     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 설정합니다.
+     * [EN] Sets whether real-time wave interaction with water (WaterLake) is enabled.
+     */
+    set enableWaterInteraction(value: boolean);
+    /**
+     * [KO] 물 파동 생성 강도 배율을 반환합니다 (기본값: 1.0).
+     * [EN] Returns the wave generation strength multiplier (default: 1.0).
+     */
+    get waterWaveStrength(): number;
+    /**
+     * [KO] 물 파동 생성 강도 배율을 설정합니다.
+     * [EN] Sets the wave generation strength multiplier.
+     */
+    set waterWaveStrength(value: number);
+    /**
+     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 반환합니다.
+     * [EN] Returns whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     */
+    get waterInteractionStatic(): boolean;
+    /**
+     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 설정합니다.
+     * [EN] Sets whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     */
+    set waterInteractionStatic(value: boolean);
     /**
      * [KO] 피벗 X 좌표를 반환합니다.
      * [EN] Returns the pivot X coordinate.
@@ -449,6 +475,20 @@ declare class Mesh extends MeshBase {
      * [EN] Whether to ignore (default: false)
      */
     setIgnoreFrustumCullingRecursively(value?: boolean): void;
+    /**
+     * [KO] 하위 계층의 모든 객체에 물 인터랙션 활성화 여부 및 파라미터를 재귀적으로 설정합니다.
+     * [EN] Recursively sets water interaction enable status and parameters for all objects in the hierarchy.
+     * @param enable -
+     * [KO] 활성화 여부 (기본값: true)
+     * [EN] Whether to enable (default: true)
+     * @param waveStrength -
+     * [KO] 파동 생성 강도 (기본값: 1.0)
+     * [EN] Wave generation strength (default: 1.0)
+     * @param isStatic -
+     * [KO] 정적 객체 여부 (기본값: false)
+     * [EN] Whether it is a static object (default: false)
+     */
+    setEnableWaterInteractionRecursively(enable?: boolean, waveStrength?: number, isStatic?: boolean): void;
     /**
      * [KO] 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
      * [EN] Calculates and returns the combined opacity considering the parent hierarchy.

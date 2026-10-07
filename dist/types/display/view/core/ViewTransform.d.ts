@@ -142,6 +142,14 @@ declare class ViewTransform extends RedGPUObject {
      */
     get frustumPlanes(): number[][];
     /**
+     * [KO] 현재 투영(projection) 및 카메라 뷰(view) 행렬을 기반으로 뷰 프러스텀 평면을 1차원 Float32Array(24)로 계산하여 반환합니다.
+     * [EN] Calculates and returns the view frustum planes as 1D Float32Array(24) based on current projection and view matrices.
+     * @returns
+     * [KO] 24개 float으로 구성된 1차원 평탄 프러스텀 평면 버퍼
+     * [EN] 1D flattened frustum planes buffer of 24 floats
+     */
+    get frustumPlanesFlat(): Float32Array;
+    /**
      * [KO] 내부적으로 참조하는 실제 카메라 인스턴스를 반환합니다. (AController가 연동된 경우 제어 대상 내부 카메라 반환)
      * [EN] Returns the raw camera instance referenced internally. (Returns internal camera if AController is linked)
      */

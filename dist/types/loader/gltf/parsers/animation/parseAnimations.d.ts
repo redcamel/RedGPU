@@ -1,6 +1,5 @@
 import { GLTF } from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
-export { GLTFParsedSingleClip } from "./GLTFParsedSingleClip";
 /**
  * Parses animation data for a given GLTF scene.
  *

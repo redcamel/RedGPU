@@ -116,7 +116,7 @@ declare class GLTFLoader extends RedGPUObject {
      */
     resultMesh: Mesh;
     /**
-     * @internal
+     *
      */
     parsingOption: any;
     /**
@@ -167,7 +167,7 @@ declare class GLTFLoader extends RedGPUObject {
     /**
      * [KO] 원본 GLTF 데이터를 설정합니다.
      * [EN] Sets the raw GLTF data.
-     * @internal
+     *
      */
     set gltfData(value: GLTF);
     /**

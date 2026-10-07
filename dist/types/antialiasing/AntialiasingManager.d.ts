@@ -120,7 +120,7 @@ declare class AntialiasingManager {
      * @returns
      * [KO] MSAA 고유 ID
      * [EN] Unique ID of MSAA
-     * @internal
+     *
      */
     get msaaID(): string;
 }
