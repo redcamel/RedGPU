@@ -90,8 +90,6 @@ class FoliageCuller extends AScatterCullPipeline {
         const {view} = renderViewStateData;
         const camera = view.rawCamera;
         const cam3D = camera as PerspectiveCamera;
-        const {x: camX, y: camY, z: camZ} = cam3D;
-        const frustumPlanes = renderViewStateData.frustumPlanesFlat;
 
         const fov = cam3D.fieldOfView ?? 60.0;
         if (fov !== this.#lastFOV) {
@@ -103,33 +101,15 @@ class FoliageCuller extends AScatterCullPipeline {
 
         if (this.#megaBuffer) {
             const hzb = view.hierarchicalZBuffer;
-            const hzbTextureView = hzb?.textureView || null;
-            const hzbSampler = hzb?.sampler || null;
-            this.#lastHZBTextureView = hzbTextureView;
-            this.#lastHZBSampler = hzbSampler;
-            const hasHZB = !!hzbTextureView;
+            this.#lastHZBTextureView = hzb?.textureView || null;
+            this.#lastHZBSampler = hzb?.sampler || null;
 
             mat4.multiply(this.#tempPVMatrix, view.projectionMatrix, cam3D.viewMatrix);
-            const viewProjectionMatrix = this.#tempPVMatrix;
-
-            const viewportHeight = view.pixelRectArray[3];
-            const activeCascadeCount = renderViewStateData.activeCascadeCount;
-            const cascadeSplitDepths = renderViewStateData.cascadeSplitDepths;
-            const cascadeShadowFrustumPlanesByCascade = renderViewStateData.cascadeShadowFrustumPlanesByCascade;
 
             this.#megaBuffer.updateUnifiedGlobalUniforms(
-                camX, camY, camZ,
+                renderViewStateData,
                 fovFactor,
-                frustumPlanes,
-                activeCascadeCount,
-                cascadeSplitDepths,
-                cascadeShadowFrustumPlanesByCascade,
-                viewportHeight,
-                hasHZB,
-                viewProjectionMatrix,
-                512.0,
-                256.0,
-                0.002
+                this.#tempPVMatrix
             );
         }
 

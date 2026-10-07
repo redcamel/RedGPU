@@ -3,7 +3,9 @@
  * [EN] Mega-buffer module integrally managing multi-LOD instance data, indirect draw, and cascade shadow buffers for large-scale foliage systems.
  * @packageDocumentation
  */
+import {mat4} from "gl-matrix";
 import RedGPUContext from '../../../../context/RedGPUContext';
+import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 import {DRAW_INDEXED_INDIRECT_ARGS_COUNT, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
 import ACpuStagedScatterMegaBuffer from '../../../core/scatter/ACpuStagedScatterMegaBuffer';
 import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
@@ -240,25 +242,39 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
 
 
     /**
-     * [KO] 유니파이드 GPU 컬링에 필요한 글로벌 유니폼 버퍼를 CPU에서 갱신하고 GPU로 전송합니다.
-     * [EN] Updates global uniforms required for unified GPU culling on CPU and transfers them to GPU.
+     * [KO] 유니파이드 GPU 컬링에 필요한 글로벌 유니폼 버퍼를 RenderViewStateData SSOT로부터 CPU에서 갱신하고 GPU로 전송합니다.
+     * [EN] Updates global uniforms required for unified GPU culling on CPU directly from RenderViewStateData SSOT and transfers them to GPU.
+     *
+     * @param renderViewStateData - 렌더 뷰 상태 데이터 (카메라, 프러스텀, 캐스케이드 정보 포함)
+     * @param fovFactor - 카메라 FOV 탄젠트 팩터
+     * @param viewProjectionMatrix - 뷰-프로젝션 행렬 (선택사항)
+     * @param hzbWidth - HZB 텍스처 가로 크기 (기본값: 512.0)
+     * @param hzbHeight - HZB 텍스처 세로 크기 (기본값: 256.0)
+     * @param depthBias - HZB 오클루전 깊이 바이어스 (기본값: 0.002)
      */
     updateUnifiedGlobalUniforms(
-        camX: number, camY: number, camZ: number,
+        renderViewStateData: RenderViewStateData,
         fovFactor: number,
-        mainFrustumPlanes: Float32Array | null,
-        activeCascadeCount: number = 0,
-        cascadeSplitDepths?: number[] | Float32Array | null,
-        cascadeShadowFrustumPlanesByCascade?: Float32Array[] | null,
-        viewportHeight: number = 1080.0,
-        hzbEnabled: boolean = false,
-        viewProjectionMatrix: any = null,
+        viewProjectionMatrix: mat4 | null = null,
         hzbWidth: number = 512.0,
         hzbHeight: number = 256.0,
         depthBias: number = 0.002
     ): void {
         const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
         if (!this.#unifiedGlobalUniformGPUBuffer || !typeParamsGPUBuffer) return;
+
+        const {view} = renderViewStateData;
+        const camera = view.rawCamera;
+        const camX = camera.x;
+        const camY = camera.y;
+        const camZ = camera.z;
+
+        const activeCascadeCount = renderViewStateData.activeCascadeCount;
+        const cascadeSplitDepths = renderViewStateData.cascadeSplitDepths;
+        const cascadeShadowFrustumPlanesByCascade = renderViewStateData.cascadeShadowFrustumPlanesByCascade;
+        const mainFrustumPlanes = renderViewStateData.frustumPlanesFlat;
+        const viewportHeight = view.pixelRectArray[3];
+        const hzbEnabled = !!view.hierarchicalZBuffer?.textureView;
 
         const gf32 = this.#cpuUnifiedGlobalUniformData;
         const gu32 = this.#cpuUnifiedGlobalUniformUint32;
@@ -290,7 +306,13 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         }
 
         if (mainFrustumPlanes && mainFrustumPlanes.length >= 24) {
-            gf32.set(mainFrustumPlanes.length === 24 ? mainFrustumPlanes : mainFrustumPlanes.subarray(0, 24), 32);
+            if (mainFrustumPlanes.length === 24) {
+                gf32.set(mainFrustumPlanes, 32);
+            } else {
+                for (let p = 0; p < 24; p++) gf32[32 + p] = mainFrustumPlanes[p];
+            }
+        } else {
+            gf32.fill(0, 32, 56);
         }
 
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
@@ -303,12 +325,17 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
                 gu32[cascadeBase + 3] = 0;
 
                 const planes = cascadeShadowFrustumPlanesByCascade[c];
-                gf32.set(planes.length === 24 ? planes : planes.subarray(0, 24), cascadeBase + 4);
+                if (planes.length === 24) {
+                    gf32.set(planes, cascadeBase + 4);
+                } else {
+                    for (let p = 0; p < 24; p++) gf32[cascadeBase + 4 + p] = planes[p];
+                }
             } else {
                 gf32[cascadeBase] = 0.0;
                 gu32[cascadeBase + 1] = 0;
                 gu32[cascadeBase + 2] = 0;
                 gu32[cascadeBase + 3] = 0;
+                gf32.fill(0, cascadeBase + 4, cascadeBase + 28);
             }
         }
 
