@@ -88,6 +88,38 @@ export interface ScatterBaseSegmentAllocation {
 }
 
 /**
+ * [KO] 보조 간접 드로우 버퍼 등록 정보 인터페이스입니다 (그림자, 추가 렌더 패스 등).
+ * [EN] Interface for auxiliary indirect draw buffer registration info (shadow, additional render passes, etc.).
+ */
+export interface AuxiliaryIndirectBufferEntry {
+    /**
+     * [KO] 고유 식별자 키 (예: 'shadow', 'custom' 등)
+     * [EN] Unique identifier key (e.g., 'shadow', 'custom', etc.)
+     */
+    key: string;
+    /**
+     * [KO] 리셋 대상 GPU 간접 드로우 버퍼
+     * [EN] Target GPU indirect draw buffer to reset
+     */
+    targetGPUBuffer: GPUBuffer | null;
+    /**
+     * [KO] GPU 템플릿 복사 원본 버퍼 (COPY_SRC)
+     * [EN] GPU template copy source buffer (COPY_SRC)
+     */
+    templateGPUBuffer: GPUBuffer | null;
+    /**
+     * [KO] CPU 템플릿 BufferSource 또는 ArrayBufferLike (GPU 큐 fallback용)
+     * [EN] CPU template BufferSource or ArrayBufferLike (for GPU queue fallback)
+     */
+    cpuTemplateBuffer?: BufferSource | ArrayBufferLike | null;
+    /**
+     * [KO] 매 프레임 리셋 시 복사할 바이트 크기를 반환하는 콜백 함수 (생략 시 templateGPUBuffer 크기 전체)
+     * [EN] Callback returning byte size to copy during per-frame reset (full size if omitted)
+     */
+    getResetByteSize?: () => number;
+}
+
+/**
  * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 순수 GPU VRAM 추상 메가버퍼 기반 클래스입니다.
  * [EN] Pure GPU VRAM abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
  *
@@ -131,6 +163,8 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
     #indirectResetTemplate: Uint32Array;
     #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
+
+    #auxiliaryIndirectBuffers: AuxiliaryIndirectBufferEntry[] = [];
 
     #onRecreated: (() => void) | null = null;
 
@@ -474,8 +508,46 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 매 프레임 GPU 컬링 실행 전 간접 드로우 인스턴스 카운트를 0으로 리셋합니다.
-     * [EN] Resets indirect draw instance counts to zero before GPU culling executes every frame.
+     * [KO] 그림자(CSM) 등 추가적인 보조 간접 드로우 GPU 버퍼를 등록합니다.
+     * [EN] Registers an auxiliary indirect draw GPU buffer such as cascade shadow passes.
+     * @param entry -
+     * [KO] 등록할 보조 간접 드로우 버퍼 정보
+     * [EN] Auxiliary indirect draw buffer entry to register
+     */
+    registerAuxiliaryIndirectBuffer(entry: AuxiliaryIndirectBufferEntry): void {
+        const idx = this.#auxiliaryIndirectBuffers.findIndex(e => e.key === entry.key);
+        if (idx >= 0) {
+            this.#auxiliaryIndirectBuffers[idx] = entry;
+        } else {
+            this.#auxiliaryIndirectBuffers.push(entry);
+        }
+    }
+
+    /**
+     * [KO] 등록된 특정 보조 간접 드로우 버퍼를 해제합니다.
+     * [EN] Unregisters a specific auxiliary indirect draw buffer.
+     * @param key -
+     * [KO] 해제할 보조 간접 드로우 버퍼 키
+     * [EN] Auxiliary indirect draw buffer key to unregister
+     */
+    unregisterAuxiliaryIndirectBuffer(key: string): void {
+        const idx = this.#auxiliaryIndirectBuffers.findIndex(e => e.key === key);
+        if (idx >= 0) {
+            this.#auxiliaryIndirectBuffers.splice(idx, 1);
+        }
+    }
+
+    /**
+     * [KO] 등록된 모든 보조 간접 드로우 버퍼를 제거합니다.
+     * [EN] Clears all registered auxiliary indirect draw buffers.
+     */
+    clearAuxiliaryIndirectBuffers(): void {
+        this.#auxiliaryIndirectBuffers.length = 0;
+    }
+
+    /**
+     * [KO] 매 프레임 GPU 컬링 실행 전 메인 및 등록된 모든 보조 간접 드로우 인스턴스 카운트를 0으로 일괄 리셋합니다 (Zero-GC).
+     * [EN] Resets instance counts to zero for main and all registered auxiliary indirect draw buffers before GPU culling executes every frame (Zero-GC).
      * @param commandEncoder -
      * [KO] 선택사항인 GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
      * [EN] Optional GPU command encoder (uses copyBufferToBuffer if provided)
@@ -483,31 +555,67 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
         if (this.#totalIndirectDrawCalls === 0) return;
 
+        // 1. 메인 간접 드로우 버퍼 리셋
         const indirectGPUBuffer = this.#indirectGPUBuffer;
-        if (!indirectGPUBuffer) return;
+        if (indirectGPUBuffer) {
+            const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
 
-        const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
-
-        if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {
-            commandEncoder.copyBufferToBuffer(
-                this.#indirectResetTemplateGPUBuffer,
-                0,
-                indirectGPUBuffer,
-                0,
-                byteSize
-            );
-            return;
+            if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {
+                commandEncoder.copyBufferToBuffer(
+                    this.#indirectResetTemplateGPUBuffer,
+                    0,
+                    indirectGPUBuffer,
+                    0,
+                    byteSize
+                );
+            } else {
+                const gpuDevice = this.gpuDevice;
+                if (gpuDevice) {
+                    gpuDevice.queue.writeBuffer(
+                        indirectGPUBuffer,
+                        0,
+                        this.#indirectResetTemplate.buffer,
+                        0,
+                        byteSize
+                    );
+                }
+            }
         }
 
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            gpuDevice.queue.writeBuffer(
-                indirectGPUBuffer,
-                0,
-                this.#indirectResetTemplate.buffer,
-                0,
-                byteSize
-            );
+        // 2. 등록된 보조 간접 드로우 버퍼 일괄 리셋 (그림자 등, Zero-GC 루프)
+        const auxList = this.#auxiliaryIndirectBuffers;
+        const auxCount = auxList.length;
+        if (auxCount > 0) {
+            for (let i = 0; i < auxCount; i++) {
+                const entry = auxList[i];
+                const targetGPUBuffer = entry.targetGPUBuffer;
+                if (!targetGPUBuffer) continue;
+
+                const templateGPUBuffer = entry.templateGPUBuffer;
+                const byteSize = entry.getResetByteSize ? entry.getResetByteSize() : (templateGPUBuffer?.size || 0);
+                if (byteSize <= 0) continue;
+
+                if (commandEncoder && templateGPUBuffer) {
+                    commandEncoder.copyBufferToBuffer(
+                        templateGPUBuffer,
+                        0,
+                        targetGPUBuffer,
+                        0,
+                        byteSize
+                    );
+                } else if (entry.cpuTemplateBuffer) {
+                    const gpuDevice = this.gpuDevice;
+                    if (gpuDevice) {
+                        gpuDevice.queue.writeBuffer(
+                            targetGPUBuffer,
+                            0,
+                            entry.cpuTemplateBuffer,
+                            0,
+                            byteSize
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -592,6 +700,8 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#indirectGPUBuffer = null;
         this.#indirectResetTemplateGPUBuffer = null;
         this.#typeParamsGPUBuffer = null;
+
+        this.clearAuxiliaryIndirectBuffers();
 
         this.onDestroy();
     }

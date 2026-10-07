@@ -256,49 +256,6 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         this.uploadInstances(allocation.rawBaseOffset + startIndex, count);
     }
 
-    /**
-     * [KO] 매 프레임 GPU 컬링 실행 전, 간접 드로우 인스턴스 카운트를 초기화합니다.
-     * [EN] Resets indirect draw instance counts before executing GPU culling every frame.
-     * @param commandEncoder -
-     * [KO] 선택사항인 GPU 커맨드 인코더 (지정 시 GPU copyBufferToBuffer 사용)
-     * [EN] Optional GPU command encoder (uses GPU copyBufferToBuffer if provided)
-     */
-    resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
-        const totalIndirect = this.totalIndirectDrawCalls;
-        if (totalIndirect === 0) return;
-
-        super.resetMultiIndirectCommands(commandEncoder);
-
-        if (!this.#shadowIndirectGPUBuffer) return;
-
-        const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
-        const shadowResetBytes = Math.min(
-            (this.maxSubMeshes * 3 + totalIndirect) * indirectStrideBytes,
-            this.#shadowIndirectResetTemplate.byteLength
-        );
-
-        if (commandEncoder && this.#shadowIndirectResetTemplateGPUBuffer) {
-            commandEncoder.copyBufferToBuffer(
-                this.#shadowIndirectResetTemplateGPUBuffer,
-                0,
-                this.#shadowIndirectGPUBuffer,
-                0,
-                shadowResetBytes
-            );
-            return;
-        }
-
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            gpuDevice.queue.writeBuffer(
-                this.#shadowIndirectGPUBuffer,
-                0,
-                this.#shadowIndirectResetTemplate.buffer,
-                this.#shadowIndirectResetTemplate.byteOffset,
-                shadowResetBytes
-            );
-        }
-    }
 
 
     /**
@@ -661,6 +618,7 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
      * [EN] Destroys shadow buffers, uniform buffers, bind groups, and foliage type allocations upon mega-buffer release.
      */
     onDestroy(): void {
+        this.unregisterAuxiliaryIndirectBuffer('shadow');
         this.#cachedHZBTextureView = null;
         this.#cachedHZBSampler = null;
         this.#shadowCulledGPUBuffer?.destroy();
@@ -718,6 +676,18 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             label: 'FoliageScatterMegaBuffer_GlobalUniformBuffer',
             size: this.#globalUniformBytes,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        });
+
+        const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+        this.registerAuxiliaryIndirectBuffer({
+            key: 'shadow',
+            targetGPUBuffer: this.#shadowIndirectGPUBuffer,
+            templateGPUBuffer: this.#shadowIndirectResetTemplateGPUBuffer,
+            cpuTemplateBuffer: this.#shadowIndirectResetTemplate.buffer,
+            getResetByteSize: () => Math.min(
+                (this.maxSubMeshes * 3 + this.totalIndirectDrawCalls) * indirectStrideBytes,
+                this.#shadowIndirectResetTemplate.byteLength
+            ),
         });
     }
 }
