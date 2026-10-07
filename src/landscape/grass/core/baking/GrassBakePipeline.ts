@@ -66,11 +66,10 @@ export default class GrassBakePipeline extends RedGPUObject {
         const rawBuffer = megaBuffer.rawGPUBuffer;
         if (!rawBuffer) return;
 
-        const vhtAtlas = landscape.vhtAtlasTexture;
-        const vbtAtlas = landscape.vbtBaseColorAtlas;
-        const vhtView = vhtAtlas?.gpuTextureView;
-        const vbtView = vbtAtlas?.gpuTextureView;
-        if (!vhtView || !vbtView) return;
+        if (!landscape.hasValidScatterAtlas) return;
+
+        const vhtView = landscape.vhtAtlasTexture.gpuTextureView;
+        const vbtView = landscape.vbtBaseColorAtlas.gpuTextureView;
 
         const alloc = megaBuffer.getAllocation(grass.typeId);
         if (!alloc) return;

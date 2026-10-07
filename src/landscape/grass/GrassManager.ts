@@ -171,9 +171,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         );
         grassType.bindAllocation(alloc);
 
-        const vhtAtlas = this.landscape.vhtAtlasTexture;
-        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
-        const canBakeImmediately = !!(this.gpuDevice && vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView);
+        const canBakeImmediately = !!(this.gpuDevice && this.landscape.hasValidScatterAtlas);
 
         // 즉시 베이킹이 가능한 경우, #bakeGrassType 완료 시 최신 instanceCount로 단 1회 기록되므로 중복 VRAM 전송 방지
         if (!canBakeImmediately) {
@@ -199,7 +197,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             const slotIndex = this.#slotPooler.allocateSlot();
             grassType.slotIndex = slotIndex;
 
-            const hasValidVbt = !!(vbtAtlas?.gpuTexture && this.landscape.tileLoadedCount > 0);
+            const hasValidVbt = this.landscape.hasValidVbtAtlas;
             this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
             const fallbackCam = this.#getFallbackCameraPosition();
@@ -241,10 +239,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             this.#frustumPlanesF32.set(renderViewStateData.frustumPlanesFlat);
         }
 
-        const {tileLoadedCount: currentLoadedTileCount} = this.landscape;
-        const vhtAtlas = this.landscape.vhtAtlasTexture;
-        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
-        const hasValidTextures = !!(vhtAtlas?.gpuTextureView && vbtAtlas?.gpuTextureView && currentLoadedTileCount > 0);
+        const currentLoadedTileCount = this.landscape.tileLoadedCount;
+        const hasValidTextures = this.landscape.hasValidScatterAtlas;
 
         const tileCountChanged = hasValidTextures && this.#lastLoadedTileCount !== currentLoadedTileCount;
         if (tileCountChanged) {
@@ -279,7 +275,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        const hasValidVbt = !!(vbtAtlas?.gpuTexture && currentLoadedTileCount > 0);
+        const hasValidVbt = this.landscape.hasValidVbtAtlas;
 
         for (let i = 0; i < grassLen; i++) {
             const type = grassList[i];
@@ -490,9 +486,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Executes GPU baking for a specific grass type to record position/normal/color into the VRAM buffer once.
      */
     #bakeGrassType(grass: Grass, centerX?: number, centerZ?: number): void {
-        const vhtAtlas = this.landscape.vhtAtlasTexture;
-        const vbtAtlas = this.landscape.vbtBaseColorAtlas;
-        if (!vhtAtlas?.gpuTextureView || !vbtAtlas?.gpuTextureView) return;
+        if (!this.landscape.hasValidScatterAtlas) return;
 
         const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
         const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];

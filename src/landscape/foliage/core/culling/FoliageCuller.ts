@@ -239,8 +239,9 @@ class FoliageCuller extends AScatterCullPipeline {
         if (!pipeline || !bindGroupLayout) return;
 
         if (this.#baker.hasPendingTasks && this.#megaBuffer) {
-            const vbtAtlasTexture = this.#landscapeRef?.vbtBaseColorAtlas;
-            const vbtView = vbtAtlasTexture?.gpuTextureView;
+            const vbtView = this.#landscapeRef?.hasValidVbtAtlas
+                ? this.#landscapeRef.vbtBaseColorAtlas?.gpuTextureView
+                : undefined;
             const worldSizeX = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[0] : 8000.0;
             const worldSizeZ = (this.#landscapeRef && this.#landscapeRef.worldSize) ? this.#landscapeRef.worldSize[1] : 8000.0;
 

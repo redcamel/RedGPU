@@ -719,6 +719,32 @@ export class Landscape extends RedGPUObject {
     }
 
     /**
+     * [KO] 스캐터링(잔디, 식생 등) 베이킹 및 인스턴싱에 필요한 지형 가상 텍스처(VHT 높이 및 VBT 베이스 컬러 아틀라스)와 로드된 타일이 유효한지 여부를 반환합니다.
+     * [EN] Returns whether the terrain virtual textures (VHT height and VBT base color atlases) and loaded tiles required for scattering (grass, foliage) are valid.
+     */
+    get hasValidScatterAtlas(): boolean {
+        const streamer = this.#tileStreamer;
+        return !!(
+            streamer?.vhtAtlasTexture?.gpuTextureView &&
+            streamer?.vbtBaseColorAtlas?.gpuTextureView &&
+            streamer?.tileLoadedCount > 0
+        );
+    }
+
+    /**
+     * [KO] 식생 및 잔디의 지면 색상 블렌딩에 필요한 지형 가상 베이스 컬러(VBT) 아틀라스와 로드된 타일이 유효한지 여부를 반환합니다.
+     * [EN] Returns whether the terrain virtual base color (VBT) atlas and loaded tiles required for foliage and grass ground blending are valid.
+     */
+    get hasValidVbtAtlas(): boolean {
+        const streamer = this.#tileStreamer;
+        return !!(
+            streamer?.vbtBaseColorAtlas?.gpuTextureView &&
+            streamer?.tileLoadedCount > 0
+        );
+    }
+
+
+    /**
      * @example
      * ```ts
      * landscape.tileUrlResolver = (row, col) => ({

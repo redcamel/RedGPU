@@ -882,7 +882,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const alloc = this.allocation;
         if (this.#megaBuffer && alloc) {
             this.#megaBuffer.uploadAllocationRangeToGPU(alloc, startIndex, count);
-            const hasVBT = !!this.#landscape?.vbtBaseColorAtlas;
+            const hasVBT = this.#landscape?.hasValidVbtAtlas ?? false;
             const needGroundBlend = this.groundBlendStrength > 0.001;
             if (this.#baker && count > 0 && hasVBT && needGroundBlend) {
                 const globalIndex = alloc.rawBaseOffset + startIndex;
@@ -1096,7 +1096,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     rebake(): void {
         const alloc = this.allocation;
-        const hasVBT = !!this.#landscape?.vbtBaseColorAtlas;
+        const hasVBT = this.#landscape?.hasValidVbtAtlas ?? false;
         const needGroundBlend = this.groundBlendStrength > 0.001;
         if (this.#megaBuffer && alloc && this.#baker && alloc.instanceCount > 0 && hasVBT && needGroundBlend) {
             this.#baker.addBakeTasks(
