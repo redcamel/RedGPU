@@ -278,8 +278,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Main scene GPURenderPassEncoder
      */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.enabled || !passEncoder || this.types.length === 0) return;
-        this.#renderer.render(view, passEncoder, this.types);
+        const {enabled, types} = this;
+        if (!enabled || !passEncoder || types.length === 0) return;
+        this.#renderer.render(view, passEncoder, types);
     }
 
 
@@ -361,8 +362,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] GPURenderPassEncoder for shadow map generation
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        if (!this.enabled || !passEncoder || this.types.length === 0) return;
-        this.#renderer.renderShadow(view, passEncoder, this.types);
+        const {enabled, types} = this;
+        if (!enabled || !passEncoder || types.length === 0) return;
+        this.#renderer.renderShadow(view, passEncoder, types);
     }
 
     /**
@@ -374,12 +376,13 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
      */
     update(renderViewStateData: RenderViewStateData): void {
-        if (!this.enabled || this.types.length === 0) return;
+        const {enabled, types, landscape} = this;
+        if (!enabled || types.length === 0) return;
 
         const {view} = renderViewStateData;
         const {rawCamera: cam} = view;
         const {x: camX, z: camZ} = cam;
-        const count = this.types.length;
+        const count = types.length;
 
         let remainingMount = this.#mountBudget;
         let remainingUnmount = this.#unmountBudget;
@@ -389,14 +392,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const startIdx = this.#roundRobinIndex;
         for (let i = 0; i < count; i++) {
             const idx = (startIdx + i) % count;
-            const foliage = this.types[idx];
+            const foliage = types[idx];
             foliage.updateStreaming(camX, camZ, remainingMount, remainingUnmount);
             remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
             remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
         }
         this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
 
-        this.#culler.updateAndDispatch(this.types, this.landscape, renderViewStateData);
+        this.#culler.updateAndDispatch(types, landscape, renderViewStateData);
     }
 
 
@@ -426,9 +429,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
      */
     rebakeAll(centerX?: number, centerZ?: number): void {
-        const count = this.types.length;
+        const {types} = this;
+        const count = types.length;
         for (let i = 0; i < count; i++) {
-            this.types[i].rebake();
+            types[i].rebake();
         }
         this.#renderer.markAllBundlesDirty();
     }
