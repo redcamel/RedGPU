@@ -29,7 +29,6 @@ import combineScatterMeshes, {
 } from "./combineScatterMeshes";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
-import {computeScatterGridSeed, fastPack2x16float, fastPackUniformScale} from "./ScatterSpatialUtils";
 import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
@@ -62,11 +61,6 @@ export {
     AScatterSubMeshSlotPooler,
     AScatterRenderer,
     AScatterMegaBuffer,
-
-    // Spatial & Packing Utilities
-    computeScatterGridSeed,
-    fastPack2x16float,
-    fastPackUniformScale,
 
     // Constants
     CULLING_WORKGROUP_SIZE,
