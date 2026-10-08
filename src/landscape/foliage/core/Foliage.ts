@@ -245,8 +245,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #lastCamZ: number = 0;
 
     #baker: ScatterInstanceBaker | null = null;
-    #onDirty?: () => void;
-    #onRepopulateRequired?: (type: Foliage) => void;
+    onUniformDirty?: (typeId: number) => void;
+    onRepopulateRequired?: (type: Foliage) => void;
     #slotPooler: FoliageSubMeshSlotPooler | null = null;
     #landscape: Landscape | null = null;
 
@@ -262,12 +262,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param megaBuffer -
      * [KO] 식생 메가 버퍼 (선택사항)
      * [EN] Foliage mega buffer (optional)
-     * @param onDirty -
-     * [KO] 더티 상태 콜백 함수 (선택사항)
-     * [EN] Dirty state callback function (optional)
-     * @param onRepopulateRequired -
-     * [KO] 재배치 요구 콜백 함수 (선택사항)
-     * [EN] Repopulate required callback function (optional)
      * @param baker -
      * [KO] 식생 인스턴스 물리 베이커 (선택사항)
      * [EN] Foliage instance physical baker (optional)
@@ -282,8 +276,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
         megaBuffer?: FoliageScatterMegaBuffer | null,
-        onDirty?: () => void,
-        onRepopulateRequired?: (type: Foliage) => void,
         baker?: ScatterInstanceBaker | null,
         slotPooler?: FoliageSubMeshSlotPooler | null,
         landscape?: Landscape | null
@@ -320,8 +312,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             height: optHeight
         } = options;
 
-        this.#onDirty = onDirty;
-        this.#onRepopulateRequired = onRepopulateRequired;
         this.#baker = baker || null;
 
         this.#useImpostor = useImpostor;
@@ -458,6 +448,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
 
         this.#syncInternalWind();
+        this.flushAllSubMeshUBOs();
+    }
+
+    set windMultiplier(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windMultiplier !== numVal) {
+            this.#windMultiplier = numVal;
+            this.#syncInternalWind();
+            this.#notifyUniformDirty();
+        }
+    }
+
+    set windFlutterMultiplier(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#windFlutterMultiplier !== numVal) {
+            this.#windFlutterMultiplier = numVal;
+            this.#syncInternalWind();
+            this.#notifyUniformDirty();
+        }
     }
 
     /**
@@ -637,12 +646,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#windMultiplier;
     }
 
-    set windMultiplier(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windMultiplier !== numVal) {
-            this.#windMultiplier = numVal;
-            this.#syncInternalWind();
-            this.#onDirty?.();
+    set alignToNormal(val: boolean) {
+        const boolVal = !!val;
+        if (this.#alignToNormal !== boolVal) {
+            this.#alignToNormal = boolVal;
+            this.#notifyRepopulateRequired();
         }
     }
 
@@ -654,12 +662,13 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#windFlutterMultiplier;
     }
 
-    set windFlutterMultiplier(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windFlutterMultiplier !== numVal) {
-            this.#windFlutterMultiplier = numVal;
-            this.#syncInternalWind();
-            this.#onDirty?.();
+    set alignFactor(val: number) {
+        const numVal = Math.min(1.0, Math.max(0.0, Number(val) || 0.0));
+        if (this.#alignFactor !== numVal) {
+            this.#alignFactor = numVal;
+            if (this.#alignToNormal) {
+                this.#notifyRepopulateRequired();
+            }
         }
     }
 
@@ -671,11 +680,21 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#alignToNormal;
     }
 
-    set alignToNormal(val: boolean) {
-        const boolVal = !!val;
-        if (this.#alignToNormal !== boolVal) {
-            this.#alignToNormal = boolVal;
-            this.#onRepopulateRequired?.(this);
+    /**
+     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
+     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
+     *
+     * @param value -
+     * [KO] 임포스터 빌보드 활성화 여부
+     * [EN] Whether to enable octahedral impostor billboards
+     */
+    set useImpostor(value: boolean) {
+        if (!this.#impostorSubMesh) return;
+        const boolVal = !!value;
+        if (this.#useImpostor !== boolVal) {
+            this.#useImpostor = boolVal;
+            this.#updatePassBuckets();
+            this.#notifyUniformDirty();
         }
     }
 
@@ -687,13 +706,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#alignFactor;
     }
 
-    set alignFactor(val: number) {
-        const numVal = Math.min(1.0, Math.max(0.0, Number(val) || 0.0));
-        if (this.#alignFactor !== numVal) {
-            this.#alignFactor = numVal;
-            if (this.#alignToNormal) {
-                this.#onRepopulateRequired?.(this);
-            }
+    /**
+     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
+     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
+     *
+     * @param v -
+     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
+     * [EN] Terrain blending vertical range to set (minimum: 0.1)
+     */
+    set groundBlendRange(v: number) {
+        const val = Math.max(0.1, Number(v) || 0.1);
+        if (this.#groundBlendRange !== val) {
+            this.#groundBlendRange = val;
+            this.#updateSubMeshGroundBlend();
+            this.#notifyUniformDirty();
         }
     }
 
@@ -714,33 +740,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
-     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
-     *
-     * @param value -
-     * [KO] 임포스터 빌보드 활성화 여부
-     * [EN] Whether to enable octahedral impostor billboards
-     */
-    set useImpostor(value: boolean) {
-        if (!this.#impostorSubMesh) return;
-        const boolVal = !!value;
-        if (this.#useImpostor !== boolVal) {
-            this.#useImpostor = boolVal;
-            this.#updatePassBuckets();
-            this.#syncTypeParams();
-            this.#onDirty?.();
-        }
-    }
-
-    /**
-     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
-     * [EN] Returns whether the depth prepass (Early-Z) is enabled during foliage rendering.
-     */
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
-    }
-
-    /**
      * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 설정합니다.
      * [EN] Sets whether the depth prepass (Early-Z) is enabled during foliage rendering.
      *
@@ -753,7 +752,37 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#useDepthPrepass !== boolVal) {
             this.#useDepthPrepass = boolVal;
             this.#updatePassBuckets();
-            this.#onDirty?.();
+            this.#notifyUniformDirty();
+        }
+    }
+
+    /**
+     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
+     * [EN] Returns whether the depth prepass (Early-Z) is enabled during foliage rendering.
+     */
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    /**
+     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다.
+     * [EN] Dynamically changes the maximum visible/transition distance (meters) for a specific LOD level.
+     *
+     * @param lodIndex -
+     * [KO] 변경할 LOD 레벨 인덱스
+     * [EN] LOD level index to modify
+     * @param distance -
+     * [KO] 새로운 LOD 전환 거리 (미터)
+     * [EN] New LOD transition distance (meters)
+     */
+    setLODDistance(lodIndex: number, distance: number): void {
+        const info = this.#lodInfoList[lodIndex];
+        if (info) {
+            const val = Math.max(0, Number(distance) || 0);
+            if (info.lodDistance !== val) {
+                info.lodDistance = val;
+                this.#notifyUniformDirty();
+            }
         }
     }
 
@@ -767,19 +796,41 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
-     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
-     *
-     * @param v -
-     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
-     * [EN] Terrain blending vertical range to set (minimum: 0.1)
+     * [KO] 식생 인스턴스, 하위 서브메시 및 서브셀 스트리밍 리소스를 안전하게 해제합니다.
+     * [EN] Safely releases foliage instance, child sub-meshes, and sub-cell streaming resources.
      */
-    set groundBlendRange(v: number) {
-        const val = Math.max(0.1, Number(v) || 0.1);
-        if (this.#groundBlendRange !== val) {
-            this.#groundBlendRange = val;
-            this.#updateSubMeshGroundBlend();
+    override destroy(): void {
+        this.clearSubCellCache();
+
+        const subCount = this.#subMeshes.length;
+        for (let i = 0; i < subCount; i++) {
+            this.#subMeshes[i].destroy();
         }
+        this.#subMeshes.length = 0;
+        this.#lod0SubMeshes.length = 0;
+        this.#depthPrepassOpaqueSubMeshes.length = 0;
+        this.#depthPrepassMaskedSubMeshes.length = 0;
+        this.#mainSubMeshes.length = 0;
+
+        const shadowCount = this.#shadowMergedSubMeshes.length;
+        for (let i = 0; i < shadowCount; i++) {
+            this.#shadowMergedSubMeshes[i].destroy();
+        }
+        this.#shadowMergedSubMeshes.length = 0;
+
+        this.#lodInfoList.length = 0;
+        this.#mountedSubCells.length = 0;
+        this.#tempCandidates.length = 0;
+
+        this.#impostorSubMesh = null;
+        this.#landscape = null;
+        this.#slotPooler = null;
+        this.#baker = null;
+        this.#megaBuffer = null;
+        this.onUniformDirty = undefined;
+        this.onRepopulateRequired = undefined;
+
+        super.destroy();
     }
 
     /**
@@ -831,25 +882,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다.
-     * [EN] Dynamically changes the maximum visible/transition distance (meters) for a specific LOD level.
-     *
-     * @param lodIndex -
-     * [KO] 변경할 LOD 레벨 인덱스
-     * [EN] LOD level index to modify
-     * @param distance -
-     * [KO] 새로운 LOD 전환 거리 (미터)
-     * [EN] New LOD transition distance (meters)
+     * [KO] 이 식생 타입에 속한 모든 서브메시 및 그림자 서브메시의 UBO 슬롯 파라미터와 타입 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes UBO slot parameters and type parameters for all sub-meshes and shadow sub-meshes of this foliage type to GPU (deferred frame batching).
      */
-    setLODDistance(lodIndex: number, distance: number): void {
-        const info = this.#lodInfoList[lodIndex];
-        if (info) {
-            const val = Math.max(0, Number(distance) || 0);
-            if (info.lodDistance !== val) {
-                info.lodDistance = val;
-                this.#syncTypeParams();
-                this.#onDirty?.();
-            }
+    flushAllSubMeshUBOs(): void {
+        this.#syncTypeParams();
+        const subList = this.#subMeshes;
+        const count = subList.length;
+        for (let i = 0; i < count; i++) {
+            subList[i].flushSlotUBO();
+        }
+        const shadowList = this.#shadowMergedSubMeshes;
+        const shadowCount = shadowList.length;
+        for (let i = 0; i < shadowCount; i++) {
+            shadowList[i].flushSlotUBO();
         }
     }
 
@@ -874,42 +920,57 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생 인스턴스, 하위 서브메시 및 서브셀 스트리밍 리소스를 안전하게 해제합니다.
-     * [EN] Safely releases foliage instance, child sub-meshes, and sub-cell streaming resources.
-     */
-    override destroy(): void {
-        this.clearSubCellCache();
+    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
+        switch (prop) {
+            // [Bake 채널] 인스턴스 재생성 및 재배치 필요
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#notifyRepopulateRequired();
+                break;
+            case 'bottomOffset':
+                this.#notifyRepopulateRequired();
+                this.#notifyUniformDirty();
+                break;
 
-        const subCount = this.#subMeshes.length;
-        for (let i = 0; i < subCount; i++) {
-            this.#subMeshes[i].destroy();
+            // [UBO 채널] GPU 슬롯 및 타입 파라미터만 갱신
+            case 'cullingDistance':
+            case 'fadeStartDistance':
+            case 'shadowCullDistance':
+            case 'castShadow':
+                this.#notifyUniformDirty();
+                break;
+            case 'groundBlendStrength':
+                this.#updateSubMeshGroundBlend();
+                this.#notifyUniformDirty();
+                break;
+
+            case 'streamingRadius': {
+                if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
+                    const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+                    const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+                    const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
+                    const megaBuffer = this.#megaBuffer;
+                    const allocation = this.allocation;
+                    if (megaBuffer && allocation) {
+                        const mounted = this.#mountedSubCells;
+                        for (let i = mounted.length - 1; i >= 0; i--) {
+                            const sc = mounted[i];
+                            const dx = sc.centerX - this.#lastCamX;
+                            const dz = sc.centerZ - this.#lastCamZ;
+                            if (dx * dx + dz * dz > unmountRadiusSq) {
+                                this.#unmountSubCellAt(i, megaBuffer, allocation);
+                            }
+                        }
+                    }
+                }
+                this.#notifyUniformDirty();
+                break;
+            }
         }
-        this.#subMeshes.length = 0;
-        this.#lod0SubMeshes.length = 0;
-        this.#depthPrepassOpaqueSubMeshes.length = 0;
-        this.#depthPrepassMaskedSubMeshes.length = 0;
-        this.#mainSubMeshes.length = 0;
-
-        const shadowCount = this.#shadowMergedSubMeshes.length;
-        for (let i = 0; i < shadowCount; i++) {
-            this.#shadowMergedSubMeshes[i].destroy();
-        }
-        this.#shadowMergedSubMeshes.length = 0;
-
-        this.#lodInfoList.length = 0;
-        this.#mountedSubCells.length = 0;
-        this.#tempCandidates.length = 0;
-
-        this.#impostorSubMesh = null;
-        this.#landscape = null;
-        this.#slotPooler = null;
-        this.#baker = null;
-        this.#megaBuffer = null;
-        this.#onDirty = undefined;
-        this.#onRepopulateRequired = undefined;
-
-        super.destroy();
     }
 
     /**
@@ -1050,55 +1111,18 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
-        switch (prop) {
-            case 'bottomOffset':
-                this.#syncTypeParams();
-                this.#onRepopulateRequired?.(this);
-                break;
-            case 'cullingDistance':
-            case 'fadeStartDistance':
-                this.#syncTypeParams();
-                break;
-            case 'shadowCullDistance':
-            case 'castShadow':
-                this.#syncTypeParams();
-                this.#onDirty?.();
-                break;
-            case 'streamingRadius': {
-                if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
-                    const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
-                    const unmountMargin = Math.max(10.0, subCellSize * 0.5);
-                    const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
-                    const megaBuffer = this.#megaBuffer;
-                    const allocation = this.allocation;
-                    if (megaBuffer && allocation) {
-                        const mounted = this.#mountedSubCells;
-                        for (let i = mounted.length - 1; i >= 0; i--) {
-                            const sc = mounted[i];
-                            const dx = sc.centerX - this.#lastCamX;
-                            const dz = sc.centerZ - this.#lastCamZ;
-                            if (dx * dx + dz * dz > unmountRadiusSq) {
-                                this.#unmountSubCellAt(i, megaBuffer, allocation);
-                            }
-                        }
-                    }
-                }
-                this.#onDirty?.();
-                break;
-            }
-            case 'targetLayer':
-            case 'minSlope':
-            case 'maxSlope':
-            case 'densityScaleByWeight':
-            case 'densityPerHectare':
-            case 'densityMultiplier':
-                this.#onRepopulateRequired?.(this);
-                break;
-            case 'groundBlendStrength':
-                this.#updateSubMeshGroundBlend();
-                break;
+    #notifyUniformDirty(): void {
+        const typeId = this.allocation?.typeId;
+        if (typeId !== undefined && this.onUniformDirty) {
+            this.onUniformDirty(typeId);
         }
+    }
+
+    #notifyRepopulateRequired(): void {
+        if (this.onRepopulateRequired) {
+            this.onRepopulateRequired(this);
+        }
+        this.#notifyUniformDirty();
     }
 
     #syncInternalWind(): void {

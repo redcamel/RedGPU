@@ -79,8 +79,8 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (16 bytes, Zero-GC)
-     * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (16 bytes, Zero-GC)
+     * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (Zero-GC)
+     * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (Zero-GC)
      * @param windMultiplier - 인스턴스별 바람 강도 배수
      * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
      * @param treeHeight - 식생 전체 높이
@@ -97,6 +97,16 @@ export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
                 windFlutterMultiplier * 0.5,
                 treeHeight
             );
+        }
+    }
+
+    /**
+     * [KO] 이 서브메시의 UBO 슬롯 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes UBO slot parameters of this sub-mesh to GPU (for deferred frame batching).
+     */
+    flushSlotUBO(): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.flushSlotBytes(this.#slotIndex);
         }
     }
 

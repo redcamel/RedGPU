@@ -65,6 +65,80 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #debugSubCellColoration: boolean = false;
     #onUniformUpdateNeeded: (() => void) | null = null;
 
+    #dirtyUboMask: number = 0;
+    #needsRepopulateMask: number = 0;
+
+    /**
+     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
+     * [EN] Returns the sub-mesh UBO slot pooler.
+     */
+    get slotPooler(): FoliageSubMeshSlotPooler {
+        return this.#slotPooler;
+    }
+
+    /**
+     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 식생 공간 격자 셀 스트리밍을 갱신하고, GPU 컬링 Compute Pass를 디스패치합니다.
+     * [EN] Called every frame to update foliage spatial grid streaming based on camera position and dispatch GPU culling compute passes.
+     *
+     * @param renderViewStateData -
+     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 절두체 평면 등 포함)
+     * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
+     */
+    update(renderViewStateData: RenderViewStateData): void {
+        const {enabled, types, landscape} = this;
+        if (!enabled || types.length === 0) return;
+
+        const count = types.length;
+
+        // 1. [Bake 채널] 지형/인스턴스 파라미터 변경으로 재배치가 필요한 식생 타입 서브셀 캐시 리셋
+        const repopMask = this.#needsRepopulateMask;
+        if (repopMask !== 0) {
+            for (let i = 0; i < count; i++) {
+                const foliage = types[i];
+                const typeId = foliage.allocation?.typeId ?? 0;
+                if ((repopMask & (1 << typeId)) !== 0) {
+                    this.#repopulateFoliage(foliage);
+                }
+            }
+            this.#needsRepopulateMask = 0;
+        }
+
+        // 2. [UBO 채널] 바람/지면블렌드/LOD전환거리 등 UBO가 변경된 식생 서브메시 UBO 슬롯 1회 일괄 플러시
+        const uboMask = this.#dirtyUboMask;
+        if (uboMask !== 0) {
+            for (let i = 0; i < count; i++) {
+                const foliage = types[i];
+                const typeId = foliage.allocation?.typeId ?? 0;
+                if ((uboMask & (1 << typeId)) !== 0) {
+                    foliage.flushAllSubMeshUBOs();
+                }
+            }
+            this.#dirtyUboMask = 0;
+            this.#renderer.markAllBundlesDirty();
+        }
+
+        const {view} = renderViewStateData;
+        const {rawCamera: cam} = view;
+        const {x: camX, z: camZ} = cam;
+
+        let remainingMount = this.#mountBudget;
+        let remainingUnmount = this.#unmountBudget;
+        if (this.#roundRobinIndex >= count) {
+            this.#roundRobinIndex = 0;
+        }
+        const startIdx = this.#roundRobinIndex;
+        for (let i = 0; i < count; i++) {
+            const idx = (startIdx + i) % count;
+            const foliage = types[idx];
+            foliage.updateStreaming(camX, camZ, remainingMount, remainingUnmount);
+            remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
+            remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
+        }
+        this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
+
+        this.#culler.updateAndDispatch(types, landscape, renderViewStateData);
+    }
+
     /**
      * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
      * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
@@ -367,42 +441,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 식생 공간 격자 셀 스트리밍을 갱신하고, GPU 컬링 Compute Pass를 디스패치합니다.
-     * [EN] Called every frame to update foliage spatial grid streaming based on camera position and dispatch GPU culling compute passes.
-     *
-     * @param renderViewStateData -
-     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 절두체 평면 등 포함)
-     * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
-     */
-    update(renderViewStateData: RenderViewStateData): void {
-        const {enabled, types, landscape} = this;
-        if (!enabled || types.length === 0) return;
-
-        const {view} = renderViewStateData;
-        const {rawCamera: cam} = view;
-        const {x: camX, z: camZ} = cam;
-        const count = types.length;
-
-        let remainingMount = this.#mountBudget;
-        let remainingUnmount = this.#unmountBudget;
-        if (this.#roundRobinIndex >= count) {
-            this.#roundRobinIndex = 0;
-        }
-        const startIdx = this.#roundRobinIndex;
-        for (let i = 0; i < count; i++) {
-            const idx = (startIdx + i) % count;
-            const foliage = types[idx];
-            foliage.updateStreaming(camX, camZ, remainingMount, remainingUnmount);
-            remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
-            remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
-        }
-        this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
-
-        this.#culler.updateAndDispatch(types, landscape, renderViewStateData);
-    }
-
-
-    /**
      * [KO] 등록된 식생 생태계 타입을 매니저에서 제거하고 관련 리소스를 해제합니다.
      * [EN] Removes a registered foliage ecosystem type from the manager and releases associated resources.
      *
@@ -418,30 +456,25 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
 
+        if (removed.allocation) {
+            const bit = 1 << removed.allocation.typeId;
+            this.#dirtyUboMask &= ~bit;
+            this.#needsRepopulateMask &= ~bit;
+        }
+
         removed.destroy();
         this.#renderer.markAllBundlesDirty();
         return true;
     }
 
     /**
-     * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
-     * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
+     * [KO] 등록된 모든 식생 타입을 일괄 제거하고 비트마스크를 초기화합니다.
+     * [EN] Clears all registered foliage types and resets bitmasks.
      */
-    rebakeAll(centerX?: number, centerZ?: number): void {
-        const {types} = this;
-        const count = types.length;
-        for (let i = 0; i < count; i++) {
-            types[i].rebake();
-        }
-        this.#renderer.markAllBundlesDirty();
-    }
-
-    /**
-     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
-     * [EN] Returns the sub-mesh UBO slot pooler.
-     */
-    get slotPooler(): FoliageSubMeshSlotPooler {
-        return this.#slotPooler;
+    override clearTypes(): void {
+        this.#dirtyUboMask = 0;
+        this.#needsRepopulateMask = 0;
+        super.clearTypes();
     }
 
     /**
@@ -467,19 +500,49 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             this.redGPUContext,
             options,
             this.#megaBuffer,
-            () => {
-                this.#renderer.markAllBundlesDirty();
-            },
-            (t) => this.#repopulateFoliage(t),
             this.#culler.baker,
             this.#slotPooler,
             this.landscape
         );
+        foliage.onUniformDirty = this.#onFoliageUniformDirty;
+        foliage.onRepopulateRequired = this.#onFoliageRepopulateRequired;
         this.registerTypeInternal(foliage);
         this.#renderer.markAllBundlesDirty();
 
         return foliage;
     }
+
+    /**
+     * [KO] 등록된 모든 식생 인스턴스의 서브셀 캐시를 초기화하고 온디맨드 재배치를 트리거합니다.
+     * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
+     */
+    repopulateAll(): void {
+        const count = this.types.length;
+        for (let i = 0; i < count; i++) {
+            const foliage = this.types[i];
+            const typeId = foliage.allocation?.typeId ?? 0;
+            this.#needsRepopulateMask |= (1 << typeId);
+            this.#dirtyUboMask |= (1 << typeId);
+            this.#repopulateFoliage(foliage);
+        }
+    }
+
+    /**
+     * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
+     * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
+     */
+    rebakeAll(centerX?: number, centerZ?: number): void {
+        const {types} = this;
+        const count = types.length;
+        for (let i = 0; i < count; i++) {
+            types[i].rebake();
+        }
+        this.#renderer.markAllBundlesDirty();
+    }
+
+    #onFoliageUniformDirty = (typeId: number): void => {
+        this.#dirtyUboMask |= (1 << typeId);
+    };
 
     /**
      * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
@@ -504,16 +567,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#renderer.markShadowBundleDirty();
     }
 
-    /**
-     * [KO] 등록된 모든 식생 인스턴스의 서브셀 캐시를 초기화하고 온디맨드 재배치를 트리거합니다.
-     * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
-     */
-    repopulateAll(): void {
-        const count = this.types.length;
-        for (let i = 0; i < count; i++) {
-            this.#repopulateFoliage(this.types[i]);
-        }
-    }
+    #onFoliageRepopulateRequired = (type: Foliage): void => {
+        const typeId = type.allocation?.typeId ?? 0;
+        this.#needsRepopulateMask |= (1 << typeId);
+        this.#dirtyUboMask |= (1 << typeId);
+    };
 
 }
 

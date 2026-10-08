@@ -205,29 +205,6 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
             byteLength
         );
     }
-
-    /**
-     * [KO] 특정 슬롯 내부의 특정 바이트 구간(부분 갱신)만 VRAM으로 정밀 업로드합니다.
-     * [EN] Uploads only a specific byte range within a slot (partial update) to VRAM.
-     * @param slot - 슬롯 인덱스
-     * @param startByteOffsetInSlot - 슬롯 내부 시작 바이트 오프셋
-     * @param byteLength - 전송할 바이트 크기
-     */
-    uploadSlotRange(slot: number, startByteOffsetInSlot: number, byteLength: number): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#gpuBuffer) return;
-
-        const offsetBytes = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_BYTES + startByteOffsetInSlot;
-        const baseByte = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_BYTES + startByteOffsetInSlot;
-
-        gpuDevice.queue.writeBuffer(
-            this.#gpuBuffer,
-            offsetBytes,
-            this.#cpuBuffer.buffer,
-            this.#cpuBuffer.byteOffset + baseByte,
-            byteLength
-        );
-    }
 }
 
 Object.freeze(AScatterSubMeshSlotPooler);

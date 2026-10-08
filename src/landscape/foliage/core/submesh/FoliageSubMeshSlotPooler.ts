@@ -107,8 +107,8 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     }
 
     /**
-     * [KO] 특정 서브메시 슬롯의 바람 파라미터를 업데이트하고 GPU에 즉시 반영합니다 (Zero-GC).
-     * [EN] Updates wind parameters for a specific sub-mesh slot and reflects to GPU immediately (Zero-GC).
+     * [KO] 특정 서브메시 슬롯의 바람 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
+     * [EN] Writes wind parameters to CPU mirror buffer for a specific sub-mesh slot (Zero-GC).
      *
      * @param slot - 슬롯 인덱스
      * @param windMultiplier - 바람 세기 배수
@@ -128,14 +128,11 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
         f32[baseFloat + 2] = windMultiplier;
         f32[baseFloat + 3] = windFlutterMultiplier;
         f32[baseFloat + 4] = treeHeight;
-
-        // 2, 3, 4번 인덱스 (12바이트)만 정밀 업로드
-        this.uploadSlotRange(slot, 2 * 4, 12);
     }
 
     /**
-     * [KO] 특정 서브메시 슬롯의 지면 블렌딩 파라미터를 업데이트하고 GPU에 즉시 반영합니다 (Zero-GC).
-     * [EN] Updates ground blending parameters for a specific sub-mesh slot and reflects to GPU immediately (Zero-GC).
+     * [KO] 특정 서브메시 슬롯의 지면 블렌딩 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
+     * [EN] Writes ground blending parameters to CPU mirror buffer for a specific sub-mesh slot (Zero-GC).
      *
      * @param slot - 슬롯 인덱스
      * @param strength - 지면 블렌드 강도
@@ -152,9 +149,17 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
 
         f32[baseFloat + 5] = strength;
         f32[baseFloat + 6] = range;
+    }
 
-        // 5, 6번 인덱스 (8바이트)만 정밀 업로드
-        this.uploadSlotRange(slot, 5 * 4, 8);
+    /**
+     * [KO] 특정 서브메시 슬롯의 전체 파라미터(32바이트)를 GPU VRAM으로 단일 전송합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes full parameters (32 bytes) of a specific sub-mesh slot to GPU VRAM (for deferred frame batching).
+     *
+     * @param slot - 슬롯 인덱스
+     */
+    flushSlotBytes(slot: number): void {
+        if (slot < 0 || slot >= this.maxSlots) return;
+        this.uploadSlotBytes(slot, this.paramsSizeBytes);
     }
 }
 
