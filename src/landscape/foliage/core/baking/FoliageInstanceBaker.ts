@@ -9,7 +9,8 @@ import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 import type Landscape from "../../../Landscape";
-import type Foliage, {FoliageSubCell} from "../Foliage";
+import type Foliage from "../Foliage";
+import {FoliageSubCell} from "../Foliage";
 
 /**
  * [KO] FoliageInstanceBaker 초기화 옵션 인터페이스입니다.
