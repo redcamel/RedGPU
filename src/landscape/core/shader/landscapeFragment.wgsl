@@ -12,6 +12,7 @@
 #redgpu_include landscape.struct.LandscapeLayerParams;
 #redgpu_include landscape.struct.LandscapeUniforms;
 #redgpu_include landscape.tiling.stochasticTiling;
+#redgpu_include landscape.math.perturbNormalOrthonormal;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -60,16 +61,6 @@ struct NearDetailLayerResult {
 fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
-}
-
-fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> {
-    if (length(tangentN.xy) <= 0.001) {
-        return baseN;
-    }
-    let upVec = select(vec3<f32>(0.0, 1.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(baseN.y) > 0.999);
-    let tangentX = normalize(cross(upVec, baseN));
-    let tangentZ = cross(baseN, tangentX);
-    return normalize(tangentX * tangentN.x + tangentZ * tangentN.y + baseN * tangentN.z);
 }
 
 fn sampleLayerStochasticGrad(

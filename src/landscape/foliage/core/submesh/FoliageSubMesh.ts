@@ -6,9 +6,8 @@
 
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
-import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "./FoliageSlotPooler";
+import AFoliageSubMeshBase, {type AFoliageSubMeshBaseInitOptions} from "./AFoliageSubMeshBase";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -20,7 +19,7 @@ export type FoliageRenderPassType = 'depthPrepass' | 'main';
  * [KO] FoliageSubMesh 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for FoliageSubMesh.
  */
-export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
+export interface FoliageSubMeshInitOptions extends AFoliageSubMeshBaseInitOptions {
     /**
      * [KO] 소스 메쉬 인스턴스 (필수)
      * [EN] Source mesh instance (required)
@@ -41,17 +40,6 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [EN] Relative normal transform matrix
      */
     relativeNormalMatrix: mat4;
-    /**
-     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)
-     * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023)
-     */
-    slotIndex?: number;
-    /**
-     * [KO] 슬롯 풀러 인스턴스
-     * [EN] Slot pooler instance
-     */
-    slotPooler?: FoliageSlotPooler | null;
-
     /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
      * [EN] Whether rendering in depth prepass
@@ -80,19 +68,17 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
 }
 
 /**
- * [KO] ScatterSubMesh를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩(바람, 지면 블렌드), 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
- * [EN] Foliage sub-mesh class inheriting ScatterSubMesh to manage Foliage-specific materials, uniform bindings (wind, ground blend), pipeline caches, and LOD states.
+ * [KO] AFoliageSubMeshBase를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩, 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
+ * [EN] Foliage sub-mesh class inheriting AFoliageSubMeshBase to manage Foliage-specific materials, uniform bindings, pipeline caches, and LOD states.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageSubMesh extends ScatterSubMesh {
+export class FoliageSubMesh extends AFoliageSubMeshBase {
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
-    #slotIndex: number = -1;
-    #slotPooler: FoliageSlotPooler | null = null;
 
     #isDepthPrepass: boolean;
     #isMainOpaqueOrMasked: boolean;
@@ -108,22 +94,12 @@ export class FoliageSubMesh extends ScatterSubMesh {
 
         this.#relativeModelMatrix = init.relativeModelMatrix;
         this.#relativeNormalMatrix = init.relativeNormalMatrix;
-        this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
-        this.#slotPooler = init.slotPooler || null;
 
         this.#isDepthPrepass = init.isDepthPrepass;
         this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
         this.#mainDepthMode = init.mainDepthMode;
         this.#isImpostor = init.isImpostor ?? false;
         this.#receiveShadow = init.receiveShadow !== false;
-    }
-
-    /**
-     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)를 반환합니다.
-     * [EN] Returns the 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023).
-     */
-    get slotIndex(): number {
-        return this.#slotIndex;
     }
 
     /**
@@ -175,56 +151,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
     }
 
 
-    /**
-     * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (Zero-GC)
-     * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (Zero-GC)
-     * @param windMultiplier - 인스턴스별 바람 강도 배수
-     * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
-     * @param treeHeight - 식생 전체 높이
-     */
-    updateWindMultipliers(
-        windMultiplier: number,
-        windFlutterMultiplier: number,
-        treeHeight: number
-    ): void {
-        if (this.#slotPooler && this.#slotIndex >= 0) {
-            this.#slotPooler.updateWindParams(
-                this.#slotIndex,
-                windMultiplier,
-                windFlutterMultiplier,
-                treeHeight
-            );
-        }
-    }
-
-    /**
-     * [KO] 지면 높이 기반 블렌딩 파라미터를 유니폼 버퍼에 기록합니다. (Zero-GC)
-     * [EN] Writes ground blend parameters to the uniform buffer. (Zero-GC)
-     * @param groundBlendStrength - 지면 블렌드 강도
-     * @param groundBlendRange - 지면 블렌드 높이 범위
-     */
-    updateGroundBlendParams(
-        groundBlendStrength: number,
-        groundBlendRange: number
-    ): void {
-        if (this.#slotPooler && this.#slotIndex >= 0) {
-            this.#slotPooler.updateGroundBlendParams(
-                this.#slotIndex,
-                groundBlendStrength,
-                groundBlendRange
-            );
-        }
-    }
-
-    /**
-     * [KO] 이 서브메시의 UBO 슬롯 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
-     * [EN] Flushes UBO slot parameters of this sub-mesh to GPU (for deferred frame batching).
-     */
-    flushSlotUBO(): void {
-        if (this.#slotPooler && this.#slotIndex >= 0) {
-            this.#slotPooler.flushSlotBytes(this.#slotIndex);
-        }
-    }
 
     /**
      * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 서브메쉬를 렌더링할 수 있는지 여부를 판별합니다.
@@ -296,15 +222,6 @@ export class FoliageSubMesh extends ScatterSubMesh {
             subMeshBindGroupLayout,
             this.isMasked
         ) || null;
-    }
-
-    override destroy(): void {
-        if (this.#slotPooler && this.#slotIndex >= 0) {
-            this.#slotPooler.freeSlot(this.#slotIndex);
-            this.#slotIndex = -1;
-        }
-        this.#slotPooler = null;
-        super.destroy();
     }
 }
 

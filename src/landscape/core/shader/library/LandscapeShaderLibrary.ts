@@ -27,6 +27,7 @@ import blendGrassGround_wgsl from './math/blendGrassGround.wgsl';
 import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
 import sampleNormalizedLayerWeight_wgsl from './math/sampleNormalizedLayerWeight.wgsl';
 import checkAABBInHZB_wgsl from './math/checkAABBInHZB.wgsl';
+import perturbNormalOrthonormal_wgsl from './math/perturbNormalOrthonormal.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -277,6 +278,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const checkAABBInHZB = checkAABBInHZB_wgsl;
+
+        /**
+         * [KO] 그람-슈미트 정규직교 기저(Gram-Schmidt Orthonormal Basis)를 구축하여 탄젠트 노멀을 월드 노멀에 섭동하는 함수 (perturbNormalOrthonormal)
+         * [EN] Function to perturb world normal with tangent normal via Gram-Schmidt orthonormal basis (perturbNormalOrthonormal)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.perturbNormalOrthonormal;
+         * ```
+         */
+        export const perturbNormalOrthonormal = perturbNormalOrthonormal_wgsl;
     }
 
     /**

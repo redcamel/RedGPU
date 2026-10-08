@@ -40,6 +40,7 @@ import Foliage, {
     type FoliageOptions,
     type FoliageSubCell
 } from "./Foliage";
+import AFoliageSubMeshBase, {type AFoliageSubMeshBaseInitOptions} from "./submesh/AFoliageSubMeshBase";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import {FoliageSlotPooler} from "./submesh/FoliageSlotPooler";
@@ -66,6 +67,8 @@ import prepareFoliageMaterials from "./assembler/internal/prepareFoliageMaterial
 export {
     // Runtime Classes & Entities
     Foliage,
+    AFoliageSubMeshBase,
+    type AFoliageSubMeshBaseInitOptions,
     FoliageSubMesh,
     FoliageShadowMergedSubMesh,
     FoliageSlotPooler,
