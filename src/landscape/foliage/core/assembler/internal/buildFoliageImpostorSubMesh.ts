@@ -13,7 +13,7 @@ import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import {FoliageSubMeshSlotPooler} from "../../submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -49,7 +49,7 @@ export default function buildFoliageImpostorSubMesh(
     subMeshes: FoliageSubMesh[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
-    slotPooler?: FoliageSubMeshSlotPooler | null
+    slotPooler?: FoliageSlotPooler | null
 ): void {
     const gpuDevice = redGPUContext.gpuDevice;
     const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);

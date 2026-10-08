@@ -5,7 +5,7 @@
  */
 
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "../../../core/scatter/AScatterGeometryUnit";
-import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "./FoliageSlotPooler";
 
 /**
  * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
@@ -31,7 +31,7 @@ export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AScatterGeom
      * [KO] 슬롯 풀러 인스턴스
      * [EN] Slot pooler instance
      */
-    slotPooler?: FoliageSubMeshSlotPooler | null;
+    slotPooler?: FoliageSlotPooler | null;
 }
 
 /**
@@ -46,7 +46,7 @@ export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AScatterGeom
 export class FoliageShadowMergedSubMesh extends AScatterGeometryUnit {
     #lodIndex: number;
     #slotIndex: number = -1;
-    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #slotPooler: FoliageSlotPooler | null = null;
 
     constructor(init: FoliageShadowMergedSubMeshInitOptions) {
         super({

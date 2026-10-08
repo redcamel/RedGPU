@@ -13,7 +13,7 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
-import {FoliageSubMeshSlotPooler} from "./core/submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "./core/submesh/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 
 /**
@@ -49,7 +49,7 @@ import {AScatterManager} from "../core/scatter";
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #subMeshDynamicBindGroup: GPUBindGroup | null = null;
-    #slotPooler: FoliageSubMeshSlotPooler;
+    #slotPooler: FoliageSlotPooler;
 
     #megaBuffer: FoliageScatterMegaBuffer;
 
@@ -69,11 +69,68 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #needsRepopulateMask: number = 0;
 
     /**
-     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
-     * [EN] Returns the sub-mesh UBO slot pooler.
+     * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
+     *
+     * @param landscape -
+     * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스
+     * [EN] Parent Landscape instance to which the foliage ecosystem is bound
+     * @param onUniformUpdateNeeded -
+     * [KO] 지형 유니폼 버퍼 갱신이 필요할 때 호출되는 내부 콜백 함수
+     * [EN] Internal callback invoked when terrain uniform buffers require updating
      */
-    get slotPooler(): FoliageSubMeshSlotPooler {
-        return this.#slotPooler;
+    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
+        super(landscape);
+        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
+        this.#slotPooler = new FoliageSlotPooler(this.redGPUContext);
+        const subMeshMegaUBO = this.#slotPooler.gpuBuffer;
+
+        const {gpuDevice, resourceManager} = this.redGPUContext;
+        if (gpuDevice && subMeshMegaUBO) {
+            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
+                label: 'Foliage_SubMesh_BindGroupLayout',
+                entries: [
+                    {
+                        binding: 0,
+                        visibility: GPUShaderStage.VERTEX,
+                        buffer: {
+                            type: 'uniform',
+                            hasDynamicOffset: true,
+                            minBindingSize: 32
+                        }
+                    }
+                ]
+            });
+
+            this.#subMeshDynamicBindGroup = gpuDevice.createBindGroup({
+                label: 'Foliage_SubMesh_DynamicBindGroup',
+                layout: this.#subMeshVertexBindGroupLayout,
+                entries: [
+                    {
+                        binding: 0,
+                        resource: {
+                            buffer: subMeshMegaUBO,
+                            offset: 0,
+                            size: 32
+                        }
+                    }
+                ]
+            });
+        }
+
+        this.#megaBuffer = new FoliageScatterMegaBuffer(this.redGPUContext);
+        this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext);
+        this.#renderer = new FoliageRenderer(
+            this.redGPUContext,
+            this.#pipelineRegistry,
+            this.#subMeshVertexBindGroupLayout,
+            this.#subMeshDynamicBindGroup
+        );
+        this.#culler = new FoliageCuller(this.redGPUContext, this.#megaBuffer);
+
+        this.#megaBuffer.onRecreated = () => {
+            this.#renderer.markAllBundlesDirty();
+        };
     }
 
     /**
@@ -139,68 +196,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
-     * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
-     *
-     * @param landscape -
-     * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스
-     * [EN] Parent Landscape instance to which the foliage ecosystem is bound
-     * @param onUniformUpdateNeeded -
-     * [KO] 지형 유니폼 버퍼 갱신이 필요할 때 호출되는 내부 콜백 함수
-     * [EN] Internal callback invoked when terrain uniform buffers require updating
+     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
+     * [EN] Returns the sub-mesh UBO slot pooler.
      */
-    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
-        super(landscape);
-        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
-        this.#slotPooler = new FoliageSubMeshSlotPooler(this.redGPUContext);
-        const subMeshMegaUBO = this.#slotPooler.gpuBuffer;
-
-        const {gpuDevice, resourceManager} = this.redGPUContext;
-        if (gpuDevice && subMeshMegaUBO) {
-            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
-                label: 'Foliage_SubMesh_BindGroupLayout',
-                entries: [
-                    {
-                        binding: 0,
-                        visibility: GPUShaderStage.VERTEX,
-                        buffer: {
-                            type: 'uniform',
-                            hasDynamicOffset: true,
-                            minBindingSize: 32
-                        }
-                    }
-                ]
-            });
-
-            this.#subMeshDynamicBindGroup = gpuDevice.createBindGroup({
-                label: 'Foliage_SubMesh_DynamicBindGroup',
-                layout: this.#subMeshVertexBindGroupLayout,
-                entries: [
-                    {
-                        binding: 0,
-                        resource: {
-                            buffer: subMeshMegaUBO,
-                            offset: 0,
-                            size: 32
-                        }
-                    }
-                ]
-            });
-        }
-
-        this.#megaBuffer = new FoliageScatterMegaBuffer(this.redGPUContext);
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext);
-        this.#renderer = new FoliageRenderer(
-            this.redGPUContext,
-            this.#pipelineRegistry,
-            this.#subMeshVertexBindGroupLayout,
-            this.#subMeshDynamicBindGroup
-        );
-        this.#culler = new FoliageCuller(this.redGPUContext, this.#megaBuffer);
-
-        this.#megaBuffer.onRecreated = () => {
-            this.#renderer.markAllBundlesDirty();
-        };
+    get slotPooler(): FoliageSlotPooler {
+        return this.#slotPooler;
     }
 
     /**

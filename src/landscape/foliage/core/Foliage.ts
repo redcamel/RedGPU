@@ -11,7 +11,7 @@ import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
-import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "./submesh/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 /**
@@ -414,7 +414,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #baker: FoliageInstanceBaker | null = null;
     onUniformDirty?: (typeId: number) => void;
     onRepopulateRequired?: (type: Foliage) => void;
-    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #slotPooler: FoliageSlotPooler | null = null;
     #landscape: Landscape | null = null;
 
     /**
@@ -444,7 +444,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         options: FoliageOptions,
         megaBuffer?: FoliageScatterMegaBuffer | null,
         baker?: FoliageInstanceBaker | null,
-        slotPooler?: FoliageSubMeshSlotPooler | null,
+        slotPooler?: FoliageSlotPooler | null,
         landscape?: Landscape | null
     ) {
         super(redGPUContext, options?.name || '');
@@ -811,7 +811,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [KO] 서브메시 UBO 슬롯 풀러 인스턴스를 반환합니다.
      * [EN] Returns the sub-mesh UBO slot pooler instance.
      */
-    get slotPooler(): FoliageSubMeshSlotPooler | null {
+    get slotPooler(): FoliageSlotPooler | null {
         return this.#slotPooler;
     }
 

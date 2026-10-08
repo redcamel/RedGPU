@@ -6,29 +6,29 @@
 
 import RedGPUContext from "../../../../context/RedGPUContext";
 import {Grass} from "../Grass";
-import AScatterSubMeshSlotPooler from "../../../core/scatter/AScatterSubMeshSlotPooler";
+import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
 /**
  * [KO] 최대 256개 잔디 슬롯(64 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 잔디 전용 슬롯 풀러 클래스입니다.
  * [EN] Grass-dedicated slot pooler class managing UBO slots for up to 256 grass slots (64 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
-export class GrassSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
+export class GrassSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 256;
     static PARAMS_SIZE_BYTES: number = 80;
     static PARAMS_SIZE_FLOATS: number = 20; // 80 / 4
 
     /**
-     * [KO] GrassSubMeshSlotPooler 인스턴스를 생성하고 64KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
-     * [EN] Creates a GrassSubMeshSlotPooler instance and pre-allocates a 64KB fixed mega UBO and CPU mirror buffers.
+     * [KO] GrassSlotPooler 인스턴스를 생성하고 64KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
+     * [EN] Creates a GrassSlotPooler instance and pre-allocates a 64KB fixed mega UBO and CPU mirror buffers.
      *
      * @param redGPUContext - RedGPU 컨텍스트 인스턴스
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
             redGPUContext,
-            GrassSubMeshSlotPooler.MAX_SLOTS,
-            GrassSubMeshSlotPooler.PARAMS_SIZE_BYTES,
-            'Grass_SubMesh_MegaUBO'
+            GrassSlotPooler.MAX_SLOTS,
+            GrassSlotPooler.PARAMS_SIZE_BYTES,
+            'Grass_SlotPooler_MegaUBO'
         );
     }
 
@@ -43,7 +43,7 @@ export class GrassSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     writeGrassSlot(slot: number, grass: Grass, hasValidVbt: boolean): void {
         if (slot < 0 || slot >= this.maxSlots) return;
 
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         const {
@@ -94,5 +94,5 @@ export class GrassSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     }
 }
 
-Object.freeze(GrassSubMeshSlotPooler);
-export default GrassSubMeshSlotPooler;
+Object.freeze(GrassSlotPooler);
+export default GrassSlotPooler;

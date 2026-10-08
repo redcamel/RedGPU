@@ -9,7 +9,7 @@ import Landscape from "../Landscape";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
-import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
+import {GrassSlotPooler} from "./core/submesh/GrassSlotPooler";
 import GrassInstanceBaker, {GRASS_CELL_SIZE} from "./core/baking/GrassInstanceBaker";
 import GrassCuller from "./core/culling/GrassCuller";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -31,7 +31,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #megaBuffer: GrassScatterMegaBuffer;
     #baker: GrassInstanceBaker;
     #culler: GrassCuller;
-    #slotPooler: GrassSubMeshSlotPooler;
+    #slotPooler: GrassSlotPooler;
 
     #nextTypeId: number = 0;
     #populated: boolean = false;
@@ -59,7 +59,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
         this.#baker = new GrassInstanceBaker(this.redGPUContext);
         this.#culler = new GrassCuller(this.redGPUContext);
-        this.#slotPooler = new GrassSubMeshSlotPooler(this.redGPUContext);
+        this.#slotPooler = new GrassSlotPooler(this.redGPUContext);
         this.#renderer = new GrassRenderer(this.redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {

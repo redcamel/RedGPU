@@ -9,7 +9,7 @@ import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {GrassSubMeshSlotPooler} from "../submesh/GrassSubMeshSlotPooler";
+import {GrassSlotPooler} from "../submesh/GrassSlotPooler";
 import ScatterSubMesh from "../../../core/scatter/ScatterSubMesh";
 import type Geometry from "../../../../geometry/Geometry";
 import type BitmapTexture from "../../../../resources/texture/BitmapTexture";
@@ -148,7 +148,7 @@ export class GrassRenderer extends AScatterRenderer {
         passEncoder: GPURenderPassEncoder,
         grassList: readonly Grass[],
         megaBuffer: GrassScatterMegaBuffer,
-        slotPooler: GrassSubMeshSlotPooler
+        slotPooler: GrassSlotPooler
     ): void {
         const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (!systemBG) return;
@@ -212,7 +212,7 @@ export class GrassRenderer extends AScatterRenderer {
         passEncoder: GPURenderPassEncoder,
         grassList: readonly Grass[],
         megaBuffer: GrassScatterMegaBuffer,
-        slotPooler: GrassSubMeshSlotPooler
+        slotPooler: GrassSlotPooler
     ): void {
         const currentCascade = view.currentCascadeIndex ?? 0;
         if (currentCascade > 1) return;
@@ -481,7 +481,7 @@ export class GrassRenderer extends AScatterRenderer {
                 {binding: 0, resource: {buffer: culledGPUBuffer}},
                 {
                     binding: 1,
-                    resource: {buffer: slotPoolerBuffer, offset: 0, size: GrassSubMeshSlotPooler.PARAMS_SIZE_BYTES}
+                    resource: {buffer: slotPoolerBuffer, offset: 0, size: GrassSlotPooler.PARAMS_SIZE_BYTES}
                 },
             ]
         });
@@ -670,7 +670,7 @@ export class GrassRenderer extends AScatterRenderer {
                     buffer: {
                         type: 'uniform',
                         hasDynamicOffset: true,
-                        minBindingSize: GrassSubMeshSlotPooler.PARAMS_SIZE_BYTES
+                        minBindingSize: GrassSlotPooler.PARAMS_SIZE_BYTES
                     }
                 },
             ]

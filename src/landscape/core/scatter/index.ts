@@ -45,7 +45,7 @@ import AScatterMegaBuffer, {
     type ScatterShaderReflectionConfig
 } from "./AScatterMegaBuffer";
 import AScatterType, {type AScatterTypeInitOptions} from "./AScatterType";
-import AScatterSubMeshSlotPooler from "./AScatterSubMeshSlotPooler";
+import AScatterSlotPooler from "./AScatterSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
 import AScatterCuller from "./AScatterCuller";
@@ -58,7 +58,7 @@ export {
     AScatterGeometryUnit,
     ScatterSubMesh,
     AScatterType,
-    AScatterSubMeshSlotPooler,
+    AScatterSlotPooler,
     AScatterRenderer,
     AScatterMegaBuffer,
 

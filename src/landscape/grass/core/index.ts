@@ -19,7 +19,7 @@ import {GrassScatterMegaBuffer} from "./buffer/GrassScatterMegaBuffer";
 import GrassInstanceBaker from "./baking/GrassInstanceBaker";
 import GrassCuller from "./culling/GrassCuller";
 import {GrassRenderer} from "./renderer/GrassRenderer";
-import {GrassSubMeshSlotPooler} from "./submesh/GrassSubMeshSlotPooler";
+import {GrassSlotPooler} from "./submesh/GrassSlotPooler";
 
 export {
     // Runtime Classes
@@ -28,7 +28,7 @@ export {
     GrassInstanceBaker,
     GrassCuller,
     GrassRenderer,
-    GrassSubMeshSlotPooler,
+    GrassSlotPooler,
 
     // Code Hint Interfaces
     type GrassOptions

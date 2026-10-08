@@ -11,7 +11,7 @@ import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorSubMesh from "./internal/buildFoliageImpostorSubMesh";
-import {FoliageSubMeshSlotPooler} from "../submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "../submesh/FoliageSlotPooler";
 
 /**
  * [KO] 식생 서브메쉬 조립 결과 인터페이스입니다.
@@ -69,7 +69,7 @@ export interface FoliageAssemblyResult {
 export default function assembleFoliageSubMeshes(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    slotPooler?: FoliageSubMeshSlotPooler | null
+    slotPooler?: FoliageSlotPooler | null
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subMeshes: FoliageSubMesh[] = [];

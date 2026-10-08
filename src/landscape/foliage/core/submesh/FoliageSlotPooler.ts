@@ -4,28 +4,28 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
-import AScatterSubMeshSlotPooler from "../../../core/scatter/AScatterSubMeshSlotPooler";
+import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
 /**
  * [KO] 최대 1,024개 서브메시(256 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 식생 전용 슬롯 풀러 클래스입니다.
  * [EN] Foliage-dedicated slot pooler class managing UBO slots for up to 1,024 sub-meshes (256 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
-export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
+export class FoliageSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 1024;
     static PARAMS_SIZE_BYTES: number = 32;
     static PARAMS_SIZE_FLOATS: number = 8; // 32 / 4
 
     /**
-     * [KO] FoliageSubMeshSlotPooler 인스턴스를 생성하고 256KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
-     * [EN] Creates a FoliageSubMeshSlotPooler instance and pre-allocates a 256KB fixed mega UBO and CPU mirror buffers.
+     * [KO] FoliageSlotPooler 인스턴스를 생성하고 256KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
+     * [EN] Creates a FoliageSlotPooler instance and pre-allocates a 256KB fixed mega UBO and CPU mirror buffers.
      *
      * @param redGPUContext - RedGPU 컨텍스트 인스턴스
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
             redGPUContext,
-            FoliageSubMeshSlotPooler.MAX_SLOTS,
-            FoliageSubMeshSlotPooler.PARAMS_SIZE_BYTES,
+            FoliageSlotPooler.MAX_SLOTS,
+            FoliageSlotPooler.PARAMS_SIZE_BYTES,
             'Foliage_SubMesh_MegaUBO'
         );
     }
@@ -59,7 +59,7 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
 
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         u32[baseFloat + 0] = globalSlot;
@@ -91,7 +91,7 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
 
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         u32[baseFloat + 0] = 0; // globalSlot
@@ -122,7 +122,7 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
         treeHeight: number
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         const f32 = this.cpuBuffer;
 
         f32[baseFloat + 2] = windMultiplier;
@@ -144,7 +144,7 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
         range: number
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         const f32 = this.cpuBuffer;
 
         f32[baseFloat + 5] = strength;
@@ -163,5 +163,5 @@ export class FoliageSubMeshSlotPooler extends AScatterSubMeshSlotPooler {
     }
 }
 
-Object.freeze(FoliageSubMeshSlotPooler);
-export default FoliageSubMeshSlotPooler;
+Object.freeze(FoliageSlotPooler);
+export default FoliageSlotPooler;

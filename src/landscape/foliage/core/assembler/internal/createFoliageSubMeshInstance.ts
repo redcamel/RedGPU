@@ -9,7 +9,7 @@ import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import type {FoliageDepthPassMode} from "../../pipeline/FoliagePipelineRegistry";
-import {FoliageSubMeshSlotPooler} from "../../submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
 
 /**
  * [KO] 서브메시 인스턴스 생성을 위한 설정 옵션 인터페이스입니다.
@@ -115,7 +115,7 @@ export interface CreateSubMeshOptions {
      * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러
      * [EN] 256B aligned Dynamic Offset UBO slot pooler
      */
-    slotPooler?: FoliageSubMeshSlotPooler | null;
+    slotPooler?: FoliageSlotPooler | null;
 }
 
 /**

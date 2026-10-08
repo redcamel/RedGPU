@@ -18,7 +18,7 @@
  * **[EN]**
  * - `Foliage`: Entity defining a single foliage type and managing per-subcell instance lifecycles
  * - `FoliageSubMesh` / `FoliageShadowMergedSubMesh`: Foliage-specific main and shadow render sub-meshes
- * - `FoliageSubMeshSlotPooler`: 256-byte aligned Dynamic Offset UBO slot allocator
+ * - `FoliageSlotPooler`: 256-byte aligned Dynamic Offset UBO slot allocator
  * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
@@ -42,7 +42,7 @@ import Foliage, {
 } from "./Foliage";
 import FoliageSubMesh from "./submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
-import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "./submesh/FoliageSlotPooler";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
@@ -68,7 +68,7 @@ export {
     Foliage,
     FoliageSubMesh,
     FoliageShadowMergedSubMesh,
-    FoliageSubMeshSlotPooler,
+    FoliageSlotPooler,
     FoliageScatterMegaBuffer,
     FoliagePipelineRegistry,
     FoliageRenderer,

@@ -15,7 +15,7 @@ import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/sca
 import combineScatterMeshes from "../../../../core/scatter/combineScatterMeshes";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
 import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import {FoliageSubMeshSlotPooler} from "../../submesh/FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -92,7 +92,7 @@ export default function assembleFoliageLODMeshes(
     lodIndex: number,
     options: FoliageOptions,
     lodReceiveShadow: boolean = true,
-    slotPooler?: FoliageSubMeshSlotPooler | null
+    slotPooler?: FoliageSlotPooler | null
 ): AssembledLODResult {
     const gpuDevice = redGPUContext.gpuDevice;
 

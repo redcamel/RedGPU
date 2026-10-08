@@ -1,6 +1,6 @@
 /**
- * [KO] 스캐터 서브메시용 256바이트 정렬 Dynamic Offset UBO 슬롯 풀러 추상 베이스 모듈입니다.
- * [EN] Abstract base module for 256-byte aligned dynamic offset UBO slot poolers for scatter sub-meshes.
+ * [KO] 스캐터 시스템(잔디, 식생 등)을 위한 256바이트 정렬 Dynamic Offset UBO 슬롯 풀러 추상 베이스 모듈입니다.
+ * [EN] Abstract base module for 256-byte aligned dynamic offset UBO slot poolers across scatter systems (Grass, Foliage, etc.).
  * @packageDocumentation
  */
 import RedGPUContext from '../../../context/RedGPUContext';
@@ -13,7 +13,7 @@ import RedGPUObject from '../../../base/RedGPUObject';
  * [EN] Abstract base class managing Dynamic Offset UBO slots conforming to WebGPU 256-byte alignment requirements.
  * Encapsulates LIFO stack O(1) pooling, CPU Float32Array/Uint32Array mirror buffers, and fixed mega UBO GPUBuffer ensuring zero-GC.
  */
-abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
+abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] WebGPU UBO 동적 오프셋 최소 정렬 바이트 규격 (256바이트)
      * [EN] WebGPU minimum dynamic UBO offset alignment in bytes (256 bytes)
@@ -52,8 +52,8 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
     #allocatedCount: number = 0;
 
     /**
-     * [KO] AScatterSubMeshSlotPooler 인스턴스를 초기화하고 CPU 미러 버퍼 및 고정 GPU 메가 UBO를 사전 할당합니다.
-     * [EN] Initializes an AScatterSubMeshSlotPooler instance and pre-allocates CPU mirror buffers and fixed GPU mega UBO.
+     * [KO] AScatterSlotPooler 인스턴스를 초기화하고 CPU 미러 버퍼 및 고정 GPU 메가 UBO를 사전 할당합니다.
+     * [EN] Initializes an AScatterSlotPooler instance and pre-allocates CPU mirror buffers and fixed GPU mega UBO.
      *
      * @param redGPUContext - RedGPU 컨텍스트 인스턴스
      * @param maxSlots - 최대 슬롯 수용량
@@ -72,7 +72,7 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
         this.paramsSizeFloats = paramsSizeBytes / 4;
 
         // CPU 미러 버퍼 사전 할당
-        const totalFloats = maxSlots * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const totalFloats = maxSlots * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer = new Float32Array(totalFloats);
         this.#cpuUint32View = new Uint32Array(this.#cpuBuffer.buffer);
 
@@ -88,7 +88,7 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
         if (gpuDevice) {
             this.#gpuBuffer = gpuDevice.createBuffer({
                 label: bufferLabel,
-                size: maxSlots * AScatterSubMeshSlotPooler.SLOT_STRIDE_BYTES,
+                size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
             });
         }
@@ -143,7 +143,7 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
         if (this.#freeTop >= this.maxSlots) return;
 
         // CPU 슬롯 메모리 0 초기화
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer.fill(0, baseFloat, baseFloat + this.paramsSizeFloats);
 
         // VRAM 동기화 (Zero-GC 정밀 write)
@@ -194,8 +194,8 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#gpuBuffer) return;
 
-        const offsetBytes = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_BYTES;
-        const baseFloat = slot * AScatterSubMeshSlotPooler.SLOT_STRIDE_FLOATS;
+        const offsetBytes = slot * AScatterSlotPooler.SLOT_STRIDE_BYTES;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
 
         gpuDevice.queue.writeBuffer(
             this.#gpuBuffer,
@@ -207,5 +207,5 @@ abstract class AScatterSubMeshSlotPooler extends RedGPUObject {
     }
 }
 
-Object.freeze(AScatterSubMeshSlotPooler);
-export default AScatterSubMeshSlotPooler;
+Object.freeze(AScatterSlotPooler);
+export default AScatterSlotPooler;

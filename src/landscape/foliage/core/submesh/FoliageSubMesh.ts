@@ -8,7 +8,7 @@ import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import {FoliageSubMeshSlotPooler} from "./FoliageSubMeshSlotPooler";
+import {FoliageSlotPooler} from "./FoliageSlotPooler";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -50,7 +50,7 @@ export interface FoliageSubMeshInitOptions extends ScatterSubMeshInitOptions {
      * [KO] 슬롯 풀러 인스턴스
      * [EN] Slot pooler instance
      */
-    slotPooler?: FoliageSubMeshSlotPooler | null;
+    slotPooler?: FoliageSlotPooler | null;
 
     /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
@@ -92,7 +92,7 @@ export class FoliageSubMesh extends ScatterSubMesh {
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
     #slotIndex: number = -1;
-    #slotPooler: FoliageSubMeshSlotPooler | null = null;
+    #slotPooler: FoliageSlotPooler | null = null;
 
     #isDepthPrepass: boolean;
     #isMainOpaqueOrMasked: boolean;
