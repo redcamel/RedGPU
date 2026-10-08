@@ -6,7 +6,6 @@
  */
 
 import RedGPUContext from "../../../../context/RedGPUContext";
-import Geometry from "../../../../geometry/Geometry";
 import FoliageSubMesh from "../submesh/FoliageSubMesh";
 import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
@@ -24,11 +23,6 @@ export interface FoliageAssemblyResult {
      * [EN] Array of all assembled sub-meshes
      */
     subMeshes: FoliageSubMesh[];
-    /**
-     * [KO] LOD 레벨별 단일 통합 지오메트리 배열
-     * [EN] Array of per-LOD unified geometries
-     */
-    unifiedGeometries: (Geometry | null)[];
     /**
      * [KO] 그림자 패스 전용 통합 서브메시 배열
      * [EN] Array of shadow pass dedicated merged sub-meshes
@@ -79,13 +73,11 @@ export default function assembleFoliageSubMeshes(
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
     const subMeshes: FoliageSubMesh[] = [];
-    const unifiedGeometries: (Geometry | null)[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
 
     if (!gpuDevice) {
         return {
             subMeshes: [],
-            unifiedGeometries: [],
             shadowMergedSubMeshes: [],
             lodInfoList: [],
             bottomOffset: 0,
@@ -117,8 +109,6 @@ export default function assembleFoliageSubMeshes(
             lodReceiveShadow,
             slotPooler
         );
-
-        unifiedGeometries.push(assembled.unifiedGeometry || null);
 
         const assembledSubMeshes = assembled.subMeshes;
         for (let s = 0; s < assembledSubMeshes.length; s++) {
@@ -178,7 +168,6 @@ export default function assembleFoliageSubMeshes(
 
     return {
         subMeshes,
-        unifiedGeometries,
         shadowMergedSubMeshes,
         lodInfoList,
         bottomOffset: options.bottomOffset ?? 0,
