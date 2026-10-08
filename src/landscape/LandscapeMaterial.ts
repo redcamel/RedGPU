@@ -8,9 +8,6 @@ import RedGPUContext from "../context/RedGPUContext";
 import AUVTransformBaseMaterial from "../material/core/AUVTransformBaseMaterial";
 import Sampler from "../resources/sampler/Sampler";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import GPU_FILTER_MODE from "../gpuConst/GPU_FILTER_MODE";
-import GPU_ADDRESS_MODE from "../gpuConst/GPU_ADDRESS_MODE";
-import GPU_MIPMAP_FILTER_MODE from "../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import landscapeFragmentSource from "./core/shader/landscapeFragment.wgsl";
 import LandscapeLayer from "./LandscapeLayer";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -102,14 +99,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.#initDummyTextureArrays();
 
-        this.baseColorTextureSampler = new Sampler(redGPUContext, {
-            magFilter: GPU_FILTER_MODE.LINEAR,
-            minFilter: GPU_FILTER_MODE.LINEAR,
-            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-            addressModeU: GPU_ADDRESS_MODE.REPEAT,
-            addressModeV: GPU_ADDRESS_MODE.REPEAT,
-
-        });
+        this.baseColorTextureSampler = redGPUContext.resourceManager.basicDisplacementSampler;
 
         this.baseColor.setColorByHEX(baseColorHex);
         this.initGPURenderInfos();

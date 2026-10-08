@@ -147,13 +147,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
-        this.#defaultSampler = gpuDevice.createSampler({
-            label: `${label}_DefaultSampler`,
-            magFilter: 'linear',
-            minFilter: 'linear',
-            addressModeU: 'clamp-to-edge',
-            addressModeV: 'clamp-to-edge'
-        });
+        this.#defaultSampler = resourceManager.basicSampler.gpuSampler;
     }
 
     /**
