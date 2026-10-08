@@ -6,8 +6,10 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from '../../../../context/RedGPUContext';
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
-import {DRAW_INDEXED_INDIRECT_ARGS_COUNT, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
-import ACpuStagedScatterMegaBuffer from '../../../core/scatter/ACpuStagedScatterMegaBuffer';
+import AScatterMegaBuffer, {
+    DRAW_INDEXED_INDIRECT_ARGS_COUNT,
+    ScatterBaseSegmentAllocation
+} from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
 import FoliageSubMesh from '../submesh/FoliageSubMesh';
 import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
@@ -43,7 +45,9 @@ export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
+export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
+    #cpuRawDataBuffer: Float32Array;
+    #cpuRawDataUint32: Uint32Array;
     #globalUniformBytes: number;
 
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
@@ -99,6 +103,9 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
             maxTypes * 8
         );
 
+        this.#cpuRawDataBuffer = new Float32Array(this.instanceCapacity * this.strideFloats);
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+
         this.#shadowIndirectResetTemplate = new Uint32Array(
             this.maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * SHADOW_CASCADE_COUNT
         );
@@ -116,6 +123,22 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
         this.#cpuUnifiedGlobalUniformUint32 = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
         this.#initBuffers();
+    }
+
+    /**
+     * [KO] CPU 스테이징 원시 인스턴스 데이터 버퍼를 반환합니다.
+     * [EN] Returns the CPU staging raw instance data buffer.
+     */
+    get cpuRawDataBuffer(): Float32Array {
+        return this.#cpuRawDataBuffer;
+    }
+
+    /**
+     * [KO] CPU 스테이징 원시 인스턴스 데이터 버퍼(Uint32 뷰)를 반환합니다.
+     * [EN] Returns the CPU staging raw instance data buffer (Uint32 view).
+     */
+    get cpuRawDataUint32(): Uint32Array {
+        return this.#cpuRawDataUint32;
     }
 
     /**
@@ -690,6 +713,65 @@ export class FoliageScatterMegaBuffer extends ACpuStagedScatterMegaBuffer {
                 this.#shadowIndirectResetTemplate.byteLength
             ),
         });
+    }
+
+    /**
+     * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
+     * [EN] Batch uploads instance data in CPU staging buffer to GPU raw buffer (rawGPUBuffer).
+     * @param startInstance -
+     * [KO] 시작 인스턴스 인덱스
+     * [EN] Starting instance index
+     * @param count -
+     * [KO] 업로드할 인스턴스 수
+     * [EN] Number of instances to upload
+     */
+    uploadInstances(startInstance: number, count: number): void {
+        const gpuDevice = this.gpuDevice;
+        const rawBuffer = this.rawGPUBuffer;
+        if (!gpuDevice || !rawBuffer || count <= 0) return;
+
+        const strideBytes = this.strideBytes;
+        const startByteOffset = startInstance * strideBytes;
+        const byteCount = count * strideBytes;
+
+        gpuDevice.queue.writeBuffer(
+            rawBuffer,
+            startByteOffset,
+            this.#cpuRawDataBuffer.buffer,
+            this.#cpuRawDataBuffer.byteOffset + startByteOffset,
+            byteCount
+        );
+    }
+
+    /**
+     * [KO] 메가버퍼의 런타임 확장으로 인해 새 GPU rawBuffer가 생성되었을 때 호출되는 훅 메서드입니다. CPU 버퍼를 2배로 확장하고 이전 데이터를 새 GPU 버퍼로 복원합니다.
+     * [EN] Hook method invoked when a new GPU rawBuffer is created due to runtime mega-buffer expansion. Expands CPU buffer by 2x and restores previous data to the new GPU buffer.
+     * @param rawBuffer -
+     * [KO] 새로 생성된 GPU 원본 인스턴스 버퍼
+     * [EN] Newly created GPU raw instance buffer
+     * @param newCapacity -
+     * [KO] 새로 확장된 인스턴스 수용 용량
+     * [EN] Newly expanded instance capacity
+     */
+    override onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
+        const oldCpuBuffer = this.#cpuRawDataBuffer;
+        this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.strideFloats);
+        if (oldCpuBuffer) {
+            this.#cpuRawDataBuffer.set(oldCpuBuffer);
+        }
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+
+        const gpuDevice = this.gpuDevice;
+        const totalAllocated = this.totalAllocatedInstances;
+        if (gpuDevice && totalAllocated > 0) {
+            gpuDevice.queue.writeBuffer(
+                rawBuffer,
+                0,
+                this.#cpuRawDataBuffer.buffer,
+                this.#cpuRawDataBuffer.byteOffset,
+                totalAllocated * this.strideBytes
+            );
+        }
     }
 }
 
