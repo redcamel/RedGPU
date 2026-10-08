@@ -1,6 +1,6 @@
 /**
- * [KO] GPU 베이킹 파이프라인 매니저 모듈입니다.
- * [EN] GPU Baking Pipeline manager module for grass.
+ * [KO] 잔디(Grass) GPU 물리 베이커 모듈입니다.
+ * [EN] GPU Physics instance baker module for grass.
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
@@ -24,7 +24,7 @@ interface BakeBindGroupCacheEntry {
     offsetsBuffer: GPUBuffer;
 }
 
-export default class GrassBakePipeline extends RedGPUObject {
+export default class GrassInstanceBaker extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #uniformBuffer: GPUBuffer | null = null;
@@ -324,4 +324,4 @@ export default class GrassBakePipeline extends RedGPUObject {
     }
 }
 
-Object.freeze(GrassBakePipeline);
+Object.freeze(GrassInstanceBaker);

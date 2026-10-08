@@ -10,8 +10,8 @@ import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
 import {GrassSubMeshSlotPooler} from "./core/submesh/GrassSubMeshSlotPooler";
-import GrassBakePipeline, {GRASS_CELL_SIZE} from "./core/baking/GrassBakePipeline";
-import GrassCullPipeline from "./core/culling/GrassCullPipeline";
+import GrassInstanceBaker, {GRASS_CELL_SIZE} from "./core/baking/GrassInstanceBaker";
+import GrassCuller from "./core/culling/GrassCuller";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {AScatterManager} from "../core/scatter";
 
@@ -29,8 +29,8 @@ import {AScatterManager} from "../core/scatter";
 export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
     #megaBuffer: GrassScatterMegaBuffer;
-    #bakePipeline: GrassBakePipeline;
-    #cullPipeline: GrassCullPipeline;
+    #baker: GrassInstanceBaker;
+    #culler: GrassCuller;
     #slotPooler: GrassSubMeshSlotPooler;
 
     #nextTypeId: number = 0;
@@ -57,8 +57,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         super(landscape);
 
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
-        this.#bakePipeline = new GrassBakePipeline(this.redGPUContext);
-        this.#cullPipeline = new GrassCullPipeline(this.redGPUContext);
+        this.#baker = new GrassInstanceBaker(this.redGPUContext);
+        this.#culler = new GrassCuller(this.redGPUContext);
         this.#slotPooler = new GrassSubMeshSlotPooler(this.redGPUContext);
         this.#renderer = new GrassRenderer(this.redGPUContext);
 
@@ -361,8 +361,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      */
     destroy(): void {
         this.#megaBuffer.destroy();
-        this.#bakePipeline.destroy();
-        this.#cullPipeline.destroy();
+        this.#baker.destroy();
+        this.#culler.destroy();
         this.#renderer.destroy();
         this.#slotPooler.destroy();
 
@@ -384,7 +384,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     // Zero-GC: 매 프레임 임시 클로저 생성 방지를 위한 바인딩 콜백
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         if (!this.#currentRenderViewStateData) return;
-        this.#cullPipeline.dispatchPass(
+        this.#culler.dispatchPass(
             computePass,
             this.#megaBuffer,
             this.#currentRenderViewStateData
@@ -466,7 +466,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #bakeGrassType(grass: Grass, centerX: number, centerZ: number): void {
         if (!this.landscape.hasValidScatterAtlas) return;
 
-        this.#bakePipeline.dispatchBake(
+        this.#baker.dispatchBake(
             this.#megaBuffer,
             this.landscape,
             grass,

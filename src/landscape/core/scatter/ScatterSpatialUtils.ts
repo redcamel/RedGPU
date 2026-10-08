@@ -1,23 +1,11 @@
 /**
- * [KO] 대규모 지형 스캐터 시스템(Foliage / Grass)을 위한 순수 공간 수학, 2D 그리드 키 해싱, Zero-GC 제자리 퀵 정렬 및 Float16 패킹 공통 유틸리티 모듈입니다.
- * [EN] Common utility module for pure spatial mathematics, 2D grid key hashing, Zero-GC in-place quicksort, and Float16 packing for large-scale terrain scatter systems (Foliage / Grass).
+ * [KO] 대규모 지형 스캐터 시스템(Foliage / Grass)을 위한 결정론적 의사난수(PRNG) 시드 생성 및 고속 Half-Float(Float16) 패킹 공통 유틸리티 모듈입니다.
+ * [EN] Common utility module for deterministic PRNG seed generation and fast Half-Float (Float16) packing for large-scale terrain scatter systems (Foliage / Grass).
  * @packageDocumentation
  */
 
 const tempFloat32 = new Float32Array(2);
 const tempUint32 = new Uint32Array(tempFloat32.buffer);
-
-/**
- * [KO] 서브셀 또는 지형 청크의 정수 2D 좌표를 단일 32비트 정수 키로 패킹합니다.
- * [EN] Packs integer 2D coordinates of a subcell or terrain chunk into a single 32-bit integer key.
- *
- * @param scX - 2D 그리드 정수 X 좌표
- * @param scZ - 2D 그리드 정수 Z 좌표
- * @returns 32비트 고유 정수 키
- */
-export function packSubCellKey(scX: number, scZ: number): number {
-    return ((scZ << 16) | (scX & 0xFFFF)) | 0;
-}
 
 /**
  * [KO] 그리드 정수 좌표와 식생/잔디 타입 이름 해시로부터 결정론적(Deterministic) 32비트 의사난수 시드를 산출합니다.
@@ -88,65 +76,4 @@ export function fastPack2x16float(x: number, y: number): number {
 export function fastPackUniformScale(scale: number): number {
     const h = fastFloatToHalf(scale) & 0xFFFF;
     return (h | (h << 16)) >>> 0;
-}
-
-/**
- * [KO] 중심 좌표(`centerX`, `centerZ`)를 갖는 서브셀 객체 배열을 카메라 기준 거리 제곱값 오름차순으로 제자리 퀵 정렬합니다. (Zero-GC & 거리 단 1회 계산)
- * [EN] In-place quick-sorts subcell object arrays having `centerX` and `centerZ` in ascending order of squared distance to camera. (Zero-GC & single distance evaluation)
- *
- * @param subCells - 정렬할 서브셀 객체 배열
- * @param dists - 사전 할당된 거리 버퍼 (최소 subCells.length 이상의 Float32Array)
- * @param camX - 카메라 월드 X 좌표
- * @param camZ - 카메라 월드 Z 좌표
- * @param count - 정렬할 서브셀 개수
- */
-export function sortSubCellsByDistance<T extends { centerX: number; centerZ: number }>(
-    subCells: T[],
-    dists: Float32Array,
-    camX: number,
-    camZ: number,
-    count: number
-): void {
-    if (count <= 1) return;
-
-    // 1. 거리 계산 1회 일괄 수행 ($N$회 연산으로 최소화)
-    for (let i = 0; i < count; i++) {
-        const c = subCells[i];
-        const dx = c.centerX - camX;
-        const dz = c.centerZ - camZ;
-        dists[i] = dx * dx + dz * dz;
-    }
-
-    // 2. 동반 제자리 퀵 정렬 수행
-    quickSortSubCells(subCells, dists, 0, count - 1);
-}
-
-function quickSortSubCells<T>(
-    subCells: T[],
-    dists: Float32Array,
-    left: number,
-    right: number
-): void {
-    if (left >= right) return;
-    const pivotVal = dists[(left + right) >> 1];
-    let i = left;
-    let j = right;
-    while (i <= j) {
-        while (dists[i] < pivotVal) i++;
-        while (dists[j] > pivotVal) j--;
-        if (i <= j) {
-            const tempSubCell = subCells[i];
-            subCells[i] = subCells[j];
-            subCells[j] = tempSubCell;
-
-            const tempDist = dists[i];
-            dists[i] = dists[j];
-            dists[j] = tempDist;
-
-            i++;
-            j--;
-        }
-    }
-    if (left < j) quickSortSubCells(subCells, dists, left, j);
-    if (i < right) quickSortSubCells(subCells, dists, i, right);
 }

@@ -8,7 +8,6 @@
  * - `AScatterGeometryUnit`: WebGPU 간접 드로우(Indirect Draw)를 수행하는 스캐터 공통 추상 지오메트리 단위
  * - `ScatterSubMesh`: 머티리얼과 베이스 컬러 텍스처, LOD 오프셋이 결합된 스캐터 공용 서브메쉬 렌더 단위
  * - `combineScatterMeshes`: 복합 계층 3D 메시를 머티리얼별 단일 결합 지오메트리로 자동 병합하는 순수 함수
- * - `ScatterInstanceBaker`: 지형 가중치 맵 및 높이맵 기반 GPU 물리 인스턴스 베이킹 디스패처
  * - `ScatterVertexFormats`: PBR 및 위치 전용 정점 인터리브 구조체 및 스트라이드 상수
  *
  * **[EN] Key Components:**
@@ -17,7 +16,6 @@
  * - `AScatterGeometryUnit`: Common scatter abstract geometry unit executing WebGPU indirect draws
  * - `ScatterSubMesh`: Common scatter sub-mesh render unit combining material, base color texture, and LOD offsets
  * - `combineScatterMeshes`: Pure function automatically combining composite hierarchical 3D meshes per material
- * - `ScatterInstanceBaker`: GPU physics instance baking dispatcher based on terrain weight maps and height maps
  * - `ScatterVertexFormats`: Interleaved vertex structures and stride constants for PBR and position-only passes
  *
  * @packageDocumentation
@@ -31,13 +29,7 @@ import combineScatterMeshes, {
 } from "./combineScatterMeshes";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
-import {
-    computeScatterGridSeed,
-    fastPack2x16float,
-    fastPackUniformScale,
-    packSubCellKey,
-    sortSubCellsByDistance
-} from "./ScatterSpatialUtils";
+import {computeScatterGridSeed, fastPack2x16float, fastPackUniformScale} from "./ScatterSpatialUtils";
 import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
@@ -47,11 +39,6 @@ import {
     POSITION_ONLY_STRIDE_BYTES
 } from "./ScatterVertexFormats";
 
-import {
-    type IScatterBakeMegaBuffer,
-    ScatterInstanceBaker,
-    type ScatterInstanceBakerOptions
-} from "./baking/ScatterInstanceBaker";
 import AScatterMegaBuffer, {
     type AuxiliaryIndirectBufferEntry,
     CULLING_WORKGROUP_SIZE,
@@ -63,14 +50,14 @@ import AScatterType, {type AScatterTypeInitOptions} from "./AScatterType";
 import AScatterSubMeshSlotPooler from "./AScatterSubMeshSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
-import AScatterCullPipeline from "./AScatterCullPipeline";
+import AScatterCuller from "./AScatterCuller";
 import type {IScatterManager} from "./IScatterManager";
 
 export {
     // Runtime Classes, Functions & Units
     type IScatterManager,
     AScatterManager,
-    AScatterCullPipeline,
+    AScatterCuller,
     combineScatterMeshes,
     AScatterGeometryUnit,
     ScatterSubMesh,
@@ -79,14 +66,11 @@ export {
     AScatterRenderer,
     AScatterMegaBuffer,
     type AuxiliaryIndirectBufferEntry,
-    ScatterInstanceBaker,
 
     // Spatial & Packing Utilities
-    packSubCellKey,
     computeScatterGridSeed,
     fastPack2x16float,
     fastPackUniformScale,
-    sortSubCellsByDistance,
 
     // Constants
     CULLING_WORKGROUP_SIZE,
@@ -100,8 +84,6 @@ export {
     type ScatterMeshCombineResult,
     type CombinedSubMeshGroup,
     type RawSubMeshNode,
-    type IScatterBakeMegaBuffer,
-    type ScatterInstanceBakerOptions,
     type ScatterShaderReflectionConfig,
     type ScatterBaseSegmentAllocation,
     PBR_INTERLEAVED_STRUCT,

@@ -17,13 +17,13 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  *
  * @category Landscape
  */
-export abstract class AScatterCullPipeline extends RedGPUObject {
+export abstract class AScatterCuller extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
-     * [KO] AScatterCullPipeline 생성자입니다.
-     * [EN] Constructor for AScatterCullPipeline.
+     * [KO] AScatterCuller 생성자입니다.
+     * [EN] Constructor for AScatterCuller.
      *
      * @param redGPUContext - RedGPUContext 인스턴스
      */
@@ -125,4 +125,4 @@ export abstract class AScatterCullPipeline extends RedGPUObject {
     }
 }
 
-export default AScatterCullPipeline;
+export default AScatterCuller;

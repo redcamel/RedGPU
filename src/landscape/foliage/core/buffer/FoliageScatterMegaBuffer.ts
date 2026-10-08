@@ -10,7 +10,7 @@ import AScatterMegaBuffer, {
     DRAW_INDEXED_INDIRECT_ARGS_COUNT,
     ScatterBaseSegmentAllocation
 } from '../../../core/scatter/AScatterMegaBuffer';
-import foliageCullingComputeWGSL from '../culling/foliageCullingCompute.wgsl';
+import foliageCullWGSL from '../culling/foliageCull.wgsl';
 import FoliageSubMesh from '../submesh/FoliageSubMesh';
 import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
 import {FoliageLODInfo} from '../Foliage';
@@ -88,7 +88,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     ) {
         const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
             'Foliage_Cull_ShaderModule',
-            foliageCullingComputeWGSL
+            foliageCullWGSL
         );
 
         super(
@@ -114,7 +114,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             shaderInfo.uniforms?.['globalUniforms']?.arrayBufferByteLength ||
             shaderInfo.structs?.['FoliageCullingUniforms']?.arrayBufferByteLength;
         if (!globalUniformBytes) {
-            throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullingComputeWGSL.');
+            throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullWGSL.');
         }
 
         this.#globalUniformBytes = globalUniformBytes;

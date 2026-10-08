@@ -49,6 +49,7 @@ import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCuller from "./culling/FoliageCuller";
+import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 // 3. Impostors
 import bakeFoliageImpostor, {type FoliageBakeResult} from "./impostor/bakeFoliageImpostor";
@@ -72,6 +73,7 @@ export {
     FoliagePipelineRegistry,
     FoliageRenderer,
     FoliageCuller,
+    FoliageInstanceBaker,
     OctahedralImpostorMaterial,
     FIXED_SCATTER_GRID_SIZE,
 

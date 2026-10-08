@@ -15,12 +15,10 @@ import {
     AScatterTypeInitOptions,
     computeScatterGridSeed,
     fastPack2x16float,
-    fastPackUniformScale,
-    packSubCellKey,
-    ScatterInstanceBaker,
-    sortSubCellsByDistance
+    fastPackUniformScale
 } from "../../core/scatter";
 import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
+import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 /**
  * [KO] 지형의 활성화된 레이어 목록 전체를 순회하여 특정 대상 레이어의 총합 대비 정규화된 가중치를 계산합니다. (식생 멀티 레이어 배치용)
@@ -87,6 +85,77 @@ export interface FoliageSubCell {
     instanceCount: number;
     isMounted: boolean;
     mountedSlotIndex: number;
+}
+
+/**
+ * [KO] 서브셀의 정수 2D 좌표를 단일 32비트 정수 키로 패킹합니다.
+ * [EN] Packs integer 2D coordinates of a subcell into a single 32-bit integer key.
+ *
+ * @param scX - 서브셀 정수 X 좌표
+ * @param scZ - 서브셀 정수 Z 좌표
+ * @returns 32비트 고유 정수 키
+ */
+function packSubCellKey(scX: number, scZ: number): number {
+    return ((scZ << 16) | (scX & 0xFFFF)) | 0;
+}
+
+/**
+ * [KO] 중심 좌표(`centerX`, `centerZ`)를 갖는 서브셀 객체 배열을 카메라 기준 거리 제곱값 오름차순으로 제자리 퀵 정렬합니다. (Zero-GC & 거리 단 1회 계산)
+ * [EN] In-place quick-sorts subcell object arrays having `centerX` and `centerZ` in ascending order of squared distance to camera. (Zero-GC & single distance evaluation)
+ *
+ * @param subCells - 정렬할 서브셀 객체 배열
+ * @param dists - 사전 할당된 거리 버퍼 (최소 subCells.length 이상의 Float32Array)
+ * @param camX - 카메라 월드 X 좌표
+ * @param camZ - 카메라 월드 Z 좌표
+ * @param count - 정렬할 서브셀 개수
+ */
+function sortSubCellsByDistance<T extends { centerX: number; centerZ: number }>(
+    subCells: T[],
+    dists: Float32Array,
+    camX: number,
+    camZ: number,
+    count: number
+): void {
+    if (count <= 1) return;
+
+    for (let i = 0; i < count; i++) {
+        const c = subCells[i];
+        const dx = c.centerX - camX;
+        const dz = c.centerZ - camZ;
+        dists[i] = dx * dx + dz * dz;
+    }
+
+    quickSortSubCells(subCells, dists, 0, count - 1);
+}
+
+function quickSortSubCells<T>(
+    subCells: T[],
+    dists: Float32Array,
+    left: number,
+    right: number
+): void {
+    if (left >= right) return;
+    const pivotVal = dists[(left + right) >> 1];
+    let i = left;
+    let j = right;
+    while (i <= j) {
+        while (dists[i] < pivotVal) i++;
+        while (dists[j] > pivotVal) j--;
+        if (i <= j) {
+            const tempSubCell = subCells[i];
+            subCells[i] = subCells[j];
+            subCells[j] = tempSubCell;
+
+            const tempDist = dists[i];
+            dists[i] = dists[j];
+            dists[j] = tempDist;
+
+            i++;
+            j--;
+        }
+    }
+    if (left < j) quickSortSubCells(subCells, dists, left, j);
+    if (i < right) quickSortSubCells(subCells, dists, i, right);
 }
 
 /**
@@ -289,7 +358,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #lastCamX: number = 0;
     #lastCamZ: number = 0;
 
-    #baker: ScatterInstanceBaker | null = null;
+    #baker: FoliageInstanceBaker | null = null;
     onUniformDirty?: (typeId: number) => void;
     onRepopulateRequired?: (type: Foliage) => void;
     #slotPooler: FoliageSubMeshSlotPooler | null = null;
@@ -321,7 +390,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
         megaBuffer?: FoliageScatterMegaBuffer | null,
-        baker?: ScatterInstanceBaker | null,
+        baker?: FoliageInstanceBaker | null,
         slotPooler?: FoliageSubMeshSlotPooler | null,
         landscape?: Landscape | null
     ) {

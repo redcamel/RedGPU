@@ -5,19 +5,19 @@
  * **[KO]**
  * - `Grass`: 개별 잔디 타입 정의 및 지형 타일별 인스턴스 배치 객체입니다.
  * - `GrassScatterMegaBuffer`: Multi-Draw Indirect 호출 및 인스턴스 데이터를 통합 관리하는 대용량 GPU 버퍼입니다.
- * - `GrassCullPipeline`: GPU 컴퓨트 기반 거리 및 프러스텀 컬링 엔진입니다.
+ * - `GrassCuller`: GPU 컴퓨트 기반 거리 및 프러스텀 컬링 엔진입니다.
  *
  * **[EN]**
  * - `Grass`: Defines individual grass types and per-tile instance placement.
  * - `GrassScatterMegaBuffer`: Unified GPU mega buffer managing Multi-Draw Indirect calls and instance data.
- * - `GrassCullPipeline`: GPU compute-based distance and frustum culling engine.
+ * - `GrassCuller`: GPU compute-based distance and frustum culling engine.
  *
  * @packageDocumentation
  */
 import Grass, {type GrassOptions} from "./Grass";
 import {GrassScatterMegaBuffer} from "./buffer/GrassScatterMegaBuffer";
-import GrassBakePipeline from "./baking/GrassBakePipeline";
-import GrassCullPipeline from "./culling/GrassCullPipeline";
+import GrassInstanceBaker from "./baking/GrassInstanceBaker";
+import GrassCuller from "./culling/GrassCuller";
 import {GrassRenderer} from "./renderer/GrassRenderer";
 import {GrassSubMeshSlotPooler} from "./submesh/GrassSubMeshSlotPooler";
 
@@ -25,8 +25,8 @@ export {
     // Runtime Classes
     Grass,
     GrassScatterMegaBuffer,
-    GrassBakePipeline,
-    GrassCullPipeline,
+    GrassInstanceBaker,
+    GrassCuller,
     GrassRenderer,
     GrassSubMeshSlotPooler,
 

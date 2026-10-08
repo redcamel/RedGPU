@@ -1,15 +1,15 @@
 /**
- * [KO] GPU 초고속 컬링 파이프라인 매니저 모듈입니다.
- * [EN] Ultra-fast GPU Culling Pipeline manager module for grass.
+ * [KO] 잔디(Grass) GPU 초고속 컬링 전담 모듈입니다.
+ * [EN] Ultra-fast GPU Culling module for grass.
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import grassCullWGSL from "./grassCull.wgsl";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
+import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
-export default class GrassCullPipeline extends AScatterCullPipeline {
+export default class GrassCuller extends AScatterCuller {
     #globalUniformBuffer: GPUBuffer | null = null;
 
     // Zero-GC: 256B ArrayBuffer 및 뷰 재사용
@@ -88,4 +88,4 @@ export default class GrassCullPipeline extends AScatterCullPipeline {
     }
 }
 
-Object.freeze(GrassCullPipeline);
+Object.freeze(GrassCuller);

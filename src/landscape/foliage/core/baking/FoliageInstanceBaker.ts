@@ -1,6 +1,6 @@
 /**
- * [KO] 스캐터 인스턴스 지형 물리 베이커 모듈입니다.
- * [EN] Scatter instance terrain physical baker module.
+ * [KO] 식생 인스턴스 지형 물리 베이커 모듈입니다.
+ * [EN] Foliage instance terrain physical baker module.
  * @packageDocumentation
  */
 
@@ -11,7 +11,7 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * [KO] 인스턴스 베이킹에 필요한 최소 GPU 버퍼 프로퍼티를 정의하는 메가버퍼 인터페이스입니다.
  * [EN] MegaBuffer interface defining the minimum GPU buffer properties required for instance baking.
  */
-export interface IScatterBakeMegaBuffer {
+export interface IFoliageBakeMegaBuffer {
     /**
      * [KO] 원본 인스턴스 데이터가 저장되는 GPU 스토리지 버퍼
      * [EN] GPU storage buffer storing raw instance data
@@ -20,10 +20,10 @@ export interface IScatterBakeMegaBuffer {
 }
 
 /**
- * [KO] ScatterInstanceBaker 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for ScatterInstanceBaker.
+ * [KO] FoliageInstanceBaker 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for FoliageInstanceBaker.
  */
-export interface ScatterInstanceBakerOptions {
+export interface FoliageInstanceBakerOptions {
     /**
      * [KO] 실행할 WebGPU Compute WGSL 셰이더 소스코드 문자열
      * [EN] WebGPU Compute WGSL shader source code string to execute
@@ -42,10 +42,10 @@ export interface ScatterInstanceBakerOptions {
 }
 
 /**
- * [KO] 지형(Landscape) 표면에 스캐터 인스턴스(식생, 잔디 등)들을 물리적으로 안착시키는 GPU Compute 기반 베이커 기본 클래스입니다.
- * [EN] GPU compute-based baker base class that physically conforms scatter instances (foliage, grass, etc.) to the landscape terrain surface.
+ * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착시키는 GPU Compute 기반 베이커 클래스입니다.
+ * [EN] GPU compute-based baker class that physically conforms foliage instances to the landscape terrain surface.
  */
-export class ScatterInstanceBaker extends RedGPUObject {
+export class FoliageInstanceBaker extends RedGPUObject {
     #bakePipeline: GPUComputePipeline | null = null;
     #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
     #bakeBindGroup: GPUBindGroup | null = null;
@@ -66,8 +66,8 @@ export class ScatterInstanceBaker extends RedGPUObject {
     #label: string;
 
     /**
-     * [KO] ScatterInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
-     * [EN] Creates a ScatterInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
+     * [KO] FoliageInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
+     * [EN] Creates a FoliageInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
@@ -76,7 +76,7 @@ export class ScatterInstanceBaker extends RedGPUObject {
      * [KO] 베이커 초기화 설정 옵션
      * [EN] Baker initialization configuration options
      */
-    constructor(redGPUContext: RedGPUContext, options: ScatterInstanceBakerOptions) {
+    constructor(redGPUContext: RedGPUContext, options: FoliageInstanceBakerOptions) {
         super(redGPUContext);
 
         const {computeShaderCode, label, initialTaskCapacity} = options;
@@ -149,8 +149,8 @@ export class ScatterInstanceBaker extends RedGPUObject {
      * [KO] 현재 실행 중인 GPUComputePassEncoder
      * [EN] Active GPUComputePassEncoder
      * @param megaBuffer -
-     * [KO] 인스턴스 데이터를 저장하는 IScatterBakeMegaBuffer 호환 메가버퍼 인스턴스
-     * [EN] IScatterBakeMegaBuffer-compatible megaBuffer instance storing instance data
+     * [KO] 인스턴스 데이터를 저장하는 IFoliageBakeMegaBuffer 호환 메가버퍼 인스턴스
+     * [EN] IFoliageBakeMegaBuffer-compatible megaBuffer instance storing instance data
      * @param vbtTextureView -
      * [KO] 지형 가상 베이스 컬러(VBT) 텍스처 뷰 (선택사항)
      * [EN] Terrain virtual base texture (VBT) texture view (optional)
@@ -163,7 +163,7 @@ export class ScatterInstanceBaker extends RedGPUObject {
      */
     dispatchPass(
         computePass: GPUComputePassEncoder,
-        megaBuffer: IScatterBakeMegaBuffer,
+        megaBuffer: IFoliageBakeMegaBuffer,
         worldSizeX: number,
         worldSizeZ: number,
         vbtTextureView?: GPUTextureView | null
@@ -235,8 +235,8 @@ export class ScatterInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] ScatterInstanceBaker가 점유하고 있는 내부 GPU 버퍼, 파이프라인 및 바인드그룹 리소스를 완전히 해제합니다.
-     * [EN] Completely releases internal GPU buffers, pipelines, and bind group resources held by ScatterInstanceBaker.
+     * [KO] FoliageInstanceBaker가 점유하고 있는 내부 GPU 버퍼, 파이프라인 및 바인드그룹 리소스를 완전히 해제합니다.
+     * [EN] Completely releases internal GPU buffers, pipelines, and bind group resources held by FoliageInstanceBaker.
      */
     destroy(): void {
         this.#uniformGPUBuffer?.destroy();
@@ -320,4 +320,5 @@ export class ScatterInstanceBaker extends RedGPUObject {
     }
 }
 
-Object.freeze(ScatterInstanceBaker);
+Object.freeze(FoliageInstanceBaker);
+export default FoliageInstanceBaker;

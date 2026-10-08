@@ -9,11 +9,11 @@ import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 import type PerspectiveCamera from "../../../../camera/camera/PerspectiveCamera";
-import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
-import AScatterCullPipeline from "../../../core/scatter/AScatterCullPipeline";
+import foliageCullWGSL from "./foliageCull.wgsl";
+import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
-import {ScatterInstanceBaker} from "../../../core/scatter";
-import foliageBakeComputeSource from "../baking/foliageBakeCompute.wgsl";
+import FoliageInstanceBaker from "../baking/FoliageInstanceBaker";
+import foliageBakeSource from "../baking/foliageBake.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
@@ -25,10 +25,10 @@ import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_EN
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageCuller extends AScatterCullPipeline {
+class FoliageCuller extends AScatterCuller {
     #tempPVMatrix: mat4 = mat4.create();
     #megaBuffer: FoliageScatterMegaBuffer | null = null;
-    #baker: ScatterInstanceBaker;
+    #baker: FoliageInstanceBaker;
     #lastHZBTextureView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
 
@@ -50,19 +50,19 @@ class FoliageCuller extends AScatterCullPipeline {
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
-        this.#baker = new ScatterInstanceBaker(this.redGPUContext, {
-            computeShaderCode: foliageBakeComputeSource,
+        this.#baker = new FoliageInstanceBaker(this.redGPUContext, {
+            computeShaderCode: foliageBakeSource,
             label: 'FoliageInstanceBaker',
             initialTaskCapacity: 8192,
         });
-        this.initComputePipeline('Foliage_Cull_ShaderModule', foliageCullingComputeWGSL, 'Foliage_Cull');
+        this.initComputePipeline('Foliage_Cull_ShaderModule', foliageCullWGSL, 'Foliage_Cull');
     }
 
     /**
      * [KO] 식생 인스턴스 물리 베이커 인스턴스
      * [EN] Foliage instance physical baker instance
      */
-    get baker(): ScatterInstanceBaker {
+    get baker(): FoliageInstanceBaker {
         return this.#baker;
     }
 
