@@ -530,7 +530,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
      * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
      */
-    rebakeAll(centerX?: number, centerZ?: number): void {
+    rebakeAll(): void {
         const {types} = this;
         const count = types.length;
         for (let i = 0; i < count; i++) {

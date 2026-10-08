@@ -191,7 +191,7 @@ export abstract class AScatterManager<
      * [KO] 등록된 모든 스캐터 타입의 인스턴스 배치를 강제로 다시 베이크합니다.
      * [EN] Forces a rebake of instance placement for all registered scatter types.
      */
-    abstract rebakeAll(centerX?: number, centerZ?: number): void;
+    abstract rebakeAll(): void;
 
     /**
      * [KO] 매 프레임 스트리밍 영역을 갱신하고 GPU 컬링 Compute Pass를 디스패치합니다.

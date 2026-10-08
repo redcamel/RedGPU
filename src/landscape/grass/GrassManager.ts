@@ -38,7 +38,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
     #renderer: GrassRenderer;
 
-    #lastCamPos: [number, number, number] = [0, 0, 0];
     #lastBakePos: [number, number] = [0, 0];
     #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
@@ -206,11 +205,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
         const {view} = renderViewStateData;
         const {rawCamera: rawCam} = view;
-        const {x: camX, y: camY, z: camZ} = rawCam;
-
-        this.#lastCamPos[0] = camX;
-        this.#lastCamPos[1] = camY;
-        this.#lastCamPos[2] = camZ;
+        const {x: camX, z: camZ} = rawCam;
 
         const currentLoadedTileCount = landscape.tileLoadedCount;
         const hasValidTextures = landscape.hasValidScatterAtlas;
@@ -240,7 +235,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             this.#initialBaked = true;
             this.#lastBakePos[0] = camX;
             this.#lastBakePos[1] = camZ;
-            this.rebakeAll(camX, camZ);
+            this.#bakeAll(camX, camZ);
             this.#needsRebakeMask = 0;
             rebakedThisFrame = true;
         }
@@ -424,19 +419,22 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     }
 
     /**
-     * [KO] 등록된 모든 잔디 타입에 대해 지형 가상 텍스처(VHT/VBT)를 기반으로 GPU 베이킹을 수행합니다.
-     * [EN] Re-executes GPU baking for all registered grass types based on landscape virtual textures (VHT/VBT).
-     *
-     * @param centerX - 베이킹 중심 월드 X 좌표 (생략 시 마지막 카메라 위치)
-     * @param centerZ - 베이킹 중심 월드 Z 좌표 (생략 시 마지막 카메라 위치)
+     * [KO] 등록된 모든 잔디 타입의 인스턴스 배치를 다음 프레임에 강제로 다시 베이크하도록 예약합니다.
+     * [EN] Schedules a forced rebake of instance placement for all registered grass types on the next frame.
      */
-    rebakeAll(centerX?: number, centerZ?: number): void {
-        const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
-        const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];
+    rebakeAll(): void {
+        this.#needsRebakeMask = -1;
+    }
+
+    /**
+     * [KO] 모든 잔디 타입에 대해 지정된 중심 좌표를 기준으로 GPU 베이킹을 실행합니다.
+     * [EN] Executes GPU baking for all registered grass types centered at the specified coordinates.
+     */
+    #bakeAll(centerX: number, centerZ: number): void {
         const list = this.types;
         const len = list.length;
         for (let i = 0; i < len; i++) {
-            this.#bakeGrassType(list[i], posX, posZ);
+            this.#bakeGrassType(list[i], centerX, centerZ);
         }
     }
 
@@ -465,18 +463,15 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [KO] 특정 잔디 타입에 대해 GPU 베이킹을 실행하여 VRAM 버퍼에 위치/노멀/색상을 1회 기록합니다.
      * [EN] Executes GPU baking for a specific grass type to record position/normal/color into the VRAM buffer once.
      */
-    #bakeGrassType(grass: Grass, centerX?: number, centerZ?: number): void {
+    #bakeGrassType(grass: Grass, centerX: number, centerZ: number): void {
         if (!this.landscape.hasValidScatterAtlas) return;
-
-        const posX = centerX !== undefined ? centerX : this.#lastCamPos[0];
-        const posZ = centerZ !== undefined ? centerZ : this.#lastCamPos[2];
 
         this.#bakePipeline.dispatchBake(
             this.#megaBuffer,
             this.landscape,
             grass,
-            posX,
-            posZ
+            centerX,
+            centerZ
         );
 
         const alloc = this.#megaBuffer.getAllocation(grass.typeId);
