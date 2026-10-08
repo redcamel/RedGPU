@@ -45,11 +45,6 @@ export interface DebuggerManagerOptions {
      */
     vbt?: boolean;
     /**
-     * [KO] 가상 베이크 베이스 컬러(VBT BaseColor) 디버거 뷰어 별칭
-     * [EN] Alias for virtual baked base color (VBT) debugger viewer
-     */
-    vbtBaseColor?: boolean;
-    /**
      * [KO] 가상 베이크 노멀(VBT Normal) 디버거 뷰어 활성화 여부
      * [EN] Whether to enable the virtual baked normal (VBT Normal) debugger viewer
      */
@@ -137,7 +132,6 @@ export class DebuggerManager {
                 vht,
                 vnt,
                 vbt,
-                vbtBaseColor,
                 vbtNormal,
                 vbtORM,
                 landscapeWireframe,
@@ -148,7 +142,7 @@ export class DebuggerManager {
             if (spatialGrid) this.spatialGrid = true;
             if (vht) this.vht = true;
             if (vnt) this.vnt = true;
-            if (vbt || vbtBaseColor) this.vbt = true;
+            if (vbt) this.vbt = true;
             if (vbtNormal) this.vbtNormal = true;
             if (vbtORM) this.vbtORM = true;
             if (landscapeWireframe !== undefined) this.landscapeWireframe = landscapeWireframe;
@@ -327,18 +321,6 @@ export class DebuggerManager {
     }
 
     /**
-     * [KO] 가상 베이크 베이스 컬러(VBT BaseColor) 온스크린 뷰어 별칭 프로퍼티입니다.
-     * [EN] Alias property for the VBT BaseColor on-screen viewer.
-     */
-    get vbtBaseColor(): boolean {
-        return this.vbt;
-    }
-
-    set vbtBaseColor(val: boolean) {
-        this.vbt = val;
-    }
-
-    /**
      * [KO] 가상 베이크 노멀(VBT Normal) 온스크린 뷰어의 활성화 여부를 설정하거나 가져옵니다.
      * [EN] Gets or sets whether the VBT Normal on-screen viewer is enabled.
      */
@@ -413,14 +395,6 @@ export class DebuggerManager {
      * [EN] Returns the LandscapeVBTDebugger instance.
      */
     get vbtDebugger(): LandscapeVBTDebugger | null {
-        return this.#vbtDebugger;
-    }
-
-    /**
-     * [KO] 가상 베이크 베이스 컬러 디버거 인스턴스 별칭을 반환합니다.
-     * [EN] Returns the alias for the LandscapeVBTDebugger instance.
-     */
-    get vbtBaseColorDebugger(): LandscapeVBTDebugger | null {
         return this.#vbtDebugger;
     }
 

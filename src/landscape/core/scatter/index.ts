@@ -40,7 +40,6 @@ import {
 } from "./ScatterVertexFormats";
 
 import AScatterMegaBuffer, {
-    type AuxiliaryIndirectBufferEntry,
     CULLING_WORKGROUP_SIZE,
     DRAW_INDEXED_INDIRECT_ARGS_COUNT,
     type ScatterBaseSegmentAllocation,
@@ -65,7 +64,6 @@ export {
     AScatterSubMeshSlotPooler,
     AScatterRenderer,
     AScatterMegaBuffer,
-    type AuxiliaryIndirectBufferEntry,
 
     // Spatial & Packing Utilities
     computeScatterGridSeed,

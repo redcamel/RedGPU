@@ -644,7 +644,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Destroys shadow buffers, uniform buffers, bind groups, and foliage type allocations upon mega-buffer release.
      */
     onDestroy(): void {
-        this.unregisterAuxiliaryIndirectBuffer('shadow');
         this.invalidateUnifiedCullingBindGroup();
         this.#shadowCulledGPUBuffer?.destroy();
         this.#shadowIndirectGPUBuffer?.destroy();
@@ -658,6 +657,45 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#allocations.clear();
         this.#allocatedTypes.length = 0;
         this.clearBaseAllocations();
+    }
+
+    /**
+     * [KO] 매 프레임 식생의 CSM 그림자 간접 드로우 버퍼 인스턴스 카운트를 템플릿으로부터 리셋합니다.
+     * [EN] Resets instance counts of foliage CSM shadow indirect draw buffers from template each frame.
+     * @param commandEncoder - GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
+     */
+    protected override onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
+        const targetGPUBuffer = this.#shadowIndirectGPUBuffer;
+        const templateGPUBuffer = this.#shadowIndirectResetTemplateGPUBuffer;
+        if (!targetGPUBuffer || !templateGPUBuffer) return;
+
+        const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+        const byteSize = Math.min(
+            (this.maxSubMeshes * 3 + this.totalIndirectDrawCalls) * indirectStrideBytes,
+            this.#shadowIndirectResetTemplate.byteLength
+        );
+        if (byteSize <= 0) return;
+
+        if (commandEncoder) {
+            commandEncoder.copyBufferToBuffer(
+                templateGPUBuffer,
+                0,
+                targetGPUBuffer,
+                0,
+                byteSize
+            );
+        } else {
+            const gpuDevice = this.gpuDevice;
+            if (gpuDevice) {
+                gpuDevice.queue.writeBuffer(
+                    targetGPUBuffer,
+                    0,
+                    this.#shadowIndirectResetTemplate.buffer,
+                    0,
+                    byteSize
+                );
+            }
+        }
     }
 
     #initBuffers(): void {
@@ -700,18 +738,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             label: 'FoliageScatterMegaBuffer_GlobalUniformBuffer',
             size: this.#globalUniformBytes,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
-
-        const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
-        this.registerAuxiliaryIndirectBuffer({
-            key: 'shadow',
-            targetGPUBuffer: this.#shadowIndirectGPUBuffer,
-            templateGPUBuffer: this.#shadowIndirectResetTemplateGPUBuffer,
-            cpuTemplateBuffer: this.#shadowIndirectResetTemplate.buffer,
-            getResetByteSize: () => Math.min(
-                (this.maxSubMeshes * 3 + this.totalIndirectDrawCalls) * indirectStrideBytes,
-                this.#shadowIndirectResetTemplate.byteLength
-            ),
         });
     }
 

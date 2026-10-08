@@ -83,50 +83,18 @@ export interface ScatterBaseSegmentAllocation {
 }
 
 /**
- * [KO] 보조 간접 드로우 버퍼 등록 정보 인터페이스입니다 (그림자, 추가 렌더 패스 등).
- * [EN] Interface for auxiliary indirect draw buffer registration info (shadow, additional render passes, etc.).
- */
-export interface AuxiliaryIndirectBufferEntry {
-    /**
-     * [KO] 고유 식별자 키 (예: 'shadow', 'custom' 등)
-     * [EN] Unique identifier key (e.g., 'shadow', 'custom', etc.)
-     */
-    key: string;
-    /**
-     * [KO] 리셋 대상 GPU 간접 드로우 버퍼
-     * [EN] Target GPU indirect draw buffer to reset
-     */
-    targetGPUBuffer: GPUBuffer | null;
-    /**
-     * [KO] GPU 템플릿 복사 원본 버퍼 (COPY_SRC)
-     * [EN] GPU template copy source buffer (COPY_SRC)
-     */
-    templateGPUBuffer: GPUBuffer | null;
-    /**
-     * [KO] CPU 템플릿 BufferSource 또는 ArrayBufferLike (GPU 큐 fallback용)
-     * [EN] CPU template BufferSource or ArrayBufferLike (for GPU queue fallback)
-     */
-    cpuTemplateBuffer?: BufferSource | ArrayBufferLike | null;
-    /**
-     * [KO] 매 프레임 리셋 시 복사할 바이트 크기를 반환하는 콜백 함수 (생략 시 templateGPUBuffer 크기 전체)
-     * [EN] Callback returning byte size to copy during per-frame reset (full size if omitted)
-     */
-    getResetByteSize?: () => number;
-}
-
-/**
  * [KO] 스캐터 시스템(Foliage, Grass 등)에서 대규모 인스턴스 데이터, 컬링 결과, 간접 드로우 버퍼를 관리하는 순수 GPU VRAM 추상 메가버퍼 기반 클래스입니다.
  * [EN] Pure GPU VRAM abstract mega-buffer base class managing massive instance data, culling results, and indirect draw buffers across the scatter system (Foliage, Grass, etc.).
  *
  * **[KO] 아키텍처 및 역할:**
  * - **VRAM 통합 관리 (Unified Mega-Buffer)**: 개별 스캐터 인스턴스 버퍼를 분할 생성하지 않고, 단일 원본 스토리지 버퍼(`rawGPUBuffer`)와 컬링 통과 스토리지 버퍼(`culledGPUBuffer`)에서 64바이트 배수로 정렬 할당하여 GPU 메모리 단편화를 제거합니다.
- * - **간접 드로우(Indirect Draw) 인프라 및 다중 버퍼 일괄 리셋**: WebGPU `drawIndexedIndirect`에 필요한 5개 u32 인자(indexCount, instanceCount, firstIndex, baseVertex, firstInstance) 버퍼를 일괄 생성하고, 사전 기록된 템플릿 버퍼(`COPY_SRC`)를 통해 매 프레임 단 1회의 `copyBufferToBuffer`로 드로우 인스턴스 수를 초고속 리셋(`resetMultiIndirectCommands`)합니다. 그림자(CSM) 등 추가 패스용 보조 버퍼(`registerAuxiliaryIndirectBuffer`)도 레지스트리에 등록하여 단일 파이프라인에서 일괄 초기화됩니다.
+ * - **간접 드로우(Indirect Draw) 인프라 및 다중 버퍼 일괄 리셋**: WebGPU `drawIndexedIndirect`에 필요한 5개 u32 인자(indexCount, instanceCount, firstIndex, baseVertex, firstInstance) 버퍼를 일괄 생성하고, 사전 기록된 템플릿 버퍼(`COPY_SRC`)를 통해 매 프레임 단 1회의 `copyBufferToBuffer`로 드로우 인스턴스 수를 초고속 리셋(`resetMultiIndirectCommands`)합니다.
  * - **WGSL 셰이더 리플렉션 연동**: 런타임에 WGSL 셰이더 구조체(`GrassInstance`, `GrassTypeParam` 등)의 스트라이드 바이트 크기를 자동 리플렉션하여 CPU/GPU 메모리 레이아웃 불일치를 원천 방지합니다.
  * - **Zero-GC 아키텍처**: 매 프레임 렌더 루프 및 리셋 과정에서 일체의 임시 객체 생성을 배제하고 사전 할당된 버퍼를 재사용합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Unified VRAM Management**: Eliminates GPU memory fragmentation by allocating 64-byte aligned segments from single raw storage (`rawGPUBuffer`) and culled storage (`culledGPUBuffer`) buffers instead of fragmenting buffers per scatter species.
- * - **Multi-Draw Indirect Infrastructure & Batch Reset**: Allocates 5-u32 indirect draw arguments (indexCount, instanceCount, firstIndex, baseVertex, firstInstance) in a unified GPU buffer, executing ultra-fast reset of instance counts per frame via a single `copyBufferToBuffer` command (`resetMultiIndirectCommands`). Auxiliary indirect buffers for shadow cascades and additional passes (`registerAuxiliaryIndirectBuffer`) are registered and batch-reset in the same pipeline.
+ * - **Multi-Draw Indirect Infrastructure & Batch Reset**: Allocates 5-u32 indirect draw arguments (indexCount, instanceCount, firstIndex, baseVertex, firstInstance) in a unified GPU buffer, executing ultra-fast reset of instance counts per frame via a single `copyBufferToBuffer` command (`resetMultiIndirectCommands`).
  * - **WGSL Shader Reflection Integration**: Automatically reflects byte strides of WGSL shader structs (`GrassInstance`, `GrassTypeParam`, etc.) at runtime to guarantee CPU/GPU memory layout synchronization.
  * - **Zero-GC Architecture**: Prohibits temporary object allocations during per-frame rendering and reset passes, relying exclusively on pre-allocated buffers.
  *
@@ -158,8 +126,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
     #indirectResetTemplate: Uint32Array;
     #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
-
-    #auxiliaryIndirectBuffers: AuxiliaryIndirectBufferEntry[] = [];
 
     #onRecreated: (() => void) | null = null;
 
@@ -501,46 +467,8 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 그림자(CSM) 등 추가적인 보조 간접 드로우 GPU 버퍼를 등록합니다.
-     * [EN] Registers an auxiliary indirect draw GPU buffer such as cascade shadow passes.
-     * @param entry -
-     * [KO] 등록할 보조 간접 드로우 버퍼 정보
-     * [EN] Auxiliary indirect draw buffer entry to register
-     */
-    registerAuxiliaryIndirectBuffer(entry: AuxiliaryIndirectBufferEntry): void {
-        const idx = this.#auxiliaryIndirectBuffers.findIndex(e => e.key === entry.key);
-        if (idx >= 0) {
-            this.#auxiliaryIndirectBuffers[idx] = entry;
-        } else {
-            this.#auxiliaryIndirectBuffers.push(entry);
-        }
-    }
-
-    /**
-     * [KO] 등록된 특정 보조 간접 드로우 버퍼를 해제합니다.
-     * [EN] Unregisters a specific auxiliary indirect draw buffer.
-     * @param key -
-     * [KO] 해제할 보조 간접 드로우 버퍼 키
-     * [EN] Auxiliary indirect draw buffer key to unregister
-     */
-    unregisterAuxiliaryIndirectBuffer(key: string): void {
-        const idx = this.#auxiliaryIndirectBuffers.findIndex(e => e.key === key);
-        if (idx >= 0) {
-            this.#auxiliaryIndirectBuffers.splice(idx, 1);
-        }
-    }
-
-    /**
-     * [KO] 등록된 모든 보조 간접 드로우 버퍼를 제거합니다.
-     * [EN] Clears all registered auxiliary indirect draw buffers.
-     */
-    clearAuxiliaryIndirectBuffers(): void {
-        this.#auxiliaryIndirectBuffers.length = 0;
-    }
-
-    /**
-     * [KO] 매 프레임 GPU 컬링 실행 전 메인 및 등록된 모든 보조 간접 드로우 인스턴스 카운트를 0으로 일괄 리셋합니다 (Zero-GC).
-     * [EN] Resets instance counts to zero for main and all registered auxiliary indirect draw buffers before GPU culling executes every frame (Zero-GC).
+     * [KO] 매 프레임 GPU 컬링 실행 전 메인 및 파생 클래스의 간접 드로우 인스턴스 카운트를 0으로 일괄 리셋합니다 (Zero-GC).
+     * [EN] Resets instance counts to zero for main and derived indirect draw buffers before GPU culling executes every frame (Zero-GC).
      * @param commandEncoder -
      * [KO] 선택사항인 GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
      * [EN] Optional GPU command encoder (uses copyBufferToBuffer if provided)
@@ -575,41 +503,17 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             }
         }
 
-        // 2. 등록된 보조 간접 드로우 버퍼 일괄 리셋 (그림자 등, Zero-GC 루프)
-        const auxList = this.#auxiliaryIndirectBuffers;
-        const auxCount = auxList.length;
-        if (auxCount > 0) {
-            for (let i = 0; i < auxCount; i++) {
-                const entry = auxList[i];
-                const targetGPUBuffer = entry.targetGPUBuffer;
-                if (!targetGPUBuffer) continue;
+        // 2. 파생 클래스 전용 간접 드로우 버퍼 확장 리셋 훅 호출 (Foliage 그림자 간접 버퍼 등)
+        this.onResetMultiIndirectCommands(commandEncoder ?? null);
+    }
 
-                const templateGPUBuffer = entry.templateGPUBuffer;
-                const byteSize = entry.getResetByteSize ? entry.getResetByteSize() : (templateGPUBuffer?.size || 0);
-                if (byteSize <= 0) continue;
-
-                if (commandEncoder && templateGPUBuffer) {
-                    commandEncoder.copyBufferToBuffer(
-                        templateGPUBuffer,
-                        0,
-                        targetGPUBuffer,
-                        0,
-                        byteSize
-                    );
-                } else if (entry.cpuTemplateBuffer) {
-                    const gpuDevice = this.gpuDevice;
-                    if (gpuDevice) {
-                        gpuDevice.queue.writeBuffer(
-                            targetGPUBuffer,
-                            0,
-                            entry.cpuTemplateBuffer,
-                            0,
-                            byteSize
-                        );
-                    }
-                }
-            }
-        }
+    /**
+     * [KO] 파생 클래스에서 추가적인 간접 드로우 버퍼(예: 식생의 CSM 그림자 간접 버퍼)를 리셋할 때 오버라이드하는 가상 훅 메서드입니다.
+     * [EN] Virtual hook method overridden by derived classes to reset additional indirect draw buffers (e.g., foliage CSM shadow indirect buffers).
+     * @param commandEncoder - GPU 커맨드 인코더 (없을 시 null)
+     */
+    protected onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
+        // 기본 구현 없음 (자식 클래스에서 필요 시 오버라이드)
     }
 
     /**
@@ -694,7 +598,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#indirectResetTemplateGPUBuffer = null;
         this.#typeParamsGPUBuffer = null;
 
-        this.clearAuxiliaryIndirectBuffers();
         this.invalidateUnifiedCullingBindGroup();
 
         this.onDestroy();
