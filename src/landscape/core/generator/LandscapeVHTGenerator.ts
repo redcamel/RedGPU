@@ -295,17 +295,22 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
-        this.#globalBindGroupLayout = gpuDevice.createBindGroupLayout(descriptor);
+        this.#globalBindGroupLayout = resourceManager.createBindGroupLayout(
+            'Landscape_VHT_GlobalBake_BindGroupLayout',
+            descriptor
+        );
 
         const shaderModule = resourceManager.createGPUShaderModule(
             'Landscape_VHT_GlobalBake_ShaderModule',
             {code: vhtGlobalBakeShaderCode}
         );
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'Landscape_VHT_GlobalBake_PipelineLayout',
-            bindGroupLayouts: [this.#globalBindGroupLayout]
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            'Landscape_VHT_GlobalBake_PipelineLayout',
+            {
+                bindGroupLayouts: [this.#globalBindGroupLayout]
+            }
+        );
 
         this.#globalComputePipeline = gpuDevice.createComputePipeline({
             label: 'Landscape_VHT_GlobalBake_ComputePipeline',

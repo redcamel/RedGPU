@@ -684,14 +684,17 @@ export class GrassRenderer extends AScatterRenderer {
             ]
         });
 
-        this.#pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `Grass_PipelineLayout_${this.instanceId}`,
-            bindGroupLayouts: [
-                systemBGLayout,
-                this.#pipelineBindGroupLayout1,
-                this.#pipelineBindGroupLayout2
-            ]
-        });
+        this.#pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `Grass_PipelineLayout_${this.instanceId}`,
+            {
+                label: `Grass_PipelineLayout_${this.instanceId}`,
+                bindGroupLayouts: [
+                    systemBGLayout,
+                    this.#pipelineBindGroupLayout1,
+                    this.#pipelineBindGroupLayout2
+                ]
+            }
+        );
     }
 }
 

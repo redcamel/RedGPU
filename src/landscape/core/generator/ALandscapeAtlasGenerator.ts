@@ -185,15 +185,21 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
             });
         }
 
-        this.#bindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: `Landscape_${this.#generatorLabel}_BindGroupLayout`,
-            entries: layoutEntries
-        });
+        this.#bindGroupLayout = resourceManager.createBindGroupLayout(
+            `Landscape_${this.#generatorLabel}_BindGroupLayout`,
+            {
+                label: `Landscape_${this.#generatorLabel}_BindGroupLayout`,
+                entries: layoutEntries
+            }
+        );
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `Landscape_${this.#generatorLabel}_PipelineLayout`,
-            bindGroupLayouts: [this.#bindGroupLayout]
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `Landscape_${this.#generatorLabel}_PipelineLayout`,
+            {
+                label: `Landscape_${this.#generatorLabel}_PipelineLayout`,
+                bindGroupLayouts: [this.#bindGroupLayout]
+            }
+        );
 
         this.#computePipeline = gpuDevice.createComputePipeline({
             label: `Landscape_${this.#generatorLabel}_ComputePipeline`,

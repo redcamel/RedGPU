@@ -299,15 +299,17 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         }
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(mipShaderInfo, 0);
-        this.#tileMipBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'Landscape_TileMipmap_BindGroupLayout',
-            ...descriptor
-        });
+        this.#tileMipBindGroupLayout = resourceManager.createBindGroupLayout(
+            'Landscape_TileMipmap_BindGroupLayout',
+            descriptor
+        );
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'Landscape_TileMipmap_PipelineLayout',
-            bindGroupLayouts: [this.#tileMipBindGroupLayout]
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            'Landscape_TileMipmap_PipelineLayout',
+            {
+                bindGroupLayouts: [this.#tileMipBindGroupLayout]
+            }
+        );
 
         this.#tileMipPipeline = gpuDevice.createComputePipeline({
             label: 'Landscape_TileMipmap_ComputePipeline',

@@ -159,7 +159,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const emptyBindGroupLayout = resourceManager.emptyBindGroupLayout;
+        const {emptyBindGroupLayout} = resourceManager;
         const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = isDepthPrepassOpaque
             ? emptyBindGroupLayout
@@ -169,10 +169,13 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `Foliage_Render_PipelineLayout_${pipelineKey}`,
-            bindGroupLayouts: bindGroupLayouts,
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `Foliage_Render_PipelineLayout_${pipelineKey}`,
+            {
+                label: `Foliage_Render_PipelineLayout_${pipelineKey}`,
+                bindGroupLayouts: bindGroupLayouts,
+            }
+        );
 
         let targets: (GPUColorTargetState | null)[] = [];
         let depthStencil: GPUDepthStencilState;
@@ -304,12 +307,16 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || resourceManager.emptyBindGroupLayout;
+        const {emptyBindGroupLayout} = resourceManager;
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
-            bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL],
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
+            {
+                label: `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
+                bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL],
+            }
+        );
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `Foliage_ShadowMerged_RenderPipeline_${pipelineKey}`,
@@ -387,16 +394,19 @@ class FoliagePipelineRegistry extends RedGPUObject {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const emptyBindGroupLayout = resourceManager.emptyBindGroupLayout;
+        const {emptyBindGroupLayout} = resourceManager;
         const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || emptyBindGroupLayout;
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
-            bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout],
-        });
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(
+            `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
+            {
+                label: `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
+                bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout],
+            }
+        );
 
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `Foliage_ShadowMasked_RenderPipeline_${pipelineKey}`,
