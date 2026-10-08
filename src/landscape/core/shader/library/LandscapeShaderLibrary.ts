@@ -13,6 +13,8 @@ import GrassTypeParam_wgsl from './struct/GrassTypeParam.wgsl';
 import GrassParams_wgsl from './struct/GrassParams.wgsl';
 import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
 import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
+import GrassVertexOutput_wgsl from './struct/GrassVertexOutput.wgsl';
+import ImpostorBakeVertexOutput_wgsl from './struct/ImpostorBakeVertexOutput.wgsl';
 import stochasticTiling_wgsl from './tiling/stochasticTiling.wgsl';
 import textureDebuggerFragment_wgsl from './debugger/textureDebuggerFragment.wgsl';
 import rotateVectorByQuat_wgsl from './math/rotateVectorByQuat.wgsl';
@@ -135,6 +137,26 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const LandscapeTile = LandscapeTile_wgsl;
+
+        /**
+         * [KO] 잔디 렌더링 파이프라인 버텍스 출력 구조체 (clipPos, worldPos, uv, normal, heightRatio, alphaFade, currentClipPos, prevClipPos, groundColor)
+         * [EN] Grass rendering pipeline vertex output structure
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.GrassVertexOutput;
+         * ```
+         */
+        export const GrassVertexOutput = GrassVertexOutput_wgsl;
+
+        /**
+         * [KO] 임포스터 베이킹 파이프라인 버텍스 출력 구조체 (position, uv, vertexColor_0, worldNormal, worldTangent, worldPos, baseColorFactor, materialParams, textureFlags, sphereCenterRadius, cameraDir)
+         * [EN] Foliage impostor baking pipeline vertex output structure
+         *
+         * ```wgsl
+         * #redgpu_include landscape.struct.ImpostorBakeVertexOutput;
+         * ```
+         */
+        export const ImpostorBakeVertexOutput = ImpostorBakeVertexOutput_wgsl;
     }
 
     /**

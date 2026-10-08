@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassParams;
+#redgpu_include landscape.struct.GrassVertexOutput;
 #redgpu_include landscape.math.transformGrassPosition;
 
 struct VertexInput {
@@ -8,18 +9,6 @@ struct VertexInput {
     @location(1) normal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @builtin(instance_index) instanceIndex: u32,
-};
-
-struct VertexOutput {
-    @builtin(position) clipPos: vec4<f32>,
-    @location(0) worldPos: vec3<f32>,
-    @location(1) uv: vec2<f32>,
-    @location(2) normal: vec3<f32>,
-    @location(3) heightRatio: f32,
-    @location(4) alphaFade: f32,
-    @location(5) currentClipPos: vec4<f32>,
-    @location(6) prevClipPos: vec4<f32>,
-    @location(7) groundColor: vec4<f32>,
 };
 
 @group(1) @binding(0) var<storage, read> culledInstances: array<GrassInstance>;
