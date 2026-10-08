@@ -9,7 +9,6 @@ import RenderViewStateData from "../../../display/view/core/RenderViewStateData"
 import type Landscape from "../../Landscape";
 import type AScatterType from "./AScatterType";
 import {AScatterTypeInitOptions} from "./AScatterType";
-import type {IScatterManager} from "./IScatterManager";
 
 /**
  * [KO] 대규모 지형(Landscape) 상에 인스턴스를 분산 배치하고 GPU 컬링 및 간접 드로우를 총괄하는 스캐터 매니저 추상 기본 클래스입니다.
@@ -28,7 +27,7 @@ import type {IScatterManager} from "./IScatterManager";
 export abstract class AScatterManager<
     TType extends AScatterType = AScatterType,
     TOptions extends AScatterTypeInitOptions = AScatterTypeInitOptions
-> extends RedGPUObject implements IScatterManager<TType, TOptions> {
+> extends RedGPUObject {
 
     #landscape: Landscape;
     #enabled: boolean = true;

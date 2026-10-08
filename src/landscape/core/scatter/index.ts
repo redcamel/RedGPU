@@ -50,11 +50,9 @@ import AScatterSubMeshSlotPooler from "./AScatterSubMeshSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
 import AScatterCuller from "./AScatterCuller";
-import type {IScatterManager} from "./IScatterManager";
 
 export {
     // Runtime Classes, Functions & Units
-    type IScatterManager,
     AScatterManager,
     AScatterCuller,
     combineScatterMeshes,
