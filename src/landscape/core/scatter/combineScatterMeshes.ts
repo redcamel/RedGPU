@@ -98,15 +98,20 @@ export interface ScatterMeshCombineResult {
  * [EN] Computes the local 4x4 matrix based on position, Euler rotation angles (degrees), and scale of a RedGPU Mesh instance.
  */
 function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
-    const x = mesh.x ?? 0;
-    const y = mesh.y ?? 0;
-    const z = mesh.z ?? 0;
-    const radX = (mesh.rotationX ?? 0) * (Math.PI / 180);
-    const radY = (mesh.rotationY ?? 0) * (Math.PI / 180);
-    const radZ = (mesh.rotationZ ?? 0) * (Math.PI / 180);
-    const sX = mesh.scaleX ?? 1;
-    const sY = mesh.scaleY ?? 1;
-    const sZ = mesh.scaleZ ?? 1;
+    const {
+        x = 0,
+        y = 0,
+        z = 0,
+        rotationX = 0,
+        rotationY = 0,
+        rotationZ = 0,
+        scaleX: sX = 1,
+        scaleY: sY = 1,
+        scaleZ: sZ = 1
+    } = mesh;
+    const radX = rotationX * (Math.PI / 180);
+    const radY = rotationY * (Math.PI / 180);
+    const radZ = rotationZ * (Math.PI / 180);
 
     out[12] = x;
     out[13] = y;
@@ -359,14 +364,13 @@ export default function combineScatterMeshes(
     }
 
     for (const entry of materialGroups.values()) {
-        const group = entry.raws;
-        const mat = entry.material;
+        const {raws, material} = entry;
 
         let totalVertexCount = 0;
         let totalIndexCount = 0;
 
-        for (let g = 0; g < group.length; g++) {
-            const geom = group[g].geometry;
+        for (let g = 0; g < raws.length; g++) {
+            const geom = raws[g].geometry;
             totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
             totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
         }
@@ -379,8 +383,8 @@ export default function combineScatterMeshes(
         const groupFirstIndex = unifiedIndexOffset;
         const groupStartVertexOffset = unifiedVertexOffset;
 
-        for (let g = 0; g < group.length; g++) {
-            const raw = group[g];
+        for (let g = 0; g < raws.length; g++) {
+            const raw = raws[g];
             const {geometry: geom, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
             const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
             const srcVData = srcVB?.data;
@@ -549,12 +553,12 @@ export default function combineScatterMeshes(
         const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
 
         groups.push({
-            material: mat,
+            material,
             geometry: combinedGeom,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
             firstIndex: groupFirstIndex,
-            rawNodes: group
+            rawNodes: raws
         });
     }
 
@@ -635,8 +639,8 @@ export default function combineScatterMeshes(
 function getMaterialKey(mat: any): string {
     if (!mat) return 'default_mat';
     const matType = mat.constructor?.name || 'Material';
-    const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
+    const baseColorKey = mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
     const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
     const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
-    return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
+    return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }

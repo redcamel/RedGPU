@@ -188,8 +188,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             const cf = this.cpuTypeParamsBuffer;
             cf.fill(0, baseFloat, baseFloat + typeParamFloats);
 
-            const gpuDevice = this.gpuDevice;
-            const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+            const {gpuDevice, typeParamsGPUBuffer} = this;
             if (gpuDevice && typeParamsGPUBuffer) {
                 const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
                 const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
@@ -234,8 +233,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         if (typeParamFloats === 0) return;
 
         const baseFloat = typeId * typeParamFloats;
-        const cf = this.cpuTypeParamsBuffer;
-        const cu = this.cpuTypeParamsUint32;
+        const {cpuTypeParamsBuffer: cf, cpuTypeParamsUint32: cu} = this;
 
         const cullingDist = grass.cullingDistance || 80.0;
         const farDist = grass.farDistance || (cullingDist * 0.5);
@@ -258,8 +256,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         cu[baseFloat + 14] = 0;
         cu[baseFloat + 15] = 0;
 
-        const gpuDevice = this.gpuDevice;
-        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+        const {gpuDevice, typeParamsGPUBuffer} = this;
         if (gpuDevice && typeParamsGPUBuffer) {
             const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
             const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;

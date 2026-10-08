@@ -123,8 +123,8 @@ export default function assembleFoliageLODMeshes(
     }
 
     const resultSubMeshes: FoliageSubMesh[] = [];
-    const unifiedGeometry = combineResult.unifiedGeometry;
-    const treeH = Math.max(5.0, (combineResult.boundingRadius || 5.0) * 1.8);
+    const {unifiedGeometry, boundingRadius = 5.0} = combineResult;
+    const treeH = Math.max(5.0, (boundingRadius || 5.0) * 1.8);
     const {groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = options;
 
     for (let g = 0; g < combineResult.groups.length; g++) {

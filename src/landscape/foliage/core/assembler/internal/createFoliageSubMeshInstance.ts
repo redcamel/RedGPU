@@ -182,7 +182,7 @@ export default function createFoliageSubMeshInstance(
         }
     }
 
-    const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
+    const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url);
 
     const isDepthPrepass = !isImpostor && (lodIndex <= maxPrepassLOD) && (!isMasked || hasBaseColorTexture);
     const isMainOpaqueOrMasked = true;

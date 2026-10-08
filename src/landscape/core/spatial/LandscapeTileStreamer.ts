@@ -727,13 +727,12 @@ export class LandscapeTileStreamer extends RedGPUObject {
             const tX1 = Math.min(511, Math.max(0, globalTexX1 - col * 512));
             const tZ1 = Math.min(511, Math.max(0, globalTexZ1 - row * 512));
 
-            const pixels = tileData.pixels;
-            const w = tileData.width;
+            const {pixels, width} = tileData;
 
-            h00 = pixels[tZ0 * w + tX0] || 0;
-            h10 = pixels[tZ0 * w + tX1] || 0;
-            h01 = pixels[tZ1 * w + tX0] || 0;
-            h11 = pixels[tZ1 * w + tX1] || 0;
+            h00 = pixels[tZ0 * width + tX0] || 0;
+            h10 = pixels[tZ0 * width + tX1] || 0;
+            h01 = pixels[tZ1 * width + tX0] || 0;
+            h11 = pixels[tZ1 * width + tX1] || 0;
         } else if (this.#globalCPUHeightMap) {
             const g = this.#globalCPUHeightMap;
             const sU0 = (globalTexX0 + 0.5) / texSizeX;
@@ -762,23 +761,20 @@ export class LandscapeTileStreamer extends RedGPUObject {
         u: number,
         v: number
     ): number {
-        const W = g.width;
-        const H = g.height;
-        const cx = Math.max(0.0, Math.min(W - 1.0, u * W - 0.5));
-        const cy = Math.max(0.0, Math.min(H - 1.0, v * H - 0.5));
+        const {width, height, pixels} = g;
+        const cx = Math.max(0.0, Math.min(width - 1.0, u * width - 0.5));
+        const cy = Math.max(0.0, Math.min(height - 1.0, v * height - 0.5));
 
         const x0 = Math.floor(cx);
         const y0 = Math.floor(cy);
-        const x1 = Math.min(x0 + 1, W - 1);
-        const y1 = Math.min(y0 + 1, H - 1);
+        const x1 = Math.min(x0 + 1, width - 1);
+        const y1 = Math.min(y0 + 1, height - 1);
         const tx = cx - x0;
         const ty = cy - y0;
-
-        const pixels = g.pixels;
-        const p00 = pixels[y0 * W + x0] || 0;
-        const p10 = pixels[y0 * W + x1] || 0;
-        const p01 = pixels[y1 * W + x0] || 0;
-        const p11 = pixels[y1 * W + x1] || 0;
+        const p00 = pixels[y0 * width + x0] || 0;
+        const p10 = pixels[y0 * width + x1] || 0;
+        const p01 = pixels[y1 * width + x0] || 0;
+        const p11 = pixels[y1 * width + x1] || 0;
 
         const top = p00 * (1.0 - tx) + p10 * tx;
         const bot = p01 * (1.0 - tx) + p11 * tx;

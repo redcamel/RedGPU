@@ -43,13 +43,11 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         centerX: number = 0,
         centerZ: number = 0
     ): void {
-        const pipeline = this.computePipeline;
-        const uniformBuffer = this.uniformGPUBuffer;
-        const gpuDevice = this.gpuDevice;
-        if (!pipeline || !uniformBuffer || !gpuDevice) return;
+        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
+        if (!computePipeline || !uniformGPUBuffer || !gpuDevice) return;
 
-        const rawBuffer = megaBuffer.rawGPUBuffer;
-        if (!rawBuffer) return;
+        const {rawGPUBuffer} = megaBuffer;
+        if (!rawGPUBuffer) return;
 
         if (!landscape.hasValidScatterAtlas) return;
 
@@ -122,10 +120,8 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         const minScale = grass.minScale || DEFAULT_GRASS_MIN_SCALE;
         const maxScale = grass.maxScale || DEFAULT_GRASS_MAX_SCALE;
-        const minScaleS = minScale[0];
-        const maxScaleS = maxScale[0];
-        const minScaleH = minScale[1];
-        const maxScaleH = maxScale[1];
+        const [minScaleS, minScaleH] = minScale;
+        const [maxScaleS, maxScaleH] = maxScale;
 
         const ui = this.#uniformInt32View;
         const uu = this.#uniformUint32View;
@@ -158,12 +154,12 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         uu[20] = weightChannelIndex;
         uu[21] = grass.densityScaleByWeight ? 1 : 0;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#uniformArrayBuffer, 0, 88);
+        gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 
         const bindGroup = this.getOrCreateBindGroup(
             grass.typeId,
             'Grass_Bake',
-            rawBuffer,
+            rawGPUBuffer,
             vhtView,
             vbtView,
             weightView,
@@ -177,7 +173,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const computePass = commandEncoder.beginComputePass({
             label: `Grass_Bake_ComputePass_Type_${grass.typeId}`
         });
-        computePass.setPipeline(pipeline);
+        computePass.setPipeline(computePipeline);
         computePass.setBindGroup(0, bindGroup);
         const workgroups = Math.ceil(totalCells / 64);
         computePass.dispatchWorkgroups(workgroups);

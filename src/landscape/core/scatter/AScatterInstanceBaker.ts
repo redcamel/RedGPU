@@ -26,12 +26,12 @@ export interface ScatterBakeBindGroupCacheEntry {
  * [EN] Abstract base class for physically conforming and generating large-scale scatter instances onto landscape terrain using GPU Compute Shaders.
  */
 export abstract class AScatterInstanceBaker extends RedGPUObject {
-    protected computePipeline: GPUComputePipeline | null = null;
-    protected bindGroupLayout: GPUBindGroupLayout | null = null;
-    protected uniformGPUBuffer: GPUBuffer | null = null;
-    protected defaultSampler: GPUSampler | null = null;
+    #computePipeline: GPUComputePipeline | null = null;
+    #bindGroupLayout: GPUBindGroupLayout | null = null;
+    #uniformGPUBuffer: GPUBuffer | null = null;
+    #defaultSampler: GPUSampler | null = null;
 
-    protected readonly bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
+    readonly #bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
 
     /**
      * [KO] AScatterInstanceBaker 인스턴스를 초기화합니다.
@@ -44,11 +44,36 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
     }
 
     /**
+     * [KO] 생성된 GPUComputePipeline 인스턴스를 반환합니다.
+     * [EN] Returns the created GPUComputePipeline instance.
+     */
+    get computePipeline(): GPUComputePipeline | null {
+        return this.#computePipeline;
+    }
+
+    /**
+     * [KO] 생성된 GPUBindGroupLayout 인스턴스를 반환합니다.
+     * [EN] Returns the created GPUBindGroupLayout instance.
+     */
+    get bindGroupLayout(): GPUBindGroupLayout | null {
+        return this.#bindGroupLayout;
+    }
+
+    /**
+     * [KO] 베이킹 파라미터가 기록되는 유니폼 GPU 버퍼를 반환합니다.
+     * [EN] Returns the uniform GPU buffer where baking parameters are recorded.
+     */
+    get uniformGPUBuffer(): GPUBuffer | null {
+        return this.#uniformGPUBuffer;
+    }
+
+
+    /**
      * [KO] 특정 타입의 바인드 그룹 캐시를 무효화합니다.
      * [EN] Invalidates the bind group cache for a specific type.
      */
     invalidateBindGroup(typeId: number): void {
-        this.bakeBindGroupCache.delete(typeId);
+        this.#bakeBindGroupCache.delete(typeId);
     }
 
     /**
@@ -56,7 +81,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      * [EN] Invalidates all bind group caches.
      */
     clearBindGroupCache(): void {
-        this.bakeBindGroupCache.clear();
+        this.#bakeBindGroupCache.clear();
     }
 
     /**
@@ -64,12 +89,12 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      * [EN] Completely releases GPU resources and caches owned by the baker.
      */
     destroy(): void {
-        this.uniformGPUBuffer?.destroy();
-        this.uniformGPUBuffer = null;
-        this.computePipeline = null;
-        this.bindGroupLayout = null;
-        this.defaultSampler = null;
-        this.bakeBindGroupCache.clear();
+        this.#uniformGPUBuffer?.destroy();
+        this.#uniformGPUBuffer = null;
+        this.#computePipeline = null;
+        this.#bindGroupLayout = null;
+        this.#defaultSampler = null;
+        this.#bakeBindGroupCache.clear();
     }
 
     /**
@@ -80,7 +105,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      * @param label - 파이프라인 및 바인드그룹 디버그 라벨
      * @param uniformByteLength - 유니폼 버퍼 바이트 크기 (기본값: 256)
      */
-    protected initComputePipeline(
+    initComputePipeline(
         shaderCode: string,
         label: string,
         uniformByteLength: number = 256
@@ -98,16 +123,16 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         }
 
         const layoutDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.bindGroupLayout = resourceManager.createBindGroupLayout(`${label}_BindGroupLayout`, {
+        this.#bindGroupLayout = resourceManager.createBindGroupLayout(`${label}_BindGroupLayout`, {
             label: `${label}_BindGroupLayout`,
             ...layoutDesc
         });
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(`${label}_PipelineLayout`, {
-            bindGroupLayouts: [this.bindGroupLayout]
+            bindGroupLayouts: [this.#bindGroupLayout]
         });
 
-        this.computePipeline = gpuDevice.createComputePipeline({
+        this.#computePipeline = gpuDevice.createComputePipeline({
             label: `${label}_ComputePipeline`,
             layout: pipelineLayout,
             compute: {
@@ -116,13 +141,13 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
             }
         });
 
-        this.uniformGPUBuffer = gpuDevice.createBuffer({
+        this.#uniformGPUBuffer = gpuDevice.createBuffer({
             label: `${label}_UniformBuffer`,
             size: uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
-        this.defaultSampler = gpuDevice.createSampler({
+        this.#defaultSampler = gpuDevice.createSampler({
             label: `${label}_DefaultSampler`,
             magFilter: 'linear',
             minFilter: 'linear',
@@ -135,7 +160,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      * [KO] 특정 타입 ID에 대해 유효한 GPUBindGroup을 반환하거나, 리소스가 변경된 경우 재생성하여 캐싱합니다.
      * [EN] Returns a valid GPUBindGroup for the specified type ID, or re-creates and caches it if resources have changed.
      */
-    protected getOrCreateBindGroup(
+    getOrCreateBindGroup(
         typeId: number,
         labelPrefix: string,
         rawBuffer: GPUBuffer,
@@ -145,12 +170,12 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         tasksBuffer: GPUBuffer
     ): GPUBindGroup | null {
         const gpuDevice = this.gpuDevice;
-        const bindGroupLayout = this.bindGroupLayout;
-        const uniformBuffer = this.uniformGPUBuffer;
-        const defaultSampler = this.defaultSampler;
+        const bindGroupLayout = this.#bindGroupLayout;
+        const uniformBuffer = this.#uniformGPUBuffer;
+        const defaultSampler = this.#defaultSampler;
         if (!gpuDevice || !bindGroupLayout || !uniformBuffer || !defaultSampler) return null;
 
-        let cacheEntry = this.bakeBindGroupCache.get(typeId);
+        let cacheEntry = this.#bakeBindGroupCache.get(typeId);
         const needsNewBindGroup = !cacheEntry
             || cacheEntry.rawBuffer !== rawBuffer
             || cacheEntry.vhtView !== vhtView
@@ -181,7 +206,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
                 weightView,
                 tasksBuffer
             };
-            this.bakeBindGroupCache.set(typeId, cacheEntry);
+            this.#bakeBindGroupCache.set(typeId, cacheEntry);
         }
 
         return cacheEntry.bindGroup;

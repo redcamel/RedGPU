@@ -213,8 +213,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#allocations.set(name, allocation);
         this.#allocatedTypes.push(allocation);
 
-        const strideFloats = this.strideFloats;
-        const strideBytes = this.strideBytes;
+        const {strideFloats, strideBytes} = this;
 
         const baseFloat = rawBaseOffset * strideFloats;
         const defaultColorAndType = (((typeId & 0xFF) << 24) | (0x33 << 16) | (0x33 << 8) | 0x33) >>> 0;
@@ -362,8 +361,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
 
         const count = this.#allocatedTypes.length;
-        const typeParamFloats = this.typeParamFloats;
-        const cpuTypeParamsUint32 = this.cpuTypeParamsUint32;
+        const {typeParamFloats, cpuTypeParamsUint32} = this;
         for (let i = 0; i < count; i++) {
             const alloc = this.#allocatedTypes[i];
             const baseOffset = alloc.typeId * typeParamFloats;
@@ -413,8 +411,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
         const baseOffset = typeId * this.typeParamFloats;
-        const f32 = this.cpuTypeParamsBuffer;
-        const u32 = this.cpuTypeParamsUint32;
+        const {cpuTypeParamsBuffer: f32, cpuTypeParamsUint32: u32} = this;
 
         f32[baseOffset] = cullingDistance;
         f32[baseOffset + 1] = fadeStartDistance;
@@ -698,10 +695,65 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
+    /**
+     * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
+     * [EN] Batch uploads instance data in CPU staging buffer to GPU raw buffer (rawGPUBuffer).
+     * @param startInstance -
+     * [KO] 시작 인스턴스 인덱스
+     * [EN] Starting instance index
+     * @param count -
+     * [KO] 업로드할 인스턴스 수
+     * [EN] Number of instances to upload
+     */
+    uploadInstances(startInstance: number, count: number): void {
+        const {gpuDevice, rawGPUBuffer} = this;
+        if (!gpuDevice || !rawGPUBuffer || count <= 0) return;
+
+        const strideBytes = this.strideBytes;
+        const startByteOffset = startInstance * strideBytes;
+        const byteCount = count * strideBytes;
+
+        gpuDevice.queue.writeBuffer(
+            rawGPUBuffer,
+            startByteOffset,
+            this.#cpuRawDataBuffer.buffer,
+            this.#cpuRawDataBuffer.byteOffset + startByteOffset,
+            byteCount
+        );
+    }
+
+    /**
+     * [KO] 메가버퍼의 런타임 확장으로 인해 새 GPU rawBuffer가 생성되었을 때 호출되는 훅 메서드입니다. CPU 버퍼를 2배로 확장하고 이전 데이터를 새 GPU 버퍼로 복원합니다.
+     * [EN] Hook method invoked when a new GPU rawBuffer is created due to runtime mega-buffer expansion. Expands CPU buffer by 2x and restores previous data to the new GPU buffer.
+     * @param rawBuffer -
+     * [KO] 새로 생성된 GPU 원본 인스턴스 버퍼
+     * [EN] Newly created GPU raw instance buffer
+     * @param newCapacity -
+     * [KO] 새로 확장된 인스턴스 수용 용량
+     * [EN] Newly expanded instance capacity
+     */
+    override onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
+        const oldCpuBuffer = this.#cpuRawDataBuffer;
+        this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.strideFloats);
+        if (oldCpuBuffer) {
+            this.#cpuRawDataBuffer.set(oldCpuBuffer);
+        }
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+
+        const {gpuDevice, rawGPUBuffer, totalAllocatedInstances} = this;
+        if (gpuDevice && rawGPUBuffer && totalAllocatedInstances > 0) {
+            gpuDevice.queue.writeBuffer(
+                rawGPUBuffer,
+                0,
+                this.#cpuRawDataBuffer.buffer,
+                this.#cpuRawDataBuffer.byteOffset,
+                totalAllocatedInstances * this.strideBytes
+            );
+        }
+    }
+
     #initBuffers(): void {
-        const gpuDevice = this.gpuDevice;
-        const instanceCapacity = this.instanceCapacity;
-        const maxSubMeshes = this.maxSubMeshes;
+        const {gpuDevice, instanceCapacity, maxSubMeshes} = this;
 
         const rawByteSize = Math.max(instanceCapacity * this.strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
@@ -739,65 +791,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             size: this.#globalUniformBytes,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
-    }
-
-    /**
-     * [KO] CPU 스테이징 버퍼의 인스턴스 데이터를 GPU 원본 버퍼(rawGPUBuffer)로 일괄 업로드합니다.
-     * [EN] Batch uploads instance data in CPU staging buffer to GPU raw buffer (rawGPUBuffer).
-     * @param startInstance -
-     * [KO] 시작 인스턴스 인덱스
-     * [EN] Starting instance index
-     * @param count -
-     * [KO] 업로드할 인스턴스 수
-     * [EN] Number of instances to upload
-     */
-    uploadInstances(startInstance: number, count: number): void {
-        const gpuDevice = this.gpuDevice;
-        const rawBuffer = this.rawGPUBuffer;
-        if (!gpuDevice || !rawBuffer || count <= 0) return;
-
-        const strideBytes = this.strideBytes;
-        const startByteOffset = startInstance * strideBytes;
-        const byteCount = count * strideBytes;
-
-        gpuDevice.queue.writeBuffer(
-            rawBuffer,
-            startByteOffset,
-            this.#cpuRawDataBuffer.buffer,
-            this.#cpuRawDataBuffer.byteOffset + startByteOffset,
-            byteCount
-        );
-    }
-
-    /**
-     * [KO] 메가버퍼의 런타임 확장으로 인해 새 GPU rawBuffer가 생성되었을 때 호출되는 훅 메서드입니다. CPU 버퍼를 2배로 확장하고 이전 데이터를 새 GPU 버퍼로 복원합니다.
-     * [EN] Hook method invoked when a new GPU rawBuffer is created due to runtime mega-buffer expansion. Expands CPU buffer by 2x and restores previous data to the new GPU buffer.
-     * @param rawBuffer -
-     * [KO] 새로 생성된 GPU 원본 인스턴스 버퍼
-     * [EN] Newly created GPU raw instance buffer
-     * @param newCapacity -
-     * [KO] 새로 확장된 인스턴스 수용 용량
-     * [EN] Newly expanded instance capacity
-     */
-    override onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
-        const oldCpuBuffer = this.#cpuRawDataBuffer;
-        this.#cpuRawDataBuffer = new Float32Array(newCapacity * this.strideFloats);
-        if (oldCpuBuffer) {
-            this.#cpuRawDataBuffer.set(oldCpuBuffer);
-        }
-        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
-
-        const gpuDevice = this.gpuDevice;
-        const totalAllocated = this.totalAllocatedInstances;
-        if (gpuDevice && totalAllocated > 0) {
-            gpuDevice.queue.writeBuffer(
-                rawBuffer,
-                0,
-                this.#cpuRawDataBuffer.buffer,
-                this.#cpuRawDataBuffer.byteOffset,
-                totalAllocated * this.strideBytes
-            );
-        }
     }
 }
 

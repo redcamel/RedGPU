@@ -86,11 +86,10 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         pixelH: number
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
-        const atlasW = vhtAtlas.gpuTexture.width;
-        const atlasH = vhtAtlas.gpuTexture.height;
-        if (pixelX >= atlasW || pixelZ >= atlasH || pixelW <= 0 || pixelH <= 0) return;
+        const {width, height} = vhtAtlas.gpuTexture;
+        if (pixelX >= width || pixelZ >= height || pixelW <= 0 || pixelH <= 0) return;
 
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this.redGPUContext;
 
         const arr = this.#uniformArray;
         arr[0] = pixelX;
@@ -99,10 +98,10 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         arr[3] = pixelH;
 
         const uniformBuffer = this.acquireUniformBuffer(this.#uniformByteLength);
-        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
 
         const srcView = srcTileTexture.createView();
-        const bindGroup = device.createBindGroup({
+        const bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_VHT_BindGroup_[${pixelX},${pixelZ}]`,
             layout: this.bindGroupLayout,
             entries: [
@@ -206,11 +205,10 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         vMax: number
     ): void {
         if (!this.#globalComputePipeline || !this.#globalBindGroupLayout) return;
-        const atlasW = vhtAtlas.gpuTexture.width;
-        const atlasH = vhtAtlas.gpuTexture.height;
-        if (pixelX >= atlasW || pixelZ >= atlasH || pixelW <= 0 || pixelH <= 0) return;
+        const {width, height} = vhtAtlas.gpuTexture;
+        if (pixelX >= width || pixelZ >= height || pixelW <= 0 || pixelH <= 0) return;
 
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this.redGPUContext;
 
         this.#globalUniformU32[0] = pixelX;
         this.#globalUniformU32[1] = pixelZ;
@@ -224,11 +222,10 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.#globalUniformF32[7] = vMax;
 
         const uniformBuffer = this.acquireUniformBuffer(this.#globalUniformByteLength);
-        device.queue.writeBuffer(uniformBuffer, 0, this.#globalUniformBuffer, 0, this.#globalUniformByteLength);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#globalUniformBuffer, 0, this.#globalUniformByteLength);
 
         const srcView = globalTexture.createView();
-
-        const bindGroup = device.createBindGroup({
+        const bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_VHT_Global_BindGroup_[${pixelX},${pixelZ}]`,
             layout: this.#globalBindGroupLayout,
             entries: [
@@ -293,25 +290,24 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initGlobalComputeResources(): void {
-        const device = this.redGPUContext.gpuDevice;
-        const resourceManager = this.redGPUContext.resourceManager;
+        const {gpuDevice, resourceManager} = this.redGPUContext;
         const shaderInfo = resourceManager.wgslParser.parse('Landscape_VHT_GlobalBake_ShaderModule', vhtGlobalBakeShaderCode);
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
-        this.#globalBindGroupLayout = device.createBindGroupLayout(descriptor);
+        this.#globalBindGroupLayout = gpuDevice.createBindGroupLayout(descriptor);
 
         const shaderModule = resourceManager.createGPUShaderModule(
             'Landscape_VHT_GlobalBake_ShaderModule',
             {code: vhtGlobalBakeShaderCode}
         );
 
-        const pipelineLayout = device.createPipelineLayout({
+        const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'Landscape_VHT_GlobalBake_PipelineLayout',
             bindGroupLayouts: [this.#globalBindGroupLayout]
         });
 
-        this.#globalComputePipeline = device.createComputePipeline({
+        this.#globalComputePipeline = gpuDevice.createComputePipeline({
             label: 'Landscape_VHT_GlobalBake_ComputePipeline',
             layout: pipelineLayout,
             compute: {

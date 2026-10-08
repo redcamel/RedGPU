@@ -250,9 +250,7 @@ export default function bakeFoliageImpostor(
         const cache = getOrCreateContextCache(redGPUContext);
 
     const aabb = calculateAABBFromSubMeshes(subMeshes);
-        const centerX = aabb.center[0];
-        const centerY = aabb.center[1];
-        const centerZ = aabb.center[2];
+    const [centerX, centerY, centerZ] = aabb.center;
         const maxRadius = aabb.maxRadius;
 
         const margin = 1.25;
@@ -388,8 +386,8 @@ export default function bakeFoliageImpostor(
             }
 
             const mat = sub.material;
-            const diffTex = mat?.diffuseTexture || mat?.baseColorTexture;
-            const diffSampler = mat?.diffuseTextureSampler || mat?.baseColorTextureSampler || basicSampler;
+            const diffTex = mat?.baseColorTexture;
+            const diffSampler = mat?.baseColorTextureSampler || basicSampler;
             const normTex = mat?.normalTexture;
             const normSampler = mat?.normalTextureSampler || basicSampler;
             const ormTex = mat?.packedORMTexture || mat?.metallicRoughnessTexture || mat?.occlusionTexture;
@@ -419,7 +417,7 @@ export default function bakeFoliageImpostor(
             let cutOff = 0.35;
             let useVertexColor = false;
             if (mat) {
-                const bcf = mat.baseColorFactor || mat.diffuseColor || mat.color;
+                const bcf = mat.baseColorFactor || mat.color;
                 if (bcf) {
                     if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
                         r = bcf[0] ?? 1.0;

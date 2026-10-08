@@ -205,7 +205,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 targetMaterial = primaryGroup.material;
             }
 
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
             if (typeof resolvedTexture === 'string') {
                 this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
             } else if (resolvedTexture) {
@@ -226,7 +226,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
             this.#subMeshes = combineResult.groups.map((group, idx) => {
                 const mat = group.material;
-                const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? mat?.diffuseTexture ?? null);
+                const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? null);
                 return new ScatterSubMesh({
                     geometry: combineResult.unifiedGeometry!,
                     vertexCount: group.vertexCount,
@@ -247,7 +247,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 );
             }
         } else {
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture ?? targetMaterial?.diffuseTexture;
+            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
             if (typeof resolvedTexture === 'string') {
                 this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
             } else if (resolvedTexture) {

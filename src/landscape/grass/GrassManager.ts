@@ -204,15 +204,14 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#currentRenderViewStateData = renderViewStateData;
 
         const {view} = renderViewStateData;
-        const {rawCamera: rawCam} = view;
-        const {x: camX, z: camZ} = rawCam;
+        const {rawCamera} = view;
+        const {x: camX, z: camZ} = rawCamera;
 
-        const currentLoadedTileCount = landscape.tileLoadedCount;
-        const hasValidTextures = landscape.hasValidScatterAtlas;
+        const {tileLoadedCount, hasValidScatterAtlas} = landscape;
 
-        const tileCountChanged = hasValidTextures && this.#lastLoadedTileCount !== currentLoadedTileCount;
+        const tileCountChanged = hasValidScatterAtlas && this.#lastLoadedTileCount !== tileLoadedCount;
         if (tileCountChanged) {
-            this.#lastLoadedTileCount = currentLoadedTileCount;
+            this.#lastLoadedTileCount = tileLoadedCount;
         }
 
         const dx = camX - this.#lastBakePos[0];
@@ -231,7 +230,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
         let rebakedThisFrame = false;
         const needsRebake = this.#needsRebakeMask !== 0;
-        if (hasValidTextures && (needsRebake || !this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
+        if (hasValidScatterAtlas && (needsRebake || !this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
             this.#initialBaked = true;
             this.#lastBakePos[0] = camX;
             this.#lastBakePos[1] = camZ;

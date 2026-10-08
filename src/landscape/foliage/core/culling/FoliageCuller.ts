@@ -141,8 +141,8 @@ class FoliageCuller extends AScatterCuller {
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
-        const {computePipeline: pipeline, bindGroupLayout} = this;
-        if (!pipeline || !bindGroupLayout) return;
+        const {computePipeline, bindGroupLayout} = this;
+        if (!computePipeline || !bindGroupLayout) return;
 
         if (this.#megaBuffer) {
             const totalAllocatedInstances = this.#megaBuffer.totalAllocatedInstances;

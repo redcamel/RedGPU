@@ -166,12 +166,12 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         layoutEntries: GPUBindGroupLayoutEntry[],
         defaultUniformByteLength: number = 16
     ): void {
-        const {gpuDevice: device, resourceManager} = this;
-        if (!device) return;
+        const {gpuDevice, resourceManager} = this;
+        if (!gpuDevice) return;
 
         this.#uniformBufferPool = [];
         for (let i = 0; i < 16; i++) {
-            this.#uniformBufferPool.push(device.createBuffer({
+            this.#uniformBufferPool.push(gpuDevice.createBuffer({
                 label: `Landscape_${this.#generatorLabel}_UniformBuffer_Slot_${i}`,
                 size: Math.max(16, defaultUniformByteLength),
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -185,17 +185,17 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
             });
         }
 
-        this.#bindGroupLayout = device.createBindGroupLayout({
+        this.#bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: `Landscape_${this.#generatorLabel}_BindGroupLayout`,
             entries: layoutEntries
         });
 
-        const pipelineLayout = device.createPipelineLayout({
+        const pipelineLayout = gpuDevice.createPipelineLayout({
             label: `Landscape_${this.#generatorLabel}_PipelineLayout`,
             bindGroupLayouts: [this.#bindGroupLayout]
         });
 
-        this.#computePipeline = device.createComputePipeline({
+        this.#computePipeline = gpuDevice.createComputePipeline({
             label: `Landscape_${this.#generatorLabel}_ComputePipeline`,
             layout: pipelineLayout,
             compute: {

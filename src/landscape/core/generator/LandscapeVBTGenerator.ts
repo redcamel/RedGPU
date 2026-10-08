@@ -90,29 +90,28 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         if (!vntAtlas?.gpuTexture) return;
         if (!vbtBaseColorArray?.gpuTexture || !vbtNormalArray?.gpuTexture || !vbtORMArray?.gpuTexture) return;
 
-        const device = this.redGPUContext.gpuDevice;
-        const atlasW = vbtBaseColorArray.gpuTexture.width;
-        const atlasH = vbtBaseColorArray.gpuTexture.height;
+        const {gpuDevice} = this.redGPUContext;
+        const {width, height} = vbtBaseColorArray.gpuTexture;
 
         const fArr = this.#uniformFloatArray;
         const uArr = this.#uniformUintArray;
 
         fArr[0] = 0;
         fArr[1] = 0;
-        fArr[2] = atlasW;
-        fArr[3] = atlasH;
-        fArr[4] = atlasW;
-        fArr[5] = atlasH;
+        fArr[2] = width;
+        fArr[3] = height;
+        fArr[4] = width;
+        fArr[5] = height;
 
         const activeLayers = material.layers;
         const activeCount = Math.min(8, activeLayers.length);
         uArr[6] = activeCount;
         fArr[7] = singleTilePixels;
 
-        const baseColorRGBA = material.baseColor ? material.baseColor.rgbNormalLinear : [0.22, 0.49, 0.26];
-        fArr[8] = baseColorRGBA[0];
-        fArr[9] = baseColorRGBA[1];
-        fArr[10] = baseColorRGBA[2];
+        const [bcR, bcG, bcB] = material.baseColor ? material.baseColor.rgbNormalLinear : [0.22, 0.49, 0.26];
+        fArr[8] = bcR;
+        fArr[9] = bcG;
+        fArr[10] = bcB;
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
@@ -125,14 +124,14 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         }
 
         const uniformBuffer = this.acquireUniformBuffer(this.#vbtUniformByteLength);
-        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, this.#vbtUniformByteLength);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, this.#vbtUniformByteLength);
 
         const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
         const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
         const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
 
         const layerViews = material.getInternalLayerViews();
-        const bindGroup = device.createBindGroup({
+        const bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_VBT_BindGroup_FullAtlas`,
             layout: this.bindGroupLayout,
             entries: [
@@ -149,7 +148,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             ]
         });
 
-        this.dispatchBakePass(bindGroup, atlasW, atlasH, 0, 0);
+        this.dispatchBakePass(bindGroup, width, height, 0, 0);
 
         this.#dispatchTileMipmaps(
             vbtBaseColorArray.gpuTexture,
@@ -157,7 +156,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             vbtORMArray.gpuTexture,
             0,
             0,
-            atlasW,
+            width,
             6
         );
     }
@@ -285,10 +284,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initTileMipComputeResources(): void {
-        const device = this.redGPUContext.gpuDevice;
-        if (!device) return;
-
-        const resourceManager = this.redGPUContext.resourceManager;
+        const {gpuDevice, resourceManager} = this.redGPUContext;
+        if (!gpuDevice) return;
         const mipShaderInfo = resourceManager.wgslParser.parse('Landscape_TileMipmap_ShaderModule', tileMipShaderCode);
         this.#tileMipUniformByteLength = mipShaderInfo.uniforms.params?.arrayBufferByteLength || 0;
 
@@ -302,17 +299,17 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         }
 
         const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(mipShaderInfo, 0);
-        this.#tileMipBindGroupLayout = device.createBindGroupLayout({
+        this.#tileMipBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'Landscape_TileMipmap_BindGroupLayout',
             ...descriptor
         });
 
-        const pipelineLayout = device.createPipelineLayout({
+        const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'Landscape_TileMipmap_PipelineLayout',
             bindGroupLayouts: [this.#tileMipBindGroupLayout]
         });
 
-        this.#tileMipPipeline = device.createComputePipeline({
+        this.#tileMipPipeline = gpuDevice.createComputePipeline({
             label: 'Landscape_TileMipmap_ComputePipeline',
             layout: pipelineLayout,
             compute: {
@@ -332,7 +329,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         maxMipLevels: number = 6
     ): void {
         if (!this.#tileMipPipeline || !this.#tileMipBindGroupLayout) return;
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this.redGPUContext;
 
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
             for (let m = 1; m < maxMipLevels; m++) {
@@ -354,7 +351,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 uArr[7] = 0;
 
                 const mipUniformBuffer = this.#getOrCreateTileMipUniformBuffer(m);
-                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
+                gpuDevice.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
 
                 const mipBindGroup = this.#getOrCreateTileMipBindGroup(bcTex, normTex, ormTex, m);
 

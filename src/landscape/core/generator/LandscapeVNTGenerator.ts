@@ -83,18 +83,17 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         if (!this.computePipeline || !this.bindGroupLayout) return;
         if (!vhtAtlas?.gpuTexture || !vntAtlas?.gpuTexture) return;
 
-        const device = this.redGPUContext.gpuDevice;
-        const atlasW = vhtAtlas.gpuTexture.width;
-        const atlasH = vhtAtlas.gpuTexture.height;
+        const {gpuDevice} = this.redGPUContext;
+        const {width, height} = vhtAtlas.gpuTexture;
 
         const texelWorldSize = worldSizeX / (componentCountX * 512);
 
         const bakeX = Math.max(0, pixelX - 1);
         const bakeZ = Math.max(0, pixelZ - 1);
-        const bakeW = Math.min(atlasW - bakeX, pixelW + (pixelX > 0 ? 2 : 1));
-        const bakeH = Math.min(atlasH - bakeZ, pixelH + (pixelZ > 0 ? 2 : 1));
+        const bakeW = Math.min(width - bakeX, pixelW + (pixelX > 0 ? 2 : 1));
+        const bakeH = Math.min(height - bakeZ, pixelH + (pixelZ > 0 ? 2 : 1));
 
-        if (bakeW <= 0 || bakeH <= 0 || pixelX >= atlasW || pixelZ >= atlasH) return;
+        if (bakeW <= 0 || bakeH <= 0 || pixelX >= width || pixelZ >= height) return;
 
         const arr = this.#uniformArray;
         arr[0] = bakeX;
@@ -102,15 +101,15 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         arr[2] = bakeW;
         arr[3] = bakeH;
 
-        arr[4] = atlasW;
-        arr[5] = atlasH;
+        arr[4] = width;
+        arr[5] = height;
         arr[6] = heightScale;
         arr[7] = texelWorldSize;
 
         const uniformBuffer = this.acquireUniformBuffer(this.#uniformByteLength);
-        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
 
-        const bindGroup = device.createBindGroup({
+        const bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_VNT_BindGroup_[${pixelX},${pixelZ}]`,
             layout: this.bindGroupLayout,
             entries: [

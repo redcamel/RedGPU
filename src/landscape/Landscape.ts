@@ -188,8 +188,7 @@ export class Landscape extends RedGPUObject {
         const componentCountZ = 16;
         const tileSizeX = worldSizeX / componentCountX;
         const tileSizeZ = worldSizeZ / componentCountZ;
-        const componentSizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
-        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
+        const {QUAD_64: componentSizeQuads, QUAD_256: lod0SizeQuads} = LANDSCAPE_BASE_GRID_SIZE;
         const lodMaxLevel = 5;
 
         const material = new LandscapeMaterial(redGPUContext);
@@ -1515,10 +1514,11 @@ export class Landscape extends RedGPUObject {
         for (let idx = 0; idx < flatCells.length; idx++) {
             const comp = flatCells[idx];
             if (!comp) continue;
-            const uMin = comp.componentX / tileCountX;
-            const uMax = (comp.componentX + 1) / tileCountX;
-            const vMin = comp.componentZ / tileCountZ;
-            const vMax = (comp.componentZ + 1) / tileCountZ;
+            const {componentX, componentZ} = comp;
+            const uMin = componentX / tileCountX;
+            const uMax = (componentX + 1) / tileCountX;
+            const vMin = componentZ / tileCountZ;
+            const vMax = (componentZ + 1) / tileCountZ;
 
             const pxMinX = Math.floor(uMin * width);
             const pxMaxX = Math.min(width - 1, Math.ceil(uMax * width));

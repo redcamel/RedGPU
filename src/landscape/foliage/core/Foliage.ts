@@ -1487,12 +1487,16 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             mountedSlotIndex: -1
         };
 
-        const densityPerHectare = this.densityPerHectare;
-        const densityMultiplier = this.densityMultiplier ?? 1.0;
+        const {
+            densityPerHectare,
+            densityMultiplier = 1.0,
+            targetLayer,
+            densityScaleByWeight = true,
+            minSlope = 0.0,
+            maxSlope = 45.0
+        } = this;
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
         if (targetCountPerHectare <= 0) return cell;
-
-        const targetLayer = this.targetLayer;
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
         let targetLayerObj: any = null;
         if (hasTargetLayer && landscape?.layers) {
@@ -1513,10 +1517,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             return cell;
         }
 
-        const densityScaleByWeight = this.densityScaleByWeight !== false;
         const hasGetHeight = typeof landscape?.getHeightAt === 'function';
-        const minSlope = this.minSlope ?? 0.0;
-        const maxSlope = this.maxSlope ?? 45.0;
         const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
 
         const subMinX = scX * subCellSize - halfWorldX;

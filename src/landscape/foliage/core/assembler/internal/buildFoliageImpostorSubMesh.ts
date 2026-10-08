@@ -54,11 +54,9 @@ export default function buildFoliageImpostorSubMesh(
     const gpuDevice = redGPUContext.gpuDevice;
     const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
 
-    const bbWidth = bakeResult.width;
-    const bbHeight = bakeResult.height;
-    const bbBottomOffset = bakeResult.bottomOffset ?? 0;
+    const {width, height, bottomOffset = 0} = bakeResult;
 
-    const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, bbBottomOffset);
+    const bbGeom = createOctahedralImpostorGeometry(redGPUContext, width, height, bottomOffset);
     const bbMat = new OctahedralImpostorMaterial(
         redGPUContext,
         bakeResult.baseColorTexture,
@@ -78,11 +76,11 @@ export default function buildFoliageImpostorSubMesh(
         strideBytes: PBR_STRIDE_BYTES,
         lodIndex: impostorLODIndex,
         isImpostorOverride: true,
-        bottomOffset: bbBottomOffset,
+        bottomOffset,
         receiveShadow: false,
         windMultiplier: options.windMultiplier,
         windFlutterMultiplier: options.windFlutterMultiplier,
-        treeHeight: bbHeight,
+        treeHeight: height,
         slotPooler
     });
     subMeshes.push(bbSubMesh);

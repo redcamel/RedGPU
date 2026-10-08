@@ -79,13 +79,11 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         targetCount: number,
         subCellSize: number
     ): void {
-        const pipeline = this.computePipeline;
-        const uniformBuffer = this.uniformGPUBuffer;
-        const gpuDevice = this.gpuDevice;
-        if (!pipeline || !uniformBuffer || !gpuDevice) return;
+        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
+        if (!computePipeline || !uniformGPUBuffer || !gpuDevice) return;
 
-        const rawBuffer = megaBuffer.rawGPUBuffer;
-        if (!rawBuffer) return;
+        const {rawGPUBuffer} = megaBuffer;
+        if (!rawGPUBuffer) return;
 
         const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
         const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
@@ -152,9 +150,11 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         const minScale = foliage.minScale || [0.8, 0.8, 0.8];
         const maxScale = foliage.maxScale || [1.2, 1.2, 1.2];
-        const scaleDiffX = maxScale[0] - minScale[0];
-        const scaleDiffY = maxScale[1] - minScale[1];
-        const scaleDiffZ = maxScale[2] - minScale[2];
+        const [minScaleX, minScaleY, minScaleZ] = minScale;
+        const [maxScaleX, maxScaleY, maxScaleZ] = maxScale;
+        const scaleDiffX = maxScaleX - minScaleX;
+        const scaleDiffY = maxScaleY - minScaleY;
+        const scaleDiffZ = maxScaleZ - minScaleZ;
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
@@ -169,9 +169,9 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         u32[6] = u32[5] * 2;
         u32[7] = foliage.nameHash || 0;
 
-        f32[8] = minScale[0];
-        f32[9] = minScale[1];
-        f32[10] = minScale[2];
+        f32[8] = minScaleX;
+        f32[9] = minScaleY;
+        f32[10] = minScaleZ;
         f32[11] = scaleDiffX;
 
         f32[12] = scaleDiffY;
@@ -204,12 +204,12 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         u32[34] = 8;
         u32[35] = 0;
 
-        gpuDevice.queue.writeBuffer(uniformBuffer, 0, f32.buffer, 0, 144);
+        gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
 
         const bindGroup = this.getOrCreateBindGroup(
             foliage.allocation?.typeId ?? 0,
             this.#label,
-            rawBuffer,
+            rawGPUBuffer,
             vhtView,
             vbtView,
             weightView,
@@ -223,7 +223,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         const computePass = commandEncoder.beginComputePass({
             label: `${this.#label}_SubCell_ComputePass`
         });
-        computePass.setPipeline(pipeline);
+        computePass.setPipeline(computePipeline);
         computePass.setBindGroup(0, bindGroup);
         const workgroups = Math.ceil(totalGrids / 64);
         computePass.dispatchWorkgroups(workgroups);

@@ -37,8 +37,7 @@ export default class GrassCuller extends AScatterCuller {
         megaBuffer: GrassScatterMegaBuffer,
         renderViewStateData: RenderViewStateData
     ): void {
-        const bindGroupLayout = this.bindGroupLayout;
-        const gpuDevice = this.gpuDevice;
+        const {bindGroupLayout, gpuDevice} = this;
         if (!this.computePipeline || !bindGroupLayout || !gpuDevice) return;
 
         const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
