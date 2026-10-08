@@ -1,6 +1,6 @@
 /**
- * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 서브메쉬를 단일 지오메트리로 자동 결합하는 스캐터 코어 함수 모듈입니다.
- * [EN] Scatter core function module that recursively traverses composite hierarchical 3D meshes (e.g. GLTF node trees), applies parent-child local transforms, and automatically merges same-material sub-meshes into unified geometries.
+ * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 메쉬를 단일 지오메트리로 자동 결합하는 스캐터 코어 함수 모듈입니다.
+ * [EN] Scatter core function module that recursively traverses composite hierarchical 3D meshes (e.g. GLTF node trees), applies parent-child local transforms, and automatically merges same-material meshes into unified geometries.
  *
  * @packageDocumentation
  */
@@ -23,10 +23,10 @@ const tempLocalMatrix: mat4 = mat4.create();
 const identityMatrix: mat4 = mat4.create();
 
 /**
- * [KO] 결합 대상 개별 서브메쉬 노드의 원시 메타데이터 인터페이스입니다.
- * [EN] Raw metadata interface for an individual sub-mesh node to be combined.
+ * [KO] 결합 대상 개별 메쉬 노드의 원시 메타데이터 인터페이스입니다.
+ * [EN] Raw metadata interface for an individual mesh node to be combined.
  */
-export interface RawSubMeshNode {
+export interface RawMeshNode {
     node: Mesh;
     geometry: Geometry | Primitive;
     material: any;
@@ -36,16 +36,16 @@ export interface RawSubMeshNode {
 }
 
 /**
- * [KO] 동일한 재질을 공유하여 하나의 버퍼로 결합된 서브메쉬 그룹 결과입니다.
- * [EN] Result of a sub-mesh group combined into a single buffer sharing the same material.
+ * [KO] 동일한 재질을 공유하여 하나의 버퍼로 결합된 메쉬 그룹 결과입니다.
+ * [EN] Result of a mesh group combined into a single buffer sharing the same material.
  */
-export interface CombinedSubMeshGroup {
+export interface CombinedMeshGroup {
     material: any;
     geometry: Geometry;
     vertexCount: number;
     indexCount: number;
     firstIndex: number;
-    rawNodes: RawSubMeshNode[];
+    rawNodes: RawMeshNode[];
 }
 
 /**
@@ -77,7 +77,7 @@ export interface ScatterMeshCombineOptions {
  * [EN] Final geometry combination result object of combineScatterMeshes.
  */
 export interface ScatterMeshCombineResult {
-    groups: CombinedSubMeshGroup[];
+    groups: CombinedMeshGroup[];
     unifiedGeometry: Geometry | null;
     totalVertexCount: number;
     totalIndexCount: number;
@@ -162,7 +162,7 @@ function traverseHierarchy(
     node: Mesh,
     parentRelativeMatrix: mat4,
     isRoot: boolean,
-    rawList: RawSubMeshNode[]
+    rawList: RawMeshNode[]
 ): void {
     if (!node) return;
 
@@ -222,8 +222,8 @@ function traverseHierarchy(
 }
 
 /**
- * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 서브메쉬를 단일 버퍼로 병합한 결합 결과 객체를 반환합니다.
- * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns a combination result object with merged sub-meshes per material.
+ * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 메쉬를 단일 버퍼로 병합한 결합 결과 객체를 반환합니다.
+ * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns a combination result object with merged meshes per material.
  *
  * **[KO] 알고리즘 및 렌더링 최적화:**
  * - **계층 구조 평탄화 (Hierarchy Flattening)**: GLTF 노드 트리의 복잡한 부모-자식 트랜스폼(위치, 오일러 회전, 스케일)을 누적 계산하여 모든 정점과 법선, 탄젠트를 전역 모델 공간으로 사전 베이킹합니다.
@@ -260,7 +260,7 @@ export default function combineScatterMeshes(
     options?: ScatterMeshCombineOptions
 ): ScatterMeshCombineResult {
     const rootList = Array.isArray(roots) ? roots : [roots];
-    const rawList: RawSubMeshNode[] = [];
+    const rawList: RawMeshNode[] = [];
 
     for (let r = 0; r < rootList.length; r++) {
         traverseHierarchy(
@@ -327,7 +327,7 @@ export default function combineScatterMeshes(
     const offsetY = preservePivot ? 0 : (isFinite(minY) ? minY : 0);
     const offsetZ = centerXZ ? ((isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0) : 0;
 
-    const materialGroups = new Map<string, { material: any; raws: RawSubMeshNode[] }>();
+    const materialGroups = new Map<string, { material: any; raws: RawMeshNode[] }>();
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
         const matKey = getMaterialKey(raw.material);
@@ -339,7 +339,7 @@ export default function combineScatterMeshes(
         entry.raws.push(raw);
     }
 
-    const groups: CombinedSubMeshGroup[] = [];
+    const groups: CombinedMeshGroup[] = [];
 
     const generateShadow = options?.generateShadowMergedGeometry ?? false;
     let shadowMergedPositions: Float32Array | null = null;

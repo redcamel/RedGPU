@@ -7,7 +7,7 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
-import type FoliageSubMesh from "../submesh/FoliageSubMesh";
+import type FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
 import impostorDilationWGSL from "./impostorDilation.wgsl";
@@ -125,16 +125,16 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
 }
 
 /**
- * [KO] 서브메시 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
- * [EN] Computes the composite AABB, bounding radius, and center by traversing sub-meshes.
- * @param subMeshes -
- * [KO] 대상 서브메시 배열
- * [EN] Target sub-mesh array
+ * [KO] 렌더 단위 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
+ * [EN] Computes the composite AABB, bounding radius, and center by traversing render units.
+ * @param renderUnits -
+ * [KO] 대상 렌더 단위 배열
+ * [EN] Target render unit array
  * @returns
  * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius, bottomOffset)
  * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius, bottomOffset)
  */
-function calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
+function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     min: [number, number, number];
     max: [number, number, number];
     width: number;
@@ -148,17 +148,17 @@ function calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
     let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
     let maxHorizDistSq = 0;
 
-    for (let s = 0; s < subMeshes.length; s++) {
-        const sub = subMeshes[s];
-        if (sub.isImpostor) continue;
+    for (let s = 0; s < renderUnits.length; s++) {
+        const unit = renderUnits[s];
+        if (unit.isImpostor) continue;
 
-        const vBuffer = sub.geometry?.vertexBuffer;
+        const vBuffer = unit.geometry?.vertexBuffer;
         const vData = vBuffer?.data;
         if (!vData || vData.length === 0) continue;
 
         const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
         const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
-        const m = sub.relativeModelMatrix;
+        const m = unit.relativeModelMatrix;
 
         for (let i = 0; i < vCount; i++) {
             const idx = i * stride;
@@ -222,14 +222,14 @@ function calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
 }
 
 /**
- * [KO] 주어진 식생 서브메시들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
- * [EN] Renders foliage sub-meshes across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
+ * [KO] 주어진 식생 렌더 유닛들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
+ * [EN] Renders foliage render units across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
- * @param subMeshes -
- * [KO] 베이킹할 소스 서브메시 배열
- * [EN] Source sub-mesh array to bake
+ * @param renderUnits -
+ * [KO] 베이킹할 소스 렌더 유닛 배열
+ * [EN] Source render unit array to bake
  * @param bakeName -
  * [KO] 베이킹 리소스 라벨용 식별자 (기본값: 'Foliage')
  * [EN] Identifier for resource labels (default: 'Foliage')
@@ -239,7 +239,7 @@ function calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
  */
 export default function bakeFoliageImpostor(
     redGPUContext: RedGPUContext,
-    subMeshes: FoliageSubMesh[],
+    renderUnits: FoliageRenderUnit[],
     bakeName: string = 'Foliage'
 ): FoliageBakeResult {
     const gpuDevice = redGPUContext.gpuDevice;
@@ -249,7 +249,7 @@ export default function bakeFoliageImpostor(
 
         const cache = getOrCreateContextCache(redGPUContext);
 
-    const aabb = calculateAABBFromSubMeshes(subMeshes);
+    const aabb = calculateAABBFromRenderUnits(renderUnits);
     const [centerX, centerY, centerZ] = aabb.center;
         const maxRadius = aabb.maxRadius;
 
@@ -298,7 +298,7 @@ export default function bakeFoliageImpostor(
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
 
-    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': subMeshes=${subMeshes.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
+    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': renderUnits=${renderUnits.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
         const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
@@ -348,7 +348,7 @@ export default function bakeFoliageImpostor(
     const {resourceManager} = redGPUContext;
     const {basicSampler} = resourceManager;
 
-        const cachedSubMeshes: {
+    const cachedRenderUnits: {
             isImpostor: boolean;
             pipeline: GPURenderPipeline | null;
             bindGroup: GPUBindGroup | null;
@@ -364,10 +364,10 @@ export default function bakeFoliageImpostor(
             isFoliage: number;
         }[] = [];
 
-        for (let s = 0; s < subMeshes.length; s++) {
-            const sub = subMeshes[s];
-            if (sub.isImpostor) {
-                cachedSubMeshes.push({
+    for (let s = 0; s < renderUnits.length; s++) {
+        const unit = renderUnits[s];
+        if (unit.isImpostor) {
+            cachedRenderUnits.push({
                     isImpostor: true,
                     pipeline: null,
                     bindGroup: null,
@@ -377,7 +377,7 @@ export default function bakeFoliageImpostor(
                     indexCount: 0,
                     indexFormat: 'uint32',
                     vertexCount: 0,
-                    relativeModelMatrix: sub.relativeModelMatrix,
+                relativeModelMatrix: unit.relativeModelMatrix,
                     matProps: EMPTY_FLOAT32_12,
                     modelMatProps: EMPTY_FLOAT32_12,
                     isFoliage: 0,
@@ -385,7 +385,7 @@ export default function bakeFoliageImpostor(
                 continue;
             }
 
-            const mat = sub.material;
+        const mat = unit.material;
             const diffTex = mat?.baseColorTexture;
             const diffSampler = mat?.baseColorTextureSampler || basicSampler;
             const normTex = mat?.normalTexture;
@@ -445,23 +445,23 @@ export default function bakeFoliageImpostor(
                 hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
             ]);
 
-            const m = sub.relativeModelMatrix;
+        const m = unit.relativeModelMatrix;
             const modelMatProps = new Float32Array([
                 m[0], m[1], m[2], m[12],
                 m[4], m[5], m[6], m[13],
                 m[8], m[9], m[10], m[14]
             ]);
 
-            cachedSubMeshes.push({
+        cachedRenderUnits.push({
                 isImpostor: false,
-                pipeline: getOrCreateBakePipeline(redGPUContext, sub),
+            pipeline: getOrCreateBakePipeline(redGPUContext, unit),
                 bindGroup,
-                vertexBuffer: sub.geometry.vertexBuffer?.gpuBuffer || null,
-                indexBuffer: sub.geometry.indexBuffer?.gpuBuffer || null,
-                isIndexed: !!sub.isIndexed,
-                indexCount: sub.indexCount,
-                indexFormat: sub.indexFormat || 'uint32',
-                vertexCount: sub.vertexCount,
+            vertexBuffer: unit.geometry.vertexBuffer?.gpuBuffer || null,
+            indexBuffer: unit.geometry.indexBuffer?.gpuBuffer || null,
+            isIndexed: !!unit.isIndexed,
+            indexCount: unit.indexCount,
+            indexFormat: unit.indexFormat || 'uint32',
+            vertexCount: unit.vertexCount,
                 relativeModelMatrix: m,
                 matProps,
                 modelMatProps,
@@ -470,8 +470,8 @@ export default function bakeFoliageImpostor(
         }
 
         const totalViews = renderPassViews.length;
-        const totalSub = subMeshes.length;
-        const totalDrawCalls = totalViews * totalSub;
+    const totalUnits = renderUnits.length;
+    const totalDrawCalls = totalViews * totalUnits;
         const strideFloats = 48;
         const totalFloats = totalDrawCalls * strideFloats;
         const allInstanceData = new Float32Array(totalFloats);
@@ -483,8 +483,8 @@ export default function bakeFoliageImpostor(
             const vpInfo = renderPassViews[v];
             const {normX, normY, normZ} = vpInfo;
 
-            for (let s = 0; s < totalSub; s++) {
-                const cached = cachedSubMeshes[s];
+            for (let s = 0; s < totalUnits; s++) {
+                const cached = cachedRenderUnits[s];
                 const baseOffset = drawSlot * strideFloats;
                 drawSlot++;
 
@@ -553,8 +553,8 @@ export default function bakeFoliageImpostor(
             renderPass.setViewport(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize, 0, 1);
             renderPass.setScissorRect(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize);
 
-            for (let s = 0; s < totalSub; s++) {
-                const cached = cachedSubMeshes[s];
+            for (let s = 0; s < totalUnits; s++) {
+                const cached = cachedRenderUnits[s];
                 const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
                 currentDrawSlot++;
 
@@ -642,10 +642,10 @@ export default function bakeFoliageImpostor(
 
     }
 
-function getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
+function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRenderUnit): GPURenderPipeline | null {
         const cache = getOrCreateContextCache(redGPUContext);
         const gpuDevice = redGPUContext.gpuDevice;
-    const stride = Math.max(sub.strideBytes, 72);
+    const stride = Math.max(unit.strideBytes, 72);
     const key = `Foliage_Impostor_Bake_RenderPipeline_${stride}`;
         let pipeline = cache.bakePipelineCache.get(key);
         if (pipeline) return pipeline;

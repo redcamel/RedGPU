@@ -584,12 +584,12 @@ RedGPU.init(
                             for (let l = 0; l < numMeshLODs; l++) {
                                 const lodIdx = l;
                                 const subFolder = lodFolder.addFolder({title: `LOD ${lodIdx}`, expanded: true});
-                                const subMeshesForLOD = (type.subMeshes || []).filter(s => s.lodIndex === lodIdx);
+                                const renderUnitsForLOD = (type.renderUnits || []).filter(s => s.lodIndex === lodIdx);
                                 let totalVerts = 0;
                                 let totalIndices = 0;
-                                for (let s = 0; s < subMeshesForLOD.length; s++) {
-                                    totalVerts += subMeshesForLOD[s].vertexCount || 0;
-                                    totalIndices += subMeshesForLOD[s].indexCount || 0;
+                                for (let s = 0; s < renderUnitsForLOD.length; s++) {
+                                    totalVerts += renderUnitsForLOD[s].vertexCount || 0;
+                                    totalIndices += renderUnitsForLOD[s].indexCount || 0;
                                 }
 
                                 const lodBinding = {
@@ -605,8 +605,8 @@ RedGPU.init(
                                     set receiveShadow(v) {
                                         type.setLODReceiveShadow(lodIdx, v);
                                     },
-                                    get subMeshCount() {
-                                        return subMeshesForLOD.length;
+                                    get renderUnitCount() {
+                                        return renderUnitsForLOD.length;
                                     },
                                     get vertexCount() {
                                         return totalVerts;
@@ -623,7 +623,10 @@ RedGPU.init(
                                     step: 5
                                 });
                                 subFolder.addBinding(lodBinding, 'receiveShadow');
-                                subFolder.addBinding(lodBinding, 'subMeshCount', {readonly: true});
+                                subFolder.addBinding(lodBinding, 'renderUnitCount', {
+                                    readonly: true,
+                                    label: 'Render Units'
+                                });
                                 subFolder.addBinding(lodBinding, 'vertexCount', {readonly: true});
                                 subFolder.addBinding(lodBinding, 'indexCount', {readonly: true});
                             }

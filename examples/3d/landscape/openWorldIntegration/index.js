@@ -420,7 +420,7 @@ function renderTestPane({
             if (!isImpostorLOD) {
                 subFolder.addBinding(lodInfo, 'lodDistance', {readonly: true, label: 'LOD Distance'});
             }
-            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true, label: 'Sub-Meshes'});
+            subFolder.addBinding(lodInfo, 'renderUnitCount', {readonly: true, label: 'Render Units'});
         });
 
         // 5. Shadow (그림자)

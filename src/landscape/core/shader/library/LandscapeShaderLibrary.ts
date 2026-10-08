@@ -79,8 +79,8 @@ export namespace LandscapeShaderLibrary {
         export const GrassInstance = GrassInstance_wgsl;
 
         /**
-         * [KO] 식생 LOD 거리 임계값 및 서브메시 오프셋 구조체
-         * [EN] Foliage LOD distance thresholds and submesh offsets struct
+         * [KO] 식생 LOD 거리 임계값 및 렌더 유닛 오프셋 구조체
+         * [EN] Foliage LOD distance thresholds and render unit offsets struct
          *
          * ```wgsl
          * #redgpu_include landscape.struct.FoliageLODUniformInfo;
@@ -221,8 +221,8 @@ export namespace LandscapeShaderLibrary {
         export const scatterSpatialPrng = scatterSpatialPrng_wgsl;
 
         /**
-         * [KO] 인스턴스 정점의 서브메시 계층 행렬 변환 및 쿼터니언 회전/스케일/월드 이동 수식 (transformFoliagePosition)
-         * [EN] Submesh hierarchy matrix transform, quaternion rotation, scale and world translation for foliage vertex (transformFoliagePosition)
+         * [KO] 인스턴스 정점의 렌더 유닛 계층 행렬 변환 및 쿼터니언 회전/스케일/월드 이동 수식 (transformFoliagePosition)
+         * [EN] Render unit hierarchy matrix transform, quaternion rotation, scale and world translation for foliage vertex (transformFoliagePosition)
          *
          * ```wgsl
          * #redgpu_include landscape.math.transformFoliagePosition;

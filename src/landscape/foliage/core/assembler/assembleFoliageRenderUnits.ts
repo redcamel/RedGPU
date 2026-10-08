@@ -1,33 +1,33 @@
 /**
- * [KO] Foliage 계층 모델의 서브메쉬 조립, LOD 분기, 옥타헤드럴 임포스터 베이킹 및 섀도우 지오메트리 결합 모듈입니다.
- * [EN] Sub-mesh assembly, LOD branching, octahedral impostor baking, and shadow geometry combination module for Foliage models.
+ * [KO] Foliage 계층 모델의 렌더 단위(Render Unit) 조립, LOD 분기, 옥타헤드럴 임포스터 베이킹 및 섀도우 지오메트리 결합 모듈입니다.
+ * [EN] Render unit assembly, LOD branching, octahedral impostor baking, and shadow geometry combination module for Foliage models.
  *
  * @packageDocumentation
  */
 
 import RedGPUContext from "../../../../context/RedGPUContext";
-import FoliageSubMesh from "../submesh/FoliageSubMesh";
-import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
+import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
+import FoliageShadowMergedRenderUnit from "../renderUnit/FoliageShadowMergedRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
-import buildFoliageImpostorSubMesh from "./internal/buildFoliageImpostorSubMesh";
-import {FoliageSlotPooler} from "../submesh/FoliageSlotPooler";
+import buildFoliageImpostorRenderUnit from "./internal/buildFoliageImpostorRenderUnit";
+import {FoliageSlotPooler} from "../renderUnit/FoliageSlotPooler";
 
 /**
- * [KO] 식생 서브메쉬 조립 결과 인터페이스입니다.
- * [EN] Foliage sub-mesh assembly result interface.
+ * [KO] 식생 렌더 단위 조립 결과 인터페이스입니다.
+ * [EN] Foliage render unit assembly result interface.
  */
 export interface FoliageAssemblyResult {
     /**
-     * [KO] 조립된 전체 서브메시 배열
-     * [EN] Array of all assembled sub-meshes
+     * [KO] 조립된 전체 렌더 단위 배열
+     * [EN] Array of all assembled render units
      */
-    subMeshes: FoliageSubMesh[];
+    renderUnits: FoliageRenderUnit[];
     /**
-     * [KO] 그림자 패스 전용 통합 서브메시 배열
-     * [EN] Array of shadow pass dedicated merged sub-meshes
+     * [KO] 그림자 패스 전용 통합 렌더 단위 배열
+     * [EN] Array of shadow pass dedicated merged render units
      */
-    shadowMergedSubMeshes: FoliageShadowMergedSubMesh[];
+    shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[];
     /**
      * [KO] LOD 레벨별 메타데이터 목록
      * [EN] List of per-LOD metadata
@@ -51,8 +51,8 @@ export interface FoliageAssemblyResult {
 }
 
 /**
- * [KO] Foliage 계층 모델의 서브메쉬들을 LOD별 단일 통합 버퍼로 조립하고, 옥타헤드럴 임포스터 및 섀도우 지오메트리를 생성합니다.
- * [EN] Assembles sub-meshes of Foliage models into unified per-LOD buffers, creating octahedral impostors and shadow geometries.
+ * [KO] Foliage 계층 모델의 렌더 단위들을 LOD별 단일 통합 버퍼로 조립하고, 옥타헤드럴 임포스터 및 섀도우 지오메트리를 생성합니다.
+ * [EN] Assembles render units of Foliage models into unified per-LOD buffers, creating octahedral impostors and shadow geometries.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
@@ -63,22 +63,22 @@ export interface FoliageAssemblyResult {
  * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
  * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
  * @returns
- * [KO] 조립 완료된 식생 서브메쉬 및 LOD 정보
- * [EN] Assembled foliage sub-meshes and LOD information
+ * [KO] 조립 완료된 식생 렌더 단위 및 LOD 정보
+ * [EN] Assembled foliage render units and LOD information
  */
-export default function assembleFoliageSubMeshes(
+export default function assembleFoliageRenderUnits(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
     slotPooler?: FoliageSlotPooler | null
 ): FoliageAssemblyResult {
     const gpuDevice = redGPUContext.gpuDevice;
-    const subMeshes: FoliageSubMesh[] = [];
+    const renderUnits: FoliageRenderUnit[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
 
     if (!gpuDevice) {
         return {
-            subMeshes: [],
-            shadowMergedSubMeshes: [],
+            renderUnits: [],
+            shadowMergedRenderUnits: [],
             lodInfoList: [],
             bottomOffset: 0,
             boundingRadius: 10.0,
@@ -89,7 +89,7 @@ export default function assembleFoliageSubMeshes(
     const {useImpostor = true, lods = []} = options;
     const numLODs = Math.min(lods.length, 8);
 
-    const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
+    const shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[] = [];
     let maxBoundingRadius = 0;
     let globalMinY = Infinity;
     let globalMaxY = -Infinity;
@@ -98,7 +98,7 @@ export default function assembleFoliageSubMeshes(
         const lodCfg = lods[l];
         const {mesh, receiveShadow = true} = lodCfg;
         const lodMeshes = Array.isArray(mesh) ? mesh : [mesh];
-        const startSubOffset = subMeshes.length;
+        const startSubOffset = renderUnits.length;
         const lodReceiveShadow = receiveShadow !== false;
 
         const assembled = assembleFoliageLODMeshes(
@@ -110,13 +110,13 @@ export default function assembleFoliageSubMeshes(
             slotPooler
         );
 
-        const assembledSubMeshes = assembled.subMeshes;
-        for (let s = 0; s < assembledSubMeshes.length; s++) {
-            subMeshes.push(assembledSubMeshes[s]);
+        const assembledUnits = assembled.renderUnits;
+        for (let s = 0; s < assembledUnits.length; s++) {
+            renderUnits.push(assembledUnits[s]);
         }
 
-        if (assembled.shadowMergedSubMesh) {
-            shadowMergedSubMeshes.push(assembled.shadowMergedSubMesh);
+        if (assembled.shadowMergedRenderUnit) {
+            shadowMergedRenderUnits.push(assembled.shadowMergedRenderUnit);
         }
 
         if (assembled.boundingRadius > maxBoundingRadius) {
@@ -129,33 +129,33 @@ export default function assembleFoliageSubMeshes(
             globalMaxY = assembled.maxY;
         }
 
-        const subCountForThisLOD = subMeshes.length - startSubOffset;
+        const unitCountForThisLOD = renderUnits.length - startSubOffset;
         const defaultDist = (l === 0) ? 80.0 : (80.0 * Math.pow(2.5, l));
         const switchDist = lodCfg.lodDistance ?? defaultDist;
 
         lodInfoList.push({
             lodIndex: l,
             lodDistance: switchDist,
-            subMeshOffset: startSubOffset,
-            subMeshCount: subCountForThisLOD,
+            renderUnitOffset: startSubOffset,
+            renderUnitCount: unitCountForThisLOD,
             receiveShadow: lodReceiveShadow,
         });
     }
 
-    if (useImpostor && subMeshes.length > 0) {
+    if (useImpostor && renderUnits.length > 0) {
         const impostorLODIndex = lodInfoList.length;
-        const lod0SubMeshes: FoliageSubMesh[] = [];
-        for (let i = 0; i < subMeshes.length; i++) {
-            if (subMeshes[i].lodIndex === 0) {
-                lod0SubMeshes.push(subMeshes[i]);
+        const lod0RenderUnits: FoliageRenderUnit[] = [];
+        for (let i = 0; i < renderUnits.length; i++) {
+            if (renderUnits[i].lodIndex === 0) {
+                lod0RenderUnits.push(renderUnits[i]);
             }
         }
 
-        buildFoliageImpostorSubMesh(
+        buildFoliageImpostorRenderUnit(
             redGPUContext,
             options,
-            lod0SubMeshes,
-            subMeshes,
+            lod0RenderUnits,
+            renderUnits,
             lodInfoList,
             impostorLODIndex,
             slotPooler
@@ -167,8 +167,8 @@ export default function assembleFoliageSubMeshes(
         : (options.height || 2.0);
 
     return {
-        subMeshes,
-        shadowMergedSubMeshes,
+        renderUnits,
+        shadowMergedRenderUnits,
         lodInfoList,
         bottomOffset: options.bottomOffset ?? 0,
         boundingRadius: maxBoundingRadius || 10.0,

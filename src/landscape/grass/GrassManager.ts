@@ -9,7 +9,7 @@ import Landscape from "../Landscape";
 import Grass, {GrassOptions} from "./core/Grass";
 import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
 import {GrassRenderer} from "./core/renderer/GrassRenderer";
-import {GrassSlotPooler} from "./core/submesh/GrassSlotPooler";
+import {GrassSlotPooler} from "./core/renderUnit/GrassSlotPooler";
 import GrassInstanceBaker, {GRASS_CELL_SIZE} from "./core/baking/GrassInstanceBaker";
 import GrassCuller from "./core/culling/GrassCuller";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -143,7 +143,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const {
             cullingDistance,
             instancesPerCell,
-            subMeshes,
+            renderUnits,
             streamingRadius,
             maxInstances: userMaxInstances
         } = grassType;
@@ -155,7 +155,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const alloc = this.#megaBuffer.allocateType(
             typeId,
             maxInstances,
-            subMeshes
+            renderUnits
         );
         grassType.bindAllocation(alloc);
 

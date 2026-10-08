@@ -11,8 +11,8 @@ import AScatterMegaBuffer, {
     ScatterBaseSegmentAllocation
 } from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullWGSL from '../culling/foliageCull.wgsl';
-import FoliageSubMesh from '../submesh/FoliageSubMesh';
-import FoliageShadowMergedSubMesh from '../submesh/FoliageShadowMergedSubMesh';
+import FoliageRenderUnit from '../renderUnit/FoliageRenderUnit';
+import FoliageShadowMergedRenderUnit from '../renderUnit/FoliageShadowMergedRenderUnit';
 import {FoliageLODInfo} from '../Foliage';
 
 /**
@@ -107,7 +107,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
 
         this.#shadowIndirectResetTemplate = new Uint32Array(
-            this.maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * SHADOW_CASCADE_COUNT
+            this.maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * SHADOW_CASCADE_COUNT
         );
 
         const globalUniformBytes =
@@ -166,12 +166,12 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * @param maxInstances -
      * [KO] 최대 허용 인스턴스 수
      * [EN] Maximum allowed instances
-     * @param subMeshes -
-     * [KO] 식생 서브메시 배열
-     * [EN] Foliage sub-meshes array
-     * @param shadowMergedSubMeshes -
-     * [KO] 그림자 패스 통합 서브메시 배열 (선택사항)
-     * [EN] Shadow pass merged sub-meshes array (optional)
+     * @param renderUnits -
+     * [KO] 식생 렌더 유닛 배열
+     * [EN] Foliage render units array
+     * @param shadowMergedRenderUnits -
+     * [KO] 그림자 패스 통합 렌더 유닛 배열 (선택사항)
+     * [EN] Shadow pass merged render units array (optional)
      * @param lodInfoList -
      * [KO] LOD 정보 목록 (선택사항)
      * [EN] LOD info list (optional)
@@ -182,8 +182,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     allocateType(
         name: string,
         maxInstances: number,
-        subMeshes: FoliageSubMesh[],
-        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
+        renderUnits: FoliageRenderUnit[],
+        shadowMergedRenderUnits?: FoliageShadowMergedRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): FoliageTypeAllocation {
         if (this.#allocations.has(name)) {
@@ -195,8 +195,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             throw new Error(`[FoliageScatterMegaBuffer] Maximum supported FoliageTypes (${this.maxTypes}) exceeded.`);
         }
 
-        const subMeshCount = subMeshes.length;
-        const baseSegment = this.allocateBaseSegment(name, maxInstances, subMeshCount, 8);
+        const renderUnitCount = renderUnits.length;
+        const baseSegment = this.allocateBaseSegment(name, maxInstances, renderUnitCount, 8);
         const {rawBaseOffset, culledBaseOffset, indirectBaseOffset, maxInstances: alignedMaxInstances} = baseSegment;
 
         const allocation: FoliageTypeAllocation = {
@@ -206,7 +206,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             rawBaseOffset,
             culledBaseOffset,
             indirectBaseOffset,
-            subMeshCount,
+            renderUnitCount,
             instanceCount: 0
         };
 
@@ -222,29 +222,29 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             cpuRawUint32[baseFloat + i * strideFloats + 7] = defaultColorAndType;
         }
 
-        for (let s = 0; s < subMeshCount; s++) {
-            const sub = subMeshes[s];
-            sub.instanceBufferOffset = (culledBaseOffset + (sub.lodIndex * alignedMaxInstances)) * strideBytes;
-            sub.indirectOffsetBytes = (indirectBaseOffset + s) * 20;
+        for (let s = 0; s < renderUnitCount; s++) {
+            const unit = renderUnits[s];
+            unit.instanceBufferOffset = (culledBaseOffset + (unit.lodIndex * alignedMaxInstances)) * strideBytes;
+            unit.indirectOffsetBytes = (indirectBaseOffset + s) * 20;
         }
 
-        if (shadowMergedSubMeshes && lodInfoList) {
-            for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
-                const shadowSub = shadowMergedSubMeshes[i];
+        if (shadowMergedRenderUnits && lodInfoList) {
+            for (let i = 0; i < shadowMergedRenderUnits.length; i++) {
+                const shadowUnit = shadowMergedRenderUnits[i];
                 let lodInfo: any = null;
                 for (let l = 0; l < lodInfoList.length; l++) {
-                    if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
+                    if (lodInfoList[l].lodIndex === shadowUnit.lodIndex) {
                         lodInfo = lodInfoList[l];
                         break;
                     }
                 }
-                const subOffset = lodInfo ? lodInfo.subMeshOffset : 0;
-                shadowSub.instanceBufferOffset = (culledBaseOffset + (shadowSub.lodIndex * alignedMaxInstances)) * strideBytes;
-                shadowSub.indirectOffsetBytes = (indirectBaseOffset + subOffset) * 20;
+                const unitOffset = lodInfo ? lodInfo.renderUnitOffset : 0;
+                shadowUnit.instanceBufferOffset = (culledBaseOffset + (shadowUnit.lodIndex * alignedMaxInstances)) * strideBytes;
+                shadowUnit.indirectOffsetBytes = (indirectBaseOffset + unitOffset) * 20;
             }
         }
 
-        this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset, shadowMergedSubMeshes, lodInfoList);
+        this.registerRenderUnitsToTemplate(renderUnits, indirectBaseOffset, shadowMergedRenderUnits, lodInfoList);
         this.invalidateUnifiedCullingBindGroup();
 
         return allocation;
@@ -306,7 +306,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         gu32[3] = this.totalAllocatedInstances;
 
         gf32[4] = fovFactor > 0 ? fovFactor : 1.0;
-        gu32[5] = this.maxSubMeshes;
+        gu32[5] = this.maxRenderUnits;
         gu32[6] = this.instanceCapacity * 8;
         gu32[7] = activeCascadeCount;
 
@@ -459,8 +459,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
                 f32[lodBase + 3] = exitEnd;
                 f32[lodBase + 4] = 1.0 / enterSpan;
                 f32[lodBase + 5] = 1.0 / exitSpan;
-                u32[lodBase + 6] = info.subMeshOffset;
-                u32[lodBase + 7] = info.subMeshCount;
+                u32[lodBase + 6] = info.renderUnitOffset;
+                u32[lodBase + 7] = info.renderUnitCount;
             } else {
                 f32[lodBase] = 999999.0;
                 f32[lodBase + 1] = 999999.0;
@@ -540,55 +540,55 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
-     * [KO] 서브메시 및 그림자 통합 서브메시의 드로우 인자들을 인디렉트 템플릿 버퍼에 등록합니다.
-     * [EN] Registers draw arguments of sub-meshes and shadow merged sub-meshes to indirect template buffer.
+     * [KO] 렌더 유닛 및 그림자 통합 렌더 유닛의 드로우 인자들을 인디렉트 템플릿 버퍼에 등록합니다.
+     * [EN] Registers draw arguments of render units and shadow merged render units to indirect template buffer.
      */
-    registerSubMeshesToTemplate(
-        subMeshes: FoliageSubMesh[],
+    registerRenderUnitsToTemplate(
+        renderUnits: FoliageRenderUnit[],
         indirectBaseOffset: number,
-        shadowMergedSubMeshes?: FoliageShadowMergedSubMesh[],
+        shadowMergedRenderUnits?: FoliageShadowMergedRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): void {
-        const maxSubMeshes = this.maxSubMeshes;
+        const maxRenderUnits = this.maxRenderUnits;
 
-        for (let s = 0; s < subMeshes.length; s++) {
-            const sub = subMeshes[s];
-            const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
-            this.registerIndirectDrawSlot(indirectBaseOffset + s, count, sub.firstIndex);
+        for (let s = 0; s < renderUnits.length; s++) {
+            const unit = renderUnits[s];
+            const count = unit.isIndexed ? unit.indexCount : unit.vertexCount;
+            this.registerIndirectDrawSlot(indirectBaseOffset + s, count, unit.firstIndex);
 
             for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
-                const shadowSlot = (c * maxSubMeshes + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
+                const shadowSlot = (c * maxRenderUnits + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
-                this.#shadowIndirectResetTemplate[shadowSlot + 2] = sub.firstIndex;
+                this.#shadowIndirectResetTemplate[shadowSlot + 2] = unit.firstIndex;
             }
         }
 
-        if (shadowMergedSubMeshes && lodInfoList) {
-            const hasMaskedLOD0 = subMeshes.some(s => s.lodIndex === 0 && s.isMasked);
-            for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
-                const shadowSub = shadowMergedSubMeshes[i];
-                if (shadowSub.lodIndex === 0 && hasMaskedLOD0) {
+        if (shadowMergedRenderUnits && lodInfoList) {
+            const hasMaskedLOD0 = renderUnits.some(s => s.lodIndex === 0 && s.isMasked);
+            for (let i = 0; i < shadowMergedRenderUnits.length; i++) {
+                const shadowUnit = shadowMergedRenderUnits[i];
+                if (shadowUnit.lodIndex === 0 && hasMaskedLOD0) {
                     continue;
                 }
                 let lodInfo: FoliageLODInfo | null = null;
                 for (let l = 0; l < lodInfoList.length; l++) {
-                    if (lodInfoList[l].lodIndex === shadowSub.lodIndex) {
+                    if (lodInfoList[l].lodIndex === shadowUnit.lodIndex) {
                         lodInfo = lodInfoList[l];
                         break;
                     }
                 }
                 if (!lodInfo) continue;
-                const slotIndex = indirectBaseOffset + lodInfo.subMeshOffset;
-                const count = shadowSub.isIndexed ? shadowSub.indexCount : shadowSub.vertexCount;
+                const slotIndex = indirectBaseOffset + lodInfo.renderUnitOffset;
+                const count = shadowUnit.isIndexed ? shadowUnit.indexCount : shadowUnit.vertexCount;
                 for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
-                    const shadowSlot = (c * maxSubMeshes + slotIndex) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
+                    const shadowSlot = (c * maxRenderUnits + slotIndex) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                     this.#shadowIndirectResetTemplate[shadowSlot] = count;
-                    this.#shadowIndirectResetTemplate[shadowSlot + 2] = shadowSub.firstIndex;
+                    this.#shadowIndirectResetTemplate[shadowSlot + 2] = shadowUnit.firstIndex;
                 }
             }
         }
 
-        this.syncIndirectResetTemplateToGPU(indirectBaseOffset, subMeshes.length);
+        this.syncIndirectResetTemplateToGPU(indirectBaseOffset, renderUnits.length);
 
         const gpuDevice = this.gpuDevice;
         if (gpuDevice && this.#shadowIndirectResetTemplateGPUBuffer) {
@@ -668,7 +668,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
         const byteSize = Math.min(
-            (this.maxSubMeshes * 3 + this.totalIndirectDrawCalls) * indirectStrideBytes,
+            (this.maxRenderUnits * 3 + this.totalIndirectDrawCalls) * indirectStrideBytes,
             this.#shadowIndirectResetTemplate.byteLength
         );
         if (byteSize <= 0) return;
@@ -753,12 +753,12 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     #initBuffers(): void {
-        const {gpuDevice, instanceCapacity, maxSubMeshes} = this;
+        const {gpuDevice, instanceCapacity, maxRenderUnits} = this;
 
         const rawByteSize = Math.max(instanceCapacity * this.strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
         const indirectByteSize = Math.max(
-            maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
+            maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
             64
         );
 

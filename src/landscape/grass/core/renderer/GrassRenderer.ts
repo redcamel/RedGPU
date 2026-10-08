@@ -9,8 +9,8 @@ import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {GrassSlotPooler} from "../submesh/GrassSlotPooler";
-import ScatterSubMesh from "../../../core/scatter/ScatterSubMesh";
+import {GrassSlotPooler} from "../renderUnit/GrassSlotPooler";
+import ScatterRenderUnit from "../../../core/scatter/ScatterRenderUnit";
 import type Geometry from "../../../../geometry/Geometry";
 import type BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import grassVertexWGSL from "../pipeline/grassVertex.wgsl";
@@ -20,8 +20,8 @@ import grassShadowVertexWGSL from "../pipeline/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 
 /**
- * [KO] 서브메시 머티리얼 바인드 그룹(Group 2) 캐시 엔트리 인터페이스입니다.
- * [EN] Interface for submesh material bind group (Group 2) cache entry.
+ * [KO] 렌더 유닛 머티리얼 바인드 그룹(Group 2) 캐시 엔트리 인터페이스입니다.
+ * [EN] Interface for render unit material bind group (Group 2) cache entry.
  */
 interface MaterialBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
@@ -330,7 +330,7 @@ export class GrassRenderer extends AScatterRenderer {
         bundleEncoder.setPipeline(nearPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {slotIndex, typeId, geometry, subMeshes} = type;
+            const {slotIndex, typeId, geometry, renderUnits} = type;
             if (slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
@@ -346,13 +346,13 @@ export class GrassRenderer extends AScatterRenderer {
             bundleEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
             bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
 
-            const subMeshCount = subMeshes.length;
-            for (let s = 0; s < subMeshCount; s++) {
-                const subMesh = subMeshes[s];
+            const renderUnitCount = renderUnits.length;
+            for (let s = 0; s < renderUnitCount; s++) {
+                const renderUnit = renderUnits[s];
                 const slot = alloc.nearSlots[s];
                 if (!slot) continue;
 
-                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
@@ -365,7 +365,7 @@ export class GrassRenderer extends AScatterRenderer {
         bundleEncoder.setPipeline(farPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {slotIndex, typeId, geometry, subMeshes} = type;
+            const {slotIndex, typeId, geometry, renderUnits} = type;
             if (slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
@@ -381,13 +381,13 @@ export class GrassRenderer extends AScatterRenderer {
             bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            const subMeshCount = subMeshes.length;
-            for (let s = 0; s < subMeshCount; s++) {
-                const subMesh = subMeshes[s];
+            const renderUnitCount = renderUnits.length;
+            for (let s = 0; s < renderUnitCount; s++) {
+                const renderUnit = renderUnits[s];
                 const slot = alloc.farSlots[s];
                 if (!slot) continue;
 
-                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
@@ -430,7 +430,7 @@ export class GrassRenderer extends AScatterRenderer {
         const count = grassList.length;
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
-            const {castShadow, slotIndex, typeId, geometry, subMeshes} = type;
+            const {castShadow, slotIndex, typeId, geometry, renderUnits} = type;
             if (!castShadow || slotIndex < 0) continue;
 
             const alloc = megaBuffer.getAllocation(typeId);
@@ -446,13 +446,13 @@ export class GrassRenderer extends AScatterRenderer {
             bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
             bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
 
-            const subMeshCount = subMeshes.length;
-            for (let s = 0; s < subMeshCount; s++) {
-                const subMesh = subMeshes[s];
+            const renderUnitCount = renderUnits.length;
+            for (let s = 0; s < renderUnitCount; s++) {
+                const renderUnit = renderUnits[s];
                 const nearSlot = alloc.nearSlots[s];
                 if (!nearSlot) continue;
 
-                const matBG = this.#getOrCreateMaterialBindGroup(subMesh, type, s);
+                const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
@@ -491,14 +491,14 @@ export class GrassRenderer extends AScatterRenderer {
         return this.#unifiedGroup1BindGroup;
     }
 
-    #getOrCreateMaterialBindGroup(subMesh: ScatterSubMesh, type: Grass, subIndex: number): GPUBindGroup | null {
+    #getOrCreateMaterialBindGroup(renderUnit: ScatterRenderUnit, type: Grass, subIndex: number): GPUBindGroup | null {
         const {gpuDevice, resourceManager} = this;
         if (!gpuDevice || !this.#pipelineBindGroupLayout2) return null;
 
         const cacheKey = (type.typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
 
-        const subTex = subMesh.baseColorTexture;
+        const subTex = renderUnit.baseColorTexture;
         const typeTexView = type.baseColorTextureView;
 
         // Fast-Path: 텍스처 참조 2개만 단순 동치 비교(===)하여 일치 시 getGPUResourceBitmapTextureView 호출 없이 즉시 리턴

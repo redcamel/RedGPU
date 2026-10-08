@@ -88,9 +88,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // Sync all sub-mesh draw calls for this stage
-    let numSubs = max(typeInfo.subMeshCount, 1u);
-    for (var s = 1u; s < numSubs; s = s + 1u) {
+    // Sync all render unit draw calls for this stage
+    let numUnits = max(typeInfo.renderUnitCount, 1u);
+    for (var s = 1u; s < numUnits; s = s + 1u) {
         atomicAdd(&indirectCommands[targetStageSlot + s].instanceCount, 1u);
     }
 

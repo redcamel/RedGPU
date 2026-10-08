@@ -1,16 +1,16 @@
 /**
- * [KO] 식생 그림자 패스 전용 통합 서브메시 모듈입니다.
- * [EN] Foliage shadow pass dedicated merged sub-mesh module.
+ * [KO] 식생 그림자 패스 전용 통합 렌더 단위(Render Unit) 모듈입니다.
+ * [EN] Foliage shadow pass dedicated merged render unit module.
  * @packageDocumentation
  */
 
-import AFoliageSubMeshBase, {type AFoliageSubMeshBaseInitOptions} from "./AFoliageSubMeshBase";
+import AFoliageRenderUnitBase, {type AFoliageRenderUnitBaseInitOptions} from "./AFoliageRenderUnitBase";
 
 /**
- * [KO] FoliageShadowMergedSubMesh 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for FoliageShadowMergedSubMesh.
+ * [KO] FoliageShadowMergedRenderUnit 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for FoliageShadowMergedRenderUnit.
  */
-export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AFoliageSubMeshBaseInitOptions, 'strideBytes'> {
+export interface FoliageShadowMergedRenderUnitInitOptions extends Omit<AFoliageRenderUnitBaseInitOptions, 'strideBytes'> {
     /**
      * [KO] 소속 LOD 인덱스
      * [EN] Associated LOD index
@@ -24,16 +24,16 @@ export interface FoliageShadowMergedSubMeshInitOptions extends Omit<AFoliageSubM
 }
 
 /**
- * [KO] 그림자 패스(Shadow Pass) 렌더링을 위해 단일 위치 전용(Position-only) 지오메트리로 통합된 식생 서브메쉬 클래스입니다.
- * [EN] Foliage sub-mesh class combined into unified position-only geometry for shadow pass rendering.
+ * [KO] 그림자 패스(Shadow Pass) 렌더링을 위해 단일 위치 전용(Position-only) 지오메트리로 통합된 식생 렌더 단위 클래스입니다.
+ * [EN] Foliage render unit class combined into unified position-only geometry for shadow pass rendering.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageShadowMergedSubMesh extends AFoliageSubMeshBase {
-    constructor(init: FoliageShadowMergedSubMeshInitOptions) {
+export class FoliageShadowMergedRenderUnit extends AFoliageRenderUnitBase {
+    constructor(init: FoliageShadowMergedRenderUnitInitOptions) {
         super({
             ...init,
             indexFormat: init.indexFormat || 'uint32',
@@ -59,5 +59,5 @@ export class FoliageShadowMergedSubMesh extends AFoliageSubMeshBase {
     }
 }
 
-Object.freeze(FoliageShadowMergedSubMesh);
-export default FoliageShadowMergedSubMesh;
+Object.freeze(FoliageShadowMergedRenderUnit);
+export default FoliageShadowMergedRenderUnit;

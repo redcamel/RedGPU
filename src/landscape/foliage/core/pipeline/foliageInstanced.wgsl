@@ -5,7 +5,7 @@
 #redgpu_include landscape.math.ditherFadeDiscard;
 #redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
 
-struct SubMeshUniforms {
+struct RenderUnitUniforms {
     globalFragmentSlotIndex: u32,
     receiveShadow: f32,
     windMultiplier: f32,
@@ -16,7 +16,7 @@ struct SubMeshUniforms {
     pad0: u32,
 };
 
-@group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
+@group(1) @binding(0) var<uniform> renderUnitUniforms: RenderUnitUniforms;
 
 fn calculateFoliageWindDisplacement(
     worldPos: vec3<f32>,
@@ -26,7 +26,7 @@ fn calculateFoliageWindDisplacement(
     instancePos: vec3<f32>,
     time: f32
 ) -> vec3<f32> {
-    if (systemUniforms.wind.enabled == 0u || systemUniforms.wind.strength <= 0.0001 || subMeshUniforms.windMultiplier <= 0.0001) {
+    if (systemUniforms.wind.enabled == 0u || systemUniforms.wind.strength <= 0.0001 || renderUnitUniforms.windMultiplier <= 0.0001) {
         return vec3<f32>(0.0);
     }
 
@@ -35,7 +35,7 @@ fn calculateFoliageWindDisplacement(
         return vec3<f32>(0.0);
     }
 
-    let treeH = max(2.0, subMeshUniforms.treeHeight);
+    let treeH = max(2.0, renderUnitUniforms.treeHeight);
     let heightNorm = clamp(localPos.y / treeH, 0.0, 1.0);
 
     let groundAnchor = smoothstep(0.08, 0.8, heightNorm);
@@ -72,7 +72,7 @@ fn calculateFoliageWindDisplacement(
 
     let trunkDistFade = clamp(1.0 - (viewDist - 350.0) / 150.0, 0.0, 1.0);
     let trunkDisplacement = vec3<f32>(windDir.x, 0.0, windDir.y) *
-                            (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * subMeshUniforms.windMultiplier * trunkDistFade);
+                            (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * renderUnitUniforms.windMultiplier * trunkDistFade);
 
     let leafPhase = dot(localPos, vec3<f32>(0.9, 1.4, 0.9)) + time * (windSpeed * 3.5);
     let leafWaveX = sin(leafPhase);
@@ -80,7 +80,7 @@ fn calculateFoliageWindDisplacement(
     let leafWaveZ = sin(leafPhase * 0.85);
 
     let flutterDistFade = clamp(1.0 - (viewDist - 150.0) / 150.0, 0.0, 1.0);
-    let flutterScale = (systemUniforms.wind.flutterStrength * 0.45) * subMeshUniforms.windMultiplier * subMeshUniforms.windFlutterMultiplier * flutterDistFade;
+    let flutterScale = (systemUniforms.wind.flutterStrength * 0.45) * renderUnitUniforms.windMultiplier * renderUnitUniforms.windFlutterMultiplier * flutterDistFade;
     let leafDisplacement = vec3<f32>(
         windDir.x * leafWaveX * 0.75,
         leafWaveY * 0.5,
@@ -244,19 +244,19 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
 
     output.instanceRotQuat = instanceRotQuat;
     output.vertexColor_0 = input.vertexColor_0;
-    output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
+    output.globalFragmentSlotIndex = renderUnitUniforms.globalFragmentSlotIndex;
     output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 
     output.combinedOpacity = combinedOpacity;
-    output.receiveShadow = subMeshUniforms.receiveShadow;
+    output.receiveShadow = renderUnitUniforms.receiveShadow;
 
     output.motionVector = vec3<f32>(0.0);
     output.pickingId = vec4<f32>(0.0);
 
     let heightAboveGround = max(0.0, worldPos.y - instancePos.y);
-    let blendRange = max(0.1, subMeshUniforms.groundBlendRange);
+    let blendRange = max(0.1, renderUnitUniforms.groundBlendRange);
     let rawBlend = clamp(1.0 - (heightAboveGround / blendRange), 0.0, 1.0);
-    let groundBlendFactor = rawBlend * subMeshUniforms.groundBlendStrength;
+    let groundBlendFactor = rawBlend * renderUnitUniforms.groundBlendStrength;
     output.groundColor_blendFactor = vec4<f32>(input.groundColor_fade.rgb, groundBlendFactor);
 
     return output;
@@ -329,7 +329,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.uv = input.uv;
     output.shadowFade = input.groundColor_fade.a;
-    output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
+    output.globalFragmentSlotIndex = renderUnitUniforms.globalFragmentSlotIndex;
     return output;
 }
 

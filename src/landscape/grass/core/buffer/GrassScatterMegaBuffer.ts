@@ -106,9 +106,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param maxInstances -
      * [KO] 해당 타입에 배정할 최대 인스턴스 수
      * [EN] Maximum instance count assigned to this type
-     * @param subMeshes -
-     * [KO] 잔디 서브메시 목록
-     * [EN] List of grass sub-meshes
+     * @param renderUnits -
+     * [KO] 잔디 렌더 유닛 목록
+     * [EN] List of grass render units
      * @returns
      * [KO] 할당된 잔디 타입 메타데이터 객체
      * [EN] Allocated grass type metadata object
@@ -116,14 +116,14 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     allocateType(
         typeId: number,
         maxInstances: number,
-        subMeshes: { indexCount: number; firstIndex?: number }[]
+        renderUnits: { indexCount: number; firstIndex?: number }[]
     ): GrassTypeAllocation {
         if (this.#allocations.has(typeId)) {
             return this.#allocations.get(typeId)!;
         }
 
-        const subMeshCount = Math.max(1, subMeshes.length);
-        const baseAlloc = this.allocateBaseSegment(typeId, maxInstances, subMeshCount * 2, 2);
+        const renderUnitCount = Math.max(1, renderUnits.length);
+        const baseAlloc = this.allocateBaseSegment(typeId, maxInstances, renderUnitCount * 2, 2);
 
         const nearCulledOffset = baseAlloc.culledBaseOffset;
         const farCulledOffset = baseAlloc.culledBaseOffset + baseAlloc.maxInstances;
@@ -131,27 +131,27 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const nearSlots: GrassDrawSlot[] = [];
         const farSlots: GrassDrawSlot[] = [];
 
-        for (let s = 0; s < subMeshCount; s++) {
-            const sub = subMeshes[s];
+        for (let s = 0; s < renderUnitCount; s++) {
+            const unit = renderUnits[s];
             const slotIdx = baseAlloc.indirectBaseOffset + s;
             const nearSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
-            this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, nearCulledOffset);
+            this.registerIndirectDrawSlot(slotIdx, unit.indexCount, unit.firstIndex, 0, nearCulledOffset);
             nearSlots.push(nearSlot);
         }
 
-        for (let s = 0; s < subMeshCount; s++) {
-            const sub = subMeshes[s];
-            const slotIdx = baseAlloc.indirectBaseOffset + subMeshCount + s;
+        for (let s = 0; s < renderUnitCount; s++) {
+            const unit = renderUnits[s];
+            const slotIdx = baseAlloc.indirectBaseOffset + renderUnitCount + s;
             const farSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
-            this.registerIndirectDrawSlot(slotIdx, sub.indexCount, sub.firstIndex, 0, farCulledOffset);
+            this.registerIndirectDrawSlot(slotIdx, unit.indexCount, unit.firstIndex, 0, farCulledOffset);
             farSlots.push(farSlot);
         }
 
-        this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, subMeshCount * 2);
+        this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, renderUnitCount * 2);
 
         const alloc: GrassTypeAllocation = {
             typeId: baseAlloc.typeId,
@@ -159,7 +159,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             rawBaseOffset: baseAlloc.rawBaseOffset,
             culledBaseOffset: baseAlloc.culledBaseOffset,
             indirectBaseOffset: baseAlloc.indirectBaseOffset,
-            subMeshCount,
+            renderUnitCount,
             instanceCount: 0,
             nearSlots,
             farSlots
@@ -248,7 +248,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         cu[baseFloat + 6] = alloc.culledBaseOffset + alloc.maxInstances;
         cu[baseFloat + 7] = alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0;
         cu[baseFloat + 8] = alloc.farSlots.length > 0 ? alloc.farSlots[0].indirectOffset : (alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0);
-        cu[baseFloat + 9] = alloc.subMeshCount;
+        cu[baseFloat + 9] = alloc.renderUnitCount;
         cu[baseFloat + 10] = alloc.farSlots.length > 0 ? 1 : 0;
         cu[baseFloat + 11] = alloc.instanceCount;
         cu[baseFloat + 12] = alloc.maxInstances;

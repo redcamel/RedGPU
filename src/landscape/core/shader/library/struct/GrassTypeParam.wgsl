@@ -8,7 +8,7 @@ struct GrassTypeParam {
     culledFarBaseOffset: u32,
     nearIndirectSlot: u32,
     farIndirectSlot: u32,
-    subMeshCount: u32,
+    renderUnitCount: u32,
     hasFarStage: u32,
     instanceCount: u32,
     maxInstances: u32,

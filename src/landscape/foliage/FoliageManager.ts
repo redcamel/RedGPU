@@ -13,7 +13,7 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
-import {FoliageSlotPooler} from "./core/submesh/FoliageSlotPooler";
+import {FoliageSlotPooler} from "./core/renderUnit/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 
 /**
@@ -47,8 +47,8 @@ import {AScatterManager} from "../core/scatter";
  * @category Landscape
  */
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
-    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #subMeshDynamicBindGroup: GPUBindGroup | null = null;
+    #renderUnitVertexBindGroupLayout: GPUBindGroupLayout | null = null;
+    #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
     #slotPooler: FoliageSlotPooler;
 
     #megaBuffer: FoliageScatterMegaBuffer;
@@ -83,12 +83,12 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         super(landscape);
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         this.#slotPooler = new FoliageSlotPooler(this.redGPUContext);
-        const subMeshMegaUBO = this.#slotPooler.gpuBuffer;
+        const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
 
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        if (gpuDevice && subMeshMegaUBO) {
-            this.#subMeshVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_SubMesh_BindGroupLayout', {
-                label: 'Foliage_SubMesh_BindGroupLayout',
+        if (gpuDevice && renderUnitMegaUBO) {
+            this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
+                label: 'Foliage_RenderUnit_BindGroupLayout',
                 entries: [
                     {
                         binding: 0,
@@ -102,14 +102,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 ]
             });
 
-            this.#subMeshDynamicBindGroup = gpuDevice.createBindGroup({
-                label: 'Foliage_SubMesh_DynamicBindGroup',
-                layout: this.#subMeshVertexBindGroupLayout,
+            this.#renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
+                label: 'Foliage_RenderUnit_DynamicBindGroup',
+                layout: this.#renderUnitVertexBindGroupLayout,
                 entries: [
                     {
                         binding: 0,
                         resource: {
-                            buffer: subMeshMegaUBO,
+                            buffer: renderUnitMegaUBO,
                             offset: 0,
                             size: 32
                         }
@@ -123,14 +123,82 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#renderer = new FoliageRenderer(
             this.redGPUContext,
             this.#pipelineRegistry,
-            this.#subMeshVertexBindGroupLayout,
-            this.#subMeshDynamicBindGroup
+            this.#renderUnitVertexBindGroupLayout,
+            this.#renderUnitDynamicBindGroup
         );
         this.#culler = new FoliageCuller(this.redGPUContext, this.#megaBuffer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markAllBundlesDirty();
         };
+    }
+
+    /**
+     * [KO] 렌더 유닛 UBO 슬롯 풀러를 반환합니다.
+     * [EN] Returns the render unit UBO slot pooler.
+     */
+    get slotPooler(): FoliageSlotPooler {
+        return this.#slotPooler;
+    }
+
+    /**
+     * [KO] 활성화된 식생 타입들이 Depth Prepass에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the depth prepass.
+     */
+    get depthPrepassDrawCalls(): number {
+        if (!this.enabled || !this.#useDepthPrepass) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const foliage = list[i];
+            if (foliage.activeInstanceCount > 0 && foliage.useDepthPrepass) {
+                count += foliage.depthPrepassOpaqueRenderUnits.length + foliage.depthPrepassMaskedRenderUnits.length;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 활성화된 식생 타입들이 순수 메인 렌더 패스(Forward Pass)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
+     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the forward main render pass.
+     */
+    get mainPassDrawCalls(): number {
+        if (!this.enabled) return 0;
+        let count = 0;
+        const list = this.types;
+        const len = list.length;
+        for (let i = 0; i < len; i++) {
+            const foliage = list[i];
+            if (foliage.activeInstanceCount > 0) {
+                count += foliage.mainRenderUnits.length;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 불투명(Opaque) 식생 렌더 유닛에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 반환합니다.
+     * [EN] Gets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage render units.
+     */
+    get useDepthPrepass(): boolean {
+        return this.#useDepthPrepass;
+    }
+
+    /**
+     * [KO] 불투명(Opaque) 식생 렌더 유닛에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 설정합니다.
+     * [EN] Sets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage render units.
+     *
+     * @param val -
+     * [KO] 활성화 여부 (`true`일 경우 메인 렌더링 전 Depth Prepass를 선행하여 픽셀 오버드로우 최소화)
+     * [EN] Whether to enable (when `true`, runs Depth Prepass before main rendering to minimize pixel overdraw)
+     */
+    set useDepthPrepass(val: boolean) {
+        const boolVal = !!val;
+        if (this.#useDepthPrepass !== boolVal) {
+            this.#useDepthPrepass = boolVal;
+            this.#renderer.useDepthPrepass = boolVal;
+        }
     }
 
     /**
@@ -160,14 +228,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             this.#needsRepopulateMask = 0;
         }
 
-        // 2. [UBO 채널] 바람/지면블렌드/LOD전환거리 등 UBO가 변경된 식생 서브메시 UBO 슬롯 1회 일괄 플러시
+        // 2. [UBO 채널] 바람/지면블렌드/LOD전환거리 등 UBO가 변경된 식생 렌더 유닛 UBO 슬롯 1회 일괄 플러시
         const uboMask = this.#dirtyUboMask;
         if (uboMask !== 0) {
             for (let i = 0; i < count; i++) {
                 const foliage = types[i];
                 const typeId = foliage.allocation?.typeId ?? 0;
                 if ((uboMask & (1 << typeId)) !== 0) {
-                    foliage.flushAllSubMeshUBOs();
+                    foliage.flushAllRenderUnitUBOs();
                 }
             }
             this.#dirtyUboMask = 0;
@@ -196,11 +264,19 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 서브메시 UBO 슬롯 풀러를 반환합니다.
-     * [EN] Returns the sub-mesh UBO slot pooler.
+     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
+     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
      */
-    get slotPooler(): FoliageSlotPooler {
-        return this.#slotPooler;
+    destroy(): void {
+        this.clearTypes();
+        this.#megaBuffer.destroy();
+        this.#pipelineRegistry.clearCache();
+        this.#renderer.destroy();
+        this.#culler.destroy();
+        this.#slotPooler.destroy();
+        this.#renderUnitDynamicBindGroup = null;
+        this.#renderUnitVertexBindGroupLayout = null;
+        this.#onUniformUpdateNeeded = null;
     }
 
     /**
@@ -209,84 +285,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      */
     protected override computeTypeDrawCalls(foliage: Foliage): number {
         if (foliage.activeInstanceCount <= 0) return 0;
-        let count = foliage.mainSubMeshes.length;
+        let count = foliage.mainRenderUnits.length;
         if (this.#useDepthPrepass && foliage.useDepthPrepass) {
-            count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
+            count += foliage.depthPrepassOpaqueRenderUnits.length + foliage.depthPrepassMaskedRenderUnits.length;
         }
-        return count;
-    }
-
-    /**
-     * [KO] 활성화된 식생 타입들이 Depth Prepass에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the depth prepass.
-     */
-    get depthPrepassDrawCalls(): number {
-        if (!this.enabled || !this.#useDepthPrepass) return 0;
-        let count = 0;
-        const list = this.types;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const foliage = list[i];
-            if (foliage.activeInstanceCount > 0 && foliage.useDepthPrepass) {
-                count += foliage.depthPrepassOpaqueSubMeshes.length + foliage.depthPrepassMaskedSubMeshes.length;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * [KO] 활성화된 식생 타입들이 순수 메인 렌더 패스(Forward Pass)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the forward main render pass.
-     */
-    get mainPassDrawCalls(): number {
-        if (!this.enabled) return 0;
-        let count = 0;
-        const list = this.types;
-        const len = list.length;
-        for (let i = 0; i < len; i++) {
-            const foliage = list[i];
-            if (foliage.activeInstanceCount > 0) {
-                count += foliage.mainSubMeshes.length;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * [KO] 불투명(Opaque) 식생 서브메시에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 반환합니다.
-     * [EN] Gets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage submeshes.
-     */
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
-    }
-
-    /**
-     * [KO] 불투명(Opaque) 식생 서브메시에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 설정합니다.
-     * [EN] Sets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage submeshes.
-     *
-     * @param val -
-     * [KO] 활성화 여부 (`true`일 경우 메인 렌더링 전 Depth Prepass를 선행하여 픽셀 오버드로우 최소화)
-     * [EN] Whether to enable (when `true`, runs Depth Prepass before main rendering to minimize pixel overdraw)
-     */
-    set useDepthPrepass(val: boolean) {
-        const boolVal = !!val;
-        if (this.#useDepthPrepass !== boolVal) {
-            this.#useDepthPrepass = boolVal;
-            this.#renderer.useDepthPrepass = boolVal;
-        }
-    }
-
-    /**
-     * [KO] 그림자를 투사하는 특정 식생 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
-     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
-     */
-    protected override computeTypeShadowDrawCalls(foliage: Foliage): number {
-        if (foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) return 0;
-        const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
-        let count = foliage.hasMaskedLOD0
-            ? foliage.lod0SubMeshes.length + (num3DLODs > 1 ? 1 : 0)
-            : 1;
-        count += 3;
         return count;
     }
 
@@ -544,19 +546,17 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     };
 
     /**
-     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
-     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
+     * [KO] 그림자를 투사하는 특정 식생 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
      */
-    destroy(): void {
-        this.clearTypes();
-        this.#megaBuffer.destroy();
-        this.#pipelineRegistry.clearCache();
-        this.#renderer.destroy();
-        this.#culler.destroy();
-        this.#slotPooler.destroy();
-        this.#subMeshDynamicBindGroup = null;
-        this.#subMeshVertexBindGroupLayout = null;
-        this.#onUniformUpdateNeeded = null;
+    protected override computeTypeShadowDrawCalls(foliage: Foliage): number {
+        if (foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) return 0;
+        const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
+        let count = foliage.hasMaskedLOD0
+            ? foliage.lod0RenderUnits.length + (num3DLODs > 1 ? 1 : 0)
+            : 1;
+        count += 3;
+        return count;
     }
 
     #repopulateFoliage(type: Foliage): void {

@@ -417,7 +417,7 @@ function renderTestPane({
         placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
             .on('change', () => placementFolder.refresh());
         placementFolder.addBinding(type, 'densityScaleByWeight');
-        placementFolder.addBinding(type, 'subMeshCount', {readonly: true});
+        placementFolder.addBinding(type, 'renderUnitCount', {readonly: true, label: 'Render Units'});
         placementFolder.addBinding(type, 'drawCallCount', {readonly: true});
         placementFolder.addButton({title: 'rebake'}).on('click', () => {
             type.rebake();
@@ -466,7 +466,7 @@ function renderTestPane({
                     type.setLODDistance(idx, ev.value);
                 });
             }
-            subFolder.addBinding(lodInfo, 'subMeshCount', {readonly: true});
+            subFolder.addBinding(lodInfo, 'renderUnitCount', {readonly: true, label: 'Render Units'});
         });
 
         // 6. Shadow (그림자)

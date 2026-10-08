@@ -1,14 +1,14 @@
 /**
- * [KO] 식생 서브메시용 256바이트 정렬 Dynamic Offset UBO 슬롯 풀러 모듈입니다.
- * [EN] 256-byte aligned dynamic offset UBO slot pooler module for foliage sub-meshes.
+ * [KO] 식생 렌더 단위(Render Unit)용 256바이트 정렬 Dynamic Offset UBO 슬롯 풀러 모듈입니다.
+ * [EN] 256-byte aligned dynamic offset UBO slot pooler module for foliage render units.
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
 /**
- * [KO] 최대 1,024개 서브메시(256 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 식생 전용 슬롯 풀러 클래스입니다.
- * [EN] Foliage-dedicated slot pooler class managing UBO slots for up to 1,024 sub-meshes (256 KB) and updating/uploading CPU mirror buffers with zero-GC.
+ * [KO] 최대 1,024개 렌더 단위(256 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 식생 전용 슬롯 풀러 클래스입니다.
+ * [EN] Foliage-dedicated slot pooler class managing UBO slots for up to 1,024 render units (256 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
 export class FoliageSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 1024;
@@ -26,13 +26,13 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
             redGPUContext,
             FoliageSlotPooler.MAX_SLOTS,
             FoliageSlotPooler.PARAMS_SIZE_BYTES,
-            'Foliage_SubMesh_MegaUBO'
+            'Foliage_RenderUnit_MegaUBO'
         );
     }
 
     /**
-     * [KO] PBR 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
-     * [EN] Writes PBR sub-mesh parameter data to the specified slot and uploads 32 bytes precisely to GPU.
+     * [KO] PBR 렌더 단위의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
+     * [EN] Writes PBR render unit parameter data to the specified slot and uploads 32 bytes precisely to GPU.
      *
      * @param slot - 슬롯 인덱스 (0 ~ 1023)
      * @param globalSlot - 전역 텍스처/머티리얼 슬롯 번호
@@ -45,7 +45,7 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
      * @param treeHeight - 식생 수목 높이
      * @param windFlutterMultiplier - 잔잎 흔들림 배수
      */
-    writePBRSubMeshSlot(
+    writePBRRenderUnitSlot(
         slot: number,
         globalSlot: number,
         receiveShadow: boolean,
@@ -75,15 +75,15 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
     }
 
     /**
-     * [KO] 그림자 병합 서브메시의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
-     * [EN] Writes shadow merged sub-mesh parameter data to the specified slot and uploads 32 bytes precisely to GPU.
+     * [KO] 그림자 병합 렌더 단위의 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 32바이트 정밀 전송합니다.
+     * [EN] Writes shadow merged render unit parameter data to the specified slot and uploads 32 bytes precisely to GPU.
      *
      * @param slot - 슬롯 인덱스 (0 ~ 1023)
      * @param windMultiplier - 바람 세기 배수
      * @param treeHeight - 식생 수목 높이
      * @param windFlutterMultiplier - 잔잎 흔들림 배수
      */
-    writeShadowSubMeshSlot(
+    writeShadowRenderUnitSlot(
         slot: number,
         windMultiplier?: number,
         treeHeight?: number,
@@ -107,8 +107,8 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
     }
 
     /**
-     * [KO] 특정 서브메시 슬롯의 바람 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
-     * [EN] Writes wind parameters to CPU mirror buffer for a specific sub-mesh slot (Zero-GC).
+     * [KO] 특정 렌더 단위 슬롯의 바람 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
+     * [EN] Writes wind parameters to CPU mirror buffer for a specific render unit slot (Zero-GC).
      *
      * @param slot - 슬롯 인덱스
      * @param windMultiplier - 바람 세기 배수
@@ -131,8 +131,8 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
     }
 
     /**
-     * [KO] 특정 서브메시 슬롯의 지면 블렌딩 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
-     * [EN] Writes ground blending parameters to CPU mirror buffer for a specific sub-mesh slot (Zero-GC).
+     * [KO] 특정 렌더 단위 슬롯의 지면 블렌딩 파라미터를 CPU 미러 버퍼에 기록합니다 (Zero-GC).
+     * [EN] Writes ground blending parameters to CPU mirror buffer for a specific render unit slot (Zero-GC).
      *
      * @param slot - 슬롯 인덱스
      * @param strength - 지면 블렌드 강도
@@ -152,8 +152,8 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
     }
 
     /**
-     * [KO] 특정 서브메시 슬롯의 전체 파라미터(32바이트)를 GPU VRAM으로 단일 전송합니다 (프레임 지연 배칭 전용).
-     * [EN] Flushes full parameters (32 bytes) of a specific sub-mesh slot to GPU VRAM (for deferred frame batching).
+     * [KO] 특정 렌더 단위 슬롯의 전체 파라미터(32바이트)를 GPU VRAM으로 단일 전송합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes full parameters (32 bytes) of a specific render unit slot to GPU VRAM (for deferred frame batching).
      *
      * @param slot - 슬롯 인덱스
      */

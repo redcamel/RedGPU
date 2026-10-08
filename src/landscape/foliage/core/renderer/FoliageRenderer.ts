@@ -6,11 +6,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
-import FoliageSubMesh from "../submesh/FoliageSubMesh";
+import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
 import Foliage from "../Foliage";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
-import FoliageShadowMergedSubMesh from "../submesh/FoliageShadowMergedSubMesh";
+import FoliageShadowMergedRenderUnit from "../renderUnit/FoliageShadowMergedRenderUnit";
 
 /**
  * [KO] 렌더링 가능한 유효 식생 타입 항목 인터페이스입니다.
@@ -34,7 +34,7 @@ export interface ValidFoliageTypeItem {
 class FoliageRenderer extends AScatterRenderer {
     static #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
-    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
+    #renderUnitVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #lastBoundPipeline: GPURenderPipeline | null = null;
     #lastBoundSystemBG: GPUBindGroup | null = null;
@@ -57,7 +57,7 @@ class FoliageRenderer extends AScatterRenderer {
         validTypeCount: number;
     }> = new WeakMap();
 
-    #subMeshDynamicBindGroup: GPUBindGroup | null = null;
+    #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
 
     /**
      * [KO] FoliageRenderer 인스턴스를 생성합니다.
@@ -68,23 +68,23 @@ class FoliageRenderer extends AScatterRenderer {
      * @param pipelineRegistry -
      * [KO] 식생 파이프라인 레지스트리
      * [EN] Foliage pipeline registry
-     * @param subMeshVertexBindGroupLayout -
-     * [KO] 서브메시 유니폼 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Sub-mesh uniform bind group layout (optional)
-     * @param subMeshDynamicBindGroup -
+     * @param renderUnitVertexBindGroupLayout -
+     * [KO] 렌더 유닛 유니폼 바인드 그룹 레이아웃 (선택사항)
+     * [EN] Render unit uniform bind group layout (optional)
+     * @param renderUnitDynamicBindGroup -
      * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹 (선택사항)
      * [EN] 256B aligned Dynamic Offset UBO bind group (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
-        subMeshVertexBindGroupLayout?: GPUBindGroupLayout | null,
-        subMeshDynamicBindGroup?: GPUBindGroup | null
+        renderUnitVertexBindGroupLayout?: GPUBindGroupLayout | null,
+        renderUnitDynamicBindGroup?: GPUBindGroup | null
     ) {
         super(redGPUContext);
         this.#pipelineRegistry = pipelineRegistry;
-        this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
-        this.#subMeshDynamicBindGroup = subMeshDynamicBindGroup || null;
+        this.#renderUnitVertexBindGroupLayout = renderUnitVertexBindGroupLayout || null;
+        this.#renderUnitDynamicBindGroup = renderUnitDynamicBindGroup || null;
 
         for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
             this.#validTypesMain.push({type: null, culledGPU: null, indirectGPU: null});
@@ -155,7 +155,7 @@ class FoliageRenderer extends AScatterRenderer {
             const megaBuffer = foliageType.megaBuffer;
             if (!megaBuffer) continue;
             const {culledGPUBuffer: culledGPU, indirectGPUBuffer: indirectGPU} = megaBuffer;
-            if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
+            if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
 
             let item = this.#validTypesMain[validCount];
             if (!item) {
@@ -205,14 +205,14 @@ class FoliageRenderer extends AScatterRenderer {
             const foliageType = item.type!;
             const culledGPU = item.culledGPU!;
             const indirectGPU = item.indirectGPU!;
-            const subMeshes = foliageType.mainSubMeshes;
-            const subCount = subMeshes.length;
+            const renderUnits = foliageType.mainRenderUnits;
+            const unitCount = renderUnits.length;
             const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
 
-            for (let s = 0; s < subCount; s++) {
-                const sub = subMeshes[s];
-                const depthMode = effectiveUsePrepass ? sub.mainDepthMode : 'normal';
-                this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
+            for (let s = 0; s < unitCount; s++) {
+                const unit = renderUnits[s];
+                const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
+                this.#drawRenderUnit(passEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
         }
     }
@@ -255,7 +255,7 @@ class FoliageRenderer extends AScatterRenderer {
                 const megaBuffer = foliageType.megaBuffer;
                 const culledGPU = megaBuffer?.shadowCulledGPUBuffer;
                 const indirectGPU = megaBuffer?.shadowIndirectGPUBuffer;
-                if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
+                if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
 
                 let item = this.#validTypesShadow[validCount];
                 if (!item) {
@@ -285,8 +285,8 @@ class FoliageRenderer extends AScatterRenderer {
 
     override destroy(): void {
         super.destroy();
-        this.#subMeshDynamicBindGroup = null;
-        this.#subMeshVertexBindGroupLayout = null;
+        this.#renderUnitDynamicBindGroup = null;
+        this.#renderUnitVertexBindGroupLayout = null;
         this.markDepthPrepassBundleDirty();
         this.#resetBoundState();
         for (let i = 0; i < this.#validTypesMain.length; i++) {
@@ -321,18 +321,18 @@ class FoliageRenderer extends AScatterRenderer {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return null;
 
-        let hasPrepassSubMeshes = false;
+        let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesMain[t];
             const foliageType = item.type;
             if (foliageType && foliageType.useDepthPrepass) {
-                if (foliageType.depthPrepassOpaqueSubMeshes.length > 0 || foliageType.depthPrepassMaskedSubMeshes.length > 0) {
-                    hasPrepassSubMeshes = true;
+                if (foliageType.depthPrepassOpaqueRenderUnits.length > 0 || foliageType.depthPrepassMaskedRenderUnits.length > 0) {
+                    hasPrepassRenderUnits = true;
                     break;
                 }
             }
         }
-        if (!hasPrepassSubMeshes) return null;
+        if (!hasPrepassRenderUnits) return null;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_DepthPrepassBundleEncoder_${view.name}`,
@@ -347,29 +347,29 @@ class FoliageRenderer extends AScatterRenderer {
 
         this.#resetBoundState();
 
-        // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
+        // [1단계] 모든 식생 타입의 Opaque Fast-Z 렌더 유닛 선행 일괄 드로우
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
-            const subMeshes = foliageType.depthPrepassOpaqueSubMeshes;
-            const subCount = subMeshes.length;
-            if (subCount === 0) continue;
+            const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
+            const unitCount = renderUnits.length;
+            if (unitCount === 0) continue;
 
-            for (let s = 0; s < subCount; s++) {
-                this.#drawSubMesh(bundleEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+            for (let s = 0; s < unitCount; s++) {
+                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
-        // [2단계] 모든 식생 타입의 Masked 서브메시 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
+        // [2단계] 모든 식생 타입의 Masked 렌더 유닛 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
-            const subMeshes = foliageType.depthPrepassMaskedSubMeshes;
-            const subCount = subMeshes.length;
-            if (subCount === 0) continue;
+            const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
+            const unitCount = renderUnits.length;
+            if (unitCount === 0) continue;
 
-            for (let s = 0; s < subCount; s++) {
-                this.#drawSubMesh(bundleEncoder, subMeshes[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+            for (let s = 0; s < unitCount; s++) {
+                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
@@ -399,10 +399,10 @@ class FoliageRenderer extends AScatterRenderer {
 
         const firstType = validCount > 0 ? this.#validTypesShadow[0].type : null;
         const megaBuffer = firstType?.megaBuffer;
-        const maxSubMeshes = megaBuffer?.maxSubMeshes ?? 256;
+        const maxRenderUnits = megaBuffer?.maxRenderUnits ?? 256;
         const instanceCapacity = megaBuffer?.instanceCapacity ?? 65536;
 
-        const cascadeIndirectOffset = currentCascade * maxSubMeshes * 20;
+        const cascadeIndirectOffset = currentCascade * maxRenderUnits * 20;
         const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
@@ -413,54 +413,54 @@ class FoliageRenderer extends AScatterRenderer {
             const maxShadowLOD = Math.max(0, num3DLODs - 1);
 
             if (currentCascade === 0 && foliageType.hasMaskedLOD0) {
-                const lod0Subs = foliageType.lod0SubMeshes;
-                const subCount = lod0Subs.length;
-                for (let l0 = 0; l0 < subCount; l0++) {
-                    const sub = lod0Subs[l0];
-                    const {instanceBufferOffset, indirectOffsetBytes} = sub;
+                const lod0Units = foliageType.lod0RenderUnits;
+                const unitCount = lod0Units.length;
+                for (let l0 = 0; l0 < unitCount; l0++) {
+                    const unit = lod0Units[l0];
+                    const {instanceBufferOffset, indirectOffsetBytes} = unit;
                     const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                     const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
-                    this.#drawShadowSubMesh(bundleEncoder, sub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                    this.#drawShadowRenderUnit(bundleEncoder, unit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                 }
 
                 if (num3DLODs > 1) {
-                    const shadowMergedSubs = foliageType.shadowMergedSubMeshes;
-                    for (let s = 0; s < shadowMergedSubs.length; s++) {
-                        const shadowSub = shadowMergedSubs[s];
-                        if (shadowSub.lodIndex === maxShadowLOD) {
-                            const {instanceBufferOffset, indirectOffsetBytes} = shadowSub;
+                    const shadowMergedUnits = foliageType.shadowMergedRenderUnits;
+                    for (let s = 0; s < shadowMergedUnits.length; s++) {
+                        const shadowUnit = shadowMergedUnits[s];
+                        if (shadowUnit.lodIndex === maxShadowLOD) {
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
                             const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                             const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
-                            this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                            this.#drawShadowMergedRenderUnit(bundleEncoder, shadowUnit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                             break;
                         }
                     }
                 }
             } else {
-                const shadowMergedSubs = foliageType.shadowMergedSubMeshes;
-                if (shadowMergedSubs.length > 0) {
+                const shadowMergedUnits = foliageType.shadowMergedRenderUnits;
+                if (shadowMergedUnits.length > 0) {
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
-                    for (let s = 0; s < shadowMergedSubs.length; s++) {
-                        const shadowSub = shadowMergedSubs[s];
-                        if (shadowSub.lodIndex === targetLOD) {
-                            const {instanceBufferOffset, indirectOffsetBytes} = shadowSub;
+                    for (let s = 0; s < shadowMergedUnits.length; s++) {
+                        const shadowUnit = shadowMergedUnits[s];
+                        if (shadowUnit.lodIndex === targetLOD) {
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
                             const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                             const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
-                            this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                            this.#drawShadowMergedRenderUnit(bundleEncoder, shadowUnit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                             break;
                         }
                     }
                 } else {
-                    const allSubMeshes = foliageType.subMeshes;
-                    const subCount = allSubMeshes.length;
+                    const allRenderUnits = foliageType.renderUnits;
+                    const unitCount = allRenderUnits.length;
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
-                    for (let s = 0; s < subCount; s++) {
-                        const sub = allSubMeshes[s];
-                        if (sub.isImpostor || sub.lodIndex !== targetLOD) continue;
-                        const {instanceBufferOffset, indirectOffsetBytes} = sub;
+                    for (let s = 0; s < unitCount; s++) {
+                        const unit = allRenderUnits[s];
+                        if (unit.isImpostor || unit.lodIndex !== targetLOD) continue;
+                        const {instanceBufferOffset, indirectOffsetBytes} = unit;
                         const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                         const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
-                        this.#drawShadowSubMesh(bundleEncoder, sub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                        this.#drawShadowRenderUnit(bundleEncoder, unit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                     }
                 }
             }
@@ -475,7 +475,7 @@ class FoliageRenderer extends AScatterRenderer {
 
     #bindAndDrawUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        unit: FoliageSubMesh | FoliageShadowMergedSubMesh,
+        unit: FoliageRenderUnit | FoliageShadowMergedRenderUnit,
         pipeline: GPURenderPipeline,
         systemBG: GPUBindGroup | null,
         matUniformBG: GPUBindGroup | null,
@@ -495,9 +495,9 @@ class FoliageRenderer extends AScatterRenderer {
             this.#lastBoundSystemBG = systemBG;
         }
 
-        if (this.#subMeshDynamicBindGroup && unit.slotIndex >= 0) {
+        if (this.#renderUnitDynamicBindGroup && unit.slotIndex >= 0) {
             this.dynamicOffsetArray[0] = unit.slotIndex * 256;
-            passEncoder.setBindGroup(1, this.#subMeshDynamicBindGroup, this.dynamicOffsetArray, 0, 1);
+            passEncoder.setBindGroup(1, this.#renderUnitDynamicBindGroup, this.dynamicOffsetArray, 0, 1);
         }
 
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
@@ -529,28 +529,28 @@ class FoliageRenderer extends AScatterRenderer {
         unit.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
     }
 
-    #drawShadowMergedSubMesh(
+    #drawShadowMergedRenderUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        shadowSub: FoliageShadowMergedSubMesh,
+        shadowUnit: FoliageShadowMergedRenderUnit,
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = shadowSub.geometry.vertexBuffer?.gpuBuffer;
+        const vertexGPUBuffer = shadowUnit.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
 
         const pipeline = this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
-            shadowSub.strideBytes,
+            shadowUnit.strideBytes,
             'none',
-            this.#subMeshVertexBindGroupLayout
+            this.#renderUnitVertexBindGroupLayout
         );
         if (!pipeline) return;
 
         this.#bindAndDrawUnit(
             passEncoder,
-            shadowSub,
+            shadowUnit,
             pipeline,
             systemBG,
             null,
@@ -562,38 +562,38 @@ class FoliageRenderer extends AScatterRenderer {
         );
     }
 
-    #drawShadowSubMesh(
+    #drawShadowRenderUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        sub: FoliageSubMesh,
+        unit: FoliageRenderUnit,
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
+        const vertexGPUBuffer = unit.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
 
-        const useMasked = (sub.lodIndex === 0) && sub.isMasked;
+        const useMasked = (unit.lodIndex === 0) && unit.isMasked;
         const pipeline = useMasked
             ? this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
-                sub.material,
-                sub.strideBytes,
+                unit.material,
+                unit.strideBytes,
                 'none',
-                this.#subMeshVertexBindGroupLayout
+                this.#renderUnitVertexBindGroupLayout
             )
             : this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
-                sub.strideBytes,
+                unit.strideBytes,
                 'none',
-                this.#subMeshVertexBindGroupLayout
+                this.#renderUnitVertexBindGroupLayout
             );
         if (!pipeline) return;
 
-        const matUniformBG = useMasked ? (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || null) : null;
+        const matUniformBG = useMasked ? (unit.material.gpuRenderInfo?.fragmentUniformBindGroup || null) : null;
 
         this.#bindAndDrawUnit(
             passEncoder,
-            sub,
+            unit,
             pipeline,
             systemBG,
             matUniformBG,
@@ -605,9 +605,9 @@ class FoliageRenderer extends AScatterRenderer {
         );
     }
 
-    #drawSubMesh(
+    #drawRenderUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        sub: FoliageSubMesh,
+        unit: FoliageRenderUnit,
         sampleCount: number,
         msaaID: string,
         systemBG: GPUBindGroup | null,
@@ -617,27 +617,27 @@ class FoliageRenderer extends AScatterRenderer {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
+        const vertexGPUBuffer = unit.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
 
-        const pipeline = sub.getPipeline(
+        const pipeline = unit.getPipeline(
             this.#pipelineRegistry,
             sampleCount,
             msaaID,
             depthPassMode,
-            this.#subMeshVertexBindGroupLayout
+            this.#renderUnitVertexBindGroupLayout
         );
         if (!pipeline) return;
 
         const emptyBG = this.resourceManager.emptyBindGroup;
-        const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !sub.isMasked;
+        const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !unit.isMasked;
         const matUniformBG = isDepthPrepassOpaque
             ? emptyBG
-            : (sub.material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
+            : (unit.material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
 
         this.#bindAndDrawUnit(
             passEncoder,
-            sub,
+            unit,
             pipeline,
             systemBG,
             matUniformBG,

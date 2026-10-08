@@ -6,12 +6,12 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
-import assembleFoliageSubMeshes from "./assembler/assembleFoliageSubMeshes";
-import FoliageSubMesh from "./submesh/FoliageSubMesh";
-import FoliageShadowMergedSubMesh from "./submesh/FoliageShadowMergedSubMesh";
+import assembleFoliageRenderUnits from "./assembler/assembleFoliageRenderUnits";
+import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
+import FoliageShadowMergedRenderUnit from "./renderUnit/FoliageShadowMergedRenderUnit";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
-import {FoliageSlotPooler} from "./submesh/FoliageSlotPooler";
+import {FoliageSlotPooler} from "./renderUnit/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 /**
@@ -199,15 +199,15 @@ export interface FoliageLODInfo {
      */
     lodDistance: number;
     /**
-     * [KO] 전체 서브메시 배열 내 해당 LOD 시작 오프셋
-     * [EN] Starting offset of this LOD in the global sub-mesh array
+     * [KO] 전체 렌더 단위 배열 내 해당 LOD 시작 오프셋
+     * [EN] Starting offset of this LOD in the global render unit array
      */
-    subMeshOffset: number;
+    renderUnitOffset: number;
     /**
-     * [KO] 해당 LOD에 속한 서브메시 개수
-     * [EN] Number of sub-meshes belonging to this LOD
+     * [KO] 해당 LOD에 속한 렌더 단위 개수
+     * [EN] Number of render units belonging to this LOD
      */
-    subMeshCount: number;
+    renderUnitCount: number;
     /**
      * [KO] 그림자 수신 여부
      * [EN] Whether shadows are received
@@ -329,12 +329,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #randomRotationY: boolean = true;
     #maxInstances: number = 0;
 
-    #subMeshes: FoliageSubMesh[] = [];
-    #shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
-    #lod0SubMeshes: FoliageSubMesh[] = [];
-    #depthPrepassOpaqueSubMeshes: FoliageSubMesh[] = [];
-    #depthPrepassMaskedSubMeshes: FoliageSubMesh[] = [];
-    #mainSubMeshes: FoliageSubMesh[] = [];
+    #renderUnits: FoliageRenderUnit[] = [];
+    #shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[] = [];
+    #lod0RenderUnits: FoliageRenderUnit[] = [];
+    #depthPrepassOpaqueRenderUnits: FoliageRenderUnit[] = [];
+    #depthPrepassMaskedRenderUnits: FoliageRenderUnit[] = [];
+    #mainRenderUnits: FoliageRenderUnit[] = [];
     #hasMaskedLOD0: boolean = false;
     #lodInfoList: FoliageLODInfo[] = [];
     #lodInfoListWithoutImpostor: FoliageLODInfo[] | null = null;
@@ -350,7 +350,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
     #groundBlendRange: number = 1.5;
-    #impostorSubMesh: FoliageSubMesh | null = null;
+    #impostorRenderUnit: FoliageRenderUnit | null = null;
 
     #subCells: Map<number, FoliageSubCell> = new Map();
     #mountedSubCells: FoliageSubCell[] = [];
@@ -487,7 +487,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
         this.#nameHash = hash;
 
-        const assembleResult = assembleFoliageSubMeshes(
+        const assembleResult = assembleFoliageRenderUnits(
             this.redGPUContext,
             options,
             this.#slotPooler
@@ -501,8 +501,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             : (assembleResult.boundingHeight || 2.0);
 
         this.#initBuckets(
-            assembleResult.subMeshes,
-            assembleResult.shadowMergedSubMeshes || []
+            assembleResult.renderUnits,
+            assembleResult.shadowMergedRenderUnits || []
         );
 
         let defaultShadowDist = 300.0;
@@ -546,8 +546,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const alloc = this.#megaBuffer.allocateType(
                 this.name,
                 resolvedMaxInstances,
-                this.#subMeshes,
-                this.#shadowMergedSubMeshes,
+                this.#renderUnits,
+                this.#shadowMergedRenderUnits,
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
@@ -565,7 +565,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
 
         this.#syncInternalWind();
-        this.flushAllSubMeshUBOs();
+        this.flushAllRenderUnitUBOs();
     }
 
     set windMultiplier(val: number) {
@@ -673,19 +673,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 모든 LOD 단계를 포함하는 전체 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of all sub-meshes across all LOD levels.
+     * [KO] 해당 식생 모델을 구성하는 공통 렌더 단위(FoliageRenderUnit) 컬렉션을 반환합니다.
+     * [EN] Returns the collection of common render units composing this foliage model.
      */
-    get subMeshes(): FoliageSubMesh[] {
-        return this.#subMeshes;
-    }
-
-    /**
-     * [KO] 등록된 총 서브메시 개수를 반환합니다.
-     * [EN] Returns the total number of registered sub-meshes.
-     */
-    override get subMeshCount(): number {
-        return this.#subMeshes.length;
+    get renderUnits(): readonly FoliageRenderUnit[] {
+        return this.#renderUnits;
     }
 
     /**
@@ -693,52 +685,51 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
      */
     override get drawCallCount(): number {
-        let count = this.#mainSubMeshes.length;
+        let count = this.#mainRenderUnits.length;
         if (this.#useDepthPrepass) {
-            count += this.#depthPrepassOpaqueSubMeshes.length + this.#depthPrepassMaskedSubMeshes.length;
+            count += this.#depthPrepassOpaqueRenderUnits.length + this.#depthPrepassMaskedRenderUnits.length;
         }
         return count;
     }
 
-
     /**
-     * [KO] 뎁스 프리패스에서 Fast-Z로 렌더링되는 불투명(Opaque) 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of opaque sub-meshes rendered with Fast-Z in depth prepass.
+     * [KO] 뎁스 프리패스에서 Fast-Z로 렌더링되는 불투명(Opaque) 렌더 단위 목록을 반환합니다.
+     * [EN] Returns the list of opaque render units rendered with Fast-Z in depth prepass.
      */
-    get depthPrepassOpaqueSubMeshes(): FoliageSubMesh[] {
-        return this.#depthPrepassOpaqueSubMeshes;
+    get depthPrepassOpaqueRenderUnits(): FoliageRenderUnit[] {
+        return this.#depthPrepassOpaqueRenderUnits;
     }
 
     /**
-     * [KO] 뎁스 프리패스에서 알파 테스트로 렌더링되는 마스크(Masked) 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of masked sub-meshes rendered with alpha testing in depth prepass.
+     * [KO] 뎁스 프리패스에서 알파 테스트로 렌더링되는 마스크(Masked) 렌더 단위 목록을 반환합니다.
+     * [EN] Returns the list of masked render units rendered with alpha testing in depth prepass.
      */
-    get depthPrepassMaskedSubMeshes(): FoliageSubMesh[] {
-        return this.#depthPrepassMaskedSubMeshes;
+    get depthPrepassMaskedRenderUnits(): FoliageRenderUnit[] {
+        return this.#depthPrepassMaskedRenderUnits;
     }
 
     /**
-     * [KO] 메인 포워드 렌더 패스에서 렌더링되는 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of sub-meshes rendered in the main forward render pass.
+     * [KO] 메인 포워드 렌더 패스에서 렌더링되는 렌더 단위 목록을 반환합니다.
+     * [EN] Returns the list of render units rendered in the main forward render pass.
      */
-    get mainSubMeshes(): FoliageSubMesh[] {
-        return this.#mainSubMeshes;
+    get mainRenderUnits(): FoliageRenderUnit[] {
+        return this.#mainRenderUnits;
     }
 
     /**
-     * [KO] 최상위 디테일 단계(LOD 0)에 속하는 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of sub-meshes belonging to the highest detail level (LOD 0).
+     * [KO] 최상위 디테일 단계(LOD 0)에 속하는 렌더 단위 목록을 반환합니다.
+     * [EN] Returns the list of render units belonging to the highest detail level (LOD 0).
      */
-    get lod0SubMeshes(): FoliageSubMesh[] {
-        return this.#lod0SubMeshes;
+    get lod0RenderUnits(): FoliageRenderUnit[] {
+        return this.#lod0RenderUnits;
     }
 
     /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스용으로 병합 최적화된 서브메시 목록을 반환합니다.
-     * [EN] Returns the list of merged sub-meshes optimized for cascaded shadow map (CSM) passes.
+     * [KO] 캐스케이드 그림자 맵(CSM) 패스용으로 병합 최적화된 렌더 단위 목록을 반환합니다.
+     * [EN] Returns the list of merged render units optimized for cascaded shadow map (CSM) passes.
      */
-    get shadowMergedSubMeshes(): FoliageShadowMergedSubMesh[] {
-        return this.#shadowMergedSubMeshes;
+    get shadowMergedRenderUnits(): FoliageShadowMergedRenderUnit[] {
+        return this.#shadowMergedRenderUnits;
     }
 
     /**
@@ -828,19 +819,18 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
-     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
+     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
+     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
      *
-     * @param value -
-     * [KO] 임포스터 빌보드 활성화 여부
-     * [EN] Whether to enable octahedral impostor billboards
+     * @param v -
+     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
+     * [EN] Terrain blending vertical range to set (minimum: 0.1)
      */
-    set useImpostor(value: boolean) {
-        if (!this.#impostorSubMesh) return;
-        const boolVal = !!value;
-        if (this.#useImpostor !== boolVal) {
-            this.#useImpostor = boolVal;
-            this.#updatePassBuckets();
+    set groundBlendRange(v: number) {
+        const val = Math.max(0.1, Number(v) || 0.1);
+        if (this.#groundBlendRange !== val) {
+            this.#groundBlendRange = val;
+            this.#updateRenderUnitGroundBlend();
             this.#notifyUniformDirty();
         }
     }
@@ -854,28 +844,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
-     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
-     *
-     * @param v -
-     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
-     * [EN] Terrain blending vertical range to set (minimum: 0.1)
-     */
-    set groundBlendRange(v: number) {
-        const val = Math.max(0.1, Number(v) || 0.1);
-        if (this.#groundBlendRange !== val) {
-            this.#groundBlendRange = val;
-            this.#updateSubMeshGroundBlend();
-            this.#notifyUniformDirty();
-        }
-    }
-
-    /**
-     * [KO] 이 식생 타입에 임포스터 서브메시가 생성되어 존재하는지 여부를 반환합니다.
-     * [EN] Returns whether an impostor sub-mesh exists for this foliage type.
+     * [KO] 이 식생 타입에 임포스터 렌더 단위가 생성되어 존재하는지 여부를 반환합니다.
+     * [EN] Returns whether an impostor render unit exists for this foliage type.
      */
     get hasImpostor(): boolean {
-        return !!this.#impostorSubMesh;
+        return !!this.#impostorRenderUnit;
     }
 
     /**
@@ -883,7 +856,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns whether octahedral impostor billboards are enabled for distant rendering.
      */
     get useImpostor(): boolean {
-        return this.#useImpostor && !!this.#impostorSubMesh;
+        return this.#useImpostor && !!this.#impostorRenderUnit;
+    }
+
+    /**
+     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
+     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
+     *
+     * @param value -
+     * [KO] 임포스터 빌보드 활성화 여부
+     * [EN] Whether to enable octahedral impostor billboards
+     */
+    set useImpostor(value: boolean) {
+        if (!this.#impostorRenderUnit) return;
+        const boolVal = !!value;
+        if (this.#useImpostor !== boolVal) {
+            this.#useImpostor = boolVal;
+            this.#updatePassBuckets();
+            this.#notifyUniformDirty();
+        }
     }
 
     /**
@@ -949,27 +940,27 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     override destroy(): void {
         this.clearSubCellCache();
 
-        const subCount = this.#subMeshes.length;
-        for (let i = 0; i < subCount; i++) {
-            this.#subMeshes[i].destroy();
+        const unitCount = this.#renderUnits.length;
+        for (let i = 0; i < unitCount; i++) {
+            this.#renderUnits[i].destroy();
         }
-        this.#subMeshes.length = 0;
-        this.#lod0SubMeshes.length = 0;
-        this.#depthPrepassOpaqueSubMeshes.length = 0;
-        this.#depthPrepassMaskedSubMeshes.length = 0;
-        this.#mainSubMeshes.length = 0;
+        this.#renderUnits.length = 0;
+        this.#lod0RenderUnits.length = 0;
+        this.#depthPrepassOpaqueRenderUnits.length = 0;
+        this.#depthPrepassMaskedRenderUnits.length = 0;
+        this.#mainRenderUnits.length = 0;
 
-        const shadowCount = this.#shadowMergedSubMeshes.length;
+        const shadowCount = this.#shadowMergedRenderUnits.length;
         for (let i = 0; i < shadowCount; i++) {
-            this.#shadowMergedSubMeshes[i].destroy();
+            this.#shadowMergedRenderUnits[i].destroy();
         }
-        this.#shadowMergedSubMeshes.length = 0;
+        this.#shadowMergedRenderUnits.length = 0;
 
         this.#lodInfoList.length = 0;
         this.#mountedSubCells.length = 0;
         this.#tempCandidates.length = 0;
 
-        this.#impostorSubMesh = null;
+        this.#impostorRenderUnit = null;
         this.#landscape = null;
         this.#slotPooler = null;
         this.#baker = null;
@@ -1006,17 +997,17 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
 
     /**
-     * [KO] 이 식생 타입에 속한 모든 서브메시 및 그림자 서브메시의 UBO 슬롯 파라미터와 타입 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
-     * [EN] Flushes UBO slot parameters and type parameters for all sub-meshes and shadow sub-meshes of this foliage type to GPU (deferred frame batching).
+     * [KO] 이 식생 타입에 속한 모든 렌더 단위 및 그림자 렌더 단위의 UBO 슬롯 파라미터와 타입 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes UBO slot parameters and type parameters for all render units and shadow render units of this foliage type to GPU (deferred frame batching).
      */
-    flushAllSubMeshUBOs(): void {
+    flushAllRenderUnitUBOs(): void {
         this.#syncTypeParams();
-        const subList = this.#subMeshes;
-        const count = subList.length;
+        const unitList = this.#renderUnits;
+        const count = unitList.length;
         for (let i = 0; i < count; i++) {
-            subList[i].flushSlotUBO();
+            unitList[i].flushSlotUBO();
         }
-        const shadowList = this.#shadowMergedSubMeshes;
+        const shadowList = this.#shadowMergedRenderUnits;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
             shadowList[i].flushSlotUBO();
@@ -1071,7 +1062,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#notifyUniformDirty();
                 break;
             case 'groundBlendStrength':
-                this.#updateSubMeshGroundBlend();
+                this.#updateRenderUnitGroundBlend();
                 this.#notifyUniformDirty();
                 break;
 
@@ -1265,23 +1256,23 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #syncInternalWind(): void {
-        const subList = this.#subMeshes;
-        const count = subList.length;
+        const unitList = this.#renderUnits;
+        const count = unitList.length;
         const windMul = this.#windMultiplier;
         const flutterMul = this.#windFlutterMultiplier;
         const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
 
         for (let i = 0; i < count; i++) {
-            const sub = subList[i];
-            const effectiveFlutterMul = sub.isMasked ? flutterMul : 0.0;
-            sub.updateWindMultipliers(
+            const unit = unitList[i];
+            const effectiveFlutterMul = unit.isMasked ? flutterMul : 0.0;
+            unit.updateWindMultipliers(
                 windMul,
                 effectiveFlutterMul,
                 treeH
             );
         }
 
-        const shadowList = this.#shadowMergedSubMeshes;
+        const shadowList = this.#shadowMergedRenderUnits;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
             shadowList[i].updateWindMultipliers(
@@ -1293,31 +1284,31 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #initBuckets(
-        subMeshes: FoliageSubMesh[],
-        shadowMergedSubMeshes: FoliageShadowMergedSubMesh[]
+        renderUnits: FoliageRenderUnit[],
+        shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[]
     ): void {
-        this.#subMeshes = subMeshes;
-        this.#shadowMergedSubMeshes = shadowMergedSubMeshes;
+        this.#renderUnits = renderUnits;
+        this.#shadowMergedRenderUnits = shadowMergedRenderUnits;
 
-        let impostorSub: FoliageSubMesh | null = null;
-        const subCount = subMeshes.length;
-        for (let i = 0; i < subCount; i++) {
-            const sub = subMeshes[i];
-            if (sub.isImpostor) {
-                impostorSub = sub;
+        let impostorUnit: FoliageRenderUnit | null = null;
+        const unitCount = renderUnits.length;
+        for (let i = 0; i < unitCount; i++) {
+            const unit = renderUnits[i];
+            if (unit.isImpostor) {
+                impostorUnit = unit;
                 break;
             }
         }
-        this.#impostorSubMesh = impostorSub;
+        this.#impostorRenderUnit = impostorUnit;
 
-        const lod0List = this.#lod0SubMeshes;
+        const lod0List = this.#lod0RenderUnits;
         lod0List.length = 0;
         let hasMaskedLOD0 = false;
-        for (let i = 0; i < subCount; i++) {
-            const sub = subMeshes[i];
-            if (sub.lodIndex === 0) {
-                lod0List.push(sub);
-                if (sub.isMasked) {
+        for (let i = 0; i < unitCount; i++) {
+            const unit = renderUnits[i];
+            if (unit.lodIndex === 0) {
+                lod0List.push(unit);
+                if (unit.isMasked) {
                     hasMaskedLOD0 = true;
                 }
             }
@@ -1328,43 +1319,43 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #updatePassBuckets(): void {
-        const subList = this.#subMeshes;
-        const count = subList.length;
+        const unitList = this.#renderUnits;
+        const count = unitList.length;
 
-        const prepassOpaqueList = this.#depthPrepassOpaqueSubMeshes;
-        const prepassMaskedList = this.#depthPrepassMaskedSubMeshes;
-        const mainList = this.#mainSubMeshes;
+        const prepassOpaqueList = this.#depthPrepassOpaqueRenderUnits;
+        const prepassMaskedList = this.#depthPrepassMaskedRenderUnits;
+        const mainList = this.#mainRenderUnits;
 
         prepassOpaqueList.length = 0;
         prepassMaskedList.length = 0;
         mainList.length = 0;
 
-        const useImpostor = this.#useImpostor && !!this.#impostorSubMesh;
+        const useImpostor = this.#useImpostor && !!this.#impostorRenderUnit;
         const useDepthPrepass = this.#useDepthPrepass;
 
         for (let i = 0; i < count; i++) {
-            const sub = subList[i];
-            if (!useImpostor && sub.isImpostor) continue;
-            if (useDepthPrepass && sub.canRenderInPass('depthPrepass')) {
-                if (!sub.isMasked) {
-                    prepassOpaqueList.push(sub);
+            const unit = unitList[i];
+            if (!useImpostor && unit.isImpostor) continue;
+            if (useDepthPrepass && unit.canRenderInPass('depthPrepass')) {
+                if (!unit.isMasked) {
+                    prepassOpaqueList.push(unit);
                 } else {
-                    prepassMaskedList.push(sub);
+                    prepassMaskedList.push(unit);
                 }
             }
-            if (sub.canRenderInPass('main')) {
-                mainList.push(sub);
+            if (unit.canRenderInPass('main')) {
+                mainList.push(unit);
             }
         }
     }
 
-    #updateSubMeshGroundBlend(): void {
-        const subList = this.#subMeshes;
-        const subCount = subList.length;
-        for (let s = 0; s < subCount; s++) {
-            const sub = subList[s];
-            if (!sub.isImpostor) {
-                sub.updateGroundBlendParams(this.groundBlendStrength, this.#groundBlendRange);
+    #updateRenderUnitGroundBlend(): void {
+        const unitList = this.#renderUnits;
+        const unitCount = unitList.length;
+        for (let s = 0; s < unitCount; s++) {
+            const unit = unitList[s];
+            if (!unit.isImpostor) {
+                unit.updateGroundBlendParams(this.groundBlendStrength, this.#groundBlendRange);
             }
         }
     }
@@ -1372,7 +1363,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #syncTypeParams(): void {
         const alloc = this.allocation;
         if (this.#megaBuffer && alloc) {
-            const hasImp = !!this.#impostorSubMesh;
+            const hasImp = !!this.#impostorRenderUnit;
             const effectiveLodList = (!this.#useImpostor && hasImp && this.#lodInfoListWithoutImpostor)
                 ? this.#lodInfoListWithoutImpostor
                 : this.#lodInfoList;

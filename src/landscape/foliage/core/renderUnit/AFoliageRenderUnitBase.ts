@@ -1,17 +1,17 @@
 /**
- * [KO] 식생 서브메시 공통 베이스 추상 클래스 모듈입니다.
- * [EN] Common base abstract class module for foliage sub-meshes.
+ * [KO] 식생 렌더 단위(Render Unit) 공통 베이스 추상 클래스 모듈입니다.
+ * [EN] Common base abstract class module for foliage render units.
  * @packageDocumentation
  */
 
-import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "../../../core/scatter/ScatterSubMesh";
+import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../../core/scatter/ScatterRenderUnit";
 import {FoliageSlotPooler} from "./FoliageSlotPooler";
 
 /**
- * [KO] AFoliageSubMeshBase 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for AFoliageSubMeshBase.
+ * [KO] AFoliageRenderUnitBase 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for AFoliageRenderUnitBase.
  */
-export interface AFoliageSubMeshBaseInitOptions extends ScatterSubMeshInitOptions {
+export interface AFoliageRenderUnitBaseInitOptions extends ScatterRenderUnitInitOptions {
     /**
      * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)
      * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023)
@@ -25,19 +25,19 @@ export interface AFoliageSubMeshBaseInitOptions extends ScatterSubMeshInitOption
 }
 
 /**
- * [KO] 식생 일반 서브메시(FoliageSubMesh) 및 그림자 통합 서브메시(FoliageShadowMergedSubMesh)의 UBO 슬롯 생명주기를 공통 관리하는 추상 기본 클래스입니다.
- * [EN] Abstract base class managing UBO slot lifecycle shared across foliage regular sub-meshes and shadow merged sub-meshes.
+ * [KO] 식생 일반 렌더 단위(FoliageRenderUnit) 및 그림자 통합 렌더 단위(FoliageShadowMergedRenderUnit)의 UBO 슬롯 생명주기를 공통 관리하는 추상 기본 클래스입니다.
+ * [EN] Abstract base class managing UBO slot lifecycle shared across foliage regular render units and shadow merged render units.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이며 시스템(FoliageManager)에 의해 자동으로 관리됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is an abstract class automatically managed by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class AFoliageSubMeshBase extends ScatterSubMesh {
+export abstract class AFoliageRenderUnitBase extends ScatterRenderUnit {
     #slotIndex: number = -1;
     #slotPooler: FoliageSlotPooler | null = null;
 
-    constructor(init: AFoliageSubMeshBaseInitOptions) {
+    constructor(init: AFoliageRenderUnitBaseInitOptions) {
         super(init);
         this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
         this.#slotPooler = init.slotPooler || null;
@@ -101,8 +101,8 @@ export abstract class AFoliageSubMeshBase extends ScatterSubMesh {
     }
 
     /**
-     * [KO] 이 서브메시의 UBO 슬롯 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
-     * [EN] Flushes UBO slot parameters of this sub-mesh to GPU (for deferred frame batching).
+     * [KO] 이 렌더 단위의 UBO 슬롯 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes UBO slot parameters of this render unit to GPU (for deferred frame batching).
      */
     flushSlotUBO(): void {
         if (this.#slotPooler && this.#slotIndex >= 0) {
@@ -111,8 +111,8 @@ export abstract class AFoliageSubMeshBase extends ScatterSubMesh {
     }
 
     /**
-     * [KO] 서브메쉬 리소스 및 할당된 UBO 슬롯을 해제합니다.
-     * [EN] Releases sub-mesh resources and allocated UBO slot.
+     * [KO] 렌더 단위 리소스 및 할당된 UBO 슬롯을 해제합니다.
+     * [EN] Releases render unit resources and allocated UBO slot.
      */
     override destroy(): void {
         if (this.#slotPooler && this.#slotIndex >= 0) {
@@ -124,4 +124,4 @@ export abstract class AFoliageSubMeshBase extends ScatterSubMesh {
     }
 }
 
-export default AFoliageSubMeshBase;
+export default AFoliageRenderUnitBase;

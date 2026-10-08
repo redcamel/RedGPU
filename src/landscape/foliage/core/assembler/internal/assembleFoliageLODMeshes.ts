@@ -1,6 +1,6 @@
 /**
- * [KO] 식생 LOD 레벨별 메시 결합 및 서브메시 인스턴스 조립 모듈입니다.
- * [EN] Mesh combining and sub-mesh instance assembly module per foliage LOD level.
+ * [KO] 식생 LOD 레벨별 메시 결합 및 렌더 단위(Render Unit) 인스턴스 조립 모듈입니다.
+ * [EN] Mesh combining and render unit instance assembly module per foliage LOD level.
  * @packageDocumentation
  */
 
@@ -8,14 +8,14 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Mesh from "../../../../../display/mesh/Mesh";
 import Geometry from "../../../../../geometry/Geometry";
-import FoliageSubMesh from "../../submesh/FoliageSubMesh";
-import FoliageShadowMergedSubMesh from "../../submesh/FoliageShadowMergedSubMesh";
+import FoliageRenderUnit from "../../renderUnit/FoliageRenderUnit";
+import FoliageShadowMergedRenderUnit from "../../renderUnit/FoliageShadowMergedRenderUnit";
 import type {FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import combineScatterMeshes from "../../../../core/scatter/combineScatterMeshes";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
-import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
-import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
+import createFoliageRenderUnitInstance from "./createFoliageRenderUnitInstance";
+import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -25,20 +25,20 @@ const identityMatrix: mat4 = mat4.create();
  */
 export interface AssembledLODResult {
     /**
-     * [KO] 조립된 서브메시 목록
-     * [EN] List of assembled sub-meshes
+     * [KO] 조립된 렌더 단위 목록
+     * [EN] List of assembled render units
      */
-    subMeshes: FoliageSubMesh[];
+    renderUnits: FoliageRenderUnit[];
     /**
      * [KO] 단일 결합된 통합 지오메트리
      * [EN] Single unified combined geometry
      */
     unifiedGeometry: Geometry | null;
     /**
-     * [KO] 그림자 패스 전용 통합 서브메시
-     * [EN] Merged sub-mesh dedicated to shadow pass
+     * [KO] 그림자 패스 전용 통합 렌더 단위
+     * [EN] Merged render unit dedicated to shadow pass
      */
-    shadowMergedSubMesh: FoliageShadowMergedSubMesh | null;
+    shadowMergedRenderUnit: FoliageShadowMergedRenderUnit | null;
     /**
      * [KO] 바운딩 구체 반경 (미터)
      * [EN] Bounding sphere radius in meters
@@ -62,8 +62,8 @@ export interface AssembledLODResult {
 }
 
 /**
- * [KO] 단일 LOD 레벨에 속한 메시 노드들을 결합하고 PBR 서브메시 및 그림자용 통합 서브메시를 생성합니다.
- * [EN] Combines mesh nodes for a single LOD level, creating PBR sub-meshes and shadow merged sub-meshes.
+ * [KO] 단일 LOD 레벨에 속한 메시 노드들을 결합하고 PBR 렌더 단위 및 그림자용 통합 렌더 단위를 생성합니다.
+ * [EN] Combines mesh nodes for a single LOD level, creating PBR render units and shadow merged render units.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
@@ -83,8 +83,8 @@ export interface AssembledLODResult {
  * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
  * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
  * @returns
- * [KO] 조립 완료된 서브메시 및 바운딩 정보
- * [EN] Assembled sub-meshes and bounding information
+ * [KO] 조립 완료된 렌더 단위 및 바운딩 정보
+ * [EN] Assembled render units and bounding information
  */
 export default function assembleFoliageLODMeshes(
     redGPUContext: RedGPUContext,
@@ -112,9 +112,9 @@ export default function assembleFoliageLODMeshes(
 
     if (combineResult.groups.length === 0) {
         return {
-            subMeshes: [],
+            renderUnits: [],
             unifiedGeometry: null,
-            shadowMergedSubMesh: null,
+            shadowMergedRenderUnit: null,
             boundingRadius: 0,
             boundingHeight: 0,
             minY: 0,
@@ -122,14 +122,14 @@ export default function assembleFoliageLODMeshes(
         };
     }
 
-    const resultSubMeshes: FoliageSubMesh[] = [];
+    const resultRenderUnits: FoliageRenderUnit[] = [];
     const {unifiedGeometry, boundingRadius = 5.0} = combineResult;
     const treeH = Math.max(5.0, (boundingRadius || 5.0) * 1.8);
     const {groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = options;
 
     for (let g = 0; g < combineResult.groups.length; g++) {
         const group = combineResult.groups[g];
-        const combinedSubMesh = createFoliageSubMeshInstance({
+        const combinedRenderUnit = createFoliageRenderUnitInstance({
             gpuDevice,
             meshNode: group.rawNodes[0]?.node,
             geom: unifiedGeometry || group.geometry,
@@ -152,16 +152,16 @@ export default function assembleFoliageLODMeshes(
             slotPooler
         });
 
-        resultSubMeshes.push(combinedSubMesh);
+        resultRenderUnits.push(combinedRenderUnit);
     }
 
-    let shadowMergedSubMesh: FoliageShadowMergedSubMesh | null = null;
+    let shadowMergedRenderUnit: FoliageShadowMergedRenderUnit | null = null;
     if (combineResult.shadowMergedGeometry && combineResult.totalVertexCount > 0) {
         let shadowSlotIndex = -1;
         if (slotPooler) {
             shadowSlotIndex = slotPooler.allocateSlot();
             if (shadowSlotIndex >= 0) {
-                slotPooler.writeShadowSubMeshSlot(
+                slotPooler.writeShadowRenderUnitSlot(
                     shadowSlotIndex,
                     options.windMultiplier,
                     treeH,
@@ -170,7 +170,7 @@ export default function assembleFoliageLODMeshes(
             }
         }
 
-        shadowMergedSubMesh = new FoliageShadowMergedSubMesh({
+        shadowMergedRenderUnit = new FoliageShadowMergedRenderUnit({
             geometry: combineResult.shadowMergedGeometry,
             indexCount: combineResult.totalIndexCount,
             vertexCount: combineResult.totalVertexCount,
@@ -186,9 +186,9 @@ export default function assembleFoliageLODMeshes(
     }
 
     return {
-        subMeshes: resultSubMeshes,
+        renderUnits: resultRenderUnits,
         unifiedGeometry,
-        shadowMergedSubMesh,
+        shadowMergedRenderUnit,
         boundingRadius: combineResult.boundingRadius,
         boundingHeight: combineResult.boundingHeight,
         minY: combineResult.minY,

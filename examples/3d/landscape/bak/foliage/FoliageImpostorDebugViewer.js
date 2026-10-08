@@ -360,8 +360,8 @@ class FoliageImpostorDebugViewer {
             return;
         }
 
-        const impostorSubMesh = targetFoliage.subMeshes?.find(s => s.isImpostor);
-        const mat = impostorSubMesh?.material;
+        const impostorRenderUnit = targetFoliage.renderUnits?.find(s => s.isImpostor);
+        const mat = impostorRenderUnit?.material;
         if (!mat) {
             if (statusTxt) statusTxt.textContent = `'${this.#currentFoliageName}' has no Impostor (3D LOD only or Impostor disabled).`;
             return;

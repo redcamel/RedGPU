@@ -377,7 +377,7 @@ function renderTestPane({
         if (!grassFolder) return;
         const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
 
-        typeFolder.addBinding(type, 'subMeshCount', {readonly: true});
+        typeFolder.addBinding(type, 'renderUnitCount', {readonly: true, label: 'Render Units'});
         typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
 
         // -----------------------------------------------------------------

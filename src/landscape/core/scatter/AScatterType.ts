@@ -7,7 +7,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import type {ScatterBaseSegmentAllocation} from "./AScatterMegaBuffer";
-import type ScatterSubMesh from "./ScatterSubMesh";
+import type ScatterRenderUnit from "./ScatterRenderUnit";
 
 /**
  * [KO] 모든 스캐터 타입(잔디 Grass, 식생 Foliage 등)의 공통 초기화 옵션 인터페이스입니다.
@@ -106,12 +106,12 @@ export interface AScatterTypeInitOptions {
  * **[KO] 아키텍처 및 역할:**
  * - **식별 및 수명주기 통일**: 모든 스캐터 종의 이름(`name`), 고유 ID(`typeId`)를 캡슐화합니다.
  * - **VRAM 세그먼트 메타데이터 바인딩**: 메가버퍼에서 배정된 세그먼트 할당 메타데이터(`allocation`)를 제네릭 타입으로 보관합니다.
- * - **서브메시 다형성 및 단일 진실 공급원**: 각 스캐터 종의 서브메시 컬렉션(`subMeshes`)을 추상 게터로 강제하며, 서브메시 개수(`subMeshCount`)는 항상 `subMeshes.length`와 일치하도록 보장합니다.
+ * - **렌더 유닛 다형성 및 단일 진실 공급원**: 각 스캐터 종의 렌더 유닛 컬렉션(`renderUnits`)을 추상 게터로 강제하며, 렌더 유닛 개수(`renderUnitCount`)는 항상 `renderUnits.length`와 일치하도록 보장합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Unified Identification & Lifecycle**: Encapsulates name (`name`) and unique ID (`typeId`) across all scatter species.
  * - **VRAM Segment Metadata Binding**: Retains segment allocation metadata (`allocation`) assigned by mega-buffers as a generic type.
- * - **Sub-mesh Polymorphism & Single Source of Truth**: Mandates sub-mesh collection (`subMeshes`) via an abstract getter, guaranteeing `subMeshCount` always equals `subMeshes.length`.
+ * - **Render Unit Polymorphism & Single Source of Truth**: Mandates render unit collection (`renderUnits`) via an abstract getter, guaranteeing `renderUnitCount` always equals `renderUnits.length`.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스화할 수 없습니다. 서브클래스(Grass, Foliage)를 통해 사용하십시오.
@@ -197,17 +197,17 @@ export abstract class AScatterType<
     }
 
     /**
-     * [KO] 해당 스캐터 모델을 구성하는 공통 서브메시 컬렉션을 반환하는 추상 게터입니다.
-     * [EN] Abstract getter returning the collection of common sub-meshes composing this scatter model.
+     * [KO] 해당 스캐터 모델을 구성하는 공통 렌더 단위(Render Unit) 컬렉션을 반환하는 추상 게터입니다.
+     * [EN] Abstract getter returning the collection of common render units composing this scatter model.
      */
-    abstract get subMeshes(): readonly ScatterSubMesh[];
+    abstract get renderUnits(): readonly ScatterRenderUnit[];
 
     /**
-     * [KO] 해당 스캐터 모델을 구성하는 서브메시 총 개수를 반환합니다. (단일 진실 공급원)
-     * [EN] Returns the total number of sub-meshes composing this scatter model. (Single source of truth)
+     * [KO] 해당 스캐터 모델을 구성하는 렌더 단위 총 개수를 반환합니다. (단일 진실 공급원)
+     * [EN] Returns the total number of render units composing this scatter model. (Single source of truth)
      */
-    get subMeshCount(): number {
-        return this.subMeshes.length;
+    get renderUnitCount(): number {
+        return this.renderUnits.length;
     }
 
     /**

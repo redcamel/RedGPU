@@ -1,21 +1,21 @@
 /**
- * [KO] 식생 서브메시 인스턴스 인스턴스화 모듈입니다.
- * [EN] Module for instantiating foliage sub-mesh instances.
+ * [KO] 식생 렌더 단위(Render Unit) 인스턴스화 모듈입니다.
+ * [EN] Module for instantiating foliage render unit instances.
  * @packageDocumentation
  */
 
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../../display/mesh/Mesh";
-import FoliageSubMesh from "../../submesh/FoliageSubMesh";
+import FoliageRenderUnit from "../../renderUnit/FoliageRenderUnit";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import type {FoliageDepthPassMode} from "../../pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
 
 /**
- * [KO] 서브메시 인스턴스 생성을 위한 설정 옵션 인터페이스입니다.
- * [EN] Configuration options interface for creating a sub-mesh instance.
+ * [KO] 렌더 단위 인스턴스 생성을 위한 설정 옵션 인터페이스입니다.
+ * [EN] Configuration options interface for creating a render unit instance.
  */
-export interface CreateSubMeshOptions {
+export interface CreateRenderUnitOptions {
     /**
      * [KO] WebGPU 디바이스 인스턴스
      * [EN] WebGPU device instance
@@ -87,13 +87,13 @@ export interface CreateSubMeshOptions {
      */
     treeHeight?: number;
     /**
-     * [KO] 서브메시 인덱스 시작 오프셋 (단일 통합 지오메트리 분할용)
-     * [EN] Sub-mesh index start offset (for unified geometry partitioning)
+     * [KO] 렌더 단위 인덱스 시작 오프셋 (단일 통합 지오메트리 분할용)
+     * [EN] Render unit index start offset (for unified geometry partitioning)
      */
     firstIndex?: number;
     /**
-     * [KO] 서브메시 인덱스 개수
-     * [EN] Sub-mesh index count
+     * [KO] 렌더 단위 인덱스 개수
+     * [EN] Render unit index count
      */
     indexCount?: number;
     /**
@@ -119,18 +119,18 @@ export interface CreateSubMeshOptions {
 }
 
 /**
- * [KO] 재질 및 지오메트리 데이터를 분석하여 최적화된 FoliageSubMesh 인스턴스를 생성하고 유니폼 버퍼를 설정/캐싱합니다.
- * [EN] Analyzes material and geometry data to create an optimized FoliageSubMesh instance, configuring/caching uniform buffers.
+ * [KO] 재질 및 지오메트리 데이터를 분석하여 최적화된 FoliageRenderUnit 인스턴스를 생성하고 유니폼 버퍼를 설정/캐싱합니다.
+ * [EN] Analyzes material and geometry data to create an optimized FoliageRenderUnit instance, configuring/caching uniform buffers.
  * @param options -
- * [KO] 서브메시 생성 옵션
- * [EN] Sub-mesh creation options
+ * [KO] 렌더 단위 생성 옵션
+ * [EN] Render unit creation options
  * @returns
- * [KO] 생성된 FoliageSubMesh 인스턴스
- * [EN] Created FoliageSubMesh instance
+ * [KO] 생성된 FoliageRenderUnit 인스턴스
+ * [EN] Created FoliageRenderUnit instance
  */
-export default function createFoliageSubMeshInstance(
-    options: CreateSubMeshOptions
-): FoliageSubMesh {
+export default function createFoliageRenderUnitInstance(
+    options: CreateRenderUnitOptions
+): FoliageRenderUnit {
     const {
         gpuDevice,
         meshNode,
@@ -167,7 +167,7 @@ export default function createFoliageSubMeshInstance(
     if (slotPooler) {
         slotIndex = slotPooler.allocateSlot();
         if (slotIndex >= 0) {
-            slotPooler.writePBRSubMeshSlot(
+            slotPooler.writePBRRenderUnitSlot(
                 slotIndex,
                 globalSlot,
                 receiveShadow,
@@ -188,7 +188,7 @@ export default function createFoliageSubMeshInstance(
     const isMainOpaqueOrMasked = true;
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
-    return new FoliageSubMesh({
+    return new FoliageRenderUnit({
         mesh: meshNode,
         geometry: geom,
         material: mat,

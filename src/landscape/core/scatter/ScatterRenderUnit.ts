@@ -1,6 +1,6 @@
 /**
- * [KO] 스캐터 시스템(잔디, 식생 등)에서 머티리얼, 텍스처, 원본 메시 참조 및 지형 피벗 오프셋을 결합한 공용 서브메쉬 렌더 단위 모듈입니다.
- * [EN] Common sub-mesh render unit module combining material, texture, source mesh reference, and terrain pivot offsets across scatter systems (Grass, Foliage, etc.).
+ * [KO] 스캐터 시스템(잔디, 식생 등)에서 머티리얼, 텍스처, 원본 메시 참조 및 지형 피벗 오프셋을 결합한 공용 렌더 단위(Render Unit) 모듈입니다.
+ * [EN] Common render unit module combining material, texture, source mesh reference, and terrain pivot offsets across scatter systems (Grass, Foliage, etc.).
  * @packageDocumentation
  */
 import Mesh from "../../../display/mesh/Mesh";
@@ -8,10 +8,10 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 
 /**
- * [KO] ScatterSubMesh 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for ScatterSubMesh.
+ * [KO] ScatterRenderUnit 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for ScatterRenderUnit.
  */
-export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptions {
+export interface ScatterRenderUnitInitOptions extends AScatterGeometryUnitInitOptions {
     /**
      * [KO] 원본 3D 메쉬 노드
      * [EN] Original 3D mesh node
@@ -19,14 +19,14 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
     mesh?: Mesh;
 
     /**
-     * [KO] 서브메쉬에 적용된 재질(Material) 인스턴스
-     * [EN] Material instance applied to the sub-mesh
+     * [KO] 렌더 단위에 적용된 재질(Material) 인스턴스
+     * [EN] Material instance applied to the render unit
      */
     material?: any;
 
     /**
-     * [KO] 서브메쉬의 기본 디퓨즈/베이스 컬러 텍스처
-     * [EN] Primary diffuse/base color texture of the sub-mesh
+     * [KO] 렌더 단위의 기본 디퓨즈/베이스 컬러 텍스처
+     * [EN] Primary diffuse/base color texture of the render unit
      */
     baseColorTexture?: BitmapTexture | null;
 
@@ -50,27 +50,27 @@ export interface ScatterSubMeshInitOptions extends AScatterGeometryUnitInitOptio
 }
 
 /**
- * [KO] WebGPU 지오메트리 버퍼 단위(`AScatterGeometryUnit`)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 스캐터 공용 서브메쉬 기본 클래스입니다.
- * [EN] Common scatter sub-mesh base class combining a WebGPU geometry buffer unit (`AScatterGeometryUnit`) with material, texture, and original mesh metadata.
+ * [KO] WebGPU 지오메트리 버퍼 단위(`AScatterGeometryUnit`)에 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 스캐터 공용 렌더 단위 기본 클래스입니다.
+ * [EN] Common scatter render unit base class combining a WebGPU geometry buffer unit (`AScatterGeometryUnit`) with material, texture, and original mesh metadata.
  *
  * **[KO] 아키텍처 및 역할:**
  * - **지오메트리와 셰이딩의 융합**: 순수 GPU 버퍼(버텍스/인덱스 버퍼 및 간접 드로우 오프셋)를 관리하는 `AScatterGeometryUnit` 위에 실제 렌더링에 필요한 머티리얼, 베이스 컬러 텍스처, 원본 메쉬 참조를 바인딩합니다.
  * - **스캐터 파이프라인의 공통 단위**:
  *   - **잔디(Grass)**: 단일 또는 복합 잔디 모델을 구성하는 기본 렌더 단위로 직접 인스턴스화되어 Multi-Draw Indirect 렌더링에 사용됩니다.
- *   - **식생(Foliage)**: 복합 3D 수목/바위의 파트별 서브메시(`FoliageSubMesh`)의 부모 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 지면 블렌딩 유니폼을 확장하는 기반이 됩니다.
+ *   - **식생(Foliage)**: 복합 3D 수목/바위의 파트별 렌더 단위(`FoliageRenderUnit`)의 부모 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 지면 블렌딩 유니폼을 확장하는 기반이 됩니다.
  *
  * **[EN] Architecture & Role:**
  * - **Fusion of Geometry and Shading**: Binds the rendering materials, base color textures, and source mesh references on top of `AScatterGeometryUnit`, which manages raw GPU vertex/index buffers and indirect draw offsets.
  * - **Common Unit for Scatter Pipelines**:
  *   - **Grass**: Directly instantiated as the primary rendering unit composing single or composite grass models for Multi-Draw Indirect rendering.
- *   - **Foliage**: Inherited by `FoliageSubMesh` representing individual parts (trunks, foliage leaves) of composite 3D trees and rocks, serving as the foundation for wind simulation and ground blending uniforms.
+ *   - **Foliage**: Inherited by `FoliageRenderUnit` representing individual parts (trunks, foliage leaves) of composite 3D trees and rocks, serving as the foundation for wind simulation and ground blending uniforms.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager 및 Grass)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager and Grass).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class ScatterSubMesh extends AScatterGeometryUnit {
+export class ScatterRenderUnit extends AScatterGeometryUnit {
     #mesh?: Mesh;
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;
@@ -78,14 +78,14 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     #isMasked: boolean;
 
     /**
-     * [KO] ScatterSubMesh 인스턴스를 생성하고 렌더링 메타데이터를 초기화합니다.
-     * [EN] Creates a ScatterSubMesh instance and initializes rendering metadata.
+     * [KO] ScatterRenderUnit 인스턴스를 생성하고 렌더링 메타데이터를 초기화합니다.
+     * [EN] Creates a ScatterRenderUnit instance and initializes rendering metadata.
      *
      * @param init -
-     * [KO] 서브메쉬 초기화 옵션 객체
-     * [EN] Sub-mesh initialization options object
+     * [KO] 렌더 단위 초기화 옵션 객체
+     * [EN] Render unit initialization options object
      */
-    constructor(init: ScatterSubMeshInitOptions) {
+    constructor(init: ScatterRenderUnitInitOptions) {
         super(init);
         const {
             mesh,
@@ -110,8 +110,8 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 서브메쉬의 머티리얼 객체를 반환합니다.
-     * [EN] Returns the material object of the sub-mesh.
+     * [KO] 렌더 단위의 머티리얼 객체를 반환합니다.
+     * [EN] Returns the material object of the render unit.
      */
     get material(): any {
         return this.#material;
@@ -142,5 +142,5 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
     }
 }
 
-Object.freeze(ScatterSubMesh);
-export default ScatterSubMesh;
+Object.freeze(ScatterRenderUnit);
+export default ScatterRenderUnit;

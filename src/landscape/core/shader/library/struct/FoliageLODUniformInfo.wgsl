@@ -5,6 +5,6 @@ struct FoliageLODUniformInfo {
     exitEnd: f32,
     invEnterRange: f32,
     invExitRange: f32,
-    subMeshOffset: u32,
-    subMeshCount: u32,
+    renderUnitOffset: u32,
+    renderUnitCount: u32,
 };

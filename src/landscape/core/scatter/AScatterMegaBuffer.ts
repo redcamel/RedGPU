@@ -71,10 +71,10 @@ export interface ScatterBaseSegmentAllocation {
      */
     indirectBaseOffset: number;
     /**
-     * [KO] 서브메시 개수
-     * [EN] Number of sub-meshes
+     * [KO] 렌더 유닛(간접 드로우 슬롯) 개수
+     * [EN] Number of render units (indirect draw slots)
      */
-    subMeshCount: number;
+    renderUnitCount: number;
     /**
      * [KO] 현재 활성화된 인스턴스 수
      * [EN] Current active instance count
@@ -108,7 +108,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     #strideFloats: number;
     #strideBytes: number;
     #typeParamFloats: number;
-    #maxSubMeshes: number;
+    #maxRenderUnits: number;
     #maxTypes: number;
 
     #totalAllocatedInstances: number = 0;
@@ -134,7 +134,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         reflectionConfig: ScatterShaderReflectionConfig,
         initialCapacity: number,
         maxTypes: number,
-        maxSubMeshes: number
+        maxRenderUnits: number
     ) {
         super(redGPUContext);
 
@@ -155,7 +155,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         }
 
         this.#maxTypes = maxTypes;
-        this.#maxSubMeshes = maxSubMeshes;
+        this.#maxRenderUnits = maxRenderUnits;
         this.#strideBytes = strideBytes;
         this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#typeParamFloats = typeParamBytes ? typeParamBytes / Float32Array.BYTES_PER_ELEMENT : 0;
@@ -167,7 +167,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#cpuTypeParamsBuffer = new Float32Array(typeParamsCount > 0 ? typeParamsCount : 1);
         this.#cpuTypeParamsUint32 = new Uint32Array(this.#cpuTypeParamsBuffer.buffer);
 
-        this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT);
+        this.#indirectResetTemplate = new Uint32Array(this.#maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT);
 
         this.#initBaseBuffers();
     }
@@ -197,11 +197,11 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     }
 
     /**
-     * [KO] 지원할 최대 간접 드로우(서브메시) 슬롯 수
-     * [EN] Maximum indirect draw (sub-mesh) slots supported
+     * [KO] 지원할 최대 간접 드로우(렌더 유닛) 슬롯 수
+     * [EN] Maximum indirect draw (render unit) slots supported
      */
-    get maxSubMeshes(): number {
-        return this.#maxSubMeshes;
+    get maxRenderUnits(): number {
+        return this.#maxRenderUnits;
     }
 
     /**
@@ -330,9 +330,9 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * @param maxInstances -
      * [KO] 최대 허용 인스턴스 수
      * [EN] Maximum allowed instances
-     * @param subMeshCount -
-     * [KO] 서브메시(드로우 슬롯) 수
-     * [EN] Number of sub-meshes (draw slots)
+     * @param renderUnitCount -
+     * [KO] 렌더 유닛(간접 드로우 슬롯) 수
+     * [EN] Number of render units (indirect draw slots)
      * @param culledMultiplier -
      * [KO] 컬링 버퍼 배수 (기본값: 2, Foliage는 8)
      * [EN] Culled buffer multiplier (default: 2, Foliage is 8)
@@ -343,7 +343,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     allocateBaseSegment(
         typeIdOrName: number | string,
         maxInstances: number,
-        subMeshCount: number,
+        renderUnitCount: number,
         culledMultiplier: number = 2
     ): ScatterBaseSegmentAllocation {
         const alignedMax = Math.ceil(maxInstances / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
@@ -355,7 +355,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
         this.#totalAllocatedInstances += alignedMax;
         this.#totalAllocatedCulledInstances += alignedMax * culledMultiplier;
-        this.#totalIndirectDrawCalls += subMeshCount;
+        this.#totalIndirectDrawCalls += renderUnitCount;
 
         const typeId = typeof typeIdOrName === 'number' ? typeIdOrName : 0;
         const name = typeof typeIdOrName === 'string' ? typeIdOrName : undefined;
@@ -367,7 +367,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             rawBaseOffset,
             culledBaseOffset,
             indirectBaseOffset,
-            subMeshCount,
+            renderUnitCount,
             instanceCount: 0
         };
     }
@@ -647,7 +647,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         }
 
         const indirectByteSize = Math.max(
-            this.#maxSubMeshes * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
+            this.#maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
             64
         );
 

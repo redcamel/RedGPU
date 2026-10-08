@@ -1,13 +1,13 @@
 /**
- * [KO] 식생 개별 서브메시 및 머티리얼 바인딩/유니폼 관리 모듈입니다.
- * [EN] Foliage individual sub-mesh and material binding/uniform management module.
+ * [KO] 식생 개별 렌더 단위(Render Unit) 및 머티리얼 바인딩/유니폼 관리 모듈입니다.
+ * [EN] Foliage individual render unit and material binding/uniform management module.
  * @packageDocumentation
  */
 
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import AFoliageSubMeshBase, {type AFoliageSubMeshBaseInitOptions} from "./AFoliageSubMeshBase";
+import AFoliageRenderUnitBase, {type AFoliageRenderUnitBaseInitOptions} from "./AFoliageRenderUnitBase";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -16,10 +16,10 @@ import AFoliageSubMeshBase, {type AFoliageSubMeshBaseInitOptions} from "./AFolia
 export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
 /**
- * [KO] FoliageSubMesh 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for FoliageSubMesh.
+ * [KO] FoliageRenderUnit 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for FoliageRenderUnit.
  */
-export interface FoliageSubMeshInitOptions extends AFoliageSubMeshBaseInitOptions {
+export interface FoliageRenderUnitInitOptions extends AFoliageRenderUnitBaseInitOptions {
     /**
      * [KO] 소스 메쉬 인스턴스 (필수)
      * [EN] Source mesh instance (required)
@@ -62,21 +62,21 @@ export interface FoliageSubMeshInitOptions extends AFoliageSubMeshBaseInitOption
     isImpostor?: boolean;
     /**
      * [KO] 그림자 수신 여부
-     * [EN] Whether this sub-mesh receives shadows
+     * [EN] Whether this render unit receives shadows
      */
     receiveShadow?: boolean;
 }
 
 /**
- * [KO] AFoliageSubMeshBase를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩, 파이프라인 캐시 및 LOD 상태를 관리하는 식생 서브메쉬 클래스입니다.
- * [EN] Foliage sub-mesh class inheriting AFoliageSubMeshBase to manage Foliage-specific materials, uniform bindings, pipeline caches, and LOD states.
+ * [KO] AFoliageRenderUnitBase를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩, 파이프라인 캐시 및 LOD 상태를 관리하는 식생 렌더 단위 클래스입니다.
+ * [EN] Foliage render unit class inheriting AFoliageRenderUnitBase to manage Foliage-specific materials, uniform bindings, pipeline caches, and LOD states.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageSubMesh extends AFoliageSubMeshBase {
+export class FoliageRenderUnit extends AFoliageRenderUnitBase {
     #relativeModelMatrix: mat4;
     #relativeNormalMatrix: mat4;
 
@@ -86,7 +86,7 @@ export class FoliageSubMesh extends AFoliageSubMeshBase {
     #isImpostor: boolean;
     #receiveShadow: boolean;
 
-    constructor(init: FoliageSubMeshInitOptions) {
+    constructor(init: FoliageRenderUnitInitOptions) {
         super({
             ...init,
             isMasked: init.isMasked ?? true
@@ -144,17 +144,15 @@ export class FoliageSubMesh extends AFoliageSubMeshBase {
 
     /**
      * [KO] 그림자 수신 여부를 반환합니다.
-     * [EN] Returns whether this sub-mesh receives shadows.
+     * [EN] Returns whether this render unit receives shadows.
      */
     get receiveShadow(): boolean {
         return this.#receiveShadow;
     }
 
-
-
     /**
-     * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 서브메쉬를 렌더링할 수 있는지 여부를 판별합니다.
-     * [EN] Determines whether this sub-mesh can be rendered in a specific render pass (depthPrepass or main).
+     * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 렌더 단위를 렌더링할 수 있는지 여부를 판별합니다.
+     * [EN] Determines whether this render unit can be rendered in a specific render pass (depthPrepass or main).
      * @param passType -
      * [KO] 렌더 패스 유형 ('depthPrepass' | 'main')
      * [EN] Render pass type ('depthPrepass' | 'main')
@@ -188,9 +186,9 @@ export class FoliageSubMesh extends AFoliageSubMeshBase {
      * @param depthPassMode -
      * [KO] 뎁스 패스 모드
      * [EN] Depth pass mode
-     * @param subMeshBindGroupLayout -
-     * [KO] 서브메시 바인드 그룹 레이아웃
-     * [EN] Sub-mesh bind group layout
+     * @param renderUnitBindGroupLayout -
+     * [KO] 렌더 단위 바인드 그룹 레이아웃
+     * [EN] Render unit bind group layout
      * @returns
      * [KO] 캐시되거나 생성된 렌더 파이프라인 (실패 시 null)
      * [EN] Cached or created render pipeline (null on failure)
@@ -200,7 +198,7 @@ export class FoliageSubMesh extends AFoliageSubMeshBase {
         sampleCount: number,
         msaaID: string,
         depthPassMode: FoliageDepthPassMode,
-        subMeshBindGroupLayout: GPUBindGroupLayout | null
+        renderUnitBindGroupLayout: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
         const material = this.material;
         if (material?.dirtyPipeline || !material?.gpuRenderInfo?.fragmentUniformBindGroup) {
@@ -219,11 +217,11 @@ export class FoliageSubMesh extends AFoliageSubMeshBase {
             this.strideBytes,
             cullMode,
             depthPassMode,
-            subMeshBindGroupLayout,
+            renderUnitBindGroupLayout,
             this.isMasked
         ) || null;
     }
 }
 
-Object.freeze(FoliageSubMesh);
-export default FoliageSubMesh;
+Object.freeze(FoliageRenderUnit);
+export default FoliageRenderUnit;

@@ -91,12 +91,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param depthPassMode -
      * [KO] 뎁스 패스 모드 (기본값: 'normal')
      * [EN] Depth pass mode (default: 'normal')
-     * @param subMeshBindGroupLayout -
-     * [KO] 서브메시 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Sub-mesh bind group layout (optional)
+     * @param renderUnitBindGroupLayout -
+     * [KO] 렌더 유닛 바인드 그룹 레이아웃 (선택사항)
+     * [EN] Render unit bind group layout (optional)
      * @param isMasked -
-     * [KO] 서브메시의 알파 마스킹 여부 (기본값: false)
-     * [EN] Whether sub-mesh uses alpha masking (default: false)
+     * [KO] 렌더 유닛의 알파 마스킹 여부 (기본값: false)
+     * [EN] Whether render unit uses alpha masking (default: false)
      * @returns
      * [KO] 생성되거나 캐시된 GPURenderPipeline (실패 시 null)
      * [EN] Created or cached GPURenderPipeline (null on failure)
@@ -108,7 +108,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         strideBytes: number = 72,
         cullMode: GPUCullMode = 'none',
         depthPassMode: FoliageDepthPassMode = 'normal',
-        subMeshBindGroupLayout?: GPUBindGroupLayout | null,
+        renderUnitBindGroupLayout?: GPUBindGroupLayout | null,
         isMasked: boolean = false
     ): GPURenderPipeline | null {
         if (!material) return null;
@@ -160,14 +160,14 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = isDepthPrepassOpaque
             ? emptyBindGroupLayout
             : (material.gpuRenderInfo?.fragmentBindGroupLayout
                 || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
                 || emptyBindGroupLayout);
 
-        const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
+        const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveRenderUnitBGL, materialBindGroupLayout];
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(
             `Foliage_Render_PipelineLayout_${pipelineKey}`,
@@ -280,9 +280,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param cullMode -
      * [KO] 컬링 모드 (기본값: 'back')
      * [EN] Cull mode (default: 'back')
-     * @param subMeshBindGroupLayout -
-     * [KO] 서브메시 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Sub-mesh bind group layout (optional)
+     * @param cullMode -
+     * [KO] 컬링 모드 (기본값: 'back')
+     * [EN] Cull mode (default: 'back')
+     * @param renderUnitBindGroupLayout -
+     * [KO] 렌더 유닛 바인드 그룹 레이아웃 (선택사항)
+     * [EN] Render unit bind group layout (optional)
      * @returns
      * [KO] 생성되거나 캐시된 GPURenderPipeline
      * [EN] Created or cached GPURenderPipeline
@@ -290,7 +293,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
     getOrCreateShadowMergedPipeline(
         strideBytes: number = 12,
         cullMode: GPUCullMode = 'back',
-        subMeshBindGroupLayout?: GPUBindGroupLayout | null
+        renderUnitBindGroupLayout?: GPUBindGroupLayout | null
     ): GPURenderPipeline {
         const pipelineKey = `FoliageShadowMerged_stride${strideBytes}_cull${cullMode}`;
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
@@ -308,13 +311,13 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(
             `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
             {
                 label: `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
-                bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL],
+                bindGroupLayouts: [systemBindGroupLayout, effectiveRenderUnitBGL],
             }
         );
 
@@ -358,9 +361,9 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param cullMode -
      * [KO] 컬링 모드 (기본값: 'none')
      * [EN] Cull mode (default: 'none')
-     * @param subMeshBindGroupLayout -
-     * [KO] 서브메시 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Sub-mesh bind group layout (optional)
+     * @param renderUnitBindGroupLayout -
+     * [KO] 렌더 유닛 바인드 그룹 레이아웃 (선택사항)
+     * [EN] Render unit bind group layout (optional)
      * @returns
      * [KO] 생성되거나 캐시된 GPURenderPipeline (실패 시 null)
      * [EN] Created or cached GPURenderPipeline (null on failure)
@@ -369,7 +372,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         material: any,
         strideBytes: number = 72,
         cullMode: GPUCullMode = 'none',
-        subMeshBindGroupLayout?: GPUBindGroupLayout | null
+        renderUnitBindGroupLayout?: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
         if (!material) return null;
 
@@ -395,7 +398,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || emptyBindGroupLayout;
@@ -404,7 +407,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
             {
                 label: `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,
-                bindGroupLayouts: [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout],
+                bindGroupLayouts: [systemBindGroupLayout, effectiveRenderUnitBGL, materialBindGroupLayout],
             }
         );
 

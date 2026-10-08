@@ -13,7 +13,7 @@ struct FoliageCullingUniforms {
     totalInstanceCount: u32,
 
     fovFactor: f32,
-    maxSubMeshes: u32,
+    maxRenderUnits: u32,
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
 
@@ -163,11 +163,11 @@ fn main(
             let finalAlpha = globalFade;
             if (finalAlpha > 0.001) {
                 let lodInfo = typeInfo.lods[0];
-                let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.renderUnitOffset;
                 let slot = atomicAdd(&mainIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
-                let numSubs = lodInfo.subMeshCount;
-                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                let numUnits = lodInfo.renderUnitCount;
+                for (var s: u32 = 1u; s < numUnits; s = s + 1u) {
                     atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                 }
 
@@ -194,11 +194,11 @@ fn main(
 
                     let finalAlpha = alpha * globalFade;
                     if (finalAlpha > 0.001) {
-                        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.renderUnitOffset;
                         let slot = atomicAdd(&mainIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
-                        let numSubs = lodInfo.subMeshCount;
-                        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                        let numUnits = lodInfo.renderUnitCount;
+                        for (var s: u32 = 1u; s < numUnits; s = s + 1u) {
                             atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
@@ -257,12 +257,12 @@ fn main(
                         }
 
                         let lodInfo = typeInfo.lods[targetShadowLOD];
-                        let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-                        let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                        let cascadeIndirectOffset = c * globalUniforms.maxRenderUnits;
+                        let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.renderUnitOffset;
                         let slot = atomicAdd(&shadowIndirectCommands[baseCmdIdx].instanceCount, 1u);
 
-                        let numSubs = lodInfo.subMeshCount;
-                        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                        let numUnits = lodInfo.renderUnitCount;
+                        for (var s: u32 = 1u; s < numUnits; s = s + 1u) {
                             atomicAdd(&shadowIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 

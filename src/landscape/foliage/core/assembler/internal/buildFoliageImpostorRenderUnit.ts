@@ -1,6 +1,6 @@
 /**
- * [KO] 식생 옥타헤드럴 임포스터 서브메시 빌더 모듈입니다.
- * [EN] Foliage octahedral impostor sub-mesh builder module.
+ * [KO] 식생 옥타헤드럴 임포스터 렌더 단위(Render Unit) 빌더 모듈입니다.
+ * [EN] Foliage octahedral impostor render unit builder module.
  * @packageDocumentation
  */
 
@@ -9,29 +9,27 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import {createOctahedralImpostorGeometry} from "../../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import bakeFoliageImpostor from "../../impostor/bakeFoliageImpostor";
-import FoliageSubMesh from "../../submesh/FoliageSubMesh";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
-import createFoliageSubMeshInstance from "./createFoliageSubMeshInstance";
 import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
 /**
- * [KO] LOD 0 서브메쉬를 기반으로 옥타헤드럴 임포스터를 베이킹하고, 마지막 LOD에 단일 임포스터 서브메쉬를 생성 및 부착합니다.
- * [EN] Bakes octahedral impostors based on LOD 0 sub-meshes and creates/attaches a single impostor sub-mesh to the last LOD.
+ * [KO] LOD 0 렌더 단위를 기반으로 옥타헤드럴 임포스터를 베이킹하고, 마지막 LOD에 단일 임포스터 렌더 단위를 생성 및 부착합니다.
+ * [EN] Bakes octahedral impostors based on LOD 0 render units and creates/attaches a single impostor render unit to the last LOD.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
  * @param options -
  * [KO] 식생 설정 옵션
  * [EN] Foliage configuration options
- * @param sourceSubMeshes -
- * [KO] 베이킹 소스로 사용할 LOD 0 서브메시 목록
- * [EN] LOD 0 sub-mesh list used as baking source
- * @param subMeshes -
- * [KO] 서브메시가 추가될 전체 서브메시 배열
- * [EN] Global sub-mesh array to append the impostor sub-mesh to
+ * @param sourceRenderUnits -
+ * [KO] 베이킹 소스로 사용할 LOD 0 렌더 단위 목록
+ * [EN] LOD 0 render unit list used as baking source
+ * @param renderUnits -
+ * [KO] 렌더 단위가 추가될 전체 렌더 단위 배열
+ * [EN] Global render unit array to append the impostor render unit to
  * @param lodInfoList -
  * [KO] LOD 메타데이터가 추가될 배열
  * [EN] LOD metadata array to append the impostor LOD to
@@ -39,20 +37,20 @@ const identityMatrix: mat4 = mat4.create();
  * [KO] 임포스터가 배치될 LOD 인덱스
  * [EN] LOD index where the impostor will be assigned
  * @param slotPooler -
- * [KO] 서브메시 슬롯 풀러 (선택사항)
- * [EN] Sub-mesh slot pooler (optional)
+ * [KO] 렌더 단위 슬롯 풀러 (선택사항)
+ * [EN] Render unit slot pooler (optional)
  */
-export default function buildFoliageImpostorSubMesh(
+export default function buildFoliageImpostorRenderUnit(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
-    sourceSubMeshes: FoliageSubMesh[],
-    subMeshes: FoliageSubMesh[],
+    sourceRenderUnits: FoliageRenderUnit[],
+    renderUnits: FoliageRenderUnit[],
     lodInfoList: FoliageLODInfo[],
     impostorLODIndex: number,
     slotPooler?: FoliageSlotPooler | null
 ): void {
     const gpuDevice = redGPUContext.gpuDevice;
-    const bakeResult = bakeFoliageImpostor(redGPUContext, sourceSubMeshes, options.name);
+    const bakeResult = bakeFoliageImpostor(redGPUContext, sourceRenderUnits, options.name);
 
     const {width, height, bottomOffset = 0} = bakeResult;
 
@@ -65,10 +63,10 @@ export default function buildFoliageImpostorSubMesh(
         `${options.name}_OctahedralMat`
     );
 
-    const bbStartOffset = subMeshes.length;
-    const bbSubMesh = createFoliageSubMeshInstance({
+    const bbStartOffset = renderUnits.length;
+    const bbRenderUnit = createFoliageRenderUnitInstance({
         gpuDevice,
-        meshNode: sourceSubMeshes[0]?.mesh,
+        meshNode: sourceRenderUnits[0]?.mesh,
         geom: bbGeom,
         mat: bbMat,
         relMatrix: identityMatrix,
@@ -83,13 +81,13 @@ export default function buildFoliageImpostorSubMesh(
         treeHeight: height,
         slotPooler
     });
-    subMeshes.push(bbSubMesh);
+    renderUnits.push(bbRenderUnit);
 
     lodInfoList.push({
         lodIndex: impostorLODIndex,
         lodDistance: 1000000.0,
-        subMeshOffset: bbStartOffset,
-        subMeshCount: 1,
+        renderUnitOffset: bbStartOffset,
+        renderUnitCount: 1,
         receiveShadow: false,
     });
 }

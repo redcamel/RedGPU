@@ -10,7 +10,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import type Primitive from "../../../primitive/core/Primitive";
 import combineScatterMeshes from "../../core/scatter/combineScatterMeshes";
-import ScatterSubMesh from "../../core/scatter/ScatterSubMesh";
+import ScatterRenderUnit from "../../core/scatter/ScatterRenderUnit";
 import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";
 import type {GrassTypeAllocation} from "./buffer/GrassScatterMegaBuffer";
 
@@ -113,7 +113,7 @@ export interface GrassOptions extends AScatterTypeInitOptions {
 export class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
-    #subMeshes: ScatterSubMesh[] = [];
+    #renderUnits: ScatterRenderUnit[] = [];
     #baseColorTexture: BitmapTexture;
     #farDistance: number = 35.0;
     #minScale: [number, number] = [0.7, 0.7];
@@ -224,10 +224,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 resolvedHeight = combineResult.boundingHeight > 0 ? combineResult.boundingHeight : 1.0;
             }
 
-            this.#subMeshes = combineResult.groups.map((group, idx) => {
+            this.#renderUnits = combineResult.groups.map((group, idx) => {
                 const mat = group.material;
                 const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? null);
-                return new ScatterSubMesh({
+                return new ScatterRenderUnit({
                     geometry: combineResult.unifiedGeometry!,
                     vertexCount: group.vertexCount,
                     indexCount: group.indexCount,
@@ -240,9 +240,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 });
             });
 
-            if (this.#subMeshes.length > 1) {
+            if (this.#renderUnits.length > 1) {
                 console.warn(
-                    `[Grass] "${this.name}" has ${this.#subMeshes.length} sub-meshes with distinct materials. ` +
+                    `[Grass] "${this.name}" has ${this.#renderUnits.length} sub-meshes with distinct materials. ` +
                     `For optimal grass rendering performance (millions of blades), merging textures into an atlas and using a single material is strongly recommended.`
                 );
             }
@@ -277,8 +277,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             }
 
             const gGeom = this.#geometry as Geometry;
-            this.#subMeshes = [
-                new ScatterSubMesh({
+            this.#renderUnits = [
+                new ScatterRenderUnit({
                     geometry: gGeom,
                     vertexCount: gGeom.vertexBuffer?.vertexCount ?? 0,
                     indexCount: gGeom.indexBuffer?.indexCount ?? (gGeom.vertexBuffer?.vertexCount ?? 0),
@@ -376,12 +376,13 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 잔디 모델을 구성하는 공용 서브메쉬(ScatterSubMesh) 목록을 반환합니다.
-     * [EN] Returns the list of shared sub-meshes (ScatterSubMesh) composing the grass model.
+     * [KO] 잔디 모델을 구성하는 공용 렌더 단위(ScatterRenderUnit) 목록을 반환합니다.
+     * [EN] Returns the list of shared render units (ScatterRenderUnit) composing the grass model.
      */
-    get subMeshes(): ScatterSubMesh[] {
-        return this.#subMeshes;
+    get renderUnits(): ScatterRenderUnit[] {
+        return this.#renderUnits;
     }
+
 
     /**
      * [KO] 이 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 실제 간접 드로우콜 총 개수를 반환합니다.
@@ -392,7 +393,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (alloc && alloc.instanceCount > 0) {
             return alloc.nearSlots.length + alloc.farSlots.length;
         }
-        return this.#subMeshes.length * 2;
+        return this.#renderUnits.length * 2;
     }
 
     /**
@@ -727,7 +728,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         }
         this.#isUnifiedGeometryOwned = false;
         this.#geometry = null as any;
-        this.#subMeshes.length = 0;
+        this.#renderUnits.length = 0;
         this.#baseColorTexture = null as any;
         this.#mesh = null as any;
         this.#onUniformDirty = null;
