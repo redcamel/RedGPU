@@ -114,7 +114,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 }
             }
             this.#dirtyUboMask = 0;
-            this.#renderer.markAllBundlesDirty();
         }
 
         const {view} = renderViewStateData;

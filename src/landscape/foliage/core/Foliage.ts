@@ -485,12 +485,42 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.allocation ? this.allocation.maxInstances : this.#maxInstances;
     }
 
+    set minScale(v: [number, number, number] | [number, number]) {
+        if (!v) return;
+        const s = this.#minScale;
+        const sx = Math.max(0.01, Number(v[0]) || 0.01);
+        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        const sz = Math.max(0.01, Number(v[2] !== undefined ? v[2] : v[0]) || 0.01);
+        if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
+            s[0] = sx;
+            s[1] = sy;
+            s[2] = sz;
+            this.clearSubCellCache();
+            this.#notifyRepopulateRequired();
+        }
+    }
+
     /**
      * [KO] 인스턴스 절차적 배치 시 적용되는 최소 스케일 `[x, y, z]`을 반환합니다.
      * [EN] Returns the minimum scale `[x, y, z]` applied during procedural instance placement.
      */
     get minScale(): [number, number, number] {
         return this.#minScale;
+    }
+
+    set maxScale(v: [number, number, number] | [number, number]) {
+        if (!v) return;
+        const s = this.#maxScale;
+        const sx = Math.max(0.01, Number(v[0]) || 0.01);
+        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        const sz = Math.max(0.01, Number(v[2] !== undefined ? v[2] : v[0]) || 0.01);
+        if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
+            s[0] = sx;
+            s[1] = sy;
+            s[2] = sz;
+            this.clearSubCellCache();
+            this.#notifyRepopulateRequired();
+        }
     }
 
     /**
@@ -929,6 +959,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             case 'densityScaleByWeight':
             case 'densityPerHectare':
             case 'densityMultiplier':
+            case 'minScale':
+            case 'maxScale':
+                this.clearSubCellCache();
                 this.#notifyRepopulateRequired();
                 break;
             case 'bottomOffset':
@@ -1344,7 +1377,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         let targetLayerObj: any = null;
         if (hasTargetLayer && landscape?.layers) {
             if (typeof targetLayer === 'string') {
-                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+                const layers = landscape.layers;
+                const len = layers.length;
+                for (let li = 0; li < len; li++) {
+                    if (layers[li].name === targetLayer) {
+                        targetLayerObj = layers[li];
+                        break;
+                    }
+                }
             } else if (typeof targetLayer === 'number') {
                 targetLayerObj = landscape.layers[targetLayer];
             }
@@ -1499,7 +1539,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         let targetLayerObj: any = null;
         if (hasTargetLayer && landscape?.layers) {
             if (typeof targetLayer === 'string') {
-                targetLayerObj = landscape.layers.find((l: any) => l.name === targetLayer);
+                const layers = landscape.layers;
+                const len = layers.length;
+                for (let li = 0; li < len; li++) {
+                    if (layers[li].name === targetLayer) {
+                        targetLayerObj = layers[li];
+                        break;
+                    }
+                }
             } else if (typeof targetLayer === 'number') {
                 targetLayerObj = landscape.layers[targetLayer];
             }
