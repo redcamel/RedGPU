@@ -25,6 +25,7 @@ import evaluateMipScaledAlphaCutoff_wgsl from './math/evaluateMipScaledAlphaCuto
 import testSphereInFrustum_wgsl from './math/testSphereInFrustum.wgsl';
 import blendGrassGround_wgsl from './math/blendGrassGround.wgsl';
 import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
+import sampleNormalizedLayerWeight_wgsl from './math/sampleNormalizedLayerWeight.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -255,6 +256,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const transformGrassPosition = transformGrassPosition_wgsl;
+
+        /**
+         * [KO] 지형 스플랫 가중치 텍스처를 샘플링하여 지정된 채널의 정규화된 레이어 가중치를 평가하는 함수 (sampleNormalizedLayerWeight)
+         * [EN] Function to sample terrain splat weight texture and evaluate normalized layer weight for a specified channel (sampleNormalizedLayerWeight)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.sampleNormalizedLayerWeight;
+         * ```
+         */
+        export const sampleNormalizedLayerWeight = sampleNormalizedLayerWeight_wgsl;
     }
 
     /**

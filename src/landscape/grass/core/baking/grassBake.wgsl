@@ -15,6 +15,7 @@
 #redgpu_include landscape.math.quatMultiply;
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.scatterSpatialPrng;
+#redgpu_include landscape.math.sampleNormalizedLayerWeight;
 
 
 struct GrassBakeUniforms {
@@ -105,23 +106,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         // WeightMap (SplatMap) evaluation: 1:1 match with landscapeFragment.wgsl
         if (uniforms.hasWeightMap != 0u) {
-            let weightSample = textureSampleLevel(weightTexture, landscapeSampler, vec2<f32>(u, v), 0.0);
-            let isAlphaFull = weightSample.a >= 0.99;
-            let effectiveA = select(weightSample.a, clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0), isAlphaFull);
-            let effectiveTotalW = weightSample.r + weightSample.g + weightSample.b + effectiveA;
-
-            var rawW = 0.0;
-            if (uniforms.weightChannelIndex == 0u) {
-                rawW = weightSample.r;
-            } else if (uniforms.weightChannelIndex == 1u) {
-                rawW = weightSample.g;
-            } else if (uniforms.weightChannelIndex == 2u) {
-                rawW = weightSample.b;
-            } else {
-                rawW = effectiveA;
-            }
-
-            let normW = select(rawW, rawW / effectiveTotalW, effectiveTotalW > 0.001);
+            let normW = sampleNormalizedLayerWeight(weightTexture, landscapeSampler, vec2<f32>(u, v), uniforms.weightChannelIndex);
 
             // Exclude non-grass layers (rock, road, gravel < 0.20)
             if (normW < 0.20) {
