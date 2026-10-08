@@ -130,9 +130,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     #maxInstances?: number;
     #instancesPerCell: number = 1;
 
-    #dirty: boolean = true;
     #slotIndex: number = -1;
-    #onRepopulateRequired: (() => void) | null = null;
+    #onUniformDirty: ((typeId: number) => void) | null = null;
+    #onRepopulateRequired: ((typeId: number) => void) | null = null;
     #isUnifiedGeometryOwned: boolean = false;
 
     /**
@@ -404,8 +404,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     set farDistance(v: number) {
-        this.#farDistance = Math.max(10.0, v);
-        this.#dirty = true;
+        const val = Math.max(10.0, Number(v) || 10.0);
+        if (this.#farDistance !== val) {
+            this.#farDistance = val;
+            this.onParameterChanged('farDistance', val);
+        }
     }
 
     /**
@@ -436,41 +439,15 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#instancesPerCell;
     }
 
-    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
-        switch (prop) {
-            case 'cullingDistance': {
-                const cDist = value as number;
-                if (cDist * 1.15 > this.streamingRadius) {
-                    this.streamingRadius = cDist * 1.15;
-                    this.#notifyChange();
-                } else {
-                    this.#dirty = true;
-                }
-                break;
-            }
-            case 'streamingRadius':
-                this.#notifyChange();
-                break;
-            case 'shadowCullDistance':
-                this.#shadowFadeStartDistance = (value as number) * 0.75;
-                this.#dirty = true;
-                break;
-            case 'bottomOffset':
-            case 'targetLayer':
-            case 'minSlope':
-            case 'maxSlope':
-            case 'densityScaleByWeight':
-                this.#notifyChange();
-                break;
-            case 'densityPerHectare':
-            case 'densityMultiplier':
-                this.#updateInstancesPerCell();
-                this.#notifyChange();
-                break;
-            case 'castShadow':
-            case 'groundBlendStrength':
-                this.#dirty = true;
-                break;
+    set minScale(v: [number, number] | [number, number, number]) {
+        if (!v) return;
+        const s = this.#minScale;
+        const sx = Math.max(0.01, Number(v[0]) || 0.01);
+        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        if (s[0] !== sx || s[1] !== sy) {
+            s[0] = sx;
+            s[1] = sy;
+            this.onParameterChanged('minScale', s);
         }
     }
 
@@ -483,9 +460,16 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#minScale;
     }
 
-    set minScale(v: [number, number] | [number, number, number]) {
-        this.#minScale = [v[0], v[1]];
-        this.#notifyChange();
+    set maxScale(v: [number, number] | [number, number, number]) {
+        if (!v) return;
+        const s = this.#maxScale;
+        const sx = Math.max(0.01, Number(v[0]) || 0.01);
+        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        if (s[0] !== sx || s[1] !== sy) {
+            s[0] = sx;
+            s[1] = sy;
+            this.onParameterChanged('maxScale', s);
+        }
     }
 
     /**
@@ -496,9 +480,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#maxScale;
     }
 
-    set maxScale(v: [number, number] | [number, number, number]) {
-        this.#maxScale = [v[0], v[1]];
-        this.#notifyChange();
+    set exposureBoost(v: number) {
+        const val = Math.max(0.1, Number(v) || 0.1);
+        if (this.#exposureBoost !== val) {
+            this.#exposureBoost = val;
+            this.onParameterChanged('exposureBoost', val);
+        }
     }
 
 
@@ -518,9 +505,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#exposureBoost;
     }
 
-    set exposureBoost(v: number) {
-        this.#exposureBoost = Math.max(0.1, v);
-        this.#dirty = true;
+    set alphaCutoff(v: number) {
+        const val = Math.max(0.01, Math.min(1, Number(v) || 0.01));
+        if (this.#alphaCutoff !== val) {
+            this.#alphaCutoff = val;
+            this.onParameterChanged('alphaCutoff', val);
+        }
     }
 
 
@@ -533,9 +523,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#alphaCutoff;
     }
 
-    set alphaCutoff(v: number) {
-        this.#alphaCutoff = Math.max(0.01, Math.min(1, v));
-        this.#dirty = true;
+    set roughness(v: number) {
+        const val = Math.max(0.04, Math.min(1, Number(v) || 0.04));
+        if (this.#roughness !== val) {
+            this.#roughness = val;
+            this.onParameterChanged('roughness', val);
+        }
     }
 
     /**
@@ -546,9 +539,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#roughness;
     }
 
-    set roughness(v: number) {
-        this.#roughness = Math.max(0.04, Math.min(1, v));
-        this.#dirty = true;
+    set subsurfaceStrength(v: number) {
+        const val = Math.max(0.0, Math.min(3.0, Number(v) || 0.0));
+        if (this.#subsurfaceStrength !== val) {
+            this.#subsurfaceStrength = val;
+            this.onParameterChanged('subsurfaceStrength', val);
+        }
     }
 
     /**
@@ -559,9 +555,18 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#subsurfaceStrength;
     }
 
-    set subsurfaceStrength(v: number) {
-        this.#subsurfaceStrength = Math.max(0.0, Math.min(3.0, v));
-        this.#dirty = true;
+    set subsurfaceColor(v: [number, number, number]) {
+        if (!v) return;
+        const c = this.#subsurfaceColor;
+        const r = Number(v[0]) || 0;
+        const g = Number(v[1]) || 0;
+        const b = Number(v[2]) || 0;
+        if (c[0] !== r || c[1] !== g || c[2] !== b) {
+            c[0] = r;
+            c[1] = g;
+            c[2] = b;
+            this.onParameterChanged('subsurfaceColor', c);
+        }
     }
 
     /**
@@ -572,9 +577,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#subsurfaceColor;
     }
 
-    set subsurfaceColor(v: [number, number, number]) {
-        this.#subsurfaceColor = [v[0], v[1], v[2]];
-        this.#dirty = true;
+    set receiveShadow(v: boolean) {
+        const boolVal = !!v;
+        if (this.#receiveShadow !== boolVal) {
+            this.#receiveShadow = boolVal;
+            this.onParameterChanged('receiveShadow', boolVal);
+        }
     }
 
 
@@ -587,9 +595,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#receiveShadow;
     }
 
-    set receiveShadow(v: boolean) {
-        this.#receiveShadow = v;
-        this.#dirty = true;
+    set shadowStrength(v: number) {
+        const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
+        if (this.#shadowStrength !== val) {
+            this.#shadowStrength = val;
+            this.onParameterChanged('shadowStrength', val);
+        }
     }
 
     /**
@@ -600,9 +611,12 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#shadowStrength;
     }
 
-    set shadowStrength(v: number) {
-        this.#shadowStrength = Math.max(0.0, Math.min(1.0, v));
-        this.#dirty = true;
+    set shadowFadeStartDistance(v: number) {
+        const val = Math.max(0.0, Number(v) || 0.0);
+        if (this.#shadowFadeStartDistance !== val) {
+            this.#shadowFadeStartDistance = val;
+            this.onParameterChanged('shadowFadeStartDistance', val);
+        }
     }
 
 
@@ -615,17 +629,73 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#shadowFadeStartDistance;
     }
 
-    set shadowFadeStartDistance(v: number) {
-        this.#shadowFadeStartDistance = Math.max(0.0, v);
-        this.#dirty = true;
+    /**
+     * [KO] 잔디 렌더링/셰이딩 UBO 파라미터 변경 시 호출되는 콜백 함수를 등록합니다.
+     * [EN] Registers a callback invoked whenever grass rendering/shading UBO parameters change.
+     */
+    set onUniformDirty(cb: ((typeId: number) => void) | null) {
+        this.#onUniformDirty = cb;
     }
 
     /**
      * [KO] 잔디 배치 관련 속성 변경 시 인스턴스 전체 재스폰(Re-populate)을 요청하는 콜백 함수를 등록합니다.
      * [EN] Registers a callback invoked whenever placement-related properties change to request full instance re-population.
      */
-    set onRepopulateRequired(cb: (() => void) | null) {
+    set onRepopulateRequired(cb: ((typeId: number) => void) | null) {
         this.#onRepopulateRequired = cb;
+    }
+
+    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
+        switch (prop) {
+            // [채널 A: 전체 지형 GPU 인스턴스 재베이킹이 필요한 파라미터 (Heavy)]
+            case 'bottomOffset':
+            case 'targetLayer':
+            case 'minSlope':
+            case 'maxSlope':
+            case 'densityScaleByWeight':
+            case 'streamingRadius':
+            case 'minScale':
+            case 'maxScale':
+                this.#notifyRepopulateRequired();
+                break;
+
+            case 'densityPerHectare':
+            case 'densityMultiplier':
+                this.#updateInstancesPerCell();
+                this.#notifyRepopulateRequired();
+                break;
+
+            case 'cullingDistance': {
+                const cDist = value as number;
+                if (cDist * 1.15 > this.streamingRadius) {
+                    this.streamingRadius = cDist * 1.15;
+                    this.#notifyRepopulateRequired();
+                } else {
+                    this.#notifyUniformDirty();
+                }
+                break;
+            }
+
+            // [채널 B: 80B UBO 슬롯만 갱신하는 셰이딩/머티리얼 파라미터 (Light)]
+            case 'shadowCullDistance':
+                this.#shadowFadeStartDistance = (value as number) * 0.75;
+                this.#notifyUniformDirty();
+                break;
+
+            case 'farDistance':
+            case 'exposureBoost':
+            case 'alphaCutoff':
+            case 'roughness':
+            case 'subsurfaceStrength':
+            case 'subsurfaceColor':
+            case 'receiveShadow':
+            case 'shadowStrength':
+            case 'shadowFadeStartDistance':
+            case 'castShadow':
+            case 'groundBlendStrength':
+                this.#notifyUniformDirty();
+                break;
+        }
     }
 
     /**
@@ -645,24 +715,26 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 렌더링 또는 유니폼 버퍼 갱신이 필요한지 여부를 나타내는 더티 플래그
-     * [EN] Dirty flag indicating whether rendering or uniform buffer update is required
+     * [KO] 잔디 인스턴스 및 하위 서브메쉬 리소스를 해제합니다.
+     * [EN] Destroys grass instance and subordinate sub-mesh resources.
      */
-    get dirty(): boolean {
-        return this.#dirty;
+    override destroy(): void {
+        this.#slotIndex = -1;
+        if (this.#isUnifiedGeometryOwned && this.#geometry instanceof Geometry) {
+            this.#geometry.destroy();
+        }
+        this.#isUnifiedGeometryOwned = false;
+        this.#geometry = null as any;
+        this.#subMeshes.length = 0;
+        this.#baseColorTexture = null as any;
+        this.#mesh = null as any;
+        this.#onUniformDirty = null;
+        this.#onRepopulateRequired = null;
+        super.destroy();
     }
 
-    /**
-     * [KO] 더티 플래그를 해제하여 데이터가 최신 상태임을 표시합니다.
-     * [EN] Clears the dirty flag to indicate data is in the latest state.
-     */
-    markClean(): void {
-        this.#dirty = false;
-    }
-
-    #notifyChange(): void {
-        this.#dirty = true;
-        if (this.#onRepopulateRequired) this.#onRepopulateRequired();
+    #notifyUniformDirty(): void {
+        this.#onUniformDirty?.(this.typeId);
     }
 
     #updateInstancesPerCell(): void {
@@ -681,22 +753,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#slotIndex = val;
     }
 
-    /**
-     * [KO] 잔디 인스턴스 및 하위 서브메쉬 리소스를 해제합니다.
-     * [EN] Destroys grass instance and subordinate sub-mesh resources.
-     */
-    override destroy(): void {
-        this.#slotIndex = -1;
-        if (this.#isUnifiedGeometryOwned && this.#geometry instanceof Geometry) {
-            this.#geometry.destroy();
-        }
-        this.#isUnifiedGeometryOwned = false;
-        this.#geometry = null as any;
-        this.#subMeshes.length = 0;
-        this.#baseColorTexture = null as any;
-        this.#mesh = null as any;
-        this.#onRepopulateRequired = null;
-        super.destroy();
+    #notifyRepopulateRequired(): void {
+        this.#onRepopulateRequired?.(this.typeId);
+        this.#onUniformDirty?.(this.typeId);
     }
 }
 

@@ -43,6 +43,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #initialBaked: boolean = false;
     #lastLoadedTileCount: number = 0;
     #currentRenderViewStateData: RenderViewStateData | null = null;
+    #dirtyUboMask: number = 0;
+    #needsRebakeMask: number = 0;
 
     /**
      * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -160,6 +162,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
         this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
 
+        grassType.onUniformDirty = this.#onGrassUniformDirty;
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
         if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.landscape.layers) {
@@ -232,11 +235,13 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const bakeThreshold = Math.max(16.0, minRadius * 0.35);
 
         let rebakedThisFrame = false;
-        if (hasValidTextures && (!this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
+        const needsRebake = this.#needsRebakeMask !== 0;
+        if (hasValidTextures && (needsRebake || !this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
             this.#initialBaked = true;
             this.#lastBakePos[0] = camX;
             this.#lastBakePos[1] = camZ;
             this.rebakeAll(camX, camZ);
+            this.#needsRebakeMask = 0;
             rebakedThisFrame = true;
         }
 
@@ -244,10 +249,11 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         if (!gpuDevice) return;
 
         const hasValidVbt = landscape.hasValidVbtAtlas;
+        const uboDirtyMask = this.#dirtyUboMask;
 
         for (let i = 0; i < grassLen; i++) {
             const type = types[i];
-            const {typeId, dirty, slotIndex} = type;
+            const {typeId, slotIndex} = type;
 
             let activeSlot = slotIndex;
             if (activeSlot < 0) {
@@ -260,9 +266,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
                 }
             }
 
-            const isDirty = dirty || tileCountChanged;
+            const isDirty = tileCountChanged || ((uboDirtyMask & (1 << typeId)) !== 0);
             if (isDirty) {
-                type.markClean();
                 this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
 
                 // rebakeAll 실행 시 이미 각 잔디 타입별 updateTypeParams가 전송되었으므로 중복 전송 방지
@@ -274,6 +279,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
                 }
             }
         }
+        this.#dirtyUboMask = 0;
 
         // VRAM 초고속 템플릿 복사 리셋 (Zero-GC: PRE_PROCESS 인코더 활용)
         this.commandEncoderManager.useEncoder(
@@ -309,7 +315,13 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             removedGrass.slotIndex = -1;
         }
 
+        if (typeId >= 0 && typeId < 32) {
+            this.#dirtyUboMask &= ~(1 << typeId);
+            this.#needsRebakeMask &= ~(1 << typeId);
+        }
+
         removedGrass.bindAllocation(null);
+        removedGrass.onUniformDirty = null;
         removedGrass.onRepopulateRequired = null;
         if (this.types.length === 0) {
             this.#populated = false;
@@ -329,6 +341,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             this.removeType(types[types.length - 1]);
         }
 
+        this.#dirtyUboMask = 0;
+        this.#needsRebakeMask = 0;
         this.#slotPooler.clear();
         this.#megaBuffer.destroy();
         this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
@@ -426,9 +440,24 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         }
     }
 
-    // Zero-GC: 잔디 리베이크 요청 공용 재사용 콜백
-    #onGrassRepopulateRequired = (): void => {
-        this.rebakeAll();
+    // Zero-GC: 잔디 UBO 갱신 요청 비트마스크 등록 콜백 (CPU 1사이클 비트마스크 세팅)
+    #onGrassUniformDirty = (typeId?: number): void => {
+        if (typeId !== undefined && typeId >= 0 && typeId < 32) {
+            this.#dirtyUboMask |= (1 << typeId);
+        } else {
+            this.#dirtyUboMask = -1;
+        }
+    };
+
+    // Zero-GC: 잔디 리베이크 요청 비트마스크 등록 콜백 (Bake 시 UBO도 동반 갱신)
+    #onGrassRepopulateRequired = (typeId?: number): void => {
+        if (typeId !== undefined && typeId >= 0 && typeId < 32) {
+            this.#needsRebakeMask |= (1 << typeId);
+            this.#dirtyUboMask |= (1 << typeId);
+        } else {
+            this.#needsRebakeMask = -1;
+            this.#dirtyUboMask = -1;
+        }
     };
 
 
