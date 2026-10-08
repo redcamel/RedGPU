@@ -13,7 +13,7 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
-import {FoliageSlotPooler} from "./core/renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "./core/buffer/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 
 /**

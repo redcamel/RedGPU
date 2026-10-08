@@ -42,10 +42,10 @@ import Foliage, {
     type FoliageSubCell
 } from "./Foliage";
 import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
-import {FoliageSlotPooler} from "./renderUnit/FoliageSlotPooler";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
+import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCuller from "./culling/FoliageCuller";

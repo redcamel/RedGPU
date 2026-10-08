@@ -10,7 +10,7 @@ import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorRenderUnit from "./internal/buildFoliageImpostorRenderUnit";
-import {FoliageSlotPooler} from "../renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../buffer/FoliageSlotPooler";
 
 /**
  * [KO] 식생 렌더 단위 조립 결과 인터페이스입니다.

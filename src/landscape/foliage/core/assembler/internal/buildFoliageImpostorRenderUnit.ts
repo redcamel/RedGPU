@@ -11,7 +11,7 @@ import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpo
 import bakeFoliageImpostor from "../../impostor/bakeFoliageImpostor";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
-import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../../buffer/FoliageSlotPooler";
 import {FoliageRenderUnit} from "../../renderUnit/FoliageRenderUnit";
 import createFoliageRenderUnitInstance from "./createFoliageRenderUnitInstance";
 

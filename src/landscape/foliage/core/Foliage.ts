@@ -10,7 +10,7 @@ import assembleFoliageRenderUnits from "./assembler/assembleFoliageRenderUnits";
 import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
-import {FoliageSlotPooler} from "./renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 /**

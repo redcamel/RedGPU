@@ -9,7 +9,7 @@ import Mesh from "../../../../../display/mesh/Mesh";
 import FoliageRenderUnit from "../../renderUnit/FoliageRenderUnit";
 import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpostorMaterial";
 import type {FoliageDepthPassMode} from "../../pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../../buffer/FoliageSlotPooler";
 
 /**
  * [KO] 렌더 단위 인스턴스 생성을 위한 설정 옵션 인터페이스입니다.

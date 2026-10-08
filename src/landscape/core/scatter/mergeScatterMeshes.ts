@@ -1,5 +1,5 @@
 /**
- * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 메쉬를 단일 지오메트리로 자동 결합하는 스캐터 코어 함수 모듈입니다.
+ * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 메쉬를 단일 지오메트리로 자동 병합하는 스캐터 코어 함수 모듈입니다.
  * [EN] Scatter core function module that recursively traverses composite hierarchical 3D meshes (e.g. GLTF node trees), applies parent-child local transforms, and automatically merges same-material meshes into unified geometries.
  *
  * @packageDocumentation
@@ -36,10 +36,10 @@ export interface RawMeshNode {
 }
 
 /**
- * [KO] 동일한 재질을 공유하여 하나의 버퍼로 결합된 메쉬 그룹 결과입니다.
- * [EN] Result of a mesh group combined into a single buffer sharing the same material.
+ * [KO] 동일한 재질을 공유하여 하나의 버퍼로 병합된 메쉬 그룹 결과입니다.
+ * [EN] Result of a mesh group merged into a single buffer sharing the same material.
  */
-export interface CombinedMeshGroup {
+export interface MergedMeshGroup {
     material: any;
     geometry: Geometry;
     vertexCount: number;
@@ -49,10 +49,10 @@ export interface CombinedMeshGroup {
 }
 
 /**
- * [KO] 메쉬 결합 설정 옵션 인터페이스입니다.
- * [EN] Configuration options interface for mesh combining.
+ * [KO] 메쉬 병합 설정 옵션 인터페이스입니다.
+ * [EN] Configuration options interface for mesh merging.
  */
-export interface ScatterMeshCombineOptions {
+export interface ScatterMeshMergeOptions {
     /**
      * [KO] 원래 모델의 피벗 기준점을 유지할지 여부 (기본값: true). false일 경우 모델의 최하단(minY)을 Y=0으로 정렬합니다.
      * [EN] Whether to preserve the original model pivot (default: true). If false, aligns the lowest vertex (minY) to Y=0.
@@ -73,11 +73,11 @@ export interface ScatterMeshCombineOptions {
 }
 
 /**
- * [KO] combineScatterMeshes의 최종 지오메트리 결합 결과 객체입니다.
- * [EN] Final geometry combination result object of combineScatterMeshes.
+ * [KO] mergeScatterMeshes의 최종 지오메트리 병합 결과 객체입니다.
+ * [EN] Final geometry merge result object of mergeScatterMeshes.
  */
-export interface ScatterMeshCombineResult {
-    groups: CombinedMeshGroup[];
+export interface ScatterMeshMergeResult {
+    groups: MergedMeshGroup[];
     unifiedGeometry: Geometry | null;
     totalVertexCount: number;
     totalIndexCount: number;
@@ -248,17 +248,17 @@ function traverseHierarchy(
  * [KO] 결합할 단일 루트 메쉬 또는 메쉬 배열
  * [EN] Single root mesh or array of root meshes to combine
  * @param options -
- * [KO] 피벗 보존, XZ 평면 중심 정렬, 그림자용 지오메트리 생성 등 결합 옵션
+ * [KO] 피벗 보존, XZ 평면 중심 정렬, 그림자용 지오메트리 생성 등 결합/병합 옵션
  * [EN] Combination options including pivot preservation, XZ plane centering, and shadow geometry generation
  * @returns
- * [KO] 머티리얼별 결합 그룹 및 통합 바운딩 정보가 포함된 결합 결과 객체
- * [EN] Combination result object containing merged groups per material and unified bounding data
+ * [KO] 머티리얼별 병합 그룹 및 통합 바운딩 정보가 포함된 병합 결과 객체
+ * [EN] Merge result object containing merged groups per material and unified bounding data
  */
-export default function combineScatterMeshes(
+export default function mergeScatterMeshes(
     redGPUContext: RedGPUContext,
     roots: Mesh | Mesh[],
-    options?: ScatterMeshCombineOptions
-): ScatterMeshCombineResult {
+    options?: ScatterMeshMergeOptions
+): ScatterMeshMergeResult {
     const rootList = Array.isArray(roots) ? roots : [roots];
     const rawList: RawMeshNode[] = [];
 
@@ -339,7 +339,7 @@ export default function combineScatterMeshes(
         entry.raws.push(raw);
     }
 
-    const groups: CombinedMeshGroup[] = [];
+    const groups: MergedMeshGroup[] = [];
 
     const generateShadow = options?.generateShadowMergedGeometry ?? false;
     let shadowMergedPositions: Float32Array | null = null;

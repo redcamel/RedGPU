@@ -8,7 +8,7 @@ import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "./FoliageSlotPooler";
+import {FoliageSlotPooler} from "../buffer/FoliageSlotPooler";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')

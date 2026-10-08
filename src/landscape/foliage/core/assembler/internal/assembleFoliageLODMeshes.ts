@@ -11,10 +11,10 @@ import Geometry from "../../../../../geometry/Geometry";
 import FoliageRenderUnit from "../../renderUnit/FoliageRenderUnit";
 import type {FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
-import combineScatterMeshes from "../../../../core/scatter/combineScatterMeshes";
+import mergeScatterMeshes from "../../../../core/scatter/mergeScatterMeshes";
 import prepareFoliageMaterials from "./prepareFoliageMaterials";
 import createFoliageRenderUnitInstance from "./createFoliageRenderUnitInstance";
-import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../../buffer/FoliageSlotPooler";
 
 const identityMatrix: mat4 = mat4.create();
 
@@ -99,7 +99,7 @@ export default function assembleFoliageLODMeshes(
         prepareFoliageMaterials(roots[r]);
     }
 
-    const combineResult = combineScatterMeshes(
+    const mergeResult = mergeScatterMeshes(
         redGPUContext,
         roots,
         {
@@ -109,7 +109,7 @@ export default function assembleFoliageLODMeshes(
         }
     );
 
-    if (combineResult.groups.length === 0) {
+    if (mergeResult.groups.length === 0) {
         return {
             renderUnits: [],
             unifiedGeometry: null,
@@ -122,12 +122,12 @@ export default function assembleFoliageLODMeshes(
     }
 
     const resultRenderUnits: FoliageRenderUnit[] = [];
-    const {unifiedGeometry, boundingRadius = 5.0} = combineResult;
+    const {unifiedGeometry, boundingRadius = 5.0} = mergeResult;
     const treeH = Math.max(5.0, (boundingRadius || 5.0) * 1.8);
     const {groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = options;
 
-    for (let g = 0; g < combineResult.groups.length; g++) {
-        const group = combineResult.groups[g];
+    for (let g = 0; g < mergeResult.groups.length; g++) {
+        const group = mergeResult.groups[g];
         const combinedRenderUnit = createFoliageRenderUnitInstance({
             gpuDevice,
             meshNode: group.rawNodes[0]?.node,
@@ -155,7 +155,7 @@ export default function assembleFoliageLODMeshes(
     }
 
     let shadowMergedRenderUnit: FoliageRenderUnit | null = null;
-    if (combineResult.shadowMergedGeometry && combineResult.totalVertexCount > 0) {
+    if (mergeResult.shadowMergedGeometry && mergeResult.totalVertexCount > 0) {
         let shadowSlotIndex = -1;
         if (slotPooler) {
             shadowSlotIndex = slotPooler.allocateSlot();
@@ -170,9 +170,9 @@ export default function assembleFoliageLODMeshes(
         }
 
         shadowMergedRenderUnit = new FoliageRenderUnit({
-            geometry: combineResult.shadowMergedGeometry,
-            indexCount: combineResult.totalIndexCount,
-            vertexCount: combineResult.totalVertexCount,
+            geometry: mergeResult.shadowMergedGeometry,
+            indexCount: mergeResult.totalIndexCount,
+            vertexCount: mergeResult.totalVertexCount,
             isIndexed: true,
             indexFormat: 'uint32',
             strideBytes: POSITION_ONLY_STRIDE_BYTES,
@@ -189,9 +189,9 @@ export default function assembleFoliageLODMeshes(
         renderUnits: resultRenderUnits,
         unifiedGeometry,
         shadowMergedRenderUnit,
-        boundingRadius: combineResult.boundingRadius,
-        boundingHeight: combineResult.boundingHeight,
-        minY: combineResult.minY,
-        maxY: combineResult.maxY,
+        boundingRadius: mergeResult.boundingRadius,
+        boundingHeight: mergeResult.boundingHeight,
+        minY: mergeResult.minY,
+        maxY: mergeResult.maxY,
     };
 }
