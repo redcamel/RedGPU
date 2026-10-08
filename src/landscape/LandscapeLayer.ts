@@ -403,9 +403,10 @@ export class LandscapeLayer {
     }
 
     set uvScale(val: [number, number]) {
-        if (this.#uvScale[0] === val[0] && this.#uvScale[1] === val[1]) return;
-        this.#uvScale[0] = val[0];
-        this.#uvScale[1] = val[1];
+        const [u, v] = val;
+        if (this.#uvScale[0] === u && this.#uvScale[1] === v) return;
+        this.#uvScale[0] = u;
+        this.#uvScale[1] = v;
         this.dirty = true;
         this.onChange?.();
     }
@@ -419,9 +420,10 @@ export class LandscapeLayer {
     }
 
     set uvOffset(val: [number, number]) {
-        if (this.#uvOffset[0] === val[0] && this.#uvOffset[1] === val[1]) return;
-        this.#uvOffset[0] = val[0];
-        this.#uvOffset[1] = val[1];
+        const [u, v] = val;
+        if (this.#uvOffset[0] === u && this.#uvOffset[1] === v) return;
+        this.#uvOffset[0] = u;
+        this.#uvOffset[1] = v;
         this.dirty = true;
         this.onChange?.();
     }

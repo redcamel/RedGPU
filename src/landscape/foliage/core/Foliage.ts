@@ -1422,7 +1422,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         const mounted = this.#mountedSubCells;
         const targetSubCell = mounted[mountedIndex];
-        const {mountedSlotIndex: targetSlot, instanceCount: targetCount} = targetSubCell;
+        const {mountedSlotIndex, instanceCount} = targetSubCell;
         const currentActive = allocation.instanceCount;
 
         const isLast = (mountedIndex === mounted.length - 1);
@@ -1431,18 +1431,18 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             mounted.pop();
             targetSubCell.isMounted = false;
             targetSubCell.mountedSlotIndex = -1;
-            allocation.instanceCount = Math.max(0, currentActive - targetCount);
+            allocation.instanceCount = Math.max(0, currentActive - instanceCount);
         } else {
             const lastSubCell = mounted.pop()!;
             const {instanceCount: lastCount} = lastSubCell;
 
-            lastSubCell.mountedSlotIndex = targetSlot;
+            lastSubCell.mountedSlotIndex = mountedSlotIndex;
             mounted[mountedIndex] = lastSubCell;
 
             targetSubCell.isMounted = false;
             targetSubCell.mountedSlotIndex = -1;
 
-            allocation.instanceCount = Math.max(0, currentActive - targetCount);
+            allocation.instanceCount = Math.max(0, currentActive - instanceCount);
 
             // [100% GPU Re-bake to compact slot]
             const landscape = this.#landscape;
@@ -1452,7 +1452,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     landscape,
                     this,
                     lastSubCell,
-                    allocation.rawBaseOffset + targetSlot,
+                    allocation.rawBaseOffset + mountedSlotIndex,
                     lastCount,
                     subCellSize
                 );

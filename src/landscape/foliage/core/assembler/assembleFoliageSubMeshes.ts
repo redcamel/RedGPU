@@ -86,9 +86,8 @@ export default function assembleFoliageSubMeshes(
         };
     }
 
-    const useImpostor = options.useImpostor !== undefined ? options.useImpostor : true;
-    const lodConfigs = options.lods || [];
-    const numLODs = Math.min(lodConfigs.length, 8);
+    const {useImpostor = true, lods = []} = options;
+    const numLODs = Math.min(lods.length, 8);
 
     const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
     let maxBoundingRadius = 0;
@@ -96,10 +95,11 @@ export default function assembleFoliageSubMeshes(
     let globalMaxY = -Infinity;
 
     for (let l = 0; l < numLODs; l++) {
-        const lodCfg = lodConfigs[l];
-        const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
+        const lodCfg = lods[l];
+        const {mesh, receiveShadow = true} = lodCfg;
+        const lodMeshes = Array.isArray(mesh) ? mesh : [mesh];
         const startSubOffset = subMeshes.length;
-        const lodReceiveShadow = lodCfg.receiveShadow !== false;
+        const lodReceiveShadow = receiveShadow !== false;
 
         const assembled = assembleFoliageLODMeshes(
             redGPUContext,

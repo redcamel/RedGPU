@@ -263,11 +263,11 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         for (let i = 0; i < 8; i++) {
             const base = 12 + i * 4;
             if (i < colorCount) {
-                const color = lodColorsRGBA[i];
-                f32[base] = color[0];
-                f32[base + 1] = color[1];
-                f32[base + 2] = color[2];
-                f32[base + 3] = color[3];
+                const [r, g, b, a] = lodColorsRGBA[i];
+                f32[base] = r;
+                f32[base + 1] = g;
+                f32[base + 2] = b;
+                f32[base + 3] = a;
             } else {
                 f32[base] = 0;
                 f32[base + 1] = 0;
@@ -324,9 +324,15 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
         for (let lod = 0; lod < lodMaxLevel; lod++) {
             const offset = lod * 5;
             const lodRange = sharedGeometry.getLODRange(lod);
-            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
-            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
-            const baseVertex = lodRange.baseVertex;
+            const {
+                wireframeIndexCount,
+                indexCount: solidIndexCount,
+                wireframeFirstIndex,
+                firstIndex: solidFirstIndex,
+                baseVertex
+            } = lodRange;
+            const indexCount = isWireframe ? wireframeIndexCount : solidIndexCount;
+            const firstIndex = isWireframe ? wireframeFirstIndex : solidFirstIndex;
 
             argsData[offset] = indexCount;
             argsData[offset + 1] = 0;

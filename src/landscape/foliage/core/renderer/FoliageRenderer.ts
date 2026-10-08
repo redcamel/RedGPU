@@ -349,11 +349,8 @@ class FoliageRenderer extends AScatterRenderer {
 
         // [1단계] 모든 식생 타입의 Opaque Fast-Z 서브메시 선행 일괄 드로우
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type!;
-            if (!foliageType.useDepthPrepass) continue;
-            const culledGPU = item.culledGPU!;
-            const indirectGPU = item.indirectGPU!;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
+            if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
             const subMeshes = foliageType.depthPrepassOpaqueSubMeshes;
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
@@ -365,11 +362,8 @@ class FoliageRenderer extends AScatterRenderer {
 
         // [2단계] 모든 식생 타입의 Masked 서브메시 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type!;
-            if (!foliageType.useDepthPrepass) continue;
-            const culledGPU = item.culledGPU!;
-            const indirectGPU = item.indirectGPU!;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
+            if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
             const subMeshes = foliageType.depthPrepassMaskedSubMeshes;
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
@@ -412,10 +406,8 @@ class FoliageRenderer extends AScatterRenderer {
         const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesShadow[t];
-            const foliageType = item.type!;
-            const culledGPU = item.culledGPU!;
-            const indirectGPU = item.indirectGPU!;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesShadow[t];
+            if (!foliageType || !culledGPU || !indirectGPU) continue;
 
             const num3DLODs = foliageType.hasImpostor ? Math.max(1, foliageType.lodInfoList.length - 1) : foliageType.lodInfoList.length;
             const maxShadowLOD = Math.max(0, num3DLODs - 1);
@@ -425,8 +417,9 @@ class FoliageRenderer extends AScatterRenderer {
                 const subCount = lod0Subs.length;
                 for (let l0 = 0; l0 < subCount; l0++) {
                     const sub = lod0Subs[l0];
-                    const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
-                    const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                    const {instanceBufferOffset, indirectOffsetBytes} = sub;
+                    const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                    const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                     this.#drawShadowSubMesh(bundleEncoder, sub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                 }
 
@@ -435,8 +428,9 @@ class FoliageRenderer extends AScatterRenderer {
                     for (let s = 0; s < shadowMergedSubs.length; s++) {
                         const shadowSub = shadowMergedSubs[s];
                         if (shadowSub.lodIndex === maxShadowLOD) {
-                            const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
-                            const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowSub;
+                            const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                            const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                             this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                             break;
                         }
@@ -449,8 +443,9 @@ class FoliageRenderer extends AScatterRenderer {
                     for (let s = 0; s < shadowMergedSubs.length; s++) {
                         const shadowSub = shadowMergedSubs[s];
                         if (shadowSub.lodIndex === targetLOD) {
-                            const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
-                            const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowSub;
+                            const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                            const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                             this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                             break;
                         }
@@ -462,8 +457,9 @@ class FoliageRenderer extends AScatterRenderer {
                     for (let s = 0; s < subCount; s++) {
                         const sub = allSubMeshes[s];
                         if (sub.isImpostor || sub.lodIndex !== targetLOD) continue;
-                        const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
-                        const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                        const {instanceBufferOffset, indirectOffsetBytes} = sub;
+                        const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                        const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                         this.#drawShadowSubMesh(bundleEncoder, sub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                     }
                 }
@@ -521,10 +517,11 @@ class FoliageRenderer extends AScatterRenderer {
             this.#lastBoundInstanceOffset = instanceBufferOffset;
         }
 
-        if (unit.isIndexed && unit.geometry.indexBuffer?.gpuBuffer) {
-            const indexGPUBuffer = unit.geometry.indexBuffer.gpuBuffer;
+        const {isIndexed, geometry, indexFormat} = unit;
+        if (isIndexed && geometry.indexBuffer?.gpuBuffer) {
+            const indexGPUBuffer = geometry.indexBuffer.gpuBuffer;
             if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
-                passEncoder.setIndexBuffer(indexGPUBuffer, unit.indexFormat);
+                passEncoder.setIndexBuffer(indexGPUBuffer, indexFormat);
                 this.#lastBoundIndexBuffer = indexGPUBuffer;
             }
         }

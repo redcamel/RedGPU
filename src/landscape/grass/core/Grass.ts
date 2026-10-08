@@ -441,9 +441,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     set minScale(v: [number, number] | [number, number, number]) {
         if (!v) return;
+        const [vx, vy] = v;
         const s = this.#minScale;
-        const sx = Math.max(0.01, Number(v[0]) || 0.01);
-        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        const sx = Math.max(0.01, Number(vx) || 0.01);
+        const sy = Math.max(0.01, Number(vy) || 0.01);
         if (s[0] !== sx || s[1] !== sy) {
             s[0] = sx;
             s[1] = sy;
@@ -462,9 +463,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     set maxScale(v: [number, number] | [number, number, number]) {
         if (!v) return;
+        const [vx, vy] = v;
         const s = this.#maxScale;
-        const sx = Math.max(0.01, Number(v[0]) || 0.01);
-        const sy = Math.max(0.01, Number(v[1]) || 0.01);
+        const sx = Math.max(0.01, Number(vx) || 0.01);
+        const sy = Math.max(0.01, Number(vy) || 0.01);
         if (s[0] !== sx || s[1] !== sy) {
             s[0] = sx;
             s[1] = sy;

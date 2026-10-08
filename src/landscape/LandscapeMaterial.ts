@@ -357,10 +357,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         uintBuf[3] = 0;
 
         const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : DEFAULT_BASE_COLOR;
-        floatBuf[4] = colorLinear[0];
-        floatBuf[5] = colorLinear[1];
-        floatBuf[6] = colorLinear[2];
-        floatBuf[7] = colorLinear[3];
+        const [r, g, b, a] = colorLinear;
+        floatBuf[4] = r;
+        floatBuf[5] = g;
+        floatBuf[6] = b;
+        floatBuf[7] = a;
 
         let offset = 8;
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {

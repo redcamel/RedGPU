@@ -214,8 +214,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             this.#lastLoadedTileCount = tileLoadedCount;
         }
 
-        const dx = camX - this.#lastBakePos[0];
-        const dz = camZ - this.#lastBakePos[1];
+        const [lastBakeX, lastBakeZ] = this.#lastBakePos;
+        const dx = camX - lastBakeX;
+        const dz = camZ - lastBakeZ;
         const distSq = dx * dx + dz * dz;
 
         let minRadius = 120.0;

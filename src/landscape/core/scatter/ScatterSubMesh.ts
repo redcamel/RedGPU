@@ -87,11 +87,18 @@ export class ScatterSubMesh extends AScatterGeometryUnit {
      */
     constructor(init: ScatterSubMeshInitOptions) {
         super(init);
-        this.#mesh = init.mesh;
-        this.#material = init.material;
-        this.#baseColorTexture = init.baseColorTexture ?? null;
-        this.#lodIndex = init.lodIndex ?? 0;
-        this.#isMasked = init.isMasked ?? false;
+        const {
+            mesh,
+            material,
+            baseColorTexture = null,
+            lodIndex = 0,
+            isMasked = false
+        } = init;
+        this.#mesh = mesh;
+        this.#material = material;
+        this.#baseColorTexture = baseColorTexture;
+        this.#lodIndex = lodIndex;
+        this.#isMasked = isMasked;
     }
 
     /**

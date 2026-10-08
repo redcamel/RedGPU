@@ -185,15 +185,15 @@ function traverseHierarchy(
         mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, tempLocalMatrix);
     }
 
-    if (node.geometry) {
-        const mat = node.material as any;
+    const {geometry, material, children} = node;
+    if (geometry) {
+        const mat = material as any;
         if (mat?.dirtyPipeline || (mat && !mat.gpuRenderInfo?.fragmentShaderModule)) {
             mat._updateFragmentState?.();
             mat.dirtyPipeline = false;
         }
 
-        const geom = node.geometry;
-        const rawStride = geom.vertexBuffer?.stride || (geom.vertexBuffer?.interleavedStruct?.arrayStride ? geom.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
+        const rawStride = geometry.vertexBuffer?.stride || (geometry.vertexBuffer?.interleavedStruct?.arrayStride ? geometry.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
 
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, currentRelativeMatrix);
@@ -201,7 +201,7 @@ function traverseHierarchy(
 
         rawList.push({
             node,
-            geometry: geom,
+            geometry,
             material: mat,
             currentRelativeMatrix,
             normalMatrix,
@@ -209,7 +209,6 @@ function traverseHierarchy(
         });
     }
 
-    const children = node.children;
     if (children && children.length > 0) {
         for (let i = 0; i < children.length; i++) {
             traverseHierarchy(
@@ -294,23 +293,23 @@ export default function combineScatterMeshes(
 
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
-        const {geometry: geom, rawStride, currentRelativeMatrix: m} = raw;
-        const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
-        const srcVData = srcVB?.data;
-        const vCount = srcVB?.vertexCount ?? 0;
+        const {geometry, rawStride, currentRelativeMatrix} = raw;
+        const {vertexBuffer, indexBuffer} = geometry;
+        const srcVData = vertexBuffer?.data;
+        const vertexCount = vertexBuffer?.vertexCount ?? 0;
 
-        lodTotalVertices += vCount;
-        lodTotalIndices += srcIB?.indexCount ?? vCount;
+        lodTotalVertices += vertexCount;
+        lodTotalIndices += indexBuffer?.indexCount ?? vertexCount;
 
-        if (srcVData && vCount > 0) {
-            for (let v = 0; v < vCount; v++) {
+        if (srcVData && vertexCount > 0) {
+            for (let v = 0; v < vertexCount; v++) {
                 const srcIdx = v * rawStride;
                 const x = srcVData[srcIdx + 0];
                 const y = srcVData[srcIdx + 1];
                 const z = srcVData[srcIdx + 2];
-                const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
-                const wy = m[1] * x + m[5] * y + m[9] * z + m[13];
-                const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
+                const wx = currentRelativeMatrix[0] * x + currentRelativeMatrix[4] * y + currentRelativeMatrix[8] * z + currentRelativeMatrix[12];
+                const wy = currentRelativeMatrix[1] * x + currentRelativeMatrix[5] * y + currentRelativeMatrix[9] * z + currentRelativeMatrix[13];
+                const wz = currentRelativeMatrix[2] * x + currentRelativeMatrix[6] * y + currentRelativeMatrix[10] * z + currentRelativeMatrix[14];
 
                 if (wx < minX) minX = wx;
                 if (wx > maxX) maxX = wx;

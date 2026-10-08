@@ -557,10 +557,14 @@ export abstract class ALandscapeDebugger {
         if (!this.#landscape) return null;
 
         const camera = this.#camera;
-        const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
-        const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
-        const rawPan = camera ? (camera.pan ?? 0) : 0;
-        const fov = camera ? (camera.fieldOfView ?? 60) : 60;
+        let camX = 0, camZ = 0, rawPan = 0, fov = 60;
+        if (camera) {
+            const {x, z, position, pan, fieldOfView} = camera;
+            camX = x ?? position?.[0] ?? 0;
+            camZ = z ?? position?.[2] ?? 0;
+            rawPan = pan ?? 0;
+            fov = fieldOfView ?? 60;
+        }
 
         const panRad = (rawPan * Math.PI) / 180.0;
         const halfFovRad = ((fov * 0.5) * Math.PI) / 180.0;

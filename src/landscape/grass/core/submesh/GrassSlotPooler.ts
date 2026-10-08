@@ -79,9 +79,10 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         u32[baseFloat + 10] = hasValidVbt ? 1 : 0;
         f32[baseFloat + 11] = exposureBoost;
 
-        f32[baseFloat + 12] = subsurfaceColor[0];
-        f32[baseFloat + 13] = subsurfaceColor[1];
-        f32[baseFloat + 14] = subsurfaceColor[2];
+        const [subR, subG, subB] = subsurfaceColor;
+        f32[baseFloat + 12] = subR;
+        f32[baseFloat + 13] = subG;
+        f32[baseFloat + 14] = subB;
         f32[baseFloat + 15] = subsurfaceStrength;
 
         f32[baseFloat + 16] = roughness;

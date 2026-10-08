@@ -58,8 +58,8 @@ export const LANDSCAPE_DEFAULT_LOD_COLORS: [number, number, number, number][] = 
  * @internal
  */
 export const LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS: string[] = Object.freeze(
-    LANDSCAPE_DEFAULT_LOD_COLORS.map(c =>
-        `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, 0.75)`
+    LANDSCAPE_DEFAULT_LOD_COLORS.map(([r, g, b]) =>
+        `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, 0.75)`
     )
 ) as string[];
 

@@ -1100,18 +1100,18 @@ export class Landscape extends RedGPUObject {
     update(renderViewStateData: RenderViewStateData): void {
         if (!renderViewStateData) return;
 
-        const {view: currentView, frustumPlanesFlat} = renderViewStateData;
-        const rawCamera = currentView.rawCamera as PerspectiveCamera;
+        const {view, frustumPlanesFlat} = renderViewStateData;
+        const rawCamera = view.rawCamera as PerspectiveCamera;
         if (!rawCamera) return;
 
         if (this.#material) {
             this.#material.updateUniformsData();
         }
 
-        const {x: camX, y: camY, z: camZ, viewMatrix, fieldOfView} = rawCamera;
-        const {projectionMatrix: projMatrix, hierarchicalZBuffer: hzb} = currentView;
+        const {x, y, z, viewMatrix, fieldOfView} = rawCamera;
+        const {projectionMatrix, hierarchicalZBuffer} = view;
 
-        this.#tileStreamer.update(camX, camZ, camY);
+        this.#tileStreamer.update(x, z, y);
 
         const {tileCountX, tileCountZ, tileSizeX, tileSizeZ} = this.#spatialGrid;
         const totalComponents = tileCountX * tileCountZ;
@@ -1126,8 +1126,8 @@ export class Landscape extends RedGPUObject {
         }
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
 
-        const effectiveHZBTextureView = hzb?.textureView || null;
-        const effectiveHZBSampler = hzb?.sampler || null;
+        const effectiveHZBTextureView = hierarchicalZBuffer?.textureView || null;
+        const effectiveHZBSampler = hierarchicalZBuffer?.sampler || null;
 
         if (this.#lastHZBView !== effectiveHZBTextureView) {
             this.#lastHZBView = effectiveHZBTextureView;
@@ -1148,13 +1148,13 @@ export class Landscape extends RedGPUObject {
         }
 
         let mainPVMatrix: Float32Array | null = null;
-        if (projMatrix && viewMatrix) {
+        if (projectionMatrix && viewMatrix) {
             mainPVMatrix = tempPVMatrix;
-            mat4.multiply(mainPVMatrix, projMatrix, viewMatrix);
+            mat4.multiply(mainPVMatrix, projectionMatrix, viewMatrix);
         }
 
         this.#gpuCuller?.updateUniforms(
-            camX, camY, camZ,
+            x, y, z,
             this.#lodMaxLevel,
             tileSizeX, tileSizeZ,
             this.#heightScale,

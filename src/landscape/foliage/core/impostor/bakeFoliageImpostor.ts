@@ -346,7 +346,7 @@ export default function bakeFoliageImpostor(
         }
 
     const {resourceManager} = redGPUContext;
-    const {emptyBitmapTextureView: emptyTexView, basicSampler} = resourceManager;
+    const {emptyBitmapTextureView, basicSampler} = resourceManager;
 
         const cachedSubMeshes: {
             isImpostor: boolean;
@@ -393,9 +393,9 @@ export default function bakeFoliageImpostor(
             const ormTex = mat?.packedORMTexture || mat?.metallicRoughnessTexture || mat?.occlusionTexture;
             const ormSampler = mat?.packedORMTextureSampler || mat?.metallicRoughnessTextureSampler || basicSampler;
 
-            const diffView = (diffTex && diffTex.gpuTexture) ? diffTex.gpuTexture.createView() : emptyTexView;
-            const normView = (normTex && normTex.gpuTexture) ? normTex.gpuTexture.createView() : emptyTexView;
-            const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyTexView;
+            const diffView = (diffTex && diffTex.gpuTexture) ? diffTex.gpuTexture.createView() : emptyBitmapTextureView;
+            const normView = (normTex && normTex.gpuTexture) ? normTex.gpuTexture.createView() : emptyBitmapTextureView;
+            const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyBitmapTextureView;
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `Foliage_Impostor_Bake_BindGroup_${s}`,
@@ -420,15 +420,9 @@ export default function bakeFoliageImpostor(
                 const bcf = mat.baseColorFactor || mat.color;
                 if (bcf) {
                     if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
-                        r = bcf[0] ?? 1.0;
-                        g = bcf[1] ?? 1.0;
-                        b = bcf[2] ?? 1.0;
-                        a = bcf[3] ?? 1.0;
+                        [r = 1.0, g = 1.0, b = 1.0, a = 1.0] = bcf as any;
                     } else if (typeof bcf.r === 'number') {
-                        r = bcf.r;
-                        g = bcf.g;
-                        b = bcf.b;
-                        a = bcf.a ?? 1.0;
+                        ({r, g, b, a = 1.0} = bcf);
                     }
                 }
                 if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;

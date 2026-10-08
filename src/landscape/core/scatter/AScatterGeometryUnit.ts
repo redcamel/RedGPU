@@ -103,15 +103,26 @@ export abstract class AScatterGeometryUnit {
      * [EN] Geometry unit initialization options object
      */
     constructor(init: AScatterGeometryUnitInitOptions) {
-        this.#geometry = init.geometry;
-        this.#vertexCount = init.vertexCount;
-        this.#indexCount = init.indexCount;
-        this.#firstIndex = init.firstIndex ?? 0;
-        this.#isIndexed = init.isIndexed;
-        this.#indexFormat = init.indexFormat || 'uint32';
-        this.#strideBytes = init.strideBytes;
-        this.#indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
-        this.#instanceBufferOffset = init.instanceBufferOffset ?? 0;
+        const {
+            geometry,
+            vertexCount,
+            indexCount,
+            firstIndex = 0,
+            isIndexed,
+            indexFormat = 'uint32',
+            strideBytes,
+            indirectOffsetBytes = 0,
+            instanceBufferOffset = 0
+        } = init;
+        this.#geometry = geometry;
+        this.#vertexCount = vertexCount;
+        this.#indexCount = indexCount;
+        this.#firstIndex = firstIndex;
+        this.#isIndexed = isIndexed;
+        this.#indexFormat = indexFormat;
+        this.#strideBytes = strideBytes;
+        this.#indirectOffsetBytes = indirectOffsetBytes;
+        this.#instanceBufferOffset = instanceBufferOffset;
     }
 
     /**

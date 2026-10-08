@@ -130,7 +130,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
         const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
 
-        const layerViews = material.getInternalLayerViews();
+        const {baseColorView, normalView, ormView, weightMapView} = material.getInternalLayerViews();
         const bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_VBT_BindGroup_FullAtlas`,
             layout: this.bindGroupLayout,
@@ -138,10 +138,10 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 {binding: 0, resource: {buffer: uniformBuffer}},
                 {binding: 1, resource: vntAtlas.gpuTextureView},
                 {binding: 2, resource: material.baseColorTextureSampler.gpuSampler},
-                {binding: 3, resource: layerViews.baseColorView!},
-                {binding: 4, resource: layerViews.normalView!},
-                {binding: 5, resource: layerViews.ormView!},
-                {binding: 6, resource: layerViews.weightMapView!},
+                {binding: 3, resource: baseColorView!},
+                {binding: 4, resource: normalView!},
+                {binding: 5, resource: ormView!},
+                {binding: 6, resource: weightMapView!},
                 {binding: 7, resource: vbtBaseColorStorageView},
                 {binding: 8, resource: vbtNormalStorageView},
                 {binding: 9, resource: vbtORMStorageView},

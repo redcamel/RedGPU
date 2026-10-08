@@ -602,16 +602,14 @@ export class LandscapeTileStreamer extends RedGPUObject {
         const vntAtlas = this.#vntAtlasTexture;
         const vntGen = this.#vntGenerator;
         const heightScale = this.#heightScale;
-        const worldSizeX = this.#spatialGrid.worldSizeX;
-        const componentCountX = this.#spatialGrid.tileCountX;
-        const componentCountZ = this.#spatialGrid.tileCountZ;
+        const {worldSizeX, tileCountX, tileCountZ} = this.#spatialGrid;
 
         for (const key of this.#cpuHeightMap.keys()) {
-            const parts = key.split('_');
-            const row = parseInt(parts[0], 10);
-            const col = parseInt(parts[1], 10);
+            const [rowStr, colStr] = key.split('_');
+            const row = parseInt(rowStr, 10);
+            const col = parseInt(colStr, 10);
 
-            if (row >= componentCountZ || col >= componentCountX) continue;
+            if (row >= tileCountZ || col >= tileCountX) continue;
 
             const targetX = col * TILE_PIXEL_SIZE;
             const targetZ = row * TILE_PIXEL_SIZE;
@@ -625,7 +623,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
                 TILE_PIXEL_SIZE,
                 heightScale,
                 worldSizeX,
-                componentCountX
+                tileCountX
             );
         }
     }
@@ -890,12 +888,12 @@ export class LandscapeTileStreamer extends RedGPUObject {
                         }
 
                         const neighborOffsets = NEIGHBOR_OFFSETS;
-                        const tileCountX = this.#spatialGrid.tileCountX;
-                        const tileCountZ = this.#spatialGrid.tileCountZ;
+                        const {tileCountX, tileCountZ} = this.#spatialGrid;
 
                         for (let n = 0; n < neighborOffsets.length; n++) {
-                            const nz = comp.componentZ + neighborOffsets[n][0];
-                            const nx = comp.componentX + neighborOffsets[n][1];
+                            const [offsetZ, offsetX] = neighborOffsets[n];
+                            const nz = comp.componentZ + offsetZ;
+                            const nx = comp.componentX + offsetX;
 
                             if (nz >= 0 && nz < tileCountZ && nx >= 0 && nx < tileCountX) {
                                 const nKey = `${nz}_${nx}`;

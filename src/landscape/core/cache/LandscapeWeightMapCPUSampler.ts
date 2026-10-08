@@ -65,9 +65,10 @@ export class LandscapeWeightMapCPUSampler {
                 }
                 img.onload = () => {
                     try {
+                        const {naturalWidth, naturalHeight, width, height} = img;
                         const canvas = document.createElement('canvas');
-                        canvas.width = img.naturalWidth || img.width;
-                        canvas.height = img.naturalHeight || img.height;
+                        canvas.width = naturalWidth || width;
+                        canvas.height = naturalHeight || height;
                         const ctx = canvas.getContext('2d');
                         if (!ctx) {
                             resolve(null);

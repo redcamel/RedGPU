@@ -338,13 +338,13 @@ export class GrassRenderer extends AScatterRenderer {
 
             const targetGeom = geometry as Geometry;
             if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
+            const {vertexBuffer, indexBuffer} = targetGeom;
+            if (!vertexBuffer || !indexBuffer) continue;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
-            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+            bundleEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
+            bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
 
             const subMeshCount = subMeshes.length;
             for (let s = 0; s < subMeshCount; s++) {

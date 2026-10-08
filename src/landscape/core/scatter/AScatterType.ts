@@ -464,22 +464,37 @@ export abstract class AScatterType<
         groundBlendStrength?: number;
         streamingRadius?: number;
     }): void {
-        if (values.height !== undefined) this.#height = values.height;
-        if (values.cullingDistance !== undefined) {
-            this.#cullingDistance = values.cullingDistance;
-            this.#fadeStartDistance = values.cullingDistance * 0.75;
+        const {
+            height,
+            cullingDistance,
+            shadowCullDistance,
+            bottomOffset,
+            targetLayer,
+            minSlope,
+            maxSlope,
+            densityScaleByWeight,
+            densityPerHectare,
+            densityMultiplier,
+            castShadow,
+            groundBlendStrength,
+            streamingRadius
+        } = values;
+        if (height !== undefined) this.#height = height;
+        if (cullingDistance !== undefined) {
+            this.#cullingDistance = cullingDistance;
+            this.#fadeStartDistance = cullingDistance * 0.75;
         }
-        if (values.shadowCullDistance !== undefined) this.#shadowCullDistance = values.shadowCullDistance;
-        if (values.bottomOffset !== undefined) this.#bottomOffset = values.bottomOffset;
-        if (values.targetLayer !== undefined) this.#targetLayer = values.targetLayer;
-        if (values.minSlope !== undefined) this.#minSlope = values.minSlope;
-        if (values.maxSlope !== undefined) this.#maxSlope = values.maxSlope;
-        if (values.densityScaleByWeight !== undefined) this.#densityScaleByWeight = values.densityScaleByWeight;
-        if (values.densityPerHectare !== undefined) this.#densityPerHectare = values.densityPerHectare;
-        if (values.densityMultiplier !== undefined) this.#densityMultiplier = values.densityMultiplier;
-        if (values.castShadow !== undefined) this.#castShadow = values.castShadow;
-        if (values.groundBlendStrength !== undefined) this.#groundBlendStrength = values.groundBlendStrength;
-        if (values.streamingRadius !== undefined) this.#streamingRadius = Math.max(10.0, Number(values.streamingRadius) || 10.0);
+        if (shadowCullDistance !== undefined) this.#shadowCullDistance = shadowCullDistance;
+        if (bottomOffset !== undefined) this.#bottomOffset = bottomOffset;
+        if (targetLayer !== undefined) this.#targetLayer = targetLayer;
+        if (minSlope !== undefined) this.#minSlope = minSlope;
+        if (maxSlope !== undefined) this.#maxSlope = maxSlope;
+        if (densityScaleByWeight !== undefined) this.#densityScaleByWeight = densityScaleByWeight;
+        if (densityPerHectare !== undefined) this.#densityPerHectare = densityPerHectare;
+        if (densityMultiplier !== undefined) this.#densityMultiplier = densityMultiplier;
+        if (castShadow !== undefined) this.#castShadow = castShadow;
+        if (groundBlendStrength !== undefined) this.#groundBlendStrength = groundBlendStrength;
+        if (streamingRadius !== undefined) this.#streamingRadius = Math.max(10.0, Number(streamingRadius) || 10.0);
     }
 
     /**
