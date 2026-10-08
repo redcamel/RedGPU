@@ -17,11 +17,56 @@ import {
     fastPack2x16float,
     fastPackUniformScale,
     packSubCellKey,
-    sampleNormalizedLayerWeight,
     ScatterInstanceBaker,
     sortSubCellsByDistance
 } from "../../core/scatter";
 import {FoliageSubMeshSlotPooler} from "./submesh/FoliageSubMeshSlotPooler";
+
+/**
+ * [KO] 지형의 활성화된 레이어 목록 전체를 순회하여 특정 대상 레이어의 총합 대비 정규화된 가중치를 계산합니다. (식생 멀티 레이어 배치용)
+ * [EN] Traverses all active landscape layers to compute the normalized weight of a target layer relative to total weight. (For foliage multi-layer placement)
+ *
+ * @param landscape - 대상 Landscape 인스턴스
+ * @param targetLayer - 가중치를 산출할 대상 LandscapeLayer 객체
+ * @param u - U 텍스처 좌표 (0.0 ~ 1.0)
+ * @param v - V 텍스처 좌표 (0.0 ~ 1.0)
+ * @returns 0.0 ~ 1.0 범위로 정규화된 레이어 가중치 값
+ */
+function sampleNormalizedLayerWeight(
+    landscape: any,
+    targetLayer: any,
+    u: number,
+    v: number
+): number {
+    if (!targetLayer) return 0.0;
+    const layers = landscape?.layers;
+    if (!layers || layers.length <= 1) {
+        return typeof targetLayer.getWeightAtUV === 'function' ? targetLayer.getWeightAtUV(u, v) : 0.0;
+    }
+
+    let activeWeightLayerCount = 0;
+    let totalWeight = 0.0;
+    let targetWeight = 0.0;
+
+    for (let i = 0; i < layers.length; i++) {
+        const layer = layers[i];
+        if (!layer.enabled) continue;
+        if (layer.weightTexture?.src) {
+            activeWeightLayerCount++;
+        }
+        const w = typeof layer.getWeightAtUV === 'function' ? layer.getWeightAtUV(u, v) : 0.0;
+        totalWeight += w;
+        if (layer === targetLayer) {
+            targetWeight = w;
+        }
+    }
+
+    if (activeWeightLayerCount <= 1 || totalWeight <= 0.001) {
+        return targetWeight;
+    }
+
+    return targetWeight / totalWeight;
+}
 
 /**
  * [KO] 식생 인스턴스의 불변 월드 배치 좌표 및 의사난수 시드를 산출하는 고정 스캐터 그리드 크기 (단위: 미터, 100m).

@@ -31,7 +31,6 @@ import combineScatterMeshes, {
 } from "./combineScatterMeshes";
 import AScatterGeometryUnit, {type AScatterGeometryUnitInitOptions} from "./AScatterGeometryUnit";
 import ScatterSubMesh, {type ScatterSubMeshInitOptions} from "./ScatterSubMesh";
-import {sampleNormalizedLayerWeight} from "./ScatterSamplingUtils";
 import {
     computeScatterGridSeed,
     fastPack2x16float,
@@ -80,7 +79,6 @@ export {
     AScatterRenderer,
     AScatterMegaBuffer,
     type AuxiliaryIndirectBufferEntry,
-    sampleNormalizedLayerWeight,
     ScatterInstanceBaker,
 
     // Spatial & Packing Utilities
