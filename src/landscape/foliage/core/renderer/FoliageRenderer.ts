@@ -8,9 +8,7 @@ import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
 import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
 import Foliage from "../Foliage";
-import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
-import FoliageShadowMergedRenderUnit from "../renderUnit/FoliageShadowMergedRenderUnit";
+import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
 /**
  * [KO] 렌더링 가능한 유효 식생 타입 항목 인터페이스입니다.
@@ -475,7 +473,7 @@ class FoliageRenderer extends AScatterRenderer {
 
     #bindAndDrawUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        unit: FoliageRenderUnit | FoliageShadowMergedRenderUnit,
+        unit: FoliageRenderUnit,
         pipeline: GPURenderPipeline,
         systemBG: GPUBindGroup | null,
         matUniformBG: GPUBindGroup | null,
@@ -531,7 +529,7 @@ class FoliageRenderer extends AScatterRenderer {
 
     #drawShadowMergedRenderUnit(
         passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
-        shadowUnit: FoliageShadowMergedRenderUnit,
+        shadowUnit: FoliageRenderUnit,
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,

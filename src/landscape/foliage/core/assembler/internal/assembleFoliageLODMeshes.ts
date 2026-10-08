@@ -9,7 +9,6 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Mesh from "../../../../../display/mesh/Mesh";
 import Geometry from "../../../../../geometry/Geometry";
 import FoliageRenderUnit from "../../renderUnit/FoliageRenderUnit";
-import FoliageShadowMergedRenderUnit from "../../renderUnit/FoliageShadowMergedRenderUnit";
 import type {FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
 import combineScatterMeshes from "../../../../core/scatter/combineScatterMeshes";
@@ -38,7 +37,7 @@ export interface AssembledLODResult {
      * [KO] 그림자 패스 전용 통합 렌더 단위
      * [EN] Merged render unit dedicated to shadow pass
      */
-    shadowMergedRenderUnit: FoliageShadowMergedRenderUnit | null;
+    shadowMergedRenderUnit: FoliageRenderUnit | null;
     /**
      * [KO] 바운딩 구체 반경 (미터)
      * [EN] Bounding sphere radius in meters
@@ -155,7 +154,7 @@ export default function assembleFoliageLODMeshes(
         resultRenderUnits.push(combinedRenderUnit);
     }
 
-    let shadowMergedRenderUnit: FoliageShadowMergedRenderUnit | null = null;
+    let shadowMergedRenderUnit: FoliageRenderUnit | null = null;
     if (combineResult.shadowMergedGeometry && combineResult.totalVertexCount > 0) {
         let shadowSlotIndex = -1;
         if (slotPooler) {
@@ -170,7 +169,7 @@ export default function assembleFoliageLODMeshes(
             }
         }
 
-        shadowMergedRenderUnit = new FoliageShadowMergedRenderUnit({
+        shadowMergedRenderUnit = new FoliageRenderUnit({
             geometry: combineResult.shadowMergedGeometry,
             indexCount: combineResult.totalIndexCount,
             vertexCount: combineResult.totalVertexCount,
@@ -180,6 +179,7 @@ export default function assembleFoliageLODMeshes(
             slotIndex: shadowSlotIndex,
             slotPooler,
             lodIndex,
+            isShadowMerged: true,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,
         });

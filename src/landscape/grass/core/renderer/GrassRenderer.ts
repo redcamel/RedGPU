@@ -9,7 +9,7 @@ import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import {Grass} from "../Grass";
 import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {GrassSlotPooler} from "../renderUnit/GrassSlotPooler";
+import {GrassSlotPooler} from "../buffer/GrassSlotPooler";
 import ScatterRenderUnit from "../../../core/scatter/ScatterRenderUnit";
 import type Geometry from "../../../../geometry/Geometry";
 import type BitmapTexture from "../../../../resources/texture/BitmapTexture";

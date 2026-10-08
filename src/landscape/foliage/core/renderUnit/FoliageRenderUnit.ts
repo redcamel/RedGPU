@@ -1,13 +1,14 @@
 /**
- * [KO] 식생 개별 렌더 단위(Render Unit) 및 머티리얼 바인딩/유니폼 관리 모듈입니다.
- * [EN] Foliage individual render unit and material binding/uniform management module.
+ * [KO] 식생 개별 렌더 단위(Render Unit) 및 머티리얼 바인딩/유니폼/그림자 병합 통합 관리 모듈입니다.
+ * [EN] Unified foliage render unit module managing individual/shadow-merged parts, material bindings, and UBO slots.
  * @packageDocumentation
  */
 
 import {mat4} from "gl-matrix";
 import Mesh from "../../../../display/mesh/Mesh";
+import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import AFoliageRenderUnitBase, {type AFoliageRenderUnitBaseInitOptions} from "./AFoliageRenderUnitBase";
+import {FoliageSlotPooler} from "./FoliageSlotPooler";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -19,42 +20,52 @@ export type FoliageRenderPassType = 'depthPrepass' | 'main';
  * [KO] FoliageRenderUnit 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for FoliageRenderUnit.
  */
-export interface FoliageRenderUnitInitOptions extends AFoliageRenderUnitBaseInitOptions {
+export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptions {
     /**
-     * [KO] 소스 메쉬 인스턴스 (필수)
-     * [EN] Source mesh instance (required)
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)
+     * [EN] 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023)
      */
-    mesh: Mesh;
+    slotIndex?: number;
     /**
-     * [KO] 소속 LOD 레벨 인덱스 (필수)
-     * [EN] Associated LOD level index (required)
+     * [KO] 슬롯 풀러 인스턴스
+     * [EN] Slot pooler instance
      */
-    lodIndex: number;
+    slotPooler?: FoliageSlotPooler | null;
+    /**
+     * [KO] 소스 메쉬 인스턴스 (일반 렌더 단위의 경우 필수, 그림자 통합 렌더 단위의 경우 생략 가능)
+     * [EN] Source mesh instance (required for regular units, optional for shadow merged units)
+     */
+    mesh?: Mesh;
+    /**
+     * [KO] 소속 LOD 레벨 인덱스 (기본값: 0)
+     * [EN] Associated LOD level index (default: 0)
+     */
+    lodIndex?: number;
     /**
      * [KO] 상대 모델 변환 행렬
      * [EN] Relative model transform matrix
      */
-    relativeModelMatrix: mat4;
+    relativeModelMatrix?: mat4 | null;
     /**
      * [KO] 상대 법선 변환 행렬
      * [EN] Relative normal transform matrix
      */
-    relativeNormalMatrix: mat4;
+    relativeNormalMatrix?: mat4 | null;
     /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
      * [EN] Whether rendering in depth prepass
      */
-    isDepthPrepass: boolean;
+    isDepthPrepass?: boolean;
     /**
      * [KO] 메인 불투명/마스크 패스 렌더링 대상 여부
      * [EN] Whether rendering in main opaque/masked pass
      */
-    isMainOpaqueOrMasked: boolean;
+    isMainOpaqueOrMasked?: boolean;
     /**
      * [KO] 메인 뎁스 패스 모드
      * [EN] Main depth pass mode
      */
-    mainDepthMode: FoliageDepthPassMode;
+    mainDepthMode?: FoliageDepthPassMode;
     /**
      * [KO] 옥타헤드럴 임포스터 메쉬 여부
      * [EN] Whether this is an octahedral impostor mesh
@@ -65,56 +76,98 @@ export interface FoliageRenderUnitInitOptions extends AFoliageRenderUnitBaseInit
      * [EN] Whether this render unit receives shadows
      */
     receiveShadow?: boolean;
+    /**
+     * [KO] 그림자 패스 전용 통합(Position-only) 렌더 단위 여부 (기본값: false)
+     * [EN] Whether this is a merged (position-only) render unit dedicated to the shadow pass (default: false)
+     */
+    isShadowMerged?: boolean;
 }
 
 /**
- * [KO] AFoliageRenderUnitBase를 상속받아 Foliage 고유의 머티리얼, 유니폼 바인딩, 파이프라인 캐시 및 LOD 상태를 관리하는 식생 렌더 단위 클래스입니다.
- * [EN] Foliage render unit class inheriting AFoliageRenderUnitBase to manage Foliage-specific materials, uniform bindings, pipeline caches, and LOD states.
+ * [KO] ScatterRenderUnit을 직접 상속받아 일반 식생 렌더링과 그림자 병합 렌더링을 단일 클래스로 일원화(SSOT)한 식생 렌더 단위 클래스입니다.
+ * [EN] Unified foliage render unit class directly extending ScatterRenderUnit (SSOT), managing both regular and shadow-merged rendering.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageRenderUnit extends AFoliageRenderUnitBase {
-    #relativeModelMatrix: mat4;
-    #relativeNormalMatrix: mat4;
+export class FoliageRenderUnit extends ScatterRenderUnit {
+    #slotIndex: number = -1;
+    #slotPooler: FoliageSlotPooler | null = null;
+    #isShadowMerged: boolean = false;
 
-    #isDepthPrepass: boolean;
-    #isMainOpaqueOrMasked: boolean;
-    #mainDepthMode: FoliageDepthPassMode;
-    #isImpostor: boolean;
-    #receiveShadow: boolean;
+    #relativeModelMatrix: mat4 | null = null;
+    #relativeNormalMatrix: mat4 | null = null;
+
+    #isDepthPrepass: boolean = false;
+    #isMainOpaqueOrMasked: boolean = true;
+    #mainDepthMode: FoliageDepthPassMode = 'normal';
+    #isImpostor: boolean = false;
+    #receiveShadow: boolean = true;
 
     constructor(init: FoliageRenderUnitInitOptions) {
+        const isShadowMerged = init.isShadowMerged ?? false;
         super({
             ...init,
-            isMasked: init.isMasked ?? true
+            strideBytes: init.strideBytes ?? (isShadowMerged ? 12 : 32),
+            isMasked: init.isMasked ?? (!isShadowMerged),
+            indexFormat: init.indexFormat || 'uint32',
+            instanceBufferOffset: init.instanceBufferOffset ?? 0,
+            indirectOffsetBytes: init.indirectOffsetBytes ?? 0,
         });
 
-        this.#relativeModelMatrix = init.relativeModelMatrix;
-        this.#relativeNormalMatrix = init.relativeNormalMatrix;
+        this.#isShadowMerged = isShadowMerged;
+        this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
+        this.#slotPooler = init.slotPooler || null;
 
-        this.#isDepthPrepass = init.isDepthPrepass;
-        this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
-        this.#mainDepthMode = init.mainDepthMode;
+        this.#relativeModelMatrix = init.relativeModelMatrix ?? null;
+        this.#relativeNormalMatrix = init.relativeNormalMatrix ?? null;
+
+        this.#isDepthPrepass = init.isDepthPrepass ?? false;
+        this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked ?? (!isShadowMerged);
+        this.#mainDepthMode = init.mainDepthMode ?? 'normal';
         this.#isImpostor = init.isImpostor ?? false;
         this.#receiveShadow = init.receiveShadow !== false;
     }
 
     /**
-     * [KO] 원본 메쉬 인스턴스를 반환합니다.
-     * [EN] Returns the original mesh instance.
+     * [KO] 256바이트 정렬 Dynamic Offset UBO 슬롯 인덱스 (0 ~ 1023)를 반환합니다.
+     * [EN] Returns the 256-byte aligned Dynamic Offset UBO slot index (0 ~ 1023).
      */
-    override get mesh(): Mesh {
-        return super.mesh as Mesh;
+    get slotIndex(): number {
+        return this.#slotIndex;
+    }
+
+    /**
+     * [KO] 슬롯 풀러 인스턴스를 반환합니다.
+     * [EN] Returns the slot pooler instance.
+     */
+    get slotPooler(): FoliageSlotPooler | null {
+        return this.#slotPooler;
+    }
+
+    /**
+     * [KO] 그림자 패스 전용 통합(Position-only) 렌더 단위 여부를 반환합니다.
+     * [EN] Returns whether this unit is dedicated to shadow pass merged geometry.
+     */
+    get isShadowMerged(): boolean {
+        return this.#isShadowMerged;
+    }
+
+    /**
+     * [KO] 원본 메쉬 인스턴스를 반환합니다 (그림자 병합 메시일 경우 undefined).
+     * [EN] Returns the original mesh instance (undefined for shadow merged geometry).
+     */
+    override get mesh(): Mesh | undefined {
+        return super.mesh;
     }
 
     /**
      * [KO] 상대 모델 변환 행렬을 반환합니다.
      * [EN] Returns the relative model transform matrix.
      */
-    get relativeModelMatrix(): mat4 {
+    get relativeModelMatrix(): mat4 | null {
         return this.#relativeModelMatrix;
     }
 
@@ -122,7 +175,7 @@ export class FoliageRenderUnit extends AFoliageRenderUnitBase {
      * [KO] 상대 법선 변환 행렬을 반환합니다.
      * [EN] Returns the relative normal transform matrix.
      */
-    get relativeNormalMatrix(): mat4 {
+    get relativeNormalMatrix(): mat4 | null {
         return this.#relativeNormalMatrix;
     }
 
@@ -151,6 +204,70 @@ export class FoliageRenderUnit extends AFoliageRenderUnitBase {
     }
 
     /**
+     * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (Zero-GC)
+     * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (Zero-GC)
+     * @param windMultiplier - 인스턴스별 바람 강도 배수
+     * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
+     * @param treeHeight - 식생 전체 높이
+     */
+    updateWindMultipliers(
+        windMultiplier: number,
+        windFlutterMultiplier: number,
+        treeHeight: number
+    ): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.updateWindParams(
+                this.#slotIndex,
+                windMultiplier,
+                windFlutterMultiplier,
+                treeHeight
+            );
+        }
+    }
+
+    /**
+     * [KO] 지면 높이 기반 블렌딩 파라미터를 유니폼 버퍼에 기록합니다. (Zero-GC)
+     * [EN] Writes ground blend parameters to the uniform buffer. (Zero-GC)
+     * @param groundBlendStrength - 지면 블렌드 강도
+     * @param groundBlendRange - 지면 블렌드 높이 범위
+     */
+    updateGroundBlendParams(
+        groundBlendStrength: number,
+        groundBlendRange: number
+    ): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.updateGroundBlendParams(
+                this.#slotIndex,
+                groundBlendStrength,
+                groundBlendRange
+            );
+        }
+    }
+
+    /**
+     * [KO] 이 렌더 단위의 UBO 슬롯 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
+     * [EN] Flushes UBO slot parameters of this render unit to GPU (for deferred frame batching).
+     */
+    flushSlotUBO(): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.flushSlotBytes(this.#slotIndex);
+        }
+    }
+
+    /**
+     * [KO] 렌더 단위 리소스 및 할당된 UBO 슬롯을 해제합니다.
+     * [EN] Releases render unit resources and allocated UBO slot.
+     */
+    override destroy(): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.freeSlot(this.#slotIndex);
+            this.#slotIndex = -1;
+        }
+        this.#slotPooler = null;
+        super.destroy();
+    }
+
+    /**
      * [KO] 특정 렌더 패스(depthPrepass 또는 main)에서 이 렌더 단위를 렌더링할 수 있는지 여부를 판별합니다.
      * [EN] Determines whether this render unit can be rendered in a specific render pass (depthPrepass or main).
      * @param passType -
@@ -161,6 +278,7 @@ export class FoliageRenderUnit extends AFoliageRenderUnitBase {
      * [EN] Whether rendering is allowed in the pass
      */
     canRenderInPass(passType: FoliageRenderPassType): boolean {
+        if (this.#isShadowMerged) return false;
         switch (passType) {
             case 'depthPrepass':
                 return this.#isDepthPrepass;

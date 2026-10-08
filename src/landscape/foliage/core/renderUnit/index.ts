@@ -4,20 +4,12 @@
  * @packageDocumentation
  */
 
-import AFoliageRenderUnitBase, {type AFoliageRenderUnitBaseInitOptions} from "./AFoliageRenderUnitBase";
 import FoliageRenderUnit, {type FoliageRenderPassType, type FoliageRenderUnitInitOptions} from "./FoliageRenderUnit";
-import FoliageShadowMergedRenderUnit, {
-    type FoliageShadowMergedRenderUnitInitOptions
-} from "./FoliageShadowMergedRenderUnit";
 import FoliageSlotPooler from "./FoliageSlotPooler";
 
 export {
-    AFoliageRenderUnitBase,
-    type AFoliageRenderUnitBaseInitOptions,
     FoliageRenderUnit,
     type FoliageRenderPassType,
     type FoliageRenderUnitInitOptions,
-    FoliageShadowMergedRenderUnit,
-    type FoliageShadowMergedRenderUnitInitOptions,
     FoliageSlotPooler
 };

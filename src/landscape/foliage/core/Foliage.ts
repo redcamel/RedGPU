@@ -8,7 +8,6 @@ import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
 import assembleFoliageRenderUnits from "./assembler/assembleFoliageRenderUnits";
 import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
-import FoliageShadowMergedRenderUnit from "./renderUnit/FoliageShadowMergedRenderUnit";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
 import {FoliageSlotPooler} from "./renderUnit/FoliageSlotPooler";
@@ -330,7 +329,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #maxInstances: number = 0;
 
     #renderUnits: FoliageRenderUnit[] = [];
-    #shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[] = [];
+    #shadowMergedRenderUnits: FoliageRenderUnit[] = [];
     #lod0RenderUnits: FoliageRenderUnit[] = [];
     #depthPrepassOpaqueRenderUnits: FoliageRenderUnit[] = [];
     #depthPrepassMaskedRenderUnits: FoliageRenderUnit[] = [];
@@ -728,7 +727,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [KO] 캐스케이드 그림자 맵(CSM) 패스용으로 병합 최적화된 렌더 단위 목록을 반환합니다.
      * [EN] Returns the list of merged render units optimized for cascaded shadow map (CSM) passes.
      */
-    get shadowMergedRenderUnits(): FoliageShadowMergedRenderUnit[] {
+    get shadowMergedRenderUnits(): FoliageRenderUnit[] {
         return this.#shadowMergedRenderUnits;
     }
 
@@ -1277,7 +1276,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         for (let i = 0; i < shadowCount; i++) {
             shadowList[i].updateWindMultipliers(
                 windMul,
-                flutterMul * 0.5,
+                flutterMul,
                 treeH
             );
         }
@@ -1285,7 +1284,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #initBuckets(
         renderUnits: FoliageRenderUnit[],
-        shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[]
+        shadowMergedRenderUnits: FoliageRenderUnit[]
     ): void {
         this.#renderUnits = renderUnits;
         this.#shadowMergedRenderUnits = shadowMergedRenderUnits;

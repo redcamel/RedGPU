@@ -112,14 +112,14 @@ export interface ScatterRenderUnitInitOptions {
  * - **간접 드로우(Multi-Draw Indirect) 인프라**: 스캐터 메가버퍼 규약에 맞추어 `drawIndexedIndirect` 명령을 고속으로 인코딩합니다.
  * - **스캐터 파이프라인의 공통 단위**:
  *   - **잔디(Grass)**: 단일 또는 복합 잔디 모델을 구성하는 기본 렌더 단위로 직접 인스턴스화되어 Multi-Draw Indirect 렌더링에 사용됩니다.
- *   - **식생(Foliage)**: 복합 3D 수목/바위의 파트별 렌더 단위(`FoliageRenderUnit`, `FoliageShadowMergedRenderUnit`)의 공통 조상 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 UBO 슬롯 풀링을 확장하는 기반이 됩니다.
+ *   - **식생(Foliage)**: 복합 3D 수목/바위의 통합 렌더 단위(`FoliageRenderUnit`)의 기반 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 UBO 슬롯 풀링을 확장하는 기반이 됩니다.
  *
  * **[EN] Architecture & Role:**
  * - **Complete Unification of Geometry and Shading (SSOT)**: Unifies raw GPU buffer management (vertex/index buffers, indirect draw offsets) with materials, base color textures, and source mesh references in a single class.
  * - **Multi-Draw Indirect Infrastructure**: Encodes `drawIndexedIndirect` commands conforming to the scatter mega-buffer layout.
  * - **Common Unit for Scatter Pipelines**:
  *   - **Grass**: Directly instantiated as the primary rendering unit composing single or composite grass models for Multi-Draw Indirect rendering.
- *   - **Foliage**: Inherited by `FoliageRenderUnit` and `FoliageShadowMergedRenderUnit` representing individual parts of composite 3D trees and rocks, serving as the foundation for wind simulation and UBO slot pooling.
+ *   - **Foliage**: Inherited by `FoliageRenderUnit` representing individual/shadow parts of composite 3D trees and rocks, serving as the foundation for wind simulation and UBO slot pooling.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager 및 Grass)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

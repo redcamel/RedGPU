@@ -7,7 +7,6 @@
 
 import RedGPUContext from "../../../../context/RedGPUContext";
 import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
-import FoliageShadowMergedRenderUnit from "../renderUnit/FoliageShadowMergedRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
 import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
 import buildFoliageImpostorRenderUnit from "./internal/buildFoliageImpostorRenderUnit";
@@ -27,7 +26,7 @@ export interface FoliageAssemblyResult {
      * [KO] 그림자 패스 전용 통합 렌더 단위 배열
      * [EN] Array of shadow pass dedicated merged render units
      */
-    shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[];
+    shadowMergedRenderUnits: FoliageRenderUnit[];
     /**
      * [KO] LOD 레벨별 메타데이터 목록
      * [EN] List of per-LOD metadata
@@ -89,7 +88,7 @@ export default function assembleFoliageRenderUnits(
     const {useImpostor = true, lods = []} = options;
     const numLODs = Math.min(lods.length, 8);
 
-    const shadowMergedRenderUnits: FoliageShadowMergedRenderUnit[] = [];
+    const shadowMergedRenderUnits: FoliageRenderUnit[] = [];
     let maxBoundingRadius = 0;
     let globalMinY = Infinity;
     let globalMaxY = -Infinity;

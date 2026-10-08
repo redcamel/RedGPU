@@ -12,7 +12,6 @@ import AScatterMegaBuffer, {
 } from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullWGSL from '../culling/foliageCull.wgsl';
 import FoliageRenderUnit from '../renderUnit/FoliageRenderUnit';
-import FoliageShadowMergedRenderUnit from '../renderUnit/FoliageShadowMergedRenderUnit';
 import {FoliageLODInfo} from '../Foliage';
 
 /**
@@ -183,7 +182,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         name: string,
         maxInstances: number,
         renderUnits: FoliageRenderUnit[],
-        shadowMergedRenderUnits?: FoliageShadowMergedRenderUnit[],
+        shadowMergedRenderUnits?: FoliageRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): FoliageTypeAllocation {
         if (this.#allocations.has(name)) {
@@ -546,7 +545,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     registerRenderUnitsToTemplate(
         renderUnits: FoliageRenderUnit[],
         indirectBaseOffset: number,
-        shadowMergedRenderUnits?: FoliageShadowMergedRenderUnit[],
+        shadowMergedRenderUnits?: FoliageRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): void {
         const maxRenderUnits = this.maxRenderUnits;
