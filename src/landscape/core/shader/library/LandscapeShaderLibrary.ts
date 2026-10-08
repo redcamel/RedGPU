@@ -26,6 +26,7 @@ import testSphereInFrustum_wgsl from './math/testSphereInFrustum.wgsl';
 import blendGrassGround_wgsl from './math/blendGrassGround.wgsl';
 import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
 import sampleNormalizedLayerWeight_wgsl from './math/sampleNormalizedLayerWeight.wgsl';
+import checkAABBInHZB_wgsl from './math/checkAABBInHZB.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -266,6 +267,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const sampleNormalizedLayerWeight = sampleNormalizedLayerWeight_wgsl;
+
+        /**
+         * [KO] 3D 바운딩 박스(AABB) 8개 정점을 NDC로 투영하여 HZB 깊이 피라미드 기반 오클루전 가시성을 판정하는 함수 (checkAABBInHZB)
+         * [EN] Function to project 3D AABB 8 corners to NDC and evaluate occlusion visibility against HZB depth pyramid (checkAABBInHZB)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.checkAABBInHZB;
+         * ```
+         */
+        export const checkAABBInHZB = checkAABBInHZB_wgsl;
     }
 
     /**

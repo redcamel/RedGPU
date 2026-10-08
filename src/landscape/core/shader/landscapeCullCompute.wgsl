@@ -21,6 +21,7 @@ struct CameraFrustumUniforms {
 
 #redgpu_include landscape.struct.LandscapeTile;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
+#redgpu_include landscape.math.checkAABBInHZB;
 
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
@@ -46,75 +47,6 @@ fn checkAABBInFrustum(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
             return false;
         }
     }
-    return true;
-}
-
-fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
-    var minNDC = vec2<f32>(1.0, 1.0);
-    var maxNDC = vec2<f32>(-1.0, -1.0);
-    var minDepth = 1.0;
-    var allBehindNearPlane = true;
-
-    let corners = array<vec3<f32>, 8>(
-        vec3<f32>(minPos.x, minPos.y, minPos.z),
-        vec3<f32>(maxPos.x, minPos.y, minPos.z),
-        vec3<f32>(minPos.x, maxPos.y, minPos.z),
-        vec3<f32>(maxPos.x, maxPos.y, minPos.z),
-        vec3<f32>(minPos.x, minPos.y, maxPos.z),
-        vec3<f32>(maxPos.x, minPos.y, maxPos.z),
-        vec3<f32>(minPos.x, maxPos.y, maxPos.z),
-        vec3<f32>(maxPos.x, maxPos.y, maxPos.z),
-    );
-
-    for (var i = 0; i < 8; i = i + 1) {
-        let clip = uniforms.viewProjectionMatrix * vec4<f32>(corners[i], 1.0);
-        if (clip.w > 0.01) {
-            allBehindNearPlane = false;
-            let invW = 1.0 / clip.w;
-            let ndc = clip.xy * invW;
-            let d = clip.z * invW;
-            minNDC = min(minNDC, ndc);
-            maxNDC = max(maxNDC, ndc);
-            minDepth = min(minDepth, d);
-        } else {
-
-            return true;
-        }
-    }
-
-    if (allBehindNearPlane) {
-        return false;
-    }
-
-    let minUV = clamp(vec2<f32>(minNDC.x * 0.5 + 0.5, 1.0 - (maxNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
-    let maxUV = clamp(vec2<f32>(maxNDC.x * 0.5 + 0.5, 1.0 - (minNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
-
-    let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
-    let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-
-    // [KO] 화면상 4픽셀 미만인 극원거리 타일은 HZB 다운샘플링 오차에 의한 깜빡임을 방지하기 위해 가시화 보장
-    // [EN] Bypass HZB occlusion for distant tiles smaller than 4 pixels to prevent sub-texel flickering
-    if (maxDim < 4.0) {
-        return true;
-    }
-
-    // [KO] 4-tap 샘플링에 적합한 보수적 밉 레벨 선택 (AABB 크기 초과 방지)
-    // [EN] Conservative mip level for 4-tap footprint avoiding over-culling from adjacent foreground occluders
-    let mipLevel = clamp(floor(log2(maxDim)), 0.0, 7.0);
-
-    let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
-    let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
-    let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
-    let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
-    let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
-
-    // [KO] 원거리 NDC 깊이 압축을 고려한 거리 적응형 안전 바이어스 (원거리 낮은 언덕 깜빡임 제거)
-    // [EN] Distance-adaptive safety depth bias accounting for non-linear NDC depth precision at distance
-    let adaptiveBias = 0.003 + minDepth * 0.004;
-    if (minDepth > maxHZBDepth + adaptiveBias) {
-        return false;
-    }
-
     return true;
 }
 
@@ -154,7 +86,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;
             if (uniforms.useHZB != 0u) {
-                if (!checkAABBInHZB(minPos, maxPos)) {
+                if (!checkAABBInHZB(minPos, maxPos, uniforms.viewProjectionMatrix, hzbTexture, hzbSampler, 0.0)) {
                     isOccluded = true;
                 }
             }

@@ -36,6 +36,7 @@ struct FoliageCullingUniforms {
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.testSphereInFrustum;
+#redgpu_include landscape.math.checkAABBInHZB;
 
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
@@ -47,62 +48,6 @@ struct FoliageCullingUniforms {
 @group(0) @binding(6) var<storage, read_write> shadowIndirectCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(7) var hzbTexture: texture_2d<f32>;
 @group(0) @binding(8) var hzbSampler: sampler;
-
-fn checkFoliageAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
-    var minNDC = vec2<f32>(1.0, 1.0);
-    var maxNDC = vec2<f32>(-1.0, -1.0);
-    var minDepth = 1.0;
-    var allBehindNearPlane = true;
-
-    let corners = array<vec3<f32>, 8>(
-        vec3<f32>(minPos.x, minPos.y, minPos.z),
-        vec3<f32>(maxPos.x, minPos.y, minPos.z),
-        vec3<f32>(minPos.x, maxPos.y, minPos.z),
-        vec3<f32>(maxPos.x, maxPos.y, minPos.z),
-        vec3<f32>(minPos.x, minPos.y, maxPos.z),
-        vec3<f32>(maxPos.x, minPos.y, maxPos.z),
-        vec3<f32>(minPos.x, maxPos.y, maxPos.z),
-        vec3<f32>(maxPos.x, maxPos.y, maxPos.z),
-    );
-
-    for (var i = 0; i < 8; i = i + 1) {
-        let clip = globalUniforms.viewProjectionMatrix * vec4<f32>(corners[i], 1.0);
-        if (clip.w > 0.01) {
-            allBehindNearPlane = false;
-            let invW = 1.0 / clip.w;
-            let ndc = clip.xy * invW;
-            let d = clip.z * invW;
-            minNDC = min(minNDC, ndc);
-            maxNDC = max(maxNDC, ndc);
-            minDepth = min(minDepth, d);
-        } else {
-            return true;
-        }
-    }
-
-    if (allBehindNearPlane) {
-        return false;
-    }
-
-    let minUV = clamp(vec2<f32>(minNDC.x * 0.5 + 0.5, 1.0 - (maxNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
-    let maxUV = clamp(vec2<f32>(maxNDC.x * 0.5 + 0.5, 1.0 - (minNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
-
-    let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(globalUniforms.hzbWidth, globalUniforms.hzbHeight), vec2<f32>(1.0));
-    let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-    let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
-
-    let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
-    let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
-    let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
-    let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
-    let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
-
-    if (minDepth > maxHZBDepth + globalUniforms.depthBias) {
-        return false;
-    }
-
-    return true;
-}
 
 @compute @workgroup_size(64)
 fn main(
@@ -194,7 +139,7 @@ fn main(
             let aabbMin = vec3<f32>(instance.posX - halfW, baseY, instance.posZ - halfW);
             let aabbMax = vec3<f32>(instance.posX + halfW, topY, instance.posZ + halfW);
 
-            if (!checkFoliageAABBInHZB(aabbMin, aabbMax)) {
+            if (!checkAABBInHZB(aabbMin, aabbMax, globalUniforms.viewProjectionMatrix, hzbTexture, hzbSampler, globalUniforms.depthBias)) {
                 inMainFrustum = false;
             }
         }
