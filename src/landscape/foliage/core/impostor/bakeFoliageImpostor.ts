@@ -346,7 +346,7 @@ export default function bakeFoliageImpostor(
         }
 
     const {resourceManager} = redGPUContext;
-    const {emptyBitmapTextureView, basicSampler} = resourceManager;
+    const {basicSampler} = resourceManager;
 
         const cachedSubMeshes: {
             isImpostor: boolean;
@@ -393,9 +393,9 @@ export default function bakeFoliageImpostor(
             const ormTex = mat?.packedORMTexture || mat?.metallicRoughnessTexture || mat?.occlusionTexture;
             const ormSampler = mat?.packedORMTextureSampler || mat?.metallicRoughnessTextureSampler || basicSampler;
 
-            const diffView = (diffTex && diffTex.gpuTexture) ? diffTex.gpuTexture.createView() : emptyBitmapTextureView;
-            const normView = (normTex && normTex.gpuTexture) ? normTex.gpuTexture.createView() : emptyBitmapTextureView;
-            const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyBitmapTextureView;
+            const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex)!;
+            const normView = resourceManager.getGPUResourceBitmapTextureView(normTex)!;
+            const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex)!;
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `Foliage_Impostor_Bake_BindGroup_${s}`,

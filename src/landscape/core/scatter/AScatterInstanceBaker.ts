@@ -147,7 +147,8 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
-        this.#defaultSampler = resourceManager.basicSampler.gpuSampler;
+        const {basicSampler} = resourceManager;
+        this.#defaultSampler = basicSampler.gpuSampler;
     }
 
     /**

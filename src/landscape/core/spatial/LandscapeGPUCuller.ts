@@ -60,11 +60,12 @@ export class LandscapeGPUCuller extends RedGPUObject {
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
     ): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, resourceManager} = this;
         if (!gpuDevice || !this.#bindGroupLayout || !this.#uniformBuffer) return;
 
-        const targetHZBView = hzbTextureView || this.resourceManager.emptyBitmapTextureView;
-        const targetHZBSampler = hzbSampler || this.resourceManager.basicSampler.gpuSampler;
+        const {emptyR32FloatTextureView, basicSampler} = resourceManager;
+        const targetHZBView = hzbTextureView || emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler || basicSampler.gpuSampler;
 
         this.#bindGroup = gpuDevice.createBindGroup({
             label: `Landscape_Cull_BindGroup_${this.instanceId}`,
@@ -197,10 +198,8 @@ export class LandscapeGPUCuller extends RedGPUObject {
     }
 
     #initGPUResources(): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, resourceManager} = this;
         if (!gpuDevice) return;
-
-        const resourceManager = this.resourceManager;
         const shaderInfo = resourceManager.wgslParser.parse('Landscape_Cull_ShaderModule', landscapeCullComputeSource);
 
         let shaderModule = resourceManager.getGPUShaderModule('Landscape_Cull_ShaderModule');

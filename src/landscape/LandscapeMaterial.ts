@@ -97,9 +97,14 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.#uniformFloatArray = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
-        this.#initDummyTextureArrays();
+        const {resourceManager} = redGPUContext;
+        const {emptyTexture2DArrayView, basicDisplacementSampler} = resourceManager;
+        this.#baseColorArrayView = emptyTexture2DArrayView;
+        this.#normalArrayView = emptyTexture2DArrayView;
+        this.#ormArrayView = emptyTexture2DArrayView;
+        this.#weightMapArrayView = emptyTexture2DArrayView;
 
-        this.baseColorTextureSampler = redGPUContext.resourceManager.basicDisplacementSampler;
+        this.baseColorTextureSampler = basicDisplacementSampler;
 
         this.baseColor.setColorByHEX(baseColorHex);
         this.initGPURenderInfos();
@@ -444,51 +449,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return 'rgba8unorm';
     }
 
-    #initDummyTextureArrays(): void {
-        const gpuDevice = this.redGPUContext.gpuDevice;
-        if (!gpuDevice) return;
-
-        const depth = 1;
-        const size: [number, number, number] = [this.#textureArraySize, this.#textureArraySize, depth];
-        const baseColorFormat = this.#getBaseColorArrayFormat();
-        const dataFormat = this.#getDataArrayFormat();
-
-        const baseColorDesc: GPUTextureDescriptor = {
-            size,
-            format: baseColorFormat,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Material_BaseColorTexture2DArray_Dummy'
-        };
-        const normalDesc: GPUTextureDescriptor = {
-            size,
-            format: dataFormat,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Material_NormalTexture2DArray_Dummy'
-        };
-        const ormDesc: GPUTextureDescriptor = {
-            size,
-            format: dataFormat,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Material_ORMTexture2DArray_Dummy'
-        };
-        const weightMapDesc: GPUTextureDescriptor = {
-            size,
-            format: dataFormat,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'Landscape_Material_WeightMapTexture2DArray_Dummy'
-        };
-
-        this.#gpuBaseColorArrayTexture = gpuDevice.createTexture(baseColorDesc);
-        this.#gpuNormalArrayTexture = gpuDevice.createTexture(normalDesc);
-        this.#gpuORMArrayTexture = gpuDevice.createTexture(ormDesc);
-        this.#gpuWeightMapArrayTexture = gpuDevice.createTexture(weightMapDesc);
-
-        this.#baseColorArrayView = this.#gpuBaseColorArrayTexture.createView({dimension: '2d-array'});
-        this.#normalArrayView = this.#gpuNormalArrayTexture.createView({dimension: '2d-array'});
-        this.#ormArrayView = this.#gpuORMArrayTexture.createView({dimension: '2d-array'});
-        this.#weightMapArrayView = this.#gpuWeightMapArrayTexture.createView({dimension: '2d-array'});
-    }
-
     #scheduleRebuildTextureArrays(): void {
         if (this.#isRebuildTextureArraysScheduled) return;
         this.#isRebuildTextureArraysScheduled = true;
@@ -500,23 +460,83 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         });
     }
 
+    /**
+     * [KO] 머티리얼에 할당된 모든 2D 어레이 GPU 텍스처, 텍스처 뷰 및 레이어 목록을 해제하고 파기합니다.
+     * [EN] Releases and destroys all 2D array GPU textures, texture views, and layer collections allocated to this material.
+     */
+    override destroy(): void {
+        super.destroy();
+        if (this.#rebakeDebounceTimer !== null) {
+            clearTimeout(this.#rebakeDebounceTimer);
+            this.#rebakeDebounceTimer = null;
+        }
+        const {commandEncoderManager} = this.redGPUContext;
+        if (this.#gpuBaseColorArrayTexture) {
+            commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
+            this.#gpuBaseColorArrayTexture = null;
+        }
+        if (this.#gpuNormalArrayTexture) {
+            commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
+            this.#gpuNormalArrayTexture = null;
+        }
+        if (this.#gpuORMArrayTexture) {
+            commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
+            this.#gpuORMArrayTexture = null;
+        }
+        if (this.#gpuWeightMapArrayTexture) {
+            commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
+            this.#gpuWeightMapArrayTexture = null;
+        }
+        this.#baseColorArrayView = null;
+        this.#normalArrayView = null;
+        this.#ormArrayView = null;
+        this.#weightMapArrayView = null;
+        this.clearLayers();
+    }
+
     #rebuildTextureArrays(): void {
-        const gpuDevice = this.redGPUContext.gpuDevice;
+        const {gpuDevice, resourceManager, commandEncoderManager} = this.redGPUContext;
         if (!gpuDevice) return;
 
         this.#textureArrayVersion++;
 
-        const count = Math.max(1, this.#layers.length);
+        if (this.#layers.length === 0) {
+            if (this.#gpuBaseColorArrayTexture) {
+                commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
+                this.#gpuBaseColorArrayTexture = null;
+            }
+            if (this.#gpuNormalArrayTexture) {
+                commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
+                this.#gpuNormalArrayTexture = null;
+            }
+            if (this.#gpuORMArrayTexture) {
+                commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
+                this.#gpuORMArrayTexture = null;
+            }
+            if (this.#gpuWeightMapArrayTexture) {
+                commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
+                this.#gpuWeightMapArrayTexture = null;
+            }
+            const {emptyTexture2DArrayView} = resourceManager;
+            this.#baseColorArrayView = emptyTexture2DArrayView;
+            this.#normalArrayView = emptyTexture2DArrayView;
+            this.#ormArrayView = emptyTexture2DArrayView;
+            this.#weightMapArrayView = emptyTexture2DArrayView;
+            this.dirtyPipeline = true;
+            return;
+        }
+
+        const count = this.#layers.length;
         const depth = count;
         const size: [number, number, number] = [this.#textureArraySize, this.#textureArraySize, depth];
         const baseColorFormat = this.#getBaseColorArrayFormat();
         const dataFormat = this.#getDataArrayFormat();
         const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
 
-        if (this.#gpuBaseColorArrayTexture) this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
-        if (this.#gpuNormalArrayTexture) this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
-        if (this.#gpuORMArrayTexture) this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
-        if (this.#gpuWeightMapArrayTexture) this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
+        if (this.#gpuBaseColorArrayTexture) commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
+        if (this.#gpuNormalArrayTexture) commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
+        if (this.#gpuORMArrayTexture) commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
+        if (this.#gpuWeightMapArrayTexture) commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
 
         this.#gpuBaseColorArrayTexture = gpuDevice.createTexture({
             size,
@@ -558,70 +578,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
 
         this.dirtyPipeline = true;
-    }
-
-    #updateLayerMipmaps(): void {
-        if (!this.#layers.length) return;
-        if (!this.#gpuBaseColorArrayTexture || this.#gpuBaseColorArrayTexture.mipLevelCount <= 1) return;
-
-        const count = this.#layers.length;
-        const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
-        const baseColorFormat = this.#getBaseColorArrayFormat();
-        const dataFormat = this.#getDataArrayFormat();
-        const mipmapGenerator = this.redGPUContext.resourceManager.mipmapGenerator;
-
-        if (this.#gpuBaseColorArrayTexture) {
-            mipmapGenerator.generateMipmap(
-                this.#gpuBaseColorArrayTexture,
-                {
-                    size: [this.#textureArraySize, this.#textureArraySize, count],
-                    mipLevelCount,
-                    format: baseColorFormat,
-                    usage: 0
-                },
-                false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
-            );
-        }
-        if (this.#gpuNormalArrayTexture) {
-            mipmapGenerator.generateMipmap(
-                this.#gpuNormalArrayTexture,
-                {
-                    size: [this.#textureArraySize, this.#textureArraySize, count],
-                    mipLevelCount,
-                    format: dataFormat,
-                    usage: 0
-                },
-                false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
-            );
-        }
-        if (this.#gpuORMArrayTexture) {
-            mipmapGenerator.generateMipmap(
-                this.#gpuORMArrayTexture,
-                {
-                    size: [this.#textureArraySize, this.#textureArraySize, count],
-                    mipLevelCount,
-                    format: dataFormat,
-                    usage: 0
-                },
-                false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
-            );
-        }
-        if (this.#gpuWeightMapArrayTexture) {
-            mipmapGenerator.generateMipmap(
-                this.#gpuWeightMapArrayTexture,
-                {
-                    size: [this.#textureArraySize, this.#textureArraySize, count],
-                    mipLevelCount,
-                    format: dataFormat,
-                    usage: 0
-                },
-                false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
-            );
-        }
     }
 
     #copyLayerTextureToSlice(layer: LandscapeLayer, sliceIndex: number): void {
@@ -730,37 +686,68 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
     }
 
-    /**
-     * [KO] 머티리얼에 할당된 모든 2D 어레이 GPU 텍스처, 텍스처 뷰 및 레이어 목록을 해제하고 파기합니다.
-     * [EN] Releases and destroys all 2D array GPU textures, texture views, and layer collections allocated to this material.
-     */
-    override destroy(): void {
-        super.destroy();
-        if (this.#rebakeDebounceTimer !== null) {
-            clearTimeout(this.#rebakeDebounceTimer);
-            this.#rebakeDebounceTimer = null;
-        }
+    #updateLayerMipmaps(): void {
+        if (!this.#layers.length) return;
+        if (!this.#gpuBaseColorArrayTexture || this.#gpuBaseColorArrayTexture.mipLevelCount <= 1) return;
+
+        const count = this.#layers.length;
+        const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
+        const baseColorFormat = this.#getBaseColorArrayFormat();
+        const dataFormat = this.#getDataArrayFormat();
+        const {mipmapGenerator} = this.redGPUContext.resourceManager;
+
         if (this.#gpuBaseColorArrayTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
-            this.#gpuBaseColorArrayTexture = null;
+            mipmapGenerator.generateMipmap(
+                this.#gpuBaseColorArrayTexture,
+                {
+                    size: [this.#textureArraySize, this.#textureArraySize, count],
+                    mipLevelCount,
+                    format: baseColorFormat,
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
         }
         if (this.#gpuNormalArrayTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
-            this.#gpuNormalArrayTexture = null;
+            mipmapGenerator.generateMipmap(
+                this.#gpuNormalArrayTexture,
+                {
+                    size: [this.#textureArraySize, this.#textureArraySize, count],
+                    mipLevelCount,
+                    format: dataFormat,
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
         }
         if (this.#gpuORMArrayTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
-            this.#gpuORMArrayTexture = null;
+            mipmapGenerator.generateMipmap(
+                this.#gpuORMArrayTexture,
+                {
+                    size: [this.#textureArraySize, this.#textureArraySize, count],
+                    mipLevelCount,
+                    format: dataFormat,
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
         }
         if (this.#gpuWeightMapArrayTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
-            this.#gpuWeightMapArrayTexture = null;
+            mipmapGenerator.generateMipmap(
+                this.#gpuWeightMapArrayTexture,
+                {
+                    size: [this.#textureArraySize, this.#textureArraySize, count],
+                    mipLevelCount,
+                    format: dataFormat,
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
         }
-        this.#baseColorArrayView = null;
-        this.#normalArrayView = null;
-        this.#ormArrayView = null;
-        this.#weightMapArrayView = null;
-        this.clearLayers();
     }
 }
 
