@@ -11,7 +11,9 @@ import OctahedralImpostorMaterial from "../../impostor/octahedral/OctahedralImpo
 import bakeFoliageImpostor from "../../impostor/bakeFoliageImpostor";
 import type {FoliageLODInfo, FoliageOptions} from "../../Foliage";
 import {PBR_STRIDE_BYTES} from "../../../../core/scatter/ScatterVertexFormats";
-import {FoliageSlotPooler} from "../../submesh/FoliageSlotPooler";
+import {FoliageSlotPooler} from "../../renderUnit/FoliageSlotPooler";
+import {FoliageRenderUnit} from "../../renderUnit/FoliageRenderUnit";
+import createFoliageRenderUnitInstance from "./createFoliageRenderUnitInstance";
 
 const identityMatrix: mat4 = mat4.create();
 

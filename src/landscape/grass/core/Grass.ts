@@ -242,7 +242,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
             if (this.#renderUnits.length > 1) {
                 console.warn(
-                    `[Grass] "${this.name}" has ${this.#renderUnits.length} sub-meshes with distinct materials. ` +
+                    `[Grass] "${this.name}" has ${this.#renderUnits.length} render units with distinct materials. ` +
                     `For optimal grass rendering performance (millions of blades), merging textures into an atlas and using a single material is strongly recommended.`
                 );
             }
