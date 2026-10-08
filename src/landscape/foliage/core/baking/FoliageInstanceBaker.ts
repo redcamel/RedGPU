@@ -1,23 +1,15 @@
 /**
- * [KO] 식생 인스턴스 지형 물리 베이커 모듈입니다.
+ * [KO] 식생(Foliage) 인스턴스 지형 물리 베이커 모듈입니다.
  * [EN] Foliage instance terrain physical baker module.
  * @packageDocumentation
  */
-
 import type RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import foliageBakeWGSL from "./foliageBake.wgsl";
+import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
-/**
- * [KO] 인스턴스 베이킹에 필요한 최소 GPU 버퍼 프로퍼티를 정의하는 메가버퍼 인터페이스입니다.
- * [EN] MegaBuffer interface defining the minimum GPU buffer properties required for instance baking.
- */
-export interface IFoliageBakeMegaBuffer {
-    /**
-     * [KO] 원본 인스턴스 데이터가 저장되는 GPU 스토리지 버퍼
-     * [EN] GPU storage buffer storing raw instance data
-     */
-    rawGPUBuffer: GPUBuffer | null;
-}
+import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
+import type Landscape from "../../../Landscape";
+import type Foliage, {FoliageSubCell} from "../Foliage";
 
 /**
  * [KO] FoliageInstanceBaker 초기화 옵션 인터페이스입니다.
@@ -25,298 +17,248 @@ export interface IFoliageBakeMegaBuffer {
  */
 export interface FoliageInstanceBakerOptions {
     /**
-     * [KO] 실행할 WebGPU Compute WGSL 셰이더 소스코드 문자열
-     * [EN] WebGPU Compute WGSL shader source code string to execute
+     * [KO] 실행할 WebGPU Compute WGSL 셰이더 소스코드 문자열 (선택사항)
+     * [EN] WebGPU Compute WGSL shader source code string to execute (optional)
      */
-    computeShaderCode: string;
+    computeShaderCode?: string;
     /**
      * [KO] 디버깅 및 프로파일링용 베이커 식별 라벨
      * [EN] Identifier label for debugging and profiling
      */
-    label: string;
-    /**
-     * [KO] 초기 태스크 큐 수용 용량 (인스턴스 수, 기본값: 32768)
-     * [EN] Initial task queue capacity (number of instances, default: 32768)
-     */
-    initialTaskCapacity?: number;
+    label?: string;
 }
 
 /**
- * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착시키는 GPU Compute 기반 베이커 클래스입니다.
- * [EN] GPU compute-based baker class that physically conforms foliage instances to the landscape terrain surface.
+ * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착 및 100% GPU 베이킹하는 클래스입니다.
+ * [EN] Baker class that physically conforms and 100% GPU-bakes foliage instances onto landscape terrain.
  */
-export class FoliageInstanceBaker extends RedGPUObject {
-    #bakePipeline: GPUComputePipeline | null = null;
-    #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
-    #bakeBindGroup: GPUBindGroup | null = null;
-
-    #uniformGPUBuffer: GPUBuffer | null = null;
+export class FoliageInstanceBaker extends AScatterInstanceBaker {
     #uniformCPUBuffer: Float32Array;
     #uniformUintBuffer: Uint32Array;
 
     #tasksGPUBuffer: GPUBuffer | null = null;
     #tasksCPUBuffer: Uint32Array;
     #taskCapacity: number;
-    #taskCount: number = 0;
 
-    #cachedRawBuffer: GPUBuffer | null = null;
-    #cachedVBTTextureView: GPUTextureView | null = null;
-
-    #computeShaderCode: string;
     #label: string;
 
     /**
      * [KO] FoliageInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
      * [EN] Creates a FoliageInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
      *
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param options -
-     * [KO] 베이커 초기화 설정 옵션
-     * [EN] Baker initialization configuration options
+     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
+     * @param options - 베이커 초기화 설정 옵션
      */
-    constructor(redGPUContext: RedGPUContext, options: FoliageInstanceBakerOptions) {
+    constructor(redGPUContext: RedGPUContext, options?: FoliageInstanceBakerOptions) {
         super(redGPUContext);
 
-        const {computeShaderCode, label, initialTaskCapacity} = options;
-        this.#computeShaderCode = computeShaderCode;
-        this.#label = label;
-        this.#taskCapacity = initialTaskCapacity || 8192;
+        const computeShaderCode = options?.computeShaderCode || foliageBakeWGSL;
+        this.#label = options?.label || 'FoliageInstanceBaker';
+        this.#taskCapacity = 256;
 
-        this.#uniformCPUBuffer = new Float32Array(4);
+        this.#uniformCPUBuffer = new Float32Array(64);
         this.#uniformUintBuffer = new Uint32Array(this.#uniformCPUBuffer.buffer);
 
-        this.#tasksCPUBuffer = new Uint32Array(this.#taskCapacity * 2);
+        this.#tasksCPUBuffer = new Uint32Array(this.#taskCapacity * 4);
 
-        this.#init();
+        this.initComputePipeline(computeShaderCode, this.#label, 256);
+        this.#initTaskBuffer();
     }
 
     /**
-     * [KO] GPU 디스패치 대기 중인 베이킹 작업이 남아있는지 여부를 반환합니다.
-     * [EN] Gets whether there are pending bake tasks awaiting GPU dispatch.
-     *
-     * @returns
-     * [KO] 대기 중인 베이킹 작업이 있으면 `true`, 없으면 `false`
-     * [EN] `true` if there are pending bake tasks, otherwise `false`
+     * [KO] 단일 서브셀(SubCell)에 대해 GPU 원스톱 베이킹을 실행합니다.
+     * [EN] Executes GPU one-stop baking for a single SubCell.
      */
-    get hasPendingTasks(): boolean {
-        return this.#taskCount > 0;
-    }
-
-    /**
-     * [KO] 현재 캐시된 WebGPU 바인드그룹 및 버퍼/텍스처 캐시를 무효화하여, 다음 디스패치 시 최신 리소스로 재생성하도록 강제합니다.
-     * [EN] Invalidates the currently cached WebGPU bind group and buffer/texture caches, forcing recreation with latest resources on the next dispatch.
-     */
-    invalidateBindGroup(): void {
-        this.#bakeBindGroup = null;
-        this.#cachedRawBuffer = null;
-        this.#cachedVBTTextureView = null;
-    }
-
-    /**
-     * [KO] 지정된 인스턴스 타입과 인스턴스 범위에 대한 베이킹 작업을 큐에 추가합니다.
-     * [EN] Adds bake tasks for a specified instance type and instance range to the task queue.
-     *
-     * @param startIndex -
-     * [KO] MegaBuffer 내 인스턴스 시작 오프셋 인덱스
-     * [EN] Starting offset index of instances within MegaBuffer
-     * @param count -
-     * [KO] 베이킹할 인스턴스 개수
-     * [EN] Number of instances to bake
-     * @param typeId -
-     * [KO] 인스턴스 종류의 고유 식별자 ID
-     * [EN] Unique identifier ID of the instance type
-     */
-    addBakeTasks(startIndex: number, count: number, typeId: number): void {
-        if (count <= 0) return;
-        this.#ensureTaskCapacity(this.#taskCount + count);
-
-        const buf = this.#tasksCPUBuffer;
-        let offset = this.#taskCount * 2;
-        for (let i = 0; i < count; i++) {
-            buf[offset++] = startIndex + i;
-            buf[offset++] = typeId;
-        }
-        this.#taskCount += count;
-    }
-
-    /**
-     * [KO] 등록된 베이킹 작업들을 GPU Compute Pass에 전달하여 실제 지형 스냅 및 지면 색상 샘플링을 실행합니다.
-     * [EN] Dispatches registered bake tasks to the GPU compute pass to execute physical terrain height snapping and ground color sampling.
-     *
-     * @param computePass -
-     * [KO] 현재 실행 중인 GPUComputePassEncoder
-     * [EN] Active GPUComputePassEncoder
-     * @param megaBuffer -
-     * [KO] 인스턴스 데이터를 저장하는 IFoliageBakeMegaBuffer 호환 메가버퍼 인스턴스
-     * [EN] IFoliageBakeMegaBuffer-compatible megaBuffer instance storing instance data
-     * @param vbtTextureView -
-     * [KO] 지형 가상 베이스 컬러(VBT) 텍스처 뷰 (선택사항)
-     * [EN] Terrain virtual base texture (VBT) texture view (optional)
-     * @param worldSizeX -
-     * [KO] 지형의 월드 X 크기
-     * [EN] World X dimension of the landscape
-     * @param worldSizeZ -
-     * [KO] 지형의 월드 Z 크기
-     * [EN] World Z dimension of the landscape
-     */
-    dispatchPass(
-        computePass: GPUComputePassEncoder,
-        megaBuffer: IFoliageBakeMegaBuffer,
-        worldSizeX: number,
-        worldSizeZ: number,
-        vbtTextureView?: GPUTextureView | null
+    dispatchBakeSubCell(
+        megaBuffer: FoliageScatterMegaBuffer,
+        landscape: Landscape,
+        foliage: Foliage,
+        subCell: FoliageSubCell,
+        targetSlot: number,
+        targetCount: number,
+        subCellSize: number
     ): void {
-        if (this.#taskCount === 0 || !this.#bakePipeline || !this.#bakeBindGroupLayout || !this.#uniformGPUBuffer || !this.#tasksGPUBuffer) {
-            return;
-        }
-
+        const pipeline = this.computePipeline;
+        const uniformBuffer = this.uniformGPUBuffer;
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !megaBuffer.rawGPUBuffer) {
-            return;
+        if (!pipeline || !uniformBuffer || !gpuDevice) return;
+
+        const rawBuffer = megaBuffer.rawGPUBuffer;
+        if (!rawBuffer) return;
+
+        const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
+        const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
+
+        const {
+            worldSizeX,
+            worldSizeZ,
+            invWorldSizeX,
+            invWorldSizeZ,
+            halfWorldSizeX: halfWorldX,
+            halfWorldSizeZ: halfWorldZ,
+            heightScale
+        } = landscape;
+        const {subCellX, subCellZ} = subCell;
+
+        const subMinX = subCellX * subCellSize - halfWorldX;
+        const subMaxX = subMinX + subCellSize;
+        const subMinZ = subCellZ * subCellSize - halfWorldZ;
+        const subMaxZ = subMinZ + subCellSize;
+
+        const FIXED_GRID = 100.0;
+        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_GRID);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_GRID);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_GRID);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_GRID);
+
+        const gridCountX = endGx - startGx + 1;
+        const gridCountZ = endGz - startGz + 1;
+        const totalGrids = gridCountX * gridCountZ;
+        if (totalGrids <= 0) return;
+
+        this.#ensureTaskCapacity(totalGrids * 2);
+        const tasksBuf = this.#tasksCPUBuffer;
+        let tOffset = 0;
+        for (let gz = startGz; gz <= endGz; gz++) {
+            for (let gx = startGx; gx <= endGx; gx++) {
+                tasksBuf[tOffset++] = gx;
+                tasksBuf[tOffset++] = gz;
+                tasksBuf[tOffset++] = targetSlot;
+                tasksBuf[tOffset++] = targetCount;
+            }
         }
 
-        const basicGPUSampler = this.resourceManager.basicSampler.gpuSampler;
-        const emptyBitmapView = this.resourceManager.emptyBitmapTextureView;
-        const targetVBTView = vbtTextureView || emptyBitmapView;
+        const taskBytes = tOffset * 4;
+        gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer!, 0, tasksBuf.buffer, 0, taskBytes);
+
+        // TargetLayer WeightMap 찾기
+        let weightView: GPUTextureView = this.resourceManager.emptyBitmapTextureView;
+        let hasWeightMap = 0;
+        let weightChannelIndex = 0;
+
+        const targetLayer = foliage.targetLayer;
+        if (targetLayer !== undefined && targetLayer !== null && targetLayer !== '' && landscape.layers) {
+            const matchedLayer = typeof targetLayer === 'number'
+                ? landscape.layers[targetLayer]
+                : landscape.layers.find((l: any) => l.name === targetLayer);
+            if (matchedLayer?.weightTexture?.gpuTexture) {
+                weightView = this.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
+                    || matchedLayer.weightTexture.gpuTexture.createView();
+                hasWeightMap = 1;
+                weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
+            }
+        }
+
+        const minScale = foliage.minScale || [0.8, 0.8, 0.8];
+        const maxScale = foliage.maxScale || [1.2, 1.2, 1.2];
+        const scaleDiffX = maxScale[0] - minScale[0];
+        const scaleDiffY = maxScale[1] - minScale[1];
+        const scaleDiffZ = maxScale[2] - minScale[2];
 
         const f32 = this.#uniformCPUBuffer;
         const u32 = this.#uniformUintBuffer;
-        f32[0] = worldSizeX > 0 ? 1.0 / worldSizeX : 0.0;
-        f32[1] = worldSizeZ > 0 ? 1.0 / worldSizeZ : 0.0;
-        u32[2] = this.#taskCount;
-        u32[3] = vbtTextureView ? 1 : 0;
 
-        gpuDevice.queue.writeBuffer(
-            this.#uniformGPUBuffer,
-            0,
-            this.#uniformCPUBuffer.buffer,
-            0,
-            16
+        f32[0] = invWorldSizeX;
+        f32[1] = invWorldSizeZ;
+        f32[2] = halfWorldX;
+        f32[3] = halfWorldZ;
+
+        f32[4] = FIXED_GRID;
+        u32[5] = Math.max(1, Math.round((foliage.densityPerHectare || 50) * (foliage.densityMultiplier || 1.0)));
+        u32[6] = u32[5] * 2;
+        u32[7] = foliage.nameHash || 0;
+
+        f32[8] = minScale[0];
+        f32[9] = minScale[1];
+        f32[10] = minScale[2];
+        f32[11] = scaleDiffX;
+
+        f32[12] = scaleDiffY;
+        f32[13] = scaleDiffZ;
+        f32[14] = foliage.bottomOffset || 0.0;
+        f32[15] = foliage.minSlope ? Math.tan(foliage.minSlope * 0.0174533) ** 2 : 0.0;
+
+        f32[16] = foliage.maxSlope ? Math.tan(foliage.maxSlope * 0.0174533) ** 2 : 9999.0;
+        f32[17] = foliage.alignFactor ?? 1.0;
+        u32[18] = (foliage.minSlope > 0 || foliage.maxSlope < 90) ? 1 : 0;
+        u32[19] = foliage.alignToNormal ? 1 : 0;
+
+        u32[20] = foliage.randomRotationY ? 1 : 0;
+        u32[21] = foliage.densityScaleByWeight ? 1 : 0;
+        u32[22] = (scaleDiffX === scaleDiffZ && minScale[0] === minScale[2]) ? 1 : 0;
+        u32[23] = foliage.allocation?.typeId ?? 0;
+
+        u32[24] = landscape.hasValidVbtAtlas ? 1 : 0;
+        u32[25] = hasWeightMap;
+        u32[26] = weightChannelIndex;
+        u32[27] = targetSlot;
+
+        f32[28] = heightScale;
+        u32[29] = totalGrids;
+        f32[30] = subMinX;
+        f32[31] = subMinZ;
+
+        f32[32] = subMaxX;
+        f32[33] = subMaxZ;
+        u32[34] = 8;
+        u32[35] = 0;
+
+        gpuDevice.queue.writeBuffer(uniformBuffer, 0, f32.buffer, 0, 144);
+
+        const bindGroup = this.getOrCreateBindGroup(
+            foliage.allocation?.typeId ?? 0,
+            this.#label,
+            rawBuffer,
+            vhtView,
+            vbtView,
+            weightView,
+            this.#tasksGPUBuffer!
         );
+        if (!bindGroup) return;
 
-        const taskBytes = this.#taskCount * 8;
-        gpuDevice.queue.writeBuffer(
-            this.#tasksGPUBuffer,
-            0,
-            this.#tasksCPUBuffer.buffer,
-            0,
-            taskBytes
-        );
-
-        if (
-            !this.#bakeBindGroup ||
-            this.#cachedRawBuffer !== megaBuffer.rawGPUBuffer ||
-            this.#cachedVBTTextureView !== targetVBTView
-        ) {
-            this.#cachedRawBuffer = megaBuffer.rawGPUBuffer;
-            this.#cachedVBTTextureView = targetVBTView;
-
-            this.#bakeBindGroup = gpuDevice.createBindGroup({
-                label: `${this.#label}_BindGroup`,
-                layout: this.#bakeBindGroupLayout,
-                entries: [
-                    {binding: 0, resource: {buffer: megaBuffer.rawGPUBuffer}},
-                    {binding: 1, resource: {buffer: this.#uniformGPUBuffer}},
-                    {binding: 2, resource: {buffer: this.#tasksGPUBuffer}},
-                    {binding: 3, resource: targetVBTView},
-                    {binding: 4, resource: basicGPUSampler},
-                ],
-            });
-        }
-
-        const workgroups = Math.ceil(this.#taskCount / 64);
-        computePass.setPipeline(this.#bakePipeline);
-        computePass.setBindGroup(0, this.#bakeBindGroup);
+        const commandEncoder = gpuDevice.createCommandEncoder({
+            label: `${this.#label}_SubCell_CommandEncoder`
+        });
+        const computePass = commandEncoder.beginComputePass({
+            label: `${this.#label}_SubCell_ComputePass`
+        });
+        computePass.setPipeline(pipeline);
+        computePass.setBindGroup(0, bindGroup);
+        const workgroups = Math.ceil(totalGrids / 64);
         computePass.dispatchWorkgroups(workgroups);
+        computePass.end();
 
-        this.#taskCount = 0;
+        gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
-    /**
-     * [KO] FoliageInstanceBaker가 점유하고 있는 내부 GPU 버퍼, 파이프라인 및 바인드그룹 리소스를 완전히 해제합니다.
-     * [EN] Completely releases internal GPU buffers, pipelines, and bind group resources held by FoliageInstanceBaker.
-     */
-    destroy(): void {
-        this.#uniformGPUBuffer?.destroy();
-        this.#uniformGPUBuffer = null;
+    override destroy(): void {
         this.#tasksGPUBuffer?.destroy();
         this.#tasksGPUBuffer = null;
-        this.#bakePipeline = null;
-        this.#bakeBindGroupLayout = null;
-        this.invalidateBindGroup();
-        this.#taskCount = 0;
+        super.destroy();
     }
 
-    #init(): void {
-        const {gpuDevice, resourceManager} = this;
+    #initTaskBuffer(): void {
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        this.#uniformGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.#label}_UniformBuffer`,
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
-
+        this.#tasksGPUBuffer?.destroy();
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.#label}_TasksBuffer`,
-            size: this.#taskCapacity * 8,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-        });
-
-        const shaderModule = resourceManager.createGPUShaderModule(`${this.#label}_ComputeModule`, {
-            code: this.#computeShaderCode,
-        });
-
-        this.#bakeBindGroupLayout = resourceManager.createBindGroupLayout(`${this.#label}_BindGroupLayout`, {
-            label: `${this.#label}_BindGroupLayout`,
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float'}},
-                {binding: 4, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-            ],
-        });
-
-        const pipelineLayout = resourceManager.createGPUPipelineLayout(`${this.#label}_PipelineLayout`, {
-            bindGroupLayouts: [this.#bakeBindGroupLayout],
-        });
-
-        this.#bakePipeline = gpuDevice.createComputePipeline({
-            label: `${this.#label}_ComputePipeline`,
-            layout: pipelineLayout,
-            compute: {
-                module: shaderModule,
-                entryPoint: 'main',
-            },
+            label: `${this.#label}_TasksGPUBuffer`,
+            size: this.#taskCapacity * 16,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
     }
 
-    #ensureTaskCapacity(requiredCapacity: number): void {
-        if (requiredCapacity <= this.#taskCapacity) return;
+    #ensureTaskCapacity(required: number): void {
+        if (required <= this.#taskCapacity) return;
 
-        const gpuDevice = this.gpuDevice;
-        let newCap = this.#taskCapacity;
-        while (newCap < requiredCapacity) {
-            newCap *= 2;
-        }
+        let newCap = Math.max(this.#taskCapacity * 2, 256);
+        while (newCap < required) newCap *= 2;
 
-        const oldCpu = this.#tasksCPUBuffer;
-        this.#tasksCPUBuffer = new Uint32Array(newCap * 2);
-        this.#tasksCPUBuffer.set(oldCpu);
+        this.#tasksCPUBuffer = new Uint32Array(newCap * 4);
         this.#taskCapacity = newCap;
 
-        if (gpuDevice) {
-            this.#tasksGPUBuffer?.destroy();
-            this.#tasksGPUBuffer = gpuDevice.createBuffer({
-                label: `${this.#label}_TasksBuffer`,
-                size: this.#taskCapacity * 8,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            });
-            this.invalidateBindGroup();
-        }
+        this.#initTaskBuffer();
     }
 }
 

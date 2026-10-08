@@ -4,47 +4,32 @@
  * @packageDocumentation
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
-import RedGPUObject from "../../../../base/RedGPUObject";
 import grassBakeWGSL from "./grassBake.wgsl";
 import type Landscape from "../../../Landscape";
 import type Grass from "../Grass";
 import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
+import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 export const GRASS_CELL_SIZE: number = 16.0;
 const DEFAULT_GRASS_MIN_SCALE = Object.freeze([0.8, 0.8] as const);
 const DEFAULT_GRASS_MAX_SCALE = Object.freeze([1.2, 1.2] as const);
 
-interface BakeBindGroupCacheEntry {
-    bindGroup: GPUBindGroup;
-    rawBuffer: GPUBuffer;
-    vhtView: GPUTextureView;
-    vbtView: GPUTextureView;
-    weightView: GPUTextureView;
-    offsetsBuffer: GPUBuffer;
-}
-
-export default class GrassInstanceBaker extends RedGPUObject {
-    #computePipeline: GPUComputePipeline | null = null;
-    #bindGroupLayout: GPUBindGroupLayout | null = null;
-    #uniformBuffer: GPUBuffer | null = null;
+export default class GrassInstanceBaker extends AScatterInstanceBaker {
     #uniformArrayBuffer: ArrayBuffer = new ArrayBuffer(256);
     #uniformFloat32View: Float32Array;
     #uniformUint32View: Uint32Array;
     #uniformInt32View: Int32Array;
-    #defaultSampler: GPUSampler | null = null;
 
     #cellOffsetsCache: Map<number, Int32Array> = new Map();
     #cellOffsetsGPUBuffer: GPUBuffer | null = null;
     #currentUploadedRadius: number = -1;
-    #bakeBindGroupCache: Map<number, BakeBindGroupCacheEntry> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#uniformFloat32View = new Float32Array(this.#uniformArrayBuffer);
         this.#uniformUint32View = new Uint32Array(this.#uniformArrayBuffer);
         this.#uniformInt32View = new Int32Array(this.#uniformArrayBuffer);
-        this.#initPipeline();
+        this.initComputePipeline(grassBakeWGSL, 'Grass_Bake', 256);
     }
 
     /**
@@ -58,12 +43,10 @@ export default class GrassInstanceBaker extends RedGPUObject {
         centerX: number = 0,
         centerZ: number = 0
     ): void {
-        const pipeline = this.#computePipeline;
-        const bindGroupLayout = this.#bindGroupLayout;
-        const uniformBuffer = this.#uniformBuffer;
-        const offsetsBuffer = this.#cellOffsetsGPUBuffer;
+        const pipeline = this.computePipeline;
+        const uniformBuffer = this.uniformGPUBuffer;
         const gpuDevice = this.gpuDevice;
-        if (!pipeline || !bindGroupLayout || !uniformBuffer || !offsetsBuffer || !gpuDevice) return;
+        if (!pipeline || !uniformBuffer || !gpuDevice) return;
 
         const rawBuffer = megaBuffer.rawGPUBuffer;
         if (!rawBuffer) return;
@@ -90,8 +73,8 @@ export default class GrassInstanceBaker extends RedGPUObject {
         const spiralOffsets = this.#getSpiralOffsets(cellRadius);
         const totalCircularCells = spiralOffsets.length / 2;
 
-        if (offsetsBuffer.size < spiralOffsets.byteLength) {
-            offsetsBuffer.destroy();
+        if (!this.#cellOffsetsGPUBuffer || this.#cellOffsetsGPUBuffer.size < spiralOffsets.byteLength) {
+            this.#cellOffsetsGPUBuffer?.destroy();
             const newSize = Math.max(2048 * 8, Math.ceil(spiralOffsets.byteLength / 256) * 256);
             this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
                 label: 'Grass_Bake_CellOffsets_Buffer',
@@ -101,7 +84,7 @@ export default class GrassInstanceBaker extends RedGPUObject {
             this.#currentUploadedRadius = -1;
         }
 
-        const activeOffsetsBuffer = this.#cellOffsetsGPUBuffer!;
+        const activeOffsetsBuffer = this.#cellOffsetsGPUBuffer;
         if (this.#currentUploadedRadius !== cellRadius) {
             this.#currentUploadedRadius = cellRadius;
             gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
@@ -177,40 +160,16 @@ export default class GrassInstanceBaker extends RedGPUObject {
 
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 
-        let cacheEntry = this.#bakeBindGroupCache.get(grass.typeId);
-        const needsNewBindGroup = !cacheEntry
-            || cacheEntry.rawBuffer !== rawBuffer
-            || cacheEntry.vhtView !== vhtView
-            || cacheEntry.vbtView !== vbtView
-            || cacheEntry.weightView !== weightView
-            || cacheEntry.offsetsBuffer !== activeOffsetsBuffer;
-
-        if (needsNewBindGroup) {
-            const bindGroup = gpuDevice.createBindGroup({
-                label: `Grass_Bake_BG_Type_${grass.typeId}`,
-                layout: bindGroupLayout,
-                entries: [
-                    {binding: 0, resource: {buffer: uniformBuffer}},
-                    {binding: 1, resource: {buffer: rawBuffer}},
-                    {binding: 2, resource: vhtView},
-                    {binding: 3, resource: vbtView},
-                    {binding: 4, resource: this.#defaultSampler!},
-                    {binding: 5, resource: weightView},
-                    {binding: 6, resource: {buffer: activeOffsetsBuffer}},
-                ]
-            });
-            cacheEntry = {
-                bindGroup,
-                rawBuffer,
-                vhtView,
-                vbtView,
-                weightView,
-                offsetsBuffer: activeOffsetsBuffer
-            };
-            this.#bakeBindGroupCache.set(grass.typeId, cacheEntry);
-        }
-
-        const bindGroup = cacheEntry.bindGroup;
+        const bindGroup = this.getOrCreateBindGroup(
+            grass.typeId,
+            'Grass_Bake',
+            rawBuffer,
+            vhtView,
+            vbtView,
+            weightView,
+            activeOffsetsBuffer
+        );
+        if (!bindGroup) return;
 
         const commandEncoder = gpuDevice.createCommandEncoder({
             label: `Grass_Bake_CommandEncoder_Type_${grass.typeId}`
@@ -227,16 +186,11 @@ export default class GrassInstanceBaker extends RedGPUObject {
         gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
-    destroy(): void {
-        this.#uniformBuffer?.destroy();
-        this.#uniformBuffer = null;
+    override destroy(): void {
         this.#cellOffsetsGPUBuffer?.destroy();
         this.#cellOffsetsGPUBuffer = null;
-        this.#computePipeline = null;
-        this.#bindGroupLayout = null;
-        this.#defaultSampler = null;
         this.#cellOffsetsCache.clear();
-        this.#bakeBindGroupCache.clear();
+        super.destroy();
     }
 
     /**
@@ -248,80 +202,29 @@ export default class GrassInstanceBaker extends RedGPUObject {
         if (cached) return cached;
 
         const maxR = cellRadius;
-        const radiusSq = maxR * maxR;
-        const candidates: { dx: number; dz: number; distSq: number }[] = [];
+        const maxRSq = maxR * maxR;
 
+        const temp: Array<{ dx: number; dz: number; distSq: number }> = [];
         for (let dz = -maxR; dz <= maxR; dz++) {
+            const dzSq = dz * dz;
             for (let dx = -maxR; dx <= maxR; dx++) {
-                const distSq = dx * dx + dz * dz;
-                if (distSq <= radiusSq) {
-                    candidates.push({dx, dz, distSq});
+                const distSq = dx * dx + dzSq;
+                if (distSq <= maxRSq) {
+                    temp.push({dx, dz, distSq});
                 }
             }
         }
 
-        candidates.sort((a, b) => a.distSq - b.distSq);
+        temp.sort((a, b) => a.distSq - b.distSq);
 
-        const count = candidates.length;
-        const arr = new Int32Array(count * 2);
+        const count = temp.length;
+        const result = new Int32Array(count * 2);
         for (let i = 0; i < count; i++) {
-            arr[i * 2] = candidates[i].dx;
-            arr[i * 2 + 1] = candidates[i].dz;
+            result[i * 2] = temp[i].dx;
+            result[i * 2 + 1] = temp[i].dz;
         }
 
-        this.#cellOffsetsCache.set(cellRadius, arr);
-        return arr;
-    }
-
-    #initPipeline(): void {
-        const {resourceManager, gpuDevice} = this.redGPUContext;
-        if (!gpuDevice) return;
-
-        this.#defaultSampler = gpuDevice.createSampler({
-            label: 'Grass_Bake_Sampler',
-            magFilter: 'linear',
-            minFilter: 'linear',
-            addressModeU: 'clamp-to-edge',
-            addressModeV: 'clamp-to-edge',
-        });
-
-        // 2048개 셀 오프셋을 저장할 수 있는 GPU 버퍼 (vec2<i32> * 2048 = 16384 bytes)
-        this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
-            label: 'Grass_Bake_CellOffsets_Buffer',
-            size: 2048 * 8,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        });
-
-        const shaderInfo = resourceManager.wgslParser.parse('Grass_Bake_ShaderModule', grassBakeWGSL);
-        let computeModule = resourceManager.getGPUShaderModule('Grass_Bake_ShaderModule');
-        if (!computeModule) {
-            computeModule = resourceManager.createGPUShaderModule('Grass_Bake_ShaderModule', {
-                code: grassBakeWGSL
-            });
-        }
-
-        const bglDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
-        this.#bindGroupLayout = resourceManager.createBindGroupLayout('Grass_Bake_BGL', bglDesc);
-
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Grass_Bake_PipelineLayout', {
-            bindGroupLayouts: [this.#bindGroupLayout]
-        });
-
-        this.#computePipeline = gpuDevice.createComputePipeline({
-            label: 'Grass_Bake_Pipeline',
-            layout: pipelineLayout,
-            compute: {
-                module: computeModule,
-                entryPoint: 'main'
-            }
-        });
-
-        this.#uniformBuffer = gpuDevice.createBuffer({
-            label: 'Grass_Bake_UniformBuffer',
-            size: this.#uniformArrayBuffer.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        this.#cellOffsetsCache.set(cellRadius, result);
+        return result;
     }
 }
-
-Object.freeze(GrassInstanceBaker);

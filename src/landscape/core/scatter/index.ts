@@ -49,6 +49,7 @@ import AScatterSlotPooler from "./AScatterSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
 import AScatterCuller from "./AScatterCuller";
+import AScatterInstanceBaker, {type ScatterBakeBindGroupCacheEntry} from "./AScatterInstanceBaker";
 
 export {
     // Runtime Classes, Functions & Units
@@ -61,6 +62,7 @@ export {
     AScatterSlotPooler,
     AScatterRenderer,
     AScatterMegaBuffer,
+    AScatterInstanceBaker,
 
     // Constants
     CULLING_WORKGROUP_SIZE,
@@ -76,6 +78,7 @@ export {
     type RawSubMeshNode,
     type ScatterShaderReflectionConfig,
     type ScatterBaseSegmentAllocation,
+    type ScatterBakeBindGroupCacheEntry,
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
     PBR_STRIDE_BYTES,

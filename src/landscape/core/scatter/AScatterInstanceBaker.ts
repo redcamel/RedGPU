@@ -1,0 +1,192 @@
+/**
+ * [KO] 스캐터 시스템(잔디, 식생 등)을 위한 GPU Compute 기반 인스턴스 베이커 추상 베이스 모듈입니다.
+ * [EN] Abstract base module for GPU Compute-based instance bakers across scatter systems (Grass, Foliage, etc.).
+ * @packageDocumentation
+ */
+
+import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
+
+/**
+ * [KO] 베이커 바인드 그룹 캐시 엔트리 인터페이스입니다.
+ * [EN] Interface for baker bind group cache entry.
+ */
+export interface ScatterBakeBindGroupCacheEntry {
+    bindGroup: GPUBindGroup;
+    rawBuffer: GPUBuffer;
+    vhtView: GPUTextureView;
+    vbtView: GPUTextureView;
+    weightView: GPUTextureView;
+    tasksBuffer: GPUBuffer;
+}
+
+/**
+ * [KO] 지형(Landscape) 표면에 대규모 스캐터 인스턴스를 GPU Compute Shader로 물리 안착 및 원스톱 생성하는 추상 베이스 클래스입니다.
+ * [EN] Abstract base class for physically conforming and generating large-scale scatter instances onto landscape terrain using GPU Compute Shaders.
+ */
+export abstract class AScatterInstanceBaker extends RedGPUObject {
+    protected computePipeline: GPUComputePipeline | null = null;
+    protected bindGroupLayout: GPUBindGroupLayout | null = null;
+    protected uniformGPUBuffer: GPUBuffer | null = null;
+    protected defaultSampler: GPUSampler | null = null;
+
+    protected readonly bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
+
+    /**
+     * [KO] AScatterInstanceBaker 인스턴스를 초기화합니다.
+     * [EN] Initializes an AScatterInstanceBaker instance.
+     *
+     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
+     */
+    constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
+    }
+
+    /**
+     * [KO] 특정 타입의 바인드 그룹 캐시를 무효화합니다.
+     * [EN] Invalidates the bind group cache for a specific type.
+     */
+    invalidateBindGroup(typeId: number): void {
+        this.bakeBindGroupCache.delete(typeId);
+    }
+
+    /**
+     * [KO] 모든 바인드 그룹 캐시를 무효화합니다.
+     * [EN] Invalidates all bind group caches.
+     */
+    clearBindGroupCache(): void {
+        this.bakeBindGroupCache.clear();
+    }
+
+    /**
+     * [KO] 베이커가 소유한 GPU 리소스 및 캐시를 완전히 해제합니다.
+     * [EN] Completely releases GPU resources and caches owned by the baker.
+     */
+    destroy(): void {
+        this.uniformGPUBuffer?.destroy();
+        this.uniformGPUBuffer = null;
+        this.computePipeline = null;
+        this.bindGroupLayout = null;
+        this.defaultSampler = null;
+        this.bakeBindGroupCache.clear();
+    }
+
+    /**
+     * [KO] 지정된 WGSL 셰이더와 라벨을 기반으로 WebGPU 컴퓨트 파이프라인 및 공통 바인드 그룹 레이아웃을 생성합니다.
+     * [EN] Creates the WebGPU compute pipeline and common bind group layout based on the provided WGSL shader and label.
+     *
+     * @param shaderCode - 컴파일할 WGSL 셰이더 코드
+     * @param label - 파이프라인 및 바인드그룹 디버그 라벨
+     * @param uniformByteLength - 유니폼 버퍼 바이트 크기 (기본값: 256)
+     */
+    protected initComputePipeline(
+        shaderCode: string,
+        label: string,
+        uniformByteLength: number = 256
+    ): void {
+        const {resourceManager, gpuDevice} = this.redGPUContext;
+        if (!gpuDevice) return;
+
+        const shaderName = `${label}_ShaderModule`;
+        const shaderInfo = resourceManager.wgslParser.parse(shaderName, shaderCode);
+        let computeModule = resourceManager.getGPUShaderModule(shaderName);
+        if (!computeModule) {
+            computeModule = resourceManager.createGPUShaderModule(shaderName, {
+                code: shaderCode
+            });
+        }
+
+        const layoutDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
+        this.bindGroupLayout = resourceManager.createBindGroupLayout(`${label}_BindGroupLayout`, {
+            label: `${label}_BindGroupLayout`,
+            ...layoutDesc
+        });
+
+        const pipelineLayout = resourceManager.createGPUPipelineLayout(`${label}_PipelineLayout`, {
+            bindGroupLayouts: [this.bindGroupLayout]
+        });
+
+        this.computePipeline = gpuDevice.createComputePipeline({
+            label: `${label}_ComputePipeline`,
+            layout: pipelineLayout,
+            compute: {
+                module: computeModule,
+                entryPoint: 'main'
+            }
+        });
+
+        this.uniformGPUBuffer = gpuDevice.createBuffer({
+            label: `${label}_UniformBuffer`,
+            size: uniformByteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        this.defaultSampler = gpuDevice.createSampler({
+            label: `${label}_DefaultSampler`,
+            magFilter: 'linear',
+            minFilter: 'linear',
+            addressModeU: 'clamp-to-edge',
+            addressModeV: 'clamp-to-edge'
+        });
+    }
+
+    /**
+     * [KO] 특정 타입 ID에 대해 유효한 GPUBindGroup을 반환하거나, 리소스가 변경된 경우 재생성하여 캐싱합니다.
+     * [EN] Returns a valid GPUBindGroup for the specified type ID, or re-creates and caches it if resources have changed.
+     */
+    protected getOrCreateBindGroup(
+        typeId: number,
+        labelPrefix: string,
+        rawBuffer: GPUBuffer,
+        vhtView: GPUTextureView,
+        vbtView: GPUTextureView,
+        weightView: GPUTextureView,
+        tasksBuffer: GPUBuffer
+    ): GPUBindGroup | null {
+        const gpuDevice = this.gpuDevice;
+        const bindGroupLayout = this.bindGroupLayout;
+        const uniformBuffer = this.uniformGPUBuffer;
+        const defaultSampler = this.defaultSampler;
+        if (!gpuDevice || !bindGroupLayout || !uniformBuffer || !defaultSampler) return null;
+
+        let cacheEntry = this.bakeBindGroupCache.get(typeId);
+        const needsNewBindGroup = !cacheEntry
+            || cacheEntry.rawBuffer !== rawBuffer
+            || cacheEntry.vhtView !== vhtView
+            || cacheEntry.vbtView !== vbtView
+            || cacheEntry.weightView !== weightView
+            || cacheEntry.tasksBuffer !== tasksBuffer;
+
+        if (needsNewBindGroup) {
+            const bindGroup = gpuDevice.createBindGroup({
+                label: `${labelPrefix}_BG_Type_${typeId}`,
+                layout: bindGroupLayout,
+                entries: [
+                    {binding: 0, resource: {buffer: uniformBuffer}},
+                    {binding: 1, resource: {buffer: rawBuffer}},
+                    {binding: 2, resource: vhtView},
+                    {binding: 3, resource: vbtView},
+                    {binding: 4, resource: defaultSampler},
+                    {binding: 5, resource: weightView},
+                    {binding: 6, resource: {buffer: tasksBuffer}}
+                ]
+            });
+
+            cacheEntry = {
+                bindGroup,
+                rawBuffer,
+                vhtView,
+                vbtView,
+                weightView,
+                tasksBuffer
+            };
+            this.bakeBindGroupCache.set(typeId, cacheEntry);
+        }
+
+        return cacheEntry.bindGroup;
+    }
+}
+
+Object.freeze(AScatterInstanceBaker);
+export default AScatterInstanceBaker;

@@ -60,9 +60,6 @@ function sampleNormalizedLayerWeight(
     return targetWeight / totalWeight;
 }
 
-const tempFloat32 = new Float32Array(2);
-const tempUint32 = new Uint32Array(tempFloat32.buffer);
-
 /**
  * [KO] 그리드 정수 좌표와 식생 타입 이름 해시로부터 결정론적(Deterministic) 32비트 의사난수 시드를 산출합니다.
  * [EN] Computes a deterministic 32-bit PRNG seed from integer grid coordinates and foliage type name hash.
@@ -70,53 +67,6 @@ const tempUint32 = new Uint32Array(tempFloat32.buffer);
 function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: number): number {
     let seed = ((gridX * 73856093) ^ (gridZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
     return seed === 0 ? 0x9e3779b9 : seed;
-}
-
-/**
- * [KO] 32비트 단정밀도 부동소수점을 16비트 반정밀도(Half-Float / IEEE 754-2008) 비트 패턴으로 고속 변환합니다.
- * [EN] Fast-converts a 32-bit single-precision float to a 16-bit half-precision float bit pattern.
- */
-function fastFloatToHalf(val: number): number {
-    tempFloat32[0] = val;
-    const f = tempUint32[0];
-    const sign = (f >> 16) & 0x8000;
-    let exp = ((f >> 23) & 0xFF) - 127 + 15;
-    let mant = (f >> 13) & 0x03FF;
-    if (exp <= 0) return sign;
-    if (exp >= 31) return sign | 0x7C00;
-    return sign | (exp << 10) | mant;
-}
-
-/**
- * [KO] 두 개의 단정밀도 부동소수점(X, Z 스케일 등)을 2개의 16비트 반정밀도로 변환하여 단일 32비트 uint로 패킹합니다.
- * [EN] Packs two 32-bit floats (X, Z scales) into two 16-bit half-floats inside a single 32-bit uint.
- */
-function fastPack2x16float(x: number, y: number): number {
-    tempFloat32[0] = x;
-    tempFloat32[1] = y;
-
-    const f0 = tempUint32[0];
-    const sign0 = (f0 >> 16) & 0x8000;
-    let exp0 = ((f0 >> 23) & 0xFF) - 127 + 15;
-    let mant0 = (f0 >> 13) & 0x03FF;
-    const hx = sign0 | (exp0 <= 0 ? 0 : (exp0 >= 31 ? 0x7C00 : (exp0 << 10) | mant0));
-
-    const f1 = tempUint32[1];
-    const sign1 = (f1 >> 16) & 0x8000;
-    let exp1 = ((f1 >> 23) & 0xFF) - 127 + 15;
-    let mant1 = (f1 >> 13) & 0x03FF;
-    const hy = sign1 | (exp1 <= 0 ? 0 : (exp1 >= 31 ? 0x7C00 : (exp1 << 10) | mant1));
-
-    return ((hx & 0xFFFF) | ((hy & 0xFFFF) << 16)) >>> 0;
-}
-
-/**
- * [KO] 단일 균일(Uniform) 스케일 값을 상위/하위 16비트에 복제 패킹합니다.
- * [EN] Duplicates and packs a single uniform scale value into high/low 16-bit half-floats.
- */
-function fastPackUniformScale(scale: number): number {
-    const h = fastFloatToHalf(scale) & 0xFFFF;
-    return (h | (h << 16)) >>> 0;
 }
 
 /**
@@ -1054,29 +1004,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#lastUnmountedCount;
     }
 
-    /**
-     * [KO] 지정된 오프셋 및 개수의 인스턴스 데이터를 CPU 스테이징에서 GPU 원본 인스턴스 버퍼로 업로드하고 베이킹 태스크를 등록합니다.
-     * [EN] Uploads instance data of the specified range from CPU staging to GPU raw buffer and queues baking tasks.
-     *
-     * @param startIndex -
-     * [KO] 타입 할당 내 로컬 시작 오프셋
-     * [EN] Local start offset within type allocation
-     * @param count -
-     * [KO] 업로드할 인스턴스 개수
-     * [EN] Number of instances to upload
-     */
-    uploadRangeToGPU(startIndex: number, count: number): void {
-        const alloc = this.allocation;
-        if (this.#megaBuffer && alloc) {
-            this.#megaBuffer.uploadAllocationRangeToGPU(alloc, startIndex, count);
-            const hasVBT = this.#landscape?.hasValidVbtAtlas ?? false;
-            const needGroundBlend = this.groundBlendStrength > 0.001;
-            if (this.#baker && count > 0 && hasVBT && needGroundBlend) {
-                const globalIndex = alloc.rawBaseOffset + startIndex;
-                this.#baker.addBakeTasks(globalIndex, count, alloc.typeId);
-            }
-        }
-    }
 
     /**
      * [KO] 이 식생 타입에 속한 모든 서브메시 및 그림자 서브메시의 UBO 슬롯 파라미터와 타입 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
@@ -1156,13 +1083,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const megaBuffer = this.#megaBuffer;
                     const allocation = this.allocation;
                     if (megaBuffer && allocation) {
+                        const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
                         const mounted = this.#mountedSubCells;
                         for (let i = mounted.length - 1; i >= 0; i--) {
                             const sc = mounted[i];
                             const dx = sc.centerX - this.#lastCamX;
                             const dz = sc.centerZ - this.#lastCamZ;
                             if (dx * dx + dz * dz > unmountRadiusSq) {
-                                this.#unmountSubCellAt(i, megaBuffer, allocation);
+                                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
                             }
                         }
                     }
@@ -1223,7 +1151,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const distSq = dx * dx + dz * dz;
 
             if (distSq > unmountRadiusSq) {
-                this.#unmountSubCellAt(i, megaBuffer, allocation);
+                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
                 unmountedThisFrame++;
             }
         }
@@ -1300,14 +1228,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     rebake(): void {
         const alloc = this.allocation;
-        const hasVBT = this.#landscape?.hasValidVbtAtlas ?? false;
-        const needGroundBlend = this.groundBlendStrength > 0.001;
-        if (this.#megaBuffer && alloc && this.#baker && alloc.instanceCount > 0 && hasVBT && needGroundBlend) {
-            this.#baker.addBakeTasks(
-                alloc.rawBaseOffset,
-                alloc.instanceCount,
-                alloc.typeId
-            );
+        const landscape = this.#landscape;
+        if (this.#megaBuffer && alloc && this.#baker && landscape && alloc.instanceCount > 0) {
+            const mounted = this.#mountedSubCells;
+            const count = mounted.length;
+            const subCellSize = landscape.foliageManager?.subCellSize ?? 100.0;
+            for (let i = 0; i < count; i++) {
+                const subCell = mounted[i];
+                if (subCell.isMounted && subCell.instanceCount > 0) {
+                    this.#baker.dispatchBakeSubCell(
+                        this.#megaBuffer,
+                        landscape,
+                        this,
+                        subCell,
+                        alloc.rawBaseOffset + subCell.mountedSlotIndex,
+                        subCell.instanceCount,
+                        subCellSize
+                    );
+                }
+            }
         }
     }
 
@@ -1458,20 +1397,29 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const count = subCell.instanceCount;
         if (currentActive + count > allocation.maxInstances) return;
 
-        const {cpuRawDataBuffer: f32, cpuRawDataUint32: u32, strideFloats} = megaBuffer;
-        const baseFloat = (allocation.rawBaseOffset + currentActive) * strideFloats;
+        const targetSlot = allocation.rawBaseOffset + currentActive;
+        const landscape = this.#landscape;
 
-        this.#populateSubCellInstances(f32, u32, baseFloat, subCell, subCellSize);
+        if (this.#baker && landscape?.hasValidScatterAtlas) {
+            this.#baker.dispatchBakeSubCell(
+                megaBuffer,
+                landscape,
+                this,
+                subCell,
+                targetSlot,
+                count,
+                subCellSize
+            );
+        }
 
         subCell.isMounted = true;
         subCell.mountedSlotIndex = currentActive;
         this.#mountedSubCells.push(subCell);
 
         allocation.instanceCount = currentActive + count;
-        this.uploadRangeToGPU(currentActive, count);
     }
 
-    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation): void {
+    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         const mounted = this.#mountedSubCells;
         const targetSubCell = mounted[mountedIndex];
         const {mountedSlotIndex: targetSlot, instanceCount: targetCount} = targetSubCell;
@@ -1486,15 +1434,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             allocation.instanceCount = Math.max(0, currentActive - targetCount);
         } else {
             const lastSubCell = mounted.pop()!;
-            const {mountedSlotIndex: lastSlot, instanceCount: lastCount} = lastSubCell;
-
-            const {cpuRawDataBuffer: f32, strideFloats} = megaBuffer;
-
-            const srcStartFloat = (allocation.rawBaseOffset + lastSlot) * strideFloats;
-            const srcEndFloat = srcStartFloat + lastCount * strideFloats;
-            const destFloat = (allocation.rawBaseOffset + targetSlot) * strideFloats;
-
-            f32.copyWithin(destFloat, srcStartFloat, srcEndFloat);
+            const {instanceCount: lastCount} = lastSubCell;
 
             lastSubCell.mountedSlotIndex = targetSlot;
             mounted[mountedIndex] = lastSubCell;
@@ -1503,7 +1443,20 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             targetSubCell.mountedSlotIndex = -1;
 
             allocation.instanceCount = Math.max(0, currentActive - targetCount);
-            this.uploadRangeToGPU(targetSlot, lastCount);
+
+            // [100% GPU Re-bake to compact slot]
+            const landscape = this.#landscape;
+            if (this.#baker && landscape?.hasValidScatterAtlas && lastCount > 0) {
+                this.#baker.dispatchBakeSubCell(
+                    megaBuffer,
+                    landscape,
+                    this,
+                    lastSubCell,
+                    allocation.rawBaseOffset + targetSlot,
+                    lastCount,
+                    subCellSize
+                );
+            }
         }
     }
 
@@ -1652,242 +1605,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         cell.instanceCount = validCount;
         return cell;
-    }
-
-    #populateSubCellInstances(
-        f32: Float32Array,
-        u32: Uint32Array,
-        baseFloat: number,
-        subCell: FoliageSubCell,
-        subCellSize: number
-    ): void {
-        const strideFloats = this.#megaBuffer?.strideFloats || 8;
-        const landscape = this.#landscape;
-
-        const {densityPerHectare, densityMultiplier = 1.0} = this;
-        const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
-        if (targetCountPerHectare <= 0 || subCell.instanceCount <= 0) return;
-
-        const {
-            worldSizeX,
-            worldSizeZ,
-            invWorldSizeX,
-            invWorldSizeZ,
-            halfWorldSizeX: halfWorldX,
-            halfWorldSizeZ: halfWorldZ
-        } = landscape!;
-        const {subCellX, subCellZ} = subCell;
-
-        const subMinX = subCellX * subCellSize - halfWorldX;
-        const subMaxX = subMinX + subCellSize;
-        const subMinZ = subCellZ * subCellSize - halfWorldZ;
-        const subMaxZ = subMinZ + subCellSize;
-
-        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
-        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
-        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
-        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
-
-        const {
-            minScale: optMinScale,
-            maxScale: optMaxScale,
-            randomRotationY,
-            targetLayer,
-            densityScaleByWeight: optDensityScaleByWeight,
-            minSlope: optMinSlope,
-            maxSlope: optMaxSlope
-        } = this;
-        const scaleDiffX = optMaxScale[0] - optMinScale[0];
-        const scaleDiffY = optMaxScale[1] - optMinScale[1];
-        const scaleDiffZ = optMaxScale[2] - optMinScale[2];
-        const isUniformXZ = (scaleDiffX === scaleDiffZ && optMinScale[0] === optMinScale[2]);
-
-        const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
-        let targetLayerObj: any = null;
-        if (hasTargetLayer && landscape?.layers) {
-            if (typeof targetLayer === 'string') {
-                const layers = landscape.layers;
-                const len = layers.length;
-                for (let li = 0; li < len; li++) {
-                    if (layers[li].name === targetLayer) {
-                        targetLayerObj = layers[li];
-                        break;
-                    }
-                }
-            } else if (typeof targetLayer === 'number') {
-                targetLayerObj = landscape.layers[targetLayer];
-            }
-        }
-
-        const densityScaleByWeight = optDensityScaleByWeight !== false;
-        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
-        const minSlope = optMinSlope ?? 0.0;
-        const maxSlope = optMaxSlope ?? 45.0;
-        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
-
-        const alignToNormal = this.#alignToNormal;
-        const alignFactor = this.#alignFactor;
-        const needNormalAlign = hasGetHeight && alignToNormal && alignFactor > 0.001;
-
-        const bottomOffset = this.bottomOffset ?? 0.0;
-        const typeId = this.allocation?.typeId ?? 0;
-        const packedTypeAndDefaultGround = (((typeId & 0xFF) << 24) | 0x00333333) >>> 0;
-        let written = 0;
-
-        for (let gz = startGz; gz <= endGz && written < subCell.instanceCount; gz++) {
-            const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
-            for (let gx = startGx; gx <= endGx && written < subCell.instanceCount; gx++) {
-                const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
-                let seed = computeScatterGridSeed(gx, gz, this.#nameHash);
-
-                const maxAttempts = densityScaleByWeight
-                    ? targetCountPerHectare
-                    : ((targetLayerObj || hasSlopeFilter) ? targetCountPerHectare * 2 : targetCountPerHectare);
-                let generatedInGrid = 0;
-
-                for (let i = 0; i < maxAttempts && generatedInGrid < targetCountPerHectare && written < subCell.instanceCount; i++) {
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rX = (seed >>> 0) / 4294967296.0;
-
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rZ = (seed >>> 0) / 4294967296.0;
-
-                    const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
-                    const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
-
-                    if (targetLayerObj) {
-                        const u = (posX + halfWorldX) * invWorldSizeX;
-                        const v = (posZ + halfWorldZ) * invWorldSizeZ;
-                        const weight = sampleNormalizedLayerWeight(landscape, targetLayerObj, u, v);
-                        if (weight < 0.1) continue;
-                        if (densityScaleByWeight) {
-                            seed ^= seed << 13;
-                            seed ^= seed >>> 17;
-                            seed ^= seed << 5;
-                            const rReject = (seed >>> 0) / 4294967296.0;
-                            if (rReject > weight) continue;
-                        }
-                    }
-
-                    let normalX = 0.0;
-                    let normalY = 1.0;
-                    let normalZ = 0.0;
-
-                    if (hasSlopeFilter || needNormalAlign) {
-                        const step = 1.0;
-                        const hL = landscape.getHeightAt(posX - step, posZ);
-                        const hR = landscape.getHeightAt(posX + step, posZ);
-                        const hD = landscape.getHeightAt(posX, posZ - step);
-                        const hU = landscape.getHeightAt(posX, posZ + step);
-                        const nx = (hL - hR) / (2 * step);
-                        const nz = (hD - hU) / (2 * step);
-                        const invLen = 1.0 / Math.sqrt(nx * nx + 1.0 + nz * nz);
-
-                        if (hasSlopeFilter) {
-                            const slopeDeg = Math.acos(Math.min(1.0, invLen)) * 57.29577951308232;
-                            if (slopeDeg < minSlope || slopeDeg > maxSlope) continue;
-                        }
-
-                        if (needNormalAlign) {
-                            normalX = nx * invLen;
-                            normalY = invLen;
-                            normalZ = nz * invLen;
-                        }
-                    }
-
-                    seed ^= seed << 13;
-                    seed ^= seed >>> 17;
-                    seed ^= seed << 5;
-                    const rScale = (seed >>> 0) / 4294967296.0;
-
-                    const scaleX = optMinScale[0] + rScale * scaleDiffX;
-                    const scaleY = optMinScale[1] + rScale * scaleDiffY;
-                    const scaleZ = isUniformXZ ? scaleX : (optMinScale[2] + rScale * scaleDiffZ);
-
-                    let posY = 0.0;
-                    if (hasGetHeight) {
-                        posY = landscape.getHeightAt(posX, posZ) + bottomOffset * scaleY;
-                    }
-
-                    let rotX = 0.0;
-                    let rotY = 0.0;
-                    let rotZ = 0.0;
-                    let rotW = 1.0;
-
-                    if (randomRotationY) {
-                        seed ^= seed << 13;
-                        seed ^= seed >>> 17;
-                        seed ^= seed << 5;
-                        const rAngle = (seed >>> 0) / 4294967296.0;
-                        const angle = rAngle * (Math.PI * 2);
-                        const halfAngle = angle * 0.5;
-                        rotY = Math.sin(halfAngle);
-                        rotW = Math.cos(halfAngle);
-                    }
-
-                    if (needNormalAlign) {
-                        const vx = normalZ;
-                        const vz = -normalX;
-                        const vw = 1.0 + normalY;
-                        const tiltLen = Math.sqrt(vx * vx + vz * vz + vw * vw);
-                        if (tiltLen > 0.0001) {
-                            const invTilt = 1.0 / tiltLen;
-                            const tx = (vx * invTilt) * alignFactor;
-                            const tz = (vz * invTilt) * alignFactor;
-                            const tw = (1.0 - alignFactor) + (vw * invTilt) * alignFactor;
-                            const alignLen = Math.sqrt(tx * tx + tz * tz + tw * tw);
-                            const invAlign = 1.0 / (alignLen > 0.0001 ? alignLen : 1.0);
-                            const ax = tx * invAlign;
-                            const az = tz * invAlign;
-                            const aw = tw * invAlign;
-
-                            const fx = ax * rotW - az * rotY;
-                            const fy = aw * rotY;
-                            const fz = az * rotW + ax * rotY;
-                            const fw = aw * rotW;
-
-                            rotX = fx;
-                            rotY = fy;
-                            rotZ = fz;
-                            rotW = fw;
-                        }
-                    }
-
-                    generatedInGrid++;
-
-                    if (posX >= subMinX && posX < subMaxX && posZ >= subMinZ && posZ < subMaxZ) {
-                        const ix = Math.max(-32768, Math.min(32767, (rotX * 32767) | 0));
-                        const iy = Math.max(-32768, Math.min(32767, (rotY * 32767) | 0));
-                        const iz = Math.max(-32768, Math.min(32767, (rotZ * 32767) | 0));
-                        const iw = Math.max(-32768, Math.min(32767, (rotW * 32767) | 0));
-
-                        const rotPackedY = ((ix & 0xFFFF) | ((iy & 0xFFFF) << 16)) >>> 0;
-                        const rotPackedW = ((iz & 0xFFFF) | ((iw & 0xFFFF) << 16)) >>> 0;
-
-                        const scalePacked = isUniformXZ
-                            ? fastPackUniformScale(scaleX)
-                            : fastPack2x16float(scaleX, scaleZ);
-
-                        const outOffset = baseFloat + written * strideFloats;
-                        f32[outOffset + 0] = posX;
-                        f32[outOffset + 1] = posY;
-                        f32[outOffset + 2] = posZ;
-                        f32[outOffset + 3] = scaleY;
-
-                        u32[outOffset + 4] = rotPackedY;
-                        u32[outOffset + 5] = rotPackedW;
-                        u32[outOffset + 6] = scalePacked;
-                        u32[outOffset + 7] = packedTypeAndDefaultGround;
-
-                        written++;
-                    }
-                }
-            }
-        }
     }
 }
 

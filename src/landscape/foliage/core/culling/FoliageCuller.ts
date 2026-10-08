@@ -13,12 +13,11 @@ import foliageCullWGSL from "./foliageCull.wgsl";
 import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
 import FoliageInstanceBaker from "../baking/FoliageInstanceBaker";
-import foliageBakeSource from "../baking/foliageBake.wgsl";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 및 베이킹 작업을 수행하는 클래스입니다.
- * [EN] Class that executes GPU compute shader passes for frustum culling, distance LOD selection, HZB occlusion culling, and baking across all foliage instances.
+ * [KO] 모든 식생 인스턴스에 대해 GPU 컴퓨트 셰이더를 통한 프러스텀 컬링, 거리 LOD 판별, HZB 오클루전 컬링 작업을 수행하는 클래스입니다.
+ * [EN] Class that executes GPU compute shader passes for frustum culling, distance LOD selection, and HZB occlusion culling across all foliage instances.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -50,11 +49,7 @@ class FoliageCuller extends AScatterCuller {
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer || null;
-        this.#baker = new FoliageInstanceBaker(this.redGPUContext, {
-            computeShaderCode: foliageBakeSource,
-            label: 'FoliageInstanceBaker',
-            initialTaskCapacity: 8192,
-        });
+        this.#baker = new FoliageInstanceBaker(this.redGPUContext);
         this.initComputePipeline('Foliage_Cull_ShaderModule', foliageCullWGSL, 'Foliage_Cull');
     }
 
@@ -148,21 +143,6 @@ class FoliageCuller extends AScatterCuller {
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         const {computePipeline: pipeline, bindGroupLayout} = this;
         if (!pipeline || !bindGroupLayout) return;
-
-        if (this.#baker.hasPendingTasks && this.#megaBuffer && this.#landscapeRef) {
-            const {hasValidVbtAtlas, vbtBaseColorAtlas, worldSizeX, worldSizeZ} = this.#landscapeRef;
-            const vbtView = hasValidVbtAtlas
-                ? vbtBaseColorAtlas?.gpuTextureView
-                : undefined;
-
-            this.#baker.dispatchPass(
-                computePass,
-                this.#megaBuffer,
-                worldSizeX,
-                worldSizeZ,
-                vbtView
-            );
-        }
 
         if (this.#megaBuffer) {
             const totalAllocatedInstances = this.#megaBuffer.totalAllocatedInstances;
