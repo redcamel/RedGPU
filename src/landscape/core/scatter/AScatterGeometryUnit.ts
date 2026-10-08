@@ -71,12 +71,11 @@ export interface AScatterGeometryUnitInitOptions {
  *
  * **[KO] 아키텍처 및 역할:**
  * - **간접 드로우(Multi-Draw Indirect) 인프라**: GPU 버퍼(`GPUBuffer`) 상에 기록된 드로우 인자(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 기반으로 CPU 개입 없는 초고속 일괄 렌더링을 수행합니다.
- * - **인덱스 및 비인덱스 드로우 자동 분기**: 인덱스 버퍼의 유무와 유효성에 따라 `drawIndexedIndirect` 또는 `drawIndirect` 명령을 자동으로 분기하여 패스 엔코더에 인코딩합니다.
+ * - **인덱스 간접 드로우(drawIndexedIndirect) 인프라**: 스캐터 메가버퍼의 20바이트 스트라이드 규약에 맞추어 `drawIndexedIndirect` 명령을 고속으로 인코딩합니다.
  * - **오프셋 연계 관리**: 인디렉트 버퍼 내의 시작 오프셋(`indirectOffsetBytes`)과 인스턴스 행렬 버퍼 오프셋(`instanceBufferOffset`)을 캡슐화하여 렌더러가 단일 호출(`draw`)로 정확한 인스턴스를 렌더링하도록 지원합니다.
  *
  * **[EN] Architecture & Role:**
- * - **Multi-Draw Indirect Infrastructure**: Executes zero-overhead batch rendering driven entirely by draw parameters stored in GPU buffers (`GPUBuffer`), eliminating CPU draw-call bottlenecks.
- * - **Automatic Indexed/Non-indexed Branching**: Intelligently routes commands to `drawIndexedIndirect` or `drawIndirect` depending on the presence and validity of GPU index buffers.
+ * - **Multi-Draw Indexed Indirect Infrastructure**: Encodes `drawIndexedIndirect` commands conforming to the 20-byte stride layout of the scatter mega-buffer.
  * - **Offset Management**: Encapsulates both `indirectOffsetBytes` and `instanceBufferOffset`, enabling render dispatchers to draw exact instance ranges with a single `draw()` call.
  *
  * ::: warning
@@ -204,8 +203,8 @@ export abstract class AScatterGeometryUnit {
     }
 
     /**
-     * [KO] 인디렉트 버퍼를 기반으로 GPU 간접 드로우 명령(`drawIndexedIndirect` 또는 `drawIndirect`)을 인코딩합니다.
-     * [EN] Encodes the GPU indirect draw command (`drawIndexedIndirect` or `drawIndirect`) based on the indirect buffer.
+     * [KO] 인디렉트 버퍼를 기반으로 GPU 인덱스 간접 드로우 명령(`drawIndexedIndirect`)을 인코딩합니다.
+     * [EN] Encodes the GPU indexed indirect draw command (`drawIndexedIndirect`) based on the indirect buffer.
      *
      * @param passEncoder - 렌더 패스 엔코더 또는 렌더 번들 엔코더
      * @param indirectGPUBuffer - 간접 드로우 인자가 포함된 GPU 버퍼
@@ -213,11 +212,7 @@ export abstract class AScatterGeometryUnit {
      */
     draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
         const offset = offsetBytes !== undefined ? offsetBytes : this.#indirectOffsetBytes;
-        if (this.#isIndexed && this.#geometry?.indexBuffer?.gpuBuffer) {
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
-        } else {
-            passEncoder.drawIndirect(indirectGPUBuffer, offset);
-        }
+        passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
     }
 
     /**

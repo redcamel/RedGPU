@@ -123,7 +123,6 @@ export abstract class AScatterType<
 > extends RedGPUObject {
     #name: string;
     #typeId: number;
-    #drawCallCount: number = 0;
     #allocation: TAllocation | null = null;
 
     // --- 12종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
@@ -215,9 +214,7 @@ export abstract class AScatterType<
      * [KO] 해당 스캐터 타입이 렌더 패스에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
      * [EN] Returns the total number of indirect draw calls dispatched by this scatter type in render passes.
      */
-    get drawCallCount(): number {
-        return this.#drawCallCount;
-    }
+    abstract get drawCallCount(): number;
 
     /**
      * [KO] 메가버퍼 내 기본 세그먼트 할당 메타데이터를 반환합니다. (미할당 시 null)
@@ -225,18 +222,6 @@ export abstract class AScatterType<
      */
     get allocation(): TAllocation | null {
         return this.#allocation;
-    }
-
-    /**
-     * [KO] 간접 드로우콜 총 개수를 갱신합니다.
-     * [EN] Updates the total number of indirect draw calls.
-     *
-     * @param drawCallCount -
-     * [KO] 갱신할 간접 드로우콜 수
-     * [EN] Updated indirect draw call count
-     */
-    updateDrawCallCount(drawCallCount: number): void {
-        this.#drawCallCount = Math.max(0, drawCallCount);
     }
 
     /**
