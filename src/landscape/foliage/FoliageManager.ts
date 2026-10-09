@@ -67,6 +67,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
 
     #dirtyUboMask: number = 0;
     #needsRepopulateMask: number = 0;
+    #lastUpdateFrameIndex: number = -1;
 
     /**
      * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
@@ -208,10 +209,15 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * @param renderViewStateData -
      * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 절두체 평면 등 포함)
      * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
+     * @param standalone -
+     * [KO] 단독 실행 모드 여부 (기본값: false, Landscape 통합 패스 모드)
+     * [EN] Standalone execution mode (default: false, Landscape unified pass mode)
      */
-    update(renderViewStateData: RenderViewStateData): void {
+    update(renderViewStateData: RenderViewStateData, standalone: boolean = false): void {
         const {enabled, types, landscape} = this;
         if (!enabled || types.length === 0) return;
+        if (this.#lastUpdateFrameIndex === renderViewStateData.frameIndex) return;
+        this.#lastUpdateFrameIndex = renderViewStateData.frameIndex;
 
         const count = types.length;
 
@@ -260,7 +266,31 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
         this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
 
-        this.#culler.updateAndDispatch(types, renderViewStateData);
+        if (standalone) {
+            this.#culler.updateAndDispatch(types, renderViewStateData);
+        } else {
+            this.#culler.update(types, renderViewStateData);
+        }
+    }
+
+    /**
+     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다 (PRE_PROCESS 커맨드 인코더).
+     * [EN] Records indirect draw command counter reset commands (PRE_PROCESS command encoder).
+     *
+     * @param encoder - 대상 GPU 커맨드 인코더
+     */
+    recordResetCommands(encoder: GPUCommandEncoder): void {
+        this.#culler.recordResetCommands(encoder);
+    }
+
+    /**
+     * [KO] 단일 통합 컴퓨트 패스에 식생 인스턴스 GPU 컬링 디스패치 커맨드를 기록합니다.
+     * [EN] Records foliage instance GPU culling dispatch commands into the unified compute pass.
+     *
+     * @param computePass - 실행 중인 GPU 컴퓨트 패스 인코더
+     */
+    dispatchCullingPass(computePass: GPUComputePassEncoder): void {
+        this.#culler.dispatchPass(computePass);
     }
 
     /**

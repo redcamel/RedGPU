@@ -68,7 +68,17 @@ class FoliageCuller extends AScatterCuller {
      * [KO] 렌더 패스 상태 데이터
      * [EN] Render pass state data
      */
-    updateAndDispatch(
+    /**
+     * [KO] 카메라 위치와 프러스텀, 그림자 캐스케이드 상태를 기반으로 컬링 파라미터를 갱신하고 GPU 디스패치를 준비합니다.
+     * [EN] Updates culling parameters and prepares GPU compute dispatches based on camera position, frustum, and shadow cascades.
+     * @param foliageList -
+     * [KO] 활성 식생 목록
+     * [EN] Active foliage list
+     * @param renderViewStateData -
+     * [KO] 렌더 패스 상태 데이터
+     * [EN] Render pass state data
+     */
+    update(
         foliageList: Foliage[],
         renderViewStateData: RenderViewStateData
     ): void {
@@ -100,37 +110,21 @@ class FoliageCuller extends AScatterCuller {
                 this.#tempPVMatrix
             );
         }
-
-        if (this.computePipeline && this.bindGroupLayout) {
-            this.commandEncoderManager.useEncoder(
-                COMMAND_ENCODER_TYPE.PRE_PROCESS,
-                this.#onResetMultiIndirectCommands
-            );
-
-            this.commandEncoderManager.addPreProcessComputePass(
-                'Foliage_GPUCulling_ComputePass',
-                this.#onPreProcessComputePass
-            );
-        }
     }
-
-    #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
-        this.#megaBuffer?.resetMultiIndirectCommands(encoder);
-    };
 
     /**
-     * [KO] 컬링 및 베이커 리소스를 해제합니다.
-     * [EN] Destroys culler and baker resources.
+     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다.
+     * [EN] Records indirect draw command counter reset commands.
      */
-    override destroy(): void {
-        super.destroy();
-        this.#baker.destroy();
-        this.#lastHZBTextureView = null;
-        this.#lastHZBSampler = null;
-        this.#megaBuffer = null;
+    recordResetCommands(encoder: GPUCommandEncoder): void {
+        this.#megaBuffer?.resetMultiIndirectCommands(encoder);
     }
 
-    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
+    /**
+     * [KO] 주어진 GPU 컴퓨트 패스 인코더를 통해 식생 인스턴스 컬링을 디스패치합니다.
+     * [EN] Dispatches foliage instance culling through the given GPU compute pass encoder.
+     */
+    dispatchPass(computePass: GPUComputePassEncoder): void {
         const {computePipeline, bindGroupLayout} = this;
         if (!computePipeline || !bindGroupLayout) return;
 
@@ -147,6 +141,49 @@ class FoliageCuller extends AScatterCuller {
                 this.dispatchCompute(computePass, unifiedBindGroup, totalAllocatedInstances, 64);
             }
         }
+    }
+
+    /**
+     * [KO] 단독 실행 모드로 컬링 파라미터를 갱신하고 독립적인 전처리 컴퓨트 패스를 발행합니다.
+     * [EN] Updates culling parameters and issues an independent pre-process compute pass in standalone mode.
+     */
+    updateAndDispatch(
+        foliageList: Foliage[],
+        renderViewStateData: RenderViewStateData
+    ): void {
+        this.update(foliageList, renderViewStateData);
+
+        if (this.computePipeline && this.bindGroupLayout) {
+            this.commandEncoderManager.useEncoder(
+                COMMAND_ENCODER_TYPE.PRE_PROCESS,
+                this.#onResetMultiIndirectCommands
+            );
+
+            this.commandEncoderManager.addPreProcessComputePass(
+                'Foliage_GPUCulling_ComputePass',
+                this.#onPreProcessComputePass
+            );
+        }
+    }
+
+    #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
+        this.recordResetCommands(encoder);
+    };
+
+    /**
+     * [KO] 컬링 및 베이커 리소스를 해제합니다.
+     * [EN] Destroys culler and baker resources.
+     */
+    override destroy(): void {
+        super.destroy();
+        this.#baker.destroy();
+        this.#lastHZBTextureView = null;
+        this.#lastHZBSampler = null;
+        this.#megaBuffer = null;
+    }
+
+    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
+        this.dispatchPass(computePass);
     };
 }
 

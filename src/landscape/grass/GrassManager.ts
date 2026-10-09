@@ -44,6 +44,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #currentRenderViewStateData: RenderViewStateData | null = null;
     #dirtyUboMask: number = 0;
     #needsRebakeMask: number = 0;
+    #lastUpdateFrameIndex: number = -1;
 
     /**
      * [KO] GrassManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
@@ -196,11 +197,14 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Called every frame to dispatch ultra-fast GPU distance/frustum culling compute pass for baked grass instances.
      *
      * @param renderViewStateData - 뷰 렌더 상태 데이터
+     * @param standalone - 단독 실행 모드 여부 (기본값: false, Landscape 통합 패스 모드)
      */
-    update(renderViewStateData: RenderViewStateData): void {
+    update(renderViewStateData: RenderViewStateData, standalone: boolean = false): void {
         const {enabled, types, landscape} = this;
         const grassLen = types.length;
         if (!enabled || grassLen === 0) return;
+        if (this.#lastUpdateFrameIndex === renderViewStateData.frameIndex) return;
+        this.#lastUpdateFrameIndex = renderViewStateData.frameIndex;
         this.#currentRenderViewStateData = renderViewStateData;
 
         const {view} = renderViewStateData;
@@ -276,16 +280,45 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         }
         this.#dirtyUboMask = 0;
 
-        // VRAM 초고속 템플릿 복사 리셋 (Zero-GC: PRE_PROCESS 인코더 활용)
-        this.commandEncoderManager.useEncoder(
-            COMMAND_ENCODER_TYPE.PRE_PROCESS,
-            this.#onResetMultiIndirectCommands
-        );
+        if (standalone) {
+            // VRAM 초고속 템플릿 복사 리셋 (Zero-GC: PRE_PROCESS 인코더 활용)
+            this.commandEncoderManager.useEncoder(
+                COMMAND_ENCODER_TYPE.PRE_PROCESS,
+                this.#onResetMultiIndirectCommands
+            );
 
-        // GPU 초고속 컬링 단일 패스 디스패치 (Zero-GC: 재사용 인스턴스 콜백 바인딩)
-        this.commandEncoderManager.addPreProcessComputePass(
-            'Grass_GPU_Culling_ComputePass',
-            this.#onPreProcessComputePass
+            // GPU 초고속 컬링 단일 패스 디스패치 (Zero-GC: 재사용 인스턴스 콜백 바인딩)
+            this.commandEncoderManager.addPreProcessComputePass(
+                'Grass_GPU_Culling_ComputePass',
+                this.#onPreProcessComputePass
+            );
+        }
+    }
+
+    /**
+     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다 (PRE_PROCESS 커맨드 인코더).
+     * [EN] Records indirect draw command counter reset commands (PRE_PROCESS command encoder).
+     *
+     * @param encoder - 대상 GPU 커맨드 인코더
+     */
+    recordResetCommands(encoder: GPUCommandEncoder): void {
+        this.#megaBuffer.resetMultiIndirectCommands(encoder);
+    }
+
+    /**
+     * [KO] 단일 통합 컴퓨트 패스에 잔디 인스턴스 GPU 컬링 디스패치 커맨드를 기록합니다.
+     * [EN] Records grass instance GPU culling dispatch commands into the unified compute pass.
+     *
+     * @param computePass - 실행 중인 GPU 컴퓨트 패스 인코더
+     * @param renderViewStateData - 선택적 렌더 뷰 상태 데이터
+     */
+    dispatchCullingPass(computePass: GPUComputePassEncoder, renderViewStateData?: RenderViewStateData): void {
+        const stateData = renderViewStateData || this.#currentRenderViewStateData;
+        if (!stateData || !this.enabled || this.types.length === 0) return;
+        this.#culler.dispatchPass(
+            computePass,
+            this.#megaBuffer,
+            stateData
         );
     }
 

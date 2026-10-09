@@ -227,8 +227,6 @@ class Renderer {
                 const landscape = scene.landscape;
                 if (landscape) {
                     landscape.update(renderViewStateData);
-                    landscape.foliageManager?.update(renderViewStateData);
-                    landscape.grassManager?.update(renderViewStateData);
                 }
             }
             // [KO] 쉐도우 패스용 업데이트 및 렌더링 (직사광이 존재할 때만 실행)

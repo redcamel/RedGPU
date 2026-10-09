@@ -20,6 +20,7 @@ import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
 import DebuggerManager from "./debugger/DebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
+import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 const DEFAULT_LOD_MULTIPLIERS: number[] = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
 const tempPVMatrix: Float32Array = new Float32Array(16);
@@ -145,6 +146,7 @@ export class Landscape extends RedGPUObject {
     #vertexShaderModule: GPUShaderModule;
     #lastHZBView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
+    #currentRenderViewStateData: RenderViewStateData | null = null;
 
     /**
      * [KO] Landscape 인스턴스를 생성하고 가상 텍스처 아틀라스 및 지형 파이프라인을 초기화합니다.
@@ -1195,9 +1197,18 @@ export class Landscape extends RedGPUObject {
             mainPVMatrix
         );
 
+        this.#foliageManager?.update(renderViewStateData);
+        this.#grassManager?.update(renderViewStateData);
+        this.#currentRenderViewStateData = renderViewStateData;
+
+        this.commandEncoderManager.useEncoder(
+            COMMAND_ENCODER_TYPE.PRE_PROCESS,
+            this.#onResetEcosystemIndirectCommands
+        );
+
         this.commandEncoderManager.addPreProcessComputePass(
-            'Landscape_GPUCulling_ComputePass',
-            this.#onPreProcessComputePass
+            'Landscape_UnifiedCulling_ComputePass',
+            this.#onPreProcessUnifiedComputePass
         );
 
         this.#debuggerManager.update(rawCamera);
@@ -1253,6 +1264,7 @@ export class Landscape extends RedGPUObject {
             this.#instanceBuffer.destroy();
         }
         this.#renderer?.destroy();
+        this.#currentRenderViewStateData = null;
     }
 
 
@@ -1447,9 +1459,18 @@ export class Landscape extends RedGPUObject {
         );
     }
 
-    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
+    #onResetEcosystemIndirectCommands = (encoder: GPUCommandEncoder): void => {
+        this.#foliageManager?.recordResetCommands(encoder);
+        this.#grassManager?.recordResetCommands(encoder);
+    };
+
+    #onPreProcessUnifiedComputePass = (computePass: GPUComputePassEncoder): void => {
         const totalComponents = this.#spatialGrid.tileCountX * this.#spatialGrid.tileCountZ;
         this.#gpuCuller?.dispatchPass(computePass, totalComponents);
+        this.#foliageManager?.dispatchCullingPass(computePass);
+        if (this.#currentRenderViewStateData) {
+            this.#grassManager?.dispatchCullingPass(computePass, this.#currentRenderViewStateData);
+        }
     };
 
     #onTileHeightBoundsLoaded(comp: LandscapeComponent): void {
