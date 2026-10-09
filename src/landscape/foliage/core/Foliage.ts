@@ -6,8 +6,8 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
-import assembleFoliageRenderUnits from "./assembler/assembleFoliageRenderUnits";
-import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
+import assembleFoliageRenderUnits from "./assembleFoliageRenderUnits";
+import FoliageRenderUnit from "./FoliageRenderUnit";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";

@@ -4,11 +4,11 @@
  * @packageDocumentation
  */
 
-import RedGPUContext from "../../../../../context/RedGPUContext";
-import Geometry from "../../../../../geometry/Geometry";
-import VertexBuffer from "../../../../../resources/buffer/vertexBuffer/VertexBuffer";
-import IndexBuffer from "../../../../../resources/buffer/indexBuffer/IndexBuffer";
-import {PBR_INTERLEAVED_STRUCT} from "../../../../core/scatter/ScatterVertexFormats";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
+import Geometry from "../../../../../../geometry/Geometry";
+import VertexBuffer from "../../../../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../../../../resources/buffer/indexBuffer/IndexBuffer";
+import {PBR_INTERLEAVED_STRUCT} from "../../../../../core/scatter/ScatterVertexFormats";
 
 /**
  * [KO] 옥타헤드럴(Octahedral) 임포스터 렌더링을 위한 4정점 2삼각형 평면 빌보드 지오메트리를 생성합니다.

@@ -6,17 +6,17 @@
  */
 
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Mesh from "../../../../display/mesh/Mesh";
-import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
-import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
-import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "../buffer/FoliageSlotPooler";
-import bakeFoliageImpostor from "../impostor/bakeFoliageImpostor";
-import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
-import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
-import mergeScatterMeshes from "../../../core/scatter/mergeScatterMeshes";
-import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../../core/scatter/ScatterVertexFormats";
+import RedGPUContext from "../../../context/RedGPUContext";
+import Mesh from "../../../display/mesh/Mesh";
+import FoliageRenderUnit from "./FoliageRenderUnit";
+import type {FoliageLODInfo, FoliageOptions} from "./Foliage";
+import type {FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
+import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import bakeFoliageImpostor from "./baking/impostor/bakeFoliageImpostor";
+import {createOctahedralImpostorGeometry} from "./baking/impostor/octahedral/createOctahedralImpostorGeometry";
+import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
+import mergeScatterMeshes from "../../core/scatter/mergeScatterMeshes";
+import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../core/scatter/ScatterVertexFormats";
 
 const identityMatrix: mat4 = mat4.create();
 

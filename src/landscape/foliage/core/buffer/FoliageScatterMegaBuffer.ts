@@ -11,7 +11,7 @@ import AScatterMegaBuffer, {
     ScatterBaseSegmentAllocation
 } from '../../../core/scatter/AScatterMegaBuffer';
 import foliageCullWGSL from '../culling/foliageCull.wgsl';
-import FoliageRenderUnit from '../renderUnit/FoliageRenderUnit';
+import FoliageRenderUnit from '../FoliageRenderUnit';
 import {FoliageLODInfo} from '../Foliage';
 
 /**

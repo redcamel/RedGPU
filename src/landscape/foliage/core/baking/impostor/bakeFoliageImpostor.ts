@@ -5,14 +5,14 @@
  */
 
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../../../context/RedGPUContext";
-import DirectTexture from "../../../../resources/texture/DirectTexture";
-import type FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
+import type FoliageRenderUnit from "../../FoliageRenderUnit";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
 import impostorDilationWGSL from "./impostorDilation.wgsl";
-import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
-import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
+import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 식생 임포스터 베이킹 결과 인터페이스입니다.

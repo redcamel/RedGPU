@@ -20,8 +20,8 @@ export * as Core from "./core";
 
 import FoliageManager from "./FoliageManager";
 import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./core/Foliage";
-import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./core/assembler/assembleFoliageRenderUnits";
-import createOctahedralImpostorGeometry from "./core/impostor/octahedral/createOctahedralImpostorGeometry";
+import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./core/assembleFoliageRenderUnits";
+import createOctahedralImpostorGeometry from "./core/baking/impostor/octahedral/createOctahedralImpostorGeometry";
 
 export {
     Foliage,

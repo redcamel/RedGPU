@@ -9,7 +9,7 @@ import ResourceManager from "../../../../resources/core/resourceManager/Resource
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
 import foliageDepthPrepassMaskedFragmentWGSL from "./foliageDepthPrepassMaskedFragment.wgsl";
 import foliageDepthPrepassOpaqueFragmentWGSL from "./foliageDepthPrepassOpaqueFragment.wgsl";
-import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
+import OctahedralImpostorMaterial from "../baking/impostor/octahedral/OctahedralImpostorMaterial";
 
 /**
  * [KO] 식생 뎁스 패스 동작 모드 ('normal' | 'depthPrepass' | 'mainShadingAfterDepth')

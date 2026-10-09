@@ -6,7 +6,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
-import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
+import FoliageRenderUnit from "../FoliageRenderUnit";
 import Foliage from "../Foliage";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 

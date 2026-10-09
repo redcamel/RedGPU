@@ -33,7 +33,7 @@ import Foliage, {
     type FoliageOptions,
     type FoliageSubCell
 } from "./Foliage";
-import FoliageRenderUnit from "./renderUnit/FoliageRenderUnit";
+import FoliageRenderUnit from "./FoliageRenderUnit";
 
 // 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
@@ -44,12 +44,12 @@ import FoliageCuller from "./culling/FoliageCuller";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 // 3. Impostors
-import bakeFoliageImpostor, {type FoliageBakeResult} from "./impostor/bakeFoliageImpostor";
-import OctahedralImpostorMaterial from "./impostor/octahedral/OctahedralImpostorMaterial";
-import createOctahedralImpostorGeometry from "./impostor/octahedral/createOctahedralImpostorGeometry";
+import bakeFoliageImpostor, {type FoliageBakeResult} from "./baking/impostor/bakeFoliageImpostor";
+import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
+import createOctahedralImpostorGeometry from "./baking/impostor/octahedral/createOctahedralImpostorGeometry";
 
 // 4. Assembler
-import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembler/assembleFoliageRenderUnits";
+import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembleFoliageRenderUnits";
 
 export {
     // Runtime Classes & Entities

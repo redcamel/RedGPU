@@ -4,17 +4,17 @@
  * @packageDocumentation
  */
 
-import RedGPUContext from "../../../../../context/RedGPUContext";
-import type Sampler from "../../../../../resources/sampler/Sampler";
-import BitmapTexture from "../../../../../resources/texture/BitmapTexture";
-import DirectTexture from "../../../../../resources/texture/DirectTexture";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
+import type Sampler from "../../../../../../resources/sampler/Sampler";
+import BitmapTexture from "../../../../../../resources/texture/BitmapTexture";
+import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
-import AUVTransformBaseMaterial from "../../../../../material/core/AUVTransformBaseMaterial";
+import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
 
-import defineSampler from "../../../../../defineProperty/funcs/texture/defineSampler";
-import defineTexture from "../../../../../defineProperty/funcs/texture/defineTexture";
-import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
-import defineBoolean from "../../../../../defineProperty/funcs/defineBoolean";
+import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
+import definePositiveNumber from "../../../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineBoolean from "../../../../../../defineProperty/funcs/defineBoolean";
 
 /**
  * [KO] 옥타헤드럴 임포스터 머티리얼 인터페이스입니다.
