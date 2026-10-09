@@ -1,5 +1,5 @@
 import RedGPUContext from "../context/RedGPUContext";
-import GPU_PRIMITIVE_TOPOLOGY from "../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
+import LandscapeRenderer from "./core/renderer/LandscapeRenderer";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
 import PerspectiveCamera from "../camera/camera/PerspectiveCamera";
 import landscapeVertexSource from "./core/shader/landscapeVertex.wgsl";
@@ -139,15 +139,10 @@ export class Landscape extends RedGPUObject {
     #heightmapShadowSoftness: number = 8.0;
 
     // =========================================================================
-    // Rendering Pipeline & Caches
+    // Rendering & Subsystems
     // =========================================================================
+    #renderer: LandscapeRenderer;
     #vertexShaderModule: GPUShaderModule;
-    #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
-    #cachedRenderPipeline: GPURenderPipeline | null = null;
-    #lastRenderTopology: string = '';
-    #lastRenderMaterialUUID: string = '';
-    #lastRenderVariantModule: any = null;
-    #lastRenderMsaaID: string = '';
     #lastHZBView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
 
@@ -234,12 +229,45 @@ export class Landscape extends RedGPUObject {
                 }
             }
         });
+        this.#renderer = new LandscapeRenderer(this);
         this.#updateLandscapeUniforms();
     }
 
     // =========================================================================
     // Properties: Context & Subsystem Managers
     // =========================================================================
+    /**
+     * [KO] 지형 전용 WebGPU 렌더러 인스턴스를 반환합니다.
+     * [EN] Returns the dedicated WebGPU renderer instance for this landscape.
+     */
+    get renderer(): LandscapeRenderer {
+        return this.#renderer;
+    }
+
+    /**
+     * [KO] 지형 LOD 공유 지오메트리 인스턴스를 반환합니다.
+     * [EN] Returns the shared geometry instance used for terrain LODs.
+     */
+    get sharedGeometry(): LandscapeSharedGeometry {
+        return this.#sharedGeometry;
+    }
+
+    /**
+     * [KO] 지형 인스턴스 스토리지 및 인다이렉트 드로우 버퍼를 반환합니다.
+     * [EN] Returns the instance storage and indirect draw buffer for terrain tiles.
+     */
+    get instanceBuffer(): LandscapeInstanceBuffer {
+        return this.#instanceBuffer;
+    }
+
+    /**
+     * [KO] 지형 버텍스 셰이더 모듈을 반환합니다.
+     * [EN] Returns the vertex shader module used for terrain rendering.
+     */
+    get vertexShaderModule(): GPUShaderModule {
+        return this.#vertexShaderModule;
+    }
+
     /**
      * [KO] 지형의 시각화 디버깅(타일 바운드, 노멀, LOD 와이어프레임 등)을 총괄하는 디버거 매니저를 반환합니다.
      * [EN] Returns the debugger manager that coordinates visual debugging (tile bounds, normals, LOD wireframes, etc.).
@@ -1196,67 +1224,7 @@ export class Landscape extends RedGPUObject {
      * @param passEncoder - 대상 WebGPU 렌더 패스 인코더 (생략 시 view에서 추출) / Optional target WebGPU render pass encoder.
      */
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
-        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
-        const view3D = view?.view || view;
-        if (!renderPassEncoder) return;
-
-        const material = this.#material;
-        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
-
-        if (material) {
-            if (material.dirtyPipeline) {
-                material._updateFragmentState();
-                material.dirtyPipeline = false;
-                this.#clearPipelineCaches();
-                if (renderResults) {
-                    renderResults.numDirtyPipelines++;
-                }
-            }
-        }
-
-        const instanceBuffer = this.#instanceBuffer;
-        const sharedGeometry = this.#sharedGeometry;
-        const combinedVB = sharedGeometry?.combinedVertexBuffer;
-        const isWireframe = !!this.#debuggerManager?.landscapeWireframe;
-        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
-
-        if (!instanceBuffer || !combinedVB || !combinedIB) return;
-
-        const {instanceStorageBindGroup: storageBG, instanceStorageBindGroupLayout: storageBGLayout} = instanceBuffer;
-        if (!storageBG || !storageBGLayout) return;
-
-        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
-        if (!pipeline) return;
-
-        renderPassEncoder.setPipeline(pipeline);
-
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
-        if (systemBG) {
-            renderPassEncoder.setBindGroup(0, systemBG);
-        }
-
-        renderPassEncoder.setBindGroup(1, storageBG);
-
-        const matUniformBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matUniformBG) {
-            renderPassEncoder.setBindGroup(2, matUniformBG);
-        }
-        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
-        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-        const lodMaxLevel = sharedGeometry.lodMaxLevel;
-        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
-
-        if (indirectDrawBuffer) {
-            for (let lod = 0; lod < lodMaxLevel; lod++) {
-                const offset = lod * 20;
-                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
-
-                if (renderResults) {
-                    renderResults.numDrawCalls++;
-                }
-            }
-        }
+        this.#renderer.render(view, passEncoder);
     }
 
     /**
@@ -1284,7 +1252,7 @@ export class Landscape extends RedGPUObject {
         if (this.#instanceBuffer) {
             this.#instanceBuffer.destroy();
         }
-        this.#clearPipelineCaches();
+        this.#renderer?.destroy();
     }
 
 
@@ -1336,7 +1304,7 @@ export class Landscape extends RedGPUObject {
         }
         this.#sharedGeometry.updateTileSize(tileSizeX, tileSizeZ);
         this.#updateLODDistances();
-        this.#clearPipelineCaches();
+        this.#renderer?.clearPipelineCaches();
 
         let needRebuildBindGroup = false;
         if (this.#tileStreamer) {
@@ -1559,102 +1527,6 @@ export class Landscape extends RedGPUObject {
         const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
         return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
-
-    #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
-        const gpuDevice = this.gpuDevice;
-        const material = this.#material;
-        if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
-
-        const {msaaID, useMSAA} = this.antialiasingManager;
-        const sampleCount = useMSAA ? 4 : 1;
-        const isWireframe = !!this.#debuggerManager?.landscapeWireframe;
-        const topology = isWireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        const fragModule = material.gpuRenderInfo.fragmentShaderModule;
-
-        if (
-            this.#cachedRenderPipeline &&
-            this.#lastRenderTopology === topology &&
-            this.#lastRenderMaterialUUID === material.uuid &&
-            this.#lastRenderVariantModule === fragModule &&
-            this.#lastRenderMsaaID === msaaID
-        ) {
-            return this.#cachedRenderPipeline;
-        }
-
-        const variantKey = fragModule.label || 'default';
-        const key = `${topology}_${material.uuid}_${variantKey}_${msaaID}`;
-
-        if (this.#renderPipelineCache.has(key)) {
-            const pipeline = this.#renderPipelineCache.get(key)!;
-            this.#cachedRenderPipeline = pipeline;
-            this.#lastRenderTopology = topology;
-            this.#lastRenderMaterialUUID = material.uuid;
-            this.#lastRenderVariantModule = fragModule;
-            this.#lastRenderMsaaID = msaaID;
-            return pipeline;
-        }
-
-        try {
-            const resourceManager = this.resourceManager;
-            const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
-            const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
-
-            const pipelineLayout = resourceManager.createGPUPipelineLayout(`Landscape_PipelineLayout_${key}`, {
-                bindGroupLayouts: [systemBGLayout, storageBGLayout, fragUniformBGLayout]
-            });
-
-            const vertexBuffers: GPUVertexBufferLayout[] = [{
-                arrayStride: geom?.interleavedStruct?.arrayStride ?? 20,
-                attributes: geom?.interleavedStruct?.attributes ?? [
-                    {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                    {shaderLocation: 1, offset: 12, format: 'float32x2'}
-                ]
-            }];
-
-            const pipeline = gpuDevice.createRenderPipeline({
-                label: `Landscape_RenderPipeline_${key}`,
-                layout: pipelineLayout,
-                vertex: {
-                    module: this.#vertexShaderModule,
-                    entryPoint: 'main',
-                    buffers: vertexBuffers,
-                },
-                fragment: material.gpuRenderInfo.fragmentState,
-                primitive: {
-                    topology: topology,
-                    cullMode: isWireframe ? 'none' : 'back'
-                },
-                depthStencil: {
-                    format: 'depth32float',
-                    depthWriteEnabled: true,
-                    depthCompare: 'less-equal',
-                },
-                multisample: {count: sampleCount}
-            });
-
-            this.#renderPipelineCache.set(key, pipeline);
-            this.#cachedRenderPipeline = pipeline;
-            this.#lastRenderTopology = topology;
-            this.#lastRenderMaterialUUID = material.uuid;
-            this.#lastRenderVariantModule = fragModule;
-            this.#lastRenderMsaaID = msaaID;
-            return pipeline;
-        } catch (e) {
-            console.warn('Failed to create Landscape RenderPipeline:', e);
-            return null;
-        }
-    }
-
-    #clearPipelineCaches(): void {
-        this.#renderPipelineCache.clear();
-        this.#cachedRenderPipeline = null;
-        this.#lastRenderTopology = '';
-        this.#lastRenderMaterialUUID = '';
-        this.#lastRenderVariantModule = null;
-        this.#lastRenderMsaaID = '';
-    }
-
-
 }
 
 Object.freeze(Landscape);
