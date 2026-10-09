@@ -545,16 +545,6 @@ export abstract class ALandscapeDebugger {
     }
 
     /**
-     * [KO] 추적할 카메라 인스턴스를 지정합니다.
-     * [EN] Assigns the camera instance to track.
-     *
-     * @param cam - [KO] 카메라 인스턴스 / [EN] Camera instance
-     */
-    setCamera(cam: any): void {
-        this.#camera = cam;
-    }
-
-    /**
      * [KO] 현재 카메라의 위치, 방향, FOV 및 지형 공간 매핑 데이터를 계산하여 반환합니다.
      * [EN] Computes and returns the camera position, orientation, FOV, and terrain space mappings.
      */
