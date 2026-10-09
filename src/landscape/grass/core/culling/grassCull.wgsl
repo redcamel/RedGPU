@@ -94,6 +94,20 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         atomicAdd(&indirectCommands[targetStageSlot + s].instanceCount, 1u);
     }
 
+    // 🌿 인스턴스당 단 1회 선행 거리 페이드 계산 (정점 셰이더의 480,000회 중복 연산 완전 소거)
+    var fadeRatio: f32 = 1.0;
+    var alphaFade: f32 = 1.0;
+    if (distSq > typeInfo.fadeStartSq) {
+        let distToCam = sqrt(distSq);
+        fadeRatio = clamp((typeInfo.cullingDistance - distToCam) * typeInfo.invFadeRange, 0.0, 1.0);
+        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
+    }
+
+    var culledInst = inst;
+    // 🌿 scaleXZ, scaleY 원본은 100% 불변 보존 (그림자 패스 완전 보호)
+    // 🌿 미사용 packedBounding 슬롯에 16비트 float 2개로 정밀 패킹
+    culledInst.packedBounding = pack2x16float(vec2<f32>(fadeRatio, alphaFade));
+
     let culledTargetIdx = culledBase + writeSlot;
-    culledInstances[culledTargetIdx] = inst;
+    culledInstances[culledTargetIdx] = culledInst;
 }

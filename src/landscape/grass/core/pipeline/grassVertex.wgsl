@@ -21,24 +21,15 @@ fn main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
-    let delta = instPos - camPos;
-    let distSq = dot(delta, delta);
 
-    var scaleXZ = instance.scaleXZ;
-    var scaleY = instance.scaleY;
-    var alphaFade: f32 = 1.0;
+    // 🌿 [0클록 혁신] 컬링 컴퓨트에서 인스턴스당 1회 계산된 값 언팩 & 직통 적용
+    let fadeData = unpack2x16float(instance.packedBounding);
+    let fadeRatio = fadeData.x;
+    let alphaFade = fadeData.y;
 
-    let fadeStart = min(grassUniforms.fadeStartDistance, grassUniforms.cullingDistance);
-    let fadeStartSq = fadeStart * fadeStart;
-    if (distSq > fadeStartSq) {
-        let distToCam = sqrt(distSq);
-        let fadeRatio = clamp((grassUniforms.cullingDistance - distToCam) * grassUniforms.invFadeRange, 0.0, 1.0);
-        scaleXZ *= fadeRatio;
-        scaleY *= fadeRatio;
-        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
-    }
+    let scaleXZ = instance.scaleXZ * fadeRatio;
+    let scaleY = instance.scaleY * fadeRatio;
 
     let q = normalize(unpack4x8snorm(instance.packedQuat));
 

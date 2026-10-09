@@ -237,11 +237,12 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         const cullingDist = grass.cullingDistance || 80.0;
         const farDist = grass.farDistance || (cullingDist * 0.5);
+        const fadeStartDist = Math.min(grass.fadeStartDistance, cullingDist);
 
         cf[baseFloat + 0] = cullingDist * cullingDist;
         cf[baseFloat + 1] = farDist * farDist;
-        cf[baseFloat + 2] = 0.0; // reserved0 (64B struct alignment)
-        cf[baseFloat + 3] = 0.0; // reserved1 (64B struct alignment)
+        cf[baseFloat + 2] = fadeStartDist * fadeStartDist; // fadeStartSq
+        cf[baseFloat + 3] = 1.0 / Math.max(0.001, cullingDist - fadeStartDist); // invFadeRange
 
         cu[baseFloat + 4] = alloc.rawBaseOffset;
         cu[baseFloat + 5] = alloc.culledBaseOffset;
@@ -252,9 +253,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         cu[baseFloat + 10] = alloc.farSlots.length > 0 ? 1 : 0;
         cu[baseFloat + 11] = alloc.instanceCount;
         cu[baseFloat + 12] = alloc.maxInstances;
-        cu[baseFloat + 13] = 0;
-        cu[baseFloat + 14] = 0;
-        cu[baseFloat + 15] = 0;
+        cf[baseFloat + 13] = cullingDist; // cullingDistance
+        cu[baseFloat + 14] = 0; // pad1
+        cu[baseFloat + 15] = 0; // pad2
 
         const {gpuDevice, typeParamsGPUBuffer} = this;
         if (gpuDevice && typeParamsGPUBuffer) {
