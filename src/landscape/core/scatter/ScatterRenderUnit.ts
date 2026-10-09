@@ -4,7 +4,6 @@
  * @packageDocumentation
  */
 import Geometry from "../../../geometry/Geometry";
-import Mesh from "../../../display/mesh/Mesh";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 
 /**
@@ -67,12 +66,6 @@ export interface ScatterRenderUnitInitOptions {
     firstIndex?: number;
 
     /**
-     * [KO] 원본 3D 메쉬 노드
-     * [EN] Original 3D mesh node
-     */
-    mesh?: Mesh;
-
-    /**
      * [KO] 렌더 단위에 적용된 재질(Material) 인스턴스
      * [EN] Material instance applied to the render unit
      */
@@ -104,18 +97,18 @@ export interface ScatterRenderUnitInitOptions {
 }
 
 /**
- * [KO] WebGPU 지오메트리 버퍼 관리, 간접 드로우 인자(`drawIndexedIndirect`), 재질(Material), 텍스처, 원본 메쉬 메타데이터를 결합한 스캐터 공용 최소 렌더 단위 기본 클래스입니다.
- * [EN] Common scatter minimal render unit base class combining WebGPU geometry buffer management, indirect draw arguments (`drawIndexedIndirect`), material, texture, and original mesh metadata.
+ * [KO] WebGPU 지오메트리 버퍼 관리, 간접 드로우 인자(`drawIndexedIndirect`), 재질(Material), 텍스처 메타데이터를 결합한 스캐터 공용 최소 렌더 단위 기본 클래스입니다.
+ * [EN] Common scatter minimal render unit base class combining WebGPU geometry buffer management, indirect draw arguments (`drawIndexedIndirect`), material, and texture metadata.
  *
  * **[KO] 아키텍처 및 역할:**
- * - **지오메트리와 셰이딩의 완전한 단일화 (SSOT)**: 순수 GPU 버퍼(버텍스/인덱스 버퍼 및 간접 드로우 오프셋) 관리와 렌더링에 필요한 머티리얼, 베이스 컬러 텍스처, 원본 메쉬 참조를 단일 클래스에서 일원화하여 관리합니다.
+ * - **지오메트리와 셰이딩의 완전한 단일화 (SSOT)**: 순수 GPU 버퍼(버텍스/인덱스 버퍼 및 간접 드로우 오프셋) 관리와 렌더링에 필요한 머티리얼, 베이스 컬러 텍스처를 단일 클래스에서 일원화하여 관리합니다.
  * - **간접 드로우(Multi-Draw Indirect) 인프라**: 스캐터 메가버퍼 규약에 맞추어 `drawIndexedIndirect` 명령을 고속으로 인코딩합니다.
  * - **스캐터 파이프라인의 공통 단위**:
  *   - **잔디(Grass)**: 단일 또는 복합 잔디 모델을 구성하는 기본 렌더 단위로 직접 인스턴스화되어 Multi-Draw Indirect 렌더링에 사용됩니다.
  *   - **식생(Foliage)**: 복합 3D 수목/바위의 통합 렌더 단위(`FoliageRenderUnit`)의 기반 클래스로 상속되어, 바람(Wind) 시뮬레이션 및 UBO 슬롯 풀링을 확장하는 기반이 됩니다.
  *
  * **[EN] Architecture & Role:**
- * - **Complete Unification of Geometry and Shading (SSOT)**: Unifies raw GPU buffer management (vertex/index buffers, indirect draw offsets) with materials, base color textures, and source mesh references in a single class.
+ * - **Complete Unification of Geometry and Shading (SSOT)**: Unifies raw GPU buffer management (vertex/index buffers, indirect draw offsets) with materials and base color textures in a single class.
  * - **Multi-Draw Indirect Infrastructure**: Encodes `drawIndexedIndirect` commands conforming to the scatter mega-buffer layout.
  * - **Common Unit for Scatter Pipelines**:
  *   - **Grass**: Directly instantiated as the primary rendering unit composing single or composite grass models for Multi-Draw Indirect rendering.
@@ -137,7 +130,6 @@ export class ScatterRenderUnit {
     #indirectOffsetBytes: number;
     #instanceBufferOffset: number;
 
-    #mesh?: Mesh;
     #material?: any;
     #baseColorTexture?: BitmapTexture | null;
     #lodIndex: number;
@@ -158,7 +150,6 @@ export class ScatterRenderUnit {
             indexFormat = 'uint32',
             indirectOffsetBytes = 0,
             instanceBufferOffset = 0,
-            mesh,
             material,
             baseColorTexture = null,
             lodIndex = 0,
@@ -179,7 +170,6 @@ export class ScatterRenderUnit {
         this.#indirectOffsetBytes = indirectOffsetBytes;
         this.#instanceBufferOffset = instanceBufferOffset;
 
-        this.#mesh = mesh;
         this.#material = material;
         this.#baseColorTexture = baseColorTexture ?? material?.baseColorTexture ?? null;
         this.#lodIndex = lodIndex;
@@ -274,13 +264,6 @@ export class ScatterRenderUnit {
         this.#instanceBufferOffset = val;
     }
 
-    /**
-     * [KO] 원본 메쉬 인스턴스를 반환합니다.
-     * [EN] Returns the original mesh instance.
-     */
-    get mesh(): Mesh | undefined {
-        return this.#mesh;
-    }
 
     /**
      * [KO] 렌더 단위의 머티리얼 객체를 반환합니다.

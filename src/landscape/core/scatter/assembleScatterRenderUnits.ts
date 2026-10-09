@@ -554,13 +554,17 @@ export default function assembleScatterRenderUnits(
             unifiedVertexData.set(combinedVertexData, groupStartVertexOffset * PBR_STRIDE);
         }
 
-        const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT);
-        const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData);
-        const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
+        const isSingleGroup = materialGroups.size === 1;
+        let groupGeom: Geometry | null = null;
+        if (isSingleGroup) {
+            const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT);
+            const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData);
+            groupGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
+        }
 
         groups.push({
             material,
-            geometry: combinedGeom,
+            geometry: groupGeom as any,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
             firstIndex: groupFirstIndex,
@@ -576,6 +580,9 @@ export default function assembleScatterRenderUnits(
             const unifiedVB = new VertexBuffer(redGPUContext, unifiedVertexData, PBR_INTERLEAVED_STRUCT);
             const unifiedIB = new IndexBuffer(redGPUContext, unifiedIndexData);
             unifiedGeometry = new Geometry(redGPUContext, unifiedVB, unifiedIB);
+            for (let i = 0; i < groups.length; i++) {
+                groups[i].geometry = unifiedGeometry;
+            }
         }
     }
 
@@ -626,7 +633,6 @@ export default function assembleScatterRenderUnits(
             vertexCount: group.vertexCount,
             indexCount: group.indexCount,
             firstIndex: group.firstIndex,
-            mesh: group.rawNodes[0]?.node,
             material: group.material
         });
     }) : [];

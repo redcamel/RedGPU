@@ -5,7 +5,6 @@
  */
 
 import {mat4} from "gl-matrix";
-import Mesh from "../../../display/mesh/Mesh";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
@@ -32,11 +31,6 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
      * [EN] Slot pooler instance
      */
     slotPooler?: FoliageSlotPooler | null;
-    /**
-     * [KO] 소스 메쉬 인스턴스 (일반 렌더 단위의 경우 필수, 그림자 통합 렌더 단위의 경우 생략 가능)
-     * [EN] Source mesh instance (required for regular units, optional for shadow merged units)
-     */
-    mesh?: Mesh;
     /**
      * [KO] 소속 LOD 레벨 인덱스 (기본값: 0)
      * [EN] Associated LOD level index (default: 0)
@@ -173,13 +167,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         return this.#isShadowMerged;
     }
 
-    /**
-     * [KO] 원본 메쉬 인스턴스를 반환합니다 (그림자 병합 메시일 경우 undefined).
-     * [EN] Returns the original mesh instance (undefined for shadow merged geometry).
-     */
-    override get mesh(): Mesh | undefined {
-        return super.mesh;
-    }
 
     /**
      * [KO] 상대 모델 변환 행렬을 반환합니다.

@@ -113,7 +113,6 @@ interface FoliageSharedContext {
  * [EN] Unified common function instantiating a PBR foliage render unit and binding the UBO slot pooler.
  */
 function createPBRRenderUnit(
-    meshNode: Mesh | undefined,
     geom: any,
     mat: any,
     firstIndex: number | undefined,
@@ -156,7 +155,6 @@ function createPBRRenderUnit(
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
     return new FoliageRenderUnit({
-        mesh: meshNode,
         geometry: geom,
         material: mat,
         firstIndex,
@@ -318,7 +316,6 @@ export default function assembleFoliageRenderUnits(
             for (let g = 0; g < groups.length; g++) {
                 const group = groups[g];
                 const unit = createPBRRenderUnit(
-                    group.rawNodes[0]?.node,
                     unifiedGeometry || group.geometry,
                     group.material,
                     group.firstIndex,
@@ -416,7 +413,6 @@ export default function assembleFoliageRenderUnits(
 
         const bbStartOffset = renderUnits.length;
         const bbRenderUnit = createPBRRenderUnit(
-            lod0RenderUnits[0]?.mesh,
             bbGeom,
             bbMat,
             0,
