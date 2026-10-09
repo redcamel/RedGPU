@@ -69,22 +69,6 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
 
 
     /**
-     * [KO] 특정 타입의 바인드 그룹 캐시를 무효화합니다.
-     * [EN] Invalidates the bind group cache for a specific type.
-     */
-    invalidateBindGroup(typeId: number): void {
-        this.#bakeBindGroupCache.delete(typeId);
-    }
-
-    /**
-     * [KO] 모든 바인드 그룹 캐시를 무효화합니다.
-     * [EN] Invalidates all bind group caches.
-     */
-    clearBindGroupCache(): void {
-        this.#bakeBindGroupCache.clear();
-    }
-
-    /**
      * [KO] 베이커가 소유한 GPU 리소스 및 캐시를 완전히 해제합니다.
      * [EN] Completely releases GPU resources and caches owned by the baker.
      */
