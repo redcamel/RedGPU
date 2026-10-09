@@ -185,111 +185,39 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         }
         this.#mesh = mesh;
 
-        let targetMaterial: any = mesh.material;
+        const assemblyResult = assembleScatterRenderUnits(redGPUContext, mesh, {
+            preservePivot: true,
+            centerXZ: false
+        });
+        if (assemblyResult.groups.length === 0 || !assemblyResult.unifiedGeometry) {
+            consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
+        }
+        this.#geometry = assemblyResult.unifiedGeometry;
+        this.#isUnifiedGeometryOwned = true;
 
-        let resolvedHeight = 1.0;
+        const primaryGroup = assemblyResult.groups[0];
+        const targetMaterial = primaryGroup?.material ?? mesh.material;
 
-        const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
-        if (isComposite) {
-            const assemblyResult = assembleScatterRenderUnits(redGPUContext, mesh, {
-                preservePivot: true,
-                centerXZ: false
-            });
-            if (assemblyResult.groups.length === 0 || !assemblyResult.unifiedGeometry) {
-                consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
-            }
-            this.#geometry = assemblyResult.unifiedGeometry;
-            this.#isUnifiedGeometryOwned = true;
-            const primaryGroup = assemblyResult.groups[0];
-            if (primaryGroup.material) {
-                targetMaterial = primaryGroup.material;
-            }
+        const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
+        if (typeof resolvedTexture === 'string') {
+            this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
+        } else if (resolvedTexture) {
+            this.#baseColorTexture = resolvedTexture;
+        }
 
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
-            if (typeof resolvedTexture === 'string') {
-                this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
-            } else if (resolvedTexture) {
-                this.#baseColorTexture = resolvedTexture;
-            }
+        this.#minY = minY !== undefined ? minY : (isFinite(assemblyResult.minY) ? assemblyResult.minY : 0.0);
+        const resolvedHeight = height !== undefined ? height : (assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0);
 
-            if (minY !== undefined) {
-                this.#minY = minY;
-            } else {
-                this.#minY = isFinite(assemblyResult.minY) ? assemblyResult.minY : 0.0;
-            }
+        this.#renderUnits = assemblyResult.renderUnits;
+        if (this.#baseColorTexture && this.#renderUnits.length > 0) {
+            this.#renderUnits[0].baseColorTexture = this.#baseColorTexture;
+        }
 
-            if (height !== undefined) {
-                resolvedHeight = height;
-            } else {
-                resolvedHeight = assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0;
-            }
-
-            this.#renderUnits = assemblyResult.groups.map((group, idx) => {
-                const mat = group.material;
-                const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? null);
-                return new ScatterRenderUnit({
-                    geometry: assemblyResult.unifiedGeometry!,
-                    vertexCount: group.vertexCount,
-                    indexCount: group.indexCount,
-                    firstIndex: group.firstIndex,
-                    isIndexed: !!assemblyResult.unifiedGeometry!.indexBuffer,
-                    strideBytes: assemblyResult.unifiedGeometry!.vertexBuffer?.stride ? assemblyResult.unifiedGeometry!.vertexBuffer.stride * 4 : 72,
-                    mesh: group.rawNodes[0]?.node ?? mesh,
-                    material: mat,
-                    baseColorTexture: tex
-                });
-            });
-
-            if (this.#renderUnits.length > 1) {
-                console.warn(
-                    `[Grass] "${this.name}" has ${this.#renderUnits.length} render units with distinct materials. ` +
-                    `For optimal grass rendering performance (millions of blades), merging textures into an atlas and using a single material is strongly recommended.`
-                );
-            }
-        } else {
-            const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
-            if (typeof resolvedTexture === 'string') {
-                this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
-            } else if (resolvedTexture) {
-                this.#baseColorTexture = resolvedTexture;
-            }
-
-            const geom = mesh.geometry;
-            if (!geom) {
-                consoleAndThrowError(`[Grass] Mesh must have a valid geometry!`);
-            }
-            this.#geometry = geom;
-
-            const vol = this.#geometry.volume;
-            if (minY !== undefined) {
-                this.#minY = minY;
-            } else if (vol && vol.minY !== undefined) {
-                this.#minY = vol.minY;
-            } else {
-                this.#minY = 0.0;
-            }
-
-            if (height !== undefined) {
-                resolvedHeight = height;
-            } else {
-                const computedH = (vol && (vol.maxY !== undefined && vol.minY !== undefined)) ? (vol.maxY - vol.minY) : 1.0;
-                resolvedHeight = computedH > 0 ? computedH : 1.0;
-            }
-
-            const gGeom = this.#geometry as Geometry;
-            this.#renderUnits = [
-                new ScatterRenderUnit({
-                    geometry: gGeom,
-                    vertexCount: gGeom.vertexBuffer?.vertexCount ?? 0,
-                    indexCount: gGeom.indexBuffer?.indexCount ?? (gGeom.vertexBuffer?.vertexCount ?? 0),
-                    firstIndex: 0,
-                    isIndexed: !!gGeom.indexBuffer,
-                    strideBytes: gGeom.vertexBuffer?.stride ? gGeom.vertexBuffer.stride * 4 : 72,
-                    mesh: mesh,
-                    material: targetMaterial,
-                    baseColorTexture: this.#baseColorTexture
-                })
-            ];
+        if (this.#renderUnits.length > 1) {
+            console.warn(
+                `[Grass] "${this.name}" has ${this.#renderUnits.length} render units with distinct materials. ` +
+                `For optimal grass rendering performance (millions of blades), merging textures into an atlas and using a single material is strongly recommended.`
+            );
         }
 
         this.#farDistance = Math.max(10.0, farDistance);

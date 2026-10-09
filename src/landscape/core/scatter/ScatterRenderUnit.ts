@@ -299,6 +299,14 @@ export class ScatterRenderUnit {
     }
 
     /**
+     * [KO] 베이스 컬러 텍스처를 설정합니다.
+     * [EN] Sets the base color texture.
+     */
+    set baseColorTexture(val: BitmapTexture | null | undefined) {
+        this.#baseColorTexture = val;
+    }
+
+    /**
      * [KO] 소속 LOD 레벨 인덱스를 반환합니다.
      * [EN] Returns the associated LOD level index.
      */
