@@ -234,13 +234,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             inst.posZ = posZ;
             inst.scaleY = scaleY;
 
-            let ix = clamp(i32(rotX * 32767.0), -32768, 32767);
-            let iy = clamp(i32(rotY * 32767.0), -32768, 32767);
-            let iz = clamp(i32(rotZ * 32767.0), -32768, 32767);
-            let iw = clamp(i32(rotW * 32767.0), -32768, 32767);
-
-            inst.packedRotXY = (u32(ix & 0xFFFF)) | (u32(iy & 0xFFFF) << 16u);
-            inst.packedRotZW = (u32(iz & 0xFFFF)) | (u32(iw & 0xFFFF) << 16u);
+            inst.packedRotXY = pack2x16snorm(vec2<f32>(rotX, rotY));
+            inst.packedRotZW = pack2x16snorm(vec2<f32>(rotZ, rotW));
 
             inst.packedScaleXZ = pack2x16float(vec2<f32>(scaleX, scaleZ));
 

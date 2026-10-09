@@ -36,7 +36,7 @@ fn calculateFoliageWindDisplacement(
     }
 
     let treeH = max(2.0, renderUnitUniforms.treeHeight);
-    let heightNorm = clamp(localPos.y / treeH, 0.0, 1.0);
+    let heightNorm = saturate(localPos.y / treeH);
 
     let groundAnchor = smoothstep(0.08, 0.8, heightNorm);
     let cubicBend = groundAnchor * groundAnchor * groundAnchor;
@@ -70,7 +70,7 @@ fn calculateFoliageWindDisplacement(
     let gustWave = sin(time * (windSpeed * 1.5) + spatialPhase * 1.8) * 0.25;
     let combinedWave = mainWave + gustWave;
 
-    let trunkDistFade = clamp(1.0 - (viewDist - 350.0) / 150.0, 0.0, 1.0);
+    let trunkDistFade = saturate(1.0 - (viewDist - 350.0) / 150.0);
     let trunkDisplacement = vec3<f32>(windDir.x, 0.0, windDir.y) *
                             (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * renderUnitUniforms.windMultiplier * trunkDistFade);
 
@@ -79,7 +79,7 @@ fn calculateFoliageWindDisplacement(
     let leafWaveY = cos(leafPhase * 1.3);
     let leafWaveZ = sin(leafPhase * 0.85);
 
-    let flutterDistFade = clamp(1.0 - (viewDist - 150.0) / 150.0, 0.0, 1.0);
+    let flutterDistFade = saturate(1.0 - (viewDist - 150.0) / 150.0);
     let flutterScale = (systemUniforms.wind.flutterStrength * 0.45) * renderUnitUniforms.windMultiplier * renderUnitUniforms.windFlutterMultiplier * flutterDistFade;
     let leafDisplacement = vec3<f32>(
         windDir.x * leafWaveX * 0.75,
@@ -255,7 +255,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
 
     let heightAboveGround = max(0.0, worldPos.y - instancePos.y);
     let blendRange = max(0.1, renderUnitUniforms.groundBlendRange);
-    let rawBlend = clamp(1.0 - (heightAboveGround / blendRange), 0.0, 1.0);
+    let rawBlend = saturate(1.0 - (heightAboveGround / blendRange));
     let groundBlendFactor = rawBlend * renderUnitUniforms.groundBlendStrength;
     output.groundColor_blendFactor = vec4<f32>(input.groundColor_fade.rgb, groundBlendFactor);
 

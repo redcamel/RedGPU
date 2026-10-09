@@ -14,7 +14,7 @@ fn transformGrassPosition(
     minY: f32,
     invMeshHeight: f32
 ) -> GrassPositionResult {
-    let heightRatio = clamp((position.y - minY) * invMeshHeight, 0.0, 1.0);
+    let heightRatio = saturate((position.y - minY) * invMeshHeight);
 
     let scaledPos = vec3<f32>(
         position.x * scaleXZ,

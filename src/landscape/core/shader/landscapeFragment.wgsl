@@ -148,10 +148,10 @@ fn computeNearFieldLandscapeLayers(
         else if (chIdx == 2u) { weightVal = weightMapSample.b; }
         else if (chIdx == 3u) {
             let isAlphaFull = weightMapSample.a >= 0.99;
-            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+            let remainingWeight = saturate(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b));
             weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
         }
-        let layerW = clamp(weightVal, 0.0, 1.0);
+        let layerW = saturate(weightVal);
 
         if (layerW <= 0.0001) { continue; }
 
@@ -288,7 +288,7 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 
 fn getRoughnessFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
     let maxF = max(vec3<f32>(1.0 - roughness), F0);
-    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f = saturate(1.0 - cosTheta);
     let f2 = f * f;
     let f5 = f2 * f2 * f;
     return F0 + (maxF - F0) * f5;
@@ -316,10 +316,10 @@ fn getDirectDiffuseBRDF(
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
     let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
     let fd90Minus1 = (0.5 + 2.0 * (LdotH * LdotH)) * roughness - 1.0;
-    let fl = clamp(1.0 - NdotL, 0.0, 1.0);
+    let fl = saturate(1.0 - NdotL);
     let fl2 = fl * fl;
     let fl5 = fl2 * fl2 * fl;
-    let fv = clamp(1.0 - NdotV, 0.0, 1.0);
+    let fv = saturate(1.0 - NdotV);
     let fv2 = fv * fv;
     let fv5 = fv2 * fv2 * fv;
     let lightScatter = 1.0 + fd90Minus1 * fl5;
@@ -690,7 +690,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
 
         if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01 && rawViewDist < shadowMaxDist * 1.5) {
-            let distRatio = clamp(rawViewDist / shadowMaxDist, 0.0, 1.0);
+            let distRatio = saturate(rawViewDist / shadowMaxDist);
             let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
 
             let terrainSelfShadow = computeLandscapeHeightmapShadow(
@@ -757,7 +757,7 @@ fn main(inputData: InputData) -> OutputFragment {
         case 4u: {
             if (uniforms.activeLayerCount > 0u) {
                 let weightSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
-                let remainingWeight = clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0);
+                let remainingWeight = saturate(1.0 - (weightSample.r + weightSample.g + weightSample.b));
                 let isAlphaFull = weightSample.a >= 0.99;
                 let weightA = select(weightSample.a, remainingWeight, isAlphaFull);
                 let splatColor = weightSample.r * vec3<f32>(1.0, 0.05, 0.05) +

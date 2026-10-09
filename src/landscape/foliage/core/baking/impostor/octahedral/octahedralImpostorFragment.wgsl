@@ -87,7 +87,7 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
 
-    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f = saturate(1.0 - cosTheta);
     let f2 = f * f;
     let f5 = f2 * f2 * f;
     return F0 + (vec3<f32>(1.0) - F0) * f5;
@@ -117,12 +117,12 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
 
-    let fL = clamp(1.0 - NdotL, 0.0, 1.0);
+    let fL = saturate(1.0 - NdotL);
     let fL2 = fL * fL;
     let fL5 = fL2 * fL2 * fL;
     let lightScatter = f0 + (fd90 - f0) * fL5;
 
-    let fV = clamp(1.0 - NdotV, 0.0, 1.0);
+    let fV = saturate(1.0 - NdotV);
     let fV2 = fV * fV;
     let fV5 = fV2 * fV2 * fV;
     let viewScatter = f0 + (fd90 - f0) * fV5;
@@ -185,7 +185,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
-    let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
+    let sharpnessFactor = saturate((maxCornerWeight - 0.25) / 0.75);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
     let ditherPx = u32(inputData.position.x) & 3u;
@@ -193,7 +193,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let frameIdx = systemUniforms.time.frameIndex & 3u;
     let ditherIdx = (((ditherPy ^ frameIdx) << 2u) | (ditherPx ^ frameIdx)) & 15u;
     let bayerPacked = select(0x6E4C2A80u, 0x5D7F91B3u, ditherIdx >= 8u);
-    let ditherThreshold = f32((bayerPacked >> ((ditherIdx & 7u) * 4u)) & 0xFu) * 0.0625;
+    let ditherThreshold = f32(extractBits(bayerPacked, (ditherIdx & 7u) * 4u, 4u)) * 0.0625;
 
     let dynamicCutOff = mix(0.20, 0.55, ditherThreshold);
     if (reconstructedAlpha <= dynamicCutOff) {
@@ -203,7 +203,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
 
     var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
-    albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
+    albedo = saturate(albedo);
 
     let toCamVec = camPos - inputData.vertexPosition;
     let distSq = dot(toCamVec, toCamVec);
@@ -272,9 +272,9 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    let ao = clamp(rawORM.r, 0.0, 1.0);
+    let ao = saturate(rawORM.r);
     let roughness = clamp(rawORM.g, 0.04, 1.0);
-    let metallic = clamp(rawORM.b, 0.0, 1.0);
+    let metallic = saturate(rawORM.b);
     let F0_dielectric = vec3<f32>(0.04);
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallic);
@@ -305,7 +305,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
         let NORM_225: f32 = 0.44444445;
-        let backWrap = clamp((-dot(N, L) + 0.5) * NORM_225, 0.0, 1.0);
+        let backWrap = saturate((-dot(N, L) + 0.5) * NORM_225);
         let distortion = 0.25;
         let lightOpposite = -(L + N * distortion);
         let vDotL = max(dot(V, lightOpposite), 0.0);

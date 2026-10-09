@@ -57,7 +57,7 @@ fn main(
     let camDir = normalize(input.cameraDir.xyz);
     let relPos = input.worldPos - center;
     let distAlongRay = dot(relPos, camDir);
-    let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
+    let normDepth = saturate(distAlongRay / (radius * 1.05) * 0.5 + 0.5);
 
     var baseAO = input.materialParams.z;
     var roughness = input.materialParams.x;
@@ -71,7 +71,7 @@ fn main(
         metallic = metallic * ormSample.b;
     }
 
-    let finalAO = clamp(baseAO, 0.0, 1.0);
+    let finalAO = saturate(baseAO);
     roughness = clamp(roughness, 0.04, 1.0);
 
     out.baseColor = vec4<f32>(finalColor.rgb, finalColor.a);

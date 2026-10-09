@@ -48,8 +48,8 @@ fn main(input: VertexOutput) -> OutputFragment {
         let dLight = light.color.rgb * light.intensity * preExposure;
 
         let nDotL = dot(N, L);
-        let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
-        let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let frontWrap = saturate((nDotL + 0.5) * NORM_225);
+        let backWrap = saturate((-nDotL + 0.5) * NORM_225);
 
         let directDiff = frontWrap * (1.0 - transRatio);
         let sssTransmission = backWrap * transRatio;

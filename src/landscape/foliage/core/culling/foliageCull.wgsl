@@ -158,7 +158,7 @@ fn main(
         var globalFade: f32 = 1.0;
         let fadeStartDist = typeInfo.fadeStartDistance;
         if (dist > fadeStartDist) {
-            globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
+            globalFade = saturate(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange);
         }
 
         if (numLODs <= 1u) {
@@ -173,7 +173,7 @@ fn main(
                     atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                 }
 
-                let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
+                let alphaByte = u32(saturate(finalAlpha) * 255.0);
                 var culledInst = instance;
                 culledInst.posY = realY;
                 culledInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, alphaByte);
@@ -189,9 +189,9 @@ fn main(
                 if (effectiveDist >= lodInfo.enterStart && (isLastLOD || effectiveDist <= lodInfo.exitEnd)) {
                     var alpha: f32 = 1.0;
                     if (l > 0u && effectiveDist < lodInfo.enterEnd) {
-                        alpha = clamp((effectiveDist - lodInfo.enterStart) * lodInfo.invEnterRange, 0.0, 1.0);
+                        alpha = saturate((effectiveDist - lodInfo.enterStart) * lodInfo.invEnterRange);
                     } else if (!isLastLOD && effectiveDist > lodInfo.exitStart) {
-                        alpha = clamp((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange, 0.0, 1.0);
+                        alpha = saturate((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange);
                     }
 
                     let finalAlpha = alpha * globalFade;
@@ -204,7 +204,7 @@ fn main(
                             atomicAdd(&mainIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
-                        let alphaByte = u32(clamp(finalAlpha, 0.0, 1.0) * 255.0);
+                        let alphaByte = u32(saturate(finalAlpha) * 255.0);
                         var culledInst = instance;
                         culledInst.posY = realY;
                         culledInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, alphaByte);
@@ -226,7 +226,7 @@ fn main(
         let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);
         var shadowFade: f32 = 1.0;
         if (dist > shadowFadeStart) {
-            shadowFade = clamp((userShadowDist - dist) / shadowFadeRange, 0.0, 1.0);
+            shadowFade = saturate((userShadowDist - dist) / shadowFadeRange);
         }
 
         if (shadowFade > 0.001) {
@@ -268,7 +268,7 @@ fn main(
                             atomicAdd(&shadowIndirectCommands[baseCmdIdx + s].instanceCount, 1u);
                         }
 
-                        let shadowFadeByte = u32(clamp(shadowFade, 0.0, 1.0) * 255.0);
+                        let shadowFadeByte = u32(saturate(shadowFade) * 255.0);
                         var shadowInst = instance;
                         shadowInst.posY = realY;
                         shadowInst.packedGroundColorAndType = replacePackedAlpha(instance.packedGroundColorAndType, shadowFadeByte);

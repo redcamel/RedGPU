@@ -91,11 +91,11 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     if (needsMainFade || needsShadowFade) {
         let distToCam = sqrt(distSq);
         if (needsMainFade) {
-            fadeRatio = clamp((typeInfo.cullingDistance - distToCam) * typeInfo.invFadeRange, 0.0, 1.0);
+            fadeRatio = saturate((typeInfo.cullingDistance - distToCam) * typeInfo.invFadeRange);
             alphaFade = smoothstep(0.0, 1.0, fadeRatio);
         }
         if (needsShadowFade) {
-            shadowFadeRatio = clamp((typeInfo.shadowCullDistance - distToCam) * typeInfo.invShadowFadeRange, 0.0, 1.0);
+            shadowFadeRatio = saturate((typeInfo.shadowCullDistance - distToCam) * typeInfo.invShadowFadeRange);
             shadowAlphaFade = smoothstep(0.0, 1.0, shadowFadeRatio);
         }
     }

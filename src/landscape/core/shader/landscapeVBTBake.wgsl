@@ -127,10 +127,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         else if (chIdx == 2u) { weightVal = weightMapSample.b; }
         else if (chIdx == 3u) {
             let isAlphaFull = weightMapSample.a >= 0.99;
-            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+            let remainingWeight = saturate(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b));
             weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
         }
-        let layerW = clamp(weightVal, 0.0, 1.0);
+        let layerW = saturate(weightVal);
 
         if (layerW <= 0.0001) { continue; }
 

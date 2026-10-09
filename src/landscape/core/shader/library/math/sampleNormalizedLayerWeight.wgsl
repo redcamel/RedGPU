@@ -6,7 +6,7 @@ fn sampleNormalizedLayerWeight(
 ) -> f32 {
     let weightSample = textureSampleLevel(weightTexture, landscapeSampler, uv, 0.0);
     let isAlphaFull = weightSample.a >= 0.99;
-    let effectiveA = select(weightSample.a, clamp(1.0 - (weightSample.r + weightSample.g + weightSample.b), 0.0, 1.0), isAlphaFull);
+    let effectiveA = select(weightSample.a, saturate(1.0 - (weightSample.r + weightSample.g + weightSample.b)), isAlphaFull);
     let effectiveTotalW = weightSample.r + weightSample.g + weightSample.b + effectiveA;
 
     var rawW = 0.0;

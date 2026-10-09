@@ -5,7 +5,7 @@ fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
         let frameIdx = frameIndex & 3u;
         let idx = (((py ^ frameIdx) << 2u) | (px ^ frameIdx)) & 15u;
         let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+        let threshold = f32(extractBits(packed, (idx & 7u) * 4u, 4u)) * 0.0625;
         if (fadeValue < threshold) {
             discard;
         }

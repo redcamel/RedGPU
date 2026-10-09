@@ -76,10 +76,10 @@ fn main(input: VertexOutput) -> OutputFragment {
         }
 
         let nDotL = dot(N, L);
-        let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let frontWrap = saturate((nDotL + 0.5) * NORM_225);
         let directDiff = frontWrap * (1.0 - transRatio);
 
-        let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
+        let backWrap = saturate((-nDotL + 0.5) * NORM_225);
         let lightOpposite = -(L + input.normal * SSS_DISTORTION);
         let vDotL = max(dot(V, lightOpposite), 0.0);
         let inScatter = vDotL * vDotL;
