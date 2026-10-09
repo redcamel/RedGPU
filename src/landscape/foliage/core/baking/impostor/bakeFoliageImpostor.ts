@@ -159,6 +159,13 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
         const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
         const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
         const m = unit.relativeModelMatrix;
+        const isIdentity = !m || (
+            m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
+            m[1] === 0 && m[2] === 0 && m[3] === 0 &&
+            m[4] === 0 && m[6] === 0 && m[7] === 0 &&
+            m[8] === 0 && m[9] === 0 && m[11] === 0 &&
+            m[12] === 0 && m[13] === 0 && m[14] === 0
+        );
 
         for (let i = 0; i < vCount; i++) {
             const idx = i * stride;
@@ -166,9 +173,9 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
             const y = vData[idx + 1];
             const z = vData[idx + 2];
 
-            const wx = m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x;
-            const wy = m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y;
-            const wz = m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z;
+            const wx = isIdentity ? x : (m![0] * x + m![4] * y + m![8] * z + m![12]);
+            const wy = isIdentity ? y : (m![1] * x + m![5] * y + m![9] * z + m![13]);
+            const wz = isIdentity ? z : (m![2] * x + m![6] * y + m![10] * z + m![14]);
 
             if (wx < minX) minX = wx;
             if (wy < minY) minY = wy;
@@ -358,7 +365,8 @@ export default function bakeFoliageImpostor(
             indexCount: number;
             indexFormat: GPUIndexFormat;
             vertexCount: number;
-            relativeModelMatrix: mat4;
+        relativeModelMatrix: mat4 | null;
+        isIdentityModelMatrix: boolean;
             matProps: Float32Array;
             modelMatProps: Float32Array;
             isFoliage: number;
@@ -378,6 +386,7 @@ export default function bakeFoliageImpostor(
                     indexFormat: 'uint32',
                     vertexCount: 0,
                 relativeModelMatrix: unit.relativeModelMatrix,
+                isIdentityModelMatrix: true,
                     matProps: EMPTY_FLOAT32_12,
                     modelMatProps: EMPTY_FLOAT32_12,
                     isFoliage: 0,
@@ -395,6 +404,13 @@ export default function bakeFoliageImpostor(
             relativeModelMatrix: m
         } = unit;
         const {vertexBuffer, indexBuffer} = geometry;
+        const isIdentityModelMatrix = !m || (
+            m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
+            m[1] === 0 && m[2] === 0 && m[3] === 0 &&
+            m[4] === 0 && m[6] === 0 && m[7] === 0 &&
+            m[8] === 0 && m[9] === 0 && m[11] === 0 &&
+            m[12] === 0 && m[13] === 0 && m[14] === 0
+        );
 
             const diffTex = mat?.baseColorTexture;
             const diffSampler = mat?.baseColorTextureSampler || basicSampler;
@@ -472,6 +488,7 @@ export default function bakeFoliageImpostor(
             indexFormat,
             vertexCount,
                 relativeModelMatrix: m,
+            isIdentityModelMatrix,
                 matProps,
                 modelMatProps,
                 isFoliage,
@@ -499,8 +516,12 @@ export default function bakeFoliageImpostor(
 
                 if (cached.isImpostor) continue;
 
-                mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix);
-                allInstanceData.set(tempMVP, baseOffset);
+                if (cached.isIdentityModelMatrix) {
+                    allInstanceData.set(vpInfo.projView, baseOffset);
+                } else {
+                    mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix!);
+                    allInstanceData.set(tempMVP, baseOffset);
+                }
 
                 allInstanceData.set(cached.matProps, baseOffset + 16);
                 allInstanceData.set(cached.modelMatProps, baseOffset + 28);
