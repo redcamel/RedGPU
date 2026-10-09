@@ -321,6 +321,16 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
             }
         });
     }
+
+    /**
+     * [KO] 전역 높이맵 분할 베이킹 컴퓨트 파이프라인, 바인드 그룹 레이아웃 및 부모 자원을 모두 해제합니다.
+     * [EN] Releases global heightmap compute pipeline, bind group layout, and parent resources.
+     */
+    override destroy(): void {
+        this.#globalComputePipeline = null;
+        this.#globalBindGroupLayout = null;
+        super.destroy();
+    }
 }
 
 Object.freeze(LandscapeVHTGenerator);

@@ -166,13 +166,20 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [EN] Releases and destroys tile mipmap uniform buffers and compute pipeline resources.
      */
     override destroy(): void {
-        super.destroy();
-        for (let i = 0; i < this.#tileMipUniformBuffers.length; i++) {
-            this.#tileMipUniformBuffers[i]?.destroy();
+        const count = this.#tileMipUniformBuffers.length;
+        for (let i = 0; i < count; i++) {
+            try {
+                this.#tileMipUniformBuffers[i]?.destroy();
+            } catch {
+            }
         }
-        this.#tileMipUniformBuffers = [];
+        this.#tileMipUniformBuffers.length = 0;
         this.#tileMipPipeline = null;
         this.#tileMipBindGroupLayout = null;
+        this.#storageViewsCache = new WeakMap();
+        this.#sampleViewsCache = new WeakMap();
+        this.#tileMipBindGroupsCache = new WeakMap();
+        super.destroy();
     }
 
     #getOrCreateTileMipUniformBuffer(mipLevel: number): GPUBuffer {

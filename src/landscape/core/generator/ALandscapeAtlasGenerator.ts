@@ -88,6 +88,10 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
 
         const buf = this.#uniformBufferPool[this.#poolIndex++];
         if (buf.size < byteLength) {
+            try {
+                buf.destroy();
+            } catch {
+            }
             const newBuf = device.createBuffer({
                 label: `Landscape_${this.#generatorLabel}_UniformBuffer_Slot_${this.#poolIndex - 1}`,
                 size: Math.max(16, byteLength),
