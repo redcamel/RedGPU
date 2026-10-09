@@ -224,6 +224,11 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
      * [EN] Array of mesh and visibility distance configurations per LOD level
      */
     lods: FoliageLODConfig[];
+    /**
+     * [KO] 이 식생 타입의 그림자 수신 여부 (기본값: true)
+     * [EN] Whether this foliage type receives shadows (default: true)
+     */
+    receiveShadow?: boolean;
 
     /**
      * [KO] 이 식생 타입에 할당될 최대 인스턴스 수용 용량 (기본값: 16384)
@@ -344,6 +349,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     #nameHash: number = 0;
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
+    #receiveShadow: boolean = true;
     #windMultiplier: number = 1.0;
     #windFlutterMultiplier: number = 1.0;
     #alignToNormal: boolean = false;
@@ -402,6 +408,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         const {
             name,
+            receiveShadow = true,
             castShadow = true,
             useImpostor = true,
             cullingDistance = 2000.0,
@@ -430,6 +437,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#baker = baker || null;
 
+        this.#receiveShadow = receiveShadow !== false;
         this.#useImpostor = useImpostor;
         this.#useDepthPrepass = useDepthPrepass !== false;
         this.#megaBuffer = megaBuffer || null;
@@ -901,6 +909,31 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
+     * [KO] 이 식생 타입의 그림자 수신 여부를 반환합니다.
+     * [EN] Returns whether this foliage type receives shadows.
+     */
+    get receiveShadow(): boolean {
+        return this.#receiveShadow;
+    }
+
+    /**
+     * [KO] 이 식생 타입의 그림자 수신 여부를 설정합니다.
+     * [EN] Sets whether this foliage type receives shadows.
+     *
+     * @param value -
+     * [KO] 그림자 수신 여부
+     * [EN] Whether shadows are received
+     */
+    set receiveShadow(value: boolean) {
+        const boolVal = !!value;
+        if (this.#receiveShadow !== boolVal) {
+            this.#receiveShadow = boolVal;
+            this.#updateRenderUnitReceiveShadow();
+            this.onParameterChanged('receiveShadow', boolVal);
+        }
+    }
+
+    /**
      * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다.
      * [EN] Dynamically changes the maximum visible/transition distance (meters) for a specific LOD level.
      *
@@ -1054,6 +1087,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
             // [UBO 채널] GPU 슬롯 및 타입 파라미터만 갱신
             case 'cullingDistance':
+            case 'fadeStartDistance':
             case 'shadowCullDistance':
             case 'castShadow':
                 this.#notifyUniformDirty();
@@ -1061,6 +1095,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             case 'groundBlendStrength':
                 this.#updateRenderUnitGroundBlend();
                 this.#notifyUniformDirty();
+                break;
+            case 'receiveShadow':
+                this.#updateRenderUnitReceiveShadow();
                 break;
 
             case 'streamingRadius': {
@@ -1352,6 +1389,18 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const unit = unitList[s];
             if (!unit.isImpostor) {
                 unit.updateGroundBlendParams(this.groundBlendStrength, this.#groundBlendRange);
+            }
+        }
+    }
+
+    #updateRenderUnitReceiveShadow(): void {
+        const unitList = this.#renderUnits;
+        const unitCount = unitList.length;
+        const receiveShadow = this.#receiveShadow;
+        for (let s = 0; s < unitCount; s++) {
+            const unit = unitList[s];
+            if (!unit.isImpostor) {
+                unit.updateReceiveShadow(receiveShadow);
             }
         }
     }

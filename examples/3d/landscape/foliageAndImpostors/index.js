@@ -258,7 +258,7 @@ function renderTestPane({
             // 2. 수목 식생 매니저 (Foliage)
             foliageFolder = pane.addFolder({title: 'Foliage', expanded: true});
 
-            const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
+            const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: false});
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'useDepthPrepass');
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
@@ -274,7 +274,7 @@ function renderTestPane({
 
             // 전역 바람 시뮬레이션 설정 (씬 레벨 WindManager)
             const windManager = scene.windManager;
-            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind (Scene)', expanded: true});
+            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind (Scene)', expanded: false});
             windGlobalFolder.addBinding(windManager, 'enabled');
             windGlobalFolder.addBinding(windManager, 'strength', {min: 0.0, max: 3.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'speed', {min: 0.0, max: 10.0, step: 0.1});
@@ -389,7 +389,7 @@ function renderTestPane({
         const typeFolder = foliageFolder.addFolder({title: type.name, expanded: true});
 
         // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
-        const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: true});
+        const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: false});
         streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 5000, step: 50});
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
@@ -401,7 +401,7 @@ function renderTestPane({
         });
 
         // 2. Placement & Density (배치 및 밀도)
-        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
+        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: false});
         const layerOptions = {'(All / None)': ''};
         if (landscape?.layers) {
             landscape.layers.forEach((l) => {
@@ -424,7 +424,7 @@ function renderTestPane({
         });
 
         // 3. Transform & Slope (스케일 및 경사각)
-        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
+        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: false});
         transformFolder.addBinding(type, 'bottomOffset', {min: -5.0, max: 5.0, step: 0.05});
         transformFolder.addBinding(type, 'minSlope', {min: 0.0, max: 89.0, step: 1.0});
         transformFolder.addBinding(type, 'maxSlope', {min: 1.0, max: 90.0, step: 1.0});
@@ -436,12 +436,12 @@ function renderTestPane({
         });
 
         // 4. Ground Blend (지형 컬러 블렌딩)
-        const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: true});
+        const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: false});
         groundBlendFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
 
         // 5. LOD & Impostor (컬링 거리 및 임포스터)
-        const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: true});
+        const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: false});
         lodFolder.addBinding(type, 'useDepthPrepass');
         lodFolder.addBinding(type, 'fadeStartDistance', {min: 50, max: 8000, step: 50});
         lodFolder.addBinding(type, 'cullingDistance', {min: 100, max: 10000, step: 50});
@@ -472,10 +472,11 @@ function renderTestPane({
         // 6. Shadow (그림자)
         const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
         shadowFolder.addBinding(type, 'castShadow');
+        shadowFolder.addBinding(type, 'receiveShadow');
         shadowFolder.addBinding(type, 'shadowCullDistance', {min: 50, max: 3000, step: 25});
 
         // 7. Wind & Motion
-        const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
+        const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: false});
         windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.05});
         windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.05});
     };

@@ -5,7 +5,6 @@
  */
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../context/RedGPUContext";
-import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 import type PerspectiveCamera from "../../../../camera/camera/PerspectiveCamera";
@@ -65,16 +64,12 @@ class FoliageCuller extends AScatterCuller {
      * @param foliageList -
      * [KO] 활성 식생 목록
      * [EN] Active foliage list
-     * @param landscape -
-     * [KO] 부모 Landscape 인스턴스
-     * [EN] Parent Landscape instance
      * @param renderViewStateData -
      * [KO] 렌더 패스 상태 데이터
      * [EN] Render pass state data
      */
     updateAndDispatch(
         foliageList: Foliage[],
-        landscape: Landscape,
         renderViewStateData: RenderViewStateData
     ): void {
         const typeCount = foliageList.length;

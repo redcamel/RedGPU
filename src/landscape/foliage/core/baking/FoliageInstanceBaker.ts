@@ -187,7 +187,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         u32[20] = foliage.randomRotationY ? 1 : 0;
         u32[21] = foliage.densityScaleByWeight ? 1 : 0;
         u32[22] = (scaleDiffX === scaleDiffZ && minScale[0] === minScale[2]) ? 1 : 0;
-        u32[23] = foliage.allocation?.typeId ?? 0;
+        u32[23] = foliage.typeId;
 
         u32[24] = landscape.hasValidVbtAtlas ? 1 : 0;
         u32[25] = hasWeightMap;
@@ -207,7 +207,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
 
         const bindGroup = this.getOrCreateBindGroup(
-            foliage.allocation?.typeId ?? 0,
+            foliage.typeId,
             this.#label,
             rawGPUBuffer,
             vhtView,

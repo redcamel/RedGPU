@@ -62,11 +62,6 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
      */
     isImpostor?: boolean;
     /**
-     * [KO] 그림자 수신 여부
-     * [EN] Whether this render unit receives shadows
-     */
-    receiveShadow?: boolean;
-    /**
      * [KO] 그림자 패스 전용 통합(Position-only) 렌더 단위 여부 (기본값: false)
      * [EN] Whether this is a merged (position-only) render unit dedicated to the shadow pass (default: false)
      */
@@ -93,7 +88,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
     #isMainOpaqueOrMasked: boolean = true;
     #mainDepthMode: FoliageDepthPassMode = 'normal';
     #isImpostor: boolean = false;
-    #receiveShadow: boolean = true;
 
     constructor(init: FoliageRenderUnitInitOptions) {
         const {
@@ -110,7 +104,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
             isMainOpaqueOrMasked = !isShadowMerged,
             mainDepthMode = 'normal',
             isImpostor = false,
-            receiveShadow = true
         } = init;
 
         super({
@@ -132,7 +125,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         this.#isMainOpaqueOrMasked = isMainOpaqueOrMasked;
         this.#mainDepthMode = mainDepthMode;
         this.#isImpostor = isImpostor;
-        this.#receiveShadow = receiveShadow;
     }
 
     /**
@@ -167,7 +159,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         return this.#relativeModelMatrix;
     }
 
-
     /**
      * [KO] 메인 뎁스 패스 모드를 반환합니다.
      * [EN] Returns the main depth pass mode.
@@ -182,14 +173,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
      */
     get isImpostor(): boolean {
         return this.#isImpostor;
-    }
-
-    /**
-     * [KO] 그림자 수신 여부를 반환합니다.
-     * [EN] Returns whether this render unit receives shadows.
-     */
-    get receiveShadow(): boolean {
-        return this.#receiveShadow;
     }
 
     /**
@@ -230,6 +213,17 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
                 groundBlendStrength,
                 groundBlendRange
             );
+        }
+    }
+
+    /**
+     * [KO] 그림자 수신 여부를 유니폼 버퍼에 기록합니다. (Zero-GC)
+     * [EN] Writes shadow receiving flag to the uniform buffer. (Zero-GC)
+     * @param receiveShadow - 그림자 수신 여부
+     */
+    updateReceiveShadow(receiveShadow: boolean): void {
+        if (this.#slotPooler && this.#slotIndex >= 0) {
+            this.#slotPooler.updateReceiveShadow(this.#slotIndex, receiveShadow);
         }
     }
 

@@ -161,6 +161,20 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         if (slot < 0 || slot >= this.maxSlots) return;
         this.uploadSlotBytes(slot, this.paramsSizeBytes);
     }
+
+    /**
+     * [KO] 특정 렌더 단위 슬롯의 그림자 수신 여부를 갱신하고 GPU 버퍼에 전송합니다 (Zero-GC).
+     * [EN] Updates shadow receiving flag for a specific render unit slot and uploads to GPU buffer (Zero-GC).
+     *
+     * @param slot - 슬롯 인덱스
+     * @param receiveShadow - 그림자 수신 여부
+     */
+    updateReceiveShadow(slot: number, receiveShadow: boolean): void {
+        if (slot < 0 || slot >= this.maxSlots) return;
+        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
+        this.cpuBuffer[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
+        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+    }
 }
 
 Object.freeze(FoliageSlotPooler);

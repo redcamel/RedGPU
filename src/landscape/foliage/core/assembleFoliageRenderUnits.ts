@@ -169,7 +169,6 @@ function createPBRRenderUnit(
         isMasked,
         mainDepthMode,
         isImpostor,
-        receiveShadow,
     });
 }
 
@@ -276,10 +275,10 @@ export default function assembleFoliageRenderUnits(
 
     // 1. LOD 레벨별 지오메트리 병합 및 PBR/섀도우 렌더 유닛 조립
     for (let l = 0; l < numLODs; l++) {
-        const {mesh, receiveShadow = true, lodDistance} = lods[l];
+        const {mesh, receiveShadow = (options.receiveShadow !== false), lodDistance} = lods[l];
         const lodMeshes = Array.isArray(mesh) ? mesh : [mesh];
         const startSubOffset = renderUnits.length;
-        const lodReceiveShadow = receiveShadow !== false;
+        const lodReceiveShadow = (options.receiveShadow !== false) && (receiveShadow !== false);
 
         // 머티리얼 전처리
         for (let r = 0; r < lodMeshes.length; r++) {

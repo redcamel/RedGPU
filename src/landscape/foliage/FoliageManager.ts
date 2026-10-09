@@ -260,7 +260,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
         this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
 
-        this.#culler.updateAndDispatch(types, landscape, renderViewStateData);
+        this.#culler.updateAndDispatch(types, renderViewStateData);
     }
 
     /**
