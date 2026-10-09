@@ -17,7 +17,7 @@ import type {FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
 import bakeFoliageImpostor from "./baking/impostor/bakeFoliageImpostor";
 import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
-import mergeScatterMeshes from "../../core/scatter/mergeScatterMeshes";
+import assembleScatterRenderUnits from "../../core/scatter/assembleScatterRenderUnits";
 import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE_BYTES,
@@ -278,8 +278,8 @@ export default function assembleFoliageRenderUnits(
             prepareFoliageMaterials(lodMeshes[r]);
         }
 
-        // 지오메트리 통합 병합
-        const mergeResult = mergeScatterMeshes(
+        // 지오메트리 및 렌더 유닛 조립
+        const mergeResult = assembleScatterRenderUnits(
             redGPUContext,
             lodMeshes,
             {

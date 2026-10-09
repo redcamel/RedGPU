@@ -12,6 +12,7 @@ import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
+import ScatterRenderUnit from "./ScatterRenderUnit";
 import {
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
@@ -36,10 +37,10 @@ export interface RawMeshNode {
 }
 
 /**
- * [KO] 동일한 재질을 공유하여 하나의 버퍼로 병합된 메쉬 그룹 결과입니다.
- * [EN] Result of a mesh group merged into a single buffer sharing the same material.
+ * [KO] 동일한 재질을 공유하여 하나의 버퍼로 조립/병합된 메쉬 그룹 결과입니다.
+ * [EN] Result of a mesh group assembled into a single buffer sharing the same material.
  */
-export interface MergedMeshGroup {
+export interface AssembledMeshGroup {
     material: any;
     geometry: Geometry;
     vertexCount: number;
@@ -49,10 +50,16 @@ export interface MergedMeshGroup {
 }
 
 /**
- * [KO] 메쉬 병합 설정 옵션 인터페이스입니다.
- * [EN] Configuration options interface for mesh merging.
+ * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
+ * [EN] Type alias for backward compatibility.
  */
-export interface ScatterMeshMergeOptions {
+export type MergedMeshGroup = AssembledMeshGroup;
+
+/**
+ * [KO] 스캐터 렌더 유닛 조립 설정 옵션 인터페이스입니다.
+ * [EN] Configuration options interface for scatter render unit assembly.
+ */
+export interface ScatterAssemblyOptions {
     /**
      * [KO] 원래 모델의 피벗 기준점을 유지할지 여부 (기본값: true). false일 경우 모델의 최하단(minY)을 Y=0으로 정렬합니다.
      * [EN] Whether to preserve the original model pivot (default: true). If false, aligns the lowest vertex (minY) to Y=0.
@@ -73,11 +80,18 @@ export interface ScatterMeshMergeOptions {
 }
 
 /**
- * [KO] mergeScatterMeshes의 최종 지오메트리 병합 결과 객체입니다.
- * [EN] Final geometry merge result object of mergeScatterMeshes.
+ * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
+ * [EN] Type alias for backward compatibility.
  */
-export interface ScatterMeshMergeResult {
-    groups: MergedMeshGroup[];
+export type ScatterMeshMergeOptions = ScatterAssemblyOptions;
+
+/**
+ * [KO] assembleScatterRenderUnits의 최종 렌더 유닛 조립 및 지오메트리 결과 객체입니다.
+ * [EN] Final render unit assembly and geometry result object of assembleScatterRenderUnits.
+ */
+export interface ScatterAssemblyResult {
+    groups: AssembledMeshGroup[];
+    renderUnits: ScatterRenderUnit[];
     unifiedGeometry: Geometry | null;
     totalVertexCount: number;
     totalIndexCount: number;
@@ -92,6 +106,12 @@ export interface ScatterMeshMergeResult {
     minZ: number;
     maxZ: number;
 }
+
+/**
+ * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
+ * [EN] Type alias for backward compatibility.
+ */
+export type ScatterMeshMergeResult = ScatterAssemblyResult;
 
 /**
  * [KO] RedGPU Mesh 인스턴스의 위치, 오일러 회전각(Degree), 스케일을 기반으로 로컬 4x4 행렬을 계산합니다.
@@ -251,14 +271,14 @@ function traverseHierarchy(
  * [KO] 피벗 보존, XZ 평면 중심 정렬, 그림자용 지오메트리 생성 등 결합/병합 옵션
  * [EN] Combination options including pivot preservation, XZ plane centering, and shadow geometry generation
  * @returns
- * [KO] 머티리얼별 병합 그룹 및 통합 바운딩 정보가 포함된 병합 결과 객체
- * [EN] Merge result object containing merged groups per material and unified bounding data
+ * [KO] 머티리얼별 병합 그룹, 기본 ScatterRenderUnit 배열 및 통합 바운딩 정보가 포함된 조립 결과 객체
+ * [EN] Assembly result object containing merged groups per material, default ScatterRenderUnit array, and unified bounding data
  */
-export default function mergeScatterMeshes(
+export default function assembleScatterRenderUnits(
     redGPUContext: RedGPUContext,
     roots: Mesh | Mesh[],
-    options?: ScatterMeshMergeOptions
-): ScatterMeshMergeResult {
+    options?: ScatterAssemblyOptions
+): ScatterAssemblyResult {
     const rootList = Array.isArray(roots) ? roots : [roots];
     const rawList: RawMeshNode[] = [];
 
@@ -274,6 +294,7 @@ export default function mergeScatterMeshes(
     if (rawList.length === 0) {
         return {
             groups: [],
+            renderUnits: [],
             unifiedGeometry: null,
             totalVertexCount: 0,
             totalIndexCount: 0,
@@ -613,8 +634,23 @@ export default function mergeScatterMeshes(
     const finalMinZ = isFinite(minZ) ? minZ - offsetZ : 0;
     const finalMaxZ = isFinite(maxZ) ? maxZ - offsetZ : 0;
 
+    const renderUnits: ScatterRenderUnit[] = unifiedGeometry ? groups.map((group) => {
+        return new ScatterRenderUnit({
+            geometry: unifiedGeometry,
+            vertexCount: group.vertexCount,
+            indexCount: group.indexCount,
+            firstIndex: group.firstIndex,
+            isIndexed: !!unifiedGeometry.indexBuffer,
+            strideBytes: unifiedGeometry.vertexBuffer?.stride ? unifiedGeometry.vertexBuffer.stride * 4 : 72,
+            mesh: group.rawNodes[0]?.node,
+            material: group.material,
+            baseColorTexture: group.material?.baseColorTexture ?? null
+        });
+    }) : [];
+
     return {
         groups,
+        renderUnits,
         unifiedGeometry,
         totalVertexCount: lodTotalVertices,
         totalIndexCount: lodTotalIndices,
@@ -643,3 +679,8 @@ function getMaterialKey(mat: any): string {
     const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }
+
+export {
+    assembleScatterRenderUnits,
+    assembleScatterRenderUnits as mergeScatterMeshes
+};

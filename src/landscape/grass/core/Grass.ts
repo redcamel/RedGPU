@@ -9,7 +9,7 @@ import Geometry from "../../../geometry/Geometry";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import Mesh from "../../../display/mesh/Mesh";
 import type Primitive from "../../../primitive/core/Primitive";
-import mergeScatterMeshes from "../../core/scatter/mergeScatterMeshes";
+import assembleScatterRenderUnits from "../../core/scatter/assembleScatterRenderUnits";
 import ScatterRenderUnit from "../../core/scatter/ScatterRenderUnit";
 import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";
 import type {GrassTypeAllocation} from "./buffer/GrassScatterMegaBuffer";
@@ -191,16 +191,16 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
         const isComposite = (mesh.children && mesh.children.length > 0) || !mesh.geometry;
         if (isComposite) {
-            const mergeResult = mergeScatterMeshes(redGPUContext, mesh, {
+            const assemblyResult = assembleScatterRenderUnits(redGPUContext, mesh, {
                 preservePivot: true,
                 centerXZ: false
             });
-            if (mergeResult.groups.length === 0 || !mergeResult.unifiedGeometry) {
+            if (assemblyResult.groups.length === 0 || !assemblyResult.unifiedGeometry) {
                 consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
             }
-            this.#geometry = mergeResult.unifiedGeometry;
+            this.#geometry = assemblyResult.unifiedGeometry;
             this.#isUnifiedGeometryOwned = true;
-            const primaryGroup = mergeResult.groups[0];
+            const primaryGroup = assemblyResult.groups[0];
             if (primaryGroup.material) {
                 targetMaterial = primaryGroup.material;
             }
@@ -215,25 +215,25 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             if (minY !== undefined) {
                 this.#minY = minY;
             } else {
-                this.#minY = isFinite(mergeResult.minY) ? mergeResult.minY : 0.0;
+                this.#minY = isFinite(assemblyResult.minY) ? assemblyResult.minY : 0.0;
             }
 
             if (height !== undefined) {
                 resolvedHeight = height;
             } else {
-                resolvedHeight = mergeResult.boundingHeight > 0 ? mergeResult.boundingHeight : 1.0;
+                resolvedHeight = assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0;
             }
 
-            this.#renderUnits = mergeResult.groups.map((group, idx) => {
+            this.#renderUnits = assemblyResult.groups.map((group, idx) => {
                 const mat = group.material;
                 const tex = idx === 0 ? this.#baseColorTexture : (mat?.baseColorTexture ?? null);
                 return new ScatterRenderUnit({
-                    geometry: mergeResult.unifiedGeometry!,
+                    geometry: assemblyResult.unifiedGeometry!,
                     vertexCount: group.vertexCount,
                     indexCount: group.indexCount,
                     firstIndex: group.firstIndex,
-                    isIndexed: !!mergeResult.unifiedGeometry!.indexBuffer,
-                    strideBytes: mergeResult.unifiedGeometry!.vertexBuffer?.stride ? mergeResult.unifiedGeometry!.vertexBuffer.stride * 4 : 72,
+                    isIndexed: !!assemblyResult.unifiedGeometry!.indexBuffer,
+                    strideBytes: assemblyResult.unifiedGeometry!.vertexBuffer?.stride ? assemblyResult.unifiedGeometry!.vertexBuffer.stride * 4 : 72,
                     mesh: group.rawNodes[0]?.node ?? mesh,
                     material: mat,
                     baseColorTexture: tex
