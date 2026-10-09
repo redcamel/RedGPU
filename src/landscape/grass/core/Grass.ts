@@ -597,7 +597,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
                 break;
             }
 
-            // [채널 B: 80B UBO 슬롯만 갱신하는 셰이딩/머티리얼 파라미터 (Light)]
+            // [채널 B: 96B UBO 슬롯만 갱신하는 셰이딩/머티리얼 파라미터 (Light)]
             case 'shadowCullDistance':
                 this.#shadowFadeStartDistance = (value as number) * 0.75;
                 this.#notifyUniformDirty();

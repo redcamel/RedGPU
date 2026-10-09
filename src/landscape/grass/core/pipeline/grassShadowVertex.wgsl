@@ -29,11 +29,8 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     let delta = instPos - camPos;
     let distSq = dot(delta, delta);
 
-    let shadowCullDist = grassUniforms.shadowCullDistance;
-    let shadowCullDistSq = shadowCullDist * shadowCullDist;
-
-    // 🌿 제곱거리 조기 탈락 (sqrt 0클록 기각)
-    if (distSq >= shadowCullDistSq) {
+    // 🌿 제곱거리 조기 탈락 (사전 계산된 shadowCullDistanceSq로 1클록 기각)
+    if (distSq >= grassUniforms.shadowCullDistanceSq) {
         output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);
         output.alphaFade = 0.0;
@@ -44,12 +41,10 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     var scaleY = instance.scaleY;
     var alphaFade: f32 = 1.0;
 
-    let shadowFadeStart = min(grassUniforms.shadowFadeStartDistance, shadowCullDist);
-    let shadowFadeStartSq = shadowFadeStart * shadowFadeStart;
-    if (distSq > shadowFadeStartSq) {
+    // 🌿 사전 계산된 shadowFadeStartSq 및 invShadowFadeRange로 나눗셈 완전 소거 및 고속 곱셈 치환
+    if (distSq > grassUniforms.shadowFadeStartSq) {
         let distToCam = sqrt(distSq);
-        let shadowFadeRange = max(0.001, shadowCullDist - shadowFadeStart);
-        let fadeRatio = clamp((shadowCullDist - distToCam) / shadowFadeRange, 0.0, 1.0);
+        let fadeRatio = clamp((grassUniforms.shadowCullDistance - distToCam) * grassUniforms.invShadowFadeRange, 0.0, 1.0);
         scaleXZ *= fadeRatio;
         scaleY *= fadeRatio;
         alphaFade = smoothstep(0.0, 1.0, fadeRatio);

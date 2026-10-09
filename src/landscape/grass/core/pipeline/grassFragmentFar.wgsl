@@ -17,8 +17,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
     let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
-    let farCutoff = clamp(materialUniforms.alphaCutoff * 0.55, 0.10, 0.30);
-    if (sourceAlpha < farCutoff) {
+    if (sourceAlpha < materialUniforms.farAlphaCutoff) {
         discard;
     }
 

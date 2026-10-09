@@ -14,7 +14,7 @@ import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
  */
 export class GrassSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 256;
-    static PARAMS_SIZE_BYTES: number = 80;
+    static PARAMS_SIZE_BYTES: number = 96;
 
     /**
      * [KO] GrassSlotPooler 인스턴스를 생성하고 64KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
@@ -32,8 +32,8 @@ export class GrassSlotPooler extends AScatterSlotPooler {
     }
 
     /**
-     * [KO] 잔디 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 80바이트 정밀 전송합니다.
-     * [EN] Writes grass parameter data to the specified slot and uploads 80 bytes precisely to GPU.
+     * [KO] 잔디 파라미터 데이터를 지정된 슬롯에 기록하고 GPU에 96바이트 정밀 전송합니다.
+     * [EN] Writes grass parameter data to the specified slot and uploads 96 bytes precisely to GPU.
      *
      * @param slot - 슬롯 인덱스 (0 ~ 255)
      * @param grass - 잔디 생태계 인스턴스
@@ -87,9 +87,16 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 16] = roughness;
         f32[baseFloat + 17] = shadowStrength;
         u32[baseFloat + 18] = receiveShadow ? 1 : 0;
-        u32[baseFloat + 19] = 0; // padding (80B alignment)
+        f32[baseFloat + 19] = Math.min(0.30, Math.max(0.10, alphaCutoff * 0.55)); // farAlphaCutoff
 
-        // 부모의 80바이트 정밀 업로드 호출
+        // Precomputed Shadow & Extended Parameters (16B, Total 96B)
+        const effShadowFadeStart = Math.min(shadowFadeStartDistance, shadowCullDistance);
+        f32[baseFloat + 20] = shadowCullDistance * shadowCullDistance; // shadowCullDistanceSq
+        f32[baseFloat + 21] = effShadowFadeStart * effShadowFadeStart; // shadowFadeStartSq
+        f32[baseFloat + 22] = 1.0 / Math.max(0.001, shadowCullDistance - effShadowFadeStart); // invShadowFadeRange
+        u32[baseFloat + 23] = 0; // padding (96B alignment)
+
+        // 부모의 96바이트 정밀 업로드 호출
         this.uploadSlotBytes(slot, this.paramsSizeBytes);
     }
 }

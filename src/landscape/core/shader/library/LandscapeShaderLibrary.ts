@@ -109,8 +109,8 @@ export namespace LandscapeShaderLibrary {
         export const GrassTypeParam = GrassTypeParam_wgsl;
 
         /**
-         * [KO] 잔디 렌더링 파라미터 구조체 (80바이트 / 20 floats/uints)
-         * [EN] Grass rendering parameters struct (80 bytes / 20 floats/uints)
+         * [KO] 잔디 렌더링 파라미터 구조체 (96바이트 / 24 floats/uints)
+         * [EN] Grass rendering parameters struct (96 bytes / 24 floats/uints)
          *
          * ```wgsl
          * #redgpu_include landscape.struct.GrassParams;
