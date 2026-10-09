@@ -146,8 +146,8 @@ function isIdentityMatrix(m: mat4 | null | undefined): boolean {
  * [KO] 대상 렌더 단위 배열
  * [EN] Target render unit array
  * @returns
- * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius, bottomOffset)
- * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius, bottomOffset)
+ * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius)
+ * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius)
  */
 function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     min: [number, number, number];
@@ -157,7 +157,6 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     depth: number;
     center: [number, number, number];
     maxRadius: number;
-    bottomOffset: number;
 } {
     let minX = Infinity, minY = Infinity, minZ = Infinity;
     let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
@@ -227,8 +226,7 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
             height: 6.0,
             depth: 4.0,
             center: [0, 3.0, 0],
-            maxRadius: 4.0,
-            bottomOffset: 0
+            maxRadius: 4.0
         };
     }
 
@@ -238,7 +236,6 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     const centerX = 0.0;
     const centerY = (minY + maxY) * 0.5;
     const centerZ = 0.0;
-    const bottomOffset = minY;
 
     const halfHeight = height * 0.5;
     const calculatedMaxRadius = Math.sqrt(maxHorizDistSq + halfHeight * halfHeight);
@@ -253,8 +250,7 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
         height,
         depth,
         center: [centerX, centerY, centerZ],
-        maxRadius,
-        bottomOffset
+        maxRadius
     };
 }
 
