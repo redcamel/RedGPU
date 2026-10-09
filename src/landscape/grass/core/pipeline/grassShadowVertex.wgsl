@@ -24,31 +24,23 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     var output: ShadowVertexOutput;
 
     let instance = culledInstances[input.instanceIndex];
-    let camPos = systemUniforms.camera.cameraPosition.xyz;
-    let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
-    let delta = instPos - camPos;
-    let distSq = dot(delta, delta);
 
-    // 🌿 제곱거리 조기 탈락 (사전 계산된 shadowCullDistanceSq로 1클록 기각)
-    if (distSq >= grassUniforms.shadowCullDistanceSq) {
+    // 🌿 [0클록 혁신] 컬링 컴퓨트에서 인스턴스당 1회 계산된 그림자 페이드 언팩
+    let fadeData = unpack4x8unorm(instance.packedBounding);
+    let shadowFadeRatio = fadeData.z;
+
+    // 🌿 35m 밖 인스턴스 조기 탈락 (거리/내적 계산 없이 1클록 즉시 기각)
+    if (shadowFadeRatio <= 0.0) {
         output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);
         output.alphaFade = 0.0;
         return output;
     }
 
-    var scaleXZ = instance.scaleXZ;
-    var scaleY = instance.scaleY;
-    var alphaFade: f32 = 1.0;
-
-    // 🌿 사전 계산된 shadowFadeStartSq 및 invShadowFadeRange로 나눗셈 완전 소거 및 고속 곱셈 치환
-    if (distSq > grassUniforms.shadowFadeStartSq) {
-        let distToCam = sqrt(distSq);
-        let fadeRatio = clamp((grassUniforms.shadowCullDistance - distToCam) * grassUniforms.invShadowFadeRange, 0.0, 1.0);
-        scaleXZ *= fadeRatio;
-        scaleY *= fadeRatio;
-        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
-    }
+    let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
+    let scaleXZ = instance.scaleXZ * shadowFadeRatio;
+    let scaleY = instance.scaleY * shadowFadeRatio;
+    let alphaFade = fadeData.w;
 
     let q = normalize(unpack4x8snorm(instance.packedQuat));
 

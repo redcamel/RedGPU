@@ -94,19 +94,37 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         atomicAdd(&indirectCommands[targetStageSlot + s].instanceCount, 1u);
     }
 
-    // 🌿 인스턴스당 단 1회 선행 거리 페이드 계산 (정점 셰이더의 480,000회 중복 연산 완전 소거)
+    // 🌿 인스턴스당 단 1회 선행 페이드 계산 (정점 셰이더 및 그림자 셰이더의 수십만 회 중복 연산 완전 소거)
     var fadeRatio: f32 = 1.0;
     var alphaFade: f32 = 1.0;
-    if (distSq > typeInfo.fadeStartSq) {
+    var shadowFadeRatio: f32 = 1.0;
+    var shadowAlphaFade: f32 = 1.0;
+
+    let needsMainFade = distSq > typeInfo.fadeStartSq;
+    let isShadowOut = distSq >= typeInfo.shadowCullDistanceSq;
+    let needsShadowFade = !isShadowOut && (distSq > typeInfo.shadowFadeStartSq);
+
+    if (needsMainFade || needsShadowFade) {
         let distToCam = sqrt(distSq);
-        fadeRatio = clamp((typeInfo.cullingDistance - distToCam) * typeInfo.invFadeRange, 0.0, 1.0);
-        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
+        if (needsMainFade) {
+            fadeRatio = clamp((typeInfo.cullingDistance - distToCam) * typeInfo.invFadeRange, 0.0, 1.0);
+            alphaFade = smoothstep(0.0, 1.0, fadeRatio);
+        }
+        if (needsShadowFade) {
+            shadowFadeRatio = clamp((typeInfo.shadowCullDistance - distToCam) * typeInfo.invShadowFadeRange, 0.0, 1.0);
+            shadowAlphaFade = smoothstep(0.0, 1.0, shadowFadeRatio);
+        }
+    }
+
+    if (isShadowOut) {
+        shadowFadeRatio = 0.0;
+        shadowAlphaFade = 0.0;
     }
 
     var culledInst = inst;
-    // 🌿 scaleXZ, scaleY 원본은 100% 불변 보존 (그림자 패스 완전 보호)
-    // 🌿 미사용 packedBounding 슬롯에 16비트 float 2개로 정밀 패킹
-    culledInst.packedBounding = pack2x16float(vec2<f32>(fadeRatio, alphaFade));
+    // 🌿 scaleXZ, scaleY 원본은 100% 불변 보존
+    // 🌿 미사용 packedBounding 슬롯(32비트)에 8비트 4채널로 메인 + 그림자 페이드 완벽 패킹
+    culledInst.packedBounding = pack4x8unorm(vec4<f32>(fadeRatio, alphaFade, shadowFadeRatio, shadowAlphaFade));
 
     let culledTargetIdx = culledBase + writeSlot;
     culledInstances[culledTargetIdx] = culledInst;
