@@ -10,7 +10,7 @@ struct GrassParams {
     shadowCullDistance: f32,
     shadowFadeStartDistance: f32,
     invMeshHeight: f32,
-    pad1: f32,
+    invFadeRange: f32,
     groundBlendStrength: f32,
     alphaCutoff: f32,
     hasGroundTexture: u32,
@@ -20,5 +20,5 @@ struct GrassParams {
     roughness: f32,
     shadowStrength: f32,
     receiveShadow: u32,
-    pad2: u32,
+    padding: u32,
 };

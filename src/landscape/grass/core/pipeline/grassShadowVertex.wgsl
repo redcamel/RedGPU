@@ -26,27 +26,42 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
     let instance = culledInstances[input.instanceIndex];
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
-    let distToCam = distance(instPos, camPos);
+    let delta = instPos - camPos;
+    let distSq = dot(delta, delta);
 
     let shadowCullDist = grassUniforms.shadowCullDistance;
-    let shadowFadeStart = min(grassUniforms.shadowFadeStartDistance, shadowCullDist);
+    let shadowCullDistSq = shadowCullDist * shadowCullDist;
 
-    if (distToCam >= shadowCullDist) {
+    // 🌿 제곱거리 조기 탈락 (sqrt 0클록 기각)
+    if (distSq >= shadowCullDistSq) {
         output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);
         output.alphaFade = 0.0;
         return output;
     }
 
-    let fade = computeGrassDistanceFade(distToCam, shadowCullDist, shadowFadeStart, instance.scaleXZ, instance.scaleY);
+    var scaleXZ = instance.scaleXZ;
+    var scaleY = instance.scaleY;
+    var alphaFade: f32 = 1.0;
+
+    let shadowFadeStart = min(grassUniforms.shadowFadeStartDistance, shadowCullDist);
+    let shadowFadeStartSq = shadowFadeStart * shadowFadeStart;
+    if (distSq > shadowFadeStartSq) {
+        let distToCam = sqrt(distSq);
+        let shadowFadeRange = max(0.001, shadowCullDist - shadowFadeStart);
+        let fadeRatio = clamp((shadowCullDist - distToCam) / shadowFadeRange, 0.0, 1.0);
+        scaleXZ *= fadeRatio;
+        scaleY *= fadeRatio;
+        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
+    }
 
     let q = normalize(unpack4x8snorm(instance.packedQuat));
 
     let xform = transformGrassPosition(
         input.position,
         instPos,
-        fade.scaleXZ,
-        fade.scaleY,
+        scaleXZ,
+        scaleY,
         q,
         grassUniforms.minY,
         grassUniforms.invMeshHeight
@@ -54,7 +69,7 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
 
     output.clipPos = getShadowClipPosition(xform.worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.uv = input.uv;
-    output.alphaFade = fade.alphaFade;
+    output.alphaFade = alphaFade;
 
     return output;
 }

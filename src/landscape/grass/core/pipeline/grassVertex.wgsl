@@ -2,6 +2,7 @@
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassParams;
 #redgpu_include landscape.struct.GrassVertexOutput;
+#redgpu_include landscape.math.rotateVectorByQuat;
 #redgpu_include landscape.math.transformGrassPosition;
 #redgpu_include landscape.math.blendGrassGround;
 
@@ -22,24 +23,35 @@ fn main(input: VertexInput) -> VertexOutput {
     let instance = culledInstances[input.instanceIndex];
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
-    let distToCam = distance(instPos, camPos);
+    let delta = instPos - camPos;
+    let distSq = dot(delta, delta);
 
-    let cullDist = grassUniforms.cullingDistance;
-    let fadeStart = min(grassUniforms.fadeStartDistance, cullDist);
-    let fade = computeGrassDistanceFade(distToCam, cullDist, fadeStart, instance.scaleXZ, instance.scaleY);
+    var scaleXZ = instance.scaleXZ;
+    var scaleY = instance.scaleY;
+    var alphaFade: f32 = 1.0;
+
+    let fadeStart = min(grassUniforms.fadeStartDistance, grassUniforms.cullingDistance);
+    let fadeStartSq = fadeStart * fadeStart;
+    if (distSq > fadeStartSq) {
+        let distToCam = sqrt(distSq);
+        let fadeRatio = clamp((grassUniforms.cullingDistance - distToCam) * grassUniforms.invFadeRange, 0.0, 1.0);
+        scaleXZ *= fadeRatio;
+        scaleY *= fadeRatio;
+        alphaFade = smoothstep(0.0, 1.0, fadeRatio);
+    }
 
     let q = normalize(unpack4x8snorm(instance.packedQuat));
 
     let xform = transformGrassPosition(
         input.position,
         instPos,
-        fade.scaleXZ,
-        fade.scaleY,
+        scaleXZ,
+        scaleY,
         q,
         grassUniforms.minY,
         grassUniforms.invMeshHeight
     );
-    let worldNormal = rotateGrassNormal(input.normal, q);
+    let worldNormal = rotateVectorByQuat(input.normal, q);
 
     let relPos = xform.worldPos - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
@@ -49,7 +61,7 @@ fn main(input: VertexInput) -> VertexOutput {
     output.uv = input.uv;
     output.normal = computeGrassUpwardNormal(worldNormal, xform.heightRatio);
     output.heightRatio = xform.heightRatio;
-    output.alphaFade = fade.alphaFade;
+    output.alphaFade = alphaFade;
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(xform.worldPos, 1.0);
 

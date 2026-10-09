@@ -70,7 +70,7 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 4] = shadowCullDistance;
         f32[baseFloat + 5] = shadowFadeStartDistance;
         f32[baseFloat + 6] = 1.0 / Math.max(0.01, height); // invMeshHeight
-        f32[baseFloat + 7] = 0.0; // pad1
+        f32[baseFloat + 7] = 1.0 / Math.max(0.001, cullingDistance - fadeStartDistance); // invFadeRange
 
         // GrassMaterialUniforms (48B)
         f32[baseFloat + 8] = groundBlendStrength;
@@ -87,7 +87,7 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 16] = roughness;
         f32[baseFloat + 17] = shadowStrength;
         u32[baseFloat + 18] = receiveShadow ? 1 : 0;
-        u32[baseFloat + 19] = 0; // pad2
+        u32[baseFloat + 19] = 0; // padding (80B alignment)
 
         // 부모의 80바이트 정밀 업로드 호출
         this.uploadSlotBytes(slot, this.paramsSizeBytes);

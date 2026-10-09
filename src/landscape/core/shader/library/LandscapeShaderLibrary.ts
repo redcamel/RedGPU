@@ -272,8 +272,8 @@ export namespace LandscapeShaderLibrary {
         export const blendGrassGround = blendGrassGround_wgsl;
 
         /**
-         * [KO] 잔디 인스턴스 정점 변환, 쿼터니언 회전, 지면 침하 보정 및 거리 페이드 모듈
-         * [EN] Grass instance vertex transformation, quaternion rotation, ground sink compensation, and distance fade module
+         * [KO] 잔디 인스턴스 정점 변환, 쿼터니언 회전 및 지면 침하 보정 모듈
+         * [EN] Grass instance vertex transformation, quaternion rotation, and ground sink compensation module
          *
          * ```wgsl
          * #redgpu_include landscape.math.transformGrassPosition;
