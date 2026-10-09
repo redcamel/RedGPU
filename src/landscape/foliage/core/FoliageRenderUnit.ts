@@ -42,11 +42,6 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
      */
     relativeModelMatrix?: mat4 | null;
     /**
-     * [KO] 상대 법선 변환 행렬
-     * [EN] Relative normal transform matrix
-     */
-    relativeNormalMatrix?: mat4 | null;
-    /**
      * [KO] 뎁스 프리패스 렌더링 대상 여부
      * [EN] Whether rendering in depth prepass
      */
@@ -93,7 +88,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
     #isShadowMerged: boolean = false;
 
     #relativeModelMatrix: mat4 | null = null;
-    #relativeNormalMatrix: mat4 | null = null;
 
     #isDepthPrepass: boolean = false;
     #isMainOpaqueOrMasked: boolean = true;
@@ -112,7 +106,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
             slotIndex = -1,
             slotPooler = null,
             relativeModelMatrix = null,
-            relativeNormalMatrix = null,
             isDepthPrepass = false,
             isMainOpaqueOrMasked = !isShadowMerged,
             mainDepthMode = 'normal',
@@ -134,7 +127,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         this.#slotPooler = slotPooler;
 
         this.#relativeModelMatrix = relativeModelMatrix;
-        this.#relativeNormalMatrix = relativeNormalMatrix;
 
         this.#isDepthPrepass = isDepthPrepass;
         this.#isMainOpaqueOrMasked = isMainOpaqueOrMasked;
@@ -175,13 +167,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         return this.#relativeModelMatrix;
     }
 
-    /**
-     * [KO] 상대 법선 변환 행렬을 반환합니다.
-     * [EN] Returns the relative normal transform matrix.
-     */
-    get relativeNormalMatrix(): mat4 | null {
-        return this.#relativeNormalMatrix;
-    }
 
     /**
      * [KO] 메인 뎁스 패스 모드를 반환합니다.

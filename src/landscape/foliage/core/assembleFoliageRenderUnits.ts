@@ -162,7 +162,6 @@ function createPBRRenderUnit(
         strideBytes: PBR_STRIDE_BYTES,
         bottomOffset,
         relativeModelMatrix: identityMatrix,
-        relativeNormalMatrix: identityMatrix,
         slotIndex,
         slotPooler,
         lodIndex,
