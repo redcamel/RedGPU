@@ -100,6 +100,14 @@ function prepareFoliageMaterials(node: Mesh): void {
     }
 }
 
+interface FoliageSharedContext {
+    slotPooler?: FoliageSlotPooler | null;
+    groundBlendStrength?: number;
+    groundBlendRange?: number;
+    windMultiplier?: number;
+    windFlutterMultiplier?: number;
+}
+
 /**
  * [KO] PBR 식생 렌더 유닛을 생성하고 UBO 슬롯 풀러를 바인딩하는 단일 공통 함수입니다.
  * [EN] Unified common function instantiating a PBR foliage render unit and binding the UBO slot pooler.
@@ -108,24 +116,21 @@ function createPBRRenderUnit(
     meshNode: Mesh | undefined,
     geom: any,
     mat: any,
-    firstIndex: number,
-    indexCount: number,
+    firstIndex: number | undefined,
+    indexCount: number | undefined,
     lodIndex: number,
     receiveShadow: boolean,
     treeHeight: number,
     bottomOffset: number,
-    groundBlendStrength: number | undefined,
-    groundBlendRange: number | undefined,
-    windMultiplier: number | undefined,
-    windFlutterMultiplier: number | undefined,
-    slotPooler?: FoliageSlotPooler | null,
+    sharedContext: FoliageSharedContext,
     isImpostorOverride: boolean = false
 ): FoliageRenderUnit {
-    const {indexBuffer, vertexBuffer} = geom;
     const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = (mat as any) || {};
 
     const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
     const isMasked = !!useCutOff || alphaBlend === 1 || alphaBlend === 2 || !!transparent || isImpostor;
+
+    const {slotPooler, groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = sharedContext;
 
     let slotIndex = -1;
     if (slotPooler) {
@@ -156,8 +161,6 @@ function createPBRRenderUnit(
         material: mat,
         firstIndex,
         indexCount,
-        vertexCount: vertexBuffer?.vertexCount ?? 0,
-        isIndexed: !!indexBuffer,
         strideBytes: PBR_STRIDE_BYTES,
         bottomOffset,
         relativeModelMatrix: identityMatrix,
@@ -261,6 +264,14 @@ export default function assembleFoliageRenderUnits(
     } = options;
     const numLODs = Math.min(lods.length, 8);
 
+    const sharedContext: FoliageSharedContext = {
+        slotPooler,
+        groundBlendStrength,
+        groundBlendRange,
+        windMultiplier,
+        windFlutterMultiplier
+    };
+
     let maxBoundingRadius = 0;
     let maxBoundingHeight = 0;
     let autoBottomOffset = 0;
@@ -305,31 +316,18 @@ export default function assembleFoliageRenderUnits(
 
             // 각 서브메시 그룹별 PBR 렌더 유닛 생성 (공통 헬퍼 활용)
             for (let g = 0; g < groups.length; g++) {
-                const {
-                    rawNodes,
-                    geometry: groupGeom,
-                    material: groupMat,
-                    firstIndex,
-                    indexCount: groupIndexCount
-                } = groups[g];
-                const geom = unifiedGeometry || groupGeom;
-                const indexCount = groupIndexCount !== undefined ? groupIndexCount : (geom.indexBuffer?.indexCount ?? 0);
-
+                const group = groups[g];
                 const unit = createPBRRenderUnit(
-                    rawNodes[0]?.node,
-                    geom,
-                    groupMat,
-                    firstIndex,
-                    indexCount,
+                    group.rawNodes[0]?.node,
+                    unifiedGeometry || group.geometry,
+                    group.material,
+                    group.firstIndex,
+                    group.indexCount,
                     l,
                     lodReceiveShadow,
                     treeH,
                     0,
-                    groundBlendStrength,
-                    groundBlendRange,
-                    windMultiplier,
-                    windFlutterMultiplier,
-                    slotPooler
+                    sharedContext
                 );
 
                 renderUnits.push(unit);
@@ -422,16 +420,12 @@ export default function assembleFoliageRenderUnits(
             bbGeom,
             bbMat,
             0,
-            bbGeom.indexBuffer?.indexCount ?? 0,
+            bbGeom.indexBuffer?.indexCount,
             impostorLODIndex,
             false,
             height,
             bakeBottomOffset,
-            groundBlendStrength,
-            groundBlendRange,
-            windMultiplier,
-            windFlutterMultiplier,
-            slotPooler,
+            sharedContext,
             true // isImpostorOverride
         );
 

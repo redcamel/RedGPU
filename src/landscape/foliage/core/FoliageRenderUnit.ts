@@ -9,6 +9,7 @@ import Mesh from "../../../display/mesh/Mesh";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../core/scatter/ScatterVertexFormats";
 
 /**
  * [KO] Foliage 렌더 패스 유형 ('depthPrepass' 또는 'main')
@@ -110,7 +111,7 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         const isShadowMerged = init.isShadowMerged ?? false;
         super({
             ...init,
-            strideBytes: init.strideBytes ?? (isShadowMerged ? 12 : 32),
+            strideBytes: init.strideBytes ?? (isShadowMerged ? POSITION_ONLY_STRIDE_BYTES : PBR_STRIDE_BYTES),
             isMasked: init.isMasked ?? (!isShadowMerged),
             indexFormat: init.indexFormat || 'uint32',
             instanceBufferOffset: init.instanceBufferOffset ?? 0,
