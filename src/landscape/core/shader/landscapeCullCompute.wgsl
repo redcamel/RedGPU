@@ -14,7 +14,11 @@ struct CameraFrustumUniforms {
     lodMetric: f32,
     useHZB: u32,
 
-    padEnd: array<f32, 5>,
+    pad0: f32, // 256-byte alignment tail padding
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
+    pad4: f32,
 };
 
 #redgpu_include landscape.struct.LandscapeTile;

@@ -45,14 +45,14 @@ struct FoliageBakeUniforms {
 
     subMaxX: f32,
     subMaxZ: f32,
-    pad_strideFloats: u32,
-    pad0: u32,
+    pad0: u32, // strideFloats
+    pad1: u32,
 };
 
 struct FoliageGridTask {
     gridX: i32,
     gridZ: i32,
-    pad_baseTargetSlot: u32,
+    pad0: u32, // baseTargetSlot
     maxSlotsForGrid: u32,
 };
 

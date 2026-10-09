@@ -296,7 +296,7 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
 
         f32[60] = foliageSubCellColoration ? 1.0 : 0.0;
         f32[61] = foliageSubCellSize;
-        f32[62] = 0.0; // _padFoliage (16-byte alignment padding for debugMode)
+        f32[62] = 0.0; // pad2 (16-byte alignment padding for debugMode)
         u32[63] = debugMode;
 
         gpuDevice.queue.writeBuffer(

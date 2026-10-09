@@ -11,6 +11,6 @@ struct LandscapeLayerParams {
     heightBlendFactor: f32,
     stochasticTiling: f32,
     stochasticScale: f32,
-    _pad0: f32,
-    _pad1: f32,
+    pad0: f32,
+    pad1: f32,
 };

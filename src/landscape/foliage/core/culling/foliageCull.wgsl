@@ -20,12 +20,12 @@ struct FoliageCullingUniforms {
     useHZB: u32,
     viewportHeight: f32,
     depthBias: f32,
-    pad_hzbWidth: f32,
+    pad0: f32, // hzbWidth
 
-    pad_hzbHeight: f32,
-    pad0: f32,
-    pad1: f32,
+    pad1: f32, // hzbHeight
     pad2: f32,
+    pad3: f32,
+    pad4: f32,
 
     viewProjectionMatrix: mat4x4<f32>,
     mainFrustumPlanes: array<vec4<f32>, 6>,

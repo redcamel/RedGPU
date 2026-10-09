@@ -8,7 +8,8 @@ struct LandscapeUniforms {
     tileSizeZ: f32,
     baseQuads: f32,
     vhtTextureSize: vec2<f32>,
-    pad0: vec2<f32>,
+    pad0: f32,
+    pad1: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
     tanHalfFOV: f32,
@@ -21,6 +22,6 @@ struct LandscapeUniforms {
     heightmapShadowSoftness: f32,
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
-    _padFoliage: f32,
+    pad2: f32, // foliage sub-cell alignment
     debugMode: u32,
 };

@@ -122,7 +122,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
             for (let gx = startGx; gx <= endGx; gx++) {
                 tasksBuf[tOffset++] = gx;
                 tasksBuf[tOffset++] = gz;
-                tasksBuf[tOffset++] = 0; // pad_baseTargetSlot
+                tasksBuf[tOffset++] = 0; // pad0 (baseTargetSlot)
                 tasksBuf[tOffset++] = targetCount;
             }
         }
@@ -200,8 +200,8 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         f32[32] = subMaxX;
         f32[33] = subMaxZ;
-        u32[34] = 0; // pad_strideFloats
-        u32[35] = 0;
+        u32[34] = 0; // pad0 (strideFloats)
+        u32[35] = 0; // pad1
 
         gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
 

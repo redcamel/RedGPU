@@ -17,6 +17,6 @@ struct GrassTypeParam {
     shadowFadeStartSq: f32,
     invShadowFadeRange: f32,
     shadowCullDistance: f32,
+    pad0: u32,
     pad1: u32,
-    pad2: u32,
 };

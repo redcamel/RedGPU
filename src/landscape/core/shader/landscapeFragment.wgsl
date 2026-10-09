@@ -30,7 +30,7 @@ struct MaterialUniforms {
     activeLayerCount: u32,
     nearDetailDistance: f32,
     nearDetailFade: f32,
-    pad2: u32,
+    pad0: u32, // 16-byte alignment
     color: vec4<f32>,
     layerParams: array<LandscapeLayerParams, 8>,
 };
