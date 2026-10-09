@@ -54,6 +54,13 @@ class FoliageRenderer extends AScatterRenderer {
         sampleCount: number;
         validTypeCount: number;
     }> = new WeakMap();
+    #mainBundlesByView: WeakMap<View3D, {
+        bundle: GPURenderBundle;
+        systemBG: GPUBindGroup;
+        sampleCount: number;
+        validTypeCount: number;
+        useDepthPrepass: boolean;
+    }> = new WeakMap();
 
     #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
 
@@ -115,12 +122,21 @@ class FoliageRenderer extends AScatterRenderer {
     }
 
     /**
-     * [KO] 식생 생태계 변경 시 모든 렌더 번들(섀도우 및 뎁스 프리패스)을 일괄 무효화합니다. (GrassRenderer 대칭 메서드)
-     * [EN] Invalidates all render bundles (shadow and depth prepass) at once on foliage ecosystem changes. (Symmetric to GrassRenderer)
+     * [KO] 캐시된 모든 메인 패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached main pass render bundles to force regeneration on the next render.
+     */
+    markMainBundleDirty(): void {
+        this.#mainBundlesByView = new WeakMap();
+    }
+
+    /**
+     * [KO] 식생 생태계 변경 시 모든 렌더 번들(메인, 섀도우 및 뎁스 프리패스)을 일괄 무효화합니다. (GrassRenderer 대칭 메서드)
+     * [EN] Invalidates all render bundles (main, shadow and depth prepass) at once on foliage ecosystem changes. (Symmetric to GrassRenderer)
      */
     override markAllBundlesDirty(): void {
         this.markShadowBundleDirty();
         this.markDepthPrepassBundleDirty();
+        this.markMainBundleDirty();
     }
 
     /**
@@ -196,21 +212,49 @@ class FoliageRenderer extends AScatterRenderer {
             }
         }
 
-        this.#resetBoundState();
+        let mainViewCache = this.#mainBundlesByView.get(view);
+        const needsMainRebuild = !mainViewCache
+            || mainViewCache.systemBG !== systemBG
+            || mainViewCache.sampleCount !== sampleCount
+            || mainViewCache.validTypeCount !== validCount
+            || mainViewCache.useDepthPrepass !== this.#useDepthPrepass;
 
-        for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type!;
-            const culledGPU = item.culledGPU!;
-            const indirectGPU = item.indirectGPU!;
-            const renderUnits = foliageType.mainRenderUnits;
-            const unitCount = renderUnits.length;
-            const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
+        if (needsMainRebuild) {
+            const bundle = this.#recordMainRenderBundle(validCount, systemBG, sampleCount, msaaID, view);
+            if (bundle) {
+                mainViewCache = {
+                    bundle,
+                    systemBG: systemBG!,
+                    sampleCount,
+                    validTypeCount: validCount,
+                    useDepthPrepass: this.#useDepthPrepass
+                };
+                this.#mainBundlesByView.set(view, mainViewCache);
+            } else {
+                mainViewCache = undefined;
+                this.#mainBundlesByView.delete(view);
+            }
+        }
 
-            for (let s = 0; s < unitCount; s++) {
-                const unit = renderUnits[s];
-                const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
-                this.#drawRenderUnit(passEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
+        if (mainViewCache?.bundle) {
+            this.executeSingleBundle(passEncoder, mainViewCache.bundle);
+        } else {
+            this.#resetBoundState();
+
+            for (let t = 0; t < validCount; t++) {
+                const item = this.#validTypesMain[t];
+                const foliageType = item.type!;
+                const culledGPU = item.culledGPU!;
+                const indirectGPU = item.indirectGPU!;
+                const renderUnits = foliageType.mainRenderUnits;
+                const unitCount = renderUnits.length;
+                const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
+
+                for (let s = 0; s < unitCount; s++) {
+                    const unit = renderUnits[s];
+                    const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
+                    this.#drawRenderUnit(passEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
+                }
             }
         }
     }
@@ -286,6 +330,7 @@ class FoliageRenderer extends AScatterRenderer {
         this.#renderUnitDynamicBindGroup = null;
         this.#renderUnitVertexBindGroupLayout = null;
         this.markDepthPrepassBundleDirty();
+        this.markMainBundleDirty();
         this.#resetBoundState();
         for (let i = 0; i < this.#validTypesMain.length; i++) {
             this.#validTypesMain[i].type = null;
@@ -373,6 +418,52 @@ class FoliageRenderer extends AScatterRenderer {
 
         const bundle = bundleEncoder.finish({
             label: `Foliage_DepthPrepassBundle_${view.name}`,
+        });
+
+        return bundle;
+    }
+
+    #recordMainRenderBundle(
+        validCount: number,
+        systemBG: GPUBindGroup | null,
+        sampleCount: number,
+        msaaID: string,
+        view: View3D
+    ): GPURenderBundle | null {
+        const gpuDevice = this.gpuDevice;
+        if (!gpuDevice) return null;
+
+        const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            label: `Foliage_MainBundleEncoder_${view.name}`,
+            colorFormats: [
+                'rgba16float',
+                navigator.gpu.getPreferredCanvasFormat(),
+                'rgba16float'
+            ],
+            depthStencilFormat: 'depth32float',
+            sampleCount: sampleCount,
+        });
+
+        this.#resetBoundState();
+
+        for (let t = 0; t < validCount; t++) {
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
+            const renderUnits = foliageType.mainRenderUnits;
+            const unitCount = renderUnits.length;
+            const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
+
+            for (let s = 0; s < unitCount; s++) {
+                const unit = renderUnits[s];
+                const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
+                this.#drawRenderUnit(bundleEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
+            }
+        }
+
+        const bundle = bundleEncoder.finish({
+            label: `Foliage_MainBundle_${view.name}`,
         });
 
         return bundle;
