@@ -564,7 +564,7 @@ export default function assembleScatterRenderUnits(
 
         groups.push({
             material,
-            geometry: groupGeom as any,
+            geometry: groupGeom!,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
             firstIndex: groupFirstIndex,

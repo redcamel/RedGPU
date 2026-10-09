@@ -1054,7 +1054,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
             // [UBO 채널] GPU 슬롯 및 타입 파라미터만 갱신
             case 'cullingDistance':
-            case 'fadeStartDistance':
             case 'shadowCullDistance':
             case 'castShadow':
                 this.#notifyUniformDirty();
