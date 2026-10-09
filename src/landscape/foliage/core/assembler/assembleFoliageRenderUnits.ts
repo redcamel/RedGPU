@@ -8,7 +8,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import FoliageRenderUnit from "../renderUnit/FoliageRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "../Foliage";
-import assembleFoliageLODMeshes from "./internal/assembleFoliageLODMeshes";
+import assembleFoliageLODRenderUnits from "./internal/assembleFoliageLODRenderUnits";
 import buildFoliageImpostorRenderUnit from "./internal/buildFoliageImpostorRenderUnit";
 import {FoliageSlotPooler} from "../buffer/FoliageSlotPooler";
 
@@ -100,7 +100,7 @@ export default function assembleFoliageRenderUnits(
         const startSubOffset = renderUnits.length;
         const lodReceiveShadow = receiveShadow !== false;
 
-        const assembled = assembleFoliageLODMeshes(
+        const assembled = assembleFoliageLODRenderUnits(
             redGPUContext,
             lodMeshes,
             l,

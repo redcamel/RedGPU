@@ -1,6 +1,6 @@
 /**
- * [KO] 식생 LOD 레벨별 메시 결합 및 렌더 단위(Render Unit) 인스턴스 조립 모듈입니다.
- * [EN] Mesh combining and render unit instance assembly module per foliage LOD level.
+ * [KO] 식생 LOD 레벨별 메시 분석·병합 및 렌더 단위(Render Unit) 조립 모듈입니다.
+ * [EN] Mesh analysis, merging, and render unit instance assembly module per foliage LOD level.
  * @packageDocumentation
  */
 
@@ -19,10 +19,10 @@ import {FoliageSlotPooler} from "../../buffer/FoliageSlotPooler";
 const identityMatrix: mat4 = mat4.create();
 
 /**
- * [KO] 조립 완료된 LOD 레벨 결과 인터페이스입니다.
- * [EN] Interface representing the result of an assembled LOD level.
+ * [KO] 조립 완료된 LOD 레벨 렌더 단위 결과 인터페이스입니다.
+ * [EN] Interface representing the assembled LOD level render unit result.
  */
-export interface AssembledLODResult {
+export interface AssembledLODRenderUnitsResult {
     /**
      * [KO] 조립된 렌더 단위 목록
      * [EN] List of assembled render units
@@ -61,8 +61,14 @@ export interface AssembledLODResult {
 }
 
 /**
- * [KO] 단일 LOD 레벨에 속한 메시 노드들을 결합하고 PBR 렌더 단위 및 그림자용 통합 렌더 단위를 생성합니다.
- * [EN] Combines mesh nodes for a single LOD level, creating PBR render units and shadow merged render units.
+ * [KO] 하위 호환용 인터페이스 별칭
+ * [EN] Interface alias for backward compatibility
+ */
+export type AssembledLODResult = AssembledLODRenderUnitsResult;
+
+/**
+ * [KO] 단일 LOD 레벨에 속한 메시 노드들을 병합하고 PBR 렌더 단위 및 그림자용 통합 렌더 단위를 조립합니다.
+ * [EN] Merges mesh nodes for a single LOD level, assembling PBR render units and shadow merged render units.
  * @param redGPUContext -
  * [KO] RedGPU 컨텍스트 인스턴스
  * [EN] RedGPU context instance
@@ -85,14 +91,14 @@ export interface AssembledLODResult {
  * [KO] 조립 완료된 렌더 단위 및 바운딩 정보
  * [EN] Assembled render units and bounding information
  */
-export default function assembleFoliageLODMeshes(
+export default function assembleFoliageLODRenderUnits(
     redGPUContext: RedGPUContext,
     roots: Mesh[],
     lodIndex: number,
     options: FoliageOptions,
     lodReceiveShadow: boolean = true,
     slotPooler?: FoliageSlotPooler | null
-): AssembledLODResult {
+): AssembledLODRenderUnitsResult {
     const gpuDevice = redGPUContext.gpuDevice;
 
     for (let r = 0; r < roots.length; r++) {

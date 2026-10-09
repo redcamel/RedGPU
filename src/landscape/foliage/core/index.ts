@@ -11,7 +11,7 @@
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `assembleFoliageRenderUnits`: 계층적 식생 3D 모델을 분석·결합하여 단일 렌더 유닛으로 조립하는 순수 함수
  * - `createOctahedralImpostorGeometry`: 8방향/16방향 3D 옥타헤드럴 임포스터 지오메트리 생성 함수
- * - `assembleFoliageLODMeshes`: 식생 LOD별 원본 메시 순회 및 지오메트리 결합 함수
+ * - `assembleFoliageLODRenderUnits`: 식생 단일 LOD별 메시 분석·병합 및 렌더 단위 조립 함수
  * - `buildFoliageImpostorRenderUnit`: 옥타헤드럴 임포스터 베이킹 및 렌더 유닛 빌드 함수
  * - `createFoliageRenderUnitInstance`: 식생 렌더 유닛 인스턴스 팩토리 함수
  * - `prepareFoliageMaterials`: 식생 원본 재질 복제 및 파이프라인 준비 함수
@@ -25,7 +25,7 @@
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `assembleFoliageRenderUnits`: Pure function assembling hierarchical foliage models into combined render units
  * - `createOctahedralImpostorGeometry`: Function generating 8-way/16-way 3D octahedral billboard geometries
- * - `assembleFoliageLODMeshes`: Function traversing and combining source meshes per LOD level
+ * - `assembleFoliageLODRenderUnits`: Function assembling render units per foliage LOD level
  * - `buildFoliageImpostorRenderUnit`: Function baking octahedral impostors and creating impostor render units
  * - `createFoliageRenderUnitInstance`: Render unit instance factory function
  * - `prepareFoliageMaterials`: Function cloning and preparing foliage materials
@@ -58,7 +58,7 @@ import createOctahedralImpostorGeometry from "./impostor/octahedral/createOctahe
 
 // 4. Assembler & Internal Helpers
 import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembler/assembleFoliageRenderUnits";
-import assembleFoliageLODMeshes from "./assembler/internal/assembleFoliageLODMeshes";
+import assembleFoliageLODRenderUnits from "./assembler/internal/assembleFoliageLODRenderUnits";
 import buildFoliageImpostorRenderUnit from "./assembler/internal/buildFoliageImpostorRenderUnit";
 import createFoliageRenderUnitInstance from "./assembler/internal/createFoliageRenderUnitInstance";
 import prepareFoliageMaterials from "./assembler/internal/prepareFoliageMaterials";
@@ -80,7 +80,7 @@ export {
     assembleFoliageRenderUnits,
     createOctahedralImpostorGeometry,
     bakeFoliageImpostor,
-    assembleFoliageLODMeshes,
+    assembleFoliageLODRenderUnits,
     buildFoliageImpostorRenderUnit,
     createFoliageRenderUnitInstance,
     prepareFoliageMaterials,
