@@ -15,12 +15,7 @@ struct ShadowVertexOutput {
 fn main(input: ShadowVertexOutput) {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
 
-    let rgbMax = max(baseTex.r, max(baseTex.g, baseTex.b));
-    var sourceAlpha = baseTex.a;
-    if (sourceAlpha > 0.85 && rgbMax < 0.15) {
-        sourceAlpha = clamp((rgbMax - 0.02) / 0.10, 0.0, 1.0);
-    }
-    sourceAlpha *= input.alphaFade;
+    let sourceAlpha = baseTex.a * input.alphaFade;
 
     if (sourceAlpha < materialUniforms.alphaCutoff) {
         discard;
