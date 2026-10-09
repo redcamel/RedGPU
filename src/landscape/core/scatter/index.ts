@@ -21,13 +21,9 @@
 
 import assembleScatterRenderUnits, {
     type AssembledMeshGroup,
-    type MergedMeshGroup,
-    mergeScatterMeshes,
     type RawMeshNode,
     type ScatterAssemblyOptions,
-    type ScatterAssemblyResult,
-    type ScatterMeshMergeOptions,
-    type ScatterMeshMergeResult
+    type ScatterAssemblyResult
 } from "./assembleScatterRenderUnits";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "./ScatterRenderUnit";
 
@@ -58,7 +54,6 @@ export {
     AScatterManager,
     AScatterCuller,
     assembleScatterRenderUnits,
-    mergeScatterMeshes,
     ScatterRenderUnit,
     AScatterType,
     AScatterSlotPooler,
@@ -76,9 +71,6 @@ export {
     type ScatterAssemblyOptions,
     type ScatterAssemblyResult,
     type AssembledMeshGroup,
-    type ScatterMeshMergeOptions,
-    type ScatterMeshMergeResult,
-    type MergedMeshGroup,
     type RawMeshNode,
     type ScatterShaderReflectionConfig,
     type ScatterBaseSegmentAllocation,

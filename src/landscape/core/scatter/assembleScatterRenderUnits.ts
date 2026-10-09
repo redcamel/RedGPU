@@ -50,12 +50,6 @@ export interface AssembledMeshGroup {
 }
 
 /**
- * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
- * [EN] Type alias for backward compatibility.
- */
-export type MergedMeshGroup = AssembledMeshGroup;
-
-/**
  * [KO] 스캐터 렌더 유닛 조립 설정 옵션 인터페이스입니다.
  * [EN] Configuration options interface for scatter render unit assembly.
  */
@@ -80,12 +74,6 @@ export interface ScatterAssemblyOptions {
 }
 
 /**
- * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
- * [EN] Type alias for backward compatibility.
- */
-export type ScatterMeshMergeOptions = ScatterAssemblyOptions;
-
-/**
  * [KO] assembleScatterRenderUnits의 최종 렌더 유닛 조립 및 지오메트리 결과 객체입니다.
  * [EN] Final render unit assembly and geometry result object of assembleScatterRenderUnits.
  */
@@ -106,12 +94,6 @@ export interface ScatterAssemblyResult {
     minZ: number;
     maxZ: number;
 }
-
-/**
- * [KO] 이전 버전 호환성을 위한 Type Alias입니다.
- * [EN] Type alias for backward compatibility.
- */
-export type ScatterMeshMergeResult = ScatterAssemblyResult;
 
 /**
  * [KO] RedGPU Mesh 인스턴스의 위치, 오일러 회전각(Degree), 스케일을 기반으로 로컬 4x4 행렬을 계산합니다.
@@ -360,7 +342,7 @@ export default function assembleScatterRenderUnits(
         entry.raws.push(raw);
     }
 
-    const groups: MergedMeshGroup[] = [];
+    const groups: AssembledMeshGroup[] = [];
 
     const generateShadow = options?.generateShadowMergedGeometry ?? false;
     let shadowMergedPositions: Float32Array | null = null;
@@ -640,11 +622,8 @@ export default function assembleScatterRenderUnits(
             vertexCount: group.vertexCount,
             indexCount: group.indexCount,
             firstIndex: group.firstIndex,
-            isIndexed: !!unifiedGeometry.indexBuffer,
-            strideBytes: unifiedGeometry.vertexBuffer?.stride ? unifiedGeometry.vertexBuffer.stride * 4 : 72,
             mesh: group.rawNodes[0]?.node,
-            material: group.material,
-            baseColorTexture: group.material?.baseColorTexture ?? null
+            material: group.material
         });
     }) : [];
 
@@ -681,6 +660,5 @@ function getMaterialKey(mat: any): string {
 }
 
 export {
-    assembleScatterRenderUnits,
-    assembleScatterRenderUnits as mergeScatterMeshes
+    assembleScatterRenderUnits
 };

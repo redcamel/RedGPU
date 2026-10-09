@@ -19,22 +19,22 @@ export interface ScatterRenderUnitInitOptions {
     geometry: Geometry;
 
     /**
-     * [KO] 지오메트리의 정점 수
-     * [EN] Number of vertices in the geometry
+     * [KO] 지오메트리의 정점 수 (생략 시 geometry.vertexBuffer.vertexCount로부터 자동 계산)
+     * [EN] Number of vertices in the geometry (auto-computed from geometry.vertexBuffer.vertexCount if omitted)
      */
-    vertexCount: number;
+    vertexCount?: number;
 
     /**
-     * [KO] 지오메트리의 인덱스 수 (인덱스 버퍼가 없으면 vertexCount와 동일)
-     * [EN] Number of indices in the geometry (equal to vertexCount if no index buffer)
+     * [KO] 지오메트리의 인덱스 수 (생략 시 geometry.indexBuffer.indexCount 또는 vertexCount로부터 자동 계산)
+     * [EN] Number of indices in the geometry (auto-computed from indexBuffer.indexCount or vertexCount if omitted)
      */
-    indexCount: number;
+    indexCount?: number;
 
     /**
-     * [KO] 인덱스 버퍼를 사용하는지 여부
-     * [EN] Whether an index buffer is used
+     * [KO] 인덱스 버퍼를 사용하는지 여부 (생략 시 !!geometry.indexBuffer로부터 자동 계산)
+     * [EN] Whether an index buffer is used (auto-computed from !!geometry.indexBuffer if omitted)
      */
-    isIndexed: boolean;
+    isIndexed?: boolean;
 
     /**
      * [KO] 인덱스 포맷 (기본값: 'uint32')
@@ -43,10 +43,10 @@ export interface ScatterRenderUnitInitOptions {
     indexFormat?: GPUIndexFormat;
 
     /**
-     * [KO] 버텍스 스트라이드 바이트 크기
-     * [EN] Vertex stride in bytes
+     * [KO] 버텍스 스트라이드 바이트 크기 (생략 시 geometry.vertexBuffer.stride * 4 또는 72바이트 기본값 적용)
+     * [EN] Vertex stride in bytes (auto-computed from geometry.vertexBuffer.stride * 4 or 72 bytes if omitted)
      */
-    strideBytes: number;
+    strideBytes?: number;
 
     /**
      * [KO] GPU 인디렉트 버퍼 내 해당 렌더 단위의 바이트 오프셋
@@ -154,12 +154,8 @@ export class ScatterRenderUnit {
     constructor(init: ScatterRenderUnitInitOptions) {
         const {
             geometry,
-            vertexCount,
-            indexCount,
             firstIndex = 0,
-            isIndexed,
             indexFormat = 'uint32',
-            strideBytes,
             indirectOffsetBytes = 0,
             instanceBufferOffset = 0,
             mesh,
@@ -169,19 +165,24 @@ export class ScatterRenderUnit {
             isMasked = false
         } = init;
 
+        const resolvedVertexCount = init.vertexCount ?? (geometry.vertexBuffer?.vertexCount ?? 0);
+        const resolvedIsIndexed = init.isIndexed !== undefined ? init.isIndexed : !!geometry.indexBuffer;
+        const resolvedIndexCount = init.indexCount ?? (geometry.indexBuffer?.indexCount ?? resolvedVertexCount);
+        const resolvedStrideBytes = init.strideBytes ?? (geometry.vertexBuffer?.stride ? geometry.vertexBuffer.stride * 4 : 72);
+
         this.#geometry = geometry;
-        this.#vertexCount = vertexCount;
-        this.#indexCount = indexCount;
+        this.#vertexCount = resolvedVertexCount;
+        this.#indexCount = resolvedIndexCount;
         this.#firstIndex = firstIndex;
-        this.#isIndexed = isIndexed;
+        this.#isIndexed = resolvedIsIndexed;
         this.#indexFormat = indexFormat;
-        this.#strideBytes = strideBytes;
+        this.#strideBytes = resolvedStrideBytes;
         this.#indirectOffsetBytes = indirectOffsetBytes;
         this.#instanceBufferOffset = instanceBufferOffset;
 
         this.#mesh = mesh;
         this.#material = material;
-        this.#baseColorTexture = baseColorTexture;
+        this.#baseColorTexture = baseColorTexture ?? material?.baseColorTexture ?? null;
         this.#lodIndex = lodIndex;
         this.#isMasked = isMasked;
     }
