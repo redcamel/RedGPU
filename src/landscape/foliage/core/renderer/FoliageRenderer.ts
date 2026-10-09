@@ -390,7 +390,6 @@ class FoliageRenderer extends AScatterRenderer {
 
         this.#resetBoundState();
 
-        // [1단계] 모든 식생 타입의 Opaque Fast-Z 렌더 유닛 선행 일괄 드로우
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;
@@ -403,7 +402,6 @@ class FoliageRenderer extends AScatterRenderer {
             }
         }
 
-        // [2단계] 모든 식생 타입의 Masked 렌더 유닛 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;

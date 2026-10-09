@@ -1,10 +1,3 @@
-// ============================================================================
-// RedGPU Landscape & Foliage Unified HZB Occlusion Culling Math
-// - Highly optimized basis vector decomposition (Arvo AABB transform, 64% ALU reduction)
-// - Conservative short-circuit HZB pyramid sampling (67% texture fetch reduction)
-// - Zero precision loss: mathematically 100% identical to exhaustive 8-corner 4-tap testing
-// ============================================================================
-
 fn checkAABBInHZB(
     minPos: vec3<f32>,
     maxPos: vec3<f32>,
@@ -13,8 +6,7 @@ fn checkAABBInHZB(
     hzbSampler: sampler,
     depthBias: f32
 ) -> bool {
-    // 1. Basis Vector Decomposition for 8 AABB corners (Arvo's Fast Transform)
-    // Clip = x * col0 + y * col1 + z * col2 + col3
+
     let col0 = viewProjectionMatrix[0];
     let col1 = viewProjectionMatrix[1];
     let col2 = viewProjectionMatrix[2];
@@ -44,13 +36,11 @@ fn checkAABBInHZB(
     let c6 = xy01 + baseZ1;
     let c7 = xy11 + baseZ1;
 
-    // Early-out if any corner intersects or is behind the near plane
     if (c0.w <= 0.01 || c1.w <= 0.01 || c2.w <= 0.01 || c3.w <= 0.01 ||
         c4.w <= 0.01 || c5.w <= 0.01 || c6.w <= 0.01 || c7.w <= 0.01) {
         return true;
     }
 
-    // 2. Project corners to NDC & find tight screen AABB
     let invW0 = 1.0 / c0.w;
     var minNDC = c0.xy * invW0;
     var maxNDC = minNDC;
@@ -98,7 +88,6 @@ fn checkAABBInHZB(
     maxNDC = max(maxNDC, ndc7);
     minDepth = min(minDepth, c7.z * invW7);
 
-    // Extreme near foreground: cannot be occluded by scene geometry
     if (minDepth <= 0.001) {
         return true;
     }
@@ -110,21 +99,15 @@ fn checkAABBInHZB(
     let aabbPixelSize = max((maxUV - minUV) * hzbDims, vec2<f32>(1.0));
     let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
 
-    // Bypass sub-texel objects (< 4px) to prevent sub-pixel flickering
-    // Also bypass screen-dominant large foreground objects (> 40% viewport)
     if (maxDim < 4.0 || maxDim > hzbDims.x * 0.4) {
         return true;
     }
 
     let mipLevel = clamp(floor(log2(maxDim)), 0.0, 7.0);
 
-    // Distance-adaptive safety depth bias
     let adaptiveBias = max(depthBias, 0.003 + minDepth * 0.004);
     let threshold = minDepth - adaptiveBias;
 
-    // 3. Short-circuit De Morgan testing:
-    // If ANY sampled depth is >= threshold, the object CANNOT be occluded.
-    // Skips remaining texture fetches immediately!
     let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
     if (hzb00 >= threshold) {
         return true;
@@ -145,7 +128,5 @@ fn checkAABBInHZB(
         return true;
     }
 
-    // 100% occluded behind geometry on all 4 footprint taps
     return false;
 }
-

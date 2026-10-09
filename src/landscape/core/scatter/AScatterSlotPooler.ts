@@ -71,19 +71,16 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         this.paramsSizeBytes = paramsSizeBytes;
         this.paramsSizeFloats = paramsSizeBytes / 4;
 
-        // CPU 미러 버퍼 사전 할당
         const totalFloats = maxSlots * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer = new Float32Array(totalFloats);
         this.#cpuUint32View = new Uint32Array(this.#cpuBuffer.buffer);
 
-        // LIFO 스택 초기화 (0번부터 순차 할당되도록 역순 push)
         this.#freeSlotStack = new Int32Array(maxSlots);
         for (let i = 0; i < maxSlots; i++) {
             this.#freeSlotStack[i] = maxSlots - 1 - i;
         }
         this.#freeTop = maxSlots;
 
-        // 고정 메가 UBO GPUBuffer 생성 (소유권 일원화)
         const gpuDevice = this.gpuDevice;
         if (gpuDevice) {
             this.#gpuBuffer = gpuDevice.createBuffer({
@@ -142,11 +139,9 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         if (slot < 0 || slot >= this.maxSlots) return;
         if (this.#freeTop >= this.maxSlots) return;
 
-        // CPU 슬롯 메모리 0 초기화
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer.fill(0, baseFloat, baseFloat + this.paramsSizeFloats);
 
-        // VRAM 동기화 (Zero-GC 정밀 write)
         this.uploadSlotBytes(slot, this.paramsSizeBytes);
 
         this.#freeSlotStack[this.#freeTop] = slot;

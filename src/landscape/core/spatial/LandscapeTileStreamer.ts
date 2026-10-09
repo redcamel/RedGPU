@@ -1,3 +1,8 @@
+/**
+ * [KO] 카메라 위치 기반 비동기 지형 타일 스트리밍, LRU 캐시 및 가상 텍스처 아틀라스 베이킹 모듈입니다.
+ * [EN] Asynchronous terrain tile streaming, LRU caching, and virtual texture atlas baking module based on camera position.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import LandscapeComponent from "./LandscapeComponent";

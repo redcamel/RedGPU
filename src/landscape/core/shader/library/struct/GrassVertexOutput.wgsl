@@ -1,8 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Grass Pipeline VertexOutput Structure
-// - Shared between grassVertex, grassFragmentNear, and grassFragmentFar
-// ============================================================================
-
 struct VertexOutput {
     @builtin(position) clipPos: vec4<f32>,
     @location(0) worldPos: vec3<f32>,

@@ -11,4 +11,3 @@ fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
         }
     }
 }
-

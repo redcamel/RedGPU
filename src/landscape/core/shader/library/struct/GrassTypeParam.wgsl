@@ -1,8 +1,8 @@
 struct GrassTypeParam {
-    cullingDistanceSq: f32, // Pre-squared culling distance for fast dot() check
-    farDistanceSq: f32,     // Pre-squared Far distance threshold
-    fadeStartSq: f32,       // Pre-squared distance threshold for fade start
-    invFadeRange: f32,      // 1.0 / (cullingDistance - fadeStart)
+    cullingDistanceSq: f32,
+    farDistanceSq: f32,
+    fadeStartSq: f32,
+    invFadeRange: f32,
     rawBaseOffset: u32,
     culledNearBaseOffset: u32,
     culledFarBaseOffset: u32,
@@ -12,7 +12,7 @@ struct GrassTypeParam {
     hasFarStage: u32,
     instanceCount: u32,
     maxInstances: u32,
-    cullingDistance: f32,   // Camera distance boundary for linear fade
+    cullingDistance: f32,
     shadowCullDistanceSq: f32,
     shadowFadeStartSq: f32,
     invShadowFadeRange: f32,
@@ -20,4 +20,3 @@ struct GrassTypeParam {
     pad1: u32,
     pad2: u32,
 };
-

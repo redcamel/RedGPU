@@ -1,3 +1,9 @@
+/**
+ * [KO] 스캐터 객체(잔디, 식생 등)를 위한 대용량 GPU 메가버퍼 추상 기본 클래스 모듈입니다.
+ * [EN] Abstract base class module for high-capacity GPU scatter mega-buffers (grass, foliage, etc.).
+ * @packageDocumentation
+ */
+
 import RedGPUObject from '../../../base/RedGPUObject';
 import RedGPUContext from '../../../context/RedGPUContext';
 
@@ -476,7 +482,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
         if (this.#totalIndirectDrawCalls === 0) return;
 
-        // 1. 메인 간접 드로우 버퍼 리셋
         const indirectGPUBuffer = this.#indirectGPUBuffer;
         if (indirectGPUBuffer) {
             const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
@@ -503,7 +508,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
             }
         }
 
-        // 2. 파생 클래스 전용 간접 드로우 버퍼 확장 리셋 훅 호출 (Foliage 그림자 간접 버퍼 등)
         this.onResetMultiIndirectCommands(commandEncoder ?? null);
     }
 
@@ -513,7 +517,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * @param commandEncoder - GPU 커맨드 인코더 (없을 시 null)
      */
     protected onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
-        // 기본 구현 없음 (자식 클래스에서 필요 시 오버라이드)
     }
 
     /**
@@ -577,8 +580,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Newly expanded instance capacity
      */
     onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
-        // [KO] 순수 GPU 메가버퍼 기본 구현: 별도의 CPU 동기화를 수행하지 않음 (Zero-op)
-        // [EN] Pure GPU mega-buffer default: No CPU synchronization performed (Zero-op)
     }
 
     /**

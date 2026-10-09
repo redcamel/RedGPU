@@ -23,7 +23,6 @@ fn main(input: VertexInput) -> VertexOutput {
     let instance = culledInstances[input.instanceIndex];
     let instPos = vec3<f32>(instance.posX, instance.posY, instance.posZ);
 
-    // 🌿 [0클록 혁신] 컬링 컴퓨트에서 인스턴스당 1회 계산된 값 언팩 & 직통 적용
     let fadeData = unpack4x8unorm(instance.packedBounding);
     let fadeRatio = fadeData.x;
     let alphaFade = fadeData.y;

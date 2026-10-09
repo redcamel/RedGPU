@@ -1,14 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Foliage GPU Baking Compute Shader
-// - Executes per 100m scatter grid or streaming subcell update
-// - 1:1 Exact Mathematical Equivalence with previous CPU subcell scattering:
-//   * Exact deterministic computeFoliageGridSeed + XorShift32 PRNG sequence
-//   * Exact targetLayer WeightMap (splatmap >= 0.10) evaluation
-//   * VHT virtual height bilinear terrain snapping & normal quaternion alignment
-//   * VBT ground albedo color sampling
-//   * Permanent write to rawInstances VRAM mega-buffer
-// ============================================================================
-
 #redgpu_include landscape.struct.FoliageInstance;
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
@@ -19,7 +8,7 @@ struct FoliageBakeUniforms {
     halfWorldSizeX: f32,
     halfWorldSizeZ: f32,
 
-    gridSize: f32,                 // FIXED_SCATTER_GRID_SIZE (100.0m)
+    gridSize: f32,
     targetCountPerHectare: u32,
     maxAttempts: u32,
     nameHash: u32,
@@ -75,13 +64,11 @@ struct FoliageGridTask {
 @group(0) @binding(5) var weightTexture: texture_2d<f32>;
 @group(0) @binding(6) var<storage, read> gridTasks: array<FoliageGridTask>;
 
-// [Visual Parity] CPU computeScatterGridSeed 1:1 Exact Match
 fn computeFoliageGridSeed(gridX: i32, gridZ: i32, nameHash: u32) -> u32 {
     let seed = ((u32(gridX) * 73856093u) ^ (u32(gridZ) * 19349663u) ^ (nameHash * 83492791u));
     return select(seed, 0x9e3779b9u, seed == 0u);
 }
 
-// [Visual Parity] CPU XorShift32 1:1 Exact Match
 fn xorShift32(seed: ptr<function, u32>) -> f32 {
     var s: u32 = *seed;
     s ^= s << 13u;
@@ -115,7 +102,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     var generatedInGrid = 0u;
     var writtenCount = 0u;
 
-    // 1:1 Exact Match with CPU Foliage.ts instance generation loop
     for (var i = 0u; i < uniforms.maxAttempts && generatedInGrid < uniforms.targetCountPerHectare; i = i + 1u) {
         let rX = xorShift32(&seed);
         let rZ = xorShift32(&seed);
@@ -126,12 +112,10 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let u = (posX + uniforms.halfWorldSizeX) * uniforms.invWorldSizeX;
         let v = (posZ + uniforms.halfWorldSizeZ) * uniforms.invWorldSizeZ;
 
-        // Boundary check
         if (u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0) {
             continue;
         }
 
-        // Splat WeightMap evaluation (1:1 with CPU sampleNormalizedLayerWeight)
         if (uniforms.hasWeightMap != 0u) {
             let weight = sampleNormalizedLayerWeight(weightTexture, landscapeSampler, vec2<f32>(u, v), uniforms.weightChannelIndex);
             if (weight < 0.1) {
@@ -146,7 +130,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             }
         }
 
-        // Bilinear terrain height & normal evaluation
         let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
         let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
 
@@ -181,7 +164,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         let invLen = 1.0 / sqrt(nx * nx + 1.0 + nz * nz);
 
-        // Slope filtering (1:1 with CPU Math.acos)
         if (uniforms.hasSlopeFilter != 0u) {
             let slopeTan2 = nx * nx + nz * nz;
             if (slopeTan2 < uniforms.minSlopeTan2 || slopeTan2 > uniforms.maxSlopeTan2) {
@@ -238,7 +220,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         generatedInGrid = generatedInGrid + 1u;
 
-        // SubCell bounding box check
         if (posX >= uniforms.subMinX && posX < uniforms.subMaxX && posZ >= uniforms.subMinZ && posZ < uniforms.subMaxZ) {
             if (writtenCount >= task.maxSlotsForGrid) {
                 return;
@@ -253,7 +234,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             inst.posZ = posZ;
             inst.scaleY = scaleY;
 
-            // Pack rotation quaternion
             let ix = clamp(i32(rotX * 32767.0), -32768, 32767);
             let iy = clamp(i32(rotY * 32767.0), -32768, 32767);
             let iz = clamp(i32(rotZ * 32767.0), -32768, 32767);

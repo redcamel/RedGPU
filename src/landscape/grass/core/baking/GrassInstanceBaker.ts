@@ -14,6 +14,10 @@ export const GRASS_CELL_SIZE: number = 16.0;
 const DEFAULT_GRASS_MIN_SCALE = Object.freeze([0.8, 0.8] as const);
 const DEFAULT_GRASS_MAX_SCALE = Object.freeze([1.2, 1.2] as const);
 
+/**
+ * [KO] 지형(Landscape) 높이맵 및 레이어 가중치 텍스처를 기반으로 잔디 인스턴스를 100% GPU 베이킹하는 클래스입니다.
+ * [EN] Baker class that bakes grass instances 100% on the GPU based on landscape heightmaps and layer weight textures.
+ */
 export default class GrassInstanceBaker extends AScatterInstanceBaker {
     #uniformArrayBuffer: ArrayBuffer = new ArrayBuffer(256);
     #uniformFloat32View: Float32Array;
@@ -59,7 +63,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         const {worldSizeX, worldSizeZ, invWorldSizeX, invWorldSizeZ, heightScale} = landscape;
 
-        // 16m 서브셀 단위 계산
         const cellSize = GRASS_CELL_SIZE;
         const effectiveRadius = Math.max(grass.streamingRadius || grass.cullingDistance || 80.0, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
@@ -67,7 +70,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const centerCellX = Math.floor(centerX / cellSize);
         const centerCellZ = Math.floor(centerZ / cellSize);
 
-        // 카메라 중심 거리순 셀 오프셋 목록 가져오기
         const spiralOffsets = this.#getSpiralOffsets(cellRadius);
         const totalCircularCells = spiralOffsets.length / 2;
 
@@ -88,7 +90,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
             gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
         }
 
-        // 셀당 인스턴스 수 계산 (16m x 16m = 256m²)
         const targetDensity = Math.max(1, Math.min(1024, grass.instancesPerCell || 64));
         const maxCellsAllowed = Math.floor(alloc.maxInstances / targetDensity);
         const totalCells = Math.min(totalCircularCells, Math.max(1, maxCellsAllowed));
@@ -96,7 +97,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         alloc.instanceCount = totalCells * targetDensity;
 
-        // TargetLayer WeightMap 찾기
         let weightView: GPUTextureView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
         let hasWeightMap = 0;
         let weightChannelIndex = 0;

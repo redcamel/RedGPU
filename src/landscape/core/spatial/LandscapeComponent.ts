@@ -1,4 +1,10 @@
 /**
+ * [KO] 지형 개별 타일(청크) 컴포넌트의 공간 위치 및 인덱스 메타데이터 모듈입니다.
+ * [EN] Spatial world coordinates and grid index metadata module for individual terrain tiles (chunks).
+ * @packageDocumentation
+ */
+
+/**
  * [KO] Landscape를 구성하는 개별 타일(청크) 컴포넌트의 공간 위치 및 인덱스 메타데이터를 저장하는 불변 값 객체입니다.
  * [EN] Immutable value object storing the spatial world coordinates and grid component indices of an individual terrain tile (chunk).
  *

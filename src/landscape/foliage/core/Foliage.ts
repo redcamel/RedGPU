@@ -1068,7 +1068,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     override onParameterChanged(prop: string, value: any, prevValue?: any): void {
         switch (prop) {
-            // [Bake 채널] 인스턴스 재생성 및 재배치 필요
             case 'targetLayer':
             case 'minSlope':
             case 'maxSlope':
@@ -1085,7 +1084,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#notifyUniformDirty();
                 break;
 
-            // [UBO 채널] GPU 슬롯 및 타입 파라미터만 갱신
             case 'cullingDistance':
             case 'fadeStartDistance':
             case 'shadowCullDistance':
@@ -1480,7 +1478,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
             allocation.instanceCount = Math.max(0, currentActive - instanceCount);
 
-            // [100% GPU Re-bake to compact slot]
             const landscape = this.#landscape;
             if (this.#baker && landscape?.hasValidScatterAtlas && lastCount > 0) {
                 this.#baker.dispatchBakeSubCell(

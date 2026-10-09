@@ -98,8 +98,6 @@ fn main(
     let hScale = uniforms.heightScale;
     let stepDist = max(0.0001, uniforms.texelWorldSize * 8.0);
 
-    // [KO] 3x3 Sobel 가중치 필터링: 수평/수직 인접에 2.0, 대각선 인접에 1.0 가중치
-    // [EN] 3x3 Sobel weighted filtering: 2.0 weight for orthogonal neighbors, 1.0 for diagonal neighbors
     let dX = ((hTR + 2.0 * hR + hBR) - (hTL + 2.0 * hL + hBL)) * hScale;
     let dZ = ((hBL + 2.0 * hB + hBR) - (hTL + 2.0 * hT + hTR)) * hScale;
 

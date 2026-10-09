@@ -1,3 +1,8 @@
+/**
+ * [KO] 공간 그리드 타일 로딩 상태 및 LOD 단계 실시간 2D 캔버스 시각화 디버거 모듈입니다.
+ * [EN] Real-time 2D canvas debugger module visualizing tile load states and LOD levels across the spatial grid.
+ * @packageDocumentation
+ */
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
 import Landscape from "../../../Landscape";
 import {LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../../LANDSCAPE_DEFAULT_LOD_COLORS";

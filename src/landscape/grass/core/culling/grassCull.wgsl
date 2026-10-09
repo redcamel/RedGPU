@@ -1,11 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Grass Ultra-Fast GPU Culling Compute Shader
-// - Single-pass unified dispatch across all registered grass types
-// - Zero texture sampling, Zero procedural calculations
-// - Distance + Frustum 6-plane culling only
-// - Updates culledInstances buffer and indirect draw indexed commands atomically
-// ============================================================================
-
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.struct.GrassTypeParam;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
@@ -37,12 +29,10 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let inst = rawInstances[index];
 
-    // Filter out invalid/masked instances
     if (inst.posY < -900000.0) {
         return;
     }
 
-    // Extract typeId from upper 8 bits of packedGroundColorAndType
     let typeIdx = unpackTypeId(inst.packedGroundColorAndType);
     if (typeIdx >= 64u) {
         return;
@@ -61,23 +51,19 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let delta = pos - uniforms.cameraPosition;
     let distSq = dot(delta, delta);
 
-    // Distance Cull
     if (distSq > typeInfo.cullingDistanceSq) {
         return;
     }
 
-    // Unpack bounding sphere (centerOffsetY, boundRadius)
     let boundData = unpack2x16float(inst.packedBounding);
     let centerOffsetY = boundData.x;
     let boundRadius = boundData.y;
     let sphereCenter = pos + vec3<f32>(0.0, centerOffsetY, 0.0);
 
-    // Frustum 6-plane Cull
     if (!testSphereInFrustum(sphereCenter, boundRadius, uniforms.frustumPlanes)) {
         return;
     }
 
-    // Stage allocation (Near vs Far)
     let isFar = typeInfo.hasFarStage != 0u && distSq > typeInfo.farDistanceSq;
     let targetStageSlot = select(typeInfo.nearIndirectSlot, typeInfo.farIndirectSlot, isFar);
     let culledBase = select(typeInfo.culledNearBaseOffset, typeInfo.culledFarBaseOffset, isFar);
@@ -88,13 +74,11 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         return;
     }
 
-    // Sync all render unit draw calls for this stage
     let numUnits = max(typeInfo.renderUnitCount, 1u);
     for (var s = 1u; s < numUnits; s = s + 1u) {
         atomicAdd(&indirectCommands[targetStageSlot + s].instanceCount, 1u);
     }
 
-    // 🌿 인스턴스당 단 1회 선행 페이드 계산 (정점 셰이더 및 그림자 셰이더의 수십만 회 중복 연산 완전 소거)
     var fadeRatio: f32 = 1.0;
     var alphaFade: f32 = 1.0;
     var shadowFadeRatio: f32 = 1.0;
@@ -122,8 +106,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     var culledInst = inst;
-    // 🌿 scaleXZ, scaleY 원본은 100% 불변 보존
-    // 🌿 미사용 packedBounding 슬롯(32비트)에 8비트 4채널로 메인 + 그림자 페이드 완벽 패킹
+
     culledInst.packedBounding = pack4x8unorm(vec4<f32>(fadeRatio, alphaFade, shadowFadeRatio, shadowAlphaFade));
 
     let culledTargetIdx = culledBase + writeSlot;

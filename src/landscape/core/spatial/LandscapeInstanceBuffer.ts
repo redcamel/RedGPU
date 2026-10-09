@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 타일 인스턴스 버퍼 및 간접 드로우 인자 버퍼 관리자 모듈입니다.
+ * [EN] Buffer manager module handling terrain tile instance buffers and indirect draw arguments.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
@@ -257,7 +262,6 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
 
         f32[8] = vhtTextureWidth;
         f32[9] = vhtTextureHeight;
-        // f32[10], f32[11] are reserved padding for 16-byte alignment of lodColors
 
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {

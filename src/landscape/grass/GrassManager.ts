@@ -269,7 +269,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             if (isDirty) {
                 this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
 
-                // rebakeAll 실행 시 이미 각 잔디 타입별 updateTypeParams가 전송되었으므로 중복 전송 방지
                 if (!rebakedThisFrame) {
                     const alloc = this.#megaBuffer.getAllocation(typeId);
                     if (alloc) {
@@ -281,13 +280,11 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#dirtyUboMask = 0;
 
         if (standalone) {
-            // VRAM 초고속 템플릿 복사 리셋 (Zero-GC: PRE_PROCESS 인코더 활용)
             this.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
             );
 
-            // GPU 초고속 컬링 단일 패스 디스패치 (Zero-GC: 재사용 인스턴스 콜백 바인딩)
             this.commandEncoderManager.addPreProcessComputePass(
                 'Grass_GPU_Culling_ComputePass',
                 this.#onPreProcessComputePass
@@ -409,12 +406,18 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#currentRenderViewStateData = null;
     }
 
-    // Zero-GC: VRAM 간접 드로우 템플릿 복사를 위한 바인딩 콜백
+    /**
+     * [KO] VRAM 간접 드로우 커맨드 템플릿 복사를 위한 바인딩 콜백 (Zero-GC)
+     * [EN] Binding callback for resetting multi-indirect draw commands in VRAM (Zero-GC)
+     */
     #onResetMultiIndirectCommands = (encoder: GPUCommandEncoder): void => {
         this.#megaBuffer.resetMultiIndirectCommands(encoder);
     };
 
-    // Zero-GC: 매 프레임 임시 클로저 생성 방지를 위한 바인딩 콜백
+    /**
+     * [KO] GPU 초고속 컬링 컴퓨트 패스 실행 콜백 (Zero-GC)
+     * [EN] Callback for executing GPU compute culling pass (Zero-GC)
+     */
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         if (!this.#currentRenderViewStateData) return;
         this.#culler.dispatchPass(
@@ -471,7 +474,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         }
     }
 
-    // Zero-GC: 잔디 UBO 갱신 요청 비트마스크 등록 콜백 (CPU 1사이클 비트마스크 세팅)
+    /**
+     * [KO] 잔디 UBO 갱신 요청 비트마스크 등록 콜백 (Zero-GC: 1사이클 비트 연산)
+     * [EN] Bitmask registration callback for grass UBO dirty requests (Zero-GC: 1-cycle bitwise operation)
+     */
     #onGrassUniformDirty = (typeId?: number): void => {
         if (typeId !== undefined && typeId >= 0 && typeId < 32) {
             this.#dirtyUboMask |= (1 << typeId);
@@ -480,7 +486,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         }
     };
 
-    // Zero-GC: 잔디 리베이크 요청 비트마스크 등록 콜백 (Bake 시 UBO도 동반 갱신)
+    /**
+     * [KO] 잔디 리베이크 요청 비트마스크 등록 콜백 (Zero-GC: 베이킹 및 UBO 동시 갱신)
+     * [EN] Bitmask registration callback for grass rebake requests (Zero-GC: simultaneous bake & UBO update)
+     */
     #onGrassRepopulateRequired = (typeId?: number): void => {
         if (typeId !== undefined && typeId >= 0 && typeId < 32) {
             this.#needsRebakeMask |= (1 << typeId);

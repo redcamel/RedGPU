@@ -273,19 +273,16 @@ export default function assembleFoliageRenderUnits(
     let autoBottomOffset = 0;
     let lod0RenderUnits: FoliageRenderUnit[] = [];
 
-    // 1. LOD 레벨별 지오메트리 병합 및 PBR/섀도우 렌더 유닛 조립
     for (let l = 0; l < numLODs; l++) {
         const {mesh, receiveShadow = (options.receiveShadow !== false), lodDistance} = lods[l];
         const lodMeshes = Array.isArray(mesh) ? mesh : [mesh];
         const startSubOffset = renderUnits.length;
         const lodReceiveShadow = (options.receiveShadow !== false) && (receiveShadow !== false);
 
-        // 머티리얼 전처리
         for (let r = 0; r < lodMeshes.length; r++) {
             prepareFoliageMaterials(lodMeshes[r]);
         }
 
-        // 지오메트리 및 렌더 유닛 조립
         const mergeResult = assembleScatterRenderUnits(
             redGPUContext,
             lodMeshes,
@@ -310,7 +307,6 @@ export default function assembleFoliageRenderUnits(
         if (groups.length > 0) {
             const treeH = lodHeight > 0 ? lodHeight : Math.max(5.0, (boundingRadius || 5.0) * 1.8);
 
-            // 각 서브메시 그룹별 PBR 렌더 유닛 생성 (공통 헬퍼 활용)
             for (let g = 0; g < groups.length; g++) {
                 const group = groups[g];
                 const unit = createPBRRenderUnit(
@@ -328,7 +324,6 @@ export default function assembleFoliageRenderUnits(
                 renderUnits.push(unit);
             }
 
-            // 그림자 패스 전용 통합 렌더 유닛 구성
             if (shadowMergedGeometry && totalVertexCount > 0) {
                 let shadowSlotIndex = -1;
                 if (slotPooler) {
@@ -356,7 +351,6 @@ export default function assembleFoliageRenderUnits(
                 }));
             }
 
-            // 바운딩 정보 갱신 (assembleScatterRenderUnits의 결과로부터 직접 집계)
             if (boundingRadius > maxBoundingRadius) {
                 maxBoundingRadius = boundingRadius;
             }
@@ -370,7 +364,6 @@ export default function assembleFoliageRenderUnits(
 
         const unitCountForThisLOD = renderUnits.length - startSubOffset;
 
-        // 첫 번째 LOD 유닛 배열을 즉시 보관 (사후 2차 전체 순회 소거)
         if (l === 0) {
             lod0RenderUnits = renderUnits.slice(startSubOffset, renderUnits.length);
         }
@@ -387,7 +380,6 @@ export default function assembleFoliageRenderUnits(
         });
     }
 
-    // 2. 옥타헤드럴 임포스터 베이킹 및 최종 LOD 렌더 유닛 추가
     if (useImpostor && lod0RenderUnits.length > 0) {
         const impostorLODIndex = lodInfoList.length;
         const bakeResult = bakeFoliageImpostor(redGPUContext, lod0RenderUnits, name);
@@ -420,7 +412,7 @@ export default function assembleFoliageRenderUnits(
             height,
             bakeBottomOffset,
             sharedContext,
-            true // isImpostorOverride
+            true
         );
 
         renderUnits.push(bbRenderUnit);

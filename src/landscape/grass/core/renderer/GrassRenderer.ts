@@ -66,15 +66,15 @@ export class GrassRenderer extends AScatterRenderer {
     #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
     #shadowPipeline: GPURenderPipeline | null = null;
 
-    // 256B 정렬 Dynamic Offset 단일 Group 1 바인드그룹 및 캐시
+    /** 256B 정렬 Dynamic Offset 단일 Group 1 바인드그룹 및 캐시 */
     #unifiedGroup1BindGroup: GPUBindGroup | null = null;
     #lastCulledBuffer: GPUBuffer | null = null;
     #lastSlotPoolerBuffer: GPUBuffer | null = null;
 
-    // Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: (typeId << 16) | subIndex)
+    /** Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: `(typeId << 16) | subIndex`) */
     #materialBindGroupCache: Map<number, MaterialBindGroupCacheEntry> = new Map();
 
-    // GPURenderBundle 캐싱 엔진
+    /** GPURenderBundle 캐싱 엔진 */
     #mainBundlesByView: WeakMap<View3D, MainBundleCacheEntry> = new WeakMap();
     #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
@@ -326,7 +326,6 @@ export class GrassRenderer extends AScatterRenderer {
 
         const count = grassList.length;
 
-        // 1단계: Near 패스 일괄 기록
         bundleEncoder.setPipeline(nearPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
@@ -361,7 +360,6 @@ export class GrassRenderer extends AScatterRenderer {
             }
         }
 
-        // 2단계: Far 패스 일괄 기록
         bundleEncoder.setPipeline(farPipeline);
         for (let i = 0; i < count; i++) {
             const type = grassList[i];
@@ -501,7 +499,6 @@ export class GrassRenderer extends AScatterRenderer {
         const subTex = renderUnit.baseColorTexture;
         const typeTexView = type.baseColorTextureView;
 
-        // Fast-Path: 텍스처 참조 2개만 단순 동치 비교(===)하여 일치 시 getGPUResourceBitmapTextureView 호출 없이 즉시 리턴
         if (entry && entry.cachedSubTex === subTex && entry.cachedTypeTexView === typeTexView) {
             return entry.bindGroup;
         }

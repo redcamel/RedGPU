@@ -1,3 +1,8 @@
+/**
+ * [KO] 풀스크린 쿼드 파이프라인 기반 지형 가상 텍스처 실시간 온스크린 투영 추상 디버거 모듈입니다.
+ * [EN] Abstract base texture debugger module projecting terrain GPU textures via fullscreen quad pipelines.
+ * @packageDocumentation
+ */
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../../Landscape";
 import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";

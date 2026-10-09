@@ -125,7 +125,6 @@ export abstract class AScatterType<
     #typeId: number;
     #allocation: TAllocation | null = null;
 
-    // --- 12종 공통 스캐터 파라미터 (Foliage & Grass 공통) + 물리 높이 ---
     #height: number = 1.0;
     #cullingDistance: number = 200.0;
     #fadeStartDistance: number = 150.0;

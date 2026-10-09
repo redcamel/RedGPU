@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 온스크린 시각화 디버거 UI 및 렌더링 추상 베이스 모듈입니다.
+ * [EN] Abstract base module for terrain on-screen visual debugger UI and rendering.
+ * @packageDocumentation
+ */
 import Landscape from "../../Landscape";
 import RedGPUContext from "../../../context/RedGPUContext";
 

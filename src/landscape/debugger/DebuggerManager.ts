@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 가상 텍스처 및 공간 그리드 시각 디버깅 총괄 매니저 모듈입니다.
+ * [EN] Overall manager module for terrain virtual texture and spatial grid visual debugging.
+ * @packageDocumentation
+ */
 import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeSpatialGridDebugger from "./core/spatialGrid/LandscapeSpatialGridDebugger";

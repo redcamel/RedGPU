@@ -3,7 +3,6 @@
 #redgpu_include landscape.tiling.stochasticTiling;
 #redgpu_include landscape.math.perturbNormalOrthonormal;
 
-
 struct VBTBakeUniforms {
     tileOriginInAtlas: vec2<f32>,
     tilePixelSize: vec2<f32>,

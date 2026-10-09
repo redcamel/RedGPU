@@ -38,7 +38,6 @@ struct FoliageCullingUniforms {
 #redgpu_include landscape.math.testSphereInFrustum;
 #redgpu_include landscape.math.checkAABBInHZB;
 
-
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> globalUniforms: FoliageCullingUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
@@ -132,7 +131,7 @@ fn main(
         inMainFrustum = testSphereInFrustum(sphereCenter, scaledRadius, globalUniforms.mainFrustumPlanes);
 
         if (inMainFrustum && globalUniforms.useHZB != 0u) {
-            // Near-range bypass: Objects whose bounds are within 10m of the camera cannot be occluded by terrain
+
             if (dist - scaledRadius > 10.0) {
                 let halfW = scaledRadius;
                 let baseY = realY + typeInfo.bottomOffset;

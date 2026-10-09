@@ -9,10 +9,13 @@ import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
+/**
+ * [KO] 단일 컴퓨트 패스로 대규모 잔디 인스턴스 전체의 시야각(프러스텀) 및 거리 컬링을 처리하는 전담 GPU 컬러 클래스입니다.
+ * [EN] Dedicated GPU culler class that performs view frustum and distance culling for large-scale grass instances in a single compute pass.
+ */
 export default class GrassCuller extends AScatterCuller {
     #globalUniformBuffer: GPUBuffer | null = null;
 
-    // Zero-GC: 256B ArrayBuffer 및 뷰 재사용
     #uniformArrayBuffer: ArrayBuffer = new ArrayBuffer(256);
     #uniformFloat32View: Float32Array;
     #uniformUint32View: Uint32Array;
@@ -68,7 +71,6 @@ export default class GrassCuller extends AScatterCuller {
             for (let p = 0; p < 24; p++) uf[4 + p] = 0;
         }
 
-        // 28 floats (112 bytes) 정확한 바이트 크기 전송으로 버스 대역폭 낭비 방지
         gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#uniformArrayBuffer, 0, 112);
 
         const unifiedBG = megaBuffer.getOrCreateUnifiedCullingBindGroup(

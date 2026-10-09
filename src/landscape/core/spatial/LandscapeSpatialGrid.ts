@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형 2D 타일 그리드 분할, 월드-그리드 좌표 변환 및 반경 기반 타일 쿼리 관리 모듈입니다.
+ * [EN] Spatial grid module responsible for 2D tile partitioning, coordinate conversion, and radius querying.
+ * @packageDocumentation
+ */
 import LandscapeComponent from "./LandscapeComponent";
 
 /**

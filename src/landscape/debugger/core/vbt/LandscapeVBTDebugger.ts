@@ -1,3 +1,8 @@
+/**
+ * [KO] 가상 베이크 베이스 컬러(VBT BaseColor) 텍스처 아틀라스 실시간 온스크린 렌더링 디버거 모듈입니다.
+ * [EN] Real-time on-screen debugger module for virtual baked base color (VBT BaseColor) texture atlas.
+ * @packageDocumentation
+ */
 import ALandscapeTextureDebugger from "../ALandscapeTextureDebugger";
 import Landscape from "../../../Landscape";
 import LandscapeTileStreamer from "../../../core/spatial/LandscapeTileStreamer";

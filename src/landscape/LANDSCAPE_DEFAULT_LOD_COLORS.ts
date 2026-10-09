@@ -1,4 +1,10 @@
 /**
+ * [KO] 지형 LOD 단계별 디버그 시각화 기본 색상 및 CSS 문자열 상수 모듈입니다.
+ * [EN] Terrain LOD level debug visualization default colors and CSS strings module.
+ * @packageDocumentation
+ */
+
+/**
  * [KO] 지형 LOD 단계별 디버그 시각화에 사용되는 기본 색상 배열(`[r, g, b, a]`)입니다.
  * [EN] Default color array in `[r, g, b, a]` format used for terrain LOD level debug visualization.
  *
@@ -25,21 +31,13 @@
  * @internal
  */
 export const LANDSCAPE_DEFAULT_LOD_COLORS: [number, number, number, number][] = Object.freeze([
-    // LOD 0: Blue (최고 해상도 / 카메라 최근접)
     [0.23, 0.51, 0.96, 1.0],
-    // LOD 1: Green
     [0.06, 0.72, 0.51, 1.0],
-    // LOD 2: Yellow
     [0.92, 0.70, 0.03, 1.0],
-    // LOD 3: Orange
     [0.98, 0.45, 0.09, 1.0],
-    // LOD 4: Red
     [0.94, 0.27, 0.27, 1.0],
-    // LOD 5: Purple
     [0.66, 0.33, 0.97, 1.0],
-    // LOD 6: Pink
     [0.93, 0.28, 0.60, 1.0],
-    // LOD 7: Slate Gray (최저 해상도 / 최원거리)
     [0.58, 0.64, 0.72, 1.0]
 ]) as [number, number, number, number][];
 

@@ -1,28 +1,25 @@
 struct CameraFrustumUniforms {
-    // 1. 16-byte aligned large members (total 192 bytes = 48 floats)
-    viewProjectionMatrix: mat4x4<f32>,   // offset 0..63 (16 floats)
-    frustumPlanes: array<vec4<f32>, 6>,  // offset 64..159 (24 floats)
-    lodDistancesSq: array<vec4<f32>, 2>, // offset 160..191 (8 floats)
 
-    // 2. Active scalar & vector members (total 44 bytes = 11 floats)
-    cameraPosition: vec3<f32>,           // offset 192..203 (3 floats)
-    lodMaxLevel: u32,                    // offset 204..207 (1 uint)
-    tileSizeX: f32,                      // offset 208..211 (1 float)
-    tileSizeZ: f32,                      // offset 212..215 (1 float)
-    heightScale: f32,                    // offset 216..219 (1 float)
-    tileCount: u32,                      // offset 220..223 (1 uint)
-    tanHalfFOV: f32,                     // offset 224..227 (1 float)
-    lodMetric: f32,                      // offset 228..231 (1 float)
-    useHZB: u32,                         // offset 232..235 (1 uint)
+    viewProjectionMatrix: mat4x4<f32>,
+    frustumPlanes: array<vec4<f32>, 6>,
+    lodDistancesSq: array<vec4<f32>, 2>,
 
-    // 3. Consolidated end padding for 256-byte alignment (20 bytes = 5 floats)
-    padEnd: array<f32, 5>,               // offset 236..255 (5 floats)
+    cameraPosition: vec3<f32>,
+    lodMaxLevel: u32,
+    tileSizeX: f32,
+    tileSizeZ: f32,
+    heightScale: f32,
+    tileCount: u32,
+    tanHalfFOV: f32,
+    lodMetric: f32,
+    useHZB: u32,
+
+    padEnd: array<f32, 5>,
 };
 
 #redgpu_include landscape.struct.LandscapeTile;
 #redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 #redgpu_include landscape.math.checkAABBInHZB;
-
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
 @group(0) @binding(1) var<storage, read> allTiles: array<LandscapeTile>;
@@ -72,12 +69,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let halfTileZ = uniforms.tileSizeZ * 0.5;
         let heightScale = uniforms.heightScale;
 
-        // 정규화 높이 비율(0.0~1.0)에 현재 heightScale을 곱하여 실시간 타이트 AABB 계산 (음수 스케일 미허용)
         let minY = tile.minHeightNorm * heightScale;
         let maxY = tile.maxHeightNorm * heightScale;
 
-        // [KO] 버텍스 모핑, 스커트 기하(최대 50m) 및 완만한 저고도 언덕을 위한 충분한 수직/수평 안전 마진 확보
-        // [EN] Ample vertical and horizontal safety margins for vertex geomorphing, skirts, and low-elevation hills
         let marginY = max(35.0, heightScale * 0.05);
         let marginXZ = uniforms.tileSizeX * 0.02;
         let minPos = vec3<f32>(tile.centerWorldX - halfTileX - marginXZ, minY - marginY, tile.centerWorldZ - halfTileZ - marginXZ);

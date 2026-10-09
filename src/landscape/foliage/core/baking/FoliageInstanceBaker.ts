@@ -130,7 +130,6 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         const taskBytes = tOffset * 4;
         gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer!, 0, tasksBuf.buffer, 0, taskBytes);
 
-        // TargetLayer WeightMap 찾기
         let weightView: GPUTextureView = this.resourceManager.emptyBitmapTextureView;
         let hasWeightMap = 0;
         let weightChannelIndex = 0;

@@ -1,7 +1,3 @@
-/**
- * [KO] 잔디 인스턴스 렌더링용 256바이트 정렬 슬롯 유니폼 구조체 (총 96바이트 / 24 floats 및 uints)
- * [EN] 256-byte aligned slot uniform structure for grass instance rendering (96 bytes total / 24 floats & uints)
- */
 struct GrassParams {
     cullingDistance: f32,
     fadeStartDistance: f32,

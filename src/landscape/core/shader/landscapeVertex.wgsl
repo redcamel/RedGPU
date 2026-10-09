@@ -71,7 +71,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     let halfTileX = landscapeUniforms.tileSizeX * 0.5;
     let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
 
-    // 1. 초기 원래 정점의 위치 및 UV 계산
     let initialWorldX = input.position.x + instanceData.centerWorldX;
     let initialWorldZ = input.position.y + instanceData.centerWorldZ;
 
@@ -84,7 +83,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     let initialTexCoord = vec2<i32>(clamp(initialGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
     let initialHeight = textureLoad(heightMapTexture, initialTexCoord, 0).r;
 
-    // 2. 카메라와의 유효 거리 및 연속 모핑 계수 (smoothMorph) 계산
     let camPos = systemUniforms.camera.cameraPosition.xyz;
     let dx = initialWorldX - camPos.x;
     let dz = initialWorldZ - camPos.z;
@@ -112,7 +110,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         }
     }
 
-    // 3. CDLOD 기하학적 정점 모핑 (스커트 정점 포함하여 홀수 정점을 상위 짝수 정점으로 동기화 보간)
     var currentSegments: f32;
     var subStep: u32;
 
@@ -154,7 +151,6 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         finalHeight = sampleHeightBilinear(morphedGlobalUV, texSize);
     }
 
-    // 4. 스마트 스커트(Smart Skirt) 안전망 깊이 적용 및 최종 월드 Y 계산
     let isSkirt = input.position.z < -0.5;
     let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
     let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * 0.15 * lodMultiplier);

@@ -50,7 +50,6 @@ import AScatterCuller from "./AScatterCuller";
 import AScatterInstanceBaker, {type ScatterBakeBindGroupCacheEntry} from "./AScatterInstanceBaker";
 
 export {
-    // Runtime Classes, Functions & Units
     AScatterManager,
     AScatterCuller,
     assembleScatterRenderUnits,
@@ -61,11 +60,9 @@ export {
     AScatterMegaBuffer,
     AScatterInstanceBaker,
 
-    // Constants
     CULLING_WORKGROUP_SIZE,
     DRAW_INDEXED_INDIRECT_ARGS_COUNT,
 
-    // Code Hint Interfaces & Vertex Constants
     type AScatterTypeInitOptions,
     type ScatterRenderUnitInitOptions,
     type ScatterAssemblyOptions,

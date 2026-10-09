@@ -23,7 +23,6 @@
  * @packageDocumentation
  */
 
-// 1. Entities & RenderUnits
 import Foliage, {
     FIXED_SCATTER_GRID_SIZE,
     type FoliageLODConfig,
@@ -33,7 +32,6 @@ import Foliage, {
 } from "./Foliage";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 
-// 2. GPU Buffer & Culling & Baking Infrastructure
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
@@ -41,15 +39,12 @@ import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCuller from "./culling/FoliageCuller";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
-// 3. Impostors
 import bakeFoliageImpostor, {type FoliageBakeResult} from "./baking/impostor/bakeFoliageImpostor";
 import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
 
-// 4. Assembler
 import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembleFoliageRenderUnits";
 
 export {
-    // Runtime Classes & Entities
     Foliage,
     FoliageRenderUnit,
     FoliageSlotPooler,
@@ -61,11 +56,9 @@ export {
     OctahedralImpostorMaterial,
     FIXED_SCATTER_GRID_SIZE,
 
-    // Standalone Functions
     assembleFoliageRenderUnits,
     bakeFoliageImpostor,
 
-    // Code Hint Interfaces
     type FoliageOptions,
     type FoliageLODConfig,
     type FoliageLODInfo,

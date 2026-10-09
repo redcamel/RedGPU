@@ -1,8 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Orthonormal Basis Normal Perturbation Math
-// - Gram-Schmidt orthonormal basis construction and tangent normal perturbation
-// ============================================================================
-
 fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> {
     if (length(tangentN.xy) <= 0.001) {
         return baseN;

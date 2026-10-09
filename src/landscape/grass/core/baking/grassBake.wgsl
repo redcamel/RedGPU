@@ -1,15 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Grass GPU Baking Compute Shader
-// - Executes ONCE per grass registration / tile load / streaming region update
-// - 1:1 Exact Mathematical Equivalence with previous SubCell scattering:
-//   * 1 GPU Thread per 16m SubCell
-//   * Exact deterministic computeScatterGridSeed + SplitMix32 PRNG sequence
-//   * Exact targetLayer WeightMap (splatmap >= 0.20) masking
-//   * VHT virtual height bilinear snapping & 25% blended normal quaternion
-//   * VBT ground albedo color sampling
-//   * Permanent write to rawInstances VRAM mega-buffer
-// ============================================================================
-
 #redgpu_include landscape.struct.GrassInstance;
 #redgpu_include landscape.math.rotateVectorByQuat;
 #redgpu_include landscape.math.quatMultiply;
@@ -17,13 +5,12 @@
 #redgpu_include landscape.math.scatterSpatialPrng;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
 
-
 struct GrassBakeUniforms {
-    centerCellX: i32,              // Center cell grid coordinate X
-    centerCellZ: i32,              // Center cell grid coordinate Z
-    totalCells: u32,               // Total active circular cells to bake
-    instancesPerCell: u32,         // Instances per 16m cell (e.g. 192~512)
-    cellSize: f32,                 // SubCell size (16.0 meters)
+    centerCellX: i32,
+    centerCellZ: i32,
+    totalCells: u32,
+    instancesPerCell: u32,
+    cellSize: f32,
     invWorldSizeX: f32,
     invWorldSizeZ: f32,
     heightScale: f32,
@@ -50,8 +37,6 @@ struct GrassBakeUniforms {
 @group(0) @binding(4) var landscapeSampler: sampler;
 @group(0) @binding(5) var weightTexture: texture_2d<f32>;
 @group(0) @binding(6) var<storage, read> cellOffsets: array<vec2<i32>>;
-
-
 
 fn writeInvalidInstance(targetIdx: u32, posX: f32, posZ: f32) {
     var inv: GrassInstance;
@@ -88,7 +73,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let baseTargetSlot = uniforms.rawBaseOffset + cellIdx * uniforms.instancesPerCell;
 
-    // Execute exact instance loop matching the CPU subcell scattering
     for (var inst = 0u; inst < uniforms.instancesPerCell; inst = inst + 1u) {
         let currentTargetIdx = baseTargetSlot + inst;
 
@@ -98,17 +82,14 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let u = gx * uniforms.invWorldSizeX + 0.5;
         let v = gz * uniforms.invWorldSizeZ + 0.5;
 
-        // Terrain boundary check
         if (u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0) {
             writeInvalidInstance(currentTargetIdx, gx, gz);
             continue;
         }
 
-        // WeightMap (SplatMap) evaluation: 1:1 match with landscapeFragment.wgsl
         if (uniforms.hasWeightMap != 0u) {
             let normW = sampleNormalizedLayerWeight(weightTexture, landscapeSampler, vec2<f32>(u, v), uniforms.weightChannelIndex);
 
-            // Exclude non-grass layers (rock, road, gravel < 0.20)
             if (normW < 0.20) {
                 writeInvalidInstance(currentTargetIdx, gx, gz);
                 continue;
@@ -124,7 +105,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let sScale = uniforms.minScaleS + splitMix32(&prngState) * uniforms.deltaScaleS;
         let hScale = uniforms.minScaleH + splitMix32(&prngState) * uniforms.deltaScaleH;
 
-        // Bilinear terrain height & normal evaluation
         let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
         let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
 
@@ -157,14 +137,12 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             rawNz = (h10 - h11) / texStepZ;
         }
 
-        // Slope filtering
         let slopeTan2 = rawNx * rawNx + rawNz * rawNz;
         if (uniforms.hasSlopeFilter != 0u && (slopeTan2 < uniforms.minSlopeTan2 || slopeTan2 > uniforms.maxSlopeTan2)) {
             writeInvalidInstance(currentTargetIdx, gx, gz);
             continue;
         }
 
-        // Surface normal alignment quaternion (blended 25% with Up vector)
         let terrainN = normalize(vec3<f32>(rawNx, 1.0, rawNz));
         let blendedN = normalize(mix(vec3<f32>(0.0, 1.0, 0.0), terrainN, 0.25));
 
@@ -184,14 +162,12 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let maxXZ = sScale;
         let boundRadius = sqrt(halfH * halfH + maxXZ * maxXZ) * 1.5;
 
-        // Ground color sampling from VBT
         var groundColor = vec3<f32>(0.15, 0.35, 0.1);
         let groundTex = textureSampleLevel(vbtTexture, landscapeSampler, vec2<f32>(u, v), 0.0);
         if (groundTex.a > 0.01) {
             groundColor = groundTex.rgb;
         }
 
-        // Write valid baked grass instance
         var outInst: GrassInstance;
         outInst.posX = gx;
         outInst.posY = terrainHeight + uniforms.bottomOffset;

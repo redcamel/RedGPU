@@ -1,9 +1,3 @@
-// ============================================================================
-// RedGPU Landscape Splat WeightMap Normalization Evaluation Math
-// - 1:1 Exact Mathematical Equivalence with CPU sampleNormalizedLayerWeight
-//   and landscapeFragment.wgsl splat layer blending
-// ============================================================================
-
 fn sampleNormalizedLayerWeight(
     weightTexture: texture_2d<f32>,
     landscapeSampler: sampler,

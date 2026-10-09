@@ -1,3 +1,8 @@
+/**
+ * [KO] 모든 LOD 레벨의 평면 그리드 및 크랙 방지용 스커트 지오메트리를 단일 버퍼로 통합 관리하는 공유 지오메트리 모듈입니다.
+ * [EN] Shared geometry module managing single combined vertex and index buffers across all LOD levels with skirts.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
@@ -203,7 +208,6 @@ export class LandscapeSharedGeometry extends RedGPUObject {
             const firstIndex = totalIndexOffset;
             const wireframeFirstIndex = totalWireframeIndexOffset;
 
-            // 1. 내부 평면 그리드 정점 생성
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
@@ -217,7 +221,6 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 }
             }
 
-            // 2. 내부 평면 삼각형 및 와이어프레임 인덱스 생성
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
                     const row1 = z * (segmentsX + 1);
@@ -236,10 +239,8 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 }
             }
 
-            // 3. 스마트 스커트(Smart Skirt) 정점 및 인덱스 생성 (안전망)
             let currentSkirtLocalIndex = innerVertexCount;
 
-            // North Skirt (Z 음수 경계)
             const northSkirtStartIndex = currentSkirtLocalIndex;
             for (let x = 0; x <= segmentsX; x++) {
                 const percentX = x / segmentsX;
@@ -259,7 +260,6 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // South Skirt (Z 양수 경계)
             const southSkirtStartIndex = currentSkirtLocalIndex;
             const southInnerRow = segmentsZ * (segmentsX + 1);
             for (let x = 0; x <= segmentsX; x++) {
@@ -280,7 +280,6 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // West Skirt (X 음수 경계)
             const westSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
@@ -300,7 +299,6 @@ export class LandscapeSharedGeometry extends RedGPUObject {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // East Skirt (X 양수 경계)
             const eastSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;

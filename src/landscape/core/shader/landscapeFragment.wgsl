@@ -351,8 +351,6 @@ fn getDirectPbrLight(
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
 
-    // [KO] 지형 전용 스펙큘러 감쇄 (흙/바위의 미세 다공성 흡수를 반영하여 언리얼 엔진 표준 0.2 수준으로 정반사 완화)
-    // [EN] Landscape specular attenuation (reflecting micro-porosity of soil/rock, attenuated to UE standard ~0.2)
     let landscapeSpecularScale = 0.2;
     let effectiveF = F * landscapeSpecularScale;
     let directLight = (SPEC_BRDF * NdotL * landscapeSpecularScale) + (vec3<f32>(1.0) - effectiveF) * diffuse_reflection;

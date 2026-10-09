@@ -16,13 +16,13 @@ import RedGPUContext from "../../../context/RedGPUContext";
  * :::
  */
 abstract class AScatterRenderer extends RedGPUObject {
-    // Zero-GC executeBundles 단일 배열 재사용 (매 프레임 [bundle] 임시 배열 할당 방지)
+    /** Zero-GC executeBundles 단일 배열 재사용 (매 프레임 임시 배열 할당 방지) */
     #singleBundleArray: [GPURenderBundle] = [null as any];
 
-    // 256B 정렬 Dynamic Offset UBO 바인딩용 1칸짜리 재사용 배열
+    /** 256B 정렬 Dynamic Offset UBO 바인딩용 재사용 배열 */
     #dynamicOffsetArray: Uint32Array = new Uint32Array(1);
 
-    // 캐스케이드 그림자 맵(CSM) 렌더 번들 캐시 (최대 4개 캐스케이드)
+    /** 캐스케이드 그림자 맵(CSM) 렌더 번들 캐시 (최대 4개 캐스케이드) */
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
     #shadowBundleValid: boolean[] = [false, false, false, false];
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
@@ -107,7 +107,6 @@ abstract class AScatterRenderer extends RedGPUObject {
      * [EN] Extension hook method for child classes to clean up domain-specific caches when shadow bundles are invalidated.
      */
     onShadowBundleDirty(): void {
-        // 자식 클래스에서 필요 시 오버라이드
     }
 
     /**

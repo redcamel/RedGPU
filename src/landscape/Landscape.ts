@@ -1,3 +1,8 @@
+/**
+ * [KO] 대규모 오픈월드 지형(Landscape) 렌더링, 동적 타일 스트리밍, 복합 생태계 총괄 오케스트레이션 모듈입니다.
+ * [EN] Large-scale open-world terrain rendering, dynamic tile streaming, and ecosystem orchestration module.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../context/RedGPUContext";
 import LandscapeRenderer from "./core/renderer/LandscapeRenderer";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";
@@ -92,9 +97,7 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  * @category Landscape
  */
 export class Landscape extends RedGPUObject {
-    // =========================================================================
-    // Core Context & Subsystems
-    // =========================================================================
+
     #spatialGrid: LandscapeSpatialGrid;
     #sharedGeometry: LandscapeSharedGeometry;
     #instanceBuffer: LandscapeInstanceBuffer;
@@ -103,23 +106,14 @@ export class Landscape extends RedGPUObject {
     #weightMapCPUSampler: LandscapeWeightMapCPUSampler;
     #gpuCuller: LandscapeGPUCuller | null = null;
 
-    // =========================================================================
-    // Subsystem Managers
-    // =========================================================================
     #foliageManager: FoliageManager;
     #grassManager: GrassManager;
     #debuggerManager: DebuggerManager;
 
-    // =========================================================================
-    // Spatial Dimensions & Grid Configuration
-    // =========================================================================
     #heightScale: number = 500.0;
     #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
 
-    // =========================================================================
-    // LOD Configuration & Buffers
-    // =========================================================================
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
     #lodMaxLevel: number;
     #lodDistancesSq: number[] = [];
@@ -129,19 +123,12 @@ export class Landscape extends RedGPUObject {
     #lastTanHalfFOV: number = 1.0;
     #tileHeightBuffer: Float32Array = new Float32Array(2);
 
-
-    // =========================================================================
-    // Lighting & Heightmap Shadow
-    // =========================================================================
     #receiveShadow: boolean = true;
     #castHeightmapShadow: boolean = true;
     #heightmapShadowSteps: number = 16;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
 
-    // =========================================================================
-    // Rendering & Subsystems
-    // =========================================================================
     #renderer: LandscapeRenderer;
     #vertexShaderModule: GPUShaderModule;
     #lastHZBView: GPUTextureView | null = null;
@@ -235,9 +222,6 @@ export class Landscape extends RedGPUObject {
         this.#updateLandscapeUniforms();
     }
 
-    // =========================================================================
-    // Properties: Context & Subsystem Managers
-    // =========================================================================
     /**
      * [KO] 지형 전용 WebGPU 렌더러 인스턴스를 반환합니다.
      * [EN] Returns the dedicated WebGPU renderer instance for this landscape.
@@ -302,10 +286,6 @@ export class Landscape extends RedGPUObject {
         return this.#material;
     }
 
-
-    // =========================================================================
-    // Properties: Spatial & Grid Dimensions
-    // =========================================================================
     /**
      * [KO] 지형의 월드 크기 `[sizeX, sizeZ]`를 튜플로 반환합니다.
      * [EN] Returns the world dimensions `[sizeX, sizeZ]` of the landscape as a tuple.
@@ -546,10 +526,6 @@ export class Landscape extends RedGPUObject {
         return this.#spatialGrid.flatCells;
     }
 
-
-    // =========================================================================
-    // Properties: LOD Configuration
-    // =========================================================================
     /**
      * [KO] 현재 적용된 LOD 계산 방식(`'distance'` 또는 `'screenSize'`)을 반환합니다.
      * [EN] Returns the current LOD calculation metric (`'distance'` or `'screenSize'`).
@@ -634,10 +610,6 @@ export class Landscape extends RedGPUObject {
         return this.#lodDistancesSq;
     }
 
-
-    // =========================================================================
-    // Properties: Material & Splat Layers
-    // =========================================================================
     /**
      * [KO] 지형의 기본 베이스 틴트 색상(`ColorRGBA`)을 반환합니다.
      * [EN] Returns the base tint color (`ColorRGBA`) of the landscape.
@@ -683,11 +655,6 @@ export class Landscape extends RedGPUObject {
         this.#material.nearDetailDistance = val;
     }
 
-
-
-    // =========================================================================
-    // Properties: Streaming & Virtual Textures
-    // =========================================================================
     /**
      * [KO] 비동기로 로드할 전체 지형 16비트 높이맵 이미지의 URL을 반환합니다.
      * [EN] Returns the URL of the global 16-bit heightmap image to load asynchronously.
@@ -840,10 +807,6 @@ export class Landscape extends RedGPUObject {
         this.#tileStreamer.tileUrlResolver = resolver;
     }
 
-
-    // =========================================================================
-    // Properties: Shadow & Lighting
-    // =========================================================================
     /**
      * @example
      * ```ts
@@ -976,10 +939,6 @@ export class Landscape extends RedGPUObject {
         }
     }
 
-
-    // =========================================================================
-    // Public Feature APIs (Terrain Query & Layer Management)
-    // =========================================================================
     /**
      * [KO] 월드 좌표 `(x, z)` 위치에서의 보간된 지형 표면 높이(Y값)를 반환합니다.
      * [EN] Returns the interpolated terrain surface height (Y coordinate) at the specified world `(x, z)` position.
@@ -1106,10 +1065,6 @@ export class Landscape extends RedGPUObject {
         return this.#material.getLayer(name);
     }
 
-
-    // =========================================================================
-    // Core Lifecycle & Rendering
-    // =========================================================================
     /**
      * @example
      * ```ts
@@ -1267,10 +1222,6 @@ export class Landscape extends RedGPUObject {
         this.#currentRenderViewStateData = null;
     }
 
-
-    // =========================================================================
-    // Private Implementation Details
-    // =========================================================================
     #initSystems(
         redGPUContext: RedGPUContext,
         componentCountX: number,

@@ -392,10 +392,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         let uniformBuffer = this.gpuRenderInfo.fragmentUniformBuffer;
 
         if (uniformBuffer && uniformBuffer.size === requiredByteLength) {
-            // [Zero-GC] 기존 버퍼 크기가 동일하므로 재사용하고 데이터만 GPU에 전송
             this.updateUniformsData();
         } else {
-            // 기존 버퍼가 존재하지만 크기가 일치하지 않는 경우 GPU 리소스 명시적 해제 (GC 누수 방지)
             if (uniformBuffer) {
                 uniformBuffer.destroy();
             }

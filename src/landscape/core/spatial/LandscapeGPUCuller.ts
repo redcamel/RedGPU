@@ -1,3 +1,8 @@
+/**
+ * [KO] 프러스텀 및 HZB 기반의 GPU 컴퓨트 컬링 및 간접 드로우 인스턴스 버퍼 디스패처 모듈입니다.
+ * [EN] GPU compute culling dispatcher module performing frustum and HZB occlusion culling.
+ * @packageDocumentation
+ */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
@@ -124,7 +129,6 @@ export class LandscapeGPUCuller extends RedGPUObject {
         const data = this.#uniformData;
         const uintData = this.#uniformUintData;
 
-        // 1. 16-byte aligned large members: viewProjectionMatrix (offset 0..15)
         if (viewProjectionMatrix && viewProjectionMatrix.length >= 16) {
             for (let i = 0; i < 16; i++) {
                 data[i] = viewProjectionMatrix[i];
@@ -135,7 +139,6 @@ export class LandscapeGPUCuller extends RedGPUObject {
             }
         }
 
-        // 1. 16-byte aligned large members: frustumPlanes (offset 16..39)
         if (frustumPlanes && frustumPlanes.length >= 24) {
             data.set(frustumPlanes.length === 24 ? frustumPlanes : frustumPlanes.subarray(0, 24), 16);
         } else {
@@ -148,14 +151,12 @@ export class LandscapeGPUCuller extends RedGPUObject {
             }
         }
 
-        // 1. 16-byte aligned large members: lodDistancesSq (offset 40..47)
         const distCount = lodDistancesSq.length;
         for (let i = 0; i < 8; i++) {
             const val = i < distCount ? lodDistancesSq[i] : 0;
             data[40 + i] = (val && val > 0) ? val : 1e15;
         }
 
-        // 2. Active scalar & vector members (offset 48..58)
         data[48] = camX;
         data[49] = camY;
         data[50] = camZ;
@@ -170,7 +171,6 @@ export class LandscapeGPUCuller extends RedGPUObject {
         data[57] = lodMetric;
         uintData[58] = useHZB ? 1 : 0;
 
-        // 3. Consolidated end padding (offset 59..63)
         data[59] = 0.0;
         data[60] = 0.0;
         data[61] = 0.0;

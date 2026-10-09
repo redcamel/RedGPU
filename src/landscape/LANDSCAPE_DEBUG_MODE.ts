@@ -1,4 +1,10 @@
 /**
+ * [KO] 대규모 지형(Landscape) 렌더링 디버그 시각화 모드 상수 및 타입 정의 모듈입니다.
+ * [EN] Debug visualization mode constants and type definition module for large-scale Landscape rendering.
+ * @packageDocumentation
+ */
+
+/**
  * [KO] 대규모 지형(Landscape) 렌더링 디버그 시각화 모드 상수 객체입니다.
  * [EN] Debug visualization mode constants for large-scale Landscape rendering.
  *

@@ -23,13 +23,11 @@
  * @packageDocumentation
  */
 
-// 1. Core & Subsystem Namespaces
 export * as Core from "./core";
 export * as Foliage from "./foliage";
 export * as Grass from "./grass";
 export * as Debugger from "./debugger";
 
-// 2. Main Entry Classes & Settings
 import Landscape from "./Landscape";
 import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeLayer, {type LandscapeLayerOptions, type LandscapeWeightMapChannel} from "./LandscapeLayer";
@@ -46,7 +44,6 @@ export {
     LandscapeShaderLibrary
 };
 
-// 3. User-facing Configuration Types (Terrain Layer System)
 export type {
     LandscapeLayerOptions,
     LandscapeWeightMapChannel

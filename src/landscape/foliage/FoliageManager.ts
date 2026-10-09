@@ -221,7 +221,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
 
         const count = types.length;
 
-        // 1. [Bake 채널] 지형/인스턴스 파라미터 변경으로 재배치가 필요한 식생 타입 서브셀 캐시 리셋
         const repopMask = this.#needsRepopulateMask;
         if (repopMask !== 0) {
             for (let i = 0; i < count; i++) {
@@ -234,7 +233,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             this.#needsRepopulateMask = 0;
         }
 
-        // 2. [UBO 채널] 바람/지면블렌드/LOD전환거리 등 UBO가 변경된 식생 렌더 유닛 UBO 슬롯 1회 일괄 플러시
         const uboMask = this.#dirtyUboMask;
         if (uboMask !== 0) {
             for (let i = 0; i < count; i++) {

@@ -25,11 +25,9 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
 
     let instance = culledInstances[input.instanceIndex];
 
-    // 🌿 [0클록 혁신] 컬링 컴퓨트에서 인스턴스당 1회 계산된 그림자 페이드 언팩
     let fadeData = unpack4x8unorm(instance.packedBounding);
     let shadowFadeRatio = fadeData.z;
 
-    // 🌿 35m 밖 인스턴스 조기 탈락 (거리/내적 계산 없이 1클록 즉시 기각)
     if (shadowFadeRatio <= 0.0) {
         output.clipPos = vec4<f32>(2.0, 2.0, 2.0, 1.0);
         output.uv = vec2<f32>(0.0, 0.0);

@@ -1,8 +1,3 @@
-/**
- * [KO] 잔디 인스턴스 정점 변환 모듈
- * [EN] Grass instance vertex transformation module
- */
-
 #redgpu_include landscape.math.rotateVectorByQuat;
 
 struct GrassPositionResult {
@@ -10,10 +5,6 @@ struct GrassPositionResult {
     heightRatio: f32,
 };
 
-/**
- * [KO] 잔디 로컬 정점 좌표를 스케일링, 쿼터니언 회전 및 지면 침하 보정하여 월드 좌표로 변환합니다.
- * [EN] Transforms local grass vertex to world coordinates with scaling, quaternion rotation, and ground sink compensation.
- */
 fn transformGrassPosition(
     position: vec3<f32>,
     instPos: vec3<f32>,
@@ -41,4 +32,3 @@ fn transformGrassPosition(
     res.heightRatio = heightRatio;
     return res;
 }
-

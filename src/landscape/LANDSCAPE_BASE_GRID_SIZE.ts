@@ -1,4 +1,10 @@
 /**
+ * [KO] 지형 컴포넌트 기본 쿼드 그리드 분할 해상도 상수 및 유효성 검증 모듈입니다.
+ * [EN] Base quad grid resolution constants and validation module for landscape components.
+ * @packageDocumentation
+ */
+
+/**
  * [KO] 지형(Landscape) 컴포넌트의 기본 쿼드(Quad) 그리드 크기 상수 객체입니다.
  * [EN] Constant object defining base quad grid sizes for Landscape components.
  *

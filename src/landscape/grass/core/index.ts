@@ -22,7 +22,6 @@ import {GrassRenderer} from "./renderer/GrassRenderer";
 import {GrassSlotPooler} from "./buffer/GrassSlotPooler";
 
 export {
-    // Runtime Classes
     Grass,
     GrassScatterMegaBuffer,
     GrassInstanceBaker,
@@ -30,6 +29,5 @@ export {
     GrassRenderer,
     GrassSlotPooler,
 
-    // Code Hint Interfaces
     type GrassOptions
 };

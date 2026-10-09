@@ -42,7 +42,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
-    // 🌿 Far Grass Ultra-Fast Direct Lighting (Zero View-Vector Math, Seamless Color Match)
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
