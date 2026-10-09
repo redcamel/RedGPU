@@ -262,8 +262,8 @@ export default function assembleFoliageRenderUnits(
     const numLODs = Math.min(lods.length, 8);
 
     let maxBoundingRadius = 0;
-    let globalMinY = Infinity;
-    let globalMaxY = -Infinity;
+    let maxBoundingHeight = 0;
+    let autoBottomOffset = 0;
     let lod0RenderUnits: FoliageRenderUnit[] = [];
 
     // 1. LOD 레벨별 지오메트리 병합 및 PBR/섀도우 렌더 유닛 조립
@@ -293,15 +293,15 @@ export default function assembleFoliageRenderUnits(
             groups,
             unifiedGeometry,
             boundingRadius = 5.0,
+            boundingHeight: lodHeight = 5.0,
+            bottomOffset: lodBottomOffset = 0,
             shadowMergedGeometry,
             totalIndexCount,
-            totalVertexCount,
-            minY,
-            maxY
+            totalVertexCount
         } = mergeResult;
 
         if (groups.length > 0) {
-            const treeH = Math.max(5.0, (boundingRadius || 5.0) * 1.8);
+            const treeH = lodHeight > 0 ? lodHeight : Math.max(5.0, (boundingRadius || 5.0) * 1.8);
 
             // 각 서브메시 그룹별 PBR 렌더 유닛 생성 (공통 헬퍼 활용)
             for (let g = 0; g < groups.length; g++) {
@@ -363,15 +363,15 @@ export default function assembleFoliageRenderUnits(
                 }));
             }
 
-            // 바운딩 정보 갱신
+            // 바운딩 정보 갱신 (assembleScatterRenderUnits의 결과로부터 직접 집계)
             if (boundingRadius > maxBoundingRadius) {
                 maxBoundingRadius = boundingRadius;
             }
-            if (isFinite(minY) && minY < globalMinY) {
-                globalMinY = minY;
+            if (lodHeight > maxBoundingHeight) {
+                maxBoundingHeight = lodHeight;
             }
-            if (isFinite(maxY) && maxY > globalMaxY) {
-                globalMaxY = maxY;
+            if (l === 0) {
+                autoBottomOffset = lodBottomOffset;
             }
         }
 
@@ -446,15 +446,14 @@ export default function assembleFoliageRenderUnits(
         });
     }
 
-    const boundingHeight = (isFinite(globalMinY) && isFinite(globalMaxY))
-        ? Math.max(0.1, globalMaxY - globalMinY)
-        : optHeight;
+    const boundingHeight = maxBoundingHeight > 0 ? maxBoundingHeight : optHeight;
+    const resolvedBottomOffset = options.bottomOffset !== undefined ? bottomOffset : autoBottomOffset;
 
     return {
         renderUnits,
         shadowMergedRenderUnits,
         lodInfoList,
-        bottomOffset,
+        bottomOffset: resolvedBottomOffset,
         boundingRadius: maxBoundingRadius || 10.0,
         boundingHeight
     };
