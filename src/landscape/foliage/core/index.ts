@@ -10,7 +10,6 @@
  * - `FoliageCuller`: HZB 오클루전 및 프러스텀 컬링 GPU 실행기
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `assembleFoliageRenderUnits`: 계층적 식생 3D 모델을 분석·결합하여 단일 렌더 유닛으로 조립하는 순수 함수
- * - `createOctahedralImpostorGeometry`: 8방향/16방향 3D 옥타헤드럴 임포스터 지오메트리 생성 함수
  *
  * **[EN]**
  * - `Foliage`: Entity defining a single foliage type and managing per-subcell instance lifecycles
@@ -20,7 +19,6 @@
  * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `assembleFoliageRenderUnits`: Pure function assembling hierarchical foliage models into combined render units
- * - `createOctahedralImpostorGeometry`: Function generating 8-way/16-way 3D octahedral billboard geometries
  *
  * @packageDocumentation
  */
@@ -46,7 +44,6 @@ import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 // 3. Impostors
 import bakeFoliageImpostor, {type FoliageBakeResult} from "./baking/impostor/bakeFoliageImpostor";
 import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
-import createOctahedralImpostorGeometry from "./baking/impostor/octahedral/createOctahedralImpostorGeometry";
 
 // 4. Assembler
 import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembleFoliageRenderUnits";
@@ -66,7 +63,6 @@ export {
 
     // Standalone Functions
     assembleFoliageRenderUnits,
-    createOctahedralImpostorGeometry,
     bakeFoliageImpostor,
 
     // Code Hint Interfaces

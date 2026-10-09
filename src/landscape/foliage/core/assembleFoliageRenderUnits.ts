@@ -8,17 +8,59 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
+import Geometry from "../../../geometry/Geometry";
+import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "./Foliage";
 import type {FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
 import bakeFoliageImpostor from "./baking/impostor/bakeFoliageImpostor";
-import {createOctahedralImpostorGeometry} from "./baking/impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
 import mergeScatterMeshes from "../../core/scatter/mergeScatterMeshes";
-import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../core/scatter/ScatterVertexFormats";
+import {
+    PBR_INTERLEAVED_STRUCT,
+    PBR_STRIDE_BYTES,
+    POSITION_ONLY_STRIDE_BYTES
+} from "../../core/scatter/ScatterVertexFormats";
 
 const identityMatrix: mat4 = mat4.create();
+const IMPOSTOR_QUAD_INDICES: Uint32Array = new Uint32Array([0, 1, 2, 0, 2, 3]);
+
+/**
+ * [KO] 옥타헤드럴(Octahedral) 임포스터 렌더링을 위한 4정점 2삼각형 평면 빌보드 지오메트리를 생성합니다.
+ * [EN] Creates a 4-vertex 2-triangle planar billboard geometry for octahedral impostor rendering.
+ */
+function createOctahedralImpostorGeometry(
+    redGPUContext: RedGPUContext,
+    width: number = 6.0,
+    height: number = 6.0,
+    bottomOffset: number = 0.0
+): Geometry {
+    const halfW = width * 0.5;
+    const halfH = height * 0.5;
+    const centerY = bottomOffset + halfH;
+
+    const interleaved = new Float32Array([
+        -halfW, -halfH, centerY, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
+        halfW, -halfH, centerY, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
+        halfW, halfH, centerY, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
+        -halfW, halfH, centerY, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0
+    ]);
+
+    const vertexBuffer = new VertexBuffer(
+        redGPUContext,
+        interleaved,
+        PBR_INTERLEAVED_STRUCT
+    );
+
+    const indexBuffer = new IndexBuffer(
+        redGPUContext,
+        IMPOSTOR_QUAD_INDICES
+    );
+
+    return new Geometry(redGPUContext, vertexBuffer, indexBuffer);
+}
 
 /**
  * [KO] 메쉬 및 하위 자식 노드의 머티리얼을 순회하며 식생 전용 셰이더 상태(CutOff, DoubleSided, AlphaBlend)를 설정합니다.
