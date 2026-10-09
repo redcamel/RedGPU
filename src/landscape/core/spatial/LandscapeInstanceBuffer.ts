@@ -262,6 +262,8 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
 
         f32[8] = vhtTextureWidth;
         f32[9] = vhtTextureHeight;
+        f32[10] = tanHalfFOV;
+        f32[11] = lodMetric;
 
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {
@@ -285,19 +287,19 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
             f32[44 + i] = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;
         }
 
-        f32[52] = tanHalfFOV;
-        f32[53] = lodMetric;
-        f32[54] = lod0Quads;
-        f32[55] = receiveShadow ? 1.0 : 0.0;
-        f32[56] = castHeightmapShadow ? 1.0 : 0.0;
-        f32[57] = heightmapShadowSteps;
-        f32[58] = heightmapShadowDistance;
-        f32[59] = heightmapShadowSoftness;
+        f32[52] = lod0Quads;
+        f32[53] = receiveShadow ? 1.0 : 0.0;
+        f32[54] = castHeightmapShadow ? 1.0 : 0.0;
+        f32[55] = heightmapShadowSteps;
+        f32[56] = heightmapShadowDistance;
+        f32[57] = heightmapShadowSoftness;
+        f32[58] = foliageSubCellColoration ? 1.0 : 0.0;
+        f32[59] = foliageSubCellSize;
 
-        f32[60] = foliageSubCellColoration ? 1.0 : 0.0;
-        f32[61] = foliageSubCellSize;
-        f32[62] = 0.0; // pad2 (16-byte alignment padding for debugMode)
-        u32[63] = debugMode;
+        u32[60] = debugMode;
+        f32[61] = 0.0; // pad0 (256-byte alignment tail padding)
+        f32[62] = 0.0; // pad1
+        f32[63] = 0.0; // pad2
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,

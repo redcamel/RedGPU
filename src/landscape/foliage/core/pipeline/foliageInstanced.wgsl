@@ -123,7 +123,7 @@ fn calculateFoliageOpaqueWorldPosition(
     let instData = unpackAndTransformFoliage(position, instancePos_scaleY, instanceRotQuat, instanceScaleXZ);
     let windDisp = calculateFoliageWindDisplacement(
         instData.xform.worldPos,
-        instData.xform.hierarchyPos,
+        position,
         vec3<f32>(0.0, 1.0, 0.0),
         vec4<f32>(1.0),
         instData.instancePos,
@@ -182,7 +182,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
     let instData = unpackAndTransformFoliage(input.position, input.instancePos_scaleY, input.instanceRotQuat, input.instanceScaleXZ);
     let instancePos = instData.instancePos;
     let instanceRotQuat = input.instanceRotQuat;
-    let hierarchyPos = instData.xform.hierarchyPos;
+    let hierarchyPos = input.position;
     var worldPos = instData.xform.worldPos;
     let safeScale = instData.xform.safeScale;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
@@ -318,7 +318,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
     let instData = unpackAndTransformFoliage(input.position, input.instancePos_scaleY, input.instanceRotQuat, input.instanceScaleXZ);
     let windDisp = calculateFoliageWindDisplacement(
         instData.xform.worldPos,
-        instData.xform.hierarchyPos,
+        input.position,
         input.vertexNormal,
         input.vertexColor_0,
         instData.instancePos,

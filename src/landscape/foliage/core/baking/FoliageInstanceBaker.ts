@@ -122,8 +122,8 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
             for (let gx = startGx; gx <= endGx; gx++) {
                 tasksBuf[tOffset++] = gx;
                 tasksBuf[tOffset++] = gz;
-                tasksBuf[tOffset++] = 0; // pad0 (baseTargetSlot)
                 tasksBuf[tOffset++] = targetCount;
+                tasksBuf[tOffset++] = 0; // pad0 (16-byte alignment tail padding)
             }
         }
 

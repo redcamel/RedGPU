@@ -52,8 +52,8 @@ struct FoliageBakeUniforms {
 struct FoliageGridTask {
     gridX: i32,
     gridZ: i32,
-    pad0: u32, // baseTargetSlot
     maxSlotsForGrid: u32,
+    pad0: u32, // 16-byte alignment tail padding
 };
 
 @group(0) @binding(0) var<uniform> uniforms: FoliageBakeUniforms;

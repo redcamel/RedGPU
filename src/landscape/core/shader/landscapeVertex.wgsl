@@ -54,10 +54,10 @@ struct OutputData {
 
 struct ComputedTerrainVertex {
     worldPos: vec4<f32>,
+    instanceColor: vec4<f32>,
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
     lodLevel: u32,
-    instanceColor: vec4<f32>,
 };
 
 fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
