@@ -186,57 +186,6 @@ export class LandscapeWeightMapCPUSampler {
     }
 
     /**
-     * [KO] 지정된 UV 좌표에서 RGBA 4채널 전체의 가중치를 한 번에 샘플링하여 출력 버퍼에 기록합니다. (Zero-GC)
-     * [EN] Samples weights for all 4 RGBA channels at the specified UV coordinates and writes them to the output buffer. (Zero-GC)
-     * @param src - [KO] 이미지 URL / [EN] Image URL
-     * @param u - [KO] U 텍스처 좌표 / [EN] U texture coordinate
-     * @param v - [KO] V 텍스처 좌표 / [EN] V texture coordinate
-     * @param outWeights - [KO] 결과를 기록할 4원소 Float32Array / [EN] 4-element Float32Array to write results
-     */
-    getAllWeights(src: string, u: number, v: number, outWeights: Float32Array): void {
-        const entry = this.#cache.get(src);
-        if (!entry) {
-            outWeights[0] = 0.0;
-            outWeights[1] = 0.0;
-            outWeights[2] = 0.0;
-            outWeights[3] = 0.0;
-            return;
-        }
-
-        const {width, height, data} = entry;
-
-        const cu = u < 0.0 ? 0.0 : (u > 1.0 ? 1.0 : u);
-        const cv = v < 0.0 ? 0.0 : (v > 1.0 ? 1.0 : v);
-
-        const fx = cu * (width - 1);
-        const fy = cv * (height - 1);
-
-        const x0 = fx | 0;
-        const y0 = fy | 0;
-        const x1 = x0 + 1 < width ? x0 + 1 : x0;
-        const y1 = y0 + 1 < height ? y0 + 1 : y0;
-
-        const tx = fx - x0;
-        const ty = fy - y0;
-
-        const idx00 = (y0 * width + x0) << 2;
-        const idx10 = (y0 * width + x1) << 2;
-        const idx01 = (y1 * width + x0) << 2;
-        const idx11 = (y1 * width + x1) << 2;
-
-        for (let c = 0; c < 4; c++) {
-            const w00 = this.#sampleChannel(data, idx00, c);
-            const w10 = this.#sampleChannel(data, idx10, c);
-            const w01 = this.#sampleChannel(data, idx01, c);
-            const w11 = this.#sampleChannel(data, idx11, c);
-
-            const top = w00 + (w10 - w00) * tx;
-            const bottom = w01 + (w11 - w01) * tx;
-            outWeights[c] = top + (bottom - top) * ty;
-        }
-    }
-
-    /**
      * [KO] 캐시된 모든 가중치 픽셀 데이터를 비우고 로딩 프로미스를 정리합니다.
      * [EN] Clears all cached weight pixel data and loading promises.
      */

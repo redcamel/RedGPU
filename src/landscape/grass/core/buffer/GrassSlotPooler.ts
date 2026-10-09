@@ -62,12 +62,14 @@ export class GrassSlotPooler extends AScatterSlotPooler {
             receiveShadow
         } = grass;
 
+        const effShadowFadeStart = Math.min(shadowFadeStartDistance, shadowCullDistance);
+
         f32[baseFloat + 0] = cullingDistance;
         f32[baseFloat + 1] = fadeStartDistance;
         f32[baseFloat + 2] = height;
         f32[baseFloat + 3] = minY;
         f32[baseFloat + 4] = shadowCullDistance;
-        f32[baseFloat + 5] = shadowFadeStartDistance;
+        f32[baseFloat + 5] = Math.min(0.30, Math.max(0.10, alphaCutoff * 0.55)); // farAlphaCutoff
         f32[baseFloat + 6] = 1.0 / Math.max(0.01, height);
         f32[baseFloat + 7] = 1.0 / Math.max(0.001, cullingDistance - fadeStartDistance);
 
@@ -85,13 +87,12 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 16] = roughness;
         f32[baseFloat + 17] = shadowStrength;
         u32[baseFloat + 18] = receiveShadow ? 1 : 0;
-        f32[baseFloat + 19] = Math.min(0.30, Math.max(0.10, alphaCutoff * 0.55));
+        f32[baseFloat + 19] = shadowCullDistance * shadowCullDistance; // shadowCullDistanceSq
 
-        const effShadowFadeStart = Math.min(shadowFadeStartDistance, shadowCullDistance);
-        f32[baseFloat + 20] = shadowCullDistance * shadowCullDistance;
-        f32[baseFloat + 21] = effShadowFadeStart * effShadowFadeStart;
-        f32[baseFloat + 22] = 1.0 / Math.max(0.001, shadowCullDistance - effShadowFadeStart);
-        u32[baseFloat + 23] = 0;
+        f32[baseFloat + 20] = effShadowFadeStart * effShadowFadeStart; // shadowFadeStartSq
+        f32[baseFloat + 21] = 1.0 / Math.max(0.001, shadowCullDistance - effShadowFadeStart); // invShadowFadeRange
+        u32[baseFloat + 22] = 0; // pad0
+        u32[baseFloat + 23] = 0; // pad1
 
         this.uploadSlotBytes(slot, this.paramsSizeBytes);
     }
