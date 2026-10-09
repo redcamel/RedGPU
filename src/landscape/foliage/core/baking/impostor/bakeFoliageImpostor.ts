@@ -125,6 +125,21 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
 }
 
 /**
+ * [KO] 4x4 행렬이 항등 행렬(Identity Matrix)인지 여부를 검사합니다.
+ * [EN] Checks whether a 4x4 matrix is an identity matrix.
+ */
+function isIdentityMatrix(m: mat4 | null | undefined): boolean {
+    if (!m) return true;
+    return (
+        m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
+        m[1] === 0 && m[2] === 0 && m[3] === 0 &&
+        m[4] === 0 && m[6] === 0 && m[7] === 0 &&
+        m[8] === 0 && m[9] === 0 && m[11] === 0 &&
+        m[12] === 0 && m[13] === 0 && m[14] === 0
+    );
+}
+
+/**
  * [KO] 렌더 단위 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
  * [EN] Computes the composite AABB, bounding radius, and center by traversing render units.
  * @param renderUnits -
@@ -159,33 +174,48 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
         const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
         const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
         const m = unit.relativeModelMatrix;
-        const isIdentity = !m || (
-            m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
-            m[1] === 0 && m[2] === 0 && m[3] === 0 &&
-            m[4] === 0 && m[6] === 0 && m[7] === 0 &&
-            m[8] === 0 && m[9] === 0 && m[11] === 0 &&
-            m[12] === 0 && m[13] === 0 && m[14] === 0
-        );
+        const isIdentity = isIdentityMatrix(m);
 
-        for (let i = 0; i < vCount; i++) {
-            const idx = i * stride;
-            const x = vData[idx];
-            const y = vData[idx + 1];
-            const z = vData[idx + 2];
+        if (isIdentity) {
+            for (let i = 0, idx = 0; i < vCount; i++, idx += stride) {
+                const x = vData[idx];
+                const y = vData[idx + 1];
+                const z = vData[idx + 2];
 
-            const wx = isIdentity ? x : (m![0] * x + m![4] * y + m![8] * z + m![12]);
-            const wy = isIdentity ? y : (m![1] * x + m![5] * y + m![9] * z + m![13]);
-            const wz = isIdentity ? z : (m![2] * x + m![6] * y + m![10] * z + m![14]);
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (z < minZ) minZ = z;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+                if (z > maxZ) maxZ = z;
 
-            if (wx < minX) minX = wx;
-            if (wy < minY) minY = wy;
-            if (wz < minZ) minZ = wz;
-            if (wx > maxX) maxX = wx;
-            if (wy > maxY) maxY = wy;
-            if (wz > maxZ) maxZ = wz;
+                const horizDistSq = x * x + z * z;
+                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
+            }
+        } else {
+            const m0 = m![0], m4 = m![4], m8 = m![8], m12 = m![12];
+            const m1 = m![1], m5 = m![5], m9 = m![9], m13 = m![13];
+            const m2 = m![2], m6 = m![6], m10 = m![10], m14 = m![14];
 
-            const horizDistSq = wx * wx + wz * wz;
-            if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
+            for (let i = 0, idx = 0; i < vCount; i++, idx += stride) {
+                const x = vData[idx];
+                const y = vData[idx + 1];
+                const z = vData[idx + 2];
+
+                const wx = m0 * x + m4 * y + m8 * z + m12;
+                const wy = m1 * x + m5 * y + m9 * z + m13;
+                const wz = m2 * x + m6 * y + m10 * z + m14;
+
+                if (wx < minX) minX = wx;
+                if (wy < minY) minY = wy;
+                if (wz < minZ) minZ = wz;
+                if (wx > maxX) maxX = wx;
+                if (wy > maxY) maxY = wy;
+                if (wz > maxZ) maxZ = wz;
+
+                const horizDistSq = wx * wx + wz * wz;
+                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
+            }
         }
     }
 
@@ -404,13 +434,7 @@ export default function bakeFoliageImpostor(
             relativeModelMatrix: m
         } = unit;
         const {vertexBuffer, indexBuffer} = geometry;
-        const isIdentityModelMatrix = !m || (
-            m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
-            m[1] === 0 && m[2] === 0 && m[3] === 0 &&
-            m[4] === 0 && m[6] === 0 && m[7] === 0 &&
-            m[8] === 0 && m[9] === 0 && m[11] === 0 &&
-            m[12] === 0 && m[13] === 0 && m[14] === 0
-        );
+        const isIdentityModelMatrix = isIdentityMatrix(m);
 
             const diffTex = mat?.baseColorTexture;
             const diffSampler = mat?.baseColorTextureSampler || basicSampler;
