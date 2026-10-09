@@ -47,7 +47,7 @@ import AScatterSlotPooler from "./AScatterSlotPooler";
 import AScatterRenderer from "./AScatterRenderer";
 import AScatterManager from "./AScatterManager";
 import AScatterCuller from "./AScatterCuller";
-import AScatterInstanceBaker, {type ScatterBakeBindGroupCacheEntry} from "./AScatterInstanceBaker";
+import AScatterInstanceBaker from "./AScatterInstanceBaker";
 
 export {
     AScatterManager,
@@ -71,7 +71,6 @@ export {
     type RawMeshNode,
     type ScatterShaderReflectionConfig,
     type ScatterBaseSegmentAllocation,
-    type ScatterBakeBindGroupCacheEntry,
     PBR_INTERLEAVED_STRUCT,
     PBR_STRIDE,
     PBR_STRIDE_BYTES,

@@ -438,22 +438,6 @@ export class DebuggerManager {
     }
 
     /**
-     * [KO] 활성화된 모든 온스크린 디버거 뷰어를 화면에 표시합니다.
-     * [EN] Shows all enabled on-screen debugger viewers.
-     */
-    showAll(): void {
-        this.visible = true;
-    }
-
-    /**
-     * [KO] 모든 온스크린 디버거 뷰어를 화면에서 숨깁니다.
-     * [EN] Hides all on-screen debugger viewers.
-     */
-    hideAll(): void {
-        this.visible = false;
-    }
-
-    /**
      * [KO] 활성화된 각 디버거 뷰어의 카메라 및 렌더링 상태를 매 프레임 갱신합니다.
      * [EN] Updates camera and render state for all active debugger viewers every frame.
      *

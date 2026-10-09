@@ -23,13 +23,7 @@
  * @packageDocumentation
  */
 
-import Foliage, {
-    FIXED_SCATTER_GRID_SIZE,
-    type FoliageLODConfig,
-    type FoliageLODInfo,
-    type FoliageOptions,
-    type FoliageSubCell
-} from "./Foliage";
+import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions, type FoliageSubCell} from "./Foliage";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
@@ -54,7 +48,6 @@ export {
     FoliageCuller,
     FoliageInstanceBaker,
     OctahedralImpostorMaterial,
-    FIXED_SCATTER_GRID_SIZE,
 
     assembleFoliageRenderUnits,
     bakeFoliageImpostor,

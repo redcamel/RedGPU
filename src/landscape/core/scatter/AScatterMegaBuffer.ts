@@ -559,27 +559,12 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
                 size: newCapacity * this.#strideBytes,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             });
-
-            this.onRawBufferCreated(this.#rawGPUBuffer, newCapacity);
         }
 
         this.onResizeBuffers(newCapacity);
 
         this.#onRecreated?.();
         return true;
-    }
-
-    /**
-     * [KO] 메가버퍼 확장으로 인해 새 GPU rawGPUBuffer가 생성되었을 때 호출되는 훅 메서드입니다. 하위 클래스에서 데이터 복원 또는 CPU 동기화를 수행할 수 있습니다.
-     * [EN] Hook method invoked when a new GPU rawGPUBuffer is created due to mega-buffer expansion. Subclasses can perform data restoration or CPU synchronization.
-     * @param rawBuffer -
-     * [KO] 새로 생성된 GPU 원본 인스턴스 버퍼
-     * [EN] Newly created GPU raw instance buffer
-     * @param newCapacity -
-     * [KO] 새로 확장된 인스턴스 수용 용량
-     * [EN] Newly expanded instance capacity
-     */
-    onRawBufferCreated(rawBuffer: GPUBuffer, newCapacity: number): void {
     }
 
     /**

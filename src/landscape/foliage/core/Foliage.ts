@@ -72,7 +72,7 @@ function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: number):
  * [KO] 식생 인스턴스의 불변 월드 배치 좌표 및 의사난수 시드를 산출하는 고정 스캐터 그리드 크기 (단위: 미터, 100m).
  * [EN] Fixed scatter grid size (100m) for computing immutable world placement coordinates and PRNG seeds.
  */
-export const FIXED_SCATTER_GRID_SIZE: number = 100.0;
+const FIXED_SCATTER_GRID_SIZE: number = 100.0;
 
 /**
  * [KO] 식생 서브셀 데이터 인터페이스입니다. (경량 메타데이터 구조체)

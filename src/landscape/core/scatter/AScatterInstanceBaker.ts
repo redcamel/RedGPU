@@ -12,7 +12,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [KO] 베이커 바인드 그룹 캐시 엔트리 인터페이스입니다.
  * [EN] Interface for baker bind group cache entry.
  */
-export interface ScatterBakeBindGroupCacheEntry {
+interface ScatterBakeBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
     rawBuffer: GPUBuffer;
     vhtView: GPUTextureView;
