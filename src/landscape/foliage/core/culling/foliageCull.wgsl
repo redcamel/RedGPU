@@ -132,15 +132,18 @@ fn main(
         inMainFrustum = testSphereInFrustum(sphereCenter, scaledRadius, globalUniforms.mainFrustumPlanes);
 
         if (inMainFrustum && globalUniforms.useHZB != 0u) {
-            let halfW = scaledRadius;
-            let baseY = realY + typeInfo.bottomOffset;
-            let effHeight = max(typeInfo.boundingHeight, typeInfo.boundingRadius * 1.5) * scaleY;
-            let topY = baseY + effHeight;
-            let aabbMin = vec3<f32>(instance.posX - halfW, baseY, instance.posZ - halfW);
-            let aabbMax = vec3<f32>(instance.posX + halfW, topY, instance.posZ + halfW);
+            // Near-range bypass: Objects whose bounds are within 10m of the camera cannot be occluded by terrain
+            if (dist - scaledRadius > 10.0) {
+                let halfW = scaledRadius;
+                let baseY = realY + typeInfo.bottomOffset;
+                let effHeight = max(typeInfo.boundingHeight, typeInfo.boundingRadius * 1.5) * scaleY;
+                let topY = baseY + effHeight;
+                let aabbMin = vec3<f32>(instance.posX - halfW, baseY, instance.posZ - halfW);
+                let aabbMax = vec3<f32>(instance.posX + halfW, topY, instance.posZ + halfW);
 
-            if (!checkAABBInHZB(aabbMin, aabbMax, globalUniforms.viewProjectionMatrix, hzbTexture, hzbSampler, globalUniforms.depthBias)) {
-                inMainFrustum = false;
+                if (!checkAABBInHZB(aabbMin, aabbMax, globalUniforms.viewProjectionMatrix, hzbTexture, hzbSampler, globalUniforms.depthBias)) {
+                    inMainFrustum = false;
+                }
             }
         }
     }
