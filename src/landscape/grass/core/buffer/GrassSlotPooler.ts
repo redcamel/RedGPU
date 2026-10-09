@@ -69,7 +69,7 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 3] = minY;
         f32[baseFloat + 4] = shadowCullDistance;
         f32[baseFloat + 5] = shadowFadeStartDistance;
-        f32[baseFloat + 6] = 0.0; // pad0
+        f32[baseFloat + 6] = 1.0 / Math.max(0.01, height); // invMeshHeight
         f32[baseFloat + 7] = 0.0; // pad1
 
         // GrassMaterialUniforms (48B)

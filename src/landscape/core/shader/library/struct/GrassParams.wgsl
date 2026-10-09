@@ -9,7 +9,7 @@ struct GrassParams {
     minY: f32,
     shadowCullDistance: f32,
     shadowFadeStartDistance: f32,
-    pad0: f32,
+    invMeshHeight: f32,
     pad1: f32,
     groundBlendStrength: f32,
     alphaCutoff: f32,

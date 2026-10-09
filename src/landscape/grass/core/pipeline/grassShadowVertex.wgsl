@@ -40,14 +40,16 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
 
     let fade = computeGrassDistanceFade(distToCam, shadowCullDist, shadowFadeStart, instance.scaleXZ, instance.scaleY);
 
+    let q = normalize(unpack4x8snorm(instance.packedQuat));
+
     let xform = transformGrassPosition(
         input.position,
         instPos,
         fade.scaleXZ,
         fade.scaleY,
-        instance.packedQuat,
+        q,
         grassUniforms.minY,
-        grassUniforms.meshHeight
+        grassUniforms.invMeshHeight
     );
 
     output.clipPos = getShadowClipPosition(xform.worldPos, systemUniforms.directionalLightProjectionViewMatrix);

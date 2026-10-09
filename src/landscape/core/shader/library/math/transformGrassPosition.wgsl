@@ -50,12 +50,11 @@ fn transformGrassPosition(
     instPos: vec3<f32>,
     scaleXZ: f32,
     scaleY: f32,
-    packedQuat: u32,
+    q: vec4<f32>,
     minY: f32,
-    meshHeight: f32
+    invMeshHeight: f32
 ) -> GrassPositionResult {
-    let baseHeight = max(0.01, meshHeight);
-    let heightRatio = clamp((position.y - minY) / baseHeight, 0.0, 1.0);
+    let heightRatio = clamp((position.y - minY) * invMeshHeight, 0.0, 1.0);
 
     let scaledPos = vec3<f32>(
         position.x * scaleXZ,
@@ -63,7 +62,6 @@ fn transformGrassPosition(
         position.z * scaleXZ
     );
 
-    let q = normalize(unpack4x8snorm(packedQuat));
     var localPos = rotateVectorByQuat(scaledPos, q);
 
     let sinkDepth = max(0.0, -localPos.y);
@@ -76,10 +74,9 @@ fn transformGrassPosition(
 }
 
 /**
- * [KO] 패킹된 쿼터니언으로 잔디 모델 정점 노멀을 회전하고 정규화합니다.
- * [EN] Rotates and normalizes grass model vertex normal by packed quaternion.
+ * [KO] 정규화된 쿼터니언으로 잔디 모델 정점 노멀을 회전합니다. (단위 벡터 강체 회전이므로 추가 normalize 불필요)
+ * [EN] Rotates grass model vertex normal by normalized quaternion. (Isometry preserves unit length, no extra normalize needed)
  */
-fn rotateGrassNormal(normal: vec3<f32>, packedQuat: u32) -> vec3<f32> {
-    let q = normalize(unpack4x8snorm(packedQuat));
-    return normalize(rotateVectorByQuat(normal, q));
+fn rotateGrassNormal(normal: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
+    return rotateVectorByQuat(normal, q);
 }

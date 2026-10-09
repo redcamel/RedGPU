@@ -32,7 +32,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         input.groundColor.rgb
     );
 
-    let N = computeGrassUpwardNormal(input.normal, input.heightRatio);
+    let N = normalize(input.normal);
 
     let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
 
@@ -42,6 +42,7 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     let sssColor = mix(albedo * 1.05, materialUniforms.subsurfaceColor, 0.35);
     let leafThickness = clamp(input.heightRatio, 0.1, 1.0);
+    let transRatio = clamp(subsurfaceStrength * leafThickness * 0.45, 0.0, 0.85);
 
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -75,7 +76,6 @@ fn main(input: VertexOutput) -> OutputFragment {
         }
 
         let nDotL = dot(N, L);
-        let transRatio = clamp(subsurfaceStrength * leafThickness * 0.45, 0.0, 0.85);
         let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
         let directDiff = frontWrap * (1.0 - transRatio);
 

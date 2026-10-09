@@ -31,8 +31,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         input.groundColor.rgb
     );
 
-    let N = computeGrassUpwardNormal(input.normal, input.heightRatio);
-    let V = normalize(systemUniforms.camera.cameraPosition.xyz - input.worldPos);
+    let N = normalize(input.normal);
     let preExposure = systemUniforms.preExposure;
 
     let subsurfaceStrength = materialUniforms.subsurfaceStrength;
@@ -44,19 +43,18 @@ fn main(input: VertexOutput) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
+    // 🌿 Far Grass Ultra-Fast Direct Lighting (Zero View-Vector Math, Seamless Color Match)
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
         let dLight = light.color.rgb * light.intensity * preExposure;
+
         let nDotL = dot(N, L);
         let frontWrap = clamp((nDotL + 0.5) * NORM_225, 0.0, 1.0);
-        let directDiff = frontWrap * (1.0 - transRatio);
-
         let backWrap = clamp((-nDotL + 0.5) * NORM_225, 0.0, 1.0);
-        let lightOpposite = -(L + input.normal * SSS_DISTORTION);
-        let vDotL = max(dot(V, lightOpposite), 0.0);
-        let inScatter = vDotL * vDotL;
-        let sssTransmission = (backWrap * 0.5 + inScatter * 0.5) * transRatio;
+
+        let directDiff = frontWrap * (1.0 - transRatio);
+        let sssTransmission = backWrap * transRatio;
 
         totalDirectLighting += (albedo * directDiff + sssColor * sssTransmission) * dLight;
     }

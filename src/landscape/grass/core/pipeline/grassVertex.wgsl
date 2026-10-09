@@ -3,6 +3,7 @@
 #redgpu_include landscape.struct.GrassParams;
 #redgpu_include landscape.struct.GrassVertexOutput;
 #redgpu_include landscape.math.transformGrassPosition;
+#redgpu_include landscape.math.blendGrassGround;
 
 struct VertexInput {
     @location(0) position: vec3<f32>,
@@ -27,16 +28,18 @@ fn main(input: VertexInput) -> VertexOutput {
     let fadeStart = min(grassUniforms.fadeStartDistance, cullDist);
     let fade = computeGrassDistanceFade(distToCam, cullDist, fadeStart, instance.scaleXZ, instance.scaleY);
 
+    let q = normalize(unpack4x8snorm(instance.packedQuat));
+
     let xform = transformGrassPosition(
         input.position,
         instPos,
         fade.scaleXZ,
         fade.scaleY,
-        instance.packedQuat,
+        q,
         grassUniforms.minY,
-        grassUniforms.meshHeight
+        grassUniforms.invMeshHeight
     );
-    let worldNormal = rotateGrassNormal(input.normal, instance.packedQuat);
+    let worldNormal = rotateGrassNormal(input.normal, q);
 
     let relPos = xform.worldPos - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
@@ -44,7 +47,7 @@ fn main(input: VertexInput) -> VertexOutput {
     output.clipPos = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.worldPos = xform.worldPos;
     output.uv = input.uv;
-    output.normal = worldNormal;
+    output.normal = computeGrassUpwardNormal(worldNormal, xform.heightRatio);
     output.heightRatio = xform.heightRatio;
     output.alphaFade = fade.alphaFade;
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
