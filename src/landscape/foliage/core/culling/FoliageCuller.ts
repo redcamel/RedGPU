@@ -31,8 +31,6 @@ class FoliageCuller extends AScatterCuller {
     #lastHZBTextureView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
 
-    #landscapeRef: Landscape | null = null;
-
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
 
@@ -109,8 +107,6 @@ class FoliageCuller extends AScatterCuller {
         }
 
         if (this.computePipeline && this.bindGroupLayout) {
-            this.#landscapeRef = landscape;
-
             this.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
@@ -137,7 +133,6 @@ class FoliageCuller extends AScatterCuller {
         this.#lastHZBTextureView = null;
         this.#lastHZBSampler = null;
         this.#megaBuffer = null;
-        this.#landscapeRef = null;
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
