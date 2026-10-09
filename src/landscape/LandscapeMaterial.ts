@@ -267,7 +267,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         layer.onUniformChange = () => {
             this.updateUniformsData();
         };
-        layer.dirty = true;
         this.dirtyPipeline = true;
         this.#scheduleRebuildTextureArrays();
         this.updateUniformsData();

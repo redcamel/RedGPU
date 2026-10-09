@@ -157,7 +157,6 @@ export class LandscapeLayer {
     #stochasticScale: number = 1.0;
 
     #weightMapCPUSampler?: LandscapeWeightMapCPUSampler;
-    dirty: boolean = true;
     onChange?: () => void;
     onUniformChange?: () => void;
 
@@ -390,7 +389,6 @@ export class LandscapeLayer {
     set enabled(val: boolean) {
         if (this.#enabled === val) return;
         this.#enabled = val;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -407,7 +405,6 @@ export class LandscapeLayer {
         if (this.#uvScale[0] === u && this.#uvScale[1] === v) return;
         this.#uvScale[0] = u;
         this.#uvScale[1] = v;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -424,7 +421,6 @@ export class LandscapeLayer {
         if (this.#uvOffset[0] === u && this.#uvOffset[1] === v) return;
         this.#uvOffset[0] = u;
         this.#uvOffset[1] = v;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -440,7 +436,6 @@ export class LandscapeLayer {
         const clamped = Math.max(0.1, val);
         if (this.#nearUVScaleMultiplier === clamped) return;
         this.#nearUVScaleMultiplier = clamped;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -456,7 +451,6 @@ export class LandscapeLayer {
         if (this.#weightChannel === val) return;
         this.#weightChannel = val;
         this.#updateWeightChannelIndex();
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -479,7 +473,6 @@ export class LandscapeLayer {
     set roughness(val: number) {
         if (this.#roughness === val) return;
         this.#roughness = val;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -494,7 +487,6 @@ export class LandscapeLayer {
     set metallic(val: number) {
         if (this.#metallic === val) return;
         this.#metallic = val;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -509,7 +501,6 @@ export class LandscapeLayer {
     set normalIntensity(val: number) {
         if (this.#normalIntensity === val) return;
         this.#normalIntensity = val;
-        this.dirty = true;
         this.onChange?.();
     }
 
@@ -517,7 +508,6 @@ export class LandscapeLayer {
     set aoIntensity(val: number) {
         if (this.#aoIntensity === val) return;
         this.#aoIntensity = val;
-        this.dirty = true;
         this.onChange?.();
     }
     #updateWeightChannelIndex(): void {
@@ -568,7 +558,6 @@ export class LandscapeLayer {
         const clamped = Math.max(0.0, Math.min(5.0, val));
         if (this.#heightBlendFactor !== clamped) {
             this.#heightBlendFactor = clamped;
-            this.dirty = true;
             if (this.onUniformChange) {
                 this.onUniformChange();
             } else {
@@ -589,7 +578,6 @@ export class LandscapeLayer {
         const boolVal = !!val;
         if (this.#stochasticTiling !== boolVal) {
             this.#stochasticTiling = boolVal;
-            this.dirty = true;
             this.onChange?.();
         }
     }
@@ -606,7 +594,6 @@ export class LandscapeLayer {
         const clamped = Math.max(0.01, val);
         if (this.#stochasticScale !== clamped) {
             this.#stochasticScale = clamped;
-            this.dirty = true;
             this.onChange?.();
         }
     }

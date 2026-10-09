@@ -13,7 +13,6 @@ import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 export class FoliageSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 1024;
     static PARAMS_SIZE_BYTES: number = 32;
-    static PARAMS_SIZE_FLOATS: number = 8; // 32 / 4
 
     /**
      * [KO] FoliageSlotPooler 인스턴스를 생성하고 256KB 고정 메가 UBO 및 CPU 미러 버퍼를 사전 할당합니다.
