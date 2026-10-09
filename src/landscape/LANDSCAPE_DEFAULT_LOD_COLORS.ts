@@ -41,24 +41,4 @@ export const LANDSCAPE_DEFAULT_LOD_COLORS: [number, number, number, number][] = 
     [0.58, 0.64, 0.72, 1.0]
 ]) as [number, number, number, number][];
 
-/**
- * [KO] 지형 기본 LOD 색상의 CSS RGBA 문자열 배열(`rgba(r, g, b, 0.75)`)입니다.
- * [EN] Array of CSS RGBA strings (`rgba(r, g, b, 0.75)`) for default terrain LOD colors.
- *
- * [KO] UI나 2D 디버그 오버레이, 범례(Legend) 등 웹 렌더링에 바로 사용할 수 있도록 0.75 알파값이 적용된 RGBA 문자열을 제공합니다.
- * [EN] Provides RGBA color strings with 0.75 alpha for immediate use in web UI, 2D debug overlays, or LOD legends.
- *
- * ### Example
- * ```typescript
- * const rgbaString = RedGPU.Landscape.LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS[0]; // "rgba(59, 130, 245, 0.75)"
- * ```
- *
- * @internal
- */
-export const LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS: string[] = Object.freeze(
-    LANDSCAPE_DEFAULT_LOD_COLORS.map(([r, g, b]) =>
-        `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, 0.75)`
-    )
-) as string[];
-
 export default LANDSCAPE_DEFAULT_LOD_COLORS;

@@ -379,10 +379,6 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
                 }
             },
             {
-                binding: 1,
-                resource: this.resourceManager.basicSampler.gpuSampler
-            },
-            {
                 binding: 2,
                 resource: vhtTextureView
             },

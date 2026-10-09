@@ -5,7 +5,6 @@
 #redgpu_include landscape.struct.LandscapeTile;
 
 @group(1) @binding(0) var<storage, read> visibleTiles: array<LandscapeTile>;
-@group(1) @binding(1) var heightMapSampler: sampler;
 @group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(4) var<uniform> landscapeUniforms: LandscapeUniforms;
 

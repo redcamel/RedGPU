@@ -20,9 +20,9 @@ struct FoliageCullingUniforms {
     useHZB: u32,
     viewportHeight: f32,
     depthBias: f32,
-    hzbWidth: f32,
+    pad_hzbWidth: f32,
 
-    hzbHeight: f32,
+    pad_hzbHeight: f32,
     pad0: f32,
     pad1: f32,
     pad2: f32,

@@ -272,9 +272,9 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         gu32[8] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
         gf32[9] = viewportHeight > 0 ? viewportHeight : 1080.0;
         gf32[10] = depthBias;
-        gf32[11] = hzbWidth;
+        gf32[11] = 0; // pad_hzbWidth
 
-        gf32[12] = hzbHeight;
+        gf32[12] = 0; // pad_hzbHeight
         gf32[13] = 0;
         gf32[14] = 0;
         gf32[15] = 0;

@@ -5,9 +5,14 @@
  */
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../ALandscapeDebugger";
 import Landscape from "../../../Landscape";
-import {LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../../LANDSCAPE_DEFAULT_LOD_COLORS";
+import LANDSCAPE_DEFAULT_LOD_COLORS from "../../../LANDSCAPE_DEFAULT_LOD_COLORS";
 
 const UNLOADED_COLOR = 'rgba(255, 255, 255, 0.08)';
+const LOD_RGBA_STRINGS: readonly string[] = Object.freeze(
+    LANDSCAPE_DEFAULT_LOD_COLORS.map(([r, g, b]) =>
+        `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, 0.75)`
+    )
+);
 
 /**
  * [KO] 공간 그리드의 각 타일 로딩 여부 및 거리별 LOD 레벨 색상을 2D 캔버스에 실시간으로 시각화하는 디버거 클래스입니다.
@@ -56,7 +61,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         this.#ctx.save();
         this.#ctx.scale(dpr, dpr);
 
-        const lodColorStrings = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
+        const lodColorStrings = LOD_RGBA_STRINGS;
         const maxColorIndex = lodColorStrings.length - 1;
 
         const cameraState = this.getCameraState();
