@@ -7,7 +7,7 @@
 
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
-import Mesh from "../../../display/mesh/Mesh";
+import type Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";

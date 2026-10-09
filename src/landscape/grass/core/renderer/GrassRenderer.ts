@@ -357,7 +357,7 @@ export class GrassRenderer extends AScatterRenderer {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
                 const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
 
@@ -392,7 +392,7 @@ export class GrassRenderer extends AScatterRenderer {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
                 const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
-                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
 
@@ -457,7 +457,7 @@ export class GrassRenderer extends AScatterRenderer {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
                 const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
-                bundleEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
 

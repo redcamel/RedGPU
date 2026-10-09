@@ -220,7 +220,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         if (repopMask !== 0) {
             for (let i = 0; i < count; i++) {
                 const foliage = types[i];
-                const typeId = foliage.allocation?.typeId ?? 0;
+                const typeId = foliage.typeId;
                 if ((repopMask & (1 << typeId)) !== 0) {
                     this.#repopulateFoliage(foliage);
                 }
@@ -233,7 +233,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         if (uboMask !== 0) {
             for (let i = 0; i < count; i++) {
                 const foliage = types[i];
-                const typeId = foliage.allocation?.typeId ?? 0;
+                const typeId = foliage.typeId;
                 if ((uboMask & (1 << typeId)) !== 0) {
                     foliage.flushAllRenderUnitUBOs();
                 }
@@ -457,11 +457,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
 
-        if (removed.allocation) {
-            const bit = 1 << removed.allocation.typeId;
-            this.#dirtyUboMask &= ~bit;
-            this.#needsRepopulateMask &= ~bit;
-        }
+        const bit = 1 << removed.typeId;
+        this.#dirtyUboMask &= ~bit;
+        this.#needsRepopulateMask &= ~bit;
 
         removed.destroy();
         this.#renderer.markAllBundlesDirty();
@@ -521,7 +519,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const count = this.types.length;
         for (let i = 0; i < count; i++) {
             const foliage = this.types[i];
-            const typeId = foliage.allocation?.typeId ?? 0;
+            const typeId = foliage.typeId;
             this.#needsRepopulateMask |= (1 << typeId);
             this.#dirtyUboMask |= (1 << typeId);
             this.#repopulateFoliage(foliage);
@@ -567,7 +565,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     #onFoliageRepopulateRequired = (type: Foliage): void => {
-        const typeId = type.allocation?.typeId ?? 0;
+        const typeId = type.typeId;
         this.#needsRepopulateMask |= (1 << typeId);
         this.#dirtyUboMask |= (1 << typeId);
     };

@@ -167,7 +167,6 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         return this.#isShadowMerged;
     }
 
-
     /**
      * [KO] 상대 모델 변환 행렬을 반환합니다.
      * [EN] Returns the relative model transform matrix.

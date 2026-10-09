@@ -264,7 +264,6 @@ export class ScatterRenderUnit {
         this.#instanceBufferOffset = val;
     }
 
-
     /**
      * [KO] 렌더 단위의 머티리얼 객체를 반환합니다.
      * [EN] Returns the material object of the render unit.

@@ -1239,8 +1239,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #notifyUniformDirty(): void {
-        const typeId = this.allocation?.typeId;
-        if (typeId !== undefined && this.onUniformDirty) {
+        const typeId = this.typeId;
+        if (this.onUniformDirty) {
             this.onUniformDirty(typeId);
         }
     }

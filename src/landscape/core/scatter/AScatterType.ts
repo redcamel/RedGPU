@@ -181,11 +181,11 @@ export abstract class AScatterType<
     }
 
     /**
-     * [KO] 스캐터 매니저 내부에서 배정하는 고유 타입 식별자 정수 (Type ID)를 반환합니다.
-     * [EN] Returns the unique type identifier integer (Type ID) assigned internally by scatter managers.
+     * [KO] 스캐터 매니저 내부에서 배정하는 고유 타입 식별자 정수 (Type ID)를 반환합니다. (단일 진실 공급원)
+     * [EN] Returns the unique type identifier integer (Type ID) assigned internally by scatter managers. (Single source of truth)
      */
     get typeId(): number {
-        return this.#typeId;
+        return this.#allocation ? this.#allocation.typeId : this.#typeId;
     }
 
     /**
@@ -194,6 +194,9 @@ export abstract class AScatterType<
      */
     set typeId(value: number) {
         this.#typeId = value;
+        if (this.#allocation) {
+            this.#allocation.typeId = value;
+        }
     }
 
     /**
@@ -225,15 +228,18 @@ export abstract class AScatterType<
     }
 
     /**
-     * [KO] 메가버퍼에서 배정된 세그먼트 메타데이터를 바인딩합니다.
-     * [EN] Binds the segment allocation metadata assigned by the mega-buffer.
+     * [KO] 메가버퍼에서 배정된 세그먼트 메타데이터를 바인딩하고 Type ID를 동기화합니다.
+     * [EN] Binds the segment allocation metadata assigned by the mega-buffer and synchronizes Type ID.
      *
      * @param allocation -
      * [KO] 할당 메타데이터 객체
      * [EN] Allocation metadata object
      */
-    bindAllocation(allocation: TAllocation): void {
+    bindAllocation(allocation: TAllocation | null): void {
         this.#allocation = allocation;
+        if (allocation) {
+            this.#typeId = allocation.typeId;
+        }
     }
 
     /**
