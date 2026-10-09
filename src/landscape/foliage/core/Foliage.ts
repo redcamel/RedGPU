@@ -420,11 +420,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             useDepthPrepass = true,
             shadowCullDistance: optShadowCullDistance,
             targetLayer,
-            minSlope,
-            maxSlope,
-            densityScaleByWeight,
+            minSlope = 0.0,
+            maxSlope = 45.0,
+            densityScaleByWeight = true,
             randomRotationY,
-            bottomOffset,
+            bottomOffset = 0.0,
             height: optHeight
         } = options;
 
@@ -493,7 +493,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         );
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
-        const resolvedBottomOffset = bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
         const resolvedHeight = optHeight !== undefined
             ? Math.max(0.1, Number(optHeight) || 0.1)
@@ -522,16 +521,16 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.setRawScatterProperties({
             height: resolvedHeight,
-            bottomOffset: resolvedBottomOffset,
+            bottomOffset,
             cullingDistance,
             shadowCullDistance: resolvedShadowCullDistance,
             targetLayer,
-            minSlope: minSlope ?? 0.0,
-            maxSlope: maxSlope ?? 45.0,
-            densityScaleByWeight: densityScaleByWeight !== false,
+            minSlope,
+            maxSlope,
+            densityScaleByWeight,
             densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier,
-            castShadow: castShadow !== false,
+            castShadow,
             groundBlendStrength: resolvedGroundBlendStrength,
             streamingRadius
         });
@@ -1073,7 +1072,6 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const megaBuffer = this.#megaBuffer;
                     const allocation = this.allocation;
                     if (megaBuffer && allocation) {
-                        const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
                         const mounted = this.#mountedSubCells;
                         for (let i = mounted.length - 1; i >= 0; i--) {
                             const sc = mounted[i];
@@ -1222,7 +1220,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#megaBuffer && alloc && this.#baker && landscape && alloc.instanceCount > 0) {
             const mounted = this.#mountedSubCells;
             const count = mounted.length;
-            const subCellSize = landscape.foliageManager?.subCellSize ?? 100.0;
+            const subCellSize = landscape.foliageManager.subCellSize;
             for (let i = 0; i < count; i++) {
                 const subCell = mounted[i];
                 if (subCell.isMounted && subCell.instanceCount > 0) {

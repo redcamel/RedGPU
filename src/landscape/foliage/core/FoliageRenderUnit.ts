@@ -337,14 +337,16 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         renderUnitBindGroupLayout: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
         const material = this.material;
-        if (material?.dirtyPipeline || !material?.gpuRenderInfo?.fragmentUniformBindGroup) {
-            material?._updateFragmentState?.();
-            if (material) material.dirtyPipeline = false;
+        if (!material) return null;
+
+        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+            material._updateFragmentState?.();
+            material.dirtyPipeline = false;
         }
 
         const cullMode: GPUCullMode = (!this.isMasked)
             ? 'back'
-            : (material?.doubleSided ? 'none' : (material?.cullMode ?? 'back'));
+            : (material.doubleSided ? 'none' : (material.cullMode ?? 'back'));
 
         return registry.getOrCreatePipeline(
             material,

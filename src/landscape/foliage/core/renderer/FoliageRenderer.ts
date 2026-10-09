@@ -144,7 +144,7 @@ class FoliageRenderer extends AScatterRenderer {
 
         const {msaaID, useMSAA} = this.antialiasingManager;
         const sampleCount = useMSAA ? 4 : 1;
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup ?? null;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
 
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
@@ -236,7 +236,7 @@ class FoliageRenderer extends AScatterRenderer {
 
         if (currentCascade > 3) return;
 
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup ?? null;
+        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
             this.markShadowBundleDirty();
@@ -348,7 +348,7 @@ class FoliageRenderer extends AScatterRenderer {
         // [1단계] 모든 식생 타입의 Opaque Fast-Z 렌더 유닛 선행 일괄 드로우
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
+            if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;
             const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
@@ -361,7 +361,7 @@ class FoliageRenderer extends AScatterRenderer {
         // [2단계] 모든 식생 타입의 Masked 렌더 유닛 알파 컷오프 드로우 (가려진 잎사귀는 Early-Z로 탈락)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType?.useDepthPrepass || !culledGPU || !indirectGPU) continue;
+            if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;
             const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;

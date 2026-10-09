@@ -376,8 +376,9 @@ export default function assembleScatterRenderUnits(
 
         for (let g = 0; g < raws.length; g++) {
             const geom = raws[g].geometry;
-            totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
-            totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
+            const vCount = geom.vertexBuffer?.vertexCount ?? 0;
+            totalVertexCount += vCount;
+            totalIndexCount += geom.indexBuffer?.indexCount ?? vCount;
         }
 
         const combinedVertexData = new Float32Array(totalVertexCount * PBR_STRIDE);

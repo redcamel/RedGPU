@@ -192,7 +192,7 @@ export class GrassRenderer extends AScatterRenderer {
             }
         }
 
-        if (cacheEntry?.bundle) {
+        if (cacheEntry.bundle) {
             this.executeSingleBundle(passEncoder, cacheEntry.bundle);
         }
     }

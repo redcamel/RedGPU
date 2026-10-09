@@ -51,11 +51,11 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         receiveShadow: boolean,
         isMasked: boolean,
         applyGroundBlend: boolean,
-        groundBlendStrength?: number,
-        groundBlendRange?: number,
-        windMultiplier?: number,
-        treeHeight?: number,
-        windFlutterMultiplier?: number
+        groundBlendStrength: number = 0.8,
+        groundBlendRange: number = 1.5,
+        windMultiplier: number = 1.0,
+        treeHeight: number = 5.0,
+        windFlutterMultiplier: number = 1.0
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
 
@@ -64,11 +64,11 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
 
         u32[baseFloat + 0] = globalSlot;
         f32[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
-        f32[baseFloat + 2] = windMultiplier ?? 1.0;
-        f32[baseFloat + 3] = isMasked ? (windFlutterMultiplier ?? 1.0) : 0.0;
-        f32[baseFloat + 4] = treeHeight ?? 5.0;
-        f32[baseFloat + 5] = applyGroundBlend ? (groundBlendStrength ?? 0.8) : 0.0;
-        f32[baseFloat + 6] = groundBlendRange ?? 1.5;
+        f32[baseFloat + 2] = windMultiplier;
+        f32[baseFloat + 3] = isMasked ? windFlutterMultiplier : 0.0;
+        f32[baseFloat + 4] = treeHeight;
+        f32[baseFloat + 5] = applyGroundBlend ? groundBlendStrength : 0.0;
+        f32[baseFloat + 6] = groundBlendRange;
         u32[baseFloat + 7] = 0; // pad0
 
         this.uploadSlotBytes(slot, this.paramsSizeBytes);
@@ -85,9 +85,9 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
      */
     writeShadowRenderUnitSlot(
         slot: number,
-        windMultiplier?: number,
-        treeHeight?: number,
-        windFlutterMultiplier?: number
+        windMultiplier: number = 1.0,
+        treeHeight: number = 5.0,
+        windFlutterMultiplier: number = 1.0
     ): void {
         if (slot < 0 || slot >= this.maxSlots) return;
 
@@ -96,9 +96,9 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
 
         u32[baseFloat + 0] = 0; // globalSlot
         f32[baseFloat + 1] = 0.0; // receiveShadow
-        f32[baseFloat + 2] = windMultiplier ?? 1.0;
-        f32[baseFloat + 3] = (windFlutterMultiplier ?? 1.0) * 0.5;
-        f32[baseFloat + 4] = treeHeight ?? 5.0;
+        f32[baseFloat + 2] = windMultiplier;
+        f32[baseFloat + 3] = windFlutterMultiplier * 0.5;
+        f32[baseFloat + 4] = treeHeight;
         f32[baseFloat + 5] = 0.0; // groundBlendStrength
         f32[baseFloat + 6] = 1.5; // groundBlendRange
         u32[baseFloat + 7] = 0; // pad0
