@@ -18,7 +18,7 @@ import {FoliageLODInfo} from '../Foliage';
  * [KO] Cascaded Shadow Maps (CSM) 그림자 캐스케이드 분할 단계 수
  * [EN] Number of Cascaded Shadow Maps (CSM) shadow cascade split levels
  */
-export const SHADOW_CASCADE_COUNT = 4;
+const SHADOW_CASCADE_COUNT = 4;
 
 /**
  * [KO] 메가버퍼 내 단일 식생 타입의 할당 정보 인터페이스입니다.

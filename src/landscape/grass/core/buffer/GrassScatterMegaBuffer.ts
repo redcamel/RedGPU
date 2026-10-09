@@ -12,7 +12,7 @@ import type Grass from '../Grass';
  * [KO] 단일 잔디 타입의 거리별(Near/Far) 간접 드로우 슬롯 정보
  * [EN] Indirect draw slot info per distance (Near/Far) for a single grass type
  */
-export interface GrassDrawSlot {
+interface GrassDrawSlot {
     /**
      * [KO] 인디렉트 버퍼 내 슬롯 오프셋 (DrawIndexedIndirect 구조체 단위)
      * [EN] Slot offset in indirect buffer (unit of DrawIndexedIndirect struct)

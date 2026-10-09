@@ -14,7 +14,7 @@ import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/Fo
  * [KO] 렌더링 가능한 유효 식생 타입 항목 인터페이스입니다.
  * [EN] Interface for valid renderable foliage type items.
  */
-export interface ValidFoliageTypeItem {
+interface ValidFoliageTypeItem {
     type: Foliage | null;
     culledGPU: GPUBuffer | null;
     indirectGPU: GPUBuffer | null;
