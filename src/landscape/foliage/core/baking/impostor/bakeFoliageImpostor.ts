@@ -385,7 +385,17 @@ export default function bakeFoliageImpostor(
                 continue;
             }
 
-        const mat = unit.material;
+        const {
+            material: mat,
+            geometry,
+            isIndexed,
+            indexCount,
+            indexFormat = 'uint32',
+            vertexCount,
+            relativeModelMatrix: m
+        } = unit;
+        const {vertexBuffer, indexBuffer} = geometry;
+
             const diffTex = mat?.baseColorTexture;
             const diffSampler = mat?.baseColorTextureSampler || basicSampler;
             const normTex = mat?.normalTexture;
@@ -445,7 +455,6 @@ export default function bakeFoliageImpostor(
                 hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
             ]);
 
-        const m = unit.relativeModelMatrix;
             const modelMatProps = new Float32Array([
                 m[0], m[1], m[2], m[12],
                 m[4], m[5], m[6], m[13],
@@ -456,12 +465,12 @@ export default function bakeFoliageImpostor(
                 isImpostor: false,
             pipeline: getOrCreateBakePipeline(redGPUContext, unit),
                 bindGroup,
-            vertexBuffer: unit.geometry.vertexBuffer?.gpuBuffer || null,
-            indexBuffer: unit.geometry.indexBuffer?.gpuBuffer || null,
-            isIndexed: !!unit.isIndexed,
-            indexCount: unit.indexCount,
-            indexFormat: unit.indexFormat || 'uint32',
-            vertexCount: unit.vertexCount,
+            vertexBuffer: vertexBuffer?.gpuBuffer || null,
+            indexBuffer: indexBuffer?.gpuBuffer || null,
+            isIndexed: !!isIndexed,
+            indexCount,
+            indexFormat,
+            vertexCount,
                 relativeModelMatrix: m,
                 matProps,
                 modelMatProps,

@@ -156,22 +156,22 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             height,
             farDistance = 35.0,
             receiveShadow = true,
-            densityPerHectare,
-            densityMultiplier,
-            densityScaleByWeight,
-            minSlope,
-            maxSlope,
-            cullingDistance,
+            densityPerHectare = 5000.0,
+            densityMultiplier = 1.0,
+            densityScaleByWeight = true,
+            minSlope = 0.0,
+            maxSlope = 35.0,
+            cullingDistance = 100.0,
             minScale,
             maxScale,
-            groundBlendStrength,
+            groundBlendStrength = 1.0,
             alphaCutoff = 0.2,
             roughness,
             subsurfaceStrength,
             subsurfaceColor,
             exposureBoost,
-            targetLayer,
-            bottomOffset,
+            targetLayer = '',
+            bottomOffset = 0.0,
             shadowStrength,
             castShadow = true,
             shadowCullDistance,
@@ -223,34 +223,24 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
 
-        const resolvedBottomOffset = bottomOffset !== undefined ? bottomOffset : 0.0;
-        const resolvedCullingDistance = cullingDistance !== undefined ? cullingDistance : 100.0;
         const resolvedShadowCullDistance = shadowCullDistance !== undefined ? Math.max(0.0, shadowCullDistance) : 35.0;
-        const resolvedTargetLayer = targetLayer !== undefined ? targetLayer : '';
-        const resolvedMinSlope = minSlope !== undefined ? minSlope : 0.0;
-        const resolvedMaxSlope = maxSlope !== undefined ? maxSlope : 35.0;
-        const resolvedDensityScaleByWeight = densityScaleByWeight !== undefined ? densityScaleByWeight : true;
-        const resolvedDensityPerHectare = densityPerHectare !== undefined ? densityPerHectare : 5000.0;
-        const resolvedDensityMultiplier = densityMultiplier !== undefined ? densityMultiplier : 1.0;
-        const resolvedCastShadow = castShadow;
-        const resolvedGroundBlendStrength = groundBlendStrength !== undefined ? groundBlendStrength : 1.0;
         const resolvedStreamingRadius = streamingRadius !== undefined
             ? Math.max(16.0, Number(streamingRadius) || 16.0)
-            : Math.max(120.0, resolvedCullingDistance * 1.15);
+            : Math.max(120.0, cullingDistance * 1.15);
 
         this.setRawScatterProperties({
             height: resolvedHeight,
-            bottomOffset: resolvedBottomOffset,
-            cullingDistance: resolvedCullingDistance,
+            bottomOffset,
+            cullingDistance,
             shadowCullDistance: resolvedShadowCullDistance,
-            targetLayer: resolvedTargetLayer,
-            minSlope: resolvedMinSlope,
-            maxSlope: resolvedMaxSlope,
-            densityScaleByWeight: resolvedDensityScaleByWeight,
-            densityPerHectare: resolvedDensityPerHectare,
-            densityMultiplier: resolvedDensityMultiplier,
-            castShadow: resolvedCastShadow,
-            groundBlendStrength: resolvedGroundBlendStrength,
+            targetLayer,
+            minSlope,
+            maxSlope,
+            densityScaleByWeight,
+            densityPerHectare,
+            densityMultiplier,
+            castShadow,
+            groundBlendStrength,
             streamingRadius: resolvedStreamingRadius
         });
 

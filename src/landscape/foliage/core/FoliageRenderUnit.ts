@@ -108,28 +108,45 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
     #receiveShadow: boolean = true;
 
     constructor(init: FoliageRenderUnitInitOptions) {
-        const isShadowMerged = init.isShadowMerged ?? false;
+        const {
+            isShadowMerged = false,
+            strideBytes = isShadowMerged ? POSITION_ONLY_STRIDE_BYTES : PBR_STRIDE_BYTES,
+            isMasked = !isShadowMerged,
+            indexFormat = 'uint32',
+            instanceBufferOffset = 0,
+            indirectOffsetBytes = 0,
+            slotIndex = -1,
+            slotPooler = null,
+            relativeModelMatrix = null,
+            relativeNormalMatrix = null,
+            isDepthPrepass = false,
+            isMainOpaqueOrMasked = !isShadowMerged,
+            mainDepthMode = 'normal',
+            isImpostor = false,
+            receiveShadow = true
+        } = init;
+
         super({
             ...init,
-            strideBytes: init.strideBytes ?? (isShadowMerged ? POSITION_ONLY_STRIDE_BYTES : PBR_STRIDE_BYTES),
-            isMasked: init.isMasked ?? (!isShadowMerged),
-            indexFormat: init.indexFormat || 'uint32',
-            instanceBufferOffset: init.instanceBufferOffset ?? 0,
-            indirectOffsetBytes: init.indirectOffsetBytes ?? 0,
+            strideBytes,
+            isMasked,
+            indexFormat,
+            instanceBufferOffset,
+            indirectOffsetBytes,
         });
 
         this.#isShadowMerged = isShadowMerged;
-        this.#slotIndex = init.slotIndex !== undefined ? init.slotIndex : -1;
-        this.#slotPooler = init.slotPooler || null;
+        this.#slotIndex = slotIndex;
+        this.#slotPooler = slotPooler;
 
-        this.#relativeModelMatrix = init.relativeModelMatrix ?? null;
-        this.#relativeNormalMatrix = init.relativeNormalMatrix ?? null;
+        this.#relativeModelMatrix = relativeModelMatrix;
+        this.#relativeNormalMatrix = relativeNormalMatrix;
 
-        this.#isDepthPrepass = init.isDepthPrepass ?? false;
-        this.#isMainOpaqueOrMasked = init.isMainOpaqueOrMasked ?? (!isShadowMerged);
-        this.#mainDepthMode = init.mainDepthMode ?? 'normal';
-        this.#isImpostor = init.isImpostor ?? false;
-        this.#receiveShadow = init.receiveShadow !== false;
+        this.#isDepthPrepass = isDepthPrepass;
+        this.#isMainOpaqueOrMasked = isMainOpaqueOrMasked;
+        this.#mainDepthMode = mainDepthMode;
+        this.#isImpostor = isImpostor;
+        this.#receiveShadow = receiveShadow;
     }
 
     /**

@@ -324,8 +324,12 @@ export default function assembleScatterRenderUnits(
         }
     }
 
-    const preservePivot = options?.preservePivot ?? true;
-    const centerXZ = options?.centerXZ ?? false;
+    const {
+        preservePivot = true,
+        centerXZ = false,
+        generateShadowMergedGeometry: generateShadow = false
+    } = options || {};
+
     const offsetX = centerXZ ? ((isFinite(minX) && isFinite(maxX)) ? (minX + maxX) * 0.5 : 0) : 0;
     const offsetY = preservePivot ? 0 : (isFinite(minY) ? minY : 0);
     const offsetZ = centerXZ ? ((isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0) : 0;
@@ -344,7 +348,6 @@ export default function assembleScatterRenderUnits(
 
     const groups: AssembledMeshGroup[] = [];
 
-    const generateShadow = options?.generateShadowMergedGeometry ?? false;
     let shadowMergedPositions: Float32Array | null = null;
     let shadowMergedIndices: Uint32Array | null = null;
     let shadowVertexOffset = 0;
