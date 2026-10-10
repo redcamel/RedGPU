@@ -118,15 +118,15 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             ]
         });
 
-        this.#megaBuffer = new FoliageScatterMegaBuffer(this.redGPUContext);
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext);
+        this.#megaBuffer = new FoliageScatterMegaBuffer(redGPUContext);
+        this.#pipelineRegistry = new FoliagePipelineRegistry(redGPUContext);
         this.#renderer = new FoliageRenderer(
-            this.redGPUContext,
+            redGPUContext,
             this.#pipelineRegistry,
             this.#renderUnitVertexBindGroupLayout,
             this.#renderUnitDynamicBindGroup
         );
-        this.#culler = new FoliageCuller(this.redGPUContext, this.#megaBuffer);
+        this.#culler = new FoliageCuller(redGPUContext, this.#megaBuffer);
 
         this.#megaBuffer.onRecreated = () => {
             this.#renderer.markAllBundlesDirty();

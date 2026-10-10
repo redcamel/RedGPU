@@ -201,8 +201,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         this.#geometry = unifiedGeometry;
         this.#isUnifiedGeometryOwned = true;
 
-        const primaryGroup = groups[0];
-        const targetMaterial = primaryGroup.material;
+        const {material: targetMaterial} = groups[0];
 
         const resolvedTexture = baseColorTexture ?? targetMaterial.baseColorTexture;
         if (typeof resolvedTexture === 'string') {
@@ -352,8 +351,9 @@ class Grass extends AScatterType<GrassTypeAllocation> {
      */
     get baseColorTextureView(): GPUTextureView {
         const {resourceManager} = this;
+        const {emptyBitmapTextureView} = resourceManager;
         return resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
-            || resourceManager.emptyBitmapTextureView;
+            || emptyBitmapTextureView;
     }
 
     /**

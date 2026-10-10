@@ -137,7 +137,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const {rawCamera} = view;
         const {x, z} = rawCamera;
 
-        const {tileLoadedCount, hasValidScatterAtlas} = landscape;
+        const {tileLoadedCount, hasValidScatterAtlas, hasValidVbtAtlas} = landscape;
 
         const tileCountChanged = hasValidScatterAtlas && this.#lastLoadedTileCount !== tileLoadedCount;
         if (tileCountChanged) {
@@ -167,7 +167,6 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
             rebakedThisFrame = true;
         }
 
-        const hasValidVbt = landscape.hasValidVbtAtlas;
         const uboDirtyMask = this.#dirtyUboMask;
 
         for (let i = 0; i < grassLen; i++) {
@@ -179,7 +178,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
                 activeSlot = this.#slotPooler.allocateSlot();
                 if (activeSlot >= 0) {
                     type.slotIndex = activeSlot;
-                    this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
+                    this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbtAtlas);
                 } else {
                     continue;
                 }
@@ -187,7 +186,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
             const isDirty = tileCountChanged || ((uboDirtyMask & (1 << typeId)) !== 0);
             if (isDirty) {
-                this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbt);
+                this.#slotPooler.writeGrassSlot(activeSlot, type, hasValidVbtAtlas);
 
                 if (!rebakedThisFrame) {
                     const alloc = this.#megaBuffer.getAllocation(typeId);
@@ -358,7 +357,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Clears all registered scatter grass types and resets to the initial state.
      */
     clearTypes(): void {
-        const {types} = this;
+        const {types, redGPUContext} = this;
         while (types.length > 0) {
             this.removeType(types[types.length - 1]);
         }
@@ -367,7 +366,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#needsRebakeMask = 0;
         this.#slotPooler.clear();
         this.#megaBuffer.destroy();
-        this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
+        this.#megaBuffer = new GrassScatterMegaBuffer(redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
             this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();

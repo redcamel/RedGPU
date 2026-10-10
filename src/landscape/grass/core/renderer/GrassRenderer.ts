@@ -150,13 +150,14 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         if (!this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
-        const slotGPUBuffer = slotPooler.gpuBuffer;
-        if (!indirectGPUBuffer || !culledGPUBuffer || !slotGPUBuffer) return;
+        const {gpuBuffer} = slotPooler;
+        if (!indirectGPUBuffer || !culledGPUBuffer || !gpuBuffer) return;
 
-        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, slotGPUBuffer);
+        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, gpuBuffer);
         if (!unifiedGroup1) return;
 
-        const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
+        const {useMSAA} = antialiasingManager;
+        const sampleCount = useMSAA ? 4 : 1;
 
         let cacheEntry = this.mainBundlesByView.get(view);
         const needsRebuild = !cacheEntry
@@ -214,10 +215,10 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         if (count === 0) return;
 
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
-        if (!indirectGPUBuffer || !culledGPUBuffer) return;
-        const slotGPUBuffer = slotPooler.gpuBuffer;
+        const {gpuBuffer} = slotPooler;
+        if (!indirectGPUBuffer || !culledGPUBuffer || !gpuBuffer) return;
 
-        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, slotGPUBuffer);
+        const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, gpuBuffer);
         if (!unifiedGroup1) return;
 
         let shadowMaskLow = 0;

@@ -83,7 +83,8 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         initialCapacity: number = 65536,
         maxTypes: number = 64
     ) {
-        const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
+        const {resourceManager} = redGPUContext;
+        const shaderInfo = resourceManager.wgslParser.parse(
             'Foliage_Cull_ShaderModule',
             foliageCullWGSL
         );
@@ -579,10 +580,9 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Newly expanded instance capacity
      */
     onResizeBuffers(newCapacity: number): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, strideBytes} = this;
         if (!gpuDevice) return;
 
-        const strideBytes = this.strideBytes;
         const instanceCapacity = newCapacity || this.instanceCapacity;
         const culledByteSize = instanceCapacity * 8 * strideBytes;
 

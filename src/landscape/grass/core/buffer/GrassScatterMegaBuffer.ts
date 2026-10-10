@@ -191,20 +191,18 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             this.#allocations.delete(typeId);
         }
 
-        const typeParamFloats = this.typeParamFloats;
+        const {typeParamFloats, cpuTypeParamsBuffer, gpuDevice, typeParamsGPUBuffer} = this;
         if (typeParamFloats > 0) {
             const baseFloat = typeId * typeParamFloats;
-            const cf = this.cpuTypeParamsBuffer;
-            cf.fill(0, baseFloat, baseFloat + typeParamFloats);
+            cpuTypeParamsBuffer.fill(0, baseFloat, baseFloat + typeParamFloats);
 
-            const {gpuDevice, typeParamsGPUBuffer} = this;
             if (typeParamsGPUBuffer) {
                 const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
                 const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
                 gpuDevice.queue.writeBuffer(
                     typeParamsGPUBuffer,
                     byteOffset,
-                    cf.buffer,
+                    cpuTypeParamsBuffer.buffer,
                     byteOffset,
                     byteSize
                 );
@@ -272,8 +270,9 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         cu[baseFloat + 4] = rawBaseOffset;
         cu[baseFloat + 5] = culledBaseOffset;
         cu[baseFloat + 6] = culledBaseOffset + maxInstances;
-        cu[baseFloat + 7] = nearSlots.length > 0 ? nearSlots[0].indirectOffset : 0;
-        cu[baseFloat + 8] = farSlots.length > 0 ? farSlots[0].indirectOffset : (nearSlots.length > 0 ? nearSlots[0].indirectOffset : 0);
+        const nearOffset = nearSlots[0]?.indirectOffset ?? 0;
+        cu[baseFloat + 7] = nearOffset;
+        cu[baseFloat + 8] = farSlots[0]?.indirectOffset ?? nearOffset;
         cu[baseFloat + 9] = renderUnitCount;
         cu[baseFloat + 10] = farSlots.length > 0 ? 1 : 0;
         cu[baseFloat + 11] = instanceCount;

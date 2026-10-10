@@ -154,13 +154,17 @@ class ScatterRenderUnit {
             baseColorTexture = null,
             lodIndex = 0,
             isMasked = false,
+            vertexCount: initVertexCount,
+            indexCount: initIndexCount,
+            isIndexed: initIsIndexed,
+            strideBytes: initStrideBytes
         } = init;
 
         const {vertexBuffer, indexBuffer} = geometry;
-        const vertexCount = init.vertexCount ?? vertexBuffer.vertexCount ?? 0;
-        const isIndexed = init.isIndexed ?? !!indexBuffer;
-        const indexCount = init.indexCount ?? indexBuffer?.indexCount ?? vertexCount;
-        const strideBytes = init.strideBytes ?? (vertexBuffer.stride ? vertexBuffer.stride * 4 : 72);
+        const vertexCount = initVertexCount ?? vertexBuffer.vertexCount ?? 0;
+        const isIndexed = initIsIndexed ?? !!indexBuffer;
+        const indexCount = initIndexCount ?? indexBuffer?.indexCount ?? vertexCount;
+        const strideBytes = initStrideBytes ?? (vertexBuffer.stride ? vertexBuffer.stride * 4 : 72);
 
         this.#geometry = geometry;
         this.#vertexCount = vertexCount;

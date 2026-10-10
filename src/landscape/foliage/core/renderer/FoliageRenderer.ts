@@ -356,7 +356,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const {type} = this.#validTypesMain[t];
-            if (type?.useDepthPrepass) {
+            if (type.useDepthPrepass) {
                 const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = type;
                 if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
                     hasPrepassRenderUnits = true;
@@ -580,7 +580,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
         }
 
-        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : unit.instanceBufferOffset;
+        const instanceBufferOffset = overrideInstanceOffset ?? unit.instanceBufferOffset;
         if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
             passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
             this.#lastBoundInstanceBuffer = culledGPUBuffer;

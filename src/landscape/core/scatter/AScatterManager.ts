@@ -240,13 +240,7 @@ abstract class AScatterManager<
      */
     unregisterTypeInternal(target: TType | string): TType | null {
         if (!target) return null;
-        let lookupName: string;
-        if (typeof target === 'string') {
-            lookupName = target;
-        } else {
-            const {name} = target;
-            lookupName = name;
-        }
+        const lookupName = typeof target === 'string' ? target : target.name;
         const found = this.#typesByName.get(lookupName);
         if (!found) return null;
 

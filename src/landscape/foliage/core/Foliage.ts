@@ -30,7 +30,7 @@ function sampleNormalizedLayerWeight(
     v: number
 ): number {
     if (!targetLayer) return 0.0;
-    const layers = landscape.layers;
+    const {layers} = landscape;
     if (!layers || layers.length <= 1) {
         return typeof targetLayer.getWeightAtUV === 'function' ? targetLayer.getWeightAtUV(u, v) : 0.0;
     }
@@ -504,7 +504,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             renderUnits,
             shadowMergedRenderUnits
         } = assembleFoliageRenderUnits(
-            this.redGPUContext,
+            redGPUContext,
             options,
             this.#slotPooler
         );

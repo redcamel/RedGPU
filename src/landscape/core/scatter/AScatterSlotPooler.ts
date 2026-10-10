@@ -134,13 +134,14 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * @param slot - 반환할 슬롯 번호
      */
     freeSlot(slot: number): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
-        if (this.#freeTop >= this.maxSlots) return;
+        const {maxSlots, paramsSizeFloats, paramsSizeBytes} = this;
+        if (slot < 0 || slot >= maxSlots) return;
+        if (this.#freeTop >= maxSlots) return;
 
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        this.#cpuBuffer.fill(0, baseFloat, baseFloat + this.paramsSizeFloats);
+        this.#cpuBuffer.fill(0, baseFloat, baseFloat + paramsSizeFloats);
 
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        this.uploadSlotBytes(slot, paramsSizeBytes);
 
         this.#freeSlotStack[this.#freeTop] = slot;
         this.#freeTop++;

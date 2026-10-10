@@ -274,7 +274,7 @@ function bakeFoliageImpostor(
     renderUnits: FoliageRenderUnit[],
     bakeName: string = 'Foliage'
 ): FoliageBakeResult {
-    const {gpuDevice} = redGPUContext;
+    const {gpuDevice, resourceManager} = redGPUContext;
     const cache = getOrCreateContextCache(redGPUContext);
 
     const aabb = calculateAABBFromRenderUnits(renderUnits);
@@ -374,7 +374,6 @@ function bakeFoliageImpostor(
             }
         }
 
-    const {resourceManager} = redGPUContext;
     const {basicSampler, emptyBitmapTextureView} = resourceManager;
 
     const cachedRenderUnits: {
@@ -673,7 +672,6 @@ function bakeFoliageImpostor(
     executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
 
         if (mipLevelCount > 1) {
-            const {resourceManager} = redGPUContext;
             const {mipmapGenerator} = resourceManager;
             const {IMMEDIATE} = COMMAND_ENCODER_TYPE;
 
