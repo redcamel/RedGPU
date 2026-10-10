@@ -443,7 +443,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
 
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#pipelineBindGroupLayout1) return null;
+        if (!this.#pipelineBindGroupLayout1) return null;
 
         this.#unifiedGroup1BindGroup = gpuDevice.createBindGroup({
             label: `Grass_Unified_Group1_BindGroup_${this.instanceId}`,
@@ -464,7 +464,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
     #getOrCreateMaterialBindGroup(renderUnit: ScatterRenderUnit, type: Grass, subIndex: number): GPUBindGroup | null {
         const {gpuDevice, resourceManager} = this;
-        if (!gpuDevice || !this.#pipelineBindGroupLayout2) return null;
+        if (!this.#pipelineBindGroupLayout2) return null;
 
         const cacheKey = (type.typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
@@ -505,7 +505,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         if (this.#shadowPipeline) return this.#shadowPipeline;
 
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
+        if (!this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
         this.#shadowPipeline = gpuDevice.createRenderPipeline({
             label: `Grass_Shadow_RenderPipeline_${this.instanceId}`,
@@ -553,7 +553,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
         const gpuDevice = this.gpuDevice;
         const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentNearModule;
-        if (!gpuDevice || !this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
+        if (!this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
 
         const preferredNormalFormat = this.#preferredCanvasFormat;
 

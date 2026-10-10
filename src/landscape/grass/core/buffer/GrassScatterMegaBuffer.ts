@@ -126,22 +126,24 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         maxInstances: number,
         renderUnits: { indexCount: number; firstIndex?: number }[]
     ): GrassTypeAllocation {
-        if (this.#allocations.has(typeId)) {
-            return this.#allocations.get(typeId)!;
+        const existing = this.#allocations.get(typeId);
+        if (existing) {
+            return existing;
         }
 
         const renderUnitCount = Math.max(1, renderUnits.length);
         const baseAlloc = this.allocateBaseSegment(typeId, maxInstances, renderUnitCount * 2, 2);
+        const {culledBaseOffset, maxInstances: baseMax, indirectBaseOffset} = baseAlloc;
 
-        const nearCulledOffset = baseAlloc.culledBaseOffset;
-        const farCulledOffset = baseAlloc.culledBaseOffset + baseAlloc.maxInstances;
+        const nearCulledOffset = culledBaseOffset;
+        const farCulledOffset = culledBaseOffset + baseMax;
 
         const nearSlots: GrassDrawSlot[] = [];
         const farSlots: GrassDrawSlot[] = [];
 
         for (let s = 0; s < renderUnitCount; s++) {
             const unit = renderUnits[s];
-            const slotIdx = baseAlloc.indirectBaseOffset + s;
+            const slotIdx = indirectBaseOffset + s;
             const nearSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
@@ -151,7 +153,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         for (let s = 0; s < renderUnitCount; s++) {
             const unit = renderUnits[s];
-            const slotIdx = baseAlloc.indirectBaseOffset + renderUnitCount + s;
+            const slotIdx = indirectBaseOffset + renderUnitCount + s;
             const farSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
@@ -159,7 +161,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             farSlots.push(farSlot);
         }
 
-        this.syncIndirectResetTemplateToGPU(baseAlloc.indirectBaseOffset, renderUnitCount * 2);
+        this.syncIndirectResetTemplateToGPU(indirectBaseOffset, renderUnitCount * 2);
 
         const alloc: GrassTypeAllocation = {
             typeId: baseAlloc.typeId,
@@ -308,10 +310,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         bindGroupLayout: GPUBindGroupLayout,
         globalUniformBuffer: GPUBuffer
     ): GPUBindGroup | null {
-        if (!this.isReady) {
-            return null;
-        }
-
         const {
             gpuDevice,
             rawGPUBuffer: rawBuffer,
@@ -319,6 +317,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             indirectGPUBuffer: indirectBuffer,
             typeParamsGPUBuffer: typeParamsBuffer
         } = this;
+
+        if (!rawBuffer || !culledBuffer || !indirectBuffer || !typeParamsBuffer) {
+            return null;
+        }
 
         if (
             this.#unifiedCullingBindGroup &&
@@ -336,10 +338,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             layout: bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: globalUniformBuffer}},
-                {binding: 1, resource: {buffer: rawBuffer!}},
-                {binding: 2, resource: {buffer: culledBuffer!}},
-                {binding: 3, resource: {buffer: indirectBuffer!}},
-                {binding: 4, resource: {buffer: typeParamsBuffer!}},
+                {binding: 1, resource: {buffer: rawBuffer}},
+                {binding: 2, resource: {buffer: culledBuffer}},
+                {binding: 3, resource: {buffer: indirectBuffer}},
+                {binding: 4, resource: {buffer: typeParamsBuffer}},
             ]
         });
 

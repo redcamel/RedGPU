@@ -50,8 +50,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
 
-        if (!landscape.hasValidScatterAtlas) return;
-
         const vhtView = landscape.vhtAtlasTexture.gpuTextureView;
         const vbtView = landscape.vbtBaseColorAtlas.gpuTextureView;
 
@@ -113,22 +111,24 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         uf[6] = invWorldSizeZ;
         uf[7] = heightScale;
 
-        uf[8] = grass.bottomOffset;
-        uf[9] = grass.height;
-        uf[10] = grass.minSlope ? Math.tan(grass.minSlope * 0.0174533) ** 2 : 0.0;
-        uf[11] = grass.maxSlope ? Math.tan(grass.maxSlope * 0.0174533) ** 2 : 9999.0;
+        const {bottomOffset, height, minSlope, maxSlope, typeId, densityScaleByWeight} = grass;
 
-        uu[12] = (grass.minSlope > 0 || grass.maxSlope < 90) ? 1 : 0;
+        uf[8] = bottomOffset;
+        uf[9] = height;
+        uf[10] = minSlope ? Math.tan(minSlope * 0.0174533) ** 2 : 0.0;
+        uf[11] = maxSlope ? Math.tan(maxSlope * 0.0174533) ** 2 : 9999.0;
+
+        uu[12] = (minSlope > 0 || maxSlope < 90) ? 1 : 0;
         uf[13] = minScaleS;
         uf[14] = minScaleH;
         uf[15] = maxScaleS - minScaleS;
         uf[16] = maxScaleH - minScaleH;
-        uu[17] = grass.typeId;
+        uu[17] = typeId;
 
         uu[18] = alloc.rawBaseOffset;
         uu[19] = hasWeightMap;
         uu[20] = weightChannelIndex;
-        uu[21] = grass.densityScaleByWeight ? 1 : 0;
+        uu[21] = densityScaleByWeight ? 1 : 0;
 
         gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 

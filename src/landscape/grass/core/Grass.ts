@@ -467,10 +467,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
 
     set subsurfaceColor(v: [number, number, number]) {
         if (!v) return;
+        const [vr, vg, vb] = v;
         const c = this.#subsurfaceColor;
-        const r = Number(v[0]) || 0;
-        const g = Number(v[1]) || 0;
-        const b = Number(v[2]) || 0;
+        const r = Number(vr) || 0;
+        const g = Number(vg) || 0;
+        const b = Number(vb) || 0;
         if (c[0] !== r || c[1] !== g || c[2] !== b) {
             c[0] = r;
             c[1] = g;

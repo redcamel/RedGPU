@@ -442,8 +442,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#useDepthPrepass = useDepthPrepass;
         this.#megaBuffer = megaBuffer || null;
 
-        const minScale: [number, number, number] = optMinScale ? [optMinScale[0], optMinScale[1], optMinScale[2]] : [1.0, 1.0, 1.0];
-        const maxScale: [number, number, number] = optMaxScale ? [optMaxScale[0], optMaxScale[1], optMaxScale[2]] : [1.0, 1.0, 1.0];
+        const [minX = 1.0, minY = 1.0, minZ = 1.0] = optMinScale || [];
+        const [maxX = 1.0, maxY = 1.0, maxZ = 1.0] = optMaxScale || [];
+        const minScale: [number, number, number] = [minX, minY, minZ];
+        const maxScale: [number, number, number] = [maxX, maxY, maxZ];
 
         let resolvedDensityPerHectare = 20.0;
         if (densityPerHectare !== undefined) {
@@ -610,10 +612,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     set minScale(v: [number, number, number] | [number, number]) {
         if (!v) return;
+        const [vx, vy, vz = vx] = v;
         const s = this.#minScale;
-        const sx = Math.max(0.01, Number(v[0]) || 0.01);
-        const sy = Math.max(0.01, Number(v[1]) || 0.01);
-        const sz = Math.max(0.01, Number(v[2] ?? v[0]) || 0.01);
+        const sx = Math.max(0.01, Number(vx) || 0.01);
+        const sy = Math.max(0.01, Number(vy) || 0.01);
+        const sz = Math.max(0.01, Number(vz) || 0.01);
         if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
             s[0] = sx;
             s[1] = sy;
@@ -633,10 +636,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     set maxScale(v: [number, number, number] | [number, number]) {
         if (!v) return;
+        const [vx, vy, vz = vx] = v;
         const s = this.#maxScale;
-        const sx = Math.max(0.01, Number(v[0]) || 0.01);
-        const sy = Math.max(0.01, Number(v[1]) || 0.01);
-        const sz = Math.max(0.01, Number(v[2] ?? v[0]) || 0.01);
+        const sx = Math.max(0.01, Number(vx) || 0.01);
+        const sy = Math.max(0.01, Number(vy) || 0.01);
+        const sz = Math.max(0.01, Number(vz) || 0.01);
         if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
             s[0] = sx;
             s[1] = sy;
@@ -1170,9 +1174,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         for (let i = mounted.length - 1; i >= 0; i--) {
             if (unmountedThisFrame >= unmountBudget) break;
 
-            const subCell = mounted[i];
-            const dx = subCell.centerX - camX;
-            const dz = subCell.centerZ - camZ;
+            const {centerX, centerZ} = mounted[i];
+            const dx = centerX - camX;
+            const dz = centerZ - camZ;
             const distSq = dx * dx + dz * dz;
 
             if (distSq > unmountRadiusSq) {

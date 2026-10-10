@@ -462,7 +462,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         const {enabled, types} = this;
-        if (!enabled || !passEncoder || types.length === 0) return;
+        if (!enabled || types.length === 0) return;
         this.#renderer.renderShadow(view, passEncoder, types);
     }
 
@@ -478,7 +478,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] `true` if target was found and removed, `false` otherwise
      */
     removeType(target: Foliage | string): boolean {
-        if (!target) return false;
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
 
@@ -583,14 +582,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     #repopulateFoliage(type: Foliage): void {
-        if (!type) return;
-
         type.clearSubCellCache();
         this.#renderer.markShadowBundleDirty();
     }
 
-    #onFoliageRepopulateRequired = (type: Foliage): void => {
-        const typeId = type.typeId;
+    #onFoliageRepopulateRequired = ({typeId}: Foliage): void => {
         this.#needsRepopulateMask |= (1 << typeId);
         this.#dirtyUboMask |= (1 << typeId);
     };

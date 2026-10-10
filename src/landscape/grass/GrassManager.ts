@@ -238,9 +238,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             rebakedThisFrame = true;
         }
 
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-
         const hasValidVbt = landscape.hasValidVbtAtlas;
         const uboDirtyMask = this.#dirtyUboMask;
 
@@ -332,10 +329,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             removedGrass.slotIndex = -1;
         }
 
-        if (typeId >= 0) {
-            this.#dirtyUboMask &= ~(1 << typeId);
-            this.#needsRebakeMask &= ~(1 << typeId);
-        }
+        this.#dirtyUboMask &= ~(1 << typeId);
+        this.#needsRebakeMask &= ~(1 << typeId);
 
         removedGrass.bindAllocation(null);
         removedGrass.onUniformDirty = null;
