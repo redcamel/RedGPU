@@ -127,7 +127,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         }
 
         const taskBytes = tOffset * 4;
-        gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer!, 0, tasksBuf.buffer, 0, taskBytes);
+        gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer, 0, tasksBuf.buffer, 0, taskBytes);
 
         const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, foliage.targetLayer);
 

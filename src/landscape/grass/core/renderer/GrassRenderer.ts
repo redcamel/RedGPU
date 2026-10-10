@@ -291,13 +291,14 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice!;
+        const gpuDevice = this.gpuDevice;
 
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return null;
 
-        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer!;
+        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return null;
 
         const preferredNormalFormat = this.#preferredCanvasFormat;
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
@@ -383,12 +384,13 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice!;
+        const gpuDevice = this.gpuDevice;
 
         const shadowPipeline = this.#getShadowRenderPipeline();
         if (!shadowPipeline) return null;
 
-        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer!;
+        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer;
+        if (!indirectGPUBuffer) return null;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Grass_Shadow_RenderBundle_c${cascadeIndex}_${this.instanceId}`,

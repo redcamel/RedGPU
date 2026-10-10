@@ -192,9 +192,10 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
                 if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
             }
         } else {
-            const m0 = m![0], m4 = m![4], m8 = m![8], m12 = m![12];
-            const m1 = m![1], m5 = m![5], m9 = m![9], m13 = m![13];
-            const m2 = m![2], m6 = m![6], m10 = m![10], m14 = m![14];
+            const modelMatrix = m;
+            const m0 = modelMatrix[0], m4 = modelMatrix[4], m8 = modelMatrix[8], m12 = modelMatrix[12];
+            const m1 = modelMatrix[1], m5 = modelMatrix[5], m9 = modelMatrix[9], m13 = modelMatrix[13];
+            const m2 = modelMatrix[2], m6 = modelMatrix[6], m10 = modelMatrix[10], m14 = modelMatrix[14];
 
             for (let i = 0, idx = 0; i < vCount; i++, idx += stride) {
                 const x = vData[idx];
@@ -435,9 +436,9 @@ export default function bakeFoliageImpostor(
         const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
         const ormSampler = mat.packedORMTextureSampler || mat.metallicRoughnessTextureSampler || basicSampler;
 
-            const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex)!;
-            const normView = resourceManager.getGPUResourceBitmapTextureView(normTex)!;
-            const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex)!;
+        const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex) || resourceManager.emptyBitmapTextureView;
+        const normView = resourceManager.getGPUResourceBitmapTextureView(normTex) || resourceManager.emptyBitmapTextureView;
+        const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) || resourceManager.emptyBitmapTextureView;
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `Foliage_Impostor_Bake_BindGroup_${s}`,
@@ -529,10 +530,10 @@ export default function bakeFoliageImpostor(
 
                 if (cached.isImpostor) continue;
 
-                if (cached.isIdentityModelMatrix) {
+                if (cached.isIdentityModelMatrix || !cached.relativeModelMatrix) {
                     allInstanceData.set(vpInfo.projView, baseOffset);
                 } else {
-                    mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix!);
+                    mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix);
                     allInstanceData.set(tempMVP, baseOffset);
                 }
 

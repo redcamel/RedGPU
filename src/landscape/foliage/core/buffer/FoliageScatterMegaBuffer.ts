@@ -172,8 +172,9 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         shadowMergedRenderUnits?: FoliageRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): FoliageTypeAllocation {
-        if (this.#allocations.has(name)) {
-            return this.#allocations.get(name)!;
+        const existing = this.#allocations.get(name);
+        if (existing) {
+            return existing;
         }
 
         const typeId = this.#allocatedTypes.length;
@@ -435,8 +436,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
     ): GPUBindGroup | null {
-        if (!this.isReady) return null;
-
         const {
             rawGPUBuffer,
             typeParamsGPUBuffer,
@@ -445,6 +444,13 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             gpuDevice,
             resourceManager
         } = this;
+        const shadowCulled = this.#shadowCulledGPUBuffer;
+        const shadowIndirect = this.#shadowIndirectGPUBuffer;
+        const globalUniform = this.#unifiedGlobalUniformGPUBuffer;
+
+        if (!rawGPUBuffer || !typeParamsGPUBuffer || !culledGPUBuffer || !indirectGPUBuffer || !shadowCulled || !shadowIndirect || !globalUniform) {
+            return null;
+        }
 
         const targetHZBView = hzbTextureView || resourceManager.emptyR32FloatTextureView;
         const targetHZBSampler = hzbSampler || resourceManager.basicSampler.gpuSampler;
@@ -462,13 +468,13 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             label: 'FoliageScatterMegaBuffer_Culling_BindGroup',
             layout,
             entries: [
-                {binding: 0, resource: {buffer: rawGPUBuffer!}},
-                {binding: 1, resource: {buffer: this.#unifiedGlobalUniformGPUBuffer!}},
-                {binding: 2, resource: {buffer: typeParamsGPUBuffer!}},
-                {binding: 3, resource: {buffer: culledGPUBuffer!}},
-                {binding: 4, resource: {buffer: indirectGPUBuffer!}},
-                {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer!}},
-                {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer!}},
+                {binding: 0, resource: {buffer: rawGPUBuffer}},
+                {binding: 1, resource: {buffer: globalUniform}},
+                {binding: 2, resource: {buffer: typeParamsGPUBuffer}},
+                {binding: 3, resource: {buffer: culledGPUBuffer}},
+                {binding: 4, resource: {buffer: indirectGPUBuffer}},
+                {binding: 5, resource: {buffer: shadowCulled}},
+                {binding: 6, resource: {buffer: shadowIndirect}},
                 {binding: 7, resource: targetHZBView},
                 {binding: 8, resource: targetHZBSampler},
             ],

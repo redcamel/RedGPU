@@ -1100,19 +1100,22 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
             case 'streamingRadius': {
                 if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
-                    const subCellSize = this.#landscape!.foliageManager.subCellSize;
-                    const unmountMargin = Math.max(10.0, subCellSize * 0.5);
-                    const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
-                    const megaBuffer = this.#megaBuffer;
-                    const allocation = this.allocation;
-                    if (megaBuffer && allocation) {
-                        const mounted = this.#mountedSubCells;
-                        for (let i = mounted.length - 1; i >= 0; i--) {
-                            const sc = mounted[i];
-                            const dx = sc.centerX - this.#lastCamX;
-                            const dz = sc.centerZ - this.#lastCamZ;
-                            if (dx * dx + dz * dz > unmountRadiusSq) {
-                                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
+                    const landscape = this.#landscape;
+                    if (landscape) {
+                        const subCellSize = landscape.foliageManager.subCellSize;
+                        const unmountMargin = Math.max(10.0, subCellSize * 0.5);
+                        const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
+                        const megaBuffer = this.#megaBuffer;
+                        const allocation = this.allocation;
+                        if (megaBuffer && allocation) {
+                            const mounted = this.#mountedSubCells;
+                            for (let i = mounted.length - 1; i >= 0; i--) {
+                                const sc = mounted[i];
+                                const dx = sc.centerX - this.#lastCamX;
+                                const dz = sc.centerZ - this.#lastCamZ;
+                                if (dx * dx + dz * dz > unmountRadiusSq) {
+                                    this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
+                                }
                             }
                         }
                     }
@@ -1152,10 +1155,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#lastCamZ = camZ;
 
         const allocation = this.allocation;
-        if (!allocation) return;
-
-        const megaBuffer = this.#megaBuffer!;
-        const landscape = this.#landscape!;
+        const megaBuffer = this.#megaBuffer;
+        const landscape = this.#landscape;
+        if (!allocation || !megaBuffer || !landscape) return;
 
         const subCellSize = landscape.foliageManager.subCellSize;
         const typeRadius = this.streamingRadius;
@@ -1216,7 +1218,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const key = packSubCellKey(sx, sz);
                     let subCell = this.#subCells.get(key);
                     if (!subCell) {
-                        subCell = this.#populateSingleSubCell(sx, sz, subCellSize);
+                        subCell = this.#populateSingleSubCell(sx, sz, subCellSize, landscape);
                         this.#subCells.set(key, subCell);
                     }
                     const {isMounted, instanceCount} = subCell;
@@ -1459,7 +1461,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const {mountedSlotIndex, instanceCount} = targetSubCell;
         const currentActive = allocation.instanceCount;
 
-        const isLast = (mountedIndex === mounted.length - 1);
+        const lastIndex = mounted.length - 1;
+        const isLast = (mountedIndex === lastIndex);
 
         if (isLast) {
             mounted.pop();
@@ -1467,7 +1470,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             targetSubCell.mountedSlotIndex = -1;
             allocation.instanceCount = Math.max(0, currentActive - instanceCount);
         } else {
-            const lastSubCell = mounted.pop()!;
+            const lastSubCell = mounted[lastIndex];
+            mounted.length = lastIndex;
             const {instanceCount: lastCount} = lastSubCell;
 
             lastSubCell.mountedSlotIndex = mountedSlotIndex;
@@ -1494,9 +1498,12 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
 
-    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number): FoliageSubCell {
+    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number, currentLandscape?: Landscape): FoliageSubCell {
         const key = packSubCellKey(scX, scZ);
-        const landscape = this.#landscape!;
+        const landscape = currentLandscape || this.#landscape;
+        if (!landscape) {
+            throw new Error('[Foliage] Cannot populate sub-cell without an attached Landscape.');
+        }
         const {
             worldSizeX,
             worldSizeZ,

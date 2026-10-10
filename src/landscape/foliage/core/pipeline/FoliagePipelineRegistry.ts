@@ -28,9 +28,9 @@ export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfter
  */
 class FoliagePipelineRegistry extends RedGPUObject {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
-    #vertexShaderModule: GPUShaderModule | null = null;
-    #depthPrepassMaskedFragmentShaderModule: GPUShaderModule | null = null;
-    #depthPrepassOpaqueFragmentShaderModule: GPUShaderModule | null = null;
+    #vertexShaderModule: GPUShaderModule;
+    #depthPrepassMaskedFragmentShaderModule: GPUShaderModule;
+    #depthPrepassOpaqueFragmentShaderModule: GPUShaderModule;
 
     /**
      * [KO] FoliagePipelineRegistry 인스턴스를 생성하고 공용 셰이더 모듈을 컴파일합니다.
@@ -41,7 +41,10 @@ class FoliagePipelineRegistry extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.#initShaderModules();
+        const modules = this.#initShaderModules();
+        this.#vertexShaderModule = modules.vModule;
+        this.#depthPrepassMaskedFragmentShaderModule = modules.depthPrepassMaskedFModule;
+        this.#depthPrepassOpaqueFragmentShaderModule = modules.depthPrepassOpaqueFModule;
     }
 
     #geoAttributesAll: GPUVertexAttribute[] = [
@@ -139,6 +142,10 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const fragmentModule: GPUShaderModule | null = isDepthPrepass
             ? (isDepthPrepassOpaque ? this.#depthPrepassOpaqueFragmentShaderModule : this.#depthPrepassMaskedFragmentShaderModule)
             : (material.gpuRenderInfo?.fragmentShaderModule || null);
+
+        if (!fragmentModule) {
+            return null;
+        }
 
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
@@ -248,12 +255,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
             label: `Foliage_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: this.#vertexShaderModule!,
+                module: this.#vertexShaderModule,
                 entryPoint: vertexEntryPoint,
                 buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
             fragment: {
-                module: fragmentModule!,
+                module: fragmentModule,
                 entryPoint: 'main',
                 targets: targets,
             },
@@ -323,7 +330,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             label: `Foliage_ShadowMerged_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: this.#vertexShaderModule!,
+                module: this.#vertexShaderModule,
                 entryPoint: 'entryPointShadowOpaqueVertex',
                 buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
@@ -411,12 +418,12 @@ class FoliagePipelineRegistry extends RedGPUObject {
             label: `Foliage_ShadowMasked_RenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: this.#vertexShaderModule!,
+                module: this.#vertexShaderModule,
                 entryPoint: 'entryPointShadowMaskedVertex',
                 buffers: [geometryBufferLayout, this.#instanceBufferLayout],
             },
             fragment: {
-                module: this.#vertexShaderModule!,
+                module: this.#vertexShaderModule,
                 entryPoint: 'entryPointShadowMaskedFragment',
                 targets: [],
             },
@@ -447,7 +454,11 @@ class FoliagePipelineRegistry extends RedGPUObject {
         this.#pipelineCache.clear();
     }
 
-    #initShaderModules(): void {
+    #initShaderModules(): {
+        vModule: GPUShaderModule;
+        depthPrepassMaskedFModule: GPUShaderModule;
+        depthPrepassOpaqueFModule: GPUShaderModule;
+    } {
         const resourceManager = this.resourceManager;
 
         let vModule = resourceManager.getGPUShaderModule('Foliage_Instanced_VertexShaderModule');
@@ -456,7 +467,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
                 code: foliageInstancedWGSL,
             });
         }
-        this.#vertexShaderModule = vModule;
 
         let depthPrepassMaskedFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule');
         if (!depthPrepassMaskedFModule) {
@@ -464,7 +474,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
                 code: foliageDepthPrepassMaskedFragmentWGSL,
             });
         }
-        this.#depthPrepassMaskedFragmentShaderModule = depthPrepassMaskedFModule;
 
         let depthPrepassOpaqueFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule');
         if (!depthPrepassOpaqueFModule) {
@@ -472,7 +481,8 @@ class FoliagePipelineRegistry extends RedGPUObject {
                 code: foliageDepthPrepassOpaqueFragmentWGSL,
             });
         }
-        this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFModule;
+
+        return {vModule, depthPrepassMaskedFModule, depthPrepassOpaqueFModule};
     }
 }
 
