@@ -45,11 +45,10 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         centerX: number = 0,
         centerZ: number = 0
     ): void {
-        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
-        if (!computePipeline || !uniformGPUBuffer || !gpuDevice) return;
-
         const {rawGPUBuffer} = megaBuffer;
         if (!rawGPUBuffer) return;
+
+        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
 
         if (!landscape.hasValidScatterAtlas) return;
 
@@ -62,7 +61,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const {worldSizeX, worldSizeZ, invWorldSizeX, invWorldSizeZ, heightScale} = landscape;
 
         const cellSize = GRASS_CELL_SIZE;
-        const effectiveRadius = Math.max(grass.streamingRadius ?? 80.0, 16.0);
+        const effectiveRadius = Math.max(grass.streamingRadius, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
 
         const centerCellX = Math.floor(centerX / cellSize);

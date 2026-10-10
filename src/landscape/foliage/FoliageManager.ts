@@ -82,7 +82,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      */
     constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         super(landscape);
-        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
+        this.#onUniformUpdateNeeded = onUniformUpdateNeeded || null;
         this.#slotPooler = new FoliageSlotPooler(this.redGPUContext);
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
 
@@ -193,10 +193,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Whether to enable (when `true`, runs Depth Prepass before main rendering to minimize pixel overdraw)
      */
     set useDepthPrepass(val: boolean) {
-        const boolVal = !!val;
-        if (this.#useDepthPrepass !== boolVal) {
-            this.#useDepthPrepass = boolVal;
-            this.#renderer.useDepthPrepass = boolVal;
+        if (this.#useDepthPrepass !== val) {
+            this.#useDepthPrepass = val;
+            this.#renderer.useDepthPrepass = val;
         }
     }
 

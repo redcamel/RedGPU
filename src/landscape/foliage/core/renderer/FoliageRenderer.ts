@@ -216,7 +216,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             if (bundle) {
                 mainViewCache = {
                     bundle,
-                    systemBG: systemBG!,
+                    systemBG,
                     sampleCount,
                     validTypeCount: validCount,
                     useDepthPrepass: this.#useDepthPrepass
@@ -235,9 +235,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
             for (let t = 0; t < validCount; t++) {
                 const item = this.#validTypesMain[t];
-                const foliageType = item.type!;
-                const culledGPU = item.culledGPU!;
-                const indirectGPU = item.indirectGPU!;
+                const foliageType = item.type;
+                const culledGPU = item.culledGPU;
+                const indirectGPU = item.indirectGPU;
+                if (!foliageType || !culledGPU || !indirectGPU) continue;
+
                 const renderUnits = foliageType.mainRenderUnits;
                 const unitCount = renderUnits.length;
                 const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;

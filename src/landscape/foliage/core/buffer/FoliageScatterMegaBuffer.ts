@@ -297,7 +297,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
             const cascadeBase = 56 + c * 28;
-            if (c < activeCascadeCount && cascadeShadowFrustumPlanesByCascade && cascadeShadowFrustumPlanesByCascade[c]) {
+            if (c < activeCascadeCount && cascadeShadowFrustumPlanesByCascade?.[c]) {
                 gf32[cascadeBase] = cascadeSplitDepths ? cascadeSplitDepths[c] : 0.0;
                 gu32[cascadeBase + 1] = 1;
                 gu32[cascadeBase + 2] = 0;

@@ -89,7 +89,7 @@ function prepareFoliageMaterials(node: Mesh): void {
         mat.dirtyPipeline = true;
 
         if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
-            mat._updateFragmentState?.();
+            mat._updateFragmentState();
             mat.dirtyPipeline = false;
         }
     }
@@ -124,7 +124,7 @@ function createPBRRenderUnit(
     sharedContext: FoliageSharedContext,
     isImpostorOverride: boolean = false
 ): FoliageRenderUnit {
-    const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = (mat as any) || {};
+    const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = mat as any;
 
     const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial;
     const isMasked = !!useCutOff || alphaBlend === 1 || alphaBlend === 2 || !!transparent || isImpostor;
@@ -284,9 +284,9 @@ export default function assembleFoliageRenderUnits(
         const {
             groups,
             unifiedGeometry,
-            boundingRadius = 5.0,
-            boundingHeight: lodHeight = 5.0,
-            bottomOffset: lodBottomOffset = 0,
+            boundingRadius,
+            boundingHeight: lodHeight,
+            bottomOffset: lodBottomOffset,
             shadowMergedGeometry,
             totalIndexCount,
             totalVertexCount

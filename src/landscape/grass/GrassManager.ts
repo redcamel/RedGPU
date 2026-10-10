@@ -324,8 +324,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @returns 제거 성공 여부
      */
     removeType(target: Grass | string): boolean {
-        if (!target) return false;
-
         const removedGrass = this.unregisterTypeInternal(target);
         if (!removedGrass) return false;
 

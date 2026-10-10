@@ -214,8 +214,8 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         if (count === 0) return;
 
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
+        if (!indirectGPUBuffer || !culledGPUBuffer) return;
         const slotGPUBuffer = slotPooler.gpuBuffer;
-        if (!indirectGPUBuffer || !culledGPUBuffer || !slotGPUBuffer) return;
 
         const unifiedGroup1 = this.#getOrCreateUnifiedGroup1BindGroup(culledGPUBuffer, slotGPUBuffer);
         if (!unifiedGroup1) return;

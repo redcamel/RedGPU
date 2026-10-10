@@ -190,12 +190,14 @@ function traverseHierarchy(
     const {geometry, material, children} = node;
     if (geometry) {
         const mat = material as any;
-        if (mat?.dirtyPipeline || (mat && !mat.gpuRenderInfo?.fragmentShaderModule)) {
-            mat._updateFragmentState?.();
-            mat.dirtyPipeline = false;
+        if (mat) {
+            if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule) {
+                mat._updateFragmentState();
+                mat.dirtyPipeline = false;
+            }
         }
 
-        const rawStride = geometry.vertexBuffer?.stride || (geometry.vertexBuffer?.interleavedStruct?.arrayStride ? geometry.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
+        const rawStride = geometry.vertexBuffer.stride || (geometry.vertexBuffer.interleavedStruct?.arrayStride ? geometry.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
 
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, currentRelativeMatrix);
@@ -298,8 +300,8 @@ export default function assembleScatterRenderUnits(
         const raw = rawList[i];
         const {geometry, rawStride, currentRelativeMatrix} = raw;
         const {vertexBuffer, indexBuffer} = geometry;
-        const srcVData = vertexBuffer?.data;
-        const vertexCount = vertexBuffer?.vertexCount ?? 0;
+        const srcVData = vertexBuffer.data;
+        const vertexCount = vertexBuffer.vertexCount;
 
         lodTotalVertices += vertexCount;
         lodTotalIndices += indexBuffer?.indexCount ?? vertexCount;

@@ -37,7 +37,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
     #uniformCPUBuffer: Float32Array;
     #uniformUintBuffer: Uint32Array;
 
-    #tasksGPUBuffer: GPUBuffer | null = null;
+    #tasksGPUBuffer!: GPUBuffer;
     #tasksCPUBuffer: Uint32Array;
     #taskCapacity: number;
 
@@ -79,11 +79,10 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         targetCount: number,
         subCellSize: number
     ): void {
-        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
-        if (!computePipeline || !uniformGPUBuffer || !gpuDevice) return;
-
         const {rawGPUBuffer} = megaBuffer;
         if (!rawGPUBuffer) return;
+
+        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
 
         const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
         const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
@@ -196,7 +195,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
             vhtView,
             vbtView,
             weightView,
-            this.#tasksGPUBuffer!
+            this.#tasksGPUBuffer
         );
         if (!bindGroup) return;
 

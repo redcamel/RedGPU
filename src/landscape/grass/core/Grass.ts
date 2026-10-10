@@ -205,8 +205,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        this.#minY = minY !== undefined ? minY : assemblyResult.minY;
-        const resolvedHeight = height !== undefined ? height : (assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0);
+        this.#minY = minY ?? assemblyResult.minY;
+        const resolvedHeight = height ?? (assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0);
 
         this.#renderUnits = assemblyResult.renderUnits;
         if (this.#baseColorTexture) {
@@ -244,8 +244,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             streamingRadius: resolvedStreamingRadius
         });
 
-        if (minScale) this.#minScale = [minScale[0], minScale[1]];
-        if (maxScale) this.#maxScale = [maxScale[0], maxScale[1]];
+        if (minScale) this.#minScale[0] = minScale[0], this.#minScale[1] = minScale[1];
+        if (maxScale) this.#maxScale[0] = maxScale[0], this.#maxScale[1] = maxScale[1];
 
         this.#alphaCutoff = alphaCutoff;
         this.#roughness = roughness ?? targetMaterial?.roughnessFactor ?? targetMaterial?.roughness ?? 0.55;

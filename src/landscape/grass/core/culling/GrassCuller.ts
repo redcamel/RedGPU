@@ -25,6 +25,12 @@ export default class GrassCuller extends AScatterCuller {
         this.#uniformFloat32View = new Float32Array(this.#uniformArrayBuffer);
         this.#uniformUint32View = new Uint32Array(this.#uniformArrayBuffer);
         this.initComputePipeline('Grass_Cull_ShaderModule', grassCullWGSL, 'Grass_Cull');
+
+        this.#globalUniformBuffer = this.gpuDevice.createBuffer({
+            label: 'Grass_Cull_GlobalUniformBuffer',
+            size: this.#uniformArrayBuffer.byteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
     }
 
     /**
@@ -40,19 +46,11 @@ export default class GrassCuller extends AScatterCuller {
         megaBuffer: GrassScatterMegaBuffer,
         renderViewStateData: RenderViewStateData
     ): void {
-        const {bindGroupLayout, gpuDevice} = this;
-        if (!this.computePipeline || !bindGroupLayout || !gpuDevice) return;
-
         const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
         if (totalAllocatedInstances <= 0) return;
 
-        if (!this.#globalUniformBuffer) {
-            this.#globalUniformBuffer = gpuDevice.createBuffer({
-                label: 'Grass_Cull_GlobalUniformBuffer',
-                size: this.#uniformArrayBuffer.byteLength,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-            });
-        }
+        const {bindGroupLayout, gpuDevice} = this;
+        if (!bindGroupLayout) return;
 
         const {view} = renderViewStateData;
         const camera = view.rawCamera;

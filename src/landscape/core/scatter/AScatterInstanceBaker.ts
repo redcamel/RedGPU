@@ -228,8 +228,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
                 ? landscape.layers[targetLayer]
                 : landscape.layers.find((l: any) => l.name === targetLayer);
             if (matchedLayer?.weightTexture?.gpuTexture) {
-                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
-                    || matchedLayer.weightTexture.gpuTexture.createView();
+                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture);
                 info.hasWeightMap = 1;
                 info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
             }

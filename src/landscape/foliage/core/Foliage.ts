@@ -442,8 +442,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#useDepthPrepass = useDepthPrepass;
         this.#megaBuffer = megaBuffer || null;
 
-        const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];
-        const maxScale: [number, number, number] = optMaxScale ? [...optMaxScale] : [1.0, 1.0, 1.0];
+        const minScale: [number, number, number] = optMinScale ? [optMinScale[0], optMinScale[1], optMinScale[2]] : [1.0, 1.0, 1.0];
+        const maxScale: [number, number, number] = optMaxScale ? [optMaxScale[0], optMaxScale[1], optMaxScale[2]] : [1.0, 1.0, 1.0];
 
         let resolvedDensityPerHectare = 20.0;
         if (densityPerHectare !== undefined) {
@@ -499,16 +499,16 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             options,
             this.#slotPooler
         );
-        this.#lodInfoList = assembleResult.lodInfoList || [];
+        this.#lodInfoList = assembleResult.lodInfoList;
         this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
-        this.#boundingRadius = assembleResult.boundingRadius || 10.0;
+        this.#boundingRadius = assembleResult.boundingRadius;
         const resolvedHeight = optHeight !== undefined
             ? Math.max(0.1, Number(optHeight) || 0.1)
             : (assembleResult.boundingHeight || 2.0);
 
         this.#initBuckets(
             assembleResult.renderUnits,
-            assembleResult.shadowMergedRenderUnits || []
+            assembleResult.shadowMergedRenderUnits
         );
 
         let defaultShadowDist = 300.0;
@@ -545,7 +545,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#minScale = minScale;
         this.#maxScale = maxScale;
-        this.#randomRotationY = randomRotationY ?? true;
+        this.#randomRotationY = randomRotationY !== false;
         this.#maxInstances = resolvedMaxInstances;
 
         if (this.#megaBuffer) {
@@ -1151,10 +1151,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#lastCamX = camX;
         this.#lastCamZ = camZ;
 
-        const megaBuffer = this.#megaBuffer;
         const allocation = this.allocation;
-        const landscape = this.#landscape;
-        if (!megaBuffer || !allocation || !landscape) return;
+        if (!allocation) return;
+
+        const megaBuffer = this.#megaBuffer!;
+        const landscape = this.#landscape!;
 
         const subCellSize = landscape.foliageManager.subCellSize;
         const typeRadius = this.streamingRadius;

@@ -601,7 +601,7 @@ export default function bakeFoliageImpostor(
                 const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
                 currentDrawSlot++;
 
-                if (cached.isImpostor || !cached.pipeline || !cached.vertexBuffer) continue;
+                if (cached.isImpostor || !cached.pipeline) continue;
 
                 renderPass.setPipeline(cached.pipeline);
 

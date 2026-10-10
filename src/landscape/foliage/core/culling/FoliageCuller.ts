@@ -68,16 +68,6 @@ class FoliageCuller extends AScatterCuller {
      * [KO] 렌더 패스 상태 데이터
      * [EN] Render pass state data
      */
-    /**
-     * [KO] 카메라 위치와 프러스텀, 그림자 캐스케이드 상태를 기반으로 컬링 파라미터를 갱신하고 GPU 디스패치를 준비합니다.
-     * [EN] Updates culling parameters and prepares GPU compute dispatches based on camera position, frustum, and shadow cascades.
-     * @param foliageList -
-     * [KO] 활성 식생 목록
-     * [EN] Active foliage list
-     * @param renderViewStateData -
-     * [KO] 렌더 패스 상태 데이터
-     * [EN] Render pass state data
-     */
     update(
         foliageList: Foliage[],
         renderViewStateData: RenderViewStateData
@@ -118,7 +108,9 @@ class FoliageCuller extends AScatterCuller {
      * [EN] Records indirect draw command counter reset commands.
      */
     recordResetCommands(encoder: GPUCommandEncoder): void {
-        this.#megaBuffer?.resetMultiIndirectCommands(encoder);
+        if (this.#megaBuffer) {
+            this.#megaBuffer.resetMultiIndirectCommands(encoder);
+        }
     }
 
     /**

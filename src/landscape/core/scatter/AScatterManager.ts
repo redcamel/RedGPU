@@ -68,7 +68,7 @@ export abstract class AScatterManager<
      * [EN] Sets whether the scatter system is enabled. When `false`, streaming, culling, and rendering are suspended.
      */
     set enabled(val: boolean) {
-        this.#enabled = !!val;
+        this.#enabled = val;
     }
 
     /**
@@ -159,7 +159,6 @@ export abstract class AScatterManager<
      * [EN] Matching scatter type instance (`undefined` if not registered)
      */
     getTypeByName(name: string): TType | undefined {
-        if (!name) return undefined;
         return this.#typesByName.get(name);
     }
 
