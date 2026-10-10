@@ -276,11 +276,7 @@ export default function bakeFoliageImpostor(
     bakeName: string = 'Foliage'
 ): FoliageBakeResult {
     const gpuDevice = redGPUContext.gpuDevice;
-    if (!gpuDevice) {
-        throw new Error('[bakeFoliageImpostor] GPUDevice is not initialized.');
-    }
-
-        const cache = getOrCreateContextCache(redGPUContext);
+    const cache = getOrCreateContextCache(redGPUContext);
 
     const aabb = calculateAABBFromRenderUnits(renderUnits);
     const [centerX, centerY, centerZ] = aabb.center;
@@ -432,12 +428,12 @@ export default function bakeFoliageImpostor(
         const {vertexBuffer, indexBuffer} = geometry;
         const isIdentityModelMatrix = isIdentityMatrix(m);
 
-            const diffTex = mat?.baseColorTexture;
-            const diffSampler = mat?.baseColorTextureSampler || basicSampler;
-            const normTex = mat?.normalTexture;
-            const normSampler = mat?.normalTextureSampler || basicSampler;
-            const ormTex = mat?.packedORMTexture || mat?.metallicRoughnessTexture || mat?.occlusionTexture;
-            const ormSampler = mat?.packedORMTextureSampler || mat?.metallicRoughnessTextureSampler || basicSampler;
+        const diffTex = mat.baseColorTexture;
+        const diffSampler = mat.baseColorTextureSampler || basicSampler;
+        const normTex = mat.normalTexture;
+        const normSampler = mat.normalTextureSampler || basicSampler;
+        const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
+        const ormSampler = mat.packedORMTextureSampler || mat.metallicRoughnessTextureSampler || basicSampler;
 
             const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex)!;
             const normView = resourceManager.getGPUResourceBitmapTextureView(normTex)!;
@@ -461,29 +457,26 @@ export default function bakeFoliageImpostor(
             let metallic = 0.0;
             let ao = 1.0;
             let cutOff = 0.35;
-            let useVertexColor = false;
-            if (mat) {
-                const bcf = mat.baseColorFactor || mat.color;
-                if (bcf) {
-                    if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
-                        [r = 1.0, g = 1.0, b = 1.0, a = 1.0] = bcf as any;
-                    } else if (typeof bcf.r === 'number') {
-                        ({r, g, b, a = 1.0} = bcf);
-                    }
-                }
-                if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
-                else if (typeof mat.roughness === 'number') roughness = mat.roughness;
-                if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
-                else if (typeof mat.metallic === 'number') metallic = mat.metallic;
-                if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
-                if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
-                useVertexColor = !!mat.useVertexColor;
+        const bcf = mat.baseColorFactor || mat.color;
+        if (bcf) {
+            if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
+                [r = 1.0, g = 1.0, b = 1.0, a = 1.0] = bcf as any;
+            } else if (typeof bcf.r === 'number') {
+                ({r, g, b, a = 1.0} = bcf);
             }
+        }
+        if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
+        else if (typeof mat.roughness === 'number') roughness = mat.roughness;
+        if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
+        else if (typeof mat.metallic === 'number') metallic = mat.metallic;
+        if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
+        if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
+        const useVertexColor = !!mat.useVertexColor;
 
             const hasDiff = !!(diffTex && diffTex.gpuTexture);
             const hasNorm = !!(normTex && normTex.gpuTexture);
             const hasORM = !!(ormTex && ormTex.gpuTexture);
-            const isFoliage = mat?.isFoliage !== false ? 1.0 : 0.0;
+        const isFoliage = mat.isFoliage !== false ? 1.0 : 0.0;
 
             const matProps = new Float32Array([
                 r, g, b, a,
@@ -501,9 +494,9 @@ export default function bakeFoliageImpostor(
                 isImpostor: false,
             pipeline: getOrCreateBakePipeline(redGPUContext, unit),
                 bindGroup,
-            vertexBuffer: vertexBuffer?.gpuBuffer || null,
-            indexBuffer: indexBuffer?.gpuBuffer || null,
-            isIndexed: !!isIndexed,
+            vertexBuffer: vertexBuffer.gpuBuffer,
+            indexBuffer: indexBuffer ? indexBuffer.gpuBuffer : null,
+            isIndexed,
             indexCount,
             indexFormat,
             vertexCount,

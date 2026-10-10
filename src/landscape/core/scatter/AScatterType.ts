@@ -157,7 +157,7 @@ export abstract class AScatterType<
     constructor(redGPUContext: RedGPUContext, name: string, typeId: number = 0) {
         super(redGPUContext);
 
-        if (!name || typeof name !== 'string' || name.trim() === '') {
+        if (typeof name !== 'string' || !name.trim()) {
             consoleAndThrowError(`[${new.target.name}] name is required and must be a non-empty string!`);
         }
 

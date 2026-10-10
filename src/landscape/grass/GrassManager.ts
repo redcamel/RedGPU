@@ -337,7 +337,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             removedGrass.slotIndex = -1;
         }
 
-        if (typeId >= 0 && typeId < 32) {
+        if (typeId >= 0) {
             this.#dirtyUboMask &= ~(1 << typeId);
             this.#needsRebakeMask &= ~(1 << typeId);
         }

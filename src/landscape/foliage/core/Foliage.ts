@@ -402,7 +402,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         slotPooler?: FoliageSlotPooler | null,
         landscape?: Landscape | null
     ) {
-        super(redGPUContext, options?.name || '');
+        super(redGPUContext, options.name);
         this.#landscape = landscape || null;
         this.#slotPooler = slotPooler || null;
 
@@ -1249,14 +1249,15 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     rebake(): void {
         const alloc = this.allocation;
         const landscape = this.#landscape;
-        if (this.#megaBuffer && alloc && landscape && alloc.instanceCount > 0) {
+        const baker = this.#baker;
+        if (this.#megaBuffer && baker && alloc && landscape && alloc.instanceCount > 0) {
             const mounted = this.#mountedSubCells;
             const count = mounted.length;
             const subCellSize = landscape.foliageManager.subCellSize;
             for (let i = 0; i < count; i++) {
                 const subCell = mounted[i];
                 if (subCell.isMounted && subCell.instanceCount > 0) {
-                    this.#baker!.dispatchBakeSubCell(
+                    baker.dispatchBakeSubCell(
                         this.#megaBuffer,
                         landscape,
                         this,

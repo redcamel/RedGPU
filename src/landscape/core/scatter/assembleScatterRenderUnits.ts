@@ -462,7 +462,7 @@ export default function assembleScatterRenderUnits(
                         vc0 = srcVData[srcIdx + 10];
                         vc1 = srcVData[srcIdx + 11];
                         vc2 = srcVData[srcIdx + 12];
-                        vc3 = srcVData[srcIdx + 13] !== 0 ? srcVData[srcIdx + 13] : 1.0;
+                        vc3 = srcVData[srcIdx + 13];
                     }
                     combinedVertexData[dstIdx + 10] = vc0;
                     combinedVertexData[dstIdx + 11] = vc1;
@@ -476,19 +476,19 @@ export default function assembleScatterRenderUnits(
                         tanX = srcVData[srcIdx + 14];
                         tanY = srcVData[srcIdx + 15];
                         tanZ = srcVData[srcIdx + 16];
-                        tanW = srcVData[srcIdx + 17] !== 0 ? srcVData[srcIdx + 17] : 1.0;
+                        tanW = srcVData[srcIdx + 17];
                         hasTangent = true;
                     } else if (rawStride >= 16) {
                         tanX = srcVData[srcIdx + 12];
                         tanY = srcVData[srcIdx + 13];
                         tanZ = srcVData[srcIdx + 14];
-                        tanW = srcVData[srcIdx + 15] !== 0 ? srcVData[srcIdx + 15] : 1.0;
+                        tanW = srcVData[srcIdx + 15];
                         hasTangent = true;
                     } else if (rawStride === 12) {
                         tanX = srcVData[srcIdx + 8];
                         tanY = srcVData[srcIdx + 9];
                         tanZ = srcVData[srcIdx + 10];
-                        tanW = srcVData[srcIdx + 11] !== 0 ? srcVData[srcIdx + 11] : 1.0;
+                        tanW = srcVData[srcIdx + 11];
                         hasTangent = true;
                     }
 

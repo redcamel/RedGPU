@@ -118,7 +118,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
 
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentShaderModule) {
-            material._updateFragmentState?.();
+            material._updateFragmentState();
         }
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
@@ -137,7 +137,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const isDepthPrepassOpaque = isDepthPrepass && !effectiveIsMasked;
         const fragmentModule: GPUShaderModule | null = isDepthPrepass
             ? (isDepthPrepassOpaque ? this.#depthPrepassOpaqueFragmentShaderModule : this.#depthPrepassMaskedFragmentShaderModule)
-            : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
+            : (material.gpuRenderInfo?.fragmentShaderModule || null);
 
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
@@ -205,21 +205,22 @@ class FoliagePipelineRegistry extends RedGPUObject {
         } else {
             const isMainShadingAfterDepth = depthPassMode === 'mainShadingAfterDepth';
 
+            const writeMask = material.writeMaskState ?? GPUColorWrite.ALL;
             targets = [
                 {
                     format: 'rgba16float',
                     blend: undefined,
-                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
+                    writeMask,
                 },
                 {
                     format: preferredFormat,
                     blend: undefined,
-                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
+                    writeMask,
                 },
                 {
                     format: 'rgba16float',
                     blend: undefined,
-                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
+                    writeMask,
                 }
             ];
 
@@ -276,9 +277,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
      * @param strideBytes -
      * [KO] 정점 스트라이드 바이트 수 (기본값: 12)
      * [EN] Vertex stride in bytes (default: 12)
-     * @param cullMode -
-     * [KO] 컬링 모드 (기본값: 'back')
-     * [EN] Cull mode (default: 'back')
      * @param cullMode -
      * [KO] 컬링 모드 (기본값: 'back')
      * [EN] Cull mode (default: 'back')

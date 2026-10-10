@@ -81,14 +81,11 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         }
         this.#freeTop = maxSlots;
 
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            this.#gpuBuffer = gpuDevice.createBuffer({
-                label: bufferLabel,
-                size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-            });
-        }
+        this.#gpuBuffer = this.gpuDevice.createBuffer({
+            label: bufferLabel,
+            size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
     }
 
     /**
@@ -161,9 +158,8 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         this.#freeTop = this.maxSlots;
         this.#allocatedCount = 0;
 
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice && this.#gpuBuffer) {
-            gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#cpuBuffer.buffer);
+        if (this.#gpuBuffer) {
+            this.gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#cpuBuffer.buffer);
         }
     }
 
@@ -186,13 +182,12 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * @param byteLength - 전송할 바이트 크기
      */
     uploadSlotBytes(slot: number, byteLength: number): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice || !this.#gpuBuffer) return;
+        if (!this.#gpuBuffer) return;
 
         const offsetBytes = slot * AScatterSlotPooler.SLOT_STRIDE_BYTES;
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
 
-        gpuDevice.queue.writeBuffer(
+        this.gpuDevice.queue.writeBuffer(
             this.#gpuBuffer,
             offsetBytes,
             this.#cpuBuffer.buffer,

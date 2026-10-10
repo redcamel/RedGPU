@@ -197,7 +197,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             cf.fill(0, baseFloat, baseFloat + typeParamFloats);
 
             const {gpuDevice, typeParamsGPUBuffer} = this;
-            if (gpuDevice && typeParamsGPUBuffer) {
+            if (typeParamsGPUBuffer) {
                 const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
                 const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
                 gpuDevice.queue.writeBuffer(
@@ -331,7 +331,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.#cachedCullBindGroupLayout = bindGroupLayout;
         this.#cachedGlobalUniformBuffer = globalUniformBuffer;
 
-        this.#unifiedCullingBindGroup = gpuDevice!.createBindGroup({
+        this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
             label: 'Grass_UnifiedCullingBindGroup',
             layout: bindGroupLayout,
             entries: [
@@ -357,7 +357,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     onResizeBuffers(newCapacity: number): void {
         this.invalidateUnifiedCullingBindGroup();
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
 
         const strideBytes = this.strideBytes;
         const culledCapacity = newCapacity * 2;

@@ -154,10 +154,10 @@ export class ScatterRenderUnit {
             baseColorTexture = null,
             lodIndex = 0,
             isMasked = false,
-            vertexCount = geometry.vertexBuffer?.vertexCount ?? 0,
+            vertexCount = geometry.vertexBuffer.vertexCount ?? 0,
             isIndexed = !!geometry.indexBuffer,
             indexCount = geometry.indexBuffer?.indexCount ?? vertexCount,
-            strideBytes = geometry.vertexBuffer?.stride ? geometry.vertexBuffer.stride * 4 : 72
+            strideBytes = geometry.vertexBuffer.stride ? geometry.vertexBuffer.stride * 4 : 72
         } = init;
 
         this.#geometry = geometry;

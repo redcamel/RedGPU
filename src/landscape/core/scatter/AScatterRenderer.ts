@@ -68,7 +68,7 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
      * @param cascadeIndex - 캐스케이드 인덱스 (0 ~ 3)
      */
     getShadowBundle(cascadeIndex: number): GPURenderBundle | null {
-        return this.#shadowRenderBundles[cascadeIndex] ?? null;
+        return this.#shadowRenderBundles[cascadeIndex];
     }
 
     /**
@@ -96,7 +96,6 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
             cascadeIndex >= 0 &&
             cascadeIndex < 4 &&
             this.#shadowBundleValid[cascadeIndex] &&
-            this.#shadowRenderBundles[cascadeIndex] !== null &&
             this.#lastSystemBGByCascade[cascadeIndex] === systemBG
         );
     }
