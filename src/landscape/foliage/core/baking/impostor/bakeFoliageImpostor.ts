@@ -295,12 +295,15 @@ function bakeFoliageImpostor(
         const atlasHeight = gridSize * tileSize;
         const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
 
+    const {RENDER_ATTACHMENT, TEXTURE_BINDING, COPY_SRC, COPY_DST} = GPUTextureUsage;
+    const bakedUsage = RENDER_ATTACHMENT | TEXTURE_BINDING | COPY_SRC | COPY_DST;
+
         const bakedGPUTexture = gpuDevice.createTexture({
             label: `Foliage_Impostor_BaseColorTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm-srgb',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+            usage: bakedUsage,
         });
 
         const bakedNormalGPUTexture = gpuDevice.createTexture({
@@ -308,7 +311,7 @@ function bakeFoliageImpostor(
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+            usage: bakedUsage,
         });
 
         const bakedORMGPUTexture = gpuDevice.createTexture({
@@ -316,7 +319,7 @@ function bakeFoliageImpostor(
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+            usage: bakedUsage,
         });
 
         const depthGPUTexture = gpuDevice.createTexture({
@@ -439,14 +442,14 @@ function bakeFoliageImpostor(
             metallicRoughnessTextureSampler
         } = mat;
 
-        const diffSampler = baseColorTextureSampler || basicSampler;
-        const normSampler = normalTextureSampler || basicSampler;
-        const ormTex = packedORMTexture || metallicRoughnessTexture || occlusionTexture;
-        const ormSampler = packedORMTextureSampler || metallicRoughnessTextureSampler || basicSampler;
+        const diffSampler = baseColorTextureSampler ?? basicSampler;
+        const normSampler = normalTextureSampler ?? basicSampler;
+        const ormTex = packedORMTexture ?? metallicRoughnessTexture ?? occlusionTexture;
+        const ormSampler = packedORMTextureSampler ?? metallicRoughnessTextureSampler ?? basicSampler;
 
-        const diffView = resourceManager.getGPUResourceBitmapTextureView(baseColorTexture) || emptyBitmapTextureView;
-        const normView = resourceManager.getGPUResourceBitmapTextureView(normalTexture) || emptyBitmapTextureView;
-        const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) || emptyBitmapTextureView;
+        const diffView = resourceManager.getGPUResourceBitmapTextureView(baseColorTexture) ?? emptyBitmapTextureView;
+        const normView = resourceManager.getGPUResourceBitmapTextureView(normalTexture) ?? emptyBitmapTextureView;
+        const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) ?? emptyBitmapTextureView;
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `Foliage_Impostor_Bake_BindGroup_${s}`,
@@ -467,7 +470,7 @@ function bakeFoliageImpostor(
             let ao = 1.0;
             let cutOff = 0.35;
         const {baseColorFactor, color} = mat;
-        const bcf = baseColorFactor || color;
+        const bcf = baseColorFactor ?? color;
         if (bcf) {
             if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
                 [r = 1.0, g = 1.0, b = 1.0, a = 1.0] = bcf as any;
@@ -830,18 +833,21 @@ function executeDilation(
     const {dilationBindGroupLayout, dilationPipeline} = cache;
     const {gpuDevice} = redGPUContext;
 
+    const {TEXTURE_BINDING, STORAGE_BINDING, COPY_SRC, COPY_DST} = GPUTextureUsage;
+    const pingPongUsage = TEXTURE_BINDING | STORAGE_BINDING | COPY_SRC | COPY_DST;
+
     const pingPongA = gpuDevice.createTexture({
         label: 'Foliage_Impostor_Dilation_PingPongTexture_A',
         size: [width, height, 1],
         format: 'rgba8unorm',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
+        usage: pingPongUsage
     });
 
     const pingPongB = gpuDevice.createTexture({
         label: 'Foliage_Impostor_Dilation_PingPongTexture_B',
         size: [width, height, 1],
         format: 'rgba8unorm',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
+        usage: pingPongUsage
     });
 
     const steps = [1, 2, 4, 8];

@@ -165,7 +165,7 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#maxRenderUnits = maxRenderUnits;
         this.#strideBytes = strideBytes;
         this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
-        this.#typeParamFloats = typeParamBytes ? typeParamBytes / Float32Array.BYTES_PER_ELEMENT : 0;
+        this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
 
         this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
 
@@ -557,15 +557,14 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
 
         this.#instanceCapacity = newCapacity;
 
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            this.#rawGPUBuffer?.destroy();
-            this.#rawGPUBuffer = gpuDevice.createBuffer({
-                label: `${this.constructor.name}_RawInstances`,
-                size: newCapacity * this.#strideBytes,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            });
-        }
+        const {gpuDevice} = this;
+        const {STORAGE, COPY_DST} = GPUBufferUsage;
+        this.#rawGPUBuffer?.destroy();
+        this.#rawGPUBuffer = gpuDevice.createBuffer({
+            label: `${this.constructor.name}_RawInstances`,
+            size: newCapacity * this.#strideBytes,
+            usage: STORAGE | COPY_DST,
+        });
 
         this.onResizeBuffers(newCapacity);
 
@@ -619,6 +618,7 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     #initBaseBuffers(): void {
         const {gpuDevice} = this;
+        const {STORAGE, COPY_DST, UNIFORM, INDIRECT, COPY_SRC} = GPUBufferUsage;
         const className = this.constructor.name;
 
         const rawByteSize = Math.max(this.#instanceCapacity * this.#strideBytes, 64);
@@ -627,14 +627,14 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#rawGPUBuffer = gpuDevice.createBuffer({
             label: `${className}_RawInstances`,
             size: rawByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            usage: STORAGE | COPY_DST,
         });
 
         if (typeParamsByteSize > 0) {
             this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
                 label: `${className}_TypeParams`,
                 size: typeParamsByteSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                usage: STORAGE | UNIFORM | COPY_DST,
             });
         }
 
@@ -646,13 +646,13 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
             label: `${className}_Indirect_Main`,
             size: indirectByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
+            usage: STORAGE | INDIRECT | COPY_DST,
         });
 
         this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
             label: `${className}_Indirect_Template`,
             size: indirectByteSize,
-            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+            usage: COPY_SRC | COPY_DST,
         });
     }
 }

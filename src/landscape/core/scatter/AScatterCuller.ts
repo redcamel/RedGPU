@@ -74,12 +74,10 @@ abstract class AScatterCuller extends RedGPUObject {
         const {resourceManager, gpuDevice} = this.redGPUContext;
         const {wgslParser} = resourceManager;
         const shaderInfo = wgslParser.parse(shaderName, shaderSource);
-        let computeModule = resourceManager.getGPUShaderModule(shaderName);
-        if (!computeModule) {
-            computeModule = resourceManager.createGPUShaderModule(shaderName, {
+        const computeModule = resourceManager.getGPUShaderModule(shaderName)
+            ?? resourceManager.createGPUShaderModule(shaderName, {
                 code: shaderSource
             });
-        }
 
         const bindGroupLayoutDescriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
         this.#bindGroupLayout = resourceManager.createBindGroupLayout(`${labelPrefix}_BindGroupLayout`, {

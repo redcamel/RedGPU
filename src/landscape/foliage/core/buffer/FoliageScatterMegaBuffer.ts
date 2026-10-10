@@ -664,6 +664,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
     #initBuffers(): void {
         const {gpuDevice, instanceCapacity, maxRenderUnits} = this;
+        const {VERTEX, STORAGE, INDIRECT, COPY_DST, COPY_SRC, UNIFORM} = GPUBufferUsage;
 
         const rawByteSize = Math.max(instanceCapacity * this.strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
@@ -675,31 +676,31 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_Main',
             size: culledByteSize,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            usage: VERTEX | STORAGE,
         });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',
             size: culledByteSize * SHADOW_CASCADE_COUNT,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            usage: VERTEX | STORAGE,
         });
 
         this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Indirect_ShadowMega',
             size: indirectByteSize * SHADOW_CASCADE_COUNT,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            usage: INDIRECT | STORAGE | COPY_DST,
         });
 
         this.#shadowIndirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Indirect_ShadowTemplate',
             size: indirectByteSize * SHADOW_CASCADE_COUNT,
-            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+            usage: COPY_SRC | COPY_DST,
         });
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_GlobalUniformBuffer',
             size: this.#globalUniformBytes,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            usage: UNIFORM | COPY_DST,
         });
     }
 }

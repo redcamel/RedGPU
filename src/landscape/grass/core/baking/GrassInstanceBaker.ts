@@ -78,10 +78,11 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         if (!this.#cellOffsetsGPUBuffer || this.#cellOffsetsGPUBuffer.size < byteLength) {
             this.#cellOffsetsGPUBuffer?.destroy();
             const newSize = Math.max(2048 * 8, Math.ceil(spiralOffsets.byteLength / 256) * 256);
+            const {STORAGE, COPY_DST} = GPUBufferUsage;
             this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
                 label: 'Grass_Bake_CellOffsets_Buffer',
                 size: newSize,
-                usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+                usage: STORAGE | COPY_DST
             });
             this.#currentUploadedRadius = -1;
         }

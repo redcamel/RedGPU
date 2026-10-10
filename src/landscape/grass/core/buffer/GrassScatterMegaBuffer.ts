@@ -286,7 +286,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         cu[baseFloat + 19] = 0; // pad2
 
         const {gpuDevice, typeParamsGPUBuffer} = this;
-        if (gpuDevice && typeParamsGPUBuffer) {
+        if (typeParamsGPUBuffer) {
             const byteOffset = baseFloat * Float32Array.BYTES_PER_ELEMENT;
             const byteSize = typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
             gpuDevice.queue.writeBuffer(

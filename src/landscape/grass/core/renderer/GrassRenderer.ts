@@ -517,7 +517,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #getShadowRenderPipeline(): GPURenderPipeline | null {
         if (this.#shadowPipeline) return this.#shadowPipeline;
 
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
         if (!this.#pipelineLayout || !this.#vertexShadowModule || !this.#fragmentShadowModule) return null;
 
         this.#shadowPipeline = gpuDevice.createRenderPipeline({
@@ -564,7 +564,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         let pipeline = cache.get(sampleCount);
         if (pipeline) return pipeline;
 
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
         const fragModule = isFar ? this.#fragmentFarModule : this.#fragmentNearModule;
         if (!this.#pipelineLayout || !this.#vertexModule || !fragModule) return null;
 

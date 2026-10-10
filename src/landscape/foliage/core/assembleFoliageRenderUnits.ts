@@ -147,11 +147,7 @@ function createPBRRenderUnit(
         }
     }
 
-    let hasBaseColorTexture = false;
-    if (baseColorTexture) {
-        const {gpuTexture, src, url} = baseColorTexture;
-        hasBaseColorTexture = !!(gpuTexture || src || url);
-    }
+    const hasBaseColorTexture = !!(baseColorTexture?.gpuTexture || baseColorTexture?.src || baseColorTexture?.url);
     const isDepthPrepass = !isImpostor && (lodIndex <= 0) && (!isMasked || hasBaseColorTexture);
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
@@ -416,7 +412,7 @@ export default function assembleFoliageRenderUnits(
     }
 
     const boundingHeight = maxBoundingHeight > 0 ? maxBoundingHeight : height;
-    const resolvedBottomOffset = options.bottomOffset !== undefined ? bottomOffset : autoBottomOffset;
+    const resolvedBottomOffset = options.bottomOffset ?? autoBottomOffset;
 
     return {
         renderUnits,

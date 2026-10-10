@@ -87,8 +87,8 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
         const {emptyBitmapTextureView} = resourceManager;
 
         const {vhtAtlasTexture, vbtBaseColorAtlas} = landscape;
-        const vhtView = vhtAtlasTexture?.gpuTextureView || emptyBitmapTextureView;
-        const vbtView = vbtBaseColorAtlas?.gpuTextureView || emptyBitmapTextureView;
+        const vhtView = vhtAtlasTexture?.gpuTextureView ?? emptyBitmapTextureView;
+        const vbtView = vbtBaseColorAtlas?.gpuTextureView ?? emptyBitmapTextureView;
 
         const {
             worldSizeX,
@@ -241,12 +241,13 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
 
     #initTaskBuffer(): void {
         const {gpuDevice} = this;
+        const {STORAGE, COPY_DST} = GPUBufferUsage;
 
         this.#tasksGPUBuffer?.destroy();
         this.#tasksGPUBuffer = gpuDevice.createBuffer({
             label: `${this.#label}_TasksGPUBuffer`,
             size: this.#taskCapacity * 16,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+            usage: STORAGE | COPY_DST
         });
     }
 

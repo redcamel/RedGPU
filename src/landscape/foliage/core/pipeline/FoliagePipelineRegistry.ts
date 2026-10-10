@@ -171,11 +171,10 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout ?? emptyBindGroupLayout;
         const materialBindGroupLayout = isDepthPrepassOpaque
             ? emptyBindGroupLayout
-            : (material.gpuRenderInfo?.fragmentBindGroupLayout
-                || emptyBindGroupLayout);
+            : (material.gpuRenderInfo?.fragmentBindGroupLayout ?? emptyBindGroupLayout);
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveRenderUnitBGL, materialBindGroupLayout];
 

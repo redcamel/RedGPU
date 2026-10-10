@@ -167,12 +167,12 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             groundBlendStrength = 1.0,
             alphaCutoff = 0.2,
             roughness,
-            subsurfaceStrength,
+            subsurfaceStrength = 0.25,
             subsurfaceColor,
-            exposureBoost,
+            exposureBoost = 1.0,
             targetLayer = '',
             bottomOffset = 0.0,
-            shadowStrength,
+            shadowStrength = 1.0,
             castShadow = true,
             shadowCullDistance,
             shadowFadeStartDistance,
@@ -263,15 +263,15 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         this.#alphaCutoff = alphaCutoff;
         this.#roughness = roughness ?? targetMaterial.roughnessFactor ?? targetMaterial.roughness ?? 0.55;
 
-        if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
+        this.#subsurfaceStrength = subsurfaceStrength;
         if (subsurfaceColor) {
             const [r, g, b] = subsurfaceColor;
             this.#subsurfaceColor[0] = r;
             this.#subsurfaceColor[1] = g;
             this.#subsurfaceColor[2] = b;
         }
-        if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
-        if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
+        this.#exposureBoost = exposureBoost;
+        this.#shadowStrength = shadowStrength;
         this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
             ? Math.max(0.0, shadowFadeStartDistance)
             : this.shadowCullDistance * 0.75;

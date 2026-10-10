@@ -273,17 +273,16 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
-        const {currentCascadeIndex = 0, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
-        const currentCascade = currentCascadeIndex;
+        const {currentCascadeIndex = 0, systemUniform_Vertex_UniformBindGroup} = view;
 
-        if (currentCascade > 3) return;
+        if (currentCascadeIndex > 3) return;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
             this.markShadowBundleDirty();
             this.#lastRecordedTypeCount = typeCount;
         }
 
-        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG);
+        const needsRebuild = !this.isShadowBundleValid(currentCascadeIndex, systemUniform_Vertex_UniformBindGroup);
 
         if (needsRebuild) {
             let validCount = 0;
@@ -302,14 +301,14 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             }
 
             if (validCount > 0) {
-                const bundle = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
-                this.setShadowBundle(currentCascade, bundle, systemBG);
+                const bundle = this.#recordShadowRenderBundle(currentCascadeIndex, validCount, systemUniform_Vertex_UniformBindGroup);
+                this.setShadowBundle(currentCascadeIndex, bundle, systemUniform_Vertex_UniformBindGroup);
             } else {
-                this.setShadowBundle(currentCascade, null, null);
+                this.setShadowBundle(currentCascadeIndex, null, null);
             }
         }
 
-        const bundle = this.getShadowBundle(currentCascade);
+        const bundle = this.getShadowBundle(currentCascadeIndex);
         if (bundle) {
             this.executeSingleBundle(passEncoder, bundle);
         }

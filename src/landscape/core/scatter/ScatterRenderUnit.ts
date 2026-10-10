@@ -319,7 +319,7 @@ class ScatterRenderUnit {
      * @param offsetBytes - 간접 드로우 인자 오프셋(바이트). 생략 시 기본 `indirectOffsetBytes` 사용.
      */
     draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
-        const offset = offsetBytes !== undefined ? offsetBytes : this.#indirectOffsetBytes;
+        const offset = offsetBytes ?? this.#indirectOffsetBytes;
         passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
     }
 

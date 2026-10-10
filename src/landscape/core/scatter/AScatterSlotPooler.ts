@@ -82,10 +82,11 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         this.#freeTop = maxSlots;
 
         const {gpuDevice} = this;
+        const {UNIFORM, COPY_DST} = GPUBufferUsage;
         this.#gpuBuffer = gpuDevice.createBuffer({
             label: bufferLabel,
             size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            usage: UNIFORM | COPY_DST
         });
     }
 

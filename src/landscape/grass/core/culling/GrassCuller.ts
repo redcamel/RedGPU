@@ -27,10 +27,11 @@ class GrassCuller extends AScatterCuller {
         this.initComputePipeline('Grass_Cull_ShaderModule', grassCullWGSL, 'Grass_Cull');
 
         const {gpuDevice} = this;
+        const {UNIFORM, COPY_DST} = GPUBufferUsage;
         this.#globalUniformBuffer = gpuDevice.createBuffer({
             label: 'Grass_Cull_GlobalUniformBuffer',
             size: this.#uniformArrayBuffer.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            usage: UNIFORM | COPY_DST
         });
     }
 

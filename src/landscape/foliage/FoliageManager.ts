@@ -82,7 +82,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      */
     constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         super(landscape);
-        this.#onUniformUpdateNeeded = onUniformUpdateNeeded || null;
+        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         const {redGPUContext} = this;
         this.#slotPooler = new FoliageSlotPooler(redGPUContext);
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
