@@ -141,7 +141,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Returns whether all essential GPU buffers (including culling and shadow buffers) are initialized and ready for use.
      */
     override get isReady(): boolean {
-        return super.isReady && this.culledGPUBuffer !== null && this.#shadowCulledGPUBuffer !== null && this.#unifiedGlobalUniformGPUBuffer !== null;
+        return super.isReady && this.culledGPUBuffer != null && this.#shadowCulledGPUBuffer != null && this.#unifiedGlobalUniformGPUBuffer != null;
     }
 
     /**
@@ -339,11 +339,12 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         if (this.#dirtyTypeParams) {
             this.#dirtyTypeParams = false;
+            const {buffer, byteOffset} = this.cpuTypeParamsBuffer;
             gpuDevice.queue.writeBuffer(
                 typeParamsGPUBuffer,
                 0,
-                this.cpuTypeParamsBuffer.buffer,
-                this.cpuTypeParamsBuffer.byteOffset,
+                buffer,
+                byteOffset,
                 this.#allocatedTypes.length * typeParamFloats * 4
             );
         }
@@ -529,7 +530,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
 
         if (shadowMergedRenderUnits && lodInfoList) {
-            const hasMaskedLOD0 = renderUnits.some(s => s.lodIndex === 0 && s.isMasked);
+            const hasMaskedLOD0 = renderUnits.some(({lodIndex, isMasked}) => lodIndex === 0 && isMasked);
             for (let i = 0; i < shadowMergedRenderUnits.length; i++) {
                 const shadowUnit = shadowMergedRenderUnits[i];
                 const {lodIndex, isIndexed, indexCount, vertexCount, firstIndex} = shadowUnit;

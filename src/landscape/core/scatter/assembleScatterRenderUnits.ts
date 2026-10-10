@@ -172,7 +172,7 @@ function traverseHierarchy(
     if (isRoot) {
         const parentChain: Mesh[] = [];
         let p: any = node.parent;
-        while (p && p.isInstanceofMesh) {
+        while (p?.isInstanceofMesh) {
             parentChain.unshift(p);
             p = p.parent;
         }
@@ -216,7 +216,7 @@ function traverseHierarchy(
         });
     }
 
-    if (children && children.length > 0) {
+    if (children?.length > 0) {
         for (let i = 0; i < children.length; i++) {
             traverseHierarchy(
                 children[i] as Mesh,

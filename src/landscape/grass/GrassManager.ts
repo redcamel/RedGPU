@@ -252,10 +252,11 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
         const {targetLayer} = grassType;
+        const {layers, hasValidVbtAtlas} = landscape;
         if (targetLayer != null && targetLayer !== '') {
             const matchedLayer = typeof targetLayer === 'number'
-                ? landscape.layers[targetLayer]
-                : landscape.layers.find(
+                ? layers[targetLayer]
+                : layers.find(
                     l => l.name === targetLayer
                 );
             const weightTexture = matchedLayer?.weightTexture;
@@ -267,8 +268,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const slotIndex = this.#slotPooler.allocateSlot();
         grassType.slotIndex = slotIndex;
 
-        const hasValidVbt = landscape.hasValidVbtAtlas;
-        this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
+        this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbtAtlas);
 
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();

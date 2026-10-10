@@ -257,7 +257,7 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Returns whether all essential base GPU buffers are initialized and ready for use.
      */
     get isReady(): boolean {
-        return this.#rawGPUBuffer !== null && this.#indirectGPUBuffer !== null;
+        return this.#rawGPUBuffer != null && this.#indirectGPUBuffer != null;
     }
 
     /**
@@ -619,19 +619,20 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     #initBaseBuffers(): void {
         const {gpuDevice} = this;
+        const className = this.constructor.name;
 
         const rawByteSize = Math.max(this.#instanceCapacity * this.#strideBytes, 64);
         const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * Float32Array.BYTES_PER_ELEMENT;
 
         this.#rawGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.constructor.name}_RawInstances`,
+            label: `${className}_RawInstances`,
             size: rawByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
         if (typeParamsByteSize > 0) {
             this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
-                label: `${this.constructor.name}_TypeParams`,
+                label: `${className}_TypeParams`,
                 size: typeParamsByteSize,
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
@@ -643,13 +644,13 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         );
 
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.constructor.name}_Indirect_Main`,
+            label: `${className}_Indirect_Main`,
             size: indirectByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
         });
 
         this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: `${this.constructor.name}_Indirect_Template`,
+            label: `${className}_Indirect_Template`,
             size: indirectByteSize,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
         });

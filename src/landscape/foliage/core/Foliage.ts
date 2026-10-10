@@ -1446,7 +1446,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         const targetSlot = rawBaseOffset + currentActive;
         const landscape = this.#landscape;
 
-        if (landscape.hasValidScatterAtlas) {
+        if (landscape?.hasValidScatterAtlas) {
             this.#baker.dispatchBakeSubCell(
                 megaBuffer,
                 landscape,

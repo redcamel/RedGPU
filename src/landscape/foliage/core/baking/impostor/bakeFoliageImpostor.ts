@@ -495,9 +495,9 @@ function bakeFoliageImpostor(
         if (typeof matCutOff === 'number' && matCutOff > 0) cutOff = matCutOff;
         const useVertexColor = !!matUseVertexColor;
 
-        const hasDiff = !!(baseColorTexture && baseColorTexture.gpuTexture);
-        const hasNorm = !!(normalTexture && normalTexture.gpuTexture);
-        const hasORM = !!(ormTex && ormTex.gpuTexture);
+        const hasDiff = !!baseColorTexture?.gpuTexture;
+        const hasNorm = !!normalTexture?.gpuTexture;
+        const hasORM = !!ormTex?.gpuTexture;
         const isFoliage = matIsFoliage !== false ? 1.0 : 0.0;
 
         const matProps = new Float32Array([
