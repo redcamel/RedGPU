@@ -256,8 +256,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             cascadeShadowFrustumPlanesByCascade,
             frustumPlanesFlat: mainFrustumPlanes
         } = renderViewStateData;
-        const {rawCamera: camera, pixelRectArray, hierarchicalZBuffer} = view;
-        const {x: camX, y: camY, z: camZ} = camera;
+        const {rawCamera, pixelRectArray, hierarchicalZBuffer} = view;
+        const {x, y, z} = rawCamera;
         const viewportHeight = pixelRectArray[3];
         const hzbEnabled = !!hierarchicalZBuffer?.textureView;
 
@@ -265,9 +265,9 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         const gu32 = this.#cpuUnifiedGlobalUniformUint32;
         const {totalAllocatedInstances, maxRenderUnits, instanceCapacity} = this;
 
-        gf32[0] = camX;
-        gf32[1] = camY;
-        gf32[2] = camZ;
+        gf32[0] = x;
+        gf32[1] = y;
+        gf32[2] = z;
         gu32[3] = totalAllocatedInstances;
 
         gf32[4] = fovFactor > 0 ? fovFactor : 1.0;
@@ -396,16 +396,16 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             const lodBase = baseOffset + 16 + l * 8;
             if (l < numLODs) {
                 const info = lodInfoList[l];
-                const {lodDistance: nextDist, renderUnitOffset, renderUnitCount} = info;
+                const {lodDistance, renderUnitOffset, renderUnitCount} = info;
                 const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
-                const span = Math.max(nextDist - prevDist, 5.0);
+                const span = Math.max(lodDistance - prevDist, 5.0);
                 const fadeRange = Math.max(5.0, Math.min(15.0, span * 0.10));
                 const halfRange = fadeRange * 0.5;
 
                 const enterStart = Math.max(prevDist - halfRange, 0.0);
                 const enterEnd = prevDist + halfRange;
-                const exitStart = nextDist - halfRange;
-                const exitEnd = nextDist + halfRange;
+                const exitStart = lodDistance - halfRange;
+                const exitEnd = lodDistance + halfRange;
 
                 const enterSpan = Math.max(enterEnd - enterStart, 0.001);
                 const exitSpan = Math.max(exitEnd - exitStart, 0.001);

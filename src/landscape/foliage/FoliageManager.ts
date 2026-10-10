@@ -249,8 +249,8 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
 
         const {view} = renderViewStateData;
-        const {rawCamera: cam} = view;
-        const {x: camX, z: camZ} = cam;
+        const {rawCamera} = view;
+        const {x, z} = rawCamera;
 
         let remainingMount = this.#mountBudget;
         let remainingUnmount = this.#unmountBudget;
@@ -261,7 +261,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         for (let i = 0; i < count; i++) {
             const idx = (startIdx + i) % count;
             const foliage = types[idx];
-            foliage.updateStreaming(camX, camZ, remainingMount, remainingUnmount);
+            foliage.updateStreaming(x, z, remainingMount, remainingUnmount);
             remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
             remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
         }

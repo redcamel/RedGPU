@@ -210,7 +210,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
         const {view} = renderViewStateData;
         const {rawCamera} = view;
-        const {x: camX, z: camZ} = rawCamera;
+        const {x, z} = rawCamera;
 
         const {tileLoadedCount, hasValidScatterAtlas} = landscape;
 
@@ -220,8 +220,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         }
 
         const [lastBakeX, lastBakeZ] = this.#lastBakePos;
-        const dx = camX - lastBakeX;
-        const dz = camZ - lastBakeZ;
+        const dx = x - lastBakeX;
+        const dz = z - lastBakeZ;
         const distSq = dx * dx + dz * dz;
 
         let minRadius = types[0].streamingRadius;
@@ -235,9 +235,9 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const needsRebake = this.#needsRebakeMask !== 0;
         if (hasValidScatterAtlas && (needsRebake || !this.#initialBaked || tileCountChanged || distSq > bakeThreshold * bakeThreshold)) {
             this.#initialBaked = true;
-            this.#lastBakePos[0] = camX;
-            this.#lastBakePos[1] = camZ;
-            this.#bakeAll(camX, camZ);
+            this.#lastBakePos[0] = x;
+            this.#lastBakePos[1] = z;
+            this.#bakeAll(x, z);
             this.#needsRebakeMask = 0;
             rebakedThisFrame = true;
         }

@@ -76,7 +76,7 @@ class FoliageCuller extends AScatterCuller {
         if (typeCount === 0) return;
 
         const {view} = renderViewStateData;
-        const {rawCamera, hierarchicalZBuffer: hzb, projectionMatrix} = view;
+        const {rawCamera, hierarchicalZBuffer, projectionMatrix} = view;
         const cam3D = rawCamera as PerspectiveCamera;
 
         const fov = cam3D.fieldOfView ?? 60.0;
@@ -90,8 +90,8 @@ class FoliageCuller extends AScatterCuller {
         const megaBuffer = this.#megaBuffer;
         if (!megaBuffer) return;
 
-        if (hzb) {
-            const {textureView = null, sampler = null} = hzb;
+        if (hierarchicalZBuffer) {
+            const {textureView = null, sampler = null} = hierarchicalZBuffer;
             this.#lastHZBTextureView = textureView;
             this.#lastHZBSampler = sampler;
         } else {

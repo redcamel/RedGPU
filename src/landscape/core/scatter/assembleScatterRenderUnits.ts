@@ -395,11 +395,11 @@ export default function assembleScatterRenderUnits(
 
         for (let g = 0; g < raws.length; g++) {
             const raw = raws[g];
-            const {geometry: geom, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
-            const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
-            const srcVData = srcVB.data;
-            const srcIData = srcIB?.data;
-            const vCount = srcVB.vertexCount;
+            const {geometry, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
+            const {vertexBuffer, indexBuffer} = geometry;
+            const srcVData = vertexBuffer.data;
+            const srcIData = indexBuffer?.data;
+            const vCount = vertexBuffer.vertexCount;
 
             if (srcVData && vCount > 0) {
 
@@ -518,8 +518,8 @@ export default function assembleScatterRenderUnits(
                     }
                 }
 
-                if (srcIData && srcIB?.indexCount) {
-                    const iCount = geom.indexBuffer.indexCount;
+                if (srcIData && indexBuffer?.indexCount) {
+                    const iCount = indexBuffer.indexCount;
                     for (let idx = 0; idx < iCount; idx++) {
                         const sVal = srcIData[idx];
                         combinedIndexData[indexOffset + idx] = vertexOffset + sVal;
@@ -600,10 +600,10 @@ export default function assembleScatterRenderUnits(
     let maxDistSq = 0;
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
-        const {geometry: geom, rawStride, currentRelativeMatrix: m} = raw;
-        const {vertexBuffer: srcVB} = geom;
-        const srcVData = srcVB?.data;
-        const vCount = srcVB?.vertexCount ?? 0;
+        const {geometry, rawStride, currentRelativeMatrix: m} = raw;
+        const {vertexBuffer} = geometry;
+        const srcVData = vertexBuffer?.data;
+        const vCount = vertexBuffer?.vertexCount ?? 0;
 
         if (srcVData && vCount > 0) {
             for (let v = 0; v < vCount; v++) {

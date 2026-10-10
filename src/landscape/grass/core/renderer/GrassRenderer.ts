@@ -351,12 +351,12 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.farSlots.length === 0) continue;
 
-            const {vertexBuffer: lvb, indexBuffer: lib} = geometry as Geometry;
+            const {vertexBuffer, indexBuffer} = geometry as Geometry;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
-            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+            bundleEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
+            bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
 
             const renderUnitCount = renderUnits.length;
             for (let s = 0; s < renderUnitCount; s++) {
@@ -411,12 +411,12 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.nearSlots.length === 0) continue;
 
-            const {vertexBuffer: lvb, indexBuffer: lib} = geometry as Geometry;
+            const {vertexBuffer, indexBuffer} = geometry as Geometry;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
-            bundleEncoder.setVertexBuffer(0, lvb.gpuBuffer);
-            bundleEncoder.setIndexBuffer(lib.gpuBuffer, 'uint32');
+            bundleEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
+            bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
 
             const renderUnitCount = renderUnits.length;
             for (let s = 0; s < renderUnitCount; s++) {
@@ -466,36 +466,41 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const {gpuDevice, resourceManager} = this;
         if (!this.#pipelineBindGroupLayout2) return null;
 
-        const {typeId, name: typeName, baseColorTextureView: typeTexView} = type;
+        const {typeId, name, baseColorTextureView} = type;
         const cacheKey = (typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
 
-        const {baseColorTexture: subTex} = renderUnit;
+        const {baseColorTexture} = renderUnit;
 
-        if (entry && entry.cachedSubTex === subTex && entry.cachedTypeTexView === typeTexView) {
+        if (entry && entry.cachedSubTex === baseColorTexture && entry.cachedTypeTexView === baseColorTextureView) {
             return entry.bindGroup;
         }
 
-        const subTexView = (subTex && resourceManager.getGPUResourceBitmapTextureView(subTex))
-            || typeTexView;
+        const subTexView = (baseColorTexture && resourceManager.getGPUResourceBitmapTextureView(baseColorTexture))
+            || baseColorTextureView;
 
         if (!entry || entry.cachedColorTexView !== subTexView) {
             const {basicSampler} = resourceManager;
             const bindGroup = gpuDevice.createBindGroup({
-                label: `Grass_MaterialBindGroup_${typeName}_sub${subIndex}_${this.instanceId}`,
+                label: `Grass_MaterialBindGroup_${name}_sub${subIndex}_${this.instanceId}`,
                 layout: this.#pipelineBindGroupLayout2,
                 entries: [
                     {binding: 0, resource: subTexView},
                     {binding: 1, resource: basicSampler.gpuSampler},
                 ]
             });
-            entry = {bindGroup, cachedColorTexView: subTexView, cachedSubTex: subTex, cachedTypeTexView: typeTexView};
+            entry = {
+                bindGroup,
+                cachedColorTexView: subTexView,
+                cachedSubTex: baseColorTexture,
+                cachedTypeTexView: baseColorTextureView
+            };
             this.#materialBindGroupCache.set(cacheKey, entry);
             this.markMainBundleDirty();
             this.markShadowBundleDirty();
         } else {
-            entry.cachedSubTex = subTex;
-            entry.cachedTypeTexView = typeTexView;
+            entry.cachedSubTex = baseColorTexture;
+            entry.cachedTypeTexView = baseColorTextureView;
         }
 
         return entry.bindGroup;

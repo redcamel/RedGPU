@@ -173,13 +173,13 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             if (foliageType.activeInstanceCount <= 0) continue;
             const megaBuffer = foliageType.megaBuffer;
             if (!megaBuffer) continue;
-            const {culledGPUBuffer: culledGPU, indirectGPUBuffer: indirectGPU} = megaBuffer;
-            if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
+            const {culledGPUBuffer, indirectGPUBuffer} = megaBuffer;
+            if (!culledGPUBuffer || !indirectGPUBuffer || foliageType.renderUnits.length === 0) continue;
 
             const item = this.#validTypesMain[validCount];
             item.type = foliageType;
-            item.culledGPU = culledGPU;
-            item.indirectGPU = indirectGPU;
+            item.culledGPU = culledGPUBuffer;
+            item.indirectGPU = indirectGPUBuffer;
             validCount++;
         }
         if (validCount === 0) return;
@@ -242,11 +242,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             this.#resetBoundState();
 
             for (let t = 0; t < validCount; t++) {
-                const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
+                const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
 
-                const renderUnits = foliageType.mainRenderUnits;
+                const renderUnits = type.mainRenderUnits;
                 const unitCount = renderUnits.length;
-                const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
+                const effectiveUsePrepass = this.#useDepthPrepass && type.useDepthPrepass;
 
                 for (let s = 0; s < unitCount; s++) {
                     const unit = renderUnits[s];
@@ -292,13 +292,13 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 const foliageType = typeList[t];
                 const {castShadow, shadowCullDistance, megaBuffer, renderUnits} = foliageType;
                 if (!castShadow || shadowCullDistance <= 0 || !megaBuffer || renderUnits.length === 0) continue;
-                const {shadowCulledGPUBuffer: culledGPU, shadowIndirectGPUBuffer: indirectGPU} = megaBuffer;
-                if (!culledGPU || !indirectGPU) continue;
+                const {shadowCulledGPUBuffer, shadowIndirectGPUBuffer} = megaBuffer;
+                if (!shadowCulledGPUBuffer || !shadowIndirectGPUBuffer) continue;
 
                 const item = this.#validTypesShadow[validCount];
                 item.type = foliageType;
-                item.culledGPU = culledGPU;
-                item.indirectGPU = indirectGPU;
+                item.culledGPU = shadowCulledGPUBuffer;
+                item.indirectGPU = shadowIndirectGPUBuffer;
                 validCount++;
             }
 
@@ -356,9 +356,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
  
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType} = this.#validTypesMain[t];
-            if (foliageType?.useDepthPrepass) {
-                const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = foliageType;
+            const {type} = this.#validTypesMain[t];
+            if (type?.useDepthPrepass) {
+                const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = type;
                 if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
                     hasPrepassRenderUnits = true;
                     break;
@@ -381,9 +381,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType.useDepthPrepass) continue;
-            const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
+            const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
+            if (!type.useDepthPrepass) continue;
+            const renderUnits = type.depthPrepassOpaqueRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
 
@@ -393,9 +393,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType.useDepthPrepass) continue;
-            const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
+            const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
+            if (!type.useDepthPrepass) continue;
+            const renderUnits = type.depthPrepassMaskedRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
 
@@ -434,10 +434,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            const renderUnits = foliageType.mainRenderUnits;
+            const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
+            const renderUnits = type.mainRenderUnits;
             const unitCount = renderUnits.length;
-            const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
+            const effectiveUsePrepass = this.#useDepthPrepass && type.useDepthPrepass;
 
             for (let s = 0; s < unitCount; s++) {
                 const unit = renderUnits[s];
@@ -476,13 +476,13 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesShadow[t];
+            const {type, culledGPU, indirectGPU} = this.#validTypesShadow[t];
 
-            const num3DLODs = foliageType.hasImpostor ? Math.max(1, foliageType.lodInfoList.length - 1) : foliageType.lodInfoList.length;
+            const num3DLODs = type.hasImpostor ? Math.max(1, type.lodInfoList.length - 1) : type.lodInfoList.length;
             const maxShadowLOD = Math.max(0, num3DLODs - 1);
 
-            if (currentCascade === 0 && foliageType.hasMaskedLOD0) {
-                const lod0Units = foliageType.lod0RenderUnits;
+            if (currentCascade === 0 && type.hasMaskedLOD0) {
+                const lod0Units = type.lod0RenderUnits;
                 const unitCount = lod0Units.length;
                 for (let l0 = 0; l0 < unitCount; l0++) {
                     const unit = lod0Units[l0];
@@ -493,7 +493,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 }
 
                 if (num3DLODs > 1) {
-                    const shadowMergedUnits = foliageType.shadowMergedRenderUnits;
+                    const shadowMergedUnits = type.shadowMergedRenderUnits;
                     for (let s = 0; s < shadowMergedUnits.length; s++) {
                         const shadowUnit = shadowMergedUnits[s];
                         if (shadowUnit.lodIndex === maxShadowLOD) {
@@ -506,7 +506,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                     }
                 }
             } else {
-                const shadowMergedUnits = foliageType.shadowMergedRenderUnits;
+                const shadowMergedUnits = type.shadowMergedRenderUnits;
                 if (shadowMergedUnits.length > 0) {
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
                     for (let s = 0; s < shadowMergedUnits.length; s++) {
@@ -520,7 +520,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                         }
                     }
                 } else {
-                    const allRenderUnits = foliageType.renderUnits;
+                    const allRenderUnits = type.renderUnits;
                     const unitCount = allRenderUnits.length;
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
                     for (let s = 0; s < unitCount; s++) {
