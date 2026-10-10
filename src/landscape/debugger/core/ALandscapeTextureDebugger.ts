@@ -134,8 +134,8 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     }
 
     #initWebGPUContext(): void {
-        const redGPUContext = this.redGPUContext;
-        const gpuDevice = redGPUContext?.gpuDevice;
+        const {redGPUContext} = this;
+        const {gpuDevice, resourceManager} = redGPUContext;
         if (!gpuDevice) return;
 
         this.#canvasFormat = ALandscapeDebugger.getPreferredCanvasFormat();
@@ -148,8 +148,6 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
             format: this.#canvasFormat,
             alphaMode: 'premultiplied'
         });
-
-        const resourceManager = redGPUContext.resourceManager;
         const combinedShaderCode = `
             ${fullscreenQuadVertexWGSL}
             ${this.#shaderCode}

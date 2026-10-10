@@ -68,7 +68,8 @@ export class LandscapeRenderer {
 
         if (!instanceBuffer || !combinedVB || !combinedIB) return;
 
-        const {instanceStorageBindGroup: storageBG, instanceStorageBindGroupLayout: storageBGLayout} = instanceBuffer;
+        const storageBG = instanceBuffer.instanceStorageBindGroup;
+        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
         if (!storageBG || !storageBGLayout) return;
 
         const pipeline = this.getOrCreateRenderPipeline(combinedVB, storageBGLayout);

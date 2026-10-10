@@ -209,7 +209,7 @@ export class LandscapeGPUCuller extends RedGPUObject {
             });
         }
 
-        this.#uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 256;
+        this.#uniformByteLength = shaderInfo.uniforms?.uniforms?.arrayBufferByteLength || 256;
         this.#uniformData = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 

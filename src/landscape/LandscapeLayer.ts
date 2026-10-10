@@ -187,7 +187,10 @@ export class LandscapeLayer {
             roughness,
             metallic,
             normalIntensity,
-            aoIntensity
+            aoIntensity,
+            heightBlendFactor,
+            stochasticTiling,
+            stochasticScale
         } = actualOptions;
 
         this.#name = name;
@@ -243,18 +246,18 @@ export class LandscapeLayer {
             this.#aoIntensity = aoIntensity;
         }
 
-        if (actualOptions.heightBlendFactor !== undefined) {
-            this.#heightBlendFactor = Math.max(0.0, Math.min(5.0, actualOptions.heightBlendFactor));
+        if (heightBlendFactor !== undefined) {
+            this.#heightBlendFactor = Math.max(0.0, Math.min(5.0, heightBlendFactor));
         }
 
-        if (actualOptions.stochasticTiling !== undefined) {
-            this.#stochasticTiling = !!actualOptions.stochasticTiling;
+        if (stochasticTiling !== undefined) {
+            this.#stochasticTiling = !!stochasticTiling;
         } else {
             this.#stochasticTiling = true;
         }
 
-        if (actualOptions.stochasticScale !== undefined) {
-            this.#stochasticScale = Math.max(0.01, actualOptions.stochasticScale);
+        if (stochasticScale !== undefined) {
+            this.#stochasticScale = Math.max(0.01, stochasticScale);
         }
     }
 

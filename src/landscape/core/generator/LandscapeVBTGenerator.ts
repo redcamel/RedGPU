@@ -169,7 +169,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const count = this.#tileMipUniformBuffers.length;
         for (let i = 0; i < count; i++) {
             try {
-                this.#tileMipUniformBuffers[i]?.destroy();
+                this.#tileMipUniformBuffers[i].destroy();
             } catch {
             }
         }
@@ -293,6 +293,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     #initTileMipComputeResources(): void {
         const {gpuDevice, resourceManager} = this.redGPUContext;
         if (!gpuDevice) return;
+
         const mipShaderInfo = resourceManager.wgslParser.parse('Landscape_TileMipmap_ShaderModule', tileMipShaderCode);
         this.#tileMipUniformByteLength = mipShaderInfo.uniforms.params?.arrayBufferByteLength || 0;
 

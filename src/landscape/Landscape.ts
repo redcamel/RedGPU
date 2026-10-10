@@ -1242,12 +1242,13 @@ export class Landscape extends RedGPUObject {
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
         const tileStreamer = this.#tileStreamer;
         if (tileStreamer?.vhtAtlasTexture && tileStreamer?.vntAtlasTexture) {
+            const {vhtAtlasTexture, vntAtlasTexture, vbtBaseColorAtlas, vbtNormalAtlas, vbtORMAtlas} = tileStreamer;
             this.#instanceBuffer.updateBindGroup(
-                tileStreamer.vhtAtlasTexture.gpuTextureView,
-                tileStreamer.vntAtlasTexture.gpuTextureView,
-                tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
-                tileStreamer.vbtNormalAtlas?.gpuTextureView,
-                tileStreamer.vbtORMAtlas?.gpuTextureView
+                vhtAtlasTexture.gpuTextureView,
+                vntAtlasTexture.gpuTextureView,
+                vbtBaseColorAtlas?.gpuTextureView,
+                vbtNormalAtlas?.gpuTextureView,
+                vbtORMAtlas?.gpuTextureView
             );
         }
 
@@ -1256,27 +1257,22 @@ export class Landscape extends RedGPUObject {
     }
 
     #rebuildTiles(): void {
-        const componentCountX = this.#spatialGrid.tileCountX;
-        const componentCountZ = this.#spatialGrid.tileCountZ;
-        const tileSizeX = this.#spatialGrid.tileSizeX;
-        const tileSizeZ = this.#spatialGrid.tileSizeZ;
+        const {tileCountX, tileCountZ, tileSizeX, tileSizeZ} = this.#spatialGrid;
+        const componentCountX = tileCountX;
+        const componentCountZ = tileCountZ;
         const targetCount = componentCountX * componentCountZ;
 
-        if (this.#tileStreamer) {
-            this.#tileStreamer.resetTileState();
-        }
+        this.#tileStreamer.resetTileState();
         this.#sharedGeometry.updateTileSize(tileSizeX, tileSizeZ);
         this.#updateLODDistances();
         this.#renderer?.clearPipelineCaches();
 
         let needRebuildBindGroup = false;
-        if (this.#tileStreamer) {
-            const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
-            if (changed) {
-                this.#tileStreamer.setTerrainConfig(this.#heightScale);
-                this.#tileStreamer.resetTileState();
-                needRebuildBindGroup = true;
-            }
+        const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
+        if (changed) {
+            this.#tileStreamer.setTerrainConfig(this.#heightScale);
+            this.#tileStreamer.resetTileState();
+            needRebuildBindGroup = true;
         }
 
         if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.lodMaxLevel !== this.#lodMaxLevel) {
@@ -1287,15 +1283,23 @@ export class Landscape extends RedGPUObject {
             needRebuildBindGroup = true;
         }
 
-        if (needRebuildBindGroup && this.#tileStreamer?.vhtAtlasTexture && this.#tileStreamer?.vntAtlasTexture) {
+        if (needRebuildBindGroup && this.#tileStreamer.vhtAtlasTexture && this.#tileStreamer.vntAtlasTexture) {
+            const {
+                vhtAtlasTexture,
+                vntAtlasTexture,
+                vbtBaseColorAtlas,
+                vbtNormalAtlas,
+                vbtORMAtlas,
+                globalHeightTexture
+            } = this.#tileStreamer;
             this.#instanceBuffer.updateBindGroup(
-                this.#tileStreamer.vhtAtlasTexture.gpuTextureView,
-                this.#tileStreamer.vntAtlasTexture.gpuTextureView,
-                this.#tileStreamer.vbtBaseColorAtlas?.gpuTextureView,
-                this.#tileStreamer.vbtNormalAtlas?.gpuTextureView,
-                this.#tileStreamer.vbtORMAtlas?.gpuTextureView
+                vhtAtlasTexture.gpuTextureView,
+                vntAtlasTexture.gpuTextureView,
+                vbtBaseColorAtlas?.gpuTextureView,
+                vbtNormalAtlas?.gpuTextureView,
+                vbtORMAtlas?.gpuTextureView
             );
-            if (this.#tileStreamer?.globalHeightTexture) {
+            if (globalHeightTexture) {
                 this.#bakeGlobalBaseToVHT();
             }
         }

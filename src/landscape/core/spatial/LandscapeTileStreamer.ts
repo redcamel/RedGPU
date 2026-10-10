@@ -372,14 +372,14 @@ export class LandscapeTileStreamer extends RedGPUObject {
             return false;
         }
 
-        if (this.#vhtAtlasTexture) this.#vhtAtlasTexture.destroy();
-        if (this.#vntAtlasTexture) this.#vntAtlasTexture.destroy();
-        if (this.#vbtBaseColorAtlas) this.#vbtBaseColorAtlas.destroy();
-        if (this.#vbtNormalAtlas) this.#vbtNormalAtlas.destroy();
-        if (this.#vbtORMAtlas) this.#vbtORMAtlas.destroy();
+        this.#vhtAtlasTexture?.destroy();
+        this.#vntAtlasTexture?.destroy();
+        this.#vbtBaseColorAtlas?.destroy();
+        this.#vbtNormalAtlas?.destroy();
+        this.#vbtORMAtlas?.destroy();
 
-        const redGPUContext = this.redGPUContext;
-        const gpuDevice = redGPUContext.gpuDevice;
+        const {redGPUContext} = this;
+        const {gpuDevice} = redGPUContext;
 
         const rawVhtTexture = gpuDevice.createTexture({
             size: [targetAtlasW, targetAtlasH],
@@ -476,14 +476,18 @@ export class LandscapeTileStreamer extends RedGPUObject {
         const atlasW = countX * 512;
         const atlasH = countZ * 512;
 
-        this.#vhtGenerator?.bakeGlobalBase(
+        if (!this.#vhtGenerator || !this.#vntGenerator || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) {
+            return;
+        }
+
+        this.#vhtGenerator.bakeGlobalBase(
             tex,
             this.#vhtAtlasTexture,
             countX,
             countZ
         );
 
-        this.#vntGenerator?.bakeTileRegion(
+        this.#vntGenerator.bakeTileRegion(
             this.#vhtAtlasTexture,
             this.#vntAtlasTexture,
             0, 0,
@@ -523,26 +527,16 @@ export class LandscapeTileStreamer extends RedGPUObject {
             this.#globalHeightTexture = null;
         }
 
-        if (this.#vhtAtlasTexture) {
-            this.#vhtAtlasTexture.destroy();
-            this.#vhtAtlasTexture = null;
-        }
-        if (this.#vntAtlasTexture) {
-            this.#vntAtlasTexture.destroy();
-            this.#vntAtlasTexture = null;
-        }
-        if (this.#vbtBaseColorAtlas) {
-            this.#vbtBaseColorAtlas.destroy();
-            this.#vbtBaseColorAtlas = null;
-        }
-        if (this.#vbtNormalAtlas) {
-            this.#vbtNormalAtlas.destroy();
-            this.#vbtNormalAtlas = null;
-        }
-        if (this.#vbtORMAtlas) {
-            this.#vbtORMAtlas.destroy();
-            this.#vbtORMAtlas = null;
-        }
+        this.#vhtAtlasTexture?.destroy();
+        this.#vhtAtlasTexture = null;
+        this.#vntAtlasTexture?.destroy();
+        this.#vntAtlasTexture = null;
+        this.#vbtBaseColorAtlas?.destroy();
+        this.#vbtBaseColorAtlas = null;
+        this.#vbtNormalAtlas?.destroy();
+        this.#vbtNormalAtlas = null;
+        this.#vbtORMAtlas?.destroy();
+        this.#vbtORMAtlas = null;
 
         this.#material = null;
         this.#tileUrlResolver = null;

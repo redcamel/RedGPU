@@ -130,7 +130,8 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         pixelX: number,
         pixelZ: number
     ): void {
-        if (!this.#computePipeline) return;
+        const computePipeline = this.#computePipeline;
+        if (!computePipeline) return;
         if (pixelW <= 0 || pixelH <= 0) return;
 
         const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
@@ -140,7 +141,7 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
             const pass = commandEncoder.beginComputePass({
                 label: `Landscape_${this.#generatorLabel}_ComputePass_[${pixelX},${pixelZ}]`
             });
-            pass.setPipeline(this.#computePipeline!);
+            pass.setPipeline(computePipeline);
             pass.setBindGroup(0, bindGroup);
             pass.dispatchWorkgroups(workgroupCountX, workgroupCountY);
             pass.end();
@@ -223,7 +224,7 @@ export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         const count = this.#uniformBufferPool.length;
         for (let i = 0; i < count; i++) {
             try {
-                this.#uniformBufferPool[i]?.destroy();
+                this.#uniformBufferPool[i].destroy();
             } catch (e) {
             }
         }

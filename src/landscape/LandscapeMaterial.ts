@@ -256,8 +256,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         if (this.#layers.includes(layer)) return this;
 
         layer.resolvePendingTextures(this.redGPUContext);
-        if (layer.weightTexture?.src) {
-            layer.weightMapCPUSampler?.load(layer.weightTexture.src);
+        const {weightTexture, weightMapCPUSampler} = layer;
+        if (weightTexture?.src) {
+            weightMapCPUSampler?.load(weightTexture.src);
         }
         this.#layers.push(layer);
         layer.onChange = () => {
@@ -677,10 +678,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             }
         };
 
-        copyTexture(layer.baseColorTexture, this.#gpuBaseColorArrayTexture, [255, 255, 255, 255], 'baseColorTexture');
-        copyTexture(layer.normalTexture, this.#gpuNormalArrayTexture, [128, 128, 255, 255], 'normalTexture');
-        copyTexture(layer.ormTexture, this.#gpuORMArrayTexture, [255, 255, 0, 255], 'ormTexture');
-        copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
+        const {baseColorTexture, normalTexture, ormTexture, weightTexture} = layer;
+        copyTexture(baseColorTexture, this.#gpuBaseColorArrayTexture, [255, 255, 255, 255], 'baseColorTexture');
+        copyTexture(normalTexture, this.#gpuNormalArrayTexture, [128, 128, 255, 255], 'normalTexture');
+        copyTexture(ormTexture, this.#gpuORMArrayTexture, [255, 255, 0, 255], 'ormTexture');
+        copyTexture(weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
     }
 
     #updateLayerMipmaps(): void {

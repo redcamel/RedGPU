@@ -283,14 +283,16 @@ export abstract class ALandscapeDebugger {
         const dpr = typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
         this.#dpr = dpr;
 
-        const w = opts?.width ?? 100;
-        const h = opts?.height ?? 100;
-        const left = opts?.left ?? 12;
-        const bottom = opts?.bottom ?? 12;
-        const title = opts?.title ?? '';
+        const {
+            width = 100,
+            height = 100,
+            left = 12,
+            bottom = 12,
+            title = ''
+        } = opts || {};
 
-        this.#width = w;
-        this.#height = h;
+        this.#width = width;
+        this.#height = height;
         this.#left = left;
         this.#bottom = bottom;
         this.#title = title;
@@ -301,8 +303,8 @@ export abstract class ALandscapeDebugger {
         container.className = 'redgpu-landscape-debugger-container';
         container.style.setProperty('left', `${left}px`, 'important');
         container.style.setProperty('bottom', `${bottom}px`, 'important');
-        container.style.setProperty('width', `${w}px`, 'important');
-        container.style.setProperty('height', `${h}px`, 'important');
+        container.style.setProperty('width', `${width}px`, 'important');
+        container.style.setProperty('height', `${height}px`, 'important');
 
         if (title) {
             const header = document.createElement('div');
@@ -312,8 +314,8 @@ export abstract class ALandscapeDebugger {
             this.#headerElement = header;
         }
 
-        const canvasCSSWidth = Math.max(10, w - INNER_MARGIN * 2);
-        const canvasCSSHeight = Math.max(10, h - INNER_MARGIN * 2);
+        const canvasCSSWidth = Math.max(10, width - INNER_MARGIN * 2);
+        const canvasCSSHeight = Math.max(10, height - INNER_MARGIN * 2);
 
         const renderWidth = Math.max(10, canvasCSSWidth - CANVAS_BORDER * 2);
         const renderHeight = Math.max(10, canvasCSSHeight - CANVAS_BORDER * 2);

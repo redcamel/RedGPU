@@ -266,7 +266,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initComputeResources(): void {
-        const resourceManager = this.redGPUContext.resourceManager;
+        const {resourceManager} = this.redGPUContext;
         const shaderInfo = resourceManager.wgslParser.parse('Landscape_VHT_Bake_ShaderModule', vhtShaderCode);
         const uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 16;
         this.#uniformByteLength = uniformByteLength;
