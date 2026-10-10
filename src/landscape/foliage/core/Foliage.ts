@@ -404,8 +404,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         landscape?: Landscape | null
     ) {
         super(redGPUContext, options.name);
-        this.#landscape = landscape || null;
-        this.#slotPooler = slotPooler || null;
+        this.#landscape = landscape ?? null;
+        this.#slotPooler = slotPooler ?? null;
 
         const {
             name,

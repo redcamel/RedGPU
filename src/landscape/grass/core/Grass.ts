@@ -353,7 +353,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const {resourceManager} = this;
         const {emptyBitmapTextureView} = resourceManager;
         return resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
-            || emptyBitmapTextureView;
+            ?? emptyBitmapTextureView;
     }
 
     /**

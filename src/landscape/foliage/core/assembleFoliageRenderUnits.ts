@@ -75,7 +75,7 @@ function prepareFoliageMaterials(node: Mesh): void {
         mat.isFoliage = true;
         if (isMasked) {
             mat.useCutOff = true;
-            mat.cutOff = cutOff || 0.3333;
+            mat.cutOff = cutOff ?? 0.3333;
             mat.doubleSided = true;
             mat.alphaBlend = 1;
             mat.transparent = false;
@@ -295,7 +295,7 @@ export default function assembleFoliageRenderUnits(
                 const group = groups[g];
                 const {geometry, material, firstIndex, indexCount} = group;
                 const unit = createPBRRenderUnit(
-                    unifiedGeometry || geometry,
+                    unifiedGeometry ?? geometry,
                     material,
                     firstIndex,
                     indexCount,
@@ -419,7 +419,7 @@ export default function assembleFoliageRenderUnits(
         shadowMergedRenderUnits,
         lodInfoList,
         bottomOffset: resolvedBottomOffset,
-        boundingRadius: maxBoundingRadius || 10.0,
+        boundingRadius: maxBoundingRadius ?? 10.0,
         boundingHeight
     };
 }

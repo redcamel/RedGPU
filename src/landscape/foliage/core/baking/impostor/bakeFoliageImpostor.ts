@@ -327,7 +327,7 @@ function bakeFoliageImpostor(
             label: `Foliage_Impostor_DepthTexture_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             format: 'depth24plus',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            usage: RENDER_ATTACHMENT,
         });
 
     const {width, height, depth} = aabb;

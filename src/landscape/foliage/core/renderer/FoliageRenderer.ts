@@ -703,7 +703,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !isMasked;
         const matUniformBG = isDepthPrepassOpaque
             ? emptyBG
-            : (material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
+            : (material.gpuRenderInfo?.fragmentUniformBindGroup ?? emptyBG);
 
         this.#bindAndDrawUnit(
             passEncoder,

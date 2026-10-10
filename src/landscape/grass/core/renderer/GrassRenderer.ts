@@ -484,8 +484,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             }
         }
 
-        const subTexView = (baseColorTexture && resourceManager.getGPUResourceBitmapTextureView(baseColorTexture))
-            || baseColorTextureView;
+        const subTexView = (baseColorTexture ? resourceManager.getGPUResourceBitmapTextureView(baseColorTexture) : null)
+            ?? baseColorTextureView;
 
         if (!entry || entry.cachedColorTexView !== subTexView) {
             const {basicSampler} = resourceManager;
