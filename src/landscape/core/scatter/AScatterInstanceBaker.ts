@@ -7,6 +7,17 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
+import type Landscape from "../../Landscape";
+
+/**
+ * [KO] 레이어 가중치 텍스처 뷰 및 채널 인덱스 해석 결과 인터페이스입니다.
+ * [EN] Interface for resolved weight texture view and channel index of landscape layer.
+ */
+export interface ResolvedWeightLayerInfo {
+    weightView: GPUTextureView;
+    hasWeightMap: number;
+    weightChannelIndex: number;
+}
 
 /**
  * [KO] 베이커 바인드 그룹 캐시 엔트리 인터페이스입니다.
@@ -32,6 +43,11 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
     #defaultSampler: GPUSampler | null = null;
 
     readonly #bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
+    readonly #resolvedWeightInfo: ResolvedWeightLayerInfo = {
+        weightView: null as any,
+        hasWeightMap: 0,
+        weightChannelIndex: 0
+    };
 
     /**
      * [KO] AScatterInstanceBaker 인스턴스를 초기화합니다.
@@ -41,6 +57,20 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+    }
+
+    /**
+     * [KO] 베이커가 소유한 GPU 리소스 및 캐시를 완전히 해제합니다.
+     * [EN] Completely releases GPU resources and caches owned by the baker.
+     */
+    destroy(): void {
+        this.#resolvedWeightInfo.weightView = null as any;
+        this.#uniformGPUBuffer?.destroy();
+        this.#uniformGPUBuffer = null;
+        this.#computePipeline = null;
+        this.#bindGroupLayout = null;
+        this.#defaultSampler = null;
+        this.#bakeBindGroupCache.clear();
     }
 
     /**
@@ -67,18 +97,35 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         return this.#uniformGPUBuffer;
     }
 
-
     /**
-     * [KO] 베이커가 소유한 GPU 리소스 및 캐시를 완전히 해제합니다.
-     * [EN] Completely releases GPU resources and caches owned by the baker.
+     * [KO] 지형 스플랫 레이어에서 대상 레이어의 가중치 텍스처 뷰 및 채널 인덱스를 안전하게 추출합니다. (Zero-GC 재사용 객체 반환)
+     * [EN] Safely resolves the weight texture view and channel index of the target layer from landscape layers. (Returns zero-GC reused object)
+     *
+     * @param landscape - 대상 Landscape 지형 인스턴스
+     * @param targetLayer - 대상 레이어 식별자 (레이어 인덱스 또는 고유 이름)
      */
-    destroy(): void {
-        this.#uniformGPUBuffer?.destroy();
-        this.#uniformGPUBuffer = null;
-        this.#computePipeline = null;
-        this.#bindGroupLayout = null;
-        this.#defaultSampler = null;
-        this.#bakeBindGroupCache.clear();
+    protected resolveWeightLayer(
+        landscape: Landscape,
+        targetLayer?: string | number | null
+    ): ResolvedWeightLayerInfo {
+        const info = this.#resolvedWeightInfo;
+        const emptyView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
+        info.weightView = emptyView;
+        info.hasWeightMap = 0;
+        info.weightChannelIndex = 0;
+
+        if (targetLayer !== undefined && targetLayer !== null && targetLayer !== '' && landscape.layers) {
+            const matchedLayer = typeof targetLayer === 'number'
+                ? landscape.layers[targetLayer]
+                : landscape.layers.find((l: any) => l.name === targetLayer);
+            if (matchedLayer?.weightTexture?.gpuTexture) {
+                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
+                    || matchedLayer.weightTexture.gpuTexture.createView();
+                info.hasWeightMap = 1;
+                info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
+            }
+        }
+        return info;
     }
 
     /**

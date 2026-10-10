@@ -97,26 +97,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         alloc.instanceCount = totalCells * targetDensity;
 
-        let weightView: GPUTextureView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
-        let hasWeightMap = 0;
-        let weightChannelIndex = 0;
-
-        if (grass.targetLayer !== undefined && grass.targetLayer !== null && grass.targetLayer !== '' && landscape.layers) {
-            const matchedLayer = typeof grass.targetLayer === 'number'
-                ? landscape.layers[grass.targetLayer]
-                : landscape.layers.find(
-                    l => l.name === grass.targetLayer
-                );
-            if (matchedLayer) {
-                const wt = matchedLayer.weightTexture;
-                if (wt && wt.gpuTexture) {
-                    weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(wt)
-                        || wt.gpuTexture.createView();
-                    hasWeightMap = 1;
-                    weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
-                }
-            }
-        }
+        const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, grass.targetLayer);
 
         const minScale = grass.minScale || DEFAULT_GRASS_MIN_SCALE;
         const maxScale = grass.maxScale || DEFAULT_GRASS_MAX_SCALE;

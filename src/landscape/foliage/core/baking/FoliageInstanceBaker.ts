@@ -130,22 +130,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         const taskBytes = tOffset * 4;
         gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer!, 0, tasksBuf.buffer, 0, taskBytes);
 
-        let weightView: GPUTextureView = this.resourceManager.emptyBitmapTextureView;
-        let hasWeightMap = 0;
-        let weightChannelIndex = 0;
-
-        const targetLayer = foliage.targetLayer;
-        if (targetLayer !== undefined && targetLayer !== null && targetLayer !== '' && landscape.layers) {
-            const matchedLayer = typeof targetLayer === 'number'
-                ? landscape.layers[targetLayer]
-                : landscape.layers.find((l: any) => l.name === targetLayer);
-            if (matchedLayer?.weightTexture?.gpuTexture) {
-                weightView = this.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
-                    || matchedLayer.weightTexture.gpuTexture.createView();
-                hasWeightMap = 1;
-                weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
-            }
-        }
+        const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, foliage.targetLayer);
 
         const minScale = foliage.minScale || [0.8, 0.8, 0.8];
         const maxScale = foliage.maxScale || [1.2, 1.2, 1.2];
