@@ -235,10 +235,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
             for (let t = 0; t < validCount; t++) {
                 const item = this.#validTypesMain[t];
-                const foliageType = item.type;
-                const culledGPU = item.culledGPU;
-                const indirectGPU = item.indirectGPU;
-                if (!foliageType || !culledGPU || !indirectGPU) continue;
+                const foliageType = item.type!;
+                const culledGPU = item.culledGPU!;
+                const indirectGPU = item.indirectGPU!;
 
                 const renderUnits = foliageType.mainRenderUnits;
                 const unitCount = renderUnits.length;
@@ -350,8 +349,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice!;
-
+        const gpuDevice = this.gpuDevice;
+ 
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesMain[t];
@@ -379,23 +378,29 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType!.useDepthPrepass) continue;
-            const renderUnits = foliageType!.depthPrepassOpaqueRenderUnits;
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            if (!foliageType.useDepthPrepass) continue;
+            const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
 
             for (let s = 0; s < unitCount; s++) {
-                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU!, culledGPU!, 'depthPrepass');
+                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType!.useDepthPrepass) continue;
-            const renderUnits = foliageType!.depthPrepassMaskedRenderUnits;
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            if (!foliageType.useDepthPrepass) continue;
+            const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
 
             for (let s = 0; s < unitCount; s++) {
                 this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
@@ -416,7 +421,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice!;
+        const gpuDevice = this.gpuDevice;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_MainBundleEncoder_${view.name}`,
@@ -459,7 +464,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         validCount: number,
         systemBG: GPUBindGroup | null
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice!;
+        const gpuDevice = this.gpuDevice;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_ShadowBundleEncoder_Cascade${currentCascade}`,
@@ -471,7 +476,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         const firstType = this.#validTypesShadow[0].type!;
-        const megaBuffer = firstType.megaBuffer!;
+        const megaBuffer = firstType.megaBuffer;
         const maxRenderUnits = megaBuffer.maxRenderUnits;
         const instanceCapacity = megaBuffer.instanceCapacity;
 

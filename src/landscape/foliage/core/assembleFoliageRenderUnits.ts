@@ -67,7 +67,6 @@ function createOctahedralImpostorGeometry(
  * [EN] Traverses materials of a mesh and its children, configuring foliage-specific shader states (CutOff, DoubleSided, AlphaBlend).
  */
 function prepareFoliageMaterials(node: Mesh): void {
-    if (!node) return;
     const {material, children} = node;
     if (material) {
         const mat = material as any;
@@ -150,7 +149,7 @@ function createPBRRenderUnit(
         }
     }
 
-    const hasBaseColorTexture = !!(baseColorTexture?.gpuTexture || baseColorTexture?.src || baseColorTexture?.url);
+    const hasBaseColorTexture = !!(baseColorTexture && (baseColorTexture.gpuTexture || baseColorTexture.src || baseColorTexture.url));
     const isDepthPrepass = !isImpostor && (lodIndex <= 0) && (!isMasked || hasBaseColorTexture);
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
@@ -394,7 +393,7 @@ export default function assembleFoliageRenderUnits(
             bbGeom,
             bbMat,
             0,
-            bbGeom.indexBuffer?.indexCount,
+            bbGeom.indexBuffer.indexCount,
             impostorLODIndex,
             false,
             height,

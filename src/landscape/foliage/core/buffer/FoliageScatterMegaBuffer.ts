@@ -249,7 +249,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         depthBias: number = 0.002
     ): void {
         const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
-        if (!this.#unifiedGlobalUniformGPUBuffer || !typeParamsGPUBuffer) return;
+        if (!typeParamsGPUBuffer) return;
 
         const {
             view,
@@ -612,7 +612,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     protected override onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
         const targetGPUBuffer = this.#shadowIndirectGPUBuffer;
         const templateGPUBuffer = this.#shadowIndirectResetTemplateGPUBuffer;
-        if (!targetGPUBuffer || !templateGPUBuffer) return;
 
         const indirectStrideBytes = DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
         const byteSize = Math.min(

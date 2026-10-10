@@ -165,7 +165,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         grassType.onUniformDirty = this.#onGrassUniformDirty;
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
-        if (grassType.targetLayer != null && grassType.targetLayer !== '' && this.landscape.layers) {
+        if (grassType.targetLayer != null && grassType.targetLayer !== '') {
             const matchedLayer = typeof grassType.targetLayer === 'number'
                 ? this.landscape.layers[grassType.targetLayer]
                 : this.landscape.layers.find(
@@ -177,14 +177,11 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
             }
         }
 
-        const gpuDevice = this.gpuDevice;
-        if (gpuDevice) {
-            const slotIndex = this.#slotPooler.allocateSlot();
-            grassType.slotIndex = slotIndex;
+        const slotIndex = this.#slotPooler.allocateSlot();
+        grassType.slotIndex = slotIndex;
 
-            const hasValidVbt = this.landscape.hasValidVbtAtlas;
-            this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
-        }
+        const hasValidVbt = this.landscape.hasValidVbtAtlas;
+        this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
         this.#renderer.markAllBundlesDirty();

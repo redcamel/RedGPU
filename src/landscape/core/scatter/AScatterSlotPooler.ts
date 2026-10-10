@@ -44,7 +44,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      */
     paramsSizeFloats: number;
 
-    #gpuBuffer: GPUBuffer | null = null;
+    #gpuBuffer!: GPUBuffer;
     #cpuBuffer: Float32Array;
     #cpuUint32View: Uint32Array;
     #freeSlotStack: Int32Array;
@@ -92,7 +92,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * [KO] 단일 고정 메가 UBO GPUBuffer 객체를 반환합니다.
      * [EN] Returns the single fixed mega UBO GPUBuffer instance.
      */
-    get gpuBuffer(): GPUBuffer | null {
+    get gpuBuffer(): GPUBuffer {
         return this.#gpuBuffer;
     }
 

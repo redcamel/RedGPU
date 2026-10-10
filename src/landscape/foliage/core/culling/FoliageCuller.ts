@@ -118,9 +118,10 @@ class FoliageCuller extends AScatterCuller {
      * [EN] Dispatches foliage instance culling through the given GPU compute pass encoder.
      */
     dispatchPass(computePass: GPUComputePassEncoder): void {
-        const {computePipeline, bindGroupLayout} = this;
         const megaBuffer = this.#megaBuffer;
-        if (!computePipeline || !bindGroupLayout || !megaBuffer) return;
+        if (!megaBuffer) return;
+
+        const {computePipeline, bindGroupLayout} = this;
 
         const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
         if (totalAllocatedInstances <= 0) return;

@@ -251,7 +251,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#roughness = roughness ?? targetMaterial.roughnessFactor ?? targetMaterial.roughness ?? 0.55;
 
         if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
-        if (subsurfaceColor) this.#subsurfaceColor = [...subsurfaceColor];
+        if (subsurfaceColor) {
+            this.#subsurfaceColor[0] = subsurfaceColor[0];
+            this.#subsurfaceColor[1] = subsurfaceColor[1];
+            this.#subsurfaceColor[2] = subsurfaceColor[2];
+        }
         if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
         if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
         this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined

@@ -613,7 +613,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const s = this.#minScale;
         const sx = Math.max(0.01, Number(v[0]) || 0.01);
         const sy = Math.max(0.01, Number(v[1]) || 0.01);
-        const sz = Math.max(0.01, Number(v[2] !== undefined ? v[2] : v[0]) || 0.01);
+        const sz = Math.max(0.01, Number(v[2] ?? v[0]) || 0.01);
         if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
             s[0] = sx;
             s[1] = sy;
@@ -636,7 +636,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const s = this.#maxScale;
         const sx = Math.max(0.01, Number(v[0]) || 0.01);
         const sy = Math.max(0.01, Number(v[1]) || 0.01);
-        const sz = Math.max(0.01, Number(v[2] !== undefined ? v[2] : v[0]) || 0.01);
+        const sz = Math.max(0.01, Number(v[2] ?? v[0]) || 0.01);
         if (s[0] !== sx || s[1] !== sy || s[2] !== sz) {
             s[0] = sx;
             s[1] = sy;

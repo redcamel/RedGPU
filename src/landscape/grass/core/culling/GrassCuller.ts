@@ -50,7 +50,6 @@ export default class GrassCuller extends AScatterCuller {
         if (totalAllocatedInstances <= 0) return;
 
         const {bindGroupLayout, gpuDevice} = this;
-        if (!bindGroupLayout) return;
 
         const {view} = renderViewStateData;
         const camera = view.rawCamera;
