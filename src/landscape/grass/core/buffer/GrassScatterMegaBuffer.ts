@@ -164,11 +164,7 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.syncIndirectResetTemplateToGPU(indirectBaseOffset, renderUnitCount * 2);
 
         const alloc: GrassTypeAllocation = {
-            typeId: baseAlloc.typeId,
-            maxInstances: baseAlloc.maxInstances,
-            rawBaseOffset: baseAlloc.rawBaseOffset,
-            culledBaseOffset: baseAlloc.culledBaseOffset,
-            indirectBaseOffset: baseAlloc.indirectBaseOffset,
+            ...baseAlloc,
             renderUnitCount,
             instanceCount: 0,
             nearSlots,

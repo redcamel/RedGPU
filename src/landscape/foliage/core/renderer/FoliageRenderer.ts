@@ -165,7 +165,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         const {msaaID, useMSAA} = this.antialiasingManager;
         const sampleCount = useMSAA ? 4 : 1;
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
+        const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
 
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
@@ -242,10 +242,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             this.#resetBoundState();
 
             for (let t = 0; t < validCount; t++) {
-                const item = this.#validTypesMain[t];
-                const foliageType = item.type;
-                const culledGPU = item.culledGPU;
-                const indirectGPU = item.indirectGPU;
+                const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
 
                 const renderUnits = foliageType.mainRenderUnits;
                 const unitCount = renderUnits.length;
@@ -277,11 +274,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
-        const currentCascade = view.currentCascadeIndex ?? 0;
+        const {currentCascadeIndex = 0, systemUniform_Vertex_UniformBindGroup: systemBG} = view;
+        const currentCascade = currentCascadeIndex;
 
         if (currentCascade > 3) return;
-
-        const systemBG = view.systemUniform_Vertex_UniformBindGroup;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
             this.markShadowBundleDirty();
@@ -386,14 +382,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType.useDepthPrepass) continue;
             const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
-            const culledGPU = item.culledGPU;
-            const indirectGPU = item.indirectGPU;
 
             for (let s = 0; s < unitCount; s++) {
                 this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
@@ -401,14 +394,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
 
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!foliageType.useDepthPrepass) continue;
             const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
-            const culledGPU = item.culledGPU;
-            const indirectGPU = item.indirectGPU;
 
             for (let s = 0; s < unitCount; s++) {
                 this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
@@ -445,10 +435,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#resetBoundState();
 
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type;
-            const culledGPU = item.culledGPU;
-            const indirectGPU = item.indirectGPU;
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
             const renderUnits = foliageType.mainRenderUnits;
             const unitCount = renderUnits.length;
             const effectiveUsePrepass = this.#useDepthPrepass && foliageType.useDepthPrepass;
@@ -483,10 +470,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         this.#resetBoundState();
 
-        const firstType = this.#validTypesShadow[0].type;
-        const megaBuffer = firstType.megaBuffer;
-        const maxRenderUnits = megaBuffer.maxRenderUnits;
-        const instanceCapacity = megaBuffer.instanceCapacity;
+        const {megaBuffer} = this.#validTypesShadow[0].type;
+        const {maxRenderUnits, instanceCapacity} = megaBuffer;
 
         const cascadeIndirectOffset = currentCascade * maxRenderUnits * 20;
         const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;

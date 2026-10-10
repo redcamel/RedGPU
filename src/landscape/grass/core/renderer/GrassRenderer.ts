@@ -603,9 +603,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     }
 
     #initShadersAndLayouts(): void {
-        const {gpuDevice, resourceManager} = this;
-
-        if (!gpuDevice) return;
+        const {resourceManager} = this;
 
         this.#vertexModule = resourceManager.createGPUShaderModule('Grass_VertexModule', {
             code: grassVertexWGSL

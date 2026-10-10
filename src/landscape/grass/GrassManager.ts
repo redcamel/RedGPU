@@ -76,10 +76,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      */
     get totalInstanceCount(): number {
         let count = 0;
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            const alloc = this.#megaBuffer.getAllocation(list[i].typeId);
+            const alloc = this.#megaBuffer.getAllocation(types[i].typeId);
             if (alloc) count += alloc.instanceCount;
         }
         return count;
@@ -454,10 +454,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Executes GPU baking for all registered grass types centered at the specified coordinates.
      */
     #bakeAll(centerX: number, centerZ: number): void {
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            this.#bakeGrassType(list[i], centerX, centerZ);
+            this.#bakeGrassType(types[i], centerX, centerZ);
         }
     }
 

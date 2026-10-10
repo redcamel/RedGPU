@@ -244,17 +244,26 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             streamingRadius: resolvedStreamingRadius
         });
 
-        if (minScale) this.#minScale[0] = minScale[0], this.#minScale[1] = minScale[1];
-        if (maxScale) this.#maxScale[0] = maxScale[0], this.#maxScale[1] = maxScale[1];
+        if (minScale) {
+            const [sx, sy] = minScale;
+            this.#minScale[0] = sx;
+            this.#minScale[1] = sy;
+        }
+        if (maxScale) {
+            const [sx, sy] = maxScale;
+            this.#maxScale[0] = sx;
+            this.#maxScale[1] = sy;
+        }
 
         this.#alphaCutoff = alphaCutoff;
         this.#roughness = roughness ?? targetMaterial.roughnessFactor ?? targetMaterial.roughness ?? 0.55;
 
         if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
         if (subsurfaceColor) {
-            this.#subsurfaceColor[0] = subsurfaceColor[0];
-            this.#subsurfaceColor[1] = subsurfaceColor[1];
-            this.#subsurfaceColor[2] = subsurfaceColor[2];
+            const [r, g, b] = subsurfaceColor;
+            this.#subsurfaceColor[0] = r;
+            this.#subsurfaceColor[1] = g;
+            this.#subsurfaceColor[2] = b;
         }
         if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
         if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
@@ -301,7 +310,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     override get drawCallCount(): number {
         const alloc = this.allocation;
         if (alloc && alloc.instanceCount > 0) {
-            return alloc.nearSlots.length + alloc.farSlots.length;
+            const {nearSlots, farSlots} = alloc;
+            return nearSlots.length + farSlots.length;
         }
         return this.#renderUnits.length * 2;
     }
@@ -612,7 +622,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Returns the maximum instance capacity allocated for this grass type. (Mega-buffer segment capacity takes precedence)
      */
     get maxInstances(): number | undefined {
-        return this.allocation ? this.allocation.maxInstances : this.#maxInstances;
+        return this.allocation?.maxInstances ?? this.#maxInstances;
     }
 
     /**
@@ -620,7 +630,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Returns the number of instances currently active and loaded into GPU buffers.
      */
     get activeInstanceCount(): number {
-        return this.allocation ? this.allocation.instanceCount : 0;
+        return this.allocation?.instanceCount ?? 0;
     }
 
     /**

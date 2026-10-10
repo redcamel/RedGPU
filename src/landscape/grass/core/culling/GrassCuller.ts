@@ -50,18 +50,17 @@ export default class GrassCuller extends AScatterCuller {
         if (totalAllocatedInstances <= 0) return;
 
         const {bindGroupLayout, gpuDevice} = this;
-
-        const {view} = renderViewStateData;
-        const camera = view.rawCamera;
+        const {view, frustumPlanesFlat} = renderViewStateData;
+        const {x: camX, y: camY, z: camZ} = view.rawCamera;
         const uf = this.#uniformFloat32View;
         const uu = this.#uniformUint32View;
 
-        uf[0] = camera.x;
-        uf[1] = camera.y;
-        uf[2] = camera.z;
+        uf[0] = camX;
+        uf[1] = camY;
+        uf[2] = camZ;
         uu[3] = totalAllocatedInstances;
 
-        uf.set(renderViewStateData.frustumPlanesFlat, 4);
+        uf.set(frustumPlanesFlat, 4);
 
         gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#uniformArrayBuffer, 0, 112);
 

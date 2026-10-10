@@ -41,10 +41,10 @@ class FoliagePipelineRegistry extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const modules = this.#initShaderModules();
-        this.#vertexShaderModule = modules.vModule;
-        this.#depthPrepassMaskedFragmentShaderModule = modules.depthPrepassMaskedFModule;
-        this.#depthPrepassOpaqueFragmentShaderModule = modules.depthPrepassOpaqueFModule;
+        const {vModule, depthPrepassMaskedFModule, depthPrepassOpaqueFModule} = this.#initShaderModules();
+        this.#vertexShaderModule = vModule;
+        this.#depthPrepassMaskedFragmentShaderModule = depthPrepassMaskedFModule;
+        this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFModule;
     }
 
     #geoAttributesAll: GPUVertexAttribute[] = [

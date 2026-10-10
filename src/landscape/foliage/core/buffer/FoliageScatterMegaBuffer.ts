@@ -184,15 +184,12 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         const renderUnitCount = renderUnits.length;
         const baseSegment = this.allocateBaseSegment(name, maxInstances, renderUnitCount, 8);
-        const {rawBaseOffset, culledBaseOffset, indirectBaseOffset, maxInstances: alignedMaxInstances} = baseSegment;
+        const {culledBaseOffset, indirectBaseOffset, maxInstances: alignedMaxInstances} = baseSegment;
 
         const allocation: FoliageTypeAllocation = {
+            ...baseSegment,
             typeId,
             name,
-            maxInstances: alignedMaxInstances,
-            rawBaseOffset,
-            culledBaseOffset,
-            indirectBaseOffset,
             renderUnitCount,
             instanceCount: 0
         };
@@ -299,7 +296,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
             const cascadeBase = 56 + c * 28;
             if (c < activeCascadeCount && cascadeShadowFrustumPlanesByCascade?.[c]) {
-                gf32[cascadeBase] = cascadeSplitDepths ? cascadeSplitDepths[c] : 0.0;
+                gf32[cascadeBase] = cascadeSplitDepths?.[c] ?? 0.0;
                 gu32[cascadeBase + 1] = 1;
                 gu32[cascadeBase + 2] = 0;
                 gu32[cascadeBase + 3] = 0;

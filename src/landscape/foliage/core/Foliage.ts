@@ -496,21 +496,27 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
         this.#nameHash = hash;
 
-        const assembleResult = assembleFoliageRenderUnits(
+        const {
+            lodInfoList,
+            boundingRadius,
+            boundingHeight,
+            renderUnits: assembledUnits,
+            shadowMergedRenderUnits: assembledShadowUnits
+        } = assembleFoliageRenderUnits(
             this.redGPUContext,
             options,
             this.#slotPooler
         );
-        this.#lodInfoList = assembleResult.lodInfoList;
-        this.#lodInfoListWithoutImpostor = this.#lodInfoList.length > 1 ? this.#lodInfoList.slice(0, -1) : null;
-        this.#boundingRadius = assembleResult.boundingRadius;
+        this.#lodInfoList = lodInfoList;
+        this.#lodInfoListWithoutImpostor = lodInfoList.length > 1 ? lodInfoList.slice(0, -1) : null;
+        this.#boundingRadius = boundingRadius;
         const resolvedHeight = optHeight !== undefined
             ? Math.max(0.1, Number(optHeight) || 0.1)
-            : (assembleResult.boundingHeight || 2.0);
+            : (boundingHeight || 2.0);
 
         this.#initBuckets(
-            assembleResult.renderUnits,
-            assembleResult.shadowMergedRenderUnits
+            assembledUnits,
+            assembledShadowUnits
         );
 
         let defaultShadowDist = 300.0;
@@ -1105,21 +1111,19 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             case 'streamingRadius': {
                 if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
                     const landscape = this.#landscape;
-                    if (landscape) {
+                    const megaBuffer = this.#megaBuffer;
+                    const allocation = this.allocation;
+                    if (landscape && megaBuffer && allocation) {
                         const subCellSize = landscape.foliageManager.subCellSize;
                         const unmountMargin = Math.max(10.0, subCellSize * 0.5);
                         const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
-                        const megaBuffer = this.#megaBuffer;
-                        const allocation = this.allocation;
-                        if (megaBuffer && allocation) {
-                            const mounted = this.#mountedSubCells;
-                            for (let i = mounted.length - 1; i >= 0; i--) {
-                                const sc = mounted[i];
-                                const dx = sc.centerX - this.#lastCamX;
-                                const dz = sc.centerZ - this.#lastCamZ;
-                                if (dx * dx + dz * dz > unmountRadiusSq) {
-                                    this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
-                                }
+                        const mounted = this.#mountedSubCells;
+                        for (let i = mounted.length - 1; i >= 0; i--) {
+                            const {centerX, centerZ} = mounted[i];
+                            const dx = centerX - this.#lastCamX;
+                            const dz = centerZ - this.#lastCamZ;
+                            if (dx * dx + dz * dz > unmountRadiusSq) {
+                                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
                             }
                         }
                     }
@@ -1279,16 +1283,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     #notifyUniformDirty(): void {
-        const typeId = this.typeId;
-        if (this.onUniformDirty) {
-            this.onUniformDirty(typeId);
-        }
+        this.onUniformDirty?.(this.typeId);
     }
 
     #notifyRepopulateRequired(): void {
-        if (this.onRepopulateRequired) {
-            this.onRepopulateRequired(this);
-        }
+        this.onRepopulateRequired?.(this);
         this.#notifyUniformDirty();
     }
 

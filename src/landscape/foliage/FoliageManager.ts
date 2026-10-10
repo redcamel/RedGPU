@@ -147,10 +147,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     get depthPrepassDrawCalls(): number {
         if (!this.enabled || !this.#useDepthPrepass) return 0;
         let count = 0;
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            const foliage = list[i];
+            const foliage = types[i];
             if (foliage.activeInstanceCount > 0 && foliage.useDepthPrepass) {
                 count += foliage.depthPrepassOpaqueRenderUnits.length + foliage.depthPrepassMaskedRenderUnits.length;
             }
@@ -165,10 +165,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     get mainPassDrawCalls(): number {
         if (!this.enabled) return 0;
         let count = 0;
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            const foliage = list[i];
+            const foliage = types[i];
             if (foliage.activeInstanceCount > 0) {
                 count += foliage.mainRenderUnits.length;
             }
@@ -341,10 +341,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      */
     get totalInstanceCount(): number {
         let count = 0;
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            count += list[i].activeInstanceCount;
+            count += types[i].activeInstanceCount;
         }
         return count;
     }
@@ -540,9 +540,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
      */
     repopulateAll(): void {
-        const count = this.types.length;
+        const {types} = this;
+        const count = types.length;
         for (let i = 0; i < count; i++) {
-            const foliage = this.types[i];
+            const foliage = types[i];
             const typeId = foliage.typeId;
             this.#needsRepopulateMask |= (1 << typeId);
             this.#dirtyUboMask |= (1 << typeId);
