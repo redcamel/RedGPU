@@ -51,7 +51,7 @@ interface MainBundleCacheEntry {
  * [EN] This class is automatically created by the system (GrassManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class GrassRenderer extends AScatterRenderer {
+export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
     #fragmentNearModule: GPUShaderModule | null = null;
@@ -74,8 +74,6 @@ export class GrassRenderer extends AScatterRenderer {
     /** Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: `(typeId << 16) | subIndex`) */
     #materialBindGroupCache: Map<number, MaterialBindGroupCacheEntry> = new Map();
 
-    /** GPURenderBundle 캐싱 엔진 */
-    #mainBundlesByView: WeakMap<View3D, MainBundleCacheEntry> = new WeakMap();
     #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
     #lastShadowMaskHigh: number = -1;
@@ -102,14 +100,6 @@ export class GrassRenderer extends AScatterRenderer {
         this.#unifiedGroup1BindGroup = null;
         this.#lastCulledBuffer = null;
         this.#lastSlotPoolerBuffer = null;
-    }
-
-    /**
-     * [KO] 캐시된 모든 메인 패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
-     * [EN] Invalidates all cached main pass render bundles to force regeneration on next render.
-     */
-    markMainBundleDirty(): void {
-        this.#mainBundlesByView = new WeakMap();
     }
 
     /**
@@ -168,7 +158,7 @@ export class GrassRenderer extends AScatterRenderer {
 
         const sampleCount = antialiasingManager.useMSAA ? 4 : 1;
 
-        let cacheEntry = this.#mainBundlesByView.get(view);
+        let cacheEntry = this.mainBundlesByView.get(view);
         const needsRebuild = !cacheEntry
             || cacheEntry.systemBG !== systemBG
             || cacheEntry.sampleCount !== sampleCount
@@ -185,9 +175,9 @@ export class GrassRenderer extends AScatterRenderer {
                     grassCount: count,
                     megaBufferInstance: megaBuffer
                 };
-                this.#mainBundlesByView.set(view, cacheEntry);
+                this.mainBundlesByView.set(view, cacheEntry);
             } else {
-                this.#mainBundlesByView.delete(view);
+                this.mainBundlesByView.delete(view);
                 return;
             }
         }

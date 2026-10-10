@@ -21,6 +21,18 @@ interface ValidFoliageTypeItem {
 }
 
 /**
+ * [KO] View3D별 메인 GPURenderBundle 캐시 엔트리 인터페이스입니다.
+ * [EN] Interface for main GPURenderBundle cache entry per View3D.
+ */
+interface FoliageMainBundleCacheEntry {
+    bundle: GPURenderBundle;
+    systemBG: GPUBindGroup;
+    sampleCount: number;
+    validTypeCount: number;
+    useDepthPrepass: boolean;
+}
+
+/**
  * [KO] GPU 컬링된 식생 인스턴스들을 간접 드로우(drawIndexedIndirect / drawIndirect)를 통해 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
  * [EN] Renderer class that renders GPU-culled foliage instances to main and shadow passes using indirect drawing (drawIndexedIndirect / drawIndirect).
  *
@@ -29,7 +41,7 @@ interface ValidFoliageTypeItem {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageRenderer extends AScatterRenderer {
+class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     static #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderUnitVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -53,13 +65,6 @@ class FoliageRenderer extends AScatterRenderer {
         systemBG: GPUBindGroup;
         sampleCount: number;
         validTypeCount: number;
-    }> = new WeakMap();
-    #mainBundlesByView: WeakMap<View3D, {
-        bundle: GPURenderBundle;
-        systemBG: GPUBindGroup;
-        sampleCount: number;
-        validTypeCount: number;
-        useDepthPrepass: boolean;
     }> = new WeakMap();
 
     #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
@@ -119,14 +124,6 @@ class FoliageRenderer extends AScatterRenderer {
      */
     markDepthPrepassBundleDirty(): void {
         this.#depthPrepassBundlesByView = new WeakMap();
-    }
-
-    /**
-     * [KO] 캐시된 모든 메인 패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
-     * [EN] Invalidates all cached main pass render bundles to force regeneration on the next render.
-     */
-    markMainBundleDirty(): void {
-        this.#mainBundlesByView = new WeakMap();
     }
 
     /**
@@ -212,7 +209,7 @@ class FoliageRenderer extends AScatterRenderer {
             }
         }
 
-        let mainViewCache = this.#mainBundlesByView.get(view);
+        let mainViewCache = this.mainBundlesByView.get(view);
         const needsMainRebuild = !mainViewCache
             || mainViewCache.systemBG !== systemBG
             || mainViewCache.sampleCount !== sampleCount
@@ -229,10 +226,10 @@ class FoliageRenderer extends AScatterRenderer {
                     validTypeCount: validCount,
                     useDepthPrepass: this.#useDepthPrepass
                 };
-                this.#mainBundlesByView.set(view, mainViewCache);
+                this.mainBundlesByView.set(view, mainViewCache);
             } else {
                 mainViewCache = undefined;
-                this.#mainBundlesByView.delete(view);
+                this.mainBundlesByView.delete(view);
             }
         }
 

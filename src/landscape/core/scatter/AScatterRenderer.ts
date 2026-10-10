@@ -5,6 +5,7 @@
  */
 import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
+import type View3D from "../../../display/view/View3D";
 
 /**
  * [KO] GPURenderBundle 캐싱, 섀도우 패스 캐스케이드 상태 관리 및 Zero-GC executeBundles 단일 배열 재사용 인프라를 제공하는 추상 클래스입니다.
@@ -15,7 +16,10 @@ import RedGPUContext from "../../../context/RedGPUContext";
  * [EN] This class is a system-internal abstract class.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-abstract class AScatterRenderer extends RedGPUObject {
+abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
+    /** 메인 패스 GPURenderBundle 캐시 (View3D 키 기반) */
+    #mainBundlesByView: WeakMap<View3D, TMainBundleCache> = new WeakMap();
+
     /** Zero-GC executeBundles 단일 배열 재사용 (매 프레임 임시 배열 할당 방지) */
     #singleBundleArray: [GPURenderBundle] = [null as any];
 
@@ -37,6 +41,14 @@ abstract class AScatterRenderer extends RedGPUObject {
      */
     get dynamicOffsetArray(): Uint32Array {
         return this.#dynamicOffsetArray;
+    }
+
+    /**
+     * [KO] View3D별 메인 GPURenderBundle 캐시 WeakMap을 반환합니다.
+     * [EN] Returns the WeakMap cache of main GPURenderBundles per View3D.
+     */
+    get mainBundlesByView(): WeakMap<View3D, TMainBundleCache> {
+        return this.#mainBundlesByView;
     }
 
     /**
@@ -110,6 +122,22 @@ abstract class AScatterRenderer extends RedGPUObject {
     }
 
     /**
+     * [KO] 캐시된 모든 메인 패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
+     * [EN] Invalidates all cached main pass render bundles to force regeneration on the next render.
+     */
+    markMainBundleDirty(): void {
+        this.#mainBundlesByView = new WeakMap();
+        this.onMainBundleDirty();
+    }
+
+    /**
+     * [KO] 메인 패스 렌더 번들이 무효화될 때 자식 클래스에서 도메인 고유 캐시를 정리할 수 있는 확장 훅 메서드입니다.
+     * [EN] Extension hook method for child classes to clean up domain-specific caches when main bundles are invalidated.
+     */
+    onMainBundleDirty(): void {
+    }
+
+    /**
      * [KO] 모든 렌더 번들 및 캐시를 일괄 무효화합니다.
      * [EN] Invalidates all render bundles and caches at once.
      */
@@ -121,6 +149,7 @@ abstract class AScatterRenderer extends RedGPUObject {
      */
     destroy(): void {
         this.markShadowBundleDirty();
+        this.markMainBundleDirty();
         this.#singleBundleArray[0] = null as any;
     }
 }
