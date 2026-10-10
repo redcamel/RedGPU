@@ -437,9 +437,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#baker = baker || null;
 
-        this.#receiveShadow = receiveShadow !== false;
+        this.#receiveShadow = receiveShadow;
         this.#useImpostor = useImpostor;
-        this.#useDepthPrepass = useDepthPrepass !== false;
+        this.#useDepthPrepass = useDepthPrepass;
         this.#megaBuffer = megaBuffer || null;
 
         const minScale: [number, number, number] = optMinScale ? [...optMinScale] : [1.0, 1.0, 1.0];

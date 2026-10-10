@@ -293,31 +293,16 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             gf32.fill(0, 16, 32);
         }
 
-        if (mainFrustumPlanes && mainFrustumPlanes.length >= 24) {
-            if (mainFrustumPlanes.length === 24) {
-                gf32.set(mainFrustumPlanes, 32);
-            } else {
-                for (let p = 0; p < 24; p++) gf32[32 + p] = mainFrustumPlanes[p];
-            }
-        } else {
-            gf32.fill(0, 32, 56);
-        }
+        gf32.set(mainFrustumPlanes, 32);
 
         for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
             const cascadeBase = 56 + c * 28;
             if (c < activeCascadeCount && cascadeShadowFrustumPlanesByCascade && cascadeShadowFrustumPlanesByCascade[c]) {
-                const maxDist = cascadeSplitDepths ? cascadeSplitDepths[c] : 0.0;
-                gf32[cascadeBase] = maxDist ?? 0.0;
+                gf32[cascadeBase] = cascadeSplitDepths ? cascadeSplitDepths[c] : 0.0;
                 gu32[cascadeBase + 1] = 1;
                 gu32[cascadeBase + 2] = 0;
                 gu32[cascadeBase + 3] = 0;
-
-                const planes = cascadeShadowFrustumPlanesByCascade[c];
-                if (planes.length === 24) {
-                    gf32.set(planes, cascadeBase + 4);
-                } else {
-                    for (let p = 0; p < 24; p++) gf32[cascadeBase + 4 + p] = planes[p];
-                }
+                gf32.set(cascadeShadowFrustumPlanesByCascade[c], cascadeBase + 4);
             } else {
                 gf32[cascadeBase] = 0.0;
                 gu32[cascadeBase + 1] = 0;

@@ -147,7 +147,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Grass configuration options object
      */
     constructor(redGPUContext: RedGPUContext, options: GrassOptions) {
-        super(redGPUContext, options?.name || '');
+        super(redGPUContext, options.name);
 
         const {
             mesh,
@@ -178,7 +178,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             shadowFadeStartDistance,
             streamingRadius,
             maxInstances
-        } = options || {};
+        } = options;
 
         if (!mesh) {
             consoleAndThrowError(`[Grass] options.mesh is required and must contain a valid Mesh instance!`);
@@ -196,7 +196,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#isUnifiedGeometryOwned = true;
 
         const primaryGroup = assemblyResult.groups[0];
-        const targetMaterial = primaryGroup?.material ?? mesh.material;
+        const targetMaterial = primaryGroup.material ?? mesh.material;
 
         const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
         if (typeof resolvedTexture === 'string') {
@@ -205,11 +205,11 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        this.#minY = minY !== undefined ? minY : (isFinite(assemblyResult.minY) ? assemblyResult.minY : 0.0);
+        this.#minY = minY !== undefined ? minY : assemblyResult.minY;
         const resolvedHeight = height !== undefined ? height : (assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0);
 
         this.#renderUnits = assemblyResult.renderUnits;
-        if (this.#baseColorTexture && this.#renderUnits.length > 0) {
+        if (this.#baseColorTexture) {
             this.#renderUnits[0].baseColorTexture = this.#baseColorTexture;
         }
 

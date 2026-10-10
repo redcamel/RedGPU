@@ -146,8 +146,8 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const count = grassList.length;
         if (count === 0) return;
 
-        const {gpuDevice, antialiasingManager} = this;
-        if (!gpuDevice || !this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
+        const {antialiasingManager} = this;
+        if (!this.#pipelineBindGroupLayout1 || !this.#pipelineBindGroupLayout2) return;
 
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
         const slotGPUBuffer = slotPooler.gpuBuffer;
@@ -182,7 +182,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             }
         }
 
-        if (cacheEntry.bundle) {
+        if (cacheEntry) {
             this.executeSingleBundle(passEncoder, cacheEntry.bundle);
         }
     }
@@ -212,9 +212,6 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
         const count = grassList.length;
         if (count === 0) return;
-
-        const {gpuDevice} = this;
-        if (!gpuDevice) return;
 
         const {indirectGPUBuffer, culledGPUBuffer} = megaBuffer;
         const slotGPUBuffer = slotPooler.gpuBuffer;
@@ -300,8 +297,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return null;
 
-        const {indirectGPUBuffer} = megaBuffer;
-        if (!indirectGPUBuffer) return null;
+        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer!;
 
         const preferredNormalFormat = this.#preferredCanvasFormat;
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
@@ -392,8 +388,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const shadowPipeline = this.#getShadowRenderPipeline();
         if (!shadowPipeline) return null;
 
-        const {indirectGPUBuffer} = megaBuffer;
-        if (!indirectGPUBuffer) return null;
+        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer!;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Grass_Shadow_RenderBundle_c${cascadeIndex}_${this.instanceId}`,

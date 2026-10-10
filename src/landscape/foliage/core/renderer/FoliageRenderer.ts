@@ -287,9 +287,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 const foliageType = typeList[t];
                 if (!foliageType.castShadow || foliageType.shadowCullDistance <= 0) continue;
                 const megaBuffer = foliageType.megaBuffer;
-                const culledGPU = megaBuffer?.shadowCulledGPUBuffer;
-                const indirectGPU = megaBuffer?.shadowIndirectGPUBuffer;
-                if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
+                if (!megaBuffer || foliageType.renderUnits.length === 0) continue;
+                const {shadowCulledGPUBuffer: culledGPU, shadowIndirectGPUBuffer: indirectGPU} = megaBuffer;
+                if (!culledGPU || !indirectGPU) continue;
 
                 const item = this.#validTypesShadow[validCount];
                 item.type = foliageType;

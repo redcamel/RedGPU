@@ -47,8 +47,8 @@ import {AScatterManager} from "../core/scatter";
  * @category Landscape
  */
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
-    #renderUnitVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
+    #renderUnitVertexBindGroupLayout: GPUBindGroupLayout;
+    #renderUnitDynamicBindGroup: GPUBindGroup;
     #slotPooler: FoliageSlotPooler;
 
     #megaBuffer: FoliageScatterMegaBuffer;
@@ -87,37 +87,35 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
 
         const {gpuDevice, resourceManager} = this.redGPUContext;
-        if (gpuDevice && renderUnitMegaUBO) {
-            this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
-                label: 'Foliage_RenderUnit_BindGroupLayout',
-                entries: [
-                    {
-                        binding: 0,
-                        visibility: GPUShaderStage.VERTEX,
-                        buffer: {
-                            type: 'uniform',
-                            hasDynamicOffset: true,
-                            minBindingSize: 32
-                        }
+        this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
+            label: 'Foliage_RenderUnit_BindGroupLayout',
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {
+                        type: 'uniform',
+                        hasDynamicOffset: true,
+                        minBindingSize: 32
                     }
-                ]
-            });
+                }
+            ]
+        });
 
-            this.#renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
-                label: 'Foliage_RenderUnit_DynamicBindGroup',
-                layout: this.#renderUnitVertexBindGroupLayout,
-                entries: [
-                    {
-                        binding: 0,
-                        resource: {
-                            buffer: renderUnitMegaUBO,
-                            offset: 0,
-                            size: 32
-                        }
+        this.#renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
+            label: 'Foliage_RenderUnit_DynamicBindGroup',
+            layout: this.#renderUnitVertexBindGroupLayout,
+            entries: [
+                {
+                    binding: 0,
+                    resource: {
+                        buffer: renderUnitMegaUBO,
+                        offset: 0,
+                        size: 32
                     }
-                ]
-            });
-        }
+                }
+            ]
+        });
 
         this.#megaBuffer = new FoliageScatterMegaBuffer(this.redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext);
@@ -369,20 +367,15 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
-     * [EN] Renders culled foliage instances in the main render pass.
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
+     * [EN] Sets the global maximum subcell mount budget per frame across all foliage types.
      *
-     * @param view -
-     * [KO] 현재 렌더링 중인 View3D 객체
-     * [EN] Current View3D object being rendered
-     * @param passEncoder -
-     * [KO] 메인 씬 GPURenderPassEncoder
-     * [EN] Main scene GPURenderPassEncoder
+     * @param val -
+     * [KO] 설정할 마운트 예산 (최소값: 1, 기본값: 16)
+     * [EN] Mount budget to set (minimum: 1, default: 16)
      */
-    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
-        const {enabled, types} = this;
-        if (!enabled || !passEncoder || types.length === 0) return;
-        this.#renderer.render(view, passEncoder, types);
+    set mountBudget(val: number) {
+        this.#mountBudget = Math.max(1, val | 0);
     }
 
 
@@ -419,15 +412,15 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
-     * [EN] Sets the global maximum subcell mount budget per frame across all foliage types.
+     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
+     * [EN] Sets the global maximum subcell unmount budget per frame across all foliage types.
      *
      * @param val -
-     * [KO] 설정할 마운트 예산 (최소값: 1, 기본값: 16)
-     * [EN] Mount budget to set (minimum: 1, default: 16)
+     * [KO] 설정할 언마운트 예산 (최소값: 1, 기본값: 32)
+     * [EN] Unmount budget to set (minimum: 1, default: 32)
      */
-    set mountBudget(val: number) {
-        this.#mountBudget = Math.max(1, (val | 0) || 1);
+    set unmountBudget(val: number) {
+        this.#unmountBudget = Math.max(1, val | 0);
     }
 
     /**
@@ -439,15 +432,20 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
-     * [EN] Sets the global maximum subcell unmount budget per frame across all foliage types.
+     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
+     * [EN] Renders culled foliage instances in the main render pass.
      *
-     * @param val -
-     * [KO] 설정할 언마운트 예산 (최소값: 1, 기본값: 32)
-     * [EN] Unmount budget to set (minimum: 1, default: 32)
+     * @param view -
+     * [KO] 현재 렌더링 중인 View3D 객체
+     * [EN] Current View3D object being rendered
+     * @param passEncoder -
+     * [KO] 메인 씬 GPURenderPassEncoder
+     * [EN] Main scene GPURenderPassEncoder
      */
-    set unmountBudget(val: number) {
-        this.#unmountBudget = Math.max(1, (val | 0) || 1);
+    render(view: View3D, passEncoder: GPURenderPassEncoder): void {
+        const {enabled, types} = this;
+        if (!enabled || types.length === 0) return;
+        this.#renderer.render(view, passEncoder, types);
     }
 
 

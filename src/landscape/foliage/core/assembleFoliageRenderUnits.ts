@@ -230,21 +230,9 @@ export default function assembleFoliageRenderUnits(
     options: FoliageOptions,
     slotPooler?: FoliageSlotPooler | null
 ): FoliageAssemblyResult {
-    const {gpuDevice} = redGPUContext;
     const renderUnits: FoliageRenderUnit[] = [];
     const shadowMergedRenderUnits: FoliageRenderUnit[] = [];
     const lodInfoList: FoliageLODInfo[] = [];
-
-    if (!gpuDevice) {
-        return {
-            renderUnits: [],
-            shadowMergedRenderUnits: [],
-            lodInfoList: [],
-            bottomOffset: 0,
-            boundingRadius: 10.0,
-            boundingHeight: 10.0
-        };
-    }
 
     const {
         name,
@@ -274,10 +262,10 @@ export default function assembleFoliageRenderUnits(
     let lod0RenderUnits: FoliageRenderUnit[] = [];
 
     for (let l = 0; l < numLODs; l++) {
-        const {mesh, receiveShadow = (options.receiveShadow !== false), lodDistance} = lods[l];
+        const {mesh, receiveShadow = true, lodDistance} = lods[l];
         const lodMeshes = Array.isArray(mesh) ? mesh : [mesh];
         const startSubOffset = renderUnits.length;
-        const lodReceiveShadow = (options.receiveShadow !== false) && (receiveShadow !== false);
+        const lodReceiveShadow = options.receiveShadow !== false && receiveShadow !== false;
 
         for (let r = 0; r < lodMeshes.length; r++) {
             prepareFoliageMaterials(lodMeshes[r]);
@@ -305,7 +293,7 @@ export default function assembleFoliageRenderUnits(
         } = mergeResult;
 
         if (groups.length > 0) {
-            const treeH = lodHeight > 0 ? lodHeight : Math.max(5.0, (boundingRadius || 5.0) * 1.8);
+            const treeH = lodHeight > 0 ? lodHeight : Math.max(5.0, boundingRadius * 1.8);
 
             for (let g = 0; g < groups.length; g++) {
                 const group = groups[g];

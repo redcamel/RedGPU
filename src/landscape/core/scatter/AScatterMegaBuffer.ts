@@ -433,8 +433,6 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     syncIndirectResetTemplateToGPU(slotIndex?: number, slotCount?: number): void {
         const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
-
         const indirectGPUBuffer = this.#indirectGPUBuffer;
         if (!indirectGPUBuffer) return;
 
@@ -490,30 +488,25 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
         if (this.#totalIndirectDrawCalls === 0) return;
 
-        const indirectGPUBuffer = this.#indirectGPUBuffer;
-        if (indirectGPUBuffer) {
-            const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
+        const indirectGPUBuffer = this.#indirectGPUBuffer!;
+        const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
 
-            if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {
-                commandEncoder.copyBufferToBuffer(
-                    this.#indirectResetTemplateGPUBuffer,
-                    0,
-                    indirectGPUBuffer,
-                    0,
-                    byteSize
-                );
-            } else {
-                const gpuDevice = this.gpuDevice;
-                if (gpuDevice) {
-                    gpuDevice.queue.writeBuffer(
-                        indirectGPUBuffer,
-                        0,
-                        this.#indirectResetTemplate.buffer,
-                        0,
-                        byteSize
-                    );
-                }
-            }
+        if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {
+            commandEncoder.copyBufferToBuffer(
+                this.#indirectResetTemplateGPUBuffer,
+                0,
+                indirectGPUBuffer,
+                0,
+                byteSize
+            );
+        } else {
+            this.gpuDevice.queue.writeBuffer(
+                indirectGPUBuffer,
+                0,
+                this.#indirectResetTemplate.buffer,
+                0,
+                byteSize
+            );
         }
 
         this.onResetMultiIndirectCommands(commandEncoder ?? null);
