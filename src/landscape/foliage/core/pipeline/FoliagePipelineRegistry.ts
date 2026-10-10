@@ -122,7 +122,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         }
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
-        const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
+        const isOctahedral = material instanceof OctahedralImpostorMaterial;
         const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url);
 
         if (isOctahedral && isDepthPrepass) {
@@ -164,7 +164,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const materialBindGroupLayout = isDepthPrepassOpaque
             ? emptyBindGroupLayout
             : (material.gpuRenderInfo?.fragmentBindGroupLayout
-                || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
                 || emptyBindGroupLayout);
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout, effectiveRenderUnitBGL, materialBindGroupLayout];
@@ -399,7 +398,6 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const {emptyBindGroupLayout} = resourceManager;
         const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
-            || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || emptyBindGroupLayout;
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(

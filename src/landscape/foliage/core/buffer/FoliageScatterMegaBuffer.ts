@@ -136,6 +136,14 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
+     * [KO] 모든 필수 GPU 버퍼(컬링 및 섀도우 버퍼 포함)가 초기화되어 준비되었는지 여부를 반환합니다.
+     * [EN] Returns whether all essential GPU buffers (including culling and shadow buffers) are initialized and ready for use.
+     */
+    override get isReady(): boolean {
+        return super.isReady && this.culledGPUBuffer !== null && this.#shadowCulledGPUBuffer !== null && this.#unifiedGlobalUniformGPUBuffer !== null;
+    }
+
+    /**
      * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다.
      * [EN] Allocates a buffer segment and registers offsets for a new foliage type.
      * @param name -
@@ -442,6 +450,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         hzbTextureView?: GPUTextureView | null,
         hzbSampler?: GPUSampler | null
     ): GPUBindGroup | null {
+        if (!this.isReady) return null;
+
         const {
             rawGPUBuffer,
             typeParamsGPUBuffer,
@@ -450,12 +460,6 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             gpuDevice,
             resourceManager
         } = this;
-
-        if (!rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !typeParamsGPUBuffer ||
-            !culledGPUBuffer || !indirectGPUBuffer ||
-            !this.#shadowCulledGPUBuffer || !this.#shadowIndirectGPUBuffer) {
-            return null;
-        }
 
         const targetHZBView = hzbTextureView || resourceManager.emptyR32FloatTextureView;
         const targetHZBSampler = hzbSampler || resourceManager.basicSampler.gpuSampler;
@@ -473,13 +477,13 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             label: 'FoliageScatterMegaBuffer_Culling_BindGroup',
             layout,
             entries: [
-                {binding: 0, resource: {buffer: rawGPUBuffer}},
-                {binding: 1, resource: {buffer: this.#unifiedGlobalUniformGPUBuffer}},
-                {binding: 2, resource: {buffer: typeParamsGPUBuffer}},
-                {binding: 3, resource: {buffer: culledGPUBuffer}},
-                {binding: 4, resource: {buffer: indirectGPUBuffer}},
-                {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer}},
-                {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
+                {binding: 0, resource: {buffer: rawGPUBuffer!}},
+                {binding: 1, resource: {buffer: this.#unifiedGlobalUniformGPUBuffer!}},
+                {binding: 2, resource: {buffer: typeParamsGPUBuffer!}},
+                {binding: 3, resource: {buffer: culledGPUBuffer!}},
+                {binding: 4, resource: {buffer: indirectGPUBuffer!}},
+                {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer!}},
+                {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer!}},
                 {binding: 7, resource: targetHZBView},
                 {binding: 8, resource: targetHZBSampler},
             ],

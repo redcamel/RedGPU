@@ -64,7 +64,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const {worldSizeX, worldSizeZ, invWorldSizeX, invWorldSizeZ, heightScale} = landscape;
 
         const cellSize = GRASS_CELL_SIZE;
-        const effectiveRadius = Math.max(grass.streamingRadius || grass.cullingDistance || 80.0, 16.0);
+        const effectiveRadius = Math.max(grass.streamingRadius ?? 80.0, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
 
         const centerCellX = Math.floor(centerX / cellSize);

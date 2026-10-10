@@ -248,27 +248,15 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (maxScale) this.#maxScale = [maxScale[0], maxScale[1]];
 
         this.#alphaCutoff = alphaCutoff;
-
-        const inheritedRoughness = targetMaterial?.roughnessFactor ?? targetMaterial?.roughness;
-        if (roughness !== undefined) {
-            this.#roughness = roughness;
-        } else if (inheritedRoughness !== undefined) {
-            this.#roughness = inheritedRoughness;
-        }
+        this.#roughness = roughness ?? targetMaterial?.roughnessFactor ?? targetMaterial?.roughness ?? 0.55;
 
         if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
         if (subsurfaceColor) this.#subsurfaceColor = [...subsurfaceColor];
         if (exposureBoost !== undefined) this.#exposureBoost = exposureBoost;
         if (shadowStrength !== undefined) this.#shadowStrength = shadowStrength;
-        if (shadowCullDistance !== undefined) {
-            this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
-                ? Math.max(0.0, shadowFadeStartDistance)
-                : Math.max(0.0, this.shadowCullDistance * 0.75);
-        } else if (shadowFadeStartDistance !== undefined) {
-            this.#shadowFadeStartDistance = Math.max(0.0, shadowFadeStartDistance);
-        } else {
-            this.#shadowFadeStartDistance = this.shadowCullDistance * 0.75;
-        }
+        this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
+            ? Math.max(0.0, shadowFadeStartDistance)
+            : this.shadowCullDistance * 0.75;
 
         if (maxInstances !== undefined) {
             this.#maxInstances = Math.max(1, Number(maxInstances) || 1);

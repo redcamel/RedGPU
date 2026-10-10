@@ -168,15 +168,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             const {culledGPUBuffer: culledGPU, indirectGPUBuffer: indirectGPU} = megaBuffer;
             if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
 
-            let item = this.#validTypesMain[validCount];
-            if (!item) {
-                item = {type: foliageType, culledGPU, indirectGPU};
-                this.#validTypesMain[validCount] = item;
-            } else {
-                item.type = foliageType;
-                item.culledGPU = culledGPU;
-                item.indirectGPU = indirectGPU;
-            }
+            const item = this.#validTypesMain[validCount];
+            item.type = foliageType;
+            item.culledGPU = culledGPU;
+            item.indirectGPU = indirectGPU;
             validCount++;
         }
         if (validCount === 0) return;
@@ -296,15 +291,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 const indirectGPU = megaBuffer?.shadowIndirectGPUBuffer;
                 if (!culledGPU || !indirectGPU || foliageType.renderUnits.length === 0) continue;
 
-                let item = this.#validTypesShadow[validCount];
-                if (!item) {
-                    item = {type: foliageType, culledGPU, indirectGPU};
-                    this.#validTypesShadow[validCount] = item;
-                } else {
-                    item.type = foliageType;
-                    item.culledGPU = culledGPU;
-                    item.indirectGPU = indirectGPU;
-                }
+                const item = this.#validTypesShadow[validCount];
+                item.type = foliageType;
+                item.culledGPU = culledGPU;
+                item.indirectGPU = indirectGPU;
                 validCount++;
             }
 
@@ -358,8 +348,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return null;
+        const gpuDevice = this.gpuDevice!;
 
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
@@ -389,20 +378,20 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;
-            const renderUnits = foliageType.depthPrepassOpaqueRenderUnits;
+            if (!foliageType!.useDepthPrepass) continue;
+            const renderUnits = foliageType!.depthPrepassOpaqueRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
 
             for (let s = 0; s < unitCount; s++) {
-                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU!, culledGPU!, 'depthPrepass');
             }
         }
 
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!foliageType.useDepthPrepass || !culledGPU || !indirectGPU) continue;
-            const renderUnits = foliageType.depthPrepassMaskedRenderUnits;
+            if (!foliageType!.useDepthPrepass) continue;
+            const renderUnits = foliageType!.depthPrepassMaskedRenderUnits;
             const unitCount = renderUnits.length;
             if (unitCount === 0) continue;
 
@@ -425,8 +414,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return null;
+        const gpuDevice = this.gpuDevice!;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_MainBundleEncoder_${view.name}`,
@@ -469,8 +457,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         validCount: number,
         systemBG: GPUBindGroup | null
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return null;
+        const gpuDevice = this.gpuDevice!;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_ShadowBundleEncoder_Cascade${currentCascade}`,
@@ -481,17 +468,16 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         this.#resetBoundState();
 
-        const firstType = validCount > 0 ? this.#validTypesShadow[0].type : null;
-        const megaBuffer = firstType?.megaBuffer;
-        const maxRenderUnits = megaBuffer?.maxRenderUnits ?? 256;
-        const instanceCapacity = megaBuffer?.instanceCapacity ?? 65536;
+        const firstType = this.#validTypesShadow[0].type!;
+        const megaBuffer = firstType.megaBuffer!;
+        const maxRenderUnits = megaBuffer.maxRenderUnits;
+        const instanceCapacity = megaBuffer.instanceCapacity;
 
         const cascadeIndirectOffset = currentCascade * maxRenderUnits * 20;
         const cascadeInstanceOffset = currentCascade * (instanceCapacity * 8) * 32;
 
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypesShadow[t];
-            if (!foliageType || !culledGPU || !indirectGPU) continue;
 
             const num3DLODs = foliageType.hasImpostor ? Math.max(1, foliageType.lodInfoList.length - 1) : foliageType.lodInfoList.length;
             const maxShadowLOD = Math.max(0, num3DLODs - 1);

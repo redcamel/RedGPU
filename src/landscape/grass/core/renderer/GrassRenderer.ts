@@ -294,8 +294,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return null;
+        const gpuDevice = this.gpuDevice!;
 
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
@@ -325,10 +324,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.nearSlots.length === 0) continue;
 
-            const targetGeom = geometry as Geometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer, indexBuffer} = targetGeom;
-            if (!vertexBuffer || !indexBuffer) continue;
+            const {vertexBuffer, indexBuffer} = geometry as Geometry;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
@@ -339,7 +335,6 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const slot = alloc.nearSlots[s];
-                if (!slot) continue;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
@@ -359,10 +354,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.farSlots.length === 0) continue;
 
-            const targetGeom = geometry as Geometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = geometry as Geometry;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
@@ -373,7 +365,6 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const slot = alloc.farSlots[s];
-                if (!slot) continue;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
@@ -396,8 +387,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return null;
+        const gpuDevice = this.gpuDevice!;
 
         const shadowPipeline = this.#getShadowRenderPipeline();
         if (!shadowPipeline) return null;
@@ -424,10 +414,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             const alloc = megaBuffer.getAllocation(typeId);
             if (!alloc || alloc.nearSlots.length === 0) continue;
 
-            const targetGeom = geometry as Geometry;
-            if (!targetGeom) continue;
-            const {vertexBuffer: lvb, indexBuffer: lib} = targetGeom;
-            if (!lvb || !lib) continue;
+            const {vertexBuffer: lvb, indexBuffer: lib} = geometry as Geometry;
 
             this.dynamicOffsetArray[0] = slotIndex * 256;
             bundleEncoder.setBindGroup(1, unifiedGroup1, this.dynamicOffsetArray, 0, 1);
@@ -438,7 +425,6 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const nearSlot = alloc.nearSlots[s];
-                if (!nearSlot) continue;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {

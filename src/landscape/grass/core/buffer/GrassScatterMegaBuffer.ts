@@ -97,6 +97,14 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     /**
+     * [KO] 모든 필수 잔디 GPU 버퍼(컬링 버퍼 포함)가 초기화되어 준비되었는지 여부를 반환합니다.
+     * [EN] Returns whether all essential grass GPU buffers (including culled buffer) are initialized and ready for use.
+     */
+    override get isReady(): boolean {
+        return super.isReady && this.culledGPUBuffer !== null;
+    }
+
+    /**
      * [KO] 특정 잔디 타입에 대해 필요한 인스턴스 메모리 공간과 Near/Far 간접 드로우 슬롯을 할당합니다.
      * [EN] Allocates required instance memory space and Near/Far indirect draw slots for a specific grass type.
      *
@@ -300,6 +308,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         bindGroupLayout: GPUBindGroupLayout,
         globalUniformBuffer: GPUBuffer
     ): GPUBindGroup | null {
+        if (!this.isReady) {
+            return null;
+        }
+
         const {
             gpuDevice,
             rawGPUBuffer: rawBuffer,
@@ -307,10 +319,6 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             indirectGPUBuffer: indirectBuffer,
             typeParamsGPUBuffer: typeParamsBuffer
         } = this;
-
-        if (!gpuDevice || !rawBuffer || !culledBuffer || !indirectBuffer || !typeParamsBuffer) {
-            return null;
-        }
 
         if (
             this.#unifiedCullingBindGroup &&
@@ -323,15 +331,15 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.#cachedCullBindGroupLayout = bindGroupLayout;
         this.#cachedGlobalUniformBuffer = globalUniformBuffer;
 
-        this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
+        this.#unifiedCullingBindGroup = gpuDevice!.createBindGroup({
             label: 'Grass_UnifiedCullingBindGroup',
             layout: bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: globalUniformBuffer}},
-                {binding: 1, resource: {buffer: rawBuffer}},
-                {binding: 2, resource: {buffer: culledBuffer}},
-                {binding: 3, resource: {buffer: indirectBuffer}},
-                {binding: 4, resource: {buffer: typeParamsBuffer}},
+                {binding: 1, resource: {buffer: rawBuffer!}},
+                {binding: 2, resource: {buffer: culledBuffer!}},
+                {binding: 3, resource: {buffer: indirectBuffer!}},
+                {binding: 4, resource: {buffer: typeParamsBuffer!}},
             ]
         });
 

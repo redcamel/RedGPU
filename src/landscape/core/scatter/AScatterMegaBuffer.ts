@@ -252,6 +252,14 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
     }
 
     /**
+     * [KO] 모든 필수 기본 GPU 버퍼들이 정상적으로 초기화되어 사용 가능한 상태인지 여부를 반환합니다.
+     * [EN] Returns whether all essential base GPU buffers are initialized and ready for use.
+     */
+    get isReady(): boolean {
+        return this.#rawGPUBuffer !== null && this.#indirectGPUBuffer !== null;
+    }
+
+    /**
      * [KO] 모든 인스턴스의 원본 배치 데이터(위치, 스케일, 회전 쿼터니언, 바운딩, 지면색 등)를 보관하는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer holding raw placement data (position, scale, rotation quaternion, bounding, ground color, etc.) for all instances.
      */

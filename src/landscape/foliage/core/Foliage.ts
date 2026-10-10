@@ -1218,11 +1218,9 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                         subCell = this.#populateSingleSubCell(sx, sz, subCellSize);
                         this.#subCells.set(key, subCell);
                     }
-                    if (subCell) {
-                        const {isMounted, instanceCount} = subCell;
-                        if (!isMounted && instanceCount > 0) {
-                            candidates.push(subCell);
-                        }
+                    const {isMounted, instanceCount} = subCell;
+                    if (!isMounted && instanceCount > 0) {
+                        candidates.push(subCell);
                     }
                 }
             }
@@ -1251,14 +1249,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
     rebake(): void {
         const alloc = this.allocation;
         const landscape = this.#landscape;
-        if (this.#megaBuffer && alloc && this.#baker && landscape && alloc.instanceCount > 0) {
+        if (this.#megaBuffer && alloc && landscape && alloc.instanceCount > 0) {
             const mounted = this.#mountedSubCells;
             const count = mounted.length;
             const subCellSize = landscape.foliageManager.subCellSize;
             for (let i = 0; i < count; i++) {
                 const subCell = mounted[i];
                 if (subCell.isMounted && subCell.instanceCount > 0) {
-                    this.#baker.dispatchBakeSubCell(
+                    this.#baker!.dispatchBakeSubCell(
                         this.#megaBuffer,
                         landscape,
                         this,
@@ -1434,8 +1432,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const targetSlot = allocation.rawBaseOffset + currentActive;
         const landscape = this.#landscape;
 
-        if (this.#baker && landscape?.hasValidScatterAtlas) {
-            this.#baker.dispatchBakeSubCell(
+        if (landscape?.hasValidScatterAtlas) {
+            this.#baker!.dispatchBakeSubCell(
                 megaBuffer,
                 landscape,
                 this,
