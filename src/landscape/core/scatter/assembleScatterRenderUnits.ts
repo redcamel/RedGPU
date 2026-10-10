@@ -332,7 +332,7 @@ export default function assembleScatterRenderUnits(
         preservePivot = true,
         centerXZ = false,
         generateShadowMergedGeometry = false
-    } = options || {};
+    } = options ?? {};
 
     const offsetX = centerXZ && isFinite(minX) ? (minX + maxX) * 0.5 : 0;
     const offsetY = !preservePivot && isFinite(minY) ? minY : 0;
@@ -671,24 +671,24 @@ export default function assembleScatterRenderUnits(
 function getMaterialKey(mat: any): string {
     if (!mat) return 'default_mat';
     const {constructor, baseColorTexture, normalTexture, ormTexture} = mat;
-    const matType = constructor?.name || 'Material';
+    const matType = constructor?.name ?? 'Material';
 
     let baseColorKey = '';
     if (baseColorTexture) {
         const {src, url, uuid} = baseColorTexture;
-        baseColorKey = src || url || uuid || '';
+        baseColorKey = src ?? url ?? uuid ?? '';
     }
 
     let normalKey = '';
     if (normalTexture) {
         const {src, url, uuid} = normalTexture;
-        normalKey = src || url || uuid || '';
+        normalKey = src ?? url ?? uuid ?? '';
     }
 
     let ormKey = '';
     if (ormTexture) {
         const {src, url, uuid} = ormTexture;
-        ormKey = src || url || uuid || '';
+        ormKey = src ?? url ?? uuid ?? '';
     }
 
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;

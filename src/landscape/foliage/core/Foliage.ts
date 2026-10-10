@@ -491,7 +491,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             : 1.5;
 
         let hash = 0;
-        const nameStr = name || '';
+        const nameStr = name ?? '';
         for (let c = 0; c < nameStr.length; c++) {
             hash = (hash * 31 + nameStr.charCodeAt(c)) | 0;
         }

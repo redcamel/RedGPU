@@ -70,16 +70,17 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
     let cache = contextCache.get(redGPUContext);
     if (!cache) {
         const {gpuDevice, resourceManager} = redGPUContext;
+        const {FRAGMENT, COMPUTE} = GPUShaderStage;
 
         const bakeBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Impostor_Bake_BindGroupLayout', {
             label: 'Foliage_Impostor_Bake_BindGroupLayout',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 0, visibility: FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 1, visibility: FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 2, visibility: FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 3, visibility: FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 4, visibility: FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 5, visibility: FRAGMENT, sampler: {type: 'filtering'}},
             ]
         });
 
@@ -90,13 +91,13 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
         const dilationBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_Impostor_Dilation_BindGroupLayout', {
             label: 'Foliage_Impostor_Dilation_BindGroupLayout',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
+                {binding: 0, visibility: COMPUTE, texture: {sampleType: 'unfilterable-float'}},
                 {
                     binding: 1,
-                    visibility: GPUShaderStage.COMPUTE,
+                    visibility: COMPUTE,
                     storageTexture: {access: 'write-only', format: 'rgba8unorm'}
                 },
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
+                {binding: 2, visibility: COMPUTE, buffer: {type: 'uniform'}}
             ]
         });
 

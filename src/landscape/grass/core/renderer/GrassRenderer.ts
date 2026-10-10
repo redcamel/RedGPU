@@ -661,8 +661,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         this.#pipelineBindGroupLayout2 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group2_Layout', {
             label: 'Grass_Pipeline_Group2_Layout',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 0, visibility: FRAGMENT, texture: {sampleType: 'float'}},
+                {binding: 1, visibility: FRAGMENT, sampler: {type: 'filtering'}},
             ]
         });
 

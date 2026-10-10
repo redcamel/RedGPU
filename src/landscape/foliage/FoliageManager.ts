@@ -88,12 +88,13 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
 
         const {gpuDevice, resourceManager} = redGPUContext;
+        const {VERTEX} = GPUShaderStage;
         this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
             label: 'Foliage_RenderUnit_BindGroupLayout',
             entries: [
                 {
                     binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
+                    visibility: VERTEX,
                     buffer: {
                         type: 'uniform',
                         hasDynamicOffset: true,

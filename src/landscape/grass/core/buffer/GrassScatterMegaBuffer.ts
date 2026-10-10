@@ -370,6 +370,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     onResizeBuffers(newCapacity: number): void {
         this.invalidateUnifiedCullingBindGroup();
         const {gpuDevice, strideBytes} = this;
+        const {STORAGE} = GPUBufferUsage;
 
         const culledCapacity = newCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
@@ -378,7 +379,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassScatterMegaBuffer_CulledInstances',
             size: culledByteSize,
-            usage: GPUBufferUsage.STORAGE,
+            usage: STORAGE,
         });
     }
 
@@ -394,6 +395,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
     #initBuffers(): void {
         const {gpuDevice, strideBytes, instanceCapacity} = this;
+        const {STORAGE} = GPUBufferUsage;
 
         const culledCapacity = instanceCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
@@ -401,7 +403,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'GrassScatterMegaBuffer_CulledInstances',
             size: culledByteSize,
-            usage: GPUBufferUsage.STORAGE,
+            usage: STORAGE,
         });
     }
 }

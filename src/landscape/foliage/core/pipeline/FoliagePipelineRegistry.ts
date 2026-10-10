@@ -389,7 +389,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const {resourceManager, gpuDevice} = this;
 
-        const materialUUID = uuid || name || 'mat';
+        const materialUUID = uuid ?? name ?? 'mat';
         const pipelineKey = `FoliageShadowMasked_${materialUUID}_stride${strideBytes}_cull${cullMode}`;
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
         if (cachedPipeline) {
