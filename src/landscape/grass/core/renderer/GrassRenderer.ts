@@ -640,13 +640,15 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
         const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
 
+        const {VERTEX, FRAGMENT} = GPUShaderStage;
+
         this.#pipelineBindGroupLayout1 = resourceManager.createBindGroupLayout('Grass_Pipeline_Group1_Layout', {
             label: 'Grass_Pipeline_Group1_Layout',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
+                {binding: 0, visibility: VERTEX, buffer: {type: 'read-only-storage'}},
                 {
                     binding: 1,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    visibility: VERTEX | FRAGMENT,
                     buffer: {
                         type: 'uniform',
                         hasDynamicOffset: true,

@@ -200,7 +200,7 @@ function traverseHierarchy(
 
         const {vertexBuffer} = geometry;
         const {stride, interleavedStruct} = vertexBuffer;
-        const rawStride = stride || (interleavedStruct?.arrayStride ? interleavedStruct.arrayStride / 4 : 18);
+        const rawStride = stride ?? (interleavedStruct?.arrayStride ? interleavedStruct.arrayStride / 4 : 18);
 
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, currentRelativeMatrix);

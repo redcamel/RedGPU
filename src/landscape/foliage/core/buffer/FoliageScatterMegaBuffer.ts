@@ -464,8 +464,8 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         }
 
         const {emptyR32FloatTextureView, basicSampler} = resourceManager;
-        const targetHZBView = hzbTextureView || emptyR32FloatTextureView;
-        const targetHZBSampler = hzbSampler || basicSampler.gpuSampler;
+        const targetHZBView = hzbTextureView ?? emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler ?? basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
             this.#cachedHZBTextureView === targetHZBView &&
@@ -558,10 +558,9 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         this.syncIndirectResetTemplateToGPU(indirectBaseOffset, renderUnits.length);
 
-        const {gpuDevice} = this;
-        if (gpuDevice && this.#shadowIndirectResetTemplateGPUBuffer) {
+        if (this.#shadowIndirectResetTemplateGPUBuffer) {
             const {buffer, byteLength} = this.#shadowIndirectResetTemplate;
-            gpuDevice.queue.writeBuffer(
+            this.gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectResetTemplateGPUBuffer,
                 0,
                 buffer,
@@ -581,7 +580,8 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      */
     onResizeBuffers(newCapacity: number): void {
         const {gpuDevice, strideBytes} = this;
-        if (!gpuDevice) return;
+        const {VERTEX, STORAGE} = GPUBufferUsage;
+        const culledBufferUsage = VERTEX | STORAGE;
 
         const instanceCapacity = newCapacity || this.instanceCapacity;
         const culledByteSize = instanceCapacity * 8 * strideBytes;
@@ -592,13 +592,13 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_Main',
             size: culledByteSize,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            usage: culledBufferUsage,
         });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',
             size: culledByteSize * SHADOW_CASCADE_COUNT,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+            usage: culledBufferUsage,
         });
 
         this.invalidateUnifiedCullingBindGroup();
@@ -649,16 +649,13 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
                 byteSize
             );
         } else {
-            const gpuDevice = this.gpuDevice;
-            if (gpuDevice) {
-                gpuDevice.queue.writeBuffer(
-                    targetGPUBuffer,
-                    0,
-                    this.#shadowIndirectResetTemplate.buffer,
-                    0,
-                    byteSize
-                );
-            }
+            this.gpuDevice.queue.writeBuffer(
+                targetGPUBuffer,
+                0,
+                this.#shadowIndirectResetTemplate.buffer,
+                0,
+                byteSize
+            );
         }
     }
 

@@ -202,10 +202,11 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
             }
         });
 
+        const {UNIFORM, COPY_DST} = GPUBufferUsage;
         this.#uniformGPUBuffer = gpuDevice.createBuffer({
             label: `${label}_UniformBuffer`,
             size: uniformByteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            usage: UNIFORM | COPY_DST
         });
 
         const {basicSampler} = resourceManager;

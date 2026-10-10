@@ -677,6 +677,8 @@ function bakeFoliageImpostor(
         if (mipLevelCount > 1) {
             const {mipmapGenerator} = resourceManager;
             const {IMMEDIATE} = COMMAND_ENCODER_TYPE;
+            const {RENDER_ATTACHMENT, TEXTURE_BINDING, COPY_SRC, COPY_DST} = GPUTextureUsage;
+            const atlasUsage = RENDER_ATTACHMENT | TEXTURE_BINDING | COPY_SRC | COPY_DST;
 
             mipmapGenerator.generateMipmap(
                 bakedGPUTexture,
@@ -684,7 +686,7 @@ function bakeFoliageImpostor(
                     size: [atlasWidth, atlasHeight, 1],
                     mipLevelCount,
                     format: 'rgba8unorm-srgb',
-                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                    usage: atlasUsage,
                 },
                 false,
                 IMMEDIATE
@@ -696,7 +698,7 @@ function bakeFoliageImpostor(
                     size: [atlasWidth, atlasHeight, 1],
                     mipLevelCount,
                     format: 'rgba8unorm',
-                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                    usage: atlasUsage,
                 },
                 false,
                 IMMEDIATE
@@ -708,7 +710,7 @@ function bakeFoliageImpostor(
                     size: [atlasWidth, atlasHeight, 1],
                     mipLevelCount,
                     format: 'rgba8unorm',
-                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                    usage: atlasUsage,
                 },
                 false,
                 IMMEDIATE

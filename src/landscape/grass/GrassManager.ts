@@ -310,7 +310,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @param renderViewStateData - 선택적 렌더 뷰 상태 데이터
      */
     dispatchCullingPass(computePass: GPUComputePassEncoder, renderViewStateData?: RenderViewStateData): void {
-        const stateData = renderViewStateData || this.#currentRenderViewStateData;
+        const stateData = renderViewStateData ?? this.#currentRenderViewStateData;
         if (!stateData || !this.enabled || this.types.length === 0) return;
         this.#culler.dispatchPass(
             computePass,

@@ -45,7 +45,7 @@ class FoliageCuller extends AScatterCuller {
      */
     constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null) {
         super(redGPUContext);
-        this.#megaBuffer = megaBuffer || null;
+        this.#megaBuffer = megaBuffer ?? null;
         this.#baker = new FoliageInstanceBaker(this.redGPUContext);
         this.initComputePipeline('Foliage_Cull_ShaderModule', foliageCullWGSL, 'Foliage_Cull');
     }

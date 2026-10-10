@@ -436,15 +436,15 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             height
         } = options;
 
-        this.#baker = baker || null;
+        this.#baker = baker ?? null;
 
         this.#receiveShadow = receiveShadow;
         this.#useImpostor = useImpostor;
         this.#useDepthPrepass = useDepthPrepass;
-        this.#megaBuffer = megaBuffer || null;
+        this.#megaBuffer = megaBuffer ?? null;
 
-        const [minX = 1.0, minY = 1.0, minZ = 1.0] = minScale || [];
-        const [maxX = 1.0, maxY = 1.0, maxZ = 1.0] = maxScale || [];
+        const [minX = 1.0, minY = 1.0, minZ = 1.0] = minScale ?? [];
+        const [maxX = 1.0, maxY = 1.0, maxZ = 1.0] = maxScale ?? [];
         const resolvedMinScale: [number, number, number] = [minX, minY, minZ];
         const resolvedMaxScale: [number, number, number] = [maxX, maxY, maxZ];
 

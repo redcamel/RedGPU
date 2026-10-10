@@ -153,7 +153,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
         const baseKey = material.uuid;
-        const shaderLabel = fragmentModule?.label || (isDepthPrepassOpaque ? 'depthPrepass_opaque' : 'default');
+        const shaderLabel = fragmentModule?.label ?? (isDepthPrepassOpaque ? 'depthPrepass_opaque' : 'default');
         const maskedSuffix = isDepthPrepass ? (isDepthPrepassOpaque ? '_opaque' : '_masked') : '';
         const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_topo${topology}_depthMode_${depthPassMode}${maskedSuffix}`;
 
@@ -317,7 +317,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout ?? emptyBindGroupLayout;
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(
             `Foliage_ShadowMerged_PipelineLayout_${pipelineKey}`,
@@ -403,9 +403,9 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
         const {emptyBindGroupLayout} = resourceManager;
-        const effectiveRenderUnitBGL = renderUnitBindGroupLayout || emptyBindGroupLayout;
+        const effectiveRenderUnitBGL = renderUnitBindGroupLayout ?? emptyBindGroupLayout;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
-            || emptyBindGroupLayout;
+            ?? emptyBindGroupLayout;
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(
             `Foliage_ShadowMasked_PipelineLayout_${pipelineKey}`,

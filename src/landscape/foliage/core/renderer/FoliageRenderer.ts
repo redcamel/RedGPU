@@ -93,8 +93,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     ) {
         super(redGPUContext);
         this.#pipelineRegistry = pipelineRegistry;
-        this.#renderUnitVertexBindGroupLayout = renderUnitVertexBindGroupLayout || null;
-        this.#renderUnitDynamicBindGroup = renderUnitDynamicBindGroup || null;
+        this.#renderUnitVertexBindGroupLayout = renderUnitVertexBindGroupLayout ?? null;
+        this.#renderUnitDynamicBindGroup = renderUnitDynamicBindGroup ?? null;
 
         for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
             this.#validTypesMain.push({
@@ -659,7 +659,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             );
         if (!pipeline) return;
 
-        const matUniformBG = useMasked ? (material.gpuRenderInfo?.fragmentUniformBindGroup ?? null) : null;
+        const matUniformBG = useMasked ? material.gpuRenderInfo?.fragmentUniformBindGroup ?? null : null;
 
         this.#bindAndDrawUnit(
             passEncoder,
