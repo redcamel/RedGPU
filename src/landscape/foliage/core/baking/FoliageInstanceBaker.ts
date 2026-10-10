@@ -53,8 +53,8 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
     constructor(redGPUContext: RedGPUContext, options?: FoliageInstanceBakerOptions) {
         super(redGPUContext);
 
-        const computeShaderCode = options?.computeShaderCode || foliageBakeWGSL;
-        this.#label = options?.label || 'FoliageInstanceBaker';
+        const {computeShaderCode = foliageBakeWGSL, label = 'FoliageInstanceBaker'} = options ?? {};
+        this.#label = label;
         this.#taskCapacity = 256;
 
         this.#uniformCPUBuffer = new Float32Array(64);
@@ -62,7 +62,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         this.#tasksCPUBuffer = new Uint32Array(this.#taskCapacity * 4);
 
-        this.initComputePipeline(computeShaderCode, this.#label, 256);
+        this.initComputePipeline(computeShaderCode, label, 256);
         this.#initTaskBuffer();
     }
 
@@ -83,6 +83,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         if (!rawGPUBuffer) return;
 
         const {computePipeline, uniformGPUBuffer, gpuDevice, resourceManager} = this;
+        const {queue} = gpuDevice;
         const {emptyBitmapTextureView} = resourceManager;
 
         const {vhtAtlasTexture, vbtBaseColorAtlas} = landscape;
@@ -129,7 +130,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         }
 
         const taskBytes = tOffset * 4;
-        gpuDevice.queue.writeBuffer(this.#tasksGPUBuffer, 0, tasksBuf.buffer, 0, taskBytes);
+        queue.writeBuffer(this.#tasksGPUBuffer, 0, tasksBuf.buffer, 0, taskBytes);
 
         const {
             targetLayer,
@@ -204,7 +205,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         u32[34] = 0; // pad0 (strideFloats)
         u32[35] = 0; // pad1
 
-        gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
+        queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
 
         const bindGroup = this.getOrCreateBindGroup(
             typeId,
@@ -229,7 +230,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         computePass.dispatchWorkgroups(workgroups);
         computePass.end();
 
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        queue.submit([commandEncoder.finish()]);
     }
 
     override destroy(): void {

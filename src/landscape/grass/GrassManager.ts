@@ -118,82 +118,6 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     }
 
     /**
-     * [KO] 그림자를 투사하는 특정 잔디 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
-     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting grass type in the CSM shadow pass.
-     */
-    protected override computeTypeShadowDrawCalls(grass: Grass): number {
-        if (!this.#populated) return 0;
-        const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-        if (alloc && alloc.instanceCount > 0) {
-            return alloc.nearSlots.length;
-        }
-        return 0;
-    }
-
-    /**
-     * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
-     * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
-     *
-     * @param options - 잔디 설정 옵션 객체
-     * @returns 생성되어 등록된 {@link Grass} 인스턴스
-     */
-    addType(options: GrassOptions): Grass {
-        const grassType = new Grass(this.redGPUContext, options);
-
-        const typeId = this.#nextTypeId++;
-        grassType.typeId = typeId;
-        this.registerTypeInternal(grassType);
-
-        const {
-            cullingDistance,
-            instancesPerCell,
-            renderUnits,
-            streamingRadius,
-            maxInstances: userMaxInstances
-        } = grassType;
-        const targetRadius = Math.max(cullingDistance, streamingRadius);
-        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (GRASS_CELL_SIZE * GRASS_CELL_SIZE));
-        const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
-        const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;
-
-        const alloc = this.#megaBuffer.allocateType(
-            typeId,
-            maxInstances,
-            renderUnits
-        );
-        grassType.bindAllocation(alloc);
-
-        this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
-
-        grassType.onUniformDirty = this.#onGrassUniformDirty;
-        grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
-
-        const {targetLayer} = grassType;
-        if (targetLayer != null && targetLayer !== '') {
-            const matchedLayer = typeof targetLayer === 'number'
-                ? this.landscape.layers[targetLayer]
-                : this.landscape.layers.find(
-                    l => l.name === targetLayer
-                );
-            const wt = matchedLayer?.weightTexture;
-            if (wt && typeof (wt as any).addLoadListeners === 'function') {
-                (wt as any).addLoadListeners(this.#onGrassRepopulateRequired);
-            }
-        }
-
-        const slotIndex = this.#slotPooler.allocateSlot();
-        grassType.slotIndex = slotIndex;
-
-        const hasValidVbt = this.landscape.hasValidVbtAtlas;
-        this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
-
-        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
-        this.#renderer.markAllBundlesDirty();
-        this.#populated = true;
-        return grassType;
-    }
-
-    /**
      * [KO] 매 프레임 호출되어 베이킹된 잔디 인스턴스들을 대상으로 초고속 GPU 거리/프러스텀 컬링 Compute Pass를 디스패치합니다.
      * [EN] Called every frame to dispatch ultra-fast GPU distance/frustum culling compute pass for baked grass instances.
      *
@@ -204,11 +128,11 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const {enabled, types, landscape} = this;
         const grassLen = types.length;
         if (!enabled || grassLen === 0) return;
-        if (this.#lastUpdateFrameIndex === renderViewStateData.frameIndex) return;
-        this.#lastUpdateFrameIndex = renderViewStateData.frameIndex;
+        const {frameIndex, view} = renderViewStateData;
+        if (this.#lastUpdateFrameIndex === frameIndex) return;
+        this.#lastUpdateFrameIndex = frameIndex;
         this.#currentRenderViewStateData = renderViewStateData;
 
-        const {view} = renderViewStateData;
         const {rawCamera} = view;
         const {x, z} = rawCamera;
 
@@ -285,6 +209,86 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
                 this.#onPreProcessComputePass
             );
         }
+    }
+
+    /**
+     * [KO] 새로운 잔디 생태계 타입을 등록하고 GPU MegaBuffer 공간 및 머티리얼 바인딩 리소스를 할당합니다.
+     * [EN] Registers a new grass ecosystem type and allocates GPU MegaBuffer capacity and material binding resources.
+     *
+     * @param options - 잔디 설정 옵션 객체
+     * @returns 생성되어 등록된 {@link Grass} 인스턴스
+     */
+    addType(options: GrassOptions): Grass {
+        const grassType = new Grass(this.redGPUContext, options);
+
+        const typeId = this.#nextTypeId++;
+        grassType.typeId = typeId;
+        this.registerTypeInternal(grassType);
+
+        const {
+            cullingDistance,
+            instancesPerCell,
+            renderUnits,
+            streamingRadius,
+            maxInstances: userMaxInstances
+        } = grassType;
+        const targetRadius = Math.max(cullingDistance, streamingRadius);
+        const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (GRASS_CELL_SIZE * GRASS_CELL_SIZE));
+        const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
+        const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;
+
+        const alloc = this.#megaBuffer.allocateType(
+            typeId,
+            maxInstances,
+            renderUnits
+        );
+        grassType.bindAllocation(alloc);
+
+        this.#megaBuffer.updateTypeParams(typeId, grassType, alloc);
+
+        grassType.onUniformDirty = this.#onGrassUniformDirty;
+        grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
+
+        const {targetLayer} = grassType;
+        if (targetLayer != null && targetLayer !== '') {
+            const matchedLayer = typeof targetLayer === 'number'
+                ? this.landscape.layers[targetLayer]
+                : this.landscape.layers.find(
+                    l => l.name === targetLayer
+                );
+            const wt = matchedLayer?.weightTexture;
+            if (wt && typeof (wt as any).addLoadListeners === 'function') {
+                (wt as any).addLoadListeners(this.#onGrassRepopulateRequired);
+            }
+        }
+
+        const slotIndex = this.#slotPooler.allocateSlot();
+        grassType.slotIndex = slotIndex;
+
+        const hasValidVbt = this.landscape.hasValidVbtAtlas;
+        this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
+
+        this.#megaBuffer.invalidateUnifiedCullingBindGroup();
+        this.#renderer.markAllBundlesDirty();
+        this.#populated = true;
+        return grassType;
+    }
+
+    /**
+     * [KO] 그림자를 투사하는 특정 잔디 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting grass type in the CSM shadow pass.
+     */
+    protected override computeTypeShadowDrawCalls(grass: Grass): number {
+        if (!this.#populated) return 0;
+        const {typeId} = grass;
+        const alloc = this.#megaBuffer.getAllocation(typeId);
+        if (alloc) {
+            const {instanceCount, nearSlots} = alloc;
+            if (instanceCount > 0) {
+                return nearSlots.length;
+            }
+        }
+        return 0;
     }
 
     /**

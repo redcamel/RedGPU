@@ -86,14 +86,12 @@ function prepareFoliageMaterials(node: Mesh): void {
             mat.transparent = false;
         }
         mat.dirtyPipeline = true;
-
-        if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
-            mat._updateFragmentState();
-            mat.dirtyPipeline = false;
-        }
+        mat._updateFragmentState();
+        mat.dirtyPipeline = false;
     }
-    if (children && children.length > 0) {
-        for (let i = 0; i < children.length; i++) {
+    if (children) {
+        const {length} = children;
+        for (let i = 0; i < length; i++) {
             prepareFoliageMaterials(children[i] as Mesh);
         }
     }

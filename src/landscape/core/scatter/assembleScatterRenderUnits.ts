@@ -191,7 +191,8 @@ function traverseHierarchy(
     if (geometry) {
         const mat = material as any;
         if (mat) {
-            if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule) {
+            const {dirtyPipeline, gpuRenderInfo} = mat;
+            if (dirtyPipeline || !gpuRenderInfo?.fragmentShaderModule) {
                 mat._updateFragmentState();
                 mat.dirtyPipeline = false;
             }
@@ -302,18 +303,17 @@ export default function assembleScatterRenderUnits(
         const raw = rawList[i];
         const {geometry, rawStride, currentRelativeMatrix} = raw;
         const {vertexBuffer, indexBuffer} = geometry;
-        const srcVData = vertexBuffer.data;
-        const vertexCount = vertexBuffer.vertexCount;
+        const {data, vertexCount} = vertexBuffer;
 
         lodTotalVertices += vertexCount;
         lodTotalIndices += indexBuffer?.indexCount ?? vertexCount;
 
-        if (srcVData && vertexCount > 0) {
+        if (data && vertexCount > 0) {
             for (let v = 0; v < vertexCount; v++) {
                 const srcIdx = v * rawStride;
-                const x = srcVData[srcIdx + 0];
-                const y = srcVData[srcIdx + 1];
-                const z = srcVData[srcIdx + 2];
+                const x = data[srcIdx + 0];
+                const y = data[srcIdx + 1];
+                const z = data[srcIdx + 2];
                 const wx = currentRelativeMatrix[0] * x + currentRelativeMatrix[4] * y + currentRelativeMatrix[8] * z + currentRelativeMatrix[12];
                 const wy = currentRelativeMatrix[1] * x + currentRelativeMatrix[5] * y + currentRelativeMatrix[9] * z + currentRelativeMatrix[13];
                 const wz = currentRelativeMatrix[2] * x + currentRelativeMatrix[6] * y + currentRelativeMatrix[10] * z + currentRelativeMatrix[14];
@@ -379,10 +379,11 @@ export default function assembleScatterRenderUnits(
         let totalIndexCount = 0;
 
         for (let g = 0; g < raws.length; g++) {
-            const geom = raws[g].geometry;
-            const vCount = geom.vertexBuffer.vertexCount;
-            totalVertexCount += vCount;
-            totalIndexCount += geom.indexBuffer?.indexCount ?? vCount;
+            const {geometry} = raws[g];
+            const {vertexBuffer, indexBuffer} = geometry;
+            const {vertexCount} = vertexBuffer;
+            totalVertexCount += vertexCount;
+            totalIndexCount += indexBuffer?.indexCount ?? vertexCount;
         }
 
         const combinedVertexData = new Float32Array(totalVertexCount * PBR_STRIDE);
@@ -397,19 +398,18 @@ export default function assembleScatterRenderUnits(
             const raw = raws[g];
             const {geometry, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
             const {vertexBuffer, indexBuffer} = geometry;
-            const srcVData = vertexBuffer.data;
+            const {data, vertexCount} = vertexBuffer;
             const srcIData = indexBuffer?.data;
-            const vCount = vertexBuffer.vertexCount;
 
-            if (srcVData && vCount > 0) {
+            if (data && vertexCount > 0) {
 
-                for (let v = 0; v < vCount; v++) {
+                for (let v = 0; v < vertexCount; v++) {
                     const srcIdx = v * rawStride;
                     const dstIdx = (vertexOffset + v) * PBR_STRIDE;
 
-                    const x = srcVData[srcIdx + 0];
-                    const y = srcVData[srcIdx + 1];
-                    const z = srcVData[srcIdx + 2];
+                    const x = data[srcIdx + 0];
+                    const y = data[srcIdx + 1];
+                    const z = data[srcIdx + 2];
                     const vx = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
                     const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
                     const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
@@ -426,9 +426,9 @@ export default function assembleScatterRenderUnits(
                     }
 
                     if (rawStride >= 6) {
-                        const nx = srcVData[srcIdx + 3];
-                        const ny = srcVData[srcIdx + 4];
-                        const nz = srcVData[srcIdx + 5];
+                        const nx = data[srcIdx + 3];
+                        const ny = data[srcIdx + 4];
+                        const nz = data[srcIdx + 5];
 
                         let tx = n[0] * nx + n[4] * ny + n[8] * nz;
                         let ty = n[1] * nx + n[5] * ny + n[9] * nz;
@@ -449,13 +449,13 @@ export default function assembleScatterRenderUnits(
                     }
 
                     if (rawStride >= 8) {
-                        combinedVertexData[dstIdx + 6] = srcVData[srcIdx + 6];
-                        combinedVertexData[dstIdx + 7] = srcVData[srcIdx + 7];
+                        combinedVertexData[dstIdx + 6] = data[srcIdx + 6];
+                        combinedVertexData[dstIdx + 7] = data[srcIdx + 7];
                     }
 
                     if (rawStride >= 10) {
-                        combinedVertexData[dstIdx + 8] = srcVData[srcIdx + 8];
-                        combinedVertexData[dstIdx + 9] = srcVData[srcIdx + 9];
+                        combinedVertexData[dstIdx + 8] = data[srcIdx + 8];
+                        combinedVertexData[dstIdx + 9] = data[srcIdx + 9];
                     } else {
                         combinedVertexData[dstIdx + 8] = combinedVertexData[dstIdx + 6];
                         combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
@@ -463,10 +463,10 @@ export default function assembleScatterRenderUnits(
 
                     let vc0 = 1.0, vc1 = 1.0, vc2 = 1.0, vc3 = 1.0;
                     if (rawStride >= 14) {
-                        vc0 = srcVData[srcIdx + 10];
-                        vc1 = srcVData[srcIdx + 11];
-                        vc2 = srcVData[srcIdx + 12];
-                        vc3 = srcVData[srcIdx + 13];
+                        vc0 = data[srcIdx + 10];
+                        vc1 = data[srcIdx + 11];
+                        vc2 = data[srcIdx + 12];
+                        vc3 = data[srcIdx + 13];
                     }
                     combinedVertexData[dstIdx + 10] = vc0;
                     combinedVertexData[dstIdx + 11] = vc1;
@@ -477,22 +477,22 @@ export default function assembleScatterRenderUnits(
                     let hasTangent = false;
 
                     if (rawStride >= 18) {
-                        tanX = srcVData[srcIdx + 14];
-                        tanY = srcVData[srcIdx + 15];
-                        tanZ = srcVData[srcIdx + 16];
-                        tanW = srcVData[srcIdx + 17];
+                        tanX = data[srcIdx + 14];
+                        tanY = data[srcIdx + 15];
+                        tanZ = data[srcIdx + 16];
+                        tanW = data[srcIdx + 17];
                         hasTangent = true;
                     } else if (rawStride >= 16) {
-                        tanX = srcVData[srcIdx + 12];
-                        tanY = srcVData[srcIdx + 13];
-                        tanZ = srcVData[srcIdx + 14];
-                        tanW = srcVData[srcIdx + 15];
+                        tanX = data[srcIdx + 12];
+                        tanY = data[srcIdx + 13];
+                        tanZ = data[srcIdx + 14];
+                        tanW = data[srcIdx + 15];
                         hasTangent = true;
                     } else if (rawStride === 12) {
-                        tanX = srcVData[srcIdx + 8];
-                        tanY = srcVData[srcIdx + 9];
-                        tanZ = srcVData[srcIdx + 10];
-                        tanW = srcVData[srcIdx + 11];
+                        tanX = data[srcIdx + 8];
+                        tanY = data[srcIdx + 9];
+                        tanZ = data[srcIdx + 10];
+                        tanW = data[srcIdx + 11];
                         hasTangent = true;
                     }
 
@@ -534,7 +534,7 @@ export default function assembleScatterRenderUnits(
                     if (unifiedIndexData) unifiedIndexOffset += iCount;
                     if (shadowMergedIndices) shadowIndexOffset += iCount;
                 } else {
-                    for (let idx = 0; idx < vCount; idx++) {
+                    for (let idx = 0; idx < vertexCount; idx++) {
                         combinedIndexData[indexOffset + idx] = vertexOffset + idx;
                         if (unifiedIndexData) {
                             unifiedIndexData[unifiedIndexOffset + idx] = unifiedVertexOffset + idx;
@@ -543,14 +543,14 @@ export default function assembleScatterRenderUnits(
                             shadowMergedIndices[shadowIndexOffset + idx] = shadowVertexOffset + idx;
                         }
                     }
-                    indexOffset += vCount;
-                    if (unifiedIndexData) unifiedIndexOffset += vCount;
-                    if (shadowMergedIndices) shadowIndexOffset += vCount;
+                    indexOffset += vertexCount;
+                    if (unifiedIndexData) unifiedIndexOffset += vertexCount;
+                    if (shadowMergedIndices) shadowIndexOffset += vertexCount;
                 }
 
-                vertexOffset += vCount;
-                if (unifiedVertexData) unifiedVertexOffset += vCount;
-                if (shadowMergedPositions) shadowVertexOffset += vCount;
+                vertexOffset += vertexCount;
+                if (unifiedVertexData) unifiedVertexOffset += vertexCount;
+                if (shadowMergedPositions) shadowVertexOffset += vertexCount;
             }
         }
 
@@ -602,15 +602,14 @@ export default function assembleScatterRenderUnits(
         const raw = rawList[i];
         const {geometry, rawStride, currentRelativeMatrix: m} = raw;
         const {vertexBuffer} = geometry;
-        const srcVData = vertexBuffer?.data;
-        const vCount = vertexBuffer?.vertexCount ?? 0;
+        const {data, vertexCount = 0} = vertexBuffer ?? {};
 
-        if (srcVData && vCount > 0) {
-            for (let v = 0; v < vCount; v++) {
+        if (data && vertexCount > 0) {
+            for (let v = 0; v < vertexCount; v++) {
                 const srcIdx = v * rawStride;
-                const x = srcVData[srcIdx + 0];
-                const y = srcVData[srcIdx + 1];
-                const z = srcVData[srcIdx + 2];
+                const x = data[srcIdx + 0];
+                const y = data[srcIdx + 1];
+                const z = data[srcIdx + 2];
                 const vx = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
                 const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
                 const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
@@ -673,9 +672,25 @@ function getMaterialKey(mat: any): string {
     if (!mat) return 'default_mat';
     const {constructor, baseColorTexture, normalTexture, ormTexture} = mat;
     const matType = constructor?.name || 'Material';
-    const baseColorKey = baseColorTexture?.src || baseColorTexture?.url || baseColorTexture?.uuid || '';
-    const normalKey = normalTexture?.src || normalTexture?.url || normalTexture?.uuid || '';
-    const ormKey = ormTexture?.src || ormTexture?.url || ormTexture?.uuid || '';
+
+    let baseColorKey = '';
+    if (baseColorTexture) {
+        const {src, url, uuid} = baseColorTexture;
+        baseColorKey = src || url || uuid || '';
+    }
+
+    let normalKey = '';
+    if (normalTexture) {
+        const {src, url, uuid} = normalTexture;
+        normalKey = src || url || uuid || '';
+    }
+
+    let ormKey = '';
+    if (ormTexture) {
+        const {src, url, uuid} = ormTexture;
+        ormKey = src || url || uuid || '';
+    }
+
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }
 

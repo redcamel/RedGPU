@@ -170,11 +170,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
-            if (foliageType.activeInstanceCount <= 0) continue;
-            const megaBuffer = foliageType.megaBuffer;
-            if (!megaBuffer) continue;
+            const {activeInstanceCount, megaBuffer, renderUnits} = foliageType;
+            if (activeInstanceCount <= 0 || !megaBuffer || renderUnits.length === 0) continue;
             const {culledGPUBuffer, indirectGPUBuffer} = megaBuffer;
-            if (!culledGPUBuffer || !indirectGPUBuffer || foliageType.renderUnits.length === 0) continue;
+            if (!culledGPUBuffer || !indirectGPUBuffer) continue;
 
             const item = this.#validTypesMain[validCount];
             item.type = foliageType;
@@ -244,12 +243,12 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             for (let t = 0; t < validCount; t++) {
                 const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
 
-                const renderUnits = type.mainRenderUnits;
-                const unitCount = renderUnits.length;
-                const effectiveUsePrepass = this.#useDepthPrepass && type.useDepthPrepass;
+                const {mainRenderUnits, useDepthPrepass} = type;
+                const unitCount = mainRenderUnits.length;
+                const effectiveUsePrepass = this.#useDepthPrepass && useDepthPrepass;
 
                 for (let s = 0; s < unitCount; s++) {
-                    const unit = renderUnits[s];
+                    const unit = mainRenderUnits[s];
                     const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
                     this.#drawRenderUnit(passEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
                 }
@@ -383,24 +382,22 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!type.useDepthPrepass) continue;
-            const renderUnits = type.depthPrepassOpaqueRenderUnits;
-            const unitCount = renderUnits.length;
-            if (unitCount === 0) continue;
+            const {depthPrepassOpaqueRenderUnits} = type;
+            const unitCount = depthPrepassOpaqueRenderUnits.length;
 
             for (let s = 0; s < unitCount; s++) {
-                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                this.#drawRenderUnit(bundleEncoder, depthPrepassOpaqueRenderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
             if (!type.useDepthPrepass) continue;
-            const renderUnits = type.depthPrepassMaskedRenderUnits;
-            const unitCount = renderUnits.length;
-            if (unitCount === 0) continue;
+            const {depthPrepassMaskedRenderUnits} = type;
+            const unitCount = depthPrepassMaskedRenderUnits.length;
 
             for (let s = 0; s < unitCount; s++) {
-                this.#drawRenderUnit(bundleEncoder, renderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
+                this.#drawRenderUnit(bundleEncoder, depthPrepassMaskedRenderUnits[s], sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
             }
         }
 
@@ -435,12 +432,12 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            const renderUnits = type.mainRenderUnits;
-            const unitCount = renderUnits.length;
-            const effectiveUsePrepass = this.#useDepthPrepass && type.useDepthPrepass;
+            const {mainRenderUnits, useDepthPrepass} = type;
+            const unitCount = mainRenderUnits.length;
+            const effectiveUsePrepass = this.#useDepthPrepass && useDepthPrepass;
 
             for (let s = 0; s < unitCount; s++) {
-                const unit = renderUnits[s];
+                const unit = mainRenderUnits[s];
                 const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
                 this.#drawRenderUnit(bundleEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
@@ -477,15 +474,22 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesShadow[t];
+            const {
+                hasImpostor,
+                lodInfoList,
+                hasMaskedLOD0,
+                lod0RenderUnits,
+                shadowMergedRenderUnits,
+                renderUnits
+            } = type;
 
-            const num3DLODs = type.hasImpostor ? Math.max(1, type.lodInfoList.length - 1) : type.lodInfoList.length;
+            const num3DLODs = hasImpostor ? Math.max(1, lodInfoList.length - 1) : lodInfoList.length;
             const maxShadowLOD = Math.max(0, num3DLODs - 1);
 
-            if (currentCascade === 0 && type.hasMaskedLOD0) {
-                const lod0Units = type.lod0RenderUnits;
-                const unitCount = lod0Units.length;
+            if (currentCascade === 0 && hasMaskedLOD0) {
+                const unitCount = lod0RenderUnits.length;
                 for (let l0 = 0; l0 < unitCount; l0++) {
-                    const unit = lod0Units[l0];
+                    const unit = lod0RenderUnits[l0];
                     const {instanceBufferOffset, indirectOffsetBytes} = unit;
                     const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                     const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
@@ -493,9 +497,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 }
 
                 if (num3DLODs > 1) {
-                    const shadowMergedUnits = type.shadowMergedRenderUnits;
-                    for (let s = 0; s < shadowMergedUnits.length; s++) {
-                        const shadowUnit = shadowMergedUnits[s];
+                    for (let s = 0; s < shadowMergedRenderUnits.length; s++) {
+                        const shadowUnit = shadowMergedRenderUnits[s];
                         if (shadowUnit.lodIndex === maxShadowLOD) {
                             const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
                             const instOffset = cascadeInstanceOffset + instanceBufferOffset;
@@ -506,11 +509,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                     }
                 }
             } else {
-                const shadowMergedUnits = type.shadowMergedRenderUnits;
-                if (shadowMergedUnits.length > 0) {
+                if (shadowMergedRenderUnits.length > 0) {
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
-                    for (let s = 0; s < shadowMergedUnits.length; s++) {
-                        const shadowUnit = shadowMergedUnits[s];
+                    for (let s = 0; s < shadowMergedRenderUnits.length; s++) {
+                        const shadowUnit = shadowMergedRenderUnits[s];
                         if (shadowUnit.lodIndex === targetLOD) {
                             const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
                             const instOffset = cascadeInstanceOffset + instanceBufferOffset;
@@ -520,11 +522,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                         }
                     }
                 } else {
-                    const allRenderUnits = type.renderUnits;
-                    const unitCount = allRenderUnits.length;
+                    const unitCount = renderUnits.length;
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
                     for (let s = 0; s < unitCount; s++) {
-                        const unit = allRenderUnits[s];
+                        const unit = renderUnits[s];
                         const {isImpostor, lodIndex, instanceBufferOffset, indirectOffsetBytes} = unit;
                         if (isImpostor || lodIndex !== targetLOD) continue;
                         const instOffset = cascadeInstanceOffset + instanceBufferOffset;
@@ -608,10 +609,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = shadowUnit.geometry.vertexBuffer.gpuBuffer;
+        const {geometry, strideBytes} = shadowUnit;
+        const vertexGPUBuffer = geometry.vertexBuffer.gpuBuffer;
 
         const pipeline = this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
-            shadowUnit.strideBytes,
+            strideBytes,
             'none',
             this.#renderUnitVertexBindGroupLayout
         );
@@ -686,7 +688,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = unit.geometry.vertexBuffer.gpuBuffer;
+        const {geometry, isMasked, material} = unit;
+        const vertexGPUBuffer = geometry.vertexBuffer.gpuBuffer;
 
         const pipeline = unit.getPipeline(
             this.#pipelineRegistry,
@@ -698,10 +701,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         if (!pipeline) return;
 
         const emptyBG = this.resourceManager.emptyBindGroup;
-        const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !unit.isMasked;
+        const isDepthPrepassOpaque = depthPassMode === 'depthPrepass' && !isMasked;
         const matUniformBG = isDepthPrepassOpaque
             ? emptyBG
-            : (unit.material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
+            : (material.gpuRenderInfo?.fragmentUniformBindGroup || emptyBG);
 
         this.#bindAndDrawUnit(
             passEncoder,

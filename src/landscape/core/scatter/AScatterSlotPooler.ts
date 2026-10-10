@@ -182,16 +182,19 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * @param byteLength - 전송할 바이트 크기
      */
     uploadSlotBytes(slot: number, byteLength: number): void {
-        if (!this.#gpuBuffer) return;
+        const gpuBuffer = this.#gpuBuffer;
+        if (!gpuBuffer) return;
 
-        const offsetBytes = slot * AScatterSlotPooler.SLOT_STRIDE_BYTES;
-        const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
+        const {SLOT_STRIDE_BYTES, SLOT_STRIDE_FLOATS} = AScatterSlotPooler;
+        const offsetBytes = slot * SLOT_STRIDE_BYTES;
+        const baseFloat = slot * SLOT_STRIDE_FLOATS;
+        const {buffer, byteOffset} = this.#cpuBuffer;
 
         this.gpuDevice.queue.writeBuffer(
-            this.#gpuBuffer,
+            gpuBuffer,
             offsetBytes,
-            this.#cpuBuffer.buffer,
-            this.#cpuBuffer.byteOffset + baseFloat * 4,
+            buffer,
+            byteOffset + baseFloat * 4,
             byteLength
         );
     }

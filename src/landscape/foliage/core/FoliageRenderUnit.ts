@@ -301,16 +301,16 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         depthPassMode: FoliageDepthPassMode,
         renderUnitBindGroupLayout: GPUBindGroupLayout | null
     ): GPURenderPipeline | null {
-        const material = this.material;
+        const {material, isMasked, strideBytes} = this;
         if (!material) return null;
 
-        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+        const {dirtyPipeline, gpuRenderInfo, doubleSided, cullMode = 'back'} = material;
+        if (dirtyPipeline || !gpuRenderInfo?.fragmentUniformBindGroup) {
             material._updateFragmentState();
             material.dirtyPipeline = false;
         }
 
-        const {doubleSided, cullMode = 'back'} = material;
-        const effectiveCullMode: GPUCullMode = (!this.isMasked)
+        const effectiveCullMode: GPUCullMode = (!isMasked)
             ? 'back'
             : (doubleSided ? 'none' : cullMode);
 
@@ -318,11 +318,11 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
             material,
             sampleCount,
             msaaID,
-            this.strideBytes,
+            strideBytes,
             effectiveCullMode,
             depthPassMode,
             renderUnitBindGroupLayout,
-            this.isMasked
+            isMasked
         );
     }
 }

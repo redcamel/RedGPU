@@ -396,25 +396,26 @@ export default function bakeFoliageImpostor(
 
     for (let s = 0; s < renderUnits.length; s++) {
         const unit = renderUnits[s];
-        if (unit.isImpostor) {
+        const {isImpostor, relativeModelMatrix} = unit;
+        if (isImpostor) {
             cachedRenderUnits.push({
-                    isImpostor: true,
-                    pipeline: null,
-                    bindGroup: null,
-                    vertexBuffer: null,
-                    indexBuffer: null,
-                    isIndexed: false,
-                    indexCount: 0,
-                    indexFormat: 'uint32',
-                    vertexCount: 0,
-                relativeModelMatrix: unit.relativeModelMatrix,
+                isImpostor: true,
+                pipeline: null,
+                bindGroup: null,
+                vertexBuffer: null,
+                indexBuffer: null,
+                isIndexed: false,
+                indexCount: 0,
+                indexFormat: 'uint32',
+                vertexCount: 0,
+                relativeModelMatrix,
                 isIdentityModelMatrix: true,
-                    matProps: EMPTY_FLOAT32_12,
-                    modelMatProps: EMPTY_FLOAT32_12,
-                    isFoliage: 0,
-                });
-                continue;
-            }
+                matProps: EMPTY_FLOAT32_12,
+                modelMatProps: EMPTY_FLOAT32_12,
+                isFoliage: 0,
+            });
+            continue;
+        }
 
         const {
             material: mat,
@@ -542,7 +543,7 @@ export default function bakeFoliageImpostor(
         let drawSlot = 0;
         for (let v = 0; v < totalViews; v++) {
             const vpInfo = renderPassViews[v];
-            const {normX, normY, normZ} = vpInfo;
+            const {normX, normY, normZ, projView} = vpInfo;
 
             for (let s = 0; s < totalUnits; s++) {
                 const cached = cachedRenderUnits[s];
@@ -559,9 +560,9 @@ export default function bakeFoliageImpostor(
                 if (isImpostor) continue;
 
                 if (isIdentityModelMatrix || !relativeModelMatrix) {
-                    allInstanceData.set(vpInfo.projView, baseOffset);
+                    allInstanceData.set(projView, baseOffset);
                 } else {
-                    mat4.multiply(tempMVP, vpInfo.projView, relativeModelMatrix);
+                    mat4.multiply(tempMVP, projView, relativeModelMatrix);
                     allInstanceData.set(tempMVP, baseOffset);
                 }
 
@@ -673,7 +674,11 @@ export default function bakeFoliageImpostor(
     executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
 
         if (mipLevelCount > 1) {
-            redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+            const {resourceManager} = redGPUContext;
+            const {mipmapGenerator} = resourceManager;
+            const {IMMEDIATE} = COMMAND_ENCODER_TYPE;
+
+            mipmapGenerator.generateMipmap(
                 bakedGPUTexture,
                 {
                     size: [atlasWidth, atlasHeight, 1],
@@ -682,10 +687,10 @@ export default function bakeFoliageImpostor(
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
                 },
                 false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
+                IMMEDIATE
             );
 
-            redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+            mipmapGenerator.generateMipmap(
                 bakedNormalGPUTexture,
                 {
                     size: [atlasWidth, atlasHeight, 1],
@@ -694,10 +699,10 @@ export default function bakeFoliageImpostor(
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
                 },
                 false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
+                IMMEDIATE
             );
 
-            redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+            mipmapGenerator.generateMipmap(
                 bakedORMGPUTexture,
                 {
                     size: [atlasWidth, atlasHeight, 1],
@@ -706,7 +711,7 @@ export default function bakeFoliageImpostor(
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
                 },
                 false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
+                IMMEDIATE
             );
         }
 
@@ -727,25 +732,24 @@ export default function bakeFoliageImpostor(
     }
 
 function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRenderUnit): GPURenderPipeline | null {
-        const cache = getOrCreateContextCache(redGPUContext);
-        const gpuDevice = redGPUContext.gpuDevice;
+    const cache = getOrCreateContextCache(redGPUContext);
+    const {bakePipelineCache, bakeBindGroupLayout} = cache;
+    const {gpuDevice, resourceManager} = redGPUContext;
     const stride = Math.max(unit.strideBytes, 72);
     const key = `Foliage_Impostor_Bake_RenderPipeline_${stride}`;
-        let pipeline = cache.bakePipelineCache.get(key);
-        if (pipeline) return pipeline;
+    let pipeline = bakePipelineCache.get(key);
+    if (pipeline) return pipeline;
 
-        const resourceManager = redGPUContext.resourceManager;
+    const vModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_VertexModule', {
+        code: impostorBakeVertexWGSL
+    });
+    const fModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_FragmentModule', {
+        code: impostorBakeShaderWGSL
+    });
 
-        const vModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_VertexModule', {
-            code: impostorBakeVertexWGSL
-        });
-        const fModule = resourceManager.createGPUShaderModule('Foliage_Impostor_Bake_FragmentModule', {
-            code: impostorBakeShaderWGSL
-        });
-
-        const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Impostor_Bake_PipelineLayout', {
-            bindGroupLayouts: [cache.bakeBindGroupLayout]
-        });
+    const pipelineLayout = resourceManager.createGPUPipelineLayout('Foliage_Impostor_Bake_PipelineLayout', {
+        bindGroupLayouts: [bakeBindGroupLayout]
+    });
 
         pipeline = gpuDevice.createRenderPipeline({
             label: key,
@@ -826,7 +830,8 @@ function executeDilation(
     tileSize: number
 ) {
     const cache = getOrCreateContextCache(redGPUContext);
-    const gpuDevice = redGPUContext.gpuDevice;
+    const {dilationBindGroupLayout, dilationPipeline} = cache;
+    const {gpuDevice} = redGPUContext;
 
     const pingPongA = gpuDevice.createTexture({
         label: 'Foliage_Impostor_Dilation_PingPongTexture_A',
@@ -867,7 +872,7 @@ function executeDilation(
 
         stepBindGroups.push(gpuDevice.createBindGroup({
             label: `Foliage_Impostor_Dilation_BindGroup_Step${step}`,
-            layout: cache.dilationBindGroupLayout,
+            layout: dilationBindGroupLayout,
             entries: [
                 {binding: 0, resource: srcView},
                 {binding: 1, resource: dstView},
@@ -889,7 +894,7 @@ function executeDilation(
 
     for (let i = 0; i < steps.length; i++) {
         const computePass = commandEncoder.beginComputePass({label: `Foliage_Impostor_Dilation_ComputePass_Step${steps[i]}`});
-        computePass.setPipeline(cache.dilationPipeline);
+        computePass.setPipeline(dilationPipeline);
         computePass.setBindGroup(0, stepBindGroups[i]);
         computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
         computePass.end();

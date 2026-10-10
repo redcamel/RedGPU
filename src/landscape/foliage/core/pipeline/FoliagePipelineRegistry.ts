@@ -119,14 +119,18 @@ class FoliagePipelineRegistry extends RedGPUObject {
         const {resourceManager, gpuDevice} = this;
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
 
-        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentShaderModule) {
+        const {dirtyPipeline, gpuRenderInfo, baseColorTexture, useCutOff, alphaBlend, transparent} = material;
+        if (dirtyPipeline || !gpuRenderInfo?.fragmentShaderModule) {
             material._updateFragmentState();
         }
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
         const isOctahedral = material instanceof OctahedralImpostorMaterial;
-        const {baseColorTexture, useCutOff, alphaBlend, transparent} = material;
-        const hasBaseColorTexture = !!(baseColorTexture && (baseColorTexture.gpuTexture || baseColorTexture.src || baseColorTexture.url));
+        let hasBaseColorTexture = false;
+        if (baseColorTexture) {
+            const {gpuTexture, src, url} = baseColorTexture;
+            hasBaseColorTexture = !!(gpuTexture || src || url);
+        }
 
         if (isOctahedral && isDepthPrepass) {
             return null;
@@ -378,14 +382,14 @@ class FoliagePipelineRegistry extends RedGPUObject {
     ): GPURenderPipeline | null {
         if (!material) return null;
 
-        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+        const {dirtyPipeline, gpuRenderInfo, uuid, name} = material;
+        if (dirtyPipeline || !gpuRenderInfo?.fragmentUniformBindGroup) {
             material._updateFragmentState();
             material.dirtyPipeline = false;
         }
 
         const {resourceManager, gpuDevice} = this;
 
-        const {uuid, name} = material;
         const materialUUID = uuid || name || 'mat';
         const pipelineKey = `FoliageShadowMasked_${materialUUID}_stride${strideBytes}_cull${cullMode}`;
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);

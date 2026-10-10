@@ -174,9 +174,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const {types} = this;
         const len = types.length;
         for (let i = 0; i < len; i++) {
-            const foliage = types[i];
-            if (foliage.activeInstanceCount > 0) {
-                count += foliage.mainRenderUnits.length;
+            const {activeInstanceCount, mainRenderUnits} = types[i];
+            if (activeInstanceCount > 0) {
+                count += mainRenderUnits.length;
             }
         }
         return count;
@@ -219,8 +219,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     update(renderViewStateData: RenderViewStateData, standalone: boolean = false): void {
         const {enabled, types, landscape} = this;
         if (!enabled || types.length === 0) return;
-        if (this.#lastUpdateFrameIndex === renderViewStateData.frameIndex) return;
-        this.#lastUpdateFrameIndex = renderViewStateData.frameIndex;
+        const {frameIndex} = renderViewStateData;
+        if (this.#lastUpdateFrameIndex === frameIndex) return;
+        this.#lastUpdateFrameIndex = frameIndex;
 
         const count = types.length;
 
@@ -262,8 +263,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             const idx = (startIdx + i) % count;
             const foliage = types[idx];
             foliage.updateStreaming(x, z, remainingMount, remainingUnmount);
-            remainingMount = Math.max(0, remainingMount - foliage.lastMountedCount);
-            remainingUnmount = Math.max(0, remainingUnmount - foliage.lastUnmountedCount);
+            const {lastMountedCount, lastUnmountedCount} = foliage;
+            remainingMount = Math.max(0, remainingMount - lastMountedCount);
+            remainingUnmount = Math.max(0, remainingUnmount - lastUnmountedCount);
         }
         this.#roundRobinIndex = (this.#roundRobinIndex + 1) % count;
 

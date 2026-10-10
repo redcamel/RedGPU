@@ -145,15 +145,16 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         super(redGPUContext);
 
         const {shaderInfo, instanceStructName, typeParamStructName} = reflectionConfig;
+        const {structs} = shaderInfo;
 
-        const strideBytes = shaderInfo.structs[instanceStructName]?.arrayBufferByteLength;
+        const strideBytes = structs[instanceStructName]?.arrayBufferByteLength;
 
         if (!strideBytes) {
             throw new Error(`[AScatterMegaBuffer] Failed to reflect instance stride for "${instanceStructName}".`);
         }
 
         const typeParamBytes = typeParamStructName
-            ? shaderInfo.structs[typeParamStructName]?.arrayBufferByteLength
+            ? structs[typeParamStructName]?.arrayBufferByteLength
             : 0;
 
         if (typeParamStructName && !typeParamBytes) {
@@ -433,24 +434,28 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     syncIndirectResetTemplateToGPU(slotIndex?: number, slotCount?: number): void {
         const {gpuDevice} = this;
+        const {queue} = gpuDevice;
         const indirectGPUBuffer = this.#indirectGPUBuffer;
         if (!indirectGPUBuffer) return;
+
+        const {buffer} = this.#indirectResetTemplate;
+        const indirectResetTemplateGPUBuffer = this.#indirectResetTemplateGPUBuffer;
 
         if (slotIndex !== undefined && slotCount !== undefined) {
             const byteOffset = slotIndex * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
             const byteSize = slotCount * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
-            gpuDevice.queue.writeBuffer(
+            queue.writeBuffer(
                 indirectGPUBuffer,
                 byteOffset,
-                this.#indirectResetTemplate.buffer,
+                buffer,
                 byteOffset,
                 byteSize
             );
-            if (this.#indirectResetTemplateGPUBuffer) {
-                gpuDevice.queue.writeBuffer(
-                    this.#indirectResetTemplateGPUBuffer,
+            if (indirectResetTemplateGPUBuffer) {
+                queue.writeBuffer(
+                    indirectResetTemplateGPUBuffer,
                     byteOffset,
-                    this.#indirectResetTemplate.buffer,
+                    buffer,
                     byteOffset,
                     byteSize
                 );
@@ -458,18 +463,18 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
         } else {
             const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
             if (byteSize > 0) {
-                gpuDevice.queue.writeBuffer(
+                queue.writeBuffer(
                     indirectGPUBuffer,
                     0,
-                    this.#indirectResetTemplate.buffer,
+                    buffer,
                     0,
                     byteSize
                 );
-                if (this.#indirectResetTemplateGPUBuffer) {
-                    gpuDevice.queue.writeBuffer(
-                        this.#indirectResetTemplateGPUBuffer,
+                if (indirectResetTemplateGPUBuffer) {
+                    queue.writeBuffer(
+                        indirectResetTemplateGPUBuffer,
                         0,
-                        this.#indirectResetTemplate.buffer,
+                        buffer,
                         0,
                         byteSize
                     );

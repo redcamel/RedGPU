@@ -41,8 +41,9 @@ function sampleNormalizedLayerWeight(
 
     for (let i = 0; i < layers.length; i++) {
         const layer = layers[i];
-        if (!layer.enabled) continue;
-        if (layer.weightTexture?.src) {
+        const {enabled, weightTexture} = layer;
+        if (!enabled) continue;
+        if (weightTexture?.src) {
             activeWeightLayerCount++;
         }
         const w = typeof layer.getWeightAtUV === 'function' ? layer.getWeightAtUV(u, v) : 0.0;
@@ -121,9 +122,9 @@ function sortSubCellsByDistance<T extends { centerX: number; centerZ: number }>(
     if (count <= 1) return;
 
     for (let i = 0; i < count; i++) {
-        const c = subCells[i];
-        const dx = c.centerX - camX;
-        const dz = c.centerZ - camZ;
+        const {centerX, centerZ} = subCells[i];
+        const dx = centerX - camX;
+        const dz = centerZ - camZ;
         dists[i] = dx * dx + dz * dz;
     }
 
@@ -1264,7 +1265,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#megaBuffer && baker && alloc && landscape && alloc.instanceCount > 0) {
             const mounted = this.#mountedSubCells;
             const count = mounted.length;
-            const subCellSize = landscape.foliageManager.subCellSize;
+            const {foliageManager} = landscape;
+            const {subCellSize} = foliageManager;
             for (let i = 0; i < count; i++) {
                 const subCell = mounted[i];
                 const {isMounted, instanceCount, mountedSlotIndex} = subCell;
@@ -1343,9 +1345,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         let hasMaskedLOD0 = false;
         for (let i = 0; i < unitCount; i++) {
             const unit = renderUnits[i];
-            if (unit.lodIndex === 0) {
+            const {lodIndex, isMasked} = unit;
+            if (lodIndex === 0) {
                 lod0List.push(unit);
-                if (unit.isMasked) {
+                if (isMasked) {
                     hasMaskedLOD0 = true;
                 }
             }
@@ -1372,9 +1375,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         for (let i = 0; i < count; i++) {
             const unit = unitList[i];
-            if (!useImpostor && unit.isImpostor) continue;
+            const {isImpostor, isMasked} = unit;
+            if (!useImpostor && isImpostor) continue;
             if (useDepthPrepass && unit.canRenderInPass('depthPrepass')) {
-                if (!unit.isMasked) {
+                if (!isMasked) {
                     prepassOpaqueList.push(unit);
                 } else {
                     prepassMaskedList.push(unit);

@@ -88,10 +88,10 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         treeHeight: number = 5.0,
         windFlutterMultiplier: number = 1.0
     ): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, paramsSizeBytes, cpuBuffer: f32, cpuUint32View: u32} = this;
+        if (slot < 0 || slot >= maxSlots) return;
 
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         u32[baseFloat + 0] = 0; // globalSlot
         f32[baseFloat + 1] = 0.0; // receiveShadow
@@ -102,7 +102,7 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 6] = 1.5; // groundBlendRange
         u32[baseFloat + 7] = 0; // pad0
 
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        this.uploadSlotBytes(slot, paramsSizeBytes);
     }
 
     /**

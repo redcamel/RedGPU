@@ -317,21 +317,23 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         const {typeParamFloats, cpuTypeParamsUint32} = this;
         for (let i = 0; i < count; i++) {
             const alloc = this.#allocatedTypes[i];
-            const baseOffset = alloc.typeId * typeParamFloats;
+            const {typeId, instanceCount} = alloc;
+            const baseOffset = typeId * typeParamFloats;
             const prevCount = cpuTypeParamsUint32[baseOffset + 9];
-            if (prevCount !== alloc.instanceCount) {
-                cpuTypeParamsUint32[baseOffset + 9] = alloc.instanceCount;
+            if (prevCount !== instanceCount) {
+                cpuTypeParamsUint32[baseOffset + 9] = instanceCount;
                 this.#dirtyTypeParams = true;
             }
         }
 
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
+        const {buffer, byteOffset} = gf32;
         const globalUniformBytes = this.#globalUniformBytes;
         gpuDevice.queue.writeBuffer(
             this.#unifiedGlobalUniformGPUBuffer,
             0,
-            gf32.buffer,
-            gf32.byteOffset,
+            buffer,
+            byteOffset,
             globalUniformBytes
         );
 
@@ -459,8 +461,9 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             return null;
         }
 
-        const targetHZBView = hzbTextureView || resourceManager.emptyR32FloatTextureView;
-        const targetHZBSampler = hzbSampler || resourceManager.basicSampler.gpuSampler;
+        const {emptyR32FloatTextureView, basicSampler} = resourceManager;
+        const targetHZBView = hzbTextureView || emptyR32FloatTextureView;
+        const targetHZBSampler = hzbSampler || basicSampler.gpuSampler;
 
         if (this.#unifiedCullingBindGroup &&
             this.#cachedHZBTextureView === targetHZBView &&
@@ -553,14 +556,15 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         this.syncIndirectResetTemplateToGPU(indirectBaseOffset, renderUnits.length);
 
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
         if (gpuDevice && this.#shadowIndirectResetTemplateGPUBuffer) {
+            const {buffer, byteLength} = this.#shadowIndirectResetTemplate;
             gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectResetTemplateGPUBuffer,
                 0,
-                this.#shadowIndirectResetTemplate.buffer,
+                buffer,
                 0,
-                this.#shadowIndirectResetTemplate.byteLength
+                byteLength
             );
         }
     }

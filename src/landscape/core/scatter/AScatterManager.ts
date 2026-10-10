@@ -223,8 +223,9 @@ export abstract class AScatterManager<
      * @internal
      */
     protected registerTypeInternal(type: TType): void {
+        const {name} = type;
         this.#types.push(type);
-        this.#typesByName.set(type.name, type);
+        this.#typesByName.set(name, type);
     }
 
     /**

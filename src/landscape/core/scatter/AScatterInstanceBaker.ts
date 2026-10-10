@@ -225,14 +225,18 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         info.hasWeightMap = 0;
         info.weightChannelIndex = 0;
 
-        if (targetLayer != null && targetLayer !== '' && landscape.layers) {
+        const {layers} = landscape;
+        if (targetLayer != null && targetLayer !== '' && layers) {
             const matchedLayer = typeof targetLayer === 'number'
-                ? landscape.layers[targetLayer]
-                : landscape.layers.find((l: any) => l.name === targetLayer);
-            if (matchedLayer?.weightTexture?.gpuTexture) {
-                info.weightView = resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture);
-                info.hasWeightMap = 1;
-                info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
+                ? layers[targetLayer]
+                : layers.find((l: any) => l.name === targetLayer);
+            if (matchedLayer) {
+                const {weightTexture, weightChannelIndex = 0} = matchedLayer;
+                if (weightTexture?.gpuTexture) {
+                    info.weightView = resourceManager.getGPUResourceBitmapTextureView(weightTexture);
+                    info.hasWeightMap = 1;
+                    info.weightChannelIndex = weightChannelIndex;
+                }
             }
         }
         return info;

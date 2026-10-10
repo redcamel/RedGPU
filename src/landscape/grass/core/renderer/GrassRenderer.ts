@@ -333,12 +333,13 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const slot = alloc.nearSlots[s];
+                const {indirectOffset} = slot;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
-                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                const indirectOffsetBytes = indirectOffset * 5 * 4;
                 renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
@@ -363,12 +364,13 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const slot = alloc.farSlots[s];
+                const {indirectOffset} = slot;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
-                const indirectOffsetBytes = slot.indirectOffset * 5 * 4;
+                const indirectOffsetBytes = indirectOffset * 5 * 4;
                 renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
@@ -423,12 +425,13 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             for (let s = 0; s < renderUnitCount; s++) {
                 const renderUnit = renderUnits[s];
                 const nearSlot = alloc.nearSlots[s];
+                const {indirectOffset} = nearSlot;
 
                 const matBG = this.#getOrCreateMaterialBindGroup(renderUnit, type, s);
                 if (matBG) {
                     bundleEncoder.setBindGroup(2, matBG);
                 }
-                const indirectOffsetBytes = nearSlot.indirectOffset * 5 * 4;
+                const indirectOffsetBytes = indirectOffset * 5 * 4;
                 renderUnit.draw(bundleEncoder, indirectGPUBuffer, indirectOffsetBytes);
             }
         }
@@ -473,8 +476,11 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
         const {baseColorTexture} = renderUnit;
 
-        if (entry && entry.cachedSubTex === baseColorTexture && entry.cachedTypeTexView === baseColorTextureView) {
-            return entry.bindGroup;
+        if (entry) {
+            const {cachedSubTex, cachedTypeTexView, bindGroup} = entry;
+            if (cachedSubTex === baseColorTexture && cachedTypeTexView === baseColorTextureView) {
+                return bindGroup;
+            }
         }
 
         const subTexView = (baseColorTexture && resourceManager.getGPUResourceBitmapTextureView(baseColorTexture))

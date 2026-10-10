@@ -50,25 +50,34 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
 
-        const vhtView = landscape.vhtAtlasTexture.gpuTextureView;
-        const vbtView = landscape.vbtBaseColorAtlas.gpuTextureView;
+        const {
+            vhtAtlasTexture,
+            vbtBaseColorAtlas,
+            worldSizeX,
+            worldSizeZ,
+            invWorldSizeX,
+            invWorldSizeZ,
+            heightScale
+        } = landscape;
+        const vhtView = vhtAtlasTexture.gpuTextureView;
+        const vbtView = vbtBaseColorAtlas.gpuTextureView;
 
-        const alloc = megaBuffer.getAllocation(grass.typeId);
+        const {typeId, streamingRadius} = grass;
+        const alloc = megaBuffer.getAllocation(typeId);
         if (!alloc) return;
 
-        const {worldSizeX, worldSizeZ, invWorldSizeX, invWorldSizeZ, heightScale} = landscape;
-
         const cellSize = GRASS_CELL_SIZE;
-        const effectiveRadius = Math.max(grass.streamingRadius, 16.0);
+        const effectiveRadius = Math.max(streamingRadius, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
 
         const centerCellX = Math.floor(centerX / cellSize);
         const centerCellZ = Math.floor(centerZ / cellSize);
 
         const spiralOffsets = this.#getSpiralOffsets(cellRadius);
-        const totalCircularCells = spiralOffsets.length / 2;
+        const {length, byteLength} = spiralOffsets;
+        const totalCircularCells = length / 2;
 
-        if (!this.#cellOffsetsGPUBuffer || this.#cellOffsetsGPUBuffer.size < spiralOffsets.byteLength) {
+        if (!this.#cellOffsetsGPUBuffer || this.#cellOffsetsGPUBuffer.size < byteLength) {
             this.#cellOffsetsGPUBuffer?.destroy();
             const newSize = Math.max(2048 * 8, Math.ceil(spiralOffsets.byteLength / 256) * 256);
             this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
@@ -95,12 +104,12 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
             height,
             minSlope,
             maxSlope,
-            typeId,
             densityScaleByWeight
         } = grass;
 
+        const {maxInstances, rawBaseOffset} = alloc;
         const targetDensity = Math.max(1, Math.min(1024, instancesPerCell));
-        const maxCellsAllowed = Math.floor(alloc.maxInstances / targetDensity);
+        const maxCellsAllowed = Math.floor(maxInstances / targetDensity);
         const totalCells = Math.min(totalCircularCells, Math.max(1, maxCellsAllowed));
         if (totalCells <= 0) return;
 
@@ -137,7 +146,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         uf[16] = maxScaleH - minScaleH;
         uu[17] = typeId;
 
-        uu[18] = alloc.rawBaseOffset;
+        uu[18] = rawBaseOffset;
         uu[19] = hasWeightMap;
         uu[20] = weightChannelIndex;
         uu[21] = densityScaleByWeight ? 1 : 0;
@@ -204,8 +213,9 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const count = temp.length;
         const result = new Int32Array(count * 2);
         for (let i = 0; i < count; i++) {
-            result[i * 2] = temp[i].dx;
-            result[i * 2 + 1] = temp[i].dz;
+            const {dx, dz} = temp[i];
+            result[i * 2] = dx;
+            result[i * 2 + 1] = dz;
         }
 
         this.#cellOffsetsCache.set(cellRadius, result);
