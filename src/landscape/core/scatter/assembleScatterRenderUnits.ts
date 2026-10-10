@@ -330,9 +330,9 @@ export default function assembleScatterRenderUnits(
         generateShadowMergedGeometry: generateShadow = false
     } = options || {};
 
-    const offsetX = centerXZ ? ((isFinite(minX) && isFinite(maxX)) ? (minX + maxX) * 0.5 : 0) : 0;
-    const offsetY = preservePivot ? 0 : (isFinite(minY) ? minY : 0);
-    const offsetZ = centerXZ ? ((isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0) : 0;
+    const offsetX = centerXZ && isFinite(minX) ? (minX + maxX) * 0.5 : 0;
+    const offsetY = !preservePivot && isFinite(minY) ? minY : 0;
+    const offsetZ = centerXZ && isFinite(minZ) ? (minZ + maxZ) * 0.5 : 0;
 
     const materialGroups = new Map<string, { material: any; raws: RawMeshNode[] }>();
     for (let i = 0; i < rawList.length; i++) {

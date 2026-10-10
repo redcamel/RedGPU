@@ -1100,7 +1100,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
             case 'streamingRadius': {
                 if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
-                    const subCellSize = this.#landscape?.foliageManager?.subCellSize ?? 100.0;
+                    const subCellSize = this.#landscape!.foliageManager.subCellSize;
                     const unmountMargin = Math.max(10.0, subCellSize * 0.5);
                     const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
                     const megaBuffer = this.#megaBuffer;
@@ -1477,7 +1477,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             allocation.instanceCount = Math.max(0, currentActive - instanceCount);
 
             const landscape = this.#landscape;
-            if (this.#baker && landscape?.hasValidScatterAtlas && lastCount > 0) {
+            if (landscape?.hasValidScatterAtlas && lastCount > 0) {
                 this.#baker.dispatchBakeSubCell(
                     megaBuffer,
                     landscape,
@@ -1548,8 +1548,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             return cell;
         }
 
-        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
-        const hasSlopeFilter = hasGetHeight && (minSlope > 0.0 || maxSlope < 90.0);
+        const hasSlopeFilter = minSlope > 0.0 || maxSlope < 90.0;
 
         const subMinX = scX * subCellSize - halfWorldX;
         const subMaxX = subMinX + subCellSize;

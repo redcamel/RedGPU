@@ -64,12 +64,7 @@ export default class GrassCuller extends AScatterCuller {
         uf[2] = camera.z;
         uu[3] = totalAllocatedInstances;
 
-        const frustumPlanesF32 = renderViewStateData.frustumPlanesFlat;
-        if (frustumPlanesF32 && frustumPlanesF32.length === 24) {
-            uf.set(frustumPlanesF32, 4);
-        } else {
-            for (let p = 0; p < 24; p++) uf[4 + p] = 0;
-        }
+        uf.set(renderViewStateData.frustumPlanesFlat, 4);
 
         gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#uniformArrayBuffer, 0, 112);
 

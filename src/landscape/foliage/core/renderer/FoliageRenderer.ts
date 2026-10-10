@@ -199,7 +199,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 }
             }
 
-            if (viewCache?.bundle) {
+            if (viewCache) {
                 this.executeSingleBundle(passEncoder, viewCache.bundle);
             }
         }
@@ -228,7 +228,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             }
         }
 
-        if (mainViewCache?.bundle) {
+        if (mainViewCache) {
             this.executeSingleBundle(passEncoder, mainViewCache.bundle);
         } else {
             this.#resetBoundState();
@@ -588,8 +588,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
 
         const {isIndexed, geometry, indexFormat} = unit;
-        if (isIndexed && geometry.indexBuffer?.gpuBuffer) {
-            const indexGPUBuffer = geometry.indexBuffer.gpuBuffer;
+        if (isIndexed) {
+            const indexGPUBuffer = geometry.indexBuffer!.gpuBuffer;
             if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
                 passEncoder.setIndexBuffer(indexGPUBuffer, indexFormat);
                 this.#lastBoundIndexBuffer = indexGPUBuffer;
@@ -608,8 +608,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = shadowUnit.geometry.vertexBuffer?.gpuBuffer;
-        if (!vertexGPUBuffer) return;
+        const vertexGPUBuffer = shadowUnit.geometry.vertexBuffer.gpuBuffer;
 
         const pipeline = this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
             shadowUnit.strideBytes,
@@ -641,8 +640,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = unit.geometry.vertexBuffer?.gpuBuffer;
-        if (!vertexGPUBuffer) return;
+        const vertexGPUBuffer = unit.geometry.vertexBuffer.gpuBuffer;
 
         const useMasked = (unit.lodIndex === 0) && unit.isMasked;
         const pipeline = useMasked
@@ -687,8 +685,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = unit.geometry.vertexBuffer?.gpuBuffer;
-        if (!vertexGPUBuffer) return;
+        const vertexGPUBuffer = unit.geometry.vertexBuffer.gpuBuffer;
 
         const pipeline = unit.getPipeline(
             this.#pipelineRegistry,

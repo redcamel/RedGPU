@@ -11,8 +11,6 @@ import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
 import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 export const GRASS_CELL_SIZE: number = 16.0;
-const DEFAULT_GRASS_MIN_SCALE = Object.freeze([0.8, 0.8] as const);
-const DEFAULT_GRASS_MAX_SCALE = Object.freeze([1.2, 1.2] as const);
 
 /**
  * [KO] 지형(Landscape) 높이맵 및 레이어 가중치 텍스처를 기반으로 잔디 인스턴스를 100% GPU 베이킹하는 클래스입니다.
@@ -90,7 +88,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
             gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
         }
 
-        const targetDensity = Math.max(1, Math.min(1024, grass.instancesPerCell || 64));
+        const targetDensity = Math.max(1, Math.min(1024, grass.instancesPerCell));
         const maxCellsAllowed = Math.floor(alloc.maxInstances / targetDensity);
         const totalCells = Math.min(totalCircularCells, Math.max(1, maxCellsAllowed));
         if (totalCells <= 0) return;
@@ -99,10 +97,8 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
 
         const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, grass.targetLayer);
 
-        const minScale = grass.minScale || DEFAULT_GRASS_MIN_SCALE;
-        const maxScale = grass.maxScale || DEFAULT_GRASS_MAX_SCALE;
-        const [minScaleS, minScaleH] = minScale;
-        const [maxScaleS, maxScaleH] = maxScale;
+        const [minScaleS, minScaleH] = grass.minScale;
+        const [maxScaleS, maxScaleH] = grass.maxScale;
 
         const ui = this.#uniformInt32View;
         const uu = this.#uniformUint32View;
@@ -118,8 +114,8 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         uf[6] = invWorldSizeZ;
         uf[7] = heightScale;
 
-        uf[8] = grass.bottomOffset || 0.0;
-        uf[9] = grass.height || 1.0;
+        uf[8] = grass.bottomOffset;
+        uf[9] = grass.height;
         uf[10] = grass.minSlope ? Math.tan(grass.minSlope * 0.0174533) ** 2 : 0.0;
         uf[11] = grass.maxSlope ? Math.tan(grass.maxSlope * 0.0174533) ** 2 : 9999.0;
 

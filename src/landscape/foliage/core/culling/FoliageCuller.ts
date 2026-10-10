@@ -97,19 +97,20 @@ class FoliageCuller extends AScatterCuller {
         }
         const fovFactor = this.#cachedFovFactor;
 
-        if (this.#megaBuffer) {
-            const {hierarchicalZBuffer: hzb, projectionMatrix} = view;
-            this.#lastHZBTextureView = hzb?.textureView || null;
-            this.#lastHZBSampler = hzb?.sampler || null;
+        const megaBuffer = this.#megaBuffer;
+        if (!megaBuffer) return;
 
-            mat4.multiply(this.#tempPVMatrix, projectionMatrix, cam3D.viewMatrix);
+        const {hierarchicalZBuffer: hzb, projectionMatrix} = view;
+        this.#lastHZBTextureView = hzb?.textureView || null;
+        this.#lastHZBSampler = hzb?.sampler || null;
 
-            this.#megaBuffer.updateUnifiedGlobalUniforms(
-                renderViewStateData,
-                fovFactor,
-                this.#tempPVMatrix
-            );
-        }
+        mat4.multiply(this.#tempPVMatrix, projectionMatrix, cam3D.viewMatrix);
+
+        megaBuffer.updateUnifiedGlobalUniforms(
+            renderViewStateData,
+            fovFactor,
+            this.#tempPVMatrix
+        );
     }
 
     /**
@@ -126,20 +127,19 @@ class FoliageCuller extends AScatterCuller {
      */
     dispatchPass(computePass: GPUComputePassEncoder): void {
         const {computePipeline, bindGroupLayout} = this;
-        if (!computePipeline || !bindGroupLayout) return;
+        const megaBuffer = this.#megaBuffer;
+        if (!computePipeline || !bindGroupLayout || !megaBuffer) return;
 
-        if (this.#megaBuffer) {
-            const totalAllocatedInstances = this.#megaBuffer.totalAllocatedInstances;
-            if (totalAllocatedInstances <= 0) return;
+        const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
+        if (totalAllocatedInstances <= 0) return;
 
-            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
-                bindGroupLayout,
-                this.#lastHZBTextureView,
-                this.#lastHZBSampler
-            );
-            if (unifiedBindGroup) {
-                this.dispatchCompute(computePass, unifiedBindGroup, totalAllocatedInstances, 64);
-            }
+        const unifiedBindGroup = megaBuffer.getOrCreateUnifiedCullingBindGroup(
+            bindGroupLayout,
+            this.#lastHZBTextureView,
+            this.#lastHZBSampler
+        );
+        if (unifiedBindGroup) {
+            this.dispatchCompute(computePass, unifiedBindGroup, totalAllocatedInstances, 64);
         }
     }
 

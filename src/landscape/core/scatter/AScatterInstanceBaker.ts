@@ -98,34 +98,59 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 스플랫 레이어에서 대상 레이어의 가중치 텍스처 뷰 및 채널 인덱스를 안전하게 추출합니다. (Zero-GC 재사용 객체 반환)
-     * [EN] Safely resolves the weight texture view and channel index of the target layer from landscape layers. (Returns zero-GC reused object)
-     *
-     * @param landscape - 대상 Landscape 지형 인스턴스
-     * @param targetLayer - 대상 레이어 식별자 (레이어 인덱스 또는 고유 이름)
+     * [KO] 특정 타입 ID에 대해 유효한 GPUBindGroup을 반환하거나, 리소스가 변경된 경우 재생성하여 캐싱합니다.
+     * [EN] Returns a valid GPUBindGroup for the specified type ID, or re-creates and caches it if resources have changed.
      */
-    protected resolveWeightLayer(
-        landscape: Landscape,
-        targetLayer?: string | number | null
-    ): ResolvedWeightLayerInfo {
-        const info = this.#resolvedWeightInfo;
-        const emptyView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
-        info.weightView = emptyView;
-        info.hasWeightMap = 0;
-        info.weightChannelIndex = 0;
+    getOrCreateBindGroup(
+        typeId: number,
+        labelPrefix: string,
+        rawBuffer: GPUBuffer,
+        vhtView: GPUTextureView,
+        vbtView: GPUTextureView,
+        weightView: GPUTextureView,
+        tasksBuffer: GPUBuffer
+    ): GPUBindGroup | null {
+        const gpuDevice = this.gpuDevice;
+        const bindGroupLayout = this.#bindGroupLayout;
+        const uniformBuffer = this.#uniformGPUBuffer;
+        const defaultSampler = this.#defaultSampler;
+        if (!bindGroupLayout || !uniformBuffer || !defaultSampler) return null;
 
-        if (targetLayer !== undefined && targetLayer !== null && targetLayer !== '' && landscape.layers) {
-            const matchedLayer = typeof targetLayer === 'number'
-                ? landscape.layers[targetLayer]
-                : landscape.layers.find((l: any) => l.name === targetLayer);
-            if (matchedLayer?.weightTexture?.gpuTexture) {
-                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
-                    || matchedLayer.weightTexture.gpuTexture.createView();
-                info.hasWeightMap = 1;
-                info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
-            }
+        let cacheEntry = this.#bakeBindGroupCache.get(typeId);
+        const needsNewBindGroup = !cacheEntry
+            || cacheEntry.rawBuffer !== rawBuffer
+            || cacheEntry.vhtView !== vhtView
+            || cacheEntry.vbtView !== vbtView
+            || cacheEntry.weightView !== weightView
+            || cacheEntry.tasksBuffer !== tasksBuffer;
+
+        if (needsNewBindGroup) {
+            const bindGroup = gpuDevice.createBindGroup({
+                label: `${labelPrefix}_BG_Type_${typeId}`,
+                layout: bindGroupLayout,
+                entries: [
+                    {binding: 0, resource: {buffer: uniformBuffer}},
+                    {binding: 1, resource: {buffer: rawBuffer}},
+                    {binding: 2, resource: vhtView},
+                    {binding: 3, resource: vbtView},
+                    {binding: 4, resource: defaultSampler},
+                    {binding: 5, resource: weightView},
+                    {binding: 6, resource: {buffer: tasksBuffer}}
+                ]
+            });
+
+            cacheEntry = {
+                bindGroup,
+                rawBuffer,
+                vhtView,
+                vbtView,
+                weightView,
+                tasksBuffer
+            };
+            this.#bakeBindGroupCache.set(typeId, cacheEntry);
         }
-        return info;
+
+        return cacheEntry.bindGroup;
     }
 
     /**
@@ -142,7 +167,6 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         uniformByteLength: number = 256
     ): void {
         const {resourceManager, gpuDevice} = this.redGPUContext;
-        if (!gpuDevice) return;
 
         const shaderName = `${label}_ShaderModule`;
         const shaderInfo = resourceManager.wgslParser.parse(shaderName, shaderCode);
@@ -183,59 +207,34 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
     }
 
     /**
-     * [KO] 특정 타입 ID에 대해 유효한 GPUBindGroup을 반환하거나, 리소스가 변경된 경우 재생성하여 캐싱합니다.
-     * [EN] Returns a valid GPUBindGroup for the specified type ID, or re-creates and caches it if resources have changed.
+     * [KO] 지형 스플랫 레이어에서 대상 레이어의 가중치 텍스처 뷰 및 채널 인덱스를 안전하게 추출합니다. (Zero-GC 재사용 객체 반환)
+     * [EN] Safely resolves the weight texture view and channel index of the target layer from landscape layers. (Returns zero-GC reused object)
+     *
+     * @param landscape - 대상 Landscape 지형 인스턴스
+     * @param targetLayer - 대상 레이어 식별자 (레이어 인덱스 또는 고유 이름)
      */
-    getOrCreateBindGroup(
-        typeId: number,
-        labelPrefix: string,
-        rawBuffer: GPUBuffer,
-        vhtView: GPUTextureView,
-        vbtView: GPUTextureView,
-        weightView: GPUTextureView,
-        tasksBuffer: GPUBuffer
-    ): GPUBindGroup | null {
-        const gpuDevice = this.gpuDevice;
-        const bindGroupLayout = this.#bindGroupLayout;
-        const uniformBuffer = this.#uniformGPUBuffer;
-        const defaultSampler = this.#defaultSampler;
-        if (!gpuDevice || !bindGroupLayout || !uniformBuffer || !defaultSampler) return null;
+    protected resolveWeightLayer(
+        landscape: Landscape,
+        targetLayer?: string | number | null
+    ): ResolvedWeightLayerInfo {
+        const info = this.#resolvedWeightInfo;
+        const emptyView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
+        info.weightView = emptyView;
+        info.hasWeightMap = 0;
+        info.weightChannelIndex = 0;
 
-        let cacheEntry = this.#bakeBindGroupCache.get(typeId);
-        const needsNewBindGroup = !cacheEntry
-            || cacheEntry.rawBuffer !== rawBuffer
-            || cacheEntry.vhtView !== vhtView
-            || cacheEntry.vbtView !== vbtView
-            || cacheEntry.weightView !== weightView
-            || cacheEntry.tasksBuffer !== tasksBuffer;
-
-        if (needsNewBindGroup) {
-            const bindGroup = gpuDevice.createBindGroup({
-                label: `${labelPrefix}_BG_Type_${typeId}`,
-                layout: bindGroupLayout,
-                entries: [
-                    {binding: 0, resource: {buffer: uniformBuffer}},
-                    {binding: 1, resource: {buffer: rawBuffer}},
-                    {binding: 2, resource: vhtView},
-                    {binding: 3, resource: vbtView},
-                    {binding: 4, resource: defaultSampler},
-                    {binding: 5, resource: weightView},
-                    {binding: 6, resource: {buffer: tasksBuffer}}
-                ]
-            });
-
-            cacheEntry = {
-                bindGroup,
-                rawBuffer,
-                vhtView,
-                vbtView,
-                weightView,
-                tasksBuffer
-            };
-            this.#bakeBindGroupCache.set(typeId, cacheEntry);
+        if (targetLayer != null && targetLayer !== '' && landscape.layers) {
+            const matchedLayer = typeof targetLayer === 'number'
+                ? landscape.layers[targetLayer]
+                : landscape.layers.find((l: any) => l.name === targetLayer);
+            if (matchedLayer?.weightTexture?.gpuTexture) {
+                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture)
+                    || matchedLayer.weightTexture.gpuTexture.createView();
+                info.hasWeightMap = 1;
+                info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
+            }
         }
-
-        return cacheEntry.bindGroup;
+        return info;
     }
 }
 

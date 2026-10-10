@@ -132,8 +132,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, foliage.targetLayer);
 
-        const minScale = foliage.minScale || [0.8, 0.8, 0.8];
-        const maxScale = foliage.maxScale || [1.2, 1.2, 1.2];
+        const {minScale, maxScale} = foliage;
         const [minScaleX, minScaleY, minScaleZ] = minScale;
         const [maxScaleX, maxScaleY, maxScaleZ] = maxScale;
         const scaleDiffX = maxScaleX - minScaleX;
@@ -149,7 +148,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         f32[3] = halfWorldZ;
 
         f32[4] = FIXED_GRID;
-        u32[5] = Math.max(1, Math.round((foliage.densityPerHectare || 50) * (foliage.densityMultiplier || 1.0)));
+        u32[5] = Math.max(1, Math.round(foliage.densityPerHectare * foliage.densityMultiplier));
         u32[6] = u32[5] * 2;
         u32[7] = foliage.nameHash || 0;
 
@@ -160,11 +159,11 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         f32[12] = scaleDiffY;
         f32[13] = scaleDiffZ;
-        f32[14] = foliage.bottomOffset || 0.0;
+        f32[14] = foliage.bottomOffset;
         f32[15] = foliage.minSlope ? Math.tan(foliage.minSlope * 0.0174533) ** 2 : 0.0;
 
         f32[16] = foliage.maxSlope ? Math.tan(foliage.maxSlope * 0.0174533) ** 2 : 9999.0;
-        f32[17] = foliage.alignFactor ?? 1.0;
+        f32[17] = foliage.alignFactor;
         u32[18] = (foliage.minSlope > 0 || foliage.maxSlope < 90) ? 1 : 0;
         u32[19] = foliage.alignToNormal ? 1 : 0;
 

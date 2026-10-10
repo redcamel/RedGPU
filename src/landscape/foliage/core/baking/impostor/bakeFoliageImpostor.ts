@@ -170,8 +170,8 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
         const vData = vBuffer?.data;
         if (!vData || vData.length === 0) continue;
 
-        const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
-        const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
+        const stride = vBuffer.stride;
+        const vCount = vBuffer.vertexCount;
         const m = unit.relativeModelMatrix;
         const isIdentity = isIdentityMatrix(m);
 
@@ -477,7 +477,7 @@ export default function bakeFoliageImpostor(
                 else if (typeof mat.metallic === 'number') metallic = mat.metallic;
                 if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
                 if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
-                useVertexColor = !!(mat.useVertexColor || mat.useVertexColor_0 || mat.useVertexColor0);
+                useVertexColor = !!mat.useVertexColor;
             }
 
             const hasDiff = !!(diffTex && diffTex.gpuTexture);

@@ -126,7 +126,7 @@ function createPBRRenderUnit(
 ): FoliageRenderUnit {
     const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = (mat as any) || {};
 
-    const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
+    const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial;
     const isMasked = !!useCutOff || alphaBlend === 1 || alphaBlend === 2 || !!transparent || isImpostor;
 
     const {slotPooler, groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = sharedContext;

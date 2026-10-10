@@ -165,7 +165,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         grassType.onUniformDirty = this.#onGrassUniformDirty;
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
-        if (grassType.targetLayer !== undefined && grassType.targetLayer !== null && grassType.targetLayer !== '' && this.landscape.layers) {
+        if (grassType.targetLayer != null && grassType.targetLayer !== '' && this.landscape.layers) {
             const matchedLayer = typeof grassType.targetLayer === 'number'
                 ? this.landscape.layers[grassType.targetLayer]
                 : this.landscape.layers.find(
@@ -223,13 +223,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const dz = camZ - lastBakeZ;
         const distSq = dx * dx + dz * dz;
 
-        let minRadius = 120.0;
-        if (grassLen > 0) {
-            minRadius = types[0].streamingRadius;
-            for (let i = 1; i < grassLen; i++) {
-                const r = types[i].streamingRadius;
-                if (r < minRadius) minRadius = r;
-            }
+        let minRadius = types[0].streamingRadius;
+        for (let i = 1; i < grassLen; i++) {
+            const r = types[i].streamingRadius;
+            if (r < minRadius) minRadius = r;
         }
         const bakeThreshold = Math.max(16.0, minRadius * 0.35);
 
