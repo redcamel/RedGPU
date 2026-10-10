@@ -85,8 +85,9 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         const {computePipeline, uniformGPUBuffer, gpuDevice, resourceManager} = this;
         const {emptyBitmapTextureView} = resourceManager;
 
-        const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || emptyBitmapTextureView;
-        const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || emptyBitmapTextureView;
+        const {vhtAtlasTexture, vbtBaseColorAtlas} = landscape;
+        const vhtView = vhtAtlasTexture?.gpuTextureView || emptyBitmapTextureView;
+        const vbtView = vbtBaseColorAtlas?.gpuTextureView || emptyBitmapTextureView;
 
         const {
             worldSizeX,

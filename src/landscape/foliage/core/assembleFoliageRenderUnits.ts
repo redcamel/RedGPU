@@ -149,7 +149,11 @@ function createPBRRenderUnit(
         }
     }
 
-    const hasBaseColorTexture = !!(baseColorTexture && (baseColorTexture.gpuTexture || baseColorTexture.src || baseColorTexture.url));
+    let hasBaseColorTexture = false;
+    if (baseColorTexture) {
+        const {gpuTexture, src, url} = baseColorTexture;
+        hasBaseColorTexture = !!(gpuTexture || src || url);
+    }
     const isDepthPrepass = !isImpostor && (lodIndex <= 0) && (!isMasked || hasBaseColorTexture);
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
@@ -296,11 +300,12 @@ export default function assembleFoliageRenderUnits(
 
             for (let g = 0; g < groups.length; g++) {
                 const group = groups[g];
+                const {geometry, material, firstIndex, indexCount} = group;
                 const unit = createPBRRenderUnit(
-                    unifiedGeometry || group.geometry,
-                    group.material,
-                    group.firstIndex,
-                    group.indexCount,
+                    unifiedGeometry || geometry,
+                    material,
+                    firstIndex,
+                    indexCount,
                     l,
                     lodReceiveShadow,
                     treeH,

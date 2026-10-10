@@ -525,8 +525,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
                     for (let s = 0; s < unitCount; s++) {
                         const unit = allRenderUnits[s];
-                        if (unit.isImpostor || unit.lodIndex !== targetLOD) continue;
-                        const {instanceBufferOffset, indirectOffsetBytes} = unit;
+                        const {isImpostor, lodIndex, instanceBufferOffset, indirectOffsetBytes} = unit;
+                        if (isImpostor || lodIndex !== targetLOD) continue;
                         const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                         const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                         this.#drawShadowRenderUnit(bundleEncoder, unit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
@@ -640,24 +640,25 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const vertexGPUBuffer = unit.geometry.vertexBuffer.gpuBuffer;
+        const {geometry, lodIndex, isMasked, material, strideBytes} = unit;
+        const vertexGPUBuffer = geometry.vertexBuffer.gpuBuffer;
 
-        const useMasked = (unit.lodIndex === 0) && unit.isMasked;
+        const useMasked = (lodIndex === 0) && isMasked;
         const pipeline = useMasked
             ? this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
-                unit.material,
-                unit.strideBytes,
+                material,
+                strideBytes,
                 'none',
                 this.#renderUnitVertexBindGroupLayout
             )
             : this.#pipelineRegistry.getOrCreateShadowMergedPipeline(
-                unit.strideBytes,
+                strideBytes,
                 'none',
                 this.#renderUnitVertexBindGroupLayout
             );
         if (!pipeline) return;
 
-        const matUniformBG = useMasked ? (unit.material.gpuRenderInfo?.fragmentUniformBindGroup ?? null) : null;
+        const matUniformBG = useMasked ? (material.gpuRenderInfo?.fragmentUniformBindGroup ?? null) : null;
 
         this.#bindAndDrawUnit(
             passEncoder,

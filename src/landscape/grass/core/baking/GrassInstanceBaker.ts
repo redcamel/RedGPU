@@ -82,7 +82,8 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const activeOffsetsBuffer = this.#cellOffsetsGPUBuffer;
         if (this.#currentUploadedRadius !== cellRadius) {
             this.#currentUploadedRadius = cellRadius;
-            gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
+            const {buffer, byteLength} = spiralOffsets;
+            gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, buffer, 0, byteLength);
         }
 
         const {

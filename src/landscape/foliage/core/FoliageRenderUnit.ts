@@ -309,20 +309,21 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
             material.dirtyPipeline = false;
         }
 
-        const cullMode: GPUCullMode = (!this.isMasked)
+        const {doubleSided, cullMode = 'back'} = material;
+        const effectiveCullMode: GPUCullMode = (!this.isMasked)
             ? 'back'
-            : (material.doubleSided ? 'none' : (material.cullMode ?? 'back'));
+            : (doubleSided ? 'none' : cullMode);
 
         return registry.getOrCreatePipeline(
             material,
             sampleCount,
             msaaID,
             this.strideBytes,
-            cullMode,
+            effectiveCullMode,
             depthPassMode,
             renderUnitBindGroupLayout,
             this.isMasked
-        ) || null;
+        );
     }
 }
 

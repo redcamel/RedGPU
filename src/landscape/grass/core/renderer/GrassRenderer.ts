@@ -224,8 +224,9 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         let shadowMaskHigh = 0;
         for (let i = 0; i < count; i++) {
             const g = grassList[i];
-            if (g.castShadow && g.slotIndex >= 0) {
-                const bit = g.typeId;
+            const {castShadow, slotIndex, typeId} = g;
+            if (castShadow && slotIndex >= 0) {
+                const bit = typeId;
                 if (bit >= 64) continue;
                 if (bit < 32) {
                     shadowMaskLow |= (1 << bit);

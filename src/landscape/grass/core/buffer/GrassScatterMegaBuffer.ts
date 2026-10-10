@@ -144,21 +144,23 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         for (let s = 0; s < renderUnitCount; s++) {
             const unit = renderUnits[s];
+            const {indexCount, firstIndex} = unit;
             const slotIdx = indirectBaseOffset + s;
             const nearSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
-            this.registerIndirectDrawSlot(slotIdx, unit.indexCount, unit.firstIndex, 0, nearCulledOffset);
+            this.registerIndirectDrawSlot(slotIdx, indexCount, firstIndex, 0, nearCulledOffset);
             nearSlots.push(nearSlot);
         }
 
         for (let s = 0; s < renderUnitCount; s++) {
             const unit = renderUnits[s];
+            const {indexCount, firstIndex} = unit;
             const slotIdx = indirectBaseOffset + renderUnitCount + s;
             const farSlot: GrassDrawSlot = {
                 indirectOffset: slotIdx
             };
-            this.registerIndirectDrawSlot(slotIdx, unit.indexCount, unit.firstIndex, 0, farCulledOffset);
+            this.registerIndirectDrawSlot(slotIdx, indexCount, firstIndex, 0, farCulledOffset);
             farSlots.push(farSlot);
         }
 

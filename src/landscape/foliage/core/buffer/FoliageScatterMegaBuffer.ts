@@ -104,9 +104,10 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             this.maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * SHADOW_CASCADE_COUNT
         );
 
+        const {uniforms, structs} = shaderInfo;
         const globalUniformBytes =
-            shaderInfo.uniforms?.['globalUniforms']?.arrayBufferByteLength ||
-            shaderInfo.structs?.['FoliageCullingUniforms']?.arrayBufferByteLength;
+            uniforms?.['globalUniforms']?.arrayBufferByteLength ||
+            structs?.['FoliageCullingUniforms']?.arrayBufferByteLength;
         if (!globalUniformBytes) {
             throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullWGSL.');
         }
@@ -201,22 +202,24 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         for (let s = 0; s < renderUnitCount; s++) {
             const unit = renderUnits[s];
-            unit.instanceBufferOffset = (culledBaseOffset + (unit.lodIndex * alignedMaxInstances)) * strideBytes;
+            const {lodIndex} = unit;
+            unit.instanceBufferOffset = (culledBaseOffset + (lodIndex * alignedMaxInstances)) * strideBytes;
             unit.indirectOffsetBytes = (indirectBaseOffset + s) * 20;
         }
 
         if (shadowMergedRenderUnits && lodInfoList) {
             for (let i = 0; i < shadowMergedRenderUnits.length; i++) {
                 const shadowUnit = shadowMergedRenderUnits[i];
+                const {lodIndex} = shadowUnit;
                 let lodInfo: any = null;
                 for (let l = 0; l < lodInfoList.length; l++) {
-                    if (lodInfoList[l].lodIndex === shadowUnit.lodIndex) {
+                    if (lodInfoList[l].lodIndex === lodIndex) {
                         lodInfo = lodInfoList[l];
                         break;
                     }
                 }
                 const unitOffset = lodInfo?.renderUnitOffset ?? 0;
-                shadowUnit.instanceBufferOffset = (culledBaseOffset + (shadowUnit.lodIndex * alignedMaxInstances)) * strideBytes;
+                shadowUnit.instanceBufferOffset = (culledBaseOffset + (lodIndex * alignedMaxInstances)) * strideBytes;
                 shadowUnit.indirectOffsetBytes = (indirectBaseOffset + unitOffset) * 20;
             }
         }

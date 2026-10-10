@@ -1267,14 +1267,15 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             const subCellSize = landscape.foliageManager.subCellSize;
             for (let i = 0; i < count; i++) {
                 const subCell = mounted[i];
-                if (subCell.isMounted && subCell.instanceCount > 0) {
+                const {isMounted, instanceCount, mountedSlotIndex} = subCell;
+                if (isMounted && instanceCount > 0) {
                     baker.dispatchBakeSubCell(
                         this.#megaBuffer,
                         landscape,
                         this,
                         subCell,
-                        alloc.rawBaseOffset + subCell.mountedSlotIndex,
-                        subCell.instanceCount,
+                        alloc.rawBaseOffset + mountedSlotIndex,
+                        instanceCount,
                         subCellSize
                     );
                 }

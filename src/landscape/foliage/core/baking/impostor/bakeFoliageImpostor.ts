@@ -164,22 +164,20 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
 
     for (let s = 0; s < renderUnits.length; s++) {
         const unit = renderUnits[s];
-        if (unit.isImpostor) continue;
+        const {isImpostor, geometry, relativeModelMatrix} = unit;
+        if (isImpostor) continue;
 
-        const vBuffer = unit.geometry.vertexBuffer;
-        const vData = vBuffer.data;
-        if (!vData || vData.length === 0) continue;
+        const {vertexBuffer} = geometry;
+        const {data, stride, vertexCount} = vertexBuffer;
+        if (!data || data.length === 0) continue;
 
-        const stride = vBuffer.stride;
-        const vCount = vBuffer.vertexCount;
-        const m = unit.relativeModelMatrix;
-        const isIdentity = isIdentityMatrix(m);
+        const isIdentity = isIdentityMatrix(relativeModelMatrix);
 
         if (isIdentity) {
-            for (let i = 0, idx = 0; i < vCount; i++, idx += stride) {
-                const x = vData[idx];
-                const y = vData[idx + 1];
-                const z = vData[idx + 2];
+            for (let i = 0, idx = 0; i < vertexCount; i++, idx += stride) {
+                const x = data[idx];
+                const y = data[idx + 1];
+                const z = data[idx + 2];
 
                 if (x < minX) minX = x;
                 if (y < minY) minY = y;
@@ -192,15 +190,15 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
                 if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
             }
         } else {
-            const modelMatrix = m;
+            const modelMatrix = relativeModelMatrix;
             const m0 = modelMatrix[0], m4 = modelMatrix[4], m8 = modelMatrix[8], m12 = modelMatrix[12];
             const m1 = modelMatrix[1], m5 = modelMatrix[5], m9 = modelMatrix[9], m13 = modelMatrix[13];
             const m2 = modelMatrix[2], m6 = modelMatrix[6], m10 = modelMatrix[10], m14 = modelMatrix[14];
 
-            for (let i = 0, idx = 0; i < vCount; i++, idx += stride) {
-                const x = vData[idx];
-                const y = vData[idx + 1];
-                const z = vData[idx + 2];
+            for (let i = 0, idx = 0; i < vertexCount; i++, idx += stride) {
+                const x = data[idx];
+                const y = data[idx + 1];
+                const z = data[idx + 2];
 
                 const wx = m0 * x + m4 * y + m8 * z + m12;
                 const wy = m1 * x + m5 * y + m9 * z + m13;
@@ -276,12 +274,12 @@ export default function bakeFoliageImpostor(
     renderUnits: FoliageRenderUnit[],
     bakeName: string = 'Foliage'
 ): FoliageBakeResult {
-    const gpuDevice = redGPUContext.gpuDevice;
+    const {gpuDevice} = redGPUContext;
     const cache = getOrCreateContextCache(redGPUContext);
 
     const aabb = calculateAABBFromRenderUnits(renderUnits);
-    const [centerX, centerY, centerZ] = aabb.center;
-        const maxRadius = aabb.maxRadius;
+    const {center, maxRadius} = aabb;
+    const [centerX, centerY, centerZ] = center;
 
         const margin = 1.25;
         const orthoHalfWidth = maxRadius * margin;
@@ -469,7 +467,8 @@ export default function bakeFoliageImpostor(
             let metallic = 0.0;
             let ao = 1.0;
             let cutOff = 0.35;
-        const bcf = mat.baseColorFactor || mat.color;
+        const {baseColorFactor, color} = mat;
+        const bcf = baseColorFactor || color;
         if (bcf) {
             if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
                 [r = 1.0, g = 1.0, b = 1.0, a = 1.0] = bcf as any;
@@ -547,20 +546,27 @@ export default function bakeFoliageImpostor(
 
             for (let s = 0; s < totalUnits; s++) {
                 const cached = cachedRenderUnits[s];
+                const {
+                    isImpostor,
+                    isIdentityModelMatrix,
+                    relativeModelMatrix,
+                    matProps,
+                    modelMatProps
+                } = cached;
                 const baseOffset = drawSlot * strideFloats;
                 drawSlot++;
 
-                if (cached.isImpostor) continue;
+                if (isImpostor) continue;
 
-                if (cached.isIdentityModelMatrix || !cached.relativeModelMatrix) {
+                if (isIdentityModelMatrix || !relativeModelMatrix) {
                     allInstanceData.set(vpInfo.projView, baseOffset);
                 } else {
-                    mat4.multiply(tempMVP, vpInfo.projView, cached.relativeModelMatrix);
+                    mat4.multiply(tempMVP, vpInfo.projView, relativeModelMatrix);
                     allInstanceData.set(tempMVP, baseOffset);
                 }
 
-                allInstanceData.set(cached.matProps, baseOffset + 16);
-                allInstanceData.set(cached.modelMatProps, baseOffset + 28);
+                allInstanceData.set(matProps, baseOffset + 16);
+                allInstanceData.set(modelMatProps, baseOffset + 28);
 
                 allInstanceData[baseOffset + 40] = centerX;
                 allInstanceData[baseOffset + 41] = centerY;
