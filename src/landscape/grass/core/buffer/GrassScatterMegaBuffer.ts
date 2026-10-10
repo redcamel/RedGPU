@@ -243,11 +243,11 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const baseFloat = typeId * typeParamFloats;
         const {cpuTypeParamsBuffer: cf, cpuTypeParamsUint32: cu} = this;
 
-        const cullingDist = grass.cullingDistance || 80.0;
-        const farDist = grass.farDistance || (cullingDist * 0.5);
+        const cullingDist = grass.cullingDistance;
+        const farDist = grass.farDistance;
         const fadeStartDist = Math.min(grass.fadeStartDistance, cullingDist);
 
-        const shadowCullDist = grass.shadowCullDistance || 35.0;
+        const shadowCullDist = grass.shadowCullDistance;
         const shadowFadeStartDist = Math.min(grass.shadowFadeStartDistance, shadowCullDist);
 
         cf[baseFloat + 0] = cullingDist * cullingDist;

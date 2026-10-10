@@ -30,7 +30,7 @@ function sampleNormalizedLayerWeight(
     v: number
 ): number {
     if (!targetLayer) return 0.0;
-    const layers = landscape?.layers;
+    const layers = landscape.layers;
     if (!layers || layers.length <= 1) {
         return typeof targetLayer.getWeightAtUV === 'function' ? targetLayer.getWeightAtUV(u, v) : 0.0;
     }
@@ -751,7 +751,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Returns the number of instances currently active and streamed into GPU buffers.
      */
     get activeInstanceCount(): number {
-        return this.allocation?.instanceCount ?? 0;
+        return this.allocation ? this.allocation.instanceCount : 0;
     }
 
     /**
@@ -1434,8 +1434,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         const targetSlot = allocation.rawBaseOffset + currentActive;
         const landscape = this.#landscape;
 
-        if (landscape?.hasValidScatterAtlas) {
-            this.#baker!.dispatchBakeSubCell(
+        if (landscape.hasValidScatterAtlas) {
+            this.#baker.dispatchBakeSubCell(
                 megaBuffer,
                 landscape,
                 this,
@@ -1532,7 +1532,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (targetCountPerHectare <= 0) return cell;
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
         let targetLayerObj: any = null;
-        if (hasTargetLayer && landscape?.layers) {
+        if (hasTargetLayer && landscape.layers) {
             if (typeof targetLayer === 'string') {
                 const layers = landscape.layers;
                 const len = layers.length;

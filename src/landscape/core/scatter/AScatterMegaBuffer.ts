@@ -146,14 +146,14 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
 
         const {shaderInfo, instanceStructName, typeParamStructName} = reflectionConfig;
 
-        const strideBytes = shaderInfo.structs?.[instanceStructName]?.arrayBufferByteLength;
+        const strideBytes = shaderInfo.structs[instanceStructName]?.arrayBufferByteLength;
 
         if (!strideBytes) {
             throw new Error(`[AScatterMegaBuffer] Failed to reflect instance stride for "${instanceStructName}".`);
         }
 
         const typeParamBytes = typeParamStructName
-            ? shaderInfo.structs?.[typeParamStructName]?.arrayBufferByteLength
+            ? shaderInfo.structs[typeParamStructName]?.arrayBufferByteLength
             : 0;
 
         if (typeParamStructName && !typeParamBytes) {

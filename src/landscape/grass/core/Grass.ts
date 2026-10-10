@@ -196,9 +196,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         this.#isUnifiedGeometryOwned = true;
 
         const primaryGroup = assemblyResult.groups[0];
-        const targetMaterial = primaryGroup.material ?? mesh.material;
+        const targetMaterial = primaryGroup.material;
 
-        const resolvedTexture = baseColorTexture ?? targetMaterial?.baseColorTexture;
+        const resolvedTexture = baseColorTexture ?? targetMaterial.baseColorTexture;
         if (typeof resolvedTexture === 'string') {
             this.#baseColorTexture = new BitmapTexture(redGPUContext, resolvedTexture);
         } else if (resolvedTexture) {
@@ -248,7 +248,7 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         if (maxScale) this.#maxScale[0] = maxScale[0], this.#maxScale[1] = maxScale[1];
 
         this.#alphaCutoff = alphaCutoff;
-        this.#roughness = roughness ?? targetMaterial?.roughnessFactor ?? targetMaterial?.roughness ?? 0.55;
+        this.#roughness = roughness ?? targetMaterial.roughnessFactor ?? targetMaterial.roughness ?? 0.55;
 
         if (subsurfaceStrength !== undefined) this.#subsurfaceStrength = subsurfaceStrength;
         if (subsurfaceColor) this.#subsurfaceColor = [...subsurfaceColor];
@@ -331,11 +331,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Base color GPUTextureView used for grass rendering
      */
     get baseColorTextureView(): GPUTextureView {
-        if (this.#baseColorTexture) {
-            return this.resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
-                || this.resourceManager.emptyBitmapTextureView;
-        }
-        return this.resourceManager.emptyBitmapTextureView;
+        return this.resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
+            || this.resourceManager.emptyBitmapTextureView;
     }
 
     /**

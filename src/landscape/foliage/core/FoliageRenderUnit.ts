@@ -305,7 +305,7 @@ export class FoliageRenderUnit extends ScatterRenderUnit {
         if (!material) return null;
 
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
-            material._updateFragmentState?.();
+            material._updateFragmentState();
             material.dirtyPipeline = false;
         }
 

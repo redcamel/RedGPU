@@ -166,8 +166,8 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
         const unit = renderUnits[s];
         if (unit.isImpostor) continue;
 
-        const vBuffer = unit.geometry?.vertexBuffer;
-        const vData = vBuffer?.data;
+        const vBuffer = unit.geometry.vertexBuffer;
+        const vData = vBuffer.data;
         if (!vData || vData.length === 0) continue;
 
         const stride = vBuffer.stride;

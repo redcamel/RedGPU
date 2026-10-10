@@ -378,7 +378,7 @@ export default function assembleScatterRenderUnits(
 
         for (let g = 0; g < raws.length; g++) {
             const geom = raws[g].geometry;
-            const vCount = geom.vertexBuffer?.vertexCount ?? 0;
+            const vCount = geom.vertexBuffer.vertexCount;
             totalVertexCount += vCount;
             totalIndexCount += geom.indexBuffer?.indexCount ?? vCount;
         }
@@ -395,9 +395,9 @@ export default function assembleScatterRenderUnits(
             const raw = raws[g];
             const {geometry: geom, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
             const {vertexBuffer: srcVB, indexBuffer: srcIB} = geom;
-            const srcVData = srcVB?.data;
+            const srcVData = srcVB.data;
             const srcIData = srcIB?.data;
-            const vCount = srcVB?.vertexCount ?? 0;
+            const vCount = srcVB.vertexCount;
 
             if (srcVData && vCount > 0) {
 
@@ -516,7 +516,7 @@ export default function assembleScatterRenderUnits(
                     }
                 }
 
-                if (srcIData && geom.indexBuffer?.indexCount) {
+                if (srcIData && srcIB?.indexCount) {
                     const iCount = geom.indexBuffer.indexCount;
                     for (let idx = 0; idx < iCount; idx++) {
                         const sVal = srcIData[idx];

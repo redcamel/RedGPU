@@ -123,7 +123,8 @@ class FoliagePipelineRegistry extends RedGPUObject {
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
         const isOctahedral = material instanceof OctahedralImpostorMaterial;
-        const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url);
+        const bTex = material.baseColorTexture;
+        const hasBaseColorTexture = !!(bTex && (bTex.gpuTexture || bTex.src || bTex.url));
 
         if (isOctahedral && isDepthPrepass) {
             return null;
@@ -373,7 +374,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
         if (!material) return null;
 
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
-            material._updateFragmentState?.();
+            material._updateFragmentState();
             material.dirtyPipeline = false;
         }
 
