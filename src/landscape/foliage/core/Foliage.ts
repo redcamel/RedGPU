@@ -1510,7 +1510,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #populateSingleSubCell(scX: number, scZ: number, subCellSize: number, currentLandscape?: Landscape): FoliageSubCell {
         const key = packSubCellKey(scX, scZ);
-        const landscape = currentLandscape || this.#landscape;
+        const landscape = currentLandscape ?? this.#landscape;
         if (!landscape) {
             throw new Error('[Foliage] Cannot populate sub-cell without an attached Landscape.');
         }

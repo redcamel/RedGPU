@@ -559,7 +559,7 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
 
         const {gpuDevice} = this;
         const {STORAGE, COPY_DST} = GPUBufferUsage;
-        this.#rawGPUBuffer?.destroy();
+        this.#rawGPUBuffer.destroy();
         this.#rawGPUBuffer = gpuDevice.createBuffer({
             label: `${this.constructor.name}_RawInstances`,
             size: newCapacity * this.#strideBytes,
@@ -577,10 +577,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Releases all GPU resources and internal memory of the mega-buffer.
      */
     destroy(): void {
-        this.#rawGPUBuffer?.destroy();
+        this.#rawGPUBuffer.destroy();
         this.#culledGPUBuffer?.destroy();
-        this.#indirectGPUBuffer?.destroy();
-        this.#indirectResetTemplateGPUBuffer?.destroy();
+        this.#indirectGPUBuffer.destroy();
+        this.#indirectResetTemplateGPUBuffer.destroy();
         this.#typeParamsGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = null;

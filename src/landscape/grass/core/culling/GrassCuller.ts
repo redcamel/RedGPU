@@ -78,7 +78,7 @@ class GrassCuller extends AScatterCuller {
 
     override destroy(): void {
         super.destroy();
-        this.#globalUniformBuffer?.destroy();
+        this.#globalUniformBuffer.destroy();
         this.#globalUniformBuffer = null;
     }
 }

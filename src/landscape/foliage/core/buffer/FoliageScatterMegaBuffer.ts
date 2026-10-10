@@ -583,11 +583,11 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         const {VERTEX, STORAGE} = GPUBufferUsage;
         const culledBufferUsage = VERTEX | STORAGE;
 
-        const instanceCapacity = newCapacity || this.instanceCapacity;
+        const instanceCapacity = newCapacity > 0 ? newCapacity : this.instanceCapacity;
         const culledByteSize = instanceCapacity * 8 * strideBytes;
 
-        this.culledGPUBuffer?.destroy();
-        this.#shadowCulledGPUBuffer?.destroy();
+        this.culledGPUBuffer.destroy();
+        this.#shadowCulledGPUBuffer.destroy();
 
         this.culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageScatterMegaBuffer_Culled_Main',
@@ -610,10 +610,10 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      */
     onDestroy(): void {
         this.invalidateUnifiedCullingBindGroup();
-        this.#shadowCulledGPUBuffer?.destroy();
-        this.#shadowIndirectGPUBuffer?.destroy();
-        this.#unifiedGlobalUniformGPUBuffer?.destroy();
-        this.#shadowIndirectResetTemplateGPUBuffer?.destroy();
+        this.#shadowCulledGPUBuffer.destroy();
+        this.#shadowIndirectGPUBuffer.destroy();
+        this.#unifiedGlobalUniformGPUBuffer.destroy();
+        this.#shadowIndirectResetTemplateGPUBuffer.destroy();
 
         this.#shadowCulledGPUBuffer = null;
         this.#shadowIndirectGPUBuffer = null;
@@ -660,10 +660,10 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     #initBuffers(): void {
-        const {gpuDevice, instanceCapacity, maxRenderUnits} = this;
+        const {gpuDevice, instanceCapacity, maxRenderUnits, strideBytes} = this;
         const {VERTEX, STORAGE, INDIRECT, COPY_DST, COPY_SRC, UNIFORM} = GPUBufferUsage;
 
-        const rawByteSize = Math.max(instanceCapacity * this.strideBytes, 64);
+        const rawByteSize = Math.max(instanceCapacity * strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
         const indirectByteSize = Math.max(
             maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,

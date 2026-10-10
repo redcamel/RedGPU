@@ -234,7 +234,7 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
     }
 
     override destroy(): void {
-        this.#tasksGPUBuffer?.destroy();
+        this.#tasksGPUBuffer.destroy();
         this.#tasksGPUBuffer = null;
         super.destroy();
     }

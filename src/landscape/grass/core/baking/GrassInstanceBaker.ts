@@ -72,12 +72,12 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         const centerCellZ = Math.floor(centerZ / cellSize);
 
         const spiralOffsets = this.#getSpiralOffsets(cellRadius);
-        const {length, byteLength} = spiralOffsets;
+        const {length, byteLength, buffer} = spiralOffsets;
         const totalCircularCells = length / 2;
 
         if (!this.#cellOffsetsGPUBuffer || this.#cellOffsetsGPUBuffer.size < byteLength) {
             this.#cellOffsetsGPUBuffer?.destroy();
-            const newSize = Math.max(2048 * 8, Math.ceil(spiralOffsets.byteLength / 256) * 256);
+            const newSize = Math.max(2048 * 8, Math.ceil(byteLength / 256) * 256);
             const {STORAGE, COPY_DST} = GPUBufferUsage;
             this.#cellOffsetsGPUBuffer = gpuDevice.createBuffer({
                 label: 'Grass_Bake_CellOffsets_Buffer',
@@ -90,7 +90,6 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         const activeOffsetsBuffer = this.#cellOffsetsGPUBuffer;
         if (this.#currentUploadedRadius !== cellRadius) {
             this.#currentUploadedRadius = cellRadius;
-            const {buffer, byteLength} = spiralOffsets;
             gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, buffer, 0, byteLength);
         }
 

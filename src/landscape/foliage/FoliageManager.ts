@@ -89,7 +89,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
 
         const {gpuDevice, resourceManager} = redGPUContext;
         const {VERTEX} = GPUShaderStage;
-        this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
+        const renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
             label: 'Foliage_RenderUnit_BindGroupLayout',
             entries: [
                 {
@@ -103,10 +103,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 }
             ]
         });
+        this.#renderUnitVertexBindGroupLayout = renderUnitVertexBindGroupLayout;
 
-        this.#renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
+        const renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
             label: 'Foliage_RenderUnit_DynamicBindGroup',
-            layout: this.#renderUnitVertexBindGroupLayout,
+            layout: renderUnitVertexBindGroupLayout,
             entries: [
                 {
                     binding: 0,
@@ -118,14 +119,15 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 }
             ]
         });
+        this.#renderUnitDynamicBindGroup = renderUnitDynamicBindGroup;
 
         this.#megaBuffer = new FoliageScatterMegaBuffer(redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(redGPUContext);
         this.#renderer = new FoliageRenderer(
             redGPUContext,
             this.#pipelineRegistry,
-            this.#renderUnitVertexBindGroupLayout,
-            this.#renderUnitDynamicBindGroup
+            renderUnitVertexBindGroupLayout,
+            renderUnitDynamicBindGroup
         );
         this.#culler = new FoliageCuller(redGPUContext, this.#megaBuffer);
 

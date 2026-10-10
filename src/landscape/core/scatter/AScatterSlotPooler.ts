@@ -172,7 +172,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * [EN] Safely releases GPUBuffer and CPU memory held by the pooler.
      */
     destroy(): void {
-        this.#gpuBuffer?.destroy();
+        this.#gpuBuffer.destroy();
         this.#gpuBuffer = null;
         this.#cpuBuffer.fill(0);
         this.#freeTop = 0;

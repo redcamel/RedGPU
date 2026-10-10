@@ -306,7 +306,7 @@ export default function assembleScatterRenderUnits(
         const {data, vertexCount} = vertexBuffer;
 
         lodTotalVertices += vertexCount;
-        lodTotalIndices += indexBuffer?.indexCount ?? vertexCount;
+        lodTotalIndices += indexBuffer ? indexBuffer.indexCount : vertexCount;
 
         if (data && vertexCount > 0) {
             for (let v = 0; v < vertexCount; v++) {
@@ -383,7 +383,7 @@ export default function assembleScatterRenderUnits(
             const {vertexBuffer, indexBuffer} = geometry;
             const {vertexCount} = vertexBuffer;
             totalVertexCount += vertexCount;
-            totalIndexCount += indexBuffer?.indexCount ?? vertexCount;
+            totalIndexCount += indexBuffer ? indexBuffer.indexCount : vertexCount;
         }
 
         const combinedVertexData = new Float32Array(totalVertexCount * PBR_STRIDE);
@@ -518,7 +518,7 @@ export default function assembleScatterRenderUnits(
                     }
                 }
 
-                if (srcIData && indexBuffer?.indexCount) {
+                if (srcIData && indexBuffer.indexCount) {
                     const iCount = indexBuffer.indexCount;
                     for (let idx = 0; idx < iCount; idx++) {
                         const sVal = srcIData[idx];
@@ -602,7 +602,7 @@ export default function assembleScatterRenderUnits(
         const raw = rawList[i];
         const {geometry, rawStride, currentRelativeMatrix} = raw;
         const {vertexBuffer} = geometry;
-        const {data, vertexCount = 0} = vertexBuffer ?? {};
+        const {data, vertexCount} = vertexBuffer;
 
         if (data && vertexCount > 0) {
             for (let v = 0; v < vertexCount; v++) {

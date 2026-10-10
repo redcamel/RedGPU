@@ -314,7 +314,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
      */
     override get drawCallCount(): number {
         const alloc = this.allocation;
-        if (alloc?.instanceCount > 0) {
+        if (alloc && alloc.instanceCount > 0) {
             const {nearSlots, farSlots} = alloc;
             return nearSlots.length + farSlots.length;
         }

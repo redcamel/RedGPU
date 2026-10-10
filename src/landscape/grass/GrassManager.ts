@@ -80,7 +80,8 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const {types} = this;
         const len = types.length;
         for (let i = 0; i < len; i++) {
-            const alloc = this.#megaBuffer.getAllocation(types[i].typeId);
+            const {typeId} = types[i];
+            const alloc = this.#megaBuffer.getAllocation(typeId);
             if (alloc) count += alloc.instanceCount;
         }
         return count;

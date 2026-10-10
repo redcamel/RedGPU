@@ -163,7 +163,7 @@ class ScatterRenderUnit {
         const {vertexBuffer, indexBuffer} = geometry;
         const vertexCount = initVertexCount ?? vertexBuffer.vertexCount ?? 0;
         const isIndexed = initIsIndexed ?? !!indexBuffer;
-        const indexCount = initIndexCount ?? indexBuffer?.indexCount ?? vertexCount;
+        const indexCount = initIndexCount ?? (indexBuffer ? indexBuffer.indexCount : vertexCount);
         const strideBytes = initStrideBytes ?? (vertexBuffer.stride ? vertexBuffer.stride * 4 : 72);
 
         this.#geometry = geometry;
@@ -328,7 +328,7 @@ class ScatterRenderUnit {
      * [EN] Destroys the geometry and render unit resources.
      */
     destroy(): void {
-        this.#geometry?.destroy();
+        this.#geometry.destroy();
     }
 }
 
