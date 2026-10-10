@@ -168,11 +168,12 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         grassType.onUniformDirty = this.#onGrassUniformDirty;
         grassType.onRepopulateRequired = this.#onGrassRepopulateRequired;
 
-        if (grassType.targetLayer != null && grassType.targetLayer !== '') {
-            const matchedLayer = typeof grassType.targetLayer === 'number'
-                ? this.landscape.layers[grassType.targetLayer]
+        const {targetLayer} = grassType;
+        if (targetLayer != null && targetLayer !== '') {
+            const matchedLayer = typeof targetLayer === 'number'
+                ? this.landscape.layers[targetLayer]
                 : this.landscape.layers.find(
-                    l => l.name === grassType.targetLayer
+                    l => l.name === targetLayer
                 );
             const wt = matchedLayer?.weightTexture;
             if (wt && typeof (wt as any).addLoadListeners === 'function') {

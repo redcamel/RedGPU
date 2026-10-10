@@ -72,7 +72,8 @@ export abstract class AScatterCuller extends RedGPUObject {
         entryPoint: string = 'main'
     ): void {
         const {resourceManager, gpuDevice} = this.redGPUContext;
-        const shaderInfo = resourceManager.wgslParser.parse(shaderName, shaderSource);
+        const {wgslParser} = resourceManager;
+        const shaderInfo = wgslParser.parse(shaderName, shaderSource);
         let computeModule = resourceManager.getGPUShaderModule(shaderName);
         if (!computeModule) {
             computeModule = resourceManager.createGPUShaderModule(shaderName, {

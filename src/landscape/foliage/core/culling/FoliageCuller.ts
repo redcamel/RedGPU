@@ -90,8 +90,14 @@ class FoliageCuller extends AScatterCuller {
         const megaBuffer = this.#megaBuffer;
         if (!megaBuffer) return;
 
-        this.#lastHZBTextureView = hzb?.textureView || null;
-        this.#lastHZBSampler = hzb?.sampler || null;
+        if (hzb) {
+            const {textureView = null, sampler = null} = hzb;
+            this.#lastHZBTextureView = textureView;
+            this.#lastHZBSampler = sampler;
+        } else {
+            this.#lastHZBTextureView = null;
+            this.#lastHZBSampler = null;
+        }
 
         mat4.multiply(this.#tempPVMatrix, projectionMatrix, cam3D.viewMatrix);
 

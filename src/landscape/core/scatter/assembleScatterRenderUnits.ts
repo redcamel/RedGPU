@@ -197,7 +197,9 @@ function traverseHierarchy(
             }
         }
 
-        const rawStride = geometry.vertexBuffer.stride || (geometry.vertexBuffer.interleavedStruct?.arrayStride ? geometry.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
+        const {vertexBuffer} = geometry;
+        const {stride, interleavedStruct} = vertexBuffer;
+        const rawStride = stride || (interleavedStruct?.arrayStride ? interleavedStruct.arrayStride / 4 : 18);
 
         const normalMatrix = mat4.create();
         mat4.invert(normalMatrix, currentRelativeMatrix);

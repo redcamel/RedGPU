@@ -75,7 +75,7 @@ function prepareFoliageMaterials(node: Mesh): void {
         mat.isFoliage = true;
         if (isMasked) {
             mat.useCutOff = true;
-            mat.cutOff = cutOff > 0 ? cutOff : 0.3333;
+            mat.cutOff = cutOff || 0.3333;
             mat.doubleSided = true;
             mat.alphaBlend = 1;
             mat.transparent = false;

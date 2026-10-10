@@ -328,7 +328,8 @@ export default function bakeFoliageImpostor(
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
 
-    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': renderUnits=${renderUnits.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
+    const {width, height, depth} = aabb;
+    console.log(`[bakeFoliageImpostor 🌲 3-Atlas MRT] Baking '${bakeName}': renderUnits=${renderUnits.length}, aabb=[W:${width.toFixed(2)}, H:${height.toFixed(2)}, D:${depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
         const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
@@ -517,7 +518,7 @@ export default function bakeFoliageImpostor(
             pipeline: getOrCreateBakePipeline(redGPUContext, unit),
             bindGroup,
             vertexBuffer: vertexBuffer.gpuBuffer,
-            indexBuffer: indexBuffer?.gpuBuffer || null,
+            indexBuffer: indexBuffer?.gpuBuffer ?? null,
             isIndexed,
             indexCount,
             indexFormat,

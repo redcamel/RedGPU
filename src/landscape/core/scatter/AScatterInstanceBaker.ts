@@ -167,9 +167,10 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         uniformByteLength: number = 256
     ): void {
         const {resourceManager, gpuDevice} = this.redGPUContext;
+        const {wgslParser} = resourceManager;
 
         const shaderName = `${label}_ShaderModule`;
-        const shaderInfo = resourceManager.wgslParser.parse(shaderName, shaderCode);
+        const shaderInfo = wgslParser.parse(shaderName, shaderCode);
         let computeModule = resourceManager.getGPUShaderModule(shaderName);
         if (!computeModule) {
             computeModule = resourceManager.createGPUShaderModule(shaderName, {

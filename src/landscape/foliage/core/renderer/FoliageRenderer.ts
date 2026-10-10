@@ -290,9 +290,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             let validCount = 0;
             for (let t = 0; t < typeCount; t++) {
                 const foliageType = typeList[t];
-                if (!foliageType.castShadow || foliageType.shadowCullDistance <= 0) continue;
-                const megaBuffer = foliageType.megaBuffer;
-                if (!megaBuffer || foliageType.renderUnits.length === 0) continue;
+                const {castShadow, shadowCullDistance, megaBuffer, renderUnits} = foliageType;
+                if (!castShadow || shadowCullDistance <= 0 || !megaBuffer || renderUnits.length === 0) continue;
                 const {shadowCulledGPUBuffer: culledGPU, shadowIndirectGPUBuffer: indirectGPU} = megaBuffer;
                 if (!culledGPU || !indirectGPU) continue;
 
@@ -658,7 +657,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             );
         if (!pipeline) return;
 
-        const matUniformBG = useMasked ? (unit.material.gpuRenderInfo?.fragmentUniformBindGroup || null) : null;
+        const matUniformBG = useMasked ? (unit.material.gpuRenderInfo?.fragmentUniformBindGroup ?? null) : null;
 
         this.#bindAndDrawUnit(
             passEncoder,

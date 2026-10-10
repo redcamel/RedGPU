@@ -315,10 +315,17 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
      */
     protected override computeTypeDrawCalls(foliage: Foliage): number {
-        if (foliage.activeInstanceCount <= 0) return 0;
-        let count = foliage.mainRenderUnits.length;
-        if (this.#useDepthPrepass && foliage.useDepthPrepass) {
-            count += foliage.depthPrepassOpaqueRenderUnits.length + foliage.depthPrepassMaskedRenderUnits.length;
+        const {
+            activeInstanceCount,
+            mainRenderUnits,
+            useDepthPrepass,
+            depthPrepassOpaqueRenderUnits,
+            depthPrepassMaskedRenderUnits
+        } = foliage;
+        if (activeInstanceCount <= 0) return 0;
+        let count = mainRenderUnits.length;
+        if (this.#useDepthPrepass && useDepthPrepass) {
+            count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
         }
         return count;
     }
@@ -579,10 +586,18 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
      */
     protected override computeTypeShadowDrawCalls(foliage: Foliage): number {
-        if (foliage.shadowCullDistance <= 0 || foliage.activeInstanceCount <= 0) return 0;
-        const num3DLODs = foliage.hasImpostor ? Math.max(1, foliage.lodInfoList.length - 1) : foliage.lodInfoList.length;
-        let count = foliage.hasMaskedLOD0
-            ? foliage.lod0RenderUnits.length + (num3DLODs > 1 ? 1 : 0)
+        const {
+            shadowCullDistance,
+            activeInstanceCount,
+            hasImpostor,
+            lodInfoList,
+            hasMaskedLOD0,
+            lod0RenderUnits
+        } = foliage;
+        if (shadowCullDistance <= 0 || activeInstanceCount <= 0) return 0;
+        const num3DLODs = hasImpostor ? Math.max(1, lodInfoList.length - 1) : lodInfoList.length;
+        let count = hasMaskedLOD0
+            ? lod0RenderUnits.length + (num3DLODs > 1 ? 1 : 0)
             : 1;
         count += 3;
         return count;
