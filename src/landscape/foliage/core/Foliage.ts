@@ -1432,11 +1432,11 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
 
     #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         if (subCell.isMounted) return;
-        const currentActive = allocation.instanceCount;
-        const count = subCell.instanceCount;
-        if (currentActive + count > allocation.maxInstances) return;
+        const {instanceCount: count} = subCell;
+        const {instanceCount: currentActive, maxInstances, rawBaseOffset} = allocation;
+        if (currentActive + count > maxInstances) return;
 
-        const targetSlot = allocation.rawBaseOffset + currentActive;
+        const targetSlot = rawBaseOffset + currentActive;
         const landscape = this.#landscape;
 
         if (landscape.hasValidScatterAtlas) {

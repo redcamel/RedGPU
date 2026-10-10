@@ -376,7 +376,7 @@ export default function bakeFoliageImpostor(
         }
 
     const {resourceManager} = redGPUContext;
-    const {basicSampler} = resourceManager;
+    const {basicSampler, emptyBitmapTextureView} = resourceManager;
 
     const cachedRenderUnits: {
             isImpostor: boolean;
@@ -429,16 +429,26 @@ export default function bakeFoliageImpostor(
         const {vertexBuffer, indexBuffer} = geometry;
         const isIdentityModelMatrix = isIdentityMatrix(m);
 
-        const diffTex = mat.baseColorTexture;
-        const diffSampler = mat.baseColorTextureSampler || basicSampler;
-        const normTex = mat.normalTexture;
-        const normSampler = mat.normalTextureSampler || basicSampler;
-        const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
-        const ormSampler = mat.packedORMTextureSampler || mat.metallicRoughnessTextureSampler || basicSampler;
+        const {
+            baseColorTexture: diffTex,
+            baseColorTextureSampler,
+            normalTexture: normTex,
+            normalTextureSampler,
+            packedORMTexture,
+            metallicRoughnessTexture,
+            occlusionTexture,
+            packedORMTextureSampler,
+            metallicRoughnessTextureSampler
+        } = mat;
 
-        const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex) || resourceManager.emptyBitmapTextureView;
-        const normView = resourceManager.getGPUResourceBitmapTextureView(normTex) || resourceManager.emptyBitmapTextureView;
-        const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) || resourceManager.emptyBitmapTextureView;
+        const diffSampler = baseColorTextureSampler || basicSampler;
+        const normSampler = normalTextureSampler || basicSampler;
+        const ormTex = packedORMTexture || metallicRoughnessTexture || occlusionTexture;
+        const ormSampler = packedORMTextureSampler || metallicRoughnessTextureSampler || basicSampler;
+
+        const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex) || emptyBitmapTextureView;
+        const normView = resourceManager.getGPUResourceBitmapTextureView(normTex) || emptyBitmapTextureView;
+        const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) || emptyBitmapTextureView;
 
             const bindGroup = gpuDevice.createBindGroup({
                 label: `Foliage_Impostor_Bake_BindGroup_${s}`,
@@ -466,37 +476,48 @@ export default function bakeFoliageImpostor(
                 ({r, g, b, a = 1.0} = bcf);
             }
         }
-        if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
-        else if (typeof mat.roughness === 'number') roughness = mat.roughness;
-        if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
-        else if (typeof mat.metallic === 'number') metallic = mat.metallic;
-        if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
-        if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
-        const useVertexColor = !!mat.useVertexColor;
+        const {
+            roughnessFactor,
+            roughness: matRoughness,
+            metallicFactor,
+            metallic: matMetallic,
+            occlusionStrength,
+            cutOff: matCutOff,
+            useVertexColor: matUseVertexColor,
+            isFoliage: matIsFoliage
+        } = mat;
 
-            const hasDiff = !!(diffTex && diffTex.gpuTexture);
-            const hasNorm = !!(normTex && normTex.gpuTexture);
-            const hasORM = !!(ormTex && ormTex.gpuTexture);
-        const isFoliage = mat.isFoliage !== false ? 1.0 : 0.0;
+        if (typeof roughnessFactor === 'number') roughness = roughnessFactor;
+        else if (typeof matRoughness === 'number') roughness = matRoughness;
+        if (typeof metallicFactor === 'number') metallic = metallicFactor;
+        else if (typeof matMetallic === 'number') metallic = matMetallic;
+        if (typeof occlusionStrength === 'number') ao = occlusionStrength;
+        if (typeof matCutOff === 'number' && matCutOff > 0) cutOff = matCutOff;
+        const useVertexColor = !!matUseVertexColor;
 
-            const matProps = new Float32Array([
-                r, g, b, a,
-                roughness, metallic, ao, cutOff,
-                hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
-            ]);
+        const hasDiff = !!(diffTex && diffTex.gpuTexture);
+        const hasNorm = !!(normTex && normTex.gpuTexture);
+        const hasORM = !!(ormTex && ormTex.gpuTexture);
+        const isFoliage = matIsFoliage !== false ? 1.0 : 0.0;
 
-            const modelMatProps = new Float32Array([
-                m[0], m[1], m[2], m[12],
-                m[4], m[5], m[6], m[13],
-                m[8], m[9], m[10], m[14]
-            ]);
+        const matProps = new Float32Array([
+            r, g, b, a,
+            roughness, metallic, ao, cutOff,
+            hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
+        ]);
+
+        const modelMatProps = new Float32Array([
+            m[0], m[1], m[2], m[12],
+            m[4], m[5], m[6], m[13],
+            m[8], m[9], m[10], m[14]
+        ]);
 
         cachedRenderUnits.push({
-                isImpostor: false,
+            isImpostor: false,
             pipeline: getOrCreateBakePipeline(redGPUContext, unit),
-                bindGroup,
+            bindGroup,
             vertexBuffer: vertexBuffer.gpuBuffer,
-            indexBuffer: indexBuffer ? indexBuffer.gpuBuffer : null,
+            indexBuffer: indexBuffer?.gpuBuffer || null,
             isIndexed,
             indexCount,
             indexFormat,
@@ -593,31 +614,43 @@ export default function bakeFoliageImpostor(
 
         let currentDrawSlot = 0;
         for (let v = 0; v < totalViews; v++) {
-            const vpInfo = renderPassViews[v];
-            renderPass.setViewport(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize, 0, 1);
-            renderPass.setScissorRect(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize);
+            const {vpX, vpY, tileSize} = renderPassViews[v];
+            renderPass.setViewport(vpX, vpY, tileSize, tileSize, 0, 1);
+            renderPass.setScissorRect(vpX, vpY, tileSize, tileSize);
 
             for (let s = 0; s < totalUnits; s++) {
                 const cached = cachedRenderUnits[s];
                 const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
                 currentDrawSlot++;
 
-                if (cached.isImpostor || !cached.pipeline) continue;
+                const {
+                    isImpostor,
+                    pipeline,
+                    bindGroup,
+                    vertexBuffer,
+                    isIndexed,
+                    indexBuffer,
+                    indexFormat,
+                    indexCount,
+                    vertexCount
+                } = cached;
 
-                renderPass.setPipeline(cached.pipeline);
+                if (isImpostor || !pipeline) continue;
 
-                if (cached.bindGroup) {
-                    renderPass.setBindGroup(0, cached.bindGroup);
+                renderPass.setPipeline(pipeline);
+
+                if (bindGroup) {
+                    renderPass.setBindGroup(0, bindGroup);
                 }
 
-                renderPass.setVertexBuffer(0, cached.vertexBuffer);
+                renderPass.setVertexBuffer(0, vertexBuffer);
                 renderPass.setVertexBuffer(1, sharedTransformGPUBuffer, bufferOffsetBytes);
 
-                if (cached.isIndexed && cached.indexBuffer) {
-                    renderPass.setIndexBuffer(cached.indexBuffer, cached.indexFormat);
-                    renderPass.drawIndexed(cached.indexCount);
+                if (isIndexed && indexBuffer) {
+                    renderPass.setIndexBuffer(indexBuffer, indexFormat);
+                    renderPass.drawIndexed(indexCount);
                 } else {
-                    renderPass.draw(cached.vertexCount);
+                    renderPass.draw(vertexCount);
                 }
             }
         }

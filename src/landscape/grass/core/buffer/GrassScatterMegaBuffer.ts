@@ -76,7 +76,8 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         initialCapacity: number = 131072,
         maxTypes: number = 64
     ) {
-        const shaderInfo = redGPUContext.resourceManager.wgslParser.parse(
+        const {resourceManager} = redGPUContext;
+        const shaderInfo = resourceManager.wgslParser.parse(
             'Grass_Cull_ShaderModule',
             grassCullWGSL
         );
@@ -235,33 +236,46 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      * @param alloc - 메가버퍼 할당 정보 객체
      */
     updateTypeParams(typeId: number, grass: Grass, alloc: GrassTypeAllocation): void {
-        const typeParamFloats = this.typeParamFloats;
+        const {typeParamFloats} = this;
         if (typeParamFloats === 0) return;
 
         const baseFloat = typeId * typeParamFloats;
         const {cpuTypeParamsBuffer: cf, cpuTypeParamsUint32: cu} = this;
 
-        const cullingDist = grass.cullingDistance;
-        const farDist = grass.farDistance;
-        const fadeStartDist = Math.min(grass.fadeStartDistance, cullingDist);
-
-        const shadowCullDist = grass.shadowCullDistance;
-        const shadowFadeStartDist = Math.min(grass.shadowFadeStartDistance, shadowCullDist);
+        const {
+            cullingDistance: cullingDist,
+            farDistance: farDist,
+            fadeStartDistance,
+            shadowCullDistance: shadowCullDist,
+            shadowFadeStartDistance
+        } = grass;
+        const fadeStartDist = Math.min(fadeStartDistance, cullingDist);
+        const shadowFadeStartDist = Math.min(shadowFadeStartDistance, shadowCullDist);
 
         cf[baseFloat + 0] = cullingDist * cullingDist;
         cf[baseFloat + 1] = farDist * farDist;
         cf[baseFloat + 2] = fadeStartDist * fadeStartDist; // fadeStartSq
         cf[baseFloat + 3] = 1.0 / Math.max(0.001, cullingDist - fadeStartDist); // invFadeRange
 
-        cu[baseFloat + 4] = alloc.rawBaseOffset;
-        cu[baseFloat + 5] = alloc.culledBaseOffset;
-        cu[baseFloat + 6] = alloc.culledBaseOffset + alloc.maxInstances;
-        cu[baseFloat + 7] = alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0;
-        cu[baseFloat + 8] = alloc.farSlots.length > 0 ? alloc.farSlots[0].indirectOffset : (alloc.nearSlots.length > 0 ? alloc.nearSlots[0].indirectOffset : 0);
-        cu[baseFloat + 9] = alloc.renderUnitCount;
-        cu[baseFloat + 10] = alloc.farSlots.length > 0 ? 1 : 0;
-        cu[baseFloat + 11] = alloc.instanceCount;
-        cu[baseFloat + 12] = alloc.maxInstances;
+        const {
+            rawBaseOffset,
+            culledBaseOffset,
+            maxInstances,
+            nearSlots,
+            farSlots,
+            renderUnitCount,
+            instanceCount
+        } = alloc;
+
+        cu[baseFloat + 4] = rawBaseOffset;
+        cu[baseFloat + 5] = culledBaseOffset;
+        cu[baseFloat + 6] = culledBaseOffset + maxInstances;
+        cu[baseFloat + 7] = nearSlots.length > 0 ? nearSlots[0].indirectOffset : 0;
+        cu[baseFloat + 8] = farSlots.length > 0 ? farSlots[0].indirectOffset : (nearSlots.length > 0 ? nearSlots[0].indirectOffset : 0);
+        cu[baseFloat + 9] = renderUnitCount;
+        cu[baseFloat + 10] = farSlots.length > 0 ? 1 : 0;
+        cu[baseFloat + 11] = instanceCount;
+        cu[baseFloat + 12] = maxInstances;
         cf[baseFloat + 13] = cullingDist; // cullingDistance
         cf[baseFloat + 14] = shadowCullDist * shadowCullDist; // shadowCullDistanceSq
         cf[baseFloat + 15] = shadowFadeStartDist * shadowFadeStartDist; // shadowFadeStartSq

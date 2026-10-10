@@ -151,8 +151,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const len = types.length;
         for (let i = 0; i < len; i++) {
             const foliage = types[i];
-            if (foliage.activeInstanceCount > 0 && foliage.useDepthPrepass) {
-                count += foliage.depthPrepassOpaqueRenderUnits.length + foliage.depthPrepassMaskedRenderUnits.length;
+            const {
+                activeInstanceCount,
+                useDepthPrepass,
+                depthPrepassOpaqueRenderUnits,
+                depthPrepassMaskedRenderUnits
+            } = foliage;
+            if (activeInstanceCount > 0 && useDepthPrepass) {
+                count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
             }
         }
         return count;

@@ -566,7 +566,7 @@ export default function assembleScatterRenderUnits(
 
         groups.push({
             material,
-            geometry: groupGeom!,
+            geometry: groupGeom as Geometry,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
             firstIndex: groupFirstIndex,
@@ -629,13 +629,18 @@ export default function assembleScatterRenderUnits(
     const finalMinZ = isFinite(minZ) ? minZ - offsetZ : 0;
     const finalMaxZ = isFinite(maxZ) ? maxZ - offsetZ : 0;
 
-    const renderUnits: ScatterRenderUnit[] = unifiedGeometry ? groups.map((group) => {
+    const renderUnits: ScatterRenderUnit[] = unifiedGeometry ? groups.map(({
+                                                                               vertexCount,
+                                                                               indexCount,
+                                                                               firstIndex,
+                                                                               material
+                                                                           }) => {
         return new ScatterRenderUnit({
             geometry: unifiedGeometry,
-            vertexCount: group.vertexCount,
-            indexCount: group.indexCount,
-            firstIndex: group.firstIndex,
-            material: group.material
+            vertexCount,
+            indexCount,
+            firstIndex,
+            material
         });
     }) : [];
 
@@ -664,10 +669,11 @@ export default function assembleScatterRenderUnits(
  */
 function getMaterialKey(mat: any): string {
     if (!mat) return 'default_mat';
-    const matType = mat.constructor?.name || 'Material';
-    const baseColorKey = mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
-    const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
-    const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
+    const {constructor, baseColorTexture, normalTexture, ormTexture} = mat;
+    const matType = constructor?.name || 'Material';
+    const baseColorKey = baseColorTexture?.src || baseColorTexture?.url || baseColorTexture?.uuid || '';
+    const normalKey = normalTexture?.src || normalTexture?.url || normalTexture?.uuid || '';
+    const ormKey = ormTexture?.src || ormTexture?.url || ormTexture?.uuid || '';
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }
 

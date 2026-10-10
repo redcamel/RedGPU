@@ -85,17 +85,30 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
             gpuDevice.queue.writeBuffer(activeOffsetsBuffer, 0, spiralOffsets.buffer, 0, spiralOffsets.byteLength);
         }
 
-        const targetDensity = Math.max(1, Math.min(1024, grass.instancesPerCell));
+        const {
+            instancesPerCell,
+            targetLayer,
+            minScale,
+            maxScale,
+            bottomOffset,
+            height,
+            minSlope,
+            maxSlope,
+            typeId,
+            densityScaleByWeight
+        } = grass;
+
+        const targetDensity = Math.max(1, Math.min(1024, instancesPerCell));
         const maxCellsAllowed = Math.floor(alloc.maxInstances / targetDensity);
         const totalCells = Math.min(totalCircularCells, Math.max(1, maxCellsAllowed));
         if (totalCells <= 0) return;
 
         alloc.instanceCount = totalCells * targetDensity;
 
-        const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, grass.targetLayer);
+        const {weightView, hasWeightMap, weightChannelIndex} = this.resolveWeightLayer(landscape, targetLayer);
 
-        const [minScaleS, minScaleH] = grass.minScale;
-        const [maxScaleS, maxScaleH] = grass.maxScale;
+        const [minScaleS, minScaleH] = minScale;
+        const [maxScaleS, maxScaleH] = maxScale;
 
         const ui = this.#uniformInt32View;
         const uu = this.#uniformUint32View;
@@ -110,8 +123,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         uf[5] = invWorldSizeX;
         uf[6] = invWorldSizeZ;
         uf[7] = heightScale;
-
-        const {bottomOffset, height, minSlope, maxSlope, typeId, densityScaleByWeight} = grass;
 
         uf[8] = bottomOffset;
         uf[9] = height;
@@ -133,7 +144,7 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         gpuDevice.queue.writeBuffer(uniformGPUBuffer, 0, this.#uniformArrayBuffer, 0, 88);
 
         const bindGroup = this.getOrCreateBindGroup(
-            grass.typeId,
+            typeId,
             'Grass_Bake',
             rawGPUBuffer,
             vhtView,
@@ -144,10 +155,10 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         if (!bindGroup) return;
 
         const commandEncoder = gpuDevice.createCommandEncoder({
-            label: `Grass_Bake_CommandEncoder_Type_${grass.typeId}`
+            label: `Grass_Bake_CommandEncoder_Type_${typeId}`
         });
         const computePass = commandEncoder.beginComputePass({
-            label: `Grass_Bake_ComputePass_Type_${grass.typeId}`
+            label: `Grass_Bake_ComputePass_Type_${typeId}`
         });
         computePass.setPipeline(computePipeline);
         computePass.setBindGroup(0, bindGroup);

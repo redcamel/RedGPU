@@ -44,7 +44,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      */
     paramsSizeFloats: number;
 
-    #gpuBuffer!: GPUBuffer;
+    #gpuBuffer: GPUBuffer;
     #cpuBuffer: Float32Array;
     #cpuUint32View: Uint32Array;
     #freeSlotStack: Int32Array;

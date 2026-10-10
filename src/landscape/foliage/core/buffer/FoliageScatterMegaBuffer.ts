@@ -215,7 +215,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
                         break;
                     }
                 }
-                const unitOffset = lodInfo ? lodInfo.renderUnitOffset : 0;
+                const unitOffset = lodInfo?.renderUnitOffset ?? 0;
                 shadowUnit.instanceBufferOffset = (culledBaseOffset + (shadowUnit.lodIndex * alignedMaxInstances)) * strideBytes;
                 shadowUnit.indirectOffsetBytes = (indirectBaseOffset + unitOffset) * 20;
             }
@@ -246,7 +246,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         hzbHeight: number = 256.0,
         depthBias: number = 0.002
     ): void {
-        const typeParamsGPUBuffer = this.typeParamsGPUBuffer;
+        const {typeParamsGPUBuffer} = this;
         if (!typeParamsGPUBuffer) return;
 
         const {
@@ -256,23 +256,23 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             cascadeShadowFrustumPlanesByCascade,
             frustumPlanesFlat: mainFrustumPlanes
         } = renderViewStateData;
-        const camera = view.rawCamera;
+        const {rawCamera: camera, pixelRectArray, hierarchicalZBuffer} = view;
         const {x: camX, y: camY, z: camZ} = camera;
-        const {pixelRectArray, hierarchicalZBuffer} = view;
         const viewportHeight = pixelRectArray[3];
         const hzbEnabled = !!hierarchicalZBuffer?.textureView;
 
         const gf32 = this.#cpuUnifiedGlobalUniformData;
         const gu32 = this.#cpuUnifiedGlobalUniformUint32;
+        const {totalAllocatedInstances, maxRenderUnits, instanceCapacity} = this;
 
         gf32[0] = camX;
         gf32[1] = camY;
         gf32[2] = camZ;
-        gu32[3] = this.totalAllocatedInstances;
+        gu32[3] = totalAllocatedInstances;
 
         gf32[4] = fovFactor > 0 ? fovFactor : 1.0;
-        gu32[5] = this.maxRenderUnits;
-        gu32[6] = this.instanceCapacity * 8;
+        gu32[5] = maxRenderUnits;
+        gu32[6] = instanceCapacity * 8;
         gu32[7] = activeCascadeCount;
 
         gu32[8] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
@@ -359,7 +359,14 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         height: number = 2.0
     ): void {
         this.#dirtyTypeParams = true;
-        const typeId = allocation.typeId;
+        const {
+            typeId,
+            maxInstances,
+            culledBaseOffset,
+            indirectBaseOffset,
+            rawBaseOffset,
+            instanceCount
+        } = allocation;
         const baseOffset = typeId * this.typeParamFloats;
         const {cpuTypeParamsBuffer: f32, cpuTypeParamsUint32: u32} = this;
 
@@ -370,13 +377,13 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         const numLODs = Math.min(lodInfoList.length, 8);
         u32[baseOffset + 4] = numLODs;
-        u32[baseOffset + 5] = allocation.maxInstances;
-        u32[baseOffset + 6] = allocation.culledBaseOffset;
-        u32[baseOffset + 7] = allocation.indirectBaseOffset;
+        u32[baseOffset + 5] = maxInstances;
+        u32[baseOffset + 6] = culledBaseOffset;
+        u32[baseOffset + 7] = indirectBaseOffset;
 
         const fadeRange = Math.max(cullingDistance - fadeStartDistance, 1.0);
-        u32[baseOffset + 8] = allocation.rawBaseOffset;
-        u32[baseOffset + 9] = allocation.instanceCount;
+        u32[baseOffset + 8] = rawBaseOffset;
+        u32[baseOffset + 9] = instanceCount;
         f32[baseOffset + 10] = shadowCullDistance;
 
         f32[baseOffset + 11] = 1.0 / fadeRange;
@@ -389,8 +396,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             const lodBase = baseOffset + 16 + l * 8;
             if (l < numLODs) {
                 const info = lodInfoList[l];
+                const {lodDistance: nextDist, renderUnitOffset, renderUnitCount} = info;
                 const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
-                const nextDist = info.lodDistance;
                 const span = Math.max(nextDist - prevDist, 5.0);
                 const fadeRange = Math.max(5.0, Math.min(15.0, span * 0.10));
                 const halfRange = fadeRange * 0.5;
@@ -409,8 +416,8 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
                 f32[lodBase + 3] = exitEnd;
                 f32[lodBase + 4] = 1.0 / enterSpan;
                 f32[lodBase + 5] = 1.0 / exitSpan;
-                u32[lodBase + 6] = info.renderUnitOffset;
-                u32[lodBase + 7] = info.renderUnitCount;
+                u32[lodBase + 6] = renderUnitOffset;
+                u32[lodBase + 7] = renderUnitCount;
             } else {
                 f32[lodBase] = 999999.0;
                 f32[lodBase + 1] = 999999.0;
@@ -500,17 +507,18 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         shadowMergedRenderUnits?: FoliageRenderUnit[],
         lodInfoList?: FoliageLODInfo[]
     ): void {
-        const maxRenderUnits = this.maxRenderUnits;
+        const {maxRenderUnits} = this;
 
         for (let s = 0; s < renderUnits.length; s++) {
             const unit = renderUnits[s];
-            const count = unit.isIndexed ? unit.indexCount : unit.vertexCount;
-            this.registerIndirectDrawSlot(indirectBaseOffset + s, count, unit.firstIndex);
+            const {isIndexed, indexCount, vertexCount, firstIndex} = unit;
+            const count = isIndexed ? indexCount : vertexCount;
+            this.registerIndirectDrawSlot(indirectBaseOffset + s, count, firstIndex);
 
             for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
                 const shadowSlot = (c * maxRenderUnits + indirectBaseOffset + s) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
-                this.#shadowIndirectResetTemplate[shadowSlot + 2] = unit.firstIndex;
+                this.#shadowIndirectResetTemplate[shadowSlot + 2] = firstIndex;
             }
         }
 
@@ -518,23 +526,24 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             const hasMaskedLOD0 = renderUnits.some(s => s.lodIndex === 0 && s.isMasked);
             for (let i = 0; i < shadowMergedRenderUnits.length; i++) {
                 const shadowUnit = shadowMergedRenderUnits[i];
-                if (shadowUnit.lodIndex === 0 && hasMaskedLOD0) {
+                const {lodIndex, isIndexed, indexCount, vertexCount, firstIndex} = shadowUnit;
+                if (lodIndex === 0 && hasMaskedLOD0) {
                     continue;
                 }
                 let lodInfo: FoliageLODInfo | null = null;
                 for (let l = 0; l < lodInfoList.length; l++) {
-                    if (lodInfoList[l].lodIndex === shadowUnit.lodIndex) {
+                    if (lodInfoList[l].lodIndex === lodIndex) {
                         lodInfo = lodInfoList[l];
                         break;
                     }
                 }
                 if (!lodInfo) continue;
                 const slotIndex = indirectBaseOffset + lodInfo.renderUnitOffset;
-                const count = shadowUnit.isIndexed ? shadowUnit.indexCount : shadowUnit.vertexCount;
+                const count = isIndexed ? indexCount : vertexCount;
                 for (let c = 0; c < SHADOW_CASCADE_COUNT; c++) {
                     const shadowSlot = (c * maxRenderUnits + slotIndex) * DRAW_INDEXED_INDIRECT_ARGS_COUNT;
                     this.#shadowIndirectResetTemplate[shadowSlot] = count;
-                    this.#shadowIndirectResetTemplate[shadowSlot + 2] = shadowUnit.firstIndex;
+                    this.#shadowIndirectResetTemplate[shadowSlot + 2] = firstIndex;
                 }
             }
         }

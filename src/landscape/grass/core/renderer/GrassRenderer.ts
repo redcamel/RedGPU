@@ -291,13 +291,13 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
 
         const nearPipeline = this.#getRenderPipeline(sampleCount, false);
         const farPipeline = this.#getRenderPipeline(sampleCount, true);
         if (!nearPipeline || !farPipeline) return null;
 
-        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer;
+        const {indirectGPUBuffer} = megaBuffer;
         if (!indirectGPUBuffer) return null;
 
         const preferredNormalFormat = this.#preferredCanvasFormat;
@@ -384,12 +384,12 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
 
         const shadowPipeline = this.#getShadowRenderPipeline();
         if (!shadowPipeline) return null;
 
-        const indirectGPUBuffer = megaBuffer.indirectGPUBuffer;
+        const {indirectGPUBuffer} = megaBuffer;
         if (!indirectGPUBuffer) return null;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
@@ -466,11 +466,11 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const {gpuDevice, resourceManager} = this;
         if (!this.#pipelineBindGroupLayout2) return null;
 
-        const cacheKey = (type.typeId << 16) | (subIndex & 0xFFFF);
+        const {typeId, name: typeName, baseColorTextureView: typeTexView} = type;
+        const cacheKey = (typeId << 16) | (subIndex & 0xFFFF);
         let entry = this.#materialBindGroupCache.get(cacheKey);
 
-        const subTex = renderUnit.baseColorTexture;
-        const typeTexView = type.baseColorTextureView;
+        const {baseColorTexture: subTex} = renderUnit;
 
         if (entry && entry.cachedSubTex === subTex && entry.cachedTypeTexView === typeTexView) {
             return entry.bindGroup;
@@ -482,7 +482,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         if (!entry || entry.cachedColorTexView !== subTexView) {
             const {basicSampler} = resourceManager;
             const bindGroup = gpuDevice.createBindGroup({
-                label: `Grass_MaterialBindGroup_${type.name}_sub${subIndex}_${this.instanceId}`,
+                label: `Grass_MaterialBindGroup_${typeName}_sub${subIndex}_${this.instanceId}`,
                 layout: this.#pipelineBindGroupLayout2,
                 entries: [
                     {binding: 0, resource: subTexView},

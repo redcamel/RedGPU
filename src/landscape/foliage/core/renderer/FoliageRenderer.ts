@@ -353,14 +353,14 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
  
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
-            const item = this.#validTypesMain[t];
-            const foliageType = item.type;
-            if (foliageType && foliageType.useDepthPrepass) {
-                if (foliageType.depthPrepassOpaqueRenderUnits.length > 0 || foliageType.depthPrepassMaskedRenderUnits.length > 0) {
+            const {type: foliageType} = this.#validTypesMain[t];
+            if (foliageType?.useDepthPrepass) {
+                const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = foliageType;
+                if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
                     hasPrepassRenderUnits = true;
                     break;
                 }
@@ -459,7 +459,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         validCount: number,
         systemBG: GPUBindGroup | null
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_ShadowBundleEncoder_Cascade${currentCascade}`,

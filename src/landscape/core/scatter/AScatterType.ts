@@ -184,7 +184,7 @@ export abstract class AScatterType<
      * [EN] Returns the unique type identifier integer (Type ID) assigned internally by scatter managers. (Single source of truth)
      */
     get typeId(): number {
-        return this.#allocation ? this.#allocation.typeId : this.#typeId;
+        return this.#allocation?.typeId ?? this.#typeId;
     }
 
     /**

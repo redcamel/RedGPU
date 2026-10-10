@@ -108,8 +108,11 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     protected override computeTypeDrawCalls(grass: Grass): number {
         if (!this.#populated) return 0;
         const alloc = this.#megaBuffer.getAllocation(grass.typeId);
-        if (alloc && alloc.instanceCount > 0) {
-            return alloc.nearSlots.length + alloc.farSlots.length;
+        if (alloc) {
+            const {instanceCount, nearSlots, farSlots} = alloc;
+            if (instanceCount > 0) {
+                return nearSlots.length + farSlots.length;
+            }
         }
         return 0;
     }

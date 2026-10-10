@@ -185,17 +185,23 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
         }
         this.#mesh = mesh;
 
-        const assemblyResult = assembleScatterRenderUnits(redGPUContext, mesh, {
+        const {
+            groups,
+            unifiedGeometry,
+            minY: assembledMinY,
+            boundingHeight,
+            renderUnits
+        } = assembleScatterRenderUnits(redGPUContext, mesh, {
             preservePivot: true,
             centerXZ: false
         });
-        if (assemblyResult.groups.length === 0 || !assemblyResult.unifiedGeometry) {
+        if (groups.length === 0 || !unifiedGeometry) {
             consoleAndThrowError(`[Grass] Failed to extract any valid geometry from mesh!`);
         }
-        this.#geometry = assemblyResult.unifiedGeometry;
+        this.#geometry = unifiedGeometry;
         this.#isUnifiedGeometryOwned = true;
 
-        const primaryGroup = assemblyResult.groups[0];
+        const primaryGroup = groups[0];
         const targetMaterial = primaryGroup.material;
 
         const resolvedTexture = baseColorTexture ?? targetMaterial.baseColorTexture;
@@ -205,10 +211,10 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
             this.#baseColorTexture = resolvedTexture;
         }
 
-        this.#minY = minY ?? assemblyResult.minY;
-        const resolvedHeight = height ?? (assemblyResult.boundingHeight > 0 ? assemblyResult.boundingHeight : 1.0);
+        this.#minY = minY ?? assembledMinY;
+        const resolvedHeight = height ?? (boundingHeight > 0 ? boundingHeight : 1.0);
 
-        this.#renderUnits = assemblyResult.renderUnits;
+        this.#renderUnits = renderUnits;
         if (this.#baseColorTexture) {
             this.#renderUnits[0].baseColorTexture = this.#baseColorTexture;
         }

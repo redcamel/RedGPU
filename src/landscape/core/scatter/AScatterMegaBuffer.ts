@@ -432,7 +432,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Number of slots to synchronize
      */
     syncIndirectResetTemplateToGPU(slotIndex?: number, slotCount?: number): void {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
         const indirectGPUBuffer = this.#indirectGPUBuffer;
         if (!indirectGPUBuffer) return;
 
@@ -486,9 +486,9 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Optional GPU command encoder (uses copyBufferToBuffer if provided)
      */
     resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
-        if (this.#totalIndirectDrawCalls === 0) return;
+        const indirectGPUBuffer = this.#indirectGPUBuffer;
+        if (this.#totalIndirectDrawCalls === 0 || !indirectGPUBuffer) return;
 
-        const indirectGPUBuffer = this.#indirectGPUBuffer!;
         const byteSize = this.#totalIndirectDrawCalls * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT;
 
         if (commandEncoder && this.#indirectResetTemplateGPUBuffer) {

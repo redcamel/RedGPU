@@ -114,11 +114,12 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
             2
         );
         if (name) this.name = name;
+        const {basicSampler} = this.redGPUContext.resourceManager;
         this.baseColorTexture = baseColorTexture;
-        this.baseColorTextureSampler = this.redGPUContext.resourceManager.basicSampler;
+        this.baseColorTextureSampler = basicSampler;
 
         this.normalTexture = normalTexture;
-        this.normalTextureSampler = this.redGPUContext.resourceManager.basicSampler;
+        this.normalTextureSampler = basicSampler;
 
         this.packedORMTexture = packedORMTexture;
 

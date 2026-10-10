@@ -110,7 +110,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         weightView: GPUTextureView,
         tasksBuffer: GPUBuffer
     ): GPUBindGroup | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
         const bindGroupLayout = this.#bindGroupLayout;
         const uniformBuffer = this.#uniformGPUBuffer;
         const defaultSampler = this.#defaultSampler;
@@ -218,8 +218,9 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         targetLayer?: string | number | null
     ): ResolvedWeightLayerInfo {
         const info = this.#resolvedWeightInfo;
-        const emptyView = this.redGPUContext.resourceManager.emptyBitmapTextureView;
-        info.weightView = emptyView;
+        const {resourceManager} = this.redGPUContext;
+        const {emptyBitmapTextureView} = resourceManager;
+        info.weightView = emptyBitmapTextureView;
         info.hasWeightMap = 0;
         info.weightChannelIndex = 0;
 
@@ -228,7 +229,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
                 ? landscape.layers[targetLayer]
                 : landscape.layers.find((l: any) => l.name === targetLayer);
             if (matchedLayer?.weightTexture?.gpuTexture) {
-                info.weightView = this.redGPUContext.resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture);
+                info.weightView = resourceManager.getGPUResourceBitmapTextureView(matchedLayer.weightTexture);
                 info.hasWeightMap = 1;
                 info.weightChannelIndex = matchedLayer.weightChannelIndex ?? 0;
             }

@@ -116,8 +116,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
     ): GPURenderPipeline | null {
         if (!material) return null;
 
-        const resourceManager = this.resourceManager;
-        const gpuDevice: GPUDevice = this.gpuDevice;
+        const {resourceManager, gpuDevice} = this;
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
 
         if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentShaderModule) {
@@ -306,8 +305,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             return cachedPipeline;
         }
 
-        const resourceManager = this.resourceManager;
-        const gpuDevice: GPUDevice = this.gpuDevice;
+        const {resourceManager, gpuDevice} = this;
 
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: strideBytes,
@@ -385,8 +383,7 @@ class FoliagePipelineRegistry extends RedGPUObject {
             material.dirtyPipeline = false;
         }
 
-        const resourceManager = this.resourceManager;
-        const gpuDevice: GPUDevice = this.gpuDevice;
+        const {resourceManager, gpuDevice} = this;
 
         const materialUUID = material.uuid || material.name || 'mat';
         const pipelineKey = `FoliageShadowMasked_${materialUUID}_stride${strideBytes}_cull${cullMode}`;

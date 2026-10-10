@@ -37,7 +37,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
     #uniformCPUBuffer: Float32Array;
     #uniformUintBuffer: Uint32Array;
 
-    #tasksGPUBuffer!: GPUBuffer;
+    #tasksGPUBuffer: GPUBuffer;
     #tasksCPUBuffer: Uint32Array;
     #taskCapacity: number;
 
@@ -82,10 +82,11 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
         const {rawGPUBuffer} = megaBuffer;
         if (!rawGPUBuffer) return;
 
-        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
+        const {computePipeline, uniformGPUBuffer, gpuDevice, resourceManager} = this;
+        const {emptyBitmapTextureView} = resourceManager;
 
-        const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
-        const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || this.resourceManager.emptyBitmapTextureView;
+        const vhtView = landscape.vhtAtlasTexture?.gpuTextureView || emptyBitmapTextureView;
+        const vbtView = landscape.vbtBaseColorAtlas?.gpuTextureView || emptyBitmapTextureView;
 
         const {
             worldSizeX,
@@ -184,7 +185,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         u32[20] = randomRotationY ? 1 : 0;
         u32[21] = densityScaleByWeight ? 1 : 0;
-        u32[22] = (scaleDiffX === scaleDiffZ && minScale[0] === minScale[2]) ? 1 : 0;
+        u32[22] = (scaleDiffX === scaleDiffZ && minScaleX === minScaleZ) ? 1 : 0;
         u32[23] = typeId;
 
         u32[24] = landscape.hasValidVbtAtlas ? 1 : 0;
