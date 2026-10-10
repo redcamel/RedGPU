@@ -27,7 +27,7 @@ import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions
 import FoliageRenderUnit from "./FoliageRenderUnit";
 
 import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
-import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
 import FoliageCuller from "./culling/FoliageCuller";

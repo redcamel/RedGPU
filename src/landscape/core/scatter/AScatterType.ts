@@ -118,7 +118,7 @@ export interface AScatterTypeInitOptions {
  * [EN] This class is abstract and cannot be directly instantiated. Use via subclasses (Grass, Foliage).
  * :::
  */
-export abstract class AScatterType<
+abstract class AScatterType<
     TAllocation extends ScatterBaseSegmentAllocation = ScatterBaseSegmentAllocation
 > extends RedGPUObject {
     #name: string;
@@ -202,7 +202,7 @@ export abstract class AScatterType<
      * [KO] 해당 스캐터 모델을 구성하는 공통 렌더 단위(Render Unit) 컬렉션을 반환하는 추상 게터입니다.
      * [EN] Abstract getter returning the collection of common render units composing this scatter model.
      */
-    abstract get renderUnits(): readonly ScatterRenderUnit[];
+    abstract get renderUnits(): ScatterRenderUnit[];
 
     /**
      * [KO] 해당 스캐터 모델을 구성하는 렌더 단위 총 개수를 반환합니다. (단일 진실 공급원)

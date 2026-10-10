@@ -7,7 +7,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import grassBakeWGSL from "./grassBake.wgsl";
 import type Landscape from "../../../Landscape";
 import type Grass from "../Grass";
-import type {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
+import type GrassScatterMegaBuffer from "../buffer/GrassScatterMegaBuffer";
 import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 export const GRASS_CELL_SIZE: number = 16.0;
@@ -16,7 +16,7 @@ export const GRASS_CELL_SIZE: number = 16.0;
  * [KO] 지형(Landscape) 높이맵 및 레이어 가중치 텍스처를 기반으로 잔디 인스턴스를 100% GPU 베이킹하는 클래스입니다.
  * [EN] Baker class that bakes grass instances 100% on the GPU based on landscape heightmaps and layer weight textures.
  */
-export default class GrassInstanceBaker extends AScatterInstanceBaker {
+class GrassInstanceBaker extends AScatterInstanceBaker {
     #uniformArrayBuffer: ArrayBuffer = new ArrayBuffer(256);
     #uniformFloat32View: Float32Array;
     #uniformUint32View: Uint32Array;
@@ -53,8 +53,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         const {
             vhtAtlasTexture,
             vbtBaseColorAtlas,
-            worldSizeX,
-            worldSizeZ,
             invWorldSizeX,
             invWorldSizeZ,
             heightScale
@@ -222,3 +220,6 @@ export default class GrassInstanceBaker extends AScatterInstanceBaker {
         return result;
     }
 }
+
+Object.freeze(GrassInstanceBaker);
+export default GrassInstanceBaker;

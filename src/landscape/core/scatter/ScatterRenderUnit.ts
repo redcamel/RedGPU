@@ -119,7 +119,7 @@ export interface ScatterRenderUnitInitOptions {
  * [EN] This class is automatically created by the system (FoliageManager and Grass).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class ScatterRenderUnit {
+class ScatterRenderUnit {
     #geometry: Geometry;
     #vertexCount: number;
     #indexCount: number;

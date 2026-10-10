@@ -10,7 +10,7 @@ import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
  * [KO] 최대 1,024개 렌더 단위(256 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 식생 전용 슬롯 풀러 클래스입니다.
  * [EN] Foliage-dedicated slot pooler class managing UBO slots for up to 1,024 render units (256 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
-export class FoliageSlotPooler extends AScatterSlotPooler {
+class FoliageSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 1024;
     static PARAMS_SIZE_BYTES: number = 32;
 
@@ -56,10 +56,10 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         treeHeight: number = 5.0,
         windFlutterMultiplier: number = 1.0
     ): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, paramsSizeBytes, cpuBuffer: f32, cpuUint32View: u32} = this;
+        if (slot < 0 || slot >= maxSlots) return;
 
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         u32[baseFloat + 0] = globalSlot;
         f32[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
@@ -70,7 +70,7 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         f32[baseFloat + 6] = groundBlendRange;
         u32[baseFloat + 7] = 0; // pad0
 
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        this.uploadSlotBytes(slot, paramsSizeBytes);
     }
 
     /**
@@ -120,9 +120,9 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         windFlutterMultiplier: number,
         treeHeight: number
     ): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, cpuBuffer: f32} = this;
+        if (slot < 0 || slot >= maxSlots) return;
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        const f32 = this.cpuBuffer;
 
         f32[baseFloat + 2] = windMultiplier;
         f32[baseFloat + 3] = windFlutterMultiplier;
@@ -142,9 +142,9 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
         strength: number,
         range: number
     ): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, cpuBuffer: f32} = this;
+        if (slot < 0 || slot >= maxSlots) return;
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        const f32 = this.cpuBuffer;
 
         f32[baseFloat + 5] = strength;
         f32[baseFloat + 6] = range;
@@ -157,8 +157,9 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
      * @param slot - 슬롯 인덱스
      */
     flushSlotBytes(slot: number): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        const {maxSlots, paramsSizeBytes} = this;
+        if (slot < 0 || slot >= maxSlots) return;
+        this.uploadSlotBytes(slot, paramsSizeBytes);
     }
 
     /**
@@ -169,10 +170,11 @@ export class FoliageSlotPooler extends AScatterSlotPooler {
      * @param receiveShadow - 그림자 수신 여부
      */
     updateReceiveShadow(slot: number, receiveShadow: boolean): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, paramsSizeBytes, cpuBuffer} = this;
+        if (slot < 0 || slot >= maxSlots) return;
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        this.cpuBuffer[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        cpuBuffer[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
+        this.uploadSlotBytes(slot, paramsSizeBytes);
     }
 }
 

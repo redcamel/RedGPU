@@ -44,7 +44,7 @@ export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
+class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     #globalUniformBytes: number;
 
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
@@ -628,7 +628,7 @@ export class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
      * [EN] Resets instance counts of foliage CSM shadow indirect draw buffers from template each frame.
      * @param commandEncoder - GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
      */
-    protected override onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
+    override onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
         const targetGPUBuffer = this.#shadowIndirectGPUBuffer;
         const templateGPUBuffer = this.#shadowIndirectResetTemplateGPUBuffer;
 

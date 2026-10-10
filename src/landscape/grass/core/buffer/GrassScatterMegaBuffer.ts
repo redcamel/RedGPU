@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 import RedGPUContext from '../../../../context/RedGPUContext';
-import {AScatterMegaBuffer, ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
+import AScatterMegaBuffer, {type ScatterBaseSegmentAllocation} from '../../../core/scatter/AScatterMegaBuffer';
 import grassCullWGSL from '../culling/grassCull.wgsl';
 import type Grass from '../Grass';
 
@@ -51,7 +51,7 @@ export interface GrassTypeAllocation extends ScatterBaseSegmentAllocation {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
+class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     #allocations: Map<number, GrassTypeAllocation> = new Map();
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedGlobalUniformBuffer: GPUBuffer | null = null;
@@ -324,13 +324,13 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     ): GPUBindGroup | null {
         const {
             gpuDevice,
-            rawGPUBuffer: rawBuffer,
-            culledGPUBuffer: culledBuffer,
-            indirectGPUBuffer: indirectBuffer,
-            typeParamsGPUBuffer: typeParamsBuffer
+            rawGPUBuffer,
+            culledGPUBuffer,
+            indirectGPUBuffer,
+            typeParamsGPUBuffer
         } = this;
 
-        if (!rawBuffer || !culledBuffer || !indirectBuffer || !typeParamsBuffer) {
+        if (!rawGPUBuffer || !culledGPUBuffer || !indirectGPUBuffer || !typeParamsGPUBuffer) {
             return null;
         }
 
@@ -350,10 +350,10 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             layout: bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: globalUniformBuffer}},
-                {binding: 1, resource: {buffer: rawBuffer}},
-                {binding: 2, resource: {buffer: culledBuffer}},
-                {binding: 3, resource: {buffer: indirectBuffer}},
-                {binding: 4, resource: {buffer: typeParamsBuffer}},
+                {binding: 1, resource: {buffer: rawGPUBuffer}},
+                {binding: 2, resource: {buffer: culledGPUBuffer}},
+                {binding: 3, resource: {buffer: indirectGPUBuffer}},
+                {binding: 4, resource: {buffer: typeParamsGPUBuffer}},
             ]
         });
 
@@ -370,9 +370,8 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
      */
     onResizeBuffers(newCapacity: number): void {
         this.invalidateUnifiedCullingBindGroup();
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice, strideBytes} = this;
 
-        const strideBytes = this.strideBytes;
         const culledCapacity = newCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
 
@@ -395,11 +394,9 @@ export class GrassScatterMegaBuffer extends AScatterMegaBuffer {
     }
 
     #initBuffers(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
+        const {gpuDevice, strideBytes, instanceCapacity} = this;
 
-        const strideBytes = this.strideBytes;
-        const culledCapacity = this.instanceCapacity * 2;
+        const culledCapacity = instanceCapacity * 2;
         const culledByteSize = culledCapacity * strideBytes;
 
         this.culledGPUBuffer = gpuDevice.createBuffer({

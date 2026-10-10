@@ -81,7 +81,8 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         }
         this.#freeTop = maxSlots;
 
-        this.#gpuBuffer = this.gpuDevice.createBuffer({
+        const {gpuDevice} = this;
+        this.#gpuBuffer = gpuDevice.createBuffer({
             label: bufferLabel,
             size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
@@ -158,8 +159,9 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         this.#freeTop = this.maxSlots;
         this.#allocatedCount = 0;
 
+        const {gpuDevice} = this;
         if (this.#gpuBuffer) {
-            this.gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#cpuBuffer.buffer);
+            gpuDevice.queue.writeBuffer(this.#gpuBuffer, 0, this.#cpuBuffer.buffer);
         }
     }
 
@@ -189,8 +191,9 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         const offsetBytes = slot * SLOT_STRIDE_BYTES;
         const baseFloat = slot * SLOT_STRIDE_FLOATS;
         const {buffer, byteOffset} = this.#cpuBuffer;
+        const {gpuDevice} = this;
 
-        this.gpuDevice.queue.writeBuffer(
+        gpuDevice.queue.writeBuffer(
             gpuBuffer,
             offsetBytes,
             buffer,

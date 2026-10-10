@@ -36,14 +36,14 @@ interface ScatterBakeBindGroupCacheEntry {
  * [KO] 지형(Landscape) 표면에 대규모 스캐터 인스턴스를 GPU Compute Shader로 물리 안착 및 원스톱 생성하는 추상 베이스 클래스입니다.
  * [EN] Abstract base class for physically conforming and generating large-scale scatter instances onto landscape terrain using GPU Compute Shaders.
  */
-export abstract class AScatterInstanceBaker extends RedGPUObject {
+abstract class AScatterInstanceBaker extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #uniformGPUBuffer: GPUBuffer | null = null;
     #defaultSampler: GPUSampler | null = null;
 
-    readonly #bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
-    readonly #resolvedWeightInfo: ResolvedWeightLayerInfo = {
+    #bakeBindGroupCache: Map<number, ScatterBakeBindGroupCacheEntry> = new Map();
+    #resolvedWeightInfo: ResolvedWeightLayerInfo = {
         weightView: null as any,
         hasWeightMap: 0,
         weightChannelIndex: 0
@@ -98,6 +98,14 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
     }
 
     /**
+     * [KO] 기본 GPUSampler 인스턴스를 반환합니다.
+     * [EN] Returns the default GPUSampler instance.
+     */
+    get defaultSampler(): GPUSampler | null {
+        return this.#defaultSampler;
+    }
+
+    /**
      * [KO] 특정 타입 ID에 대해 유효한 GPUBindGroup을 반환하거나, 리소스가 변경된 경우 재생성하여 캐싱합니다.
      * [EN] Returns a valid GPUBindGroup for the specified type ID, or re-creates and caches it if resources have changed.
      */
@@ -110,11 +118,8 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
         weightView: GPUTextureView,
         tasksBuffer: GPUBuffer
     ): GPUBindGroup | null {
-        const {gpuDevice} = this;
-        const bindGroupLayout = this.#bindGroupLayout;
-        const uniformBuffer = this.#uniformGPUBuffer;
-        const defaultSampler = this.#defaultSampler;
-        if (!bindGroupLayout || !uniformBuffer || !defaultSampler) return null;
+        const {gpuDevice, bindGroupLayout, uniformGPUBuffer, defaultSampler} = this;
+        if (!bindGroupLayout || !uniformGPUBuffer || !defaultSampler) return null;
 
         let cacheEntry = this.#bakeBindGroupCache.get(typeId);
         const needsNewBindGroup = !cacheEntry
@@ -129,7 +134,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
                 label: `${labelPrefix}_BG_Type_${typeId}`,
                 layout: bindGroupLayout,
                 entries: [
-                    {binding: 0, resource: {buffer: uniformBuffer}},
+                    {binding: 0, resource: {buffer: uniformGPUBuffer}},
                     {binding: 1, resource: {buffer: rawBuffer}},
                     {binding: 2, resource: vhtView},
                     {binding: 3, resource: vbtView},
@@ -214,7 +219,7 @@ export abstract class AScatterInstanceBaker extends RedGPUObject {
      * @param landscape - 대상 Landscape 지형 인스턴스
      * @param targetLayer - 대상 레이어 식별자 (레이어 인덱스 또는 고유 이름)
      */
-    protected resolveWeightLayer(
+    resolveWeightLayer(
         landscape: Landscape,
         targetLayer?: string | number | null
     ): ResolvedWeightLayerInfo {

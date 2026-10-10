@@ -5,14 +5,14 @@
  */
 
 import RedGPUContext from "../../../../context/RedGPUContext";
-import {Grass} from "../Grass";
+import type Grass from "../Grass";
 import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
 /**
  * [KO] 최대 256개 잔디 슬롯(64 KB)의 UBO 슬롯을 관리하고, Zero-GC 방식으로 CPU 미러 버퍼를 갱신/업로드하는 잔디 전용 슬롯 풀러 클래스입니다.
  * [EN] Grass-dedicated slot pooler class managing UBO slots for up to 256 grass slots (64 KB) and updating/uploading CPU mirror buffers with zero-GC.
  */
-export class GrassSlotPooler extends AScatterSlotPooler {
+class GrassSlotPooler extends AScatterSlotPooler {
     static MAX_SLOTS: number = 256;
     static PARAMS_SIZE_BYTES: number = 96;
 
@@ -40,10 +40,10 @@ export class GrassSlotPooler extends AScatterSlotPooler {
      * @param hasValidVbt - 유효한 가상 베이스 텍스처(VBT) 존재 여부
      */
     writeGrassSlot(slot: number, grass: Grass, hasValidVbt: boolean): void {
-        if (slot < 0 || slot >= this.maxSlots) return;
+        const {maxSlots, paramsSizeBytes, cpuBuffer: f32, cpuUint32View: u32} = this;
+        if (slot < 0 || slot >= maxSlots) return;
 
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        const {cpuBuffer: f32, cpuUint32View: u32} = this;
 
         const {
             cullingDistance,
@@ -94,7 +94,7 @@ export class GrassSlotPooler extends AScatterSlotPooler {
         u32[baseFloat + 22] = 0; // pad0
         u32[baseFloat + 23] = 0; // pad1
 
-        this.uploadSlotBytes(slot, this.paramsSizeBytes);
+        this.uploadSlotBytes(slot, paramsSizeBytes);
     }
 }
 

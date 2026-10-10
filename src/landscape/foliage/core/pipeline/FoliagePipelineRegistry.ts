@@ -41,10 +41,14 @@ class FoliagePipelineRegistry extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const {vModule, depthPrepassMaskedFModule, depthPrepassOpaqueFModule} = this.#initShaderModules();
-        this.#vertexShaderModule = vModule;
-        this.#depthPrepassMaskedFragmentShaderModule = depthPrepassMaskedFModule;
-        this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFModule;
+        const {
+            vertexShaderModule,
+            depthPrepassMaskedFragmentShaderModule,
+            depthPrepassOpaqueFragmentShaderModule
+        } = this.#initShaderModules();
+        this.#vertexShaderModule = vertexShaderModule;
+        this.#depthPrepassMaskedFragmentShaderModule = depthPrepassMaskedFragmentShaderModule;
+        this.#depthPrepassOpaqueFragmentShaderModule = depthPrepassOpaqueFragmentShaderModule;
     }
 
     #geoAttributesAll: GPUVertexAttribute[] = [
@@ -457,34 +461,34 @@ class FoliagePipelineRegistry extends RedGPUObject {
     }
 
     #initShaderModules(): {
-        vModule: GPUShaderModule;
-        depthPrepassMaskedFModule: GPUShaderModule;
-        depthPrepassOpaqueFModule: GPUShaderModule;
+        vertexShaderModule: GPUShaderModule;
+        depthPrepassMaskedFragmentShaderModule: GPUShaderModule;
+        depthPrepassOpaqueFragmentShaderModule: GPUShaderModule;
     } {
-        const resourceManager = this.resourceManager;
+        const {resourceManager} = this;
 
-        let vModule = resourceManager.getGPUShaderModule('Foliage_Instanced_VertexShaderModule');
-        if (!vModule) {
-            vModule = resourceManager.createGPUShaderModule('Foliage_Instanced_VertexShaderModule', {
+        let vertexShaderModule = resourceManager.getGPUShaderModule('Foliage_Instanced_VertexShaderModule');
+        if (!vertexShaderModule) {
+            vertexShaderModule = resourceManager.createGPUShaderModule('Foliage_Instanced_VertexShaderModule', {
                 code: foliageInstancedWGSL,
             });
         }
 
-        let depthPrepassMaskedFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule');
-        if (!depthPrepassMaskedFModule) {
-            depthPrepassMaskedFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule', {
+        let depthPrepassMaskedFragmentShaderModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule');
+        if (!depthPrepassMaskedFragmentShaderModule) {
+            depthPrepassMaskedFragmentShaderModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Masked_FragmentShaderModule', {
                 code: foliageDepthPrepassMaskedFragmentWGSL,
             });
         }
 
-        let depthPrepassOpaqueFModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule');
-        if (!depthPrepassOpaqueFModule) {
-            depthPrepassOpaqueFModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule', {
+        let depthPrepassOpaqueFragmentShaderModule = resourceManager.getGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule');
+        if (!depthPrepassOpaqueFragmentShaderModule) {
+            depthPrepassOpaqueFragmentShaderModule = resourceManager.createGPUShaderModule('Foliage_DepthPrepass_Opaque_FragmentShaderModule', {
                 code: foliageDepthPrepassOpaqueFragmentWGSL,
             });
         }
 
-        return {vModule, depthPrepassMaskedFModule, depthPrepassOpaqueFModule};
+        return {vertexShaderModule, depthPrepassMaskedFragmentShaderModule, depthPrepassOpaqueFragmentShaderModule};
     }
 }
 

@@ -110,7 +110,7 @@ export interface GrassOptions extends AScatterTypeInitOptions {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class Grass extends AScatterType<GrassTypeAllocation> {
+class Grass extends AScatterType<GrassTypeAllocation> {
     #mesh: Mesh;
     #geometry: Geometry | Primitive;
     #renderUnits: ScatterRenderUnit[] = [];
@@ -351,8 +351,9 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
      * [EN] Base color GPUTextureView used for grass rendering
      */
     get baseColorTextureView(): GPUTextureView {
-        return this.resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
-            || this.resourceManager.emptyBitmapTextureView;
+        const {resourceManager} = this;
+        return resourceManager.getGPUResourceBitmapTextureView(this.#baseColorTexture)
+            || resourceManager.emptyBitmapTextureView;
     }
 
     /**
@@ -663,7 +664,8 @@ export class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     #updateInstancesPerCell(): void {
-        this.#instancesPerCell = Math.max(1, Math.round((this.densityPerHectare * 256.0 / 10000.0) * this.densityMultiplier));
+        const {densityPerHectare, densityMultiplier} = this;
+        this.#instancesPerCell = Math.max(1, Math.round((densityPerHectare * 256.0 / 10000.0) * densityMultiplier));
     }
 
     /**

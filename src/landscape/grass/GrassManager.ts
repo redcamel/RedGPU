@@ -7,9 +7,9 @@ import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
 import Grass, {GrassOptions} from "./core/Grass";
-import {GrassScatterMegaBuffer} from "./core/buffer/GrassScatterMegaBuffer";
-import {GrassRenderer} from "./core/renderer/GrassRenderer";
-import {GrassSlotPooler} from "./core/buffer/GrassSlotPooler";
+import GrassScatterMegaBuffer from "./core/buffer/GrassScatterMegaBuffer";
+import GrassRenderer from "./core/renderer/GrassRenderer";
+import GrassSlotPooler from "./core/buffer/GrassSlotPooler";
 import GrassInstanceBaker, {GRASS_CELL_SIZE} from "./core/baking/GrassInstanceBaker";
 import GrassCuller from "./core/culling/GrassCuller";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -26,7 +26,7 @@ import {AScatterManager} from "../core/scatter";
  *
  * @category Landscape
  */
-export class GrassManager extends AScatterManager<Grass, GrassOptions> {
+class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
     #megaBuffer: GrassScatterMegaBuffer;
     #baker: GrassInstanceBaker;
@@ -57,11 +57,12 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
     constructor(landscape: Landscape) {
         super(landscape);
 
-        this.#megaBuffer = new GrassScatterMegaBuffer(this.redGPUContext, 131072);
-        this.#baker = new GrassInstanceBaker(this.redGPUContext);
-        this.#culler = new GrassCuller(this.redGPUContext);
-        this.#slotPooler = new GrassSlotPooler(this.redGPUContext);
-        this.#renderer = new GrassRenderer(this.redGPUContext);
+        const {redGPUContext} = this;
+        this.#megaBuffer = new GrassScatterMegaBuffer(redGPUContext, 131072);
+        this.#baker = new GrassInstanceBaker(redGPUContext);
+        this.#culler = new GrassCuller(redGPUContext);
+        this.#slotPooler = new GrassSlotPooler(redGPUContext);
+        this.#renderer = new GrassRenderer(redGPUContext);
 
         this.#megaBuffer.onRecreated = () => {
             this.#megaBuffer.invalidateUnifiedCullingBindGroup();
@@ -105,7 +106,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [KO] 특정 잔디 타입이 메인 렌더 패스(Near + Far)에서 발행하는 간접 드로우콜 수를 계산합니다.
      * [EN] Computes the number of indirect draw calls dispatched by a specific grass type in the main pass (Near + Far).
      */
-    protected override computeTypeDrawCalls(grass: Grass): number {
+    override computeTypeDrawCalls(grass: Grass): number {
         if (!this.#populated) return 0;
         const alloc = this.#megaBuffer.getAllocation(grass.typeId);
         if (alloc) {
@@ -219,7 +220,8 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * @returns 생성되어 등록된 {@link Grass} 인스턴스
      */
     addType(options: GrassOptions): Grass {
-        const grassType = new Grass(this.redGPUContext, options);
+        const {redGPUContext, landscape} = this;
+        const grassType = new Grass(redGPUContext, options);
 
         const typeId = this.#nextTypeId++;
         grassType.typeId = typeId;
@@ -252,20 +254,20 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const {targetLayer} = grassType;
         if (targetLayer != null && targetLayer !== '') {
             const matchedLayer = typeof targetLayer === 'number'
-                ? this.landscape.layers[targetLayer]
-                : this.landscape.layers.find(
+                ? landscape.layers[targetLayer]
+                : landscape.layers.find(
                     l => l.name === targetLayer
                 );
-            const wt = matchedLayer?.weightTexture;
-            if (wt && typeof (wt as any).addLoadListeners === 'function') {
-                (wt as any).addLoadListeners(this.#onGrassRepopulateRequired);
+            const weightTexture = matchedLayer?.weightTexture;
+            if (weightTexture && typeof (weightTexture as any).addLoadListeners === 'function') {
+                (weightTexture as any).addLoadListeners(this.#onGrassRepopulateRequired);
             }
         }
 
         const slotIndex = this.#slotPooler.allocateSlot();
         grassType.slotIndex = slotIndex;
 
-        const hasValidVbt = this.landscape.hasValidVbtAtlas;
+        const hasValidVbt = landscape.hasValidVbtAtlas;
         this.#slotPooler.writeGrassSlot(slotIndex, grassType, hasValidVbt);
 
         this.#megaBuffer.invalidateUnifiedCullingBindGroup();
@@ -278,7 +280,7 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [KO] 그림자를 투사하는 특정 잔디 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
      * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting grass type in the CSM shadow pass.
      */
-    protected override computeTypeShadowDrawCalls(grass: Grass): number {
+    override computeTypeShadowDrawCalls(grass: Grass): number {
         if (!this.#populated) return 0;
         const {typeId} = grass;
         const alloc = this.#megaBuffer.getAllocation(typeId);
@@ -391,10 +393,10 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#renderer.destroy();
         this.#slotPooler.destroy();
 
-        const list = this.types;
-        const len = list.length;
+        const {types} = this;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            list[i].destroy();
+            types[i].destroy();
         }
         this.clearTypes();
 
@@ -501,11 +503,12 @@ export class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Executes GPU baking for a specific grass type to record position/normal/color into the VRAM buffer once.
      */
     #bakeGrassType(grass: Grass, centerX: number, centerZ: number): void {
-        if (!this.landscape.hasValidScatterAtlas) return;
+        const {landscape} = this;
+        if (!landscape.hasValidScatterAtlas) return;
 
         this.#baker.dispatchBake(
             this.#megaBuffer,
-            this.landscape,
+            landscape,
             grass,
             centerX,
             centerZ

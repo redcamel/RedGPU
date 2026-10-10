@@ -109,7 +109,7 @@ export interface ScatterBaseSegmentAllocation {
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class AScatterMegaBuffer extends RedGPUObject {
+abstract class AScatterMegaBuffer extends RedGPUObject {
     #instanceCapacity: number;
     #strideFloats: number;
     #strideBytes: number;
@@ -522,7 +522,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Virtual hook method overridden by derived classes to reset additional indirect draw buffers (e.g., foliage CSM shadow indirect buffers).
      * @param commandEncoder - GPU 커맨드 인코더 (없을 시 null)
      */
-    protected onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
+    onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
     }
 
     /**
@@ -618,8 +618,7 @@ export abstract class AScatterMegaBuffer extends RedGPUObject {
      * [EN] Initializes common base GPU buffers (rawGPUBuffer, typeParamsGPUBuffer).
      */
     #initBaseBuffers(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
+        const {gpuDevice} = this;
 
         const rawByteSize = Math.max(this.#instanceCapacity * this.#strideBytes, 64);
         const typeParamsByteSize = this.#maxTypes * this.#typeParamFloats * Float32Array.BYTES_PER_ELEMENT;

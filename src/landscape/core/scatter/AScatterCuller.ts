@@ -17,7 +17,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  *
  * @category Landscape
  */
-export abstract class AScatterCuller extends RedGPUObject {
+abstract class AScatterCuller extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
@@ -65,7 +65,7 @@ export abstract class AScatterCuller extends RedGPUObject {
      * @param labelPrefix - WebGPU 리소스 라벨 접두사
      * @param entryPoint - 컴퓨트 셰이더 진입점 (기본값: 'main')
      */
-    protected initComputePipeline(
+    initComputePipeline(
         shaderName: string,
         shaderSource: string,
         labelPrefix: string,
@@ -81,10 +81,10 @@ export abstract class AScatterCuller extends RedGPUObject {
             });
         }
 
-        const bglDesc = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
+        const bindGroupLayoutDescriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
         this.#bindGroupLayout = resourceManager.createBindGroupLayout(`${labelPrefix}_BindGroupLayout`, {
             label: `${labelPrefix}_BindGroupLayout`,
-            ...bglDesc
+            ...bindGroupLayoutDescriptor
         });
 
         const pipelineLayout = resourceManager.createGPUPipelineLayout(`${labelPrefix}_PipelineLayout`, {
@@ -110,7 +110,7 @@ export abstract class AScatterCuller extends RedGPUObject {
      * @param totalInstances - 처리할 총 인스턴스 개수
      * @param workgroupSize - 셰이더 워크그룹 크기 (기본값: 64)
      */
-    protected dispatchCompute(
+    dispatchCompute(
         computePass: GPUComputePassEncoder,
         bindGroup: GPUBindGroup,
         totalInstances: number,
@@ -124,4 +124,5 @@ export abstract class AScatterCuller extends RedGPUObject {
     }
 }
 
+Object.freeze(AScatterCuller);
 export default AScatterCuller;

@@ -15,11 +15,11 @@
  * @packageDocumentation
  */
 import Grass, {type GrassOptions} from "./Grass";
-import {GrassScatterMegaBuffer} from "./buffer/GrassScatterMegaBuffer";
+import GrassScatterMegaBuffer from "./buffer/GrassScatterMegaBuffer";
 import GrassInstanceBaker from "./baking/GrassInstanceBaker";
 import GrassCuller from "./culling/GrassCuller";
-import {GrassRenderer} from "./renderer/GrassRenderer";
-import {GrassSlotPooler} from "./buffer/GrassSlotPooler";
+import GrassRenderer from "./renderer/GrassRenderer";
+import GrassSlotPooler from "./buffer/GrassSlotPooler";
 
 export {
     Grass,

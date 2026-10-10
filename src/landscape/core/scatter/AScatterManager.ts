@@ -24,7 +24,7 @@ import {AScatterTypeInitOptions} from "./AScatterType";
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class AScatterManager<
+abstract class AScatterManager<
     TType extends AScatterType = AScatterType,
     TOptions extends AScatterTypeInitOptions = AScatterTypeInitOptions
 > extends RedGPUObject {
@@ -104,12 +104,12 @@ export abstract class AScatterManager<
      * [EN] Returns total number of indirect draw calls in the main render pass, aggregated across all active scatter types in a single loop.
      */
     get totalDrawCalls(): number {
-        if (!this.enabled) return 0;
+        const {enabled, types} = this;
+        if (!enabled) return 0;
         let count = 0;
-        const list = this.#types;
-        const len = list.length;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            count += this.computeTypeDrawCalls(list[i]);
+            count += this.computeTypeDrawCalls(types[i]);
         }
         return count;
     }
@@ -119,13 +119,14 @@ export abstract class AScatterManager<
      * [EN] Returns total number of indirect draw calls in the CSM shadow map pass, aggregated across shadow-casting types in a single loop.
      */
     get shadowDrawCalls(): number {
-        if (!this.enabled) return 0;
+        const {enabled, types} = this;
+        if (!enabled) return 0;
         let count = 0;
-        const list = this.#types;
-        const len = list.length;
+        const len = types.length;
         for (let i = 0; i < len; i++) {
-            const type = list[i];
-            if (!type.castShadow) continue;
+            const type = types[i];
+            const {castShadow} = type;
+            if (!castShadow) continue;
             count += this.computeTypeShadowDrawCalls(type);
         }
         return count;
@@ -137,7 +138,7 @@ export abstract class AScatterManager<
      *
      * @param type - 대상 스캐터 타입 인스턴스
      */
-    protected abstract computeTypeDrawCalls(type: TType): number;
+    abstract computeTypeDrawCalls(type: TType): number;
 
     /**
      * [KO] 그림자를 투사하는 특정 스캐터 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
@@ -145,7 +146,7 @@ export abstract class AScatterManager<
      *
      * @param type - 대상 스캐터 타입 인스턴스
      */
-    protected abstract computeTypeShadowDrawCalls(type: TType): number;
+    abstract computeTypeShadowDrawCalls(type: TType): number;
 
     /**
      * [KO] 고유 이름을 통해 등록된 스캐터 타입 인스턴스를 조회합니다.
@@ -167,8 +168,9 @@ export abstract class AScatterManager<
      * [EN] Clears all registered scatter types and resets to the initial state.
      */
     clearTypes(): void {
-        while (this.#types.length > 0) {
-            this.removeType(this.#types[this.#types.length - 1]);
+        const {types} = this;
+        while (types.length > 0) {
+            this.removeType(types[types.length - 1]);
         }
         this.#typesByName.clear();
     }
@@ -222,7 +224,7 @@ export abstract class AScatterManager<
      * @param type - 등록할 스캐터 타입 인스턴스
      * @internal
      */
-    protected registerTypeInternal(type: TType): void {
+    registerTypeInternal(type: TType): void {
         const {name} = type;
         this.#types.push(type);
         this.#typesByName.set(name, type);
@@ -236,19 +238,26 @@ export abstract class AScatterManager<
      * @returns 제거된 스캐터 타입 인스턴스 (미발견 시 null)
      * @internal
      */
-    protected unregisterTypeInternal(target: TType | string): TType | null {
+    unregisterTypeInternal(target: TType | string): TType | null {
         if (!target) return null;
-        const name = typeof target === 'string' ? target : target.name;
-        const found = this.#typesByName.get(name);
+        let lookupName: string;
+        if (typeof target === 'string') {
+            lookupName = target;
+        } else {
+            const {name} = target;
+            lookupName = name;
+        }
+        const found = this.#typesByName.get(lookupName);
         if (!found) return null;
 
         const idx = this.#types.indexOf(found);
         if (idx !== -1) {
             this.#types.splice(idx, 1);
         }
-        this.#typesByName.delete(name);
+        this.#typesByName.delete(lookupName);
         return found;
     }
 }
 
+Object.freeze(AScatterManager);
 export default AScatterManager;

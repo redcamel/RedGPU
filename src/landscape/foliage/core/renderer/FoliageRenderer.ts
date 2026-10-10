@@ -415,7 +415,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         msaaID: string,
         view: View3D
     ): GPURenderBundle | null {
-        const gpuDevice = this.gpuDevice;
+        const {gpuDevice} = this;
 
         const bundleEncoder = gpuDevice.createRenderBundleEncoder({
             label: `Foliage_MainBundleEncoder_${view.name}`,

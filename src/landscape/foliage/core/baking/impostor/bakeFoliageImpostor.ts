@@ -269,7 +269,7 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
  * [KO] 생성된 아틀라스 텍스처 및 빌보드 치수 결과
  * [EN] Resulting atlas textures and billboard dimensions
  */
-export default function bakeFoliageImpostor(
+function bakeFoliageImpostor(
     redGPUContext: RedGPUContext,
     renderUnits: FoliageRenderUnit[],
     bakeName: string = 'Foliage'
@@ -423,16 +423,15 @@ export default function bakeFoliageImpostor(
             isIndexed,
             indexCount,
             indexFormat = 'uint32',
-            vertexCount,
-            relativeModelMatrix: m
+            vertexCount
         } = unit;
         const {vertexBuffer, indexBuffer} = geometry;
-        const isIdentityModelMatrix = isIdentityMatrix(m);
+        const isIdentityModelMatrix = isIdentityMatrix(relativeModelMatrix);
 
         const {
-            baseColorTexture: diffTex,
+            baseColorTexture,
             baseColorTextureSampler,
-            normalTexture: normTex,
+            normalTexture,
             normalTextureSampler,
             packedORMTexture,
             metallicRoughnessTexture,
@@ -446,8 +445,8 @@ export default function bakeFoliageImpostor(
         const ormTex = packedORMTexture || metallicRoughnessTexture || occlusionTexture;
         const ormSampler = packedORMTextureSampler || metallicRoughnessTextureSampler || basicSampler;
 
-        const diffView = resourceManager.getGPUResourceBitmapTextureView(diffTex) || emptyBitmapTextureView;
-        const normView = resourceManager.getGPUResourceBitmapTextureView(normTex) || emptyBitmapTextureView;
+        const diffView = resourceManager.getGPUResourceBitmapTextureView(baseColorTexture) || emptyBitmapTextureView;
+        const normView = resourceManager.getGPUResourceBitmapTextureView(normalTexture) || emptyBitmapTextureView;
         const ormView = resourceManager.getGPUResourceBitmapTextureView(ormTex) || emptyBitmapTextureView;
 
             const bindGroup = gpuDevice.createBindGroup({
@@ -496,8 +495,8 @@ export default function bakeFoliageImpostor(
         if (typeof matCutOff === 'number' && matCutOff > 0) cutOff = matCutOff;
         const useVertexColor = !!matUseVertexColor;
 
-        const hasDiff = !!(diffTex && diffTex.gpuTexture);
-        const hasNorm = !!(normTex && normTex.gpuTexture);
+        const hasDiff = !!(baseColorTexture && baseColorTexture.gpuTexture);
+        const hasNorm = !!(normalTexture && normalTexture.gpuTexture);
         const hasORM = !!(ormTex && ormTex.gpuTexture);
         const isFoliage = matIsFoliage !== false ? 1.0 : 0.0;
 
@@ -508,9 +507,9 @@ export default function bakeFoliageImpostor(
         ]);
 
         const modelMatProps = new Float32Array([
-            m[0], m[1], m[2], m[12],
-            m[4], m[5], m[6], m[13],
-            m[8], m[9], m[10], m[14]
+            relativeModelMatrix[0], relativeModelMatrix[1], relativeModelMatrix[2], relativeModelMatrix[12],
+            relativeModelMatrix[4], relativeModelMatrix[5], relativeModelMatrix[6], relativeModelMatrix[13],
+            relativeModelMatrix[8], relativeModelMatrix[9], relativeModelMatrix[10], relativeModelMatrix[14]
         ]);
 
         cachedRenderUnits.push({
@@ -523,12 +522,12 @@ export default function bakeFoliageImpostor(
             indexCount,
             indexFormat,
             vertexCount,
-                relativeModelMatrix: m,
+            relativeModelMatrix,
             isIdentityModelMatrix,
-                matProps,
-                modelMatProps,
-                isFoliage,
-            });
+            matProps,
+            modelMatProps,
+            isFoliage,
+        });
         }
 
         const totalViews = renderPassViews.length;
@@ -725,7 +724,7 @@ export default function bakeFoliageImpostor(
             packedORMTexture: directORMTexture,
             width: actualQuadWidth,
             height: actualQuadHeight,
-            depth: aabb.depth,
+            depth,
             bottomOffset: actualBottomOffset,
         };
 
@@ -915,6 +914,5 @@ function executeDilation(
     pingPongB.destroy();
 }
 
-export {
-    bakeFoliageImpostor
-};
+export default bakeFoliageImpostor;
+

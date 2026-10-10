@@ -107,9 +107,9 @@ function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
         rotationX = 0,
         rotationY = 0,
         rotationZ = 0,
-        scaleX: sX = 1,
-        scaleY: sY = 1,
-        scaleZ: sZ = 1
+        scaleX = 1,
+        scaleY = 1,
+        scaleZ = 1
     } = mesh;
     const radX = rotationX * (Math.PI / 180);
     const radY = rotationY * (Math.PI / 180);
@@ -136,19 +136,19 @@ function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
     const b21 = -aSx * aCy;
     const b22 = aCx * aCy;
 
-    out[0] = b00 * sX;
-    out[1] = b01 * sX;
-    out[2] = b02 * sX;
+    out[0] = b00 * scaleX;
+    out[1] = b01 * scaleX;
+    out[2] = b02 * scaleX;
     out[3] = 0;
 
-    out[4] = b10 * sY;
-    out[5] = b11 * sY;
-    out[6] = b12 * sY;
+    out[4] = b10 * scaleY;
+    out[5] = b11 * scaleY;
+    out[6] = b12 * scaleY;
     out[7] = 0;
 
-    out[8] = b20 * sZ;
-    out[9] = b21 * sZ;
-    out[10] = b22 * sZ;
+    out[8] = b20 * scaleZ;
+    out[9] = b21 * scaleZ;
+    out[10] = b22 * scaleZ;
     out[11] = 0;
 
     return out;
@@ -331,7 +331,7 @@ export default function assembleScatterRenderUnits(
     const {
         preservePivot = true,
         centerXZ = false,
-        generateShadowMergedGeometry: generateShadow = false
+        generateShadowMergedGeometry = false
     } = options || {};
 
     const offsetX = centerXZ && isFinite(minX) ? (minX + maxX) * 0.5 : 0;
@@ -357,7 +357,7 @@ export default function assembleScatterRenderUnits(
     let shadowVertexOffset = 0;
     let shadowIndexOffset = 0;
 
-    if (generateShadow && lodTotalVertices > 0) {
+    if (generateShadowMergedGeometry && lodTotalVertices > 0) {
         shadowMergedPositions = new Float32Array(lodTotalVertices * POSITION_ONLY_STRIDE);
         shadowMergedIndices = new Uint32Array(lodTotalIndices);
     }
@@ -396,7 +396,7 @@ export default function assembleScatterRenderUnits(
 
         for (let g = 0; g < raws.length; g++) {
             const raw = raws[g];
-            const {geometry, rawStride, currentRelativeMatrix: m, normalMatrix: n} = raw;
+            const {geometry, rawStride, currentRelativeMatrix, normalMatrix} = raw;
             const {vertexBuffer, indexBuffer} = geometry;
             const {data, vertexCount} = vertexBuffer;
             const srcIData = indexBuffer?.data;
@@ -410,9 +410,9 @@ export default function assembleScatterRenderUnits(
                     const x = data[srcIdx + 0];
                     const y = data[srcIdx + 1];
                     const z = data[srcIdx + 2];
-                    const vx = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
-                    const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
-                    const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
+                    const vx = (currentRelativeMatrix[0] * x + currentRelativeMatrix[4] * y + currentRelativeMatrix[8] * z + currentRelativeMatrix[12]) - offsetX;
+                    const vy = (currentRelativeMatrix[1] * x + currentRelativeMatrix[5] * y + currentRelativeMatrix[9] * z + currentRelativeMatrix[13]) - offsetY;
+                    const vz = (currentRelativeMatrix[2] * x + currentRelativeMatrix[6] * y + currentRelativeMatrix[10] * z + currentRelativeMatrix[14]) - offsetZ;
 
                     combinedVertexData[dstIdx + 0] = vx;
                     combinedVertexData[dstIdx + 1] = vy;
@@ -430,9 +430,9 @@ export default function assembleScatterRenderUnits(
                         const ny = data[srcIdx + 4];
                         const nz = data[srcIdx + 5];
 
-                        let tx = n[0] * nx + n[4] * ny + n[8] * nz;
-                        let ty = n[1] * nx + n[5] * ny + n[9] * nz;
-                        let tz = n[2] * nx + n[6] * ny + n[10] * nz;
+                        let tx = normalMatrix[0] * nx + normalMatrix[4] * ny + normalMatrix[8] * nz;
+                        let ty = normalMatrix[1] * nx + normalMatrix[5] * ny + normalMatrix[9] * nz;
+                        let tz = normalMatrix[2] * nx + normalMatrix[6] * ny + normalMatrix[10] * nz;
                         const len = Math.sqrt(tx * tx + ty * ty + tz * tz);
                         if (len > 0.000001) {
                             tx /= len;
@@ -497,9 +497,9 @@ export default function assembleScatterRenderUnits(
                     }
 
                     if (hasTangent) {
-                        let rtx = m[0] * tanX + m[4] * tanY + m[8] * tanZ;
-                        let rty = m[1] * tanX + m[5] * tanY + m[9] * tanZ;
-                        let rtz = m[2] * tanX + m[6] * tanY + m[10] * tanZ;
+                        let rtx = normalMatrix[0] * tanX + normalMatrix[4] * tanY + normalMatrix[8] * tanZ;
+                        let rty = normalMatrix[1] * tanX + normalMatrix[5] * tanY + normalMatrix[9] * tanZ;
+                        let rtz = normalMatrix[2] * tanX + normalMatrix[6] * tanY + normalMatrix[10] * tanZ;
                         const tlen = Math.sqrt(rtx * rtx + rty * rty + rtz * rtz);
                         if (tlen > 0.000001) {
                             rtx /= tlen;
@@ -600,7 +600,7 @@ export default function assembleScatterRenderUnits(
     let maxDistSq = 0;
     for (let i = 0; i < rawList.length; i++) {
         const raw = rawList[i];
-        const {geometry, rawStride, currentRelativeMatrix: m} = raw;
+        const {geometry, rawStride, currentRelativeMatrix} = raw;
         const {vertexBuffer} = geometry;
         const {data, vertexCount = 0} = vertexBuffer ?? {};
 
@@ -610,9 +610,9 @@ export default function assembleScatterRenderUnits(
                 const x = data[srcIdx + 0];
                 const y = data[srcIdx + 1];
                 const z = data[srcIdx + 2];
-                const vx = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
-                const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
-                const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
+                const vx = (currentRelativeMatrix[0] * x + currentRelativeMatrix[4] * y + currentRelativeMatrix[8] * z + currentRelativeMatrix[12]) - offsetX;
+                const vy = (currentRelativeMatrix[1] * x + currentRelativeMatrix[5] * y + currentRelativeMatrix[9] * z + currentRelativeMatrix[13]) - offsetY;
+                const vz = (currentRelativeMatrix[2] * x + currentRelativeMatrix[6] * y + currentRelativeMatrix[10] * z + currentRelativeMatrix[14]) - offsetZ;
                 const dSq = vx * vx + vy * vy + vz * vz;
                 if (dSq > maxDistSq) maxDistSq = dSq;
             }
@@ -693,7 +693,3 @@ function getMaterialKey(mat: any): string {
 
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }
-
-export {
-    assembleScatterRenderUnits
-};

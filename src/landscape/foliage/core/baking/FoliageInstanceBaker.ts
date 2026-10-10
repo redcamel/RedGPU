@@ -33,7 +33,7 @@ export interface FoliageInstanceBakerOptions {
  * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착 및 100% GPU 베이킹하는 클래스입니다.
  * [EN] Baker class that physically conforms and 100% GPU-bakes foliage instances onto landscape terrain.
  */
-export class FoliageInstanceBaker extends AScatterInstanceBaker {
+class FoliageInstanceBaker extends AScatterInstanceBaker {
     #uniformCPUBuffer: Float32Array;
     #uniformUintBuffer: Uint32Array;
 
@@ -240,8 +240,7 @@ export class FoliageInstanceBaker extends AScatterInstanceBaker {
     }
 
     #initTaskBuffer(): void {
-        const gpuDevice = this.gpuDevice;
-        if (!gpuDevice) return;
+        const {gpuDevice} = this;
 
         this.#tasksGPUBuffer?.destroy();
         this.#tasksGPUBuffer = gpuDevice.createBuffer({

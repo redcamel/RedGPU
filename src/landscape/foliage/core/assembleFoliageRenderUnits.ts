@@ -14,7 +14,7 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 import type {FoliageLODInfo, FoliageOptions} from "./Foliage";
 import type {FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import type FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import bakeFoliageImpostor from "./baking/impostor/bakeFoliageImpostor";
 import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralImpostorMaterial";
 import assembleScatterRenderUnits from "../../core/scatter/assembleScatterRenderUnits";
@@ -110,8 +110,8 @@ interface FoliageSharedContext {
  * [EN] Unified common function instantiating a PBR foliage render unit and binding the UBO slot pooler.
  */
 function createPBRRenderUnit(
-    geom: any,
-    mat: any,
+    geometry: any,
+    material: any,
     firstIndex: number | undefined,
     indexCount: number | undefined,
     lodIndex: number,
@@ -121,9 +121,9 @@ function createPBRRenderUnit(
     sharedContext: FoliageSharedContext,
     isImpostorOverride: boolean = false
 ): FoliageRenderUnit {
-    const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = mat as any;
+    const {useCutOff, alphaBlend, transparent, baseColorTexture, globalFragmentSlotIndex = 0} = material as any;
 
-    const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial;
+    const isImpostor = isImpostorOverride || material instanceof OctahedralImpostorMaterial;
     const isMasked = !!useCutOff || alphaBlend === 1 || alphaBlend === 2 || !!transparent || isImpostor;
 
     const {slotPooler, groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = sharedContext;
@@ -156,8 +156,8 @@ function createPBRRenderUnit(
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
     return new FoliageRenderUnit({
-        geometry: geom,
-        material: mat,
+        geometry,
+        material,
         firstIndex,
         indexCount,
         strideBytes: PBR_STRIDE_BYTES,
@@ -241,7 +241,7 @@ export default function assembleFoliageRenderUnits(
         lods = [],
         preservePivot = true,
         bottomOffset = 0,
-        height: optHeight = 2.0,
+        height = 2.0,
         groundBlendStrength,
         groundBlendRange,
         windMultiplier,
@@ -286,15 +286,14 @@ export default function assembleFoliageRenderUnits(
             groups,
             unifiedGeometry,
             boundingRadius,
-            boundingHeight: lodHeight,
-            bottomOffset: lodBottomOffset,
+            boundingHeight,
             shadowMergedGeometry,
             totalIndexCount,
             totalVertexCount
         } = mergeResult;
 
         if (groups.length > 0) {
-            const treeH = lodHeight > 0 ? lodHeight : Math.max(5.0, boundingRadius * 1.8);
+            const treeH = boundingHeight > 0 ? boundingHeight : Math.max(5.0, boundingRadius * 1.8);
 
             for (let g = 0; g < groups.length; g++) {
                 const group = groups[g];
@@ -344,11 +343,11 @@ export default function assembleFoliageRenderUnits(
             if (boundingRadius > maxBoundingRadius) {
                 maxBoundingRadius = boundingRadius;
             }
-            if (lodHeight > maxBoundingHeight) {
-                maxBoundingHeight = lodHeight;
+            if (boundingHeight > maxBoundingHeight) {
+                maxBoundingHeight = boundingHeight;
             }
             if (l === 0) {
-                autoBottomOffset = lodBottomOffset;
+                autoBottomOffset = mergeResult.bottomOffset;
             }
         }
 
@@ -375,15 +374,15 @@ export default function assembleFoliageRenderUnits(
         const bakeResult = bakeFoliageImpostor(redGPUContext, lod0RenderUnits, name);
         const {
             width,
-            height,
-            bottomOffset: bakeBottomOffset = 0,
+            height: impostorHeight,
+            bottomOffset = 0,
             baseColorTexture,
             normalTexture,
             packedORMTexture
         } = bakeResult;
 
-        const bbGeom = createOctahedralImpostorGeometry(redGPUContext, width, height, bakeBottomOffset);
-        const bbMat = new OctahedralImpostorMaterial(
+        const impostorGeometry = createOctahedralImpostorGeometry(redGPUContext, width, impostorHeight, bottomOffset);
+        const impostorMaterial = new OctahedralImpostorMaterial(
             redGPUContext,
             baseColorTexture,
             normalTexture,
@@ -393,14 +392,14 @@ export default function assembleFoliageRenderUnits(
 
         const bbStartOffset = renderUnits.length;
         const bbRenderUnit = createPBRRenderUnit(
-            bbGeom,
-            bbMat,
+            impostorGeometry,
+            impostorMaterial,
             0,
-            bbGeom.indexBuffer.indexCount,
+            impostorGeometry.indexBuffer.indexCount,
             impostorLODIndex,
             false,
-            height,
-            bakeBottomOffset,
+            impostorHeight,
+            bottomOffset,
             sharedContext,
             true
         );
@@ -416,7 +415,7 @@ export default function assembleFoliageRenderUnits(
         });
     }
 
-    const boundingHeight = maxBoundingHeight > 0 ? maxBoundingHeight : optHeight;
+    const boundingHeight = maxBoundingHeight > 0 ? maxBoundingHeight : height;
     const resolvedBottomOffset = options.bottomOffset !== undefined ? bottomOffset : autoBottomOffset;
 
     return {

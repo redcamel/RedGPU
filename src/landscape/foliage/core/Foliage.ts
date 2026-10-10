@@ -10,7 +10,7 @@ import assembleFoliageRenderUnits from "./assembleFoliageRenderUnits";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
-import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 
 /**
@@ -328,7 +328,7 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * });
  * ```
  */
-export class Foliage extends AScatterType<FoliageTypeAllocation> {
+class Foliage extends AScatterType<FoliageTypeAllocation> {
     #minScale: [number, number, number] = [1.0, 1.0, 1.0];
     #maxScale: [number, number, number] = [1.0, 1.0, 1.0];
     #randomRotationY: boolean = true;
@@ -413,10 +413,10 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             castShadow = true,
             useImpostor = true,
             cullingDistance = 2000.0,
-            minScale: optMinScale,
-            maxScale: optMaxScale,
+            minScale,
+            maxScale,
             densityPerHectare,
-            densityMultiplier: optDensityMultiplier,
+            densityMultiplier,
             streamingRadius = 600.0,
             maxInstances,
             windMultiplier,
@@ -426,14 +426,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             groundBlendStrength,
             groundBlendRange,
             useDepthPrepass = true,
-            shadowCullDistance: optShadowCullDistance,
+            shadowCullDistance,
             targetLayer,
             minSlope = 0.0,
             maxSlope = 45.0,
             densityScaleByWeight = true,
             randomRotationY,
             bottomOffset = 0.0,
-            height: optHeight
+            height
         } = options;
 
         this.#baker = baker || null;
@@ -443,25 +443,25 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#useDepthPrepass = useDepthPrepass;
         this.#megaBuffer = megaBuffer || null;
 
-        const [minX = 1.0, minY = 1.0, minZ = 1.0] = optMinScale || [];
-        const [maxX = 1.0, maxY = 1.0, maxZ = 1.0] = optMaxScale || [];
-        const minScale: [number, number, number] = [minX, minY, minZ];
-        const maxScale: [number, number, number] = [maxX, maxY, maxZ];
+        const [minX = 1.0, minY = 1.0, minZ = 1.0] = minScale || [];
+        const [maxX = 1.0, maxY = 1.0, maxZ = 1.0] = maxScale || [];
+        const resolvedMinScale: [number, number, number] = [minX, minY, minZ];
+        const resolvedMaxScale: [number, number, number] = [maxX, maxY, maxZ];
 
         let resolvedDensityPerHectare = 20.0;
         if (densityPerHectare !== undefined) {
             resolvedDensityPerHectare = Math.max(0, Number(densityPerHectare) || 0);
         }
 
-        const densityMultiplier = optDensityMultiplier !== undefined
-            ? Math.max(0.0, Number(optDensityMultiplier) || 0.0)
+        const resolvedDensityMultiplier = densityMultiplier !== undefined
+            ? Math.max(0.0, Number(densityMultiplier) || 0.0)
             : 1.0;
 
         const effectiveRadius = streamingRadius + 150.0;
         const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
         const activeHectares = effectiveAreaMetersSq / 10000.0;
 
-        const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * densityMultiplier;
+        const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * resolvedDensityMultiplier;
         const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
 
         const minSafeCapacity = 16384;
@@ -501,8 +501,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             lodInfoList,
             boundingRadius,
             boundingHeight,
-            renderUnits: assembledUnits,
-            shadowMergedRenderUnits: assembledShadowUnits
+            renderUnits,
+            shadowMergedRenderUnits
         } = assembleFoliageRenderUnits(
             this.redGPUContext,
             options,
@@ -511,17 +511,17 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#lodInfoList = lodInfoList;
         this.#lodInfoListWithoutImpostor = lodInfoList.length > 1 ? lodInfoList.slice(0, -1) : null;
         this.#boundingRadius = boundingRadius;
-        const resolvedHeight = optHeight !== undefined
-            ? Math.max(0.1, Number(optHeight) || 0.1)
+        const resolvedHeight = height !== undefined
+            ? Math.max(0.1, Number(height) || 0.1)
             : (boundingHeight || 2.0);
 
         this.#initBuckets(
-            assembledUnits,
-            assembledShadowUnits
+            renderUnits,
+            shadowMergedRenderUnits
         );
 
         let defaultShadowDist = 300.0;
-        const effectiveHeight = resolvedHeight * maxScale[1];
+        const effectiveHeight = resolvedHeight * resolvedMaxScale[1];
         if (effectiveHeight < 0.6) {
             defaultShadowDist = 35.0;
         } else if (effectiveHeight < 1.5) {
@@ -532,8 +532,8 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             defaultShadowDist = 350.0;
         }
 
-        const resolvedShadowCullDistance = optShadowCullDistance !== undefined
-            ? Math.max(0, Number(optShadowCullDistance) || 0)
+        const resolvedShadowCullDistance = shadowCullDistance !== undefined
+            ? Math.max(0, Number(shadowCullDistance) || 0)
             : defaultShadowDist;
 
         this.setRawScatterProperties({
@@ -546,14 +546,14 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
             maxSlope,
             densityScaleByWeight,
             densityPerHectare: resolvedDensityPerHectare,
-            densityMultiplier,
+            densityMultiplier: resolvedDensityMultiplier,
             castShadow,
             groundBlendStrength: resolvedGroundBlendStrength,
             streamingRadius
         });
 
-        this.#minScale = minScale;
-        this.#maxScale = maxScale;
+        this.#minScale = resolvedMinScale;
+        this.#maxScale = resolvedMaxScale;
         this.#randomRotationY = randomRotationY !== false;
         this.#maxInstances = resolvedMaxInstances;
 
@@ -566,16 +566,17 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
-            const effectiveShadowDist = this.castShadow ? this.shadowCullDistance : 0.0;
+            const {cullingDistance, fadeStartDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
+            const effectiveShadowDist = castShadow ? shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
-                this.cullingDistance,
-                this.fadeStartDistance,
+                cullingDistance,
+                fadeStartDistance,
                 this.#boundingRadius,
-                this.bottomOffset,
+                bottomOffset,
                 this.#lodInfoList,
                 effectiveShadowDist,
-                this.height
+                height
             );
         }
 
@@ -693,7 +694,7 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [KO] 해당 식생 모델을 구성하는 공통 렌더 단위(FoliageRenderUnit) 컬렉션을 반환합니다.
      * [EN] Returns the collection of common render units composing this foliage model.
      */
-    get renderUnits(): readonly FoliageRenderUnit[] {
+    get renderUnits(): FoliageRenderUnit[] {
         return this.#renderUnits;
     }
 
@@ -1421,16 +1422,17 @@ export class Foliage extends AScatterType<FoliageTypeAllocation> {
                 ? this.#lodInfoListWithoutImpostor
                 : this.#lodInfoList;
 
-            const effectiveShadowDist = this.castShadow ? this.shadowCullDistance : 0.0;
+            const {cullingDistance, fadeStartDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
+            const effectiveShadowDist = castShadow ? shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
-                this.cullingDistance,
-                this.fadeStartDistance,
+                cullingDistance,
+                fadeStartDistance,
                 this.#boundingRadius,
-                this.bottomOffset,
+                bottomOffset,
                 effectiveLodList,
                 effectiveShadowDist,
-                this.height
+                height
             );
         }
     }

@@ -7,7 +7,7 @@
 import {mat4} from "gl-matrix";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
-import {FoliageSlotPooler} from "./buffer/FoliageSlotPooler";
+import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import {PBR_STRIDE_BYTES, POSITION_ONLY_STRIDE_BYTES} from "../../core/scatter/ScatterVertexFormats";
 
 /**
@@ -77,7 +77,7 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class FoliageRenderUnit extends ScatterRenderUnit {
+class FoliageRenderUnit extends ScatterRenderUnit {
     #slotIndex: number = -1;
     #slotPooler: FoliageSlotPooler | null = null;
     #isShadowMerged: boolean = false;

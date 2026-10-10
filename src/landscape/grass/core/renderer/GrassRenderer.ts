@@ -7,9 +7,9 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import {Grass} from "../Grass";
-import {GrassScatterMegaBuffer} from "../buffer/GrassScatterMegaBuffer";
-import {GrassSlotPooler} from "../buffer/GrassSlotPooler";
+import Grass from "../Grass";
+import GrassScatterMegaBuffer from "../buffer/GrassScatterMegaBuffer";
+import GrassSlotPooler from "../buffer/GrassSlotPooler";
 import ScatterRenderUnit from "../../../core/scatter/ScatterRenderUnit";
 import type Geometry from "../../../../geometry/Geometry";
 import type BitmapTexture from "../../../../resources/texture/BitmapTexture";
@@ -51,7 +51,7 @@ interface MainBundleCacheEntry {
  * [EN] This class is automatically created by the system (GrassManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
+class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
     #fragmentNearModule: GPUShaderModule | null = null;
@@ -136,7 +136,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     render(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
-        grassList: readonly Grass[],
+        grassList: Grass[],
         megaBuffer: GrassScatterMegaBuffer,
         slotPooler: GrassSlotPooler
     ): void {
@@ -200,7 +200,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     renderShadow(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
-        grassList: readonly Grass[],
+        grassList: Grass[],
         megaBuffer: GrassScatterMegaBuffer,
         slotPooler: GrassSlotPooler
     ): void {
@@ -288,7 +288,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #recordMainRenderBundle(
         sampleCount: number,
         systemBG: GPUBindGroup,
-        grassList: readonly Grass[],
+        grassList: Grass[],
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
@@ -383,7 +383,7 @@ export class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #recordShadowRenderBundle(
         cascadeIndex: number,
         systemBG: GPUBindGroup,
-        grassList: readonly Grass[],
+        grassList: Grass[],
         megaBuffer: GrassScatterMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {

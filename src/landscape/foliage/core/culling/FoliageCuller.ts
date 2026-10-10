@@ -126,7 +126,7 @@ class FoliageCuller extends AScatterCuller {
         const megaBuffer = this.#megaBuffer;
         if (!megaBuffer) return;
 
-        const {computePipeline, bindGroupLayout} = this;
+        const {bindGroupLayout} = this;
 
         const totalAllocatedInstances = megaBuffer.totalAllocatedInstances;
         if (totalAllocatedInstances <= 0) return;
@@ -151,13 +151,14 @@ class FoliageCuller extends AScatterCuller {
     ): void {
         this.update(foliageList, renderViewStateData);
 
-        if (this.computePipeline && this.bindGroupLayout) {
-            this.commandEncoderManager.useEncoder(
+        const {computePipeline, bindGroupLayout, commandEncoderManager} = this;
+        if (computePipeline && bindGroupLayout) {
+            commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
             );
 
-            this.commandEncoderManager.addPreProcessComputePass(
+            commandEncoderManager.addPreProcessComputePass(
                 'Foliage_GPUCulling_ComputePass',
                 this.#onPreProcessComputePass
             );

@@ -13,7 +13,7 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCuller from "./core/culling/FoliageCuller";
 
 import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
-import {FoliageSlotPooler} from "./core/buffer/FoliageSlotPooler";
+import FoliageSlotPooler from "./core/buffer/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 
 /**
@@ -83,10 +83,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         super(landscape);
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded || null;
-        this.#slotPooler = new FoliageSlotPooler(this.redGPUContext);
+        const {redGPUContext} = this;
+        this.#slotPooler = new FoliageSlotPooler(redGPUContext);
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
 
-        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const {gpuDevice, resourceManager} = redGPUContext;
         this.#renderUnitVertexBindGroupLayout = resourceManager.createBindGroupLayout('Foliage_RenderUnit_BindGroupLayout', {
             label: 'Foliage_RenderUnit_BindGroupLayout',
             entries: [
@@ -206,6 +207,57 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
+     * [KO] 현재 스트리밍되어 메모리에 로드된 총 식생 인스턴스 수를 반환합니다. (GrassManager 대칭 프로퍼티)
+     * [EN] Returns the total number of foliage instances currently populated and loaded in memory. (Symmetric to GrassManager)
+     */
+    get totalInstanceCount(): number {
+        let count = 0;
+        const {types} = this;
+        const len = types.length;
+        for (let i = 0; i < len; i++) {
+            const {activeInstanceCount} = types[i];
+            count += activeInstanceCount;
+        }
+        return count;
+    }
+
+    /**
+     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다 (PRE_PROCESS 커맨드 인코더).
+     * [EN] Records indirect draw command counter reset commands (PRE_PROCESS command encoder).
+     *
+     * @param encoder - 대상 GPU 커맨드 인코더
+     */
+    recordResetCommands(encoder: GPUCommandEncoder): void {
+        this.#culler.recordResetCommands(encoder);
+    }
+
+    /**
+     * [KO] 단일 통합 컴퓨트 패스에 식생 인스턴스 GPU 컬링 디스패치 커맨드를 기록합니다.
+     * [EN] Records foliage instance GPU culling dispatch commands into the unified compute pass.
+     *
+     * @param computePass - 실행 중인 GPU 컴퓨트 패스 인코더
+     */
+    dispatchCullingPass(computePass: GPUComputePassEncoder): void {
+        this.#culler.dispatchPass(computePass);
+    }
+
+    /**
+     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
+     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
+     */
+    destroy(): void {
+        this.clearTypes();
+        this.#megaBuffer.destroy();
+        this.#pipelineRegistry.clearCache();
+        this.#renderer.destroy();
+        this.#culler.destroy();
+        this.#slotPooler.destroy();
+        this.#renderUnitDynamicBindGroup = null;
+        this.#renderUnitVertexBindGroupLayout = null;
+        this.#onUniformUpdateNeeded = null;
+    }
+
+    /**
      * [KO] 매 프레임 호출되어 카메라 위치에 기반한 식생 공간 격자 셀 스트리밍을 갱신하고, GPU 컬링 Compute Pass를 디스패치합니다.
      * [EN] Called every frame to update foliage spatial grid streaming based on camera position and dispatch GPU culling compute passes.
      *
@@ -217,7 +269,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Standalone execution mode (default: false, Landscape unified pass mode)
      */
     update(renderViewStateData: RenderViewStateData, standalone: boolean = false): void {
-        const {enabled, types, landscape} = this;
+        const {enabled, types} = this;
         if (!enabled || types.length === 0) return;
         const {frameIndex} = renderViewStateData;
         if (this.#lastUpdateFrameIndex === frameIndex) return;
@@ -277,62 +329,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다 (PRE_PROCESS 커맨드 인코더).
-     * [EN] Records indirect draw command counter reset commands (PRE_PROCESS command encoder).
-     *
-     * @param encoder - 대상 GPU 커맨드 인코더
-     */
-    recordResetCommands(encoder: GPUCommandEncoder): void {
-        this.#culler.recordResetCommands(encoder);
-    }
-
-    /**
-     * [KO] 단일 통합 컴퓨트 패스에 식생 인스턴스 GPU 컬링 디스패치 커맨드를 기록합니다.
-     * [EN] Records foliage instance GPU culling dispatch commands into the unified compute pass.
-     *
-     * @param computePass - 실행 중인 GPU 컴퓨트 패스 인코더
-     */
-    dispatchCullingPass(computePass: GPUComputePassEncoder): void {
-        this.#culler.dispatchPass(computePass);
-    }
-
-    /**
-     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
-     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
-     */
-    destroy(): void {
-        this.clearTypes();
-        this.#megaBuffer.destroy();
-        this.#pipelineRegistry.clearCache();
-        this.#renderer.destroy();
-        this.#culler.destroy();
-        this.#slotPooler.destroy();
-        this.#renderUnitDynamicBindGroup = null;
-        this.#renderUnitVertexBindGroupLayout = null;
-        this.#onUniformUpdateNeeded = null;
-    }
-
-    /**
-     * [KO] 특정 식생 타입이 메인 렌더 패스(Depth Prepass 활성화 시 포함)에서 발행하는 간접 드로우콜 수를 단일 패스로 계산합니다.
-     * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
-     */
-    protected override computeTypeDrawCalls(foliage: Foliage): number {
-        const {
-            activeInstanceCount,
-            mainRenderUnits,
-            useDepthPrepass,
-            depthPrepassOpaqueRenderUnits,
-            depthPrepassMaskedRenderUnits
-        } = foliage;
-        if (activeInstanceCount <= 0) return 0;
-        let count = mainRenderUnits.length;
-        if (this.#useDepthPrepass && useDepthPrepass) {
-            count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
-        }
-        return count;
-    }
-
-    /**
      * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 식생 서브셀 캐시가 초기화되고 온디맨드 재배치가 수행됩니다.
      * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage subcell caches are cleared and repopulated on-demand across cells upon change.
      *
@@ -349,17 +345,22 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-
     /**
-     * [KO] 현재 스트리밍되어 메모리에 로드된 총 식생 인스턴스 수를 반환합니다. (GrassManager 대칭 프로퍼티)
-     * [EN] Returns the total number of foliage instances currently populated and loaded in memory. (Symmetric to GrassManager)
+     * [KO] 특정 식생 타입이 메인 렌더 패스(Depth Prepass 활성화 시 포함)에서 발행하는 간접 드로우콜 수를 단일 패스로 계산합니다.
+     * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
      */
-    get totalInstanceCount(): number {
-        let count = 0;
-        const {types} = this;
-        const len = types.length;
-        for (let i = 0; i < len; i++) {
-            count += types[i].activeInstanceCount;
+    override computeTypeDrawCalls(foliage: Foliage): number {
+        const {
+            activeInstanceCount,
+            mainRenderUnits,
+            useDepthPrepass,
+            depthPrepassOpaqueRenderUnits,
+            depthPrepassMaskedRenderUnits
+        } = foliage;
+        if (activeInstanceCount <= 0) return 0;
+        let count = mainRenderUnits.length;
+        if (this.#useDepthPrepass && useDepthPrepass) {
+            count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
         }
         return count;
     }
@@ -496,7 +497,8 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
 
-        const bit = 1 << removed.typeId;
+        const {typeId} = removed;
+        const bit = 1 << typeId;
         this.#dirtyUboMask &= ~bit;
         this.#needsRepopulateMask &= ~bit;
 
@@ -534,13 +536,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             return existing;
         }
 
+        const {redGPUContext, landscape} = this;
         const foliage = new Foliage(
-            this.redGPUContext,
+            redGPUContext,
             options,
             this.#megaBuffer,
             this.#culler.baker,
             this.#slotPooler,
-            this.landscape
+            landscape
         );
         foliage.onUniformDirty = this.#onFoliageUniformDirty;
         foliage.onRepopulateRequired = this.#onFoliageRepopulateRequired;
@@ -587,7 +590,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [KO] 그림자를 투사하는 특정 식생 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
      * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
      */
-    protected override computeTypeShadowDrawCalls(foliage: Foliage): number {
+    override computeTypeShadowDrawCalls(foliage: Foliage): number {
         const {
             shadowCullDistance,
             activeInstanceCount,
