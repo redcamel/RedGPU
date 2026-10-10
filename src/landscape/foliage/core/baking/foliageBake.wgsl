@@ -1,6 +1,7 @@
 #redgpu_include landscape.struct.FoliageInstance;
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
+#redgpu_include landscape.math.sampleTerrainHeightAndNormal;
 
 struct FoliageBakeUniforms {
     invWorldSizeX: f32,
@@ -130,43 +131,12 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             }
         }
 
-        let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
-        let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
-
-        let cX = i32(floor(fCoordX));
-        let cZ = i32(floor(fCoordZ));
-        let fracX = fCoordX - f32(cX);
-        let fracZ = fCoordZ - f32(cZ);
-
-        let c00 = vec2<i32>(cX, cZ);
-        let c10 = min(c00 + vec2<i32>(1, 0), maxCoord);
-        let c01 = min(c00 + vec2<i32>(0, 1), maxCoord);
-        let c11 = min(c00 + vec2<i32>(1, 1), maxCoord);
-
-        let h00 = textureLoad(vhtTexture, c00, 0).r * uniforms.heightScale;
-        let h10 = textureLoad(vhtTexture, c10, 0).r * uniforms.heightScale;
-        let h01 = textureLoad(vhtTexture, c01, 0).r * uniforms.heightScale;
-        let h11 = textureLoad(vhtTexture, c11, 0).r * uniforms.heightScale;
-
-        var terrainHeight: f32;
-        var nx: f32;
-        var nz: f32;
-
-        if (fracX + fracZ <= 1.0) {
-            terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
-            nx = (h00 - h10) / texStepX;
-            nz = (h00 - h01) / texStepZ;
-        } else {
-            terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
-            nx = (h01 - h11) / texStepX;
-            nz = (h10 - h11) / texStepZ;
-        }
-
-        let invLen = 1.0 / sqrt(nx * nx + 1.0 + nz * nz);
+        let surface = sampleTerrainHeightAndNormal(
+            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
+        );
 
         if (uniforms.hasSlopeFilter != 0u) {
-            let slopeTan2 = nx * nx + nz * nz;
-            if (slopeTan2 < uniforms.minSlopeTan2 || slopeTan2 > uniforms.maxSlopeTan2) {
+            if (surface.slopeTan2 < uniforms.minSlopeTan2 || surface.slopeTan2 > uniforms.maxSlopeTan2) {
                 continue;
             }
         }
@@ -176,7 +146,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let scaleY = uniforms.minScaleY + rScale * uniforms.scaleDiffY;
         let scaleZ = select(uniforms.minScaleZ + rScale * uniforms.scaleDiffZ, scaleX, uniforms.isUniformXZ != 0u);
 
-        let posY = terrainHeight + uniforms.bottomOffset * scaleY;
+        let posY = surface.height + uniforms.bottomOffset * scaleY;
 
         var rotX: f32 = 0.0;
         var rotY: f32 = 0.0;
@@ -192,9 +162,9 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         }
 
         if (uniforms.needNormalAlign != 0u) {
-            let normalX = nx * invLen;
-            let normalY = invLen;
-            let normalZ = nz * invLen;
+            let normalX = surface.normal.x;
+            let normalY = surface.normal.y;
+            let normalZ = surface.normal.z;
 
             let vx = normalZ;
             let vz = -normalX;

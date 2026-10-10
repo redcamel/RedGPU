@@ -4,6 +4,7 @@
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.scatterSpatialPrng;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
+#redgpu_include landscape.math.sampleTerrainHeightAndNormal;
 
 struct GrassBakeUniforms {
     centerCellX: i32,
@@ -105,45 +106,16 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let sScale = uniforms.minScaleS + splitMix32(&prngState) * uniforms.deltaScaleS;
         let hScale = uniforms.minScaleH + splitMix32(&prngState) * uniforms.deltaScaleH;
 
-        let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
-        let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
+        let surface = sampleTerrainHeightAndNormal(
+            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
+        );
 
-        let cX = i32(floor(fCoordX));
-        let cZ = i32(floor(fCoordZ));
-        let fracX = fCoordX - f32(cX);
-        let fracZ = fCoordZ - f32(cZ);
-
-        let c00 = vec2<i32>(cX, cZ);
-        let c10 = min(c00 + vec2<i32>(1, 0), maxCoord);
-        let c01 = min(c00 + vec2<i32>(0, 1), maxCoord);
-        let c11 = min(c00 + vec2<i32>(1, 1), maxCoord);
-
-        let h00 = textureLoad(vhtTexture, c00, 0).r * uniforms.heightScale;
-        let h10 = textureLoad(vhtTexture, c10, 0).r * uniforms.heightScale;
-        let h01 = textureLoad(vhtTexture, c01, 0).r * uniforms.heightScale;
-        let h11 = textureLoad(vhtTexture, c11, 0).r * uniforms.heightScale;
-
-        var terrainHeight: f32;
-        var rawNx: f32;
-        var rawNz: f32;
-
-        if (fracX + fracZ <= 1.0) {
-            terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
-            rawNx = (h00 - h10) / texStepX;
-            rawNz = (h00 - h01) / texStepZ;
-        } else {
-            terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
-            rawNx = (h01 - h11) / texStepX;
-            rawNz = (h10 - h11) / texStepZ;
-        }
-
-        let slopeTan2 = rawNx * rawNx + rawNz * rawNz;
-        if (uniforms.hasSlopeFilter != 0u && (slopeTan2 < uniforms.minSlopeTan2 || slopeTan2 > uniforms.maxSlopeTan2)) {
+        if (uniforms.hasSlopeFilter != 0u && (surface.slopeTan2 < uniforms.minSlopeTan2 || surface.slopeTan2 > uniforms.maxSlopeTan2)) {
             writeInvalidInstance(currentTargetIdx, gx, gz);
             continue;
         }
 
-        let terrainN = normalize(vec3<f32>(rawNx, 1.0, rawNz));
+        let terrainN = surface.normal;
         let blendedN = normalize(mix(vec3<f32>(0.0, 1.0, 0.0), terrainN, 0.25));
 
         let halfRotY = rot * 0.5;
@@ -170,7 +142,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         var outInst: GrassInstance;
         outInst.posX = gx;
-        outInst.posY = terrainHeight + uniforms.bottomOffset;
+        outInst.posY = surface.height + uniforms.bottomOffset;
         outInst.posZ = gz;
         outInst.scaleY = hScale;
         outInst.scaleXZ = sScale;

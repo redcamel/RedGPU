@@ -30,6 +30,7 @@ import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
 import sampleNormalizedLayerWeight_wgsl from './math/sampleNormalizedLayerWeight.wgsl';
 import checkAABBInHZB_wgsl from './math/checkAABBInHZB.wgsl';
 import perturbNormalOrthonormal_wgsl from './math/perturbNormalOrthonormal.wgsl';
+import sampleTerrainHeightAndNormal_wgsl from './math/sampleTerrainHeightAndNormal.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -310,6 +311,16 @@ export namespace LandscapeShaderLibrary {
          * ```
          */
         export const perturbNormalOrthonormal = perturbNormalOrthonormal_wgsl;
+
+        /**
+         * [KO] 지형 높이맵(VHT)으로부터 4점 바이리니어 샘플링을 수행하여 정밀 고도, 표면 법선 및 탄젠트 경사 제곱값을 일괄 계산하는 함수 (sampleTerrainHeightAndNormal)
+         * [EN] Function performing 4-point bilinear sampling on terrain heightmap (VHT) to compute elevation, surface normal, and slopeTan2 (sampleTerrainHeightAndNormal)
+         *
+         * ```wgsl
+         * #redgpu_include landscape.math.sampleTerrainHeightAndNormal;
+         * ```
+         */
+        export const sampleTerrainHeightAndNormal = sampleTerrainHeightAndNormal_wgsl;
     }
 
     /**
