@@ -24,7 +24,7 @@ import LandscapeComponent from "./LandscapeComponent";
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeSpatialGrid {
+class LandscapeSpatialGrid {
     #tileCountX: number;
     #tileCountZ: number;
     #tileSizeX: number;

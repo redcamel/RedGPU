@@ -126,7 +126,7 @@ export interface LandscapeLayerOptions {
  * [EN] This class is automatically created by the system (`landscape.addLayer(options)`).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeLayer {
+class LandscapeLayer {
     #name: string;
     #enabled: boolean = true;
 

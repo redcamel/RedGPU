@@ -28,7 +28,7 @@ export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileS
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
+abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;

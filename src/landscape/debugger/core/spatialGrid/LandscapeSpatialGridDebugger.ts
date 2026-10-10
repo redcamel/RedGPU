@@ -23,7 +23,7 @@ const LOD_RGBA_STRINGS: readonly string[] = Object.freeze(
  * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
+class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #ctx: CanvasRenderingContext2D | null;
 
     /**

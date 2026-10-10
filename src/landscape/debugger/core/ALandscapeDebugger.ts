@@ -214,7 +214,7 @@ function ensureDebuggerStyles(): void {
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class ALandscapeDebugger {
+abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #container: HTMLDivElement;
     #canvas: HTMLCanvasElement;

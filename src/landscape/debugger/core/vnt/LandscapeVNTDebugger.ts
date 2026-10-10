@@ -18,7 +18,7 @@ import LandscapeShaderLibrary from "../../../core/shader/library/LandscapeShader
  * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
+class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
     /**
      * [KO] LandscapeVNTDebugger 생성자입니다.
      * [EN] Constructor for LandscapeVNTDebugger.

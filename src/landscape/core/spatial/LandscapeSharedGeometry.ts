@@ -66,7 +66,7 @@ export interface LandscapeLODGeometryRange {
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeSharedGeometry extends RedGPUObject {
+class LandscapeSharedGeometry extends RedGPUObject {
     #tileSizeX: number;
     #tileSizeZ: number;
     #componentSizeQuads: number;

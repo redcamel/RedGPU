@@ -18,7 +18,7 @@ import vhtDebuggerWGSL from "./shader/vhtDebugger.wgsl";
  * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeVHTDebugger extends ALandscapeTextureDebugger {
+class LandscapeVHTDebugger extends ALandscapeTextureDebugger {
     /**
      * [KO] LandscapeVHTDebugger 생성자입니다.
      * [EN] Constructor for LandscapeVHTDebugger.

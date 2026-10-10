@@ -47,8 +47,6 @@ import {AScatterManager} from "../core/scatter";
  * @category Landscape
  */
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
-    #renderUnitVertexBindGroupLayout: GPUBindGroupLayout;
-    #renderUnitDynamicBindGroup: GPUBindGroup;
     #slotPooler: FoliageSlotPooler;
 
     #megaBuffer: FoliageScatterMegaBuffer;
@@ -103,7 +101,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 }
             ]
         });
-        this.#renderUnitVertexBindGroupLayout = renderUnitVertexBindGroupLayout;
 
         const renderUnitDynamicBindGroup = gpuDevice.createBindGroup({
             label: 'Foliage_RenderUnit_DynamicBindGroup',
@@ -119,7 +116,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
                 }
             ]
         });
-        this.#renderUnitDynamicBindGroup = renderUnitDynamicBindGroup;
 
         this.#megaBuffer = new FoliageScatterMegaBuffer(redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(redGPUContext);
@@ -255,8 +251,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#renderer.destroy();
         this.#culler.destroy();
         this.#slotPooler.destroy();
-        this.#renderUnitDynamicBindGroup = null;
-        this.#renderUnitVertexBindGroupLayout = null;
         this.#onUniformUpdateNeeded = null;
     }
 

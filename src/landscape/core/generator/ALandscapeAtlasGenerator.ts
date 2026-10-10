@@ -29,7 +29,7 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export abstract class ALandscapeAtlasGenerator extends RedGPUObject {
+abstract class ALandscapeAtlasGenerator extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 

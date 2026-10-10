@@ -30,7 +30,7 @@ export interface WeightMapPixelData {
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeWeightMapCPUSampler {
+class LandscapeWeightMapCPUSampler {
     #cache: Map<string, WeightMapPixelData> = new Map();
     #loadingPromises: Map<string, Promise<WeightMapPixelData | null>> = new Map();
 

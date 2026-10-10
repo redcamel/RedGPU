@@ -96,7 +96,7 @@ export interface DebuggerManagerOptions {
  * debuggerManager.vbt = true;
  * ```
  */
-export class DebuggerManager {
+class DebuggerManager {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
 

@@ -23,7 +23,7 @@
  * [EN] This class is automatically created by the system (LandscapeSpatialGrid).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeComponent {
+class LandscapeComponent {
     #worldX: number = 0;
     #worldZ: number = 0;
     #componentX: number = 0;

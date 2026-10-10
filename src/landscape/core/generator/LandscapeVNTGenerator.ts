@@ -28,7 +28,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
+class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Float32Array;
     #uniformByteLength: number = 48;
 

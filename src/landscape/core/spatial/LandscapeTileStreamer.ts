@@ -52,7 +52,7 @@ export type LandscapeTileUrlResolver = (row: number, col: number, comp?: Landsca
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeTileStreamer extends RedGPUObject {
+class LandscapeTileStreamer extends RedGPUObject {
     #spatialGrid: LandscapeSpatialGrid;
 
     #tileLoadingRadius: number = 2500.0;
@@ -79,7 +79,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
      * [KO] LOD 0 단계의 쿼드 세그먼트 수
      * [EN] Number of quad segments for LOD 0
      */
-    lod0SizeQuads: number = 256;
+    #lod0SizeQuads: number = 256;
 
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #activeComponentsBuffer: LandscapeComponent[] = [];
@@ -151,27 +151,19 @@ export class LandscapeTileStreamer extends RedGPUObject {
     }
 
     /**
-     * [KO] 가상 하이트맵(VHT) 생성기 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVHTGenerator instance.
+     * [KO] LOD 0 단계의 쿼드 세그먼트 수를 반환합니다.
+     * [EN] Returns the number of quad segments for LOD 0.
      */
-    get vhtGenerator(): LandscapeVHTGenerator | null {
-        return this.#vhtGenerator;
+    get lod0SizeQuads(): number {
+        return this.#lod0SizeQuads;
     }
 
     /**
-     * [KO] 가상 노멀맵(VNT) 생성기 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVNTGenerator instance.
+     * [KO] LOD 0 단계의 쿼드 세그먼트 수를 설정합니다.
+     * [EN] Sets the number of quad segments for LOD 0.
      */
-    get vntGenerator(): LandscapeVNTGenerator | null {
-        return this.#vntGenerator;
-    }
-
-    /**
-     * [KO] 가상 베이크 텍스처(VBT) 생성기 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVBTGenerator instance.
-     */
-    get vbtGenerator(): LandscapeVBTGenerator | null {
-        return this.#vbtGenerator;
+    set lod0SizeQuads(value: number) {
+        this.#lod0SizeQuads = value;
     }
 
     /**
@@ -680,7 +672,7 @@ export class LandscapeTileStreamer extends RedGPUObject {
         const tileMinX = col * tileSizeX - halfWX;
         const tileMinZ = row * tileSizeZ - halfWZ;
 
-        const segments = this.lod0SizeQuads || 256;
+        const segments = this.#lod0SizeQuads || 256;
         const stepX = tileSizeX / segments;
         const stepZ = tileSizeZ / segments;
 

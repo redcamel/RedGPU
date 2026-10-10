@@ -96,7 +96,7 @@ const tempPVMatrix: Float32Array = new Float32Array(16);
  *
  * @category Landscape
  */
-export class Landscape extends RedGPUObject {
+class Landscape extends RedGPUObject {
 
     #spatialGrid: LandscapeSpatialGrid;
     #sharedGeometry: LandscapeSharedGeometry;
