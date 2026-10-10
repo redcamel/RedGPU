@@ -6,11 +6,9 @@
 import Landscape from "../Landscape";
 import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeSpatialGridDebugger from "./core/spatialGrid/LandscapeSpatialGridDebugger";
-import LandscapeVHTDebugger from "./core/vht/LandscapeVHTDebugger";
-import LandscapeVNTDebugger from "./core/vnt/LandscapeVNTDebugger";
-import LandscapeVBTDebugger from "./core/vbt/LandscapeVBTDebugger";
-import LandscapeVBTNormalDebugger from "./core/vbt/LandscapeVBTNormalDebugger";
-import LandscapeVBTORMDebugger from "./core/vbt/LandscapeVBTORMDebugger";
+import LandscapeTextureDebugger from "./core/LandscapeTextureDebugger";
+import vhtDebuggerWGSL from "./core/shader/vhtDebugger.wgsl";
+import LandscapeShaderLibrary from "../core/shader/library/LandscapeShaderLibrary";
 
 /**
  * [KO] 디버그 프로퍼티 키 타입입니다.
@@ -101,11 +99,11 @@ class DebuggerManager {
     #tileStreamer: LandscapeTileStreamer;
 
     #spatialGridDebugger: LandscapeSpatialGridDebugger | null = null;
-    #vhtDebugger: LandscapeVHTDebugger | null = null;
-    #vntDebugger: LandscapeVNTDebugger | null = null;
-    #vbtDebugger: LandscapeVBTDebugger | null = null;
-    #vbtNormalDebugger: LandscapeVBTNormalDebugger | null = null;
-    #vbtORMDebugger: LandscapeVBTORMDebugger | null = null;
+    #vhtDebugger: LandscapeTextureDebugger | null = null;
+    #vntDebugger: LandscapeTextureDebugger | null = null;
+    #vbtDebugger: LandscapeTextureDebugger | null = null;
+    #vbtNormalDebugger: LandscapeTextureDebugger | null = null;
+    #vbtORMDebugger: LandscapeTextureDebugger | null = null;
 
     #enableSpatialGrid: boolean = false;
     #enableVHT: boolean = false;
@@ -267,12 +265,22 @@ class DebuggerManager {
     set vht(val: boolean) {
         this.#enableVHT = val;
         if (val && !this.#vhtDebugger) {
-            this.#vhtDebugger = new LandscapeVHTDebugger(this.#landscape, this.#tileStreamer, null, {
-                width: 100,
-                height: 100,
-                left: 122,
-                bottom: 12
-            });
+            this.#vhtDebugger = new LandscapeTextureDebugger(
+                this.#landscape,
+                this.#tileStreamer,
+                null,
+                {
+                    title: 'VHT (Height)',
+                    width: 100,
+                    height: 100,
+                    left: 122,
+                    bottom: 12
+                },
+                vhtDebuggerWGSL,
+                'Landscape_Debugger_VHT_ShaderModule',
+                (_, ts) => ts?.getAtlasTexture('vht') ?? null,
+                {r: 0.06, g: 0.09, b: 0.16, a: 1.0}
+            );
         }
         if (this.#vhtDebugger) {
             this.#vhtDebugger.visible = this.#visible && val;
@@ -290,12 +298,22 @@ class DebuggerManager {
     set vnt(val: boolean) {
         this.#enableVNT = val;
         if (val && !this.#vntDebugger) {
-            this.#vntDebugger = new LandscapeVNTDebugger(this.#landscape, this.#tileStreamer, null, {
-                width: 100,
-                height: 100,
-                left: 232,
-                bottom: 12
-            });
+            this.#vntDebugger = new LandscapeTextureDebugger(
+                this.#landscape,
+                this.#tileStreamer,
+                null,
+                {
+                    title: 'VNT (Normal)',
+                    width: 100,
+                    height: 100,
+                    left: 232,
+                    bottom: 12
+                },
+                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                'Landscape_Debugger_VNT_ShaderModule',
+                (_, ts) => ts?.getAtlasTexture('vnt') ?? null,
+                {r: 0.1, g: 0.1, b: 0.1, a: 1.0}
+            );
         }
         if (this.#vntDebugger) {
             this.#vntDebugger.visible = this.#visible && val;
@@ -313,12 +331,22 @@ class DebuggerManager {
     set vbt(val: boolean) {
         this.#enableVBT = val;
         if (val && !this.#vbtDebugger) {
-            this.#vbtDebugger = new LandscapeVBTDebugger(this.#landscape, this.#tileStreamer, null, {
-                width: 100,
-                height: 100,
-                left: 342,
-                bottom: 12
-            });
+            this.#vbtDebugger = new LandscapeTextureDebugger(
+                this.#landscape,
+                this.#tileStreamer,
+                null,
+                {
+                    title: 'VBT (BaseColor)',
+                    width: 100,
+                    height: 100,
+                    left: 342,
+                    bottom: 12
+                },
+                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                'Landscape_Debugger_VBT_BaseColor_ShaderModule',
+                (_, ts) => ts?.getAtlasTexture('vbtBaseColor') ?? null,
+                {r: 0.08, g: 0.08, b: 0.08, a: 1.0}
+            );
         }
         if (this.#vbtDebugger) {
             this.#vbtDebugger.visible = this.#visible && val;
@@ -336,12 +364,22 @@ class DebuggerManager {
     set vbtNormal(val: boolean) {
         this.#enableVBTNormal = val;
         if (val && !this.#vbtNormalDebugger) {
-            this.#vbtNormalDebugger = new LandscapeVBTNormalDebugger(this.#landscape, this.#tileStreamer, null, {
-                width: 100,
-                height: 100,
-                left: 452,
-                bottom: 12
-            });
+            this.#vbtNormalDebugger = new LandscapeTextureDebugger(
+                this.#landscape,
+                this.#tileStreamer,
+                null,
+                {
+                    title: 'VBT (Normal)',
+                    width: 100,
+                    height: 100,
+                    left: 452,
+                    bottom: 12
+                },
+                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                'Landscape_Debugger_VBT_Normal_ShaderModule',
+                (_, ts) => ts?.getAtlasTexture('vbtNormal') ?? null,
+                {r: 0.5, g: 0.5, b: 1.0, a: 1.0}
+            );
         }
         if (this.#vbtNormalDebugger) {
             this.#vbtNormalDebugger.visible = this.#visible && val;
@@ -359,12 +397,22 @@ class DebuggerManager {
     set vbtORM(val: boolean) {
         this.#enableVBTORM = val;
         if (val && !this.#vbtORMDebugger) {
-            this.#vbtORMDebugger = new LandscapeVBTORMDebugger(this.#landscape, this.#tileStreamer, null, {
-                width: 100,
-                height: 100,
-                left: 562,
-                bottom: 12
-            });
+            this.#vbtORMDebugger = new LandscapeTextureDebugger(
+                this.#landscape,
+                this.#tileStreamer,
+                null,
+                {
+                    title: 'VBT (ORM)',
+                    width: 100,
+                    height: 100,
+                    left: 562,
+                    bottom: 12
+                },
+                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                'Landscape_Debugger_VBT_ORM_ShaderModule',
+                (_, ts) => ts?.getAtlasTexture('vbtORM') ?? null,
+                {r: 1.0, g: 0.8, b: 0.0, a: 1.0}
+            );
         }
         if (this.#vbtORMDebugger) {
             this.#vbtORMDebugger.visible = this.#visible && val;
@@ -381,41 +429,41 @@ class DebuggerManager {
 
     /**
      * [KO] 가상 하이트맵(VHT) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVHTDebugger instance.
+     * [EN] Returns the LandscapeTextureDebugger instance for VHT.
      */
-    get vhtDebugger(): LandscapeVHTDebugger | null {
+    get vhtDebugger(): LandscapeTextureDebugger | null {
         return this.#vhtDebugger;
     }
 
     /**
      * [KO] 가상 노멀맵(VNT) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVNTDebugger instance.
+     * [EN] Returns the LandscapeTextureDebugger instance for VNT.
      */
-    get vntDebugger(): LandscapeVNTDebugger | null {
+    get vntDebugger(): LandscapeTextureDebugger | null {
         return this.#vntDebugger;
     }
 
     /**
-     * [KO] 가상 베이크 텍스처(VBT) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVBTDebugger instance.
+     * [KO] 가상 베이크 텍스처(VBT BaseColor) 디버거 인스턴스를 반환합니다.
+     * [EN] Returns the LandscapeTextureDebugger instance for VBT BaseColor.
      */
-    get vbtDebugger(): LandscapeVBTDebugger | null {
+    get vbtDebugger(): LandscapeTextureDebugger | null {
         return this.#vbtDebugger;
     }
 
     /**
-     * [KO] 가상 베이크 노멀 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVBTNormalDebugger instance.
+     * [KO] 가상 베이크 노멀(VBT Normal) 디버거 인스턴스를 반환합니다.
+     * [EN] Returns the LandscapeTextureDebugger instance for VBT Normal.
      */
-    get vbtNormalDebugger(): LandscapeVBTNormalDebugger | null {
+    get vbtNormalDebugger(): LandscapeTextureDebugger | null {
         return this.#vbtNormalDebugger;
     }
 
     /**
-     * [KO] 가상 베이크 ORM 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeVBTORMDebugger instance.
+     * [KO] 가상 베이크 ORM(VBT ORM) 디버거 인스턴스를 반환합니다.
+     * [EN] Returns the LandscapeTextureDebugger instance for VBT ORM.
      */
-    get vbtORMDebugger(): LandscapeVBTORMDebugger | null {
+    get vbtORMDebugger(): LandscapeTextureDebugger | null {
         return this.#vbtORMDebugger;
     }
 

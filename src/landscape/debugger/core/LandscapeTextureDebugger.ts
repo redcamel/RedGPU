@@ -1,6 +1,6 @@
 /**
- * [KO] 풀스크린 쿼드 파이프라인 기반 지형 가상 텍스처 실시간 온스크린 투영 추상 디버거 모듈입니다.
- * [EN] Abstract base texture debugger module projecting terrain GPU textures via fullscreen quad pipelines.
+ * [KO] 풀스크린 쿼드 파이프라인 기반 지형 가상 텍스처 실시간 온스크린 투영 디버거 모듈입니다.
+ * [EN] Texture debugger module projecting terrain GPU textures via fullscreen quad pipelines.
  * @packageDocumentation
  */
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
@@ -20,15 +20,15 @@ export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileS
 } | null;
 
 /**
- * [KO] WebGPU 풀스크린 쿼드 렌더링 파이프라인을 구축하여 지형 텍스처(VHT/VNT/VBT)를 온스크린 캔버스에 실시간 투영하는 기반 추상 텍스처 디버거 클래스입니다.
- * [EN] Base abstract texture debugger projecting terrain GPU textures (VHT/VNT/VBT) onto on-screen canvases via WebGPU fullscreen quad render pipelines.
+ * [KO] WebGPU 풀스크린 쿼드 렌더링 파이프라인을 구축하여 지형 텍스처(VHT/VNT/VBT)를 온스크린 캔버스에 실시간 투영하는 텍스처 디버거 클래스입니다.
+ * [EN] Texture debugger projecting terrain GPU textures (VHT/VNT/VBT) onto on-screen canvases via WebGPU fullscreen quad render pipelines.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템에 의해 내부적으로 관리되는 추상 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is an abstract class managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템(DebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
+class LandscapeTextureDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;
@@ -43,8 +43,8 @@ abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
     #clearColor: GPUColorDict;
 
     /**
-     * [KO] ALandscapeTextureDebugger 생성자입니다.
-     * [EN] Constructor for ALandscapeTextureDebugger.
+     * [KO] LandscapeTextureDebugger 생성자입니다.
+     * [EN] Constructor for LandscapeTextureDebugger.
      *
      * @param landscape - [KO] 대상 Landscape 인스턴스 / [EN] Target Landscape instance
      * @param tileStreamer - [KO] 타일 스트리머 인스턴스 / [EN] Tile streamer instance
@@ -133,6 +133,19 @@ abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
         this.renderOverlay();
     }
 
+    /**
+     * [KO] 파이프라인 및 바인드 그룹 리소스를 해제하고 디버거 DOM 요소를 제거합니다.
+     * [EN] Releases pipeline and bind group resources and destroys debugger DOM elements.
+     */
+    override destroy(): void {
+        super.destroy();
+        this.#pipeline = null;
+        this.#bindGroup = null;
+        this.#bindGroupLayout = null;
+        this.#context = null;
+        this.#lastBoundTexture = null;
+    }
+
     #initWebGPUContext(): void {
         const {redGPUContext} = this;
         const {gpuDevice, resourceManager} = redGPUContext;
@@ -203,20 +216,7 @@ abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
             }
         });
     }
-
-    /**
-     * [KO] 파이프라인 및 바인드 그룹 리소스를 해제하고 디버거 DOM 요소를 제거합니다.
-     * [EN] Releases pipeline and bind group resources and destroys debugger DOM elements.
-     */
-    override destroy(): void {
-        super.destroy();
-        this.#pipeline = null;
-        this.#bindGroup = null;
-        this.#bindGroupLayout = null;
-        this.#context = null;
-        this.#lastBoundTexture = null;
-    }
 }
 
-Object.freeze(ALandscapeTextureDebugger);
-export default ALandscapeTextureDebugger;
+Object.freeze(LandscapeTextureDebugger);
+export default LandscapeTextureDebugger;
