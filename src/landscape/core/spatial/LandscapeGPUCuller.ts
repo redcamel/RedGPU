@@ -27,7 +27,7 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeGPUCuller extends RedGPUObject {
+class LandscapeGPUCuller extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #uniformBuffer: GPUBuffer | null = null;
     #bindGroup: GPUBindGroup | null = null;
@@ -94,8 +94,6 @@ export class LandscapeGPUCuller extends RedGPUObject {
      * @param camY - [KO] 카메라 월드 Y 좌표 / [EN] Camera world Y coordinate
      * @param camZ - [KO] 카메라 월드 Z 좌표 / [EN] Camera world Z coordinate
      * @param lodMaxLevel - [KO] 최대 LOD 단계 수 / [EN] Maximum LOD levels count
-     * @param worldSizeX - [KO] 전체 지형 월드 X 크기 / [EN] Total terrain world X size
-     * @param worldSizeZ - [KO] 전체 지형 월드 Z 크기 / [EN] Total terrain world Z size
      * @param tileSizeX - [KO] 단일 타일 X 크기 / [EN] Single tile X size
      * @param tileSizeZ - [KO] 단일 타일 Z 크기 / [EN] Single tile Z size
      * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale

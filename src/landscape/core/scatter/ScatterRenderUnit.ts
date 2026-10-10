@@ -77,11 +77,6 @@ export interface ScatterRenderUnitInitOptions {
      */
     baseColorTexture?: BitmapTexture | null;
 
-    /**
-     * [KO] 피벗 보정을 위한 밑둥 Y 오프셋 (기본값: 0.0)
-     * [EN] Bottom Y offset for pivot compensation (default: 0.0)
-     */
-    bottomOffset?: number;
 
     /**
      * [KO] 소속 LOD 레벨 인덱스

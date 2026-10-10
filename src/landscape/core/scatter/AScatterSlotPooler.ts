@@ -26,25 +26,11 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      */
     static SLOT_STRIDE_FLOATS: number = 64;
 
-    /**
-     * [KO] 풀러가 수용 가능한 최대 슬롯 개수
-     * [EN] Maximum number of slots supported by this pooler
-     */
-    maxSlots: number;
+    #maxSlots: number;
+    #paramsSizeBytes: number;
+    #paramsSizeFloats: number;
 
-    /**
-     * [KO] 슬롯당 실제 유효 파라미터 바이트 크기
-     * [EN] Actual valid parameter byte size per slot
-     */
-    paramsSizeBytes: number;
-
-    /**
-     * [KO] 슬롯당 실제 유효 파라미터 Float 요소 개수
-     * [EN] Actual valid parameter float count per slot
-     */
-    paramsSizeFloats: number;
-
-    #gpuBuffer: GPUBuffer;
+    #gpuBuffer: GPUBuffer | null = null;
     #cpuBuffer: Float32Array;
     #cpuUint32View: Uint32Array;
     #freeSlotStack: Int32Array;
@@ -67,9 +53,9 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         bufferLabel: string
     ) {
         super(redGPUContext);
-        this.maxSlots = maxSlots;
-        this.paramsSizeBytes = paramsSizeBytes;
-        this.paramsSizeFloats = paramsSizeBytes / 4;
+        this.#maxSlots = maxSlots;
+        this.#paramsSizeBytes = paramsSizeBytes;
+        this.#paramsSizeFloats = paramsSizeBytes / 4;
 
         const totalFloats = maxSlots * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
         this.#cpuBuffer = new Float32Array(totalFloats);
@@ -91,10 +77,34 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     }
 
     /**
+     * [KO] 풀러가 수용 가능한 최대 슬롯 개수를 반환합니다.
+     * [EN] Returns the maximum number of slots supported by this pooler.
+     */
+    get maxSlots(): number {
+        return this.#maxSlots;
+    }
+
+    /**
+     * [KO] 슬롯당 실제 유효 파라미터 바이트 크기를 반환합니다.
+     * [EN] Returns the actual valid parameter byte size per slot.
+     */
+    get paramsSizeBytes(): number {
+        return this.#paramsSizeBytes;
+    }
+
+    /**
+     * [KO] 슬롯당 실제 유효 파라미터 Float 요소 개수를 반환합니다.
+     * [EN] Returns the actual valid parameter float count per slot.
+     */
+    get paramsSizeFloats(): number {
+        return this.#paramsSizeFloats;
+    }
+
+    /**
      * [KO] 단일 고정 메가 UBO GPUBuffer 객체를 반환합니다.
      * [EN] Returns the single fixed mega UBO GPUBuffer instance.
      */
-    get gpuBuffer(): GPUBuffer {
+    get gpuBuffer(): GPUBuffer | null {
         return this.#gpuBuffer;
     }
 
@@ -121,7 +131,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      */
     allocateSlot(): number {
         if (this.#freeTop <= 0) {
-            console.error(`[${this.constructor.name}] Exhausted all ${this.maxSlots} UBO slots!`);
+            console.error(`[${this.constructor.name}] Exhausted all ${this.#maxSlots} UBO slots!`);
             return -1;
         }
         this.#freeTop--;
@@ -155,10 +165,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      */
     clear(): void {
         this.#cpuBuffer.fill(0);
-        for (let i = 0; i < this.maxSlots; i++) {
-            this.#freeSlotStack[i] = this.maxSlots - 1 - i;
+        for (let i = 0; i < this.#maxSlots; i++) {
+            this.#freeSlotStack[i] = this.#maxSlots - 1 - i;
         }
-        this.#freeTop = this.maxSlots;
+        this.#freeTop = this.#maxSlots;
         this.#allocatedCount = 0;
 
         const {gpuDevice} = this;
@@ -172,8 +182,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * [EN] Safely releases GPUBuffer and CPU memory held by the pooler.
      */
     destroy(): void {
-        this.#gpuBuffer.destroy();
-        this.#gpuBuffer = null;
+        if (this.#gpuBuffer) {
+            this.#gpuBuffer.destroy();
+            this.#gpuBuffer = null;
+        }
         this.#cpuBuffer.fill(0);
         this.#freeTop = 0;
         this.#allocatedCount = 0;

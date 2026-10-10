@@ -21,7 +21,7 @@ import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/La
 import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
 import GrassManager from "./grass/GrassManager";
-import {LandscapeGPUCuller} from "./core/spatial/LandscapeGPUCuller";
+import LandscapeGPUCuller from "./core/spatial/LandscapeGPUCuller";
 import DebuggerManager from "./debugger/DebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';

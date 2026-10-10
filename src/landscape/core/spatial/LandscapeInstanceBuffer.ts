@@ -30,7 +30,7 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
  * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeInstanceBuffer extends RedGPUObject {
+class LandscapeInstanceBuffer extends RedGPUObject {
     #maxComponentCount: number;
     #lodMaxLevel: number;
 
@@ -216,7 +216,6 @@ export class LandscapeInstanceBuffer extends RedGPUObject {
      * @param heightmapShadowSoftness - [KO] 소프트 섀도우 부드러움 계수 / [EN] Soft shadow factor
      * @param foliageSubCellColoration - [KO] 식생 서브셀 그리드 시각화 여부 / [EN] Whether foliage subcell grid is colored
      * @param foliageSubCellSize - [KO] 식생 서브셀 크기 / [EN] Foliage subcell size
-     * @param foliageStreamingRadius - [KO] 식생 스트리밍 반경 / [EN] Foliage streaming radius
      * @param debugMode - [KO] 디버그 모드 플래그 / [EN] Debug mode flag
      */
     updateUniforms(

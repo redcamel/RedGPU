@@ -249,6 +249,14 @@ abstract class AScatterType<
         return this.#height;
     }
 
+    set height(val: number) {
+        const numVal = Math.max(0.01, Number(val) || 0.01);
+        if (this.#height !== numVal) {
+            this.#height = numVal;
+            this.onParameterChanged('height', numVal);
+        }
+    }
+
     /**
      * [KO] 지형 표면 대비 밑둥/뿌리 피벗 추가 Y 보정 오프셋(미터)을 반환합니다.
      * [EN] Returns additional bottom pivot correction offset in meters relative to terrain surface.

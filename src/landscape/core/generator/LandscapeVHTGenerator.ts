@@ -32,7 +32,7 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
  * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
+class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
     #uniformByteLength: number = 16;
 
@@ -148,7 +148,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     ): void {
         const atlasW = compCountX * 512;
         const atlasH = compCountZ * 512;
-        this.bakeGlobalRegion(
+        this.#bakeGlobalRegion(
             globalTexture,
             vhtAtlas,
             0, 0,
@@ -192,7 +192,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
      * [KO] 소스 텍스처 종료 V 좌표 (0.0 ~ 1.0)
      * [EN] Source texture end V coordinate (0.0 to 1.0)
      */
-    bakeGlobalRegion(
+    #bakeGlobalRegion(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
         pixelX: number,
@@ -204,7 +204,8 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         uMax: number,
         vMax: number
     ): void {
-        if (!this.#globalComputePipeline || !this.#globalBindGroupLayout) return;
+        const pipeline = this.#globalComputePipeline;
+        if (!pipeline || !this.#globalBindGroupLayout) return;
         const {width, height} = vhtAtlas.gpuTexture;
         if (pixelX >= width || pixelZ >= height || pixelW <= 0 || pixelH <= 0) return;
 
@@ -257,7 +258,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
                 const pass = commandEncoder.beginComputePass({
                     label: `Landscape_VHT_Global_BakePass_[${pixelX},${pixelZ}]`
                 });
-                pass.setPipeline(this.#globalComputePipeline!);
+                pass.setPipeline(pipeline);
                 pass.setBindGroup(0, bindGroup);
                 pass.dispatchWorkgroups(workgroupCountX, workgroupCountY);
                 pass.end();

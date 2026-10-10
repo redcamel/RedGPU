@@ -117,7 +117,6 @@ function createPBRRenderUnit(
     lodIndex: number,
     receiveShadow: boolean,
     treeHeight: number,
-    bottomOffset: number,
     sharedContext: FoliageSharedContext,
     isImpostorOverride: boolean = false
 ): FoliageRenderUnit {
@@ -157,7 +156,6 @@ function createPBRRenderUnit(
         firstIndex,
         indexCount,
         strideBytes: PBR_STRIDE_BYTES,
-        bottomOffset,
         relativeModelMatrix: identityMatrix,
         slotIndex,
         slotPooler,
@@ -302,7 +300,6 @@ export default function assembleFoliageRenderUnits(
                     l,
                     lodReceiveShadow,
                     treeH,
-                    0,
                     sharedContext
                 );
 
@@ -395,7 +392,6 @@ export default function assembleFoliageRenderUnits(
             impostorLODIndex,
             false,
             impostorHeight,
-            bottomOffset,
             sharedContext,
             true
         );
