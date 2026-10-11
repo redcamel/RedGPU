@@ -419,53 +419,6 @@ class DebuggerManager {
         }
     }
 
-    /**
-     * [KO] 공간 그리드 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeSpatialGridDebugger instance.
-     */
-    get spatialGridDebugger(): LandscapeSpatialGridDebugger | null {
-        return this.#spatialGridDebugger;
-    }
-
-    /**
-     * [KO] 가상 하이트맵(VHT) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeTextureDebugger instance for VHT.
-     */
-    get vhtDebugger(): LandscapeTextureDebugger | null {
-        return this.#vhtDebugger;
-    }
-
-    /**
-     * [KO] 가상 노멀맵(VNT) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeTextureDebugger instance for VNT.
-     */
-    get vntDebugger(): LandscapeTextureDebugger | null {
-        return this.#vntDebugger;
-    }
-
-    /**
-     * [KO] 가상 베이크 텍스처(VBT BaseColor) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeTextureDebugger instance for VBT BaseColor.
-     */
-    get vbtDebugger(): LandscapeTextureDebugger | null {
-        return this.#vbtDebugger;
-    }
-
-    /**
-     * [KO] 가상 베이크 노멀(VBT Normal) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeTextureDebugger instance for VBT Normal.
-     */
-    get vbtNormalDebugger(): LandscapeTextureDebugger | null {
-        return this.#vbtNormalDebugger;
-    }
-
-    /**
-     * [KO] 가상 베이크 ORM(VBT ORM) 디버거 인스턴스를 반환합니다.
-     * [EN] Returns the LandscapeTextureDebugger instance for VBT ORM.
-     */
-    get vbtORMDebugger(): LandscapeTextureDebugger | null {
-        return this.#vbtORMDebugger;
-    }
 
     /**
      * [KO] 모든 온스크린 디버거 뷰어의 일괄 가시성 상태를 설정하거나 가져옵니다.
