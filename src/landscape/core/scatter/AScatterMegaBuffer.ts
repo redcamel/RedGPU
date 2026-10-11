@@ -244,13 +244,6 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         return this.#cpuTypeParamsUint32;
     }
 
-    /**
-     * [KO] 간접 드로우 리셋 템플릿 배열을 반환합니다.
-     * [EN] Returns the indirect draw reset template array.
-     */
-    get indirectResetTemplate(): Uint32Array {
-        return this.#indirectResetTemplate;
-    }
 
     /**
      * [KO] 모든 필수 기본 GPU 버퍼들이 정상적으로 초기화되어 사용 가능한 상태인지 여부를 반환합니다.
@@ -320,13 +313,6 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         return this.#totalAllocatedInstances;
     }
 
-    /**
-     * [KO] 현재까지 등록된 모든 타입들의 총 할당 컬링 인스턴스 수를 반환합니다.
-     * [EN] Returns the total allocated culled instance count across all registered types to date.
-     */
-    get totalAllocatedCulledInstances(): number {
-        return this.#totalAllocatedCulledInstances;
-    }
 
     /**
      * [KO] 현재까지 등록된 총 간접 드로우 슬롯(호출) 수를 반환합니다.

@@ -95,13 +95,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         return this.#indirectDrawBuffer;
     }
 
-    /**
-     * [KO] 지형 글로벌 렌더링 파라미터가 기록되는 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the global landscape uniform buffer.
-     */
-    get landscapeUniformBuffer(): GPUBuffer | null {
-        return this.#landscapeUniformBuffer;
-    }
 
     /**
      * [KO] 지형 버텍스/프래그먼트 셰이더용 인스턴스 스토리지 바인드 그룹을 반환합니다.

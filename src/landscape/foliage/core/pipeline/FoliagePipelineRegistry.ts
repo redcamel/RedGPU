@@ -26,6 +26,13 @@ export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfter
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
+const INSTANCE_ATTRIBUTES_ALL: GPUVertexAttribute[] = [
+    {shaderLocation: 6, offset: 0, format: 'float32x4'},
+    {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
+    {shaderLocation: 8, offset: 24, format: 'float16x2'},
+    {shaderLocation: 9, offset: 28, format: 'unorm8x4'},
+];
+
 class FoliagePipelineRegistry extends RedGPUObject {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule;
@@ -64,17 +71,10 @@ class FoliagePipelineRegistry extends RedGPUObject {
         {shaderLocation: 0, offset: 0, format: 'float32x3'},
     ];
 
-    #instanceAttributesAll: GPUVertexAttribute[] = [
-        {shaderLocation: 6, offset: 0, format: 'float32x4'},
-        {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
-        {shaderLocation: 8, offset: 24, format: 'float16x2'},
-        {shaderLocation: 9, offset: 28, format: 'unorm8x4'},
-    ];
-
     #instanceBufferLayout: GPUVertexBufferLayout = {
         arrayStride: 8 * 4,
         stepMode: 'instance',
-        attributes: this.#instanceAttributesAll,
+        attributes: INSTANCE_ATTRIBUTES_ALL,
     };
 
     /**

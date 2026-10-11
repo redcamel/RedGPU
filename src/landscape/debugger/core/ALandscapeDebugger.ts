@@ -388,13 +388,6 @@ abstract class ALandscapeDebugger {
         return this.#landscape;
     }
 
-    /**
-     * [KO] 2D 오버레이 캔버스 요소를 반환합니다.
-     * [EN] Returns the 2D overlay canvas element.
-     */
-    get overlayCanvas(): HTMLCanvasElement {
-        return this.#overlayCanvas;
-    }
 
     /**
      * [KO] 디버거 최상위 컨테이너 DIV 요소를 반환합니다.

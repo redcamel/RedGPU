@@ -92,13 +92,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         return this.#paramsSizeBytes;
     }
 
-    /**
-     * [KO] 슬롯당 실제 유효 파라미터 Float 요소 개수를 반환합니다.
-     * [EN] Returns the actual valid parameter float count per slot.
-     */
-    get paramsSizeFloats(): number {
-        return this.#paramsSizeFloats;
-    }
 
     /**
      * [KO] 단일 고정 메가 UBO GPUBuffer 객체를 반환합니다.
@@ -145,12 +138,12 @@ abstract class AScatterSlotPooler extends RedGPUObject {
      * @param slot - 반환할 슬롯 번호
      */
     freeSlot(slot: number): void {
-        const {maxSlots, paramsSizeFloats, paramsSizeBytes} = this;
+        const {maxSlots, paramsSizeBytes} = this;
         if (slot < 0 || slot >= maxSlots) return;
         if (this.#freeTop >= maxSlots) return;
 
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
-        this.#cpuBuffer.fill(0, baseFloat, baseFloat + paramsSizeFloats);
+        this.#cpuBuffer.fill(0, baseFloat, baseFloat + this.#paramsSizeFloats);
 
         this.uploadSlotBytes(slot, paramsSizeBytes);
 
