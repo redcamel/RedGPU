@@ -36,13 +36,13 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let avgBaseColor = (bc00 + bc10 + bc01 + bc11) * 0.25;
     textureStore(dstBaseColor, dstCoord, avgBaseColor);
 
-    let n00 = textureLoad(srcNormal, srcCoord00, 0).rgb * 2.0 - vec3<f32>(1.0);
-    let n10 = textureLoad(srcNormal, srcCoord10, 0).rgb * 2.0 - vec3<f32>(1.0);
-    let n01 = textureLoad(srcNormal, srcCoord01, 0).rgb * 2.0 - vec3<f32>(1.0);
-    let n11 = textureLoad(srcNormal, srcCoord11, 0).rgb * 2.0 - vec3<f32>(1.0);
-    let sumN = n00 + n10 + n01 + n11;
-    let lenN = length(sumN);
-    let avgN = select(vec3<f32>(0.0, 1.0, 0.0), sumN / lenN, lenN > 0.0001);
+    let c00 = textureLoad(srcNormal, srcCoord00, 0).rgb;
+    let c10 = textureLoad(srcNormal, srcCoord10, 0).rgb;
+    let c01 = textureLoad(srcNormal, srcCoord01, 0).rgb;
+    let c11 = textureLoad(srcNormal, srcCoord11, 0).rgb;
+    let rawSum = (c00 + c10 + c01 + c11) - vec3<f32>(2.0);
+    let lenSq = dot(rawSum, rawSum);
+    let avgN = select(vec3<f32>(0.0, 1.0, 0.0), rawSum * inverseSqrt(lenSq), lenSq > 1e-6);
     let packedN = avgN * 0.5 + vec3<f32>(0.5);
     textureStore(dstNormal, dstCoord, vec4<f32>(packedN, 1.0));
 

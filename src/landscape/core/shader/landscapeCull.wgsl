@@ -69,17 +69,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
     if (index < uniforms.tileCount) {
         currentTile = allTiles[index];
         let tile = currentTile;
-        let halfTileX = uniforms.tileSizeX * 0.5;
-        let halfTileZ = uniforms.tileSizeZ * 0.5;
+        let tileExtentX = uniforms.tileSizeX * 0.52;
+        let tileExtentZ = uniforms.tileSizeZ * 0.52;
         let heightScale = uniforms.heightScale;
 
         let minY = tile.minHeightNorm * heightScale;
         let maxY = tile.maxHeightNorm * heightScale;
 
         let marginY = max(35.0, heightScale * 0.05);
-        let marginXZ = uniforms.tileSizeX * 0.02;
-        let minPos = vec3<f32>(tile.centerWorldX - halfTileX - marginXZ, minY - marginY, tile.centerWorldZ - halfTileZ - marginXZ);
-        let maxPos = vec3<f32>(tile.centerWorldX + halfTileX + marginXZ, maxY + marginY, tile.centerWorldZ + halfTileZ + marginXZ);
+        let minPos = vec3<f32>(tile.centerWorldX - tileExtentX, minY - marginY, tile.centerWorldZ - tileExtentZ);
+        let maxPos = vec3<f32>(tile.centerWorldX + tileExtentX, maxY + marginY, tile.centerWorldZ + tileExtentZ);
 
         if (checkAABBInFrustum(minPos, maxPos)) {
             var isOccluded = false;

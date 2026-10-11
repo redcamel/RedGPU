@@ -85,13 +85,6 @@ fn main(
         return;
     }
 
-    let scaleXZ = unpack2x16float(instance.packedScaleXZ);
-    let scaleX = scaleXZ.x;
-    let scaleZ = scaleXZ.y;
-    let scaleY = instance.scaleY;
-
-    let maxScale = max(max(scaleX, scaleY), scaleZ);
-    let scaledRadius = typeInfo.boundingRadius * maxScale;
     let realY = instance.posY;
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
@@ -99,11 +92,18 @@ fn main(
         return;
     }
 
-    let dist = sqrt(distSq);
-    let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
+    let scaleY = instance.scaleY;
+    let scaleXZ = unpack2x16float(instance.packedScaleXZ);
+    let maxScale = max(max(scaleXZ.x, scaleY), scaleXZ.y);
+    let scaledRadius = typeInfo.boundingRadius * maxScale;
 
+    let effFov = max(globalUniforms.fovFactor, 0.0001);
     let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
-    let isSubpixel = (effectiveDist * 2.0 > scaledRadius * vpHeight);
+    let subpixelLimit = scaledRadius * vpHeight;
+    let isSubpixel = (distSq * (4.0 * effFov * effFov) > subpixelLimit * subpixelLimit);
+
+    let dist = sqrt(distSq);
+    let effectiveDist = dist * effFov;
 
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
     let userShadowDist = typeInfo.shadowCullDistance;

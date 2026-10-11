@@ -23,11 +23,13 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let iCoord = floor(srcCoord);
     let fCoord = fract(srcCoord);
 
+    let baseCoord = vec2<i32>(iCoord);
     let maxCoord = vec2<i32>(srcDims) - vec2<i32>(1);
-    let c0 = vec2<i32>(clamp(iCoord, vec2<f32>(0.0), vec2<f32>(maxCoord)));
-    let c1 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), vec2<f32>(maxCoord)));
-    let c2 = vec2<i32>(clamp(iCoord + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(maxCoord)));
-    let c3 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(maxCoord)));
+    let zeroCoord = vec2<i32>(0);
+    let c0 = clamp(baseCoord, zeroCoord, maxCoord);
+    let c1 = clamp(baseCoord + vec2<i32>(1, 0), zeroCoord, maxCoord);
+    let c2 = clamp(baseCoord + vec2<i32>(0, 1), zeroCoord, maxCoord);
+    let c3 = clamp(baseCoord + vec2<i32>(1, 1), zeroCoord, maxCoord);
 
     let h0 = textureLoad(srcTileTexture, c0, 0).r;
     let h1 = textureLoad(srcTileTexture, c1, 0).r;

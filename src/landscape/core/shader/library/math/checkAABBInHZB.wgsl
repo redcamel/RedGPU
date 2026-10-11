@@ -103,7 +103,7 @@ fn checkAABBInHZB(
         return true;
     }
 
-    let mipLevel = clamp(floor(log2(maxDim)), 0.0, 7.0);
+    let mipLevel = f32(clamp(firstLeadingBit(u32(maxDim)), 0u, 7u));
 
     let adaptiveBias = max(depthBias, 0.003 + minDepth * 0.004);
     let threshold = minDepth - adaptiveBias;
