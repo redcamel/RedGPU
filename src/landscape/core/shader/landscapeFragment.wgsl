@@ -7,7 +7,7 @@
 #redgpu_include math.EPSILON;
 #redgpu_include math.direction.getViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
-#redgpu_include shadow.getDirectionalShadowVisibility;
+#redgpu_include shadow.getDirectionalShadowVisibilityLandscape;
 #redgpu_include math.getInterleavedGradientNoise;
 #redgpu_include landscape.struct.LandscapeLayerParams;
 #redgpu_include landscape.struct.LandscapeUniforms;
@@ -715,7 +715,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
     if (enableCSM && rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
-        let rawVisibility: f32 = getDirectionalShadowVisibility(
+        let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
             directionalShadowMap,
             directionalShadowMapSampler,
             input_vertexPosition,
