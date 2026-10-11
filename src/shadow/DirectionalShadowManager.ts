@@ -57,6 +57,26 @@ class DirectionalShadowManager {
     #cascadeProjectionMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
     #cascadeViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
 
+    #casterBoundingCenter: Float32Array = new Float32Array(3);
+    #casterBoundingRadiusSq: number = -1;
+    #hasCastingListCycleStarted: boolean = false;
+
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 중심 좌표(vec3)를 반환합니다.
+     * [EN] Returns the center coordinates (vec3) of the casters' effective shadow volume.
+     */
+    get casterBoundingCenter(): Float32Array {
+        return this.#casterBoundingCenter;
+    }
+
+    /**
+     * [KO] 캐스터들의 그림자 유효 영역 반경 제곱값을 반환합니다. (0.0: 캐스터 없음, <0.0: 전역 캐스터 존재로 가드 우회, >0.0: 유효 반경 제곱)
+     * [EN] Returns the squared radius of the casters' effective shadow volume (0.0: no casters, <0.0: global casters bypass, >0.0: valid squared radius).
+     */
+    get casterBoundingRadiusSq(): number {
+        return this.#casterBoundingRadiusSq;
+    }
+
     /**
      * [KO] 현재 섀도우 맵이 사용하는 비디오 메모리 크기(Bytes)를 반환합니다.
      * [EN] Returns the video memory size (Bytes) used by the current shadow map.
@@ -282,6 +302,7 @@ class DirectionalShadowManager {
      */
     resetCastingList() {
         this.#castingList.length = 0;
+        this.#hasCastingListCycleStarted = true;
     }
 
     /**
@@ -308,12 +329,14 @@ class DirectionalShadowManager {
 
         if (!directionalLights?.length || !(rawCamera instanceof PerspectiveCamera)) {
             splitDepths.fill(1000.0);
+            this.#casterBoundingRadiusSq = 0.0;
             return;
         }
 
         const camViewMatrix = rawCamera.viewMatrix;
         if (!mat4.invert(g_invVM, camViewMatrix)) {
             splitDepths.fill(1000.0);
+            this.#casterBoundingRadiusSq = 0.0;
             return;
         }
 
@@ -325,6 +348,9 @@ class DirectionalShadowManager {
         const light = directionalLights[0];
         vec3.set(g_lightDir, light.direction[0], light.direction[1], light.direction[2]);
         vec3.normalize(g_lightDir, g_lightDir);
+
+        // 🌟 [캐스터 바운딩 볼륨 연산] 0-Tap 조기 탈출 가드용 투영 구(Bounding Sphere) 계산
+        this.#updateCasterBoundingVolume(view, g_lightDir);
 
         vec3.set(g_up, 0, 1, 0);
         if (Math.abs(vec3.dot(g_lightDir, g_up)) > 0.99) {
@@ -424,19 +450,6 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 내부 상태를 업데이트합니다. (주로 해상도 변경 체크)
-     * [EN] Updates internal state. (Mainly checks for resolution changes)
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     */
-    update(redGPUContext: RedGPUContext): boolean {
-        this.#redGPUContext = redGPUContext;
-        return this.#checkDepthTexture();
-    }
-
-    /**
      * [KO] 사용 중인 GPU 리소스를 해제합니다.
      * [EN] Releases GPU resources in use.
      */
@@ -453,7 +466,122 @@ class DirectionalShadowManager {
             this.#shadowDepthTextureEmpty = null;
             this.#shadowDepthTextureViewEmpty = null;
         }
+        this.#hasCastingListCycleStarted = false;
         keepLog('🧹 DirectionalShadowManager destroy 완료');
+    }
+
+    /**
+     * [KO] 내부 상태를 업데이트합니다. (주로 해상도 변경 체크)
+     * [EN] Updates internal state. (Mainly checks for resolution changes)
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
+    update(redGPUContext: RedGPUContext): boolean {
+        this.#redGPUContext = redGPUContext;
+        return this.#checkDepthTexture();
+    }
+
+    /**
+     * [KO] 그림자를 드리우는 캐스터 메쉬들의 바운딩 AABB를 종합하여
+     *      그림자가 도달할 수 있는 지면 유효 영역(Bounding Sphere)을 산출하고
+     *      0-Tap 조기 탈출 가드용 센터 및 반경 제곱값을 업데이트합니다.
+     * [EN] Computes the effective ground shadow bounding sphere from casters' AABBs
+     *      and updates the center and squared radius for 0-Tap early exit culling.
+     *
+     * @param view - 대상 View3D
+     * @param lightDir - 정규화된 직사광 방향 벡터 (광원을 향하는 방향)
+     */
+    #updateCasterBoundingVolume(view: View3D, lightDir: vec3): void {
+        // 1. 전역 분산 캐스터(식생/잔디) 활성화 여부 확인
+        const landscape = view.scene?.landscape;
+        if (landscape) {
+            const foliageManager = landscape.foliageManager;
+            if (foliageManager?.enabled) {
+                const types = foliageManager.types;
+                const len = types.length;
+                for (let i = 0; i < len; i++) {
+                    if (types[i].castShadow) {
+                        this.#casterBoundingRadiusSq = -1.0;
+                        return;
+                    }
+                }
+            }
+            const grassManager = landscape.grassManager;
+            if (grassManager?.enabled) {
+                const types = grassManager.types;
+                const len = types.length;
+                for (let i = 0; i < len; i++) {
+                    if (types[i].castShadow) {
+                        this.#casterBoundingRadiusSq = -1.0;
+                        return;
+                    }
+                }
+            }
+        }
+
+        // 2. 캐스팅 목록 확인 (캐스터가 0개면 그림자 연산 불필요)
+        const castingList = this.#castingList;
+        const count = castingList.length;
+        if (count === 0) {
+            this.#casterBoundingRadiusSq = this.#hasCastingListCycleStarted ? 0.0 : -1.0;
+            return;
+        }
+
+        // 3. Zero-GC 캐스터 통합 바운딩 박스(AABB) 산출
+        let minX = Infinity;
+        let minY = Infinity;
+        let minZ = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+        let maxZ = -Infinity;
+
+        for (let i = 0; i < count; i++) {
+            const aabb = castingList[i].boundingAABB;
+            if (aabb.minX < minX) minX = aabb.minX;
+            if (aabb.maxX > maxX) maxX = aabb.maxX;
+            if (aabb.minY < minY) minY = aabb.minY;
+            if (aabb.maxY > maxY) maxY = aabb.maxY;
+            if (aabb.minZ < minZ) minZ = aabb.minZ;
+            if (aabb.maxZ > maxZ) maxZ = aabb.maxZ;
+        }
+
+        const cx = (minX + maxX) * 0.5;
+        const cy = (minY + maxY) * 0.5;
+        const cz = (minZ + maxZ) * 0.5;
+
+        const dx = (maxX - minX) * 0.5;
+        const dy = (maxY - minY) * 0.5;
+        const dz = (maxZ - minZ) * 0.5;
+        const casterRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        // 4. 방향광의 그림자 투영 연장(Shadow Projection Extension) 계산
+        // lightDir는 광선이 나아가는 방향(Light Ray Forward)이므로 그림자도 동일한 방향으로 드리워집니다.
+        const shadowDirX = lightDir[0];
+        const shadowDirZ = lightDir[2];
+        const horizLen = Math.sqrt(shadowDirX * shadowDirX + shadowDirZ * shadowDirZ);
+
+        const clampedLy = Math.max(Math.abs(lightDir[1]), 0.15);
+        const maxDist = this.#maxShadowDistance ?? 200.0;
+        const shadowExtension = Math.min((2.0 * casterRadius) / clampedLy, maxDist);
+
+        let normShadowDirX = 0;
+        let normShadowDirZ = 0;
+        if (horizLen > 0.0001) {
+            const invLen = 1.0 / horizLen;
+            normShadowDirX = shadowDirX * invLen;
+            normShadowDirZ = shadowDirZ * invLen;
+        }
+
+        // 5. 그림자 볼륨 중심 이동 및 안전 여유 반경(고저차 대응 15m 안전 마진) 설정
+        const halfExt = shadowExtension * 0.5;
+        this.#casterBoundingCenter[0] = cx + normShadowDirX * halfExt;
+        this.#casterBoundingCenter[1] = cy;
+        this.#casterBoundingCenter[2] = cz + normShadowDirZ * halfExt;
+
+        const shadowRadius = casterRadius + halfExt + 15.0;
+        this.#casterBoundingRadiusSq = shadowRadius * shadowRadius;
     }
 
     /** 비디오 메모리 계산 */

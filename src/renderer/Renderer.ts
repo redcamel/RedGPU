@@ -296,6 +296,7 @@ class Renderer {
             // 1. Opaque Occluders (지형 및 일반 메시로 뎁스 버퍼 선점)
             landscape?.render(view, viewRenderPassEncoder);
             if (axis) axis.render(renderViewStateData);
+            scene.shadowManager?.directionalShadowManager?.resetCastingList();
             renderBasicLayer(view, viewRenderPassEncoder);
 
             // 2. Alpha-Tested Vegetation (식생 및 잔디 - 가려진 픽셀 Early-Z 자동 기각)

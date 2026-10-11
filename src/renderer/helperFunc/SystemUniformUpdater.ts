@@ -172,6 +172,14 @@ class SystemUniformUpdater {
                 {
                     key: 'pcssLightSize',
                     value: directionalShadowManager.pcssLightSize,
+                },
+                {
+                    key: 'casterBoundingCenter',
+                    value: directionalShadowManager.casterBoundingCenter,
+                },
+                {
+                    key: 'casterBoundingRadiusSq',
+                    value: directionalShadowManager.casterBoundingRadiusSq,
                 }
             ]
         );

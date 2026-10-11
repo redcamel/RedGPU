@@ -160,6 +160,19 @@ fn getDirectionalShadowVisibility(
         return 1.0;
     }
 
+    // 🌟 [Caster Bounding Volume 0-Tap 가드]
+    // 그림자를 드리우는 캐스터가 없거나(0.0), 픽셀이 캐스터 그림자 투영 반경 밖인 경우 즉시 탈출 (>0.0)
+    let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+    if (casterRadiusSq == 0.0) {
+        return 1.0;
+    }
+    if (casterRadiusSq > 0.0) {
+        let diff = worldPosition - shadowInfo.casterBoundingCenter;
+        if (dot(diff, diff) > casterRadiusSq) {
+            return 1.0;
+        }
+    }
+
     // 🌟 [대규모 오픈월드 부동소수점 오차 흡수 바이어스 계수 산출]
     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);

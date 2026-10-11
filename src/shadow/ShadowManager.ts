@@ -112,8 +112,6 @@ class ShadowManager {
                 view.currentCascadeIndex = undefined;
             });
         }
-
-        this.#directionalShadowManager.resetCastingList()
     }
 
     /**

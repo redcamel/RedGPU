@@ -41,6 +41,19 @@ fn getDirectionalShadowVisibilityLandscape(
         return 1.0;
     }
 
+    // 🌟 [Caster Bounding Volume 0-Tap 가드]
+    // 그림자를 드리우는 캐스터가 없거나(0.0), 지형 픽셀이 캐스터 그림자 투영 반경 밖인 경우 즉시 탈출 (>0.0)
+    let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+    if (casterRadiusSq == 0.0) {
+        return 1.0;
+    }
+    if (casterRadiusSq > 0.0) {
+        let diff = worldPosition - shadowInfo.casterBoundingCenter;
+        if (dot(diff, diff) > casterRadiusSq) {
+            return 1.0;
+        }
+    }
+
     let nDotL = dot(N, L);
     // 2. 완전 역광은 샘플링 스킵 (0-Tap 즉시 탈출)
     if (nDotL <= -0.08) {

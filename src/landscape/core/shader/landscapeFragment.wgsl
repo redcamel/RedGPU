@@ -754,10 +754,21 @@ fn main(inputData: InputData) -> OutputFragment {
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         let maxCSMDistSq = maxCSMDist * maxCSMDist;
 
+        // 🌟 [Caster Bounding Volume 선행 가드]
+        // 캐스터가 없거나(0.0), 지형 픽셀이 캐스터 그림자 영향권 밖(>0.0)인 경우 고비용 CSM 함수 호출 자체를 0-Tap 스킵
+        let casterRadiusSq = systemUniforms.shadow.casterBoundingRadiusSq;
+        var inCasterVolume = true;
+        if (casterRadiusSq == 0.0) {
+            inCasterVolume = false;
+        } else if (casterRadiusSq > 0.0) {
+            let diff = input_vertexPosition - systemUniforms.shadow.casterBoundingCenter;
+            inCasterVolume = dot(diff, diff) <= casterRadiusSq;
+        }
+
         // 🚀 [조기 탈락 3단계]: 완전 역광(산 뒤쪽 배면)은 0-Tap 즉시 완전 암부 확정
         if (geoNdotL <= 0.0) {
             csmVisibility = 1.0 - shadowStrength;
-        } else if (rawViewDistSq < maxCSMDistSq && !isDeepTerrainShadow) {
+        } else if (rawViewDistSq < maxCSMDistSq && !isDeepTerrainShadow && inCasterVolume) {
             let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
                 directionalShadowMap,
                 directionalShadowMapSampler,

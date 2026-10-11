@@ -14,4 +14,6 @@ struct Shadow {
     pad0: f32,
     pad1: f32,
     pad2: f32,
+    casterBoundingCenter: vec3<f32>,
+    casterBoundingRadiusSq: f32,
 };
