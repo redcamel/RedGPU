@@ -82,16 +82,24 @@ fn sampleLayerStochasticGrad(
     let ang1 = r1.z * PI2;
     let ang2 = r2.z * PI2;
 
-    let uv0 = rotate2D(baseUV, ang0) + r0.xy;
-    let uv1 = rotate2D(baseUV, ang1) + r1.xy;
-    let uv2 = rotate2D(baseUV, ang2) + r2.xy;
+    // 🚀 [SFU 최적화]: 각도당 cos/sin 1회만 계산 후 UV, ddx, ddy 회전에 재사용 (삼각함수 18회 ➔ 6회 단축)
+    let c0 = cos(ang0);
+    let s0 = sin(ang0);
+    let uv0 = rotate2DPrecalc(baseUV, c0, s0) + r0.xy;
+    let ddx0 = rotate2DPrecalc(ddxUV, c0, s0);
+    let ddy0 = rotate2DPrecalc(ddyUV, c0, s0);
 
-    let ddx0 = rotate2D(ddxUV, ang0);
-    let ddy0 = rotate2D(ddyUV, ang0);
-    let ddx1 = rotate2D(ddxUV, ang1);
-    let ddy1 = rotate2D(ddyUV, ang1);
-    let ddx2 = rotate2D(ddxUV, ang2);
-    let ddy2 = rotate2D(ddyUV, ang2);
+    let c1 = cos(ang1);
+    let s1 = sin(ang1);
+    let uv1 = rotate2DPrecalc(baseUV, c1, s1) + r1.xy;
+    let ddx1 = rotate2DPrecalc(ddxUV, c1, s1);
+    let ddy1 = rotate2DPrecalc(ddyUV, c1, s1);
+
+    let c2 = cos(ang2);
+    let s2 = sin(ang2);
+    let uv2 = rotate2DPrecalc(baseUV, c2, s2) + r2.xy;
+    let ddx2 = rotate2DPrecalc(ddxUV, c2, s2);
+    let ddy2 = rotate2DPrecalc(ddyUV, c2, s2);
 
     let alb0 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv0, layerIdx, ddx0, ddy0).rgb;
     let alb1 = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, uv1, layerIdx, ddx1, ddy1).rgb;
@@ -365,7 +373,8 @@ fn getDirectPbrLighting(
     NdotV: f32,
     roughnessParameter: f32,
     albedo: vec3<f32>,
-    visibility: f32
+    visibility: f32,
+    mainLightDir: vec3<f32>
 ) -> vec3<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -373,8 +382,20 @@ fn getDirectPbrLighting(
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let lightIntensity = u_directionalLights[i].intensity;
-        let L = -normalize(u_directionalLights[i].direction);
+        if (lightIntensity <= 0.0) {
+            continue;
+        }
+
+        // 🚀 [SFU 최적화]: main()에서 이미 정규화된 0번 주 광원 벡터 L 재사용 (SFU normalize 829만 회 중복 제거)
+        let L = select(-normalize(u_directionalLights[i].direction), mainLightDir, i == 0u);
+        let NdotL = max(dot(N, L), 0.0);
         let shadowFactor = select(1.0, visibility, i == 0u);
+
+        // 🚀 [조기 탈락]: 배면(NdotL <= 0) 또는 완전 암부(shadowFactor <= 0.001)는 대기산란 LUT 및 BRDF 연산 스킵
+        if (NdotL <= 0.0 || shadowFactor <= 0.001) {
+            continue;
+        }
+
         var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * shadowFactor;
 
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
@@ -753,7 +774,8 @@ fn main(inputData: InputData) -> OutputFragment {
         input_vertexPosition,
         N, V, NdotV,
         roughnessParameter, albedo,
-        visibility
+        visibility,
+        L
     );
 
     let indirectLighting = getLandscapeIndirectLighting(

@@ -10,6 +10,11 @@ fn rotate2D(v: vec2<f32>, angle: f32) -> vec2<f32> {
     return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
+// 🚀 [SFU 최적화]: 동일 각도에 대해 사전 계산된 cos, sin을 재사용하여 중복 삼각함수 호출 제거
+fn rotate2DPrecalc(v: vec2<f32>, c: f32, s: f32) -> vec2<f32> {
+    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
+}
+
 struct StochasticGridTri {
     v0: vec2<f32>,
     v1: vec2<f32>,
@@ -44,10 +49,10 @@ fn getStochasticGridTri(uv: vec2<f32>) -> StochasticGridTri {
         w2 = 1.0 - f.x;
     }
 
-    let p = 3.0;
-    let sw0 = pow(w0, p);
-    let sw1 = pow(w1, p);
-    let sw2 = pow(w2, p);
+    // 🚀 [SFU 최적화]: 정수 3승을 pow() 대신 순수 ALU 곱셈으로 전개 (SFU pow 3회 완전 제거)
+    let sw0 = w0 * w0 * w0;
+    let sw1 = w1 * w1 * w1;
+    let sw2 = w2 * w2 * w2;
     let sumW = sw0 + sw1 + sw2;
 
     res.v0 = v0;
