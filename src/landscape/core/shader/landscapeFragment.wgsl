@@ -238,7 +238,7 @@ fn computeNearFieldLandscapeLayers(
         result.metallic = blendedMetallic * invW;
         result.ao = blendedAO * invW;
 
-        let layerBlendNormal = normalize(blendedNormalTangent * invW);
+        let layerBlendNormal = normalize(blendedNormalTangent);
         result.normal = perturbNormalOrthonormal(baseNormal, layerBlendNormal);
         result.isValid = true;
     } else {
@@ -357,12 +357,12 @@ fn getDirectPbrLight(
 
     let F0 = vec3<f32>(0.04);
     let F = getRoughnessFresnel(VdotH, F0, roughnessParameter);
-    let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
-    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
-
     let landscapeSpecularScale = 0.2;
     let effectiveF = F * landscapeSpecularScale;
-    let directLight = (SPEC_BRDF * NdotL * landscapeSpecularScale) + (vec3<f32>(1.0) - effectiveF) * diffuse_reflection;
+    let SPEC_BRDF = getDirectSpecularBRDF(effectiveF, roughnessParameter, NdotH, NdotV, NdotL);
+    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
+
+    let directLight = (SPEC_BRDF * NdotL) + (vec3<f32>(1.0) - effectiveF) * diffuse_reflection;
     return directLight * lightColor;
 }
 
@@ -454,10 +454,13 @@ fn sampleBilinearHeight(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
     let fCoord = fract(coord);
 
     let maxCoord = texSize - vec2<f32>(1.0);
-    let c0 = vec2<i32>(clamp(iCoord, vec2<f32>(0.0), maxCoord));
-    let c1 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), maxCoord));
-    let c2 = vec2<i32>(clamp(iCoord + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), maxCoord));
-    let c3 = vec2<i32>(clamp(iCoord + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), maxCoord));
+    let baseCoord = vec2<i32>(iCoord);
+    let maxCoordI = vec2<i32>(maxCoord);
+    let zeroCoord = vec2<i32>(0);
+    let c0 = clamp(baseCoord, zeroCoord, maxCoordI);
+    let c1 = clamp(baseCoord + vec2<i32>(1, 0), zeroCoord, maxCoordI);
+    let c2 = clamp(baseCoord + vec2<i32>(0, 1), zeroCoord, maxCoordI);
+    let c3 = clamp(baseCoord + vec2<i32>(1, 1), zeroCoord, maxCoordI);
 
     let h0 = textureLoad(heightMapTexture, c0, 0).r;
     let h1 = textureLoad(heightMapTexture, c1, 0).r;
@@ -591,7 +594,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let relCamPos = input_vertexPosition - u_cameraPosition;
     let rawViewDistSq = dot(relCamPos, relCamPos);
-    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
+    let invDist = inverseSqrt(max(rawViewDistSq, 1e-8));
+    let V: vec3<f32> = -relCamPos * invDist;
+    let rawViewDist = rawViewDistSq * invDist;
     let baseNormal = getBaseNormal(globalUV);
 
     let nearDist = uniforms.nearDetailDistance;
@@ -665,7 +670,6 @@ fn main(inputData: InputData) -> OutputFragment {
         );
 
         if (nearDetail.isValid) {
-            let rawViewDist = sqrt(rawViewDistSq);
             let blendFactor = clamp((nearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
@@ -717,7 +721,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let enableHeightmapShadow = systemUniforms.directionalLightCount > 0u && L.y > 0.01 && geoNdotL > 0.001;
 
         if (enableHeightmapShadow && rawViewDistSq < shadowMaxDistLimitSq) {
-            let rawViewDist = sqrt(rawViewDistSq);
             let distRatio = saturate(rawViewDist / shadowMaxDist);
             let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
 
@@ -744,13 +747,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let shadowStrength = systemUniforms.shadow.directionalShadowStrength;
     let mainLightIntensity = select(0.0, systemUniforms.directionalLights[0].intensity, systemUniforms.directionalLightCount > 0u);
     let hasValidShadow = shadowStrength > 0.001 && mainLightIntensity > 0.0;
-
-    let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
-    let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-    let maxCSMDistSq = maxCSMDist * maxCSMDist;
-
     // 🚀 [조기 탈락 2단계]: 섀도우 비활성화 또는 원경 타일(receiveShadow == 0) 즉시 스킵
     if (hasValidShadow && inputData.receiveShadow > 0.5) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+        let maxCSMDistSq = maxCSMDist * maxCSMDist;
+
         // 🚀 [조기 탈락 3단계]: 완전 역광(산 뒤쪽 배면)은 0-Tap 즉시 완전 암부 확정
         if (geoNdotL <= 0.0) {
             csmVisibility = 1.0 - shadowStrength;

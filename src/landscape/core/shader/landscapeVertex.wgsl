@@ -147,10 +147,12 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     }
 
     let isSkirt = input.position.z < -0.5;
-    let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
-    let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * 0.15 * lodMultiplier);
-
-    let worldY = finalHeight * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
+    var worldY = finalHeight * landscapeUniforms.heightScale;
+    if (isSkirt) {
+        let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
+        let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * (0.15 * lodMultiplier));
+        worldY += dynamicSkirtDepth;
+    }
 
     res.worldPos = vec4<f32>(morphedWorldX, worldY, morphedWorldZ, 1.0);
     res.globalUV = morphedGlobalUV;
@@ -171,7 +173,11 @@ fn main(input: InputData) -> OutputData {
     let worldPos4 = computed.worldPos;
 
     let relPos = worldPos4.xyz - systemUniforms.camera.cameraPosition;
-    let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
+    let viewPos = mat3x3<f32>(
+        systemUniforms.camera.viewMatrix[0].xyz,
+        systemUniforms.camera.viewMatrix[1].xyz,
+        systemUniforms.camera.viewMatrix[2].xyz
+    ) * relPos;
 
     output.position = systemUniforms.projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = worldPos4.xyz;
@@ -185,11 +191,16 @@ fn main(input: InputData) -> OutputData {
 
     // 🚀 [조기 탈락 1단계] CSM 최대 유효 거리 + 타일 반경 마진을 초과한 원경 버텍스는 그림자 수신을 0.0으로 사전 차단
     let viewDepth = -viewPos.z;
-    let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
-    let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-    let tileRadius = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ) * 0.75;
-    let isWithinCSMRange = viewDepth < (maxCSMDist + tileRadius);
-    output.receiveShadow = select(0.0, landscapeUniforms.receiveShadow, isWithinCSMRange);
+    var receiveShadow = 0.0;
+    if (landscapeUniforms.receiveShadow > 0.5) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+        let tileRadius = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ) * 0.75;
+        if (viewDepth < (maxCSMDist + tileRadius)) {
+            receiveShadow = landscapeUniforms.receiveShadow;
+        }
+    }
+    output.receiveShadow = receiveShadow;
     output.viewDepth = viewDepth;
 
     return output;

@@ -177,7 +177,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         if (totalLayerWeight > 0.0001) {
             let invW = 1.0 / totalLayerWeight;
             finalAlbedo = blendedAlbedo * invW;
-            let layerBlendNormal = normalize(blendedNormalTangent * invW);
+            let layerBlendNormal = normalize(blendedNormalTangent);
             finalRoughness = blendedRoughness * invW;
             finalMetallic = blendedMetallic * invW;
             finalAO = blendedAO * invW;
