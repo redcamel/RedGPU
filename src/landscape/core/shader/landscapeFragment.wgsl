@@ -568,15 +568,18 @@ fn main(inputData: InputData) -> OutputFragment {
     let ddxWorldTileUV = dpdx(worldTileUV);
     let ddyWorldTileUV = dpdy(worldTileUV);
 
-    let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
+    let relCamPos = input_vertexPosition - u_cameraPosition;
+    let rawViewDistSq = dot(relCamPos, relCamPos);
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal = getBaseNormal(globalUV);
 
     let nearDist = uniforms.nearDetailDistance;
+    let nearDistSq = nearDist * nearDist;
     let nearFade = uniforms.nearDetailFade;
     let fadeStartDist = max(0.0, nearDist - nearFade);
+    let fadeStartDistSq = fadeStartDist * fadeStartDist;
 
-    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDist < nearDist;
+    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDistSq < nearDistSq;
 
     var albedo = uniforms.color.rgb;
     var N = baseNormal;
@@ -596,7 +599,7 @@ fn main(inputData: InputData) -> OutputFragment {
         albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
         roughnessFactor = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
         ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
-    } else if (rawViewDist <= fadeStartDist) {
+    } else if (rawViewDistSq <= fadeStartDistSq) {
         let nearDetail = computeNearFieldLandscapeLayers(
             globalUV,
             worldTileUV,
@@ -641,6 +644,7 @@ fn main(inputData: InputData) -> OutputFragment {
         );
 
         if (nearDetail.isValid) {
+            let rawViewDist = sqrt(rawViewDistSq);
             let blendFactor = clamp((nearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
@@ -685,28 +689,33 @@ fn main(inputData: InputData) -> OutputFragment {
     var isDeepTerrainShadow = false;
 
     // 1. 지형 자체 높이맵 레이마칭 산그늘 (receiveShadow와 완전 독립)
-    let enableHeightmapShadow = landscapeInstanceUniforms.heightmapShadow > 0.5 && systemUniforms.directionalLightCount > 0u && L.y > 0.01 && geoNdotL > 0.001;
-    let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
+    if (landscapeInstanceUniforms.heightmapShadow > 0.5) {
+        let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
+        let shadowMaxDistLimit = shadowMaxDist * 1.5;
+        let shadowMaxDistLimitSq = shadowMaxDistLimit * shadowMaxDistLimit;
+        let enableHeightmapShadow = systemUniforms.directionalLightCount > 0u && L.y > 0.01 && geoNdotL > 0.001;
 
-    if (enableHeightmapShadow && rawViewDist < shadowMaxDist * 1.5) {
-        let distRatio = saturate(rawViewDist / shadowMaxDist);
-        let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
+        if (enableHeightmapShadow && rawViewDistSq < shadowMaxDistLimitSq) {
+            let rawViewDist = sqrt(rawViewDistSq);
+            let distRatio = saturate(rawViewDist / shadowMaxDist);
+            let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
 
-        let terrainSelfShadow = computeLandscapeHeightmapShadow(
-            input_vertexPosition,
-            baseNormal,
-            L,
-            inputData.position.xy,
-            landscapeInstanceUniforms.worldSizeX,
-            landscapeInstanceUniforms.worldSizeZ,
-            landscapeInstanceUniforms.vhtTextureSize,
-            landscapeInstanceUniforms.heightScale,
-            shadowMaxDist,
-            dynamicSteps,
-            landscapeInstanceUniforms.heightmapShadowSoftness
-        );
-        terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
-        isDeepTerrainShadow = terrainSelfShadow <= 0.001;
+            let terrainSelfShadow = computeLandscapeHeightmapShadow(
+                input_vertexPosition,
+                baseNormal,
+                L,
+                inputData.position.xy,
+                landscapeInstanceUniforms.worldSizeX,
+                landscapeInstanceUniforms.worldSizeZ,
+                landscapeInstanceUniforms.vhtTextureSize,
+                landscapeInstanceUniforms.heightScale,
+                shadowMaxDist,
+                dynamicSteps,
+                landscapeInstanceUniforms.heightmapShadowSoftness
+            );
+            terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+            isDeepTerrainShadow = terrainSelfShadow <= 0.001;
+        }
     }
 
     // 2. 외부 CSM 그림자 수신 최적화
@@ -717,13 +726,14 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
     let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+    let maxCSMDistSq = maxCSMDist * maxCSMDist;
 
     // 🚀 [조기 탈락 2단계]: 섀도우 비활성화 또는 원경 타일(receiveShadow == 0) 즉시 스킵
     if (hasValidShadow && inputData.receiveShadow > 0.5) {
         // 🚀 [조기 탈락 3단계]: 완전 역광(산 뒤쪽 배면)은 0-Tap 즉시 완전 암부 확정
         if (geoNdotL <= 0.0) {
             csmVisibility = 1.0 - shadowStrength;
-        } else if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
+        } else if (rawViewDistSq < maxCSMDistSq && !isDeepTerrainShadow) {
             let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
                 directionalShadowMap,
                 directionalShadowMapSampler,

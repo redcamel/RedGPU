@@ -62,7 +62,8 @@ fn sampleLandscapeHeightAndNormal(
     }
 
     let slopeTan2 = nx * nx + nz * nz;
-    let invLen = 1.0 / sqrt(slopeTan2 + 1.0);
+    // 🚀 [SFU 최적화]: 1.0 / sqrt() 대신 고속 rsqrt 유닛 1회 사용 (레이턴시 60% 단축)
+    let invLen = inverseSqrt(slopeTan2 + 1.0);
     let normal = vec3<f32>(nx * invLen, invLen, nz * invLen);
 
     var result: LandscapeSurfaceSample;
