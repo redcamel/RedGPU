@@ -223,14 +223,6 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 전용 WebGPU 렌더러 인스턴스를 반환합니다.
-     * [EN] Returns the dedicated WebGPU renderer instance for this landscape.
-     */
-    get renderer(): LandscapeRenderer {
-        return this.#renderer;
-    }
-
-    /**
      * [KO] 지형 LOD 공유 지오메트리 인스턴스를 반환합니다.
      * [EN] Returns the shared geometry instance used for terrain LODs.
      */
@@ -626,14 +618,6 @@ class Landscape extends RedGPUObject {
         return this.#material.layers;
     }
 
-    /**
-     * [KO] 지형 스플랫 가중치 맵을 CPU 측에서 이중선형 보간으로 샘플링하는 CPU 전용 가중치 샘플러를 반환합니다.
-     * [EN] Returns the CPU-side weight sampler that samples terrain splat weight maps via bilinear interpolation.
-     */
-    get weightMapCPUSampler(): LandscapeWeightMapCPUSampler {
-        return this.#weightMapCPUSampler;
-    }
-
 
     /**
      * [KO] 카메라 근접 텍스처 디테일이 최대로 유지되는 시작 거리(월드 단위)를 반환합니다.
@@ -724,21 +708,6 @@ class Landscape extends RedGPUObject {
         this.#tileStreamer.tileMaxLoadsPerFrame = value;
     }
 
-    /**
-     * [KO] 지형 가상 높이 텍스처(VHT) 아틀라스 텍스처 객체를 반환합니다.
-     * [EN] Returns the landscape virtual height texture (VHT) atlas texture object.
-     */
-    get vhtAtlasTexture(): any {
-        return this.#tileStreamer?.vhtAtlasTexture ?? null;
-    }
-
-    /**
-     * [KO] 지형 가상 베이스 컬러(VBT) 아틀라스 텍스처 객체를 반환합니다.
-     * [EN] Returns the landscape virtual base color (VBT) atlas texture object.
-     */
-    get vbtBaseColorAtlas(): any {
-        return this.#tileStreamer?.vbtBaseColorAtlas ?? null;
-    }
 
     /**
      * @example
@@ -755,6 +724,22 @@ class Landscape extends RedGPUObject {
      */
     get tileLoadedCount(): number {
         return this.#tileStreamer?.tileLoadedCount ?? 0;
+    }
+
+    /**
+     * [KO] 식생 및 잔디 GPU 베이킹에 사용되는 지형 가상 높이 텍스처(VHT) 뷰를 반환합니다.
+     * [EN] Returns the landscape virtual height texture (VHT) view used for foliage and grass GPU baking.
+     */
+    get vhtTextureView(): GPUTextureView | null {
+        return this.#tileStreamer?.vhtAtlasTexture?.gpuTextureView ?? null;
+    }
+
+    /**
+     * [KO] 식생 및 잔디 GPU 베이킹에 사용되는 지형 가상 베이스 컬러(VBT) 텍스처 뷰를 반환합니다.
+     * [EN] Returns the landscape virtual base color (VBT) texture view used for foliage and grass GPU baking.
+     */
+    get vbtTextureView(): GPUTextureView | null {
+        return this.#tileStreamer?.vbtBaseColorAtlas?.gpuTextureView ?? null;
     }
 
     /**

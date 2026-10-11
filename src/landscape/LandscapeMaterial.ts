@@ -119,14 +119,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     /**
-     * [KO] 텍스처 2D 어레이 레이어 슬라이스의 가로/세로 해상도를 반환합니다.
-     * [EN] Returns the width/height resolution of the texture 2D array layer slices.
-     */
-    get textureArraySize(): number {
-        return this.#textureArraySize;
-    }
-
-    /**
      * [KO] 카메라 근접 텍스처 디테일이 최대로 유지되는 시작 거리(월드 단위)를 반환합니다.
      * [EN] Returns the near-distance threshold (world units) where close-up texture detail remains fully visible.
      */

@@ -48,17 +48,18 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         const {rawGPUBuffer} = megaBuffer;
         if (!rawGPUBuffer) return;
 
-        const {computePipeline, uniformGPUBuffer, gpuDevice} = this;
+        const {computePipeline, uniformGPUBuffer, gpuDevice, resourceManager} = this;
+        const {emptyBitmapTextureView} = resourceManager;
 
         const {
-            vhtAtlasTexture,
-            vbtBaseColorAtlas,
+            vhtTextureView,
+            vbtTextureView,
             invWorldSizeX,
             invWorldSizeZ,
             heightScale
         } = landscape;
-        const vhtView = vhtAtlasTexture.gpuTextureView;
-        const vbtView = vbtBaseColorAtlas.gpuTextureView;
+        const vhtView = vhtTextureView ?? emptyBitmapTextureView;
+        const vbtView = vbtTextureView ?? emptyBitmapTextureView;
 
         const {typeId, streamingRadius} = grass;
         const alloc = megaBuffer.getAllocation(typeId);

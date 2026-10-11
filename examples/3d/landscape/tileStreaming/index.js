@@ -248,9 +248,20 @@ function renderTestPane({
             // [KO] Tile Streaming 설정 (타일 스트리밍 전용)
             // [EN] Tile Streaming settings (Tile streaming controls)
             const streamFolder = landscapeFolder.addFolder({title: 'Tile Streaming', expanded: true});
+            streamFolder.addBinding(landscape, 'tileLoadedCount', {readonly: true, label: 'Loaded Tiles', interval: 200});
             streamFolder.addBinding(landscape, 'tileLoadingRadius', {min: 1000, max: 8000, step: 250});
             streamFolder.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 8, step: 1});
-            streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
+
+            // [KO] 2D 온스크린 디버거 뷰어 (공간 분할 그리드 및 가상 텍스처 아틀라스)
+            // [EN] 2D on-screen debugger viewers (Spatial grid and virtual texture atlases)
+            const debugViewersFolder = streamFolder.addFolder({title: '2D Debug Viewers', expanded: true});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'visible', {label: 'All Viewers'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'spatialGrid', {label: 'Spatial Grid'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'vht', {label: 'VHT (Height)'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'vnt', {label: 'VNT (Normal)'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbt', {label: 'VBT (BaseColor)'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbtNormal', {label: 'VBT (Normal)'});
+            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbtORM', {label: 'VBT (ORM)'});
 
             // [KO] LOD 설정
             // [EN] LOD settings
