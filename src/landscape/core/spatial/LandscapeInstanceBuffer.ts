@@ -17,13 +17,13 @@ import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../materia
  * - **타일 인스턴스 스토리지 버퍼 (`allTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
  * - **가시 인덱스 스트림 버퍼 (`visibleTilesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.
  * - **멀티 LOD 인디렉트 버퍼 (`indirectDrawBuffer`)**: WebGPU의 `drawIndexedIndirect` 스펙에 맞추어 LOD 레벨당 5개의 uint32 필드(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 배치하여 멀티 레벨 간접 드로우를 단일 패스로 처리합니다.
- * - **전역 유니폼 동기화 (`landscapeUniformBuffer`)**: 카메라 역행렬, 뷰/프로젝션 행렬, 높이 스케일, 안개 파라미터 등을 256바이트 정렬 버퍼로 래핑하여 셰이더와 동기화합니다.
+ * - **전역 유니폼 동기화 (`landscapeUniformBuffer`)**: 카메라 역행렬, 뷰/프로젝션 행렬, 높이 스케일, 안개 파라미터 등을 320바이트 정렬 버퍼로 래핑하여 셰이더와 동기화합니다.
  *
  * **[EN] Architecture & Role:**
  * - **Tile Instance Storage (`allTilesBuffer`)**: Houses spatial metadata for all terrain tiles including world coordinates, bounding boxes, height bounds, and atlas UV offsets.
  * - **Visible Index Stream (`visibleTilesBuffer`)**: Dedicated GPU output buffer sequentially populated with tile indices that passed frustum and occlusion culling tests.
  * - **Multi-LOD Indirect Buffer (`indirectDrawBuffer`)**: Layouts 5 uint32 fields (`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`) per LOD level conforming to WebGPU `drawIndexedIndirect` specifications.
- * - **Global Uniform Sync (`landscapeUniformBuffer`)**: Synchronizes view/projection matrices, height scales, and fog parameters via a 256-byte aligned uniform buffer.
+ * - **Global Uniform Sync (`landscapeUniformBuffer`)**: Synchronizes view/projection matrices, height scales, and fog parameters via a 320-byte aligned uniform buffer.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -46,7 +46,7 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
     #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
-    #landscapeUniformByteLength: number = 256;
+    #landscapeUniformByteLength: number = 320;
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
@@ -276,22 +276,37 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
         const distCount = Math.min(8, lodDistancesSq.length);
         for (let i = 0; i < 8; i++) {
-            f32[44 + i] = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;
+            const val = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;
+            f32[44 + i] = val;
+
+            if (val < 1e14) {
+                const nextDist = Math.sqrt(val);
+                const prevVal = (i > 0 && i - 1 < distCount && lodDistancesSq[i - 1] > 0) ? lodDistancesSq[i - 1] : 0;
+                const prevDist = (i > 0 && prevVal < 1e14) ? Math.sqrt(prevVal) : 0.0;
+                const morphRange = Math.max(1.0, nextDist - prevDist);
+                const morphStartDist = prevDist + morphRange * 0.7;
+                const morphEndDist = nextDist;
+                f32[52 + i] = morphStartDist;
+                f32[60 + i] = 1.0 / Math.max(0.001, morphEndDist - morphStartDist);
+            } else {
+                f32[52 + i] = 1e15;
+                f32[60 + i] = 0.0;
+            }
         }
 
-        f32[52] = lod0Quads;
-        f32[53] = receiveShadow ? 1.0 : 0.0;
-        f32[54] = castHeightmapShadow ? 1.0 : 0.0;
-        f32[55] = heightmapShadowSteps;
-        f32[56] = heightmapShadowDistance;
-        f32[57] = heightmapShadowSoftness;
-        f32[58] = foliageSubCellColoration ? 1.0 : 0.0;
-        f32[59] = foliageSubCellSize;
+        f32[68] = lod0Quads;
+        f32[69] = receiveShadow ? 1.0 : 0.0;
+        f32[70] = castHeightmapShadow ? 1.0 : 0.0;
+        f32[71] = heightmapShadowSteps;
+        f32[72] = heightmapShadowDistance;
+        f32[73] = heightmapShadowSoftness;
+        f32[74] = foliageSubCellColoration ? 1.0 : 0.0;
+        f32[75] = foliageSubCellSize;
 
-        u32[60] = debugMode;
-        f32[61] = 0.0; // pad0 (256-byte alignment tail padding)
-        f32[62] = 0.0; // pad1
-        f32[63] = 0.0; // pad2
+        u32[76] = debugMode;
+        f32[77] = 0.0; // pad0 (16-byte alignment tail padding)
+        f32[78] = 0.0; // pad1
+        f32[79] = 0.0; // pad2
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,
@@ -472,7 +487,7 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
         const uniformByteLength = vertexShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
             || fragmentShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
-            || 208;
+            || 320;
         this.#landscapeUniformByteLength = uniformByteLength;
 
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({

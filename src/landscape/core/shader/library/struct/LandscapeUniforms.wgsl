@@ -12,6 +12,8 @@ struct LandscapeUniforms {
     lodMetric: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
+    lodMorphStartDistances: array<vec4<f32>, 2>,
+    lodInvMorphRanges: array<vec4<f32>, 2>,
     lod0Quads: f32,
     receiveShadow: f32,
     heightmapShadow: f32,
@@ -21,7 +23,7 @@ struct LandscapeUniforms {
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
     debugMode: u32,
-    pad0: f32, // 256-byte alignment tail padding
+    pad0: f32, // 16-byte alignment tail padding (320 bytes total)
     pad1: f32,
     pad2: f32,
 };

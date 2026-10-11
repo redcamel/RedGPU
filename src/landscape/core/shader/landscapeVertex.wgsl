@@ -8,10 +8,13 @@
 @group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(4) var<uniform> landscapeUniforms: LandscapeUniforms;
 
-const LOD_GEOMORPH_START_RATIO: f32 = 0.7;
+fn getLodMorphStartDist(lod: u32) -> f32 {
+    let packedVec = landscapeUniforms.lodMorphStartDistances[lod / 4u];
+    return packedVec[lod % 4u];
+}
 
-fn getLodThresholdSq(lod: u32) -> f32 {
-    let packedVec = landscapeUniforms.lodDistancesSq[lod / 4u];
+fn getLodInvMorphRange(lod: u32) -> f32 {
+    let packedVec = landscapeUniforms.lodInvMorphRanges[lod / 4u];
     return packedVec[lod % 4u];
 }
 
@@ -93,21 +96,13 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     let metricFactor = select(1.0, landscapeUniforms.tanHalfFOV, isScreenSize);
     let effectiveDist = sqrt(distSq) * metricFactor;
 
-    let nextThresholdSq = getLodThresholdSq(lodLevel);
+    let morphStartDist = getLodMorphStartDist(lodLevel);
     var smoothMorph = 0.0;
 
-    if (nextThresholdSq < 1e14) {
-        let nextDist = sqrt(nextThresholdSq);
-        let prevDist = select(0.0, sqrt(getLodThresholdSq(lodLevel - 1u)), lodLevel > 0u);
-
-        let morphRange = max(1.0, nextDist - prevDist);
-        let morphStartDist = prevDist + morphRange * LOD_GEOMORPH_START_RATIO;
-        let morphEndDist = nextDist;
-
-        if (effectiveDist >= morphStartDist) {
-            let morphFactor = clamp((effectiveDist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
-            smoothMorph = smoothstep(0.0, 1.0, morphFactor);
-        }
+    if (effectiveDist >= morphStartDist) {
+        let invMorphRange = getLodInvMorphRange(lodLevel);
+        let morphFactor = saturate((effectiveDist - morphStartDist) * invMorphRange);
+        smoothMorph = smoothstep(0.0, 1.0, morphFactor);
     }
 
     var currentSegments: f32;
