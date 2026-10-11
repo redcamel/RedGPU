@@ -44,12 +44,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         vec2<i32>(step, step)
     );
 
+    var lastCoord = px;
+
     for (var i = 0u; i < 8u; i = i + 1u) {
         let sampleCoord = vec2<i32>(px) + offsets[i];
         let clampedCoord = vec2<u32>(
             clamp(u32(max(0, sampleCoord.x)), tileMinX, tileMaxX),
             clamp(u32(max(0, sampleCoord.y)), tileMinY, tileMaxY)
         );
+
+        if (clampedCoord.x == lastCoord.x && clampedCoord.y == lastCoord.y) {
+            continue;
+        }
+        lastCoord = clampedCoord;
 
         let neighbor = textureLoad(inputTexture, clampedCoord, 0);
         if (neighbor.a > 0.05) {
