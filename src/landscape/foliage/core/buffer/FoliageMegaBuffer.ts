@@ -44,7 +44,7 @@ export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
  * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
+class FoliageMegaBuffer extends AScatterMegaBuffer {
     #globalUniformBytes: number;
 
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
@@ -66,8 +66,8 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
     #cachedHZBSampler: GPUSampler | null = null;
 
     /**
-     * [KO] FoliageScatterMegaBuffer 인스턴스를 생성하고 내부 GPU 버퍼들을 초기화합니다.
-     * [EN] Creates a FoliageScatterMegaBuffer instance and initializes internal GPU buffers.
+     * [KO] FoliageMegaBuffer 인스턴스를 생성하고 내부 GPU 버퍼들을 초기화합니다.
+     * [EN] Creates a FoliageMegaBuffer instance and initializes internal GPU buffers.
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
      * [EN] RedGPU context instance
@@ -110,7 +110,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
             uniforms?.['globalUniforms']?.arrayBufferByteLength ??
             structs?.['FoliageCullingUniforms']?.arrayBufferByteLength;
         if (!globalUniformBytes) {
-            throw new Error('[FoliageScatterMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullWGSL.');
+            throw new Error('[FoliageMegaBuffer] Failed to reflect "FoliageCullingUniforms" struct size from foliageCullWGSL.');
         }
 
         this.#globalUniformBytes = globalUniformBytes;
@@ -181,7 +181,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
 
         const typeId = this.#allocatedTypes.length;
         if (typeId >= this.maxTypes) {
-            throw new Error(`[FoliageScatterMegaBuffer] Maximum supported FoliageTypes (${this.maxTypes}) exceeded.`);
+            throw new Error(`[FoliageMegaBuffer] Maximum supported FoliageTypes (${this.maxTypes}) exceeded.`);
         }
 
         const renderUnitCount = renderUnits.length;
@@ -477,7 +477,7 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         this.#cachedHZBSampler = targetHZBSampler;
 
         this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
-            label: 'FoliageScatterMegaBuffer_Culling_BindGroup',
+            label: 'FoliageMegaBuffer_Culling_BindGroup',
             layout,
             entries: [
                 {binding: 0, resource: {buffer: rawGPUBuffer}},
@@ -671,36 +671,36 @@ class FoliageScatterMegaBuffer extends AScatterMegaBuffer {
         );
 
         this.culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Culled_Main',
+            label: 'FoliageMegaBuffer_Culled_Main',
             size: culledByteSize,
             usage: VERTEX | STORAGE,
         });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',
+            label: 'FoliageMegaBuffer_Culled_ShadowMega',
             size: culledByteSize * SHADOW_CASCADE_COUNT,
             usage: VERTEX | STORAGE,
         });
 
         this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Indirect_ShadowMega',
+            label: 'FoliageMegaBuffer_Indirect_ShadowMega',
             size: indirectByteSize * SHADOW_CASCADE_COUNT,
             usage: INDIRECT | STORAGE | COPY_DST,
         });
 
         this.#shadowIndirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Indirect_ShadowTemplate',
+            label: 'FoliageMegaBuffer_Indirect_ShadowTemplate',
             size: indirectByteSize * SHADOW_CASCADE_COUNT,
             usage: COPY_SRC | COPY_DST,
         });
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_GlobalUniformBuffer',
+            label: 'FoliageMegaBuffer_GlobalUniformBuffer',
             size: this.#globalUniformBytes,
             usage: UNIFORM | COPY_DST,
         });
     }
 }
 
-Object.freeze(FoliageScatterMegaBuffer);
-export default FoliageScatterMegaBuffer;
+Object.freeze(FoliageMegaBuffer);
+export default FoliageMegaBuffer;

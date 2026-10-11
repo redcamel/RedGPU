@@ -7,7 +7,7 @@ import type RedGPUContext from "../../../../context/RedGPUContext";
 import foliageBakeWGSL from "./foliageBake.wgsl";
 import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
-import type FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
+import type FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import {FoliageSubCell} from "../Foliage";
@@ -71,7 +71,7 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
      * [EN] Executes GPU one-stop baking for a single SubCell.
      */
     dispatchBakeSubCell(
-        megaBuffer: FoliageScatterMegaBuffer,
+        megaBuffer: FoliageMegaBuffer,
         landscape: Landscape,
         foliage: Foliage,
         subCell: FoliageSubCell,

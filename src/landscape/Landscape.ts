@@ -22,7 +22,7 @@ import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
 import GrassManager from "./grass/GrassManager";
 import LandscapeGPUCuller from "./core/spatial/LandscapeGPUCuller";
-import DebuggerManager from "./debugger/DebuggerManager";
+import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 import {mat4} from 'gl-matrix';
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -108,7 +108,7 @@ class Landscape extends RedGPUObject {
 
     #foliageManager: FoliageManager;
     #grassManager: GrassManager;
-    #debuggerManager: DebuggerManager;
+    #debuggerManager: LandscapeDebuggerManager;
 
     #heightScale: number = 500.0;
     #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
@@ -211,7 +211,7 @@ class Landscape extends RedGPUObject {
             this.#grassManager?.rebakeAll();
             this.#foliageManager?.repopulateAll();
         });
-        this.#debuggerManager = new DebuggerManager(this, this.#tileStreamer, {
+        this.#debuggerManager = new LandscapeDebuggerManager(this, this.#tileStreamer, {
             onDebugPropertyChange: (key) => {
                 if (key === 'debugMode' || key === 'lodColoration') {
                     this.#updateLandscapeUniforms();
@@ -250,7 +250,7 @@ class Landscape extends RedGPUObject {
      * [KO] 지형의 시각화 디버깅(타일 바운드, 노멀, LOD 와이어프레임 등)을 총괄하는 디버거 매니저를 반환합니다.
      * [EN] Returns the debugger manager that coordinates visual debugging (tile bounds, normals, LOD wireframes, etc.).
      */
-    get debuggerManager(): DebuggerManager {
+    get debuggerManager(): LandscapeDebuggerManager {
         return this.#debuggerManager;
     }
 

@@ -23,10 +23,10 @@ export type DebuggerPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 export type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean | number) => void;
 
 /**
- * [KO] DebuggerManager 생성 및 초기 활성화 옵션입니다.
- * [EN] Initialization options for DebuggerManager.
+ * [KO] LandscapeDebuggerManager 생성 및 초기 활성화 옵션입니다.
+ * [EN] Initialization options for LandscapeDebuggerManager.
  */
-export interface DebuggerManagerOptions {
+export interface LandscapeDebuggerManagerOptions {
     /**
      * [KO] 공간 그리드 디버거 뷰어 활성화 여부
      * [EN] Whether to enable the spatial grid debugger viewer
@@ -94,7 +94,7 @@ export interface DebuggerManagerOptions {
  * debuggerManager.vbt = true;
  * ```
  */
-class DebuggerManager {
+class LandscapeDebuggerManager {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
 
@@ -118,14 +118,14 @@ class DebuggerManager {
     #onDebugPropertyChange?: DebuggerPropertyChangeHandler;
 
     /**
-     * [KO] DebuggerManager 생성자입니다.
-     * [EN] Constructor for DebuggerManager.
+     * [KO] LandscapeDebuggerManager 생성자입니다.
+     * [EN] Constructor for LandscapeDebuggerManager.
      *
      * @param landscape - [KO] 대상 Landscape 인스턴스 / [EN] Target Landscape instance
      * @param tileStreamer - [KO] 타일 스트리머 인스턴스 / [EN] Tile streamer instance
      * @param options - [KO] 초기 디버거 설정 옵션 / [EN] Initial debugger options
      */
-    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: DebuggerManagerOptions) {
+    constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: LandscapeDebuggerManagerOptions) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
         if (options) {
@@ -514,5 +514,5 @@ class DebuggerManager {
     }
 }
 
-Object.freeze(DebuggerManager);
-export default DebuggerManager;
+Object.freeze(LandscapeDebuggerManager);
+export default LandscapeDebuggerManager;

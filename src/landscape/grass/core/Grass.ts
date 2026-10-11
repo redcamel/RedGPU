@@ -12,7 +12,7 @@ import type Primitive from "../../../primitive/core/Primitive";
 import assembleScatterRenderUnits from "../../core/scatter/assembleScatterRenderUnits";
 import ScatterRenderUnit from "../../core/scatter/ScatterRenderUnit";
 import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";
-import type {GrassTypeAllocation} from "./buffer/GrassScatterMegaBuffer";
+import type {GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.

@@ -7,7 +7,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import grassBakeWGSL from "./grassBake.wgsl";
 import type Landscape from "../../../Landscape";
 import type Grass from "../Grass";
-import type GrassScatterMegaBuffer from "../buffer/GrassScatterMegaBuffer";
+import type GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 export const GRASS_CELL_SIZE: number = 16.0;
@@ -39,7 +39,7 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
      * [EN] Executes GPU Baking Compute Pass once for a specific grass type using 16m subcells.
      */
     dispatchBake(
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         landscape: Landscape,
         grass: Grass,
         centerX: number = 0,

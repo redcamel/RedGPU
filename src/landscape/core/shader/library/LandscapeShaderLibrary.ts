@@ -10,7 +10,7 @@ import GrassInstance_wgsl from './struct/GrassInstance.wgsl';
 import FoliageLODUniformInfo_wgsl from './struct/FoliageLODUniformInfo.wgsl';
 import FoliageTypeParam_wgsl from './struct/FoliageTypeParam.wgsl';
 import GrassTypeParam_wgsl from './struct/GrassTypeParam.wgsl';
-import GrassParams_wgsl from './struct/GrassParams.wgsl';
+import GrassRenderParams_wgsl from './struct/GrassRenderParams.wgsl';
 import LandscapeUniforms_wgsl from './struct/LandscapeUniforms.wgsl';
 import LandscapeTile_wgsl from './struct/LandscapeTile.wgsl';
 import GrassVertexOutput_wgsl from './struct/GrassVertexOutput.wgsl';
@@ -30,7 +30,7 @@ import transformGrassPosition_wgsl from './math/transformGrassPosition.wgsl';
 import sampleNormalizedLayerWeight_wgsl from './math/sampleNormalizedLayerWeight.wgsl';
 import checkAABBInHZB_wgsl from './math/checkAABBInHZB.wgsl';
 import perturbNormalOrthonormal_wgsl from './math/perturbNormalOrthonormal.wgsl';
-import sampleTerrainHeightAndNormal_wgsl from './math/sampleTerrainHeightAndNormal.wgsl';
+import sampleLandscapeHeightAndNormal_wgsl from './math/sampleLandscapeHeightAndNormal.wgsl';
 import WGSLParser from '../../../../resources/wgslParser/WGSLParser';
 
 export namespace LandscapeShaderLibrary {
@@ -114,10 +114,10 @@ export namespace LandscapeShaderLibrary {
          * [EN] Grass rendering parameters struct (96 bytes / 24 floats/uints)
          *
          * ```wgsl
-         * #redgpu_include landscape.struct.GrassParams;
+         * #redgpu_include landscape.struct.GrassRenderParams;
          * ```
          */
-        export const GrassParams = GrassParams_wgsl;
+        export const GrassRenderParams = GrassRenderParams_wgsl;
 
         /**
          * [KO] 지형 버텍스 및 프래그먼트 셰이더 메인 유니폼 버퍼 구조체 (26개 필드)
@@ -313,14 +313,14 @@ export namespace LandscapeShaderLibrary {
         export const perturbNormalOrthonormal = perturbNormalOrthonormal_wgsl;
 
         /**
-         * [KO] 지형 높이맵(VHT)으로부터 4점 바이리니어 샘플링을 수행하여 정밀 고도, 표면 법선 및 탄젠트 경사 제곱값을 일괄 계산하는 함수 (sampleTerrainHeightAndNormal)
-         * [EN] Function performing 4-point bilinear sampling on terrain heightmap (VHT) to compute elevation, surface normal, and slopeTan2 (sampleTerrainHeightAndNormal)
+         * [KO] 지형 높이맵(VHT)으로부터 4점 바이리니어 샘플링을 수행하여 정밀 고도, 표면 법선 및 탄젠트 경사 제곱값을 일괄 계산하는 함수 (sampleLandscapeHeightAndNormal)
+         * [EN] Function performing 4-point bilinear sampling on terrain heightmap (VHT) to compute elevation, surface normal, and slopeTan2 (sampleLandscapeHeightAndNormal)
          *
          * ```wgsl
-         * #redgpu_include landscape.math.sampleTerrainHeightAndNormal;
+         * #redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
          * ```
          */
-        export const sampleTerrainHeightAndNormal = sampleTerrainHeightAndNormal_wgsl;
+        export const sampleLandscapeHeightAndNormal = sampleLandscapeHeightAndNormal_wgsl;
     }
 
     /**

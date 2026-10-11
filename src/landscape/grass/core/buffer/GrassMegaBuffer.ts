@@ -51,15 +51,15 @@ export interface GrassTypeAllocation extends ScatterBaseSegmentAllocation {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class GrassScatterMegaBuffer extends AScatterMegaBuffer {
+class GrassMegaBuffer extends AScatterMegaBuffer {
     #allocations: Map<number, GrassTypeAllocation> = new Map();
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedGlobalUniformBuffer: GPUBuffer | null = null;
     #cachedCullBindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
-     * [KO] GrassScatterMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
-     * [EN] Creates a GrassScatterMegaBuffer instance and initializes initial VRAM buffers and template memory. (Do not instantiate directly; access via the `landscape.grassManager` property instead.)
+     * [KO] GrassMegaBuffer 인스턴스를 생성하고 초기 VRAM 버퍼 및 템플릿 메모리를 초기화합니다. (사용자가 직접 생성하지 마시고 `landscape.grassManager` 프로퍼티를 통해 접근하십시오.)
+     * [EN] Creates a GrassMegaBuffer instance and initializes initial VRAM buffers and template memory. (Do not instantiate directly; access via the `landscape.grassManager` property instead.)
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트 인스턴스
@@ -209,7 +209,6 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
             }
         }
     }
-
 
 
     /**
@@ -378,7 +377,7 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
 
         this.culledGPUBuffer.destroy();
         this.culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassScatterMegaBuffer_CulledInstances',
+            label: 'GrassMegaBuffer_CulledInstances',
             size: culledByteSize,
             usage: STORAGE,
         });
@@ -402,12 +401,12 @@ class GrassScatterMegaBuffer extends AScatterMegaBuffer {
         const culledByteSize = culledCapacity * strideBytes;
 
         this.culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'GrassScatterMegaBuffer_CulledInstances',
+            label: 'GrassMegaBuffer_CulledInstances',
             size: culledByteSize,
             usage: STORAGE,
         });
     }
 }
 
-Object.freeze(GrassScatterMegaBuffer);
-export default GrassScatterMegaBuffer;
+Object.freeze(GrassMegaBuffer);
+export default GrassMegaBuffer;

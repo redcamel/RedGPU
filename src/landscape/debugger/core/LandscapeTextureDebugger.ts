@@ -24,8 +24,8 @@ export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileS
  * [EN] Texture debugger projecting terrain GPU textures (VHT/VNT/VBT) onto on-screen canvases via WebGPU fullscreen quad render pipelines.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템(DebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템(LandscapeDebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (LandscapeDebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
 class LandscapeTextureDebugger extends ALandscapeDebugger {

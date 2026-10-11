@@ -1,7 +1,7 @@
 #redgpu_include landscape.struct.FoliageInstance;
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
-#redgpu_include landscape.math.sampleTerrainHeightAndNormal;
+#redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
 
 struct FoliageBakeUniforms {
     invWorldSizeX: f32,
@@ -131,7 +131,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             }
         }
 
-        let surface = sampleTerrainHeightAndNormal(
+        let surface = sampleLandscapeHeightAndNormal(
             u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
         );
 

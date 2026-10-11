@@ -5,7 +5,7 @@
  */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
-import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
+import landscapeCullSource from "../shader/landscapeCull.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 /**
@@ -13,12 +13,12 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../materi
  * [EN] GPU compute culling dispatcher performing frustum and HZB occlusion culling, selecting tile LODs, and updating indirect draw arguments.
  *
  * **[KO] 아키텍처 및 역할:**
- * - **GPU 주도형(GPU-driven) 지형 컬링**: 카메라 뷰 프러스텀 6개 평면과의 AABB 교차 검사 및 HZB(Hierarchical Z-Buffer) 깊이 피라미드 오클루전 테스트를 WebGPU 컴퓨트 셰이더(`landscapeCullCompute.wgsl`)에서 100% 병렬 처리합니다.
+ * - **GPU 주도형(GPU-driven) 지형 컬링**: 카메라 뷰 프러스텀 6개 평면과의 AABB 교차 검사 및 HZB(Hierarchical Z-Buffer) 깊이 피라미드 오클루전 테스트를 WebGPU 컴퓨트 셰이더(`landscapeCull.wgsl`)에서 100% 병렬 처리합니다.
  * - **동적 LOD 레벨 산정**: 카메라와의 유클리드 거리 또는 화면 점유율(Screen Size Metric)을 기반으로 각 타일의 최적 LOD 단계를 GPU 내에서 실시간 결정합니다.
  * - **간접 드로우 인자 버퍼 자동 갱신**: 컬링을 통과한 가시 타일들만 LOD별 간접 인덱스 드로우 버퍼(`indirectDrawBuffer`)의 `instanceCount`를 원자적(Atomic)으로 증가시켜 CPU 개입 없는 완벽한 제로 오버헤드 렌더링을 구현합니다.
  *
  * **[EN] Architecture & Role:**
- * - **GPU-Driven Terrain Culling**: Executes 6-plane frustum AABB intersection tests and hierarchical Z-buffer (HZB) occlusion culling entirely in parallel via WebGPU compute shaders (`landscapeCullCompute.wgsl`).
+ * - **GPU-Driven Terrain Culling**: Executes 6-plane frustum AABB intersection tests and hierarchical Z-buffer (HZB) occlusion culling entirely in parallel via WebGPU compute shaders (`landscapeCull.wgsl`).
  * - **Dynamic LOD Selection**: Computes the optimal LOD level for each tile on the GPU based on Euclidean distance or screen-space metrics.
  * - **Atomic Indirect Argument Updates**: Atomically increments `instanceCount` inside `indirectDrawBuffer` for visible tiles per LOD, enabling zero-CPU-overhead multi-LOD indirect rendering.
  *
@@ -198,12 +198,12 @@ class LandscapeGPUCuller extends RedGPUObject {
     #initGPUResources(): void {
         const {gpuDevice, resourceManager} = this;
         if (!gpuDevice) return;
-        const shaderInfo = resourceManager.wgslParser.parse('Landscape_Cull_ShaderModule', landscapeCullComputeSource);
+        const shaderInfo = resourceManager.wgslParser.parse('Landscape_Cull_ShaderModule', landscapeCullSource);
 
         let shaderModule = resourceManager.getGPUShaderModule('Landscape_Cull_ShaderModule');
         if (!shaderModule) {
             shaderModule = resourceManager.createGPUShaderModule('Landscape_Cull_ShaderModule', {
-                code: landscapeCullComputeSource
+                code: landscapeCullSource
             });
         }
 

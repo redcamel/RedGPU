@@ -5,7 +5,7 @@
  */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import grassCullWGSL from "./grassCull.wgsl";
-import type GrassScatterMegaBuffer from "../buffer/GrassScatterMegaBuffer";
+import type GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
@@ -45,7 +45,7 @@ class GrassCuller extends AScatterCuller {
      */
     dispatchPass(
         computePass: GPUComputePassEncoder,
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         renderViewStateData: RenderViewStateData
     ): void {
         const {totalAllocatedInstances} = megaBuffer;

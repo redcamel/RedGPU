@@ -8,7 +8,7 @@ import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import Grass from "../Grass";
-import GrassScatterMegaBuffer from "../buffer/GrassScatterMegaBuffer";
+import GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 import GrassSlotPooler from "../buffer/GrassSlotPooler";
 import ScatterRenderUnit from "../../../core/scatter/ScatterRenderUnit";
 import type Geometry from "../../../../geometry/Geometry";
@@ -39,7 +39,7 @@ interface MainBundleCacheEntry {
     systemBG: GPUBindGroup;
     sampleCount: number;
     grassCount: number;
-    megaBufferInstance: GrassScatterMegaBuffer;
+    megaBufferInstance: GrassMegaBuffer;
 }
 
 /**
@@ -74,7 +74,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     /** Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: `(typeId << 16) | subIndex`) */
     #materialBindGroupCache: Map<number, MaterialBindGroupCacheEntry> = new Map();
 
-    #lastShadowMegaBuffer: GrassScatterMegaBuffer | null = null;
+    #lastShadowMegaBuffer: GrassMegaBuffer | null = null;
     #lastShadowMaskLow: number = -1;
     #lastShadowMaskHigh: number = -1;
 
@@ -137,7 +137,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         view: View3D,
         passEncoder: GPURenderPassEncoder,
         grassList: Grass[],
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         slotPooler: GrassSlotPooler
     ): void {
         const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
@@ -202,7 +202,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         view: View3D,
         passEncoder: GPURenderPassEncoder,
         grassList: Grass[],
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         slotPooler: GrassSlotPooler
     ): void {
         const currentCascade = view.currentCascadeIndex ?? 0;
@@ -290,7 +290,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         sampleCount: number,
         systemBG: GPUBindGroup,
         grassList: Grass[],
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
         const {gpuDevice} = this;
@@ -385,7 +385,7 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         cascadeIndex: number,
         systemBG: GPUBindGroup,
         grassList: Grass[],
-        megaBuffer: GrassScatterMegaBuffer,
+        megaBuffer: GrassMegaBuffer,
         unifiedGroup1: GPUBindGroup
     ): GPURenderBundle | null {
         const {gpuDevice} = this;

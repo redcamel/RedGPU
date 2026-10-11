@@ -4,7 +4,7 @@
 #redgpu_include landscape.math.scatterColorPack;
 #redgpu_include landscape.math.scatterSpatialPrng;
 #redgpu_include landscape.math.sampleNormalizedLayerWeight;
-#redgpu_include landscape.math.sampleTerrainHeightAndNormal;
+#redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
 
 struct GrassBakeUniforms {
     centerCellX: i32,
@@ -106,7 +106,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let sScale = uniforms.minScaleS + splitMix32(&prngState) * uniforms.deltaScaleS;
         let hScale = uniforms.minScaleH + splitMix32(&prngState) * uniforms.deltaScaleH;
 
-        let surface = sampleTerrainHeightAndNormal(
+        let surface = sampleLandscapeHeightAndNormal(
             u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
         );
 

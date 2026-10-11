@@ -7,7 +7,7 @@ import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import Landscape from "../Landscape";
 import Grass, {GrassOptions} from "./core/Grass";
-import GrassScatterMegaBuffer from "./core/buffer/GrassScatterMegaBuffer";
+import GrassMegaBuffer from "./core/buffer/GrassMegaBuffer";
 import GrassRenderer from "./core/renderer/GrassRenderer";
 import GrassSlotPooler from "./core/buffer/GrassSlotPooler";
 import GrassInstanceBaker, {GRASS_CELL_SIZE} from "./core/baking/GrassInstanceBaker";
@@ -28,7 +28,7 @@ import {AScatterManager} from "../core/scatter";
  */
 class GrassManager extends AScatterManager<Grass, GrassOptions> {
 
-    #megaBuffer: GrassScatterMegaBuffer;
+    #megaBuffer: GrassMegaBuffer;
     #baker: GrassInstanceBaker;
     #culler: GrassCuller;
     #slotPooler: GrassSlotPooler;
@@ -58,7 +58,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         super(landscape);
 
         const {redGPUContext} = this;
-        this.#megaBuffer = new GrassScatterMegaBuffer(redGPUContext, 131072);
+        this.#megaBuffer = new GrassMegaBuffer(redGPUContext, 131072);
         this.#baker = new GrassInstanceBaker(redGPUContext);
         this.#culler = new GrassCuller(redGPUContext);
         this.#slotPooler = new GrassSlotPooler(redGPUContext);
@@ -367,7 +367,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#needsRebakeMask = 0;
         this.#slotPooler.clear();
         this.#megaBuffer.destroy();
-        this.#megaBuffer = new GrassScatterMegaBuffer(redGPUContext, 131072);
+        this.#megaBuffer = new GrassMegaBuffer(redGPUContext, 131072);
         this.#megaBuffer.onRecreated = () => {
             this.#megaBuffer.invalidateUnifiedCullingBindGroup();
             this.#renderer.markAllBundlesDirty();

@@ -2,7 +2,7 @@
  * [KO] 지형 높이맵(VHT)으로부터 4점 텍셀을 읽어 대각선 평면 분할 바이리니어 보간 높이 및 편미분 표면 법선(Normal)을 정밀 계산하는 공통 구조체입니다.
  * [EN] Common structure for bilinearly interpolated height and partial-derivative surface normal sampled from terrain heightmap (VHT).
  */
-struct TerrainSurfaceSample {
+struct LandscapeSurfaceSample {
     height: f32,
     normal: vec3<f32>,
     slopeTan2: f32,
@@ -15,11 +15,11 @@ struct TerrainSurfaceSample {
  * [EN] Bilinearly samples terrain heightmap from normalized UV, computing precise elevation, partial-derivative slopes, normalized surface normal, and slopeTan2.
  *
  * ```wgsl
- * #redgpu_include landscape.math.sampleTerrainHeightAndNormal;
- * let surface = sampleTerrainHeightAndNormal(u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ);
+ * #redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
+ * let surface = sampleLandscapeHeightAndNormal(u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ);
  * ```
  */
-fn sampleTerrainHeightAndNormal(
+fn sampleLandscapeHeightAndNormal(
     u: f32,
     v: f32,
     texDims: vec2<f32>,
@@ -28,7 +28,7 @@ fn sampleTerrainHeightAndNormal(
     heightScale: f32,
     texStepX: f32,
     texStepZ: f32
-) -> TerrainSurfaceSample {
+) -> LandscapeSurfaceSample {
     let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
     let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
 
@@ -65,7 +65,7 @@ fn sampleTerrainHeightAndNormal(
     let invLen = 1.0 / sqrt(slopeTan2 + 1.0);
     let normal = vec3<f32>(nx * invLen, invLen, nz * invLen);
 
-    var result: TerrainSurfaceSample;
+    var result: LandscapeSurfaceSample;
     result.height = terrainHeight;
     result.normal = normal;
     result.slopeTan2 = slopeTan2;

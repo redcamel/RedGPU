@@ -1,6 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include landscape.struct.GrassInstance;
-#redgpu_include landscape.struct.GrassParams;
+#redgpu_include landscape.struct.GrassRenderParams;
 #redgpu_include landscape.struct.GrassVertexOutput;
 #redgpu_include landscape.math.rotateVectorByQuat;
 #redgpu_include landscape.math.transformGrassPosition;
@@ -14,7 +14,7 @@ struct VertexInput {
 };
 
 @group(1) @binding(0) var<storage, read> culledInstances: array<GrassInstance>;
-@group(1) @binding(1) var<uniform> grassUniforms: GrassParams;
+@group(1) @binding(1) var<uniform> grassUniforms: GrassRenderParams;
 
 @vertex
 fn main(input: VertexInput) -> VertexOutput {

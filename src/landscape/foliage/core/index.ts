@@ -6,7 +6,7 @@
  * - `Foliage`: 단일 식생 타입 정의 및 서브셀별 인스턴스 라이프사이클 관리 엔티티
  * - `FoliageRenderUnit`: 식생 전용 통합 렌더 유닛 (SSOT, 메인 및 그림자 통합 지원)
  * - `FoliageSlotPooler`: 256-byte 정렬 Dynamic Offset UBO 슬롯 풀러
- * - `FoliageScatterMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
+ * - `FoliageMegaBuffer`: 대규모 인스턴스 트랜스폼 및 렌더 데이터를 통합 관리하는 GPU 버퍼
  * - `FoliageCuller`: HZB 오클루전 및 프러스텀 컬링 GPU 실행기
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 원거리 최적화를 위한 3D 옥타헤드럴 임포스터 베이커 및 셰이더
  * - `assembleFoliageRenderUnits`: 계층적 식생 3D 모델을 분석·결합하여 단일 렌더 유닛으로 조립하는 순수 함수
@@ -15,7 +15,7 @@
  * - `Foliage`: Entity defining a single foliage type and managing per-subcell instance lifecycles
  * - `FoliageRenderUnit`: Foliage-specific unified render unit (SSOT, supports main and shadow-merged)
  * - `FoliageSlotPooler`: 256-byte aligned Dynamic Offset UBO slot allocator
- * - `FoliageScatterMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
+ * - `FoliageMegaBuffer`: Unified GPU mega buffer managing large-scale instance transforms and draw data
  * - `FoliageCuller`: GPU culler for HZB occlusion and view frustum culling
  * - `bakeFoliageImpostor` / `OctahedralImpostorMaterial`: 3D octahedral impostor baker and shader for distant LODs
  * - `assembleFoliageRenderUnits`: Pure function assembling hierarchical foliage models into combined render units
@@ -26,7 +26,7 @@
 import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions, type FoliageSubCell} from "./Foliage";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 
-import FoliageScatterMegaBuffer from "./buffer/FoliageScatterMegaBuffer";
+import FoliageMegaBuffer from "./buffer/FoliageMegaBuffer";
 import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliagePipelineRegistry from "./pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./renderer/FoliageRenderer";
@@ -42,7 +42,7 @@ export {
     Foliage,
     FoliageRenderUnit,
     FoliageSlotPooler,
-    FoliageScatterMegaBuffer,
+    FoliageMegaBuffer,
     FoliagePipelineRegistry,
     FoliageRenderer,
     FoliageCuller,

@@ -19,8 +19,8 @@ const LOD_RGBA_STRINGS: readonly string[] = Object.freeze(
  * [EN] Real-time debugger visualizing tile load states and distance-based LOD colors across the spatial grid on a 2D canvas.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템(DebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (DebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템(LandscapeDebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system (LandscapeDebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
 class LandscapeSpatialGridDebugger extends ALandscapeDebugger {

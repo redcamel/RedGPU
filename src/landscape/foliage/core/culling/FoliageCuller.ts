@@ -10,7 +10,7 @@ import type RenderViewStateData from "../../../../display/view/core/RenderViewSt
 import type PerspectiveCamera from "../../../../camera/camera/PerspectiveCamera";
 import foliageCullWGSL from "./foliageCull.wgsl";
 import AScatterCuller from "../../../core/scatter/AScatterCuller";
-import FoliageScatterMegaBuffer from "../buffer/FoliageScatterMegaBuffer";
+import FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 import FoliageInstanceBaker from "../baking/FoliageInstanceBaker";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
@@ -25,7 +25,7 @@ import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_EN
  */
 class FoliageCuller extends AScatterCuller {
     #tempPVMatrix: mat4 = mat4.create();
-    #megaBuffer: FoliageScatterMegaBuffer | null = null;
+    #megaBuffer: FoliageMegaBuffer | null = null;
     #baker: FoliageInstanceBaker;
     #lastHZBTextureView: GPUTextureView | null = null;
     #lastHZBSampler: GPUSampler | null = null;
@@ -43,7 +43,7 @@ class FoliageCuller extends AScatterCuller {
      * [KO] 식생 메가 버퍼 (선택사항)
      * [EN] Foliage mega buffer (optional)
      */
-    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageScatterMegaBuffer | null) {
+    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null) {
         super(redGPUContext);
         this.#megaBuffer = megaBuffer ?? null;
         this.#baker = new FoliageInstanceBaker(redGPUContext);

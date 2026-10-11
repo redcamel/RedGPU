@@ -1,5 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include landscape.struct.GrassParams;
+#redgpu_include landscape.struct.GrassRenderParams;
 #redgpu_include landscape.struct.GrassVertexOutput;
 #redgpu_include landscape.math.blendGrassGround;
 #redgpu_include systemStruct.OutputFragment;
@@ -7,7 +7,7 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
 
-@group(1) @binding(1) var<uniform> materialUniforms: GrassParams;
+@group(1) @binding(1) var<uniform> materialUniforms: GrassRenderParams;
 
 @group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
 @group(2) @binding(1) var baseColorSampler: sampler;

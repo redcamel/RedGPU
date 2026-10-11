@@ -12,7 +12,7 @@ import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCuller from "./core/culling/FoliageCuller";
 
-import FoliageScatterMegaBuffer from "./core/buffer/FoliageScatterMegaBuffer";
+import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
 import FoliageSlotPooler from "./core/buffer/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 
@@ -49,7 +49,7 @@ import {AScatterManager} from "../core/scatter";
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #slotPooler: FoliageSlotPooler;
 
-    #megaBuffer: FoliageScatterMegaBuffer;
+    #megaBuffer: FoliageMegaBuffer;
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
@@ -117,7 +117,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             ]
         });
 
-        this.#megaBuffer = new FoliageScatterMegaBuffer(redGPUContext);
+        this.#megaBuffer = new FoliageMegaBuffer(redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(redGPUContext);
         this.#renderer = new FoliageRenderer(
             redGPUContext,

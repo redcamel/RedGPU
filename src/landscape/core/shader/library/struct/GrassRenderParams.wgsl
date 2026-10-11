@@ -1,4 +1,4 @@
-struct GrassParams {
+struct GrassRenderParams {
     cullingDistance: f32,
     fadeStartDistance: f32,
     meshHeight: f32,

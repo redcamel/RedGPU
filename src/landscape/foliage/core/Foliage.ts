@@ -8,7 +8,7 @@ import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
 import assembleFoliageRenderUnits from "./assembleFoliageRenderUnits";
 import FoliageRenderUnit from "./FoliageRenderUnit";
-import FoliageScatterMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageScatterMegaBuffer";
+import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuffer";
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
 import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
@@ -344,7 +344,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #lodInfoList: FoliageLODInfo[] = [];
     #lodInfoListWithoutImpostor: FoliageLODInfo[] | null = null;
 
-    #megaBuffer: FoliageScatterMegaBuffer | null = null;
+    #megaBuffer: FoliageMegaBuffer | null = null;
 
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
@@ -398,7 +398,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
-        megaBuffer?: FoliageScatterMegaBuffer | null,
+        megaBuffer?: FoliageMegaBuffer | null,
         baker?: FoliageInstanceBaker | null,
         slotPooler?: FoliageSlotPooler | null,
         landscape?: Landscape | null
@@ -678,7 +678,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [KO] 인스턴스 데이터 및 간접 드로우 버퍼를 관리하는 연결된 메가버퍼를 반환합니다.
      * [EN] Returns the associated mega-buffer managing instance data and indirect draw buffers.
      */
-    get megaBuffer(): FoliageScatterMegaBuffer | null {
+    get megaBuffer(): FoliageMegaBuffer | null {
         return this.#megaBuffer;
     }
 
@@ -1437,7 +1437,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
+    #mountSubCell(subCell: FoliageSubCell, megaBuffer: FoliageMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         if (subCell.isMounted) return;
         const {instanceCount: count} = subCell;
         const {instanceCount: currentActive, maxInstances, rawBaseOffset} = allocation;
@@ -1465,7 +1465,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         allocation.instanceCount = currentActive + count;
     }
 
-    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageScatterMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
+    #unmountSubCellAt(mountedIndex: number, megaBuffer: FoliageMegaBuffer, allocation: FoliageTypeAllocation, subCellSize: number): void {
         const mounted = this.#mountedSubCells;
         const targetSubCell = mounted[mountedIndex];
         const {mountedSlotIndex, instanceCount} = targetSubCell;

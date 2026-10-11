@@ -1,4 +1,4 @@
-#redgpu_include landscape.struct.GrassParams;
+#redgpu_include landscape.struct.GrassRenderParams;
 
 struct ShadowVertexOutput {
     @builtin(position) clipPos: vec4<f32>,
@@ -6,7 +6,7 @@ struct ShadowVertexOutput {
     @location(1) alphaFade: f32,
 };
 
-@group(1) @binding(1) var<uniform> materialUniforms: GrassParams;
+@group(1) @binding(1) var<uniform> materialUniforms: GrassRenderParams;
 
 @group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
 @group(2) @binding(1) var baseColorSampler: sampler;
