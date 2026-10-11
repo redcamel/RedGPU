@@ -188,7 +188,7 @@ class LandscapeSpatialGrid {
         this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
         this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
         this.#updateTuples();
-        this.clearTiles();
+        this.#flatCells.length = 0;
     }
 
     /**
@@ -217,14 +217,6 @@ class LandscapeSpatialGrid {
                 index++;
             }
         }
-    }
-
-    /**
-     * [KO] 등록된 모든 타일 컴포넌트 목록을 초기화합니다.
-     * [EN] Clears all registered tile components.
-     */
-    clearTiles(): void {
-        this.#flatCells.length = 0;
     }
 
     #updateTuples(): void {
