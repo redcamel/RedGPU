@@ -24,6 +24,7 @@ struct InputData {
     @location(5) instanceColor: vec4<f32>,
     @location(6) @interpolate(flat) lodLevel: f32,
     @location(7) @interpolate(flat) receiveShadow: f32,
+    @location(8) viewDepth: f32,
 };
 
 struct MaterialUniforms {
@@ -728,7 +729,8 @@ fn main(inputData: InputData) -> OutputFragment {
                 directionalShadowMapSampler,
                 input_vertexPosition,
                 baseNormal,
-                L
+                L,
+                inputData.viewDepth
             );
             csmVisibility = mix(1.0 - shadowStrength, 1.0, rawVisibility);
         }

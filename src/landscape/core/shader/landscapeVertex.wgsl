@@ -50,6 +50,7 @@ struct OutputData {
     @location(5) instanceColor: vec4<f32>,
     @location(6) @interpolate(flat) lodLevel: f32,
     @location(7) @interpolate(flat) receiveShadow: f32,
+    @location(8) viewDepth: f32,
 };
 
 struct ComputedTerrainVertex {
@@ -194,6 +195,7 @@ fn main(input: InputData) -> OutputData {
     let tileRadius = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ) * 0.75;
     let isWithinCSMRange = viewDepth < (maxCSMDist + tileRadius);
     output.receiveShadow = select(0.0, landscapeUniforms.receiveShadow, isWithinCSMRange);
+    output.viewDepth = viewDepth;
 
     return output;
 }
