@@ -708,21 +708,30 @@ fn main(inputData: InputData) -> OutputFragment {
         isDeepTerrainShadow = terrainSelfShadow <= 0.001;
     }
 
-    // 2. 외부 CSM 그림자 수신 (castHeightmapShadow와 완전 독립)
+    // 2. 외부 CSM 그림자 수신 최적화
     var csmVisibility = 1.0;
-    let enableCSM = inputData.receiveShadow > 0.5 && systemUniforms.directionalLightCount > 0u && geoNdotL > 0.001;
+    let shadowStrength = systemUniforms.shadow.directionalShadowStrength;
+    let mainLightIntensity = select(0.0, systemUniforms.directionalLights[0].intensity, systemUniforms.directionalLightCount > 0u);
+    let hasValidShadow = shadowStrength > 0.001 && mainLightIntensity > 0.0;
+
     let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
     let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
-    if (enableCSM && rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
-        let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            input_vertexPosition,
-            baseNormal,
-            L
-        );
-        csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+    // 🚀 [조기 탈락 2단계]: 섀도우 비활성화 또는 원경 타일(receiveShadow == 0) 즉시 스킵
+    if (hasValidShadow && inputData.receiveShadow > 0.5) {
+        // 🚀 [조기 탈락 3단계]: 완전 역광(산 뒤쪽 배면)은 0-Tap 즉시 완전 암부 확정
+        if (geoNdotL <= 0.0) {
+            csmVisibility = 1.0 - shadowStrength;
+        } else if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
+            let rawVisibility: f32 = getDirectionalShadowVisibilityLandscape(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                input_vertexPosition,
+                baseNormal,
+                L
+            );
+            csmVisibility = mix(1.0 - shadowStrength, 1.0, rawVisibility);
+        }
     }
 
     // 3. 최종 가시성 합성

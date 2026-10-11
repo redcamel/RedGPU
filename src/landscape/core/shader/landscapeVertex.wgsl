@@ -186,7 +186,14 @@ fn main(input: InputData) -> OutputData {
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
     output.instanceColor = computed.instanceColor;
     output.lodLevel = f32(computed.lodLevel);
-    output.receiveShadow = landscapeUniforms.receiveShadow;
+
+    // 🚀 [조기 탈락 1단계] CSM 최대 유효 거리 + 타일 반경 마진을 초과한 원경 버텍스는 그림자 수신을 0.0으로 사전 차단
+    let viewDepth = -viewPos.z;
+    let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+    let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+    let tileRadius = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ) * 0.75;
+    let isWithinCSMRange = viewDepth < (maxCSMDist + tileRadius);
+    output.receiveShadow = select(0.0, landscapeUniforms.receiveShadow, isWithinCSMRange);
 
     return output;
 }
