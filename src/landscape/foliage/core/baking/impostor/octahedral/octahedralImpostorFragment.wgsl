@@ -47,6 +47,9 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return saturate(vec2<f32>(u, v));
 }
 
+const INV_OCT_N: f32 = 0.125; // 1.0 / 8.0
+const BORDER_PADDING: f32 = 0.00390625; // 1.0 / 256.0
+
 fn sampleOctahedralAtlas(
     tex: texture_2d<f32>,
     smp: sampler,
@@ -58,9 +61,8 @@ fn sampleOctahedralAtlas(
 ) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let borderPadding = 1.0 / 256.0;
-    let safeSubUV = clamp(subUV, vec2<f32>(borderPadding), vec2<f32>(1.0 - borderPadding));
-    let atlasUV = (clampedGrid + safeSubUV) / n;
+    let safeSubUV = clamp(subUV, vec2<f32>(BORDER_PADDING), vec2<f32>(1.0 - BORDER_PADDING));
+    let atlasUV = (clampedGrid + safeSubUV) * INV_OCT_N;
 
     let sampled = textureSampleGrad(tex, smp, atlasUV, ddxAtlas, ddyAtlas);
     return select(vec4<f32>(0.0), sampled, isInside);
@@ -111,10 +113,12 @@ fn getDirectSpecularBRDF(
     return D * V * F;
 }
 
+const INV_151: f32 = 0.66225166;
+
 fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
     let energyBias = mix(0.0, 0.5, roughness);
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let energyFactor = mix(1.0, INV_151, roughness);
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
 
@@ -158,8 +162,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
-    let ddxAtlas = ddxUV / n;
-    let ddyAtlas = ddyUV / n;
+    let ddxAtlas = ddxUV * INV_OCT_N;
+    let ddyAtlas = ddyUV * INV_OCT_N;
 
     let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
     let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
@@ -186,7 +190,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
-    let sharpnessFactor = saturate((maxCornerWeight - 0.25) / 0.75);
+    let sharpnessFactor = saturate((maxCornerWeight - 0.25) * 1.33333333);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
     let ditherPx = u32(inputData.position.x) & 3u;
@@ -286,7 +290,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
-        let L = -normalize(light.direction);
+        let L = select(-normalize(light.direction), L0, i == 0u);
 
         let NdotL = max(dot(N, L), 0.0);
         let H = normalize(L + V);
@@ -313,7 +317,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let inScatter = vDotL * vDotL;
         let transmissionFactor = 0.45;
         let diffuseTransmission = albedo * (backWrap * 0.5 + inScatter * 0.5);
-        let totalDiffuse = diffuseReflection * (1.0 - transmissionFactor) + diffuseTransmission * transmissionFactor;
+        let totalDiffuse = mix(diffuseReflection, diffuseTransmission, transmissionFactor);
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;

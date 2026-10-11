@@ -16,7 +16,7 @@ struct LandscapeSurfaceSample {
  *
  * ```wgsl
  * #redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
- * let surface = sampleLandscapeHeightAndNormal(u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ);
+ * let surface = sampleLandscapeHeightAndNormal(u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, invTexStepX, invTexStepZ);
  * ```
  */
 fn sampleLandscapeHeightAndNormal(
@@ -26,8 +26,8 @@ fn sampleLandscapeHeightAndNormal(
     maxCoord: vec2<i32>,
     vhtTexture: texture_2d<f32>,
     heightScale: f32,
-    texStepX: f32,
-    texStepZ: f32
+    invTexStepX: f32,
+    invTexStepZ: f32
 ) -> LandscapeSurfaceSample {
     let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
     let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
@@ -53,12 +53,12 @@ fn sampleLandscapeHeightAndNormal(
 
     if (fracX + fracZ <= 1.0) {
         terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
-        nx = (h00 - h10) / texStepX;
-        nz = (h00 - h01) / texStepZ;
+        nx = (h00 - h10) * invTexStepX;
+        nz = (h00 - h01) * invTexStepZ;
     } else {
         terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
-        nx = (h01 - h11) / texStepX;
-        nz = (h10 - h11) / texStepZ;
+        nx = (h01 - h11) * invTexStepX;
+        nz = (h10 - h11) * invTexStepZ;
     }
 
     let slopeTan2 = nx * nx + nz * nz;

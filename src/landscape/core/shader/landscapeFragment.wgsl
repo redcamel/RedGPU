@@ -323,7 +323,8 @@ fn getDirectDiffuseBRDF(
     albedo: vec3<f32>
 ) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    const INV_151: f32 = 0.66225166; // 1.0 / 1.51
+    let energyFactor = mix(1.0, INV_151, roughness);
     let fd90Minus1 = (0.5 + 2.0 * (LdotH * LdotH)) * roughness - 1.0;
     let fl = saturate(1.0 - NdotL);
     let fl2 = fl * fl;
@@ -670,7 +671,7 @@ fn main(inputData: InputData) -> OutputFragment {
         );
 
         if (nearDetail.isValid) {
-            let blendFactor = clamp((nearDist - rawViewDist) / max(0.001, nearFade), 0.0, 1.0);
+            let blendFactor = saturate((nearDist - rawViewDist) / max(0.001, nearFade));
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
             albedo = mix(farAlbedo, nearDetail.albedo, smoothBlend);

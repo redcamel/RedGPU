@@ -9,13 +9,13 @@
 @group(1) @binding(4) var<uniform> landscapeUniforms: LandscapeUniforms;
 
 fn getLodMorphStartDist(lod: u32) -> f32 {
-    let packedVec = landscapeUniforms.lodMorphStartDistances[lod / 4u];
-    return packedVec[lod % 4u];
+    let packedVec = landscapeUniforms.lodMorphStartDistances[lod >> 2u];
+    return packedVec[lod & 3u];
 }
 
 fn getLodInvMorphRange(lod: u32) -> f32 {
-    let packedVec = landscapeUniforms.lodInvMorphRanges[lod / 4u];
-    return packedVec[lod % 4u];
+    let packedVec = landscapeUniforms.lodInvMorphRanges[lod >> 2u];
+    return packedVec[lod & 3u];
 }
 
 fn sampleHeightBilinear(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
@@ -73,13 +73,14 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
 
     let halfTileX = landscapeUniforms.tileSizeX * 0.5;
     let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
+    let invWorldSize = vec2<f32>(1.0 / landscapeUniforms.worldSizeX, 1.0 / landscapeUniforms.worldSizeZ);
 
     let initialWorldX = input.position.x + instanceData.centerWorldX;
     let initialWorldZ = input.position.y + instanceData.centerWorldZ;
 
     let initialGlobalUV = vec2<f32>(
-        (initialWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-        (initialWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+        (initialWorldX + landscapeUniforms.worldSizeX * 0.5) * invWorldSize.x,
+        (initialWorldZ + landscapeUniforms.worldSizeZ * 0.5) * invWorldSize.y
     );
 
     let texSize = landscapeUniforms.vhtTextureSize;
@@ -139,8 +140,8 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         morphedWorldZ = morphedLocalZ + instanceData.centerWorldZ;
 
         morphedGlobalUV = vec2<f32>(
-            (morphedWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-            (morphedWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+            (morphedWorldX + landscapeUniforms.worldSizeX * 0.5) * invWorldSize.x,
+            (morphedWorldZ + landscapeUniforms.worldSizeZ * 0.5) * invWorldSize.y
         );
 
         finalHeight = sampleHeightBilinear(morphedGlobalUV, texSize);

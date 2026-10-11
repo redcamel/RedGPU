@@ -223,10 +223,11 @@ fn main(
 
     if (canHaveShadow && distSq < maxShadowDistSq) {
         let shadowFadeRange = clamp(userShadowDist * 0.20, 10.0, 60.0);
+        let invShadowFadeRange = 1.0 / shadowFadeRange;
         let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);
         var shadowFade: f32 = 1.0;
         if (dist > shadowFadeStart) {
-            shadowFade = saturate((userShadowDist - dist) / shadowFadeRange);
+            shadowFade = saturate((userShadowDist - dist) * invShadowFadeRange);
         }
 
         if (shadowFade > 0.001) {

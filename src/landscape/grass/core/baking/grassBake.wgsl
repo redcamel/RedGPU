@@ -69,8 +69,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     var prngState = computeScatterGridSeed(cellCoordX, cellCoordZ, uniforms.typeId);
     let texDims = vec2<f32>(textureDimensions(vhtTexture, 0));
     let maxCoord = vec2<i32>(texDims) - vec2<i32>(1);
-    let texStepX = select(1.0, 1.0 / (uniforms.invWorldSizeX * texDims.x), uniforms.invWorldSizeX > 0.0);
-    let texStepZ = select(1.0, 1.0 / (uniforms.invWorldSizeZ * texDims.y), uniforms.invWorldSizeZ > 0.0);
+    let invTexStepX = uniforms.invWorldSizeX * texDims.x;
+    let invTexStepZ = uniforms.invWorldSizeZ * texDims.y;
 
     let baseTargetSlot = uniforms.rawBaseOffset + cellIdx * uniforms.instancesPerCell;
 
@@ -107,7 +107,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let hScale = uniforms.minScaleH + splitMix32(&prngState) * uniforms.deltaScaleH;
 
         let surface = sampleLandscapeHeightAndNormal(
-            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
+            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, invTexStepX, invTexStepZ
         );
 
         if (uniforms.hasSlopeFilter != 0u && (surface.slopeTan2 < uniforms.minSlopeTan2 || surface.slopeTan2 > uniforms.maxSlopeTan2)) {

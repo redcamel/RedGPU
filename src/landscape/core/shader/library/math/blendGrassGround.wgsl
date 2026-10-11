@@ -5,7 +5,7 @@ fn filterGrassAlpha(baseTex: vec4<f32>, alphaFade: f32) -> f32 {
     let rgbMax = max(baseTex.r, max(baseTex.g, baseTex.b));
     var sourceAlpha = baseTex.a;
     if (sourceAlpha > 0.85 && rgbMax < 0.15) {
-        sourceAlpha = saturate((rgbMax - 0.02) / 0.10);
+        sourceAlpha = saturate((rgbMax - 0.02) * 10.0);
     }
     return sourceAlpha * alphaFade;
 }

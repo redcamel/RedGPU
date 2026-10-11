@@ -70,13 +70,15 @@ fn computeFoliageGridSeed(gridX: i32, gridZ: i32, nameHash: u32) -> u32 {
     return select(seed, 0x9e3779b9u, seed == 0u);
 }
 
+const INV_2_POW_32: f32 = 2.3283064365386963e-10;
+
 fn xorShift32(seed: ptr<function, u32>) -> f32 {
     var s: u32 = *seed;
     s ^= s << 13u;
     s ^= s >> 17u;
     s ^= s << 5u;
     *seed = s;
-    return f32(s) / 4294967296.0;
+    return f32(s) * INV_2_POW_32;
 }
 
 @compute @workgroup_size(64, 1, 1)
@@ -97,8 +99,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let texDims = vec2<f32>(textureDimensions(vhtTexture, 0));
     let maxCoord = vec2<i32>(texDims) - vec2<i32>(1);
-    let texStepX = select(1.0, 1.0 / (uniforms.invWorldSizeX * texDims.x), uniforms.invWorldSizeX > 0.0);
-    let texStepZ = select(1.0, 1.0 / (uniforms.invWorldSizeZ * texDims.y), uniforms.invWorldSizeZ > 0.0);
+    let invTexStepX = uniforms.invWorldSizeX * texDims.x;
+    let invTexStepZ = uniforms.invWorldSizeZ * texDims.y;
 
     var generatedInGrid = 0u;
     var writtenCount = 0u;
@@ -132,7 +134,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         }
 
         let surface = sampleLandscapeHeightAndNormal(
-            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, texStepX, texStepZ
+            u, v, texDims, maxCoord, vhtTexture, uniforms.heightScale, invTexStepX, invTexStepZ
         );
 
         if (uniforms.hasSlopeFilter != 0u) {
@@ -174,7 +176,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
                 let invTilt = inverseSqrt(tiltLenSq);
                 let tx = (vx * invTilt) * uniforms.alignFactor;
                 let tz = (vz * invTilt) * uniforms.alignFactor;
-                let tw = (1.0 - uniforms.alignFactor) + (vw * invTilt) * uniforms.alignFactor;
+                let tw = mix(1.0, vw * invTilt, uniforms.alignFactor);
                 let alignLenSq = tx * tx + tz * tz + tw * tw;
                 let invAlign = select(1.0, inverseSqrt(alignLenSq), alignLenSq > 1e-8);
                 let ax = tx * invAlign;

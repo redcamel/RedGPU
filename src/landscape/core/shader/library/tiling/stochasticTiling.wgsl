@@ -55,12 +55,13 @@ fn getStochasticGridTri(uv: vec2<f32>) -> StochasticGridTri {
     let sw2 = w2 * w2 * w2;
     let sumW = sw0 + sw1 + sw2;
 
+    let invSumW = 1.0 / sumW;
     res.v0 = v0;
     res.v1 = v1;
     res.v2 = v2;
-    res.w0 = sw0 / sumW;
-    res.w1 = sw1 / sumW;
-    res.w2 = sw2 / sumW;
+    res.w0 = sw0 * invSumW;
+    res.w1 = sw1 * invSumW;
+    res.w2 = sw2 * invSumW;
     return res;
 }
 
