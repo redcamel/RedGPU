@@ -124,7 +124,7 @@ class Landscape extends RedGPUObject {
     #tileHeightBuffer: Float32Array = new Float32Array(2);
 
     #receiveShadow: boolean = true;
-    #castHeightmapShadow: boolean = true;
+    #castHeightmapShadow: boolean = false;
     #heightmapShadowSteps: number = 16;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;

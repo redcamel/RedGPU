@@ -674,59 +674,59 @@ fn main(inputData: InputData) -> OutputFragment {
     let NdotV = max(abs(dot(N, V)), 0.04);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
-    let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.directionalLightCount > 0u;
     var L = vec3<f32>(0.0, 1.0, 0.0);
     if (systemUniforms.directionalLightCount > 0u) {
         L = -normalize(systemUniforms.directionalLights[0].direction);
     }
     let geoNdotL = dot(baseNormal, L);
 
-    var visibility = 1.0;
     var terrainShadowVis = 1.0;
-    var csmVisibility = 1.0;
+    var isDeepTerrainShadow = false;
 
-    if (receiveShadowYn && geoNdotL > 0.001) {
-        var isDeepTerrainShadow = false;
-        let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
+    // 1. 지형 자체 높이맵 레이마칭 산그늘 (receiveShadow와 완전 독립)
+    let enableHeightmapShadow = landscapeInstanceUniforms.heightmapShadow > 0.5 && systemUniforms.directionalLightCount > 0u && L.y > 0.01 && geoNdotL > 0.001;
+    let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
 
-        if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01 && rawViewDist < shadowMaxDist * 1.5) {
-            let distRatio = saturate(rawViewDist / shadowMaxDist);
-            let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
+    if (enableHeightmapShadow && rawViewDist < shadowMaxDist * 1.5) {
+        let distRatio = saturate(rawViewDist / shadowMaxDist);
+        let dynamicSteps = max(4.0, landscapeInstanceUniforms.heightmapShadowSteps * (1.0 - distRatio * 0.5));
 
-            let terrainSelfShadow = computeLandscapeHeightmapShadow(
-                input_vertexPosition,
-                baseNormal,
-                L,
-                inputData.position.xy,
-                landscapeInstanceUniforms.worldSizeX,
-                landscapeInstanceUniforms.worldSizeZ,
-                landscapeInstanceUniforms.vhtTextureSize,
-                landscapeInstanceUniforms.heightScale,
-                shadowMaxDist,
-                dynamicSteps,
-                landscapeInstanceUniforms.heightmapShadowSoftness
-            );
-            terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
-            isDeepTerrainShadow = terrainSelfShadow <= 0.001;
-        }
-
-        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
-        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-
-        if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
-            let rawVisibility: f32 = getDirectionalShadowVisibility(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                input_vertexPosition,
-                baseNormal,
-                L
-            );
-            csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
-            visibility = min(csmVisibility, terrainShadowVis);
-        } else {
-            visibility = terrainShadowVis;
-        }
+        let terrainSelfShadow = computeLandscapeHeightmapShadow(
+            input_vertexPosition,
+            baseNormal,
+            L,
+            inputData.position.xy,
+            landscapeInstanceUniforms.worldSizeX,
+            landscapeInstanceUniforms.worldSizeZ,
+            landscapeInstanceUniforms.vhtTextureSize,
+            landscapeInstanceUniforms.heightScale,
+            shadowMaxDist,
+            dynamicSteps,
+            landscapeInstanceUniforms.heightmapShadowSoftness
+        );
+        terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+        isDeepTerrainShadow = terrainSelfShadow <= 0.001;
     }
+
+    // 2. 외부 CSM 그림자 수신 (castHeightmapShadow와 완전 독립)
+    var csmVisibility = 1.0;
+    let enableCSM = inputData.receiveShadow > 0.5 && systemUniforms.directionalLightCount > 0u && geoNdotL > 0.001;
+    let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+    let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+
+    if (enableCSM && rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
+        let rawVisibility: f32 = getDirectionalShadowVisibility(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            input_vertexPosition,
+            baseNormal,
+            L
+        );
+        csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+    }
+
+    // 3. 최종 가시성 합성
+    let visibility = min(csmVisibility, terrainShadowVis);
 
     let directLighting = getDirectPbrLighting(
         input_vertexPosition,
