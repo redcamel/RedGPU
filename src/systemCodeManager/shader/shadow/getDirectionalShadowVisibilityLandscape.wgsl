@@ -59,10 +59,8 @@ fn getDirectionalShadowVisibilityLandscape(
     // 4. 지형 특화 슬로프 바이어스 및 노멀 오프셋
     let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    // 🚀 [SFU 제거]: length()의 sqrt 초월함수 및 나눗셈을 제거하고 dot() + inverseSqrt() 1회로 분해
-    let orthoScaleSq = dot(lightVP[0].xyz, lightVP[0].xyz);
-    let invOrthoScale = inverseSqrt(max(orthoScaleSq, 1e-8));
-    let worldTexelSize = select(0.01, 2.0 * invOrthoScale, orthoScaleSq > 1e-8) * oneOverTextureSize;
+    // 🚀 [UBO 사전 계산]: CPU에서 사전 계산된 캐스케이드별 텍셀 크기를 직접 로드하여 매 픽셀 dot + inverseSqrt 완전 제거
+    let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
     let normalOffset = N * (1.2 + slopeBias * 2.2) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 

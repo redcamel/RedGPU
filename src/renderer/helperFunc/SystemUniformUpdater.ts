@@ -10,6 +10,7 @@ import SkyAtmosphere from "../../display/skyAtmosphere/SkyAtmosphere";
 import WindManager from "../../wind/WindManager";
 
 let temp3 = mat4.create()
+const tempCascadeTexelSizes = new Float32Array(4);
 
 /**
  * [KO] 시스템 유니폼 데이터를 업데이트하는 유틸리티 클래스입니다.
@@ -124,6 +125,22 @@ class SystemUniformUpdater {
         const directionalShadowManager = shadowManager.directionalShadowManager;
         const cascadePV = directionalShadowManager.cascadeProjectionViewMatrices;
         const cascadeSplits = directionalShadowManager.cascadeSplitDepths;
+        const depthTexSize = directionalShadowManager.shadowDepthTextureSize;
+        const oneOverTextureSize = 1.0 / Math.max(1, depthTexSize);
+
+        for (let i = 0; i < 4; i++) {
+            const mat = cascadePV[i];
+            if (mat) {
+                const m0 = mat[0];
+                const m1 = mat[1];
+                const m2 = mat[2];
+                const orthoScaleSq = m0 * m0 + m1 * m1 + m2 * m2;
+                const invOrthoScale = orthoScaleSq > 1e-8 ? 1.0 / Math.sqrt(orthoScaleSq) : 100.0;
+                tempCascadeTexelSizes[i] = (orthoScaleSq > 1e-8 ? 2.0 * invOrthoScale : 0.01) * oneOverTextureSize;
+            } else {
+                tempCascadeTexelSizes[i] = 0.01 * oneOverTextureSize;
+            }
+        }
 
         updateSystemUniformData(
             shadowMembers, uniformDataF32, uniformDataU32,
@@ -147,6 +164,10 @@ class SystemUniformUpdater {
                 {
                     key: 'cascadeSplitDepths',
                     value: cascadeSplits,
+                },
+                {
+                    key: 'cascadeTexelSizes',
+                    value: tempCascadeTexelSizes,
                 },
                 {
                     key: 'pcssLightSize',
