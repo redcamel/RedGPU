@@ -92,8 +92,8 @@ fn checkAABBInHZB(
         return true;
     }
 
-    let minUV = clamp(vec2<f32>(minNDC.x * 0.5 + 0.5, 1.0 - (maxNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
-    let maxUV = clamp(vec2<f32>(maxNDC.x * 0.5 + 0.5, 1.0 - (minNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
+    let minUV = saturate(vec2<f32>(minNDC.x * 0.5 + 0.5, 0.5 - maxNDC.y * 0.5));
+    let maxUV = saturate(vec2<f32>(maxNDC.x * 0.5 + 0.5, 0.5 - minNDC.y * 0.5));
 
     let hzbDims = vec2<f32>(textureDimensions(hzbTexture, 0));
     let aabbPixelSize = max((maxUV - minUV) * hzbDims, vec2<f32>(1.0));

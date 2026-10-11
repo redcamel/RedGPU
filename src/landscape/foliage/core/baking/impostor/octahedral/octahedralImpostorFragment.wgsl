@@ -41,9 +41,10 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     let d = normalize(vec3<f32>(dir.x, max(dir.y, 0.0), dir.z));
     let l1 = abs(d.x) + d.y + abs(d.z);
     let invL1 = select(1.0 / l1, 1.0, l1 < 0.0001);
-    let u = (d.x + d.z) * 0.5 * invL1 + 0.5;
-    let v = (d.z - d.x) * 0.5 * invL1 + 0.5;
-    return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
+    let halfInvL1 = 0.5 * invL1;
+    let u = (d.x + d.z) * halfInvL1 + 0.5;
+    let v = (d.z - d.x) * halfInvL1 + 0.5;
+    return saturate(vec2<f32>(u, v));
 }
 
 fn sampleOctahedralAtlas(
@@ -237,7 +238,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let V = normalize(toCamVec);
 
     var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
-    if (length(bakedN) < 0.1) {
+    if (dot(bakedN, bakedN) < 0.01) {
         bakedN = vec3<f32>(0.0, 1.0, 0.0);
     }
     var N = bakedN;
@@ -404,7 +405,7 @@ fn main(inputData: InputData) -> OutputFragment {
     finalRgb = tinted.rgb;
 
     let smoothness = 1.0 - roughness;
-    let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+    let smoothnessCurved = smoothstep(0.0, 1.0, smoothness);
     let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
 
     output.color = vec4<f32>(finalRgb, globalFragmentData.opacity);

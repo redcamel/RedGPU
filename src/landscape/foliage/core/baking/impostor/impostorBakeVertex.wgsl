@@ -35,11 +35,11 @@ fn main(
     out.vertexColor_0 = vertexColor_0;
 
     var n = normal;
-    if (length(n) < 0.001) { n = vec3<f32>(0.0, 1.0, 0.0); }
+    if (dot(n, n) < 1e-6) { n = vec3<f32>(0.0, 1.0, 0.0); }
     out.worldNormal = normalize(nMat * n);
 
     var t = tangent.xyz;
-    if (length(t) < 0.001) {
+    if (dot(t, t) < 1e-6) {
         t = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(n.x) > 0.9);
     }
     let worldT = normalize(nMat * t);

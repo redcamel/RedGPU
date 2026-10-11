@@ -30,10 +30,12 @@ fn calculateFoliageWindDisplacement(
         return vec3<f32>(0.0);
     }
 
-    let viewDist = distance(systemUniforms.camera.cameraPosition, instancePos);
-    if (viewDist > 500.0) {
+    let diff = systemUniforms.camera.cameraPosition - instancePos;
+    let distSq = dot(diff, diff);
+    if (distSq > 250000.0) {
         return vec3<f32>(0.0);
     }
+    let viewDist = sqrt(distSq);
 
     let treeH = max(2.0, renderUnitUniforms.treeHeight);
     let heightNorm = saturate(localPos.y / treeH);
@@ -60,7 +62,7 @@ fn calculateFoliageWindDisplacement(
     );
 
     let rawWindXZ = systemUniforms.wind.direction.xz;
-    let windDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), length(rawWindXZ) > 0.0001);
+    let windDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), dot(rawWindXZ, rawWindXZ) > 1e-8);
     let windSpeed = systemUniforms.wind.speed;
     let windFreq = systemUniforms.wind.frequency;
 

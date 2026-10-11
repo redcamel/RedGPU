@@ -533,7 +533,7 @@ fn computeLandscapeHeightmapShadow(
         if (diff <= 0.0) {
             return 0.0;
         } else {
-            let penumbra = clamp((diff * softness) / max(1.0, t), 0.0, 1.0);
+            let penumbra = saturate((diff * softness) / max(1.0, t));
             shadowFactor = min(shadowFactor, penumbra);
         }
 
@@ -830,7 +830,7 @@ fn main(inputData: InputData) -> OutputFragment {
             outColor = vec4<f32>(vec3<f32>(visibility), 1.0);
         }
         case 10u: {
-            let heightRatio = clamp(input_vertexPosition.y / max(1.0, landscapeInstanceUniforms.heightScale), 0.0, 1.0);
+            let heightRatio = saturate(input_vertexPosition.y / max(1.0, landscapeInstanceUniforms.heightScale));
             let c0 = vec3<f32>(0.0, 0.1, 0.8);
             let c1 = vec3<f32>(0.0, 0.8, 0.8);
             let c2 = vec3<f32>(0.1, 0.8, 0.1);

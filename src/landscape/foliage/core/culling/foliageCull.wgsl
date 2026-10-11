@@ -102,9 +102,6 @@ fn main(
     let subpixelLimit = scaledRadius * vpHeight;
     let isSubpixel = (distSq * (4.0 * effFov * effFov) > subpixelLimit * subpixelLimit);
 
-    let dist = sqrt(distSq);
-    let effectiveDist = dist * effFov;
-
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
     let userShadowDist = typeInfo.shadowCullDistance;
     let shadowMargin = scaledRadius * 4.0;
@@ -123,6 +120,9 @@ fn main(
     if (isSubpixel && !canHaveShadow) {
         return;
     }
+
+    let dist = sqrt(distSq);
+    let effectiveDist = dist * effFov;
 
     var inMainFrustum = false;
     let sphereCenter = vec3<f32>(instance.posX, realY, instance.posZ);

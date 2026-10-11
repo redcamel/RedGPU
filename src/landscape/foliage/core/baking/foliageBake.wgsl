@@ -169,14 +169,14 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             let vx = normalZ;
             let vz = -normalX;
             let vw = 1.0 + normalY;
-            let tiltLen = sqrt(vx * vx + vz * vz + vw * vw);
-            if (tiltLen > 0.0001) {
-                let invTilt = 1.0 / tiltLen;
+            let tiltLenSq = vx * vx + vz * vz + vw * vw;
+            if (tiltLenSq > 1e-8) {
+                let invTilt = inverseSqrt(tiltLenSq);
                 let tx = (vx * invTilt) * uniforms.alignFactor;
                 let tz = (vz * invTilt) * uniforms.alignFactor;
                 let tw = (1.0 - uniforms.alignFactor) + (vw * invTilt) * uniforms.alignFactor;
-                let alignLen = sqrt(tx * tx + tz * tz + tw * tw);
-                let invAlign = 1.0 / select(1.0, alignLen, alignLen > 0.0001);
+                let alignLenSq = tx * tx + tz * tz + tw * tw;
+                let invAlign = select(1.0, inverseSqrt(alignLenSq), alignLenSq > 1e-8);
                 let ax = tx * invAlign;
                 let az = tz * invAlign;
                 let aw = tw * invAlign;

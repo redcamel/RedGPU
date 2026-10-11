@@ -48,9 +48,13 @@ fn main(input: VertexOutput) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
+    var firstLightDir = vec3<f32>(0.0, 1.0, 0.0);
+    if (u_directionalLightCount > 0u) {
+        firstLightDir = -normalize(u_directionalLights[0].direction);
+    }
+
     var shadowFactor: f32 = 1.0;
     if (materialUniforms.receiveShadow != 0u && u_directionalLightCount > 0u) {
-        let firstLightDir = -normalize(u_directionalLights[0].direction);
         let rawVisibility = getDirectionalShadowVisibilityFoliage(
             directionalShadowMap,
             directionalShadowMapSampler,
@@ -64,7 +68,7 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
-        let L = -normalize(light.direction);
+        let L = select(-normalize(light.direction), firstLightDir, i == 0u);
         let currentShadow = select(1.0, shadowFactor, i == 0u);
         var dLight = light.color.rgb * light.intensity * preExposure * currentShadow;
 
