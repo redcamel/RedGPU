@@ -140,11 +140,10 @@
         let baseBlend = mix(convergenceBlend, 0.20, motionSoft);
 
         // =====================================================================
-        // 6. 공용 모듈 기하학적 차폐 검증 (Motion-Gated Geometric Occlusion Rejection)
+        // 6. 선형 깊이 델타 기반 차폐 검증 (Motion-Gated Geometric Occlusion Rejection)
         // =====================================================================
-        // 1) 3D 월드 역투영 기반 정밀 재투영 기대 깊이(Expected Depth) 오차 물리 검증
-        let currentUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize;
-        let depthConfidence = get_geometric_depth_confidence(currentUV, currentDepth, prevDepth);
+        // FSR 2 / UE5 표준: 무거운 3D 역투영 없이 선형 깊이 델타 직접 비교
+        let depthConfidence = get_geometric_depth_confidence(currentDepth, prevDepth);
 
         // 정적 상태에서는 물리적 차폐/언차폐가 발생하지 않으므로 깊이 기하학적 리젝션을 모션에 100% 연동
         // (원경 FP32 정밀도 오차 및 서브픽셀 잔디 잎으로 인한 정적 히스토리 오기각 완전 차단)
@@ -154,14 +153,6 @@
         // 모션 발생 시 루마 불일치 민감도 가중
         let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);
         blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
-
-        // =====================================================================
-        // 7. 정적 표면 동적 그림자 분리 (Decoupled Shadow Rejection)
-        // =====================================================================
-        let localContrast = max(stats.maxColor.x - stats.minColor.x, 0.001);
-        let flatSurfaceConfidence = 1.0 - smoothstep(0.10, 0.35, localContrast);
-        let shadowLumaRejection = smoothstep(0.20, 0.90, lumaWeight) * 0.65 * flatSurfaceConfidence;
-        blendFactor = max(blendFactor, shadowLumaRejection);
 
         // Phase 2: 반투명/파티클 영역 반응형 마스크 (Reactive Transparency Rejection)
         let reactiveTrans = get_reactive_transparency_weight(stats);

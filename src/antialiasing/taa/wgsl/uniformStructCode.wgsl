@@ -2,7 +2,6 @@
 #redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
-#redgpu_include math.reconstruct.getWorldPositionFromDepth
 
 /**
  * [KO] TAA 균일 버퍼(UBO) 구조체 (CPU 바인딩 1:1 매핑)
@@ -47,20 +46,16 @@ struct SampledColor {
 // =============================================================================
 
 /**
- * [KO] 3D 월드 역투영 기반 정밀 재투영 기대 깊이(Expected Depth) 오차 물리 검증
- * [EN] Physics-based expected reprojection depth error validation via 3D world position reconstruction
+ * [KO] 현재 프레임과 이전 프레임(재투영 위치) 간 선형 깊이 델타 기반 차폐 검증 (FSR 2 / UE5 표준)
+ * [EN] Linear depth delta-based occlusion rejection between current and reprojected previous frame
  */
-fn get_geometric_depth_confidence(currUV: vec2<f32>, currDepth: f32, prevDepth: f32) -> f32 {
-    let worldPos = getWorldPositionFromDepth(currUV, currDepth, systemUniforms.projection.inverseProjectionViewMatrix);
-    let prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
-    let expectedPrevDepth = prevClipPos.z / max(prevClipPos.w, 1e-5);
-
-    let expectedLinear = getLinearizeDepth(expectedPrevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-    let actualLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-    let depthDiff = abs(expectedLinear - actualLinear);
+fn get_geometric_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
+    let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+    let prevLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+    let depthDiff = abs(currLinear - prevLinear);
 
     // 카메라 거리에 비례하는 스케일 적응형 허용 오차
-    let tolerance = max(0.15, expectedLinear * 0.04);
+    let tolerance = max(0.15, currLinear * 0.04);
     return 1.0 - saturate((depthDiff - tolerance * 0.5) / (tolerance * 1.5));
 }
 
