@@ -48,42 +48,39 @@ struct WaterUniforms {
     deepColor: vec3<f32>,
     refractionStrength: f32,
 
-    windDirection: vec2<f32>,
     normalScale: f32,
     normalTiling: f32,
-
-    windSpeed: f32,
+    flowRateScale: f32,
     extinctionFactor: f32,
-    depthFadeDistance: f32,
-    debugMaxDepth: f32,
 
-    debugMode: u32,
     normalDetailScale: f32,
     normalDetailTiling: f32,
-    normalDetailWindSpeed: f32,
-
-    normalDetailWindDirection: vec2<f32>,
+    depthFadeDistance: f32,
     roughness: f32,
-    specularFactor: f32,
 
+    specularFactor: f32,
+    debugMaxDepth: f32,
+    debugMode: u32,
     invertNormalY: u32,
+
     invertNormalDetailY: u32,
     causticsStrength: f32,
     causticsScale: f32,
-
     causticsSpeed: f32,
+
     enableSSR: u32,
     ssrMaxDistance: f32,
     ssrStepCount: u32,
-
     ssrThickness: f32,
+
     turbidity: f32,
     rippleDomainSize: f32,
     rippleNormalStrength: f32,
+    pad0: f32,
 
     rippleDomainCenter: vec2<f32>,
-    padding01: f32,
-    padding02: f32,
+    pad1: f32,
+    pad2: f32,
 };
 
 fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
@@ -240,11 +237,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let timeSec = systemUniforms.time.time;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
-    let windDirLen1 = length(uniforms.windDirection);
-    let baseWindDir1 = select(vec2<f32>(1.0, 0.0), uniforms.windDirection / windDirLen1, windDirLen1 > 0.001);
-    let windDirLen2 = length(uniforms.normalDetailWindDirection);
-    let baseWindDir2 = select(vec2<f32>(-0.6, 0.8), uniforms.normalDetailWindDirection / windDirLen2, windDirLen2 > 0.001);
-    let waveUV1 = inputData.uv * uniforms.normalTiling + baseWindDir1 * (timeSec * uniforms.windSpeed);
+    let rawWindXZ = systemUniforms.wind.direction.xz;
+    let rawLenSq = dot(rawWindXZ, rawWindXZ);
+    let primaryWindDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), rawLenSq > 1e-8);
+    let secondaryWindDir = vec2<f32>(
+        primaryWindDir.x * 0.819152 - primaryWindDir.y * 0.573576,
+        primaryWindDir.x * 0.573576 + primaryWindDir.y * 0.819152
+    );
+
+    let effectiveWindSpeed = select(0.0, systemUniforms.wind.speed, systemUniforms.wind.enabled == 1u);
+    let baseScrollSpeed = timeSec * effectiveWindSpeed * uniforms.flowRateScale;
+    let waveUV1 = inputData.uv * uniforms.normalTiling + primaryWindDir * baseScrollSpeed;
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     var rawXY1 = rawSample1.xy * 2.0 - 1.0;
@@ -258,7 +261,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     #redgpu_if normalDetailTexture
     {
-        let waveUV2 = inputData.uv * uniforms.normalDetailTiling + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed);
+        let waveUV2 = inputData.uv * uniforms.normalDetailTiling + secondaryWindDir * (baseScrollSpeed * 1.6);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
@@ -384,7 +387,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let invCScale = 1.0 / max(0.01, uniforms.causticsScale);
         let cWorldScale = 0.35 * invCScale;
         let cSpeed = uniforms.causticsSpeed;
-        let cUV1 = groundSurfacePos * cWorldScale + baseWindDir1 * (timeSec * uniforms.windSpeed * cSpeed);
+        let cUV1 = groundSurfacePos * cWorldScale + primaryWindDir * (baseScrollSpeed * cSpeed);
 
         let causticMip = clamp((camDist - 30.0) / 40.0, 0.0, 1.2);
         let rawN1 = (textureSampleLevel(normalTexture, normalTextureSampler, cUV1, causticMip).rgb * 2.0 - 1.0).xy;
@@ -393,7 +396,7 @@ fn main(inputData: InputData) -> OutputFragment {
         var s2: vec2<f32>;
         #redgpu_if normalDetailTexture
         {
-            let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + baseWindDir2 * (timeSec * uniforms.normalDetailWindSpeed * cSpeed);
+            let cUV2 = groundSurfacePos * (cWorldScale * 1.8) + secondaryWindDir * (baseScrollSpeed * 1.6 * cSpeed);
             let rawN2 = (textureSampleLevel(normalDetailTexture, normalTextureSampler, cUV2, causticMip).rgb * 2.0 - 1.0).xy;
 
             let distortUV1 = cUV1 + rawN2 * 0.18;

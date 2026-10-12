@@ -5,7 +5,6 @@ import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
-import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import {
     WaterActiveMeshEntry,
@@ -21,7 +20,6 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 interface WaterLake {
     waveAmplitude: number;
     waveWavelength: number;
-    waveSpeed: number;
     maxPenetration: number;
 }
 
@@ -94,7 +92,6 @@ class WaterLake extends Mesh {
 
         this.waveAmplitude = 0.025;
         this.waveWavelength = 16.0;
-        this.waveSpeed = 1.0;
         this.maxPenetration = 0.35;
 
         this.depthStencilState.depthWriteEnabled = false;
@@ -126,7 +123,6 @@ class WaterLake extends Mesh {
     #syncVertexUniforms(): void {
         updateTargetUniform(this, 'waveAmplitude', this.waveAmplitude);
         updateTargetUniform(this, 'waveWavelength', this.waveWavelength);
-        updateTargetUniform(this, 'waveSpeed', this.waveSpeed);
     }
 
     get rippleWaveSpeed(): number {
@@ -305,10 +301,6 @@ definePositiveNumber(WaterLake, [
     {key: 'waveAmplitude', value: 0.025, min: 0},
     {key: 'waveWavelength', value: 16.0, min: 0.1},
     {key: 'maxPenetration', value: 0.35, min: 0.05},
-]);
-
-defineNumber(WaterLake, [
-    {key: 'waveSpeed', value: 1.0},
 ]);
 
 Object.freeze(WaterLake);

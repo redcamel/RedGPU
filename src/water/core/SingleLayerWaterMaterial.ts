@@ -28,10 +28,7 @@ interface SingleLayerWaterMaterial {
     normalDetailScale: number;
     normalTiling: number;
     normalDetailTiling: number;
-    windSpeed: number;
-    normalDetailWindSpeed: number;
-    windDirection: [number, number];
-    normalDetailWindDirection: [number, number];
+    flowRateScale: number;
     refractionStrength: number;
     extinctionFactor: number;
     opacity: number;
@@ -85,10 +82,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
         this.normalDetailScale = 0.5;
         this.normalTiling = 18.0;
         this.normalDetailTiling = 36.0;
-        this.windSpeed = 0.025;
-        this.normalDetailWindSpeed = 0.040;
-        this.windDirection = [1.0, 0.3];
-        this.normalDetailWindDirection = [-0.6, 0.8];
+        this.flowRateScale = 0.025;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
         this.roughness = 0.07;
@@ -128,8 +122,6 @@ defineSampler(SingleLayerWaterMaterial, [
 ]);
 
 defineVector2(SingleLayerWaterMaterial, [
-    {key: 'windDirection', value: [1.0, 0.3]},
-    {key: 'normalDetailWindDirection', value: [-0.6, 0.8]},
     {key: 'rippleDomainCenter', value: [0.0, 0.0]},
 ]);
 
@@ -140,8 +132,7 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'normalDetailScale', value: 0.5, min: 0.0, max: 1.0},
     {key: 'normalTiling', value: 18.0},
     {key: 'normalDetailTiling', value: 36.0},
-    {key: 'windSpeed', value: 0.025},
-    {key: 'normalDetailWindSpeed', value: 0.040},
+    {key: 'flowRateScale', value: 0.025},
     {key: 'extinctionFactor', value: 0.22},
     {key: 'depthFadeDistance', value: 0.8},
     {key: 'roughness', value: 0.07, min: 0, max: 1},

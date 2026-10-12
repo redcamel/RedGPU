@@ -491,21 +491,19 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             const swellFolder = pane.addFolder({title: 'Micro Swell', expanded: false});
             swellFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.005});
             swellFolder.addBinding(lake, 'waveWavelength', {min: 2.0, max: 60.0, step: 1.0});
-            swellFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 5.0, step: 0.1});
 
             const waveFolder = pane.addFolder({title: 'Waves & Refraction', expanded: true});
+            waveFolder.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
             waveFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.01});
 
             const layer1Folder = waveFolder.addFolder({title: 'Layer 1: Base Swell', expanded: false});
             layer1Folder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.0, max: 1.0, step: 0.01});
             layer1Folder.addBinding(lake.waterMaterial, 'normalTiling', {min: 1.0, max: 120.0, step: 1.0});
-            layer1Folder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.2, step: 0.005});
             layer1Folder.addBinding(lake.waterMaterial, 'invertNormalY');
 
             const layer2Folder = waveFolder.addFolder({title: 'Layer 2: Micro Ripple (RNM)', expanded: true});
             layer2Folder.addBinding(lake.waterMaterial, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.01});
             layer2Folder.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 1.0, max: 200.0, step: 1.0});
-            layer2Folder.addBinding(lake.waterMaterial, 'normalDetailWindSpeed', {min: 0.0, max: 0.2, step: 0.005});
             layer2Folder.addBinding(lake.waterMaterial, 'invertNormalDetailY');
 
             const colorFolder = pane.addFolder({title: 'Water Color & Optics', expanded: false});

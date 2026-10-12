@@ -136,7 +136,6 @@ RedGPU.init(
 
         lake.waveAmplitude = 0.045;
         lake.waveWavelength = 16.0;
-        lake.waveSpeed = 1.0;
         lake.interactionDomainSize = 35.0;
         lake.maxPenetration = 0.35;
 
@@ -151,7 +150,7 @@ RedGPU.init(
         lake.waterMaterial.depthFadeDistance = 1.0;
         lake.waterMaterial.roughness = 0.04;
         lake.waterMaterial.specularFactor = 1.0;
-        lake.waterMaterial.windSpeed = 0.025;
+        lake.waterMaterial.flowRateScale = 0.025;
         lake.waterMaterial.normalTiling = 18.0;
         lake.waterMaterial.normalDetailTiling = 36.0;
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
@@ -397,18 +396,17 @@ function renderTestPane(redGPUContext, lake, landscape, directionalLight, charac
             folderLake.addBinding(lake, 'y', {min: -1.0, max: 12.0, step: 0.1});
             folderLake.addBinding(lake, 'waveAmplitude', {min: 0, max: 0.15, step: 0.002});
             folderLake.addBinding(lake, 'waveWavelength', {min: 2, max: 40, step: 0.5});
-            folderLake.addBinding(lake, 'waveSpeed', {min: 0, max: 4, step: 0.1});
             folderLake.addBinding(lake, 'maxPenetration', {min: 0.05, max: 0.8, step: 0.02});
             folderLake.addBinding(lake, 'interactionDomainSize', {min: 5, max: 60, step: 1});
 
             // 3. Water Material (수면 광학)
             const folderMat = pane.addFolder({title: 'Water Material (수면 광학)', expanded: false});
+            folderMat.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
             folderMat.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
             folderMat.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
             folderMat.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.05});
             folderMat.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.2, max: 3.0, step: 0.1});
             folderMat.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.1, max: 3.0, step: 0.1});
-            folderMat.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.1, step: 0.005});
             folderMat.addBinding(lake.waterMaterial, 'normalTiling', {min: 2.0, max: 60.0, step: 1.0});
             folderMat.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 5.0, max: 100.0, step: 1.0});
 

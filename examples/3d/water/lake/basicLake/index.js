@@ -221,7 +221,6 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
         waterLevel: lake.waterLevel,
         waveAmplitude: lake.waveAmplitude,
         waveWavelength: lake.waveWavelength,
-        waveSpeed: lake.waveSpeed,
 
         // Material PBR 속성
         baseColor: mat.baseColor.hex,
@@ -253,11 +252,6 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
             lakeFolder.addBinding(params, 'waveWavelength', {min: 4.0, max: 30.0, step: 0.5})
                 .on('change', (ev) => {
                     lake.waveWavelength = ev.value;
-                });
-
-            lakeFolder.addBinding(params, 'waveSpeed', {min: 0.0, max: 4.0, step: 0.05})
-                .on('change', (ev) => {
-                    lake.waveSpeed = ev.value;
                 });
 
             // 2. Material PBR 재질 폴더

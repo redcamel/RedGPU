@@ -78,7 +78,6 @@ RedGPU.init(
                 baseColor: '#18d8b6',
                 deepColor: '#065279',
                 waveAmplitude: 0.02,
-                waveSpeed: 0.9,
                 roughness: 0.06,
                 opacity: 0.95,
                 refractionStrength: 0.85,
@@ -94,7 +93,6 @@ RedGPU.init(
                 baseColor: '#00a8ff',
                 deepColor: '#001845',
                 waveAmplitude: 0.025,
-                waveSpeed: 1.2,
                 roughness: 0.04,
                 opacity: 1.0,
                 refractionStrength: 0.7,
@@ -110,7 +108,6 @@ RedGPU.init(
                 baseColor: '#48dbfb',
                 deepColor: '#0abde3',
                 waveAmplitude: 0.015,
-                waveSpeed: 0.8,
                 roughness: 0.08,
                 opacity: 0.88,
                 refractionStrength: 1.1,
@@ -126,7 +123,6 @@ RedGPU.init(
                 baseColor: '#ff9f43',
                 deepColor: '#ee5253',
                 waveAmplitude: 0.022,
-                waveSpeed: 1.0,
                 roughness: 0.05,
                 opacity: 0.96,
                 refractionStrength: 0.9,
@@ -142,7 +138,6 @@ RedGPU.init(
                 baseColor: '#9b59b6',
                 deepColor: '#2c003e',
                 waveAmplitude: 0.018,
-                waveSpeed: 0.7,
                 roughness: 0.03,
                 opacity: 1.0,
                 refractionStrength: 1.0,
@@ -168,7 +163,6 @@ RedGPU.init(
 
             // 파도 물성
             lake.waveAmplitude = cfg.waveAmplitude;
-            lake.waveSpeed = cfg.waveSpeed;
 
             // 광학 및 재질 물성
             const mat = lake.waterMaterial;
@@ -518,7 +512,6 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
         name: lakeNames[0],
         waterLevel: lakes[0].waterLevel,
         waveAmplitude: lakes[0].waveAmplitude,
-        waveSpeed: lakes[0].waveSpeed,
         baseColor: lakes[0].waterMaterial.baseColor.hex,
         deepColor: lakes[0].waterMaterial.deepColor.hex,
         roughness: lakes[0].waterMaterial.roughness,
@@ -576,7 +569,6 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
                 currentParams.name = lakeNames[ev.value];
                 currentParams.waterLevel = lake.waterLevel;
                 currentParams.waveAmplitude = lake.waveAmplitude;
-                currentParams.waveSpeed = lake.waveSpeed;
                 currentParams.baseColor = mat.baseColor.hex;
                 currentParams.deepColor = mat.deepColor.hex;
                 currentParams.roughness = mat.roughness;
@@ -605,11 +597,6 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
             })
                 .on('change', (ev) => {
                     lakes[masterParams.activeLakeIndex].waveAmplitude = ev.value;
-                });
-
-            lakeFolder.addBinding(currentParams, 'waveSpeed', {min: 0.0, max: 3.0, step: 0.1, label: 'waveSpeed'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waveSpeed = ev.value;
                 });
 
             lakeFolder.addBinding(currentParams, 'baseColor', {label: 'baseColor'})

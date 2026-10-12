@@ -288,13 +288,12 @@ function renderTestPane({
 
             waterFolder.addBinding(lake, 'y', {min: 295.0, max: 310.0, step: 0.1});
             waterFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.5, step: 0.01});
-            waterFolder.addBinding(lake, 'waveSpeed', {min: 0.0, max: 5.0, step: 0.1});
             waterFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
+            waterFolder.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
             waterFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
             waterFolder.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.1});
             waterFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.1, max: 10.0, step: 0.1});
             waterFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
-            waterFolder.addBinding(lake.waterMaterial, 'windSpeed', {min: 0.0, max: 0.15, step: 0.005});
             waterFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.1, max: 3.0, step: 0.1});
 
             // 3. 지형 설정 폴더

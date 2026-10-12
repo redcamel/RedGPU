@@ -76,7 +76,7 @@ RedGPU.init(
         renderer.start(redGPUContext);
 
         // 8. Tweakpane 컨트롤 패널 바인딩
-        renderTestPane(redGPUContext, lake, directionalLight);
+        renderTestPane(redGPUContext, scene, lake, directionalLight);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -232,24 +232,18 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
 /**
  * [KO] Tweakpane GUI를 구성하여 파도 노멀, 바람 및 광학 속성을 실시간 제어합니다.
  */
-function renderTestPane(redGPUContext, lake, directionalLight) {
+function renderTestPane(redGPUContext, scene, lake, directionalLight) {
+    const wind = scene.windManager;
     const mat = lake.waterMaterial;
-
-    const radToDeg = (rad) => (rad * 180 / Math.PI + 360) % 360;
-    const degToRad = (deg) => deg * Math.PI / 180;
 
     const params = {
         // Normal Layer 1 (기본 파도)
         normalScale: mat.normalScale,
         normalTiling: mat.normalTiling,
-        windSpeed: mat.windSpeed,
-        windAngle: radToDeg(Math.atan2(mat.windDirection[1], mat.windDirection[0])),
 
         // Normal Layer 2 (잔물결 디테일)
         normalDetailScale: mat.normalDetailScale,
         normalDetailTiling: mat.normalDetailTiling,
-        normalDetailWindSpeed: mat.normalDetailWindSpeed,
-        normalDetailWindAngle: radToDeg(Math.atan2(mat.normalDetailWindDirection[1], mat.normalDetailWindDirection[0])),
 
         // 광학 및 굴절
         roughness: mat.roughness,
@@ -274,8 +268,17 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. Normal Layer 1 (기본 파도 노멀 및 풍향)
-            const layer1Folder = pane.addFolder({title: 'Wave Layer 1 (기본 파도)', expanded: true});
+            // 0. Global Wind & Flow (전역 바람 및 흐름)
+            const windFolder = pane.addFolder({title: 'Wind & Flow', expanded: true});
+
+            windFolder.addBinding(wind, 'enabled');
+            windFolder.addBinding(wind, 'speed', {min: 0.0, max: 5.0, step: 0.1});
+            windFolder.addBinding(wind, 'strength', {min: 0.0, max: 2.0, step: 0.05});
+            windFolder.addBinding(wind, 'directionAngle', {min: 0, max: 360, step: 1});
+            windFolder.addBinding(mat, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+
+            // 1. Normal Layer 1 (기본 파도 노멀)
+            const layer1Folder = pane.addFolder({title: 'Wave Layer 1 (기본 파도 노멀)', expanded: true});
 
             layer1Folder.addBinding(params, 'normalScale', {min: 0.0, max: 2.0, step: 0.05})
                 .on('change', (ev) => {
@@ -287,19 +290,8 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
                     mat.normalTiling = ev.value;
                 });
 
-            layer1Folder.addBinding(params, 'windSpeed', {min: 0.0, max: 0.15, step: 0.005})
-                .on('change', (ev) => {
-                    mat.windSpeed = ev.value;
-                });
-
-            layer1Folder.addBinding(params, 'windAngle', {min: 0, max: 360, step: 1})
-                .on('change', (ev) => {
-                    const r = degToRad(ev.value);
-                    mat.windDirection = [Math.cos(r), Math.sin(r)];
-                });
-
-            // 2. Normal Layer 2 (잔물결 디테일 노멀 및 풍향)
-            const layer2Folder = pane.addFolder({title: 'Wave Layer 2 (디테일 잔물결)', expanded: true});
+            // 2. Normal Layer 2 (잔물결 디테일 노멀)
+            const layer2Folder = pane.addFolder({title: 'Wave Layer 2 (디테일 잔물결 노멀)', expanded: true});
 
             layer2Folder.addBinding(params, 'normalDetailScale', {min: 0.0, max: 2.0, step: 0.05})
                 .on('change', (ev) => {
@@ -309,17 +301,6 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
             layer2Folder.addBinding(params, 'normalDetailTiling', {min: 5.0, max: 80.0, step: 1.0})
                 .on('change', (ev) => {
                     mat.normalDetailTiling = ev.value;
-                });
-
-            layer2Folder.addBinding(params, 'normalDetailWindSpeed', {min: 0.0, max: 0.20, step: 0.005})
-                .on('change', (ev) => {
-                    mat.normalDetailWindSpeed = ev.value;
-                });
-
-            layer2Folder.addBinding(params, 'normalDetailWindAngle', {min: 0, max: 360, step: 1})
-                .on('change', (ev) => {
-                    const r = degToRad(ev.value);
-                    mat.normalDetailWindDirection = [Math.cos(r), Math.sin(r)];
                 });
 
             // 3. Optics & Refraction (광학 / 굴절 / 반사)
