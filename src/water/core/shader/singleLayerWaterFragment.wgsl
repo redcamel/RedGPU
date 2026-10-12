@@ -4,7 +4,6 @@
 
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
-#redgpu_include math.getInterleavedGradientNoise;
 #redgpu_include math.reconstruct.getWorldPositionFromDepth;
 #redgpu_include math.getMotionVector;
 
@@ -95,8 +94,7 @@ fn worldToScreen(worldPos: vec3<f32>) -> vec2<f32> {
 fn calculateWaterSSR(
     startWorldPos: vec3<f32>,
     worldNormal: vec3<f32>,
-    R: vec3<f32>,
-    pixelCoord: vec2<i32>
+    R: vec3<f32>
 ) -> vec4<f32> {
     if (uniforms.enableSSR == 0u || R.y <= 0.001) {
         return vec4<f32>(0.0);
@@ -112,24 +110,20 @@ fn calculateWaterSSR(
     let thickness = max(0.05, uniforms.ssrThickness);
     let cameraWorldPos = systemUniforms.camera.cameraPosition;
 
-    let jitter = getInterleavedGradientNoise(vec2<f32>(pixelCoord));
-
-    var currentWorldPos = startWorldPos + worldNormal * 0.008 + R * (baseStepSize * jitter);
+    var currentWorldPos = startWorldPos + worldNormal * 0.02;
     var hitUV = vec2<f32>(0.0);
     var hitFound = false;
     var hitStep = 0u;
-    var refinementLevel = 0u;
-    let maxRefinementLevels = 4u;
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
         let progress = f32(i) / f32(maxSteps);
-        let stepScale = 0.25 + progress * 1.5;
+        let stepScale = 0.35 + progress * 1.3;
         let actualStep = baseStepSize * stepScale;
         currentWorldPos = currentWorldPos + R * actualStep;
 
         let travelVec = currentWorldPos - startWorldPos;
-        let travelDist = length(travelVec);
-        if (travelDist > maxDist) {
+        let travelDistSq = dot(travelVec, travelVec);
+        if (travelDistSq > maxDist * maxDist) {
             break;
         }
 
@@ -155,16 +149,42 @@ fn calculateWaterSSR(
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        let effectiveThickness = max(thickness, actualStep * 2.2);
+        let effectiveThickness = thickness + actualStep * 0.8;
 
         if (distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
-            if (refinementLevel < maxRefinementLevels) {
-                currentWorldPos = currentWorldPos - R * (actualStep * 0.5);
-                refinementLevel = refinementLevel + 1u;
-                continue;
+            // 정밀 이분 탐색 (Binary Search Refinement)
+            var minPos = currentWorldPos - R * actualStep;
+            var maxPos = currentWorldPos;
+            var bestUV = currentScreenUV;
+
+            for (var r = 0u; r < 5u; r = r + 1u) {
+                let midPos = (minPos + maxPos) * 0.5;
+                let midUV = worldToScreen(midPos);
+                if (midUV.x < 0.0 || midUV.x > 1.0 || midUV.y < 0.0 || midUV.y > 1.0) {
+                    break;
+                }
+
+                let midCoord = vec2<i32>(midUV * systemUniforms.resolution);
+                let midRawDepth = textureLoad(renderPath1DepthTexture, midCoord, 0);
+                if (midRawDepth >= 0.9999) {
+                    minPos = midPos;
+                    continue;
+                }
+
+                let midSampledPos = getWorldPositionFromDepth(midUV, midRawDepth, systemUniforms.projection.inverseProjectionViewMatrix);
+                let midRayDist = length(midPos - cameraWorldPos);
+                let midSurfDist = length(midSampledPos - cameraWorldPos);
+                let midDiff = midRayDist - midSurfDist;
+
+                if (midDiff > 0.0 && midDiff < effectiveThickness) {
+                    maxPos = midPos;
+                    bestUV = midUV;
+                } else {
+                    minPos = midPos;
+                }
             }
 
-            hitUV = currentScreenUV;
+            hitUV = bestUV;
             hitFound = true;
             hitStep = i;
             break;
@@ -176,14 +196,15 @@ fn calculateWaterSSR(
     }
 
     let edge = min(hitUV, vec2<f32>(1.0) - hitUV);
-    let edgeFade = smoothstep(0.0, 0.10, min(edge.x, edge.y));
+    let edgeFade = smoothstep(0.0, 0.08, min(edge.x, edge.y));
 
-    let finalTravelDist = length(currentWorldPos - startWorldPos);
+    let finalTravelDistSq = dot(currentWorldPos - startWorldPos, currentWorldPos - startWorldPos);
+    let finalTravelDist = sqrt(finalTravelDistSq);
     let distFade = 1.0 - smoothstep(maxDist * 0.70, maxDist * 0.95, finalTravelDist);
 
     let stepFade = smoothstep(0.0, 0.08, 1.0 - f32(hitStep) / f32(maxSteps));
 
-    let rayFade = clamp(R.y * 12.0, 0.0, 1.0);
+    let rayFade = saturate(R.y * 12.0);
 
     let totalWeight = edgeFade * distFade * stepFade * rayFade;
     if (totalWeight <= 0.001) {
@@ -491,7 +512,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let ambientSkyColor = systemUniforms.ambientLight.color * (min(100.0, systemUniforms.ambientLight.intensity) * preExposure * 0.75);
     let safeSkyReflection = max(rawSkyReflection, ambientSkyColor);
 
-    let ssrResult = calculateWaterSSR(worldPos, ssrWaveNormal, ssrR, pixelCoord);
+    let ssrResult = calculateWaterSSR(worldPos, ssrWaveNormal, ssrR);
     let blendedSkyReflection = mix(safeSkyReflection, ssrResult.rgb, ssrResult.a);
     let skyReflectionColor = blendedSkyReflection * uniforms.specularFactor;
 
