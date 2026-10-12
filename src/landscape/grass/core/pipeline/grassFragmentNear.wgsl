@@ -136,7 +136,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     }
 
     var shadowFactor: f32 = 1.0;
-    if (input.shadowData.x > 0.5) {
+    if (input.shadowData.x > 0.001) {
         let shadowInfo = systemUniforms.shadow;
         let viewDepth = input.shadowData.y;
         let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
@@ -161,7 +161,8 @@ fn main(input: VertexOutput) -> OutputFragment {
             let nDotL = dot(N, firstLightDir);
             let horizonFade = saturate(nDotL * 6.25 + 0.5);
             let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
-            shadowFactor = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
+            let pureShadow = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
+            shadowFactor = mix(1.0, pureShadow, input.shadowData.x);
         }
     }
 
