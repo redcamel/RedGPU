@@ -81,8 +81,8 @@ class TAA extends ASinglePassPostEffect {
      * [EN] Returns the sharpening strength of AMD FidelityFX CAS following TAA.
      *
      * @returns
-     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대, 기본값: 1.0)
-     * [EN] Sharpening strength (0.0: disabled, 1.0: max, default: 1.0)
+     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대, 기본값: 0.5)
+     * [EN] Sharpening strength (0.0: disabled, 1.0: max, default: 0.5)
      */
     get sharpness(): number {
         return this.#casPass.sharpness;

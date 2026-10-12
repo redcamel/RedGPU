@@ -96,10 +96,12 @@
     }
 
     // =========================================================================
-    // 4. 히스토리 좌표 역추적 (Dejittered History Reprojection)
+    // 4. 히스토리 좌표 역추적 (Modern Standard Dejittered History Reprojection)
+    // 현재 픽셀 위치에서 서브픽셀 지터를 상쇄(Dejitter)한 참값 UV에 모션 벡터 적용
+    // 히스토리 버퍼는 이미 지터가 제거된 Resolve 버퍼이므로 이전 지터 차감 금지 (FSR2/UE5 표준)
     // =========================================================================
-    let prevJitterOffsetPix = uniforms.prevJitterOffset * yFlipVec2;
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 + jitterOffsetPix - prevJitterOffsetPix) / screenSize - velocity;
+    let currentUnjitteredUV = (vec2<f32>(pixelCoord) + 0.5 - jitterOffsetPix) / screenSize;
+    let historyUV = currentUnjitteredUV - velocity;
 
     var finalRGBA: vec4<f32>;
 
@@ -126,17 +128,17 @@
         // Phase 2: 3x3 국소 서브픽셀 속도 분산(Subpixel Velocity Variance) 측정
         let velVariance = calculate_velocity_variance(gBufferMotionVector, closestCoord, velocity, screenSize);
 
-        // Phase 3: 3D Ray-Box 선분 교차 클리핑 (Color Desaturation 100% 제거)
-        let clippedYCoCg = clip_history_ray_box_ycocg(historyData.ycocg, stats, motionSoft, velVariance);
+        // Phase 3: Salvi 2016 표준 3D Ray-Box 선분 교차 클리핑 (Color Desaturation 100% 제거)
+        let clippedYCoCg = clip_history_ray_box_ycocg(historyData.ycocg, reconstructedCurrent.ycocg, stats, motionSoft, velVariance);
         let clippedAlpha = clamp(historyData.alpha, stats.minAlpha, stats.maxAlpha);
         let clippedHistoryRGB = YCoCgToRgb(clippedYCoCg);
 
         let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg.x);
 
         // Phase 2: 시간적 누적 수명(History Age) 적응형 수렴 블렌딩 (Temporal Convergence)
-        // UE5/FSR 2 표준: 정지 시 히스토리 96% 이상 안정적 누적 (blendFactor 0.04)
+        // 정지 시 새 프레임 선명 디테일 유입량 2배 확보 (0.04 -> 0.08)로 블러 영구 고착 차단
         let effectiveAge = min(uniforms.frameIndex, 32.0);
-        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.04);
+        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.08);
         let baseBlend = mix(convergenceBlend, 0.20, motionSoft);
 
         // =====================================================================

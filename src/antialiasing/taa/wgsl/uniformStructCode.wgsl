@@ -125,8 +125,8 @@ fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: v
         for (var x: i32 = -1; x <= 1; x++) {
             let delta = vec2<f32>(f32(x), f32(y)) + jitterOffsetPix;
             let distSq = dot(delta, delta);
-            // Karis 2014 / UE5 표준 지수 감쇄 가중치 (Exponential falloff weight: 중심 신호 43% 강화)
-            let w = exp(-3.29 * distSq);
+            // Karis / UE5 지수 감쇄 가중치 강화 (중심 참값 신호 비중 65% 이상으로 상향하여 원천 블러 억제)
+            let w = exp(-4.85 * distSq);
 
             let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
             sumRGB += sampleRGBA.rgb * w;
@@ -158,8 +158,10 @@ fn get_color_discrepancy_weight(stats: NeighborhoodStats, historyLuminance: f32)
 }
 
 /**
- * [KO] Catmull-Rom 5-Tap 고정밀 바이큐빅 안티 플리커 히스토리 샘플링
- * [EN] Catmull-Rom 5-tap high-precision bicubic anti-flicker history sampling
+ * [KO] Catmull-Rom 5-Tap 고정밀 바이큐빅 히스토리 샘플링 (현대 표준 규격)
+ * 바이큐빅 스플라인 무결성을 보존하여 고주파 디테일의 뭉개짐(블러)을 원천 차단합니다.
+ * [EN] Catmull-Rom 5-tap high-precision bicubic history sampling (Modern Standard)
+ * Preserves bicubic spline integrity to eliminate high-frequency blurring at the source.
  */
 fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
     let samplePos = uv * texSize;
@@ -194,8 +196,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     for (var i = 0; i < 5; i++) {
         let sampleRGBA = textureSampleLevel(tex, smp, coords[i], 0.0);
         let sampleRGB = max(sampleRGBA.rgb, vec3<f32>(0.0));
-        let sampleLum = dot(sampleRGB, vec3<f32>(0.25, 0.5, 0.25));
-        let w = weights[i] * (1.0 / (1.0 + sampleLum));
+        let w = weights[i];
 
         sumRGB += sampleRGB * w;
         sumAlpha += sampleRGBA.a * w;
@@ -263,12 +264,18 @@ fn inverse_tonemap(rgb: vec3<f32>) -> vec3<f32> {
 }
 
 /**
- * [KO] 3D 선분-AABB 교차 클리핑 (Ray-Box Segment Clipping in YCoCg)
- * 단순 축별 독립 clamp()의 탈색(Desaturation) 문제를 해결하고, 3D 색상 벡터 방향을 100% 보존합니다.
- * [EN] 3D Ray-Box Segment Clipping in YCoCg
- * Solves color desaturation of per-axis clamp() and preserves 3D color vector direction 100%.
+ * [KO] Salvi 2016 표준 3D 선분-AABB 교차 클리핑 (Ray-Box Segment Clipping in YCoCg)
+ * history -> current 방향의 참값 광선과 국소 AABB의 교차점을 정확히 산출하여 탈색 및 색상 편차를 100% 제거합니다.
+ * [EN] Salvi 2016 standard 3D Ray-Box Segment Clipping in YCoCg
+ * Precisely computes intersection of ray (history -> current) with local AABB, 100% eliminating desaturation and color shift.
  */
-fn clip_history_ray_box_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32, velVariance: f32) -> vec3<f32> {
+fn clip_history_ray_box_ycocg(
+    historyYCoCg: vec3<f32>,
+    currentYCoCg: vec3<f32>,
+    stats: NeighborhoodStats,
+    motion: f32,
+    velVariance: f32
+) -> vec3<f32> {
     let edgeTighten = smoothstep(0.1, 1.5, velVariance);
     let baseGamma = mix(2.25, 2.75, motion);
     let gamma = mix(baseGamma, 1.5, edgeTighten);
@@ -276,19 +283,26 @@ fn clip_history_ray_box_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats,
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
 
-    let boxCenter = (v_min + v_max) * 0.5;
-    let boxExtent = max((v_max - v_min) * 0.5, vec3<f32>(EPSILON));
+    // Salvi 2016 / Karis 표준 선분 교차 (history -> current)
+    let rayDir = currentYCoCg - historyYCoCg;
+    let invDir = 1.0 / select(rayDir, sign(rayDir) * 1e-5, abs(rayDir) < vec3<f32>(1e-5));
 
-    // 히스토리 기준 중심 상대 좌표
-    let p_clip = historyYCoCg - boxCenter;
-    let p_unit = p_clip / boxExtent;
-    let p_unit_abs = abs(p_unit);
-    let max_unit = max(max(p_unit_abs.x, p_unit_abs.y), p_unit_abs.z);
+    let t0 = (v_min - historyYCoCg) * invDir;
+    let t1 = (v_max - historyYCoCg) * invDir;
 
-    if (max_unit > 1.0) {
-        return boxCenter + p_clip / max_unit;
+    let tMin = min(t0, t1);
+    let tMax = max(t0, t1);
+
+    let tEnter = max(max(tMin.x, tMin.y), tMin.z);
+    let tExit = min(min(tMax.x, tMax.y), tMax.z);
+
+    // 히스토리가 박스 외부에 있어 선분 교차가 성립하는 경우 교차점으로 클리핑
+    if (tEnter <= tExit && tEnter >= 0.0 && tEnter <= 1.0) {
+        return historyYCoCg + rayDir * tEnter;
     }
-    return historyYCoCg;
+
+    // 박스 내부이면 history 그대로 유지, 완전히 벗어난 예외는 클램프로 안전 보호
+    return clamp(historyYCoCg, v_min, v_max);
 }
 
 

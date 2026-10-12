@@ -17,7 +17,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  * @category PostEffect
  */
 class TAACASPass extends ASinglePassPostEffect {
-    #sharpness: number = 1.0;
+    #sharpness: number = 0.5;
 
     /**
      * [KO] TAACASPass 인스턴스를 생성합니다.
@@ -46,7 +46,7 @@ class TAACASPass extends ASinglePassPostEffect {
      * [KO] 샤프닝 강도를 반환합니다.
      * [EN] Returns the sharpening strength.
      *
-     * @returns [KO] 샤프닝 강도 (0.0 ~ 1.0, 기본값: 1.0) [EN] Sharpening strength (0.0 ~ 1.0, default: 1.0)
+     * @returns [KO] 샤프닝 강도 (0.0 ~ 1.0, 기본값: 0.5) [EN] Sharpening strength (0.0 ~ 1.0, default: 0.5)
      */
     get sharpness(): number {
         return this.#sharpness;
