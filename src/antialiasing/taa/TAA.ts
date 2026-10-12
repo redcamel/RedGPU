@@ -40,7 +40,7 @@ class TAA extends ASinglePassPostEffect {
     /** [KO] 현재 프레임 누적 인덱스 [EN] Current frame accumulation index */
     #frameIndex: number = 0;
     /** [KO] 지터링 강도 [EN] Jitter strength */
-    #jitterStrength: number = 0.5;
+    #jitterStrength: number = 1.0;
     #prevJitterOffset: [number, number] = [0, 0];
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
     #videoMemorySize: number = 0;
@@ -110,8 +110,8 @@ class TAA extends ASinglePassPostEffect {
      * [EN] Returns the jitter strength.
      *
      * @returns
-     * [KO] 지터링 강도 (기본값: 0.5)
-     * [EN] Jitter strength (default: 0.5)
+     * [KO] 지터링 강도 (기본값: 1.0)
+     * [EN] Jitter strength (default: 1.0)
      */
     get jitterStrength(): number {
         return this.#jitterStrength;
