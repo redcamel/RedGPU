@@ -51,6 +51,7 @@ struct VertexOutput {
     @location(5) currentClipPos: vec4<f32>,
     @location(6) prevClipPos: vec4<f32>,
     @location(7) groundColor: vec4<f32>,
+    @location(8) @interpolate(flat) shadowData: vec2<f32>,
 };
 
 
@@ -180,6 +181,15 @@ fn main(input: VertexInput) -> VertexOutput {
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(xform.worldPos, 1.0);
 
     output.groundColor = unpack4x8unorm(instance.packedGroundColorAndType);
+
+    let viewDepth = -viewPos.z;
+    var canReceiveShadow = 0.0;
+    if (grassUniforms.receiveShadow != 0u && systemUniforms.directionalLightCount > 0u) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+        canReceiveShadow = select(0.0, 1.0, viewDepth < min(maxCSMDist, grassUniforms.shadowCullDistance));
+    }
+    output.shadowData = vec2<f32>(canReceiveShadow, viewDepth);
 
     return output;
 }

@@ -39,6 +39,7 @@ struct VertexOutput {
     @location(5) currentClipPos: vec4<f32>,
     @location(6) prevClipPos: vec4<f32>,
     @location(7) groundColor: vec4<f32>,
+    @location(8) @interpolate(flat) shadowData: vec2<f32>,
 };
 
 const SSS_DISTORTION: f32 = 0.35;
@@ -86,7 +87,7 @@ fn computeGrassContactAO(heightRatio: f32) -> f32 {
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
-#redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
+#redgpu_include shadow.getShadowCoord;
 
 @group(1) @binding(1) var<uniform> materialUniforms: GrassRenderParams;
 
@@ -135,16 +136,27 @@ fn main(input: VertexOutput) -> OutputFragment {
     }
 
     var shadowFactor: f32 = 1.0;
-    if (materialUniforms.receiveShadow != 0u && u_directionalLightCount > 0u) {
-        let rawVisibility = getDirectionalShadowVisibilityFoliage(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            input.worldPos,
-            N,
-            firstLightDir
-        );
-        let csmStrength = systemUniforms.shadow.directionalShadowStrength * materialUniforms.shadowStrength;
-        shadowFactor = mix(1.0 - csmStrength, 1.0, rawVisibility);
+    if (input.shadowData.x > 0.5) {
+        let shadowInfo = systemUniforms.shadow;
+        let viewDepth = input.shadowData.y;
+        let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
+        let cascadeIndex = select(0u, min(1u, cascadeCount - 1u), viewDepth > shadowInfo.cascadeSplitDepths[0]);
+        let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+        let shadowCoord = getShadowCoord(input.worldPos, lightVP);
+
+        let tUV = shadowCoord.xy;
+        if (shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0 && tUV.x >= 0.0 && tUV.x <= 1.0 && tUV.y >= 0.0 && tUV.y <= 1.0) {
+            let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.8) + 0.0002;
+            let rawVisibility = textureSampleCompareLevel(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                tUV,
+                cascadeIndex,
+                saturate(shadowCoord.z - cascadeBias)
+            );
+            let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
+            shadowFactor = mix(1.0 - csmStrength, 1.0, rawVisibility);
+        }
     }
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {

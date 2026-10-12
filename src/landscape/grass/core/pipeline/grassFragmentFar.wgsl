@@ -39,6 +39,7 @@ struct VertexOutput {
     @location(5) currentClipPos: vec4<f32>,
     @location(6) prevClipPos: vec4<f32>,
     @location(7) groundColor: vec4<f32>,
+    @location(8) @interpolate(flat) shadowData: vec2<f32>,
 };
 
 const SSS_DISTORTION: f32 = 0.35;
