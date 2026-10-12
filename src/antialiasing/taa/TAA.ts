@@ -54,7 +54,7 @@ class TAA extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {x: 8, y: 8, z: 1});
-        this.isLdr = true;
+        this.isLdr = false;
         this.init(
             redGPUContext,
             'POST_EFFECT_TAA',
@@ -94,6 +94,14 @@ class TAA extends ASinglePassPostEffect {
      */
     get frameIndex(): number {
         return this.#frameIndex;
+    }
+
+    /**
+     * [KO] TAA 누적 히스토리를 즉시 리셋합니다 (카메라 컷/씬 전환/텔레포트 시 호출).
+     * [EN] Immediately resets the TAA accumulation history (call during camera cut/scene change/teleport).
+     */
+    reset(): void {
+        this.#frameIndex = 0;
     }
     #targetAllocResult: IPostEffectResult = null;
 
@@ -209,6 +217,7 @@ class TAA extends ASinglePassPostEffect {
         }
         this.#prevInfo = null;
         this.#historyIndex = 0;
+        this.#frameIndex = 0;
     }
 
     #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;

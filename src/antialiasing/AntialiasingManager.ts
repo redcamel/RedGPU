@@ -167,6 +167,25 @@ class AntialiasingManager {
     }
 
     /**
+     * [KO] TAA 누적 히스토리를 즉시 초기화합니다 (카메라 컷/씬 전환/텔레포트 시 호출).
+     * [EN] Immediately resets TAA accumulation history (call during camera cut/scene change/teleport).
+     *
+     * * ### Example
+     * ```typescript
+     * // [KO] 카메라 텔레포트 또는 씬 전환 시 히스토리 초기화
+     * // [EN] Reset history on camera teleport or scene transition
+     * antialiasingManager.resetHistory(view);
+     * ```
+     *
+     * @param view -
+     * [KO] 초기화할 뷰 인스턴스
+     * [EN] View instance to reset
+     */
+    resetHistory(view?: { taa?: { reset(): void } }): void {
+        view?.taa?.reset();
+    }
+
+    /**
      * [KO] 모든 안티앨리어싱 설정을 초기화하는 공통 메서드입니다.
      * [EN] Common method that resets all anti-aliasing settings.
      */

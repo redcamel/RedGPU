@@ -435,8 +435,14 @@ class PostEffectManager {
             currentTextureView = this.#applySingleEffect(this.ssr, currentTextureView, width, height);
         }
 
-        // [KO] 2. 노출 및 사용자 이펙트 단계 (Smart Tone Mapping Transition)
-        // [EN] 2. Exposure and User Effects Phase (Smart Tone Mapping Transition)
+        // [KO] 2. 선형 HDR 단계: TAA (Temporal Anti-Aliasing)
+        // [EN] 2. Linear HDR Phase: TAA (Temporal Anti-Aliasing)
+        if (useTAA && this.#view.constructor.name === 'View3D') {
+            currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
+        }
+
+        // [KO] 3. 노출 및 사용자 이펙트 단계 (Smart Tone Mapping Transition)
+        // [EN] 3. Exposure and User Effects Phase (Smart Tone Mapping Transition)
         if (useAutoExposure) {
             this.autoExposure.render(currentTextureView);
         }
@@ -461,18 +467,10 @@ class PostEffectManager {
             currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
         }
 
-        // [KO] 3. LDR 단계: AA (FXAA / TAA)
-        // [EN] 3. LDR Phase: AA (FXAA / TAA)
-        if (useFXAA) {
+        // [KO] 4. LDR 단계: FXAA (TAA 미사용 시 또는 View2D 대체용)
+        // [EN] 4. LDR Phase: FXAA (When TAA unused or fallback for View2D)
+        if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
             currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
-        }
-
-        if (useTAA) {
-            if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
-                currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
-            } else {
-                currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
-            }
         }
 
         // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수

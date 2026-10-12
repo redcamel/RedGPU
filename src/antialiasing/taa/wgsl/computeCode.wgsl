@@ -3,53 +3,66 @@
     let screenSize = vec2<f32>(screenSizeU);
     let c_max = vec2<i32>(screenSizeU) - 1;
 
-    // 🚀 [무손실 3: LDS 협력 로딩 (Cooperative LDS Loading)]
-    // 8x8 타일 + 1픽셀 외곽 패딩 = 10x10 (100개 픽셀)을 64개 스레드가 협동 로드
-    // VRAM 텍스처 접근을 1,152회 ➡️ 200회로 82.6% 급감
+    // =========================================================================
+    // 1. LDS (Workgroup Shared Memory) 10x10 타일 협력 로딩 (Cooperative Loading)
+    // 8x8 타일 + 1픽셀 외곽 패딩(100개 픽셀)을 64개 스레드가 분할 로드 (VRAM 대역폭 82.6% 절감)
+    // =========================================================================
     let tileOrigin = vec2<i32>(workgroup_id.xy) * 8 - vec2<i32>(1, 1);
     let tid = i32(local_invocation_index);
 
-    // 1차 로드 (스레드 0~63 ➡️ 슬롯 0~63)
+    // 1차 분할 로드 (스레드 0~63 -> 슬롯 0~63)
     let lx0 = tid % 10;
     let ly0 = tid / 10;
     let coord0 = clamp(tileOrigin + vec2<i32>(lx0, ly0), vec2<i32>(0), c_max);
-    s_color[ly0][lx0] = textureLoad(sourceTexture, coord0, 0);
+    let rawColor0 = textureLoad(sourceTexture, coord0, 0);
+    // Phase 3: 고휘도 HDR 파이어플라이/링잉 방지를 위한 LDS 온칩 가역 톤매핑 압축 적재
+    s_color[ly0][lx0] = vec4<f32>(reversible_tonemap(rawColor0.rgb), rawColor0.a);
     s_depth[ly0][lx0] = textureLoad(depthTexture, coord0, 0);
 
-    // 2차 로드 (스레드 0~35 ➡️ 슬롯 64~99)
+    // 2차 분할 로드 (스레드 0~35 -> 슬롯 64~99)
     let tid2 = tid + 64;
     if (tid2 < 100) {
         let lx1 = tid2 % 10;
         let ly1 = tid2 / 10;
         let coord1 = clamp(tileOrigin + vec2<i32>(lx1, ly1), vec2<i32>(0), c_max);
-        s_color[ly1][lx1] = textureLoad(sourceTexture, coord1, 0);
+        let rawColor1 = textureLoad(sourceTexture, coord1, 0);
+        s_color[ly1][lx1] = vec4<f32>(reversible_tonemap(rawColor1.rgb), rawColor1.a);
         s_depth[ly1][lx1] = textureLoad(depthTexture, coord1, 0);
     }
 
-    // 워크그룹 전체 100개 픽셀 로딩 완료 동기화
+    // 온칩 캐시 적재 완료 동기화
     workgroupBarrier();
 
-    // 화면 경계 밖 스레드는 동기화 이후 안전하게 종료
+    // 화면 경계 밖 스레드 안전 탈출
     let pixelCoord = vec2<i32>(global_id.xy);
     if (any(pixelCoord >= vec2<i32>(screenSizeU))) { return; }
 
     let localCoord = vec2<i32>(local_id.xy) + vec2<i32>(1, 1);
     let yFlipVec2 = vec2<f32>(1.0, -1.0);
 
-    // [KO] 2. 온칩 LDS 주변 통계 산출 및 3x3 서브픽셀 신호 재구성 필터
-    // [EN] 2. On-chip LDS neighborhood stats and 3x3 subpixel signal reconstruction filter
+    // =========================================================================
+    // 2. 3x3 국소 영역 통계 및 온칩 서브픽셀 신호 재구성 (Reconstruction Filter)
+    // =========================================================================
     let stats = calculate_neighborhood_stats_ycocg_lds(localCoord);
 
-    // 🚀 [표준 TAA: 온칩 3x3 서브픽셀 신호 재구성 필터 (Reconstruction Filter)]
-    // 하드웨어 바이리니어 블러(흐림)를 100% 제거하고, 지터링된 3x3 샘플로부터 픽셀 중심 참값 신호 복원
+    // Karis 지수 재구성 필터를 통해 바이리니어 블러 없이 픽셀 중심 참값 신호 복원
     let jitterOffsetPix = uniforms.currJitterOffset * yFlipVec2;
     let reconstructedCurrent = reconstruct_current_color_ycocg_lds(localCoord, jitterOffsetPix);
     let currentRGB = reconstructedCurrent.rgb;
     let currentAlpha = reconstructedCurrent.alpha;
-    let currentYCoCg = reconstructedCurrent.ycocg;
-    
-    // 🚀 [무손실 3: LDS 온칩 3x3 뎁스 탐색 (On-Chip 3x3 Closest Depth Search)]
-    // VRAM 텍스처 접근 0회! 온칩 초고속 SRAM에서 9개 뎁스 비교
+    let currentRGBA = vec4<f32>(currentRGB, currentAlpha);
+
+    // 🌟 [필수 가드 1] 첫 프레임 및 카메라 컷(Camera Cut) 감지 시 히스토리 차단 (블랙 플래시/고스팅 방지)
+    if (uniforms.frameIndex <= 1.0) {
+        let finalHDR_RGB = inverse_tonemap(currentRGB);
+        textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, currentAlpha));
+        return;
+    }
+
+    // =========================================================================
+    // 3. 온칩 3x3 최근접 뎁스 탐색 (Foreground Motion Vector Dilation)
+    // 전경(카메라에 더 가까운 물체)의 모션 벡터를 채택하여 배경 모션의 윤곽선 침범 방지
+    // =========================================================================
     let currentDepth = s_depth[localCoord.y][localCoord.x];
     var closestDepth = currentDepth;
     var closestCoord = pixelCoord;
@@ -71,84 +84,95 @@
     if (d_tr < closestDepth) { closestDepth = d_tr; closestCoord = clamp(pixelCoord + vec2<i32>( 1, -1), vec2<i32>(0), c_max); }
     if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = clamp(pixelCoord + vec2<i32>(-1,  1), vec2<i32>(0), c_max); }
     if (d_br < closestDepth) { closestDepth = d_br; closestCoord = clamp(pixelCoord + vec2<i32>( 1,  1), vec2<i32>(0), c_max); }
-    
+
     let closestMotionData = textureLoad(gBufferMotionVector, closestCoord, 0);
     let velocity = closestMotionData.xy;
 
-    // 모션 벡터가 명시적으로 지터링 제외 상태인 경우 처리
-    let jitterDisabled = closestMotionData.z > 0.5;
-    if (jitterDisabled) {
-        textureStore(outputTexture, pixelCoord, vec4<f32>(currentRGB, currentAlpha));
+    // 🌟 [필수 가드 2] 지터링 제외 플래그 활성화 시 현재 신호 즉각 출력
+    if (closestMotionData.z > 0.5) {
+        let finalHDR_RGB = inverse_tonemap(currentRGB);
+        textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, currentAlpha));
         return;
     }
 
-    // [KO] 4. 히스토리(History) 좌표 계산 및 데이터 로드
-    // [EN] 4. Calculate History coordinates and load data
-    let historyUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2 + uniforms.prevJitterOffset * yFlipVec2) / screenSize - velocity;
+    // =========================================================================
+    // 4. 히스토리 좌표 역추적 (Dejittered History Reprojection)
+    // =========================================================================
+    let prevJitterOffsetPix = uniforms.prevJitterOffset * yFlipVec2;
+    let historyUV = (vec2<f32>(pixelCoord) + 0.5 + jitterOffsetPix - prevJitterOffsetPix) / screenSize - velocity;
 
-    var finalRGB: vec3<f32>;
-    var finalAlpha: f32;
+    var finalRGBA: vec4<f32>;
 
-    // 화면 경계 밖인 경우 누적 제외
     if (any(historyUV < vec2<f32>(0.0)) || any(historyUV > vec2<f32>(1.0))) {
-        finalRGB = currentRGB;
-        finalAlpha = currentAlpha;
+        // 화면 외곽에서 유입된 신호는 히스토리 누적 제외
+        finalRGBA = currentRGBA;
     } else {
-        // [KO] 고정밀 필터링(Catmull-Rom)을 통한 히스토리 샘플링
-        // [EN] History sampling via high-precision filtering (Catmull-Rom)
-        let prevDepth = fetch_depth_point(historyUV, screenSize);
-        let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
+        // =====================================================================
+        // 5. Catmull-Rom 5-Tap 히스토리 샘플링 및 Phase 3 3D Ray-Box 선분 교차 클리핑
+        // =====================================================================
+        let historyCoord = clamp(vec2<i32>(historyUV * screenSize), vec2<i32>(0), c_max);
+        let prevDepth = textureLoad(prevDepthTexture, historyCoord, 0);
+        let rawHistoryData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
+
+        // Phase 3: 히스토리 샘플을 가역 톤매핑 압축 색공간으로 정규화
+        var historyData: SampledColor;
+        historyData.rgb = reversible_tonemap(rawHistoryData.rgb);
+        historyData.ycocg = rgbToYCoCg(historyData.rgb);
+        historyData.alpha = rawHistoryData.alpha;
 
         let motionLen = length(velocity * screenSize);
         let motionSoft = smoothstep(0.0, 1.0, motionLen);
 
-        // [KO] 5. 히스토리 클램핑(Clipping/Clamping) 및 가중치 조절
-        // [EN] 5. History Clipping/Clamping and weight adjustment
-        // [KO] 잔상(Ghosting) 방지를 위해 히스토리 컬러를 현재 픽셀 주변의 통계 범위 내로 강제 제한합니다.
-        // [EN] Forces the history color within the statistical range of the current neighborhood to prevent ghosting.
-        let clippedYCoCg = clip_history_ycocg(historyData.ycocg, stats, motionSoft);
+        // Phase 2: 3x3 국소 서브픽셀 속도 분산(Subpixel Velocity Variance) 측정
+        let velVariance = calculate_velocity_variance(gBufferMotionVector, closestCoord, velocity, screenSize);
+
+        // Phase 3: 3D Ray-Box 선분 교차 클리핑 (Color Desaturation 100% 제거)
+        let clippedYCoCg = clip_history_ray_box_ycocg(historyData.ycocg, stats, motionSoft, velVariance);
         let clippedAlpha = clamp(historyData.alpha, stats.minAlpha, stats.maxAlpha);
-
         let clippedHistoryRGB = YCoCgToRgb(clippedYCoCg);
-        let lumaWeight = get_color_discrepancy_weight(stats, clippedHistoryRGB);
 
-        // [KO] 6. 최종 블렌딩 및 결과 저장
-        // [EN] 6. Final blending and store result
-        let baseBlend = mix(0.05, 0.25, motionSoft);
-        
-        // 🚀 [공용 모듈 1: 3D 역투영 기대 깊이(Expected Depth) 오차 물리 검증]
+        let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg.x);
+
+        // Phase 2: 시간적 누적 수명(History Age) 적응형 수렴 블렌딩 (Temporal Convergence)
+        let effectiveAge = min(uniforms.frameIndex, 32.0);
+        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.03);
+        let baseBlend = mix(convergenceBlend, 0.25, motionSoft);
+
+        // =====================================================================
+        // 6. 공용 모듈 듀얼 불연속성 검증 (Dual Discontinuity Rejection)
+        // =====================================================================
+        // 1) 3D 월드 역투영 기반 정밀 재투영 기대 깊이(Expected Depth) 오차 물리 검증
         let currentUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize;
         let depthConfidence = get_geometric_depth_confidence(currentUV, currentDepth, prevDepth);
 
-        // 🚀 [공용 모듈 2: G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별]
-        let historyCoord = clamp(vec2<i32>(historyUV * screenSize), vec2<i32>(0), c_max);
+        // 2) G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별
         let normalConfidence = get_normal_confidence(pixelCoord, historyCoord);
 
-        // 기하학적 복합 신뢰도 (깊이 불일치 또는 실루엣 에지 시 히스토리 즉각 리젝션)
+        // 기하학적 복합 신뢰도 (차폐/에지 발생 시 히스토리 즉각 리젝션)
         let geometricConfidence = depthConfidence * normalConfidence;
         var blendFactor = max(baseBlend, (1.0 - geometricConfidence) * 0.85);
 
-        // 모션이 있을 때의 루마 불일치 반응
+        // 모션 발생 시 루마 불일치 민감도 가중
         let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);
         blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
 
-        // 🌟 [표준 TAA: 정적 표면 위 동적 그림자/라이팅 고스팅 방어 (Decoupled Shadow Rejection)]
-        // 3x3 로컬 루마 대비(Local Contrast)를 측정하여,
-        // 잔디/나뭇잎/헤어 등 고주파 서브픽셀 영역(High Contrast)의 지터링 노이즈는 그림자로 오판하지 않도록 억제하고,
-        // 평평한 표면(Flat Surface, Low Contrast) 위를 지나는 동적 그림자만 정밀 감지하여 고스팅 제거
+        // =====================================================================
+        // 7. 정적 표면 동적 그림자 분리 (Decoupled Shadow Rejection)
+        // =====================================================================
         let localContrast = max(stats.maxColor.x - stats.minColor.x, 0.001);
         let flatSurfaceConfidence = 1.0 - smoothstep(0.10, 0.35, localContrast);
         let shadowLumaRejection = smoothstep(0.20, 0.90, lumaWeight) * 0.65 * flatSurfaceConfidence;
         blendFactor = max(blendFactor, shadowLumaRejection);
 
-        let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);
+        // Phase 2: 반투명/파티클 영역 반응형 마스크 (Reactive Transparency Rejection)
+        let reactiveTrans = get_reactive_transparency_weight(stats);
+        blendFactor = mix(blendFactor, 1.0, reactiveTrans);
+
         let clippedHistoryRGBA = vec4<f32>(clippedHistoryRGB, clippedAlpha);
-
-        let finalRGBA = mix(clippedHistoryRGBA, currentRGBA_final, blendFactor);
-
-        finalRGB = finalRGBA.rgb;
-        finalAlpha = finalRGBA.a;
+        finalRGBA = mix(clippedHistoryRGBA, currentRGBA, blendFactor);
     }
 
-    textureStore(outputTexture, pixelCoord, vec4<f32>(finalRGB, finalAlpha));
+    // Phase 3: 최종 출력 직전 가역 톤매핑 100% 무손실 HDR 역복원
+    let finalHDR_RGB = inverse_tonemap(finalRGBA.rgb);
+    textureStore(outputTexture, pixelCoord, vec4<f32>(finalHDR_RGB, finalRGBA.a));
 }
