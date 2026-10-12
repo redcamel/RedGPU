@@ -1,7 +1,107 @@
-#redgpu_include landscape.struct.FoliageInstance;
-#redgpu_include landscape.math.scatterColorPack;
-#redgpu_include landscape.math.sampleNormalizedLayerWeight;
-#redgpu_include landscape.math.sampleLandscapeHeightAndNormal;
+struct FoliageInstance {
+    posX: f32,
+    posY: f32,
+    posZ: f32,
+    scaleY: f32,
+    packedRotXY: u32,
+    packedRotZW: u32,
+    packedScaleXZ: u32,
+    packedGroundColorAndType: u32,
+};
+
+fn packGroundColorAndType(groundColor: vec3<f32>, typeId: u32) -> u32 {
+    let rgbPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0));
+    return insertBits(rgbPacked, typeId, 24u, 8u);
+}
+
+fn sampleNormalizedLayerWeight(
+    weightTexture: texture_2d<f32>,
+    landscapeSampler: sampler,
+    uv: vec2<f32>,
+    channelIndex: u32
+) -> f32 {
+    let weightSample = textureSampleLevel(weightTexture, landscapeSampler, uv, 0.0);
+    let isAlphaFull = weightSample.a >= 0.99;
+    let effectiveA = select(weightSample.a, saturate(1.0 - (weightSample.r + weightSample.g + weightSample.b)), isAlphaFull);
+    let effectiveTotalW = weightSample.r + weightSample.g + weightSample.b + effectiveA;
+
+    var rawW = 0.0;
+    if (channelIndex == 0u) {
+        rawW = weightSample.r;
+    } else if (channelIndex == 1u) {
+        rawW = weightSample.g;
+    } else if (channelIndex == 2u) {
+        rawW = weightSample.b;
+    } else {
+        rawW = effectiveA;
+    }
+
+    return select(rawW, rawW / effectiveTotalW, effectiveTotalW > 0.001);
+}
+
+struct LandscapeSurfaceSample {
+    height: f32,
+    normal: vec3<f32>,
+    slopeTan2: f32,
+    rawNx: f32,
+    rawNz: f32,
+};
+
+fn sampleLandscapeHeightAndNormal(
+    u: f32,
+    v: f32,
+    texDims: vec2<f32>,
+    maxCoord: vec2<i32>,
+    vhtTexture: texture_2d<f32>,
+    heightScale: f32,
+    invTexStepX: f32,
+    invTexStepZ: f32
+) -> LandscapeSurfaceSample {
+    let fCoordX = clamp(u * texDims.x, 0.0, texDims.x - 1.0001);
+    let fCoordZ = clamp(v * texDims.y, 0.0, texDims.y - 1.0001);
+
+    let cX = i32(floor(fCoordX));
+    let cZ = i32(floor(fCoordZ));
+    let fracX = fCoordX - f32(cX);
+    let fracZ = fCoordZ - f32(cZ);
+
+    let c00 = vec2<i32>(cX, cZ);
+    let c10 = min(c00 + vec2<i32>(1, 0), maxCoord);
+    let c01 = min(c00 + vec2<i32>(0, 1), maxCoord);
+    let c11 = min(c00 + vec2<i32>(1, 1), maxCoord);
+
+    let h00 = textureLoad(vhtTexture, c00, 0).r * heightScale;
+    let h10 = textureLoad(vhtTexture, c10, 0).r * heightScale;
+    let h01 = textureLoad(vhtTexture, c01, 0).r * heightScale;
+    let h11 = textureLoad(vhtTexture, c11, 0).r * heightScale;
+
+    var terrainHeight: f32;
+    var nx: f32;
+    var nz: f32;
+
+    if (fracX + fracZ <= 1.0) {
+        terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
+        nx = (h00 - h10) * invTexStepX;
+        nz = (h00 - h01) * invTexStepZ;
+    } else {
+        terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
+        nx = (h01 - h11) * invTexStepX;
+        nz = (h10 - h11) * invTexStepZ;
+    }
+
+    let slopeTan2 = nx * nx + nz * nz;
+    let invLen = inverseSqrt(slopeTan2 + 1.0);
+    let normal = vec3<f32>(nx * invLen, invLen, nz * invLen);
+
+    var result: LandscapeSurfaceSample;
+    result.height = terrainHeight;
+    result.normal = normal;
+    result.slopeTan2 = slopeTan2;
+    result.rawNx = nx;
+    result.rawNz = nz;
+    return result;
+}
+
 
 struct FoliageBakeUniforms {
     invWorldSizeX: f32,

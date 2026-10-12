@@ -1,9 +1,53 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowClipPosition;
-#redgpu_include landscape.math.rotateVectorByQuat;
-#redgpu_include landscape.math.transformFoliagePosition;
-#redgpu_include landscape.math.ditherFadeDiscard;
-#redgpu_include landscape.math.evaluateMipScaledAlphaCutoff;
+fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
+    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+
+struct FoliageVertexTransformResult {
+    worldPos: vec3<f32>,
+    safeScale: vec3<f32>,
+};
+
+fn transformFoliagePosition(
+    position: vec3<f32>,
+    instancePos: vec3<f32>,
+    instanceScale: vec3<f32>,
+    instanceRotQuat: vec4<f32>
+) -> FoliageVertexTransformResult {
+    let safeScale = max(instanceScale, vec3<f32>(0.0001));
+    let scaledPos = position * safeScale;
+    let rotatedPos = rotateVectorByQuat(scaledPos, instanceRotQuat);
+    let worldPos = rotatedPos + instancePos;
+    return FoliageVertexTransformResult(worldPos, safeScale);
+}
+
+fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
+    if (fadeValue < 0.999) {
+        let px = u32(fragCoordXY.x) & 3u;
+        let py = u32(fragCoordXY.y) & 3u;
+        let frameIdx = frameIndex & 3u;
+        let idx = (((py ^ frameIdx) << 2u) | (px ^ frameIdx)) & 15u;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32(extractBits(packed, (idx & 7u) * 4u, 4u)) * 0.0625;
+        if (fadeValue < threshold) {
+            discard;
+        }
+    }
+}
+
+fn evaluateMipScaledAlphaCutoff(alpha: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>, baseCutOff: f32) {
+    if (alpha < baseCutOff) {
+        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
+        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+        let effectiveAlpha = alpha * mipAlphaScale;
+        if (effectiveAlpha <= baseCutOff) {
+            discard;
+        }
+    }
+}
+
 
 struct RenderUnitUniforms {
     globalFragmentSlotIndex: u32,

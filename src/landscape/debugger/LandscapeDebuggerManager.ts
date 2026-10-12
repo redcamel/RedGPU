@@ -8,7 +8,7 @@ import LandscapeTileStreamer from "../core/spatial/LandscapeTileStreamer";
 import LandscapeSpatialGridDebugger from "./core/spatialGrid/LandscapeSpatialGridDebugger";
 import LandscapeTextureDebugger from "./core/LandscapeTextureDebugger";
 import vhtDebuggerWGSL from "./core/shader/vhtDebugger.wgsl";
-import LandscapeShaderLibrary from "../core/shader/library/LandscapeShaderLibrary";
+import textureDebuggerFragmentWGSL from "./core/shader/textureDebuggerFragment.wgsl";
 
 /**
  * [KO] 디버그 프로퍼티 키 타입입니다.
@@ -309,7 +309,7 @@ class LandscapeDebuggerManager {
                     left: 232,
                     bottom: 12
                 },
-                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                textureDebuggerFragmentWGSL,
                 'Landscape_Debugger_VNT_ShaderModule',
                 (_, ts) => ts?.getAtlasTexture('vnt') ?? null,
                 {r: 0.1, g: 0.1, b: 0.1, a: 1.0}
@@ -342,7 +342,7 @@ class LandscapeDebuggerManager {
                     left: 342,
                     bottom: 12
                 },
-                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                textureDebuggerFragmentWGSL,
                 'Landscape_Debugger_VBT_BaseColor_ShaderModule',
                 (_, ts) => ts?.getAtlasTexture('vbtBaseColor') ?? null,
                 {r: 0.08, g: 0.08, b: 0.08, a: 1.0}
@@ -375,7 +375,7 @@ class LandscapeDebuggerManager {
                     left: 452,
                     bottom: 12
                 },
-                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                textureDebuggerFragmentWGSL,
                 'Landscape_Debugger_VBT_Normal_ShaderModule',
                 (_, ts) => ts?.getAtlasTexture('vbtNormal') ?? null,
                 {r: 0.5, g: 0.5, b: 1.0, a: 1.0}
@@ -408,7 +408,7 @@ class LandscapeDebuggerManager {
                     left: 562,
                     bottom: 12
                 },
-                LandscapeShaderLibrary.debug.textureDebuggerFragment,
+                textureDebuggerFragmentWGSL,
                 'Landscape_Debugger_VBT_ORM_ShaderModule',
                 (_, ts) => ts?.getAtlasTexture('vbtORM') ?? null,
                 {r: 1.0, g: 0.8, b: 0.0, a: 1.0}

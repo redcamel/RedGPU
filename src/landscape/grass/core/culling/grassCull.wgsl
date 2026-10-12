@@ -1,8 +1,58 @@
-#redgpu_include landscape.struct.GrassInstance;
-#redgpu_include landscape.struct.GrassTypeParam;
-#redgpu_include landscape.struct.DrawIndexedIndirectArgs;
-#redgpu_include landscape.math.scatterColorPack;
-#redgpu_include landscape.math.testSphereInFrustum;
+struct GrassInstance {
+    posX: f32,
+    posY: f32,
+    posZ: f32,
+    scaleY: f32,
+    scaleXZ: f32,
+    packedBounding: u32,
+    packedQuat: u32,
+    packedGroundColorAndType: u32,
+};
+
+struct GrassTypeParam {
+    cullingDistanceSq: f32,
+    farDistanceSq: f32,
+    fadeStartSq: f32,
+    invFadeRange: f32,
+    rawBaseOffset: u32,
+    culledNearBaseOffset: u32,
+    culledFarBaseOffset: u32,
+    nearIndirectSlot: u32,
+    farIndirectSlot: u32,
+    renderUnitCount: u32,
+    hasFarStage: u32,
+    instanceCount: u32,
+    maxInstances: u32,
+    cullingDistance: f32,
+    shadowCullDistanceSq: f32,
+    shadowFadeStartSq: f32,
+    invShadowFadeRange: f32,
+    shadowCullDistance: f32,
+    pad0: u32,
+    pad1: u32,
+};
+
+struct DrawIndexedIndirectArgs {
+    indexCount: u32,
+    instanceCount: atomic<u32>,
+    firstIndex: u32,
+    baseVertex: i32,
+    firstInstance: u32,
+};
+
+fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
+    return extractBits(packedGroundColorAndType, 24u, 8u);
+}
+
+fn testSphereInFrustum(center: vec3<f32>, radius: f32, frustumPlanes: array<vec4<f32>, 6>) -> bool {
+    for (var i = 0u; i < 6u; i = i + 1u) {
+        let dist = dot(frustumPlanes[i].xyz, center) + frustumPlanes[i].w;
+        if (dist < -radius) {
+            return false;
+        }
+    }
+    return true;
+}
 
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,

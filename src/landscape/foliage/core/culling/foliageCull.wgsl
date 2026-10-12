@@ -1,4 +1,34 @@
-#redgpu_include landscape.struct.FoliageTypeParam;
+struct FoliageLODUniformInfo {
+    enterStart: f32,
+    enterEnd: f32,
+    exitStart: f32,
+    exitEnd: f32,
+    invEnterRange: f32,
+    invExitRange: f32,
+    renderUnitOffset: u32,
+    renderUnitCount: u32,
+};
+
+struct FoliageTypeParam {
+    cullingDistance: f32,
+    fadeStartDistance: f32,
+    boundingRadius: f32,
+    bottomOffset: f32,
+    lodCount: u32,
+    maxInstances: u32,
+    culledBaseOffset: u32,
+    indirectBaseOffset: u32,
+    rawBaseOffset: u32,
+    instanceCount: u32,
+    shadowCullDistance: f32,
+    invFadeRange: f32,
+    boundingHeight: f32,
+    pad0: f32,
+    pad1: f32,
+    pad2: f32,
+    lods: array<FoliageLODUniformInfo, 8>,
+};
+
 
 struct CascadeCullingInfo {
     maxDistance: f32,
@@ -32,11 +62,181 @@ struct FoliageCullingUniforms {
     cascades: array<CascadeCullingInfo, 4>,
 };
 
-#redgpu_include landscape.struct.FoliageInstance;
-#redgpu_include landscape.struct.DrawIndexedIndirectArgs;
-#redgpu_include landscape.math.scatterColorPack;
-#redgpu_include landscape.math.testSphereInFrustum;
-#redgpu_include landscape.math.checkAABBInHZB;
+struct FoliageInstance {
+    posX: f32,
+    posY: f32,
+    posZ: f32,
+    scaleY: f32,
+    packedRotXY: u32,
+    packedRotZW: u32,
+    packedScaleXZ: u32,
+    packedGroundColorAndType: u32,
+};
+
+struct DrawIndexedIndirectArgs {
+    indexCount: u32,
+    instanceCount: atomic<u32>,
+    firstIndex: u32,
+    baseVertex: u32,
+    firstInstance: u32,
+};
+
+fn packGroundColorAndType(groundColor: vec3<f32>, typeId: u32) -> u32 {
+    let rgbPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0));
+    return insertBits(rgbPacked, typeId, 24u, 8u);
+}
+
+fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
+    return extractBits(packedGroundColorAndType, 24u, 8u);
+}
+
+fn replacePackedAlpha(packedGroundColorAndType: u32, alphaByte: u32) -> u32 {
+    return insertBits(packedGroundColorAndType, alphaByte, 24u, 8u);
+}
+
+fn testSphereInFrustum(sphereCenter: vec3<f32>, boundRadius: f32, planes: array<vec4<f32>, 6>) -> bool {
+    let p = vec4<f32>(sphereCenter, 1.0);
+    let negRadius = -boundRadius;
+    return dot(p, planes[0]) >= negRadius &&
+           dot(p, planes[1]) >= negRadius &&
+           dot(p, planes[2]) >= negRadius &&
+           dot(p, planes[3]) >= negRadius &&
+           dot(p, planes[4]) >= negRadius &&
+           dot(p, planes[5]) >= negRadius;
+}
+
+fn checkAABBInHZB(
+    minPos: vec3<f32>,
+    maxPos: vec3<f32>,
+    viewProjectionMatrix: mat4x4<f32>,
+    hzbTexture: texture_2d<f32>,
+    hzbSampler: sampler,
+    depthBias: f32
+) -> bool {
+    let col0 = viewProjectionMatrix[0];
+    let col1 = viewProjectionMatrix[1];
+    let col2 = viewProjectionMatrix[2];
+    let col3 = viewProjectionMatrix[3];
+
+    let xMin0 = minPos.x * col0;
+    let xMax0 = maxPos.x * col0;
+    let yMin1 = minPos.y * col1;
+    let yMax1 = maxPos.y * col1;
+    let zMin2 = minPos.z * col2;
+    let zMax2 = maxPos.z * col2;
+
+    let baseZ0 = zMin2 + col3;
+    let baseZ1 = zMax2 + col3;
+
+    let xy00 = xMin0 + yMin1;
+    let xy10 = xMax0 + yMin1;
+    let xy01 = xMin0 + yMax1;
+    let xy11 = xMax0 + yMax1;
+
+    let c0 = xy00 + baseZ0;
+    let c1 = xy10 + baseZ0;
+    let c2 = xy01 + baseZ0;
+    let c3 = xy11 + baseZ0;
+    let c4 = xy00 + baseZ1;
+    let c5 = xy10 + baseZ1;
+    let c6 = xy01 + baseZ1;
+    let c7 = xy11 + baseZ1;
+
+    if (c0.w <= 0.01 || c1.w <= 0.01 || c2.w <= 0.01 || c3.w <= 0.01 ||
+        c4.w <= 0.01 || c5.w <= 0.01 || c6.w <= 0.01 || c7.w <= 0.01) {
+        return true;
+    }
+
+    let invW0 = 1.0 / c0.w;
+    var minNDC = c0.xy * invW0;
+    var maxNDC = minNDC;
+    var minDepth = c0.z * invW0;
+
+    let invW1 = 1.0 / c1.w;
+    let ndc1 = c1.xy * invW1;
+    minNDC = min(minNDC, ndc1);
+    maxNDC = max(maxNDC, ndc1);
+    minDepth = min(minDepth, c1.z * invW1);
+
+    let invW2 = 1.0 / c2.w;
+    let ndc2 = c2.xy * invW2;
+    minNDC = min(minNDC, ndc2);
+    maxNDC = max(maxNDC, ndc2);
+    minDepth = min(minDepth, c2.z * invW2);
+
+    let invW3 = 1.0 / c3.w;
+    let ndc3 = c3.xy * invW3;
+    minNDC = min(minNDC, ndc3);
+    maxNDC = max(maxNDC, ndc3);
+    minDepth = min(minDepth, c3.z * invW3);
+
+    let invW4 = 1.0 / c4.w;
+    let ndc4 = c4.xy * invW4;
+    minNDC = min(minNDC, ndc4);
+    maxNDC = max(maxNDC, ndc4);
+    minDepth = min(minDepth, c4.z * invW4);
+
+    let invW5 = 1.0 / c5.w;
+    let ndc5 = c5.xy * invW5;
+    minNDC = min(minNDC, ndc5);
+    maxNDC = max(maxNDC, ndc5);
+    minDepth = min(minDepth, c5.z * invW5);
+
+    let invW6 = 1.0 / c6.w;
+    let ndc6 = c6.xy * invW6;
+    minNDC = min(minNDC, ndc6);
+    maxNDC = max(maxNDC, ndc6);
+    minDepth = min(minDepth, c6.z * invW6);
+
+    let invW7 = 1.0 / c7.w;
+    let ndc7 = c7.xy * invW7;
+    minNDC = min(minNDC, ndc7);
+    maxNDC = max(maxNDC, ndc7);
+    minDepth = min(minDepth, c7.z * invW7);
+
+    if (minDepth <= 0.001) {
+        return true;
+    }
+
+    let minUV = saturate(vec2<f32>(minNDC.x * 0.5 + 0.5, 0.5 - maxNDC.y * 0.5));
+    let maxUV = saturate(vec2<f32>(maxNDC.x * 0.5 + 0.5, 0.5 - minNDC.y * 0.5));
+
+    let hzbDims = vec2<f32>(textureDimensions(hzbTexture, 0));
+    let aabbPixelSize = max((maxUV - minUV) * hzbDims, vec2<f32>(1.0));
+    let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
+
+    if (maxDim < 4.0 || maxDim > hzbDims.x * 0.4) {
+        return true;
+    }
+
+    let mipLevel = f32(clamp(firstLeadingBit(u32(maxDim)), 0u, 7u));
+
+    let adaptiveBias = max(depthBias, 0.003 + minDepth * 0.004);
+    let threshold = minDepth - adaptiveBias;
+
+    let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
+    if (hzb00 >= threshold) {
+        return true;
+    }
+
+    let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
+    if (hzb10 >= threshold) {
+        return true;
+    }
+
+    let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
+    if (hzb01 >= threshold) {
+        return true;
+    }
+
+    let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
+    if (hzb11 >= threshold) {
+        return true;
+    }
+
+    return false;
+}
+
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> globalUniforms: FoliageCullingUniforms;
