@@ -142,11 +142,14 @@ fn main(input: VertexOutput) -> OutputFragment {
         let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
         let cascadeIndex = select(0u, min(1u, cascadeCount - 1u), viewDepth > shadowInfo.cascadeSplitDepths[0]);
         let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-        let shadowCoord = getShadowCoord(input.worldPos, lightVP);
+
+        // 🌿 자가 그림자 Z-fighting(아크네/지글거림) 원천 방지용 초경량 노멀 오프셋
+        let normalOffset = N * select(0.025, 0.07, cascadeIndex > 0u);
+        let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
 
         let tUV = shadowCoord.xy;
         if (shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0 && tUV.x >= 0.0 && tUV.x <= 1.0 && tUV.y >= 0.0 && tUV.y <= 1.0) {
-            let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.8) + 0.0002;
+            let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.8) + 0.0003;
             let rawVisibility = textureSampleCompareLevel(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -154,8 +157,11 @@ fn main(input: VertexOutput) -> OutputFragment {
                 cascadeIndex,
                 saturate(shadowCoord.z - cascadeBias)
             );
+            // ☀️ 터미네이터(빛과 수평인 각도) 경계선 톱니 지글거림 방지 초고속 선형 페이드
+            let nDotL = dot(N, firstLightDir);
+            let horizonFade = saturate(nDotL * 6.25 + 0.5);
             let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
-            shadowFactor = mix(1.0 - csmStrength, 1.0, rawVisibility);
+            shadowFactor = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
         }
     }
 
