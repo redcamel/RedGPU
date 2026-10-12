@@ -473,6 +473,12 @@ class PostEffectManager {
             currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
         }
 
+        // [KO] 5. LDR 선명도 복원 단계: TAA AMD FidelityFX CAS (톤매핑 후 최종 LDR 버퍼에 적용)
+        // [EN] 5. LDR Sharpening Phase: TAA AMD FidelityFX CAS (Applied to final LDR buffer post-tonemapping)
+        if (useTAA && this.#view.constructor.name === 'View3D' && taa.sharpness > 0) {
+            currentTextureView = this.#applySingleEffect(taa.casPass, currentTextureView, width, height);
+        }
+
         // 프레임 렌더링 종료 후 사용된 텍스처 일괄 회수
         this.#texturePool.releaseAll();
 

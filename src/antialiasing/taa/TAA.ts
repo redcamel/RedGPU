@@ -7,6 +7,7 @@ import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffe
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
+import TAACASPass from "./cas/TAACASPass";
 
 /**
  * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
@@ -41,6 +42,8 @@ class TAA extends ASinglePassPostEffect {
     #frameIndex: number = 0;
     /** [KO] 지터링 강도 [EN] Jitter strength */
     #jitterStrength: number = 1.0;
+    /** [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 패스 [EN] AMD FidelityFX CAS sharpening pass following TAA */
+    #casPass: TAACASPass;
     #prevJitterOffset: [number, number] = [0, 0];
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
     #videoMemorySize: number = 0;
@@ -69,7 +72,42 @@ class TAA extends ASinglePassPostEffect {
                 false
             )
         );
+        this.#casPass = new TAACASPass(redGPUContext);
         this.jitterStrength = this.#jitterStrength;
+    }
+
+    /**
+     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 강도를 반환합니다.
+     * [EN] Returns the sharpening strength of AMD FidelityFX CAS following TAA.
+     *
+     * @returns
+     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대, 기본값: 1.0)
+     * [EN] Sharpening strength (0.0: disabled, 1.0: max, default: 1.0)
+     */
+    get sharpness(): number {
+        return this.#casPass.sharpness;
+    }
+
+    /**
+     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 강도를 설정합니다.
+     * [EN] Sets the sharpening strength of AMD FidelityFX CAS following TAA.
+     *
+     * @param value -
+     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대)
+     * [EN] Sharpening strength to set (0.0: disabled, 1.0: max)
+     */
+    set sharpness(value: number) {
+        this.#casPass.sharpness = value;
+    }
+
+    /**
+     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 패스 인스턴스를 반환합니다.
+     * [EN] Returns the AMD FidelityFX CAS sharpening pass instance following TAA.
+     *
+     * @returns [KO] TAACASPass 인스턴스 [EN] TAACASPass instance
+     */
+    get casPass(): TAACASPass {
+        return this.#casPass;
     }
 
     /**
@@ -207,6 +245,7 @@ class TAA extends ASinglePassPostEffect {
      */
     clear() {
         super.clear();
+        this.#casPass.clear();
         for (let i = 0; i < 2; i++) {
             if (this.#historyTextures[i]) {
                 this.#historyTextures[i].destroy();
