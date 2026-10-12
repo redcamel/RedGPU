@@ -134,23 +134,22 @@
         let lumaWeight = get_color_discrepancy_weight(stats, clippedYCoCg.x);
 
         // Phase 2: 시간적 누적 수명(History Age) 적응형 수렴 블렌딩 (Temporal Convergence)
+        // UE5/FSR 2 표준: 정지 시 히스토리 96% 이상 안정적 누적 (blendFactor 0.04)
         let effectiveAge = min(uniforms.frameIndex, 32.0);
-        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.03);
-        let baseBlend = mix(convergenceBlend, 0.25, motionSoft);
+        let convergenceBlend = max(1.0 / max(effectiveAge, 1.0), 0.04);
+        let baseBlend = mix(convergenceBlend, 0.20, motionSoft);
 
         // =====================================================================
-        // 6. 공용 모듈 듀얼 불연속성 검증 (Dual Discontinuity Rejection)
+        // 6. 공용 모듈 기하학적 차폐 검증 (Motion-Gated Geometric Occlusion Rejection)
         // =====================================================================
         // 1) 3D 월드 역투영 기반 정밀 재투영 기대 깊이(Expected Depth) 오차 물리 검증
         let currentUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize;
         let depthConfidence = get_geometric_depth_confidence(currentUV, currentDepth, prevDepth);
 
-        // 2) G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별
-        let normalConfidence = get_normal_confidence(pixelCoord, historyCoord);
-
-        // 기하학적 복합 신뢰도 (차폐/에지 발생 시 히스토리 즉각 리젝션)
-        let geometricConfidence = depthConfidence * normalConfidence;
-        var blendFactor = max(baseBlend, (1.0 - geometricConfidence) * 0.85);
+        // 정적 상태에서는 물리적 차폐/언차폐가 발생하지 않으므로 깊이 기하학적 리젝션을 모션에 100% 연동
+        // (원경 FP32 정밀도 오차 및 서브픽셀 잔디 잎으로 인한 정적 히스토리 오기각 완전 차단)
+        let geometricConfidence = mix(1.0, depthConfidence, motionSoft);
+        var blendFactor = max(baseBlend, (1.0 - geometricConfidence) * 0.85 * motionSoft);
 
         // 모션 발생 시 루마 불일치 민감도 가중
         let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);

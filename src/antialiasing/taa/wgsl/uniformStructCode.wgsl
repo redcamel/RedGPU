@@ -2,7 +2,6 @@
 #redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
-#redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
 #redgpu_include math.reconstruct.getWorldPositionFromDepth
 
 /**
@@ -63,21 +62,6 @@ fn get_geometric_depth_confidence(currUV: vec2<f32>, currDepth: f32, prevDepth: 
     // 카메라 거리에 비례하는 스케일 적응형 허용 오차
     let tolerance = max(0.15, expectedLinear * 0.04);
     return 1.0 - saturate((depthDiff - tolerance * 0.5) / (tolerance * 1.5));
-}
-
-/**
- * [KO] G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별
- * [EN] Geometric silhouette edge detection based on G-Buffer 3D physical normal dot product
- */
-fn get_normal_confidence(currPixelCoord: vec2<i32>, historyCoord: vec2<i32>) -> f32 {
-    let currNormalRaw = textureLoad(gBufferNormalTexture, currPixelCoord, 0).xyz;
-    let prevNormalRaw = textureLoad(gBufferNormalTexture, historyCoord, 0).xyz;
-
-    let currNormal = getWorldNormalFromGNormalBuffer(currNormalRaw);
-    let prevNormal = getWorldNormalFromGNormalBuffer(prevNormalRaw);
-
-    let normalDot = dot(currNormal, prevNormal);
-    return smoothstep(0.707, 0.95, normalDot);
 }
 
 // =============================================================================
@@ -291,8 +275,8 @@ fn inverse_tonemap(rgb: vec3<f32>) -> vec3<f32> {
  */
 fn clip_history_ray_box_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32, velVariance: f32) -> vec3<f32> {
     let edgeTighten = smoothstep(0.1, 1.5, velVariance);
-    let baseGamma = mix(1.75, 2.25, motion);
-    let gamma = mix(baseGamma, 1.25, edgeTighten);
+    let baseGamma = mix(2.25, 2.75, motion);
+    let gamma = mix(baseGamma, 1.5, edgeTighten);
 
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
