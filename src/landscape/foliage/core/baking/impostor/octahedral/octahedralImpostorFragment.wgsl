@@ -6,9 +6,7 @@
 #redgpu_include math.PI;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityFoliage;
-fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
+#redgpu_include landscape.rotateVectorByQuat;
 
 fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
     if (fadeValue < 0.999) {
@@ -75,7 +73,7 @@ fn sampleOctahedralAtlas(
     ddxAtlas: vec2<f32>,
     ddyAtlas: vec2<f32>
 ) -> vec4<f32> {
-    let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
+    let isInside = all(subUV >= vec2<f32>(0.0)) && all(subUV <= vec2<f32>(1.0));
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let safeSubUV = clamp(subUV, vec2<f32>(BORDER_PADDING), vec2<f32>(1.0 - BORDER_PADDING));
     let atlasUV = (clampedGrid + safeSubUV) * INV_OCT_N;

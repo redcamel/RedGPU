@@ -52,7 +52,7 @@ fn getLodInvMorphRange(lod: u32) -> f32 {
     return packedVec[lod & 3u];
 }
 
-fn sampleHeightBilinear(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
+fn sampleBilinearHeight(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
     let p = clamp(uv * texSize - vec2<f32>(0.5), vec2<f32>(0.0), texSize - vec2<f32>(1.0));
     let base = vec2<i32>(floor(p));
     let f = fract(p);
@@ -178,7 +178,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
             (morphedWorldZ + landscapeUniforms.worldSizeZ * 0.5) * invWorldSize.y
         );
 
-        finalHeight = sampleHeightBilinear(morphedGlobalUV, texSize);
+        finalHeight = sampleBilinearHeight(morphedGlobalUV, texSize);
     }
 
     let isSkirt = input.position.z < -0.5;
@@ -193,11 +193,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     res.globalUV = morphedGlobalUV;
     res.worldTileUV = morphedUV;
     res.lodLevel = lodLevel;
-    if (landscapeUniforms.lodColoration > 0.5) {
-        res.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
-    } else {
-        res.instanceColor = vec4<f32>(0.0);
-    }
+    res.instanceColor = select(vec4<f32>(0.0), landscapeUniforms.lodColors[min(lodLevel, 7u)], landscapeUniforms.lodColoration > 0.5);
     return res;
 }
 
@@ -231,9 +227,7 @@ fn main(input: InputData) -> OutputData {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         let tileRadius = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ) * 0.75;
-        if (viewDepth < (maxCSMDist + tileRadius)) {
-            receiveShadow = landscapeUniforms.receiveShadow;
-        }
+        receiveShadow = select(0.0, landscapeUniforms.receiveShadow, viewDepth < (maxCSMDist + tileRadius));
     }
     output.receiveShadow = receiveShadow;
     output.viewDepth = viewDepth;

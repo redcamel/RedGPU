@@ -1,3 +1,5 @@
+#redgpu_include landscape.testSphereInFrustum;
+
 struct GrassInstance {
     posX: f32,
     posY: f32,
@@ -44,15 +46,6 @@ fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
     return extractBits(packedGroundColorAndType, 24u, 8u);
 }
 
-fn testSphereInFrustum(center: vec3<f32>, radius: f32, frustumPlanes: array<vec4<f32>, 6>) -> bool {
-    for (var i = 0u; i < 6u; i = i + 1u) {
-        let dist = dot(frustumPlanes[i].xyz, center) + frustumPlanes[i].w;
-        if (dist < -radius) {
-            return false;
-        }
-    }
-    return true;
-}
 
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,

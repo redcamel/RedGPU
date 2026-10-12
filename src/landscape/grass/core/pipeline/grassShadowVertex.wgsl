@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowClipPosition;
+#redgpu_include landscape.rotateVectorByQuat;
 struct GrassInstance {
     posX: f32,
     posY: f32,
@@ -41,10 +42,6 @@ struct GrassRenderParams {
     pad1: u32,
 };
 
-fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    let t = 2.0 * cross(q.xyz, v);
-    return v + q.w * t + cross(q.xyz, t);
-}
 
 struct GrassPositionResult {
     worldPos: vec3<f32>,

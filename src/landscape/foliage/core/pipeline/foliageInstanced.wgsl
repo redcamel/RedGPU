@@ -1,8 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowClipPosition;
-fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
-}
+#redgpu_include landscape.rotateVectorByQuat;
 
 struct FoliageVertexTransformResult {
     worldPos: vec3<f32>,
@@ -266,8 +264,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
 
         var inTan = hierarchyTangent;
         if (dot(inTan, inTan) < 0.0001) {
-            var rawT = vec3<f32>(1.0, 0.0, 0.0);
-            if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
+            let rawT = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(hierarchyNormal.x) > 0.9);
             inTan = normalize(cross(hierarchyNormal, rawT));
         }
         let scaledTangent = inTan * safeScale;

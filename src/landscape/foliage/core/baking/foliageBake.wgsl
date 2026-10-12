@@ -1,3 +1,5 @@
+#redgpu_include math.PI2;
+
 struct FoliageInstance {
     posX: f32,
     posY: f32,
@@ -257,7 +259,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
         if (uniforms.randomRotationY != 0u) {
             let rAngle = xorShift32(&seed);
-            let angle = rAngle * 6.283185307179586;
+            let angle = rAngle * PI2;
             let halfAngle = angle * 0.5;
             rotY = sin(halfAngle);
             rotW = cos(halfAngle);

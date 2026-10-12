@@ -1,3 +1,6 @@
+#redgpu_include math.PI2;
+#redgpu_include landscape.rotateVectorByQuat;
+
 struct GrassInstance {
     posX: f32,
     posY: f32,
@@ -9,10 +12,6 @@ struct GrassInstance {
     packedGroundColorAndType: u32,
 };
 
-fn rotateVectorByQuat(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
-    let t = 2.0 * cross(q.xyz, v);
-    return v + q.w * t + cross(q.xyz, t);
-}
 
 fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(
@@ -37,7 +36,7 @@ fn splitMix32(state: ptr<function, u32>) -> f32 {
     *state = (*state + 0x6D2B79F5u);
     var t = (*state ^ (*state >> 15u)) * (1u | *state);
     t = (t + ((t ^ (t >> 7u)) * (61u | t))) ^ t;
-    return f32((t ^ (t >> 14u)) & 0xFFFFFFFFu) * INV_2_POW_32;
+    return f32(t ^ (t >> 14u)) * INV_2_POW_32;
 }
 
 fn sampleNormalizedLayerWeight(
@@ -106,11 +105,11 @@ fn sampleLandscapeHeightAndNormal(
     var nz: f32;
 
     if (fracX + fracZ <= 1.0) {
-        terrainHeight = h00 + fracX * (h10 - h00) + fracZ * (h01 - h00);
+        terrainHeight = fma(fracZ, h01 - h00, fma(fracX, h10 - h00, h00));
         nx = (h00 - h10) * invTexStepX;
         nz = (h00 - h01) * invTexStepZ;
     } else {
-        terrainHeight = h11 + (1.0 - fracZ) * (h10 - h11) + (1.0 - fracX) * (h01 - h11);
+        terrainHeight = fma(1.0 - fracX, h01 - h11, fma(1.0 - fracZ, h10 - h11, h11));
         nx = (h01 - h11) * invTexStepX;
         nz = (h10 - h11) * invTexStepZ;
     }
@@ -205,7 +204,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let u = gx * uniforms.invWorldSizeX + 0.5;
         let v = gz * uniforms.invWorldSizeZ + 0.5;
 
-        if (u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0) {
+        let uv = vec2<f32>(u, v);
+        if (any(uv < vec2<f32>(0.0)) || any(uv > vec2<f32>(1.0))) {
             writeInvalidInstance(currentTargetIdx, gx, gz);
             continue;
         }
@@ -224,7 +224,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
             }
         }
 
-        let rot = splitMix32(&prngState) * 6.2831853;
+        let rot = splitMix32(&prngState) * PI2;
         let sScale = uniforms.minScaleS + splitMix32(&prngState) * uniforms.deltaScaleS;
         let hScale = uniforms.minScaleH + splitMix32(&prngState) * uniforms.deltaScaleH;
 
