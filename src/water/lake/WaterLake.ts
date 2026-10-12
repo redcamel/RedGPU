@@ -180,7 +180,9 @@ class WaterLake extends Mesh {
     }
 
     override createCustomMeshVertexShaderModule = (): GPUShaderModule => {
-        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const {resourceManager} = this.redGPUContext;
+        const {wgslParser} = resourceManager;
+        const SHADER_INFO = wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
         const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
         this.#syncVertexUniforms();
@@ -197,6 +199,11 @@ class WaterLake extends Mesh {
         if (this.#waveSimulator) this.#waveSimulator.destroy();
         if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
         if (this.#interactionManager) this.#interactionManager.destroy();
+        if (this.material) {
+            this.waterMaterial.rippleTexture = null;
+        }
+        this.#interactionFollowTarget = null;
+        this.#currentActiveMeshes.length = 0;
         super.destroy();
     }
 
@@ -239,7 +246,7 @@ class WaterLake extends Mesh {
             targetX = m ? m[12] : this.#interactionFollowTarget.x;
             targetZ = m ? m[14] : this.#interactionFollowTarget.z;
         } else {
-            const firstMesh = WaterInteractionRegistry.meshes.values().next().value;
+            const firstMesh = WaterInteractionRegistry.firstMesh;
             if (firstMesh) {
                 const m = firstMesh.modelMatrix;
                 targetX = m ? m[12] : firstMesh.x;

@@ -97,13 +97,10 @@ fn main(inputData: InputData) -> VertexOutput {
     let dYdx = waveResult.y;
     let dYdz = waveResult.z;
 
-    localPos.y = localPos.y + dispY;
-
     let localNormal = normalize(vec3<f32>(-dYdx, 1.0, -dYdz));
     let localTangent = normalize(vec3<f32>(1.0, dYdx, 0.0));
 
-    let input_position_vec4 = vec4<f32>(localPos, 1.0);
-    let worldPos = gu_modelMatrix * input_position_vec4;
+    let worldPos = vec4<f32>(baseWorldPos.xyz + gu_modelMatrix[1].xyz * dispY, 1.0);
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
     let worldTangent = normalize((gu_normalModelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 

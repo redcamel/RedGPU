@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
-import {WaterInteractionRegistry} from "./WaterInteractionRegistry";
+import WaterInteractionRegistry from "./WaterInteractionRegistry";
 
 export interface WaterActiveMeshEntry {
     mesh: Mesh;
