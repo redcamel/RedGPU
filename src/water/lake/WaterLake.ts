@@ -4,7 +4,6 @@ import Mesh from "../../display/mesh/Mesh";
 import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
 import GPU_CULL_MODE from "../../gpuConst/GPU_CULL_MODE";
 import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
-import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import {
     WaterActiveMeshEntry,
@@ -17,16 +16,70 @@ import DirectTexture from "../../resources/texture/DirectTexture";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 
-interface WaterLake {
-    waveAmplitude: number;
-    waveWavelength: number;
-    maxPenetration: number;
-}
-
 class WaterLake extends Mesh {
-    readonly isWater: boolean = true;
+    #isWater: boolean = true;
+    #waveAmplitude: number = 0.025;
+    #waveWavelength: number = 16.0;
+    #maxPenetration: number = 0.35;
+    #interactionFollowTarget: Mesh | null = null;
     #interactionEnabled: boolean = true;
     #interactionDomainSize: number = 16.0;
+
+    #interactionManager: WaterInteractionManager;
+    #capturePass: WaterCapturePass;
+    #waveSimulator: WaterWaveSimulator;
+    #rippleDirectTexture: DirectTexture;
+    #lastInteractionTime: number = 0;
+    #prevSnapX: number = 0;
+    #prevSnapZ: number = 0;
+    #isFirstSnap: boolean = true;
+    #decayFramesRemaining: number = 0;
+
+    readonly #domainCenterBuffer: [number, number] = [0, 0];
+    #currentActiveMeshes: WaterActiveMeshEntry[] = [];
+    #currentSnapX: number = 0;
+    #currentSnapZ: number = 0;
+    #currentDomainSize: number = 0;
+    #currentShiftX: number = 0;
+    #currentShiftZ: number = 0;
+
+    get isWater(): boolean {
+        return this.#isWater;
+    }
+
+    get waveAmplitude(): number {
+        return this.#waveAmplitude;
+    }
+
+    set waveAmplitude(value: number) {
+        this.#waveAmplitude = Math.max(0, value);
+        updateTargetUniform(this, 'waveAmplitude', this.#waveAmplitude);
+    }
+
+    get waveWavelength(): number {
+        return this.#waveWavelength;
+    }
+
+    set waveWavelength(value: number) {
+        this.#waveWavelength = Math.max(0.1, value);
+        updateTargetUniform(this, 'waveWavelength', this.#waveWavelength);
+    }
+
+    get maxPenetration(): number {
+        return this.#maxPenetration;
+    }
+
+    set maxPenetration(value: number) {
+        this.#maxPenetration = Math.max(0.05, value);
+    }
+
+    get interactionFollowTarget(): Mesh | null {
+        return this.#interactionFollowTarget;
+    }
+
+    set interactionFollowTarget(target: Mesh | null) {
+        this.#interactionFollowTarget = target;
+    }
 
     get interactionEnabled(): boolean {
         return this.#interactionEnabled;
@@ -48,27 +101,10 @@ class WaterLake extends Mesh {
 
     set interactionDomainSize(value: number) {
         this.#interactionDomainSize = value;
-        if (this._material) {
+        if (this.material) {
             this.waterMaterial.rippleDomainSize = value;
         }
     }
-    #interactionManager: WaterInteractionManager;
-    #capturePass: WaterCapturePass;
-    #waveSimulator: WaterWaveSimulator;
-    #rippleDirectTexture: DirectTexture;
-    #lastInteractionTime: number = 0;
-    #prevSnapX: number = 0;
-    #prevSnapZ: number = 0;
-    #isFirstSnap: boolean = true;
-    #decayFramesRemaining: number = 0;
-
-    readonly #domainCenterBuffer: [number, number] = [0, 0];
-    #currentActiveMeshes: WaterActiveMeshEntry[] = [];
-    #currentSnapX: number = 0;
-    #currentSnapZ: number = 0;
-    #currentDomainSize: number = 0;
-    #currentShiftX: number = 0;
-    #currentShiftZ: number = 0;
 
     override render(renderViewStateData: RenderViewStateData): void {
         if (renderViewStateData.viewIndex === 0) {
@@ -90,10 +126,6 @@ class WaterLake extends Mesh {
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
 
-        this.waveAmplitude = 0.025;
-        this.waveWavelength = 16.0;
-        this.maxPenetration = 0.35;
-
         this.depthStencilState.depthWriteEnabled = false;
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         this.dirtyPipeline = true;
@@ -112,17 +144,12 @@ class WaterLake extends Mesh {
         this.waterMaterial.rippleDomainSize = this.interactionDomainSize;
     }
 
-    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
-        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
-        const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
-        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
-        this.#syncVertexUniforms();
-        return shaderModule;
-    };
+    get waterMaterial(): SingleLayerWaterMaterial {
+        return this.material as SingleLayerWaterMaterial;
+    }
 
-    #syncVertexUniforms(): void {
-        updateTargetUniform(this, 'waveAmplitude', this.waveAmplitude);
-        updateTargetUniform(this, 'waveWavelength', this.waveWavelength);
+    get geometry(): Ground {
+        return super.geometry as Ground;
     }
 
     get rippleWaveSpeed(): number {
@@ -152,6 +179,27 @@ class WaterLake extends Mesh {
         }
     }
 
+    override createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
+        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+        this.#syncVertexUniforms();
+        return shaderModule;
+    };
+
+    #syncVertexUniforms(): void {
+        updateTargetUniform(this, 'waveAmplitude', this.#waveAmplitude);
+        updateTargetUniform(this, 'waveWavelength', this.#waveWavelength);
+    }
+
+    override destroy(): void {
+        if (this.#capturePass) this.#capturePass.destroy();
+        if (this.#waveSimulator) this.#waveSimulator.destroy();
+        if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
+        if (this.#interactionManager) this.#interactionManager.destroy();
+        super.destroy();
+    }
+
     readonly #encodePass = (encoder: GPUCommandEncoder): void => {
         this.#capturePass.render(
             encoder,
@@ -160,13 +208,13 @@ class WaterLake extends Mesh {
             this.#currentSnapZ,
             this.#currentDomainSize,
             this.waterLevel,
-            this.maxPenetration
+            this.#maxPenetration
         );
         this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
     };
 
     #updateInteraction(renderViewStateData?: RenderViewStateData): void {
-        if (!this.interactionEnabled || !this.passFrustumCulling) return;
+        if (!this.#interactionEnabled || !this.passFrustumCulling) return;
 
         const hasMeshes = WaterInteractionRegistry.meshes.size > 0;
         if (hasMeshes) {
@@ -183,57 +231,23 @@ class WaterLake extends Mesh {
             : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
         this.#lastInteractionTime = currentTime;
 
-        let targetX = this.#prevSnapX || this.x;
-        let targetZ = this.#prevSnapZ || this.z;
+        let targetX = this.x;
+        let targetZ = this.z;
 
-        const camera = renderViewStateData?.view?.rawCamera;
-        if (camera) {
-            const camX = camera.x;
-            const camY = camera.y;
-            const camZ = camera.z;
-            const vm = camera.viewMatrix;
-
-            if (vm) {
-                const dirX = -vm[2];
-                const dirY = -vm[6];
-                const dirZ = -vm[10];
-
-                if (dirY < -0.01) {
-                    const t = (this.waterLevel - camY) / dirY;
-                    if (t > 0 && t < 120.0) {
-                        targetX = camX + t * dirX;
-                        targetZ = camZ + t * dirZ;
-                    } else {
-                        targetX = camX + dirX * 15.0;
-                        targetZ = camZ + dirZ * 15.0;
-                    }
-                } else if (dirY > 0.01 && camY < this.waterLevel) {
-                    const t = (this.waterLevel - camY) / dirY;
-                    if (t > 0 && t < 120.0) {
-                        targetX = camX + t * dirX;
-                        targetZ = camZ + t * dirZ;
-                    } else {
-                        targetX = camX + dirX * 15.0;
-                        targetZ = camZ + dirZ * 15.0;
-                    }
-                } else {
-                    targetX = camX + dirX * 15.0;
-                    targetZ = camZ + dirZ * 15.0;
-                }
-            } else {
-                targetX = camX;
-                targetZ = camZ;
-            }
-        } else if (hasMeshes) {
-            const mesh = WaterInteractionRegistry.meshes.values().next().value;
-            if (mesh) {
-                const m = mesh.modelMatrix;
-                targetX = m ? m[12] : mesh.x;
-                targetZ = m ? m[14] : mesh.z;
+        if (this.#interactionFollowTarget) {
+            const m = this.#interactionFollowTarget.modelMatrix;
+            targetX = m ? m[12] : this.#interactionFollowTarget.x;
+            targetZ = m ? m[14] : this.#interactionFollowTarget.z;
+        } else {
+            const firstMesh = WaterInteractionRegistry.meshes.values().next().value;
+            if (firstMesh) {
+                const m = firstMesh.modelMatrix;
+                targetX = m ? m[12] : firstMesh.x;
+                targetZ = m ? m[14] : firstMesh.z;
             }
         }
 
-        const domainSize = this.interactionDomainSize;
+        const domainSize = this.#interactionDomainSize;
         const texelSize = domainSize / this.#waveSimulator.textureSize;
         const snapX = Math.floor(targetX / texelSize) * texelSize;
         const snapZ = Math.floor(targetZ / texelSize) * texelSize;
@@ -272,22 +286,6 @@ class WaterLake extends Mesh {
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodePass);
     }
 
-    override destroy(): void {
-        if (this.#capturePass) this.#capturePass.destroy();
-        if (this.#waveSimulator) this.#waveSimulator.destroy();
-        if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
-        if (this.#interactionManager) this.#interactionManager.destroy();
-        super.destroy();
-    }
-
-    get waterMaterial(): SingleLayerWaterMaterial {
-        return this._material as SingleLayerWaterMaterial;
-    }
-
-    get geometry(): Ground {
-        return this._geometry as Ground;
-    }
-
     get waterLevel(): number {
         return this.y;
     }
@@ -296,12 +294,6 @@ class WaterLake extends Mesh {
         this.y = value;
     }
 }
-
-definePositiveNumber(WaterLake, [
-    {key: 'waveAmplitude', value: 0.025, min: 0},
-    {key: 'waveWavelength', value: 16.0, min: 0.1},
-    {key: 'maxPenetration', value: 0.35, min: 0.05},
-]);
 
 Object.freeze(WaterLake);
 export default WaterLake;

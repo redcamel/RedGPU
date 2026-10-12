@@ -95,6 +95,7 @@ RedGPU.init(
 
                 // 스킨드 메시의 모든 자식 계층을 물 상호작용 대상으로 재귀 등록
                 characterMesh.setEnableWaterInteractionRecursively(true, 1.4);
+                lake.interactionFollowTarget = characterMesh;
 
                 // 카메라 추적 중심점 정렬
                 controller.centerX = characterMesh.x;

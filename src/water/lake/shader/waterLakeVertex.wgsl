@@ -5,7 +5,7 @@
 struct WaterLakeVertexUniforms {
     waveAmplitude: f32,
     waveWavelength: f32,
-    pad0: f32,
+    pad0: f32, // 16-byte tail alignment
     pad1: f32,
 };
 
@@ -46,7 +46,8 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     );
 
     let k1 = k;
-    let omega1 = sqrt(9.8 * k1) * 0.4 + speed * 0.6;
+    let sqrt98k = sqrt(9.8 * k1);
+    let omega1 = sqrt98k * 0.4 + speed * 0.6;
     let phase1 = dot(posXZ, dir1) * k1 - timeSec * omega1;
     let cosP1 = cos(phase1);
     let sinP1 = sin(phase1);
@@ -57,7 +58,7 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let dY1dz = amp1 * k1 * dir1.y * cosP1;
 
     let k2 = k * 1.65;
-    let omega2 = sqrt(9.8 * k2) * 0.4 + speed * 0.8;
+    let omega2 = sqrt98k * 0.5138093 + speed * 0.8;
     let phase2 = dot(posXZ, dir2) * k2 - timeSec * omega2;
     let cosP2 = cos(phase2);
     let sinP2 = sin(phase2);
@@ -109,13 +110,13 @@ fn main(inputData: InputData) -> VertexOutput {
     let toCam = systemUniforms.camera.cameraPosition - worldPos.xyz;
     let camDist = length(toCam);
     let V = toCam / max(camDist, 0.001);
-    let NdotV = clamp(dot(vec3<f32>(0.0, 1.0, 0.0), V), 0.0, 1.0);
+    let NdotV = saturate(V.y);
     let grazingFactor = 1.0 - NdotV;
     let horizonAngleFactor = smoothstep(0.65, 0.90, grazingFactor);
     let distFactor = smoothstep(20.0, 100.0, camDist);
     let taaFactor = horizonAngleFactor * distFactor;
 
-    let relPos = worldPos.xyz - systemUniforms.camera.cameraPosition;
+    let relPos = -toCam;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
     let clipPosNoneJitter = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
     let clipPosJittered = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);

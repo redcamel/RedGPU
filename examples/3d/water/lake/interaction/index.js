@@ -81,6 +81,7 @@ RedGPU.init(
         sphere.x = 0;
         sphere.y = 0;
         sphere.z = 0;
+        lake.interactionFollowTarget = sphere;
         scene.addChild(sphere);
 
         // 8. 모션 애니메이션 및 인터랙션 상태 관리 (Zero-GC 변수)
