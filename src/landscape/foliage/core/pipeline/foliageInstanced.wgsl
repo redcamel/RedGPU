@@ -50,9 +50,9 @@ fn evaluateMipScaledAlphaCutoff(alpha: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>, 
 struct RenderUnitUniforms {
     globalFragmentSlotIndex: u32,
     receiveShadow: f32,
-    windMultiplier: f32,
-    windFlutterMultiplier: f32,
-    treeHeight: f32,
+    trunkBendScale: f32,
+    leafFlutterScale: f32,
+    foliageHeight: f32,
     groundBlendStrength: f32,
     groundBlendRange: f32,
     pad0: u32,
@@ -61,6 +61,7 @@ struct RenderUnitUniforms {
 @group(1) @binding(0) var<uniform> renderUnitUniforms: RenderUnitUniforms;
 
 const INV_150: f32 = 0.006666667;
+const WIND_SPATIAL_SCALE: f32 = 0.05;
 
 fn calculateFoliageWindDisplacement(
     worldPos: vec3<f32>,
@@ -70,7 +71,7 @@ fn calculateFoliageWindDisplacement(
     instancePos: vec3<f32>,
     time: f32
 ) -> vec3<f32> {
-    if (systemUniforms.wind.enabled == 0u || systemUniforms.wind.strength <= 0.0001 || renderUnitUniforms.windMultiplier <= 0.0001) {
+    if (systemUniforms.wind.enabled == 0u || systemUniforms.wind.strength <= 0.0001 || (renderUnitUniforms.trunkBendScale <= 0.0001 && renderUnitUniforms.leafFlutterScale <= 0.0001)) {
         return vec3<f32>(0.0);
     }
 
@@ -81,8 +82,8 @@ fn calculateFoliageWindDisplacement(
     }
     let viewDist = sqrt(distSq);
 
-    let treeH = max(2.0, renderUnitUniforms.treeHeight);
-    let heightNorm = saturate(localPos.y / treeH);
+    let foliageH = max(2.0, renderUnitUniforms.foliageHeight);
+    let heightNorm = saturate(localPos.y / foliageH);
 
     let groundAnchor = smoothstep(0.08, 0.8, heightNorm);
     let cubicBend = groundAnchor * groundAnchor * groundAnchor;
@@ -108,17 +109,16 @@ fn calculateFoliageWindDisplacement(
     let rawWindXZ = systemUniforms.wind.direction.xz;
     let windDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), dot(rawWindXZ, rawWindXZ) > 1e-8);
     let windSpeed = systemUniforms.wind.speed;
-    let windFreq = systemUniforms.wind.frequency;
 
     let treeBaseXZ = instancePos.xz;
-    let spatialPhase = (treeBaseXZ.x * windDir.x + treeBaseXZ.y * windDir.y) * windFreq;
+    let spatialPhase = (treeBaseXZ.x * windDir.x + treeBaseXZ.y * windDir.y) * WIND_SPATIAL_SCALE;
     let mainWave = sin(time * windSpeed + spatialPhase);
     let gustWave = sin(time * (windSpeed * 1.5) + spatialPhase * 1.8) * 0.25;
     let combinedWave = mainWave + gustWave;
 
     let trunkDistFade = saturate(1.0 - (viewDist - 350.0) * INV_150);
     let trunkDisplacement = vec3<f32>(windDir.x, 0.0, windDir.y) *
-                            (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * renderUnitUniforms.windMultiplier * trunkDistFade);
+                            (combinedWave * trunkMask * (systemUniforms.wind.strength * 0.45) * renderUnitUniforms.trunkBendScale * trunkDistFade);
 
     let leafPhase = dot(localPos, vec3<f32>(0.9, 1.4, 0.9)) + time * (windSpeed * 3.5);
     let leafWaveX = sin(leafPhase);
@@ -126,7 +126,7 @@ fn calculateFoliageWindDisplacement(
     let leafWaveZ = sin(leafPhase * 0.85);
 
     let flutterDistFade = saturate(1.0 - (viewDist - 150.0) * INV_150);
-    let flutterScale = (systemUniforms.wind.flutterStrength * 0.45) * renderUnitUniforms.windMultiplier * renderUnitUniforms.windFlutterMultiplier * flutterDistFade;
+    let flutterScale = (systemUniforms.wind.strength * 0.225) * renderUnitUniforms.leafFlutterScale * flutterDistFade;
     let leafDisplacement = vec3<f32>(
         windDir.x * leafWaveX * 0.75,
         leafWaveY * 0.5,

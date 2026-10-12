@@ -310,8 +310,6 @@ function renderTestPane({
             windGlobalFolder.addBinding(windManager, 'enabled');
             windGlobalFolder.addBinding(windManager, 'strength', {min: 0.0, max: 3.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'speed', {min: 0.0, max: 10.0, step: 0.1});
-            windGlobalFolder.addBinding(windManager, 'frequency', {min: 0.01, max: 1.0, step: 0.01});
-            windGlobalFolder.addBinding(windManager, 'flutterStrength', {min: 0.0, max: 2.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'directionAngle', {min: 0, max: 360, step: 1});
 
             // 4. 지형 설정 (Landscape)
@@ -430,8 +428,8 @@ function renderTestPane({
 
         // 6. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: true});
-        windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.1});
-        windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.1});
+        windFolder.addBinding(type, 'trunkBendScale', {min: 0.0, max: 3.0, step: 0.1});
+        windFolder.addBinding(type, 'leafFlutterScale', {min: 0.0, max: 3.0, step: 0.1});
     };
 
     // 렌더 프레임 업데이트

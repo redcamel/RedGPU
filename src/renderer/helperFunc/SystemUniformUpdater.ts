@@ -514,16 +514,6 @@ class SystemUniformUpdater {
             uniformDataF32[(strengthInfo.uniformOffset ?? strengthInfo.offset) / 4] = windManager.strength;
         }
 
-        const freqInfo = members.frequency;
-        if (freqInfo) {
-            uniformDataF32[(freqInfo.uniformOffset ?? freqInfo.offset) / 4] = windManager.frequency;
-        }
-
-        const flutterInfo = members.flutterStrength;
-        if (flutterInfo) {
-            uniformDataF32[(flutterInfo.uniformOffset ?? flutterInfo.offset) / 4] = windManager.flutterStrength;
-        }
-
         uniformDataU32[enabledIdx] = 1;
     }
 }

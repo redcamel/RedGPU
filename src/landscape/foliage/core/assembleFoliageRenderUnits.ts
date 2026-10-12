@@ -101,8 +101,8 @@ interface FoliageSharedContext {
     slotPooler?: FoliageSlotPooler | null;
     groundBlendStrength?: number;
     groundBlendRange?: number;
-    windMultiplier?: number;
-    windFlutterMultiplier?: number;
+    trunkBendScale?: number;
+    leafFlutterScale?: number;
 }
 
 /**
@@ -116,7 +116,7 @@ function createPBRRenderUnit(
     indexCount: number | undefined,
     lodIndex: number,
     receiveShadow: boolean,
-    treeHeight: number,
+    foliageHeight: number,
     sharedContext: FoliageSharedContext,
     isImpostorOverride: boolean = false
 ): FoliageRenderUnit {
@@ -125,7 +125,7 @@ function createPBRRenderUnit(
     const isImpostor = isImpostorOverride || material instanceof OctahedralImpostorMaterial;
     const isMasked = !!useCutOff || alphaBlend === 1 || alphaBlend === 2 || !!transparent || isImpostor;
 
-    const {slotPooler, groundBlendStrength, groundBlendRange, windMultiplier, windFlutterMultiplier} = sharedContext;
+    const {slotPooler, groundBlendStrength, groundBlendRange, trunkBendScale, leafFlutterScale} = sharedContext;
 
     let slotIndex = -1;
     if (slotPooler) {
@@ -139,9 +139,9 @@ function createPBRRenderUnit(
                 !isImpostor,
                 groundBlendStrength,
                 groundBlendRange,
-                windMultiplier,
-                treeHeight,
-                windFlutterMultiplier
+                trunkBendScale,
+                foliageHeight,
+                leafFlutterScale
             );
         }
     }
@@ -238,8 +238,8 @@ export default function assembleFoliageRenderUnits(
         height = 2.0,
         groundBlendStrength,
         groundBlendRange,
-        windMultiplier,
-        windFlutterMultiplier
+        trunkBendScale,
+        leafFlutterScale
     } = options;
     const numLODs = Math.min(lods.length, 8);
 
@@ -247,8 +247,8 @@ export default function assembleFoliageRenderUnits(
         slotPooler,
         groundBlendStrength,
         groundBlendRange,
-        windMultiplier,
-        windFlutterMultiplier
+        trunkBendScale,
+        leafFlutterScale
     };
 
     let maxBoundingRadius = 0;
@@ -313,9 +313,9 @@ export default function assembleFoliageRenderUnits(
                     if (shadowSlotIndex >= 0) {
                         slotPooler.writeShadowRenderUnitSlot(
                             shadowSlotIndex,
-                            windMultiplier,
+                            trunkBendScale,
                             treeH,
-                            windFlutterMultiplier
+                            leafFlutterScale
                         );
                     }
                 }

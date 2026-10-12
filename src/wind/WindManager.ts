@@ -8,7 +8,7 @@ import Scene from "../display/scene/Scene";
  * [EN] This class is automatically created by the Scene.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * // 씬에서 바람 매니저 접근 (Access wind manager from scene)
  * const windManager = scene.windManager;
@@ -21,13 +21,11 @@ import Scene from "../display/scene/Scene";
  *
  * @category Environment
  */
-export default class WindManager {
+class WindManager {
     #scene: Scene;
     #direction: [number, number, number] = [1, 0, 0];
     #speed: number = 1.0;
     #strength: number = 1.0;
-    #frequency: number = 1.0;
-    #flutterStrength: number = 0.5;
     #enabled: boolean = true;
 
     /**
@@ -98,8 +96,8 @@ export default class WindManager {
     }
 
     /**
-     * [KO] 줄기 및 식생 본체의 주 굽힘 강도를 반환하거나 설정합니다.
-     * [EN] Returns or sets the main bending strength of stems and main foliage bodies.
+     * [KO] 바람의 물리적 기본 세기 / 풍압을 반환하거나 설정합니다.
+     * [EN] Returns or sets the physical base strength / force of the wind.
      */
     get strength(): number {
         return this.#strength;
@@ -107,30 +105,6 @@ export default class WindManager {
 
     set strength(value: number) {
         this.#strength = value;
-    }
-
-    /**
-     * [KO] 바람 진동 주파수(물결 주기 배율)를 반환하거나 설정합니다.
-     * [EN] Returns or sets the wind oscillation frequency (wave cycle multiplier).
-     */
-    get frequency(): number {
-        return this.#frequency;
-    }
-
-    set frequency(value: number) {
-        this.#frequency = value;
-    }
-
-    /**
-     * [KO] 잎사귀 및 잔가지의 미세 떨림 강도를 반환하거나 설정합니다.
-     * [EN] Returns or sets the flutter strength of leaves and twigs.
-     */
-    get flutterStrength(): number {
-        return this.#flutterStrength;
-    }
-
-    set flutterStrength(value: number) {
-        this.#flutterStrength = value;
     }
 
     /**
@@ -145,3 +119,6 @@ export default class WindManager {
         this.#enabled = value;
     }
 }
+
+Object.freeze(WindManager);
+export default WindManager;

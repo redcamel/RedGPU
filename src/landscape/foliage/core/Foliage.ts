@@ -274,16 +274,16 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
     streamingRadius?: number;
 
     /**
-     * [KO] 인스턴스 바람 시뮬레이션 기본 강도 배수 (기본값: 1.0)
-     * [EN] Instance wind simulation base strength multiplier (default: 1.0)
+     * [KO] 인스턴스 줄기 휘어짐 강도 배수 (기본값: 1.0)
+     * [EN] Instance trunk bend strength multiplier (default: 1.0)
      */
-    windMultiplier?: number;
+    trunkBendScale?: number;
 
     /**
-     * [KO] 인스턴스 잔잎 흔들림 강도 배수 (기본값: 1.0)
+     * [KO] 인스턴스 잎 떨림 강도 배수 (기본값: 1.0)
      * [EN] Instance leaf flutter strength multiplier (default: 1.0)
      */
-    windFlutterMultiplier?: number;
+    leafFlutterScale?: number;
 
     /**
      * [KO] 지형 표면 법선 벡터에 맞추어 인스턴스를 기울일지 여부
@@ -351,8 +351,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #useImpostor: boolean = true;
     #useDepthPrepass: boolean = true;
     #receiveShadow: boolean = true;
-    #windMultiplier: number = 1.0;
-    #windFlutterMultiplier: number = 1.0;
+    #trunkBendScale: number = 1.0;
+    #leafFlutterScale: number = 1.0;
     #alignToNormal: boolean = false;
     #alignFactor: number = 1.0;
     #groundBlendRange: number = 1.5;
@@ -419,8 +419,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             densityMultiplier,
             streamingRadius = 600.0,
             maxInstances,
-            windMultiplier,
-            windFlutterMultiplier,
+            trunkBendScale,
+            leafFlutterScale,
             alignToNormal = false,
             alignFactor,
             groundBlendStrength,
@@ -470,16 +470,16 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             ? Math.max(maxInstances, calculatedMax, minSafeCapacity)
             : Math.max(calculatedMax, minSafeCapacity);
 
-        const resolvedWindMultiplier = windMultiplier !== undefined ? Math.max(0, Number(windMultiplier) || 0) : 1.0;
-        const resolvedWindFlutterMultiplier = windFlutterMultiplier !== undefined ? Math.max(0, Number(windFlutterMultiplier) || 0) : 1.0;
+        const resolvedTrunkBendScale = trunkBendScale !== undefined ? Math.max(0, Number(trunkBendScale) || 0) : 1.0;
+        const resolvedLeafFlutterScale = leafFlutterScale !== undefined ? Math.max(0, Number(leafFlutterScale) || 0) : 1.0;
 
         const resolvedAlignToNormal = alignToNormal;
         const resolvedAlignFactor = alignFactor !== undefined
             ? Math.min(1.0, Math.max(0.0, Number(alignFactor) || 0))
             : 1.0;
 
-        this.#windMultiplier = resolvedWindMultiplier;
-        this.#windFlutterMultiplier = resolvedWindFlutterMultiplier;
+        this.#trunkBendScale = resolvedTrunkBendScale;
+        this.#leafFlutterScale = resolvedLeafFlutterScale;
         this.#alignToNormal = resolvedAlignToNormal;
         this.#alignFactor = resolvedAlignFactor;
 
@@ -584,19 +584,22 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.flushAllRenderUnitUBOs();
     }
 
-    set windMultiplier(val: number) {
-        const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windMultiplier !== numVal) {
-            this.#windMultiplier = numVal;
-            this.#syncInternalWind();
-            this.#notifyUniformDirty();
-        }
+    /**
+     * [KO] 인스턴스 줄기 휘어짐 강도 배수를 반환합니다.
+     * [EN] Returns the trunk bend strength multiplier.
+     */
+    get trunkBendScale(): number {
+        return this.#trunkBendScale;
     }
 
-    set windFlutterMultiplier(val: number) {
+    /**
+     * [KO] 줄기 휘어짐 배수를 설정합니다.
+     * [EN] Sets the trunk bend scale multiplier.
+     */
+    set trunkBendScale(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
-        if (this.#windFlutterMultiplier !== numVal) {
-            this.#windFlutterMultiplier = numVal;
+        if (this.#trunkBendScale !== numVal) {
+            this.#trunkBendScale = numVal;
             this.#syncInternalWind();
             this.#notifyUniformDirty();
         }
@@ -793,13 +796,12 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         return this.#hasMaskedLOD0;
     }
 
-
     /**
-     * [KO] 인스턴스 줄기 바람 흔들림 강도 배수를 반환합니다.
-     * [EN] Returns the trunk wind simulation strength multiplier.
+     * [KO] 잎 떨림 강도 배수를 반환합니다.
+     * [EN] Returns the leaf flutter strength multiplier.
      */
-    get windMultiplier(): number {
-        return this.#windMultiplier;
+    get leafFlutterScale(): number {
+        return this.#leafFlutterScale;
     }
 
     set alignToNormal(val: boolean) {
@@ -811,11 +813,16 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 잎사귀 세부 떨림(Flutter) 강도 배수를 반환합니다.
-     * [EN] Returns the leaf flutter simulation strength multiplier.
+     * [KO] 잎 떨림 배수를 설정합니다.
+     * [EN] Sets the leaf flutter scale multiplier.
      */
-    get windFlutterMultiplier(): number {
-        return this.#windFlutterMultiplier;
+    set leafFlutterScale(val: number) {
+        const numVal = Math.max(0.0, Number(val) || 0.0);
+        if (this.#leafFlutterScale !== numVal) {
+            this.#leafFlutterScale = numVal;
+            this.#syncInternalWind();
+            this.#notifyUniformDirty();
+        }
     }
 
     set alignFactor(val: number) {
@@ -1298,27 +1305,27 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #syncInternalWind(): void {
         const unitList = this.#renderUnits;
         const count = unitList.length;
-        const windMul = this.#windMultiplier;
-        const flutterMul = this.#windFlutterMultiplier;
-        const treeH = Math.max(5.0, this.#boundingRadius * 1.8);
+        const trunkScale = this.#trunkBendScale;
+        const leafScale = this.#leafFlutterScale;
+        const foliageH = Math.max(5.0, this.#boundingRadius * 1.8);
 
         for (let i = 0; i < count; i++) {
             const unit = unitList[i];
-            const effectiveFlutterMul = unit.isMasked ? flutterMul : 0.0;
-            unit.updateWindMultipliers(
-                windMul,
-                effectiveFlutterMul,
-                treeH
+            const effectiveLeafScale = unit.isMasked ? leafScale : 0.0;
+            unit.updateWindScales(
+                trunkScale,
+                effectiveLeafScale,
+                foliageH
             );
         }
 
         const shadowList = this.#shadowMergedRenderUnits;
         const shadowCount = shadowList.length;
         for (let i = 0; i < shadowCount; i++) {
-            shadowList[i].updateWindMultipliers(
-                windMul,
-                flutterMul,
-                treeH
+            shadowList[i].updateWindScales(
+                trunkScale,
+                leafScale,
+                foliageH
             );
         }
     }

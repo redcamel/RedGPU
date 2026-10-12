@@ -3,16 +3,16 @@
  * [EN] Engine global wind physics parameter structure (32 Bytes, 16-byte aligned)
  */
 struct Wind {
-    // Offset 0: 바람 진행 방향 단위 벡터 (정규화된 vec3)
+    // Offset 0 (12B): 바람 진행 방향 단위 벡터 (정규화된 vec3)
     direction: vec3<f32>,
-    // Offset 12: 바람 이동 속도 (시간 배율)
+    // Offset 12 (4B): 풍속 (대기 흐름의 시간 진행 속도 배율)
     speed: f32,
-    // Offset 16: 줄기 및 본체 주 굽힘 강도
+    // Offset 16 (4B): 풍압 / 바람의 기본 물리적 세기 (Wind Force / Intensity)
     strength: f32,
-    // Offset 20: 바람 진동 주파수 (물결 주기)
-    frequency: f32,
-    // Offset 24: 잎사귀/잔가지 미세 떨림 강도
-    flutterStrength: f32,
-    // Offset 28: 바람 효과 활성화 플래그 (1 = ON, 0 = OFF)
+    // Offset 20 (4B): 바람 효과 활성화 플래그 (1 = ON, 0 = OFF)
     enabled: u32,
+    // Offset 24 (4B): 16바이트 슬롯 완성을 위한 끝단 패딩 0
+    pad0: f32,
+    // Offset 28 (4B): 16바이트 슬롯 완성을 위한 끝단 패딩 1 (총 32B)
+    pad1: f32,
 };

@@ -40,9 +40,9 @@ class FoliageSlotPooler extends AScatterSlotPooler {
      * @param applyGroundBlend - 지면 색상 블렌딩 적용 여부
      * @param groundBlendStrength - 지면 블렌드 강도
      * @param groundBlendRange - 지면 블렌드 높이 범위
-     * @param windMultiplier - 바람 세기 배수
-     * @param treeHeight - 식생 수목 높이
-     * @param windFlutterMultiplier - 잔잎 흔들림 배수
+     * @param trunkBendScale - 줄기 휘어짐 배수
+     * @param foliageHeight - 식생 기준 수목 높이
+     * @param leafFlutterScale - 잎 떨림 배수
      */
     writePBRRenderUnitSlot(
         slot: number,
@@ -52,9 +52,9 @@ class FoliageSlotPooler extends AScatterSlotPooler {
         applyGroundBlend: boolean,
         groundBlendStrength: number = 0.8,
         groundBlendRange: number = 1.5,
-        windMultiplier: number = 1.0,
-        treeHeight: number = 5.0,
-        windFlutterMultiplier: number = 1.0
+        trunkBendScale: number = 1.0,
+        foliageHeight: number = 5.0,
+        leafFlutterScale: number = 1.0
     ): void {
         const {maxSlots, paramsSizeBytes, cpuBuffer: f32, cpuUint32View: u32} = this;
         if (slot < 0 || slot >= maxSlots) return;
@@ -63,9 +63,9 @@ class FoliageSlotPooler extends AScatterSlotPooler {
 
         u32[baseFloat + 0] = globalSlot;
         f32[baseFloat + 1] = receiveShadow ? 1.0 : 0.0;
-        f32[baseFloat + 2] = windMultiplier;
-        f32[baseFloat + 3] = isMasked ? windFlutterMultiplier : 0.0;
-        f32[baseFloat + 4] = treeHeight;
+        f32[baseFloat + 2] = trunkBendScale;
+        f32[baseFloat + 3] = isMasked ? leafFlutterScale : 0.0;
+        f32[baseFloat + 4] = foliageHeight;
         f32[baseFloat + 5] = applyGroundBlend ? groundBlendStrength : 0.0;
         f32[baseFloat + 6] = groundBlendRange;
         u32[baseFloat + 7] = 0; // pad0
@@ -78,15 +78,15 @@ class FoliageSlotPooler extends AScatterSlotPooler {
      * [EN] Writes shadow merged render unit parameter data to the specified slot and uploads 32 bytes precisely to GPU.
      *
      * @param slot - 슬롯 인덱스 (0 ~ 1023)
-     * @param windMultiplier - 바람 세기 배수
-     * @param treeHeight - 식생 수목 높이
-     * @param windFlutterMultiplier - 잔잎 흔들림 배수
+     * @param trunkBendScale - 줄기 휘어짐 배수
+     * @param foliageHeight - 식생 기준 수목 높이
+     * @param leafFlutterScale - 잎 떨림 배수
      */
     writeShadowRenderUnitSlot(
         slot: number,
-        windMultiplier: number = 1.0,
-        treeHeight: number = 5.0,
-        windFlutterMultiplier: number = 1.0
+        trunkBendScale: number = 1.0,
+        foliageHeight: number = 5.0,
+        leafFlutterScale: number = 1.0
     ): void {
         const {maxSlots, paramsSizeBytes, cpuBuffer: f32, cpuUint32View: u32} = this;
         if (slot < 0 || slot >= maxSlots) return;
@@ -95,9 +95,9 @@ class FoliageSlotPooler extends AScatterSlotPooler {
 
         u32[baseFloat + 0] = 0; // globalSlot
         f32[baseFloat + 1] = 0.0; // receiveShadow
-        f32[baseFloat + 2] = windMultiplier;
-        f32[baseFloat + 3] = windFlutterMultiplier * 0.5;
-        f32[baseFloat + 4] = treeHeight;
+        f32[baseFloat + 2] = trunkBendScale;
+        f32[baseFloat + 3] = leafFlutterScale * 0.5;
+        f32[baseFloat + 4] = foliageHeight;
         f32[baseFloat + 5] = 0.0; // groundBlendStrength
         f32[baseFloat + 6] = 1.5; // groundBlendRange
         u32[baseFloat + 7] = 0; // pad0
@@ -110,23 +110,23 @@ class FoliageSlotPooler extends AScatterSlotPooler {
      * [EN] Writes wind parameters to CPU mirror buffer for a specific render unit slot (Zero-GC).
      *
      * @param slot - 슬롯 인덱스
-     * @param windMultiplier - 바람 세기 배수
-     * @param windFlutterMultiplier - 잔잎 흔들림 배수
-     * @param treeHeight - 식생 수목 높이
+     * @param trunkBendScale - 줄기 휘어짐 배수
+     * @param leafFlutterScale - 잎 떨림 배수
+     * @param foliageHeight - 식생 기준 수목 높이
      */
     updateWindParams(
         slot: number,
-        windMultiplier: number,
-        windFlutterMultiplier: number,
-        treeHeight: number
+        trunkBendScale: number,
+        leafFlutterScale: number,
+        foliageHeight: number
     ): void {
         const {maxSlots, cpuBuffer: f32} = this;
         if (slot < 0 || slot >= maxSlots) return;
         const baseFloat = slot * AScatterSlotPooler.SLOT_STRIDE_FLOATS;
 
-        f32[baseFloat + 2] = windMultiplier;
-        f32[baseFloat + 3] = windFlutterMultiplier;
-        f32[baseFloat + 4] = treeHeight;
+        f32[baseFloat + 2] = trunkBendScale;
+        f32[baseFloat + 3] = leafFlutterScale;
+        f32[baseFloat + 4] = foliageHeight;
     }
 
     /**

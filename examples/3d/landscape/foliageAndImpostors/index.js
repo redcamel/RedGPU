@@ -278,8 +278,6 @@ function renderTestPane({
             windGlobalFolder.addBinding(windManager, 'enabled');
             windGlobalFolder.addBinding(windManager, 'strength', {min: 0.0, max: 3.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'speed', {min: 0.0, max: 10.0, step: 0.1});
-            windGlobalFolder.addBinding(windManager, 'frequency', {min: 0.01, max: 1.0, step: 0.01});
-            windGlobalFolder.addBinding(windManager, 'flutterStrength', {min: 0.0, max: 2.0, step: 0.05});
             windGlobalFolder.addBinding(windManager, 'directionAngle', {min: 0, max: 360, step: 1});
 
             // 대기 중이던 식생 타입들 일괄 등록
@@ -477,8 +475,8 @@ function renderTestPane({
 
         // 7. Wind & Motion
         const windFolder = typeFolder.addFolder({title: 'Wind & Motion', expanded: false});
-        windFolder.addBinding(type, 'windMultiplier', {min: 0.0, max: 3.0, step: 0.05});
-        windFolder.addBinding(type, 'windFlutterMultiplier', {min: 0.0, max: 3.0, step: 0.05});
+        windFolder.addBinding(type, 'trunkBendScale', {min: 0.0, max: 3.0, step: 0.05});
+        windFolder.addBinding(type, 'leafFlutterScale', {min: 0.0, max: 3.0, step: 0.05});
     };
 
     // 렌더 프레임 업데이트

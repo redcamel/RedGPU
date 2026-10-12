@@ -176,23 +176,23 @@ class FoliageRenderUnit extends ScatterRenderUnit {
     }
 
     /**
-     * [KO] 인스턴스별 바람 강도 배수, 잔잎 떨림 배수 및 수목 높이를 유니폼 버퍼에 기록합니다. (Zero-GC)
-     * [EN] Writes per-instance wind multiplier, flutter multiplier, and tree height to uniform buffer. (Zero-GC)
-     * @param windMultiplier - 인스턴스별 바람 강도 배수
-     * @param windFlutterMultiplier - 인스턴스별 잔잎 흔들림 배수
-     * @param treeHeight - 식생 전체 높이
+     * [KO] 줄기 휘어짐 배수, 잎 떨림 배수 및 식생 기준 수목 높이를 유니폼 버퍼에 기록합니다. (Zero-GC)
+     * [EN] Writes trunk bend scale, leaf flutter scale, and foliage reference height to uniform buffer. (Zero-GC)
+     * @param trunkBendScale - 줄기 휘어짐 배수
+     * @param leafFlutterScale - 잎 떨림 배수
+     * @param foliageHeight - 식생 기준 수목 높이
      */
-    updateWindMultipliers(
-        windMultiplier: number,
-        windFlutterMultiplier: number,
-        treeHeight: number
+    updateWindScales(
+        trunkBendScale: number,
+        leafFlutterScale: number,
+        foliageHeight: number
     ): void {
         if (this.#slotPooler && this.#slotIndex >= 0) {
             this.#slotPooler.updateWindParams(
                 this.#slotIndex,
-                windMultiplier,
-                windFlutterMultiplier,
-                treeHeight
+                trunkBendScale,
+                leafFlutterScale,
+                foliageHeight
             );
         }
     }

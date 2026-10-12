@@ -426,17 +426,17 @@ RedGPU.init(
                         });
 
                         const windTypeFolder = typeFolder.addFolder({title: '🍃 Wind & Alignment', expanded: true});
-                        windTypeFolder.addBinding(type, 'windMultiplier', {
+                        windTypeFolder.addBinding(type, 'trunkBendScale', {
                             min: 0,
                             max: 3.0,
                             step: 0.1,
-                            label: 'Wind Multiplier'
+                            label: 'Trunk Bend Scale'
                         });
-                        windTypeFolder.addBinding(type, 'windFlutterMultiplier', {
+                        windTypeFolder.addBinding(type, 'leafFlutterScale', {
                             min: 0,
                             max: 3.0,
                             step: 0.1,
-                            label: 'Flutter Multiplier'
+                            label: 'Leaf Flutter Scale'
                         });
                         windTypeFolder.addBinding(type, 'useVertexColorWind', {label: 'VertexColor Wind'});
                         windTypeFolder.addBinding(type, 'alignToNormal', {label: 'Align To Normal'});
