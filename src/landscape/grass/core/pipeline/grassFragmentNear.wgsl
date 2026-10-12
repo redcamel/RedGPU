@@ -101,7 +101,12 @@ fn main(input: VertexOutput) -> OutputFragment {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
     let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
-    if (sourceAlpha < materialUniforms.alphaCutoff) {
+    // 🌿 TAA 서브픽셀 지터링 깜빡임 방지용 적응형 알파 컷오프 (Alpha Widening)
+    let uvDeriv = fwidth(input.uv);
+    let subpixelFactor = saturate(max(uvDeriv.x, uvDeriv.y) * 50.0);
+    let adaptiveCutoff = mix(materialUniforms.alphaCutoff, materialUniforms.alphaCutoff * 0.45, subpixelFactor);
+
+    if (sourceAlpha < adaptiveCutoff) {
         discard;
     }
 
