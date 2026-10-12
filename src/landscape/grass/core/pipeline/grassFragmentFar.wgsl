@@ -117,7 +117,8 @@ fn main(input: VertexOutput) -> OutputFragment {
         input.groundColor.rgb
     );
 
-    let N = normalize(input.normal);
+    // 🌿 원거리 잔디 서브픽셀 라이팅 지글거림 방지: 개별 풀잎 노멀을 지면 수직 노멀(+Y)로 85% 수렴 (Normal Flattening)
+    let N = normalize(mix(input.normal, vec3<f32>(0.0, 1.0, 0.0), 0.85));
     let preExposure = systemUniforms.preExposure;
 
     let subsurfaceStrength = materialUniforms.subsurfaceStrength;

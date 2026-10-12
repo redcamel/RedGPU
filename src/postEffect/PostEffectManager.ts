@@ -6,7 +6,6 @@ import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
-import TAASharpen from "../antialiasing/taa/sharpen/TAASharpen";
 import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
@@ -79,7 +78,6 @@ class PostEffectManager {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
-    #taaSharpenEffect: TAASharpen
     #ssao: SSAO;
     #useSSAO: boolean = false;
     #ssr: SSR;
@@ -309,10 +307,6 @@ class PostEffectManager {
             this.#ssr.destroy();
             this.#ssr = null;
         }
-        if (this.#taaSharpenEffect) {
-            this.#taaSharpenEffect.destroy();
-            this.#taaSharpenEffect = null;
-        }
         if (this.#autoExposure) {
             this.#autoExposure.destroy();
             this.#autoExposure = null;
@@ -476,10 +470,6 @@ class PostEffectManager {
         if (useTAA) {
             if (this.#view.constructor.name === 'View3D') { // View2D에는 TAA적용 안함{
                 currentTextureView = this.#applySingleEffect(taa, currentTextureView, width, height);
-                if (!this.#taaSharpenEffect) {
-                    this.#taaSharpenEffect = new TAASharpen(redGPUContext)
-                }
-                currentTextureView = this.#applySingleEffect(this.#taaSharpenEffect, currentTextureView, width, height);
             } else {
                 currentTextureView = this.#applySingleEffect(fxaa, currentTextureView, width, height);
             }

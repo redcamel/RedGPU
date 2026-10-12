@@ -36,17 +36,17 @@
     let localCoord = vec2<i32>(local_id.xy) + vec2<i32>(1, 1);
     let yFlipVec2 = vec2<f32>(1.0, -1.0);
 
-    // [KO] 2. 지터링(Jittering)이 보정된 현재 UV 및 온칩 LDS 주변 통계 산출
-    // [EN] 2. Calculate current UV with jittering correction and on-chip LDS neighborhood stats
-    let currentUV = (vec2<f32>(pixelCoord) + 0.5 - uniforms.currJitterOffset * yFlipVec2) / screenSize;
+    // [KO] 2. 온칩 LDS 주변 통계 산출 및 3x3 서브픽셀 신호 재구성 필터
+    // [EN] 2. On-chip LDS neighborhood stats and 3x3 subpixel signal reconstruction filter
     let stats = calculate_neighborhood_stats_ycocg_lds(localCoord);
 
-    // [KO] 하드웨어 샘플러를 통한 현재 프레임 컬러 로드
-    // [EN] Load current frame color via hardware sampler
-    let currentRGBA = textureSampleLevel(sourceTexture, basicSampler, currentUV, 0.0);
-    let currentRGB = currentRGBA.rgb;
-    let currentAlpha = currentRGBA.a;
-    let currentYCoCg = rgbToYCoCg(currentRGB);
+    // 🚀 [표준 TAA: 온칩 3x3 서브픽셀 신호 재구성 필터 (Reconstruction Filter)]
+    // 하드웨어 바이리니어 블러(흐림)를 100% 제거하고, 지터링된 3x3 샘플로부터 픽셀 중심 참값 신호 복원
+    let jitterOffsetPix = uniforms.currJitterOffset * yFlipVec2;
+    let reconstructedCurrent = reconstruct_current_color_ycocg_lds(localCoord, jitterOffsetPix);
+    let currentRGB = reconstructedCurrent.rgb;
+    let currentAlpha = reconstructedCurrent.alpha;
+    let currentYCoCg = reconstructedCurrent.ycocg;
     
     // 🚀 [무손실 3: LDS 온칩 3x3 뎁스 탐색 (On-Chip 3x3 Closest Depth Search)]
     // VRAM 텍스처 접근 0회! 온칩 초고속 SRAM에서 9개 뎁스 비교
@@ -96,7 +96,7 @@
     } else {
         // [KO] 고정밀 필터링(Catmull-Rom)을 통한 히스토리 샘플링
         // [EN] History sampling via high-precision filtering (Catmull-Rom)
-        let prevDepth = fetch_depth_bilinear(historyUV, screenSize);
+        let prevDepth = fetch_depth_point(historyUV, screenSize);
         let historyData = sample_texture_catmull_rom_antiflicker(historyTexture, basicSampler, historyUV, screenSize);
 
         let motionLen = length(velocity * screenSize);
@@ -115,20 +115,30 @@
         // [KO] 6. 최종 블렌딩 및 결과 저장
         // [EN] 6. Final blending and store result
         let baseBlend = mix(0.05, 0.25, motionSoft);
-        let currLinear = getLinearizeDepth(currentDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-        let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
+        
+        // 🚀 [공용 모듈 1: 3D 역투영 기대 깊이(Expected Depth) 오차 물리 검증]
+        let currentUV = (vec2<f32>(pixelCoord) + 0.5) / screenSize;
+        let depthConfidence = get_geometric_depth_confidence(currentUV, currentDepth, prevDepth);
 
-        // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Depth Discontinuity Rejection)
-        var blendFactor = max(baseBlend, (1.0 - depthConfidence) * 0.8);
+        // 🚀 [공용 모듈 2: G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별]
+        let historyCoord = clamp(vec2<i32>(historyUV * screenSize), vec2<i32>(0), c_max);
+        let normalConfidence = get_normal_confidence(pixelCoord, historyCoord);
+
+        // 기하학적 복합 신뢰도 (깊이 불일치 또는 실루엣 에지 시 히스토리 즉각 리젝션)
+        let geometricConfidence = depthConfidence * normalConfidence;
+        var blendFactor = max(baseBlend, (1.0 - geometricConfidence) * 0.85);
 
         // 모션이 있을 때의 루마 불일치 반응
         let motionLumaBlend = max(blendFactor, lumaWeight * 0.6);
         blendFactor = mix(blendFactor, motionLumaBlend, motionSoft);
 
         // 🌟 [표준 TAA: 정적 표면 위 동적 그림자/라이팅 고스팅 방어 (Decoupled Shadow Rejection)]
-        // 원거리(30m~150m)에서는 고주파 서브픽셀 지터링으로 인한 루마 노이즈를 그림자로 오판하지 않도록 감쇄 (Distance Fadeout)
-        let shadowDistFade = 1.0 - smoothstep(30.0, 150.0, currLinear);
-        let shadowLumaRejection = smoothstep(0.15, 0.85, lumaWeight) * 0.75 * shadowDistFade;
+        // 3x3 로컬 루마 대비(Local Contrast)를 측정하여,
+        // 잔디/나뭇잎/헤어 등 고주파 서브픽셀 영역(High Contrast)의 지터링 노이즈는 그림자로 오판하지 않도록 억제하고,
+        // 평평한 표면(Flat Surface, Low Contrast) 위를 지나는 동적 그림자만 정밀 감지하여 고스팅 제거
+        let localContrast = max(stats.maxColor.x - stats.minColor.x, 0.001);
+        let flatSurfaceConfidence = 1.0 - smoothstep(0.10, 0.35, localContrast);
+        let shadowLumaRejection = smoothstep(0.20, 0.90, lumaWeight) * 0.65 * flatSurfaceConfidence;
         blendFactor = max(blendFactor, shadowLumaRejection);
 
         let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);

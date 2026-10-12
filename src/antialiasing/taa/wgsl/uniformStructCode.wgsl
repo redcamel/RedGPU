@@ -3,6 +3,8 @@
 #redgpu_include color.YCoCgToRgb
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
+#redgpu_include math.reconstruct.getWorldNormalFromGNormalBuffer
+#redgpu_include math.reconstruct.getWorldPositionFromDepth
 
 // ===== 1. 구조체 및 유틸리티 (Alpha 지원 확장) =====
 struct Uniforms {
@@ -29,28 +31,37 @@ struct SampledColor {
     alpha: f32,       
 };
 
-fn get_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
-    let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-    let prevLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
-    let depthDiff = abs(currLinear - prevLinear);
-    // [KO] 거리에 비례한 상대적 깊이 허용 오차 (원거리 서브픽셀 지터 및 경사면 깊이 흔들림 방어)
-    // [EN] Distance-proportional relative depth tolerance (Defends against far subpixel jitter & slope depth variation)
-    let tolerance = max(0.3, currLinear * 0.05);
+// 🌟 [공용 모듈: 3D 월드 역투영 기반 정밀 재투영 기대 깊이(Expected Reprojection Depth) 검증]
+fn get_geometric_depth_confidence(currUV: vec2<f32>, currDepth: f32, prevDepth: f32) -> f32 {
+    let worldPos = getWorldPositionFromDepth(currUV, currDepth, systemUniforms.projection.inverseProjectionViewMatrix);
+    let prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    let expectedPrevDepth = prevClipPos.z / max(prevClipPos.w, 1e-5);
+
+    let expectedLinear = getLinearizeDepth(expectedPrevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+    let actualLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
+    let depthDiff = abs(expectedLinear - actualLinear);
+
+    let tolerance = max(0.2, expectedLinear * 0.05);
     return 1.0 - clamp((depthDiff - tolerance * 0.5) / (tolerance * 1.5), 0.0, 1.0);
 }
 
-fn fetch_depth_bilinear(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
-    let samplePos = uv * screenSize - 0.5;
-    let f = fract(samplePos);
-    let base = vec2<i32>(floor(samplePos));
+// 🌟 [공용 모듈: G-Buffer 3D 물리 법선 내적 기반 지오메트리 실루엣 에지 판별 (Normal Discontinuity)]
+fn get_normal_confidence(currPixelCoord: vec2<i32>, historyCoord: vec2<i32>) -> f32 {
+    let currNormalRaw = textureLoad(gBufferNormalTexture, currPixelCoord, 0).xyz;
+    let prevNormalRaw = textureLoad(gBufferNormalTexture, historyCoord, 0).xyz;
+
+    let currNormal = getWorldNormalFromGNormalBuffer(currNormalRaw);
+    let prevNormal = getWorldNormalFromGNormalBuffer(prevNormalRaw);
+
+    // 두 법선의 내적 (각도 차이 판별, 45도 이상 꺾인 면은 히스토리 감쇄)
+    let normalDot = dot(currNormal, prevNormal);
+    return smoothstep(0.707, 0.95, normalDot);
+}
+
+fn fetch_depth_point(uv: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     let size = vec2<i32>(textureDimensions(prevDepthTexture));
-
-    let d00 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 0), vec2<i32>(0), size - 1), 0);
-    let d10 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 0), vec2<i32>(0), size - 1), 0);
-    let d01 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(0, 1), vec2<i32>(0), size - 1), 0);
-    let d11 = textureLoad(prevDepthTexture, clamp(base + vec2<i32>(1, 1), vec2<i32>(0), size - 1), 0);
-
-    return mix(mix(d00, d10, f.x), mix(d01, d11, f.x), f.y);
+    let coord = clamp(vec2<i32>(uv * screenSize), vec2<i32>(0), size - 1);
+    return textureLoad(prevDepthTexture, coord, 0);
 }
 
 // ===== 1.5. LDS (Workgroup Shared Memory) 선언 =====
@@ -103,6 +114,35 @@ fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> Neighborhood
     stats.meanAlpha = m1A / sampleCount;
 
     return stats;
+}
+
+// 🚀 [표준 TAA: 온칩 3x3 서브픽셀 신호 재구성 필터 (Exponential Reconstruction Filter)]
+// 하드웨어 바이리니어 블러를 완전히 제거하고, 지터링된 3x3 샘플로부터 픽셀 중심 참값 신호를 복원합니다.
+fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: vec2<f32>) -> SampledColor {
+    var sumRGB = vec3<f32>(0.0);
+    var sumAlpha = 0.0;
+    var sumWeight = 0.0;
+
+    for (var y: i32 = -1; y <= 1; y++) {
+        for (var x: i32 = -1; x <= 1; x++) {
+            let delta = vec2<f32>(f32(x), f32(y)) + jitterOffsetPix;
+            let distSq = dot(delta, delta);
+            // 🚀 Karis 2014 표준 지수 재구성 필터 (Exponential Reconstruction Weight)
+            let w = exp(-2.29 * distSq);
+
+            let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
+            sumRGB += sampleRGBA.rgb * w;
+            sumAlpha += sampleRGBA.a * w;
+            sumWeight += w;
+        }
+    }
+
+    let invW = 1.0 / max(sumWeight, EPSILON);
+    var result: SampledColor;
+    result.rgb = sumRGB * invW;
+    result.ycocg = rgbToYCoCg(result.rgb);
+    result.alpha = sumAlpha * invW;
+    return result;
 }
 
 fn get_color_discrepancy_weight(stats: NeighborhoodStats, histRGB: vec3<f32>) -> f32 {
@@ -170,7 +210,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
     // [KO] 언리얼 엔진 / Playdead 표준 Variance Clipping 교집합 박스 (원거리 서브픽셀 디테일 안정화)
     // [EN] Unreal Engine / Playdead standard Variance Clipping intersection box (Far subpixel detail stabilization)
-    let gamma = mix(1.25, 2.0, motion);
+    let gamma = mix(1.50, 2.25, motion);
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
     return clamp(historyYCoCg, v_min, v_max);
