@@ -176,7 +176,6 @@ RedGPU.init(
         // 6. 호숫가 및 산기슭 소나무(Pine Trees) Multi-LOD 식생 시스템 구성
         const foliageManager = landscape.foliageManager;
         foliageManager.debugSubCellColoration = false;
-        foliageManager.subCellSize = 50; // 400x400 월드에 최적화된 서브셀 크기
 
         const TREE_MODEL_URL = '../../../../assets/terrain/test.glb';
         new RedGPU.GLTFLoader(

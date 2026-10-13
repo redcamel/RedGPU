@@ -91,7 +91,6 @@ RedGPU.init(
 
         // 7. 수목 식생 매니저
         const foliageManager = landscape.foliageManager;
-        foliageManager.subCellSize = 100;
 
         let onFoliageTypeAdded = null;
 
@@ -261,7 +260,7 @@ function renderTestPane({
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: false});
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'useDepthPrepass');
-            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
+            managerFolder.addBinding(foliageManager, 'subCellSize', {readonly: true});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             managerFolder.addBinding(foliageManager, 'typeCount', {readonly: true});

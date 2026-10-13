@@ -11,6 +11,7 @@ import type FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
 import type Landscape from "../../../Landscape";
 import type Foliage from "../Foliage";
 import {FoliageSubCell} from "../Foliage";
+import {FOLIAGE_SEED_GRID_SIZE} from "../../FOLIAGE_CONSTANTS";
 
 /**
  * [KO] FoliageInstanceBaker 초기화 옵션 인터페이스입니다.
@@ -106,11 +107,10 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
         const subMinZ = subCellZ * subCellSize - halfWorldZ;
         const subMaxZ = subMinZ + subCellSize;
 
-        const FIXED_GRID = 100.0;
-        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_GRID);
-        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_GRID);
-        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_GRID);
-        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_GRID);
+        const startGx = Math.floor((subMinX + halfWorldX) / FOLIAGE_SEED_GRID_SIZE);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FOLIAGE_SEED_GRID_SIZE);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FOLIAGE_SEED_GRID_SIZE);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FOLIAGE_SEED_GRID_SIZE);
 
         const gridCountX = endGx - startGx + 1;
         const gridCountZ = endGz - startGz + 1;
@@ -165,7 +165,7 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
         f32[2] = halfWorldX;
         f32[3] = halfWorldZ;
 
-        f32[4] = FIXED_GRID;
+        f32[4] = FOLIAGE_SEED_GRID_SIZE;
         u32[5] = Math.max(1, Math.round(densityPerHectare * densityMultiplier));
         u32[6] = u32[5] * 2;
         u32[7] = nameHash;

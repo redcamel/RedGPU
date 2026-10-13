@@ -20,6 +20,7 @@ import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
 import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
+import {FOLIAGE_SUB_CELL_SIZE} from "./foliage/FOLIAGE_CONSTANTS";
 import GrassManager from "./grass/GrassManager";
 import LandscapeGPUCuller from "./core/spatial/LandscapeGPUCuller";
 import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
@@ -1394,7 +1395,7 @@ class Landscape extends RedGPUObject {
             this.#heightmapShadowDistance,
             this.#heightmapShadowSoftness,
             this.#foliageManager?.debugSubCellColoration ?? false,
-            this.#foliageManager?.subCellSize ?? 100.0,
+            FOLIAGE_SUB_CELL_SIZE,
             this.#debuggerManager?.landscapeDebugMode ?? 0
         );
     }

@@ -8,6 +8,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
 import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
+import {FOLIAGE_SUB_CELL_SIZE} from "../../foliage/FOLIAGE_CONSTANTS";
 
 /**
  * [KO] GPU 컴퓨트 컬링 및 간접 드로우(Indirect Draw)를 지원하기 위한 지형 타일 인스턴스 버퍼 및 유니폼 버퍼 관리자입니다.
@@ -233,7 +234,7 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         heightmapShadowDistance: number = 3000.0,
         heightmapShadowSoftness: number = 8.0,
         foliageSubCellColoration: boolean = false,
-        foliageSubCellSize: number = 100.0,
+        foliageSubCellSize: number = FOLIAGE_SUB_CELL_SIZE,
         debugMode: number = 0
     ): void {
         const gpuDevice = this.gpuDevice;

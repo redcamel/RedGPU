@@ -12,6 +12,7 @@ import FoliageMegaBuffer, {FoliageTypeAllocation} from "./buffer/FoliageMegaBuff
 import {AScatterType, AScatterTypeInitOptions} from "../../core/scatter";
 import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
+import {FOLIAGE_SEED_GRID_SIZE} from "../FOLIAGE_CONSTANTS";
 
 /**
  * [KO] 지형의 활성화된 레이어 목록 전체를 순회하여 특정 대상 레이어의 총합 대비 정규화된 가중치를 계산합니다. (식생 멀티 레이어 배치용)
@@ -69,11 +70,6 @@ function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: number):
     return seed === 0 ? 0x9e3779b9 : seed;
 }
 
-/**
- * [KO] 식생 인스턴스의 불변 월드 배치 좌표 및 의사난수 시드를 산출하는 고정 스캐터 그리드 크기 (단위: 미터, 100m).
- * [EN] Fixed scatter grid size (100m) for computing immutable world placement coordinates and PRNG seeds.
- */
-const FIXED_SCATTER_GRID_SIZE: number = 100.0;
 
 /**
  * [KO] 식생 서브셀 데이터 인터페이스입니다. (경량 메타데이터 구조체)
@@ -1627,18 +1623,18 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         const subMinZ = scZ * subCellSize - halfWorldZ;
         const subMaxZ = subMinZ + subCellSize;
 
-        const startGx = Math.floor((subMinX + halfWorldX) / FIXED_SCATTER_GRID_SIZE);
-        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FIXED_SCATTER_GRID_SIZE);
-        const startGz = Math.floor((subMinZ + halfWorldZ) / FIXED_SCATTER_GRID_SIZE);
-        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FIXED_SCATTER_GRID_SIZE);
+        const startGx = Math.floor((subMinX + halfWorldX) / FOLIAGE_SEED_GRID_SIZE);
+        const endGx = Math.floor((subMaxX + halfWorldX - 0.001) / FOLIAGE_SEED_GRID_SIZE);
+        const startGz = Math.floor((subMinZ + halfWorldZ) / FOLIAGE_SEED_GRID_SIZE);
+        const endGz = Math.floor((subMaxZ + halfWorldZ - 0.001) / FOLIAGE_SEED_GRID_SIZE);
 
         const nameHash = this.#nameHash;
         let validCount = 0;
 
         for (let gz = startGz; gz <= endGz; gz++) {
-            const gridMinZ = gz * FIXED_SCATTER_GRID_SIZE - halfWorldZ;
+            const gridMinZ = gz * FOLIAGE_SEED_GRID_SIZE - halfWorldZ;
             for (let gx = startGx; gx <= endGx; gx++) {
-                const gridMinX = gx * FIXED_SCATTER_GRID_SIZE - halfWorldX;
+                const gridMinX = gx * FOLIAGE_SEED_GRID_SIZE - halfWorldX;
                 let seed = computeScatterGridSeed(gx, gz, nameHash);
 
                 const maxAttempts = densityScaleByWeight
@@ -1657,8 +1653,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                     seed ^= seed << 5;
                     const rZ = (seed >>> 0) / 4294967296.0;
 
-                    const posX = gridMinX + rX * FIXED_SCATTER_GRID_SIZE;
-                    const posZ = gridMinZ + rZ * FIXED_SCATTER_GRID_SIZE;
+                    const posX = gridMinX + rX * FOLIAGE_SEED_GRID_SIZE;
+                    const posZ = gridMinZ + rZ * FOLIAGE_SEED_GRID_SIZE;
 
                     if (targetLayerObj) {
                         const u = (posX + halfWorldX) * invWorldSizeX;

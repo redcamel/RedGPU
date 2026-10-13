@@ -15,6 +15,7 @@ import FoliageCuller from "./core/culling/FoliageCuller";
 import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
 import FoliageSlotPooler from "./core/buffer/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
+import {FOLIAGE_SUB_CELL_SIZE} from "./FOLIAGE_CONSTANTS";
 
 /**
  * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
@@ -58,7 +59,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #culler: FoliageCuller;
     #useDepthPrepass: boolean = true;
 
-    #subCellSize: number = 100.0;
     #roundRobinIndex: number = 0;
     #debugSubCellColoration: boolean = false;
     #onUniformUpdateNeeded: (() => void) | null = null;
@@ -326,23 +326,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 식생 공간 분할 격자의 단위 서브셀 크기를 설정합니다. 변경 시 식생 서브셀 캐시가 초기화되고 온디맨드 재배치가 수행됩니다.
-     * [EN] Sets the unit subcell size of the foliage spatial grid. Foliage subcell caches are cleared and repopulated on-demand across cells upon change.
-     *
-     * @param val -
-     * [KO] 설정할 서브셀 크기 (최소값: 10.0)
-     * [EN] Subcell size to set (minimum: 10.0)
-     */
-    set subCellSize(val: number) {
-        const clamped = Math.max(10.0, val);
-        if (this.#subCellSize !== clamped) {
-            this.#subCellSize = clamped;
-            this.#onUniformUpdateNeeded?.();
-            this.repopulateAll();
-        }
-    }
-
-    /**
      * [KO] 특정 식생 타입이 메인 렌더 패스(Depth Prepass 활성화 시 포함)에서 발행하는 간접 드로우콜 수를 단일 패스로 계산합니다.
      * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
      */
@@ -371,11 +354,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 기본값: 100)를 반환합니다.
-     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, default: 100).
+     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 불변 고정값: 100)를 반환합니다.
+     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, immutable constant: 100).
      */
     get subCellSize(): number {
-        return this.#subCellSize;
+        return FOLIAGE_SUB_CELL_SIZE;
     }
 
 

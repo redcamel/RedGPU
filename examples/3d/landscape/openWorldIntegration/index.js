@@ -300,7 +300,7 @@ function renderTestPane({
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
             managerFolder.addBinding(foliageManager, 'enabled');
-            managerFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
+            managerFolder.addBinding(foliageManager, 'subCellSize', {readonly: true});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             // 전역 바람 시뮬레이션 설정 (씬 레벨 WindManager)
