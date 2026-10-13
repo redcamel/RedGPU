@@ -107,7 +107,11 @@ fn calculateFoliageWindDisplacement(
     );
 
     let rawWindXZ = systemUniforms.wind.direction.xz;
-    let windDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), dot(rawWindXZ, rawWindXZ) > 1e-8);
+    var windDir = vec2<f32>(1.0, 0.0);
+    let windLenSq = dot(rawWindXZ, rawWindXZ);
+    if (windLenSq > 1e-8) {
+        windDir = rawWindXZ * inverseSqrt(windLenSq);
+    }
     let windSpeed = systemUniforms.wind.speed;
 
     let treeBaseXZ = instancePos.xz;

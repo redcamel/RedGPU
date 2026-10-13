@@ -84,11 +84,6 @@ struct DrawIndexedIndirectArgs {
     firstInstance: u32,
 };
 
-fn packGroundColorAndType(groundColor: vec3<f32>, typeId: u32) -> u32 {
-    let rgbPacked = pack4x8unorm(vec4<f32>(groundColor, 0.0));
-    return insertBits(rgbPacked, typeId, 24u, 8u);
-}
-
 fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
     return extractBits(packedGroundColorAndType, 24u, 8u);
 }
@@ -212,7 +207,6 @@ fn main(
     }
 
     let numLODs = typeInfo.lodCount;
-    let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
 
     if (inMainFrustum) {
         var globalFade: f32 = 1.0;
@@ -281,7 +275,7 @@ fn main(
         }
     }
 
-    if (canHaveShadow && distSq < maxShadowDistSq) {
+    if (canHaveShadow) {
         let shadowFadeRange = clamp(userShadowDist * 0.20, 10.0, 60.0);
         let invShadowFadeRange = 1.0 / shadowFadeRange;
         let shadowFadeStart = max(0.0, userShadowDist - shadowFadeRange);
@@ -309,6 +303,7 @@ fn main(
                     if (inShadowFrustum) {
                         var targetShadowLOD: u32 = 0u;
                         if (numLODs > 1u) {
+                            let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
                             let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
                             let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
 

@@ -48,9 +48,11 @@ fn getDirectionalShadowVisibilityFoliage(
 
     // 4. 경량 슬로프 바이어스 및 노멀 오프셋
     let slopeBias = saturate(1.0 - nDotL);
+    let normalBiasScale = 0.5 + slopeBias * 1.5;
+    let baseBiasFactor = bias * (1.0 + slopeBias * 2.0);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-    let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
+    let normalOffset = N * normalBiasScale * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -62,10 +64,11 @@ fn getDirectionalShadowVisibilityFoliage(
         return 1.0;
     }
 
-    let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
+    let absPos = abs(worldPosition);
+    let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);
     let shadowDepth = saturate(shadowCoord.z);
-    let cascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+    let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
     // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
     var finalVis = textureSampleCompareLevel(
@@ -80,7 +83,8 @@ fn getDirectionalShadowVisibilityFoliage(
     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
-        let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
+        let safePrevIndex = max(1u, cascadeIndex) - 1u;
+        let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[safePrevIndex], cascadeIndex > 0u);
         let cascadeRange = splitFar - splitNear;
         let blendMargin = cascadeRange * 0.20;
         let blendStart = splitFar - blendMargin;
@@ -89,13 +93,13 @@ fn getDirectionalShadowVisibilityFoliage(
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-            let nextNormalOffset = N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
+            let nextNormalOffset = N * normalBiasScale * nextWorldTexelSize;
             let nextBiasedPos = worldPosition + nextNormalOffset;
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
 
             let nextTUV = nextShadowCoord.xy;
             let nextShadowDepth = saturate(nextShadowCoord.z);
-            let nextCascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+            let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
             let nextVis = textureSampleCompareLevel(
                 directionalShadowMap,

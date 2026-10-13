@@ -302,11 +302,21 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
+    let NORM_225: f32 = 0.44444445;
+    let sssDistortion: f32 = 0.25;
+    let sssTransmissionFactor: f32 = 0.45;
+
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
-        let L = select(-normalize(light.direction), L0, i == 0u);
+        var L: vec3<f32>;
+        if (i == 0u) {
+            L = L0;
+        } else {
+            L = -normalize(light.direction);
+        }
 
-        let NdotL = max(dot(N, L), 0.0);
+        let rawNdotL = dot(N, L);
+        let NdotL = max(rawNdotL, 0.0);
         let H = normalize(L + V);
         let NdotH = max(dot(N, H), 0.0);
         let LdotH = max(dot(L, H), 0.0);
@@ -323,15 +333,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let F = getFresnel(VdotH, F0);
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
-        let NORM_225: f32 = 0.44444445;
-        let backWrap = saturate((-dot(N, L) + 0.5) * NORM_225);
-        let distortion = 0.25;
-        let lightOpposite = -(L + N * distortion);
+        let backWrap = saturate((-rawNdotL + 0.5) * NORM_225);
+        let lightOpposite = -(L + N * sssDistortion);
         let vDotL = max(dot(V, lightOpposite), 0.0);
         let inScatter = vDotL * vDotL;
-        let transmissionFactor = 0.45;
         let diffuseTransmission = albedo * (backWrap * 0.5 + inScatter * 0.5);
-        let totalDiffuse = mix(diffuseReflection, diffuseTransmission, transmissionFactor);
+        let totalDiffuse = mix(diffuseReflection, diffuseTransmission, sssTransmissionFactor);
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;
@@ -407,7 +414,7 @@ fn main(inputData: InputData) -> OutputFragment {
             backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
         }
         let transmittedIBL = backScatteringColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric);
-        envIBL_DIFFUSE = envIBL_DIFFUSE * (1.0 - 0.45) + transmittedIBL * (0.45 * 0.35);
+        envIBL_DIFFUSE = envIBL_DIFFUSE * 0.55 + transmittedIBL * 0.1575;
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
