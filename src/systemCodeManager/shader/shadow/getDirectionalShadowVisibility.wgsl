@@ -41,7 +41,7 @@ fn sampleModernCascadeShadow(
     slopeFactor: f32,
     driftBias: f32
 ) -> f32 {
-    let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
+    let shadowDepth = saturate(shadowCoord.z);
     // 🌟 [슬로프 스케일 뎁스 바이어스 + 대규모 오픈월드 부동소수점 오차 동적 흡수]
     let cascadeBias = max(bias * (1.0 + slopeFactor * 3.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
@@ -68,7 +68,7 @@ fn sampleModernCascadeShadow(
     }
 
     // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
-    let cascadeScale = mix(2.5, 3.2, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
+    let cascadeScale = mix(2.5, 3.2, saturate(f32(cascadeIndex) / 3.0));
     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
 
     var weightedVisibility: f32 = 0.0;
@@ -187,8 +187,7 @@ fn getDirectionalShadowVisibility(
     // 16-Tap PCF 필터 반경 및 곡면 메시(캐릭터 등)의 자가 그림자 여드름(Acne)을 완벽 차단
     let slopeBias = saturate(1.0 - nDotL);
     var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    var orthoScale = length(lightVP[0].xyz);
-    var worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+    var worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
     var normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
     var biasedWorldPosition = worldPosition + normalOffset;
 
@@ -199,8 +198,7 @@ fn getDirectionalShadowVisibility(
     if ((shadowCoord.x < -0.02 || shadowCoord.x > 1.02 || shadowCoord.y < -0.02 || shadowCoord.y > 1.02) && cascadeIndex < cascadeCount - 1u) {
         cascadeIndex = cascadeIndex + 1u;
         lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-        orthoScale = length(lightVP[0].xyz);
-        worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+        worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
         normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
         biasedWorldPosition = worldPosition + normalOffset;
         shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -232,8 +230,7 @@ fn getDirectionalShadowVisibility(
         if (viewDepth > blendStart && visibility > 0.0001 && visibility < 0.9999) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
-            let nextOrthoScale = length(nextLightVP[0].xyz);
-            let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
+            let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
             let nextBiasedPos = worldPosition + N * (1.2 + slopeBias * 2.5) * nextWorldTexelSize;
 
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);

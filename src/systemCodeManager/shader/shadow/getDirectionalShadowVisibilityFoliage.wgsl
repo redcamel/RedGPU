@@ -28,7 +28,6 @@ fn getDirectionalShadowVisibilityFoliage(
 
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-    let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
     let bias = shadowInfo.directionalShadowBias;
 
     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
@@ -50,8 +49,7 @@ fn getDirectionalShadowVisibilityFoliage(
     // 4. 경량 슬로프 바이어스 및 노멀 오프셋
     let slopeBias = saturate(1.0 - nDotL);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    let orthoScale = length(lightVP[0].xyz);
-    let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+    let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
     let normalOffset = N * (1.0 + slopeBias * 2.0) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 

@@ -3351,8 +3351,6 @@ export namespace ShaderLibrary {
      *       //
      *       directionalLightCount:u32,
      *       directionalLightProjectionViewMatrix:mat4x4<f32>,
-     *       directionalLightProjectionMatrix:mat4x4<f32>,
-     *       directionalLightViewMatrix:mat4x4<f32>,
      *       directionalLights:array<DirectionalLight,3>,
      * 	  //
      * 	  ambientLight:AmbientLight,

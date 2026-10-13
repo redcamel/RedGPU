@@ -34,11 +34,11 @@ const renderShadowLayer = (view: View3D, viewShadowRenderPassEncoder: GPURenderP
         const {gpuRenderInfo} = target;
         if (!gpuRenderInfo || !gpuRenderInfo.shadowPipeline) continue;
 
-        const currentGeometry = (target as any)._geometry;
+        const currentGeometry = target.geometry;
         if (!currentGeometry) continue;
 
         // 🌟 [Per-Cascade Culling] 메쉬의 바운딩 상자/구체와 캐스케이드 외접구 간 교차 판정
-        const aabb = (target as any).boundingAABB;
+        const aabb = target.boundingAABB;
         if (aabb) {
             const mx = aabb.centerX;
             const my = aabb.centerY;
@@ -70,13 +70,13 @@ const renderShadowLayer = (view: View3D, viewShadowRenderPassEncoder: GPURenderP
             const {indexBuffer} = currentGeometry;
             const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer;
             viewShadowRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format);
-            viewShadowRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, (target as any).globalVertexSlotIndex);
+            viewShadowRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, target.globalVertexSlotIndex);
             renderResults.numTriangles += triangleCount;
             renderResults.numPoints += indexCount;
         } else {
             const {vertexBuffer} = currentGeometry;
             const {vertexCount, triangleCount} = vertexBuffer;
-            viewShadowRenderPassEncoder.draw(vertexCount, 1, 0, (target as any).globalVertexSlotIndex);
+            viewShadowRenderPassEncoder.draw(vertexCount, 1, 0, target.globalVertexSlotIndex);
             renderResults.numTriangles += triangleCount;
             renderResults.numPoints += vertexCount;
         }

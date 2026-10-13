@@ -354,12 +354,6 @@ class View3D extends AView {
     /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.
-     * @param shadowRender -
-     * [KO] 그림자 맵 생성 렌더 패스인지 여부
-     * [EN] Whether it is a shadow map generation render pass
-     * @param calcPointLightCluster -
-     * [KO] 포인트 라이트 클러스터 계산 여부
-     * [EN] Whether to calculate point light cluster
      * @param renderPath1ResultTextureView -
      * [KO] 렌더 패스 1단계 결과 텍스처 뷰
      * [EN] Render path 1 stage result texture view
@@ -367,7 +361,7 @@ class View3D extends AView {
      * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰
      * [EN] Render path 1 stage depth result texture view
      */
-    update(shadowRender: boolean = false, calcPointLightCluster: boolean = false, renderPath1ResultTextureView?: GPUTextureView, renderPath1DepthTextureView?: GPUTextureView) {
+    update(renderPath1ResultTextureView?: GPUTextureView, renderPath1DepthTextureView?: GPUTextureView) {
         const {scene, redGPUContext, ibl, skyAtmosphere} = this
         const {shadowManager,} = scene
         shadowManager.update(redGPUContext)
@@ -375,9 +369,9 @@ class View3D extends AView {
 
         const ibl_prefilterTexture = ibl?.prefilterTexture?.gpuTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture?.gpuTexture
-        let shadowDepthTextureView = shadowRender ? directionalShadowManager.shadowDepthTextureViewEmpty : directionalShadowManager.shadowDepthTextureView
+        const shadowDepthTextureView = directionalShadowManager.shadowDepthTextureView
         const index = this.redGPUContext.viewList.indexOf(this)
-        const key = `${index}_${shadowRender ? 'shadowRender' : 'basic'}_2path${!!renderPath1ResultTextureView}_depth${!!renderPath1DepthTextureView}`
+        const key = `${index}_basic_2path${!!renderPath1ResultTextureView}_depth${!!renderPath1DepthTextureView}`
 
         if (index > -1) {
             let needResetBindGroup = true
@@ -488,11 +482,6 @@ class View3D extends AView {
                     key: 'directionalLightProjectionViewMatrix',
                     value: shadowManager.directionalShadowManager.cascadeProjectionViewMatrices[0]
                 },
-                {
-                    key: 'directionalLightProjectionMatrix',
-                    value: lightManager.getDirectionalLightProjectionMatrix(this)
-                },
-                {key: 'directionalLightViewMatrix', value: lightManager.getDirectionalLightViewMatrix(this)},
                 {
                     key: 'preExposure',
                     value: this.postEffectManager.autoExposure.preExposure

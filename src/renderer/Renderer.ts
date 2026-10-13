@@ -229,18 +229,17 @@ class Renderer {
                     landscape.update(renderViewStateData);
                 }
             }
-            // [KO] 쉐도우 패스용 업데이트 및 렌더링 (직사광이 존재할 때만 실행)
-            // [EN] Update and render for shadow pass (only executed when directional lights exist)
-            if (scene.lightManager.directionalLightCount > 0) {
-                view.update(true, false, null)
-                shadowManager.render(view)
-            }
-
-            // [KO] 기본 패스용 업데이트 및 렌더링
-            // [EN] Update and render for basic pass
+            // [KO] 기본 패스용 텍스처 뷰 획득 및 뷰 유니폼/CSM 업데이트 (1회 통합 실행)
+            // [EN] Acquire basic pass texture views and update view uniforms / CSM (single consolidated execution)
             const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
             const renderPath1DepthResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
-            view.update(false, true, renderPath1ResultTextureView, renderPath1DepthResultTextureView)
+            view.update(renderPath1ResultTextureView, renderPath1DepthResultTextureView);
+
+            // [KO] 쉐도우 패스 렌더링 (직사광이 존재할 때만 실행)
+            // [EN] Render shadow pass (only executed when directional lights exist)
+            if (scene.lightManager.directionalLightCount > 0) {
+                shadowManager.render(view);
+            }
 
             // 🌿 [Hierarchical Z-Buffer] Depth Texture로부터 8단계 HZB 피라미드 생성 (0.02ms)
             const currentDepthView = view.viewRenderTextureManager.depthTextureView;

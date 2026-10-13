@@ -686,14 +686,15 @@ class DirectionalShadowManager {
             label: `${this.#shadowDepthTexture.label}_ArrayView`
         });
 
-        this.#cascadeLayerViews = [0, 1, 2, 3].map(layerIndex =>
-            this.#shadowDepthTexture.createView({
+        this.#cascadeLayerViews.length = 0;
+        for (let layerIndex = 0; layerIndex < 4; layerIndex++) {
+            this.#cascadeLayerViews[layerIndex] = this.#shadowDepthTexture.createView({
                 label: `${this.#shadowDepthTexture.label}_Layer_${layerIndex}`,
                 dimension: '2d',
                 baseArrayLayer: layerIndex,
                 arrayLayerCount: 1
-            })
-        );
+            });
+        }
 
         if (!this.#shadowDepthTextureViewEmpty) this.#createEmptyDepthTexture(gpuDevice);
     }

@@ -133,9 +133,10 @@ class ShadowManager {
      */
     #getCascadePassDescriptor(c: number): GPURenderPassDescriptor {
         let descriptor = this.#cascadePassDescriptors[c];
+        const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
         if (!descriptor) {
             const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
-                view: null as any,
+                view: layerView,
                 depthClearValue: 1.0,
                 depthLoadOp: GPU_LOAD_OP.CLEAR,
                 depthStoreOp: GPU_STORE_OP.STORE,
@@ -146,9 +147,8 @@ class ShadowManager {
                 depthStencilAttachment,
             };
             this.#cascadePassDescriptors[c] = descriptor;
-        }
-        if (descriptor.depthStencilAttachment) {
-            descriptor.depthStencilAttachment.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        } else if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = layerView;
         }
         return descriptor;
     }
@@ -160,7 +160,7 @@ class ShadowManager {
     #hasAnyShadowCaster(view: View3D): boolean {
         if (this.#directionalShadowManager.castingList.length > 0) return true;
 
-        const scene = (view as any).rawScene || view.scene;
+        const scene = view.scene;
         if (!scene) return false;
 
         const landscape = scene.landscape;
@@ -192,9 +192,10 @@ class ShadowManager {
      */
     #getClearPassDescriptor(c: number): GPURenderPassDescriptor {
         let descriptor = this.#clearPassDescriptors[c];
+        const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
         if (!descriptor) {
             const depthStencilAttachment: GPURenderPassDepthStencilAttachment = {
-                view: null as any,
+                view: layerView,
                 depthClearValue: 1.0,
                 depthLoadOp: GPU_LOAD_OP.CLEAR,
                 depthStoreOp: GPU_STORE_OP.STORE,
@@ -205,9 +206,8 @@ class ShadowManager {
                 depthStencilAttachment,
             };
             this.#clearPassDescriptors[c] = descriptor;
-        }
-        if (descriptor.depthStencilAttachment) {
-            descriptor.depthStencilAttachment.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        } else if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = layerView;
         }
         return descriptor;
     }
