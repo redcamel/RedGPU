@@ -1,8 +1,3 @@
-/**
- * [KO] 식생(Foliage) 인스턴스 지형 물리 베이커 모듈입니다.
- * [EN] Foliage instance terrain physical baker module.
- * @packageDocumentation
- */
 import type RedGPUContext from "../../../../context/RedGPUContext";
 import foliageBakeWGSL from "./foliageBake.wgsl";
 import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
@@ -13,27 +8,11 @@ import type Foliage from "../Foliage";
 import {FoliageSubCell} from "../Foliage";
 import {FOLIAGE_SEED_GRID_SIZE} from "../../FOLIAGE_CONSTANTS";
 
-/**
- * [KO] FoliageInstanceBaker 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for FoliageInstanceBaker.
- */
 export interface FoliageInstanceBakerOptions {
-    /**
-     * [KO] 실행할 WebGPU Compute WGSL 셰이더 소스코드 문자열 (선택사항)
-     * [EN] WebGPU Compute WGSL shader source code string to execute (optional)
-     */
     computeShaderCode?: string;
-    /**
-     * [KO] 디버깅 및 프로파일링용 베이커 식별 라벨
-     * [EN] Identifier label for debugging and profiling
-     */
     label?: string;
 }
 
-/**
- * [KO] 지형(Landscape) 표면에 식생 인스턴스들을 물리적으로 안착 및 100% GPU 베이킹하는 클래스입니다.
- * [EN] Baker class that physically conforms and 100% GPU-bakes foliage instances onto landscape terrain.
- */
 class FoliageInstanceBaker extends AScatterInstanceBaker {
     #uniformCPUBuffer: Float32Array;
     #uniformUintBuffer: Uint32Array;
@@ -44,13 +23,6 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
 
     #label: string;
 
-    /**
-     * [KO] FoliageInstanceBaker 인스턴스를 생성하고 내부 유니폼 버퍼 및 GPU 컴퓨트 파이프라인을 초기화합니다.
-     * [EN] Creates a FoliageInstanceBaker instance and initializes internal uniform buffers and the GPU compute pipeline.
-     *
-     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
-     * @param options - 베이커 초기화 설정 옵션
-     */
     constructor(redGPUContext: RedGPUContext, options?: FoliageInstanceBakerOptions) {
         super(redGPUContext);
 
@@ -67,10 +39,6 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
         this.#initTaskBuffer();
     }
 
-    /**
-     * [KO] 단일 서브셀(SubCell)에 대해 GPU 원스톱 베이킹을 실행합니다.
-     * [EN] Executes GPU one-stop baking for a single SubCell.
-     */
     dispatchBakeSubCell(
         megaBuffer: FoliageMegaBuffer,
         landscape: Landscape,
@@ -125,7 +93,7 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
                 tasksBuf[tOffset++] = gx;
                 tasksBuf[tOffset++] = gz;
                 tasksBuf[tOffset++] = targetCount;
-                tasksBuf[tOffset++] = 0; // pad0 (16-byte alignment tail padding)
+                tasksBuf[tOffset++] = 0;
             }
         }
 
@@ -202,8 +170,8 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
 
         f32[32] = subMaxX;
         f32[33] = subMaxZ;
-        u32[34] = 0; // pad0 (strideFloats)
-        u32[35] = 0; // pad1
+        u32[34] = 0;
+        u32[35] = 0;
 
         queue.writeBuffer(uniformGPUBuffer, 0, f32.buffer, 0, 144);
 
@@ -266,3 +234,4 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
 
 Object.freeze(FoliageInstanceBaker);
 export default FoliageInstanceBaker;
+

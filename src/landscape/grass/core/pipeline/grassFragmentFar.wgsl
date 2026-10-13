@@ -92,7 +92,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
     let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
-    // 🌿 TAA 서브픽셀 지터링 깜빡임 방지용 적응형 알파 컷오프 (Alpha Widening)
     let uvDeriv = fwidth(input.uv);
     let subpixelFactor = saturate(max(uvDeriv.x, uvDeriv.y) * 50.0);
     let adaptiveCutoff = mix(materialUniforms.farAlphaCutoff, materialUniforms.farAlphaCutoff * 0.45, subpixelFactor);
@@ -110,7 +109,6 @@ fn main(input: VertexOutput) -> OutputFragment {
         input.groundColor.rgb
     );
 
-    // 🌿 원거리 잔디 서브픽셀 라이팅 지글거림 방지: 개별 풀잎 노멀을 지면 수직 노멀(+Y)로 85% 수렴 (Normal Flattening)
     let N = normalize(mix(input.normal, vec3<f32>(0.0, 1.0, 0.0), 0.85));
     let preExposure = systemUniforms.preExposure;
 
@@ -169,3 +167,4 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     return output;
 }
+

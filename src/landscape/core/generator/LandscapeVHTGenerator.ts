@@ -1,8 +1,3 @@
-/**
- * [KO] 지형 가상 높이 텍스처(VHT) 아틀라스 베이킹 제너레이터 모듈입니다.
- * [EN] Terrain virtual height texture (VHT) atlas baking generator module.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
@@ -11,27 +6,6 @@ import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-/**
- * [KO] 타일 단위 높이맵 또는 전역 지형 높이맵 텍스처를 VHT 아틀라스 텍스처로 베이킹하는 제너레이터 클래스입니다.
- * [EN] Generator class that bakes per-tile height maps or global terrain height map textures into the VHT atlas texture.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **가상 높이 텍스처(VHT) 구축**: 지형 지면의 물리적 고도 데이터를 16/32비트 고정밀 부동소수점 포맷으로 VHT 아틀라스에 굽습니다. 이 데이터는 지형 컴포넌트의 버텍스 셰이더 변위(Vertex Displacement) 및 물리 충돌 계산의 원천이 됩니다.
- * - **듀얼 베이킹 파이프라인**:
- *   - **개별 타일 베이킹 (`landscapeVHTBake.wgsl`)**: 스트리밍되는 타일별 개별 높이맵 이미지를 아틀라스의 해당 타일 슬롯 위치에 정밀하게 배치합니다.
- *   - **전역 높이맵 분할 베이킹 (`landscapeVHTGlobalBake.wgsl`)**: 전체 지형을 아우르는 단일 거대 전역 높이맵으로부터 각 타일 영역의 UV를 계산하여 고속 분할 복사합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Virtual Height Texture (VHT) Construction**: Bakes terrain physical elevation data into the VHT atlas in 16/32-bit high-precision floating-point formats, providing the single source of truth for vertex displacement and physics queries.
- * - **Dual Baking Pipelines**:
- *   - **Per-tile Baking (`landscapeVHTBake.wgsl`)**: Precisely places streamed individual tile heightmap images into designated atlas tile slots.
- *   - **Global Heightmap Split Baking (`landscapeVHTGlobalBake.wgsl`)**: Fast-samples and splits localized tile regions from a unified global heightmap texture using UV coordinate transformation.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(LandscapeTileStreamer)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (LandscapeTileStreamer).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
     #uniformByteLength: number = 16;
@@ -55,28 +29,6 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.#initGlobalComputeResources();
     }
 
-    /**
-     * [KO] 특정 지형 컴포넌트(타일)의 높이맵 텍스처를 VHT 아틀라스의 지정된 영역으로 베이킹합니다.
-     * [EN] Bakes the heightmap texture of a specific terrain component (tile) into the designated region of the VHT atlas.
-     * @param srcTileTexture -
-     * [KO] 소스 타일 높이맵 GPUTexture
-     * [EN] Source tile heightmap GPUTexture
-     * @param vhtAtlas -
-     * [KO] 대상 VHT 아틀라스 DirectTexture
-     * [EN] Target VHT atlas DirectTexture
-     * @param pixelX -
-     * [KO] 아틀라스 내 베이킹 대상 X 좌표 (픽셀)
-     * [EN] Destination X coordinate in atlas (pixels)
-     * @param pixelZ -
-     * [KO] 아틀라스 내 베이킹 대상 Z 좌표 (픽셀)
-     * [EN] Destination Z coordinate in atlas (pixels)
-     * @param pixelW -
-     * [KO] 베이킹 영역 너비 (픽셀)
-     * [EN] Baking region width (pixels)
-     * @param pixelH -
-     * [KO] 베이킹 영역 높이 (픽셀)
-     * [EN] Baking region height (pixels)
-     */
     bakeTileRegion(
         srcTileTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -123,23 +75,6 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.dispatchBakePass(bindGroup, pixelW, pixelH, pixelX, pixelZ);
     }
 
-    /**
-     * [KO] 전역 지형 높이맵 텍스처 전체를 VHT 아틀라스의 전역 베이스로 일괄 베이킹합니다.
-     * [EN] Bakes the entire global terrain heightmap texture into the VHT atlas base in a single batch.
-     *
-     * @param globalTexture -
-     * [KO] 소스 전역 높이맵 GPUTexture
-     * [EN] Source global heightmap GPUTexture
-     * @param vhtAtlas -
-     * [KO] 대상 VHT 아틀라스 DirectTexture
-     * [EN] Target VHT atlas DirectTexture
-     * @param compCountX -
-     * [KO] X축 컴포넌트 타일 개수
-     * [EN] Number of component tiles along X axis
-     * @param compCountZ -
-     * [KO] Z축 컴포넌트 타일 개수
-     * [EN] Number of component tiles along Z axis
-     */
     bakeGlobalBase(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -157,41 +92,6 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         );
     }
 
-    /**
-     * [KO] 전역 지형 높이맵의 특정 UV 서브 영역을 VHT 아틀라스의 지정된 픽셀 영역으로 베이킹합니다.
-     * [EN] Bakes a specific UV sub-region of the global terrain heightmap into the designated pixel area of the VHT atlas.
-     *
-     * @param globalTexture -
-     * [KO] 소스 전역 높이맵 GPUTexture
-     * [EN] Source global heightmap GPUTexture
-     * @param vhtAtlas -
-     * [KO] 대상 VHT 아틀라스 DirectTexture
-     * [EN] Target VHT atlas DirectTexture
-     * @param pixelX -
-     * [KO] 아틀라스 내 베이킹 대상 X 좌표 (픽셀)
-     * [EN] Destination X coordinate in atlas (pixels)
-     * @param pixelZ -
-     * [KO] 아틀라스 내 베이킹 대상 Z 좌표 (픽셀)
-     * [EN] Destination Z coordinate in atlas (pixels)
-     * @param pixelW -
-     * [KO] 베이킹 영역 너비 (픽셀)
-     * [EN] Baking region width (pixels)
-     * @param pixelH -
-     * [KO] 베이킹 영역 높이 (픽셀)
-     * [EN] Baking region height (pixels)
-     * @param uMin -
-     * [KO] 소스 텍스처 시작 U 좌표 (0.0 ~ 1.0)
-     * [EN] Source texture start U coordinate (0.0 to 1.0)
-     * @param vMin -
-     * [KO] 소스 텍스처 시작 V 좌표 (0.0 ~ 1.0)
-     * [EN] Source texture start V coordinate (0.0 to 1.0)
-     * @param uMax -
-     * [KO] 소스 텍스처 종료 U 좌표 (0.0 ~ 1.0)
-     * [EN] Source texture end U coordinate (0.0 to 1.0)
-     * @param vMax -
-     * [KO] 소스 텍스처 종료 V 좌표 (0.0 ~ 1.0)
-     * [EN] Source texture end V coordinate (0.0 to 1.0)
-     */
     #bakeGlobalRegion(
         globalTexture: GPUTexture,
         vhtAtlas: DirectTexture,
@@ -323,10 +223,6 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         });
     }
 
-    /**
-     * [KO] 전역 높이맵 분할 베이킹 컴퓨트 파이프라인, 바인드 그룹 레이아웃 및 부모 자원을 모두 해제합니다.
-     * [EN] Releases global heightmap compute pipeline, bind group layout, and parent resources.
-     */
     override destroy(): void {
         this.#globalComputePipeline = null;
         this.#globalBindGroupLayout = null;
@@ -336,3 +232,4 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
 
 Object.freeze(LandscapeVHTGenerator);
 export default LandscapeVHTGenerator;
+

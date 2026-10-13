@@ -1,32 +1,8 @@
-/**
- * [KO] 프러스텀 및 HZB 기반의 GPU 컴퓨트 컬링 및 간접 드로우 인스턴스 버퍼 디스패처 모듈입니다.
- * [EN] GPU compute culling dispatcher module performing frustum and HZB occlusion culling.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeCullSource from "../shader/landscapeCull.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
-/**
- * [KO] 프러스텀 및 HZB 기반의 GPU 컴퓨트 컬링 및 LOD 선정을 수행하고 간접 드로우 인스턴스 버퍼를 갱신하는 디스패처 클래스입니다.
- * [EN] GPU compute culling dispatcher performing frustum and HZB occlusion culling, selecting tile LODs, and updating indirect draw arguments.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **GPU 주도형(GPU-driven) 지형 컬링**: 카메라 뷰 프러스텀 6개 평면과의 AABB 교차 검사 및 HZB(Hierarchical Z-Buffer) 깊이 피라미드 오클루전 테스트를 WebGPU 컴퓨트 셰이더(`landscapeCull.wgsl`)에서 100% 병렬 처리합니다.
- * - **동적 LOD 레벨 산정**: 카메라와의 유클리드 거리 또는 화면 점유율(Screen Size Metric)을 기반으로 각 타일의 최적 LOD 단계를 GPU 내에서 실시간 결정합니다.
- * - **간접 드로우 인자 버퍼 자동 갱신**: 컬링을 통과한 가시 타일들만 LOD별 간접 인덱스 드로우 버퍼(`indirectDrawBuffer`)의 `instanceCount`를 원자적(Atomic)으로 증가시켜 CPU 개입 없는 완벽한 제로 오버헤드 렌더링을 구현합니다.
- *
- * **[EN] Architecture & Role:**
- * - **GPU-Driven Terrain Culling**: Executes 6-plane frustum AABB intersection tests and hierarchical Z-buffer (HZB) occlusion culling entirely in parallel via WebGPU compute shaders (`landscapeCull.wgsl`).
- * - **Dynamic LOD Selection**: Computes the optimal LOD level for each tile on the GPU based on Euclidean distance or screen-space metrics.
- * - **Atomic Indirect Argument Updates**: Atomically increments `instanceCount` inside `indirectDrawBuffer` for visible tiles per LOD, enabling zero-CPU-overhead multi-LOD indirect rendering.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeGPUCuller extends RedGPUObject {
     #computePipeline: GPUComputePipeline | null = null;
     #uniformBuffer: GPUBuffer | null = null;
@@ -37,27 +13,11 @@ class LandscapeGPUCuller extends RedGPUObject {
     #uniformData: Float32Array;
     #uniformUintData: Uint32Array;
 
-    /**
-     * [KO] LandscapeGPUCuller 생성자입니다.
-     * [EN] Constructor for LandscapeGPUCuller.
-     *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 / [EN] RedGPU context
-     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#initGPUResources();
     }
 
-    /**
-     * [KO] GPU 컬링 연산에 필요한 전체 타일 버퍼, 가시 타일 출력 버퍼, 간접 드로우 버퍼 및 HZB 텍스처를 바인드 그룹으로 바인딩합니다.
-     * [EN] Updates the compute bind group with all tiles, visible tiles, indirect draw buffers, and optional HZB texture.
-     *
-     * @param allTilesBuffer - [KO] 전체 타일 스토리지 버퍼 / [EN] Storage buffer containing all tiles
-     * @param visibleTilesBuffer - [KO] 컬링된 가시 타일 데이터 출력 스토리지 버퍼 / [EN] Output storage buffer for visible tiles
-     * @param indirectDrawBuffer - [KO] LOD별 간접 인덱스 드로우 인자 버퍼 / [EN] Indirect indexed draw argument buffer
-     * @param hzbTextureView - [KO] HZB 텍스처 뷰 (선택 사항) / [EN] Optional HZB texture view
-     * @param hzbSampler - [KO] HZB 텍스처 샘플러 (선택 사항) / [EN] Optional HZB sampler
-     */
     updateBindGroup(
         allTilesBuffer: GPUBuffer,
         visibleTilesBuffer: GPUBuffer,
@@ -86,25 +46,6 @@ class LandscapeGPUCuller extends RedGPUObject {
         });
     }
 
-    /**
-     * [KO] 카메라 위치, 프러스텀 평면, LOD 거리 임계값 및 투영 행렬을 컬링 유니폼 버퍼에 갱신합니다.
-     * [EN] Updates camera position, frustum planes, LOD distance thresholds, and projection matrix to the culling uniform buffer.
-     *
-     * @param camX - [KO] 카메라 월드 X 좌표 / [EN] Camera world X coordinate
-     * @param camY - [KO] 카메라 월드 Y 좌표 / [EN] Camera world Y coordinate
-     * @param camZ - [KO] 카메라 월드 Z 좌표 / [EN] Camera world Z coordinate
-     * @param lodMaxLevel - [KO] 최대 LOD 단계 수 / [EN] Maximum LOD levels count
-     * @param tileSizeX - [KO] 단일 타일 X 크기 / [EN] Single tile X size
-     * @param tileSizeZ - [KO] 단일 타일 Z 크기 / [EN] Single tile Z size
-     * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale
-     * @param tileCount - [KO] 전체 활성 타일 수 / [EN] Total active tile count
-     * @param frustumPlanes - [KO] 카메라 뷰 프러스텀 1차원 평탄 버퍼 (Float32Array(24)) / [EN] Flattened camera view frustum planes buffer (Float32Array(24))
-     * @param lodDistancesSq - [KO] LOD 레벨 전환 제곱 거리 배열 / [EN] Squared distance thresholds per LOD
-     * @param tanHalfFOV - [KO] tan(halfFOV) 값 / [EN] tan(halfFOV) factor
-     * @param lodMetric - [KO] 화면 투영 오차 LOD 계수 / [EN] Screen space error metric
-     * @param useHZB - [KO] HZB 오클루전 컬링 활성화 여부 / [EN] Whether HZB occlusion culling is enabled
-     * @param viewProjectionMatrix - [KO] 뷰-프로젝션 결합 행렬 / [EN] Optional view-projection matrix
-     */
     updateUniforms(
         camX: number,
         camY: number,
@@ -178,13 +119,6 @@ class LandscapeGPUCuller extends RedGPUObject {
         gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, data.buffer, 0, data.byteLength);
     }
 
-    /**
-     * [KO] 주어진 컴퓨트 패스 인코더를 통해 GPU 컬링 컴퓨트 셰이더를 디스패치합니다.
-     * [EN] Dispatches the GPU culling compute shader through the provided compute pass encoder.
-     *
-     * @param computePass - [KO] GPU 컴퓨트 패스 인코더 / [EN] GPU compute pass encoder
-     * @param tileCount - [KO] 디스패치할 활성 타일 수 / [EN] Active tile count to dispatch
-     */
     dispatchPass(computePass: GPUComputePassEncoder, tileCount: number): void {
         if (!this.#computePipeline || !this.#bindGroup) return;
 
@@ -236,10 +170,6 @@ class LandscapeGPUCuller extends RedGPUObject {
         });
     }
 
-    /**
-     * [KO] GPU 유니폼 버퍼 및 파이프라인 참조를 해제합니다.
-     * [EN] Destroys GPU uniform buffers and releases pipeline references.
-     */
     destroy(): void {
         if (this.#uniformBuffer) {
             try {
@@ -256,3 +186,4 @@ class LandscapeGPUCuller extends RedGPUObject {
 
 Object.freeze(LandscapeGPUCuller);
 export default LandscapeGPUCuller;
+

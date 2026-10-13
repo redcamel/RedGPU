@@ -1,8 +1,3 @@
-/**
- * [KO] 식생 WebGPU 렌더러 모듈입니다.
- * [EN] Foliage WebGPU renderer module.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
@@ -10,20 +5,12 @@ import FoliageRenderUnit from "../FoliageRenderUnit";
 import Foliage from "../Foliage";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 
-/**
- * [KO] 렌더링 가능한 유효 식생 타입 항목 인터페이스입니다.
- * [EN] Interface for valid renderable foliage type items.
- */
 interface ValidFoliageTypeItem {
     type: Foliage;
     culledGPU: GPUBuffer;
     indirectGPU: GPUBuffer;
 }
 
-/**
- * [KO] View3D별 메인 GPURenderBundle 캐시 엔트리 인터페이스입니다.
- * [EN] Interface for main GPURenderBundle cache entry per View3D.
- */
 interface FoliageMainBundleCacheEntry {
     bundle: GPURenderBundle;
     systemBG: GPUBindGroup | null;
@@ -32,15 +19,6 @@ interface FoliageMainBundleCacheEntry {
     useDepthPrepass: boolean;
 }
 
-/**
- * [KO] GPU 컬링된 식생 인스턴스들을 간접 드로우(drawIndexedIndirect / drawIndirect)를 통해 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
- * [EN] Renderer class that renders GPU-culled foliage instances to main and shadow passes using indirect drawing (drawIndexedIndirect / drawIndirect).
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     static #MAX_POOLED_TYPES = 64;
     #pipelineRegistry: FoliagePipelineRegistry;
@@ -69,22 +47,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
     #renderUnitDynamicBindGroup: GPUBindGroup | null = null;
 
-    /**
-     * [KO] FoliageRenderer 인스턴스를 생성합니다.
-     * [EN] Creates a FoliageRenderer instance.
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param pipelineRegistry -
-     * [KO] 식생 파이프라인 레지스트리
-     * [EN] Foliage pipeline registry
-     * @param renderUnitVertexBindGroupLayout -
-     * [KO] 렌더 유닛 유니폼 바인드 그룹 레이아웃 (선택사항)
-     * [EN] Render unit uniform bind group layout (optional)
-     * @param renderUnitDynamicBindGroup -
-     * [KO] 256B 정렬 Dynamic Offset UBO 바인드 그룹 (선택사항)
-     * [EN] 256B aligned Dynamic Offset UBO bind group (optional)
-     */
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
@@ -110,10 +72,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 메인 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
-     * [EN] Returns whether the depth prepass (Early-Z) is enabled during main rendering.
-     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
@@ -126,37 +84,16 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 캐시된 모든 메인 뎁스 프리패스 렌더 번들을 무효화하여 다음 렌더링 시 재생성하도록 합니다.
-     * [EN] Invalidates all cached main depth prepass render bundles to force regeneration on the next render.
-     */
     markDepthPrepassBundleDirty(): void {
         this.#depthPrepassBundlesByView = new WeakMap();
     }
 
-    /**
-     * [KO] 식생 생태계 변경 시 모든 렌더 번들(메인, 섀도우 및 뎁스 프리패스)을 일괄 무효화합니다. (GrassRenderer 대칭 메서드)
-     * [EN] Invalidates all render bundles (main, shadow and depth prepass) at once on foliage ecosystem changes. (Symmetric to GrassRenderer)
-     */
     override markAllBundlesDirty(): void {
         this.markShadowBundleDirty();
         this.markDepthPrepassBundleDirty();
         this.markMainBundleDirty();
     }
 
-    /**
-     * [KO] 주어진 식생 타입들의 인스턴스를 메인 렌더 패스(뎁스 프리패스 포함)에 드로우합니다.
-     * [EN] Draws instances of the given foliage types to the main render pass (including depth prepass).
-     * @param view -
-     * [KO] 렌더링 뷰 인스턴스
-     * [EN] Rendering View3D instance
-     * @param passEncoder -
-     * [KO] GPURenderPassEncoder 인스턴스
-     * [EN] GPURenderPassEncoder instance
-     * @param typeList -
-     * [KO] 렌더링할 식생 타입 배열
-     * [EN] Array of foliage types to render
-     */
     render(view: View3D, passEncoder: GPURenderPassEncoder, typeList: Foliage[]): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
@@ -256,19 +193,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 지정된 캐스케이드 인덱스에 대해 식생 인스턴스를 그림자 맵 패스에 드로우합니다 (렌더 번들 캐싱 지원).
-     * [EN] Draws foliage instances to the shadow map pass for the specified cascade index (supports render bundle caching).
-     * @param view -
-     * [KO] 렌더링 뷰 인스턴스 (캐스케이드 정보 포함)
-     * [EN] Rendering View3D instance (including cascade info)
-     * @param passEncoder -
-     * [KO] GPURenderPassEncoder 인스턴스
-     * [EN] GPURenderPassEncoder instance
-     * @param typeList -
-     * [KO] 그림자를 캐스팅할 식생 타입 배열
-     * [EN] Array of shadow-casting foliage types
-     */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder, typeList: Foliage[]): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
@@ -351,7 +275,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         view: View3D
     ): GPURenderBundle | null {
         const {gpuDevice} = this;
- 
+
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const {type} = this.#validTypesMain[t];
@@ -739,3 +663,4 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
 Object.freeze(FoliageRenderer);
 export default FoliageRenderer;
+

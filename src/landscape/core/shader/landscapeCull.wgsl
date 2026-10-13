@@ -16,7 +16,7 @@ struct CameraFrustumUniforms {
     lodMetric: f32,
     useHZB: u32,
 
-    pad0: f32, // 256-byte alignment tail padding
+    pad0: f32,
     pad1: f32,
     pad2: f32,
     pad3: f32,
@@ -37,7 +37,6 @@ struct DrawIndexedIndirectArgs {
     baseVertex: u32,
     firstInstance: u32,
 };
-
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
 @group(0) @binding(1) var<storage, read> allTiles: array<LandscapeTile>;
@@ -147,3 +146,4 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         visibleTiles[targetIndex] = currentTile;
     }
 }
+

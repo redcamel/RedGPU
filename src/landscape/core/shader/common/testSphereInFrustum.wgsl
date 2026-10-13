@@ -8,3 +8,4 @@ fn testSphereInFrustum(center: vec3<f32>, radius: f32, frustumPlanes: array<vec4
            dot(p, frustumPlanes[4]) >= negRadius &&
            dot(p, frustumPlanes[5]) >= negRadius;
 }
+

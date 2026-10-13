@@ -1,8 +1,3 @@
-/**
- * [KO] 잔디 WebGPU 렌더러 모듈입니다. GPURenderBundle 캐싱 엔진을 통해 매 프레임 단 1회의 executeBundles로 대규모 간접 드로우를 수행합니다.
- * [EN] Grass WebGPU renderer module. Executes large-scale indirect drawing with a single executeBundles call per frame via GPURenderBundle caching engine.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterRenderer from "../../../core/scatter/AScatterRenderer";
 import View3D from "../../../../display/view/View3D";
@@ -19,10 +14,6 @@ import grassFragmentFarWGSL from "../pipeline/grassFragmentFar.wgsl";
 import grassShadowVertexWGSL from "../pipeline/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 
-/**
- * [KO] 렌더 유닛 머티리얼 바인드 그룹(Group 2) 캐시 엔트리 인터페이스입니다.
- * [EN] Interface for render unit material bind group (Group 2) cache entry.
- */
 interface MaterialBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
     cachedColorTexView: GPUTextureView;
@@ -30,10 +21,6 @@ interface MaterialBindGroupCacheEntry {
     cachedTypeTexView: GPUTextureView | null;
 }
 
-/**
- * [KO] View3D별 메인 GPURenderBundle 캐시 엔트리 인터페이스입니다.
- * [EN] Interface for main GPURenderBundle cache entry per View3D.
- */
 interface MainBundleCacheEntry {
     bundle: GPURenderBundle;
     systemBG: GPUBindGroup;
@@ -42,15 +29,6 @@ interface MainBundleCacheEntry {
     megaBufferInstance: GrassMegaBuffer;
 }
 
-/**
- * [KO] GPU 컬링된 대규모 잔디 인스턴스들을 GPURenderBundle 기반 단일 executeBundles 호출로 메인 패스 및 섀도우 패스로 렌더링하는 렌더러 클래스입니다.
- * [EN] Renderer class that renders GPU-culled large-scale grass instances to main and shadow passes using single executeBundles calls based on GPURenderBundle.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(GrassManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (GrassManager).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
@@ -66,12 +44,10 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #renderPipelinesFar: Map<number, GPURenderPipeline> = new Map();
     #shadowPipeline: GPURenderPipeline | null = null;
 
-    /** 256B 정렬 Dynamic Offset 단일 Group 1 바인드그룹 및 캐시 */
     #unifiedGroup1BindGroup: GPUBindGroup | null = null;
     #lastCulledBuffer: GPUBuffer | null = null;
     #lastSlotPoolerBuffer: GPUBuffer | null = null;
 
-    /** Group 2 (텍스처/샘플러) 캐시 (32-bit 정수 키: `(typeId << 16) | subIndex`) */
     #materialBindGroupCache: Map<number, MaterialBindGroupCacheEntry> = new Map();
 
     #lastShadowMegaBuffer: GrassMegaBuffer | null = null;
@@ -80,42 +56,24 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
     #preferredCanvasFormat: GPUTextureFormat;
 
-    /**
-     * [KO] GrassRenderer 인스턴스를 생성하고 셰이더 모듈 및 파이프라인 레이아웃을 초기화합니다.
-     * [EN] Creates a GrassRenderer instance and initializes shader modules and pipeline layouts.
-     * @param redGPUContext - RedGPU 컨텍스트 인스턴스
-     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
         this.#initShadersAndLayouts();
     }
 
-
-    /**
-     * [KO] 캐시된 Group 1 바인드그룹을 무효화합니다 (메가버퍼 재생성 시 호출).
-     * [EN] Invalidates the cached Group 1 bind group (invoked when mega-buffer is recreated).
-     */
     invalidateGroup1BindGroup(): void {
         this.#unifiedGroup1BindGroup = null;
         this.#lastCulledBuffer = null;
         this.#lastSlotPoolerBuffer = null;
     }
 
-    /**
-     * [KO] 그림자 번들이 무효화될 때 잔디 도메인 고유 캐시를 정리합니다.
-     * [EN] Cleans up grass domain-specific cache when shadow bundles are invalidated.
-     */
     override onShadowBundleDirty(): void {
         this.#lastShadowMegaBuffer = null;
         this.#lastShadowMaskLow = -1;
         this.#lastShadowMaskHigh = -1;
     }
 
-    /**
-     * [KO] 잔디 생태계 변경(타입 추가/삭제/메가버퍼 재생성) 시 모든 렌더 번들 및 바인드그룹을 일괄 무효화합니다.
-     * [EN] Invalidates all render bundles and bind groups at once on grass ecosystem changes.
-     */
     override markAllBundlesDirty(): void {
         this.markMainBundleDirty();
         this.markShadowBundleDirty();
@@ -123,16 +81,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         this.#materialBindGroupCache.clear();
     }
 
-    /**
-     * [KO] 주어진 잔디 타입들의 인스턴스를 메인 렌더 패스에 드로우합니다 (GPURenderBundle 캐싱 지원).
-     * [EN] Draws instances of the given grass types to the main render pass (supports GPURenderBundle caching).
-     *
-     * @param view - 현재 렌더링 중인 View3D 객체
-     * @param passEncoder - 메인 씬 GPURenderPassEncoder
-     * @param grassList - 렌더링할 잔디 타입 목록
-     * @param megaBuffer - 잔디 스캐터 메가버퍼 인스턴스
-     * @param slotPooler - 잔디 256B Dynamic Offset UBO 슬롯 풀러
-     */
     render(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
@@ -188,16 +136,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 잔디 그림자를 렌더링합니다 (GPURenderBundle 캐싱 지원).
-     * [EN] Renders grass shadows in the cascaded shadow map (CSM) pass (supports GPURenderBundle caching).
-     *
-     * @param view - 그림자 패스를 렌더링 중인 View3D 객체
-     * @param passEncoder - 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     * @param grassList - 렌더링할 잔디 타입 목록
-     * @param megaBuffer - 잔디 스캐터 메가버퍼 인스턴스
-     * @param slotPooler - 잔디 256B Dynamic Offset UBO 슬롯 풀러
-     */
     renderShadow(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
@@ -261,10 +199,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 렌더러의 내부 리소스(파이프라인 캐시, 렌더 번들 및 셰이더 참조)를 해제합니다.
-     * [EN] Releases internal resources (pipeline caches, render bundles, and shader references) of the renderer.
-     */
     override destroy(): void {
         super.destroy();
         this.markMainBundleDirty();
@@ -682,3 +616,4 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
 Object.freeze(GrassRenderer);
 export default GrassRenderer;
+

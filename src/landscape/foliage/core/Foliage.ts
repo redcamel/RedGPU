@@ -1,8 +1,3 @@
-/**
- * [KO] 단일 식생(Foliage) 종(Type)의 LOD 메쉬, 인스턴스 스트리밍, 렌더링 파라미터를 정의하고 관리하는 핵심 엔티티 모듈입니다.
- * [EN] Core entity module defining and managing LOD meshes, instance streaming, and rendering parameters for a single foliage type.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
 import type Landscape from "../../Landscape";
@@ -14,16 +9,6 @@ import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 import {FOLIAGE_SEED_GRID_SIZE} from "../FOLIAGE_CONSTANTS";
 
-/**
- * [KO] 지형의 활성화된 레이어 목록 전체를 순회하여 특정 대상 레이어의 총합 대비 정규화된 가중치를 계산합니다. (식생 멀티 레이어 배치용)
- * [EN] Traverses all active landscape layers to compute the normalized weight of a target layer relative to total weight. (For foliage multi-layer placement)
- *
- * @param landscape - 대상 Landscape 인스턴스
- * @param targetLayer - 가중치를 산출할 대상 LandscapeLayer 객체
- * @param u - U 텍스처 좌표 (0.0 ~ 1.0)
- * @param v - V 텍스처 좌표 (0.0 ~ 1.0)
- * @returns 0.0 ~ 1.0 범위로 정규화된 레이어 가중치 값
- */
 function sampleNormalizedLayerWeight(
     landscape: any,
     targetLayer: any,
@@ -61,20 +46,11 @@ function sampleNormalizedLayerWeight(
     return targetWeight / totalWeight;
 }
 
-/**
- * [KO] 그리드 정수 좌표와 식생 타입 이름 해시로부터 결정론적(Deterministic) 32비트 의사난수 시드를 산출합니다.
- * [EN] Computes a deterministic 32-bit PRNG seed from integer grid coordinates and foliage type name hash.
- */
 function computeScatterGridSeed(gridX: number, gridZ: number, nameHash: number): number {
     let seed = ((gridX * 73856093) ^ (gridZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
     return seed === 0 ? 0x9e3779b9 : seed;
 }
 
-
-/**
- * [KO] 식생 서브셀 데이터 인터페이스입니다. (경량 메타데이터 구조체)
- * [EN] Foliage subcell data interface. (Lightweight metadata struct)
- */
 export interface FoliageSubCell {
     subCellKey: number;
     subCellX: number;
@@ -86,28 +62,10 @@ export interface FoliageSubCell {
     mountedSlotIndex: number;
 }
 
-/**
- * [KO] 서브셀의 정수 2D 좌표를 단일 32비트 정수 키로 패킹합니다.
- * [EN] Packs integer 2D coordinates of a subcell into a single 32-bit integer key.
- *
- * @param scX - 서브셀 정수 X 좌표
- * @param scZ - 서브셀 정수 Z 좌표
- * @returns 32비트 고유 정수 키
- */
 function packSubCellKey(scX: number, scZ: number): number {
     return ((scZ << 16) | (scX & 0xFFFF)) | 0;
 }
 
-/**
- * [KO] 중심 좌표(`centerX`, `centerZ`)를 갖는 서브셀 객체 배열을 카메라 기준 거리 제곱값 오름차순으로 제자리 퀵 정렬합니다. (Zero-GC & 거리 단 1회 계산)
- * [EN] In-place quick-sorts subcell object arrays having `centerX` and `centerZ` in ascending order of squared distance to camera. (Zero-GC & single distance evaluation)
- *
- * @param subCells - 정렬할 서브셀 객체 배열
- * @param dists - 사전 할당된 거리 버퍼 (최소 subCells.length 이상의 Float32Array)
- * @param camX - 카메라 월드 X 좌표
- * @param camZ - 카메라 월드 Z 좌표
- * @param count - 정렬할 서브셀 개수
- */
 function sortSubCellsByDistance<T extends { centerX: number; centerZ: number }>(
     subCells: T[],
     dists: Float32Array,
@@ -157,167 +115,49 @@ function quickSortSubCells<T>(
     if (i < right) quickSortSubCells(subCells, dists, i, right);
 }
 
-/**
- * [KO] 식생 LOD 설정 인터페이스입니다.
- * [EN] Foliage LOD configuration interface.
- */
 export interface FoliageLODConfig {
-    /**
-     * [KO] LOD 레벨에 해당하는 메쉬 또는 메쉬 배열
-     * [EN] Mesh or array of meshes corresponding to this LOD level
-     */
     mesh: Mesh | Mesh[];
-    /**
-     * [KO] 해당 LOD가 전환되는 최대 가시 거리 (미터)
-     * [EN] Maximum visible distance in meters at which this LOD switches
-     */
     lodDistance?: number;
-    /**
-     * [KO] 해당 LOD 레벨의 그림자 수신 여부 (기본값: true)
-     * [EN] Whether this LOD level receives shadows (default: true)
-     */
     receiveShadow?: boolean;
 }
 
-/**
- * [KO] 조립 완료된 식생 LOD 메타데이터 인터페이스입니다.
- * [EN] Assembled foliage LOD metadata interface.
- */
 export interface FoliageLODInfo {
-    /**
-     * [KO] LOD 레벨 인덱스 (0부터 시작)
-     * [EN] LOD level index (starting from 0)
-     */
     lodIndex: number;
-    /**
-     * [KO] LOD 전환 최대 거리 (미터)
-     * [EN] LOD transition maximum distance in meters
-     */
     lodDistance: number;
-    /**
-     * [KO] 전체 렌더 단위 배열 내 해당 LOD 시작 오프셋
-     * [EN] Starting offset of this LOD in the global render unit array
-     */
     renderUnitOffset: number;
-    /**
-     * [KO] 해당 LOD에 속한 렌더 단위 개수
-     * [EN] Number of render units belonging to this LOD
-     */
     renderUnitCount: number;
-    /**
-     * [KO] 그림자 수신 여부
-     * [EN] Whether shadows are received
-     */
     receiveShadow?: boolean;
 }
 
-/**
- * [KO] Foliage 인스턴스 생성 및 배치 설정을 위한 옵션 인터페이스입니다.
- * [EN] Configuration options interface for creating and scattering Foliage instances.
- */
 export interface FoliageOptions extends AScatterTypeInitOptions {
-    /**
-     * [KO] LOD 레벨별 메쉬 및 가시 거리 구성 배열
-     * [EN] Array of mesh and visibility distance configurations per LOD level
-     */
     lods: FoliageLODConfig[];
-    /**
-     * [KO] 이 식생 타입의 그림자 수신 여부 (기본값: true)
-     * [EN] Whether this foliage type receives shadows (default: true)
-     */
     receiveShadow?: boolean;
 
-    /**
-     * [KO] 이 식생 타입에 할당될 최대 인스턴스 수용 용량 (기본값: 16384)
-     * [EN] Maximum instance capacity allocated for this foliage type (default: 16384)
-     */
     maxInstances?: number;
 
-    /**
-     * [KO] 인스턴스 랜덤 스케일 최소값 [x, y, z] (기본값: [1, 1, 1])
-     * [EN] Minimum random scale for instances [x, y, z] (default: [1, 1, 1])
-     */
     minScale?: [number, number, number];
 
-    /**
-     * [KO] 인스턴스 랜덤 스케일 최대값 [x, y, z] (기본값: [1, 1, 1])
-     * [EN] Maximum random scale for instances [x, y, z] (default: [1, 1, 1])
-     */
     maxScale?: [number, number, number];
 
-    /**
-     * [KO] 인스턴스 배치 시 Y축 360도 무작위 회전 적용 여부 (기본값: true)
-     * [EN] Whether to apply random 360-degree Y rotation on placement (default: true)
-     */
     randomRotationY?: boolean;
 
-    /**
-     * [KO] 마지막 LOD 단계에 옥타헤드럴 임포스터 빌보드를 자동 생성하여 부착할지 여부 (기본값: true)
-     * [EN] Whether to automatically bake and attach an octahedral impostor billboard to the final LOD level (default: true)
-     */
     useImpostor?: boolean;
 
-    /**
-     * [KO] 서브메시 결합 시 원본 피벗 유지 여부 (기본값: true)
-     * [EN] Whether to preserve original pivots when combining sub-meshes (default: true)
-     */
     preservePivot?: boolean;
 
-    /**
-     * [KO] 인스턴스 줄기 휘어짐 강도 배수 (기본값: 1.0)
-     * [EN] Instance trunk bend strength multiplier (default: 1.0)
-     */
     trunkBendScale?: number;
 
-    /**
-     * [KO] 인스턴스 잎 떨림 강도 배수 (기본값: 1.0)
-     * [EN] Instance leaf flutter strength multiplier (default: 1.0)
-     */
     leafFlutterScale?: number;
 
-    /**
-     * [KO] 지형 표면 법선 벡터에 맞추어 인스턴스를 기울일지 여부
-     * [EN] Whether to align instance orientation to terrain surface normal
-     */
     alignToNormal?: boolean;
 
-    /**
-     * [KO] 지형 법선 정렬 강도 (0.0=수직 유지, 1.0=완전 경사 정렬)
-     * [EN] Terrain normal alignment factor (0.0=stay upright, 1.0=full slope alignment)
-     */
     alignFactor?: number;
 
-    /**
-     * [KO] 밑둥 지면 색상 블렌딩 높이 범위 (미터, 기본값: 1.5)
-     * [EN] Bottom ground color blending vertical range in meters (default: 1.5)
-     */
     groundBlendRange?: number;
 
-    /**
-     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스 참여 여부 (기본값: true)
-     * [EN] Whether foliage participates in the depth prepass (Early-Z) pass (default: true)
-     */
     useDepthPrepass?: boolean;
 }
 
-/**
- * [KO] 단일 식생 종의 다단계 LOD 서브메쉬, 옥타헤드럴 임포스터, 서브셀 인스턴스 스트리밍을 총괄하는 핵심 클래스입니다.
- * [EN] Core class orchestrating multi-level LOD sub-meshes, octahedral impostors, and sub-cell instance streaming for a single foliage type.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * ### Example
- * ```typescript
- * // FoliageManager를 통해 인스턴스를 등록하고 참조를 얻습니다.
- * const tree = landscape.foliageManager.addType({
- *     name: 'PineTree',
- *     lods: [{ mesh: treeMesh }]
- * });
- * ```
- */
 class Foliage extends AScatterType<FoliageTypeAllocation> {
     static MAX_SAFE_TYPE_CAPACITY: number = 262144;
 
@@ -366,28 +206,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #slotPooler: FoliageSlotPooler | null = null;
     #landscape: Landscape | null = null;
 
-    /**
-     * [KO] 지형 식생/나무 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager.addType(options)` 팩토리 메서드를 사용하십시오.)
-     * [EN] Creates a landscape foliage instance. (Do not instantiate directly; use the `landscape.foliageManager.addType(options)` factory method instead.)
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param options -
-     * [KO] 식생 설정 옵션
-     * [EN] Foliage configuration options
-     * @param megaBuffer -
-     * [KO] 식생 메가 버퍼 (선택사항)
-     * [EN] Foliage mega buffer (optional)
-     * @param baker -
-     * [KO] 식생 인스턴스 물리 베이커 (선택사항)
-     * [EN] Foliage instance physical baker (optional)
-     * @param slotPooler -
-     * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
-     * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
-     * @param landscape -
-     * [KO] 부모 Landscape 인스턴스 (선택사항)
-     * [EN] Parent Landscape instance (optional)
-     */
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageOptions,
@@ -578,18 +396,10 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.flushAllRenderUnitUBOs();
     }
 
-    /**
-     * [KO] 인스턴스 줄기 휘어짐 강도 배수를 반환합니다.
-     * [EN] Returns the trunk bend strength multiplier.
-     */
     get trunkBendScale(): number {
         return this.#trunkBendScale;
     }
 
-    /**
-     * [KO] 줄기 휘어짐 배수를 설정합니다.
-     * [EN] Sets the trunk bend scale multiplier.
-     */
     set trunkBendScale(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#trunkBendScale !== numVal) {
@@ -599,18 +409,10 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생 이름 문자열의 32비트 해시 정수값을 반환합니다.
-     * [EN] Returns the 32-bit hash integer of the foliage name string.
-     */
     get nameHash(): number {
         return this.#nameHash;
     }
 
-    /**
-     * [KO] 이 식생 타입에 할당된 최대 인스턴스 수용 용량을 반환합니다.
-     * [EN] Returns the maximum instance capacity allocated for this foliage type.
-     */
     get maxInstances(): number {
         return this.allocation ? this.allocation.maxInstances : this.#maxInstances;
     }
@@ -631,10 +433,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 인스턴스 절차적 배치 시 적용되는 최소 스케일 `[x, y, z]`을 반환합니다.
-     * [EN] Returns the minimum scale `[x, y, z]` applied during procedural instance placement.
-     */
     get minScale(): [number, number, number] {
         return this.#minScale;
     }
@@ -655,50 +453,26 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 인스턴스 절차적 배치 시 적용되는 최대 스케일 `[x, y, z]`을 반환합니다.
-     * [EN] Returns the maximum scale `[x, y, z]` applied during procedural instance placement.
-     */
     get maxScale(): [number, number, number] {
         return this.#maxScale;
     }
 
-    /**
-     * [KO] 인스턴스 배치 시 Y축 360도 무작위 회전 적용 여부를 반환합니다.
-     * [EN] Returns whether random 360-degree Y rotation is applied during placement.
-     */
     get randomRotationY(): boolean {
         return this.#randomRotationY;
     }
 
-    /**
-     * [KO] 인스턴스 데이터 및 간접 드로우 버퍼를 관리하는 연결된 메가버퍼를 반환합니다.
-     * [EN] Returns the associated mega-buffer managing instance data and indirect draw buffers.
-     */
     get megaBuffer(): FoliageMegaBuffer | null {
         return this.#megaBuffer;
     }
 
-    /**
-     * [KO] 연결된 부모 Landscape 인스턴스를 반환합니다.
-     * [EN] Returns the associated parent Landscape instance.
-     */
     get landscape(): Landscape | null {
         return this.#landscape;
     }
 
-    /**
-     * [KO] 해당 식생 모델을 구성하는 공통 렌더 단위(FoliageRenderUnit) 컬렉션을 반환합니다.
-     * [EN] Returns the collection of common render units composing this foliage model.
-     */
     get renderUnits(): FoliageRenderUnit[] {
         return this.#renderUnits;
     }
 
-    /**
-     * [KO] 이 식생 타입이 메인 렌더 패스에서 소비하는 간접 드로우콜 개수를 반환합니다.
-     * [EN] Returns the number of indirect draw calls consumed by this foliage type in the main render pass.
-     */
     override get drawCallCount(): number {
         let count = this.#mainRenderUnits.length;
         if (this.#useDepthPrepass) {
@@ -707,93 +481,46 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         return count;
     }
 
-    /**
-     * [KO] 뎁스 프리패스에서 Fast-Z로 렌더링되는 불투명(Opaque) 렌더 단위 목록을 반환합니다.
-     * [EN] Returns the list of opaque render units rendered with Fast-Z in depth prepass.
-     */
     get depthPrepassOpaqueRenderUnits(): FoliageRenderUnit[] {
         return this.#depthPrepassOpaqueRenderUnits;
     }
 
-    /**
-     * [KO] 뎁스 프리패스에서 알파 테스트로 렌더링되는 마스크(Masked) 렌더 단위 목록을 반환합니다.
-     * [EN] Returns the list of masked render units rendered with alpha testing in depth prepass.
-     */
     get depthPrepassMaskedRenderUnits(): FoliageRenderUnit[] {
         return this.#depthPrepassMaskedRenderUnits;
     }
 
-    /**
-     * [KO] 메인 포워드 렌더 패스에서 렌더링되는 렌더 단위 목록을 반환합니다.
-     * [EN] Returns the list of render units rendered in the main forward render pass.
-     */
     get mainRenderUnits(): FoliageRenderUnit[] {
         return this.#mainRenderUnits;
     }
 
-    /**
-     * [KO] 최상위 디테일 단계(LOD 0)에 속하는 렌더 단위 목록을 반환합니다.
-     * [EN] Returns the list of render units belonging to the highest detail level (LOD 0).
-     */
     get lod0RenderUnits(): FoliageRenderUnit[] {
         return this.#lod0RenderUnits;
     }
 
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스용으로 병합 최적화된 렌더 단위 목록을 반환합니다.
-     * [EN] Returns the list of merged render units optimized for cascaded shadow map (CSM) passes.
-     */
     get shadowMergedRenderUnits(): FoliageRenderUnit[] {
         return this.#shadowMergedRenderUnits;
     }
 
-    /**
-     * [KO] 모든 LOD 레벨의 전환 거리 및 서브메시 오프셋 정보를 담은 배열을 반환합니다.
-     * [EN] Returns the array containing transition distances and sub-mesh offsets for all LOD levels.
-     */
     get lodInfoList(): FoliageLODInfo[] {
         return this.#lodInfoList;
     }
 
-    /**
-     * [KO] 현재 스트리밍되어 GPU 버퍼 상에 활성화된 인스턴스 수를 반환합니다.
-     * [EN] Returns the number of instances currently active and streamed into GPU buffers.
-     */
     get activeInstanceCount(): number {
         return this.allocation ? this.allocation.instanceCount : 0;
     }
 
-    /**
-     * [KO] 서브메시 UBO 슬롯 풀러 인스턴스를 반환합니다.
-     * [EN] Returns the sub-mesh UBO slot pooler instance.
-     */
     get slotPooler(): FoliageSlotPooler | null {
         return this.#slotPooler;
     }
 
-    /**
-     * [KO] 프러스텀 및 구체 컬링에 사용되는 바운딩 구체 반경(미터)을 반환합니다.
-     * [EN] Returns the bounding sphere radius in meters used for frustum and sphere culling.
-     */
     get boundingRadius(): number {
         return this.#boundingRadius;
     }
 
-
-
-
-    /**
-     * [KO] LOD 0 단계에 알파 마스킹(Cutout) 머티리얼이 포함되어 있는지 여부를 반환합니다.
-     * [EN] Returns whether the LOD 0 stage contains alpha-masked (cutout) materials.
-     */
     get hasMaskedLOD0(): boolean {
         return this.#hasMaskedLOD0;
     }
 
-    /**
-     * [KO] 잎 떨림 강도 배수를 반환합니다.
-     * [EN] Returns the leaf flutter strength multiplier.
-     */
     get leafFlutterScale(): number {
         return this.#leafFlutterScale;
     }
@@ -806,10 +533,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 잎 떨림 배수를 설정합니다.
-     * [EN] Sets the leaf flutter scale multiplier.
-     */
     set leafFlutterScale(val: number) {
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#leafFlutterScale !== numVal) {
@@ -829,22 +552,10 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 지형 표면 법선 벡터에 맞추어 인스턴스를 기울일지 여부를 반환합니다.
-     * [EN] Returns whether to align instance orientation to the terrain surface normal.
-     */
     get alignToNormal(): boolean {
         return this.#alignToNormal;
     }
 
-    /**
-     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 설정합니다.
-     * [EN] Sets vertical height range in meters where bottom surface color blending is applied.
-     *
-     * @param v -
-     * [KO] 설정할 지형 블렌딩 수직 범위 (최소값: 0.1)
-     * [EN] Terrain blending vertical range to set (minimum: 0.1)
-     */
     set groundBlendRange(v: number) {
         const val = Math.max(0.1, Number(v) || 0.1);
         if (this.#groundBlendRange !== val) {
@@ -854,38 +565,18 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 지형 법선 정렬 강도 (0.0=완전 수직 유지, 1.0=지형 경사면 완전 정렬)를 반환합니다.
-     * [EN] Returns the terrain normal alignment factor (0.0=stay upright, 1.0=full slope alignment).
-     */
     get alignFactor(): number {
         return this.#alignFactor;
     }
 
-    /**
-     * [KO] 이 식생 타입에 임포스터 렌더 단위가 생성되어 존재하는지 여부를 반환합니다.
-     * [EN] Returns whether an impostor render unit exists for this foliage type.
-     */
     get hasImpostor(): boolean {
         return !!this.#impostorRenderUnit;
     }
 
-    /**
-     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 반환합니다.
-     * [EN] Returns whether octahedral impostor billboards are enabled for distant rendering.
-     */
     get useImpostor(): boolean {
         return this.#useImpostor && !!this.#impostorRenderUnit;
     }
 
-    /**
-     * [KO] 원거리 렌더링 시 옥타헤드럴 임포스터 빌보드를 활성화하여 사용할지 여부를 설정합니다.
-     * [EN] Sets whether octahedral impostor billboards are enabled for distant rendering.
-     *
-     * @param value -
-     * [KO] 임포스터 빌보드 활성화 여부
-     * [EN] Whether to enable octahedral impostor billboards
-     */
     set useImpostor(value: boolean) {
         if (!this.#impostorRenderUnit) return;
         const boolVal = !!value;
@@ -896,14 +587,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 설정합니다.
-     * [EN] Sets whether the depth prepass (Early-Z) is enabled during foliage rendering.
-     *
-     * @param value -
-     * [KO] 뎁스 프리패스 활성화 여부
-     * [EN] Whether depth prepass is enabled
-     */
     set useDepthPrepass(value: boolean) {
         const boolVal = !!value;
         if (this.#useDepthPrepass !== boolVal) {
@@ -913,30 +596,14 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 식생 렌더링 시 뎁스 프리패스(Early-Z) 패스를 활성화할지 여부를 반환합니다.
-     * [EN] Returns whether the depth prepass (Early-Z) is enabled during foliage rendering.
-     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
 
-    /**
-     * [KO] 이 식생 타입의 그림자 수신 여부를 반환합니다.
-     * [EN] Returns whether this foliage type receives shadows.
-     */
     get receiveShadow(): boolean {
         return this.#receiveShadow;
     }
 
-    /**
-     * [KO] 이 식생 타입의 그림자 수신 여부를 설정합니다.
-     * [EN] Sets whether this foliage type receives shadows.
-     *
-     * @param value -
-     * [KO] 그림자 수신 여부
-     * [EN] Whether shadows are received
-     */
     set receiveShadow(value: boolean) {
         const boolVal = !!value;
         if (this.#receiveShadow !== boolVal) {
@@ -946,27 +613,14 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 이 식생의 가시 한계선과 지형 서브셀 크기를 기반으로 엔진이 자동 계산한 현재 스트리밍 반경(m)입니다. (디버깅/관측용 읽기 전용)
-     * [EN] Current streaming radius (in meters) automatically calculated by the engine based on effective visual distance and sub-cell size. (Read-only for debugging/monitoring)
-     */
     get streamingRadius(): number {
         return this.#streamingRadius;
     }
 
-
-    /**
-     * [KO] 지형 밑둥 표면 색상 블렌딩이 적용되는 수직 높이 범위(미터)를 반환합니다.
-     * [EN] Returns the vertical height range in meters where bottom surface color blending is applied.
-     */
     get groundBlendRange(): number {
         return this.#groundBlendRange;
     }
 
-    /**
-     * [KO] 식생 인스턴스, 하위 서브메시 및 서브셀 스트리밍 리소스를 안전하게 해제합니다.
-     * [EN] Safely releases foliage instance, child sub-meshes, and sub-cell streaming resources.
-     */
     override destroy(): void {
         this.clearSubCellCache();
 
@@ -1001,35 +655,18 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         super.destroy();
     }
 
-    /**
-     * [KO] 현재 GPU 버퍼에 마운트되어 활성화된 서브셀의 총 개수를 반환합니다.
-     * [EN] Returns the total number of sub-cells currently mounted and active in the GPU buffer.
-     */
     get mountedSubCellCount(): number {
         return this.#mountedSubCells.length;
     }
 
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually mounted in the last streaming update
-     */
     get lastMountedCount(): number {
         return this.#lastMountedCount;
     }
 
-    /**
-     * [KO] 직전 스트리밍 업데이트에서 실제로 언마운트된 서브셀 개수
-     * [EN] Number of sub-cells actually unmounted in the last streaming update
-     */
     get lastUnmountedCount(): number {
         return this.#lastUnmountedCount;
     }
 
-
-    /**
-     * [KO] 이 식생 타입에 속한 모든 렌더 단위 및 그림자 렌더 단위의 UBO 슬롯 파라미터와 타입 파라미터를 GPU로 단일 플러시합니다 (프레임 지연 배칭 전용).
-     * [EN] Flushes UBO slot parameters and type parameters for all render units and shadow render units of this foliage type to GPU (deferred frame batching).
-     */
     flushAllRenderUnitUBOs(): void {
         this.#syncTypeParams();
         const unitList = this.#renderUnits;
@@ -1044,11 +681,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-
-    /**
-     * [KO] 스트리밍된 서브셀 캐시 및 GPU 마운트 인스턴스를 완전히 비우고 초기화합니다.
-     * [EN] Completely clears and resets the streamed sub-cell cache and GPU mounted instances.
-     */
     clearSubCellCache(): void {
         this.#tempCandidates.length = 0;
         const mounted = this.#mountedSubCells;
@@ -1065,17 +697,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다. 가시 한계선 변경 시 스트리밍 반경도 즉각 자동 재계산됩니다.
-     * [EN] Dynamically modifies the maximum visible/transition distance (meters) of a specific LOD level. Streaming radius is immediately recomputed.
-     *
-     * @param lodIndex -
-     * [KO] 변경할 LOD 레벨 인덱스
-     * [EN] LOD level index to modify
-     * @param distance -
-     * [KO] 새로운 LOD 전환 거리 (미터)
-     * [EN] New LOD transition distance (meters)
-     */
     setLODDistance(lodIndex: number, distance: number): void {
         const info = this.#lodInfoList[lodIndex];
         if (info) {
@@ -1124,17 +745,12 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 이 식생의 가시 한계선(cullingDistance/LOD)과 지형 서브셀 크기를 기반으로 최적의 스트리밍 반경을 자동 산출합니다.
-     * [EN] Automatically computes optimal streaming radius based on effective visual distance and terrain sub-cell size.
-     */
     #recalculateStreamingRadius(): void {
         const landscape = this.#landscape;
         if (!landscape) return;
 
         const subCellSize = landscape.foliageManager.subCellSize;
 
-        // 1. 임포스터 미사용 시 마지막 3D LOD 거리 확인
         let maxDrawableDistance = this.cullingDistance;
         if (!this.#useImpostor && this.#lodInfoList.length > 0) {
             const lastLOD = this.#lodInfoList[this.#lodInfoList.length - 1];
@@ -1143,14 +759,11 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             }
         }
 
-        // 2. 실제 시각 가시 한계선 결정
         const effectiveVisualDistance = Math.min(this.cullingDistance, maxDrawableDistance);
 
-        // 3. 서브셀 안전 마진 가산 및 반올림
         const streamingMargin = subCellSize * 1.5;
         const calculatedRadius = Math.ceil(effectiveVisualDistance + streamingMargin);
 
-        // 4. 값 갱신 및 축소 시 언마운트 트리거
         const oldRadius = this.#streamingRadius;
         if (calculatedRadius !== oldRadius) {
             this.#streamingRadius = calculatedRadius;
@@ -1160,10 +773,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 스트리밍 반경 축소 시 범위를 벗어난 마운트 서브셀들을 즉시 안전하게 언마운트합니다.
-     * [EN] Immediately and safely unmounts mounted sub-cells that fall outside the reduced streaming radius.
-     */
     #pruneMountedSubCellsOutOfRange(newRadius: number, subCellSize: number): void {
         const megaBuffer = this.#megaBuffer;
         const allocation = this.allocation;
@@ -1183,23 +792,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-    /**
-     * [KO] 카메라 위치에 기반하여 이 식생 고유의 스트리밍 반경(streamingRadius) 내 서브셀을 온디맨드로 생성하고 GPU 메가버퍼에 점진적으로 마운트/언마운트합니다.
-     * [EN] Populates sub-cells on-demand within this foliage's streamingRadius based on camera position and incrementally mounts/unmounts to the GPU mega-buffer.
-     *
-     * @param camX -
-     * [KO] 카메라 월드 X 좌표
-     * [EN] Camera world X coordinate
-     * @param camZ -
-     * [KO] 카메라 월드 Z 좌표
-     * [EN] Camera world Z coordinate
-     * @param mountBudget -
-     * [KO] 이번 업데이트에서 마운트 가능한 최대 서브셀 수 (기본값: 16)
-     * [EN] Maximum sub-cells allowed to mount in this update (default: 16)
-     * @param unmountBudget -
-     * [KO] 이번 업데이트에서 언마운트 가능한 최대 서브셀 수 (기본값: 32)
-     * [EN] Maximum sub-cells allowed to unmount in this update (default: 32)
-     */
     updateStreaming(
         camX: number,
         camZ: number,
@@ -1327,10 +919,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         this.#lastMountedCount = mountedThisFrame;
     }
 
-    /**
-     * [KO] 현재 활성화된 모든 식생 인스턴스의 지형 스냅 및 물리 배치를 재베이킹합니다.
-     * [EN] Re-bakes terrain snapping and physical placement for all currently active foliage instances.
-     */
     rebake(): void {
         const alloc = this.allocation;
         const landscape = this.#landscape;
@@ -1579,7 +1167,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
-
     #computeSubCellInstances(cell: FoliageSubCell, subCellSize: number, currentLandscape?: Landscape): void {
         const landscape = currentLandscape ?? this.#landscape;
         if (!landscape) {
@@ -1740,3 +1327,4 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
 
 Object.freeze(Foliage);
 export default Foliage;
+

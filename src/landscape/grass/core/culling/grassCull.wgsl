@@ -46,7 +46,6 @@ fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
     return extractBits(packedGroundColorAndType, 24u, 8u);
 }
 
-
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,
     totalInstanceCount: u32,
@@ -155,3 +154,4 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let culledTargetIdx = culledBase + writeSlot;
     culledInstances[culledTargetIdx] = culledInst;
 }
+

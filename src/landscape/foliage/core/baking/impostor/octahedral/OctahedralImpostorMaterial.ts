@@ -1,9 +1,3 @@
-/**
- * [KO] 옥타헤드럴 임포스터 전용 머티리얼 모듈입니다.
- * [EN] Dedicated material module for octahedral impostors.
- * @packageDocumentation
- */
-
 import RedGPUContext from "../../../../../../context/RedGPUContext";
 import type Sampler from "../../../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../../../resources/texture/BitmapTexture";
@@ -16,95 +10,23 @@ import defineTexture from "../../../../../../defineProperty/funcs/texture/define
 import definePositiveNumber from "../../../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../../../../../defineProperty/funcs/defineBoolean";
 
-/**
- * [KO] 옥타헤드럴 임포스터 머티리얼 인터페이스입니다.
- * [EN] Interface for octahedral impostor material properties.
- */
 interface OctahedralImpostorMaterial {
-    /**
-     * [KO] 베이스 컬러 아틀라스 텍스처
-     * [EN] Base color atlas texture
-     */
     baseColorTexture: BitmapTexture | DirectTexture;
-    /**
-     * [KO] 베이스 컬러 텍스처 샘플러
-     * [EN] Base color texture sampler
-     */
     baseColorTextureSampler: Sampler;
 
-    /**
-     * [KO] 노멀 아틀라스 텍스처
-     * [EN] Normal atlas texture
-     */
     normalTexture: BitmapTexture | DirectTexture;
-    /**
-     * [KO] 노멀 텍스처 샘플러
-     * [EN] Normal texture sampler
-     */
     normalTextureSampler: Sampler;
 
-    /**
-     * [KO] 패킹 ORM (Occlusion/Roughness/Metallic) 아틀라스 텍스처
-     * [EN] Packed ORM (Occlusion/Roughness/Metallic) atlas texture
-     */
     packedORMTexture: BitmapTexture | DirectTexture;
 
-    /**
-     * [KO] 알파 컷오프(Cutout) 사용 여부
-     * [EN] Whether alpha cutoff is enabled
-     */
     useCutOff: boolean;
-    /**
-     * [KO] 알파 컷오프 임계값
-     * [EN] Alpha cutoff threshold
-     */
     cutOff: number;
-    /**
-     * [KO] 양면 렌더링 활성화 여부
-     * [EN] Whether double-sided rendering is enabled
-     */
     doubleSided: boolean;
-    /**
-     * [KO] 식생 전용 셰이딩 플래그
-     * [EN] Foliage dedicated shading flag
-     */
     isFoliage: boolean;
-    /**
-     * [KO] 바운딩 구체 반경 (미터, Pixel Depth Offset 복원용)
-     * [EN] Bounding sphere radius in meters for Pixel Depth Offset reconstruction
-     */
     boundingRadius: number;
 }
 
-/**
- * [KO] 옥타헤드럴 임포스터 빌보드를 위한 전용 셰이더 및 텍스처를 바인딩하는 머티리얼 클래스입니다.
- * [EN] Dedicated material class binding shaders and textures for octahedral impostor billboards.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(assembleFoliageRenderUnits)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (assembleFoliageRenderUnits).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
-    /**
-     * [KO] OctahedralImpostorMaterial 인스턴스를 생성합니다.
-     * [EN] Creates an OctahedralImpostorMaterial instance.
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param baseColorTexture -
-     * [KO] 베이스 컬러 아틀라스 텍스처
-     * [EN] Base color atlas texture
-     * @param normalTexture -
-     * [KO] 노멀 아틀라스 텍스처
-     * [EN] Normal atlas texture
-     * @param packedORMTexture -
-     * [KO] 패킹 ORM (Occlusion/Roughness/Metallic) 아틀라스 텍스처
-     * [EN] Packed ORM (Occlusion/Roughness/Metallic) atlas texture
-     * @param name -
-     * [KO] 머티리얼 이름
-     * [EN] Material name
-     */
     constructor(
         redGPUContext: RedGPUContext,
         baseColorTexture?: BitmapTexture | DirectTexture,
@@ -167,3 +89,4 @@ Object.defineProperty(OctahedralImpostorMaterial.prototype, 'isBuiltInMaterial',
 
 Object.freeze(OctahedralImpostorMaterial);
 export default OctahedralImpostorMaterial;
+

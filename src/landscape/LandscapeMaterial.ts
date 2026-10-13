@@ -1,8 +1,3 @@
-/**
- * [KO] 지형 전용 텍스처 2D 어레이 스플래팅 PBR 머티리얼 모듈입니다.
- * [EN] Terrain dedicated 2D texture array splatting PBR material module.
- * @packageDocumentation
- */
 import ColorRGBA from "../color/ColorRGBA";
 import RedGPUContext from "../context/RedGPUContext";
 import AUVTransformBaseMaterial from "../material/core/AUVTransformBaseMaterial";
@@ -24,30 +19,6 @@ interface LandscapeMaterial {
 
 const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
 
-/**
- * [KO] 최대 8개의 스플랫 텍스처 레이어를 Texture2DArray로 패킹하여 고속 블렌딩 셰이딩을 수행하는 지형 머티리얼 클래스입니다.
- * [EN] Terrain material class that packs up to 8 splat texture layers into Texture2DArray for high-speed blending shading.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **Texture2DArray 기반 텍스처 패킹**: 최대 8개의 레이어(`MAX_LANDSCAPE_LAYERS = 8`)를 지원하며, 각 레이어의 BaseColor, Normal, ORM, WeightMap을 개별 2D 텍스처 배열(`GPUTexture` with `texture_2d_array`)로 바인딩하여 셰이더 샘플러 슬롯 낭비 없이 고속 샘플링을 수행합니다.
- * - **가상 베이스 텍스처(VBT) 리베이킹 조정자**: 레이어 목록 변경, 파라미터 수정, 텍스처 로드 완료 등을 감지하여 지형 전체의 텍스처 배열을 재구성하고, 등록된 콜백(`onRebakeVBTRequested`)을 통해 비동기 VBT 베이킹을 조율합니다.
- * - **PBR 프래그먼트 셰이딩**: `landscapeFragment.wgsl`을 통해 각 프래그먼트에서 가중치 합계 정규화, 높이 맵 기반 블렌딩 콘트라스트 보정, 물리 기반 셰이딩을 안정적으로 수행합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Texture2DArray Texture Packing**: Supports up to 8 layers (`MAX_LANDSCAPE_LAYERS = 8`), packing each layer's BaseColor, Normal, ORM, and WeightMap into individual 2D texture arrays (`GPUTexture` with `texture_2d_array`) for efficient sampling without consuming individual sampler slots.
- * - **Virtual Base Texture (VBT) Rebake Coordinator**: Detects layer list changes, parameter adjustments, and image load completions to rebuild GPU texture arrays and orchestrate asynchronous VBT atlas rebaking via `onRebakeVBTRequested`.
- * - **PBR Fragment Shading**: Executes normalized weight blending, height-based blend contrast enhancement, and physically-based shading via `landscapeFragment.wgsl`.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * ### Example
- * ```typescript
- * const material = landscape.material;
- * ```
- */
 class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     #layers: LandscapeLayer[] = [];
@@ -70,19 +41,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
 
-    /**
-     * [KO] LandscapeMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a LandscapeMaterial instance.
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param baseColorHex -
-     * [KO] 기본 베이스 컬러 HEX 코드 (기본값: '#387d42')
-     * [EN] Default base color HEX code (default: '#387d42')
-     * @param textureArraySize -
-     * [KO] 텍스처 어레이 레이어 해상도 (기본값: 1024)
-     * [EN] Texture array layer resolution (default: 1024)
-     */
     constructor(redGPUContext: RedGPUContext, baseColorHex: string = '#387d42', textureArraySize: number = 1024) {
         super(
             redGPUContext,
@@ -110,30 +68,14 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.initGPURenderInfos();
     }
 
-    /**
-     * [KO] 지형 머티리얼에 등록된 텍스처 블렌딩 레이어 목록을 반환합니다. (읽기 전용)
-     * [EN] Returns the list of texture blending layers registered on this terrain material. (Read-only)
-     */
     get layers(): LandscapeLayer[] {
         return this.#layers;
     }
 
-    /**
-     * [KO] 카메라 근접 텍스처 디테일이 최대로 유지되는 시작 거리(월드 단위)를 반환합니다.
-     * [EN] Returns the near-distance threshold (world units) where close-up texture detail remains fully visible.
-     */
     get nearDetailDistance(): number {
         return this.#nearDetailDistance;
     }
 
-    /**
-     * [KO] 카메라 근접 텍스처 디테일 시작 거리를 설정합니다.
-     * [EN] Sets the near-distance threshold for close-up texture detail.
-     *
-     * @param val -
-     * [KO] 근접 디테일 유지 거리
-     * [EN] Near detail distance
-     */
     set nearDetailDistance(val: number) {
         this.#nearDetailDistance = Math.max(0, val);
         this.updateUniformsData();
@@ -152,12 +94,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         weightMapView: null as GPUTextureView | null,
     };
 
-    /**
-     * [KO] 셰이더 바인딩용 내부 Texture2DArray 뷰 객체들을 반환합니다. (시스템 내부 렌더러용)
-     * [EN] Returns the internal Texture2DArray views for shader bindings. (Internal renderer use)
-     *
-     * @internal
-     */
     getInternalLayerViews(): {
         baseColorView: GPUTextureView | null;
         normalView: GPUTextureView | null;
@@ -171,29 +107,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#internalLayerViews;
     }
 
-    /**
-     * [KO] 가상 베이스 텍스처(VBT) 재베이킹 요청 시 호출될 콜백 리스너를 등록합니다.
-     * [EN] Registers the callback listener invoked when a Virtual Base Texture (VBT) rebake is requested.
-     *
-     * @param callback -
-     * [KO] 재베이킹 요청 콜백
-     * [EN] Rebake request callback
-     */
     setOnRebakeVBTRequested(callback?: () => void): void {
         this.#onRebakeVBTRequested = callback;
     }
 
-    /**
-     * [KO] 지형 VBT 아틀라스 재베이킹을 요청합니다. 디바운싱 타이머 또는 즉시 마이크로태스크 실행을 지원합니다.
-     * [EN] Requests rebaking of the terrain VBT atlas. Supports debounced timer or immediate microtask execution.
-     *
-     * @param immediate -
-     * [KO] 지연 없이 즉시 실행 여부 (기본값: false)
-     * [EN] Whether to execute immediately without debounce delay (default: false)
-     * @param debounceDelayMs -
-     * [KO] 디바운스 대기 시간(밀리초, 기본값: 200)
-     * [EN] Debounce delay in milliseconds (default: 200)
-     */
     requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 200): void {
         if (this.#layers.length === 0) return;
         this.#pendingLayerMipmapUpdate = true;
@@ -229,17 +146,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }, debounceDelayMs);
     }
 
-    /**
-     * [KO] 지형 스플랫 레이어를 머티리얼에 추가하고 텍스처 2D 어레이를 재구성합니다.
-     * [EN] Adds a terrain splat layer to the material and reconstructs the 2D texture arrays.
-     *
-     * @param layer -
-     * [KO] 추가할 LandscapeLayer 인스턴스
-     * [EN] LandscapeLayer instance to add
-     * @returns
-     * [KO] 체이닝을 위한 LandscapeMaterial 인스턴스 자신
-     * [EN] This LandscapeMaterial instance for chaining
-     */
     addLayer(layer: LandscapeLayer): this {
         if (this.#layers.length >= MAX_LANDSCAPE_LAYERS) {
             console.warn(`[LandscapeMaterial] Maximum layer count (${MAX_LANDSCAPE_LAYERS}) reached.`);
@@ -266,17 +172,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this;
     }
 
-    /**
-     * [KO] 지정된 레이어 인스턴스 또는 레이어 이름으로 머티리얼에서 레이어를 제거합니다.
-     * [EN] Removes a layer from the material by instance or layer name.
-     *
-     * @param layer -
-     * [KO] 제거할 LandscapeLayer 인스턴스 또는 레이어 이름 문자열
-     * [EN] LandscapeLayer instance or layer name string to remove
-     * @returns
-     * [KO] 제거 성공 여부
-     * [EN] Whether removal succeeded
-     */
     removeLayer(layer: LandscapeLayer | string): boolean {
         if (!layer) return false;
         const target = typeof layer === 'string'
@@ -298,27 +193,12 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return false;
     }
 
-    /**
-     * [KO] 등록된 모든 스플랫 텍스처 레이어를 머티리얼에서 제거합니다.
-     * [EN] Clears all registered splat texture layers from the material.
-     */
     clearLayers(): void {
         while (this.#layers.length > 0) {
             this.removeLayer(this.#layers[this.#layers.length - 1]);
         }
     }
 
-    /**
-     * [KO] 등록된 지형 텍스처 블렌딩 레이어를 이름으로 조회합니다.
-     * [EN] Retrieves a registered terrain texture blending layer by name.
-     *
-     * @param layerName -
-     * [KO] 조회할 레이어 이름
-     * [EN] Name of the layer to retrieve
-     * @returns
-     * [KO] 일치하는 {@link LandscapeLayer} 인스턴스 (미등록 시 `undefined`)
-     * [EN] Matching {@link LandscapeLayer} instance (`undefined` if not registered)
-     */
     getLayer(layerName: string): LandscapeLayer | undefined {
         if (!layerName) return undefined;
         const count = this.#layers.length;
@@ -329,10 +209,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return undefined;
     }
 
-    /**
-     * [KO] 등록된 레이어 속성 및 유니폼 파라미터(디테일 거리/페이드, 베이스 컬러, UV 스케일/오프셋 등)를 GPU 유니폼 버퍼에 기록합니다.
-     * [EN] Writes registered layer attributes and uniform parameters (detail distance/fade, base color, UV scale/offset, etc.) to the GPU uniform buffer.
-     */
     updateUniformsData(): void {
         const floatBuf = this.#uniformFloatArray;
         const uintBuf = this.#uniformUintArray;
@@ -369,10 +245,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
     }
 
-    /**
-     * [KO] 프래그먼트 셰이더 상태 및 머티리얼 바인드 그룹(바인딩 0~5: 유니폼, 샘플러, 4개 2D 어레이 뷰)을 재구성합니다.
-     * [EN] Reconstructs fragment shader state and material bind group (bindings 0 to 5: uniform, sampler, four 2D array views).
-     */
     override _updateFragmentState(): void {
         if (this.redGPUContext.destroyed) return;
 
@@ -450,10 +322,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         });
     }
 
-    /**
-     * [KO] 머티리얼에 할당된 모든 2D 어레이 GPU 텍스처, 텍스처 뷰 및 레이어 목록을 해제하고 파기합니다.
-     * [EN] Releases and destroys all 2D array GPU textures, texture views, and layer collections allocated to this material.
-     */
     override destroy(): void {
         super.destroy();
         if (this.#rebakeDebounceTimer !== null) {
@@ -753,3 +621,4 @@ defineSampler(LandscapeMaterial, [
 export {LandscapeMaterial};
 Object.freeze(LandscapeMaterial);
 export default LandscapeMaterial;
+

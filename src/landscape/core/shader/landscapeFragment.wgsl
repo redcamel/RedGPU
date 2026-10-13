@@ -50,7 +50,7 @@ struct LandscapeUniforms {
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
     debugMode: u32,
-    pad0: f32, // 16-byte alignment tail padding (320 bytes total)
+    pad0: f32,
     pad1: f32,
     pad2: f32,
 };
@@ -61,8 +61,6 @@ fn stochasticHash2D(p: vec2<f32>) -> vec3<f32> {
     return fract((p3.xxy + p3.yzz) * p3.zyx);
 }
 
-
-// 🚀 [SFU 최적화]: 동일 각도에 대해 사전 계산된 cos, sin을 재사용하여 중복 삼각함수 호출 제거
 fn rotate2DPrecalc(v: vec2<f32>, c: f32, s: f32) -> vec2<f32> {
     return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
 }
@@ -101,7 +99,6 @@ fn getStochasticGridTri(uv: vec2<f32>) -> StochasticGridTri {
         w2 = 1.0 - f.x;
     }
 
-    // 🚀 [SFU 최적화]: 정수 3승을 pow() 대신 순수 ALU 곱셈으로 전개 (SFU pow 3회 완전 제거)
     let sw0 = w0 * w0 * w0;
     let sw1 = w1 * w1 * w1;
     let sw2 = w2 * w2 * w2;
@@ -124,7 +121,6 @@ struct StochasticSampleResult {
 };
 
 fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> {
-    // 🚀 [SFU 최적화]: length()의 sqrt 대신 내적 제곱 거리(dot)로 비교하여 SFU sqrt 제거
     if (dot(tangentN.xy, tangentN.xy) <= 1e-6) {
         return baseN;
     }
@@ -133,7 +129,6 @@ fn perturbNormalOrthonormal(baseN: vec3<f32>, tangentN: vec3<f32>) -> vec3<f32> 
     let tangentZ = cross(baseN, tangentX);
     return tangentX * tangentN.x + tangentZ * tangentN.y + baseN * tangentN.z;
 }
-
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -152,7 +147,7 @@ struct MaterialUniforms {
     activeLayerCount: u32,
     nearDetailDistance: f32,
     nearDetailFade: f32,
-    pad0: u32, // 16-byte alignment
+    pad0: u32,
     color: vec4<f32>,
     layerParams: array<LandscapeLayerParams, 8>,
 };
@@ -203,7 +198,6 @@ fn sampleLayerStochasticGrad(
     let ang1 = r1.z * PI2;
     let ang2 = r2.z * PI2;
 
-    // 🚀 [SFU 최적화]: 각도당 cos/sin 1회만 계산 후 UV, ddx, ddy 회전에 재사용 (삼각함수 18회 ➔ 6회 단축)
     let c0 = cos(ang0);
     let s0 = sin(ang0);
     let uv0 = rotate2DPrecalc(baseUV, c0, s0) + r0.xy;
@@ -444,7 +438,7 @@ fn getDirectDiffuseBRDF(
     albedo: vec3<f32>
 ) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    const INV_151: f32 = 0.66225166; // 1.0 / 1.51
+    const INV_151: f32 = 0.66225166;
     let energyFactor = mix(1.0, INV_151, roughness);
     let fd90Minus1 = (0.5 + 2.0 * (LdotH * LdotH)) * roughness - 1.0;
     let fl = saturate(1.0 - NdotL);
@@ -508,7 +502,6 @@ fn getDirectPbrLighting(
             continue;
         }
 
-        // 🚀 [SFU 최적화]: main()에서 이미 정규화된 0번 주 광원 벡터 L 재사용 (SFU normalize 829만 회 중복 제거)
         var L: vec3<f32>;
         if (i == 0u) {
             L = mainLightDir;
@@ -518,7 +511,6 @@ fn getDirectPbrLighting(
         let NdotL = max(dot(N, L), 0.0);
         let shadowFactor = select(1.0, visibility, i == 0u);
 
-        // 🚀 [조기 탈락]: 배면(NdotL <= 0) 또는 완전 암부(shadowFactor <= 0.001)는 대기산란 LUT 및 BRDF 연산 스킵
         if (NdotL <= 0.0 || shadowFactor <= 0.001) {
             continue;
         }
@@ -840,7 +832,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var terrainShadowVis = 1.0;
     var isDeepTerrainShadow = false;
 
-    // 1. 지형 자체 높이맵 레이마칭 산그늘 (receiveShadow와 완전 독립)
     if (landscapeInstanceUniforms.heightmapShadow > 0.5) {
         let shadowMaxDist = landscapeInstanceUniforms.heightmapShadowDistance;
         let shadowMaxDistLimit = shadowMaxDist * 1.5;
@@ -869,19 +860,15 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 2. 외부 CSM 그림자 수신 최적화
     var csmVisibility = 1.0;
     let shadowStrength = systemUniforms.shadow.directionalShadowStrength;
     let mainLightIntensity = select(0.0, systemUniforms.directionalLights[0].intensity, systemUniforms.directionalLightCount > 0u);
     let hasValidShadow = shadowStrength > 0.001 && mainLightIntensity > 0.0;
-    // 🚀 [조기 탈락 2단계]: 섀도우 비활성화 또는 원경 타일(receiveShadow == 0) 즉시 스킵
     if (hasValidShadow && inputData.receiveShadow > 0.5) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         let maxCSMDistSq = maxCSMDist * maxCSMDist;
 
-        // 🌟 [Caster Bounding Volume 선행 가드]
-        // 캐스터가 없거나(0.0), 지형 픽셀이 캐스터 그림자 영향권 밖(>0.0)인 경우 고비용 CSM 함수 호출 자체를 0-Tap 스킵
         let casterRadiusSq = systemUniforms.shadow.casterBoundingRadiusSq;
         var inCasterVolume = true;
         if (casterRadiusSq == 0.0) {
@@ -891,7 +878,6 @@ fn main(inputData: InputData) -> OutputFragment {
             inCasterVolume = dot(diff, diff) <= casterRadiusSq;
         }
 
-        // 🚀 [조기 탈락 3단계]: 완전 역광(산 뒤쪽 배면)은 0-Tap 즉시 완전 암부 확정
         if (geoNdotL <= 0.0) {
             csmVisibility = 1.0 - shadowStrength;
         } else if (rawViewDistSq < maxCSMDistSq && !isDeepTerrainShadow && inCasterVolume) {
@@ -908,7 +894,6 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 3. 최종 가시성 합성
     let visibility = min(csmVisibility, terrainShadowVis);
 
     let directLighting = getDirectPbrLighting(
@@ -1000,3 +985,4 @@ fn main(inputData: InputData) -> OutputFragment {
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
     return output;
 }
+

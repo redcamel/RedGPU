@@ -1,10 +1,3 @@
-/**
- * [KO] Foliage 계층 모델의 렌더 단위(Render Unit) 조립, LOD 분기, 옥타헤드럴 임포스터 베이킹 및 섀도우 지오메트리 결합 모듈입니다.
- * [EN] Render unit assembly, LOD branching, octahedral impostor baking, and shadow geometry combination module for Foliage models.
- *
- * @packageDocumentation
- */
-
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import type Mesh from "../../../display/mesh/Mesh";
@@ -27,10 +20,6 @@ import {
 const identityMatrix: mat4 = mat4.create();
 const IMPOSTOR_QUAD_INDICES: Uint32Array = new Uint32Array([0, 1, 2, 0, 2, 3]);
 
-/**
- * [KO] 옥타헤드럴(Octahedral) 임포스터 렌더링을 위한 4정점 2삼각형 평면 빌보드 지오메트리를 생성합니다.
- * [EN] Creates a 4-vertex 2-triangle planar billboard geometry for octahedral impostor rendering.
- */
 function createOctahedralImpostorGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
@@ -62,10 +51,6 @@ function createOctahedralImpostorGeometry(
     return new Geometry(redGPUContext, vertexBuffer, indexBuffer);
 }
 
-/**
- * [KO] 메쉬 및 하위 자식 노드의 머티리얼을 순회하며 식생 전용 셰이더 상태(CutOff, DoubleSided, AlphaBlend)를 설정합니다.
- * [EN] Traverses materials of a mesh and its children, configuring foliage-specific shader states (CutOff, DoubleSided, AlphaBlend).
- */
 function prepareFoliageMaterials(node: Mesh): void {
     const {material, children} = node;
     if (material) {
@@ -105,10 +90,6 @@ interface FoliageSharedContext {
     leafFlutterScale?: number;
 }
 
-/**
- * [KO] PBR 식생 렌더 유닛을 생성하고 UBO 슬롯 풀러를 바인딩하는 단일 공통 함수입니다.
- * [EN] Unified common function instantiating a PBR foliage render unit and binding the UBO slot pooler.
- */
 function createPBRRenderUnit(
     geometry: any,
     material: any,
@@ -167,59 +148,15 @@ function createPBRRenderUnit(
     });
 }
 
-/**
- * [KO] 식생 렌더 단위 조립 결과 인터페이스입니다.
- * [EN] Foliage render unit assembly result interface.
- */
 export interface FoliageAssemblyResult {
-    /**
-     * [KO] 조립된 전체 렌더 단위 배열
-     * [EN] Array of all assembled render units
-     */
     renderUnits: FoliageRenderUnit[];
-    /**
-     * [KO] 그림자 패스 전용 통합 렌더 단위 배열
-     * [EN] Array of shadow pass dedicated merged render units
-     */
     shadowMergedRenderUnits: FoliageRenderUnit[];
-    /**
-     * [KO] LOD 레벨별 메타데이터 목록
-     * [EN] List of per-LOD metadata
-     */
     lodInfoList: FoliageLODInfo[];
-    /**
-     * [KO] 밑둥 피벗 보정 오프셋 (미터)
-     * [EN] Bottom pivot correction offset in meters
-     */
     bottomOffset: number;
-    /**
-     * [KO] 식생 모델의 최대 바운딩 구체 반경 (미터)
-     * [EN] Maximum bounding sphere radius in meters of the foliage model
-     */
     boundingRadius: number;
-    /**
-     * [KO] 식생 모델의 바운딩 높이 (미터)
-     * [EN] Bounding height in meters of the foliage model
-     */
     boundingHeight: number;
 }
 
-/**
- * [KO] Foliage 계층 모델의 렌더 단위들을 LOD별 단일 통합 버퍼로 조립하고, 옥타헤드럴 임포스터 및 섀도우 지오메트리를 생성합니다.
- * [EN] Assembles render units of Foliage models into unified per-LOD buffers, creating octahedral impostors and shadow geometries.
- * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPU context instance
- * @param options -
- * [KO] 식생 설정 옵션
- * [EN] Foliage configuration options
- * @param slotPooler -
- * [KO] 256B 정렬 Dynamic Offset UBO 슬롯 풀러 (선택사항)
- * [EN] 256B aligned Dynamic Offset UBO slot pooler (optional)
- * @returns
- * [KO] 조립 완료된 식생 렌더 단위 및 LOD 정보
- * [EN] Assembled foliage render units and LOD information
- */
 export default function assembleFoliageRenderUnits(
     redGPUContext: RedGPUContext,
     options: FoliageOptions,
@@ -450,3 +387,4 @@ export default function assembleFoliageRenderUnits(
         boundingHeight
     };
 }
+

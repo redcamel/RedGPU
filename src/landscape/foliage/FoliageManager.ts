@@ -1,8 +1,3 @@
-/**
- * [KO] 대규모 지형 3D 식생 생태계 및 인스턴스/컬링/렌더링 총괄 매니저 모듈입니다.
- * [EN] Overall manager module for large-scale terrain 3D foliage ecosystems, instances, culling, and rendering.
- * @packageDocumentation
- */
 import View3D from "../../display/view/View3D";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import type Landscape from "../Landscape";
@@ -17,35 +12,6 @@ import FoliageSlotPooler from "./core/buffer/FoliageSlotPooler";
 import {AScatterManager} from "../core/scatter";
 import {FOLIAGE_SUB_CELL_SIZE} from "./FOLIAGE_CONSTANTS";
 
-/**
- * [KO] 대규모 지형(Landscape)의 3D 식생(나무, 수풀, 바위 등) 및 옥타헤드럴 임포스터 생태계를 총괄 관리하는 매니저 클래스입니다.
- * [EN] Manager class that oversees the large-scale 3D foliage (trees, bushes, rocks, etc.) and octahedral impostor ecosystem of the landscape.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * ### Example
- * ```typescript
- * const foliageManager = landscape.foliageManager;
- *
- * // 식생 생태계 타입 등록 (다중 LOD 및 옥타헤드럴 임포스터 지원)
- * const pineTree = foliageManager.addType({
- *     name: 'PineTree',
- *     lods: [
- *         { mesh: treeMeshLOD0, lodDistance: 50 },
- *         { mesh: treeMeshLOD1, lodDistance: 120 }
- *     ],
- *     densityPerHectare: 80,
- *     useImpostor: true,
- *     minScale: [0.8, 0.8, 0.8],
- *     maxScale: [1.3, 1.3, 1.3]
- * });
- * ```
- *
- * @category Landscape
- */
 const DEFAULT_MOUNT_BUDGET: number = 16;
 const DEFAULT_UNMOUNT_BUDGET: number = 32;
 
@@ -67,17 +33,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #needsRepopulateMask: number = 0;
     #lastUpdateFrameIndex: number = -1;
 
-    /**
-     * [KO] FoliageManager의 새 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `landscape.foliageManager` 프로퍼티를 통해 접근하십시오.)
-     * [EN] Creates a new instance of FoliageManager. (Do not instantiate directly; access via the `landscape.foliageManager` property.)
-     *
-     * @param landscape -
-     * [KO] 식생 생태계가 바인딩될 부모 Landscape 인스턴스
-     * [EN] Parent Landscape instance to which the foliage ecosystem is bound
-     * @param onUniformUpdateNeeded -
-     * [KO] 지형 유니폼 버퍼 갱신이 필요할 때 호출되는 내부 콜백 함수
-     * [EN] Internal callback invoked when terrain uniform buffers require updating
-     */
     constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
         super(landscape);
         this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
@@ -132,18 +87,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         };
     }
 
-    /**
-     * [KO] 렌더 유닛 UBO 슬롯 풀러를 반환합니다.
-     * [EN] Returns the render unit UBO slot pooler.
-     */
     get slotPooler(): FoliageSlotPooler {
         return this.#slotPooler;
     }
 
-    /**
-     * [KO] 활성화된 식생 타입들이 Depth Prepass에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the depth prepass.
-     */
     get depthPrepassDrawCalls(): number {
         if (!this.enabled || !this.#useDepthPrepass) return 0;
         let count = 0;
@@ -164,10 +111,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return count;
     }
 
-    /**
-     * [KO] 활성화된 식생 타입들이 순수 메인 렌더 패스(Forward Pass)에서 발행하는 간접 드로우콜 총 개수를 반환합니다.
-     * [EN] Returns the total number of indirect draw calls dispatched by active foliage types in the forward main render pass.
-     */
     get mainPassDrawCalls(): number {
         if (!this.enabled) return 0;
         let count = 0;
@@ -182,22 +125,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return count;
     }
 
-    /**
-     * [KO] 불투명(Opaque) 식생 렌더 유닛에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 반환합니다.
-     * [EN] Gets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage render units.
-     */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;
     }
 
-    /**
-     * [KO] 불투명(Opaque) 식생 렌더 유닛에 대한 Depth Prepass(Z-Prepass) 활성화 여부를 설정합니다.
-     * [EN] Sets whether Depth Prepass (Z-Prepass) is enabled for opaque foliage render units.
-     *
-     * @param val -
-     * [KO] 활성화 여부 (`true`일 경우 메인 렌더링 전 Depth Prepass를 선행하여 픽셀 오버드로우 최소화)
-     * [EN] Whether to enable (when `true`, runs Depth Prepass before main rendering to minimize pixel overdraw)
-     */
     set useDepthPrepass(val: boolean) {
         if (this.#useDepthPrepass !== val) {
             this.#useDepthPrepass = val;
@@ -205,10 +136,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-    /**
-     * [KO] 현재 스트리밍되어 메모리에 로드된 총 식생 인스턴스 수를 반환합니다. (GrassManager 대칭 프로퍼티)
-     * [EN] Returns the total number of foliage instances currently populated and loaded in memory. (Symmetric to GrassManager)
-     */
     get totalInstanceCount(): number {
         let count = 0;
         const {types} = this;
@@ -220,30 +147,14 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return count;
     }
 
-    /**
-     * [KO] 인다이렉트 드로우 커맨드 카운터 리셋 커맨드를 기록합니다 (PRE_PROCESS 커맨드 인코더).
-     * [EN] Records indirect draw command counter reset commands (PRE_PROCESS command encoder).
-     *
-     * @param encoder - 대상 GPU 커맨드 인코더
-     */
     recordResetCommands(encoder: GPUCommandEncoder): void {
         this.#culler.recordResetCommands(encoder);
     }
 
-    /**
-     * [KO] 단일 통합 컴퓨트 패스에 식생 인스턴스 GPU 컬링 디스패치 커맨드를 기록합니다.
-     * [EN] Records foliage instance GPU culling dispatch commands into the unified compute pass.
-     *
-     * @param computePass - 실행 중인 GPU 컴퓨트 패스 인코더
-     */
     dispatchCullingPass(computePass: GPUComputePassEncoder): void {
         this.#culler.dispatchPass(computePass);
     }
 
-    /**
-     * [KO] 매니저에 등록된 모든 식생을 제거하고 메가버퍼, 렌더러, 컬링 디스패처 등 모든 WebGPU 자원을 안전하게 해제합니다.
-     * [EN] Clears all foliage registered in the manager and safely releases all WebGPU resources including mega-buffers, renderers, and culling dispatchers.
-     */
     destroy(): void {
         this.clearTypes();
         this.#megaBuffer.destroy();
@@ -254,17 +165,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#onUniformUpdateNeeded = null;
     }
 
-    /**
-     * [KO] 매 프레임 호출되어 카메라 위치에 기반한 식생 공간 격자 셀 스트리밍을 갱신하고, GPU 컬링 Compute Pass를 디스패치합니다.
-     * [EN] Called every frame to update foliage spatial grid streaming based on camera position and dispatch GPU culling compute passes.
-     *
-     * @param renderViewStateData -
-     * [KO] 뷰 렌더 상태 데이터 (카메라, HZB 텍스처 뷰, 절두체 평면 등 포함)
-     * [EN] View render state data (including camera, HZB texture views, frustum planes, etc.)
-     * @param standalone -
-     * [KO] 단독 실행 모드 여부 (기본값: false, Landscape 통합 패스 모드)
-     * [EN] Standalone execution mode (default: false, Landscape unified pass mode)
-     */
     update(renderViewStateData: RenderViewStateData, standalone: boolean = false): void {
         const {enabled, types} = this;
         if (!enabled || types.length === 0) return;
@@ -325,10 +225,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-    /**
-     * [KO] 특정 식생 타입이 메인 렌더 패스(Depth Prepass 활성화 시 포함)에서 발행하는 간접 드로우콜 수를 단일 패스로 계산합니다.
-     * [EN] Computes the number of indirect draw calls dispatched by a specific foliage type in the main render pass (including Depth Prepass if active) in a single pass.
-     */
     override computeTypeDrawCalls(foliage: Foliage): number {
         const {
             activeInstanceCount,
@@ -345,40 +241,18 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return count;
     }
 
-    /**
-     * [KO] 현재 메가버퍼(MegaBuffer)에 할당된 최대 식생 인스턴스 수용 용량(VRAM Buffer Capacity)을 반환합니다. (GrassManager 대칭 프로퍼티)
-     * [EN] Returns the maximum foliage instance capacity (VRAM Buffer Capacity) currently allocated in the mega-buffer. (Symmetric to GrassManager)
-     */
     get instanceCapacity(): number {
         return this.#megaBuffer.instanceCapacity;
     }
 
-    /**
-     * [KO] 식생 공간 분할 격자(Foliage Spatial Grid)의 단위 서브셀 크기(단위: 월드 유닛, 불변 고정값: 100)를 반환합니다.
-     * [EN] Gets the unit subcell size of the foliage spatial grid (unit: world units, immutable constant: 100).
-     */
     get subCellSize(): number {
         return FOLIAGE_SUB_CELL_SIZE;
     }
 
-
-
-    /**
-     * [KO] 지형 셰이더에서 식생 공간 서브셀 경계를 온스크린 격자 색상으로 시각화할지 여부를 반환합니다.
-     * [EN] Gets whether to visualize foliage spatial subcell boundaries with on-screen grid colors in the landscape shader.
-     */
     get debugSubCellColoration(): boolean {
         return this.#debugSubCellColoration;
     }
 
-    /**
-     * [KO] 지형 셰이더에서 식생 공간 서브셀 경계의 시각화 여부를 설정합니다.
-     * [EN] Sets whether to visualize foliage spatial subcell boundaries in the landscape shader.
-     *
-     * @param val -
-     * [KO] 디버그 색상화 활성화 여부
-     * [EN] Whether to enable debug coloration
-     */
     set debugSubCellColoration(val: boolean) {
         const boolVal = !!val;
         if (this.#debugSubCellColoration !== boolVal) {
@@ -387,54 +261,18 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-
-    /**
-     * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
-     * [EN] Renders culled foliage instances in the main render pass.
-     *
-     * @param view -
-     * [KO] 현재 렌더링 중인 View3D 객체
-     * [EN] Current View3D object being rendered
-     * @param passEncoder -
-     * [KO] 메인 씬 GPURenderPassEncoder
-     * [EN] Main scene GPURenderPassEncoder
-     */
     render(view: View3D, passEncoder: GPURenderPassEncoder): void {
         const {enabled, types} = this;
         if (!enabled || types.length === 0) return;
         this.#renderer.render(view, passEncoder, types);
     }
 
-
-
-    /**
-     * [KO] 캐스케이드 그림자 맵(CSM) 패스에서 그림자 투사가 설정된 식생 인스턴스들의 그림자를 렌더링합니다.
-     * [EN] Renders shadows for foliage instances in the cascaded shadow map (CSM) pass.
-     *
-     * @param view -
-     * [KO] 그림자 패스를 렌더링 중인 View3D 객체
-     * [EN] Current View3D object rendering the shadow pass
-     * @param passEncoder -
-     * [KO] 섀도우 맵 생성을 위한 GPURenderPassEncoder
-     * [EN] GPURenderPassEncoder for shadow map generation
-     */
     renderShadow(view: View3D, passEncoder: GPURenderPassEncoder): void {
         const {enabled, types} = this;
         if (!enabled || types.length === 0) return;
         this.#renderer.renderShadow(view, passEncoder, types);
     }
 
-    /**
-     * [KO] 등록된 식생 생태계 타입을 매니저에서 제거하고 관련 리소스를 해제합니다.
-     * [EN] Removes a registered foliage ecosystem type from the manager and releases associated resources.
-     *
-     * @param target -
-     * [KO] 제거할 식생의 고유 이름(`string`) 또는 {@link Foliage} 인스턴스
-     * [EN] Unique name (`string`) or {@link Foliage} instance to remove
-     * @returns
-     * [KO] 대상이 정상적으로 제거되었으면 `true`, 미존재 시 `false`
-     * [EN] `true` if target was found and removed, `false` otherwise
-     */
     removeType(target: Foliage | string): boolean {
         const removed = this.unregisterTypeInternal(target);
         if (!removed) return false;
@@ -449,27 +287,12 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return true;
     }
 
-    /**
-     * [KO] 등록된 모든 식생 타입을 일괄 제거하고 비트마스크를 초기화합니다.
-     * [EN] Clears all registered foliage types and resets bitmasks.
-     */
     override clearTypes(): void {
         this.#dirtyUboMask = 0;
         this.#needsRepopulateMask = 0;
         super.clearTypes();
     }
 
-    /**
-     * [KO] 새로운 식생 생태계 타입({@link Foliage})을 생성하여 매니저에 등록하고, 카메라 기반 온디맨드 스트리밍을 준비합니다.
-     * [EN] Creates and registers a new foliage ecosystem type ({@link Foliage}) into the manager, preparing camera-based on-demand streaming.
-     *
-     * @param options -
-     * [KO] 식생 생성 및 지형 배치 규칙 옵션 {@link FoliageOptions}
-     * [EN] Foliage creation and landscape placement rule options {@link FoliageOptions}
-     * @returns
-     * [KO] 생성되어 등록된 {@link Foliage} 인스턴스
-     * [EN] Newly created and registered {@link Foliage} instance
-     */
     addType(options: FoliageOptions): Foliage {
         const {name} = options;
         const existing = this.getTypeByName(name);
@@ -495,10 +318,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return foliage;
     }
 
-    /**
-     * [KO] 등록된 모든 식생 인스턴스의 서브셀 캐시를 초기화하고 온디맨드 재배치를 트리거합니다.
-     * [EN] Clears the sub-cell cache of all registered foliage instances and triggers on-demand repopulation.
-     */
     repopulateAll(): void {
         const {types} = this;
         const count = types.length;
@@ -511,10 +330,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-    /**
-     * [KO] 등록된 모든 식생 타입의 메가버퍼 인스턴스 배치를 강제로 다시 베이크(Rebake)합니다.
-     * [EN] Forces a rebake of mega-buffer instance placement for all registered foliage types.
-     */
     rebakeAll(): void {
         const {types} = this;
         const count = types.length;
@@ -528,10 +343,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#dirtyUboMask |= (1 << typeId);
     };
 
-    /**
-     * [KO] 그림자를 투사하는 특정 식생 타입이 CSM 그림자 맵 패스에서 발행하는 간접 드로우콜 수를 계산합니다.
-     * [EN] Computes the number of indirect draw calls dispatched by a shadow-casting foliage type in the CSM shadow pass.
-     */
     override computeTypeShadowDrawCalls(foliage: Foliage): number {
         const {
             shadowCullDistance,
@@ -563,3 +374,4 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
 
 Object.freeze(FoliageManager);
 export default FoliageManager;
+

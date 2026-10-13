@@ -106,3 +106,4 @@ fn main(
 
     textureStore(vntOutput, vec2<i32>(curX, curZ), vec4<f32>(encodedNormal, 1.0));
 }
+

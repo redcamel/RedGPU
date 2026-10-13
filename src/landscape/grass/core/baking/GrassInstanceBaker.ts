@@ -1,8 +1,3 @@
-/**
- * [KO] 잔디(Grass) GPU 물리 베이커 모듈입니다.
- * [EN] GPU Physics instance baker module for grass.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import grassBakeWGSL from "./grassBake.wgsl";
 import type Landscape from "../../../Landscape";
@@ -12,10 +7,6 @@ import AScatterInstanceBaker from "../../../core/scatter/AScatterInstanceBaker";
 
 export const GRASS_CELL_SIZE: number = 16.0;
 
-/**
- * [KO] 지형(Landscape) 높이맵 및 레이어 가중치 텍스처를 기반으로 잔디 인스턴스를 100% GPU 베이킹하는 클래스입니다.
- * [EN] Baker class that bakes grass instances 100% on the GPU based on landscape heightmaps and layer weight textures.
- */
 class GrassInstanceBaker extends AScatterInstanceBaker {
     #uniformArrayBuffer: ArrayBuffer = new ArrayBuffer(256);
     #uniformFloat32View: Float32Array;
@@ -34,10 +25,6 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         this.initComputePipeline(grassBakeWGSL, 'Grass_Bake', 256);
     }
 
-    /**
-     * [KO] 특정 잔디 타입에 대해 16m 서브셀 단위 GPU 베이킹 Compute Pass를 1회 실행합니다.
-     * [EN] Executes GPU Baking Compute Pass once for a specific grass type using 16m subcells.
-     */
     dispatchBake(
         megaBuffer: GrassMegaBuffer,
         landscape: Landscape,
@@ -185,10 +172,6 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         super.destroy();
     }
 
-    /**
-     * [KO] 특정 반경에 대해 카메라 중심 기준 원형 거리순으로 정렬된 상대 셀 좌표 [dx, dz] 배열을 반환합니다. (Zero-GC 캐싱)
-     * [EN] Returns relative cell coordinates [dx, dz] sorted in circular distance order from the camera center. (Zero-GC cached)
-     */
     #getSpiralOffsets(cellRadius: number): Int32Array {
         let cached = this.#cellOffsetsCache.get(cellRadius);
         if (cached) return cached;
@@ -224,3 +207,4 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
 
 Object.freeze(GrassInstanceBaker);
 export default GrassInstanceBaker;
+

@@ -31,7 +31,7 @@ struct LandscapeUniforms {
     foliageSubCellColoration: f32,
     foliageSubCellSize: f32,
     debugMode: u32,
-    pad0: f32, // 16-byte alignment tail padding (320 bytes total)
+    pad0: f32,
     pad1: f32,
     pad2: f32,
 };
@@ -218,7 +218,6 @@ fn main(input: InputData) -> OutputData {
     output.instanceColor = computed.instanceColor;
     output.lodLevel = f32(computed.lodLevel);
 
-    // 🚀 [조기 탈락 1단계] CSM 최대 유효 거리 + 타일 반경 마진을 초과한 원경 버텍스는 그림자 수신을 0.0으로 사전 차단
     let viewDepth = -viewPos.z;
     var receiveShadow = 0.0;
     if (landscapeUniforms.receiveShadow > 0.5) {
@@ -232,3 +231,4 @@ fn main(input: InputData) -> OutputData {
 
     return output;
 }
+

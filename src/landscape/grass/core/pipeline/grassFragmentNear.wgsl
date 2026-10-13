@@ -71,7 +71,6 @@ fn blendGrassGroundColor(
     return albedo;
 }
 
-
 fn computeGrassSkyOcclusion(heightRatio: f32) -> f32 {
     return mix(0.65, 1.0, saturate(heightRatio * 1.43));
 }
@@ -96,7 +95,6 @@ fn main(input: VertexOutput) -> OutputFragment {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
     let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
-    // 🌿 TAA 서브픽셀 지터링 깜빡임 방지용 적응형 알파 컷오프 (Alpha Widening)
     let uvDeriv = fwidth(input.uv);
     let subpixelFactor = saturate(max(uvDeriv.x, uvDeriv.y) * 50.0);
     let adaptiveCutoff = mix(materialUniforms.alphaCutoff, materialUniforms.alphaCutoff * 0.45, subpixelFactor);
@@ -144,7 +142,6 @@ fn main(input: VertexOutput) -> OutputFragment {
         let cascadeIndex = select(0u, min(1u, cascadeCount - 1u), viewDepth > shadowInfo.cascadeSplitDepths[0]);
         let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
 
-        // 🌿 자가 그림자 Z-fighting(아크네/지글거림) 원천 방지용 초경량 노멀 오프셋
         let normalOffset = N * select(0.025, 0.07, cascadeIndex > 0u);
         let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
 
@@ -158,7 +155,6 @@ fn main(input: VertexOutput) -> OutputFragment {
                 cascadeIndex,
                 saturate(shadowCoord.z - cascadeBias)
             );
-            // ☀️ 터미네이터(빛과 수평인 각도) 경계선 톱니 지글거림 방지 초고속 선형 페이드
             let horizonFade = saturate(firstNDotL * 6.25 + 0.5);
             let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
             let pureShadow = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
@@ -227,3 +223,4 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     return output;
 }
+

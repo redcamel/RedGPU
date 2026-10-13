@@ -42,7 +42,6 @@ struct GrassRenderParams {
     pad1: u32,
 };
 
-
 struct GrassPositionResult {
     worldPos: vec3<f32>,
     heightRatio: f32,
@@ -130,3 +129,4 @@ fn main(input: VertexInput) -> ShadowVertexOutput {
 
     return output;
 }
+

@@ -7,3 +7,4 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let h = textureLoad(vhtTexture, texCoord, 0).r;
     return vec4<f32>(h, h * 0.9 + 0.1, h * 0.8, 1.0);
 }
+

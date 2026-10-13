@@ -1,10 +1,3 @@
-/**
- * [KO] 복합 계층 3D 메쉬(GLTF 노드 트리 등)를 재귀 순회하여 부모-자식 로컬 트랜스폼을 적용하고, 동일 재질 메쉬를 단일 지오메트리로 자동 병합하는 스캐터 코어 함수 모듈입니다.
- * [EN] Scatter core function module that recursively traverses composite hierarchical 3D meshes (e.g. GLTF node trees), applies parent-child local transforms, and automatically merges same-material meshes into unified geometries.
- *
- * @packageDocumentation
- */
-
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../../display/mesh/Mesh";
@@ -23,10 +16,6 @@ import {
 const tempLocalMatrix: mat4 = mat4.create();
 const identityMatrix: mat4 = mat4.create();
 
-/**
- * [KO] 결합 대상 개별 메쉬 노드의 원시 메타데이터 인터페이스입니다.
- * [EN] Raw metadata interface for an individual mesh node to be combined.
- */
 export interface RawMeshNode {
     node: Mesh;
     geometry: Geometry | Primitive;
@@ -36,10 +25,6 @@ export interface RawMeshNode {
     rawStride: number;
 }
 
-/**
- * [KO] 동일한 재질을 공유하여 하나의 버퍼로 조립/병합된 메쉬 그룹 결과입니다.
- * [EN] Result of a mesh group assembled into a single buffer sharing the same material.
- */
 export interface AssembledMeshGroup {
     material: any;
     geometry: Geometry;
@@ -49,34 +34,14 @@ export interface AssembledMeshGroup {
     rawNodes: RawMeshNode[];
 }
 
-/**
- * [KO] 스캐터 렌더 유닛 조립 설정 옵션 인터페이스입니다.
- * [EN] Configuration options interface for scatter render unit assembly.
- */
 export interface ScatterAssemblyOptions {
-    /**
-     * [KO] 원래 모델의 피벗 기준점을 유지할지 여부 (기본값: true). false일 경우 모델의 최하단(minY)을 Y=0으로 정렬합니다.
-     * [EN] Whether to preserve the original model pivot (default: true). If false, aligns the lowest vertex (minY) to Y=0.
-     */
     preservePivot?: boolean;
 
-    /**
-     * [KO] XZ 평면 상에서 기하학적 중심((minX+maxX)*0.5, (minZ+maxZ)*0.5)을 원점으로 정렬할지 여부 (기본값: false, Foliage처럼 수목 중심 정렬 시 true).
-     * [EN] Whether to center vertices on the XZ plane to geometric center (default: false, true for Foliage tree centering).
-     */
     centerXZ?: boolean;
 
-    /**
-     * [KO] 뎁스 프리패스나 그림자 패스에 최적화된 포지션 전용(Position-Only 3 floats) 지오메트리를 추가로 생성할지 여부 (기본값: false)
-     * [EN] Whether to also generate a position-only (3 floats) geometry optimized for depth/shadow passes (default: false)
-     */
     generateShadowMergedGeometry?: boolean;
 }
 
-/**
- * [KO] assembleScatterRenderUnits의 최종 렌더 유닛 조립 및 지오메트리 결과 객체입니다.
- * [EN] Final render unit assembly and geometry result object of assembleScatterRenderUnits.
- */
 export interface ScatterAssemblyResult {
     groups: AssembledMeshGroup[];
     renderUnits: ScatterRenderUnit[];
@@ -95,10 +60,6 @@ export interface ScatterAssemblyResult {
     maxZ: number;
 }
 
-/**
- * [KO] RedGPU Mesh 인스턴스의 위치, 오일러 회전각(Degree), 스케일을 기반으로 로컬 4x4 행렬을 계산합니다.
- * [EN] Computes the local 4x4 matrix based on position, Euler rotation angles (degrees), and scale of a RedGPU Mesh instance.
- */
 function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
     const {
         x = 0,
@@ -154,12 +115,6 @@ function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
     return out;
 }
 
-/**
- * [KO] 단일 메쉬 노드 및 그 자식 노드(`children`)를 재귀 순회하여 유효한 지오메트리를 가진 서브메쉬 목록을 추출합니다.
- *      루트 노드인 경우 부모 체인(GLTF 상위 노드의 회전/스케일)을 역추적하여 누적 계산합니다.
- * [EN] Recursively traverses a mesh node and its children to extract sub-mesh nodes with valid geometries.
- *      For root nodes, traces up the parent chain to accumulate GLTF parent transforms.
- */
 function traverseHierarchy(
     node: Mesh,
     parentRelativeMatrix: mat4,
@@ -228,39 +183,6 @@ function traverseHierarchy(
     }
 }
 
-/**
- * [KO] 하나 이상의 루트 메쉬를 입력받아 계층 구조를 순회하고, 동일 재질 메쉬를 단일 버퍼로 병합한 결합 결과 객체를 반환합니다.
- * [EN] Accepts one or more root meshes, traverses their hierarchies, and returns a combination result object with merged meshes per material.
- *
- * **[KO] 알고리즘 및 렌더링 최적화:**
- * - **계층 구조 평탄화 (Hierarchy Flattening)**: GLTF 노드 트리의 복잡한 부모-자식 트랜스폼(위치, 오일러 회전, 스케일)을 누적 계산하여 모든 정점과 법선, 탄젠트를 전역 모델 공간으로 사전 베이킹합니다.
- * - **재질별 드로우콜 병합 (Material Grouping)**: 동일한 텍스처와 재질 파라미터를 공유하는 여러 메쉬 노드를 단일 Vertex/Index 버퍼로 결합하여 드로우콜 횟수를 최소화합니다.
- * - **스캐터 정렬 옵션**:
- *   - `preservePivot`: 원본 3D 모델의 원점(피벗)을 그대로 보존하거나, 지형 표면에 정확히 맞닿도록 최하단 정점(minY)을 Y=0으로 스냅합니다.
- *   - `centerXZ`: 나무나 풀과 같은 식생 모델을 회전/배치할 때 비틀림이 없도록 XZ 평면 중심을 원점으로 재정렬합니다.
- * - **그림자 패스 최적화 (`generateShadowMergedGeometry`)**: 불필요한 노멀/UV/탄젠트를 제외하고 오직 위치값(Position-only, 3 floats)만으로 구성된 단일 섀도우 지오메트리를 생성하여 캐스케이드 그림자 맵 렌더링 대역폭을 획기적으로 절감합니다.
- *
- * **[EN] Algorithm & Rendering Optimizations:**
- * - **Hierarchy Flattening**: Accumulates nested parent-child transforms (position, Euler rotation, scale) across GLTF node trees to pre-bake all vertices, normals, and tangents into unified model space.
- * - **Material-based Draw Call Batching**: Merges multiple mesh nodes sharing the same textures and material properties into single Vertex/Index buffers to minimize draw calls.
- * - **Scatter Alignment Options**:
- *   - `preservePivot`: Preserves the original model pivot or aligns the lowest vertex (minY) to Y=0 for accurate terrain snapping.
- *   - `centerXZ`: Re-centers the XZ plane geometry to eliminate rotation wobble when instancing trees or vegetation.
- * - **Shadow Pass Optimization (`generateShadowMergedGeometry`)**: Produces a unified position-only (3 floats) geometry stripped of normals, UVs, and tangents to dramatically cut memory bandwidth during shadow map passes.
- *
- * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPU context instance
- * @param roots -
- * [KO] 결합할 단일 루트 메쉬 또는 메쉬 배열
- * [EN] Single root mesh or array of root meshes to combine
- * @param options -
- * [KO] 피벗 보존, XZ 평면 중심 정렬, 그림자용 지오메트리 생성 등 결합/병합 옵션
- * [EN] Combination options including pivot preservation, XZ plane centering, and shadow geometry generation
- * @returns
- * [KO] 머티리얼별 병합 그룹, 기본 ScatterRenderUnit 배열 및 통합 바운딩 정보가 포함된 조립 결과 객체
- * [EN] Assembly result object containing merged groups per material, default ScatterRenderUnit array, and unified bounding data
- */
 export default function assembleScatterRenderUnits(
     redGPUContext: RedGPUContext,
     roots: Mesh | Mesh[],
@@ -664,10 +586,6 @@ export default function assembleScatterRenderUnits(
     };
 }
 
-/**
- * [KO] 재질 객체로부터 동일 머티리얼 판별을 위한 고유 해시 키를 생성합니다.
- * [EN] Generates a unique hash key from a material object to identify identical materials.
- */
 function getMaterialKey(mat: any): string {
     if (!mat) return 'default_mat';
     const {constructor, baseColorTexture, normalTexture, ormTexture} = mat;
@@ -693,3 +611,4 @@ function getMaterialKey(mat: any): string {
 
     return `${matType}_${baseColorKey}_${normalKey}_${ormKey}`;
 }
+

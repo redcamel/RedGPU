@@ -1,8 +1,3 @@
-/**
- * [KO] 대규모 식생(Foliage) 시스템의 멀티 LOD 인스턴스 데이터, 간접 드로우 및 캐스케이드 그림자 버퍼를 통합 관리하는 메가버퍼 모듈입니다.
- * [EN] Mega-buffer module integrally managing multi-LOD instance data, indirect draw, and cascade shadow buffers for large-scale foliage systems.
- * @packageDocumentation
- */
 import {mat4} from "gl-matrix";
 import RedGPUContext from '../../../../context/RedGPUContext';
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
@@ -15,36 +10,12 @@ import FoliageRenderUnit from '../FoliageRenderUnit';
 import {FoliageLODInfo} from '../Foliage';
 import consoleAndThrowError from '../../../../utils/consoleAndThrowError';
 
-/**
- * [KO] Cascaded Shadow Maps (CSM) 그림자 캐스케이드 분할 단계 수
- * [EN] Number of Cascaded Shadow Maps (CSM) shadow cascade split levels
- */
 const SHADOW_CASCADE_COUNT = 4;
 
-/**
- * [KO] 메가버퍼 내 단일 식생 타입의 할당 정보 인터페이스입니다.
- * [EN] Interface for single foliage type allocation information in mega-buffer.
- */
 export interface FoliageTypeAllocation extends ScatterBaseSegmentAllocation {
-    /**
-     * [KO] 식생 타입 고유 이름
-     * [EN] Unique foliage type name
-     */
     name: string;
 }
 
-
-/**
- * [KO] 모든 식생 타입의 인스턴스 원시 데이터, GPU 컬링 결과, 간접 드로우 버퍼, 캐스케이드 그림자 버퍼를 단일 대형 GPU 버퍼로 통합 관리하는 클래스입니다.
- * 그림자 간접 버퍼는 가상 훅(`onResetMultiIndirectCommands`) 오버라이드를 통해 매 프레임 단일 GPU 커맨드 인코더 파이프라인에서 일괄 리셋됩니다.
- * [EN] Class that integrally manages raw instance data, GPU culling results, indirect draw buffers, and cascade shadow buffers for all foliage types in a single large GPU buffer.
- * Shadow indirect draw buffers are batch-reset within a single GPU command encoder pipeline per frame via the overridden virtual hook (`onResetMultiIndirectCommands`).
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(FoliageManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (FoliageManager).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class FoliageMegaBuffer extends AScatterMegaBuffer {
     #globalUniformBytes: number;
 
@@ -66,19 +37,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
     #cachedHZBTextureView: GPUTextureView | null = null;
     #cachedHZBSampler: GPUSampler | null = null;
 
-    /**
-     * [KO] FoliageMegaBuffer 인스턴스를 생성하고 내부 GPU 버퍼들을 초기화합니다.
-     * [EN] Creates a FoliageMegaBuffer instance and initializes internal GPU buffers.
-     * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     * @param initialCapacity -
-     * [KO] 초기 인스턴스 수용 용량 (기본값: 65536)
-     * [EN] Initial instance capacity (default: 65536)
-     * @param maxTypes -
-     * [KO] 최대 지원 식생 타입 개수 (기본값: 64)
-     * [EN] Maximum supported foliage types count (default: 64)
-     */
     constructor(
         redGPUContext: RedGPUContext,
         initialCapacity: number = 65536,
@@ -122,52 +80,18 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         this.#initBuffers();
     }
 
-    /**
-     * [KO] 캐스케이드 그림자 컬링을 통과한 인스턴스 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer where instances passing cascade shadow culling are recorded.
-     */
     get shadowCulledGPUBuffer(): GPUBuffer | null {
         return this.#shadowCulledGPUBuffer;
     }
 
-    /**
-     * [KO] 캐스케이드 그림자 드로우 호출에 사용되는 GPU 간접 버퍼를 반환합니다.
-     * [EN] Returns the GPU indirect buffer used for cascade shadow draw calls.
-     */
     get shadowIndirectGPUBuffer(): GPUBuffer | null {
         return this.#shadowIndirectGPUBuffer;
     }
 
-    /**
-     * [KO] 모든 필수 GPU 버퍼(컬링 및 섀도우 버퍼 포함)가 초기화되어 준비되었는지 여부를 반환합니다.
-     * [EN] Returns whether all essential GPU buffers (including culling and shadow buffers) are initialized and ready for use.
-     */
     override get isReady(): boolean {
         return super.isReady && this.culledGPUBuffer != null && this.#shadowCulledGPUBuffer != null && this.#unifiedGlobalUniformGPUBuffer != null;
     }
 
-    /**
-     * [KO] 새로운 식생 타입에 대한 버퍼 세그먼트를 할당하고 오프셋을 등록합니다.
-     * [EN] Allocates a buffer segment and registers offsets for a new foliage type.
-     * @param name -
-     * [KO] 식생 타입 고유 이름
-     * [EN] Unique foliage type name
-     * @param maxInstances -
-     * [KO] 최대 허용 인스턴스 수
-     * [EN] Maximum allowed instances
-     * @param renderUnits -
-     * [KO] 식생 렌더 유닛 배열
-     * [EN] Foliage render units array
-     * @param shadowMergedRenderUnits -
-     * [KO] 그림자 패스 통합 렌더 유닛 배열 (선택사항)
-     * [EN] Shadow pass merged render units array (optional)
-     * @param lodInfoList -
-     * [KO] LOD 정보 목록 (선택사항)
-     * [EN] LOD info list (optional)
-     * @returns
-     * [KO] 할당된 세그먼트 정보 객체
-     * [EN] Allocated segment info object
-     */
     allocateType(
         name: string,
         maxInstances: number,
@@ -232,17 +156,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         return allocation;
     }
 
-    /**
-     * [KO] 유니파이드 GPU 컬링에 필요한 글로벌 유니폼 버퍼를 RenderViewStateData SSOT로부터 CPU에서 갱신하고 GPU로 전송합니다.
-     * [EN] Updates global uniforms required for unified GPU culling on CPU directly from RenderViewStateData SSOT and transfers them to GPU.
-     *
-     * @param renderViewStateData - 렌더 뷰 상태 데이터 (카메라, 프러스텀, 캐스케이드 정보 포함)
-     * @param fovFactor - 카메라 FOV 탄젠트 팩터
-     * @param viewProjectionMatrix - 뷰-프로젝션 행렬 (선택사항)
-     * @param hzbWidth - HZB 텍스처 가로 크기 (기본값: 512.0)
-     * @param hzbHeight - HZB 텍스처 세로 크기 (기본값: 256.0)
-     * @param depthBias - HZB 오클루전 깊이 바이어스 (기본값: 0.002)
-     */
     updateUnifiedGlobalUniforms(
         renderViewStateData: RenderViewStateData,
         fovFactor: number,
@@ -283,12 +196,12 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         gu32[8] = (hzbEnabled && viewProjectionMatrix) ? 1 : 0;
         gf32[9] = viewportHeight > 0 ? viewportHeight : 1080.0;
         gf32[10] = depthBias;
-        gf32[11] = 0; // pad0 (hzbWidth)
+        gf32[11] = 0;
 
-        gf32[12] = 0; // pad1 (hzbHeight)
-        gf32[13] = 0; // pad2
-        gf32[14] = 0; // pad3
-        gf32[15] = 0; // pad4
+        gf32[12] = 0;
+        gf32[13] = 0;
+        gf32[14] = 0;
+        gf32[15] = 0;
 
         if (viewProjectionMatrix) {
             gf32.set(viewProjectionMatrix, 16);
@@ -352,10 +265,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
-    /**
-     * [KO] 특정 식생 타입의 컬링 및 LOD 파라미터를 CPU 버퍼에 갱신합니다.
-     * [EN] Updates culling and LOD parameters for a specific foliage type in CPU buffer.
-     */
     updateTypeParams(
         allocation: FoliageTypeAllocation,
         cullingDistance: number,
@@ -439,10 +348,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
-    /**
-     * [KO] 통합 컬링 연산에 필요한 GPUBindGroup을 생성하거나 캐시된 바인드그룹을 반환합니다.
-     * [EN] Creates GPUBindGroup required for unified culling compute or returns cached bind group.
-     */
     getOrCreateUnifiedCullingBindGroup(
         layout: GPUBindGroupLayout,
         hzbTextureView?: GPUTextureView | null,
@@ -496,20 +401,12 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         return this.#unifiedCullingBindGroup;
     }
 
-    /**
-     * [KO] 캐시된 단일 일괄 컬링 바인드그룹 및 HZB 텍스처/샘플러 캐시를 무효화합니다.
-     * [EN] Invalidates the cached unified culling bind group and HZB texture/sampler caches.
-     */
     override invalidateUnifiedCullingBindGroup(): void {
         this.#unifiedCullingBindGroup = null;
         this.#cachedHZBTextureView = null;
         this.#cachedHZBSampler = null;
     }
 
-    /**
-     * [KO] 렌더 유닛 및 그림자 통합 렌더 유닛의 드로우 인자들을 인디렉트 템플릿 버퍼에 등록합니다.
-     * [EN] Registers draw arguments of render units and shadow merged render units to indirect template buffer.
-     */
     registerRenderUnitsToTemplate(
         renderUnits: FoliageRenderUnit[],
         indirectBaseOffset: number,
@@ -571,14 +468,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         }
     }
 
-    /**
-     * [KO] 인스턴스 최대 수용 용량이 증가할 때 호출되어 메인 및 그림자 컬링 GPU 버퍼를 리사이징합니다.
-     * [EN] Invoked when maximum instance capacity expands to resize main and shadow culled GPU buffers.
-     *
-     * @param newCapacity -
-     * [KO] 새로 확장된 인스턴스 수용 용량
-     * [EN] Newly expanded instance capacity
-     */
     onResizeBuffers(newCapacity: number): void {
         const {gpuDevice, strideBytes} = this;
         const {VERTEX, STORAGE} = GPUBufferUsage;
@@ -613,10 +502,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         this.invalidateUnifiedCullingBindGroup();
     }
 
-    /**
-     * [KO] 메가버퍼 인스턴스 해제 시 그림자 버퍼, 유니폼 버퍼, 바인드그룹 및 식생 타입 할당 목록을 파괴합니다.
-     * [EN] Destroys shadow buffers, uniform buffers, bind groups, and foliage type allocations upon mega-buffer release.
-     */
     onDestroy(): void {
         this.invalidateUnifiedCullingBindGroup();
         this.#shadowCulledGPUBuffer.destroy();
@@ -633,11 +518,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         this.clearBaseAllocations();
     }
 
-    /**
-     * [KO] 매 프레임 식생의 CSM 그림자 간접 드로우 버퍼 인스턴스 카운트를 템플릿으로부터 리셋합니다.
-     * [EN] Resets instance counts of foliage CSM shadow indirect draw buffers from template each frame.
-     * @param commandEncoder - GPU 커맨드 인코더 (제공 시 copyBufferToBuffer 사용)
-     */
     override onResetMultiIndirectCommands(commandEncoder: GPUCommandEncoder | null): void {
         const targetGPUBuffer = this.#shadowIndirectGPUBuffer;
         const templateGPUBuffer = this.#shadowIndirectResetTemplateGPUBuffer;
@@ -722,3 +602,4 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
 
 Object.freeze(FoliageMegaBuffer);
 export default FoliageMegaBuffer;
+

@@ -28,7 +28,6 @@ fn rotate2D(v: vec2<f32>, angle: f32) -> vec2<f32> {
     return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-
 struct StochasticGridTri {
     v0: vec2<f32>,
     v1: vec2<f32>,
@@ -181,7 +180,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let vntSample = textureSampleLevel(vntAtlasTexture, vbtTextureSampler, globalUV, 0.0).rgb;
     let sampledNormal = normalize(vntSample * 2.0 - vec3<f32>(1.0));
-    // 🚀 [SFU 최적화]: length() 대신 dot() 내적 제곱 거리로 비교하여 SFU sqrt 제거
     var N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6);
 
     var baseAlbedo = uniforms.baseColor.rgb;
@@ -312,3 +310,4 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     textureStore(vbtORMOutput, storeCoord, vec4<f32>(finalAO, finalRoughness, finalMetallic, 1.0));
 }
+

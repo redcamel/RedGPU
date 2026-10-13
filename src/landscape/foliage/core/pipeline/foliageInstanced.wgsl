@@ -34,8 +34,6 @@ fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
     }
 }
 
-
-
 struct RenderUnitUniforms {
     globalFragmentSlotIndex: u32,
     receiveShadow: f32,
@@ -435,3 +433,4 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
         discard;
     }
 }
+

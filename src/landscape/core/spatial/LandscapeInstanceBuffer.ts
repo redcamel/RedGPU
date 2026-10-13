@@ -1,8 +1,3 @@
-/**
- * [KO] 지형 타일 인스턴스 버퍼 및 간접 드로우 인자 버퍼 관리자 모듈입니다.
- * [EN] Buffer manager module handling terrain tile instance buffers and indirect draw arguments.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
@@ -10,27 +5,6 @@ import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
 import {FOLIAGE_SUB_CELL_SIZE} from "../../foliage/FOLIAGE_CONSTANTS";
 
-/**
- * [KO] GPU 컴퓨트 컬링 및 간접 드로우(Indirect Draw)를 지원하기 위한 지형 타일 인스턴스 버퍼 및 유니폼 버퍼 관리자입니다.
- * [EN] Buffer manager handling terrain tile instance buffers, indirect draw arguments, and global landscape uniform buffers for GPU compute culling and multi-LOD indirect rendering.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **타일 인스턴스 스토리지 버퍼 (`allTilesBuffer`)**: 전체 지형 타일의 월드 좌표, 바운딩 박스, 높이 범위, 아틀라스 UV 오프셋 등의 메타데이터를 저장합니다.
- * - **가시 인덱스 스트림 버퍼 (`visibleTilesBuffer`)**: GPU 컬링 패스에서 가시성을 통과한 타일들의 인덱스가 순차적으로 기록되는 GPU 전용 출력 버퍼입니다.
- * - **멀티 LOD 인디렉트 버퍼 (`indirectDrawBuffer`)**: WebGPU의 `drawIndexedIndirect` 스펙에 맞추어 LOD 레벨당 5개의 uint32 필드(`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`)를 배치하여 멀티 레벨 간접 드로우를 단일 패스로 처리합니다.
- * - **전역 유니폼 동기화 (`landscapeUniformBuffer`)**: 카메라 역행렬, 뷰/프로젝션 행렬, 높이 스케일, 안개 파라미터 등을 320바이트 정렬 버퍼로 래핑하여 셰이더와 동기화합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Tile Instance Storage (`allTilesBuffer`)**: Houses spatial metadata for all terrain tiles including world coordinates, bounding boxes, height bounds, and atlas UV offsets.
- * - **Visible Index Stream (`visibleTilesBuffer`)**: Dedicated GPU output buffer sequentially populated with tile indices that passed frustum and occlusion culling tests.
- * - **Multi-LOD Indirect Buffer (`indirectDrawBuffer`)**: Layouts 5 uint32 fields (`indexCount`, `instanceCount`, `firstIndex`, `baseVertex`, `firstInstance`) per LOD level conforming to WebGPU `drawIndexedIndirect` specifications.
- * - **Global Uniform Sync (`landscapeUniformBuffer`)**: Synchronizes view/projection matrices, height scales, and fog parameters via a 320-byte aligned uniform buffer.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeInstanceBuffer extends RedGPUObject {
     #maxComponentCount: number;
     #lodMaxLevel: number;
@@ -51,14 +25,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
-    /**
-     * [KO] LandscapeInstanceBuffer 생성자입니다.
-     * [EN] Constructor for LandscapeInstanceBuffer.
-     *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 / [EN] RedGPU context
-     * @param maxComponentCount - [KO] 최대 타일(컴포넌트) 개수 / [EN] Maximum component (tile) count
-     * @param lodMaxLevel - [KO] 최대 LOD 단계 수 / [EN] Maximum LOD levels count
-     */
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, lodMaxLevel: number) {
         super(redGPUContext);
         this.#maxComponentCount = maxComponentCount;
@@ -72,73 +38,34 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         this.#landscapeUniformUintData = new Uint32Array(this.#landscapeUniformData.buffer);
     }
 
-    /**
-     * [KO] 전체 타일의 원본 공간 메타데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer containing raw metadata of all tiles.
-     */
     get allTilesBuffer(): GPUBuffer | null {
         return this.#allTilesBuffer;
     }
 
-    /**
-     * [KO] GPU 컬링 후 가시적인 타일 데이터 목록이 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer containing visible tile data output by GPU culling.
-     */
     get visibleTilesBuffer(): GPUBuffer | null {
         return this.#visibleTilesBuffer;
     }
 
-    /**
-     * [KO] LOD 레벨별 간접 드로우 인자(`drawIndexedIndirect`)가 기록되는 GPU 버퍼를 반환합니다.
-     * [EN] Returns the GPU indirect draw argument buffer (`drawIndexedIndirect`) per LOD level.
-     */
     get indirectDrawBuffer(): GPUBuffer | null {
         return this.#indirectDrawBuffer;
     }
 
-
-    /**
-     * [KO] 지형 버텍스/프래그먼트 셰이더용 인스턴스 스토리지 바인드 그룹을 반환합니다.
-     * [EN] Returns the instance storage bind group for vertex and fragment shaders.
-     */
     get instanceStorageBindGroup(): GPUBindGroup | null {
         return this.#instanceStorageBindGroup;
     }
 
-    /**
-     * [KO] 인스턴스 스토리지 바인드 그룹 레이아웃을 반환합니다.
-     * [EN] Returns the instance storage bind group layout.
-     */
     get instanceStorageBindGroupLayout(): GPUBindGroupLayout | null {
         return this.#instanceStorageBindGroupLayout;
     }
 
-    /**
-     * [KO] 허용된 최대 타일(컴포넌트) 개수를 반환합니다.
-     * [EN] Returns the maximum allowed component (tile) count.
-     */
     get maxComponentCount(): number {
         return this.#maxComponentCount;
     }
 
-    /**
-     * [KO] 최대 LOD 단계 수를 반환합니다.
-     * [EN] Returns the maximum number of LOD levels.
-     */
     get lodMaxLevel(): number {
         return this.#lodMaxLevel;
     }
 
-    /**
-     * [KO] 특정 타일 인덱스의 정적 공간 좌표 및 높이 범위 데이터를 CPU 버퍼에 설정합니다.
-     * [EN] Sets the static spatial world coordinates and height bounds of a specific tile index in the CPU buffer.
-     *
-     * @param index - [KO] 타일 인덱스 / [EN] Tile index
-     * @param centerWorldX - [KO] 타일 중심 월드 X 좌표 / [EN] Tile center world X coordinate
-     * @param centerWorldZ - [KO] 타일 중심 월드 Z 좌표 / [EN] Tile center world Z coordinate
-     * @param minHeightNorm - [KO] 타일 영역 내 지형의 최소 정규화 높이 비율 (0.0~1.0) / [EN] Minimum normalized height ratio (0.0~1.0)
-     * @param maxHeightNorm - [KO] 타일 영역 내 지형의 최대 정규화 높이 비율 (0.0~1.0) / [EN] Maximum normalized height ratio (0.0~1.0)
-     */
     setStaticTileData(
         index: number,
         centerWorldX: number,
@@ -153,24 +80,12 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         this.#allTilesData[offset + 3] = maxHeightNorm;
     }
 
-    /**
-     * [KO] 특정 타일의 정규화 높이 범위(0.0~1.0)를 갱신합니다.
-     * [EN] Updates the normalized height bounds (0.0 to 1.0) of a specific tile index.
-     *
-     * @param index - [KO] 타일 인덱스 / [EN] Tile index
-     * @param minHeightNorm - [KO] 타일 최소 정규화 높이 비율 (0.0~1.0) / [EN] Tile minimum normalized height ratio (0.0~1.0)
-     * @param maxHeightNorm - [KO] 타일 최대 정규화 높이 비율 (0.0~1.0) / [EN] Tile maximum normalized height ratio (0.0~1.0)
-     */
     updateTileHeightBounds(index: number, minHeightNorm: number, maxHeightNorm: number): void {
         const offset = index * 4;
         this.#allTilesData[offset + 2] = minHeightNorm;
         this.#allTilesData[offset + 3] = maxHeightNorm;
     }
 
-    /**
-     * [KO] CPU 측에 구성된 모든 정적 타일 데이터를 GPU 스토리지 버퍼로 업로드합니다.
-     * [EN] Uploads all configured static tile data from CPU memory to the GPU storage buffer.
-     */
     uploadStaticTilesToGPU(): void {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice || !this.#allTilesBuffer) return;
@@ -184,34 +99,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         );
     }
 
-    /**
-     * [KO] 지형 글로벌 유니폼 버퍼 데이터를 갱신하고 GPU로 전송합니다.
-     * [EN] Updates global landscape uniform buffer parameters and uploads to GPU.
-     *
-     * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale
-     * @param worldSizeX - [KO] 전체 지형 월드 X 크기 / [EN] Total terrain world X size
-     * @param worldSizeZ - [KO] 전체 지형 월드 Z 크기 / [EN] Total terrain world Z size
-     * @param lodColoration - [KO] LOD 레벨 시각화 색상 활성화 여부 / [EN] Whether LOD level color visualization is enabled
-     * @param maxComponentCount - [KO] 최대 컴포넌트 개수 / [EN] Maximum component count
-     * @param tileSizeX - [KO] 단일 타일 X 크기 / [EN] Single tile X size
-     * @param tileSizeZ - [KO] 단일 타일 Z 크기 / [EN] Single tile Z size
-     * @param baseQuads - [KO] 기본 쿼드 세그먼트 수 / [EN] Base quad segment count
-     * @param vhtTextureWidth - [KO] 가상 하이트맵(VHT) 텍스처 너비 / [EN] VHT texture width
-     * @param vhtTextureHeight - [KO] 가상 하이트맵(VHT) 텍스처 높이 / [EN] VHT texture height
-     * @param lodColorsRGBA - [KO] LOD별 색상 배열 / [EN] Array of RGBA colors per LOD
-     * @param lodDistancesSq - [KO] LOD 전환 제곱 거리 배열 / [EN] Squared distance thresholds per LOD
-     * @param tanHalfFOV - [KO] 카메라 tan(halfFOV) 값 / [EN] Camera tan(halfFOV)
-     * @param lodMetric - [KO] 화면 투영 오차 LOD 계수 / [EN] Screen space error LOD metric
-     * @param lod0Quads - [KO] LOD 0 단계 쿼드 해상도 / [EN] LOD 0 quad resolution
-     * @param receiveShadow - [KO] 그림자 수신 여부 / [EN] Whether terrain receives shadows
-     * @param castHeightmapShadow - [KO] 하이트맵 셀프 섀도우 연산 여부 / [EN] Whether to cast heightmap self-shadows
-     * @param heightmapShadowSteps - [KO] 레이마칭 스텝 수 / [EN] Raymarching sample steps
-     * @param heightmapShadowDistance - [KO] 그림자 최대 추적 거리 / [EN] Maximum shadow tracing distance
-     * @param heightmapShadowSoftness - [KO] 소프트 섀도우 부드러움 계수 / [EN] Soft shadow factor
-     * @param foliageSubCellColoration - [KO] 식생 서브셀 그리드 시각화 여부 / [EN] Whether foliage subcell grid is colored
-     * @param foliageSubCellSize - [KO] 식생 서브셀 크기 / [EN] Foliage subcell size
-     * @param debugMode - [KO] 디버그 모드 플래그 / [EN] Debug mode flag
-     */
     updateUniforms(
         heightScale: number,
         worldSizeX: number,
@@ -305,9 +192,9 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         f32[75] = foliageSubCellSize;
 
         u32[76] = debugMode;
-        f32[77] = 0.0; // pad0 (16-byte alignment tail padding)
-        f32[78] = 0.0; // pad1
-        f32[79] = 0.0; // pad2
+        f32[77] = 0.0;
+        f32[78] = 0.0;
+        f32[79] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,
@@ -318,14 +205,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         );
     }
 
-    /**
-     * [KO] 각 LOD 레벨별 간접 인덱스 드로우 인자 버퍼(`indexCount, 0, firstIndex, baseVertex, firstInstance`)를 초기화합니다.
-     * [EN] Resets the indirect indexed draw arguments buffer per LOD level.
-     *
-     * @param sharedGeometry - [KO] LOD 범위 정보를 제공하는 공유 지오메트리 객체 / [EN] Shared geometry object providing LOD ranges
-     * @param lodMaxLevel - [KO] 최대 LOD 단계 수 / [EN] Maximum LOD levels count
-     * @param isWireframe - [KO] 와이어프레임 렌더링 여부 / [EN] Whether wireframe mode is enabled
-     */
     resetIndirectDrawBuffer(
         sharedGeometry: { getLODRange(lod: number): any },
         lodMaxLevel: number,
@@ -359,16 +238,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, byteLength);
     }
 
-    /**
-     * [KO] 가상 텍스처 아틀라스(VHT/VNT/VBT) 뷰들을 인스턴스 렌더링 바인드 그룹에 연결합니다.
-     * [EN] Binds virtual texture atlas views (VHT/VNT/VBT) to the instance rendering bind group.
-     *
-     * @param vhtTextureView - [KO] 가상 하이트맵(VHT) 텍스처 뷰 / [EN] VHT texture view
-     * @param vntTextureView - [KO] 가상 노멀맵(VNT) 텍스처 뷰 / [EN] Optional VNT texture view
-     * @param vbtBaseColorView - [KO] 가상 베이크 베이스컬러 텍스처 뷰 / [EN] Optional VBT base color texture view
-     * @param vbtNormalView - [KO] 가상 베이크 노멀 텍스처 뷰 / [EN] Optional VBT normal texture view
-     * @param vbtORMView - [KO] 가상 베이크 ORM 텍스처 뷰 / [EN] Optional VBT ORM texture view
-     */
     updateBindGroup(
         vhtTextureView: GPUTextureView,
         vntTextureView?: GPUTextureView,
@@ -423,10 +292,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         });
     }
 
-    /**
-     * [KO] 할당된 모든 GPU 버퍼 리소스를 해제합니다.
-     * [EN] Destroys all allocated GPU buffer resources.
-     */
     destroy(): void {
         if (this.#allTilesBuffer) {
             this.#allTilesBuffer.destroy();
@@ -501,3 +366,4 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
 Object.freeze(LandscapeInstanceBuffer);
 export default LandscapeInstanceBuffer;
+

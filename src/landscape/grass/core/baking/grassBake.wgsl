@@ -12,7 +12,6 @@ struct GrassInstance {
     packedGroundColorAndType: u32,
 };
 
-
 fn quatMultiply(a: vec4<f32>, b: vec4<f32>) -> vec4<f32> {
     return vec4<f32>(
         a.w * b.xyz + b.w * a.xyz + cross(a.xyz, b.xyz),
@@ -275,3 +274,4 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         rawInstances[currentTargetIdx] = outInst;
     }
 }
+

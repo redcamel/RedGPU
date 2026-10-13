@@ -1,131 +1,31 @@
-/**
- * [KO] 지형 스플랫 텍스처 레이어 정의 및 파라미터 관리 모듈입니다.
- * [EN] Terrain splat texture layer definition and parameter management module.
- * @packageDocumentation
- */
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import type RedGPUContext from "../context/RedGPUContext";
 import LandscapeWeightMapCPUSampler from "./core/cache/LandscapeWeightMapCPUSampler";
 
-/**
- * [KO] 스플랫 가중치 텍스처에서 샘플링할 채널 식별자 ('R' | 'G' | 'B' | 'A' 또는 0 | 1 | 2 | 3)
- * [EN] Channel identifier to sample from splat weight texture ('R' | 'G' | 'B' | 'A' or 0 | 1 | 2 | 3)
- */
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
 
-/**
- * [KO] 지형 텍스처 레이어 생성 옵션 인터페이스입니다.
- * [EN] Options interface for creating a landscape texture layer.
- */
 export interface LandscapeLayerOptions {
-    /**
-     * [KO] 레이어 식별 이름
-     * [EN] Layer identification name
-     */
     name: string;
-    /**
-     * [KO] 레이어 활성화 여부 (기본값: true)
-     * [EN] Whether the layer is enabled (default: true)
-     */
     enabled?: boolean;
-    /**
-     * [KO] 베이스 컬러 텍스처 (BitmapTexture 또는 이미지 URL)
-     * [EN] Base color texture (BitmapTexture or image URL)
-     */
     baseColorTexture?: BitmapTexture | string;
-    /**
-     * [KO] 노멀 텍스처 (BitmapTexture 또는 이미지 URL)
-     * [EN] Normal texture (BitmapTexture or image URL)
-     */
     normalTexture?: BitmapTexture | string;
-    /**
-     * [KO] ORM (Occlusion/Roughness/Metallic) 텍스처 (BitmapTexture 또는 이미지 URL)
-     * [EN] ORM (Occlusion/Roughness/Metallic) texture (BitmapTexture or image URL)
-     */
     ormTexture?: BitmapTexture | string;
-    /**
-     * [KO] 스플랫 가중치 텍스처 (BitmapTexture 또는 이미지 URL)
-     * [EN] Splat weight texture (BitmapTexture or image URL)
-     */
     weightTexture?: BitmapTexture | string;
 
-    /**
-     * [KO] 텍스처 UV 스케일 [u, v] (기본값: [20.0, 20.0])
-     * [EN] Texture UV scale [u, v] (default: [20.0, 20.0])
-     */
     uvScale?: [number, number];
-    /**
-     * [KO] 텍스처 UV 오프셋 [u, v] (기본값: [0.0, 0.0])
-     * [EN] Texture UV offset [u, v] (default: [0.0, 0.0])
-     */
     uvOffset?: [number, number];
-    /**
-     * [KO] 근거리 UV 스케일 배수 (기본값: 2.0)
-     * [EN] Near distance UV scale multiplier (default: 2.0)
-     */
     nearUVScaleMultiplier?: number;
-    /**
-     * [KO] 스플랫 가중치 텍스처에서 참조할 채널 (기본값: 'R')
-     * [EN] Channel referenced in splat weight texture (default: 'R')
-     */
     weightChannel?: LandscapeWeightMapChannel;
 
-    /**
-     * [KO] 표면 거칠기 (0.0~1.0, 기본값: 1.0)
-     * [EN] Surface roughness (0.0-1.0, default: 1.0)
-     */
     roughness?: number;
-    /**
-     * [KO] 금속성 (0.0~1.0, 기본값: 0.0)
-     * [EN] Metallic value (0.0-1.0, default: 0.0)
-     */
     metallic?: number;
-    /**
-     * [KO] 노멀 맵 강도 (기본값: 1.0)
-     * [EN] Normal map intensity (default: 1.0)
-     */
     normalIntensity?: number;
-    /**
-     * [KO] 앰비언트 오클루전 강도 (기본값: 1.0)
-     * [EN] Ambient occlusion intensity (default: 1.0)
-     */
     aoIntensity?: number;
-    /**
-     * [KO] 근경 디테일 렌더링 시 높이 기반 스플랫 블렌딩 변위 강도 (0.0~5.0, 기본값: 1.0, 원경 VBT 베이킹에는 미적용)
-     * [EN] Height-based splat blending displacement factor for near-detail rendering (0.0-5.0, default: 1.0, not applied in far VBT baking)
-     */
     heightBlendFactor?: number;
-    /**
-     * [KO] 텍스처 타일링 반복 방지(Stochastic Procedural Bombing) 활성화 여부 (기본값: true)
-     * [EN] Whether to enable stochastic tiling repetition suppression (default: true)
-     */
     stochasticTiling?: boolean;
-    /**
-     * [KO] 절차적 스토캐스틱 셀 스케일 배수 (기본값: 1.0)
-     * [EN] Procedural stochastic cell scale multiplier (default: 1.0)
-     */
     stochasticScale?: number;
 }
 
-/**
- * [KO] 지형 표면의 개별 스플랫 텍스처 레이어(베이스컬러, 노멀, ORM, 가중치 맵)를 정의하고 관리하는 클래스입니다.
- * [EN] Class that defines and manages an individual splat texture layer (base color, normal, ORM, weight map) on the terrain surface.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **지형 레이어 속성 캡슐화**: 풀(Grass), 흙(Dirt), 암석(Rock), 눈(Snow) 등 지형 표면을 구성하는 단일 재질의 Albedo, Normal, ORM(Occlusion, Roughness, Metallic) 텍스처 및 UV 타일링 파라미터를 캡슐화합니다.
- * - **스플랫 가중치 맵 바인딩**: `weightTexture`와 특정 채널(`weightChannel`: R, G, B, A)을 지정하여 지형 전체에서 해당 레이어가 차지하는 블렌딩 비율을 제어합니다.
- * - **반응형 리베이킹 통지 (`onLayerDirty`)**: 레이어의 텍스처나 UV 스케일, 거칠기 등의 파라미터가 변경되면 머티리얼과 타일 스트리머에 알림을 전송하여 VBT(가상 베이스 텍스처) 아틀라스의 자동 리베이킹을 유도합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Terrain Layer Property Encapsulation**: Encapsulates Albedo, Normal, ORM (Occlusion, Roughness, Metallic) textures and UV tiling parameters for individual surface materials like grass, dirt, rock, and snow.
- * - **Splat Weight Map Binding**: Governs the blending distribution across the terrain by associating a `weightTexture` with a dedicated channel (`weightChannel`: R, G, B, A).
- * - **Reactive Rebake Notifications (`onLayerDirty`)**: Emits dirty events upon modifications to textures, UV scaling, or roughness values to trigger automatic rebaking of the VBT (Virtual Base Texture) atlas.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(`landscape.addLayer(options)`)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (`landscape.addLayer(options)`).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeLayer {
     #name: string;
     #enabled: boolean = true;
@@ -160,10 +60,6 @@ class LandscapeLayer {
     onChange?: () => void;
     onUniformChange?: () => void;
 
-    /**
-     * [KO] 지형 텍스처 레이어 인스턴스를 생성합니다. (사용자가 직접 생성하지 마시고 `Landscape.addLayer(options)` 팩토리 메서드를 사용하십시오.)
-     * [EN] Creates a terrain texture layer instance. (Do not instantiate directly; use the `Landscape.addLayer(options)` factory method instead.)
-     */
     constructor(redGPUContextOrOptions: RedGPUContext | LandscapeLayerOptions, options?: LandscapeLayerOptions) {
         let actualOptions: LandscapeLayerOptions;
         if (options) {
@@ -261,18 +157,10 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 레이어의 고유 식별 이름입니다. (읽기 전용)
-     * [EN] Unique identification name of the layer. (Read-only)
-     */
     get name(): string {
         return this.#name;
     }
 
-    /**
-     * [KO] 레이어의 베이스 컬러(알베도) 텍스처를 가져오거나 설정합니다.
-     * [EN] Gets or sets the base color (albedo) texture of the layer.
-     */
     get baseColorTexture(): BitmapTexture | undefined {
         return this.#baseColorTexture;
     }
@@ -293,10 +181,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어의 노멀 맵 텍스처를 가져오거나 설정합니다.
-     * [EN] Gets or sets the normal map texture of the layer.
-     */
     get normalTexture(): BitmapTexture | undefined {
         return this.#normalTexture;
     }
@@ -317,10 +201,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어의 ORM (Occlusion/Roughness/Metallic) 텍스처를 가져오거나 설정합니다.
-     * [EN] Gets or sets the ORM (Occlusion/Roughness/Metallic) texture of the layer.
-     */
     get ormTexture(): BitmapTexture | undefined {
         return this.#ormTexture;
     }
@@ -341,10 +221,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어의 스플랫 가중치(WeightMap) 텍스처를 가져오거나 설정합니다.
-     * [EN] Gets or sets the splat weight texture of the layer.
-     */
     get weightTexture(): BitmapTexture | undefined {
         return this.#weightTexture;
     }
@@ -369,10 +245,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어의 활성화 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether the layer is enabled.
-     */
     get enabled(): boolean {
         return this.#enabled;
     }
@@ -381,10 +253,6 @@ class LandscapeLayer {
         return 'rgba8unorm';
     }
 
-    /**
-     * [KO] 레이어 텍스처의 월드 UV 타일링 스케일 `[u, v]`를 가져오거나 설정합니다.
-     * [EN] Gets or sets the world UV tiling scale `[u, v]` of the layer textures.
-     */
     get uvScale(): [number, number] {
         return this.#uvScale;
     }
@@ -395,10 +263,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어 텍스처의 월드 UV 오프셋 `[u, v]`를 가져오거나 설정합니다.
-     * [EN] Gets or sets the world UV offset `[u, v]` of the layer textures.
-     */
     get uvOffset(): [number, number] {
         return this.#uvOffset;
     }
@@ -411,10 +275,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 카메라 근접 거리에서 텍스처 타일링을 세분화하기 위한 근접 UV 스케일 배수를 가져오거나 설정합니다.
-     * [EN] Gets or sets the near UV scale multiplier for refining texture tiling up close to the camera.
-     */
     get nearUVScaleMultiplier(): number {
         return this.#nearUVScaleMultiplier;
     }
@@ -427,10 +287,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 스플랫 가중치 텍스처에서 참조할 RGBA 채널 식별자를 가져오거나 설정합니다.
-     * [EN] Gets or sets the RGBA channel identifier referenced in the splat weight texture.
-     */
     get weightChannel(): LandscapeWeightMapChannel {
         return this.#weightChannel;
     }
@@ -442,10 +298,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 스플랫 가중치 채널의 정수 인덱스(0: R, 1: G, 2: B, 3: A)를 반환합니다. (읽기 전용)
-     * [EN] Returns the integer index of the splat weight channel (0: R, 1: G, 2: B, 3: A). (Read-only)
-     */
     get weightChannelIndex(): number {
         return this.#weightChannelIndex;
     }
@@ -457,18 +309,10 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어 표면 거칠기(0.0~1.0)를 가져오거나 설정합니다.
-     * [EN] Gets or sets the layer surface roughness (0.0 to 1.0).
-     */
     get roughness(): number {
         return this.#roughness;
     }
 
-    /**
-     * [KO] 레이어 금속성(0.0~1.0)을 가져오거나 설정합니다.
-     * [EN] Gets or sets the layer metallic value (0.0 to 1.0).
-     */
     get metallic(): number {
         return this.#metallic;
     }
@@ -479,10 +323,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어 노멀 맵의 굴곡 강도를 가져오거나 설정합니다.
-     * [EN] Gets or sets the bump intensity of the layer normal map.
-     */
     get normalIntensity(): number {
         return this.#normalIntensity;
     }
@@ -493,10 +333,6 @@ class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 레이어 앰비언트 오클루전(AO) 강도를 가져오거나 설정합니다.
-     * [EN] Gets or sets the ambient occlusion (AO) intensity of the layer.
-     */
     get aoIntensity(): number {
         return this.#aoIntensity;
     }
@@ -506,7 +342,6 @@ class LandscapeLayer {
         this.#normalIntensity = val;
         this.onChange?.();
     }
-
 
     set aoIntensity(val: number) {
         if (this.#aoIntensity === val) return;
@@ -521,14 +356,6 @@ class LandscapeLayer {
         else this.#weightChannelIndex = 0;
     }
 
-    /**
-     * [KO] 문자열 URL로 전달되어 아직 인스턴스화되지 않은 지연 텍스처들을 전달받은 컨텍스트를 사용해 실제 `BitmapTexture`로 인스턴스화합니다.
-     * [EN] Resolves any pending string URL textures into actual `BitmapTexture` instances using the provided RedGPUContext.
-     *
-     * @param context -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
-     */
     resolvePendingTextures(context: RedGPUContext): void {
         this.#redGPUContext = context;
         if (this.#pendingBaseColorSrc) {
@@ -549,10 +376,6 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 근경 디테일 렌더링 시 높이 기반 스플랫 블렌딩 변위 강도를 가져오거나 설정합니다. (0.0~5.0, 기본값: 1.0, 원경 VBT 베이킹에는 미적용)
-     * [EN] Gets or sets the height-based splat blending displacement factor for near-detail rendering. (0.0-5.0, default: 1.0, not applied in far VBT baking)
-     */
     get heightBlendFactor(): number {
         return this.#heightBlendFactor;
     }
@@ -569,10 +392,6 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 텍스처 타일링 반복 방지(Stochastic Tiling) 활성화 여부를 가져오거나 설정합니다. (기본값: true)
-     * [EN] Gets or sets whether stochastic tiling repetition suppression is enabled. (default: true)
-     */
     get stochasticTiling(): boolean {
         return this.#stochasticTiling;
     }
@@ -585,10 +404,6 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 절차적 스토캐스틱 셀 스케일 배수를 가져오거나 설정합니다. (기본값: 1.0)
-     * [EN] Gets or sets the procedural stochastic cell scale multiplier. (default: 1.0)
-     */
     get stochasticScale(): number {
         return this.#stochasticScale;
     }
@@ -601,10 +416,6 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 레이어의 가중치 맵을 CPU에서 샘플링하기 위한 `LandscapeWeightMapCPUSampler` 인스턴스를 가져오거나 설정합니다.
-     * [EN] Gets or sets the `LandscapeWeightMapCPUSampler` instance for sampling the layer's weight map on the CPU.
-     */
     get weightMapCPUSampler(): LandscapeWeightMapCPUSampler | undefined {
         return this.#weightMapCPUSampler;
     }
@@ -617,20 +428,6 @@ class LandscapeLayer {
         }
     }
 
-    /**
-     * [KO] 지정된 UV `(u, v)` 좌표에서 이 레이어의 블렌딩 가중치(0.0~1.0)를 CPU 가중치 샘플러를 통해 조회합니다.
-     * [EN] Queries the blending weight (0.0 to 1.0) of this layer at the specified UV `(u, v)` coordinates via the CPU weight sampler.
-     *
-     * @param u -
-     * [KO] 텍스처 수평 좌표 U (0.0 ~ 1.0)
-     * [EN] Texture horizontal coordinate U (0.0 to 1.0)
-     * @param v -
-     * [KO] 텍스처 수직 좌표 V (0.0 ~ 1.0)
-     * [EN] Texture vertical coordinate V (0.0 to 1.0)
-     * @returns
-     * [KO] 샘플링된 가중치 값 (0.0 ~ 1.0)
-     * [EN] Sampled weight value (0.0 to 1.0)
-     */
     getWeightAtUV(u: number, v: number): number {
         if (!this.#enabled) return 0.0;
         const src = this.#weightTexture?.src || this.#pendingWeightSrc;
@@ -638,30 +435,12 @@ class LandscapeLayer {
         return this.#weightMapCPUSampler.getWeight(src, u, v, this.#weightChannelIndex);
     }
 
-    /**
-     * [KO] 단일 레이어가 차지하는 유니폼 버퍼 float(f32) 원소 개수 (16 floats = 64 bytes)
-     * [EN] Number of uniform buffer float(f32) elements occupied by a single layer (16 floats = 64 bytes)
-     */
     static readonly UNIFORM_FLOAT_COUNT = 16;
 
-    /**
-     * [KO] 지정된 Float32Array 버퍼의 특정 offset 위치에 16 floats의 0 데이터를 채웁니다.
-     * [EN] Fills 16 floats of zeros at the specified offset in the target Float32Array buffer.
-     *
-     * @param targetBuffer - [KO] 기록 대상 Float32Array / [EN] Target Float32Array buffer
-     * @param offset - [KO] 기록 시작 인덱스 / [EN] Starting float index
-     */
     static writeZeroUniformData(targetBuffer: Float32Array, offset: number): void {
         targetBuffer.fill(0, offset, offset + 16);
     }
 
-    /**
-     * [KO] 지정된 Float32Array 버퍼의 특정 offset 위치에 레이어 파라미터를 WGSL LandscapeLayerParams 구조체 레이아웃에 맞춰 복사합니다.
-     * [EN] Copies the layer parameters into the specified Float32Array buffer at the offset matching the WGSL LandscapeLayerParams struct layout.
-     *
-     * @param targetBuffer - [KO] 기록 대상 Float32Array / [EN] Target Float32Array buffer
-     * @param offset - [KO] 기록 시작 인덱스 / [EN] Starting float index
-     */
     writeUniformData(targetBuffer: Float32Array, offset: number): void {
         targetBuffer[offset + 0] = this.#uvOffset[0];
         targetBuffer[offset + 1] = this.#uvOffset[1];
@@ -687,3 +466,4 @@ class LandscapeLayer {
 
 Object.freeze(LandscapeLayer);
 export default LandscapeLayer;
+

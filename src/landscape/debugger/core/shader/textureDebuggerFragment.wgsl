@@ -7,3 +7,4 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     let sampleColor = textureLoad(targetTexture, texCoord, 0).rgb;
     return vec4<f32>(sampleColor, 1.0);
 }
+

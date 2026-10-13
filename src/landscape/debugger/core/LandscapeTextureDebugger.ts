@@ -1,8 +1,3 @@
-/**
- * [KO] 풀스크린 쿼드 파이프라인 기반 지형 가상 텍스처 실시간 온스크린 투영 디버거 모듈입니다.
- * [EN] Texture debugger module projecting terrain GPU textures via fullscreen quad pipelines.
- * @packageDocumentation
- */
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../../Landscape";
 import LandscapeTileStreamer from "../../core/spatial/LandscapeTileStreamer";
@@ -10,24 +5,11 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
-/**
- * [KO] Landscape 또는 LandscapeTileStreamer로부터 관찰 대상 GPUTexture 및 GPUTextureView를 추출하는 게터 함수 타입입니다.
- * [EN] Getter function type resolving target GPUTexture and GPUTextureView from Landscape or LandscapeTileStreamer.
- */
 export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileStreamer | null) => {
     gpuTexture?: GPUTexture | null;
     gpuTextureView?: GPUTextureView | null;
 } | null;
 
-/**
- * [KO] WebGPU 풀스크린 쿼드 렌더링 파이프라인을 구축하여 지형 텍스처(VHT/VNT/VBT)를 온스크린 캔버스에 실시간 투영하는 텍스처 디버거 클래스입니다.
- * [EN] Texture debugger projecting terrain GPU textures (VHT/VNT/VBT) onto on-screen canvases via WebGPU fullscreen quad render pipelines.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(LandscapeDebuggerManager)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (LandscapeDebuggerManager).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeTextureDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
@@ -42,19 +24,6 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
     #textureGetter: TextureGetter;
     #clearColor: GPUColorDict;
 
-    /**
-     * [KO] LandscapeTextureDebugger 생성자입니다.
-     * [EN] Constructor for LandscapeTextureDebugger.
-     *
-     * @param landscape - [KO] 대상 Landscape 인스턴스 / [EN] Target Landscape instance
-     * @param tileStreamer - [KO] 타일 스트리머 인스턴스 / [EN] Tile streamer instance
-     * @param cameraOrOptions - [KO] 카메라 인스턴스 또는 옵션 / [EN] Camera instance or options
-     * @param options - [KO] 디버거 옵션 / [EN] Debugger options
-     * @param shaderCode - [KO] 프래그먼트 셰이더 WGSL 코드 / [EN] Fragment shader WGSL source code
-     * @param shaderModuleName - [KO] 고유 셰이더 모듈 식별자 / [EN] Unique shader module identifier
-     * @param textureGetter - [KO] 텍스처 추출 게터 함수 / [EN] Texture extractor getter function
-     * @param clearColor - [KO] 배경 클리어 색상 (기본값: 진한 남색) / [EN] Background clear color (default: dark navy)
-     */
     constructor(
         landscape: Landscape,
         tileStreamer: LandscapeTileStreamer | null | undefined,
@@ -75,10 +44,6 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
         this.#initWebGPUContext();
     }
 
-    /**
-     * [KO] 매 프레임 대상 GPUTexture를 풀스크린 쿼드로 캔버스에 렌더링하고 오버레이(카메라, 그리드)를 갱신합니다.
-     * [EN] Renders target GPUTexture to canvas via fullscreen quad each frame and updates overlay (camera, grid).
-     */
     update(): void {
         if (!this.visible || !this.#context) return;
 
@@ -133,10 +98,6 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
         this.renderOverlay();
     }
 
-    /**
-     * [KO] 파이프라인 및 바인드 그룹 리소스를 해제하고 디버거 DOM 요소를 제거합니다.
-     * [EN] Releases pipeline and bind group resources and destroys debugger DOM elements.
-     */
     override destroy(): void {
         super.destroy();
         this.#pipeline = null;
@@ -220,3 +181,4 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
 
 Object.freeze(LandscapeTextureDebugger);
 export default LandscapeTextureDebugger;
+

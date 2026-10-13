@@ -12,7 +12,6 @@ struct VertexOutput {
     @location(9) @interpolate(flat) cameraDir: vec4<f32>,
 };
 
-
 struct BakeFragmentOutput {
     @location(0) baseColor: vec4<f32>,
     @location(1) normalDepth: vec4<f32>,
@@ -36,7 +35,6 @@ fn main(
     let u_useVertexColor = (input.textureFlags.w > 0.5);
     let isFoliage = (input.cameraDir.w > 0.5);
     var baseColor = input.baseColorFactor;
-    // 🌿 식생은 vertexColor_0이 바람 시뮬레이션 가중치(Wind Weight)이므로 베이킹 알베도에 합성하지 않음
     baseColor *= select(vec4<f32>(1.0), input.vertexColor_0, u_useVertexColor && !isFoliage);
 
     var finalColor = baseColor;
@@ -91,3 +89,4 @@ fn main(
     out.ormSubsurface = vec4<f32>(finalAO, roughness, metallic, subsurface);
     return out;
 }
+

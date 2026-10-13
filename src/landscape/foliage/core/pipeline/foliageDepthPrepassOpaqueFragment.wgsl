@@ -5,3 +5,4 @@ fn main() -> OutputFragment {
     var output: OutputFragment;
     return output;
 }
+

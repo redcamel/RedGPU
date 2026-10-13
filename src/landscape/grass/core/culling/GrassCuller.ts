@@ -1,18 +1,9 @@
-/**
- * [KO] 잔디(Grass) GPU 초고속 컬링 전담 모듈입니다.
- * [EN] Ultra-fast GPU Culling module for grass.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../../context/RedGPUContext";
 import grassCullWGSL from "./grassCull.wgsl";
 import type GrassMegaBuffer from "../buffer/GrassMegaBuffer";
 import AScatterCuller from "../../../core/scatter/AScatterCuller";
 import type RenderViewStateData from "../../../../display/view/core/RenderViewStateData";
 
-/**
- * [KO] 단일 컴퓨트 패스로 대규모 잔디 인스턴스 전체의 시야각(프러스텀) 및 거리 컬링을 처리하는 전담 GPU 컬러 클래스입니다.
- * [EN] Dedicated GPU culler class that performs view frustum and distance culling for large-scale grass instances in a single compute pass.
- */
 class GrassCuller extends AScatterCuller {
     #globalUniformBuffer: GPUBuffer | null = null;
 
@@ -35,14 +26,6 @@ class GrassCuller extends AScatterCuller {
         });
     }
 
-    /**
-     * [KO] 매 프레임 GPU 컴퓨트 패스를 통해 등록된 모든 잔디 타입의 거리 및 프러스텀 컬링을 단 1회의 디스패치로 초고속 수행합니다 (위치 계산 0%).
-     * [EN] Dispatches ultra-fast GPU distance and frustum culling across all registered grass types in a single dispatch every frame (0% position calculations).
-     *
-     * @param computePass - GPU 컴퓨트 패스 인코더
-     * @param megaBuffer - 잔디 스캐터 메가버퍼
-     * @param renderViewStateData - 렌더 뷰 상태 데이터 SSOT
-     */
     dispatchPass(
         computePass: GPUComputePassEncoder,
         megaBuffer: GrassMegaBuffer,
@@ -85,3 +68,4 @@ class GrassCuller extends AScatterCuller {
 
 Object.freeze(GrassCuller);
 export default GrassCuller;
+

@@ -12,7 +12,6 @@ struct VertexOutput {
     @location(9) @interpolate(flat) cameraDir: vec4<f32>,
 };
 
-
 struct TransformInput {
     @location(6) mvp0: vec4<f32>,
     @location(7) mvp1: vec4<f32>,
@@ -67,3 +66,4 @@ fn main(
     out.cameraDir = trans.cameraDir;
     return out;
 }
+

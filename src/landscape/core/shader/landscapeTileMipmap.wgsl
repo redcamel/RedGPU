@@ -56,3 +56,4 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let avgORM = (orm00 + orm10 + orm01 + orm11) * 0.25;
     textureStore(dstORM, dstCoord, avgORM);
 }
+

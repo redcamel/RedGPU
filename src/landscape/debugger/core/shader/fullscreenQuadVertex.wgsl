@@ -22,3 +22,4 @@ fn vs_main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     output.uv = uvs[vertexIndex];
     return output;
 }
+

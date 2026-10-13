@@ -1,8 +1,3 @@
-/**
- * [KO] 모든 LOD 레벨의 평면 그리드 및 크랙 방지용 스커트 지오메트리를 단일 버퍼로 통합 관리하는 공유 지오메트리 모듈입니다.
- * [EN] Shared geometry module managing single combined vertex and index buffers across all LOD levels with skirts.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
@@ -10,62 +5,15 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 
-/**
- * [KO] 단일 LOD 레벨 지오메트리의 버텍스 및 인덱스 버퍼 오프셋 범위 정보입니다.
- * [EN] Range metadata defining vertex and index buffer offsets for a single LOD geometry level.
- */
 export interface LandscapeLODGeometryRange {
-    /**
-     * [KO] LOD 레벨 (0이 최고 해상도)
-     * [EN] LOD level (0 is highest resolution)
-     */
     lodLevel: number;
-    /**
-     * [KO] 결합 인덱스 버퍼 내 해당 LOD의 첫 번째 인덱스 오프셋
-     * [EN] Starting index offset for this LOD within the combined index buffer
-     */
     firstIndex: number;
-    /**
-     * [KO] 해당 LOD가 사용하는 총 인덱스 개수
-     * [EN] Total index count utilized by this LOD level
-     */
     indexCount: number;
-    /**
-     * [KO] 와이어프레임 렌더링용 결합 인덱스 버퍼 내 첫 번째 인덱스 오프셋
-     * [EN] Starting index offset for wireframe rendering within the combined wireframe index buffer
-     */
     wireframeFirstIndex: number;
-    /**
-     * [KO] 와이어프레임 렌더링에 사용되는 총 인덱스 개수
-     * [EN] Total index count utilized for wireframe rendering
-     */
     wireframeIndexCount: number;
-    /**
-     * [KO] 결합 버텍스 버퍼 내 해당 LOD의 기본 버텍스 시작 오프셋
-     * [EN] Base vertex starting offset for this LOD within the combined vertex buffer
-     */
     baseVertex: number;
 }
 
-/**
- * [KO] 모든 LOD 레벨의 평면 그리드 및 크랙 방지용 스마트 스커트(Skirt) 지오메트리를 단일 버텍스/인덱스 버퍼로 통합 관리하는 공유 지오메트리 클래스입니다.
- * [EN] Shared geometry class managing single combined vertex and index buffers across all LOD levels with smart crack-preventing skirts.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **단일 공유 버퍼 아키텍처**: LOD 0(최고 정밀도)부터 최대 LOD 단계까지의 쿼드 평면 그리드 정점들을 하나의 거대한 Vertex Buffer와 Index Buffer로 패킹하여, 드로우콜마다 버퍼 바인딩을 교체할 필요 없이 오프셋(`LandscapeLODGeometryRange`)만으로 전환합니다.
- * - **CDLOD 동기화 스마트 스커트 (Smart Skirt)**: UE5 및 AAA 게임 엔진 표준과 동일하게, 버텍스 셰이더 CDLOD 지오모핑을 100% 추종하는 4방 둘레 스커트를 생성하여 부동소수점 오차나 비동기 스트리밍 시차로 인한 찰나의 틈새(Seam/Crack)를 완벽히 차단합니다.
- * - **와이어프레임 디버그 인덱스**: 일반 솔리드 렌더링용 인덱스 버퍼 외에 격자선 시각화를 위한 전용 와이어프레임 인덱스 버퍼를 함께 빌드하여 디버거 시스템을 지원합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Unified Shared Buffer Architecture**: Packs quad planar grids from LOD 0 through maximum LOD into single unified Vertex and Index buffers, switching levels solely via offset ranges (`LandscapeLODGeometryRange`) without buffer rebinds.
- * - **CDLOD-Synchronized Smart Skirt**: Following UE5 and AAA standards, builds perimeter skirts that strictly synchronize with vertex shader CDLOD geomorphing to eliminate any seam gaps.
- * - **Wireframe Debug Indices**: Builds dedicated wireframe index buffers alongside standard solid triangle indices to support real-time grid visualization and debugging tools.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeSharedGeometry extends RedGPUObject {
     #tileSizeX: number;
     #tileSizeZ: number;
@@ -78,17 +26,6 @@ class LandscapeSharedGeometry extends RedGPUObject {
     #combinedWireframeIndexBuffer: IndexBuffer | null = null;
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
-    /**
-     * [KO] LandscapeSharedGeometry 생성자입니다.
-     * [EN] Constructor for LandscapeSharedGeometry.
-     *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 / [EN] RedGPU context
-     * @param tileSizeX - [KO] 단일 타일의 월드 X축 크기 / [EN] World size of a single tile along X axis
-     * @param tileSizeZ - [KO] 단일 타일의 월드 Z축 크기 / [EN] World size of a single tile along Z axis
-     * @param componentSizeQuads - [KO] 타일 기본 쿼드 분할 해상도 / [EN] Base quad resolution per tile component
-     * @param lodMaxLevel - [KO] 최대 LOD 단계 수 / [EN] Maximum LOD levels count
-     * @param lod0SizeQuads - [KO] LOD 0 단계의 쿼드 해상도 (기본값: 256) / [EN] Quad resolution for LOD 0 (default: 256)
-     */
     constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, lodMaxLevel: number, lod0SizeQuads: number = 256) {
         super(redGPUContext);
         this.#tileSizeX = tileSizeX;
@@ -100,61 +37,30 @@ class LandscapeSharedGeometry extends RedGPUObject {
         this.#buildCombinedGeometry();
     }
 
-    /**
-     * [KO] 모든 LOD 레벨이 패킹된 통합 버텍스 버퍼를 반환합니다.
-     * [EN] Returns the combined vertex buffer containing packed data across all LOD levels.
-     */
     get combinedVertexBuffer(): VertexBuffer | null {
         return this.#combinedVertexBuffer;
     }
 
-    /**
-     * [KO] 솔리드 트라이앵글 렌더링용 통합 인덱스 버퍼를 반환합니다.
-     * [EN] Returns the combined index buffer for solid triangle rendering.
-     */
     get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
     }
 
-    /**
-     * [KO] 와이어프레임 렌더링용 통합 라인 인덱스 버퍼를 반환합니다.
-     * [EN] Returns the combined index buffer for wireframe line rendering.
-     */
     get combinedWireframeIndexBuffer(): IndexBuffer | null {
         return this.#combinedWireframeIndexBuffer;
     }
 
-    /**
-     * [KO] 생성된 최대 LOD 단계 수를 반환합니다.
-     * [EN] Returns the maximum number of LOD levels.
-     */
     get lodMaxLevel(): number {
         return this.#lodMaxLevel;
     }
 
-    /**
-     * [KO] 컴포넌트의 기본 쿼드 세그먼트 크기를 반환합니다.
-     * [EN] Returns the base quad segment count per component.
-     */
     get componentSizeQuads(): number {
         return this.#componentSizeQuads;
     }
 
-    /**
-     * [KO] LOD 0 단계의 쿼드 세그먼트 크기를 반환합니다.
-     * [EN] Returns the quad segment count for LOD 0.
-     */
     get lod0SizeQuads(): number {
         return this.#lod0SizeQuads;
     }
 
-    /**
-     * [KO] 타일 월드 크기를 갱신하고 결합 지오메트리를 재생성합니다.
-     * [EN] Updates the tile world size and rebuilds the combined geometry buffers.
-     *
-     * @param tileSizeX - [KO] 새로운 타일 X축 크기 / [EN] New tile size along X axis
-     * @param tileSizeZ - [KO] 새로운 타일 Z축 크기 / [EN] New tile size along Z axis
-     */
     updateTileSize(tileSizeX: number, tileSizeZ: number): void {
         if (this.#tileSizeX !== tileSizeX || this.#tileSizeZ !== tileSizeZ) {
             this.#tileSizeX = tileSizeX;
@@ -163,12 +69,6 @@ class LandscapeSharedGeometry extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 특정 LOD 단계에 해당하는 지오메트리 오프셋 범위를 반환합니다.
-     * [EN] Returns the geometry range metadata for the specified LOD level.
-     *
-     * @param lodLevel - [KO] 요청할 LOD 레벨 / [EN] Target LOD level
-     */
     getLODRange(lodLevel: number): LandscapeLODGeometryRange {
         const index = Math.min(Math.max(0, lodLevel), this.#lodRanges.length - 1);
         return this.#lodRanges[index];
@@ -358,10 +258,6 @@ class LandscapeSharedGeometry extends RedGPUObject {
         );
     }
 
-    /**
-     * [KO] 내부 버텍스 및 인덱스 GPU 버퍼 리소스를 해제합니다.
-     * [EN] Destroys internal vertex and index GPU buffer resources.
-     */
     destroy(): void {
         if (this.#combinedVertexBuffer) {
             this.#combinedVertexBuffer.destroy();
@@ -381,3 +277,4 @@ class LandscapeSharedGeometry extends RedGPUObject {
 
 Object.freeze(LandscapeSharedGeometry);
 export default LandscapeSharedGeometry;
+

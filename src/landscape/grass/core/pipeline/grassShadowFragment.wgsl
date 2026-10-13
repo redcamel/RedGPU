@@ -49,3 +49,4 @@ fn main(input: ShadowVertexOutput) {
         discard;
     }
 }
+

@@ -32,7 +32,6 @@ struct FoliageTypeParam {
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
-
 struct CascadeCullingInfo {
     maxDistance: f32,
     hasShadow: u32,
@@ -53,9 +52,9 @@ struct FoliageCullingUniforms {
     useHZB: u32,
     viewportHeight: f32,
     depthBias: f32,
-    pad0: f32, // hzbWidth
+    pad0: f32,
 
-    pad1: f32, // hzbHeight
+    pad1: f32,
     pad2: f32,
     pad3: f32,
     pad4: f32,
@@ -91,8 +90,6 @@ fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
 fn replacePackedAlpha(packedGroundColorAndType: u32, alphaByte: u32) -> u32 {
     return insertBits(packedGroundColorAndType, alphaByte, 24u, 8u);
 }
-
-
 
 @group(0) @binding(0) var<storage, read> rawInstances: array<FoliageInstance>;
 @group(0) @binding(1) var<uniform> globalUniforms: FoliageCullingUniforms;
@@ -344,3 +341,4 @@ fn main(
         }
     }
 }
+

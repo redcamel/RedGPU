@@ -1,8 +1,3 @@
-/**
- * [KO] 카메라 위치 기반 비동기 지형 타일 스트리밍, LRU 캐시 및 가상 텍스처 아틀라스 베이킹 모듈입니다.
- * [EN] Asynchronous terrain tile streaming, LRU caching, and virtual texture atlas baking module based on camera position.
- * @packageDocumentation
- */
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import LandscapeComponent from "./LandscapeComponent";
@@ -21,37 +16,8 @@ const NEIGHBOR_OFFSETS: [number, number][] = [
     [0, 1]
 ];
 
-/**
- * [KO] 타일의 그리드 행/열 및 컴포넌트 메타데이터를 기반으로 16비트 높이맵 텍스처 URL을 반환하는 함수 타입입니다.
- * [EN] Function type resolving the 16-bit heightmap texture URL based on tile grid row/column and component metadata.
- */
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
-/**
- * [KO] 카메라 위치 기반 비동기 지형 타일 스트리밍, 가상 텍스처 아틀라스(VHT/VNT/VBT) 베이킹 및 CPU 지형 고도 샘플링을 총괄하는 스트리머 클래스입니다.
- * [EN] Streamer orchestrating distance-based async terrain tile streaming, virtual texture atlas (VHT/VNT/VBT) baking, and CPU height sampling.
- *
- * **[KO] 아키텍처 및 역할:**
- * - **거리 기반 비동기 스트리밍**: 카메라와의 거리를 감시하여 `tileLoadingRadius` 범위 내에 진입한 타일의 높이맵을 비동기 다운로드합니다. 프레임 드랍을 방지하기 위해 `tileMaxLoadsPerFrame`을 통해 프레임당 최대 로딩 개수를 엄격히 제어합니다.
- * - **가상 텍스처 아틀라스 파이프라인 총괄**:
- *   - VHT(가상 높이): 16비트 PNG 또는 원시 데이터로부터 타일 높이맵을 아틀라스에 베이킹합니다.
- *   - VNT(가상 노멀): VHT 높이 데이터를 기반으로 Sobel/중앙 차분 노멀을 실시간 베이킹합니다.
- *   - VBT(가상 베이스): 스플랫 레이어와 VNT를 융합하여 PBR 베이스컬러/노멀/ORM 아틀라스를 합성하고 타일별 독자 밉체인을 구축합니다.
- * - **고속 CPU 고도 질의 (`getInterpolatedHeightAt`)**: 캐릭터 컨트롤러나 카메라, 식생/잔디 스캐터 배치가 지형 표면에 정확히 밀착할 수 있도록 CPU 메모리에 캐싱된 16비트 높이맵 픽셀 데이터를 이중 선형 보간하여 지형 높이를 즉시 반환합니다.
- *
- * **[EN] Architecture & Role:**
- * - **Distance-based Async Streaming**: Monitors camera positions to asynchronously stream heightmaps within `tileLoadingRadius`. Strictly regulates frame budget via `tileMaxLoadsPerFrame` to prevent stutter.
- * - **Virtual Texture Atlas Pipeline Orchestration**:
- *   - VHT (Height): Bakes tile heightmaps from 16-bit PNG or raw buffers into the VHT atlas.
- *   - VNT (Normal): Computes and bakes Sobel/central difference normals from VHT height data in real time.
- *   - VBT (Base): Composites PBR BaseColor/Normal/ORM atlases by blending splat layers with VNT normals and constructs per-tile mip-chains.
- * - **High-Speed CPU Height Queries (`getInterpolatedHeightAt`)**: Bilinearly interpolates 16-bit cached height pixels to instantly resolve terrain elevation for character controllers, cameras, and foliage/grass placement.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템(Landscape)에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system (Landscape).<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- */
 class LandscapeTileStreamer extends RedGPUObject {
     #spatialGrid: LandscapeSpatialGrid;
 
@@ -75,10 +41,6 @@ class LandscapeTileStreamer extends RedGPUObject {
     #onGlobalHeightmapBaked: (() => void) | null = null;
 
     #heightScale: number = 500.0;
-    /**
-     * [KO] LOD 0 단계의 쿼드 세그먼트 수
-     * [EN] Number of quad segments for LOD 0
-     */
     #lod0SizeQuads: number = 256;
 
     #tempCellBuffer: Int32Array = new Int32Array(2);
@@ -93,14 +55,6 @@ class LandscapeTileStreamer extends RedGPUObject {
     #sortCamX: number = 0;
     #sortCamZ: number = 0;
 
-    /**
-     * [KO] LandscapeTileStreamer 생성자입니다.
-     * [EN] Constructor for LandscapeTileStreamer.
-     *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 / [EN] RedGPU context
-     * @param spatialGrid - [KO] 공간 그리드 인스턴스 / [EN] Spatial grid instance
-     * @param tileLoadingRadius - [KO] 타일 비동기 로딩 반경 (기본값: 2500) / [EN] Tile async loading radius (default: 2500)
-     */
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, tileLoadingRadius: number = 2500.0) {
         super(redGPUContext);
         this.#spatialGrid = spatialGrid;
@@ -110,74 +64,38 @@ class LandscapeTileStreamer extends RedGPUObject {
         this.#vbtGenerator = new LandscapeVBTGenerator(redGPUContext);
     }
 
-    /**
-     * [KO] 가상 하이트맵(VHT) 아틀라스 텍스처를 반환합니다.
-     * [EN] Returns the virtual heightmap (VHT) atlas texture.
-     */
     get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
     }
 
-    /**
-     * [KO] 가상 노멀맵(VNT) 아틀라스 텍스처를 반환합니다.
-     * [EN] Returns the virtual normal (VNT) atlas texture.
-     */
     get vntAtlasTexture(): DirectTexture | null {
         return this.#vntAtlasTexture;
     }
 
-    /**
-     * [KO] 가상 베이크 베이스 컬러(VBT BaseColor) 아틀라스 텍스처를 반환합니다.
-     * [EN] Returns the virtual baked base color (VBT BaseColor) atlas texture.
-     */
     get vbtBaseColorAtlas(): DirectTexture | null {
         return this.#vbtBaseColorAtlas;
     }
 
-    /**
-     * [KO] 가상 베이크 노멀(VBT Normal) 아틀라스 텍스처를 반환합니다.
-     * [EN] Returns the virtual baked normal (VBT Normal) atlas texture.
-     */
     get vbtNormalAtlas(): DirectTexture | null {
         return this.#vbtNormalAtlas;
     }
 
-    /**
-     * [KO] 가상 베이크 ORM(VBT ORM) 아틀라스 텍스처를 반환합니다.
-     * [EN] Returns the virtual baked ORM (VBT ORM) atlas texture.
-     */
     get vbtORMAtlas(): DirectTexture | null {
         return this.#vbtORMAtlas;
     }
 
-    /**
-     * [KO] LOD 0 단계의 쿼드 세그먼트 수를 반환합니다.
-     * [EN] Returns the number of quad segments for LOD 0.
-     */
     get lod0SizeQuads(): number {
         return this.#lod0SizeQuads;
     }
 
-    /**
-     * [KO] LOD 0 단계의 쿼드 세그먼트 수를 설정합니다.
-     * [EN] Sets the number of quad segments for LOD 0.
-     */
     set lod0SizeQuads(value: number) {
         this.#lod0SizeQuads = value;
     }
 
-    /**
-     * [KO] 전체 지형의 저해상도 글로벌 높이맵 URL을 반환합니다.
-     * [EN] Returns the global low-resolution heightmap URL.
-     */
     get globalHeightmapUrl(): string {
         return this.#globalHeightmapUrl;
     }
 
-    /**
-     * [KO] 글로벌 높이맵 URL을 설정하고 비동기 다운로드 및 베이스 아틀라스 베이킹을 시작합니다.
-     * [EN] Sets the global heightmap URL and initiates async download and base atlas baking.
-     */
     set globalHeightmapUrl(val: string) {
         if (this.#globalHeightmapUrl !== val) {
             this.#globalHeightmapUrl = val;
@@ -185,79 +103,39 @@ class LandscapeTileStreamer extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 글로벌 높이맵 GPUTexture 인스턴스를 반환합니다.
-     * [EN] Returns the global heightmap GPUTexture instance.
-     */
     get globalHeightTexture(): GPUTexture | null {
         return this.#globalHeightTexture;
     }
 
-    /**
-     * [KO] 카메라 기준 타일 활성화 로딩 반경(기본값: 2500)을 반환합니다.
-     * [EN] Returns the camera tile loading radius (default: 2500).
-     */
     get tileLoadingRadius(): number {
         return this.#tileLoadingRadius;
     }
 
-    /**
-     * [KO] 카메라 기준 타일 활성화 로딩 반경을 설정합니다. (최소값: 100)
-     * [EN] Sets the camera tile loading radius (minimum: 100).
-     */
     set tileLoadingRadius(val: number) {
         this.#tileLoadingRadius = Math.max(100, val);
     }
 
-    /**
-     * [KO] 프레임당 최대 비동기 타일 다운로드 요청 수를 반환합니다.
-     * [EN] Returns the maximum async tile loads initiated per frame.
-     */
     get tileMaxLoadsPerFrame(): number {
         return this.#tileMaxLoadsPerFrame;
     }
 
-    /**
-     * [KO] 프레임당 최대 비동기 타일 다운로드 요청 수를 설정합니다. (최소값: 1)
-     * [EN] Sets the maximum async tile loads initiated per frame (minimum: 1).
-     */
     set tileMaxLoadsPerFrame(val: number) {
         this.#tileMaxLoadsPerFrame = Math.max(1, val);
     }
 
-    /**
-     * [KO] 등록된 타일 URL 리졸버 함수를 반환합니다.
-     * [EN] Returns the registered tile URL resolver function.
-     */
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileUrlResolver;
     }
 
-    /**
-     * [KO] 타일 URL 리졸버 함수를 설정하고 타일 캐시 상태를 리셋합니다.
-     * [EN] Sets the tile URL resolver function and resets tile cache states.
-     */
     set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
         this.#tileUrlResolver = resolver;
         this.resetTileState();
     }
 
-    /**
-     * [KO] 현재 완전히 로드되어 아틀라스에 베이킹된 타일의 총 개수를 반환합니다.
-     * [EN] Returns the total count of tiles fully loaded and baked into the atlas.
-     */
     get tileLoadedCount(): number {
         return this.#loadedMap.size;
     }
 
-    /**
-     * [KO] 카메라 위치에 따라 로딩 반경 내 미로딩 타일을 수집하고 우선순위(거리순)로 정렬하여 프레임당 로딩 한도 내에서 비동기 로딩을 트리거합니다.
-     * [EN] Collects unloaded tiles within the camera radius, sorts them by distance priority, and triggers async loads within per-frame budgets.
-     *
-     * @param cameraX - [KO] 카메라 월드 X 좌표 / [EN] Camera world X coordinate
-     * @param cameraZ - [KO] 카메라 월드 Z 좌표 / [EN] Camera world Z coordinate
-     * @param cameraY - [KO] 카메라 월드 Y 고도 / [EN] Camera world Y elevation
-     */
     update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
         if (!this.#tileUrlResolver) return;
 
@@ -304,10 +182,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 모든 로딩 중, 로딩 완료, 실패 상태 및 CPU 높이 캐시를 초기화합니다.
-     * [EN] Resets all loading, loaded, failed tile states, and CPU height cache.
-     */
     resetTileState(): void {
         this.#loadingMap.clear();
         this.#loadedMap.clear();
@@ -316,12 +190,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         this.#pendingQueue.length = 0;
     }
 
-    /**
-     * [KO] 지정된 아틀라스 타입에 해당하는 DirectTexture 인스턴스를 반환합니다.
-     * [EN] Returns the DirectTexture instance corresponding to the specified atlas type.
-     *
-     * @param type - [KO] 요청할 아틀라스 타입 / [EN] Requested atlas type
-     */
     getAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
         switch (type) {
             case 'vht':
@@ -339,14 +207,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 지정된 타일 개수에 맞추어 VHT, VNT 및 VBT 아틀라스 텍스처 크기를 재할당하고 보장합니다.
-     * [EN] Ensures and reallocates VHT, VNT, and VBT atlas texture sizes according to the given component counts.
-     *
-     * @param componentCountX - [KO] X축 컴포넌트(타일) 개수 / [EN] Component count along X axis
-     * @param componentCountZ - [KO] Z축 컴포넌트(타일) 개수 / [EN] Component count along Z axis
-     * @returns [KO] 텍스처가 새로 재생성되었으면 true, 기존 크기와 일치하면 false / [EN] True if textures were recreated, false if unchanged
-     */
     ensureAtlasSize(componentCountX: number, componentCountZ: number): boolean {
         const targetAtlasW = componentCountX * 512;
         const targetAtlasH = componentCountZ * 512;
@@ -419,37 +279,14 @@ class LandscapeTileStreamer extends RedGPUObject {
         return true;
     }
 
-    /**
-     * [KO] VBT 베이킹에 사용할 지형 머티리얼을 지정합니다.
-     * [EN] Sets the landscape material used for VBT atlas baking.
-     *
-     * @param mat - [KO] 지형 머티리얼 인스턴스 / [EN] Landscape material instance
-     */
     setMaterial(mat: LandscapeMaterial | null): void {
         this.#material = mat;
     }
 
-
-    /**
-     * [KO] 개별 타일의 텍스처 로딩 및 베이킹이 완료되었을 때 실행될 콜백을 설정합니다.
-     * [EN] Sets the callback invoked when an individual tile texture is loaded and baked.
-     *
-     * @param callback - [KO] 타일 로드 완료 콜백 / [EN] Tile loaded callback
-     */
     setOnTileLoaded(callback: ((tileComponent: LandscapeComponent) => void) | null): void {
         this.#onTileLoaded = callback;
     }
 
-    /**
-     * [KO] 전체 아틀라스를 글로벌 베이스 높이맵으로 일괄 베이킹(VHT, VNT, VBT)합니다.
-     * [EN] Bakes the entire atlas with the global base heightmap across VHT, VNT, and VBT.
-     *
-     * @param globalHeightTexture - [KO] 대상 글로벌 높이 텍스처 / [EN] Target global height texture
-     * @param componentCountX - [KO] X축 컴포넌트 수 / [EN] Component count along X
-     * @param componentCountZ - [KO] Z축 컴포넌트 수 / [EN] Component count along Z
-     * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale
-     * @param worldSizeX - [KO] 지형 월드 X 크기 / [EN] Terrain world X size
-     */
     bakeGlobalBase(
         globalHeightTexture?: GPUTexture | null,
         componentCountX?: number,
@@ -490,20 +327,10 @@ class LandscapeTileStreamer extends RedGPUObject {
         );
     }
 
-    /**
-     * [KO] 글로벌 높이맵 베이킹 완료 시 호출될 콜백을 등록합니다.
-     * [EN] Registers the callback invoked when global heightmap baking is completed.
-     *
-     * @param callback - [KO] 완료 콜백 함수 / [EN] Completion callback function
-     */
     setOnGlobalHeightmapBaked(callback: (() => void) | null): void {
         this.#onGlobalHeightmapBaked = callback;
     }
 
-    /**
-     * [KO] 모든 아틀라스 텍스처, 제너레이터 및 내부 상태를 파괴하고 메모리를 해제합니다.
-     * [EN] Destroys all atlas textures, generators, and internal states, releasing GPU memory.
-     */
     destroy(): void {
         this.resetTileState();
 
@@ -536,13 +363,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         this.#onGlobalHeightmapBaked = null;
     }
 
-
-    /**
-     * [KO] CPU 측 레이캐스팅 및 고도 샘플링에 사용될 글로벌 높이맵 픽셀 데이터를 설정합니다.
-     * [EN] Sets global CPU heightmap pixel data used for elevation sampling and raycasting.
-     *
-     * @param data - [KO] 글로벌 높이맵 픽셀 버퍼 객체 / [EN] Global heightmap pixel buffer data
-     */
     setGlobalCPUHeightMap(data: {
         width: number;
         height: number;
@@ -562,29 +382,14 @@ class LandscapeTileStreamer extends RedGPUObject {
         };
     }
 
-    /**
-     * [KO] 캐시된 전역 CPU 높이맵 픽셀 데이터 객체를 반환합니다.
-     * [EN] Returns the cached global CPU heightmap pixel data object.
-     */
     get globalCPUHeightMap(): { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null {
         return this.#globalCPUHeightMap;
     }
 
-
-    /**
-     * [KO] 지형의 최대 높이 스케일 설정을 갱신합니다.
-     * [EN] Updates the terrain height scale configuration.
-     *
-     * @param heightScale - [KO] 지형 높이 스케일 / [EN] Terrain height scale
-     */
     setTerrainConfig(heightScale: number): void {
         this.#heightScale = heightScale;
     }
 
-    /**
-     * [KO] 현재 로드된 모든 타일의 가상 노멀맵(VNT)을 재계산하여 아틀라스에 다시 베이킹합니다.
-     * [EN] Recalculates and rebakes virtual normal maps (VNT) for all currently loaded tiles.
-     */
     rebakeAllLoadedVNT(): void {
         if (!this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#vntGenerator || !this.#spatialGrid) return;
 
@@ -619,13 +424,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 특정 행과 열의 타일이 메모리에 로드되어 있는지 여부를 확인합니다.
-     * [EN] Checks whether the tile at the specified row and column is loaded.
-     *
-     * @param row - [KO] 그리드 행 인덱스 / [EN] Grid row index
-     * @param col - [KO] 그리드 컬럼 인덱스 / [EN] Grid column index
-     */
     isTileLoaded(row: number, col: number): boolean {
         const comp = this.#spatialGrid?.getComponent(row, col);
         return comp ? this.#loadedMap.has(comp.key) : false;
@@ -639,14 +437,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         return da - db;
     };
 
-    /**
-     * [KO] 임의의 월드 X, Z 위치에서의 정확한 지형 고도(Y)를 CPU에서 쌍선형 보간(Bilinear Interpolation)하여 반환합니다.
-     * [EN] Returns the exact terrain elevation (Y) at an arbitrary world X, Z position via bilinear interpolation on CPU.
-     *
-     * @param x - [KO] 월드 X 좌표 / [EN] World X coordinate
-     * @param z - [KO] 월드 Z 좌표 / [EN] World Z coordinate
-     * @returns [KO] 계산된 월드 Y 고도값 / [EN] Computed world Y elevation
-     */
     getHeightAt(x: number, z: number): number {
         if (!this.#spatialGrid) return 0.0;
 
@@ -772,10 +562,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         return (val / g.maxVal) * 65535.0;
     }
 
-    /**
-     * [KO] 머티리얼 레이어 정보를 기반으로 전체 VBT(베이스 컬러, 노멀, ORM) 아틀라스를 다시 베이킹합니다.
-     * [EN] Rebakes the full VBT (base color, normal, ORM) atlases based on material layer configurations.
-     */
     rebakeAllLoadedVBT(): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vntAtlasTexture) return;
 
@@ -970,3 +756,4 @@ class LandscapeTileStreamer extends RedGPUObject {
 
 Object.freeze(LandscapeTileStreamer);
 export default LandscapeTileStreamer;
+

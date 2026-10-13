@@ -22,7 +22,6 @@ fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
     }
 }
 
-
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
 @group(2) @binding(3) var normalTextureSampler: sampler;
@@ -61,8 +60,8 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return saturate(vec2<f32>(u, v));
 }
 
-const INV_OCT_N: f32 = 0.125; // 1.0 / 8.0
-const BORDER_PADDING: f32 = 0.00390625; // 1.0 / 256.0
+const INV_OCT_N: f32 = 0.125;
+const BORDER_PADDING: f32 = 0.00390625;
 
 fn sampleOctahedralAtlas(
     tex: texture_2d<f32>,
@@ -289,9 +288,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let viewDist = sqrt(distSq);
 
-    // 🌿 [산업 표준 수목 캐노피 매크로 노멀 (Canopy Spherical Macro Normal)]
-    // 원거리에서 개별 나뭇잎의 미세 노멀이 밉맵으로 소멸/플랫화되는 현상을 극복하고,
-    // 태양광 방향에 맞춰 수관(Canopy)의 좌우/상하 3D 입체 음영을 100% 재현
     let quadOffset = (subUV - vec2<f32>(0.5, 0.5)) * 2.0;
     let offsetLenSq = dot(quadOffset, quadOffset);
     let sphereZ = sqrt(max(0.0, 1.0 - saturate(offsetLenSq) * 0.75));
@@ -318,7 +314,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
-        // 🌿 베이킹된 AO 기반 원거리 수목 캐노피 자체 차폐(Virtual Canopy Shadowing)
         let distantCanopyVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength * 0.7, 1.0, rawORM.r);
 
         if (distSq < maxCSMDist * maxCSMDist) {
@@ -331,12 +326,10 @@ fn main(inputData: InputData) -> OutputFragment {
             );
             let localCSMVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
 
-            // CSM 경계 부근(70% ~ 100%)에서 원거리 수목 캐노피 차폐로 자연스럽게 블렌딩하여 경계 튐 방지
             let csmFadeStart = maxCSMDist * 0.7;
             let csmBlend = saturate((viewDist - csmFadeStart) / max(maxCSMDist * 0.3, 1.0));
             shadowVis = mix(localCSMVis, distantCanopyVis, csmBlend);
         } else {
-            // CSM 범위 밖: 100% 직사광으로 발광하지 않고 원거리 수목 캐노피 차폐 음영 유지
             shadowVis = distantCanopyVis;
         }
     }
@@ -354,7 +347,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let NORM_225: f32 = 0.44444445;
     let sssDistortion: f32 = 0.25;
-    // 🌿 원거리(60m~240m)로 갈수록 개별 잎 투과광(라임 발광 원인)을 소거하고 캐노피 반사광으로 정규화
     let sssDistFade = 1.0 - saturate((viewDist - 60.0) * 0.005555556);
     let sssTransmissionFactor: f32 = 0.20 * sssDistFade;
 
@@ -390,7 +382,6 @@ fn main(inputData: InputData) -> OutputFragment {
         let vDotL = max(dot(V, lightOpposite), 0.0);
         let inScatter = vDotL * vDotL;
         let diffuseTransmission = albedo * (backWrap * 0.5 + inScatter * 0.5);
-        // 🌿 임포스터는 1장의 평면 쿼드이므로 직사광에서도 나뭇잎/가지 내부 캐노피 차폐가 보존되도록 AO 감쇄 조정
         let directAO = mix(ao, 1.0, saturate(NdotL * 0.5) * 0.5);
         let canopyNdotL = dot(canopySphereNormal, L);
         let shadowSideFade = saturate(canopyNdotL * 1.5 + 0.3);
@@ -495,3 +486,4 @@ fn main(inputData: InputData) -> OutputFragment {
 
     return output;
 }
+

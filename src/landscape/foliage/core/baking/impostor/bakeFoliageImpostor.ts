@@ -1,9 +1,3 @@
-/**
- * [KO] 식생 옥타헤드럴 임포스터 베이커 모듈입니다.
- * [EN] Foliage octahedral impostor baker module.
- * @packageDocumentation
- */
-
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
@@ -14,45 +8,13 @@ import impostorDilationWGSL from "./impostorDilation.wgsl";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-/**
- * [KO] 식생 임포스터 베이킹 결과 인터페이스입니다.
- * [EN] Result interface for foliage impostor baking.
- */
 export interface FoliageBakeResult {
-    /**
-     * [KO] 베이킹된 베이스 컬러 텍스처
-     * [EN] Baked base color texture
-     */
     baseColorTexture: DirectTexture;
-    /**
-     * [KO] 베이킹된 노멀 텍스처
-     * [EN] Baked normal texture
-     */
     normalTexture: DirectTexture;
-    /**
-     * [KO] 베이킹된 패킹 ORM (Occlusion, Roughness, Metallic) 텍스처
-     * [EN] Baked packed ORM (Occlusion, Roughness, Metallic) texture
-     */
     packedORMTexture: DirectTexture;
-    /**
-     * [KO] 빌보드 쿼드 너비
-     * [EN] Billboard quad width
-     */
     width: number;
-    /**
-     * [KO] 빌보드 쿼드 높이
-     * [EN] Billboard quad height
-     */
     height: number;
-    /**
-     * [KO] 빌보드 깊이
-     * [EN] Billboard depth
-     */
     depth: number;
-    /**
-     * [KO] 피벗 기준 바닥 오프셋
-     * [EN] Bottom offset relative to pivot
-     */
     bottomOffset: number;
 }
 
@@ -125,10 +87,6 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
     return cache;
 }
 
-/**
- * [KO] 4x4 행렬이 항등 행렬(Identity Matrix)인지 여부를 검사합니다.
- * [EN] Checks whether a 4x4 matrix is an identity matrix.
- */
 function isIdentityMatrix(m: mat4 | null | undefined): boolean {
     if (!m) return true;
     return (
@@ -140,16 +98,6 @@ function isIdentityMatrix(m: mat4 | null | undefined): boolean {
     );
 }
 
-/**
- * [KO] 렌더 단위 배열을 순회하여 합성 AABB, 바운딩 반경 및 중심점을 계산합니다.
- * [EN] Computes the composite AABB, bounding radius, and center by traversing render units.
- * @param renderUnits -
- * [KO] 대상 렌더 단위 배열
- * [EN] Target render unit array
- * @returns
- * [KO] 계산된 바운딩 정보 (min, max, width, height, depth, center, maxRadius)
- * [EN] Computed bounding information (min, max, width, height, depth, center, maxRadius)
- */
 function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     min: [number, number, number];
     max: [number, number, number];
@@ -254,22 +202,6 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     };
 }
 
-/**
- * [KO] 주어진 식생 렌더 유닛들을 8x8 옥타헤드럴 뷰로 렌더링하여 베이스컬러/노멀/ORM 아틀라스를 베이킹합니다.
- * [EN] Renders foliage render units across an 8x8 octahedral grid to bake baseColor, normal, and ORM atlases.
- * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPU context instance
- * @param renderUnits -
- * [KO] 베이킹할 소스 렌더 유닛 배열
- * [EN] Source render unit array to bake
- * @param bakeName -
- * [KO] 베이킹 리소스 라벨용 식별자 (기본값: 'Foliage')
- * [EN] Identifier for resource labels (default: 'Foliage')
- * @returns
- * [KO] 생성된 아틀라스 텍스처 및 빌보드 치수 결과
- * [EN] Resulting atlas textures and billboard dimensions
- */
 function bakeFoliageImpostor(
     redGPUContext: RedGPUContext,
     renderUnits: FoliageRenderUnit[],

@@ -104,7 +104,6 @@ fn sampleLandscapeHeightAndNormal(
     return result;
 }
 
-
 struct FoliageBakeUniforms {
     invWorldSizeX: f32,
     invWorldSizeZ: f32,
@@ -148,7 +147,7 @@ struct FoliageBakeUniforms {
 
     subMaxX: f32,
     subMaxZ: f32,
-    pad0: u32, // strideFloats
+    pad0: u32,
     pad1: u32,
 };
 
@@ -156,7 +155,7 @@ struct FoliageGridTask {
     gridX: i32,
     gridZ: i32,
     maxSlotsForGrid: u32,
-    pad0: u32, // 16-byte alignment tail padding
+    pad0: u32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: FoliageBakeUniforms;
@@ -326,3 +325,4 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         }
     }
 }
+

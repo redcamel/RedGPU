@@ -54,7 +54,6 @@ struct VertexOutput {
     @location(8) @interpolate(flat) shadowData: vec2<f32>,
 };
 
-
 struct GrassPositionResult {
     worldPos: vec3<f32>,
     heightRatio: f32,
@@ -159,3 +158,4 @@ fn main(input: VertexInput) -> VertexOutput {
 
     return output;
 }
+
