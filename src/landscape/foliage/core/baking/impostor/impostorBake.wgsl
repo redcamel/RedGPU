@@ -36,9 +36,8 @@ fn main(
     let u_useVertexColor = (input.textureFlags.w > 0.5);
     let isFoliage = (input.cameraDir.w > 0.5);
     var baseColor = input.baseColorFactor;
-    if (!isFoliage) {
-        baseColor *= select(vec4<f32>(1.0), input.vertexColor_0, u_useVertexColor);
-    }
+    // 🌿 식생은 vertexColor_0이 바람 시뮬레이션 가중치(Wind Weight)이므로 베이킹 알베도에 합성하지 않음
+    baseColor *= select(vec4<f32>(1.0), input.vertexColor_0, u_useVertexColor && !isFoliage);
 
     var finalColor = baseColor;
     if (input.textureFlags.x > 0.5) {

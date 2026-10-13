@@ -167,10 +167,32 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseGrid = floor(gridPos);
     let frac = gridPos - baseGrid;
 
-    let g00 = clamp(baseGrid + vec2<f32>(0.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g10 = clamp(baseGrid + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    var g0 = baseGrid;
+    var g1 = baseGrid;
+    var g2 = baseGrid;
+    var w0: f32;
+    var w1: f32;
+    var w2: f32;
+
+    if (frac.x + frac.y < 1.0) {
+        g0 += vec2<f32>(0.0, 0.0);
+        g1 += vec2<f32>(1.0, 0.0);
+        g2 += vec2<f32>(0.0, 1.0);
+        w0 = 1.0 - frac.x - frac.y;
+        w1 = frac.x;
+        w2 = frac.y;
+    } else {
+        g0 += vec2<f32>(1.0, 1.0);
+        g1 += vec2<f32>(1.0, 0.0);
+        g2 += vec2<f32>(0.0, 1.0);
+        w0 = frac.x + frac.y - 1.0;
+        w1 = 1.0 - frac.y;
+        w2 = 1.0 - frac.x;
+    }
+
+    g0 = clamp(g0, vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    g1 = clamp(g1, vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    g2 = clamp(g2, vec2<f32>(0.0), vec2<f32>(n - 1.0));
 
     let subUV = inputData.uv;
 
@@ -179,21 +201,14 @@ fn main(inputData: InputData) -> OutputFragment {
     let ddxAtlas = ddxUV * INV_OCT_N;
     let ddyAtlas = ddyUV * INV_OCT_N;
 
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
+    let s0 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g0, subUV, n, ddxAtlas, ddyAtlas);
+    let s1 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g1, subUV, n, ddxAtlas, ddyAtlas);
+    let s2 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g2, subUV, n, ddxAtlas, ddyAtlas);
 
-    let w00 = (1.0 - frac.x) * (1.0 - frac.y);
-    let w10 = frac.x * (1.0 - frac.y);
-    let w01 = (1.0 - frac.x) * frac.y;
-    let w11 = frac.x * frac.y;
-
-    let cov00 = w00 * s00.a;
-    let cov10 = w10 * s10.a;
-    let cov01 = w01 * s01.a;
-    let cov11 = w11 * s11.a;
-    let totalCoverage = cov00 + cov10 + cov01 + cov11;
+    let cov0 = w0 * s0.a;
+    let cov1 = w1 * s1.a;
+    let cov2 = w2 * s2.a;
+    let totalCoverage = cov0 + cov1 + cov2;
 
     if (totalCoverage < 0.001) {
         discard;
@@ -202,10 +217,16 @@ fn main(inputData: InputData) -> OutputFragment {
     ditherFadeDiscard(inputData.position.xy, inputData.combinedOpacity, systemUniforms.time.frameIndex);
 
     let linearAlpha = totalCoverage;
-    let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
-    let maxCornerWeight = max(max(w00, w10), max(w01, w11));
-    let sharpnessFactor = saturate((maxCornerWeight - 0.25) * 1.33333333);
+    let maxAlpha = max(max(s0.a, s1.a), s2.a);
+    let maxCornerWeight = max(max(w0, w1), w2);
+    let sharpnessFactor = saturate((maxCornerWeight - 0.333333) * 1.5);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
+
+    let texDim = vec2<f32>(textureDimensions(baseColorTexture));
+    let maxDim = max(texDim.x, texDim.y);
+    let lenSq = max(dot(ddxAtlas, ddxAtlas), dot(ddyAtlas, ddyAtlas));
+    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * (maxDim * maxDim), 1.0)));
+    let effectiveAlpha = reconstructedAlpha * (1.0 + mipLevel * 0.28);
 
     let ditherPx = u32(inputData.position.x) & 3u;
     let ditherPy = u32(inputData.position.y) & 3u;
@@ -215,13 +236,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let ditherThreshold = f32(extractBits(bayerPacked, (ditherIdx & 7u) * 4u, 4u)) * 0.0625;
 
     let dynamicCutOff = mix(0.20, 0.55, ditherThreshold);
-    if (reconstructedAlpha <= dynamicCutOff) {
+    if (effectiveAlpha <= dynamicCutOff) {
         discard;
     }
 
     let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
 
-    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
+    var albedo = (s0.rgb * cov0 + s1.rgb * cov1 + s2.rgb * cov2) * invSafeCoverage;
     albedo = saturate(albedo);
 
     let toCamVec = camPos - inputData.vertexPosition;
@@ -231,29 +252,30 @@ fn main(inputData: InputData) -> OutputFragment {
     var rawORM: vec4<f32>;
 
     if (distSq > 250000.0) {
-        var domG = g00;
-        var maxCov = cov00;
-        if (cov10 > maxCov) { maxCov = cov10; domG = g10; }
-        if (cov01 > maxCov) { maxCov = cov01; domG = g01; }
-        if (cov11 > maxCov) { maxCov = cov11; domG = g11; }
+        var domG = g0;
+        var maxCov = cov0;
+        if (cov1 > maxCov) { maxCov = cov1; domG = g1; }
+        if (cov2 > maxCov) { maxCov = cov2; domG = g2; }
 
         rawNormalDepth = sampleOctahedralAtlas(normalTexture, normalTextureSampler, domG, subUV, n, ddxAtlas, ddyAtlas);
         rawORM = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, domG, subUV, n, ddxAtlas, ddyAtlas);
     } else {
-        let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
-        let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
-        let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
-        let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
+        let n0 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g0, subUV, n, ddxAtlas, ddyAtlas);
+        let n1 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g1, subUV, n, ddxAtlas, ddyAtlas);
+        let n2 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g2, subUV, n, ddxAtlas, ddyAtlas);
 
-        let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, subUV, n, ddxAtlas, ddyAtlas);
-        let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, subUV, n, ddxAtlas, ddyAtlas);
-        let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, subUV, n, ddxAtlas, ddyAtlas);
-        let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, subUV, n, ddxAtlas, ddyAtlas);
+        let orm0 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g0, subUV, n, ddxAtlas, ddyAtlas);
+        let orm1 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g1, subUV, n, ddxAtlas, ddyAtlas);
+        let orm2 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g2, subUV, n, ddxAtlas, ddyAtlas);
 
-        rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
-        rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
+        rawNormalDepth = (n0 * cov0 + n1 * cov1 + n2 * cov2) * invSafeCoverage;
+        rawORM = (orm0 * cov0 + orm1 * cov1 + orm2 * cov2) * invSafeCoverage;
     }
     let V = normalize(toCamVec);
+
+    let sphereRadius = max(inputData.localNodeScale_volumeScale.y * 3.5, 2.0);
+    let depthOffsetMeters = (rawNormalDepth.w - 0.5) * 2.0 * sphereRadius;
+    let virtualWorldPos = inputData.vertexPosition - V * depthOffsetMeters;
 
     var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
     if (dot(bakedN, bakedN) < 0.01) {
@@ -265,10 +287,27 @@ fn main(inputData: InputData) -> OutputFragment {
         N = normalize(rotateVectorByQuat(bakedN, quat));
     }
 
+    let viewDist = sqrt(distSq);
+
+    // 🌿 [산업 표준 수목 캐노피 매크로 노멀 (Canopy Spherical Macro Normal)]
+    // 원거리에서 개별 나뭇잎의 미세 노멀이 밉맵으로 소멸/플랫화되는 현상을 극복하고,
+    // 태양광 방향에 맞춰 수관(Canopy)의 좌우/상하 3D 입체 음영을 100% 재현
+    let quadOffset = (subUV - vec2<f32>(0.5, 0.5)) * 2.0;
+    let offsetLenSq = dot(quadOffset, quadOffset);
+    let sphereZ = sqrt(max(0.0, 1.0 - saturate(offsetLenSq) * 0.75));
+    let rightXZ = vec2<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[2][0]);
+    let rightLenSq = dot(rightXZ, rightXZ);
+    let billboardRight = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(rightXZ.x, 0.0, rightXZ.y) * inverseSqrt(rightLenSq), rightLenSq > 0.0001);
+    let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
+    let canopySphereNormal = normalize(billboardRight * (quadOffset.x * 0.85) + billboardUp * ((-quadOffset.y) * 0.65) + V * sphereZ);
+
+    let canopyBlend = saturate((viewDist - 40.0) * 0.0125);
+    N = normalize(mix(N, canopySphereNormal, mix(0.40, 0.85, canopyBlend)));
+
     let NdotV = max(dot(N, V), 0.04);
     let preExposure = systemUniforms.preExposure;
 
-    let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.directionalLightCount > 0u;
+    let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.shadow.directionalShadowStrength > 0.0 && systemUniforms.directionalLightCount > 0u;
     var shadowVis: f32 = 1.0;
     var L0 = vec3<f32>(0.0, 1.0, 0.0);
     if (systemUniforms.directionalLightCount > 0u) {
@@ -279,15 +318,26 @@ fn main(inputData: InputData) -> OutputFragment {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
+        // 🌿 베이킹된 AO 기반 원거리 수목 캐노피 자체 차폐(Virtual Canopy Shadowing)
+        let distantCanopyVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength * 0.7, 1.0, rawORM.r);
+
         if (distSq < maxCSMDist * maxCSMDist) {
             let rawVis = getDirectionalShadowVisibilityFoliage(
                 directionalShadowMap,
                 directionalShadowMapSampler,
-                inputData.vertexPosition,
+                virtualWorldPos,
                 N,
                 L0
             );
-            shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
+            let localCSMVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
+
+            // CSM 경계 부근(70% ~ 100%)에서 원거리 수목 캐노피 차폐로 자연스럽게 블렌딩하여 경계 튐 방지
+            let csmFadeStart = maxCSMDist * 0.7;
+            let csmBlend = saturate((viewDist - csmFadeStart) / max(maxCSMDist * 0.3, 1.0));
+            shadowVis = mix(localCSMVis, distantCanopyVis, csmBlend);
+        } else {
+            // CSM 범위 밖: 100% 직사광으로 발광하지 않고 원거리 수목 캐노피 차폐 음영 유지
+            shadowVis = distantCanopyVis;
         }
     }
 
@@ -304,7 +354,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let NORM_225: f32 = 0.44444445;
     let sssDistortion: f32 = 0.25;
-    let sssTransmissionFactor: f32 = 0.45;
+    // 🌿 원거리(60m~240m)로 갈수록 개별 잎 투과광(라임 발광 원인)을 소거하고 캐노피 반사광으로 정규화
+    let sssDistFade = 1.0 - saturate((viewDist - 60.0) * 0.005555556);
+    let sssTransmissionFactor: f32 = 0.20 * sssDistFade;
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
@@ -338,7 +390,11 @@ fn main(inputData: InputData) -> OutputFragment {
         let vDotL = max(dot(V, lightOpposite), 0.0);
         let inScatter = vDotL * vDotL;
         let diffuseTransmission = albedo * (backWrap * 0.5 + inScatter * 0.5);
-        let totalDiffuse = mix(diffuseReflection, diffuseTransmission, sssTransmissionFactor);
+        // 🌿 임포스터는 1장의 평면 쿼드이므로 직사광에서도 나뭇잎/가지 내부 캐노피 차폐가 보존되도록 AO 감쇄 조정
+        let directAO = mix(ao, 1.0, saturate(NdotL * 0.5) * 0.5);
+        let canopyNdotL = dot(canopySphereNormal, L);
+        let shadowSideFade = saturate(canopyNdotL * 1.5 + 0.3);
+        let totalDiffuse = mix(diffuseReflection, diffuseTransmission * shadowSideFade, sssTransmissionFactor) * directAO;
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;
@@ -414,7 +470,7 @@ fn main(inputData: InputData) -> OutputFragment {
             backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
         }
         let transmittedIBL = backScatteringColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric);
-        envIBL_DIFFUSE = envIBL_DIFFUSE * 0.55 + transmittedIBL * 0.1575;
+        envIBL_DIFFUSE = envIBL_DIFFUSE * 0.55 + transmittedIBL * (0.1575 * sssDistFade);
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;

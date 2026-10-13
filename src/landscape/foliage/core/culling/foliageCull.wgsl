@@ -303,11 +303,21 @@ fn main(
                     if (inShadowFrustum) {
                         var targetShadowLOD: u32 = 0u;
                         if (numLODs > 1u) {
-                            let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
-                            let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
+                            let lastLOD = numLODs - 1u;
+                            let hasInfiniteImpostor = (typeInfo.lods[lastLOD].exitEnd >= 100000.0);
                             let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
 
-                            targetShadowLOD = select(maxShadowLOD, 0u, c <= 1u && effectiveDist <= lod0Dist);
+                            if (hasInfiniteImpostor) {
+                                let impostorEnterStart = typeInfo.lods[lastLOD].enterStart;
+                                if (effectiveDist >= impostorEnterStart) {
+                                    targetShadowLOD = lastLOD;
+                                } else {
+                                    let max3DLOD = max(lastLOD - 1u, 0u);
+                                    targetShadowLOD = select(max3DLOD, 0u, c <= 1u && effectiveDist <= lod0Dist);
+                                }
+                            } else {
+                                targetShadowLOD = select(lastLOD, 0u, c <= 1u && effectiveDist <= lod0Dist);
+                            }
                         }
 
                         let lodInfo = typeInfo.lods[targetShadowLOD];

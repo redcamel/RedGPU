@@ -507,17 +507,34 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                         }
                     }
                 }
+
+                if (hasImpostor) {
+                    for (let s = 0; s < shadowMergedRenderUnits.length; s++) {
+                        const shadowUnit = shadowMergedRenderUnits[s];
+                        if (shadowUnit.isImpostor) {
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
+                            const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                            const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
+                            this.#drawShadowRenderUnit(bundleEncoder, shadowUnit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                            break;
+                        }
+                    }
+                }
             } else {
                 if (shadowMergedRenderUnits.length > 0) {
                     const targetLOD = num3DLODs > 1 ? maxShadowLOD : 0;
                     for (let s = 0; s < shadowMergedRenderUnits.length; s++) {
                         const shadowUnit = shadowMergedRenderUnits[s];
-                        if (shadowUnit.lodIndex === targetLOD) {
+                        if (shadowUnit.isImpostor) {
+                            const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
+                            const instOffset = cascadeInstanceOffset + instanceBufferOffset;
+                            const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
+                            this.#drawShadowRenderUnit(bundleEncoder, shadowUnit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                        } else if (shadowUnit.lodIndex === targetLOD) {
                             const {instanceBufferOffset, indirectOffsetBytes} = shadowUnit;
                             const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                             const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                             this.#drawShadowMergedRenderUnit(bundleEncoder, shadowUnit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
-                            break;
                         }
                     }
                 } else {
@@ -526,7 +543,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                     for (let s = 0; s < unitCount; s++) {
                         const unit = renderUnits[s];
                         const {isImpostor, lodIndex, instanceBufferOffset, indirectOffsetBytes} = unit;
-                        if (isImpostor || lodIndex !== targetLOD) continue;
+                        if (!isImpostor && lodIndex !== targetLOD) continue;
                         const instOffset = cascadeInstanceOffset + instanceBufferOffset;
                         const indOffset = cascadeIndirectOffset + indirectOffsetBytes;
                         this.#drawShadowRenderUnit(bundleEncoder, unit, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
@@ -641,10 +658,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         overrideInstanceOffset?: number,
         overrideIndirectOffset?: number
     ): void {
-        const {geometry, lodIndex, isMasked, material, strideBytes} = unit;
+        const {geometry, lodIndex, isMasked, isImpostor, material, strideBytes} = unit;
         const vertexGPUBuffer = geometry.vertexBuffer.gpuBuffer;
 
-        const useMasked = (lodIndex === 0) && isMasked;
+        const useMasked = (lodIndex === 0 || isImpostor) && isMasked;
         const pipeline = useMasked
             ? this.#pipelineRegistry.getOrCreateShadowMaskedPipeline(
                 material,

@@ -69,6 +69,11 @@ interface OctahedralImpostorMaterial {
      * [EN] Foliage dedicated shading flag
      */
     isFoliage: boolean;
+    /**
+     * [KO] 바운딩 구체 반경 (미터, Pixel Depth Offset 복원용)
+     * [EN] Bounding sphere radius in meters for Pixel Depth Offset reconstruction
+     */
+    boundingRadius: number;
 }
 
 /**
@@ -105,6 +110,7 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         baseColorTexture?: BitmapTexture | DirectTexture,
         normalTexture?: BitmapTexture | DirectTexture,
         packedORMTexture?: BitmapTexture | DirectTexture,
+        boundingRadius: number = 3.0,
         name?: string
     ) {
         super(
@@ -129,6 +135,7 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         this.doubleSided = false;
 
         this.isFoliage = true;
+        this.boundingRadius = boundingRadius;
         this.transparent = false;
 
         this.initGPURenderInfos();
@@ -147,7 +154,8 @@ defineTexture(OctahedralImpostorMaterial, [
 ]);
 
 definePositiveNumber(OctahedralImpostorMaterial, [
-    {key: 'cutOff', value: 0.35}
+    {key: 'cutOff', value: 0.35},
+    {key: 'boundingRadius', value: 3.0}
 ]);
 defineBoolean(OctahedralImpostorMaterial, [
     {key: 'isFoliage', value: true}

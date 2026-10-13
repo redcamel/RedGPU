@@ -147,7 +147,7 @@ function createPBRRenderUnit(
     }
 
     const hasBaseColorTexture = !!(baseColorTexture?.gpuTexture || baseColorTexture?.src || baseColorTexture?.url);
-    const isDepthPrepass = !isImpostor && (lodIndex <= 0) && (!isMasked || hasBaseColorTexture);
+    const isDepthPrepass = (lodIndex <= 0 || isImpostor) && (!isMasked || hasBaseColorTexture);
     const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
     return new FoliageRenderUnit({
@@ -380,17 +380,19 @@ export default function assembleFoliageRenderUnits(
             baseColorTexture,
             normalTexture,
             packedORMTexture,
+            maxBoundingRadius > 0 ? maxBoundingRadius : 3.0,
             `${name}_OctahedralMat`
         );
 
         const bbStartOffset = renderUnits.length;
+        const bbReceiveShadow = options.receiveShadow !== false;
         const bbRenderUnit = createPBRRenderUnit(
             impostorGeometry,
             impostorMaterial,
             0,
             impostorGeometry.indexBuffer.indexCount,
             impostorLODIndex,
-            false,
+            bbReceiveShadow,
             impostorHeight,
             sharedContext,
             true
@@ -398,12 +400,41 @@ export default function assembleFoliageRenderUnits(
 
         renderUnits.push(bbRenderUnit);
 
+        if (options.castShadow !== false) {
+            let shadowSlotIndex = -1;
+            if (slotPooler) {
+                shadowSlotIndex = slotPooler.allocateSlot();
+                if (shadowSlotIndex >= 0) {
+                    slotPooler.writeShadowRenderUnitSlot(
+                        shadowSlotIndex,
+                        0,
+                        impostorHeight,
+                        0
+                    );
+                }
+            }
+
+            shadowMergedRenderUnits.push(new FoliageRenderUnit({
+                geometry: impostorGeometry,
+                material: impostorMaterial,
+                indexCount: impostorGeometry.indexBuffer.indexCount,
+                isIndexed: true,
+                strideBytes: PBR_STRIDE_BYTES,
+                slotIndex: shadowSlotIndex,
+                slotPooler,
+                lodIndex: impostorLODIndex,
+                isShadowMerged: false,
+                isImpostor: true,
+                isMasked: true
+            }));
+        }
+
         lodInfoList.push({
             lodIndex: impostorLODIndex,
             lodDistance: 1000000.0,
             renderUnitOffset: bbStartOffset,
             renderUnitCount: 1,
-            receiveShadow: false,
+            receiveShadow: bbReceiveShadow,
         });
     }
 

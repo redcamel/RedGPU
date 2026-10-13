@@ -262,7 +262,11 @@ fn main(inputData:InputData) -> OutputFragment {
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    #redgpu_if isFoliage
+        // 🌿 식생은 vertexColor_0이 바람 시뮬레이션 가중치(Wind Weight)이므로 알베도에 합성하지 않음
+    #redgpu_else
+        baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    #redgpu_endIf
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
         baseColor *= diffuseSampleColor;

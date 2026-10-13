@@ -350,22 +350,59 @@ struct FoliageShadowMaskedOutput {
     @location(2) @interpolate(flat) globalFragmentSlotIndex: u32,
 };
 
+fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
+    let d = normalize(vec3<f32>(dir.x, max(dir.y, 0.0), dir.z));
+    let l1 = abs(d.x) + d.y + abs(d.z);
+    let invL1 = select(1.0 / l1, 1.0, l1 < 0.0001);
+    let halfInvL1 = 0.5 * invL1;
+    let u = (d.x + d.z) * halfInvL1 + 0.5;
+    let v = (d.z - d.x) * halfInvL1 + 0.5;
+    return saturate(vec2<f32>(u, v));
+}
+
 @vertex
 fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutput {
     var output : FoliageShadowMaskedOutput;
     let instData = unpackAndTransformFoliage(input.position, input.instancePos_scaleY, input.instanceRotQuat, input.instanceScaleXZ);
-    let windDisp = calculateFoliageWindDisplacement(
-        instData.xform.worldPos,
-        input.position,
-        input.vertexNormal,
-        input.vertexColor_0,
-        instData.instancePos,
-        systemUniforms.time.time
-    );
-    let worldPos = instData.xform.worldPos + windDisp;
+    let isImpostor = (input.vertexTangent.w < -500.0);
+    var worldPos: vec3<f32>;
+    var outUV = input.uv;
+
+    if (isImpostor) {
+        let lightDir = -systemUniforms.directionalLights[0].direction;
+        let rightXZ = vec2<f32>(lightDir.z, -lightDir.x);
+        let rightLenSq = dot(rightXZ, rightXZ);
+        let billboardRight = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(rightXZ.x, 0.0, rightXZ.y) * inverseSqrt(rightLenSq), rightLenSq > 0.0001);
+        let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
+
+        let hierarchyPos = input.position;
+        let safeScale = instData.xform.safeScale;
+        let centerYLocal = hierarchyPos.z;
+        let treeCenter = instData.instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
+
+        let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
+        worldPos = treeCenter + impostorOffset;
+
+        let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
+        let localLightDir = normalize(rotateVectorByQuat(lightDir, invQuat));
+        let octUV = dirToHemiOctahedralUV(localLightDir);
+        let grid = clamp(floor(octUV * 8.0), vec2<f32>(0.0), vec2<f32>(7.0));
+        let safeSubUV = clamp(input.uv, vec2<f32>(0.00390625), vec2<f32>(1.0 - 0.00390625));
+        outUV = (grid + safeSubUV) * 0.125;
+    } else {
+        let windDisp = calculateFoliageWindDisplacement(
+            instData.xform.worldPos,
+            input.position,
+            input.vertexNormal,
+            input.vertexColor_0,
+            instData.instancePos,
+            systemUniforms.time.time
+        );
+        worldPos = instData.xform.worldPos + windDisp;
+    }
 
     output.position = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
-    output.uv = input.uv;
+    output.uv = outUV;
     output.shadowFade = input.groundColor_fade.a;
     output.globalFragmentSlotIndex = renderUnitUniforms.globalFragmentSlotIndex;
     return output;
