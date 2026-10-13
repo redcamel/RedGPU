@@ -21,6 +21,8 @@ const g_zero = vec3.fromValues(0, 0, 0);
 
 const g_lightRotMat = mat4.create();
 const g_invLightRotMat = mat4.create();
+const g_tempLightP = mat4.create();
+const g_tempLightV = mat4.create();
 const g_cascadeSplits = new Float32Array(5);
 
 /**
@@ -41,6 +43,7 @@ class DirectionalShadowManager {
     #maxShadowDistance: number = 200;
     #cascadeCount: number = 4;
     #pcssLightSize: number = 1.0;
+    #targetNearTexelSize: number = 0.01;
 
     #shadowDepthTexture: GPUTexture;
     #shadowDepthTextureView: GPUTextureView;
@@ -53,13 +56,20 @@ class DirectionalShadowManager {
     #videoMemorySize: number = 0;
 
     #cascadeSplitDepths: Float32Array = new Float32Array(4);
+    #cascadeBoundingSpheres: Float32Array = new Float32Array(16); // 4 cascades * [center.x, center.y, center.z, radius]
     #cascadeProjectionViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
-    #cascadeProjectionMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
-    #cascadeViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
 
     #casterBoundingCenter: Float32Array = new Float32Array(3);
     #casterBoundingRadiusSq: number = -1;
     #hasCastingListCycleStarted: boolean = false;
+
+    /**
+     * [KO] 각 캐스케이드의 월드 공간 외접구 정보 [center.x, center.y, center.z, radius] * 4 (길이 16 Float32Array)를 반환합니다.
+     * [EN] Returns the world-space bounding sphere info [center.x, center.y, center.z, radius] * 4 (length 16 Float32Array) for each cascade.
+     */
+    get cascadeBoundingSpheres(): Float32Array {
+        return this.#cascadeBoundingSpheres;
+    }
 
     /**
      * [KO] 캐스터들의 그림자 유효 영역 중심 좌표(vec3)를 반환합니다.
@@ -220,6 +230,31 @@ class DirectionalShadowManager {
     }
 
     /**
+     * [KO] 카메라 근경(Cascade 0)에서 보장할 물리적 목표 텍셀 크기(단위: m, 기본값: 0.01m = 1cm)를 반환합니다.
+     * [EN] Returns the target physical texel size (in meters, default: 0.01m = 1cm) guaranteed at near camera range (Cascade 0).
+     *
+     * @returns
+     * [KO] 목표 텍셀 크기 (m)
+     * [EN] Target texel size in meters
+     */
+    get targetNearTexelSize(): number {
+        return this.#targetNearTexelSize;
+    }
+
+    /**
+     * [KO] 카메라 근경(Cascade 0)에서 보장할 물리적 목표 텍셀 크기(단위: m, 0.001 ~ 0.1)를 설정합니다.
+     * [EN] Sets the target physical texel size (in meters, 0.001 to 0.1) guaranteed at near camera range (Cascade 0).
+     *
+     * @param value -
+     * [KO] 목표 텍셀 크기 (m)
+     * [EN] Target texel size in meters
+     */
+    set targetNearTexelSize(value: number) {
+        validatePositiveNumberRange(value, 0.001, 0.1);
+        this.#targetNearTexelSize = value;
+    }
+
+    /**
      * [KO] 각 캐스케이드의 분할 깊이(Split Depth) 배열(길이 4)을 반환합니다.
      * [EN] Returns the array of split depths for each cascade (length 4).
      *
@@ -306,10 +341,10 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 언리얼 엔진 5(UE5) 표준 지수 분할(Exponential Distribution Exponent = 3.0) 및
-     *      해석적 외접구(Analytical Bounding Sphere) 텍셀 스냅핑 알고리즘을 적용하여
-     *      CSM 행렬과 분할 깊이를 직접(In-Place) 계산합니다.
-     * [EN] In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers.
+     * [KO] Auto-CSM 물리 기반 텍셀 밀도 역산 모델 및 절두체 8정점 완전 포섭 대칭 외접구(Symmetric Bounding Sphere)
+     *      알고리즘을 적용하여 CSM 행렬과 분할 깊이를 직접(In-Place) 계산합니다.
+     * [EN] In-place calculates jitter-free high-precision CSM matrices and split depths directly into member buffers
+     *      using the Auto-CSM physical texel density inversion model and symmetric bounding sphere algorithm.
      *
      * @param view - 대상 View3D
      */
@@ -324,8 +359,6 @@ class DirectionalShadowManager {
 
         const splitDepths = this.#cascadeSplitDepths;
         const cascadePV = this.#cascadeProjectionViewMatrices;
-        const cascadeP = this.#cascadeProjectionMatrices;
-        const cascadeV = this.#cascadeViewMatrices;
 
         if (!directionalLights?.length || !(rawCamera instanceof PerspectiveCamera)) {
             splitDepths.fill(1000.0);
@@ -361,44 +394,59 @@ class DirectionalShadowManager {
         mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
         mat4.invert(g_invLightRotMat, g_lightRotMat);
 
-        // 🌟 1. [언리얼 엔진 5(UE5) 표준 지수 분할: Cascade Distribution Exponent = 2.0]
-        // 근경(Cascade 0)은 약 12.6m까지 충분히 확장하여 캐릭터 및 주변 오브젝트를 완벽히 포괄하고,
-        // Cascade 1은 ~50m, Cascade 2는 ~112.5m, Cascade 3은 200m로 균일하고 부드러운 해상도 전이 제공
+        // 🌟 1. [Auto-CSM: 물리 기반 텍셀 밀도 역산 모델 및 등비수열(Geometric Progression) 분할]
+        // 카메라 화각(FOV), 종횡비(Aspect), 섀도우 해상도(textureSize)로부터 목표 텍셀 크기(targetNearTexelSize, 기본 1cm)를 역산하여
+        // 전체 가시거리(maxShadowDistance)의 증감에 구애받지 않고 근경(Cascade 0)의 1cm 핀샤프 해상도를 상시 보장합니다.
         g_cascadeSplits[0] = near;
-        const exponent = 2.0;
-        const range = shadowFar - near;
-        for (let i = 1; i <= cascadeCount; i++) {
-            const p = i / cascadeCount;
-            const expFraction = Math.pow(p, exponent);
-            const split = near + range * expFraction;
-            g_cascadeSplits[i] = split;
-            if (i <= 4) {
-                splitDepths[i - 1] = split;
-            }
-        }
-        for (let i = cascadeCount; i < 4; i++) {
-            splitDepths[i] = shadowFar * 2.0;
-        }
 
-        // 절두체 기하 계수
         const tanHalfFov = Math.tan(fov * 0.5);
         const k = tanHalfFov * Math.sqrt(1.0 + aspect * aspect);
-        const k2 = k * k;
+        const kSafe = Math.max(k, 0.001);
 
-        // 2. 각 캐스케이드별 해석적 외접구(Analytical Bounding Sphere) 및 텍셀 스냅핑
+        if (cascadeCount === 1) {
+            g_cascadeSplits[1] = shadowFar;
+            splitDepths[0] = shadowFar;
+            for (let i = 1; i < 4; i++) {
+                splitDepths[i] = shadowFar * 2.0;
+            }
+        } else {
+            // 4대 안전 가드를 포함한 Cascade 0 거리 (d0) 역산
+            const maxD0 = shadowFar / cascadeCount;
+            const minD0 = Math.min(near + 0.5, maxD0 * 0.5);
+            const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * kSafe);
+            const d0 = Math.min(Math.max(calculatedD0, minD0), maxD0);
+
+            g_cascadeSplits[1] = d0;
+            splitDepths[0] = d0;
+
+            // 잔여 구간 [d0, shadowFar]을 등비수열(Geometric Progression)로 분할
+            const remainingCount = cascadeCount - 1;
+            const ratio = Math.pow(shadowFar / d0, 1.0 / remainingCount);
+
+            for (let j = 1; j <= remainingCount; j++) {
+                const cascadeIndex = j + 1;
+                const dist = (j === remainingCount) ? shadowFar : d0 * Math.pow(ratio, j);
+                g_cascadeSplits[cascadeIndex] = dist;
+                if (cascadeIndex - 1 < 4) {
+                    splitDepths[cascadeIndex - 1] = dist;
+                }
+            }
+
+            for (let i = cascadeCount; i < 4; i++) {
+                splitDepths[i] = shadowFar * 2.0;
+            }
+        }
+
+        // 2. 각 캐스케이드별 절두체 8정점 완전 포섭 대칭 외접구(Symmetric Bounding Sphere) 및 텍셀 스냅핑
         for (let c = 0; c < cascadeCount; c++) {
             const subNear = g_cascadeSplits[c];
             const subFar = g_cascadeSplits[c + 1];
 
-            // 🌟 [수학적 정석] 해석적 최소 외접구 중심(Cz) 및 불변 반경(R) 도출
-            // k2 > (subFar - subNear)/(subFar + subNear) 일 때 cz > subFar 방지 가드 (와이드스크린/고각 FOV 안정화)
-            let cz = ((subFar + subNear) * 0.5) * (1.0 + k2);
-            if (cz > subFar) {
-                cz = subFar;
-            }
-            const diffFar = subFar - cz;
+            // 🌟 [수학적 정석] 절두체 슬라이스 8정점 완전 포섭 대칭 외접구 (Frustum Clipping 원천 차단)
+            const cz = (subFar + subNear) * 0.5;
+            const halfDepth = (subFar - subNear) * 0.5;
             const farDiag = subFar * k;
-            let sphereRadius = Math.sqrt(diffFar * diffFar + farDiag * farDiag);
+            let sphereRadius = Math.sqrt(halfDepth * halfDepth + farDiag * farDiag);
 
             // 🌟 [화면 모서리 클리핑 방지] 텍셀 스냅핑(최대 1.414 텍셀) + 16-Tap PCF 필터 반경(3.8 텍셀) 여유 마진 (5텍셀)
             const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
@@ -422,9 +470,8 @@ class DirectionalShadowManager {
             const lightDistance = Math.max(sphereRadius * 2.0 + 50.0, 100.0);
             vec3.scaleAndAdd(g_lightPos, g_snappedCenter, g_lightDir, -lightDistance);
 
-            // 최종 라이트 뷰 행렬 생성
-            const lightView = cascadeV[c];
-            mat4.lookAt(lightView, g_lightPos, g_snappedCenter, g_up);
+            // 최종 라이트 뷰 행렬 생성 (Zero-GC 재사용 스크래치 행렬)
+            mat4.lookAt(g_tempLightV, g_lightPos, g_snappedCenter, g_up);
 
             // 직교 투영 행렬: 완전 대칭 박스
             const left = -sphereRadius;
@@ -434,18 +481,27 @@ class DirectionalShadowManager {
             const nearPlane = 0.1;
             const farPlane = lightDistance + sphereRadius * 2.0;
 
-            const lightProjection = cascadeP[c];
-            mat4.orthoZO(lightProjection, left, right, bottom, top, nearPlane, farPlane);
+            mat4.orthoZO(g_tempLightP, left, right, bottom, top, nearPlane, farPlane);
 
-            const lightProjectionView = cascadePV[c];
-            mat4.multiply(lightProjectionView, lightProjection, lightView);
+            mat4.multiply(cascadePV[c], g_tempLightP, g_tempLightV);
+
+            // 🌟 [캐스케이드별 Bounding Sphere 정보 기록 (Zero-GC)]
+            const sphereIdx = c * 4;
+            this.#cascadeBoundingSpheres[sphereIdx] = g_snappedCenter[0];
+            this.#cascadeBoundingSpheres[sphereIdx + 1] = g_snappedCenter[1];
+            this.#cascadeBoundingSpheres[sphereIdx + 2] = g_snappedCenter[2];
+            this.#cascadeBoundingSpheres[sphereIdx + 3] = sphereRadius;
         }
 
-        // 미사용 캐스케이드 슬롯은 마지막 캐스케이드 행렬로 복제
+        // 미사용 캐스케이드 슬롯은 마지막 캐스케이드 행렬 및 외접구로 복제
         for (let c = cascadeCount; c < 4; c++) {
             mat4.copy(cascadePV[c], cascadePV[cascadeCount - 1]);
-            mat4.copy(cascadeP[c], cascadeP[cascadeCount - 1]);
-            mat4.copy(cascadeV[c], cascadeV[cascadeCount - 1]);
+            const srcIdx = (cascadeCount - 1) * 4;
+            const dstIdx = c * 4;
+            this.#cascadeBoundingSpheres[dstIdx] = this.#cascadeBoundingSpheres[srcIdx];
+            this.#cascadeBoundingSpheres[dstIdx + 1] = this.#cascadeBoundingSpheres[srcIdx + 1];
+            this.#cascadeBoundingSpheres[dstIdx + 2] = this.#cascadeBoundingSpheres[srcIdx + 2];
+            this.#cascadeBoundingSpheres[dstIdx + 3] = this.#cascadeBoundingSpheres[srcIdx + 3];
         }
     }
 

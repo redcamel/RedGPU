@@ -70,7 +70,7 @@ fn getDirectionalShadowVisibilityLandscape(
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
     // 4. 지형 특화 슬로프 바이어스 및 노멀 오프셋
-    let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
+    let slopeBias = saturate(1.0 - nDotL);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     // 🚀 [UBO 사전 계산]: CPU에서 사전 계산된 캐스케이드별 텍셀 크기를 직접 로드하여 매 픽셀 dot + inverseSqrt 완전 제거
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
@@ -81,14 +81,14 @@ fn getDirectionalShadowVisibilityLandscape(
 
     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
     let tUV = shadowCoord.xy;
-    let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+    let outOfBounds = tUV.x < -0.02 || tUV.x > 1.02 || tUV.y < -0.02 || tUV.y > 1.02;
     if (invalidDepth || outOfBounds) {
         return 1.0;
     }
 
     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);
-    let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
+    let shadowDepth = saturate(shadowCoord.z);
     let cascadeBias = max(bias * (1.0 + slopeBias * 2.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
     var finalVis: f32 = 1.0;
@@ -135,7 +135,7 @@ fn getDirectionalShadowVisibilityLandscape(
     if (cascadeIndex == cascadeCount - 1u) {
         let fadeStart = maxShadowDist * 0.85;
         if (viewDepth > fadeStart) {
-            let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
+            let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
             finalVis = mix(finalVis, 1.0, fadeFactor);
         }
     }

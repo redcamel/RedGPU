@@ -48,7 +48,7 @@ fn getDirectionalShadowVisibilityFoliage(
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
     // 4. 경량 슬로프 바이어스 및 노멀 오프셋
-    let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
+    let slopeBias = saturate(1.0 - nDotL);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let orthoScale = length(lightVP[0].xyz);
     let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
@@ -59,14 +59,14 @@ fn getDirectionalShadowVisibilityFoliage(
 
     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
     let tUV = shadowCoord.xy;
-    let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+    let outOfBounds = tUV.x < -0.02 || tUV.x > 1.02 || tUV.y < -0.02 || tUV.y > 1.02;
     if (invalidDepth || outOfBounds) {
         return 1.0;
     }
 
     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);
-    let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
+    let shadowDepth = saturate(shadowCoord.z);
     let cascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
 
     // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
@@ -82,7 +82,7 @@ fn getDirectionalShadowVisibilityFoliage(
     if (cascadeIndex == cascadeCount - 1u) {
         let fadeStart = maxShadowDist * 0.85;
         if (viewDepth > fadeStart) {
-            let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
+            let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
             finalVis = mix(finalVis, 1.0, fadeFactor);
         }
     }

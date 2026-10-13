@@ -76,6 +76,7 @@ class View3D extends AView {
     #uniformData: ArrayBuffer
     #uniformDataF32: Float32Array
     #uniformDataU32: Uint32Array
+    #uniformDataU8: Uint8Array
     #noneJitterProjectionViewMatrix: mat4 = mat4.create()
     #clusterLightManager: ClusterLightManager
     #currentCascadeIndex: number | undefined = undefined
@@ -83,6 +84,7 @@ class View3D extends AView {
     #systemUniform_Cascade_BindGroups: GPUBindGroup[] = []
     #cascadeUniformData: ArrayBuffer
     #cascadeUniformDataF32: Float32Array
+    #cascadeUniformDataU8: Uint8Array
     #hierarchicalZBuffer: HierarchicalZBuffer
 
     /**
@@ -115,6 +117,7 @@ class View3D extends AView {
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
+        this.#uniformDataU8 = new Uint8Array(this.#uniformData)
     }
 
     /**
@@ -159,6 +162,16 @@ class View3D extends AView {
 
     set currentCascadeIndex(value: number | undefined) {
         this.#currentCascadeIndex = value;
+    }
+
+    /**
+     * [KO] 지정된 캐스케이드 인덱스에 대응하는 시스템 버텍스 유니폼 바인드 그룹을 명시적으로 반환합니다.
+     * [EN] Explicitly returns the system vertex uniform bind group corresponding to the specified cascade index.
+     *
+     * @param cascadeIndex - 캐스케이드 인덱스 (0 ~ 3)
+     */
+    getCascadeUniformBindGroup(cascadeIndex: number): GPUBindGroup {
+        return this.#systemUniform_Cascade_BindGroups[cascadeIndex] || this.#systemUniform_Vertex_UniformBindGroup;
     }
 
     /**
@@ -495,14 +508,16 @@ class View3D extends AView {
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
 
         const dirLightVPInfo = members.directionalLightProjectionViewMatrix;
-        if (dirLightVPInfo && this.#systemUniform_Cascade_Buffers.length) {
+        if (dirLightVPInfo && this.#systemUniform_Cascade_Buffers.length && lightManager.directionalLightCount > 0 && shadowManager) {
             const vpOffsetF32 = dirLightVPInfo.uniformOffset / Float32Array.BYTES_PER_ELEMENT;
             const cascadePV = shadowManager.directionalShadowManager.cascadeProjectionViewMatrices;
-            new Uint8Array(this.#cascadeUniformData).set(new Uint8Array(this.#uniformData));
-            for (let c = 0; c < 4; c++) {
-                if (this.#systemUniform_Cascade_Buffers[c]) {
+            const activeCascadeCount = Math.min(this.#systemUniform_Cascade_Buffers.length, Math.min(4, Math.max(1, shadowManager.directionalShadowManager.cascadeCount || 3)));
+            this.#cascadeUniformDataU8.set(this.#uniformDataU8);
+            for (let c = 0; c < activeCascadeCount; c++) {
+                const cascadeBuffer = this.#systemUniform_Cascade_Buffers[c];
+                if (cascadeBuffer) {
                     this.#cascadeUniformDataF32.set(cascadePV[c], vpOffsetF32);
-                    gpuDevice.queue.writeBuffer(this.#systemUniform_Cascade_Buffers[c].gpuBuffer, 0, this.#cascadeUniformData);
+                    gpuDevice.queue.writeBuffer(cascadeBuffer.gpuBuffer, 0, this.#cascadeUniformData);
                 }
             }
         }
@@ -662,6 +677,7 @@ class View3D extends AView {
 
         this.#cascadeUniformData = new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength);
         this.#cascadeUniformDataF32 = new Float32Array(this.#cascadeUniformData);
+        this.#cascadeUniformDataU8 = new Uint8Array(this.#cascadeUniformData);
         this.#systemUniform_Cascade_Buffers = [];
         for (let c = 0; c < 4; c++) {
             const cascadeBuf = new UniformBuffer(this.redGPUContext, new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength), `SYSTEM_UNIFORM_BUFFER_CASCADE_${c}`, `SYSTEM_UNIFORM_BUFFER_CASCADE_${c}`);

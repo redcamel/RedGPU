@@ -98,7 +98,7 @@ class ShadowManager {
 
                 // [Step 1: Null-Fragment Opaque Occluders (프래그먼트 없는 순수 뎁스 초고속 기록)]
                 if (this.#directionalShadowManager.castingList.length) {
-                    renderShadowLayer(view, viewShadowRenderPassEncoder);
+                    renderShadowLayer(view, viewShadowRenderPassEncoder, c);
                 }
 
                 // [Step 2: Masked Alpha-Test Geometry (알파 텍스처 샘플링 & discard)]
@@ -147,7 +147,9 @@ class ShadowManager {
             };
             this.#cascadePassDescriptors[c] = descriptor;
         }
-        descriptor.depthStencilAttachment!.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        }
         return descriptor;
     }
 
@@ -204,7 +206,9 @@ class ShadowManager {
             };
             this.#clearPassDescriptors[c] = descriptor;
         }
-        descriptor.depthStencilAttachment!.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        if (descriptor.depthStencilAttachment) {
+            descriptor.depthStencilAttachment.view = this.#directionalShadowManager.getCascadeLayerView(c);
+        }
         return descriptor;
     }
 
