@@ -42,7 +42,6 @@ struct VertexOutput {
     @location(8) @interpolate(flat) shadowData: vec2<f32>,
 };
 
-const SSS_DISTORTION: f32 = 0.35;
 const NORM_225: f32 = 0.44444445;
 
 fn filterGrassAlpha(baseTex: vec4<f32>, alphaFade: f32) -> f32 {
@@ -69,12 +68,6 @@ fn blendGrassGroundColor(
         albedo = mix(albedo, groundColor, blendFactor);
     }
     return albedo;
-}
-
-fn computeGrassUpwardNormal(vertexNormal: vec3<f32>, heightRatio: f32) -> vec3<f32> {
-    let upVec = vec3<f32>(0.0, 1.0, 0.0);
-    let upwardBlend = mix(0.55, 0.85, heightRatio);
-    return normalize(mix(vertexNormal, upVec, upwardBlend));
 }
 
 fn computeGrassSkyOcclusion(heightRatio: f32) -> f32 {
@@ -124,15 +117,26 @@ fn main(input: VertexOutput) -> OutputFragment {
     let subsurfaceStrength = materialUniforms.subsurfaceStrength;
     let sssColor = materialUniforms.subsurfaceColor * albedo;
     let leafThickness = clamp(input.heightRatio * 1.25, 0.20, 1.0);
-    let transRatio = clamp(subsurfaceStrength * leafThickness * 0.35, 0.0, 0.80);
+    let sssThickness = subsurfaceStrength * leafThickness;
+    let transRatio = clamp(sssThickness * 0.35, 0.0, 0.80);
 
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
+    var firstLightDir = vec3<f32>(0.0, 1.0, 0.0);
+    if (u_directionalLightCount > 0u) {
+        firstLightDir = -normalize(u_directionalLights[0].direction);
+    }
+
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
-        let L = -normalize(light.direction);
+        var L: vec3<f32>;
+        if (i == 0u) {
+            L = firstLightDir;
+        } else {
+            L = -normalize(light.direction);
+        }
         let dLight = light.color.rgb * light.intensity * preExposure;
 
         let nDotL = dot(N, L);
@@ -153,7 +157,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         ambColor = max(ambColor, iblEquiv);
     }
 
-    let ambSSS = ambColor * sssColor * (subsurfaceStrength * leafThickness * 0.25);
+    let ambSSS = ambColor * sssColor * (sssThickness * 0.25);
     let totalIndirectLighting = (albedo * (ambColor * skyOcclusion)) + ambSSS;
 
     let contactAO = computeGrassContactAO(input.heightRatio);

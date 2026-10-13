@@ -71,11 +71,6 @@ fn blendGrassGroundColor(
     return albedo;
 }
 
-fn computeGrassUpwardNormal(vertexNormal: vec3<f32>, heightRatio: f32) -> vec3<f32> {
-    let upVec = vec3<f32>(0.0, 1.0, 0.0);
-    let upwardBlend = mix(0.55, 0.85, heightRatio);
-    return normalize(mix(vertexNormal, upVec, upwardBlend));
-}
 
 fn computeGrassSkyOcclusion(heightRatio: f32) -> f32 {
     return mix(0.65, 1.0, saturate(heightRatio * 1.43));
@@ -139,6 +134,7 @@ fn main(input: VertexOutput) -> OutputFragment {
     if (u_directionalLightCount > 0u) {
         firstLightDir = -normalize(u_directionalLights[0].direction);
     }
+    let firstNDotL = dot(N, firstLightDir);
 
     var shadowFactor: f32 = 1.0;
     if (input.shadowData.x > 0.001) {
@@ -153,7 +149,7 @@ fn main(input: VertexOutput) -> OutputFragment {
         let shadowCoord = getShadowCoord(input.worldPos + normalOffset, lightVP);
 
         let tUV = shadowCoord.xy;
-        if (shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0 && tUV.x >= 0.0 && tUV.x <= 1.0 && tUV.y >= 0.0 && tUV.y <= 1.0) {
+        if (all(tUV >= vec2<f32>(0.0)) && all(tUV <= vec2<f32>(1.0)) && shadowCoord.z >= 0.0 && shadowCoord.z <= 1.0) {
             let cascadeBias = shadowInfo.directionalShadowBias * (1.0 + f32(cascadeIndex) * 0.8) + 0.0003;
             let rawVisibility = textureSampleCompareLevel(
                 directionalShadowMap,
@@ -163,8 +159,7 @@ fn main(input: VertexOutput) -> OutputFragment {
                 saturate(shadowCoord.z - cascadeBias)
             );
             // ☀️ 터미네이터(빛과 수평인 각도) 경계선 톱니 지글거림 방지 초고속 선형 페이드
-            let nDotL = dot(N, firstLightDir);
-            let horizonFade = saturate(nDotL * 6.25 + 0.5);
+            let horizonFade = saturate(firstNDotL * 6.25 + 0.5);
             let csmStrength = shadowInfo.directionalShadowStrength * materialUniforms.shadowStrength;
             let pureShadow = mix(1.0 - csmStrength, 1.0, rawVisibility * horizonFade);
             shadowFactor = mix(1.0, pureShadow, input.shadowData.x);
@@ -173,7 +168,15 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
-        let L = select(-normalize(light.direction), firstLightDir, i == 0u);
+        var L: vec3<f32>;
+        var nDotL: f32;
+        if (i == 0u) {
+            L = firstLightDir;
+            nDotL = firstNDotL;
+        } else {
+            L = -normalize(light.direction);
+            nDotL = dot(N, L);
+        }
         let currentShadow = select(1.0, shadowFactor, i == 0u);
         var dLight = light.color.rgb * light.intensity * preExposure * currentShadow;
 
@@ -184,7 +187,6 @@ fn main(input: VertexOutput) -> OutputFragment {
             dLight *= atmosphereTransmittance;
         }
 
-        let nDotL = dot(N, L);
         let frontWrap = saturate((nDotL + 0.5) * NORM_225);
         let directDiff = frontWrap * (1.0 - transRatio);
 
@@ -205,9 +207,8 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     let skyOcclusion = computeGrassSkyOcclusion(input.heightRatio);
     var totalIndirectLighting = vec3<f32>(0.0);
-    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
 
-    if (u_usePrefilterTexture) {
+    if (systemUniforms.usePrefilterTexture == 1u) {
         let iblColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0.0).rgb * (preExposure * systemUniforms.iblIntensity);
         totalIndirectLighting = albedo * iblColor * skyOcclusion;
     } else {
