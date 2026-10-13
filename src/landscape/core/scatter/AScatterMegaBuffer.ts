@@ -536,14 +536,28 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
             return false;
         }
 
+        const {gpuDevice} = this;
+        const maxBufferSize = gpuDevice.limits?.maxBufferSize ?? 2147483648;
+        const maxSafeInstanceCapacity = Math.floor(maxBufferSize / (this.#strideBytes * 32));
+
         let newCapacity = this.#instanceCapacity;
         while (newCapacity < requiredCapacity) {
             newCapacity = Math.ceil((newCapacity * 2) / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
         }
 
+        if (newCapacity > maxSafeInstanceCapacity) {
+            console.warn(
+                `[${this.constructor.name}] Requested capacity (${newCapacity}) exceeds safe limit (${maxSafeInstanceCapacity}) for WebGPU maxBufferSize (${maxBufferSize} bytes). Clamping to safe limit.`
+            );
+            newCapacity = Math.floor(maxSafeInstanceCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
+        }
+
+        if (newCapacity <= this.#instanceCapacity) {
+            return false;
+        }
+
         this.#instanceCapacity = newCapacity;
 
-        const {gpuDevice} = this;
         const {STORAGE, COPY_DST} = GPUBufferUsage;
         this.#rawGPUBuffer.destroy();
         this.#rawGPUBuffer = gpuDevice.createBuffer({

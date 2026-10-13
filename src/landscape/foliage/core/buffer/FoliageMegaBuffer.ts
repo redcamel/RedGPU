@@ -13,6 +13,7 @@ import AScatterMegaBuffer, {
 import foliageCullWGSL from '../culling/foliageCull.wgsl';
 import FoliageRenderUnit from '../FoliageRenderUnit';
 import {FoliageLODInfo} from '../Foliage';
+import consoleAndThrowError from '../../../../utils/consoleAndThrowError';
 
 /**
  * [KO] Cascaded Shadow Maps (CSM) 그림자 캐스케이드 분할 단계 수
@@ -585,19 +586,27 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
 
         const instanceCapacity = newCapacity > 0 ? newCapacity : this.instanceCapacity;
         const culledByteSize = instanceCapacity * 8 * strideBytes;
+        const maxBufferSize = gpuDevice.limits?.maxBufferSize ?? 2147483648;
+        const shadowCulledByteSize = culledByteSize * SHADOW_CASCADE_COUNT;
+
+        if (shadowCulledByteSize > maxBufferSize) {
+            consoleAndThrowError(
+                `[FoliageMegaBuffer] Requested shadow culled buffer size (${shadowCulledByteSize} bytes) exceeds WebGPU maxBufferSize limit (${maxBufferSize} bytes).`
+            );
+        }
 
         this.culledGPUBuffer.destroy();
         this.#shadowCulledGPUBuffer.destroy();
 
         this.culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Culled_Main',
+            label: 'FoliageMegaBuffer_Culled_Main',
             size: culledByteSize,
             usage: culledBufferUsage,
         });
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageScatterMegaBuffer_Culled_ShadowMega',
-            size: culledByteSize * SHADOW_CASCADE_COUNT,
+            label: 'FoliageMegaBuffer_Culled_ShadowMega',
+            size: shadowCulledByteSize,
             usage: culledBufferUsage,
         });
 
@@ -665,6 +674,15 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
 
         const rawByteSize = Math.max(instanceCapacity * strideBytes, 64);
         const culledByteSize = rawByteSize * 8;
+        const maxBufferSize = gpuDevice.limits?.maxBufferSize ?? 2147483648;
+        const shadowCulledByteSize = culledByteSize * SHADOW_CASCADE_COUNT;
+
+        if (shadowCulledByteSize > maxBufferSize) {
+            consoleAndThrowError(
+                `[FoliageMegaBuffer] Initial shadow culled buffer size (${shadowCulledByteSize} bytes) exceeds WebGPU maxBufferSize limit (${maxBufferSize} bytes).`
+            );
+        }
+
         const indirectByteSize = Math.max(
             maxRenderUnits * DRAW_INDEXED_INDIRECT_ARGS_COUNT * Uint32Array.BYTES_PER_ELEMENT,
             64
@@ -678,7 +696,7 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
 
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_Culled_ShadowMega',
-            size: culledByteSize * SHADOW_CASCADE_COUNT,
+            size: shadowCulledByteSize,
             usage: VERTEX | STORAGE,
         });
 

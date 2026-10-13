@@ -300,7 +300,6 @@ function renderTestPane({
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: true});
             managerFolder.addBinding(foliageManager, 'enabled');
-            managerFolder.addBinding(foliageManager, 'streamingRadius', {min: 200, max: 2000, step: 50});
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 50, max: 200, step: 10});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 

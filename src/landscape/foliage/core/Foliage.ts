@@ -268,12 +268,6 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
     preservePivot?: boolean;
 
     /**
-     * [KO] 서브셀 스트리밍 활성 반경 (미터, 기본값: 600.0)
-     * [EN] Active sub-cell streaming radius in meters (default: 600.0)
-     */
-    streamingRadius?: number;
-
-    /**
      * [KO] 인스턴스 줄기 휘어짐 강도 배수 (기본값: 1.0)
      * [EN] Instance trunk bend strength multiplier (default: 1.0)
      */
@@ -329,6 +323,8 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * ```
  */
 class Foliage extends AScatterType<FoliageTypeAllocation> {
+    static MAX_SAFE_TYPE_CAPACITY: number = 262144;
+
     #minScale: [number, number, number] = [1.0, 1.0, 1.0];
     #maxScale: [number, number, number] = [1.0, 1.0, 1.0];
     #randomRotationY: boolean = true;
@@ -366,6 +362,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #lastUnmountedCount: number = 0;
     #lastCamX: number = 0;
     #lastCamZ: number = 0;
+    #streamingRadius: number = 0;
 
     #baker: FoliageInstanceBaker | null = null;
     onUniformDirty?: (typeId: number) => void;
@@ -417,7 +414,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             maxScale,
             densityPerHectare,
             densityMultiplier,
-            streamingRadius = 600.0,
             maxInstances,
             trunkBendScale,
             leafFlutterScale,
@@ -456,19 +452,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         const resolvedDensityMultiplier = densityMultiplier !== undefined
             ? Math.max(0.0, Number(densityMultiplier) || 0.0)
             : 1.0;
-
-        const effectiveRadius = streamingRadius + 150.0;
-        const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
-        const activeHectares = effectiveAreaMetersSq / 10000.0;
-
-        const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * resolvedDensityMultiplier;
-        const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
-
-        const minSafeCapacity = 16384;
-
-        const resolvedMaxInstances = maxInstances !== undefined
-            ? Math.max(maxInstances, calculatedMax, minSafeCapacity)
-            : Math.max(calculatedMax, minSafeCapacity);
 
         const resolvedTrunkBendScale = trunkBendScale !== undefined ? Math.max(0, Number(trunkBendScale) || 0) : 1.0;
         const resolvedLeafFlutterScale = leafFlutterScale !== undefined ? Math.max(0, Number(leafFlutterScale) || 0) : 1.0;
@@ -548,9 +531,24 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             densityPerHectare: resolvedDensityPerHectare,
             densityMultiplier: resolvedDensityMultiplier,
             castShadow,
-            groundBlendStrength: resolvedGroundBlendStrength,
-            streamingRadius
+            groundBlendStrength: resolvedGroundBlendStrength
         });
+
+        this.#recalculateStreamingRadius();
+
+        const effectiveRadius = this.#streamingRadius;
+        const effectiveAreaMetersSq = Math.PI * effectiveRadius * effectiveRadius * 1.25;
+        const activeHectares = effectiveAreaMetersSq / 10000.0;
+
+        const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * resolvedDensityMultiplier;
+        const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
+
+        const MAX_SAFE_CAPACITY = Foliage.MAX_SAFE_TYPE_CAPACITY;
+        const minSafeCapacity = 16384;
+
+        const resolvedMaxInstances = maxInstances !== undefined
+            ? Math.min(MAX_SAFE_CAPACITY, Math.max(maxInstances, 64))
+            : Math.min(MAX_SAFE_CAPACITY, Math.max(calculatedMax, minSafeCapacity));
 
         this.#minScale = resolvedMinScale;
         this.#maxScale = resolvedMaxScale;
@@ -953,25 +951,11 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다.
-     * [EN] Dynamically changes the maximum visible/transition distance (meters) for a specific LOD level.
-     *
-     * @param lodIndex -
-     * [KO] 변경할 LOD 레벨 인덱스
-     * [EN] LOD level index to modify
-     * @param distance -
-     * [KO] 새로운 LOD 전환 거리 (미터)
-     * [EN] New LOD transition distance (meters)
+     * [KO] 이 식생의 가시 한계선과 지형 서브셀 크기를 기반으로 엔진이 자동 계산한 현재 스트리밍 반경(m)입니다. (디버깅/관측용 읽기 전용)
+     * [EN] Current streaming radius (in meters) automatically calculated by the engine based on effective visual distance and sub-cell size. (Read-only for debugging/monitoring)
      */
-    setLODDistance(lodIndex: number, distance: number): void {
-        const info = this.#lodInfoList[lodIndex];
-        if (info) {
-            const val = Math.max(0, Number(distance) || 0);
-            if (info.lodDistance !== val) {
-                info.lodDistance = val;
-                this.#notifyUniformDirty();
-            }
-        }
+    get streamingRadius(): number {
+        return this.#streamingRadius;
     }
 
 
@@ -1085,6 +1069,29 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
     }
 
+    /**
+     * [KO] 특정 LOD 단계의 최대 가시/전환 거리(미터)를 동적으로 변경합니다. 가시 한계선 변경 시 스트리밍 반경도 즉각 자동 재계산됩니다.
+     * [EN] Dynamically modifies the maximum visible/transition distance (meters) of a specific LOD level. Streaming radius is immediately recomputed.
+     *
+     * @param lodIndex -
+     * [KO] 변경할 LOD 레벨 인덱스
+     * [EN] LOD level index to modify
+     * @param distance -
+     * [KO] 새로운 LOD 전환 거리 (미터)
+     * [EN] New LOD transition distance (meters)
+     */
+    setLODDistance(lodIndex: number, distance: number): void {
+        const info = this.#lodInfoList[lodIndex];
+        if (info) {
+            const val = Math.max(0, Number(distance) || 0);
+            if (info.lodDistance !== val) {
+                info.lodDistance = val;
+                this.#recalculateStreamingRadius();
+                this.#notifyUniformDirty();
+            }
+        }
+    }
+
     override onParameterChanged(prop: string, value: any, prevValue?: any): void {
         switch (prop) {
             case 'targetLayer':
@@ -1103,7 +1110,11 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#notifyUniformDirty();
                 break;
 
-            case 'cullingDistance':
+            case 'cullingDistance': {
+                this.#recalculateStreamingRadius();
+                this.#notifyUniformDirty();
+                break;
+            }
             case 'fadeStartDistance':
             case 'shadowCullDistance':
             case 'castShadow':
@@ -1116,29 +1127,64 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             case 'receiveShadow':
                 this.#updateRenderUnitReceiveShadow();
                 break;
+        }
+    }
 
-            case 'streamingRadius': {
-                if (prevValue !== undefined && value < prevValue && this.#mountedSubCells.length > 0) {
-                    const landscape = this.#landscape;
-                    const megaBuffer = this.#megaBuffer;
-                    const allocation = this.allocation;
-                    if (landscape && megaBuffer && allocation) {
-                        const subCellSize = landscape.foliageManager.subCellSize;
-                        const unmountMargin = Math.max(10.0, subCellSize * 0.5);
-                        const unmountRadiusSq = (value + unmountMargin) * (value + unmountMargin);
-                        const mounted = this.#mountedSubCells;
-                        for (let i = mounted.length - 1; i >= 0; i--) {
-                            const {centerX, centerZ} = mounted[i];
-                            const dx = centerX - this.#lastCamX;
-                            const dz = centerZ - this.#lastCamZ;
-                            if (dx * dx + dz * dz > unmountRadiusSq) {
-                                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
-                            }
-                        }
-                    }
-                }
-                this.#notifyUniformDirty();
-                break;
+    /**
+     * [KO] 이 식생의 가시 한계선(cullingDistance/LOD)과 지형 서브셀 크기를 기반으로 최적의 스트리밍 반경을 자동 산출합니다.
+     * [EN] Automatically computes optimal streaming radius based on effective visual distance and terrain sub-cell size.
+     */
+    #recalculateStreamingRadius(): void {
+        const landscape = this.#landscape;
+        if (!landscape) return;
+
+        const subCellSize = landscape.foliageManager.subCellSize;
+
+        // 1. 임포스터 미사용 시 마지막 3D LOD 거리 확인
+        let maxDrawableDistance = this.cullingDistance;
+        if (!this.#useImpostor && this.#lodInfoList.length > 0) {
+            const lastLOD = this.#lodInfoList[this.#lodInfoList.length - 1];
+            if (lastLOD.lodDistance > 0 && lastLOD.lodDistance < 100000.0) {
+                maxDrawableDistance = lastLOD.lodDistance;
+            }
+        }
+
+        // 2. 실제 시각 가시 한계선 결정
+        const effectiveVisualDistance = Math.min(this.cullingDistance, maxDrawableDistance);
+
+        // 3. 서브셀 안전 마진 가산 및 반올림
+        const streamingMargin = subCellSize * 1.5;
+        const calculatedRadius = Math.ceil(effectiveVisualDistance + streamingMargin);
+
+        // 4. 값 갱신 및 축소 시 언마운트 트리거
+        const oldRadius = this.#streamingRadius;
+        if (calculatedRadius !== oldRadius) {
+            this.#streamingRadius = calculatedRadius;
+            if (oldRadius > 0 && calculatedRadius < oldRadius) {
+                this.#pruneMountedSubCellsOutOfRange(calculatedRadius, subCellSize);
+            }
+        }
+    }
+
+    /**
+     * [KO] 스트리밍 반경 축소 시 범위를 벗어난 마운트 서브셀들을 즉시 안전하게 언마운트합니다.
+     * [EN] Immediately and safely unmounts mounted sub-cells that fall outside the reduced streaming radius.
+     */
+    #pruneMountedSubCellsOutOfRange(newRadius: number, subCellSize: number): void {
+        const megaBuffer = this.#megaBuffer;
+        const allocation = this.allocation;
+        if (!megaBuffer || !allocation || this.#mountedSubCells.length === 0) return;
+
+        const unmountMargin = subCellSize * 0.5;
+        const unmountRadiusSq = (newRadius + unmountMargin) * (newRadius + unmountMargin);
+        const mounted = this.#mountedSubCells;
+
+        for (let i = mounted.length - 1; i >= 0; i--) {
+            const {centerX, centerZ} = mounted[i];
+            const dx = centerX - this.#lastCamX;
+            const dz = centerZ - this.#lastCamZ;
+            if (dx * dx + dz * dz > unmountRadiusSq) {
+                this.#unmountSubCellAt(i, megaBuffer, allocation, subCellSize);
             }
         }
     }

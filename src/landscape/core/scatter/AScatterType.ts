@@ -91,12 +91,6 @@ export interface AScatterTypeInitOptions {
      * [EN] Bottom ground color blending strength (0.0-1.0)
      */
     groundBlendStrength?: number;
-
-    /**
-     * [KO] 카메라 중심 서브셀 스트리밍 활성 반경 (미터 단위)
-     * [EN] Active sub-cell streaming radius around camera in meters
-     */
-    streamingRadius?: number;
 }
 
 /**
@@ -138,7 +132,6 @@ abstract class AScatterType<
     #densityMultiplier: number = 1.0;
     #castShadow: boolean = true;
     #groundBlendStrength: number = 1.0;
-    #streamingRadius: number = 200.0;
 
     /**
      * [KO] AScatterType 인스턴스를 생성합니다.
@@ -442,23 +435,6 @@ abstract class AScatterType<
     }
 
     /**
-     * [KO] 카메라 중심 서브셀 스트리밍 활성 반경(미터 단위)을 반환합니다.
-     * [EN] Returns active sub-cell streaming radius around camera in meters.
-     */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    set streamingRadius(val: number) {
-        const numVal = Math.max(10.0, Number(val) || 10.0);
-        if (this.#streamingRadius !== numVal) {
-            const oldRadius = this.#streamingRadius;
-            this.#streamingRadius = numVal;
-            this.onParameterChanged('streamingRadius', numVal, oldRadius);
-        }
-    }
-
-    /**
      * [KO] 서브클래스 생성자 초기화 시 후속 훅 트리거 없이 고유 기본값을 안전하게 주입합니다.
      * [EN] Safely injects initial unique default values during subclass construction without triggering hooks.
      */
@@ -475,7 +451,6 @@ abstract class AScatterType<
         densityMultiplier?: number;
         castShadow?: boolean;
         groundBlendStrength?: number;
-        streamingRadius?: number;
     }): void {
         const {
             height,
@@ -489,8 +464,7 @@ abstract class AScatterType<
             densityPerHectare,
             densityMultiplier,
             castShadow,
-            groundBlendStrength,
-            streamingRadius
+            groundBlendStrength
         } = values;
         if (height !== undefined) this.#height = height;
         if (cullingDistance !== undefined) {
@@ -507,7 +481,6 @@ abstract class AScatterType<
         if (densityMultiplier !== undefined) this.#densityMultiplier = densityMultiplier;
         if (castShadow !== undefined) this.#castShadow = castShadow;
         if (groundBlendStrength !== undefined) this.#groundBlendStrength = groundBlendStrength;
-        if (streamingRadius !== undefined) this.#streamingRadius = Math.max(10.0, Number(streamingRadius) || 10.0);
     }
 
     /**

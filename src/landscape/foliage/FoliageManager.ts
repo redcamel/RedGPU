@@ -37,7 +37,6 @@ import {AScatterManager} from "../core/scatter";
  *         { mesh: treeMeshLOD1, lodDistance: 120 }
  *     ],
  *     densityPerHectare: 80,
- *     streamingRadius: 800,
  *     useImpostor: true,
  *     minScale: [0.8, 0.8, 0.8],
  *     maxScale: [1.3, 1.3, 1.3]

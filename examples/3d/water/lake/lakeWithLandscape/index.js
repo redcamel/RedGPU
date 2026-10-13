@@ -177,7 +177,6 @@ RedGPU.init(
         const foliageManager = landscape.foliageManager;
         foliageManager.debugSubCellColoration = false;
         foliageManager.subCellSize = 50; // 400x400 월드에 최적화된 서브셀 크기
-        foliageManager.streamingRadius = 400;
 
         const TREE_MODEL_URL = '../../../../assets/terrain/test.glb';
         new RedGPU.GLTFLoader(
@@ -419,7 +418,6 @@ function renderTestPane(redGPUContext, lake, landscape, directionalLight, charac
             if (foliageManager) {
                 const folderFoliage = pane.addFolder({title: 'Foliage (식생 설정)', expanded: false});
                 folderFoliage.addBinding(foliageManager, 'enabled');
-                folderFoliage.addBinding(foliageManager, 'streamingRadius', {min: 100, max: 1000, step: 25});
             }
 
             // 6. DirectionalLight (태양광)

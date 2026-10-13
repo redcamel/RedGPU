@@ -388,7 +388,7 @@ function renderTestPane({
 
         // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
         const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: false});
-        streamingStatsFolder.addBinding(type, 'streamingRadius', {min: 100, max: 5000, step: 50});
+        streamingStatsFolder.addBinding(type, 'streamingRadius', {readonly: true});
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'maxInstances', {readonly: true});
@@ -638,7 +638,6 @@ function initFoliageAssets({redGPUContext, foliageManager, onFoliageTypeAdded}) 
                     name: `Tree_${baseName}`,
                     lods: lodConfigs,
                     densityPerHectare: 120.0,
-                    streamingRadius: 1000,
                     minScale: [0.4, 0.4, 0.4],
                     maxScale: [0.7, 0.75, 0.7],
                     cullingDistance: 6000,
