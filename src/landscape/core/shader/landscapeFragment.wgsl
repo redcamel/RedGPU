@@ -1,7 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
-#redgpu_include math.PI;
 #redgpu_include math.PI2;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
@@ -62,11 +61,6 @@ fn stochasticHash2D(p: vec2<f32>) -> vec3<f32> {
     return fract((p3.xxy + p3.yzz) * p3.zyx);
 }
 
-fn rotate2D(v: vec2<f32>, angle: f32) -> vec2<f32> {
-    let c = cos(angle);
-    let s = sin(angle);
-    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
-}
 
 // 🚀 [SFU 최적화]: 동일 각도에 대해 사전 계산된 cos, sin을 재사용하여 중복 삼각함수 호출 제거
 fn rotate2DPrecalc(v: vec2<f32>, c: f32, s: f32) -> vec2<f32> {
@@ -515,7 +509,12 @@ fn getDirectPbrLighting(
         }
 
         // 🚀 [SFU 최적화]: main()에서 이미 정규화된 0번 주 광원 벡터 L 재사용 (SFU normalize 829만 회 중복 제거)
-        let L = select(-normalize(u_directionalLights[i].direction), mainLightDir, i == 0u);
+        var L: vec3<f32>;
+        if (i == 0u) {
+            L = mainLightDir;
+        } else {
+            L = -normalize(u_directionalLights[i].direction);
+        }
         let NdotL = max(dot(N, L), 0.0);
         let shadowFactor = select(1.0, visibility, i == 0u);
 

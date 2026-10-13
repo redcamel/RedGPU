@@ -1,6 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowClipPosition;
-#redgpu_include systemStruct.OutputShadowData;
 struct LandscapeTile {
     centerWorldX: f32,
     centerWorldZ: f32,

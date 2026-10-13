@@ -28,9 +28,6 @@ fn rotate2D(v: vec2<f32>, angle: f32) -> vec2<f32> {
     return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
 }
 
-fn rotate2DPrecalc(v: vec2<f32>, c: f32, s: f32) -> vec2<f32> {
-    return vec2<f32>(v.x * c - v.y * s, v.x * s + v.y * c);
-}
 
 struct StochasticGridTri {
     v0: vec2<f32>,

@@ -42,7 +42,10 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let c11 = textureLoad(srcNormal, srcCoord11, 0).rgb;
     let rawSum = (c00 + c10 + c01 + c11) - vec3<f32>(2.0);
     let lenSq = dot(rawSum, rawSum);
-    let avgN = select(vec3<f32>(0.0, 1.0, 0.0), rawSum * inverseSqrt(lenSq), lenSq > 1e-6);
+    var avgN = vec3<f32>(0.0, 1.0, 0.0);
+    if (lenSq > 1e-6) {
+        avgN = rawSum * inverseSqrt(lenSq);
+    }
     let packedN = avgN * 0.5 + vec3<f32>(0.5);
     textureStore(dstNormal, dstCoord, vec4<f32>(packedN, 1.0));
 

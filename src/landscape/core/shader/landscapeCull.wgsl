@@ -81,8 +81,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
     var currentTile: LandscapeTile;
 
     if (index < uniforms.tileCount) {
-        currentTile = allTiles[index];
-        let tile = currentTile;
+        let tile = allTiles[index];
+        currentTile = tile;
         let tileExtentX = uniforms.tileSizeX * 0.52;
         let tileExtentZ = uniforms.tileSizeZ * 0.52;
         let heightScale = uniforms.heightScale;
@@ -115,8 +115,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
                 lodLevel = uniforms.lodMaxLevel - 1u;
                 for (var lod = 0u; lod < uniforms.lodMaxLevel; lod = lod + 1u) {
-                    let packedVec = uniforms.lodDistancesSq[lod / 4u];
-                    let thresholdSq = packedVec[lod % 4u];
+                    let packedVec = uniforms.lodDistancesSq[lod >> 2u];
+                    let thresholdSq = packedVec[lod & 3u];
                     if (effectiveDistSq < thresholdSq) {
                         lodLevel = lod;
                         break;
