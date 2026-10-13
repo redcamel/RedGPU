@@ -381,12 +381,13 @@ function renderTestPane({
         typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
 
         // -----------------------------------------------------------------
-        // 1. Streaming & Culling (스트리밍 및 컬링 거리)
+        // 1. Culling & Distance (컬링 및 자동 베이킹 반경)
         // -----------------------------------------------------------------
-        const streamingFolder = typeFolder.addFolder({title: 'Streaming & Culling', expanded: true});
-        streamingFolder.addBinding(type, 'streamingRadius', {min: 20, max: 300, step: 5});
-        streamingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5});
-        streamingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5});
+        const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
+        cullingFolder.addBinding(type, 'bakeRadius', {readonly: true});
+        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5})
+            .on('change', () => cullingFolder.refresh());
+        cullingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5});
 
         // -----------------------------------------------------------------
         // 2. Placement & Density (스폰 배치 및 밀도)

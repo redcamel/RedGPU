@@ -150,12 +150,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         const dz = z - lastBakeZ;
         const distSq = dx * dx + dz * dz;
 
-        let minRadius = types[0].streamingRadius;
-        for (let i = 1; i < grassLen; i++) {
-            const r = types[i].streamingRadius;
-            if (r < minRadius) minRadius = r;
-        }
-        const bakeThreshold = Math.max(16.0, minRadius * 0.35);
+        const bakeThreshold = GRASS_CELL_SIZE;
 
         let rebakedThisFrame = false;
         const needsRebake = this.#needsRebakeMask !== 0;
@@ -228,13 +223,12 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.registerTypeInternal(grassType);
 
         const {
-            cullingDistance,
             instancesPerCell,
             renderUnits,
-            streamingRadius,
+            bakeRadius,
             maxInstances: userMaxInstances
         } = grassType;
-        const targetRadius = Math.max(cullingDistance, streamingRadius);
+        const targetRadius = bakeRadius;
         const cellCountApprox = Math.ceil((Math.PI * targetRadius * targetRadius) / (GRASS_CELL_SIZE * GRASS_CELL_SIZE));
         const computedMax = Math.max(4096, Math.min(262144, cellCountApprox * Math.ceil(instancesPerCell * 1.3)));
         const maxInstances = userMaxInstances !== undefined ? Math.max(4096, userMaxInstances) : computedMax;

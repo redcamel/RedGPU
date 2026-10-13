@@ -13,6 +13,7 @@ import assembleScatterRenderUnits from "../../core/scatter/assembleScatterRender
 import ScatterRenderUnit from "../../core/scatter/ScatterRenderUnit";
 import AScatterType, {AScatterTypeInitOptions} from "../../core/scatter/AScatterType";
 import type {GrassTypeAllocation} from "./buffer/GrassMegaBuffer";
+import {GRASS_CELL_SIZE} from "./baking/GrassInstanceBaker";
 
 /**
  * [KO] 잔디(Grass) 인스턴스 생성 시 전달되는 설정 옵션 인터페이스입니다.
@@ -90,13 +91,8 @@ export interface GrassOptions extends AScatterTypeInitOptions {
      */
     shadowFadeStartDistance?: number;
     /**
-     * [KO] 서브셀 스트리밍 활성 반경 (미터, 미지정 시 cullingDistance * 1.15 또는 매니저 기본값 사용)
-     * [EN] Active sub-cell streaming radius in meters (falls back to cullingDistance * 1.15 or manager default if omitted)
-     */
-    streamingRadius?: number;
-    /**
-     * [KO] 이 잔디 타입에 할당될 최대 인스턴스 수용 용량 (미지정 시 스트리밍 반경 및 밀도로 자동 계산)
-     * [EN] Maximum instance capacity allocated for this grass type (auto-calculated from streaming radius and density if omitted)
+     * [KO] 이 잔디 타입에 할당될 최대 인스턴스 수용 용량 (미지정 시 베이킹 반경 및 밀도로 자동 계산)
+     * [EN] Maximum instance capacity allocated for this grass type (auto-calculated from baking radius and density if omitted)
      */
     maxInstances?: number;
 }
@@ -129,7 +125,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     #shadowFadeStartDistance: number = 26.25;
     #maxInstances?: number;
     #instancesPerCell: number = 1;
-    #streamingRadius: number = 600.0;
 
     #slotIndex: number = -1;
     #onUniformDirty: ((typeId: number) => void) | null = null;
@@ -177,7 +172,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             castShadow = true,
             shadowCullDistance,
             shadowFadeStartDistance,
-            streamingRadius,
             maxInstances
         } = options;
 
@@ -230,10 +224,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         this.#receiveShadow = receiveShadow;
 
         const resolvedShadowCullDistance = shadowCullDistance !== undefined ? Math.max(0.0, shadowCullDistance) : 35.0;
-        const resolvedStreamingRadius = streamingRadius !== undefined
-            ? Math.max(16.0, Number(streamingRadius) || 16.0)
-            : Math.max(120.0, cullingDistance * 1.15);
-        this.#streamingRadius = resolvedStreamingRadius;
 
         this.setRawScatterProperties({
             height: resolvedHeight,
@@ -575,19 +565,12 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 서브셀 스트리밍 활성 반경(미터)을 반환합니다.
-     * [EN] Returns active sub-cell streaming radius in meters.
+     * [KO] cullingDistance 및 서브셀 안전 마진을 기반으로 엔진 내부에서 자동 계산된 실제 GPU 인스턴스 베이킹 반경(미터)입니다. (읽기 전용)
+     * [EN] Actual GPU instance baking radius in meters automatically calculated by the engine based on cullingDistance and safety cell margins. (Read-only)
      */
-    get streamingRadius(): number {
-        return this.#streamingRadius;
-    }
-
-    set streamingRadius(val: number) {
-        const numVal = Math.max(16.0, Number(val) || 16.0);
-        if (this.#streamingRadius !== numVal) {
-            this.#streamingRadius = numVal;
-            this.onParameterChanged('streamingRadius', numVal);
-        }
+    get bakeRadius(): number {
+        const margin = Math.max(GRASS_CELL_SIZE * 2, this.cullingDistance * 0.2);
+        return this.cullingDistance + margin;
     }
 
     override onParameterChanged(prop: string, value: any, prevValue?: any): void {
@@ -597,7 +580,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             case 'minSlope':
             case 'maxSlope':
             case 'densityScaleByWeight':
-            case 'streamingRadius':
             case 'minScale':
             case 'maxScale':
                 this.#notifyRepopulateRequired();
@@ -609,16 +591,9 @@ class Grass extends AScatterType<GrassTypeAllocation> {
                 this.#notifyRepopulateRequired();
                 break;
 
-            case 'cullingDistance': {
-                const cDist = value as number;
-                if (cDist * 1.15 > this.streamingRadius) {
-                    this.streamingRadius = cDist * 1.15;
-                    this.#notifyRepopulateRequired();
-                } else {
-                    this.#notifyUniformDirty();
-                }
+            case 'cullingDistance':
+                this.#notifyRepopulateRequired();
                 break;
-            }
 
             case 'shadowCullDistance':
                 this.#shadowFadeStartDistance = (value as number) * 0.75;

@@ -61,12 +61,12 @@ class GrassInstanceBaker extends AScatterInstanceBaker {
         const vhtView = vhtTextureView ?? emptyBitmapTextureView;
         const vbtView = vbtTextureView ?? emptyBitmapTextureView;
 
-        const {typeId, streamingRadius} = grass;
+        const {typeId, bakeRadius} = grass;
         const alloc = megaBuffer.getAllocation(typeId);
         if (!alloc) return;
 
         const cellSize = GRASS_CELL_SIZE;
-        const effectiveRadius = Math.max(streamingRadius, 16.0);
+        const effectiveRadius = Math.max(bakeRadius, 16.0);
         const cellRadius = Math.ceil(effectiveRadius / cellSize);
 
         const centerCellX = Math.floor(centerX / cellSize);
