@@ -31,11 +31,6 @@ export interface GrassOptions extends AScatterTypeInitOptions {
      */
     baseColorTexture?: string | BitmapTexture;
     /**
-     * [KO] 원거리 간소화 셰이더(Far Grass)로 전환을 시작하는 거리 (기본값: 35.0)
-     * [EN] Distance where transition to simplified far-distance grass shader begins (default: 35.0)
-     */
-    farDistance?: number;
-    /**
      * [KO] 절차적 생성 시 적용되는 최소 스케일 `[x, y, z]` 또는 `[x, y]`
      * [EN] Minimum random scale `[x, y, z]` or `[x, y]` applied during procedural placement
      */
@@ -86,11 +81,6 @@ export interface GrassOptions extends AScatterTypeInitOptions {
      */
     shadowStrength?: number;
     /**
-     * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (기본값: shadowCullDistance * 0.75)
-     * [EN] Distance where shadow-casting fade smoothly begins towards shadow culling boundary (default: shadowCullDistance * 0.75)
-     */
-    shadowFadeStartDistance?: number;
-    /**
      * [KO] 이 잔디 타입에 할당될 최대 인스턴스 수용 용량 (미지정 시 베이킹 반경 및 밀도로 자동 계산)
      * [EN] Maximum instance capacity allocated for this grass type (auto-calculated from baking radius and density if omitted)
      */
@@ -111,7 +101,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     #geometry: Geometry | Primitive;
     #renderUnits: ScatterRenderUnit[] = [];
     #baseColorTexture: BitmapTexture;
-    #farDistance: number = 35.0;
     #minScale: [number, number] = [0.7, 0.7];
     #maxScale: [number, number] = [1.3, 1.4];
     #minY: number = 0.0;
@@ -122,7 +111,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     #roughness: number = 0.55;
     #receiveShadow: boolean = true;
     #shadowStrength: number = 1.0;
-    #shadowFadeStartDistance: number = 26.25;
     #maxInstances?: number;
     #instancesPerCell: number = 1;
 
@@ -150,7 +138,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             baseColorTexture,
             minY,
             height,
-            farDistance = 35.0,
             receiveShadow = true,
             densityPerHectare = 5000.0,
             densityMultiplier = 1.0,
@@ -170,8 +157,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             bottomOffset = 0.0,
             shadowStrength = 1.0,
             castShadow = true,
-            shadowCullDistance,
-            shadowFadeStartDistance,
             maxInstances
         } = options;
 
@@ -220,16 +205,13 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             );
         }
 
-        this.#farDistance = Math.max(10.0, farDistance);
         this.#receiveShadow = receiveShadow;
-
-        const resolvedShadowCullDistance = shadowCullDistance !== undefined ? Math.max(0.0, shadowCullDistance) : 35.0;
 
         this.setRawScatterProperties({
             height: resolvedHeight,
             bottomOffset,
             cullingDistance,
-            shadowCullDistance: resolvedShadowCullDistance,
+            shadowCullDistance: Math.max(15.0, Math.min(40.0, cullingDistance * 0.35)),
             targetLayer,
             minSlope,
             maxSlope,
@@ -263,9 +245,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         }
         this.#exposureBoost = exposureBoost;
         this.#shadowStrength = shadowStrength;
-        this.#shadowFadeStartDistance = shadowFadeStartDistance !== undefined
-            ? Math.max(0.0, shadowFadeStartDistance)
-            : this.shadowCullDistance * 0.75;
 
         if (maxInstances !== undefined) {
             this.#maxInstances = Math.max(1, Number(maxInstances) || 1);
@@ -313,19 +292,11 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 원거리 간소화 셰이더(Far Grass)로 전환을 시작하는 거리 (미터 단위)
-     * [EN] Transition distance in meters where far grass shader is engaged
+     * [KO] 원거리 간소화 셰이더(Far Grass)로 전환되는 거리 (미터 단위, cullingDistance에 비례하여 내부 자동 계산)
+     * [EN] Transition distance to the Far grass simplified shader in meters (automatically calculated proportionally to cullingDistance)
      */
     get farDistance(): number {
-        return this.#farDistance;
-    }
-
-    set farDistance(v: number) {
-        const val = Math.max(10.0, Number(v) || 10.0);
-        if (this.#farDistance !== val) {
-            this.#farDistance = val;
-            this.onParameterChanged('farDistance', val);
-        }
+        return Math.max(15.0, Math.min(40.0, this.cullingDistance * 0.35));
     }
 
     /**
@@ -530,22 +501,28 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         return this.#shadowStrength;
     }
 
-    set shadowFadeStartDistance(v: number) {
-        const val = Math.max(0.0, Number(v) || 0.0);
-        if (this.#shadowFadeStartDistance !== val) {
-            this.#shadowFadeStartDistance = val;
-            this.onParameterChanged('shadowFadeStartDistance', val);
-        }
+    /**
+     * [KO] 잔디 섀도우 맵 렌더링 및 그림자 수신 최대 거리 (farDistance에 연동되어 자동 계산됨)
+     * [EN] Maximum shadow culling and receive distance for grass (automatically unified with farDistance)
+     */
+    override get shadowCullDistance(): number {
+        return this.farDistance;
     }
 
-
+    override set shadowCullDistance(_val: number) {
+        console.warn(`[Grass] "${this.name}": shadowCullDistance is auto-derived from farDistance and cannot be set directly.`);
+    }
 
     /**
-     * [KO] 그림자 렌더링 시 페이드(스케일 축소)가 시작되는 거리 (미터 단위)
-     * [EN] Distance in meters where shadow-casting fade smoothly begins towards shadow culling boundary
+     * [KO] 그림자 렌더링 시 페이드(스케일 축소 및 감쇠)가 시작되는 거리 (shadowCullDistance * 0.5로 자동 계산되어 50% 완충 구간 확보)
+     * [EN] Distance where shadow fade smoothly begins (auto-calculated as shadowCullDistance * 0.5 providing a 50% smooth buffer)
      */
     get shadowFadeStartDistance(): number {
-        return this.#shadowFadeStartDistance;
+        return this.shadowCullDistance * 0.5;
+    }
+
+    set shadowFadeStartDistance(_val: number) {
+        console.warn(`[Grass] "${this.name}": shadowFadeStartDistance is auto-calculated and cannot be set directly.`);
     }
 
     /**
@@ -593,14 +570,9 @@ class Grass extends AScatterType<GrassTypeAllocation> {
 
             case 'cullingDistance':
                 this.#notifyRepopulateRequired();
-                break;
-
-            case 'shadowCullDistance':
-                this.#shadowFadeStartDistance = (value as number) * 0.75;
                 this.#notifyUniformDirty();
                 break;
 
-            case 'farDistance':
             case 'exposureBoost':
             case 'alphaCutoff':
             case 'roughness':
@@ -608,7 +580,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             case 'subsurfaceColor':
             case 'receiveShadow':
             case 'shadowStrength':
-            case 'shadowFadeStartDistance':
             case 'castShadow':
             case 'groundBlendStrength':
                 this.#notifyUniformDirty();

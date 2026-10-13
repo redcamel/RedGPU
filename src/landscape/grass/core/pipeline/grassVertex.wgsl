@@ -183,12 +183,14 @@ fn main(input: VertexInput) -> VertexOutput {
     output.groundColor = unpack4x8unorm(instance.packedGroundColorAndType);
 
     let viewDepth = -viewPos.z;
+    let distToCam = length(relPos);
     var shadowWeight = 0.0;
     if (grassUniforms.receiveShadow != 0u && systemUniforms.directionalLightCount > 0u) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
         let maxDist = min(maxCSMDist, grassUniforms.shadowCullDistance);
-        shadowWeight = select(0.0, saturate((maxDist - viewDepth) * grassUniforms.invShadowFadeRange), viewDepth < maxDist);
+        let fadeLinear = saturate((maxDist - distToCam) * grassUniforms.invShadowFadeRange);
+        shadowWeight = select(0.0, smoothstep(0.0, 1.0, fadeLinear), distToCam < maxDist);
     }
     output.shadowData = vec2<f32>(shadowWeight, viewDepth);
 
