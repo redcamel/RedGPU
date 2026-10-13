@@ -262,8 +262,6 @@ function renderTestPane({
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'useDepthPrepass');
             managerFolder.addBinding(foliageManager, 'subCellSize', {min: 20, max: 200, step: 5});
-            managerFolder.addBinding(foliageManager, 'mountBudget', {min: 1, max: 64, step: 1});
-            managerFolder.addBinding(foliageManager, 'unmountBudget', {min: 1, max: 128, step: 1});
             managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
 
             managerFolder.addBinding(foliageManager, 'typeCount', {readonly: true});

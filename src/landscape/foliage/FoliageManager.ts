@@ -45,6 +45,9 @@ import {AScatterManager} from "../core/scatter";
  *
  * @category Landscape
  */
+const DEFAULT_MOUNT_BUDGET: number = 16;
+const DEFAULT_UNMOUNT_BUDGET: number = 32;
+
 class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #slotPooler: FoliageSlotPooler;
 
@@ -56,8 +59,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #useDepthPrepass: boolean = true;
 
     #subCellSize: number = 100.0;
-    #mountBudget: number = 16;
-    #unmountBudget: number = 32;
     #roundRobinIndex: number = 0;
     #debugSubCellColoration: boolean = false;
     #onUniformUpdateNeeded: (() => void) | null = null;
@@ -301,8 +302,8 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const {rawCamera} = view;
         const {x, z} = rawCamera;
 
-        let remainingMount = this.#mountBudget;
-        let remainingUnmount = this.#unmountBudget;
+        let remainingMount = DEFAULT_MOUNT_BUDGET;
+        let remainingUnmount = DEFAULT_UNMOUNT_BUDGET;
         if (this.#roundRobinIndex >= count) {
             this.#roundRobinIndex = 0;
         }
@@ -377,17 +378,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         return this.#subCellSize;
     }
 
-    /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
-     * [EN] Sets the global maximum subcell mount budget per frame across all foliage types.
-     *
-     * @param val -
-     * [KO] 설정할 마운트 예산 (최소값: 1, 기본값: 16)
-     * [EN] Mount budget to set (minimum: 1, default: 16)
-     */
-    set mountBudget(val: number) {
-        this.#mountBudget = Math.max(1, val | 0);
-    }
 
 
     /**
@@ -414,33 +404,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         }
     }
 
-    /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 마운트할 수 있는 전역 서브셀 예산 총량을 반환합니다.
-     * [EN] Returns the global maximum subcell mount budget per frame across all foliage types.
-     */
-    get mountBudget(): number {
-        return this.#mountBudget;
-    }
-
-    /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 설정합니다.
-     * [EN] Sets the global maximum subcell unmount budget per frame across all foliage types.
-     *
-     * @param val -
-     * [KO] 설정할 언마운트 예산 (최소값: 1, 기본값: 32)
-     * [EN] Unmount budget to set (minimum: 1, default: 32)
-     */
-    set unmountBudget(val: number) {
-        this.#unmountBudget = Math.max(1, val | 0);
-    }
-
-    /**
-     * [KO] 매 프레임 모든 식생 타입을 통틀어 최대로 언마운트할 수 있는 전역 서브셀 예산 총량을 반환합니다.
-     * [EN] Returns the global maximum subcell unmount budget per frame across all foliage types.
-     */
-    get unmountBudget(): number {
-        return this.#unmountBudget;
-    }
 
     /**
      * [KO] 메인 렌더 패스에서 GPU 컬링을 통과한 식생 인스턴스들을 일괄 렌더링합니다.
