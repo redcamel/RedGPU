@@ -275,10 +275,24 @@ fn main(inputData:InputData) -> OutputFragment {
         if (inputData.groundColor_blendFactor.a > 0.001) {
             baseColor = vec4<f32>(mix(baseColor.rgb, inputData.groundColor_blendFactor.rgb, inputData.groundColor_blendFactor.a), baseColor.a);
         }
-    #redgpu_else
-        #redgpu_if useCutOff
-            if (resultAlpha <= u_cutOff) { discard; }
+    #redgpu_endIf
+
+    #redgpu_if useCutOff
+        let effectiveCutOff = select(0.3333, u_cutOff, u_cutOff > 0.0);
+        #redgpu_if isFoliage
+            #redgpu_if baseColorTexture
+                let ddxUV = dpdx(input_uv);
+                let ddyUV = dpdy(input_uv);
+                if (resultAlpha < effectiveCutOff) {
+                    let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+                    let texDim = vec2<f32>(textureDimensions(baseColorTexture));
+                    let maxDim = max(texDim.x, texDim.y);
+                    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * (maxDim * maxDim), 1.0)));
+                    resultAlpha = resultAlpha * (1.0 + mipLevel * 0.28);
+                }
+            #redgpu_endIf
         #redgpu_endIf
+        if (resultAlpha <= effectiveCutOff) { discard; }
     #redgpu_endIf
 
 

@@ -34,17 +34,6 @@ fn ditherFadeDiscard(fragCoordXY: vec2<f32>, fadeValue: f32, frameIndex: u32) {
     }
 }
 
-fn evaluateMipScaledAlphaCutoff(alpha: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>, baseCutOff: f32) {
-    if (alpha < baseCutOff) {
-        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
-        let effectiveAlpha = alpha * mipAlphaScale;
-        if (effectiveAlpha <= baseCutOff) {
-            discard;
-        }
-    }
-}
 
 
 struct RenderUnitUniforms {
@@ -396,5 +385,16 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
     let globalFragmentData = globalFragmentSSBO_PBR[input.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
 
-    evaluateMipScaledAlphaCutoff(alpha, ddxUV, ddyUV, baseCutOff);
+    var effectiveAlpha = alpha;
+    if (alpha < baseCutOff) {
+        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+        let texDim = vec2<f32>(textureDimensions(shadowBaseColorTexture));
+        let maxDim = max(texDim.x, texDim.y);
+        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * (maxDim * maxDim), 1.0)));
+        effectiveAlpha = alpha * (1.0 + mipLevel * 0.28);
+    }
+
+    if (effectiveAlpha <= baseCutOff) {
+        discard;
+    }
 }
