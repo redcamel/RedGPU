@@ -1102,7 +1102,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#notifyRepopulateRequired();
                 break;
             case 'bottomOffset':
-                this.#notifyRepopulateRequired();
                 this.#notifyUniformDirty();
                 break;
 
@@ -1277,11 +1276,19 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                     const key = packSubCellKey(sx, sz);
                     let subCell = this.#subCells.get(key);
                     if (!subCell) {
-                        subCell = this.#populateSingleSubCell(sx, sz, subCellSize, landscape);
+                        subCell = {
+                            subCellKey: key,
+                            subCellX: sx,
+                            subCellZ: sz,
+                            centerX: cellCenterX,
+                            centerZ: cellCenterZ,
+                            instanceCount: -1,
+                            isMounted: false,
+                            mountedSlotIndex: -1
+                        };
                         this.#subCells.set(key, subCell);
                     }
-                    const {isMounted, instanceCount} = subCell;
-                    if (!isMounted && instanceCount > 0) {
+                    if (!subCell.isMounted && subCell.instanceCount !== 0) {
                         candidates.push(subCell);
                     }
                 }
@@ -1296,12 +1303,29 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
         sortSubCellsByDistance(candidates, this.#candidateDists, camX, camZ, candidateCount);
 
-        const toMountCount = Math.min(candidateCount, mountBudget);
-        for (let i = 0; i < toMountCount; i++) {
+        let mountedThisFrame = 0;
+        let populatedThisFrame = 0;
+        const populateBudget = mountBudget;
+
+        for (let i = 0; i < candidateCount; i++) {
+            if (mountedThisFrame >= mountBudget) break;
             const subCell = candidates[i];
+
+            if (subCell.instanceCount === -1) {
+                if (populatedThisFrame >= populateBudget) {
+                    continue;
+                }
+                this.#computeSubCellInstances(subCell, subCellSize, landscape);
+                populatedThisFrame++;
+                if (subCell.instanceCount <= 0) {
+                    continue;
+                }
+            }
+
             this.#mountSubCell(subCell, megaBuffer, allocation, subCellSize);
+            mountedThisFrame++;
         }
-        this.#lastMountedCount = toMountCount;
+        this.#lastMountedCount = mountedThisFrame;
     }
 
     /**
@@ -1557,11 +1581,11 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
 
-    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number, currentLandscape?: Landscape): FoliageSubCell {
-        const key = packSubCellKey(scX, scZ);
+    #computeSubCellInstances(cell: FoliageSubCell, subCellSize: number, currentLandscape?: Landscape): void {
         const landscape = currentLandscape ?? this.#landscape;
         if (!landscape) {
-            throw new Error('[Foliage] Cannot populate sub-cell without an attached Landscape.');
+            cell.instanceCount = 0;
+            return;
         }
         const {
             worldSizeX,
@@ -1571,20 +1595,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             halfWorldSizeX: halfWorldX,
             halfWorldSizeZ: halfWorldZ
         } = landscape;
-
-        const centerX = (scX + 0.5) * subCellSize - halfWorldX;
-        const centerZ = (scZ + 0.5) * subCellSize - halfWorldZ;
-
-        const cell: FoliageSubCell = {
-            subCellKey: key,
-            subCellX: scX,
-            subCellZ: scZ,
-            centerX,
-            centerZ,
-            instanceCount: 0,
-            isMounted: false,
-            mountedSlotIndex: -1
-        };
+        const {subCellX: scX, subCellZ: scZ} = cell;
 
         const {
             densityPerHectare,
@@ -1595,7 +1606,10 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             maxSlope = 45.0
         } = this;
         const targetCountPerHectare = Math.max(0, Math.round(densityPerHectare * densityMultiplier));
-        if (targetCountPerHectare <= 0) return cell;
+        if (targetCountPerHectare <= 0) {
+            cell.instanceCount = 0;
+            return;
+        }
         const hasTargetLayer = targetLayer !== undefined && targetLayer !== '';
         let targetLayerObj: any = null;
         if (hasTargetLayer && landscape.layers) {
@@ -1613,7 +1627,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             }
         }
         if (hasTargetLayer && !targetLayerObj) {
-            return cell;
+            cell.instanceCount = 0;
+            return;
         }
 
         const hasSlopeFilter = minSlope > 0.0 || maxSlope < 90.0;
@@ -1703,6 +1718,23 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         }
 
         cell.instanceCount = validCount;
+    }
+
+    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number, currentLandscape?: Landscape): FoliageSubCell {
+        const landscape = currentLandscape ?? this.#landscape;
+        const halfWorldX = landscape ? landscape.halfWorldSizeX : 0;
+        const halfWorldZ = landscape ? landscape.halfWorldSizeZ : 0;
+        const cell: FoliageSubCell = {
+            subCellKey: packSubCellKey(scX, scZ),
+            subCellX: scX,
+            subCellZ: scZ,
+            centerX: (scX + 0.5) * subCellSize - halfWorldX,
+            centerZ: (scZ + 0.5) * subCellSize - halfWorldZ,
+            instanceCount: -1,
+            isMounted: false,
+            mountedSlotIndex: -1
+        };
+        this.#computeSubCellInstances(cell, subCellSize, landscape);
         return cell;
     }
 }

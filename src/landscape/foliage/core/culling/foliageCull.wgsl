@@ -146,14 +146,13 @@ fn main(
         return;
     }
 
-    let realY = instance.posY;
+    let scaleY = instance.scaleY;
+    let realY = instance.posY + typeInfo.bottomOffset * scaleY;
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
     if (distSq >= effectiveCullingDistSq) {
         return;
     }
-
-    let scaleY = instance.scaleY;
     let scaleXZ = unpack2x16float(instance.packedScaleXZ);
     let maxScale = max(max(scaleXZ.x, scaleY), scaleXZ.y);
     let scaledRadius = typeInfo.boundingRadius * maxScale;
@@ -195,7 +194,7 @@ fn main(
 
             if (dist - scaledRadius > 10.0) {
                 let halfW = scaledRadius;
-                let baseY = realY + typeInfo.bottomOffset;
+                let baseY = realY;
                 let effHeight = max(typeInfo.boundingHeight, typeInfo.boundingRadius * 1.5) * scaleY;
                 let topY = baseY + effHeight;
                 let aabbMin = vec3<f32>(instance.posX - halfW, baseY, instance.posZ - halfW);

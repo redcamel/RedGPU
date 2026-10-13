@@ -250,7 +250,7 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let scaleY = uniforms.minScaleY + rScale * uniforms.scaleDiffY;
         let scaleZ = select(uniforms.minScaleZ + rScale * uniforms.scaleDiffZ, scaleX, uniforms.isUniformXZ != 0u);
 
-        let posY = surface.height + uniforms.bottomOffset * scaleY;
+        let posY = surface.height;
 
         var rotX: f32 = 0.0;
         var rotY: f32 = 0.0;
