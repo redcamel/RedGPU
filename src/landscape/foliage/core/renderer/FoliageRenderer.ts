@@ -485,7 +485,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             const num3DLODs = hasImpostor ? Math.max(1, lodInfoList.length - 1) : lodInfoList.length;
             const maxShadowLOD = Math.max(0, num3DLODs - 1);
 
-            if (currentCascade === 0 && hasMaskedLOD0) {
+            if (currentCascade <= 1 && hasMaskedLOD0) {
                 const unitCount = lod0RenderUnits.length;
                 for (let l0 = 0; l0 < unitCount; l0++) {
                     const unit = lod0RenderUnits[l0];

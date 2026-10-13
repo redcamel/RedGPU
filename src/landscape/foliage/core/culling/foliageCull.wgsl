@@ -313,7 +313,7 @@ fn main(
                             let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
                             let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
 
-                            targetShadowLOD = select(maxShadowLOD, 0u, c == 0u && effectiveDist <= lod0Dist);
+                            targetShadowLOD = select(maxShadowLOD, 0u, c <= 1u && effectiveDist <= lod0Dist);
                         }
 
                         let lodInfo = typeInfo.lods[targetShadowLOD];

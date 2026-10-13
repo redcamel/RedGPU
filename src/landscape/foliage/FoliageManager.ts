@@ -598,11 +598,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         } = foliage;
         if (shadowCullDistance <= 0 || activeInstanceCount <= 0) return 0;
         const num3DLODs = hasImpostor ? Math.max(1, lodInfoList.length - 1) : lodInfoList.length;
-        let count = hasMaskedLOD0
+        const cascadeDraws = hasMaskedLOD0
             ? lod0RenderUnits.length + (num3DLODs > 1 ? 1 : 0)
             : 1;
-        count += 3;
-        return count;
+        return cascadeDraws * 2 + 2;
     }
 
     #repopulateFoliage(type: Foliage): void {
