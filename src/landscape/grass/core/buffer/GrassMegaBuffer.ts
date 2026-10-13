@@ -244,11 +244,10 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
         const {
             cullingDistance: cullingDist,
             farDistance: farDist,
-            fadeStartDistance,
             shadowCullDistance: shadowCullDist,
             shadowFadeStartDistance
         } = grass;
-        const fadeStartDist = Math.min(fadeStartDistance, cullingDist);
+        const fadeStartDist = cullingDist * 0.75;
         const shadowFadeStartDist = Math.min(shadowFadeStartDistance, shadowCullDist);
 
         cf[baseFloat + 0] = cullingDist * cullingDist;

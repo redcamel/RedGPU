@@ -121,7 +121,6 @@ abstract class AScatterType<
 
     #height: number = 1.0;
     #cullingDistance: number = 200.0;
-    #fadeStartDistance: number = 150.0;
     #shadowCullDistance: number = 50.0;
     #bottomOffset: number = 0.0;
     #targetLayer: string | number | undefined = '';
@@ -278,17 +277,8 @@ abstract class AScatterType<
         const numVal = Math.max(0, Number(val) || 0);
         if (this.#cullingDistance !== numVal) {
             this.#cullingDistance = numVal;
-            this.#fadeStartDistance = numVal * 0.75;
             this.onParameterChanged('cullingDistance', numVal);
         }
-    }
-
-    /**
-     * [KO] 카메라 거리에 따라 인스턴스 페이드(스케일 축소)가 시작되는 거리 (미터 단위, cullingDistance * 0.75로 자동 계산)
-     * [EN] Distance in meters where instance fade begins (automatically calculated as cullingDistance * 0.75)
-     */
-    get fadeStartDistance(): number {
-        return this.#fadeStartDistance;
     }
 
     /**
@@ -469,7 +459,6 @@ abstract class AScatterType<
         if (height !== undefined) this.#height = height;
         if (cullingDistance !== undefined) {
             this.#cullingDistance = cullingDistance;
-            this.#fadeStartDistance = cullingDistance * 0.75;
         }
         if (shadowCullDistance !== undefined) this.#shadowCullDistance = shadowCullDistance;
         if (bottomOffset !== undefined) this.#bottomOffset = bottomOffset;

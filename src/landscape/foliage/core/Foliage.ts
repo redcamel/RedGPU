@@ -560,12 +560,12 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#lodInfoList
             );
             this.bindAllocation(alloc);
-            const {cullingDistance, fadeStartDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
+            const {cullingDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
             const effectiveShadowDist = castShadow ? shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 cullingDistance,
-                fadeStartDistance,
+                cullingDistance * 0.75,
                 this.#boundingRadius,
                 bottomOffset,
                 this.#lodInfoList,
@@ -1110,7 +1110,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                 this.#notifyUniformDirty();
                 break;
             }
-            case 'fadeStartDistance':
             case 'shadowCullDistance':
             case 'castShadow':
                 this.#notifyUniformDirty();
@@ -1495,12 +1494,12 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
                 ? this.#lodInfoListWithoutImpostor
                 : this.#lodInfoList;
 
-            const {cullingDistance, fadeStartDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
+            const {cullingDistance, bottomOffset, height, castShadow, shadowCullDistance} = this;
             const effectiveShadowDist = castShadow ? shadowCullDistance : 0.0;
             this.#megaBuffer.updateTypeParams(
                 alloc,
                 cullingDistance,
-                fadeStartDistance,
+                cullingDistance * 0.75,
                 this.#boundingRadius,
                 bottomOffset,
                 effectiveLodList,

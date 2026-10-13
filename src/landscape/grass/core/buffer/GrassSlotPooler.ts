@@ -47,7 +47,6 @@ class GrassSlotPooler extends AScatterSlotPooler {
 
         const {
             cullingDistance,
-            fadeStartDistance,
             height,
             minY,
             shadowCullDistance,
@@ -63,6 +62,7 @@ class GrassSlotPooler extends AScatterSlotPooler {
         } = grass;
 
         const effShadowFadeStart = Math.min(shadowFadeStartDistance, shadowCullDistance);
+        const fadeStartDistance = cullingDistance * 0.75;
 
         f32[baseFloat + 0] = cullingDistance;
         f32[baseFloat + 1] = fadeStartDistance;

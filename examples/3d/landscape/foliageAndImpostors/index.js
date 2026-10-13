@@ -383,8 +383,10 @@ function renderTestPane({
         }
         const typeFolder = foliageFolder.addFolder({title: type.name, expanded: true});
 
-        // 1. Streaming & Stats (스트리밍 및 인스턴스 현황)
-        const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Stats', expanded: false});
+        // 1. Streaming & Culling (스트리밍 및 가시거리/인스턴스 현황)
+        const streamingStatsFolder = typeFolder.addFolder({title: 'Streaming & Culling', expanded: false});
+        streamingStatsFolder.addBinding(type, 'cullingDistance', {min: 100, max: 10000, step: 50})
+            .on('change', () => streamingStatsFolder.refresh());
         streamingStatsFolder.addBinding(type, 'streamingRadius', {readonly: true});
         streamingStatsFolder.addBinding(type, 'activeInstanceCount', {readonly: true});
         streamingStatsFolder.addBinding(type, 'mountedSubCellCount', {readonly: true});
@@ -435,11 +437,9 @@ function renderTestPane({
         groundBlendFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
 
-        // 5. LOD & Impostor (컬링 거리 및 임포스터)
+        // 5. LOD & Impostor (LOD 단계 및 임포스터)
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: false});
         lodFolder.addBinding(type, 'useDepthPrepass');
-        lodFolder.addBinding(type, 'fadeStartDistance', {min: 50, max: 8000, step: 50});
-        lodFolder.addBinding(type, 'cullingDistance', {min: 100, max: 10000, step: 50});
         if (type.hasImpostor) {
             lodFolder.addBinding(type, 'useImpostor');
         }
