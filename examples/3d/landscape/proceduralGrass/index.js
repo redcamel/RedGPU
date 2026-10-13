@@ -384,10 +384,10 @@ function renderTestPane({
         // 1. Culling & Distance (컬링 및 자동 베이킹 반경)
         // -----------------------------------------------------------------
         const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
-        cullingFolder.addBinding(type, 'bakeRadius', {readonly: true});
         cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5})
             .on('change', () => cullingFolder.refresh());
-        cullingFolder.addBinding(type, 'farDistance', {min: 10, max: 200, step: 5});
+        cullingFolder.addBinding(type, 'bakeRadius', {readonly: true});
+        cullingFolder.addBinding(type, 'farDistance', {readonly: true});
 
         // -----------------------------------------------------------------
         // 2. Placement & Density (스폰 배치 및 밀도)
@@ -457,7 +457,6 @@ function renderTestPane({
         shadowFolder.addBinding(type, 'castShadow');
         shadowFolder.addBinding(type, 'receiveShadow');
         shadowFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05});
-        shadowFolder.addBinding(type, 'shadowCullDistance', {min: 10, max: 100, step: 5});
     };
 
     // [KO] 매 프레임 캐릭터 및 카메라 업데이트
