@@ -1,4 +1,5 @@
 #redgpu_include shadow.getShadowCoord;
+#redgpu_include math.getInterleavedGradientNoise;
 
 /**
  * 🌟 [수학적 최적화] 16-Tap Vogel Spiral (황금각 페르마 나선) 및 반경 기반 가우시안 텐트 가중치
@@ -28,13 +29,13 @@ const TOTAL_VOGEL_WEIGHT: f32 = 10.0;
  * - Cascade 1 (30~80m): 8-Tap Golden Disk (50% 연산 절감)
  * - Cascade 2 (80~200m): 4-Tap PCF (75% 연산 절감)
  * - Cascade 3 & Impostor (200m+): 1-Tap 하드웨어 Bilinear PCF (94% 연산 절감)
- * - 선행 4-Tap 반음영 검사로 완전 양지/음지 즉시 조기 탈출 (Early Exit)
  */
 fn sampleModernCascadeShadow(
     directionalShadowMap: texture_depth_2d_array,
     directionalShadowMapSampler: sampler_comparison,
     cascadeIndex: u32,
     shadowCoord: vec3<f32>,
+    screenPos: vec2<f32>,
     oneOverTextureSize: f32,
     bias: f32,
     lightSize: f32,
@@ -67,41 +68,27 @@ fn sampleModernCascadeShadow(
         );
     }
 
-    // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
-    let cascadeScale = mix(2.5, 3.2, saturate(f32(cascadeIndex) / 3.0));
+    // 🌟 [언리얼 엔진 5 표준 안티앨리어싱 필터 반경 및 회전 지터]
+    let cascadeScale = mix(3.2, 3.8, saturate(f32(cascadeIndex) / 3.0));
     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
+
+// 픽셀별 IGN 의사 난수 기반 2D 회전각 산출 (GPU ALU cos/sin 하드웨어 회전)
+    let noise = getInterleavedGradientNoise(screenPos);
+    let angle = noise * 6.2831853;
+    let cosAngle = cos(angle);
+    let sinAngle = sin(angle);
 
     var weightedVisibility: f32 = 0.0;
     var totalWeight: f32 = 0.0;
 
-    // 3. 선행 4-Tap 반음영(Penumbra) 검사 & 조기 탈출 (Early Exit)
-    for (var i = 0u; i < 4u; i++) {
-        let offset = VOGEL_DISK_16[i] * filterRadius;
-        let tUV = shadowCoord.xy + offset;
-
-        let sampleVisibility = textureSampleCompareLevel(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            tUV,
-            cascadeIndex,
-            shadowDepth - cascadeBias
+    // 3. 16-Tap 가중 페르마 나선(Vogel Disk) PCF 필터링 (조기 탈출 분기 없는 하드웨어 최적화 균일 샘플링)
+    for (var i = 0u; i < tapCount; i++) {
+        let rawOffset = VOGEL_DISK_16[i];
+        let rotatedOffset = vec2<f32>(
+            rawOffset.x * cosAngle - rawOffset.y * sinAngle,
+            rawOffset.x * sinAngle + rawOffset.y * cosAngle
         );
-
-        let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
-        let vis = select(sampleVisibility, 1.0, outOfBounds);
-        let w = VOGEL_WEIGHTS_16[i];
-        weightedVisibility += vis * w;
-        totalWeight += w;
-    }
-
-    // 🚀 [Early Exit] 4개 선행 탭이 모두 완전 햇빛(1.0)이거나 완전 암부(0.0)이면 나머지 루프 100% 스킵
-    if (weightedVisibility >= totalWeight - 0.0001) { return 1.0; }
-    if (weightedVisibility <= 0.0001) { return 0.0; }
-
-    // 4. 반음영(Penumbra) 경계선 픽셀만 나머지 탭 정밀 샘플링
-    for (var i = 4u; i < tapCount; i++) {
-        let offset = VOGEL_DISK_16[i] * filterRadius;
-        let tUV = shadowCoord.xy + offset;
+        let tUV = shadowCoord.xy + rotatedOffset * filterRadius;
 
         let sampleVisibility = textureSampleCompareLevel(
             directionalShadowMap,
@@ -129,6 +116,7 @@ fn sampleModernCascadeShadow(
  * @param worldPosition [KO] 월드 공간 상의 정점/픽셀 좌표 [EN] World position of vertex/pixel
  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
+ * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
  */
 fn getDirectionalShadowVisibility(
@@ -136,7 +124,8 @@ fn getDirectionalShadowVisibility(
     directionalShadowMapSampler: sampler_comparison,
     worldPosition: vec3<f32>,
     N: vec3<f32>,
-    L: vec3<f32>
+    L: vec3<f32>,
+    screenPos: vec2<f32>
 ) -> f32 {
     let nDotL = dot(N, L);
     // 🚀 1. 완전 역광(-0.08 미만)은 샘플링 스킵 (GPU 부하 절감)
@@ -183,32 +172,22 @@ fn getDirectionalShadowVisibility(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 🚀 4. [언리얼 엔진 5 표준 슬로프 스케일 노멀 오프셋 바이어스]
-    // 16-Tap PCF 필터 반경 및 곡면 메시(캐릭터 등)의 자가 그림자 여드름(Acne)을 완벽 차단
+    // 🚀 4. [언리얼 엔진 5 표준 서브텍셀 노멀 오프셋 바이어스]
+    // CPU단 투영 박스의 텍셀 정수배 팽창과 결합하여 피터 패닝(Peter Panning)과 자가 그림자 여드름(Acne) 동시 원천 차단
     let slopeBias = saturate(1.0 - nDotL);
-    var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    var worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-    var normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
-    var biasedWorldPosition = worldPosition + normalOffset;
+    let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+    let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
+    let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
+    let biasedWorldPosition = worldPosition + normalOffset;
 
-    var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
-
-    // 🌟 [화면 모서리 원근 탈출(OOB) 1단계 보수적 승격 방어망 (연쇄 강등 폭포 차단)]
-    // 2% 여유 마진을 부여하여 미세 경계에서 불필요한 조기 승격을 억제하고 단 1단계만 보수적으로 승격
-    if ((shadowCoord.x < -0.02 || shadowCoord.x > 1.02 || shadowCoord.y < -0.02 || shadowCoord.y > 1.02) && cascadeIndex < cascadeCount - 1u) {
-        cascadeIndex = cascadeIndex + 1u;
-        lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-        worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-        normalOffset = N * (1.2 + slopeBias * 2.5) * worldTexelSize;
-        biasedWorldPosition = worldPosition + normalOffset;
-        shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
-    }
+    let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
 
     let visibility = sampleModernCascadeShadow(
         directionalShadowMap,
         directionalShadowMapSampler,
         cascadeIndex,
         shadowCoord,
+        screenPos,
         oneOverTextureSize,
         bias,
         lightSize,
@@ -231,7 +210,7 @@ fn getDirectionalShadowVisibility(
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-            let nextBiasedPos = worldPosition + N * (1.2 + slopeBias * 2.5) * nextWorldTexelSize;
+            let nextBiasedPos = worldPosition + N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
 
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
             let nextVis = sampleModernCascadeShadow(
@@ -239,6 +218,7 @@ fn getDirectionalShadowVisibility(
                 directionalShadowMapSampler,
                 nextIndex,
                 nextShadowCoord,
+                screenPos,
                 oneOverTextureSize,
                 bias,
                 lightSize,

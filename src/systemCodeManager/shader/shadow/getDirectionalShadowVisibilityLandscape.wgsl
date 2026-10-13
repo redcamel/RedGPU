@@ -1,4 +1,5 @@
 #redgpu_include shadow.getShadowCoord;
+#redgpu_include math.getInterleavedGradientNoise;
 
 /**
  * 🌟 [지형(Landscape) 전용 적응형 초경량 4-Tap/1-Tap Poisson PCF 오프셋]
@@ -22,6 +23,7 @@ const LANDSCAPE_SHADOW_OFFSETS_4 = array<vec2<f32>, 4>(
  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
  * @param viewDepth [KO] 사전 보간된 카메라 뷰 공간 깊이 [EN] Pre-interpolated camera view-space depth
+ * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
  */
 fn getDirectionalShadowVisibilityLandscape(
@@ -30,7 +32,8 @@ fn getDirectionalShadowVisibilityLandscape(
     worldPosition: vec3<f32>,
     N: vec3<f32>,
     L: vec3<f32>,
-    viewDepth: f32
+    viewDepth: f32,
+    screenPos: vec2<f32>
 ) -> f32 {
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
@@ -69,12 +72,12 @@ fn getDirectionalShadowVisibilityLandscape(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 4. 지형 특화 슬로프 바이어스 및 노멀 오프셋
+    // 4. 지형 특화 서브텍셀 노멀 오프셋
     let slopeBias = saturate(1.0 - nDotL);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     // 🚀 [UBO 사전 계산]: CPU에서 사전 계산된 캐스케이드별 텍셀 크기를 직접 로드하여 매 픽셀 dot + inverseSqrt 완전 제거
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-    let normalOffset = N * (1.2 + slopeBias * 2.2) * worldTexelSize;
+    let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -93,34 +96,38 @@ fn getDirectionalShadowVisibilityLandscape(
 
     var finalVis: f32 = 1.0;
 
-    // 5. 적응형 샘플링: 발밑(Cascade 0)은 선행 1-Tap 조기 탈출 + 반음영 4-Tap, 중원경(Cascade 1+)은 1-Tap 초고속 처리
+    // 5. 적응형 샘플링: 발밑(Cascade 0)은 5-Tap 회전 PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
     if (cascadeIndex == 0u) {
-        let firstSample = textureSampleCompareLevel(
+        let noise = getInterleavedGradientNoise(screenPos);
+        let angle = noise * 6.2831853;
+        let cosAngle = cos(angle);
+        let sinAngle = sin(angle);
+
+        let filterRadius = oneOverTextureSize * 2.5;
+        let centerSample = textureSampleCompareLevel(
             directionalShadowMap,
             directionalShadowMapSampler,
             tUV,
             0u,
             shadowDepth - cascadeBias
         );
-
-        // 🚀 [조기 탈락]: 완전 햇빛(1.0) 또는 완전 암부(0.0)이면 나머지 4-Tap 즉시 스킵
-        if (firstSample >= 0.9999 || firstSample <= 0.0001) {
-            finalVis = firstSample;
-        } else {
-            let filterRadius = oneOverTextureSize * 2.0;
-            var accum: f32 = firstSample;
-            for (var i = 0u; i < 4u; i++) {
-                let offsetUV = tUV + LANDSCAPE_SHADOW_OFFSETS_4[i] * filterRadius;
-                accum += textureSampleCompareLevel(
-                    directionalShadowMap,
-                    directionalShadowMapSampler,
-                    offsetUV,
-                    0u,
-                    shadowDepth - cascadeBias
-                );
-            }
-            finalVis = accum * 0.2; // (중심 1-Tap + 주변 4-Tap) 5-Tap 반음영 정밀 필터링
+        var accum: f32 = centerSample;
+        for (var i = 0u; i < 4u; i++) {
+            let rawOffset = LANDSCAPE_SHADOW_OFFSETS_4[i];
+            let rotatedOffset = vec2<f32>(
+                rawOffset.x * cosAngle - rawOffset.y * sinAngle,
+                rawOffset.x * sinAngle + rawOffset.y * cosAngle
+            );
+            let offsetUV = tUV + rotatedOffset * filterRadius;
+            accum += textureSampleCompareLevel(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                offsetUV,
+                0u,
+                shadowDepth - cascadeBias
+            );
         }
+        finalVis = accum * 0.2; // (중심 1-Tap + 주변 4-Tap) 5-Tap 반음영 정밀 필터링
     } else {
         finalVis = textureSampleCompareLevel(
             directionalShadowMap,

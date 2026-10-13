@@ -50,7 +50,7 @@ fn getDirectionalShadowVisibilityFoliage(
     let slopeBias = saturate(1.0 - nDotL);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-    let normalOffset = N * (1.0 + slopeBias * 2.0) * worldTexelSize;
+    let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);

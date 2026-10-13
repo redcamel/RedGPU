@@ -244,7 +244,8 @@ fn main(inputData:InputData) -> OutputFragment {
                 directionalShadowMapSampler,
                 input_vertexPosition,
                 N,
-                L0
+                L0,
+                inputData.position.xy
             );
             visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
         }

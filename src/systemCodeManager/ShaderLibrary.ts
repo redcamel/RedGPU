@@ -1079,6 +1079,7 @@ export namespace ShadowLibrary {
      *  * @param worldPosition [KO] 월드 공간 상의 정점/픽셀 좌표 [EN] World position of vertex/pixel
      *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
      *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
+     *  * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
      *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
      *  * 
      *  *\/
@@ -1087,7 +1088,8 @@ export namespace ShadowLibrary {
      *     directionalShadowMapSampler: sampler_comparison,
      *     worldPosition: vec3<f32>,
      *     N: vec3<f32>,
-     *     L: vec3<f32>
+     *     L: vec3<f32>,
+     *     screenPos: vec2<f32>
      * ) -> f32 {
      *     let nDotL = dot(N, L);
      *     // 🚀 1. 완전 역광(-0.08 미만)은 샘플링 스킵 (GPU 부하 절감)
@@ -1352,6 +1354,7 @@ export namespace ShadowLibrary {
      *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
      *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
      *  * @param viewDepth [KO] 사전 보간된 카메라 뷰 공간 깊이 [EN] Pre-interpolated camera view-space depth
+     *  * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
      *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
      *  *
      *  *\/
@@ -1361,7 +1364,8 @@ export namespace ShadowLibrary {
      *     worldPosition: vec3<f32>,
      *     N: vec3<f32>,
      *     L: vec3<f32>,
-     *     viewDepth: f32
+     *     viewDepth: f32,
+     *     screenPos: vec2<f32>
      * ) -> f32 {
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));

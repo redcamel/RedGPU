@@ -360,7 +360,7 @@ fn main(inputData:InputData) -> OutputFragment {
             #redgpu_if isFoliage
                 let rawVis = getDirectionalShadowVisibilityFoliage(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, baseNormal, L0);
             #redgpu_else
-                let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, baseNormal, L0);
+                let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, baseNormal, L0, inputData.position.xy);
             #redgpu_endIf
             visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
         }

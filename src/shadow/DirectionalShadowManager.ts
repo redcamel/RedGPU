@@ -448,12 +448,12 @@ class DirectionalShadowManager {
             const farDiag = subFar * k;
             let sphereRadius = Math.sqrt(halfDepth * halfDepth + farDiag * farDiag);
 
-            // 🌟 [화면 모서리 클리핑 방지] 텍셀 스냅핑(최대 1.414 텍셀) + 16-Tap PCF 필터 반경(3.8 텍셀) 여유 마진 (5텍셀)
+            // 🌟 [화면 모서리 클리핑 방지] 텍셀 스냅핑(최대 1.414 텍셀) + 16-Tap PCF 필터 반경(3.8 텍셀) 여유 마진 (6텍셀)
             const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
-            sphereRadius += rawWorldUnitsPerTexel * 5.0;
+            sphereRadius += rawWorldUnitsPerTexel * 6.0;
 
-            // 텍셀 여유 마진 (16텍셀 단위 정렬)
-            sphereRadius = Math.ceil(sphereRadius * 16.0) / 16.0;
+            // 🌟 [텍셀 크기 정수배 스냅] 물리 텍셀 크기 단위로 올림 정렬하여 텍스처 해상도 변경 시에도 1:1 완벽 정렬
+            sphereRadius = Math.ceil(sphereRadius / rawWorldUnitsPerTexel) * rawWorldUnitsPerTexel;
 
             // 카메라 시선 방향 로컬 중심 (0, 0, -cz)을 월드 좌표로 변환
             vec3.set(g_localCenter, 0, 0, -cz);
