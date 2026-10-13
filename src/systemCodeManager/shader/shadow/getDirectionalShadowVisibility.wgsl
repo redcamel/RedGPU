@@ -197,16 +197,16 @@ fn getDirectionalShadowVisibility(
 
     var finalVisibility = visibility;
 
-    // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.15)]
-    // 🚀 [32-Tap 폭풍 차단]: 현재 캐스케이드가 완전 햇빛(1.0) 또는 완전 암부(0.0)이면 다음 캐스케이드 샘플링 완전 스킵!
+    // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+    // 🚀 [32-Tap 폭풍 차단]: 현재 캐스케이드가 완전 햇빛(1.0)이면 다음 캐스케이드 샘플링 완전 스킵!
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
         let cascadeRange = splitFar - splitNear;
-        let blendMargin = cascadeRange * 0.15;
+        let blendMargin = cascadeRange * 0.20;
         let blendStart = splitFar - blendMargin;
 
-        if (viewDepth > blendStart && visibility > 0.0001 && visibility < 0.9999) {
+        if (viewDepth > blendStart && visibility < 0.9999) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];

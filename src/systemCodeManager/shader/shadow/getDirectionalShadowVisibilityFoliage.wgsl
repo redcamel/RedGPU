@@ -76,8 +76,40 @@ fn getDirectionalShadowVisibilityFoliage(
         shadowDepth - cascadeBias
     );
 
-    // 6. 최외곽 캐스케이드 부드러운 페이드아웃
-    if (cascadeIndex == cascadeCount - 1u) {
+    // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
+    // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
+    if (cascadeIndex < cascadeCount - 1u) {
+        let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+        let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
+        let cascadeRange = splitFar - splitNear;
+        let blendMargin = cascadeRange * 0.20;
+        let blendStart = splitFar - blendMargin;
+
+        if (viewDepth > blendStart && finalVis < 0.9999) {
+            let nextIndex = cascadeIndex + 1u;
+            let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
+            let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
+            let nextNormalOffset = N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
+            let nextBiasedPos = worldPosition + nextNormalOffset;
+            let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
+
+            let nextTUV = nextShadowCoord.xy;
+            let nextShadowDepth = saturate(nextShadowCoord.z);
+            let nextCascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+
+            let nextVis = textureSampleCompareLevel(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                nextTUV,
+                nextIndex,
+                nextShadowDepth - nextCascadeBias
+            );
+
+            let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
+            finalVis = mix(finalVis, nextVis, blendFactor);
+        }
+    } else {
+        // 7. 최외곽 캐스케이드 부드러운 페이드아웃
         let fadeStart = maxShadowDist * 0.85;
         if (viewDepth > fadeStart) {
             let fadeFactor = smoothstep(0.0, 1.0, saturate((viewDepth - fadeStart) / (maxShadowDist - fadeStart)));
@@ -85,7 +117,7 @@ fn getDirectionalShadowVisibilityFoliage(
         }
     }
 
-    // 7. Soft Horizon Terminator Fade
+    // 8. Soft Horizon Terminator Fade
     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
     return finalVis * horizonFade;
 }

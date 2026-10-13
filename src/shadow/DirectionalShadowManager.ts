@@ -412,7 +412,7 @@ class DirectionalShadowManager {
         } else {
             // 4대 안전 가드를 포함한 Cascade 0 거리 (d0) 역산
             const maxD0 = shadowFar / cascadeCount;
-            const minD0 = Math.min(near + 0.5, maxD0 * 0.5);
+            const minD0 = Math.min(Math.max(near + 0.5, 15.0), maxD0 * 0.5);
             const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * kSafe);
             const d0 = Math.min(Math.max(calculatedD0, minD0), maxD0);
 
