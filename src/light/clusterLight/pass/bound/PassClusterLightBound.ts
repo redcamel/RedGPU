@@ -93,7 +93,6 @@ class PassClusterLightBound extends RedGPUObject {
         this.#clusterBoundPipeline = null;
         this.#source = null;
         this.#view = null;
-        console.log("🧹 PassClusterLightBound destroy 완료");
     }
 
     #initPipeLine() {

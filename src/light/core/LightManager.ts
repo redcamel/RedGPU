@@ -326,8 +326,6 @@ class LightManager {
         this.#pointLights.length = 0;
         this.#spotLights.length = 0;
         this.#ambientLight = null;
-
-        console.log("🧹 LightManager destroy 완료");
     }
 }
 

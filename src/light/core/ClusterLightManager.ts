@@ -201,7 +201,6 @@ class ClusterLightManager extends RedGPUObject {
 
         this.#view = null;
         this.#clusterLightsBufferData = null;
-        console.log("🧹 ClusterLightManager destroy 완료");
     }
 }
 

@@ -51,7 +51,6 @@ class PassClustersLight extends RedGPUObject {
         this.#view = view;
         this.#passClusterLightBound = passClusterLightBound;
         this.#initPipeLine();
-        console.log(this);
     }
 
     /**
@@ -103,7 +102,6 @@ class PassClustersLight extends RedGPUObject {
         this.#clusterLightBindGroupLayout = null
         this.#source = null
         this.#view = null;
-        console.log("🧹 PassClustersLight destroy 완료");
     }
 
     #initPipeLine() {

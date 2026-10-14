@@ -302,9 +302,9 @@ class SpotLight extends ABaseLight {
         if (Array.isArray(x)) {
             [this.#x, this.#y, this.#z] = x;
         } else {
-            this.#x = x!;
-            this.#y = y!;
-            this.#z = z!;
+            this.#x = x as number;
+            this.#y = y as number;
+            this.#z = z as number;
         }
     }
 
@@ -334,9 +334,9 @@ class SpotLight extends ABaseLight {
         if (Array.isArray(targetX)) {
             [tx, ty, tz] = targetX;
         } else {
-            tx = targetX!;
-            ty = targetY!;
-            tz = targetZ!;
+            tx = targetX as number;
+            ty = targetY as number;
+            tz = targetZ as number;
         }
         const dx = tx - this.#x;
         const dy = ty - this.#y;
