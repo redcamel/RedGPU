@@ -1,20 +1,19 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import {GLTF} from "../GLTF";
 
-export default class GLTFCacheManager {
-    readonly #redGPUContext: RedGPUContext;
+class GLTFCacheManager extends RedGPUObject {
+    #gltfCacheMap: Map<string, GLTF> = new Map();
+    #gltfPendingMap: Map<string, Promise<any>> = new Map();
 
-    readonly #gltfCacheMap: Map<string, GLTF> = new Map();
-    readonly #gltfPendingMap: Map<string, Promise<any>> = new Map();
+    #glbCacheMap: Map<string, ArrayBuffer> = new Map();
+    #glbPendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
 
-    readonly #glbCacheMap: Map<string, ArrayBuffer> = new Map();
-    readonly #glbPendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
-
-    readonly #bufferCacheMap: Map<string, ArrayBuffer> = new Map();
-    readonly #bufferPendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
+    #bufferCacheMap: Map<string, ArrayBuffer> = new Map();
+    #bufferPendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
     get gltfCache() {
@@ -49,3 +48,7 @@ export default class GLTFCacheManager {
         this.#bufferPendingMap.clear();
     }
 }
+
+Object.freeze(GLTFCacheManager);
+export default GLTFCacheManager;
+

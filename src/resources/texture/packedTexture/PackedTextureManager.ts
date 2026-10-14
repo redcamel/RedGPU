@@ -1,21 +1,21 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 
-export default class PackedTextureManager {
-    readonly #redGPUContext: RedGPUContext;
-    readonly #cacheMap: Map<string, {
+class PackedTextureManager extends RedGPUObject {
+    #cacheMap: Map<string, {
         gpuTexture: GPUTexture;
         useNum: number;
         mappingKey: string;
         uuid: string
     }> = new Map();
-    readonly #instanceMappingKeys: WeakMap<any, string> = new WeakMap();
+    #instanceMappingKeys: WeakMap<any, string> = new WeakMap();
 
     #globalPipeline: GPURenderPipeline | null = null;
     #globalBindGroupLayout: GPUBindGroupLayout | null = null;
     #mappingBuffer: GPUBuffer | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
     get cacheMap() {
@@ -30,7 +30,7 @@ export default class PackedTextureManager {
      * 컨텍스트에 의존적인 텍스처 패킹 전용 GPU 리소스들을 반환하거나 최초 생성합니다.
      */
     getOrCreateResources(computeShaderCode: string) {
-        const {resourceManager, gpuDevice} = this.#redGPUContext;
+        const {resourceManager, gpuDevice} = this;
 
         if (!this.#mappingBuffer) {
             this.#mappingBuffer = resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
@@ -111,3 +111,7 @@ export default class PackedTextureManager {
         this.#globalBindGroupLayout = null;
     }
 }
+
+Object.freeze(PackedTextureManager);
+export default PackedTextureManager;
+

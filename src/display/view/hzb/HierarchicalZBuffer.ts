@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import hzbDownsampleShader from "./hzbDownsample.wgsl";
 import hzbMip0MSAAShader from "./hzbMip0MSAA.wgsl";
 
@@ -7,12 +8,11 @@ import hzbMip0MSAAShader from "./hzbMip0MSAA.wgsl";
  * - 뷰포트 깊이 버퍼로부터 8단계 Mipmap 깊이 피라미드(512x256 POT)를 생성합니다.
  * - GPU Culling (식생/오브젝트) 및 Hi-Z SSR, SSAO, Contact Shadow에 활용됩니다.
  */
-class HierarchicalZBuffer {
-    static readonly HZB_WIDTH = 512;
-    static readonly HZB_HEIGHT = 256;
-    static readonly MIP_COUNT = 8; // 512x256 -> 256x128 -> 128x64 -> 64x32 -> 32x16 -> 16x8 -> 8x4 -> 4x2
+class HierarchicalZBuffer extends RedGPUObject {
+    static HZB_WIDTH = 512;
+    static HZB_HEIGHT = 256;
+    static MIP_COUNT = 8; // 512x256 -> 256x128 -> 128x64 -> 64x32 -> 32x16 -> 16x8 -> 8x4 -> 4x2
 
-    #redGPUContext: RedGPUContext;
     #hzbTexture: GPUTexture | null = null;
     #hzbFullTextureView: GPUTextureView | null = null;
     #hzbMipViews: GPUTextureView[] = [];
@@ -40,7 +40,7 @@ class HierarchicalZBuffer {
     #isInitialized = false;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#init();
     }
 
@@ -67,7 +67,7 @@ class HierarchicalZBuffer {
         isMSAA: boolean = false
     ): void {
         if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineMip0MSAA || !this.#pipelineDownsampleSPD5 || !this.#pipelineDownsampleTail) return;
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
 
         // Mip 0 파라미터 업데이트 (해상도 변경 시에만 1회 전송 및 GC 0건 인플레이스 기록)
         if (this.#lastSrcWidth !== srcWidth || this.#lastSrcHeight !== srcHeight) {
@@ -146,7 +146,7 @@ class HierarchicalZBuffer {
     }
 
     #init(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
         // 1. HZB 텍스처 생성 (512x256, r32float, 8 Mips)

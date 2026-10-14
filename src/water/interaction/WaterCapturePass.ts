@@ -1,13 +1,13 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 import Mesh from "../../display/mesh/Mesh";
 import vertexShaderCode from "./shader/waterCapturePenetration.wgsl";
 import vertexShaderSkinnedCode from "./shader/waterCapturePenetrationSkinned.wgsl";
 import {WaterActiveMeshEntry} from "./WaterInteractionManager";
 
-export class WaterCapturePass {
-    readonly redGPUContext: RedGPUContext;
-    readonly textureSize: number = 512;
+export class WaterCapturePass extends RedGPUObject {
+    textureSize: number = 512;
 
     captureTexture: GPUTexture;
     captureTextureView: GPUTextureView;
@@ -17,7 +17,7 @@ export class WaterCapturePass {
 
     #shaderModule: GPUShaderModule;
     #pipelineLayout: GPUPipelineLayout;
-    readonly #pipelines: Map<number, GPURenderPipeline> = new Map();
+    #pipelines: Map<number, GPURenderPipeline> = new Map();
 
     #shaderModuleSkinned: GPUShaderModule;
     #pipelineSkinnedLayout: GPUPipelineLayout;
@@ -26,21 +26,21 @@ export class WaterCapturePass {
     #globalUniformBuffer: GPUBuffer;
     #globalBindGroup: GPUBindGroup;
 
-    readonly #meshUniformBuffers: GPUBuffer[] = [];
-    readonly #meshBindGroups: GPUBindGroup[] = [];
-    readonly #meshUniformData: Float32Array = new Float32Array(20);
+    #meshUniformBuffers: GPUBuffer[] = [];
+    #meshBindGroups: GPUBindGroup[] = [];
+    #meshUniformData: Float32Array = new Float32Array(20);
 
-    readonly #skinnedBindGroups: GPUBindGroup[] = [];
-    readonly #skinnedBoundStorageBuffers: (GPUBuffer | null)[] = [];
+    #skinnedBindGroups: GPUBindGroup[] = [];
+    #skinnedBoundStorageBuffers: (GPUBuffer | null)[] = [];
 
-    readonly #orthoProj: mat4 = mat4.create();
-    readonly #topView: mat4 = mat4.create();
-    readonly #viewProj: mat4 = mat4.create();
-    readonly #globalData: Float32Array = new Float32Array(20);
+    #orthoProj: mat4 = mat4.create();
+    #topView: mat4 = mat4.create();
+    #viewProj: mat4 = mat4.create();
+    #globalData: Float32Array = new Float32Array(20);
 
-    readonly #lookAtEye: Float32Array = new Float32Array(3);
-    readonly #lookAtCenter: Float32Array = new Float32Array(3);
-    readonly #lookAtUp: Float32Array = new Float32Array([0, 0, -1]);
+    #lookAtEye: Float32Array = new Float32Array(3);
+    #lookAtCenter: Float32Array = new Float32Array(3);
+    #lookAtUp: Float32Array = new Float32Array([0, 0, -1]);
 
     #renderPassDescriptor: GPURenderPassDescriptor;
 
@@ -48,7 +48,7 @@ export class WaterCapturePass {
     #meshSkinnedBGL: GPUBindGroupLayout;
 
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
-        this.redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.textureSize = textureSize;
 
         this.#createTextures();
@@ -64,7 +64,7 @@ export class WaterCapturePass {
         waterLevel: number,
         maxPenetration: number = 0.35
     ): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
         const halfSize = domainSize * 0.5;
 
         mat4.ortho(this.#orthoProj, -halfSize, halfSize, -halfSize, halfSize, 0.1, 20.0);
@@ -86,7 +86,7 @@ export class WaterCapturePass {
         this.#globalData[17] = maxPenetration;
         this.#globalData[18] = 0;
         this.#globalData[19] = 0;
-        device.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#globalData as unknown as BufferSource);
+        gpuDevice.queue.writeBuffer(this.#globalUniformBuffer, 0, this.#globalData as unknown as BufferSource);
 
         const passEncoder = commandEncoder.beginRenderPass(this.#renderPassDescriptor);
 
@@ -108,7 +108,7 @@ export class WaterCapturePass {
 
                 const buf = this.#getOrCreateMeshUniformBuffer(i);
                 this.#fillMeshUniformData(mesh, entry);
-                device.queue.writeBuffer(buf, 0, this.#meshUniformData as unknown as BufferSource);
+                gpuDevice.queue.writeBuffer(buf, 0, this.#meshUniformData as unknown as BufferSource);
 
                 if (isSkinned) {
                     const pipeline = this.#getOrCreateSkinnedPipeline();
@@ -163,9 +163,9 @@ export class WaterCapturePass {
     }
 
     #createTextures(): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
 
-        this.captureTexture = device.createTexture({
+        this.captureTexture = gpuDevice.createTexture({
             size: [this.textureSize, this.textureSize, 1],
             format: 'rg16float',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
@@ -173,7 +173,7 @@ export class WaterCapturePass {
         });
         this.captureTextureView = this.captureTexture.createView();
 
-        this.#depthTexture = device.createTexture({
+        this.#depthTexture = gpuDevice.createTexture({
             size: [this.textureSize, this.textureSize, 1],
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
@@ -199,25 +199,25 @@ export class WaterCapturePass {
     }
 
     #initPipelineLayout(): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
 
-        this.#shaderModule = device.createShaderModule({
+        this.#shaderModule = gpuDevice.createShaderModule({
             code: vertexShaderCode,
             label: 'WaterCapturePenetrationShader'
         });
 
-        this.#shaderModuleSkinned = device.createShaderModule({
+        this.#shaderModuleSkinned = gpuDevice.createShaderModule({
             code: vertexShaderSkinnedCode,
             label: 'WaterCapturePenetrationSkinnedShader'
         });
 
-        this.#globalUniformBuffer = device.createBuffer({
+        this.#globalUniformBuffer = gpuDevice.createBuffer({
             size: 96,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             label: 'WaterCapture_GlobalUniformBuffer'
         });
 
-        const globalBGL = device.createBindGroupLayout({
+        const globalBGL = gpuDevice.createBindGroupLayout({
             entries: [{
                 binding: 0,
                 visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
@@ -226,7 +226,7 @@ export class WaterCapturePass {
             label: 'WaterCapture_GlobalBGL'
         });
 
-        this.#globalBindGroup = device.createBindGroup({
+        this.#globalBindGroup = gpuDevice.createBindGroup({
             layout: globalBGL,
             entries: [{
                 binding: 0,
@@ -235,7 +235,7 @@ export class WaterCapturePass {
             label: 'WaterCapture_GlobalBindGroup'
         });
 
-        this.#meshBGL = device.createBindGroupLayout({
+        this.#meshBGL = gpuDevice.createBindGroupLayout({
             entries: [{
                 binding: 0,
                 visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
@@ -244,12 +244,12 @@ export class WaterCapturePass {
             label: 'WaterCapture_MeshBGL'
         });
 
-        this.#pipelineLayout = device.createPipelineLayout({
+        this.#pipelineLayout = gpuDevice.createPipelineLayout({
             bindGroupLayouts: [globalBGL, this.#meshBGL],
             label: 'WaterCapture_PipelineLayout'
         });
 
-        this.#meshSkinnedBGL = device.createBindGroupLayout({
+        this.#meshSkinnedBGL = gpuDevice.createBindGroupLayout({
             entries: [
                 {
                     binding: 0,
@@ -265,7 +265,7 @@ export class WaterCapturePass {
             label: 'WaterCapture_MeshSkinnedBGL'
         });
 
-        this.#pipelineSkinnedLayout = device.createPipelineLayout({
+        this.#pipelineSkinnedLayout = gpuDevice.createPipelineLayout({
             bindGroupLayouts: [globalBGL, this.#meshSkinnedBGL],
             label: 'WaterCapture_PipelineSkinnedLayout'
         });
@@ -275,8 +275,8 @@ export class WaterCapturePass {
         let pipeline = this.#pipelines.get(stride);
         if (pipeline) return pipeline;
 
-        const device = this.redGPUContext.gpuDevice;
-        pipeline = device.createRenderPipeline({
+        const {gpuDevice} = this;
+        pipeline = gpuDevice.createRenderPipeline({
             layout: this.#pipelineLayout,
             vertex: {
                 module: this.#shaderModule,
@@ -328,8 +328,8 @@ export class WaterCapturePass {
     #getOrCreateSkinnedPipeline(): GPURenderPipeline {
         if (this.#pipelineSkinned) return this.#pipelineSkinned;
 
-        const device = this.redGPUContext.gpuDevice;
-        this.#pipelineSkinned = device.createRenderPipeline({
+        const {gpuDevice} = this;
+        this.#pipelineSkinned = gpuDevice.createRenderPipeline({
             layout: this.#pipelineSkinnedLayout,
             vertex: {
                 module: this.#shaderModuleSkinned,
@@ -371,10 +371,10 @@ export class WaterCapturePass {
     }
 
     #getOrCreateMeshUniformBuffer(index: number): GPUBuffer {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
         while (index >= this.#meshUniformBuffers.length) {
             const idx = this.#meshUniformBuffers.length;
-            const buffer = device.createBuffer({
+            const buffer = gpuDevice.createBuffer({
                 size: 80,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
                 label: `WaterCapture_MeshUniformBuffer_${idx}`
@@ -391,8 +391,8 @@ export class WaterCapturePass {
             return this.#meshBindGroups[index];
         }
 
-        const device = this.redGPUContext.gpuDevice;
-        const bindGroup = device.createBindGroup({
+        const {gpuDevice} = this;
+        const bindGroup = gpuDevice.createBindGroup({
             layout: this.#meshBGL,
             entries: [{
                 binding: 0,
@@ -416,8 +416,8 @@ export class WaterCapturePass {
             return this.#skinnedBindGroups[index];
         }
 
-        const device = this.redGPUContext.gpuDevice;
-        const bindGroup = device.createBindGroup({
+        const {gpuDevice} = this;
+        const bindGroup = gpuDevice.createBindGroup({
             layout: this.#meshSkinnedBGL,
             entries: [
                 {
@@ -445,3 +445,6 @@ export class WaterCapturePass {
         this.#meshUniformData[19] = entry.footSide;
     }
 }
+
+Object.freeze(WaterCapturePass);
+

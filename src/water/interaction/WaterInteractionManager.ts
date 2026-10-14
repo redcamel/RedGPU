@@ -1,4 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 import Mesh from "../../display/mesh/Mesh";
 import WaterInteractionRegistry from "./WaterInteractionRegistry";
 
@@ -11,7 +12,7 @@ export interface WaterActiveMeshEntry {
 }
 
 class MeshMotionTracker {
-    readonly data: Float32Array = new Float32Array(7);
+    data: Float32Array = new Float32Array(7);
     isInitialized: boolean = false;
 
     get speed(): number {
@@ -77,14 +78,14 @@ class MeshMotionTracker {
     }
 }
 
-export class WaterInteractionManager {
-    readonly redGPUContext: RedGPUContext;
-    readonly #motionTrackers: Map<Mesh, MeshMotionTracker> = new Map();
+Object.freeze(MeshMotionTracker);
 
-    readonly #activeMeshBuffer: WaterActiveMeshEntry[] = [];
+export class WaterInteractionManager extends RedGPUObject {
+    #motionTrackers: Map<Mesh, MeshMotionTracker> = new Map();
+    #activeMeshBuffer: WaterActiveMeshEntry[] = [];
 
     constructor(redGPUContext: RedGPUContext) {
-        this.redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
     collectActiveMeshes(
@@ -203,3 +204,6 @@ export class WaterInteractionManager {
         }
     }
 }
+
+Object.freeze(WaterInteractionManager);
+

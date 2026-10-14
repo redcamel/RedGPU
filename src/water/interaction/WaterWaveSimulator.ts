@@ -1,9 +1,9 @@
 import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 import computeShaderCode from "./shader/waterWaveSimulation.wgsl";
 
-export class WaterWaveSimulator {
-    readonly redGPUContext: RedGPUContext;
-    readonly textureSize: number = 512;
+export class WaterWaveSimulator extends RedGPUObject {
+    textureSize: number = 512;
 
     rippleNormalTexture: GPUTexture;
     rippleNormalTextureView: GPUTextureView;
@@ -21,14 +21,14 @@ export class WaterWaveSimulator {
     #bindGroupA: GPUBindGroup;
     #bindGroupB: GPUBindGroup;
     #isBufferAPrimary: boolean = true;
-    readonly #uniformData: Float32Array = new Float32Array(8);
-    readonly #computePassDescriptor: GPUComputePassDescriptor = {
+    #uniformData: Float32Array = new Float32Array(8);
+    #computePassDescriptor: GPUComputePassDescriptor = {
         label: 'WaterWave_ComputePass'
     };
-    readonly #workgroups: number;
+    #workgroups: number;
 
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
-        this.redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.textureSize = textureSize;
         this.#workgroups = Math.ceil(textureSize / 16);
 
@@ -37,10 +37,10 @@ export class WaterWaveSimulator {
     }
 
     updateCaptureBinding(captureTextureView: GPUTextureView): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
         const bgl = this.#pipeline.getBindGroupLayout(0);
 
-        this.#bindGroupA = device.createBindGroup({
+        this.#bindGroupA = gpuDevice.createBindGroup({
             layout: bgl,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
@@ -52,7 +52,7 @@ export class WaterWaveSimulator {
             label: 'WaterWave_BindGroupA'
         });
 
-        this.#bindGroupB = device.createBindGroup({
+        this.#bindGroupB = gpuDevice.createBindGroup({
             layout: bgl,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
@@ -68,7 +68,7 @@ export class WaterWaveSimulator {
     simulate(commandEncoder: GPUCommandEncoder, shiftX: number = 0, shiftZ: number = 0): void {
         if (!this.#bindGroupA || !this.#bindGroupB) return;
 
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
 
         this.#uniformData[0] = this.waveSpeed;
         this.#uniformData[1] = this.damping;
@@ -78,7 +78,7 @@ export class WaterWaveSimulator {
         this.#uniformData[5] = 0;
         this.#uniformData[6] = 0;
         this.#uniformData[7] = 0;
-        device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as unknown as BufferSource);
+        gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformData as unknown as BufferSource);
 
         const passEncoder = commandEncoder.beginComputePass(this.#computePassDescriptor);
 
@@ -100,10 +100,10 @@ export class WaterWaveSimulator {
     }
 
     #createTextures(): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
 
         const createStorageTexture = (label: string) => {
-            return device.createTexture({
+            return gpuDevice.createTexture({
                 size: [this.textureSize, this.textureSize, 1],
                 format: 'rgba16float',
                 usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
@@ -122,20 +122,20 @@ export class WaterWaveSimulator {
     }
 
     #createPipeline(): void {
-        const device = this.redGPUContext.gpuDevice;
+        const {gpuDevice} = this;
 
-        const shaderModule = device.createShaderModule({
+        const shaderModule = gpuDevice.createShaderModule({
             code: computeShaderCode,
             label: 'WaterWaveSimulationShader'
         });
 
-        this.#uniformBuffer = device.createBuffer({
+        this.#uniformBuffer = gpuDevice.createBuffer({
             size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             label: 'WaterWave_SimUniformBuffer'
         });
 
-        const bgl = device.createBindGroupLayout({
+        const bgl = gpuDevice.createBindGroupLayout({
             entries: [
                 {
                     binding: 0,
@@ -172,12 +172,12 @@ export class WaterWaveSimulator {
             label: 'WaterWave_ComputeBGL'
         });
 
-        const pipelineLayout = device.createPipelineLayout({
+        const pipelineLayout = gpuDevice.createPipelineLayout({
             bindGroupLayouts: [bgl],
             label: 'WaterWave_ComputePipelineLayout'
         });
 
-        this.#pipeline = device.createComputePipeline({
+        this.#pipeline = gpuDevice.createComputePipeline({
             layout: pipelineLayout,
             compute: {
                 module: shaderModule,
@@ -187,3 +187,6 @@ export class WaterWaveSimulator {
         });
     }
 }
+
+Object.freeze(WaterWaveSimulator);
+

@@ -1,4 +1,5 @@
 import View3D from "../display/view/View3D";
+import RedGPUObject from "../base/RedGPUObject";
 import RedGPUContext from "../context/RedGPUContext";
 import AToneMappingEffect from "./core/AToneMappingEffect";
 import TONE_MAPPING_MODE from "./TONE_MAPPING_MODE";
@@ -26,8 +27,7 @@ import {IPostEffectResult} from "../postEffect/core/types";
  * ```
  * @category ToneMapping
  */
-class ToneMappingManager {
-    #redGPUContext: RedGPUContext;
+class ToneMappingManager extends RedGPUObject {
     #toneMapping?: AToneMappingEffect;
     #mode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
 
@@ -40,12 +40,7 @@ class ToneMappingManager {
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-    }
-
-    /** [KO] RedGPUContext 인스턴스를 반환합니다. [EN] Returns the RedGPUContext instance. */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
+        super(redGPUContext);
     }
 
     /** [KO] 현재 활성화된 톤 매핑 이펙트 인스턴스를 반환합니다. [EN] Returns the currently active tone mapping effect instance. */
@@ -119,7 +114,6 @@ class ToneMappingManager {
      */
     destroy() {
         this.clear();
-        this.#redGPUContext = null;
         console.log("🧹 ToneMappingManager destroy 완료");
     }
 
