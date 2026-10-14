@@ -347,9 +347,31 @@ export default withMermaid(defineConfig({
         ['meta', { name: 'author', content: 'RedCamel' }],
         ['meta', { property: 'og:type', content: 'website' }],
         ['meta', { property: 'og:site_name', content: 'RedGPU Documentation' }],
-        ['meta', { property: 'og:title', content: 'RedGPU' }],
-        ['meta', { property: 'og:description', content: 'RedGPU - WebGPU based 3D Graphics Engine' }],
+        ['meta', {
+            property: 'og:image',
+            content: 'https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e'
+        }],
+        ['meta', {name: 'twitter:card', content: 'summary_large_image'}],
+        ['meta', {
+            name: 'twitter:image',
+            content: 'https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e'
+        }],
     ],
+    transformHead({pageData}) {
+        const canonicalUrl = `https://redcamel.github.io/RedGPU/manual/${pageData.relativePath}`
+            .replace(/index\.md$/, '')
+            .replace(/\.md$/, '.html');
+        const pageTitle = pageData.title ? `${pageData.title} | RedGPU` : 'RedGPU Documentation';
+        const pageDescription = pageData.description || 'RedGPU - WebGPU based 3D Graphics Engine';
+        return [
+            ['link', {rel: 'canonical', href: canonicalUrl}],
+            ['meta', {property: 'og:url', content: canonicalUrl}],
+            ['meta', {property: 'og:title', content: pageTitle}],
+            ['meta', {property: 'og:description', content: pageDescription}],
+            ['meta', {name: 'twitter:title', content: pageTitle}],
+            ['meta', {name: 'twitter:description', content: pageDescription}],
+        ];
+    },
 
     // 다국어 로케일 설정 (자동 생성)
     locales: Object.fromEntries(
