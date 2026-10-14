@@ -18,7 +18,7 @@ import ABaseLight from "../core/ABaseLight";
  * @category Light
  */
 class AmbientLight extends ABaseLight {
-    #lux: number = 0
+    #lux: number
 
     /**
      * [KO] 새로운 AmbientLight 인스턴스를 생성합니다.

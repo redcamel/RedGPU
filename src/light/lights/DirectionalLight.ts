@@ -21,14 +21,14 @@ import ABaseLight from "../core/ABaseLight";
  * @category Light
  */
 class DirectionalLight extends ABaseLight {
-    #directionX: number = -1;
-    #directionY: number = -1;
-    #directionZ: number = -1;
+    #directionX: number;
+    #directionY: number;
+    #directionZ: number;
 
-    #elevation: number = 35.264389682754654;
-    #azimuth: number = 45;
+    #elevation: number;
+    #azimuth: number;
 
-    #lux: number = 100000;
+    #lux: number;
 
     /**
      * [KO] 새로운 DirectionalLight 인스턴스를 생성합니다.

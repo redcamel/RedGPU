@@ -42,7 +42,7 @@ class ClusterLightManager extends RedGPUObject {
      */
     constructor(view: View3D) {
         super(view.redGPUContext)
-        const {resourceManager, gpuDevice} = this
+        const {resourceManager} = this
         this.#view = view
 
         this.#clusterLightsBufferData = new Float32Array((16 * PassClustersLightHelper.MAX_CLUSTER_LIGHTS) + 4)
@@ -52,7 +52,6 @@ class ClusterLightManager extends RedGPUObject {
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
             }
         )
-        gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
 
         this.#passClusterLightBound = new PassClusterLightBound(this.redGPUContext, this.#view)
         this.#passClustersLight = new PassClustersLight(this.redGPUContext, this.#view, this.#passClusterLightBound)

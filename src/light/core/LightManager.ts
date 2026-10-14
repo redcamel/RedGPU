@@ -320,7 +320,6 @@ class LightManager {
         this.#directionalLights.forEach(cleanupLight);
         this.#pointLights.forEach(cleanupLight);
         this.#spotLights.forEach(cleanupLight);
-        cleanupLight(this.#ambientLight);
 
         this.#directionalLights.length = 0;
         this.#pointLights.length = 0;

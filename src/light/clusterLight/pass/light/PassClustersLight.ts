@@ -30,7 +30,6 @@ class PassClustersLight extends RedGPUObject {
     #clusterLightBindGroupLayout: GPUBindGroupLayout
     #clusterLightsBuffer: GPUBuffer
     #passClusterLightBound: PassClusterLightBound
-    #source
 
     /**
      * [KO] 새로운 PassClustersLight 인스턴스를 생성합니다.
@@ -100,13 +99,12 @@ class PassClustersLight extends RedGPUObject {
         this.#clusterLightPipeline = null;
         this.#passClusterLightBound = null;
         this.#clusterLightBindGroupLayout = null
-        this.#source = null
         this.#view = null;
     }
 
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
-        this.#source = resourceManager.wgslParser.parse('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
+        const source = resourceManager.wgslParser.parse('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
         this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
             size: PassClustersLightHelper.getClusterLightsBufferSize(),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -143,7 +141,7 @@ class PassClustersLight extends RedGPUObject {
             }),
             compute: {
                 module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER', {
-                    code: this.#source,
+                    code: source,
                 }),
                 entryPoint: 'main'
             }

@@ -36,7 +36,7 @@ class SpotLight extends ABaseLight {
     #directionZ: number = 0;
     #innerCutoff: number = 0.0;
     #outerCutoff: number = 44.0;
-    #lumen: number = 1000;
+    #lumen: number;
 
     /**
      * [KO] 새로운 SpotLight 인스턴스를 생성합니다.

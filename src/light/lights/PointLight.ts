@@ -29,7 +29,7 @@ class PointLight extends ABaseLight {
     #x: number = 0;
     #y: number = 0;
     #z: number = 0;
-    #lumen: number = 1000;
+    #lumen: number;
 
     /**
      * [KO] 새로운 PointLight 인스턴스를 생성합니다.
