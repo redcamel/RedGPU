@@ -1,11 +1,10 @@
-import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 import type Landscape from "../../Landscape";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import type RenderViewStateData from "../../../display/view/core/RenderViewStateData";
 
-class LandscapeRenderer {
-    #landscape: Landscape;
-    #redGPUContext: RedGPUContext;
+class LandscapeRenderer extends RedGPUObject {
+    #landscape: Landscape | null;
 
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #cachedRenderPipeline: GPURenderPipeline | null = null;
@@ -15,8 +14,8 @@ class LandscapeRenderer {
     #lastRenderMsaaID: string = '';
 
     constructor(landscape: Landscape) {
+        super(landscape.redGPUContext);
         this.#landscape = landscape;
-        this.#redGPUContext = landscape.redGPUContext;
     }
 
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
@@ -25,6 +24,7 @@ class LandscapeRenderer {
         if (!renderPassEncoder) return;
 
         const landscape = this.#landscape;
+        if (!landscape) return;
         const material = landscape.material;
         const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
@@ -86,12 +86,13 @@ class LandscapeRenderer {
     }
 
     getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const {gpuDevice, antialiasingManager, resourceManager} = this;
         const landscape = this.#landscape;
+        if (!landscape) return null;
         const material = landscape.material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
-        const {msaaID, useMSAA} = this.#redGPUContext.antialiasingManager;
+        const {msaaID, useMSAA} = antialiasingManager;
         const sampleCount = useMSAA ? 4 : 1;
         const isWireframe = !!landscape.debuggerManager?.landscapeWireframe;
         const topology = isWireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
@@ -110,18 +111,17 @@ class LandscapeRenderer {
         const variantKey = fragModule.label || 'default';
         const key = `${topology}_${material.uuid}_${variantKey}_${msaaID}`;
 
-        if (this.#renderPipelineCache.has(key)) {
-            const pipeline = this.#renderPipelineCache.get(key)!;
-            this.#cachedRenderPipeline = pipeline;
+        const cachedPipeline = this.#renderPipelineCache.get(key);
+        if (cachedPipeline) {
+            this.#cachedRenderPipeline = cachedPipeline;
             this.#lastRenderTopology = topology;
             this.#lastRenderMaterialUUID = material.uuid;
             this.#lastRenderVariantModule = fragModule;
             this.#lastRenderMsaaID = msaaID;
-            return pipeline;
+            return cachedPipeline;
         }
 
         try {
-            const resourceManager = this.#redGPUContext.resourceManager;
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
             const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 
@@ -182,11 +182,11 @@ class LandscapeRenderer {
 
     destroy(): void {
         this.clearPipelineCaches();
-        this.#landscape = null!;
-        this.#redGPUContext = null!;
+        this.#landscape = null;
     }
 }
 
 Object.freeze(LandscapeRenderer);
 export default LandscapeRenderer;
+
 

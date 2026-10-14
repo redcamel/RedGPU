@@ -1,3 +1,4 @@
+import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
@@ -31,13 +32,14 @@ import TextField3D from "../../textFields/textField3D/TextField3D";
  *
  * @category Debugger
  */
-abstract class ADrawDebuggerLight<T extends ABaseLight> {
+abstract class ADrawDebuggerLight<T extends ABaseLight> extends RedGPUObject {
     #lightMaterial: ColorMaterial;
     #lightDebugMesh: Mesh;
     #target: T;
     #label: TextField3D;
 
-    protected constructor(redGPUContext: RedGPUContext, target: T, labelIcon: string, color: [number, number, number], maxLines: number = 32) {
+    constructor(redGPUContext: RedGPUContext, target: T, labelIcon: string, color: [number, number, number], maxLines: number = 32) {
+        super(redGPUContext);
         this.#target = target;
         const lightGeometry = this.#createLightDebugGeometry(redGPUContext, maxLines);
         this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));

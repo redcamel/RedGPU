@@ -1,3 +1,4 @@
+import RedGPUObject from "../../base/RedGPUObject";
 import RedGPUContext from "../RedGPUContext";
 
 /**
@@ -9,7 +10,7 @@ import RedGPUContext from "../RedGPUContext";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  */
-class RedGPUContextDetector {
+class RedGPUContextDetector extends RedGPUObject {
     #gpuAdapter: GPUAdapter;
     #adapterInfo: GPUAdapterInfo;
     #supportedLimits: GPUSupportedLimits;
@@ -36,6 +37,7 @@ class RedGPUContextDetector {
      * [EN] RedGPUContextDetector constructor
      */
     constructor(redGPUContext: RedGPUContext) {
+        super(redGPUContext);
         const ua = navigator.userAgent;
         this.#userAgent = ua;
 
@@ -299,4 +301,5 @@ class RedGPUContextDetector {
     }
 }
 
+Object.freeze(RedGPUContextDetector);
 export default RedGPUContextDetector;

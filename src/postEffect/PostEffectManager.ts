@@ -1,4 +1,5 @@
 import {mat4} from "gl-matrix";
+import RedGPUObject from "../base/RedGPUObject";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
@@ -33,12 +34,12 @@ import keepLog from "../utils/keepLog";
  *
  * @category Core
  */
-class PostEffectManager {
+class PostEffectManager extends RedGPUObject {
     /**
      * [KO] 연결된 View3D 인스턴스 (읽기 전용)
      * [EN] Connected View3D instance (read-only)
      */
-    readonly #view: View3D
+    #view: View3D
     /**
      * [KO] 등록된 후처리 이펙트 리스트
      * [EN] List of registered post-processing effects
@@ -102,8 +103,9 @@ class PostEffectManager {
      * [EN] View3D instance
      */
     constructor(view: View3D) {
+        super(view.redGPUContext);
         this.#view = view;
-        this.#texturePool = new PostEffectTexturePool(this.#view.redGPUContext);
+        this.#texturePool = new PostEffectTexturePool(this.redGPUContext);
         this.#init();
         this.#initGBufferLayouts();
     }
@@ -117,7 +119,7 @@ class PostEffectManager {
      * [EN] G-Buffer bind group layout
      */
     get gbufferBindGroupLayout(): GPUBindGroupLayout {
-        return this.#view.redGPUContext.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
+        return this.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
     }
 
     /**

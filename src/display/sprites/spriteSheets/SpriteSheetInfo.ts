@@ -1,6 +1,6 @@
+import RedGPUObject from "../../../base/RedGPUObject";
 import RedGPUContext from "../../../context/RedGPUContext";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
@@ -22,7 +22,7 @@ import validateUintRange from "../../../runtimeChecker/validateFunc/validateUint
  * ```
  * @category SpriteSheet
  */
-class SpriteSheetInfo {
+class SpriteSheetInfo extends RedGPUObject {
     /**
      * [KO] 가로 세그먼트 수 (텍스처를 가로로 몇 개로 나눌지)
      * [EN] Number of horizontal segments (how many parts to divide the texture horizontally)
@@ -99,7 +99,7 @@ class SpriteSheetInfo {
         loop: boolean = true,
         frameRate: number = 60
     ) {
-        validateRedGPUContext(redGPUContext)
+        super(redGPUContext)
         validateUintRange(segmentW)
         validateUintRange(segmentH)
         validateUintRange(totalFrame)

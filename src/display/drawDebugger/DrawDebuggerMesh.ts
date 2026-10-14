@@ -1,3 +1,4 @@
+import RedGPUObject from "../../base/RedGPUObject";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
@@ -45,7 +46,7 @@ const EDGES = [
  *
  * @category Debugger
  */
-class DrawDebuggerMesh {
+class DrawDebuggerMesh extends RedGPUObject {
     #target: Mesh;
     #vertexBuffer: VertexBuffer;
     #material: ColorMaterial;
@@ -59,6 +60,7 @@ class DrawDebuggerMesh {
     #cachedAABB: AABB | null = null;
 
     constructor(redGPUContext: RedGPUContext, target: Mesh) {
+        super(redGPUContext);
         this.#target = target;
         const geometry = this.#createWireframeBoxGeometry(redGPUContext);
         this.#vertexBuffer = geometry.vertexBuffer;
