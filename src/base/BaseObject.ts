@@ -5,7 +5,7 @@ import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
  * [KO] RedGPU의 모든 엔진 객체가 상속받는 최상위 추상 클래스입니다.
  * [EN] Top-level abstract class inherited by all engine objects in RedGPU.
  *
- * [KO] 객체별 고유 식별자(`uuid`), 클래스별 순차 인스턴스 번호(`instanceId`), 객체 이름(`name`) 등 엔진 전반의 객체 식별 및 관리에 필요한 공통 속성을 제공합니다.
+ * [KO] 객체별 고유 식별자(`uuid`), 클래스별 순차 인스턴스 번호(`instanceId`), 객체 이름(`name`) 등 엔진 전반의 객체 식별과 관리에 필요한 공통 속성을 제공합니다.
  * [EN] Provides common properties required for object identification and management across the engine, including a universally unique identifier (`uuid`), per-class sequential instance ID (`instanceId`), and object name (`name`).
  *
  * ::: warning
@@ -16,44 +16,61 @@ import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
  * @category Core
  */
 abstract class BaseObject {
-    /**
-     * [KO] 클래스별로 0부터 순차 부여되는 고유 인스턴스 순번 ID입니다.
-     * [EN] Unique sequential instance ID assigned starting from 0 per class.
-     */
-    readonly instanceId: number;
-    #uuid: string = createUUID();
+    #instanceId: number;
+    #uuid: string = '';
     #name: string = '';
 
     /**
-     * [KO] BaseObject의 생성자입니다.
-     * [EN] Constructor for BaseObject.
+     * [KO] `BaseObject` 인스턴스를 초기화하고 클래스별 고유 `instanceId`를 할당합니다.
+     * [EN] Initializes the `BaseObject` instance and assigns a per-class unique `instanceId`.
      */
-    protected constructor() {
-        this.instanceId = InstanceIdGenerator.getNextId(this.constructor);
+    constructor() {
+        this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
     }
 
     /**
-     * [KO] 객체의 고유 식별자(UUID v4)를 반환합니다.
-     * [EN] Returns the universally unique identifier (UUID v4) of the object.
+     * [KO] 클래스별로 0부터 순차 부여되는 고유 인스턴스 번호를 반환합니다.
+     * [EN] Returns the unique sequential instance ID assigned starting from 0 per class.
+     *
+     * @returns
+     * [KO] 클래스별 고유 인스턴스 번호
+     * [EN] Per-class unique instance ID
+     */
+    get instanceId(): number {
+        return this.#instanceId;
+    }
+
+    /**
+     * [KO] 객체의 고유 식별자(UUID)를 반환합니다.
+     * [EN] Returns the universally unique identifier (UUID) of the object.
      *
      * @returns
      * [KO] 객체의 UUID 문자열
      * [EN] UUID string of the object
      */
     get uuid(): string {
+        if (!this.#uuid) {
+            this.#uuid = createUUID();
+        }
         return this.#uuid;
     }
 
     /**
-     * [KO] 객체의 이름을 가져오거나 설정합니다. 이름이 지정되지 않았거나 빈 문자열(`''`)인 경우 클래스명과 `instanceId`를 조합한 기본 이름을 반환합니다.
-     * [EN] Gets or sets the name of the object. If no name is set or it is an empty string (`''`), returns a default name combining the class name and `instanceId`.
+     * [KO] 객체의 이름을 반환하거나 설정합니다.
+     * [EN] Gets or sets the name of the object.
+     *
+     * [KO] 이름이 별도로 설정되지 않은 경우 클래스명과 `instanceId`를 조합한 기본 이름(`ClassName Instance N`)을 반환합니다.
+     * [EN] If no name has been explicitly set, returns a default name combining the class name and `instanceId` (`ClassName Instance N`).
      *
      * @returns
      * [KO] 객체 이름 문자열
      * [EN] Object name string
      */
     get name(): string {
-        return this.#name || `${this.constructor.name} Instance ${this.instanceId}`;
+        if (!this.#name) {
+            this.#name = `${this.constructor.name} Instance ${this.#instanceId}`;
+        }
+        return this.#name;
     }
 
     set name(value: string) {
