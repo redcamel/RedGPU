@@ -5,46 +5,60 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 
-
+/**
+ * [KO] `FXAA` 클래스의 동적 정의 프로퍼티 인터페이스입니다.
+ * [EN] Interface for dynamically defined properties of the `FXAA` class.
+ */
 interface FXAA {
-    /** [KO] 서브픽셀 필터링 강도. 값이 클수록 미세한 지터링과 계단 현상이 더 부드럽게 제거됩니다. [EN] Subpixel filtering intensity. Higher values remove fine jitter and aliasing more smoothly. */
+    /**
+     * [KO] 서브픽셀 안티앨리어싱 강도입니다. 범위는 `0.0` ~ `1.0`이며 기본값은 `0.75`입니다. 값이 클수록 미세한 고주파 노이즈와 지터링이 부드럽게 완화됩니다.
+     * [EN] Subpixel anti-aliasing intensity. Ranges from `0.0` to `1.0` with a default of `0.75`. Higher values smoothly attenuate fine high-frequency noise and jittering.
+     */
     subpix: number
-    /** [KO] 엣지 감지 임계값. 값이 작을수록 더 많은 영역을 엣지로 판단하여 처리합니다. [EN] Edge detection threshold. Lower values classify more areas as edges. */
+    /**
+     * [KO] 로컬 대비 기반 엣지 검출 임계값입니다. 범위는 `0.0001` ~ `0.25`이며 기본값은 `0.125`입니다. 값이 작을수록 더 많은 영역을 엣지로 판별하여 필터링합니다.
+     * [EN] Edge detection threshold based on local contrast. Ranges from `0.0001` to `0.25` with a default of `0.125`. Lower values classify more regions as edges for filtering.
+     */
     edgeThreshold: number
-    /** [KO] 최소 엣지 임계값. 매우 어두운 영역에서 처리를 무시할 기준점입니다. [EN] Minimum edge threshold. Criterion to ignore processing in very dark areas. */
+    /**
+     * [KO] 어두운 영역에서 불필요한 엣지 처리를 건너뛰기 위한 최소 대비 임계값입니다. 범위는 `0.00001` ~ `0.1`이며 기본값은 `0.0625`입니다.
+     * [EN] Minimum contrast threshold to skip unnecessary edge processing in dark regions. Ranges from `0.00001` to `0.1` with a default of `0.0625`.
+     */
     edgeThresholdMin: number
 }
 
 /**
- * [KO] FXAA(Fast Approximate Anti-Aliasing) 후처리 이펙트입니다.
- * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing effect.
+ * [KO] FXAA(Fast Approximate Anti-Aliasing) 후처리 안티앨리어싱 이펙트 클래스입니다.
+ * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing anti-aliasing effect class.
  *
- * [KO] 화면의 색상 대비(Luminance Contrast)를 분석하여 엣지 부분을 부드럽게 처리하는 저비용 안티앨리어싱 기법입니다. 별도의 기하학적 정보 없이 오직 이미지 정보를 이용하므로 연산 효율이 매우 우수합니다.
- * [EN] A low-cost anti-aliasing technique that smoothens edges by analyzing screen luminance contrast. It is highly computationally efficient as it relies solely on image information without requiring geometric data.
- *
- * [KO] 이 효과는 LDR 공간에서 동작하여 색상 대비 분석이 가장 정확하게 수행되도록 설계되었습니다.
- * [EN] This effect operates in LDR space, ensuring that color contrast analysis is performed most accurately.
+ * [KO] 톤매핑 이후의 LDR(Low Dynamic Range) 화면 공간에서 픽셀 간 휘도 대비(Luminance Contrast)를 분석하여 계단 현상(Aliasing)이 발생한 외곽선을 검출하고 부드럽게 보간합니다. 기하 정보나 히스토리 버퍼 없이 단일 컴퓨트 패스로 동작하므로 연산 비용이 매우 낮습니다.
+ * [EN] Analyzes pixel luminance contrast in LDR (Low Dynamic Range) screen space after tone mapping to detect and smoothly interpolate aliased edges. Operates in a single compute pass without geometric data or history buffers, offering very low computational cost.
  *
  * ::: warning
- * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * // [KO] AntialiasingManager를 통해 FXAA를 활성화합니다.
- * // [EN] Enable FXAA via AntialiasingManager.
  * redGPUContext.antialiasingManager.useFXAA = true;
+ *
+ * const fxaa = view.fxaa;
+ * fxaa.subpix = 0.75;
+ * fxaa.edgeThreshold = 0.125;
+ * fxaa.edgeThresholdMin = 0.0625;
  * ```
  *
- * @category PostEffect
+ * @category Antialiasing
  */
 class FXAA extends ASinglePassPostEffect {
     /**
-     * [KO] FXAA 인스턴스를 생성합니다.
-     * [EN] Creates an FXAA instance.
+     * [KO] `FXAA` 인스턴스를 생성합니다.
+     * [EN] Creates an `FXAA` instance.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     * @param redGPUContext -
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -64,3 +78,4 @@ definePositiveNumber(FXAA, [
 ])
 Object.freeze(FXAA);
 export default FXAA;
+

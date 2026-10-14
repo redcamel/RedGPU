@@ -10,39 +10,35 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
 import TAACASPass from "./cas/TAACASPass";
 
 /**
- * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
- * [EN] TAA (Temporal Anti-Aliasing) post-processing effect.
+ * [KO] TAA(Temporal Anti-Aliasing) 후처리 안티앨리어싱 이펙트 클래스입니다.
+ * [EN] TAA (Temporal Anti-Aliasing) post-processing anti-aliasing effect class.
  *
- * [KO] 이전 프레임들의 정보를 현재 프레임에 누적하여 계단 현상을 제거하는 고품질 안티앨리어싱 기법입니다. 화면이 정지해 있을 때도 부드러운 외곽선을 유지하며, MSAA보다 적은 비용으로 우수한 품질을 제공합니다.
- * [EN] A high-quality anti-aliasing technique that removes aliasing by accumulating information from previous frames into the current frame. It maintains smooth edges even when the screen is static and provides superior quality at a lower cost than MSAA.
- *
- * [KO] 이 효과는 지터링(Jittering)된 투영 행렬과 모션 벡터(Motion Vector)를 활용하여 프레임 간의 픽셀 대응점을 추적합니다.
- * [EN] This effect utilizes jittered projection matrices and motion vectors to track pixel correspondences between frames.
+ * [KO] 서브픽셀 지터링(Jittering)이 적용된 투영 행렬과 모션 벡터(Motion Vector), 선형 깊이 검증, 및 YCoCg 색공간 3D Ray-Box 클리핑을 결합하여 이전 프레임들의 샘플을 현재 프레임에 누적함으로써 공간적·시간적 계단 현상과 깜빡임(Shimmering)을 제거합니다. 톤매핑 이후에는 후속 `TAACASPass`(AMD FidelityFX CAS)를 통해 시간적 누적으로 인한 미세 블러를 복원합니다.
+ * [EN] Combines subpixel-jittered projection matrices, motion vectors, linear depth rejection, and YCoCg 3D Ray-Box clipping to accumulate samples from previous frames into the current frame, eliminating spatial and temporal aliasing as well as shimmering. After tone mapping, a subsequent `TAACASPass` (AMD FidelityFX CAS) restores fine sharpness lost during temporal accumulation.
  *
  * ::: warning
- * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * // [KO] AntialiasingManager를 통해 TAA를 활성화합니다.
- * // [EN] Enable TAA via AntialiasingManager.
  * redGPUContext.antialiasingManager.useTAA = true;
+ *
+ * const taa = view.taa;
+ * taa.sharpness = 0.5;
+ * taa.jitterStrength = 1.0;
  * ```
  *
- * @category PostEffect
+ * @category Antialiasing
  */
 class TAA extends ASinglePassPostEffect {
     #historyTextures: [GPUTexture, GPUTexture] = [null, null];
     #historyTextureViews: [GPUTextureView, GPUTextureView] = [null, null];
     #historyResults: [IPostEffectResult, IPostEffectResult] = [null, null];
     #historyIndex: number = 0;
-    /** [KO] 현재 프레임 누적 인덱스 [EN] Current frame accumulation index */
     #frameIndex: number = 0;
-    /** [KO] 지터링 강도 [EN] Jitter strength */
     #jitterStrength: number = 1.0;
-    /** [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 패스 [EN] AMD FidelityFX CAS sharpening pass following TAA */
     #casPass: TAACASPass;
     #prevJitterOffset: [number, number] = [0, 0];
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
@@ -50,10 +46,12 @@ class TAA extends ASinglePassPostEffect {
     #prevInfo: { width: number, height: number };
 
     /**
-     * [KO] TAA 인스턴스를 생성합니다.
-     * [EN] Creates a TAA instance.
+     * [KO] `TAA` 인스턴스를 생성합니다.
+     * [EN] Creates a `TAA` instance.
      *
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     * @param redGPUContext -
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {x: 8, y: 8, z: 1});
@@ -78,89 +76,103 @@ class TAA extends ASinglePassPostEffect {
 
     /**
      * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 강도를 반환합니다.
-     * [EN] Returns the sharpening strength of AMD FidelityFX CAS following TAA.
+     * [EN] Returns the sharpening strength of the subsequent AMD FidelityFX CAS pass.
+     *
+     * ### Example
+     * ```typescript
+     * const sharpness = view.taa.sharpness;
+     * ```
      *
      * @returns
-     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대, 기본값: 0.5)
-     * [EN] Sharpening strength (0.0: disabled, 1.0: max, default: 0.5)
+     * [KO] 샤프닝 강도 (`0.0` ~ `1.0`, 기본값: `0.5`)
+     * [EN] Sharpening strength (`0.0` to `1.0`, default: `0.5`)
      */
     get sharpness(): number {
         return this.#casPass.sharpness;
     }
 
     /**
-     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 강도를 설정합니다.
-     * [EN] Sets the sharpening strength of AMD FidelityFX CAS following TAA.
+     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 강도를 설정합니다. `0.0`으로 설정하면 CAS 패스가 생략됩니다.
+     * [EN] Sets the sharpening strength of the subsequent AMD FidelityFX CAS pass. Setting to `0.0` skips the CAS pass.
+     *
+     * ### Example
+     * ```typescript
+     * view.taa.sharpness = 0.6;
+     * ```
      *
      * @param value -
-     * [KO] 샤프닝 강도 (0.0: 비활성화, 1.0: 최대)
-     * [EN] Sharpening strength to set (0.0: disabled, 1.0: max)
+     * [KO] 샤프닝 강도 (`0.0` ~ `1.0`)
+     * [EN] Sharpening strength (`0.0` to `1.0`)
      */
     set sharpness(value: number) {
         this.#casPass.sharpness = value;
     }
 
     /**
-     * [KO] TAA 후속 AMD FidelityFX CAS 선명도 복원 패스 인스턴스를 반환합니다.
-     * [EN] Returns the AMD FidelityFX CAS sharpening pass instance following TAA.
+     * [KO] TAA 후속 선명도 복원을 담당하는 `TAACASPass` 인스턴스를 반환합니다.
+     * [EN] Returns the `TAACASPass` instance responsible for post-TAA sharpness restoration.
      *
-     * @returns [KO] TAACASPass 인스턴스 [EN] TAACASPass instance
+     * @returns
+     * [KO] `TAACASPass` 인스턴스
+     * [EN] `TAACASPass` instance
      */
     get casPass(): TAACASPass {
         return this.#casPass;
     }
 
     /**
-     * [KO] 이전 프레임의 지터링 없는 투영 뷰(Projection-View) 행렬을 반환합니다.
-     * [EN] Returns the non-jittered projection-view matrix of the previous frame.
+     * [KO] 이전 프레임의 지터링이 제거된 투영-뷰(Projection-View) 행렬을 반환합니다.
+     * [EN] Returns the non-jittered projection-view matrix from the previous frame.
      *
      * @returns
-     * [KO] 이전 프레임의 투영 뷰 행렬
-     * [EN] Non-jittered projection-view matrix of the previous frame
+     * [KO] 이전 프레임의 비-지터 투영-뷰 행렬 (`mat4`)
+     * [EN] Non-jittered projection-view matrix (`mat4`) of the previous frame
      */
     get prevNoneJitterProjectionViewMatrix(): mat4 {
         return this.#prevNoneJitterProjectionViewMatrix;
     }
 
     /**
-     * [KO] 프레임 인덱스를 반환합니다.
-     * [EN] Returns the frame index.
+     * [KO] 현재 누적된 TAA 프레임 인덱스를 반환합니다.
+     * [EN] Returns the currently accumulated TAA frame index.
      *
      * @returns
-     * [KO] 프레임 인덱스
-     * [EN] Frame index
+     * [KO] 누적 프레임 인덱스
+     * [EN] Accumulated frame index
      */
     get frameIndex(): number {
         return this.#frameIndex;
     }
 
     /**
-     * [KO] TAA 누적 히스토리를 즉시 리셋합니다 (카메라 컷/씬 전환/텔레포트 시 호출).
-     * [EN] Immediately resets the TAA accumulation history (call during camera cut/scene change/teleport).
-     */
-    reset(): void {
-        this.#frameIndex = 0;
-    }
-    #targetAllocResult: IPostEffectResult = null;
-
-    /**
-     * [KO] 지터링 강도를 반환합니다.
-     * [EN] Returns the jitter strength.
+     * [KO] 서브픽셀 카메라 지터링 강도를 반환합니다.
+     * [EN] Returns the subpixel camera jitter strength.
+     *
+     * ### Example
+     * ```typescript
+     * const jitterStrength = view.taa.jitterStrength;
+     * ```
      *
      * @returns
-     * [KO] 지터링 강도 (기본값: 1.0)
-     * [EN] Jitter strength (default: 1.0)
+     * [KO] 지터링 강도 (기본값: `1.0`)
+     * [EN] Jitter strength (default: `1.0`)
      */
     get jitterStrength(): number {
         return this.#jitterStrength;
     }
+    #targetAllocResult: IPostEffectResult = null;
 
     /**
-     * [KO] 지터링 강도를 설정합니다.
-     * [EN] Sets the jitter strength.
+     * [KO] 서브픽셀 카메라 지터링 강도를 설정합니다.
+     * [EN] Sets the subpixel camera jitter strength.
+     *
+     * ### Example
+     * ```typescript
+     * view.taa.jitterStrength = 1.0;
+     * ```
      *
      * @param value -
-     * [KO] 지터링 강도
+     * [KO] 설정할 지터링 강도
      * [EN] Jitter strength to set
      */
     set jitterStrength(value: number) {
@@ -168,41 +180,53 @@ class TAA extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns the video memory usage.
+     * [KO] TAA 유니폼 버퍼 및 핑퐁 히스토리 텍스처가 점유 중인 총 비디오 메모리 크기(Bytes)를 반환합니다.
+     * [EN] Returns the total video memory size in bytes occupied by the TAA uniform buffer and ping-pong history textures.
      *
      * @returns
-     * [KO] 비디오 메모리 바이트 수
-     * [EN] Video memory size in bytes
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
     /**
-     * [KO] TAA 이펙트를 렌더링합니다 (Zero-Copy 핑퐁 스왑).
-     * [EN] Renders the TAA effect (Zero-Copy Ping-Pong swap).
+     * [KO] TAA 누적 프레임 인덱스를 `0`으로 초기화하여 이전 프레임 히스토리를 즉시 폐기합니다.
+     * [EN] Resets the TAA accumulated frame index to `0`, immediately discarding previous frame history.
+     *
+     * ### Example
+     * ```typescript
+     * view.taa.reset();
+     * ```
+     */
+    reset(): void {
+        this.#frameIndex = 0;
+    }
+
+    /**
+     * [KO] TAA 컴퓨트 패스를 실행하고 핑퐁 히스토리 텍스처 결과를 반환합니다.
+     * [EN] Executes the TAA compute pass and returns the ping-pong history texture result.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 렌더링 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance for rendering
      * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
+     * [KO] 렌더 타겟 너비 (픽셀)
+     * [EN] Render target width in pixels
      * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
+     * [KO] 렌더 타겟 높이 (픽셀)
+     * [EN] Render target height in pixels
      * @param sourceTextureInfo -
-     * [KO] 입력으로 사용될 소스 텍스처 정보
-     * [EN] Source texture information to be used as input
+     * [KO] 현재 프레임의 입력 소스 텍스처 정보
+     * [EN] Input source texture information of the current frame
      * @returns
-     * [KO] 렌더링 결과 (텍스처 및 뷰)
-     * [EN] Rendering result (texture and view)
+     * [KO] TAA가 적용된 출력 텍스처 결과 (`IPostEffectResult`)
+     * [EN] Output texture result (`IPostEffectResult`) with TAA applied
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         this.#frameIndex++;
 
-        // 유니폼 업데이트
         this.updateUniform('frameIndex', this.#frameIndex);
         this.updateUniform('currJitterOffset', view.jitterOffset);
         this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
@@ -210,7 +234,6 @@ class TAA extends ASinglePassPostEffect {
         this.#prevJitterOffset[0] = view.jitterOffset[0];
         this.#prevJitterOffset[1] = view.jitterOffset[1];
 
-        // 🌟 히스토리 텍스처 2장 확보 (Zero-Copy 핑퐁)
         this.#updateHistoryTextures(width, height);
 
         const readIndex = this.#historyIndex;
@@ -219,29 +242,25 @@ class TAA extends ASinglePassPostEffect {
         const historyInfo = this.#historyResults[readIndex];
         const targetOutputResult = this.#historyResults[writeIndex];
 
-        // 🌟 [방법 2] ASinglePassPostEffect 원본을 100% 유지하면서 풀 할당 함수만 일시 가로채기 (Zero-GC Hooking)
         const pool = view.postEffectManager.texturePool;
         const originalAlloc = pool.allocResult;
 
         this.#targetAllocResult = targetOutputResult;
         pool.allocResult = this.#hookedAllocResult;
 
-        // ASinglePassPostEffect 원본의 super.render() 호출
         const result = super.render(view, width, height, sourceTextureInfo, historyInfo);
 
-        // 원래 풀 함수 및 임시 참조 원복
         pool.allocResult = originalAlloc;
         this.#targetAllocResult = null;
 
-        // 다음 프레임을 위한 히스토리 인덱스 스왑
         this.#historyIndex = writeIndex;
 
         return result;
     }
 
     /**
-     * [KO] TAA 리소스를 해제합니다.
-     * [EN] Clears TAA resources.
+     * [KO] TAA 히스토리 텍스처 및 후속 `TAACASPass`의 캐시 리소스를 정리합니다.
+     * [EN] Clears TAA history textures and cached resources of the subsequent `TAACASPass`.
      */
     clear() {
         super.clear();
@@ -261,17 +280,6 @@ class TAA extends ASinglePassPostEffect {
 
     #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;
 
-    /**
-     * [KO] 핑퐁 스왑용 히스토리 텍스처 2장을 관리합니다.
-     * [EN] Manages 2 history textures for ping-pong swapping.
-     *
-     * @param width -
-     * [KO] 텍스처 너비
-     * [EN] Texture width
-     * @param height -
-     * [KO] 텍스처 높이
-     * [EN] Texture height
-     */
     #updateHistoryTextures(width: number, height: number) {
         if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTextures[0]) {
             if (this.#historyTextures[0]) this.#historyTextures[0].destroy();
@@ -301,10 +309,6 @@ class TAA extends ASinglePassPostEffect {
         }
     }
 
-    /**
-     * [KO] TAA에 사용되는 비디오 메모리 사용량을 계산합니다.
-     * [EN] Calculates the video memory usage for TAA.
-     */
     #calcTAAVideoMemory() {
         this.#videoMemorySize = this.uniformBuffer ? this.uniformBuffer.size : 0;
         if (this.#historyTextures[0]) {
@@ -315,3 +319,4 @@ class TAA extends ASinglePassPostEffect {
 
 Object.freeze(TAA);
 export default TAA;
+

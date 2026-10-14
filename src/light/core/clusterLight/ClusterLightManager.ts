@@ -16,6 +16,13 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D 인스턴스를 통해 접근합니다.
+ * // [EN] Access via a View3D instance.
+ * const clusterLightManager = view.clusterLightManager;
+ * ```
+ *
  * @see [PointLight Performance Example](/RedGPU/examples/3d/light/pointLightPerformance/)
  * @see [SpotLight Performance Example](/RedGPU/examples/3d/light/spotLightPerformance/)
  * @category Light
