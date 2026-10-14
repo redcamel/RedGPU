@@ -144,8 +144,39 @@ const filterLanguageFiles = (dir, currentLang) => {
                 processed = linesAfterFilter.join('\n');
             }
 
+            // Get Signature만 존재하고 Set Signature가 없는 읽기 전용 Accessor에 `readonly` 배지 자동 주입
+            if (processed.includes('#### Get Signature')) {
+                const sectionBlocks = processed.split(/(?=^#{2,3} )/m);
+                for (let i = 0; i < sectionBlocks.length; i++) {
+                    const block = sectionBlocks[i];
+                    if (
+                        block.startsWith('### ') &&
+                        block.includes('#### Get Signature') &&
+                        !block.includes('#### Set Signature') &&
+                        !block.includes('readonly-badge')
+                    ) {
+                        sectionBlocks[i] = block.replace(
+                            /^> (?:`readonly` )?\*\*get\*\* /m,
+                            '> <span class="readonly-badge">readonly</span> **get** '
+                        );
+                    }
+                }
+                processed = sectionBlocks.join('');
+            }
+
+            // 일반 readonly 프로퍼티(`> `readonly` **prop**`)에도 동일한 readonly-badge 스타일 적용
+            if (processed.includes('> `readonly` ')) {
+                processed = processed.replace(/^> `readonly` /gm, '> <span class="readonly-badge">readonly</span> ');
+            }
+
             // 상속된 속성과 메서드를 분리하여 각각 '상속받은 속성', '상속받은 메서드' H2 아래로 배치하는 로직
-            if (processed.includes('Inherited from') || processed.includes('#### Inherited from')) {
+            if (
+                (processed.includes('Inherited from') || processed.includes('#### Inherited from')) &&
+                !processed.includes('## 상속받은 속성') &&
+                !processed.includes('## 상속받은 메서드') &&
+                !processed.includes('## Inherited Properties') &&
+                !processed.includes('## Inherited Methods')
+            ) {
                 const lines = processed.split('\n');
                 const mainSections = [];
                 let currentH2 = '';

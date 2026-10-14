@@ -602,5 +602,30 @@
     border-color: rgba(251, 191, 36, 0.35);
 }
 
+/* ============================================================
+   본문 API 시그니처 readonly 배지 스타일
+   ============================================================ */
+.vp-doc .readonly-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 7px;
+    margin-right: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    border-radius: 4px;
+    font-family: var(--vp-font-family-mono, monospace);
+    background-color: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    vertical-align: middle;
+    transform: translateY(-1px);
+    user-select: none;
+}
 
-
+.dark .vp-doc .readonly-badge {
+    background-color: rgba(52, 211, 153, 0.18);
+    color: #6ee7b7;
+    border-color: rgba(52, 211, 153, 0.35);
+}
