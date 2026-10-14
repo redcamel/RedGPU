@@ -35,14 +35,19 @@ let num = 0;
 
 // 폴더 구조 재귀적으로 탐색
 function exploreDirectory(dirPath, urlPath) {
+    const indexHtmlPath = path.join(dirPath, 'index.html');
     // index.html 파일이 있는지 확인
-    if (fs.existsSync(path.join(dirPath, 'index.html'))) {
+    if (fs.existsSync(indexHtmlPath)) {
+        const indexJsPath = path.join(dirPath, 'index.js');
+        const targetPath = fs.existsSync(indexJsPath) ? indexJsPath : indexHtmlPath;
+        const lastModDate = fs.statSync(targetPath).mtime.toISOString().split('T')[0];
+
         // index.html이 있는 경우만 사이트맵에 추가
         examplesSitemapXML += `  <url>
     <loc>${urlPath}/</loc>
-    <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>${lastModDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 `;
         urlCount++;
@@ -84,7 +89,7 @@ fs.writeFileSync(path.join(sitemapDir, 'sitemap-examples.xml'), examplesSitemapX
 console.log(`Examples 사이트맵이 생성되었습니다: sitemap-examples.xml (총 ${urlCount}개 URL)`);
 
 
-// 2. Root Sitemap Index 생성 (sitemap/sitemap.xml)
+// 2. Root Sitemap Index 생성 (sitemap.xml)
 // 이 파일은 다른 사이트맵들을 가리키는 인덱스 파일입니다.
 const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -99,5 +104,5 @@ const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 </sitemapindex>`;
 
 // Root 사이트맵 인덱스 파일 저장
-fs.writeFileSync(path.join(sitemapDir, 'sitemap_v2.xml'), sitemapIndexXML);
+fs.writeFileSync(path.join(sitemapDir, 'sitemap.xml'), sitemapIndexXML);
 console.log(`루트 사이트맵 인덱스가 생성되었습니다: sitemap.xml`);
