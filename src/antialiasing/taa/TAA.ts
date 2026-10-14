@@ -27,7 +27,6 @@ import TAACASPass from "./cas/TAACASPass";
  *
  * const taa = view.taa;
  * taa.sharpness = 0.5;
- * taa.jitterStrength = 1.0;
  * ```
  *
  * @category Antialiasing
@@ -38,7 +37,6 @@ class TAA extends ASinglePassPostEffect {
     #historyResults: [IPostEffectResult, IPostEffectResult] = [null, null];
     #historyIndex: number = 0;
     #frameIndex: number = 0;
-    #jitterStrength: number = 1.0;
     #casPass: TAACASPass;
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
     #videoMemorySize: number = 0;
@@ -70,7 +68,6 @@ class TAA extends ASinglePassPostEffect {
             )
         );
         this.#casPass = new TAACASPass(redGPUContext);
-        this.jitterStrength = this.#jitterStrength;
     }
 
     /**
@@ -143,40 +140,7 @@ class TAA extends ASinglePassPostEffect {
         return this.#frameIndex;
     }
 
-    /**
-     * [KO] 서브픽셀 카메라 지터링 강도를 반환합니다.
-     * [EN] Returns the subpixel camera jitter strength.
-     *
-     * ### Example
-     * ```typescript
-     * const jitterStrength = view.taa.jitterStrength;
-     * ```
-     *
-     * @returns
-     * [KO] 지터링 강도 (기본값: `1.0`)
-     * [EN] Jitter strength (default: `1.0`)
-     */
-    get jitterStrength(): number {
-        return this.#jitterStrength;
-    }
     #targetAllocResult: IPostEffectResult = null;
-
-    /**
-     * [KO] 서브픽셀 카메라 지터링 강도를 설정합니다.
-     * [EN] Sets the subpixel camera jitter strength.
-     *
-     * ### Example
-     * ```typescript
-     * view.taa.jitterStrength = 1.0;
-     * ```
-     *
-     * @param value -
-     * [KO] 설정할 지터링 강도
-     * [EN] Jitter strength to set
-     */
-    set jitterStrength(value: number) {
-        this.#jitterStrength = value;
-    }
 
     /**
      * [KO] TAA 유니폼 버퍼 및 핑퐁 히스토리 텍스처가 점유 중인 총 비디오 메모리 크기(Bytes)를 반환합니다.
