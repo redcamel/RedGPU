@@ -6,80 +6,58 @@ import SpotLight from "../lights/SpotLight";
 import PassClustersLightHelper from "../clusterLight/core/PassClustersLightHelper";
 
 /**
- * [KO] 씬(Scene) 내의 모든 조명을 통합 관리하는 클래스입니다.
- * [EN] Class that manages all lights within a scene.
+ * [KO] 씬(`Scene`) 내의 모든 조명을 통합 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that integrates and manages all lights within a `Scene`.
+ *
+ * [KO] 방향광(`DirectionalLight`), 포인트 조명(`PointLight`), 스포트 조명(`SpotLight`), 환경광(`AmbientLight`)의 추가, 제거 및 최대 개수 제한을 관리하며, `Scene` 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Manages the addition, removal, and maximum count limits of `DirectionalLight`, `PointLight`, `SpotLight`, and `AmbientLight`, and is automatically created internally when a `Scene` is created.
+ *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * * ### Example
+ * ### Example
  * ```typescript
- * // 씬에서 라이트 매니저 접근 (Access light manager from scene)
+ * // [KO] Scene 인스턴스를 통해 LightManager에 접근
+ * // [EN] Access LightManager through a Scene instance
  * const lightManager = scene.lightManager;
  *
- * // 조명 추가 예시 (Example of adding a light)
- * lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+ * // [KO] 방향광 및 환경광 설정
+ * // [EN] Configure DirectionalLight and AmbientLight
+ * const directionalLight = new RedGPU.Light.DirectionalLight();
+ * lightManager.addDirectionalLight(directionalLight);
+ * lightManager.ambientLight = new RedGPU.Light.AmbientLight();
  * ```
  *
+ * @see [DirectionalLight Basic Example](/RedGPU/examples/3d/light/directionalLight/)
+ * @see [PointLight Basic Example](/RedGPU/examples/3d/light/pointLight/)
+ * @see [SpotLight Basic Example](/RedGPU/examples/3d/light/spotLight/)
  * @category Light
  */
 class LightManager {
-    /**
-     * [KO] 방향성 조명의 최대 허용 개수입니다.
-     * [EN] Maximum allowable count for directional lights.
-     * @defaultValue 3
-     * @private
-     */
     #limitDirectionalLightCount: number = 3
-    /**
-     * [KO] 클러스터 조명(Point + Spot)의 최대 허용 개수입니다.
-     * [EN] Maximum allowable count for cluster lights (Point + Spot).
-     * @defaultValue PassClustersLightHelper.MAX_CLUSTER_LIGHTS
-     * @private
-     */
     #limitClusterLightCount: number = PassClustersLightHelper.MAX_CLUSTER_LIGHTS
-    /**
-     * [KO] 등록된 방향성 조명 목록입니다.
-     * [EN] List of registered directional lights.
-     * @private
-     */
     #directionalLights: DirectionalLight[] = []
-    /**
-     * [KO] 등록된 포인트 조명 목록입니다.
-     * [EN] List of registered point lights.
-     * @private
-     */
     #pointLights: PointLight[] = []
-    /**
-     * [KO] 등록된 스포트 조명 목록입니다.
-     * [EN] List of registered spot lights.
-     * @private
-     */
     #spotLights: SpotLight[] = []
-    /**
-     * [KO] 장면의 환경광(Ambient Light) 인스턴스입니다.
-     * [EN] Ambient Light instance of the scene.
-     * @private
-     */
     #ambientLight: AmbientLight
 
-
     /**
-     * [KO] 등록된 스포트 조명 배열을 반환합니다.
-     * [EN] Returns the array of registered spot lights.
+     * [KO] 등록된 스포트 조명(`SpotLight`) 목록을 반환합니다.
+     * [EN] Returns the list of registered `SpotLight` instances.
      *
      * @returns
-     * [KO] 등록된 SpotLight 배열
-     * [EN] Array of registered SpotLights
+     * [KO] `SpotLight` 배열
+     * [EN] Array of `SpotLight` instances
      */
     get spotLights(): SpotLight[] {
         return this.#spotLights;
     }
 
     /**
-     * [KO] 등록된 스포트 조명의 개수를 반환합니다.
-     * [EN] Returns the number of registered spot lights.
+     * [KO] 현재 등록된 스포트 조명의 개수를 반환합니다.
+     * [EN] Returns the number of currently registered spot lights.
      *
      * @returns
      * [KO] 스포트 조명 개수
@@ -90,11 +68,11 @@ class LightManager {
     }
 
     /**
-     * [KO] 클러스터 조명(Point + Spot)의 최대 허용 개수를 반환합니다.
-     * [EN] Returns the maximum allowable count for cluster lights (Point + Spot).
+     * [KO] 씬에서 사용 가능한 최대 클러스터 조명(포인트 + 스포트) 개수를 반환합니다.
+     * [EN] Returns the maximum number of cluster lights (point + spot) available in the scene.
      *
      * @returns
-     * [KO] 클러스터 조명 최대 개수
+     * [KO] 최대 클러스터 조명 개수
      * [EN] Maximum number of cluster lights
      */
     get limitClusterLightCount(): number {
@@ -102,20 +80,20 @@ class LightManager {
     }
 
     /**
-     * [KO] 등록된 포인트 조명 배열을 반환합니다.
-     * [EN] Returns the array of registered point lights.
+     * [KO] 등록된 포인트 조명(`PointLight`) 목록을 반환합니다.
+     * [EN] Returns the list of registered `PointLight` instances.
      *
      * @returns
-     * [KO] 등록된 PointLight 배열
-     * [EN] Array of registered PointLights
+     * [KO] `PointLight` 배열
+     * [EN] Array of `PointLight` instances
      */
     get pointLights(): PointLight[] {
         return this.#pointLights;
     }
 
     /**
-     * [KO] 등록된 포인트 조명의 개수를 반환합니다.
-     * [EN] Returns the number of registered point lights.
+     * [KO] 현재 등록된 포인트 조명의 개수를 반환합니다.
+     * [EN] Returns the number of currently registered point lights.
      *
      * @returns
      * [KO] 포인트 조명 개수
@@ -126,11 +104,11 @@ class LightManager {
     }
 
     /**
-     * [KO] 방향성 조명의 최대 허용 개수를 반환합니다.
-     * [EN] Returns the maximum allowable count for directional lights.
+     * [KO] 씬에서 사용 가능한 최대 방향광(`DirectionalLight`) 개수를 반환합니다.
+     * [EN] Returns the maximum number of `DirectionalLight` instances available in the scene.
      *
      * @returns
-     * [KO] 방향성 조명 최대 개수
+     * [KO] 최대 방향광 개수
      * [EN] Maximum number of directional lights
      */
     get limitDirectionalLightCount(): number {
@@ -138,11 +116,11 @@ class LightManager {
     }
 
     /**
-     * [KO] 등록된 방향성 조명의 개수를 반환합니다.
-     * [EN] Returns the number of registered directional lights.
+     * [KO] 현재 등록된 방향광의 개수를 반환합니다.
+     * [EN] Returns the number of currently registered directional lights.
      *
      * @returns
-     * [KO] 방향성 조명 개수
+     * [KO] 방향광 개수
      * [EN] Number of directional lights
      */
     get directionalLightCount(): number {
@@ -150,60 +128,56 @@ class LightManager {
     }
 
     /**
-     * [KO] 등록된 방향성 조명 배열을 반환합니다.
-     * [EN] Returns the array of registered directional lights.
+     * [KO] 등록된 방향광(`DirectionalLight`) 목록을 반환합니다.
+     * [EN] Returns the list of registered `DirectionalLight` instances.
      *
      * @returns
-     * [KO] 등록된 DirectionalLight 배열
-     * [EN] Array of registered DirectionalLights
+     * [KO] `DirectionalLight` 배열
+     * [EN] Array of `DirectionalLight` instances
      */
     get directionalLights(): DirectionalLight[] {
         return this.#directionalLights;
     }
 
     /**
-     * [KO] 현재 설정된 환경광(AmbientLight)을 반환합니다.
-     * [EN] Returns the currently set AmbientLight.
+     * [KO] 씬의 환경광(`AmbientLight`)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the `AmbientLight` of the scene.
+     *
+     * ### Example
+     * ```typescript
+     * // [KO] 환경광 설정
+     * // [EN] Set AmbientLight
+     * scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ADD8E6', 50);
+     * ```
      *
      * @returns
-     * [KO] AmbientLight 인스턴스 또는 null
-     * [EN] AmbientLight instance or null
+     * [KO] `AmbientLight` 인스턴스
+     * [EN] `AmbientLight` instance
      */
     get ambientLight(): AmbientLight {
         return this.#ambientLight;
     }
 
-    /**
-     * [KO] 환경광(AmbientLight)을 설정합니다.
-     * [EN] Sets the AmbientLight.
-     *
-     * @param value -
-     * [KO] 설정할 AmbientLight 인스턴스
-     * [EN] AmbientLight instance to set
-     * @throws
-     * [KO] AmbientLight 인스턴스가 아닌 값을 전달하면 오류를 던집니다.
-     * [EN] Throws an error if a value that is not an AmbientLight instance is passed.
-     */
     set ambientLight(value: AmbientLight) {
         if (!(value instanceof AmbientLight)) consoleAndThrowError('allow only AmbientLight instance')
         this.#ambientLight = value;
     }
 
     /**
-     * [KO] SpotLight를 추가합니다.
-     * [EN] Adds a SpotLight.
+     * [KO] 스포트 조명(`SpotLight`)을 씬에 추가합니다.
+     * [EN] Adds a `SpotLight` to the scene.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
-     * scene.lightManager.addSpotLight(new RedGPU.Light.SpotLight());
+     * // [KO] 스포트 조명 생성 및 추가
+     * // [EN] Create and add a SpotLight
+     * const spotLight = new RedGPU.Light.SpotLight('#ffffff', 1000);
+     * scene.lightManager.addSpotLight(spotLight);
      * ```
      *
      * @param value -
-     * [KO] 추가할 SpotLight 인스턴스
-     * [EN] SpotLight instance to add
-     * @throws
-     * [KO] PointLight와 합친 개수가 클러스터 제한을 초과하면 오류를 던집니다.
-     * [EN] Throws an error if the total count combined with PointLights exceeds the cluster limit.
+     * [KO] 추가할 `SpotLight` 인스턴스
+     * [EN] `SpotLight` instance to add
      */
     addSpotLight(value: SpotLight) {
         if (!(value instanceof SpotLight)) consoleAndThrowError('allow only SpotLight instance')
@@ -215,20 +189,20 @@ class LightManager {
     }
 
     /**
-     * [KO] PointLight를 추가합니다.
-     * [EN] Adds a PointLight.
+     * [KO] 포인트 조명(`PointLight`)을 씬에 추가합니다.
+     * [EN] Adds a `PointLight` to the scene.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
-     * scene.lightManager.addPointLight(new RedGPU.Light.PointLight());
+     * // [KO] 포인트 조명 생성 및 추가
+     * // [EN] Create and add a PointLight
+     * const pointLight = new RedGPU.Light.PointLight('#ffffff', 1000);
+     * scene.lightManager.addPointLight(pointLight);
      * ```
      *
      * @param value -
-     * [KO] 추가할 PointLight 인스턴스
-     * [EN] PointLight instance to add
-     * @throws
-     * [KO] SpotLight와 합친 개수가 클러스터 제한을 초과하면 오류를 던집니다.
-     * [EN] Throws an error if the total count combined with SpotLights exceeds the cluster limit.
+     * [KO] 추가할 `PointLight` 인스턴스
+     * [EN] `PointLight` instance to add
      */
     addPointLight(value: PointLight) {
         if (!(value instanceof PointLight)) consoleAndThrowError('allow only PointLight instance')
@@ -240,20 +214,20 @@ class LightManager {
     }
 
     /**
-     * [KO] DirectionalLight를 추가합니다.
-     * [EN] Adds a DirectionalLight.
+     * [KO] 방향광(`DirectionalLight`)을 씬에 추가합니다.
+     * [EN] Adds a `DirectionalLight` to the scene.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
-     * scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+     * // [KO] 방향광 생성 및 추가
+     * // [EN] Create and add a DirectionalLight
+     * const directionalLight = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff', 100000);
+     * scene.lightManager.addDirectionalLight(directionalLight);
      * ```
      *
      * @param value -
-     * [KO] 추가할 DirectionalLight 인스턴스
-     * [EN] DirectionalLight instance to add
-     * @throws
-     * [KO] 최대 방향성 조명 개수를 초과하면 오류를 던집니다.
-     * [EN] Throws an error if the maximum number of directional lights is exceeded.
+     * [KO] 추가할 `DirectionalLight` 인스턴스
+     * [EN] `DirectionalLight` instance to add
      */
     addDirectionalLight(value: DirectionalLight) {
         if (!(value instanceof DirectionalLight)) consoleAndThrowError('allow only DirectionalLight instance')
@@ -265,12 +239,12 @@ class LightManager {
     }
 
     /**
-     * [KO] 특정 SpotLight를 제거합니다.
-     * [EN] Removes a specific SpotLight.
+     * [KO] 특정 스포트 조명(`SpotLight`)을 씬에서 제거합니다.
+     * [EN] Removes a specific `SpotLight` from the scene.
      *
      * @param value -
-     * [KO] 제거할 SpotLight 인스턴스
-     * [EN] SpotLight instance to remove
+     * [KO] 제거할 `SpotLight` 인스턴스
+     * [EN] `SpotLight` instance to remove
      */
     removeSpotLight(value: SpotLight) {
         const index = this.#spotLights.indexOf(value);
@@ -278,12 +252,12 @@ class LightManager {
     }
 
     /**
-     * [KO] 특정 PointLight를 제거합니다.
-     * [EN] Removes a specific PointLight.
+     * [KO] 특정 포인트 조명(`PointLight`)을 씬에서 제거합니다.
+     * [EN] Removes a specific `PointLight` from the scene.
      *
      * @param value -
-     * [KO] 제거할 PointLight 인스턴스
-     * [EN] PointLight instance to remove
+     * [KO] 제거할 `PointLight` 인스턴스
+     * [EN] `PointLight` instance to remove
      */
     removePointLight(value: PointLight) {
         const index = this.#pointLights.indexOf(value);
@@ -291,12 +265,12 @@ class LightManager {
     }
 
     /**
-     * [KO] 특정 DirectionalLight를 제거합니다.
-     * [EN] Removes a specific DirectionalLight.
+     * [KO] 특정 방향광(`DirectionalLight`)을 씬에서 제거합니다.
+     * [EN] Removes a specific `DirectionalLight` from the scene.
      *
      * @param value -
-     * [KO] 제거할 DirectionalLight 인스턴스
-     * [EN] DirectionalLight instance to remove
+     * [KO] 제거할 `DirectionalLight` 인스턴스
+     * [EN] `DirectionalLight` instance to remove
      */
     removeDirectionalLight(value: DirectionalLight) {
         const index = this.#directionalLights.indexOf(value);
@@ -304,35 +278,32 @@ class LightManager {
     }
 
     /**
-     * [KO] 모든 SpotLight를 제거합니다.
-     * [EN] Removes all SpotLights.
+     * [KO] 등록된 모든 스포트 조명을 제거합니다.
+     * [EN] Removes all registered spot lights.
      */
     removeAllSpotLight() {
         this.#spotLights = [];
     }
 
     /**
-     * [KO] 모든 PointLight를 제거합니다.
-     * [EN] Removes all PointLights.
+     * [KO] 등록된 모든 포인트 조명을 제거합니다.
+     * [EN] Removes all registered point lights.
      */
     removeAllPointLight() {
         this.#pointLights = [];
     }
 
     /**
-     * [KO] 모든 DirectionalLight를 제거합니다.
-     * [EN] Removes all DirectionalLights.
+     * [KO] 등록된 모든 방향광을 제거합니다.
+     * [EN] Removes all registered directional lights.
      */
     removeAllDirectionalLight() {
         this.#directionalLights = [];
     }
 
     /**
-     * [KO] 장면의 모든 조명을 제거합니다.
-     * [EN] Removes all lights in the scene.
-     *
-     * [KO] 포인트/스포트/방향성 조명을 모두 제거하고 환경광은 null로 설정합니다.
-     * [EN] Removes all point, spot, and directional lights, and sets ambient light to null.
+     * [KO] 환경광을 포함한 씬 내의 모든 조명을 제거합니다.
+     * [EN] Removes all lights in the scene, including the ambient light.
      */
     removeAllLight() {
         this.removeAllPointLight()
@@ -341,14 +312,11 @@ class LightManager {
         this.#ambientLight = null
     }
 
-
     /**
-     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
-     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
+     * [KO] LightManager 인스턴스를 파기하고 등록된 모든 조명 및 디버거 리소스를 정리합니다.
+     * [EN] Destroys the LightManager instance and cleans up all registered lights and debugger resources.
      */
     destroy() {
-
-
         this.#directionalLights.forEach(cleanupLight);
         this.#pointLights.forEach(cleanupLight);
         this.#spotLights.forEach(cleanupLight);
@@ -368,6 +336,7 @@ const cleanupLight = (light: any) => {
         try {
             light.drawDebugger.destroy();
         } catch (e) {
+            // 예외 처리
         }
         light.drawDebugger = null;
     }

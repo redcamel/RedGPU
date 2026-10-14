@@ -1,13 +1,6 @@
 /**
- * [KO] RedGPU 라이트 모듈입니다.
- * [EN] RedGPU Light module.
- *
- * [KO] 다양한 광원(AmbientLight, DirectionalLight, PointLight, SpotLight)과 이를 통합 관리하는 LightManager를 제공합니다.
- * [EN] Provides various light sources (AmbientLight, DirectionalLight, PointLight, SpotLight) and LightManager to manage them.
- *
- * [KO] 각 광원 속성을 세밀하게 제어하여 씬(Scene)의 조명 효과와 분위기를 연출할 수 있습니다.
- * [EN] You can create lighting effects and atmosphere in the scene by finely controlling the properties of each light source.
- *
+ * [KO] 3D 씬의 광원 효과를 연출하기 위한 다양한 조명(AmbientLight, DirectionalLight, PointLight, SpotLight)과 조명 관리 시스템을 제공합니다.
+ * [EN] Provides various lights (AmbientLight, DirectionalLight, PointLight, SpotLight) and light management systems for lighting effects in 3D scenes.
  * @packageDocumentation
  */
 import AmbientLight from "./lights/AmbientLight";

@@ -10,16 +10,17 @@ import PassClusterLightBound from "../bound/PassClusterLightBound";
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
 
 /**
- * [KO] 각 클러스터에 영향을 주는 조명을 식별하는 컴퓨트 패스 클래스입니다.
- * [EN] Compute pass class that identifies lights affecting each cluster.
+ * [KO] 각 클러스터 타일의 AABB와 씬 내 광원(PointLight, SpotLight) 간의 교차 판정(Culling)을 수행하여 타일별 유효 조명 목록을 구축하는 컴퓨트 패스 클래스입니다.
+ * [EN] Compute pass class that performs intersection culling between each cluster tile's AABB and lights in the scene (PointLight, SpotLight) to build per-tile active light lists.
  *
- * [KO] 포인트 조명 및 스포트 조명과 클러스터(타일) 간의 교차 검사를 수행하여 각 클러스터에 포함되는 조명 인덱스를 기록합니다.
- * [EN] Performs intersection tests between point lights/spot lights and clusters (tiles) to record light indices included in each cluster.
+ * [KO] 시스템에 의해 자동으로 생성되어 `View3D` 내부에서 관리됩니다.
+ * [EN] Automatically created by the system and managed internally within `View3D`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
  * @category Light
  */
 class PassClustersLight extends RedGPUObject {
@@ -32,17 +33,18 @@ class PassClustersLight extends RedGPUObject {
     #source
 
     /**
-     * [KO] PassClustersLight 인스턴스를 생성합니다.
-     * [EN] Creates a PassClustersLight instance.
+     * [KO] 새로운 PassClustersLight 인스턴스를 생성합니다.
+     * [EN] Creates a new PassClustersLight instance.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 클러스터 라이트 컬링을 수행할 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance for cluster light culling
      * @param passClusterLightBound -
-     * [KO] PassClusterLightBound 인스턴스
-     * [EN] PassClusterLightBound instance
+     * [KO] 클러스터 AABB 바운드 정보를 제공하는 `PassClusterLightBound` 인스턴스
+     * [EN] `PassClusterLightBound` instance providing cluster AABB bound data
      */
     constructor(redGPUContext: RedGPUContext, view: View3D, passClusterLightBound: PassClusterLightBound) {
         super(redGPUContext)
@@ -53,19 +55,20 @@ class PassClustersLight extends RedGPUObject {
     }
 
     /**
-     * [KO] 클러스터 조명 버퍼를 반환합니다.
-     * [EN] Returns the cluster lights buffer.
+     * [KO] 각 클러스터 셀별 조명 인덱스 및 개수가 저장된 GPU 스토리지 버퍼를 반환합니다.
+     * [EN] Returns the GPU storage buffer containing the light indices and counts for each cluster cell.
+     *
      * @returns
-     * [KO] 클러스터 조명 GPUBuffer
-     * [EN] Cluster lights GPUBuffer
+     * [KO] 클러스터 라이트 그리드 `GPUBuffer` 인스턴스
+     * [EN] Cluster light grid `GPUBuffer` instance
      */
     get clusterLightsBuffer(): GPUBuffer {
         return this.#clusterLightsBuffer;
     }
 
     /**
-     * [KO] 클러스터 조명을 계산하는 컴퓨트 패스를 실행합니다.
-     * [EN] Executes the compute pass to calculate cluster lights.
+     * [KO] 매 프레임 클러스터별 광원 교차 판정(Culling) 컴퓨트 패스를 디스패치합니다.
+     * [EN] Dispatches the per-cluster light intersection culling compute pass each frame.
      */
     render() {
         const systemUniformBindGroup: GPUBindGroup = this.#view.systemUniform_Vertex_UniformBindGroup;
@@ -83,15 +86,14 @@ class PassClustersLight extends RedGPUObject {
     }
 
     /**
-     * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
-     * [EN] Destroys the PassClustersLight instance and releases allocated GPUBuffer and pipelines.
+     * [KO] 할당된 GPU 버퍼 및 파이프라인 리소스를 해제합니다.
+     * [EN] Releases allocated GPU buffer and pipeline resources.
      */
     destroy(): void {
         if (this.#clusterLightsBuffer) {
             try {
                 this.#clusterLightsBuffer.destroy();
             } catch (e) {
-                // 예외 처리
             }
             this.#clusterLightsBuffer = null;
         }
@@ -107,7 +109,6 @@ class PassClustersLight extends RedGPUObject {
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
         this.#source = resourceManager.wgslParser.parse('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
-        // keepLog(this.#source )
         this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
             size: PassClustersLightHelper.getClusterLightsBufferSize(),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST

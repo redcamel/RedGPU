@@ -1,6 +1,6 @@
 /**
- * [KO] RedGPU 라이트 모듈의 핵심 인터페이스 및 추상 클래스를 제공합니다.
- * [EN] Provides core interfaces and abstract classes for the RedGPU Light module.
+ * [KO] 조명 시스템의 기반 추상 클래스(`ABaseLight`) 및 씬 조명 매니저(`LightManager`)를 제공합니다.
+ * [EN] Provides the base abstract light class (`ABaseLight`) and scene light manager (`LightManager`).
  * @packageDocumentation
  */
 import ABaseLight from "./ABaseLight";

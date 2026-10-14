@@ -3,93 +3,56 @@ import convertHexToRgb from "../../color/convertHexToRgb";
 import ABaseLight from "../core/ABaseLight";
 
 /**
- * [KO] 스포트라이트(SpotLight)를 정의하는 클래스입니다.
- * [EN] Class that defines a spotlight source.
+ * [KO] 공간의 한 점에서 특정 방향으로 원뿔(Cone) 형태의 빛을 방출하는 스포트라이트(Spot Light) 클래스입니다.
+ * [EN] Spot light class that emits a cone-shaped beam of light in a specific direction from a single point in space.
  *
- * [KO] 이 광원은 특정 위치에서 지정된 방향으로 빛을 방사하며, 내부/외부 컷오프 각도를 통해 빛의 퍼짐 범위를 제어할 수 있습니다.
- * [EN] This light radiates light in a specific direction from a certain position, and the spread of light can be controlled through inner/outer cutoff angles.
- * * ### Example
+ * [KO] 반경(`radius`)에 따른 거리 감쇠와 함께, 내부 컷오프 각도(`innerCutoff`)와 외부 컷오프 각도(`outerCutoff`) 사이의 부드러운 가장자리 감쇠를 지원합니다.
+ * [EN] Supports distance attenuation based on `radius` along with smooth edge falloff between the inner cutoff angle (`innerCutoff`) and outer cutoff angle (`outerCutoff`).
+ *
+ * ### Example
  * ```typescript
- * const light = new RedGPU.Light.SpotLight('#ffffff', 2.0);
- * light.setPosition(0, 5, 10);
- * light.lookAt(0, 0, 0);
- * scene.lightManager.addSpotLight(light);
+ * const spotLight = new RedGPU.Light.SpotLight('#ffffff', 1000);
+ * spotLight.setPosition(0, 5, 5);
+ * spotLight.lookAt(0, 0, 0);
+ * spotLight.innerCutoff = 15;
+ * spotLight.outerCutoff = 30;
+ * scene.lightManager.addSpotLight(spotLight);
  * ```
+ *
  * <iframe src="/RedGPU/examples/3d/light/spotLight/" ></iframe>
  *
- * [KO] 아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and behavior of SpotLight.
- * @see [SpotLight Cluster Performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
- * @see [SpotLight with glTF example](/RedGPU/examples/3d/light/spotLightWithGltf/)
+ * @see [SpotLight basic example](/RedGPU/examples/3d/light/spotLight/)
+ * @see [SpotLight performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
+ * @see [SpotLight with GLTF example](/RedGPU/examples/3d/light/spotLightWithGltf/)
  * @category Light
  */
 class SpotLight extends ABaseLight {
-    /**
-     * [KO] 광원의 영향을 미치는 반경입니다.
-     * [EN] Radius affected by the light.
-     * @defaultValue 10
-     */
     #radius: number = 10;
-    /**
-     * [KO] 광원의 X 좌표입니다.
-     * [EN] X coordinate of the light.
-     * @defaultValue 0
-     */
     #x: number = 0;
-    /**
-     * [KO] 광원의 Y 좌표입니다.
-     * [EN] Y coordinate of the light.
-     * @defaultValue 2
-     */
     #y: number = 2;
-    /**
-     * [KO] 광원의 Z 좌표입니다.
-     * [EN] Z coordinate of the light.
-     * @defaultValue 0
-     */
     #z: number = 0;
-    /**
-     * [KO] 광원의 방향 벡터 X 성분입니다.
-     * [EN] X component of the light's direction vector.
-     * @defaultValue 0
-     */
     #directionX: number = 0;
-    /**
-     * [KO] 광원의 방향 벡터 Y 성분입니다.
-     * [EN] Y component of the light's direction vector.
-     * @defaultValue -1
-     */
     #directionY: number = -1;
-    /**
-     * [KO] 광원의 방향 벡터 Z 성분입니다.
-     * [EN] Z component of the light's direction vector.
-     * @defaultValue 0
-     */
     #directionZ: number = 0;
-    /**
-     * [KO] 내부 컷오프 각도 (degree)입니다.
-     * [EN] Inner cutoff angle (degrees).
-     * @defaultValue 0.0
-     */
     #innerCutoff: number = 0.0;
-    /**
-     * [KO] 외부 컷오프 각도 (degree)입니다.
-     * [EN] Outer cutoff angle (degrees).
-     * @defaultValue 44.0
-     */
     #outerCutoff: number = 44.0;
-
     #lumen: number = 1000;
 
     /**
      * [KO] 새로운 SpotLight 인스턴스를 생성합니다.
      * [EN] Creates a new SpotLight instance.
+     *
+     * ### Example
+     * ```typescript
+     * const light = new RedGPU.Light.SpotLight('#ffffff', 1000);
+     * ```
+     *
      * @param color -
-     * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
-     * [EN] Color of the light (hex string, e.g., '#ffffff')
+     * [KO] 조명의 색상 (HEX 문자열, 기본값: `'#fff'`)
+     * [EN] Light color (HEX string, default: `'#fff'`)
      * @param lumen -
-     * [KO] 광원의 광선속 (Lumen, lm, 기본값: 1,000)
-     * [EN] Luminous flux of the light (Lumen, lm, default: 1,000)
+     * [KO] 조명의 광속 (Lumen 단위, 기본값: `1000`)
+     * [EN] Luminous flux of the light (in Lumens, default: `1000`)
      */
     constructor(color: string = '#fff', lumen: number = 1000) {
         super(new ColorRGB(...convertHexToRgb(color, true)));
@@ -97,210 +60,157 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 광선속(Lumen, lm)을 반환합니다.
-     * [EN] Returns the luminous flux (Lumen, lm) of the light source.
+     * [KO] 스포트라이트의 광속(Lumen)을 반환하거나 설정합니다.
+     * [EN] Gets or sets the luminous flux (Lumen) of the spot light.
+     *
      * @returns
-     * [KO] 광선속 값
-     * [EN] Luminous flux value
+     * [KO] 광속 값 (Lumen)
+     * [EN] Luminous flux value (Lumen)
      */
     get lumen(): number {
         return this.#lumen;
     }
 
-    /**
-     * [KO] 광원의 광선속(Lumen, lm)을 설정합니다.
-     * [EN] Sets the luminous flux (Lumen, lm) of the light source.
-     * @param value -
-     * [KO] 광선속 값 (예: 1,000)
-     * [EN] Luminous flux value (e.g., 1,000)
-     */
     set lumen(value: number) {
         this.#lumen = value;
     }
 
     /**
-     * [KO] X 좌표를 반환합니다.
-     * [EN] Returns the X coordinate.
+     * [KO] 광원의 월드 X 좌표를 반환하거나 설정합니다.
+     * [EN] Gets or sets the world X coordinate of the light source.
+     *
      * @returns
-     * [KO] X 좌표
-     * [EN] X coordinate
+     * [KO] X축 좌표
+     * [EN] X-axis coordinate
      */
     get x(): number {
         return this.#x;
     }
 
-    /**
-     * [KO] X 좌표를 설정합니다.
-     * [EN] Sets the X coordinate.
-     * @param value -
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     set x(value: number) {
         this.#x = value;
     }
 
     /**
-     * [KO] Y 좌표를 반환합니다.
-     * [EN] Returns the Y coordinate.
+     * [KO] 광원의 월드 Y 좌표를 반환하거나 설정합니다.
+     * [EN] Gets or sets the world Y coordinate of the light source.
+     *
      * @returns
-     * [KO] Y 좌표
-     * [EN] Y coordinate
+     * [KO] Y축 좌표
+     * [EN] Y-axis coordinate
      */
     get y(): number {
         return this.#y;
     }
 
-    /**
-     * [KO] Y 좌표를 설정합니다.
-     * [EN] Sets the Y coordinate.
-     * @param value -
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     set y(value: number) {
         this.#y = value;
     }
 
     /**
-     * [KO] Z 좌표를 반환합니다.
-     * [EN] Returns the Z coordinate.
+     * [KO] 광원의 월드 Z 좌표를 반환하거나 설정합니다.
+     * [EN] Gets or sets the world Z coordinate of the light source.
+     *
      * @returns
-     * [KO] Z 좌표
-     * [EN] Z coordinate
+     * [KO] Z축 좌표
+     * [EN] Z-axis coordinate
      */
     get z(): number {
         return this.#z;
     }
 
-    /**
-     * [KO] Z 좌표를 설정합니다.
-     * [EN] Sets the Z coordinate.
-     * @param value -
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     set z(value: number) {
         this.#z = value;
     }
 
     /**
-     * [KO] 광원의 위치를 [x, y, z] 형태로 반환합니다.
-     * [EN] Returns the position of the light in [x, y, z] format.
+     * [KO] 광원의 월드 위치 좌표(`[x, y, z]`)를 반환합니다.
+     * [EN] Returns the world position coordinates (`[x, y, z]`) of the light source.
+     *
      * @returns
-     * [KO] 위치 배열 [x, y, z]
-     * [EN] Position array [x, y, z]
+     * [KO] 위치 좌표 튜플 (`[number, number, number]`)
+     * [EN] Position coordinate tuple (`[number, number, number]`)
      */
     get position(): [number, number, number] {
         return [this.#x, this.#y, this.#z];
     }
 
     /**
-     * [KO] 광원의 반경을 반환합니다.
-     * [EN] Returns the radius of the light.
+     * [KO] 빛이 도달하는 최대 감쇠 반경(`radius`)을 반환하거나 설정합니다.
+     * [EN] Gets or sets the maximum attenuation radius (`radius`) of the light.
+     *
      * @returns
-     * [KO] 반경 값
-     * [EN] Radius value
+     * [KO] 광원 반경
+     * [EN] Light radius
      */
     get radius(): number {
         return this.#radius;
     }
 
-    /**
-     * [KO] 광원의 반경을 설정합니다.
-     * [EN] Sets the radius of the light.
-     * @param value -
-     * [KO] 반경 값 (예: 5.0)
-     * [EN] Radius value (e.g., 5.0)
-     */
     set radius(value: number) {
         this.#radius = value;
     }
 
     /**
-     * [KO] 방향 벡터의 X 성분을 반환합니다.
-     * [EN] Returns the X component of the direction vector.
+     * [KO] 빛의 진행 방향 X 성분을 반환하거나 설정합니다.
+     * [EN] Gets or sets the X component of the light direction.
+     *
      * @returns
-     * [KO] X 성분 값
-     * [EN] X component value
+     * [KO] 방향 벡터의 X 성분
+     * [EN] X component of the direction vector
      */
     get directionX(): number {
         return this.#directionX;
     }
 
-    /**
-     * [KO] 방향 벡터의 X 성분을 설정합니다.
-     * [EN] Sets the X component of the direction vector.
-     * @param value -
-     * [KO] X 성분 값
-     * [EN] X component value
-     */
     set directionX(value: number) {
         this.#directionX = value;
     }
 
     /**
-     * [KO] 방향 벡터의 Y 성분을 반환합니다.
-     * [EN] Returns the Y component of the direction vector.
+     * [KO] 빛의 진행 방향 Y 성분을 반환하거나 설정합니다.
+     * [EN] Gets or sets the Y component of the light direction.
+     *
      * @returns
-     * [KO] Y 성분 값
-     * [EN] Y component value
+     * [KO] 방향 벡터의 Y 성분
+     * [EN] Y component of the direction vector
      */
     get directionY(): number {
         return this.#directionY;
     }
 
-    /**
-     * [KO] 방향 벡터의 Y 성분을 설정합니다.
-     * [EN] Sets the Y component of the direction vector.
-     * @param value -
-     * [KO] Y 성분 값
-     * [EN] Y component value
-     */
     set directionY(value: number) {
         this.#directionY = value;
     }
 
     /**
-     * [KO] 방향 벡터의 Z 성분을 반환합니다.
-     * [EN] Returns the Z component of the direction vector.
+     * [KO] 빛의 진행 방향 Z 성분을 반환하거나 설정합니다.
+     * [EN] Gets or sets the Z component of the light direction.
+     *
      * @returns
-     * [KO] Z 성분 값
-     * [EN] Z component value
+     * [KO] 방향 벡터의 Z 성분
+     * [EN] Z component of the direction vector
      */
     get directionZ(): number {
         return this.#directionZ;
     }
 
-    /**
-     * [KO] 방향 벡터의 Z 성분을 설정합니다.
-     * [EN] Sets the Z component of the direction vector.
-     * @param value -
-     * [KO] Z 성분 값
-     * [EN] Z component value
-     */
     set directionZ(value: number) {
         this.#directionZ = value;
     }
 
     /**
-     * [KO] 광원의 방향 벡터를 [x, y, z] 형태로 반환합니다.
-     * [EN] Returns the direction vector of the light in [x, y, z] format.
+     * [KO] 빛의 진행 방향 벡터(`[x, y, z]`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the light direction vector (`[x, y, z]`).
+     *
      * @returns
-     * [KO] 방향 벡터 [x, y, z]
-     * [EN] Direction vector [x, y, z]
+     * [KO] 방향 벡터 튜플 (`[number, number, number]`)
+     * [EN] Direction vector tuple (`[number, number, number]`)
      */
     get direction(): [number, number, number] {
         return [this.#directionX, this.#directionY, this.#directionZ];
     }
 
-    /**
-     * [KO] 광원의 방향 벡터를 설정합니다.
-     * [EN] Sets the direction vector of the light.
-     * @param value -
-     * [KO] [x, y, z] 형태의 방향 벡터
-     * [EN] Direction vector in [x, y, z] format
-     */
     set direction(value: [number, number, number]) {
         this.#directionX = value[0];
         this.#directionY = value[1];
@@ -308,89 +218,85 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 내부 컷오프 각도를 반환합니다.
-     * [EN] Returns the inner cutoff angle.
+     * [KO] 빛의 세기가 최대로 유지되는 내부 원뿔 각도(도 단위, `degree`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the inner cone cutoff angle (in degrees) within which light intensity remains at maximum.
+     *
      * @returns
-     * [KO] 각도 (degree)
-     * [EN] Angle (degrees)
+     * [KO] 내부 컷오프 각도 (도 단위, `degree`)
+     * [EN] Inner cutoff angle (in degrees)
      */
     get innerCutoff(): number {
         return this.#innerCutoff;
     }
 
-    /**
-     * [KO] 내부 컷오프 각도를 설정합니다.
-     * [EN] Sets the inner cutoff angle.
-     * @param degrees -
-     * [KO] 각도 (degree)
-     * [EN] Angle (degrees)
-     */
     set innerCutoff(degrees: number) {
         this.#innerCutoff = degrees;
     }
 
     /**
-     * [KO] 외부 컷오프 각도를 반환합니다.
-     * [EN] Returns the outer cutoff angle.
+     * [KO] 빛이 완전히 소멸하는 외부 원뿔 각도(도 단위, `degree`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the outer cone cutoff angle (in degrees) beyond which light completely falls off.
+     *
      * @returns
-     * [KO] 각도 (degree)
-     * [EN] Angle (degrees)
+     * [KO] 외부 컷오프 각도 (도 단위, `degree`)
+     * [EN] Outer cutoff angle (in degrees)
      */
     get outerCutoff(): number {
         return this.#outerCutoff;
     }
 
-    /**
-     * [KO] 외부 컷오프 각도를 설정합니다.
-     * [EN] Sets the outer cutoff angle.
-     * @param degrees -
-     * [KO] 각도 (degree)
-     * [EN] Angle (degrees)
-     */
     set outerCutoff(degrees: number) {
         this.#outerCutoff = degrees;
     }
 
     /**
-     * [KO] 내부 컷오프 각도의 코사인 값을 반환합니다.
-     * [EN] Returns the cosine value of the inner cutoff angle.
+     * [KO] 내부 컷오프 각도(`innerCutoff`)의 코사인 값을 반환합니다.
+     * [EN] Returns the cosine value of the inner cutoff angle (`innerCutoff`).
      *
-     * [KO] 셰이더 계산 등에 사용됩니다.
-     * [EN] Used for shader calculations, etc.
      * @returns
-     * [KO] 코사인 값
-     * [EN] Cosine value
+     * [KO] `cos(innerCutoff)` 값
+     * [EN] `cos(innerCutoff)` value
      */
     get innerCutoffCos(): number {
         return Math.cos(this.#innerCutoff * Math.PI / 180);
     }
 
     /**
-     * [KO] 외부 컷오프 각도의 코사인 값을 반환합니다.
-     * [EN] Returns the cosine value of the outer cutoff angle.
+     * [KO] 외부 컷오프 각도(`outerCutoff`)의 코사인 값을 반환합니다.
+     * [EN] Returns the cosine value of the outer cutoff angle (`outerCutoff`).
      *
-     * [KO] 셰이더 계산 등에 사용됩니다.
-     * [EN] Used for shader calculations, etc.
      * @returns
-     * [KO] 코사인 값
-     * [EN] Cosine value
+     * [KO] `cos(outerCutoff)` 값
+     * [EN] `cos(outerCutoff)` value
      */
     get outerCutoffCos(): number {
         return Math.cos(this.#outerCutoff * Math.PI / 180);
     }
 
     /**
-     * [KO] 광원의 위치를 설정합니다.
-     * [EN] Sets the position of the light.
+     * [KO] 광원의 월드 위치를 설정합니다. 개별 좌표(`x, y, z`) 또는 3요소 배열(`[x, y, z]`)을 전달할 수 있습니다.
+     * [EN] Sets the world position of the light source. Accepts individual coordinates (`x, y, z`) or a 3-element array (`[x, y, z]`).
+     *
+     * ### Example
+     * ```typescript
+     * // [KO] 개별 좌표로 위치 설정
+     * // [EN] Set position with individual coordinates
+     * spotLight.setPosition(0, 5, 5);
+     *
+     * // [KO] 배열로 위치 설정
+     * // [EN] Set position with an array
+     * spotLight.setPosition([0, 5, 5]);
+     * ```
+     *
      * @param x -
-     * [KO] X 좌표 또는 [x, y, z] 배열
-     * [EN] X coordinate or [x, y, z] array
+     * [KO] X축 좌표 또는 `[x, y, z]` 좌표 배열
+     * [EN] X-axis coordinate or `[x, y, z]` coordinate array
      * @param y -
-     * [KO] Y 좌표 (x가 숫자일 경우)
-     * [EN] Y coordinate (if x is a number)
+     * [KO] Y축 좌표 (`x`가 숫자인 경우)
+     * [EN] Y-axis coordinate (when `x` is a number)
      * @param z -
-     * [KO] Z 좌표 (x가 숫자일 경우)
-     * [EN] Z coordinate (if x is a number)
+     * [KO] Z축 좌표 (`x`가 숫자인 경우)
+     * [EN] Z-axis coordinate (when `x` is a number)
      */
     setPosition(x: number | [number, number, number], y?: number, z?: number): void {
         if (Array.isArray(x)) {
@@ -403,17 +309,25 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 특정 타겟 위치를 바라보도록 방향 벡터를 설정합니다.
-     * [EN] Sets the direction vector to look at a specific target position.
+     * [KO] 광원이 지정된 목표 지점을 바라보도록 방향 벡터(`direction`)를 계산하여 갱신합니다.
+     * [EN] Calculates and updates the direction vector (`direction`) so that the light points toward the specified target position.
+     *
+     * ### Example
+     * ```typescript
+     * // [KO] 원점을 바라보도록 방향 설정
+     * // [EN] Point the light toward the origin
+     * spotLight.lookAt(0, 0, 0);
+     * ```
+     *
      * @param targetX -
-     * [KO] 타겟 X 좌표 또는 [x, y, z] 배열
-     * [EN] Target X coordinate or [x, y, z] array
+     * [KO] 목표 지점의 X 좌표 또는 `[x, y, z]` 좌표 배열
+     * [EN] Target X coordinate or `[x, y, z]` coordinate array
      * @param targetY -
-     * [KO] 타겟 Y 좌표 (targetX가 숫자일 경우)
-     * [EN] Target Y coordinate (if targetX is a number)
+     * [KO] 목표 지점의 Y 좌표 (`targetX`가 숫자인 경우)
+     * [EN] Target Y coordinate (when `targetX` is a number)
      * @param targetZ -
-     * [KO] 타겟 Z 좌표 (targetX가 숫자일 경우)
-     * [EN] Target Z coordinate (if targetX is a number)
+     * [KO] 목표 지점의 Z 좌표 (`targetX`가 숫자인 경우)
+     * [EN] Target Z coordinate (when `targetX` is a number)
      */
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
         let tx: number, ty: number, tz: number;

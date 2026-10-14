@@ -7,52 +7,29 @@ import PassClustersLightHelper from "../clusterLight/core/PassClustersLightHelpe
 import RedGPUObject from "../../base/RedGPUObject";
 
 /**
- * [KO] 클러스터 기반 조명 연산을 관리하는 매니저 클래스입니다.
- * [EN] Manager class that manages cluster-based lighting computations.
+ * [KO] 클러스터 라이팅(Clustered Lighting) 데이터 및 컴퓨트 패스를 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that manages Clustered Lighting data and compute passes.
  *
- * [KO] 씬 내부의 포인트 조명(PointLight)과 스포트 조명(SpotLight)을 3D 클러스터 공간에 매핑하여 효율적으로 렌더링하도록 돕습니다.
- * [EN] Maps point lights (PointLight) and spot lights (SpotLight) within the scene to 3D cluster space for efficient rendering.
+ * [KO] 뷰(`View3D`) 공간을 3차원 프러스텀 클러스터(타일)로 분할하고, 다수의 포인트 조명(`PointLight`)과 스포트 조명(`SpotLight`) 데이터를 GPU 스토리지 버퍼로 업로드하여 클러스터별 조명 컬링 패스를 수행합니다. `View3D` 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Divides the `View3D` space into 3D frustum clusters (tiles), uploads multiple `PointLight` and `SpotLight` data to a GPU storage buffer, and executes per-cluster light culling passes. Automatically created internally when a `View3D` is created.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * @see [PointLight Performance Example](/RedGPU/examples/3d/light/pointLightPerformance/)
+ * @see [SpotLight Performance Example](/RedGPU/examples/3d/light/spotLightPerformance/)
  * @category Light
  */
 class ClusterLightManager extends RedGPUObject {
 
     #view: View3D
-
-    /**
-     * [KO] 더티 체킹용 이전 프레임 너비
-     * [EN] Previous frame width for dirty checking
-     */
     #prevWidth: number = undefined
-    /**
-     * [KO] 더티 체킹용 이전 프레임 높이
-     * [EN] Previous frame height for dirty checking
-     */
     #prevHeight: number = undefined
-    /**
-     * [KO] 클러스터 라이트 경계 계산 패스
-     * [EN] Cluster light boundary calculation pass
-     */
     #passClusterLightBound: PassClusterLightBound
-    /**
-     * [KO] 클러스터 라이트 처리 패스
-     * [EN] Cluster light processing pass
-     */
     #passClustersLight: PassClustersLight
-    /**
-     * [KO] 클러스터 라이트 데이터를 저장하는 GPU 버퍼
-     * [EN] GPU buffer for storing cluster light data
-     */
     #clusterLightsBuffer: GPUBuffer
-    /**
-     * [KO] 클러스터 라이트 데이터를 담은 Float32Array
-     * [EN] Float32Array containing cluster light data
-     */
     #clusterLightsBufferData: Float32Array
 
     /**
@@ -60,8 +37,8 @@ class ClusterLightManager extends RedGPUObject {
      * [EN] Creates a ClusterLightManager instance.
      *
      * @param view -
-     * [KO] 이 매니저가 속할 View3D 인스턴스
-     * [EN] The View3D instance this manager belongs to
+     * [KO] 클러스터 라이팅을 적용할 `View3D` 인스턴스
+     * [EN] `View3D` instance to apply clustered lighting
      */
     constructor(view: View3D) {
         super(view.redGPUContext)
@@ -82,42 +59,56 @@ class ClusterLightManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 클러스터 라이팅 경계 패스를 반환합니다.
-     * [EN] Returns the cluster light boundary pass.
+     * [KO] 클러스터 경계(AABB) 계산 컴퓨트 패스 객체를 반환합니다.
+     * [EN] Returns the cluster bound (AABB) calculation compute pass object.
+     *
+     * @returns
+     * [KO] `PassClusterLightBound` 인스턴스
+     * [EN] `PassClusterLightBound` instance
      */
     get passClusterLightBound(): PassClusterLightBound {
         return this.#passClusterLightBound;
     }
 
     /**
-     * [KO] 클러스터 라이팅 렌더링 패스를 반환합니다.
-     * [EN] Returns the cluster lighting rendering pass.
+     * [KO] 클러스터별 조명 교차 판정 컴퓨트 패스 객체를 반환합니다.
+     * [EN] Returns the per-cluster light intersection test compute pass object.
+     *
+     * @returns
+     * [KO] `PassClustersLight` 인스턴스
+     * [EN] `PassClustersLight` instance
      */
     get passClustersLight(): PassClustersLight {
         return this.#passClustersLight;
     }
 
     /**
-     * [KO] 클러스터 라이트 데이터를 담은 GPUBuffer를 반환합니다.
-     * [EN] Returns the GPUBuffer containing cluster light data.
+     * [KO] 클러스터 조명 데이터가 저장된 `GPUBuffer`를 반환합니다.
+     * [EN] Returns the `GPUBuffer` storing cluster light data.
+     *
+     * @returns
+     * [KO] 클러스터 조명 스토리지 `GPUBuffer`
+     * [EN] Cluster light storage `GPUBuffer`
      */
     get clusterLightsBuffer(): GPUBuffer {
         return this.#clusterLightsBuffer;
     }
 
     /**
-     * [KO] 클러스터 라이트 데이터를 담은 Float32Array를 반환합니다.
-     * [EN] Returns the Float32Array containing cluster light data.
+     * [KO] 클러스터 조명 데이터를 담고 있는 `Float32Array` 버퍼 데이터를 반환합니다.
+     * [EN] Returns the `Float32Array` buffer data containing cluster light information.
+     *
+     * @returns
+     * [KO] 클러스터 조명 `Float32Array` 데이터
+     * [EN] Cluster light `Float32Array` data
      */
     get clusterLightsBufferData(): Float32Array {
         return this.#clusterLightsBufferData;
     }
 
     /**
-     * [KO] 클러스터 라이트를 업데이트합니다.
-     * [KO] 포인트 라이트와 스팟 라이트 데이터를 계산하고 GPU 버퍼에 업로드합니다.
-     * [EN] Updates cluster lights.
-     * [EN] Calculates PointLight and SpotLight data and uploads them to the GPU buffer.
+     * [KO] 현재 씬의 포인트 조명 및 스포트 조명 데이터를 갱신하고 클러스터 라이팅 컴퓨트 패스를 실행합니다.
+     * [EN] Updates point light and spot light data in the current scene and executes the clustered lighting compute passes.
      */
     updateClusterLights() {
         const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
@@ -139,7 +130,6 @@ class ClusterLightManager extends RedGPUObject {
             const spotLightNum = spotLights.length
             if (pointLightNum) {
                 let i = pointLightNum
-                // console.log('실행이되긴하하나2')
                 while (i--) {
                     const tLight = pointLights[i]
                     const stride = 16
@@ -161,7 +151,6 @@ class ClusterLightManager extends RedGPUObject {
                 const stride = 16
                 const prevOffset = pointLightNum * stride
                 let i = spotLightNum
-                // console.log('실행이되긴하하나2')
                 while (i--) {
                     const tLight = spotLights[i]
                     const offset = 4 + stride * i + prevOffset;
@@ -173,7 +162,6 @@ class ClusterLightManager extends RedGPUObject {
                         offset,
                     )
                     if (tLight.enableDebugger) {
-                        // TODO - 버그 IBL과 함꼐 실행하면 죽는다
                         if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
                         tLight.drawDebugger.render(renderViewStateData)
                     }
@@ -189,15 +177,14 @@ class ClusterLightManager extends RedGPUObject {
     }
 
     /**
-     * [KO] ClusterLightManager 인스턴스를 파기하고 버퍼 및 연산 서브 패스들을 정리합니다.
-     * [EN] Destroys the ClusterLightManager instance and cleans up buffers and computing sub-passes.
+     * [KO] ClusterLightManager 인스턴스를 파기하고 할당된 GPU 버퍼 및 하위 컴퓨트 패스를 해제합니다.
+     * [EN] Destroys the ClusterLightManager instance and releases allocated GPU buffers and sub-compute passes.
      */
     destroy(): void {
         if (this.#clusterLightsBuffer) {
             try {
                 this.#clusterLightsBuffer.destroy();
             } catch (e) {
-                // 예외 처리
             }
             this.#clusterLightsBuffer = null;
         }
