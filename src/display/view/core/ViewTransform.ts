@@ -83,15 +83,10 @@ class ViewTransform extends RedGPUObject {
      */
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
     /**
-     * [KO] 현재 적용된 지터 오프셋 X 값 (정규화된 값)
-     * [EN] Currently applied jitter offset X value (normalized value)
+     * [KO] 현재 적용된 지터 오프셋 [offsetX, offsetY] (정규화된 값, Zero-GC)
+     * [EN] Currently applied jitter offset [offsetX, offsetY] (normalized value, Zero-GC)
      */
-    #jitterOffsetX: number = 0;
-    /**
-     * [KO] 현재 적용된 지터 오프셋 Y 값 (정규화된 값)
-     * [EN] Currently applied jitter offset Y value (normalized value)
-     */
-    #jitterOffsetY: number = 0;
+    #jitterOffset: [number, number] = [0, 0];
 
     /**
      * [KO] ViewTransform 인스턴스를 생성합니다.
@@ -338,9 +333,9 @@ class ViewTransform extends RedGPUObject {
         const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !== 'IsometricController') && antialiasingManager.useTAA
 
         if (needJitter) {
-            if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-                const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
-                const ndcJitterY = (this.#jitterOffsetY / this.pixelRectObject.height) * 2.0;
+            if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffset[0] !== 0 || this.#jitterOffset[1] !== 0)) {
+                const ndcJitterX = (this.#jitterOffset[0] / this.pixelRectObject.width) * 2.0;
+                const ndcJitterY = (this.#jitterOffset[1] / this.pixelRectObject.height) * 2.0;
 
                 this.#projectionMatrix[8] += ndcJitterX;
                 this.#projectionMatrix[9] += ndcJitterY;
@@ -362,7 +357,7 @@ class ViewTransform extends RedGPUObject {
      * [EN] Returns the currently configured jitter offset [offsetX, offsetY].
      */
     get jitterOffset(): [number, number] {
-        return [this.#jitterOffsetX, this.#jitterOffsetY];
+        return this.#jitterOffset;
     }
 
     /**
@@ -376,8 +371,8 @@ class ViewTransform extends RedGPUObject {
      * [EN] Y-axis jitter offset value
      */
     setJitterOffset(offsetX: number, offsetY: number) {
-        this.#jitterOffsetX = offsetX;
-        this.#jitterOffsetY = offsetY;
+        this.#jitterOffset[0] = offsetX;
+        this.#jitterOffset[1] = offsetY;
     }
 
     /**
@@ -385,8 +380,8 @@ class ViewTransform extends RedGPUObject {
      * [EN] Clears and resets the jitter offset to 0.
      */
     clearJitterOffset() {
-        this.#jitterOffsetX = 0;
-        this.#jitterOffsetY = 0;
+        this.#jitterOffset[0] = 0;
+        this.#jitterOffset[1] = 0;
     }
 
     /**

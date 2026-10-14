@@ -40,7 +40,6 @@ class TAA extends ASinglePassPostEffect {
     #frameIndex: number = 0;
     #jitterStrength: number = 1.0;
     #casPass: TAACASPass;
-    #prevJitterOffset: [number, number] = [0, 0];
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
     #videoMemorySize: number = 0;
     #prevInfo: { width: number, height: number };
@@ -229,10 +228,7 @@ class TAA extends ASinglePassPostEffect {
 
         this.updateUniform('frameIndex', this.#frameIndex);
         this.updateUniform('currJitterOffset', view.jitterOffset);
-        this.updateUniform('prevJitterOffset', this.#prevJitterOffset);
         mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix);
-        this.#prevJitterOffset[0] = view.jitterOffset[0];
-        this.#prevJitterOffset[1] = view.jitterOffset[1];
 
         this.#updateHistoryTextures(width, height);
 
@@ -276,6 +272,17 @@ class TAA extends ASinglePassPostEffect {
         this.#prevInfo = null;
         this.#historyIndex = 0;
         this.#frameIndex = 0;
+    }
+
+    /**
+     * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 후속 `TAACASPass`의 모든 GPU 리소스를 파괴합니다.
+     * [EN] Destroys all GPU resources of TAA history textures, uniform buffer, and the subsequent `TAACASPass`.
+     */
+    destroy(): void {
+        if (this.#casPass) {
+            this.#casPass.destroy();
+        }
+        super.destroy();
     }
 
     #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;

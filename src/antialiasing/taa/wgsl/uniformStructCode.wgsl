@@ -8,12 +8,9 @@
  * [EN] TAA Uniform Buffer (UBO) structure (1:1 mapping with CPU binding)
  */
 struct Uniforms {
-    frameIndex: f32,
-    pad0: f32, // vec2 정렬 충족을 위한 명시적 4B 스칼라 패딩
     currJitterOffset: vec2<f32>,
-    prevJitterOffset: vec2<f32>,
-    pad1: f32, // 16바이트 바운더리 완성용 끝단 패딩
-    pad2: f32,
+    frameIndex: f32,
+    pad0: f32, // 16-byte tail alignment
 };
 
 /**
