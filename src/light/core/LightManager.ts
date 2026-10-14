@@ -335,7 +335,6 @@ const cleanupLight = (light: any) => {
         } catch (e) {
             // 예외 처리
         }
-        light.drawDebugger = null;
     }
 };
 Object.freeze(LightManager)

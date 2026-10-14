@@ -15,7 +15,6 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
-import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
 import SkyAtmosphere from "../skyAtmosphere/SkyAtmosphere";
@@ -490,8 +489,7 @@ class View3D extends AView {
         }
         lightManager.directionalLights.forEach((light: DirectionalLight) => {
             if (light.enableDebugger) {
-                if (!light.drawDebugger) light.drawDebugger = new DrawDebuggerDirectionalLight(redGPUContext, light)
-                light.drawDebugger.render(this.renderViewStateData)
+                light.render(this.renderViewStateData)
             }
         })
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);

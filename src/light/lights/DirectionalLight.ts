@@ -1,5 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../color/convertHexToRgb";
+import DrawDebuggerDirectionalLight from "../../display/drawDebugger/light/DrawDebuggerDirectionalLight";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
@@ -29,6 +31,7 @@ class DirectionalLight extends ABaseLight {
     #azimuth: number;
 
     #lux: number;
+    #drawDebugger: DrawDebuggerDirectionalLight = null;
 
     /**
      * [KO] 새로운 DirectionalLight 인스턴스를 생성합니다.
@@ -173,6 +176,33 @@ class DirectionalLight extends ABaseLight {
         this.#directionY = value[1];
         this.#directionZ = value[2];
         this.#updateSphericalFromDirection();
+    }
+
+    /**
+     * [KO] 직사광의 시각적 디버거(`DrawDebuggerDirectionalLight`) 인스턴스를 반환합니다.
+     * [EN] Returns the visual debugger (`DrawDebuggerDirectionalLight`) instance for the directional light.
+     *
+     * @returns
+     * [KO] 디버거 인스턴스 (`DrawDebuggerDirectionalLight`)
+     * [EN] Debugger instance (`DrawDebuggerDirectionalLight`)
+     */
+    get drawDebugger(): DrawDebuggerDirectionalLight {
+        return this.#drawDebugger;
+    }
+
+    /**
+     * [KO] 디버거가 활성화된 경우 직사광 디버거 기즈모를 렌더링합니다.
+     * [EN] Renders the directional light debugger gizmo when the debugger is enabled.
+     *
+     * @param debugViewRenderState -
+     * [KO] 현재 렌더링 뷰의 상태 데이터 (`RenderViewStateData`)
+     * [EN] State data of the current render view (`RenderViewStateData`)
+     */
+    render(debugViewRenderState: RenderViewStateData) {
+        if (this.enableDebugger) {
+            if (!this.#drawDebugger) this.#drawDebugger = new DrawDebuggerDirectionalLight(debugViewRenderState.view.redGPUContext, this);
+            this.#drawDebugger.render(debugViewRenderState);
+        }
     }
 
     #updateDirectionFromSpherical() {

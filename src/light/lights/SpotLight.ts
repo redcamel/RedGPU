@@ -1,5 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../color/convertHexToRgb";
+import DrawDebuggerSpotLight from "../../display/drawDebugger/light/DrawDebuggerSpotLight";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
@@ -37,6 +39,7 @@ class SpotLight extends ABaseLight {
     #innerCutoff: number = 0.0;
     #outerCutoff: number = 44.0;
     #lumen: number;
+    #drawDebugger: DrawDebuggerSpotLight = null;
 
     /**
      * [KO] 새로운 SpotLight 인스턴스를 생성합니다.
@@ -250,30 +253,6 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 내부 컷오프 각도(`innerCutoff`)의 코사인 값을 반환합니다.
-     * [EN] Returns the cosine value of the inner cutoff angle (`innerCutoff`).
-     *
-     * @returns
-     * [KO] `cos(innerCutoff)` 값
-     * [EN] `cos(innerCutoff)` value
-     */
-    get innerCutoffCos(): number {
-        return Math.cos(this.#innerCutoff * Math.PI / 180);
-    }
-
-    /**
-     * [KO] 외부 컷오프 각도(`outerCutoff`)의 코사인 값을 반환합니다.
-     * [EN] Returns the cosine value of the outer cutoff angle (`outerCutoff`).
-     *
-     * @returns
-     * [KO] `cos(outerCutoff)` 값
-     * [EN] `cos(outerCutoff)` value
-     */
-    get outerCutoffCos(): number {
-        return Math.cos(this.#outerCutoff * Math.PI / 180);
-    }
-
-    /**
      * [KO] 광원의 월드 위치를 설정합니다. 개별 좌표(`x, y, z`) 또는 3요소 배열(`[x, y, z]`)을 전달할 수 있습니다.
      * [EN] Sets the world position of the light source. Accepts individual coordinates (`x, y, z`) or a 3-element array (`[x, y, z]`).
      *
@@ -346,6 +325,33 @@ class SpotLight extends ABaseLight {
             this.#directionX = dx / length;
             this.#directionY = dy / length;
             this.#directionZ = dz / length;
+        }
+    }
+
+    /**
+     * [KO] 스포트라이트의 시각적 디버거(`DrawDebuggerSpotLight`) 인스턴스를 반환합니다.
+     * [EN] Returns the visual debugger (`DrawDebuggerSpotLight`) instance for the spot light.
+     *
+     * @returns
+     * [KO] 디버거 인스턴스 (`DrawDebuggerSpotLight`)
+     * [EN] Debugger instance (`DrawDebuggerSpotLight`)
+     */
+    get drawDebugger(): DrawDebuggerSpotLight {
+        return this.#drawDebugger;
+    }
+
+    /**
+     * [KO] 디버거가 활성화된 경우 스포트라이트 디버거 기즈모를 렌더링합니다.
+     * [EN] Renders the spot light debugger gizmo when the debugger is enabled.
+     *
+     * @param debugViewRenderState -
+     * [KO] 현재 렌더링 뷰의 상태 데이터 (`RenderViewStateData`)
+     * [EN] State data of the current render view (`RenderViewStateData`)
+     */
+    render(debugViewRenderState: RenderViewStateData) {
+        if (this.enableDebugger) {
+            if (!this.#drawDebugger) this.#drawDebugger = new DrawDebuggerSpotLight(debugViewRenderState.view.redGPUContext, this);
+            this.#drawDebugger.render(debugViewRenderState);
         }
     }
 }

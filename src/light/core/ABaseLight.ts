@@ -1,5 +1,4 @@
 import ColorRGB from "../../color/ColorRGB";
-import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLight";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
@@ -18,11 +17,6 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * @category Light
  */
 abstract class ABaseLight {
-    /**
-     * [KO] 조명 영역을 시각적으로 표시하는 디버거 객체
-     * [EN] Debugger object that visually displays the light area
-     */
-    drawDebugger: ADrawDebuggerLight<ABaseLight>;
     #color: ColorRGB;
     #intensityMultiplier: number;
     #enableDebugger: boolean = false;

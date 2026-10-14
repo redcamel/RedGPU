@@ -1,5 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import convertHexToRgb from "../../color/convertHexToRgb";
+import DrawDebuggerPointLight from "../../display/drawDebugger/light/DrawDebuggerPointLight";
+import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
@@ -30,6 +32,7 @@ class PointLight extends ABaseLight {
     #y: number = 0;
     #z: number = 0;
     #lumen: number;
+    #drawDebugger: DrawDebuggerPointLight = null;
 
     /**
      * [KO] 새로운 PointLight 인스턴스를 생성합니다.
@@ -176,6 +179,33 @@ class PointLight extends ABaseLight {
             this.#x = x;
             this.#y = y;
             this.#z = z;
+        }
+    }
+
+    /**
+     * [KO] 점광원의 시각적 디버거(`DrawDebuggerPointLight`) 인스턴스를 반환합니다.
+     * [EN] Returns the visual debugger (`DrawDebuggerPointLight`) instance for the point light.
+     *
+     * @returns
+     * [KO] 디버거 인스턴스 (`DrawDebuggerPointLight`)
+     * [EN] Debugger instance (`DrawDebuggerPointLight`)
+     */
+    get drawDebugger(): DrawDebuggerPointLight {
+        return this.#drawDebugger;
+    }
+
+    /**
+     * [KO] 디버거가 활성화된 경우 점광원 디버거 기즈모를 렌더링합니다.
+     * [EN] Renders the point light debugger gizmo when the debugger is enabled.
+     *
+     * @param debugViewRenderState -
+     * [KO] 현재 렌더링 뷰의 상태 데이터 (`RenderViewStateData`)
+     * [EN] State data of the current render view (`RenderViewStateData`)
+     */
+    render(debugViewRenderState: RenderViewStateData) {
+        if (this.enableDebugger) {
+            if (!this.#drawDebugger) this.#drawDebugger = new DrawDebuggerPointLight(debugViewRenderState.view.redGPUContext, this);
+            this.#drawDebugger.render(debugViewRenderState);
         }
     }
 }

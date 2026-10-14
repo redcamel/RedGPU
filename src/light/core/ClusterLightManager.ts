@@ -1,6 +1,4 @@
 import View3D from "../../display/view/View3D";
-import DrawDebuggerPointLight from "../../display/drawDebugger/light/DrawDebuggerPointLight";
-import DrawDebuggerSpotLight from "../../display/drawDebugger/light/DrawDebuggerSpotLight";
 import PassClusterLightBound from "../clusterLight/pass/bound/PassClusterLightBound";
 import PassClustersLight from "../clusterLight/pass/light/PassClustersLight";
 import PassClustersLightHelper from "../clusterLight/core/PassClustersLightHelper";
@@ -94,23 +92,11 @@ class ClusterLightManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 클러스터 조명 데이터를 담고 있는 `Float32Array` 버퍼 데이터를 반환합니다.
-     * [EN] Returns the `Float32Array` buffer data containing cluster light information.
-     *
-     * @returns
-     * [KO] 클러스터 조명 `Float32Array` 데이터
-     * [EN] Cluster light `Float32Array` data
-     */
-    get clusterLightsBufferData(): Float32Array {
-        return this.#clusterLightsBufferData;
-    }
-
-    /**
      * [KO] 현재 씬의 포인트 조명 및 스포트 조명 데이터를 갱신하고 클러스터 라이팅 컴퓨트 패스를 실행합니다.
      * [EN] Updates point light and spot light data in the current scene and executes the clustered lighting compute passes.
      */
     updateClusterLights() {
-        const {redGPUContext, scene, renderViewStateData, pixelRectArray} = this.#view
+        const {scene, renderViewStateData, pixelRectArray} = this.#view
         const width = pixelRectArray[2]
         const height = pixelRectArray[3]
 
@@ -141,8 +127,7 @@ class ClusterLightManager extends RedGPUObject {
                         offset,
                     )
                     if (tLight.enableDebugger) {
-                        if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerPointLight(redGPUContext, tLight)
-                        tLight.drawDebugger.render(renderViewStateData)
+                        tLight.render(renderViewStateData)
                     }
                 }
             }
@@ -161,8 +146,7 @@ class ClusterLightManager extends RedGPUObject {
                         offset,
                     )
                     if (tLight.enableDebugger) {
-                        if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
-                        tLight.drawDebugger.render(renderViewStateData)
+                        tLight.render(renderViewStateData)
                     }
                 }
             }
