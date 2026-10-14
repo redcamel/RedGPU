@@ -6,11 +6,16 @@ import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 
 /**
- * [KO] TAA 후속 AMD FidelityFX CAS(Contrast Adaptive Sharpening) 선명도 복원 패스 클래스입니다.
- * [EN] AMD FidelityFX CAS (Contrast Adaptive Sharpening) restoration pass class following TAA.
+ * [KO] TAA(Temporal Anti-Aliasing) 적용 후 시간적 재투영으로 인해 미세하게 손실된 고주파 디테일을 복원하는 CAS(Contrast Adaptive Sharpening) 후처리 패스 클래스입니다.
+ * [EN] CAS (Contrast Adaptive Sharpening) post-processing pass class that restores fine high-frequency details slightly softened by temporal reprojection in TAA (Temporal Anti-Aliasing).
  *
- * [KO] 톤매핑이 완료된 LDR(Low Dynamic Range) 화면 공간에서 3x3 국소 픽셀 대비를 분석하여 링잉(Ringing) 현상을 억제하면서 TAA 시간적 누적으로 인해 약화된 고주파 선명도를 복원합니다. `TAA` 인스턴스 생성 시 내부적으로 자동 생성됩니다.
- * [EN] Analyzes 3x3 local pixel contrast in LDR (Low Dynamic Range) screen space after tone mapping to restore high-frequency sharpness attenuated by TAA temporal accumulation while suppressing ringing artifacts. Automatically created internally when a `TAA` instance is instantiated.
+ * [KO] 픽셀 주변의 로컬 대비(Contrast)를 분석하여 이미 대비가 높은 경계선의 링잉(Ringing)이나 헤일로(Halo) 현상을 억제하면서 저대비 디테일 영역을 적응형으로 선명하게 보정합니다.
+ * [EN] Analyzes local pixel contrast to adaptively sharpen low-contrast detail regions while suppressing ringing and halo artifacts along high-contrast edges.
+ *
+ * ::: info
+ * [KO] 이 패스는 `TAA` 내부에 포함되어 톤매핑 이후 LDR 색 공간(`isLdr = true`)에서 자동으로 실행됩니다.
+ * [EN] This pass is embedded within `TAA` and executes automatically in LDR color space (`isLdr = true`) after tone mapping.
+ * :::
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -19,8 +24,9 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
  *
  * ### Example
  * ```typescript
- * const casPass = view.taa.casPass;
- * casPass.sharpness = 0.5;
+ * // [KO] TAA 인스턴스를 통해 샤프닝 강도 제어
+ * // [EN] Control sharpening strength via the TAA instance
+ * view.taa.sharpness = 0.5;
  * ```
  *
  * @category Antialiasing
@@ -29,12 +35,12 @@ class TAACASPass extends ASinglePassPostEffect {
     #sharpness: number = 0.5;
 
     /**
-     * [KO] `TAACASPass` 인스턴스를 생성합니다.
-     * [EN] Creates a `TAACASPass` instance.
+     * [KO] `TAACASPass` 인스턴스를 초기화합니다.
+     * [EN] Initializes the `TAACASPass` instance.
      *
      * @param redGPUContext -
-     * [KO] `RedGPUContext` 인스턴스
-     * [EN] `RedGPUContext` instance
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {x: 8, y: 8, z: 1});
@@ -54,35 +60,20 @@ class TAACASPass extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] CAS 샤프닝(선명도 복원) 강도를 반환합니다.
-     * [EN] Returns the CAS sharpening (sharpness restoration) strength.
+     * [KO] 적응형 샤프닝(CAS) 강도를 반환하거나 설정합니다.
+     * [EN] Gets or sets the Contrast Adaptive Sharpening (CAS) strength.
      *
-     * ### Example
-     * ```typescript
-     * const sharpness = view.taa.casPass.sharpness;
-     * ```
+     * [KO] 허용 범위는 `0.0` ~ `1.0`이며 기본값은 `0.5`입니다.
+     * [EN] Valid range is `0.0` to `1.0`, and the default value is `0.5`.
      *
-     * @returns
-     * [KO] 샤프닝 강도 (`0.0` ~ `1.0`, 기본값: `0.5`)
-     * [EN] Sharpening strength (`0.0` to `1.0`, default: `0.5`)
+     * @throws
+     * [KO] `value`가 `0.0` ~ `1.0` 범위를 벗어날 경우 에러가 발생합니다.
+     * [EN] Throws an error if `value` is outside the `0.0` to `1.0` range.
      */
     get sharpness(): number {
         return this.#sharpness;
     }
 
-    /**
-     * [KO] CAS 샤프닝(선명도 복원) 강도를 설정합니다. 유효 범위는 `0.0` ~ `1.0`입니다.
-     * [EN] Sets the CAS sharpening (sharpness restoration) strength. Valid range is `0.0` to `1.0`.
-     *
-     * ### Example
-     * ```typescript
-     * view.taa.casPass.sharpness = 0.6;
-     * ```
-     *
-     * @param value -
-     * [KO] 샤프닝 강도 (`0.0` ~ `1.0`)
-     * [EN] Sharpening strength (`0.0` to `1.0`)
-     */
     set sharpness(value: number) {
         validateNumberRange(value, 0, 1);
         this.#sharpness = value;
@@ -92,4 +83,3 @@ class TAACASPass extends ASinglePassPostEffect {
 
 Object.freeze(TAACASPass);
 export default TAACASPass;
-

@@ -1,11 +1,16 @@
 import createUUID from "../utils/uuid/createUUID";
 
 /**
- * [KO] 엔진 전역 안티앨리어싱(Anti-aliasing) 모드를 상호 배타적으로 관리하는 매니저 클래스입니다.
- * [EN] Manager class that mutually exclusively manages global anti-aliasing modes across the engine.
+ * [KO] 컨텍스트 전역의 안티앨리어싱(Anti-aliasing) 모드를 통합 관리하는 클래스입니다.
+ * [EN] Class that manages the global anti-aliasing mode across the context.
  *
- * [KO] `MSAA`(Multi-Sample Anti-Aliasing), `FXAA`(Fast Approximate Anti-Aliasing), `TAA`(Temporal Anti-Aliasing) 중 하나의 안티앨리어싱 기법을 선택하여 활성화하며, 기법 전환 시 기존 모드를 자동으로 해제합니다. `RedGPUContext` 생성 시 내부적으로 자동 생성됩니다.
- * [EN] Selects and activates one anti-aliasing technique among `MSAA` (Multi-Sample Anti-Aliasing), `FXAA` (Fast Approximate Anti-Aliasing), and `TAA` (Temporal Anti-Aliasing), automatically deactivating other modes upon switching. Automatically created internally when `RedGPUContext` is instantiated.
+ * [KO] MSAA(Multi-Sample Anti-Aliasing), FXAA(Fast Approximate Anti-Aliasing), TAA(Temporal Anti-Aliasing) 중 하나의 기법을 상호 배타적으로 활성화하며, 모드 전환 시 기존 안티앨리어싱 설정을 자동으로 해제합니다.
+ * [EN] Mutually exclusively activates one technique among MSAA (Multi-Sample Anti-Aliasing), FXAA (Fast Approximate Anti-Aliasing), and TAA (Temporal Anti-Aliasing), automatically deactivating the previous setting when switching modes.
+ *
+ * ::: info
+ * [KO] 초기 생성 시 디스플레이의 픽셀 밀도(`window.devicePixelRatio`)가 `1.0`을 초과하는 고해상도(HiDPI/Retina) 환경에서는 `useTAA`가 기본 활성화되며, 일반 해상도(`1.0` 이하) 환경에서는 `useMSAA`가 기본 활성화됩니다.
+ * [EN] Upon initialization, `useTAA` is enabled by default on high-resolution (HiDPI/Retina) displays where `window.devicePixelRatio` exceeds `1.0`, while `useMSAA` is enabled by default on standard-resolution (`1.0` or lower) displays.
+ * :::
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -14,7 +19,9 @@ import createUUID from "../utils/uuid/createUUID";
  *
  * ### Example
  * ```typescript
- * const antialiasingManager = redGPUContext.antialiasingManager;
+ * // [KO] RedGPUContext로부터 AntialiasingManager 접근 및 모드 전환
+ * // [EN] Access AntialiasingManager from RedGPUContext and switch modes
+ * const { antialiasingManager } = redGPUContext;
  * antialiasingManager.useTAA = true;
  * ```
  *
@@ -27,11 +34,8 @@ class AntialiasingManager {
     #useTAA: boolean = false
 
     /**
-     * [KO] `AntialiasingManager` 인스턴스를 생성합니다.
-     * [EN] Creates an `AntialiasingManager` instance.
-     *
-     * [KO] 디스플레이의 `window.devicePixelRatio` 값에 따라 초기 안티앨리어싱 모드를 자동으로 결정합니다 (`devicePixelRatio > 1.0`인 고해상도 환경에서는 `TAA`, 그 외에는 `MSAA` 활성화).
-     * [EN] Automatically determines the initial anti-aliasing mode based on the display's `window.devicePixelRatio` (`TAA` for High-DPI displays with `devicePixelRatio > 1.0`, otherwise `MSAA`).
+     * [KO] `AntialiasingManager` 인스턴스를 초기화하고 디스플레이 픽셀 밀도에 따라 기본 안티앨리어싱 모드를 설정합니다.
+     * [EN] Initializes the `AntialiasingManager` instance and sets the default anti-aliasing mode based on the display pixel ratio.
      */
     constructor() {
         if (window.devicePixelRatio > 1.0) {
@@ -42,35 +46,25 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] TAA(Temporal Anti-Aliasing) 활성화 여부를 반환합니다.
-     * [EN] Returns whether TAA (Temporal Anti-Aliasing) is enabled.
+     * [KO] TAA(Temporal Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether TAA (Temporal Anti-Aliasing) is enabled.
+     *
+     * ::: info
+     * [KO] `true`로 설정하면 기존에 활성화된 `useMSAA` 및 `useFXAA`는 자동으로 `false`로 전환됩니다.
+     * [EN] Setting this to `true` automatically switches any previously enabled `useMSAA` and `useFXAA` to `false`.
+     * :::
      *
      * ### Example
      * ```typescript
-     * const isTAA = redGPUContext.antialiasingManager.useTAA;
+     * // [KO] TAA 활성화
+     * // [EN] Enable TAA
+     * redGPUContext.antialiasingManager.useTAA = true;
      * ```
-     *
-     * @returns
-     * [KO] TAA 활성화 여부
-     * [EN] Whether TAA is enabled
      */
     get useTAA(): boolean {
         return this.#useTAA;
     }
 
-    /**
-     * [KO] TAA(Temporal Anti-Aliasing) 활성화 여부를 설정합니다. 활성화 시 MSAA 및 FXAA는 자동으로 비활성화됩니다.
-     * [EN] Sets whether to enable TAA (Temporal Anti-Aliasing). Enabling TAA automatically disables MSAA and FXAA.
-     *
-     * ### Example
-     * ```typescript
-     * redGPUContext.antialiasingManager.useTAA = true;
-     * ```
-     *
-     * @param value -
-     * [KO] TAA 활성화 여부
-     * [EN] Whether to enable TAA
-     */
     set useTAA(value: boolean) {
         if (this.#useTAA === value) return;
         this.#clearAll();
@@ -78,35 +72,25 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 반환합니다.
-     * [EN] Returns whether MSAA (Multi-Sample Anti-Aliasing) is enabled.
+     * [KO] MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether MSAA (Multi-Sample Anti-Aliasing) is enabled.
+     *
+     * ::: info
+     * [KO] 상태가 변경될 때마다 새로운 `msaaID`가 발급되어 렌더 파이프라인의 멀티샘플링 구성을 갱신하며, 기존 `useFXAA` 및 `useTAA`는 자동으로 해제됩니다.
+     * [EN] Whenever the state changes, a new `msaaID` is issued to update the multisampling configuration of the render pipeline, and any previously enabled `useFXAA` and `useTAA` are automatically disabled.
+     * :::
      *
      * ### Example
      * ```typescript
-     * const isMSAA = redGPUContext.antialiasingManager.useMSAA;
+     * // [KO] MSAA 활성화
+     * // [EN] Enable MSAA
+     * redGPUContext.antialiasingManager.useMSAA = true;
      * ```
-     *
-     * @returns
-     * [KO] MSAA 활성화 여부
-     * [EN] Whether MSAA is enabled
      */
     get useMSAA(): boolean {
         return this.#useMSAA;
     }
 
-    /**
-     * [KO] MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 설정합니다. 상태 변경 시 새로운 `msaaID`가 발급되며, TAA 및 FXAA는 자동으로 비활성화됩니다.
-     * [EN] Sets whether to enable MSAA (Multi-Sample Anti-Aliasing). Issues a new `msaaID` upon state change and automatically disables TAA and FXAA.
-     *
-     * ### Example
-     * ```typescript
-     * redGPUContext.antialiasingManager.useMSAA = true;
-     * ```
-     *
-     * @param value -
-     * [KO] MSAA 활성화 여부
-     * [EN] Whether to enable MSAA
-     */
     set useMSAA(value: boolean) {
         if (this.#useMSAA === value) return;
         this.#clearAll();
@@ -115,35 +99,25 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 반환합니다.
-     * [EN] Returns whether FXAA (Fast Approximate Anti-Aliasing) is enabled.
+     * [KO] FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether FXAA (Fast Approximate Anti-Aliasing) is enabled.
+     *
+     * ::: info
+     * [KO] `true`로 설정하면 기존에 활성화된 `useMSAA` 및 `useTAA`는 자동으로 `false`로 전환됩니다.
+     * [EN] Setting this to `true` automatically switches any previously enabled `useMSAA` and `useTAA` to `false`.
+     * :::
      *
      * ### Example
      * ```typescript
-     * const isFXAA = redGPUContext.antialiasingManager.useFXAA;
+     * // [KO] FXAA 활성화
+     * // [EN] Enable FXAA
+     * redGPUContext.antialiasingManager.useFXAA = true;
      * ```
-     *
-     * @returns
-     * [KO] FXAA 활성화 여부
-     * [EN] Whether FXAA is enabled
      */
     get useFXAA(): boolean {
         return this.#useFXAA;
     }
 
-    /**
-     * [KO] FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 설정합니다. 활성화 시 MSAA 및 TAA는 자동으로 비활성화됩니다.
-     * [EN] Sets whether to enable FXAA (Fast Approximate Anti-Aliasing). Enabling FXAA automatically disables MSAA and TAA.
-     *
-     * ### Example
-     * ```typescript
-     * redGPUContext.antialiasingManager.useFXAA = true;
-     * ```
-     *
-     * @param value -
-     * [KO] FXAA 활성화 여부
-     * [EN] Whether to enable FXAA
-     */
     set useFXAA(value: boolean) {
         if (this.#useFXAA === value) return;
         this.#clearAll();
@@ -151,32 +125,11 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] MSAA 상태 변경 감지를 위한 고유 식별자(UUID)를 반환합니다.
-     * [EN] Returns the unique identifier (UUID) for detecting MSAA state changes.
-     *
-     * @returns
-     * [KO] MSAA 상태 고유 ID
-     * [EN] Unique ID of the MSAA state
+     * [KO] MSAA 상태 변경을 추적하기 위한 고유 식별자(UUID)를 반환합니다.
+     * [EN] Returns the unique identifier (UUID) used to track MSAA state changes.
      */
     get msaaID(): string {
         return this.#msaaID;
-    }
-
-    /**
-     * [KO] 지정된 뷰의 TAA 누적 히스토리를 즉시 초기화합니다. 카메라 컷, 씬 전환, 또는 카메라 텔레포트 시 잔상(Ghosting)을 방지하기 위해 호출합니다.
-     * [EN] Immediately resets the TAA accumulation history of the specified view. Call during camera cuts, scene transitions, or camera teleportation to prevent ghosting.
-     *
-     * ### Example
-     * ```typescript
-     * redGPUContext.antialiasingManager.resetHistory(view);
-     * ```
-     *
-     * @param view -
-     * [KO] TAA 히스토리를 초기화할 대상 뷰 인스턴스
-     * [EN] Target view instance whose TAA history will be reset
-     */
-    resetHistory(view?: { taa?: { reset(): void } }): void {
-        view?.taa?.reset();
     }
 
     #clearAll() {
@@ -188,4 +141,3 @@ class AntialiasingManager {
 
 Object.freeze(AntialiasingManager)
 export default AntialiasingManager
-

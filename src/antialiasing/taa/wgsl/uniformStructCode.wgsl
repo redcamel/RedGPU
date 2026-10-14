@@ -3,20 +3,14 @@
 #redgpu_include depth.getLinearizeDepth
 #redgpu_include math.EPSILON
 
-/**
- * [KO] TAA 균일 버퍼(UBO) 구조체 (CPU 바인딩 1:1 매핑)
- * [EN] TAA Uniform Buffer (UBO) structure (1:1 mapping with CPU binding)
- */
+// TAA uniform buffer layout (16-byte aligned)
 struct Uniforms {
     currJitterOffset: vec2<f32>,
     frameIndex: f32,
     pad0: f32, // 16-byte tail alignment
 };
 
-/**
- * [KO] 3x3 국소 픽셀 영역 통계 데이터 구조체 (YCoCg 색공간 및 Alpha, 16B Coalesced 패킹)
- * [EN] 3x3 Local pixel neighborhood statistical data structure (YCoCg color space & Alpha, 16B Coalesced packing)
- */
+// 3x3 neighborhood statistical moments and AABB bounds in YCoCg space (64 bytes, 16B aligned per slot)
 struct NeighborhoodStats {
     minColor: vec3<f32>,
     minAlpha: f32, // 12B + 4B = 16B
@@ -28,46 +22,27 @@ struct NeighborhoodStats {
     pad0: f32, // 16-byte tail alignment
 };
 
-/**
- * [KO] 샘플링된 색상 및 색공간 변환 캐시 구조체
- * [EN] Sampled color and color space conversion cache structure
- */
 struct SampledColor {
     rgb: vec3<f32>,
     ycocg: vec3<f32>,
     alpha: f32,
 };
 
-// =============================================================================
-// 1. 공용 엔진 모듈 연계 기하학적 신뢰도 판별 (Geometric Discontinuity Rejection)
-// =============================================================================
-
-/**
- * [KO] 현재 프레임과 이전 프레임(재투영 위치) 간 선형 깊이 델타 기반 차폐 검증 (FSR 2 / UE5 표준)
- * [EN] Linear depth delta-based occlusion rejection between current and reprojected previous frame
- */
+// Evaluates depth continuity confidence between current and reprojected depth to detect disocclusion
 fn get_geometric_depth_confidence(currDepth: f32, prevDepth: f32) -> f32 {
     let currLinear = getLinearizeDepth(currDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let prevLinear = getLinearizeDepth(prevDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping);
     let depthDiff = abs(currLinear - prevLinear);
 
-    // 카메라 거리에 비례하는 스케일 적응형 허용 오차
     let tolerance = max(0.15, currLinear * 0.04);
     return 1.0 - saturate((depthDiff - tolerance * 0.5) / (tolerance * 1.5));
 }
 
-// =============================================================================
-// 2. 워크그룹 공유 메모리(LDS) 및 온칩 신호 재구성 필터 (On-Chip Reconstruction)
-// =============================================================================
-
-// 8x8 스레드 타일 + 1픽셀 외곽 패딩 = 10x10 타일 온칩 공유 캐시 (2.0 KB)
+// 10x10 workgroup shared memory (8x8 active tile + 1-pixel halo border)
 var<workgroup> s_color : array<array<vec4<f32>, 10>, 10>;
 var<workgroup> s_depth : array<array<f32, 10>, 10>;
 
-/**
- * [KO] LDS 공유 메모리 기반 3x3 국소 영역 통계 산출 (YCoCg 색공간 및 Alpha)
- * [EN] Calculates 3x3 local neighborhood statistics from LDS shared memory (YCoCg space & Alpha)
- */
+// Computes 3x3 YCoCg mean, standard deviation, and min/max bounds from workgroup shared memory
 fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> NeighborhoodStats {
     var m1 = vec3<f32>(0.0);
     var m2 = vec3<f32>(0.0);
@@ -107,12 +82,7 @@ fn calculate_neighborhood_stats_ycocg_lds(localCoord: vec2<i32>) -> Neighborhood
     return stats;
 }
 
-/**
- * [KO] 온칩 3x3 지수 재구성 필터 (Karis 2014 Reconstruction Filter)
- * 하드웨어 바이리니어 블러를 완전히 제거하고, 지터링된 3x3 국소 샘플로부터 픽셀 중심 참값 신호를 복원합니다.
- * [EN] On-chip 3x3 exponential reconstruction filter (Karis 2014)
- * Completely eliminates hardware bilinear blur and recovers true pixel-center signal from 3x3 jittered samples.
- */
+// Reconstructs unjittered current pixel color using a 3x3 sub-pixel Gaussian filter in shared memory
 fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: vec2<f32>) -> SampledColor {
     var sumRGB = vec3<f32>(0.0);
     var sumAlpha = 0.0;
@@ -122,7 +92,6 @@ fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: v
         for (var x: i32 = -1; x <= 1; x++) {
             let delta = vec2<f32>(f32(x), f32(y)) + jitterOffsetPix;
             let distSq = dot(delta, delta);
-            // Karis / UE5 지수 감쇄 가중치 강화 (중심 참값 신호 비중 65% 이상으로 상향하여 원천 블러 억제)
             let w = exp(-4.85 * distSq);
 
             let sampleRGBA = s_color[localCoord.y + y][localCoord.x + x];
@@ -140,26 +109,14 @@ fn reconstruct_current_color_ycocg_lds(localCoord: vec2<i32>, jitterOffsetPix: v
     return result;
 }
 
-// =============================================================================
-// 3. 히스토리 샘플링 및 분산 클리핑 (History Sampling & Variance Clipping)
-// =============================================================================
-
-/**
- * [KO] 히스토리 색상과 국소 통계 간 휘도 불일치 가중치 산출
- * [EN] Calculates luminance discrepancy weight between history color and local neighborhood stats
- */
+// Measures luminance discrepancy between neighborhood mean and clipped history luminance
 fn get_color_discrepancy_weight(stats: NeighborhoodStats, historyLuminance: f32) -> f32 {
     let diff = abs(stats.mean.x - historyLuminance);
     let threshold = max(stats.stdDev.x * 0.45, 0.01);
     return smoothstep(threshold, threshold * 2.0, diff);
 }
 
-/**
- * [KO] Catmull-Rom 5-Tap 고정밀 바이큐빅 히스토리 샘플링 (현대 표준 규격)
- * 바이큐빅 스플라인 무결성을 보존하여 고주파 디테일의 뭉개짐(블러)을 원천 차단합니다.
- * [EN] Catmull-Rom 5-tap high-precision bicubic history sampling (Modern Standard)
- * Preserves bicubic spline integrity to eliminate high-frequency blurring at the source.
- */
+// 5-tap bicubic Catmull-Rom history sampler to minimize reprojection resampling blur
 fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv: vec2<f32>, texSize: vec2<f32>) -> SampledColor {
     let samplePos = uv * texSize;
     let texPos1 = floor(samplePos - 0.5) + 0.5;
@@ -208,12 +165,7 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
     return result;
 }
 
-/**
- * [KO] 3x3 국소 십자 방향 모션 벡터 분산(Subpixel Velocity Variance) 산출
- * 움직이는 오브젝트와 배경의 실루엣 경계를 물리적으로 검출합니다.
- * [EN] Calculates 3x3 local cross-pattern subpixel motion vector variance
- * Physically detects silhouette boundaries between moving objects and background.
- */
+// Computes local screen-space velocity variance across 4-cardinal neighbors to detect motion boundaries
 fn calculate_velocity_variance(tex: texture_2d<f32>, centerCoord: vec2<i32>, centerVel: vec2<f32>, screenSize: vec2<f32>) -> f32 {
     let velR = textureLoad(tex, centerCoord + vec2<i32>(1, 0), 0).xy;
     let velL = textureLoad(tex, centerCoord - vec2<i32>(1, 0), 0).xy;
@@ -229,43 +181,24 @@ fn calculate_velocity_variance(tex: texture_2d<f32>, centerCoord: vec2<i32>, cen
     return sqrt(varSq * 0.25);
 }
 
-/**
- * [KO] 반투명/파티클 영역 반응형 마스크 가중치 산출 (Reactive Transparency Factor)
- * [EN] Calculates reactive transparency mask weight for translucent/particle regions
- */
+// Increases current-frame blend weight in translucent regions where motion vectors may not match
 fn get_reactive_transparency_weight(stats: NeighborhoodStats) -> f32 {
-    // 통계 알파가 1.0 미만인 반투명 영역은 반응성을 높여 이전 프레임 잔상을 즉시 차단
     return saturate(1.0 - stats.meanAlpha);
 }
 
-/**
- * [KO] Karis 2014 표준 가역 톤매핑 압축 (Reversible Tonemapping)
- * 고휘도 HDR 하이라이트(스펙큘러, 라이트)의 색상 파단 및 파이어플라이를 안정적인 가역 범위로 압축합니다.
- * [EN] Karis 2014 standard reversible tonemapping compression
- * Compresses high-luminance HDR highlights into a stable reversible range.
- */
+// Karis reversible luminance-weighted tone map to suppress HDR fireflies during temporal filtering
 fn reversible_tonemap(rgb: vec3<f32>) -> vec3<f32> {
     let luma = max(dot(rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 0.0);
     return rgb / (1.0 + luma);
 }
 
-/**
- * [KO] 가역 톤매핑 100% 무손실 역복원 (Inverse Tonemapping)
- * 압축 공간에서 블렌딩된 색상을 원본 HDR 다이내믹 레인지로 무손실 복원합니다.
- * [EN] 100% Lossless Inverse Tonemapping
- * Restores blended color from compressed space back to original HDR dynamic range.
- */
+// Inverse Karis tone map to restore linear HDR radiance before storing to the history buffer
 fn inverse_tonemap(rgb: vec3<f32>) -> vec3<f32> {
     let luma = max(dot(rgb, vec3<f32>(0.2126, 0.7152, 0.0722)), 0.0);
     return rgb / max(1.0 - luma, 1e-4);
 }
 
-/**
- * [KO] Salvi 2016 표준 3D 선분-AABB 교차 클리핑 (Ray-Box Segment Clipping in YCoCg)
- * history -> current 방향의 참값 광선과 국소 AABB의 교차점을 정확히 산출하여 탈색 및 색상 편차를 100% 제거합니다.
- * [EN] Salvi 2016 standard 3D Ray-Box Segment Clipping in YCoCg
- * Precisely computes intersection of ray (history -> current) with local AABB, 100% eliminating desaturation and color shift.
- */
+// Clips history YCoCg color toward current pixel color against a variance-guided AABB using slab intersection
 fn clip_history_ray_box_ycocg(
     historyYCoCg: vec3<f32>,
     currentYCoCg: vec3<f32>,
@@ -280,7 +213,6 @@ fn clip_history_ray_box_ycocg(
     let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
     let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
 
-    // Salvi 2016 / Karis 표준 선분 교차 (history -> current)
     let rayDir = currentYCoCg - historyYCoCg;
     let invDir = 1.0 / select(rayDir, sign(rayDir) * 1e-5, abs(rayDir) < vec3<f32>(1e-5));
 
@@ -293,13 +225,9 @@ fn clip_history_ray_box_ycocg(
     let tEnter = max(max(tMin.x, tMin.y), tMin.z);
     let tExit = min(min(tMax.x, tMax.y), tMax.z);
 
-    // 히스토리가 박스 외부에 있어 선분 교차가 성립하는 경우 교차점으로 클리핑
     if (tEnter <= tExit && tEnter >= 0.0 && tEnter <= 1.0) {
         return historyYCoCg + rayDir * tEnter;
     }
 
-    // 박스 내부이면 history 그대로 유지, 완전히 벗어난 예외는 클램프로 안전 보호
     return clamp(historyYCoCg, v_min, v_max);
 }
-
-
