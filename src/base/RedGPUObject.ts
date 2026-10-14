@@ -6,22 +6,29 @@ import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPU
 import BaseObject from "./BaseObject";
 
 /**
- * [KO] GPU 컨텍스트를 사용하는 모든 엔진 객체의 기반 클래스입니다.
- * [EN] Base class for all engine objects using GPU context.
+ * [KO] `RedGPUContext`를 사용하는 모든 엔진 객체의 기반 추상 클래스입니다.
+ * [EN] Abstract base class for all engine objects that use `RedGPUContext`.
  *
- * [KO] RedGPUContext 및 관련 매니저들(ResourceManager, AntialiasingManager 등)에 대한 공통 접근 경로를 제공합니다.
- * [EN] Provides common access paths to RedGPUContext and related managers (ResourceManager, AntialiasingManager, etc.).
+ * [KO] 생성 시점에 `RedGPUContext` 인스턴스의 유효성을 검증하며, `gpuDevice`, `resourceManager`, `antialiasingManager`, `commandEncoderManager` 등 핵심 하위 시스템에 대한 공통 단축 접근자(Getter)를 제공합니다.
+ * [EN] Validates the `RedGPUContext` instance upon creation and provides common shortcut getters to core subsystems such as `gpuDevice`, `resourceManager`, `antialiasingManager`, and `commandEncoderManager`.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Core
  */
 abstract class RedGPUObject extends BaseObject {
     readonly #redGPUContext: RedGPUContext;
 
     /**
-     * [KO] RedGPUObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
-     * [EN] RedGPUObject constructor. (Abstract class, cannot be instantiated directly)
+     * [KO] RedGPUObject의 생성자입니다. 전달된 `RedGPUContext`의 유효성을 검증하고 내부에 바인딩합니다.
+     * [EN] Constructor for RedGPUObject. Validates and binds the provided `RedGPUContext`.
      *
      * @param redGPUContext -
-     * [KO] 사용할 RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance to use
+     * [KO] 바인딩할 `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance to bind
      */
     protected constructor(redGPUContext: RedGPUContext) {
         super()
@@ -30,60 +37,60 @@ abstract class RedGPUObject extends BaseObject {
     }
 
     /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
+     * [KO] 현재 객체에 바인딩된 `RedGPUContext` 인스턴스를 반환합니다.
+     * [EN] Returns the `RedGPUContext` instance bound to the current object.
      *
      * @returns
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext;
     }
 
     /**
-     * [KO] WebGPU 디바이스 객체를 반환합니다. (단축 경로)
-     * [EN] Returns the WebGPU device object. (Short-cut path)
+     * [KO] `RedGPUContext`에 할당된 논리적 WebGPU 디바이스(`GPUDevice`) 객체를 반환합니다.
+     * [EN] Returns the logical WebGPU device (`GPUDevice`) object assigned to `RedGPUContext`.
      *
      * @returns
-     * [KO] GPUDevice 인스턴스
-     * [EN] GPUDevice instance
+     * [KO] `GPUDevice` 인스턴스
+     * [EN] `GPUDevice` instance
      */
     get gpuDevice(): GPUDevice {
         return this.#redGPUContext.gpuDevice;
     }
 
     /**
-     * [KO] 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the ResourceManager instance. (Short-cut path)
+     * [KO] 엔진 전역 GPU 리소스를 관리하는 `ResourceManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `ResourceManager` instance that manages global engine GPU resources.
      *
      * @returns
-     * [KO] ResourceManager 인스턴스
-     * [EN] ResourceManager instance
+     * [KO] `ResourceManager` 인스턴스
+     * [EN] `ResourceManager` instance
      */
     get resourceManager(): ResourceManager {
         return this.#redGPUContext.resourceManager;
     }
 
     /**
-     * [KO] 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the AntialiasingManager instance. (Short-cut path)
+     * [KO] 안티앨리어싱 설정을 관리하는 `AntialiasingManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `AntialiasingManager` instance that manages anti-aliasing settings.
      *
      * @returns
-     * [KO] AntialiasingManager 인스턴스
-     * [EN] AntialiasingManager instance
+     * [KO] `AntialiasingManager` 인스턴스
+     * [EN] `AntialiasingManager` instance
      */
     get antialiasingManager(): AntialiasingManager {
         return this.#redGPUContext.antialiasingManager;
     }
 
     /**
-     * [KO] 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
-     * [EN] Returns the CommandEncoderManager instance. (Short-cut path)
+     * [KO] WebGPU 커맨드 인코딩을 총괄하는 `CommandEncoderManager` 인스턴스를 반환합니다.
+     * [EN] Returns the `CommandEncoderManager` instance that coordinates WebGPU command encoding.
      *
      * @returns
-     * [KO] CommandEncoderManager 인스턴스
-     * [EN] CommandEncoderManager instance
+     * [KO] `CommandEncoderManager` 인스턴스
+     * [EN] `CommandEncoderManager` instance
      */
     get commandEncoderManager(): CommandEncoderManager {
         return this.#redGPUContext.commandEncoderManager;
