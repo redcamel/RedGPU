@@ -4,13 +4,8 @@ import createUUID from "../utils/uuid/createUUID";
  * [KO] 컨텍스트 전역의 안티앨리어싱(Anti-aliasing) 모드를 통합 관리하는 클래스입니다.
  * [EN] Class that manages the global anti-aliasing mode across the context.
  *
- * [KO] MSAA(Multi-Sample Anti-Aliasing), FXAA(Fast Approximate Anti-Aliasing), TAA(Temporal Anti-Aliasing) 중 하나의 기법을 상호 배타적으로 활성화하며, 모드 전환 시 기존 안티앨리어싱 설정을 자동으로 해제합니다.
- * [EN] Mutually exclusively activates one technique among MSAA (Multi-Sample Anti-Aliasing), FXAA (Fast Approximate Anti-Aliasing), and TAA (Temporal Anti-Aliasing), automatically deactivating the previous setting when switching modes.
- *
- * ::: info
- * [KO] 초기 생성 시 디스플레이의 픽셀 밀도(`window.devicePixelRatio`)가 `1.0`을 초과하는 고해상도(HiDPI/Retina) 환경에서는 `useTAA`가 기본 활성화되며, 일반 해상도(`1.0` 이하) 환경에서는 `useMSAA`가 기본 활성화됩니다.
- * [EN] Upon initialization, `useTAA` is enabled by default on high-resolution (HiDPI/Retina) displays where `window.devicePixelRatio` exceeds `1.0`, while `useMSAA` is enabled by default on standard-resolution (`1.0` or lower) displays.
- * :::
+ * [KO] MSAA(Multi-Sample Anti-Aliasing), FXAA(Fast Approximate Anti-Aliasing), TAA(Temporal Anti-Aliasing) 중 하나의 기법을 상호 배타적으로 활성화하며, 초기 생성 시 디스플레이 픽셀 밀도(`window.devicePixelRatio > 1.0`)에 따라 고해상도 환경에서는 `useTAA`, 일반 해상도 환경에서는 `useMSAA`가 기본 활성화됩니다.
+ * [EN] Mutually exclusively activates one technique among MSAA (Multi-Sample Anti-Aliasing), FXAA (Fast Approximate Anti-Aliasing), and TAA (Temporal Anti-Aliasing); upon initialization, `useTAA` is enabled by default on high-DPI displays (`window.devicePixelRatio > 1.0`) and `useMSAA` on standard displays.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -46,13 +41,8 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] TAA(Temporal Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether TAA (Temporal Anti-Aliasing) is enabled.
-     *
-     * ::: info
-     * [KO] `true`로 설정하면 기존에 활성화된 `useMSAA` 및 `useFXAA`는 자동으로 `false`로 전환됩니다.
-     * [EN] Setting this to `true` automatically switches any previously enabled `useMSAA` and `useFXAA` to `false`.
-     * :::
+     * [KO] TAA(Temporal Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 활성화 시 기존 `useMSAA` 및 `useFXAA`는 자동으로 해제됩니다.
+     * [EN] Gets or sets whether TAA (Temporal Anti-Aliasing) is enabled. Enabling this automatically disables `useMSAA` and `useFXAA`.
      *
      * ### Example
      * ```typescript
@@ -72,13 +62,8 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether MSAA (Multi-Sample Anti-Aliasing) is enabled.
-     *
-     * ::: info
-     * [KO] 상태가 변경될 때마다 새로운 `msaaID`가 발급되어 렌더 파이프라인의 멀티샘플링 구성을 갱신하며, 기존 `useFXAA` 및 `useTAA`는 자동으로 해제됩니다.
-     * [EN] Whenever the state changes, a new `msaaID` is issued to update the multisampling configuration of the render pipeline, and any previously enabled `useFXAA` and `useTAA` are automatically disabled.
-     * :::
+     * [KO] MSAA(Multi-Sample Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 상태 변경 시 새로운 `msaaID`가 발급되며 기존 `useFXAA` 및 `useTAA`는 자동으로 해제됩니다.
+     * [EN] Gets or sets whether MSAA (Multi-Sample Anti-Aliasing) is enabled. When changed, a new `msaaID` is issued and `useFXAA` and `useTAA` are automatically disabled.
      *
      * ### Example
      * ```typescript
@@ -99,13 +84,8 @@ class AntialiasingManager {
     }
 
     /**
-     * [KO] FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether FXAA (Fast Approximate Anti-Aliasing) is enabled.
-     *
-     * ::: info
-     * [KO] `true`로 설정하면 기존에 활성화된 `useMSAA` 및 `useTAA`는 자동으로 `false`로 전환됩니다.
-     * [EN] Setting this to `true` automatically switches any previously enabled `useMSAA` and `useTAA` to `false`.
-     * :::
+     * [KO] FXAA(Fast Approximate Anti-Aliasing) 활성화 여부를 반환하거나 설정합니다. 활성화 시 기존 `useMSAA` 및 `useTAA`는 자동으로 해제됩니다.
+     * [EN] Gets or sets whether FXAA (Fast Approximate Anti-Aliasing) is enabled. Enabling this automatically disables `useMSAA` and `useTAA`.
      *
      * ### Example
      * ```typescript
@@ -130,6 +110,25 @@ class AntialiasingManager {
      */
     get msaaID(): string {
         return this.#msaaID;
+    }
+
+    /**
+     * [KO] 지정된 뷰(`View3D`)의 TAA 누적 히스토리 프레임을 초기화합니다. 카메라가 컷 전환(순간 이동)되거나 씬 구성이 급격히 변경될 때 호출하면 이전 프레임 잔상(Ghosting)을 즉시 제거할 수 있습니다.
+     * [EN] Resets the accumulated TAA history frames for the specified view (`View3D`). Call this when the camera teleports or the scene changes abruptly to immediately eliminate ghosting artifacts.
+     *
+     * ### Example
+     * ```typescript
+     * // [KO] 카메라 위치 급변 후 TAA 히스토리 리셋
+     * // [EN] Reset TAA history after an abrupt camera position change
+     * redGPUContext.antialiasingManager.resetHistory(view);
+     * ```
+     *
+     * @param view -
+     * [KO] TAA 히스토리를 리셋할 대상 뷰 객체
+     * [EN] Target view object whose TAA history will be reset
+     */
+    resetHistory(view?: { taa?: { reset(): void } }): void {
+        view?.taa?.reset();
     }
 
     #clearAll() {

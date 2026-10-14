@@ -16,11 +16,6 @@ import TAACASPass from "./cas/TAACASPass";
  * [KO] 폴리곤 경계의 계단 현상뿐만 아니라 셰이더 내부의 스페큘러 하이라이트 깜빡임(Specular Aliasing)과 서브픽셀 라인의 끊김 현상까지 시간축 누적 샘플링으로 억제하며, 내장된 CAS(Contrast Adaptive Sharpening) 패스를 통해 선명도를 복원합니다.
  * [EN] Suppresses not only polygon edge aliasing but also shader specular aliasing and sub-pixel line shimmering through temporal accumulation, while restoring image crispness via the built-in CAS (Contrast Adaptive Sharpening) pass.
  *
- * ::: info
- * [KO] TAA 본 패스는 톤매핑 이전의 HDR 영역(`isLdr = false`, `rgba16float`)에서 고휘도 하이라이트를 보존하며 수행되고, 후속 샤프닝 패스(`casPass`)는 톤매핑 이후 LDR 영역에서 실행됩니다.
- * [EN] The main TAA resolve pass executes in HDR space (`isLdr = false`, `rgba16float`) prior to tone mapping to preserve bright highlights, whereas the subsequent sharpening pass (`casPass`) runs in LDR space after tone mapping.
- * :::
- *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
@@ -50,6 +45,21 @@ class TAA extends ASinglePassPostEffect {
     #targetAllocResult: IPostEffectResult = null;
 
     /**
+     * [KO] TAA 후속 CAS(Contrast Adaptive Sharpening) 패스의 선명도 강도를 반환하거나 설정합니다. 허용 범위는 `0.0` ~ `1.0`이며 기본값은 `0.5`입니다.
+     * [EN] Gets or sets the sharpening strength of the post-TAA CAS (Contrast Adaptive Sharpening) pass. Valid range is `0.0` to `1.0`, and the default value is `0.5`.
+     *
+     * ### Example
+     * ```typescript
+     * // [KO] TAA 샤프닝 강도 조절
+     * // [EN] Adjust TAA sharpening strength
+     * view.taa.sharpness = 0.6;
+     * ```
+     */
+    get sharpness(): number {
+        return this.#casPass.sharpness;
+    }
+
+    /**
      * [KO] `TAA` 인스턴스 및 내부 `TAACASPass`를 초기화합니다.
      * [EN] Initializes the `TAA` instance and its internal `TAACASPass`.
      *
@@ -77,63 +87,8 @@ class TAA extends ASinglePassPostEffect {
         this.#casPass = new TAACASPass(redGPUContext);
     }
 
-    /**
-     * [KO] TAA 후속 CAS(Contrast Adaptive Sharpening) 패스의 선명도 강도를 반환하거나 설정합니다.
-     * [EN] Gets or sets the sharpening strength of the post-TAA CAS (Contrast Adaptive Sharpening) pass.
-     *
-     * [KO] 허용 범위는 `0.0` ~ `1.0`이며 기본값은 `0.5`입니다.
-     * [EN] Valid range is `0.0` to `1.0`, and the default value is `0.5`.
-     *
-     * ::: tip
-     * [KO] 값을 `0.0`으로 설정하면 렌더 루프에서 CAS 컴퓨트 패스 디스패치를 자동으로 건너뛰어 GPU 연산 비용을 절약합니다.
-     * [EN] Setting this value to `0.0` automatically skips dispatching the CAS compute pass in the render loop, saving GPU cost.
-     * :::
-     *
-     * ### Example
-     * ```typescript
-     * // [KO] TAA 샤프닝 강도 조절
-     * // [EN] Adjust TAA sharpening strength
-     * view.taa.sharpness = 0.6;
-     * ```
-     */
-    get sharpness(): number {
-        return this.#casPass.sharpness;
-    }
-
-    /**
-     * [KO] TAA의 시간적 블렌딩 블러를 보완하는 내장 `TAACASPass` 인스턴스를 반환합니다.
-     * [EN] Returns the built-in `TAACASPass` instance that compensates for TAA temporal blending blur.
-     */
-    get casPass(): TAACASPass {
-        return this.#casPass;
-    }
-
     set sharpness(value: number) {
         this.#casPass.sharpness = value;
-    }
-
-    /**
-     * [KO] 이전 프레임의 지터가 제거된 투영-뷰 행렬(`mat4`)을 반환합니다.
-     * [EN] Returns the unjittered projection-view matrix (`mat4`) from the previous frame.
-     */
-    get prevNoneJitterProjectionViewMatrix(): mat4 {
-        return this.#prevNoneJitterProjectionViewMatrix;
-    }
-
-    /**
-     * [KO] 현재까지 누적된 TAA 렌더링 프레임 인덱스를 반환합니다.
-     * [EN] Returns the accumulated TAA rendering frame index.
-     */
-    get frameIndex(): number {
-        return this.#frameIndex;
-    }
-
-    /**
-     * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 CAS 패스가 점유 중인 총 비디오 메모리 크기(Byte)를 반환합니다.
-     * [EN] Returns the total video memory size (in bytes) occupied by the TAA history textures, uniform buffer, and CAS pass.
-     */
-    get videoMemorySize(): number {
-        return this.#videoMemorySize;
     }
 
     /**
@@ -191,13 +146,40 @@ class TAA extends ASinglePassPostEffect {
     }
 
     /**
+     * [KO] TAA의 시간적 블렌딩 블러를 보완하는 내장 `TAACASPass` 인스턴스를 반환합니다.
+     * [EN] Returns the built-in `TAACASPass` instance that compensates for TAA temporal blending blur.
+     */
+    get casPass(): TAACASPass {
+        return this.#casPass;
+    }
+
+    /**
+     * [KO] 이전 프레임의 지터가 제거된 투영-뷰 행렬(`mat4`)을 반환합니다.
+     * [EN] Returns the unjittered projection-view matrix (`mat4`) from the previous frame.
+     */
+    get prevNoneJitterProjectionViewMatrix(): mat4 {
+        return this.#prevNoneJitterProjectionViewMatrix;
+    }
+
+    /**
+     * [KO] 현재까지 누적된 TAA 렌더링 프레임 인덱스를 반환합니다.
+     * [EN] Returns the accumulated TAA rendering frame index.
+     */
+    get frameIndex(): number {
+        return this.#frameIndex;
+    }
+
+    /**
+     * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 CAS 패스가 점유 중인 총 비디오 메모리 크기(Byte)를 반환합니다.
+     * [EN] Returns the total video memory size (in bytes) occupied by the TAA history textures, uniform buffer, and CAS pass.
+     */
+    get videoMemorySize(): number {
+        return this.#videoMemorySize;
+    }
+
+    /**
      * [KO] 누적된 프레임 인덱스를 `0`으로 초기화하여 다음 프레임에서 이전 히스토리 블렌딩 없이 새로 수렴하도록 설정합니다.
      * [EN] Resets the accumulated frame index to `0` so that the next frame starts fresh convergence without blending previous history.
-     *
-     * ::: tip
-     * [KO] 카메라 위치나 방향이 순간적으로 바뀌는 장면 전환 시 호출하면 이전 프레임의 잔상(Ghosting)을 방지할 수 있습니다.
-     * [EN] Call this during instantaneous camera cuts or scene transitions to prevent ghosting artifacts from previous frames.
-     * :::
      *
      * ### Example
      * ```typescript
