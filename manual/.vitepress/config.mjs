@@ -3,6 +3,10 @@ import {generateSidebar} from 'vitepress-sidebar';
 import {withMermaid} from 'vitepress-plugin-mermaid';
 import fs from 'fs';
 import path from 'path';
+import {fileURLToPath} from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '../..');
 
 const isClassesFolder = (item) => {
     if (!item || !item.items) return false;
@@ -279,51 +283,87 @@ export default withMermaid(defineConfig({
     ignoreDeadLinks: true,
     lastUpdated: true,
 
-    // 로컬 개발 서버 환경에서 /RedGPU/examples/ 요청을 실제 examples 폴더로 라우팅하는 설정
+    // 로컬 개발 서버 환경에서 /RedGPU/examples/ 및 /RedGPU/dist/ 요청을 실제 프로젝트 루트 폴더로 라우팅하는 설정
     vite: {
         server: {
             fs: {
                 // 프로젝트 루트 상위 디렉토리 파일 접근 허용 (보안 해제)
-                allow: ['..']
+                allow: ['..', projectRoot]
             }
         },
         plugins: [
             {
                 name: 'serve-examples',
                 configureServer(server) {
+                    const MIME_TYPES = {
+                        '.html': 'text/html; charset=utf-8',
+                        '.js': 'application/javascript; charset=utf-8',
+                        '.mjs': 'application/javascript; charset=utf-8',
+                        '.css': 'text/css; charset=utf-8',
+                        '.json': 'application/json; charset=utf-8',
+                        '.gltf': 'model/gltf+json',
+                        '.map': 'application/json; charset=utf-8',
+                        '.png': 'image/png',
+                        '.jpg': 'image/jpeg',
+                        '.jpeg': 'image/jpeg',
+                        '.webp': 'image/webp',
+                        '.gif': 'image/gif',
+                        '.svg': 'image/svg+xml',
+                        '.ico': 'image/x-icon',
+                        '.wasm': 'application/wasm',
+                        '.glb': 'model/gltf-binary',
+                        '.bin': 'application/octet-stream',
+                        '.hdr': 'application/octet-stream',
+                        '.ktx2': 'image/ktx2',
+                        '.mp3': 'audio/mpeg',
+                        '.ogg': 'audio/ogg',
+                        '.wav': 'audio/wav',
+                        '.mp4': 'video/mp4',
+                        '.webm': 'video/webm',
+                        '.woff': 'font/woff',
+                        '.woff2': 'font/woff2',
+                        '.ttf': 'font/ttf',
+                        '.wgsl': 'text/plain; charset=utf-8'
+                    };
+
                     server.middlewares.use((req, res, next) => {
-                        let targetFile = null;
-                        if (req.url.startsWith('/RedGPU/examples/')) {
-                            const relativePath = req.url.replace('/RedGPU/examples/', '').split('?')[0];
-                            const filePath = path.resolve(process.cwd(), 'examples', relativePath);
-                            targetFile = filePath;
-                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-                                targetFile = path.join(filePath, 'index.html');
-                            }
-                        } else if (req.url.startsWith('/RedGPU/dist/')) {
-                            const relativePath = req.url.replace('/RedGPU/dist/', '').split('?')[0];
-                            const filePath = path.resolve(process.cwd(), 'dist', relativePath);
-                            targetFile = filePath;
-                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-                                targetFile = path.join(filePath, 'index.html');
-                            }
+                        if (!req.url) return next();
+
+                        const [rawPath, queryString] = req.url.split('?');
+                        const cleanPath = decodeURIComponent(rawPath);
+                        let filePath = null;
+
+                        if (cleanPath.startsWith('/RedGPU/examples/')) {
+                            const relativePath = cleanPath.slice('/RedGPU/examples/'.length);
+                            filePath = path.resolve(projectRoot, 'examples', relativePath);
+                        } else if (cleanPath.startsWith('/RedGPU/dist/')) {
+                            const relativePath = cleanPath.slice('/RedGPU/dist/'.length);
+                            filePath = path.resolve(projectRoot, 'dist', relativePath);
+                        } else if (cleanPath.startsWith('/RedGPU/src/')) {
+                            const relativePath = cleanPath.slice('/RedGPU/src/'.length);
+                            filePath = path.resolve(projectRoot, 'src', relativePath);
                         }
 
-                        if (targetFile && fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
-                            const ext = path.extname(targetFile);
-                            let contentType = 'text/plain';
-                            if (ext === '.html') contentType = 'text/html';
-                            else if (ext === '.js' || ext === '.mjs') contentType = 'application/javascript';
-                            else if (ext === '.css') contentType = 'text/css';
-                            else if (ext === '.png') contentType = 'image/png';
-                            else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
-                            else if (ext === '.svg') contentType = 'image/svg+xml';
-                            else if (ext === '.json') contentType = 'application/json';
-                            else if (ext === '.wasm') contentType = 'application/wasm';
+                        if (filePath && fs.existsSync(filePath)) {
+                            const stat = fs.statSync(filePath);
+                            if (stat.isDirectory()) {
+                                if (!cleanPath.endsWith('/')) {
+                                    res.statusCode = 302;
+                                    res.setHeader('Location', `${cleanPath}/${queryString ? '?' + queryString : ''}`);
+                                    res.end();
+                                    return;
+                                }
+                                filePath = path.join(filePath, 'index.html');
+                            }
 
-                            res.setHeader('Content-Type', contentType);
-                            res.end(fs.readFileSync(targetFile));
-                            return;
+                            if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+                                const ext = path.extname(filePath).toLowerCase();
+                                const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+                                res.setHeader('Content-Type', contentType);
+                                res.end(fs.readFileSync(filePath));
+                                return;
+                            }
                         }
                         next();
                     });
