@@ -40,7 +40,63 @@ class TAA extends ASinglePassPostEffect {
     #casPass: TAACASPass;
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
     #videoMemorySize: number = 0;
-    #prevInfo: { width: number, height: number };
+    #prevWidth: number = 0;
+    #prevHeight: number = 0;
+    #targetAllocResult: IPostEffectResult = null;
+
+    /**
+     * [KO] TAA 컴퓨트 패스를 실행하고 핑퐁 히스토리 텍스처 결과를 반환합니다.
+     * [EN] Executes the TAA compute pass and returns the ping-pong history texture result.
+     *
+     * @param view -
+     * [KO] 렌더링 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance for rendering
+     * @param width -
+     * [KO] 렌더 타겟 너비 (픽셀)
+     * [EN] Render target width in pixels
+     * @param height -
+     * [KO] 렌더 타겟 높이 (픽셀)
+     * [EN] Render target height in pixels
+     * @param sourceTextureInfo -
+     * [KO] 현재 프레임의 입력 소스 텍스처 정보
+     * [EN] Input source texture information of the current frame
+     * @returns
+     * [KO] TAA가 적용된 출력 텍스처 결과 (`IPostEffectResult`)
+     * [EN] Output texture result (`IPostEffectResult`) with TAA applied
+     */
+    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
+        this.#frameIndex++;
+
+        this.updateUniform('frameIndex', this.#frameIndex);
+        this.updateUniform('currJitterOffset', view.jitterOffset);
+        mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix);
+
+        this.#updateHistoryTextures(width, height);
+
+        const readIndex = this.#historyIndex;
+        const writeIndex = 1 - this.#historyIndex;
+
+        const historyInfo = this.#historyResults[readIndex];
+        const targetOutputResult = this.#historyResults[writeIndex];
+
+        const pool = view.postEffectManager.texturePool;
+        const originalAlloc = pool.allocResult;
+
+        this.#targetAllocResult = targetOutputResult;
+        pool.allocResult = this.#hookedAllocResult;
+
+        let result: IPostEffectResult;
+        try {
+            result = super.render(view, width, height, sourceTextureInfo, historyInfo);
+        } finally {
+            pool.allocResult = originalAlloc;
+            this.#targetAllocResult = null;
+        }
+
+        this.#historyIndex = writeIndex;
+
+        return result;
+    }
 
     /**
      * [KO] `TAA` 인스턴스를 생성합니다.
@@ -140,8 +196,6 @@ class TAA extends ASinglePassPostEffect {
         return this.#frameIndex;
     }
 
-    #targetAllocResult: IPostEffectResult = null;
-
     /**
      * [KO] TAA 유니폼 버퍼 및 핑퐁 히스토리 텍스처가 점유 중인 총 비디오 메모리 크기(Bytes)를 반환합니다.
      * [EN] Returns the total video memory size in bytes occupied by the TAA uniform buffer and ping-pong history textures.
@@ -168,57 +222,6 @@ class TAA extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] TAA 컴퓨트 패스를 실행하고 핑퐁 히스토리 텍스처 결과를 반환합니다.
-     * [EN] Executes the TAA compute pass and returns the ping-pong history texture result.
-     *
-     * @param view -
-     * [KO] 렌더링 대상 `View3D` 인스턴스
-     * [EN] Target `View3D` instance for rendering
-     * @param width -
-     * [KO] 렌더 타겟 너비 (픽셀)
-     * [EN] Render target width in pixels
-     * @param height -
-     * [KO] 렌더 타겟 높이 (픽셀)
-     * [EN] Render target height in pixels
-     * @param sourceTextureInfo -
-     * [KO] 현재 프레임의 입력 소스 텍스처 정보
-     * [EN] Input source texture information of the current frame
-     * @returns
-     * [KO] TAA가 적용된 출력 텍스처 결과 (`IPostEffectResult`)
-     * [EN] Output texture result (`IPostEffectResult`) with TAA applied
-     */
-    render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
-        this.#frameIndex++;
-
-        this.updateUniform('frameIndex', this.#frameIndex);
-        this.updateUniform('currJitterOffset', view.jitterOffset);
-        mat4.copy(this.#prevNoneJitterProjectionViewMatrix, view.noneJitterProjectionViewMatrix);
-
-        this.#updateHistoryTextures(width, height);
-
-        const readIndex = this.#historyIndex;
-        const writeIndex = 1 - this.#historyIndex;
-
-        const historyInfo = this.#historyResults[readIndex];
-        const targetOutputResult = this.#historyResults[writeIndex];
-
-        const pool = view.postEffectManager.texturePool;
-        const originalAlloc = pool.allocResult;
-
-        this.#targetAllocResult = targetOutputResult;
-        pool.allocResult = this.#hookedAllocResult;
-
-        const result = super.render(view, width, height, sourceTextureInfo, historyInfo);
-
-        pool.allocResult = originalAlloc;
-        this.#targetAllocResult = null;
-
-        this.#historyIndex = writeIndex;
-
-        return result;
-    }
-
-    /**
      * [KO] TAA 히스토리 텍스처 및 후속 `TAACASPass`의 캐시 리소스를 정리합니다.
      * [EN] Clears TAA history textures and cached resources of the subsequent `TAACASPass`.
      */
@@ -233,10 +236,13 @@ class TAA extends ASinglePassPostEffect {
                 this.#historyResults[i] = null;
             }
         }
-        this.#prevInfo = null;
+        this.#prevWidth = 0;
+        this.#prevHeight = 0;
         this.#historyIndex = 0;
         this.#frameIndex = 0;
     }
+
+    #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;
 
     /**
      * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 후속 `TAACASPass`의 모든 GPU 리소스를 파괴합니다.
@@ -249,10 +255,8 @@ class TAA extends ASinglePassPostEffect {
         super.destroy();
     }
 
-    #hookedAllocResult: (width: number, height: number, format?: GPUTextureFormat) => IPostEffectResult = () => this.#targetAllocResult;
-
     #updateHistoryTextures(width: number, height: number) {
-        if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTextures[0]) {
+        if (this.#prevWidth !== width || this.#prevHeight !== height || !this.#historyTextures[0]) {
             if (this.#historyTextures[0]) this.#historyTextures[0].destroy();
             if (this.#historyTextures[1]) this.#historyTextures[1].destroy();
 
@@ -274,14 +278,15 @@ class TAA extends ASinglePassPostEffect {
                 this.#historyResults[i] = {texture, textureView};
             }
 
-            this.#prevInfo = {width, height};
+            this.#prevWidth = width;
+            this.#prevHeight = height;
             this.#historyIndex = 0;
             this.#calcTAAVideoMemory();
         }
     }
 
     #calcTAAVideoMemory() {
-        this.#videoMemorySize = this.uniformBuffer ? this.uniformBuffer.size : 0;
+        this.#videoMemorySize = (this.uniformBuffer ? this.uniformBuffer.size : 0) + (this.#casPass ? this.#casPass.videoMemorySize : 0);
         if (this.#historyTextures[0]) {
             this.#videoMemorySize += calculateTextureByteSize(this.#historyTextures[0]) * 2;
         }

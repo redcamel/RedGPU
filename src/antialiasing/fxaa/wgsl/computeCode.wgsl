@@ -1,7 +1,9 @@
 // [KO] 1. 인덱스 및 기초 데이터 로드
 // [EN] 1. Index and basic data loading
 let index = global_id.xy;
-let dims = textureDimensions(sourceTexture);
+let dims = postEffectOutputDimensions;
+let invDims = 1.0 / vec2<f32>(dims);
+let uvM = (vec2<f32>(index) + 0.5) * invDims;
 let i_index = vec2<i32>(index);
 
 // [KO] 현재 픽셀 및 상/하/좌/우 4방향 루마(Luma) 데이터 샘플링
@@ -9,15 +11,10 @@ let i_index = vec2<i32>(index);
 let colorM4 = textureLoad(sourceTexture, index, 0);
 let lumaM = getLuminance(colorM4.rgb);
 
-let colorN4 = fetchColor4(i_index + vec2<i32>(0, -1), dims);
-let colorS4 = fetchColor4(i_index + vec2<i32>(0, 1), dims);
-let colorW4 = fetchColor4(i_index + vec2<i32>(-1, 0), dims);
-let colorE4 = fetchColor4(i_index + vec2<i32>(1, 0), dims);
-
-let lumaN = getLuminance(colorN4.rgb);
-let lumaS = getLuminance(colorS4.rgb);
-let lumaW = getLuminance(colorW4.rgb);
-let lumaE = getLuminance(colorE4.rgb);
+let lumaN = getLuminance(fetchColor4(i_index + vec2<i32>(0, -1), dims).rgb);
+let lumaS = getLuminance(fetchColor4(i_index + vec2<i32>(0, 1), dims).rgb);
+let lumaW = getLuminance(fetchColor4(i_index + vec2<i32>(-1, 0), dims).rgb);
+let lumaE = getLuminance(fetchColor4(i_index + vec2<i32>(1, 0), dims).rgb);
 
 // [KO] 2. 로컬 대비(Contrast) 분석 및 조기 종료 판단
 // [EN] 2. Local Contrast analysis and early exit decision
@@ -41,72 +38,86 @@ let lumaSE = getLuminance(fetchColor4(i_index + vec2<i32>(1, 1), dims).rgb);
 
 // [KO] 4. 엣지 방향 판단 (수직 vs 수평)
 // [EN] 4. Edge direction detection (Vertical vs Horizontal)
-let edgeVer = abs(lumaNW + lumaSW - 2.0 * lumaW) + abs(lumaN + lumaS - 2.0 * lumaM) * 2.0 + abs(lumaNE + lumaSE - 2.0 * lumaE);
-let edgeHor = abs(lumaNW + lumaNE - 2.0 * lumaN) + abs(lumaW + lumaE - 2.0 * lumaM) * 2.0 + abs(lumaSW + lumaSE - 2.0 * lumaS);
+let lumaNS = lumaN + lumaS;
+let lumaWE = lumaW + lumaE;
+let lumaNWSW = lumaNW + lumaSW;
+let lumaNESE = lumaNE + lumaSE;
+let lumaNWNE = lumaNW + lumaNE;
+let lumaSWSE = lumaSW + lumaSE;
+
+let edgeHor = abs(lumaNWSW - 2.0 * lumaW) + abs(lumaNS - 2.0 * lumaM) * 2.0 + abs(lumaNESE - 2.0 * lumaE);
+let edgeVer = abs(lumaNWNE - 2.0 * lumaN) + abs(lumaWE - 2.0 * lumaM) * 2.0 + abs(lumaSWSE - 2.0 * lumaS);
 let isHorizontal = edgeHor >= edgeVer;
 
-// [KO] 5. 엣지 방향에 따른 기울기 및 오프셋 단계 설정
-// [EN] 5. Set gradient and offset step based on edge direction
+// [KO] 5. 엣지 법선 방향 기울기 및 +0.5 텍셀 경계 중점(Midpoint) 설정
+// [EN] 5. Set edge normal gradient and +0.5 texel boundary midpoint
 let luma1 = select(lumaW, lumaN, isHorizontal);
 let luma2 = select(lumaE, lumaS, isHorizontal);
 let gradient1 = luma1 - lumaM;
 let gradient2 = luma2 - lumaM;
-let is1Steeper = abs(gradient1) >= abs(gradient2);
-let gradientScaled = 0.25 * max(abs(gradient1), abs(gradient2));
+let absGrad1 = abs(gradient1);
+let absGrad2 = abs(gradient2);
+let is1Steeper = absGrad1 >= absGrad2;
+let gradientScaled = 0.25 * max(absGrad1, absGrad2);
 
-var lumaLocalAverage = 0.0;
-var edgeStep = vec2<i32>(0, 0);
-if (is1Steeper) {
-    edgeStep = select(vec2<i32>(-1, 0), vec2<i32>(0, -1), isHorizontal);
-    lumaLocalAverage = 0.5 * (luma1 + lumaM);
-} else {
-    edgeStep = select(vec2<i32>(1, 0), vec2<i32>(0, 1), isHorizontal);
-    lumaLocalAverage = 0.5 * (luma2 + lumaM);
-}
+let stepLength = select(invDims.x, invDims.y, isHorizontal) * select(1.0, -1.0, is1Steeper);
+let lumaLocalAverage = 0.5 * (select(luma2, luma1, is1Steeper) + lumaM);
+let currentUv = uvM + select(vec2<f32>(stepLength * 0.5, 0.0), vec2<f32>(0.0, stepLength * 0.5), isHorizontal);
 
-// [KO] 6. 엣지 탐색 루프 (Edge Search Iteration)
-// [EN] 6. Edge Search Iteration
-// [KO] 실제 엣지의 끝점을 추적하여 블렌딩 반경을 결정합니다.
-// [EN] Tracks the actual edge endpoints to determine the blending radius.
-var posP = i_index + edgeStep;
-var posN = i_index + edgeStep;
-let searchStep = select(vec2<i32>(1, 0), vec2<i32>(0, 1), isHorizontal);
-
+// [KO] 6. 엣지 진행 방향 양끝점 가속 탐색 루프 (FXAA 3.11 Quality)
+// [EN] 6. Accelerated edge endpoint search iteration along the edge (FXAA 3.11 Quality)
+let uvOffset = select(vec2<f32>(0.0, invDims.y), vec2<f32>(invDims.x, 0.0), isHorizontal);
+var uvP = currentUv + uvOffset;
+var uvN = currentUv - uvOffset;
+var lumaEndP = 0.0;
+var lumaEndN = 0.0;
 var doneP = false;
 var doneN = false;
+
 for (var i = 0; i < 10; i++) {
     if (!doneP) {
-        if (abs(getLuminance(fetchColor4(posP, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneP = true; }
-        else { posP += searchStep; }
+        lumaEndP = getLuminance(textureSampleLevel(sourceTexture, basicSampler, uvP, 0.0).rgb) - lumaLocalAverage;
     }
     if (!doneN) {
-        if (abs(getLuminance(fetchColor4(posN, dims).rgb) - lumaLocalAverage) >= gradientScaled) { doneN = true; }
-        else { posN -= searchStep; }
+        lumaEndN = getLuminance(textureSampleLevel(sourceTexture, basicSampler, uvN, 0.0).rgb) - lumaLocalAverage;
     }
-    if (doneP && doneN) { break; }
+    doneP = doneP || (abs(lumaEndP) >= gradientScaled);
+    doneN = doneN || (abs(lumaEndN) >= gradientScaled);
+    if (doneP && doneN) {
+        break;
+    }
+    let stepSize = FXAA_QUALITY_STEPS[i];
+    if (!doneP) {
+        uvP += uvOffset * stepSize;
+    }
+    if (!doneN) {
+        uvN -= uvOffset * stepSize;
+    }
 }
 
-// [KO] 7. 탐색된 끝점까지의 거리를 기반으로 한 엣지 블렌딩 계수 산출
-// [EN] 7. Calculate edge blending factor based on distance to searched endpoints
-let distP = select(f32(posP.x - i_index.x), f32(posP.y - i_index.y), isHorizontal);
-let distN = select(f32(i_index.x - posN.x), f32(i_index.y - posN.y), isHorizontal);
-let distMin = min(abs(distP), abs(distN));
-let edgeBlend = saturate(0.5 - distMin / (abs(distP) + abs(distN)));
+// [KO] 7. 끝점 거리 및 루마 부호 방향 검증(correctVariation)을 통한 엣지 블렌딩 계수 산출
+// [EN] 7. Calculate edge blending factor with endpoint distance and luma variation sign check
+let distP = select(uvP.y - uvM.y, uvP.x - uvM.x, isHorizontal);
+let distN = select(uvM.y - uvN.y, uvM.x - uvN.x, isHorizontal);
+let isDirectionN = distN < distP;
+let distMin = min(distP, distN);
+let lumaEnd = select(lumaEndP, lumaEndN, isDirectionN);
+let isLumaCenterSmaller = lumaM < lumaLocalAverage;
+let correctVariation = (lumaEnd < 0.0) != isLumaCenterSmaller;
+let edgeBlend = select(0.0, 0.5 - distMin / (distP + distN), correctVariation);
 
-// [KO] 8. 서브픽셀 필터링 (미세한 고주파 노이즈 보정)
-// [EN] 8. Subpixel filtering (Fine high-frequency noise correction)
-let lumaL = (lumaN + lumaS + lumaW + lumaE) * 2.0;
-let lumaCorners = lumaNW + lumaNE + lumaSW + lumaSE;
-let subpixFilter = saturate(abs((lumaL + lumaCorners) / 12.0 - lumaM) / range);
-let subpixBlend = smoothstep(0.0, 1.0, subpixFilter) * uniforms.subpix;
+// [KO] 8. 서브픽셀 필터링 (3x3 텐트 필터 및 2차 제곱 감쇠)
+// [EN] 8. Subpixel filtering (3x3 tent filter and squared smoothstep falloff)
+let lumaL = (lumaNS + lumaWE) * 2.0 + lumaNWSW + lumaNESE;
+let subpixFilter = saturate(abs(lumaL * (1.0 / 12.0) - lumaM) / range);
+let subpixF = smoothstep(0.0, 1.0, subpixFilter);
+let subpixBlend = subpixF * subpixF * uniforms.subpix;
 
-// [KO] 9. 최종 블렌딩 및 결과 저장
-// [EN] 9. Final blending and result storage
+// [KO] 9. 최종 오프셋 산출 및 하드웨어 바이리니어 보간 샘플링
+// [EN] 9. Final offset calculation and hardware bilinear interpolated sampling
 let finalBlend = max(edgeBlend, subpixBlend);
-let colorTarget4 = fetchColor4(i_index + edgeStep, dims);
-
-// [KO] RGBA 전체를 보간하여 투명도 및 컬러 연속성 유지
-// [EN] Interpolate full RGBA to maintain transparency and color continuity
-let finalColor4 = mix(colorM4, colorTarget4, finalBlend);
+let finalUv = uvM + select(vec2<f32>(stepLength * finalBlend, 0.0), vec2<f32>(0.0, stepLength * finalBlend), isHorizontal);
+let finalColor4 = textureSampleLevel(sourceTexture, basicSampler, finalUv, 0.0);
 
 textureStore(outputTexture, index, finalColor4);
+
