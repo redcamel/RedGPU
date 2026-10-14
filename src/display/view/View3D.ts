@@ -23,7 +23,7 @@ import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/viewRenderTextureManager/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
-import ClusterLightManager from "../../light/core/ClusterLightManager";
+import ClusterLightManager from "../../light/core/clusterLight/ClusterLightManager";
 import HierarchicalZBuffer from "./hzb/HierarchicalZBuffer";
 import keepLog from "../../utils/keepLog";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";

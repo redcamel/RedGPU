@@ -1,7 +1,7 @@
 import {WgslReflect} from "wgsl_reflect";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
 import ShaderVariantGenerator from "./core/ShaderVariantGenerator";
-import PassClustersLightHelper from "../../light/clusterLight/core/PassClustersLightHelper";
+import PassClustersLightHelper from "../../light/core/clusterLight/core/PassClustersLightHelper";
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
 // 매크로 및 전처리용 정규식/상수 정의 (순수 함수 영역)

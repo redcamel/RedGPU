@@ -1,11 +1,11 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
-import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import View3D from "../../../../../display/view/View3D";
+import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
 
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] 뷰 프러스텀(View Frustum)을 3차원 클러스터 그리드로 분할하고 각 셀의 AABB 바운딩 볼륨을 계산하는 컴퓨트 패스 클래스입니다.

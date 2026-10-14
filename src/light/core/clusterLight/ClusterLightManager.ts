@@ -1,8 +1,8 @@
-import View3D from "../../display/view/View3D";
-import PassClusterLightBound from "../clusterLight/pass/bound/PassClusterLightBound";
-import PassClustersLight from "../clusterLight/pass/light/PassClustersLight";
-import PassClustersLightHelper from "../clusterLight/core/PassClustersLightHelper";
-import RedGPUObject from "../../base/RedGPUObject";
+import View3D from "../../../display/view/View3D";
+import PassClusterLightBound from "./pass/bound/PassClusterLightBound";
+import PassClustersLight from "./pass/light/PassClustersLight";
+import PassClustersLightHelper from "./core/PassClustersLightHelper";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
  * [KO] 클러스터 라이팅(Clustered Lighting) 데이터 및 컴퓨트 패스를 관리하는 매니저 클래스입니다.

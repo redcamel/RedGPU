@@ -1,10 +1,10 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import View3D from "../../../../display/view/View3D";
-import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import View3D from "../../../../../display/view/View3D";
+import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
-import RedGPUObject from "../../../../base/RedGPUObject";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 import PassClusterLightBound from "../bound/PassClusterLightBound";
 
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
