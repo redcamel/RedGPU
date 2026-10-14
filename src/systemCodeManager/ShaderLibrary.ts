@@ -1017,11 +1017,11 @@ export namespace ShadowLibrary {
      *             shadowDepth - cascadeBias
      *         );
      *     }
-     *
+     * 
      *     // 🌟 [언리얼 엔진 5 표준 안티앨리어싱 필터 반경 및 회전 지터]
      *     let cascadeScale = mix(3.2, 3.8, saturate(f32(cascadeIndex) / 3.0));
      *     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
-     *
+     * 
      * // 픽셀별 IGN 의사 난수 기반 2D 회전각 산출 (GPU ALU cos/sin 하드웨어 회전)
      *     let noise = getInterleavedGradientNoise(screenPos);
      *     let angle = noise * 6.2831853;
@@ -1030,7 +1030,7 @@ export namespace ShadowLibrary {
      * 
      *     var weightedVisibility: f32 = 0.0;
      *     var totalWeight: f32 = 0.0;
-     *
+     * 
      *     // 3. 16-Tap 가중 페르마 나선(Vogel Disk) PCF 필터링 (조기 탈출 분기 없는 하드웨어 최적화 균일 샘플링)
      *     for (var i = 0u; i < tapCount; i++) {
      *         let rawOffset = VOGEL_DISK_16[i];
@@ -1122,7 +1122,7 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
-     *
+     * 
      *     // 🚀 4. [언리얼 엔진 5 표준 서브텍셀 노멀 오프셋 바이어스]
      *     // CPU단 투영 박스의 텍셀 정수배 팽창과 결합하여 피터 패닝(Peter Panning)과 자가 그림자 여드름(Acne) 동시 원천 차단
      *     let slopeBias = saturate(1.0 - nDotL);
@@ -1130,7 +1130,7 @@ export namespace ShadowLibrary {
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
      *     let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
      *     let biasedWorldPosition = worldPosition + normalOffset;
-     *
+     * 
      *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
      * 
      *     let visibility = sampleModernCascadeShadow(
@@ -1156,7 +1156,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart && visibility < 0.9999) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
@@ -1176,7 +1176,7 @@ export namespace ShadowLibrary {
      *                 slopeBias,
      *                 driftBias
      *             );
-     *
+     * 
      *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *             finalVisibility = mix(visibility, nextVis, blendFactor);
      *         }
@@ -1263,7 +1263,7 @@ export namespace ShadowLibrary {
      *     if (invalidDepth || outOfBounds) {
      *         return 1.0;
      *     }
-     *
+     * 
      *     let absPos = abs(worldPosition);
      *     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
      *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
@@ -1278,7 +1278,7 @@ export namespace ShadowLibrary {
      *         cascadeIndex,
      *         shadowDepth - cascadeBias
      *     );
-     *
+     * 
      *     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
      *     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
      *     if (cascadeIndex < cascadeCount - 1u) {
@@ -1288,7 +1288,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart && finalVis < 0.9999) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
@@ -1296,11 +1296,11 @@ export namespace ShadowLibrary {
      *             let nextNormalOffset = N * normalBiasScale * nextWorldTexelSize;
      *             let nextBiasedPos = worldPosition + nextNormalOffset;
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
-     *
+     * 
      *             let nextTUV = nextShadowCoord.xy;
      *             let nextShadowDepth = saturate(nextShadowCoord.z);
      *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
-     *
+     * 
      *             let nextVis = textureSampleCompareLevel(
      *                 directionalShadowMap,
      *                 directionalShadowMapSampler,
@@ -1308,7 +1308,7 @@ export namespace ShadowLibrary {
      *                 nextIndex,
      *                 nextShadowDepth - nextCascadeBias
      *             );
-     *
+     * 
      *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *             finalVis = mix(finalVis, nextVis, blendFactor);
      *         }
@@ -1320,7 +1320,7 @@ export namespace ShadowLibrary {
      *             finalVis = mix(finalVis, 1.0, fadeFactor);
      *         }
      *     }
-     *
+     * 
      *     // 8. Soft Horizon Terminator Fade
      *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
      *     return finalVis * horizonFade;
@@ -1404,7 +1404,7 @@ export namespace ShadowLibrary {
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
-     *
+     * 
      *     // 4. 지형 특화 서브텍셀 노멀 오프셋
      *     let slopeBias = saturate(1.0 - nDotL);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
@@ -1428,14 +1428,14 @@ export namespace ShadowLibrary {
      *     let cascadeBias = max(bias * (1.0 + slopeBias * 2.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
      * 
      *     var finalVis: f32 = 1.0;
-     *
+     * 
      *     // 5. 적응형 샘플링: 발밑(Cascade 0)은 5-Tap 회전 PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
      *     if (cascadeIndex == 0u) {
      *         let noise = getInterleavedGradientNoise(screenPos);
      *         let angle = noise * 6.2831853;
      *         let cosAngle = cos(angle);
      *         let sinAngle = sin(angle);
-     *
+     * 
      *         let filterRadius = oneOverTextureSize * 2.5;
      *         let centerSample = textureSampleCompareLevel(
      *             directionalShadowMap,
@@ -1470,7 +1470,7 @@ export namespace ShadowLibrary {
      *             shadowDepth - cascadeBias
      *         );
      *     }
-     *
+     * 
      *     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
      *     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
      *     if (cascadeIndex < cascadeCount - 1u) {
@@ -1479,7 +1479,7 @@ export namespace ShadowLibrary {
      *         let cascadeRange = splitFar - splitNear;
      *         let blendMargin = cascadeRange * 0.20;
      *         let blendStart = splitFar - blendMargin;
-     *
+     * 
      *         if (viewDepth > blendStart && finalVis < 0.9999) {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
@@ -1487,11 +1487,11 @@ export namespace ShadowLibrary {
      *             let nextNormalOffset = N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
      *             let nextBiasedPos = worldPosition + nextNormalOffset;
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
-     *
+     * 
      *             let nextTUV = nextShadowCoord.xy;
      *             let nextShadowDepth = saturate(nextShadowCoord.z);
      *             let nextCascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
-     *
+     * 
      *             let nextVis = textureSampleCompareLevel(
      *                 directionalShadowMap,
      *                 directionalShadowMapSampler,
@@ -1499,7 +1499,7 @@ export namespace ShadowLibrary {
      *                 nextIndex,
      *                 nextShadowDepth - nextCascadeBias
      *             );
-     *
+     * 
      *             let blendFactor = smoothstep(0.0, 1.0, saturate((viewDepth - blendStart) / blendMargin));
      *             finalVis = mix(finalVis, nextVis, blendFactor);
      *         }
@@ -1511,7 +1511,7 @@ export namespace ShadowLibrary {
      *             finalVis = mix(finalVis, 1.0, fadeFactor);
      *         }
      *     }
-     *
+     * 
      *     // 8. Soft Horizon Terminator Fade
      *     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
      *     return finalVis * horizonFade;

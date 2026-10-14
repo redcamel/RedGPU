@@ -1,5 +1,5 @@
 import ColorRGBA from "../../color/ColorRGBA";
-import LightManager from "../../light/core/LightManager";
+import LightManager from "../../light/LightManager";
 import ShadowManager from "../../shadow/ShadowManager";
 import WindManager from "../../wind/WindManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";

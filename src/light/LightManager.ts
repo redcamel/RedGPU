@@ -1,9 +1,9 @@
-import consoleAndThrowError from "../../utils/consoleAndThrowError";
-import AmbientLight from "../lights/AmbientLight";
-import DirectionalLight from "../lights/DirectionalLight";
-import PointLight from "../lights/PointLight";
-import SpotLight from "../lights/SpotLight";
-import PassClustersLightHelper from "../clusterLight/core/PassClustersLightHelper";
+import consoleAndThrowError from "../utils/consoleAndThrowError";
+import AmbientLight from "./lights/AmbientLight";
+import DirectionalLight from "./lights/DirectionalLight";
+import PointLight from "./lights/PointLight";
+import SpotLight from "./lights/SpotLight";
+import PassClustersLightHelper from "./clusterLight/core/PassClustersLightHelper";
 
 /**
  * [KO] 씬(`Scene`) 내의 모든 조명을 통합 관리하는 매니저 클래스입니다.
