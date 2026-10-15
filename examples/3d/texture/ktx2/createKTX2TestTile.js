@@ -1,7 +1,9 @@
-import * as RedGPU from '../../../../dist/index.js?t=1785971869723';
+import * as RedGPU from '../../../../dist/index.js';
 
 /**
- * [KO] 현재 GPU 디바이스 지원 압축 포맷 피처 및 트랜스코드 타겟 현황을 exampleHelper 디자인 테마에 완벽히 맞추어 표시합니다.
+ * [KO] 현재 GPU 디바이스 지원 압축 포맷 피처 및 트랜스코드 타겟 현황을 표시합니다.
+ * [EN] Displays supported GPU compression format features and active transcode target on the HUD.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
 export function createKTX2DeviceInfoHUD(redGPUContext) {
     if (document.getElementById('ktx2-device-info-hud')) return;
@@ -16,7 +18,6 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     else if (hasBC) activeTranscodeTarget = 'BC1 / BC3 / BC7 / BC6H';
     else if (hasETC2) activeTranscodeTarget = 'ETC2 / EAC';
 
-    // exampleHelper 모바일/isNarrow 반응형 미디어 쿼리 스타일 주입
     if (!document.getElementById('ktx2-hud-responsive-style')) {
         const styleEl = document.createElement('style');
         styleEl.id = 'ktx2-hud-responsive-style';
@@ -103,9 +104,16 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     document.body.appendChild(container);
 }
 
-
 /**
- * [KO] KTX2 테스트 텍스처 타일 및 라벨 생성 공용 헬퍼 함수
+ * [KO] KTX2 테스트 텍스처 타일 및 라벨을 생성합니다.
+ * [EN] Creates a KTX2 test texture tile and its status label.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
+ * @param {RedGPU.Primitive.Plane} geometry
+ * @param {RedGPU.Resource.Sampler} linearSampler
+ * @param {{path: string}} item
+ * @param {number} posX
+ * @param {number} posY
  */
 export function createKTX2TestTile(redGPUContext, scene, geometry, linearSampler, item, posX, posY) {
     createKTX2DeviceInfoHUD(redGPUContext);

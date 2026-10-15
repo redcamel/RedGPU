@@ -1,9 +1,13 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1785971869723';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971869723';
-import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971869723';
+import * as RedGPU from '../../../../../dist/index.js';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js';
+import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
 /**
- * [KO] KTX2 ZSTD 예제 - ZSTD 초고압축 텍스처 리스트 (GitHub Pages 호스팅 자산)
+ * [KO] KTX2 ZSTD 예제
+ * [EN] KTX2 ZSTD example
+ *
+ * [KO] Zstandard(ZSTD) 슈퍼압축 및 UASTC/블록 압축 KTX2 텍스처 로딩을 시연합니다.
+ * [EN] Demonstrates loading Zstandard (ZSTD) supercompressed and UASTC/block-compressed KTX2 textures.
  */
 
 const canvas = document.createElement('canvas');
@@ -24,42 +28,42 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [2.중급 Block / ZSTD / BC / UASTC 2D 전수 리스트]
+        // [KO] ZSTD 슈퍼압축 및 UASTC / BC 2D KTX2 텍스처 리스트
+        // [EN] ZSTD supercompressed and UASTC / BC 2D KTX2 texture list
         const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/';
         const testKTX2Files = [
-            {"path": BASE_URL + "camera_camera_BaseColor_uastc.ktx2"},
-            {"path": BASE_URL + "ccwn2c08.ktx2"},
-            {"path": BASE_URL + "CesiumLogoFlat.ktx2"},
-            {"path": BASE_URL + "cimg5293_uastc.ktx2"},
-            {"path": BASE_URL + "cimg5293_uastc_zstd.ktx2"},
-            {"path": BASE_URL + "color_grid_uastc.ktx2"},
-            {"path": BASE_URL + "color_grid_uastc_zstd.ktx2"},
-            {"path": BASE_URL + "g03n2c08.ktx2"},
-            {"path": BASE_URL + "hűtő.ktx2"},
-            {"path": BASE_URL + "hűtő_zstd.ktx2"},
-            {"path": BASE_URL + "ktx_app-u.ktx2"},
-            {"path": BASE_URL + "ktx_document_uastc_rdo4_zstd5.ktx2"},
-            {"path": BASE_URL + "orient-down-metadata-u.ktx2"},
-            {"path": BASE_URL + "orient-up-metadata.ktx2"},
-            {"path": BASE_URL + "orient-up-metadata-u.ktx2"},
-            {"path": BASE_URL + "pattern_02_bc2.ktx2"},
-            {"path": BASE_URL + "StainedGlassLamp_base.ktx2"},
-            {"path": BASE_URL + "StainedGlassLamp_normal.ktx2"},
-            {"path": BASE_URL + "tbrn2c08.ktx2"},
-            {"path": BASE_URL + "tbyn3p08.ktx2"},
-            {"path": BASE_URL + "tm3n3p02.ktx2"},
-            {"path": BASE_URL + "uastc_Iron_Bars_001_normal.ktx2"},
-            {"path": BASE_URL + "نَسِيج.ktx2"},
-            {"path": BASE_URL + "نَسِيج_zstd.ktx2"},
-            {"path": BASE_URL + "テクスチャ.ktx2"},
-            {"path": BASE_URL + "テクスチャ_zstd.ktx2"},
-            {"path": BASE_URL + "质地.ktx2"},
-            {"path": BASE_URL + "质地_zstd.ktx2"},
-            {"path": BASE_URL + "조직.ktx2"},
-            {"path": BASE_URL + "조직_zstd.ktx2"}
+            {path: BASE_URL + 'camera_camera_BaseColor_uastc.ktx2'},
+            {path: BASE_URL + 'ccwn2c08.ktx2'},
+            {path: BASE_URL + 'CesiumLogoFlat.ktx2'},
+            {path: BASE_URL + 'cimg5293_uastc.ktx2'},
+            {path: BASE_URL + 'cimg5293_uastc_zstd.ktx2'},
+            {path: BASE_URL + 'color_grid_uastc.ktx2'},
+            {path: BASE_URL + 'color_grid_uastc_zstd.ktx2'},
+            {path: BASE_URL + 'g03n2c08.ktx2'},
+            {path: BASE_URL + 'hűtő.ktx2'},
+            {path: BASE_URL + 'hűtő_zstd.ktx2'},
+            {path: BASE_URL + 'ktx_app-u.ktx2'},
+            {path: BASE_URL + 'ktx_document_uastc_rdo4_zstd5.ktx2'},
+            {path: BASE_URL + 'orient-down-metadata-u.ktx2'},
+            {path: BASE_URL + 'orient-up-metadata.ktx2'},
+            {path: BASE_URL + 'orient-up-metadata-u.ktx2'},
+            {path: BASE_URL + 'pattern_02_bc2.ktx2'},
+            {path: BASE_URL + 'StainedGlassLamp_base.ktx2'},
+            {path: BASE_URL + 'StainedGlassLamp_normal.ktx2'},
+            {path: BASE_URL + 'tbrn2c08.ktx2'},
+            {path: BASE_URL + 'tbyn3p08.ktx2'},
+            {path: BASE_URL + 'tm3n3p02.ktx2'},
+            {path: BASE_URL + 'uastc_Iron_Bars_001_normal.ktx2'},
+            {path: BASE_URL + 'نَسِيج.ktx2'},
+            {path: BASE_URL + 'نَسِيج_zstd.ktx2'},
+            {path: BASE_URL + 'テクスチャ.ktx2'},
+            {path: BASE_URL + 'テクスチャ_zstd.ktx2'},
+            {path: BASE_URL + '质地.ktx2'},
+            {path: BASE_URL + '质地_zstd.ktx2'},
+            {path: BASE_URL + '조직.ktx2'},
+            {path: BASE_URL + '조직_zstd.ktx2'}
         ];
 
-        // isNarrow (window.innerWidth <= 768)일 땐 3열, 넓을 땐 화면 크기(window.innerWidth)에 따라 가로 열 수 넓게 채움
         const cols = isNarrow ? 3 : Math.max(4, Math.floor(window.innerWidth / 150));
         const totalRows = Math.ceil(testKTX2Files.length / cols);
         const spacingX = isNarrow ? 9.5 : 8.5;
@@ -68,7 +72,6 @@ RedGPU.init(
         controller.distance = isNarrow ? 28 + totalRows * 4.5 : Math.max(25, 12 + cols * 2.2 + totalRows * 2.5);
 
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
-
         const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {
             magFilter: 'linear',
             minFilter: 'linear',
@@ -86,12 +89,24 @@ RedGPU.init(
         });
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, () => {
+        renderer.start(redGPUContext, (time) => {
         });
 
-        new RedGPUExampleHelper(redGPUContext);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ */
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
+};
