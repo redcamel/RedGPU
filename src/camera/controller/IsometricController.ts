@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import OrthographicCamera from "../camera/OrthographicCamera";
@@ -14,7 +13,7 @@ const PER_PI = Math.PI / 180;
  * [KO] 거리감 없는 직교 투영을 사용하여 전략 시뮬레이션이나 타일 기반 게임에서 주로 사용되는 고정된 각도의 쿼터뷰(Quarter View)를 구현합니다.
  * [EN] Implements a fixed-angle quarter view, commonly used in strategy simulations or tile-based games, using orthographic projection without perspective distortion.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const controller = new RedGPU.IsometricController(redGPUContext);
  * controller.viewHeight = 15;
@@ -38,7 +37,8 @@ class IsometricController extends AController {
     #targetViewHeight: number = 15;
     #viewHeightInterpolation: number = 0.1;
     // ==================== 타겟 추적 ====================
-    #targetMesh: Mesh | null = null;
+    #currentX: number = 0;
+    #currentZ: number = 0;
     #targetX: number = 0;
     #targetZ: number = 0;
     // ==================== 이동 관련 ====================
@@ -69,7 +69,6 @@ class IsometricController extends AController {
                 this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, this.#targetZoom));
             },
             HD_Move: (deltaX: number, deltaY: number) => {
-                if (!this.#targetMesh) return;
                 const angleRad = this.#cameraAngle * PER_PI;
                 const cos = Math.cos(angleRad);
                 const sin = Math.sin(angleRad);
@@ -92,24 +91,17 @@ class IsometricController extends AController {
             },
             useKeyboard: true
         });
-        this.#targetMesh = new Mesh(redGPUContext);
-        this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
     }
 
     /**
-     * [KO] 줌 레벨을 가져옵니다.
-     * [EN] Gets the zoom level.
+     * [KO] 줌 레벨을 가져오거나 설정합니다.
+     * [EN] Gets or sets the zoom level.
      * @returns [KO] 줌 레벨 [EN] Zoom level
      */
     get zoom(): number {
         return this.#targetZoom;
     }
 
-    /**
-     * [KO] 줌 레벨을 설정합니다.
-     * [EN] Sets the zoom level.
-     * @param value - [KO] 줌 레벨 [EN] Zoom level
-     */
     set zoom(value: number) {
         validateNumberRange(value);
         this.#targetZoom = Math.max(this.#minZoom, Math.min(this.#maxZoom, value));
@@ -224,17 +216,17 @@ class IsometricController extends AController {
 
     /** [KO] 타겟 X 위치 [EN] Target X position */
     get targetX(): number {
-        return this.#targetMesh.x;
+        return this.#currentX;
     }
 
     /** [KO] 타겟 Y 위치 [EN] Target Y position */
     get targetY(): number {
-        return this.#targetMesh.y;
+        return 0;
     }
 
     /** [KO] 타겟 Z 위치 [EN] Target Z position */
     get targetZ(): number {
-        return this.#targetMesh.z;
+        return this.#currentZ;
     }
 
     /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
@@ -264,32 +256,20 @@ class IsometricController extends AController {
      * @param time - [KO] 현재 시간 [EN] Current time
      */
     update(view: View3D, time: number): void {
-        super.update(view, time, (deltaTime) => {
-            this.#updateAnimation(view, deltaTime);
-        });
+        super.update(view, time, this.#updateAnimation);
     }
 
-    /**
-     * [KO] 카메라 애니메이션을 업데이트합니다.
-     * [EN] Updates camera animation.
-     * @param view - [KO] 3D 뷰 객체 [EN] 3D View object
-     * @param deltaTime - [KO] 경과 시간 [EN] Delta time
-     * 
-     */
-    #updateAnimation(view: View3D, deltaTime: number): void {
+    #updateAnimation = (view: View3D, deltaTime: number): void => {
         this.#handleKeyboardInput(view, deltaTime);
 
         // 지수적 감쇄 보간
         this.#currentZoom = this.#targetZoom + (this.#currentZoom - this.#targetZoom) * Math.pow(this.#zoomInterpolation, deltaTime);
         this.#currentViewHeight = this.#targetViewHeight + (this.#currentViewHeight - this.#targetViewHeight) * Math.pow(this.#viewHeightInterpolation, deltaTime);
 
-        if (!this.#targetMesh) return;
-
         const posSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
-        this.#targetMesh.x = this.#targetX + (this.#targetMesh.x - this.#targetX) * posSmoothing;
-        this.#targetMesh.z = this.#targetZ + (this.#targetMesh.z - this.#targetZ) * posSmoothing;
+        this.#currentX = this.#targetX + (this.#currentX - this.#targetX) * posSmoothing;
+        this.#currentZ = this.#targetZ + (this.#currentZ - this.#targetZ) * posSmoothing;
 
-        const targetPos = this.#targetMesh.position;
         const angleRad = this.#cameraAngle * PER_PI;
 
         const {width, height} = view.pixelRectObject;
@@ -304,28 +284,22 @@ class IsometricController extends AController {
         const cameraDistance = (baseDistance * scaleFactor) / this.#currentZoom;
         const cameraHeight = (baseHeight * scaleFactor) / this.#currentZoom;
 
-        const cameraX = targetPos[0] + Math.cos(angleRad) * cameraDistance;
-        const cameraY = targetPos[1] + cameraHeight;
-        const cameraZ = targetPos[2] + Math.sin(angleRad) * cameraDistance;
+        const cameraX = this.#currentX + Math.cos(angleRad) * cameraDistance;
+        const cameraY = cameraHeight;
+        const cameraZ = this.#currentZ + Math.sin(angleRad) * cameraDistance;
 
         this.camera.setPosition(cameraX, cameraY, cameraZ);
-        this.camera.lookAt(targetPos[0], targetPos[1], targetPos[2]);
+        this.camera.lookAt(this.#currentX, 0, this.#currentZ);
 
         const orthoCamera = this.camera as OrthographicCamera;
         orthoCamera.left = -effectiveWidth / 2;
         orthoCamera.right = effectiveWidth / 2;
         orthoCamera.top = effectiveHeight / 2;
         orthoCamera.bottom = -effectiveHeight / 2;
-    }
+    };
 
-    /**
-     * [KO] 키보드 입력을 처리합니다.
-     * [EN] Handles keyboard input.
-     * @private
-     */
     #handleKeyboardInput(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
-        if (!this.#targetMesh) return false;
 
         const {keyboardKeyBuffer} = view.redGPUContext;
         const tKeyNameMapper = this.#keyNameMapper;
@@ -350,5 +324,5 @@ class IsometricController extends AController {
     }
 }
 
-Object.freeze(IsometricController)
+Object.freeze(IsometricController);
 export default IsometricController;

@@ -1,8 +1,6 @@
 import {mat4, vec3} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
-import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
@@ -34,7 +32,7 @@ type KeyNameMapper = {
  * [KO] FPS 게임이나 3D 에디터의 뷰포트처럼 키보드와 마우스를 사용하여 공간을 자유롭게 비행하듯 탐색할 수 있습니다.
  * [EN] Allows for free-flight exploration of the space using keyboard and mouse, similar to FPS games or 3D editor viewports.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const controller = new RedGPU.FreeController(redGPUContext);
  * controller.pan = 30;
@@ -70,12 +68,18 @@ class FreeController extends AController {
     #desirePosition: [number, number, number] = [0, 0, 0];
     #pan: number = 0;
     #tilt: number = 0;
-    #targetMesh: Mesh;
+    #currentX: number = 0;
+    #currentY: number = 0;
+    #currentZ: number = 0;
+    #currentPan: number = 0;
+    #currentTilt: number = 0;
 
     // ==================== 내부 계산용 속성 (인스턴스 안전성 확보) ====================
     #tMTX0 = mat4.create();
     #displacementMTX = mat4.create();
     #displacementVec3 = vec3.create();
+    #currentPositionVec3 = vec3.create();
+    #forwardVec3 = vec3.create();
 
     /**
      * [KO] FreeController 인스턴스를 생성합니다.
@@ -95,40 +99,39 @@ class FreeController extends AController {
                 },
                 useKeyboard: true
             });
-        this.#initListener();
     }
 
     // ==================== 위치(Position) Getter/Setter ====================
     /** [KO] X축 위치 [EN] X-axis position */
     get x(): number {
-        return this.#targetMesh.x;
+        return this.#currentX;
     }
 
     set x(value: number) {
         validateNumber(value);
-        this.#targetMesh.x = value;
+        this.#currentX = value;
         this.#desirePosition[0] = value;
     }
 
     /** [KO] Y축 위치 [EN] Y-axis position */
     get y(): number {
-        return this.#targetMesh.y;
+        return this.#currentY;
     }
 
     set y(value: number) {
         validateNumber(value);
-        this.#targetMesh.y = value;
+        this.#currentY = value;
         this.#desirePosition[1] = value;
     }
 
     /** [KO] Z축 위치 [EN] Z-axis position */
     get z(): number {
-        return this.#targetMesh.z;
+        return this.#currentZ;
     }
 
     set z(value: number) {
         validateNumber(value);
-        this.#targetMesh.z = value;
+        this.#currentZ = value;
         this.#desirePosition[2] = value;
     }
 
@@ -278,60 +281,54 @@ class FreeController extends AController {
      * @param time - [KO] 현재 시간 [EN] Current time
      */
     update(view: View3D, time: number): void {
-        super.update(view, time, (deltaTime: number) => {
-            this.#updateAnimation(view, deltaTime);
-        });
+        super.update(view, time, this.#updateAnimation);
     }
 
-    #initListener() {
-        this.#targetMesh = new Mesh(this.redGPUContext);
-    }
-
-    #updateAnimation(view: View3D, deltaTime: number) {
-        const targetMesh = this.#targetMesh;
+    #updateAnimation = (view: View3D, deltaTime: number): void => {
         const tDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
         const tDelayRotation = Math.pow(this.#rotationInterpolation, deltaTime);
 
-        let panDelta = (this.#pan - targetMesh.rotationY) % 360;
+        let panDelta = (this.#pan - this.#currentPan) % 360;
         if (panDelta > 180) panDelta -= 360;
         if (panDelta < -180) panDelta += 360;
-        targetMesh.rotationY += panDelta * (1 - tDelayRotation);
+        this.#currentPan += panDelta * (1 - tDelayRotation);
 
-        const tiltDelta = (this.#tilt - targetMesh.rotationX);
-        targetMesh.rotationX += tiltDelta * (1 - tDelayRotation);
+        const tiltDelta = (this.#tilt - this.#currentTilt);
+        this.#currentTilt += tiltDelta * (1 - tDelayRotation);
 
         if (this.#checkKeyboardKeyBuffer(view, deltaTime)) {
-            updateObject3DMatrix(targetMesh, view);
             mat4.identity(this.#displacementMTX);
-            mat4.rotateY(this.#displacementMTX, this.#displacementMTX, targetMesh.rotationY * PER_PI);
-            mat4.rotateX(this.#displacementMTX, this.#displacementMTX, targetMesh.rotationX * PER_PI);
+            mat4.rotateY(this.#displacementMTX, this.#displacementMTX, this.#currentPan * PER_PI);
+            mat4.rotateX(this.#displacementMTX, this.#displacementMTX, this.#currentTilt * PER_PI);
             mat4.translate(this.#displacementMTX, this.#displacementMTX, this.#displacementVec3);
 
+            vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
             mat4.identity(this.#tMTX0);
-            mat4.translate(this.#tMTX0, this.#tMTX0, targetMesh.position);
+            mat4.translate(this.#tMTX0, this.#tMTX0, this.#currentPositionVec3);
             mat4.multiply(this.#tMTX0, this.#tMTX0, this.#displacementMTX);
             this.#desirePosition[0] = this.#tMTX0[12];
             this.#desirePosition[1] = this.#tMTX0[13];
             this.#desirePosition[2] = this.#tMTX0[14];
         }
 
-        targetMesh.x += (this.#desirePosition[0] - targetMesh.x) * (1 - tDelay);
-        targetMesh.y += (this.#desirePosition[1] - targetMesh.y) * (1 - tDelay);
-        targetMesh.z += (this.#desirePosition[2] - targetMesh.z) * (1 - tDelay);
+        this.#currentX += (this.#desirePosition[0] - this.#currentX) * (1 - tDelay);
+        this.#currentY += (this.#desirePosition[1] - this.#currentY) * (1 - tDelay);
+        this.#currentZ += (this.#desirePosition[2] - this.#currentZ) * (1 - tDelay);
 
+        vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
         mat4.identity(this.#tMTX0);
-        mat4.translate(this.#tMTX0, this.#tMTX0, targetMesh.position);
-        mat4.rotateY(this.#tMTX0, this.#tMTX0, targetMesh.rotationY * PER_PI);
-        mat4.rotateX(this.#tMTX0, this.#tMTX0, targetMesh.rotationX * PER_PI);
+        mat4.translate(this.#tMTX0, this.#tMTX0, this.#currentPositionVec3);
+        mat4.rotateY(this.#tMTX0, this.#tMTX0, this.#currentPan * PER_PI);
+        mat4.rotateX(this.#tMTX0, this.#tMTX0, this.#currentTilt * PER_PI);
 
-        this.camera.setPosition(targetMesh.x, targetMesh.y, targetMesh.z);
+        this.camera.setPosition(this.#currentX, this.#currentY, this.#currentZ);
 
-        const forward = vec3.fromValues(0, 0, -10);
-        vec3.transformMat4(forward, forward, this.#tMTX0);
-        this.camera.lookAt(forward[0], forward[1], forward[2]);
-        this.camera.rotationX = targetMesh.rotationX;
-        this.camera.rotationY = targetMesh.rotationY;
-    }
+        vec3.set(this.#forwardVec3, 0, 0, -10);
+        vec3.transformMat4(this.#forwardVec3, this.#forwardVec3, this.#tMTX0);
+        this.camera.lookAt(this.#forwardVec3[0], this.#forwardVec3[1], this.#forwardVec3[2]);
+        this.camera.rotationX = this.#currentTilt;
+        this.camera.rotationY = this.#currentPan;
+    };
 
     #checkKeyboardKeyBuffer(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
@@ -406,4 +403,5 @@ class FreeController extends AController {
     }
 }
 
+Object.freeze(FreeController);
 export default FreeController;

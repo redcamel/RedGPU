@@ -1,13 +1,12 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
+import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
 const ROTATION_THRESHOLD = 0.0001;
 const DISTANCE_THRESHOLD = 0.0001;
-const tempMatrix = mat4.create();
 
 /**
  * [KO] 특정 지점을 중심으로 회전하는 궤도형 카메라 컨트롤러입니다.
@@ -93,8 +92,8 @@ class OrbitController extends AController {
 
     // ==================== 센터 좌표 Getter/Setter ====================
     /**
-     * [KO] 회전 중심의 X축 좌표를 가져옵니다.
-     * [EN] Gets the X-axis coordinate of the rotation center.
+     * [KO] 회전 중심의 X축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis coordinate of the rotation center.
      *
      * @returns
      * [KO] 중심점 X축 좌표
@@ -104,21 +103,14 @@ class OrbitController extends AController {
         return this.#centerX;
     }
 
-    /**
-     * [KO] 회전 중심의 X축 좌표를 설정합니다.
-     * [EN] Sets the X-axis coordinate of the rotation center.
-     *
-     * @param value -
-     * [KO] 중심점 X축 좌표
-     * [EN] Center point X-axis coordinate
-     */
     set centerX(value: number) {
+        validateNumber(value);
         this.#centerX = value;
     }
 
     /**
-     * [KO] 회전 중심의 Y축 좌표를 가져옵니다.
-     * [EN] Gets the Y-axis coordinate of the rotation center.
+     * [KO] 회전 중심의 Y축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis coordinate of the rotation center.
      *
      * @returns
      * [KO] 중심점 Y축 좌표
@@ -128,21 +120,14 @@ class OrbitController extends AController {
         return this.#centerY;
     }
 
-    /**
-     * [KO] 회전 중심의 Y축 좌표를 설정합니다.
-     * [EN] Sets the Y-axis coordinate of the rotation center.
-     *
-     * @param value -
-     * [KO] 중심점 Y축 좌표
-     * [EN] Center point Y-axis coordinate
-     */
     set centerY(value: number) {
+        validateNumber(value);
         this.#centerY = value;
     }
 
     /**
-     * [KO] 회전 중심의 Z축 좌표를 가져옵니다.
-     * [EN] Gets the Z-axis coordinate of the rotation center.
+     * [KO] 회전 중심의 Z축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis coordinate of the rotation center.
      *
      * @returns
      * [KO] 중심점 Z축 좌표
@@ -152,22 +137,15 @@ class OrbitController extends AController {
         return this.#centerZ;
     }
 
-    /**
-     * [KO] 회전 중심의 Z축 좌표를 설정합니다.
-     * [EN] Sets the Z-axis coordinate of the rotation center.
-     *
-     * @param value -
-     * [KO] 중심점 Z축 좌표
-     * [EN] Center point Z-axis coordinate
-     */
     set centerZ(value: number) {
+        validateNumber(value);
         this.#centerZ = value;
     }
 
     // ==================== 거리(줌) Getter/Setter ====================
     /**
-     * [KO] 중심점으로부터 카메라까지의 거리를 가져옵니다.
-     * [EN] Gets the distance from the center point to the camera.
+     * [KO] 중심점으로부터 카메라까지의 거리를 가져오거나 설정합니다. (0 이상)
+     * [EN] Gets or sets the distance from the center point to the camera. (min 0)
      *
      * @returns
      * [KO] 거리 값
@@ -177,22 +155,14 @@ class OrbitController extends AController {
         return this.#distance;
     }
 
-    /**
-     * [KO] 중심점으로부터 카메라까지의 거리를 설정합니다.
-     * [EN] Sets the distance from the center point to the camera.
-     *
-     * @param value -
-     * [KO] 거리 값 (0 이상)
-     * [EN] Distance value (min 0)
-     */
     set distance(value: number) {
         validateNumberRange(value, 0);
         this.#distance = value;
     }
 
     /**
-     * [KO] 거리 조절 속도를 가져옵니다.
-     * [EN] Gets the distance adjustment speed.
+     * [KO] 거리 조절 속도를 가져오거나 설정합니다. 높을수록 빠른 줌 속도 (0.01 이상)
+     * [EN] Gets or sets the distance adjustment speed. Higher values for faster zoom speed. (min 0.01)
      *
      * @returns
      * [KO] 거리 변화 속도
@@ -202,22 +172,14 @@ class OrbitController extends AController {
         return this.#speedDistance;
     }
 
-    /**
-     * [KO] 거리 조절 속도를 설정합니다. 높을수록 빠른 줌 속도
-     * [EN] Sets the distance adjustment speed. Higher values for faster zoom speed.
-     *
-     * @param value -
-     * [KO] 거리 변화 속도 (0.01 이상)
-     * [EN] Distance change speed (min 0.01)
-     */
     set speedDistance(value: number) {
         validateNumberRange(value, 0.01);
         this.#speedDistance = value;
     }
 
     /**
-     * [KO] 거리 보간 계수를 가져옵니다.
-     * [EN] Gets the distance interpolation factor.
+     * [KO] 거리 보간 계수를 가져오거나 설정합니다. 낮을수록 부드러운 줌 이동 (0.01 ~ 1)
+     * [EN] Gets or sets the distance interpolation factor. Lower values for smoother zoom movement. (0.01 ~ 1)
      *
      * @returns
      * [KO] 거리 보간 계수 (0.01 ~ 1)
@@ -227,22 +189,14 @@ class OrbitController extends AController {
         return this.#distanceInterpolation;
     }
 
-    /**
-     * [KO] 거리 보간 계수를 설정합니다. 낮을수록 부드러운 줌 이동
-     * [EN] Sets the distance interpolation factor. Lower values for smoother zoom movement.
-     *
-     * @param value -
-     * [KO] 보간 계수 (0.01 ~ 1)
-     * [EN] Interpolation factor (0.01 ~ 1)
-     */
     set distanceInterpolation(value: number) {
         validateNumberRange(value, 0.01, 1);
         this.#distanceInterpolation = value;
     }
 
     /**
-     * [KO] 최소 줌 거리를 가져옵니다.
-     * [EN] Gets the minimum zoom distance.
+     * [KO] 최소 줌 거리를 가져오거나 설정합니다. (0.1 이상)
+     * [EN] Gets or sets the minimum zoom distance. (min 0.1)
      *
      * @returns
      * [KO] 최소 거리
@@ -252,22 +206,14 @@ class OrbitController extends AController {
         return this.#minDistance;
     }
 
-    /**
-     * [KO] 최소 줌 거리를 설정합니다.
-     * [EN] Sets the minimum zoom distance.
-     *
-     * @param value -
-     * [KO] 최소 거리 (0.1 이상)
-     * [EN] Minimum distance (min 0.1)
-     */
     set minDistance(value: number) {
         validateNumberRange(value, 0.1);
         this.#minDistance = value;
     }
 
     /**
-     * [KO] 최대 줌 거리를 가져옵니다.
-     * [EN] Gets the maximum zoom distance.
+     * [KO] 최대 줌 거리를 가져오거나 설정합니다. (0.1 이상)
+     * [EN] Gets or sets the maximum zoom distance. (min 0.1)
      *
      * @returns
      * [KO] 최대 거리
@@ -277,14 +223,6 @@ class OrbitController extends AController {
         return this.#maxDistance;
     }
 
-    /**
-     * [KO] 최대 줌 거리를 설정합니다.
-     * [EN] Sets the maximum zoom distance.
-     *
-     * @param value -
-     * [KO] 최대 거리 (0.1 이상)
-     * [EN] Maximum distance (min 0.1)
-     */
     set maxDistance(value: number) {
         validateNumberRange(value, 0.1);
         this.#maxDistance = value;
@@ -292,8 +230,8 @@ class OrbitController extends AController {
 
     // ==================== 회전 속도 Getter/Setter ====================
     /**
-     * [KO] 회전 속도를 가져옵니다.
-     * [EN] Gets the rotation speed.
+     * [KO] 회전 속도를 가져오거나 설정합니다. 높을수록 빠른 회전 속도 (0.01 이상)
+     * [EN] Gets or sets the rotation speed. Higher values for faster rotation speed. (min 0.01)
      *
      * @returns
      * [KO] 회전 속도 값
@@ -303,22 +241,14 @@ class OrbitController extends AController {
         return this.#speedRotation;
     }
 
-    /**
-     * [KO] 회전 속도를 설정합니다. 높을수록 빠른 회전 속도
-     * [EN] Sets the rotation speed. Higher values for faster rotation speed.
-     *
-     * @param value -
-     * [KO] 회전 속도 값 (0.01 이상)
-     * [EN] Rotation speed value (min 0.01)
-     */
     set speedRotation(value: number) {
         validateNumberRange(value, 0.01);
         this.#speedRotation = value;
     }
 
     /**
-     * [KO] 회전 보간 계수를 가져옵니다.
-     * [EN] Gets the rotation interpolation factor.
+     * [KO] 회전 보간 계수를 가져오거나 설정합니다. 낮을수록 부드러운 회전 (0.01 ~ 1)
+     * [EN] Gets or sets the rotation interpolation factor. Lower values for smoother rotation. (0.01 ~ 1)
      *
      * @returns
      * [KO] 회전 보간 계수 (0.01 ~ 1)
@@ -328,14 +258,6 @@ class OrbitController extends AController {
         return this.#rotationInterpolation;
     }
 
-    /**
-     * [KO] 회전 보간 계수를 설정합니다. 낮을수록 부드러운 회전
-     * [EN] Sets the rotation interpolation factor. Lower values for smoother rotation.
-     *
-     * @param value -
-     * [KO] 보간 계수 (0.01 ~ 1)
-     * [EN] Interpolation factor (0.01 ~ 1)
-     */
     set rotationInterpolation(value: number) {
         validateNumberRange(value, 0.01, 1);
         this.#rotationInterpolation = value;
@@ -343,8 +265,8 @@ class OrbitController extends AController {
 
     // ==================== 팬/틸트 Getter/Setter ====================
     /**
-     * [KO] 카메라의 팬(가로 회전) 각도를 가져옵니다. (단위: 도)
-     * [EN] Gets the camera's pan (horizontal rotation) angle. (Unit: degrees)
+     * [KO] 카메라의 팬(가로 회전) 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's pan (horizontal rotation) angle. (Unit: degrees)
      *
      * @returns
      * [KO] 팬 각도 값
@@ -354,21 +276,14 @@ class OrbitController extends AController {
         return this.#pan;
     }
 
-    /**
-     * [KO] 카메라의 팬(가로 회전) 각도를 설정합니다. (단위: 도)
-     * [EN] Sets the camera's pan (horizontal rotation) angle. (Unit: degrees)
-     *
-     * @param value -
-     * [KO] 팬 각도 값
-     * [EN] Pan angle value
-     */
     set pan(value: number) {
+        validateNumber(value);
         this.#pan = value;
     }
 
     /**
-     * [KO] 카메라의 틸트(세로 회전) 각도를 가져옵니다. (단위: 도, 범위: -90 ~ 90)
-     * [EN] Gets the camera's tilt (vertical rotation) angle. (Unit: degrees, Range: -90 ~ 90)
+     * [KO] 카메라의 틸트(세로 회전) 각도를 가져오거나 설정합니다. (단위: 도, 범위: -90 ~ 90)
+     * [EN] Gets or sets the camera's tilt (vertical rotation) angle. (Unit: degrees, Range: -90 ~ 90)
      *
      * @returns
      * [KO] 틸트 각도 값
@@ -378,22 +293,14 @@ class OrbitController extends AController {
         return this.#tilt;
     }
 
-    /**
-     * [KO] 카메라의 틸트(세로 회전) 각도를 설정합니다. (단위: 도)
-     * [EN] Sets the camera's tilt (vertical rotation) angle. (Unit: degrees)
-     *
-     * @param value -
-     * [KO] 틸트 각도 값 (-90 ~ 90 범위로 제한됨)
-     * [EN] Tilt angle value (limited to -90 ~ 90 range)
-     */
     set tilt(value: number) {
         validateNumberRange(value, -90, 90);
         this.#tilt = value;
     }
 
     /**
-     * [KO] 최소 틸트 각도를 가져옵니다.
-     * [EN] Gets the minimum tilt angle.
+     * [KO] 최소 틸트 각도를 가져오거나 설정합니다. (-90 ~ 90)
+     * [EN] Gets or sets the minimum tilt angle. (-90 ~ 90)
      *
      * @returns
      * [KO] 최소 틸트 각도
@@ -403,22 +310,14 @@ class OrbitController extends AController {
         return this.#minTilt;
     }
 
-    /**
-     * [KO] 최소 틸트 각도를 설정합니다.
-     * [EN] Sets the minimum tilt angle.
-     *
-     * @param value -
-     * [KO] 최소 틸트 각도 (-90 ~ 90)
-     * [EN] Minimum tilt angle (-90 ~ 90)
-     */
     set minTilt(value: number) {
         validateNumberRange(value, -90, 90);
         this.#minTilt = value;
     }
 
     /**
-     * [KO] 최대 틸트 각도를 가져옵니다.
-     * [EN] Gets the maximum tilt angle.
+     * [KO] 최대 틸트 각도를 가져오거나 설정합니다. (-90 ~ 90)
+     * [EN] Gets or sets the maximum tilt angle. (-90 ~ 90)
      *
      * @returns
      * [KO] 최대 틸트 각도
@@ -428,14 +327,6 @@ class OrbitController extends AController {
         return this.#maxTilt;
     }
 
-    /**
-     * [KO] 최대 틸트 각도를 설정합니다.
-     * [EN] Sets the maximum tilt angle.
-     *
-     * @param value -
-     * [KO] 최대 틸트 각도 (-90 ~ 90)
-     * [EN] Maximum tilt angle (-90 ~ 90)
-     */
     set maxTilt(value: number) {
         validateNumberRange(value, -90, 90);
         this.#maxTilt = value;
@@ -454,22 +345,10 @@ class OrbitController extends AController {
      * [EN] Current time (ms)
      */
     update(view: View3D, time: number): void {
-        super.update(view, time, (deltaTime) => {
-            this.#updateAnimation(deltaTime);
-        });
+        super.update(view, time, this.#updateAnimation);
     }
 
-
-    /**
-     * [KO] 카메라 애니메이션을 업데이트합니다.
-     * [EN] Updates camera animation.
-     *
-     * @param deltaTime -
-     * [KO] 초 단위 경과 시간
-     * [EN] Elapsed time in seconds
-     * @private
-     */
-    #updateAnimation(deltaTime: number): void {
+    #updateAnimation = (view: View3D, deltaTime: number): void => {
         // 틸트 범위 제한
         if (this.#tilt < this.#minTilt) this.#tilt = this.#minTilt;
         if (this.#tilt > this.#maxTilt) this.#tilt = this.#maxTilt;
@@ -506,19 +385,20 @@ class OrbitController extends AController {
 
         if (this.#currentDistance < camera.nearClipping) this.#currentDistance = camera.nearClipping;
 
-        // 카메라 위치 계산
-        mat4.identity(tempMatrix);
-        mat4.translate(tempMatrix, tempMatrix, [this.#centerX, this.#centerY, this.#centerZ]);
-        mat4.rotateY(tempMatrix, tempMatrix, this.#currentPan * PER_PI);
-        mat4.rotateX(tempMatrix, tempMatrix, this.#currentTilt * PER_PI);
-        mat4.translate(tempMatrix, tempMatrix, [0, 0, this.#currentDistance]);
-        // 카메라에 적용
-        camera.x = tempMatrix[12];
-        camera.y = tempMatrix[13];
-        camera.z = tempMatrix[14];
-        this.camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
-    }
+        // 구면 좌표계 직접 삼각함수 연산 (4x4 행렬 곱셈 4회 및 임시 배열 2회 제거)
+        const panRad = this.#currentPan * PER_PI;
+        const tiltRad = this.#currentTilt * PER_PI;
+        const cosTilt = Math.cos(tiltRad);
+        const distCosTilt = this.#currentDistance * cosTilt;
+
+        camera.setPosition(
+            this.#centerX + Math.sin(panRad) * distCosTilt,
+            this.#centerY - Math.sin(tiltRad) * this.#currentDistance,
+            this.#centerZ + Math.cos(panRad) * distCosTilt
+        );
+        camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
+    };
 }
 
-Object.freeze(OrbitController)
+Object.freeze(OrbitController);
 export default OrbitController;
