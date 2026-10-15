@@ -44,8 +44,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Scene',
                                 path: '3d/scene',
                                 description: {
-                                    ko: `RedGPU의 Scene 객체에 대한 샘플입니다.<br/> Scene 객체에 제공되는 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                                    en: `This example is a sample of a Scene object in RedGPU.<br/> It provides real-time testing of the basic options provided to the Scene object.`
+                                    ko: `3D 오브젝트와 조명을 담는 컨테이너인 Scene을 생성하고 구성하는 기본 예제입니다.<br/>배경 색상(backgroundColor) 및 투명도(alpha) 설정을 비롯한 Scene의 기본 옵션을 실시간으로 테스트할 수 있습니다.`,
+                                    en: `Demonstrates how to create and configure a Scene container for 3D objects and lights.<br/>Provides real-time testing of basic Scene options including background color and alpha transparency.`
                                 },
                             }
                         ]
