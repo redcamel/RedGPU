@@ -32,6 +32,7 @@ class ClusterLightManager extends RedGPUObject {
     #view: View3D
     #prevWidth: number = undefined
     #prevHeight: number = undefined
+    #prevTotalLightCount: number = 0
     #passClusterLightBound: PassClusterLightBound
     #passClustersLight: PassClustersLight
     #clusterLightsBuffer: GPUBuffer
@@ -104,10 +105,20 @@ class ClusterLightManager extends RedGPUObject {
      */
     updateClusterLights() {
         const {scene, renderViewStateData, pixelRectArray} = this.#view
+        if (!scene) return
+
+        const {pointLights, spotLights} = scene.lightManager
+        const pointLightNum = pointLights.length
+        const spotLightNum = spotLights.length
+        const totalLightNum = pointLightNum + spotLightNum
+        if (totalLightNum === 0 && this.#prevTotalLightCount === 0) return
+
         const width = pixelRectArray[2]
         const height = pixelRectArray[3]
 
         if (!this.#view.systemUniform_Vertex_UniformBindGroup || width === 0 || height === 0) return
+
+        this.#prevTotalLightCount = totalLightNum
 
         const dirtyPixelSize = this.#prevWidth === undefined || this.#prevHeight === undefined || this.#prevWidth !== width || this.#prevHeight !== height
         if (dirtyPixelSize) {
@@ -116,54 +127,49 @@ class ClusterLightManager extends RedGPUObject {
             this.#prevHeight = height
         }
 
-        if (scene) {
-            const {pointLights, spotLights} = scene.lightManager
-            const pointLightNum = pointLights.length
-            const spotLightNum = spotLights.length
-            if (pointLightNum) {
-                let i = pointLightNum
-                while (i--) {
-                    const tLight = pointLights[i]
-                    const stride = 16
-                    const offset = 4 + stride * i
-                    this.#clusterLightsBufferData.set(
-                        [
-                            ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 0
-                        ],
-                        offset,
-                    )
-                    if (tLight.enableDebugger) {
-                        tLight.render(renderViewStateData)
-                    }
-                }
-            }
-            if (spotLightNum) {
+        if (pointLightNum) {
+            let i = pointLightNum
+            while (i--) {
+                const tLight = pointLights[i]
                 const stride = 16
-                const prevOffset = pointLightNum * stride
-                let i = spotLightNum
-                while (i--) {
-                    const tLight = spotLights[i]
-                    const offset = 4 + stride * i + prevOffset;
-                    this.#clusterLightsBufferData.set(
-                        [
-                            ...tLight.position, tLight.radius,
-                            ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
-                        ],
-                        offset,
-                    )
-                    if (tLight.enableDebugger) {
-                        tLight.render(renderViewStateData)
-                    }
+                const offset = 4 + stride * i
+                this.#clusterLightsBufferData.set(
+                    [
+                        ...tLight.position, tLight.radius,
+                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 0
+                    ],
+                    offset,
+                )
+                if (tLight.enableDebugger) {
+                    tLight.render(renderViewStateData)
                 }
             }
-            this.#clusterLightsBufferData.set(
-                [pointLightNum, spotLightNum, 0, 0],
-                0,
-            )
-            this.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
-            this.#passClustersLight.render()
         }
+        if (spotLightNum) {
+            const stride = 16
+            const prevOffset = pointLightNum * stride
+            let i = spotLightNum
+            while (i--) {
+                const tLight = spotLights[i]
+                const offset = 4 + stride * i + prevOffset;
+                this.#clusterLightsBufferData.set(
+                    [
+                        ...tLight.position, tLight.radius,
+                        ...tLight.color.rgbNormalLinear, tLight.intensityMultiplier * tLight.lumen, 1, ...tLight.direction, tLight.outerCutoff, tLight.innerCutoff
+                    ],
+                    offset,
+                )
+                if (tLight.enableDebugger) {
+                    tLight.render(renderViewStateData)
+                }
+            }
+        }
+        this.#clusterLightsBufferData.set(
+            [pointLightNum, spotLightNum, 0, 0],
+            0,
+        )
+        this.gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource);
+        this.#passClustersLight.render()
     }
 
     /**
@@ -191,6 +197,7 @@ class ClusterLightManager extends RedGPUObject {
 
         this.#view = null;
         this.#clusterLightsBufferData = null;
+        this.#prevTotalLightCount = 0;
     }
 }
 
