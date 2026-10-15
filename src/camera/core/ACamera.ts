@@ -7,8 +7,8 @@ const STANDARD_SHUTTER_SPEEDS = [
 ];
 
 /**
- * [KO] 모든 카메라의 기본이 되는 추상 클래스입니다. 물리적 카메라 속성과 공통 메타데이터를 관리합니다.
- * [EN] Abstract base class for all cameras. Manages physical camera properties and common metadata.
+ * [KO] 모든 카메라 클래스의 최상위 추상 클래스로, 조리개·셔터 속도·ISO 기반 물리 노출(EV100) 연산을 관리합니다.
+ * [EN] Abstract base class for all cameras, managing physical exposure (EV100) calculations based on aperture, shutter speed, and ISO.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -26,8 +26,8 @@ abstract class ACamera extends BaseObject {
     #exposureDirty: boolean = true;
 
     /**
-     * [KO] 자동 노출 사용 여부를 반환합니다.
-     * [EN] Returns whether to use auto exposure.
+     * [KO] 자동 노출 활성화 여부를 가져오거나 설정합니다. 비활성화(`false`) 전환 시 현재 EV100을 유지하도록 ISO를 100으로 고정하고 가장 가까운 표준 셔터 속도로 스냅합니다. (기본값: `true`)
+     * [EN] Gets or sets whether auto exposure is enabled. When switched to `false`, fixes ISO to 100 and snaps shutter speed to the nearest standard stop to preserve the current EV100. (Default: `true`)
      *
      * @returns
      * [KO] 자동 노출 활성화 여부
@@ -41,16 +41,9 @@ abstract class ACamera extends BaseObject {
         if (this.#useAutoExposure === value) return;
 
         if (this.#useAutoExposure && !value) {
-            // [KO] ON -> OFF 전환 시: 시각적 연속성을 위해 셔터 속도를 재계산하고 표준 값으로 스냅합니다.
-            // [EN] ON -> OFF transition: Recalculate shutter speed and snap to standard values for visual continuity.
-
-            // 1. ISO를 100으로 표준화 (Standardize ISO to 100)
             this.#iso = 100;
-
-            // 2. 현재 EV100을 유지하기 위한 셔터 속도 계산 (ISO 100 기준)
             const rawShutterSpeed = (this.#aperture * this.#aperture) / Math.pow(2, this.#ev100);
 
-            // 3. 가장 가까운 표준 셔터 스피드 값 찾기 (Zero-GC for 루프)
             let closestSpeed = STANDARD_SHUTTER_SPEEDS[0];
             let minDiff = Math.abs(closestSpeed - rawShutterSpeed);
             for (let i = 1, len = STANDARD_SHUTTER_SPEEDS.length; i < len; i++) {
@@ -70,8 +63,8 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 물리적 노출 지수(EV100)를 반환합니다.
-     * [EN] Returns the physical exposure value (EV100).
+     * [KO] ISO 100 기준 물리적 노출 지수(EV100)를 반환합니다.
+     * [EN] Returns the physical exposure value at ISO 100 (EV100).
      *
      * @returns
      * [KO] EV100 값
@@ -83,12 +76,12 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 조리개(f-stop) 값을 반환합니다.
-     * [EN] Returns the aperture (f-stop) value.
+     * [KO] 조리개(f-stop) 값을 가져오거나 설정합니다. (양수, 기본값: `16.0`)
+     * [EN] Gets or sets the aperture (f-stop) value. (Positive number, Default: `16.0`)
      *
      * @returns
-     * [KO] 조리개 값
-     * [EN] Aperture value
+     * [KO] 조리개(f-stop) 값
+     * [EN] Aperture (f-stop) value
      */
     get aperture(): number {
         return this.#aperture;
@@ -102,12 +95,12 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 셔터 속도(초 단위)를 반환합니다.
-     * [EN] Returns the shutter speed (in seconds).
+     * [KO] 초(second) 단위의 셔터 속도를 가져오거나 설정합니다. (양수, 기본값: `1 / 3200`)
+     * [EN] Gets or sets the shutter speed in seconds. (Positive number, Default: `1 / 3200`)
      *
      * @returns
-     * [KO] 셔터 속도
-     * [EN] Shutter speed
+     * [KO] 셔터 속도 (초)
+     * [EN] Shutter speed in seconds
      */
     get shutterSpeed(): number {
         return this.#shutterSpeed;
@@ -121,12 +114,12 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 센서 감도(ISO)를 반환합니다.
-     * [EN] Returns the sensor sensitivity (ISO).
+     * [KO] 센서 감도(ISO)를 가져오거나 설정합니다. (양수, 기본값: `100`)
+     * [EN] Gets or sets the sensor sensitivity (ISO). (Positive number, Default: `100`)
      *
      * @returns
-     * [KO] ISO 감도
-     * [EN] ISO sensitivity
+     * [KO] ISO 감도 값
+     * [EN] ISO sensitivity value
      */
     get iso(): number {
         return this.#iso;
@@ -140,21 +133,17 @@ abstract class ACamera extends BaseObject {
     }
 
     /**
-     * [KO] 노출 값을 업데이트합니다.
-     * [EN] Updates the exposure value.
+     * [KO] 자동 노출 결과 또는 수동 물리 파라미터(`aperture`, `shutterSpeed`, `iso`)를 바탕으로 `ev100` 값을 갱신합니다.
+     * [EN] Updates the `ev100` value based on auto exposure results or manual physical parameters (`aperture`, `shutterSpeed`, `iso`).
      *
      * @param view -
-     * [KO] View3D 인스턴스 (선택 사항)
-     * [EN] View3D instance (optional)
+     * [KO] 자동 노출 값을 참조할 `View3D` 인스턴스 (선택)
+     * [EN] Optional `View3D` instance from which to read adapted auto exposure
      */
     updateExposure(view?: View3D): void {
         if (view && this.#useAutoExposure) {
-            // [KO] 자동 노출 사용 시 적응된 EV100 값을 가져옴
-            // [EN] Get the adapted EV100 value when using auto exposure
             this.#ev100 = view.postEffectManager.autoExposure.currentAdaptedEV100;
         } else {
-            // [KO] 물리적 수치 기반 EV100 계산: log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
-            // [EN] Calculate EV100 based on physical values: log2( (Aperture^2 / ShutterSpeed) * (100 / ISO) )
             this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
         }
         this.#exposureDirty = false;

@@ -1,4 +1,3 @@
-
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 @group(1) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
 
@@ -24,8 +23,6 @@ struct AutoExposureUniforms {
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
-// [KO] 공유 메모리를 사용하여 전역 원자적 연산 병목 해소
-// [EN] Use shared memory to resolve global atomic operation bottlenecks
 var<workgroup> localHistogram: array<atomic<u32>, 256>;
 
 @compute @workgroup_size(16, 16, 1)
@@ -33,7 +30,6 @@ fn main(
     @builtin(global_invocation_id) global_id : vec3<u32>,
     @builtin(local_invocation_index) local_index : u32
 ) {
-    // [KO] 로컬 히스토그램 초기화 [EN] Initialize local histogram
     if (local_index < 256u) {
         atomicStore(&localHistogram[local_index], 0u);
     }
@@ -41,8 +37,6 @@ fn main(
 
     let coords = global_id.xy * 2u;
     if (coords.x < u32(uniforms.width) && coords.y < u32(uniforms.height)) {
-        // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사 (depthTexture 제거로 VRAM 대역폭 50% 절감)
-        // [EN] Fetch color texture only once to check both alpha and RGB (50% VRAM bandwidth savings by removing depthTexture)
         let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
         
         if (texel.a > 0.0) {
@@ -52,15 +46,10 @@ fn main(
             let lum = brightness * invPreExposure;
             
             if (lum > MIN_LUMINANCE) {
-                // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
-                // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
                 let ev100 = log2(lum) + 3.0;
-                    
                 let normalizedEV100 = saturate((ev100 - uniforms.minEV100) * uniforms.invEv100Range);
                 let binIndex = u32(normalizedEV100 * 255.0);
 
-                // [KO] 측광 가중치 계산 (화면비 왜곡 보정 적용으로 완벽한 정원 측광 수행)
-                // [EN] Calculate metering weight (Aspect ratio distortion corrected for perfect circular metering)
                 var weight = 1.0;
                 if (uniforms.meteringMode > 0.5) {
                     let invHeight = 1.0 / uniforms.height;
@@ -69,30 +58,22 @@ fn main(
                     let dist = sqrt(dot(delta, delta));
 
                     if (uniforms.meteringMode < 1.5) {
-                        // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
                         let w = saturate(1.0 - dist);
                         weight = w * w;
                     } else {
-                        // [KO] 스포트 측광 (Spot) [EN] Spot
                         let w = saturate(1.0 - dist * 4.0);
                         let w2 = w * w;
                         weight = w2 * w2;
                     }
                 }
 
-                // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)
-                // [EN] Accumulate into local histogram with weight (scaled 0-100)
                 atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
             }
         }
     }
 
-    // [KO] 모든 스레드가 로컬 히스토그램 작성을 마칠 때까지 대기
-    // [EN] Wait for all threads to finish writing to the local histogram
     workgroupBarrier();
 
-    // [KO] 로컬 히스토그램을 전역 히스토그램으로 병합
-    // [EN] Merge local histogram into global histogram
     if (local_index < 256u) {
         let localCount = atomicLoad(&localHistogram[local_index]);
         if (localCount > 0u) {

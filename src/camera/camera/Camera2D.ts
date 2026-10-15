@@ -3,19 +3,16 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import ACamera from "../core/ACamera";
 
 /**
- * [KO] 2D 환경에서 객체를 관찰하는 카메라입니다.
- * [EN] Camera for observing objects in a 2D environment.
- *
- * [KO] 평면적인 2D 좌표계를 기반으로 위치를 제어하며, UI나 2D 게임 요소의 렌더링에 주로 사용됩니다.
- * [EN] Controls position based on a flat 2D coordinate system, primarily used for rendering UI or 2D game elements.
+ * [KO] 2D 평면 좌표계를 기반으로 객체를 렌더링하는 카메라 클래스입니다.
+ * [EN] Camera class that renders objects based on a 2D planar coordinate system.
  *
  * ### Example
  * ```typescript
  * const camera = new RedGPU.Camera.Camera2D();
- * camera.x = 100;
- * camera.y = 50;
- * camera.setPosition(200, 100);
+ * camera.setPosition(100, 50);
  * ```
+ *
+ * @see [MultiView with 2D/3D example](/RedGPU/examples/2d/view/multiViewWith3D/)
  * @category Camera
  */
 class Camera2D extends ACamera {
@@ -26,7 +23,7 @@ class Camera2D extends ACamera {
 
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
-     * [EN] Creates an instance of Camera2D.
+     * [EN] Creates a Camera2D instance.
      *
      * ### Example
      * ```typescript
@@ -42,32 +39,32 @@ class Camera2D extends ACamera {
      * [EN] Returns the view matrix.
      *
      * @returns
-     * [KO] 뷰 행렬
-     * [EN] View matrix
+     * [KO] 뷰 행렬 (`mat4`)
+     * [EN] View matrix (`mat4`)
      */
     get viewMatrix(): mat4 {
         return this.#viewMatrix;
     }
 
     /**
-     * [KO] Z 좌표를 반환합니다. (미사용)
-     * [EN] Returns the Z coordinate. (Unused)
+     * [KO] 카메라의 Z축 좌표를 반환합니다. (2D 환경에서는 항상 `0`으로 유지됨)
+     * [EN] Returns the camera's Z-axis coordinate. (Always maintained at `0` in a 2D environment)
      *
      * @returns
-     * [KO] Z 좌표
-     * [EN] Z coordinate
+     * [KO] Z축 좌표 (`0`)
+     * [EN] Z-axis coordinate (`0`)
      */
     get z(): number {
         return this.#z;
     }
 
     /**
-     * [KO] X 좌표를 반환합니다.
-     * [EN] Returns the X coordinate.
+     * [KO] 카메라의 X축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's X-axis coordinate.
      *
      * @returns
-     * [KO] X 좌표
-     * [EN] X coordinate
+     * [KO] X축 좌표 (기본값: `0`)
+     * [EN] X-axis coordinate (default: `0`)
      */
     get x(): number {
         return this.#x;
@@ -80,12 +77,12 @@ class Camera2D extends ACamera {
     }
 
     /**
-     * [KO] Y 좌표를 반환합니다.
-     * [EN] Returns the Y coordinate.
+     * [KO] 카메라의 Y축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's Y-axis coordinate.
      *
      * @returns
-     * [KO] Y 좌표
-     * [EN] Y coordinate
+     * [KO] Y축 좌표 (기본값: `0`)
+     * [EN] Y-axis coordinate (default: `0`)
      */
     get y(): number {
         return this.#y;
@@ -98,20 +95,20 @@ class Camera2D extends ACamera {
     }
 
     /**
-     * [KO] 카메라 위치 (x, y)를 반환합니다.
-     * [EN] Returns the camera position (x, y).
+     * [KO] 카메라의 2D 위치 좌표를 반환합니다.
+     * [EN] Returns the camera's 2D position coordinates.
      *
      * @returns
-     * [KO] [x, y] 좌표 배열
-     * [EN] [x, y] coordinate array
+     * [KO] `[x, y]` 좌표 튜플
+     * [EN] `[x, y]` coordinate tuple
      */
     get position(): [number, number] {
         return [this.#x, this.#y];
     }
 
     /**
-     * [KO] 카메라의 위치를 설정합니다.
-     * [EN] Sets the camera position.
+     * [KO] 카메라의 2D 위치를 설정합니다.
+     * [EN] Sets the camera's 2D position.
      *
      * ### Example
      * ```typescript
@@ -120,11 +117,11 @@ class Camera2D extends ACamera {
      * ```
      *
      * @param x -
-     * [KO] X 좌표 또는 [x, y, z] 배열
-     * [EN] X coordinate or [x, y, z] array
+     * [KO] X축 좌표 또는 `[x, y, z]` 배열
+     * [EN] X-axis coordinate or `[x, y, z]` array
      * @param y -
-     * [KO] Y 좌표 (x가 배열인 경우 무시됨)
-     * [EN] Y coordinate (ignored if x is an array)
+     * [KO] Y축 좌표 (`x`가 배열인 경우 무시됨)
+     * [EN] Y-axis coordinate (ignored if `x` is an array)
      */
     setPosition(x: number | [number, number, number], y?: number): void {
         if (Array.isArray(x)) {
@@ -146,4 +143,3 @@ class Camera2D extends ACamera {
 
 Object.freeze(Camera2D);
 export default Camera2D;
-

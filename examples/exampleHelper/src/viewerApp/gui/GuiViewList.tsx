@@ -25,12 +25,6 @@ const GuiViewList: React.FC<GuiViewListProps> = ({gui, redGPUContext}) => {
         const addViewControls = (view: any, container: any) => {
             const isView3D = view.constructor.name === 'View3D';
             if (isView3D) {
-                // View Properties
-                container.addBinding(view, 'useFrustumCulling');
-                container.addBinding(view, 'useDistanceCulling');
-                container.addBinding(view, 'distanceCulling', {min: 0, max: 1000, step: 1});
-                container.addBlade({view: 'separator'});
-
                 // Grid & Axis
                 const debugFolder = container.addFolder({title: 'Debug Helpers'});
                 const debugProxy = {

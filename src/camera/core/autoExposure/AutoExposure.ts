@@ -14,13 +14,22 @@ import RedGPUObject from "../../../base/RedGPUObject";
 
 
 /**
- * [KO] 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
- * [EN] Class that performs auto-exposure and eye adaptation.
+ * [KO] 컴퓨트 셰이더 기반 256-bin 로그 휘도 히스토그램 분석을 통해 자동 노출(Auto-Exposure)과 눈 적응(Eye Adaptation)을 수행하는 클래스입니다. `PostEffectManager` 내부에서 자동으로 생성됩니다.
+ * [EN] Class that performs auto-exposure and eye adaptation via compute-shader-based 256-bin log-luminance histogram analysis. Automatically created inside `PostEffectManager`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D의 postEffectManager를 통해 접근
+ * // [EN] Access via postEffectManager of View3D
+ * const autoExposure = view.postEffectManager.autoExposure;
+ * autoExposure.exposureCompensation = 0.5;
+ * autoExposure.meteringMode = RedGPU.Camera.Core.METERING_MODE.CENTER_WEIGHTED;
+ * ```
  *
  * @category Core
  */
@@ -41,8 +50,6 @@ class AutoExposure extends RedGPUObject {
     #readBuffer: GPUBuffer;
     #isReading: boolean = false;
 
-    // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
-    // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
     #minEV100: number = -2.0;
     #maxEV100: number = 16.0;
     #adaptationSpeedUp: number = 3.0;
@@ -54,18 +61,23 @@ class AutoExposure extends RedGPUObject {
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
 
-    // 캐싱 관련 필드
     #prevWidth: number;
     #prevHeight: number;
     #downsampleBindGroup0Cache: WeakMap<GPUTexture, GPUBindGroup> = new WeakMap();
     #downsampleBindGroup1: GPUBindGroup;
     #adaptationBindGroup0: GPUBindGroup;
 
-    // [KO] 매 프레임 힙 메모리 할당 및 GC 부하 방지를 위한 재사용 버퍼
-    // [EN] Reusable buffers to prevent per-frame heap allocation and GC overhead
     #cachedUniformData: Float32Array = new Float32Array(16);
     #cachedEV100Data: Float32Array = new Float32Array(1);
 
+    /**
+     * [KO] `AutoExposure` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AutoExposure` instance.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     */
     constructor(view: View3D) {
         super(view.redGPUContext);
         this.#view = view;
@@ -74,12 +86,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 가져오거나 설정합니다.
-     * [EN] Gets or sets the exposure compensation value.
+     * [KO] EV 스탑 단위의 노출 보정(Exposure Compensation) 값을 가져오거나 설정합니다. (기본값: `0.0`)
+     * [EN] Gets or sets the exposure compensation value in EV stops. (Default: `0.0`)
      *
      * @returns
-     * [KO] 노출 보정 값
-     * [EN] Exposure compensation value
+     * [KO] 노출 보정 값 (EV)
+     * [EN] Exposure compensation value in EV
      */
     get exposureCompensation(): number {
         return this.#exposureCompensation;
@@ -91,8 +103,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 목표 휘도를 가져오거나 설정합니다. (0 이상)
-     * [EN] Gets or sets the target luminance. (min 0)
+     * [KO] 자동 노출이 수렴하려는 목표 평균 휘도(18% 미들 그레이 기준)를 가져오거나 설정합니다. (`0` 이상, 기본값: `0.18`)
+     * [EN] Gets or sets the target average luminance (based on 18% middle gray) toward which auto-exposure converges. (Min `0`, Default: `0.18`)
      *
      * @returns
      * [KO] 목표 휘도 값
@@ -108,8 +120,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출 최소 EV100을 가져오거나 설정합니다.
-     * [EN] Gets or sets the minimum EV100 for auto-exposure.
+     * [KO] 자동 노출이 허용하는 최소 EV100 하한값을 가져오거나 설정합니다. (기본값: `-2.0`)
+     * [EN] Gets or sets the minimum EV100 lower bound allowed by auto-exposure. (Default: `-2.0`)
      *
      * @returns
      * [KO] 최소 EV100 값
@@ -125,8 +137,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출 최대 EV100을 가져오거나 설정합니다.
-     * [EN] Gets or sets the maximum EV100 for auto-exposure.
+     * [KO] 자동 노출이 허용하는 최대 EV100 상한값을 가져오거나 설정합니다. (기본값: `16.0`)
+     * [EN] Gets or sets the maximum EV100 upper bound allowed by auto-exposure. (Default: `16.0`)
      *
      * @returns
      * [KO] 최대 EV100 값
@@ -142,12 +154,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 눈 적응 속도(밝아질 때)를 가져오거나 설정합니다. (0 이상)
-     * [EN] Gets or sets the eye adaptation speed (brightening). (min 0)
+     * [KO] 어두운 곳에서 밝은 곳으로 전환될 때의 눈 적응 속도를 가져오거나 설정합니다. (`0` 이상, 기본값: `3.0`)
+     * [EN] Gets or sets the eye adaptation speed when transitioning from dark to bright environments. (Min `0`, Default: `3.0`)
      *
      * @returns
-     * [KO] 눈 적응 속도 (상승)
-     * [EN] Eye adaptation speed (upward)
+     * [KO] 밝아질 때의 적응 속도
+     * [EN] Brightening adaptation speed
      */
     get adaptationSpeedUp(): number {
         return this.#adaptationSpeedUp;
@@ -159,12 +171,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 눈 적응 속도(어두워질 때)를 가져오거나 설정합니다. (0 이상)
-     * [EN] Gets or sets the eye adaptation speed (darkening). (min 0)
+     * [KO] 밝은 곳에서 어두운 곳으로 전환될 때의 눈 적응 속도를 가져오거나 설정합니다. (`0` 이상, 기본값: `1.0`)
+     * [EN] Gets or sets the eye adaptation speed when transitioning from bright to dark environments. (Min `0`, Default: `1.0`)
      *
      * @returns
-     * [KO] 눈 적응 속도 (하강)
-     * [EN] Eye adaptation speed (downward)
+     * [KO] 어두워질 때의 적응 속도
+     * [EN] Darkening adaptation speed
      */
     get adaptationSpeedDown(): number {
         return this.#adaptationSpeedDown;
@@ -176,12 +188,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 가져오거나 설정합니다. (0 ~ 1)
-     * [EN] Gets or sets the histogram analysis range (exclude bottom percentile). (0 - 1)
+     * [KO] 히스토그램 평균 산출 시 제외할 하위 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.8`)
+     * [EN] Gets or sets the lower percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.8`)
      *
      * @returns
-     * [KO] 하위 백분위 값 (0 ~ 1)
-     * [EN] Low percentile value (0 - 1)
+     * [KO] 하위 백분위 값 (`0` ~ `1`)
+     * [EN] Low percentile value (`0` to `1`)
      */
     get lowPercentile(): number {
         return this.#lowPercentile;
@@ -193,12 +205,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 가져오거나 설정합니다. (0 ~ 1)
-     * [EN] Gets or sets the histogram analysis range (exclude top percentile). (0 - 1)
+     * [KO] 히스토그램 평균 산출 시 제외할 상위 백분위 기준값을 가져오거나 설정합니다. (`0` ~ `1`, 기본값: `0.95`)
+     * [EN] Gets or sets the upper percentile threshold excluded when averaging the histogram. (`0` to `1`, Default: `0.95`)
      *
      * @returns
-     * [KO] 상위 백분위 값 (0 ~ 1)
-     * [EN] High percentile value (0 - 1)
+     * [KO] 상위 백분위 값 (`0` ~ `1`)
+     * [EN] High percentile value (`0` to `1`)
      */
     get highPercentile(): number {
         return this.#highPercentile;
@@ -210,12 +222,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 가져오거나 설정합니다. (기본값: 64.0, 1.0 이상)
-     * [EN] Gets or sets the maximum exposure multiplier for auto-exposure. (Default: 64.0, min 1.0)
+     * [KO] 어두운 장면에서 허용할 최대 노출 증폭 배율을 가져오거나 설정합니다. (`1.0` 이상, 기본값: `64.0`)
+     * [EN] Gets or sets the maximum exposure amplification multiplier allowed in dark scenes. (Min `1.0`, Default: `64.0`)
      *
      * @returns
      * [KO] 최대 노출 증폭 배율
-     * [EN] Maximum exposure multiplier
+     * [EN] Maximum exposure amplification multiplier
      */
     get maxExposureMultiplier(): number {
         return this.#maxExposureMultiplier;
@@ -227,12 +239,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출의 측광 모드(Metering Mode)를 가져오거나 설정합니다.
-     * [EN] Gets or sets the metering mode for auto-exposure.
+     * [KO] 화면 휘도 측정 시 사용할 측광 모드(`METERING_MODE`)를 가져오거나 설정합니다. (기본값: `METERING_MODE.AVERAGE`)
+     * [EN] Gets or sets the metering mode (`METERING_MODE`) used when measuring screen luminance. (Default: `METERING_MODE.AVERAGE`)
      *
      * @returns
-     * [KO] 측광 모드
-     * [EN] Metering mode
+     * [KO] 현재 측광 모드
+     * [EN] Current metering mode
      */
     get meteringMode(): METERING_MODE {
         return this.#meteringMode;
@@ -243,12 +255,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 적응된 노출 배율(preExposure)을 반환합니다.
-     * [EN] Returns the currently adapted exposure multiplier (preExposure).
+     * [KO] 카메라의 현재 `ev100`과 `exposureCompensation`을 반영하여 계산된 사전 노출 배율(`preExposure`)을 반환합니다.
+     * [EN] Returns the pre-exposure multiplier (`preExposure`) calculated from the camera's current `ev100` and `exposureCompensation`.
      *
      * @returns
-     * [KO] 현재 노출 배율
-     * [EN] Current exposure multiplier
+     * [KO] 사전 노출 배율
+     * [EN] Pre-exposure multiplier
      */
     get preExposure(): number {
         const {rawCamera} = this.#view;
@@ -256,12 +268,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 적응된 EV100 값을 가져오거나 설정합니다. (설정 시 GPU 버퍼도 함께 갱신)
-     * [EN] Gets or sets the currently adapted EV100 value. (Also updates the GPU buffer when set)
+     * [KO] 현재 적응된 EV100 값을 가져오거나 설정합니다. 값을 설정하면 내부 GPU 스토리지 버퍼도 즉시 갱신됩니다.
+     * [EN] Gets or sets the currently adapted EV100 value. Setting this value immediately updates the internal GPU storage buffer.
      *
      * @returns
-     * [KO] 적응된 EV100 값
-     * [EN] Adapted EV100 value
+     * [KO] 현재 적응된 EV100 값
+     * [EN] Currently adapted EV100 value
      */
     get currentAdaptedEV100(): number {
         return this.#currentAdaptedEV100;
@@ -276,24 +288,24 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 적응된 EV100 데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
-     * [EN] Returns the GPU storage buffer where adapted EV100 data is stored.
+     * [KO] 적응된 EV100 값이 기록되는 GPU `StorageBuffer` 인스턴스를 반환합니다.
+     * [EN] Returns the GPU `StorageBuffer` instance storing the adapted EV100 value.
      *
      * @returns
-     * [KO] 스토리지 버퍼 인스턴스
-     * [EN] Storage buffer instance
+     * [KO] 적응된 EV100 `StorageBuffer`
+     * [EN] Adapted EV100 `StorageBuffer`
      */
     get adaptedLuminanceBuffer(): StorageBuffer {
         return this.#adaptedEV100Buffer;
     }
 
     /**
-     * [KO] 자동 노출 처리를 수행합니다. (커맨드 기록)
-     * [EN] Performs auto exposure processing. (Record commands)
+     * [KO] 소스 컬러 텍스처의 로그 휘도 히스토그램 생성 및 눈 적응 컴퓨트 패스를 기록합니다.
+     * [EN] Records the log-luminance histogram generation and eye adaptation compute passes for the source color texture.
      *
      * @param sourceTextureInfo -
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture information
+     * [KO] 후처리 입력 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Post-processing input texture information (`IPostEffectResult`)
      */
     render(sourceTextureInfo: IPostEffectResult) {
         const {gpuDevice, commandEncoderManager} = this;
@@ -302,16 +314,11 @@ class AutoExposure extends RedGPUObject {
         const {deltaTime} = renderViewStateData;
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
-
-        // [KO] 현재 프레임에 적용되어 있는 최종 노출값 계산
         const currentPreExposure = this.#calculatePreExposure(rawCamera.ev100, this.#exposureCompensation);
 
-        // [KO] CPU 측에서 log2 초월함수(SFU) 사전 계산 (GPU SFU 호출 0회화)
-        // [EN] Precalculate log2 transcendental functions (SFU) on CPU (0 GPU SFU calls)
         const targetEV100Bias = Math.log2(9.6 * Math.max(0.000001, this.#targetLuminance)) + this.#exposureCompensation;
         const minPossibleEV100 = this.#exposureCompensation - Math.log2(1.2 * Math.max(1.0, this.#maxExposureMultiplier));
 
-        // Update uniforms (재사용 버퍼 인플레이스 갱신으로 매 프레임 GC 0건 유지)
         const u = this.#cachedUniformData;
         u[0] = deltaTime;
         u[1] = targetEV100Bias;
@@ -328,7 +335,7 @@ class AutoExposure extends RedGPUObject {
         u[12] = height;
         u[13] = currentPreExposure;
         u[14] = this.#meteringMode;
-        u[15] = 0.0; // pad0 (16-byte tail alignment)
+        u[15] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer,
@@ -358,7 +365,6 @@ class AutoExposure extends RedGPUObject {
             this.#downsampleBindGroup0Cache.set(sourceTextureInfo.texture, cachedBG0);
         }
 
-        // Pass 1: Generate Histogram (depthTexture 제거로 단일 텍스처 바인딩)
         commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
             pass1.setPipeline(this.#downsamplePipeline);
             pass1.setBindGroup(0, cachedBG0);
@@ -366,15 +372,12 @@ class AutoExposure extends RedGPUObject {
             pass1.dispatchWorkgroups(Math.ceil(width / 32), Math.ceil(height / 32), 1);
         });
 
-        // Pass 2: Average Histogram and Adapt
         commandEncoderManager.addPostProcessComputePass('AutoExposure_Adaptation_Pass', (pass2) => {
             pass2.setPipeline(this.#adaptationPipeline);
             pass2.setBindGroup(0, this.#adaptationBindGroup0);
             pass2.dispatchWorkgroups(1, 1, 1);
         });
 
-        // [KO] 오직 읽기 작업 중이 아닐 때만 GPU 버퍼에서 읽기 전용 버퍼로 복사 명령 기록
-        // [EN] Record copy command only when not currently reading
         if (!this.#isReading) {
             commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
                 copyGPUBuffer(encoder, this.#adaptedEV100Buffer.gpuBuffer, this.#readBuffer);
@@ -383,8 +386,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] GPU 작업 완료 후 데이터를 비동기적으로 읽어옵니다. (Renderer에서 호출)
-     * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
+     * [KO] GPU에서 계산된 적응형 EV100 값을 리드백 버퍼로부터 비동기 매핑하여 CPU 상태에 동기화합니다.
+     * [EN] Asynchronously maps the readback buffer to synchronize the GPU-computed adapted EV100 value to CPU state.
      */
     resolveReadback() {
         if (!this.#isReading && this.#readBuffer) {
@@ -405,8 +408,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] AutoExposure 인스턴스를 파기하고 할당된 물리 GPU 버퍼들을 모두 소멸시킵니다.
-     * [EN] Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+     * [KO] 할당된 GPU 버퍼 및 컴퓨트 파이프라인 리소스를 모두 해제합니다.
+     * [EN] Releases all allocated GPU buffers and compute pipeline resources.
      */
     destroy() {
         if (this.#adaptedEV100Buffer) {
@@ -436,18 +439,12 @@ class AutoExposure extends RedGPUObject {
     }
 
     #calculatePreExposure(ev100: number, exposureCompensation: number): number {
-        // [KO] UE5 표준 물리 노출 공식 적용: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
-        // [EN] Apply UE5 standard physical exposure formula: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
-        // [KO] 여기서 1.2는 언리얼의 노출 보정 계수이며, ISO 2720 표준(K=12.5)과 조합되어 최종 휘도를 결정합니다.
-        // [EN] Here, 1.2 is Unreal's exposure calibration factor, used in combination with ISO 2720 standard (K=12.5) to determine final luminance.
         return Math.pow(2, exposureCompensation) / (1.2 * Math.pow(2, ev100));
     }
 
     #initResources() {
         const {gpuDevice, redGPUContext} = this;
 
-        // [KO] 초기 EV100 값 설정 (기본적으로 카메라의 물리적 EV100으로 시작하여 급격한 노출 변화를 방지합니다)
-        // [EN] Set initial EV100 value (starts with the camera's physical EV100 by default to prevent sudden exposure changes)
         this.#view.rawCamera.updateExposure();
         const initialEV100 = Math.max(this.#minEV100, Math.min(this.#maxEV100, this.#view.rawCamera.ev100));
         this.#currentAdaptedEV100 = initialEV100;
@@ -455,17 +452,14 @@ class AutoExposure extends RedGPUObject {
         const initialData = new Float32Array([initialEV100]);
         this.#adaptedEV100Buffer = new StorageBuffer(redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
-        // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
         this.#histogramBuffer = new StorageBuffer(redGPUContext, new Uint32Array(256).buffer, 'AutoExposure_HistogramBuffer');
 
-        // Readback buffer
         this.#readBuffer = gpuDevice.createBuffer({
             size: 4,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
             label: 'AutoExposure_ReadBuffer'
         });
 
-        // [KO] 통합 유니폼 데이터 구성 (총 16개 요소) [EN] Unified globalStruct data configuration (total 16 elements)
         const uniformData = new Float32Array(16);
         this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }

@@ -7,21 +7,18 @@ const TEMP_TARGET: [number, number, number] = [0, 0, 0];
 const TEMP_UP: [number, number, number] = [0, 1, 0];
 
 /**
- * [KO] 원근 투영을 사용하는 카메라입니다.
- * [EN] Camera that uses perspective projection.
- *
- * [KO] 인간의 눈이나 카메라 렌즈와 유사하게 거리에 따라 물체의 크기가 달라지는 원근감을 제공합니다. 3D 환경에서 깊이감 있는 씬을 렌더링할 때 기본적으로 사용됩니다.
- * [EN] Provides perspective where object sizes vary based on distance, similar to the human eye or a camera lens. It is used by default for rendering depth-filled scenes in a 3D environment.
+ * [KO] 거리에 따른 원근감을 적용하여 3D 씬을 렌더링하는 원근 투영 카메라 클래스입니다.
+ * [EN] Perspective projection camera class that renders 3D scenes with distance-based depth perception.
  *
  * ### Example
  * ```typescript
  * const camera = new RedGPU.Camera.PerspectiveCamera();
- * camera.x = 10;
- * camera.y = 5;
- * camera.z = 20;
- * camera.fieldOfView = 75;
+ * camera.setPosition(10, 5, 20);
+ * camera.fieldOfView = 60;
  * camera.lookAt(0, 0, 0);
  * ```
+ *
+ * @see [SingleView example](/RedGPU/examples/3d/view/singleView/)
  * @category Camera
  */
 class PerspectiveCamera extends ACamera {
@@ -39,7 +36,7 @@ class PerspectiveCamera extends ACamera {
 
     /**
      * [KO] PerspectiveCamera 인스턴스를 생성합니다.
-     * [EN] Creates an instance of PerspectiveCamera.
+     * [EN] Creates a PerspectiveCamera instance.
      *
      * ### Example
      * ```typescript
@@ -51,12 +48,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] X축 회전값을 반환합니다. (라디안)
-     * [EN] Returns the X rotation value. (radians)
+     * [KO] 카메라의 X축 회전 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's X-axis rotation angle. (Unit: degrees)
      *
      * @returns
-     * [KO] X축 회전값
-     * [EN] X rotation value
+     * [KO] X축 회전 각도 (기본값: `0`)
+     * [EN] X-axis rotation angle (default: `0`)
      */
     get rotationX(): number {
         return this.#rotationX;
@@ -68,12 +65,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] Y축 회전값을 반환합니다. (라디안)
-     * [EN] Returns the Y rotation value. (radians)
+     * [KO] 카메라의 Y축 회전 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's Y-axis rotation angle. (Unit: degrees)
      *
      * @returns
-     * [KO] Y축 회전값
-     * [EN] Y rotation value
+     * [KO] Y축 회전 각도 (기본값: `0`)
+     * [EN] Y-axis rotation angle (default: `0`)
      */
     get rotationY(): number {
         return this.#rotationY;
@@ -85,12 +82,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] Z축 회전값을 반환합니다. (라디안)
-     * [EN] Returns the Z rotation value. (radians)
+     * [KO] 카메라의 Z축 회전 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's Z-axis rotation angle. (Unit: degrees)
      *
      * @returns
-     * [KO] Z축 회전값
-     * [EN] Z rotation value
+     * [KO] Z축 회전 각도 (기본값: `0`)
+     * [EN] Z-axis rotation angle (default: `0`)
      */
     get rotationZ(): number {
         return this.#rotationZ;
@@ -102,12 +99,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] 시야각(FOV)을 반환합니다. (도)
-     * [EN] Returns the field of view. (degrees)
+     * [KO] 수직 시야각(FOV)을 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the vertical field of view (FOV). (Unit: degrees)
      *
      * @returns
-     * [KO] 시야각
-     * [EN] Field of view
+     * [KO] 시야각 (기본값: `60`)
+     * [EN] Field of view (default: `60`)
      */
     get fieldOfView(): number {
         return this.#fieldOfView;
@@ -119,12 +116,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] 근평면(near) 거리를 반환합니다.
-     * [EN] Returns the near clipping distance.
+     * [KO] 근평면(Near Clipping Plane) 거리를 가져오거나 설정합니다.
+     * [EN] Gets or sets the near clipping plane distance.
      *
      * @returns
-     * [KO] 근평면 거리
-     * [EN] Near clipping distance
+     * [KO] 근평면 거리 (기본값: `0.1`)
+     * [EN] Near clipping plane distance (default: `0.1`)
      */
     get nearClipping(): number {
         return this.#nearClipping;
@@ -136,12 +133,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] 원평면(far) 거리를 반환합니다.
-     * [EN] Returns the far clipping distance.
+     * [KO] 원평면(Far Clipping Plane) 거리를 가져오거나 설정합니다.
+     * [EN] Gets or sets the far clipping plane distance.
      *
      * @returns
-     * [KO] 원평면 거리
-     * [EN] Far clipping distance
+     * [KO] 원평면 거리 (기본값: `50000`)
+     * [EN] Far clipping plane distance (default: `50000`)
      */
     get farClipping(): number {
         return this.#farClipping;
@@ -157,20 +154,20 @@ class PerspectiveCamera extends ACamera {
      * [EN] Returns the view matrix.
      *
      * @returns
-     * [KO] 뷰 행렬
-     * [EN] View matrix
+     * [KO] 뷰 행렬 (`mat4`)
+     * [EN] View matrix (`mat4`)
      */
     get viewMatrix(): mat4 {
         return this.#viewMatrix;
     }
 
     /**
-     * [KO] X 좌표를 반환합니다.
-     * [EN] Returns the X coordinate.
+     * [KO] 카메라의 X축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's X-axis coordinate.
      *
      * @returns
-     * [KO] X 좌표
-     * [EN] X coordinate
+     * [KO] X축 좌표 (기본값: `0`)
+     * [EN] X-axis coordinate (default: `0`)
      */
     get x(): number {
         return this.#x;
@@ -183,12 +180,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] Y 좌표를 반환합니다.
-     * [EN] Returns the Y coordinate.
+     * [KO] 카메라의 Y축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's Y-axis coordinate.
      *
      * @returns
-     * [KO] Y 좌표
-     * [EN] Y coordinate
+     * [KO] Y축 좌표 (기본값: `0`)
+     * [EN] Y-axis coordinate (default: `0`)
      */
     get y(): number {
         return this.#y;
@@ -201,12 +198,12 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] Z 좌표를 반환합니다.
-     * [EN] Returns the Z coordinate.
+     * [KO] 카메라의 Z축 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's Z-axis coordinate.
      *
      * @returns
-     * [KO] Z 좌표
-     * [EN] Z coordinate
+     * [KO] Z축 좌표 (기본값: `0`)
+     * [EN] Z-axis coordinate (default: `0`)
      */
     get z(): number {
         return this.#z;
@@ -219,20 +216,20 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] 카메라 위치 (x, y, z)를 반환합니다.
-     * [EN] Returns the camera position (x, y, z).
+     * [KO] 카메라의 3D 위치 좌표를 반환합니다.
+     * [EN] Returns the camera's 3D position coordinates.
      *
      * @returns
-     * [KO] [x, y, z] 좌표 배열
-     * [EN] [x, y, z] coordinate array
+     * [KO] `[x, y, z]` 좌표 튜플
+     * [EN] `[x, y, z]` coordinate tuple
      */
     get position(): [number, number, number] {
         return [this.#x, this.#y, this.#z];
     }
 
     /**
-     * [KO] 카메라 위치를 설정합니다.
-     * [EN] Sets the camera position.
+     * [KO] 카메라의 3D 위치를 설정합니다.
+     * [EN] Sets the camera's 3D position.
      *
      * ### Example
      * ```typescript
@@ -241,14 +238,14 @@ class PerspectiveCamera extends ACamera {
      * ```
      *
      * @param x -
-     * [KO] X 좌표 또는 [x, y, z] 배열
-     * [EN] X coordinate or [x, y, z] array
+     * [KO] X축 좌표 또는 `[x, y, z]` 배열
+     * [EN] X-axis coordinate or `[x, y, z]` array
      * @param y -
-     * [KO] Y 좌표 (x가 배열인 경우 무시됨)
-     * [EN] Y coordinate (ignored if x is an array)
+     * [KO] Y축 좌표 (`x`가 배열인 경우 무시됨)
+     * [EN] Y-axis coordinate (ignored if `x` is an array)
      * @param z -
-     * [KO] Z 좌표 (x가 배열인 경우 무시됨)
-     * [EN] Z coordinate (ignored if x is an array)
+     * [KO] Z축 좌표 (`x`가 배열인 경우 무시됨)
+     * [EN] Z-axis coordinate (ignored if `x` is an array)
      */
     setPosition(x: number | [number, number, number], y?: number, z?: number): void {
         if (Array.isArray(x)) {
@@ -272,8 +269,8 @@ class PerspectiveCamera extends ACamera {
     }
 
     /**
-     * [KO] 카메라가 특정 좌표를 바라보도록 회전시킵니다.
-     * [EN] Rotates the camera to look at a specific coordinate.
+     * [KO] 카메라가 지정된 월드 좌표를 바라보도록 뷰 행렬을 갱신합니다.
+     * [EN] Updates the view matrix so the camera looks at the specified world coordinates.
      *
      * ### Example
      * ```typescript
@@ -281,14 +278,14 @@ class PerspectiveCamera extends ACamera {
      * ```
      *
      * @param x -
-     * [KO] 바라볼 대상의 X 좌표
-     * [EN] Target X coordinate to look at
+     * [KO] 바라볼 목표 지점의 X축 좌표
+     * [EN] Target X-axis coordinate to look at
      * @param y -
-     * [KO] 바라볼 대상의 Y 좌표
-     * [EN] Target Y coordinate to look at
+     * [KO] 바라볼 목표 지점의 Y축 좌표
+     * [EN] Target Y-axis coordinate to look at
      * @param z -
-     * [KO] 바라볼 대상의 Z 좌표
-     * [EN] Target Z coordinate to look at
+     * [KO] 바라볼 목표 지점의 Z축 좌표
+     * [EN] Target Z-axis coordinate to look at
      */
     lookAt(x: number, y: number, z: number): void {
         validateNumber(x);
@@ -341,4 +338,3 @@ class PerspectiveCamera extends ACamera {
 
 Object.freeze(PerspectiveCamera);
 export default PerspectiveCamera;
-

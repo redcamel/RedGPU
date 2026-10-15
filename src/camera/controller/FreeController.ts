@@ -5,44 +5,84 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import AController from "../core/AController";
 
-// ==================== 모듈 레벨 상수 ====================
 const PER_PI = Math.PI / 180;
 
 /**
- * [KO] 키보드 입력 키 매핑 설정을 정의합니다.
- * [EN] Defines keyboard input key mapping configuration.
+ * [KO] FreeController의 키보드 입력 키 매핑 구성을 정의하는 타입입니다.
+ * [EN] Type defining the keyboard input key mapping configuration for FreeController.
  */
 type KeyNameMapper = {
-    /** [KO] 전진 이동 [EN] Move forward */ moveForward: string;
-    /** [KO] 후진 이동 [EN] Move backward */ moveBack: string;
-    /** [KO] 좌측 이동 [EN] Move left */ moveLeft: string;
-    /** [KO] 우측 이동 [EN] Move right */ moveRight: string;
-    /** [KO] 상향 이동 [EN] Move up */ moveUp: string;
-    /** [KO] 하향 이동 [EN] Move down */ moveDown: string;
-    /** [KO] 좌회전 [EN] Turn left */ turnLeft: string;
-    /** [KO] 우회전 [EN] Turn right */ turnRight: string;
-    /** [KO] 상향 회전 [EN] Turn up */ turnUp: string;
-    /** [KO] 하향 회전 [EN] Turn down */ turnDown: string;
+    /**
+     * [KO] 전진 이동 키
+     * [EN] Move forward key
+     */
+    moveForward: string;
+    /**
+     * [KO] 후진 이동 키
+     * [EN] Move backward key
+     */
+    moveBack: string;
+    /**
+     * [KO] 좌측 이동 키
+     * [EN] Move left key
+     */
+    moveLeft: string;
+    /**
+     * [KO] 우측 이동 키
+     * [EN] Move right key
+     */
+    moveRight: string;
+    /**
+     * [KO] 상향 이동 키
+     * [EN] Move up key
+     */
+    moveUp: string;
+    /**
+     * [KO] 하향 이동 키
+     * [EN] Move down key
+     */
+    moveDown: string;
+    /**
+     * [KO] 좌회전 키
+     * [EN] Turn left key
+     */
+    turnLeft: string;
+    /**
+     * [KO] 우회전 키
+     * [EN] Turn right key
+     */
+    turnRight: string;
+    /**
+     * [KO] 상향 회전 키
+     * [EN] Turn up key
+     */
+    turnUp: string;
+    /**
+     * [KO] 하향 회전 키
+     * [EN] Turn down key
+     */
+    turnDown: string;
 };
 
 /**
- * [KO] 자유롭게 이동 가능한 1인칭 시점의 카메라 컨트롤러입니다.
- * [EN] First-person camera controller that allows free movement.
- *
- * [KO] FPS 게임이나 3D 에디터의 뷰포트처럼 키보드와 마우스를 사용하여 공간을 자유롭게 비행하듯 탐색할 수 있습니다.
- * [EN] Allows for free-flight exploration of the space using keyboard and mouse, similar to FPS games or 3D editor viewports.
+ * [KO] 키보드와 마우스 입력을 사용하여 3D 공간을 자유롭게 탐색하는 1인칭 시점 카메라 컨트롤러 클래스입니다.
+ * [EN] First-person camera controller class that freely navigates 3D space using keyboard and mouse inputs.
  *
  * ### Example
  * ```typescript
- * const controller = new RedGPU.FreeController(redGPUContext);
- * controller.pan = 30;
- * controller.tilt = 10;
+ * const controller = new RedGPU.Camera.FreeController(redGPUContext);
+ * controller.x = 0;
+ * controller.y = 5;
+ * controller.z = 20;
+ * controller.pan = 0;
+ * controller.tilt = -15;
  * ```
+ *
  * <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:500px;"></iframe>
+ * @see [FreeController example](/RedGPU/examples/3d/controller/freeController/)
  * @category Controller
  */
 class FreeController extends AController {
-    // ==================== 키 매핑 (Unreal Engine Standard) ====================
     #keyNameMapper: KeyNameMapper = {
         moveForward: 'w',
         moveBack: 's',
@@ -55,16 +95,13 @@ class FreeController extends AController {
         turnUp: 'r',
         turnDown: 'f'
     };
-    // ==================== 이동 관련 설정 ====================
     #moveSpeed: number = 600;
     #moveDelayInterpolation: number = 0.001;
     #maxAcceleration: number = 1;
     #currentAcceleration: number = 0;
-    // ==================== 회전 관련 설정 ====================
     #rotationSpeed: number = 360;
     #rotationInterpolation: number = 0.001;
     #mouseSensitivity: number = 0.15;
-    // ==================== 위치 및 회전 상태 ====================
     #desirePosition: [number, number, number] = [0, 0, 0];
     #pan: number = 0;
     #tilt: number = 0;
@@ -74,7 +111,6 @@ class FreeController extends AController {
     #currentPan: number = 0;
     #currentTilt: number = 0;
 
-    // ==================== 내부 계산용 속성 (인스턴스 안전성 확보) ====================
     #tMTX0 = mat4.create();
     #displacementMTX = mat4.create();
     #displacementVec3 = vec3.create();
@@ -83,11 +119,16 @@ class FreeController extends AController {
 
     /**
      * [KO] FreeController 인스턴스를 생성합니다.
-     * [EN] Creates an instance of FreeController.
+     * [EN] Creates a FreeController instance.
+     *
+     * ### Example
+     * ```typescript
+     * const controller = new RedGPU.Camera.FreeController(redGPUContext);
+     * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 객체
-     * [EN] RedGPU Context object
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -101,8 +142,14 @@ class FreeController extends AController {
             });
     }
 
-    // ==================== 위치(Position) Getter/Setter ====================
-    /** [KO] X축 위치 [EN] X-axis position */
+    /**
+     * [KO] 카메라의 현재 X축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's current X-axis position.
+     *
+     * @returns
+     * [KO] X축 위치 (기본값: `0`)
+     * [EN] X-axis position (default: `0`)
+     */
     get x(): number {
         return this.#currentX;
     }
@@ -113,7 +160,14 @@ class FreeController extends AController {
         this.#desirePosition[0] = value;
     }
 
-    /** [KO] Y축 위치 [EN] Y-axis position */
+    /**
+     * [KO] 카메라의 현재 Y축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's current Y-axis position.
+     *
+     * @returns
+     * [KO] Y축 위치 (기본값: `0`)
+     * [EN] Y-axis position (default: `0`)
+     */
     get y(): number {
         return this.#currentY;
     }
@@ -124,7 +178,14 @@ class FreeController extends AController {
         this.#desirePosition[1] = value;
     }
 
-    /** [KO] Z축 위치 [EN] Z-axis position */
+    /**
+     * [KO] 카메라의 현재 Z축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's current Z-axis position.
+     *
+     * @returns
+     * [KO] Z축 위치 (기본값: `0`)
+     * [EN] Z-axis position (default: `0`)
+     */
     get z(): number {
         return this.#currentZ;
     }
@@ -135,9 +196,14 @@ class FreeController extends AController {
         this.#desirePosition[2] = value;
     }
 
-
-    // ==================== 회전(Rotation) Getter/Setter ====================
-    /** [KO] 좌우 회전 각도 (도) [EN] Horizontal rotation angle (Pan) in degrees */
+    /**
+     * [KO] 카메라의 수평 회전(Pan) 목표 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's target horizontal rotation (Pan) angle. (Unit: degrees)
+     *
+     * @returns
+     * [KO] 팬 각도 (기본값: `0`)
+     * [EN] Pan angle (default: `0`)
+     */
     get pan(): number {
         return this.#pan;
     }
@@ -147,7 +213,14 @@ class FreeController extends AController {
         this.#pan = value;
     }
 
-    /** [KO] 상하 회전 각도 (도) [EN] Vertical rotation angle (Tilt) in degrees */
+    /**
+     * [KO] 카메라의 수직 회전(Tilt) 목표 각도를 가져오거나 설정합니다. (단위: 도, 범위: `-89.9` ~ `89.9`)
+     * [EN] Gets or sets the camera's target vertical rotation (Tilt) angle. (Unit: degrees, Range: `-89.9` ~ `89.9`)
+     *
+     * @returns
+     * [KO] 틸트 각도 (기본값: `0`)
+     * [EN] Tilt angle (default: `0`)
+     */
     get tilt(): number {
         return this.#tilt;
     }
@@ -157,7 +230,14 @@ class FreeController extends AController {
         this.#tilt = Math.max(-89.9, Math.min(89.9, value));
     }
 
-    /** [KO] 마우스 감도 [EN] Mouse rotation sensitivity */
+    /**
+     * [KO] 마우스 드래그 회전 감도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the mouse drag rotation sensitivity. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 마우스 회전 감도 (기본값: `0.15`)
+     * [EN] Mouse rotation sensitivity (default: `0.15`)
+     */
     get mouseSensitivity(): number {
         return this.#mouseSensitivity;
     }
@@ -167,8 +247,14 @@ class FreeController extends AController {
         this.#mouseSensitivity = value;
     }
 
-    // ==================== 이동 속도 및 보간 설정 ====================
-    /** [KO] 이동 속도 [EN] Movement speed */
+    /**
+     * [KO] 키보드 이동 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the keyboard movement speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 이동 속도 (기본값: `600`)
+     * [EN] Movement speed (default: `600`)
+     */
     get moveSpeed(): number {
         return this.#moveSpeed;
     }
@@ -178,7 +264,14 @@ class FreeController extends AController {
         this.#moveSpeed = value;
     }
 
-    /** [KO] 이동 보간 계수 [EN] Movement interpolation factor */
+    /**
+     * [KO] 이동 위치 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for movement position changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 이동 보간 계수 (기본값: `0.001`)
+     * [EN] Movement interpolation factor (default: `0.001`)
+     */
     get moveSpeedInterpolation(): number {
         return this.#moveDelayInterpolation;
     }
@@ -188,7 +281,14 @@ class FreeController extends AController {
         this.#moveDelayInterpolation = value;
     }
 
-    /** [KO] 회전 속도 [EN] Rotation speed */
+    /**
+     * [KO] 키보드 회전 속도를 가져오거나 설정합니다. (`0.01` 이상)
+     * [EN] Gets or sets the keyboard rotation speed. (`0.01` or greater)
+     *
+     * @returns
+     * [KO] 회전 속도 (기본값: `360`)
+     * [EN] Rotation speed (default: `360`)
+     */
     get rotationSpeed(): number {
         return this.#rotationSpeed;
     }
@@ -198,7 +298,14 @@ class FreeController extends AController {
         this.#rotationSpeed = value;
     }
 
-    /** [KO] 회전 보간 계수 [EN] Rotation interpolation factor */
+    /**
+     * [KO] 회전 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.0001` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for rotation changes. (`0.0001` ~ `1`)
+     *
+     * @returns
+     * [KO] 회전 보간 계수 (기본값: `0.001`)
+     * [EN] Rotation interpolation factor (default: `0.001`)
+     */
     get rotationSpeedInterpolation(): number {
         return this.#rotationInterpolation;
     }
@@ -208,7 +315,14 @@ class FreeController extends AController {
         this.#rotationInterpolation = value;
     }
 
-    /** [KO] 최대 가속도 배율 [EN] Maximum acceleration scale */
+    /**
+     * [KO] 최대 이동 가속도 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum movement acceleration scale.
+     *
+     * @returns
+     * [KO] 최대 가속도 배율 (기본값: `1`)
+     * [EN] Maximum acceleration scale (default: `1`)
+     */
     get maxAcceleration(): number {
         return this.#maxAcceleration;
     }
@@ -217,68 +331,148 @@ class FreeController extends AController {
         this.#maxAcceleration = value;
     }
 
-    /** [KO] 키 매핑 설정 객체 [EN] Key mapping configuration object */
+    /**
+     * [KO] 현재 설정된 키보드 키 매핑 객체의 복사본을 반환합니다.
+     * [EN] Returns a copy of the currently configured keyboard key mapping object.
+     *
+     * @returns
+     * [KO] 키 매핑 설정 객체 (`KeyNameMapper`)
+     * [EN] Key mapping configuration object (`KeyNameMapper`)
+     */
     get keyNameMapper(): KeyNameMapper {
         return {...this.#keyNameMapper};
     }
 
-    // ==================== 키 매핑 설정 메서드 ====================
-    /** [KO] 전진 키 설정 [EN] Sets the move forward key */
+    /**
+     * [KO] 전진 이동 키를 설정합니다.
+     * [EN] Sets the move forward key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'w'`)
+     * [EN] Key name to assign (e.g., `'w'`)
+     */
     setMoveForwardKey(value: string) {
         this.#keyNameMapper.moveForward = value;
     }
 
-    /** [KO] 후진 키 설정 [EN] Sets the move backward key */
+    /**
+     * [KO] 후진 이동 키를 설정합니다.
+     * [EN] Sets the move backward key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'s'`)
+     * [EN] Key name to assign (e.g., `'s'`)
+     */
     setMoveBackKey(value: string) {
         this.#keyNameMapper.moveBack = value;
     }
 
-    /** [KO] 좌측 이동 키 설정 [EN] Sets the move left key */
+    /**
+     * [KO] 좌측 이동 키를 설정합니다.
+     * [EN] Sets the move left key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'a'`)
+     * [EN] Key name to assign (e.g., `'a'`)
+     */
     setMoveLeftKey(value: string) {
         this.#keyNameMapper.moveLeft = value;
     }
 
-    /** [KO] 우측 이동 키 설정 [EN] Sets the move right key */
+    /**
+     * [KO] 우측 이동 키를 설정합니다.
+     * [EN] Sets the move right key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'d'`)
+     * [EN] Key name to assign (e.g., `'d'`)
+     */
     setMoveRightKey(value: string) {
         this.#keyNameMapper.moveRight = value;
     }
 
-    /** [KO] 상향 이동 키 설정 [EN] Sets the move up key */
+    /**
+     * [KO] 상향 이동 키를 설정합니다.
+     * [EN] Sets the move up key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'e'`)
+     * [EN] Key name to assign (e.g., `'e'`)
+     */
     setMoveUpKey(value: string) {
         this.#keyNameMapper.moveUp = value;
     }
 
-    /** [KO] 하향 이동 키 설정 [EN] Sets the move down key */
+    /**
+     * [KO] 하향 이동 키를 설정합니다.
+     * [EN] Sets the move down key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'q'`)
+     * [EN] Key name to assign (e.g., `'q'`)
+     */
     setMoveDownKey(value: string) {
         this.#keyNameMapper.moveDown = value;
     }
 
-    /** [KO] 좌회전 키 설정 [EN] Sets the turn left key */
+    /**
+     * [KO] 좌회전 키를 설정합니다.
+     * [EN] Sets the turn left key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'z'`)
+     * [EN] Key name to assign (e.g., `'z'`)
+     */
     setTurnLeftKey(value: string) {
         this.#keyNameMapper.turnLeft = value;
     }
 
-    /** [KO] 우회전 키 설정 [EN] Sets the turn right key */
+    /**
+     * [KO] 우회전 키를 설정합니다.
+     * [EN] Sets the turn right key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'c'`)
+     * [EN] Key name to assign (e.g., `'c'`)
+     */
     setTurnRightKey(value: string) {
         this.#keyNameMapper.turnRight = value;
     }
 
-    /** [KO] 상향 회전 키 설정 [EN] Sets the turn up key */
+    /**
+     * [KO] 상향 회전 키를 설정합니다.
+     * [EN] Sets the turn up key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'r'`)
+     * [EN] Key name to assign (e.g., `'r'`)
+     */
     setTurnUpKey(value: string) {
         this.#keyNameMapper.turnUp = value;
     }
 
-    /** [KO] 하향 회전 키 설정 [EN] Sets the turn down key */
+    /**
+     * [KO] 하향 회전 키를 설정합니다.
+     * [EN] Sets the turn down key.
+     *
+     * @param value -
+     * [KO] 할당할 키 이름 (예: `'f'`)
+     * [EN] Key name to assign (e.g., `'f'`)
+     */
     setTurnDownKey(value: string) {
         this.#keyNameMapper.turnDown = value;
     }
 
     /**
-     * [KO] 매 프레임 컨트롤러를 업데이트합니다.
-     * [EN] Updates the controller every frame.
+     * [KO] 매 프레임 자유 시점 카메라의 상태를 갱신합니다.
+     * [EN] Updates the free-view camera state every frame.
      *
-     * @param view - [KO] 3D 뷰 [EN] 3D View
-     * @param time - [KO] 현재 시간 [EN] Current time
+     * @param view -
+     * [KO] 컨트롤러가 연결된 `View3D` 인스턴스
+     * [EN] `View3D` instance connected to the controller
+     * @param time -
+     * [KO] 현재 경과 시간 (ms)
+     * [EN] Current elapsed time (ms)
      */
     update(view: View3D, time: number): void {
         super.update(view, time, this.#updateAnimation);

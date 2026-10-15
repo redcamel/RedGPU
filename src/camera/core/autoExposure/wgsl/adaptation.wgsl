@@ -26,7 +26,6 @@ fn main() {
     var countBuffer: array<u32, 256>;
     var totalPixels: u32 = 0u;
 
-    // [KO] 히스토그램 데이터 읽기 및 초기화 [EN] Read and clear histogram data
     for (var i = 0u; i < 256u; i = i + 1u) {
         let val = atomicExchange(&histogram[i], 0u);
         countBuffer[i] = val;
@@ -35,7 +34,6 @@ fn main() {
 
     if (totalPixels == 0u) { return; }
 
-    // [KO] 퍼센타일 기반 필터링 [EN] Percentile-based filtering
     let minPixel = u32(f32(totalPixels) * uniforms.lowPercentile);
     let maxPixel = u32(f32(totalPixels) * uniforms.highPercentile);
 
@@ -51,39 +49,21 @@ fn main() {
         let validPixels = max(0.0, f32(min(nextCounter, maxPixel)) - f32(max(pixelCounter, minPixel)));
         if (validPixels > 0.0) {
             let ev100 = uniforms.minEV100 + (f32(i) * INV_255) * uniforms.ev100Range;
-            
-            // [KO] 로그 공간(EV100)에서 직접 가중 평균 수행 (언리얼 방식의 Log-Luminance Average)
-            // [EN] Perform weighted average directly in EV100 space (Unreal-style Log-Luminance Average)
             weightedEV100Sum += ev100 * validPixels;
             totalValidPixels += validPixels;
         }
         pixelCounter = nextCounter;
     }
 
-    // [KO] 로그 공간에서의 평균 EV100 산출 [EN] Calculate average EV100 in log space
     let avgEV100 = weightedEV100Sum * (1.0 / max(totalValidPixels, 1.0));
-
-    // [KO] 목표 휘도 및 노출 보정을 반영한 목표 EV100 결정 (CPU에서 log2 사전 계산 완료하여 SFU 0회)
-    // [EN] Determine target EV100 reflecting target luminance and exposure compensation (log2 precalculated on CPU, 0 SFU calls)
     var targetEV100 = avgEV100 - uniforms.targetEV100Bias;
-
-    // [KO] 노출 배율 제한 적용 (CPU에서 log2 사전 계산 완료)
-    // [EN] Apply exposure multiplier limit (log2 precalculated on CPU)
     targetEV100 = max(targetEV100, uniforms.minPossibleEV100);
 
-    // [KO] 눈 적응 시뮬레이션 (EV100 공간에서 수행)
-    // [EN] Eye adaptation simulation (performed in EV100 space)
     let prevEV100 = adaptedEV100;
     let diff = targetEV100 - prevEV100;
-    
-    // [KO] 밝아질 때와 어두워질 때의 속도 차이 적용
-    // [EN] Apply different speeds for brightening and darkening
     let speed = select(uniforms.adjustmentSpeedDown, uniforms.adjustmentSpeedUp, diff > 0.0);
-    
-    // [KO] 지수 감쇄 공식 (언리얼 방식) [EN] Exponential decay formula (Unreal style)
     let adaptationFactor = 1.0 - exp(-speed * uniforms.deltaTime);
     var nextEV100 = prevEV100 + diff * adaptationFactor;
-    
-    // [KO] EV100 범위 제한 [EN] Limit EV100 range
+
     adaptedEV100 = clamp(nextEV100, uniforms.minEV100, uniforms.maxEV100);
 }

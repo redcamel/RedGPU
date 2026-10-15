@@ -12,21 +12,20 @@ const tempMat4 = mat4.create();
 const tempVec3 = vec3.create();
 
 /**
- * [KO] 특정 타겟 메시를 추적하는 카메라 컨트롤러입니다.
- * [EN] Camera controller that tracks a specific target mesh.
- *
- * [KO] 3인칭 게임의 캐릭터 카메라처럼 타겟의 뒤를 쫓거나 주변을 회전하며 관찰하는 데 사용됩니다. 타겟의 이동과 회전을 부드럽게 따라가며, 거리와 높이, 각도를 조절하여 다양한 연출이 가능합니다.
- * [EN] Used to follow behind or rotate around a target, like a character camera in a 3rd person game. It smoothly tracks the target's movement and rotation, allowing for various cinematic effects by adjusting distance, height, and angles.
+ * [KO] 지정된 타겟 메시(Mesh)의 이동과 회전을 부드럽게 추적하는 3인칭 시점 카메라 컨트롤러 클래스입니다.
+ * [EN] Third-person camera controller class that smoothly tracks the movement and rotation of a specified target `Mesh`.
  *
  * ### Example
  * ```typescript
- * const followController = new RedGPU.FollowController(redGPUContext, targetMesh);
- * followController.distance = 15;
- * followController.height = 8;
- * followController.pan = 45;
- * followController.tilt = 30;
+ * const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
+ * controller.distance = 15;
+ * controller.height = 8;
+ * controller.pan = 45;
+ * controller.tilt = 30;
  * ```
+ *
  * <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:500px;"></iframe>
+ * @see [FollowController example](/RedGPU/examples/3d/controller/followController/)
  * @category Controller
  */
 class FollowController extends AController {
@@ -59,22 +58,19 @@ class FollowController extends AController {
 
     /**
      * [KO] FollowController 인스턴스를 생성합니다.
-     * [EN] Creates an instance of FollowController.
+     * [EN] Creates a FollowController instance.
      *
      * ### Example
      * ```typescript
-     * const controller = new RedGPU.FollowController(redGPUContext, targetMesh);
+     * const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param targetMesh -
-     * [KO] 따라갈 대상 메시
-     * [EN] Target mesh to follow
-     * @throws
-     * [KO] targetMesh가 null이거나 undefined일 경우 에러 발생
-     * [EN] Throws Error if targetMesh is null or undefined
+     * [KO] 추적할 대상 `Mesh` 인스턴스
+     * [EN] Target `Mesh` instance to follow
      */
     constructor(redGPUContext: RedGPUContext, targetMesh: Mesh) {
         super(redGPUContext, {
@@ -91,12 +87,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟으로부터의 카메라 거리를 가져오거나 설정합니다. (0.1 이상)
-     * [EN] Gets or sets the camera distance from the target. (min 0.1)
+     * [KO] 타겟 메시로부터 카메라까지의 목표 거리를 가져오거나 설정합니다. (`0.1` 이상)
+     * [EN] Gets or sets the target distance from the target mesh to the camera. (`0.1` or greater)
      *
      * @returns
-     * [KO] 목표 거리 (0.1 이상)
-     * [EN] Target distance (min 0.1)
+     * [KO] 목표 거리 (기본값: `5`)
+     * [EN] Target distance (default: `5`)
      */
     get distance(): number {
         return this.#targetDistance;
@@ -108,12 +104,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 거리 값의 보간 계수를 가져오거나 설정합니다. (0.01 ~ 1)
-     * [EN] Gets or sets the interpolation factor for the distance value. (0.01 ~ 1)
+     * [KO] 거리 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.01` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for distance changes. (`0.01` ~ `1`)
      *
      * @returns
-     * [KO] 거리 보간 계수 (0.01 ~ 1)
-     * [EN] Distance interpolation factor (0.01 ~ 1)
+     * [KO] 거리 보간 계수 (기본값: `0.02`)
+     * [EN] Distance interpolation factor (default: `0.02`)
      */
     get distanceInterpolation(): number {
         return this.#distanceInterpolation;
@@ -125,12 +121,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟으로부터의 카메라 높이를 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera height from the target.
+     * [KO] 타겟 메시로부터 카메라까지의 목표 높이를 가져오거나 설정합니다.
+     * [EN] Gets or sets the target height of the camera from the target mesh.
      *
      * @returns
-     * [KO] 목표 높이
-     * [EN] Target height
+     * [KO] 목표 높이 (기본값: `1`)
+     * [EN] Target height (default: `1`)
      */
     get height(): number {
         return this.#targetHeight;
@@ -142,12 +138,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 높이 값의 보간 계수를 가져오거나 설정합니다. (0.01 ~ 1)
-     * [EN] Gets or sets the interpolation factor for the height value. (0.01 ~ 1)
+     * [KO] 높이 변화의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.01` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for height changes. (`0.01` ~ `1`)
      *
      * @returns
-     * [KO] 높이 보간 계수 (0.01 ~ 1)
-     * [EN] Height interpolation factor (0.01 ~ 1)
+     * [KO] 높이 보간 계수 (기본값: `0.02`)
+     * [EN] Height interpolation factor (default: `0.02`)
      */
     get heightInterpolation(): number {
         return this.#heightInterpolation;
@@ -159,12 +155,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟을 중심으로 한 카메라의 가로 회전(팬) 각도를 가져오거나 설정합니다. (도 단위)
-     * [EN] Gets or sets the camera's horizontal rotation (pan) angle around the target (in degrees).
+     * [KO] 타겟을 중심으로 한 카메라의 수평 회전(Pan) 목표 각도를 가져오거나 설정합니다. (단위: 도)
+     * [EN] Gets or sets the camera's target horizontal rotation (Pan) angle around the target. (Unit: degrees)
      *
      * @returns
-     * [KO] 팬 각도 (도 단위)
-     * [EN] Pan angle (in degrees)
+     * [KO] 팬 각도 (기본값: `0`)
+     * [EN] Pan angle (default: `0`)
      */
     get pan(): number {
         return this.#targetPan;
@@ -176,12 +172,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 팬 값의 보간 계수를 가져오거나 설정합니다. (0.01 ~ 1)
-     * [EN] Gets or sets the interpolation factor for the pan value. (0.01 ~ 1)
+     * [KO] 팬(Pan) 회전의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.01` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for pan rotation. (`0.01` ~ `1`)
      *
      * @returns
-     * [KO] 팬 보간 계수 (0.01 ~ 1)
-     * [EN] Pan interpolation factor (0.01 ~ 1)
+     * [KO] 팬 보간 계수 (기본값: `0.02`)
+     * [EN] Pan interpolation factor (default: `0.02`)
      */
     get panInterpolation(): number {
         return this.#panInterpolation;
@@ -193,12 +189,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟을 중심으로 한 카메라의 세로 회전(틸트) 각도를 가져오거나 설정합니다. (도 단위, -89 ~ 89)
-     * [EN] Gets or sets the camera's vertical rotation (tilt) angle around the target (in degrees, -89 ~ 89).
+     * [KO] 타겟을 중심으로 한 카메라의 수직 회전(Tilt) 목표 각도를 가져오거나 설정합니다. (단위: 도, 범위: `-89` ~ `89`)
+     * [EN] Gets or sets the camera's target vertical rotation (Tilt) angle around the target. (Unit: degrees, Range: `-89` ~ `89`)
      *
      * @returns
-     * [KO] 틸트 각도 (도 단위, -89 ~ 89)
-     * [EN] Tilt angle (in degrees, -89 ~ 89)
+     * [KO] 틸트 각도 (기본값: `15`)
+     * [EN] Tilt angle (default: `15`)
      */
     get tilt(): number {
         return this.#targetTilt;
@@ -210,12 +206,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 틸트 값의 보간 계수를 가져오거나 설정합니다. (0.01 ~ 1)
-     * [EN] Gets or sets the interpolation factor for the tilt value. (0.01 ~ 1)
+     * [KO] 틸트(Tilt) 회전의 감쇄 보간 계수를 가져오거나 설정합니다. (`0.01` ~ `1`)
+     * [EN] Gets or sets the damping interpolation factor for tilt rotation. (`0.01` ~ `1`)
      *
      * @returns
-     * [KO] 틸트 보간 계수 (0.01 ~ 1)
-     * [EN] Tilt interpolation factor (0.01 ~ 1)
+     * [KO] 틸트 보간 계수 (기본값: `0.02`)
+     * [EN] Tilt interpolation factor (default: `0.02`)
      */
     get tiltInterpolation(): number {
         return this.#tiltInterpolation;
@@ -227,12 +223,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 전체 카메라 위치의 보간 계수를 가져오거나 설정합니다. (0.01 ~ 1)
-     * [EN] Gets or sets the interpolation factor for the overall camera position. (0.01 ~ 1)
+     * [KO] 카메라 위치 추적의 전체 감쇄 보간 계수를 가져오거나 설정합니다. (`0.01` ~ `1`)
+     * [EN] Gets or sets the overall damping interpolation factor for camera position tracking. (`0.01` ~ `1`)
      *
      * @returns
-     * [KO] 보간 계수 (0.01 ~ 1)
-     * [EN] Interpolation factor (0.01 ~ 1)
+     * [KO] 위치 보간 계수 (기본값: `0.02`)
+     * [EN] Position interpolation factor (default: `0.02`)
      */
     get interpolation(): number {
         return this.#interpolation;
@@ -244,12 +240,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟 메시의 회전을 따를지 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether to follow the target mesh's rotation.
+     * [KO] 타겟 메시의 회전을 따라 카메라 공전 기준축을 회전시킬지 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to rotate the camera's orbital reference axes along with the target mesh's rotation.
      *
      * @returns
-     * [KO] true일 경우 타겟의 회전을 따름
-     * [EN] If true, follows the target's rotation
+     * [KO] 타겟 회전 추적 여부 (기본값: `true`)
+     * [EN] Whether target rotation tracking is enabled (default: `true`)
      */
     get followTargetRotation(): boolean {
         return this.#followTargetRotation;
@@ -260,12 +256,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟으로부터의 카메라 X축 오프셋을 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's X-axis offset from the target.
+     * [KO] 카메라가 바라보는 타겟 지점의 X축 오프셋을 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis offset of the target point the camera looks at.
      *
      * @returns
-     * [KO] X축 오프셋
-     * [EN] X-axis offset
+     * [KO] X축 오프셋 (기본값: `0`)
+     * [EN] X-axis offset (default: `0`)
      */
     get targetOffsetX(): number {
         return this.#targetOffsetX;
@@ -277,12 +273,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟으로부터의 카메라 Y축 오프셋을 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's Y-axis offset from the target.
+     * [KO] 카메라가 바라보는 타겟 지점의 Y축 오프셋을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis offset of the target point the camera looks at.
      *
      * @returns
-     * [KO] Y축 오프셋
-     * [EN] Y-axis offset
+     * [KO] Y축 오프셋 (기본값: `0`)
+     * [EN] Y-axis offset (default: `0`)
      */
     get targetOffsetY(): number {
         return this.#targetOffsetY;
@@ -294,12 +290,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 타겟으로부터의 카메라 Z축 오프셋을 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's Z-axis offset from the target.
+     * [KO] 카메라가 바라보는 타겟 지점의 Z축 오프셋을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis offset of the target point the camera looks at.
      *
      * @returns
-     * [KO] Z축 오프셋
-     * [EN] Z-axis offset
+     * [KO] Z축 오프셋 (기본값: `0`)
+     * [EN] Z-axis offset (default: `0`)
      */
     get targetOffsetZ(): number {
         return this.#targetOffsetZ;
@@ -311,12 +307,12 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 따라갈 대상 메시를 가져오거나 설정합니다.
-     * [EN] Gets or sets the target mesh to follow.
+     * [KO] 현재 추적 중인 타겟 메시를 가져오거나 설정합니다.
+     * [EN] Gets or sets the target mesh currently being followed.
      *
      * @returns
-     * [KO] 현재 타겟 메시
-     * [EN] Current target mesh
+     * [KO] 타겟 `Mesh` 인스턴스
+     * [EN] Target `Mesh` instance
      */
     get targetMesh(): Mesh {
         return this.#targetMesh;
@@ -330,23 +326,23 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 카메라의 타겟 오프셋을 한 번에 설정합니다.
-     * [EN] Sets the camera's target offset at once.
+     * [KO] 카메라가 바라보는 타겟 지점의 3축 오프셋을 한 번에 설정합니다.
+     * [EN] Sets the 3-axis offset of the target point the camera looks at all at once.
      *
      * ### Example
      * ```typescript
-     * controller.setTargetOffset(0, 5, 0);
+     * controller.setTargetOffset(0, 2, 0);
      * ```
      *
      * @param x -
      * [KO] X축 오프셋
      * [EN] X-axis offset
      * @param y -
-     * [KO] Y축 오프셋 (기본값: 0)
-     * [EN] Y-axis offset (default: 0)
+     * [KO] Y축 오프셋 (기본값: `0`)
+     * [EN] Y-axis offset (default: `0`)
      * @param z -
-     * [KO] Z축 오프셋 (기본값: 0)
-     * [EN] Z-axis offset (default: 0)
+     * [KO] Z축 오프셋 (기본값: `0`)
+     * [EN] Z-axis offset (default: `0`)
      */
     setTargetOffset(x: number, y: number = 0, z: number = 0): void {
         validateNumber(x);
@@ -358,15 +354,15 @@ class FollowController extends AController {
     }
 
     /**
-     * [KO] 매 프레임마다 카메라의 위치와 방향을 업데이트합니다.
-     * [EN] Updates the camera's position and orientation every frame.
+     * [KO] 매 프레임 추적 카메라의 위치와 시선 방향을 갱신합니다.
+     * [EN] Updates the follow camera's position and look-at direction every frame.
      *
      * @param view -
-     * [KO] 카메라가 속한 3D 뷰
-     * [EN] The 3D view the camera belongs to
+     * [KO] 컨트롤러가 연결된 `View3D` 인스턴스
+     * [EN] `View3D` instance connected to the controller
      * @param time -
-     * [KO] 현재 시간 (ms)
-     * [EN] Current time (ms)
+     * [KO] 현재 경과 시간 (ms)
+     * [EN] Current elapsed time (ms)
      */
     update(view: View3D, time: number): void {
         super.update(view, time, this.#updateAnimation);
@@ -381,7 +377,6 @@ class FollowController extends AController {
         this.#currentDistance = this.#targetDistance + (this.#currentDistance - this.#targetDistance) * Math.pow(this.#distanceInterpolation, deltaTime);
         this.#currentHeight = this.#targetHeight + (this.#currentHeight - this.#targetHeight) * Math.pow(this.#heightInterpolation, deltaTime);
 
-        // 팬(Pan) 보간 - 지수적 감쇄 및 최단 경로(Shortest Path) 적용
         let panDelta = (this.#targetPan - this.#currentPan) % 360;
         if (panDelta > 180) panDelta -= 360;
         if (panDelta < -180) panDelta += 360;
@@ -410,7 +405,6 @@ class FollowController extends AController {
         const cosP = Math.cos(panRad);
         const sinP = Math.sin(panRad);
 
-        // 타겟 메시의 월드 위치 가져오기
         const worldMatrix = this.#targetMesh.modelMatrix;
         const targetWorldX = worldMatrix[12];
         const targetWorldY = worldMatrix[13];
@@ -423,7 +417,6 @@ class FollowController extends AController {
                 cosP * this.#currentDistance * cosT
             );
 
-            // 회전만 적용 (이동 제거)
             mat4.copy(tempMat4, worldMatrix);
             tempMat4[12] = tempMat4[13] = tempMat4[14] = 0;
             vec3.transformMat4(tempVec3, tempVec3, tempMat4);
@@ -453,7 +446,6 @@ class FollowController extends AController {
         const targetWorldZ = worldMatrix[14];
 
         if (this.#followTargetRotation && (this.#targetOffsetX !== 0 || this.#targetOffsetY !== 0 || this.#targetOffsetZ !== 0)) {
-            // 회전만 적용 (이동 제거)
             mat4.copy(tempMat4, worldMatrix);
             tempMat4[12] = tempMat4[13] = tempMat4[14] = 0;
             vec3.transformMat4(tempVec3, tempVec3, tempMat4);
@@ -468,18 +460,14 @@ class FollowController extends AController {
     }
 
     #snapToTarget(): void {
-        // [KO] 초기화 시에도 매트릭스를 정확히 계산합니다.
-        // [EN] Calculate the matrix accurately even during initialization.
         // @ts-ignore
         updateObject3DMatrix(this.#targetMesh, {pixelRectObject: {height: 1}});
 
-        // 목표값들을 현재값으로 즉시 동기화
         this.#currentDistance = this.#targetDistance;
         this.#currentHeight = this.#targetHeight;
         this.#currentPan = this.#targetPan;
         this.#currentTilt = this.#targetTilt;
 
-        // 계산된 위치를 현재 위치로 즉시 설정
         const initialPos = this.#calculateCameraPosition();
         vec3.copy(this.#currentPos, initialPos);
 
