@@ -13,8 +13,8 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    padding: f32,
-    meteringMode: f32
+    meteringMode: f32,
+    pad0: f32 // 16-byte tail alignment
 };
 
 @group(0) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;

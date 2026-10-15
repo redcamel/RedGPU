@@ -2,6 +2,8 @@
 @group(0) @binding(0) var sourceTexture : texture_2d<f32>;
 @group(1) @binding(0) var<storage, read_write> histogram : array<atomic<u32>, 256>;
 
+const MIN_LUMINANCE: f32 = 0.0000001;
+
 struct AutoExposureUniforms {
     deltaTime: f32,
     targetEV100Bias: f32,
@@ -17,8 +19,8 @@ struct AutoExposureUniforms {
     width: f32,
     height: f32,
     currentPreExposure: f32,
-    padding: f32,
-    meteringMode: f32
+    meteringMode: f32,
+    pad0: f32 // 16-byte tail alignment
 };
 @group(1) @binding(1) var<uniform> uniforms : AutoExposureUniforms;
 
@@ -46,15 +48,15 @@ fn main(
         if (texel.a > 0.0) {
             let color = texel.rgb;
             let brightness = max(color.r, max(color.g, color.b));
-            let invPreExposure = 1.0 / max(uniforms.currentPreExposure, 0.0000001);
+            let invPreExposure = 1.0 / max(uniforms.currentPreExposure, MIN_LUMINANCE);
             let lum = brightness * invPreExposure;
             
-            if (lum > 0.0000001) {
+            if (lum > MIN_LUMINANCE) {
                 // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
                 // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / 12.5) = log2(L) + 3.0
                 let ev100 = log2(lum) + 3.0;
                     
-                let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
+                let normalizedEV100 = saturate((ev100 - uniforms.minEV100) * uniforms.invEv100Range);
                 let binIndex = u32(normalizedEV100 * 255.0);
 
                 // [KO] 측광 가중치 계산 (화면비 왜곡 보정 적용으로 완벽한 정원 측광 수행)
@@ -68,11 +70,11 @@ fn main(
 
                     if (uniforms.meteringMode < 1.5) {
                         // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
-                        let w = clamp(1.0 - dist, 0.0, 1.0);
+                        let w = saturate(1.0 - dist);
                         weight = w * w;
                     } else {
                         // [KO] 스포트 측광 (Spot) [EN] Spot
-                        let w = clamp(1.0 - dist * 4.0, 0.0, 1.0);
+                        let w = saturate(1.0 - dist * 4.0);
                         let w2 = w * w;
                         weight = w2 * w2;
                     }

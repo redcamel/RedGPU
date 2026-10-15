@@ -2,6 +2,8 @@ import View3D from "../../../display/view/View3D";
 import {IPostEffectResult} from "../../../postEffect/core/types";
 import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
+import validateNumber from "../../../runtimeChecker/validateFunc/validateNumber";
+import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
 import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
 import METERING_MODE from "../METERING_MODE";
@@ -23,7 +25,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * @category Core
  */
 class AutoExposure extends RedGPUObject {
-    readonly #view: View3D;
+    #view: View3D;
     #adaptedEV100Buffer: StorageBuffer;
     #histogramBuffer: StorageBuffer;
 
@@ -65,15 +67,15 @@ class AutoExposure extends RedGPUObject {
     #cachedEV100Data: Float32Array = new Float32Array(1);
 
     constructor(view: View3D) {
-        super(view.redGPUContext)
+        super(view.redGPUContext);
         this.#view = view;
         this.#initResources();
         this.#initPipelines();
     }
 
     /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 반환합니다.
-     * [EN] Returns the exposure compensation value.
+     * [KO] 노출 보정(Exposure Compensation) 값을 가져오거나 설정합니다.
+     * [EN] Gets or sets the exposure compensation value.
      *
      * @returns
      * [KO] 노출 보정 값
@@ -83,21 +85,14 @@ class AutoExposure extends RedGPUObject {
         return this.#exposureCompensation;
     }
 
-    /**
-     * [KO] 노출 보정(Exposure Compensation) 값을 설정합니다.
-     * [EN] Sets the exposure compensation value.
-     *
-     * @param value -
-     * [KO] 설정할 노출 보정 값
-     * [EN] Exposure compensation value to set
-     */
     set exposureCompensation(value: number) {
+        validateNumber(value);
         this.#exposureCompensation = value;
     }
 
     /**
-     * [KO] 목표 휘도를 반환합니다.
-     * [EN] Returns the target luminance.
+     * [KO] 목표 휘도를 가져오거나 설정합니다. (0 이상)
+     * [EN] Gets or sets the target luminance. (min 0)
      *
      * @returns
      * [KO] 목표 휘도 값
@@ -107,21 +102,14 @@ class AutoExposure extends RedGPUObject {
         return this.#targetLuminance;
     }
 
-    /**
-     * [KO] 목표 휘도를 설정합니다.
-     * [EN] Sets the target luminance.
-     *
-     * @param value -
-     * [KO] 설정할 목표 휘도 값
-     * [EN] Target luminance value to set
-     */
     set targetLuminance(value: number) {
+        validateNumberRange(value, 0);
         this.#targetLuminance = value;
     }
 
     /**
-     * [KO] 자동 노출 최소 EV100을 반환합니다.
-     * [EN] Returns the minimum EV100 for auto-exposure.
+     * [KO] 자동 노출 최소 EV100을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum EV100 for auto-exposure.
      *
      * @returns
      * [KO] 최소 EV100 값
@@ -131,21 +119,14 @@ class AutoExposure extends RedGPUObject {
         return this.#minEV100;
     }
 
-    /**
-     * [KO] 자동 노출 최소 EV100을 설정합니다.
-     * [EN] Sets the minimum EV100 for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 최소 EV100 값
-     * [EN] Minimum EV100 value to set
-     */
     set minEV100(value: number) {
+        validateNumber(value);
         this.#minEV100 = value;
     }
 
     /**
-     * [KO] 자동 노출 최대 EV100을 반환합니다.
-     * [EN] Returns the maximum EV100 for auto-exposure.
+     * [KO] 자동 노출 최대 EV100을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum EV100 for auto-exposure.
      *
      * @returns
      * [KO] 최대 EV100 값
@@ -155,21 +136,14 @@ class AutoExposure extends RedGPUObject {
         return this.#maxEV100;
     }
 
-    /**
-     * [KO] 자동 노출 최대 EV100을 설정합니다.
-     * [EN] Sets the maximum EV100 for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 최대 EV100 값
-     * [EN] Maximum EV100 value to set
-     */
     set maxEV100(value: number) {
+        validateNumber(value);
         this.#maxEV100 = value;
     }
 
     /**
-     * [KO] 눈 적응 속도(밝아질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (brightening).
+     * [KO] 눈 적응 속도(밝아질 때)를 가져오거나 설정합니다. (0 이상)
+     * [EN] Gets or sets the eye adaptation speed (brightening). (min 0)
      *
      * @returns
      * [KO] 눈 적응 속도 (상승)
@@ -179,21 +153,14 @@ class AutoExposure extends RedGPUObject {
         return this.#adaptationSpeedUp;
     }
 
-    /**
-     * [KO] 눈 적응 속도(밝아질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (brightening).
-     *
-     * @param value -
-     * [KO] 설정할 눈 적응 속도 (상승)
-     * [EN] Eye adaptation speed (upward) to set
-     */
     set adaptationSpeedUp(value: number) {
+        validateNumberRange(value, 0);
         this.#adaptationSpeedUp = value;
     }
 
     /**
-     * [KO] 눈 적응 속도(어두워질 때)를 반환합니다.
-     * [EN] Returns the eye adaptation speed (darkening).
+     * [KO] 눈 적응 속도(어두워질 때)를 가져오거나 설정합니다. (0 이상)
+     * [EN] Gets or sets the eye adaptation speed (darkening). (min 0)
      *
      * @returns
      * [KO] 눈 적응 속도 (하강)
@@ -203,21 +170,14 @@ class AutoExposure extends RedGPUObject {
         return this.#adaptationSpeedDown;
     }
 
-    /**
-     * [KO] 눈 적응 속도(어두워질 때)를 설정합니다.
-     * [EN] Sets the eye adaptation speed (darkening).
-     *
-     * @param value -
-     * [KO] 설정할 눈 적응 속도 (하강)
-     * [EN] Eye adaptation speed (downward) to set
-     */
     set adaptationSpeedDown(value: number) {
+        validateNumberRange(value, 0);
         this.#adaptationSpeedDown = value;
     }
 
     /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude bottom percentile).
+     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 가져오거나 설정합니다. (0 ~ 1)
+     * [EN] Gets or sets the histogram analysis range (exclude bottom percentile). (0 - 1)
      *
      * @returns
      * [KO] 하위 백분위 값 (0 ~ 1)
@@ -227,21 +187,14 @@ class AutoExposure extends RedGPUObject {
         return this.#lowPercentile;
     }
 
-    /**
-     * [KO] 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude bottom percentile).
-     *
-     * @param value -
-     * [KO] 설정할 하위 백분위 값 (0 ~ 1)
-     * [EN] Low percentile value to set (0 - 1)
-     */
     set lowPercentile(value: number) {
+        validateNumberRange(value, 0, 1);
         this.#lowPercentile = value;
     }
 
     /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다.
-     * [EN] Returns the histogram analysis range (exclude top percentile).
+     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 가져오거나 설정합니다. (0 ~ 1)
+     * [EN] Gets or sets the histogram analysis range (exclude top percentile). (0 - 1)
      *
      * @returns
      * [KO] 상위 백분위 값 (0 ~ 1)
@@ -251,21 +204,14 @@ class AutoExposure extends RedGPUObject {
         return this.#highPercentile;
     }
 
-    /**
-     * [KO] 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다.
-     * [EN] Sets the histogram analysis range (exclude top percentile).
-     *
-     * @param value -
-     * [KO] 설정할 상위 백분위 값 (0 ~ 1)
-     * [EN] High percentile value to set (0 - 1)
-     */
     set highPercentile(value: number) {
+        validateNumberRange(value, 0, 1);
         this.#highPercentile = value;
     }
 
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 반환합니다.
-     * [EN] Returns the maximum exposure multiplier for auto-exposure.
+     * [KO] 자동 노출의 최대 증폭 배율을 가져오거나 설정합니다. (기본값: 64.0, 1.0 이상)
+     * [EN] Gets or sets the maximum exposure multiplier for auto-exposure. (Default: 64.0, min 1.0)
      *
      * @returns
      * [KO] 최대 노출 증폭 배율
@@ -275,21 +221,14 @@ class AutoExposure extends RedGPUObject {
         return this.#maxExposureMultiplier;
     }
 
-    /**
-     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 64.0)
-     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 64.0)
-     *
-     * @param value -
-     * [KO] 설정할 최대 노출 증폭 배율
-     * [EN] Maximum exposure multiplier to set
-     */
     set maxExposureMultiplier(value: number) {
+        validateNumberRange(value, 1);
         this.#maxExposureMultiplier = value;
     }
 
     /**
-     * [KO] 자동 노출의 측광 모드(Metering Mode)를 반환합니다.
-     * [EN] Returns the metering mode for auto-exposure.
+     * [KO] 자동 노출의 측광 모드(Metering Mode)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the metering mode for auto-exposure.
      *
      * @returns
      * [KO] 측광 모드
@@ -299,14 +238,6 @@ class AutoExposure extends RedGPUObject {
         return this.#meteringMode;
     }
 
-    /**
-     * [KO] 자동 노출의 측광 모드(Metering Mode)를 설정합니다.
-     * [EN] Sets the metering mode for auto-exposure.
-     *
-     * @param value -
-     * [KO] 설정할 측광 모드
-     * [EN] Metering mode to set
-     */
     set meteringMode(value: METERING_MODE) {
         this.#meteringMode = value;
     }
@@ -325,8 +256,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 적응된 EV100 값을 반환합니다.
-     * [EN] Returns the currently adapted EV100 value.
+     * [KO] 현재 적응된 EV100 값을 가져오거나 설정합니다. (설정 시 GPU 버퍼도 함께 갱신)
+     * [EN] Gets or sets the currently adapted EV100 value. (Also updates the GPU buffer when set)
      *
      * @returns
      * [KO] 적응된 EV100 값
@@ -336,15 +267,8 @@ class AutoExposure extends RedGPUObject {
         return this.#currentAdaptedEV100;
     }
 
-    /**
-     * [KO] 현재 적응된 EV100 값을 설정합니다. (GPU 버퍼도 함께 갱신)
-     * [EN] Sets the currently adapted EV100 value. (Also updates the GPU buffer)
-     *
-     * @param value -
-     * [KO] 설정할 EV100 값
-     * [EN] EV100 value to set
-     */
     set currentAdaptedEV100(value: number) {
+        validateNumber(value);
         this.#currentAdaptedEV100 = value;
         const u = this.#cachedEV100Data;
         u[0] = value;
@@ -372,11 +296,10 @@ class AutoExposure extends RedGPUObject {
      * [EN] Source texture information
      */
     render(sourceTextureInfo: IPostEffectResult) {
-        const {gpuDevice, antialiasingManager, commandEncoderManager} = this;
-        const {useMSAA, msaaID} = antialiasingManager;
+        const {gpuDevice, commandEncoderManager} = this;
         const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {rawCamera, renderViewStateData, viewRenderTextureManager} = this.#view;
-        const {deltaTime, swapBufferIndex} = renderViewStateData;
+        const {rawCamera, renderViewStateData} = this.#view;
+        const {deltaTime} = renderViewStateData;
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
 
@@ -404,8 +327,8 @@ class AutoExposure extends RedGPUObject {
         u[11] = width;
         u[12] = height;
         u[13] = currentPreExposure;
-        u[14] = 0.0;
-        u[15] = this.#meteringMode;
+        u[14] = this.#meteringMode;
+        u[15] = 0.0; // pad0 (16-byte tail alignment)
 
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer,
@@ -464,9 +387,13 @@ class AutoExposure extends RedGPUObject {
      * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
      */
     resolveReadback() {
-        if (!this.#isReading) {
+        if (!this.#isReading && this.#readBuffer) {
             this.#isReading = true;
             this.#readBuffer.mapAsync(GPUMapMode.READ).then(() => {
+                if (!this.#readBuffer) {
+                    this.#isReading = false;
+                    return;
+                }
                 const data = new Float32Array(this.#readBuffer.getMappedRange());
                 this.#currentAdaptedEV100 = data[0];
                 this.#readBuffer.unmap();
@@ -506,17 +433,8 @@ class AutoExposure extends RedGPUObject {
         this.#adaptationBindGroupLayout0 = null;
         this.#downsampleBindGroup1 = null;
         this.#adaptationBindGroup0 = null;
-
-        console.log("🧹 AutoExposure destroy 완료");
     }
 
-    /**
-     * [KO] EV100 기반으로 물리적 노출 배율(preExposure)을 계산합니다. (UE5 표준 물리 노출 공식)
-     * [EN] Calculates physical exposure multiplier (preExposure) based on EV100. (UE5 standard physical exposure formula)
-     * @param ev100 - [KO] 물리적 노출 지수 [EN] Physical exposure value (EV100)
-     * @param exposureCompensation - [KO] 노출 보정 값 [EN] Exposure compensation value
-     * @returns [KO] 계산된 노출 배율 [EN] Calculated exposure multiplier
-     */
     #calculatePreExposure(ev100: number, exposureCompensation: number): number {
         // [KO] UE5 표준 물리 노출 공식 적용: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
         // [EN] Apply UE5 standard physical exposure formula: 1 / (1.2 * 2^EV100) * 2^ExposureCompensation
@@ -612,5 +530,5 @@ class AutoExposure extends RedGPUObject {
     }
 }
 
-Object.freeze(AutoExposure)
+Object.freeze(AutoExposure);
 export default AutoExposure;
