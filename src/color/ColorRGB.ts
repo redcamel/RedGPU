@@ -3,13 +3,23 @@ import consoleAndThrowError from "../utils/consoleAndThrowError";
 import convertHexToRgb from "./convertHexToRgb";
 import convertRgbToHex from "./convertRgbToHex";
 
+const NORMAL_LUT = new Float64Array(256);
+const LINEAR_LUT = new Float64Array(256);
+for (let i = 0; i < 256; i++) {
+    const n = i / 255;
+    NORMAL_LUT[i] = n;
+    LINEAR_LUT[i] = Math.pow(n, 2.2);
+}
+
+const RGB_STRING_REGEX = /rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
+
 /**
  * [KO] RGB 색상을 나타내는 클래스입니다.
  * [EN] Class representing RGB color.
  *
  * [KO] 이 클래스는 RGB 색상 값을 생성, 조작, 변환하는 메서드를 제공합니다. 색상 구성 요소의 유효성 검사 및 선택적 변경 알림을 지원합니다.
  * [EN] This class provides methods to create, manipulate, and convert RGB color values. It supports validation of color components and optional change notifications.
- * * ### Example
+ * ### Example
  * ```typescript
  * // [KO] 흰색 생성
  * // [EN] Create white
@@ -34,15 +44,15 @@ import convertRgbToHex from "./convertRgbToHex";
  * @category Color
  */
 class ColorRGB {
-    #r: number
-    #g: number
-    #b: number
-    readonly #onChange: Function;
+    #r: number = 255;
+    #g: number = 255;
+    #b: number = 255;
+    #onChange: (() => void) | undefined;
 
     /**
      * [KO] ColorRGB 클래스의 새 인스턴스를 생성합니다.
      * [EN] Creates a new instance of the ColorRGB class.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * ```
@@ -63,7 +73,7 @@ class ColorRGB {
      * [KO] RGB 값이 0-255 범위를 벗어나면 오류가 발생합니다.
      * [EN] Throws an error if RGB values are out of the 0-255 range.
      */
-    constructor(r: number = 255, g: number = 255, b: number = 255, onChange: Function = undefined) {
+    constructor(r: number = 255, g: number = 255, b: number = 255, onChange: (() => void) | undefined = undefined) {
         // console.log(r, g, b)
         this.#validateRGB(r, g, b)
         this.#setRGB(r, g, b)
@@ -71,11 +81,12 @@ class ColorRGB {
     }
 
     /**
-     * [KO] 빨간색 구성 요소를 가져옵니다.
-     * [EN] Gets the red component.
-     * * ### Example
+     * [KO] 빨간색 구성 요소를 가져오거나 설정합니다.
+     * [EN] Gets or sets the red component.
+     * ### Example
      * ```typescript
      * const r = color.r;
+     * color.r = 255;
      * ```
      * @returns
      * [KO] 0에서 255 사이의 빨간색 값
@@ -85,20 +96,6 @@ class ColorRGB {
         return this.#r;
     }
 
-    /**
-     * [KO] 빨간색 구성 요소를 설정합니다.
-     * [EN] Sets the red component.
-     * * ### Example
-     * ```typescript
-     * color.r = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 빨간색 값 (0-255)
-     * [EN] Red value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set r(value: number) {
         validateUintRange(value, 0, 255)
         this.#r = value;
@@ -106,11 +103,12 @@ class ColorRGB {
     }
 
     /**
-     * [KO] 초록색 구성 요소를 가져옵니다.
-     * [EN] Gets the green component.
-     * * ### Example
+     * [KO] 초록색 구성 요소를 가져오거나 설정합니다.
+     * [EN] Gets or sets the green component.
+     * ### Example
      * ```typescript
      * const g = color.g;
+     * color.g = 255;
      * ```
      * @returns
      * [KO] 0에서 255 사이의 초록색 값
@@ -120,20 +118,6 @@ class ColorRGB {
         return this.#g;
     }
 
-    /**
-     * [KO] 초록색 구성 요소를 설정합니다.
-     * [EN] Sets the green component.
-     * * ### Example
-     * ```typescript
-     * color.g = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 초록색 값 (0-255)
-     * [EN] Green value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set g(value: number) {
         validateUintRange(value, 0, 255)
         this.#g = value;
@@ -141,11 +125,12 @@ class ColorRGB {
     }
 
     /**
-     * [KO] 파란색 구성 요소를 가져옵니다.
-     * [EN] Gets the blue component.
-     * * ### Example
+     * [KO] 파란색 구성 요소를 가져오거나 설정합니다.
+     * [EN] Gets or sets the blue component.
+     * ### Example
      * ```typescript
      * const b = color.b;
+     * color.b = 255;
      * ```
      * @returns
      * [KO] 0에서 255 사이의 파란색 값
@@ -155,20 +140,6 @@ class ColorRGB {
         return this.#b;
     }
 
-    /**
-     * [KO] 파란색 구성 요소를 설정합니다.
-     * [EN] Sets the blue component.
-     * * ### Example
-     * ```typescript
-     * color.b = 255;
-     * ```
-     * @param value -
-     * [KO] 설정할 파란색 값 (0-255)
-     * [EN] Blue value to set (0-255)
-     * @throws
-     * [KO] 값이 0-255 범위를 벗어나면 오류가 발생합니다.
-     * [EN] Throws an error if the value is out of the 0-255 range.
-     */
     set b(value: number) {
         validateUintRange(value, 0, 255)
         this.#b = value;
@@ -178,7 +149,7 @@ class ColorRGB {
     /**
      * [KO] 색상의 RGB 값을 포함하는 배열을 반환합니다.
      * [EN] Returns an array containing the RGB values of the color.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * console.log(color.rgb); // [255, 128, 0]
@@ -194,7 +165,7 @@ class ColorRGB {
     /**
      * [KO] 정규화된 RGB 값을 배열로 반환합니다. 각 값은 0에서 1 사이로 정규화됩니다.
      * [EN] Returns normalized RGB values as an array. Each value is normalized between 0 and 1.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * console.log(color.rgbNormal); // [1, 0.501, 0]
@@ -204,13 +175,13 @@ class ColorRGB {
      * [EN] Array containing normalized RGB values [r/255, g/255, b/255]
      */
     get rgbNormal(): number[] {
-        return [this.#r / 255, this.#g / 255, this.#b / 255];
+        return [NORMAL_LUT[this.#r], NORMAL_LUT[this.#g], NORMAL_LUT[this.#b]];
     }
 
     /**
      * [KO] 감마 보정된(Linear) 정규화된 RGB 값을 배열로 반환합니다.
      * [EN] Returns gamma-corrected (Linear) normalized RGB values as an array.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * console.log(color.rgbNormalLinear);
@@ -221,16 +192,16 @@ class ColorRGB {
      */
     get rgbNormalLinear(): number[] {
         return [
-            Math.pow(this.#r / 255, 2.2),
-            Math.pow(this.#g / 255, 2.2),
-            Math.pow(this.#b / 255, 2.2)
+            LINEAR_LUT[this.#r],
+            LINEAR_LUT[this.#g],
+            LINEAR_LUT[this.#b]
         ];
     }
 
     /**
      * [KO] RGB 색상의 16진수 표현을 반환합니다.
      * [EN] Returns the hexadecimal representation of the RGB color.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB(255, 128, 0);
      * console.log(color.hex); // "#FF8000"
@@ -246,7 +217,7 @@ class ColorRGB {
     /**
      * [KO] 제공된 RGB 값을 기반으로 객체의 색상을 설정합니다.
      * [EN] Sets the color of the object based on the provided RGB values.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByRGB(255, 128, 0);
@@ -272,7 +243,7 @@ class ColorRGB {
     /**
      * [KO] 16진수 색상 코드를 사용하여 객체의 색상을 설정합니다.
      * [EN] Sets the color of the object using a hexadecimal color code.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByHEX('#FF8000');
@@ -293,7 +264,7 @@ class ColorRGB {
     /**
      * [KO] RGB 색상 값을 나타내는 문자열을 파싱하여 객체의 색상을 설정합니다.
      * [EN] Parses a string representing an RGB color value and sets the object's color.
-     * * ### Example
+     * ### Example
      * ```typescript
      * const color = new RedGPU.Color.ColorRGB();
      * color.setColorByRGBString('rgb(255, 128, 0)');
@@ -307,9 +278,11 @@ class ColorRGB {
      * [EN] Throws an error if the provided rgbString is not a valid RGB color value.
      */
     setColorByRGBString(rgbString: string) {
-        const rgbMatch = /rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/.exec(rgbString);
+        const rgbMatch = RGB_STRING_REGEX.exec(rgbString);
         if (!rgbMatch) consoleAndThrowError(`유효하지 않은 rgb 색상 값입니다: ${rgbString}`);
-        const [, r, g, b] = rgbMatch.map(Number);
+        const r = +rgbMatch[1];
+        const g = +rgbMatch[2];
+        const b = +rgbMatch[3];
         this.#validateRGB(r, g, b)
         this.#setRGB(r, g, b)
     }

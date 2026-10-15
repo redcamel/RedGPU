@@ -12,10 +12,8 @@ export const ExampleList: ExampleListType = [
                         name: 'Hello RedGPU',
                         path: '3d/helloWorld',
                         description: {
-                            ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다.<br/>초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                            en: `This example is a sample of the basic initialization of RedGPU.<br/>
-                        It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
-
+                            ko: `RedGPU의 가장 기본적인 초기화 파이프라인을 보여주는 예제입니다.<br/>캔버스 생성 및 RedGPU.init()을 통한 컨텍스트 초기화부터 Scene, View3D, OrbitController 구성과 Renderer 렌더링 루프 시작까지의 핵심 흐름을 안내합니다.`,
+                            en: `Demonstrates the fundamental initialization pipeline of RedGPU.<br/>Covers the core setup flow from canvas creation and context initialization via RedGPU.init() to configuring Scene, View3D, OrbitController, and starting the Renderer loop.`
                         },
                     },
                     {
@@ -24,21 +22,17 @@ export const ExampleList: ExampleListType = [
                             {
                                 name: 'Single View3D',
                                 path: '3d/view/singleView',
-
                                 description: {
-                                    ko: `RedGPU의 View 객체에 대한 샘플입니다. View 객체에 제공되는 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                                    en: `This example is a sample for a View object in RedGPU.<br/>
-                        It provides real-time testing of the basic options provided to a View object.`
-
+                                    ko: `단일 View3D를 생성하고 Scene 및 OrbitController를 연결해 3D 공간을 렌더링하는 기본 예제입니다.<br/>월드 축(axis), 그리드(grid) 헬퍼 표시 및 View3D의 다양한 뷰포트 옵션을 실시간으로 테스트할 수 있습니다.`,
+                                    en: `Demonstrates how to create a single View3D and connect a Scene and OrbitController to render a 3D space.<br/>Provides real-time testing of world axis, grid helpers, and various View3D viewport options.`
                                 },
                             },
                             {
                                 name: 'Multi View3D',
                                 path: '3d/view/multiView',
                                 description: {
-                                    ko: `RedGPU의 멀티 뷰 기능을 보여주는 샘플입니다.<br/> RedGPUContext는 여러 개의 View를 소유하고 관리할 수 있습니다.`,
-                                    en: `This example is a sample of RedGPU's Multi View.<br/> RedGPUContext can own and manage multiple MultiViews.`
-
+                                    ko: `하나의 캔버스에 여러 개의 독립된 View3D를 배치하고 제어하는 멀티 뷰 예제입니다.<br/>뷰별 배경 색상 구분과 다양한 크기·위치 지정 방식(setSize/setPosition 메서드, 개별 프로퍼티, '%' 및 'px' 단위)을 활용한 화면 분할 및 동적 레이아웃 제어를 보여줍니다.`,
+                                    en: `Demonstrates how to arrange and independently control multiple View3D instances on a single canvas.<br/>Shows split-screen and dynamic layout control using distinct scene background colors and various sizing/positioning methods (setSize/setPosition, individual properties, '%' and 'px' units).`
                                 },
                             }
                         ]

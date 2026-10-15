@@ -7,7 +7,7 @@ import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange"
  * [KO] 각 채널(R, G, B)을 2자리 16진수 대문자 문자열('#RRGGBB')로 변환합니다.
  * [EN] Converts each channel (R, G, B) into a 2-digit uppercase hexadecimal string ('#RRGGBB').
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const hex = RedGPU.Color.convertRgbToHex(255, 0, 0); // '#FF0000'
  * ```
@@ -33,9 +33,6 @@ const convertRgbToHex = (r: number, g: number, b: number): string => {
     validateUintRange(r, 0, 255)
     validateUintRange(g, 0, 255)
     validateUintRange(b, 0, 255)
-    const r2 = r.toString(16).padStart(2, '0').toUpperCase();
-    const g2 = g.toString(16).padStart(2, '0').toUpperCase();
-    const b2 = b.toString(16).padStart(2, '0').toUpperCase();
-    return `#${r2}${g2}${b2}`;
+    return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
 }
 export default convertRgbToHex
