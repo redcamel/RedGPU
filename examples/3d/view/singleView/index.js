@@ -28,7 +28,8 @@ RedGPU.init(
         addMeshesToScene(redGPUContext, scene, 1000);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
         renderTestPane(redGPUContext);
     },

@@ -40,7 +40,8 @@ RedGPU.init(
         // [KO] 렌더러 생성 및 렌더링 루프 시작
         // [EN] Create renderer and start rendering loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
         // [KO] 테스트 패널(GUI) 생성
         // [EN] Create test panel (GUI)

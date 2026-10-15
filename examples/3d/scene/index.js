@@ -24,14 +24,13 @@ RedGPU.init(
         scene.backgroundColor.setColorByHEX('#5259c3');
         scene.backgroundColor.a = 0.5;
 
-
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
         view.grid = true;
         redGPUContext.addView(view);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, () => {
+        renderer.start(redGPUContext, (time) => {
         });
 
         renderTestPane(redGPUContext);
