@@ -1,4 +1,5 @@
 import {mat4} from "gl-matrix";
+import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import ACamera from "../core/ACamera";
 
 /**
@@ -10,7 +11,7 @@ import ACamera from "../core/ACamera";
  *
  * ### Example
  * ```typescript
- * const camera = new RedGPU.Camera2D();
+ * const camera = new RedGPU.Camera.Camera2D();
  * camera.x = 100;
  * camera.y = 50;
  * camera.setPosition(200, 100);
@@ -18,28 +19,9 @@ import ACamera from "../core/ACamera";
  * @category Camera
  */
 class Camera2D extends ACamera {
-    /**
-     * [KO] 모델 행렬
-     * [EN] Model matrix
-     */
     #viewMatrix: mat4 = mat4.create();
-
-    /**
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     #x: number = 0;
-
-    /**
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     #y: number = 0;
-
-    /**
-     * [KO] Z 좌표 (미사용)
-     * [EN] Z coordinate (unused)
-     */
     #z: number = 0;
 
     /**
@@ -48,7 +30,7 @@ class Camera2D extends ACamera {
      *
      * ### Example
      * ```typescript
-     * const camera = new RedGPU.Camera2D();
+     * const camera = new RedGPU.Camera.Camera2D();
      * ```
      */
     constructor() {
@@ -56,12 +38,12 @@ class Camera2D extends ACamera {
     }
 
     /**
-     * [KO] 모델 행렬을 반환합니다.
-     * [EN] Returns the model matrix.
+     * [KO] 뷰 행렬을 반환합니다.
+     * [EN] Returns the view matrix.
      *
      * @returns
-     * [KO] 모델 행렬
-     * [EN] Model matrix
+     * [KO] 뷰 행렬
+     * [EN] View matrix
      */
     get viewMatrix(): mat4 {
         return this.#viewMatrix;
@@ -91,15 +73,8 @@ class Camera2D extends ACamera {
         return this.#x;
     }
 
-    /**
-     * [KO] X 좌표를 설정합니다.
-     * [EN] Sets the X coordinate.
-     *
-     * @param value -
-     * [KO] 설정할 X 좌표
-     * [EN] X coordinate to set
-     */
     set x(value: number) {
+        validateNumber(value);
         this.#x = value;
         this.#viewMatrix[12] = value;
     }
@@ -116,15 +91,8 @@ class Camera2D extends ACamera {
         return this.#y;
     }
 
-    /**
-     * [KO] Y 좌표를 설정합니다.
-     * [EN] Sets the Y coordinate.
-     *
-     * @param value -
-     * [KO] 설정할 Y 좌표
-     * [EN] Y coordinate to set
-     */
     set y(value: number) {
+        validateNumber(value);
         this.#y = value;
         this.#viewMatrix[13] = value;
     }
@@ -160,14 +128,22 @@ class Camera2D extends ACamera {
      */
     setPosition(x: number | [number, number, number], y?: number): void {
         if (Array.isArray(x)) {
-            [this.#x, this.#y] = x;
+            validateNumber(x[0]);
+            validateNumber(x[1]);
+            this.#x = x[0];
+            this.#y = x[1];
         } else {
+            validateNumber(x);
+            validateNumber(y);
             this.#x = x;
             this.#y = y;
         }
-        [this.#viewMatrix[12], this.#viewMatrix[13], this.#viewMatrix[14]] = [this.#x, this.#y, 0];
+        this.#viewMatrix[12] = this.#x;
+        this.#viewMatrix[13] = this.#y;
+        this.#viewMatrix[14] = 0;
     }
 }
 
 Object.freeze(Camera2D);
 export default Camera2D;
+

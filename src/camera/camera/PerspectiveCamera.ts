@@ -2,6 +2,10 @@ import {mat4} from "gl-matrix";
 import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import ACamera from "../core/ACamera";
 
+const TEMP_EYE: [number, number, number] = [0, 0, 0];
+const TEMP_TARGET: [number, number, number] = [0, 0, 0];
+const TEMP_UP: [number, number, number] = [0, 1, 0];
+
 /**
  * [KO] 원근 투영을 사용하는 카메라입니다.
  * [EN] Camera that uses perspective projection.
@@ -11,7 +15,7 @@ import ACamera from "../core/ACamera";
  *
  * ### Example
  * ```typescript
- * const camera = new RedGPU.PerspectiveCamera();
+ * const camera = new RedGPU.Camera.PerspectiveCamera();
  * camera.x = 10;
  * camera.y = 5;
  * camera.z = 20;
@@ -21,70 +25,16 @@ import ACamera from "../core/ACamera";
  * @category Camera
  */
 class PerspectiveCamera extends ACamera {
-    /**
-     * [KO] up 벡터 (기본값 [0, 1, 0])
-     * [EN] Up vector (default [0, 1, 0])
-     */
     #up = new Float32Array([0, 1, 0]);
-
-    /**
-     * [KO] 모델 행렬(mat4)
-     * [EN] Model matrix (mat4)
-     */
     #viewMatrix: mat4 = mat4.create();
-
-    /**
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     #x: number = 0;
-
-    /**
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     #z: number = 0;
-
-    /**
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     #y: number = 0;
-
-    /**
-     * [KO] X축 회전(라디안)
-     * [EN] Rotation X (radians)
-     */
     #rotationX: number = 0;
-
-    /**
-     * [KO] Y축 회전(라디안)
-     * [EN] Rotation Y (radians)
-     */
     #rotationY: number = 0;
-
-    /**
-     * [KO] Z축 회전(라디안)
-     * [EN] Rotation Z (radians)
-     */
     #rotationZ: number = 0;
-
-    /**
-     * [KO] 시야각(FOV, 도)
-     * [EN] Field of view (degrees)
-     */
     #fieldOfView: number = 60;
-
-    /**
-     * [KO] 근평면(near)
-     * [EN] Near clipping plane
-     */
     #nearClipping: number = 0.1;
-
-    /**
-     * [KO] 원평면(far)
-     * [EN] Far clipping plane
-     */
     #farClipping: number = 50000;
 
     /**
@@ -93,7 +43,7 @@ class PerspectiveCamera extends ACamera {
      *
      * ### Example
      * ```typescript
-     * const camera = new RedGPU.PerspectiveCamera();
+     * const camera = new RedGPU.Camera.PerspectiveCamera();
      * ```
      */
     constructor() {
@@ -112,15 +62,8 @@ class PerspectiveCamera extends ACamera {
         return this.#rotationX;
     }
 
-    /**
-     * [KO] X축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the X rotation value. (radians)
-     *
-     * @param value -
-     * [KO] 설정할 회전값
-     * [EN] Rotation value to set
-     */
     set rotationX(value: number) {
+        validateNumber(value);
         this.#rotationX = value;
     }
 
@@ -136,15 +79,8 @@ class PerspectiveCamera extends ACamera {
         return this.#rotationY;
     }
 
-    /**
-     * [KO] Y축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the X rotation value. (radians)
-     *
-     * @param value -
-     * [KO] 설정할 회전값
-     * [EN] Rotation value to set
-     */
     set rotationY(value: number) {
+        validateNumber(value);
         this.#rotationY = value;
     }
 
@@ -160,15 +96,8 @@ class PerspectiveCamera extends ACamera {
         return this.#rotationZ;
     }
 
-    /**
-     * [KO] Z축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the X rotation value. (radians)
-     *
-     * @param value -
-     * [KO] 설정할 회전값
-     * [EN] Rotation value to set
-     */
     set rotationZ(value: number) {
+        validateNumber(value);
         this.#rotationZ = value;
     }
 
@@ -184,14 +113,6 @@ class PerspectiveCamera extends ACamera {
         return this.#fieldOfView;
     }
 
-    /**
-     * [KO] 시야각(FOV)을 설정합니다. (도)
-     * [EN] Sets the field of view. (degrees)
-     *
-     * @param value -
-     * [KO] 설정할 시야각
-     * [EN] Field of view to set
-     */
     set fieldOfView(value: number) {
         validateNumber(value);
         this.#fieldOfView = value;
@@ -209,14 +130,6 @@ class PerspectiveCamera extends ACamera {
         return this.#nearClipping;
     }
 
-    /**
-     * [KO] 근평면(near) 거리를 설정합니다.
-     * [EN] Sets the near clipping distance.
-     *
-     * @param value -
-     * [KO] 설정할 근평면 거리
-     * [EN] Near clipping distance to set
-     */
     set nearClipping(value: number) {
         validateNumber(value);
         this.#nearClipping = value;
@@ -234,26 +147,18 @@ class PerspectiveCamera extends ACamera {
         return this.#farClipping;
     }
 
-    /**
-     * [KO] 원평면(far) 거리를 설정합니다.
-     * [EN] Sets the far clipping distance.
-     *
-     * @param value -
-     * [KO] 설정할 원평면 거리
-     * [EN] Far clipping distance to set
-     */
     set farClipping(value: number) {
         validateNumber(value);
         this.#farClipping = value;
     }
 
     /**
-     * [KO] 모델 행렬을 반환합니다.
-     * [EN] Returns the model matrix.
+     * [KO] 뷰 행렬을 반환합니다.
+     * [EN] Returns the view matrix.
      *
      * @returns
-     * [KO] 모델 행렬
-     * [EN] Model matrix
+     * [KO] 뷰 행렬
+     * [EN] View matrix
      */
     get viewMatrix(): mat4 {
         return this.#viewMatrix;
@@ -271,15 +176,8 @@ class PerspectiveCamera extends ACamera {
         return this.#x;
     }
 
-    /**
-     * [KO] X 좌표를 설정합니다.
-     * [EN] Sets the X coordinate.
-     *
-     * @param value -
-     * [KO] 설정할 X 좌표
-     * [EN] X coordinate to set
-     */
     set x(value: number) {
+        validateNumber(value);
         this.#x = value;
         this.#viewMatrix[12] = value;
     }
@@ -296,15 +194,8 @@ class PerspectiveCamera extends ACamera {
         return this.#y;
     }
 
-    /**
-     * [KO] Y 좌표를 설정합니다.
-     * [EN] Sets the Y coordinate.
-     *
-     * @param value -
-     * [KO] 설정할 Y 좌표
-     * [EN] Y coordinate to set
-     */
     set y(value: number) {
+        validateNumber(value);
         this.#y = value;
         this.#viewMatrix[13] = value;
     }
@@ -321,15 +212,8 @@ class PerspectiveCamera extends ACamera {
         return this.#z;
     }
 
-    /**
-     * [KO] Z 좌표를 설정합니다.
-     * [EN] Sets the Z coordinate.
-     *
-     * @param value -
-     * [KO] 설정할 Z 좌표
-     * [EN] Z coordinate to set
-     */
     set z(value: number) {
+        validateNumber(value);
         this.#z = value;
         this.#viewMatrix[14] = value;
     }
@@ -368,13 +252,23 @@ class PerspectiveCamera extends ACamera {
      */
     setPosition(x: number | [number, number, number], y?: number, z?: number): void {
         if (Array.isArray(x)) {
-            [this.#x, this.#y, this.#z] = x;
+            validateNumber(x[0]);
+            validateNumber(x[1]);
+            validateNumber(x[2]);
+            this.#x = x[0];
+            this.#y = x[1];
+            this.#z = x[2];
         } else {
+            validateNumber(x);
+            validateNumber(y);
+            validateNumber(z);
             this.#x = x;
             this.#y = y;
             this.#z = z;
         }
-        [this.#viewMatrix[12], this.#viewMatrix[13], this.#viewMatrix[14]] = [this.#x, this.#y, this.#z];
+        this.#viewMatrix[12] = this.#x;
+        this.#viewMatrix[13] = this.#y;
+        this.#viewMatrix[14] = this.#z;
     }
 
     /**
@@ -397,35 +291,54 @@ class PerspectiveCamera extends ACamera {
      * [EN] Target Z coordinate to look at
      */
     lookAt(x: number, y: number, z: number): void {
-        const eye: [number, number, number] = [this.#x, this.#y, this.#z];
-        const target: [number, number, number] = [x, y, z];
-        const up: [number, number, number] = [this.#up[0], this.#up[1], this.#up[2]];
+        validateNumber(x);
+        validateNumber(y);
+        validateNumber(z);
 
+        const eyeX = this.#x;
+        const eyeY = this.#y;
+        const eyeZ = this.#z;
 
-        // 방향 벡터 계산
-        const dir = [target[0] - eye[0], target[1] - eye[1], target[2] - eye[2]];
-        const len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-        dir[0] /= len;
-        dir[1] /= len;
-        dir[2] /= len;
+        let dirX = x - eyeX;
+        let dirY = y - eyeY;
+        let dirZ = z - eyeZ;
+        const len = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+        if (len < 1e-6) return;
 
-        // 방향 벡터와 up 벡터가 평행한지 확인 (외적의 크기가 0에 가까우면 평행)
-        const cross = [
-            dir[1] * up[2] - dir[2] * up[1],
-            dir[2] * up[0] - dir[0] * up[2],
-            dir[0] * up[1] - dir[1] * up[0]
-        ];
-        const crossLen = Math.sqrt(cross[0] * cross[0] + cross[1] * cross[1] + cross[2] * cross[2]);
+        const invLen = 1 / len;
+        dirX *= invLen;
+        dirY *= invLen;
+        dirZ *= invLen;
+
+        let upX = this.#up[0];
+        let upY = this.#up[1];
+        let upZ = this.#up[2];
+
+        const crossX = dirY * upZ - dirZ * upY;
+        const crossY = dirZ * upX - dirX * upZ;
+        const crossZ = dirX * upY - dirY * upX;
+        const crossLen = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ);
 
         if (crossLen < 0.0001) {
-            // 평행할 경우 대체 up 벡터 사용
-            up[2] = (dir[1] > 0) ? 1 : -1;
-            up[0] = 0;
-            up[1] = 0;
+            upX = 0;
+            upY = 0;
+            upZ = dirY > 0 ? 1 : -1;
         }
 
-        mat4.lookAt(this.#viewMatrix, eye, target, up);
+        TEMP_EYE[0] = eyeX;
+        TEMP_EYE[1] = eyeY;
+        TEMP_EYE[2] = eyeZ;
+        TEMP_TARGET[0] = x;
+        TEMP_TARGET[1] = y;
+        TEMP_TARGET[2] = z;
+        TEMP_UP[0] = upX;
+        TEMP_UP[1] = upY;
+        TEMP_UP[2] = upZ;
+
+        mat4.lookAt(this.#viewMatrix, TEMP_EYE, TEMP_TARGET, TEMP_UP);
     }
 }
 
+Object.freeze(PerspectiveCamera);
 export default PerspectiveCamera;
+

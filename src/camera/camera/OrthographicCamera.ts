@@ -11,7 +11,7 @@ import PerspectiveCamera from "./PerspectiveCamera";
  *
  * ### Example
  * ```typescript
- * const camera = new RedGPU.OrthographicCamera();
+ * const camera = new RedGPU.Camera.OrthographicCamera();
  * camera.top = 10;
  * camera.bottom = -10;
  * camera.left = -20;
@@ -20,46 +20,12 @@ import PerspectiveCamera from "./PerspectiveCamera";
  * @category Camera
  */
 class OrthographicCamera extends PerspectiveCamera {
-    /**
-     * [KO] 투영 상단
-     * [EN] Projection top
-     */
     #top: number = 1;
-
-    /**
-     * [KO] 투영 하단
-     * [EN] Projection bottom
-     */
     #bottom: number = -1;
-
-    /**
-     * [KO] 투영 좌측
-     * [EN] Projection left
-     */
     #left: number = -1;
-
-    /**
-     * [KO] 투영 우측
-     * [EN] Projection right
-     */
     #right: number = 1;
-
-    /**
-     * [KO] 줌 레벨 (기본값 1 = 줌 없음)
-     * [EN] Zoom level (default 1 = no zoom)
-     */
     #zoom: number = 1;
-
-    /**
-     * [KO] 최소 줌
-     * [EN] Minimum zoom
-     */
     #minZoom: number = 0.1;
-
-    /**
-     * [KO] 최대 줌
-     * [EN] Maximum zoom
-     */
     #maxZoom: number = 10;
 
     /**
@@ -68,7 +34,7 @@ class OrthographicCamera extends PerspectiveCamera {
      *
      * ### Example
      * ```typescript
-     * const camera = new RedGPU.OrthographicCamera();
+     * const camera = new RedGPU.Camera.OrthographicCamera();
      * ```
      */
     constructor() {
@@ -89,14 +55,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#top;
     }
 
-    /**
-     * [KO] 투영 상단 값을 설정합니다.
-     * [EN] Sets the projection top value.
-     *
-     * @param value -
-     * [KO] 설정할 상단 값
-     * [EN] Top value to set
-     */
     set top(value: number) {
         validateNumber(value);
         this.#top = value;
@@ -114,14 +72,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#bottom;
     }
 
-    /**
-     * [KO] 투영 하단 값을 설정합니다.
-     * [EN] Sets the projection bottom value.
-     *
-     * @param value -
-     * [KO] 설정할 하단 값
-     * [EN] Bottom value to set
-     */
     set bottom(value: number) {
         validateNumber(value);
         this.#bottom = value;
@@ -139,14 +89,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#left;
     }
 
-    /**
-     * [KO] 투영 좌측 값을 설정합니다.
-     * [EN] Sets the projection left value.
-     *
-     * @param value -
-     * [KO] 설정할 좌측 값
-     * [EN] Left value to set
-     */
     set left(value: number) {
         validateNumber(value);
         this.#left = value;
@@ -164,14 +106,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#right;
     }
 
-    /**
-     * [KO] 투영 우측 값을 설정합니다.
-     * [EN] Sets the projection right value.
-     *
-     * @param value -
-     * [KO] 설정할 우측 값
-     * [EN] Right value to set
-     */
     set right(value: number) {
         validateNumber(value);
         this.#right = value;
@@ -189,14 +123,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#zoom;
     }
 
-    /**
-     * [KO] 줌 레벨을 설정합니다.
-     * [EN] Sets the zoom level.
-     *
-     * @param value -
-     * [KO] 설정할 줌 레벨 (minZoom ~ maxZoom)
-     * [EN] Zoom level to set (minZoom ~ maxZoom)
-     */
     set zoom(value: number) {
         validateNumberRange(value, this.#minZoom, this.#maxZoom);
         this.#zoom = value;
@@ -214,14 +140,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#minZoom;
     }
 
-    /**
-     * [KO] 최소 줌 레벨을 설정합니다.
-     * [EN] Sets the minimum zoom level.
-     *
-     * @param value -
-     * [KO] 설정할 최소 줌 (0.01 이상)
-     * [EN] Minimum zoom to set (min 0.01)
-     */
     set minZoom(value: number) {
         validateNumberRange(value, 0.01);
         this.#minZoom = value;
@@ -239,14 +157,6 @@ class OrthographicCamera extends PerspectiveCamera {
         return this.#maxZoom;
     }
 
-    /**
-     * [KO] 최대 줌 레벨을 설정합니다.
-     * [EN] Sets the maximum zoom level.
-     *
-     * @param value -
-     * [KO] 설정할 최대 줌 (0.01 이상)
-     * [EN] Maximum zoom to set (min 0.01)
-     */
     set maxZoom(value: number) {
         validateNumberRange(value, 0.01);
         this.#maxZoom = value;
@@ -270,4 +180,6 @@ class OrthographicCamera extends PerspectiveCamera {
     }
 }
 
+Object.freeze(OrthographicCamera);
 export default OrthographicCamera;
+
