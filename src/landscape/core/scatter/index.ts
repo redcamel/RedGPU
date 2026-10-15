@@ -1,3 +1,9 @@
+/**
+ * [KO] 지형(Landscape)의 식생(Foliage) 및 디테일(Detail) 스캐터링 시스템을 위한 추상 코어 클래스와 유틸리티를 제공합니다.
+ * [EN] Provides abstract core classes and utilities for the Foliage and Detail scattering systems of Landscape.
+ *
+ * @packageDocumentation
+ */
 import assembleScatterRenderUnits, {
     type AssembledMeshGroup,
     type RawMeshNode,
@@ -57,4 +63,3 @@ export {
     POSITION_ONLY_STRIDE,
     POSITION_ONLY_STRIDE_BYTES
 };
-

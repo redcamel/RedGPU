@@ -2,13 +2,15 @@ import RedGPUObject from "../../base/RedGPUObject";
 import RedGPUContext from "../RedGPUContext";
 
 /**
- * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
- * [EN] Class that detects and analyzes the GPU adapter and browser environment.
+ * [KO] GPU 어댑터/디바이스의 기능 및 한계치(Limits)와 브라우저·플랫폼·하드웨어 환경을 감지하고 분석하는 클래스입니다.
+ * [EN] Class that detects and analyzes GPU adapter/device features and limits, as well as browser, platform, and hardware environments.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
+ * @category Context
  */
 class RedGPUContextDetector extends RedGPUObject {
     #gpuAdapter: GPUAdapter;
@@ -20,7 +22,6 @@ class RedGPUContextDetector extends RedGPUObject {
     #isFallbackAdapter: boolean;
     #userAgent: string;
 
-    // Platform & Environment (Cached)
     #isMobile: boolean;
     #isIOS: boolean;
     #isAndroid: boolean;
@@ -28,20 +29,22 @@ class RedGPUContextDetector extends RedGPUObject {
     #isSafari: boolean;
     #isFirefox: boolean;
 
-    // Hardware Resources
     #hardwareConcurrency: number;
     #deviceMemory: number;
 
     /**
-     * [KO] RedGPUContextDetector 생성자
-     * [EN] RedGPUContextDetector constructor
+     * [KO] RedGPUContextDetector 인스턴스를 생성합니다.
+     * [EN] Creates a RedGPUContextDetector instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         const ua = navigator.userAgent;
         this.#userAgent = ua;
 
-        // Platform Detection (Cached)
         this.#isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(ua);
         this.#isIOS = /iPhone|iPad|iPod/i.test(ua);
         this.#isAndroid = /Android/i.test(ua);
@@ -55,7 +58,6 @@ class RedGPUContextDetector extends RedGPUObject {
         const {gpuAdapter, gpuDevice} = redGPUContext;
         this.#gpuAdapter = gpuAdapter;
 
-        // [KO] 추적할 주요 기능 목록
         const allKnownFeatures = [
             "core-features-and-limits",
             "depth-clip-control",
@@ -81,7 +83,6 @@ class RedGPUContextDetector extends RedGPUObject {
             "texture-component-swizzle"
         ];
 
-        // [KO] 1. 하드웨어 지원 정보 수집 (Adapter)
         if (gpuAdapter) {
             this.#adapterInfo = gpuAdapter.info;
             this.#isFallbackAdapter = gpuAdapter.info.isFallbackAdapter;
@@ -96,7 +97,6 @@ class RedGPUContextDetector extends RedGPUObject {
             }
         }
 
-        // [KO] 2. 실제 장치 활성화 정보 수집 (Device)
         if (gpuDevice) {
             this.#activeLimits = gpuDevice.limits;
             this.#activeFeatures = {};
@@ -104,38 +104,51 @@ class RedGPUContextDetector extends RedGPUObject {
                 this.#activeFeatures[k] = gpuDevice.features.has(k);
             }
         }
-
-        // keepLog(this);
     }
 
-    // Getters
     /**
-     * [KO] GPU 어댑터가 지원하는 전체 기능 목록의 키와 지원 여부 맵을 반환합니다.
-     * [EN] Returns a map of all known features and whether they are supported by the GPU adapter.
+     * [KO] GPU 어댑터가 지원하는 전체 기능의 지원 여부 맵(`Record<string, boolean>`)을 반환합니다.
+     * [EN] Returns a map (`Record<string, boolean>`) of all known features and whether they are supported by the GPU adapter.
+     *
+     * @returns
+     * [KO] 기능별 어댑터 지원 여부 맵
+     * [EN] Feature support map of the GPU adapter
      */
     get supportedFeatures(): Record<string, boolean> {
         return this.#supportedFeatures;
     }
 
     /**
-     * [KO] GPU 디바이스에 실제 활성화된 기능 목록의 키와 활성화 여부 맵을 반환합니다.
-     * [EN] Returns a map of all known features and whether they are active on the GPU device.
+     * [KO] GPU 디바이스에 실제 활성화된 기능 여부 맵(`Record<string, boolean>`)을 반환합니다.
+     * [EN] Returns a map (`Record<string, boolean>`) of all known features and whether they are active on the GPU device.
+     *
+     * @returns
+     * [KO] 기능별 디바이스 활성화 여부 맵
+     * [EN] Feature activation map of the GPU device
      */
     get activeFeatures(): Record<string, boolean> {
         return this.#activeFeatures;
     }
 
     /**
-     * [KO] GPU 어댑터의 한계 제한치(Limits)를 반환합니다.
-     * [EN] Returns the limits supported by the GPU adapter.
+     * [KO] GPU 어댑터가 지원하는 한계 제한치(`GPUSupportedLimits`)를 반환합니다.
+     * [EN] Returns the limits (`GPUSupportedLimits`) supported by the GPU adapter.
+     *
+     * @returns
+     * [KO] GPU 어댑터 지원 한계치
+     * [EN] Supported limits of the GPU adapter
      */
     get supportedLimits(): GPUSupportedLimits {
         return this.#supportedLimits;
     }
 
     /**
-     * [KO] GPU 디바이스의 한계 제한치(Limits)를 반환합니다.
-     * [EN] Returns the limits active on the GPU device.
+     * [KO] GPU 디바이스에 적용된 한계 제한치(`GPUSupportedLimits`)를 반환합니다.
+     * [EN] Returns the limits (`GPUSupportedLimits`) active on the GPU device.
+     *
+     * @returns
+     * [KO] GPU 디바이스 활성 한계치
+     * [EN] Active limits of the GPU device
      */
     get activeLimits(): GPUSupportedLimits {
         return this.#activeLimits;
@@ -144,6 +157,10 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] GPU 어댑터 객체를 반환합니다.
      * [EN] Returns the GPU adapter object.
+     *
+     * @returns
+     * [KO] `GPUAdapter` 인스턴스
+     * [EN] `GPUAdapter` instance
      */
     get gpuAdapter(): GPUAdapter {
         return this.#gpuAdapter;
@@ -152,14 +169,22 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] GPU 어댑터 정보를 반환합니다.
      * [EN] Returns the GPU adapter information.
+     *
+     * @returns
+     * [KO] `GPUAdapterInfo` 인스턴스
+     * [EN] `GPUAdapterInfo` instance
      */
     get adapterInfo(): GPUAdapterInfo {
         return this.#adapterInfo;
     }
 
     /**
-     * [KO] 폴백 어댑터(Fallback Adapter) 여부를 반환합니다. (예: CPU 소프트웨어 렌더러)
-     * [EN] Returns whether it is a fallback adapter (e.g., CPU software renderer).
+     * [KO] 폴백 어댑터(소프트웨어 렌더러 등) 여부를 반환합니다.
+     * [EN] Returns whether the adapter is a fallback adapter (e.g., software renderer).
+     *
+     * @returns
+     * [KO] 폴백 어댑터 여부
+     * [EN] Whether it is a fallback adapter
      */
     get isFallbackAdapter(): boolean {
         return this.#isFallbackAdapter;
@@ -167,7 +192,11 @@ class RedGPUContextDetector extends RedGPUObject {
 
     /**
      * [KO] 브라우저의 UserAgent 문자열을 반환합니다.
-     * [EN] Returns the UserAgent string of the browser.
+     * [EN] Returns the browser's UserAgent string.
+     *
+     * @returns
+     * [KO] UserAgent 문자열
+     * [EN] UserAgent string
      */
     get userAgent(): string {
         return this.#userAgent;
@@ -175,7 +204,11 @@ class RedGPUContextDetector extends RedGPUObject {
 
     /**
      * [KO] 모바일 환경(스마트폰, 태블릿 등) 여부를 반환합니다.
-     * [EN] Returns whether it is a mobile environment (smartphones, tablets, etc.).
+     * [EN] Returns whether the current environment is mobile (smartphones, tablets, etc.).
+     *
+     * @returns
+     * [KO] 모바일 환경 여부
+     * [EN] Whether it is a mobile environment
      */
     get isMobile(): boolean {
         return this.#isMobile;
@@ -184,6 +217,10 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] iOS 운영체제 여부를 반환합니다.
      * [EN] Returns whether the operating system is iOS.
+     *
+     * @returns
+     * [KO] iOS 여부
+     * [EN] Whether it is iOS
      */
     get isIOS(): boolean {
         return this.#isIOS;
@@ -192,6 +229,10 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] Android 운영체제 여부를 반환합니다.
      * [EN] Returns whether the operating system is Android.
+     *
+     * @returns
+     * [KO] Android 여부
+     * [EN] Whether it is Android
      */
     get isAndroid(): boolean {
         return this.#isAndroid;
@@ -199,7 +240,11 @@ class RedGPUContextDetector extends RedGPUObject {
 
     /**
      * [KO] Chromium 기반 브라우저 여부를 반환합니다.
-     * [EN] Returns whether it is a Chromium-based browser.
+     * [EN] Returns whether the browser is Chromium-based.
+     *
+     * @returns
+     * [KO] Chromium 기반 브라우저 여부
+     * [EN] Whether it is a Chromium-based browser
      */
     get isChromium(): boolean {
         return this.#isChromium;
@@ -208,6 +253,10 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] Safari 브라우저 여부를 반환합니다.
      * [EN] Returns whether the browser is Safari.
+     *
+     * @returns
+     * [KO] Safari 브라우저 여부
+     * [EN] Whether it is Safari
      */
     get isSafari(): boolean {
         return this.#isSafari;
@@ -216,6 +265,10 @@ class RedGPUContextDetector extends RedGPUObject {
     /**
      * [KO] Firefox 브라우저 여부를 반환합니다.
      * [EN] Returns whether the browser is Firefox.
+     *
+     * @returns
+     * [KO] Firefox 브라우저 여부
+     * [EN] Whether it is Firefox
      */
     get isFirefox(): boolean {
         return this.#isFirefox;
@@ -223,38 +276,48 @@ class RedGPUContextDetector extends RedGPUObject {
 
     /**
      * [KO] 논리 프로세서 코어 개수를 반환합니다. (기본값: 4)
-     * [EN] Returns the number of logical processor cores. (default: 4)
+     * [EN] Returns the number of logical processor cores (default: 4).
+     *
+     * @returns
+     * [KO] 논리 프로세서 코어 수
+     * [EN] Number of logical processor cores
      */
     get hardwareConcurrency(): number {
         return this.#hardwareConcurrency;
     }
 
     /**
-     * [KO] 장치 메모리 용량을 대략적인 GB 단위로 반환합니다. (기본값: 4)
-     * [EN] Returns the approximate device memory in GB. (default: 4)
+     * [KO] 대략적인 장치 메모리 용량(GB 단위)을 반환합니다. (기본값: 4)
+     * [EN] Returns the approximate device memory capacity in GB (default: 4).
+     *
+     * @returns
+     * [KO] 장치 메모리 용량 (GB)
+     * [EN] Device memory capacity (GB)
      */
     get deviceMemory(): number {
         return this.#deviceMemory;
     }
 
+    /**
+     * [KO] RedGPUContextDetector 인스턴스를 파기하고 내부 GPU 및 환경 참조를 해제합니다.
+     * [EN] Destroys the RedGPUContextDetector instance and releases internal GPU and environment references.
+     */
     destroy(): void {
-        // WebGPU 네이티브 객체 참조 끊기 (타입 에러 방지를 위해 as any 사용 또는 null 허용 타입으로 변경)
         this.#gpuAdapter = null as any;
         this.#adapterInfo = null as any;
         this.#supportedLimits = null as any;
         this.#activeLimits = null as any;
 
-        // Record(객체) 참조 끊기
         this.#supportedFeatures = {};
         this.#activeFeatures = {};
 
-        // 문자열 캐시 정리 (선택 사항이나 GC에 도움됨)
         this.#userAgent = '';
     }
 
     /**
-     * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
-     * [EN] Returns all detected information as a report object.
+     * [KO] 감지된 플랫폼, 브라우저, 하드웨어 및 GPU 정보를 종합한 리포트 객체를 반환합니다.
+     * [EN] Returns a comprehensive report object containing detected platform, browser, hardware, and GPU information.
+     *
      * @returns
      * [KO] 플랫폼, 브라우저, 하드웨어, GPU 정보가 포함된 리포트 객체
      * [EN] Report object containing platform, browser, hardware, and GPU information

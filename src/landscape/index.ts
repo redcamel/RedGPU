@@ -1,3 +1,8 @@
+/**
+ * [KO] 지형(Landscape) 시스템의 핵심 클래스, 재질, 레이어, 식생(Foliage), 잔디(Grass) 및 디버거 모듈을 제공합니다.
+ * [EN] Provides core classes, materials, layers, foliage, grass, and debugger modules for the Landscape system.
+ * @packageDocumentation
+ */
 export * as Core from "./core";
 export * as Foliage from "./foliage";
 export * as Grass from "./grass";

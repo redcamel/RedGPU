@@ -1,6 +1,6 @@
 /**
- * [KO] 3D 연산에 필요한 다양한 수학 함수, 기하학적 유틸리티 및 좌표 변환 기능을 제공합니다.
- * [EN] Provides various mathematical functions, geometric utilities, and coordinate transformation features required for 3D operations.
+ * [KO] 3D 공간 연산, 프러스텀 평면 추출, 광선 교차 판정 및 좌표계 변환 유틸리티를 제공합니다.
+ * [EN] Provides utilities for 3D spatial operations, frustum plane extraction, ray intersection testing, and coordinate system transformations.
  * @packageDocumentation
  */
 import calculateNormals from "./calculateNormals";

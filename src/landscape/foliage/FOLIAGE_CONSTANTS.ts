@@ -1,4 +1,13 @@
+/**
+ * [KO] 식생(Foliage) 공간 분할 서브 셀의 한 변 크기(월드 단위)입니다.
+ * [EN] Side length of a foliage spatial partitioning sub-cell in world units.
+ * @category Landscape
+ */
 export const FOLIAGE_SUB_CELL_SIZE: number = 100.0;
 
+/**
+ * [KO] 식생(Foliage) 절차적 시드(Seed) 그리드의 한 변 크기(월드 단위)입니다.
+ * [EN] Side length of a foliage procedural seed grid in world units.
+ * @category Landscape
+ */
 export const FOLIAGE_SEED_GRID_SIZE: number = 100.0;
-

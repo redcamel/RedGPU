@@ -8,30 +8,28 @@ let pointMTX = mat4.create();
 let invViewProjection = mat4.create();
 let resultMTX;
 /**
- * [KO] 화면 상의 2D 픽셀 좌표를 3D 월드 좌표로 변환합니다.
- * [EN] Converts 2D screen pixel coordinates to 3D world coordinates.
- *
- * [KO] View3D의 카메라 및 프로젝션 정보를 바탕으로 3D 공간의 위치를 계산합니다.
- * [EN] Calculates a position in 3D space based on View3D's camera and projection.
+ * [KO] 화면의 2D 픽셀 좌표(`screenX`, `screenY`)를 뷰(`AView`)의 역 투영-뷰 행렬을 통해 3D 월드 좌표(`[x, y, z]`)로 변환합니다.
+ * [EN] Converts 2D screen pixel coordinates (`screenX`, `screenY`) into 3D world coordinates (`[x, y, z]`) using the inverse view-projection matrix of the view (`AView`).
  *
  * ### Example
  * ```typescript
- * const worldPos = RedGPU.math.screenToWorld(mouseX, mouseY, view);
+ * const [worldX, worldY, worldZ] = RedGPU.Math.screenToWorld(mouseX, mouseY, view);
  * ```
  *
  * @param screenX -
- * [KO] 화면 X 좌표 (픽셀)
- * [EN] Screen X coordinate (pixels)
+ * [KO] 화면 X 좌표 (CSS 픽셀 단위)
+ * [EN] Screen X coordinate (in CSS pixels)
  * @param screenY -
- * [KO] 화면 Y 좌표 (픽셀)
- * [EN] Screen Y coordinate (pixels)
+ * [KO] 화면 Y 좌표 (CSS 픽셀 단위)
+ * [EN] Screen Y coordinate (in CSS pixels)
  * @param view -
- * [KO] 변환에 사용할 AView 인스턴스
- * [EN] AView instance to use for conversion
+ * [KO] 변환 기준이 되는 `AView` 인스턴스
+ * [EN] Target `AView` instance for transformation
  * @returns
- * [KO] 변환된 3D 월드 좌표 [x, y, z]
- * [EN] Converted 3D world coordinates [x, y, z]
- * @category Coordinates
+ * [KO] 변환된 3D 월드 좌표 배열 (`[x, y, z]`)
+ * [EN] Transformed 3D world coordinate array (`[x, y, z]`)
+ * @see [Screen to World example](/RedGPU/examples/3d/coordinateTransformation/screenToWorld/)
+ * @category Math
  */
 const screenToWorld = (screenX: number, screenY: number, view: AView,) => {
     const {rawCamera, pixelRectArray} = view
@@ -48,8 +46,7 @@ const screenToWorld = (screenX: number, screenY: number, view: AView,) => {
     point[0] = resultMTX[12];
     point[1] = resultMTX[13];
     point[2] = resultMTX[14];
-    // w = invViewProjection[12] * x + invViewProjection[13] * y + invViewProjection[14] * 0 + invViewProjection[15]; // required for perspective divide
-    w = invViewProjection[12] * x + invViewProjection[13] * y + invViewProjection[15]; // required for perspective divide
+    w = invViewProjection[12] * x + invViewProjection[13] * y + invViewProjection[15];
     if (w !== 0) {
         invW = 1 / w;
         point[0] /= invW;

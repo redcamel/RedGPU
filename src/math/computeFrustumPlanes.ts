@@ -3,29 +3,26 @@ import {mat4} from "gl-matrix";
 const tempMTX = mat4.create();
 
 /**
- * [KO] 프로젝션 및 카메라 행렬로부터 6개의 뷰 프러스텀 평면을 계산합니다.
- * [EN] Computes 6 view frustum planes from projection and camera matrices.
- *
- * [KO] 각 평면의 방정식을 [A, B, C, D] 형태로 정규화하여 반환합니다. out 버퍼가 주어지면 해당 버퍼에 인플레이스로 기록(Zero-GC)합니다.
- * [EN] Returns equations of each plane normalized in [A, B, C, D] format. Records in-place if out buffer is provided (Zero-GC).
+ * [KO] 투영 행렬과 뷰 행렬을 곱하여 정규화된 6개의 뷰 프러스텀 평면 방정식(`[A, B, C, D]`) 배열을 계산합니다.
+ * [EN] Multiplies the projection and view matrices to compute an array of 6 normalized view frustum plane equations (`[A, B, C, D]`).
  *
  * ### Example
  * ```typescript
- * const planes = RedGPU.math.computeFrustumPlanes(projectionMatrix, cameraMTX);
+ * const planes = RedGPU.Math.computeFrustumPlanes(projectionMatrix, viewMatrix);
  * ```
  *
  * @param projectionMatrix -
- * [KO] 프로젝션 행렬
- * [EN] Projection matrix
+ * [KO] 4x4 투영 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 projection matrix (`mat4`, column-major)
  * @param viewMatrix -
- * [KO] 카메라 행렬
- * [EN] Camera matrix
+ * [KO] 4x4 뷰 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 view matrix (`mat4`, column-major)
  * @param out -
- * [KO] 재사용할 프러스텀 평면 버퍼 (선택 사항, 미제공 시 독립된 새 배열 생성)
- * [EN] Reusable frustum planes buffer (optional, creates fresh array if omitted)
+ * [KO] 결과를 기록할 재사용 2차원 배열 버퍼 (선택 사항, 미지정 시 새 배열 할당)
+ * [EN] Reusable 2D array buffer to write the result (optional, allocates a new array if omitted)
  * @returns
- * [KO] 6개 평면의 [A, B, C, D] 배열
- * [EN] Array of [A, B, C, D] for 6 planes
+ * [KO] 6개 평면의 정규화된 계수 배열 (`Array<Array<number>>`, 각 요소는 `[A, B, C, D]`)
+ * [EN] Array of normalized coefficients for 6 planes (`Array<Array<number>>`, each element is `[A, B, C, D]`)
  * @category Math
  */
 const computeFrustumPlanes = (
@@ -82,29 +79,26 @@ const computeFrustumPlanes = (
 };
 
 /**
- * [KO] 프로젝션 및 카메라 행렬로부터 6개의 뷰 프러스텀 평면을 계산하여 1차원 Float32Array(24)로 반환합니다.
- * [EN] Computes 6 view frustum planes from projection and camera matrices and returns them as a 1D Float32Array(24).
- *
- * [KO] GPU Uniform/Storage 버퍼 전송에 최적화된 평탄화(Flat) 형태([A0,B0,C0,D0, A1,B1,C1,D1, ...])입니다. out 버퍼가 주어지면 해당 버퍼에 인플레이스로 기록(Zero-GC)합니다.
- * [EN] Flattened format ([A0,B0,C0,D0, A1,B1,C1,D1, ...]) optimized for GPU Uniform/Storage buffer uploads. Records in-place if out buffer is provided (Zero-GC).
+ * [KO] 투영 행렬과 뷰 행렬로부터 정규화된 6개의 뷰 프러스텀 평면을 1차원 `Float32Array`(길이 24)로 계산합니다.
+ * [EN] Computes 6 normalized view frustum planes as a 1D `Float32Array` (length 24) from projection and view matrices.
  *
  * ### Example
  * ```typescript
- * const planesFlat = RedGPU.math.computeFrustumPlanesFlat(projectionMatrix, cameraMTX);
+ * const planesFlat = RedGPU.Math.computeFrustumPlanesFlat(projectionMatrix, viewMatrix);
  * ```
  *
  * @param projectionMatrix -
- * [KO] 프로젝션 행렬
- * [EN] Projection matrix
+ * [KO] 4x4 투영 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 projection matrix (`mat4`, column-major)
  * @param viewMatrix -
- * [KO] 카메라 행렬
- * [EN] Camera matrix
+ * [KO] 4x4 뷰 행렬 (`mat4`, 열 우선)
+ * [EN] 4x4 view matrix (`mat4`, column-major)
  * @param out -
- * [KO] 재사용할 프러스텀 평면 버퍼 (선택 사항, 미제공 시 독립된 새 Float32Array(24) 생성)
- * [EN] Reusable frustum planes buffer (optional, creates fresh Float32Array(24) if omitted)
+ * [KO] 결과를 기록할 재사용 `Float32Array(24)` 버퍼 (선택 사항, 미지정 시 새 버퍼 할당)
+ * [EN] Reusable `Float32Array(24)` buffer to write the result (optional, allocates a new buffer if omitted)
  * @returns
- * [KO] 24개 float으로 구성된 1차원 평탄 버퍼
- * [EN] 1D flattened buffer of 24 floats
+ * [KO] 평탄화된 6개 평면 계수 버퍼 (`Float32Array`, `[A0, B0, C0, D0, ..., A5, B5, C5, D5]`)
+ * [EN] Flattened 6-plane coefficient buffer (`Float32Array`, `[A0, B0, C0, D0, ..., A5, B5, C5, D5]`)
  * @category Math
  */
 const computeFrustumPlanesFlat = (
@@ -118,37 +112,31 @@ const computeFrustumPlanesFlat = (
     mat4.multiply(tempMTX, projectionMatrix, viewMatrix);
     const m = tempMTX;
 
-    // Plane 0 (m3 - m0)
     out[0] = m[3] - m[0];
     out[1] = m[7] - m[4];
     out[2] = m[11] - m[8];
     out[3] = m[15] - m[12];
 
-    // Plane 1 (m3 + m0)
     out[4] = m[3] + m[0];
     out[5] = m[7] + m[4];
     out[6] = m[11] + m[8];
     out[7] = m[15] + m[12];
 
-    // Plane 2 (m3 + m1)
     out[8] = m[3] + m[1];
     out[9] = m[7] + m[5];
     out[10] = m[11] + m[9];
     out[11] = m[15] + m[13];
 
-    // Plane 3 (m3 - m1)
     out[12] = m[3] - m[1];
     out[13] = m[7] - m[5];
     out[14] = m[11] - m[9];
     out[15] = m[15] - m[13];
 
-    // Plane 4 (m3 - m2)
     out[16] = m[3] - m[2];
     out[17] = m[7] - m[6];
     out[18] = m[11] - m[10];
     out[19] = m[15] - m[14];
 
-    // Plane 5 (m3 + m2)
     out[20] = m[3] + m[2];
     out[21] = m[7] + m[6];
     out[22] = m[11] + m[10];
@@ -168,18 +156,23 @@ const computeFrustumPlanesFlat = (
 };
 
 /**
- * [KO] 4x4 행렬(WebGPU [0, 1] depth 규격)로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 정규화하여 out 배열에 인플레이스 기입합니다.
- * [EN] Extracts and normalizes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) from 4x4 matrix (WebGPU [0, 1] depth standard) in-place.
+ * [KO] 투영-뷰 결합 행렬(WebGPU `[0, 1]` 깊이 규격)로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 추출 및 정규화합니다.
+ * [EN] Extracts and normalizes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) from a combined projection-view matrix (WebGPU `[0, 1]` depth standard).
+ *
+ * ### Example
+ * ```typescript
+ * const planes = RedGPU.Math.computeFrustumPlanesFromPVMatrix(pvMatrix);
+ * ```
  *
  * @param m -
- * [KO] 투영-뷰 결합 4x4 행렬
- * [EN] Projection-view combined 4x4 matrix
+ * [KO] 투영-뷰 결합 4x4 행렬 (`mat4`, 열 우선)
+ * [EN] Combined projection-view 4x4 matrix (`mat4`, column-major)
  * @param out -
- * [KO] 재사용할 프러스텀 평면 버퍼 (선택 사항, 미제공 시 독립된 새 배열 생성)
- * [EN] Reusable frustum planes buffer (optional, creates fresh array if omitted)
+ * [KO] 결과를 기록할 재사용 2차원 배열 버퍼 (선택 사항, 미지정 시 새 배열 할당)
+ * [EN] Reusable 2D array buffer to write the result (optional, allocates a new array if omitted)
  * @returns
- * [KO] 6개 평면의 [A, B, C, D] 배열
- * [EN] Array of [A, B, C, D] for 6 planes
+ * [KO] 6개 평면의 정규화된 계수 배열 (`Array<Array<number>>`, 각 요소는 `[A, B, C, D]`)
+ * [EN] Array of normalized coefficients for 6 planes (`Array<Array<number>>`, each element is `[A, B, C, D]`)
  * @category Math
  */
 const computeFrustumPlanesFromPVMatrix = (m: mat4, out?: number[][]): number[][] => {
@@ -191,37 +184,31 @@ const computeFrustumPlanesFromPVMatrix = (m: mat4, out?: number[][]): number[][]
     }
     const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
 
-    // Left plane (m3 + m0)
     p0[0] = m[3] + m[0];
     p0[1] = m[7] + m[4];
     p0[2] = m[11] + m[8];
     p0[3] = m[15] + m[12];
 
-    // Right plane (m3 - m0)
     p1[0] = m[3] - m[0];
     p1[1] = m[7] - m[4];
     p1[2] = m[11] - m[8];
     p1[3] = m[15] - m[12];
 
-    // Bottom plane (m3 + m1)
     p2[0] = m[3] + m[1];
     p2[1] = m[7] + m[5];
     p2[2] = m[11] + m[9];
     p2[3] = m[15] + m[13];
 
-    // Top plane (m3 - m1)
     p3[0] = m[3] - m[1];
     p3[1] = m[7] - m[5];
     p3[2] = m[11] - m[9];
     p3[3] = m[15] - m[13];
 
-    // Near plane (m2) - WebGPU [0, 1] depth
     p4[0] = m[2];
     p4[1] = m[6];
     p4[2] = m[10];
     p4[3] = m[14];
 
-    // Far plane (m3 - m2) - WebGPU [0, 1] depth
     p5[0] = m[3] - m[2];
     p5[1] = m[7] - m[6];
     p5[2] = m[11] - m[10];
@@ -242,18 +229,23 @@ const computeFrustumPlanesFromPVMatrix = (m: mat4, out?: number[][]): number[][]
 };
 
 /**
- * [KO] 4x4 결합 행렬(WebGPU [0, 1] depth 규격)로부터 6개 프러스텀 평면을 계산하여 1차원 Float32Array(24)로 반환합니다.
- * [EN] Computes 6 frustum planes from a 4x4 combined matrix (WebGPU [0, 1] depth standard) and returns them as a 1D Float32Array(24).
+ * [KO] 투영-뷰 결합 행렬(WebGPU `[0, 1]` 깊이 규격)로부터 6개 프러스텀 평면(Left, Right, Bottom, Top, Near, Far)을 1차원 `Float32Array`(길이 24)로 계산합니다.
+ * [EN] Computes 6 frustum planes (Left, Right, Bottom, Top, Near, Far) as a 1D `Float32Array` (length 24) from a combined projection-view matrix (WebGPU `[0, 1]` depth standard).
+ *
+ * ### Example
+ * ```typescript
+ * const planesFlat = RedGPU.Math.computeFrustumPlanesFromPVMatrixFlat(pvMatrix);
+ * ```
  *
  * @param m -
- * [KO] 투영-뷰 결합 4x4 행렬
- * [EN] Projection-view combined 4x4 matrix
+ * [KO] 투영-뷰 결합 4x4 행렬 (`mat4`, 열 우선)
+ * [EN] Combined projection-view 4x4 matrix (`mat4`, column-major)
  * @param out -
- * [KO] 재사용할 프러스텀 평면 버퍼 (선택 사항, 미제공 시 독립된 새 Float32Array(24) 생성)
- * [EN] Reusable frustum planes buffer (optional, creates fresh Float32Array(24) if omitted)
+ * [KO] 결과를 기록할 재사용 `Float32Array(24)` 버퍼 (선택 사항, 미지정 시 새 버퍼 할당)
+ * [EN] Reusable `Float32Array(24)` buffer to write the result (optional, allocates a new buffer if omitted)
  * @returns
- * [KO] 24개 float으로 구성된 1차원 평탄 버퍼
- * [EN] 1D flattened buffer of 24 floats
+ * [KO] 평탄화된 6개 평면 계수 버퍼 (`Float32Array`, `[A0, B0, C0, D0, ..., A5, B5, C5, D5]`)
+ * [EN] Flattened 6-plane coefficient buffer (`Float32Array`, `[A0, B0, C0, D0, ..., A5, B5, C5, D5]`)
  * @category Math
  */
 const computeFrustumPlanesFromPVMatrixFlat = (
@@ -264,37 +256,31 @@ const computeFrustumPlanesFromPVMatrixFlat = (
         out = new Float32Array(24);
     }
 
-    // Left plane (m3 + m0)
     out[0] = m[3] + m[0];
     out[1] = m[7] + m[4];
     out[2] = m[11] + m[8];
     out[3] = m[15] + m[12];
 
-    // Right plane (m3 - m0)
     out[4] = m[3] - m[0];
     out[5] = m[7] - m[4];
     out[6] = m[11] - m[8];
     out[7] = m[15] - m[12];
 
-    // Bottom plane (m3 + m1)
     out[8] = m[3] + m[1];
     out[9] = m[7] + m[5];
     out[10] = m[11] + m[9];
     out[11] = m[15] + m[13];
 
-    // Top plane (m3 - m1)
     out[12] = m[3] - m[1];
     out[13] = m[7] - m[5];
     out[14] = m[11] - m[9];
     out[15] = m[15] - m[13];
 
-    // Near plane (m2) - WebGPU [0, 1] depth
     out[16] = m[2];
     out[17] = m[6];
     out[18] = m[10];
     out[19] = m[14];
 
-    // Far plane (m3 - m2) - WebGPU [0, 1] depth
     out[20] = m[3] - m[2];
     out[21] = m[7] - m[6];
     out[22] = m[11] - m[10];
