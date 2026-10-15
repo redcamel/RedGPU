@@ -1,28 +1,25 @@
 /**
- * [KO] 텍스처 샘플링 및 래핑을 위한 주소 모드 옵션을 정의하는 상수군입니다.
- * [EN] Constants defining address mode options for texture sampling and wrapping.
- *
- * [KO] 텍스처 좌표가 [0, 1] 범위를 벗어날 때의 샘플링 방식을 결정합니다.
- * [EN] Determines how textures are sampled when coordinates are outside the [0, 1] range.
+ * [KO] 텍스처 좌표가 정규화된 범위(`[0, 1]`)를 벗어날 때 적용되는 샘플링 래핑 모드 상수입니다.
+ * [EN] Sampling wrapping mode constants applied when texture coordinates fall outside the normalized range (`[0, 1]`).
  *
  * @category Constants
  */
 const GPU_ADDRESS_MODE = {
     /**
-     * [KO] 텍스처 좌표를 [0, 1] 범위 내로 클램핑합니다.
-     * [EN] Clamps texture coordinates to the [0, 1] range.
+     * [KO] 범위 밖의 좌표를 가장자리 끝값(`0.0` 또는 `1.0`)으로 고정합니다.
+     * [EN] Clamps out-of-range coordinates to the edge values (`0.0` or `1.0`).
      */
     CLAMP_TO_EDGE: 'clamp-to-edge',
     /**
-     * [KO] 텍스처를 타일 형태로 반복합니다.
-     * [EN] Repeats the texture in a tiled fashion.
+     * [KO] 정수를 버리고 소수 부분만 취해 텍스처 타일을 주기적으로 반복합니다.
+     * [EN] Repeats the texture tile periodically by taking only the fractional part of coordinates.
      */
     REPEAT: 'repeat',
     /**
-     * [KO] 텍스처를 미러링하며 타일 형태로 반복합니다.
-     * [EN] Repeats the texture in a tiled fashion, mirroring each alternate tile.
+     * [KO] 정수 경계마다 텍스처를 거울처럼 반전시키며 타일을 반복합니다.
+     * [EN] Repeats the texture tile while mirroring it across each integer boundary.
      */
     MIRRORED_REPEAT: 'mirror-repeat'
-} as const;
-Object.freeze(GPU_ADDRESS_MODE);
-export default GPU_ADDRESS_MODE;
+} as const
+Object.freeze(GPU_ADDRESS_MODE)
+export default GPU_ADDRESS_MODE
