@@ -3,14 +3,6 @@ import consoleAndThrowError from "../utils/consoleAndThrowError";
 import convertHexToRgb from "./convertHexToRgb";
 import convertRgbToHex from "./convertRgbToHex";
 
-const NORMAL_LUT = new Float64Array(256);
-const LINEAR_LUT = new Float64Array(256);
-for (let i = 0; i < 256; i++) {
-    const n = i / 255;
-    NORMAL_LUT[i] = n;
-    LINEAR_LUT[i] = Math.pow(n, 2.2);
-}
-
 const RGB_STRING_REGEX = /rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/;
 
 /**
@@ -175,7 +167,7 @@ class ColorRGB {
      * [EN] Array containing normalized RGB values [r/255, g/255, b/255]
      */
     get rgbNormal(): number[] {
-        return [NORMAL_LUT[this.#r], NORMAL_LUT[this.#g], NORMAL_LUT[this.#b]];
+        return [this.#r / 255, this.#g / 255, this.#b / 255];
     }
 
     /**
@@ -192,9 +184,9 @@ class ColorRGB {
      */
     get rgbNormalLinear(): number[] {
         return [
-            LINEAR_LUT[this.#r],
-            LINEAR_LUT[this.#g],
-            LINEAR_LUT[this.#b]
+            Math.pow(this.#r / 255, 2.2),
+            Math.pow(this.#g / 255, 2.2),
+            Math.pow(this.#b / 255, 2.2)
         ];
     }
 

@@ -2,14 +2,6 @@ import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validate
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import ColorRGB from "./ColorRGB";
 
-const NORMAL_LUT = new Float64Array(256);
-const LINEAR_LUT = new Float64Array(256);
-for (let i = 0; i < 256; i++) {
-    const n = i / 255;
-    NORMAL_LUT[i] = n;
-    LINEAR_LUT[i] = Math.pow(n, 2.2);
-}
-
 const RGBA_STRING_REGEX = /rgba\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d*(?:\.\d+)?)\s*\)/;
 
 /**
@@ -143,9 +135,9 @@ class ColorRGBA extends ColorRGB {
      */
     get rgbaNormal(): number[] {
         const out = this.#rgbaNormal;
-        out[0] = NORMAL_LUT[this.r];
-        out[1] = NORMAL_LUT[this.g];
-        out[2] = NORMAL_LUT[this.b];
+        out[0] = this.r / 255;
+        out[1] = this.g / 255;
+        out[2] = this.b / 255;
         out[3] = this.#a;
         return out;
     }
@@ -164,9 +156,9 @@ class ColorRGBA extends ColorRGB {
      */
     get rgbaNormalLinear(): number[] {
         const out = this.#rgbaNormalLinear;
-        out[0] = LINEAR_LUT[this.r];
-        out[1] = LINEAR_LUT[this.g];
-        out[2] = LINEAR_LUT[this.b];
+        out[0] = Math.pow(this.r / 255, 2.2);
+        out[1] = Math.pow(this.g / 255, 2.2);
+        out[2] = Math.pow(this.b / 255, 2.2);
         out[3] = this.#a;
         return out;
     }
