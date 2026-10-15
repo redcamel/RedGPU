@@ -121,6 +121,10 @@ try {
 
                 const cssPath = path.join(targetFolder, 'assets/css/example.css');
                 const cssRelPath = path.relative(dirPath, cssPath).replace(/\\/g, '/');
+                const distPath = path.join(process.cwd(), 'dist/index.js');
+                const distRelPath = path.relative(dirPath, distPath).replace(/\\/g, '/');
+                const helperPath = path.join(targetFolder, 'exampleHelper/dist/index.js');
+                const helperRelPath = path.relative(dirPath, helperPath).replace(/\\/g, '/');
                 const canonicalUrl = (baseUrl + fileRelPath).replace(/\/index\.html$/, '/');
 
                 // Cleanup existing SEO elements
@@ -150,9 +154,9 @@ try {
                 };
 
                 const standardTags = [
-                    `    <title>${title}</title>`,
                     '    <meta charset="UTF-8">',
                     '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
+                    `    <title>${title}</title>`,
                     `    <meta name="description" content="${cleanDescription}">`,
                     `    <meta name="keywords" content="${keywords}">`,
                     `    <link rel="canonical" href="${canonicalUrl}">`,
@@ -174,9 +178,9 @@ try {
                     '    <!-- Structured Data -->',
                     `    <script type="application/ld+json">${JSON.stringify(jsonLd, null, 2)}</script>`,
                     '',
-                    '    <!-- Assets Preload -->',
-                    `    <link rel="preload" href="${cssRelPath}?t=${timestamp}" as="style">`,
-                    `    <link rel="modulepreload" href="index.js?t=${timestamp}">`,
+                    '    <!-- Module Preload -->',
+                    `    <link rel="modulepreload" href="${distRelPath}?t=${timestamp}">`,
+                    `    <link rel="modulepreload" href="${helperRelPath}?t=${timestamp}">`,
                     '',
                     '    <!-- Assets -->',
                     `    <link rel="stylesheet" href="${cssRelPath}?t=${timestamp}">`,
@@ -184,10 +188,7 @@ try {
                 ].join('\n');
 
                 // Update Head
-                content = content.replace(/<head>/i, `<head>\n${standardTags}`);
-                content = content.replace(/(<head>[\s\S]*?<\/head>)/i, (match, head) => {
-                    return head.replace(/\n\s*\n\s*\n/g, '\n\n').replace(/\n\s*\n$/g, '\n');
-                });
+                content = content.replace(/<head>[\s\S]*?<\/head>/i, `<head>\n${standardTags}\n</head>`);
             }
         }
 
