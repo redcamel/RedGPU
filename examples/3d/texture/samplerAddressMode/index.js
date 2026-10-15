@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Sampler Address Mode 예제
  * [EN] Sampler Address Mode example
  *
- * [KO] 텍스처 샘플러의 Address Mode(clamp-to-edge, repeat, mirror-repeat) 조합에 따른 렌더링 결과를 비교합니다.
- * [EN] Compares rendering results across combinations of Texture Sampler Address Modes (clamp-to-edge, repeat, mirror-repeat).
+ * [KO] 텍스처 샘플러의 Address Mode(clamp-to-edge, repeat, mirror-repeat) 3x3 전체 조합을 비교합니다.
+ * [EN] Compares all 3x3 combinations of Texture Sampler Address Modes (clamp-to-edge, repeat, mirror-repeat).
  */
 
 const canvas = document.createElement('canvas');
@@ -16,7 +16,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 20;
+        controller.distance = 16;
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
@@ -26,14 +26,12 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        createCategoryGroups(redGPUContext, scene);
+        const meshes = createAddressModeGrid(redGPUContext, scene);
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            scene.children.forEach((child) => {
-                if (child.geometry instanceof RedGPU.Primitive.Box) {
-                    child.rotationY += 0.1;
-                }
+            meshes.forEach((mesh) => {
+                mesh.rotationY += 0.1;
             });
         });
 
@@ -48,163 +46,55 @@ RedGPU.init(
 );
 
 /**
- * [KO] 샘플러 조합을 생성합니다.
- * [EN] Generates sampler combinations.
- * @param {Array<object>} settings
- * @param {string} fixedCategory
- * @param {string} fixedValue
- * @returns {Array<object>}
- */
-const generateSamplerCombinations = (settings, fixedCategory, fixedValue) => {
-    const combinations = [];
-    const recursiveGenerator = (current, depth) => {
-        if (depth === settings.length) {
-            if (current[fixedCategory] === fixedValue) {
-                combinations.push({...current});
-            }
-            return;
-        }
-        const {name, values} = settings[depth];
-        values.forEach((value) => {
-            recursiveGenerator({...current, [name]: value}, depth + 1);
-        });
-    };
-    recursiveGenerator({}, 0);
-    return combinations;
-};
-
-/**
- * [KO] 그룹화된 조합을 생성합니다.
- * [EN] Generates grouped combinations.
- * @param {Array<object>} settings
- * @param {string} category
- * @returns {Array<{name: string, combinations: Array<object>}>}
- */
-const generateGroupedCombinations = (settings, category) => {
-    const targetSetting = settings.find((setting) => setting.name === category);
-    return targetSetting.values.map((value) => ({
-        name: `${category}: ${value}`,
-        combinations: generateSamplerCombinations(settings, category, value)
-    }));
-};
-
-/**
- * [KO] 카테고리 그룹들을 생성합니다.
- * [EN] Creates category groups.
+ * [KO] addressModeU와 addressModeV의 3x3 전체 조합 그리드를 생성합니다.
+ * [EN] Creates a 3x3 grid of all addressModeU and addressModeV combinations.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Scene} scene
+ * @returns {Array<RedGPU.Display.Mesh>}
  */
-const createCategoryGroups = (redGPUContext, scene) => {
-    const settings = [
-        {name: 'addressModeU', values: ['clamp-to-edge', 'repeat', 'mirror-repeat']},
-        {name: 'addressModeV', values: ['clamp-to-edge', 'repeat', 'mirror-repeat']}
+const createAddressModeGrid = (redGPUContext, scene) => {
+    const addressModes = [
+        RedGPU.GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+        RedGPU.GPU_ADDRESS_MODE.REPEAT,
+        RedGPU.GPU_ADDRESS_MODE.MIRRORED_REPEAT
     ];
-
-    const addressModeUGroups = generateGroupedCombinations(settings, 'addressModeU');
-    const addressModeVGroups = generateGroupedCombinations(settings, 'addressModeV');
-    const categories = [addressModeUGroups, addressModeVGroups];
 
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2, 1, 1, 1, 2);
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/crate.png');
 
-    const spacingX = 3.8;
-    const spacingY = 2;
-    const categorySpacingY = 6;
-    const groupSpacingX = 12;
+    const spacingX = 4.5;
+    const spacingY = 4.2;
+    const meshes = [];
 
-    const totalGroupsPerCategory = addressModeUGroups.length;
-    const totalCategoryWidth = (totalGroupsPerCategory - 1) * groupSpacingX;
-    const centerOffsetX = -totalCategoryWidth / 2;
+    addressModes.forEach((modeV, rowIndex) => {
+        addressModes.forEach((modeU, colIndex) => {
+            const x = (colIndex - 1) * spacingX;
+            const y = (1 - rowIndex) * spacingY + 0.5;
 
-    let currentY = 5;
+            // [KO] 샘플러의 addressModeU, addressModeV 조합 설정
+            // [EN] Set addressModeU and addressModeV combination on the sampler
+            const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+            material.textureScale = [2, 2];
+            material.diffuseTextureSampler.addressModeU = modeU;
+            material.diffuseTextureSampler.addressModeV = modeV;
 
-    categories.forEach((categoryGroups, categoryIndex) => {
-        let currentX = centerOffsetX;
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+            mesh.setPosition(x, y, 0);
+            scene.addChild(mesh);
+            meshes.push(mesh);
 
-        const categoryLabel = new RedGPU.Display.TextField3D(redGPUContext);
-        categoryLabel.text = `Category: ${['addressModeU', 'addressModeV'][categoryIndex]}`;
-        categoryLabel.color = '#dc631d';
-        categoryLabel.worldSize = 1.8;
-        categoryLabel.setPosition(currentX + totalCategoryWidth / 2, currentY + 2, 0);
-        categoryLabel.useBillboard = true;
-        categoryLabel.useBillboardPerspective = true;
-        scene.addChild(categoryLabel);
-
-        currentY -= 1.5;
-
-        categoryGroups.forEach((group) => {
-            createGroupMeshes(
-                redGPUContext,
-                scene,
-                geometry,
-                texture,
-                group,
-                spacingX,
-                spacingY,
-                currentX,
-                currentY
-            );
-            currentX += groupSpacingX;
+            const label = new RedGPU.Display.TextField3D(redGPUContext);
+            label.text = `U: ${modeU}<br/>V: ${modeV}`;
+            label.color = '#ffffff';
+            label.worldSize = 0.85;
+            label.useBillboard = true;
+            label.useBillboardPerspective = true;
+            label.setPosition(x, y - 1.8, 0);
+            scene.addChild(label);
         });
-
-        currentY -= categorySpacingY;
-    });
-};
-
-/**
- * [KO] 그룹 메시들을 생성합니다.
- * [EN] Creates group meshes.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Primitive.Box} geometry
- * @param {RedGPU.Resource.BitmapTexture} texture
- * @param {object} group
- * @param {number} spacingX
- * @param {number} spacingY
- * @param {number} groupX
- * @param {number} groupY
- */
-const createGroupMeshes = (redGPUContext, scene, geometry, texture, group, spacingX, spacingY, groupX, groupY) => {
-    let maxYOffset = 0;
-    let minYOffset = 0;
-
-    group.combinations.forEach((sampler, samplerIndex) => {
-        const x = groupX + (samplerIndex % 3) * spacingX - spacingX;
-        const y = groupY - Math.floor(samplerIndex / 3) * spacingY;
-
-        if (samplerIndex === 0) maxYOffset = y;
-        minYOffset = y;
-
-        // [KO] 샘플러의 addressModeU, addressModeV 설정 적용
-        // [EN] Apply addressModeU and addressModeV settings to the sampler
-        const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-        material.textureScale = [2, 2];
-        material.diffuseTextureSampler.addressModeU = sampler.addressModeU;
-        material.diffuseTextureSampler.addressModeV = sampler.addressModeV;
-
-        const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-        mesh.setPosition(x, y, 0);
-        scene.addChild(mesh);
-
-        const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.text = `ModeU: ${sampler.addressModeU}<br/>ModeV: ${sampler.addressModeV}`;
-        label.color = '#ffffff';
-        label.worldSize = 1;
-        label.useBillboard = true;
-        label.useBillboardPerspective = true;
-        label.setPosition(x, y - 2, 0);
-        scene.addChild(label);
     });
 
-    const groupHeight = maxYOffset - minYOffset;
-    const groupLabel = new RedGPU.Display.TextField3D(redGPUContext);
-    groupLabel.text = group.name;
-    groupLabel.color = '#5fd7ff';
-    groupLabel.worldSize = 1.25;
-    groupLabel.setPosition(groupX, maxYOffset + groupHeight / 2 + 2, 0);
-    groupLabel.useBillboard = true;
-    groupLabel.useBillboardPerspective = true;
-    scene.addChild(groupLabel);
+    return meshes;
 };
 
 /**

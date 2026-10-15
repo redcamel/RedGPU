@@ -203,7 +203,8 @@ export function createKTX2TestTile(redGPUContext, scene, geometry, linearSampler
     };
 
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, item.path, true, handleSuccess, handleError);
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture, linearSampler);
+    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+    material.diffuseTextureSampler = linearSampler;
 
     mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     mesh.setPosition(posX, posY, 0);
