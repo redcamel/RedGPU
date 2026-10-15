@@ -28,39 +28,30 @@ export type controllerInit = {
  */
 abstract class AController extends RedGPUObject {
     // ==================== Static - 전역 상태 ====================
-    /**
-     * [KO] 전역 키보드 활성 View - 모든 컨트롤러 인스턴스에서 공유
-     * [EN] Global keyboard active View - Shared across all controller instances
-     */
     static #globalKeyboardActiveView: View3D | null = null;
-    /**
-     * [KO] 전역 키보드 활성 컨트롤러 - 어떤 컨트롤러가 키보드를 사용 중인지 추적
-     * [EN] Global keyboard active controller - Tracks which controller is using the keyboard
-     */
     static #globalKeyboardActiveController: AController | null = null;
 
     // ==================== 인스턴스 정보 ====================
 
-    readonly #camera: PerspectiveCamera | OrthographicCamera
+    #camera: PerspectiveCamera | OrthographicCamera;
     #initInfo: controllerInit;
 
     // ==================== 프레임 관리 ====================
     #lastUpdateTime = -1;
     #currentDeltaTime = 0;
     #currentFrameViews = new Set<View3D>();
-    #keyboardProcessedThisFrame: boolean = false
+    #keyboardProcessedThisFrame: boolean = false;
 
     // ==================== View 상태 ====================
-    #hoveredView: View3D | null = null
-    #isDragging: boolean = false
+    #hoveredView: View3D | null = null;
+    #isDragging: boolean = false;
 
     // ==================== 입력 이벤트 관련 ====================
-    readonly #eventTypeKeys: { moveKey: string; upKey: string; downKey: string };
+    #eventTypeKeys: { moveKey: string; upKey: string; downKey: string };
     #dragStartX: number = 0;
     #dragStartY: number = 0;
     #pinchStartDistance: number = 0;
     #isMultiTouch: boolean = false;
-
 
     /**
      * [KO] AController 인스턴스를 생성합니다.
@@ -73,10 +64,10 @@ abstract class AController extends RedGPUObject {
      * [KO] 컨트롤러 초기화 정보
      * [EN] Controller initialization info
      */
-    protected constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
+    constructor(redGPUContext: RedGPUContext, initInfo: controllerInit) {
         super(redGPUContext);
-        this.#initInfo = initInfo || {}
-        this.#camera = initInfo.camera || new PerspectiveCamera()
+        this.#initInfo = initInfo || {};
+        this.#camera = this.#initInfo.camera || new PerspectiveCamera();
         const isMobile = this.redGPUContext.detector.isMobile;
         this.#eventTypeKeys = {
             moveKey: isMobile ? 'touchmove' : 'mousemove',
@@ -87,7 +78,6 @@ abstract class AController extends RedGPUObject {
     }
 
     // ==================== Public Getters/Setters ====================
-
 
     /**
      * [KO] 이 컨트롤러가 제어하는 카메라를 반환합니다.
@@ -137,7 +127,7 @@ abstract class AController extends RedGPUObject {
         return this.camera.z;
     }
 
-    // ==================== Protected - 파생 클래스 전용 ====================
+    // ==================== 파생 클래스 전용 ====================
     /**
      * [KO] 현재 마우스가 호버링 중인 View를 반환합니다.
      * [EN] Returns the View currently being hovered by the mouse.
@@ -145,7 +135,6 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 호버링 중인 View 또는 null
      * [EN] Hovered View or null
-     * 
      */
     get hoveredView(): View3D | null {
         return this.#hoveredView;
@@ -158,28 +147,16 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 키보드 활성 View 또는 null
      * [EN] Keyboard active View or null
-     * 
      */
     get keyboardActiveView(): View3D | null {
         return AController.#globalKeyboardActiveView;
     }
 
-    /**
-     * [KO] 키보드 입력이 활성화된 View를 설정합니다.
-     * [EN] Sets the View with active keyboard input.
-     *
-     * @param value -
-     * [KO] 설정할 View 또는 null
-     * [EN] View to set or null
-     * 
-     */
     set keyboardActiveView(value: View3D | null) {
         AController.#globalKeyboardActiveView = value;
-        // View가 null이면 컨트롤러도 null로 설정
         if (value === null) {
             AController.#globalKeyboardActiveController = null;
         } else {
-            // View가 설정되면 현재 컨트롤러를 활성 컨트롤러로 설정
             AController.#globalKeyboardActiveController = this;
         }
     }
@@ -191,7 +168,6 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 키보드 활성 컨트롤러 여부
      * [EN] Whether it is the keyboard active controller
-     * 
      */
     get isKeyboardActiveController(): boolean {
         return AController.#globalKeyboardActiveController === this;
@@ -204,21 +180,11 @@ abstract class AController extends RedGPUObject {
      * @returns
      * [KO] 처리 여부
      * [EN] Processing status
-     * 
      */
     get keyboardProcessedThisFrame(): boolean {
         return this.#keyboardProcessedThisFrame;
     }
 
-    /**
-     * [KO] 이번 프레임에서 키보드 입력이 처리되었는지 여부를 설정합니다.
-     * [EN] Sets whether keyboard input has been processed in this frame.
-     *
-     * @param value -
-     * [KO] 설정할 처리 여부
-     * [EN] Processing status to set
-     * 
-     */
     set keyboardProcessedThisFrame(value: boolean) {
         this.#keyboardProcessedThisFrame = value;
     }
@@ -251,13 +217,12 @@ abstract class AController extends RedGPUObject {
         this.#hoveredView = null;
         this.#currentFrameViews.clear();
         this.#initInfo = null;
-        console.log(`🧹 AController destroy 완료`);
     }
 
     // ==================== Update ====================
     /**
-     * [KO] 컨트롤러 상태를 업데이트합니다. 파생 클래스에서 구현해야 합니다.
-     * [EN] Updates the controller state. Must be implemented in derived classes.
+     * [KO] 컨트롤러 상태를 업데이트합니다.
+     * [EN] Updates the controller state.
      *
      * @param view -
      * [KO] 현재 View
@@ -266,22 +231,20 @@ abstract class AController extends RedGPUObject {
      * [KO] 현재 시간 (ms)
      * [EN] Current time (ms)
      * @param updateAnimation -
-     * [KO] 애니메이션 업데이트 콜백 (deltaTime 전달)
-     * [EN] Animation update callback (receives deltaTime)
+     * [KO] 애니메이션 업데이트 콜백 (선택 사항)
+     * [EN] Animation update callback (optional)
      */
-    update(view: View3D, time: number, updateAnimation: (deltaTime: number) => void): void {
-        // 새로운 프레임이 시작되면 상태 초기화 및 deltaTime 계산
+    update(view: View3D, time: number, updateAnimation?: (view: View3D, deltaTime: number) => void): void {
         if (this.#lastUpdateTime !== time) {
             this.#currentDeltaTime = this.#lastUpdateTime === -1 ? 0 : (time - this.#lastUpdateTime) / 1000;
             this.#lastUpdateTime = time;
             this.#currentFrameViews.clear();
             this.#keyboardProcessedThisFrame = false;
         }
-        // 중복 업데이트 방지
         if (this.#currentFrameViews.has(view)) return;
         this.#currentFrameViews.add(view);
-        if (this.#initInfo.useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view) return;
-        updateAnimation?.(this.#currentDeltaTime);
+        if (this.#initInfo?.useKeyboard && this.keyboardActiveView && this.keyboardActiveView !== view) return;
+        updateAnimation?.(view, this.#currentDeltaTime);
     }
 
     /**
@@ -506,6 +469,7 @@ abstract class AController extends RedGPUObject {
             return;
         }
         const targetView = this.findTargetViewByInputEvent(e);
+        if (!targetView) return;
         if (targetView.rawCamera !== this.#camera) return;
         const deltaScale = currentDistance / this.#pinchStartDistance;
         this.#initInfo.HD_TouchPinch?.(deltaScale);
@@ -534,4 +498,5 @@ abstract class AController extends RedGPUObject {
     }
 }
 
+Object.freeze(AController);
 export default AController
