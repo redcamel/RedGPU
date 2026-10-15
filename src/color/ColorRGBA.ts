@@ -189,11 +189,8 @@ class ColorRGBA extends ColorRGB {
      */
     setColorByRGBA(r: number, g: number, b: number, a: number) {
         this.#validateRGBA(r, g, b, a)
-        this.r = r
-        this.g = g
-        this.b = b
         this.#a = a;
-        this.#onChange?.()
+        super.setColorByRGB(r, g, b)
     }
 
     /**
@@ -221,11 +218,8 @@ class ColorRGBA extends ColorRGB {
         const b = +rgbaMatch[3];
         const a = +rgbaMatch[4];
         this.#validateRGBA(r, g, b, a)
-        this.r = r;
-        this.g = g;
-        this.b = b;
         this.#a = a;
-        this.#onChange?.()
+        super.setColorByRGB(r, g, b)
     }
 
     #validateRGBA(r: number, g: number, b: number, a: number) {
