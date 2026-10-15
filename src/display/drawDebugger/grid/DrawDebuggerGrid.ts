@@ -1,8 +1,14 @@
+import BaseObject from "../../../base/BaseObject";
 import ColorRGBA from "../../../color/ColorRGBA";
 import RedGPUContext from "../../../context/RedGPUContext";
+import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
+import GPU_BLEND_OPERATION from "../../../gpuConst/GPU_BLEND_OPERATION";
 import GPU_COMPARE_FUNCTION from "../../../gpuConst/GPU_COMPARE_FUNCTION";
+import GPU_LOAD_OP from "../../../gpuConst/GPU_LOAD_OP";
+import GPU_STORE_OP from "../../../gpuConst/GPU_STORE_OP";
 import {getBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 import DrawBufferManager, {DrawCommandSlot} from "../../../renderer/core/DrawBufferManager";
+import updateViewportAndScissor from "../../../renderer/helperFunc/updateViewportAndScissor";
 import BlendState from "../../../renderState/BlendState";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
@@ -11,9 +17,8 @@ import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/Vert
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
+import View3D from "../../view/View3D";
 import shaderSource from './shader.wgsl';
-import BaseObject from "../../../base/BaseObject";
 
 const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID';
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_GRID';
@@ -46,16 +51,15 @@ class DrawDebuggerGrid extends BaseObject {
     #vertexBuffer: VertexBuffer;
     #indexBuffer: IndexBuffer;
     #uniformBuffer: UniformBuffer;
-    readonly #fragmentBindGroup: GPUBindGroup;
-    readonly #pipeline: GPURenderPipeline;
-    readonly #pipelineMSAA: GPURenderPipeline;
+    #fragmentBindGroup: GPUBindGroup;
+    #pipeline: GPURenderPipeline;
     #blendColorState: BlendState;
     #blendAlphaState: BlendState;
 
-    readonly #lineColor: ColorRGBA;
-    readonly #majorLineColor: ColorRGBA;
-    readonly #xAxisColor: ColorRGBA;
-    readonly #zAxisColor: ColorRGBA;
+    #lineColor: ColorRGBA;
+    #majorLineColor: ColorRGBA;
+    #xAxisColor: ColorRGBA;
+    #zAxisColor: ColorRGBA;
 
     #size: number = 100;
     #gridSize: number = 1.0;
@@ -66,25 +70,36 @@ class DrawDebuggerGrid extends BaseObject {
     #fadeStart: number = 25.0;
     #fadeEnd: number = 60.0;
 
-    readonly #uniformData: Float32Array = new Float32Array(24);
+    #uniformData: Float32Array = new Float32Array(24);
 
     #drawBufferManager: DrawBufferManager;
     #drawCommandSlot: DrawCommandSlot;
     #bundleEncoder: GPURenderBundleEncoder;
     #renderBundle: GPURenderBundle;
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup;
-    #lastUpdateMSAAID: string;
     #SHADER_INFO: any;
+
+    #bundleEncoderDescriptor: GPURenderBundleEncoderDescriptor;
+    #colorAttachment: GPURenderPassColorAttachment;
+    #depthStencilAttachment: GPURenderPassDepthStencilAttachment;
+    #renderPassDescriptor: GPURenderPassDescriptor;
+    #singleBundleArray: [GPURenderBundle] = [null as any];
+    #currentView: View3D = null;
 
     constructor(redGPUContext: RedGPUContext) {
         super();
         validateRedGPUContext(redGPUContext);
-        this.#drawBufferManager = redGPUContext.drawBufferManager;
-        const {resourceManager, gpuDevice} = redGPUContext;
+        const {resourceManager, gpuDevice, drawBufferManager} = redGPUContext;
+        this.#drawBufferManager = drawBufferManager;
         const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource};
         const shaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(SHADER_MODULE_NAME, moduleDescriptor);
         this.#blendColorState = new BlendState(this);
-        this.#blendAlphaState = new BlendState(this);
+        this.#blendAlphaState = new BlendState(
+            this,
+            GPU_BLEND_FACTOR.ONE,
+            GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA,
+            GPU_BLEND_OPERATION.ADD
+        );
 
         // 색상 변경 시 즉시 유니폼 버퍼를 갱신하도록 콜백 등록
         this.#lineColor = new ColorRGBA(128, 128, 128, 0.25, () => this.#updateUniformBuffer());
@@ -153,14 +168,6 @@ class DrawDebuggerGrid extends BaseObject {
                             alpha: this.#blendAlphaState.state
                         },
                     },
-                    {
-                        format: navigator.gpu.getPreferredCanvasFormat(),
-                        blend: undefined,
-                    },
-                    {
-                        format: 'rgba16float',
-                        blend: undefined,
-                    },
                 ],
             },
             depthStencil: {
@@ -171,18 +178,70 @@ class DrawDebuggerGrid extends BaseObject {
         };
 
         this.#pipeline = gpuDevice.createRenderPipeline(basePipelineDescriptor);
-        this.#pipelineMSAA = gpuDevice.createRenderPipeline({
-            ...basePipelineDescriptor,
-            multisample: {
-                count: 4
-            }
-        });
 
-        const drawBufferManager = this.#drawBufferManager;
+        this.#bundleEncoderDescriptor = {
+            label: this.name,
+            colorFormats: ['rgba16float'],
+            depthStencilFormat: 'depth32float',
+            sampleCount: 1,
+            depthReadOnly: true,
+        };
+        this.#colorAttachment = {
+            view: null as any,
+            loadOp: GPU_LOAD_OP.LOAD,
+            storeOp: GPU_STORE_OP.STORE,
+        };
+        this.#depthStencilAttachment = {
+            view: null as any,
+            depthReadOnly: true,
+        };
+        this.#renderPassDescriptor = {
+            label: 'DrawDebuggerGrid Overlay Render Pass',
+            colorAttachments: [this.#colorAttachment],
+            depthStencilAttachment: this.#depthStencilAttachment,
+        };
+
         if (!this.#drawCommandSlot) {
             this.#drawCommandSlot = drawBufferManager.allocateDrawCommand(this.name);
             drawBufferManager.setIndexedIndirectCommand(this.#drawCommandSlot, this.#indexBuffer.indexCount, 1, 0, 0, 0);
         }
+    }
+
+    render(view: View3D, targetTextureView: GPUTextureView, depthTextureView: GPUTextureView): void {
+        const renderResults = view.renderViewStateData.renderResults;
+        const redGPUContext = view.redGPUContext;
+        const systemBindGroup = view.systemUniform_Vertex_UniformBindGroup;
+
+        renderResults.num3DObjects++;
+        renderResults.numDrawCalls++;
+        const changedSystemBindGroup = systemBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup;
+
+        if (this.#pipeline) {
+            if (!this.#bundleEncoder || changedSystemBindGroup) {
+                this.#bundleEncoder = redGPUContext.gpuDevice.createRenderBundleEncoder(this.#bundleEncoderDescriptor);
+                this.#bundleEncoder.setPipeline(this.#pipeline);
+                this.#bundleEncoder.setBindGroup(0, systemBindGroup);
+                this.#bundleEncoder.setBindGroup(1, this.#fragmentBindGroup);
+                this.#bundleEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
+                this.#bundleEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
+                this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4);
+                this.#renderBundle = this.#bundleEncoder.finish();
+            }
+            renderResults.numTriangles += 2;
+            renderResults.numPoints += 0;
+
+            this.#colorAttachment.view = targetTextureView;
+            this.#depthStencilAttachment.view = depthTextureView;
+            this.#singleBundleArray[0] = this.#renderBundle;
+            this.#currentView = view;
+
+            redGPUContext.commandEncoderManager.addPostProcessRenderPass(
+                this.#renderPassDescriptor,
+                this.#executeRenderPass
+            );
+            this.#currentView = null;
+        }
+        this.#prevSystemUniform_Vertex_UniformBindGroup = systemBindGroup;
     }
 
     /**
@@ -369,39 +428,6 @@ class DrawDebuggerGrid extends BaseObject {
         return this.#zAxisColor;
     }
 
-    render(renderViewStateData: RenderViewStateData) {
-        const {view, currentRenderPassEncoder, renderResults} = renderViewStateData;
-        const {redGPUContext} = view;
-        const {gpuDevice, antialiasingManager} = redGPUContext;
-        const {msaaID} = antialiasingManager;
-
-        renderResults.num3DObjects++;
-        renderResults.numDrawCalls++;
-        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-        const changedSystemBindGroup = view.systemUniform_Vertex_UniformBindGroup !== this.#prevSystemUniform_Vertex_UniformBindGroup;
-
-        if (this.#pipeline) {
-            if (!this.#bundleEncoder || dirtyMSAA || changedSystemBindGroup) {
-                this.#lastUpdateMSAAID = msaaID;
-                this.#bundleEncoder = gpuDevice.createRenderBundleEncoder({
-                    ...view.basicRenderBundleEncoderDescriptor,
-                    label: this.name
-                });
-                this.#bundleEncoder.setPipeline(view.redGPUContext.antialiasingManager.useMSAA ? this.#pipelineMSAA : this.#pipeline);
-                this.#bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-                this.#bundleEncoder.setBindGroup(1, this.#fragmentBindGroup);
-                this.#bundleEncoder.setVertexBuffer(0, this.#vertexBuffer.gpuBuffer);
-                this.#bundleEncoder.setIndexBuffer(this.#indexBuffer.gpuBuffer, this.#indexBuffer.format);
-                this.#bundleEncoder.drawIndexedIndirect(this.#drawCommandSlot.buffer, this.#drawCommandSlot.commandOffset * 4);
-                this.#renderBundle = this.#bundleEncoder.finish();
-            }
-            renderResults.numTriangles += 2;
-            renderResults.numPoints += 0;
-            currentRenderPassEncoder.executeBundles([this.#renderBundle]);
-        }
-        this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
-    }
-
     /**
      * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
      * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
@@ -422,36 +448,42 @@ class DrawDebuggerGrid extends BaseObject {
         this.#bundleEncoder = null;
         this.#prevSystemUniform_Vertex_UniformBindGroup = null;
         this.#drawBufferManager = null;
+        this.#currentView = null;
         console.log("🧹 DrawDebuggerGrid destroy 완료");
     }
+
+    #executeRenderPass = (passEncoder: GPURenderPassEncoder): void => {
+        updateViewportAndScissor(this.#currentView, passEncoder, 'DEFAULT');
+        passEncoder.executeBundles(this.#singleBundleArray);
+    };
 
     #updateUniformBuffer(): void {
         if (!this.#uniformBuffer) return;
         const d = this.#uniformData;
 
-        // 0 ~ 3: lineColor (RGBA)
-        const lc = this.#lineColor.rgbaNormalLinear;
+        // 0 ~ 3: lineColor (RGBA - 톤매핑 이후 sRGB 공간에 직접 오버레이되므로 rgbaNormal 사용)
+        const lc = this.#lineColor.rgbaNormal;
         d[0] = lc[0];
         d[1] = lc[1];
         d[2] = lc[2];
         d[3] = lc[3];
 
         // 4 ~ 7: majorLineColor (RGBA)
-        const mc = this.#majorLineColor.rgbaNormalLinear;
+        const mc = this.#majorLineColor.rgbaNormal;
         d[4] = mc[0];
         d[5] = mc[1];
         d[6] = mc[2];
         d[7] = mc[3];
 
         // 8 ~ 11: xAxisColor (RGBA)
-        const xc = this.#xAxisColor.rgbaNormalLinear;
+        const xc = this.#xAxisColor.rgbaNormal;
         d[8] = xc[0];
         d[9] = xc[1];
         d[10] = xc[2];
         d[11] = xc[3];
 
         // 12 ~ 15: zAxisColor (RGBA)
-        const zc = this.#zAxisColor.rgbaNormalLinear;
+        const zc = this.#zAxisColor.rgbaNormal;
         d[12] = zc[0];
         d[13] = zc[1];
         d[14] = zc[2];

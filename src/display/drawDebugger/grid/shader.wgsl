@@ -1,6 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include systemStruct.OutputFragment;
-#redgpu_include math.getMotionVector;
 
 /**
  * [KO] 그리드 디버거를 위한 버텍스 입력 구조체입니다.
@@ -17,8 +15,6 @@ struct InputData {
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) worldPos: vec3<f32>,
-    @location(1) currentClipPos: vec4<f32>,
-    @location(2) prevClipPos: vec4<f32>,
 }
 
 /**
@@ -86,12 +82,9 @@ fn vertexMain(inputData: InputData) -> VertexOutput {
     let modelPos = vec4<f32>(worldPos, 1.0);
 
     let viewProj = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let prevViewProj = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
     output.position = viewProj * modelPos;
     output.worldPos = worldPos;
-    output.currentClipPos = output.position;
-    output.prevClipPos = prevViewProj * modelPos;
 
     return output;
 }
@@ -101,9 +94,7 @@ fn vertexMain(inputData: InputData) -> VertexOutput {
  * [EN] Grid fragment shader entry point.
  */
 @fragment
-fn fragmentMain(inputData: VertexOutput) -> OutputFragment {
-    var output: OutputFragment;
-
+fn fragmentMain(inputData: VertexOutput) -> @location(0) vec4<f32> {
     let worldXZ = inputData.worldPos.xz;
 
     // 1. 보조 그리드 (Minor Grid, 예: 1m 간격) - 해상도 기반 LOD 안티앨리어싱
@@ -146,11 +137,5 @@ fn fragmentMain(inputData: VertexOutput) -> OutputFragment {
         discard;
     }
 
-    output.color = vec4<f32>(finalColor, finalAlpha);
-
-    // 5. G-Buffer 모션 벡터 연동
-    let motion = getMotionVector(inputData.currentClipPos, inputData.prevClipPos);
-    output.gBufferMotionVector = vec4<f32>(motion, 0.0, 1.0);
-
-    return output;
+    return vec4<f32>(finalColor, finalAlpha);
 }

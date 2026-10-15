@@ -279,7 +279,7 @@ class Renderer {
     }
 
     #renderPassViewBasicLayer(view: View3D, renderPassDescriptor: GPURenderPassDescriptor) {
-        const {renderViewStateData, skybox, skyAtmosphere, grid, axis, redGPUContext, scene} = view
+        const {renderViewStateData, skybox, skyAtmosphere, axis, redGPUContext, scene} = view
         if (skyAtmosphere) {
             skyAtmosphere.update(view)
         }
@@ -306,9 +306,7 @@ class Renderer {
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
 
-            // 4. Debug Overlays & Translucency
-
-            if (grid) grid.render(renderViewStateData)
+            // 4. Translucency
             renderAlphaLayer(view, viewRenderPassEncoder)
         });
     }
@@ -358,6 +356,16 @@ class Renderer {
             }, (renderPassEncoder) => {
                 updateViewportAndScissor(view, renderPassEncoder)
                 renderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListRender2PathLayer);
+            });
+
+            if (useMSAA && view.grid) {
+                commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                    view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
+                });
+            }
+        } else if (useMSAA && view.grid) {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                view.viewRenderTextureManager.copyDepthToRenderPath1(encoder);
             });
         }
     }

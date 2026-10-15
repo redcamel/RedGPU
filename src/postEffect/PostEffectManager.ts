@@ -469,6 +469,15 @@ class PostEffectManager extends RedGPUObject {
             currentTextureView = this.#applySingleEffect(this.#view.toneMappingManager, currentTextureView, width, height);
         }
 
+        // [KO] 3.5. 톤매핑 완료 후 디버그 그리드 오버레이 렌더링 (AutoExposure/SSAO/SSR/ToneMapping 오염 방지 및 깊이 테스트 유지)
+        // [EN] 3.5. Render debug grid overlay after tone mapping (Prevents AutoExposure/SSAO/SSR/ToneMapping pollution while preserving depth test)
+        if (this.#view.grid) {
+            const singleSampleDepthView = useMSAA
+                ? viewRenderTextureManager.renderPath1DepthResultTextureView
+                : viewRenderTextureManager.depthTextureView;
+            this.#view.grid.render(this.#view, currentTextureView.textureView, singleSampleDepthView);
+        }
+
         // [KO] 4. LDR 단계: FXAA (TAA 미사용 시 또는 View2D 대체용)
         // [EN] 4. LDR Phase: FXAA (When TAA unused or fallback for View2D)
         if (useFXAA || (useTAA && this.#view.constructor.name !== 'View3D')) {
