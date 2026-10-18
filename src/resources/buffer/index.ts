@@ -1,5 +1,5 @@
 /**
- * [KO] `IndexBuffer`, `StorageBuffer`, `UniformBuffer`, `VertexBuffer`, `GlobalStorageBufferManager` ??GPU 踰꾪띁 由ъ냼?ㅻ? ?쒓났?⑸땲??
+ * [KO] `IndexBuffer`, `StorageBuffer`, `UniformBuffer`, `VertexBuffer`, `GlobalStorageBufferManager` 등 GPU 버퍼 리소스를 제공합니다.
  * [EN] Provides GPU buffer resources such as `IndexBuffer`, `StorageBuffer`, `UniformBuffer`, `VertexBuffer`, and `GlobalStorageBufferManager`.
  * @packageDocumentation
  */

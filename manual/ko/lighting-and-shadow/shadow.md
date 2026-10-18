@@ -51,12 +51,23 @@ floor.receiveShadow = true;
 
 ## 3. 그림자 품질 관리 (ShadowManager)
 
-**Scene** 은 내부적으로 **ShadowManager** 를 소유하고 있어, 그림자의 해상도나 품질을 전역적으로 관리할 수 있습니다.
+**Scene** 은 내부적으로 **ShadowManager** 와 **DirectionalShadowManager** 를 소유하고 있어, 최대 4단계 **캐스케이드 그림자 맵**(Cascaded Shadow
+Maps, CSM) 및 **PCSS**(Percentage-Closer Soft Shadows) 품질을 전역적으로 제어할 수 있습니다.
 
 ```javascript
-// 그림자 맵의 해상도 설정 (기본값: 1024)
-// 값이 클수록 그림자 경계가 선명해지지만 성능 비용이 증가합니다.
-scene.shadowManager.directionalShadowManager.shadowDepthTextureSize = 2048;
+const dirShadowManager = scene.shadowManager.directionalShadowManager;
+
+// 1. 그림자 맵의 해상도 설정 (기본값: 2048)
+// 값이 클수록 그림자 경계가 선명해지지만 GPU 메모리와 연산 비용이 증가합니다.
+dirShadowManager.shadowDepthTextureSize = 2048;
+
+// 2. CSM 캐스케이드 분할 수 (1 ~ 4, 기본값: 4) 및 최대 그림자 거리
+dirShadowManager.cascadeCount = 4;
+dirShadowManager.maxShadowDistance = 300;
+
+// 3. PCSS 소프트 그림자 광원 크기 및 진하기 조절
+dirShadowManager.pcssLightSize = 0.08;
+dirShadowManager.strength = 0.85;
 ```
 
 ## 4. 실습 예제: 그림자가 있는 씬 구성

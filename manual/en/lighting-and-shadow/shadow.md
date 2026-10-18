@@ -51,12 +51,23 @@ floor.receiveShadow = true;
 
 ## 3. Shadow Quality Management (ShadowManager)
 
-The **Scene** owns a **ShadowManager** internally, allowing you to manage shadow resolution or quality globally.
+The **Scene** owns a **ShadowManager** and **DirectionalShadowManager** internally, allowing you to globally control up
+to 4-stage **Cascaded Shadow Maps** (CSM) and **PCSS** (Percentage-Closer Soft Shadows) quality.
 
 ```javascript
-// Set shadow map resolution (Default: 1024)
-// Larger values lead to sharper shadow edges but increase the performance cost.
-scene.shadowManager.directionalShadowManager.shadowDepthTextureSize = 2048;
+const dirShadowManager = scene.shadowManager.directionalShadowManager;
+
+// 1. Set shadow map resolution (Default: 2048)
+// Larger values produce sharper shadow edges but increase GPU memory and performance cost.
+dirShadowManager.shadowDepthTextureSize = 2048;
+
+// 2. Configure CSM cascade count (1 to 4, Default: 4) and maximum shadow distance
+dirShadowManager.cascadeCount = 4;
+dirShadowManager.maxShadowDistance = 300;
+
+// 3. Adjust PCSS soft shadow light size and shadow strength
+dirShadowManager.pcssLightSize = 0.08;
+dirShadowManager.strength = 0.85;
 ```
 
 ## 4. Practical Example: Configuring a Scene with Shadows

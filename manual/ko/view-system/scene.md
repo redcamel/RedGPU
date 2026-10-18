@@ -47,6 +47,8 @@ const sceneGraph = `
 
 *   **계층 구조 관리**: `addChild()`, `removeChild()` 메서드를 통해 객체들의 부모-자식 관계를 관리합니다.
 *   **조명 데이터 관리**: 기본적으로 포함된 **LightManager** 를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 통합 관리합니다.
+* **자연 환경 및 시뮬레이션 통합**: **대규모 지형**(Landscape), **수체**(WaterLake), **전역 바람**(WindManager), **그림자**(ShadowManager) 및 **물리
+  엔진**(IPhysicsEngine) 을 씬 단위로 통합 제어합니다.
 
 ## 2. 객체 관리 (Hierarchy)
 
@@ -181,17 +183,22 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 5. 주요 API 속성 및 메서드
 
-`Scene` 클래스는 배경 처리, 조명 및 그림자, 물리 시뮬레이션, 그리고 자식 객체들을 계층적으로 관리하는 다양한 API를 제공합니다.
+`Scene` 클래스는 배경 처리, 조명 및 그림자, 자연 환경 (지형·수체·바람), 물리 시뮬레이션, 그리고 자식 객체들을 계층적으로 관리하는 다양한 API를 제공합니다.
 
 ### 5.1 배경색 설정
 
 * **`backgroundColor`** (`ColorRGBA`): 씬의 배경을 지울(Clear) 때 사용되는 배경색입니다. `ColorRGBA` 인스턴스를 대입해야 합니다.
 * **`useBackgroundColor`** (`boolean`, 기본값: `false`): 이 값을 `true`로 설정하면 지정된 `backgroundColor` 수치로 배경 채우기가 활성화됩니다.
 
-### 5.2 엔진 및 매니저 연동
+### 5.2 엔진 및 환경 매니저 연동
 
-* **`lightManager`** (`LightManager`, 읽기 전용): 씬 내부에 배치되는 다양한 광원(Ambient, Directional 등)을 통합적으로 관리하고 통제하는 매니저입니다.
-* **`shadowManager`** (`ShadowManager`, 읽기 전용): 광원에 대한 그림자 맵 생성 및 관련 자원, 연산 파이프라인을 제어하는 매니저입니다.
+* **`lightManager`** (`LightManager`, 읽기 전용): 씬 내부에 배치되는 다양한 광원 (Ambient, Directional, Point, Spot 등)을 통합적으로 관리하고 통제하는
+  매니저입니다.
+* **`shadowManager`** (`ShadowManager`, 읽기 전용): 광원에 대한 그림자 맵 (CSM) 생성 및 관련 자원, 연산 파이프라인을 제어하는 매니저입니다.
+* **`windManager`** (`WindManager`, 읽기 전용): 식생 (Foliage, Grass) 흔들림과 수면 물결에 공통 적용되는 전역 바람의 방향, 풍속, 돌풍 강도를 제어하는 매니저입니다.
+* **`landscape`** (`Landscape | null`): 씬에 바인딩된 대규모 GPU-Driven 지형 인스턴스입니다. 지형 및 그에 속한 식생/잔디 시스템을 활성화합니다.
+* **`addWater(water)` / `removeWater(water)` / `waterChildren`**: 물리 기반 수체 (`WaterLake`)를 씬의 전용 수체 렌더링 패스에 등록하거나 제거하며,
+  등록된 수체 목록을 조회합니다.
 * **`physicsEngine`** (`IPhysicsEngine`): 씬 내부에서 작동할 물리 엔진 플러그인을 바인딩하여 실시간 시뮬레이션을 가능하게 합니다.
 
 ### 5.3 자식 노드 관리 (Object3DContainer 상속)

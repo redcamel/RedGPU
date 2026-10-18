@@ -1,5 +1,5 @@
 /**
- * [KO] 踰꾪띁, ?띿뒪泥? ?섑뵆?? 由ъ냼??留ㅻ땲? 肄붿뼱, WGSL ?뚯꽌 ??GPU 由ъ냼??紐⑤뱢???쒓났?⑸땲??
+ * [KO] 버퍼, 텍스처, 샘플러, 리소스 매니저 코어, WGSL 파서 등 GPU 리소스 모듈을 제공합니다.
  * [EN] Provides GPU resource modules such as buffers, textures, samplers, resource manager core, and the WGSL parser.
  * @packageDocumentation
  */

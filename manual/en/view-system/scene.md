@@ -46,6 +46,9 @@ A **Scene** goes beyond being a simple container and performs the following core
 
 *   **Hierarchy Management**: Manages parent-child relationships of objects through `addChild()` and `removeChild()` methods.
 *   **Lighting Data Management**: Centrally manages lighting data that affects the entire scene through the included **LightManager**, using GPU buffers (Uniform Buffers).
+* **Natural Environment & Simulation Integration**: Centrally coordinates large-scale terrain (**Landscape**), water
+  bodies (**WaterLake**), global wind (**WindManager**), shadows (**ShadowManager**), and physics plugins
+  (**IPhysicsEngine**) at the scene level.
 
 ## 2. Object Management (Hierarchy)
 
@@ -178,8 +181,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 5. Key API Properties and Methods
 
-The `Scene` class provides various APIs for background clearing, light/shadow management, physics engine binding, and
-hierarchical child management.
+The `Scene` class provides various APIs for background clearing, light/shadow management, natural environment (terrain,
+water, wind) integration, physics engine binding, and hierarchical child management.
 
 ### 5.1 Background Color Configuration
 
@@ -188,12 +191,19 @@ hierarchical child management.
 * **`useBackgroundColor`** (`boolean`, default: `false`): If set to `true`, background clearing with the specified
   `backgroundColor` is enabled.
 
-### 5.2 Engine & Manager Integration
+### 5.2 Engine & Environment Manager Integration
 
 * **`lightManager`** (`LightManager`, Read-only): A manager that integrates and controls various light sources (Ambient,
-  Directional, etc.) placed inside the scene.
-* **`shadowManager`** (`ShadowManager`, Read-only): A manager that controls shadow map generation, resources, and
+  Directional, Point, Spot, etc.) placed inside the scene.
+* **`shadowManager`** (`ShadowManager`, Read-only): A manager that controls Cascaded Shadow Map (CSM) generation,
+  resources, and
   computation pipelines.
+* **`windManager`** (`WindManager`, Read-only): A manager that controls global wind direction, speed, and gust strength
+  shared across vegetation (Foliage, Grass) and water surfaces.
+* **`landscape`** (`Landscape | null`): The large-scale GPU-Driven terrain instance bound to the scene, enabling terrain
+  rendering as well as its associated foliage and grass systems.
+* **`addWater(water)` / `removeWater(water)` / `waterChildren`**: Registers or removes physically based water instances
+  (`WaterLake`) for the dedicated water rendering pass and retrieves the list of registered water bodies.
 * **`physicsEngine`** (`IPhysicsEngine`): Binds a physics engine plugin to run real-time physics simulations inside the
   scene.
 
