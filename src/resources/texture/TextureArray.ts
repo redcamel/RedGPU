@@ -161,7 +161,6 @@ class TextureArray extends ManagementResourceBase {
                 );
             }
 
-            // ImageBitmap 최적화: 사용 완료된 비트맵 객체 메모리 해제
             resizedBitmaps.forEach((bitmap) => {
                 try {
                     bitmap?.close();
@@ -180,6 +179,10 @@ class TextureArray extends ManagementResourceBase {
         });
     }
 
+    /**
+     * [KO] 텍스처 배열의 GPU 리소스를 파괴합니다.
+     * [EN] Destroys the GPU texture resource of this texture array.
+     */
     destroy() {
         if (this.#gpuTexture) {
             this.#gpuTexture.destroy();

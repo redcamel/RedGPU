@@ -63,7 +63,7 @@ class DirectionalShadowManager {
     #videoMemorySize: number = 0;
 
     #cascadeSplitDepths: Float32Array = new Float32Array(4);
-    #cascadeBoundingSpheres: Float32Array = new Float32Array(16); // 4 cascades * [center.x, center.y, center.z, radius]
+    #cascadeBoundingSpheres: Float32Array = new Float32Array(16);
     #cascadeProjectionViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
 
     #casterBoundingCenter: Float32Array = new Float32Array(3);
@@ -395,7 +395,6 @@ class DirectionalShadowManager {
         vec3.set(g_lightDir, light.direction[0], light.direction[1], light.direction[2]);
         vec3.normalize(g_lightDir, g_lightDir);
 
-        // 🌟 [캐스터 바운딩 볼륨 연산] 0-Tap 조기 탈출 가드용 투영 구(Bounding Sphere) 계산
         this.#updateCasterBoundingVolume(view, g_lightDir);
 
         vec3.set(g_up, 0, 1, 0);
@@ -403,13 +402,9 @@ class DirectionalShadowManager {
             vec3.set(g_up, 0, 0, 1);
         }
 
-        // 원점 기준 고정 라이트 방향 행렬 (스냅 계산용)
         mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
         mat4.invert(g_invLightRotMat, g_lightRotMat);
 
-        // 🌟 1. [Auto-CSM: 물리 기반 텍셀 밀도 역산 모델 및 등비수열(Geometric Progression) 분할]
-        // 카메라 화각(FOV), 종횡비(Aspect), 섀도우 해상도(textureSize)로부터 목표 텍셀 크기(targetNearTexelSize, 기본 1cm)를 역산하여
-        // 전체 가시거리(maxShadowDistance)의 증감에 구애받지 않고 근경(Cascade 0)의 1cm 핀샤프 해상도를 상시 보장합니다.
         g_cascadeSplits[0] = near;
 
         const tanHalfFov = Math.tan(fov * 0.5);
@@ -423,7 +418,6 @@ class DirectionalShadowManager {
                 splitDepths[i] = shadowFar * 2.0;
             }
         } else {
-            // 4대 안전 가드를 포함한 Cascade 0 거리 (d0) 역산
             const maxD0 = shadowFar / cascadeCount;
             const minD0 = Math.min(Math.max(near + 0.5, 15.0), maxD0 * 0.5);
             const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * kSafe);
@@ -432,7 +426,6 @@ class DirectionalShadowManager {
             g_cascadeSplits[1] = d0;
             splitDepths[0] = d0;
 
-            // 잔여 구간 [d0, shadowFar]을 등비수열(Geometric Progression)로 분할
             const remainingCount = cascadeCount - 1;
             const ratio = Math.pow(shadowFar / d0, 1.0 / remainingCount);
 
@@ -450,43 +443,34 @@ class DirectionalShadowManager {
             }
         }
 
-        // 2. 각 캐스케이드별 절두체 8정점 완전 포섭 대칭 외접구(Symmetric Bounding Sphere) 및 텍셀 스냅핑
         for (let c = 0; c < cascadeCount; c++) {
             const subNear = g_cascadeSplits[c];
             const subFar = g_cascadeSplits[c + 1];
 
-            // 🌟 [수학적 정석] 절두체 슬라이스 8정점 완전 포섭 대칭 외접구 (Frustum Clipping 원천 차단)
             const cz = (subFar + subNear) * 0.5;
             const halfDepth = (subFar - subNear) * 0.5;
             const farDiag = subFar * k;
             let sphereRadius = Math.sqrt(halfDepth * halfDepth + farDiag * farDiag);
 
-            // 🌟 [화면 모서리 클리핑 방지] 텍셀 스냅핑(최대 1.414 텍셀) + 16-Tap PCF 필터 반경(3.8 텍셀) 여유 마진 (6텍셀)
             const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
             sphereRadius += rawWorldUnitsPerTexel * 6.0;
 
-            // 🌟 [텍셀 크기 정수배 스냅] 물리 텍셀 크기 단위로 올림 정렬하여 텍스처 해상도 변경 시에도 1:1 완벽 정렬
             sphereRadius = Math.ceil(sphereRadius / rawWorldUnitsPerTexel) * rawWorldUnitsPerTexel;
 
-            // 카메라 시선 방향 로컬 중심 (0, 0, -cz)을 월드 좌표로 변환
             vec3.set(g_localCenter, 0, 0, -cz);
             vec3.transformMat4(g_frustumCenter, g_localCenter, g_invVM);
 
-            // 🌟 [원점 뷰 공간 기준 텍셀 스냅핑] 카메라 이동 시 서브픽셀 떨림 완벽 제거
             const worldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
             vec3.transformMat4(g_p, g_frustumCenter, g_lightRotMat);
             g_p[0] = Math.floor(g_p[0] / worldUnitsPerTexel) * worldUnitsPerTexel;
             g_p[1] = Math.floor(g_p[1] / worldUnitsPerTexel) * worldUnitsPerTexel;
             vec3.transformMat4(g_snappedCenter, g_p, g_invLightRotMat);
 
-            // 라이트 위치: 스냅된 중심에서 광원 반대 방향으로 안전하게 후퇴
             const lightDistance = Math.max(sphereRadius * 2.0 + 50.0, 100.0);
             vec3.scaleAndAdd(g_lightPos, g_snappedCenter, g_lightDir, -lightDistance);
 
-            // 최종 라이트 뷰 행렬 생성 (Zero-GC 재사용 스크래치 행렬)
             mat4.lookAt(g_tempLightV, g_lightPos, g_snappedCenter, g_up);
 
-            // 직교 투영 행렬: 완전 대칭 박스
             const left = -sphereRadius;
             const right = sphereRadius;
             const bottom = -sphereRadius;
@@ -498,7 +482,6 @@ class DirectionalShadowManager {
 
             mat4.multiply(cascadePV[c], g_tempLightP, g_tempLightV);
 
-            // 🌟 [캐스케이드별 Bounding Sphere 정보 기록 (Zero-GC)]
             const sphereIdx = c * 4;
             this.#cascadeBoundingSpheres[sphereIdx] = g_snappedCenter[0];
             this.#cascadeBoundingSpheres[sphereIdx + 1] = g_snappedCenter[1];
@@ -506,7 +489,6 @@ class DirectionalShadowManager {
             this.#cascadeBoundingSpheres[sphereIdx + 3] = sphereRadius;
         }
 
-        // 미사용 캐스케이드 슬롯은 마지막 캐스케이드 행렬 및 외접구로 복제
         for (let c = cascadeCount; c < 4; c++) {
             mat4.copy(cascadePV[c], cascadePV[cascadeCount - 1]);
             const srcIdx = (cascadeCount - 1) * 4;
@@ -552,18 +534,7 @@ class DirectionalShadowManager {
         return this.#checkDepthTexture();
     }
 
-    /**
-     * [KO] 그림자를 드리우는 캐스터 메쉬들의 바운딩 AABB를 종합하여
-     *      그림자가 도달할 수 있는 지면 유효 영역(Bounding Sphere)을 산출하고
-     *      0-Tap 조기 탈출 가드용 센터 및 반경 제곱값을 업데이트합니다.
-     * [EN] Computes the effective ground shadow bounding sphere from casters' AABBs
-     *      and updates the center and squared radius for 0-Tap early exit culling.
-     *
-     * @param view - 대상 View3D
-     * @param lightDir - 정규화된 직사광 방향 벡터 (광원을 향하는 방향)
-     */
     #updateCasterBoundingVolume(view: View3D, lightDir: vec3): void {
-        // 1. 전역 분산 캐스터(식생/잔디) 활성화 여부 확인
         const landscape = view.scene?.landscape;
         if (landscape) {
             const foliageManager = landscape.foliageManager;
@@ -590,7 +561,6 @@ class DirectionalShadowManager {
             }
         }
 
-        // 2. 캐스팅 목록 확인 (캐스터가 0개면 그림자 연산 불필요)
         const castingList = this.#castingList;
         const count = castingList.length;
         if (count === 0) {
@@ -598,7 +568,6 @@ class DirectionalShadowManager {
             return;
         }
 
-        // 3. Zero-GC 캐스터 통합 바운딩 박스(AABB) 산출
         let minX = Infinity;
         let minY = Infinity;
         let minZ = Infinity;
@@ -625,8 +594,6 @@ class DirectionalShadowManager {
         const dz = (maxZ - minZ) * 0.5;
         const casterRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
 
-        // 4. 방향광의 그림자 투영 연장(Shadow Projection Extension) 계산
-        // lightDir는 광선이 나아가는 방향(Light Ray Forward)이므로 그림자도 동일한 방향으로 드리워집니다.
         const shadowDirX = lightDir[0];
         const shadowDirZ = lightDir[2];
         const horizLen = Math.sqrt(shadowDirX * shadowDirX + shadowDirZ * shadowDirZ);
@@ -643,7 +610,6 @@ class DirectionalShadowManager {
             normShadowDirZ = shadowDirZ * invLen;
         }
 
-        // 5. 그림자 볼륨 중심 이동 및 안전 여유 반경(고저차 대응 15m 안전 마진) 설정
         const halfExt = shadowExtension * 0.5;
         this.#casterBoundingCenter[0] = cx + normShadowDirX * halfExt;
         this.#casterBoundingCenter[1] = cy;
@@ -653,14 +619,12 @@ class DirectionalShadowManager {
         this.#casterBoundingRadiusSq = shadowRadius * shadowRadius;
     }
 
-    /** 비디오 메모리 계산 */
     #calcVideoMemory() {
         const texture = this.#shadowDepthTexture;
         if (!texture) return 0;
         this.#videoMemorySize = calculateTextureByteSize(texture);
     }
 
-    /** 뎁스 텍스처 변경 여부 확인 및 재생성 */
     #checkDepthTexture(): boolean {
         if (this.#shadowDepthTexture?.width !== this.#shadowDepthTextureSize) {
             this.destroy();
@@ -671,7 +635,6 @@ class DirectionalShadowManager {
         return false;
     }
 
-    /** 빈 뎁스 텍스처(1x1x4 2D Array) 생성 */
     #createEmptyDepthTexture(gpuDevice: GPUDevice) {
         this.#shadowDepthTextureEmpty = gpuDevice.createTexture({
             size: [1, 1, 4],
@@ -685,7 +648,6 @@ class DirectionalShadowManager {
         });
     }
 
-    /** 실제 CSM 섀도우 뎁스 텍스처 어레이(4 레이어) 생성 */
     #createDepthTexture() {
         const {gpuDevice, resourceManager} = this.#redGPUContext;
         this.#shadowDepthTexture = resourceManager.createManagedTexture({
