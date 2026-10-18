@@ -1,19 +1,19 @@
 import Scene from "../display/scene/Scene";
 
 /**
- * [KO] 씬 전체의 대기 바람 물리 시뮬레이션을 총괄하는 환경 관리자입니다.
- * [EN] Environmental manager overseeing atmospheric wind physics simulation across the entire scene.
+ * [KO] 씬 전역의 바람 방향, 속도, 세기를 관리하는 클래스로, Scene에 의해 내부적으로 자동 생성됩니다.
+ * [EN] Class that manages scene-wide wind direction, speed, and strength; automatically created internally by the Scene.
+ *
  * ::: warning
- * [KO] 이 클래스는 Scene에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the Scene.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * ### Example
  * ```typescript
- * // 씬에서 바람 매니저 접근 (Access wind manager from scene)
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
  * const windManager = scene.windManager;
- *
- * // 바람 속성 설정 (Configure wind properties)
  * windManager.direction = [1, 0, 0.5];
  * windManager.speed = 2.0;
  * windManager.strength = 1.5;
@@ -29,25 +29,41 @@ class WindManager {
     #enabled: boolean = true;
 
     /**
-     * [KO] WindManager 인스턴스를 생성합니다.
-     * [EN] Creates a WindManager instance.
-     * @param scene [KO] 소속된 씬 인스턴스 [EN] The parent Scene instance
+     * [KO] WindManager 인스턴스를 생성합니다. (내부 시스템 전용)
+     * [EN] Creates a WindManager instance. (Internal system only)
+     *
+     * @param scene -
+     * [KO] 소속 Scene 인스턴스
+     * [EN] Parent Scene instance
      */
     constructor(scene: Scene) {
         this.#scene = scene;
     }
 
     /**
-     * [KO] 소속된 씬(Scene) 인스턴스를 반환합니다.
+     * [KO] 소속 Scene 인스턴스를 반환합니다.
      * [EN] Returns the parent Scene instance.
+     *
+     * @returns
+     * [KO] 소속 Scene
+     * [EN] Parent Scene
      */
     get scene(): Scene {
         return this.#scene;
     }
 
     /**
-     * [KO] 바람이 불어가는 진행 방향 단위 벡터 [X, Y, Z]를 반환하거나 설정합니다. (설정 시 자동 정규화)
-     * [EN] Returns or sets the unit direction vector [X, Y, Z] of the wind. (Automatically normalized upon setting)
+     * [KO] 바람 진행 방향 단위 벡터 [X, Y, Z]입니다. 설정 시 자동으로 정규화되며, 길이가 0이면 정규화 분모로 1을 사용합니다.
+     * [EN] Unit direction vector [X, Y, Z] of the wind. Automatically normalized on set; a zero-length input uses 1 as the divisor.
+     *
+     * ### Example
+     * ```typescript
+     * scene.windManager.direction = [1, 0, 1];
+     * ```
+     *
+     * @returns
+     * [KO] 정규화된 방향 벡터
+     * [EN] Normalized direction vector
      */
     get direction(): [number, number, number] {
         return this.#direction;
@@ -64,8 +80,17 @@ class WindManager {
     }
 
     /**
-     * [KO] 바람의 수평 진행 방향 각도를 반환합니다. (XZ 평면, 단위: 도(degree), 0° ~ 360°)
-     * [EN] Returns the horizontal wind direction angle in degrees on the XZ plane (0° to 360°).
+     * [KO] XZ 평면 기준 바람의 수평 방향 각도입니다. (단위: degree, 0 ~ 360) 설정 시 Y 성분은 유지됩니다.
+     * [EN] Horizontal wind direction angle on the XZ plane. (Unit: degree, 0 ~ 360) The Y component is preserved on set.
+     *
+     * ### Example
+     * ```typescript
+     * scene.windManager.directionAngle = 45;
+     * ```
+     *
+     * @returns
+     * [KO] 방향 각도 (degree)
+     * [EN] Direction angle (degree)
      */
     get directionAngle(): number {
         const rad = Math.atan2(this.#direction[2], this.#direction[0]);
@@ -74,18 +99,18 @@ class WindManager {
         return deg;
     }
 
-    /**
-     * [KO] 바람의 수평 진행 방향 각도를 설정합니다. (XZ 평면, 단위: 도(degree))
-     * [EN] Sets the horizontal wind direction angle in degrees on the XZ plane.
-     */
     set directionAngle(deg: number) {
         const rad = deg * (Math.PI / 180.0);
         this.direction = [Math.cos(rad), this.#direction[1], Math.sin(rad)];
     }
 
     /**
-     * [KO] 바람의 이동 속도(시간 배율)를 반환하거나 설정합니다.
-     * [EN] Returns or sets the wind movement speed (time multiplier).
+     * [KO] 바람 애니메이션의 시간 배율입니다. (기본값: 1.0)
+     * [EN] Time multiplier of the wind animation. (default: 1.0)
+     *
+     * @returns
+     * [KO] 속도 배율
+     * [EN] Speed multiplier
      */
     get speed(): number {
         return this.#speed;
@@ -96,8 +121,12 @@ class WindManager {
     }
 
     /**
-     * [KO] 바람의 물리적 기본 세기 / 풍압을 반환하거나 설정합니다.
-     * [EN] Returns or sets the physical base strength / force of the wind.
+     * [KO] 바람의 기본 세기(풍압)입니다. (기본값: 1.0)
+     * [EN] Base wind strength (force). (default: 1.0)
+     *
+     * @returns
+     * [KO] 바람 세기
+     * [EN] Wind strength
      */
     get strength(): number {
         return this.#strength;
@@ -108,8 +137,12 @@ class WindManager {
     }
 
     /**
-     * [KO] 바람 효과의 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Returns or sets whether the wind effect is enabled.
+     * [KO] 바람 효과 활성화 여부입니다. (기본값: true)
+     * [EN] Whether the wind effect is enabled. (default: true)
+     *
+     * @returns
+     * [KO] 활성화 여부
+     * [EN] Enabled state
      */
     get enabled(): boolean {
         return this.#enabled;

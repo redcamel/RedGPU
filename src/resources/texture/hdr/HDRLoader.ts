@@ -117,7 +117,6 @@ class HDRLoader {
         }
         const buffer = await response.arrayBuffer();
         const uint8Array = new Uint8Array(buffer);
-        // 🔍 기본 HDR 데이터 파싱
         const rawHdrData = this.#parseHDRFile(uint8Array, src);
         keepLog(
             {
@@ -129,10 +128,6 @@ class HDRLoader {
         }
     }
 
-
-    /**
-     * HDR 파일 데이터를 파싱합니다
-     */
     #parseHDRFile(uint8Array: Uint8Array, src: string): HDRData {
         const validation = this.#validateHDRFile(uint8Array);
         if (this.#enableDebugLogs) {
@@ -143,7 +138,6 @@ class HDRLoader {
         }
         if (src.split('?')[0].toLowerCase().endsWith('.hdr')) {
             if (this.#enableDebugLogs) {
-                // keepLog('파일 첫 200바이트:');
                 this.#hexDump(uint8Array.slice(0, 200));
             }
             const hdrData = this.#parseRGBE(uint8Array);
@@ -158,14 +152,10 @@ class HDRLoader {
         }
     }
 
-    /**
-     * RGBE 데이터 파싱
-     */
     #parseRGBE(uint8Array: Uint8Array): HDRData {
         let offset = 0;
         let line = '';
         const header: Record<string, string> = {};
-        // 첫 번째 라인
         while (offset < uint8Array.length) {
             const char = String.fromCharCode(uint8Array[offset++]);
             if (char === '\n') break;
@@ -174,7 +164,6 @@ class HDRLoader {
         if (!line.startsWith('#?RADIANCE') && !line.startsWith('#?RGBE')) {
             throw new Error('Invalid HDR file header');
         }
-        // 헤더 정보 파싱
         while (offset < uint8Array.length) {
             line = '';
             while (offset < uint8Array.length) {
@@ -189,7 +178,6 @@ class HDRLoader {
                 header[key] = line.substring(equalIndex + 1).trim();
             }
         }
-        // 해상도 파싱
         line = '';
         while (offset < uint8Array.length) {
             const char = String.fromCharCode(uint8Array[offset++]);
@@ -202,7 +190,6 @@ class HDRLoader {
         }
         const height = parseInt(resolutionMatch[1]);
         const width = parseInt(resolutionMatch[2]);
-        // 헤더에서 노출 정보 추출
         let fileExposure: number | undefined;
         if (header.EXPOSURE) {
             fileExposure = parseFloat(header.EXPOSURE);
@@ -210,7 +197,6 @@ class HDRLoader {
                 keepLog(`파일 노출값: ${fileExposure.toFixed(3)}`);
             }
         }
-        // RGBE 데이터 파싱
         const pixelData = new Float32Array(width * height * 4);
         let pixelIndex = 0;
         for (let y = 0; y < height; y++) {
@@ -243,9 +229,6 @@ class HDRLoader {
         };
     }
 
-    /**
-     * HDR 파일 유효성 검사
-     */
     #validateHDRFile(data: Uint8Array): FileValidation {
         if (data.length < 50) {
             return {
@@ -269,26 +252,20 @@ class HDRLoader {
         };
     }
 
-    /**
-     * RGBE 스캔라인 읽기 (RLE 압축 지원)
-     */
     #readRGBEScanline(data: Uint8Array, offset: number, width: number): {
         data: Uint8Array,
         nextOffset: number
     } {
         const scanlineData = new Uint8Array(width * 4);
-        // 새로운 RLE 포맷 확인
         if (data[offset] === 0x02 && data[offset + 1] === 0x02 &&
             data[offset + 2] === ((width >> 8) & 0xff) &&
             data[offset + 3] === (width & 0xff)) {
             offset += 4;
-            // 각 채널(R,G,B,E)을 개별적으로 압축 해제
             for (let channel = 0; channel < 4; channel++) {
                 let pixelIndex = channel;
                 while (pixelIndex < width * 4) {
                     const code = data[offset++];
                     if (code > 128) {
-                        // RLE 압축된 데이터
                         const count = code - 128;
                         const value = data[offset++];
                         for (let i = 0; i < count && pixelIndex < width * 4; i++) {
@@ -296,7 +273,6 @@ class HDRLoader {
                             pixelIndex += 4;
                         }
                     } else {
-                        // 압축되지 않은 데이터
                         const count = code;
                         for (let i = 0; i < count && pixelIndex < width * 4; i++) {
                             scanlineData[pixelIndex] = data[offset++];
@@ -306,7 +282,6 @@ class HDRLoader {
                 }
             }
         } else {
-            // 구 포맷 또는 압축되지 않은 데이터
             for (let i = 0; i < width * 4; i++) {
                 scanlineData[i] = data[offset++];
             }
@@ -314,29 +289,14 @@ class HDRLoader {
         return {data: scanlineData, nextOffset: offset};
     }
 
-    /**
-     * HDR 데이터 디버그 정보 출력
-     */
     #debugHDRInfo(hdrData: HDRData): void {
         if (!this.#enableDebugLogs) return;
         keepLog(`HDR 정보:`);
         keepLog(`크기: ${hdrData.width} x ${hdrData.height}`);
         keepLog(`데이터 길이: ${hdrData.data.length}`);
         keepLog(`예상 픽셀 수: ${hdrData.width * hdrData.height * 4}`);
-        // 첫 몇 픽셀의 값 확인
-        // keepLog('첫 4픽셀 값 (원본):');
-        // for (let i = 0; i < Math.min(16, hdrData.data.length); i += 4) {
-        //     const r = hdrData.data[i];
-        //     const g = hdrData.data[i + 1];
-        //     const b = hdrData.data[i + 2];
-        //     const a = hdrData.data[i + 3];
-        //     // keepLog(`픽셀 ${i / 4}: R=${r.toFixed(3)}, G=${g.toFixed(3)}, B=${b.toFixed(3)}, A=${a.toFixed(3)}`);
-        // }
     }
 
-    /**
-     * 헥스 덤프 출력
-     */
     #hexDump(data: Uint8Array): void {
         if (!this.#enableDebugLogs) return;
         for (let i = 0; i < data.length; i += 16) {
@@ -346,9 +306,9 @@ class HDRLoader {
             const ascii = Array.from(data.slice(i, i + 16))
                 .map(b => (b >= 32 && b <= 126) ? String.fromCharCode(b) : '.')
                 .join('');
-            // keepLog(`${i.toString(16).padStart(8, '0')}: ${hex.padEnd(48, ' ')} |${ascii}|`);
         }
     }
 }
 
+Object.freeze(HDRLoader);
 export default HDRLoader;

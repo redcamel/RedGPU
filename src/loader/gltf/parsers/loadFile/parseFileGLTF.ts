@@ -5,12 +5,41 @@ import parseGLTF from "../parseGLTF";
 import formatBytes from "../../../../utils/formatBytes";
 import keepLog from "../../../../utils/keepLog";
 
+/**
+ * [KO] 캐싱된 GLTF 데이터에서 메쉬 배열을 깊은 복사하여 반환합니다.
+ * [EN] Deep copies the meshes array from cached GLTF data and returns a new GLTF data object.
+ *
+ * @param gltfData -
+ * [KO] 원본 GLTF 데이터 객체
+ * [EN] Source GLTF data object
+ * @returns
+ * [KO] 복제된 GLTF 데이터 객체
+ * [EN] Cloned GLTF data object
+ */
 const getData = (gltfData) => {
     return {
         ...gltfData,
         meshes: JSON.parse(JSON.stringify(gltfData.meshes)),
     }
 }
+/**
+ * [KO] GLTF(.gltf) JSON 파일을 로드 및 파싱하고 완료 시 콜백 함수를 호출합니다.
+ * [EN] Loads and parses a GLTF (.gltf) JSON file and invokes the callback function upon completion.
+ *
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param callBack -
+ * [KO] 파싱 완료 후 호출될 콜백 함수
+ * [EN] Callback function invoked after parsing is complete
+ * @param onProgress -
+ * [KO] 로딩 진행 상태를 전달받는 콜백 함수
+ * [EN] Optional callback function receiving loading progress information
+ * @returns
+ * [KO] 파싱 시작이 완료되면 해결되는 `Promise<void>`
+ * [EN] `Promise<void>` that resolves when parsing initialization is complete
+ * @category Loader
+ */
 const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);
     const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.gltfCache;
@@ -29,7 +58,6 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
             onProgress(gltfLoader.loadingProgressInfo);
         }
     }
-    // 캐싱된 데이터가 있으면 바로 파싱
     if (cache.has(loadFilePath)) {
         gltfLoader.gltfData = getData(cache.get(loadFilePath))
         cachedProgress()
@@ -38,7 +66,6 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         });
         return;
     }
-    // 진행 중 Promise 있으면 그것이 끝날 때까지 대기 후 파싱
     if (pending.has(loadFilePath)) {
         await pending.get(loadFilePath);
         cachedProgress()
@@ -48,7 +75,6 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         });
         return;
     }
-    // 신규 요청은 Promise를 pendingMap에 추가
     const promise = new Promise<GLTF>(async (resolve, reject) => {
         try {
             const response = await fetch(gltfLoader.url);

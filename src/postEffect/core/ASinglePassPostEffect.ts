@@ -8,26 +8,37 @@ import RedGPUObject from "../../base/RedGPUObject";
 const resourceIdMap = new WeakMap<GPUTexture, number>();
 let nextResourceId = 0;
 
+/**
+ * [KO] 단일 패스 후처리 이펙트의 타입 판별 프로퍼티를 정의하는 인터페이스입니다.
+ * [EN] Interface defining the type guard property for single-pass post-processing effects.
+ *
+ * @category PostEffect
+ */
 interface ASinglePassPostEffect {
+    /**
+     * [KO] 후처리 이펙트 인스턴스 여부
+     * [EN] Whether the instance is a post-processing effect
+     */
     isInstanceofPostEffect: boolean
 }
 
 /**
- * [KO] 단일 패스 후처리 이펙트 추상 클래스입니다.
- * [EN] Abstract class for single-pass post-processing effects.
+ * [KO] 단일 컴퓨트 패스(Compute Pass)로 동작하는 후처리 이펙트의 추상 기본 클래스입니다.
+ * [EN] Abstract base class for post-processing effects that execute in a single compute pass.
  *
- * [KO] 한 번의 컴퓨트(Compute) 패스로 동작하는 후처리 이펙트의 기반 클래스입니다.
- * [EN] Base class for post-processing effects that operate in a single compute pass.
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * @category Core
+ * @category PostEffect
  */
 abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
-     * [KO] 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
-     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space
+     * [KO] 이펙트가 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부 (기본값: `false`)
+     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space after tone mapping (default: `false`)
      */
     isLdr: boolean = false
-    // 컴퓨트 셰이더 및 파이프라인 관련 리소스
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
@@ -44,7 +55,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #computePipeline: GPUComputePipeline
     #computePipelineMSAA: GPUComputePipeline
     #computePipelineNonMSAA: GPUComputePipeline
-    // 유니폼 및 셰이더 구조 정보
     #uniformBuffer: UniformBuffer
     #uniformsInfo
     #systemUniformsInfo
@@ -54,7 +64,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #SHADER_INFO_NON_MSAA
     #prevWidth: number = 0
     #prevHeight: number = 0
-    // 출력 텍스처 및 설정
     #outputTexture: GPUTexture
     #outputTextureView: GPUTextureView
     #WORK_SIZE_X: number = 16
@@ -63,7 +72,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
-    // 바인드 그룹 캐시
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
@@ -74,11 +82,11 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [EN] Creates an ASinglePassPostEffect instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param workSize -
-     * [KO] 워크그룹 사이즈 설정 (선택, 기본값: {x: 16, y: 16, z: 1})
-     * [EN] Workgroup size configuration (optional, default: {x: 16, y: 16, z: 1})
+     * [KO] 컴퓨트 워크그룹 크기 설정 (기본값: `{ x: 16, y: 16, z: 1 }`)
+     * [EN] Compute workgroup size configuration (default: `{ x: 16, y: 16, z: 1 }`)
      */
     protected constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
         super(redGPUContext)
@@ -90,37 +98,36 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 비디오 메모리 사용량(Bytes)을 반환합니다.
-     * [EN] Returns the video memory usage in bytes.
+     * [KO] 이펙트 고유 버퍼의 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the video memory usage (in bytes) of the effect's dedicated buffer.
      *
      * @returns
-     * [KO] 비디오 메모리 사용량 (Bytes)
-     * [EN] Video memory usage in bytes
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
-
     /**
-     * [KO] 셰이더의 스토리지 구조 정보를 반환합니다.
-     * [EN] Returns storage info from the shader.
+     * [KO] 파싱된 셰이더의 스토리지 바인딩 구조 정보를 반환합니다.
+     * [EN] Returns the parsed shader's storage binding structure information.
      *
      * @returns
-     * [KO] 스토리지 구조 정보
-     * [EN] Storage structure information
+     * [KO] 스토리지 바인딩 구조 정보
+     * [EN] Storage binding structure information
      */
     get storageInfo() {
         return this.#storageInfo
     }
 
     /**
-     * [KO] 현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
-     * [EN] Returns shader information based on the current MSAA state.
+     * [KO] 현재 MSAA 상태에 대응하는 WGSL 셰이더 파싱 정보를 반환합니다.
+     * [EN] Returns the WGSL shader parsing information corresponding to the current MSAA state.
      *
      * @returns
-     * [KO] WGSL 셰이더 분석 정보
-     * [EN] WGSL shader analysis info
+     * [KO] WGSL 셰이더 파싱 정보
+     * [EN] WGSL shader parsing information
      */
     get shaderInfo() {
         return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
@@ -128,91 +135,91 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
 
     /**
      * [KO] 이펙트 전용 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the effect-specific globalStruct buffer.
+     * [EN] Returns the effect-specific uniform buffer.
      *
      * @returns
-     * [KO] 유니폼 버퍼 인스턴스
-     * [EN] Uniform buffer instance
+     * [KO] `UniformBuffer` 인스턴스
+     * [EN] `UniformBuffer` instance
      */
     get uniformBuffer(): UniformBuffer {
         return this.#uniformBuffer;
     }
 
     /**
-     * [KO] 이펙트 전용 유니폼 구조 정보를 반환합니다.
-     * [EN] Returns the effect-specific globalStruct struct information.
+     * [KO] 이펙트 전용 유니폼 구조체 정보를 반환합니다.
+     * [EN] Returns the effect-specific uniform struct information.
      *
      * @returns
-     * [KO] 유니폼 구조 정보
-     * [EN] Uniform structure info
+     * [KO] 유니폼 구조체 정보
+     * [EN] Uniform struct information
      */
     get uniformsInfo() {
         return this.#uniformsInfo
     }
 
     /**
-     * [KO] 시스템 공용 유니폼 구조 정보를 반환합니다.
-     * [EN] Returns the system common globalStruct struct information.
+     * [KO] 시스템 공용 유니폼 구조체 정보를 반환합니다.
+     * [EN] Returns the system common uniform struct information.
      *
      * @returns
-     * [KO] 시스템 유니폼 구조 정보
-     * [EN] System globalStruct structure info
+     * [KO] 시스템 유니폼 구조체 정보
+     * [EN] System uniform struct information
      */
     get systemUniformsInfo() {
         return this.#systemUniformsInfo
     }
 
     /**
-     * [KO] 워크그룹 사이즈 X를 반환합니다.
-     * [EN] Returns the workgroup size X.
+     * [KO] 컴퓨트 워크그룹 X축 크기를 반환합니다.
+     * [EN] Returns the compute workgroup X-axis size.
      *
      * @returns
-     * [KO] 워크그룹 사이즈 X
-     * [EN] Workgroup size X
+     * [KO] 워크그룹 X 크기
+     * [EN] Workgroup X size
      */
     get WORK_SIZE_X(): number {
         return this.#WORK_SIZE_X;
     }
 
     /**
-     * [KO] 워크그룹 사이즈 Y를 반환합니다.
-     * [EN] Returns the workgroup size Y.
+     * [KO] 컴퓨트 워크그룹 Y축 크기를 반환합니다.
+     * [EN] Returns the compute workgroup Y-axis size.
      *
      * @returns
-     * [KO] 워크그룹 사이즈 Y
-     * [EN] Workgroup size Y
+     * [KO] 워크그룹 Y 크기
+     * [EN] Workgroup Y size
      */
     get WORK_SIZE_Y(): number {
         return this.#WORK_SIZE_Y;
     }
 
     /**
-     * [KO] 워크그룹 사이즈 Z를 반환합니다.
-     * [EN] Returns the workgroup size Z.
+     * [KO] 컴퓨트 워크그룹 Z축 크기를 반환합니다.
+     * [EN] Returns the compute workgroup Z-axis size.
      *
      * @returns
-     * [KO] 워크그룹 사이즈 Z
-     * [EN] Workgroup size Z
+     * [KO] 워크그룹 Z 크기
+     * [EN] Workgroup Z size
      */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
     }
 
     /**
-     * [KO] 현재 할당된 출력 텍스처 뷰를 반환합니다.
-     * [EN] Returns the currently allocated output texture view.
+     * [KO] 현재 패스에 할당된 출력 텍스처 뷰를 반환합니다.
+     * [EN] Returns the output texture view allocated to the current pass.
      *
      * @returns
-     * [KO] 출력 GPUTextureView
-     * [EN] Output GPUTextureView
+     * [KO] 출력 `GPUTextureView`
+     * [EN] Output `GPUTextureView`
      */
     get outputTextureView(): GPUTextureView {
         return this.#outputTextureView;
     }
 
     /**
-     * [KO] 이펙트에서 사용 중인 리소스를 해제합니다.
-     * [EN] Clears the resources used by the effect.
+     * [KO] 캐시된 바인드 그룹 및 출력 텍스처 참조를 초기화합니다.
+     * [EN] Clears cached bind groups and output texture references.
      */
     clear() {
         this.#outputTexture = null;
@@ -222,6 +229,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#bindGroupCache3.clear();
     }
 
+    /**
+     * [KO] 이펙트의 유니폼 버퍼와 캐시 리소스를 파기합니다.
+     * [EN] Destroys the effect's uniform buffer and cached resources.
+     */
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
@@ -237,18 +248,18 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
-     * [EN] Initializes the effect. Creates compute shaders and globalStruct buffers.
+     * [KO] MSAA/Non-MSAA 컴퓨트 셰이더 모듈과 유니폼 버퍼를 생성하여 이펙트를 초기화합니다.
+     * [EN] Initializes the effect by creating MSAA/Non-MSAA compute shader modules and the uniform buffer.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param name -
-     * [KO] 이펙트 이름
-     * [EN] Effect name
+     * [KO] 이펙트 식별 이름
+     * [EN] Effect identifier name
      * @param computeCodes -
-     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 소스 코드
-     * [EN] Compute shader source codes for MSAA and Non-MSAA
+     * [KO] MSAA 및 Non-MSAA용 컴퓨트 셰이더 코드 객체
+     * [EN] Compute shader code object for MSAA and Non-MSAA
      */
     init(redGPUContext: RedGPUContext, name: string, computeCodes: {
         msaa: string,
@@ -257,11 +268,9 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#name = name;
         const {resourceManager} = redGPUContext;
 
-        // 셰이더 모듈 생성
         this.#computeShaderMSAA = resourceManager.createGPUShaderModule(`${name}_MSAA`, {code: computeCodes.msaa});
         this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
 
-        // 셰이더 정보 파싱 (WGSL 분석)
         this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${name}_MSAA`, computeCodes.msaa);
         this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${name}_NonMSAA`, computeCodes.nonMsaa);
 
@@ -270,14 +279,12 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#uniformsInfo = uniforms.uniforms;
         this.#systemUniformsInfo = uniforms.systemUniforms;
 
-        // 유니폼 버퍼 초기화
         if (this.#uniformsInfo) {
             const uniformData = new ArrayBuffer(this.#uniformsInfo.arrayBufferByteLength);
             this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData, `${this.constructor.name}_UniformBuffer`);
         }
 
         {
-            // keepLog(this.#uniformsInfo)
             const {members} = this.#uniformsInfo || {}
             if (members) {
                 for (const k in members) {
@@ -289,56 +296,48 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 이펙트를 렌더링하고 결과를 반환합니다. 필요한 경우 바인드 그룹을 갱신합니다.
-     * [EN] Renders the effect and returns the result. Updates bind groups if necessary.
+     * [KO] 텍스처 풀에서 출력 텍스처를 할당받아 컴퓨트 패스를 실행하고 결과 텍스처 정보를 반환합니다.
+     * [EN] Allocates an output texture from the texture pool, executes the compute pass, and returns the result texture information.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
+     * [KO] 렌더링 너비 (픽셀)
+     * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
+     * [KO] 렌더링 높이 (픽셀)
+     * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
-     * [KO] 입력으로 사용될 소스 텍스처 정보 리스트
-     * [EN] List of source texture information to be used as input
+     * [KO] 입력 소스 텍스처 정보 목록
+     * [EN] List of input source texture information
      * @returns
-     * [KO] 렌더링 결과 (텍스처 및 뷰)
-     * [EN] Rendering result (texture and view)
+     * [KO] 렌더링 결과 텍스처 및 뷰 (`IPostEffectResult`)
+     * [EN] Rendering result texture and view (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult {
         const {gpuDevice, antialiasingManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        // 텍스처 풀에서 출력 텍스처 할당 (IPostEffectResult 형식으로 직접 획득)
         const result = view.postEffectManager.texturePool.allocResult(width, height, 'rgba16float');
         this.#outputTexture = result.texture;
         this.#outputTextureView = result.textureView;
 
-        // 변경 감지 (구조적 변경 확인)
         const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
 
-        // MSAA나 해상도가 바뀌면 기존 바인드 그룹 캐시는 더 이상 유효하지 않으므로 클리어
         if (dimensionsChanged || msaaChanged) {
             this.#bindGroupCache0.clear();
             this.#bindGroupCache1 = null;
             this.#bindGroupCache3.clear();
         }
 
-        // 파이프라인 준비 (상태에 따라 최초 1회 생성 및 캐싱)
         this.#checkAndCreatePipeline(view, useMSAA, gpuDevice);
 
-        // 🌟 바인드 그룹 할당/갱신 (핑퐁 전략 시 매 프레임 텍스처가 바뀌므로 항상 호출)
-        // 내부적으로 캐시를 확인하여 생성을 최소화함
         this.#updateBindGroups(sourceTextureInfo, this.#outputTextureView, useMSAA, gpuDevice);
 
-        // 컴퓨트 패스 실행
         this.#execute(view, width, height, view.postEffectManager.gbufferBindGroup);
 
-        // 이전 상태 저장
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
         this.#prevWidth = width;
@@ -349,15 +348,15 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 특정 유니폼 값을 업데이트합니다.
-     * [EN] Updates a specific globalStruct value.
+     * [KO] 지정된 유니폼 멤버의 값을 유니폼 버퍼에 기록합니다.
+     * [EN] Writes the value of the specified uniform member to the uniform buffer.
      *
      * @param key -
-     * [KO] 유니폼 키 이름
-     * [EN] Uniform key name
+     * [KO] 유니폼 멤버 키 이름
+     * [EN] Uniform member key name
      * @param value -
-     * [KO] 설정할 값
-     * [EN] Value to set
+     * [KO] 기록할 값
+     * [EN] Value to write
      */
     updateUniform(key: string, value: number | number[] | boolean) {
         const memberInfo = this.uniformsInfo?.members[key];
@@ -376,10 +375,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         return id;
     }
 
-    /**
-     * [KO] 실제 컴퓨트 패스를 커맨드 인코더에 추가합니다.
-     * [EN] Adds the actual compute pass to the command encoder.
-     */
     #execute(view: View3D, width: number, height: number, gbufferBindGroup: GPUBindGroup) {
         const {commandEncoderManager} = this;
         const {renderViewStateData} = view;
@@ -387,8 +382,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         commandEncoderManager.addPostProcessComputePass(`ASinglePassPostEffect_${this.#name}_ComputePass`, (computePassEncoder) => {
             computePassEncoder.setPipeline(this.#computePipeline);
 
-            // [KO] 정의된 바인드 그룹만 설정 (정의되지 않은 그룹을 setBindGroup하면 에러 발생)
-            // [EN] Only set defined bind groups (Setting an undefined group causes an error)
             const bg0 = renderViewStateData.swapBufferIndex ? this.#computeBindGroup0List_swap1 : this.#computeBindGroup0List_swap0;
             if (bg0) computePassEncoder.setBindGroup(0, bg0);
 
@@ -400,10 +393,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         });
     }
 
-    /**
-     * [KO] 파이프라인 및 레이아웃을 확인하고 필요한 경우 생성합니다.
-     * [EN] Checks for the pipeline and layout, creating them if necessary.
-     */
     #checkAndCreatePipeline(view: View3D, useMSAA: boolean, gpuDevice: GPUDevice) {
         const cachedPipeline = useMSAA ? this.#computePipelineMSAA : this.#computePipelineNonMSAA;
         if (cachedPipeline) {
@@ -419,7 +408,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         const layout1Name = `${this.#name}_BIND_GROUP_LAYOUT_1_USE_MSAA_${useMSAA}`;
         const layout3Name = `${this.#name}_BIND_GROUP_LAYOUT_3_USE_MSAA_${useMSAA}`;
 
-        // 레이아웃 캐싱 및 생성
         this.#computeBindGroupLayout0 = resourceManager.getGPUBindGroupLayout(layout0Name) ||
             resourceManager.createBindGroupLayout(layout0Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 0, useMSAA));
 
@@ -429,7 +417,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#outputBindGroupLayout = resourceManager.getGPUBindGroupLayout(layout3Name) ||
             resourceManager.createBindGroupLayout(layout3Name, getComputeBindGroupLayoutDescriptorFromShaderInfo(currentShaderInfo, 3, useMSAA));
 
-        // 파이프라인 생성
         const pipeline = gpuDevice.createComputePipeline({
             label: `${this.#name}_COMPUTE_PIPELINE_USE_MSAA_${useMSAA}`,
             layout: gpuDevice.createPipelineLayout({
@@ -443,21 +430,15 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
             compute: {module: currentShader, entryPoint: 'main'}
         });
 
-        // 캐싱
         if (useMSAA) this.#computePipelineMSAA = pipeline;
         else this.#computePipelineNonMSAA = pipeline;
 
         this.#computePipeline = pipeline;
     }
 
-    /**
-     * [KO] 바인드 그룹을 갱신합니다.
-     * [EN] Updates bind groups.
-     */
     #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
         const {storage, textures} = this.shaderInfo;
 
-        // Group 0 캐시 키 생성 (소스 텍스처들의 조합, Zero-GC)
         let group0Key: string;
         const sourceCount = sourceTextureInfoList.length;
         if (sourceCount === 1) {
@@ -471,8 +452,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         }
         const cachedBG0_swap0 = this.#bindGroupCache0.get(`${group0Key}_swap0`);
         const cachedBG0_swap1 = this.#bindGroupCache0.get(`${group0Key}_swap1`);
-        // keepLog(this.constructor.name, view.postEffectManager.texturePool.activeTextureNum, group0Key, cachedBG0_swap0, cachedBG0_swap1)
-        // keepLog(this.constructor.name, `pool size : ${view.postEffectManager.texturePool.poolNum}`)
         if (cachedBG0_swap0 && cachedBG0_swap1) {
             this.#computeBindGroup0List_swap0 = cachedBG0_swap0;
             this.#computeBindGroup0List_swap1 = cachedBG0_swap1;
@@ -482,7 +461,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
             this.#computeBindGroupEntries0_swap1 = [];
 
 
-            // Group 0: 소스 텍스처들
             for (const k in storage) {
                 const {binding, name, group} = storage[k];
                 if (group === 0 && name !== 'outputTexture') {
@@ -520,7 +498,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
             this.#bindGroupCache0.set(`${group0Key}_swap1`, this.#computeBindGroup0List_swap1);
         }
 
-        // Group 1: 이펙트 개별 유니폼 버퍼 (거의 변하지 않으므로 1회만 생성)
         if (this.#bindGroupCache1) {
             this.#computeBindGroup1 = this.#bindGroupCache1;
         } else if (this.#uniformBuffer && this.uniformsInfo) {
@@ -540,7 +517,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
             this.#bindGroupCache1 = this.#computeBindGroup1;
         }
 
-        // Group 3: 출력 텍스처
         const outputTextureId = this.#getResourceId(this.#outputTexture);
         if (this.#bindGroupCache3.has(outputTextureId)) {
             this.#outputBindGroup = this.#bindGroupCache3.get(outputTextureId);
@@ -556,10 +532,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
 
     }
 
-    /**
-     * [KO] 비디오 메모리 사용량을 계산합니다. (유니폼 버퍼 크기 기준)
-     * [EN] Calculates video memory usage based on globalStruct buffer size.
-     */
     #calcVideoMemory() {
         this.#videoMemorySize = this.#uniformBuffer ? this.#uniformBuffer.size : 0;
     }

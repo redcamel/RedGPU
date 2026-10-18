@@ -6,13 +6,25 @@ import parseMesh_GLTF from "./parseMesh_GLTF";
 import parseTRSAndMATRIX_GLTF from "./parseTRSAndMATRIX_GLTF";
 
 /**
- * Parses the children and skin of a node in a GLTF file.
+ * [KO] glTF 노드의 하위 자식 노드들과 스킨 정보를 재귀적으로 파싱합니다.
+ * [EN] Recursively parses child nodes and skin information of a glTF node.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader instance.
- * @param {GLTF} gltfData - The GLTF data object.
- * @param {Mesh} mesh - The mesh object.
- * @param {Node} nodeInfo - The node information object.
- * @param {Skin[]} skins - The array of skin objects.
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @param gltfData -
+ * [KO] 원본 `GLTF` 데이터 객체
+ * [EN] Source `GLTF` data object
+ * @param mesh -
+ * [KO] 기준이 되는 대상 `Mesh` 인스턴스
+ * [EN] Target `Mesh` instance serving as the parent/base
+ * @param nodeInfo -
+ * [KO] 파싱할 glTF 노드 정보 객체
+ * [EN] glTF node information object to parse
+ * @param skins -
+ * [KO] glTF 스킨 데이터 배열
+ * [EN] Array of glTF skin data
+ * @category GLTF
  */
 const parseChildrenAndSkin = (gltfLoader: GLTFLoader, gltfData: GLTF, mesh: Mesh, nodeInfo: Node, skins: Skin[]) => {
     if ('children' in nodeInfo) {
@@ -27,12 +39,22 @@ const parseChildrenAndSkin = (gltfLoader: GLTFLoader, gltfData: GLTF, mesh: Mesh
     }
 }
 /**
- * Parses a node in a GLTF hierarchy and constructs the corresponding mesh or group in the scene.
+ * [KO] glTF 노드 계층을 파싱하여 대응하는 메시 또는 그룹을 생성하고 부모 메시에 추가합니다.
+ * [EN] Parses the glTF node hierarchy to construct the corresponding mesh or group and attaches it to the parent mesh.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader instance.
- * @param {GLTF} gltfData - The GLTF data.
- * @param {GlTfId} nodeGlTfId - The identifier of the node in the GLTF data.
- * @param {Mesh} parentMesh - The parent mesh to attach the parsed node to.
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @param gltfData -
+ * [KO] 원본 `GLTF` 데이터 객체
+ * [EN] Source `GLTF` data object
+ * @param nodeGlTfId -
+ * [KO] 파싱할 노드의 glTF 식별자
+ * [EN] glTF identifier of the node to parse
+ * @param parentMesh -
+ * [KO] 생성된 노드를 하위 자식으로 추가할 부모 `Mesh` 인스턴스
+ * [EN] Parent `Mesh` instance to attach the parsed node to
+ * @category GLTF
  */
 const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTfId, parentMesh: Mesh) => {
     const {redGPUContext, parsingResult} = gltfLoader;
@@ -61,14 +83,6 @@ const parseNode_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, nodeGlTfId: GlTf
             resultGroups[nodeGlTfId] = targetGroup;
         }
         parseTRSAndMATRIX_GLTF(targetGroup, nodeInfo);
-        //TODO -카메라 까야함
-        // if ('camera' in nodeInfo) {
-        // 	resultCameras[nodeInfo.camera]['_parentMesh'] = parentMesh;
-        // 	resultCameras[nodeInfo.camera]['_targetMesh'] = targetGroup;
-        // 	let cameraMesh = new Mesh(redGPUContext);
-        // 	targetGroup.addChild(cameraMesh);
-        // 	resultCameras[nodeInfo.camera]['_cameraMesh'] = cameraMesh;
-        // }
         parseChildrenAndSkin(gltfLoader, gltfData, targetGroup, nodeInfo, skins);
     }
 }

@@ -34,6 +34,13 @@ const g_cascadeSplits = new Float32Array(5);
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const directionalShadowManager = view.directionalShadowManager;
+ * ```
+ *
  * @category Shadow
  */
 class DirectionalShadowManager {
@@ -206,10 +213,12 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 설정합니다.
-     * [EN] Sets the maximum shadow distance (Unreal Engine standard default: 200m).
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(기본값: 200m)를 설정합니다.
+     * [EN] Sets the maximum shadow distance (default: 200m).
      *
-     * @param value - 최대 그림자 가시거리 (m)
+     * @param value -
+     * [KO] 최대 그림자 가시거리 (m)
+     * [EN] Maximum shadow distance in meters
      */
     set maxShadowDistance(value: number) {
         validatePositiveNumberRange(value, 1);
@@ -321,11 +330,15 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 특정 캐스케이드 레이어의 단일 2D 뎁스 텍스처 뷰를 반환합니다. (캐스케이드 렌더 패스 Attachment용)
-     * [EN] Returns a single 2D depth texture view for a specific cascade layer. (For cascade render pass attachment)
+     * [KO] 특정 캐스케이드 레이어의 단일 2D 뎁스 텍스처 뷰를 반환합니다.
+     * [EN] Returns a single 2D depth texture view for a specific cascade layer.
      *
-     * @param index - 캐스케이드 인덱스 (0 ~ 3)
-     * @returns 해당 레이어의 2D GPUTextureView
+     * @param index -
+     * [KO] 캐스케이드 인덱스 (0 ~ 3)
+     * [EN] Cascade index (0 to 3)
+     * @returns
+     * [KO] 해당 레이어의 2D GPUTextureView
+     * [EN] 2D GPUTextureView of the layer
      */
     getCascadeLayerView(index: number): GPUTextureView {
         return this.#cascadeLayerViews[index] || this.#shadowDepthTextureViewEmpty;

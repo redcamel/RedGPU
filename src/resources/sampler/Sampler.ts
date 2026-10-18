@@ -11,13 +11,21 @@ const validUVW: GPUAddressMode[] = Object.values(GPU_ADDRESS_MODE);
 const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTER_MODE);
 
 /**
- * [KO] GPU 텍스처 샘플러를 관리하는 클래스입니다.
- * [EN] Class that manages GPU texture samplers.
+ * [KO] GPU 텍스처 샘플러(`GPUSampler`)를 관리하는 클래스입니다.
+ * [EN] Class that manages GPU texture samplers (`GPUSampler`).
  *
- * [KO] 샘플러의 필터, 어드레스 모드, 애니소트로피 등 다양한 옵션을 설정할 수 있습니다.
- * [EN] Various options such as sampler's filter, address mode, and anisotropy can be set.
- * [KO] 동일 옵션의 샘플러는 내부적으로 캐싱하여 중복 생성을 방지하며, 옵션 변경 시 자동으로 샘플러를 갱신합니다.
- * [EN] Samplers with the same options are cached internally to prevent redundant creation, and the sampler is automatically updated when options change.
+ * [KO] 필터링 모드, 어드레스 모드, 이방성 필터링(`maxAnisotropy`) 옵션을 설정할 수 있으며, 동일 옵션의 샘플러는 내부적으로 캐싱됩니다.
+ * [EN] Configures filtering modes, address modes, and anisotropic filtering (`maxAnisotropy`) options, and caches samplers with identical options internally.
+ *
+ * ### Example
+ * ```typescript
+ * const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
+ *   magFilter: 'linear',
+ *   minFilter: 'linear',
+ *   addressModeU: 'repeat',
+ *   addressModeV: 'repeat'
+ * });
+ * ```
  *
  * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
  *
@@ -27,34 +35,23 @@ const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTE
  * @category Sampler
  */
 class Sampler extends ResourceBase {
-    /** [KO] GPU 샘플러 객체 [EN] GPU sampler object */
     #gpuSampler: GPUSampler
-    /** [KO] 확대 필터 모드 [EN] Magnification filter mode */
     #magFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
-    /** [KO] 축소 필터 모드 [EN] Minification filter mode */
     #minFilter: GPUFilterMode = GPU_FILTER_MODE.LINEAR
-    /** [KO] 밉맵 필터 모드 [EN] Mipmap filter mode */
     #mipmapFilter: GPUMipmapFilterMode = GPU_MIPMAP_FILTER_MODE.LINEAR
-    /** [KO] U축 어드레스 모드 [EN] Address mode for U coordinate */
     #addressModeU?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE
-    /** [KO] V축 어드레스 모드 [EN] Address mode for V coordinate */
     #addressModeV?: GPUAddressMode = GPU_ADDRESS_MODE.CLAMP_TO_EDGE;
-    /** [KO] W축 어드레스 모드 [EN] Address mode for W coordinate */
     #addressModeW?: GPUAddressMode = GPU_ADDRESS_MODE.REPEAT;
-    /** [KO] LOD 최소값 [EN] Minimum LOD clamp */
     #lodMinClamp?: number;
-    /** [KO] LOD 최대값 [EN] Maximum LOD clamp */
     #lodMaxClamp?: number;
-    /** [KO] 비교 함수 [EN] Comparison function */
     #compare?: GPUCompareFunction;
-    /** [KO] 최대 애니소트로피 [EN] Maximum anisotropy */
     #maxAnisotropy: number = 1;
 
     /**
      * [KO] Sampler 인스턴스를 생성합니다.
      * [EN] Creates a Sampler instance.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
      *   magFilter: 'linear',
@@ -68,8 +65,8 @@ class Sampler extends ResourceBase {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param options -
-     * [KO] GPUSamplerDescriptor 옵션 객체
-     * [EN] GPUSamplerDescriptor options object
+     * [KO] GPUSamplerDescriptor 옵션 객체 (선택)
+     * [EN] GPUSamplerDescriptor options object (optional)
      */
     constructor(redGPUContext: RedGPUContext, options?: GPUSamplerDescriptor) {
         super(redGPUContext)
@@ -77,139 +74,125 @@ class Sampler extends ResourceBase {
     }
 
     /**
-     * [KO] U축 어드레스 모드를 반환합니다.
-     * [EN] Returns the address mode for the U coordinate.
-     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     * [KO] U축 어드레스 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the address mode for the U coordinate.
+     *
+     * @returns
+     * [KO] U축 어드레스 모드
+     * [EN] Address mode for the U coordinate
      */
     get addressModeU(): GPUAddressMode {
         return this.#addressModeU;
     }
 
-    /**
-     * [KO] U축 어드레스 모드를 설정합니다.
-     * [EN] Sets the address mode for the U coordinate.
-     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
-     */
     set addressModeU(value: GPUAddressMode) {
         this.#validateAddressMode(value, 'addressModeU')
     }
 
     /**
-     * [KO] V축 어드레스 모드를 반환합니다.
-     * [EN] Returns the address mode for the V coordinate.
-     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     * [KO] V축 어드레스 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the address mode for the V coordinate.
+     *
+     * @returns
+     * [KO] V축 어드레스 모드
+     * [EN] Address mode for the V coordinate
      */
     get addressModeV(): GPUAddressMode {
         return this.#addressModeV;
     }
 
-    /**
-     * [KO] V축 어드레스 모드를 설정합니다.
-     * [EN] Sets the address mode for the V coordinate.
-     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
-     */
     set addressModeV(value: GPUAddressMode) {
         this.#validateAddressMode(value, 'addressModeV')
     }
 
     /**
-     * [KO] W축 어드레스 모드를 반환합니다.
-     * [EN] Returns the address mode for the W coordinate.
-     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     * [KO] W축 어드레스 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the address mode for the W coordinate.
+     *
+     * @returns
+     * [KO] W축 어드레스 모드
+     * [EN] Address mode for the W coordinate
      */
     get addressModeW(): GPUAddressMode {
         return this.#addressModeW;
     }
 
-    /**
-     * [KO] W축 어드레스 모드를 설정합니다.
-     * [EN] Sets the address mode for the W coordinate.
-     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
-     */
     set addressModeW(value: GPUAddressMode) {
         this.#validateAddressMode(value, 'addressModeW')
     }
 
     /**
-     * [KO] 밉맵 필터 모드를 반환합니다.
-     * [EN] Returns the mipmap filter mode.
-     * @returns - [KO] 밉맵 필터 모드 [EN] Mipmap filter mode
+     * [KO] 밉맵 필터 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the mipmap filter mode.
+     *
+     * @returns
+     * [KO] 밉맵 필터 모드
+     * [EN] Mipmap filter mode
      */
     get mipmapFilter(): GPUMipmapFilterMode {
         return this.#mipmapFilter;
     }
 
-    /**
-     * [KO] 밉맵 필터 모드를 설정합니다.
-     * [EN] Sets the mipmap filter mode.
-     * @param value - [KO] 설정할 밉맵 필터 모드 [EN] Mipmap filter mode to set
-     */
     set mipmapFilter(value: GPUMipmapFilterMode) {
         this.#updateAndValidateFilter(value, validMipmapFilters, "mipmapFilter");
     }
 
     /**
-     * [KO] GPU 샘플러 객체를 반환합니다.
-     * [EN] Returns the GPU sampler object.
-     * @returns - [KO] WebGPU GPU 샘플러 객체 [EN] WebGPU GPU sampler object
+     * [KO] 생성된 `GPUSampler` 객체를 반환합니다.
+     * [EN] Returns the created `GPUSampler` object.
+     *
+     * @returns
+     * [KO] WebGPU `GPUSampler` 객체
+     * [EN] WebGPU `GPUSampler` object
      */
     get gpuSampler(): GPUSampler {
         return this.#gpuSampler;
     }
 
     /**
-     * [KO] 확대 필터 모드를 반환합니다.
-     * [EN] Returns the magnification filter mode.
-     * @returns - [KO] 확대 필터 모드 [EN] Magnification filter mode
+     * [KO] 확대 필터 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the magnification filter mode.
+     *
+     * @returns
+     * [KO] 확대 필터 모드
+     * [EN] Magnification filter mode
      */
     get magFilter(): GPUFilterMode {
         return this.#magFilter;
     }
 
-    /**
-     * [KO] 확대 필터 모드를 설정합니다.
-     * [EN] Sets the magnification filter mode.
-     * @param value - [KO] 설정할 확대 필터 모드 [EN] Magnification filter mode to set
-     */
     set magFilter(value: GPUFilterMode) {
         this.#updateAndValidateFilter(value, validFilters, "magFilter");
     }
 
     /**
-     * [KO] 축소 필터 모드를 반환합니다.
-     * [EN] Returns the minification filter mode.
-     * @returns - [KO] 축소 필터 모드 [EN] Minification filter mode
+     * [KO] 축소 필터 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the minification filter mode.
+     *
+     * @returns
+     * [KO] 축소 필터 모드
+     * [EN] Minification filter mode
      */
     get minFilter(): GPUFilterMode {
         return this.#minFilter;
     }
 
-    /**
-     * [KO] 축소 필터 모드를 설정합니다.
-     * [EN] Sets the minification filter mode.
-     * @param value - [KO] 설정할 축소 필터 모드 [EN] Minification filter mode to set
-     */
     set minFilter(value: GPUFilterMode) {
         this.#updateAndValidateFilter(value, validFilters, "minFilter");
     }
 
     /**
-     * [KO] 최대 애니소트로피 값을 반환합니다.
-     * [EN] Returns the maximum anisotropy value.
-     * @returns - [KO] 최대 애니소트로피 값 [EN] Maximum anisotropy value
+     * [KO] 최대 이방성 필터링(`maxAnisotropy`) 값을 반환하거나 설정합니다. (유효 범위: 1~16)
+     * [EN] Gets or sets the maximum anisotropy (`maxAnisotropy`) value. (Valid range: 1–16)
+     *
+     * @returns
+     * [KO] 최대 이방성 필터링 값
+     * [EN] Maximum anisotropy value
      */
     get maxAnisotropy(): number {
         return this.#maxAnisotropy;
     }
 
-    /**
-     * [KO] 최대 애니소트로피 값을 설정합니다. (1~16 사이)
-     * [EN] Sets the maximum anisotropy value. (Between 1 and 16)
-     * @param value - [KO] 애니소트로피 값 [EN] Anisotropy value
-     * @throws
-     * [KO] 1 미만 또는 16 초과 시 RangeError 발생
-     * [EN] Throws RangeError if value is less than 1 or greater than 16
-     */
     set maxAnisotropy(value: number) {
         validateUintRange(value, 1, 16)
         this.#maxAnisotropy = value;
@@ -217,9 +200,12 @@ class Sampler extends ResourceBase {
     }
 
     /**
-     * [KO] 애니소트로피 설정이 유효한지 확인합니다. (모든 필터가 'linear'여야 함)
-     * [EN] Checks if the anisotropy setting is valid. (All filters must be 'linear')
-     * @returns - [KO] 유효 여부 [EN] Whether it is valid
+     * [KO] 이방성 필터링 설정이 유효한지 여부를 반환합니다. (`magFilter`, `minFilter`, `mipmapFilter`가 모두 `'linear'`여야 유효)
+     * [EN] Returns whether the anisotropy setting is valid. (Valid only when `magFilter`, `minFilter`, and `mipmapFilter` are all `'linear'`)
+     *
+     * @returns
+     * [KO] 유효 여부
+     * [EN] Whether the setting is valid
      */
     get isAnisotropyValid(): boolean {
         return this.#maxAnisotropy
@@ -227,18 +213,10 @@ class Sampler extends ResourceBase {
             : true;
     }
 
-    /**
-     * [KO] GPU 샘플러 변경 시 리스너를 호출합니다.
-     * [EN] Calls listeners when the GPU sampler changes.
-     */
     #onGpuSamplerChanged() {
         this.notifyUpdate()
     }
 
-    /**
-     * [KO] 어드레스 모드 값의 유효성을 검사합니다.
-     * [EN] Validates the address mode value.
-     */
     #validateAddressMode(value: GPUAddressMode, modeName: string) {
         if (!validUVW.includes(value)) {
             consoleAndThrowError(`Invalid ${modeName} value. Must be one of ${validUVW.join(', ')}, but received: ${value}.`);
@@ -258,10 +236,6 @@ class Sampler extends ResourceBase {
         }
     }
 
-    /**
-     * [KO] 필터 값의 유효성을 검사하고 샘플러를 업데이트합니다.
-     * [EN] Validates the filter value and updates the sampler.
-     */
     #updateAndValidateFilter(filterValue: GPUFilterMode | GPUMipmapFilterMode,
                              validFilters: string[], filterName: string) {
         if (!validFilters.includes(filterValue) && filterValue !== null) {
@@ -282,12 +256,10 @@ class Sampler extends ResourceBase {
         }
     }
 
-    /** [KO] 현재 옵션을 기반으로 캐시 키를 생성합니다. [EN] Creates a cache key based on current options. */
     #getKey(): string {
         return `${this.#magFilter}:${this.#minFilter}:${this.#mipmapFilter}:${this.#addressModeU}:${this.#addressModeV}:${this.#addressModeW}:${this.#lodMinClamp}:${this.#lodMaxClamp}:${this.#compare}:${this.#maxAnisotropy}`;
     }
 
-    /** [KO] 샘플러 옵션을 업데이트하고 필요한 경우 새로운 GPUSampler를 생성합니다. [EN] Updates sampler options and creates a new GPUSampler if necessary. */
     #updateSampler(options?: GPUSamplerDescriptor) {
         if (options) {
             if (options.magFilter) this.#magFilter = options.magFilter;

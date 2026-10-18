@@ -1,6 +1,6 @@
 /**
- * [KO] 프리미티브 생성을 위한 핵심 클래스 및 유틸리티를 제공합니다.
- * [EN] Provides core classes and utilities for primitive generation.
+ * [KO] 기본 도형(Primitive) 생성 및 정점 레이아웃 관리를 위한 코어 클래스와 유틸리티를 제공합니다.
+ * [EN] Provides core classes and utilities for primitive geometry generation and vertex layout management.
  * @packageDocumentation
  */
 import createPrimitiveGeometry from "./createPrimitiveGeometry";

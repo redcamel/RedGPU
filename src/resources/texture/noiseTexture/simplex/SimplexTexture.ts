@@ -37,29 +37,33 @@ const BASIC_OPTIONS = {
  * @category NoiseTexture
  */
 class SimplexTexture extends ANoiseTexture {
-    /** [KO] 노이즈 패턴의 밀도/크기 [EN] Density/scale of the noise pattern */
     #frequency: number = BASIC_OPTIONS.frequency;
-    /** [KO] 노이즈 강도/대비 [EN] Strength/contrast of the noise */
     #amplitude: number = BASIC_OPTIONS.amplitude;
-    /** [KO] 합성할 노이즈 레이어 개수 [EN] Number of noise layers to combine */
     #octaves: number = BASIC_OPTIONS.octaves;
-    /** [KO] 각 옥타브마다 진폭 감소 비율 [EN] Rate of amplitude reduction for each octave */
     #persistence: number = BASIC_OPTIONS.persistence;
-    /** [KO] 각 옥타브마다 주파수 증가 비율 [EN] Rate of frequency increase for each octave */
     #lacunarity: number = BASIC_OPTIONS.lacunarity;
-    /** [KO] 노이즈 패턴의 시작점 [EN] Starting point of the noise pattern */
     #seed: number = BASIC_OPTIONS.seed;
-    /** [KO] 노이즈 차원 (1, 2, 3) [EN] Noise dimension (1, 2, 3) */
-    #noiseDimension: number = BASIC_OPTIONS.noiseDimension
+    #noiseDimension: number = BASIC_OPTIONS.noiseDimension;
 
     /**
      * [KO] SimplexTexture 인스턴스를 생성합니다.
      * [EN] Creates a SimplexTexture instance.
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
-     * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
-     * @param define - [KO] 노이즈 정의 객체 (선택) [EN] Noise definition object (optional)
-     * @param useMipmap - [KO] 밉맵 사용 여부 (기본값: true) [EN] Whether to use mipmaps (default: true)
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param width -
+     * [KO] 텍스처 가로 크기 (기본값: 1024)
+     * [EN] Texture width (default: 1024)
+     * @param height -
+     * [KO] 텍스처 세로 크기 (기본값: 1024)
+     * [EN] Texture height (default: 1024)
+     * @param define -
+     * [KO] 노이즈 정의 객체
+     * [EN] Noise definition object
+     * @param useMipmap -
+     * [KO] 밉맵 사용 여부 (기본값: true)
+     * [EN] Whether to use mipmaps (default: true)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -95,12 +99,22 @@ class SimplexTexture extends ANoiseTexture {
         }, useMipmap);
     }
 
-    /** [KO] 노이즈 차원을 반환합니다. [EN] Returns the noise dimension. */
+    /**
+     * [KO] 노이즈 차원을 반환합니다.
+     * [EN] Returns the noise dimension.
+     */
     get noiseDimension(): number {
         return this.#noiseDimension;
     }
 
-    /** [KO] 노이즈 차원을 설정합니다. [EN] Sets the noise dimension. */
+    /**
+     * [KO] 노이즈 차원을 설정합니다.
+     * [EN] Sets the noise dimension.
+     *
+     * @param value -
+     * [KO] 노이즈 차원 값
+     * [EN] Noise dimension value
+     */
     set noiseDimension(value: number) {
         if (validDimensions.includes(value)) {
             this.#noiseDimension = value;
@@ -110,83 +124,153 @@ class SimplexTexture extends ANoiseTexture {
         }
     }
 
-    /** [KO] 주파수(Frequency)를 반환합니다. [EN] Returns the frequency. */
+    /**
+     * [KO] 주파수(Frequency)를 반환합니다.
+     * [EN] Returns the frequency.
+     */
     get frequency(): number {
         return this.#frequency;
     }
 
-    /** [KO] 주파수(Frequency)를 설정합니다. [EN] Sets the frequency. */
+    /**
+     * [KO] 주파수(Frequency)를 설정합니다.
+     * [EN] Sets the frequency.
+     *
+     * @param value -
+     * [KO] 주파수 값
+     * [EN] Frequency value
+     */
     set frequency(value: number) {
         validatePositiveNumberRange(value);
         this.#frequency = value;
         this.updateUniform('frequency', value);
     }
 
-    /** [KO] 진폭(Amplitude)을 반환합니다. [EN] Returns the amplitude. */
+    /**
+     * [KO] 진폭(Amplitude)을 반환합니다.
+     * [EN] Returns the amplitude.
+     */
     get amplitude(): number {
         return this.#amplitude;
     }
 
-    /** [KO] 진폭(Amplitude)을 설정합니다. [EN] Sets the amplitude. */
+    /**
+     * [KO] 진폭(Amplitude)을 설정합니다.
+     * [EN] Sets the amplitude.
+     *
+     * @param value -
+     * [KO] 진폭 값
+     * [EN] Amplitude value
+     */
     set amplitude(value: number) {
         validatePositiveNumberRange(value);
         this.#amplitude = value;
         this.updateUniform('amplitude', value);
     }
 
-    /** [KO] 옥타브(Octaves) 수를 반환합니다. [EN] Returns the number of octaves. */
+    /**
+     * [KO] 옥타브(Octaves) 수를 반환합니다.
+     * [EN] Returns the number of octaves.
+     */
     get octaves(): number {
         return this.#octaves;
     }
 
-    /** [KO] 옥타브(Octaves) 수를 설정합니다. [EN] Sets the number of octaves. */
+    /**
+     * [KO] 옥타브(Octaves) 수를 설정합니다.
+     * [EN] Sets the number of octaves.
+     *
+     * @param value -
+     * [KO] 옥타브 수 (1 ~ 8)
+     * [EN] Number of octaves (1 to 8)
+     */
     set octaves(value: number) {
-        validateUintRange(value, 1, 8)
+        validateUintRange(value, 1, 8);
         this.#octaves = value;
         this.updateUniform('octaves', value);
     }
 
-    /** [KO] 지속성(Persistence)을 반환합니다. [EN] Returns the persistence. */
+    /**
+     * [KO] 지속성(Persistence)을 반환합니다.
+     * [EN] Returns the persistence.
+     */
     get persistence(): number {
         return this.#persistence;
     }
 
-    /** [KO] 지속성(Persistence)을 설정합니다. [EN] Sets the persistence. */
+    /**
+     * [KO] 지속성(Persistence)을 설정합니다.
+     * [EN] Sets the persistence.
+     *
+     * @param value -
+     * [KO] 지속성 값 (0 ~ 1)
+     * [EN] Persistence value (0 to 1)
+     */
     set persistence(value: number) {
-        validatePositiveNumberRange(value, 0, 1)
+        validatePositiveNumberRange(value, 0, 1);
         this.#persistence = value;
         this.updateUniform('persistence', value);
     }
 
-    /** [KO] 간극성(Lacunarity)을 반환합니다. [EN] Returns the lacunarity. */
+    /**
+     * [KO] 간극성(Lacunarity)을 반환합니다.
+     * [EN] Returns the lacunarity.
+     */
     get lacunarity(): number {
         return this.#lacunarity;
     }
 
-    /** [KO] 간극성(Lacunarity)을 설정합니다. [EN] Sets the lacunarity. */
+    /**
+     * [KO] 간극성(Lacunarity)을 설정합니다.
+     * [EN] Sets the lacunarity.
+     *
+     * @param value -
+     * [KO] 간극성 값
+     * [EN] Lacunarity value
+     */
     set lacunarity(value: number) {
         validatePositiveNumberRange(value);
         this.#lacunarity = value;
         this.updateUniform('lacunarity', value);
     }
 
-    /** [KO] 시드(Seed)를 반환합니다. [EN] Returns the seed. */
+    /**
+     * [KO] 시드(Seed)를 반환합니다.
+     * [EN] Returns the seed.
+     */
     get seed(): number {
         return this.#seed;
     }
 
-    /** [KO] 시드(Seed)를 설정합니다. [EN] Sets the seed. */
+    /**
+     * [KO] 시드(Seed)를 설정합니다.
+     * [EN] Sets the seed.
+     *
+     * @param value -
+     * [KO] 시드 값
+     * [EN] Seed value
+     */
     set seed(value: number) {
         this.#seed = value;
         this.updateUniform('seed', value);
     }
 
-    /** [KO] 시드를 랜덤 값으로 설정합니다. [EN] Randomizes the seed value. */
+    /**
+     * [KO] 시드를 무작위 값으로 설정합니다.
+     * [EN] Randomizes the seed value.
+     */
     randomizeSeed(): void {
         this.seed = Math.random() * 1000.0;
     }
 
-    /** [KO] 현재 모든 노이즈 설정을 반환합니다. [EN] Returns all current noise settings. */
+    /**
+     * [KO] 현재 모든 노이즈 설정을 반환합니다.
+     * [EN] Returns all current noise settings.
+     *
+     * @returns
+     * [KO] 노이즈 파라미터 객체
+     * [EN] Noise parameters object
+     */
     getSettings(): {
         frequency: number;
         amplitude: number;
@@ -205,7 +289,14 @@ class SimplexTexture extends ANoiseTexture {
         };
     }
 
-    /** [KO] 노이즈 설정을 일괄 적용합니다. [EN] Applies noise settings at once. */
+    /**
+     * [KO] 노이즈 설정을 일괄 적용합니다.
+     * [EN] Applies noise settings at once.
+     *
+     * @param settings -
+     * [KO] 적용할 노이즈 설정 부분 객체
+     * [EN] Partial noise settings object to apply
+     */
     applySettings(settings: Partial<{
         frequency: number;
         amplitude: number;
@@ -223,4 +314,5 @@ class SimplexTexture extends ANoiseTexture {
     }
 }
 
+Object.freeze(SimplexTexture);
 export default SimplexTexture;

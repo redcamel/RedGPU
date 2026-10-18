@@ -5,11 +5,8 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
- * [KO] 3차원 공간의 한 점에서 모든 방향으로 균일하게 퍼져 나가는 점광원(Point Light) 클래스입니다.
- * [EN] Point light class that emits light uniformly in all directions from a single point in 3D space.
- *
- * [KO] 광원으로부터의 거리가 멀어질수록 빛의 세기가 감쇠하며, 설정된 반경(`radius`) 내에서만 조명 연산에 영향을 미칩니다.
- * [EN] Light intensity attenuates as the distance from the source increases, affecting lighting calculations only within the configured `radius`.
+ * [KO] 한 점에서 모든 방향으로 균일하게 퍼져 나가는 점광원(Point Light) 클래스입니다. 설정된 반경(`radius`) 내에서 거리에 따라 빛의 세기가 감쇠합니다.
+ * [EN] Point light class that emits light uniformly in all directions from a single point. Light intensity attenuates with distance within the configured `radius`.
  *
  * ### Example
  * ```typescript
@@ -35,8 +32,8 @@ class PointLight extends ABaseLight {
     #drawDebugger: DrawDebuggerPointLight = null;
 
     /**
-     * [KO] 새로운 PointLight 인스턴스를 생성합니다.
-     * [EN] Creates a new PointLight instance.
+     * [KO] PointLight 인스턴스를 생성합니다.
+     * [EN] Creates a PointLight instance.
      *
      * ### Example
      * ```typescript
@@ -56,7 +53,7 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 점광원의 광속(Lumen)을 반환하거나 설정합니다.
+     * [KO] 점광원의 광속(Lumen)을 가져오거나 설정합니다.
      * [EN] Gets or sets the luminous flux (Lumen) of the point light.
      *
      * @returns
@@ -72,7 +69,7 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 X 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 X 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world X coordinate of the light source.
      *
      * @returns
@@ -88,7 +85,7 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 Y 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 Y 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world Y coordinate of the light source.
      *
      * @returns
@@ -104,7 +101,7 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 Z 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 Z 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world Z coordinate of the light source.
      *
      * @returns
@@ -132,7 +129,7 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛이 도달하는 최대 감쇠 반경(`radius`)을 반환하거나 설정합니다.
+     * [KO] 빛이 도달하는 최대 감쇠 반경(`radius`)을 가져오거나 설정합니다.
      * [EN] Gets or sets the maximum attenuation radius (`radius`) of the light.
      *
      * @returns
@@ -148,8 +145,8 @@ class PointLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 위치를 설정합니다. 개별 좌표(`x, y, z`) 또는 3요소 배열(`[x, y, z]`)을 전달할 수 있습니다.
-     * [EN] Sets the world position of the light source. Accepts individual coordinates (`x, y, z`) or a 3-element array (`[x, y, z]`).
+     * [KO] 광원의 월드 위치를 설정합니다.
+     * [EN] Sets the world position of the light source.
      *
      * ### Example
      * ```typescript

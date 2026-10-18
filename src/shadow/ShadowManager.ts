@@ -64,7 +64,6 @@ class ShadowManager {
         if (!hasCasters) {
             this.#directionalShadowManager.resetCastingList();
             if (this.#needsClear) {
-                // 최초 1회 또는 캐스터가 꺼진 첫 프레임: 뎁스 텍스처를 1.0으로 초기화하여 잔상/아티팩트 방지
                 this.#clearShadowDepthTextures(view);
                 this.#needsClear = false;
             }
@@ -89,22 +88,18 @@ class ShadowManager {
         const grassManager = landscape?.grassManager;
 
         for (let c = 0; c < cascadeCount; c++) {
-            // 💡 Zero-GC: 캐스케이드별 사전 캐싱된 디스크립터 재사용
             const cascadePassDescriptor = this.#getCascadePassDescriptor(c);
 
             redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, (viewShadowRenderPassEncoder) => {
                 view.currentCascadeIndex = c;
                 updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW');
 
-                // [Step 1: Null-Fragment Opaque Occluders (프래그먼트 없는 순수 뎁스 초고속 기록)]
                 if (this.#directionalShadowManager.castingList.length) {
                     renderShadowLayer(view, viewShadowRenderPassEncoder, c);
                 }
 
-                // [Step 2: Masked Alpha-Test Geometry (알파 텍스처 샘플링 & discard)]
                 foliageManager?.renderShadow(view, viewShadowRenderPassEncoder);
 
-                // 🌿 Cascade Filtering: 잔디는 초근거리(30m 이내, Cascade 0 및 1)에서만 그림자를 생성
                 if (c <= 1) {
                     grassManager?.renderShadow(view, viewShadowRenderPassEncoder);
                 }
@@ -128,9 +123,6 @@ class ShadowManager {
         keepLog("🧹 ShadowManager destroy 완료");
     }
 
-    /**
-     * [KO] 캐스케이드 인덱스에 해당하는 재사용 렌더 패스 디스크립터를 반환합니다 (Zero-GC).
-     */
     #getCascadePassDescriptor(c: number): GPURenderPassDescriptor {
         let descriptor = this.#cascadePassDescriptors[c];
         const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
@@ -153,10 +145,6 @@ class ShadowManager {
         return descriptor;
     }
 
-    /**
-     * [KO] 현재 씬 내에 그림자를 투영할 대상(Mesh, Landscape, Foliage)이 하나라도 존재하는지 빠르게 검사합니다 (Zero-GC).
-     * [EN] Quickly checks if there are any objects (Mesh, Landscape, Foliage) that cast shadows in the scene (Zero-GC).
-     */
     #hasAnyShadowCaster(view: View3D): boolean {
         if (this.#directionalShadowManager.castingList.length > 0) return true;
 
@@ -187,9 +175,6 @@ class ShadowManager {
         return false;
     }
 
-    /**
-     * [KO] 캐스케이드 클리어용 재사용 렌더 패스 디스크립터를 반환합니다 (Zero-GC).
-     */
     #getClearPassDescriptor(c: number): GPURenderPassDescriptor {
         let descriptor = this.#clearPassDescriptors[c];
         const layerView = this.#directionalShadowManager.getCascadeLayerView(c);
@@ -226,10 +211,6 @@ class ShadowManager {
         }
     }
 
-    /**
-     * [KO] 캐스터가 꺼지는 전환 프레임에서 잔상(Ghosting)을 지우기 위해 1회 뎁스 텍스처를 1.0으로 초기화합니다.
-     * [EN] Clears depth textures to 1.0 once in the transition frame when casters turn off to eliminate ghosting.
-     */
     #clearShadowDepthTextures(view: View3D): void {
         const {redGPUContext} = view;
         const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));

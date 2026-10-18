@@ -1,6 +1,6 @@
 /**
- * [KO] 다수의 포인트 조명 및 스포트 조명을 실시간 처리하기 위한 클러스터 라이팅(Clustered Lighting) 패스 및 매니저를 제공합니다.
- * [EN] Provides clustered lighting passes and managers for real-time processing of multiple point lights and spot lights.
+ * [KO] 다중 광원(`PointLight`, `SpotLight`) 처리를 위한 클러스터 라이팅 매니저 및 컴퓨트 패스 클래스들을 제공합니다.
+ * [EN] Provides clustered lighting manager and compute pass classes for processing multiple lights (`PointLight`, `SpotLight`).
  * @packageDocumentation
  */
 import PassClusterLightBound from "./pass/bound/PassClusterLightBound";

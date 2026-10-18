@@ -6,52 +6,164 @@ import ResourceManager from "../../../resources/core/resourceManager/ResourceMan
 import Sphere from "../../../primitive/Sphere";
 import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 
+/**
+ * [KO] glTF 스키닝 애니메이션을 위한 조인트, 역바인드 행렬 및 컴퓨트 파이프라인 리소스를 관리하는 클래스입니다.
+ * [EN] Class that manages joints, inverse bind matrices, and compute pipeline resources for glTF skinning animation.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 GLTFLoader에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is internally created by GLTFLoader.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category GLTF
+ */
 class ParsedSkinInfo_GLTF {
+    /**
+     * [KO] 스키닝에 참여하는 조인트 메쉬 배열
+     * [EN] Array of joint meshes participating in skinning
+     */
     joints: Mesh[] = []
+    /**
+     * [KO] 각 조인트의 역바인드 행렬(`Float32Array`) 배열
+     * [EN] Array of inverse bind matrices (`Float32Array`) for each joint
+     */
     inverseBindMatrices: Float32Array[]
+    /**
+     * [KO] 스켈레톤 루트 메쉬
+     * [EN] Skeleton root mesh
+     */
     skeletonMesh: Mesh
+    /**
+     * [KO] 정점 스토리지 메타 정보
+     * [EN] Vertex storage meta information
+     */
     vertexStorageInfo
+    /**
+     * [KO] 현재 프레임의 스키닝된 정점 데이터를 저장하는 GPU 버퍼
+     * [EN] GPU buffer storing skinned vertex data for the current frame
+     */
     vertexStorageBuffer: GPUBuffer
+    /**
+     * [KO] 이전 프레임의 스키닝된 정점 데이터를 저장하는 GPU 버퍼
+     * [EN] GPU buffer storing skinned vertex data for the previous frame
+     */
     prevVertexStorageBuffer: GPUBuffer
+    /**
+     * [KO] 대상 메쉬 노드의 글로벌 변환 역행렬
+     * [EN] Inverse global transform matrix of the target mesh node
+     */
     invertNodeGlobalTransform: Float32Array
+    /**
+     * [KO] 메쉬 정점에서 실제로 참조하는 조인트 인덱스 배열
+     * [EN] Array of joint indices actually referenced by the mesh vertices
+     */
     usedJoints: number[] = null
+    /**
+     * [KO] 컴퓨트 셰이더 워크그룹 크기
+     * [EN] Compute shader workgroup size
+     */
     WORK_SIZE: number = 64
+    /**
+     * [KO] 조인트 행렬 연산용 데이터 버퍼
+     * [EN] Data buffer for joint matrix computation
+     */
     jointData: Float32Array
+    /**
+     * [KO] 스키닝 유니폼 데이터를 저장하는 GPU 버퍼
+     * [EN] GPU buffer storing skinning uniform data
+     */
     uniformBuffer: GPUBuffer
+    /**
+     * [KO] 조인트 슬롯 인덱스 GPU 버퍼
+     * [EN] Joint slot indices GPU buffer
+     */
     jointSlotIndicesBuffer: GPUBuffer
+    /**
+     * [KO] 마지막으로 적용된 메쉬 모델 행렬
+     * [EN] Last applied mesh model matrix
+     */
     lastMeshModelMatrix: any = null;
+    /**
+     * [KO] 스키닝 연산용 컴퓨트 셰이더 모듈
+     * [EN] Compute shader module for skinning calculation
+     */
     computeShader: GPUShaderModule;
+    /**
+     * [KO] 스키닝 연산용 컴퓨트 파이프라인
+     * [EN] Compute pipeline for skinning calculation
+     */
     computePipeline: GPUComputePipeline;
+    /**
+     * [KO] 스키닝 리소스 바인드 그룹
+     * [EN] Skinning resource bind group
+     */
     bindGroup: GPUBindGroup;
+    /**
+     * [KO] 스키닝 바인드 그룹 레이아웃
+     * [EN] Skinning bind group layout
+     */
     skinnerBindGroupLayout: GPUBindGroupLayout;
+    /**
+     * [KO] 이전 프레임의 글로벌 정점 SSBO GPU 버퍼 참조
+     * [EN] Reference to the previous frame's global vertex SSBO GPU buffer
+     */
     prevGlobalVertexSSBOBuffer: GPUBuffer;
     #geometry: Sphere;
     #material: ColorMaterial
 
+    /**
+     * [KO] ParsedSkinInfo_GLTF 인스턴스를 생성합니다.
+     * [EN] Creates a ParsedSkinInfo_GLTF instance.
+     */
     constructor() {
         this.joints = [];
         this.inverseBindMatrices = null;
         this.skeletonMesh = null;
     }
 
+    /**
+     * [KO] 디버그용 구체 지오메트리를 반환합니다.
+     * [EN] Returns the sphere geometry for debugging.
+     *
+     * @returns
+     * [KO] 구체 지오메트리 인스턴스
+     * [EN] Sphere geometry instance
+     */
     get geometry(): Sphere {
         return this.#geometry;
     }
 
+    /**
+     * [KO] 디버그용 컬러 머티리얼을 반환합니다.
+     * [EN] Returns the color material for debugging.
+     *
+     * @returns
+     * [KO] 컬러 머티리얼 인스턴스
+     * [EN] Color material instance
+     */
     get material(): ColorMaterial {
         return this.#material;
     }
 
+    /**
+     * [KO] 대상 메쉬의 조인트 버퍼에서 실제로 사용되는 조인트 인덱스 목록을 추출합니다.
+     * [EN] Extracts the list of joint indices actually used from the target mesh's joint buffer.
+     *
+     * @param mesh -
+     * [KO] 조인트 정보를 추출할 대상 메쉬
+     * [EN] Target mesh to extract joint information from
+     * @returns
+     * [KO] 사용된 조인트 인덱스 배열
+     * [EN] Array of used joint indices
+     */
     getUsedJointIndices(mesh: Mesh): number[] {
         const usedJoints = new Set<number>();
         const {jointBuffer} = mesh.animationInfo;
-        // 인터리브된 데이터에서 joint 정보 추출
         if (!jointBuffer.data.length) return [];
         const data = jointBuffer.data;
         const len = data.length;
         for (let i = 0; i < len; i++) {
             const baseIndex = i;
-            // 각 정점마다 4개의 조인트 인덱스
             for (let j = 0; j < 4; j++) {
                 const jointIndex = Math.floor(data[baseIndex + j]);
                 if (jointIndex >= 0 && jointIndex < this.joints.length) {
@@ -62,6 +174,29 @@ class ParsedSkinInfo_GLTF {
         return Array.from(usedJoints);
     }
 
+    /**
+     * [KO] 스키닝 연산을 위한 GPU 컴퓨트 파이프라인과 유니폼 버퍼를 생성하고 초기화합니다.
+     * [EN] Creates and initializes the GPU compute pipeline and uniform buffer for skinning calculations.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU context
+     * @param device -
+     * [KO] WebGPU 디바이스
+     * [EN] WebGPU device
+     * @param vertexBuffer -
+     * [KO] 원본 정점 버퍼
+     * [EN] Source vertex buffer
+     * @param weightBuffer -
+     * [KO] 조인트 가중치 버퍼
+     * [EN] Joint weight buffer
+     * @param jointBuffer -
+     * [KO] 조인트 인덱스 버퍼
+     * [EN] Joint index buffer
+     * @param mesh -
+     * [KO] 스키닝 대상 메쉬
+     * [EN] Target mesh for skinning
+     */
     createCompute(
         redGPUContext: RedGPUContext,
         device: GPUDevice,
@@ -206,10 +341,8 @@ class ParsedSkinInfo_GLTF {
     `;
         this.computeShader = redGPUContext.resourceManager.createGPUShaderModule(`calcSkinMatrix_${this.usedJoints.length}`, {code: source})
 
-        // systemLayout 가져오기 (group 0)
         const systemLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
 
-        // skinnerLayout 명시적 생성 (group 1)
         this.skinnerBindGroupLayout = device.createBindGroupLayout({
             label: 'calcSkinMatrix_skinnerLayout',
             entries: [
@@ -222,7 +355,6 @@ class ParsedSkinInfo_GLTF {
             ]
         });
 
-        // 명시적 pipelineLayout 생성
         const pipelineLayout = device.createPipelineLayout({
             label: 'calcSkinMatrix_pipelineLayout',
             bindGroupLayouts: [systemLayout, this.skinnerBindGroupLayout]
@@ -237,21 +369,18 @@ class ParsedSkinInfo_GLTF {
             },
         });
 
-        // uniforms 사이즈 = meshSlotIndex (16바이트 정렬) + searchJointIndexTable + inverseBindMatrices + layout 메타데이터 (16바이트) + jointSlotIndices (Math.ceil(this.usedJoints.length / 4) * 16바이트) + invertNodeGlobalTransform (64바이트)
         const jointSlotIndicesNum = Math.ceil(this.usedJoints.length / 4) * 4;
         this.uniformBuffer = device.createBuffer({
             size: 16 + (this.joints.length * 4 * 4) + (this.joints.length * 16 * 4) + 16 + (jointSlotIndicesNum * 4) + 64,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
 
-        // 메인 메쉬의 globalVertexSlotIndex 최초 1회 주입
         device.queue.writeBuffer(
             this.uniformBuffer,
             0,
             new Uint32Array([mesh.globalVertexSlotIndex])
         )
 
-        // searchJointIndexTableData 주입
         const searchJointIndexTableData = new Uint32Array(this.joints.length * 4);
         searchJointIndexTableData.fill(0);
         this.usedJoints.forEach((jointIdx, i) => {
@@ -263,14 +392,12 @@ class ParsedSkinInfo_GLTF {
             searchJointIndexTableData
         )
 
-        // inverseBindMatrices 주입
         device.queue.writeBuffer(
             this.uniformBuffer,
             16 + (this.joints.length * 16),
             new Float32Array(this.inverseBindMatrices.map(v => Array.from(v)).flat())
         )
 
-        // 정점 레이아웃 메타데이터 기록 (u32 4개 = 16바이트)
         const layoutMetadata = new Uint32Array([stride, positionOffset, normalOffset, tangentOffset]);
         device.queue.writeBuffer(
             this.uniformBuffer,
@@ -278,7 +405,6 @@ class ParsedSkinInfo_GLTF {
             layoutMetadata
         )
 
-        // 조인트 슬롯 인덱스 데이터를 보관할 임시 배열 (4의 배수로 올림 패킹)
         const jointSlotIndices = new Uint32Array(jointSlotIndicesNum);
         jointSlotIndices.fill(0);
         this.usedJoints.forEach((jointIdx, i) => {
@@ -299,6 +425,26 @@ class ParsedSkinInfo_GLTF {
         )
     }
 
+    /**
+     * [KO] 스키닝 컴퓨트 파이프라인의 바인드 그룹을 갱신합니다.
+     * [EN] Updates the bind group for the skinning compute pipeline.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU context
+     * @param device -
+     * [KO] WebGPU 디바이스
+     * [EN] WebGPU device
+     * @param vertexBuffer -
+     * [KO] 원본 정점 버퍼
+     * [EN] Source vertex buffer
+     * @param weightBuffer -
+     * [KO] 조인트 가중치 버퍼
+     * [EN] Joint weight buffer
+     * @param jointBuffer -
+     * [KO] 조인트 인덱스 버퍼
+     * [EN] Joint index buffer
+     */
     updateBindGroup(
         redGPUContext: RedGPUContext,
         device: GPUDevice,
@@ -320,6 +466,10 @@ class ParsedSkinInfo_GLTF {
         this.prevGlobalVertexSSBOBuffer = redGPUContext.globalVertexSSBO.gpuBuffer
     }
 
+    /**
+     * [KO] 스키닝 정보와 관련된 모든 GPU 버퍼 및 리소스를 해제합니다.
+     * [EN] Destroys all GPU buffers and resources associated with the skinning information.
+     */
     destroy() {
         if (this.uniformBuffer) {
             this.uniformBuffer.destroy();

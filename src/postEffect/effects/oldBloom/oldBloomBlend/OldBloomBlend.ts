@@ -9,29 +9,41 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 
 
 interface OldBloomBlend {
+    /**
+     * [KO] 블룸 효과의 강도 (기본값: 1)
+     * [EN] Strength of the bloom effect (default: 1)
+     */
     bloomStrength: number
+    /**
+     * [KO] 최종 합성 시 노출 보정값 (기본값: 1)
+     * [EN] Exposure compensation value for final composition (default: 1)
+     */
     exposure: number
 }
 
 /**
- * [KO] 올드 블룸 블렌딩 이펙트입니다.
- * [EN] Old Bloom blending effect.
+ * [KO] 올드 블룸(Old Bloom) 후처리의 최종 블렌딩 단계를 수행하는 내부 이펙트 클래스입니다.
+ * [EN] Internal effect class that performs the final blending step of Old Bloom post-processing.
  *
- * [KO] 추출되어 블러 처리된 블룸 텍스처를 원본 이미지와 합성하는 마지막 단계를 담당합니다.
- * [EN] Responsible for the final step of blending the extracted and blurred bloom texture with the original image.
+ * [KO] 블러 처리된 블룸 텍스처를 YCoCg 색공간에서 원본 이미지와 가산 합성하며, 시스템(OldBloom)에 의해 자동으로 생성됩니다.
+ * [EN] Additively blends the blurred bloom texture with the original image in the YCoCg color space, and is automatically created by the system (OldBloom).
  *
- * [KO] YCoCg 색공간을 사용하여 밝기 정보를 보존하며 가산 혼합을 수행합니다.
- * [EN] Performs additive blending while preserving luminance information using the YCoCg color space.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
+ * @see [OldBloom example](/RedGPU/examples/postEffect/oldBloom/)
  * @category Visual Effects
  */
 class OldBloomBlend extends ASinglePassPostEffect {
-
-
     /**
      * [KO] OldBloomBlend 인스턴스를 생성합니다.
      * [EN] Creates an OldBloomBlend instance.
-     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -53,14 +65,27 @@ class OldBloomBlend extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 블룸 블렌딩 효과를 렌더링합니다.
-     * [EN] Renders the bloom blending effect.
+     * [KO] 원본 텍스처와 블러 처리된 블룸 텍스처를 합성하여 렌더링합니다.
+     * [EN] Renders by blending the original texture and the blurred bloom texture.
      *
-     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
-     * @param width - [KO] 너비 [EN] Width
-     * @param height - [KO] 높이 [EN] Height
-     * @param sourceTextureInfo - [KO] 원본 소스 텍스처 [EN] Original source texture
-     * @param sourceTextureInfo1 - [KO] 블러 처리된 블룸 소스 텍스처 [EN] Blurred bloom source texture
+     * @param view -
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width -
+     * [KO] 렌더링 너비 (픽셀 단위)
+     * [EN] Rendering width (in pixels)
+     * @param height -
+     * [KO] 렌더링 높이 (픽셀 단위)
+     * [EN] Rendering height (in pixels)
+     * @param sourceTextureInfo -
+     * [KO] 원본 소스 텍스처 정보
+     * [EN] Original source texture information
+     * @param sourceTextureInfo1 -
+     * [KO] 블러 처리된 블룸 소스 텍스처 정보
+     * [EN] Blurred bloom source texture information
+     * @returns
+     * [KO] 합성된 후처리 결과 (`IPostEffectResult`)
+     * [EN] Blended post-effect result (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult, sourceTextureInfo1: IPostEffectResult) {
         return super.render(view, width, height, sourceTextureInfo, sourceTextureInfo1);

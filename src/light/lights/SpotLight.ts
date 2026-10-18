@@ -5,11 +5,8 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
- * [KO] 공간의 한 점에서 특정 방향으로 원뿔(Cone) 형태의 빛을 방출하는 스포트라이트(Spot Light) 클래스입니다.
- * [EN] Spot light class that emits a cone-shaped beam of light in a specific direction from a single point in space.
- *
- * [KO] 반경(`radius`)에 따른 거리 감쇠와 함께, 내부 컷오프 각도(`innerCutoff`)와 외부 컷오프 각도(`outerCutoff`) 사이의 부드러운 가장자리 감쇠를 지원합니다.
- * [EN] Supports distance attenuation based on `radius` along with smooth edge falloff between the inner cutoff angle (`innerCutoff`) and outer cutoff angle (`outerCutoff`).
+ * [KO] 한 점에서 특정 방향으로 원뿔(Cone) 형태의 빛을 방출하는 스포트라이트(Spot Light) 클래스입니다. 반경(`radius`) 거리 감쇠와 내·외부 컷오프 각도(`innerCutoff`, `outerCutoff`) 기반 가장자리 감쇠를 지원합니다.
+ * [EN] Spot light class that emits a cone-shaped beam of light in a specific direction from a single point. Supports distance attenuation based on `radius` and smooth edge falloff between `innerCutoff` and `outerCutoff` angles.
  *
  * ### Example
  * ```typescript
@@ -42,8 +39,8 @@ class SpotLight extends ABaseLight {
     #drawDebugger: DrawDebuggerSpotLight = null;
 
     /**
-     * [KO] 새로운 SpotLight 인스턴스를 생성합니다.
-     * [EN] Creates a new SpotLight instance.
+     * [KO] SpotLight 인스턴스를 생성합니다.
+     * [EN] Creates a SpotLight instance.
      *
      * ### Example
      * ```typescript
@@ -63,7 +60,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 스포트라이트의 광속(Lumen)을 반환하거나 설정합니다.
+     * [KO] 스포트라이트의 광속(Lumen)을 가져오거나 설정합니다.
      * [EN] Gets or sets the luminous flux (Lumen) of the spot light.
      *
      * @returns
@@ -79,7 +76,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 X 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 X 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world X coordinate of the light source.
      *
      * @returns
@@ -95,7 +92,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 Y 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 Y 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world Y coordinate of the light source.
      *
      * @returns
@@ -111,7 +108,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 Z 좌표를 반환하거나 설정합니다.
+     * [KO] 광원의 월드 Z 좌표를 가져오거나 설정합니다.
      * [EN] Gets or sets the world Z coordinate of the light source.
      *
      * @returns
@@ -139,7 +136,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛이 도달하는 최대 감쇠 반경(`radius`)을 반환하거나 설정합니다.
+     * [KO] 빛이 도달하는 최대 감쇠 반경(`radius`)을 가져오거나 설정합니다.
      * [EN] Gets or sets the maximum attenuation radius (`radius`) of the light.
      *
      * @returns
@@ -155,7 +152,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛의 진행 방향 X 성분을 반환하거나 설정합니다.
+     * [KO] 빛의 진행 방향 X 성분을 가져오거나 설정합니다.
      * [EN] Gets or sets the X component of the light direction.
      *
      * @returns
@@ -171,7 +168,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛의 진행 방향 Y 성분을 반환하거나 설정합니다.
+     * [KO] 빛의 진행 방향 Y 성분을 가져오거나 설정합니다.
      * [EN] Gets or sets the Y component of the light direction.
      *
      * @returns
@@ -187,7 +184,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛의 진행 방향 Z 성분을 반환하거나 설정합니다.
+     * [KO] 빛의 진행 방향 Z 성분을 가져오거나 설정합니다.
      * [EN] Gets or sets the Z component of the light direction.
      *
      * @returns
@@ -203,7 +200,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛의 진행 방향 벡터(`[x, y, z]`)를 반환하거나 설정합니다.
+     * [KO] 빛의 진행 방향 벡터(`[x, y, z]`)를 가져오거나 설정합니다.
      * [EN] Gets or sets the light direction vector (`[x, y, z]`).
      *
      * @returns
@@ -221,7 +218,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛의 세기가 최대로 유지되는 내부 원뿔 각도(도 단위, `degree`)를 반환하거나 설정합니다.
+     * [KO] 빛의 세기가 최대로 유지되는 내부 원뿔 각도(도 단위, `degree`)를 가져오거나 설정합니다.
      * [EN] Gets or sets the inner cone cutoff angle (in degrees) within which light intensity remains at maximum.
      *
      * @returns
@@ -237,7 +234,7 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 빛이 완전히 소멸하는 외부 원뿔 각도(도 단위, `degree`)를 반환하거나 설정합니다.
+     * [KO] 빛이 완전히 소멸하는 외부 원뿔 각도(도 단위, `degree`)를 가져오거나 설정합니다.
      * [EN] Gets or sets the outer cone cutoff angle (in degrees) beyond which light completely falls off.
      *
      * @returns
@@ -253,8 +250,8 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원의 월드 위치를 설정합니다. 개별 좌표(`x, y, z`) 또는 3요소 배열(`[x, y, z]`)을 전달할 수 있습니다.
-     * [EN] Sets the world position of the light source. Accepts individual coordinates (`x, y, z`) or a 3-element array (`[x, y, z]`).
+     * [KO] 광원의 월드 위치를 설정합니다.
+     * [EN] Sets the world position of the light source.
      *
      * ### Example
      * ```typescript
@@ -288,8 +285,8 @@ class SpotLight extends ABaseLight {
     }
 
     /**
-     * [KO] 광원이 지정된 목표 지점을 바라보도록 방향 벡터(`direction`)를 계산하여 갱신합니다.
-     * [EN] Calculates and updates the direction vector (`direction`) so that the light points toward the specified target position.
+     * [KO] 광원이 지정된 목표 지점을 바라보도록 방향 벡터(`direction`)를 갱신합니다.
+     * [EN] Updates the direction vector (`direction`) so that the light points toward the specified target position.
      *
      * ### Example
      * ```typescript

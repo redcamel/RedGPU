@@ -3,11 +3,8 @@ import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/valid
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
- * [KO] 모든 조명(Light) 클래스의 기본이 되는 추상 클래스입니다.
- * [EN] Abstract class that serves as the base for all light classes.
- *
- * [KO] 조명의 색상(`color`), 강도 배율(`intensityMultiplier`), 디버거 활성화(`enableDebugger`) 등 모든 조명이 공유하는 공통 속성을 정의합니다.
- * [EN] Defines common properties shared by all lights, such as light color (`color`), intensity multiplier (`intensityMultiplier`), and debugger activation (`enableDebugger`).
+ * [KO] 모든 조명(Light)의 공통 속성(`color`, `intensityMultiplier`, `enableDebugger`)을 정의하는 추상 클래스입니다.
+ * [EN] Abstract class that defines common properties (`color`, `intensityMultiplier`, `enableDebugger`) for all lights.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -22,8 +19,8 @@ abstract class ABaseLight {
     #enableDebugger: boolean = false;
 
     /**
-     * [KO] ABaseLight의 생성자입니다.
-     * [EN] Constructor for ABaseLight.
+     * [KO] ABaseLight 인스턴스를 초기화합니다.
+     * [EN] Initializes the ABaseLight instance.
      *
      * @param color -
      * [KO] 조명의 기본 색상 (`ColorRGB` 인스턴스)
@@ -38,15 +35,8 @@ abstract class ABaseLight {
     }
 
     /**
-     * [KO] 조명 디버거 활성화 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether the light debugger is enabled.
-     *
-     * ### Example
-     * ```typescript
-     * // [KO] 조명 디버거 활성화
-     * // [EN] Enable light debugger
-     * light.enableDebugger = true;
-     * ```
+     * [KO] 조명 시각적 디버거 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the visual light debugger is enabled.
      *
      * @returns
      * [KO] 디버거 활성화 여부
@@ -61,15 +51,8 @@ abstract class ABaseLight {
     }
 
     /**
-     * [KO] 조명의 색상(`ColorRGB`) 객체를 가져오거나 설정합니다.
-     * [EN] Gets or sets the color (`ColorRGB`) object of the light.
-     *
-     * ### Example
-     * ```typescript
-     * // [KO] 조명 색상 변경
-     * // [EN] Change light color
-     * light.color.setColorByHEX('#ff0000');
-     * ```
+     * [KO] 조명의 색상(`ColorRGB`) 인스턴스를 반환하거나 설정합니다.
+     * [EN] Gets or sets the color (`ColorRGB`) instance of the light.
      *
      * @returns
      * [KO] 조명의 `ColorRGB` 인스턴스
@@ -87,19 +70,12 @@ abstract class ABaseLight {
     }
 
     /**
-     * [KO] 조명의 시각적 강도를 조절하기 위한 강도 배율을 가져오거나 설정합니다.
-     * [EN] Gets or sets the intensity multiplier to adjust the visual strength of the light.
-     *
-     * ### Example
-     * ```typescript
-     * // [KO] 조명 강도 배율 설정
-     * // [EN] Set light intensity multiplier
-     * light.intensityMultiplier = 1.5;
-     * ```
+     * [KO] 조명 강도 배율(`0` 이상의 실수)을 반환하거나 설정합니다.
+     * [EN] Gets or sets the light intensity multiplier (real number `0` or greater).
      *
      * @returns
-     * [KO] 조명 강도 배율 (`0` 이상의 값)
-     * [EN] Light intensity multiplier (value greater than or equal to `0`)
+     * [KO] 조명 강도 배율
+     * [EN] Light intensity multiplier
      */
     get intensityMultiplier(): number {
         return this.#intensityMultiplier;

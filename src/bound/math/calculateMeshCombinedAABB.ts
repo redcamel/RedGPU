@@ -2,13 +2,10 @@ import Mesh from "../../display/mesh/Mesh";
 import AABB from "../AABB";
 
 /**
- * [KO] 메시와 모든 자식 메시의 AABB를 통합하여 계산합니다.
- * [EN] Calculates a combined AABB encompassing the mesh and all its children.
+ * [KO] 메시와 모든 자식 메시의 바운딩 볼륨을 통합한 AABB를 계산합니다.
+ * [EN] Calculates a combined AABB encompassing the mesh and all its child meshes.
  *
- * [KO] 메시 계층 구조를 순회하며 모든 바운딩 볼륨을 통합한 새로운 AABB를 반환합니다.
- * [EN] Traverses the mesh hierarchy and returns a new AABB combining all bounding volumes.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const combinedAABB = RedGPU.Bound.calculateMeshCombinedAABB(rootMesh);
  * ```
@@ -28,23 +25,21 @@ const calculateMeshCombinedAABB = (mesh: Mesh): AABB => {
     return calculateCombinedAABBFromAABBs(allAABBs);
 };
 /**
- * [KO] 모든 자식 메시의 AABB를 재귀적으로 수집합니다.
- * [EN] Recursively collects AABBs of all child meshes.
+ * [KO] 대상 메시와 자식 메시들의 AABB를 재귀적으로 수집합니다.
+ * [EN] Recursively collects AABBs of the target mesh and its child meshes.
  *
  * @param mesh -
  * [KO] AABB를 수집할 메시 객체
  * [EN] Mesh object to collect AABB from
  * @param aabbs -
- * [KO] 수집된 AABB 배열
- * [EN] Array of collected AABBs
+ * [KO] 수집된 AABB가 저장될 배열
+ * [EN] Array to store collected AABBs
  */
 const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
-    // 지오메트리가 있는 경우에만 AABB 계산 및 추가
     if (mesh._geometry) {
         const aabb = mesh.boundingAABB
         aabbs.push(aabb);
     }
-    // 지오메트리가 없어도 자식들은 처리해야 함
     if (mesh.children) {
         for (let i = 0; i < mesh.children.length; i++) {
             const child = mesh.children[i];
@@ -55,8 +50,8 @@ const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
     }
 };
 /**
- * [KO] 여러 AABB를 통합하여 전체를 감싸는 AABB를 계산합니다.
- * [EN] Calculates an AABB encompassing multiple AABBs.
+ * [KO] 여러 AABB 배열로부터 전체 영역을 포함하는 단일 AABB를 계산합니다.
+ * [EN] Calculates a single AABB encompassing all AABBs in the array.
  *
  * @param aabbs -
  * [KO] 통합할 AABB 배열

@@ -3,18 +3,17 @@ import Primitive from "./core/Primitive";
 import PrimitiveUtils from "./core/PrimitiveUtils";
 
 /**
- * [KO] Cone(원뿔) 기본 도형 클래스입니다.
- * [EN] Cone primitive geometry class.
- *
- * [KO] 반지름, 높이, 세그먼트 등을 기반으로 3D 원뿔 형태의 데이터를 생성하여 관리합니다.
- * [EN] Generates and manages 3D cone data based on radius, height, segments, etc.
+ * [KO] 3D 원뿔 형태의 정점 및 인덱스 데이터를 생성하는 기본 도형 클래스입니다.
+ * [EN] Primitive geometry class that generates vertex and index data for a 3D cone.
  *
  * ### Example
  * ```typescript
- * // 반지름 1, 높이 2짜리 원뿔 생성
- * const cone = new RedGPU.Primitive.Cone(redGPUContext, 1, 2);
+ * const cone = new RedGPU.Primitive.Cone(redGPUContext, 1, 2, 32, 1, true);
  * ```
  * <iframe src="/RedGPU/examples/3d/primitive/cone/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Cone example](/RedGPU/examples/3d/primitive/cone/)
+ * @see [Primitives example](/RedGPU/examples/3d/primitive/primitives/)
  * @category Primitive
  */
 class Cone extends Primitive {
@@ -22,14 +21,35 @@ class Cone extends Primitive {
      * [KO] Cone 인스턴스를 생성합니다.
      * [EN] Creates an instance of Cone.
      *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param radius - [KO] 밑면 반지름 (기본값 1) [EN] Base radius (default 1)
-     * @param height - [KO] 높이 (기본값 1) [EN] Height (default 1)
-     * @param radialSegments - [KO] 원주 방향 분할 수 (기본값 32) [EN] Radial segments (default 32)
-     * @param heightSegments - [KO] 높이 방향 분할 수 (기본값 1) [EN] Height segments (default 1)
-     * @param capBottom - [KO] 밑면을 닫을지 여부 (기본값 true) [EN] Whether to close the bottom cap (default true)
-     * @param thetaStart - [KO] 시작 각도 (라디안, 기본값 0) [EN] Start angle (radians, default 0)
-     * @param thetaLength - [KO] 원호 각도 (라디안, 기본값 2*PI) [EN] Arc angle (radians, default 2*PI)
+     * ### Example
+     * ```typescript
+     * const cone = new RedGPU.Primitive.Cone(redGPUContext, 1, 2, 32, 1, true);
+     * ```
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param radius -
+     * [KO] 밑면 반지름 (기본값: 1)
+     * [EN] Base radius (default: 1)
+     * @param height -
+     * [KO] 높이 (기본값: 1)
+     * [EN] Height (default: 1)
+     * @param radialSegments -
+     * [KO] 원주 방향 분할 수 (기본값: 32)
+     * [EN] Number of radial segments (default: 32)
+     * @param heightSegments -
+     * [KO] 높이 방향 분할 수 (기본값: 1)
+     * [EN] Number of height segments (default: 1)
+     * @param capBottom -
+     * [KO] 밑면 단면 생성 여부 (기본값: true)
+     * [EN] Whether to generate the bottom cap (default: true)
+     * @param thetaStart -
+     * [KO] 시작 각도 (라디안, 기본값: 0.0)
+     * [EN] Start angle in radians (default: 0.0)
+     * @param thetaLength -
+     * [KO] 원호 중심각 (라디안, 기본값: `Math.PI * 2`)
+     * [EN] Central angle of the circular sector in radians (default: `Math.PI * 2`)
      */
     constructor(redGPUContext: RedGPUContext,
                 radius: number = 1,

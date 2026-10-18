@@ -58,6 +58,9 @@ class TAACASPass extends ASinglePassPostEffect {
      * [KO] 적응형 샤프닝(CAS) 강도를 반환하거나 설정합니다. 허용 범위는 `0.0` ~ `1.0`이며 기본값은 `0.5`입니다.
      * [EN] Gets or sets the Contrast Adaptive Sharpening (CAS) strength. Valid range is `0.0` to `1.0`, and the default value is `0.5`.
      *
+     * @returns
+     * [KO] CAS 샤프닝 강도 (`0.0` ~ `1.0`)
+     * [EN] CAS sharpening strength (`0.0` to `1.0`)
      * @throws
      * [KO] `value`가 `0.0` ~ `1.0` 범위를 벗어날 경우 에러가 발생합니다.
      * [EN] Throws an error if `value` is outside the `0.0` to `1.0` range.

@@ -74,6 +74,12 @@ import getTintBlendMode_wgsl from './shader/color/getTintBlendMode.wgsl';
 import getLinearizeDepth_wgsl from './shader/depth/getLinearizeDepth.wgsl';
 import getIsFinite_wgsl from './shader/math/getIsFinite.wgsl';
 
+/**
+ * [KO] 셰이더 수학 연산 함수 라이브러리입니다.
+ * [EN] Shader math calculation functions library.
+ *
+ * @category Shader
+ */
 export namespace MathLibrary {
 
     export namespace hash {
@@ -3358,6 +3364,12 @@ export namespace DisplacementLibrary {
     export const getDisplacementNormal = getDisplacementNormal_wgsl;
 }
 
+/**
+ * [KO] RedGPU 엔진 내부 및 사용자 정의 셰이더에서 사용하는 표준 WGSL 셰이더 코드 라이브러리입니다.
+ * [EN] Standard WGSL shader code library used in RedGPU engine internals and custom shaders.
+ *
+ * @category Shader
+ */
 export namespace ShaderLibrary {
     /**
      * // [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.

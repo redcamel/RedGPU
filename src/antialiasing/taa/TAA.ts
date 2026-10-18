@@ -54,6 +54,10 @@ class TAA extends ASinglePassPostEffect {
      * // [EN] Adjust TAA sharpening strength
      * view.taa.sharpness = 0.6;
      * ```
+     *
+     * @returns
+     * [KO] CAS 선명도 강도 (`0.0` ~ `1.0`)
+     * [EN] CAS sharpening strength (`0.0` to `1.0`)
      */
     get sharpness(): number {
         return this.#casPass.sharpness;
@@ -148,6 +152,10 @@ class TAA extends ASinglePassPostEffect {
     /**
      * [KO] TAA의 시간적 블렌딩 블러를 보완하는 내장 `TAACASPass` 인스턴스를 반환합니다.
      * [EN] Returns the built-in `TAACASPass` instance that compensates for TAA temporal blending blur.
+     *
+     * @returns
+     * [KO] 내장 `TAACASPass` 인스턴스
+     * [EN] Built-in `TAACASPass` instance
      */
     get casPass(): TAACASPass {
         return this.#casPass;
@@ -156,6 +164,10 @@ class TAA extends ASinglePassPostEffect {
     /**
      * [KO] 이전 프레임의 지터가 제거된 투영-뷰 행렬(`mat4`)을 반환합니다.
      * [EN] Returns the unjittered projection-view matrix (`mat4`) from the previous frame.
+     *
+     * @returns
+     * [KO] 이전 프레임의 투영-뷰 행렬(`mat4`)
+     * [EN] Previous frame's projection-view matrix (`mat4`)
      */
     get prevNoneJitterProjectionViewMatrix(): mat4 {
         return this.#prevNoneJitterProjectionViewMatrix;
@@ -164,6 +176,10 @@ class TAA extends ASinglePassPostEffect {
     /**
      * [KO] 현재까지 누적된 TAA 렌더링 프레임 인덱스를 반환합니다.
      * [EN] Returns the accumulated TAA rendering frame index.
+     *
+     * @returns
+     * [KO] 누적 프레임 인덱스
+     * [EN] Accumulated frame index
      */
     get frameIndex(): number {
         return this.#frameIndex;
@@ -172,6 +188,10 @@ class TAA extends ASinglePassPostEffect {
     /**
      * [KO] TAA 히스토리 텍스처, 유니폼 버퍼 및 CAS 패스가 점유 중인 총 비디오 메모리 크기(Byte)를 반환합니다.
      * [EN] Returns the total video memory size (in bytes) occupied by the TAA history textures, uniform buffer, and CAS pass.
+     *
+     * @returns
+     * [KO] 점유 중인 총 비디오 메모리 크기 (Byte)
+     * [EN] Total occupied video memory size in bytes
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;

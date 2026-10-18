@@ -1,19 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 
-/**
- * [KO] 이미지 파싱 결과 데이터 정보 타입입니다.
- * [EN] Image parsing result data info type.
- */
 export interface ParsedImageData {
-    /** [KO] 픽셀 데이터 [EN] Pixel data */
     pixels: Uint16Array | Float32Array | Uint8Array | Uint8ClampedArray;
-    /** [KO] 이미지 가로 크기 [EN] Image width */
     width: number;
-    /** [KO] 이미지 세로 크기 [EN] Image height */
     height: number;
 }
 
-// Zero-GC 정적 재사용 핑퐁 행 버퍼 (Static Ping-Pong Row Buffers)
 let g_rowBufA = new Uint8Array(8192);
 let g_rowBufB = new Uint8Array(8192);
 
@@ -24,15 +16,6 @@ function ensureRowBufferSize(size: number): void {
     }
 }
 
-/**
- * [KO] ArrayBuffer 형태의 16비트 PNG 데이터를 원본 알고리즘과 100% 완전히 동일하게 파싱하여 Uint16Array 픽셀 데이터를 추출합니다.
- * [EN] Parses 16-bit PNG data from ArrayBuffer 100% identically to the original algorithm and extracts Uint16Array pixel data.
- *
- * @param buffer - [KO] PNG 바이너리 ArrayBuffer [EN] PNG binary ArrayBuffer
- * @param flipY - [KO] Y축 반전 여부 (기본값: false) [EN] Whether to flip Y-axis (Default: false)
- * @returns [KO] 디코딩된 픽셀 정보 객체 또는 실패 시 null [EN] Decoded pixel info object or null on failure
- * @category Texture
- */
 export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = false): Promise<ParsedImageData | null> {
     try {
         const view = new DataView(buffer);
@@ -49,14 +32,14 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
         while (offset < buffer.byteLength) {
             const length = view.getUint32(offset);
             const type = view.getUint32(offset + 4);
-            if (type === 0x49484452) { // IHDR
+            if (type === 0x49484452) {
                 width = view.getUint32(offset + 8);
                 height = view.getUint32(offset + 12);
                 bitDepth = view.getUint8(offset + 16);
                 colorType = view.getUint8(offset + 17);
-            } else if (type === 0x49444154) { // IDAT
+            } else if (type === 0x49444154) {
                 idatChunks.push(new Uint8Array(buffer, offset + 8, length));
-            } else if (type === 0x49454E44) { // IEND
+            } else if (type === 0x49454E44) {
                 break;
             }
             offset += 12 + length;
@@ -113,7 +96,6 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
         let curRow = g_rowBufB;
         prevRow.fill(0, 0, rowByteLength);
 
-        // ★ Zero-GC 핑퐁 행 버퍼(Static Ping-Pong Row Buffer) 알고리즘 (매 행 임시 객체/Subarray 생성 100% 소멸)
         for (let y = 0; y < height; y++) {
             const rowStart = y * stride;
             const filterType = decompressedData[rowStart];
@@ -126,15 +108,15 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
                 const c = i >= bytesPerPixel ? prevRow[i - bytesPerPixel] : 0;
 
                 let reconstructed = 0;
-                if (filterType === 0) { // None
+                if (filterType === 0) {
                     reconstructed = x;
-                } else if (filterType === 1) { // Sub
+                } else if (filterType === 1) {
                     reconstructed = (x + a);
-                } else if (filterType === 2) { // Up
+                } else if (filterType === 2) {
                     reconstructed = (x + b);
-                } else if (filterType === 3) { // Average
+                } else if (filterType === 3) {
                     reconstructed = (x + ((a + b) >> 1));
-                } else if (filterType === 4) { // Paeth
+                } else if (filterType === 4) {
                     const p = a + b - c;
                     const pa = Math.abs(p - a);
                     const pb = Math.abs(p - b);
@@ -147,18 +129,15 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
                 curRow[i] = reconstructed & 0xFF;
             }
 
-            // Extract 16-bit values and normalize/pack to 16-bit format
             const targetY = flipY ? (height - 1 - y) : y;
             const rowOffset = targetY * width;
             for (let x = 0; x < width; x++) {
                 const sampleIdx = x * bytesPerPixel;
                 const highByte = curRow[sampleIdx];
                 const lowByte = curRow[sampleIdx + 1];
-                // PNG 16-bit is Big-Endian: (highByte << 8) | lowByte
                 outPixels[rowOffset + x] = (highByte << 8) | lowByte;
             }
 
-            // 핑퐁 버퍼 포인터 스와핑 (Zero-GC)
             const temp = prevRow;
             prevRow = curRow;
             curRow = temp;

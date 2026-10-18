@@ -5,23 +5,89 @@ import LandscapeTextureDebugger from "./core/LandscapeTextureDebugger";
 import vhtDebuggerWGSL from "./core/shader/vhtDebugger.wgsl";
 import textureDebuggerFragmentWGSL from "./core/shader/textureDebuggerFragment.wgsl";
 
+/**
+ * [KO] 지형 디버그 속성 키 타입입니다.
+ * [EN] Key type for landscape debug properties.
+ * @category Debugger
+ */
 export type DebuggerPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 
+/**
+ * [KO] 지형 디버그 속성 변경 시 호출되는 콜백 함수 타입입니다.
+ * [EN] Callback function type invoked when a landscape debug property changes.
+ * @category Debugger
+ */
 export type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean | number) => void;
 
+/**
+ * [KO] 지형 디버거 매니저 생성 옵션 인터페이스입니다.
+ * [EN] Configuration options interface for creating a `LandscapeDebuggerManager`.
+ * @category Debugger
+ */
 export interface LandscapeDebuggerManagerOptions {
+    /**
+     * [KO] 공간 그리드(LOD) 디버거 활성화 여부
+     * [EN] Whether to enable the spatial grid (LOD) debugger
+     */
     spatialGrid?: boolean;
+    /**
+     * [KO] 가상 하이트맵 텍스처(VHT) 디버거 활성화 여부
+     * [EN] Whether to enable the Virtual Heightmap Texture (VHT) debugger
+     */
     vht?: boolean;
+    /**
+     * [KO] 가상 노멀 텍스처(VNT) 디버거 활성화 여부
+     * [EN] Whether to enable the Virtual Normal Texture (VNT) debugger
+     */
     vnt?: boolean;
+    /**
+     * [KO] 가상 블렌드 베이스 컬러 텍스처(VBT) 디버거 활성화 여부
+     * [EN] Whether to enable the Virtual Blend BaseColor Texture (VBT) debugger
+     */
     vbt?: boolean;
+    /**
+     * [KO] 가상 블렌드 노멀 텍스처(VBT Normal) 디버거 활성화 여부
+     * [EN] Whether to enable the Virtual Blend Normal Texture (VBT Normal) debugger
+     */
     vbtNormal?: boolean;
+    /**
+     * [KO] 가상 블렌드 ORM 텍스처(VBT ORM) 디버거 활성화 여부
+     * [EN] Whether to enable the Virtual Blend ORM Texture (VBT ORM) debugger
+     */
     vbtORM?: boolean;
+    /**
+     * [KO] 지형 와이어프레임 렌더링 활성화 여부
+     * [EN] Whether to enable landscape wireframe rendering
+     */
     landscapeWireframe?: boolean;
+    /**
+     * [KO] 지형 LOD 단계별 색상 시각화 활성화 여부
+     * [EN] Whether to enable landscape LOD level coloration
+     */
     landscapeLodColoration?: boolean;
+    /**
+     * [KO] 지형 디버그 렌더링 모드 인덱스
+     * [EN] Landscape debug rendering mode index
+     */
     landscapeDebugMode?: number;
+    /**
+     * [KO] 디버그 속성 변경 시 호출될 콜백 핸들러
+     * [EN] Callback handler invoked when a debug property changes
+     */
     onDebugPropertyChange?: DebuggerPropertyChangeHandler;
 }
 
+/**
+ * [KO] 지형(Landscape)의 공간 그리드(LOD) 및 가상 텍스처(VHT, VNT, VBT) 디버거와 디버그 렌더링 상태를 통합 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that integrates and controls spatial grid (LOD) and virtual texture (VHT, VNT, VBT) debuggers and debug rendering states for `Landscape`.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Debugger
+ */
 class LandscapeDebuggerManager {
     #landscape: Landscape;
     #tileStreamer: LandscapeTileStreamer;
@@ -45,6 +111,20 @@ class LandscapeDebuggerManager {
     #landscapeDebugMode: number = 0;
     #onDebugPropertyChange?: DebuggerPropertyChangeHandler;
 
+    /**
+     * [KO] `LandscapeDebuggerManager` 인스턴스를 생성합니다.
+     * [EN] Creates a `LandscapeDebuggerManager` instance.
+     *
+     * @param landscape -
+     * [KO] 대상 지형 인스턴스
+     * [EN] Target `Landscape` instance
+     * @param tileStreamer -
+     * [KO] 지형 타일 스트리머 인스턴스
+     * [EN] `LandscapeTileStreamer` instance
+     * @param options -
+     * [KO] 초기 디버거 설정 옵션
+     * [EN] Initial debugger configuration options
+     */
     constructor(landscape: Landscape, tileStreamer: LandscapeTileStreamer, options?: LandscapeDebuggerManagerOptions) {
         this.#landscape = landscape;
         this.#tileStreamer = tileStreamer;
@@ -74,10 +154,24 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 관리 대상 지형(`Landscape`) 인스턴스를 반환합니다.
+     * [EN] Returns the managed `Landscape` instance.
+     * @returns
+     * [KO] `Landscape` 인스턴스
+     * [EN] `Landscape` instance
+     */
     get landscape(): Landscape {
         return this.#landscape;
     }
 
+    /**
+     * [KO] 지형 와이어프레임 렌더링 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether landscape wireframe rendering is enabled.
+     * @returns
+     * [KO] 와이어프레임 활성화 여부
+     * [EN] Whether wireframe is enabled
+     */
     get landscapeWireframe(): boolean {
         return this.#landscapeWireframe;
     }
@@ -89,6 +183,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 지형 디버그 렌더링 모드를 반환하거나 설정합니다.
+     * [EN] Gets or sets the landscape debug rendering mode.
+     * @returns
+     * [KO] 디버그 모드 값
+     * [EN] Debug mode value
+     */
     get landscapeDebugMode(): number {
         return this.#landscapeDebugMode;
     }
@@ -100,6 +201,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 지형 LOD 단계별 색상 시각화 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether landscape LOD coloration is enabled.
+     * @returns
+     * [KO] LOD 색상 시각화 활성화 여부
+     * [EN] Whether LOD coloration is enabled
+     */
     get landscapeLodColoration(): boolean {
         return this.#landscapeLodColoration;
     }
@@ -111,6 +219,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 공간 그리드(LOD) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the spatial grid (LOD) debugger overlay is enabled.
+     * @returns
+     * [KO] 공간 그리드 디버거 활성화 여부
+     * [EN] Whether the spatial grid debugger is enabled
+     */
     get spatialGrid(): boolean {
         return this.#enableSpatialGrid;
     }
@@ -130,6 +245,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 가상 하이트맵 텍스처(VHT) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the Virtual Heightmap Texture (VHT) debugger overlay is enabled.
+     * @returns
+     * [KO] VHT 디버거 활성화 여부
+     * [EN] Whether the VHT debugger is enabled
+     */
     get vht(): boolean {
         return this.#enableVHT;
     }
@@ -159,6 +281,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 가상 노멀 텍스처(VNT) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the Virtual Normal Texture (VNT) debugger overlay is enabled.
+     * @returns
+     * [KO] VNT 디버거 활성화 여부
+     * [EN] Whether the VNT debugger is enabled
+     */
     get vnt(): boolean {
         return this.#enableVNT;
     }
@@ -188,6 +317,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 가상 블렌드 베이스 컬러 텍스처(VBT BaseColor) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the Virtual Blend BaseColor Texture (VBT BaseColor) debugger overlay is enabled.
+     * @returns
+     * [KO] VBT BaseColor 디버거 활성화 여부
+     * [EN] Whether the VBT BaseColor debugger is enabled
+     */
     get vbt(): boolean {
         return this.#enableVBT;
     }
@@ -217,6 +353,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 가상 블렌드 노멀 텍스처(VBT Normal) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the Virtual Blend Normal Texture (VBT Normal) debugger overlay is enabled.
+     * @returns
+     * [KO] VBT Normal 디버거 활성화 여부
+     * [EN] Whether the VBT Normal debugger is enabled
+     */
     get vbtNormal(): boolean {
         return this.#enableVBTNormal;
     }
@@ -246,6 +389,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 가상 블렌드 ORM 텍스처(VBT ORM) 디버거 오버레이 활성화 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets whether the Virtual Blend ORM Texture (VBT ORM) debugger overlay is enabled.
+     * @returns
+     * [KO] VBT ORM 디버거 활성화 여부
+     * [EN] Whether the VBT ORM debugger is enabled
+     */
     get vbtORM(): boolean {
         return this.#enableVBTORM;
     }
@@ -275,6 +425,13 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 모든 지형 디버거 오버레이의 전체 가시성 여부를 반환하거나 설정합니다.
+     * [EN] Gets or sets the overall visibility of all landscape debugger overlays.
+     * @returns
+     * [KO] 전체 가시성 여부
+     * [EN] Overall visibility state
+     */
     get visible(): boolean {
         return this.#visible;
     }
@@ -289,6 +446,14 @@ class LandscapeDebuggerManager {
         if (this.#vbtORMDebugger) this.#vbtORMDebugger.visible = val && this.#enableVBTORM;
     }
 
+    /**
+     * [KO] 활성화된 모든 지형 디버거 오버레이를 갱신합니다.
+     * [EN] Updates all enabled landscape debugger overlays.
+     *
+     * @param camera -
+     * [KO] 카메라 위치 및 시야각 표시에 사용할 카메라 인스턴스
+     * [EN] Camera instance used to display camera position and FOV
+     */
     update(camera?: any): void {
         if (!this.#visible) return;
 
@@ -323,6 +488,10 @@ class LandscapeDebuggerManager {
         }
     }
 
+    /**
+     * [KO] 생성된 모든 디버거 인스턴스와 관련 리소스를 해제합니다.
+     * [EN] Destroys all created debugger instances and releases related resources.
+     */
     destroy(): void {
         this.landscapeWireframe = false;
         this.landscapeLodColoration = false;

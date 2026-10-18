@@ -38,9 +38,25 @@ const tempFloat32_4 = new Float32Array(4);
 const up = new Float32Array([0, 1, 0]);
 
 interface Mesh {
+    /**
+     * [KO] 그림자 수신 여부
+     * [EN] Whether to receive shadows
+     */
     receiveShadow: boolean
+    /**
+     * [KO] TAA 지터(Jitter) 비활성화 여부
+     * [EN] Whether to disable TAA jitter
+     */
     disableJitter: boolean
+    /**
+     * [KO] 변위 텍스처(Displacement Texture) 사용 여부
+     * [EN] Whether to use displacement texture
+     */
     useDisplacementTexture: boolean
+    /**
+     * [KO] Mesh 인스턴스 여부 판별 식별자
+     * [EN] Identifier to determine if it is a Mesh instance
+     */
     isInstanceofMesh: boolean
 }
 
@@ -59,7 +75,7 @@ interface LODGPURenderInfo {
  * [KO] 위치, 회전, 스케일, 피벗, 계층 구조, 그림자, 디버깅, 이벤트 등 다양한 기능을 지원합니다.
  * [EN] Supports various functions such as position, rotation, scale, pivot, hierarchy, shadow, debugging, and events.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
  * scene.addChild(mesh);
@@ -103,167 +119,39 @@ class Mesh extends MeshBase {
     #waterWaveStrength: number = 1.0;
     #waterInteractionStatic: boolean = false;
 
-    /**
-     * [KO] 부모 객체
-     * [EN] Parent object
-     */
     #parent: Object3DContainer
-    /**
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     #x: number = 0
-    /**
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     #y: number = 0
-    /**
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     #z: number = 0
-    /**
-     * [KO] 위치 배열 [x, y, z]
-     * [EN] Position array [x, y, z]
-     */
     #positionArray: Float32Array = new Float32Array([0, 0, 0])
-    /**
-     * [KO] 피벗 X
-     * [EN] Pivot X
-     */
     #pivotX: number = 0
-    /**
-     * [KO] 피벗 Y
-     * [EN] Pivot Y
-     */
     #pivotY: number = 0
-    /**
-     * [KO] 피벗 Z
-     * [EN] Pivot Z
-     */
     #pivotZ: number = 0
-    /**
-     * [KO] 피킹 ID
-     * [EN] Picking ID
-     */
     readonly #pickingId: number
-    /**
-     * [KO] X 스케일
-     * [EN] X scale
-     */
     #scaleX: number = 1
-    /**
-     * [KO] Y 스케일
-     * [EN] Y scale
-     */
     #scaleY: number = 1
-    /**
-     * [KO] Z 스케일
-     * [EN] Z scale
-     */
     #scaleZ: number = 1
-    /**
-     * [KO] 스케일 배열 [x, y, z]
-     * [EN] Scale array [x, y, z]
-     */
     #scaleArray: Float32Array = new Float32Array([1, 1, 1])
-    /**
-     * [KO] X축 회전 (deg)
-     * [EN] X-axis rotation (deg)
-     */
     #rotationX: number = 0
-    /**
-     * [KO] Y축 회전 (deg)
-     * [EN] Y-axis rotation (deg)
-     */
     #rotationY: number = 0
-    /**
-     * [KO] Z축 회전 (deg)
-     * [EN] Z-axis rotation (deg)
-     */
     #rotationZ: number = 0
-    /**
-     * [KO] 회전 배열 [x, y, z] (deg)
-     * [EN] Rotation array [x, y, z] (deg)
-     */
     #rotationArray: Float32Array = new Float32Array([0, 0, 0])
-    /**
-     * [KO] 이벤트 핸들러 객체
-     * [EN] Event handler object
-     */
     #events: any = {}
-    /**
-     * [KO] 등록된 이벤트 개수
-     * [EN] Number of registered events
-     */
     #eventsNum: number = 0
-    /**
-     * [KO] 프러스텀 컬링 무시 여부
-     * [EN] Whether to ignore frustum culling
-     */
     #ignoreFrustumCulling: boolean = false
-    /**
-     * [KO] 투영 면적 Culling 사용 여부
-     * [EN] Whether to use screen space size culling
-     */
     #useScreenSpaceSizeCulling: boolean = false
-    /**
-     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값
-     * [EN] Minimum size ratio threshold for screen space size culling
-     */
     #minScreenSpaceSize: number = 0.01
-    /**
-     * [KO] 메시 투명도
-     * [EN] Mesh opacity
-     */
     #opacity: number = 1;
-    /**
-     * [KO] 디버그 메시 객체
-     * [EN] Debug mesh object
-     */
     #drawDebugger: DrawDebuggerMesh;
-    /**
-     * [KO] 디버그 활성화 여부
-     * [EN] Whether to enable debugging
-     */
     #enableDebugger: boolean = false;
-    /**
-     * [KO] 캐싱된 AABB (Zero-GC 재사용)
-     * [EN] Cached AABB (Zero-GC reusable)
-     */
     #cachedBoundingAABB: AABB = new AABB();
     #dirtyBoundingAABB: boolean = true;
-    /**
-     * [KO] 캐싱된 OBB
-     * [EN] Cached OBB
-     */
     #cachedBoundingOBB: OBB;
-    /**
-     * [KO] 이전 프레임의 모델 행렬
-     * [EN] Model matrix of the previous frame
-     */
     #prevModelMatrix: Float32Array;
-    /**
-     * [KO] 렌더 번들 인코더
-     * [EN] Render bundle encoder
-     */
     #bundleEncoder: GPURenderBundleEncoder;
-    /**
-     * [KO] 렌더 번들
-     * [EN] Render bundle
-     */
     #renderBundle: GPURenderBundle;
     #renderBundle_LODList: GPURenderBundle[] = [];
-    /**
-     * [KO] 이전 시스템 바인드 그룹
-     * [EN] Previous system bind group
-     */
     #prevSystemBindGroupList: GPUBindGroup[] = [];
-    /**
-     * [KO] 이전 프래그먼트 바인드 그룹
-     * [EN] Previous fragment bind group
-     */
     #prevFragmentBindGroup: GPUBindGroup;
     #drawCommandSlot: DrawCommandSlot | null = null;
     #drawCommandSlot_LODList: DrawCommandSlot[] = [];
@@ -282,6 +170,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
+     *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -314,6 +203,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
      * [EN] Returns the global buffer slot index.
+     *
+     * @returns
+     * [KO] 글로벌 버텍스 슬롯 인덱스
+     * [EN] Global vertex slot index
      */
     get globalVertexSlotIndex(): number {
         return this.#globalVertexSlotIndex;
@@ -322,6 +215,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 드로우 커맨드 슬롯을 반환합니다.
      * [EN] Returns the draw command slot.
+     *
+     * @returns
+     * [KO] DrawCommandSlot 인스턴스 또는 `null`
+     * [EN] DrawCommandSlot instance or `null`
      */
     get drawCommandSlot(): DrawCommandSlot | null {
         return this.#drawCommandSlot;
@@ -330,6 +227,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 드로우 버퍼 매니저를 반환합니다.
      * [EN] Returns the draw buffer manager.
+     *
+     * @returns
+     * [KO] DrawBufferManager 인스턴스 또는 `null`
+     * [EN] DrawBufferManager instance or `null`
      */
     get drawBufferManager(): DrawBufferManager | null {
         return this.#drawBufferManager;
@@ -338,6 +239,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
+     *
      * @returns
      * [KO] LODManager 인스턴스
      * [EN] LODManager instance
@@ -347,20 +249,17 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 디버거 활성화 여부를 반환합니다.
-     * [EN] Returns whether the debugger is enabled.
+     * [KO] 디버거 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether the debugger is enabled.
+     *
+     * @returns
+     * [KO] 디버거 활성화 여부
+     * [EN] Whether the debugger is enabled
      */
     get enableDebugger(): boolean {
         return this.#enableDebugger;
     }
 
-    /**
-     * [KO] 디버거 활성화 여부를 설정합니다.
-     * [EN] Sets whether the debugger is enabled.
-     * @param value -
-     * [KO] 활성화 여부
-     * [EN] Whether to enable
-     */
     set enableDebugger(value: boolean) {
         this.#enableDebugger = value;
         if (value && !this.#drawDebugger) this.#drawDebugger = new DrawDebuggerMesh(this.redGPUContext, this);
@@ -369,6 +268,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 디버그 메시 객체를 반환합니다.
      * [EN] Returns the debug mesh object.
+     *
+     * @returns
+     * [KO] DrawDebuggerMesh 인스턴스
+     * [EN] DrawDebuggerMesh instance
      */
     get drawDebugger(): DrawDebuggerMesh {
         return this.#drawDebugger;
@@ -377,26 +280,21 @@ class Mesh extends MeshBase {
     _material;
 
     /**
-     * [KO] 머티리얼을 반환합니다.
-     * [EN] Returns the material.
+     * [KO] 머티리얼을 가져오거나 설정합니다.
+     * [EN] Gets or sets the material.
+     *
+     * @returns
+     * [KO] 설정된 머티리얼 인스턴스
+     * [EN] Configured material instance
      */
     get material() {
         return this._material;
     }
 
-    /**
-     * [KO] 머티리얼을 설정합니다.
-     * [EN] Sets the material.
-     * @param value -
-     * [KO] 설정할 머티리얼
-     * [EN] Material to set
-     */
     set material(value) {
         this._material = value;
         this.dirtyPipeline = true;
-        // blendMode 키가 있는 경우 블렌드 모드 재적용
         if ("blendMode" in this) {
-            //TODO - 이거 이제 해결된것 같은데 확인해봐야함
             this.blendMode = this.blendMode;
         }
     }
@@ -404,20 +302,17 @@ class Mesh extends MeshBase {
     _geometry: Geometry | Primitive;
 
     /**
-     * [KO] 지오메트리를 반환합니다.
-     * [EN] Returns the geometry.
+     * [KO] 지오메트리를 가져오거나 설정합니다.
+     * [EN] Gets or sets the geometry.
+     *
+     * @returns
+     * [KO] Geometry 또는 Primitive 인스턴스
+     * [EN] Geometry or Primitive instance
      */
     get geometry(): Geometry | Primitive {
         return this._geometry;
     }
 
-    /**
-     * [KO] 지오메트리를 설정합니다.
-     * [EN] Sets the geometry.
-     * @param value -
-     * [KO] 설정할 지오메트리
-     * [EN] Geometry to set
-     */
     set geometry(value: Geometry | Primitive) {
         this._geometry = value;
         this.dirtyPipeline = true;
@@ -425,20 +320,17 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 메시의 투명도를 반환합니다. (0~1)
-     * [EN] Returns the opacity of the mesh. (0~1)
+     * [KO] 메시의 투명도를 가져오거나 설정합니다 (0~1).
+     * [EN] Gets or sets the opacity of the mesh (0~1).
+     *
+     * @returns
+     * [KO] 투명도 값 (0~1)
+     * [EN] Opacity value (0~1)
      */
     get opacity(): number {
         return this.#opacity;
     }
 
-    /**
-     * [KO] 메시의 투명도를 설정합니다. (0~1)
-     * [EN] Sets the opacity of the mesh. (0~1)
-     * @param value -
-     * [KO] 투명도 값
-     * [EN] Opacity value
-     */
     set opacity(value: number) {
         validatePositiveNumberRange(value, 0, 1);
         this.#opacity = value;
@@ -446,54 +338,49 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 프러스텀 컬링 무시 여부를 반환합니다.
-     * [EN] Returns whether to ignore frustum culling.
+     * [KO] 프러스텀 컬링 무시 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to ignore frustum culling.
+     *
+     * @returns
+     * [KO] 프러스텀 컬링 무시 여부
+     * [EN] Whether frustum culling is ignored
      */
     get ignoreFrustumCulling(): boolean {
         return this.#ignoreFrustumCulling;
     }
 
-    /**
-     * [KO] 프러스텀 컬링 무시 여부를 설정합니다.
-     * [EN] Sets whether to ignore frustum culling.
-     * @param value -
-     * [KO] 무시 여부
-     * [EN] Whether to ignore
-     */
     set ignoreFrustumCulling(value: boolean) {
         this.#ignoreFrustumCulling = value;
     }
 
     /**
-     * [KO] 투영 면적 Culling 사용 여부를 반환합니다.
-     * [EN] Returns whether to use screen space size culling.
+     * [KO] 투영 면적 컬링(Screen Space Size Culling) 사용 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether to use screen space size culling.
+     *
+     * @returns
+     * [KO] 투영 면적 컬링 사용 여부
+     * [EN] Whether screen space size culling is used
      */
     get useScreenSpaceSizeCulling(): boolean {
         return this.#useScreenSpaceSizeCulling;
     }
 
-    /**
-     * [KO] 투영 면적 Culling 사용 여부를 설정합니다.
-     * [EN] Sets whether to use screen space size culling.
-     * @param value - [KO] 사용 여부 [EN] Whether to use
-     */
     set useScreenSpaceSizeCulling(value: boolean) {
         this.#useScreenSpaceSizeCulling = value;
     }
 
     /**
-     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 반환합니다.
-     * [EN] Returns the minimum size ratio threshold for screen space size culling.
+     * [KO] 투영 면적 컬링의 화면상 크기 비율 임계값을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum size ratio threshold for screen space size culling.
+     *
+     * @returns
+     * [KO] 화면상 크기 비율 임계값
+     * [EN] Screen space size ratio threshold
      */
     get minScreenSpaceSize(): number {
         return this.#minScreenSpaceSize;
     }
 
-    /**
-     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 설정합니다.
-     * [EN] Sets the minimum size ratio threshold for screen space size culling.
-     * @param value - [KO] 크기 비율 임계값 [EN] Size ratio threshold
-     */
     set minScreenSpaceSize(value: number) {
         this.#minScreenSpaceSize = value;
     }
@@ -501,58 +388,67 @@ class Mesh extends MeshBase {
     /**
      * [KO] 피킹 ID를 반환합니다.
      * [EN] Returns the picking ID.
+     *
+     * @returns
+     * [KO] 피킹 식별자 값
+     * [EN] Picking identifier value
      */
     get pickingId(): number {
         return this.#pickingId;
     }
 
     /**
-     * [KO] 등록된 이벤트들을 반환합니다.
-     * [EN] Returns the registered events.
+     * [KO] 등록된 이벤트 맵 객체를 반환합니다.
+     * [EN] Returns the registered event map object.
+     *
+     * @returns
+     * [KO] 등록된 이벤트 객체
+     * [EN] Registered events object
      */
     get events(): any {
         return this.#events;
     }
 
     /**
-     * [KO] 버텍스 상태 버퍼 레이아웃을 반환합니다.
-     * [EN] Returns the vertex state buffer layouts.
+     * [KO] 버텍스 상태 버퍼 레이아웃 배열을 반환합니다.
+     * [EN] Returns the array of vertex state buffer layouts.
+     *
+     * @returns
+     * [KO] GPUVertexBufferLayout 배열
+     * [EN] Array of GPUVertexBufferLayout
      */
     get vertexStateBuffers(): GPUVertexBufferLayout[] {
         return this._geometry.gpuRenderInfo.buffers;
     }
 
     /**
-     * [KO] 설정된 부모 객체를 반환합니다.
-     * [EN] Returns the set parent object.
+     * [KO] 설정된 부모 컨테이너 객체를 가져오거나 설정합니다.
+     * [EN] Gets or sets the parent container object.
+     *
+     * @returns
+     * [KO] 부모 Object3DContainer 인스턴스
+     * [EN] Parent Object3DContainer instance
      */
     get parent(): Object3DContainer {
         return this.#parent;
     }
 
-    /**
-     * [KO] 부모 객체를 설정합니다.
-     * [EN] Sets the parent object.
-     * @param value -
-     * [KO] 부모 컨테이너
-     * [EN] Parent container
-     */
     set parent(value: Object3DContainer) {
         this.#parent = value;
     }
 
     /**
-     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 반환합니다.
-     * [EN] Returns whether real-time wave interaction with water (WaterLake) is enabled.
+     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether real-time wave interaction with water (WaterLake) is enabled.
+     *
+     * @returns
+     * [KO] 물 파동 인터랙션 활성화 여부
+     * [EN] Whether water wave interaction is enabled
      */
     get enableWaterInteraction(): boolean {
         return this.#enableWaterInteraction;
     }
 
-    /**
-     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 설정합니다.
-     * [EN] Sets whether real-time wave interaction with water (WaterLake) is enabled.
-     */
     set enableWaterInteraction(value: boolean) {
         const boolVal = !!value;
         if (this.#enableWaterInteraction !== boolVal) {
@@ -566,152 +462,134 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 물 파동 생성 강도 배율을 반환합니다 (기본값: 1.0).
-     * [EN] Returns the wave generation strength multiplier (default: 1.0).
+     * [KO] 물 파동 생성 강도 배율을 가져오거나 설정합니다 (기본값: 1.0).
+     * [EN] Gets or sets the wave generation strength multiplier (default: 1.0).
+     *
+     * @returns
+     * [KO] 물 파동 생성 강도 배율
+     * [EN] Water wave generation strength multiplier
      */
     get waterWaveStrength(): number {
         return this.#waterWaveStrength;
     }
 
-    /**
-     * [KO] 물 파동 생성 강도 배율을 설정합니다.
-     * [EN] Sets the wave generation strength multiplier.
-     */
     set waterWaveStrength(value: number) {
         this.#waterWaveStrength = Math.max(0, value);
     }
 
     /**
-     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 반환합니다.
-     * [EN] Returns whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
+     *
+     * @returns
+     * [KO] 정적 객체 처리 여부
+     * [EN] Whether treated as a static object
      */
     get waterInteractionStatic(): boolean {
         return this.#waterInteractionStatic;
     }
 
-    /**
-     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 설정합니다.
-     * [EN] Sets whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
-     */
     set waterInteractionStatic(value: boolean) {
         this.#waterInteractionStatic = !!value;
     }
 
     /**
-     * [KO] 피벗 X 좌표를 반환합니다.
-     * [EN] Returns the pivot X coordinate.
+     * [KO] 피벗 X 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot X coordinate.
+     *
+     * @returns
+     * [KO] 피벗 X 좌표
+     * [EN] Pivot X coordinate
      */
     get pivotX(): number {
         return this.#pivotX;
     }
 
-    /**
-     * [KO] 피벗 X 좌표를 설정합니다.
-     * [EN] Sets the pivot X coordinate.
-     * @param value -
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     set pivotX(value: number) {
         this.#pivotX = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] 피벗 Y 좌표를 반환합니다.
-     * [EN] Returns the pivot Y coordinate.
+     * [KO] 피벗 Y 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot Y coordinate.
+     *
+     * @returns
+     * [KO] 피벗 Y 좌표
+     * [EN] Pivot Y coordinate
      */
     get pivotY(): number {
         return this.#pivotY;
     }
 
-    /**
-     * [KO] 피벗 Y 좌표를 설정합니다.
-     * [EN] Sets the pivot Y coordinate.
-     * @param value -
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     set pivotY(value: number) {
         this.#pivotY = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] 피벗 Z 좌표를 반환합니다.
-     * [EN] Returns the pivot Z coordinate.
+     * [KO] 피벗 Z 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the pivot Z coordinate.
+     *
+     * @returns
+     * [KO] 피벗 Z 좌표
+     * [EN] Pivot Z coordinate
      */
     get pivotZ(): number {
         return this.#pivotZ;
     }
 
-    /**
-     * [KO] 피벗 Z 좌표를 설정합니다.
-     * [EN] Sets the pivot Z coordinate.
-     * @param value -
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     set pivotZ(value: number) {
         this.#pivotZ = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] X 위치 좌표를 반환합니다.
-     * [EN] Returns the X position coordinate.
+     * [KO] X 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the X position coordinate.
+     *
+     * @returns
+     * [KO] X 위치 좌표
+     * [EN] X position coordinate
      */
     get x(): number {
         return this.#x;
     }
 
-    /**
-     * [KO] X 위치 좌표를 설정합니다.
-     * [EN] Sets the X position coordinate.
-     * @param value -
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     set x(value: number) {
         this.#x = this.#positionArray[0] = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Y 위치 좌표를 반환합니다.
-     * [EN] Returns the Y position coordinate.
+     * [KO] Y 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y position coordinate.
+     *
+     * @returns
+     * [KO] Y 위치 좌표
+     * [EN] Y position coordinate
      */
     get y(): number {
         return this.#y;
     }
 
-    /**
-     * [KO] Y 위치 좌표를 설정합니다.
-     * [EN] Sets the Y position coordinate.
-     * @param value -
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     set y(value: number) {
         this.#y = this.#positionArray[1] = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Z 위치 좌표를 반환합니다.
-     * [EN] Returns the Z position coordinate.
+     * [KO] Z 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z position coordinate.
+     *
+     * @returns
+     * [KO] Z 위치 좌표
+     * [EN] Z position coordinate
      */
     get z(): number {
         return this.#z;
     }
 
-    /**
-     * [KO] Z 위치 좌표를 설정합니다.
-     * [EN] Sets the Z position coordinate.
-     * @param value -
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     set z(value: number) {
         this.#z = this.#positionArray[2] = value;
         this.dirtyTransform = true;
@@ -720,6 +598,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 현재 위치를 반환합니다. [x, y, z]
      * [EN] Returns the current position. [x, y, z]
+     *
      * @returns
      * [KO] 위치 배열
      * [EN] Position array
@@ -729,60 +608,51 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] X축 스케일을 반환합니다.
-     * [EN] Returns the X-axis scale.
+     * [KO] X축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis scale.
+     *
+     * @returns
+     * [KO] X축 스케일 값
+     * [EN] X-axis scale value
      */
     get scaleX(): number {
         return this.#scaleX;
     }
 
-    /**
-     * [KO] X축 스케일을 설정합니다.
-     * [EN] Sets the X-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleX(value: number) {
         this.#scaleX = this.#scaleArray[0] = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Y축 스케일을 반환합니다.
-     * [EN] Returns the Y-axis scale.
+     * [KO] Y축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis scale.
+     *
+     * @returns
+     * [KO] Y축 스케일 값
+     * [EN] Y-axis scale value
      */
     get scaleY(): number {
         return this.#scaleY;
     }
 
-    /**
-     * [KO] Y축 스케일을 설정합니다.
-     * [EN] Sets the Y-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleY(value: number) {
         this.#scaleY = this.#scaleArray[1] = value;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Z축 스케일을 반환합니다.
-     * [EN] Returns the Z-axis scale.
+     * [KO] Z축 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis scale.
+     *
+     * @returns
+     * [KO] Z축 스케일 값
+     * [EN] Z-axis scale value
      */
     get scaleZ(): number {
         return this.#scaleZ;
     }
 
-    /**
-     * [KO] Z축 스케일을 설정합니다.
-     * [EN] Sets the Z-axis scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
     set scaleZ(value: number) {
         this.#scaleZ = this.#scaleArray[2] = value;
         this.dirtyTransform = true;
@@ -791,66 +661,61 @@ class Mesh extends MeshBase {
     /**
      * [KO] 현재 스케일을 반환합니다. [x, y, z]
      * [EN] Returns the current scale. [x, y, z]
+     *
+     * @returns
+     * [KO] 스케일 배열
+     * [EN] Scale array
      */
     get scale(): Float32Array {
         return this.#scaleArray;
     }
 
     /**
-     * [KO] X축 회전값을 반환합니다. (도)
-     * [EN] Returns the X-axis rotation value. (degrees)
+     * [KO] X축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the X-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] X축 회전값 (도)
+     * [EN] X-axis rotation value (degrees)
      */
     get rotationX(): number {
         return this.#rotationX;
     }
 
-    /**
-     * [KO] X축 회전값을 설정합니다. (도)
-     * [EN] Sets the X-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationX(value: number) {
         this.#rotationX = this.#rotationArray[0] = value % 360;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Y축 회전값을 반환합니다. (도)
-     * [EN] Returns the Y-axis rotation value. (degrees)
+     * [KO] Y축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the Y-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] Y축 회전값 (도)
+     * [EN] Y-axis rotation value (degrees)
      */
     get rotationY(): number {
         return this.#rotationY;
     }
 
-    /**
-     * [KO] Y축 회전값을 설정합니다. (도)
-     * [EN] Sets the Y-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationY(value: number) {
         this.#rotationY = this.#rotationArray[1] = value % 360;
         this.dirtyTransform = true;
     }
 
     /**
-     * [KO] Z축 회전값을 반환합니다. (도)
-     * [EN] Returns the Z-axis rotation value. (degrees)
+     * [KO] Z축 회전값을 가져오거나 설정합니다 (도).
+     * [EN] Gets or sets the Z-axis rotation value (degrees).
+     *
+     * @returns
+     * [KO] Z축 회전값 (도)
+     * [EN] Z-axis rotation value (degrees)
      */
     get rotationZ(): number {
         return this.#rotationZ;
     }
 
-    /**
-     * [KO] Z축 회전값을 설정합니다. (도)
-     * [EN] Sets the Z-axis rotation value. (degrees)
-     * @param value -
-     * [KO] 회전값
-     * [EN] Rotation value
-     */
     set rotationZ(value: number) {
         this.#rotationZ = this.#rotationArray[2] = value % 360;
         this.dirtyTransform = true;
@@ -859,6 +724,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 현재 회전값을 반환합니다. [x, y, z] (도)
      * [EN] Returns the current rotation values. [x, y, z] (degrees)
+     *
+     * @returns
+     * [KO] 회전값 배열 (도)
+     * [EN] Rotation values array (degrees)
      */
     get rotation(): Float32Array {
         return this.#rotationArray;
@@ -867,6 +736,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] OBB(Oriented Bounding Box) 정보를 반환합니다.
      * [EN] Returns the OBB (Oriented Bounding Box) information.
+     *
+     * @returns
+     * [KO] 계산된 OBB 인스턴스
+     * [EN] Calculated OBB instance
      */
     get boundingOBB(): OBB {
         if (!this.#cachedBoundingOBB || this.dirtyTransform) {
@@ -878,6 +751,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] AABB(Axis-Aligned Bounding Box) 정보를 반환합니다. (Zero-GC 인플레이스 재사용)
      * [EN] Returns the AABB (Axis-Aligned Bounding Box) information. (Zero-GC in-place reuse)
+     *
+     * @returns
+     * [KO] 계산된 AABB 인스턴스
+     * [EN] Calculated AABB instance
      */
     get boundingAABB(): AABB {
         if (!this.#cachedBoundingAABB) {
@@ -894,6 +771,10 @@ class Mesh extends MeshBase {
     /**
      * [KO] 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
      * [EN] Returns the combined AABB information including child objects.
+     *
+     * @returns
+     * [KO] 통합된 AABB 인스턴스
+     * [EN] Combined AABB instance
      */
     get combinedBoundingAABB(): AABB {
         return calculateMeshCombinedAABB(this);
@@ -902,6 +783,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.
+     *
      * @param enableDebugger -
      * [KO] 활성화 여부 (기본값: false)
      * [EN] Whether to enable (default: false)
@@ -920,6 +802,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
      * [EN] Sets shadow casting for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 캐스팅 여부 (기본값: false)
      * [EN] Whether to cast (default: false)
@@ -938,6 +821,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
      * [EN] Sets shadow receiving for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 수신 여부 (기본값: false)
      * [EN] Whether to receive (default: false)
@@ -956,6 +840,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
      * [EN] Sets whether to ignore frustum culling for all objects in the hierarchy.
+     *
      * @param value -
      * [KO] 무시 여부 (기본값: false)
      * [EN] Whether to ignore (default: false)
@@ -974,6 +859,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 하위 계층의 모든 객체에 물 인터랙션 활성화 여부 및 파라미터를 재귀적으로 설정합니다.
      * [EN] Recursively sets water interaction enable status and parameters for all objects in the hierarchy.
+     *
      * @param enable -
      * [KO] 활성화 여부 (기본값: true)
      * [EN] Whether to enable (default: true)
@@ -1000,6 +886,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
      * [EN] Calculates and returns the combined opacity considering the parent hierarchy.
+     *
      * @returns
      * [KO] 통합 투명도 값
      * [EN] Combined opacity value
@@ -1015,6 +902,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 이벤트 리스너를 추가합니다.
      * [EN] Adds an event listener.
+     *
      * @param eventName -
      * [KO] 이벤트 이름
      * [EN] Event name
@@ -1030,6 +918,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 메시가 특정 좌표를 바라보도록 회전시킵니다.
      * [EN] Rotates the mesh to look at a specific coordinate.
+     *
      * @param targetX -
      * [KO] 대상 X 좌표 또는 [x, y, z] 배열
      * [EN] Target X coordinate or [x, y, z] array
@@ -1046,7 +935,6 @@ class Mesh extends MeshBase {
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
-        //out, eye, center, up
         mat4.identity(this.localMatrix);
         mat4.targetTo(this.localMatrix, [this.#x, this.#y, this.#z], tPosition, up);
         tRotation = mat4ToEuler(this.localMatrix, []);
@@ -1058,6 +946,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 스케일을 설정합니다.
      * [EN] Sets the scale.
+     *
      * @param x -
      * [KO] X축 스케일
      * [EN] X-axis scale
@@ -1081,6 +970,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 위치를 설정합니다.
      * [EN] Sets the position.
+     *
      * @param x -
      * [KO] X 좌표
      * [EN] X coordinate
@@ -1104,6 +994,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 회전값을 설정합니다. (도)
      * [EN] Sets the rotation values. (degrees)
+     *
      * @param rotationX -
      * [KO] X축 회전
      * [EN] X-axis rotation
@@ -1127,6 +1018,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 메시를 복제합니다.
      * [EN] Clones the mesh.
+     *
      * @experimental
      * @returns
      * [KO] 복제된 Mesh 인스턴스
@@ -1137,9 +1029,6 @@ class Mesh extends MeshBase {
         cloneMesh.setPosition(this.#x, this.#y, this.#z);
         cloneMesh.setRotation(this.#rotationX, this.#rotationY, this.#rotationZ);
         cloneMesh.setScale(this.#scaleX, this.#scaleY, this.#scaleZ);
-        // cloneMesh.geometry = this._geometry
-        // cloneMesh.material = this._material
-        //TODO 추가로 먼가 더해야할것 같으디..
         let i = this.children.length;
         while (i--) {
             cloneMesh.addChild(this.children[i].clone());
@@ -1150,6 +1039,7 @@ class Mesh extends MeshBase {
     /**
      * [KO] 메시를 렌더링합니다.
      * [EN] Renders the mesh.
+     *
      * @param renderViewStateData -
      * [KO] 렌더 상태 데이터
      * [EN] Render view state data
@@ -1196,20 +1086,16 @@ class Mesh extends MeshBase {
                 const parent = this.parent
                 const tLocalMatrix = this.localMatrix;
                 let aX, aY, aZ;
-                // tLocalMatrix translate
                 tLocalMatrix[12] = this.#x;
                 tLocalMatrix[13] = this.#y;
                 tLocalMatrix[14] = this.#z;
                 tLocalMatrix[15] = 1;
-                // tLocalMatrix rotate
                 aX = this.#rotationX * CONVERT_RADIAN;
                 aY = this.#rotationY * CONVERT_RADIAN;
                 aZ = this.#rotationZ * CONVERT_RADIAN;
-                /////////////////////////
                 let aSx, aSy, aSz, aCx, aCy, aCz;
                 let b0, b1, b2, b3;
                 let b00, b01, b02, b10, b11, b12, b20, b21, b22;
-                // sin,cos 관련
                 let a00, a01, a02, a03, a10, a11, a12, a13, a20, a21, a22, a23, a30, a31, a32, a33;
                 let tRadian;
                 a00 = 1, a01 = 0, a02 = 0;
@@ -1239,7 +1125,6 @@ class Mesh extends MeshBase {
                 tRadian < -CPI ? tRadian = tRadian + CPI2 : tRadian > CPI ? tRadian = tRadian - CPI2 : 0;
                 tRadian = tRadian < 0 ? C127 * tRadian + C045 * tRadian * tRadian : C127 * tRadian - C045 * tRadian * tRadian;
                 aCz = tRadian < 0 ? C225 * (tRadian * -tRadian - tRadian) + tRadian : C225 * (tRadian * tRadian - tRadian) + tRadian;
-                /////////////////////////
                 b00 = aCy * aCz;
                 b01 = aCx * aSz + aSx * aSy * aCz;
                 b02 = aSx * aSz - aCx * aSy * aCz;
@@ -1251,7 +1136,6 @@ class Mesh extends MeshBase {
                 b20 = aSy;
                 b21 = -aSx * aCy;
                 b22 = aCx * aCy;
-                // tLocalMatrix scale
                 let sX = this.#scaleX, sY = this.#scaleY, sZ = this.#scaleZ;
                 //@ts-ignore
                 if (this.renderTextureWidth) {
@@ -1261,7 +1145,6 @@ class Mesh extends MeshBase {
                     sY *= this.renderTextureHeight;
                 }
 
-// 4. Local Matrix 조립 (Translate + Rotation * Scale)
                 tLocalMatrix[0] = b00 * sX;
                 tLocalMatrix[1] = b01 * sX;
                 tLocalMatrix[2] = b02 * sX;
@@ -1278,13 +1161,10 @@ class Mesh extends MeshBase {
                 tLocalMatrix[11] = 0;
                 {
                     (this.#pivotX || this.#pivotY || this.#pivotZ) ? (
-                        // 피봇처리
-                        // 매트립스 곱
                         a00 = tLocalMatrix[0], a01 = tLocalMatrix[1], a02 = tLocalMatrix[2], a03 = tLocalMatrix[3],
                             a10 = tLocalMatrix[4], a11 = tLocalMatrix[5], a12 = tLocalMatrix[6], a13 = tLocalMatrix[7],
                             a20 = tLocalMatrix[8], a21 = tLocalMatrix[9], a22 = tLocalMatrix[10], a23 = tLocalMatrix[11],
                             a30 = tLocalMatrix[12], a31 = tLocalMatrix[13], a32 = tLocalMatrix[14], a33 = tLocalMatrix[15],
-                            // Cache only the current line of the second matrix
                             b0 = 1, b1 = 0, b2 = 0, b3 = 0,
                             tLocalMatrix[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30,
                             tLocalMatrix[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31,
@@ -1318,7 +1198,6 @@ class Mesh extends MeshBase {
 
 
                     if (parent?.modelMatrix) {
-                        // mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
                         const p = parent.modelMatrix
                         const l = this.localMatrix
                         const out = this.modelMatrix
@@ -1326,7 +1205,6 @@ class Mesh extends MeshBase {
                         const a10 = p[4], a11 = p[5], a12 = p[6], a13 = p[7];
                         const a20 = p[8], a21 = p[9], a22 = p[10], a23 = p[11];
                         const a30 = p[12], a31 = p[13], a32 = p[14], a33 = p[15];
-                        // Cache only the current line of the second matrix
                         let b0 = l[0], b1 = l[1], b2 = l[2], b3 = l[3];
                         out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
                         out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
@@ -1348,7 +1226,6 @@ class Mesh extends MeshBase {
                         out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
                         out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
                     } else {
-                        // this.modelMatrix = mat4.clone(this.localMatrix)
                         const {modelMatrix, localMatrix} = this
                         modelMatrix[0] = localMatrix[0], modelMatrix[1] = localMatrix[1], modelMatrix[2] = localMatrix[2], modelMatrix[3] = localMatrix[3];
                         modelMatrix[4] = localMatrix[4], modelMatrix[5] = localMatrix[5], modelMatrix[6] = localMatrix[6], modelMatrix[7] = localMatrix[7];
@@ -1356,25 +1233,8 @@ class Mesh extends MeshBase {
                         modelMatrix[12] = localMatrix[12], modelMatrix[13] = localMatrix[13], modelMatrix[14] = localMatrix[14], modelMatrix[15] = localMatrix[15];
                     }
                 }
-                // const localMatrix = this.modelMatrix;
-                // //
-                // mat4.identity(localMatrix)
-                // mat4.translate(localMatrix, localMatrix, [this.x, this.y, this.z]);
-                // mat4.rotateX(localMatrix, localMatrix, this.rotationX * Math.PI / 180);
-                // mat4.rotateY(localMatrix, localMatrix, this.rotationY * Math.PI / 180);
-                // mat4.rotateZ(localMatrix, localMatrix, this.rotationZ * Math.PI / 180);
-                // mat4.scale(localMatrix, localMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
-                // mat4.copy(this.localMatrix, localMatrix);
-                // //
-                // if (this.parent) {
-                //     mat4.multiply(this.modelMatrix, this.parent?.modelMatrix, localMatrix);
-                // } else {
-                //     mat4.copy(this.modelMatrix, localMatrix);
-                // }
 
             }
-            // if (!currentGeometry) this.#needUpdateMatrixUniform = false
-
 
             this.dirtyTransform = false
             this.#dirtyBoundingAABB = true
@@ -1382,7 +1242,6 @@ class Mesh extends MeshBase {
         }
 
 
-        // check distanceCulling
         const needCheckInterleavedCulling = dirtyTransformForChildren ||
             (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex))
         let passFrustumCulling = this.passFrustumCulling = redGPUContext.viewList.length > 1 ? true : this.passFrustumCulling
@@ -1394,11 +1253,9 @@ class Mesh extends MeshBase {
         if (aabb) {
             if (useDistanceCulling && currentGeometry || lodLen) {
                 const {rawCamera} = view
-                // AABB 중심점과 카메라 위치 간의 거리 계산
                 const dx = rawCamera.x - aabb.centerX;
                 const dy = rawCamera.y - aabb.centerY;
                 const dz = rawCamera.z - aabb.centerZ;
-                // 거리 제곱 계산
                 distanceSquared = dx * dx + dy * dy + dz * dz;
             }
         }
@@ -1407,13 +1264,11 @@ class Mesh extends MeshBase {
 
             if (useDistanceCulling && currentGeometry && aabb) {
                 const geometryRadius = aabb.geometryRadius;
-                // AABB의 반지름을 고려한 컬링 거리 계산
                 const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
                 if (distanceSquared > cullingDistanceWithRadius) {
                     passFrustumCulling = false;
                 }
             }
-            // check frustumCulling
             if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling && aabb) {
                 const {rawCamera} = view
                 const combinedAABB = aabb;
@@ -1421,24 +1276,19 @@ class Mesh extends MeshBase {
                 const isIsometricController = rawCamera.constructor.name === 'IsometricController';
 
                 if (isIsometricController) {
-                    // ==================== AABB 정보 추출 ====================
                     const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
 
-                    // ==================== 카메라 정보 추출 ====================
                     const orthoCamera = rawCamera as OrthographicCamera;
                     const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
                     const {x: camX, y: camY, z: camZ} = orthoCamera;
 
-                    // ==================== 각도 기반 컬링 ====================
                     const cameraAngle = 45;
 
                     if (cameraAngle) {
-                        // 상대 좌표 계산
                         const relX = centerX - camX;
                         const relY = centerY - camY;
                         const relZ = centerZ - camZ;
 
-                        // 회전 적용
                         const angleRad = cameraAngle * (Math.PI / 180);
                         const cos = Math.cos(angleRad);
                         const sin = Math.sin(angleRad);
@@ -1446,14 +1296,12 @@ class Mesh extends MeshBase {
                         const rotatedX = relX * cos + relZ * sin;
                         const rotatedZ = -relX * sin + relZ * cos;
 
-                        // 뷰 범위 확인
                         if (rotatedX + radius < left || rotatedX - radius > right ||
                             relY + radius < bottom || relY - radius > top ||
                             rotatedZ + radius < near || rotatedZ - radius > far) {
                             passFrustumCulling = false;
                         }
                     } else {
-                        // 각도 없음 (기본 처리)
                         if (centerX + radius < left || centerX - radius > right ||
                             centerY + radius < bottom || centerY - radius > top ||
                             centerZ + radius < near || centerZ - radius > far) {
@@ -1466,24 +1314,19 @@ class Mesh extends MeshBase {
                     const centerZ = combinedAABB.centerZ;
                     const radius = combinedAABB.geometryRadius;
 
-                    // ==================== 2차 필터: Early-Out (카메라 뒤쪽 판정) ====================
-                    // 카메라의 viewMatrix(column-major)에서 3번째 행(row) 벡터의 부호를 반전한 것이 월드 전방 방향 벡터가 됨
                     const viewMatrix = rawCamera.viewMatrix;
                     const camForwardX = -viewMatrix[2];
                     const camForwardY = -viewMatrix[6];
                     const camForwardZ = -viewMatrix[10];
 
-                    // 카메라로부터 메쉬 중심까지의 방향 벡터
                     const dx = centerX - rawCamera.x;
                     const dy = centerY - rawCamera.y;
                     const dz = centerZ - rawCamera.z;
 
-                    // 내적 연산 (Dot Product)
                     const dot = dx * camForwardX + dy * camForwardY + dz * camForwardZ;
 
-                    const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
+                    const bias = 1.0;
 
-                    // 카메라 뒤쪽이면 즉시 조기 탈락(Early-Out) 처리하여 6-Plane 연산 회피
                     if (dot < -radius - bias) {
                         passFrustumCulling = false;
                     } else {
@@ -1515,11 +1358,9 @@ class Mesh extends MeshBase {
                 }
             }
         }
-        // TODO - 일단 임시로 그림자 케스팅이 된녀석은 무조건 통과
         if (this.castShadow) passFrustumCulling = true
         if (passFrustumCulling) {
             {
-                // 변경시만 이전 모델 메트릭스 업데이트
                 if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
                     const {redGPUContext} = this
@@ -1536,7 +1377,6 @@ class Mesh extends MeshBase {
                             )
                         }
                     }
-                    // 브랜치가 먼가 꼬였네
                     {
                         if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
                         const prev = this.#prevModelMatrix
@@ -1561,8 +1401,6 @@ class Mesh extends MeshBase {
                     if (this.#needUpdateMatrixUniform) {
                         {
                             const modelMatrix = (
-                                //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
-                                // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
                                 // @ts-ignore
                                 this.is2DMeshType ? mat4.multiply(
                                     mat4.create(),
@@ -1573,19 +1411,11 @@ class Mesh extends MeshBase {
                                     ),
                                 ) : this.modelMatrix
                             )
-                            //
-                            // gpuDevice.queue.writeBuffer(
-                            // 	vertexUniformGPUBuffer,
-                            // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
-                            // 	modelMatrix
-                            // )
-                            // keepLog(GLOBAL_VERTEX_STRUCT)
                             this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                         }
                         {
                             if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
                                 this.#needUpdateNormalMatrixUniform = false
-                                // calculate NormalMatrix
                                 const m = this.modelMatrix;
                                 const n = this.normalModelMatrix;
                                 const a00 = m[0], a01 = m[1], a02 = m[2];
@@ -1593,11 +1423,9 @@ class Mesh extends MeshBase {
                                 const a20 = m[8], a21 = m[9], a22 = m[10];
                                 const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
                                 if (det === 0) {
-                                    // 역행렬 없음 → 단위 행렬로 대체
                                     n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
                                 } else {
                                     const invDet = 1 / det;
-                                    // 역행렬의 전치 (transpose of inverse)
                                     n[0] = (a11 * a22 - a12 * a21) * invDet;
                                     n[1] = (a12 * a20 - a10 * a22) * invDet;
                                     n[2] = (a10 * a21 - a11 * a20) * invDet;
@@ -1610,30 +1438,16 @@ class Mesh extends MeshBase {
                                     n[9] = (a02 * a10 - a00 * a12) * invDet;
                                     n[10] = (a00 * a11 - a01 * a10) * invDet;
                                     n[11] = 0;
-                                    // 하단 행은 단위 행렬처럼 설정
                                     n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
                                 }
                             }
-                            // gpuDevice.queue.writeBuffer(
-                            // 	vertexUniformGPUBuffer,
-                            // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
-                            // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
-                            // 	this.normalModelMatrix as Float32Array
-                            // )
                             this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                         }
                         if (vertexUniformInfoMatrixListMembers.localMatrix) {
-                            // gpuDevice.queue.writeBuffer(
-                            // 	vertexUniformGPUBuffer,
-                            // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
-                            // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
-                            // 	this.localMatrix as Float32Array
-                            // )
                             this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                         }
                         dirtyTransformForChildren = true
                         this.#needUpdateMatrixUniform = false
-                        // keepLog('진짜 버퍼업로드', this.name)
                         redGPUContext.globalVertexSSBO.updateFloatData(
                             this.#globalVertexSlotIndex,
                             this.#uniformDataMatrixList,
@@ -1657,12 +1471,10 @@ class Mesh extends MeshBase {
         } else {
         }
         this.passFrustumCulling = passFrustumCulling
-        // render
         const {displacementTexture, displacementScale} = currentMaterial || {}
         if (currentDirtyPipeline || currentMaterial?.dirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
             dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
         }
-        // keepLog(this.gpuRenderInfo?.vertexStructInfo)
         if (currentGeometry) {
             renderViewStateData.renderResults.num3DObjects++
             if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
@@ -1729,7 +1541,6 @@ class Mesh extends MeshBase {
                     this.#displacementScale !== displacementScale
                 ) {
                     this.#displacementScale = displacementScale
-                    // keepLog('실행을 하나보네',displacementScale)
                     tempFloat32_1[0] = displacementScale
                     redGPUContext.globalVertexSSBO.updateFloatData(
                         this.#globalVertexSlotIndex,
@@ -1790,7 +1601,6 @@ class Mesh extends MeshBase {
                         if (lodLen) {
                             let idx = this.#currentLODIndex;
 
-                            // 인덱스 범위 검증 수정
                             if (idx < 0 || idx >= lodLen) {
                                 idx = -1;
                             }
@@ -1798,17 +1608,14 @@ class Mesh extends MeshBase {
                             let needUpdate = false;
 
                             if (idx === -1) {
-                                // 기본 번들 → 첫 LOD 경계 체크
                                 if (distanceSquared >= lodList[0].distanceSquared) {
                                     needUpdate = true;
                                 }
                             } else if (idx === lodLen - 1) {
-                                // 마지막 LOD → 아래로 내려가는지 체크
                                 if (distanceSquared < lodList[idx].distanceSquared) {
                                     needUpdate = true;
                                 }
                             } else {
-                                // 중간 LOD
                                 const lowerBoundary = lodList[idx].distanceSquared;
                                 const upperBoundary = lodList[idx + 1].distanceSquared;
                                 if (distanceSquared < lowerBoundary || distanceSquared >= upperBoundary) {
@@ -1817,7 +1624,6 @@ class Mesh extends MeshBase {
                             }
 
                             if (needUpdate) {
-                                // LOD 인덱스 재계산
                                 let newIdx = -1;
                                 for (let i = 0; i < lodLen; i++) {
                                     if (distanceSquared >= lodList[i].distanceSquared) {
@@ -1827,18 +1633,14 @@ class Mesh extends MeshBase {
                                     }
                                 }
 
-                                // 인덱스 업데이트 및 번들 선택
                                 if (newIdx !== idx) {
                                     this.#currentLODIndex = newIdx;
                                     if (newIdx >= 0 && newIdx < lodLen) {
                                         renderBundle = this.#renderBundle_LODList[newIdx];
                                     }
-                                    // newIdx가 -1이면 기본 renderBundle 사용 (이미 설정됨)
-
                                 }
 
                             } else if (idx >= 0 && idx < lodLen) {
-                                // 현재 LOD 유지
                                 renderBundle = this.#renderBundle_LODList[idx];
 
                             }
@@ -1882,11 +1684,9 @@ class Mesh extends MeshBase {
             if (this.castShadow || (this.castShadow && !currentGeometry)) castingList[castingList.length] = this
             if (this.#enableDebugger) this.#drawDebugger.render(renderViewStateData)
         }
-        // children render
         const {children} = this
         let i = 0
         const childNum = children.length
-        // while (i--) {
         this.dirtyTransform = false
         for (; i < childNum; i++) {
             const child = children[i]
@@ -1896,6 +1696,10 @@ class Mesh extends MeshBase {
         }
     }
 
+    /**
+     * [KO] 메시의 GPU 렌더링 정보(VertexGPURenderInfo)를 초기화하고 파이프라인을 갱신합니다.
+     * [EN] Initializes the mesh's GPU render info (VertexGPURenderInfo) and updates the pipeline.
+     */
     initGPURenderInfos() {
         this.gpuRenderInfo = new VertexGPURenderInfo(
             null,
@@ -1910,6 +1714,26 @@ class Mesh extends MeshBase {
         updateMeshDirtyPipeline(this)
     }
 
+    /**
+     * [KO] 기본 메시 버텍스 셰이더 모듈과 유니폼 바인드 그룹을 생성하고 반환합니다.
+     * [EN] Creates and returns the basic mesh vertex shader module and uniform bind group.
+     *
+     * @param VERTEX_SHADER_MODULE_NAME -
+     * [KO] 버텍스 셰이더 모듈 이름
+     * [EN] Vertex shader module name
+     * @param SHADER_INFO -
+     * [KO] 파싱된 WGSL 셰이더 정보
+     * [EN] Parsed WGSL shader info
+     * @param UNIFORM_STRUCT_BASIC -
+     * [KO] 버텍스 유니폼 구조체 정보
+     * [EN] Vertex uniform struct info
+     * @param vertexModuleSource -
+     * [KO] 버텍스 셰이더 WGSL 소스 코드
+     * [EN] Vertex shader WGSL source code
+     * @returns
+     * [KO] 생성된 GPUShaderModule 인스턴스
+     * [EN] Created GPUShaderModule instance
+     */
     createMeshVertexShaderModuleBASIC = (VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT_BASIC, vertexModuleSource): GPUShaderModule => {
         const {redGPUContext} = this
         const {gpuRenderInfo} = this
@@ -1930,28 +1754,23 @@ class Mesh extends MeshBase {
      * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
      */
     destroy() {
-        // 물 인터랙션 등록 해제
         if (this.#enableWaterInteraction) {
             WaterInteractionRegistry.unregister(this);
             this.#enableWaterInteraction = false;
         }
 
-        // 1. 자식 객체들 재귀 소멸
         super.destroy();
 
-        // 2. 부모 컨테이너 연결 끊기
         if (this.#parent) {
             this.#parent.removeChild(this);
             this.#parent = null;
         }
 
-        // 3. 글로벌 Vertex SSBO 버퍼 슬롯 해제
         if (this.#globalVertexSlotIndex !== -1) {
             this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
             this.#globalVertexSlotIndex = -1;
         }
 
-        // 4. 드로우 버퍼 매니저 슬롯 인스턴스 개수 0 무효화 및 해제
         if (this.#drawCommandSlot && this.#drawBufferManager) {
             this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
             this.#drawCommandSlot = null;
@@ -1966,13 +1785,6 @@ class Mesh extends MeshBase {
         }
         this.#drawBufferManager = null;
 
-        // 5. 디버거 리소스 소멸
-        // if (this.#drawDebugger) {
-        //     this.#drawDebugger.destroy();
-        //     this.#drawDebugger = null;
-        // }
-
-        // 6. LOD 및 렌더 번들 및 바운딩 캐시 참조 해제
         this.#lodGPURenderInfoList = [];
         this.#renderBundle = null;
         this.#renderBundle_LODList = [];
@@ -1981,7 +1793,6 @@ class Mesh extends MeshBase {
         this.#cachedBoundingAABB = null;
         this.#cachedBoundingOBB = null;
 
-        // 7. 지오메트리 및 재질 참조 해제 및 파괴
         if (this._geometry) {
             // @ts-ignore
             if (typeof this._geometry.destroy === 'function') {
@@ -1999,7 +1810,6 @@ class Mesh extends MeshBase {
             this._material = null;
         }
 
-        // 8. GLTF 애니메이션 및 스킨 데이터 클리어
         if (this.animationInfo) {
             this.animationInfo.morphInfo = null;
             this.animationInfo.weightBuffer = null;
@@ -2015,7 +1825,6 @@ class Mesh extends MeshBase {
             this.gltfLoaderInfo = null;
         }
 
-        // 9. 이벤트 참조 해제
         this.#events = {};
         this.#eventsNum = 0;
 
@@ -2092,8 +1901,6 @@ class Mesh extends MeshBase {
             const currentMaterial = lod.material || this._material
             this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, currentMaterial, index)
         });
-        // keepLog('렌더번들갱신', this.name)
-        // keepLog(this.#renderBundle_LODList)
     }
 
     #createRenderBundle(view: View3D, geometry: Geometry | Primitive, material: ABaseMaterial, lodIndex: number = null): GPURenderBundle {
@@ -2133,11 +1940,9 @@ class Mesh extends MeshBase {
         bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
         bundleEncoder.setBindGroup(2, fragmentUniformBindGroup)
-        //
         let drawCommandSlot = this.#drawCommandSlot
         if (lodIndex !== null) {
             drawCommandSlot = this.#drawCommandSlot_LODList[lodIndex]
-            // keepLog('걸리냐',lodIndex,this.#LODManager.LODList[lodIndex])
         }
         if (indexBuffer) {
             const {gpuBuffer: indexGPUBuffer, format} = indexBuffer
@@ -2179,14 +1984,6 @@ class Mesh extends MeshBase {
                 drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, this.#globalVertexSlotIndex)
             } else {
                 drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, this.#globalVertexSlotIndex)
-                // {
-                //     const data = this.#drawCommandSlot.dataArray
-                //     const offset = this.#drawCommandSlot.commandOffset
-                //     keepLog(`📊 드로우 데이터 설정: ${this.name}`, {
-                //         indexCount,
-                //         actualData: [data[offset], data[offset + 1], data[offset + 2], data[offset + 3], data[offset + 4]]
-                //     })
-                // }
             }
         } else {
             const {vertexCount} = vertexBuffer
@@ -2196,45 +1993,35 @@ class Mesh extends MeshBase {
 
     #checkVariant(moduleName: String) {
         const {resourceManager} = this.redGPUContext
-        // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
-        // 바리안트별 셰이더 모듈 확인/생성
         const variantShaderModuleName = `${moduleName}_${currentVariantKey}`;
         let targetShaderModule = resourceManager.getGPUShaderModule(variantShaderModuleName);
         if (!targetShaderModule) {
-            // 레이지 바리안트 생성기에서 바리안트 소스 코드 가져오기
             let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
             if (variantSource) {
-                // keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
                 targetShaderModule = resourceManager.createGPUShaderModule(
                     `${variantShaderModuleName}`,
                     {code: variantSource}
                 );
             } else {
                 console.warn('⚠️ 버텍스 바리안트 소스를 찾을 수 없음:', currentVariantKey);
-                targetShaderModule = this.gpuRenderInfo.vertexShaderModule; // 기본값 사용
+                targetShaderModule = this.gpuRenderInfo.vertexShaderModule;
             }
         } else {
             console.log('🚀 버텍스 바리안트 셰이더 모듈 캐시 히트:', currentVariantKey);
         }
-        // 셰이더 모듈 업데이트
         this.gpuRenderInfo.vertexShaderModule = targetShaderModule;
     }
 
     #findMatchingVariantKey(): string {
         const {vertexShaderVariantConditionalBlocks} = this.gpuRenderInfo;
-        // keepLog(this.gpuRenderInfo, vertexShaderVariantConditionalBlocks)
-        // 현재 활성화된 기능들 확인 (vertexShaderVariantConditionalBlocks 기반)
         const activeFeatures = new Set<string>();
-        // keepLog('vertexShaderVariantConditionalBlocks', vertexShaderVariantConditionalBlocks, this)
-        // 실제 셰이더에서 발견된 조건부 블록들만 체크
         for (const uniformName of vertexShaderVariantConditionalBlocks) {
             if (this[uniformName]) {
                 activeFeatures.add(uniformName);
             }
         }
         console.log('activeFeatures', activeFeatures, this);
-        // 활성화된 기능들로부터 바리안트 키 생성
         const variantKey = activeFeatures.size > 0 ?
             Array.from(activeFeatures).sort().join('+') : 'none';
         if (activeFeatures.size) {

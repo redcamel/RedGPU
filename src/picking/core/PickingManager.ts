@@ -17,11 +17,8 @@ import RedGPUObject from "../../base/RedGPUObject";
 import AView from "../../display/view/core/AView";
 
 /**
- * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
- * [EN] Class that handles mouse events and manages interaction with objects.
- *
- * [KO] 마우스 클릭, 이동, 오버 등의 이벤트를 감지하고 처리합니다. GPU 텍스처를 사용하여 픽셀 단위의 객체 선택을 구현합니다.
- * [EN] Detects and processes events such as mouse clicks, moves, and overs. Implements pixel-perfect object selection using GPU textures.
+ * [KO] GPU 오프스크린 피킹 패스와 레이캐스팅을 결합하여 뷰 내 객체의 마우스 상호작용을 처리하는 매니저 클래스입니다.
+ * [EN] Manager class that processes mouse interactions with objects in a view by combining a GPU offscreen picking pass and raycasting.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -30,13 +27,23 @@ import AView from "../../display/view/core/AView";
  *
  * ### Example
  * ```typescript
- * // 올바른 접근 방법 (Correct access)
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
  * const pickingManager = view.pickingManager;
  * ```
+ *
  * @category Picking
  */
 class PickingManager extends RedGPUObject {
+    /**
+     * [KO] 마지막으로 수신된 마우스 이동/버튼 이벤트
+     * [EN] Last received mouse move/button event
+     */
     lastMouseEvent: MouseEvent
+    /**
+     * [KO] 마지막으로 수신된 마우스 클릭 이벤트
+     * [EN] Last received mouse click event
+     */
     lastMouseClickEvent: MouseEvent
     #pickingDepthGPUTexture: GPUTexture
     #pickingDepthGPUTextureView: GPUTextureView
@@ -52,27 +59,42 @@ class PickingManager extends RedGPUObject {
     #videoMemorySize: number = 0
     #raycaster3D: Raycaster3D = new Raycaster3D();
     #raycaster2D: Raycaster2D = new Raycaster2D();
-    /** [KO] 픽셀 값을 읽어올 임시 버퍼 [EN] Temporary buffer to read pixel values */
     #readPixelBuffer: GPUBuffer;
     #isReading: boolean = false;
     #pickingPassDescriptor: GPURenderPassDescriptor
 
+    /**
+     * [KO] PickingManager 인스턴스를 생성합니다.
+     * [EN] Creates a PickingManager instance.
+     *
+     * @param view -
+     * [KO] 피킹을 수행할 대상 뷰 인스턴스
+     * [EN] Target view instance for picking
+     */
     constructor(view: AView) {
         super(view.redGPUContext);
         this.#view = view
     }
 
     /**
-     * [KO] 비디오 메모리 사용량을 반환합니다.
-     * [EN] Returns the video memory usage.
+     * [KO] 피킹용 텍스처들이 점유 중인 총 비디오 메모리 크기(바이트)를 반환합니다.
+     * [EN] Returns the total video memory size (in bytes) occupied by picking textures.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
     /**
-     * [KO] 마우스 X 좌표
-     * [EN] Mouse X coordinate
+     * [KO] 현재 논리 마우스 X 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the current logical mouse X coordinate.
+     *
+     * @returns
+     * [KO] 논리 마우스 X 좌표
+     * [EN] Logical mouse X coordinate
      */
     get mouseX(): number {
         return this.#mouseX;
@@ -83,8 +105,12 @@ class PickingManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 마우스 Y 좌표
-     * [EN] Mouse Y coordinate
+     * [KO] 현재 논리 마우스 Y 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the current logical mouse Y coordinate.
+     *
+     * @returns
+     * [KO] 논리 마우스 Y 좌표
+     * [EN] Logical mouse Y coordinate
      */
     get mouseY(): number {
         return this.#mouseY;
@@ -95,41 +121,73 @@ class PickingManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 피킹 대상 리스트를 반환합니다.
-     * [EN] Returns the picking casting list.
+     * [KO] 현재 프레임에 수집된 피킹 대상 객체 목록을 반환합니다.
+     * [EN] Returns the list of picking target objects collected in the current frame.
+     *
+     * @returns
+     * [KO] 피킹 대상 메시 배열
+     * [EN] Array of picking target meshes
      */
     get castingList(): (Mesh | InstancingMesh)[] {
         return this.#castingList;
     }
 
     /**
-     * [KO] 피킹용 GPU 텍스처를 반환합니다.
-     * [EN] Returns the GPU texture for picking.
+     * [KO] 피킹 색상 렌더링용 GPU 텍스처를 반환합니다.
+     * [EN] Returns the GPU texture used for picking color rendering.
+     *
+     * @returns
+     * [KO] 피킹용 `GPUTexture`
+     * [EN] `GPUTexture` for picking
      */
     get pickingGPUTexture(): GPUTexture {
         return this.#pickingGPUTexture;
     }
 
     /**
-     * [KO] 피킹용 GPU 텍스처 뷰를 반환합니다.
-     * [EN] Returns the GPU texture view for picking.
+     * [KO] 피킹 색상 텍스처의 GPU 텍스처 뷰를 반환합니다.
+     * [EN] Returns the GPU texture view of the picking color texture.
+     *
+     * @returns
+     * [KO] 피킹용 `GPUTextureView`
+     * [EN] `GPUTextureView` for picking
      */
     get pickingGPUTextureView(): GPUTextureView {
         return this.#pickingGPUTextureView;
     }
 
     /**
-     * [KO] 피킹용 깊이 텍스처 뷰를 반환합니다.
-     * [EN] Returns the depth texture view for picking.
+     * [KO] 피킹 깊이 텍스처의 GPU 텍스처 뷰를 반환합니다.
+     * [EN] Returns the GPU texture view of the picking depth texture.
+     *
+     * @returns
+     * [KO] 피킹 깊이용 `GPUTextureView`
+     * [EN] `GPUTextureView` for picking depth
      */
     get pickingDepthGPUTextureView(): GPUTextureView {
         return this.#pickingDepthGPUTextureView;
     }
 
+    /**
+     * [KO] 피킹 렌더 패스 디스크립터를 반환합니다.
+     * [EN] Returns the picking render pass descriptor.
+     *
+     * @returns
+     * [KO] `GPURenderPassDescriptor` 객체
+     * [EN] `GPURenderPassDescriptor` object
+     */
     get pickingPassDescriptor(): GPURenderPassDescriptor {
         return this.#pickingPassDescriptor;
     }
 
+    /**
+     * [KO] 수집된 피킹 대상 객체들을 피킹 렌더 패스에 기록하고 픽셀 읽기 복사를 예약합니다.
+     * [EN] Records collected picking target objects into the picking render pass and schedules pixel readback copy.
+     *
+     * @param view -
+     * [KO] 렌더링할 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance to render
+     */
     render(view: View3D) {
         if (this.castingList.length) {
             const {redGPUContext} = view
@@ -170,16 +228,16 @@ class PickingManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 캐스팅 리스트를 초기화합니다.
-     * [EN] Resets the casting list.
+     * [KO] 피킹 대상 객체 리스트를 비웁니다.
+     * [EN] Clears the picking casting list.
      */
     resetCastingList() {
         this.#castingList.length = 0
     }
 
     /**
-     * [KO] PickingManager를 파기합니다.
-     * [EN] Destroys the PickingManager.
+     * [KO] 피킹 매니저의 GPU 텍스처 및 픽셀 읽기 버퍼를 파기합니다.
+     * [EN] Destroys the picking manager's GPU textures and pixel readback buffer.
      */
     destroy() {
         if (this.#pickingGPUTexture) {
@@ -197,15 +255,15 @@ class PickingManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 이벤트를 확인하고 처리합니다.
-     * [EN] Checks and processes events.
+     * [KO] 비동기로 픽셀 색상 값을 읽어 피킹된 객체를 판별하고 등록된 마우스 이벤트를 실행합니다.
+     * [EN] Asynchronously reads the pixel color value to identify the picked object and dispatches registered mouse events.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 뷰 인스턴스
+     * [EN] Target view instance
      * @param time -
-     * [KO] 시간
-     * [EN] Time
+     * [KO] 현재 프레임 시각 (ms)
+     * [EN] Current frame time (ms)
      */
     async checkEvents(view: any, time: number) {
         if (this.castingList.length && !this.#isReading) {
@@ -217,7 +275,6 @@ class PickingManager extends RedGPUObject {
             const x = this.#mouseX;
             const y = this.#mouseY;
 
-            // [KO] 논리 좌표를 물리 좌표로 변환하여 범위 검사 [EN] Convert logical coordinates to physical coordinates for bounds checking
             const physicalX = x * combinedScale;
             const physicalY = y * combinedScale;
 
@@ -242,14 +299,6 @@ class PickingManager extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 텍스처 크기를 확인하고 필요시 재생성합니다.
-     * [EN] Checks the texture size and recreates it if necessary.
-     *
-     * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     */
     #checkTexture(view: any) {
         const {redGPUContext} = view
         const {resourceManager} = redGPUContext
@@ -264,15 +313,9 @@ class PickingManager extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 다음 렌더링 시 픽셀 읽기 작업을 준비합니다.
-     * [EN] Prepares for a pixel read operation during the next render.
-     *
-     * @param view - View3D 인스턴스
-     */
     #prepareRead(view: any) {
         if (!this.castingList.length) return;
-        if (this.#isReading) return; // [KO] 이미 읽기 작업 중이면 스킵 [EN] Skip if already reading
+        if (this.#isReading) return;
 
         const {gpuDevice, commandEncoderManager, redGPUContext} = this
         const dpr = window.devicePixelRatio;
@@ -283,7 +326,6 @@ class PickingManager extends RedGPUObject {
         const y = this.#mouseY;
         const {pixelRectArray} = view;
 
-        // [KO] 논리 좌표를 물리 좌표로 변환 [EN] Convert logical coordinates to physical coordinates
         const physicalX = Math.floor(x * combinedScale);
         const physicalY = Math.floor(y * combinedScale);
 
@@ -331,7 +373,6 @@ class PickingManager extends RedGPUObject {
         }, {});
 
     #createPickingEvent(uint32Color, mouseX, mouseY, tMesh, time, eventType, nativeEvent) {
-        // [KO] mouseX, mouseY는 이미 논리 좌표(CSS)임 [EN] mouseX and mouseY are already in logical coordinates (CSS)
         const isView2D = this.#view.rawCamera.constructor.name === 'Camera2D';
         const raycaster = isView2D ? this.#raycaster2D : this.#raycaster3D;
         raycaster.setFromCamera(this.#mouseX, this.#mouseY, this.#view as any);

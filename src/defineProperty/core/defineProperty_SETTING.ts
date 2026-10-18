@@ -1,6 +1,8 @@
 /**
- * [KO] RedGPU 속성 정의 시 Object.defineProperty에 공통으로 적용되는 PropertyDescriptor 설정값입니다.
- * [EN] PropertyDescriptor configuration values commonly applied to Object.defineProperty in RedGPU property definitions.
+ * [KO] 동적 프로퍼티 정의 시 `Object.defineProperty`에 공통 적용되는 `PropertyDescriptor` 기본 설정입니다.
+ * [EN] Default `PropertyDescriptor` configuration commonly applied to `Object.defineProperty` when defining dynamic properties.
+ *
+ * @category DefineProperty
  */
 const defineProperty_SETTING: PropertyDescriptor = {
     enumerable: true,

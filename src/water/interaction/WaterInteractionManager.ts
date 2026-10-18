@@ -3,11 +3,35 @@ import RedGPUObject from "../../base/RedGPUObject";
 import Mesh from "../../display/mesh/Mesh";
 import WaterInteractionRegistry from "./WaterInteractionRegistry";
 
+/**
+ * [KO] 수면과 상호작용하는 활성 메시의 물리적 파라미터를 담는 인터페이스입니다.
+ * [EN] Interface containing physical parameters of an active mesh interacting with the water surface.
+ */
 export interface WaterActiveMeshEntry {
+    /**
+     * [KO] 상호작용 대상 Mesh
+     * [EN] Target Mesh for interaction
+     */
     mesh: Mesh;
+    /**
+     * [KO] 생성할 물결 파동 세기
+     * [EN] Wave strength to generate
+     */
     waveStrength: number;
+    /**
+     * [KO] 메시 이동 속도
+     * [EN] Movement speed of the mesh
+     */
     speed: number;
+    /**
+     * [KO] 발자국/걸음 펄스 세기
+     * [EN] Footstep/step pulse strength
+     */
     stepPulse: number;
+    /**
+     * [KO] 걸음 좌우측 구분 (-1.0 또는 1.0)
+     * [EN] Footstep side indicator (-1.0 or 1.0)
+     */
     footSide: number;
 }
 
@@ -80,14 +104,59 @@ class MeshMotionTracker {
 
 Object.freeze(MeshMotionTracker);
 
+/**
+ * [KO] 수면과 충돌/상호작용하는 메시들을 감지하고 파동 파라미터를 수집하는 관리자 클래스입니다.
+ * [EN] Manager class that detects meshes colliding/interacting with the water surface and collects wave parameters.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Water
+ */
 export class WaterInteractionManager extends RedGPUObject {
     #motionTrackers: Map<Mesh, MeshMotionTracker> = new Map();
     #activeMeshBuffer: WaterActiveMeshEntry[] = [];
 
+    /**
+     * [KO] WaterInteractionManager 인스턴스를 생성합니다.
+     * [EN] Creates an instance of WaterInteractionManager.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
     }
 
+    /**
+     * [KO] 수면 상호작용 도메인 내의 활성 메시 목록을 수집합니다.
+     * [EN] Collects the list of active meshes within the water interaction domain.
+     *
+     * @param dt -
+     * [KO] 델타 시간 (초)
+     * [EN] Delta time in seconds
+     * @param domainCenterX -
+     * [KO] 도메인 중심 X 좌표
+     * [EN] Domain center X coordinate
+     * @param domainCenterZ -
+     * [KO] 도메인 중심 Z 좌표
+     * [EN] Domain center Z coordinate
+     * @param domainRadius -
+     * [KO] 도메인 반경
+     * [EN] Domain radius
+     * @param waterLevel -
+     * [KO] 수면 높이 Y 좌표
+     * [EN] Water surface height Y coordinate
+     * @param verticalRange -
+     * [KO] 수직 검사 범위 (기본값: 6.0)
+     * [EN] Vertical check range (default: 6.0)
+     * @returns
+     * [KO] 활성 메시 엔트리 배열
+     * [EN] Array of active mesh entries
+     */
     collectActiveMeshes(
         dt: number,
         domainCenterX: number,
@@ -188,6 +257,10 @@ export class WaterInteractionManager extends RedGPUObject {
         return this.#activeMeshBuffer;
     }
 
+    /**
+     * [KO] WaterInteractionManager 인스턴스를 파괴하고 내부 모션 트래커 및 버퍼를 해제합니다.
+     * [EN] Destroys the WaterInteractionManager instance and clears internal motion trackers and buffers.
+     */
     destroy(): void {
         this.#motionTrackers.clear();
         this.#activeMeshBuffer.length = 0;

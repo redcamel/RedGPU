@@ -4,25 +4,19 @@ import ASinglePassPostEffect from "./ASinglePassPostEffect";
 import {IPostEffectResult} from "./types";
 
 /**
- * [KO] 다중 패스 후처리 이펙트 추상 클래스입니다.
- * [EN] Abstract class for multi-pass post-processing effects.
+ * [KO] 여러 개의 단일 패스(`ASinglePassPostEffect`) 이펙트를 순차적으로 연결해 실행하는 다중 패스 후처리 추상 클래스입니다.
+ * [EN] Abstract class for multi-pass post-processing effects that sequentially chains and executes multiple single-pass (`ASinglePassPostEffect`) effects.
  *
- * [KO] 여러 개의 단일 패스(Single-pass) 이펙트를 체인처럼 연결하여 순차적으로 실행하는 기반 클래스입니다.
- * [EN] Base class for chaining and sequentially executing multiple single-pass effects.
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
- * @category Core
+ * @category PostEffect
  */
 abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
-    /**
-     * [KO] 실행될 내부 패스(이펙트) 리스트
-     * [EN] List of internal passes (effects) to be executed
-     */
     #passList: ASinglePassPostEffect[] = []
 
-    /**
-     * [KO] 합산된 총 비디오 메모리 사용량 (Bytes)
-     * [EN] Total accumulated video memory usage in bytes
-     */
     #videoMemorySize: number = 0
     #destroyed: boolean = false
 
@@ -31,11 +25,11 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [EN] Creates an AMultiPassPostEffect instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param passList -
-     * [KO] 순차적으로 적용할 단일 패스 이펙트 배열
-     * [EN] Array of single-pass effects to be applied sequentially
+     * [KO] 순차적으로 실행할 단일 패스 이펙트 배열
+     * [EN] Array of single-pass effects to execute sequentially
      */
     protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
         super(redGPUContext);
@@ -43,12 +37,12 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 모든 내부 패스의 비디오 메모리 사용량을 합산하여 반환합니다.
-     * [EN] Returns the sum of video memory usage of all internal passes.
+     * [KO] 모든 내부 패스의 비디오 메모리 사용량 합계(바이트)를 반환합니다.
+     * [EN] Returns the sum of video memory usage (in bytes) of all internal passes.
      *
      * @returns
-     * [KO] 비디오 메모리 사용량 (Bytes)
-     * [EN] Video memory usage in bytes
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
      */
     get videoMemorySize(): number {
         this.#calcVideoMemory();
@@ -56,17 +50,21 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 등록된 내부 패스 리스트를 반환합니다.
-     * [EN] Returns the list of registered internal passes.
+     * [KO] 등록된 내부 단일 패스 이펙트 배열을 반환합니다.
+     * [EN] Returns the array of registered internal single-pass effects.
      *
      * @returns
-     * [KO] 내부 단일 패스 이펙트 배열
-     * [EN] Array of internal single-pass post effects
+     * [KO] 내부 단일 패스 이펙트 배열 (`ASinglePassPostEffect[]`)
+     * [EN] Array of internal single-pass post effects (`ASinglePassPostEffect[]`)
      */
     get passList(): ASinglePassPostEffect[] {
         return this.#passList;
     }
 
+    /**
+     * [KO] 모든 내부 패스 이펙트와 할당된 리소스를 파기합니다.
+     * [EN] Destroys all internal pass effects and allocated resources.
+     */
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
@@ -76,32 +74,32 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 등록된 모든 내부 패스의 리소스를 해제합니다.
-     * [EN] Clears the resources of all registered internal passes.
+     * [KO] 등록된 모든 내부 패스의 캐시 리소스를 비웁니다.
+     * [EN] Clears cached resources of all registered internal passes.
      */
     clear() {
         this.#passList.forEach(v => v.clear());
     }
 
     /**
-     * [KO] 모든 패스를 순차적으로 렌더링합니다. 각 패스의 결과는 다음 패스의 입력으로 전달됩니다.
-     * [EN] Renders all passes sequentially. The result of each pass is passed as input to the next.
+     * [KO] 내부 패스들을 순차적으로 실행하고 최종 패스의 렌더링 결과를 반환합니다.
+     * [EN] Sequentially executes internal passes and returns the rendering result of the final pass.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
+     * [KO] 렌더링 너비 (픽셀)
+     * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
+     * [KO] 렌더링 높이 (픽셀)
+     * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
      * [KO] 최초 입력 소스 텍스처 정보
      * [EN] Initial input source texture information
      * @returns
-     * [KO] 최종 패스의 렌더링 결과
-     * [EN] Rendering result of the final pass
+     * [KO] 최종 패스의 출력 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Output texture information of the final pass (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         let targetOutputInfo: IPostEffectResult;
@@ -112,14 +110,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
             const effect = passList[i];
             const prevTemp = targetOutputInfo;
 
-            // [KO] 두 번째 패스부터는 이전 패스의 결과물을 입력 소스로 사용합니다.
-            // [EN] From the second pass onwards, use the result of the previous pass as the input source.
             if (i > 0) sourceTextureInfo = targetOutputInfo;
 
             targetOutputInfo = effect.render(view, width, height, sourceTextureInfo);
 
-            // [KO] 이전 패스에서 생성된 중간 단계 텍스처는 다음 패스의 입력으로 사용된 직후 풀에 반납하여 메모리를 효율적으로 관리합니다.
-            // [EN] Intermediate textures from previous passes are released back to the pool immediately after being used as input for the next pass to manage memory efficiently.
             if (prevTemp) {
                 pool.release(prevTemp.texture);
             }
@@ -128,10 +122,6 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
         return targetOutputInfo;
     }
 
-    /**
-     * [KO] 모든 내부 패스의 메모리 사용량을 합산하여 총 사용량을 계산합니다.
-     * [EN] Calculates the total usage by summing the memory usage of all internal passes.
-     */
     #calcVideoMemory() {
         this.#videoMemorySize = 0;
         this.#passList.forEach(effect => {

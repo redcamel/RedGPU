@@ -50,6 +50,10 @@ class AntialiasingManager {
      * // [EN] Enable TAA
      * redGPUContext.antialiasingManager.useTAA = true;
      * ```
+     *
+     * @returns
+     * [KO] TAA 활성화 여부
+     * [EN] Whether TAA is enabled
      */
     get useTAA(): boolean {
         return this.#useTAA;
@@ -71,6 +75,10 @@ class AntialiasingManager {
      * // [EN] Enable MSAA
      * redGPUContext.antialiasingManager.useMSAA = true;
      * ```
+     *
+     * @returns
+     * [KO] MSAA 활성화 여부
+     * [EN] Whether MSAA is enabled
      */
     get useMSAA(): boolean {
         return this.#useMSAA;
@@ -93,6 +101,10 @@ class AntialiasingManager {
      * // [EN] Enable FXAA
      * redGPUContext.antialiasingManager.useFXAA = true;
      * ```
+     *
+     * @returns
+     * [KO] FXAA 활성화 여부
+     * [EN] Whether FXAA is enabled
      */
     get useFXAA(): boolean {
         return this.#useFXAA;
@@ -107,6 +119,10 @@ class AntialiasingManager {
     /**
      * [KO] MSAA 상태 변경을 추적하기 위한 고유 식별자(UUID)를 반환합니다.
      * [EN] Returns the unique identifier (UUID) used to track MSAA state changes.
+     *
+     * @returns
+     * [KO] MSAA 상태 식별용 UUID 문자열
+     * [EN] UUID string for identifying MSAA state
      */
     get msaaID(): string {
         return this.#msaaID;

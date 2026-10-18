@@ -11,17 +11,24 @@ const haltonSequence = (index: number, base: number): number => {
     }
     return result;
 }
+/**
+ * [KO] TAA(Temporal Anti-Aliasing)를 위해 Halton 시퀀스 기반의 서브픽셀 지터(Jitter) 오프셋(`[-0.5, 0.5]`)을 계산하여 `View3D`에 적용합니다.
+ * [EN] Calculates sub-pixel jitter offsets (`[-0.5, 0.5]`) based on the Halton sequence for TAA (Temporal Anti-Aliasing) and applies them to `View3D`.
+ *
+ * @param view -
+ * [KO] 지터 오프셋을 적용할 대상 `View3D` 인스턴스
+ * [EN] Target `View3D` instance to apply jitter offsets
+ * @category Renderer
+ */
 const updateJitter = (view: View3D) => {
     const {taa} = view;
     const frameIndex = taa.frameIndex || 0;
     const sampleCount = 16;
     const currentSample = frameIndex % sampleCount;
 
-    // Halton 시퀀스 (0~1 범위)
     const haltonX = haltonSequence(currentSample + 1, 2);
     const haltonY = haltonSequence(currentSample + 1, 3);
 
-    // 물리적 픽셀 기준의 오프셋 계산: (halton - 0.5)는 [-0.5, 0.5] 물리 반 픽셀 범위
     const jitterX = haltonX - 0.5;
     const jitterY = haltonY - 0.5;
 

@@ -7,13 +7,15 @@ import {Node} from "../GLTF";
 
 const RAD_TO_DEG = 180 / Math.PI;
 /**
- * Sets the rotation of a mesh using the given rotation values.
- * The rotation values should be in radians.
+ * [KO] 라디안 단위의 회전 배열을 각도(degree)로 변환하여 메쉬의 회전을 설정합니다.
+ * [EN] Converts a rotation array in radians to degrees and sets the rotation of the mesh.
  *
- * @param {number[]} tRotation - The rotation values in radians along the x, y, and z axes.
- * @param {Mesh} mesh - The mesh to set the rotation of.
- *
- * @returns {void}
+ * @param tRotation -
+ * [KO] X, Y, Z 축의 회전 값 배열 (라디안 단위)
+ * [EN] Array of rotation values along the X, Y, and Z axes (in radians)
+ * @param mesh -
+ * [KO] 회전을 적용할 대상 메쉬
+ * [EN] Target mesh to apply the rotation to
  */
 const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
     mesh.setRotation(
@@ -24,11 +26,16 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
 
 }
 /**
- * Parses the transformation and matrix information from `nodeInfo` and applies it to the `mesh`.
+ * [KO] GLTF 노드의 변환(TRS) 및 행렬(Matrix) 정보를 파싱하여 메쉬에 적용합니다.
+ * [EN] Parses the transformation (TRS) and matrix information of a GLTF node and applies it to the mesh.
  *
- * @param {Mesh} mesh - The mesh to apply the transformations to.
- * @param {Node} nodeInfo - The information about the node containing the transformation data.
- * @returns {void}
+ * @param mesh -
+ * [KO] 변환을 적용할 대상 메쉬
+ * [EN] Target mesh to apply transformations to
+ * @param nodeInfo -
+ * [KO] 변환 데이터를 포함하는 GLTF 노드 정보
+ * [EN] GLTF node information containing transformation data
+ * @category Loader
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
     const {matrix, rotation: quaternion, translation, scale} = nodeInfo;
@@ -74,7 +81,6 @@ const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
         if ('translation' in nodeInfo)
             mesh.setPosition(translation[0], translation[1], translation[2]);
         if ('scale' in nodeInfo) {
-            // console.log('scale', scale)
             mesh.setScale(scale[0], scale[1], scale[2]);
             if (scale[0] < 0 || scale[1] < 0 || scale[2] < 0) {
                 mesh.primitiveState.frontFace = GPU_FRONT_FACE.CW

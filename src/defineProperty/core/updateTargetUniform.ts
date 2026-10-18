@@ -1,13 +1,19 @@
 /**
- * [KO] 타겟 객체(Material, PostEffect 등)로부터 유니폼 정보와 버퍼를 추출하여 새로운 값을 유니폼 버퍼에 기록하는 내부 유틸리티입니다.
- * [EN] Internal utility that extracts globalStruct information and buffer from target objects (Material, PostEffect, etc.) and writes the new value to the globalStruct buffer.
+ * [KO] 대상 객체(`Material`, `PostEffect` 등)의 유니폼 버퍼 또는 전역 SSBO 슬롯에 변경된 프로퍼티 값을 기록합니다.
+ * [EN] Writes the updated property value to the uniform buffer or global SSBO slot of the target object (`Material`, `PostEffect`, etc.).
  *
- * @param target - [KO] 유니폼 정보를 추출할 대상 인스턴스 [EN] Target instance to extract globalStruct information from
- * @param propertyKey - [KO] 업데이트할 유니폼 멤버의 속성 키 [EN] Property key of the globalStruct member to update
- * @param newValue - [KO] 버퍼에 기록할 새 값 [EN] New value to write to the buffer
+ * @param target -
+ * [KO] 유니폼 데이터를 갱신할 대상 인스턴스
+ * [EN] Target instance whose uniform data will be updated
+ * @param propertyKey -
+ * [KO] 갱신할 유니폼 멤버의 프로퍼티 키 이름
+ * [EN] Property key name of the uniform member to update
+ * @param newValue -
+ * [KO] 버퍼에 기록할 새 값
+ * [EN] New value to write to the buffer
+ * @category DefineProperty
  */
 const updateTargetUniform = (target: any, propertyKey: string, newValue: any) => {
-    //TODO 힙안생기게... 보강해야함
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo, redGPUContext} = target

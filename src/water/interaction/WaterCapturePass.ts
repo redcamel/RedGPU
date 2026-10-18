@@ -6,10 +6,33 @@ import vertexShaderCode from "./shader/waterCapturePenetration.wgsl";
 import vertexShaderSkinnedCode from "./shader/waterCapturePenetrationSkinned.wgsl";
 import {WaterActiveMeshEntry} from "./WaterInteractionManager";
 
+/**
+ * [KO] 물 상호작용 객체의 침투 깊이를 캡처하는 렌더 패스 클래스입니다.
+ * [EN] Render pass class that captures penetration depth for water interaction objects.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Water
+ */
 export class WaterCapturePass extends RedGPUObject {
+    /**
+     * [KO] 캡처 텍스처 해상도 크기 (기본값: 512)
+     * [EN] Capture texture resolution size (default: 512)
+     */
     textureSize: number = 512;
 
+    /**
+     * [KO] 캡처된 침투 깊이 및 속도 데이터가 기록되는 GPUTexture
+     * [EN] GPUTexture where captured penetration depth and velocity data are recorded
+     */
     captureTexture: GPUTexture;
+    /**
+     * [KO] 캡처 텍스처의 GPUTextureView
+     * [EN] GPUTextureView of the capture texture
+     */
     captureTextureView: GPUTextureView;
 
     #depthTexture: GPUTexture;
@@ -47,6 +70,17 @@ export class WaterCapturePass extends RedGPUObject {
     #meshBGL: GPUBindGroupLayout;
     #meshSkinnedBGL: GPUBindGroupLayout;
 
+    /**
+     * [KO] WaterCapturePass 인스턴스를 생성합니다.
+     * [EN] Creates an instance of WaterCapturePass.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param textureSize -
+     * [KO] 캡처 텍스처 해상도 크기 (기본값: 512)
+     * [EN] Capture texture resolution size (default: 512)
+     */
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
         super(redGPUContext);
         this.textureSize = textureSize;
@@ -55,6 +89,32 @@ export class WaterCapturePass extends RedGPUObject {
         this.#initPipelineLayout();
     }
 
+    /**
+     * [KO] 활성 메시들의 수면 침투 깊이를 캡처 텍스처에 렌더링합니다.
+     * [EN] Renders the water penetration depth of active meshes to the capture texture.
+     *
+     * @param commandEncoder -
+     * [KO] WebGPU 명령 인코더
+     * [EN] WebGPU command encoder
+     * @param activeMeshes -
+     * [KO] 수면과 교차하는 활성 메시 항목 배열
+     * [EN] Array of active mesh entries intersecting the water surface
+     * @param domainCenterX -
+     * [KO] 도메인 중심 X 좌표
+     * [EN] Domain center X coordinate
+     * @param domainCenterZ -
+     * [KO] 도메인 중심 Z 좌표
+     * [EN] Domain center Z coordinate
+     * @param domainSize -
+     * [KO] 도메인 크기
+     * [EN] Domain size
+     * @param waterLevel -
+     * [KO] 수면 높이 Y 좌표
+     * [EN] Water surface height Y coordinate
+     * @param maxPenetration -
+     * [KO] 최대 침투 깊이 (기본값: 0.35)
+     * [EN] Maximum penetration depth (default: 0.35)
+     */
     render(
         commandEncoder: GPUCommandEncoder,
         activeMeshes: WaterActiveMeshEntry[],
@@ -141,6 +201,10 @@ export class WaterCapturePass extends RedGPUObject {
         passEncoder.end();
     }
 
+    /**
+     * [KO] WaterCapturePass 인스턴스를 파괴하고 할당된 GPU 텍스처 및 버퍼 리소스를 해제합니다.
+     * [EN] Destroys the WaterCapturePass instance and releases allocated GPU texture and buffer resources.
+     */
     destroy(): void {
         if (this.captureTexture) {
             this.captureTexture.destroy();

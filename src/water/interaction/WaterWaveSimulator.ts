@@ -92,6 +92,10 @@ export class WaterWaveSimulator extends RedGPUObject {
         this.#isBufferAPrimary = !this.#isBufferAPrimary;
     }
 
+    /**
+     * [KO] 파동 버퍼, 리플 노멀 텍스처, 유니폼 버퍼 GPU 리소스를 해제합니다.
+     * [EN] Releases the wave buffers, ripple normal texture, and uniform buffer GPU resources.
+     */
     destroy(): void {
         if (this.#waveBufferA) this.#waveBufferA.destroy();
         if (this.#waveBufferB) this.#waveBufferB.destroy();

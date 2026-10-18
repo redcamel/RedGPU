@@ -5,10 +5,10 @@ import consoleAndThrowError from "../utils/consoleAndThrowError";
  * [KO] 3차원 방향성 경계 상자(Oriented Bounding Box) 클래스입니다.
  * [EN] 3D Oriented Bounding Box (OBB) class.
  *
- * [KO] 임의의 방향을 가질 수 있는 경계 상자를 정의하며 SAT 기반 교차 판정 및 포함 여부 확인 기능을 제공합니다.
- * [EN] Defines a bounding box with arbitrary orientation and provides SAT-based intersection and containment tests.
+ * [KO] 중심 좌표, 세 축의 반치수(Half Extents), 방향 행렬(`mat4`)을 기반으로 회전된 경계 상자를 정의하며 분리축 정리(SAT) 기반 교차 판정 및 점 포함 여부를 검사합니다.
+ * [EN] Defines an oriented bounding box using center coordinates, half-extents along three axes, and an orientation matrix (`mat4`), providing Separating Axis Theorem (SAT) intersection and point containment tests.
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 1, 1], orientationMatrix);
  * const intersects = obb.intersects(otherOBB);
@@ -18,69 +18,74 @@ import consoleAndThrowError from "../utils/consoleAndThrowError";
  */
 export class OBB {
     /**
-     * [KO] X축 중심 좌표
-     * [EN] Center X coordinate
+     * [KO] X축 중심 좌표입니다.
+     * [EN] Center X coordinate.
      */
     readonly centerX: number;
     /**
-     * [KO] Y축 중심 좌표
-     * [EN] Center Y coordinate
+     * [KO] Y축 중심 좌표입니다.
+     * [EN] Center Y coordinate.
      */
     readonly centerY: number;
     /**
-     * [KO] Z축 중심 좌표
-     * [EN] Center Z coordinate
+     * [KO] Z축 중심 좌표입니다.
+     * [EN] Center Z coordinate.
      */
     readonly centerZ: number;
     /**
-     * [KO] X축 반치수(half extent)
-     * [EN] X half extent
+     * [KO] 로컬 X축 방향의 반치수(Half Extent)입니다.
+     * [EN] Half extent along the local X-axis.
      */
     readonly halfExtentX: number;
     /**
-     * [KO] Y축 반치수(half extent)
-     * [EN] Y half extent
+     * [KO] 로컬 Y축 방향의 반치수(Half Extent)입니다.
+     * [EN] Half extent along the local Y-axis.
      */
     readonly halfExtentY: number;
     /**
-     * [KO] Z축 반치수(half extent)
-     * [EN] Z half extent
+     * [KO] 로컬 Z축 방향의 반치수(Half Extent)입니다.
+     * [EN] Half extent along the local Z-axis.
      */
     readonly halfExtentZ: number;
     /**
-     * [KO] 방향 행렬(mat4)
-     * [EN] Orientation matrix (mat4)
+     * [KO] 경계 상자의 회전 방향을 나타내는 4x4 행렬(`mat4`)입니다.
+     * [EN] 4x4 matrix (`mat4`) representing the rotational orientation of the bounding box.
      */
     readonly orientation: mat4;
     /**
-     * [KO] 중심 좌표 [x, y, z]
-     * [EN] Center coordinates [x, y, z]
+     * [KO] 경계 상자의 중심 좌표 `[x, y, z]` 튜플입니다.
+     * [EN] Center coordinates `[x, y, z]` tuple of the bounding box.
      */
     readonly center: [number, number, number];
     /**
-     * [KO] 반치수 [x, y, z]
-     * [EN] Half extents [x, y, z]
+     * [KO] 경계 상자의 세 축 반치수 `[x, y, z]` 튜플입니다.
+     * [EN] Half extents `[x, y, z]` tuple along the three axes of the bounding box.
      */
     readonly halfExtents: [number, number, number];
     /**
-     * [KO] 중심에서 꼭짓점까지의 거리(반지름)
-     * [EN] Distance from center to vertex (radius)
+     * [KO] 경계 상자의 중심에서 꼭짓점까지의 유클리드 거리(외접 구 반지름)입니다.
+     * [EN] Euclidean distance from the center of the bounding box to a corner vertex (bounding sphere radius).
      */
     readonly geometryRadius: number;
 
     /**
-     * [KO] OBB 인스턴스를 생성합니다.
-     * [EN] Creates an OBB instance.
+     * [KO] `OBB` 인스턴스를 생성합니다.
+     * [EN] Creates an `OBB` instance.
+     *
+     * ### Example
+     * ```typescript
+     * const obb = new RedGPU.Bound.OBB([0, 0, 0], [1, 2, 1], orientationMatrix);
+     * ```
      *
      * @param center -
-     * [KO] 중심 좌표 [x, y, z]
-     * [EN] Center coordinates [x, y, z]
+     * [KO] 중심 좌표 `[x, y, z]`
+     * [EN] Center coordinates `[x, y, z]`
      * @param halfExtents -
-     * [KO] 반치수 [x, y, z]
-     * [EN] Half extents [x, y, z]
+     * [KO] 각 축의 반치수 `[x, y, z]`
+     * [EN] Half extents `[x, y, z]` along each axis
      * @param orientation -
-     * [KO] 방향 행렬(mat4)
-     * [EN] Orientation matrix (mat4)
+     * [KO] 4x4 방향 행렬(`mat4`)
+     * [EN] 4x4 orientation matrix (`mat4`)
      */
     constructor(
         center: [number, number, number],
@@ -104,30 +109,32 @@ export class OBB {
     }
 
     /**
-     * [KO] 다른 OBB와의 교차 여부를 반환합니다.
-     * [EN] Returns whether it intersects with another OBB.
+     * [KO] 분리축 정리(SAT)를 사용하여 다른 `OBB` 인스턴스와의 교차 여부를 판정합니다.
+     * [EN] Determines whether this box intersects with another `OBB` instance using the Separating Axis Theorem (SAT).
+     *
+     * ### Example
+     * ```typescript
+     * const isIntersecting = obb.intersects(otherOBB);
+     * ```
      *
      * @param other -
-     * [KO] 교차 여부를 검사할 OBB 인스턴스
-     * [EN] OBB instance to check for intersection
+     * [KO] 교차 여부를 검사할 대상 `OBB` 인스턴스
+     * [EN] Target `OBB` instance to test for intersection
      * @returns
-     * [KO] 교차하면 true, 아니면 false
-     * [EN] True if intersecting, otherwise false
+     * [KO] 교차 시 `true`, 그렇지 않으면 `false`
+     * [EN] `true` if intersecting, otherwise `false`
      */
     intersects(other: OBB): boolean {
         if (!(other instanceof OBB)) {
             consoleAndThrowError('allow only OBB instance');
         }
-        // 간단한 구 테스트 먼저 수행 (빠른 거부)
         const centerDiff = vec3.subtract(vec3.create(), this.center, other.center);
         const centerDistance = vec3.length(centerDiff);
         if (centerDistance > this.geometryRadius + other.geometryRadius) {
             return false;
         }
-        // SAT를 위한 축 벡터들 추출
         const axesA = this.#getAxes();
         const axesB = other.#getAxes();
-        // 6개 축만 테스트 (각 OBB의 3개 축)
         const axes = [...axesA, ...axesB];
         for (const axis of axes) {
             const radiusA = this.#getProjectionRadius(axis);
@@ -141,21 +148,27 @@ export class OBB {
     }
 
     /**
-     * [KO] 점 또는 좌표가 OBB 내부에 포함되는지 여부를 반환합니다.
-     * [EN] Returns whether a point or coordinate is contained within the OBB.
+     * [KO] 지정한 3차원 좌표 또는 점이 `OBB` 내부에 포함되는지 확인합니다.
+     * [EN] Checks whether the specified 3D coordinate or point is contained within the `OBB`.
+     *
+     * ### Example
+     * ```typescript
+     * const isInside = obb.contains(0, 0, 0);
+     * const isPointInside = obb.contains([0, 0, 0]);
+     * ```
      *
      * @param pointOrX -
-     * [KO] [x, y, z] 배열 또는 x 좌표
-     * [EN] [x, y, z] array or x coordinate
+     * [KO] `[x, y, z]` 좌표 튜플 배열 또는 X축 좌표
+     * [EN] `[x, y, z]` coordinate tuple array or X-axis coordinate
      * @param y -
-     * [KO] y 좌표
-     * [EN] y coordinate
+     * [KO] Y축 좌표 (`pointOrX`가 숫자인 경우 사용)
+     * [EN] Y-axis coordinate (used when `pointOrX` is a number)
      * @param z -
-     * [KO] z 좌표
-     * [EN] z coordinate
+     * [KO] Z축 좌표 (`pointOrX`가 숫자인 경우 사용)
+     * [EN] Z-axis coordinate (used when `pointOrX` is a number)
      * @returns
-     * [KO] 포함되면 true, 아니면 false
-     * [EN] True if contained, otherwise false
+     * [KO] 포함 시 `true`, 그렇지 않으면 `false`
+     * [EN] `true` if contained, otherwise `false`
      */
     contains(pointOrX: [number, number, number] | number, y?: number, z?: number): boolean {
         let point: vec3;
@@ -176,12 +189,17 @@ export class OBB {
     }
 
     /**
-     * [KO] OBB 인스턴스를 복제합니다.
-     * [EN] Clones the OBB instance.
+     * [KO] 현재 `OBB`와 동일한 속성을 가진 새 `OBB` 인스턴스를 복제하여 반환합니다.
+     * [EN] Clones and returns a new `OBB` instance with the same properties as the current `OBB`.
+     *
+     * ### Example
+     * ```typescript
+     * const clonedOBB = obb.clone();
+     * ```
      *
      * @returns
-     * [KO] 복제된 OBB 인스턴스
-     * [EN] Cloned OBB instance
+     * [KO] 복제된 `OBB` 인스턴스
+     * [EN] Cloned `OBB` instance
      */
     clone(): OBB {
         return new OBB(
@@ -191,14 +209,6 @@ export class OBB {
         );
     }
 
-    /**
-     * [KO] OBB의 로컬 축 벡터 3개를 반환합니다.
-     * [EN] Returns the 3 local axis vectors of the OBB.
-     * @returns
-     * [KO] [vec3, vec3, vec3] 각 축 벡터
-     * [EN] [vec3, vec3, vec3] axis vectors
-     * 
-     */
     #getAxes(): [vec3, vec3, vec3] {
         return [
             vec3.fromValues(this.orientation[0], this.orientation[1], this.orientation[2]),
@@ -207,17 +217,6 @@ export class OBB {
         ];
     }
 
-    /**
-     * [KO] 주어진 축(axis)에 대한 OBB의 투영 반지름을 반환합니다.
-     * [EN] Returns the projection radius of the OBB onto the given axis.
-     * @param axis -
-     * [KO] 투영할 축 벡터
-     * [EN] Axis vector to project onto
-     * @returns
-     * [KO] 투영 반지름
-     * [EN] Projection radius
-     * 
-     */
     #getProjectionRadius(axis: vec3): number {
         const axes = this.#getAxes();
         return Math.abs(vec3.dot(axes[0], axis)) * this.halfExtentX +

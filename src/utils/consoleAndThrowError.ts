@@ -1,21 +1,20 @@
 /**
- * [KO] 에러 메시지를 콘솔에 출력하고 예외를 발생시킵니다.
- * [EN] Logs error messages to the console and throws an exception.
+ * [KO] 전달된 인자들을 공백으로 연결하여 콘솔에 출력한 뒤 `Error`를 던집니다.
+ * [EN] Joins the given arguments with spaces, logs them to the console, and throws an `Error`.
  *
- * [KO] 전달된 모든 인자를 합쳐 콘솔에 출력하고 Error를 throw합니다.
- * [EN] Joins all arguments, logs them to the console, and throws an Error.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * RedGPU.Util.consoleAndThrowError('Invalid', 'parameter', 42);
+ * // [KO] 'Invalid parameter 42' 메시지로 예외 발생
+ * // [EN] Throws an exception with the message 'Invalid parameter 42'
+ * consoleAndThrowError('Invalid', 'parameter', 42);
  * ```
  *
  * @param arg -
- * [KO] 출력할 메시지 인자들
- * [EN] Message arguments to log
+ * [KO] 출력할 메시지 인자 목록
+ * [EN] List of message arguments to log
  * @throws
- * [KO] 합쳐진 메시지를 포함한 Error 객체
- * [EN] Error object containing the joined message
+ * [KO] 연결된 메시지를 담은 `Error`
+ * [EN] `Error` containing the joined message
  * @category Utility
  */
 const consoleAndThrowError = (...arg: any[]) => {

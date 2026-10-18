@@ -3,11 +3,8 @@ import convertHexToRgb from "../../color/convertHexToRgb";
 import ABaseLight from "../core/ABaseLight";
 
 /**
- * [KO] 씬 전체에 방향성 없이 균일하게 빛을 비추는 환경광(Ambient Light) 클래스입니다.
- * [EN] Ambient light class that illuminates the entire scene uniformly without directionality.
- *
- * [KO] 그림자나 반사 하이라이트를 생성하지 않으며, 어두운 영역의 기본 밝기와 색조를 결정합니다.
- * [EN] Does not cast shadows or specular highlights, and determines the base brightness and tint of dark areas.
+ * [KO] 씬 전체에 방향성이나 그림자 없이 균일한 기본 밝기와 색조를 부여하는 환경광(Ambient Light) 클래스입니다.
+ * [EN] Ambient light class that provides uniform base brightness and tint across the entire scene without directionality or shadows.
  *
  * ### Example
  * ```typescript

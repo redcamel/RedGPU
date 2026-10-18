@@ -7,19 +7,10 @@ import DOFUnified from "./DOFUnified/DOFUnified";
 
 
 /**
- * [KO] 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.
- * [EN] Depth of Field (DOF) post-processing effect.
+ * [KO] CoC(착란원) 모델을 기반으로 초점 거리에 따른 블러와 보케(Bokeh)를 시뮬레이션하는 피사계 심도(DOF) 후처리 이펙트입니다.
+ * [EN] Depth of Field (DOF) post-processing effect that simulates distance-based blur and bokeh based on the Circle of Confusion (CoC) model.
  *
- * [KO] 실제 카메라 렌즈의 특성을 시뮬레이션하여, 초점이 맞는 영역은 선명하게 하고 그 외의 영역은 거리에 따라 부드럽게 블러 처리합니다.
- * [EN] Simulates real camera lens characteristics by keeping focused areas sharp while smoothly blurring other areas based on distance.
- *
- * [KO] CoC(Circle of Confusion) 모델을 기반으로 물리적으로 정확한 심도 표현을 제공하며, 고품질 하드웨어 샘플링을 통해 매끄러운 보케(Bokeh) 질감을 구현합니다.
- * [EN] Provides physically accurate depth representation based on the CoC (Circle of Confusion) model and implements smooth bokeh textures through high-quality hardware sampling.
- *
- * [KO] 이 효과는 HDR 공간에서 동작하여 밝은 광원의 보케 형태를 아름답게 보존합니다.
- * [EN] This effect operates in HDR space, beautifully preserving the bokeh shapes of bright light sources.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
  * effect.focusDistance = 10;
@@ -33,78 +24,23 @@ import DOFUnified from "./DOFUnified/DOFUnified";
  * @category Lens
  */
 class DOF extends AMultiPassPostEffect {
-    /**
-     * [KO] CoC 계산용 이펙트
-     * [EN] Effect for CoC calculation
-     */
     #effect_coc: DOFCoC;
-    /**
-     * [KO] 블러/합성용 이펙트
-     * [EN] Effect for blur/compositing
-     */
     #effect_unified: DOFUnified;
-    // CoC 파라미터
-    /**
-     * [KO] 초점 거리
-     * [EN] Focus distance
-     * @defaultValue 15.0
-     */
     #focusDistance: number = 15.0;
-    /**
-     * [KO] 조리개(F값)
-     * [EN] Aperture (F-number)
-     * @defaultValue 2.8
-     */
     #aperture: number = 2.8;
-    /**
-     * [KO] 최대 CoC
-     * [EN] Max CoC
-     * @defaultValue 25.0
-     */
     #maxCoC: number = 25.0;
-    /**
-     * [KO] 근평면
-     * [EN] Near plane
-     * @defaultValue 0.1
-     */
     #nearPlane: number = 0.1;
-    /**
-     * [KO] 원평면
-     * [EN] Far plane
-     * @defaultValue 1000.0
-     */
     #farPlane: number = 1000.0;
-    // 블러 파라미터
-    /**
-     * [KO] 근거리 블러 크기
-     * [EN] Near blur size
-     * @defaultValue 15
-     */
     #nearBlurSize: number = 15;
-    /**
-     * [KO] 원거리 블러 크기
-     * [EN] Far blur size
-     * @defaultValue 15
-     */
     #farBlurSize: number = 15;
-    /**
-     * [KO] 근거리 블러 강도
-     * [EN] Near blur strength
-     * @defaultValue 1.0
-     */
     #nearStrength: number = 1.0;
-    /**
-     * [KO] 원거리 블러 강도
-     * [EN] Far blur strength
-     * @defaultValue 1.0
-     */
     #farStrength: number = 1.0;
 
     /**
      * [KO] DOF 인스턴스를 생성합니다.
      * [EN] Creates a DOF instance.
      *
-     * @param redGPUContext
+     * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
      * [EN] RedGPU Context
      */
@@ -118,20 +54,17 @@ class DOF extends AMultiPassPostEffect {
         );
         this.#effect_coc = this.passList[0] as DOFCoC;
         this.#effect_unified = this.passList[1] as DOFUnified;
-        // CoC 파라미터 초기화
         this.#effect_coc.focusDistance = this.#focusDistance;
         this.#effect_coc.aperture = this.#aperture;
         this.#effect_coc.maxCoC = this.#maxCoC;
         this.#effect_coc.nearPlane = this.#nearPlane;
         this.#effect_coc.farPlane = this.#farPlane;
-        // 통합 효과 파라미터 초기화
         this.#effect_unified.nearBlurSize = this.#nearBlurSize;
         this.#effect_unified.farBlurSize = this.#farBlurSize;
         this.#effect_unified.nearStrength = this.#nearStrength;
         this.#effect_unified.farStrength = this.#farStrength;
     }
 
-    // CoC 관련 getter/setter
     /**
      * [KO] 초점 거리를 반환합니다.
      * [EN] Returns the focus distance.
@@ -162,7 +95,7 @@ class DOF extends AMultiPassPostEffect {
      * [EN] Returns the aperture value.
      *
      * @returns
-     * [KO] 조리개 값 (F값)
+     * [KO] 조리개 값 (F-number)
      * [EN] Aperture value (F-number)
      */
     get aperture(): number {
@@ -174,7 +107,7 @@ class DOF extends AMultiPassPostEffect {
      * [EN] Sets the aperture value.
      *
      * @param value -
-     * [KO] 조리개 값 (F값)
+     * [KO] 조리개 값 (F-number)
      * [EN] Aperture value (F-number)
      */
     set aperture(value: number) {
@@ -183,24 +116,24 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 최대 CoC 값을 반환합니다.
-     * [EN] Returns the max CoC value.
+     * [KO] 최대 착란원(CoC) 크기를 반환합니다.
+     * [EN] Returns the maximum Circle of Confusion (CoC) size.
      *
      * @returns
-     * [KO] 최대 CoC 값
-     * [EN] Max CoC value
+     * [KO] 최대 CoC 크기
+     * [EN] Max CoC size
      */
     get maxCoC(): number {
         return this.#maxCoC;
     }
 
     /**
-     * [KO] 최대 CoC 값을 설정합니다.
-     * [EN] Sets the max CoC value.
+     * [KO] 최대 착란원(CoC) 크기를 설정합니다.
+     * [EN] Sets the maximum Circle of Confusion (CoC) size.
      *
      * @param value -
-     * [KO] 최대 CoC 값
-     * [EN] Max CoC value
+     * [KO] 최대 CoC 크기
+     * [EN] Max CoC size
      */
     set maxCoC(value: number) {
         this.#maxCoC = value;
@@ -208,8 +141,8 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 근평면 값을 반환합니다.
-     * [EN] Returns the near plane value.
+     * [KO] 근평면 거리를 반환합니다.
+     * [EN] Returns the near plane distance.
      *
      * @returns
      * [KO] 근평면 거리
@@ -220,8 +153,8 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 근평면 값을 설정합니다.
-     * [EN] Sets the near plane value.
+     * [KO] 근평면 거리를 설정합니다.
+     * [EN] Sets the near plane distance.
      *
      * @param value -
      * [KO] 근평면 거리
@@ -233,8 +166,8 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 원평면 값을 반환합니다.
-     * [EN] Returns the far plane value.
+     * [KO] 원평면 거리를 반환합니다.
+     * [EN] Returns the far plane distance.
      *
      * @returns
      * [KO] 원평면 거리
@@ -245,8 +178,8 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 원평면 값을 설정합니다.
-     * [EN] Sets the far plane value.
+     * [KO] 원평면 거리를 설정합니다.
+     * [EN] Sets the far plane distance.
      *
      * @param value -
      * [KO] 원평면 거리
@@ -257,7 +190,6 @@ class DOF extends AMultiPassPostEffect {
         this.#effect_coc.farPlane = value;
     }
 
-    // 블러 관련 getter/setter
     /**
      * [KO] 근거리 블러 크기를 반환합니다.
      * [EN] Returns the near blur size.
@@ -359,12 +291,12 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 게임 기본 프리셋을 적용합니다. (균형잡힌 품질/성능)
-     * [EN] Applies the Game Default preset. (Balanced quality/performance)
+     * [KO] 게임 기본 프리셋을 적용합니다.
+     * [EN] Applies the Game Default preset.
      */
     setGameDefault(): void {
         this.focusDistance = 15.0;
-        this.aperture = 2.8;         // F/2.8 (자연스러운)
+        this.aperture = 2.8;
         this.maxCoC = 25.0;
         this.nearBlurSize = 15;
         this.farBlurSize = 15;
@@ -373,82 +305,82 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 시네마틱 프리셋을 적용합니다. (강한 DOF, 영화같은 느낌)
-     * [EN] Applies the Cinematic preset. (Strong DOF, cinematic feel)
+     * [KO] 시네마틱 프리셋을 적용합니다.
+     * [EN] Applies the Cinematic preset.
      */
     setCinematic(): void {
         this.focusDistance = 20.0;
-        this.aperture = 1.4;         // F/1.4 (매우 얕은 심도)
-        this.maxCoC = 40.0;          // 큰 흐림원
-        this.nearBlurSize = 25;      // 강한 블러
+        this.aperture = 1.4;
+        this.maxCoC = 40.0;
+        this.nearBlurSize = 25;
         this.farBlurSize = 30;
-        this.nearStrength = 1.2;     // 강한 강도
+        this.nearStrength = 1.2;
         this.farStrength = 1.3;
     }
 
     /**
-     * [KO] 인물 사진 프리셋을 적용합니다. (배경 흐림, 인물 포커스)
-     * [EN] Applies the Portrait preset. (Blurred background, focused subject)
+     * [KO] 인물 사진 프리셋을 적용합니다.
+     * [EN] Applies the Portrait preset.
      */
     setPortrait(): void {
-        this.focusDistance = 8.0;    // 가까운 거리 포커스
-        this.aperture = 1.8;         // F/1.8 (인물 촬영 조리개)
+        this.focusDistance = 8.0;
+        this.aperture = 1.8;
         this.maxCoC = 35.0;
-        this.nearBlurSize = 12;      // 근거리는 덜 흐림
-        this.farBlurSize = 25;       // 배경은 많이 흐림
+        this.nearBlurSize = 12;
+        this.farBlurSize = 25;
         this.nearStrength = 0.8;
-        this.farStrength = 1.4;      // 배경 블러 강조
+        this.farStrength = 1.4;
     }
 
     /**
-     * [KO] 풍경 사진 프리셋을 적용합니다. (전체적으로 선명, 약간의 원거리 흐림)
-     * [EN] Applies the Landscape preset. (Generally sharp, slight far blur)
+     * [KO] 풍경 사진 프리셋을 적용합니다.
+     * [EN] Applies the Landscape preset.
      */
     setLandscape(): void {
-        this.focusDistance = 50.0;   // 멀리 포커스
-        this.aperture = 8.0;         // F/8 (풍경 촬영 조리개)
+        this.focusDistance = 50.0;
+        this.aperture = 8.0;
         this.maxCoC = 20.0;
-        this.nearBlurSize = 20;      // 근거리 흐림
-        this.farBlurSize = 10;       // 원거리는 덜 흐림
+        this.nearBlurSize = 20;
+        this.farBlurSize = 10;
         this.nearStrength = 1.1;
-        this.farStrength = 0.6;      // 원거리 약하게
+        this.farStrength = 0.6;
     }
 
     /**
-     * [KO] 매크로 촬영 프리셋을 적용합니다. (극도로 얕은 심도)
-     * [EN] Applies the Macro preset. (Extremely shallow depth of field)
+     * [KO] 매크로 촬영 프리셋을 적용합니다.
+     * [EN] Applies the Macro preset.
      */
     setMacro(): void {
-        this.focusDistance = 2.0;    // 매우 가까운 거리
-        this.aperture = 1.0;         // F/1.0 (극한 조리개)
-        this.maxCoC = 50.0;          // 매우 큰 흐림원
-        this.nearBlurSize = 30;      // 강한 근거리 블러
-        this.farBlurSize = 35;       // 강한 원거리 블러
+        this.focusDistance = 2.0;
+        this.aperture = 1.0;
+        this.maxCoC = 50.0;
+        this.nearBlurSize = 30;
+        this.farBlurSize = 35;
         this.nearStrength = 1.5;
         this.farStrength = 1.6;
     }
 
     /**
-     * [KO] 액션/스포츠 프리셋을 적용합니다. (빠른 움직임에 적합)
-     * [EN] Applies the Action/Sports preset. (Suitable for fast motion)
+     * [KO] 액션/스포츠 프리셋을 적용합니다.
+     * [EN] Applies the Action/Sports preset.
      */
     setSports(): void {
-        this.focusDistance = 25.0;   // 중간 거리
-        this.aperture = 4.0;         // F/4 (적당한 심도)
+        this.focusDistance = 25.0;
+        this.aperture = 4.0;
         this.maxCoC = 18.0;
-        this.nearBlurSize = 10;      // 빠른 처리를 위해 작게
+        this.nearBlurSize = 10;
         this.farBlurSize = 12;
         this.nearStrength = 0.8;
         this.farStrength = 0.9;
     }
 
     /**
-     * [KO] 야간 촬영 프리셋을 적용합니다. (저조도 환경)
-     * [EN] Applies the Night Mode preset. (Low light environment)
+     * [KO] 야간 촬영 프리셋을 적용합니다.
+     * [EN] Applies the Night Mode preset.
      */
     setNightMode(): void {
         this.focusDistance = 12.0;
-        this.aperture = 2.0;         // F/2.0 (빛 확보)
+        this.aperture = 2.0;
         this.maxCoC = 30.0;
         this.nearBlurSize = 18;
         this.farBlurSize = 20;
@@ -460,16 +392,16 @@ class DOF extends AMultiPassPostEffect {
      * [KO] DOF 효과를 렌더링합니다.
      * [EN] Renders the DOF effect.
      *
-     * @param view
+     * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     * @param sourceTextureInfo
+     * @param width -
+     * [KO] 렌더링 너비
+     * [EN] Rendering width
+     * @param height -
+     * [KO] 렌더링 높이
+     * [EN] Rendering height
+     * @param sourceTextureInfo -
      * [KO] 소스 텍스처 정보
      * [EN] Source texture info
      * @returns
@@ -478,15 +410,12 @@ class DOF extends AMultiPassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
-        // 1단계: CoC (Circle of Confusion) 계산
         const cocResult = this.#effect_coc.render(
             view, width, height, sourceTextureInfo
         );
-        // 2단계: 통합된 DOF 블러 및 컴포지팅
         const result = this.#effect_unified.render(
             view, width, height, sourceTextureInfo, cocResult
         );
-        // cocResult는 unified에서 사용된 후 더 이상 필요 없음
         pool.release(cocResult.texture);
 
         return result;

@@ -1,17 +1,22 @@
 import formatBytes from "../../../utils/formatBytes";
 
 /**
- * ArrayBuffer 로딩 성공 시 호출되는 콜백 함수 타입
+ * [KO] `ArrayBuffer` 로딩 완료 시 호출되는 콜백 함수 타입입니다.
+ * [EN] Callback function type invoked when `ArrayBuffer` loading completes.
  */
 type LoaderCallback = (buffer: ArrayBuffer) => void;
 
 /**
- * 에러 발생 시 호출되는 콜백 함수 타입
+ * [KO] 로딩 중 에러 발생 시 호출되는 콜백 함수 타입입니다.
+ * [EN] Callback function type invoked when an error occurs during loading.
  */
 type ErrorCallback = (err: any) => void;
 
 /**
- * 로딩 진행 상태를 추적하는 콜백 함수 타입
+ * [KO] 로딩 진행 상태를 전달받는 콜백 함수 타입입니다.
+ * [EN] Callback function type that receives loading progress status.
+ *
+ * @category GLTF
  */
 export type ProgressCallback = (event: {
     loaded: number;
@@ -23,8 +28,25 @@ export type ProgressCallback = (event: {
 }) => void;
 
 /**
- * fetch API를 사용하여 지정된 URL에서 ArrayBuffer를 로드하고 진행 상태를 추적합니다.
- * 스트림 완료 후 onLoad가 확실히 호출되도록 구조를 개선했습니다.
+ * [KO] 지정된 URL에서 `fetch` 스트림을 통해 `ArrayBuffer`를 로드하고 진행 상태를 추적합니다.
+ * [EN] Loads an `ArrayBuffer` from the specified URL via a `fetch` stream and tracks loading progress.
+ *
+ * @param src -
+ * [KO] 로드할 리소스 URL
+ * [EN] Resource URL to load
+ * @param onLoad -
+ * [KO] 로드 완료 시 호출될 콜백 함수
+ * [EN] Callback function invoked when loading completes
+ * @param onError -
+ * [KO] 에러 발생 시 호출될 콜백 함수
+ * [EN] Callback function invoked when an error occurs
+ * @param onProgress -
+ * [KO] 로딩 진행률 갱신 시 호출될 콜백 함수
+ * [EN] Callback function invoked when loading progress updates
+ * @returns
+ * [KO] 로딩 완료를 나타내는 `Promise<void>`
+ * [EN] `Promise<void>` representing completion of loading
+ * @category GLTF
  */
 const getArrayBufferFromSrc = async (
     src: string,
@@ -47,7 +69,6 @@ const getArrayBufferFromSrc = async (
 
 
         if (!response.body) {
-            // Body가 없는 경우 즉시 빈 버퍼 반환하여 완료 처리
             const emptyBuffer = new ArrayBuffer(0);
             onLoad(emptyBuffer);
             return;
@@ -57,7 +78,6 @@ const getArrayBufferFromSrc = async (
         let loaded = 0;
         const chunks: Uint8Array[] = [];
 
-        // 스트림 읽기 루프
         while (true) {
             const {done, value} = await reader.read();
 
@@ -67,7 +87,6 @@ const getArrayBufferFromSrc = async (
                 chunks.push(value);
                 loaded += value.length;
 
-                // 프로그레스 콜백 호출
                 onProgress({
                     loaded,
                     total,
@@ -87,7 +106,6 @@ const getArrayBufferFromSrc = async (
         const blob = new Blob(chunks as unknown as BlobPart[]);
         const arrayBuffer = await blob.arrayBuffer();
 
-        // 명시적으로 onLoad 호출
         onLoad(arrayBuffer);
 
     } catch (error) {

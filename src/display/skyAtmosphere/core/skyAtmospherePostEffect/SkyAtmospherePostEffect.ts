@@ -7,15 +7,37 @@ import ShaderLibrary from "../../../../systemCodeManager/ShaderLibrary";
 import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
 
 /**
- * [KO] SkyAtmospherePostEffect 클래스는 씬 내의 불투명 오브젝트들에 대기 효과를 적용합니다.
- * [EN] The SkyAtmospherePostEffect class applies atmospheric effects to opaque objects in the scene.
+ * [KO] Aerial Perspective 3D LUT를 참조하여 씬 내 오브젝트들에 깊이에 따른 대기 산란광과 투과율 감쇠를 적용하는 포스트 이펙트 클래스입니다.
+ * [EN] Post-effect class that applies depth-based atmospheric scattered light and transmittance attenuation to scene objects by referencing the Aerial Perspective 3D LUT.
  *
- * [KO] Aerial Perspective 3D LUT를 참조하여 물체의 깊이에 따른 대기 산란광과 투과율 감쇠를 적용함으로써, 멀리 있는 물체가 대기색에 묻히는 효과를 시뮬레이션합니다.
- * [EN] Simulates the effect of distant objects being obscured by atmospheric color by referencing the Aerial Perspective 3D LUT and applying scattered light and transmittance attenuation based on depth.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const postEffect = skyAtmosphere.postEffect;
+ * ```
+ *
+ * @category SkyAtmosphere
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #skyAtmosphere: SkyAtmosphere;
 
+    /**
+     * [KO] SkyAtmospherePostEffect 인스턴스를 생성합니다.
+     * [EN] Creates a SkyAtmospherePostEffect instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param skyAtmosphere -
+     * [KO] 연결된 SkyAtmosphere 인스턴스
+     * [EN] Associated SkyAtmosphere instance
+     */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
         super(redGPUContext);
         this.#skyAtmosphere = skyAtmosphere;
@@ -62,37 +84,51 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 스카이 대기 포스트 이펙트를 렌더링합니다.
-     * [EN] Renders the sky atmosphere post effect.
+     * [KO] 대기 원근(Aerial Perspective) 포스트 이펙트를 렌더링합니다.
+     * [EN] Renders the aerial perspective post-effect.
      *
-     * @param view - [KO] 현재 뷰 [EN] Current view
-     * @param width - [KO] 너비 [EN] Width
-     * @param height - [KO] 높이 [EN] Height
-     * @param sourceTextureInfo - [KO] 소스 컬러 텍스처 [EN] Source color texture
-     * @returns [KO] 렌더링 결과 [EN] Render result
+     * @param view -
+     * [KO] 렌더링 대상 View3D 인스턴스
+     * [EN] Target View3D instance for rendering
+     * @param width -
+     * [KO] 렌더 타겟 너비
+     * [EN] Render target width
+     * @param height -
+     * [KO] 렌더 타겟 높이
+     * [EN] Render target height
+     * @param sourceTextureInfo -
+     * [KO] 입력 소스 컬러 텍스처 정보
+     * [EN] Input source color texture information
+     * @returns
+     * [KO] 포스트 이펙트 렌더링 결과
+     * [EN] Post-effect render result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const skyAtmosphere = this.#skyAtmosphere;
 
         return super.render(view, width, height,
-            sourceTextureInfo, // 0
+            sourceTextureInfo,
             {
                 texture: skyAtmosphere.transmittanceLUT.gpuTexture,
                 textureView: skyAtmosphere.transmittanceLUT.gpuTextureView
-            }, // 1
-            {texture: skyAtmosphere.multiScatLUT.gpuTexture, textureView: skyAtmosphere.multiScatLUT.gpuTextureView}, // 2
-            {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView}, // 3
+            },
+            {texture: skyAtmosphere.multiScatLUT.gpuTexture, textureView: skyAtmosphere.multiScatLUT.gpuTextureView},
+            {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView},
             {
                 texture: skyAtmosphere.aerialPerspectiveLUT.gpuTexture,
                 textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTextureView
-            }, // 4
+            },
             {
                 texture: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTexture,
                 textureView: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView
-            } // 5
+            }
         );
     }
 
+    /**
+     * [KO] 포스트 이펙트 인스턴스 및 내부 리소스를 해제합니다.
+     * [EN] Releases the post-effect instance and internal resources.
+     */
     destroy() {
         super.destroy();
         this.#skyAtmosphere = null;

@@ -1,7 +1,3 @@
-/**
- * [KO] SVG 이미지 URL 또는 소스를 읽어 ImageBitmap으로 변환합니다.
- * [EN] Loads an SVG image URL or source and converts it to an ImageBitmap.
- */
 export async function convertSvgToImageBitmap(
     src: string,
     premultiplyAlpha: PremultiplyAlpha = 'none'

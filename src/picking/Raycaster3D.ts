@@ -5,38 +5,37 @@ import Mesh from "../display/mesh/Mesh";
 import keepLog from "../utils/keepLog";
 
 /**
- * [KO] 3D 공간에서 광선(Ray)을 투사하여 객체와의 교차를 검사하는 클래스입니다.
- * [EN] Class that casts a ray in 3D space to check for intersections with objects.
- *
- * [KO] 마우스 좌표와 카메라 정보를 기반으로 광선을 생성하고, 메시의 정밀한 삼각형 단위 충돌 검사를 수행합니다.
- * [EN] Generates a ray based on mouse coordinates and camera information, and performs precise triangle-level collision tests on meshes.
+ * [KO] 3D 공간에서 카메라와 화면 좌표를 기반으로 광선(`Ray`)을 투사하여 메시와의 정밀한 삼각형 단위 교차를 검사하는 클래스입니다.
+ * [EN] Class that casts a `Ray` in 3D space based on camera and screen coordinates to perform precise triangle-level intersection tests with meshes.
  *
  * ### Example
  * ```typescript
  * const raycaster = new RedGPU.Picking.Raycaster3D();
+ * // [KO] 화면 좌표와 뷰를 기반으로 광선 설정 및 교차 검사 수행
+ * // [EN] Set ray based on screen coordinates and view, then perform intersection test
  * raycaster.setFromCamera(mouseX, mouseY, view);
  * const intersects = raycaster.intersectObjects(scene.children);
  * ```
+ *
+ * @see [MouseEvent (Raycasting) example](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
  * @category Picking
  */
 class Raycaster3D {
     /**
-     * [KO] 내부적으로 관리되는 광원 객체
-     * [EN] Internally managed ray object
+     * [KO] 내부적으로 관리되는 광선(`Ray`) 객체
+     * [EN] Internally managed `Ray` object
      */
     readonly ray: Ray;
 
     /**
-     * [KO] 교차 검사 시 고려할 최소 거리 (카메라로부터)
-     * [EN] Minimum distance to consider for intersection (from camera)
-     * @defaultValue 0
+     * [KO] 교차 검사 시 고려할 카메라로부터의 최소 거리 (기본값: `0`)
+     * [EN] Minimum distance from the camera to consider for intersection (default: `0`)
      */
     near: number = 0;
 
     /**
-     * [KO] 교차 검사 시 고려할 최대 거리 (카메라로부터)
-     * [EN] Maximum distance to consider for intersection (from camera)
-     * @defaultValue Infinity
+     * [KO] 교차 검사 시 고려할 카메라로부터의 최대 거리 (기본값: `Infinity`)
+     * [EN] Maximum distance from the camera to consider for intersection (default: `Infinity`)
      */
     far: number = Infinity;
 
@@ -48,16 +47,16 @@ class Raycaster3D {
     #screenPoint: vec2 = vec2.create();
 
     /**
-     * [KO] Raycaster3D 인스턴스를 생성합니다.
-     * [EN] Creates a Raycaster3D instance.
+     * [KO] `Raycaster3D` 인스턴스를 생성합니다.
+     * [EN] Creates a `Raycaster3D` instance.
      */
     constructor() {
         this.ray = new Ray();
     }
 
     /**
-     * [KO] 화면 좌표와 카메라 정보를 기반으로 광선을 설정합니다.
-     * [EN] Sets the ray based on screen coordinates and camera information.
+     * [KO] 화면 좌표와 `View3D`의 카메라 정보를 기반으로 광선을 설정합니다.
+     * [EN] Sets the ray based on screen coordinates and camera information of `View3D`.
      *
      * ### Example
      * ```typescript
@@ -71,8 +70,8 @@ class Raycaster3D {
      * [KO] 화면 Y 좌표
      * [EN] Screen Y coordinate
      * @param view -
-     * [KO] 대상 View3D 인스턴스
-     * [EN] Target View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      */
     setFromCamera(screenX: number, screenY: number, view: View3D): void {
         const {rawCamera, redGPUContext} = view;
@@ -90,8 +89,6 @@ class Raycaster3D {
         const dpr = window.devicePixelRatio;
         const renderScale = redGPUContext.renderScale;
 
-        // [KO] 논리 좌표(CSS)를 물리 픽셀 좌표로 변환하여 NDC 계산
-        // [EN] Convert logical coordinates (CSS) to physical pixel coordinates and calculate NDC
         const physicalX = screenX * dpr * renderScale;
         const physicalY = screenY * dpr * renderScale;
 
@@ -104,8 +101,8 @@ class Raycaster3D {
     }
 
     /**
-     * [KO] 단일 객체와의 교차 여부를 검사합니다.
-     * [EN] Checks for intersection with a single object.
+     * [KO] 단일 메시 객체와의 교차 여부를 검사합니다.
+     * [EN] Checks for intersection with a single mesh object.
      *
      * ### Example
      * ```typescript
@@ -116,11 +113,11 @@ class Raycaster3D {
      * [KO] 검사할 메시 객체
      * [EN] Mesh object to check
      * @param recursive -
-     * [KO] 자식 객체도 포함할지 여부 (기본값: true)
-     * [EN] Whether to include child objects (default: true)
+     * [KO] 자식 객체도 포함할지 여부 (기본값: `true`)
+     * [EN] Whether to include child objects (default: `true`)
      * @returns
-     * [KO] 교차 정보 배열 (`RayIntersectResult[]`)
-     * [EN] Array of intersection information (`RayIntersectResult[]`)
+     * [KO] 거리순으로 정렬된 교차 결과 배열 (`RayIntersectResult[]`)
+     * [EN] Array of intersection results sorted by distance (`RayIntersectResult[]`)
      */
     intersectObject(mesh: Mesh, recursive: boolean = true): RayIntersectResult[] {
         const intersects: RayIntersectResult[] = [];
@@ -129,8 +126,8 @@ class Raycaster3D {
     }
 
     /**
-     * [KO] 여러 객체와의 교차 여부를 검사합니다.
-     * [EN] Checks for intersections with multiple objects.
+     * [KO] 여러 메시 객체와의 교차 여부를 검사합니다.
+     * [EN] Checks for intersections with multiple mesh objects.
      *
      * ### Example
      * ```typescript
@@ -141,11 +138,11 @@ class Raycaster3D {
      * [KO] 검사할 메시 객체 배열
      * [EN] Array of mesh objects to check
      * @param recursive -
-     * [KO] 자식 객체도 포함할지 여부 (기본값: true)
-     * [EN] Whether to include child objects (default: true)
+     * [KO] 자식 객체도 포함할지 여부 (기본값: `true`)
+     * [EN] Whether to include child objects (default: `true`)
      * @returns
-     * [KO] 교차 정보 배열 (`RayIntersectResult[]`)
-     * [EN] Array of intersection information (`RayIntersectResult[]`)
+     * [KO] 거리순으로 정렬된 교차 결과 배열 (`RayIntersectResult[]`)
+     * [EN] Array of intersection results sorted by distance (`RayIntersectResult[]`)
      */
     intersectObjects(meshes: Mesh[], recursive: boolean = true): RayIntersectResult[] {
         const intersects: RayIntersectResult[] = [];
@@ -171,10 +168,8 @@ class Raycaster3D {
             const effectiveModelMatrix = this.#tempMat4_2;
             mat4.copy(effectiveModelMatrix, mesh.modelMatrix);
 
-            // Sprite3D, TextField3D 등 종횡비 보정이 들어가는 클래스 대응
             if (rx !== 1 || ry !== 1) {
                 mat4.scale(effectiveModelMatrix, effectiveModelMatrix, [rx, ry, 1]);
-                // 이 경우 기존 boundingAABB가 맞지 않으므로 바로 정밀 검사 수행
                 this.#intersectNarrowPhase(mesh, effectiveModelMatrix, intersects, true);
             } else {
                 const worldAABB = mesh.boundingAABB;
@@ -201,7 +196,6 @@ class Raycaster3D {
 
         const {rawCamera, projectionMatrix, pixelRectObject} = view;
 
-        // 1. Pivot NDC 계산
         const centerWorld = vec3.fromValues(m[12], m[13], m[14]);
         const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.viewMatrix);
         const centerClip = vec4.transformMat4(this.#tempMat4, vec4.fromValues(centerView[0], centerView[1], centerView[2], 1.0), projectionMatrix);
@@ -211,16 +205,13 @@ class Raycaster3D {
         const ndcX = centerClip[0] / centerClip[3];
         const ndcY = centerClip[1] / centerClip[3];
 
-        // 2. 마우스 포인터 (NDC)
         const mouseX = this.#screenPoint[0];
         const mouseY = this.#screenPoint[1];
 
-        // 3. NDC 크기 계산 (셰이더 로직 모사 - 물리 픽셀 기준)
         const physicalPixelSize = pixelSize * window.devicePixelRatio;
         const scaleX = (physicalPixelSize / pixelRectObject.width) * 2.0 * (rx / ry);
         const scaleY = (physicalPixelSize / pixelRectObject.height) * 2.0;
 
-        // 4. 히트 테스트
         if (
             Math.abs(mouseX - ndcX) <= scaleX * 0.5 &&
             Math.abs(mouseY - ndcY) <= scaleY * 0.5
@@ -249,7 +240,6 @@ class Raycaster3D {
         const rx = (mesh as any)._renderRatioX || 1;
         const ry = (mesh as any)._renderRatioY || 1;
 
-        // 1. 빌보드 월드 행렬 생성
         const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.viewMatrix);
         const billboardWorldMatrix = this.#tempMat4_3;
         mat4.copy(billboardWorldMatrix, invView);
@@ -263,7 +253,6 @@ class Raycaster3D {
         const sz = Math.hypot(m[8], m[9], m[10]);
         mat4.scale(billboardWorldMatrix, billboardWorldMatrix, [sx * rx, sy * ry, sz]);
 
-        // 2. 좁은 단계 교차 검사
         this.#intersectNarrowPhase(mesh, billboardWorldMatrix, intersects, false);
     }
 
@@ -318,8 +307,6 @@ class Raycaster3D {
 
             const distance = vec3.distance(this.ray.origin, worldIntersectPoint);
             if (distance >= this.near && distance <= this.far) {
-                // UV Interpolation
-                // [교정] 인터리브 레이아웃: [Px, Py, Pz, Nx, Ny, Nz, U, V, Tx, Ty, Tz, Tw] (Stride 12)
                 const uv0 = vec2.fromValues(data[i0 * stride + 6], data[i0 * stride + 7]);
                 const uv1 = vec2.fromValues(data[i1 * stride + 6], data[i1 * stride + 7]);
                 const uv2 = vec2.fromValues(data[i2 * stride + 6], data[i2 * stride + 7]);
@@ -348,8 +335,9 @@ Object.freeze(Raycaster3D);
 export default Raycaster3D
 
 /**
- * [KO] 레이캐스팅 교차 결과 인터페이스입니다.
- * [EN] Raycasting intersection result interface.
+ * [KO] 레이캐스팅 교차 검사 결과를 나타내는 인터페이스입니다.
+ * [EN] Interface representing the result of a raycasting intersection test.
+ * @category Picking
  */
 export interface RayIntersectResult {
     /**
@@ -358,33 +346,33 @@ export interface RayIntersectResult {
      */
     distance: number;
     /**
-     * [KO] 월드 공간상의 교차 지점 좌표
-     * [EN] Intersection point coordinates in world space
+     * [KO] 월드 공간상의 교차 지점 좌표 (`vec3`)
+     * [EN] Intersection point coordinates in world space (`vec3`)
      */
     point: vec3;
     /**
-     * [KO] 객체의 로컬 공간상의 교차 지점 좌표
-     * [EN] Intersection point coordinates in the object's local space
+     * [KO] 객체의 로컬 공간상의 교차 지점 좌표 (`vec3`)
+     * [EN] Intersection point coordinates in the object's local space (`vec3`)
      */
     localPoint: vec3;
     /**
-     * [KO] 교차된 메시 객체
-     * [EN] The intersected mesh object
+     * [KO] 교차된 메시(`Mesh`) 객체
+     * [EN] Intersected `Mesh` object
      */
     object: Mesh;
     /**
-     * [KO] 교차된 삼각형의 인덱스
-     * [EN] Index of the intersected triangle
+     * [KO] 교차된 삼각형의 면 인덱스
+     * [EN] Face index of the intersected triangle
      */
     faceIndex?: number;
     /**
-     * [KO] 교차 지점의 UV 좌표 (텍스처 좌표)
-     * [EN] UV coordinates at the intersection point (Texture coordinates)
+     * [KO] 교차 지점의 보간된 UV 텍스처 좌표 (`vec2`)
+     * [EN] Interpolated UV texture coordinates at the intersection point (`vec2`)
      */
     uv?: vec2;
     /**
-     * [KO] 교차 검사에 사용된 월드 광선
-     * [EN] World ray used for intersection test
+     * [KO] 교차 검사에 사용된 월드 광선 (`Ray`)
+     * [EN] World `Ray` used for the intersection test
      */
     ray: Ray;
 }

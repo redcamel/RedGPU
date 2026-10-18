@@ -165,32 +165,35 @@ class HDRTexture extends ManagementResourceBase {
         if (this.#src) this.#loadHDRTexture(this.#src);
     }
 
-    /** [KO] 리소스를 파괴합니다. [EN] Destroys the texture resource. */
+    /**
+     * [KO] 리소스를 파괴합니다.
+     * [EN] Destroys the texture resource.
+     */
     destroy() {
-        const temp = this.#gpuTexture
+        const temp = this.#gpuTexture;
         this.#setGpuTexture(null);
-        this.notifyUpdate(true)
-        this.#unregisterResource()
-        this.#src = null
-        this.cacheKey = null
+        this.notifyUpdate(true);
+        this.#unregisterResource();
+        this.#src = null;
+        this.cacheKey = null;
         if (temp) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp);
         }
     }
 
     #getCacheKey(srcInfo?: HDRSrcInfo): string {
-        let result
+        let result;
         if (!srcInfo) result = this.uuid;
         if (typeof srcInfo === 'string') {
             result = getAbsoluteURL(window.location.href, srcInfo);
         } else {
             result = srcInfo.cacheKey || getAbsoluteURL(window.location.href, srcInfo.src);
         }
-        return `HDRTexture_${result}`
+        return `HDRTexture_${result}`;
     }
 
     #getParsedSrc(srcInfo?: HDRSrcInfo): string {
-        return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
+        return typeof srcInfo === 'string' ? srcInfo : srcInfo.src;
     }
 
     #validateHDRFormat(src: string): void {
@@ -214,7 +217,7 @@ class HDRTexture extends ManagementResourceBase {
     }
 
     async #createGPUTexture(hdrData: HDRData) {
-        const {gpuDevice} = this.redGPUContext
+        const {gpuDevice} = this.redGPUContext;
         const oldTexture = this.#gpuTexture;
 
         const textureDescriptor: GPUTextureDescriptor = {
@@ -226,7 +229,6 @@ class HDRTexture extends ManagementResourceBase {
 
         const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
 
-        // Float32 to Float16 conversion and upload
         await float32ToFloat16Linear(
             this.redGPUContext,
             hdrData.data,

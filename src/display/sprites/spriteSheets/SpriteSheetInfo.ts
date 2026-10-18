@@ -4,93 +4,71 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
- * [KO] 스프라이트 시트 애니메이션을 위한 정보를 담는 클래스입니다.
- * [EN] Class that contains information for sprite sheet animation.
+ * [KO] 스프라이트 시트 애니메이션의 격자 분할 정보와 재생 설정을 정의하는 데이터 클래스입니다.
+ * [EN] Data class that defines grid division information and playback settings for sprite sheet animations.
  *
- * [KO] 하나의 텍스처에 격자 형태로 배열된 애니메이션 프레임들의 구조와 재생 설정을 정의합니다. 스프라이트 시트 인스턴스들이 공유하는 애니메이션 메타데이터를 관리합니다.
- * [EN] Defines the structure and playback settings of animation frames arranged in a grid within a single texture. Manages animation metadata shared by sprite sheet instances.
- *
- * * ### Example
+ * ### Example
  * ```typescript
  * const info = new RedGPU.Display.SpriteSheetInfo(
- *    redGPUContext,
- *    'path/to/image.png',
- *    5, 3, // segmentW, segmentH
- *    15,   // totalFrame
- *    0     // startIndex
+ *     redGPUContext,
+ *     'path/to/image.png',
+ *     5, 3,
+ *     15,
+ *     0,
+ *     true,
+ *     60
  * );
  * ```
+ *
+ * @see [SpriteSheet2D Basic Example](/RedGPU/examples/2d/spriteSheet2D/basic/)
+ * @see [SpriteSheet3D Basic Example](/RedGPU/examples/3d/sprite/spriteSheet3D/)
  * @category SpriteSheet
  */
 class SpriteSheetInfo extends RedGPUObject {
-    /**
-     * [KO] 가로 세그먼트 수 (텍스처를 가로로 몇 개로 나눌지)
-     * [EN] Number of horizontal segments (how many parts to divide the texture horizontally)
-     */
     #segmentW: number = 0
-    /**
-     * [KO] 세로 세그먼트 수 (텍스처를 세로로 몇 개로 나눌지)
-     * [EN] Number of vertical segments (how many parts to divide the texture vertically)
-     */
     #segmentH: number = 0
-    /**
-     * [KO] 총 애니메이션 프레임 수
-     * [EN] Total number of animation frames
-     */
     #totalFrame: number = 0
-    /**
-     * [KO] 시작 프레임 인덱스
-     * [EN] Starting frame index
-     */
     #startIndex: number = 0
-    /**
-     * [KO] 애니메이션 프레임 레이트 (FPS)
-     * [EN] Animation frame rate (FPS)
-     */
     #frameRate: number = 0
-    /**
-     * [KO] 반복 재생 여부
-     * [EN] Whether to repeat playback
-     */
     #loop: boolean = true
-    /**
-     * [KO] 스프라이트 시트 텍스처
-     * [EN] Sprite sheet texture
-     */
     #texture: BitmapTexture
 
     /**
-     * [KO] 새로운 SpriteSheetInfo 인스턴스를 생성합니다.
-     * [EN] Creates a new SpriteSheetInfo instance.
+     * [KO] SpriteSheetInfo 인스턴스를 생성합니다.
+     * [EN] Creates a SpriteSheetInfo instance.
+     *
+     * ### Example
+     * ```typescript
+     * const info = new RedGPU.Display.SpriteSheetInfo(redGPUContext, 'sheet.png', 5, 3, 15, 0, true, 60);
+     * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      * @param src -
-     * [KO] 스프라이트 시트 이미지 파일 경로 또는 URL
-     * [EN] Path or URL to the sprite sheet image file
+     * [KO] 스프라이트 시트 이미지 경로 또는 URL
+     * [EN] Sprite sheet image path or URL
      * @param segmentW -
-     * [KO] 가로 세그먼트 수 (양의 정수)
+     * [KO] 가로 세그먼트 분할 수 (양의 정수)
      * [EN] Number of horizontal segments (positive integer)
      * @param segmentH -
-     * [KO] 세로 세그먼트 수 (양의 정수)
+     * [KO] 세로 세그먼트 분할 수 (양의 정수)
      * [EN] Number of vertical segments (positive integer)
      * @param totalFrame -
-     * [KO] 총 애니메이션 프레임 수 (양의 정수)
-     * [EN] Total number of animation frames (positive integer)
+     * [KO] 전체 프레임 수 (양의 정수)
+     * [EN] Total number of frames (positive integer)
      * @param startIndex -
      * [KO] 시작 프레임 인덱스 (0 이상의 정수)
-     * [EN] Starting frame index (integer of 0 or more)
+     * [EN] Starting frame index (non-negative integer)
      * @param loop -
-     * [KO] 반복 재생 여부 (기본값: true)
-     * [EN] Whether to repeat playback (default: true)
+     * [KO] 반복 재생 여부 (기본값: `true`)
+     * [EN] Whether to loop playback (default: `true`)
      * @param frameRate -
-     * [KO] 애니메이션 프레임 레이트 (기본값: 60 FPS)
-     * [EN] Animation frame rate (default: 60 FPS)
-     *
+     * [KO] 초당 재생 프레임 수 (기본값: `60`)
+     * [EN] Frames per second (default: `60`)
      * @throws
-     * [KO] redGPUContext가 유효하지 않거나 매개변수가 범위를 벗어나는 경우 에러 발생
-     * [EN] Throws error if redGPUContext is invalid or parameters are out of range
+     * [KO] 숫자 매개변수가 유효한 부호 없는 정수 범위를 벗어날 경우 에러 발생
+     * [EN] Throws an error if numeric parameters are out of valid unsigned integer range
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -115,8 +93,9 @@ class SpriteSheetInfo extends RedGPUObject {
     }
 
     /**
-     * [KO] 가로 세그먼트 수를 반환합니다. (텍스처를 가로로 나누는 분할 수)
-     * [EN] Returns the number of horizontal segments. (Texture division count horizontally)
+     * [KO] 가로 세그먼트 분할 수를 반환합니다.
+     * [EN] Returns the number of horizontal segments.
+     *
      * @returns
      * [KO] 가로 세그먼트 수
      * [EN] Number of horizontal segments
@@ -126,8 +105,9 @@ class SpriteSheetInfo extends RedGPUObject {
     }
 
     /**
-     * [KO] 세로 세그먼트 수를 반환합니다. (텍스처를 세로로 나누는 분할 수)
-     * [EN] Returns the number of vertical segments. (Texture division count vertically)
+     * [KO] 세로 세그먼트 분할 수를 반환합니다.
+     * [EN] Returns the number of vertical segments.
+     *
      * @returns
      * [KO] 세로 세그먼트 수
      * [EN] Number of vertical segments
@@ -139,6 +119,7 @@ class SpriteSheetInfo extends RedGPUObject {
     /**
      * [KO] 총 애니메이션 프레임 수를 반환합니다.
      * [EN] Returns the total number of animation frames.
+     *
      * @returns
      * [KO] 총 프레임 수
      * [EN] Total frame count
@@ -148,33 +129,36 @@ class SpriteSheetInfo extends RedGPUObject {
     }
 
     /**
-     * [KO] 시작 프레임 인덱스를 반환합니다. (0부터 시작)
-     * [EN] Returns the starting frame index. (0-based index)
+     * [KO] 시작 프레임 인덱스를 반환합니다.
+     * [EN] Returns the starting frame index.
+     *
      * @returns
-     * [KO] 시작 프레임 인덱스
-     * [EN] Starting frame index
+     * [KO] 시작 프레임 인덱스 (0부터 시작)
+     * [EN] Starting frame index (0-based)
      */
     get startIndex(): number {
         return this.#startIndex;
     }
 
     /**
-     * [KO] 스프라이트 시트 비트맵 텍스처를 반환합니다.
-     * [EN] Returns the sprite sheet bitmap texture.
+     * [KO] 스프라이트 시트의 비트맵 텍스처를 반환합니다.
+     * [EN] Returns the bitmap texture of the sprite sheet.
+     *
      * @returns
-     * [KO] 사용되는 비트맵 텍스처
-     * [EN] Bitmap texture used
+     * [KO] 비트맵 텍스처 인스턴스
+     * [EN] BitmapTexture instance
      */
     get texture(): BitmapTexture {
         return this.#texture;
     }
 
     /**
-     * [KO] 애니메이션 프레임 레이트 (FPS)를 반환합니다.
+     * [KO] 초당 애니메이션 프레임 수(FPS)를 반환합니다.
      * [EN] Returns the animation frame rate (FPS).
+     *
      * @returns
      * [KO] 초당 프레임 수
-     * [EN] Frames per second (FPS)
+     * [EN] Frames per second
      */
     get frameRate(): number {
         return this.#frameRate;
@@ -182,19 +166,16 @@ class SpriteSheetInfo extends RedGPUObject {
 
     /**
      * [KO] 반복 재생 여부를 반환합니다.
-     * [EN] Returns whether to repeat playback.
+     * [EN] Returns whether playback loops.
+     *
      * @returns
-     * [KO] true일 경우 반복 재생, false인 경우 한 번만 재생
-     * [EN] If true, playback loops; if false, it plays once
+     * [KO] 반복 재생 여부
+     * [EN] Whether playback loops
      */
     get loop(): boolean {
         return this.#loop;
     }
 }
 
-/**
- * SpriteSheetInfo 클래스를 동결하여 런타임에서의 수정을 방지합니다.
- * @readonly
- */
 Object.freeze(SpriteSheetInfo)
 export default SpriteSheetInfo

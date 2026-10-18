@@ -11,11 +11,15 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 
 
 /**
- * [KO] SkyLightIrradianceGenerator는 대기 산란 기반의 간접 디퓨즈 조명(Irradiance)을 생성합니다.
- * [EN] SkyLightIrradianceGenerator generates indirect diffuse lighting (Irradiance) based on atmospheric scattering.
+ * [KO] 대기 산란 데이터를 기반으로 간접 디퓨즈 조명(Irradiance)용 큐브맵을 베이킹하고 프리필터링하는 생성기입니다.
+ * [EN] Generator that bakes and prefilters a cubemap for indirect diffuse lighting (Irradiance) based on atmospheric scattering data.
  *
- * [KO] 하늘의 모든 방향에 대한 기초 산란광을 큐브맵에 베이킹하고, 이를 다시 디퓨즈 조명용으로 가공합니다.
- * [EN] Bakes base scattered light from all directions of the sky into a cubemap and processes it for diffuse lighting.
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category SkyAtmosphere
  */
 class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
@@ -24,23 +28,78 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
 
+    /**
+     * [KO] SkyLightIrradianceGenerator 인스턴스를 생성합니다.
+     * [EN] Creates a SkyLightIrradianceGenerator instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param sharedUniformBuffer -
+     * [KO] 대기 파라미터 공유 유니폼 버퍼
+     * [EN] Shared uniform buffer for atmospheric parameters
+     * @param sampler -
+     * [KO] LUT 샘플링용 샘플러
+     * [EN] Sampler for LUT sampling
+     */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
         super(redGPUContext, sharedUniformBuffer, sampler, 'SkyLight_Irradiance_Gen', 256, 256, 6);
         this.#init();
     }
 
+    /**
+     * [KO] 베이킹된 원본 소스 큐브 텍스처를 반환합니다.
+     * [EN] Returns the baked original source cube texture.
+     *
+     * @returns
+     * [KO] 원본 GPUTexture 인스턴스
+     * [EN] Original GPUTexture instance
+     */
     get sourceCubeTexture(): GPUTexture {
         return this.#sourceCubeTexture;
     }
 
+    /**
+     * [KO] 프리필터링이 완료된 큐브 텍스처를 반환합니다.
+     * [EN] Returns the prefiltered cube texture.
+     *
+     * @returns
+     * [KO] DirectCubeTexture 인스턴스
+     * [EN] DirectCubeTexture instance
+     */
     get prefilteredTexture(): DirectCubeTexture {
         return this.#prefilteredTexture;
     }
 
+    /**
+     * [KO] 생성된 LUT 큐브 텍스처를 반환합니다.
+     * [EN] Returns the generated LUT cube texture.
+     *
+     * @returns
+     * [KO] DirectCubeTexture 인스턴스
+     * [EN] DirectCubeTexture instance
+     */
     get lutTexture(): DirectCubeTexture {
         return this.#prefilteredTexture;
     }
 
+    /**
+     * [KO] 대기 LUT 텍스처들을 입력받아 디퓨즈 조명용 큐브맵을 렌더링하고 프리필터링합니다.
+     * [EN] Renders and prefilters the diffuse lighting cubemap using atmospheric LUT textures as input.
+     *
+     * @param transmittance -
+     * [KO] 대기 투과율(Transmittance) LUT 텍스처
+     * [EN] Transmittance LUT texture
+     * @param multiScat -
+     * [KO] 다중 산란(Multi-Scattering) LUT 텍스처
+     * [EN] Multi-Scattering LUT texture
+     * @param skyView -
+     * [KO] 스카이 뷰(Sky View) LUT 텍스처
+     * [EN] Sky View LUT texture
+     * @returns
+     * [KO] 렌더링 완료 Promise (`Promise<void>`)
+     * [EN] Render completion Promise (`Promise<void>`)
+     */
     // @ts-ignore
     async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
         if (!this.#bindGroup) {
@@ -49,6 +108,10 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
     }
 
+    /**
+     * [KO] 생성기 및 내부 큐브 텍스처 리소스를 해제합니다.
+     * [EN] Releases the generator and internal cube texture resources.
+     */
     destroy(): void {
         super.destroy();
         if (this.#sourceCubeTexture) {

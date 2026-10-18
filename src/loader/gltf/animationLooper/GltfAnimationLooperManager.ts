@@ -6,15 +6,11 @@ import {PlayAnimationInfo} from "../GLTFLoader";
 import {ClipAnimState} from "./AnimStateMachine";
 import gltfAnimationMotionBlending from "./gltfAnimationMotionBlending";
 
-// 최적화: 매 프레임 산술 연산 및 변수 생성을 방지하기 위해 상수를 파일 모듈 스코프로 승격
 const PI_180 = 180 / Math.PI;
 
 /**
- * [KO] GLTF 애니메이션 재생을 프레임 단위로 처리하는 매니저 클래스입니다.
- * [EN] Manager class that processes GLTF animation playback on a per-frame basis.
- *
- * [KO] 단일 재생 및 모션 블렌딩 두 가지 모드를 지원하며, 쿼터니언 보간(SLERP/CUBICSPLINE) 및 번역·스케일 보간을 최적화된 방식으로 수행합니다.
- * [EN] Supports both single playback and motion blending modes, performing quaternion interpolation (SLERP/CUBICSPLINE) and translation/scale interpolation in an optimized manner.
+ * [KO] GLTF 애니메이션의 단일 재생 및 모션 블렌딩을 프레임 단위로 처리하고 회전·이동·스케일·모프 가중치 보간을 수행하는 매니저 클래스입니다.
+ * [EN] Manager class that processes single playback and motion blending of GLTF animations per frame and interpolates rotation, translation, scale, and morph weights.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -24,25 +20,9 @@ const PI_180 = 180 / Math.PI;
  * @category Loader
  */
 class GltfAnimationLooperManager {
-    /**
-     * [KO] 애니메이션 목표 프레임레이트(FPS)
-     * [EN] Target frame rate (FPS) for animation
-     */
     #targetFps: number = 60;
-    /**
-     * [KO] 단일 프레임의 목표 경과 시간 (ms). `1000 / targetFps` 로 계산됩니다.
-     * [EN] Target elapsed time per frame (ms). Calculated as `1000 / targetFps`.
-     */
-    #frameTime: number = 1000 / this.#targetFps; // 16.67ms
-    /**
-     * [KO] 마지막으로 프레임이 처리된 시각의 타임스탬프 (ms)
-     * [EN] Timestamp (ms) of the last frame that was processed
-     */
+    #frameTime: number = 1000 / this.#targetFps;
     #lastUpdateTime: number = 0;
-    /**
-     * [KO] 누적 처리된 프레임 수
-     * [EN] Accumulated number of processed frames
-     */
     #frameCount: number = 0;
 
     /**
@@ -71,14 +51,10 @@ class GltfAnimationLooperManager {
         const now = timestamp;
         const deltaTime = now - this.#lastUpdateTime;
         if (deltaTime < this.#frameTime) {
-            // return;
         }
         this.#lastUpdateTime = now;
         this.#frameCount++;
 
-        // ==========================================
-        // [최적화] 함수 초입으로 변수 선언 호이스팅 (VM 레지스터 스필 소거)
-        // ==========================================
         let playAnimationInfoIDX: number = playAnimationInfoList.length;
         let targetPlayAnimationInfo: PlayAnimationInfo;
         let animStateMachine;
@@ -143,21 +119,15 @@ class GltfAnimationLooperManager {
         while (playAnimationInfoIDX--) {
             targetPlayAnimationInfo = playAnimationInfoList[playAnimationInfoIDX];
 
-            // 룩업 최소화: 상태 머신 로컬 캐싱
             animStateMachine = targetPlayAnimationInfo.animStateMachine;
             if (animStateMachine) {
                 animStateMachine.update(deltaTime, timestamp, targetPlayAnimationInfo);
             }
 
-            // 룩업 최소화: 블렌딩 여부 로컬 캐싱
             isBlending = targetPlayAnimationInfo.isBlending;
             if (isBlending) {
-                // 블렌딩 재생 모드 (외부 파일 모듈 위임)
                 gltfAnimationMotionBlending(redGPUContext, timestamp, computePassEncoder, targetPlayAnimationInfo);
             } else {
-                // ==========================================
-                // 1. 단일 재생 모드 (씬 대다수의 액티브 애니메이션 오브젝트 - 초고속 다이렉트 핫 패스)
-                // ==========================================
                 fromClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
                 maxTimeFrom = fromClip.clip.maxTime;
                 startTime = targetPlayAnimationInfo.startTime;
@@ -167,7 +137,6 @@ class GltfAnimationLooperManager {
                 while (targetAniTrackIDX--) {
                     trackFrom = fromClip.clip.tracks[targetAniTrackIDX];
 
-                    // 최적화: 구조 분해 할당을 대입문으로 해제하여 미세 임시 객체 생성을 회피
                     mesh = trackFrom.animationTargetMesh;
                     timeAnimationInfo = trackFrom.timeAnimationInfo;
                     aniDataAnimationInfo = trackFrom.aniDataAnimationInfo;
@@ -239,7 +208,6 @@ class GltfAnimationLooperManager {
                     previousTimeFrame = targetTimeDataList[previousTimeDataIDX];
                     nextTimeFrame = targetTimeDataList[nextTimeDataIDX];
 
-                    // 최적화: 정수형 보간 타입(interpolationType)으로 문자열 비교 회피 (2: CUBICSPLINE)
                     interpolationType = trackFrom.interpolationType;
                     isCUBICSPLINE = interpolationType === 2;
 
@@ -255,7 +223,6 @@ class GltfAnimationLooperManager {
                         s0 = 1 - s2;
                         s1 = s3 - pp + p;
                     } else {
-                        // 0: STEP
                         if (interpolationType === 0) {
                             interpolationValue = 0;
                         } else {
@@ -264,9 +231,8 @@ class GltfAnimationLooperManager {
                         }
                     }
 
-                    // 최적화: 정수형 키 타입(keyType) 점프 테이블 분기로 문자열 매칭 회피 (1: rotation, 2: translation, 3: scale, 4: weights)
                     switch (trackFrom.keyType) {
-                        case 1: { // rotation
+                        case 1: {
                             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                                 const idx = previousTimeDataIDX << 2;
                                 rX = targetAnimationDataList[idx];
@@ -353,7 +319,6 @@ class GltfAnimationLooperManager {
                                 nextIdx = nextTimeDataIDX << 2;
                                 numericCacheKey = (prevIdx << 16) | nextIdx;
 
-                                // 최적화: 해시 테이블 탐색 우회 바인딩 캐싱 가동
                                 cached = trackFrom.lastCachedItem;
                                 if (!cached || trackFrom.lastCachedKey !== numericCacheKey) {
                                     cached = trackFrom.cacheTable[numericCacheKey];
@@ -441,7 +406,6 @@ class GltfAnimationLooperManager {
                                 rW = scale0 * prevW + scale1 * nextW;
                             }
 
-                            // [quatToEuler inline with rX, rY, rZ, rW]
                             x2 = rX + rX;
                             y2 = rY + rY;
                             z2 = rZ + rZ;
@@ -475,7 +439,7 @@ class GltfAnimationLooperManager {
                             mesh.rotationZ = rotZ * PI_180;
                             break;
                         }
-                        case 2: { // translation
+                        case 2: {
                             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                                 const idx = previousTimeDataIDX * 3;
                                 mesh.x = targetAnimationDataList[idx];
@@ -518,7 +482,7 @@ class GltfAnimationLooperManager {
                             }
                             break;
                         }
-                        case 3: { // scale
+                        case 3: {
                             if (previousTimeDataIDX === targetTimeDataListLength - 1) {
                                 const idx = previousTimeDataIDX * 3;
                                 mesh.scaleX = targetAnimationDataList[idx];
@@ -561,7 +525,7 @@ class GltfAnimationLooperManager {
                             }
                             break;
                         }
-                        case 4: { // weights
+                        case 4: {
                             animationTargetIndex = weightMeshes.length;
                             while (animationTargetIndex--) {
                                 trackFrom.renderWeight(

@@ -5,11 +5,8 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import ABaseLight from "../core/ABaseLight";
 
 /**
- * [KO] 태양광처럼 무한히 먼 거리에서 일정한 방향으로 평행하게 입사하는 직사광(Directional Light) 클래스입니다.
- * [EN] Directional light class that emits parallel light rays in a constant direction as if from an infinitely distant source like the sun.
- *
- * [KO] 위치에 따른 거리 감쇠가 없으며, 직교 방향 벡터(`direction`) 또는 구면 좌표계의 고도각(`elevation`)과 방위각(`azimuth`)을 통해 빛의 입사 방향을 제어할 수 있습니다.
- * [EN] Has no distance attenuation based on position, and the light direction can be controlled via a Cartesian direction vector (`direction`) or spherical coordinates (`elevation` and `azimuth`).
+ * [KO] 무한히 먼 거리에서 일정한 방향으로 평행하게 입사하는 직사광(Directional Light) 클래스입니다. 거리 감쇠가 없으며 직교 방향 벡터(`direction`) 또는 구면 좌표(`elevation`, `azimuth`)로 입사 방향을 제어합니다.
+ * [EN] Directional light class emitting parallel rays in a constant direction without distance attenuation, controlled via a direction vector (`direction`) or spherical coordinates (`elevation`, `azimuth`).
  *
  * ### Example
  * ```typescript

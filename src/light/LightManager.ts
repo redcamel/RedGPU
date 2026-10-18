@@ -333,7 +333,6 @@ const cleanupLight = (light: any) => {
         try {
             light.drawDebugger.destroy();
         } catch (e) {
-            // 예외 처리
         }
     }
 };

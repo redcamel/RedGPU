@@ -19,31 +19,30 @@ const LOCAL_VERTICES = [
     [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
 ];
 const EDGES = [
-    [0, 1], [1, 2], [2, 3], [3, 0], // 뒷면
-    [4, 5], [5, 6], [6, 7], [7, 4], // 앞면
-    [0, 4], [1, 5], [2, 6], [3, 7]  // 연결선
+    [0, 1], [1, 2], [2, 3], [3, 0],
+    [4, 5], [5, 6], [6, 7], [7, 4],
+    [0, 4], [1, 5], [2, 6], [3, 7]
 ];
 
 /**
- * 대상 3D 메시(Mesh)의 공간 바운딩 박스(AABB, OBB) 정보를 추출하여 시각적으로 투영해 주는 디버깅용 클래스입니다.
+ * [KO] 대상 3D 메시(`Mesh`)의 공간 바운딩 박스(AABB, OBB)를 와이어프레임으로 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class that visualizes the spatial bounding box (AABB, OBB) of a target 3D `Mesh` as a wireframe.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * @remarks
- * **[KO]**
- * - 모드는 OBB(빨간색 와이어프레임), AABB(초록색 와이어프레임), 혹은 두 형태를 모두 표기하는 BOTH 모드를 지원합니다.
- * - 메시 오브젝트의 크기, 회전, 스케일 등 볼륨 데이터의 변경 이력을 감지(캐싱 연산)하여 필요할 때만 GPU 버텍스 정보를 갱신합니다.
- * - 카메라 절두체 컬링(View Frustum Culling) 로직과 긴밀하게 연동되어, 바운딩 볼륨이 화면 밖으로 이탈하면 렌더 루프 호출을 방지합니다.
+ * ### Example
+ * ```typescript
+ * // [KO] Mesh의 enableDebugger 프로퍼티를 통해 활성화합니다.
+ * // [EN] Enable via the enableDebugger property of Mesh.
+ * mesh.enableDebugger = true;
+ * mesh.drawDebugger.debugMode = 'BOTH';
+ * ```
  *
- * **[EN]**
- * - Visualizes spatial bounds (AABB, OBB) of a target 3D Mesh in the viewport.
- * - Renders bounding wireframe boxes in various modes: OBB (Red), AABB (Green), or BOTH.
- * - Tracks change history of target geometries to execute GPU vertex updates lazily (performance-optimized caching).
- * - Implements view frustum culling to bypass drawing operations once the target object leaves the view camera boundaries.
- *
+ * @see [DrawDebugger basic example](/RedGPU/examples/3d/drawDebugger/basic/)
+ * @see [Mesh BoundBox example](/RedGPU/examples/3d/mesh/boundBox/meshBoundBox/)
  * @category Debugger
  */
 class DrawDebuggerMesh extends RedGPUObject {
@@ -52,13 +51,22 @@ class DrawDebuggerMesh extends RedGPUObject {
     #material: ColorMaterial;
     #debugMesh: Mesh;
     #debugMode: DebugMode = 'AABB';
-    // BOTH 모드용 추가 메시
     #aabbMaterial: ColorMaterial;
     #aabbDebugMesh: Mesh;
-    // 캐시된 볼륨 데이터 (변경 감지용)
     #cachedOBB: OBB | null = null;
     #cachedAABB: AABB | null = null;
 
+    /**
+     * [KO] `DrawDebuggerMesh` 인스턴스를 생성합니다.
+     * [EN] Creates a `DrawDebuggerMesh` instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param target -
+     * [KO] 디버깅할 대상 `Mesh` 인스턴스
+     * [EN] Target `Mesh` instance to debug
+     */
     constructor(redGPUContext: RedGPUContext, target: Mesh) {
         super(redGPUContext);
         this.#target = target;
@@ -79,6 +87,14 @@ class DrawDebuggerMesh extends RedGPUObject {
 
     }
 
+    /**
+     * [KO] 바운딩 박스 디버그 표시 모드(`'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB'`)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the bounding box debug display mode (`'OBB' | 'AABB' | 'BOTH' | 'COMBINED_AABB'`).
+     *
+     * @returns
+     * [KO] 현재 설정된 디버그 모드
+     * [EN] Currently set debug mode
+     */
     get debugMode(): DebugMode {
         return this.#debugMode;
     }
@@ -93,23 +109,28 @@ class DrawDebuggerMesh extends RedGPUObject {
             this.#material.color.setColorByRGB(255, 0, 0);
             this.#aabbMaterial.color.setColorByRGB(0, 255, 0);
         }
-        // 디버그 모드가 변경되면 캐시 무효화 (다음 렌더링에서 업데이트 강제)
         this.#cachedOBB = null;
         this.#cachedAABB = null;
     }
 
+    /**
+     * [KO] 대상 메시의 바운딩 볼륨 디버그 와이어프레임을 렌더링합니다.
+     * [EN] Renders the bounding volume debug wireframe of the target mesh.
+     *
+     * @param renderViewStateData -
+     * [KO] 현재 뷰의 렌더링 상태 데이터
+     * [EN] Render state data of the current view
+     */
     render(renderViewStateData: RenderViewStateData) {
         if (!this.#target.enableDebugger) return;
         if (this.#debugMode === 'OBB') {
             const targetOBB = this.#target.boundingOBB;
-            // OBB가 변경된 경우에만 업데이트
             if (this.#hasOBBChanged(targetOBB)) {
                 this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);
                 this.#cacheOBB(targetOBB);
             }
         } else if (this.#debugMode === 'AABB' || this.#debugMode === 'COMBINED_AABB') {
             const targetAABB = this.#debugMode === 'COMBINED_AABB' ? this.#target.combinedBoundingAABB : this.#target.boundingAABB;
-            // AABB가 변경된 경우에만 업데이트
             if (this.#hasAABBChanged(targetAABB)) {
                 this.#updateVertexDataFromAABB(targetAABB, this.#vertexBuffer);
                 this.#cacheAABB(targetAABB);
@@ -117,12 +138,10 @@ class DrawDebuggerMesh extends RedGPUObject {
         } else if (this.#debugMode === 'BOTH') {
             const targetOBB = this.#target.boundingOBB;
             const targetAABB = this.#target.boundingAABB;
-            // OBB (빨간색) - 변경된 경우에만 업데이트
             if (this.#hasOBBChanged(targetOBB)) {
                 this.#updateVertexDataFromOBB(targetOBB, this.#vertexBuffer);
                 this.#cacheOBB(targetOBB);
             }
-            // AABB (초록색) - 변경된 경우에만 업데이트
             if (this.#hasAABBChanged(targetAABB)) {
                 this.#updateVertexDataFromAABB(targetAABB, this.#aabbDebugMesh.geometry.vertexBuffer);
                 this.#cacheAABB(targetAABB);
@@ -144,7 +163,6 @@ class DrawDebuggerMesh extends RedGPUObject {
                 const centerY = boundBox.centerY;
                 const centerZ = boundBox.centerZ;
                 const radius = boundBox.geometryRadius;
-                // 각 frustum plane에 대해 거리 계산
                 frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumAABBCulling = false
                     : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumAABBCulling = false
                         : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumAABBCulling = false
@@ -158,7 +176,6 @@ class DrawDebuggerMesh extends RedGPUObject {
                 const centerY = boundBox.centerY;
                 const centerZ = boundBox.centerZ;
                 const radius = boundBox.geometryRadius;
-                // 각 frustum plane에 대해 거리 계산
                 frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumOBBCulling = false
                     : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumOBBCulling = false
                         : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumOBBCulling = false
@@ -178,7 +195,7 @@ class DrawDebuggerMesh extends RedGPUObject {
     }
 
     #createWireframeBoxGeometry(redGPUContext: RedGPUContext): Geometry {
-        const vertices = new Float32Array(24 * 12); // 8 -> 12 (pos:3, normal:3, uv:2, tangent:4)
+        const vertices = new Float32Array(24 * 12);
         const interleavedStruct = new VertexInterleavedStruct(
             {
                 vertexPosition: VertexInterleaveType.float32x3,
@@ -226,7 +243,7 @@ class DrawDebuggerMesh extends RedGPUObject {
     #isMatrixEqual(a: Float32Array | number[] | mat4, b: Float32Array | number[] | mat4): boolean {
         if (a.length !== b.length) return false;
         for (let i = 0; i < a.length; i++) {
-            if (Math.abs(a[i] - b[i]) > 0.0001) return false; // 부동소수점 오차 허용
+            if (Math.abs(a[i] - b[i]) > 0.0001) return false;
         }
         return true;
     }
@@ -266,8 +283,8 @@ class DrawDebuggerMesh extends RedGPUObject {
     #updateVertexDataFromAABB(targetAABB: AABB, vertexBuffer: VertexBuffer) {
         const {minX, maxX, minY, maxY, minZ, maxZ} = targetAABB;
         const transformedVertices = [
-            [minX, minY, minZ], [maxX, minY, minZ], [maxX, maxY, minZ], [minX, maxY, minZ], // 뒷면
-            [minX, minY, maxZ], [maxX, minY, maxZ], [maxX, maxY, maxZ], [minX, maxY, maxZ]  // 앞면
+            [minX, minY, minZ], [maxX, minY, minZ], [maxX, maxY, minZ], [minX, maxY, minZ],
+            [minX, minY, maxZ], [maxX, minY, maxZ], [maxX, maxY, maxZ], [minX, maxY, maxZ]
         ];
         this.#updateVertexBuffer(transformedVertices, vertexBuffer);
     }
@@ -282,7 +299,6 @@ class DrawDebuggerMesh extends RedGPUObject {
             const start = transformedVertices[startIdx];
             const end = transformedVertices[endIdx];
 
-            // 시작점
             vertexData[offset++] = start[0];
             vertexData[offset++] = start[1];
             vertexData[offset++] = start[2];
@@ -291,12 +307,10 @@ class DrawDebuggerMesh extends RedGPUObject {
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
-            // 탄젠트 (더미 데이터)
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
             vertexData[offset++] = 1;
-            // 끝점
             vertexData[offset++] = end[0];
             vertexData[offset++] = end[1];
             vertexData[offset++] = end[2];
@@ -305,7 +319,6 @@ class DrawDebuggerMesh extends RedGPUObject {
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;
-            // 탄젠트 (더미 데이터)
             vertexData[offset++] = 1;
             vertexData[offset++] = 0;
             vertexData[offset++] = 0;

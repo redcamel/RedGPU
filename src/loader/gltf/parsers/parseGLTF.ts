@@ -8,9 +8,25 @@ import parseCameras_GLTF from "./parseCameras_GLTF";
 import parseScene_GLTF from "./parseScene_GLTF";
 
 
+/**
+ * [KO] glTF 데이터를 프레임 단위로 분산 파싱하여 버퍼, 씬, 카메라, 텍스처, 애니메이션 리소스를 순차적으로 구성합니다.
+ * [EN] Parses glTF data across multiple frames to sequentially construct buffers, scenes, cameras, textures, and animation resources.
+ *
+ * @param gltfLoader -
+ * [KO] 대상 `GLTFLoader` 인스턴스
+ * [EN] Target `GLTFLoader` instance
+ * @param gltfData -
+ * [KO] 파싱할 원본 `GLTF` 데이터 객체
+ * [EN] Source `GLTF` data object to parse
+ * @param callBack -
+ * [KO] 전체 파싱 및 리소스 로딩 완료 시 호출할 콜백 함수
+ * [EN] Callback function invoked when all parsing and resource loading complete
+ * @param onProgress -
+ * [KO] 로딩 진행 상태를 전달받는 콜백 함수 (선택)
+ * [EN] Callback function receiving loading progress information (optional)
+ * @category GLTF
+ */
 const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
-    //  작업을 여러 프레임에 분산
-    // keepLog(gltfData)
     if (gltfData.extensionsUsed?.includes("KHR_draco_mesh_compression")) {
         alert('RedGPU GLTFLoader does not support the KHR_draco_mesh_compression extension. Models using this extension may not load properly.');
     }
@@ -22,7 +38,6 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?
                     parseScene_GLTF(gltfLoader, gltfData, () => {
                         requestAnimationFrame(() => {
                             parseCameras_GLTF(gltfLoader, gltfData);
-                            // TextureLoader 실행
                             new TextureLoader(
                                 gltfLoader.redGPUContext,
                                 Object.values(gltfLoader.parsingResult.textureRawList),
@@ -40,8 +55,6 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?
                                             }
                                         })
                                     });
-                                    // [KO] 로딩 완료 후, 사용한 Object URL들을 메모리에서 즉시 해제합니다.
-                                    // [EN] After loading is complete, release the used Object URLs from memory immediately.
                                     Object.values(gltfLoader.parsingResult.textureRawList).forEach((item: any) => {
                                         if (typeof item.src === 'string' && item.src.startsWith('blob:')) {
                                             URL.revokeObjectURL(item.src);

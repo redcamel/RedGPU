@@ -1,6 +1,6 @@
 /**
- * [KO] 물리 시뮬레이션에서 사용하는 충돌체 형상(Shape)의 종류를 정의합니다.
- * [EN] Defines the types of collider shapes used in physics simulations.
+ * [KO] 물리 시뮬레이션에서 사용하는 충돌체 형상(Shape) 상수입니다.
+ * [EN] Collider shape constants used in physics simulations.
  *
  * ::: warning
  * [KO] 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
@@ -32,13 +32,13 @@ export const PHYSICS_SHAPE = {
      */
     CYLINDER: 'cylinder',
     /**
-     * [KO] 높이맵 형태의 충돌체 (지형 등에 사용)
-     * [EN] Heightfield-shaped collider (Used for terrain, etc.)
+     * [KO] 높이맵 형태의 충돌체
+     * [EN] Heightfield-shaped collider
      */
     HEIGHTFIELD: 'heightfield',
     /**
-     * [KO] 임의의 메시 형태의 충돌체 (Trimesh)
-     * [EN] Arbitrary mesh-shaped collider (Trimesh)
+     * [KO] 삼각형 메시(Trimesh) 형태의 충돌체
+     * [EN] Triangle mesh (Trimesh) collider
      */
     MESH: 'mesh'
 } as const;
@@ -46,5 +46,7 @@ export const PHYSICS_SHAPE = {
 /**
  * [KO] `PHYSICS_SHAPE`의 값들에 대한 유니온 타입입니다.
  * [EN] Union type for the values of `PHYSICS_SHAPE`.
+ *
+ * @category Physics
  */
 export type PhysicsShape = typeof PHYSICS_SHAPE[keyof typeof PHYSICS_SHAPE];

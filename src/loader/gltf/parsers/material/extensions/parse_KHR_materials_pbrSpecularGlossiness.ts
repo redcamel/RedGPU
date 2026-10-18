@@ -3,12 +3,19 @@ import GLTFLoader from "../../../GLTFLoader";
 import parseMaterialTexture from "../parseMaterialTexture";
 
 /**
- * [KO] glTF KHR_materials_pbrSpecularGlossiness 확장을 파싱하여 PBRMaterial에 매핑합니다.
- * [EN] Parses glTF KHR_materials_pbrSpecularGlossiness extension and maps it to PBRMaterial.
+ * [KO] glTF의 `KHR_materials_pbrSpecularGlossiness` 확장을 파싱하여 `PBRMaterial`에 매핑합니다.
+ * [EN] Parses the `KHR_materials_pbrSpecularGlossiness` extension of glTF and maps it to `PBRMaterial`.
  *
- * @param currentMaterial - The target PBRMaterial
- * @param specGlossInfo - The extension data from glTF
- * @param gltfLoader - The GLTFLoader instance
+ * @param currentMaterial -
+ * [KO] 대상 `PBRMaterial` 인스턴스
+ * [EN] Target `PBRMaterial` instance
+ * @param specGlossInfo -
+ * [KO] `KHR_materials_pbrSpecularGlossiness` 확장 데이터
+ * [EN] `KHR_materials_pbrSpecularGlossiness` extension data
+ * @param gltfLoader -
+ * [KO] `GLTFLoader` 인스턴스
+ * [EN] `GLTFLoader` instance
+ * @category GLTF
  */
 const parse_KHR_materials_pbrSpecularGlossiness = (
     currentMaterial: PBRMaterial,

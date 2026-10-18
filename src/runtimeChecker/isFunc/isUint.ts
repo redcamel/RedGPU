@@ -1,21 +1,19 @@
 /**
- * [KO] 주어진 값이 부호 없는 정수(Unsigned Integer)인지 검사합니다.
- * [EN] Checks if the given value is an unsigned integer.
+ * [KO] 값이 0 이상의 정수(Unsigned Integer)인지 검사합니다.
+ * [EN] Checks whether the value is an integer greater than or equal to 0 (unsigned integer).
  *
- * [KO] 0 이상의 정수이면 true를 반환합니다.
- * [EN] Returns true if the value is an integer greater than or equal to 0.
- *
- * * ### Example
+ * ### Example
  * ```typescript
- * const isValid = RedGPU.RuntimeChecker.isUint(10);
+ * RedGPU.RuntimeChecker.isUint(10); // true
+ * RedGPU.RuntimeChecker.isUint(-1); // false
  * ```
  *
  * @param value -
  * [KO] 검사할 숫자 값
- * [EN] Value to check
+ * [EN] Numeric value to check
  * @returns
  * [KO] 부호 없는 정수이면 true, 아니면 false
- * [EN] True if it is an unsigned integer, otherwise false
+ * [EN] True if the value is an unsigned integer, otherwise false
  * @category Checker
  */
 const isUint = (value: number): boolean => {

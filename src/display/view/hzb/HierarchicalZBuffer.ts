@@ -4,14 +4,39 @@ import hzbDownsampleShader from "./hzbDownsample.wgsl";
 import hzbMip0MSAAShader from "./hzbMip0MSAA.wgsl";
 
 /**
- * 🌿 Hierarchical Z-Buffer (HZB) 전역 피라미드 매니저
- * - 뷰포트 깊이 버퍼로부터 8단계 Mipmap 깊이 피라미드(512x256 POT)를 생성합니다.
- * - GPU Culling (식생/오브젝트) 및 Hi-Z SSR, SSAO, Contact Shadow에 활용됩니다.
+ * [KO] 뷰포트 깊이 버퍼로부터 8단계 밉맵 깊이 피라미드를 생성하고 관리하는 클래스입니다.
+ * [EN] Class that generates and manages an 8-level mipmap depth pyramid from the viewport depth buffer.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const hzb = view.hierarchicalZBuffer;
+ * ```
+ *
+ * @category View
  */
 class HierarchicalZBuffer extends RedGPUObject {
+    /**
+     * [KO] HZB 피라미드의 기본 너비 (픽셀)
+     * [EN] Base width of the HZB pyramid (pixels)
+     */
     static HZB_WIDTH = 512;
+    /**
+     * [KO] HZB 피라미드의 기본 높이 (픽셀)
+     * [EN] Base height of the HZB pyramid (pixels)
+     */
     static HZB_HEIGHT = 256;
-    static MIP_COUNT = 8; // 512x256 -> 256x128 -> 128x64 -> 64x32 -> 32x16 -> 16x8 -> 8x4 -> 4x2
+    /**
+     * [KO] HZB 피라미드의 밉맵 단계 수
+     * [EN] Number of mipmap levels in the HZB pyramid
+     */
+    static MIP_COUNT = 8;
 
     #hzbTexture: GPUTexture | null = null;
     #hzbFullTextureView: GPUTextureView | null = null;
@@ -39,25 +64,74 @@ class HierarchicalZBuffer extends RedGPUObject {
 
     #isInitialized = false;
 
+    /**
+     * [KO] `HierarchicalZBuffer` 인스턴스를 생성합니다.
+     * [EN] Creates a `HierarchicalZBuffer` instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#init();
     }
 
+    /**
+     * [KO] HZB 밉맵 피라미드 `GPUTexture`를 반환합니다.
+     * [EN] Returns the HZB mipmap pyramid `GPUTexture`.
+     *
+     * @returns
+     * [KO] `GPUTexture` 또는 `null`
+     * [EN] `GPUTexture` or `null`
+     */
     get texture(): GPUTexture | null {
         return this.#hzbTexture;
     }
 
+    /**
+     * [KO] 전체 HZB 밉맵 레벨을 포함하는 `GPUTextureView`를 반환합니다.
+     * [EN] Returns the `GPUTextureView` covering all HZB mipmap levels.
+     *
+     * @returns
+     * [KO] `GPUTextureView` 또는 `null`
+     * [EN] `GPUTextureView` or `null`
+     */
     get textureView(): GPUTextureView | null {
         return this.#hzbFullTextureView;
     }
 
+    /**
+     * [KO] HZB 샘플러(`GPUSampler`)를 반환합니다.
+     * [EN] Returns the HZB `GPUSampler`.
+     *
+     * @returns
+     * [KO] `GPUSampler` 또는 `null`
+     * [EN] `GPUSampler` or `null`
+     */
     get sampler(): GPUSampler | null {
         return this.#hzbSampler;
     }
 
     /**
-     * Depth Texture로부터 8단계 HZB Mipmap 피라미드를 초고속 SPD(Single-Pass Downsampler)로 생성합니다.
+     * [KO] 소스 깊이 텍스처 뷰로부터 8단계 HZB 밉맵 피라미드를 SPD(Single-Pass Downsampler)로 생성합니다.
+     * [EN] Generates an 8-level HZB mipmap pyramid from the source depth texture view using Single-Pass Downsampler (SPD).
+     *
+     * @param commandEncoder -
+     * [KO] 컴퓨트 패스를 기록할 `GPUCommandEncoder`
+     * [EN] `GPUCommandEncoder` to record the compute pass
+     * @param sourceDepthTextureView -
+     * [KO] 원본 깊이 텍스처 뷰
+     * [EN] Source depth texture view
+     * @param srcWidth -
+     * [KO] 원본 깊이 텍스처 너비 (픽셀)
+     * [EN] Source depth texture width (pixels)
+     * @param srcHeight -
+     * [KO] 원본 깊이 텍스처 높이 (픽셀)
+     * [EN] Source depth texture height (pixels)
+     * @param isMSAA -
+     * [KO] 멀티샘플링(MSAA) 깊이 텍스처 여부 (기본값: `false`)
+     * [EN] Whether the depth texture is multisampled (MSAA) (default: `false`)
      */
     generate(
         commandEncoder: GPUCommandEncoder,
@@ -69,7 +143,6 @@ class HierarchicalZBuffer extends RedGPUObject {
         if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineMip0MSAA || !this.#pipelineDownsampleSPD5 || !this.#pipelineDownsampleTail) return;
         const gpuDevice = this.gpuDevice;
 
-        // Mip 0 파라미터 업데이트 (해상도 변경 시에만 1회 전송 및 GC 0건 인플레이스 기록)
         if (this.#lastSrcWidth !== srcWidth || this.#lastSrcHeight !== srcHeight) {
             this.#lastSrcWidth = srcWidth;
             this.#lastSrcHeight = srcHeight;
@@ -82,7 +155,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             gpuDevice.queue.writeBuffer(this.#uniformBufferMip0!, 0, p.buffer, p.byteOffset, p.byteLength);
         }
 
-        // Mip 0 바인드그룹 조회 또는 생성
         let bgMip0 = this.#bindGroupsMip0.get(sourceDepthTextureView);
         if (!bgMip0) {
             const layout = isMSAA ? this.#bglMip0MSAA! : this.#bglMip0!;
@@ -102,7 +174,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             label: 'HierarchicalZBuffer_Generation_Pass',
         });
 
-        // 1. Mip 0 생성 (Depth -> HZB Mip 0: 512x256)
         const pipelineMip0 = isMSAA ? this.#pipelineMip0MSAA : this.#pipelineMip0;
         pass.setPipeline(pipelineMip0);
         pass.setBindGroup(0, bgMip0);
@@ -111,12 +182,10 @@ class HierarchicalZBuffer extends RedGPUObject {
             Math.ceil(HierarchicalZBuffer.HZB_HEIGHT / 8)
         );
 
-        // 2. SPD Stage 1: Mip 1 ~ Mip 5 단일 패스 LDS 계층 동시 축약 (16x16 워크그룹 x 128개 = 단 1회 디스패치)
         pass.setPipeline(this.#pipelineDownsampleSPD5);
         pass.setBindGroup(0, this.#bindGroupDownsampleSPD5!);
         pass.dispatchWorkgroups(16, 8);
 
-        // 3. SPD Stage 2: Mip 5 -> Mip 6 (8x4), Mip 7 (4x2) 최종 온칩 축약 (단 1개 워크그룹 디스패치)
         pass.setPipeline(this.#pipelineDownsampleTail);
         pass.setBindGroup(0, this.#bindGroupDownsampleTail!);
         pass.dispatchWorkgroups(1, 1);
@@ -124,6 +193,10 @@ class HierarchicalZBuffer extends RedGPUObject {
         pass.end();
     }
 
+    /**
+     * [KO] HZB 피라미드 텍스처 및 컴퓨트 파이프라인 리소스를 해제합니다.
+     * [EN] Destroys the HZB pyramid texture and compute pipeline resources.
+     */
     destroy(): void {
         this.#hzbTexture?.destroy();
         this.#hzbTexture = null;
@@ -149,7 +222,6 @@ class HierarchicalZBuffer extends RedGPUObject {
         const gpuDevice = this.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. HZB 텍스처 생성 (512x256, r32float, 8 Mips)
         this.#hzbTexture = gpuDevice.createTexture({
             label: 'HierarchicalZBuffer_Texture',
             size: {
@@ -176,7 +248,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             this.#hzbMipViews.push(mipView);
         }
 
-        // 2. HZB 샘플러 생성 (Point/Linear Clamp)
         this.#hzbSampler = gpuDevice.createSampler({
             label: 'HierarchicalZBuffer_Sampler',
             magFilter: 'linear',
@@ -186,7 +257,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             addressModeV: 'clamp-to-edge',
         });
 
-        // 3. Compute Shader 모듈 생성
         const shaderModule = gpuDevice.createShaderModule({
             label: 'HierarchicalZBuffer_ShaderModule',
             code: hzbDownsampleShader,
@@ -197,7 +267,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             code: hzbMip0MSAAShader,
         });
 
-        // 4. BindGroupLayouts
         this.#bglMip0 = gpuDevice.createBindGroupLayout({
             label: 'HZB_BGL_Mip0',
             entries: [
@@ -240,7 +309,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             ],
         });
 
-        // 🚀 SPD Stage 1 BindGroupLayout (Mip 0 읽기 + Mip 1~5 동시 쓰기)
         this.#bglDownsampleSPD5 = gpuDevice.createBindGroupLayout({
             label: 'HZB_BGL_Downsample_SPD5',
             entries: [
@@ -273,7 +341,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             ],
         });
 
-        // 🚀 SPD Stage 2 BindGroupLayout (Mip 5 읽기 + Mip 6, 7 동시 쓰기)
         this.#bglDownsampleTail = gpuDevice.createBindGroupLayout({
             label: 'HZB_BGL_Downsample_Tail',
             entries: [
@@ -291,7 +358,6 @@ class HierarchicalZBuffer extends RedGPUObject {
             ],
         });
 
-        // 5. Compute Pipelines
         this.#pipelineMip0 = gpuDevice.createComputePipeline({
             label: 'HZB_Pipeline_Mip0',
             layout: gpuDevice.createPipelineLayout({
@@ -336,14 +402,12 @@ class HierarchicalZBuffer extends RedGPUObject {
             },
         });
 
-        // 6. Uniform Buffer (Mip 0 전용)
         this.#uniformBufferMip0 = gpuDevice.createBuffer({
             label: 'HZB_UniformBuffer_Mip0',
-            size: 16, // 4 x u32
+            size: 16,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
-        // 7. SPD 바인드그룹 사전 생성 (Mip 0, Mip 5 기반 고정 바인드그룹)
         this.#bindGroupDownsampleSPD5 = gpuDevice.createBindGroup({
             label: 'HZB_BindGroup_Downsample_SPD5',
             layout: this.#bglDownsampleSPD5,

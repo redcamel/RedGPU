@@ -6,10 +6,10 @@ import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
 const MANAGED_STATE_KEY = 'managedUniformBufferState'
 
 /**
- * [KO] Uniform 버퍼를 관리하는 클래스입니다.
- * [EN] Class that manages globalStruct buffers.
+ * [KO] 유니폼 버퍼(`GPUBuffer`)를 관리하는 클래스입니다.
+ * [EN] Class that manages uniform buffers (`GPUBuffer`).
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const uniformBuffer = new RedGPU.Resource.UniformBuffer(redGPUContext, data);
  * ```
@@ -20,7 +20,7 @@ class UniformBuffer extends AUniformBaseBuffer {
      * [KO] UniformBuffer 인스턴스를 생성합니다.
      * [EN] Creates a UniformBuffer instance.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const uniformBuffer = new RedGPU.Resource.UniformBuffer(redGPUContext, data, 'MyUniformBuffer');
      * ```

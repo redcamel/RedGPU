@@ -7,52 +7,23 @@ const BASIS_WASM_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/bas
 
 export interface CreateKTX2Options {
     device: GPUDevice;
-    /**
-     * KTX2 파일 URL(string), 바이너리(ArrayBuffer / Uint8Array), 또는 파싱된 KTX2Container
-     */
     container: string | KTX2Container | ArrayBuffer | Uint8Array;
-    /** Red 채널과 Blue 채널 스와이프(Swizzle) 여부 (BGRA <-> RGBA 색상 반전 보정) */
     swapRedBlue?: boolean;
-    /** 디버깅을 위한 GPU 리소스 라벨 */
     label?: string;
-    /** 추가적인 GPUTextureUsage 플래그 (기본: TEXTURE_BINDING | COPY_DST) */
     usage?: GPUTextureUsageFlags;
 }
 
-/**
- * KTX2 keyValue 영역에서 파싱된 HDR/텍스처 메타데이터.
- *
- * @see https://registry.khronos.org/KTX/specs/2.0/ktxspec.v2.html#metadata
- */
 export interface KTX2Metadata {
-    /** KHR_texture_basisu 등 사용 writer 정보 (KTXwriter) */
     writer?: string;
-    /** 텍스처 방향 (KTXorientation). 예: 'rd', 'ru' */
     orientation?: string;
-    /** 스위즐 정보 (KTXswizzle). 예: 'rgba', 'rgb1' */
     swizzle?: string;
-    /**
-     * HDR 노출값 (KHRexposure).
-     * 중간 밝기(linear scene) → 디스플레이 밝기 변환에 사용되는 EV 오프셋.
-     * 0.0 = 노출 보정 없음, 양수 = 밝게, 음수 = 어둡게.
-     */
     exposure?: number;
-    /**
-     * 톤매핑 방식 (KHRtonemapping).
-     * 0 = None(Linear), 1 = PBR Neutral, 2 = ACES, 3 = Filmic
-     */
     tonemapping?: number;
-    /** HDR 색공간 원색(primaries) ID (KHRhdrColorSpace) */
     hdrColorPrimaries?: number;
-    /** HDR 전달 함수(transfer function) ID (KHRhdrColorSpace) */
     hdrTransferFunction?: number;
-    /** 파싱되지 않은 나머지 원시 keyValue 항목 */
     raw: Record<string, string | Uint8Array>;
 }
 
-/**
- * KTX2Container의 keyValue 영역을 파싱해 {@link KTX2Metadata}로 반환합니다.
- */
 function parseKTX2Metadata(container: KTX2Container): KTX2Metadata {
     const kv = container.keyValue ?? {};
     const raw: Record<string, string | Uint8Array> = {};
@@ -61,11 +32,9 @@ function parseKTX2Metadata(container: KTX2Container): KTX2Metadata {
         const val = kv[key];
         if (val === undefined) return undefined;
         if (typeof val === 'string') {
-            // null terminator 제거
             raw[key] = val;
             return val.replace(/\0+$/, '');
         }
-        // Uint8Array → UTF-8 문자열 변환
         const str = new TextDecoder('utf-8').decode(val).replace(/\0+$/, '');
         raw[key] = val;
         return str;
@@ -85,12 +54,10 @@ function parseKTX2Metadata(container: KTX2Container): KTX2Metadata {
         return isNaN(n) ? undefined : n;
     };
 
-    // 파싱되지 않은 키도 raw에 보존
     for (const key of Object.keys(kv)) {
         if (!raw[key]) raw[key] = kv[key];
     }
 
-    // KHRhdrColorSpace: "<primaries> <transferFunction>" 형식의 공백 구분 문자열
     let hdrColorPrimaries: number | undefined;
     let hdrTransferFunction: number | undefined;
     const hdrColorSpaceStr = getString('KHRhdrColorSpace');
@@ -114,14 +81,8 @@ function parseKTX2Metadata(container: KTX2Container): KTX2Metadata {
     };
 }
 
-/**
- * KTXwriter 문자열에서 주 버전(Major) 및 부 버전(Minor) 번호를 수치(Number)로 스마트하게 파싱합니다.
- * 예: "toktx v4.0.__default__" → { major: 4, minor: 0 }
- *     "BasisU v1.12" → { major: 1, minor: 12 }
- */
 function parseWriterVersion(writerStr?: string): { name: string; major: number; minor: number } | null {
     if (!writerStr) return null;
-    // basisu, toktx, libktx 뒤의 v1.1, v1.11, /v1.11 등 다양한 구획 기호와 버전 번호 스마트 추출
     const match = writerStr.match(/(toktx|libktx|basisu)[_\s\/-]*v?(\d+)\.(\d+)/i);
     if (!match) return null;
     return {
@@ -131,10 +92,6 @@ function parseWriterVersion(writerStr?: string): { name: string; major: number; 
     };
 }
 
-/**
- * [KO] KTX2 바이너리 메타데이터(DFD, KTXwriter 버저닝, swizzle 등)를 분석하여
- * 1세대 구형(Legacy) 텍스처 여부와 모든 판별 원인들을 전수 종합 분석합니다.
- */
 function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
     isLegacy: boolean;
     legacyReason?: string
@@ -143,12 +100,10 @@ function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
     const dfd = Array.isArray(dfdList) ? dfdList[0] : dfdList;
     const reasons: string[] = [];
 
-    // 1. 레거시 swizzle 매핑 구조적 검사 (r001, rrr1, rrrg, rrra 등 1세대 휘도/단채널 스위즐)
     if (metadata.swizzle && (metadata.swizzle.includes('r0') || metadata.swizzle === 'rrr1' || metadata.swizzle === 'rrrg' || metadata.swizzle === 'rrra')) {
         reasons.push(`폐기된 휘도/단채널 Swizzle (${metadata.swizzle})`);
     }
 
-    // 2. Transcodable (vkFormat === 0) 텍스처 중 DFD colorModel이 미지정이거나 163(ETC1S)/166(UASTC) 외 비표준 포맷인 경우
     if (container.vkFormat === 0) {
         const colorModel = dfd?.colorModel;
         if (colorModel === undefined || (colorModel !== 163 && colorModel !== 166)) {
@@ -156,12 +111,10 @@ function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
         }
     }
 
-    // 3. DFD transferFunction 감마 스펙 수치 미지정(0/Undefined) 검사
     if (!dfd || dfd.transferFunction === 0 || dfd.transferFunction === undefined) {
         reasons.push(`DFD 감마 미지정 (transferFunction: 0)`);
     }
 
-    // 4. KTXwriter 생성자 시만틱 버저닝(SemVer) 수치 검사 (존재할 경우에만 수치 검사)
     if (metadata.writer) {
         const ver = parseWriterVersion(metadata.writer);
         keepLog(ver)
@@ -185,12 +138,9 @@ function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
     return {isLegacy: false};
 }
 
-/** Basis Universal WASM Singleton 인스턴스 관리 */
 let basisTranscoderPromise: Promise<any> | null = null;
 let basisModule: any = null;
 
-// ✨ Basis Universal C++ 내부 열거형(Enum) 상수 하드코딩 (HDR 포맷 BC6H, RGBA16F 포함)
-// https://github.com/BinomialLLC/basis_universal/blob/master/transcoder/basisu_transcoder.h
 const BASIS_FORMAT = {
     ETC1_RGB: 0,
     ETC2_RGBA: 1,
@@ -200,13 +150,13 @@ const BASIS_FORMAT = {
     BC5_RG: 5,
     BC7_RGBA: 6,
     PVRTC1_4_RGBA: 9,
-    ASTC_4x4_RGBA: 10,        // ✅ 9 → 10 수정
+    ASTC_4x4_RGBA: 10,
     RGBA32: 13,
     ETC2_EAC_RG11: 21,
-    BC6H: 22,                  // ✅ 21 → 22 수정
+    BC6H: 22,
     ASTC_HDR_4x4_RGBA: 23,
     RGB_HALF: 24,
-    RGBA_HALF: 25,             // ✅ 22 → 25 수정 (RGBA16F는 RGBA_HALF)
+    RGBA_HALF: 25,
     RGB_9E5: 26
 };
 
@@ -257,12 +207,7 @@ async function initBasisTranscoder(): Promise<any> {
     return basisTranscoderPromise;
 }
 
-/**
- * Vulkan Format ID -> WebGPU GPUTextureFormat 매핑 테이블
- *
- */
 const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
-    // 8-bit Unorm / Srgb
     9: 'r8unorm',
     16: 'rg8unorm',
     23: 'rgba8unorm',
@@ -272,24 +217,20 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     44: 'bgra8unorm',
     50: 'bgra8unorm-srgb',
 
-    // 16-bit Unorm / Snorm
     70: 'r16snorm',
     76: 'r16float',
     77: 'rg16unorm',
     91: 'rgba16float',
 
-    // Packed Float & Special Float Formats
     122: 'rg11b10ufloat',
     123: 'rgb9e5ufloat',
 
-    // 16-bit / 32-bit Float
     83: 'rg16float',
     97: 'rgba16float',
     100: 'r32float',
     103: 'rg32float',
     109: 'rgba16float',
 
-    // Block Compression - BC
     131: 'bc1-rgba-unorm',
     132: 'bc1-rgba-unorm-srgb',
     133: 'bc1-rgba-unorm',
@@ -307,7 +248,6 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     145: 'bc7-rgba-unorm',
     146: 'bc7-rgba-unorm-srgb',
 
-    // Block Compression - ETC2 / EAC
     147: 'etc2-rgb8unorm',
     148: 'etc2-rgb8unorm-srgb',
     149: 'etc2-rgb8a1unorm',
@@ -319,7 +259,6 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     155: 'eac-rg11unorm',
     156: 'eac-rg11snorm',
 
-    // Block Compression - ASTC 2D
     157: 'astc-4x4-unorm',
     158: 'astc-4x4-unorm-srgb',
     159: 'astc-5x4-unorm',
@@ -371,7 +310,6 @@ const FORMAT_BYTES_PER_PIXEL: Partial<Record<GPUTextureFormat, number>> = {
 };
 
 function createFallbackGPUTexture(device: GPUDevice, label?: string, vkFormat?: any): GPUTexture {
-    // keepLog('createFallbackGPUTexture', label);
     const fallbackTex = device.createTexture({
         label: label ? `${label}_fallback` : 'KTX2_Fallback_Texture',
         size: {width: 1, height: 1, depthOrArrayLayers: 1},
@@ -405,7 +343,6 @@ export async function createGPUTextureFromKTX2({
     let rawBuffer: Uint8Array | null = null;
     let container: KTX2Container;
 
-    // 1. 순수 바이너리 사본 안전 분리
     if (typeof inputContainer === 'string') {
         const response = await fetch(inputContainer);
         if (!response.ok) {
@@ -450,11 +387,9 @@ export async function createGPUTextureFromKTX2({
     let ktx2FileInstance: any = null;
     let basisTargetFormatEnum: number = 0;
 
-    // ✨ 핵심 수정: vkFormat이 0이거나, HDR ASTC 포맷(1000066000)이거나, DFD 컬러 모델이 UASTC(166)/ETC1S(163)인 경우 Basis 트랜스코더 진입
     const colorModel = (dfdList && dfdList[0]) ? dfdList[0].colorModel : null;
     const isBasisContainer = container.vkFormat === 0 || container.vkFormat === 1000066000 || colorModel === 166 || colorModel === 163;
 
-    // 2. Format 판단 및 Basis WASM 초기화
     if (isBasisContainer) {
         const Module = await initBasisTranscoder();
 
@@ -472,8 +407,6 @@ export async function createGPUTextureFromKTX2({
         const isHDR = typeof ktx2FileInstance.isHDR === 'function' ? ktx2FileInstance.isHDR() : false;
         const hasAlpha = ktx2FileInstance.getHasAlpha();
 
-        // KHR_DF_TRANSFER_SRGB = 2, KHR_DF_TRANSFER_LINEAR = 1
-        // ktx2FileInstance.isSRGB() 와 DFD transferFunction 둘 다 체크 (OR 결합)
         const dfdIsSRGB = Array.isArray(dfdList) && !!dfdList[0] && dfdList[0].transferFunction === 2;
         const isSRGB = (typeof ktx2FileInstance.isSRGB === 'function' ? ktx2FileInstance.isSRGB() : false) || dfdIsSRGB;
 
@@ -482,7 +415,6 @@ export async function createGPUTextureFromKTX2({
         const hasETC2 = device.features.has('texture-compression-etc2');
 
 
-        // ✨ HDR 및 범용 KTX2 포맷 대응 매핑 분기
         if (isHDR) {
             if (hasBC) {
                 format = 'bc6h-rgb-ufloat';
@@ -507,7 +439,6 @@ export async function createGPUTextureFromKTX2({
                 basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
             }
         } else {
-            // ETC1S 트랜스코딩 타겟
             if (hasASTC) {
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
                 basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
@@ -533,7 +464,6 @@ export async function createGPUTextureFromKTX2({
             }
         }
 
-        // 🔍 진단 로그 - 색상 문제 디버깅용
         console.log(`[KTX2 Transcode Diagnosis] ${label ?? 'unknown'}`, {
             isUASTC, isHDR, isSRGB, hasAlpha,
             hasBC, hasASTC, hasETC2,
@@ -552,9 +482,7 @@ export async function createGPUTextureFromKTX2({
         }
     }
 
-    // keepLog(isBasisTranscoded, container, format, basisTargetFormatEnum);
 
-    // 3. GPU device feature 검증
     let missingFeature = '';
     if (format.startsWith('astc-') && !device.features.has('texture-compression-astc')) {
         missingFeature = 'texture-compression-astc';
@@ -594,7 +522,6 @@ export async function createGPUTextureFromKTX2({
         textureHeight = Math.ceil(height / blockHeight) * blockHeight;
     }
 
-    // 4. GPUTexture 생성
     const texture = device.createTexture({
         label: label ?? `KTX2_Texture_${width}x${height}`,
         size: {
@@ -609,7 +536,6 @@ export async function createGPUTextureFromKTX2({
     });
 
     try {
-        // 5. Mipmap & Layer 업로드
         for (let mipLevel = 0; mipLevel < mipLevelCount; mipLevel++) {
             const mipWidth = Math.max(1, width >> mipLevel);
             const mipHeight = Math.max(1, height >> mipLevel);
@@ -624,7 +550,6 @@ export async function createGPUTextureFromKTX2({
                     );
 
                     {
-                        // keepLog(`[KTX2 Transcode] mipLevel=${mipLevel}, mipSize=${mipWidth}x${mipHeight}, imageSize=${imageSize}`);
 
                         if (!imageSize || imageSize <= 0) {
                             console.error(`[ERROR] Invalid imageSize=${imageSize} at mipLevel=${mipLevel}`);
@@ -668,8 +593,8 @@ export async function createGPUTextureFromKTX2({
                         if (format.startsWith('bc1') || format.startsWith('bc4') ||
                             format === 'etc2-rgb8unorm' || format === 'etc2-rgb8unorm-srgb' ||
                             format === 'eac-r11unorm' || format === 'eac-r11snorm' ||
-                            format === 'bc6h-rgb-ufloat' || format === 'bc6h-rgb-float') { // BC6H 블록 바이트 수 대응 (16바이트)
-                            bytesPerBlock = format.startsWith('bc6h') ? 16 : 8; // BC6H는 픽셀 블록 당 16바이트
+                            format === 'bc6h-rgb-ufloat' || format === 'bc6h-rgb-float') {
+                            bytesPerBlock = format.startsWith('bc6h') ? 16 : 8;
                         }
 
                         const unpaddedBytesPerRow = blocksWide * bytesPerBlock;
@@ -708,7 +633,6 @@ export async function createGPUTextureFromKTX2({
                             }
                         );
                     } else {
-                        // 비압축 포맷 (RGBA16F 등) 처리
                         const unpaddedBytesPerRow = mipWidth * bytesPerPixel;
                         const paddedBytesPerRow = (unpaddedBytesPerRow + 255) & ~255;
 
@@ -743,7 +667,6 @@ export async function createGPUTextureFromKTX2({
                     }
                 }
             } else {
-                // Raw KTX2 (사전 압축 / 비압축 KTX2) 처리
                 const levelInfo = container.levels[mipLevel];
                 let levelDataView: Uint8Array<any> = new Uint8Array(
                     levelInfo.levelData.buffer,
@@ -966,21 +889,15 @@ export async function createGPUTextureFromKTX2({
     texture.ktxInfo = {
         vkFormat: container.vkFormat,
         vkFormatName: VK_FORMAT_TO_WEBGPU[container.vkFormat ?? 0],
-        /** 1세대 구형(Legacy) KTX2 텍스처 여부 */
         isLegacy: legacyInfo.isLegacy,
-        /** 1세대 구형(Legacy) 판별 구체적 기술적 원인 */
         legacyReason: legacyInfo.legacyReason,
-        // KTX2 keyValue 메타데이터
         writer: metadata.writer,
         orientation: metadata.orientation,
         swizzle: metadata.swizzle,
-        /** HDR 노출 보정값 (EV 오프셋). 0.0 = 보정 없음 */
         exposure: metadata.exposure,
-        /** 톤매핑 힌트 (0=None, 1=PBR Neutral, 2=ACES, 3=Filmic) */
         tonemapping: metadata.tonemapping,
         hdrColorPrimaries: metadata.hdrColorPrimaries,
         hdrTransferFunction: metadata.hdrTransferFunction,
-        /** 파싱되지 않은 원시 keyValue 전체 */
         metadataRaw: metadata.raw,
     };
     return texture;

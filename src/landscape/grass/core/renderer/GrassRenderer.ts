@@ -14,21 +14,76 @@ import grassFragmentFarWGSL from "../pipeline/grassFragmentFar.wgsl";
 import grassShadowVertexWGSL from "../pipeline/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 
+/**
+ * [KO] 잔디 서브메시 재질 바인드 그룹 캐시 엔트리 인터페이스입니다.
+ * [EN] Material bind group cache entry interface for grass submeshes.
+ */
 interface MaterialBindGroupCacheEntry {
+    /**
+     * [KO] 캐싱된 `GPUBindGroup` 인스턴스
+     * [EN] Cached `GPUBindGroup` instance
+     */
     bindGroup: GPUBindGroup;
+    /**
+     * [KO] 캐싱된 베이스 컬러 `GPUTextureView`
+     * [EN] Cached base color `GPUTextureView`
+     */
     cachedColorTexView: GPUTextureView;
+    /**
+     * [KO] 캐싱된 서브메시 `BitmapTexture`
+     * [EN] Cached submesh `BitmapTexture`
+     */
     cachedSubTex: BitmapTexture | null | undefined;
+    /**
+     * [KO] 캐싱된 잔디 타입 기본 `GPUTextureView`
+     * [EN] Cached grass type default `GPUTextureView`
+     */
     cachedTypeTexView: GPUTextureView | null;
 }
 
+/**
+ * [KO] 뷰별 잔디 메인 렌더 번들 캐시 엔트리 인터페이스입니다.
+ * [EN] Per-view grass main render bundle cache entry interface.
+ */
 interface MainBundleCacheEntry {
+    /**
+     * [KO] 기록된 `GPURenderBundle` 인스턴스
+     * [EN] Recorded `GPURenderBundle` instance
+     */
     bundle: GPURenderBundle;
+    /**
+     * [KO] 시스템 유니폼 바인드 그룹
+     * [EN] System uniform bind group
+     */
     systemBG: GPUBindGroup;
+    /**
+     * [KO] 멀티샘플링 수 (1 또는 4)
+     * [EN] Sample count for multisampling (1 or 4)
+     */
     sampleCount: number;
+    /**
+     * [KO] 번들 기록 시점의 잔디 타입 수
+     * [EN] Number of grass types at the time of bundle recording
+     */
     grassCount: number;
+    /**
+     * [KO] 번들 기록에 사용된 `GrassMegaBuffer` 인스턴스
+     * [EN] `GrassMegaBuffer` instance used for bundle recording
+     */
     megaBufferInstance: GrassMegaBuffer;
 }
 
+/**
+ * [KO] 컬링된 잔디 인스턴스를 `GPURenderBundle` 및 간접 드로우(Indirect Draw) 방식으로 메인 패스와 그림자 패스에 렌더링하는 시스템 내부 클래스입니다.
+ * [EN] Internal system class that renders culled grass instances in main and shadow passes using `GPURenderBundle` and indirect draw calls.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Landscape
+ */
 class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #vertexModule: GPUShaderModule | null = null;
     #vertexShadowModule: GPUShaderModule | null = null;
@@ -56,24 +111,44 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
     #preferredCanvasFormat: GPUTextureFormat;
 
+    /**
+     * [KO] GrassRenderer 인스턴스를 초기화합니다.
+     * [EN] Initializes the GrassRenderer instance.
+     *
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.#preferredCanvasFormat = navigator.gpu.getPreferredCanvasFormat();
         this.#initShadersAndLayouts();
     }
 
+    /**
+     * [KO] 캐싱된 Group 1 통합 바인드 그룹을 무효화합니다.
+     * [EN] Invalidates the cached unified Group 1 bind group.
+     */
     invalidateGroup1BindGroup(): void {
         this.#unifiedGroup1BindGroup = null;
         this.#lastCulledBuffer = null;
         this.#lastSlotPoolerBuffer = null;
     }
 
+    /**
+     * [KO] 그림자 렌더 번들이 더티 상태가 될 때 내부 캐시 상태를 초기화합니다.
+     * [EN] Resets internal cache states when the shadow render bundle becomes dirty.
+     */
     override onShadowBundleDirty(): void {
         this.#lastShadowMegaBuffer = null;
         this.#lastShadowMaskLow = -1;
         this.#lastShadowMaskHigh = -1;
     }
 
+    /**
+     * [KO] 메인 및 그림자 렌더 번들과 바인드 그룹 캐시를 모두 더티 상태로 표시합니다.
+     * [EN] Marks all main and shadow render bundles and bind group caches as dirty.
+     */
     override markAllBundlesDirty(): void {
         this.markMainBundleDirty();
         this.markShadowBundleDirty();
@@ -81,6 +156,26 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         this.#materialBindGroupCache.clear();
     }
 
+    /**
+     * [KO] 메인 렌더 패스에서 근거리 및 원거리 잔디 인스턴스를 렌더링합니다.
+     * [EN] Renders near and far grass instances in the main render pass.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param passEncoder -
+     * [KO] 현재 `GPURenderPassEncoder` 인스턴스
+     * [EN] Current `GPURenderPassEncoder` instance
+     * @param grassList -
+     * [KO] 렌더링할 잔디 타입 배열
+     * [EN] Array of grass types to render
+     * @param megaBuffer -
+     * [KO] 잔디 메가 버퍼 인스턴스
+     * [EN] Grass mega buffer instance
+     * @param slotPooler -
+     * [KO] 잔디 유니폼 슬롯 풀러 인스턴스
+     * [EN] Grass uniform slot pooler instance
+     */
     render(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
@@ -136,6 +231,26 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
     }
 
+    /**
+     * [KO] 디렉셔널 섀도우 맵(CSM) 렌더 패스에서 잔디 그림자를 렌더링합니다.
+     * [EN] Renders grass shadows in the directional shadow map (CSM) render pass.
+     *
+     * @param view -
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
+     * @param passEncoder -
+     * [KO] 그림자 패스용 `GPURenderPassEncoder` 인스턴스
+     * [EN] `GPURenderPassEncoder` instance for the shadow pass
+     * @param grassList -
+     * [KO] 렌더링할 잔디 타입 배열
+     * [EN] Array of grass types to render
+     * @param megaBuffer -
+     * [KO] 잔디 메가 버퍼 인스턴스
+     * [EN] Grass mega buffer instance
+     * @param slotPooler -
+     * [KO] 잔디 유니폼 슬롯 풀러 인스턴스
+     * [EN] Grass uniform slot pooler instance
+     */
     renderShadow(
         view: View3D,
         passEncoder: GPURenderPassEncoder,
@@ -199,6 +314,10 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
     }
 
+    /**
+     * [KO] 렌더러가 점유한 파이프라인, 셰이더 모듈, 바인드 그룹 및 렌더 번들 캐시를 모두 해제합니다.
+     * [EN] Releases all pipelines, shader modules, bind groups, and render bundle caches occupied by the renderer.
+     */
     override destroy(): void {
         super.destroy();
         this.markMainBundleDirty();

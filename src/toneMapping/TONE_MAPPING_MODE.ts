@@ -1,6 +1,12 @@
 /**
  * [KO] 사용 가능한 톤 매핑 모드 상수 정의입니다.
  * [EN] Constants for available tone mapping modes.
+ *
+ * ### Example
+ * ```typescript
+ * view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
+ * ```
+ *
  * @category ToneMapping
  */
 export const TONE_MAPPING_MODE = {
@@ -27,8 +33,10 @@ export const TONE_MAPPING_MODE = {
 } as const;
 
 /**
- * [KO] TONE_MAPPING_MODE 타입
- * [EN] TONE_MAPPING_MODE type
+ * [KO] 톤 매핑 모드 유니온 타입입니다.
+ * [EN] Tone mapping mode union type.
+ *
+ * @category ToneMapping
  */
 export type TONE_MAPPING_MODE = (typeof TONE_MAPPING_MODE)[keyof typeof TONE_MAPPING_MODE];
 

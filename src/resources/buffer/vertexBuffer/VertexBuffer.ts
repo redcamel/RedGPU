@@ -7,10 +7,10 @@ import VertexInterleavedStruct from "./VertexInterleavedStruct";
 const MANAGED_STATE_KEY = 'managedVertexBufferState'
 
 /**
- * [KO] 정점(Vertex) 버퍼를 관리하는 클래스입니다.
- * [EN] Class that manages vertex buffers.
+ * [KO] 정점 버퍼(`GPUBuffer`)를 관리하는 클래스입니다.
+ * [EN] Class that manages vertex buffers (`GPUBuffer`).
  *
- * * ### Example
+ * ### Example
  * ```typescript
  * const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, interleavedStruct);
  * ```
@@ -18,36 +18,20 @@ const MANAGED_STATE_KEY = 'managedVertexBufferState'
  */
 class VertexBuffer extends ABaseBuffer {
     /**
-     * [KO] 버텍스 데이터가 저장되는 내부 버퍼입니다.
+     * [KO] 정점 데이터가 저장되는 내부 버퍼입니다.
      * [EN] Internal buffer where vertex data is stored.
      */
     [GPU_BUFFER_DATA_SYMBOL]: Float32Array
-    /**
-     * [KO] 버텍스 개수입니다.
-     * [EN] Number of vertices.
-     */
     #vertexCount: number = 0
-    /**
-     * [KO] stride(버텍스 당 바이트 수)입니다.
-     * [EN] Stride (number of bytes per vertex).
-     */
     #stride: number = 0
-    /**
-     * [KO] 버텍스 데이터의 구조를 정의하는 객체입니다.
-     * [EN] Object that defines the structure of vertex data.
-     */
     #interleavedStruct: VertexInterleavedStruct
-    /**
-     * [KO] 삼각형 개수입니다. (인덱스 버퍼를 사용하지 않는 경우를 가정한 값)
-     * [EN] Number of triangles. (Assumed value when not using an index buffer)
-     */
     #triangleCount: number = 0
 
     /**
      * [KO] VertexBuffer 인스턴스를 생성합니다.
      * [EN] Creates a VertexBuffer instance.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * const vertexBuffer = new RedGPU.Resource.VertexBuffer(redGPUContext, data, interleavedStruct, GPUBufferUsage.VERTEX);
      * ```
@@ -56,14 +40,14 @@ class VertexBuffer extends ABaseBuffer {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param data -
-     * [KO] 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
+     * [KO] 정점 데이터 (`Array<number>` 또는 `Float32Array`)
      * [EN] Vertex data (`Array<number>` or `Float32Array`)
      * @param interleavedStruct -
-     * [KO] 버텍스 데이터 구조 정의
+     * [KO] 정점 데이터 구조 정의
      * [EN] Vertex data structure definition
      * @param usage -
-     * [KO] GPUBufferUsageFlags (기본값: `VERTEX | COPY_DST | STORAGE`)
-     * [EN] GPUBufferUsageFlags (default: `VERTEX | COPY_DST | STORAGE`)
+     * [KO] GPUBufferUsageFlags (기본값: `GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE`)
+     * [EN] GPUBufferUsageFlags (default: `GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE`)
      * @param cacheKey -
      * [KO] 버퍼 캐시 키 (선택)
      * [EN] Buffer cache key (optional)
@@ -95,36 +79,48 @@ class VertexBuffer extends ABaseBuffer {
     }
 
     /**
-     * [KO] 버텍스 데이터를 반환합니다.
+     * [KO] 정점 데이터를 반환합니다.
      * [EN] Returns the vertex data.
-     * @returns - [KO] Float32Array 형식의 버텍스 데이터 [EN] Vertex data as Float32Array
+     *
+     * @returns
+     * [KO] `Float32Array` 형식의 정점 데이터
+     * [EN] Vertex data as `Float32Array`
      */
     get data(): Float32Array {
         return this[GPU_BUFFER_DATA_SYMBOL];
     }
 
     /**
-     * [KO] stride(버텍스 당 바이트 수)를 반환합니다.
-     * [EN] Returns the stride (number of bytes per vertex).
-     * @returns - [KO] stride 바이트 크기 [EN] Stride byte size
+     * [KO] 정점당 요소 개수(stride)를 반환합니다.
+     * [EN] Returns the element count per vertex (stride).
+     *
+     * @returns
+     * [KO] 정점당 요소 개수
+     * [EN] Element count per vertex
      */
     get stride(): number {
         return this.#stride;
     }
 
     /**
-     * [KO] 버텍스 데이터 구조를 반환합니다.
-     * [EN] Returns the vertex data structure.
-     * @returns - [KO] 버텍스 인터리브 구조 객체 [EN] Vertex interleaved structure object
+     * [KO] 정점 인터리브 구조 객체를 반환합니다.
+     * [EN] Returns the vertex interleaved structure object.
+     *
+     * @returns
+     * [KO] 정점 인터리브 구조 객체
+     * [EN] Vertex interleaved structure object
      */
     get interleavedStruct(): VertexInterleavedStruct {
         return this.#interleavedStruct
     }
 
     /**
-     * [KO] 버텍스 개수를 반환합니다.
+     * [KO] 정점 개수를 반환합니다.
      * [EN] Returns the number of vertices.
-     * @returns - [KO] 버텍스 수 [EN] Number of vertices
+     *
+     * @returns
+     * [KO] 정점 개수
+     * [EN] Number of vertices
      */
     get vertexCount(): number {
         return this.#vertexCount;
@@ -133,26 +129,29 @@ class VertexBuffer extends ABaseBuffer {
     /**
      * [KO] 삼각형 개수를 반환합니다.
      * [EN] Returns the number of triangles.
-     * @returns - [KO] 삼각형 수 [EN] Number of triangles
+     *
+     * @returns
+     * [KO] 삼각형 개수
+     * [EN] Number of triangles
      */
     get triangleCount(): number {
         return this.#triangleCount;
     }
 
     /**
-     * [KO] 버텍스 버퍼의 데이터를 변경합니다.
+     * [KO] 정점 버퍼의 데이터를 변경합니다.
      * [EN] Changes the data of the vertex buffer.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * vertexBuffer.changeData(newData);
      * ```
      *
      * @param data -
-     * [KO] 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
+     * [KO] 새로운 정점 데이터 (`Array<number>` 또는 `Float32Array`)
      * [EN] New vertex data (`Array<number>` or `Float32Array`)
      * @param interleavedStruct -
-     * [KO] 버텍스 데이터 구조 정의 (선택)
+     * [KO] 정점 데이터 구조 정의 (선택)
      * [EN] Vertex data structure definition (optional)
      */
     changeData(data: Array<number> | Float32Array, interleavedStruct?: VertexInterleavedStruct) {
@@ -184,20 +183,20 @@ class VertexBuffer extends ABaseBuffer {
     }
 
     /**
-     * [KO] 버텍스 버퍼의 일부 데이터를 오프셋부터 업데이트합니다.
-     * [EN] Updates part of the vertex buffer data starting from the offset.
+     * [KO] 정점 버퍼의 일부 데이터를 지정한 오프셋부터 업데이트합니다.
+     * [EN] Updates part of the vertex buffer data starting from the specified offset.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * vertexBuffer.updateData(partialData, 1024);
      * ```
      *
      * @param data -
-     * [KO] 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
-     * [EN] New vertex data (`Array<number>` or `Float32Array`)
+     * [KO] 업데이트할 정점 데이터 (`Array<number>` 또는 `Float32Array`)
+     * [EN] Vertex data to update (`Array<number>` or `Float32Array`)
      * @param offset -
-     * [KO] 업데이트 시작 오프셋 (기본값: 0)
-     * [EN] Update start offset (default: 0)
+     * [KO] 바이트 단위 시작 오프셋 (기본값: 0)
+     * [EN] Start offset in bytes (default: 0)
      */
     updateData(data: Array<number> | Float32Array, offset: number = 0) {
         if (data instanceof Array) data = new Float32Array(data);
@@ -206,16 +205,16 @@ class VertexBuffer extends ABaseBuffer {
     }
 
     /**
-     * [KO] 버텍스 버퍼의 전체 데이터를 GPU에 다시 업로드합니다.
+     * [KO] 정점 버퍼의 전체 데이터를 GPU에 다시 업로드합니다.
      * [EN] Re-uploads the entire data of the vertex buffer to the GPU.
      *
-     * * ### Example
+     * ### Example
      * ```typescript
      * vertexBuffer.updateAllData(fullData);
      * ```
      *
      * @param data -
-     * [KO] 새로운 버텍스 데이터 (`Array<number>` 또는 `Float32Array`)
+     * [KO] 새로운 정점 데이터 (`Array<number>` 또는 `Float32Array`)
      * [EN] New vertex data (`Array<number>` or `Float32Array`)
      */
     updateAllData(data: Array<number> | Float32Array) {
@@ -223,13 +222,6 @@ class VertexBuffer extends ABaseBuffer {
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 
-    /**
-     * [KO] 버텍스 데이터 구조를 내부적으로 갱신합니다.
-     * [EN] Internally updates the vertex data structure.
-     * @param interleavedStruct -
-     * [KO] 버텍스 데이터 구조 정의
-     * [EN] Vertex data structure definition
-     */
     #updateInterleavedStruct(interleavedStruct: VertexInterleavedStruct) {
         this.#interleavedStruct = interleavedStruct;
         this.#vertexCount = 0;

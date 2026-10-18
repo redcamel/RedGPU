@@ -13,8 +13,10 @@ const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
 type GBUFFER_INNER_TYPE = 'depthTexture0' | 'depthTexture1';
 
 /**
- * [KO] G-Buffer 텍스처 및 관련 뷰 정보를 정의하는 타입
- * [EN] Type defining G-Buffer texture and related view information
+ * [KO] G-Buffer 텍스처 및 관련 뷰 정보를 정의하는 타입입니다.
+ * [EN] Type defining G-Buffer texture and related view information.
+ *
+ * @category Core
  */
 type GBufferInfo = {
     /**
@@ -33,27 +35,23 @@ type GBufferInfo = {
      */
     textureDescriptor: GPUTextureDescriptor,
     /**
-     * [KO] MSAA용 Resolve 대상 GPU 텍스처 객체 (선택 사항)
-     * [EN] Resolve target GPU texture object for MSAA (optional)
+     * [KO] MSAA Resolve 대상 GPU 텍스처 객체
+     * [EN] Resolve target GPU texture object for MSAA
      */
     resolveTexture?: GPUTexture,
     /**
-     * [KO] MSAA용 Resolve 대상 GPU 텍스처 뷰 객체 (선택 사항)
-     * [EN] Resolve target GPU texture view object for MSAA (optional)
+     * [KO] MSAA Resolve 대상 GPU 텍스처 뷰 객체
+     * [EN] Resolve target GPU texture view object for MSAA
      */
     resolveTextureView?: GPUTextureView,
     /**
-     * [KO] MSAA용 Resolve 대상 GPU 텍스처 디스크립터 (선택 사항)
-     * [EN] Resolve target GPU texture descriptor for MSAA (optional)
+     * [KO] MSAA Resolve 대상 GPU 텍스처 디스크립터
+     * [EN] Resolve target GPU texture descriptor for MSAA
      */
     resolveTextureDescriptor?: GPUTextureDescriptor,
 }
 const BASIC_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
 
-/**
- * [KO] G-Buffer 타입별 포맷 및 사용 용도 정의
- * [EN] Define formats and usages by G-Buffer type
- */
 const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
     format?: GPUTextureFormat,
     usage: GPUTextureUsageFlags,
@@ -67,7 +65,7 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
         useMipmap: false
     },
     [GBUFFER_TYPE.MOTION_VECTOR]: {format: 'rgba16float', usage: BASIC_USAGE, withResolve: true, useMipmap: false},
-    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false}, // navigator.gpu.getPreferredCanvasFormat() 사용
+    [GBUFFER_TYPE.NORMAL]: {usage: BASIC_USAGE, withResolve: true, useMipmap: false},
     [GBUFFER_TYPE.RENDER_PATH1_RESULT]: {
         format: 'rgba16float',
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
@@ -83,36 +81,27 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
 };
 
 /**
- * [KO] View3D/2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
- * [EN] Manager class that creates and manages render targets (color, depth, G-Buffer, etc.) for View3D/2D.
+ * [KO] View3D/View2D의 렌더 타깃(컬러, 깊이, G-Buffer 등)을 생성 및 관리하는 매니저 클래스입니다.
+ * [EN] Manager class that creates and manages render targets (color, depth, G-Buffer, etc.) for View3D/View2D.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * ### Example
+ * ```typescript
+ * // [KO] View3D 인스턴스를 통해 접근
+ * // [EN] Access via View3D instance
+ * const viewRenderTextureManager = view.viewRenderTextureManager;
+ * ```
+ *
  * @category Core
  */
 class ViewRenderTextureManager extends RedGPUObject {
-    /**
-     * [KO] 관리 중인 텍스처들의 총 비디오 메모리 사용량 (바이트 단위)
-     * [EN] Total video memory usage of managed textures (in bytes)
-     */
     #videoMemorySize: number = 0
-    /**
-     * [KO] 소유하고 있는 View3D 인스턴스
-     * [EN] Owned View3D instance
-     */
     #view: View3D
-    /**
-     * [KO] G-Buffer 맵
-     * [EN] G-Buffer map
-     */
     #gBuffers: Map<string, GBufferInfo> = new Map()
-    /**
-     * [KO] 마지막으로 업데이트된 MSAA 고유 ID
-     * [EN] Last updated MSAA unique ID
-     */
     #lastUpdateMSAAID: string
     #targetTextureSize: GPUExtent3DDict
     #targetTextureSizeString: string
@@ -132,7 +121,8 @@ class ViewRenderTextureManager extends RedGPUObject {
 
     /**
      * [KO] ViewRenderTextureManager 인스턴스를 생성합니다.
-     * [EN] Creates a new ViewRenderTextureManager instance.
+     * [EN] Creates a ViewRenderTextureManager instance.
+     *
      * @param view -
      * [KO] 이 매니저가 관리할 View3D 인스턴스
      * [EN] View3D instance this manager will manage
@@ -143,32 +133,48 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] G-Buffer 맵을 반환합니다.
-     * [EN] Returns the G-Buffer map.
+     * [KO] G-Buffer 맵(`Map<string, GBufferInfo>`)을 반환합니다.
+     * [EN] Returns the G-Buffer map (`Map<string, GBufferInfo>`).
+     *
+     * @returns
+     * [KO] G-Buffer 정보 맵
+     * [EN] G-Buffer information map
      */
     get gBuffers(): Map<string, GBufferInfo> {
         return this.#gBuffers;
     }
 
     /**
-     * [KO] 현재 계산된 비디오 메모리 사용량 (바이트 단위)을 반환합니다.
-     * [EN] Returns the currently calculated video memory usage (in bytes).
+     * [KO] 현재 관리 중인 렌더 텍스처들의 총 비디오 메모리 사용량(바이트)을 반환합니다.
+     * [EN] Returns the total video memory usage (in bytes) of the currently managed render textures.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (바이트)
+     * [EN] Video memory usage (bytes)
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
     /**
-     * [KO] 렌더 패스 1단계 결과 텍스처 생성에 사용된 디스크립터를 반환합니다.
-     * [EN] Returns the descriptor used to create the render path 1 stage result texture.
+     * [KO] 1차 렌더 패스 결과 텍스처의 디스크립터를 반환합니다.
+     * [EN] Returns the texture descriptor of the render path 1 result texture.
+     *
+     * @returns
+     * [KO] 1차 렌더 패스 결과 텍스처 디스크립터
+     * [EN] Render path 1 result texture descriptor
      */
     get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
         return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.textureDescriptor;
     }
 
     /**
-     * [KO] 깊이(depth) 텍스처를 반환합니다. (스왑 버퍼링 반영)
-     * [EN] Returns the depth texture. (reflects swap buffering)
+     * [KO] 현재 프레임의 깊이(Depth) 텍스처를 반환합니다.
+     * [EN] Returns the depth texture of the current frame.
+     *
+     * @returns
+     * [KO] 현재 깊이 텍스처
+     * [EN] Current depth texture
      */
     get depthTexture(): GPUTexture {
         this.#update();
@@ -176,8 +182,12 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
-     * [EN] Returns the depth texture view. (reflects swap buffering)
+     * [KO] 현재 프레임의 깊이(Depth) 텍스처 뷰를 반환합니다.
+     * [EN] Returns the depth texture view of the current frame.
+     *
+     * @returns
+     * [KO] 현재 깊이 텍스처 뷰
+     * [EN] Current depth texture view
      */
     get depthTextureView(): GPUTextureView {
         this.#update();
@@ -185,8 +195,12 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 이전 프레임의 깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
-     * [EN] Returns the depth texture view of the previous frame. (reflects swap buffering)
+     * [KO] 이전 프레임의 깊이(Depth) 텍스처 뷰를 반환합니다.
+     * [EN] Returns the depth texture view of the previous frame.
+     *
+     * @returns
+     * [KO] 이전 프레임 깊이 텍스처 뷰
+     * [EN] Previous frame depth texture view
      */
     get prevDepthTextureView(): GPUTextureView {
         this.#update();
@@ -194,8 +208,12 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 첫 번째 깊이(depth) 텍스처 뷰를 반환합니다.
-     * [EN] Returns the first depth texture view.
+     * [KO] 첫 번째 깊이 텍스처(`depthTexture0`)의 뷰를 반환합니다.
+     * [EN] Returns the view of the first depth texture (`depthTexture0`).
+     *
+     * @returns
+     * [KO] 첫 번째 깊이 텍스처 뷰
+     * [EN] First depth texture view
      */
     get depthTexture0View(): GPUTextureView {
         this.#update();
@@ -203,8 +221,12 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 두 번째 깊이(depth) 텍스처 뷰를 반환합니다.
-     * [EN] Returns the second depth texture view.
+     * [KO] 두 번째 깊이 텍스처(`depthTexture1`)의 뷰를 반환합니다.
+     * [EN] Returns the view of the second depth texture (`depthTexture1`).
+     *
+     * @returns
+     * [KO] 두 번째 깊이 텍스처 뷰
+     * [EN] Second depth texture view
      */
     get depthTexture1View(): GPUTextureView {
         this.#update();
@@ -212,42 +234,57 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 렌더 패스 1단계 결과 텍스처 뷰를 반환합니다.
-     * [EN] Returns the render path 1 stage result texture view.
+     * [KO] 1차 렌더 패스 컬러 결과 텍스처 뷰를 반환합니다.
+     * [EN] Returns the render path 1 color result texture view.
+     *
+     * @returns
+     * [KO] 1차 렌더 패스 결과 텍스처 뷰
+     * [EN] Render path 1 result texture view
      */
     get renderPath1ResultTextureView(): GPUTextureView {
         return this.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
     }
 
     /**
-     * [KO] 렌더 패스 1단계 결과 텍스처를 반환합니다.
-     * [EN] Returns the render path 1 stage result texture.
+     * [KO] 1차 렌더 패스 컬러 결과 텍스처를 반환합니다.
+     * [EN] Returns the render path 1 color result texture.
+     *
+     * @returns
+     * [KO] 1차 렌더 패스 결과 텍스처
+     * [EN] Render path 1 result texture
      */
     get renderPath1ResultTexture(): GPUTexture {
         return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
     }
 
     /**
-     * [KO] 렌더 패스 1단계 깊이 결과 텍스처 뷰를 반환합니다.
-     * [EN] Returns the render path 1 stage depth result texture view.
+     * [KO] 1차 렌더 패스 깊이 결과 텍스처 뷰를 반환합니다.
+     * [EN] Returns the render path 1 depth result texture view.
+     *
+     * @returns
+     * [KO] 1차 렌더 패스 깊이 결과 텍스처 뷰
+     * [EN] Render path 1 depth result texture view
      */
     get renderPath1DepthResultTextureView(): GPUTextureView {
         return this.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
     }
 
     /**
-     * [KO] 렌더 패스 1단계 깊이 결과 텍스처를 반환합니다.
-     * [EN] Returns the render path 1 stage depth result texture.
+     * [KO] 1차 렌더 패스 깊이 결과 텍스처를 반환합니다.
+     * [EN] Returns the render path 1 depth result texture.
+     *
+     * @returns
+     * [KO] 1차 렌더 패스 깊이 결과 텍스처
+     * [EN] Render path 1 depth result texture
      */
     get renderPath1DepthResultTexture(): GPUTexture {
         return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT);
     }
 
     /**
-     * [KO] 1차 렌더 패스의 깊이 버퍼를 2차 패스(Water, 굴절 등)에서 읽을 수 있도록 renderPath1DepthResultTexture에 복사합니다.
-     * MSAA 활성화 여부에 따라 직접 복사(1x -> 1x) 또는 풀스크린 렌더 리졸브(4x -> 1x)를 자동으로 선택하여 수행합니다.
-     * [EN] Copies the depth buffer of render path 1 into renderPath1DepthResultTexture for reading in path 2.
-     * Automatically performs direct copy (1x -> 1x) or fullscreen render resolve (4x -> 1x) based on MSAA state.
+     * [KO] 1차 렌더 패스의 깊이 버퍼를 2차 패스 참조용 `renderPath1DepthResultTexture`에 복사 또는 MSAA 리졸브합니다.
+     * [EN] Copies or MSAA-resolves the depth buffer of render path 1 into `renderPath1DepthResultTexture` for reading in path 2.
+     *
      * @param encoder -
      * [KO] GPUCommandEncoder 인스턴스
      * [EN] GPUCommandEncoder instance
@@ -269,15 +306,16 @@ class ViewRenderTextureManager extends RedGPUObject {
         }
     }
 
-    /* ----------------------------------------
-     * G-Buffer 공통 접근 메서드
-     * ---------------------------------------- */
     /**
      * [KO] 지정된 타입의 G-Buffer 텍스처를 반환합니다.
      * [EN] Returns the G-Buffer texture of the specified type.
+     *
      * @param type -
      * [KO] G-Buffer 타입 상수
      * [EN] G-Buffer type constant
+     * @returns
+     * [KO] G-Buffer GPU 텍스처
+     * [EN] G-Buffer GPU texture
      */
     getGBufferTexture(type: GBUFFER_TYPE): GPUTexture {
         this.#update();
@@ -285,11 +323,15 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 지정된 타입의 G-Buffer Resolve 텍스처를 반환합니다. (MSAA 해제 시 대상)
-     * [EN] Returns the G-Buffer resolve texture of the specified type.
+     * [KO] 지정된 타입의 MSAA Resolve G-Buffer 텍스처를 반환합니다.
+     * [EN] Returns the MSAA resolve G-Buffer texture of the specified type.
+     *
      * @param type -
      * [KO] G-Buffer 타입 상수
      * [EN] G-Buffer type constant
+     * @returns
+     * [KO] Resolve 대상 GPU 텍스처
+     * [EN] Resolve target GPU texture
      */
     getGBufferResolveTexture(type: GBUFFER_TYPE): GPUTexture {
         this.#update();
@@ -299,9 +341,13 @@ class ViewRenderTextureManager extends RedGPUObject {
     /**
      * [KO] 지정된 타입의 G-Buffer 텍스처 뷰를 반환합니다.
      * [EN] Returns the G-Buffer texture view of the specified type.
+     *
      * @param type -
      * [KO] G-Buffer 타입 상수
      * [EN] G-Buffer type constant
+     * @returns
+     * [KO] G-Buffer GPU 텍스처 뷰
+     * [EN] G-Buffer GPU texture view
      */
     getGBufferTextureView(type: GBUFFER_TYPE): GPUTextureView {
         this.#update();
@@ -309,11 +355,15 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 지정된 타입의 G-Buffer Resolve 텍스처 뷰를 반환합니다. (MSAA 해제 시 대상 뷰)
-     * [EN] Returns the G-Buffer resolve texture view of the specified type.
+     * [KO] 지정된 타입의 MSAA Resolve G-Buffer 텍스처 뷰를 반환합니다.
+     * [EN] Returns the MSAA resolve G-Buffer texture view of the specified type.
+     *
      * @param type -
      * [KO] G-Buffer 타입 상수
      * [EN] G-Buffer type constant
+     * @returns
+     * [KO] Resolve 대상 GPU 텍스처 뷰
+     * [EN] Resolve target GPU texture view
      */
     getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView {
         this.#update();
@@ -321,8 +371,8 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * [KO] ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던 G-Buffer 및 Depth 텍스처들을 물리적으로 해제합니다.
-     * [EN] Destroys the ViewRenderTextureManager instance and physically releases all G-Buffer and Depth textures held inside.
+     * [KO] 관리 중인 모든 G-Buffer 및 깊이 텍스처 리소스를 해제하고 매니저를 파기합니다.
+     * [EN] Releases all managed G-Buffer and depth texture resources and destroys the manager.
      */
     destroy(): void {
         for (const key of this.#gBuffers.keys()) {
@@ -339,14 +389,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         console.log("🧹 ViewRenderTextureManager destroy 완료");
     }
 
-    /* ----------------------------------------
-     * Public getters (메모리/텍스처 접근)
-     * ---------------------------------------- */
-    /**
-     * [KO] 모든 렌더 텍스처들의 상태(크기, MSAA 등)를 일괄 확인하고 필요 시 재생성합니다.
-     * [EN] Batch check the status (size, MSAA, etc.) of all render textures and regenerate them if necessary.
-     * @private
-     */
     #update() {
         const {antialiasingManager} = this;
         const {msaaID} = antialiasingManager;
@@ -357,7 +399,6 @@ class ViewRenderTextureManager extends RedGPUObject {
             depthOrArrayLayers: 1
         }
         this.#targetTextureSizeString = `${this.#targetTextureSize.width}x${this.#targetTextureSize.height}`
-        // 하나라도 변경되었는지 확인
         const renderPath1ResultTexture = this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.texture
         const changedSize = renderPath1ResultTexture?.width !== this.#targetTextureSize.width || renderPath1ResultTexture?.height !== this.#targetTextureSize.height;
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
@@ -367,31 +408,19 @@ class ViewRenderTextureManager extends RedGPUObject {
             renderViewStateData.swapBufferIndex = 0
             this.#depthResolveBindGroupMap.clear();
 
-            // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
-            // 2. 새로운 리소스 일괄 생성
             this.#createDepthTexture(DEPTH0);
             this.#createDepthTexture(DEPTH1);
 
-            // G-Buffer 일괄 생성 (for...in 루프로 최적화)
             for (const key in GBUFFER_TYPE) {
                 this.#createGBuffer(GBUFFER_TYPE[key]);
             }
 
-            // 3. 비디오 메모리 계산 (마지막에 한 번만 수행)
             this.#checkVideoMemorySize();
         }
     }
 
-    /* ----------------------------------------
-     * Private helpers
-     * ---------------------------------------- */
-    /**
-     * 현재 관리 중인 텍스처들을 기반으로 비디오 메모리 사용량을 계산하여 #videoMemorySize를 업데이트합니다.
-     * @private
-     */
     #checkVideoMemorySize() {
         const textures = []
-        // 모든 G-Buffer 텍스처 추가
         this.#gBuffers.forEach(info => {
             if (info.texture) textures.push(info.texture);
             if (info.resolveTexture) textures.push(info.resolveTexture);
@@ -409,10 +438,8 @@ class ViewRenderTextureManager extends RedGPUObject {
             const {texture, resolveTexture} = targetInfo;
             targetInfo.texture = null
             targetInfo.textureView = null
-            //
             targetInfo.resolveTexture = null
             targetInfo.resolveTextureView = null
-            //
             this.#gBuffers.delete(type)
 
             const {commandEncoderManager} = this;
@@ -440,7 +467,7 @@ class ViewRenderTextureManager extends RedGPUObject {
         const sampleCount = (type === GBUFFER_TYPE.RENDER_PATH1_RESULT || type === GBUFFER_TYPE.RENDER_PATH1_DEPTH_RESULT) ? 1 : (useMSAA && mipLevelCount === 1 ? 4 : 1);
         const textureDescriptor = {
             size: this.#targetTextureSize,
-            sampleCount, // 밉맵을 쓸 때는 보통 MSAA를 쓰지 않거나 resolve된 타겟을 씁니다.
+            sampleCount,
             label: `${name}_${type}_texture_${this.#targetTextureSizeString}`,
             format: format,
             usage: sampleCount > 1 ? (usage & ~GPUTextureUsage.STORAGE_BINDING) : usage,
@@ -451,7 +478,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         newInfo.texture = newTexture;
         newInfo.textureView = resourceManager.getGPUResourceBitmapTextureView(newTexture);
 
-        // MSAA 사용 시 Resolve 텍스처 생성
         if (withResolve && useMSAA) {
             const resolveTextureDescriptor = {
                 size: this.#targetTextureSize,
@@ -468,11 +494,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         return newInfo
     }
 
-    /**
-     * 지정된 G-Buffer 타입의 텍스처를 생성하거나 재생성합니다.
-     * @private
-     * @param {GBUFFER_TYPE} type - G-Buffer 식별자
-     */
     #createGBuffer(type: GBUFFER_TYPE) {
         keepLog(`새 텍스처 생성 중: ${type}`)
 
@@ -484,10 +505,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, format, usage, withResolve, mipLevelCount))
     }
 
-    /**
-     * 깊이 텍스처를 생성하거나 재생성합니다.
-     * @private
-     */
     #createDepthTexture(type: GBUFFER_INNER_TYPE): void {
         this.#destroyGBuffer(type)
         keepLog(`새 텍스처 생성 중: ${type}`)
@@ -495,10 +512,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         this.#gBuffers.set(type, this.#createGBufferTextureAndTextureView(type, 'depth32float', usage, false))
     }
 
-    /**
-     * [KO] MSAA 4x 깊이 텍스처를 1x 단일 샘플 텍스처(renderPath1DepthResultTexture)로 리졸브 복사합니다.
-     * @private
-     */
     #resolveDepthMSAA(encoder: GPUCommandEncoder): void {
         const sourceDepthView = this.depthTextureView;
         const targetDepthView = this.renderPath1DepthResultTextureView;
@@ -526,10 +539,6 @@ class ViewRenderTextureManager extends RedGPUObject {
         passEncoder.end();
     }
 
-    /**
-     * [KO] MSAA 깊이 리졸브용 초경량 렌더 파이프라인을 초기화합니다.
-     * @private
-     */
     #initDepthResolvePipeline(): void {
         const gpuDevice = this.redGPUContext.gpuDevice;
         this.#depthResolveBindGroupLayout = gpuDevice.createBindGroupLayout({

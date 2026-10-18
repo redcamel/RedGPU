@@ -4,27 +4,30 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
 /**
- * `defineUint` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ * [KO] `defineUint` 함수에 전달할 속성 정의 옵션 인터페이스입니다.
+ * [EN] Interface for property definition options passed to the `defineUint` function.
+ *
+ * @category DefineProperty
  */
 export interface DefineUintInfo {
     /**
-     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
-     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     * [KO] 대상 객체 프로토타입에 정의할 속성 키 이름
+     * [EN] Property key name to define on the target object's prototype
      */
     key: string;
     /**
-     * [KO] 속성의 초기 부호 없는 정수(Uint) 값.
-     * [EN] Initial unsigned integer (Uint) value of the property.
+     * [KO] 속성의 초기 부호 없는 정수(Uint) 값
+     * [EN] Initial unsigned integer (Uint) value of the property
      */
     value: number;
     /**
-     * [KO] 허용할 최소값 (옵션, 기본값 0). 설정 범위 미만의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
-     * [EN] Optional minimum allowed value (defaults to 0). Assigning a value below this limit will log a warning and clamp it.
+     * [KO] 허용할 최소값 (선택, 기본값: 0). 범위 미만의 값이 할당되면 경고를 출력하고 이 값으로 클램핑됩니다.
+     * [EN] Optional minimum allowed value (default: 0). Values below this limit log a warning and are clamped.
      */
     min?: number;
     /**
-     * [KO] 허용할 최대값 (옵션). 설정 범위 초과의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
-     * [EN] Optional maximum allowed value. Assigning a value above this limit will log a warning and clamp it.
+     * [KO] 허용할 최대값 (선택). 범위 초과의 값이 할당되면 경고를 출력하고 이 값으로 클램핑됩니다.
+     * [EN] Optional maximum allowed value. Values above this limit log a warning and are clamped.
      */
     max?: number;
 }
@@ -67,31 +70,33 @@ function defineUintRange_func(
 }
 
 /**
- * 지정된 클래스의 프로토타입에 GPU와 연동되는 부호 없는 정수(Uint) 속성을 정의합니다.
+ * [KO] 지정된 대상의 프로토타입에 GPU 유니폼 버퍼와 연동되는 부호 없는 정수(Uint) 속성을 정의합니다.
+ * [EN] Defines unsigned integer (Uint) properties on the target's prototype that synchronize with GPU uniform buffers.
  *
- * @remarks
- * **[KO]**
- * - 값 설정 시 {@link validateUintRange}를 통해 0 이상의 정수(unsigned integer)인지 검사합니다.
- * - 범위 외의 정수나 실수가 들어오면 `console.warn` 경고를 출력한 후 최소/최대 범위 및 정수 값으로 조절하여 저장하고 GPU 버퍼에 반영합니다.
+ * [KO] 값 할당 시 0 이상의 정수 여부를 검사하며, `min`(기본값: 0) 및 `max` 범위를 벗어나면 경고 출력 후 경계값으로 클램핑하여 유니폼 버퍼를 갱신합니다.
+ * [EN] Validates that the assigned value is an unsigned integer (`>= 0`), clamping out-of-bounds values to `min` (default: 0) or `max` with a warning before updating the uniform buffer.
  *
- * **[EN]**
- * - Validates that the input is an unsigned integer (>= 0) via {@link validateUintRange}.
- * - Values outside the range print a `console.warn` and are clamped/adjusted before writing to the GPU buffer.
- *
- * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link DefineUintInfo} 설정 또는 그 배열 [EN] A single {@link DefineUintInfo} configuration or an array of configurations
- *
- * @example
+ * ### Example
  * ```typescript
- * // 단일 설정
+ * // [KO] 단일 부호 없는 정수 속성 정의
+ * // [EN] Define a single unsigned integer property
  * RedGPU.DefineGPUProperty.defineUint(MyMaterial, { key: 'lightType', value: 1, min: 0, max: 10 });
  *
- * // 여러 속성 일괄 정의
+ * // [KO] 다중 부호 없는 정수 속성 일괄 정의
+ * // [EN] Define multiple unsigned integer properties at once
  * RedGPU.DefineGPUProperty.defineUint(MyMaterial, [
  *   { key: 'shadowMode', value: 0 },
  *   { key: 'maxLights', value: 4, min: 0, max: 16 }
  * ]);
  * ```
+ *
+ * @param target -
+ * [KO] 속성을 정의할 대상 클래스 또는 프로토타입
+ * [EN] Target class or prototype to define properties on
+ * @param defineInfo -
+ * [KO] 단일 `DefineUintInfo` 설정 또는 설정 배열
+ * [EN] Single `DefineUintInfo` configuration or an array of configurations
+ * @category DefineProperty
  */
 const defineUint = (target: any, defineInfo: DefineUintInfo | DefineUintInfo[]) => applyProperties(target, defineInfo, defineUintRange_func);
 

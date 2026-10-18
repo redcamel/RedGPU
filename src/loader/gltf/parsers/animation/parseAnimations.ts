@@ -5,11 +5,19 @@ import parseSingleChannel from "./parseAnimationChannel_GLTF";
 import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
 
 /**
- * Parses animation data for a given GLTF scene.
+ * [KO] GLTF 데이터의 전체 애니메이션 클립 및 채널들을 비동기로 파싱합니다.
+ * [EN] Asynchronously parses all animation clips and channels in the GLTF data.
  *
- * @param {GLTFLoader} gltfLoader - The GLTFLoader used for loading the scene data.
- * @param {GLTF} gltfData - The GLTF scene data containing animations to be parsed.
- * @returns {Promise<void>} - A promise that resolves when the animation data has been parsed.
+ * @param gltfLoader -
+ * [KO] GLTFLoader 인스턴스
+ * [EN] GLTFLoader instance
+ * @param gltfData -
+ * [KO] 애니메이션 정보를 포함한 GLTF 데이터 객체
+ * [EN] GLTF data object containing animation information
+ * @returns
+ * [KO] 애니메이션 파싱이 완료되면 해결되는 `Promise<void>`
+ * [EN] `Promise<void>` that resolves when animation parsing is complete
+ * @category Loader
  */
 const parseAnimations = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
     return new Promise<void>(async resolve => {
