@@ -6,10 +6,12 @@
 import SkyLight from "./skyLight/SkyLight";
 import SkyAtmosphereBackground from "./skyAtmosphereBackground/SkyAtmosphereBackground";
 import SkyAtmospherePostEffect from "./skyAtmospherePostEffect/SkyAtmospherePostEffect";
+import SkyAtmosphereShaderLibrary from "./SkyAtmosphereShaderLibrary";
 
 export * from "./generator";
 export {
     SkyAtmosphereBackground,
     SkyAtmospherePostEffect,
+    SkyAtmosphereShaderLibrary,
     SkyLight
 }
