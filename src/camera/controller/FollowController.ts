@@ -77,10 +77,12 @@ class FollowController extends AController {
         super(redGPUContext, {
             HD_Wheel: (e: WheelEvent) => {
                 this.#targetDistance += e.deltaY / 100;
+                if (this.#targetDistance < 0.1) this.#targetDistance = 0.1;
             },
             HD_TouchPinch: (deltaScale: number) => {
                 const scaleChange = (deltaScale - 1);
                 this.#targetDistance -= scaleChange * this.#targetDistance;
+                if (this.#targetDistance < 0.1) this.#targetDistance = 0.1;
             },
         });
         this.targetMesh = targetMesh || new Mesh(redGPUContext);

@@ -25,19 +25,19 @@ class IsometricController extends AController {
     #cameraAngle: number = 45;
     #currentZoom: number = 1;
     #targetZoom: number = 1;
-    #zoomInterpolation: number = 0.1;
+    #zoomInterpolation: number = 0.02;
     #speedZoom: number = 0.1;
     #minZoom: number = 0.5;
     #maxZoom: number = 3;
     #currentViewHeight: number = 15;
     #targetViewHeight: number = 15;
-    #viewHeightInterpolation: number = 0.1;
+    #viewHeightInterpolation: number = 0.02;
     #currentX: number = 0;
     #currentZ: number = 0;
     #targetX: number = 0;
     #targetZ: number = 0;
-    #moveSpeed: number = 50;
-    #moveSpeedInterpolation: number = 0.1;
+    #moveSpeed: number = 20;
+    #moveSpeedInterpolation: number = 0.02;
     #keyNameMapper = {
         moveUp: 'w',
         moveDown: 's',
@@ -45,7 +45,8 @@ class IsometricController extends AController {
         moveRight: 'd'
     };
     #mouseMoveSpeed: number = 1;
-    #mouseMoveSpeedInterpolation: number = 0.1;
+    #mouseMoveSpeedInterpolation: number = 0.02;
+    #isMouseMoving: boolean = false;
 
     /**
      * [KO] IsometricController 인스턴스를 생성합니다.
@@ -75,14 +76,15 @@ class IsometricController extends AController {
                 const effectiveHeight = this.#currentViewHeight / this.#currentZoom;
                 const worldPerPixel = effectiveHeight / redGPUContext.boundingClientRect.height;
 
-                const mouseDeltaX = deltaX * worldPerPixel;
-                const mouseDeltaY = deltaY * worldPerPixel;
+                const mouseDeltaX = deltaX * worldPerPixel * this.#mouseMoveSpeed;
+                const mouseDeltaY = deltaY * worldPerPixel * this.#mouseMoveSpeed;
 
                 const worldDeltaX = -(mouseDeltaX * cos) - (mouseDeltaY * sin);
                 const worldDeltaZ = -(mouseDeltaX * (-sin)) - (mouseDeltaY * cos);
 
                 this.#targetX += worldDeltaX;
                 this.#targetZ += worldDeltaZ;
+                this.#isMouseMoving = true;
             },
             HD_TouchPinch: (deltaScale: number) => {
                 this.#targetZoom /= deltaScale;
@@ -114,8 +116,8 @@ class IsometricController extends AController {
      * [EN] Gets or sets the damping interpolation factor for zoom changes. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 줌 보간 계수 (기본값: `0.1`)
-     * [EN] Zoom interpolation factor (default: `0.1`)
+     * [KO] 줌 보간 계수 (기본값: `0.02`)
+     * [EN] Zoom interpolation factor (default: `0.02`)
      */
     get zoomInterpolation(): number {
         return this.#zoomInterpolation;
@@ -201,8 +203,8 @@ class IsometricController extends AController {
      * [EN] Gets or sets the damping interpolation factor for view height changes. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 뷰 높이 보간 계수 (기본값: `0.1`)
-     * [EN] View height interpolation factor (default: `0.1`)
+     * [KO] 뷰 높이 보간 계수 (기본값: `0.02`)
+     * [EN] View height interpolation factor (default: `0.02`)
      */
     get viewHeightInterpolation(): number {
         return this.#viewHeightInterpolation;
@@ -218,8 +220,8 @@ class IsometricController extends AController {
      * [EN] Gets or sets the keyboard movement speed. (`0.01` or greater)
      *
      * @returns
-     * [KO] 이동 속도 (기본값: `50`)
-     * [EN] Movement speed (default: `50`)
+     * [KO] 이동 속도 (기본값: `20`)
+     * [EN] Movement speed (default: `20`)
      */
     get moveSpeed(): number {
         return this.#moveSpeed;
@@ -235,8 +237,8 @@ class IsometricController extends AController {
      * [EN] Gets or sets the damping interpolation factor for position movement. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 이동 보간 계수 (기본값: `0.1`)
-     * [EN] Movement interpolation factor (default: `0.1`)
+     * [KO] 이동 보간 계수 (기본값: `0.02`)
+     * [EN] Movement interpolation factor (default: `0.02`)
      */
     get moveSpeedInterpolation(): number {
         return this.#moveSpeedInterpolation;
@@ -269,8 +271,8 @@ class IsometricController extends AController {
      * [EN] Gets or sets the damping interpolation factor for mouse movement. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 마우스 이동 보간 계수 (기본값: `0.1`)
-     * [EN] Mouse movement interpolation factor (default: `0.1`)
+     * [KO] 마우스 이동 보간 계수 (기본값: `0.02`)
+     * [EN] Mouse movement interpolation factor (default: `0.02`)
      */
     get mouseMoveSpeedInterpolation(): number {
         return this.#mouseMoveSpeedInterpolation;
@@ -398,7 +400,8 @@ class IsometricController extends AController {
         this.#currentZoom = this.#targetZoom + (this.#currentZoom - this.#targetZoom) * Math.pow(this.#zoomInterpolation, deltaTime);
         this.#currentViewHeight = this.#targetViewHeight + (this.#currentViewHeight - this.#targetViewHeight) * Math.pow(this.#viewHeightInterpolation, deltaTime);
 
-        const positionSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
+        const moveInterpolation = this.#isMouseMoving ? this.#mouseMoveSpeedInterpolation : this.#moveSpeedInterpolation;
+        const positionSmoothing = Math.pow(moveInterpolation, deltaTime);
         this.#currentX = this.#targetX + (this.#currentX - this.#targetX) * positionSmoothing;
         this.#currentZ = this.#targetZ + (this.#currentZ - this.#targetZ) * positionSmoothing;
 
@@ -452,6 +455,7 @@ class IsometricController extends AController {
 
         this.#targetX += worldDeltaX;
         this.#targetZ += worldDeltaZ;
+        this.#isMouseMoving = false;
         return true;
     }
 }

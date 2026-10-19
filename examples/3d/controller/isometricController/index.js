@@ -149,21 +149,21 @@ const renderTestPane = (redGPUContext, controller) => {
             const testModes = {testMode: 'singleView'};
 
             const movementFolder = pane.addFolder({title: 'Movement', expanded: true});
-            movementFolder.addBinding(controller, 'moveSpeed', {min: 1, max: 200, step: 1});
-            movementFolder.addBinding(controller, 'moveSpeedInterpolation', {min: 0.0001, max: 0.3, step: 0.0001});
+            movementFolder.addBinding(controller, 'moveSpeed', {min: 1, max: 100, step: 1});
+            movementFolder.addBinding(controller, 'moveSpeedInterpolation', {min: 0.001, max: 0.3, step: 0.001});
             movementFolder.addBinding(controller, 'mouseMoveSpeed', {min: 0.1, max: 10, step: 0.1});
-            movementFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {min: 0.0001, max: 0.3, step: 0.0001});
+            movementFolder.addBinding(controller, 'mouseMoveSpeedInterpolation', {min: 0.001, max: 0.3, step: 0.001});
 
             const zoomFolder = pane.addFolder({title: 'Zoom', expanded: true});
             zoomFolder.addBinding(controller, 'zoom', {min: 0.1, max: 10, step: 0.1});
-            zoomFolder.addBinding(controller, 'zoomInterpolation', {min: 0.0001, max: 0.3, step: 0.0001});
+            zoomFolder.addBinding(controller, 'zoomInterpolation', {min: 0.001, max: 0.3, step: 0.001});
             zoomFolder.addBinding(controller, 'speedZoom', {min: 0.01, max: 1.0, step: 0.01});
             zoomFolder.addBinding(controller, 'minZoom', {min: 0.1, max: 2, step: 0.1});
             zoomFolder.addBinding(controller, 'maxZoom', {min: 1, max: 20, step: 0.1});
 
             const viewFolder = pane.addFolder({title: 'View', expanded: true});
-            viewFolder.addBinding(controller, 'viewHeight', {min: 1, max: 500, step: 1});
-            viewFolder.addBinding(controller, 'viewHeightInterpolation', {min: 0.0001, max: 0.3, step: 0.0001});
+            viewFolder.addBinding(controller, 'viewHeight', {min: 1, max: 100, step: 1});
+            viewFolder.addBinding(controller, 'viewHeightInterpolation', {min: 0.001, max: 0.3, step: 0.001});
 
             const targetFolder = pane.addFolder({title: 'Target Position', expanded: true});
             targetFolder.addBinding(controller, 'targetX', {readonly: true});
