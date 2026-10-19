@@ -18,7 +18,7 @@ import ABaseLight from "../core/ABaseLight";
  * scene.lightManager.addSpotLight(spotLight);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/light/spotLight/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/light/spotLight/" style="width:100%; height:500px;"></iframe>
  *
  * @see [SpotLight basic example](/RedGPU/examples/3d/light/spotLight/)
  * @see [SpotLight performance example](/RedGPU/examples/3d/light/spotLightPerformance/)

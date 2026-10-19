@@ -16,7 +16,7 @@ import ABaseLight from "../core/ABaseLight";
  * scene.lightManager.addPointLight(pointLight);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/light/pointLight/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/light/pointLight/" style="width:100%; height:500px;"></iframe>
  *
  * @see [PointLight basic example](/RedGPU/examples/3d/light/pointLight/)
  * @see [PointLight performance example](/RedGPU/examples/3d/light/pointLightPerformance/)

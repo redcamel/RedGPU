@@ -14,7 +14,7 @@ import ABaseLight from "../core/ABaseLight";
  * scene.lightManager.addDirectionalLight(directionalLight);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/light/directionalLight/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/light/directionalLight/" style="width:100%; height:500px;"></iframe>
  *
  * @see [DirectionalLight example](/RedGPU/examples/3d/light/directionalLight/)
  * @category Light

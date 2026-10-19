@@ -55,7 +55,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 현재 컨텍스트를 렌더링 중인 대상 `Renderer` 인스턴스
      * [EN] Target `Renderer` instance currently rendering this context
      */
-    #targetRenderer: Renderer
+    targetRenderer: Renderer
     #configurationDescription: GPUCanvasConfiguration
     #gpuAdapter: GPUAdapter
     #alphaMode: GPUCanvasAlphaMode
@@ -468,7 +468,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         if (this.#destroyed) return;
         this.#destroyed = true;
 
-        this.#targetRenderer?.destroy(this)
+        this.targetRenderer?.destroy(this)
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
