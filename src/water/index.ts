@@ -8,9 +8,11 @@ export * as Core from "./core";
 export * as Interaction from "./interaction";
 
 import WaterLake from "./lake/WaterLake";
+import SingleLayerWaterMaterial from "./core/SingleLayerWaterMaterial";
 
 export {
-    WaterLake
+    WaterLake,
+    SingleLayerWaterMaterial
 };
 export default WaterLake;
 

@@ -189,7 +189,7 @@ interface SingleLayerWaterMaterial {
  *
  * ### Example
  * ```typescript
- * const material = new RedGPU.Water.Core.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279');
+ * const material = new RedGPU.Water.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279');
  * material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'waterNormal.jpg');
  * ```
  *
@@ -205,7 +205,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
      *
      * ### Example
      * ```typescript
-     * const material = new RedGPU.Water.Core.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279', 1.0);
+     * const material = new RedGPU.Water.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279', 1.0);
      * ```
      *
      * @param redGPUContext -
