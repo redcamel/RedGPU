@@ -15,8 +15,8 @@ interface DirectionalBlur {
      */
     amount: number,
     /**
-     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 30)
-     * [EN] Number of samples (range: 1 to 100, default: 30)
+     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 16)
+     * [EN] Number of samples (range: 1 to 100, default: 16)
      */
     sampleCount: number
 }
@@ -100,7 +100,7 @@ definePositiveNumber(DirectionalBlur, [
     {key: 'amount', value: 15}
 ])
 defineUint(DirectionalBlur, [
-    {key: 'sampleCount', value: 30, min: 1, max: 100}
+    {key: 'sampleCount', value: 16, min: 1, max: 100}
 ])
 Object.freeze(DirectionalBlur)
 export default DirectionalBlur

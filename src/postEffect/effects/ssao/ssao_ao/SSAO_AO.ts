@@ -23,7 +23,7 @@ interface SSAO_AO {
     /**
      * [KO] 샘플링 반경 (월드 단위, 0.01 ~ 5.0)
      * [EN] Sampling radius in world units (0.01 ~ 5.0)
-     * @defaultValue 0.253
+     * @defaultValue 0.25
      */
     radius: number;
     /**
@@ -97,7 +97,7 @@ defineBoolean(SSAO_AO, [
 ])
 definePositiveNumber(SSAO_AO, [
     {key: 'contrast', value: 1.5, min: 0.5, max: 4.0},
-    {key: 'radius', value: 0.253, min: 0.01, max: 5.0},
+    {key: 'radius', value: 0.25, min: 0.01, max: 5.0},
     {key: 'intensity', value: 1, min: 0, max: 10},
     {key: 'bias', value: 0.02, min: 0.0, max: 0.1},
     {key: 'biasDistanceScale', value: 0.02, min: 0.0, max: 0.5},

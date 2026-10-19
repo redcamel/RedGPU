@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1783326645983";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783326645983";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Invert 예제
@@ -9,35 +9,34 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17833266
  * [EN] Demonstrates how to invert screen colors using post effects.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
-
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] Invert 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create Invert post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.Invert(redGPUContext));
+        const effect = new RedGPU.PostEffect.Invert(redGPUContext);
+        viewEffect.postEffectManager.addEffect(effect);
         redGPUContext.addView(viewEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -63,55 +62,50 @@ RedGPU.init(
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
 function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
+    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
+        scene.addChild(v['resultMesh']);
+    });
 }
 
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui: pane => {
-            const effect = targetView.postEffectManager.getEffectAt(0);
-            const TEST_STATE = {
-                Invert: true,
-                amount: effect.amount,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-            folder.addBinding(TEST_STATE, 'Invert').on('change', (v) => {
+        gui: (pane) => {
+            const config = {Invert: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
+
+            folder.addBinding(config, 'Invert').on('change', (v) => {
                 if (v.value) {
-                    const newEffect = new RedGPU.PostEffect.Invert(redGPUContext);
-                    newEffect.amount = TEST_STATE.amount;
-                    targetView.postEffectManager.addEffect(newEffect)
+                    targetView.postEffectManager.addEffect(effect);
                 } else {
-                    targetView.postEffectManager.removeAllEffect()
+                    targetView.postEffectManager.removeAllEffect();
                 }
                 amountControl.disabled = !v.value;
-            })
+            });
 
-            const amountControl = folder.addBinding(TEST_STATE, 'amount', {
+            const amountControl = folder.addBinding(effect, 'amount', {
                 min: 0,
                 max: 1,
                 step: 0.01
-            }).on('change', (v) => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) currentEffect.amount = v.value
-            })
+            });
         }
     });
-
-
 };

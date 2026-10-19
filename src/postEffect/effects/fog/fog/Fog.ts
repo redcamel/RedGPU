@@ -12,13 +12,13 @@ import defineColorRGB from "../../../../defineProperty/funcs/color/defineColorRG
 
 interface Fog {
     /**
-     * [KO] 안개 밀도 (범위: 0 ~ 1, 기본값: 0.5)
-     * [EN] Fog density (range: 0 to 1, default: 0.5)
+     * [KO] 안개 밀도 (범위: 0 ~ 1, 기본값: 0.1)
+     * [EN] Fog density (range: 0 to 1, default: 0.1)
      */
     density: number;
     /**
-     * [KO] 안개 시작 거리 (최소값: 0, 기본값: 4.5)
-     * [EN] Fog start distance from camera (min: 0, default: 4.5)
+     * [KO] 안개 시작 거리 (최소값: 0, 기본값: 5.0)
+     * [EN] Fog start distance from camera (min: 0, default: 5.0)
      */
     nearDistance: number;
     /**
@@ -32,8 +32,8 @@ interface Fog {
      */
     fogType: number;
     /**
-     * [KO] 안개 색상 (기본값: '#1b2866')
-     * [EN] Fog color (default: '#1b2866')
+     * [KO] 안개 색상 (기본값: '#c8d2ff')
+     * [EN] Fog color (default: '#c8d2ff')
      */
     fogColor: ColorRGB
 }
@@ -49,7 +49,7 @@ interface Fog {
  * effect.density = 0.1;
  * effect.nearDistance = 5.0;
  * effect.farDistance = 40.0;
- * effect.fogColor.setRGB(200, 220, 255);
+ * effect.fogColor.setColorByRGB(200, 210, 255);
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -95,17 +95,17 @@ class Fog extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(Fog, [
-    {key: 'density', value: 0.5, min: 0, max: 1},
+    {key: 'density', value: 0.1, min: 0, max: 1},
 ])
 defineNumber(Fog, [
-    {key: 'nearDistance', value: 4.5, min: 0},
+    {key: 'nearDistance', value: 5.0, min: 0},
     {key: 'farDistance', value: 50, min: 0.1},
 ])
 defineUint(Fog, [
     {key: 'fogType', value: Fog.EXPONENTIAL, max: 1}
 ])
 defineColorRGB(Fog, [
-    {key: 'fogColor', value: '#1b2866'},
+    {key: 'fogColor', value: '#c8d2ff'},
 ])
 Object.freeze(Fog);
 export default Fog;

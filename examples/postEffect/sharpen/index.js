@@ -1,39 +1,37 @@
-import * as RedGPU from "../../../dist/index.js?t=1783326645983";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1783326645983";
+import * as RedGPU from "../../../dist/index.js";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Sharpen 예제
  * [EN] Sharpen example
  *
- * [KO] 샤픈(Sharpen) 포스트 이펙트를 시연합니다.
- * [EN] Demonstrates sharpen post effect.
+ * [KO] 샤픈(Sharpen) 포스트 이펙트를 사용하여 화면의 윤곽선 선명도를 높이는 방법을 시연합니다.
+ * [EN] Demonstrates how to enhance screen edge sharpness using the Sharpen post effect.
  */
 
-// 1. Create and append a container and canvas
 const container = document.createElement('div');
 document.body.appendChild(container);
 
 const canvas = document.createElement('canvas');
 container.appendChild(canvas);
 
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
-        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
 
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
+        // [KO] Sharpen 포스트 이펙트 생성 및 뷰에 추가
+        // [EN] Create Sharpen post effect and add it to the view
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -49,47 +47,58 @@ RedGPU.init(
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
             if (isNarrow) {
-                viewNormal.setSize('100%', '50%'); viewNormal.setPosition(0, 0);
-                viewEffect.setSize('100%', '50%'); viewEffect.setPosition(0, '50%');
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, '50%');
             } else {
-                viewNormal.setSize('50%', '100%'); viewNormal.setPosition(0, 0);
-                viewEffect.setSize('50%', '100%'); viewEffect.setPosition('50%', 0);
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
             }
         };
         updateLayout();
         window.addEventListener('resize', updateLayout);
 
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        renderTestPane(redGPUContext, viewEffect, container);
+        renderTestPane(redGPUContext, viewEffect, effect, container);
     },
-    (failReason) => console.error(failReason)
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
+    }
 );
 
 function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
+    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
+        scene.addChild(v['resultMesh']);
+    });
 }
 
-const renderTestPane = async (redGPUContext, targetView, container) => {
-
+const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
             title: 'PostEffect Applied',
             normalTitle: 'Original',
             targetContainer: container
         },
-        gui:pane=>{
-            const TEST_STATE = {
-                Sharpen: true,
-            }
-            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-            folder.addBinding(TEST_STATE, 'Sharpen').on('change', (v) => {
-                if (v.value) targetView.postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext))
-                else targetView.postEffectManager.removeAllEffect()
+        gui: (pane) => {
+            const config = {Sharpen: true};
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
+
+            folder.addBinding(config, 'Sharpen').on('change', (v) => {
+                if (v.value) {
+                    targetView.postEffectManager.addEffect(effect);
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
             });
         }
     });
-
-
 };

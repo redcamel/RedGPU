@@ -11,13 +11,13 @@ interface Vignetting {
     /**
      * [KO] 비네팅 크기 (0 ~ 1)
      * [EN] Vignette size (0 ~ 1)
-     * @defaultValue 0.5
+     * @defaultValue 0.55
      */
     size: number;
     /**
      * [KO] 경계면 부드러움 정도 (0 ~ 1)
      * [EN] Edge smoothness (0 ~ 1)
-     * @defaultValue 0.2
+     * @defaultValue 0.35
      */
     smoothness: number;
     /**
@@ -72,8 +72,8 @@ class Vignetting extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(Vignetting, [
-    {key: 'size', value: 0.5, max: 1},
-    {key: 'smoothness', value: 0.2, max: 1},
+    {key: 'size', value: 0.55, max: 1},
+    {key: 'smoothness', value: 0.35, max: 1},
 ])
 defineNumber(Vignetting, [
     {key: 'centerX', value: 0},

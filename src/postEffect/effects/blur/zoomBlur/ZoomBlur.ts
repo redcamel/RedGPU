@@ -10,8 +10,8 @@ import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 interface ZoomBlur {
     /**
-     * [KO] 블러 강도 (기본값: 10)
-     * [EN] Blur strength (default: 10)
+     * [KO] 블러 강도 (범위: 0 ~ 100, 기본값: 10)
+     * [EN] Blur strength (range: 0 to 100, default: 10)
      */
     amount: number
     /**
@@ -25,8 +25,8 @@ interface ZoomBlur {
      */
     centerY: number
     /**
-     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 30)
-     * [EN] Number of samples (range: 1 to 100, default: 30)
+     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 16)
+     * [EN] Number of samples (range: 1 to 100, default: 16)
      */
     sampleCount: number
 }
@@ -80,14 +80,14 @@ class ZoomBlur extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(ZoomBlur, [
-    {key: 'amount', value: 10}
+    {key: 'amount', value: 10, min: 0, max: 100}
 ])
 defineNumber(ZoomBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
 ])
 defineUint(ZoomBlur, [
-    {key: 'sampleCount', value: 30, min: 1, max: 100}
+    {key: 'sampleCount', value: 16, min: 1, max: 100}
 ])
 Object.freeze(ZoomBlur)
 export default ZoomBlur

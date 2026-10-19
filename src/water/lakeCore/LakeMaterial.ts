@@ -184,11 +184,18 @@ interface LakeMaterial {
  * [KO] 굴절, 수심 기반 색상 감쇠, 수중 커스틱, 스크린 스페이스 반사(SSR)를 지원하는 호수 수면 재질 클래스입니다.
  * [EN] Lake water surface material class supporting refraction, depth-based color extinction, underwater caustics, and screen-space reflection (SSR).
  *
- * [KO] 2패스 렌더링(`use2PathRender`)을 활성화하여 불투명 씬이 렌더링된 뒤 수면 굴절 및 반사를 합성합니다.
- * [EN] Enables 2-pass rendering (`use2PathRender`) to composite water refraction and reflection after the opaque scene is rendered.
+ * [KO] `Lake` 인스턴스 생성 시 내부적으로 자동 생성되며, 2패스 렌더링(`use2PathRender`)을 통해 불투명 씬 렌더링 이후 수면 굴절 및 반사를 합성합니다.
+ * [EN] Automatically created internally when a `Lake` instance is constructed, and uses 2-pass rendering (`use2PathRender`) to composite water refraction and reflection after the opaque scene is rendered.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * ### Example
  * ```typescript
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
  * const lake = new RedGPU.Water.Lake(redGPUContext, 200, 200);
  * const material = lake.waterMaterial;
  * material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'waterNormal.jpg');
@@ -205,11 +212,6 @@ class LakeMaterial extends ABitmapBaseMaterial {
     /**
      * [KO] `LakeMaterial` 인스턴스를 생성합니다.
      * [EN] Creates an instance of `LakeMaterial`.
-     *
-     * ### Example
-     * ```typescript
-     * const material = new RedGPU.Water.LakeCore.LakeMaterial(redGPUContext, '#18d8b6', '#065279', 1.0);
-     * ```
      *
      * @param redGPUContext -
      * [KO] `RedGPUContext` 인스턴스

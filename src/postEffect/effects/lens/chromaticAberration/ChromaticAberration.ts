@@ -23,8 +23,8 @@ interface ChromaticAberration {
      */
     centerY: number
     /**
-     * [KO] 중심으로부터의 효과 감쇠율 (범위: 0 ~ 5, 기본값: 0.5)
-     * [EN] Effect falloff from center (range: 0 to 5, default: 0.5)
+     * [KO] 중심으로부터의 효과 감쇠율 (범위: 0 ~ 5, 기본값: 1.0)
+     * [EN] Effect falloff from center (range: 0 to 5, default: 1.0)
      */
     falloff: number
 }
@@ -78,7 +78,7 @@ defineNumber(ChromaticAberration, [
     {key: 'strength', value: 0.015, min: 0},
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
-    {key: 'falloff', value: 0.5, min: 0, max: 5},
+    {key: 'falloff', value: 1.0, min: 0, max: 5},
 ])
 
 Object.freeze(ChromaticAberration)

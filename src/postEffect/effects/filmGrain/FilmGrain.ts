@@ -37,28 +37,28 @@ const VINTAGE = {
 
 interface FilmGrain {
     /**
-     * [KO] 그레인 입자 강도 (기본값: 0.06)
-     * [EN] Grain particle intensity (default: 0.06)
+     * [KO] 그레인 입자 강도 (기본값: 0.015)
+     * [EN] Grain particle intensity (default: 0.015)
      */
     filmGrainIntensity: number;
     /**
-     * [KO] 명도에 따른 그레인 반응 곡선 (기본값: 0.7)
-     * [EN] Luminance-based grain response curve (default: 0.7)
+     * [KO] 명도에 따른 그레인 반응 곡선 (기본값: 1.2)
+     * [EN] Luminance-based grain response curve (default: 1.2)
      */
     filmGrainResponse: number;
     /**
-     * [KO] 그레인 입자 크기 스케일 (기본값: 4.0)
-     * [EN] Grain particle size scale (default: 4.0)
+     * [KO] 그레인 입자 크기 스케일 (기본값: 1.8)
+     * [EN] Grain particle size scale (default: 1.8)
      */
     filmGrainScale: number;
     /**
-     * [KO] 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러, 기본값: 0.6)
-     * [EN] Colored grain ratio (0: monochromatic, 1: full color, default: 0.6)
+     * [KO] 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러, 기본값: 0.15)
+     * [EN] Colored grain ratio (0: monochromatic, 1: full color, default: 0.15)
      */
     coloredGrain: number;
     /**
-     * [KO] 그레인 입자 채도 강도 (기본값: 0.8)
-     * [EN] Grain particle saturation intensity (default: 0.8)
+     * [KO] 그레인 입자 채도 강도 (기본값: 0.3)
+     * [EN] Grain particle saturation intensity (default: 0.3)
      */
     grainSaturation: number;
 }
@@ -148,11 +148,11 @@ class FilmGrain extends ASinglePassPostEffect {
 }
 
 definePositiveNumber(FilmGrain, [
-    {key: 'filmGrainIntensity', value: VINTAGE.filmGrainIntensity},
-    {key: 'filmGrainResponse', value: VINTAGE.filmGrainResponse},
-    {key: 'filmGrainScale', value: VINTAGE.filmGrainScale},
-    {key: 'coloredGrain', value: VINTAGE.coloredGrain},
-    {key: 'grainSaturation', value: VINTAGE.grainSaturation},
+    {key: 'filmGrainIntensity', value: MEDIUM.filmGrainIntensity},
+    {key: 'filmGrainResponse', value: MEDIUM.filmGrainResponse},
+    {key: 'filmGrainScale', value: MEDIUM.filmGrainScale},
+    {key: 'coloredGrain', value: MEDIUM.coloredGrain},
+    {key: 'grainSaturation', value: MEDIUM.grainSaturation},
 ])
 Object.freeze(FilmGrain);
 export default FilmGrain;

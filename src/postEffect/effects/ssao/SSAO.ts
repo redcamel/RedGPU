@@ -82,8 +82,8 @@ class SSAO extends AMultiPassPostEffect {
      * [EN] Returns or sets the sampling radius in world units for occlusion calculation.
      *
      * @returns
-     * [KO] 샘플링 반경 (범위: 0.01 ~ 5.0, 기본값: 0.253)
-     * [EN] Sampling radius (range: 0.01 ~ 5.0, default: 0.253)
+     * [KO] 샘플링 반경 (범위: 0.01 ~ 5.0, 기본값: 0.25)
+     * [EN] Sampling radius (range: 0.01 ~ 5.0, default: 0.25)
      */
     get radius(): number {
         return this.#effect_ao.radius;

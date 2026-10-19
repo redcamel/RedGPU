@@ -21,13 +21,13 @@ interface HeightFog {
      */
     baseHeight: number;
     /**
-     * [KO] 안개의 수직 두께 (최소값: 0.1, 기본값: 100.0)
-     * [EN] Vertical thickness of the fog (min: 0.1, default: 100.0)
+     * [KO] 안개의 수직 두께 (최소값: 0.1, 기본값: 20.0)
+     * [EN] Vertical thickness of the fog (min: 0.1, default: 20.0)
      */
     thickness: number;
     /**
-     * [KO] 높이에 따른 안개 감쇠율 (범위: 0.001 ~ 2, 기본값: 0.1)
-     * [EN] Fog falloff rate based on height (range: 0.001 to 2, default: 0.1)
+     * [KO] 높이에 따른 안개 감쇠율 (범위: 0.001 ~ 2, 기본값: 0.5)
+     * [EN] Fog falloff rate based on height (range: 0.001 to 2, default: 0.5)
      */
     falloff: number;
     /**
@@ -36,8 +36,8 @@ interface HeightFog {
      */
     startDepth: number;
     /**
-     * [KO] 안개 최대 밀도 도달 거리 (최소값: 0.0, 기본값: 0.0)
-     * [EN] End distance from camera for fog (min: 0.0, default: 0.0)
+     * [KO] 안개 최대 밀도 도달 거리 (최소값: 0.0, 기본값: 50.0)
+     * [EN] End distance from camera for fog (min: 0.0, default: 50.0)
      */
     endDepth: number;
     /**
@@ -46,8 +46,8 @@ interface HeightFog {
      */
     fogType: number;
     /**
-     * [KO] 안개 색상 (기본값: '#1b2866')
-     * [EN] Fog color (default: '#1b2866')
+     * [KO] 안개 색상 (기본값: '#c8d2ff')
+     * [EN] Fog color (default: '#c8d2ff')
      */
     fogColor: string;
 }
@@ -61,7 +61,7 @@ interface HeightFog {
  * const effect = new RedGPU.PostEffect.HeightFog(redGPUContext);
  * effect.density = 1.5;
  * effect.baseHeight = 0.0;
- * effect.thickness = 50.0;
+ * effect.thickness = 20.0;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -105,10 +105,10 @@ class HeightFog extends ASinglePassPostEffect {
 
 definePositiveNumber(HeightFog, [
     {key: 'density', value: 1.0, min: 0, max: 5},
-    {key: 'falloff', value: 0.1, min: 0.001, max: 2},
-    {key: 'thickness', value: 100.0, min: 0.1},
+    {key: 'falloff', value: 0.5, min: 0.001, max: 2},
+    {key: 'thickness', value: 20.0, min: 0.1},
     {key: 'startDepth', value: 0.0, min: 0.0},
-    {key: 'endDepth', value: 0.0, min: 0.0},
+    {key: 'endDepth', value: 50.0, min: 0.0},
 ])
 defineNumber(HeightFog, [
     {key: 'baseHeight', value: 0.0},
@@ -117,7 +117,7 @@ defineUint(HeightFog, [
     {key: 'fogType', value: HeightFog.EXPONENTIAL, max: 1}
 ])
 defineColorRGB(HeightFog, [
-    {key: 'fogColor', value: '#1b2866'}
+    {key: 'fogColor', value: '#c8d2ff'}
 ])
 Object.freeze(HeightFog);
 export default HeightFog;
