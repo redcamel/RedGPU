@@ -39,12 +39,13 @@ abstract class AController extends RedGPUObject {
     #lastUpdateTime = -1;
     #currentDeltaTime = 0;
     #currentFrameViews = new Set<View3D>();
-    #keyboardProcessedThisFrame: boolean = false;
+    #isKeyboardProcessedThisFrame: boolean = false;
 
     #hoveredView: View3D | null = null;
     #isDragging: boolean = false;
 
     #eventTypeKeys: { moveKey: string; upKey: string; downKey: string };
+    #canvasEventPoint: { x: number; y: number } = {x: 0, y: 0};
     #dragStartX: number = 0;
     #dragStartY: number = 0;
     #pinchStartDistance: number = 0;
@@ -176,11 +177,11 @@ abstract class AController extends RedGPUObject {
      * [EN] Whether keyboard input has been processed this frame
      */
     get keyboardProcessedThisFrame(): boolean {
-        return this.#keyboardProcessedThisFrame;
+        return this.#isKeyboardProcessedThisFrame;
     }
 
     set keyboardProcessedThisFrame(value: boolean) {
-        this.#keyboardProcessedThisFrame = value;
+        this.#isKeyboardProcessedThisFrame = value;
     }
 
     /**
@@ -190,16 +191,16 @@ abstract class AController extends RedGPUObject {
     destroy() {
         const {moveKey, upKey, downKey} = this.#eventTypeKeys;
         const {htmlCanvas} = this.redGPUContext;
-        htmlCanvas.removeEventListener(downKey, this.#HD_down);
-        htmlCanvas.removeEventListener(moveKey, this.#HD_hover);
-        htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
-        window.removeEventListener(upKey, this.#HD_up);
+        htmlCanvas.removeEventListener(downKey, this.#handleDown);
+        htmlCanvas.removeEventListener(moveKey, this.#handleHover);
+        htmlCanvas.removeEventListener(moveKey, this.#handleMove);
+        window.removeEventListener(upKey, this.#handleUp);
         if (this.#initInfo) {
             if (this.#initInfo.HD_Wheel) {
-                htmlCanvas.removeEventListener('wheel', this.#HD_wheel);
+                htmlCanvas.removeEventListener('wheel', this.#handleWheel);
             }
             if (this.#initInfo.HD_TouchPinch) {
-                htmlCanvas.removeEventListener('touchmove', this.#HD_touchPinch);
+                htmlCanvas.removeEventListener('touchmove', this.#handleTouchPinch);
             }
         }
         if (AController.#globalKeyboardActiveController === this) {
@@ -232,7 +233,7 @@ abstract class AController extends RedGPUObject {
             this.#currentDeltaTime = this.#lastUpdateTime === -1 ? 0 : (time - this.#lastUpdateTime) / 1000;
             this.#lastUpdateTime = time;
             this.#currentFrameViews.clear();
-            this.#keyboardProcessedThisFrame = false;
+            this.#isKeyboardProcessedThisFrame = false;
         }
         if (this.#currentFrameViews.has(view)) return;
         this.#currentFrameViews.add(view);
@@ -299,25 +300,22 @@ abstract class AController extends RedGPUObject {
      * [EN] Canvas-local `{ x, y }` coordinate object
      */
     getCanvasEventPoint = (e: MouseEvent | TouchEvent | WheelEvent, redGPUContext: RedGPUContext) => {
-        const isMobile = redGPUContext.detector.isMobile;
-        const rect = redGPUContext.boundingClientRect;
-        const tX_key = 'clientX';
-        const tY_key = 'clientY';
+        const {detector, boundingClientRect} = redGPUContext;
+        const {isMobile} = detector;
         let clientX: number;
         let clientY: number;
         if (isMobile) {
             const touch = e instanceof WheelEvent ? e : (e as TouchEvent).changedTouches[0];
-            clientX = touch[tX_key];
-            clientY = touch[tY_key];
+            clientX = touch.clientX;
+            clientY = touch.clientY;
         } else {
             const mouseEvent = e as MouseEvent;
-            clientX = mouseEvent[tX_key];
-            clientY = mouseEvent[tY_key];
+            clientX = mouseEvent.clientX;
+            clientY = mouseEvent.clientY;
         }
-        return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
-        };
+        this.#canvasEventPoint.x = clientX - boundingClientRect.left;
+        this.#canvasEventPoint.y = clientY - boundingClientRect.top;
+        return this.#canvasEventPoint;
     }
 
     /**
@@ -336,14 +334,14 @@ abstract class AController extends RedGPUObject {
         const {renderScale, viewList} = redGPUContext;
         const {x, y} = this.getCanvasEventPoint(e, redGPUContext);
         const scale = window.devicePixelRatio * renderScale;
-        const tX = x * scale;
-        const tY = y * scale;
+        const targetX = x * scale;
+        const targetY = y * scale;
 
         let targetView = null;
         for (const view of viewList) {
-            const tViewRect = view.pixelRectObject;
-            if (tViewRect.x < tX && tX < tViewRect.x + tViewRect.width &&
-                tViewRect.y < tY && tY < tViewRect.y + tViewRect.height) {
+            const viewRect = view.pixelRectObject;
+            if (viewRect.x < targetX && targetX < viewRect.x + viewRect.width &&
+                viewRect.y < targetY && targetY < viewRect.y + viewRect.height) {
                 targetView = view;
             }
         }
@@ -361,22 +359,22 @@ abstract class AController extends RedGPUObject {
         const {redGPUContext} = this;
         const {htmlCanvas} = redGPUContext;
         const {downKey, moveKey} = this.#eventTypeKeys;
-        htmlCanvas.addEventListener(downKey, this.#HD_down);
-        htmlCanvas.addEventListener(moveKey, this.#HD_hover);
+        htmlCanvas.addEventListener(downKey, this.#handleDown);
+        htmlCanvas.addEventListener(moveKey, this.#handleHover);
         if (this.#initInfo.HD_Wheel) {
-            htmlCanvas.addEventListener('wheel', this.#HD_wheel, {passive: false});
+            htmlCanvas.addEventListener('wheel', this.#handleWheel, {passive: false});
         }
         if (this.#initInfo.HD_TouchPinch) {
-            htmlCanvas.addEventListener('touchmove', this.#HD_touchPinch, {passive: false});
+            htmlCanvas.addEventListener('touchmove', this.#handleTouchPinch, {passive: false});
         }
     }
 
-    #HD_hover = (e: MouseEvent | TouchEvent) => {
+    #handleHover = (e: MouseEvent | TouchEvent) => {
         if (AController.#globalKeyboardActiveView || this.#isDragging) return;
         this.#hoveredView = this.findTargetViewByInputEvent(e);
     }
 
-    #HD_down = (e: MouseEvent | TouchEvent) => {
+    #handleDown = (e: MouseEvent | TouchEvent) => {
         const targetView = this.findTargetViewByInputEvent(e);
         if (!targetView) return;
 
@@ -404,12 +402,12 @@ abstract class AController extends RedGPUObject {
             this.#isDragging = true;
             AController.#globalKeyboardActiveView = targetView;
 
-            redGPUContext.htmlCanvas.addEventListener(moveKey, this.#HD_Move);
-            window.addEventListener(upKey, this.#HD_up);
+            redGPUContext.htmlCanvas.addEventListener(moveKey, this.#handleMove);
+            window.addEventListener(upKey, this.#handleUp);
         }
     }
 
-    #HD_Move = (e: MouseEvent | TouchEvent) => {
+    #handleMove = (e: MouseEvent | TouchEvent) => {
         if (e instanceof TouchEvent && e.touches.length >= 2) {
             this.#isMultiTouch = true;
             return;
@@ -425,7 +423,7 @@ abstract class AController extends RedGPUObject {
         this.#initInfo.HD_Move?.(deltaX, deltaY);
     }
 
-    #HD_touchPinch = (e: TouchEvent) => {
+    #handleTouchPinch = (e: TouchEvent) => {
         if (e.touches.length < 2 || !this.#initInfo.HD_TouchPinch) return;
         if (!this.#isMultiTouch) return;
         e.preventDefault();
@@ -442,7 +440,7 @@ abstract class AController extends RedGPUObject {
         this.#pinchStartDistance = currentDistance;
     }
 
-    #HD_up = () => {
+    #handleUp = () => {
         const {htmlCanvas} = this.redGPUContext;
         const {moveKey, upKey} = this.#eventTypeKeys;
 
@@ -450,11 +448,11 @@ abstract class AController extends RedGPUObject {
         this.#pinchStartDistance = 0;
         this.#isDragging = false;
 
-        htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
-        window.removeEventListener(upKey, this.#HD_up);
+        htmlCanvas.removeEventListener(moveKey, this.#handleMove);
+        window.removeEventListener(upKey, this.#handleUp);
     }
 
-    #HD_wheel = (e: WheelEvent) => {
+    #handleWheel = (e: WheelEvent) => {
         const targetView = this.findTargetViewByInputEvent(e);
         if (!targetView) return;
         if (targetView.rawCamera !== this.#camera) return;

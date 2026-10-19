@@ -111,8 +111,8 @@ class FreeController extends AController {
     #currentPan: number = 0;
     #currentTilt: number = 0;
 
-    #tMTX0 = mat4.create();
-    #displacementMTX = mat4.create();
+    #tempMatrix = mat4.create();
+    #displacementMatrix = mat4.create();
     #displacementVec3 = vec3.create();
     #currentPositionVec3 = vec3.create();
     #forwardVec3 = vec3.create();
@@ -479,46 +479,46 @@ class FreeController extends AController {
     }
 
     #updateAnimation = (view: View3D, deltaTime: number): void => {
-        const tDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
-        const tDelayRotation = Math.pow(this.#rotationInterpolation, deltaTime);
+        const moveDelay = Math.pow(this.#moveDelayInterpolation, deltaTime);
+        const rotationDelay = Math.pow(this.#rotationInterpolation, deltaTime);
 
         let panDelta = (this.#pan - this.#currentPan) % 360;
         if (panDelta > 180) panDelta -= 360;
         if (panDelta < -180) panDelta += 360;
-        this.#currentPan += panDelta * (1 - tDelayRotation);
+        this.#currentPan += panDelta * (1 - rotationDelay);
 
         const tiltDelta = (this.#tilt - this.#currentTilt);
-        this.#currentTilt += tiltDelta * (1 - tDelayRotation);
+        this.#currentTilt += tiltDelta * (1 - rotationDelay);
 
         if (this.#checkKeyboardKeyBuffer(view, deltaTime)) {
-            mat4.identity(this.#displacementMTX);
-            mat4.rotateY(this.#displacementMTX, this.#displacementMTX, this.#currentPan * PER_PI);
-            mat4.rotateX(this.#displacementMTX, this.#displacementMTX, this.#currentTilt * PER_PI);
-            mat4.translate(this.#displacementMTX, this.#displacementMTX, this.#displacementVec3);
+            mat4.identity(this.#displacementMatrix);
+            mat4.rotateY(this.#displacementMatrix, this.#displacementMatrix, this.#currentPan * PER_PI);
+            mat4.rotateX(this.#displacementMatrix, this.#displacementMatrix, this.#currentTilt * PER_PI);
+            mat4.translate(this.#displacementMatrix, this.#displacementMatrix, this.#displacementVec3);
 
             vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
-            mat4.identity(this.#tMTX0);
-            mat4.translate(this.#tMTX0, this.#tMTX0, this.#currentPositionVec3);
-            mat4.multiply(this.#tMTX0, this.#tMTX0, this.#displacementMTX);
-            this.#desirePosition[0] = this.#tMTX0[12];
-            this.#desirePosition[1] = this.#tMTX0[13];
-            this.#desirePosition[2] = this.#tMTX0[14];
+            mat4.identity(this.#tempMatrix);
+            mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#currentPositionVec3);
+            mat4.multiply(this.#tempMatrix, this.#tempMatrix, this.#displacementMatrix);
+            this.#desirePosition[0] = this.#tempMatrix[12];
+            this.#desirePosition[1] = this.#tempMatrix[13];
+            this.#desirePosition[2] = this.#tempMatrix[14];
         }
 
-        this.#currentX += (this.#desirePosition[0] - this.#currentX) * (1 - tDelay);
-        this.#currentY += (this.#desirePosition[1] - this.#currentY) * (1 - tDelay);
-        this.#currentZ += (this.#desirePosition[2] - this.#currentZ) * (1 - tDelay);
+        this.#currentX += (this.#desirePosition[0] - this.#currentX) * (1 - moveDelay);
+        this.#currentY += (this.#desirePosition[1] - this.#currentY) * (1 - moveDelay);
+        this.#currentZ += (this.#desirePosition[2] - this.#currentZ) * (1 - moveDelay);
 
         vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
-        mat4.identity(this.#tMTX0);
-        mat4.translate(this.#tMTX0, this.#tMTX0, this.#currentPositionVec3);
-        mat4.rotateY(this.#tMTX0, this.#tMTX0, this.#currentPan * PER_PI);
-        mat4.rotateX(this.#tMTX0, this.#tMTX0, this.#currentTilt * PER_PI);
+        mat4.identity(this.#tempMatrix);
+        mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#currentPositionVec3);
+        mat4.rotateY(this.#tempMatrix, this.#tempMatrix, this.#currentPan * PER_PI);
+        mat4.rotateX(this.#tempMatrix, this.#tempMatrix, this.#currentTilt * PER_PI);
 
         this.camera.setPosition(this.#currentX, this.#currentY, this.#currentZ);
 
         vec3.set(this.#forwardVec3, 0, 0, -10);
-        vec3.transformMat4(this.#forwardVec3, this.#forwardVec3, this.#tMTX0);
+        vec3.transformMat4(this.#forwardVec3, this.#forwardVec3, this.#tempMatrix);
         this.camera.lookAt(this.#forwardVec3[0], this.#forwardVec3[1], this.#forwardVec3[2]);
         this.camera.rotationX = this.#currentTilt;
         this.camera.rotationY = this.#currentPan;
@@ -527,73 +527,73 @@ class FreeController extends AController {
     #checkKeyboardKeyBuffer(view: View3D, deltaTime: number): boolean {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
         const {keyboardKeyBuffer} = view.redGPUContext;
-        const tSpeed = this.#moveSpeed * deltaTime;
-        const tSpeedRotation = this.#rotationSpeed * deltaTime;
-        const tKeyNameMapper = this.#keyNameMapper;
-        let move = false;
-        let rotate = false;
+        const moveSpeed = this.#moveSpeed * deltaTime;
+        const rotationSpeed = this.#rotationSpeed * deltaTime;
+        const keyNameMapper = this.#keyNameMapper;
+        let isMoving = false;
+        let isRotating = false;
         let pan = 0;
         let tilt = 0;
         this.#displacementVec3[0] = 0;
         this.#displacementVec3[1] = 0;
         this.#displacementVec3[2] = 0;
 
-        const tempAccelerationValue = this.#currentAcceleration * tSpeed;
+        const tempAccelerationValue = this.#currentAcceleration * moveSpeed;
 
-        if (keyboardKeyBuffer[tKeyNameMapper.turnLeft]) {
-            rotate = true;
-            pan = tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnLeft]) {
+            isRotating = true;
+            pan = rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnRight]) {
-            rotate = true;
-            pan = -tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnRight]) {
+            isRotating = true;
+            pan = -rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnUp]) {
-            rotate = true;
-            tilt = tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnUp]) {
+            isRotating = true;
+            tilt = rotationSpeed;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.turnDown]) {
-            rotate = true;
-            tilt = -tSpeedRotation;
+        if (keyboardKeyBuffer[keyNameMapper.turnDown]) {
+            isRotating = true;
+            tilt = -rotationSpeed;
         }
 
-        if (keyboardKeyBuffer[tKeyNameMapper.moveForward]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveForward]) {
+            isMoving = true;
             this.#displacementVec3[2] = -tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveBack]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveBack]) {
+            isMoving = true;
             this.#displacementVec3[2] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveLeft]) {
+            isMoving = true;
             this.#displacementVec3[0] = -tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveRight]) {
+            isMoving = true;
             this.#displacementVec3[0] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveUp]) {
+            isMoving = true;
             this.#displacementVec3[1] = tempAccelerationValue;
         }
-        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) {
-            move = true;
+        if (keyboardKeyBuffer[keyNameMapper.moveDown]) {
+            isMoving = true;
             this.#displacementVec3[1] = -tempAccelerationValue;
         }
 
         const accelerationDelta = 3 * deltaTime;
-        if (rotate || move) {
+        if (isRotating || isMoving) {
             this.#currentAcceleration = Math.min(this.#maxAcceleration, this.#currentAcceleration + accelerationDelta);
         } else {
             this.#currentAcceleration = Math.max(0, this.#currentAcceleration - accelerationDelta);
         }
 
-        if (rotate) {
+        if (isRotating) {
             this.#pan += pan;
             this.#tilt = Math.max(-89.9, Math.min(89.9, this.#tilt + tilt));
         }
-        return move || rotate;
+        return isMoving || isRotating;
     }
 }
 

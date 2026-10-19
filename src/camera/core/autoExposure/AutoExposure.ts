@@ -35,19 +35,19 @@ import RedGPUObject from "../../../base/RedGPUObject";
  */
 class AutoExposure extends RedGPUObject {
     #view: View3D;
-    #adaptedEV100Buffer: StorageBuffer;
-    #histogramBuffer: StorageBuffer;
+    #adaptedEV100Buffer: StorageBuffer | null = null;
+    #histogramBuffer: StorageBuffer | null = null;
 
-    #adaptationPipeline: GPUComputePipeline;
-    #downsamplePipeline: GPUComputePipeline;
-    #downsampleBindGroupLayout0: GPUBindGroupLayout;
-    #downsampleBindGroupLayout1: GPUBindGroupLayout;
-    #adaptationBindGroupLayout0: GPUBindGroupLayout;
+    #adaptationPipeline: GPUComputePipeline | null = null;
+    #downsamplePipeline: GPUComputePipeline | null = null;
+    #downsampleBindGroupLayout0: GPUBindGroupLayout | null = null;
+    #downsampleBindGroupLayout1: GPUBindGroupLayout | null = null;
+    #adaptationBindGroupLayout0: GPUBindGroupLayout | null = null;
 
-    #uniformBuffer: UniformBuffer;
+    #uniformBuffer: UniformBuffer | null = null;
 
     #currentAdaptedEV100: number = 1.0;
-    #readBuffer: GPUBuffer;
+    #readBuffer: GPUBuffer | null = null;
     #isReading: boolean = false;
 
     #minEV100: number = -2.0;
@@ -61,11 +61,14 @@ class AutoExposure extends RedGPUObject {
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
 
-    #prevWidth: number;
-    #prevHeight: number;
+    #prevWidth: number = 0;
+    #prevHeight: number = 0;
     #downsampleBindGroup0Cache: WeakMap<GPUTexture, GPUBindGroup> = new WeakMap();
-    #downsampleBindGroup1: GPUBindGroup;
-    #adaptationBindGroup0: GPUBindGroup;
+    #downsampleBindGroup1: GPUBindGroup | null = null;
+    #adaptationBindGroup0: GPUBindGroup | null = null;
+    #currentDownsampleBindGroup0: GPUBindGroup | null = null;
+    #dispatchWorkgroupX: number = 1;
+    #dispatchWorkgroupY: number = 1;
 
     #cachedUniformData: Float32Array = new Float32Array(16);
     #cachedEV100Data: Float32Array = new Float32Array(1);
@@ -282,9 +285,9 @@ class AutoExposure extends RedGPUObject {
     set currentAdaptedEV100(value: number) {
         validateNumber(value);
         this.#currentAdaptedEV100 = value;
-        const u = this.#cachedEV100Data;
-        u[0] = value;
-        this.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, u.buffer, u.byteOffset, u.byteLength);
+        const ev100Data = this.#cachedEV100Data;
+        ev100Data[0] = value;
+        this.gpuDevice.queue.writeBuffer(this.#adaptedEV100Buffer.gpuBuffer, 0, ev100Data.buffer, ev100Data.byteOffset, ev100Data.byteLength);
     }
 
     /**
@@ -309,8 +312,9 @@ class AutoExposure extends RedGPUObject {
      */
     render(sourceTextureInfo: IPostEffectResult) {
         const {gpuDevice, commandEncoderManager} = this;
-        const {width, height} = this.#view.viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
-        const {rawCamera, renderViewStateData} = this.#view;
+        const {viewRenderTextureManager, rawCamera, renderViewStateData} = this.#view;
+        const colorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
+        const {width, height} = colorTexture;
         const {deltaTime} = renderViewStateData;
 
         const ev100Range = this.#maxEV100 - this.#minEV100;
@@ -319,71 +323,81 @@ class AutoExposure extends RedGPUObject {
         const targetEV100Bias = Math.log2(9.6 * Math.max(0.000001, this.#targetLuminance)) + this.#exposureCompensation;
         const minPossibleEV100 = this.#exposureCompensation - Math.log2(1.2 * Math.max(1.0, this.#maxExposureMultiplier));
 
-        const u = this.#cachedUniformData;
-        u[0] = deltaTime;
-        u[1] = targetEV100Bias;
-        u[2] = this.#adaptationSpeedUp;
-        u[3] = this.#adaptationSpeedDown;
-        u[4] = minPossibleEV100;
-        u[5] = this.#minEV100;
-        u[6] = this.#maxEV100;
-        u[7] = ev100Range;
-        u[8] = this.#lowPercentile;
-        u[9] = this.#highPercentile;
-        u[10] = 1.0 / ev100Range;
-        u[11] = width;
-        u[12] = height;
-        u[13] = currentPreExposure;
-        u[14] = this.#meteringMode;
-        u[15] = 0.0;
+        const uniformData = this.#cachedUniformData;
+        uniformData[0] = deltaTime;
+        uniformData[1] = targetEV100Bias;
+        uniformData[2] = this.#adaptationSpeedUp;
+        uniformData[3] = this.#adaptationSpeedDown;
+        uniformData[4] = minPossibleEV100;
+        uniformData[5] = this.#minEV100;
+        uniformData[6] = this.#maxEV100;
+        uniformData[7] = ev100Range;
+        uniformData[8] = this.#lowPercentile;
+        uniformData[9] = this.#highPercentile;
+        uniformData[10] = 1.0 / ev100Range;
+        uniformData[11] = width;
+        uniformData[12] = height;
+        uniformData[13] = currentPreExposure;
+        uniformData[14] = this.#meteringMode;
+        uniformData[15] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#uniformBuffer.gpuBuffer,
             0,
-            u.buffer,
-            u.byteOffset,
-            u.byteLength
+            uniformData.buffer,
+            uniformData.byteOffset,
+            uniformData.byteLength
         );
 
-        const sizeChanged = this.#prevWidth !== width || this.#prevHeight !== height;
+        const isSizeChanged = this.#prevWidth !== width || this.#prevHeight !== height;
 
-        if (sizeChanged) {
+        if (isSizeChanged) {
             this.#downsampleBindGroup0Cache = new WeakMap();
             this.#prevWidth = width;
             this.#prevHeight = height;
         }
 
-        let cachedBG0 = this.#downsampleBindGroup0Cache.get(sourceTextureInfo.texture);
-        if (!cachedBG0) {
-            cachedBG0 = gpuDevice.createBindGroup({
+        const sourceTexture = sourceTextureInfo.texture;
+        let cachedBindGroup0 = this.#downsampleBindGroup0Cache.get(sourceTexture);
+        if (!cachedBindGroup0) {
+            cachedBindGroup0 = gpuDevice.createBindGroup({
                 label: 'AutoExposure_Downsample_BG0',
                 layout: this.#downsampleBindGroupLayout0,
                 entries: [
                     {binding: 0, resource: sourceTextureInfo.textureView}
                 ]
             });
-            this.#downsampleBindGroup0Cache.set(sourceTextureInfo.texture, cachedBG0);
+            this.#downsampleBindGroup0Cache.set(sourceTexture, cachedBindGroup0);
         }
 
-        commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', (pass1) => {
-            pass1.setPipeline(this.#downsamplePipeline);
-            pass1.setBindGroup(0, cachedBG0);
-            pass1.setBindGroup(1, this.#downsampleBindGroup1);
-            pass1.dispatchWorkgroups(Math.ceil(width / 32), Math.ceil(height / 32), 1);
-        });
+        this.#currentDownsampleBindGroup0 = cachedBindGroup0;
+        this.#dispatchWorkgroupX = Math.ceil(width / 32);
+        this.#dispatchWorkgroupY = Math.ceil(height / 32);
 
-        commandEncoderManager.addPostProcessComputePass('AutoExposure_Adaptation_Pass', (pass2) => {
-            pass2.setPipeline(this.#adaptationPipeline);
-            pass2.setBindGroup(0, this.#adaptationBindGroup0);
-            pass2.dispatchWorkgroups(1, 1, 1);
-        });
+        commandEncoderManager.addPostProcessComputePass('AutoExposure_GenerateHistogram_Pass', this.#executeDownsamplePass);
+        commandEncoderManager.addPostProcessComputePass('AutoExposure_Adaptation_Pass', this.#executeAdaptationPass);
 
         if (!this.#isReading) {
-            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, encoder => {
-                copyGPUBuffer(encoder, this.#adaptedEV100Buffer.gpuBuffer, this.#readBuffer);
-            });
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.POST_PROCESS, this.#executeReadbackCopy);
         }
     }
+
+    #executeDownsamplePass = (passEncoder: GPUComputePassEncoder): void => {
+        passEncoder.setPipeline(this.#downsamplePipeline);
+        passEncoder.setBindGroup(0, this.#currentDownsampleBindGroup0);
+        passEncoder.setBindGroup(1, this.#downsampleBindGroup1);
+        passEncoder.dispatchWorkgroups(this.#dispatchWorkgroupX, this.#dispatchWorkgroupY, 1);
+    };
+
+    #executeAdaptationPass = (passEncoder: GPUComputePassEncoder): void => {
+        passEncoder.setPipeline(this.#adaptationPipeline);
+        passEncoder.setBindGroup(0, this.#adaptationBindGroup0);
+        passEncoder.dispatchWorkgroups(1, 1, 1);
+    };
+
+    #executeReadbackCopy = (encoder: GPUCommandEncoder): void => {
+        copyGPUBuffer(encoder, this.#adaptedEV100Buffer.gpuBuffer, this.#readBuffer);
+    };
 
     /**
      * [KO] GPU에서 계산된 적응형 EV100 값을 리드백 버퍼로부터 비동기 매핑하여 CPU 상태에 동기화합니다.

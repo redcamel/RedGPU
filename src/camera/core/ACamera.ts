@@ -23,7 +23,7 @@ abstract class ACamera extends BaseObject {
     #iso: number = 100;
     #ev100: number = 0;
     #useAutoExposure: boolean = true;
-    #exposureDirty: boolean = true;
+    #isExposureDirty: boolean = true;
 
     /**
      * [KO] 자동 노출 활성화 여부를 가져오거나 설정합니다. 비활성화(`false`) 전환 시 현재 EV100을 유지하도록 ISO를 100으로 고정하고 가장 가까운 표준 셔터 속도로 스냅합니다. (기본값: `true`)
@@ -46,17 +46,17 @@ abstract class ACamera extends BaseObject {
 
             let closestSpeed = STANDARD_SHUTTER_SPEEDS[0];
             let minDiff = Math.abs(closestSpeed - rawShutterSpeed);
-            for (let i = 1, len = STANDARD_SHUTTER_SPEEDS.length; i < len; i++) {
-                const curr = STANDARD_SHUTTER_SPEEDS[i];
-                const diff = Math.abs(curr - rawShutterSpeed);
+            for (let i = 1, length = STANDARD_SHUTTER_SPEEDS.length; i < length; i++) {
+                const currentSpeed = STANDARD_SHUTTER_SPEEDS[i];
+                const diff = Math.abs(currentSpeed - rawShutterSpeed);
                 if (diff < minDiff) {
                     minDiff = diff;
-                    closestSpeed = curr;
+                    closestSpeed = currentSpeed;
                 }
             }
             this.#shutterSpeed = closestSpeed;
 
-            this.#exposureDirty = true;
+            this.#isExposureDirty = true;
         }
 
         this.#useAutoExposure = value;
@@ -71,7 +71,7 @@ abstract class ACamera extends BaseObject {
      * [EN] EV100 value
      */
     get ev100(): number {
-        if (this.#exposureDirty) this.updateExposure();
+        if (this.#isExposureDirty) this.updateExposure();
         return this.#ev100;
     }
 
@@ -91,7 +91,7 @@ abstract class ACamera extends BaseObject {
         validatePositiveNumberRange(value, Number.MIN_VALUE);
         if (this.#aperture === value) return;
         this.#aperture = value;
-        this.#exposureDirty = true;
+        this.#isExposureDirty = true;
     }
 
     /**
@@ -110,7 +110,7 @@ abstract class ACamera extends BaseObject {
         validatePositiveNumberRange(value, Number.MIN_VALUE);
         if (this.#shutterSpeed === value) return;
         this.#shutterSpeed = value;
-        this.#exposureDirty = true;
+        this.#isExposureDirty = true;
     }
 
     /**
@@ -129,7 +129,7 @@ abstract class ACamera extends BaseObject {
         validatePositiveNumberRange(value, Number.MIN_VALUE);
         if (this.#iso === value) return;
         this.#iso = value;
-        this.#exposureDirty = true;
+        this.#isExposureDirty = true;
     }
 
     /**
@@ -146,7 +146,7 @@ abstract class ACamera extends BaseObject {
         } else {
             this.#ev100 = Math.log2((this.#aperture * this.#aperture / this.#shutterSpeed) * (100 / this.#iso));
         }
-        this.#exposureDirty = false;
+        this.#isExposureDirty = false;
     }
 }
 

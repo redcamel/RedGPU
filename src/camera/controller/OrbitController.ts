@@ -373,12 +373,12 @@ class OrbitController extends AController {
         const panRad = this.#currentPan * PER_PI;
         const tiltRad = this.#currentTilt * PER_PI;
         const cosTilt = Math.cos(tiltRad);
-        const distCosTilt = this.#currentDistance * cosTilt;
+        const distanceCosTilt = this.#currentDistance * cosTilt;
 
         camera.setPosition(
-            this.#centerX + Math.sin(panRad) * distCosTilt,
+            this.#centerX + Math.sin(panRad) * distanceCosTilt,
             this.#centerY - Math.sin(tiltRad) * this.#currentDistance,
-            this.#centerZ + Math.cos(panRad) * distCosTilt
+            this.#centerZ + Math.cos(panRad) * distanceCosTilt
         );
         camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
     };

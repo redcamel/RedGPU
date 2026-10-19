@@ -8,8 +8,9 @@ import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumbe
 import AController from "../core/AController";
 
 const PER_PI = Math.PI / 180;
-const tempMat4 = mat4.create();
-const tempVec3 = vec3.create();
+const TEMP_MAT4 = mat4.create();
+const TEMP_VEC3 = vec3.create();
+const DUMMY_VIEW = {pixelRectObject: {height: 1}} as unknown as View3D;
 
 /**
  * [KO] 지정된 타겟 메시(Mesh)의 이동과 회전을 부드럽게 추적하는 3인칭 시점 카메라 컨트롤러 클래스입니다.
@@ -47,14 +48,14 @@ class FollowController extends AController {
     #targetTilt: number = 15;
     #tiltInterpolation: number = 0.02;
 
-    #followTargetRotation: boolean = true;
+    #isFollowingTargetRotation: boolean = true;
     #targetOffsetX: number = 0;
     #targetOffsetY: number = 0;
     #targetOffsetZ: number = 0;
     #targetMesh: Mesh;
-    #currentPos = vec3.create();
-    #cameraPos = vec3.create();
-    #lookAtTargetPos = vec3.create();
+    #currentPosition = vec3.create();
+    #cameraPosition = vec3.create();
+    #lookAtTargetPosition = vec3.create();
 
     /**
      * [KO] FollowController 인스턴스를 생성합니다.
@@ -248,11 +249,11 @@ class FollowController extends AController {
      * [EN] Whether target rotation tracking is enabled (default: `true`)
      */
     get followTargetRotation(): boolean {
-        return this.#followTargetRotation;
+        return this.#isFollowingTargetRotation;
     }
 
     set followTargetRotation(value: boolean) {
-        this.#followTargetRotation = value;
+        this.#isFollowingTargetRotation = value;
     }
 
     /**
@@ -384,14 +385,14 @@ class FollowController extends AController {
 
         this.#currentTilt = this.#targetTilt + (this.#currentTilt - this.#targetTilt) * Math.pow(this.#tiltInterpolation, deltaTime);
 
-        const targetPos = this.#calculateCameraPosition();
-        const posSmoothing = Math.pow(this.#interpolation, deltaTime);
+        const targetPosition = this.#calculateCameraPosition();
+        const positionSmoothing = Math.pow(this.#interpolation, deltaTime);
 
-        this.#currentPos[0] = targetPos[0] + (this.#currentPos[0] - targetPos[0]) * posSmoothing;
-        this.#currentPos[1] = targetPos[1] + (this.#currentPos[1] - targetPos[1]) * posSmoothing;
-        this.#currentPos[2] = targetPos[2] + (this.#currentPos[2] - targetPos[2]) * posSmoothing;
+        this.#currentPosition[0] = targetPosition[0] + (this.#currentPosition[0] - targetPosition[0]) * positionSmoothing;
+        this.#currentPosition[1] = targetPosition[1] + (this.#currentPosition[1] - targetPosition[1]) * positionSmoothing;
+        this.#currentPosition[2] = targetPosition[2] + (this.#currentPosition[2] - targetPosition[2]) * positionSmoothing;
 
-        this.camera.setPosition(this.#currentPos[0], this.#currentPos[1], this.#currentPos[2]);
+        this.camera.setPosition(this.#currentPosition[0], this.#currentPosition[1], this.#currentPosition[2]);
 
         const lookAt = this.#calculateLookAtTarget();
         this.camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
@@ -410,27 +411,27 @@ class FollowController extends AController {
         const targetWorldY = worldMatrix[13];
         const targetWorldZ = worldMatrix[14];
 
-        if (this.#followTargetRotation) {
-            vec3.set(tempVec3,
+        if (this.#isFollowingTargetRotation) {
+            vec3.set(TEMP_VEC3,
                 sinP * this.#currentDistance * cosT,
                 sinT * this.#currentDistance + this.#currentHeight,
                 cosP * this.#currentDistance * cosT
             );
 
-            mat4.copy(tempMat4, worldMatrix);
-            tempMat4[12] = tempMat4[13] = tempMat4[14] = 0;
-            vec3.transformMat4(tempVec3, tempVec3, tempMat4);
+            mat4.copy(TEMP_MAT4, worldMatrix);
+            TEMP_MAT4[12] = TEMP_MAT4[13] = TEMP_MAT4[14] = 0;
+            vec3.transformMat4(TEMP_VEC3, TEMP_VEC3, TEMP_MAT4);
 
             return vec3.set(
-                this.#cameraPos,
-                targetWorldX + tempVec3[0],
-                targetWorldY + tempVec3[1],
-                targetWorldZ + tempVec3[2]
+                this.#cameraPosition,
+                targetWorldX + TEMP_VEC3[0],
+                targetWorldY + TEMP_VEC3[1],
+                targetWorldZ + TEMP_VEC3[2]
             );
         }
 
         return vec3.set(
-            this.#cameraPos,
+            this.#cameraPosition,
             targetWorldX + this.#currentDistance * cosT * sinP,
             targetWorldY + this.#currentHeight + this.#currentDistance * sinT,
             targetWorldZ + this.#currentDistance * cosT * cosP
@@ -438,40 +439,39 @@ class FollowController extends AController {
     }
 
     #calculateLookAtTarget(): vec3 {
-        vec3.set(tempVec3, this.#targetOffsetX, this.#targetOffsetY, this.#targetOffsetZ);
+        vec3.set(TEMP_VEC3, this.#targetOffsetX, this.#targetOffsetY, this.#targetOffsetZ);
 
         const worldMatrix = this.#targetMesh.modelMatrix;
         const targetWorldX = worldMatrix[12];
         const targetWorldY = worldMatrix[13];
         const targetWorldZ = worldMatrix[14];
 
-        if (this.#followTargetRotation && (this.#targetOffsetX !== 0 || this.#targetOffsetY !== 0 || this.#targetOffsetZ !== 0)) {
-            mat4.copy(tempMat4, worldMatrix);
-            tempMat4[12] = tempMat4[13] = tempMat4[14] = 0;
-            vec3.transformMat4(tempVec3, tempVec3, tempMat4);
+        if (this.#isFollowingTargetRotation && (this.#targetOffsetX !== 0 || this.#targetOffsetY !== 0 || this.#targetOffsetZ !== 0)) {
+            mat4.copy(TEMP_MAT4, worldMatrix);
+            TEMP_MAT4[12] = TEMP_MAT4[13] = TEMP_MAT4[14] = 0;
+            vec3.transformMat4(TEMP_VEC3, TEMP_VEC3, TEMP_MAT4);
         }
 
         return vec3.set(
-            this.#lookAtTargetPos,
-            targetWorldX + tempVec3[0],
-            targetWorldY + tempVec3[1],
-            targetWorldZ + tempVec3[2]
+            this.#lookAtTargetPosition,
+            targetWorldX + TEMP_VEC3[0],
+            targetWorldY + TEMP_VEC3[1],
+            targetWorldZ + TEMP_VEC3[2]
         );
     }
 
     #snapToTarget(): void {
-        // @ts-ignore
-        updateObject3DMatrix(this.#targetMesh, {pixelRectObject: {height: 1}});
+        updateObject3DMatrix(this.#targetMesh, DUMMY_VIEW);
 
         this.#currentDistance = this.#targetDistance;
         this.#currentHeight = this.#targetHeight;
         this.#currentPan = this.#targetPan;
         this.#currentTilt = this.#targetTilt;
 
-        const initialPos = this.#calculateCameraPosition();
-        vec3.copy(this.#currentPos, initialPos);
+        const initialPosition = this.#calculateCameraPosition();
+        vec3.copy(this.#currentPosition, initialPosition);
 
-        this.camera.setPosition(this.#currentPos[0], this.#currentPos[1], this.#currentPos[2]);
+        this.camera.setPosition(this.#currentPosition[0], this.#currentPosition[1], this.#currentPosition[2]);
         const lookAt = this.#calculateLookAtTarget();
         this.camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
     }

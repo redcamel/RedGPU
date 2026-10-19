@@ -398,9 +398,9 @@ class IsometricController extends AController {
         this.#currentZoom = this.#targetZoom + (this.#currentZoom - this.#targetZoom) * Math.pow(this.#zoomInterpolation, deltaTime);
         this.#currentViewHeight = this.#targetViewHeight + (this.#currentViewHeight - this.#targetViewHeight) * Math.pow(this.#viewHeightInterpolation, deltaTime);
 
-        const posSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
-        this.#currentX = this.#targetX + (this.#currentX - this.#targetX) * posSmoothing;
-        this.#currentZ = this.#targetZ + (this.#currentZ - this.#targetZ) * posSmoothing;
+        const positionSmoothing = Math.pow(this.#moveSpeedInterpolation, deltaTime);
+        this.#currentX = this.#targetX + (this.#currentX - this.#targetX) * positionSmoothing;
+        this.#currentZ = this.#targetZ + (this.#currentZ - this.#targetZ) * positionSmoothing;
 
         const angleRad = this.#cameraAngle * PER_PI;
 
@@ -434,14 +434,14 @@ class IsometricController extends AController {
         if (!this.checkKeyboardInput(view, this.#keyNameMapper)) return false;
 
         const {keyboardKeyBuffer} = view.redGPUContext;
-        const tKeyNameMapper = this.#keyNameMapper;
+        const keyNameMapper = this.#keyNameMapper;
         const speed = this.#moveSpeed * deltaTime;
 
         let inputUp = 0, inputDown = 0, inputLeft = 0, inputRight = 0;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveUp]) inputUp = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveDown]) inputDown = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveLeft]) inputLeft = speed;
-        if (keyboardKeyBuffer[tKeyNameMapper.moveRight]) inputRight = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveUp]) inputUp = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveDown]) inputDown = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveLeft]) inputLeft = speed;
+        if (keyboardKeyBuffer[keyNameMapper.moveRight]) inputRight = speed;
 
         const angleRad = this.#cameraAngle * PER_PI;
         const cos = Math.cos(angleRad);

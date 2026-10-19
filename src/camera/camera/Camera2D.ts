@@ -20,6 +20,7 @@ class Camera2D extends ACamera {
     #x: number = 0;
     #y: number = 0;
     #z: number = 0;
+    #position: [number, number] = [0, 0];
 
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
@@ -103,7 +104,9 @@ class Camera2D extends ACamera {
      * [EN] `[x, y]` coordinate tuple
      */
     get position(): [number, number] {
-        return [this.#x, this.#y];
+        this.#position[0] = this.#x;
+        this.#position[1] = this.#y;
+        return this.#position;
     }
 
     /**

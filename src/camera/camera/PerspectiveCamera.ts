@@ -27,6 +27,7 @@ class PerspectiveCamera extends ACamera {
     #x: number = 0;
     #z: number = 0;
     #y: number = 0;
+    #position: [number, number, number] = [0, 0, 0];
     #rotationX: number = 0;
     #rotationY: number = 0;
     #rotationZ: number = 0;
@@ -224,7 +225,10 @@ class PerspectiveCamera extends ACamera {
      * [EN] `[x, y, z]` coordinate tuple
      */
     get position(): [number, number, number] {
-        return [this.#x, this.#y, this.#z];
+        this.#position[0] = this.#x;
+        this.#position[1] = this.#y;
+        this.#position[2] = this.#z;
+        return this.#position;
     }
 
     /**
@@ -299,13 +303,13 @@ class PerspectiveCamera extends ACamera {
         let dirX = x - eyeX;
         let dirY = y - eyeY;
         let dirZ = z - eyeZ;
-        const len = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-        if (len < 1e-6) return;
+        const length = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+        if (length < 1e-6) return;
 
-        const invLen = 1 / len;
-        dirX *= invLen;
-        dirY *= invLen;
-        dirZ *= invLen;
+        const invLength = 1 / length;
+        dirX *= invLength;
+        dirY *= invLength;
+        dirZ *= invLength;
 
         let upX = this.#up[0];
         let upY = this.#up[1];
@@ -314,9 +318,9 @@ class PerspectiveCamera extends ACamera {
         const crossX = dirY * upZ - dirZ * upY;
         const crossY = dirZ * upX - dirX * upZ;
         const crossZ = dirX * upY - dirY * upX;
-        const crossLen = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ);
+        const crossLength = Math.sqrt(crossX * crossX + crossY * crossY + crossZ * crossZ);
 
-        if (crossLen < 0.0001) {
+        if (crossLength < 0.0001) {
             upX = 0;
             upY = 0;
             upZ = dirY > 0 ? 1 : -1;
