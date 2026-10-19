@@ -30,8 +30,8 @@ interface FXAA {
 }
 
 /**
- * [KO] 화면 공간의 휘도 대비를 분석하여 계단 현상을 완화하는 단일 LDR 컴퓨트 패스 기반 FXAA(Fast Approximate Anti-Aliasing) 클래스입니다.
- * [EN] Single LDR compute pass FXAA (Fast Approximate Anti-Aliasing) class that reduces aliasing by analyzing screen-space luminance contrast.
+ * [KO] 화면의 밝기 차이(대비)를 분석해 물체 경계의 계단 현상을 부드럽게 완화하는 FXAA(Fast Approximate Anti-Aliasing) 후처리 클래스입니다.
+ * [EN] FXAA (Fast Approximate Anti-Aliasing) post-processing class that smooths jagged edges by analyzing brightness contrast on the screen.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

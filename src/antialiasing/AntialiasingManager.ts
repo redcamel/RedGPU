@@ -4,8 +4,8 @@ import createUUID from "../utils/uuid/createUUID";
  * [KO] 컨텍스트 전역의 안티앨리어싱(Anti-aliasing) 모드를 통합 관리하는 클래스입니다.
  * [EN] Class that manages the global anti-aliasing mode across the context.
  *
- * [KO] MSAA(Multi-Sample Anti-Aliasing), FXAA(Fast Approximate Anti-Aliasing), TAA(Temporal Anti-Aliasing) 중 하나의 기법을 상호 배타적으로 활성화하며, 초기 생성 시 디스플레이 픽셀 밀도(`window.devicePixelRatio > 1.0`)에 따라 고해상도 환경에서는 `useTAA`, 일반 해상도 환경에서는 `useMSAA`가 기본 활성화됩니다.
- * [EN] Mutually exclusively activates one technique among MSAA (Multi-Sample Anti-Aliasing), FXAA (Fast Approximate Anti-Aliasing), and TAA (Temporal Anti-Aliasing); upon initialization, `useTAA` is enabled by default on high-DPI displays (`window.devicePixelRatio > 1.0`) and `useMSAA` on standard displays.
+ * [KO] MSAA, FXAA, TAA 중 하나의 안티앨리어싱 기법만 선택해 적용할 수 있습니다. 처음 생성될 때는 화면 해상도(`window.devicePixelRatio > 1.0`)를 감지하여, 고해상도(Retina 등) 모니터에서는 `useTAA`가, 일반 모니터에서는 `useMSAA`가 기본으로 켜집니다.
+ * [EN] Only one anti-aliasing technique among MSAA, FXAA, and TAA can be applied at a time. Upon initial creation, it detects the screen resolution (`window.devicePixelRatio > 1.0`) and enables `useTAA` by default on high-DPI (e.g., Retina) displays, or `useMSAA` on standard displays.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

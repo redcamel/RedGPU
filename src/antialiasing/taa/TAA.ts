@@ -10,11 +10,11 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
 import TAACASPass from "./cas/TAACASPass";
 
 /**
- * [KO] 프레임 간 서브픽셀 카메라 지터링(Jittering)과 모션 벡터 기반 히스토리 재투영을 결합한 TAA(Temporal Anti-Aliasing) 클래스입니다.
- * [EN] TAA (Temporal Anti-Aliasing) class that combines inter-frame sub-pixel camera jittering with motion-vector-based history reprojection.
+ * [KO] 이전 프레임의 화면 정보와 픽셀 이동 경로(모션 벡터)를 활용해 고품질 안티앨리어싱을 수행하는 TAA(Temporal Anti-Aliasing) 클래스입니다.
+ * [EN] TAA (Temporal Anti-Aliasing) class that delivers high-quality anti-aliasing by combining previous frame history with pixel motion vectors.
  *
- * [KO] 폴리곤 경계의 계단 현상뿐만 아니라 셰이더 내부의 스페큘러 하이라이트 깜빡임(Specular Aliasing)과 서브픽셀 라인의 끊김 현상까지 시간축 누적 샘플링으로 억제하며, 내장된 CAS(Contrast Adaptive Sharpening) 패스를 통해 선명도를 복원합니다.
- * [EN] Suppresses not only polygon edge aliasing but also shader specular aliasing and sub-pixel line shimmering through temporal accumulation, while restoring image crispness via the built-in CAS (Contrast Adaptive Sharpening) pass.
+ * [KO] 물체 외곽선의 계단 현상은 물론, 빛 반사(하이라이트)가 깜빡이거나 얇은 선이 끊어져 보이는 현상까지 자연스럽게 잡아주며, 내장된 샤프닝(CAS) 처리로 원본의 선명함을 유지합니다.
+ * [EN] Smooths out not only jagged object edges, but also flickering specular highlights and broken thin lines, while preserving image sharpness through built-in Contrast Adaptive Sharpening (CAS).
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
