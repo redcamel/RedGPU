@@ -151,7 +151,7 @@ fn sampleLayerStochasticLevel(
     return res;
 }
 
-@compute @workgroup_size(16, 16)
+@compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tileW = u32(uniforms.tilePixelSize.x);
     let tileH = u32(uniforms.tilePixelSize.y);

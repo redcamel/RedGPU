@@ -960,7 +960,7 @@ class ParticleEmitter extends Mesh {
         commandEncoderManager.addPreProcessComputePass('PARTICLE_EMITTER_COMPUTE_PASS', (computePass) => {
             computePass.setPipeline(this.#computePipeline);
             computePass.setBindGroup(0, this.#computeBindGroup);
-            computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
+            computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 64));
         });
     }
 

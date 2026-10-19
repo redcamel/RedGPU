@@ -21,6 +21,7 @@ abstract class ALandscapeAtlasGenerator extends RedGPUObject {
     #poolIndex: number = 0;
     #lastFrameId: number = -1;
     #generatorLabel: string;
+    #workgroupSize: number = 16;
 
     /**
      * [KO] `ALandscapeAtlasGenerator` 인스턴스를 초기화합니다.
@@ -32,10 +33,14 @@ abstract class ALandscapeAtlasGenerator extends RedGPUObject {
      * @param generatorLabel -
      * [KO] GPU 리소스 디버그 라벨 식별자 (예: `'VHT'`, `'VNT'`, `'VBT'`)
      * [EN] GPU resource debug label identifier (e.g., `'VHT'`, `'VNT'`, `'VBT'`)
+     * @param workgroupSize -
+     * [KO] 컴퓨트 셰이더 2D 워크그룹 가로/세로 크기 (기본값: `16`)
+     * [EN] Compute shader 2D workgroup width/height size (Default: `16`)
      */
-    constructor(redGPUContext: RedGPUContext, generatorLabel: string) {
+    constructor(redGPUContext: RedGPUContext, generatorLabel: string, workgroupSize: number = 16) {
         super(redGPUContext);
         this.#generatorLabel = generatorLabel;
+        this.#workgroupSize = workgroupSize;
     }
 
     /**
@@ -139,8 +144,8 @@ abstract class ALandscapeAtlasGenerator extends RedGPUObject {
         if (!computePipeline) return;
         if (pixelW <= 0 || pixelH <= 0) return;
 
-        const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
-        const workgroupCountY = Math.max(1, Math.ceil(pixelH / 16));
+        const workgroupCountX = Math.max(1, Math.ceil(pixelW / this.#workgroupSize));
+        const workgroupCountY = Math.max(1, Math.ceil(pixelH / this.#workgroupSize));
 
         this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
             const pass = commandEncoder.beginComputePass({

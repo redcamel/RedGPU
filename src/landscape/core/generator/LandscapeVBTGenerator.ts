@@ -44,7 +44,7 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, 'VBT');
+        super(redGPUContext, 'VBT', 8);
         this.#initComputeResources();
         this.#initTileMipComputeResources();
     }

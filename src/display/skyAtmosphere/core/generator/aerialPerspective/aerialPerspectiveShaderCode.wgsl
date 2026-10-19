@@ -7,7 +7,7 @@
 @group(0) @binding(4) var transmittanceLUT: texture_2d<f32>;
 @group(0) @binding(13) var skyAtmosphereSampler: sampler;
 
-@compute @workgroup_size(8, 8, 4)
+@compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [KO] 1. 인덱스 및 정규화된 UVW 좌표 계산 (3D LUT)
     // [EN] 1. Index and normalized UVW coordinate calculation (3D LUT)

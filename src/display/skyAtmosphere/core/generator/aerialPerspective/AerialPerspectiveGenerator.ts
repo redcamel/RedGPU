@@ -91,7 +91,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
             ]);
         }
 
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
     }
 
     /**

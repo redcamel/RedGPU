@@ -201,11 +201,12 @@ fn randomRange(min:f32, max:f32, v:f32)->f32
 fn compute_value(tInfo: Info, lifeRatio: f32) -> f32 {
     return tInfo.startValue + ((tInfo.endValue - tInfo.startValue) * calEasing(lifeRatio, tInfo.easeType));
 }
-@compute @workgroup_size(256,1,1)
+@compute @workgroup_size(64, 1, 1)
 fn main(
     @builtin(global_invocation_id) global_id : vec3<u32>
  ) {
     let index: u32 = (global_id.x);
+    if (index >= arrayLength(&particles)) { return; }
     let age: f32 = (params.time - particles[index].startTime);
     var lifeRatio: f32 = (age / particles[index].life);
     if (lifeRatio >= 1.0 ) {

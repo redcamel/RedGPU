@@ -7,7 +7,7 @@
 @group(0) @binding(3) var skyAtmosphereSampler: sampler;
 @group(0) @binding(4) var<uniform> params: SkyAtmosphere;
 
-@compute @workgroup_size(16, 16)
+@compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [KO] 1. 인덱스 및 정규화된 좌표 계산
     // [EN] 1. Index and normalized coordinate calculation
