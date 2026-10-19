@@ -27,7 +27,7 @@ const BaseTextField2D = mixInMesh2D(ATextField);
  * scene.addChild(textField);
  * ```
  *
- * <iframe src="/RedGPU/examples/2d/textField2D/basic/"></iframe>
+ * <iframe src="/RedGPU/examples/2d/textField2D/basic/" style="width:100%; height:500px;"></iframe>
  *
  * @see [TextField2D Basic Example](/RedGPU/examples/2d/textField2D/basic/)
  * @see [TextField2D MouseEvent Example](/RedGPU/examples/2d/interaction/mouseEvent/textField2D/)

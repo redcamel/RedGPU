@@ -33,7 +33,7 @@ interface Vibrance {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/" style="width:100%; height:500px;"></iframe>
  * @category Adjustments
  */
 class Vibrance extends ASinglePassPostEffect {

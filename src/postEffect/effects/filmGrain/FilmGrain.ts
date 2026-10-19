@@ -74,7 +74,7 @@ interface FilmGrain {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/filmGrain/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/filmGrain/" style="width:100%; height:500px;"></iframe>
  * @see [FilmGrain example](/RedGPU/examples/postEffect/filmGrain/)
  * @category Visual Effects
  */

@@ -18,7 +18,7 @@ import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/oldBloom/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/oldBloom/" style="width:100%; height:500px;"></iframe>
  * @category Visual Effects
  */
 class OldBloom extends AMultiPassPostEffect {

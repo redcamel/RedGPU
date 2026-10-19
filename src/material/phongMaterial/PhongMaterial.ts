@@ -150,7 +150,7 @@ interface PhongMaterial {
  * material.diffuseTexture = sourceTexture;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/material/phongMaterial/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/material/phongMaterial/" style="width:100%; height:500px;"></iframe>
  *
  * @see [PhongMaterial example](/RedGPU/examples/3d/material/phongMaterial/)
  * @see [PhongMaterial Textures example](/RedGPU/examples/3d/material/phongMaterialTextures/)

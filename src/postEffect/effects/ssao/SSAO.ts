@@ -28,7 +28,7 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
  * ssaoEffect.intensity = 1.5;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/ssao/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
  * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */

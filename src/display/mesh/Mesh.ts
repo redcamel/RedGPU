@@ -81,7 +81,7 @@ interface LODGPURenderInfo {
  * scene.addChild(mesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/mesh/basicMesh/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Mesh Hierarchy example](/RedGPU/examples/3d/mesh/hierarchy/)
  * @see [Mesh Pivot example](/RedGPU/examples/3d/mesh/pivot/)

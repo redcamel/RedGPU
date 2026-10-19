@@ -54,11 +54,11 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
  * scene.addChild(textField);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/textField/textField3D/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/textField/textField3D/" style="width:100%; height:500px;"></iframe>
  *
  * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
  * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/textField/textField3DCompare/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/textField/textField3DCompare/" style="width:100%; height:500px;"></iframe>
  *
  * @see [TextField3D Basic Example](/RedGPU/examples/3d/textField/textField3D/)
  * @see [TextField3D Comparison (World vs Pixel)](/RedGPU/examples/3d/textField/textField3DCompare/)

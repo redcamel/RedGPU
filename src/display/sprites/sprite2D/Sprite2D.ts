@@ -21,7 +21,7 @@ const BaseSprite2D = mixInMesh2D(Mesh);
  * scene.addChild(sprite);
  * ```
  *
- * <iframe src="/RedGPU/examples/2d/sprite2D/basic/"></iframe>
+ * <iframe src="/RedGPU/examples/2d/sprite2D/basic/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Sprite2D Basic example](/RedGPU/examples/2d/sprite2D/basic/)
  * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)

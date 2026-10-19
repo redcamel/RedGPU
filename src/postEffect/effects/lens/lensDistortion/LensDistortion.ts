@@ -39,7 +39,7 @@ interface LensDistortion {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/lensDistortion/" style="width:100%; height:500px;"></iframe>
  * @category Lens
  */
 class LensDistortion extends ASinglePassPostEffect {

@@ -33,7 +33,7 @@ interface HueSaturation {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/" style="width:100%; height:500px;"></iframe>
  * @category Adjustments
  */
 class HueSaturation extends ASinglePassPostEffect {

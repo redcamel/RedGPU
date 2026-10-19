@@ -17,7 +17,7 @@ import Convolution from "./convolution/Convolution";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/sharpen/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/sharpen/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Sharpen example](/RedGPU/examples/postEffect/sharpen/)
  * @category PostEffect

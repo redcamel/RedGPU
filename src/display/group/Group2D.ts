@@ -12,7 +12,7 @@ import Group3D from "./Group3D";
  * scene.addChild(group);
  * ```
  *
- * <iframe src="/RedGPU/examples/2d/group2D/basic/" ></iframe>
+ * <iframe src="/RedGPU/examples/2d/group2D/basic/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Group2D basic example](/RedGPU/examples/2d/group2D/basic/)
  * @category Group

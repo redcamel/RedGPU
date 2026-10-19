@@ -49,7 +49,7 @@ interface ZoomBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/" style="width:100%; height:500px;"></iframe>
  * @see [ZoomBlur example](/RedGPU/examples/postEffect/blur/zoomBlur/)
  * @category Blur
  */

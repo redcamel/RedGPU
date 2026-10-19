@@ -16,7 +16,7 @@ import BlurY from "./blurY/BlurY";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/" style="width:100%; height:500px;"></iframe>
  * @see [GaussianBlur example](/RedGPU/examples/postEffect/blur/gaussianBlur/)
  * @category Blur
  */

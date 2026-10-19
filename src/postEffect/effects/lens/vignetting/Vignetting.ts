@@ -47,7 +47,7 @@ interface Vignetting {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/vignetting/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/vignetting/" style="width:100%; height:500px;"></iframe>
  * @category Lens
  */
 class Vignetting extends ASinglePassPostEffect {

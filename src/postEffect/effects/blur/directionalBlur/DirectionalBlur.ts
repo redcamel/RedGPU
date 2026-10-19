@@ -38,7 +38,7 @@ interface DirectionalBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/" style="width:100%; height:500px;"></iframe>
  * @see [DirectionalBlur example](/RedGPU/examples/postEffect/blur/directionalBlur/)
  * @category Blur
  */

@@ -26,7 +26,7 @@ interface Invert {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/" style="width:100%; height:500px;"></iframe>
  * @category Adjustments
  */
 class Invert extends ASinglePassPostEffect {

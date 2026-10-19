@@ -43,7 +43,7 @@ interface RadialBlur {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/" style="width:100%; height:500px;"></iframe>
  * @see [RadialBlur example](/RedGPU/examples/postEffect/blur/radialBlur/)
  * @category Blur
  */

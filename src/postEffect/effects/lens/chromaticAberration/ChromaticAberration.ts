@@ -44,7 +44,7 @@ interface ChromaticAberration {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/chromaticAberration/" style="width:100%; height:500px;"></iframe>
  * @see [ChromaticAberration example](/RedGPU/examples/postEffect/lens/chromaticAberration/)
  * @category Lens
  */

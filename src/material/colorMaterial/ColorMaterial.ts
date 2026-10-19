@@ -26,7 +26,7 @@ interface ColorMaterial {
  * const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/material/colorMaterial/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/material/colorMaterial/" style="width:100%; height:500px;"></iframe>
  *
  * @see [ColorMaterial example](/RedGPU/examples/3d/material/colorMaterial/)
  * @see [Material Opacity example](/RedGPU/examples/3d/material/opacity/)

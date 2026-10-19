@@ -41,7 +41,7 @@ const EMBOSS = ([
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/convolution/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/convolution/" style="width:100%; height:500px;"></iframe>
  * @see [Convolution example](/RedGPU/examples/postEffect/convolution/)
  * @category PostEffect
  */

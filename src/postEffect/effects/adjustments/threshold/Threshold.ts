@@ -26,7 +26,7 @@ interface Threshold {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/" style="width:100%; height:500px;"></iframe>
  * @category Adjustments
  */
 class Threshold extends ASinglePassPostEffect {

@@ -27,7 +27,7 @@ const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTE
  * });
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/texture/bitmapTextureSampler/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Sampler Combination example](/RedGPU/examples/3d/texture/samplerCombination/)
  * @see [Sampler AddressMode example](/RedGPU/examples/3d/texture/samplerAddressMode/)

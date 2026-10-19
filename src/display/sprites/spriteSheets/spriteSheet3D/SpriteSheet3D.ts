@@ -53,7 +53,7 @@ interface SpriteSheet3D extends ASpriteSheet {
  * scene.addChild(spriteSheet);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/" style="width:100%; height:500px;"></iframe>
  *
  * @see [SpriteSheet3D Basic Example](/RedGPU/examples/3d/sprite/spriteSheet3D/)
  * @see [SpriteSheet3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)

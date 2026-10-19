@@ -19,7 +19,7 @@ interface Group3D {
  * scene.addChild(group);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/group3D/basic/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/group3D/basic/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Group3D basic example](/RedGPU/examples/3d/group3D/basic/)
  * @category Group

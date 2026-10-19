@@ -36,7 +36,7 @@ const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_SKYBOX'
  * view.skybox = skybox;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" style="width:100%; height:500px;"></iframe>
  *
  * @see [SkyBox basic example](/RedGPU/examples/3d/skybox/skybox/)
  * @see [SkyBox IBL example](/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/)

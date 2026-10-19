@@ -48,7 +48,7 @@ let temp3 = mat4.create()
  * redGPUContext.addView(view);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/view/singleView/" ></iframe>
+ * <iframe src="/RedGPU/examples/3d/view/singleView/" style="width:100%; height:500px;"></iframe>
  *
  * @see [singleView Example](/RedGPU/examples/3d/view/singleView/)
  * @see [multiView Example](/RedGPU/examples/3d/view/multiView/)

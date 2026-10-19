@@ -37,7 +37,7 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
  * scene.addChild(line);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/line3D/linear/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/line3D/linear/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Line3D Linear Type example](/RedGPU/examples/3d/line3D/linear/)
  * @see [Line3D Bezier Type example](/RedGPU/examples/3d/line3D/bezier/)

@@ -37,7 +37,7 @@ interface BitmapMaterial {
  * const material = new RedGPU.Material.BitmapMaterial(redGPUContext, sourceTexture);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/material/bitmapMaterial/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/material/bitmapMaterial/" style="width:100%; height:500px;"></iframe>
  *
  * @see [BitmapMaterial example](/RedGPU/examples/3d/material/bitmapMaterial/)
  * @see [Material Opacity example](/RedGPU/examples/3d/material/opacity/)

@@ -46,7 +46,7 @@ interface ParticleEmitter {
  * scene.addChild(emitter);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/particle/basic/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/particle/basic/" style="width:100%; height:500px;"></iframe>
  *
  * [KO] 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of ParticleEmitter.

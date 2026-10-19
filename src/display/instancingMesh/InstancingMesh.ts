@@ -61,7 +61,7 @@ interface LODGPURenderInfo {
  * scene.addChild(instancingMesh);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/" style="width:100%; height:500px;"></iframe>
  *
  * @see [InstancingMesh Simple example](/RedGPU/examples/3d/instancedMesh/simple/)
  * @see [InstancingMesh Sphere example](/RedGPU/examples/3d/instancedMesh/sphere/)

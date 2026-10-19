@@ -28,7 +28,7 @@ const BaseSpriteSheet2D = mixInMesh2D(ASpriteSheet);
  * scene.addChild(spriteSheet);
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/" style="width:100%; height:500px;"></iframe>
  *
  * @see [SpriteSheet2D Basic Example](/RedGPU/examples/2d/spriteSheet2D/basic/)
  * @see [SpriteSheet2D MouseEvent Example](/RedGPU/examples/2d/interaction/mouseEvent/spriteSheet2D/)

@@ -20,7 +20,7 @@ import DOFUnified from "./DOFUnified/DOFUnified";
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/lens/dof/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
  * @category Lens
  */
 class DOF extends AMultiPassPostEffect {

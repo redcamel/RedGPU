@@ -15,7 +15,7 @@ import Convolution from "../convolution/Convolution";
  * view.postEffectManager.addEffect(new RedGPU.PostEffect.Blur(redGPUContext));
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/blur/blur/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/blur/blur/" style="width:100%; height:500px;"></iframe>
  * @see [Blur example](/RedGPU/examples/postEffect/blur/blur/)
  * @category Blur
  */

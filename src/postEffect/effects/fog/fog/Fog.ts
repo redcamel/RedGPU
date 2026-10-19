@@ -53,7 +53,7 @@ interface Fog {
  * view.postEffectManager.addEffect(effect);
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/fog/fog/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/fog/fog/" style="width:100%; height:500px;"></iframe>
  * @see [Fog example](/RedGPU/examples/postEffect/fog/fog/)
  * @category Fog
  */
