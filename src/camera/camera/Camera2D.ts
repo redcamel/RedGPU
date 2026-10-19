@@ -3,12 +3,20 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import ACamera from "../core/ACamera";
 
 /**
- * [KO] 2D 평면 좌표계를 기반으로 객체를 렌더링하는 카메라 클래스입니다.
- * [EN] Camera class that renders objects based on a 2D planar coordinate system.
+ * [KO] 2D 평면 좌표계를 기반으로 객체를 렌더링하는 카메라 클래스입니다. `View2D` 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Camera class that renders objects based on a 2D planar coordinate system. Automatically created internally when `View2D` is instantiated.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * ### Example
  * ```typescript
- * const camera = new RedGPU.Camera.Camera2D();
+ * // [KO] 올바른 접근 방법
+ * // [EN] Correct access method
+ * const view = new RedGPU.Display.View2D(redGPUContext, scene);
+ * const camera = view.camera;
  * camera.setPosition(100, 50);
  * ```
  *
@@ -25,11 +33,6 @@ class Camera2D extends ACamera {
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
      * [EN] Creates a Camera2D instance.
-     *
-     * ### Example
-     * ```typescript
-     * const camera = new RedGPU.Camera.Camera2D();
-     * ```
      */
     constructor() {
         super();
