@@ -16,7 +16,6 @@ struct SkyAtmosphere {
 	skyLuminanceFactor: vec3<f32>,
 	multiScatteringFactor: f32,
 	sunDirection: vec3<f32>,
-	transmittanceMinLightElevationAngle: f32,
 	groundRadius: f32,
 	atmosphereHeight: f32,
 	aerialPerspectiveDistanceScale: f32,

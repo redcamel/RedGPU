@@ -237,7 +237,6 @@ class SystemUniformUpdater {
                 {key: 'skyLuminanceFactor', value: params?.skyLuminanceFactor || [1, 1, 1]},
                 {key: 'multiScatteringFactor', value: params?.multiScatteringFactor || 0},
                 {key: 'sunDirection', value: params?.sunDirection || [0, 0, 0]},
-                {key: 'transmittanceMinLightElevationAngle', value: params?.transmittanceMinLightElevationAngle || 0},
                 {key: 'groundRadius', value: params?.groundRadius || 0},
                 {key: 'atmosphereHeight', value: params?.atmosphereHeight || 0},
                 {key: 'aerialPerspectiveDistanceScale', value: params?.aerialPerspectiveDistanceScale || 100.0},

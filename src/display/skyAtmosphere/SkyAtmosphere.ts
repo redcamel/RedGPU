@@ -27,7 +27,6 @@ interface CachedUniformMember {
     key: string;
     offset: number;
     isFloat: boolean;
-    isArray: boolean;
 }
 
 /**
@@ -79,7 +78,6 @@ class SkyAtmosphere extends RedGPUObject {
         skyLuminanceFactor: [1.0, 1.0, 1.0],
         multiScatteringFactor: 1.0,
         sunDirection: new Float32Array([0, 1, 0]),
-        transmittanceMinLightElevationAngle: -90.0,
         groundRadius: 6360.0,
         atmosphereHeight: 60.0,
         aerialPerspectiveDistanceScale: 100.0,
@@ -95,7 +93,6 @@ class SkyAtmosphere extends RedGPUObject {
         cloudHeight: 5.0
     };
 
-    #activeSunSource: DirectionalLight = null;
     #prevSunSource: DirectionalLight = null;
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
@@ -264,22 +261,6 @@ class SkyAtmosphere extends RedGPUObject {
 
     set aerialPerspectiveStartDepth(v: number) {
         this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
-    }
-
-    /**
-     * [KO] 투과율 계산에 사용되는 최소 태양 고도각(단위: 도, 범위: -90 ~ 90)을 가져오거나 설정합니다. (기본값: -90.0)
-     * [EN] Gets or sets the minimum light elevation angle used for transmittance calculation (unit: degrees, range: -90 to 90). (Default: -90.0)
-     *
-     * @returns
-     * [KO] 최소 고도각 (도)
-     * [EN] Minimum elevation angle (degrees)
-     */
-    get transmittanceMinLightElevationAngle(): number {
-        return this.#params.transmittanceMinLightElevationAngle;
-    }
-
-    set transmittanceMinLightElevationAngle(v: number) {
-        this.#setParam('transmittanceMinLightElevationAngle', v, true, true, true, (v) => validateNumberRange(v, -90, 90));
     }
 
     /**
@@ -455,7 +436,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set absorptionTipAltitude(v: number) {
-        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(0, 100));
+        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100));
     }
 
     /**
@@ -741,7 +722,6 @@ class SkyAtmosphere extends RedGPUObject {
         this.#skyLight = null;
         this.#backgroundRenderer = null;
         this.#postEffect = null;
-        this.#activeSunSource = null;
         this.#prevSunSource = null;
     }
 
@@ -761,7 +741,6 @@ class SkyAtmosphere extends RedGPUObject {
         const sourceChanged = this.#prevSunSource !== source;
         if (sourceChanged) {
             this.#prevSunSource = source;
-            this.#activeSunSource = source;
         }
 
         if (source) {
@@ -861,12 +840,10 @@ class SkyAtmosphere extends RedGPUObject {
         this.#cachedUniformMembers = [];
         for (const [key, member] of Object.entries(members)) {
             const targetMember = member as any;
-            const isArray = targetMember.arrayLength !== undefined || targetMember.isVector;
             this.#cachedUniformMembers.push({
                 key,
                 offset: targetMember.uniformOffset / 4,
-                isFloat: targetMember.View === Float32Array,
-                isArray
+                isFloat: targetMember.View === Float32Array
             });
         }
     }

@@ -106,7 +106,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         ]);
     }
 
-    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup): Promise<void> {
+    #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup): void {
         const {resourceManager} = this.redGPUContext;
         this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
         resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
@@ -116,7 +116,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: getMipLevelCount(this.width, this.height),
             dimension: '2d'
         }, true, COMMAND_ENCODER_TYPE.RESOURCE);
-        await resourceManager.irradianceGenerator.render(
+        resourceManager.irradianceGenerator.render(
             this.#sourceCubeTexture,
             this.#lutTexture.gpuTexture,
             COMMAND_ENCODER_TYPE.RESOURCE
