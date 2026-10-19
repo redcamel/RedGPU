@@ -148,9 +148,9 @@ class Mesh extends MeshBase {
     #dirtyBoundingAABB: boolean = true;
     #cachedBoundingOBB: OBB;
     #prevModelMatrix: Float32Array;
-    #bundleEncoder: GPURenderBundleEncoder;
-    #renderBundle: GPURenderBundle;
-    #renderBundle_LODList: GPURenderBundle[] = [];
+    #bundleEncoderList: GPURenderBundleEncoder[] = [];
+    #renderBundleList: GPURenderBundle[] = [];
+    #renderBundle_LODList: GPURenderBundle[][] = [];
     #prevSystemBindGroupList: GPUBindGroup[] = [];
     #prevFragmentBindGroup: GPUBindGroup;
     #drawCommandSlot: DrawCommandSlot | null = null;
@@ -1490,8 +1490,10 @@ class Mesh extends MeshBase {
             }
             if (currentDirtyPipeline || dirtyVertexUniformFromMaterial[currentMaterialUUID]) {
                 updateMeshDirtyPipeline(this, renderViewStateData)
-                this.#bundleEncoder = null
-                this.#renderBundle = null
+                this.#bundleEncoderList.length = 0
+                this.#renderBundleList.length = 0
+                this.#renderBundle_LODList.length = 0
+                this.#prevSystemBindGroupList.length = 0
 
             }
 
@@ -1571,16 +1573,22 @@ class Mesh extends MeshBase {
             } = renderViewStateData.renderBundleResults
             {
                 {
+                    const {viewIndex} = renderViewStateData
                     const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
                     if (
-                        !this.#bundleEncoder
-                        || currentDirtyPipeline
+                        currentDirtyPipeline
                         || this.#prevFragmentBindGroup !== fragmentUniformBindGroup
-                        || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
-
-
+                        this.#bundleEncoderList.length = 0
+                        this.#renderBundleList.length = 0
+                        this.#renderBundle_LODList.length = 0
+                        this.#prevSystemBindGroupList.length = 0
+                    }
+                    if (
+                        !this.#bundleEncoderList[viewIndex]
+                        || this.#prevSystemBindGroupList[viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
+                    ) {
                         this.#setRenderBundle(renderViewStateData)
                     }
 
@@ -1596,9 +1604,10 @@ class Mesh extends MeshBase {
                         renderViewStateData.renderResults.numTriangles += triangleCount;
                         renderViewStateData.renderResults.numPoints += vertexCount
                     }
-                    let renderBundle = this.#renderBundle;
+                    let renderBundle = this.#renderBundleList[viewIndex];
                     {
                         if (lodLen) {
+                            const viewLODBundleList = this.#renderBundle_LODList[viewIndex];
                             let idx = this.#currentLODIndex;
 
                             if (idx < 0 || idx >= lodLen) {
@@ -1636,15 +1645,15 @@ class Mesh extends MeshBase {
                                 if (newIdx !== idx) {
                                     this.#currentLODIndex = newIdx;
                                     if (newIdx >= 0 && newIdx < lodLen) {
-                                        renderBundle = this.#renderBundle_LODList[newIdx];
+                                        renderBundle = viewLODBundleList[newIdx];
                                     }
                                 }
 
                             } else if (idx >= 0 && idx < lodLen) {
-                                renderBundle = this.#renderBundle_LODList[idx];
+                                renderBundle = viewLODBundleList[idx];
 
                             }
-                            let targetIdx = this.#renderBundle_LODList.indexOf(renderBundle)
+                            let targetIdx = viewLODBundleList.indexOf(renderBundle)
                             const lodMaterial = this.#LODManager.LODList[targetIdx]?.material || currentMaterial
                             if (this.#prevLodIDX !== targetIdx && lodMaterial.globalFragmentSlotIndex !== undefined && lodMaterial.globalFragmentSlotIndex > -1) {
 
@@ -1786,7 +1795,8 @@ class Mesh extends MeshBase {
         this.#drawBufferManager = null;
 
         this.#lodGPURenderInfoList = [];
-        this.#renderBundle = null;
+        this.#bundleEncoderList = [];
+        this.#renderBundleList = [];
         this.#renderBundle_LODList = [];
         this.#prevSystemBindGroupList = [];
         this.#prevFragmentBindGroup = null;
@@ -1878,7 +1888,7 @@ class Mesh extends MeshBase {
     }
 
     #setRenderBundle(renderViewStateData: RenderViewStateData) {
-        const {view} = renderViewStateData
+        const {view, viewIndex} = renderViewStateData
         const {redGPUContext} = this
         const {resourceManager} = redGPUContext
         const currentMaterial = this._material
@@ -1891,15 +1901,20 @@ class Mesh extends MeshBase {
             redGPUContext.globalVertexSSBO.flush();
         }
         this.#prevLodIDX = -1;
-        this.#renderBundle = this.#createRenderBundle(view, this._geometry, this._material)
         if (this.dirtyLOD) {
             this.#updateLODPipeline()
             this.dirtyLOD = false
         }
-        this.#renderBundle_LODList.length = 0;
+        this.#renderBundleList[viewIndex] = this.#createRenderBundle(view, this._geometry, this._material)
+        let viewLODBundleList = this.#renderBundle_LODList[viewIndex]
+        if (!viewLODBundleList) {
+            viewLODBundleList = this.#renderBundle_LODList[viewIndex] = []
+        } else {
+            viewLODBundleList.length = 0
+        }
         this.LODManager.LODList.forEach((lod, index) => {
             const currentMaterial = lod.material || this._material
-            this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, currentMaterial, index)
+            viewLODBundleList[index] = this.#createRenderBundle(view, lod.geometry, currentMaterial, index)
         });
     }
 
@@ -1918,7 +1933,7 @@ class Mesh extends MeshBase {
         if (isLOD) {
 
         } else {
-            this.#bundleEncoder = bundleEncoder
+            this.#bundleEncoderList[renderViewStateData.viewIndex] = bundleEncoder
             this.#prevSystemBindGroupList[renderViewStateData.viewIndex] = view.systemUniform_Vertex_UniformBindGroup
             this.#prevFragmentBindGroup = fragmentUniformBindGroup
         }
