@@ -11,8 +11,8 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 
 
 /**
- * [KO] 대기 산란 데이터를 기반으로 간접 디퓨즈 조명(Irradiance)용 큐브맵을 베이킹하고 프리필터링하는 생성기입니다.
- * [EN] Generator that bakes and prefilters a cubemap for indirect diffuse lighting (Irradiance) based on atmospheric scattering data.
+ * [KO] 대기 산란 데이터를 기반으로 간접 디퓨즈 조명(Irradiance)용 큐브맵을 베이킹하는 생성기입니다.
+ * [EN] Generator that bakes a cubemap for indirect diffuse lighting (Irradiance) based on atmospheric scattering data.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -24,7 +24,7 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
-    #prefilteredTexture: DirectCubeTexture;
+    #lutTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
 
@@ -48,44 +48,20 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 베이킹된 원본 소스 큐브 텍스처를 반환합니다.
-     * [EN] Returns the baked original source cube texture.
-     *
-     * @returns
-     * [KO] 원본 GPUTexture 인스턴스
-     * [EN] Original GPUTexture instance
-     */
-    get sourceCubeTexture(): GPUTexture {
-        return this.#sourceCubeTexture;
-    }
-
-    /**
-     * [KO] 프리필터링이 완료된 큐브 텍스처를 반환합니다.
-     * [EN] Returns the prefiltered cube texture.
-     *
-     * @returns
-     * [KO] DirectCubeTexture 인스턴스
-     * [EN] DirectCubeTexture instance
-     */
-    get prefilteredTexture(): DirectCubeTexture {
-        return this.#prefilteredTexture;
-    }
-
-    /**
-     * [KO] 생성된 LUT 큐브 텍스처를 반환합니다.
-     * [EN] Returns the generated LUT cube texture.
+     * [KO] 생성된 간접 디퓨즈 조명용 Irradiance LUT 큐브 텍스처를 반환합니다.
+     * [EN] Returns the generated Irradiance LUT cube texture for indirect diffuse lighting.
      *
      * @returns
      * [KO] DirectCubeTexture 인스턴스
      * [EN] DirectCubeTexture instance
      */
     get lutTexture(): DirectCubeTexture {
-        return this.#prefilteredTexture;
+        return this.#lutTexture;
     }
 
     /**
-     * [KO] 대기 LUT 텍스처들을 입력받아 디퓨즈 조명용 큐브맵을 렌더링하고 프리필터링합니다.
-     * [EN] Renders and prefilters the diffuse lighting cubemap using atmospheric LUT textures as input.
+     * [KO] 대기 LUT 텍스처들을 입력받아 디퓨즈 조명용 Irradiance 큐브맵을 렌더링합니다.
+     * [EN] Renders the diffuse lighting Irradiance cubemap using atmospheric LUT textures as input.
      *
      * @param transmittance -
      * [KO] 대기 투과율(Transmittance) LUT 텍스처
@@ -97,12 +73,11 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 렌더링 완료 Promise (`Promise<void>`)
      * [EN] Render completion Promise (`Promise<void>`)
      */
-    // @ts-ignore
     async render(transmittance: DirectTexture, skyView: DirectTexture): Promise<void> {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
-        await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
+        await this.#processPass(this.#pipeline, this.#bindGroup);
     }
 
     /**
@@ -114,12 +89,9 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         if (this.#sourceCubeTexture) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
         }
-        if (this.#prefilteredTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#prefilteredTexture);
-        }
         this.#sourceCubeTexture = null;
         this.#sourceCubeTextureView = null;
-        this.#prefilteredTexture = null;
+        this.#lutTexture = null;
         this.#pipeline = null;
         this.#bindGroup = null;
     }
@@ -134,7 +106,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         ]);
     }
 
-    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
+    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup): Promise<void> {
         const {resourceManager} = this.redGPUContext;
         this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
         resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
@@ -144,13 +116,18 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: getMipLevelCount(this.width, this.height),
             dimension: '2d'
         }, true, COMMAND_ENCODER_TYPE.RESOURCE);
-        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture, COMMAND_ENCODER_TYPE.RESOURCE);
+        await resourceManager.irradianceGenerator.render(
+            this.#sourceCubeTexture,
+            this.#lutTexture.gpuTexture,
+            COMMAND_ENCODER_TYPE.RESOURCE
+        );
+        this.#lutTexture.notifyUpdate();
     }
 
     #init(): void {
-        const {gpuDevice} = this.redGPUContext;
+        const {gpuDevice, resourceManager} = this.redGPUContext;
         const mipLevelCount = getMipLevelCount(this.width, this.height);
-        const IRRADIANCE_SHADER_INFO = this.resourceManager.wgslParser.parse('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
+        const IRRADIANCE_SHADER_INFO = resourceManager.wgslParser.parse('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
 
         this.#sourceCubeTexture = gpuDevice.createTexture({
             label: 'SkyLight_Irradiance_Source_CubeTexture',
@@ -165,7 +142,18 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: 1
         });
 
-        this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Irradiance_LUTTexture_${createUUID()}`);
+        this.#lutTexture = new DirectCubeTexture(
+            this.redGPUContext,
+            `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`,
+            resourceManager.createManagedTexture({
+                size: [32, 32, 6],
+                format: 'rgba16float',
+                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+                dimension: '2d',
+                mipLevelCount: 1,
+                label: 'SkyAtmosphere_Irradiance_LUT'
+            })
+        );
         this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
     }
 

@@ -49,10 +49,8 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
                 '@group(0) @binding(0) var sourceTexture : texture_storage_2d<rgba16float, read>;',
                 '@group(0) @binding(1) var transmittanceLUT : texture_2d<f32>;',
-                '@group(0) @binding(2) var multiScatLUT : texture_2d<f32>;',
-                '@group(0) @binding(3) var skyViewLUT : texture_2d<f32>;',
-                '@group(0) @binding(4) var aerialPerspectiveLUT : texture_3d<f32>;',
-                '@group(0) @binding(5) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
+                '@group(0) @binding(2) var skyViewLUT : texture_2d<f32>;',
+                '@group(0) @binding(3) var aerialPerspectiveLUT : texture_3d<f32>;',
                 '',
                 postEffectSystemUniform,
                 '',
@@ -67,7 +65,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 `@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})`,
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
-                '    let viewHeight = uniforms.cameraHeight;',
                 skyAtmospherePostEffect_compute_wgsl,
                 '}'
             ].join('\n');
@@ -112,15 +109,10 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 texture: skyAtmosphere.transmittanceLUT.gpuTexture,
                 textureView: skyAtmosphere.transmittanceLUT.gpuTextureView
             },
-            {texture: skyAtmosphere.multiScatLUT.gpuTexture, textureView: skyAtmosphere.multiScatLUT.gpuTextureView},
             {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView},
             {
                 texture: skyAtmosphere.aerialPerspectiveLUT.gpuTexture,
                 textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTextureView
-            },
-            {
-                texture: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTexture,
-                textureView: skyAtmosphere.skyAtmosphereIrradianceLUT.gpuTextureView
             }
         );
     }

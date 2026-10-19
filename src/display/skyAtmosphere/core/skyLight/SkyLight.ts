@@ -3,7 +3,6 @@ import SkyAtmosphere from "../../SkyAtmosphere";
 import SkyLightReflectionGenerator from "./core/SkyLightReflectionGenerator";
 import SkyLightIrradianceGenerator from "./core/SkyLightIrradianceGenerator";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
-import createUUID from "../../../../utils/uuid/createUUID";
 import Sampler from "../../../../resources/sampler/Sampler";
 import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import RedGPUObject from "../../../../base/RedGPUObject";
@@ -34,7 +33,6 @@ class SkyLight extends RedGPUObject {
     dirty: boolean = true;
     #reflectionGenerator: SkyLightReflectionGenerator;
     #irradianceGenerator: SkyLightIrradianceGenerator;
-    #irradianceLUT: DirectCubeTexture;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
     #isUpdatingIBL: boolean = false;
@@ -58,16 +56,6 @@ class SkyLight extends RedGPUObject {
         this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = sampler;
 
-        this.#irradianceLUT = new DirectCubeTexture(redGPUContext, `SkyAtmosphere_Irradiance_LUTTexture_${createUUID()}`,
-            this.resourceManager.createManagedTexture({
-                size: [32, 32, 6],
-                format: 'rgba16float',
-                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-                dimension: '2d',
-                mipLevelCount: 1,
-                label: 'SkyAtmosphere_Irradiance_LUT'
-            })
-        );
         this.#reflectionGenerator = new SkyLightReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#irradianceGenerator = new SkyLightIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
     }
@@ -81,7 +69,7 @@ class SkyLight extends RedGPUObject {
      * [EN] Irradiance cube texture
      */
     get irradianceLUT(): DirectCubeTexture {
-        return this.#irradianceLUT;
+        return this.#irradianceGenerator.lutTexture;
     }
 
     /**
@@ -93,7 +81,7 @@ class SkyLight extends RedGPUObject {
      * [EN] Reflection cube texture
      */
     get reflectionLUT(): DirectCubeTexture {
-        return this.#reflectionGenerator.prefilteredTexture;
+        return this.#reflectionGenerator.lutTexture;
     }
 
     /**
@@ -120,12 +108,6 @@ class SkyLight extends RedGPUObject {
                 skyAtmosphere.skyViewLUT
             );
 
-            this.resourceManager.irradianceGenerator.render(
-                this.#irradianceGenerator.sourceCubeTexture,
-                this.#irradianceLUT.gpuTexture
-            );
-
-            this.#irradianceLUT.notifyUpdate();
             this.#isUpdatingIBL = false;
             this.dirty = false;
         }
@@ -136,16 +118,12 @@ class SkyLight extends RedGPUObject {
      * [EN] Releases the SkyLight instance and internal IBL generator resources.
      */
     destroy(): void {
-        if (this.#irradianceLUT) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#irradianceLUT);
-        }
         if (this.#reflectionGenerator) {
             this.#reflectionGenerator.destroy();
         }
         if (this.#irradianceGenerator) {
             this.#irradianceGenerator.destroy();
         }
-        this.#irradianceLUT = null;
         this.#reflectionGenerator = null;
         this.#irradianceGenerator = null;
         this.#sharedUniformBuffer = null;

@@ -24,7 +24,7 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
-    #prefilteredTexture: DirectCubeTexture;
+    #lutTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
 
@@ -48,39 +48,15 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 베이킹된 원본 소스 큐브 텍스처를 반환합니다.
-     * [EN] Returns the baked original source cube texture.
-     *
-     * @returns
-     * [KO] 원본 GPUTexture 인스턴스
-     * [EN] Original GPUTexture instance
-     */
-    get sourceCubeTexture(): GPUTexture {
-        return this.#sourceCubeTexture;
-    }
-
-    /**
-     * [KO] 거칠기별 프리필터링이 완료된 반사 큐브 텍스처를 반환합니다.
-     * [EN] Returns the reflection cube texture prefiltered by roughness.
-     *
-     * @returns
-     * [KO] DirectCubeTexture 인스턴스
-     * [EN] DirectCubeTexture instance
-     */
-    get prefilteredTexture(): DirectCubeTexture {
-        return this.#prefilteredTexture;
-    }
-
-    /**
-     * [KO] 생성된 LUT 큐브 텍스처를 반환합니다.
-     * [EN] Returns the generated LUT cube texture.
+     * [KO] 거칠기별 프리필터링이 완료된 반사 LUT 큐브 텍스처를 반환합니다.
+     * [EN] Returns the reflection LUT cube texture prefiltered by roughness.
      *
      * @returns
      * [KO] DirectCubeTexture 인스턴스
      * [EN] DirectCubeTexture instance
      */
     get lutTexture(): DirectCubeTexture {
-        return this.#prefilteredTexture;
+        return this.#lutTexture;
     }
 
     /**
@@ -97,12 +73,11 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * [KO] 렌더링 완료 Promise (`Promise<void>`)
      * [EN] Render completion Promise (`Promise<void>`)
      */
-    // @ts-ignore
     async render(transmittance: DirectTexture, skyView: DirectTexture): Promise<void> {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
-        await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
+        await this.#processPass(this.#pipeline, this.#bindGroup, this.#lutTexture);
     }
 
     /**
@@ -114,12 +89,9 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         if (this.#sourceCubeTexture) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
         }
-        if (this.#prefilteredTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#prefilteredTexture);
-        }
         this.#sourceCubeTexture = null;
         this.#sourceCubeTextureView = null;
-        this.#prefilteredTexture = null;
+        this.#lutTexture = null;
         this.#pipeline = null;
         this.#bindGroup = null;
     }
@@ -165,7 +137,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: 1
         });
 
-        this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
+        this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
         this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
     }
 
