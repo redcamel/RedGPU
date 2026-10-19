@@ -46,8 +46,8 @@ RedGPU.init(
             return -1.212 - (z - 0.156) * 0.158384;
         };
 
-        // 6. 호수 수체(WaterLake) 생성 및 듀얼 노멀 바인딩
-        const lake = new RedGPU.Water.WaterLake(redGPUContext, 160, 160, 80, 80);
+        // 6. 호수 수체(Lake) 생성 및 듀얼 노멀 바인딩
+        const lake = new RedGPU.Water.Lake(redGPUContext, 160, 160, 80, 80);
         lake.waterLevel = 0.5;
 
         // 기본 수면 노멀 및 디테일 노멀 텍스처 바인딩
@@ -269,8 +269,8 @@ function createBeachEnvironment(redGPUContext, scene) {
 function renderTestPane(redGPUContext, lake, characterController, directionalLight) {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. WaterLake (수체 파동 시뮬레이션)
-            const lakeFolder = pane.addFolder({title: 'WaterLake (수체 파동 시뮬레이션)', expanded: true});
+            // 1. Lake (수체 파동 시뮬레이션)
+            const lakeFolder = pane.addFolder({title: 'Lake (수체 파동 시뮬레이션)', expanded: true});
 
             lakeFolder.addBinding(lake, 'interactionEnabled');
             lakeFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.05, max: 0.8, step: 0.01});

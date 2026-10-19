@@ -1,13 +1,13 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import RedGPUObject from "../../base/RedGPUObject";
-import Mesh from "../../display/mesh/Mesh";
-import WaterInteractionRegistry from "./WaterInteractionRegistry";
+import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import Mesh from "../../../display/mesh/Mesh";
+import LakeInteractionRegistry from "./LakeInteractionRegistry";
 
 /**
  * [KO] 수면과 상호작용하는 활성 메시의 물리적 파라미터를 담는 인터페이스입니다.
  * [EN] Interface containing physical parameters of an active mesh interacting with the water surface.
  */
-export interface WaterActiveMeshEntry {
+export interface LakeActiveMeshEntry {
     /**
      * [KO] 상호작용 대상 Mesh
      * [EN] Target Mesh for interaction
@@ -115,13 +115,13 @@ Object.freeze(MeshMotionTracker);
  *
  * @category Water
  */
-export class WaterInteractionManager extends RedGPUObject {
+class LakeInteractionManager extends RedGPUObject {
     #motionTrackers: Map<Mesh, MeshMotionTracker> = new Map();
-    #activeMeshBuffer: WaterActiveMeshEntry[] = [];
+    #activeMeshBuffer: LakeActiveMeshEntry[] = [];
 
     /**
-     * [KO] WaterInteractionManager 인스턴스를 생성합니다.
-     * [EN] Creates an instance of WaterInteractionManager.
+     * [KO] LakeInteractionManager 인스턴스를 생성합니다.
+     * [EN] Creates an instance of LakeInteractionManager.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -164,10 +164,10 @@ export class WaterInteractionManager extends RedGPUObject {
         domainRadius: number,
         waterLevel: number,
         verticalRange: number = 6.0
-    ): WaterActiveMeshEntry[] {
+    ): LakeActiveMeshEntry[] {
         let count = 0;
         const r2 = domainRadius * domainRadius;
-        const meshes = WaterInteractionRegistry.meshes;
+        const meshes = LakeInteractionRegistry.meshes;
 
         for (const mesh of meshes) {
             if (!mesh.geometry) continue;
@@ -258,8 +258,8 @@ export class WaterInteractionManager extends RedGPUObject {
     }
 
     /**
-     * [KO] WaterInteractionManager 인스턴스를 파괴하고 내부 모션 트래커 및 버퍼를 해제합니다.
-     * [EN] Destroys the WaterInteractionManager instance and clears internal motion trackers and buffers.
+     * [KO] LakeInteractionManager 인스턴스를 파괴하고 내부 모션 트래커 및 버퍼를 해제합니다.
+     * [EN] Destroys the LakeInteractionManager instance and clears internal motion trackers and buffers.
      */
     destroy(): void {
         this.#motionTrackers.clear();
@@ -267,7 +267,7 @@ export class WaterInteractionManager extends RedGPUObject {
     }
 
     #cleanupTrackers(): void {
-        const meshes = WaterInteractionRegistry.meshes;
+        const meshes = LakeInteractionRegistry.meshes;
         if (this.#motionTrackers.size > meshes.size + 16) {
             for (const mesh of this.#motionTrackers.keys()) {
                 if (!meshes.has(mesh)) {
@@ -278,5 +278,6 @@ export class WaterInteractionManager extends RedGPUObject {
     }
 }
 
-Object.freeze(WaterInteractionManager);
+Object.freeze(LakeInteractionManager);
+export default LakeInteractionManager;
 

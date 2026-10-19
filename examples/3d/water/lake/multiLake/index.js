@@ -5,9 +5,9 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] Multi Lake (다중 수체) 테스트 예제
  * [EN] Multi Lake test example
  *
- * [KO] 단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 WaterLake 수체를 동시에 렌더링하고,
+ * [KO] 단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 Lake 수체를 동시에 렌더링하고,
  *      각각의 수영장 벽체 내경에 물의 크기를 완벽하게 일치시켜 수영장 풀 구조를 정밀 테스트합니다.
- * [EN] Simultaneously renders 5 independent WaterLake bodies with distinct elevations (waterLevel), locations,
+ * [EN] Simultaneously renders 5 independent Lake bodies with distinct elevations (waterLevel), locations,
  *      sizes, and optical properties within a single scene, snuggly fitted inside pool boundary walls.
  */
 
@@ -66,7 +66,7 @@ RedGPU.init(
             'rgba8unorm'
         );
 
-        // 6. 5개의 독립된 수영장(WaterLake) 규격 정의 (수영장 내경과 물 크기 1:1 일치)
+        // 6. 5개의 독립된 수영장(Lake) 규격 정의 (수영장 내경과 물 크기 1:1 일치)
         const poolConfigs = [
             {
                 name: 'Pool 1 (Top Alpine)',
@@ -148,8 +148,8 @@ RedGPU.init(
         const lakes = [];
         for (let i = 0; i < poolConfigs.length; i++) {
             const cfg = poolConfigs[i];
-            // 수영장 벽 내경에 딱 맞는 크기로 WaterLake 생성 (수영장 내경 = 물 크기)
-            const lake = new RedGPU.Water.WaterLake(
+            // 수영장 벽 내경에 딱 맞는 크기로 Lake 생성 (수영장 내경 = 물 크기)
+            const lake = new RedGPU.Water.Lake(
                 redGPUContext,
                 cfg.poolWidth,
                 cfg.poolHeight,

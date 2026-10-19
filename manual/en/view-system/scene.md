@@ -47,7 +47,7 @@ A **Scene** goes beyond being a simple container and performs the following core
 *   **Hierarchy Management**: Manages parent-child relationships of objects through `addChild()` and `removeChild()` methods.
 *   **Lighting Data Management**: Centrally manages lighting data that affects the entire scene through the included **LightManager**, using GPU buffers (Uniform Buffers).
 * **Natural Environment & Simulation Integration**: Centrally coordinates large-scale terrain (**Landscape**), water
-  bodies (**WaterLake**), global wind (**WindManager**), shadows (**ShadowManager**), and physics plugins
+  bodies (**Lake**), global wind (**WindManager**), shadows (**ShadowManager**), and physics plugins
   (**IPhysicsEngine**) at the scene level.
 
 ## 2. Object Management (Hierarchy)
@@ -203,7 +203,7 @@ water, wind) integration, physics engine binding, and hierarchical child managem
 * **`landscape`** (`Landscape | null`): The large-scale GPU-Driven terrain instance bound to the scene, enabling terrain
   rendering as well as its associated foliage and grass systems.
 * **`addWater(water)` / `removeWater(water)` / `waterChildren`**: Registers or removes physically based water instances
-  (`WaterLake`) for the dedicated water rendering pass and retrieves the list of registered water bodies.
+  (`Lake`) for the dedicated water rendering pass and retrieves the list of registered water bodies.
 * **`physicsEngine`** (`IPhysicsEngine`): Binds a physics engine plugin to run real-time physics simulations inside the
   scene.
 

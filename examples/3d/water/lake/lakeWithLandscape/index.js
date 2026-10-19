@@ -124,8 +124,8 @@ RedGPU.init(
 
         scene.landscape = landscape;
 
-        // 5. WaterLake (산악 분지와 맞닿는 고품질 호수 수체)
-        const lake = new RedGPU.Water.WaterLake(
+        // 5. Lake (산악 분지와 맞닿는 고품질 호수 수체)
+        const lake = new RedGPU.Water.Lake(
             redGPUContext,
             300,
             300,
@@ -389,8 +389,8 @@ function renderTestPane(redGPUContext, lake, landscape, directionalLight, charac
                 folderChar.addBinding(characterController, 'jumpForce', {min: 4.0, max: 16.0, step: 0.5});
             }
 
-            // 2. WaterLake (호수 설정)
-            const folderLake = pane.addFolder({title: 'WaterLake (호수 설정)', expanded: true});
+            // 2. Lake (호수 설정)
+            const folderLake = pane.addFolder({title: 'Lake (호수 설정)', expanded: true});
             folderLake.addBinding(lake, 'y', {min: -1.0, max: 12.0, step: 0.1});
             folderLake.addBinding(lake, 'waveAmplitude', {min: 0, max: 0.15, step: 0.002});
             folderLake.addBinding(lake, 'waveWavelength', {min: 2, max: 40, step: 0.5});

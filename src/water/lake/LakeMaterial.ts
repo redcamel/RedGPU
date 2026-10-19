@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
-import fragmentModuleSource from './shader/singleLayerWaterFragment.wgsl';
+import fragmentModuleSource from './shader/lakeFragment.wgsl';
 import ColorRGB from "../../color/ColorRGB";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import Sampler from "../../resources/sampler/Sampler";
@@ -17,7 +17,7 @@ import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
 import DirectTexture from "../../resources/texture/DirectTexture";
 
-interface SingleLayerWaterMaterial {
+interface LakeMaterial {
     /**
      * [KO] 얕은 수면의 기본 색상입니다.
      * [EN] Base color of shallow water.
@@ -181,15 +181,15 @@ interface SingleLayerWaterMaterial {
 }
 
 /**
- * [KO] 굴절, 수심 기반 색상·감쇠, 커스틱, SSR을 지원하는 단일 레이어 물 재질입니다.
- * [EN] Single-layer water material supporting refraction, depth-based color/extinction, caustics, and SSR.
+ * [KO] 굴절, 수심 기반 색상·감쇠, 커스틱, SSR을 지원하는 호수 수면 재질입니다.
+ * [EN] Lake water material supporting refraction, depth-based color/extinction, caustics, and SSR.
  *
  * [KO] 2패스 렌더링(`use2PathRender`)을 사용하여 불투명 씬을 먼저 렌더링한 뒤 수면을 합성합니다.
  * [EN] Uses 2-pass rendering (`use2PathRender`) to composite the water surface after the opaque scene is rendered.
  *
  * ### Example
  * ```typescript
- * const material = new RedGPU.Water.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279');
+ * const material = new RedGPU.Water.LakeMaterial(redGPUContext, '#18d8b6', '#065279');
  * material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'waterNormal.jpg');
  * ```
  *
@@ -198,14 +198,14 @@ interface SingleLayerWaterMaterial {
  * @see [Waves and optics example](/RedGPU/examples/3d/water/lake/wavesAndOptics/)
  * @category Water
  */
-class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
+class LakeMaterial extends ABitmapBaseMaterial {
     /**
-     * [KO] SingleLayerWaterMaterial 인스턴스를 생성합니다.
-     * [EN] Creates a SingleLayerWaterMaterial instance.
+     * [KO] LakeMaterial 인스턴스를 생성합니다.
+     * [EN] Creates a LakeMaterial instance.
      *
      * ### Example
      * ```typescript
-     * const material = new RedGPU.Water.SingleLayerWaterMaterial(redGPUContext, '#18d8b6', '#065279', 1.0);
+     * const material = new RedGPU.Water.LakeMaterial(redGPUContext, '#18d8b6', '#065279', 1.0);
      * ```
      *
      * @param redGPUContext -
@@ -224,7 +224,7 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
     constructor(redGPUContext: RedGPUContext, baseColor: string = '#18d8b6', deepColor: string = '#065279', opacity: number = 1.0) {
         super(
             redGPUContext,
-            'SINGLE_LAYER_WATER_MATERIAL',
+            'LAKE_MATERIAL',
             fragmentModuleSource,
             2
         );
@@ -274,26 +274,26 @@ class SingleLayerWaterMaterial extends ABitmapBaseMaterial {
     }
 }
 
-defineColorRGB(SingleLayerWaterMaterial, [
+defineColorRGB(LakeMaterial, [
     {key: 'baseColor', value: '#18d8b6'},
     {key: 'deepColor', value: '#065279'},
 ]);
 
-defineTexture(SingleLayerWaterMaterial, [
+defineTexture(LakeMaterial, [
     {key: 'normalTexture'},
     {key: 'normalDetailTexture'},
     {key: 'rippleTexture'},
 ]);
 
-defineSampler(SingleLayerWaterMaterial, [
+defineSampler(LakeMaterial, [
     {key: 'normalTextureSampler'},
 ]);
 
-defineVector2(SingleLayerWaterMaterial, [
+defineVector2(LakeMaterial, [
     {key: 'rippleDomainCenter', value: [0.0, 0.0]},
 ]);
 
-definePositiveNumber(SingleLayerWaterMaterial, [
+definePositiveNumber(LakeMaterial, [
     {key: 'opacity', value: 1.0, min: 0, max: 1},
     {key: 'refractionStrength', value: 1.0, min: 0, max: 1},
     {key: 'normalScale', value: 1.0, min: 0.0, max: 1.0},
@@ -316,16 +316,16 @@ definePositiveNumber(SingleLayerWaterMaterial, [
     {key: 'rippleNormalStrength', value: 1.0, min: 0.0},
 ]);
 
-defineUint(SingleLayerWaterMaterial, [
+defineUint(LakeMaterial, [
     {key: 'debugMode', value: 0},
     {key: 'ssrStepCount', value: 64},
 ]);
 
-defineBoolean(SingleLayerWaterMaterial, [
+defineBoolean(LakeMaterial, [
     {key: 'invertNormalY', value: false},
     {key: 'invertNormalDetailY', value: false},
     {key: 'enableSSR', value: true},
 ]);
 
-Object.freeze(SingleLayerWaterMaterial);
-export default SingleLayerWaterMaterial;
+Object.freeze(LakeMaterial);
+export default LakeMaterial;

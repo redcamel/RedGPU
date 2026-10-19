@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] Step 1: Basic Lake 예제
  * [EN] Step 1: Basic Lake example
  *
- * [KO] 최소 코드로 WaterLake 수체를 생성하고, 수위(waterLevel) 및 기본 PBR 물성을 실시간 제어하는 입문 예제입니다.
- * [EN] Introductory example creating a WaterLake with minimal code and controlling waterLevel and PBR properties in real time.
+ * [KO] 최소 코드로 Lake 수체를 생성하고, 수위(waterLevel) 및 기본 PBR 물성을 실시간 제어하는 입문 예제입니다.
+ * [EN] Introductory example creating a Lake with minimal code and controlling waterLevel and PBR properties in real time.
  */
 
 const canvas = document.createElement('canvas');
@@ -47,8 +47,8 @@ RedGPU.init(
         // 5. 수위 비교용 바닥 지형 및 랜드마크 오브젝트 생성
         createEnvironment(redGPUContext, scene);
 
-        // 6. 기본 호수(WaterLake) 수체 생성 및 추가 (기본 물성 자동 적용)
-        const lake = new RedGPU.Water.WaterLake(redGPUContext, 60, 60, 80, 80);
+        // 6. 기본 호수(Lake) 수체 생성 및 추가 (기본 물성 자동 적용)
+        const lake = new RedGPU.Water.Lake(redGPUContext, 60, 60, 80, 80);
 
         // 기본 노멀 텍스처 바인딩
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 변환으로 인한 벡터 왜곡을 방지하기 위해 선형 포맷인 'rgba8unorm'을 명시합니다.
@@ -217,7 +217,7 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
     const mat = lake.waterMaterial;
 
     const params = {
-        // WaterLake 속성
+        // Lake 속성
         waterLevel: lake.waterLevel,
         waveAmplitude: lake.waveAmplitude,
         waveWavelength: lake.waveWavelength,
@@ -236,8 +236,8 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. WaterLake 설정 폴더
-            const lakeFolder = pane.addFolder({title: 'WaterLake (수체)', expanded: true});
+            // 1. Lake 설정 폴더
+            const lakeFolder = pane.addFolder({title: 'Lake (수체)', expanded: true});
 
             lakeFolder.addBinding(params, 'waterLevel', {min: -2.0, max: 2.0, step: 0.02})
                 .on('change', (ev) => {
@@ -255,7 +255,7 @@ function renderTestPane(redGPUContext, lake, directionalLight) {
                 });
 
             // 2. Material PBR 재질 폴더
-            const matFolder = pane.addFolder({title: 'SingleLayerWaterMaterial (수면 재질)', expanded: true});
+            const matFolder = pane.addFolder({title: 'LakeMaterial (수면 재질)', expanded: true});
 
             matFolder.addBinding(params, 'baseColor', {view: 'color'})
                 .on('change', (ev) => {

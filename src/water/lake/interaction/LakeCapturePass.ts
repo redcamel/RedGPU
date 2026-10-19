@@ -1,10 +1,10 @@
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../context/RedGPUContext";
-import RedGPUObject from "../../base/RedGPUObject";
-import Mesh from "../../display/mesh/Mesh";
-import vertexShaderCode from "./shader/waterCapturePenetration.wgsl";
-import vertexShaderSkinnedCode from "./shader/waterCapturePenetrationSkinned.wgsl";
-import {WaterActiveMeshEntry} from "./WaterInteractionManager";
+import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import Mesh from "../../../display/mesh/Mesh";
+import vertexShaderCode from "./shader/lakeCapturePenetration.wgsl";
+import vertexShaderSkinnedCode from "./shader/lakeCapturePenetrationSkinned.wgsl";
+import {LakeActiveMeshEntry} from "./LakeInteractionManager";
 
 /**
  * [KO] 물 상호작용 객체의 침투 깊이를 캡처하는 렌더 패스 클래스입니다.
@@ -17,7 +17,7 @@ import {WaterActiveMeshEntry} from "./WaterInteractionManager";
  *
  * @category Water
  */
-export class WaterCapturePass extends RedGPUObject {
+class LakeCapturePass extends RedGPUObject {
     /**
      * [KO] 캡처 텍스처 해상도 크기 (기본값: 512)
      * [EN] Capture texture resolution size (default: 512)
@@ -71,8 +71,8 @@ export class WaterCapturePass extends RedGPUObject {
     #meshSkinnedBGL: GPUBindGroupLayout;
 
     /**
-     * [KO] WaterCapturePass 인스턴스를 생성합니다.
-     * [EN] Creates an instance of WaterCapturePass.
+     * [KO] LakeCapturePass 인스턴스를 생성합니다.
+     * [EN] Creates an instance of LakeCapturePass.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -117,7 +117,7 @@ export class WaterCapturePass extends RedGPUObject {
      */
     render(
         commandEncoder: GPUCommandEncoder,
-        activeMeshes: WaterActiveMeshEntry[],
+        activeMeshes: LakeActiveMeshEntry[],
         domainCenterX: number,
         domainCenterZ: number,
         domainSize: number,
@@ -202,8 +202,8 @@ export class WaterCapturePass extends RedGPUObject {
     }
 
     /**
-     * [KO] WaterCapturePass 인스턴스를 파괴하고 할당된 GPU 텍스처 및 버퍼 리소스를 해제합니다.
-     * [EN] Destroys the WaterCapturePass instance and releases allocated GPU texture and buffer resources.
+     * [KO] LakeCapturePass 인스턴스를 파괴하고 할당된 GPU 텍스처 및 버퍼 리소스를 해제합니다.
+     * [EN] Destroys the LakeCapturePass instance and releases allocated GPU texture and buffer resources.
      */
     destroy(): void {
         if (this.captureTexture) {
@@ -501,7 +501,7 @@ export class WaterCapturePass extends RedGPUObject {
         return bindGroup;
     }
 
-    #fillMeshUniformData(mesh: Mesh, entry: WaterActiveMeshEntry): void {
+    #fillMeshUniformData(mesh: Mesh, entry: LakeActiveMeshEntry): void {
         this.#meshUniformData.set(mesh.modelMatrix, 0);
         this.#meshUniformData[16] = entry.waveStrength;
         this.#meshUniformData[17] = entry.speed;
@@ -510,5 +510,6 @@ export class WaterCapturePass extends RedGPUObject {
     }
 }
 
-Object.freeze(WaterCapturePass);
+Object.freeze(LakeCapturePass);
+export default LakeCapturePass;
 

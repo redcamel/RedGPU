@@ -1081,10 +1081,10 @@ export const ExampleList: ExampleListType = [
                                 name: 'Landscape & Water System',
                                 path: '3d/landscape/landscapeAndWater',
                                 description: {
-                                    ko: `랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(WaterLake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.<br/>
+                                    ko: `랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(Lake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.<br/>
                                         • <b>수위(Water Level) 조절</b>: Water 폴더의 y 값을 조절하여 지형의 골짜기가 호수로 채워지거나 말라붙는 수변 경계를 실시간으로 확인하세요.<br/>
                                         • <b>수중 광학 효과</b>: causticsStrength, refractionStrength, depthFadeDistance를 조절하여 얕은 여울과 깊은 호수 바닥의 빛 투과를 관찰하세요.`,
-                                    en: `An integrated simulation uniting landscape terrain valleys with physical lake water (WaterLake), controlling water level, dual normal waves, refraction, and depth caustics.<br/>
+                                    en: `An integrated simulation uniting landscape terrain valleys with physical lake water (Lake), controlling water level, dual normal waves, refraction, and depth caustics.<br/>
                                         • <b>Water Level Control</b>: Adjust lake y in the Water folder to watch terrain valleys flood or drain dynamically.<br/>
                                         • <b>Underwater Optics</b>: Tune causticsStrength, refractionStrength, and depthFadeDistance to inspect light absorption and caustics.`
                                 }
@@ -1104,8 +1104,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Basic Lake',
                                         path: '3d/water/lake/basicLake',
                                         description: {
-                                            ko: `최소한의 코드로 호수 수체(WaterLake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
-                                            en: `An introductory example creating a WaterLake with minimal code and manipulating waterLevel and PBR properties in real time.`
+                                            ko: `최소한의 코드로 호수 수체(Lake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
+                                            en: `An introductory example creating a Lake with minimal code and manipulating waterLevel and PBR properties in real time.`
                                         }
                                     },
                                     {
@@ -1140,8 +1140,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Lake Settings',
                                         path: '3d/water/lake/lakeSettings',
                                         description: {
-                                            ko: `호수 수체(WaterLake) 및 SingleLayerWaterMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.`,
-                                            en: `A comprehensive settings example allowing real-time adjustment and testing of all WaterLake and SingleLayerWaterMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.`
+                                            ko: `호수 수체(Lake) 및 LakeMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.`,
+                                            en: `A comprehensive settings example allowing real-time adjustment and testing of all Lake and LakeMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.`
                                         }
                                     },
                                     {
@@ -1150,7 +1150,7 @@ export const ExampleList: ExampleListType = [
                                         path: '3d/water/lake/lakeWithLandscape',
                                         description: {
                                             ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
-                                            en: `A showcase combining large-scale terrain landscape with an interactive WaterLake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
+                                            en: `A showcase combining large-scale terrain landscape with an interactive Lake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
                                         }
                                     },
                                     {
@@ -1158,8 +1158,8 @@ export const ExampleList: ExampleListType = [
                                         name: 'Multi Lake',
                                         path: '3d/water/lake/multiLake',
                                         description: {
-                                            ko: `단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 WaterLake 수체를 동시에 렌더링하고, 다중 수체의 SSR, 굴절, 코스틱스를 종합 테스트하는 예제입니다.`,
-                                            en: `A demonstration rendering 5 independent WaterLake bodies with distinct elevations (waterLevel), locations, and optical properties simultaneously, testing multi-lake SSR, refraction, and caustics.`
+                                            ko: `단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 Lake 수체를 동시에 렌더링하고, 다중 수체의 SSR, 굴절, 코스틱스를 종합 테스트하는 예제입니다.`,
+                                            en: `A demonstration rendering 5 independent Lake bodies with distinct elevations (waterLevel), locations, and optical properties simultaneously, testing multi-lake SSR, refraction, and caustics.`
                                         }
                                     }
                                 ]

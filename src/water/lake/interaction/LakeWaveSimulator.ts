@@ -1,8 +1,19 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import RedGPUObject from "../../base/RedGPUObject";
-import computeShaderCode from "./shader/waterWaveSimulation.wgsl";
+import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
+import computeShaderCode from "./shader/lakeWaveSimulation.wgsl";
 
-export class WaterWaveSimulator extends RedGPUObject {
+/**
+ * [KO] FDTD 기반 수면 파동 방정식을 시뮬레이션하고 리플 노멀 텍스처를 생성하는 컴퓨트 시뮬레이터 클래스입니다.
+ * [EN] Compute simulator class that simulates FDTD-based water wave equations and generates ripple normal textures.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * @category Water
+ */
+class LakeWaveSimulator extends RedGPUObject {
     textureSize: number = 512;
 
     rippleNormalTexture: GPUTexture;
@@ -192,5 +203,6 @@ export class WaterWaveSimulator extends RedGPUObject {
     }
 }
 
-Object.freeze(WaterWaveSimulator);
+Object.freeze(LakeWaveSimulator);
+export default LakeWaveSimulator;
 

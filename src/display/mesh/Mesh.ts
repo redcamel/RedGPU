@@ -26,7 +26,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
-import WaterInteractionRegistry from "../../water/interaction/WaterInteractionRegistry";
+import LakeInteractionRegistry from "../../water/lake/interaction/LakeInteractionRegistry";
 
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
@@ -438,8 +438,8 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 물(WaterLake)과의 실시간 파동 인터랙션 활성화 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether real-time wave interaction with water (WaterLake) is enabled.
+     * [KO] 물(Lake)과의 실시간 파동 인터랙션 활성화 여부를 가져오거나 설정합니다.
+     * [EN] Gets or sets whether real-time wave interaction with water (Lake) is enabled.
      *
      * @returns
      * [KO] 물 파동 인터랙션 활성화 여부
@@ -454,9 +454,9 @@ class Mesh extends MeshBase {
         if (this.#enableWaterInteraction !== boolVal) {
             this.#enableWaterInteraction = boolVal;
             if (boolVal) {
-                WaterInteractionRegistry.register(this);
+                LakeInteractionRegistry.register(this);
             } else {
-                WaterInteractionRegistry.unregister(this);
+                LakeInteractionRegistry.unregister(this);
             }
         }
     }
@@ -1764,7 +1764,7 @@ class Mesh extends MeshBase {
      */
     destroy() {
         if (this.#enableWaterInteraction) {
-            WaterInteractionRegistry.unregister(this);
+            LakeInteractionRegistry.unregister(this);
             this.#enableWaterInteraction = false;
         }
 

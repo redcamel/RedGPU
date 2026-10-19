@@ -41,9 +41,9 @@ RedGPU.init(
         // 5. 수중 바닥 지형 (수심 및 굴절, 침수 대비용)
         createUnderwaterEnvironment(redGPUContext, scene);
 
-        // 6. WaterLake 수체 생성 (기본값 활용 및 듀얼 노멀 바인딩)
+        // 6. Lake 수체 생성 (기본값 활용 및 듀얼 노멀 바인딩)
         // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 벡터 왜곡을 방지하기 위해 반드시 선형 포맷인 'rgba8unorm'을 명시합니다.
-        const lake = new RedGPU.Water.WaterLake(redGPUContext, 80, 80, 80, 80);
+        const lake = new RedGPU.Water.Lake(redGPUContext, 80, 80, 80, 80);
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -210,8 +210,8 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
 function renderTestPane(redGPUContext, lake, sphere, directionalLight, motionState) {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. WaterLake (수체 파동 시뮬레이션)
-            const lakeFolder = pane.addFolder({title: 'WaterLake (수체 파동 시뮬레이션)', expanded: true});
+            // 1. Lake (수체 파동 시뮬레이션)
+            const lakeFolder = pane.addFolder({title: 'Lake (수체 파동 시뮬레이션)', expanded: true});
 
             lakeFolder.addBinding(lake, 'interactionEnabled');
             lakeFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.05, max: 0.8, step: 0.01});

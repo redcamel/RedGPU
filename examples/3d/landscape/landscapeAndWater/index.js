@@ -5,10 +5,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] Step 7: Landscape & Water System (랜드스케이프와 호수 수체 통합 시스템)
  * [EN] Step 7: Landscape & Water System (Landscape & Lake Water System Integration)
  *
- * [KO] 랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(WaterLake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.
+ * [KO] 랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(Lake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.
  *      • 수위(Water Level) 조절: Water 폴더의 y 값을 조절하여 지형의 골짜기가 호수로 채워지거나 말라붙는 수변 경계를 실시간으로 확인하세요.
  *      • 수중 광학 효과: causticsStrength, refractionStrength, depthFadeDistance를 조절하여 얕은 여울과 깊은 호수 바닥의 빛 투과를 관찰하세요.
- * [EN] An integrated simulation uniting landscape terrain valleys with physical lake water (WaterLake), controlling water level, dual normal waves, refraction, and depth caustics.
+ * [EN] An integrated simulation uniting landscape terrain valleys with physical lake water (Lake), controlling water level, dual normal waves, refraction, and depth caustics.
  *      • Water Level Control: Adjust lake y in the Water folder to watch terrain valleys flood or drain dynamically.
  *      • Underwater Optics: Tune causticsStrength, refractionStrength, and depthFadeDistance to inspect light absorption and caustics.
  */
@@ -113,8 +113,8 @@ RedGPU.init(
 
         scene.landscape = landscape;
 
-        // 7. 물리 기반 산중 호수 수체 (WaterLake) 생성
-        const lake = new RedGPU.Water.WaterLake(
+        // 7. 물리 기반 산중 호수 수체 (Lake) 생성
+        const lake = new RedGPU.Water.Lake(
             redGPUContext,
             1500,
             1500,

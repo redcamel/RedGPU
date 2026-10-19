@@ -6,14 +6,14 @@ import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 import Landscape from "../../landscape/Landscape";
-import type WaterLake from "../../water/lake/WaterLake";
+import type Lake from "../../water/lake/Lake";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
  * [EN] Root container class that defines the scene space to be rendered in a View.
  *
- * [KO] 조명(LightManager), 그림자(ShadowManager), 바람(WindManager), 물리 엔진(IPhysicsEngine), 지형(Landscape), 수체(WaterLake) 및 3D 디스플레이 객체 계층을 통합 관리합니다.
- * [EN] Integrates and manages lighting (LightManager), shadows (ShadowManager), wind (WindManager), physics engine (IPhysicsEngine), terrain (Landscape), water bodies (WaterLake), and the 3D display object hierarchy.
+ * [KO] 조명(LightManager), 그림자(ShadowManager), 바람(WindManager), 물리 엔진(IPhysicsEngine), 지형(Landscape), 수체(Lake) 및 3D 디스플레이 객체 계층을 통합 관리합니다.
+ * [EN] Integrates and manages lighting (LightManager), shadows (ShadowManager), wind (WindManager), physics engine (IPhysicsEngine), terrain (Landscape), water bodies (Lake), and the 3D display object hierarchy.
  *
  * ### Example
  * ```typescript
@@ -33,7 +33,7 @@ class Scene extends Object3DContainer {
     #destroyed: boolean = false
 
     #landscape: Landscape | null = null;
-    #waterChildren: WaterLake[] = []
+    #waterChildren: Lake[] = []
 
     /**
      * [KO] Scene 인스턴스를 생성합니다.
@@ -148,26 +148,26 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * [KO] 씬에 바인딩된 수체(WaterLake) 객체 리스트를 반환합니다.
-     * [EN] Returns the list of WaterLake objects bound to the scene.
+     * [KO] 씬에 바인딩된 수체(Lake) 객체 리스트를 반환합니다.
+     * [EN] Returns the list of Lake objects bound to the scene.
      *
      * @returns
-     * [KO] 등록된 WaterLake 인스턴스 배열
-     * [EN] Array of registered WaterLake instances
+     * [KO] 등록된 Lake 인스턴스 배열
+     * [EN] Array of registered Lake instances
      */
-    get waterChildren(): WaterLake[] {
+    get waterChildren(): Lake[] {
         return this.#waterChildren;
     }
 
     /**
-     * [KO] 수체 객체(WaterLake)를 씬 수체 리스트에 등록하고 자식 노드로 추가합니다.
-     * [EN] Registers a WaterLake object to the scene water list and adds it as a child node.
+     * [KO] 수체 객체(Lake)를 씬 수체 리스트에 등록하고 자식 노드로 추가합니다.
+     * [EN] Registers a Lake object to the scene water list and adds it as a child node.
      *
      * @param water -
-     * [KO] 등록할 WaterLake 인스턴스
-     * [EN] WaterLake instance to register
+     * [KO] 등록할 Lake 인스턴스
+     * [EN] Lake instance to register
      */
-    addWater(water: WaterLake): void {
+    addWater(water: Lake): void {
         this.#checkWaterInstance(water);
         if (!this.#waterChildren.includes(water)) {
             this.#waterChildren.push(water);
@@ -178,14 +178,14 @@ class Scene extends Object3DContainer {
     }
 
     /**
-     * [KO] 씬에서 수체 객체(WaterLake)를 제거합니다.
-     * [EN] Removes a WaterLake object from the scene.
+     * [KO] 씬에서 수체 객체(Lake)를 제거합니다.
+     * [EN] Removes a Lake object from the scene.
      *
      * @param water -
-     * [KO] 제거할 WaterLake 인스턴스
-     * [EN] WaterLake instance to remove
+     * [KO] 제거할 Lake 인스턴스
+     * [EN] Lake instance to remove
      */
-    removeWater(water: WaterLake): void {
+    removeWater(water: Lake): void {
         this.#checkWaterInstance(water);
         const index = this.#waterChildren.indexOf(water);
         if (index > -1) {
@@ -194,9 +194,9 @@ class Scene extends Object3DContainer {
         }
     }
 
-    #checkWaterInstance(target: WaterLake) {
+    #checkWaterInstance(target: Lake) {
         if (!target || !(target as any).isWater) {
-            consoleAndThrowError('allow only WaterLake instance.');
+            consoleAndThrowError('allow only Lake instance.');
         }
     }
 

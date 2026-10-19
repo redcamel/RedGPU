@@ -47,7 +47,7 @@ const sceneGraph = `
 
 *   **계층 구조 관리**: `addChild()`, `removeChild()` 메서드를 통해 객체들의 부모-자식 관계를 관리합니다.
 *   **조명 데이터 관리**: 기본적으로 포함된 **LightManager** 를 통해 씬 전체에 영향을 주는 조명 데이터를 GPU 버퍼(Uniform Buffer)로 통합 관리합니다.
-* **자연 환경 및 시뮬레이션 통합**: **대규모 지형**(Landscape), **수체**(WaterLake), **전역 바람**(WindManager), **그림자**(ShadowManager) 및 **물리
+* **자연 환경 및 시뮬레이션 통합**: **대규모 지형**(Landscape), **수체**(Lake), **전역 바람**(WindManager), **그림자**(ShadowManager) 및 **물리
   엔진**(IPhysicsEngine) 을 씬 단위로 통합 제어합니다.
 
 ## 2. 객체 관리 (Hierarchy)
@@ -197,7 +197,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 * **`shadowManager`** (`ShadowManager`, 읽기 전용): 광원에 대한 그림자 맵 (CSM) 생성 및 관련 자원, 연산 파이프라인을 제어하는 매니저입니다.
 * **`windManager`** (`WindManager`, 읽기 전용): 식생 (Foliage, Grass) 흔들림과 수면 물결에 공통 적용되는 전역 바람의 방향, 풍속, 돌풍 강도를 제어하는 매니저입니다.
 * **`landscape`** (`Landscape | null`): 씬에 바인딩된 대규모 GPU-Driven 지형 인스턴스입니다. 지형 및 그에 속한 식생/잔디 시스템을 활성화합니다.
-* **`addWater(water)` / `removeWater(water)` / `waterChildren`**: 물리 기반 수체 (`WaterLake`)를 씬의 전용 수체 렌더링 패스에 등록하거나 제거하며,
+* **`addWater(water)` / `removeWater(water)` / `waterChildren`**: 물리 기반 수체 (`Lake`)를 씬의 전용 수체 렌더링 패스에 등록하거나 제거하며,
   등록된 수체 목록을 조회합니다.
 * **`physicsEngine`** (`IPhysicsEngine`): 씬 내부에서 작동할 물리 엔진 플러그인을 바인딩하여 실시간 시뮬레이션을 가능하게 합니다.
 

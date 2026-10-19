@@ -27,7 +27,7 @@ RedGPU.init(
 
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
-        const lake = new RedGPU.Water.WaterLake(redGPUContext, 240, 240, 120, 120);
+        const lake = new RedGPU.Water.Lake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
 
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
@@ -440,7 +440,7 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
         ibl: true,
         gui: (pane) => {
 
-            const basicFolder = pane.addFolder({title: 'WaterLake Controller', expanded: true});
+            const basicFolder = pane.addFolder({title: 'Lake Controller', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
 
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {

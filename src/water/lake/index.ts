@@ -1,11 +1,16 @@
 /**
- * [KO] 평면 호수 수면을 렌더링하는 WaterLake를 제공합니다.
- * [EN] Provides WaterLake, which renders a flat lake surface.
+ * [KO] 평면 호수 수면을 렌더링하는 Lake와 수면 재질인 LakeMaterial을 제공합니다.
+ * [EN] Provides Lake, which renders a flat lake surface, and LakeMaterial, the lake water surface material.
  * @packageDocumentation
  */
-import WaterLake from "./WaterLake";
+export * as Interaction from "./interaction";
+
+import Lake from "./Lake";
+import LakeMaterial from "./LakeMaterial";
+import LakeInteractionRegistry from "./interaction/LakeInteractionRegistry";
 
 export {
-    WaterLake
+    Lake,
+    LakeMaterial,
+    LakeInteractionRegistry
 };
-export default WaterLake;

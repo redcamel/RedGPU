@@ -1,17 +1,17 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Ground from "../../primitive/Ground";
 import Mesh from "../../display/mesh/Mesh";
-import SingleLayerWaterMaterial from "../core/SingleLayerWaterMaterial";
+import LakeMaterial from "./LakeMaterial";
 import GPU_CULL_MODE from "../../gpuConst/GPU_CULL_MODE";
-import vertexModuleSource from "./shader/waterLakeVertex.wgsl";
+import vertexModuleSource from "./shader/lakeVertex.wgsl";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import {
-    WaterActiveMeshEntry,
-    WaterCapturePass,
-    WaterInteractionManager,
-    WaterInteractionRegistry,
-    WaterWaveSimulator
-} from "../interaction";
+    LakeActiveMeshEntry,
+    LakeCapturePass,
+    LakeInteractionManager,
+    LakeInteractionRegistry,
+    LakeWaveSimulator
+} from "./interaction";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
@@ -22,13 +22,13 @@ import RenderViewStateData from "../../display/view/core/RenderViewStateData";
  *
  * ### Example
  * ```ts
- * const lake = new RedGPU.Water.WaterLake(redGPUContext, 200, 200);
+ * const lake = new RedGPU.Water.Lake(redGPUContext, 200, 200);
  * scene.addChild(lake);
  * ```
  *
  * @category Water
  */
-class WaterLake extends Mesh {
+class Lake extends Mesh {
     #isWater: boolean = true;
     #waveAmplitude: number = 0.025;
     #waveWavelength: number = 16.0;
@@ -37,9 +37,9 @@ class WaterLake extends Mesh {
     #interactionEnabled: boolean = true;
     #interactionDomainSize: number = 16.0;
 
-    #interactionManager: WaterInteractionManager;
-    #capturePass: WaterCapturePass;
-    #waveSimulator: WaterWaveSimulator;
+    #interactionManager: LakeInteractionManager;
+    #capturePass: LakeCapturePass;
+    #waveSimulator: LakeWaveSimulator;
     #rippleDirectTexture: DirectTexture;
     #lastInteractionTime: number = 0;
     #prevSnapX: number = 0;
@@ -48,7 +48,7 @@ class WaterLake extends Mesh {
     #decayFramesRemaining: number = 0;
 
     readonly #domainCenterBuffer: [number, number] = [0, 0];
-    #currentActiveMeshes: WaterActiveMeshEntry[] = [];
+    #currentActiveMeshes: LakeActiveMeshEntry[] = [];
     #currentSnapX: number = 0;
     #currentSnapZ: number = 0;
     #currentDomainSize: number = 0;
@@ -56,8 +56,8 @@ class WaterLake extends Mesh {
     #currentShiftZ: number = 0;
 
     /**
-     * [KO] WaterLake 인스턴스를 생성합니다.
-     * [EN] Creates an instance of WaterLake.
+     * [KO] Lake 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Lake.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
@@ -75,8 +75,8 @@ class WaterLake extends Mesh {
      * [KO] 세로 분할 세그먼트 수 (기본값: 64)
      * [EN] Number of height segments (default: 64)
      * @param name -
-     * [KO] 메시 이름 (기본값: 'WaterLake')
-     * [EN] Mesh name (default: 'WaterLake')
+     * [KO] 메시 이름 (기본값: 'Lake')
+     * [EN] Mesh name (default: 'Lake')
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -84,9 +84,9 @@ class WaterLake extends Mesh {
         height: number = 100,
         widthSegments: number = 64,
         heightSegments: number = 64,
-        name: string = 'WaterLake'
+        name: string = 'Lake'
     ) {
-        const waterMaterial = new SingleLayerWaterMaterial(redGPUContext);
+        const waterMaterial = new LakeMaterial(redGPUContext);
         const waterGeometry = new Ground(redGPUContext, width, height, widthSegments, heightSegments);
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
@@ -95,14 +95,14 @@ class WaterLake extends Mesh {
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         this.dirtyPipeline = true;
 
-        this.#interactionManager = new WaterInteractionManager(redGPUContext);
-        this.#capturePass = new WaterCapturePass(redGPUContext, 512);
-        this.#waveSimulator = new WaterWaveSimulator(redGPUContext, 512);
+        this.#interactionManager = new LakeInteractionManager(redGPUContext);
+        this.#capturePass = new LakeCapturePass(redGPUContext, 512);
+        this.#waveSimulator = new LakeWaveSimulator(redGPUContext, 512);
         this.#waveSimulator.updateCaptureBinding(this.#capturePass.captureTextureView);
 
         this.#rippleDirectTexture = new DirectTexture(
             redGPUContext,
-            `WaterLake_Ripple_${this.uuid}`,
+            `Lake_Ripple_${this.uuid}`,
             this.#waveSimulator.rippleNormalTexture
         );
         this.waterMaterial.rippleTexture = this.#rippleDirectTexture;
@@ -208,11 +208,11 @@ class WaterLake extends Mesh {
     }
 
     /**
-     * [KO] 수면에 적용된 SingleLayerWaterMaterial 인스턴스를 반환합니다.
-     * [EN] Returns the SingleLayerWaterMaterial instance applied to the water surface.
+     * [KO] 수면에 적용된 LakeMaterial 인스턴스를 반환합니다.
+     * [EN] Returns the LakeMaterial instance applied to the water surface.
      */
-    get waterMaterial(): SingleLayerWaterMaterial {
-        return this.material as SingleLayerWaterMaterial;
+    get waterMaterial(): LakeMaterial {
+        return this.material as LakeMaterial;
     }
 
     /**
@@ -265,9 +265,9 @@ class WaterLake extends Mesh {
     override createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const {resourceManager} = this.redGPUContext;
         const {wgslParser} = resourceManager;
-        const SHADER_INFO = wgslParser.parse('WATER_LAKE_VERTEX', vertexModuleSource);
+        const SHADER_INFO = wgslParser.parse('LAKE_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms?.vertexUniforms;
-        const shaderModule = this.createMeshVertexShaderModuleBASIC('WATER_LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+        const shaderModule = this.createMeshVertexShaderModuleBASIC('LAKE_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
         this.#syncVertexUniforms();
         return shaderModule;
     };
@@ -298,10 +298,27 @@ class WaterLake extends Mesh {
         this.#waveSimulator.simulate(encoder, this.#currentShiftX, this.#currentShiftZ);
     };
 
+    /**
+     * [KO] Lake 인스턴스를 파괴하고 시뮬레이터 및 상호작용 관련 리소스를 해제합니다.
+     * [EN] Destroys the Lake instance and releases simulator and interaction resources.
+     */
+    override destroy(): void {
+        if (this.#capturePass) this.#capturePass.destroy();
+        if (this.#waveSimulator) this.#waveSimulator.destroy();
+        if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
+        if (this.#interactionManager) this.#interactionManager.destroy();
+        if (this.material) {
+            this.waterMaterial.rippleTexture = null;
+        }
+        this.#interactionFollowTarget = null;
+        this.#currentActiveMeshes.length = 0;
+        super.destroy();
+    }
+
     #updateInteraction(renderViewStateData?: RenderViewStateData): void {
         if (!this.#interactionEnabled || !this.passFrustumCulling) return;
 
-        const hasMeshes = WaterInteractionRegistry.meshes.size > 0;
+        const hasMeshes = LakeInteractionRegistry.meshes.size > 0;
         if (hasMeshes) {
             this.#decayFramesRemaining = 90;
         } else if (this.#decayFramesRemaining > 0) {
@@ -324,7 +341,7 @@ class WaterLake extends Mesh {
             targetX = m ? m[12] : this.#interactionFollowTarget.x;
             targetZ = m ? m[14] : this.#interactionFollowTarget.z;
         } else {
-            const firstMesh = WaterInteractionRegistry.firstMesh;
+            const firstMesh = LakeInteractionRegistry.firstMesh;
             if (firstMesh) {
                 const m = firstMesh.modelMatrix;
                 targetX = m ? m[12] : firstMesh.x;
@@ -371,27 +388,10 @@ class WaterLake extends Mesh {
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodePass);
     }
 
-    /**
-     * [KO] WaterLake 인스턴스를 파괴하고 시뮬레이터 및 상호작용 관련 리소스를 해제합니다.
-     * [EN] Destroys the WaterLake instance and releases simulator and interaction resources.
-     */
-    override destroy(): void {
-        if (this.#capturePass) this.#capturePass.destroy();
-        if (this.#waveSimulator) this.#waveSimulator.destroy();
-        if (this.#rippleDirectTexture) this.#rippleDirectTexture.destroy();
-        if (this.#interactionManager) this.#interactionManager.destroy();
-        if (this.material) {
-            this.waterMaterial.rippleTexture = null;
-        }
-        this.#interactionFollowTarget = null;
-        this.#currentActiveMeshes.length = 0;
-        super.destroy();
-    }
-
     set waterLevel(value: number) {
         this.y = value;
     }
 }
 
-Object.freeze(WaterLake);
-export default WaterLake;
+Object.freeze(Lake);
+export default Lake;

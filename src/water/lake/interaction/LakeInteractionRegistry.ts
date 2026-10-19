@@ -1,4 +1,4 @@
-import type Mesh from "../../display/mesh/Mesh";
+import type Mesh from "../../../display/mesh/Mesh";
 
 /**
  * [KO] 수면과 상호작용(파동 생성)할 메시를 전역으로 등록·관리하는 정적 레지스트리입니다.
@@ -6,15 +6,15 @@ import type Mesh from "../../display/mesh/Mesh";
  *
  * ### Example
  * ```typescript
- * RedGPU.Water.Interaction.WaterInteractionRegistry.register(characterMesh);
- * RedGPU.Water.Interaction.WaterInteractionRegistry.unregister(characterMesh);
+ * RedGPU.Water.Interaction.LakeInteractionRegistry.register(characterMesh);
+ * RedGPU.Water.Interaction.LakeInteractionRegistry.unregister(characterMesh);
  * ```
  *
  * @see [Lake interaction example](/RedGPU/examples/3d/water/lake/interaction/)
  * @see [Character walking example](/RedGPU/examples/3d/water/lake/characterWalking/)
  * @category Water
  */
-class WaterInteractionRegistry {
+class LakeInteractionRegistry {
     static #meshes: Set<Mesh> = new Set();
     static #firstMesh: Mesh | null = null;
 
@@ -48,7 +48,7 @@ class WaterInteractionRegistry {
      *
      * ### Example
      * ```typescript
-     * RedGPU.Water.Interaction.WaterInteractionRegistry.register(mesh);
+     * RedGPU.Water.Interaction.LakeInteractionRegistry.register(mesh);
      * ```
      *
      * @param mesh -
@@ -87,5 +87,5 @@ class WaterInteractionRegistry {
     }
 }
 
-Object.freeze(WaterInteractionRegistry);
-export default WaterInteractionRegistry;
+Object.freeze(LakeInteractionRegistry);
+export default LakeInteractionRegistry;

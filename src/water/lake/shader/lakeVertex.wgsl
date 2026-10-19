@@ -2,14 +2,14 @@
 #redgpu_include systemStruct.globalVertexStruct;
 #redgpu_include math.PI;
 
-struct WaterLakeVertexUniforms {
+struct LakeVertexUniforms {
     waveAmplitude: f32,
     waveWavelength: f32,
     pad0: f32, // 16-byte tail alignment
     pad1: f32,
 };
 
-@group(1) @binding(0) var<uniform> vertexUniforms: WaterLakeVertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: LakeVertexUniforms;
 
 struct InputData {
     @builtin(instance_index) globalVertexSlotIndex: u32,
