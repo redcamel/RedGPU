@@ -75,7 +75,15 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
-        this.#processPass(this.#pipeline, this.#bindGroup);
+        const {resourceManager} = this.redGPUContext;
+        this.executeComputePass(this.#pipeline, this.#bindGroup, 8, 8, 1, false);
+        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, this.#sourceTextureDescriptor, true, COMMAND_ENCODER_TYPE.RESOURCE);
+        resourceManager.irradianceGenerator.render(
+            this.#sourceCubeTexture,
+            this.#lutTexture.gpuTexture,
+            COMMAND_ENCODER_TYPE.RESOURCE
+        );
+        this.#lutTexture.notifyUpdate();
     }
 
     /**
@@ -103,18 +111,6 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
             {binding: 4, resource: transmittance.gpuTextureView},
             {binding: 5, resource: skyView.gpuTextureView}
         ]);
-    }
-
-    #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup): void {
-        const {resourceManager} = this.redGPUContext;
-        this.executeComputePass(pipeline, bindGroup, 8, 8, 1, false);
-        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, this.#sourceTextureDescriptor, true, COMMAND_ENCODER_TYPE.RESOURCE);
-        resourceManager.irradianceGenerator.render(
-            this.#sourceCubeTexture,
-            this.#lutTexture.gpuTexture,
-            COMMAND_ENCODER_TYPE.RESOURCE
-        );
-        this.#lutTexture.notifyUpdate();
     }
 
     #init(): void {

@@ -30,8 +30,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let tEarth = getRaySphereIntersection(camPos, viewDir, groundRadius);
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
-    let sunDir = normalize(uniforms.sunDirection);
-    let viewSunCos = dot(viewDir, sunDir);
+    let sunDir = uniforms.sunDirection;
 
     var baseRadiance: vec3<f32>;
     var skyTransmittance: f32 = 1.0;
@@ -62,11 +61,12 @@ fn main(input : VertexOutput) -> FragmentOutput {
     // [KO] 2. 태양 디스크(Sun Disk) 및 태양 주변부 광륜(Mie Glow) 계산
     // [EN] 2. Calculate Sun Disk and forward scattering Mie Glow (Sun Halo)
     var addedRadiance = vec3<f32>(0.0);
-    if (!isGroundHit) {
-        let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius);
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, vec3<f32>(skyTransmittance));
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance));
-        addedRadiance = (mieGlow + sunDisk) * sunShadow;
+    if (!isGroundHit && getPlanetShadowMask(camPos, sunDir, groundRadius) > 0.0) {
+        let viewSunCos = dot(viewDir, sunDir);
+        let skyTransVec = vec3<f32>(skyTransmittance);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, skyTransVec);
+        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, skyTransVec);
+        addedRadiance = mieGlow + sunDisk;
     }
 
     // [KO] 3. 절차적 구름 레이어 합성 (Simple Procedural Clouds)

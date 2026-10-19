@@ -44,8 +44,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 미 산란 글로우(Mie Glow) 추가: 태양 주변의 대기 산란 광채 표현
         // [EN] Add Mie Glow: Represent atmospheric scattering bloom around the sun
-        let sunDir = normalize(params.sunDirection);
-        let viewSunCos = dot(viewDir, sunDir);
+        let viewSunCos = dot(viewDir, params.sunDirection);
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transmittance);
         radiance += mieGlow;
     }

@@ -21,7 +21,7 @@ let rayLengthRatio = dotPos * invRayLengthRatio;
 let worldRotation = mat3x3<f32>(systemUniforms.camera.inverseViewMatrix[0].xyz, systemUniforms.camera.inverseViewMatrix[1].xyz, systemUniforms.camera.inverseViewMatrix[2].xyz);
 let viewDir = (worldRotation * viewSpacePos) * invRayLengthRatio;
 
-let sunDir = normalize(uniforms.sunDirection);
+let sunDir = uniforms.sunDirection;
 let viewSunCos = dot(viewDir, sunDir);
 let mappingH = max(0.0, uniforms.cameraHeight);
 let groundRadius = uniforms.groundRadius;
@@ -46,7 +46,7 @@ if (rawDepth >= 1.0) {
     let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
     // Z축 매핑: LUT 생성 시의 제곱 스케일 역산
-    let apW = clamp(sqrt(apDist * (1.0 / maxApDist)), 0.0, 1.0);
+    let apW = saturate(sqrt(apDist * (1.0 / maxApDist)));
     var apSample = textureSampleLevel(aerialPerspectiveLUT, basicSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
 
     // 근거리 보정 (분해능 한계 극복용 해석적 보간)
@@ -70,32 +70,32 @@ if (rawDepth >= 1.0) {
     sceneBlendingTrans = apSample.a;
 }
 
-// [KO] 3. 추가 시각 효과 계산 (Mie Glow, Sun Disk)
-// [EN] 3. Calculate additional visual effects (Mie Glow, Sun Disk)
+// [KO] 3. 추가 시각 효과 계산 (Mie Glow, Sun Disk, Cloud Masking)
+// [EN] 3. Calculate additional visual effects (Mie Glow, Sun Disk, Cloud Masking)
 let camPos = vec3<f32>(0.0, mappingH + groundRadius, 0.0);
-let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius);
+var addedRadiance = vec3<f32>(0.0);
 
-// 대기 투과율을 적용한 Glow 및 태양 디스크 계산
-let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, vec3<f32>(atmosphereTrans));
+if (getPlanetShadowMask(camPos, sunDir, groundRadius) > 0.0) {
+    let transVec = vec3<f32>(atmosphereTrans);
+    let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, transVec);
+    var sunDisk = vec3<f32>(0.0);
+    var finalCloudMask: f32 = 0.0;
 
-let hitsVirtualGround = groundRadius > 0.0 && getRaySphereIntersection(camPos, viewDir, groundRadius) > 0.0;
-let drawSunDisk = (rawDepth >= 1.0) && !hitsVirtualGround;
-let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans)), drawSunDisk);
-
-// 구름에 의한 태양 및 글로우 가림 처리 (Cloud Masking)
-var finalCloudMask: f32 = 0.0;
-if (drawSunDisk) {
-    let cloudR = groundRadius + uniforms.cloudHeight;
-    let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
-    if (tCloud > 0.0) {
-        let hitP = camPos + viewDir * tCloud;
-        finalCloudMask = getCloudDensity(cloud_fbm(getCloudWarpedUV(hitP, uniforms)), uniforms);
+    if (rawDepth >= 1.0 && !(groundRadius > 0.0 && getRaySphereIntersection(camPos, viewDir, groundRadius) > 0.0)) {
+        sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transVec);
+        let cloudR = groundRadius + uniforms.cloudHeight;
+        let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
+        if (tCloud > 0.0) {
+            let hitP = camPos + viewDir * tCloud;
+            finalCloudMask = getCloudDensity(cloud_fbm(getCloudWarpedUV(hitP, uniforms)), uniforms);
+        }
     }
+
+    addedRadiance = (mieGlow + sunDisk) * (1.0 - finalCloudMask);
 }
 
 // [KO] 4. 최종 산란광 합산 및 장면 합성
 // [EN] 4. Sum final scattering and composite scene
-let addedRadiance = (mieGlow + sunDisk) * sunShadow * (1.0 - finalCloudMask);
 let totalScattering = (baseScattering + addedRadiance) * (uniforms.sunIntensity * systemUniforms.preExposure);
 let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
 

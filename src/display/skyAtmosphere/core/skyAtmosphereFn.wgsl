@@ -92,20 +92,17 @@ fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32) -> f32 {
 
 fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereDensities {
     var d: AtmosphereDensities;
-    if (viewHeight < 0.0) {
-        d.rhoR = 0.0; d.rhoM = 0.0; d.rhoO = 0.0;
-    } else {
-        d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
-        d.rhoM = exp(-viewHeight / params.mieExponentialDistribution);
-        let ozoneDist = abs(viewHeight - params.absorptionTipAltitude);
-        d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
-    }
+    d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
+    d.rhoM = exp(-viewHeight / params.mieExponentialDistribution);
+    let ozoneDist = abs(viewHeight - params.absorptionTipAltitude);
+    d.rhoO = max(0.0, 1.0 - ozoneDist / params.absorptionTentWidth);
     return d;
 }
 
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
     if (tMax <= tMin) { return vec3<f32>(0.0); }
     let stepSize = (tMax - tMin) / f32(steps);
+    let mieExt = params.mieScattering + params.mieAbsorption;
     var optExt = vec3<f32>(0.0);
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
@@ -115,11 +112,11 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let viewHeight = (pSq * invPLen) - params.groundRadius;
         if (viewHeight < 0.0) { continue; }
         let d = getAtmosphereDensities(viewHeight, params);
-        
+
         let scatR_phys = params.rayleighScattering * d.rhoR;
-        let mieExt_phys = (params.mieScattering + params.mieAbsorption) * d.rhoM;
+        let mieExt_phys = mieExt * d.rhoM;
         let absC_phys = params.absorptionCoefficient * d.rhoO;
-        
+
         optExt += (scatR_phys + mieExt_phys + absC_phys) * stepSize;
     }
     return optExt;
@@ -239,6 +236,9 @@ fn integrateScatSegment(
     // [EN] Calculate Phase Functions (Reflecting Rayleigh/Mie scattering characteristics)
     let phaseR = phaseRayleigh(viewSunCos);
     let phaseM = phaseMieStable(viewSunCos, params.mieAnisotropy);
+    let rayleighScatLuminous = params.rayleighScattering * params.skyLuminanceFactor;
+    let mieScatLuminous = params.mieScattering * params.skyLuminanceFactor;
+    let mieExtPhys = params.mieScattering + params.mieAbsorption;
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
@@ -261,12 +261,11 @@ fn integrateScatSegment(
         let d = getAtmosphereDensities(viewHeight, params);
 
         let scatR_phys = params.rayleighScattering * d.rhoR;
-        let scatM_phys = params.mieScattering * d.rhoM;
-        let mieAbs_phys = params.mieAbsorption * d.rhoM;
+        let mieExt_phys = mieExtPhys * d.rhoM;
         let ozoneAbs_phys = params.absorptionCoefficient * d.rhoO;
 
-        let scatR_luminous = scatR_phys * params.skyLuminanceFactor;
-        let scatM_luminous = scatM_phys * params.skyLuminanceFactor;
+        let scatR_luminous = rayleighScatLuminous * d.rhoR;
+        let scatM_luminous = mieScatLuminous * d.rhoM;
         
         let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM) * sunTrans * shadowMask;
         
@@ -279,7 +278,7 @@ fn integrateScatSegment(
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;
         
-        let extinction_phys = scatR_phys + scatM_phys + mieAbs_phys + ozoneAbs_phys;
+        let extinction_phys = scatR_phys + mieExt_phys + ozoneAbs_phys;
         *transmittance *= exp(-extinction_phys * stepSize);
     }
 }
@@ -323,27 +322,22 @@ fn evaluateIBLRadiance(
     let r = params.groundRadius;
     let viewHeight = max(0.0, params.cameraHeight);
     let atmosphereHeight = params.atmosphereHeight;
-    let sunDir = normalize(params.sunDirection);
+    let sunDir = params.sunDirection;
 
     let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
     let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
     
     var radiance = skySample.rgb;
 
-    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-    
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-    let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
+    let isGround = viewDir.y < -0.0001 && r > 0.0 && getRaySphereIntersection(camPos, viewDir, r) > 0.0;
 
-    let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
-    
-    let sunShadow = getPlanetShadowMask(camPos, sunDir, r);
-    if (!isGround && sunShadow > 0.0) {
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
-        radiance += mieGlow * sunShadow;
+    if (!isGround && getPlanetShadowMask(camPos, sunDir, r) > 0.0) {
+        let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
+        let transToEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
+        radiance += getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
         if (includeSunDisk) {
-            radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params) * sunShadow;
+            radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params);
         }
     }
 

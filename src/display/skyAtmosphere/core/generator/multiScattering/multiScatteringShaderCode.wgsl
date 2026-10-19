@@ -92,6 +92,7 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
     let stepSize = (tMax - tMin) / f32(steps);
 
     let phaseIsotropic = 0.25 * INV_PI;
+    let mieExt = params.mieScattering + params.mieAbsorption;
 
     for (var j = 0u; j < steps; j = j + 1u) {
         let t = tMin + (f32(j) + 0.5) * stepSize;
@@ -99,7 +100,7 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let dotP = dot(p, p);
         let invPLen = inverseSqrt(dotP);
         let pLen = dotP * invPLen;
-        let h = pLen - groundRadius;
+        let h = max(0.0, pLen - groundRadius);
         
         let d = getAtmosphereDensities(h, params);
         
@@ -110,11 +111,12 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
 
         let scatR = params.rayleighScattering * d.rhoR;
         let scatM = params.mieScattering * d.rhoM;
-        let ext = scatR + scatM + params.mieAbsorption * d.rhoM + params.absorptionCoefficient * d.rhoO;
+        let scatTotal = (scatR + scatM) * stepSize;
+        let ext = scatR + mieExt * d.rhoM + params.absorptionCoefficient * d.rhoO;
 
-        *L1 += *TPath * sunT * (scatR + scatM) * phaseIsotropic * shadowMask * stepSize;
+        *L1 += *TPath * sunT * scatTotal * phaseIsotropic * shadowMask;
         
-        *f1 += *TPath * (scatR + scatM) * stepSize;
+        *f1 += *TPath * scatTotal;
         
         *TPath *= exp(-ext * stepSize);
     }

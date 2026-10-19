@@ -70,15 +70,15 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * @param skyView -
      * [KO] 스카이 뷰(Sky View) LUT 텍스처
      * [EN] Sky View LUT texture
-     * @returns
-     * [KO] 렌더링 완료 Promise (`Promise<void>`)
-     * [EN] Render completion Promise (`Promise<void>`)
      */
-    async render(transmittance: DirectTexture, skyView: DirectTexture): Promise<void> {
+    render(transmittance: DirectTexture, skyView: DirectTexture): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
-        await this.#processPass(this.#pipeline, this.#bindGroup, this.#lutTexture);
+        const {resourceManager} = this.redGPUContext;
+        this.executeComputePass(this.#pipeline, this.#bindGroup, 8, 8, 1, false);
+        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, this.#sourceTextureDescriptor, true, COMMAND_ENCODER_TYPE.RESOURCE);
+        resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, this.#lutTexture, COMMAND_ENCODER_TYPE.RESOURCE);
     }
 
     /**
@@ -106,13 +106,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             {binding: 4, resource: transmittance.gpuTextureView},
             {binding: 5, resource: skyView.gpuTextureView}
         ]);
-    }
-
-    async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
-        const {resourceManager} = this.redGPUContext;
-        this.executeComputePass(pipeline, bindGroup, 8, 8, 1, false);
-        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, this.#sourceTextureDescriptor, true, COMMAND_ENCODER_TYPE.RESOURCE);
-        await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture, COMMAND_ENCODER_TYPE.RESOURCE);
     }
 
     #init(): void {

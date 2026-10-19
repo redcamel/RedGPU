@@ -50,7 +50,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [EN] 3. Perform atmospheric integration
     let tEarth = getRaySphereIntersection(rayOrigin, viewDir, groundRadius);
     let atmosphereHeight = params.atmosphereHeight;
-    let tMax = getRaySphereIntersection(rayOrigin, viewDir, groundRadius + atmosphereHeight);
 
     if (groundRadius > 0.0 && tEarth > 0.0) {
         // 지면 방향 산란광 계산
@@ -58,8 +57,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let hitPoint = rayOrigin + viewDir * tEarth;
         let up = hitPoint * inverseSqrt(dot(hitPoint, hitPoint));
-        let sunDir = normalize(params.sunDirection);
-        let localCosSun = dot(up, sunDir);
+        let localCosSun = dot(up, params.sunDirection);
 
         // 지면의 투과율 및 다중 산란 에너지 기여도 합산
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, localCosSun, atmosphereHeight);
@@ -68,9 +66,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let groundRadiance = evaluateGroundRadiance(localCosSun, sunT, msEnergy, params.groundAlbedo);
         radiance += transmittance * groundRadiance;
-    } else if (tMax > 0.0) {
-        // 하늘 방향 산란광 계산
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, SKY_VIEW_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, &radiance, &transmittance);
+    } else {
+        let tMax = getRaySphereIntersection(rayOrigin, viewDir, groundRadius + atmosphereHeight);
+        if (tMax > 0.0) {
+            // 하늘 방향 산란광 계산
+            integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, SKY_VIEW_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, &radiance, &transmittance);
+        }
     }
 
     // [KO] 4. 결과 저장 (산란광 및 평균 투과율)

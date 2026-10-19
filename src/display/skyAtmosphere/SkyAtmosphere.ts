@@ -101,7 +101,6 @@ class SkyAtmosphere extends RedGPUObject {
 
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
-    #UNIFORM_STRUCT: any
 
     /**
      * [KO] SkyAtmosphere 인스턴스를 생성합니다.
@@ -118,9 +117,9 @@ class SkyAtmosphere extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        const SHADER_INFO = redGPUContext.resourceManager.wgslParser.parse('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
-        this.#UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
-        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(this.#UNIFORM_STRUCT.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
+        const SHADER_INFO = redGPUContext.resourceManager.wgslParser.parse('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
+        const uniformStruct = SHADER_INFO.uniforms.params;
+        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(uniformStruct.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -139,7 +138,7 @@ class SkyAtmosphere extends RedGPUObject {
         this.#backgroundRenderer = new SkyAtmosphereBackground(redGPUContext);
         this.#postEffect = new SkyAtmospherePostEffect(redGPUContext, this);
 
-        this.#initCachedUniformMembers();
+        this.#initCachedUniformMembers(uniformStruct);
     }
 
 
@@ -834,8 +833,8 @@ class SkyAtmosphere extends RedGPUObject {
         this.#markDirty(lut, skyView, ibl);
     }
 
-    #initCachedUniformMembers(): void {
-        const {members} = this.#UNIFORM_STRUCT;
+    #initCachedUniformMembers(uniformStruct: any): void {
+        const {members} = uniformStruct;
         const params = this.#params as any;
         this.#cachedUniformMembers = [];
         for (const [key, member] of Object.entries(members)) {

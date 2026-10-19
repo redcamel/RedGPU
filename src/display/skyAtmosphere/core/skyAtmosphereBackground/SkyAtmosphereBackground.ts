@@ -23,7 +23,6 @@ class SkyAtmosphereBackground extends RedGPUObject {
 
     #backgroundBindGroup2: GPUBindGroup;
     #backgroundPipeline: GPURenderPipeline;
-    #backgroundRenderBundle: GPURenderBundle;
     #singleBundleArray: [GPURenderBundle] = [null];
 
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
@@ -84,20 +83,24 @@ class SkyAtmosphereBackground extends RedGPUObject {
 
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
         if (!this.#backgroundPipeline || dirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
-            this.#lastUpdateMSAAID = msaaID;
-            this.#updateBackgroundPipeline(useMSAA);
+            if (!this.#backgroundPipeline || dirtyMSAA) {
+                this.#lastUpdateMSAAID = msaaID;
+                this.#updateBackgroundPipeline(useMSAA);
+            }
             this.#prevBackgroundSystemUniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
 
-            this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
-                label: 'SKY_ATMOSPHERE_BACKGROUND_BG_2',
-                layout: this.#backgroundBindGroupLayout2,
-                entries: [
-                    {binding: 0, resource: transmittanceLUT.gpuTextureView},
-                    {binding: 1, resource: multiScatLUT.gpuTextureView},
-                    {binding: 2, resource: skyViewLUT.gpuTextureView},
-                    {binding: 3, resource: sampler.gpuSampler}
-                ]
-            });
+            if (!this.#backgroundBindGroup2) {
+                this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
+                    label: 'SKY_ATMOSPHERE_BACKGROUND_BG_2',
+                    layout: this.#backgroundBindGroupLayout2,
+                    entries: [
+                        {binding: 0, resource: transmittanceLUT.gpuTextureView},
+                        {binding: 1, resource: multiScatLUT.gpuTextureView},
+                        {binding: 2, resource: skyViewLUT.gpuTextureView},
+                        {binding: 3, resource: sampler.gpuSampler}
+                    ]
+                });
+            }
 
             const bundleEncoder = gpuDevice.createRenderBundleEncoder({
                 ...view.basicRenderBundleEncoderDescriptor,
@@ -109,8 +112,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
             bundleEncoder.setBindGroup(1, this.#backgroundBindGroup2);
             bundleEncoder.draw(3, 1, 0, 0);
 
-            this.#backgroundRenderBundle = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
-            this.#singleBundleArray[0] = this.#backgroundRenderBundle;
+            this.#singleBundleArray[0] = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
         }
 
         currentRenderPassEncoder.executeBundles(this.#singleBundleArray);
@@ -124,7 +126,6 @@ class SkyAtmosphereBackground extends RedGPUObject {
         this.#singleBundleArray[0] = null;
         this.#backgroundBindGroup2 = null;
         this.#backgroundPipeline = null;
-        this.#backgroundRenderBundle = null;
         this.#prevBackgroundSystemUniformBindGroup = null;
         this.#backgroundBindGroupLayout2 = null;
     }

@@ -33,8 +33,6 @@ class SkyLight extends RedGPUObject {
     dirty: boolean = true;
     #reflectionGenerator: SkyLightReflectionGenerator;
     #irradianceGenerator: SkyLightIrradianceGenerator;
-    #sampler: Sampler;
-    #sharedUniformBuffer: UniformBuffer;
 
     /**
      * [KO] SkyLight 인스턴스를 생성합니다.
@@ -52,11 +50,8 @@ class SkyLight extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
         super(redGPUContext);
-        this.#sharedUniformBuffer = sharedUniformBuffer;
-        this.#sampler = sampler;
-
-        this.#reflectionGenerator = new SkyLightReflectionGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
-        this.#irradianceGenerator = new SkyLightIrradianceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#reflectionGenerator = new SkyLightReflectionGenerator(redGPUContext, sharedUniformBuffer, sampler);
+        this.#irradianceGenerator = new SkyLightIrradianceGenerator(redGPUContext, sharedUniformBuffer, sampler);
     }
 
     /**
@@ -93,14 +88,9 @@ class SkyLight extends RedGPUObject {
      */
     update(skyAtmosphere: SkyAtmosphere): void {
         if (this.dirty) {
-            this.#reflectionGenerator.render(
-                skyAtmosphere.transmittanceLUT,
-                skyAtmosphere.skyViewLUT
-            );
-            this.#irradianceGenerator.render(
-                skyAtmosphere.transmittanceLUT,
-                skyAtmosphere.skyViewLUT
-            );
+            const {transmittanceLUT, skyViewLUT} = skyAtmosphere;
+            this.#reflectionGenerator.render(transmittanceLUT, skyViewLUT);
+            this.#irradianceGenerator.render(transmittanceLUT, skyViewLUT);
 
             this.dirty = false;
         }
@@ -119,8 +109,6 @@ class SkyLight extends RedGPUObject {
         }
         this.#reflectionGenerator = null;
         this.#irradianceGenerator = null;
-        this.#sharedUniformBuffer = null;
-        this.#sampler = null;
     }
 }
 
