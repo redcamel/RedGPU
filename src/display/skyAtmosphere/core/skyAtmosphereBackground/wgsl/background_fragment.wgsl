@@ -3,7 +3,7 @@
 
 struct VertexOutput {
     @builtin(position) position : vec4<f32>,
-    @location(0) vertexPosition: vec4<f32>,
+    @location(0) vertexPosition: vec3<f32>,
 };
 
 struct FragmentOutput {
@@ -23,7 +23,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let groundRadius = uniforms.groundRadius;
     let atmosphereHeight = uniforms.atmosphereHeight;
     
-    let viewDir = normalize(input.vertexPosition.xyz);
+    let viewDir = normalize(input.vertexPosition);
     let viewHeight = max(0.0, uniforms.cameraHeight);
 
     let camPos = vec3<f32>(0.0, groundRadius + viewHeight, 0.0);
@@ -65,7 +65,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     if (!isGroundHit) {
         let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius);
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, vec3<f32>(skyTransmittance));
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance), 0.01);
+        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance));
         addedRadiance = (mieGlow + sunDisk) * sunShadow;
     }
 
@@ -78,13 +78,15 @@ fn main(input : VertexOutput) -> FragmentOutput {
         
         if (tCloud > 0.0) {
             let hitP = camPos + viewDir * tCloud;
-            finalCloudMask = getCloudDensity(hitP, uniforms);
+            let warpedUV = getCloudWarpedUV(hitP, uniforms);
+            let rawCloudDensity = cloud_fbm(warpedUV);
+            finalCloudMask = getCloudDensity(rawCloudDensity, uniforms);
             
             if (finalCloudMask > 0.0) {
                 let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, uniforms.cloudHeight, sunDir.y, atmosphereHeight);
                 
                 // 구름용 가짜 조명(Pseudo-Lighting) 및 색상 결정
-                let cloudNormal = getCloudNormal(hitP, uniforms);
+                let cloudNormal = getCloudNormal(warpedUV, rawCloudDensity);
                 let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
                 let cloudColor = (sunT * INV_PI + baseRadiance) * 0.5 * cloudShadow;
                 

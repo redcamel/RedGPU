@@ -26,6 +26,9 @@ import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #skyAtmosphere: SkyAtmosphere;
+    #transmittanceTextureInfo: IPostEffectResult = {texture: null, textureView: null};
+    #skyViewTextureInfo: IPostEffectResult = {texture: null, textureView: null};
+    #aerialPerspectiveTextureInfo: IPostEffectResult = {texture: null, textureView: null};
 
     /**
      * [KO] SkyAtmospherePostEffect 인스턴스를 생성합니다.
@@ -102,18 +105,23 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const skyAtmosphere = this.#skyAtmosphere;
+        const transmittanceLUT = skyAtmosphere.transmittanceLUT;
+        const skyViewLUT = skyAtmosphere.skyViewLUT;
+        const aerialPerspectiveLUT = skyAtmosphere.aerialPerspectiveLUT;
 
-        return super.render(view, width, height,
+        this.#transmittanceTextureInfo.texture = transmittanceLUT.gpuTexture;
+        this.#transmittanceTextureInfo.textureView = transmittanceLUT.gpuTextureView;
+        this.#skyViewTextureInfo.texture = skyViewLUT.gpuTexture;
+        this.#skyViewTextureInfo.textureView = skyViewLUT.gpuTextureView;
+        this.#aerialPerspectiveTextureInfo.texture = aerialPerspectiveLUT.gpuTexture;
+        this.#aerialPerspectiveTextureInfo.textureView = aerialPerspectiveLUT.gpuTextureView;
+
+        return super.render(
+            view, width, height,
             sourceTextureInfo,
-            {
-                texture: skyAtmosphere.transmittanceLUT.gpuTexture,
-                textureView: skyAtmosphere.transmittanceLUT.gpuTextureView
-            },
-            {texture: skyAtmosphere.skyViewLUT.gpuTexture, textureView: skyAtmosphere.skyViewLUT.gpuTextureView},
-            {
-                texture: skyAtmosphere.aerialPerspectiveLUT.gpuTexture,
-                textureView: skyAtmosphere.aerialPerspectiveLUT.gpuTextureView
-            }
+            this.#transmittanceTextureInfo,
+            this.#skyViewTextureInfo,
+            this.#aerialPerspectiveTextureInfo
         );
     }
 
@@ -123,6 +131,12 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      */
     destroy() {
         super.destroy();
+        this.#transmittanceTextureInfo.texture = null;
+        this.#transmittanceTextureInfo.textureView = null;
+        this.#skyViewTextureInfo.texture = null;
+        this.#skyViewTextureInfo.textureView = null;
+        this.#aerialPerspectiveTextureInfo.texture = null;
+        this.#aerialPerspectiveTextureInfo.textureView = null;
         this.#skyAtmosphere = null;
     }
 }

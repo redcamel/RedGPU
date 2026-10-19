@@ -2,7 +2,7 @@
 
 struct VertexOutput {
     @builtin(position) position : vec4<f32>,
-    @location(0) vertexPosition: vec4<f32>,
+    @location(0) vertexPosition: vec3<f32>,
 };
 
 @vertex
@@ -18,21 +18,13 @@ fn main(@builtin(vertex_index) vertexIndex: u32) -> VertexOutput {
     let ndcPos = vec4<f32>(x, y, 1.0, 1.0);
     output.position = ndcPos.xyww; // xyww 트릭으로 항상 원거리 평면에 배치
 
-    let u_camera = systemUniforms.camera;
     let invProj = systemUniforms.projection.inverseProjectionMatrix;
-    
-    // View 회전 행렬 (이동 제외)
-    var viewRotation = u_camera.viewMatrix;
-    viewRotation[3] = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-    
-    // 회전 행렬의 역행렬은 전치 행렬과 같음
-    let invViewRotation = transpose(viewRotation);
+    let invView = systemUniforms.camera.inverseViewMatrix;
 
-    // NDC -> View Space -> World Space 방향 복원
-    var viewDir = invProj * ndcPos;
-    viewDir = vec4<f32>(viewDir.xyz / viewDir.w, 0.0);
-    let worldDir = invViewRotation * viewDir;
+    // NDC -> View Space -> World Space 방향 복원 (w=0.0으로 이동 성분 자동 소거)
+    let viewDir = invProj * ndcPos;
+    let worldDir = invView * vec4<f32>(viewDir.xyz / viewDir.w, 0.0);
 
-    output.vertexPosition = vec4<f32>(worldDir.xyz, 1.0);
+    output.vertexPosition = worldDir.xyz;
     return output;
 }

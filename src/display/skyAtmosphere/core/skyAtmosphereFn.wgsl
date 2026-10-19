@@ -155,8 +155,7 @@ fn getSunDiskRadianceUnit(
     viewSunCos: f32,
     sunSize: f32,
     sunLimbDarkening: f32,
-    skyTrans: vec3<f32>,
-    edgeSoftness: f32
+    skyTrans: vec3<f32>
 ) -> vec3<f32> {
     let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
     let cosSunRad = cos(sunRad);
@@ -164,7 +163,7 @@ fn getSunDiskRadianceUnit(
     let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
 
     let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
-    let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
+    let sunMask = 1.0 - smoothstep(0.99, 1.0, dist);
     if (sunMask <= 0.0) { return vec3<f32>(0.0); }
 
     let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
@@ -258,7 +257,7 @@ fn integrateScatSegment(
         // [EN] Sample precomputed transmittance LUT
         let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
         
-        let shadowMask = select(1.0, 0.0, r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0);
+        let shadowMask = getPlanetShadowMask(p, sunDir, r);
         let d = getAtmosphereDensities(viewHeight, params);
 
         let scatR_phys = params.rayleighScattering * d.rhoR;
@@ -391,17 +390,13 @@ fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
     return baseUV + warp * 0.2;
 }
 
-fn getCloudDensity(hitP: vec3<f32>, params: SkyAtmosphere) -> f32 {
-    let warpedUV = getCloudWarpedUV(hitP, params);
-    let density = cloud_fbm(warpedUV);
+fn getCloudDensity(density: f32, params: SkyAtmosphere) -> f32 {
     let coverage = params.cloudCoverage;
     let softness = (1.0 - params.cloudDensity) * 0.5 + 0.01;
     return smoothstep(1.0 - coverage, 1.0 - coverage + softness, density);
 }
 
-fn getCloudNormal(hitP: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-    let warpedUV = getCloudWarpedUV(hitP, params);
-    let density = cloud_fbm(warpedUV);
+fn getCloudNormal(warpedUV: vec2<f32>, density: f32) -> vec3<f32> {
     let eps = 0.2;
     const INV_EPS: f32 = 5.0; // 1.0 / 0.2
     let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) * INV_EPS;

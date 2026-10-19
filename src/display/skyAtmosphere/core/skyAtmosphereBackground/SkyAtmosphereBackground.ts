@@ -24,6 +24,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
     #backgroundBindGroup2: GPUBindGroup;
     #backgroundPipeline: GPURenderPipeline;
     #backgroundRenderBundle: GPURenderBundle;
+    #singleBundleArray: [GPURenderBundle] = [null];
 
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
     #lastUpdateMSAAID: string;
@@ -109,9 +110,10 @@ class SkyAtmosphereBackground extends RedGPUObject {
             bundleEncoder.draw(3, 1, 0, 0);
 
             this.#backgroundRenderBundle = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
+            this.#singleBundleArray[0] = this.#backgroundRenderBundle;
         }
 
-        currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
+        currentRenderPassEncoder.executeBundles(this.#singleBundleArray);
     }
 
     /**
@@ -119,6 +121,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
      * [EN] Releases the background renderer and internal pipeline resource references.
      */
     destroy(): void {
+        this.#singleBundleArray[0] = null;
         this.#backgroundBindGroup2 = null;
         this.#backgroundPipeline = null;
         this.#backgroundRenderBundle = null;

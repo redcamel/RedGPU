@@ -71,7 +71,7 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
                 {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
             ]);
         }
-        this.executeComputePass(this.#pipeline, this.#bindGroup, [1, 1, 1]);
+        this.executeComputePass(this.#pipeline, this.#bindGroup, 1, 1, 1);
     }
 
     /**

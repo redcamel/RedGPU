@@ -53,7 +53,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
      * [KO] LUT 텍스처 깊이 또는 레이어 수 (기본값: 1)
      * [EN] LUT texture depth or layer count (default: 1)
      */
-    protected constructor(
+    constructor(
         redGPUContext: RedGPUContext,
         sharedUniformBuffer: UniformBuffer,
         sampler: Sampler,
@@ -161,26 +161,38 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
      * @param bindGroup -
      * [KO] 바인딩할 리소스 바인드 그룹
      * [EN] Resource bind group to bind
-     * @param workgroupSize -
-     * [KO] 워크그룹 크기 (기본값: `[16, 16, 1]`)
-     * [EN] Workgroup size (default: `[16, 16, 1]`)
+     * @param workgroupSizeX -
+     * [KO] X축 워크그룹 크기 (기본값: 8)
+     * [EN] X-axis workgroup size (default: 8)
+     * @param workgroupSizeY -
+     * [KO] Y축 워크그룹 크기 (기본값: 8)
+     * [EN] Y-axis workgroup size (default: 8)
+     * @param workgroupSizeZ -
+     * [KO] Z축 워크그룹 크기 (기본값: 1)
+     * [EN] Z-axis workgroup size (default: 1)
+     * @param notifyUpdate -
+     * [KO] 패스 실행 후 `lutTexture.notifyUpdate()` 자동 호출 여부 (기본값: true)
+     * [EN] Whether to automatically call `lutTexture.notifyUpdate()` after pass execution (default: true)
      */
     executeComputePass(
         pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,
-        workgroupSize: [number, number, number] = [16, 16, 1]
+        workgroupSizeX: number = 8,
+        workgroupSizeY: number = 8,
+        workgroupSizeZ: number = 1,
+        notifyUpdate: boolean = true
     ): void {
         const {commandEncoderManager} = this;
         commandEncoderManager.addResourceComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(
-                Math.ceil(this.#width / workgroupSize[0]),
-                Math.ceil(this.#height / workgroupSize[1]),
-                Math.ceil(this.#depth / workgroupSize[2])
+                Math.ceil(this.#width / workgroupSizeX),
+                Math.ceil(this.#height / workgroupSizeY),
+                Math.ceil(this.#depth / workgroupSizeZ)
             );
         });
-        this.lutTexture.notifyUpdate();
+        if (notifyUpdate) this.lutTexture.notifyUpdate();
     }
 
     /**
@@ -235,7 +247,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
      * [KO] 생성된 GPUComputePipeline
      * [EN] Created GPUComputePipeline
      */
-    protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
+    createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
         const {gpuDevice} = this;
         return gpuDevice.createComputePipeline({
             label,
@@ -264,7 +276,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
      * [KO] 생성된 GPUBindGroup
      * [EN] Created GPUBindGroup
      */
-    protected createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
+    createBindGroup(label: string, pipeline: GPUComputePipeline, entries: GPUBindGroupEntry[]): GPUBindGroup {
         return this.gpuDevice.createBindGroup({
             label,
             layout: pipeline.getBindGroupLayout(0),

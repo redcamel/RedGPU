@@ -26,7 +26,7 @@ import RedGPUObject from "../../base/RedGPUObject";
 interface CachedUniformMember {
     key: string;
     offset: number;
-    isFloat: boolean;
+    isVector: boolean;
 }
 
 /**
@@ -628,7 +628,7 @@ class SkyAtmosphere extends RedGPUObject {
             renderViewStateData,
             this.#transmittanceGenerator.lutTexture,
             this.#multiScatteringGenerator.lutTexture,
-            this.skyViewLUT,
+            this.#skyViewGenerator.lutTexture,
             this.#sampler
         );
     }
@@ -836,20 +836,22 @@ class SkyAtmosphere extends RedGPUObject {
 
     #initCachedUniformMembers(): void {
         const {members} = this.#UNIFORM_STRUCT;
+        const params = this.#params as any;
         this.#cachedUniformMembers = [];
         for (const [key, member] of Object.entries(members)) {
-            const targetMember = member as any;
-            this.#cachedUniformMembers.push({
-                key,
-                offset: targetMember.uniformOffset / 4,
-                isFloat: targetMember.View === Float32Array
-            });
+            if (params[key] !== undefined) {
+                const targetMember = member as any;
+                this.#cachedUniformMembers.push({
+                    key,
+                    offset: targetMember.uniformOffset / 4,
+                    isVector: Array.isArray(params[key]) || params[key] instanceof Float32Array
+                });
+            }
         }
     }
 
     #updateSharedUniformBuffer(): void {
         const dataViewF32 = this.#sharedUniformBuffer.dataViewF32;
-        const dataViewU32 = this.#sharedUniformBuffer.dataViewU32;
         const members = this.#cachedUniformMembers;
         const params = this.#params as any;
         const len = members.length;
@@ -857,15 +859,13 @@ class SkyAtmosphere extends RedGPUObject {
         for (let i = 0; i < len; i++) {
             const item = members[i];
             const value = params[item.key];
-            if (value !== undefined) {
-                const offset = item.offset;
-                if (typeof value === 'number') {
-                    if (item.isFloat) dataViewF32[offset] = value;
-                    else dataViewU32[offset] = value;
-                } else if (value instanceof Float32Array || Array.isArray(value)) {
-                    const vLen = value.length;
-                    for (let j = 0; j < vLen; j++) dataViewF32[offset + j] = value[j];
-                }
+            const offset = item.offset;
+            if (item.isVector) {
+                dataViewF32[offset] = value[0];
+                dataViewF32[offset + 1] = value[1];
+                dataViewF32[offset + 2] = value[2];
+            } else {
+                dataViewF32[offset] = value;
             }
         }
         this.redGPUContext.gpuDevice.queue.writeBuffer(this.#sharedUniformBuffer.gpuBuffer, 0, this.#sharedUniformBuffer.data);

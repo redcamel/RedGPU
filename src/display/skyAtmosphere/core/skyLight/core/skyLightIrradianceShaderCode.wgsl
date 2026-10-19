@@ -46,5 +46,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // [EN] 3. Average results and store in cubemap texture array
     const INV_SAMPLE_COUNT_PI: f32 = (1.0 / f32(SAMPLE_COUNT)) * PI;
     let radiance = totalRadiance * INV_SAMPLE_COUNT_PI;
-    textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
+    textureStore(outputTexture, global_id.xy, face, vec4<f32>(radiance, 1.0));
 }

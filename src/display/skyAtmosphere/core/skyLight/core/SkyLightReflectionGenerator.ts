@@ -24,6 +24,7 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
+    #sourceTextureDescriptor: GPUTextureDescriptor;
     #lutTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
     #bindGroup: GPUBindGroup;
@@ -91,6 +92,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         }
         this.#sourceCubeTexture = null;
         this.#sourceCubeTextureView = null;
+        this.#sourceTextureDescriptor = null;
         this.#lutTexture = null;
         this.#pipeline = null;
         this.#bindGroup = null;
@@ -108,14 +110,8 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
     async #processPass(pipeline: GPUComputePipeline, bindGroup: GPUBindGroup, targetTexture: DirectCubeTexture): Promise<void> {
         const {resourceManager} = this.redGPUContext;
-        this.#computeRender(pipeline, bindGroup, [8, 8, 1]);
-        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, {
-            size: [this.width, this.height, 6],
-            format: 'rgba16float',
-            usage: this.#sourceCubeTexture.usage,
-            mipLevelCount: getMipLevelCount(this.width, this.height),
-            dimension: '2d'
-        }, true, COMMAND_ENCODER_TYPE.RESOURCE);
+        this.executeComputePass(pipeline, bindGroup, 8, 8, 1, false);
+        resourceManager.mipmapGenerator.generateMipmap(this.#sourceCubeTexture, this.#sourceTextureDescriptor, true, COMMAND_ENCODER_TYPE.RESOURCE);
         await resourceManager.prefilterGenerator.generate(this.#sourceCubeTexture, this.width, targetTexture, COMMAND_ENCODER_TYPE.RESOURCE);
     }
 
@@ -124,13 +120,15 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         const mipLevelCount = getMipLevelCount(this.width, this.height);
         const SPECULAR_SHADER_INFO = this.resourceManager.wgslParser.parse('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
-        this.#sourceCubeTexture = gpuDevice.createTexture({
+        this.#sourceTextureDescriptor = {
             label: 'SkyLight_Reflection_Source_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            mipLevelCount: mipLevelCount
-        });
+            mipLevelCount: mipLevelCount,
+            dimension: '2d'
+        };
+        this.#sourceCubeTexture = gpuDevice.createTexture(this.#sourceTextureDescriptor);
         this.#sourceCubeTextureView = this.#sourceCubeTexture.createView({
             dimension: '2d-array',
             baseMipLevel: 0,
@@ -139,23 +137,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
         this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
-    }
-
-    #computeRender(
-        pipeline: GPUComputePipeline,
-        bindGroup: GPUBindGroup,
-        workgroupSize: [number, number, number]
-    ): void {
-        const {commandEncoderManager} = this.redGPUContext;
-        commandEncoderManager.addResourceComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
-            passEncoder.setPipeline(pipeline);
-            passEncoder.setBindGroup(0, bindGroup);
-            passEncoder.dispatchWorkgroups(
-                Math.ceil(this.width / workgroupSize[0]),
-                Math.ceil(this.height / workgroupSize[1]),
-                Math.ceil(this.depth / workgroupSize[2])
-            );
-        });
     }
 }
 
