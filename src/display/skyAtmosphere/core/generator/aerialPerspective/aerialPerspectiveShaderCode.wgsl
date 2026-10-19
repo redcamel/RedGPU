@@ -40,7 +40,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tMax = select(sliceDist, min(sliceDist, tEarth), groundRadius > 0.0 && tEarth > 0.0);
 
     if (tMax > 0.0) {
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, AP_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, AP_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, &radiance, &transmittance);
 
         // [KO] 미 산란 글로우(Mie Glow) 추가: 태양 주변의 대기 산란 광채 표현
         // [EN] Add Mie Glow: Represent atmospheric scattering bloom around the sun

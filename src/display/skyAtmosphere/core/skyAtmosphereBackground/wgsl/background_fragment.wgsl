@@ -1,4 +1,3 @@
-#redgpu_include math.PI
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 
@@ -87,10 +86,10 @@ fn main(input : VertexOutput) -> FragmentOutput {
                 // 구름용 가짜 조명(Pseudo-Lighting) 및 색상 결정
                 let cloudNormal = getCloudNormal(hitP, uniforms);
                 let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
-                let cloudColor = (sunT * uniforms.sunIntensity * 0.5 + baseRadiance * PI * uniforms.sunIntensity * 0.5) * cloudShadow;
+                let cloudColor = (sunT * INV_PI + baseRadiance) * 0.5 * cloudShadow;
                 
                 // 구름 마스크 적용
-                baseRadiance = mix(baseRadiance * PI * uniforms.sunIntensity, cloudColor, finalCloudMask * skyTransmittance) / (max(uniforms.sunIntensity, 0.0001) * PI);
+                baseRadiance = mix(baseRadiance, cloudColor, finalCloudMask * skyTransmittance);
             }
         }
     }

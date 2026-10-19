@@ -54,7 +54,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     if (groundRadius > 0.0 && tEarth > 0.0) {
         // 지면 방향 산란광 계산
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tEarth, SKY_VIEW_STEPS / 2u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tEarth, SKY_VIEW_STEPS / 2u, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, &radiance, &transmittance);
 
         let hitPoint = rayOrigin + viewDir * tEarth;
         let up = hitPoint * inverseSqrt(dot(hitPoint, hitPoint));
@@ -70,7 +70,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         radiance += transmittance * groundRadiance;
     } else if (tMax > 0.0) {
         // 하늘 방향 산란광 계산
-        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, SKY_VIEW_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, true, &radiance, &transmittance);
+        integrateScatSegment(rayOrigin, viewDir, 0.0, tMax, SKY_VIEW_STEPS, params, transmittanceLUT, skyAtmosphereSampler, multiScatLUT, &radiance, &transmittance);
     }
 
     // [KO] 4. 결과 저장 (산란광 및 평균 투과율)

@@ -69,15 +69,12 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
      * @param skyView -
      * [KO] 스카이 뷰(Sky View) LUT 텍스처
      * [EN] Sky View LUT texture
-     * @returns
-     * [KO] 렌더링 완료 Promise (`Promise<void>`)
-     * [EN] Render completion Promise (`Promise<void>`)
      */
-    async render(transmittance: DirectTexture, skyView: DirectTexture): Promise<void> {
+    render(transmittance: DirectTexture, skyView: DirectTexture): void {
         if (!this.#bindGroup) {
             this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
-        await this.#processPass(this.#pipeline, this.#bindGroup);
+        this.#processPass(this.#pipeline, this.#bindGroup);
     }
 
     /**
@@ -160,19 +157,16 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #computeRender(
         pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,
-        workgroupSize: [number, number, number] = [16, 16, 1],
-        width: number = this.width,
-        height: number = this.height,
-        depth: number = this.depth
+        workgroupSize: [number, number, number]
     ): void {
         const {commandEncoderManager} = this.redGPUContext;
         commandEncoderManager.addResourceComputePass(`SkyLight_${this.label}_ComputePass`, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(
-                Math.ceil(width / workgroupSize[0]),
-                Math.ceil(height / workgroupSize[1]),
-                Math.ceil(depth / workgroupSize[2])
+                Math.ceil(this.width / workgroupSize[0]),
+                Math.ceil(this.height / workgroupSize[1]),
+                Math.ceil(this.depth / workgroupSize[2])
             );
         });
     }

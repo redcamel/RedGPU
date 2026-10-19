@@ -3,7 +3,6 @@ import transmittanceShaderCode_wgsl from "./transmittanceShaderCode.wgsl";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
-import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
 
@@ -33,12 +32,9 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      * @param sharedUniformBuffer -
      * [KO] 대기 파라미터 공유 유니폼 버퍼
      * [EN] Shared uniform buffer for atmospheric parameters
-     * @param sampler -
-     * [KO] LUT 샘플링용 샘플러
-     * [EN] Sampler for LUT sampling
      */
-    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'Transmittance_Gen', 256, 64);
+    constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer) {
+        super(redGPUContext, sharedUniformBuffer, null, 'Transmittance_Gen', 256, 64);
         this.#init();
     }
 

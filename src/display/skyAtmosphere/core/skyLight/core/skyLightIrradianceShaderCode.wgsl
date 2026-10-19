@@ -39,7 +39,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 에너지 보정된 대기 광량 산출 (하드웨어 선형 샘플링 활용)
         // [EN] Calculate energy-compensated atmospheric radiance (Using hardware linear sampling)
-        totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler);
+        totalRadiance += evaluateIBLRadiance(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler, true);
     }
 
     // [KO] 3. 결과 평균화 및 큐브맵 텍스처 배열에 저장

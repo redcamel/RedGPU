@@ -15,7 +15,7 @@
 fn getIBLAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
     // [KO] 하드웨어 선형 샘플링을 통해 기초 대기 광량 조회
     // [EN] Retrieve base atmospheric radiance via hardware linear sampling
-    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler);
+    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler, false);
 
     // [KO] IBL 베이킹 시 태양 등의 극단적인 고휘도가 텍셀을 깨뜨리지 않도록 임계값 클램핑
     // [EN] Clamp radiance to prevent extreme highlights (like the sun) from breaking texels during IBL baking

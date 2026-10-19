@@ -19,13 +19,12 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * @category SkyAtmosphere
  */
 class SkyAtmosphereBackground extends RedGPUObject {
-    readonly #backgroundBindGroupLayout2: GPUBindGroupLayout;
+    #backgroundBindGroupLayout2: GPUBindGroupLayout;
 
     #backgroundBindGroup2: GPUBindGroup;
     #backgroundPipeline: GPURenderPipeline;
     #backgroundRenderBundle: GPURenderBundle;
 
-    #dirtyBackgroundPipeline: boolean = true;
     #prevBackgroundSystemUniformBindGroup: GPUBindGroup;
     #lastUpdateMSAAID: string;
 
@@ -83,10 +82,9 @@ class SkyAtmosphereBackground extends RedGPUObject {
         const {useMSAA, msaaID} = antialiasingManager;
 
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-        if (this.#dirtyBackgroundPipeline || dirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+        if (!this.#backgroundPipeline || dirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
             this.#lastUpdateMSAAID = msaaID;
             this.#updateBackgroundPipeline(useMSAA);
-            this.#dirtyBackgroundPipeline = false;
             this.#prevBackgroundSystemUniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
 
             this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
@@ -125,7 +123,6 @@ class SkyAtmosphereBackground extends RedGPUObject {
         this.#backgroundPipeline = null;
         this.#backgroundRenderBundle = null;
         this.#prevBackgroundSystemUniformBindGroup = null;
-        // @ts-ignore
         this.#backgroundBindGroupLayout2 = null;
     }
 

@@ -7,14 +7,12 @@
 #redgpu_include systemStruct.SkyAtmosphere
 
 const MAX_TAU: f32 = 100.0;
-const LN_HALF: f32 = -0.69314718056;
 
 const TRANSMITTANCE_STEPS: u32 = 40u;
 const MULTI_SCAT_STEPS: u32 = 40u;
 const SKY_VIEW_STEPS: u32 = 128u;
 const AP_STEPS: u32 = 64u;
 
-const SUN_RADIANCE_BOOST: f32 = 1.0;
 const MIE_GLOW_SUPPRESS: f32 = 0.40;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
@@ -33,15 +31,6 @@ fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadiu
     if (t0 > EPSILON) { return t0; }
     if (t1 > EPSILON) { return t1; }
     return -1.0;
-}
-
-fn getPlanetIntersection(origin: vec3<f32>, dir: vec3<f32>, r: f32) -> vec2<f32> {
-    let b = dot(origin, dir);
-    let c = dot(origin, origin) - r * r;
-    let delta = b * b - c;
-    if (delta < 0.0) { return vec2<f32>(-1.0); }
-    let s = sqrt(delta);
-    return vec2<f32>(-b - s, -b + s);
 }
 
 fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
@@ -114,28 +103,6 @@ fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereD
     return d;
 }
 
-fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-    let r = params.groundRadius;
-    let tMax = getRaySphereIntersection(p, sunDir, r + params.atmosphereHeight);
-    if (tMax <= 0.0) { return vec3<f32>(1.0); }
-    let intersect = getPlanetIntersection(p, sunDir, r);
-    
-    if (r > 0.0 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
-
-    var optExt = vec3<f32>(0.0);
-    let halfSteps = TRANSMITTANCE_STEPS / 2u;
-
-    if (intersect.x > EPSILON && intersect.x < tMax) {
-        optExt += integrateOpticalDepth(p, sunDir, 0.0, intersect.x, halfSteps, params);
-        if (intersect.y > 0.0 && tMax > intersect.y) {
-            optExt += integrateOpticalDepth(p, sunDir, intersect.y, tMax, halfSteps, params);
-        }
-    } else {
-        optExt = integrateOpticalDepth(p, sunDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
-    }
-    return exp(-min(optExt, vec3<f32>(MAX_TAU)));
-}
-
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
     if (tMax <= tMin) { return vec3<f32>(0.0); }
     let stepSize = (tMax - tMin) / f32(steps);
@@ -194,7 +161,7 @@ fn getSunDiskRadianceUnit(
     let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
     let cosSunRad = cos(sunRad);
     let solidAngle = PI2 * (1.0 - cosSunRad);
-    let radianceScale = SUN_RADIANCE_BOOST / max(6.7e-5, solidAngle); 
+    let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
 
     let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
     let sunMask = 1.0 - smoothstep(1.0 - edgeSoftness, 1.0, dist);
@@ -260,7 +227,6 @@ fn integrateScatSegment(
     transmittanceLUT: texture_2d<f32>, 
     skyAtmosphereSampler: sampler,
     multiScatLUT: texture_2d<f32>,
-    useLUT: bool,
     radiance: ptr<function, vec3<f32>>, 
     transmittance: ptr<function, vec3<f32>>
 ) {
@@ -273,7 +239,7 @@ fn integrateScatSegment(
     // [KO] 위상 함수 계산 (레일리/미 산란 특성 반영)
     // [EN] Calculate Phase Functions (Reflecting Rayleigh/Mie scattering characteristics)
     let phaseR = phaseRayleigh(viewSunCos);
-    let phaseM = select(phaseMie(viewSunCos, params.mieAnisotropy), phaseMieStable(viewSunCos, params.mieAnisotropy), useLUT);
+    let phaseM = phaseMieStable(viewSunCos, params.mieAnisotropy);
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
@@ -288,16 +254,9 @@ fn integrateScatSegment(
         let up = p * invPLen;
         let cosSun = dot(up, sunDir);
         
-        var sunTrans: vec3<f32>;
-        if (useLUT) {
-            // [KO] 미리 계산된 투과율 LUT 샘플링
-            // [EN] Sample precomputed transmittance LUT
-            sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
-        } else {
-            // [KO] 실시간 수치 적분 수행 (LUT 생성 시 사용)
-            // [EN] Perform real-time numerical integration (Used during LUT generation)
-            sunTrans = getSunTransmittanceManual(p, sunDir, params);
-        }
+        // [KO] 미리 계산된 투과율 LUT 샘플링
+        // [EN] Sample precomputed transmittance LUT
+        let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
         
         let shadowMask = select(1.0, 0.0, r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0);
         let d = getAtmosphereDensities(viewHeight, params);
@@ -359,7 +318,8 @@ fn evaluateIBLRadiance(
     params: SkyAtmosphere, 
     transmittanceLUT: texture_2d<f32>, 
     skyViewLUT: texture_2d<f32>, 
-    skyAtmosphereSampler: sampler
+    skyAtmosphereSampler: sampler,
+    includeSunDisk: bool
 ) -> vec3<f32> {
     let r = params.groundRadius;
     let viewHeight = max(0.0, params.cameraHeight);
@@ -383,48 +343,9 @@ fn evaluateIBLRadiance(
     if (!isGround && sunShadow > 0.0) {
         let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
         radiance += mieGlow * sunShadow;
-    }
-
-    return radiance;
-}
-
-fn getSpecularSunLobe(viewSun: f32, lobeHalfAngle: f32) -> f32 {
-    let cosHalf = cos(lobeHalfAngle);
-    let sunLobePower = clamp(LN_HALF / log(max(1e-4, cosHalf)), 2.0, 128.0);
-    let sunLobeNorm = (sunLobePower + 1.0) * (0.5 * INV_PI);
-    return sunLobeNorm * pow(max(0.0, viewSun), sunLobePower);
-}
-
-fn evaluateIBLRadianceCompensated(
-    viewDir: vec3<f32>,
-    params: SkyAtmosphere,
-    transmittanceLUT: texture_2d<f32>,
-    skyViewLUT: texture_2d<f32>,
-    skyAtmosphereSampler: sampler
-) -> vec3<f32> {
-    let r = params.groundRadius;
-    let viewHeight = max(0.0, params.cameraHeight);
-    let atmosphereHeight = params.atmosphereHeight;
-    let sunDir = normalize(params.sunDirection);
-
-    let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
-    let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-
-    var radiance = skySample.rgb;
-
-    let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-
-    let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
-    let tEarth = getRaySphereIntersection(camPos, viewDir, r);
-    let isGround = r > 0.0 && tEarth > 0.0 && viewDir.y < -0.0001;
-
-    let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
-
-    let sunShadow = getPlanetShadowMask(camPos, sunDir, r);
-    if (!isGround && sunShadow > 0.0) {
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
-        radiance += mieGlow * sunShadow;
-        radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params) * sunShadow;
+        if (includeSunDisk) {
+            radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params) * sunShadow;
+        }
     }
 
     return radiance;

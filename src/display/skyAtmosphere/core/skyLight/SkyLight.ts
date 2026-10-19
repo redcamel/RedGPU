@@ -35,7 +35,6 @@ class SkyLight extends RedGPUObject {
     #irradianceGenerator: SkyLightIrradianceGenerator;
     #sampler: Sampler;
     #sharedUniformBuffer: UniformBuffer;
-    #isUpdatingIBL: boolean = false;
 
     /**
      * [KO] SkyLight 인스턴스를 생성합니다.
@@ -85,20 +84,15 @@ class SkyLight extends RedGPUObject {
     }
 
     /**
-     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 디퓨즈 및 스펙큘러 IBL 큐브맵을 비동기로 베이킹합니다.
-     * [EN] Asynchronously bakes diffuse and specular IBL cubemaps based on SkyAtmosphere's LUT data.
+     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 디퓨즈 및 스펙큘러 IBL 큐브맵을 베이킹합니다.
+     * [EN] Bakes diffuse and specular IBL cubemaps based on SkyAtmosphere's LUT data.
      *
      * @param skyAtmosphere -
      * [KO] 소스 SkyAtmosphere 인스턴스
      * [EN] Source SkyAtmosphere instance
-     * @returns
-     * [KO] 업데이트 완료 Promise (`Promise<void>`)
-     * [EN] Update completion Promise (`Promise<void>`)
      */
-    async update(skyAtmosphere: SkyAtmosphere): Promise<void> {
-        if (this.dirty && !this.#isUpdatingIBL) {
-            this.#isUpdatingIBL = true;
-
+    update(skyAtmosphere: SkyAtmosphere): void {
+        if (this.dirty) {
             this.#reflectionGenerator.render(
                 skyAtmosphere.transmittanceLUT,
                 skyAtmosphere.skyViewLUT
@@ -108,7 +102,6 @@ class SkyLight extends RedGPUObject {
                 skyAtmosphere.skyViewLUT
             );
 
-            this.#isUpdatingIBL = false;
             this.dirty = false;
         }
     }

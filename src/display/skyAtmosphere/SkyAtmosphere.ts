@@ -130,7 +130,7 @@ class SkyAtmosphere extends RedGPUObject {
             addressModeV: 'clamp-to-edge'
         });
 
-        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
+        this.#transmittanceGenerator = new TransmittanceGenerator(redGPUContext, this.#sharedUniformBuffer);
         this.#multiScatteringGenerator = new MultiScatteringGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#skyViewGenerator = new SkyViewGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
         this.#aerialPerspectiveGenerator = new AerialPerspectiveGenerator(redGPUContext, this.#sharedUniformBuffer, this.#sampler);
@@ -180,7 +180,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set cloudTimeMultiplier(v: number) {
-        this.#setParam('cloudTimeMultiplier', v, false, false, false, (v) => validateNumberRange(v,));
+        this.#setParam('cloudTimeMultiplier', v, false, false, false, validateNumberRange);
     }
 
     /**
@@ -778,8 +778,7 @@ class SkyAtmosphere extends RedGPUObject {
 
     #updateLUTs(view: View3D) {
         const {rawCamera} = view;
-        const cameraPos = [rawCamera.x, rawCamera.y, rawCamera.z];
-        const currentHeightKm = Math.max(0.001, (cameraPos[1] / 1000.0));
+        const currentHeightKm = Math.max(0.001, (rawCamera.y / 1000.0));
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
             this.#params.cameraHeight = currentHeightKm;
