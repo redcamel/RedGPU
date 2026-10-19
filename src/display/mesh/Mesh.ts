@@ -26,7 +26,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
-import LakeInteractionRegistry from "../../water/lake/interaction/LakeInteractionRegistry";
+import LakeInteractionRegistry from "../../water/lakeCore/interaction/LakeInteractionRegistry";
 
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'

@@ -7,8 +7,11 @@ import vertexShaderSkinnedCode from "./shader/lakeCapturePenetrationSkinned.wgsl
 import {LakeActiveMeshEntry} from "./LakeInteractionManager";
 
 /**
- * [KO] 물 상호작용 객체의 침투 깊이를 캡처하는 렌더 패스 클래스입니다.
- * [EN] Render pass class that captures penetration depth for water interaction objects.
+ * [KO] 상단 직교 투영(Top-down Orthographic Projection)을 통해 활성 메시의 수면 침투 깊이 및 파동 자극 데이터를 `rg16float` 텍스처에 캡처하는 렌더 패스 클래스입니다.
+ * [EN] Render pass class that captures water penetration depth and wave impulse data of active meshes into an `rg16float` texture via top-down orthographic projection.
+ *
+ * [KO] 일반 정적/동적 메시와 스키닝(Skinned) 메시 파이프라인을 모두 지원하며, `Lake` 인스턴스 내부에서 자동으로 생성됩니다.
+ * [EN] Supports both standard static/dynamic meshes and skinned mesh pipelines, and is automatically created inside a `Lake` instance.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -19,19 +22,19 @@ import {LakeActiveMeshEntry} from "./LakeInteractionManager";
  */
 class LakeCapturePass extends RedGPUObject {
     /**
-     * [KO] 캡처 텍스처 해상도 크기 (기본값: 512)
-     * [EN] Capture texture resolution size (default: 512)
+     * [KO] 캡처 텍스처의 가로·세로 해상도(픽셀)입니다. (기본값: `512`)
+     * [EN] Width and height resolution of the capture texture in pixels. (Default: `512`)
      */
     textureSize: number = 512;
 
     /**
-     * [KO] 캡처된 침투 깊이 및 속도 데이터가 기록되는 GPUTexture
-     * [EN] GPUTexture where captured penetration depth and velocity data are recorded
+     * [KO] 침투 깊이 및 속도 자극이 기록되는 `rg16float` 포맷의 `GPUTexture`입니다.
+     * [EN] `GPUTexture` in `rg16float` format where penetration depth and velocity impulses are recorded.
      */
     captureTexture: GPUTexture;
     /**
-     * [KO] 캡처 텍스처의 GPUTextureView
-     * [EN] GPUTextureView of the capture texture
+     * [KO] `captureTexture`의 `GPUTextureView`입니다.
+     * [EN] `GPUTextureView` of `captureTexture`.
      */
     captureTextureView: GPUTextureView;
 
@@ -71,15 +74,15 @@ class LakeCapturePass extends RedGPUObject {
     #meshSkinnedBGL: GPUBindGroupLayout;
 
     /**
-     * [KO] LakeCapturePass 인스턴스를 생성합니다.
-     * [EN] Creates an instance of LakeCapturePass.
+     * [KO] `LakeCapturePass` 인스턴스를 생성합니다.
+     * [EN] Creates an instance of `LakeCapturePass`.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param textureSize -
-     * [KO] 캡처 텍스처 해상도 크기 (기본값: 512)
-     * [EN] Capture texture resolution size (default: 512)
+     * [KO] 캡처 텍스처 해상도 (기본값: `512`)
+     * [EN] Capture texture resolution (default: `512`)
      */
     constructor(redGPUContext: RedGPUContext, textureSize: number = 512) {
         super(redGPUContext);
@@ -90,30 +93,30 @@ class LakeCapturePass extends RedGPUObject {
     }
 
     /**
-     * [KO] 활성 메시들의 수면 침투 깊이를 캡처 텍스처에 렌더링합니다.
-     * [EN] Renders the water penetration depth of active meshes to the capture texture.
+     * [KO] 활성 메시 목록을 상단 직교 투영으로 렌더링하여 수면 침투 깊이를 캡처 텍스처에 기록합니다.
+     * [EN] Renders the active mesh list with top-down orthographic projection to record water penetration depth into the capture texture.
      *
      * @param commandEncoder -
-     * [KO] WebGPU 명령 인코더
-     * [EN] WebGPU command encoder
+     * [KO] 패스를 기록할 `GPUCommandEncoder`
+     * [EN] `GPUCommandEncoder` to record the pass
      * @param activeMeshes -
-     * [KO] 수면과 교차하는 활성 메시 항목 배열
-     * [EN] Array of active mesh entries intersecting the water surface
+     * [KO] 수면과 교차 중인 활성 메시 엔트리 배열 (`LakeActiveMeshEntry[]`)
+     * [EN] Array of active mesh entries intersecting the water surface (`LakeActiveMeshEntry[]`)
      * @param domainCenterX -
-     * [KO] 도메인 중심 X 좌표
-     * [EN] Domain center X coordinate
+     * [KO] 캡처 도메인 중심 월드 X 좌표
+     * [EN] Capture domain center world X coordinate
      * @param domainCenterZ -
-     * [KO] 도메인 중심 Z 좌표
-     * [EN] Domain center Z coordinate
+     * [KO] 캡처 도메인 중심 월드 Z 좌표
+     * [EN] Capture domain center world Z coordinate
      * @param domainSize -
-     * [KO] 도메인 크기
-     * [EN] Domain size
+     * [KO] 캡처 도메인의 월드 단위 한 변 크기
+     * [EN] Side length of the capture domain in world units
      * @param waterLevel -
-     * [KO] 수면 높이 Y 좌표
-     * [EN] Water surface height Y coordinate
+     * [KO] 호수 수면의 월드 Y 좌표
+     * [EN] World Y coordinate of the lake water surface
      * @param maxPenetration -
-     * [KO] 최대 침투 깊이 (기본값: 0.35)
-     * [EN] Maximum penetration depth (default: 0.35)
+     * [KO] 최대 허용 침투 깊이 (기본값: `0.35`)
+     * [EN] Maximum allowable penetration depth (default: `0.35`)
      */
     render(
         commandEncoder: GPUCommandEncoder,
@@ -202,8 +205,8 @@ class LakeCapturePass extends RedGPUObject {
     }
 
     /**
-     * [KO] LakeCapturePass 인스턴스를 파괴하고 할당된 GPU 텍스처 및 버퍼 리소스를 해제합니다.
-     * [EN] Destroys the LakeCapturePass instance and releases allocated GPU texture and buffer resources.
+     * [KO] 캡처 텍스처, 깊이 텍스처 및 유니폼 버퍼 등 할당된 GPU 리소스를 모두 해제합니다.
+     * [EN] Releases all allocated GPU resources including capture texture, depth texture, and uniform buffers.
      */
     destroy(): void {
         if (this.captureTexture) {
@@ -233,7 +236,7 @@ class LakeCapturePass extends RedGPUObject {
             size: [this.textureSize, this.textureSize, 1],
             format: 'rg16float',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-            label: 'WaterInteraction_CaptureTexture'
+            label: 'LakeInteraction_CaptureTexture'
         });
         this.captureTextureView = this.captureTexture.createView();
 
@@ -241,7 +244,7 @@ class LakeCapturePass extends RedGPUObject {
             size: [this.textureSize, this.textureSize, 1],
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            label: 'WaterInteraction_CaptureDepthTexture'
+            label: 'LakeInteraction_CaptureDepthTexture'
         });
         this.#depthTextureView = this.#depthTexture.createView();
 
@@ -258,7 +261,7 @@ class LakeCapturePass extends RedGPUObject {
                 depthLoadOp: 'clear',
                 depthStoreOp: 'discard'
             },
-            label: 'WaterCapture_RenderPass'
+            label: 'LakeCapture_RenderPass'
         };
     }
 
@@ -267,18 +270,18 @@ class LakeCapturePass extends RedGPUObject {
 
         this.#shaderModule = gpuDevice.createShaderModule({
             code: vertexShaderCode,
-            label: 'WaterCapturePenetrationShader'
+            label: 'LakeCapturePenetrationShader'
         });
 
         this.#shaderModuleSkinned = gpuDevice.createShaderModule({
             code: vertexShaderSkinnedCode,
-            label: 'WaterCapturePenetrationSkinnedShader'
+            label: 'LakeCapturePenetrationSkinnedShader'
         });
 
         this.#globalUniformBuffer = gpuDevice.createBuffer({
             size: 96,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            label: 'WaterCapture_GlobalUniformBuffer'
+            label: 'LakeCapture_GlobalUniformBuffer'
         });
 
         const globalBGL = gpuDevice.createBindGroupLayout({
@@ -287,7 +290,7 @@ class LakeCapturePass extends RedGPUObject {
                 visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                 buffer: {type: 'uniform'}
             }],
-            label: 'WaterCapture_GlobalBGL'
+            label: 'LakeCapture_GlobalBGL'
         });
 
         this.#globalBindGroup = gpuDevice.createBindGroup({
@@ -296,7 +299,7 @@ class LakeCapturePass extends RedGPUObject {
                 binding: 0,
                 resource: {buffer: this.#globalUniformBuffer}
             }],
-            label: 'WaterCapture_GlobalBindGroup'
+            label: 'LakeCapture_GlobalBindGroup'
         });
 
         this.#meshBGL = gpuDevice.createBindGroupLayout({
@@ -305,12 +308,12 @@ class LakeCapturePass extends RedGPUObject {
                 visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                 buffer: {type: 'uniform'}
             }],
-            label: 'WaterCapture_MeshBGL'
+            label: 'LakeCapture_MeshBGL'
         });
 
         this.#pipelineLayout = gpuDevice.createPipelineLayout({
             bindGroupLayouts: [globalBGL, this.#meshBGL],
-            label: 'WaterCapture_PipelineLayout'
+            label: 'LakeCapture_PipelineLayout'
         });
 
         this.#meshSkinnedBGL = gpuDevice.createBindGroupLayout({
@@ -326,12 +329,12 @@ class LakeCapturePass extends RedGPUObject {
                     buffer: {type: 'read-only-storage'}
                 }
             ],
-            label: 'WaterCapture_MeshSkinnedBGL'
+            label: 'LakeCapture_MeshSkinnedBGL'
         });
 
         this.#pipelineSkinnedLayout = gpuDevice.createPipelineLayout({
             bindGroupLayouts: [globalBGL, this.#meshSkinnedBGL],
-            label: 'WaterCapture_PipelineSkinnedLayout'
+            label: 'LakeCapture_PipelineSkinnedLayout'
         });
     }
 
@@ -382,7 +385,7 @@ class LakeCapturePass extends RedGPUObject {
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal'
             },
-            label: `WaterCapture_RenderPipeline_stride_${stride}`
+            label: `LakeCapture_RenderPipeline_stride_${stride}`
         });
 
         this.#pipelines.set(stride, pipeline);
@@ -428,7 +431,7 @@ class LakeCapturePass extends RedGPUObject {
                 depthWriteEnabled: true,
                 depthCompare: 'less-equal'
             },
-            label: 'WaterCapture_RenderPipeline_Skinned'
+            label: 'LakeCapture_RenderPipeline_Skinned'
         });
 
         return this.#pipelineSkinned;
@@ -441,7 +444,7 @@ class LakeCapturePass extends RedGPUObject {
             const buffer = gpuDevice.createBuffer({
                 size: 80,
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-                label: `WaterCapture_MeshUniformBuffer_${idx}`
+                label: `LakeCapture_MeshUniformBuffer_${idx}`
             });
             this.#meshUniformBuffers.push(buffer);
         }
@@ -462,7 +465,7 @@ class LakeCapturePass extends RedGPUObject {
                 binding: 0,
                 resource: {buffer}
             }],
-            label: `WaterCapture_MeshBindGroup_${index}`
+            label: `LakeCapture_MeshBindGroup_${index}`
         });
 
         this.#meshBindGroups[index] = bindGroup;
@@ -493,7 +496,7 @@ class LakeCapturePass extends RedGPUObject {
                     resource: {buffer: storageBuffer}
                 }
             ],
-            label: `WaterCapture_MeshSkinnedBindGroup_${index}`
+            label: `LakeCapture_MeshSkinnedBindGroup_${index}`
         });
 
         this.#skinnedBindGroups[index] = bindGroup;

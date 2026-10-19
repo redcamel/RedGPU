@@ -2540,7 +2540,7 @@ export namespace SkyAtmosphereLibrary {
      * @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
      * @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
      * 
-     * @compute @workgroup_size(16, 16)
+     * @compute @workgroup_size(8, 8)
      * fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
      *     // [KO] 1. 인덱스 계산 및 정규화된 UV 산출
      *     // [EN] 1. Index calculation and normalized UV derivation
