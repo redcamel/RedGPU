@@ -44,8 +44,8 @@ class Sharpen extends AMultiPassPostEffect {
             [
                 new Convolution(redGPUContext),
             ],
+            true
         );
-        this.isLdr = true;
         this.#effect_convolution = this.passList[0] as Convolution;
         this.#effect_convolution.kernel = Convolution.SHARPEN;
     }

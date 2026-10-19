@@ -34,11 +34,7 @@ interface ASinglePassPostEffect {
  * @category PostEffect
  */
 abstract class ASinglePassPostEffect extends RedGPUObject {
-    /**
-     * [KO] 이펙트가 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부 (기본값: `false`)
-     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space after tone mapping (default: `false`)
-     */
-    isLdr: boolean = false
+    #isLdr: boolean = false
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
     #computeBindGroupLayout0: GPUBindGroupLayout
@@ -84,17 +80,39 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
-     * @param workSize -
-     * [KO] 컴퓨트 워크그룹 크기 설정 (기본값: `{ x: 16, y: 16, z: 1 }`)
-     * [EN] Compute workgroup size configuration (default: `{ x: 16, y: 16, z: 1 }`)
+     * @param options -
+     * [KO] 초기화 옵션 (컴퓨트 워크그룹 크기 `workSizeX`, `workSizeY`, `workSizeZ` 및 LDR 공간 동작 여부 `isLdr`)
+     * [EN] Initialization options (compute workgroup size `workSizeX`, `workSizeY`, `workSizeZ` and LDR space operation flag `isLdr`)
      */
-    protected constructor(redGPUContext: RedGPUContext, workSize?: { x?: number, y?: number, z?: number }) {
-        super(redGPUContext)
-        if (workSize) {
-            if (workSize.x !== undefined) this.#WORK_SIZE_X = workSize.x;
-            if (workSize.y !== undefined) this.#WORK_SIZE_Y = workSize.y;
-            if (workSize.z !== undefined) this.#WORK_SIZE_Z = workSize.z;
+    protected constructor(
+        redGPUContext: RedGPUContext,
+        options?: {
+            workSizeX?: number;
+            workSizeY?: number;
+            workSizeZ?: number;
+            isLdr?: boolean;
         }
+    ) {
+        super(redGPUContext)
+        if (options) {
+            const {workSizeX, workSizeY, workSizeZ, isLdr} = options;
+            if (workSizeX !== undefined) this.#WORK_SIZE_X = workSizeX;
+            if (workSizeY !== undefined) this.#WORK_SIZE_Y = workSizeY;
+            if (workSizeZ !== undefined) this.#WORK_SIZE_Z = workSizeZ;
+            if (isLdr !== undefined) this.#isLdr = isLdr;
+        }
+    }
+
+    /**
+     * [KO] 이펙트가 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
+     * [EN] Returns whether the effect operates in LDR (Low Dynamic Range) space after tone mapping.
+     *
+     * @returns
+     * [KO] LDR 공간 동작 여부 (기본값: `false`)
+     * [EN] Whether the effect operates in LDR space (default: `false`)
+     */
+    get isLdr(): boolean {
+        return this.#isLdr
     }
 
     /**

@@ -72,8 +72,7 @@ class TAA extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {x: 8, y: 8, z: 1});
-        this.isLdr = false;
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_TAA',

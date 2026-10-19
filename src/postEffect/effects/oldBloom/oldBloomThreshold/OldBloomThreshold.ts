@@ -38,8 +38,7 @@ class OldBloomThreshold extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.isLdr = true;
+        super(redGPUContext, {isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_OLD_BLOOM_THRESHOLD',

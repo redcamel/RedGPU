@@ -52,8 +52,7 @@ class LensDistortion extends ASinglePassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.isLdr = true;
+        super(redGPUContext, {isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_DISTORTION',

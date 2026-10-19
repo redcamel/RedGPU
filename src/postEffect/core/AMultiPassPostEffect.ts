@@ -30,9 +30,12 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * @param passList -
      * [KO] 순차적으로 실행할 단일 패스 이펙트 배열
      * [EN] Array of single-pass effects to execute sequentially
+     * @param isLdr -
+     * [KO] 톤매핑 이후 LDR 공간 동작 여부 (기본값: `false`)
+     * [EN] Whether the effect operates in LDR space after tone mapping (default: `false`)
      */
-    protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
-        super(redGPUContext);
+    protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[], isLdr: boolean = false) {
+        super(redGPUContext, {isLdr});
         this.#passList.push(...passList);
     }
 
