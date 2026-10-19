@@ -747,13 +747,11 @@ class SkyAtmosphere extends RedGPUObject {
             const currentDir = this.#params.sunDirection;
             const EPSILON = 0.0001;
             const dirLen = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-            const normalizedDirX = dirLen > EPSILON ? dir[0] / dirLen : dir[0];
-            const normalizedDirY = dirLen > EPSILON ? dir[1] / dirLen : dir[1];
-            const normalizedDirZ = dirLen > EPSILON ? dir[2] / dirLen : dir[2];
+            const invLen = dirLen > EPSILON ? -1 / dirLen : -1;
 
-            const targetDirX = -normalizedDirX;
-            const targetDirY = -normalizedDirY;
-            const targetDirZ = -normalizedDirZ;
+            const targetDirX = dir[0] * invLen;
+            const targetDirY = dir[1] * invLen;
+            const targetDirZ = dir[2] * invLen;
 
             const directionChanged =
                 Math.abs(targetDirX - currentDir[0]) > EPSILON ||

@@ -22,7 +22,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 3. 광학 깊이(Optical Depth) 적분 및 투과율 산출
     // [EN] 3. Integrate Optical Depth and calculate Transmittance
-    let T = exp(-min(getOpticalDepth(viewHeight, cosTheta), vec3<f32>(100.0)));
+    let T = exp(-min(getOpticalDepth(viewHeight, cosTheta), vec3<f32>(MAX_TAU)));
 
     // [KO] 4. 결과 저장
     // [EN] 4. Store result

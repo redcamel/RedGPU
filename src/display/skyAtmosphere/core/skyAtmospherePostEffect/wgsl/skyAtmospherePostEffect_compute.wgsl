@@ -35,9 +35,8 @@ var sceneBlendingTrans: f32 = 1.0;
 
 if (rawDepth >= 1.0) {
     // [Background] 배경은 이미 산란광이 그려졌으므로 투과율만 추출하여 Glow 연산에 활용
-    let skyUV = getSkyViewUV(viewDir, mappingH, groundRadius, atmosphereHeight);
+    let skyUV = getSkyViewUV(viewDir, mappingH, groundRadius);
     atmosphereTrans = textureSampleLevel(skyViewLUT, basicSampler, skyUV, 0.0).a;
-    sceneBlendingTrans = 1.0; 
 } else {
     // [Object] Aerial Perspective 적용: 깊이 정보를 기반으로 3D LUT 샘플링
     let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
@@ -57,8 +56,8 @@ if (rawDepth >= 1.0) {
         let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
         let phaseR = phaseRayleigh(viewSunCos);
         let phaseM = phaseMie(viewSunCos, uniforms.mieAnisotropy);
-        let localScat = (scatR * phaseR + vec3<f32>(scatM * phaseM)) * sunT;
-        let localExt = scatR + vec3<f32>((uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor) + uniforms.absorptionCoefficient * d.rhoO;
+        let localScat = (scatR * phaseR + scatM * phaseM) * sunT;
+        let localExt = scatR + (uniforms.mieScattering + uniforms.mieAbsorption) * d.rhoM * uniforms.skyLuminanceFactor + uniforms.absorptionCoefficient * d.rhoO;
         let analyticalScat = localScat * actualDist;
         let analyticalTrans = exp(-localExt * actualDist);
         let analyticalA = (analyticalTrans.r + analyticalTrans.g + analyticalTrans.b) * (1.0 / 3.0);

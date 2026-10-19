@@ -23,6 +23,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;
     #label: string;
+    #computePassLabel: string;
     #width: number;
     #height: number;
     #depth: number;
@@ -64,6 +65,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
         this.#sharedUniformBuffer = sharedUniformBuffer;
         this.#sampler = sampler;
         this.#label = label;
+        this.#computePassLabel = `SkyAtmosphere_${label}_ComputePass`;
         this.#width = width;
         this.#height = height;
         this.#depth = depth;
@@ -94,18 +96,6 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
     }
 
     /**
-     * [KO] 생성기 구분 레이블을 반환합니다.
-     * [EN] Returns the generator identification label.
-     *
-     * @returns
-     * [KO] 레이블 문자열
-     * [EN] Label string
-     */
-    get label(): string {
-        return this.#label;
-    }
-
-    /**
      * [KO] LUT 텍스처의 너비를 반환합니다.
      * [EN] Returns the width of the LUT texture.
      *
@@ -127,18 +117,6 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
      */
     get height(): number {
         return this.#height;
-    }
-
-    /**
-     * [KO] LUT 텍스처의 깊이 또는 레이어 수를 반환합니다.
-     * [EN] Returns the depth or layer count of the LUT texture.
-     *
-     * @returns
-     * [KO] 텍스처 깊이
-     * [EN] Texture depth
-     */
-    get depth(): number {
-        return this.#depth;
     }
 
     /**
@@ -183,7 +161,7 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
         notifyUpdate: boolean = true
     ): void {
         const {commandEncoderManager} = this;
-        commandEncoderManager.addResourceComputePass(`SkyAtmosphere_${this.#label}_ComputePass`, (passEncoder) => {
+        commandEncoderManager.addResourceComputePass(this.#computePassLabel, (passEncoder) => {
             passEncoder.setPipeline(pipeline);
             passEncoder.setBindGroup(0, bindGroup);
             passEncoder.dispatchWorkgroups(

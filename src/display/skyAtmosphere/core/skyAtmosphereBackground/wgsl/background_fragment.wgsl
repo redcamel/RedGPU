@@ -52,7 +52,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     } else {
         // [KO] 1-B. 하늘 영역: SkyView LUT에서 산란광 샘플링
         // [EN] 1-B. Sky Region: Sample radiance from SkyView LUT
-        let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius, atmosphereHeight);
+        let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius);
         let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
         baseRadiance = skySample.rgb;
         skyTransmittance = skySample.a;

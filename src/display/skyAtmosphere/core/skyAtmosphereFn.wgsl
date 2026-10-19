@@ -40,7 +40,7 @@ fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> 
     return vec2<f32>(u, v);
 }
 
-fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32, atmosphereHeight: f32) -> vec2<f32> {
+fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32) -> vec2<f32> {
     var azimuth: f32;
     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
         azimuth = 0.0;
@@ -75,12 +75,10 @@ fn getTransmittance(transmittanceLUT: texture_2d<f32>, skyAtmosphereSampler: sam
     // [KO] 하드웨어 선형 샘플링을 통해 LUT 사이의 값을 부드럽게 보간합니다.
     // [EN] Smoothly interpolate between LUT entries via hardware linear sampling.
     var transmittance = textureSampleLevel(transmittanceLUT, skyAtmosphereSampler, uv, 0.0).rgb;
-    let mu = clamp(cosTheta, -1.0, 1.0);
-    if (mu < 0.0) {
+    if (cosTheta < 0.0) {
         // [KO] 지평선 아래로 내려갈 때 지면에 의한 차폐를 부드럽게 적용합니다.
         // [EN] Smoothly apply ground occlusion when below the horizon.
-        let groundMask = smoothstep(-0.015, 0.0, mu); 
-        transmittance *= groundMask;
+        transmittance *= smoothstep(-0.015, 0.0, cosTheta);
     }
     return transmittance;
 }
@@ -102,8 +100,7 @@ fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereD
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
     if (tMax <= tMin) { return vec3<f32>(0.0); }
     let stepSize = (tMax - tMin) / f32(steps);
-    let mieExt = params.mieScattering + params.mieAbsorption;
-    var optExt = vec3<f32>(0.0);
+    var totalRho = vec3<f32>(0.0);
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
         let p = origin + dir * t;
@@ -112,14 +109,10 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
         let viewHeight = (pSq * invPLen) - params.groundRadius;
         if (viewHeight < 0.0) { continue; }
         let d = getAtmosphereDensities(viewHeight, params);
-
-        let scatR_phys = params.rayleighScattering * d.rhoR;
-        let mieExt_phys = mieExt * d.rhoM;
-        let absC_phys = params.absorptionCoefficient * d.rhoO;
-
-        optExt += (scatR_phys + mieExt_phys + absC_phys) * stepSize;
+        totalRho += vec3<f32>(d.rhoR, d.rhoM, d.rhoO);
     }
-    return optExt;
+    let mieExt = params.mieScattering + params.mieAbsorption;
+    return (params.rayleighScattering * totalRho.x + mieExt * totalRho.y + params.absorptionCoefficient * totalRho.z) * stepSize;
 }
 
 fn phaseRayleigh(cosTheta: f32) -> f32 {
@@ -204,9 +197,7 @@ fn getMieGlowAmountUnit(
     let stablePhase = phaseMie(viewSunCos, stableG);
     let diffPhase = max(0.0, sharpPhase - stablePhase);
 
-    let sunDirY = params.sunDirection.y;
-    let sunCosTheta = clamp(sunDirY, -1.0, 1.0); 
-    let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, sunCosTheta, params.atmosphereHeight);
+    let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, params.sunDirection.y, params.atmosphereHeight);
     
     return sunTransForGlow * (params.mieScattering / max(vec3<f32>(0.0001), params.mieScattering + params.mieAbsorption)) 
                         * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
@@ -321,10 +312,9 @@ fn evaluateIBLRadiance(
 ) -> vec3<f32> {
     let r = params.groundRadius;
     let viewHeight = max(0.0, params.cameraHeight);
-    let atmosphereHeight = params.atmosphereHeight;
     let sunDir = params.sunDirection;
 
-    let skyUV = getSkyViewUV(viewDir, viewHeight, r, atmosphereHeight);
+    let skyUV = getSkyViewUV(viewDir, viewHeight, r);
     let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
     
     var radiance = skySample.rgb;
@@ -334,7 +324,7 @@ fn evaluateIBLRadiance(
 
     if (!isGround && getPlanetShadowMask(camPos, sunDir, r) > 0.0) {
         let viewSunCos = getSquashedViewSunCos(viewDir, sunDir);
-        let transToEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight);
+        let transToEdge = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, params.atmosphereHeight);
         radiance += getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
         if (includeSunDisk) {
             radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params);

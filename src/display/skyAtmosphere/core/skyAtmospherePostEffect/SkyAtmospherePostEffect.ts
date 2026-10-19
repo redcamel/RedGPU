@@ -25,10 +25,9 @@ import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect
  * @category SkyAtmosphere
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
-    #skyAtmosphere: SkyAtmosphere;
-    #transmittanceTextureInfo: IPostEffectResult = {texture: null, textureView: null};
-    #skyViewTextureInfo: IPostEffectResult = {texture: null, textureView: null};
-    #aerialPerspectiveTextureInfo: IPostEffectResult = {texture: null, textureView: null};
+    #transmittanceTextureInfo: IPostEffectResult;
+    #skyViewTextureInfo: IPostEffectResult;
+    #aerialPerspectiveTextureInfo: IPostEffectResult;
 
     /**
      * [KO] SkyAtmospherePostEffect 인스턴스를 생성합니다.
@@ -43,7 +42,16 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
-        this.#skyAtmosphere = skyAtmosphere;
+        const {transmittanceLUT, skyViewLUT, aerialPerspectiveLUT} = skyAtmosphere;
+        this.#transmittanceTextureInfo = {
+            texture: transmittanceLUT.gpuTexture,
+            textureView: transmittanceLUT.gpuTextureView
+        };
+        this.#skyViewTextureInfo = {texture: skyViewLUT.gpuTexture, textureView: skyViewLUT.gpuTextureView};
+        this.#aerialPerspectiveTextureInfo = {
+            texture: aerialPerspectiveLUT.gpuTexture,
+            textureView: aerialPerspectiveLUT.gpuTextureView
+        };
 
         const createCode = (useMSAA: boolean) => {
             const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
@@ -104,18 +112,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * [EN] Post-effect render result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
-        const skyAtmosphere = this.#skyAtmosphere;
-        const transmittanceLUT = skyAtmosphere.transmittanceLUT;
-        const skyViewLUT = skyAtmosphere.skyViewLUT;
-        const aerialPerspectiveLUT = skyAtmosphere.aerialPerspectiveLUT;
-
-        this.#transmittanceTextureInfo.texture = transmittanceLUT.gpuTexture;
-        this.#transmittanceTextureInfo.textureView = transmittanceLUT.gpuTextureView;
-        this.#skyViewTextureInfo.texture = skyViewLUT.gpuTexture;
-        this.#skyViewTextureInfo.textureView = skyViewLUT.gpuTextureView;
-        this.#aerialPerspectiveTextureInfo.texture = aerialPerspectiveLUT.gpuTexture;
-        this.#aerialPerspectiveTextureInfo.textureView = aerialPerspectiveLUT.gpuTextureView;
-
         return super.render(
             view, width, height,
             sourceTextureInfo,
@@ -137,7 +133,6 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         this.#skyViewTextureInfo.textureView = null;
         this.#aerialPerspectiveTextureInfo.texture = null;
         this.#aerialPerspectiveTextureInfo.textureView = null;
-        this.#skyAtmosphere = null;
     }
 }
 
