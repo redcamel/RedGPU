@@ -95,12 +95,12 @@ class FreeController extends AController {
         turnUp: 'r',
         turnDown: 'f'
     };
-    #moveSpeed: number = 600;
-    #moveDelayInterpolation: number = 0.001;
+    #moveSpeed: number = 20;
+    #moveDelayInterpolation: number = 0.01;
     #maxAcceleration: number = 1;
     #currentAcceleration: number = 0;
-    #rotationSpeed: number = 360;
-    #rotationInterpolation: number = 0.001;
+    #rotationSpeed: number = 100;
+    #rotationInterpolation: number = 0.01;
     #mouseSensitivity: number = 0.15;
     #desirePosition: [number, number, number] = [0, 0, 0];
     #pan: number = 0;
@@ -143,56 +143,53 @@ class FreeController extends AController {
     }
 
     /**
-     * [KO] 카메라의 현재 X축 위치를 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's current X-axis position.
+     * [KO] 카메라의 목표 X축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target X-axis position.
      *
      * @returns
      * [KO] X축 위치 (기본값: `0`)
      * [EN] X-axis position (default: `0`)
      */
     get x(): number {
-        return this.#currentX;
+        return this.#desirePosition[0];
     }
 
     set x(value: number) {
         validateNumber(value);
-        this.#currentX = value;
         this.#desirePosition[0] = value;
     }
 
     /**
-     * [KO] 카메라의 현재 Y축 위치를 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's current Y-axis position.
+     * [KO] 카메라의 목표 Y축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target Y-axis position.
      *
      * @returns
      * [KO] Y축 위치 (기본값: `0`)
      * [EN] Y-axis position (default: `0`)
      */
     get y(): number {
-        return this.#currentY;
+        return this.#desirePosition[1];
     }
 
     set y(value: number) {
         validateNumber(value);
-        this.#currentY = value;
         this.#desirePosition[1] = value;
     }
 
     /**
-     * [KO] 카메라의 현재 Z축 위치를 가져오거나 설정합니다.
-     * [EN] Gets or sets the camera's current Z-axis position.
+     * [KO] 카메라의 목표 Z축 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the camera's target Z-axis position.
      *
      * @returns
      * [KO] Z축 위치 (기본값: `0`)
      * [EN] Z-axis position (default: `0`)
      */
     get z(): number {
-        return this.#currentZ;
+        return this.#desirePosition[2];
     }
 
     set z(value: number) {
         validateNumber(value);
-        this.#currentZ = value;
         this.#desirePosition[2] = value;
     }
 
@@ -252,8 +249,8 @@ class FreeController extends AController {
      * [EN] Gets or sets the keyboard movement speed. (`0.01` or greater)
      *
      * @returns
-     * [KO] 이동 속도 (기본값: `600`)
-     * [EN] Movement speed (default: `600`)
+     * [KO] 이동 속도 (기본값: `20`)
+     * [EN] Movement speed (default: `20`)
      */
     get moveSpeed(): number {
         return this.#moveSpeed;
@@ -269,8 +266,8 @@ class FreeController extends AController {
      * [EN] Gets or sets the damping interpolation factor for movement position changes. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 이동 보간 계수 (기본값: `0.001`)
-     * [EN] Movement interpolation factor (default: `0.001`)
+     * [KO] 이동 보간 계수 (기본값: `0.01`)
+     * [EN] Movement interpolation factor (default: `0.01`)
      */
     get moveSpeedInterpolation(): number {
         return this.#moveDelayInterpolation;
@@ -286,8 +283,8 @@ class FreeController extends AController {
      * [EN] Gets or sets the keyboard rotation speed. (`0.01` or greater)
      *
      * @returns
-     * [KO] 회전 속도 (기본값: `360`)
-     * [EN] Rotation speed (default: `360`)
+     * [KO] 회전 속도 (기본값: `100`)
+     * [EN] Rotation speed (default: `100`)
      */
     get rotationSpeed(): number {
         return this.#rotationSpeed;
@@ -303,8 +300,8 @@ class FreeController extends AController {
      * [EN] Gets or sets the damping interpolation factor for rotation changes. (`0.0001` ~ `1`)
      *
      * @returns
-     * [KO] 회전 보간 계수 (기본값: `0.001`)
-     * [EN] Rotation interpolation factor (default: `0.001`)
+     * [KO] 회전 보간 계수 (기본값: `0.01`)
+     * [EN] Rotation interpolation factor (default: `0.01`)
      */
     get rotationSpeedInterpolation(): number {
         return this.#rotationInterpolation;
@@ -496,9 +493,8 @@ class FreeController extends AController {
             mat4.rotateX(this.#displacementMatrix, this.#displacementMatrix, this.#currentTilt * PER_PI);
             mat4.translate(this.#displacementMatrix, this.#displacementMatrix, this.#displacementVec3);
 
-            vec3.set(this.#currentPositionVec3, this.#currentX, this.#currentY, this.#currentZ);
             mat4.identity(this.#tempMatrix);
-            mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#currentPositionVec3);
+            mat4.translate(this.#tempMatrix, this.#tempMatrix, this.#desirePosition);
             mat4.multiply(this.#tempMatrix, this.#tempMatrix, this.#displacementMatrix);
             this.#desirePosition[0] = this.#tempMatrix[12];
             this.#desirePosition[1] = this.#tempMatrix[13];
