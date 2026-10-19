@@ -33,12 +33,14 @@ import vertexSourceOutput from "../../../display/mesh/shader/meshVertex_output.w
 import vertexSource from "../../../display/mesh/shader/meshVertex.wgsl";
 
 
-enum ResourceType {
-    GPUShaderModule = 'GPUShaderModule',
-    GPUBindGroupLayout = 'GPUBindGroupLayout',
-    GPUPipelineLayout = 'GPUPipelineLayout',
-    GPUBuffer = 'GPUBuffer',
-}
+const ResourceType = {
+    GPUShaderModule: 'GPUShaderModule',
+    GPUBindGroupLayout: 'GPUBindGroupLayout',
+    GPUPipelineLayout: 'GPUPipelineLayout',
+    GPUBuffer: 'GPUBuffer',
+} as const;
+type ResourceType = typeof ResourceType[keyof typeof ResourceType];
+Object.freeze(ResourceType);
 
 export type {
     ResourceStateIndexBuffer,
