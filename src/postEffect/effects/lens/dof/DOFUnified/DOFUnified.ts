@@ -59,7 +59,7 @@ class DOFUnified extends ASinglePassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_DOF_UNIFIED',

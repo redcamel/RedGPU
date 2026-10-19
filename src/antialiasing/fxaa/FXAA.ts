@@ -55,7 +55,7 @@ class FXAA extends ASinglePassPostEffect {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext, {isLdr: true});
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1, isLdr: true});
         this.init(
             redGPUContext,
             'POST_EFFECT_FXAA',

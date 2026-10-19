@@ -39,7 +39,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
      * [EN] Associated SkyAtmosphere instance
      */
     constructor(redGPUContext: RedGPUContext, skyAtmosphere: SkyAtmosphere) {
-        super(redGPUContext);
+        super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
         this.#skyAtmosphere = skyAtmosphere;
 
         const createCode = (useMSAA: boolean) => {
@@ -64,7 +64,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '    return textureLoad(depthTexture, clampedPos, 0);',
                 '}',
                 '',
-                '@compute @workgroup_size(16, 16)',
+                `@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})`,
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
                 '    let viewHeight = uniforms.cameraHeight;',
