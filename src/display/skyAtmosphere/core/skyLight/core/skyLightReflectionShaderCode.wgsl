@@ -1,15 +1,9 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 @group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
-@group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 @group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(5) var skyViewTexture: texture_2d<f32>;
-
-#redgpu_include math.PI
-#redgpu_include math.PI2
-#redgpu_include math.DEG_TO_RAD
-#redgpu_include math.INV_PI
 
 #redgpu_include math.hash.getHammersley
 #redgpu_include color.getLuminance
@@ -21,7 +15,7 @@
 fn getIBLAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
     // [KO] 하드웨어 선형 샘플링을 통해 기초 대기 광량 조회
     // [EN] Retrieve base atmospheric radiance via hardware linear sampling
-    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
+    var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler);
 
     // [KO] IBL 베이킹 시 태양 등의 극단적인 고휘도가 텍셀을 깨뜨리지 않도록 임계값 클램핑
     // [EN] Clamp radiance to prevent extreme highlights (like the sun) from breaking texels during IBL baking

@@ -46,7 +46,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         // [EN] Add Mie Glow: Represent atmospheric scattering bloom around the sun
         let sunDir = normalize(params.sunDirection);
         let viewSunCos = dot(viewDir, sunDir);
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transmittance, 0.0);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transmittance);
         radiance += mieGlow;
     }
 

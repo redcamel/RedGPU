@@ -90,9 +90,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * @param transmittance -
      * [KO] 대기 투과율(Transmittance) LUT 텍스처
      * [EN] Transmittance LUT texture
-     * @param multiScat -
-     * [KO] 다중 산란(Multi-Scattering) LUT 텍스처
-     * [EN] Multi-Scattering LUT texture
      * @param skyView -
      * [KO] 스카이 뷰(Sky View) LUT 텍스처
      * [EN] Sky View LUT texture
@@ -101,9 +98,9 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Render completion Promise (`Promise<void>`)
      */
     // @ts-ignore
-    async render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void> {
+    async render(transmittance: DirectTexture, skyView: DirectTexture): Promise<void> {
         if (!this.#bindGroup) {
-            this.#bindGroup = this.#createBindGroup(transmittance, multiScat, skyView);
+            this.#bindGroup = this.#createBindGroup(transmittance, skyView);
         }
         await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
     }
@@ -127,10 +124,9 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         this.#bindGroup = null;
     }
 
-    #createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
+    #createBindGroup(transmittance: DirectTexture, skyView: DirectTexture): GPUBindGroup {
         return this.createBindGroup(`SkyLight_Reflection_BindGroup_${createUUID()}`, this.#pipeline, [
             {binding: 0, resource: this.#sourceCubeTextureView},
-            {binding: 1, resource: multiScat.gpuTextureView},
             {binding: 2, resource: this.sampler.gpuSampler},
             {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
             {binding: 4, resource: transmittance.gpuTextureView},

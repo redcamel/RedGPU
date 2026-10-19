@@ -73,14 +73,14 @@ if (rawDepth >= 1.0) {
 // [KO] 3. 추가 시각 효과 계산 (Mie Glow, Sun Disk)
 // [EN] 3. Calculate additional visual effects (Mie Glow, Sun Disk)
 let camPos = vec3<f32>(0.0, mappingH + groundRadius, 0.0);
-let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
+let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius);
 
 // 대기 투과율을 적용한 Glow 및 태양 디스크 계산
-let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, vec3<f32>(atmosphereTrans), 0.0);
+let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, vec3<f32>(atmosphereTrans));
 
 let hitsVirtualGround = groundRadius > 0.0 && getRaySphereIntersection(camPos, viewDir, groundRadius) > 0.0;
 let drawSunDisk = (rawDepth >= 1.0) && !hitsVirtualGround;
-let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), drawSunDisk);
+let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01), drawSunDisk);
 
 // 구름에 의한 태양 및 글로우 가림 처리 (Cloud Masking)
 var finalCloudMask: f32 = 0.0;

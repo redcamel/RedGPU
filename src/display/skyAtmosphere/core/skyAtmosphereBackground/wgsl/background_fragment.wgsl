@@ -1,5 +1,4 @@
 #redgpu_include math.PI
-#redgpu_include math.DEG_TO_RAD
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 
@@ -65,9 +64,9 @@ fn main(input : VertexOutput) -> FragmentOutput {
     // [EN] 2. Calculate Sun Disk and forward scattering Mie Glow (Sun Halo)
     var addedRadiance = vec3<f32>(0.0);
     if (!isGroundHit) {
-        let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, vec3<f32>(skyTransmittance), 0.0);
-        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance), 0.01, uniforms);
+        let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, uniforms, bg_transmittanceLUT, bg_skyAtmosphereSampler, vec3<f32>(skyTransmittance));
+        let sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(skyTransmittance), 0.01);
         addedRadiance = (mieGlow + sunDisk) * sunShadow;
     }
 

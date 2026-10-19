@@ -1,5 +1,4 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
-#redgpu_include math.INV_PI
 
 @group(0) @binding(0) var multiScatLUT: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceLUT: texture_2d<f32>;
@@ -107,7 +106,7 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let up = p * invPLen;
         let localCosSun = dot(up, sunDir);
         let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, h, localCosSun, params.atmosphereHeight);
-        let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius, params);
+        let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius);
 
         let scatR = params.rayleighScattering * d.rhoR;
         let scatM = params.mieScattering * d.rhoM;

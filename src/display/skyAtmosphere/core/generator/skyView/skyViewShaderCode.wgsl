@@ -1,5 +1,4 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
-#redgpu_include math.INV_PI
 
 @group(0) @binding(0) var skyViewLUT: texture_storage_2d<rgba16float, write>;
 @group(0) @binding(1) var transmittanceLUT: texture_2d<f32>;

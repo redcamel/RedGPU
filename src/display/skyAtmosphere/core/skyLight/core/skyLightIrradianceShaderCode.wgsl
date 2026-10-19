@@ -1,15 +1,9 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 @group(0) @binding(0) var outputTexture: texture_storage_2d_array<rgba16float, write>;
-@group(0) @binding(1) var multiScatTexture: texture_2d<f32>;
 @group(0) @binding(2) var atmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 @group(0) @binding(4) var transmittanceTexture: texture_2d<f32>;
 @group(0) @binding(5) var skyViewTexture: texture_2d<f32>;
-
-#redgpu_include math.PI
-#redgpu_include math.PI2
-#redgpu_include math.DEG_TO_RAD
-#redgpu_include math.INV_PI
 
 #redgpu_include math.hash.getHammersley
 
@@ -45,7 +39,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         // [KO] 에너지 보정된 대기 광량 산출 (하드웨어 선형 샘플링 활용)
         // [EN] Calculate energy-compensated atmospheric radiance (Using hardware linear sampling)
-        totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, multiScatTexture, skyViewTexture, atmosphereSampler);
+        totalRadiance += evaluateIBLRadianceCompensated(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler);
     }
 
     // [KO] 3. 결과 평균화 및 큐브맵 텍스처 배열에 저장

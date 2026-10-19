@@ -113,12 +113,10 @@ class SkyLight extends RedGPUObject {
 
             this.#reflectionGenerator.render(
                 skyAtmosphere.transmittanceLUT,
-                skyAtmosphere.multiScatLUT,
                 skyAtmosphere.skyViewLUT
             );
             this.#irradianceGenerator.render(
                 skyAtmosphere.transmittanceLUT,
-                skyAtmosphere.multiScatLUT,
                 skyAtmosphere.skyViewLUT
             );
 

@@ -5,20 +5,14 @@
 #redgpu_include math.DEG_TO_RAD
 #redgpu_include math.EPSILON
 #redgpu_include systemStruct.SkyAtmosphere
-#redgpu_include color.getLuminance
 
 const MAX_TAU: f32 = 100.0;
 const LN_HALF: f32 = -0.69314718056;
-
-const SUN_ANGULAR_RADIUS_RAD: f32 = 0.00465;
-const SUN_SOLID_ANGLE_BASE: f32 = 6.794e-5;
 
 const TRANSMITTANCE_STEPS: u32 = 40u;
 const MULTI_SCAT_STEPS: u32 = 40u;
 const SKY_VIEW_STEPS: u32 = 128u;
 const AP_STEPS: u32 = 64u;
-const MULTI_SCAT_SAMPLES: u32 = 128u;
-const IRRADIANCE_SAMPLES: u32 = 256u;
 
 const SUN_RADIANCE_BOOST: f32 = 1.0;
 const MIE_GLOW_SUPPRESS: f32 = 0.40;
@@ -26,11 +20,6 @@ const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
 struct AtmosphereDensities {
     rhoR: f32, rhoM: f32, rhoO: f32
-};
-
-struct AtmosphereCoefficients {
-    scatTotal: vec3<f32>,
-    extinction: vec3<f32>
 };
 
 fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadius: f32) -> f32 {
@@ -107,7 +96,7 @@ fn getTransmittance(transmittanceLUT: texture_2d<f32>, skyAtmosphereSampler: sam
     return transmittance;
 }
 
-fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32, params: SkyAtmosphere) -> f32 {
+fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32) -> f32 {
     if (r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0) { return 0.0; }
     return 1.0;
 }
@@ -145,21 +134,6 @@ fn getSunTransmittanceManual(p: vec3<f32>, sunDir: vec3<f32>, params: SkyAtmosph
         optExt = integrateOpticalDepth(p, sunDir, 0.0, tMax, TRANSMITTANCE_STEPS, params);
     }
     return exp(-min(optExt, vec3<f32>(MAX_TAU)));
-}
-
-fn getPhysicalTransmittance(p: vec3<f32>, sunDir: vec3<f32>, r: f32, atmosphereHeight: f32, params: SkyAtmosphere) -> vec3<f32> {
-    let minElevationRad = params.transmittanceMinLightElevationAngle * DEG_TO_RAD;
-    var adjustedSunDir = sunDir;
-    if (sunDir.y < sin(minElevationRad)) {
-        let cosEl = cos(minElevationRad);
-        let sinEl = sin(minElevationRad);
-        let horizontalDir = normalize(vec3<f32>(sunDir.x, 0.0, sunDir.z));
-        adjustedSunDir = vec3<f32>(horizontalDir.x * cosEl, sinEl, horizontalDir.z * cosEl);
-    }
-
-    let intersect = getPlanetIntersection(p, adjustedSunDir, r);
-    if (r > 0.0 && intersect.x > EPSILON) { return vec3<f32>(0.0); }
-    return getSunTransmittanceManual(p, adjustedSunDir, params);
 }
 
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
@@ -215,8 +189,7 @@ fn getSunDiskRadianceUnit(
     sunSize: f32,
     sunLimbDarkening: f32,
     skyTrans: vec3<f32>,
-    edgeSoftness: f32,
-    params: SkyAtmosphere
+    edgeSoftness: f32
 ) -> vec3<f32> {
     let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
     let cosSunRad = cos(sunRad);
@@ -235,7 +208,6 @@ fn getSunDiskRadianceUnit(
 
 fn getSunDiskRadianceIBL(
     viewSunCos: f32,
-    sunLimbDarkening: f32,
     skyTrans: vec3<f32>,
     params: SkyAtmosphere
 ) -> vec3<f32> {
@@ -258,13 +230,11 @@ fn getMieGlowAmountUnit(
     params: SkyAtmosphere, 
     transmittanceLUT: texture_2d<f32>, 
     skyAtmosphereSampler: sampler,
-    transToEdge: vec3<f32>,
-    overrideHalo: f32 
+    transToEdge: vec3<f32>
 ) -> vec3<f32> {
     let actualAnisotropy = params.mieAnisotropy;
-    let halo = select(actualAnisotropy, overrideHalo, overrideHalo > 0.0);
     
-    let sharpG = min(max(halo, 0.88), 0.94); 
+    let sharpG = min(max(actualAnisotropy, 0.88), 0.94); 
     let stableG = min(actualAnisotropy, 0.80);
 
     let sharpPhase = phaseMie(viewSunCos, sharpG);
@@ -388,7 +358,6 @@ fn evaluateIBLRadiance(
     viewDir: vec3<f32>, 
     params: SkyAtmosphere, 
     transmittanceLUT: texture_2d<f32>, 
-    multiScatLUT: texture_2d<f32>, 
     skyViewLUT: texture_2d<f32>, 
     skyAtmosphereSampler: sampler
 ) -> vec3<f32> {
@@ -410,9 +379,9 @@ fn evaluateIBLRadiance(
 
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
     
-    let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
+    let sunShadow = getPlanetShadowMask(camPos, sunDir, r);
     if (!isGround && sunShadow > 0.0) {
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
         radiance += mieGlow * sunShadow;
     }
 
@@ -430,7 +399,6 @@ fn evaluateIBLRadianceCompensated(
     viewDir: vec3<f32>,
     params: SkyAtmosphere,
     transmittanceLUT: texture_2d<f32>,
-    multiScatLUT: texture_2d<f32>,
     skyViewLUT: texture_2d<f32>,
     skyAtmosphereSampler: sampler
 ) -> vec3<f32> {
@@ -452,20 +420,14 @@ fn evaluateIBLRadianceCompensated(
 
     let transToEdge = select(getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, viewDir.y, atmosphereHeight), vec3<f32>(skySample.a), isGround);
 
-    let sunShadow = getPlanetShadowMask(camPos, sunDir, r, params);
+    let sunShadow = getPlanetShadowMask(camPos, sunDir, r);
     if (!isGround && sunShadow > 0.0) {
-        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge, 0.0);
+        let mieGlow = getMieGlowAmountUnit(viewSunCos, viewHeight, params, transmittanceLUT, skyAtmosphereSampler, transToEdge);
         radiance += mieGlow * sunShadow;
-        radiance += getSunDiskRadianceIBL(viewSunCos, params.sunLimbDarkening, transToEdge, params) * sunShadow;
+        radiance += getSunDiskRadianceIBL(viewSunCos, transToEdge, params) * sunShadow;
     }
 
     return radiance;
-}
-fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -> vec3<f32> {
-    let ndc = vec2<f32>(uv.x * 2.0 - 1.0, (1.0 - uv.y) * 2.0 - 1.0);
-    let viewSpaceDir = normalize(vec3<f32>(ndc.x * invP[0][0], ndc.y * invP[1][1], -1.0));
-    let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
-    return normalize(worldRotation * viewSpaceDir);
 }
 
 // [KO] 정수 비트 조작 기반 고속 해시 (sin 초월함수 100% 제거) [EN] Fast integer bit-manipulation hash (100% sin SFU elimination)
@@ -473,11 +435,6 @@ fn cloud_hash_u(p: vec2<u32>) -> f32 {
     var q = p * vec2<u32>(1597334673u, 3812015801u);
     let n = (q.x ^ q.y) * 1597334673u;
     return f32(n) * (1.0 / 4294967296.0);
-}
-
-fn cloud_hash(p: vec2<f32>) -> f32 {
-    let ui = vec2<u32>(vec2<i32>(floor(p)) + vec2<i32>(0x8000));
-    return cloud_hash_u(ui);
 }
 
 fn cloud_noise(p: vec2<f32>) -> f32 {
