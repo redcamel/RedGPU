@@ -32,11 +32,7 @@ RedGPU.init(
         // [KO] Fog 포스트 이펙트 생성 및 뷰에 추가
         // [EN] Create Fog post effect and add it to the view
         const fogEffect = new RedGPU.PostEffect.Fog(redGPUContext);
-        fogEffect.fogType = RedGPU.PostEffect.Fog.EXPONENTIAL;
-        fogEffect.density = 0.1;
-        fogEffect.nearDistance = 5;
         fogEffect.farDistance = 30;
-        fogEffect.fogColor.setColorByRGB(200, 210, 255);
         view.postEffectManager.addEffect(fogEffect);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -58,12 +54,12 @@ RedGPU.init(
     }
 );
 
-function createTestScene(redGPUContext, scene) {
+const createTestScene = (redGPUContext, scene) => {
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
         (result) => {
-            const mainMesh = scene.addChild(result['resultMesh']);
+            const mainMesh = scene.addChild(result.resultMesh);
             mainMesh.setScale(2);
         }
     );
@@ -107,7 +103,7 @@ function createTestScene(redGPUContext, scene) {
     groundMesh.y = -3;
     groundMesh.alpha = 0.3;
     scene.addChild(groundMesh);
-}
+};
 
 const renderTestPane = (redGPUContext, view, fogEffect) => {
     new RedGPUExampleHelper(redGPUContext, {
@@ -124,7 +120,7 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                 }
             };
 
-            const fogFolder = pane.addFolder({title: 'Fog', expanded: true});
+            const fogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
 
             fogFolder.addBinding(config, 'Fog').on('change', (ev) => {
                 if (ev.value) {
@@ -132,50 +128,50 @@ const renderTestPane = (redGPUContext, view, fogEffect) => {
                 } else {
                     view.postEffectManager.removeAllEffect();
                 }
+                controls.forEach((c) => c.disabled = !ev.value);
+                presetFolder.disabled = !ev.value;
             });
 
-            fogFolder.addBinding(fogEffect, 'fogType', {
-                options: {
-                    EXPONENTIAL: RedGPU.PostEffect.Fog.EXPONENTIAL,
-                    EXPONENTIAL_SQUARED: RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED
-                }
-            });
-
-            fogFolder.addBinding(fogEffect, 'density', {
-                min: 0.001,
-                max: 1,
-                step: 0.001
-            });
-
-            fogFolder.addBinding(fogEffect, 'nearDistance', {
-                min: 0,
-                max: 30,
-                step: 0.1
-            }).on('change', (ev) => {
-                if (fogEffect.farDistance <= ev.value) {
-                    fogEffect.farDistance = ev.value + 1;
-                    pane.refresh();
-                }
-            });
-
-            fogFolder.addBinding(fogEffect, 'farDistance', {
-                min: 1,
-                max: 100,
-                step: 0.1
-            }).on('change', (ev) => {
-                if (ev.value <= fogEffect.nearDistance) {
-                    fogEffect.farDistance = fogEffect.nearDistance + 1;
-                    pane.refresh();
-                }
-            });
-
-            fogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
-                fogEffect.fogColor.setColorByRGB(
-                    Math.floor(ev.value.r),
-                    Math.floor(ev.value.g),
-                    Math.floor(ev.value.b)
-                );
-            });
+            const controls = [
+                fogFolder.addBinding(fogEffect, 'fogType', {
+                    options: {
+                        EXPONENTIAL: RedGPU.PostEffect.Fog.EXPONENTIAL,
+                        EXPONENTIAL_SQUARED: RedGPU.PostEffect.Fog.EXPONENTIAL_SQUARED
+                    }
+                }),
+                fogFolder.addBinding(fogEffect, 'density', {
+                    min: 0,
+                    max: 1,
+                    step: 0.001
+                }),
+                fogFolder.addBinding(fogEffect, 'nearDistance', {
+                    min: 0,
+                    max: 50,
+                    step: 0.1
+                }).on('change', (ev) => {
+                    if (fogEffect.farDistance <= ev.value) {
+                        fogEffect.farDistance = ev.value + 1;
+                        pane.refresh();
+                    }
+                }),
+                fogFolder.addBinding(fogEffect, 'farDistance', {
+                    min: 0.1,
+                    max: 100,
+                    step: 0.1
+                }).on('change', (ev) => {
+                    if (ev.value <= fogEffect.nearDistance) {
+                        fogEffect.farDistance = fogEffect.nearDistance + 1;
+                        pane.refresh();
+                    }
+                }),
+                fogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
+                    fogEffect.fogColor.setColorByRGB(
+                        Math.floor(ev.value.r),
+                        Math.floor(ev.value.g),
+                        Math.floor(ev.value.b)
+                    );
+                })
+            ];
 
             const presetFolder = fogFolder.addFolder({title: 'Presets', expanded: true});
 

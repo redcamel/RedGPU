@@ -42,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -75,16 +81,10 @@ RedGPU.init(
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
-        scene.addChild(v['resultMesh']);
-    });
-}
-
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
@@ -102,10 +102,10 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
             });
 
             const controls = [
-                folder.addBinding(effect, 'threshold', {min: 1, max: 255}),
-                folder.addBinding(effect, 'gaussianBlurSize', {min: 0, max: 256}),
-                folder.addBinding(effect, 'exposure', {min: 0, max: 3}),
-                folder.addBinding(effect, 'bloomStrength', {min: 0, max: 3})
+                folder.addBinding(effect, 'threshold', {min: 1, max: 255, step: 1}),
+                folder.addBinding(effect, 'gaussianBlurSize', {min: 0, max: 256, step: 0.1}),
+                folder.addBinding(effect, 'exposure', {min: 0, max: 3, step: 0.01}),
+                folder.addBinding(effect, 'bloomStrength', {min: 0, max: 3, step: 0.01})
             ];
         }
     });

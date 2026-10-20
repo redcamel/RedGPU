@@ -42,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -75,22 +81,16 @@ RedGPU.init(
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
-        scene.addChild(v['resultMesh']);
-    });
-}
-
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
         gui: (pane) => {
             const config = {FilmGrain: true};
-            const folder = pane.addFolder({title: 'FilmGrain', expanded: true});
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
             folder.addBinding(config, 'FilmGrain').on('change', (v) => {
                 if (v.value) {
@@ -99,6 +99,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                     targetView.postEffectManager.removeAllEffect();
                 }
                 controls.forEach((c) => c.disabled = !v.value);
+                presetFolder.disabled = !v.value;
             });
 
             const controls = [
@@ -109,7 +110,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 folder.addBinding(effect, 'grainSaturation', {min: 0, max: 2, step: 0.01})
             ];
 
-            const presetFolder = pane.addFolder({title: 'Presets', expanded: false});
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
             const applyPreset = (preset) => {
                 effect.applyPreset(preset);
                 pane.refresh();

@@ -30,7 +30,6 @@ RedGPU.init(
         // [KO] HeightFog 포스트 이펙트 생성 및 뷰에 추가
         // [EN] Create HeightFog post effect and add it to the view
         const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
-        heightFog.fogType = RedGPU.PostEffect.HeightFog.EXPONENTIAL;
         heightFog.density = 1.8;
         heightFog.fogColor.setColorByRGB(255, 245, 220);
         heightFog.baseHeight = -2;
@@ -82,7 +81,7 @@ RedGPU.init(
     }
 );
 
-function createGroundLevelScene(redGPUContext, scene) {
+const createGroundLevelScene = (redGPUContext, scene) => {
     const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1024, 1024);
     const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
@@ -234,7 +233,7 @@ function createGroundLevelScene(redGPUContext, scene) {
         testMesh.userData = {isFloating: true, baseY: height};
         scene.addChild(testMesh);
     });
-}
+};
 
 const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
     new RedGPUExampleHelper(redGPUContext, {
@@ -251,7 +250,7 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 }
             };
 
-            const heightFogFolder = pane.addFolder({title: 'HeightFog', expanded: true});
+            const heightFogFolder = pane.addFolder({title: 'PostEffect', expanded: true});
 
             heightFogFolder.addBinding(config, 'HeightFog').on('change', (ev) => {
                 if (ev.value) {
@@ -259,35 +258,35 @@ const renderTestPane = (redGPUContext, view, heightFog, autoRotateState) => {
                 } else {
                     view.postEffectManager.removeAllEffect();
                 }
+                controls.forEach((c) => c.disabled = !ev.value);
+                scenarioFolder.disabled = !ev.value;
             });
 
             heightFogFolder.addBinding(autoRotateState, 'autoRotate');
 
-            const fogFolder = heightFogFolder.addFolder({title: 'Fog Settings', expanded: true});
+            const controls = [
+                heightFogFolder.addBinding(heightFog, 'fogType', {
+                    options: {
+                        EXPONENTIAL: RedGPU.PostEffect.HeightFog.EXPONENTIAL,
+                        EXPONENTIAL_SQUARED: RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED
+                    }
+                }),
+                heightFogFolder.addBinding(heightFog, 'density', {min: 0, max: 5, step: 0.1}),
+                heightFogFolder.addBinding(heightFog, 'baseHeight', {min: -5, max: 8, step: 0.1}),
+                heightFogFolder.addBinding(heightFog, 'thickness', {min: 0.1, max: 50, step: 0.5}),
+                heightFogFolder.addBinding(heightFog, 'falloff', {min: 0.001, max: 2, step: 0.01}),
+                heightFogFolder.addBinding(heightFog, 'startDepth', {min: 0, max: 100, step: 1}),
+                heightFogFolder.addBinding(heightFog, 'endDepth', {min: 0, max: 200, step: 1}),
+                heightFogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
+                    heightFog.fogColor.setColorByRGB(
+                        Math.round(ev.value.r),
+                        Math.round(ev.value.g),
+                        Math.round(ev.value.b)
+                    );
+                })
+            ];
 
-            fogFolder.addBinding(heightFog, 'fogType', {
-                options: {
-                    EXPONENTIAL: RedGPU.PostEffect.HeightFog.EXPONENTIAL,
-                    EXPONENTIAL_SQUARED: RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED
-                }
-            });
-
-            fogFolder.addBinding(heightFog, 'density', {min: 0, max: 5, step: 0.1});
-            fogFolder.addBinding(heightFog, 'baseHeight', {min: -5, max: 8, step: 0.1});
-            fogFolder.addBinding(heightFog, 'thickness', {min: 2, max: 20, step: 0.5});
-            fogFolder.addBinding(heightFog, 'falloff', {min: 0.1, max: 2, step: 0.1});
-            fogFolder.addBinding(heightFog, 'startDepth', {min: 0, max: 100, step: 1});
-            fogFolder.addBinding(heightFog, 'endDepth', {min: 0, max: 200, step: 1});
-
-            fogFolder.addBinding(config, 'fogColor').on('change', (ev) => {
-                heightFog.fogColor.setColorByRGB(
-                    Math.round(ev.value.r),
-                    Math.round(ev.value.g),
-                    Math.round(ev.value.b)
-                );
-            });
-
-            const scenarioFolder = heightFogFolder.addFolder({title: 'Scenarios', expanded: true});
+            const scenarioFolder = heightFogFolder.addFolder({title: 'Presets', expanded: true});
 
             const applyPreset = (density, baseHeight, thickness, falloff, fogColor, fogType) => {
                 heightFog.density = density;

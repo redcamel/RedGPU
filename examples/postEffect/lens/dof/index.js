@@ -76,7 +76,7 @@ RedGPU.init(
     }
 );
 
-function setupDOFScene(redGPUContext, scene) {
+const setupDOFScene = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(
         redGPUContext,
         new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
@@ -94,18 +94,18 @@ function setupDOFScene(redGPUContext, scene) {
         mesh.rotationY = i * 20;
         scene.addChild(mesh);
     }
-}
+};
 
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
         gui: (pane) => {
             const config = {DOF: true};
-            const folder = pane.addFolder({title: 'DOF', expanded: true});
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
 
             folder.addBinding(config, 'DOF').on('change', (v) => {
                 if (v.value) {
@@ -114,6 +114,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                     targetView.postEffectManager.removeAllEffect();
                 }
                 controls.forEach((c) => c.disabled = !v.value);
+                presetFolder.disabled = !v.value;
             });
 
             const controls = [
@@ -128,7 +129,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 folder.addBinding(effect, 'farStrength', {min: 0, max: 3.0})
             ];
 
-            const presetFolder = folder.addFolder({title: 'Presets', expanded: false});
+            const presetFolder = folder.addFolder({title: 'Presets', expanded: true});
             const addPresetButton = (title, method) => {
                 presetFolder.addButton({title}).on('click', () => {
                     effect[method]();

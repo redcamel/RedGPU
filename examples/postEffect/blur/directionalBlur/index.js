@@ -42,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -75,16 +81,10 @@ RedGPU.init(
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
-        scene.addChild(v['resultMesh']);
-    });
-}
-
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
@@ -98,18 +98,14 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 } else {
                     targetView.postEffectManager.removeAllEffect();
                 }
-                amountControl.disabled = !v.value;
-                angleControl.disabled = !v.value;
-                sampleCountControl.disabled = !v.value;
+                controls.forEach((c) => c.disabled = !v.value);
             });
 
-            const amountControl = folder.addBinding(effect, 'amount', {min: 0, max: 100});
-            const angleControl = folder.addBinding(effect, 'angle', {min: 0, max: 360});
-            const sampleCountControl = folder.addBinding(effect, 'sampleCount', {
-                min: 1,
-                max: 100,
-                step: 1
-            });
+            const controls = [
+                folder.addBinding(effect, 'amount', {min: 0, max: 100}),
+                folder.addBinding(effect, 'angle', {min: 0, max: 360}),
+                folder.addBinding(effect, 'sampleCount', {min: 1, max: 100, step: 1})
+            ];
         }
     });
 };

@@ -42,7 +42,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -75,35 +81,16 @@ RedGPU.init(
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
-        scene.addChild(v['resultMesh']);
-    });
-}
-
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
         gui: (pane) => {
             const config = {ColorBalance: true};
             const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
-            const controls = [
-                folder.addBinding(effect, 'shadowCyanRed', {min: -100, max: 100}),
-                folder.addBinding(effect, 'shadowMagentaGreen', {min: -100, max: 100}),
-                folder.addBinding(effect, 'shadowYellowBlue', {min: -100, max: 100}),
-                folder.addBinding(effect, 'midtoneCyanRed', {min: -100, max: 100}),
-                folder.addBinding(effect, 'midtoneMagentaGreen', {min: -100, max: 100}),
-                folder.addBinding(effect, 'midtoneYellowBlue', {min: -100, max: 100}),
-                folder.addBinding(effect, 'highlightCyanRed', {min: -100, max: 100}),
-                folder.addBinding(effect, 'highlightMagentaGreen', {min: -100, max: 100}),
-                folder.addBinding(effect, 'highlightYellowBlue', {min: -100, max: 100}),
-                folder.addBinding(effect, 'preserveLuminosity')
-            ];
 
             folder.addBinding(config, 'ColorBalance').on('change', (v) => {
                 if (v.value) {
@@ -113,6 +100,19 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 }
                 controls.forEach((c) => c.disabled = !v.value);
             });
+
+            const controls = [
+                folder.addBinding(effect, 'shadowCyanRed', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'shadowMagentaGreen', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'shadowYellowBlue', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'midtoneCyanRed', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'midtoneMagentaGreen', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'midtoneYellowBlue', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'highlightCyanRed', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'highlightMagentaGreen', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'highlightYellowBlue', {min: -100, max: 100, step: 1}),
+                folder.addBinding(effect, 'preserveLuminosity')
+            ];
         }
     });
 };

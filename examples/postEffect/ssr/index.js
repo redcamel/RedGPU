@@ -72,7 +72,7 @@ RedGPU.init(
     }
 );
 
-function loadGLTFModels(redGPUContext, scene) {
+const loadGLTFModels = (redGPUContext, scene) => {
     const models = [
         {
             url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
@@ -90,7 +90,7 @@ function loadGLTFModels(redGPUContext, scene) {
             Object.assign(mesh, pos);
         });
     });
-}
+};
 
 const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
@@ -98,16 +98,21 @@ const renderTestPane = (redGPUContext, view) => {
         ibl: true,
         skybox: true,
         gui: (pane) => {
-            const ssrFolder = pane.addFolder({title: 'SSR', expanded: true});
+            const ssrFolder = pane.addFolder({title: 'PostEffect', expanded: true});
             const ssr = view.postEffectManager.ssr;
 
-            ssrFolder.addBinding(view.postEffectManager, 'useSSR');
-            ssrFolder.addBinding(ssr, 'maxSteps', {min: 16, max: 128, step: 1});
-            ssrFolder.addBinding(ssr, 'maxDistance', {min: 1, max: 50, step: 0.1});
-            ssrFolder.addBinding(ssr, 'stepSize', {min: 0.001, max: 0.1, step: 0.001});
-            ssrFolder.addBinding(ssr, 'reflectionIntensity', {min: 0.0, max: 5.0, step: 0.01});
-            ssrFolder.addBinding(ssr, 'fadeDistance', {min: 1, max: 25, step: 0.1});
-            ssrFolder.addBinding(ssr, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01});
+            ssrFolder.addBinding(view.postEffectManager, 'useSSR').on('change', (v) => {
+                controls.forEach((c) => c.disabled = !v.value);
+            });
+
+            const controls = [
+                ssrFolder.addBinding(ssr, 'maxSteps', {min: 1, max: 512, step: 1}),
+                ssrFolder.addBinding(ssr, 'maxDistance', {min: 1, max: 200, step: 0.1}),
+                ssrFolder.addBinding(ssr, 'stepSize', {min: 0.001, max: 5.0, step: 0.001}),
+                ssrFolder.addBinding(ssr, 'reflectionIntensity', {min: 0.0, max: 10.0, step: 0.01}),
+                ssrFolder.addBinding(ssr, 'fadeDistance', {min: 1, max: 100, step: 0.1}),
+                ssrFolder.addBinding(ssr, 'edgeFade', {min: 0.0, max: 0.5, step: 0.01})
+            ];
         }
     });
 };

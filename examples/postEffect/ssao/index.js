@@ -58,18 +58,23 @@ const renderTestPane = (redGPUContext, view) => {
         ibl: true,
         skybox: true,
         gui: (pane) => {
-            const ssaoFolder = pane.addFolder({title: 'SSAO', expanded: true});
+            const ssaoFolder = pane.addFolder({title: 'PostEffect', expanded: true});
             const ssao = view.postEffectManager.ssao;
 
-            ssaoFolder.addBinding(view.postEffectManager, 'useSSAO');
-            ssaoFolder.addBinding(ssao, 'useBlur');
-            ssaoFolder.addBinding(ssao, 'radius', {min: 0.01, max: 5.0, step: 0.01});
-            ssaoFolder.addBinding(ssao, 'intensity', {min: 0.0, max: 10.0, step: 0.1});
-            ssaoFolder.addBinding(ssao, 'bias', {min: 0.0, max: 0.1, step: 0.001});
-            ssaoFolder.addBinding(ssao, 'biasDistanceScale', {min: 0.0, max: 0.5, step: 0.01});
-            ssaoFolder.addBinding(ssao, 'fadeDistanceStart', {min: 1.0, max: 200.0, step: 0.01});
-            ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {min: 1.0, max: 100.0, step: 0.01});
-            ssaoFolder.addBinding(ssao, 'contrast', {min: 0.5, max: 4.0, step: 0.1});
+            ssaoFolder.addBinding(view.postEffectManager, 'useSSAO').on('change', (v) => {
+                controls.forEach((c) => c.disabled = !v.value);
+            });
+
+            const controls = [
+                ssaoFolder.addBinding(ssao, 'useBlur'),
+                ssaoFolder.addBinding(ssao, 'radius', {min: 0.01, max: 5.0, step: 0.01}),
+                ssaoFolder.addBinding(ssao, 'intensity', {min: 0.0, max: 10.0, step: 0.1}),
+                ssaoFolder.addBinding(ssao, 'bias', {min: 0.0, max: 0.1, step: 0.001}),
+                ssaoFolder.addBinding(ssao, 'biasDistanceScale', {min: 0.0, max: 0.5, step: 0.01}),
+                ssaoFolder.addBinding(ssao, 'fadeDistanceStart', {min: 1.0, max: 200.0, step: 0.1}),
+                ssaoFolder.addBinding(ssao, 'fadeDistanceRange', {min: 1.0, max: 100.0, step: 0.1}),
+                ssaoFolder.addBinding(ssao, 'contrast', {min: 0.5, max: 4.0, step: 0.1})
+            ];
         }
     });
 };

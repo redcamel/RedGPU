@@ -43,7 +43,13 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+            (v) => {
+                scene.addChild(v.resultMesh);
+            }
+        );
 
         const updateLayout = () => {
             const isNarrow = window.innerWidth <= 768;
@@ -76,16 +82,10 @@ RedGPU.init(
     }
 );
 
-function loadGLTF(redGPUContext, scene, url) {
-    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
-        scene.addChild(v['resultMesh']);
-    });
-}
-
 const renderTestPane = (redGPUContext, targetView, effect, container) => {
     new RedGPUExampleHelper(redGPUContext, {
         compareLabel: {
-            title: 'PostEffect Applied',
+            title: 'PostEffect',
             normalTitle: 'Original',
             targetContainer: container
         },
@@ -98,6 +98,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                 EMBOSS: RedGPU.PostEffect.Convolution.EMBOSS
             };
 
+            const customKernel = [...effect.kernel];
             const config = {
                 Convolution: true,
                 kernel: 'EDGE'
@@ -112,6 +113,7 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                     targetView.postEffectManager.removeAllEffect();
                 }
                 kernelControl.disabled = !v.value;
+                matrixFolder.disabled = !v.value;
             });
 
             const kernelControl = folder.addBinding(config, 'kernel', {
@@ -123,8 +125,28 @@ const renderTestPane = (redGPUContext, targetView, effect, container) => {
                     EMBOSS: 'EMBOSS'
                 }
             }).on('change', (v) => {
-                effect.kernel = convolutionMatrices[v.value];
+                const preset = convolutionMatrices[v.value];
+                for (let i = 0; i < 12; i++) {
+                    customKernel[i] = preset[i];
+                }
+                effect.kernel = [...customKernel];
+                pane.refresh();
             });
+
+            const matrixFolder = folder.addFolder({title: 'Kernel Matrix (3x3)', expanded: true});
+            for (let row = 0; row < 3; row++) {
+                const rowFolder = matrixFolder.addFolder({title: `Row ${row}`, expanded: true});
+                for (let col = 0; col < 3; col++) {
+                    const index = row * 4 + col;
+                    rowFolder.addBinding(customKernel, index, {
+                        min: -5,
+                        max: 5,
+                        step: 0.1
+                    }).on('change', () => {
+                        effect.kernel = [...customKernel];
+                    });
+                }
+            }
         }
     });
 };
