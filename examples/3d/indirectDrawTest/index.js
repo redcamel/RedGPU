@@ -1,12 +1,12 @@
-import * as RedGPU from "../../../dist/index.js?t=1783326645983";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1783326645983";
+import * as RedGPU from "../../../dist/index.js";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Indirect Draw 테스트 예제
  * [EN] Indirect Draw test example
  *
- * [KO] GPU 기반의 Indirect Draw 기능을 사용하여 다양한 객체들(Mesh, GLTF, Sprite, Particle 등)이 정상적으로 렌더링되는지 테스트합니다.
- * [EN] Tests whether various objects (Mesh, GLTF, Sprite, Particle, etc.) are rendered correctly using GPU-based Indirect Draw.
+ * [KO] GPU 기반의 Indirect Draw 파이프라인에서 다양한 객체들(Mesh, GLTF, Sprite3D, SpriteSheet3D, TextField3D, ParticleEmitter)이 정상적으로 렌더링되는지 검증합니다.
+ * [EN] Verifies that various objects (Mesh, GLTF, Sprite3D, SpriteSheet3D, TextField3D, ParticleEmitter) render properly in the GPU-based Indirect Draw pipeline.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 8;
         controller.speedDistance = 0.3;
@@ -26,11 +25,17 @@ RedGPU.init(
         view.axis = true;
         redGPUContext.addView(view);
 
-        // 2. 조명 설정
-        const light = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(light);
+        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
-        // 3. 다양한 샘플 객체 생성 및 로드
+        const ibl = new RedGPU.Resource.IBL(
+            redGPUContext,
+            '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+        );
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
+        // [KO] Indirect Draw 검증을 위한 다양한 3D 객체 및 GLTF 모델 배치
+        // [EN] Place various 3D objects and GLTF models for Indirect Draw verification
         const glbUrls = [
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
@@ -39,65 +44,72 @@ RedGPU.init(
         ];
 
         loadGLTFGrid(view, glbUrls);
-        createSampleMesh(redGPUContext, scene);
-        createSampleMesh2(redGPUContext, scene);
-        createSampleText(redGPUContext, scene);
-        createSampleSprite3D(redGPUContext, scene);
-        createSampleSpriteSheet3D(redGPUContext, scene);
+        createSampleObjects(redGPUContext, scene);
         const testParticleWrap = createSampleParticle(redGPUContext, scene);
 
-        // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            // 파티클 래퍼 애니메이션
             testParticleWrap.x += Math.sin(time / 500) * 0.5;
             testParticleWrap.y += Math.cos(time / 500) * 0.5;
             testParticleWrap.z += Math.sin(time / 500) * 0.5;
         });
 
-        // 5. 테스트 GUI 설정
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error('RedGPU initialization failed:', failReason);
-        const errorDiv = document.createElement('div');
-        errorDiv.innerHTML = failReason;
-        document.body.appendChild(errorDiv);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 샘플 SpriteSheet3D를 생성합니다.
- * [EN] Creates a sample SpriteSheet3D.
- */
-const createSampleSpriteSheet3D = (redGPUContext, scene) => {
-    const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
+const createSampleObjects = (redGPUContext, scene) => {
+    const box = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2),
+        new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
+    );
+    box.z = -20;
+    scene.addChild(box);
+
+    const sphere = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Sphere(redGPUContext),
+        new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000')
+    );
+    sphere.x = -5;
+    sphere.z = -20;
+    scene.addChild(sphere);
+
+    const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
+    textField3D.text = textField3D.name.split(' ').join('<br/>');
+    textField3D.color = 'red';
+    textField3D.y = 2;
+    textField3D.z = -2;
+    scene.addChild(textField3D);
+
+    const sprite3D = new RedGPU.Display.Sprite3D(
+        redGPUContext,
+        new RedGPU.Material.BitmapMaterial(
+            redGPUContext,
+            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')
+        )
+    );
+    sprite3D.z = -3;
+    scene.addChild(sprite3D);
+
+    const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(
+        redGPUContext,
+        '../../assets/spriteSheet/spriteSheet.png',
+        5, 3, 15, 0, true, 24
+    );
     const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
     spriteSheet.z = -5;
     scene.addChild(spriteSheet);
 };
 
-/**
- * [KO] 샘플 Sprite3D를 생성합니다.
- * [EN] Creates a sample Sprite3D.
- */
-const createSampleSprite3D = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.BitmapMaterial(
-        redGPUContext,
-        new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/UV_Grid_Sm.jpg')
-    );
-
-    const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-    sprite3D.z = -3;
-    scene.addChild(sprite3D);
-};
-
-/**
- * [KO] 샘플 파티클을 생성합니다.
- * [EN] Creates a sample particle.
- */
 const createSampleParticle = (redGPUContext, scene) => {
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../assets/particle/particle2.png');
     const testParticleWrap = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -106,62 +118,18 @@ const createSampleParticle = (redGPUContext, scene) => {
     scene.addChild(testParticleWrap);
 
     const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext);
-    testParticleWrap.addChild(testParticle);
-    testParticle.material.diffuseTexture = texture;
+    testParticle.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(
+        redGPUContext,
+        '../../assets/particle/particle2.png'
+    );
     testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE;
+    testParticleWrap.addChild(testParticle);
 
     return testParticleWrap;
 };
 
-/**
- * [KO] 샘플 텍스트를 생성합니다.
- * [EN] Creates sample text.
- */
-const createSampleText = (redGPUContext, scene) => {
-    const textField3D = new RedGPU.Display.TextField3D(redGPUContext);
-    textField3D.text = textField3D.name.split(' ').join('<br/>');
-    textField3D.color = 'red';
-    textField3D.y = 2;
-    textField3D.z = -2;
-    scene.addChild(textField3D);
-};
-
-/**
- * [KO] 샘플 메시를 생성합니다.
- * [EN] Creates a sample mesh.
- */
-const createSampleMesh = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
-    const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    mesh.z = -20;
-    scene.addChild(mesh);
-
-    return mesh;
-};
-
-/**
- * [KO] 두 번째 샘플 메시를 생성합니다.
- * [EN] Creates a second sample mesh.
- */
-const createSampleMesh2 = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    mesh.x = -5;
-    mesh.z = -20;
-    scene.addChild(mesh);
-
-    return mesh;
-};
-
-/**
- * [KO] GLTF 모델들을 그리드 형태로 로드합니다.
- * [EN] Loads GLTF models in a grid layout.
- */
 const loadGLTFGrid = (view, urls, gridSize = 3, spacing = 3) => {
     const {redGPUContext, scene} = view;
-
     const totalCols = Math.min(gridSize, urls.length);
     const totalRows = Math.ceil(urls.length / gridSize);
     const totalWidth = (totalCols - 1) * spacing;
@@ -170,30 +138,20 @@ const loadGLTFGrid = (view, urls, gridSize = 3, spacing = 3) => {
     urls.forEach((url, index) => {
         new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
             const mesh = result.resultMesh;
-            scene.addChild(mesh);
-
             const row = Math.floor(index / gridSize);
             const col = index % gridSize;
-            const x = col * spacing - totalWidth / 2;
-            const z = row * spacing - totalDepth / 2;
 
-            if (url.includes('breakDance')) mesh.setScale(0.001)
-
-            mesh.x = x;
-            mesh.y = -0.5;
-            mesh.z = z;
+            if (url.includes('breakDance')) mesh.setScale(0.001);
+            mesh.setPosition(
+                col * spacing - totalWidth / 2,
+                -0.5,
+                row * spacing - totalDepth / 2
+            );
+            scene.addChild(mesh);
         });
     });
 };
 
-/**
- * [KO] 예제 도우미 패널을 렌더링합니다.
- * [EN] Renders the example helper panel.
- */
 const renderTestPane = (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU: RedGPU,
-        ibl: true,
-        skybox: true
-    });
+    new RedGPUExampleHelper(redGPUContext);
 };
