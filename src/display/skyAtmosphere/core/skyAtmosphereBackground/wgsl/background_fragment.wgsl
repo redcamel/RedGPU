@@ -99,7 +99,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     // [KO] 4. 최종 복사휘도 합성 (기초 산란광 * PI + 태양 디스크 + 미 산란 광륜)
     // [EN] 4. Final radiance composition (Base scattering * PI + Sun Disk + Mie Glow)
     let scaledSunIntensity = uniforms.sunIntensity * systemUniforms.preExposure;
-    var finalRadiance = (baseRadiance * PI + addedRadiance) * scaledSunIntensity;
+    let finalRadiance = (baseRadiance * PI + addedRadiance) * scaledSunIntensity;
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);

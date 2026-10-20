@@ -5,8 +5,7 @@ if (id.x >= size.x || id.y >= size.y) { return; }
 let uv = (vec2<f32>(id) + 0.5) / vec2<f32>(size);
 // [KO] 저장 텍스처(Storage Texture)로부터 원본 픽셀 로드 (밉 레벨 제외)
 // [EN] Load original pixel from storage texture (Excluding mip level)
-let sceneSample = textureLoad(sourceTexture, id);
-var sceneColor = sceneSample.rgb;
+let sceneColor = textureLoad(sourceTexture, id).rgb;
 
 let rawDepth = fetchDepth(id);
 
@@ -25,7 +24,6 @@ let sunDir = uniforms.sunDirection;
 let viewSunCos = dot(viewDir, sunDir);
 let mappingH = max(0.0, uniforms.cameraHeight);
 let groundRadius = uniforms.groundRadius;
-let atmosphereHeight = uniforms.atmosphereHeight;
 
 // [KO] 2. 기초 대기 속성 결정 (산란광, 투과율, 장면 블렌딩 배수)
 // [EN] 2. Determine base atmospheric properties (Scattering, Transmittance, Blending)
@@ -51,7 +49,7 @@ if (rawDepth >= 1.0) {
     // 근거리 보정 (분해능 한계 극복용 해석적 보간)
     if (actualDist < NEAR_FIELD_CORRECTION_DIST) { 
         let d = getAtmosphereDensities(mappingH, uniforms);
-        let sunT = getTransmittance(transmittanceLUT, basicSampler, mappingH, sunDir.y, atmosphereHeight);
+        let sunT = getTransmittance(transmittanceLUT, basicSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
         let scatR = uniforms.rayleighScattering * d.rhoR * uniforms.skyLuminanceFactor;
         let scatM = uniforms.mieScattering * d.rhoM * uniforms.skyLuminanceFactor;
         let phaseR = phaseRayleigh(viewSunCos);

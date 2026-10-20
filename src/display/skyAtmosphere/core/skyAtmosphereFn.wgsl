@@ -48,10 +48,9 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32) -> vec2<
         azimuth = atan2(viewDir.z, viewDir.x);
     }
     let u = clamp((azimuth / PI2) + 0.5, 0.001, 0.999);
-    let r = groundRadius;
     let h = max(0.0001, viewHeight);
     
-    let horizonCos = -sqrt(max(0.0, h * (2.0 * r + h))) / (r + h);
+    let horizonCos = -sqrt(max(0.0, h * (2.0 * groundRadius + h))) / (groundRadius + h);
     let horizonElevation = asin(clamp(horizonCos, -1.0, 1.0));
     let viewElevation = asin(clamp(viewDir.y, -1.0, 1.0));
 
@@ -189,10 +188,8 @@ fn getMieGlowAmountUnit(
     skyAtmosphereSampler: sampler,
     transToEdge: vec3<f32>
 ) -> vec3<f32> {
-    let actualAnisotropy = params.mieAnisotropy;
-    
-    let sharpG = min(max(actualAnisotropy, 0.88), 0.94); 
-    let stableG = min(actualAnisotropy, 0.80);
+    let sharpG = min(max(params.mieAnisotropy, 0.88), 0.94); 
+    let stableG = min(params.mieAnisotropy, 0.80);
 
     let sharpPhase = phaseMie(viewSunCos, sharpG);
     let stablePhase = phaseMie(viewSunCos, stableG);
@@ -291,15 +288,10 @@ fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
 
 fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
-    var groundRadiance = vec3<f32>(0.0);
-    
     if (sunShadow > 0.0) {
-        groundRadiance = (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
-    } else {
-        groundRadiance = msEnergy * groundAlbedo;
+        return (sunTrans * max(0.0, cosSun) * INV_PI + msEnergy) * groundAlbedo * sunShadow;
     }
-    
-    return groundRadiance;
+    return msEnergy * groundAlbedo;
 }
 
 fn evaluateIBLRadiance(
@@ -315,9 +307,7 @@ fn evaluateIBLRadiance(
     let sunDir = params.sunDirection;
 
     let skyUV = getSkyViewUV(viewDir, viewHeight, r);
-    let skySample = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0);
-    
-    var radiance = skySample.rgb;
+    var radiance = textureSampleLevel(skyViewLUT, skyAtmosphereSampler, skyUV, 0.0).rgb;
 
     let camPos = vec3<f32>(0.0, r + viewHeight, 0.0);
     let isGround = viewDir.y < -0.0001 && r > 0.0 && getRaySphereIntersection(camPos, viewDir, r) > 0.0;
@@ -353,11 +343,11 @@ fn cloud_noise(p: vec2<f32>) -> f32 {
 fn cloud_fbm(p: vec2<f32>) -> f32 {
     var v = 0.0;
     var a = 0.5;
-    var shift = vec2<f32>(100.0);
+    const SHIFT = vec2<f32>(100.0);
     var p_mut = p;
     for (var i = 0; i < 5; i = i + 1) {
         v += a * cloud_noise(p_mut);
-        p_mut = p_mut * 2.0 + shift;
+        p_mut = p_mut * 2.0 + SHIFT;
         a *= 0.5;
     }
     return v;
@@ -382,10 +372,10 @@ fn getCloudDensity(density: f32, params: SkyAtmosphere) -> f32 {
 }
 
 fn getCloudNormal(warpedUV: vec2<f32>, density: f32) -> vec3<f32> {
-    let eps = 0.2;
+    const EPS: f32 = 0.2;
     const INV_EPS: f32 = 5.0; // 1.0 / 0.2
-    let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) * INV_EPS;
-    let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) * INV_EPS;
+    let dIdx = (cloud_fbm(warpedUV + vec2<f32>(EPS, 0.0)) - density) * INV_EPS;
+    let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, EPS)) - density) * INV_EPS;
     let n = vec3<f32>(-dIdx, 2.0, -dIdy);
     let invNLen = inverseSqrt(dot(n, n));
     return n * invNLen;
