@@ -4,6 +4,8 @@ import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import {IPostEffectResult} from "./types";
 import RedGPUObject from "../../base/RedGPUObject";
+import ColorRGB from "../../color/ColorRGB";
+import ColorRGBA from "../../color/ColorRGBA";
 
 const resourceIdMap = new WeakMap<GPUTexture, number>();
 let nextResourceId = 0;
@@ -306,7 +308,14 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
             const {members} = this.#uniformsInfo || {}
             if (members) {
                 for (const k in members) {
-                    this.uniformBuffer.writeOnlyBuffer(members[k], this[k]);
+                    const property = this[k];
+                    if (property instanceof ColorRGBA) {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbaNormalLinear);
+                    } else if (property instanceof ColorRGB) {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property.rgbNormalLinear);
+                    } else {
+                        this.uniformBuffer.writeOnlyBuffer(members[k], property);
+                    }
                 }
             }
         }
