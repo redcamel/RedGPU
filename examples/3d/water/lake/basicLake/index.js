@@ -201,6 +201,13 @@ const renderTestPane = (redGPUContext, lake, directionalLight) => {
             matFolder.addBinding(mat, 'opacity', {min: 0.0, max: 1.0, step: 0.01});
             matFolder.addBinding(mat, 'enableSSR');
 
+            const normalFolder = matFolder.addFolder({title: 'Normal', expanded: true});
+            normalFolder.addBinding(mat, 'normalScale', {min: 0.0, max: 1.0, step: 0.01});
+            normalFolder.addBinding(mat, 'normalTiling', {min: 1.0, max: 60.0, step: 1.0});
+            normalFolder.addBinding(mat, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.01});
+            normalFolder.addBinding(mat, 'normalDetailTiling', {min: 1.0, max: 100.0, step: 1.0});
+            normalFolder.addBinding(mat, 'flowRateScale', {min: 0.0, max: 0.2, step: 0.005});
+
             const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: true});
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
