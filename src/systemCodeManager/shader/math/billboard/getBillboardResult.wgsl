@@ -54,7 +54,7 @@ fn getBillboardResult(
         let billboardMatrix = getBillboardMatrix(viewMatrix, modelMatrix, 1u);
         
         if (usePixelSize == 1u) {
-            // [Pixel Size 모드] - 피벗 기반 확장 및 W-보정 적용
+            // [빌보드 + Pixel Size 모드] - 피벗 기반 클립 공간 확장 및 W-보정 적용
             let viewCenter = billboardMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
             let clipCenter = projectionMatrix * viewCenter;
 
@@ -68,14 +68,28 @@ fn getBillboardResult(
             viewPos = viewCenter;
             viewNormal = vec4<f32>(0.0, 0.0, 1.0, 0.0);
         } else {
-            // [월드 모드] - 일반 빌보드 변환
+            // [빌보드 + World Size 모드]
             viewPos = billboardMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
             viewNormal = vec4<f32>(0.0, 0.0, 1.0, 0.0); 
             result.position = projectionMatrix * viewPos;
         }
     } else {
-        // [일반 모드] - 빌보드 없는 평면 변환
-        viewPos = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+        if (usePixelSize == 1u) {
+            // [일반 3D 평면 + Pixel Size 모드] - 3D 회전 유지 및 거리(W) 비례 스케일 보정
+            let viewCenter = viewMatrix * modelMatrix * vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            let clipCenter = projectionMatrix * viewCenter;
+            let pixelWorldScale = (pixelSize / resolution.y) * (2.0 * clipCenter.w / abs(projectionMatrix[1][1]));
+            let pixelRatioScaleMatrix = mat4x4<f32>(
+                renderRatioX * pixelWorldScale, 0, 0, 0,
+                0, renderRatioY * pixelWorldScale, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            );
+            viewPos = viewMatrix * modelMatrix * pixelRatioScaleMatrix * vec4<f32>(input_position, 1.0);
+        } else {
+            // [일반 3D 평면 + World Size 모드]
+            viewPos = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_position, 1.0);
+        }
         viewNormal = viewMatrix * modelMatrix * ratioScaleMatrix * vec4<f32>(input_normal, 0.0);
         result.position = projectionMatrix * viewPos;
     }

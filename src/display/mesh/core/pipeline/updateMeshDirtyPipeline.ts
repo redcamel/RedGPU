@@ -45,7 +45,7 @@ const updateMeshDirtyPipeline = (
     if (vertexUniformInfo) {
         const {members} = vertexUniformInfo
         for (const k in members) {
-            if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
+            if (k !== 'pickingId' && k !== 'pixelSize' && k !== 'renderRatioX' && k !== 'renderRatioY' && k in mesh) mesh[k] = mesh[k]
         }
     }
 

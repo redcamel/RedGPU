@@ -81,10 +81,9 @@ const renderTestPane = (redGPUContext, scene) => {
 
             folder.addBinding(target, 'useBillboard').on('change', (evt) => {
                 updateAll('useBillboard', evt.value);
-                updateUIState();
             });
 
-            const usePixelSizeBinding = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+            folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
                 updateAll('usePixelSize', evt.value);
                 updateUIState();
             });
@@ -119,12 +118,11 @@ const renderTestPane = (redGPUContext, scene) => {
             });
 
             const updateUIState = () => {
-                const isBillboard = target.useBillboard;
                 const isPixel = target.usePixelSize;
-
-                usePixelSizeBinding.disabled = !isBillboard;
-                pixelSizeBinding.disabled = !isBillboard || !isPixel;
-                worldSizeBinding.disabled = isBillboard && isPixel;
+                pixelSizeBinding.disabled = !isPixel;
+                worldSizeBinding.disabled = isPixel;
+                pixelSizeBinding.refresh();
+                worldSizeBinding.refresh();
             };
 
             updateUIState();

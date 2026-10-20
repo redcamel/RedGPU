@@ -165,10 +165,23 @@ class Raycaster3D {
                 this.#intersectWorldBillboard(mesh, intersects);
             }
         } else if (mesh.geometry) {
+            const usePixelSize = (mesh as any).usePixelSize;
             const effectiveModelMatrix = this.#tempMat4_2;
             mat4.copy(effectiveModelMatrix, mesh.modelMatrix);
 
-            if (rx !== 1 || ry !== 1) {
+            if (usePixelSize && this.#view) {
+                const {rawCamera, projectionMatrix, pixelRectObject} = this.#view;
+                const m = mesh.modelMatrix;
+                const centerWorld = vec3.fromValues(m[12], m[13], m[14]);
+                const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.viewMatrix);
+                const centerClip = vec4.transformMat4(this.#tempMat4, vec4.fromValues(centerView[0], centerView[1], centerView[2], 1.0), projectionMatrix);
+                if (centerClip[3] > 0) {
+                    const physicalPixelSize = ((mesh as any).pixelSize || 1) * window.devicePixelRatio;
+                    const pixelWorldScale = (physicalPixelSize / pixelRectObject.height) * (2.0 * centerClip[3] / Math.abs(projectionMatrix[5]));
+                    mat4.scale(effectiveModelMatrix, effectiveModelMatrix, [rx * pixelWorldScale, ry * pixelWorldScale, 1]);
+                    this.#intersectNarrowPhase(mesh, effectiveModelMatrix, intersects, true);
+                }
+            } else if (rx !== 1 || ry !== 1) {
                 mat4.scale(effectiveModelMatrix, effectiveModelMatrix, [rx, ry, 1]);
                 this.#intersectNarrowPhase(mesh, effectiveModelMatrix, intersects, true);
             } else {

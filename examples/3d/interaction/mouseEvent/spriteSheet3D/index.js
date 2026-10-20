@@ -1,6 +1,6 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1783326645983";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1783326645983";
-import {createEventInfoBox, updateEventInfoBoxStyle, updateEventInfo} from "../eventInfoBox.js?t=1783326645983";
+import {createEventInfoBox, updateEventInfo, updateEventInfoBoxStyle} from "../eventInfoBox.js?t=1783326645983";
 
 /**
  * [KO] SpriteSheet3D Mouse Event 예제
@@ -94,6 +94,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
         spriteSheet.name = `SpriteSheet3D_${eventName}`;
         spriteSheet.primitiveState.cullMode = 'none';
         spriteSheet.worldSize = 1.0;
+        spriteSheet.pixelSize = 64;
 
         scene.addChild(spriteSheet);
         spriteSheet.addListener(eventName, (e) => {
@@ -147,62 +148,48 @@ const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const folder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
+            const target = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
 
-            const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
-            const controls = {
-                useBillboard: child.useBillboard,
-                usePixelSize: child.usePixelSize,
-                pixelSize: child.pixelSize,
-                worldSize: child.worldSize,
+            const updateAll = (key, value) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.SpriteSheet3D) child[key] = value;
+                });
             };
 
-            const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-                scene.children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
-                });
-                updateControlsState();
+            folder.addBinding(target, 'useBillboard').on('change', (evt) => {
+                updateAll('useBillboard', evt.value);
             });
 
-            const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-                scene.children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.usePixelSize = evt.value;
-                });
-                updateControlsState();
+            folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+                updateAll('usePixelSize', evt.value);
+                updateUIState();
             });
 
-            const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
-                scene.children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.pixelSize = evt.value;
-                });
+            const pixelSizeBinding = folder.addBinding(target, 'pixelSize', {
+                min: 1,
+                max: 256,
+                step: 1
+            }).on('change', (evt) => {
+                updateAll('pixelSize', evt.value);
             });
 
-            const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
-                scene.children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.worldSize = evt.value;
-                });
+            const worldSizeBinding = folder.addBinding(target, 'worldSize', {
+                min: 0.01,
+                max: 5,
+                step: 0.01
+            }).on('change', (evt) => {
+                updateAll('worldSize', evt.value);
             });
 
-            const updateControlsState = () => {
-                const {useBillboard, usePixelSize} = controls;
-
-                if (!useBillboard) {
-                    usePixelSizeBinding.disabled = true;
-                    pixelSizeBinding.disabled = true;
-                    worldSizeBinding.disabled = false;
-                } else {
-                    usePixelSizeBinding.disabled = false;
-
-                    if (usePixelSize) {
-                        pixelSizeBinding.disabled = false;
-                        worldSizeBinding.disabled = true;
-                    } else {
-                        pixelSizeBinding.disabled = true;
-                        worldSizeBinding.disabled = false;
-                    }
-                }
+            const updateUIState = () => {
+                const isPixel = target.usePixelSize;
+                pixelSizeBinding.disabled = !isPixel;
+                worldSizeBinding.disabled = isPixel;
+                pixelSizeBinding.refresh();
+                worldSizeBinding.refresh();
             };
 
-            updateControlsState();
+            updateUIState();
         }
     });
 };

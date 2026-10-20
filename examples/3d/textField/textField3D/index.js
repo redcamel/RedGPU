@@ -90,9 +90,8 @@ const renderTestPane = (redGPUContext, scene) => {
             const transformFolder = folder.addFolder({title: 'Transform & Billboard'});
             transformFolder.addBinding(target, 'useBillboard').on('change', (evt) => {
                 updateAll('useBillboard', evt.value);
-                updateUI();
             });
-            const usePixelSizeBinding = transformFolder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+            transformFolder.addBinding(target, 'usePixelSize').on('change', (evt) => {
                 updateAll('usePixelSize', evt.value);
                 updateUI();
             });
@@ -130,9 +129,7 @@ const renderTestPane = (redGPUContext, scene) => {
             });
 
             const updateUI = () => {
-                const isBillboard = target.useBillboard;
-                usePixelSizeBinding.disabled = !isBillboard;
-                worldSizeBinding.disabled = isBillboard && target.usePixelSize;
+                worldSizeBinding.disabled = target.usePixelSize;
             };
 
             updateUI();
