@@ -32,7 +32,6 @@ import RenderViewStateData from "../display/view/core/RenderViewStateData";
  * <iframe src="/RedGPU/examples/3d/water/lake/basicLake/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Basic lake example](/RedGPU/examples/3d/water/lake/basicLake/)
- * @see [Lake settings example](/RedGPU/examples/3d/water/lake/lakeSettings/)
  * @see [Lake material example](/RedGPU/examples/3d/water/lake/lakeMaterial/)
  * @see [Lake interaction example](/RedGPU/examples/3d/water/lake/interaction/)
  * @see [Character walking example](/RedGPU/examples/3d/water/lake/characterWalking/)

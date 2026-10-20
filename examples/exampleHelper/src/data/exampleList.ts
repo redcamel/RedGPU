@@ -1129,15 +1129,6 @@ export const ExampleList: ExampleListType = [
                                     },
                                     {
                                         experimental: true,
-                                        name: 'Lake Settings',
-                                        path: '3d/water/lake/lakeSettings',
-                                        description: {
-                                            ko: `호수 수체(Lake) 및 LakeMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.`,
-                                            en: `A comprehensive settings example allowing real-time adjustment and testing of all Lake and LakeMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.`
-                                        }
-                                    },
-                                    {
-                                        experimental: true,
                                         name: 'Lake with Landscape',
                                         path: '3d/water/lake/lakeWithLandscape',
                                         description: {
