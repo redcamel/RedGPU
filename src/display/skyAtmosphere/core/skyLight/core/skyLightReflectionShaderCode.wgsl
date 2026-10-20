@@ -9,16 +9,12 @@
 #redgpu_include color.getLuminance
 
 /**
- * [KO] IBL용 대기 광량을 산출하고 극단적인 밝기를 제어합니다.
- * [EN] Calculate atmospheric radiance for IBL and control extreme brightness.
+ * [KO] 정반사 IBL 베이킹을 위해 대기 복사휘도를 조회하고 파이어플라이(Firefly) 방지를 위해 최대 휘도를 제한합니다.
+ * [EN] Evaluates atmospheric radiance for specular IBL baking and clamps maximum luminance to prevent fireflies.
  */
 fn getIBLAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
-    // [KO] 하드웨어 선형 샘플링을 통해 기초 대기 광량 조회
-    // [EN] Retrieve base atmospheric radiance via hardware linear sampling
     var radiance = evaluateIBLRadiance(viewDir, params, transmittanceTexture, skyViewTexture, atmosphereSampler, false);
 
-    // [KO] IBL 베이킹 시 태양 등의 극단적인 고휘도가 텍셀을 깨뜨리지 않도록 임계값 클램핑
-    // [EN] Clamp radiance to prevent extreme highlights (like the sun) from breaking texels during IBL baking
     let maxIBLLuminance: f32 = 10000.0; 
     let lum = getLuminance(radiance);
     if (lum > maxIBLLuminance) {
@@ -28,10 +24,12 @@ fn getIBLAtmosphereRadiance(viewDir: vec3<f32>) -> vec3<f32> {
     return radiance;
 }
 
+/**
+ * [KO] 간접 정반사 조명(Reflection) 프리필터링의 소스 환경 큐브맵을 대기 산란 데이터로부터 생성합니다.
+ * [EN] Generates the source environment cubemap for indirect specular (Reflection) prefiltering from atmospheric scattering data.
+ */
 @compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    // [KO] 1. 인덱스 및 기초 데이터 로드
-    // [EN] 1. Index and basic data loading
     let size_u = textureDimensions(outputTexture).xy;
     if (global_id.x >= size_u.x || global_id.y >= size_u.y || global_id.z >= 6u) { return; }
 
@@ -42,8 +40,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var totalRadiance = vec3<f32>(0.0);
     const SAMPLE_COUNT: u32 = 8u;
 
-    // [KO] 2. 큐브맵 베이킹을 위한 대기 산란광 샘플링 루프
-    // [EN] 2. Atmospheric radiance sampling loop for cubemap baking
+    // [KO] Hammersley 시퀀스를 이용해 큐브맵 각 면의 대기 산란광을 멀티 샘플링합니다.
+    // [EN] Multi-sample atmospheric scattered radiance across each cubemap face using the Hammersley sequence.
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;
         let uv = (baseCoord + offset) / size;
@@ -59,8 +57,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         totalRadiance += getIBLAtmosphereRadiance(viewDir);
     }
 
-    // [KO] 3. 평균 산란광 저장
-    // [EN] 3. Store average radiance
     const INV_SAMPLE_COUNT_PI: f32 = (1.0 / f32(SAMPLE_COUNT)) * PI;
     let radiance = totalRadiance * INV_SAMPLE_COUNT_PI;
     textureStore(outputTexture, global_id.xy, face, vec4<f32>(radiance, 1.0));

@@ -11,7 +11,7 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 
 
 /**
- * [KO] 대기 산란 데이터를 기반으로 간접 스펙큘러 조명(Reflection)용 큐브맵을 베이킹하고 거칠기(Roughness)별 밉맵을 프리필터링하는 생성기입니다.
+ * [KO] 대기 산란 데이터를 기반으로 간접 정반사 조명(Reflection)용 큐브맵을 베이킹하고 거칠기(Roughness)별 밉맵을 프리필터링하는 생성기입니다.
  * [EN] Generator that bakes a cubemap for indirect specular lighting (Reflection) based on atmospheric scattering data and prefilters mipmaps by roughness.
  *
  * ::: warning
@@ -60,7 +60,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 대기 LUT 텍스처들을 입력받아 스펙큘러 반사용 큐브맵을 렌더링하고 프리필터링합니다.
+     * [KO] 대기 LUT 텍스처들을 입력받아 정반사용 큐브맵을 렌더링하고 프리필터링합니다.
      * [EN] Renders and prefilters the specular reflection cubemap using atmospheric LUT textures as input.
      *
      * @param transmittance -

@@ -32,17 +32,16 @@ interface CachedUniformMember {
 }
 
 /**
- * [KO] 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 클래스입니다.
- * [EN] Physically based atmospheric scattering simulation class.
- *
- * [KO] 레일리 산란(Rayleigh Scattering), 미 산란(Mie Scattering), 오존 흡수(Ozone Absorption)를 다단계 LUT로 사전 계산하여 실시간 하늘 배경, 노을, Aerial Perspective 및 대기 기반 간접 조명(IBL)을 생성합니다.
- * [EN] Precomputes Rayleigh scattering, Mie scattering, and Ozone absorption into multi-stage LUTs to generate real-time sky backgrounds, sunsets, aerial perspective, and atmosphere-based indirect lighting (IBL).
+ * [KO] 레일리 산란(Rayleigh), 미 산란(Mie), 오존 흡수(Ozone)를 다단계 LUT로 사전 계산하여 실시간 하늘 배경, 대기 원근(Aerial Perspective) 및 간접 조명(IBL)을 생성하는 물리 기반 대기 시뮬레이션 클래스입니다.
+ * [EN] Physically based atmospheric simulation class that precomputes Rayleigh scattering, Mie scattering, and Ozone absorption into multi-stage LUTs to generate real-time sky backgrounds, aerial perspective, and indirect lighting (IBL).
  *
  * ### Example
  * ```typescript
  * const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
  * view.skyAtmosphere = skyAtmosphere;
  * ```
+ *
+ * <iframe src="/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/" style="width:100%; height:500px;"></iframe>
  *
  * @see [SkyAtmosphere Basic Example](/RedGPU/examples/3d/skyAtmosphere/skyAtmosphere/)
  * @see [SkyAtmosphere Scattering Test](/RedGPU/examples/3d/skyAtmosphere/scatteringTest/)
@@ -227,8 +226,8 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] Aerial Perspective 효과의 거리 스케일(범위: 1 ~ 1000)을 가져오거나 설정합니다. (기본값: 100.0)
-     * [EN] Gets or sets the distance scale for the Aerial Perspective effect (range: 1 to 1000). (Default: 100.0)
+     * [KO] 대기 원근(Aerial Perspective) 효과의 거리 스케일(범위: 1 ~ 1000)을 가져오거나 설정합니다. (기본값: 100.0)
+     * [EN] Gets or sets the distance scale for the aerial perspective effect (range: 1 to 1000). (Default: 100.0)
      *
      * @returns
      * [KO] 거리 스케일
@@ -243,8 +242,8 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] Aerial Perspective 효과가 시작되는 깊이(범위: 0 ~ 100)를 가져오거나 설정합니다. (기본값: 0.0)
-     * [EN] Gets or sets the starting depth for the Aerial Perspective effect (range: 0 to 100). (Default: 0.0)
+     * [KO] 대기 원근(Aerial Perspective) 효과가 시작되는 깊이(범위: 0 ~ 100)를 가져오거나 설정합니다. (기본값: 0.0)
+     * [EN] Gets or sets the starting depth for the aerial perspective effect (range: 0 to 100). (Default: 0.0)
      *
      * @returns
      * [KO] 시작 깊이
@@ -291,11 +290,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 미 산란(Mie Scattering) RGB 계수를 가져오거나 설정합니다.
-     * [EN] Gets or sets the Mie scattering RGB coefficients.
+     * [KO] 미 산란(Mie Scattering) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.003996, 0.003996, 0.003996]`)
+     * [EN] Gets or sets the Mie scattering RGB coefficients. (Default: `[0.003996, 0.003996, 0.003996]`)
      *
      * @returns
-     * [KO] RGB 미 산란 계수 배열 (`[number, number, number]`)
+     * [KO] RGB 미 산란 계수 튜플 (`[number, number, number]`)
      * [EN] RGB Mie scattering coefficient tuple (`[number, number, number]`)
      */
     get mieScattering(): [number, number, number] {
@@ -307,11 +306,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 미 흡수(Mie Absorption) RGB 계수를 가져오거나 설정합니다.
-     * [EN] Gets or sets the Mie absorption RGB coefficients.
+     * [KO] 미 흡수(Mie Absorption) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.000444, 0.000444, 0.000444]`)
+     * [EN] Gets or sets the Mie absorption RGB coefficients. (Default: `[0.000444, 0.000444, 0.000444]`)
      *
      * @returns
-     * [KO] RGB 미 흡수 계수 배열 (`[number, number, number]`)
+     * [KO] RGB 미 흡수 계수 튜플 (`[number, number, number]`)
      * [EN] RGB Mie absorption coefficient tuple (`[number, number, number]`)
      */
     get mieAbsorption(): [number, number, number] {
@@ -323,11 +322,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 레일리 산란(Rayleigh Scattering) RGB 계수를 가져오거나 설정합니다.
-     * [EN] Gets or sets the Rayleigh scattering RGB coefficients.
+     * [KO] 레일리 산란(Rayleigh Scattering) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.005802, 0.013558, 0.033100]`)
+     * [EN] Gets or sets the Rayleigh scattering RGB coefficients. (Default: `[0.005802, 0.013558, 0.033100]`)
      *
      * @returns
-     * [KO] RGB 레일리 산란 계수 배열 (`[number, number, number]`)
+     * [KO] RGB 레일리 산란 계수 튜플 (`[number, number, number]`)
      * [EN] RGB Rayleigh scattering coefficient tuple (`[number, number, number]`)
      */
     get rayleighScattering(): [number, number, number] {
@@ -387,11 +386,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 지표면의 RGB 반사율(Albedo)을 가져오거나 설정합니다.
-     * [EN] Gets or sets the ground RGB albedo.
+     * [KO] 지표면의 RGB 반사율(Albedo)을 가져오거나 설정합니다. (기본값: `[0.4, 0.4, 0.4]`)
+     * [EN] Gets or sets the ground RGB albedo. (Default: `[0.4, 0.4, 0.4]`)
      *
      * @returns
-     * [KO] 지표면 RGB 반사율 배열 (`[number, number, number]`)
+     * [KO] 지표면 RGB 반사율 튜플 (`[number, number, number]`)
      * [EN] Ground RGB albedo tuple (`[number, number, number]`)
      */
     get groundAlbedo(): [number, number, number] {
@@ -403,11 +402,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 오존층의 빛 흡수 RGB 계수를 가져오거나 설정합니다.
-     * [EN] Gets or sets the Ozone layer RGB absorption coefficients.
+     * [KO] 오존층의 빛 흡수 RGB 계수를 가져오거나 설정합니다. (기본값: `[0.000650, 0.001881, 0.000085]`)
+     * [EN] Gets or sets the Ozone layer RGB absorption coefficients. (Default: `[0.000650, 0.001881, 0.000085]`)
      *
      * @returns
-     * [KO] 오존 흡수 RGB 계수 배열 (`[number, number, number]`)
+     * [KO] 오존 흡수 RGB 계수 튜플 (`[number, number, number]`)
      * [EN] Ozone RGB absorption coefficient tuple (`[number, number, number]`)
      */
     get absorptionCoefficient(): [number, number, number] {
@@ -419,8 +418,8 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 오존 밀도가 최대가 되는 고도(단위: km)를 가져오거나 설정합니다. (기본값: 25.0)
-     * [EN] Gets or sets the altitude where Ozone density peaks (unit: km). (Default: 25.0)
+     * [KO] 오존 밀도가 최대가 되는 고도(단위: km, 범위: 0 ~ 100)를 가져오거나 설정합니다. (기본값: 25.0)
+     * [EN] Gets or sets the altitude where Ozone density peaks (unit: km, range: 0 to 100). (Default: 25.0)
      *
      * @returns
      * [KO] 오존 최대 밀도 고도 (km)
@@ -499,11 +498,11 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 하늘 전체의 RGB 휘도 배율을 가져오거나 설정합니다.
-     * [EN] Gets or sets the overall sky RGB luminance factor.
+     * [KO] 하늘 전체의 RGB 휘도 배율을 가져오거나 설정합니다. (기본값: `[1.0, 1.0, 1.0]`)
+     * [EN] Gets or sets the overall sky RGB luminance factor. (Default: `[1.0, 1.0, 1.0]`)
      *
      * @returns
-     * [KO] 하늘 RGB 휘도 배율 배열 (`[number, number, number]`)
+     * [KO] 하늘 RGB 휘도 배율 튜플 (`[number, number, number]`)
      * [EN] Sky RGB luminance factor tuple (`[number, number, number]`)
      */
     get skyLuminanceFactor(): [number, number, number] {
@@ -551,8 +550,8 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 거리별 대기 산란을 저장한 Aerial Perspective 3D LUT 텍스처를 반환합니다.
-     * [EN] Returns the Aerial Perspective 3D LUT texture storing distance-based atmospheric scattering.
+     * [KO] 거리별 대기 산란을 저장한 대기 원근(Aerial Perspective) 볼륨 LUT 텍스처를 반환합니다.
+     * [EN] Returns the Aerial Perspective volume LUT texture storing distance-based atmospheric scattering.
      *
      * @returns
      * [KO] Aerial Perspective LUT 텍스처
@@ -563,7 +562,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 대기 산란 기반 간접 디퓨즈(Irradiance) 큐브 텍스처를 반환합니다.
+     * [KO] 대기 산란 기반 간접 난반사(Irradiance) 큐브 텍스처를 반환합니다.
      * [EN] Returns the atmospheric scattering-based indirect diffuse (Irradiance) cube texture.
      *
      * @returns
@@ -575,7 +574,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 대기 산란 기반 간접 스펙큘러(Reflection) 큐브 텍스처를 반환합니다.
+     * [KO] 대기 산란 기반 간접 정반사(Reflection) 큐브 텍스처를 반환합니다.
      * [EN] Returns the atmospheric scattering-based indirect specular (Reflection) cube texture.
      *
      * @returns

@@ -8,7 +8,7 @@ import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuf
 import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
- * [KO] SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명(IBL)용 디퓨즈(Irradiance) 및 스펙큘러(Reflection) 큐브맵을 생성하는 클래스입니다.
+ * [KO] SkyAtmosphere의 대기 산란 데이터를 기반으로 실시간 간접 조명(IBL)용 난반사(Irradiance) 및 정반사(Reflection) 큐브맵을 생성하는 클래스입니다.
  * [EN] Class that generates diffuse (Irradiance) and specular (Reflection) cubemaps for real-time indirect lighting (IBL) based on SkyAtmosphere's atmospheric scattering data.
  *
  * ::: warning
@@ -43,7 +43,7 @@ class SkyLight extends RedGPUObject {
     }
 
     /**
-     * [KO] 간접 디퓨즈 조명용 Irradiance 큐브 텍스처를 반환합니다.
+     * [KO] 간접 난반사 조명용 Irradiance 큐브 텍스처를 반환합니다.
      * [EN] Returns the Irradiance cube texture for indirect diffuse lighting.
      *
      * @returns
@@ -55,7 +55,7 @@ class SkyLight extends RedGPUObject {
     }
 
     /**
-     * [KO] 간접 스펙큘러 조명용 Reflection 큐브 텍스처를 반환합니다.
+     * [KO] 간접 정반사 조명용 Reflection 큐브 텍스처를 반환합니다.
      * [EN] Returns the Reflection cube texture for indirect specular lighting.
      *
      * @returns
@@ -67,7 +67,7 @@ class SkyLight extends RedGPUObject {
     }
 
     /**
-     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 디퓨즈 및 스펙큘러 IBL 큐브맵을 베이킹합니다.
+     * [KO] SkyAtmosphere의 LUT 데이터를 기반으로 난반사 및 정반사 IBL 큐브맵을 베이킹합니다.
      * [EN] Bakes diffuse and specular IBL cubemaps based on SkyAtmosphere's LUT data.
      *
      * @param skyAtmosphere -

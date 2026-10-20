@@ -8,7 +8,7 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
- * [KO] 미리 계산된 SkyView LUT를 참조하여 무한 거리의 하늘 배경을 렌더링하는 클래스입니다.
+ * [KO] 사전 계산된 SkyView LUT를 참조하여 무한 거리의 하늘 배경을 렌더링하는 클래스입니다.
  * [EN] Class that renders the sky background at infinite distance by referencing the precomputed SkyView LUT.
  *
  * ::: warning

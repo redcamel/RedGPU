@@ -3,14 +3,12 @@ let size = textureDimensions(outputTexture);
 if (id.x >= size.x || id.y >= size.y) { return; }
 
 let uv = (vec2<f32>(id) + 0.5) / vec2<f32>(size);
-// [KO] 저장 텍스처(Storage Texture)로부터 원본 픽셀 로드 (밉 레벨 제외)
-// [EN] Load original pixel from storage texture (Excluding mip level)
 let sceneColor = textureLoad(sourceTexture, id).rgb;
 
 let rawDepth = fetchDepth(id);
 
-// [KO] 1. 레이 방향 및 파라미터 준비 (단일 inverseSqrt로 length/normalize 동시 해결)
-// [EN] 1. Prepare ray direction and parameters (Single inverseSqrt for length and normalize)
+// [KO] 1. 화면 픽셀의 뷰 공간 광선 비율과 월드 공간 시선 방향을 계산합니다.
+// [EN] 1. Compute the view-space ray length ratio and world-space view direction for the current pixel.
 let invP = systemUniforms.projection.inverseProjectionMatrix;
 let viewSpacePos = vec3<f32>((uv.x * 2.0 - 1.0) * invP[0][0], ((1.0 - uv.y) * 2.0 - 1.0) * invP[1][1], -1.0);
 let dotPos = dot(viewSpacePos, viewSpacePos);
@@ -25,28 +23,26 @@ let viewSunCos = dot(viewDir, sunDir);
 let mappingH = max(0.0, uniforms.cameraHeight);
 let groundRadius = uniforms.groundRadius;
 
-// [KO] 2. 기초 대기 속성 결정 (산란광, 투과율, 장면 블렌딩 배수)
-// [EN] 2. Determine base atmospheric properties (Scattering, Transmittance, Blending)
+// [KO] 2. 배경 여부에 따라 SkyView 투과율 또는 Aerial Perspective 3D LUT 산란광/투과율을 샘플링합니다.
+// [EN] 2. Sample SkyView transmittance for background pixels or Aerial Perspective 3D LUT scattering/transmittance for scene geometry.
 var baseScattering: vec3<f32> = vec3<f32>(0.0);
 var atmosphereTrans: f32 = 1.0;
 var sceneBlendingTrans: f32 = 1.0;
 
 if (rawDepth >= 1.0) {
-    // [Background] 배경은 이미 산란광이 그려졌으므로 투과율만 추출하여 Glow 연산에 활용
     let skyUV = getSkyViewUV(viewDir, mappingH, groundRadius);
     atmosphereTrans = textureSampleLevel(skyViewLUT, basicSampler, skyUV, 0.0).a;
 } else {
-    // [Object] Aerial Perspective 적용: 깊이 정보를 기반으로 3D LUT 샘플링
     let depthKm = getLinearizeDepth(rawDepth, systemUniforms.camera.nearClipping, systemUniforms.camera.farClipping) / 1000.0;
     let actualDist = depthKm * rayLengthRatio;
     let maxApDist = uniforms.aerialPerspectiveDistanceScale; 
     let apDist = clamp(actualDist - uniforms.aerialPerspectiveStartDepth, 0.0, maxApDist);
 
-    // Z축 매핑: LUT 생성 시의 제곱 스케일 역산
     let apW = saturate(sqrt(apDist * (1.0 / maxApDist)));
     var apSample = textureSampleLevel(aerialPerspectiveLUT, basicSampler, vec3<f32>(uv.x, uv.y, apW), 0.0);
 
-    // 근거리 보정 (분해능 한계 극복용 해석적 보간)
+    // [KO] 3D LUT 첫 번째 슬라이스 이내의 초근거리 구간은 해석적 단일 산란과 부드럽게 보간합니다.
+    // [EN] Smoothly interpolate ultra-near-field distances within the first 3D LUT slice using analytical single scattering.
     if (actualDist < NEAR_FIELD_CORRECTION_DIST) { 
         let d = getAtmosphereDensities(mappingH, uniforms);
         let sunT = getTransmittance(transmittanceLUT, basicSampler, mappingH, sunDir.y, uniforms.atmosphereHeight);
@@ -67,8 +63,8 @@ if (rawDepth >= 1.0) {
     sceneBlendingTrans = apSample.a;
 }
 
-// [KO] 3. 추가 시각 효과 계산 (Mie Glow, Sun Disk, Cloud Masking)
-// [EN] 3. Calculate additional visual effects (Mie Glow, Sun Disk, Cloud Masking)
+// [KO] 3. 행성 그림자 외부에서 전방 미 산란 광륜(Mie Glow)과 배경 태양 디스크·구름 차폐를 계산합니다.
+// [EN] 3. Compute forward Mie glow and background sun disk/cloud occlusion outside the planet shadow.
 let camPos = vec3<f32>(0.0, mappingH + groundRadius, 0.0);
 var addedRadiance = vec3<f32>(0.0);
 
@@ -90,8 +86,8 @@ if (getPlanetShadowMask(camPos, sunDir, groundRadius) > 0.0) {
     }
 }
 
-// [KO] 4. 최종 산란광 합산 및 장면 합성
-// [EN] 4. Sum final scattering and composite scene
+// [KO] 4. 원본 씬 색상에 대기 투과율 감쇠와 누적 산란광을 합성하여 출력 텍스처에 기록합니다.
+// [EN] 4. Composite atmospheric transmittance attenuation and accumulated scattering onto the scene color and write to outputTexture.
 let totalScattering = (baseScattering + addedRadiance) * (uniforms.sunIntensity * systemUniforms.preExposure);
 let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
 

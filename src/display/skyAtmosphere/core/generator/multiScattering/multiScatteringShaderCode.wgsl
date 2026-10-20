@@ -5,13 +5,18 @@
 @group(0) @binding(2) var skyAtmosphereSampler: sampler;
 @group(0) @binding(3) var<uniform> params: SkyAtmosphere;
 
-const GOLDEN_SPHERE_STEP: f32 = 10.16640738463052; // (sqrt(5.0) + 1.0) * PI
+const GOLDEN_SPHERE_STEP: f32 = 10.16640738463052;
 const INV_MULTI_SCAT_SAMPLES: f32 = 1.0 / 128.0;
 
-// [LDS] 온칩 고속 공유 메모리 (128개 스레드 복사휘도 및 감쇠계수 캐싱)
+// [KO] 워크그룹 내 128개 구면 방향 샘플의 산란 휘도(s_lum)와 다중 산란 전달 계수(s_f1)를 집계하는 공유 메모리입니다.
+// [EN] Workgroup shared memory aggregating scattered luminance (s_lum) and transfer factors (s_f1) across 128 spherical samples.
 var<workgroup> s_lum : array<vec3<f32>, 128>;
 var<workgroup> s_f1  : array<vec3<f32>, 128>;
 
+/**
+ * [KO] 구면 피보나치 샘플링과 병렬 트리 리덕션을 통해 등방성 다중 산란(Multi-Scattering) 2D LUT를 계산합니다.
+ * [EN] Computes the isotropic Multi-Scattering 2D LUT using spherical Fibonacci sampling and parallel tree reduction.
+ */
 @compute @workgroup_size(128, 1, 1)
 fn main(
     @builtin(workgroup_id) wg_id: vec3<u32>,
@@ -21,7 +26,7 @@ fn main(
     let size = textureDimensions(multiScatLUT);
     if (texelCoord.x >= size.x || texelCoord.y >= size.y) { return; }
 
-    let sampleIdx = local_id.x; // 0u ~ 127u
+    let sampleIdx = local_id.x;
 
     let uv = (vec2<f32>(texelCoord) + 0.5) / vec2<f32>(size);
     let cosSunTheta = uv.x * 2.0 - 1.0;
@@ -31,7 +36,8 @@ fn main(
     let rayOrigin = vec3<f32>(0.0, viewHeight + groundRadius, 0.0);
     let sunDir = vec3<f32>(sqrt(max(0.0, 1.0 - cosSunTheta * cosSunTheta)), cosSunTheta, 0.0);
 
-    // [1단계: 128개 스레드가 각각 자기 담당 샘플 1개만 40스텝 레이마칭 (100% 병렬화)]
+    // [KO] 1. 스레드별 구면 방향 샘플 생성 및 광선 적분 수행
+    // [EN] 1. Generate per-thread spherical direction sample and perform ray integration
     let step = f32(sampleIdx) + 0.5;
     let cosTheta = clamp(1.0 - 2.0 * step * INV_MULTI_SCAT_SAMPLES, -1.0, 1.0);
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
@@ -64,13 +70,15 @@ fn main(
         }
     }
 
-    // [2단계: 온칩 LDS에 결과 캐싱 및 워크그룹 동기화]
+    // [KO] 2. 워크그룹 공유 메모리에 스레드별 적분 결과 기록
+    // [EN] 2. Store per-thread integration results into workgroup shared memory
     s_lum[sampleIdx] = L1;
     s_f1[sampleIdx]  = f1;
 
     workgroupBarrier();
 
-    // [3단계: 온칩 LDS 병렬 트리 축소 (Parallel Reduction - 7사이클 완료)]
+    // [KO] 3. 공유 메모리 병렬 리덕션으로 128개 샘플 합산
+    // [EN] 3. Sum all 128 samples via parallel reduction in shared memory
     for (var stride = 64u; stride > 0u; stride = stride >> 1u) {
         if (sampleIdx < stride) {
             s_lum[sampleIdx] += s_lum[sampleIdx + stride];
@@ -79,7 +87,8 @@ fn main(
         workgroupBarrier();
     }
 
-    // [4단계: 0번 스레드가 무한 등비급수 산출 후 텍스처에 단 1회 기록]
+    // [KO] 4. 무한 등비급수 근사를 통해 고차 다중 산란 에너지를 산출하고 LUT에 저장
+    // [EN] 4. Compute higher-order multi-scattering energy via geometric series approximation and store to LUT
     if (sampleIdx == 0u) {
         let lumTotal = s_lum[0];
         let fmsTotal = s_f1[0] * INV_MULTI_SCAT_SAMPLES;
@@ -88,6 +97,10 @@ fn main(
     }
 }
 
+/**
+ * [KO] 단일 구면 방향 광선에 대해 1차 등방성 산란 휘도(L1)와 산란 전달 계수(f1)를 적분합니다.
+ * [EN] Integrates first-order isotropic scattered luminance (L1) and scattering transfer factor (f1) along a single spherical ray.
+ */
 fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, sunDir: vec3<f32>, L1: ptr<function, vec3<f32>>, f1: ptr<function, vec3<f32>>, TPath: ptr<function, vec3<f32>>) {
     if (tMax <= tMin) { return; }
     let groundRadius = params.groundRadius;

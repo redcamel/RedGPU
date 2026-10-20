@@ -6,11 +6,8 @@ import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
- * [KO] 대기 산란용 LUT(Look Up Table) 생성을 위한 추상 클래스입니다.
- * [EN] Abstract class for generating atmospheric scattering LUTs (Look Up Tables).
- *
- * [KO] 컴퓨트 셰이더를 사용하여 물리 연산 결과를 텍스처에 베이킹하는 공통 기능을 제공합니다.
- * [EN] Provides common functionality for baking physical calculation results into textures using compute shaders.
+ * [KO] 컴퓨트 셰이더를 통해 물리 기반 대기 산란 연산 결과를 텍스처에 베이킹하는 대기 산란용 LUT(Look-Up Table) 생성기의 추상 베이스 클래스입니다.
+ * [EN] Abstract base class for atmospheric scattering LUT (Look-Up Table) generators that bake physically based atmospheric scattering calculations into textures using compute shaders.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

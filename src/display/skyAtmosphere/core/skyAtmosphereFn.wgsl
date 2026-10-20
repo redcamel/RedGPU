@@ -16,10 +16,18 @@ const AP_STEPS: u32 = 64u;
 const MIE_GLOW_SUPPRESS: f32 = 0.40;
 const NEAR_FIELD_CORRECTION_DIST: f32 = 0.2;
 
+/**
+ * [KO] 특정 고도에서의 레일리, 미, 오존 입자 밀도를 담는 구조체입니다.
+ * [EN] Structure holding Rayleigh, Mie, and Ozone particle densities at a specific altitude.
+ */
 struct AtmosphereDensities {
     rhoR: f32, rhoM: f32, rhoO: f32
 };
 
+/**
+ * [KO] 광선과 구의 첫 번째 양수 교차 거리를 계산합니다. (교차하지 않으면 -1.0 반환)
+ * [EN] Calculates the first positive intersection distance between a ray and a sphere. (Returns -1.0 if no intersection)
+ */
 fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadius: f32) -> f32 {
     let b = dot(rayOrigin, rayDir);
     let c = dot(rayOrigin, rayOrigin) - sphereRadius * sphereRadius;
@@ -33,6 +41,10 @@ fn getRaySphereIntersection(rayOrigin: vec3<f32>, rayDir: vec3<f32>, sphereRadiu
     return -1.0;
 }
 
+/**
+ * [KO] 고도와 천정각 코사인 값을 Transmittance LUT의 UV 좌표로 변환합니다.
+ * [EN] Converts altitude and zenith angle cosine into UV coordinates for the Transmittance LUT.
+ */
 fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec2<f32> {
     let mu = clamp(cosTheta, -1.0, 1.0);
     let u = clamp(0.5 + 0.5 * sign(mu) * sqrt(abs(mu)), 0.001, 0.999);
@@ -40,6 +52,10 @@ fn getTransmittanceUV(viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> 
     return vec2<f32>(u, v);
 }
 
+/**
+ * [KO] 시선 방향과 카메라 고도를 지평선 중심 비선형 매핑이 적용된 SkyView LUT UV 좌표로 변환합니다.
+ * [EN] Converts view direction and camera altitude into SkyView LUT UV coordinates with horizon-centered non-linear mapping.
+ */
 fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32) -> vec2<f32> {
     var azimuth: f32;
     if (abs(viewDir.z) < 1e-6 && abs(viewDir.x) < 1e-6) {
@@ -66,27 +82,31 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32) -> vec2<
 }
 
 /**
- * [KO] 특정 고도와 각도에서의 대기 투과율(Transmittance)을 조회합니다.
- * [EN] Retrieves atmospheric transmittance at a specific altitude and angle.
+ * [KO] 특정 고도와 각도에서의 대기 투과율(Transmittance)을 조회하고 지평선 하단 차폐를 적용합니다.
+ * [EN] Retrieves atmospheric transmittance at a specific altitude and angle with sub-horizon ground occlusion.
  */
 fn getTransmittance(transmittanceLUT: texture_2d<f32>, skyAtmosphereSampler: sampler, viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
     let uv = getTransmittanceUV(viewHeight, cosTheta, atmosphereHeight);
-    // [KO] 하드웨어 선형 샘플링을 통해 LUT 사이의 값을 부드럽게 보간합니다.
-    // [EN] Smoothly interpolate between LUT entries via hardware linear sampling.
     var transmittance = textureSampleLevel(transmittanceLUT, skyAtmosphereSampler, uv, 0.0).rgb;
     if (cosTheta < 0.0) {
-        // [KO] 지평선 아래로 내려갈 때 지면에 의한 차폐를 부드럽게 적용합니다.
-        // [EN] Smoothly apply ground occlusion when below the horizon.
         transmittance *= smoothstep(-0.015, 0.0, cosTheta);
     }
     return transmittance;
 }
 
+/**
+ * [KO] 지정된 위치에서 태양 방향이 행성 지표면에 의해 차폐되는지 여부를 판별합니다. (차폐 시 0.0, 비차폐 시 1.0)
+ * [EN] Determines whether the sun direction from a given position is occluded by the planet surface. (0.0 if occluded, 1.0 otherwise)
+ */
 fn getPlanetShadowMask(p: vec3<f32>, sunDir: vec3<f32>, r: f32) -> f32 {
     if (r > 0.0 && getRaySphereIntersection(p, sunDir, r) > 0.0) { return 0.0; }
     return 1.0;
 }
 
+/**
+ * [KO] 주어진 고도(km)에서 레일리, 미, 오존 입자의 상대 밀도를 계산합니다.
+ * [EN] Calculates the relative densities of Rayleigh, Mie, and Ozone particles at a given altitude (km).
+ */
 fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereDensities {
     var d: AtmosphereDensities;
     d.rhoR = exp(-viewHeight / params.rayleighExponentialDistribution);
@@ -96,6 +116,10 @@ fn getAtmosphereDensities(viewHeight: f32, params: SkyAtmosphere) -> AtmosphereD
     return d;
 }
 
+/**
+ * [KO] 광선 구간을 따라 레일리, 미, 오존에 의한 누적 광학 깊이(Optical Depth)를 수치 적분합니다.
+ * [EN] Numerically integrates cumulative optical depth from Rayleigh, Mie, and Ozone along a ray segment.
+ */
 fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32, steps: u32, params: SkyAtmosphere) -> vec3<f32> {
     if (tMax <= tMin) { return vec3<f32>(0.0); }
     let stepSize = (tMax - tMin) / f32(steps);
@@ -114,10 +138,18 @@ fn integrateOpticalDepth(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax: f32
     return (params.rayleighScattering * totalRho.x + mieExt * totalRho.y + params.absorptionCoefficient * totalRho.z) * stepSize;
 }
 
+/**
+ * [KO] 레일리 산란(Rayleigh Scattering) 위상 함수를 평가합니다.
+ * [EN] Evaluates the Rayleigh scattering phase function.
+ */
 fn phaseRayleigh(cosTheta: f32) -> f32 {
     return 3.0 / (16.0 * PI) * (1.0 + cosTheta * cosTheta);
 }
 
+/**
+ * [KO] Henyey-Greenstein 근사 기반 미 산란(Mie Scattering) 위상 함수를 평가합니다.
+ * [EN] Evaluates the Mie scattering phase function based on the Henyey-Greenstein approximation.
+ */
 fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     let g2 = g * g;
     let denom = max(EPSILON, 1.0 + g2 - 2.0 * g * cosTheta);
@@ -126,10 +158,18 @@ fn phaseMie(cosTheta: f32, g: f32) -> f32 {
     return (0.25 * INV_PI) * ((1.0 - g2) * invDenom15);
 }
 
+/**
+ * [KO] LUT 베이킹 시 특이점 방지를 위해 비등방성 계수 상한(0.80)을 제한한 안정화 미 위상 함수입니다.
+ * [EN] Stabilized Mie phase function with anisotropy capped at 0.80 to prevent singularities during LUT baking.
+ */
 fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
     return phaseMie(cosTheta, min(g, 0.80));
 }
 
+/**
+ * [KO] 일출/일몰 시 대기 굴절에 의해 태양 디스크가 수직으로 압축되는 코사인 각도를 보정합니다.
+ * [EN] Adjusts the view-sun cosine angle for vertical sun disk squashing caused by atmospheric refraction near the horizon.
+ */
 fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
     let viewSunDot = dot(viewDir, sunDir);
     if (viewSunDot <= 0.0) { return viewSunDot; }
@@ -141,6 +181,10 @@ fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
     return viewSunDot - squashCorrection;
 }
 
+/**
+ * [KO] 주연 감광(Limb Darkening)이 적용된 태양 디스크의 단위 복사휘도를 계산합니다.
+ * [EN] Calculates the unit radiance of the sun disk with limb darkening applied.
+ */
 fn getSunDiskRadianceUnit(
     viewSunCos: f32,
     sunSize: f32,
@@ -163,6 +207,10 @@ fn getSunDiskRadianceUnit(
     return (radianceScale * limbDarkening * energyNormalization * sunMask) * skyTrans;
 }
 
+/**
+ * [KO] IBL 큐브맵 베이킹 시 앨리어싱 방지를 위해 가우시안 감쇠로 완화한 태양 디스크 복사휘도를 계산합니다.
+ * [EN] Calculates Gaussian-softened sun disk radiance to prevent aliasing during IBL cubemap baking.
+ */
 fn getSunDiskRadianceIBL(
     viewSunCos: f32,
     skyTrans: vec3<f32>,
@@ -180,6 +228,10 @@ fn getSunDiskRadianceIBL(
     return (radScale * falloff) * skyTrans / PI;
 }
 
+/**
+ * [KO] 태양 주변의 날카로운 전방 미 산란 광륜(Mie Glow) 보정치를 계산합니다.
+ * [EN] Calculates the sharp forward Mie scattering glow (solar aureole) around the sun.
+ */
 fn getMieGlowAmountUnit(
     viewSunCos: f32,
     viewHeight: f32, 
@@ -203,8 +255,8 @@ fn getMieGlowAmountUnit(
 }
 
 /**
- * [KO] 지정된 구간에 대해 대기 산란 적분을 수행합니다. (LUT 및 물리 파라미터 활용)
- * [EN] Performs atmospheric scattering integration over a specified segment (Using LUTs and physical parameters).
+ * [KO] 광선 구간을 따라 단일 및 다중 대기 산란 복사휘도와 투과율을 적분합니다.
+ * [EN] Integrates single and multiple atmospheric scattering radiance and transmittance along a ray segment.
  */
 fn integrateScatSegment(
     origin: vec3<f32>, dir: vec3<f32>, 
@@ -222,8 +274,6 @@ fn integrateScatSegment(
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
     
-    // [KO] 위상 함수 계산 (레일리/미 산란 특성 반영)
-    // [EN] Calculate Phase Functions (Reflecting Rayleigh/Mie scattering characteristics)
     let phaseR = phaseRayleigh(viewSunCos);
     let phaseM = phaseMieStable(viewSunCos, params.mieAnisotropy);
     let rayleighScatLuminous = params.rayleighScattering * params.skyLuminanceFactor;
@@ -247,8 +297,6 @@ fn integrateScatSegment(
             let up = p * invPLen;
             let cosSun = dot(up, sunDir);
             
-            // [KO] 미리 계산된 투과율 LUT 샘플링
-            // [EN] Sample precomputed transmittance LUT
             let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
 
             let scatR_luminous = rayleighScatLuminous * d.rhoR;
@@ -258,9 +306,6 @@ fn integrateScatSegment(
             
             let scatTotal_luminous = scatR_luminous + scatM_luminous;
             let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight * invAtmosphereHeight, 0.001, 0.999));
-            
-            // [KO] 다중 산란 기여분 합산 (하드웨어 선형 샘플링 필수)
-            // [EN] Add multi-scattering contribution (Hardware linear sampling mandatory)
             let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * params.multiScatteringFactor;
 
             *radiance += *transmittance * (stepScat + msScat) * stepSize;
@@ -271,6 +316,10 @@ fn integrateScatSegment(
     }
 }
 
+/**
+ * [KO] 큐브맵 면(Face) 인덱스와 정규화 UV 좌표를 3D 방향 벡터로 변환합니다.
+ * [EN] Converts a cubemap face index and normalized UV coordinates into a 3D direction vector.
+ */
 fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
     let tex = uv * 2.0 - 1.0;
     var dir: vec3<f32>;
@@ -286,6 +335,10 @@ fn getCubeMapDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
     return dir;
 }
 
+/**
+ * [KO] 태양 직접광 투과율과 다중 산란 에너지를 기반으로 지표면 난반사 복사휘도를 평가합니다.
+ * [EN] Evaluates ground diffuse radiance based on direct sun transmittance and multi-scattering energy.
+ */
 fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>, groundAlbedo: vec3<f32>) -> vec3<f32> {
     let sunShadow = smoothstep(-0.01, 0.01, cosSun);
     if (sunShadow > 0.0) {
@@ -294,6 +347,10 @@ fn evaluateGroundRadiance(cosSun: f32, sunTrans: vec3<f32>, msEnergy: vec3<f32>,
     return msEnergy * groundAlbedo;
 }
 
+/**
+ * [KO] IBL 큐브맵 베이킹을 위해 주어진 시선 방향의 하늘 산란광, 미 산란 광륜 및 태양 디스크 복사휘도를 평가합니다.
+ * [EN] Evaluates sky scattering, Mie glow, and optional sun disk radiance along a view direction for IBL cubemap baking.
+ */
 fn evaluateIBLRadiance(
     viewDir: vec3<f32>, 
     params: SkyAtmosphere, 
@@ -324,13 +381,20 @@ fn evaluateIBLRadiance(
     return radiance;
 }
 
-// [KO] 정수 비트 조작 기반 고속 해시 (sin 초월함수 100% 제거) [EN] Fast integer bit-manipulation hash (100% sin SFU elimination)
+/**
+ * [KO] 정수 비트 연산 기반의 2D 의사 난수 해시 함수입니다.
+ * [EN] 2D pseudo-random hash function based on integer bit manipulation.
+ */
 fn cloud_hash_u(p: vec2<u32>) -> f32 {
     var q = p * vec2<u32>(1597334673u, 3812015801u);
     let n = (q.x ^ q.y) * 1597334673u;
     return f32(n) * (1.0 / 4294967296.0);
 }
 
+/**
+ * [KO] Hermite 보간을 사용하는 2D 값 노이즈(Value Noise) 함수입니다.
+ * [EN] 2D value noise function using Hermite interpolation.
+ */
 fn cloud_noise(p: vec2<f32>) -> f32 {
     let i = floor(p);
     let f = fract(p);
@@ -340,6 +404,10 @@ fn cloud_noise(p: vec2<f32>) -> f32 {
                mix(cloud_hash_u(ui + vec2<u32>(0u, 1u)), cloud_hash_u(ui + vec2<u32>(1u, 1u)), u.x), u.y);
 }
 
+/**
+ * [KO] 5옥타브 프랙탈 브라운 운동(fBm) 기반 구름 밀도 노이즈를 생성합니다.
+ * [EN] Generates 5-octave Fractal Brownian Motion (fBm) cloud density noise.
+ */
 fn cloud_fbm(p: vec2<f32>) -> f32 {
     var v = 0.0;
     var a = 0.5;
@@ -353,11 +421,13 @@ fn cloud_fbm(p: vec2<f32>) -> f32 {
     return v;
 }
 
+/**
+ * [KO] 도메인 워핑(Domain Warping)이 적용된 구름 샘플링 UV 좌표를 계산합니다.
+ * [EN] Calculates domain-warped UV coordinates for cloud sampling.
+ */
 fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
     let baseUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
     let scaledUV = baseUV * 1.2;
-    // [KO] 도메인 워핑: UV를 노이즈로 살짝 비틀어 유기적인 형태 생성
-    // [EN] Domain Warping: Distort UVs with noise to create organic shapes
     let warp = vec2<f32>(
         cloud_noise(scaledUV + vec2<f32>(params.cloudTime * 0.01)),
         cloud_noise(scaledUV + vec2<f32>(5.7, 1.3) + vec2<f32>(params.cloudTime * 0.012))
@@ -365,15 +435,23 @@ fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
     return baseUV + warp * 0.2;
 }
 
+/**
+ * [KO] 구름 커버리지와 밀도 파라미터를 적용하여 최종 구름 불투명도 마스크를 반환합니다.
+ * [EN] Applies cloud coverage and density parameters to return the final cloud opacity mask.
+ */
 fn getCloudDensity(density: f32, params: SkyAtmosphere) -> f32 {
     let coverage = params.cloudCoverage;
     let softness = (1.0 - params.cloudDensity) * 0.5 + 0.01;
     return smoothstep(1.0 - coverage, 1.0 - coverage + softness, density);
 }
 
+/**
+ * [KO] 인접 구름 밀도 차분을 이용해 구름 표면의 의사 법선(Pseudo-Normal) 벡터를 계산합니다.
+ * [EN] Computes a pseudo-normal vector of the cloud surface using finite differences of cloud density.
+ */
 fn getCloudNormal(warpedUV: vec2<f32>, density: f32) -> vec3<f32> {
     const EPS: f32 = 0.2;
-    const INV_EPS: f32 = 5.0; // 1.0 / 0.2
+    const INV_EPS: f32 = 5.0;
     let dIdx = (cloud_fbm(warpedUV + vec2<f32>(EPS, 0.0)) - density) * INV_EPS;
     let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, EPS)) - density) * INV_EPS;
     let n = vec3<f32>(-dIdx, 2.0, -dIdy);

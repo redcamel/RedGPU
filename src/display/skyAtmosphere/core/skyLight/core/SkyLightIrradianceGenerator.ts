@@ -11,7 +11,7 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 
 
 /**
- * [KO] 대기 산란 데이터를 기반으로 간접 디퓨즈 조명(Irradiance)용 큐브맵을 베이킹하는 생성기입니다.
+ * [KO] 대기 산란 데이터를 기반으로 간접 난반사 조명(Irradiance)용 큐브맵을 베이킹하는 생성기입니다.
  * [EN] Generator that bakes a cubemap for indirect diffuse lighting (Irradiance) based on atmospheric scattering data.
  *
  * ::: warning
@@ -48,7 +48,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 생성된 간접 디퓨즈 조명용 Irradiance LUT 큐브 텍스처를 반환합니다.
+     * [KO] 생성된 간접 난반사 조명용 Irradiance LUT 큐브 텍스처를 반환합니다.
      * [EN] Returns the generated Irradiance LUT cube texture for indirect diffuse lighting.
      *
      * @returns
@@ -60,7 +60,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 대기 LUT 텍스처들을 입력받아 디퓨즈 조명용 Irradiance 큐브맵을 렌더링합니다.
+     * [KO] 대기 LUT 텍스처들을 입력받아 난반사 조명용 Irradiance 큐브맵을 렌더링합니다.
      * [EN] Renders the diffuse lighting Irradiance cubemap using atmospheric LUT textures as input.
      *
      * @param transmittance -

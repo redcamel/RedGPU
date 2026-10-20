@@ -10,7 +10,7 @@ import View3D from "../../../../view/View3D";
 
 
 /**
- * [KO] 카메라와 물체 사이의 거리에 따른 대기 산란 및 투과율 감쇠를 저장하는 Aerial Perspective 3D LUT 생성기입니다.
+ * [KO] 카메라와 물체 사이의 거리에 따른 대기 산란 및 투과율 감쇠를 저장하는 대기 원근(Aerial Perspective) 3D LUT 생성기입니다.
  * [EN] Generator for the Aerial Perspective 3D LUT that stores atmospheric scattering and transmittance attenuation by distance from the camera.
  *
  * ::: warning
@@ -46,7 +46,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 생성된 Aerial Perspective 3D LUT 텍스처를 반환합니다.
+     * [KO] 생성된 대기 원근(Aerial Perspective) 3D LUT 텍스처를 반환합니다.
      * [EN] Returns the generated Aerial Perspective 3D LUT texture.
      *
      * @returns
@@ -58,7 +58,7 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     /**
-     * [KO] 현재 뷰와 투과율 및 다중 산란 LUT를 기반으로 Aerial Perspective LUT를 계산합니다.
+     * [KO] 현재 뷰와 투과율 및 다중 산란 LUT를 기반으로 대기 원근(Aerial Perspective) LUT를 계산합니다.
      * [EN] Computes the Aerial Perspective LUT based on the current view, transmittance LUT, and multi-scattering LUT.
      *
      * @param view -

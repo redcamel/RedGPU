@@ -2,8 +2,8 @@ import WGSLParser from '../../../resources/wgslParser/WGSLParser';
 import skyAtmosphereFn from './skyAtmosphereFn.wgsl';
 
 /**
- * [KO] SkyAtmosphere 및 대기 산란 참조 셰이더에서 사용하는 WGSL 유틸리티 함수 라이브러리입니다.
- * [EN] WGSL utility function library used in SkyAtmosphere and atmospheric scattering shaders.
+ * [KO] SkyAtmosphere 및 대기 산란 셰이더에서 공용으로 사용하는 WGSL 함수 라이브러리입니다.
+ * [EN] Shared WGSL function library used in SkyAtmosphere and atmospheric scattering shaders.
  *
  * @category SkyAtmosphere
  */
