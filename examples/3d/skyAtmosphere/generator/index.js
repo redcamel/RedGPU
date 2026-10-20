@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17833266
  * [KO] SkyAtmosphere Generator (LUT) 예제
  * [EN] SkyAtmosphere Generator (LUT) example
  *
- * [KO] SkyAtmosphere 시스템 내부에서 실시간으로 생성되는 다양한 LUT(Look-Up Table) 텍스처들을 시각화합니다.
- * [EN] Visualizes various LUT (Look-Up Table) textures generated in real-time within the SkyAtmosphere system.
+ * [KO] SkyAtmosphere 시스템 내부에서 실시간으로 생성되는 다양한 LUT(Look-Up Table) 텍스처들과 간접 조명(Reflection/Irradiance LUT) 결과를 시각화합니다.
+ * [EN] Visualizes various LUT (Look-Up Table) textures and indirect lighting (Reflection/Irradiance LUT) results generated in real-time within the SkyAtmosphere system.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,23 +15,24 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
-        controller.distance = 35; // 전체 레이아웃을 보기 위해 거리 확대
+        controller.distance = 35;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // 2. SkyAtmosphere 초기화 및 설정
+        // [KO] 태양 광원(DirectionalLight) 및 SkyAtmosphere 초기화
+        // [EN] Initialize sun light source (DirectionalLight) and SkyAtmosphere
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        directionalLight.elevation = 35;
+        directionalLight.azimuth = 0;
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
-        /**
-         * [KO] LUT 텍스처를 시각화하기 위한 스프라이트와 레이블을 생성합니다.
-         * [EN] Creates a sprite and label to visualize a LUT texture.
-         */
         const createLUTSprite = (texture, name, x, y) => {
             if (!texture) return;
 
@@ -40,12 +41,12 @@ RedGPU.init(
 
             const sprite = new RedGPU.Display.Sprite3D(redGPUContext, material);
             sprite.setPosition(x, y, 0);
-            sprite.worldSize = 2; // 크기 약간 확대
+            sprite.worldSize = 2;
             scene.addChild(sprite);
 
             const label = new RedGPU.Display.TextField3D(redGPUContext);
             label.text = name;
-            label.setPosition(x, y - 3, 0); // 스프라이트 아래 배치
+            label.setPosition(x, y - 3, 0);
             label.fontSize = 32;
             label.color = '#fff';
             scene.addChild(label);
@@ -53,15 +54,14 @@ RedGPU.init(
             return sprite;
         };
 
-        // 3. 주요 2D LUT 시각화 (상단 배치 - 겹치지 않도록 넓은 간격 유지)
+        // [KO] 주요 2D LUT 시각화 및 Reflection/Irradiance LUT 검증 구체 배치
+        // [EN] Visualize primary 2D LUTs and place verification spheres for Reflection/Irradiance LUTs
         createLUTSprite(skyAtmosphere.transmittanceLUT, 'Transmittance LUT', -9, 9);
         createLUTSprite(skyAtmosphere.multiScatLUT, 'Multi-Scat LUT', 0, 9);
         createLUTSprite(skyAtmosphere.skyViewLUT, 'Sky-View LUT', 9, 9);
 
-        // 4. 라이팅 및 IBL 검증을 위한 구체 배치 (중단 배치)
         const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 4, 32, 32);
 
-        // [KO] 왼쪽: 완전 금속 구체 (Reflection LUT 검증용)
         const metallicMat = new RedGPU.Material.PBRMaterial(redGPUContext);
         metallicMat.metallicFactor = 1.0;
         metallicMat.roughnessFactor = 0.05;
@@ -77,7 +77,6 @@ RedGPU.init(
         metallicLabel.color = '#00ccff';
         scene.addChild(metallicLabel);
 
-        // [KO] 오른쪽: 완전 디퓨즈 구체 (Irradiance LUT 검증용)
         const diffuseMat = new RedGPU.Material.PBRMaterial(redGPUContext);
         diffuseMat.metallicFactor = 0.0;
         diffuseMat.roughnessFactor = 1.0;
@@ -93,38 +92,125 @@ RedGPU.init(
         diffuseLabel.color = '#00ccff';
         scene.addChild(diffuseLabel);
 
-        // 하단 안내 텍스트 (하단으로 더 배치)
         const infoLabel = new RedGPU.Display.TextField3D(redGPUContext);
         infoLabel.text = 'Note: Aerial Perspective LUT is a 3D Volume texture utilized in the background.';
         infoLabel.setPosition(0, -15, 0);
         infoLabel.fontSize = 20;
-        infoLabel.worldSize =1;
+        infoLabel.worldSize = 1;
         infoLabel.color = '#999';
         scene.addChild(infoLabel);
 
-        // 5. 렌더링 시작
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
 
-        // 6. 테스트 GUI 설정
-        renderTestPane(view, skyAtmosphere);
+        renderTestPane(view, skyAtmosphere, directionalLight);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
-        const errorMessage = document.createElement("div");
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 테스트용 GUI를 렌더링하고 SkyAtmosphere 속성을 제어합니다.
- * [EN] Renders the GUI for testing and controls SkyAtmosphere properties.
- */
-const renderTestPane = (targetView, skyAtmosphere) => {
+const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
         gui: (pane) => {
+            const state = {
+                skyLuminanceFactor: {
+                    r: skyAtmosphere.skyLuminanceFactor.r,
+                    g: skyAtmosphere.skyLuminanceFactor.g,
+                    b: skyAtmosphere.skyLuminanceFactor.b
+                },
+                rayleighScattering: {
+                    r: skyAtmosphere.rayleighScattering.r,
+                    g: skyAtmosphere.rayleighScattering.g,
+                    b: skyAtmosphere.rayleighScattering.b
+                },
+                mieScattering: {
+                    r: skyAtmosphere.mieScattering.r,
+                    g: skyAtmosphere.mieScattering.g,
+                    b: skyAtmosphere.mieScattering.b
+                },
+                mieAbsorption: {
+                    r: skyAtmosphere.mieAbsorption.r,
+                    g: skyAtmosphere.mieAbsorption.g,
+                    b: skyAtmosphere.mieAbsorption.b
+                },
+                absorptionCoefficient: {
+                    r: skyAtmosphere.absorptionCoefficient.r,
+                    g: skyAtmosphere.absorptionCoefficient.g,
+                    b: skyAtmosphere.absorptionCoefficient.b
+                },
+                groundAlbedo: {
+                    r: skyAtmosphere.groundAlbedo.r,
+                    g: skyAtmosphere.groundAlbedo.g,
+                    b: skyAtmosphere.groundAlbedo.b
+                }
+            };
 
+            const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: true});
+            f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001});
+            f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001});
+            f_sun.addBinding(sunSource, 'lux', {min: 0, max: 200000, step: 100});
+            f_sun.addBinding(sunSource, 'intensityMultiplier', {min: 0, max: 10, step: 0.1});
+
+            const f_atmo = pane.addFolder({title: 'SkyAtmosphere', expanded: true});
+            f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
+            f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
+            f_atmo.addBinding(skyAtmosphere, 'multiScatteringFactor', {min: 0, max: 10, step: 0.01});
+            f_atmo.addBinding(state, 'skyLuminanceFactor', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.skyLuminanceFactor.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+
+            const f_clouds = f_atmo.addFolder({title: 'Clouds', expanded: false});
+            f_clouds.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
+            f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
+
+            const f_scattering = f_atmo.addFolder({title: 'Scattering & Planet', expanded: true});
+
+            const f_rayleigh = f_scattering.addFolder({title: 'Rayleigh', expanded: true});
+            f_rayleigh.addBinding(state, 'rayleighScattering', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.rayleighScattering.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighScatteringScale', {min: 0, max: 0.2, step: 0.0001});
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
+
+            const f_mie = f_scattering.addFolder({title: 'Mie', expanded: true});
+            f_mie.addBinding(state, 'mieScattering', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.mieScattering.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_mie.addBinding(skyAtmosphere, 'mieScatteringScale', {min: 0, max: 0.1, step: 0.0001});
+            f_mie.addBinding(state, 'mieAbsorption', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.mieAbsorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_mie.addBinding(skyAtmosphere, 'mieAbsorptionScale', {min: 0, max: 0.1, step: 0.0001});
+            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001});
+            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
+
+            const f_ozone = f_scattering.addFolder({title: 'Ozone', expanded: false});
+            f_ozone.addBinding(state, 'absorptionCoefficient', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.absorptionCoefficient.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
+            f_ozone.addBinding(skyAtmosphere, 'absorptionScale', {min: 0, max: 0.1, step: 0.0001});
+            f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1});
+            f_ozone.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.1});
+
+            const f_planet = f_scattering.addFolder({title: 'Planet', expanded: false});
+            f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1});
+            f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
+            f_planet.addBinding(state, 'groundAlbedo', {view: 'color'}).on('change', (ev) => {
+                const {r, g, b} = ev.value;
+                skyAtmosphere.groundAlbedo.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+            });
         }
     });
 };

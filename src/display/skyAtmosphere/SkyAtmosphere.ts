@@ -1,5 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
+import ColorRGB from "../../color/ColorRGB";
 import validateNumberRange from "../../runtimeChecker/validateFunc/validateNumberRange";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import TransmittanceGenerator from "./core/generator/transmittance/TransmittanceGenerator";
@@ -103,6 +104,34 @@ class SkyAtmosphere extends RedGPUObject {
 
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
+
+    #rayleighScatteringScale: number = 0.0331;
+    #rayleighScattering: ColorRGB = new ColorRGB(45, 104, 255, () => {
+        this.#updateVec3FromColorAndScale('rayleighScattering', this.#rayleighScattering, this.#rayleighScatteringScale);
+    });
+
+    #mieScatteringScale: number = 0.003996;
+    #mieScattering: ColorRGB = new ColorRGB(255, 255, 255, () => {
+        this.#updateVec3FromColorAndScale('mieScattering', this.#mieScattering, this.#mieScatteringScale);
+    });
+
+    #mieAbsorptionScale: number = 0.000444;
+    #mieAbsorption: ColorRGB = new ColorRGB(255, 255, 255, () => {
+        this.#updateVec3FromColorAndScale('mieAbsorption', this.#mieAbsorption, this.#mieAbsorptionScale);
+    });
+
+    #absorptionScale: number = 0.001881;
+    #absorptionCoefficient: ColorRGB = new ColorRGB(88, 255, 12, () => {
+        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorptionCoefficient, this.#absorptionScale);
+    });
+
+    #groundAlbedo: ColorRGB = new ColorRGB(102, 102, 102, () => {
+        this.#updateVec3FromColorAndScale('groundAlbedo', this.#groundAlbedo, 1.0);
+    });
+
+    #skyLuminanceFactor: ColorRGB = new ColorRGB(255, 255, 255, () => {
+        this.#updateVec3FromColorAndScale('skyLuminanceFactor', this.#skyLuminanceFactor, 1.0);
+    });
 
     /**
      * [KO] SkyAtmosphere 인스턴스를 생성합니다.
@@ -290,51 +319,93 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 미 산란(Mie Scattering) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.003996, 0.003996, 0.003996]`)
-     * [EN] Gets or sets the Mie scattering RGB coefficients. (Default: `[0.003996, 0.003996, 0.003996]`)
+     * [KO] 미 산란(Mie Scattering)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
+     * [EN] Returns the Mie scattering RGB color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
      *
      * @returns
-     * [KO] RGB 미 산란 계수 튜플 (`[number, number, number]`)
-     * [EN] RGB Mie scattering coefficient tuple (`[number, number, number]`)
+     * [KO] 미 산란 `ColorRGB` 인스턴스
+     * [EN] Mie scattering `ColorRGB` instance
      */
-    get mieScattering(): [number, number, number] {
-        return [this.#params.mieScattering[0], this.#params.mieScattering[1], this.#params.mieScattering[2]];
-    }
-
-    set mieScattering(v: [number, number, number]) {
-        this.#setVec3Param('mieScattering', v, true, false, true);
+    get mieScattering(): ColorRGB {
+        return this.#mieScattering;
     }
 
     /**
-     * [KO] 미 흡수(Mie Absorption) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.000444, 0.000444, 0.000444]`)
-     * [EN] Gets or sets the Mie absorption RGB coefficients. (Default: `[0.000444, 0.000444, 0.000444]`)
+     * [KO] 미 산란(Mie Scattering) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.003996)
+     * [EN] Gets or sets the Mie scattering coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.003996)
      *
      * @returns
-     * [KO] RGB 미 흡수 계수 튜플 (`[number, number, number]`)
-     * [EN] RGB Mie absorption coefficient tuple (`[number, number, number]`)
+     * [KO] 미 산란 계수 배율 (km⁻¹)
+     * [EN] Mie scattering coefficient scale (km⁻¹)
      */
-    get mieAbsorption(): [number, number, number] {
-        return [this.#params.mieAbsorption[0], this.#params.mieAbsorption[1], this.#params.mieAbsorption[2]];
+    get mieScatteringScale(): number {
+        return this.#mieScatteringScale;
     }
 
-    set mieAbsorption(v: [number, number, number]) {
-        this.#setVec3Param('mieAbsorption', v, true, false, true);
+    set mieScatteringScale(v: number) {
+        validatePositiveNumberRange(v, 0);
+        this.#mieScatteringScale = v;
+        this.#updateVec3FromColorAndScale('mieScattering', this.#mieScattering, v);
     }
 
     /**
-     * [KO] 레일리 산란(Rayleigh Scattering) RGB 계수를 가져오거나 설정합니다. (기본값: `[0.005802, 0.013558, 0.033100]`)
-     * [EN] Gets or sets the Rayleigh scattering RGB coefficients. (Default: `[0.005802, 0.013558, 0.033100]`)
+     * [KO] 미 흡수(Mie Absorption)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
+     * [EN] Returns the Mie absorption RGB color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
      *
      * @returns
-     * [KO] RGB 레일리 산란 계수 튜플 (`[number, number, number]`)
-     * [EN] RGB Rayleigh scattering coefficient tuple (`[number, number, number]`)
+     * [KO] 미 흡수 `ColorRGB` 인스턴스
+     * [EN] Mie absorption `ColorRGB` instance
      */
-    get rayleighScattering(): [number, number, number] {
-        return [this.#params.rayleighScattering[0], this.#params.rayleighScattering[1], this.#params.rayleighScattering[2]];
+    get mieAbsorption(): ColorRGB {
+        return this.#mieAbsorption;
     }
 
-    set rayleighScattering(v: [number, number, number]) {
-        this.#setVec3Param('rayleighScattering', v, true, false, true);
+    /**
+     * [KO] 미 흡수(Mie Absorption) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.000444)
+     * [EN] Gets or sets the Mie absorption coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.000444)
+     *
+     * @returns
+     * [KO] 미 흡수 계수 배율 (km⁻¹)
+     * [EN] Mie absorption coefficient scale (km⁻¹)
+     */
+    get mieAbsorptionScale(): number {
+        return this.#mieAbsorptionScale;
+    }
+
+    set mieAbsorptionScale(v: number) {
+        validatePositiveNumberRange(v, 0);
+        this.#mieAbsorptionScale = v;
+        this.#updateVec3FromColorAndScale('mieAbsorption', this.#mieAbsorption, v);
+    }
+
+    /**
+     * [KO] 레일리 산란(Rayleigh Scattering)의 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(45, 104, 255)`)
+     * [EN] Returns the Rayleigh scattering RGB color (`ColorRGB`) object. (Default: `ColorRGB(45, 104, 255)`)
+     *
+     * @returns
+     * [KO] 레일리 산란 `ColorRGB` 인스턴스
+     * [EN] Rayleigh scattering `ColorRGB` instance
+     */
+    get rayleighScattering(): ColorRGB {
+        return this.#rayleighScattering;
+    }
+
+    /**
+     * [KO] 레일리 산란(Rayleigh Scattering) 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.0331)
+     * [EN] Gets or sets the Rayleigh scattering coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.0331)
+     *
+     * @returns
+     * [KO] 레일리 산란 계수 배율 (km⁻¹)
+     * [EN] Rayleigh scattering coefficient scale (km⁻¹)
+     */
+    get rayleighScatteringScale(): number {
+        return this.#rayleighScatteringScale;
+    }
+
+    set rayleighScatteringScale(v: number) {
+        validatePositiveNumberRange(v, 0);
+        this.#rayleighScatteringScale = v;
+        this.#updateVec3FromColorAndScale('rayleighScattering', this.#rayleighScattering, v);
     }
 
     /**
@@ -386,35 +457,45 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 지표면의 RGB 반사율(Albedo)을 가져오거나 설정합니다. (기본값: `[0.4, 0.4, 0.4]`)
-     * [EN] Gets or sets the ground RGB albedo. (Default: `[0.4, 0.4, 0.4]`)
+     * [KO] 지표면의 반사율(Albedo) RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(102, 102, 102)`)
+     * [EN] Returns the ground albedo RGB color (`ColorRGB`) object. (Default: `ColorRGB(102, 102, 102)`)
      *
      * @returns
-     * [KO] 지표면 RGB 반사율 튜플 (`[number, number, number]`)
-     * [EN] Ground RGB albedo tuple (`[number, number, number]`)
+     * [KO] 지표면 반사율 `ColorRGB` 인스턴스
+     * [EN] Ground albedo `ColorRGB` instance
      */
-    get groundAlbedo(): [number, number, number] {
-        return [this.#params.groundAlbedo[0], this.#params.groundAlbedo[1], this.#params.groundAlbedo[2]];
-    }
-
-    set groundAlbedo(v: [number, number, number]) {
-        this.#setVec3Param('groundAlbedo', v, true, false, true);
+    get groundAlbedo(): ColorRGB {
+        return this.#groundAlbedo;
     }
 
     /**
-     * [KO] 오존층의 빛 흡수 RGB 계수를 가져오거나 설정합니다. (기본값: `[0.000650, 0.001881, 0.000085]`)
-     * [EN] Gets or sets the Ozone layer RGB absorption coefficients. (Default: `[0.000650, 0.001881, 0.000085]`)
+     * [KO] 오존층의 빛 흡수 RGB 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(88, 255, 12)`)
+     * [EN] Returns the Ozone layer light absorption RGB color (`ColorRGB`) object. (Default: `ColorRGB(88, 255, 12)`)
      *
      * @returns
-     * [KO] 오존 흡수 RGB 계수 튜플 (`[number, number, number]`)
-     * [EN] Ozone RGB absorption coefficient tuple (`[number, number, number]`)
+     * [KO] 오존 흡수 `ColorRGB` 인스턴스
+     * [EN] Ozone absorption `ColorRGB` instance
      */
-    get absorptionCoefficient(): [number, number, number] {
-        return [this.#params.absorptionCoefficient[0], this.#params.absorptionCoefficient[1], this.#params.absorptionCoefficient[2]];
+    get absorptionCoefficient(): ColorRGB {
+        return this.#absorptionCoefficient;
     }
 
-    set absorptionCoefficient(v: [number, number, number]) {
-        this.#setVec3Param('absorptionCoefficient', v, true, false, true);
+    /**
+     * [KO] 오존층의 빛 흡수 계수 배율(단위: km⁻¹, 0 이상)을 가져오거나 설정합니다. (기본값: 0.001881)
+     * [EN] Gets or sets the Ozone layer absorption coefficient scale (unit: km⁻¹, 0 or greater). (Default: 0.001881)
+     *
+     * @returns
+     * [KO] 오존 흡수 계수 배율 (km⁻¹)
+     * [EN] Ozone absorption coefficient scale (km⁻¹)
+     */
+    get absorptionScale(): number {
+        return this.#absorptionScale;
+    }
+
+    set absorptionScale(v: number) {
+        validatePositiveNumberRange(v, 0);
+        this.#absorptionScale = v;
+        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorptionCoefficient, v);
     }
 
     /**
@@ -498,19 +579,15 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 하늘 전체의 RGB 휘도 배율을 가져오거나 설정합니다. (기본값: `[1.0, 1.0, 1.0]`)
-     * [EN] Gets or sets the overall sky RGB luminance factor. (Default: `[1.0, 1.0, 1.0]`)
+     * [KO] 하늘 전체의 RGB 휘도 배율 색상(`ColorRGB`) 객체를 반환합니다. (기본값: `ColorRGB(255, 255, 255)`)
+     * [EN] Returns the overall sky RGB luminance factor color (`ColorRGB`) object. (Default: `ColorRGB(255, 255, 255)`)
      *
      * @returns
-     * [KO] 하늘 RGB 휘도 배율 튜플 (`[number, number, number]`)
-     * [EN] Sky RGB luminance factor tuple (`[number, number, number]`)
+     * [KO] 하늘 휘도 배율 `ColorRGB` 인스턴스
+     * [EN] Sky luminance factor `ColorRGB` instance
      */
-    get skyLuminanceFactor(): [number, number, number] {
-        return [this.#params.skyLuminanceFactor[0], this.#params.skyLuminanceFactor[1], this.#params.skyLuminanceFactor[2]];
-    }
-
-    set skyLuminanceFactor(v: [number, number, number]) {
-        this.#setVec3Param('skyLuminanceFactor', v, true, false, true);
+    get skyLuminanceFactor(): ColorRGB {
+        return this.#skyLuminanceFactor;
     }
 
     /**
@@ -818,12 +895,17 @@ class SkyAtmosphere extends RedGPUObject {
         this.#markDirty(lut, skyView, ibl);
     }
 
-    #setVec3Param(key: string, value: [number, number, number], lut: boolean, skyView: boolean, ibl: boolean): void {
-        const target = (this.#params as any)[key];
-        target[0] = value[0];
-        target[1] = value[1];
-        target[2] = value[2];
-        this.#markDirty(lut, skyView, ibl);
+    #updateVec3FromColorAndScale(
+        key: 'rayleighScattering' | 'mieScattering' | 'mieAbsorption' | 'absorptionCoefficient' | 'groundAlbedo' | 'skyLuminanceFactor',
+        color: ColorRGB,
+        scale: number = 1.0
+    ): void {
+        const factor = scale / 255;
+        const target = this.#params[key];
+        target[0] = color.r * factor;
+        target[1] = color.g * factor;
+        target[2] = color.b * factor;
+        this.#markDirty(true, false, true);
     }
 
     #initCachedUniformMembers(uniformStruct: any): void {
