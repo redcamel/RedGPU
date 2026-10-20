@@ -1,8 +1,8 @@
-import * as RedGPU from "../../../../dist/index.js?t=1783326645983";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783326645983";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] InstancedMesh 멀티 머티리얼 GPU LOD 예제
+ * [KO] InstancedMesh Multi-Material GPU LOD 예제
  * [EN] InstancedMesh Multi-Material GPU LOD example
  *
  * [KO] 인스턴싱 메시에서 거리별로 지오메트리와 머티리얼을 동시에 변경하는 GPU 기반 LOD 기능을 시연합니다.
@@ -15,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 10;
         controller.maxTilt = 0;
@@ -23,55 +22,45 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
-        // 2. 조명 설정
-        const light = new RedGPU.Light.DirectionalLight();
-        scene.lightManager.addDirectionalLight(light);
+        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
-        // 3. IBL 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
-
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-        view.grid = true;
 
-        // 4. 머티리얼 LOD 테스트 생성
         createInstancedMaterialLODTest(redGPUContext, scene);
 
-        // 5. 렌더링 시작
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        renderer.start(redGPUContext, (time) => {
+        });
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
-        const errorMessage = document.createElement("div");
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 머티리얼 변경을 포함한 인스턴싱 LOD 테스트를 생성합니다.
- * [EN] Creates instancing LOD test including material switching.
- */
 const createInstancedMaterialLODTest = (redGPUContext, scene) => {
     const maxInstanceCount = 20000;
     const instanceCount = redGPUContext.detector.isMobile ? 5000 : 20000;
     const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Suzanne/glTF/Suzanne.gltf';
 
-    // GLTF 모델 로드 후 LOD 설정
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const baseMesh = result.resultMesh.children[0];
-
-        // 각 LOD 단계별 머티리얼 생성
         const materialLOD0 = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
         const materialLOD1 = new RedGPU.Material.PhongMaterial(redGPUContext, '#00ff00');
         const materialLOD2 = new RedGPU.Material.PhongMaterial(redGPUContext, '#0000ff');
 
+        // [KO] GLTF 지오메트리 기반 InstancingMesh 생성 및 거리별 지오메트리·머티리얼 LOD(500, 750, 1000) 등록
+        // [EN] Create GLTF-based InstancingMesh and register distance-based geometry and material LOD levels (500, 750, 1000)
         const instancingMesh = new RedGPU.Display.InstancingMesh(
             redGPUContext,
             maxInstanceCount,
@@ -79,12 +68,11 @@ const createInstancedMaterialLODTest = (redGPUContext, scene) => {
             baseMesh.geometry,
             baseMesh.material
         );
+        instancingMesh.LODManager.addLOD(500, baseMesh.geometry, materialLOD0);
+        instancingMesh.LODManager.addLOD(750, new RedGPU.Primitive.Box(redGPUContext), materialLOD1);
+        instancingMesh.LODManager.addLOD(1000, new RedGPU.Primitive.Ground(redGPUContext), materialLOD2);
         scene.addChild(instancingMesh);
 
-        /**
-         * [KO] 인스턴스들의 초기 배치를 설정합니다.
-         * [EN] Sets the initial layout of instances.
-         */
         const initializeInstances = () => {
             const radius = 1000;
             for (let i = 0; i < instancingMesh.instanceCount; i++) {
@@ -102,90 +90,66 @@ const createInstancedMaterialLODTest = (redGPUContext, scene) => {
             }
         };
 
-        // 초기화 및 LOD 단계 추가
-        instancingMesh.LODManager.addLOD(500, baseMesh.geometry, materialLOD0);
-        instancingMesh.LODManager.addLOD(750, new RedGPU.Primitive.Box(redGPUContext), materialLOD1);
-        instancingMesh.LODManager.addLOD(1000, new RedGPU.Primitive.Ground(redGPUContext), materialLOD2);
-
         initializeInstances();
 
-        // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, instancingMesh, {
             baseMesh,
             materialLOD0,
             materialLOD1,
             materialLOD2,
-            initializeInstances,
-            maxInstanceCount
+            initializeInstances
         });
     });
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링하고 멀티 머티리얼 LOD 설정을 제어합니다.
- * [EN] Renders the GUI for testing and controls multi-material LOD settings.
- */
 const renderTestPane = (redGPUContext, instancingMesh, config) => {
-    const {baseMesh, materialLOD0, materialLOD1, materialLOD2, initializeInstances, maxInstanceCount} = config;
+    const {baseMesh, materialLOD0, materialLOD1, materialLOD2, initializeInstances} = config;
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const lodFolder = pane.addFolder({title: 'Multi-Material LOD', expanded: true});
-
+            const lodFolder = pane.addFolder({title: 'LODManager (Base: GLTF Suzanne)', expanded: true});
             const lodState = {
-                lod500: true,
-                lod750: true,
-                lod1000: true,
-                get lodCount() { return instancingMesh.LODManager.LODList.length; },
-                get lodDistances() {
-                    return instancingMesh.LODManager.LODList
-                        .map(lod => lod.distance)
-                        .sort((a, b) => a - b)
-                        .join(', ');
+                lod500_RedSuzanne: true,
+                lod750_GreenBox: true,
+                lod1000_BlueGround: true,
+                get lodCount() {
+                    return instancingMesh.LODManager.LODList.length;
+                },
+                get distances() {
+                    return instancingMesh.LODManager.LODList.map((lod) => lod.distance).join(', ');
                 }
             };
 
-            const baseInfo = {baseMesh: "Suzanne (GLTF)"};
-            lodFolder.addBinding(baseInfo, "baseMesh", {label: "Base Mesh (LOD 0)", readonly: true});
-
-            // LOD 단계 토글 설정
-            const setupLODToggle = (distance, label, geometryFactory, material) => {
-                lodFolder.addBinding(lodState, `lod${distance}`, {label})
-                    .on('change', (ev) => {
-                        if (ev.value) {
-                            instancingMesh.LODManager.addLOD(distance, geometryFactory(), material);
-                        } else {
-                            instancingMesh.LODManager.removeLOD(distance);
-                        }
-                        pane.refresh();
-                    });
+            const setupLODToggle = (key, distance, geometryFactory, material) => {
+                lodFolder.addBinding(lodState, key).on('change', (ev) => {
+                    if (ev.value) {
+                        instancingMesh.LODManager.addLOD(distance, geometryFactory(), material);
+                    } else {
+                        instancingMesh.LODManager.removeLOD(distance);
+                    }
+                    pane.refresh();
+                });
             };
 
-            setupLODToggle(500, 'LOD 500 (Red Suzanne)', () => baseMesh.geometry, materialLOD0);
-            setupLODToggle(750, 'LOD 750 (Green Box)', () => new RedGPU.Primitive.Box(redGPUContext), materialLOD1);
-            setupLODToggle(1000, 'LOD 1000 (Blue Ground)', () => new RedGPU.Primitive.Ground(redGPUContext), materialLOD2);
+            setupLODToggle('lod500_RedSuzanne', 500, () => baseMesh.geometry, materialLOD0);
+            setupLODToggle('lod750_GreenBox', 750, () => new RedGPU.Primitive.Box(redGPUContext), materialLOD1);
+            setupLODToggle('lod1000_BlueGround', 1000, () => new RedGPU.Primitive.Ground(redGPUContext), materialLOD2);
+            lodFolder.addBinding(lodState, 'lodCount', {readonly: true});
+            lodFolder.addBinding(lodState, 'distances', {readonly: true});
 
-            lodFolder.addBinding(lodState, 'lodCount', {label: 'Active LOD Steps', readonly: true});
-            lodFolder.addBinding(lodState, 'lodDistances', {label: 'Distances', readonly: true});
-
-            const instancingFolder = pane.addFolder({title: 'Instancing Options', expanded: true});
+            const instancingFolder = pane.addFolder({title: 'InstancingMesh', expanded: true});
             instancingFolder.addBinding(instancingMesh, 'instanceCount', {
                 min: 100,
-                max: maxInstanceCount,
-                step: 1,
-                label: 'Instance Count'
+                max: instancingMesh.maxInstanceCount,
+                step: 1
             }).on('change', initializeInstances);
-
-            instancingFolder.addBinding({maxInstanceCount}, 'maxInstanceCount', {
+            instancingFolder.addBinding(instancingMesh, 'maxInstanceCount', {
                 readonly: true,
-                format: (v) => `${Math.floor(v).toLocaleString()}`,
-                label: 'Max Instances'
+                format: (v) => `${Math.floor(v).toLocaleString()}`
             });
-
-            instancingFolder.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
+            instancingFolder.addBinding({getLimitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'getLimitSize', {
                 readonly: true,
-                format: (v) => `${Math.floor(v).toLocaleString()}`,
-                label: 'Hardware Limit'
+                format: (v) => `${Math.floor(v).toLocaleString()}`
             });
         }
     });
