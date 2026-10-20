@@ -5,6 +5,14 @@
 let isGlobalListenerAttached = false;
 let observer = null;
 let rafId = null;
+let lastPathname = '';
+
+const INHERITED_TITLES = new Set([
+    '상속받은 속성',
+    '상속받은 메서드',
+    'inherited properties',
+    'inherited methods'
+]);
 
 // 아래를 가리키는 기본 꺾쇠 아이콘 (열린 상태)
 const CARET_SVG = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>`;
@@ -90,6 +98,11 @@ export function updateOutlineElements() {
 
     const outlineItems = outlineRoot.querySelectorAll('.VPDocOutlineItem li');
     if (!outlineItems.length) return;
+
+    // Vue의 DOM 노드 재사용(in-place patch)으로 인해 이전 페이지에서 숨겨진(display: none) li 상태를 초기화
+    outlineItems.forEach(li => {
+        li.style.display = '';
+    });
 
     // 0. Constructor 이후에 등장하는 하위 Example 항목은 목차에서 숨김 처리 (Constructor 이전의 클래스 Example만 보존)
     let pastConstructors = false;
@@ -182,6 +195,14 @@ export function updateOutlineElements() {
     });
 
     let hasAnyNested = false;
+    const currentPathname = window.location.pathname;
+    const isRouteChanged = currentPathname !== lastPathname;
+    if (isRouteChanged) {
+        lastPathname = currentPathname;
+        document.querySelectorAll('.vp-doc details').forEach(detailsEl => {
+            detailsEl.open = false;
+        });
+    }
 
     // 1. 하위 목록(ul)을 가진 항목들에 토글 버튼 추가 및 클래스 지정
     outlineItems.forEach(li => {
@@ -190,7 +211,12 @@ export function updateOutlineElements() {
         if (hasChildren) {
             hasAnyNested = true;
             li.classList.add('has-nested');
+            const link = li.querySelector(':scope > .outline-link');
+            const titleText = (link?.textContent || '').trim().toLowerCase();
+            const isInheritedSection = INHERITED_TITLES.has(titleText);
+
             let toggleBtn = li.querySelector(':scope > .outline-toggle-btn');
+            const isFirstInit = !toggleBtn;
             if (!toggleBtn) {
                 toggleBtn = document.createElement('button');
                 toggleBtn.type = 'button';
@@ -199,7 +225,18 @@ export function updateOutlineElements() {
                 toggleBtn.innerHTML = CARET_SVG;
                 li.insertBefore(toggleBtn, li.firstChild);
             }
+
+            if (isFirstInit || isRouteChanged || li.dataset.sectionTitle !== titleText) {
+                li.dataset.sectionTitle = titleText;
+                li.classList.toggle('is-collapsed', isInheritedSection);
+            }
+
             toggleBtn.setAttribute('aria-expanded', !li.classList.contains('is-collapsed'));
+        } else {
+            li.classList.remove('has-nested', 'is-collapsed');
+            delete li.dataset.sectionTitle;
+            const staleToggleBtn = li.querySelector(':scope > .outline-toggle-btn');
+            if (staleToggleBtn) staleToggleBtn.remove();
         }
     });
 
@@ -243,7 +280,10 @@ function applyAccessorBadges(outlineRoot) {
         const isPropSection = text.includes('properties') || text.includes('속성') || text.includes('accessors') ||
             href.includes('properties') || href.includes('accessors');
 
-        if (!isPropSection) return;
+        if (!isPropSection) {
+            parentLi.querySelectorAll('.accessor-badge').forEach(badge => badge.remove());
+            return;
+        }
 
         const childLinks = parentLi.querySelectorAll(':scope > ul > li > .outline-link');
         childLinks.forEach(link => {
@@ -391,6 +431,15 @@ function attachGlobalEventListener() {
                     e.preventDefault();
                     e.stopPropagation();
                     toggleListItem(parentLi, false);
+                }
+            } else {
+                const rawHref = outlineLink.getAttribute('href');
+                if (rawHref && rawHref.startsWith('#')) {
+                    const targetEl = document.getElementById(decodeURIComponent(rawHref.slice(1)));
+                    const detailsEl = targetEl?.closest('details');
+                    if (detailsEl && !detailsEl.open) {
+                        detailsEl.open = true;
+                    }
                 }
             }
         }
