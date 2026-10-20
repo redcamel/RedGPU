@@ -19,10 +19,14 @@ RedGPU.init(
         controller.y = 1;
         controller.tilt = 15;
         controller.pan = 90;
-        controller.moveSpeed = 20;
+        controller.moveSpeed = 5;
 
         const scene = new RedGPU.Display.Scene();
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr', 60000);
+
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, ibl.luminance);
         redGPUContext.addView(view);
 
         // [KO] SSAO 활성화
@@ -35,7 +39,8 @@ RedGPU.init(
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Sponza/glTF/Sponza.gltf',
             (result) => {
                 scene.addChild(result.resultMesh);
-            }
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
         );
 
         const renderer = new RedGPU.Renderer();
@@ -54,9 +59,6 @@ RedGPU.init(
 
 const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
-        RedGPU,
-        ibl: true,
-        skybox: true,
         gui: (pane) => {
             const ssaoFolder = pane.addFolder({title: 'PostEffect', expanded: true});
             const ssao = view.postEffectManager.ssao;
