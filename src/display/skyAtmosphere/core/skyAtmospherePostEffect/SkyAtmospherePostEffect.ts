@@ -15,13 +15,6 @@ import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * ### Example
- * ```typescript
- * // [KO] 올바른 접근 방법
- * // [EN] Correct access method
- * const postEffect = skyAtmosphere.postEffect;
- * ```
- *
  * @category SkyAtmosphere
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {

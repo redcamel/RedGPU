@@ -97,6 +97,7 @@ class SkyAtmosphere extends RedGPUObject {
     #dirtyLUT: boolean = true;
     #dirtySkyView: boolean = true;
     #dirtyAerialPerspective: boolean = true;
+    #dirtySkyLight: boolean = true;
     #dirtyUniformBuffer: boolean = true;
 
     #lastUpdateFrame: number = -1;
@@ -143,20 +144,13 @@ class SkyAtmosphere extends RedGPUObject {
 
 
     /**
-     * [KO] 대기 투과 포스트 이펙트 인스턴스를 반환합니다.
-     * [EN] Returns the atmospheric transmittance post-effect instance.
-     *
-     * @returns
-     * [KO] SkyAtmospherePostEffect 인스턴스
-     * [EN] SkyAtmospherePostEffect instance
-     */
-    get postEffect(): SkyAtmospherePostEffect {
-        return this.#postEffect;
-    }
-
-    /**
      * [KO] 대기 물리 시뮬레이션 파라미터 객체를 반환합니다.
      * [EN] Returns the atmospheric physical simulation parameters object.
+     *
+     * ::: warning
+     * [KO] 이 속성은 시스템 유니폼 업데이트를 위한 내부 전용입니다.<br/>반환된 객체의 내부 속성을 직접 수정하지 마십시오.
+     * [EN] This property is for internal system uniform updates only.<br/>Do not directly modify properties of the returned object.
+     * :::
      *
      * @returns
      * [KO] 시뮬레이션 파라미터 객체
@@ -591,18 +585,6 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     /**
-     * [KO] 대기 데이터를 기반으로 간접 조명(IBL)을 생성하는 SkyLight 인스턴스를 반환합니다.
-     * [EN] Returns the SkyLight instance that generates indirect lighting (IBL) based on atmospheric data.
-     *
-     * @returns
-     * [KO] SkyLight 인스턴스
-     * [EN] SkyLight instance
-     */
-    get skyLight(): SkyLight {
-        return this.#skyLight;
-    }
-
-    /**
      * [KO] 대기 LUT 샘플링에 사용되는 선형 샘플러를 반환합니다.
      * [EN] Returns the linear sampler used for atmospheric LUT sampling.
      *
@@ -731,7 +713,7 @@ class SkyAtmosphere extends RedGPUObject {
             this.#dirtySkyView = true;
             this.#dirtyAerialPerspective = true;
         }
-        if (ibl) this.#skyLight.dirty = true;
+        if (ibl) this.#dirtySkyLight = true;
     }
 
     #updateSunInfo(view: View3D): void {
@@ -811,7 +793,7 @@ class SkyAtmosphere extends RedGPUObject {
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
             this.#dirtyAerialPerspective = true;
-            this.#skyLight.dirty = true;
+            this.#dirtySkyLight = true;
         }
 
         if (this.#dirtySkyView) {
@@ -824,7 +806,10 @@ class SkyAtmosphere extends RedGPUObject {
             this.#dirtyAerialPerspective = false;
         }
 
-        this.#skyLight.update(this);
+        if (this.#dirtySkyLight) {
+            this.#skyLight.update(this);
+            this.#dirtySkyLight = false;
+        }
     }
 
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {

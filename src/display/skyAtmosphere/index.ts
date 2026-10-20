@@ -5,10 +5,9 @@
  */
 import SkyAtmosphere from "./SkyAtmosphere";
 import * as CoreSkyAtmosphere from "./core";
-import SkyAtmosphereShaderLibrary from "./core/SkyAtmosphereShaderLibrary";
+import "./core/SkyAtmosphereShaderLibrary";
 
 export {
     SkyAtmosphere,
-    CoreSkyAtmosphere,
-    SkyAtmosphereShaderLibrary
+    CoreSkyAtmosphere
 }

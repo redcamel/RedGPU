@@ -16,21 +16,9 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
- * ### Example
- * ```typescript
- * // [KO] 올바른 접근 방법
- * // [EN] Correct access method
- * const skyLight = skyAtmosphere.skyLight;
- * ```
- *
  * @category SkyAtmosphere
  */
 class SkyLight extends RedGPUObject {
-    /**
-     * [KO] IBL 데이터 갱신 필요 여부 (기본값: true)
-     * [EN] Whether IBL data needs to be updated (default: true)
-     */
-    dirty: boolean = true;
     #reflectionGenerator: SkyLightReflectionGenerator;
     #irradianceGenerator: SkyLightIrradianceGenerator;
 
@@ -87,13 +75,9 @@ class SkyLight extends RedGPUObject {
      * [EN] Source SkyAtmosphere instance
      */
     update(skyAtmosphere: SkyAtmosphere): void {
-        if (this.dirty) {
-            const {transmittanceLUT, skyViewLUT} = skyAtmosphere;
-            this.#reflectionGenerator.render(transmittanceLUT, skyViewLUT);
-            this.#irradianceGenerator.render(transmittanceLUT, skyViewLUT);
-
-            this.dirty = false;
-        }
+        const {transmittanceLUT, skyViewLUT} = skyAtmosphere;
+        this.#reflectionGenerator.render(transmittanceLUT, skyViewLUT);
+        this.#irradianceGenerator.render(transmittanceLUT, skyViewLUT);
     }
 
     /**
