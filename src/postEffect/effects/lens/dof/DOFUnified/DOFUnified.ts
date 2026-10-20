@@ -6,20 +6,16 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
 import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
-/**
- * [KO] DOFUnified의 속성 인터페이스입니다.
- * [EN] Property interface for DOFUnified.
- */
 interface DOFUnified {
     /**
-     * [KO] 근거리 블러 크기 (픽셀 단위)
-     * [EN] Near blur size in pixels
+     * [KO] 근거리 블러 크기 (단위: 픽셀)
+     * [EN] Near blur size (in pixels)
      * @defaultValue 16
      */
     nearBlurSize: number;
     /**
-     * [KO] 원거리 블러 크기 (픽셀 단위)
-     * [EN] Far blur size in pixels
+     * [KO] 원거리 블러 크기 (단위: 픽셀)
+     * [EN] Far blur size (in pixels)
      * @defaultValue 24
      */
     farBlurSize: number;
@@ -46,6 +42,7 @@ interface DOFUnified {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
  * @category Lens
  */
 class DOFUnified extends ASinglePassPostEffect {
@@ -55,8 +52,8 @@ class DOFUnified extends ASinglePassPostEffect {
      * [EN] Creates a DOFUnified instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});

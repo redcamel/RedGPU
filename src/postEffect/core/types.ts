@@ -32,6 +32,7 @@ export interface IPostEffectSourceConfig {
     /**
      * [KO] 샘플러와 함께 사용하는 샘플링 가능 타입(`texture_2d<f32>`) 여부
      * [EN] Whether to use as a sampleable texture type (`texture_2d<f32>`) with a sampler
+     * @defaultValue true
      */
     isSampled?: boolean;
 }

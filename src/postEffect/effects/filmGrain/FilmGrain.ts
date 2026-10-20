@@ -37,28 +37,33 @@ const VINTAGE = {
 
 interface FilmGrain {
     /**
-     * [KO] 그레인 입자 강도 (기본값: 0.015)
-     * [EN] Grain particle intensity (default: 0.015)
+     * [KO] 그레인 입자 강도 (0 이상)
+     * [EN] Grain particle intensity (0 or greater)
+     * @defaultValue 0.015
      */
     filmGrainIntensity: number;
     /**
-     * [KO] 명도에 따른 그레인 반응 곡선 (기본값: 1.2)
-     * [EN] Luminance-based grain response curve (default: 1.2)
+     * [KO] 명도에 따른 그레인 반응 곡선 (0 이상)
+     * [EN] Luminance-based grain response curve (0 or greater)
+     * @defaultValue 1.2
      */
     filmGrainResponse: number;
     /**
-     * [KO] 그레인 입자 크기 스케일 (기본값: 1.8)
-     * [EN] Grain particle size scale (default: 1.8)
+     * [KO] 그레인 입자 크기 스케일 (0 이상)
+     * [EN] Grain particle size scale (0 or greater)
+     * @defaultValue 1.8
      */
     filmGrainScale: number;
     /**
-     * [KO] 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러, 기본값: 0.15)
-     * [EN] Colored grain ratio (0: monochromatic, 1: full color, default: 0.15)
+     * [KO] 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러)
+     * [EN] Colored grain ratio (0: monochromatic, 1: full color)
+     * @defaultValue 0.15
      */
     coloredGrain: number;
     /**
-     * [KO] 그레인 입자 채도 강도 (기본값: 0.3)
-     * [EN] Grain particle saturation intensity (default: 0.3)
+     * [KO] 그레인 입자 채도 강도 (0 이상)
+     * [EN] Grain particle saturation intensity (0 or greater)
+     * @defaultValue 0.3
      */
     grainSaturation: number;
 }
@@ -75,6 +80,7 @@ interface FilmGrain {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/filmGrain/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [FilmGrain example](/RedGPU/examples/postEffect/filmGrain/)
  * @category Visual Effects
  */
@@ -110,8 +116,8 @@ class FilmGrain extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

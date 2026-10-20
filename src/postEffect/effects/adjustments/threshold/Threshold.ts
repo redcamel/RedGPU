@@ -27,6 +27,8 @@ interface Threshold {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/threshold/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Threshold example](/RedGPU/examples/postEffect/adjustments/threshold/)
  * @category Adjustments
  */
 class Threshold extends ASinglePassPostEffect {
@@ -35,9 +37,14 @@ class Threshold extends ASinglePassPostEffect {
      * [KO] Threshold 인스턴스를 생성합니다.
      * [EN] Creates a Threshold instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Threshold(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

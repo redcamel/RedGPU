@@ -10,16 +10,11 @@ import ColorRGBA from "../../color/ColorRGBA";
 const resourceIdMap = new WeakMap<GPUTexture, number>();
 let nextResourceId = 0;
 
-/**
- * [KO] 단일 패스 후처리 이펙트의 타입 판별 프로퍼티를 정의하는 인터페이스입니다.
- * [EN] Interface defining the type guard property for single-pass post-processing effects.
- *
- * @category PostEffect
- */
 interface ASinglePassPostEffect {
     /**
      * [KO] 후처리 이펙트 인스턴스 여부
      * [EN] Whether the instance is a post-processing effect
+     * @defaultValue true
      */
     isInstanceofPostEffect: boolean
 }
@@ -83,8 +78,8 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param options -
-     * [KO] 초기화 옵션 (컴퓨트 워크그룹 크기 `workSizeX`, `workSizeY`, `workSizeZ` 및 LDR 공간 동작 여부 `isLdr`)
-     * [EN] Initialization options (compute workgroup size `workSizeX`, `workSizeY`, `workSizeZ` and LDR space operation flag `isLdr`)
+     * [KO] 초기화 옵션 (`workSizeX`, `workSizeY`, `workSizeZ`, `isLdr`)
+     * [EN] Initialization options (`workSizeX`, `workSizeY`, `workSizeZ`, `isLdr`)
      */
     protected constructor(
         redGPUContext: RedGPUContext,
@@ -106,12 +101,13 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     }
 
     /**
-     * [KO] 이펙트가 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
+     * [KO] 톤매핑 이후 LDR(Low Dynamic Range) 공간에서 동작하는지 여부를 반환합니다.
      * [EN] Returns whether the effect operates in LDR (Low Dynamic Range) space after tone mapping.
      *
+     * @defaultValue false
      * @returns
-     * [KO] LDR 공간 동작 여부 (기본값: `false`)
-     * [EN] Whether the effect operates in LDR space (default: `false`)
+     * [KO] LDR 공간 동작 여부
+     * [EN] Whether the effect operates in LDR space
      */
     get isLdr(): boolean {
         return this.#isLdr
@@ -193,6 +189,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [KO] 컴퓨트 워크그룹 X축 크기를 반환합니다.
      * [EN] Returns the compute workgroup X-axis size.
      *
+     * @defaultValue 16
      * @returns
      * [KO] 워크그룹 X 크기
      * [EN] Workgroup X size
@@ -205,6 +202,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [KO] 컴퓨트 워크그룹 Y축 크기를 반환합니다.
      * [EN] Returns the compute workgroup Y-axis size.
      *
+     * @defaultValue 16
      * @returns
      * [KO] 워크그룹 Y 크기
      * [EN] Workgroup Y size
@@ -217,6 +215,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [KO] 컴퓨트 워크그룹 Z축 크기를 반환합니다.
      * [EN] Returns the compute workgroup Z-axis size.
      *
+     * @defaultValue 1
      * @returns
      * [KO] 워크그룹 Z 크기
      * [EN] Workgroup Z size
@@ -330,10 +329,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [KO] 대상 `View3D` 인스턴스
      * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비 (픽셀)
+     * [KO] 렌더링 너비 (단위: 픽셀)
      * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이 (픽셀)
+     * [KO] 렌더링 높이 (단위: 픽셀)
      * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
      * [KO] 입력 소스 텍스처 정보 목록

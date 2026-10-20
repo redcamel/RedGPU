@@ -74,14 +74,14 @@ const createCode = (
  * [KO] `main` 함수 내부에 삽입할 WGSL 연산 코드
  * [EN] WGSL computation code to insert inside the `main` function
  * @param uniformStruct -
- * [KO] 이펙트 전용 `Uniforms` 구조체 정의 문자열 (선택)
- * [EN] Effect-specific `Uniforms` struct definition string (optional)
+ * [KO] 이펙트 전용 `Uniforms` 구조체 정의 문자열
+ * [EN] Effect-specific `Uniforms` struct definition string
  * @param sourceTextureConfigs -
- * [KO] 입력 소스 텍스처 바인딩 설정 (기본값: `{ name: 'sourceTexture' }`)
- * [EN] Input source texture binding configuration (default: `{ name: 'sourceTexture' }`)
+ * [KO] 입력 소스 텍스처 바인딩 설정
+ * [EN] Input source texture binding configuration
  * @param earlyExit -
- * [KO] 출력 해상도 경계 밖 스레드 즉시 종료 여부 (기본값: `true`, 워크그룹 배리어 사용 시 `false`)
- * [EN] Whether to immediately terminate threads outside output resolution bounds (default: `true`, set `false` when using workgroup barriers)
+ * [KO] 출력 해상도 경계 밖 스레드 즉시 종료 여부 (워크그룹 배리어 사용 시 `false`)
+ * [EN] Whether to immediately terminate threads outside output resolution bounds (set `false` when using workgroup barriers)
  * @returns
  * [KO] MSAA 및 Non-MSAA용 WGSL 코드 객체 (`{ msaa: string, nonMsaa: string }`)
  * [EN] WGSL code object for MSAA and Non-MSAA (`{ msaa: string, nonMsaa: string }`)

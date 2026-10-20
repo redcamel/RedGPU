@@ -21,7 +21,7 @@ interface SSAO_AO {
      */
     contrast: number;
     /**
-     * [KO] 샘플링 반경 (월드 단위, 0.01 ~ 5.0)
+     * [KO] 샘플링 반경 (단위: 월드 거리, 0.01 ~ 5.0)
      * [EN] Sampling radius in world units (0.01 ~ 5.0)
      * @defaultValue 0.25
      */
@@ -33,8 +33,8 @@ interface SSAO_AO {
      */
     intensity: number;
     /**
-     * [KO] 자기 차폐 방지용 바이어스 값 (0.0 ~ 0.1)
-     * [EN] Bias value to prevent self-occlusion (0.0 ~ 0.1)
+     * [KO] 자기 차폐 방지용 깊이 바이어스 값 (0.0 ~ 0.1)
+     * [EN] Depth bias value to prevent self-occlusion (0.0 ~ 0.1)
      * @defaultValue 0.02
      */
     bias: number;
@@ -67,6 +67,7 @@ interface SSAO_AO {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
 class SSAO_AO extends ASinglePassPostEffect {
@@ -76,8 +77,8 @@ class SSAO_AO extends ASinglePassPostEffect {
      * [EN] Creates an SSAO_AO instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});

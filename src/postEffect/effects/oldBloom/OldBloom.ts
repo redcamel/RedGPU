@@ -19,6 +19,8 @@ import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/oldBloom/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [OldBloom example](/RedGPU/examples/postEffect/oldBloom/)
  * @category Visual Effects
  */
 class OldBloom extends AMultiPassPostEffect {
@@ -34,9 +36,14 @@ class OldBloom extends AMultiPassPostEffect {
      * [KO] OldBloom 인스턴스를 생성합니다.
      * [EN] Creates an OldBloom instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.OldBloom(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -58,34 +65,28 @@ class OldBloom extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 블룸 임계값을 반환합니다.
-     * [EN] Returns the bloom threshold.
+     * [KO] 밝은 영역 추출 기준 임계값(1 ~ 255)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the threshold value (1 ~ 255) for extracting bright areas.
      *
+     * @defaultValue 156
      * @returns
-     * [KO] 최소 밝기 기준값
-     * [EN] Minimum brightness threshold
+     * [KO] 밝기 임계값
+     * [EN] Brightness threshold
      */
     get threshold(): number {
         return this.#threshold;
     }
 
-    /**
-     * [KO] 블룸 임계값을 설정합니다.
-     * [EN] Sets the bloom threshold.
-     *
-     * @param value -
-     * [KO] 최소 밝기 기준값
-     * [EN] Minimum brightness threshold
-     */
     set threshold(value: number) {
         this.#threshold = value;
         this.#effect_threshold.threshold = value;
     }
 
     /**
-     * [KO] 가우시안 블러 크기를 반환합니다.
-     * [EN] Returns the Gaussian blur size.
+     * [KO] 가우시안 블러 반경 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the Gaussian blur radius size (in pixels).
      *
+     * @defaultValue 32
      * @returns
      * [KO] 블러 반경 크기
      * [EN] Blur radius size
@@ -94,23 +95,16 @@ class OldBloom extends AMultiPassPostEffect {
         return this.#gaussianBlurSize;
     }
 
-    /**
-     * [KO] 가우시안 블러 크기를 설정합니다.
-     * [EN] Sets the Gaussian blur size.
-     *
-     * @param value -
-     * [KO] 블러 반경 크기
-     * [EN] Blur radius size
-     */
     set gaussianBlurSize(value: number) {
         this.#gaussianBlurSize = value;
         this.#effect_gaussianBlur.size = Math.max(1, value * 0.5);
     }
 
     /**
-     * [KO] 노출 보정값을 반환합니다.
-     * [EN] Returns the exposure compensation value.
+     * [KO] 노출 보정값을 반환하거나 설정합니다.
+     * [EN] Returns or sets the exposure compensation value.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 노출 보정값
      * [EN] Exposure compensation value
@@ -119,23 +113,16 @@ class OldBloom extends AMultiPassPostEffect {
         return this.#exposure;
     }
 
-    /**
-     * [KO] 노출 보정값을 설정합니다.
-     * [EN] Sets the exposure compensation value.
-     *
-     * @param value -
-     * [KO] 노출 보정값
-     * [EN] Exposure compensation value
-     */
     set exposure(value: number) {
         this.#exposure = value;
         this.#effect_oldBloomBlend.exposure = value;
     }
 
     /**
-     * [KO] 블룸 강도를 반환합니다.
-     * [EN] Returns the bloom strength.
+     * [KO] 블룸 효과 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the bloom effect strength.
      *
+     * @defaultValue 1.2
      * @returns
      * [KO] 블룸 강도
      * [EN] Bloom strength
@@ -144,38 +131,30 @@ class OldBloom extends AMultiPassPostEffect {
         return this.#bloomStrength;
     }
 
-    /**
-     * [KO] 블룸 강도를 설정합니다.
-     * [EN] Sets the bloom strength.
-     *
-     * @param value -
-     * [KO] 블룸 강도
-     * [EN] Bloom strength
-     */
     set bloomStrength(value: number) {
         this.#bloomStrength = value;
         this.#effect_oldBloomBlend.bloomStrength = value;
     }
 
     /**
-     * [KO] 올드 블룸 효과를 렌더링합니다.
-     * [EN] Renders the Old Bloom effect.
+     * [KO] 올드 블룸 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass Old Bloom post-processing effect.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture info
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
      * @returns
-     * [KO] 최종 블룸 합성 결과
-     * [EN] Final bloom compositing result
+     * [KO] 블룸 합성된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Bloom composited output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;

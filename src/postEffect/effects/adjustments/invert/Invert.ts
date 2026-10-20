@@ -27,6 +27,8 @@ interface Invert {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/invert/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Invert example](/RedGPU/examples/postEffect/adjustments/invert/)
  * @category Adjustments
  */
 class Invert extends ASinglePassPostEffect {
@@ -34,9 +36,14 @@ class Invert extends ASinglePassPostEffect {
      * [KO] Invert 인스턴스를 생성합니다.
      * [EN] Creates an Invert instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Invert(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

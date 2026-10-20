@@ -15,8 +15,8 @@ interface ColorTemperatureTint {
      */
     amount: number;
     /**
-     * [KO] 색온도 값 (Kelvin, 1000 ~ 20000)
-     * [EN] Color temperature value (Kelvin, 1000 ~ 20000)
+     * [KO] 색온도 값 (단위: 캘빈, 1000 ~ 20000)
+     * [EN] Color temperature value (unit: Kelvin, 1000 ~ 20000)
      * @defaultValue 6500
      */
     temperature: number;
@@ -42,6 +42,8 @@ interface ColorTemperatureTint {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [ColorTemperatureTint example](/RedGPU/examples/postEffect/adjustments/colorTemperatureTint/)
  * @category Adjustments
  */
 class ColorTemperatureTint extends ASinglePassPostEffect {
@@ -50,9 +52,14 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
      * [KO] ColorTemperatureTint 인스턴스를 생성합니다.
      * [EN] Creates a ColorTemperatureTint instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.ColorTemperatureTint(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});
@@ -68,8 +75,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 따뜻한 색감 프리셋을 적용합니다. (3200K)
-     * [EN] Applies the Warm Tone preset. (3200K)
+     * [KO] 따뜻한 색감 프리셋(3200K, 틴트 -10)을 적용합니다.
+     * [EN] Applies the Warm Tone preset (3200K, tint -10).
      */
     setWarmTone() {
         this.temperature = 3200;
@@ -77,8 +84,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 차가운 색감 프리셋을 적용합니다. (8000K)
-     * [EN] Applies the Cool Tone preset. (8000K)
+     * [KO] 차가운 색감 프리셋(8000K, 틴트 10)을 적용합니다.
+     * [EN] Applies the Cool Tone preset (8000K, tint 10).
      */
     setCoolTone() {
         this.temperature = 8000;
@@ -86,8 +93,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 표준 주간광 프리셋을 적용합니다. (6500K)
-     * [EN] Applies the Neutral preset. (6500K)
+     * [KO] 표준 주간광 프리셋(6500K, 틴트 0)을 적용합니다.
+     * [EN] Applies the Neutral preset (6500K, tint 0).
      */
     setNeutral() {
         this.temperature = 6500;
@@ -95,8 +102,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 촛불 조명 프리셋을 적용합니다. (1900K)
-     * [EN] Applies the Candle Light preset. (1900K)
+     * [KO] 촛불 조명 프리셋(1900K, 틴트 -5)을 적용합니다.
+     * [EN] Applies the Candle Light preset (1900K, tint -5).
      */
     setCandleLight() {
         this.temperature = 1900;
@@ -104,8 +111,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 맑은 날 주간광 프리셋을 적용합니다. (5600K)
-     * [EN] Applies the Daylight preset. (5600K)
+     * [KO] 맑은 날 주간광 프리셋(5600K, 틴트 0)을 적용합니다.
+     * [EN] Applies the Daylight preset (5600K, tint 0).
      */
     setDaylight() {
         this.temperature = 5600;
@@ -113,8 +120,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 흐린 날 프리셋을 적용합니다. (7500K)
-     * [EN] Applies the Cloudy Day preset. (7500K)
+     * [KO] 흐린 날 프리셋(7500K, 틴트 5)을 적용합니다.
+     * [EN] Applies the Cloudy Day preset (7500K, tint 5).
      */
     setCloudyDay() {
         this.temperature = 7500;
@@ -122,8 +129,8 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 네온 조명 프리셋을 적용합니다. (9000K)
-     * [EN] Applies the Neon Light preset. (9000K)
+     * [KO] 네온 조명 프리셋(9000K, 틴트 15)을 적용합니다.
+     * [EN] Applies the Neon Light preset (9000K, tint 15).
      */
     setNeonLight() {
         this.temperature = 9000;

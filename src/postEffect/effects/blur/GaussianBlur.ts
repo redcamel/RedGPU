@@ -10,13 +10,12 @@ import BlurY from "./blurY/BlurY";
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.GaussianBlur(redGPUContext);
- * // [KO] 블러 강도 조절
- * // [EN] Adjust blur strength
  * effect.size = 64;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [GaussianBlur example](/RedGPU/examples/postEffect/blur/gaussianBlur/)
  * @category Blur
  */
@@ -33,8 +32,8 @@ class GaussianBlur extends AMultiPassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -48,9 +47,10 @@ class GaussianBlur extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 블러 강도(픽셀 단위 반경, 기본값: 32)를 반환하거나 설정합니다.
-     * [EN] Returns or sets the blur strength (radius in pixels, default: 32).
+     * [KO] 블러 강도(단위: 픽셀, 0 ~ 512)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the blur strength (unit: pixels, 0 ~ 512).
      *
+     * @defaultValue 32
      * @returns
      * [KO] 블러 강도
      * [EN] Blur strength

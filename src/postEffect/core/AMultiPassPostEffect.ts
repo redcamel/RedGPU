@@ -31,8 +31,8 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 순차적으로 실행할 단일 패스 이펙트 배열
      * [EN] Array of single-pass effects to execute sequentially
      * @param isLdr -
-     * [KO] 톤매핑 이후 LDR 공간 동작 여부 (기본값: `false`)
-     * [EN] Whether the effect operates in LDR space after tone mapping (default: `false`)
+     * [KO] 톤매핑 이후 LDR 공간 동작 여부
+     * [EN] Whether the effect operates in LDR space after tone mapping
      */
     protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[], isLdr: boolean = false) {
         super(redGPUContext, {isLdr});
@@ -92,10 +92,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [KO] 대상 `View3D` 인스턴스
      * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비 (픽셀)
+     * [KO] 렌더링 너비 (단위: 픽셀)
      * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이 (픽셀)
+     * [KO] 렌더링 높이 (단위: 픽셀)
      * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
      * [KO] 최초 입력 소스 텍스처 정보

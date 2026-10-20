@@ -10,23 +10,27 @@ import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 interface ZoomBlur {
     /**
-     * [KO] 블러 강도 (범위: 0 ~ 100, 기본값: 10)
-     * [EN] Blur strength (range: 0 to 100, default: 10)
+     * [KO] 블러 강도 (0 ~ 100)
+     * [EN] Blur strength (0 ~ 100)
+     * @defaultValue 10
      */
     amount: number
     /**
-     * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙, 기본값: 0)
-     * [EN] Blur center X offset (unit: pixels, 0 = screen center, default: 0)
+     * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center X offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
      */
     centerX: number
     /**
-     * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙, 기본값: 0)
-     * [EN] Blur center Y offset (unit: pixels, 0 = screen center, default: 0)
+     * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center Y offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
      */
     centerY: number
     /**
-     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 16)
-     * [EN] Number of samples (range: 1 to 100, default: 16)
+     * [KO] 샘플링 횟수 (1 ~ 100)
+     * [EN] Number of samples (1 ~ 100)
+     * @defaultValue 16
      */
     sampleCount: number
 }
@@ -38,18 +42,15 @@ interface ZoomBlur {
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.ZoomBlur(redGPUContext);
- * // [KO] 블러 강도 및 샘플링 횟수 조절
- * // [EN] Adjust blur strength and sample count
  * effect.amount = 80;
  * effect.sampleCount = 40;
- * // [KO] 중심점 오프셋 설정 (단위: 픽셀)
- * // [EN] Set center offset (unit: pixels)
  * effect.centerX = 100;
  * effect.centerY = -50;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/zoomBlur/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [ZoomBlur example](/RedGPU/examples/postEffect/blur/zoomBlur/)
  * @category Blur
  */
@@ -65,8 +66,8 @@ class ZoomBlur extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});

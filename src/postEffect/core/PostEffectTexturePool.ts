@@ -14,8 +14,8 @@ import RedGPUObject from "../../base/RedGPUObject";
  *
  * ### Example
  * ```typescript
- * // [KO] View3D의 postEffectManager를 통해 접근합니다.
- * // [EN] Access through the postEffectManager of View3D.
+ * // [KO] View3D의 postEffectManager를 통해 접근
+ * // [EN] Access via View3D's postEffectManager
  * const texturePool = view.postEffectManager.texturePool;
  * ```
  *
@@ -47,12 +47,12 @@ class PostEffectTexturePool extends RedGPUObject {
     }
 
     /**
-     * [KO] 풀 내의 전체 비디오 메모리 사용량(Byte)을 반환합니다.
+     * [KO] 풀 내의 전체 비디오 메모리 사용량(바이트)을 반환합니다.
      * [EN] Returns the total video memory usage (in bytes) in the pool.
      *
      * @returns
-     * [KO] 비디오 메모리 사용량 (Bytes)
-     * [EN] Video memory usage in bytes
+     * [KO] 비디오 메모리 사용량 (단위: 바이트)
+     * [EN] Video memory usage (unit: bytes)
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
@@ -122,11 +122,11 @@ class PostEffectTexturePool extends RedGPUObject {
 
     /**
      * [KO] 텍스처 재사용 적중률(0 ~ 1)을 반환합니다.
-     * [EN] Returns the texture reuse hit rate (0 to 1).
+     * [EN] Returns the texture reuse hit rate (0 ~ 1).
      *
      * @returns
      * [KO] 적중률 (0 ~ 1)
-     * [EN] Hit rate (0 to 1)
+     * [EN] Hit rate (0 ~ 1)
      */
     get hitRate(): number {
         if (this.#requestCount === 0) return 0;
@@ -160,17 +160,17 @@ class PostEffectTexturePool extends RedGPUObject {
      * [EN] Retrieves a texture of the specified size and format from the pool or allocates a new one.
      *
      * @param width -
-     * [KO] 텍스처 가로 크기
-     * [EN] Texture width
+     * [KO] 텍스처 너비 (단위: 픽셀)
+     * [EN] Texture width (in pixels)
      * @param height -
-     * [KO] 텍스처 세로 크기
-     * [EN] Texture height
+     * [KO] 텍스처 높이 (단위: 픽셀)
+     * [EN] Texture height (in pixels)
      * @param format -
-     * [KO] 텍스처 포맷 (기본값: `'rgba16float'`)
-     * [EN] Texture format (Default: `'rgba16float'`)
+     * [KO] 텍스처 포맷
+     * [EN] Texture format
      * @returns
-     * [KO] 할당된 텍스처 및 뷰 결과 객체
-     * [EN] Allocated texture and view result object
+     * [KO] 할당된 텍스처 및 뷰 결과 객체 (`IPostEffectResult`)
+     * [EN] Allocated texture and view result object (`IPostEffectResult`)
      */
     allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
         const texture = this.#alloc(width, height, format);
@@ -210,7 +210,7 @@ class PostEffectTexturePool extends RedGPUObject {
     }
 
     /**
-     * [KO] 풀에 있는 모든 텍스처를 파괴하고 통계 상태를 초기화합니다.
+     * [KO] 풀에 있는 모든 텍스처를 파기하고 통계 상태를 초기화합니다.
      * [EN] Destroys all textures in the pool and resets statistics.
      */
     clear(): void {

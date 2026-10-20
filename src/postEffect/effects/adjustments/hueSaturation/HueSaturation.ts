@@ -8,8 +8,8 @@ import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 
 interface HueSaturation {
     /**
-     * [KO] 색상 회전 값 (-180 ~ 180)
-     * [EN] Hue rotation value (-180 ~ 180)
+     * [KO] 색상 회전 값 (단위: 도, -180 ~ 180)
+     * [EN] Hue rotation value (unit: degrees, -180 ~ 180)
      * @defaultValue 0
      */
     hue: number
@@ -22,8 +22,8 @@ interface HueSaturation {
 }
 
 /**
- * [KO] 이미지의 색상 톤(Hue)을 회전시키거나 전체적인 채도(Saturation)를 조절하는 후처리 이펙트입니다.
- * [EN] Post-processing effect that rotates the color tone (Hue) or adjusts the overall color intensity (Saturation) of an image.
+ * [KO] 이미지의 색상 톤(Hue)을 회전시키거나 전체 채도(Saturation)를 조절하는 후처리 이펙트입니다.
+ * [EN] Post-processing effect that rotates the color tone (Hue) or adjusts the overall saturation of an image.
  *
  * ### Example
  * ```typescript
@@ -34,6 +34,8 @@ interface HueSaturation {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/hueSaturation/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [HueSaturation example](/RedGPU/examples/postEffect/adjustments/hueSaturation/)
  * @category Adjustments
  */
 class HueSaturation extends ASinglePassPostEffect {
@@ -42,9 +44,14 @@ class HueSaturation extends ASinglePassPostEffect {
      * [KO] HueSaturation 인스턴스를 생성합니다.
      * [EN] Creates a HueSaturation instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.HueSaturation(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

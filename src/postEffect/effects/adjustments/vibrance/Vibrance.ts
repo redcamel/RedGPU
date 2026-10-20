@@ -34,6 +34,8 @@ interface Vibrance {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/vibrance/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Vibrance example](/RedGPU/examples/postEffect/adjustments/vibrance/)
  * @category Adjustments
  */
 class Vibrance extends ASinglePassPostEffect {
@@ -42,9 +44,14 @@ class Vibrance extends ASinglePassPostEffect {
      * [KO] Vibrance 인스턴스를 생성합니다.
      * [EN] Creates a Vibrance instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Vibrance(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

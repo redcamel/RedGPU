@@ -21,14 +21,14 @@ interface Vignetting {
      */
     smoothness: number;
     /**
-     * [KO] 비네팅 중심점 X 오프셋 (픽셀 단위)
-     * [EN] Vignette center X offset in pixels
+     * [KO] 비네팅 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Vignette center X offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
     centerX: number;
     /**
-     * [KO] 비네팅 중심점 Y 오프셋 (픽셀 단위)
-     * [EN] Vignette center Y offset in pixels
+     * [KO] 비네팅 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Vignette center Y offset (unit: pixels, 0 = screen center)
      * @defaultValue 0
      */
     centerY: number;
@@ -48,6 +48,8 @@ interface Vignetting {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/lens/vignetting/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Vignetting example](/RedGPU/examples/postEffect/lens/vignetting/)
  * @category Lens
  */
 class Vignetting extends ASinglePassPostEffect {
@@ -56,9 +58,14 @@ class Vignetting extends ASinglePassPostEffect {
      * [KO] Vignetting 인스턴스를 생성합니다.
      * [EN] Creates a Vignetting instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Vignetting(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

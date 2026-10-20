@@ -10,23 +10,27 @@ import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 interface RadialBlur {
     /**
-     * [KO] 블러 강도 (기본값: 50)
-     * [EN] Blur strength (default: 50)
+     * [KO] 블러 강도 (0 이상)
+     * [EN] Blur strength (0 or greater)
+     * @defaultValue 50
      */
     amount: number
     /**
-     * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙, 기본값: 0)
-     * [EN] Blur center X offset (unit: pixels, 0 = screen center, default: 0)
+     * [KO] 블러 중심점 X 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center X offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
      */
     centerX: number
     /**
-     * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙, 기본값: 0)
-     * [EN] Blur center Y offset (unit: pixels, 0 = screen center, default: 0)
+     * [KO] 블러 중심점 Y 오프셋 (단위: 픽셀, 0 = 화면 중앙)
+     * [EN] Blur center Y offset (unit: pixels, 0 = screen center)
+     * @defaultValue 0
      */
     centerY: number
     /**
-     * [KO] 샘플링 횟수 (범위: 2 ~ 100, 기본값: 16)
-     * [EN] Number of samples (range: 2 to 100, default: 16)
+     * [KO] 샘플링 횟수 (2 ~ 100)
+     * [EN] Number of samples (2 ~ 100)
+     * @defaultValue 16
      */
     sampleCount: number
 }
@@ -44,6 +48,7 @@ interface RadialBlur {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [RadialBlur example](/RedGPU/examples/postEffect/blur/radialBlur/)
  * @category Blur
  */
@@ -59,8 +64,8 @@ class RadialBlur extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});

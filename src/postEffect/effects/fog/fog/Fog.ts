@@ -12,28 +12,33 @@ import defineColorRGB from "../../../../defineProperty/funcs/color/defineColorRG
 
 interface Fog {
     /**
-     * [KO] 안개 밀도 (범위: 0 ~ 1, 기본값: 0.1)
-     * [EN] Fog density (range: 0 to 1, default: 0.1)
+     * [KO] 안개 밀도 (0 ~ 1)
+     * [EN] Fog density (0 ~ 1)
+     * @defaultValue 0.1
      */
     density: number;
     /**
-     * [KO] 안개 시작 거리 (최소값: 0, 기본값: 5.0)
-     * [EN] Fog start distance from camera (min: 0, default: 5.0)
+     * [KO] 안개 시작 거리 (0 이상)
+     * [EN] Fog start distance from camera (0 or greater)
+     * @defaultValue 5.0
      */
     nearDistance: number;
     /**
-     * [KO] 안개 최대 밀도 도달 거리 (최소값: 0.1, 기본값: 50)
-     * [EN] Fog maximum density distance (min: 0.1, default: 50)
+     * [KO] 안개 최대 밀도 도달 거리 (0.1 이상)
+     * [EN] Fog maximum density distance (0.1 or greater)
+     * @defaultValue 50
      */
     farDistance: number;
     /**
-     * [KO] 안개 계산 방식 (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1, 기본값: 0)
-     * [EN] Fog calculation type (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1, default: 0)
+     * [KO] 안개 계산 방식 (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
+     * [EN] Fog calculation type (`Fog.EXPONENTIAL`: 0, `Fog.EXPONENTIAL_SQUARED`: 1)
+     * @defaultValue 0
      */
     fogType: number;
     /**
-     * [KO] 안개 색상 (기본값: '#c8d2ff')
-     * [EN] Fog color (default: '#c8d2ff')
+     * [KO] 안개 색상 객체 (`ColorRGB`)
+     * [EN] Fog color object (`ColorRGB`)
+     * @defaultValue '#c8d2ff'
      */
     fogColor: ColorRGB
 }
@@ -54,18 +59,19 @@ interface Fog {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/fog/fog/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [Fog example](/RedGPU/examples/postEffect/fog/fog/)
  * @category Fog
  */
 class Fog extends ASinglePassPostEffect {
     /**
-     * [KO] 지수 안개 타입 (0)
-     * [EN] Exponential fog type (0)
+     * [KO] 지수(Exponential) 안개 타입 (`0`)
+     * [EN] Exponential fog type (`0`)
      */
     static EXPONENTIAL = 0;
     /**
-     * [KO] 지수제곱 안개 타입 (1)
-     * [EN] Exponential Squared fog type (1)
+     * [KO] 지수제곱(Exponential Squared) 안개 타입 (`1`)
+     * [EN] Exponential Squared fog type (`1`)
      */
     static EXPONENTIAL_SQUARED = 1;
 
@@ -80,8 +86,8 @@ class Fog extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

@@ -15,9 +15,8 @@ import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
 import keepLog from "../utils/keepLog";
 
-
 /**
- * [KO] 뷰(`View3D`)의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
+ * [KO] `View3D`의 HDR/LDR 후처리 파이프라인(SSAO, SSR, TAA, ToneMapping, FXAA 및 사용자 이펙트)을 통합 관리하는 클래스입니다.
  * [EN] Class that manages the HDR/LDR post-processing pipeline (SSAO, SSR, TAA, ToneMapping, FXAA, and user effects) of a `View3D`.
  *
  * ::: warning
@@ -27,8 +26,8 @@ import keepLog from "../utils/keepLog";
  *
  * ### Example
  * ```typescript
- * // [KO] 올바른 접근 방법
- * // [EN] Correct access method
+ * // [KO] View3D의 postEffectManager를 통해 접근
+ * // [EN] Access via View3D's postEffectManager
  * const postEffectManager = view.postEffectManager;
  * postEffectManager.addEffect(new RedGPU.PostEffect.Sharpen(redGPUContext));
  * ```
@@ -130,9 +129,10 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
-     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether SSAO (Screen Space Ambient Occlusion) is enabled.
+     * [KO] SSAO(Screen Space Ambient Occlusion) 활성화 여부입니다.
+     * [EN] Whether SSAO (Screen Space Ambient Occlusion) is enabled.
      *
+     * @defaultValue false
      * @returns
      * [KO] SSAO 활성화 여부
      * [EN] Whether SSAO is enabled
@@ -162,9 +162,10 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
-     * [KO] SSR(Screen Space Reflection) 활성화 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether SSR (Screen Space Reflection) is enabled.
+     * [KO] SSR(Screen Space Reflection) 활성화 여부입니다.
+     * [EN] Whether SSR (Screen Space Reflection) is enabled.
      *
+     * @defaultValue false
      * @returns
      * [KO] SSR 활성화 여부
      * [EN] Whether SSR is enabled
@@ -243,8 +244,8 @@ class PostEffectManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 등록된 모든 후처리 이펙트, 텍스처 풀, 시스템 버퍼를 파기하고 GPU 메모리를 해제합니다.
-     * [EN] Destroys all registered post-processing effects, texture pool, and system buffers, releasing GPU memory.
+     * [KO] 등록된 모든 후처리 이펙트, 텍스처 풀, 시스템 버퍼를 파기합니다.
+     * [EN] Destroys all registered post-processing effects, texture pool, and system buffers.
      */
     destroy() {
         if (this.#destroyed) return;

@@ -13,7 +13,7 @@ interface SSR {
      */
     maxSteps: number;
     /**
-     * [KO] 최대 반사 추적 거리 (월드 단위, 1.0 ~ 200.0)
+     * [KO] 최대 반사 추적 거리 (단위: 월드 거리, 1.0 ~ 200.0)
      * [EN] Maximum reflection tracking distance in world units (1.0 ~ 200.0)
      * @defaultValue 15.0
      */
@@ -55,13 +55,17 @@ interface SSR {
  *
  * ### Example
  * ```typescript
+ * // [KO] View3D의 postEffectManager를 통해 SSR 활성화 및 설정 제어
+ * // [EN] Enable and configure SSR through View3D's postEffectManager
  * view.postEffectManager.useSSR = true;
- * const ssrEffect = view.postEffectManager.ssr;
- * ssrEffect.maxSteps = 128;
- * ssrEffect.reflectionIntensity = 0.8;
+ * const ssr = view.postEffectManager.ssr;
+ * ssr.maxSteps = 128;
+ * ssr.reflectionIntensity = 0.8;
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [SSR example](/RedGPU/examples/postEffect/ssr/)
  * @category PostEffect
  */
 class SSR extends ASinglePassPostEffect {
@@ -71,8 +75,8 @@ class SSR extends ASinglePassPostEffect {
      * [EN] Creates an SSR instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});

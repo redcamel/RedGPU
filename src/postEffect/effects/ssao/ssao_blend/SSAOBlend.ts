@@ -12,6 +12,7 @@ import computeCode from "./wgsl/computeCode.wgsl";
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * @see [SSAO example](/RedGPU/examples/postEffect/ssao/)
  * @category PostEffect
  */
 class SSAOBlend extends ASinglePassPostEffect {
@@ -20,8 +21,8 @@ class SSAOBlend extends ASinglePassPostEffect {
      * [EN] Creates an SSAOBlend instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -44,4 +45,3 @@ class SSAOBlend extends ASinglePassPostEffect {
 
 Object.freeze(SSAOBlend)
 export default SSAOBlend
-

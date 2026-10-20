@@ -8,13 +8,15 @@ import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 
 interface BrightnessContrast {
     /**
-     * [KO] 밝기 조절 값 (범위: `-150` ~ `150`, 기본값: `0`)
-     * [EN] Brightness adjustment value (range: `-150` to `150`, default: `0`)
+     * [KO] 밝기 조절 값 (-150 ~ 150)
+     * [EN] Brightness adjustment value (-150 ~ 150)
+     * @defaultValue 0
      */
     brightness: number,
     /**
-     * [KO] 대비 조절 값 (범위: `-50` ~ `100`, 기본값: `0`)
-     * [EN] Contrast adjustment value (range: `-50` to `100`, default: `0`)
+     * [KO] 대비 조절 값 (-50 ~ 100)
+     * [EN] Contrast adjustment value (-50 ~ 100)
+     * @defaultValue 0
      */
     contrast: number
 }
@@ -23,14 +25,9 @@ interface BrightnessContrast {
  * [KO] 이미지의 명도(Brightness)와 대비(Contrast)를 조절하는 후처리 이펙트입니다.
  * [EN] Post-processing effect that adjusts the brightness and contrast of an image.
  *
- * [KO] LDR 공간(0 ~ 1 표준 색상 범위)에서 동작합니다.
- * [EN] Operates in LDR space (standard 0 to 1 color range).
- *
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.BrightnessContrast(redGPUContext);
- * // [KO] 밝기 및 대비 증가
- * // [EN] Increase brightness and contrast
  * effect.brightness = 50;
  * effect.contrast = 20;
  * view.postEffectManager.addEffect(effect);

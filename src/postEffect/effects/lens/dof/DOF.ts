@@ -7,7 +7,7 @@ import DOFUnified from "./DOFUnified/DOFUnified";
 
 
 /**
- * [KO] CoC(착란원) 모델을 기반으로 초점 거리에 따른 블러와 보케(Bokeh)를 시뮬레이션하는 피사계 심도(DOF) 후처리 이펙트입니다.
+ * [KO] 착란원(CoC) 모델을 기반으로 초점 거리에 따른 블러와 보케(Bokeh)를 시뮬레이션하는 피사계 심도(DOF) 후처리 이펙트입니다.
  * [EN] Depth of Field (DOF) post-processing effect that simulates distance-based blur and bokeh based on the Circle of Confusion (CoC) model.
  *
  * ### Example
@@ -21,6 +21,8 @@ import DOFUnified from "./DOFUnified/DOFUnified";
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/lens/dof/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
  * @category Lens
  */
 class DOF extends AMultiPassPostEffect {
@@ -40,9 +42,14 @@ class DOF extends AMultiPassPostEffect {
      * [KO] DOF 인스턴스를 생성합니다.
      * [EN] Creates a DOF instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -66,9 +73,10 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] 초점 거리를 반환합니다.
-     * [EN] Returns the focus distance.
+     * [KO] 초점 거리를 반환하거나 설정합니다.
+     * [EN] Returns or sets the focus distance.
      *
+     * @defaultValue 15.0
      * @returns
      * [KO] 초점 거리
      * [EN] Focus distance
@@ -77,23 +85,16 @@ class DOF extends AMultiPassPostEffect {
         return this.#focusDistance;
     }
 
-    /**
-     * [KO] 초점 거리를 설정합니다.
-     * [EN] Sets the focus distance.
-     *
-     * @param value -
-     * [KO] 초점 거리
-     * [EN] Focus distance
-     */
     set focusDistance(value: number) {
         this.#focusDistance = value;
         this.#effect_coc.focusDistance = value;
     }
 
     /**
-     * [KO] 조리개 값을 반환합니다.
-     * [EN] Returns the aperture value.
+     * [KO] 조리개 값(F-number)을 반환하거나 설정합니다.
+     * [EN] Returns or sets the aperture value (F-number).
      *
+     * @defaultValue 2.8
      * @returns
      * [KO] 조리개 값 (F-number)
      * [EN] Aperture value (F-number)
@@ -102,48 +103,34 @@ class DOF extends AMultiPassPostEffect {
         return this.#aperture;
     }
 
-    /**
-     * [KO] 조리개 값을 설정합니다.
-     * [EN] Sets the aperture value.
-     *
-     * @param value -
-     * [KO] 조리개 값 (F-number)
-     * [EN] Aperture value (F-number)
-     */
     set aperture(value: number) {
         this.#aperture = value;
         this.#effect_coc.aperture = value;
     }
 
     /**
-     * [KO] 최대 착란원(CoC) 크기를 반환합니다.
-     * [EN] Returns the maximum Circle of Confusion (CoC) size.
+     * [KO] 최대 착란원(CoC) 크기(0 ~ 100)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the maximum Circle of Confusion (CoC) size (0 ~ 100).
      *
+     * @defaultValue 25.0
      * @returns
      * [KO] 최대 CoC 크기
-     * [EN] Max CoC size
+     * [EN] Maximum CoC size
      */
     get maxCoC(): number {
         return this.#maxCoC;
     }
 
-    /**
-     * [KO] 최대 착란원(CoC) 크기를 설정합니다.
-     * [EN] Sets the maximum Circle of Confusion (CoC) size.
-     *
-     * @param value -
-     * [KO] 최대 CoC 크기
-     * [EN] Max CoC size
-     */
     set maxCoC(value: number) {
         this.#maxCoC = value;
         this.#effect_coc.maxCoC = value;
     }
 
     /**
-     * [KO] 근평면 거리를 반환합니다.
-     * [EN] Returns the near plane distance.
+     * [KO] 근평면 거리(0 이상)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near plane distance (0 or greater).
      *
+     * @defaultValue 0.1
      * @returns
      * [KO] 근평면 거리
      * [EN] Near plane distance
@@ -152,23 +139,16 @@ class DOF extends AMultiPassPostEffect {
         return this.#nearPlane;
     }
 
-    /**
-     * [KO] 근평면 거리를 설정합니다.
-     * [EN] Sets the near plane distance.
-     *
-     * @param value -
-     * [KO] 근평면 거리
-     * [EN] Near plane distance
-     */
     set nearPlane(value: number) {
         this.#nearPlane = value;
         this.#effect_coc.nearPlane = value;
     }
 
     /**
-     * [KO] 원평면 거리를 반환합니다.
-     * [EN] Returns the far plane distance.
+     * [KO] 원평면 거리(0.1 이상)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far plane distance (0.1 or greater).
      *
+     * @defaultValue 1000.0
      * @returns
      * [KO] 원평면 거리
      * [EN] Far plane distance
@@ -177,73 +157,52 @@ class DOF extends AMultiPassPostEffect {
         return this.#farPlane;
     }
 
-    /**
-     * [KO] 원평면 거리를 설정합니다.
-     * [EN] Sets the far plane distance.
-     *
-     * @param value -
-     * [KO] 원평면 거리
-     * [EN] Far plane distance
-     */
     set farPlane(value: number) {
         this.#farPlane = value;
         this.#effect_coc.farPlane = value;
     }
 
     /**
-     * [KO] 근거리 블러 크기를 반환합니다.
-     * [EN] Returns the near blur size.
+     * [KO] 근거리 블러 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near blur size (in pixels).
      *
+     * @defaultValue 15
      * @returns
-     * [KO] 근거리 블러 크기 (픽셀 단위)
-     * [EN] Near blur size in pixels
+     * [KO] 근거리 블러 크기 (단위: 픽셀)
+     * [EN] Near blur size (in pixels)
      */
     get nearBlurSize(): number {
         return this.#nearBlurSize;
     }
 
-    /**
-     * [KO] 근거리 블러 크기를 설정합니다.
-     * [EN] Sets the near blur size.
-     *
-     * @param value -
-     * [KO] 근거리 블러 크기 (픽셀 단위)
-     * [EN] Near blur size in pixels
-     */
     set nearBlurSize(value: number) {
         this.#nearBlurSize = value;
         this.#effect_unified.nearBlurSize = value;
     }
 
     /**
-     * [KO] 원거리 블러 크기를 반환합니다.
-     * [EN] Returns the far blur size.
+     * [KO] 원거리 블러 크기(단위: 픽셀)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far blur size (in pixels).
      *
+     * @defaultValue 15
      * @returns
-     * [KO] 원거리 블러 크기 (픽셀 단위)
-     * [EN] Far blur size in pixels
+     * [KO] 원거리 블러 크기 (단위: 픽셀)
+     * [EN] Far blur size (in pixels)
      */
     get farBlurSize(): number {
         return this.#farBlurSize;
     }
 
-    /**
-     * [KO] 원거리 블러 크기를 설정합니다.
-     * [EN] Sets the far blur size.
-     *
-     * @param value -
-     * [KO] 원거리 블러 크기 (픽셀 단위)
-     * [EN] Far blur size in pixels
-     */
     set farBlurSize(value: number) {
         this.#farBlurSize = value;
         this.#effect_unified.farBlurSize = value;
     }
 
     /**
-     * [KO] 근거리 블러 강도를 반환합니다.
-     * [EN] Returns the near blur strength.
+     * [KO] 근거리 블러 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the near blur strength.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 근거리 블러 강도
      * [EN] Near blur strength
@@ -252,23 +211,16 @@ class DOF extends AMultiPassPostEffect {
         return this.#nearStrength;
     }
 
-    /**
-     * [KO] 근거리 블러 강도를 설정합니다.
-     * [EN] Sets the near blur strength.
-     *
-     * @param value -
-     * [KO] 근거리 블러 강도
-     * [EN] Near blur strength
-     */
     set nearStrength(value: number) {
         this.#nearStrength = value;
         this.#effect_unified.nearStrength = value;
     }
 
     /**
-     * [KO] 원거리 블러 강도를 반환합니다.
-     * [EN] Returns the far blur strength.
+     * [KO] 원거리 블러 강도를 반환하거나 설정합니다.
+     * [EN] Returns or sets the far blur strength.
      *
+     * @defaultValue 1.0
      * @returns
      * [KO] 원거리 블러 강도
      * [EN] Far blur strength
@@ -277,14 +229,6 @@ class DOF extends AMultiPassPostEffect {
         return this.#farStrength;
     }
 
-    /**
-     * [KO] 원거리 블러 강도를 설정합니다.
-     * [EN] Sets the far blur strength.
-     *
-     * @param value -
-     * [KO] 원거리 블러 강도
-     * [EN] Far blur strength
-     */
     set farStrength(value: number) {
         this.#farStrength = value;
         this.#effect_unified.farStrength = value;
@@ -389,24 +333,24 @@ class DOF extends AMultiPassPostEffect {
     }
 
     /**
-     * [KO] DOF 효과를 렌더링합니다.
-     * [EN] Renders the DOF effect.
+     * [KO] DOF 다중 패스 후처리 효과를 렌더링합니다.
+     * [EN] Renders the multi-pass DOF post-processing effect.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비
-     * [EN] Rendering width
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이
-     * [EN] Rendering height
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture info
+     * [KO] 입력 소스 텍스처 정보
+     * [EN] Input source texture information
      * @returns
-     * [KO] 최종 DOF 처리 결과
-     * [EN] Final DOF result
+     * [KO] DOF 처리된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] DOF output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;

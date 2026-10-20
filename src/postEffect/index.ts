@@ -1,6 +1,6 @@
 /**
- * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, 단일/다중 패스 이펙트 코어 클래스를 제공합니다.
- * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, and single/multi-pass effect core classes.
+ * [KO] 후처리 이펙트(색상 보정, 블러, 렌즈 효과, 환경 효과 등)와 `PostEffectManager`, 단일/다중 패스 코어 클래스를 제공합니다.
+ * [EN] Provides post-processing effects (color adjustments, blur, lens effects, environmental effects, etc.), `PostEffectManager`, and single/multi-pass core classes.
  * @packageDocumentation
  */
 import BrightnessContrast from "./effects/adjustments/brightnessContrast/BrightnessContrast";

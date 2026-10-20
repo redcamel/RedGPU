@@ -10,13 +10,15 @@ import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 interface DirectionalBlur {
     /**
-     * [KO] 블러 강도 (기본값: 15)
-     * [EN] Blur strength (default: 15)
+     * [KO] 블러 강도 (0 이상)
+     * [EN] Blur strength (0 or greater)
+     * @defaultValue 15
      */
     amount: number,
     /**
-     * [KO] 샘플링 횟수 (범위: 1 ~ 100, 기본값: 16)
-     * [EN] Number of samples (range: 1 to 100, default: 16)
+     * [KO] 샘플링 횟수 (1 ~ 100)
+     * [EN] Number of samples (1 ~ 100)
+     * @defaultValue 16
      */
     sampleCount: number
 }
@@ -28,17 +30,14 @@ interface DirectionalBlur {
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
- * // [KO] 45도 방향 블러 설정
- * // [EN] Set 45-degree directional blur
  * effect.angle = 45;
- * // [KO] 블러 강도 및 샘플링 횟수 조절
- * // [EN] Adjust blur strength and sample count
  * effect.amount = 30;
  * effect.sampleCount = 40;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/directionalBlur/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [DirectionalBlur example](/RedGPU/examples/postEffect/blur/directionalBlur/)
  * @category Blur
  */
@@ -56,8 +55,8 @@ class DirectionalBlur extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {workSizeX: 8, workSizeY: 8, workSizeZ: 1});
@@ -69,9 +68,10 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 블러 각도(단위: 도, 0 = 오른쪽, 360도로 정규화됨, 기본값: 0)를 반환하거나 설정합니다.
-     * [EN] Returns or sets the blur angle (unit: degrees, 0 = right, normalized to 360 degrees, default: 0).
+     * [KO] 블러 각도(단위: 도, 0 = 오른쪽, 360도로 정규화)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the blur angle (unit: degrees, 0 = right, normalized to 360 degrees).
      *
+     * @defaultValue 0
      * @returns
      * [KO] 블러 각도
      * [EN] Blur angle

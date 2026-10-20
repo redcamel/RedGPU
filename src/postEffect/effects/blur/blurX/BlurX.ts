@@ -7,8 +7,9 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 
 interface BlurX {
     /**
-     * [KO] 블러 강도 (범위: 0 ~ 512, 기본값: 32)
-     * [EN] Blur strength (range: 0 to 512, default: 32)
+     * [KO] 블러 강도 (단위: 픽셀, 0 ~ 512)
+     * [EN] Blur strength (unit: pixels, 0 ~ 512)
+     * @defaultValue 32
      */
     size: number
 }
@@ -20,13 +21,12 @@ interface BlurX {
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.BlurX(redGPUContext);
- * // [KO] 블러 강도 조절
- * // [EN] Adjust blur strength
  * effect.size = 64;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/blur/blurX/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [BlurX example](/RedGPU/examples/postEffect/blur/blurX/)
  * @category Blur
  */
@@ -42,8 +42,8 @@ class BlurX extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

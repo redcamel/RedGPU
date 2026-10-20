@@ -169,6 +169,25 @@ const filterLanguageFiles = (dir, currentLang) => {
                 processed = processed.replace(/^> `readonly` /gm, '> <span class="readonly-badge">readonly</span> ');
             }
 
+            // #### Default Value (또는 ##### Default Value) 블록을 상단 시그니처(`> **prop**: `type` = `val``) 옆으로 인라인 병합
+            if (processed.includes('Default Value')) {
+                const sectionBlocks = processed.split(/(?=^#{2,3} )/m);
+                const defaultValRegex = /\r?\n+#{4,5} Default Value\r?\n+```(?:ts|typescript)?\r?\n([^\r\n]+)\r?\n```/;
+                for (let i = 0; i < sectionBlocks.length; i++) {
+                    const block = sectionBlocks[i];
+                    if (block.startsWith('### ') && defaultValRegex.test(block)) {
+                        const match = block.match(defaultValRegex);
+                        if (match) {
+                            const defaultVal = match[1].trim();
+                            let updatedBlock = block.replace(defaultValRegex, '');
+                            updatedBlock = updatedBlock.replace(/^(> [^\r\n]+)$/m, `$1 = \`${defaultVal}\``);
+                            sectionBlocks[i] = updatedBlock;
+                        }
+                    }
+                }
+                processed = sectionBlocks.join('');
+            }
+
             // 상속된 속성과 메서드를 분리하여 각각 '상속받은 속성', '상속받은 메서드' H2 아래로 배치하는 로직
             if (
                 (processed.includes('Inherited from') || processed.includes('#### Inherited from')) &&

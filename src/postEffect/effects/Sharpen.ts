@@ -8,9 +8,6 @@ import Convolution from "./convolution/Convolution";
  * [KO] 컨볼루션 커널을 사용하여 인접 픽셀 간 대비를 높이고 경계를 선명하게 강조하는 샤픈(Sharpen) 후처리 이펙트입니다.
  * [EN] Sharpen post-processing effect that enhances edges and details by increasing contrast between adjacent pixels using a convolution kernel.
  *
- * [KO] LDR 공간에서 동작합니다.
- * [EN] Operates in LDR space.
- *
  * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
@@ -55,20 +52,20 @@ class Sharpen extends AMultiPassPostEffect {
      * [EN] Renders the sharpen post-processing effect.
      *
      * @param view -
-     * [KO] 렌더링 대상 View3D 인스턴스
-     * [EN] Target View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더 타겟 너비
-     * [EN] Render target width
+     * [KO] 렌더링 너비 (단위: 픽셀)
+     * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더 타겟 높이
-     * [EN] Render target height
+     * [KO] 렌더링 높이 (단위: 픽셀)
+     * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
      * [KO] 입력 소스 텍스처 정보
      * [EN] Input source texture information
      * @returns
-     * [KO] 샤픈 처리된 결과 텍스처 정보
-     * [EN] Sharpened output texture information
+     * [KO] 샤픈 처리된 결과 텍스처 정보 (`IPostEffectResult`)
+     * [EN] Sharpened output texture information (`IPostEffectResult`)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         return this.#effect_convolution.render(

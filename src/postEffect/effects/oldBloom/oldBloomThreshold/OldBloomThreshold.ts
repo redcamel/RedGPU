@@ -7,18 +7,16 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 
 interface OldBloomThreshold {
     /**
-     * [KO] 밝은 영역 추출 기준 임계값 (범위: 1 ~ 255, 기본값: 128)
-     * [EN] Threshold value for extracting bright areas (range: 1 ~ 255, default: 128)
+     * [KO] 밝은 영역 추출 기준 임계값 (1 ~ 255)
+     * [EN] Threshold value for extracting bright areas (1 ~ 255)
+     * @defaultValue 128
      */
     threshold: number;
 }
 
 /**
- * [KO] 올드 블룸(Old Bloom) 후처리의 밝은 영역 추출 단계를 수행하는 내부 이펙트 클래스입니다.
- * [EN] Internal effect class that performs the bright region extraction step of Old Bloom post-processing.
- *
- * [KO] 1/2 다운샘플링 단계에서 선형 보간을 적용하여 임계값 이상의 밝은 영역을 추출하며, 시스템(OldBloom)에 의해 자동으로 생성됩니다.
- * [EN] Extracts bright regions above the threshold using linear interpolation during the 1/2 downsampling step, and is automatically created by the system (OldBloom).
+ * [KO] 올드 블룸(Old Bloom) 후처리의 밝은 영역 추출 단계를 수행하는 내부 후처리 패스입니다.
+ * [EN] Internal post-processing pass that performs the bright region extraction step of Old Bloom.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

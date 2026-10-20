@@ -10,23 +10,22 @@ import definePositiveNumber from "../../../../defineProperty/funcs/number/define
 
 interface OldBloomBlend {
     /**
-     * [KO] 블룸 효과의 강도 (기본값: 1)
-     * [EN] Strength of the bloom effect (default: 1)
+     * [KO] 블룸 효과 강도 (0 이상)
+     * [EN] Strength of the bloom effect (0 or greater)
+     * @defaultValue 1
      */
     bloomStrength: number
     /**
-     * [KO] 최종 합성 시 노출 보정값 (기본값: 1)
-     * [EN] Exposure compensation value for final composition (default: 1)
+     * [KO] 최종 합성 시 노출 보정값 (0 이상)
+     * [EN] Exposure compensation value for final composition (0 or greater)
+     * @defaultValue 1
      */
     exposure: number
 }
 
 /**
- * [KO] 올드 블룸(Old Bloom) 후처리의 최종 블렌딩 단계를 수행하는 내부 이펙트 클래스입니다.
- * [EN] Internal effect class that performs the final blending step of Old Bloom post-processing.
- *
- * [KO] 블러 처리된 블룸 텍스처를 YCoCg 색공간에서 원본 이미지와 가산 합성하며, 시스템(OldBloom)에 의해 자동으로 생성됩니다.
- * [EN] Additively blends the blurred bloom texture with the original image in the YCoCg color space, and is automatically created by the system (OldBloom).
+ * [KO] 블러 처리된 블룸 텍스처를 원본 이미지와 가산 합성하는 내부 후처리 패스입니다.
+ * [EN] Internal post-processing pass that additively blends the blurred bloom texture with the original image.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -69,13 +68,13 @@ class OldBloomBlend extends ASinglePassPostEffect {
      * [EN] Renders by blending the original texture and the blurred bloom texture.
      *
      * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
+     * [KO] 대상 `View3D` 인스턴스
+     * [EN] Target `View3D` instance
      * @param width -
-     * [KO] 렌더링 너비 (픽셀 단위)
+     * [KO] 렌더링 너비 (단위: 픽셀)
      * [EN] Rendering width (in pixels)
      * @param height -
-     * [KO] 렌더링 높이 (픽셀 단위)
+     * [KO] 렌더링 높이 (단위: 픽셀)
      * [EN] Rendering height (in pixels)
      * @param sourceTextureInfo -
      * [KO] 원본 소스 텍스처 정보

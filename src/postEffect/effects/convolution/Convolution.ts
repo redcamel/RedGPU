@@ -42,6 +42,7 @@ const EMBOSS = ([
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/convolution/" style="width:100%; height:500px;"></iframe>
+ *
  * @see [Convolution example](/RedGPU/examples/postEffect/convolution/)
  * @category PostEffect
  */
@@ -84,8 +85,8 @@ class Convolution extends ASinglePassPostEffect {
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});
@@ -97,12 +98,13 @@ class Convolution extends ASinglePassPostEffect {
     }
 
     /**
-     * [KO] 3x3 커널 데이터(12개 요소의 `mat3x3` 정렬 숫자 배열, 기본값: `Convolution.EDGE`)를 반환하거나 설정합니다.
-     * [EN] Returns or sets the 3x3 kernel data (12-element `mat3x3` aligned number array, default: `Convolution.EDGE`).
+     * [KO] 3x3 커널 데이터(12개 요소의 `mat3x3` 정렬 숫자 배열)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the 3x3 kernel data (12-element `mat3x3` aligned number array).
      *
+     * @defaultValue Convolution.EDGE
      * @returns
-     * [KO] 커널 데이터 배열
-     * [EN] Kernel data array
+     * [KO] 커널 데이터 배열 (`number[]`)
+     * [EN] Kernel data array (`number[]`)
      */
     get kernel(): number[] {
         return this.#kernel;

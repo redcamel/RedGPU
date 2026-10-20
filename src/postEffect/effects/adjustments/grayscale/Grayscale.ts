@@ -27,6 +27,8 @@ interface Grayscale {
  * ```
  *
  * <iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/" style="width:100%; height:500px;"></iframe>
+ *
+ * @see [Grayscale example](/RedGPU/examples/postEffect/adjustments/grayscale/)
  * @category Adjustments
  */
 class Grayscale extends ASinglePassPostEffect {
@@ -34,9 +36,14 @@ class Grayscale extends ASinglePassPostEffect {
      * [KO] Grayscale 인스턴스를 생성합니다.
      * [EN] Creates a Grayscale instance.
      *
+     * ### Example
+     * ```typescript
+     * const effect = new RedGPU.PostEffect.Grayscale(redGPUContext);
+     * ```
+     *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {isLdr: true});

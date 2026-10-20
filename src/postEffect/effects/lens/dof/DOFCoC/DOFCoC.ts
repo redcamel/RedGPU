@@ -6,10 +6,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
-/**
- * [KO] DOFCoC의 속성 인터페이스입니다.
- * [EN] Property interface for DOFCoC.
- */
 interface DOFCoC {
     /**
      * [KO] 초점 거리
@@ -30,14 +26,14 @@ interface DOFCoC {
      */
     maxCoC: number;
     /**
-     * [KO] 근평면 거리
-     * [EN] Near plane distance
+     * [KO] 근평면 거리 (0 이상)
+     * [EN] Near plane distance (0 or greater)
      * @defaultValue 0.1
      */
     nearPlane: number;
     /**
-     * [KO] 원평면 거리
-     * [EN] Far plane distance
+     * [KO] 원평면 거리 (0.1 이상)
+     * [EN] Far plane distance (0.1 or greater)
      * @defaultValue 1000
      */
     farPlane: number;
@@ -52,6 +48,7 @@ interface DOFCoC {
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
+ * @see [DOF example](/RedGPU/examples/postEffect/lens/dof/)
  * @category Lens
  */
 class DOFCoC extends ASinglePassPostEffect {
@@ -61,8 +58,8 @@ class DOFCoC extends ASinglePassPostEffect {
      * [EN] Creates a DOFCoC instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
