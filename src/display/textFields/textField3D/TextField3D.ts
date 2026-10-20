@@ -5,30 +5,8 @@ import Plane from "../../../primitive/Plane";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
-import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
-
-
-/**
- * [KO] TextField3D의 빌보드 속성을 정의하는 인터페이스입니다.
- * [EN] Interface defining billboard properties of TextField3D.
- *
- * @category TextField
- */
-interface TextField3D {
-    /**
-     * [KO] 빌보드 모드 사용 여부 (`true`일 경우 항상 카메라를 향함)
-     * [EN] Whether to use billboard mode (always faces the camera if `true`)
-     */
-    useBillboard: boolean;
-    /**
-     * [KO] 글자 크기 (픽셀 단위)
-     * [EN] Font size (in pixels)
-     */
-    fontSize: number;
-}
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
-
 
 /**
  * [KO] 3D 공간에서 빌보드 및 고정 픽셀 크기 모드를 지원하는 3D 텍스트 필드 클래스입니다.
@@ -58,6 +36,7 @@ class TextField3D extends ATextField {
     #nativeWidth: number = 1
     #nativeHeight: number = 1
     #worldSize: number = 1
+    #useBillboard: boolean = true
     #usePixelSize: boolean = false
     #renderRatioX: number = 1
     #renderRatioY: number = 1
@@ -100,6 +79,28 @@ class TextField3D extends ATextField {
         this._geometry = new Plane(redGPUContext);
         this.disableJitter = true;
         if (text) this.text = text;
+    }
+
+    /**
+     * [KO] 빌보드 모드 사용 여부를 반환하거나 설정합니다. `true`일 경우 항상 카메라를 향합니다.
+     * [EN] Returns or sets whether to use billboard mode. Always faces the camera if `true`.
+     *
+     * @returns
+     * [KO] 빌보드 모드 사용 여부
+     * [EN] Whether billboard mode is enabled
+     */
+    get useBillboard(): boolean {
+        return this.#useBillboard;
+    }
+
+    set useBillboard(value: boolean) {
+        if (this.gpuRenderInfo) {
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
+            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members.useBillboard, value ? 1 : 0);
+        }
+        if (this.#useBillboard === value) return;
+        this.#useBillboard = value;
+        this.#updateRatios();
     }
 
     /**
@@ -161,6 +162,30 @@ class TextField3D extends ATextField {
      */
     get pixelSize(): number {
         return this.#nativeHeight;
+    }
+
+    /**
+     * [KO] 텍스트 텍스처 종횡비와 현재 크기 모드에 따라 계산된 가로 렌더링 비율을 반환합니다.
+     * [EN] Returns the horizontal rendering ratio calculated from the text texture aspect ratio and current size mode.
+     *
+     * @returns
+     * [KO] 가로 렌더링 비율
+     * [EN] Horizontal rendering ratio
+     */
+    get renderRatioX(): number {
+        return this.#renderRatioX;
+    }
+
+    /**
+     * [KO] 현재 크기 모드에 따라 계산된 세로 렌더링 비율을 반환합니다.
+     * [EN] Returns the vertical rendering ratio calculated from the current size mode.
+     *
+     * @returns
+     * [KO] 세로 렌더링 비율
+     * [EN] Vertical rendering ratio
+     */
+    get renderRatioY(): number {
+        return this.#renderRatioY;
     }
 
     /**
@@ -233,7 +258,7 @@ class TextField3D extends ATextField {
             const prevX = this.#renderRatioX;
             const prevY = this.#renderRatioY;
 
-            if (this.#usePixelSize) {
+            if (this.#useBillboard && this.#usePixelSize) {
                 this.#renderRatioY = 1;
                 this.#renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
@@ -254,8 +279,5 @@ class TextField3D extends ATextField {
     }
 }
 
-defineBoolean(TextField3D, [
-    {key: 'useBillboard', value: true},
-])
 Object.freeze(TextField3D);
 export default TextField3D;

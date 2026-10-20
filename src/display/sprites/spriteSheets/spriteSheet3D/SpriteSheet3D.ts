@@ -8,25 +8,8 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
-
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
-
-
-/**
- * [KO] 3D 스프라이트 시트의 빌보드 속성을 정의하는 인터페이스입니다.
- * [EN] Interface defining billboard properties of a 3D sprite sheet.
- *
- * @category SpriteSheet
- */
-interface SpriteSheet3D extends ASpriteSheet {
-    /**
-     * [KO] 빌보드 모드 사용 여부 (`true`일 경우 항상 카메라를 향함)
-     * [EN] Whether to use billboard mode (always faces the camera if `true`)
-     */
-    useBillboard: boolean;
-}
 
 /**
  * [KO] 3D 공간에서 빌보드 및 고정 픽셀 크기 모드를 지원하는 스프라이트 시트 애니메이션 클래스입니다.
@@ -54,6 +37,7 @@ class SpriteSheet3D extends ASpriteSheet {
     #nativeHeight: number = 1
     #worldSize: number = 1
     #pixelSize: number = 0
+    #useBillboard: boolean = true
     #usePixelSize: boolean = false
     #renderRatioX: number = 1
     #renderRatioY: number = 1
@@ -97,6 +81,28 @@ class SpriteSheet3D extends ASpriteSheet {
             }
         });
         this._geometry = new Plane(redGPUContext);
+    }
+
+    /**
+     * [KO] 빌보드 모드 사용 여부를 반환하거나 설정합니다. `true`일 경우 항상 카메라를 향합니다.
+     * [EN] Returns or sets whether to use billboard mode. Always faces the camera if `true`.
+     *
+     * @returns
+     * [KO] 빌보드 모드 사용 여부
+     * [EN] Whether billboard mode is enabled
+     */
+    get useBillboard(): boolean {
+        return this.#useBillboard;
+    }
+
+    set useBillboard(value: boolean) {
+        if (this.gpuRenderInfo) {
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
+            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members.useBillboard, value ? 1 : 0);
+        }
+        if (this.#useBillboard === value) return;
+        this.#useBillboard = value;
+        this.#updateRatios();
     }
 
     /**
@@ -168,6 +174,30 @@ class SpriteSheet3D extends ASpriteSheet {
     }
 
     /**
+     * [KO] 세그먼트 종횡비와 현재 크기 모드에 따라 계산된 가로 렌더링 비율을 반환합니다.
+     * [EN] Returns the horizontal rendering ratio calculated from the segment aspect ratio and current size mode.
+     *
+     * @returns
+     * [KO] 가로 렌더링 비율
+     * [EN] Horizontal rendering ratio
+     */
+    get renderRatioX(): number {
+        return this.#renderRatioX;
+    }
+
+    /**
+     * [KO] 현재 크기 모드에 따라 계산된 세로 렌더링 비율을 반환합니다.
+     * [EN] Returns the vertical rendering ratio calculated from the current size mode.
+     *
+     * @returns
+     * [KO] 세로 렌더링 비율
+     * [EN] Vertical rendering ratio
+     */
+    get renderRatioY(): number {
+        return this.#renderRatioY;
+    }
+
+    /**
      * [KO] 고정된 Plane 지오메트리를 반환합니다. 외부에서 변경할 수 없습니다.
      * [EN] Returns the fixed Plane geometry. Cannot be changed externally.
      *
@@ -232,7 +262,7 @@ class SpriteSheet3D extends ASpriteSheet {
             const prevX = this.#renderRatioX;
             const prevY = this.#renderRatioY;
 
-            if (this.#usePixelSize) {
+            if (this.#useBillboard && this.#usePixelSize) {
                 this.#renderRatioY = 1;
                 this.#renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
@@ -253,8 +283,5 @@ class SpriteSheet3D extends ASpriteSheet {
     }
 }
 
-defineBoolean(SpriteSheet3D, [
-    {key: 'useBillboard', value: true},
-])
 Object.freeze(SpriteSheet3D)
 export default SpriteSheet3D

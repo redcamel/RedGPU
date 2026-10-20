@@ -7,24 +7,8 @@ import Plane from "../../../primitive/Plane";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
-import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
-
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
-
-/**
- * [KO] `Sprite3D`의 빌보드 프로퍼티를 정의하는 인터페이스입니다.
- * [EN] Interface defining billboard properties for `Sprite3D`.
- *
- * @category Sprite
- */
-interface Sprite3D {
-    /**
-     * [KO] 빌보드 모드 사용 여부 (`true`일 경우 항상 카메라를 향함)
-     * [EN] Whether to use billboard mode (if `true`, always faces the camera)
-     */
-    useBillboard: boolean;
-}
 
 /**
  * [KO] 3D 공간에 배치되어 빌보드 및 고정 픽셀 크기 모드를 지원하는 3D 스프라이트 클래스입니다.
@@ -51,6 +35,7 @@ class Sprite3D extends Mesh {
     #nativeHeight: number = 1
     #worldSize: number = 1
     #pixelSize: number = 0
+    #useBillboard: boolean = true
     #usePixelSize: boolean = false
     #renderRatioX: number = 1
     #renderRatioY: number = 1
@@ -82,6 +67,28 @@ class Sprite3D extends Mesh {
         this.dirtyPipeline = true
         this.dirtyTransform = true
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE
+    }
+
+    /**
+     * [KO] 빌보드 모드 사용 여부를 가져오거나 설정합니다. `true`일 경우 항상 카메라를 향합니다.
+     * [EN] Gets or sets whether to use billboard mode. If `true`, always faces the camera.
+     *
+     * @returns
+     * [KO] 빌보드 모드 사용 여부
+     * [EN] Whether billboard mode is enabled
+     */
+    get useBillboard(): boolean {
+        return this.#useBillboard;
+    }
+
+    set useBillboard(value: boolean) {
+        if (this.gpuRenderInfo) {
+            const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
+            vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members.useBillboard, value ? 1 : 0);
+        }
+        if (this.#useBillboard === value) return;
+        this.#useBillboard = value;
+        this.#updateRatios();
     }
 
     /**
@@ -153,6 +160,30 @@ class Sprite3D extends Mesh {
     }
 
     /**
+     * [KO] 텍스처 종횡비와 현재 크기 모드에 따라 계산된 가로 렌더링 비율을 반환합니다.
+     * [EN] Returns the horizontal rendering ratio calculated from the texture aspect ratio and current size mode.
+     *
+     * @returns
+     * [KO] 가로 렌더링 비율
+     * [EN] Horizontal rendering ratio
+     */
+    get renderRatioX(): number {
+        return this.#renderRatioX;
+    }
+
+    /**
+     * [KO] 현재 크기 모드에 따라 계산된 세로 렌더링 비율을 반환합니다.
+     * [EN] Returns the vertical rendering ratio calculated from the current size mode.
+     *
+     * @returns
+     * [KO] 세로 렌더링 비율
+     * [EN] Vertical rendering ratio
+     */
+    get renderRatioY(): number {
+        return this.#renderRatioY;
+    }
+
+    /**
      * [KO] 스프라이트를 렌더링하며 텍스처 해상도 변경 시 렌더링 비율을 동기화합니다.
      * [EN] Renders the sprite and synchronizes rendering ratios when texture resolution changes.
      *
@@ -204,7 +235,7 @@ class Sprite3D extends Mesh {
             const prevX = this.#renderRatioX;
             const prevY = this.#renderRatioY;
 
-            if (this.#usePixelSize) {
+            if (this.#useBillboard && this.#usePixelSize) {
                 this.#renderRatioY = 1;
                 this.#renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
@@ -225,8 +256,5 @@ class Sprite3D extends Mesh {
     }
 }
 
-defineBoolean(Sprite3D, [
-    {key: 'useBillboard', value: true},
-])
 Object.freeze(Sprite3D)
 export default Sprite3D

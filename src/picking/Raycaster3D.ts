@@ -154,8 +154,8 @@ class Raycaster3D {
 
     #intersectObject(mesh: Mesh, recursive: boolean, intersects: RayIntersectResult[]): void {
         const isBillboard = (mesh as any).useBillboard;
-        const rx = (mesh as any)._renderRatioX || 1;
-        const ry = (mesh as any)._renderRatioY || 1;
+        const rx = (mesh as any).renderRatioX || 1;
+        const ry = (mesh as any).renderRatioY || 1;
 
         if (isBillboard && this.#view) {
             const usePixelSize = (mesh as any).usePixelSize;
@@ -191,8 +191,8 @@ class Raycaster3D {
         const m = mesh.modelMatrix;
         const pixelSize = (mesh as any).pixelSize;
         keepLog((mesh as any).fontSize)
-        const rx = (mesh as any)._renderRatioX || 1;
-        const ry = (mesh as any)._renderRatioY || 1;
+        const rx = (mesh as any).renderRatioX || 1;
+        const ry = (mesh as any).renderRatioY || 1;
 
         const {rawCamera, projectionMatrix, pixelRectObject} = view;
 
@@ -237,8 +237,8 @@ class Raycaster3D {
     #intersectWorldBillboard(mesh: Mesh, intersects: RayIntersectResult[]) {
         const view = this.#view;
         const m = mesh.modelMatrix;
-        const rx = (mesh as any)._renderRatioX || 1;
-        const ry = (mesh as any)._renderRatioY || 1;
+        const rx = (mesh as any).renderRatioX || 1;
+        const ry = (mesh as any).renderRatioY || 1;
 
         const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.viewMatrix);
         const billboardWorldMatrix = this.#tempMat4_3;
