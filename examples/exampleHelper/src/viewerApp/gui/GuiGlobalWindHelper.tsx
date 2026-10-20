@@ -7,13 +7,14 @@ import React, {useEffect} from 'react';
 interface GuiGlobalWindHelperProps {
     gui: any;
     windManager: any;
+    expanded?: boolean;
 }
 
-const GuiGlobalWindHelper: React.FC<GuiGlobalWindHelperProps> = ({gui, windManager}) => {
+const GuiGlobalWindHelper: React.FC<GuiGlobalWindHelperProps> = ({gui, windManager, expanded = false}) => {
     useEffect(() => {
         if (!windManager) return;
 
-        const windFolder = gui.addFolder({title: 'Global Wind', expanded: true});
+        const windFolder = gui.addFolder({title: 'Global Wind', expanded});
 
         windFolder.addBinding(windManager, 'enabled');
 
@@ -38,7 +39,7 @@ const GuiGlobalWindHelper: React.FC<GuiGlobalWindHelperProps> = ({gui, windManag
         return () => {
             windFolder.dispose();
         };
-    }, [gui, windManager]);
+    }, [gui, windManager, expanded]);
 
     return null;
 };

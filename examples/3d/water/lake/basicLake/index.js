@@ -187,7 +187,7 @@ const renderTestPane = (redGPUContext, lake, directionalLight) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
-        globalWind: true,
+        globalWind: {expanded: false},
         gui: (pane) => {
             const lakeFolder = pane.addFolder({title: 'Lake', expanded: true});
             lakeFolder.addBinding(lake, 'waterLevel', {min: -2.0, max: 2.0, step: 0.02});
@@ -199,7 +199,6 @@ const renderTestPane = (redGPUContext, lake, directionalLight) => {
             matFolder.addBinding(colors, 'deepColor').on('change', (ev) => mat.deepColor.setColorByHEX(ev.value));
             matFolder.addBinding(mat, 'roughness', {min: 0.0, max: 1.0, step: 0.01});
             matFolder.addBinding(mat, 'opacity', {min: 0.0, max: 1.0, step: 0.01});
-            matFolder.addBinding(mat, 'enableSSR');
 
             const normalFolder = matFolder.addFolder({title: 'Normal', expanded: true});
             normalFolder.addBinding(mat, 'normalScale', {min: 0.0, max: 1.0, step: 0.01});

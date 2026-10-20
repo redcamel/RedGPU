@@ -1102,8 +1102,8 @@ export const ExampleList: ExampleListType = [
                                     },
                                     {
                                         experimental: true,
-                                        name: 'Waves & Optics',
-                                        path: '3d/water/lake/wavesAndOptics',
+                                        name: 'Lake Material',
+                                        path: '3d/water/lake/lakeMaterial',
                                         description: {
                                             ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
                                             en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`

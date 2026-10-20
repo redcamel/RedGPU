@@ -33,7 +33,7 @@ import RenderViewStateData from "../display/view/core/RenderViewStateData";
  *
  * @see [Basic lake example](/RedGPU/examples/3d/water/lake/basicLake/)
  * @see [Lake settings example](/RedGPU/examples/3d/water/lake/lakeSettings/)
- * @see [Waves and optics example](/RedGPU/examples/3d/water/lake/wavesAndOptics/)
+ * @see [Lake material example](/RedGPU/examples/3d/water/lake/lakeMaterial/)
  * @see [Lake interaction example](/RedGPU/examples/3d/water/lake/interaction/)
  * @see [Character walking example](/RedGPU/examples/3d/water/lake/characterWalking/)
  * @see [Lake with landscape example](/RedGPU/examples/3d/water/lake/lakeWithLandscape/)

@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Waves & Optics 예제
- * [EN] Waves & Optics Example
+ * [KO] LakeMaterial 예제
+ * [EN] LakeMaterial Example
  *
- * [KO] 듀얼 노멀 맵(Layer 1 + Detail Layer 2), 바람 시뮬레이션, 수중 굴절, 코스틱스 및 PBR 광학 제어를 시연합니다.
- * [EN] Demonstrates dual normal map blending (Layer 1 + Detail Layer 2), wind simulation, refraction, caustics, and PBR optics control.
+ * [KO] LakeMaterial의 듀얼 노멀 맵, 수중 굴절, 감쇠, 코스틱스, SSR 및 디버그 뷰 등 모든 재질 속성을 실시간으로 제어합니다.
+ * [EN] Controls all LakeMaterial properties in real time, including dual normal maps, refraction, extinction, caustics, SSR, and debug views.
  */
 
 const canvas = document.createElement('canvas');
@@ -68,7 +68,7 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
         });
 
-        renderTestPane(redGPUContext, scene, lake, directionalLight);
+        renderTestPane(redGPUContext, lake, directionalLight);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -200,8 +200,7 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
     scene.addChild(amberPillar);
 };
 
-const renderTestPane = (redGPUContext, scene, lake, directionalLight) => {
-    const wind = scene.windManager;
+const renderTestPane = (redGPUContext, lake, directionalLight) => {
     const mat = lake.waterMaterial;
     const colors = {
         baseColor: mat.baseColor.hex,
@@ -209,36 +208,66 @@ const renderTestPane = (redGPUContext, scene, lake, directionalLight) => {
     };
 
     new RedGPUExampleHelper(redGPUContext, {
+        globalWind: true,
         gui: (pane) => {
-            const windFolder = pane.addFolder({title: 'Wind & Flow', expanded: true});
-            windFolder.addBinding(wind, 'enabled');
-            windFolder.addBinding(wind, 'speed', {min: 0.0, max: 5.0, step: 0.1});
-            windFolder.addBinding(wind, 'strength', {min: 0.0, max: 2.0, step: 0.05});
-            windFolder.addBinding(wind, 'directionAngle', {min: 0, max: 360, step: 1});
-            windFolder.addBinding(mat, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+            const lakeFolder = pane.addFolder({title: 'Lake (Vertex Swell)', expanded: true});
+            lakeFolder.addBinding(lake, 'waterLevel', {min: -2.0, max: 2.0, step: 0.02});
+            lakeFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.15, step: 0.002});
+            lakeFolder.addBinding(lake, 'waveWavelength', {min: 2.0, max: 60.0, step: 0.5});
 
-            const layer1Folder = pane.addFolder({title: 'Wave Layer 1', expanded: true});
-            layer1Folder.addBinding(mat, 'normalScale', {min: 0.0, max: 1.0, step: 0.02});
-            layer1Folder.addBinding(mat, 'normalTiling', {min: 2.0, max: 50.0, step: 1.0});
+            const normalFolder = pane.addFolder({title: 'Normal & Flow', expanded: true});
+            normalFolder.addBinding(mat, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+            normalFolder.addBinding(mat, 'normalScale', {min: 0.0, max: 1.0, step: 0.01});
+            normalFolder.addBinding(mat, 'normalTiling', {min: 1.0, max: 120.0, step: 1.0});
+            normalFolder.addBinding(mat, 'invertNormalY');
+            normalFolder.addBinding(mat, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.01});
+            normalFolder.addBinding(mat, 'normalDetailTiling', {min: 1.0, max: 200.0, step: 1.0});
+            normalFolder.addBinding(mat, 'invertNormalDetailY');
 
-            const layer2Folder = pane.addFolder({title: 'Wave Layer 2 (Detail)', expanded: true});
-            layer2Folder.addBinding(mat, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.02});
-            layer2Folder.addBinding(mat, 'normalDetailTiling', {min: 5.0, max: 80.0, step: 1.0});
-
-            const opticsFolder = pane.addFolder({title: 'Optics & Refraction', expanded: false});
-            opticsFolder.addBinding(mat, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.02});
-            opticsFolder.addBinding(mat, 'extinctionFactor', {min: 0.0, max: 1.0, step: 0.01});
-            opticsFolder.addBinding(mat, 'depthFadeDistance', {min: 0.1, max: 5.0, step: 0.1});
-            opticsFolder.addBinding(mat, 'turbidity', {min: 0.0, max: 1.0, step: 0.02});
-            opticsFolder.addBinding(mat, 'specularFactor', {min: 0.0, max: 2.0, step: 0.05});
-            opticsFolder.addBinding(mat, 'roughness', {min: 0.0, max: 1.0, step: 0.01});
+            const opticsFolder = pane.addFolder({title: 'Color & Optics', expanded: true});
             opticsFolder.addBinding(colors, 'baseColor').on('change', (ev) => mat.baseColor.setColorByHEX(ev.value));
             opticsFolder.addBinding(colors, 'deepColor').on('change', (ev) => mat.deepColor.setColorByHEX(ev.value));
+            opticsFolder.addBinding(mat, 'opacity', {min: 0.0, max: 1.0, step: 0.01});
+            opticsFolder.addBinding(mat, 'roughness', {min: 0.0, max: 1.0, step: 0.01});
+            opticsFolder.addBinding(mat, 'specularFactor', {min: 0.0, max: 2.0, step: 0.05});
+            opticsFolder.addBinding(mat, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.01});
+            opticsFolder.addBinding(mat, 'extinctionFactor', {min: 0.01, max: 2.0, step: 0.01});
+            opticsFolder.addBinding(mat, 'depthFadeDistance', {min: 0.05, max: 10.0, step: 0.05});
+            opticsFolder.addBinding(mat, 'turbidity', {min: 0.0, max: 1.0, step: 0.01});
 
-            const causticsFolder = pane.addFolder({title: 'Caustics', expanded: false});
+            const causticsFolder = pane.addFolder({title: 'Underwater Caustics', expanded: true});
             causticsFolder.addBinding(mat, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
-            causticsFolder.addBinding(mat, 'causticsScale', {min: 0.2, max: 5.0, step: 0.1});
-            causticsFolder.addBinding(mat, 'causticsSpeed', {min: 0.0, max: 3.0, step: 0.1});
+            causticsFolder.addBinding(mat, 'causticsScale', {min: 0.1, max: 5.0, step: 0.1});
+            causticsFolder.addBinding(mat, 'causticsSpeed', {min: 0.0, max: 5.0, step: 0.1});
+
+            const ssrFolder = pane.addFolder({title: 'Screen Space Reflection (SSR)', expanded: true});
+            ssrFolder.addBinding(mat, 'enableSSR');
+            ssrFolder.addBinding(mat, 'ssrMaxDistance', {min: 2.0, max: 300.0, step: 1.0});
+            ssrFolder.addBinding(mat, 'ssrStepCount', {min: 8, max: 128, step: 8});
+            ssrFolder.addBinding(mat, 'ssrThickness', {min: 0.05, max: 5.0, step: 0.05});
+
+            const debugFolder = pane.addFolder({title: 'Debug View', expanded: false});
+            debugFolder.addBinding(mat, 'debugMode', {
+                options: {
+                    'PBR Water (Full) (0)': 0,
+                    'Screen Space Reflection Only (15)': 15,
+                    'Underwater Caustics Only (14)': 14,
+                    'Sun Specular Glitter Only (13)': 13,
+                    'Sky Reflection Color Only (12)': 12,
+                    'Fresnel Factor Mask (11)': 11,
+                    'Refraction Offset View (10)': 10,
+                    'Wave Normal Map View (9)': 9,
+                    'Water Albedo Only (8)': 8,
+                    'Extinction Absorption Mask (7)': 7,
+                    'Scene Passthrough (6)': 6,
+                    'Depth Fade Mask (5)': 5,
+                    'Delta Depth Water Mask (4)': 4,
+                    'Linear Water Depth (3)': 3,
+                    'Linear Scene Depth (2)': 2,
+                    'Raw Scene Depth (1)': 1
+                }
+            });
+            debugFolder.addBinding(mat, 'debugMaxDepth', {min: 0.5, max: 30.0, step: 0.5});
 
             const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 1000});

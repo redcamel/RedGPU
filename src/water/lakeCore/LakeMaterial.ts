@@ -201,11 +201,11 @@ interface LakeMaterial {
  * material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'waterNormal.jpg');
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/water/lake/wavesAndOptics/" style="width:100%; height:500px;"></iframe>
+ * <iframe src="/RedGPU/examples/3d/water/lake/lakeMaterial/" style="width:100%; height:500px;"></iframe>
  *
  * @see [Basic lake example](/RedGPU/examples/3d/water/lake/basicLake/)
  * @see [Lake settings example](/RedGPU/examples/3d/water/lake/lakeSettings/)
- * @see [Waves and optics example](/RedGPU/examples/3d/water/lake/wavesAndOptics/)
+ * @see [Lake material example](/RedGPU/examples/3d/water/lake/lakeMaterial/)
  * @category Water
  */
 class LakeMaterial extends ABitmapBaseMaterial {

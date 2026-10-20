@@ -65,7 +65,8 @@ const GuiPanel: React.FC = () => {
             )}
             {guiInstance && guiConfig.globalWind && redGPUContext && redGPUContext.viewList[0]?.scene?.windManager && (
                 <GuiGlobalWindHelper gui={guiInstance}
-                                     windManager={redGPUContext.viewList[0].scene.windManager}/>
+                                     windManager={redGPUContext.viewList[0].scene.windManager}
+                                     expanded={typeof guiConfig.globalWind === 'object' ? guiConfig.globalWind.expanded : false}/>
             )}
             {guiInstance && guiConfig.ibl && redGPUContext && redGPUContext.viewList[0] && (
                 <GuiIBLHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>

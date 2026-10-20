@@ -38,7 +38,7 @@ export interface GuiConfig {
     directionalShadow?: boolean;
     ibl?: boolean;
     skybox?: boolean;
-    globalWind?: boolean;
+    globalWind?: boolean | { expanded?: boolean };
     compareLabel?: CompareLabelConfig;
     gui?: (gui: any) => void;
 }
