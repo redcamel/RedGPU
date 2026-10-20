@@ -14,7 +14,7 @@ import Scene from "../display/scene/Scene";
  * // [KO] 올바른 접근 방법
  * // [EN] Correct access method
  * const windManager = scene.windManager;
- * windManager.direction = [1, 0, 0.5];
+ * windManager.directionAngle = 45;
  * windManager.speed = 2.0;
  * windManager.strength = 1.5;
  * ```
@@ -23,7 +23,9 @@ import Scene from "../display/scene/Scene";
  */
 class WindManager {
     #scene: Scene;
-    #direction: [number, number, number] = [1, 0, 0];
+    #directionAngle: number = 0;
+    #directionX: number = 1.0;
+    #directionZ: number = 0.0;
     #speed: number = 1.0;
     #strength: number = 1.0;
     #enabled: boolean = true;
@@ -53,35 +55,8 @@ class WindManager {
     }
 
     /**
-     * [KO] 바람 진행 방향 단위 벡터 [X, Y, Z]입니다. 설정 시 자동으로 정규화되며, 길이가 0이면 정규화 분모로 1을 사용합니다.
-     * [EN] Unit direction vector [X, Y, Z] of the wind. Automatically normalized on set; a zero-length input uses 1 as the divisor.
-     *
-     * ### Example
-     * ```typescript
-     * scene.windManager.direction = [1, 0, 1];
-     * ```
-     *
-     * @returns
-     * [KO] 정규화된 방향 벡터
-     * [EN] Normalized direction vector
-     */
-    get direction(): [number, number, number] {
-        return this.#direction;
-    }
-
-    set direction(value: [number, number, number]) {
-        const x = value[0];
-        const y = value[1];
-        const z = value[2];
-        const len = Math.hypot(x, y, z) || 1.0;
-        this.#direction[0] = x / len;
-        this.#direction[1] = y / len;
-        this.#direction[2] = z / len;
-    }
-
-    /**
-     * [KO] XZ 평면 기준 바람의 수평 방향 각도입니다. (단위: degree, 0 ~ 360) 설정 시 Y 성분은 유지됩니다.
-     * [EN] Horizontal wind direction angle on the XZ plane. (Unit: degree, 0 ~ 360) The Y component is preserved on set.
+     * [KO] XZ 평면 기준 바람의 수평 진행 방향 각도입니다. (단위: degree, 0 ~ 360, 기본값: 0)
+     * [EN] Horizontal wind direction angle on the XZ plane. (Unit: degree, 0 ~ 360, default: 0)
      *
      * ### Example
      * ```typescript
@@ -93,15 +68,38 @@ class WindManager {
      * [EN] Direction angle (degree)
      */
     get directionAngle(): number {
-        const rad = Math.atan2(this.#direction[2], this.#direction[0]);
-        let deg = rad * (180.0 / Math.PI);
-        if (deg < 0) deg += 360;
-        return deg;
+        return this.#directionAngle;
     }
 
     set directionAngle(deg: number) {
+        this.#directionAngle = deg;
         const rad = deg * (Math.PI / 180.0);
-        this.direction = [Math.cos(rad), this.#direction[1], Math.sin(rad)];
+        this.#directionX = Math.cos(rad);
+        this.#directionZ = Math.sin(rad);
+    }
+
+    /**
+     * [KO] 바람 진행 방향의 정규화된 X 성분 (`cos(directionAngle)`)을 반환합니다.
+     * [EN] Returns the normalized X component (`cos(directionAngle)`) of the wind direction.
+     *
+     * @returns
+     * [KO] 정규화된 X 방향 성분
+     * [EN] Normalized X direction component
+     */
+    get directionX(): number {
+        return this.#directionX;
+    }
+
+    /**
+     * [KO] 바람 진행 방향의 정규화된 Z 성분 (`sin(directionAngle)`)을 반환합니다.
+     * [EN] Returns the normalized Z component (`sin(directionAngle)`) of the wind direction.
+     *
+     * @returns
+     * [KO] 정규화된 Z 방향 성분
+     * [EN] Normalized Z direction component
+     */
+    get directionZ(): number {
+        return this.#directionZ;
     }
 
     /**

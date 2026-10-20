@@ -489,11 +489,10 @@ class SystemUniformUpdater {
 
         const dirInfo = members.direction;
         if (dirInfo) {
-            const dir = windManager.direction;
             const dirIdx = (dirInfo.uniformOffset ?? dirInfo.offset) / 4;
-            uniformDataF32[dirIdx] = dir[0];
-            uniformDataF32[dirIdx + 1] = dir[1];
-            uniformDataF32[dirIdx + 2] = dir[2];
+            uniformDataF32[dirIdx] = windManager.directionX;
+            uniformDataF32[dirIdx + 1] = 0.0;
+            uniformDataF32[dirIdx + 2] = windManager.directionZ;
         }
 
         const speedInfo = members.speed;

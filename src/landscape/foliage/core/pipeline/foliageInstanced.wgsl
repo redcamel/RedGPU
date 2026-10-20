@@ -93,12 +93,7 @@ fn calculateFoliageWindDisplacement(
         hasValidMask
     );
 
-    let rawWindXZ = systemUniforms.wind.direction.xz;
-    var windDir = vec2<f32>(1.0, 0.0);
-    let windLenSq = dot(rawWindXZ, rawWindXZ);
-    if (windLenSq > 1e-8) {
-        windDir = rawWindXZ * inverseSqrt(windLenSq);
-    }
+    let windDir = systemUniforms.wind.direction.xz;
     let windSpeed = systemUniforms.wind.speed;
 
     let treeBaseXZ = instancePos.xz;
@@ -433,4 +428,3 @@ fn entryPointShadowMaskedFragment(input : FoliageShadowMaskedOutput) {
         discard;
     }
 }
-

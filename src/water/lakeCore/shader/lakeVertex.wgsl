@@ -37,9 +37,7 @@ fn calculateWaveDisplacement(posXZ: vec2<f32>, timeSec: f32) -> vec4<f32> {
     let speed = systemUniforms.wind.speed;
     let amp = vertexUniforms.waveAmplitude * systemUniforms.wind.strength;
 
-    let rawWindXZ = systemUniforms.wind.direction.xz;
-    let rawLenSq = dot(rawWindXZ, rawWindXZ);
-    let dir1 = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), rawLenSq > 1e-8);
+    let dir1 = systemUniforms.wind.direction.xz;
     let dir2 = vec2<f32>(
         dir1.x * 0.819152 - dir1.y * 0.573576,
         dir1.x * 0.573576 + dir1.y * 0.819152

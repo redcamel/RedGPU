@@ -1,5 +1,13 @@
-import * as RedGPU from "../../../../../dist";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
+
+/**
+ * [KO] Lake Settings 종합 설정 예제
+ * [EN] Lake Settings Comprehensive Example
+ *
+ * [KO] 호수 수체(Lake) 및 LakeMaterial의 모든 파라미터(파동, 광학, 굴절, 코스틱스, 실시간 동적 인터랙션, SSR, 디버그 모드 등)를 실시간으로 제어하고 테스트하는 종합 설정 예제입니다.
+ * [EN] A comprehensive settings example allowing real-time adjustment and testing of all Lake and LakeMaterial parameters including waves, optics, refraction, caustics, dynamic ripples, SSR, and debug modes.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -7,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 28;
         controller.tilt = -13;
@@ -16,7 +23,6 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = false;
         redGPUContext.addView(view);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
@@ -25,11 +31,14 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
+        // [KO] 해변 지형, 수중 암초, 해안 바위, 고대 신전 기둥 및 부유 바위 환경 생성
+        // [EN] Create beach terrain, submerged reefs, shoreline boulders, temple colonnade, and floating rocks
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
+        // [KO] 호수(Lake) 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
+        // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
         const lake = new RedGPU.Water.Lake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
-
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -46,7 +55,6 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-
         scene.addWater(lake);
 
         if (beachEnvironment.floatingRocks && beachEnvironment.floatingRocks.length > 0) {
@@ -62,17 +70,16 @@ RedGPU.init(
         let lastTime = null;
 
         const getLakeFloorHeight = (x, z) => {
-
             return -1.212 - (z - 0.156) * 0.158384;
         };
 
-        const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+        // [KO] 로컬 스킨드 메시(Soldier.glb) 로드 및 수체 상호작용 재귀 등록
+        // [EN] Load local skinned mesh (Soldier.glb) and recursively register for water interaction
         new RedGPU.GLTFLoader(
             redGPUContext,
-            MODEL_URL,
+            '../../../../assets/gltf/Soldier.glb',
             (loader) => {
                 characterMesh = loader.resultMesh;
-
                 characterMesh.x = 0;
                 characterMesh.z = -12;
                 characterMesh.y = getLakeFloorHeight(characterMesh.x, characterMesh.z);
@@ -119,12 +126,11 @@ RedGPU.init(
                     stateMachine.addState(runState);
 
                     const BLEND = 0.25;
-                    const pairs = [
+                    [
                         ['Idle', 'Walk'], ['Idle', 'Run'],
                         ['Walk', 'Idle'], ['Walk', 'Run'],
                         ['Run', 'Idle'], ['Run', 'Walk'],
-                    ];
-                    pairs.forEach(([from, to]) => {
+                    ].forEach(([from, to]) => {
                         stateMachine.addTransition({
                             fromState: from,
                             toState: to,
@@ -139,14 +145,12 @@ RedGPU.init(
                         loader.activeAnimations[0].animStateMachine = stateMachine;
                     }
                 }
-                console.log('🚶 [Character] Soldier loaded and ready for lake water interaction.');
             },
             RedGPUExampleHelper.loadingProgressInfoHandler
         );
 
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-
+        renderer.start(redGPUContext, (time) => {
             const floatingRocks = beachEnvironment.floatingRocks;
             const count = floatingRocks.length;
             const t = time * 0.001;
@@ -170,10 +174,9 @@ RedGPU.init(
                     else targetStateName = 'Idle';
                 }
             }
-        };
-        renderer.start(redGPUContext, render);
+        });
 
-        renderTestPane(redGPUContext, lake, directionalLight, view);
+        renderTestPane(redGPUContext, lake);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -183,7 +186,7 @@ RedGPU.init(
     }
 );
 
-function createBeachEnvironment(redGPUContext, scene) {
+const createBeachEnvironment = (redGPUContext, scene) => {
     const floatingRocks = [];
 
     const gravelAlbedo = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/terrain/terrainTest_001/layer/gravel.jpg');
@@ -215,11 +218,12 @@ function createBeachEnvironment(redGPUContext, scene) {
     seabedMaterial.roughnessFactor = 0.92;
     seabedMaterial.metallicFactor = 0.0;
 
-    const seabedGeometry = new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 280);
-    const seabedMesh = new RedGPU.Display.Mesh(redGPUContext, seabedGeometry, seabedMaterial);
-    seabedMesh.x = 0;
-    seabedMesh.y = -2.2;
-    seabedMesh.z = 0;
+    const seabedMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 280),
+        seabedMaterial
+    );
+    seabedMesh.setPosition(0, -2.2, 0);
     seabedMesh.rotationX = 9.0;
     seabedMesh.receiveShadow = true;
     scene.addChild(seabedMesh);
@@ -236,11 +240,12 @@ function createBeachEnvironment(redGPUContext, scene) {
     beachMaterial.roughnessFactor = 0.95;
     beachMaterial.metallicFactor = 0.0;
 
-    const beachGeometry = new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 40);
-    const beachMesh = new RedGPU.Display.Mesh(redGPUContext, beachGeometry, beachMaterial);
-    beachMesh.x = 0;
-    beachMesh.y = 0.35;
-    beachMesh.z = -30;
+    const beachMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 40),
+        beachMaterial
+    );
+    beachMesh.setPosition(0, 0.35, -30);
     beachMesh.rotationX = 13.5;
     beachMesh.castShadow = true;
     beachMesh.receiveShadow = true;
@@ -258,48 +263,42 @@ function createBeachEnvironment(redGPUContext, scene) {
     rockMaterial.roughnessFactor = 0.82;
     rockMaterial.metallicFactor = 0.04;
 
-    const rockStackGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 2.2, 3.0, 8.5, 18);
-    const rockStack = new RedGPU.Display.Mesh(redGPUContext, rockStackGeom, rockMaterial);
-    rockStack.x = 11.5;
-    rockStack.y = 2.2;
-    rockStack.z = -0.5;
+    const rockStack = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Cylinder(redGPUContext, 2.2, 3.0, 8.5, 18),
+        rockMaterial
+    );
+    rockStack.setPosition(11.5, 2.2, -0.5);
     rockStack.rotationY = 25;
     rockStack.rotationZ = -4;
     rockStack.castShadow = true;
     rockStack.receiveShadow = true;
     scene.addChild(rockStack);
 
-    const rockStackSubGeom = new RedGPU.Primitive.Sphere(redGPUContext, 2.6, 24, 24);
-    const rockStackSub = new RedGPU.Display.Mesh(redGPUContext, rockStackSubGeom, rockMaterial);
-    rockStackSub.x = 7.8;
-    rockStackSub.y = 1.0;
-    rockStackSub.z = -4.2;
-    rockStackSub.scaleX = 1.3;
-    rockStackSub.scaleY = 0.9;
-    rockStackSub.scaleZ = 1.2;
+    const rockStackSub = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Sphere(redGPUContext, 2.6, 24, 24),
+        rockMaterial
+    );
+    rockStackSub.setPosition(7.8, 1.0, -4.2);
+    rockStackSub.setScale(1.3, 0.9, 1.2);
     rockStackSub.rotationX = 40;
     rockStackSub.rotationY = -25;
     rockStackSub.castShadow = true;
     rockStackSub.receiveShadow = true;
     scene.addChild(rockStackSub);
 
-    const submergedReefs = [
+    const sphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
+    [
         {x: -11, y: -0.9, z: -4, scale: [3.2, 1.3, 2.8], rotX: 35, rotY: 15},
         {x: -9.5, y: -1.7, z: 4, scale: [3.8, 1.5, 3.4], rotX: -25, rotY: 45},
         {x: -6.5, y: -2.8, z: 11, scale: [4.4, 2.0, 4.0], rotX: 40, rotY: -30},
         {x: 5.5, y: -1.4, z: 4, scale: [2.6, 1.2, 2.6], rotX: 20, rotY: 60},
         {x: 1.5, y: -2.6, z: 10, scale: [3.6, 1.7, 3.0], rotX: -30, rotY: -15},
-    ];
-
-    submergedReefs.forEach((info) => {
-        const reefGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
-        const reefMesh = new RedGPU.Display.Mesh(redGPUContext, reefGeom, rockMaterial);
-        reefMesh.x = info.x;
-        reefMesh.y = info.y;
-        reefMesh.z = info.z;
-        reefMesh.scaleX = info.scale[0];
-        reefMesh.scaleY = info.scale[1];
-        reefMesh.scaleZ = info.scale[2];
+    ].forEach((info) => {
+        const reefMesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, rockMaterial);
+        reefMesh.setPosition(info.x, info.y, info.z);
+        reefMesh.setScale(info.scale[0], info.scale[1], info.scale[2]);
         reefMesh.rotationX = info.rotX;
         reefMesh.rotationY = info.rotY;
         reefMesh.castShadow = true;
@@ -307,22 +306,15 @@ function createBeachEnvironment(redGPUContext, scene) {
         scene.addChild(reefMesh);
     });
 
-    const shorelineBoulders = [
+    [
         {x: -14, y: 0.5, z: -8, scale: [2.4, 1.8, 2.2], rotX: 30, rotY: 25},
         {x: -6, y: 0.38, z: -8.5, scale: [1.8, 1.3, 1.6], rotX: -35, rotY: -40},
         {x: 13, y: 0.48, z: -7, scale: [2.6, 1.7, 2.4], rotX: 45, rotY: 10},
         {x: 2.5, y: 0.28, z: -7.5, scale: [2.0, 1.2, 1.8], rotX: -20, rotY: 55},
-    ];
-
-    shorelineBoulders.forEach((info) => {
-        const boulderGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
-        const boulderMesh = new RedGPU.Display.Mesh(redGPUContext, boulderGeom, rockMaterial);
-        boulderMesh.x = info.x;
-        boulderMesh.y = info.y;
-        boulderMesh.z = info.z;
-        boulderMesh.scaleX = info.scale[0];
-        boulderMesh.scaleY = info.scale[1];
-        boulderMesh.scaleZ = info.scale[2];
+    ].forEach((info) => {
+        const boulderMesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, rockMaterial);
+        boulderMesh.setPosition(info.x, info.y, info.z);
+        boulderMesh.setScale(info.scale[0], info.scale[1], info.scale[2]);
         boulderMesh.rotationX = info.rotX;
         boulderMesh.rotationY = info.rotY;
         boulderMesh.castShadow = true;
@@ -332,19 +324,15 @@ function createBeachEnvironment(redGPUContext, scene) {
 
     const floatReefGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16);
     const floatReef1 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
-    floatReef1.x = -2.5;
-    floatReef1.y = 0.46;
+    floatReef1.setPosition(-2.5, 0.46, 6);
     floatReef1.originalY = 0.46;
-    floatReef1.z = 6;
     floatReef1.castShadow = true;
     scene.addChild(floatReef1);
     floatingRocks.push(floatReef1);
 
     const floatReef2 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
-    floatReef2.x = 7.5;
-    floatReef2.y = 0.38;
+    floatReef2.setPosition(7.5, 0.38, 8);
     floatReef2.originalY = 0.38;
-    floatReef2.z = 8;
     floatReef2.scaleX = 0.85;
     floatReef2.scaleZ = 0.85;
     floatReef2.castShadow = true;
@@ -361,68 +349,66 @@ function createBeachEnvironment(redGPUContext, scene) {
     terracottaMaterial.roughnessFactor = 0.28;
     terracottaMaterial.metallicFactor = 0.05;
 
-    const platformGeom = new RedGPU.Primitive.Box(redGPUContext, 8.5, 0.8, 6.0);
-    const platformMesh = new RedGPU.Display.Mesh(redGPUContext, platformGeom, marbleMaterial);
-    platformMesh.x = -3.2;
-    platformMesh.y = 0.7;
-    platformMesh.z = 2.0;
+    const platformMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 8.5, 0.8, 6.0),
+        marbleMaterial
+    );
+    platformMesh.setPosition(-3.2, 0.7, 2.0);
     platformMesh.rotationY = 22;
     platformMesh.castShadow = true;
     platformMesh.receiveShadow = true;
     scene.addChild(platformMesh);
 
-    const obeliskGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 1.1, 13.5, 16);
-    const obeliskMesh = new RedGPU.Display.Mesh(redGPUContext, obeliskGeom, terracottaMaterial);
-    obeliskMesh.x = -3.2;
-    obeliskMesh.y = 6.8;
-    obeliskMesh.z = 2.0;
+    const obeliskMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 1.1, 13.5, 16),
+        terracottaMaterial
+    );
+    obeliskMesh.setPosition(-3.2, 6.8, 2.0);
     obeliskMesh.rotationY = 22;
     obeliskMesh.castShadow = true;
     obeliskMesh.receiveShadow = true;
     scene.addChild(obeliskMesh);
 
     const columnGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 0.5, 9.0, 24);
-    const colonnadeCoords = [
-        {x: -5.8, z: 0.6, h: 9.0},
-        {x: -1.0, z: 3.2, h: 9.0},
-        {x: 3.8, z: 1.2, h: 8.5},
-        {x: 6.8, z: 3.5, h: 8.5},
-    ];
-
-    colonnadeCoords.forEach((p, idx) => {
+    const capGeom = new RedGPU.Primitive.Box(redGPUContext, 1.3, 0.45, 1.3);
+    [
+        {x: -5.8, z: 0.6},
+        {x: -1.0, z: 3.2},
+        {x: 3.8, z: 1.2},
+        {x: 6.8, z: 3.5},
+    ].forEach((p) => {
         const column = new RedGPU.Display.Mesh(redGPUContext, columnGeom, marbleMaterial);
-        column.x = p.x;
-        column.y = 4.3;
-        column.z = p.z;
+        column.setPosition(p.x, 4.3, p.z);
         column.castShadow = true;
         column.receiveShadow = true;
         scene.addChild(column);
 
-        const capGeom = new RedGPU.Primitive.Box(redGPUContext, 1.3, 0.45, 1.3);
         const cap = new RedGPU.Display.Mesh(redGPUContext, capGeom, marbleMaterial);
-        cap.x = p.x;
-        cap.y = 8.8;
-        cap.z = p.z;
+        cap.setPosition(p.x, 8.8, p.z);
         cap.castShadow = true;
         cap.receiveShadow = true;
         scene.addChild(cap);
     });
 
-    const beamGeom = new RedGPU.Primitive.Box(redGPUContext, 5.5, 0.6, 1.2);
-    const beam = new RedGPU.Display.Mesh(redGPUContext, beamGeom, marbleMaterial);
-    beam.x = -3.4;
-    beam.y = 9.3;
-    beam.z = 1.9;
+    const beam = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Box(redGPUContext, 5.5, 0.6, 1.2),
+        marbleMaterial
+    );
+    beam.setPosition(-3.4, 9.3, 1.9);
     beam.rotationY = 28;
     beam.castShadow = true;
     beam.receiveShadow = true;
     scene.addChild(beam);
 
-    const strawGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.45, 0.55, 12.0, 20);
-    const strawMesh = new RedGPU.Display.Mesh(redGPUContext, strawGeom, marbleMaterial);
-    strawMesh.x = 0.5;
-    strawMesh.y = 1.2;
-    strawMesh.z = -1.2;
+    const strawMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Cylinder(redGPUContext, 0.45, 0.55, 12.0, 20),
+        marbleMaterial
+    );
+    strawMesh.setPosition(0.5, 1.2, -1.2);
     strawMesh.rotationZ = 34;
     strawMesh.rotationX = 18;
     strawMesh.castShadow = true;
@@ -430,19 +416,17 @@ function createBeachEnvironment(redGPUContext, scene) {
     scene.addChild(strawMesh);
 
     return {floatingRocks};
-}
+};
 
-function renderTestPane(redGPUContext, lake, directionalLight, view) {
+const renderTestPane = (redGPUContext, lake) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         directionalShadow: true,
         skybox: true,
         ibl: true,
         gui: (pane) => {
-
             const basicFolder = pane.addFolder({title: 'Lake Controller', expanded: true});
             basicFolder.addBinding(lake, 'waterLevel', {min: -3, max: 4, step: 0.05});
-
             basicFolder.addBinding(lake.waterMaterial, 'debugMode', {
                 options: {
                     'PBR Water (Full) (0)': 0,
@@ -463,22 +447,12 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
                     'Raw Scene Depth (1)': 1
                 }
             });
-            basicFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {
-                min: 0.5,
-                max: 30.0,
-                step: 0.5
-            });
+            basicFolder.addBinding(lake.waterMaterial, 'debugMaxDepth', {min: 0.5, max: 30.0, step: 0.5});
 
             const interactionFolder = pane.addFolder({title: 'Water Interaction (Dynamic Ripples)', expanded: true});
             interactionFolder.addBinding(lake, 'interactionEnabled');
             interactionFolder.addBinding(lake, 'interactionDomainSize', {min: 16.0, max: 64.0, step: 2.0});
-            if (typeof lake.maxPenetration === 'number') {
-                interactionFolder.addBinding(lake, 'maxPenetration', {
-                    min: 0.05,
-                    max: 1.5,
-                    step: 0.05
-                });
-            }
+            interactionFolder.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.5, step: 0.05});
             interactionFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.1, max: 0.45, step: 0.01});
             interactionFolder.addBinding(lake, 'rippleDamping', {min: 0.005, max: 0.08, step: 0.001});
             interactionFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.5, max: 5.0, step: 0.1});
@@ -543,6 +517,4 @@ function renderTestPane(redGPUContext, lake, directionalLight, view) {
             ssrFolder.addBinding(lake.waterMaterial, 'ssrThickness', {min: 0.1, max: 2.0, step: 0.05});
         }
     });
-}
-
-
+};

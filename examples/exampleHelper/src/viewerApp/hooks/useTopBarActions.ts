@@ -82,8 +82,10 @@ export const useTopBarActions = () => {
                 guiConfig?.redGPUContext ||
                 guiConfig?.viewList ||
                 guiConfig?.scene ||
+                guiConfig?.directionalShadow ||
                 guiConfig?.ibl ||
                 guiConfig?.skybox ||
+                guiConfig?.globalWind ||
                 guiConfig?.gui
             );
 
@@ -99,7 +101,7 @@ export const useTopBarActions = () => {
                 });
             }
         }
-    }, [redGPUContext, addTopBarRightAction, axisActive, gridActive, debugActive, guiConfig, showSettingsPanel, setShowSettingsPanel]);
+    }, [redGPUContext, axisActive, gridActive, debugActive, showSettingsPanel, guiConfig, addTopBarRightAction, setShowSettingsPanel]);
 
     return {
         debugActive,

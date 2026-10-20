@@ -38,6 +38,7 @@ export interface GuiConfig {
     directionalShadow?: boolean;
     ibl?: boolean;
     skybox?: boolean;
+    globalWind?: boolean;
     compareLabel?: CompareLabelConfig;
     gui?: (gui: any) => void;
 }
@@ -104,8 +105,10 @@ export const useExampleHelperStore = create<ExampleHelperState>((set) => ({
             config?.redGPUContext ||
             config?.viewList ||
             config?.scene ||
+            config?.directionalShadow ||
             config?.ibl ||
             config?.skybox ||
+            config?.globalWind ||
             config?.gui
         );
         set({guiConfig: config, showSettingsPanel: hasPanels});

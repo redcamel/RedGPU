@@ -2,13 +2,11 @@ import * as RedGPU from "../../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Multi Lake (다중 수체) 테스트 예제
- * [EN] Multi Lake test example
+ * [KO] Multi Lake (다중 수체) 예제
+ * [EN] Multi Lake Example
  *
- * [KO] 단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 Lake 수체를 동시에 렌더링하고,
- *      각각의 수영장 벽체 내경에 물의 크기를 완벽하게 일치시켜 수영장 풀 구조를 정밀 테스트합니다.
- * [EN] Simultaneously renders 5 independent Lake bodies with distinct elevations (waterLevel), locations,
- *      sizes, and optical properties within a single scene, snuggly fitted inside pool boundary walls.
+ * [KO] 단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 Lake 수체를 동시에 렌더링하고 제어하는 예제입니다.
+ * [EN] Simultaneously renders and controls 5 independent Lake bodies with distinct elevations (waterLevel), locations, sizes, and optical properties within a single scene.
  */
 
 const canvas = document.createElement('canvas');
@@ -17,7 +15,6 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 설정 (5개의 다단 수영장 풀을 파노라마로 조망할 수 있는 시점)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 75;
         controller.tilt = -20;
@@ -26,13 +23,10 @@ RedGPU.init(
         controller.maxDistance = 250;
         controller.speedDistance = 0.5;
 
-        // 2. 씬 및 뷰 구성
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = false;
         redGPUContext.addView(view);
 
-        // 3. IBL 환경 맵 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -40,7 +34,6 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
 
-        // 4. 태양 방향성 라이트 추가
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 32;
         directionalLight.azimuth = 145;
@@ -48,7 +41,8 @@ RedGPU.init(
         directionalLight.lux = 75000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 5. 공용 노멀 맵 텍스처 (GPU 리소스 효율 공유, 선형 포맷 rgba8unorm 지정)
+        // [KO] 공용 노멀 맵 텍스처 생성 (선형 포맷 'rgba8unorm')
+        // [EN] Create shared normal map textures (linear format 'rgba8unorm')
         const sharedNormalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -66,7 +60,8 @@ RedGPU.init(
             'rgba8unorm'
         );
 
-        // 6. 5개의 독립된 수영장(Lake) 규격 정의 (수영장 내경과 물 크기 1:1 일치)
+        // [KO] 5개의 독립된 수영장(Lake) 규격 정의 및 생성
+        // [EN] Define and create 5 independent pool Lake instances
         const poolConfigs = [
             {
                 name: 'Pool 1 (Top Alpine)',
@@ -110,7 +105,7 @@ RedGPU.init(
                 waveAmplitude: 0.015,
                 roughness: 0.08,
                 opacity: 0.88,
-                refractionStrength: 1.1,
+                refractionStrength: 1.0,
                 causticsStrength: 1.2,
             },
             {
@@ -148,23 +143,18 @@ RedGPU.init(
         const lakes = [];
         for (let i = 0; i < poolConfigs.length; i++) {
             const cfg = poolConfigs[i];
-            // 수영장 벽 내경에 딱 맞는 크기로 Lake 생성 (수영장 내경 = 물 크기)
             const lake = new RedGPU.Water.Lake(
                 redGPUContext,
                 cfg.poolWidth,
                 cfg.poolHeight,
                 64,
-                64,
-                cfg.name
+                64
             );
             lake.x = cfg.x;
             lake.waterLevel = cfg.y;
             lake.z = cfg.z;
-
-            // 파도 물성
             lake.waveAmplitude = cfg.waveAmplitude;
 
-            // 광학 및 재질 물성
             const mat = lake.waterMaterial;
             mat.normalTexture = sharedNormalTexture;
             mat.normalDetailTexture = sharedNormalDetailTexture;
@@ -174,16 +164,13 @@ RedGPU.init(
             mat.opacity = cfg.opacity;
             mat.refractionStrength = cfg.refractionStrength;
             mat.causticsStrength = cfg.causticsStrength;
-            mat.enableSSR = true;
 
             scene.addWater(lake);
             lakes.push(lake);
         }
 
-        // 7. 각 수영장 벽 내경에 물이 딱 맞물리는 정밀 벽체 및 테라스 지형 구축
         const animatedObjects = createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs);
 
-        // 8. 렌더 루프 시작 (Zero-GC 애니메이션 업데이트)
         const renderer = new RedGPU.Renderer();
         const animCount = animatedObjects.length;
         renderer.start(redGPUContext, (time) => {
@@ -199,7 +186,6 @@ RedGPU.init(
             }
         });
 
-        // 9. 인터랙티브 컨트롤 패널 바인딩
         renderTestPane(redGPUContext, lakes, directionalLight);
     },
     (failReason) => {
@@ -210,25 +196,19 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 물 크기(poolWidth x poolHeight)와 수영장 내경이 100% 일치하도록 정밀한 수영장 벽 및 바닥 지형을 생성합니다.
- */
-function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
+const createPrecisePoolEnvironment = (redGPUContext, scene, poolConfigs) => {
     const animatedList = [];
 
-    // 수영장 외벽/상단 림(Coping) 재질: 고급스러운 밝은 대리석 스톤
     const poolRimMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     poolRimMaterial.baseColorFactor = [0.82, 0.82, 0.85, 1.0];
     poolRimMaterial.roughnessFactor = 0.35;
     poolRimMaterial.metallicFactor = 0.05;
 
-    // 수영장 바닥 및 내벽 타일 재질: 은은한 쿨 그레이 타일
     const poolTileMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     poolTileMaterial.baseColorFactor = [0.65, 0.72, 0.78, 1.0];
     poolTileMaterial.roughnessFactor = 0.45;
     poolTileMaterial.metallicFactor = 0.0;
 
-    // 주변 전체 지형 기저 바닥 (Base Ground)
     const cliffMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     cliffMaterial.baseColorFactor = [0.30, 0.28, 0.25, 1.0];
     cliffMaterial.roughnessFactor = 0.9;
@@ -259,106 +239,79 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
     emeraldMaterial.roughnessFactor = 0.2;
     emeraldMaterial.metallicFactor = 0.8;
 
-    // 광활한 월드 기저 지형
-    const worldBaseGeom = new RedGPU.Primitive.Ground(redGPUContext, 160, 160, 16, 16);
-    const worldBaseMesh = new RedGPU.Display.Mesh(redGPUContext, worldBaseGeom, cliffMaterial);
+    const worldBaseMesh = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Ground(redGPUContext, 160, 160, 16, 16),
+        cliffMaterial
+    );
     worldBaseMesh.y = -6.0;
     scene.addChild(worldBaseMesh);
 
-    // 각 수영장 풀 생성
+    const createWall = (sx, sy, sz, x, y, z) => {
+        const wallMesh = new RedGPU.Display.Mesh(
+            redGPUContext,
+            new RedGPU.Primitive.Box(redGPUContext, sx, sy, sz),
+            poolRimMaterial
+        );
+        wallMesh.setPosition(x, y, z);
+        wallMesh.castShadow = true;
+        scene.addChild(wallMesh);
+    };
+
+    const createPillar = (material, x, baseY, z, height) => {
+        const pillar = new RedGPU.Display.Mesh(
+            redGPUContext,
+            new RedGPU.Primitive.Cylinder(redGPUContext, 0.55, 0.55, height, 16),
+            material
+        );
+        pillar.setPosition(x, baseY + height / 2, z);
+        pillar.castShadow = true;
+        scene.addChild(pillar);
+    };
+
     for (let i = 0; i < poolConfigs.length; i++) {
         const cfg = poolConfigs[i];
         const pw = cfg.poolWidth;
         const ph = cfg.poolHeight;
-        const basinDepth = 2.5; // 수심 (수면 아래 2.5m)
-        const wallThickness = 1.5; // 수영장 벽 두께
-        const curbHeight = 0.6; // 수면 위로 솟아오른 수영장 턱(Rim) 높이
-        const totalWallHeight = basinDepth + curbHeight; // 전체 벽 높이 (바닥 ~ 수면 위)
+        const basinDepth = 2.5;
+        const wallThickness = 1.5;
+        const curbHeight = 0.6;
+        const totalWallHeight = basinDepth + curbHeight;
         const wallCenterY = cfg.y - basinDepth + totalWallHeight / 2;
 
-        // 1) 수영장 바닥 (Pool Floor): 내경 면적에 딱 맞게 배치
-        const floorGeom = new RedGPU.Primitive.Ground(redGPUContext, pw, ph, 8, 8);
-        const floorMesh = new RedGPU.Display.Mesh(redGPUContext, floorGeom, poolTileMaterial);
-        floorMesh.x = cfg.x;
-        floorMesh.y = cfg.y - basinDepth;
-        floorMesh.z = cfg.z;
+        const floorMesh = new RedGPU.Display.Mesh(
+            redGPUContext,
+            new RedGPU.Primitive.Ground(redGPUContext, pw, ph, 8, 8),
+            poolTileMaterial
+        );
+        floorMesh.setPosition(cfg.x, cfg.y - basinDepth, cfg.z);
         scene.addChild(floorMesh);
 
-        // 2) 4면 수영장 벽 (North, South, East, West)
-        // 물의 경계(pw x ph)와 내벽면이 완벽하게 맞물리도록 정확한 센터 오프셋 적용
-        // 북쪽 벽 (North Wall: X 전체 커버)
-        createWall(
-            redGPUContext,
-            scene,
-            poolRimMaterial,
-            pw + wallThickness * 2,
-            totalWallHeight,
-            wallThickness,
-            cfg.x,
-            wallCenterY,
-            cfg.z - ph / 2 - wallThickness / 2
-        );
+        createWall(pw + wallThickness * 2, totalWallHeight, wallThickness, cfg.x, wallCenterY, cfg.z - ph / 2 - wallThickness / 2);
+        createWall(pw + wallThickness * 2, totalWallHeight, wallThickness, cfg.x, wallCenterY, cfg.z + ph / 2 + wallThickness / 2);
+        createWall(wallThickness, totalWallHeight, ph, cfg.x - pw / 2 - wallThickness / 2, wallCenterY, cfg.z);
+        createWall(wallThickness, totalWallHeight, ph, cfg.x + pw / 2 + wallThickness / 2, wallCenterY, cfg.z);
 
-        // 남쪽 벽 (South Wall: X 전체 커버)
-        createWall(
-            redGPUContext,
-            scene,
-            poolRimMaterial,
-            pw + wallThickness * 2,
-            totalWallHeight,
-            wallThickness,
-            cfg.x,
-            wallCenterY,
-            cfg.z + ph / 2 + wallThickness / 2
-        );
-
-        // 서쪽 벽 (West Wall: 북/남 벽 사이 완벽 결합)
-        createWall(
-            redGPUContext,
-            scene,
-            poolRimMaterial,
-            wallThickness,
-            totalWallHeight,
-            ph,
-            cfg.x - pw / 2 - wallThickness / 2,
-            wallCenterY,
-            cfg.z
-        );
-
-        // 동쪽 벽 (East Wall: 북/남 벽 사이 완벽 결합)
-        createWall(
-            redGPUContext,
-            scene,
-            poolRimMaterial,
-            wallThickness,
-            totalWallHeight,
-            ph,
-            cfg.x + pw / 2 + wallThickness / 2,
-            wallCenterY,
-            cfg.z
-        );
-
-        // 3) 수면 바로 위 SSR 반사 검증 랜드마크 오브젝트 (각 풀 테마에 맞춤)
         if (i === 0) {
-            // Pool 1: 황금 토러스 링 + 크롬 기둥
-            const ringGeom = new RedGPU.Primitive.Torus(redGPUContext, 3.2, 0.7, 32, 32);
-            const ring = new RedGPU.Display.Mesh(redGPUContext, ringGeom, goldMaterial);
-            ring.x = cfg.x;
-            ring.y = cfg.y + 1.6;
-            ring.z = cfg.z;
+            const ring = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Torus(redGPUContext, 3.2, 0.7, 32, 32),
+                goldMaterial
+            );
+            ring.setPosition(cfg.x, cfg.y + 1.6, cfg.z);
             ring.castShadow = true;
             scene.addChild(ring);
             animatedList.push({mesh: ring, rotSpeed: 0.6, baseY: cfg.y + 1.6, bobAmp: 0.35, bobFreq: 1.5, phase: 0});
 
-            createPillar(redGPUContext, scene, chromeMaterial, cfg.x - 7, cfg.y - basinDepth, cfg.z - 7, 6.5);
-            createPillar(redGPUContext, scene, chromeMaterial, cfg.x + 7, cfg.y - basinDepth, cfg.z - 7, 6.5);
+            createPillar(chromeMaterial, cfg.x - 7, cfg.y - basinDepth, cfg.z - 7, 6.5);
+            createPillar(chromeMaterial, cfg.x + 7, cfg.y - basinDepth, cfg.z - 7, 6.5);
         } else if (i === 1) {
-            // Pool 2: 크롬 구체 + 골드 기둥
-            const sphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 2.0, 32, 32);
-            const sphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, chromeMaterial);
-            sphere.x = cfg.x;
-            sphere.y = cfg.y + 1.3;
-            sphere.z = cfg.z;
+            const sphere = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Sphere(redGPUContext, 2.0, 32, 32),
+                chromeMaterial
+            );
+            sphere.setPosition(cfg.x, cfg.y + 1.3, cfg.z);
             sphere.castShadow = true;
             scene.addChild(sphere);
             animatedList.push({
@@ -370,15 +323,15 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 1.2
             });
 
-            createPillar(redGPUContext, scene, goldMaterial, cfg.x - 5, cfg.y - basinDepth, cfg.z + 5, 5.0);
-            createPillar(redGPUContext, scene, goldMaterial, cfg.x + 5, cfg.y - basinDepth, cfg.z + 5, 5.0);
+            createPillar(goldMaterial, cfg.x - 5, cfg.y - basinDepth, cfg.z + 5, 5.0);
+            createPillar(goldMaterial, cfg.x + 5, cfg.y - basinDepth, cfg.z + 5, 5.0);
         } else if (i === 2) {
-            // Pool 3: 구리 토러스 링 + 에메랄드 구체
-            const torusGeom = new RedGPU.Primitive.Torus(redGPUContext, 2.4, 0.5, 32, 32);
-            const torus = new RedGPU.Display.Mesh(redGPUContext, torusGeom, copperMaterial);
-            torus.x = cfg.x;
-            torus.y = cfg.y + 1.3;
-            torus.z = cfg.z;
+            const torus = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Torus(redGPUContext, 2.4, 0.5, 32, 32),
+                copperMaterial
+            );
+            torus.setPosition(cfg.x, cfg.y + 1.3, cfg.z);
             torus.castShadow = true;
             scene.addChild(torus);
             animatedList.push({
@@ -390,21 +343,22 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 2.1
             });
 
-            const sphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.4, 24, 24);
-            const sphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, emeraldMaterial);
-            sphere.x = cfg.x + 4.0;
-            sphere.y = cfg.y + 1.1;
-            sphere.z = cfg.z - 4.0;
+            const sphere = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Sphere(redGPUContext, 1.4, 24, 24),
+                emeraldMaterial
+            );
+            sphere.setPosition(cfg.x + 4.0, cfg.y + 1.1, cfg.z - 4.0);
             sphere.castShadow = true;
             scene.addChild(sphere);
             animatedList.push({mesh: sphere, rotSpeed: 0.5, baseY: cfg.y + 1.1, bobAmp: 0.2, bobFreq: 2.0, phase: 0.8});
         } else if (i === 3) {
-            // Pool 4: 대형 황금 링 + 루비/크롬 듀얼 구체
-            const bigRingGeom = new RedGPU.Primitive.Torus(redGPUContext, 3.8, 0.75, 36, 36);
-            const bigRing = new RedGPU.Display.Mesh(redGPUContext, bigRingGeom, goldMaterial);
-            bigRing.x = cfg.x;
-            bigRing.y = cfg.y + 1.8;
-            bigRing.z = cfg.z;
+            const bigRing = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Torus(redGPUContext, 3.8, 0.75, 36, 36),
+                goldMaterial
+            );
+            bigRing.setPosition(cfg.x, cfg.y + 1.8, cfg.z);
             bigRing.castShadow = true;
             scene.addChild(bigRing);
             animatedList.push({
@@ -416,11 +370,12 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 3.0
             });
 
-            const rubySphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 28, 28);
-            const rubySphere = new RedGPU.Display.Mesh(redGPUContext, rubySphereGeom, rubyMaterial);
-            rubySphere.x = cfg.x - 8.0;
-            rubySphere.y = cfg.y + 1.4;
-            rubySphere.z = cfg.z + 3.0;
+            const rubySphere = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 28, 28),
+                rubyMaterial
+            );
+            rubySphere.setPosition(cfg.x - 8.0, cfg.y + 1.4, cfg.z + 3.0);
             rubySphere.castShadow = true;
             scene.addChild(rubySphere);
             animatedList.push({
@@ -432,11 +387,12 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 1.9
             });
 
-            const chromeSphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 28, 28);
-            const chromeSphere = new RedGPU.Display.Mesh(redGPUContext, chromeSphereGeom, chromeMaterial);
-            chromeSphere.x = cfg.x + 8.0;
-            chromeSphere.y = cfg.y + 1.4;
-            chromeSphere.z = cfg.z + 3.0;
+            const chromeSphere = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Sphere(redGPUContext, 1.6, 28, 28),
+                chromeMaterial
+            );
+            chromeSphere.setPosition(cfg.x + 8.0, cfg.y + 1.4, cfg.z + 3.0);
             chromeSphere.castShadow = true;
             scene.addChild(chromeSphere);
             animatedList.push({
@@ -448,12 +404,12 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 0.4
             });
         } else if (i === 4) {
-            // Pool 5: 퍼플 토러스 + 코퍼 기둥
-            const purpleRingGeom = new RedGPU.Primitive.Torus(redGPUContext, 2.2, 0.45, 32, 32);
-            const purpleRing = new RedGPU.Display.Mesh(redGPUContext, purpleRingGeom, rubyMaterial);
-            purpleRing.x = cfg.x;
-            purpleRing.y = cfg.y + 1.2;
-            purpleRing.z = cfg.z;
+            const purpleRing = new RedGPU.Display.Mesh(
+                redGPUContext,
+                new RedGPU.Primitive.Torus(redGPUContext, 2.2, 0.45, 32, 32),
+                rubyMaterial
+            );
+            purpleRing.setPosition(cfg.x, cfg.y + 1.2, cfg.z);
             purpleRing.castShadow = true;
             scene.addChild(purpleRing);
             animatedList.push({
@@ -465,51 +421,30 @@ function createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs) {
                 phase: 2.7
             });
 
-            createPillar(redGPUContext, scene, copperMaterial, cfg.x - 4.0, cfg.y - basinDepth, cfg.z - 4.0, 4.5);
-            createPillar(redGPUContext, scene, copperMaterial, cfg.x + 4.0, cfg.y - basinDepth, cfg.z + 4.0, 4.5);
+            createPillar(copperMaterial, cfg.x - 4.0, cfg.y - basinDepth, cfg.z - 4.0, 4.5);
+            createPillar(copperMaterial, cfg.x + 4.0, cfg.y - basinDepth, cfg.z + 4.0, 4.5);
         }
     }
 
     return animatedList;
-}
+};
 
-function createWall(redGPUContext, scene, material, sx, sy, sz, x, y, z) {
-    const wallGeom = new RedGPU.Primitive.Box(redGPUContext, sx, sy, sz);
-    const wallMesh = new RedGPU.Display.Mesh(redGPUContext, wallGeom, material);
-    wallMesh.x = x;
-    wallMesh.y = y;
-    wallMesh.z = z;
-    wallMesh.castShadow = true;
-    scene.addChild(wallMesh);
-}
-
-function createPillar(redGPUContext, scene, material, x, baseY, z, height) {
-    const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.55, 0.55, height, 16);
-    const pillar = new RedGPU.Display.Mesh(redGPUContext, pillarGeom, material);
-    pillar.x = x;
-    pillar.y = baseY + height / 2;
-    pillar.z = z;
-    pillar.castShadow = true;
-    scene.addChild(pillar);
-}
-
-/**
- * [KO] 5개의 수영장 풀을 편리하게 실시간 제어할 수 있는 Tweakpane GUI 패널을 구성합니다.
- */
-function renderTestPane(redGPUContext, lakes, directionalLight) {
-    const lakeNames = ['Pool 1 (Top Alpine)', 'Pool 2 (Mid-Left Deep)', 'Pool 3 (Mid-Right Lagoon)', 'Pool 4 (Lower-Center)', 'Pool 5 (Bottom Mystic)'];
+const renderTestPane = (redGPUContext, lakes, directionalLight) => {
+    const lakeNames = [
+        'Pool 1 (Top Alpine)',
+        'Pool 2 (Mid-Left Deep)',
+        'Pool 3 (Mid-Right Lagoon)',
+        'Pool 4 (Lower-Center)',
+        'Pool 5 (Bottom Mystic)'
+    ];
 
     const masterParams = {
-        masterSSR: true,
-        masterWaveScale: 1.0,
-        activeLakeIndex: 0,
-        elevation: directionalLight.elevation,
-        azimuth: directionalLight.azimuth,
-        lux: directionalLight.lux,
+        enableSSR: true,
+        waveScale: 1.0,
+        activePool: 0
     };
 
     const currentParams = {
-        name: lakeNames[0],
         waterLevel: lakes[0].waterLevel,
         waveAmplitude: lakes[0].waveAmplitude,
         baseColor: lakes[0].waterMaterial.baseColor.hex,
@@ -518,55 +453,42 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
         opacity: lakes[0].waterMaterial.opacity,
         refractionStrength: lakes[0].waterMaterial.refractionStrength,
         causticsStrength: lakes[0].waterMaterial.causticsStrength,
-        enableSSR: lakes[0].waterMaterial.enableSSR,
+        enableSSR: lakes[0].waterMaterial.enableSSR
     };
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. 전역 마스터 제어 폴더
-            const masterFolder = pane.addFolder({title: 'Master Controls (전역 제어)', expanded: true});
+            const masterFolder = pane.addFolder({title: 'Master Controls', expanded: true});
+            masterFolder.addBinding(masterParams, 'enableSSR').on('change', (ev) => {
+                for (let i = 0; i < lakes.length; i++) {
+                    lakes[i].waterMaterial.enableSSR = ev.value;
+                }
+                currentParams.enableSSR = ev.value;
+                pane.refresh();
+            });
 
-            masterFolder.addBinding(masterParams, 'masterSSR', {label: 'All SSR On/Off'})
-                .on('change', (ev) => {
-                    for (let i = 0; i < lakes.length; i++) {
-                        lakes[i].waterMaterial.enableSSR = ev.value;
-                    }
-                    currentParams.enableSSR = ev.value;
-                    pane.refresh();
-                });
+            masterFolder.addBinding(masterParams, 'waveScale', {min: 0.0, max: 3.0, step: 0.1}).on('change', (ev) => {
+                const scale = ev.value;
+                const baseAmps = [0.02, 0.025, 0.015, 0.022, 0.018];
+                for (let i = 0; i < lakes.length; i++) {
+                    lakes[i].waveAmplitude = baseAmps[i] * scale;
+                }
+                currentParams.waveAmplitude = lakes[masterParams.activePool].waveAmplitude;
+                pane.refresh();
+            });
 
-            masterFolder.addBinding(masterParams, 'masterWaveScale', {
-                min: 0.0,
-                max: 3.0,
-                step: 0.1,
-                label: 'Wave Scale'
-            })
-                .on('change', (ev) => {
-                    const scale = ev.value;
-                    const baseAmps = [0.02, 0.025, 0.015, 0.022, 0.018];
-                    for (let i = 0; i < lakes.length; i++) {
-                        lakes[i].waveAmplitude = baseAmps[i] * scale;
-                    }
-                    currentParams.waveAmplitude = lakes[masterParams.activeLakeIndex].waveAmplitude;
-                    pane.refresh();
-                });
-
-            // 2. 수영장별 세부 선택 및 튜닝 폴더
-            const lakeFolder = pane.addFolder({title: 'Selected Pool Tuning (수영장별 세부 제어)', expanded: true});
-
-            lakeFolder.addBinding(masterParams, 'activeLakeIndex', {
-                label: 'Select Pool',
+            const lakeFolder = pane.addFolder({title: 'Selected Pool Tuning', expanded: true});
+            lakeFolder.addBinding(masterParams, 'activePool', {
                 options: {
                     'Pool 1 (Top Alpine)': 0,
                     'Pool 2 (Mid-Left Deep)': 1,
                     'Pool 3 (Mid-Right Lagoon)': 2,
                     'Pool 4 (Lower-Center)': 3,
-                    'Pool 5 (Bottom Mystic)': 4,
+                    'Pool 5 (Bottom Mystic)': 4
                 }
             }).on('change', (ev) => {
                 const lake = lakes[ev.value];
                 const mat = lake.waterMaterial;
-                currentParams.name = lakeNames[ev.value];
                 currentParams.waterLevel = lake.waterLevel;
                 currentParams.waveAmplitude = lake.waveAmplitude;
                 currentParams.baseColor = mat.baseColor.hex;
@@ -579,89 +501,50 @@ function renderTestPane(redGPUContext, lakes, directionalLight) {
                 pane.refresh();
             });
 
-            lakeFolder.addBinding(currentParams, 'waterLevel', {
-                min: -6.0,
-                max: 8.0,
-                step: 0.05,
-                label: 'waterLevel (y)'
-            })
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterLevel = ev.value;
-                });
-
+            lakeFolder.addBinding(currentParams, 'waterLevel', {min: -6.0, max: 8.0, step: 0.05}).on('change', (ev) => {
+                lakes[masterParams.activePool].waterLevel = ev.value;
+            });
             lakeFolder.addBinding(currentParams, 'waveAmplitude', {
                 min: 0.0,
                 max: 0.06,
-                step: 0.001,
-                label: 'waveAmplitude'
-            })
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waveAmplitude = ev.value;
-                });
-
-            lakeFolder.addBinding(currentParams, 'baseColor', {label: 'baseColor'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.baseColor.setColorByHEX(ev.value);
-                });
-
-            lakeFolder.addBinding(currentParams, 'deepColor', {label: 'deepColor'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.deepColor.setColorByHEX(ev.value);
-                });
-
-            lakeFolder.addBinding(currentParams, 'roughness', {min: 0.0, max: 1.0, step: 0.01, label: 'roughness'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.roughness = ev.value;
-                });
-
-            lakeFolder.addBinding(currentParams, 'opacity', {min: 0.0, max: 1.0, step: 0.01, label: 'opacity'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.opacity = ev.value;
-                });
-
+                step: 0.001
+            }).on('change', (ev) => {
+                lakes[masterParams.activePool].waveAmplitude = ev.value;
+            });
+            lakeFolder.addBinding(currentParams, 'baseColor').on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.baseColor.setColorByHEX(ev.value);
+            });
+            lakeFolder.addBinding(currentParams, 'deepColor').on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.deepColor.setColorByHEX(ev.value);
+            });
+            lakeFolder.addBinding(currentParams, 'roughness', {min: 0.0, max: 1.0, step: 0.01}).on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.roughness = ev.value;
+            });
+            lakeFolder.addBinding(currentParams, 'opacity', {min: 0.0, max: 1.0, step: 0.01}).on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.opacity = ev.value;
+            });
             lakeFolder.addBinding(currentParams, 'refractionStrength', {
                 min: 0.0,
-                max: 3.0,
-                step: 0.05,
-                label: 'refraction'
-            })
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.refractionStrength = ev.value;
-                });
-
+                max: 1.0,
+                step: 0.02
+            }).on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.refractionStrength = ev.value;
+            });
             lakeFolder.addBinding(currentParams, 'causticsStrength', {
                 min: 0.0,
-                max: 3.0,
-                step: 0.05,
-                label: 'caustics'
-            })
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.causticsStrength = ev.value;
-                });
+                max: 2.0,
+                step: 0.05
+            }).on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.causticsStrength = ev.value;
+            });
+            lakeFolder.addBinding(currentParams, 'enableSSR').on('change', (ev) => {
+                lakes[masterParams.activePool].waterMaterial.enableSSR = ev.value;
+            });
 
-            lakeFolder.addBinding(currentParams, 'enableSSR', {label: 'enableSSR'})
-                .on('change', (ev) => {
-                    lakes[masterParams.activeLakeIndex].waterMaterial.enableSSR = ev.value;
-                });
-
-            // 3. 태양광 환경 폴더
-            const lightFolder = pane.addFolder({title: 'Directional Light (태양광)', expanded: false});
-
-            lightFolder.addBinding(masterParams, 'elevation', {min: 5, max: 85, step: 1, label: 'elevation'})
-                .on('change', (ev) => {
-                    directionalLight.elevation = ev.value;
-                });
-
-            lightFolder.addBinding(masterParams, 'azimuth', {min: 0, max: 360, step: 1, label: 'azimuth'})
-                .on('change', (ev) => {
-                    directionalLight.azimuth = ev.value;
-                });
-
-            lightFolder.addBinding(masterParams, 'lux', {min: 10000, max: 150000, step: 5000, label: 'lux'})
-                .on('change', (ev) => {
-                    directionalLight.lux = ev.value;
-                });
+            const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
+            lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 85, step: 1});
+            lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+            lightFolder.addBinding(directionalLight, 'lux', {min: 10000, max: 150000, step: 5000});
         }
     });
-}
-
+};

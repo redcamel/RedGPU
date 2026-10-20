@@ -258,9 +258,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let timeSec = systemUniforms.time.time;
     let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
 
-    let rawWindXZ = systemUniforms.wind.direction.xz;
-    let rawLenSq = dot(rawWindXZ, rawWindXZ);
-    let primaryWindDir = select(vec2<f32>(1.0, 0.0), normalize(rawWindXZ), rawLenSq > 1e-8);
+    let primaryWindDir = systemUniforms.wind.direction.xz;
     let secondaryWindDir = vec2<f32>(
         primaryWindDir.x * 0.819152 - primaryWindDir.y * 0.573576,
         primaryWindDir.x * 0.573576 + primaryWindDir.y * 0.819152

@@ -3,7 +3,7 @@
  * [EN] Engine global wind physics parameter structure (32 Bytes, 16-byte aligned)
  */
 struct Wind {
-    // Offset 0 (12B): 바람 진행 방향 단위 벡터 (정규화된 vec3)
+    // Offset 0 (12B): 바람 진행 방향 단위 벡터 (정규화된 vec3, Y=0)
     direction: vec3<f32>,
     // Offset 12 (4B): 풍속 (대기 흐름의 시간 진행 속도 배율)
     speed: f32,

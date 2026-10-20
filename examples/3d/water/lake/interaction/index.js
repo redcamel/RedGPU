@@ -1,13 +1,20 @@
 import * as RedGPU from "../../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
+/**
+ * [KO] Lake Object Interaction 예제
+ * [EN] Lake Object Interaction Example
+ *
+ * [KO] 동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 수체 상호작용 속성을 시연합니다.
+ * [EN] Demonstrates real-time 2D wave equation (FDTD) ripple simulation and water interaction properties between dynamic objects and the water body.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 및 컨트롤러 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 18;
         controller.tilt = -14;
@@ -16,13 +23,10 @@ RedGPU.init(
         controller.maxDistance = 60;
         controller.speedDistance = 0.2;
 
-        // 2. 씬 및 뷰 생성
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = false;
         redGPUContext.addView(view);
 
-        // 3. IBL 환경 맵 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -30,7 +34,6 @@ RedGPU.init(
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
 
-        // 4. 직사광 (DirectionalLight) 설정 - 75000 Lux 단일 제어
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 38;
         directionalLight.azimuth = 135;
@@ -38,11 +41,12 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 5. 수중 바닥 지형 (수심 및 굴절, 침수 대비용)
+        // [KO] 수중 바닥 지형 및 SSR 반사용 포털 게이트 환경 생성
+        // [EN] Create underwater floor and golden portal gate environment for SSR reflection
         createUnderwaterEnvironment(redGPUContext, scene);
 
-        // 6. Lake 수체 생성 (기본값 활용 및 듀얼 노멀 바인딩)
-        // [중요] 노멀 맵은 색상이 아닌 방향 벡터(X,Y,Z) 데이터이므로, sRGB 감마 보정으로 인한 벡터 왜곡을 방지하기 위해 반드시 선형 포맷인 'rgba8unorm'을 명시합니다.
+        // [KO] Lake 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
+        // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
         const lake = new RedGPU.Water.Lake(redGPUContext, 80, 80, 80, 80);
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -50,7 +54,7 @@ RedGPU.init(
             true,
             null,
             null,
-            'rgba8unorm' // [포맷 명시] sRGB 감마 변환 방지 (Linear Color Space 유지)
+            'rgba8unorm'
         );
         lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -58,12 +62,12 @@ RedGPU.init(
             true,
             null,
             null,
-            'rgba8unorm' // [포맷 명시] sRGB 감마 변환 방지 (Linear Color Space 유지)
+            'rgba8unorm'
         );
         scene.addWater(lake);
 
-        // 7. 실시간 물 상호작용 객체 생성
-        // 7-1. 주 상호작용 객체 (골드 메탈릭 구체)
+        // [KO] 실시간 수체 상호작용 객체(골드 메탈릭 구체) 생성 및 추적 타겟 지정
+        // [EN] Create interactive gold metallic sphere and assign as interaction follow target
         const sphereMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
         sphereMaterial.baseColorFactor = [0.95, 0.61, 0.07, 1.0];
         sphereMaterial.roughnessFactor = 0.15;
@@ -78,13 +82,9 @@ RedGPU.init(
         sphere.receiveShadow = true;
         sphere.enableWaterInteraction = true;
         sphere.waterWaveStrength = 1.5;
-        sphere.x = 0;
-        sphere.y = 0;
-        sphere.z = 0;
         lake.interactionFollowTarget = sphere;
         scene.addChild(sphere);
 
-        // 8. 모션 애니메이션 및 인터랙션 상태 관리 (Zero-GC 변수)
         const motionState = {
             autoMove: true,
             moveSpeed: 1.2,
@@ -93,38 +93,31 @@ RedGPU.init(
             time: 0,
         };
 
-        // 9. 매 프레임 렌더 콜백 및 렌더러 시작 (Zero-GC 철저 준수)
         let lastTimestamp = performance.now();
-
-        const onFrame = (currentTimestamp) => {
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, (currentTimestamp) => {
             const dt = Math.min((currentTimestamp - lastTimestamp) * 0.001, 0.1);
             lastTimestamp = currentTimestamp;
 
             if (motionState.autoMove) {
-                // 자동 궤도 순환 및 수면 부유 모션
                 motionState.time += dt * motionState.moveSpeed;
                 sphere.x = Math.sin(motionState.time) * motionState.moveRadius;
                 sphere.z = Math.cos(motionState.time * 0.8) * (motionState.moveRadius * 0.7);
                 sphere.y = Math.sin(motionState.time * 2.2) * motionState.bobbingAmplitude;
             }
-        };
+        });
 
-        const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, onFrame);
-
-        // 10. Tweakpane GUI 연동
         renderTestPane(redGPUContext, lake, sphere, directionalLight, motionState);
     },
-    (error) => {
-        console.error('RedGPU 초기화 실패:', error);
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] 수심 판정 및 굴절 비교를 위한 바닥 수중 지형을 생성합니다.
- */
-function createUnderwaterEnvironment(redGPUContext, scene) {
-    // 바닥 타일 지면
+const createUnderwaterEnvironment = (redGPUContext, scene) => {
     const groundMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     groundMaterial.baseColorFactor = [0.17, 0.24, 0.31, 1.0];
     groundMaterial.roughnessFactor = 0.8;
@@ -139,7 +132,6 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
     groundMesh.receiveShadow = true;
     scene.addChild(groundMesh);
 
-    // 수심 비교용 원형 기둥들
     const pillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     pillarMaterial.baseColorFactor = [0.74, 0.76, 0.78, 1.0];
     pillarMaterial.roughnessFactor = 0.4;
@@ -155,34 +147,26 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
             new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 3.5, 24),
             pillarMaterial
         );
-        pillar.x = coord[0];
-        pillar.y = -1.25;
-        pillar.z = coord[1];
+        pillar.setPosition(coord[0], -1.25, coord[1]);
         pillar.castShadow = true;
         pillar.receiveShadow = true;
         scene.addChild(pillar);
     }
 
-    // 수면 공간 반사(SSR) 관찰용 거대 골든 포털 링 게이트 및 지지 타워 (수면 위 7~8m)
-    // 구체가 회전하며 생성하는 실시간 2D 잔물결 파동(Dynamic Ripples) 위로 게이트의 반사상이 파동치며 일렁이는 모습을 극적으로 체감
     const gateGold = new RedGPU.Material.PBRMaterial(redGPUContext);
     gateGold.baseColorFactor = [1.0, 0.75, 0.25, 1.0];
     gateGold.roughnessFactor = 0.15;
     gateGold.metallicFactor = 0.95;
 
-    // 거대 원형 토러스 포털 링 (수면 근접 배치: y=1.5)
     const portalRing = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Torus(redGPUContext, 3.2, 0.70, 32, 32),
         gateGold
     );
-    portalRing.x = 0;
-    portalRing.y = 1.5;
-    portalRing.z = -5.2;
+    portalRing.setPosition(0, 1.5, -5.2);
     portalRing.castShadow = true;
     scene.addChild(portalRing);
 
-    // 좌우측 지지 타워 (넓은 간격: x=±6.5)
     const towerMat = new RedGPU.Material.PBRMaterial(redGPUContext);
     towerMat.baseColorFactor = [0.85, 0.88, 0.92, 1.0];
     towerMat.roughnessFactor = 0.25;
@@ -190,69 +174,48 @@ function createUnderwaterEnvironment(redGPUContext, scene) {
 
     const towerGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 8.5, 24);
     const leftGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
-    leftGate.x = -6.5;
-    leftGate.y = 1.2;
-    leftGate.z = -5.2;
+    leftGate.setPosition(-6.5, 1.2, -5.2);
     leftGate.castShadow = true;
     scene.addChild(leftGate);
 
     const rightGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
-    rightGate.x = 6.5;
-    rightGate.y = 1.2;
-    rightGate.z = -5.2;
+    rightGate.setPosition(6.5, 1.2, -5.2);
     rightGate.castShadow = true;
     scene.addChild(rightGate);
-}
+};
 
-/**
- * [KO] Tweakpane GUI를 구성하여 파동 시뮬레이션, 메쉬 상호작용 및 광학 속성을 실시간 제어합니다.
- */
-function renderTestPane(redGPUContext, lake, sphere, directionalLight, motionState) {
+const renderTestPane = (redGPUContext, lake, sphere, directionalLight, motionState) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. Lake (수체 파동 시뮬레이션)
-            const lakeFolder = pane.addFolder({title: 'Lake (수체 파동 시뮬레이션)', expanded: true});
-
+            const lakeFolder = pane.addFolder({title: 'Lake', expanded: true});
             lakeFolder.addBinding(lake, 'interactionEnabled');
             lakeFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.05, max: 0.8, step: 0.01});
             lakeFolder.addBinding(lake, 'rippleDamping', {min: 0.001, max: 0.05, step: 0.001});
             lakeFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
             lakeFolder.addBinding(lake, 'interactionDomainSize', {min: 4.0, max: 32.0, step: 1.0});
-            if (typeof lake.maxPenetration === 'number') {
-                lakeFolder.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.0, step: 0.05});
-            }
+            lakeFolder.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.0, step: 0.05});
             lakeFolder.addBinding(lake, 'waterLevel', {min: -2.0, max: 2.0, step: 0.05});
 
-            // 2. Interactive Sphere (상호작용 구체 & 모션)
-            const sphereFolder = pane.addFolder({title: 'Interactive Sphere (상호작용 구체 & 모션)', expanded: true});
-
+            const sphereFolder = pane.addFolder({title: 'Interactive Sphere', expanded: true});
             sphereFolder.addBinding(sphere, 'enableWaterInteraction');
             sphereFolder.addBinding(sphere, 'waterWaveStrength', {min: 0.0, max: 4.0, step: 0.1});
-
             sphereFolder.addBinding(motionState, 'autoMove');
             sphereFolder.addBinding(motionState, 'moveSpeed', {min: 0.1, max: 3.0, step: 0.1});
             sphereFolder.addBinding(motionState, 'moveRadius', {min: 1.0, max: 8.0, step: 0.2});
+            sphereFolder.addBinding(sphere, 'y', {min: -2.0, max: 4.0, step: 0.05}).on('change', () => {
+                motionState.autoMove = false;
+            });
+            sphereFolder.addBinding(sphere, 'x', {min: -10.0, max: 10.0, step: 0.1}).on('change', () => {
+                motionState.autoMove = false;
+            });
+            sphereFolder.addBinding(sphere, 'z', {min: -10.0, max: 10.0, step: 0.1}).on('change', () => {
+                motionState.autoMove = false;
+            });
 
-            sphereFolder.addBinding(sphere, 'y', {min: -2.0, max: 4.0, step: 0.05})
-                .on('change', () => {
-                    motionState.autoMove = false;
-                });
-            sphereFolder.addBinding(sphere, 'x', {min: -10.0, max: 10.0, step: 0.1})
-                .on('change', () => {
-                    motionState.autoMove = false;
-                });
-            sphereFolder.addBinding(sphere, 'z', {min: -10.0, max: 10.0, step: 0.1})
-                .on('change', () => {
-                    motionState.autoMove = false;
-                });
-
-            // 3. DirectionalLight (직사광)
-            const lightFolder = pane.addFolder({title: 'DirectionalLight (직사광)', expanded: false});
-
+            const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
         }
     });
-}
-
+};
