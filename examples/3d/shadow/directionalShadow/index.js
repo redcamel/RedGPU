@@ -22,6 +22,7 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
         // 2. 조명 설정
@@ -29,7 +30,6 @@ RedGPU.init(
         // [EN] Add a directional light that will generate shadows.
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
-
 
         // 4. 무작위 객체 생성
         addRandomMeshes(redGPUContext, scene);
@@ -48,7 +48,6 @@ RedGPU.init(
                 mesh.y += Math.sin(time / 1000 + i * 10) / 10;
             }
         });
-
 
         // 7. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);

@@ -17,11 +17,12 @@ RedGPU.init(
     (redGPUContext) => {
         // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 15;
+        controller.distance = 20;
         controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
         // 2. 조명 설정
@@ -32,8 +33,8 @@ RedGPU.init(
 
         // 3. 바닥 및 GLTF 모델 로드
         addGround(redGPUContext, scene);
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -1, 1);
-        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 1, 0);
+        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', -3, 3, 3);
+        loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BrainStem/glTF-Binary/BrainStem.glb', 3, 0, 3);
 
         // 4. 애니메이션 렌더 루프 및 시작
         const renderer = new RedGPU.Renderer();
@@ -46,7 +47,6 @@ RedGPU.init(
                 model.rotationY += 0.5;
             }
         });
-
 
         // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
@@ -63,12 +63,13 @@ RedGPU.init(
  * [KO] GLTF 모델을 로드하고 그림자 설정을 적용합니다.
  * [EN] Loads a GLTF model and applies shadow settings.
  */
-const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition) => {
+const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition, scale = 1) => {
     new RedGPU.GLTFLoader(
         redGPUContext,
         url,
         (v) => {
             const mesh = v['resultMesh'];
+            mesh.setScale(scale);
             mesh.x = xPosition;
             mesh.y = yPosition;
 
