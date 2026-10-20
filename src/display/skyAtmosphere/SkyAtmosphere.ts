@@ -307,7 +307,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set mieScattering(v: [number, number, number]) {
-        this.#setParam('mieScattering', [...v], true, false, true);
+        this.#setVec3Param('mieScattering', v, true, false, true);
     }
 
     /**
@@ -323,7 +323,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set mieAbsorption(v: [number, number, number]) {
-        this.#setParam('mieAbsorption', [...v], true, false, true);
+        this.#setVec3Param('mieAbsorption', v, true, false, true);
     }
 
     /**
@@ -339,7 +339,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set rayleighScattering(v: [number, number, number]) {
-        this.#setParam('rayleighScattering', [...v], true, false, true);
+        this.#setVec3Param('rayleighScattering', v, true, false, true);
     }
 
     /**
@@ -403,7 +403,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set groundAlbedo(v: [number, number, number]) {
-        this.#setParam('groundAlbedo', [...v], true, false, true);
+        this.#setVec3Param('groundAlbedo', v, true, false, true);
     }
 
     /**
@@ -419,7 +419,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set absorptionCoefficient(v: [number, number, number]) {
-        this.#setParam('absorptionCoefficient', [...v], true, false, true);
+        this.#setVec3Param('absorptionCoefficient', v, true, false, true);
     }
 
     /**
@@ -515,7 +515,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set skyLuminanceFactor(v: [number, number, number]) {
-        this.#setParam('skyLuminanceFactor', [...v], true, false, true);
+        this.#setVec3Param('skyLuminanceFactor', v, true, false, true);
     }
 
     /**
@@ -785,17 +785,16 @@ class SkyAtmosphere extends RedGPUObject {
         }
 
         const camMatrix = rawCamera.viewMatrix;
-        let camMoved = false;
-        for (let i = 0; i < 16; i++) {
-            if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > 0.0001) {
-                camMoved = true;
-                break;
-            }
-        }
-
-        if (camMoved) {
+        if (this.#dirtyAerialPerspective || this.#dirtyLUT) {
             mat4.copy(this.#prevCameraMatrix, camMatrix);
-            this.#dirtyAerialPerspective = true;
+        } else {
+            for (let i = 0; i < 16; i++) {
+                if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > 0.0001) {
+                    mat4.copy(this.#prevCameraMatrix, camMatrix);
+                    this.#dirtyAerialPerspective = true;
+                    break;
+                }
+            }
         }
 
         if (this.#dirtyUniformBuffer) {
@@ -803,9 +802,12 @@ class SkyAtmosphere extends RedGPUObject {
             this.#dirtyUniformBuffer = false;
         }
 
+        const transmittanceLUT = this.#transmittanceGenerator.lutTexture;
+        const multiScatLUT = this.#multiScatteringGenerator.lutTexture;
+
         if (this.#dirtyLUT) {
             this.#transmittanceGenerator.render();
-            this.#multiScatteringGenerator.render(this.#transmittanceGenerator.lutTexture);
+            this.#multiScatteringGenerator.render(transmittanceLUT);
             this.#dirtyLUT = false;
             this.#dirtySkyView = true;
             this.#dirtyAerialPerspective = true;
@@ -813,12 +815,12 @@ class SkyAtmosphere extends RedGPUObject {
         }
 
         if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#skyViewGenerator.render(transmittanceLUT, multiScatLUT);
             this.#dirtySkyView = false;
         }
 
         if (this.#dirtyAerialPerspective) {
-            this.#aerialPerspectiveGenerator.render(view, this.#transmittanceGenerator.lutTexture, this.#multiScatteringGenerator.lutTexture);
+            this.#aerialPerspectiveGenerator.render(view, transmittanceLUT, multiScatLUT);
             this.#dirtyAerialPerspective = false;
         }
 
@@ -828,6 +830,14 @@ class SkyAtmosphere extends RedGPUObject {
     #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {
         if (validator) validator(value);
         (this.#params as any)[key] = value;
+        this.#markDirty(lut, skyView, ibl);
+    }
+
+    #setVec3Param(key: string, value: [number, number, number], lut: boolean, skyView: boolean, ibl: boolean): void {
+        const target = (this.#params as any)[key];
+        target[0] = value[0];
+        target[1] = value[1];
+        target[2] = value[2];
         this.#markDirty(lut, skyView, ibl);
     }
 

@@ -40,7 +40,6 @@ fn main(
     let sinPhi = sin(phi);
     let rayDir = vec3<f32>(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
 
-    let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
     let tEarth = getRaySphereIntersection(rayOrigin, rayDir, groundRadius);
 
     var L1 = vec3<f32>(0.0);
@@ -58,8 +57,11 @@ fn main(
 
         L1 += TPath * sunT * max(0.0, localCosSun) * params.groundAlbedo * INV_PI;
         f1 += TPath * params.groundAlbedo;
-    } else if (tMax > 0.0) {
-        integrateMultiScatSegment(rayOrigin, rayDir, 0.0, tMax, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
+    } else {
+        let tMax = getRaySphereIntersection(rayOrigin, rayDir, groundRadius + params.atmosphereHeight);
+        if (tMax > 0.0) {
+            integrateMultiScatSegment(rayOrigin, rayDir, 0.0, tMax, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
+        }
     }
 
     // [2단계: 온칩 LDS에 결과 캐싱 및 워크그룹 동기화]
@@ -103,20 +105,19 @@ fn integrateMultiScatSegment(origin: vec3<f32>, dir: vec3<f32>, tMin: f32, tMax:
         let h = max(0.0, pLen - groundRadius);
         
         let d = getAtmosphereDensities(h, params);
-        
-        let up = p * invPLen;
-        let localCosSun = dot(up, sunDir);
-        let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, h, localCosSun, params.atmosphereHeight);
-        let shadowMask = getPlanetShadowMask(p, sunDir, groundRadius);
 
         let scatR = params.rayleighScattering * d.rhoR;
         let scatM = params.mieScattering * d.rhoM;
-        let scatTotal = (scatR + scatM) * stepSize;
+        let scatStep = (*TPath) * (scatR + scatM) * stepSize;
         let ext = scatR + mieExt * d.rhoM + params.absorptionCoefficient * d.rhoO;
 
-        *L1 += *TPath * sunT * scatTotal * phaseIsotropic * shadowMask;
+        if (getPlanetShadowMask(p, sunDir, groundRadius) > 0.0) {
+            let localCosSun = dot(p * invPLen, sunDir);
+            let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, h, localCosSun, params.atmosphereHeight);
+            *L1 += scatStep * sunT * phaseIsotropic;
+        }
         
-        *f1 += *TPath * scatTotal;
+        *f1 += scatStep;
         
         *TPath *= exp(-ext * stepSize);
     }

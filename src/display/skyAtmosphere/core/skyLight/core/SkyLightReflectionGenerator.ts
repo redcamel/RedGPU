@@ -99,7 +99,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #createBindGroup(transmittance: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-        return this.createBindGroup(`SkyLight_Reflection_BindGroup_${createUUID()}`, this.#pipeline, [
+        return this.createBindGroup('SkyLight_Reflection_BindGroup', this.#pipeline, [
             {binding: 0, resource: this.#sourceCubeTextureView},
             {binding: 2, resource: this.sampler.gpuSampler},
             {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
@@ -129,7 +129,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         });
 
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
-        this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
+        this.#pipeline = this.createComputePipeline('SkyLight_Reflection_Pipeline', SPECULAR_SHADER_INFO.defaultSource);
     }
 }
 

@@ -133,6 +133,7 @@ fn phaseMieStable(cosTheta: f32, g: f32) -> f32 {
 
 fn getSquashedViewSunCos(viewDir: vec3<f32>, sunDir: vec3<f32>) -> f32 {
     let viewSunDot = dot(viewDir, sunDir);
+    if (viewSunDot <= 0.0) { return viewSunDot; }
     let sunElevationParam = saturate(sunDir.y);
     let squashFactor = mix(0.85, 1.0, sunElevationParam);
     let verticalDist = viewDir.y - sunDir.y;
@@ -149,13 +150,14 @@ fn getSunDiskRadianceUnit(
 ) -> vec3<f32> {
     let sunRad = (sunSize * 0.5) * DEG_TO_RAD;
     let cosSunRad = cos(sunRad);
-    let solidAngle = PI2 * (1.0 - cosSunRad);
-    let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
-
-    let dist = (1.0 - viewSunCos) / max(1e-7, 1.0 - cosSunRad);
+    if (viewSunCos <= cosSunRad) { return vec3<f32>(0.0); }
+    let oneMinusCosSunRad = 1.0 - cosSunRad;
+    let dist = (1.0 - viewSunCos) / max(1e-7, oneMinusCosSunRad);
     let sunMask = 1.0 - smoothstep(0.99, 1.0, dist);
     if (sunMask <= 0.0) { return vec3<f32>(0.0); }
 
+    let solidAngle = PI2 * oneMinusCosSunRad;
+    let radianceScale = 1.0 / max(6.7e-5, solidAngle); 
     let limbDarkening = pow(max(1e-7, 1.0 - saturate(dist)), sunLimbDarkening);
     let energyNormalization = sunLimbDarkening + 1.0;
 
@@ -170,13 +172,12 @@ fn getSunDiskRadianceIBL(
     let sunRad = (params.sunSize * 0.5) * DEG_TO_RAD;
     let iblAlpha = max(sunRad * 2.0, 0.175); 
     let cosAlpha = cos(iblAlpha);
-    
-    let radScale = 1.0 / (PI2 * (1.0 - cosAlpha));
-    let diff = saturate(1.0 - viewSunCos);
     let sigma_sq = 1.0 - cosAlpha;
+    let diff = saturate(1.0 - viewSunCos);
     let falloff = exp(-diff / max(1e-7, sigma_sq));
     if (falloff < 0.001) { return vec3<f32>(0.0); }
 
+    let radScale = 1.0 / (PI2 * sigma_sq);
     return (radScale * falloff) * skyTrans / PI;
 }
 
@@ -196,6 +197,7 @@ fn getMieGlowAmountUnit(
     let sharpPhase = phaseMie(viewSunCos, sharpG);
     let stablePhase = phaseMie(viewSunCos, stableG);
     let diffPhase = max(0.0, sharpPhase - stablePhase);
+    if (diffPhase <= 0.0) { return vec3<f32>(0.0); }
 
     let sunTransForGlow = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, params.sunDirection.y, params.atmosphereHeight);
     
@@ -230,6 +232,7 @@ fn integrateScatSegment(
     let rayleighScatLuminous = params.rayleighScattering * params.skyLuminanceFactor;
     let mieScatLuminous = params.mieScattering * params.skyLuminanceFactor;
     let mieExtPhys = params.mieScattering + params.mieAbsorption;
+    let invAtmosphereHeight = 1.0 / params.atmosphereHeight;
 
     for (var i = 0u; i < steps; i = i + 1u) {
         let t = tMin + (f32(i) + 0.5) * stepSize;
@@ -241,35 +244,32 @@ fn integrateScatSegment(
         
         if (r > 0.0 && viewHeight < 0.0) { continue; }
 
-        let up = p * invPLen;
-        let cosSun = dot(up, sunDir);
-        
-        // [KO] 미리 계산된 투과율 LUT 샘플링
-        // [EN] Sample precomputed transmittance LUT
-        let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
-        
-        let shadowMask = getPlanetShadowMask(p, sunDir, r);
         let d = getAtmosphereDensities(viewHeight, params);
 
-        let scatR_phys = params.rayleighScattering * d.rhoR;
-        let mieExt_phys = mieExtPhys * d.rhoM;
-        let ozoneAbs_phys = params.absorptionCoefficient * d.rhoO;
+        if (getPlanetShadowMask(p, sunDir, r) > 0.0) {
+            let up = p * invPLen;
+            let cosSun = dot(up, sunDir);
+            
+            // [KO] 미리 계산된 투과율 LUT 샘플링
+            // [EN] Sample precomputed transmittance LUT
+            let sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
 
-        let scatR_luminous = rayleighScatLuminous * d.rhoR;
-        let scatM_luminous = mieScatLuminous * d.rhoM;
-        
-        let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM) * sunTrans * shadowMask;
-        
-        let scatTotal_luminous = scatR_luminous + scatM_luminous;
-        let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
-        
-        // [KO] 다중 산란 기여분 합산 (하드웨어 선형 샘플링 필수)
-        // [EN] Add multi-scattering contribution (Hardware linear sampling mandatory)
-        let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * shadowMask * params.multiScatteringFactor;
+            let scatR_luminous = rayleighScatLuminous * d.rhoR;
+            let scatM_luminous = mieScatLuminous * d.rhoM;
+            
+            let stepScat = (scatR_luminous * phaseR + scatM_luminous * phaseM) * sunTrans;
+            
+            let scatTotal_luminous = scatR_luminous + scatM_luminous;
+            let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight * invAtmosphereHeight, 0.001, 0.999));
+            
+            // [KO] 다중 산란 기여분 합산 (하드웨어 선형 샘플링 필수)
+            // [EN] Add multi-scattering contribution (Hardware linear sampling mandatory)
+            let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * params.multiScatteringFactor;
 
-        *radiance += *transmittance * (stepScat + msScat) * stepSize;
+            *radiance += *transmittance * (stepScat + msScat) * stepSize;
+        }
         
-        let extinction_phys = scatR_phys + mieExt_phys + ozoneAbs_phys;
+        let extinction_phys = params.rayleighScattering * d.rhoR + mieExtPhys * d.rhoM + params.absorptionCoefficient * d.rhoO;
         *transmittance *= exp(-extinction_phys * stepSize);
     }
 }
@@ -365,11 +365,12 @@ fn cloud_fbm(p: vec2<f32>) -> f32 {
 
 fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
     let baseUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
+    let scaledUV = baseUV * 1.2;
     // [KO] 도메인 워핑: UV를 노이즈로 살짝 비틀어 유기적인 형태 생성
     // [EN] Domain Warping: Distort UVs with noise to create organic shapes
     let warp = vec2<f32>(
-        cloud_noise(baseUV * 1.2 + vec2<f32>(params.cloudTime * 0.01)),
-        cloud_noise(baseUV * 1.2 + vec2<f32>(5.7, 1.3) + vec2<f32>(params.cloudTime * 0.012))
+        cloud_noise(scaledUV + vec2<f32>(params.cloudTime * 0.01)),
+        cloud_noise(scaledUV + vec2<f32>(5.7, 1.3) + vec2<f32>(params.cloudTime * 0.012))
     );
     return baseUV + warp * 0.2;
 }

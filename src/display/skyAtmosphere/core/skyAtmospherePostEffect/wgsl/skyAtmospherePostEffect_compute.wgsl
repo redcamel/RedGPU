@@ -76,21 +76,20 @@ var addedRadiance = vec3<f32>(0.0);
 
 if (getPlanetShadowMask(camPos, sunDir, groundRadius) > 0.0) {
     let transVec = vec3<f32>(atmosphereTrans);
-    let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, transVec);
-    var sunDisk = vec3<f32>(0.0);
-    var finalCloudMask: f32 = 0.0;
+    addedRadiance = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, transVec);
 
     if (rawDepth >= 1.0 && !(groundRadius > 0.0 && getRaySphereIntersection(camPos, viewDir, groundRadius) > 0.0)) {
-        sunDisk = getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transVec);
-        let cloudR = groundRadius + uniforms.cloudHeight;
-        let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
-        if (tCloud > 0.0) {
-            let hitP = camPos + viewDir * tCloud;
-            finalCloudMask = getCloudDensity(cloud_fbm(getCloudWarpedUV(hitP, uniforms)), uniforms);
+        addedRadiance += getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, transVec);
+        if (uniforms.cloudCoverage > 0.0 && any(addedRadiance > vec3<f32>(0.0))) {
+            let cloudR = groundRadius + uniforms.cloudHeight;
+            let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
+            if (tCloud > 0.0) {
+                let hitP = camPos + viewDir * tCloud;
+                let finalCloudMask = getCloudDensity(cloud_fbm(getCloudWarpedUV(hitP, uniforms)), uniforms);
+                addedRadiance *= (1.0 - finalCloudMask);
+            }
         }
     }
-
-    addedRadiance = (mieGlow + sunDisk) * (1.0 - finalCloudMask);
 }
 
 // [KO] 4. 최종 산란광 합산 및 장면 합성

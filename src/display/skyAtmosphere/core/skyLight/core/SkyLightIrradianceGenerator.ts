@@ -104,7 +104,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #createBindGroup(transmittance: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-        return this.createBindGroup(`SkyLight_Irradiance_BindGroup_${createUUID()}`, this.#pipeline, [
+        return this.createBindGroup('SkyLight_Irradiance_BindGroup', this.#pipeline, [
             {binding: 0, resource: this.#sourceCubeTextureView},
             {binding: 2, resource: this.sampler.gpuSampler},
             {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
@@ -145,7 +145,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
                 label: 'SkyAtmosphere_Irradiance_LUT'
             })
         );
-        this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
+        this.#pipeline = this.createComputePipeline('SkyLight_Irradiance_Pipeline', IRRADIANCE_SHADER_INFO.defaultSource);
     }
 }
 

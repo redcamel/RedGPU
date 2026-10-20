@@ -15,6 +15,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (global_id.x >= size_u.x || global_id.y >= size_u.y || global_id.z >= 6u) { return; }
 
     let size = vec2<f32>(size_u);
+    let baseCoord = vec2<f32>(global_id.xy) + 0.5;
     let face = global_id.z;
     
     var totalRadiance = vec3<f32>(0.0);
@@ -26,7 +27,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     for (var i = 0u; i < SAMPLE_COUNT; i = i + 1u) {
         // Hammersley 시퀀스를 이용한 정밀 샘플링
         let offset = getHammersley(i, SAMPLE_COUNT) - 0.5;
-        let uv = (vec2<f32>(global_id.xy) + 0.5 + offset * 0.8) / size;
+        let uv = (baseCoord + offset * 0.8) / size;
         
         let rawDir = getCubeMapDirection(uv, face);
         let invLen = inverseSqrt(dot(rawDir, rawDir));

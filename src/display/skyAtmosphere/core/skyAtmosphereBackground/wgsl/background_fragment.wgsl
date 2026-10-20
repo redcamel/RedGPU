@@ -71,8 +71,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
     // [KO] 3. 절차적 구름 레이어 합성 (Simple Procedural Clouds)
     // [EN] 3. Composite procedural cloud layer
-    var finalCloudMask: f32 = 0.0;
-    if (!isGroundHit && viewDir.y > 0.0) {
+    if (!isGroundHit && viewDir.y > 0.0 && uniforms.cloudCoverage > 0.0) {
         let cloudR = groundRadius + uniforms.cloudHeight;
         let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
         
@@ -80,7 +79,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
             let hitP = camPos + viewDir * tCloud;
             let warpedUV = getCloudWarpedUV(hitP, uniforms);
             let rawCloudDensity = cloud_fbm(warpedUV);
-            finalCloudMask = getCloudDensity(rawCloudDensity, uniforms);
+            let finalCloudMask = getCloudDensity(rawCloudDensity, uniforms);
             
             if (finalCloudMask > 0.0) {
                 let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, uniforms.cloudHeight, sunDir.y, atmosphereHeight);
@@ -90,14 +89,12 @@ fn main(input : VertexOutput) -> FragmentOutput {
                 let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
                 let cloudColor = (sunT * INV_PI + baseRadiance) * 0.5 * cloudShadow;
                 
-                // 구름 마스크 적용
+                // 구름 마스크 적용 및 태양/광륜 감쇠
                 baseRadiance = mix(baseRadiance, cloudColor, finalCloudMask * skyTransmittance);
+                addedRadiance *= (1.0 - finalCloudMask);
             }
         }
     }
-
-    // 구름에 의한 태양 및 광륜 감쇠
-    addedRadiance *= (1.0 - finalCloudMask);
 
     // [KO] 4. 최종 복사휘도 합성 (기초 산란광 * PI + 태양 디스크 + 미 산란 광륜)
     // [EN] 4. Final radiance composition (Base scattering * PI + Sun Disk + Mie Glow)
