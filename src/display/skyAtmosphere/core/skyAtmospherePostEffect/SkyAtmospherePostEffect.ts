@@ -4,7 +4,7 @@ import ASinglePassPostEffect from "../../../../postEffect/core/ASinglePassPostEf
 import {IPostEffectResult} from "../../../../postEffect/core/types";
 import SkyAtmosphere from "../../SkyAtmosphere";
 import ShaderLibrary from "../../../../systemCodeManager/ShaderLibrary";
-import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
+import skyAtmospherePostEffectComputeShaderCode_wgsl from "./wgsl/skyAtmospherePostEffectComputeShaderCode.wgsl";
 
 /**
  * [KO] Aerial Perspective 3D LUT를 참조하여 씬 내 오브젝트들에 깊이에 따른 대기 산란광과 투과율 감쇠를 적용하는 포스트 이펙트 클래스입니다.
@@ -69,7 +69,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 `@compute @workgroup_size(${this.WORK_SIZE_X}, ${this.WORK_SIZE_Y}, ${this.WORK_SIZE_Z})`,
                 'fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {',
                 '    let uniforms = systemUniforms.skyAtmosphere;',
-                skyAtmospherePostEffect_compute_wgsl,
+                skyAtmospherePostEffectComputeShaderCode_wgsl,
                 '}'
             ].join('\n');
         };

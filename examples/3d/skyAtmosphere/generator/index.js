@@ -57,7 +57,7 @@ RedGPU.init(
         // [KO] 주요 2D LUT 시각화 및 Reflection/Irradiance LUT 검증 구체 배치
         // [EN] Visualize primary 2D LUTs and place verification spheres for Reflection/Irradiance LUTs
         createLUTSprite(skyAtmosphere.transmittanceLUT, 'Transmittance LUT', -9, 9);
-        createLUTSprite(skyAtmosphere.multiScatLUT, 'Multi-Scat LUT', 0, 9);
+        createLUTSprite(skyAtmosphere.multiScatteringLUT, 'Multi-Scattering LUT', 0, 9);
         createLUTSprite(skyAtmosphere.skyViewLUT, 'Sky-View LUT', 9, 9);
 
         const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 4, 32, 32);
@@ -118,6 +118,7 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
     new RedGPUExampleHelper(targetView.redGPUContext, {
         gui: (pane) => {
             const state = {
+                useSkyAtmosphere: true,
                 skyLuminanceFactor: {
                     r: skyAtmosphere.skyLuminanceFactor.r,
                     g: skyAtmosphere.skyLuminanceFactor.g,
@@ -138,10 +139,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
                     g: skyAtmosphere.mieAbsorption.g,
                     b: skyAtmosphere.mieAbsorption.b
                 },
-                absorptionCoefficient: {
-                    r: skyAtmosphere.absorptionCoefficient.r,
-                    g: skyAtmosphere.absorptionCoefficient.g,
-                    b: skyAtmosphere.absorptionCoefficient.b
+                absorption: {
+                    r: skyAtmosphere.absorption.r,
+                    g: skyAtmosphere.absorption.g,
+                    b: skyAtmosphere.absorption.b
                 },
                 groundAlbedo: {
                     r: skyAtmosphere.groundAlbedo.r,
@@ -149,6 +150,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
                     b: skyAtmosphere.groundAlbedo.b
                 }
             };
+
+            pane.addBinding(state, 'useSkyAtmosphere').on('change', (ev) => {
+                targetView.skyAtmosphere = ev.value ? skyAtmosphere : null;
+            });
 
             const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: true});
             f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001});
@@ -170,6 +175,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
             f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
             f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
             f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
+
+            const f_aerial = f_atmo.addFolder({title: 'Aerial Perspective', expanded: false});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveStartDepth', {min: 0, max: 100, step: 0.1});
 
             const f_scattering = f_atmo.addFolder({title: 'Scattering & Planet', expanded: true});
 
@@ -196,9 +205,9 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
             f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
 
             const f_ozone = f_scattering.addFolder({title: 'Ozone', expanded: false});
-            f_ozone.addBinding(state, 'absorptionCoefficient', {view: 'color'}).on('change', (ev) => {
+            f_ozone.addBinding(state, 'absorption', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
-                skyAtmosphere.absorptionCoefficient.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+                skyAtmosphere.absorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
             });
             f_ozone.addBinding(skyAtmosphere, 'absorptionScale', {min: 0, max: 0.1, step: 0.0001});
             f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1});

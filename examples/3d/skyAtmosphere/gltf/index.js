@@ -116,10 +116,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
             g: skyAtmosphere.mieAbsorption.g,
             b: skyAtmosphere.mieAbsorption.b
         },
-        absorptionCoefficient: {
-            r: skyAtmosphere.absorptionCoefficient.r,
-            g: skyAtmosphere.absorptionCoefficient.g,
-            b: skyAtmosphere.absorptionCoefficient.b
+        absorption: {
+            r: skyAtmosphere.absorption.r,
+            g: skyAtmosphere.absorption.g,
+            b: skyAtmosphere.absorption.b
         },
         groundAlbedo: {
             r: skyAtmosphere.groundAlbedo.r,
@@ -156,6 +156,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
             f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
             f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
 
+            const f_aerial = f_atmo.addFolder({title: 'Aerial Perspective', expanded: false});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1});
+            f_aerial.addBinding(skyAtmosphere, 'aerialPerspectiveStartDepth', {min: 0, max: 100, step: 0.1});
+
             const f_scattering = f_atmo.addFolder({title: 'Scattering & Planet', expanded: false});
 
             const f_rayleigh = f_scattering.addFolder({title: 'Rayleigh', expanded: true});
@@ -181,9 +185,9 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
             f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
 
             const f_ozone = f_scattering.addFolder({title: 'Ozone', expanded: true});
-            f_ozone.addBinding(state, 'absorptionCoefficient', {view: 'color'}).on('change', (ev) => {
+            f_ozone.addBinding(state, 'absorption', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
-                skyAtmosphere.absorptionCoefficient.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+                skyAtmosphere.absorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
             });
             f_ozone.addBinding(skyAtmosphere, 'absorptionScale', {min: 0, max: 0.1, step: 0.0001});
             f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1});

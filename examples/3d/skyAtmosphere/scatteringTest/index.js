@@ -166,10 +166,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
                     g: skyAtmosphere.mieAbsorption.g,
                     b: skyAtmosphere.mieAbsorption.b
                 },
-                absorptionCoefficient: {
-                    r: skyAtmosphere.absorptionCoefficient.r,
-                    g: skyAtmosphere.absorptionCoefficient.g,
-                    b: skyAtmosphere.absorptionCoefficient.b
+                absorption: {
+                    r: skyAtmosphere.absorption.r,
+                    g: skyAtmosphere.absorption.g,
+                    b: skyAtmosphere.absorption.b
                 },
                 groundAlbedo: {
                     r: skyAtmosphere.groundAlbedo.r,
@@ -232,9 +232,9 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
             f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1});
 
             const f_ozone = f_scattering.addFolder({title: 'Ozone', expanded: true});
-            f_ozone.addBinding(state, 'absorptionCoefficient', {view: 'color'}).on('change', (ev) => {
+            f_ozone.addBinding(state, 'absorption', {view: 'color'}).on('change', (ev) => {
                 const {r, g, b} = ev.value;
-                skyAtmosphere.absorptionCoefficient.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
+                skyAtmosphere.absorption.setColorByRGB(Math.round(r), Math.round(g), Math.round(b));
             });
             f_ozone.addBinding(skyAtmosphere, 'absorptionScale', {min: 0, max: 0.1, step: 0.0001});
             f_ozone.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1});

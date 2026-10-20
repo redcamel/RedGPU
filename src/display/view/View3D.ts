@@ -435,8 +435,8 @@ class View3D extends AView {
             let needResetBindGroup = true
             let prevInfo = this.#prevInfoList[key]
 
-            const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
-            const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
+            const skyAtmosphereReflectionLUT = skyAtmosphere?.reflectionLUT;
+            const skyAtmosphereIrradianceLUT = skyAtmosphere?.irradianceLUT;
 
             const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexSSBO.gpuBuffer;
             const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentSSBO_PBR.gpuBuffer;
@@ -637,11 +637,11 @@ class View3D extends AView {
                 },
                 {
                     binding: 15,
-                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereIrradianceLUT, this.skyAtmosphere?.skyAtmosphereIrradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.irradianceLUT, this.skyAtmosphere?.irradianceLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                 },
                 {
                     binding: 16,
-                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                    resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.reflectionLUT, this.skyAtmosphere?.reflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                 },
                 {
                     binding: 17,

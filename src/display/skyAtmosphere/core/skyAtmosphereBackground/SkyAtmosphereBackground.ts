@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import backgroundVertexShaderCode_wgsl from "./wgsl/background_vertex.wgsl";
-import backgroundFragmentShaderCode_wgsl from "./wgsl/background_fragment.wgsl";
+import backgroundVertexShaderCode_wgsl from "./wgsl/backgroundVertexShaderCode.wgsl";
+import backgroundFragmentShaderCode_wgsl from "./wgsl/backgroundFragmentShaderCode.wgsl";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import Sampler from "../../../../resources/sampler/Sampler";
@@ -19,9 +19,9 @@ import RedGPUObject from "../../../../base/RedGPUObject";
  * @category SkyAtmosphere
  */
 class SkyAtmosphereBackground extends RedGPUObject {
-    #backgroundBindGroupLayout2: GPUBindGroupLayout;
+    #backgroundBindGroupLayout: GPUBindGroupLayout;
 
-    #backgroundBindGroup2: GPUBindGroup;
+    #backgroundBindGroup: GPUBindGroup;
     #backgroundPipeline: GPURenderPipeline;
     #singleBundleArray: [GPURenderBundle] = [null];
 
@@ -39,8 +39,8 @@ class SkyAtmosphereBackground extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext,)
 
-        this.#backgroundBindGroupLayout2 = this.gpuDevice.createBindGroupLayout({
-            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL_2',
+        this.#backgroundBindGroupLayout = this.gpuDevice.createBindGroupLayout({
+            label: 'SKY_ATMOSPHERE_BACKGROUND_BGL',
             entries: [
                 {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                 {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
@@ -60,7 +60,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
      * @param transmittanceLUT -
      * [KO] 대기 투과율(Transmittance) LUT 텍스처
      * [EN] Transmittance LUT texture
-     * @param multiScatLUT -
+     * @param multiScatteringLUT -
      * [KO] 다중 산란(Multi-Scattering) LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      * @param skyViewLUT -
@@ -73,7 +73,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
     render(
         renderViewStateData: RenderViewStateData,
         transmittanceLUT: DirectTexture,
-        multiScatLUT: DirectTexture,
+        multiScatteringLUT: DirectTexture,
         skyViewLUT: DirectTexture,
         sampler: Sampler
     ) {
@@ -81,21 +81,21 @@ class SkyAtmosphereBackground extends RedGPUObject {
         const {gpuDevice, antialiasingManager} = this;
         const {useMSAA, msaaID} = antialiasingManager;
 
-        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
-        if (!this.#backgroundPipeline || dirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
-            if (!this.#backgroundPipeline || dirtyMSAA) {
+        const isDirtyMSAA = this.#lastUpdateMSAAID !== msaaID;
+        if (!this.#backgroundPipeline || isDirtyMSAA || this.#prevBackgroundSystemUniformBindGroup !== view.systemUniform_Vertex_UniformBindGroup) {
+            if (!this.#backgroundPipeline || isDirtyMSAA) {
                 this.#lastUpdateMSAAID = msaaID;
                 this.#updateBackgroundPipeline(useMSAA);
             }
             this.#prevBackgroundSystemUniformBindGroup = view.systemUniform_Vertex_UniformBindGroup;
 
-            if (!this.#backgroundBindGroup2) {
-                this.#backgroundBindGroup2 = gpuDevice.createBindGroup({
-                    label: 'SKY_ATMOSPHERE_BACKGROUND_BG_2',
-                    layout: this.#backgroundBindGroupLayout2,
+            if (!this.#backgroundBindGroup) {
+                this.#backgroundBindGroup = gpuDevice.createBindGroup({
+                    label: 'SKY_ATMOSPHERE_BACKGROUND_BG',
+                    layout: this.#backgroundBindGroupLayout,
                     entries: [
                         {binding: 0, resource: transmittanceLUT.gpuTextureView},
-                        {binding: 1, resource: multiScatLUT.gpuTextureView},
+                        {binding: 1, resource: multiScatteringLUT.gpuTextureView},
                         {binding: 2, resource: skyViewLUT.gpuTextureView},
                         {binding: 3, resource: sampler.gpuSampler}
                     ]
@@ -109,7 +109,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
 
             bundleEncoder.setPipeline(this.#backgroundPipeline);
             bundleEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-            bundleEncoder.setBindGroup(1, this.#backgroundBindGroup2);
+            bundleEncoder.setBindGroup(1, this.#backgroundBindGroup);
             bundleEncoder.draw(3, 1, 0, 0);
 
             this.#singleBundleArray[0] = bundleEncoder.finish({label: 'SKY_ATMOSPHERE_BACKGROUND_BUNDLE'});
@@ -124,10 +124,10 @@ class SkyAtmosphereBackground extends RedGPUObject {
      */
     destroy(): void {
         this.#singleBundleArray[0] = null;
-        this.#backgroundBindGroup2 = null;
+        this.#backgroundBindGroup = null;
         this.#backgroundPipeline = null;
         this.#prevBackgroundSystemUniformBindGroup = null;
-        this.#backgroundBindGroupLayout2 = null;
+        this.#backgroundBindGroupLayout = null;
     }
 
     #updateBackgroundPipeline(useMSAA: boolean) {
@@ -140,7 +140,7 @@ class SkyAtmosphereBackground extends RedGPUObject {
             layout: gpuDevice.createPipelineLayout({
                 bindGroupLayouts: [
                     resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-                    this.#backgroundBindGroupLayout2
+                    this.#backgroundBindGroupLayout
                 ]
             }),
             vertex: {

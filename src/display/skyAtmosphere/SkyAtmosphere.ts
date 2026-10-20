@@ -96,11 +96,11 @@ class SkyAtmosphere extends RedGPUObject {
     };
 
     #prevSunSource: DirectionalLight = null;
-    #dirtyLUT: boolean = true;
-    #dirtySkyView: boolean = true;
-    #dirtyAerialPerspective: boolean = true;
-    #dirtySkyLight: boolean = true;
-    #dirtyUniformBuffer: boolean = true;
+    #isDirtyOpticalLUT: boolean = true;
+    #isDirtySkyView: boolean = true;
+    #isDirtyAerialPerspective: boolean = true;
+    #isDirtySkyLight: boolean = true;
+    #isDirtyUniformBuffer: boolean = true;
 
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
@@ -121,8 +121,8 @@ class SkyAtmosphere extends RedGPUObject {
     });
 
     #absorptionScale: number = 0.001881;
-    #absorptionCoefficient: ColorRGB = new ColorRGB(88, 255, 12, () => {
-        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorptionCoefficient, this.#absorptionScale);
+    #absorption: ColorRGB = new ColorRGB(88, 255, 12, () => {
+        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorption, this.#absorptionScale);
     });
 
     #groundAlbedo: ColorRGB = new ColorRGB(102, 102, 102, () => {
@@ -202,8 +202,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.cloudTimeMultiplier;
     }
 
-    set cloudTimeMultiplier(v: number) {
-        this.#setParam('cloudTimeMultiplier', v, false, false, false, validateNumberRange);
+    set cloudTimeMultiplier(value: number) {
+        this.#setParam('cloudTimeMultiplier', value, false, false, false, validateNumberRange);
     }
 
     /**
@@ -218,8 +218,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.cloudCoverage;
     }
 
-    set cloudCoverage(v: number) {
-        this.#setParam('cloudCoverage', v, false, false, false, (v) => validateNumberRange(v, 0, 1.0));
+    set cloudCoverage(value: number) {
+        this.#setParam('cloudCoverage', value, false, false, false, (value) => validateNumberRange(value, 0, 1.0));
     }
 
     /**
@@ -234,8 +234,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.cloudDensity;
     }
 
-    set cloudDensity(v: number) {
-        this.#setParam('cloudDensity', v, false, false, false, (v) => validateNumberRange(v, 0, 1.0));
+    set cloudDensity(value: number) {
+        this.#setParam('cloudDensity', value, false, false, false, (value) => validateNumberRange(value, 0, 1.0));
     }
 
     /**
@@ -250,8 +250,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.cloudHeight;
     }
 
-    set cloudHeight(v: number) {
-        this.#setParam('cloudHeight', v, false, false, false, (v) => validatePositiveNumberRange(v, 0.1, 20.0));
+    set cloudHeight(value: number) {
+        this.#setParam('cloudHeight', value, false, false, false, (value) => validatePositiveNumberRange(value, 0.1, 20.0));
     }
 
     /**
@@ -266,8 +266,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.aerialPerspectiveDistanceScale;
     }
 
-    set aerialPerspectiveDistanceScale(v: number) {
-        this.#setParam('aerialPerspectiveDistanceScale', v, false, true, true, (v) => validatePositiveNumberRange(v, 1, 1000));
+    set aerialPerspectiveDistanceScale(value: number) {
+        this.#setParam('aerialPerspectiveDistanceScale', value, false, true, true, (value) => validatePositiveNumberRange(value, 1, 1000));
     }
 
     /**
@@ -282,8 +282,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.aerialPerspectiveStartDepth;
     }
 
-    set aerialPerspectiveStartDepth(v: number) {
-        this.#setParam('aerialPerspectiveStartDepth', v, false, true, true, (v) => validatePositiveNumberRange(v, 0, 100));
+    set aerialPerspectiveStartDepth(value: number) {
+        this.#setParam('aerialPerspectiveStartDepth', value, false, true, true, (value) => validatePositiveNumberRange(value, 0, 100));
     }
 
     /**
@@ -298,8 +298,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.groundRadius;
     }
 
-    set groundRadius(v: number) {
-        this.#setParam('groundRadius', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
+    set groundRadius(value: number) {
+        this.#setParam('groundRadius', value, true, false, true, (value) => validatePositiveNumberRange(value, 1));
     }
 
     /**
@@ -314,8 +314,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.atmosphereHeight;
     }
 
-    set atmosphereHeight(v: number) {
-        this.#setParam('atmosphereHeight', v, true, false, true, (v) => validatePositiveNumberRange(v, 1));
+    set atmosphereHeight(value: number) {
+        this.#setParam('atmosphereHeight', value, true, false, true, (value) => validatePositiveNumberRange(value, 1));
     }
 
     /**
@@ -342,10 +342,10 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#mieScatteringScale;
     }
 
-    set mieScatteringScale(v: number) {
-        validatePositiveNumberRange(v, 0);
-        this.#mieScatteringScale = v;
-        this.#updateVec3FromColorAndScale('mieScattering', this.#mieScattering, v);
+    set mieScatteringScale(value: number) {
+        validatePositiveNumberRange(value, 0);
+        this.#mieScatteringScale = value;
+        this.#updateVec3FromColorAndScale('mieScattering', this.#mieScattering, value);
     }
 
     /**
@@ -372,10 +372,10 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#mieAbsorptionScale;
     }
 
-    set mieAbsorptionScale(v: number) {
-        validatePositiveNumberRange(v, 0);
-        this.#mieAbsorptionScale = v;
-        this.#updateVec3FromColorAndScale('mieAbsorption', this.#mieAbsorption, v);
+    set mieAbsorptionScale(value: number) {
+        validatePositiveNumberRange(value, 0);
+        this.#mieAbsorptionScale = value;
+        this.#updateVec3FromColorAndScale('mieAbsorption', this.#mieAbsorption, value);
     }
 
     /**
@@ -402,10 +402,10 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#rayleighScatteringScale;
     }
 
-    set rayleighScatteringScale(v: number) {
-        validatePositiveNumberRange(v, 0);
-        this.#rayleighScatteringScale = v;
-        this.#updateVec3FromColorAndScale('rayleighScattering', this.#rayleighScattering, v);
+    set rayleighScatteringScale(value: number) {
+        validatePositiveNumberRange(value, 0);
+        this.#rayleighScatteringScale = value;
+        this.#updateVec3FromColorAndScale('rayleighScattering', this.#rayleighScattering, value);
     }
 
     /**
@@ -420,8 +420,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.rayleighExponentialDistribution;
     }
 
-    set rayleighExponentialDistribution(v: number) {
-        this.#setParam('rayleighExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    set rayleighExponentialDistribution(value: number) {
+        this.#setParam('rayleighExponentialDistribution', value, true, false, true, (value) => validatePositiveNumberRange(value, 0.1, 100));
     }
 
     /**
@@ -436,8 +436,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.mieExponentialDistribution;
     }
 
-    set mieExponentialDistribution(v: number) {
-        this.#setParam('mieExponentialDistribution', v, true, false, true, (v) => validatePositiveNumberRange(v, 0.1, 100));
+    set mieExponentialDistribution(value: number) {
+        this.#setParam('mieExponentialDistribution', value, true, false, true, (value) => validatePositiveNumberRange(value, 0.1, 100));
     }
 
     /**
@@ -452,8 +452,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.mieAnisotropy;
     }
 
-    set mieAnisotropy(v: number) {
-        this.#setParam('mieAnisotropy', v, true, false, true, (v) => validateNumberRange(v, 0, 0.999));
+    set mieAnisotropy(value: number) {
+        this.#setParam('mieAnisotropy', value, true, false, true, (value) => validateNumberRange(value, 0, 0.999));
     }
 
     /**
@@ -476,8 +476,8 @@ class SkyAtmosphere extends RedGPUObject {
      * [KO] 오존 흡수 `ColorRGB` 인스턴스
      * [EN] Ozone absorption `ColorRGB` instance
      */
-    get absorptionCoefficient(): ColorRGB {
-        return this.#absorptionCoefficient;
+    get absorption(): ColorRGB {
+        return this.#absorption;
     }
 
     /**
@@ -492,10 +492,10 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#absorptionScale;
     }
 
-    set absorptionScale(v: number) {
-        validatePositiveNumberRange(v, 0);
-        this.#absorptionScale = v;
-        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorptionCoefficient, v);
+    set absorptionScale(value: number) {
+        validatePositiveNumberRange(value, 0);
+        this.#absorptionScale = value;
+        this.#updateVec3FromColorAndScale('absorptionCoefficient', this.#absorption, value);
     }
 
     /**
@@ -510,8 +510,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.absorptionTipAltitude;
     }
 
-    set absorptionTipAltitude(v: number) {
-        this.#setParam('absorptionTipAltitude', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 100));
+    set absorptionTipAltitude(value: number) {
+        this.#setParam('absorptionTipAltitude', value, true, false, true, (value) => validatePositiveNumberRange(value, 0, 100));
     }
 
     /**
@@ -526,8 +526,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.absorptionTentWidth;
     }
 
-    set absorptionTentWidth(v: number) {
-        this.#setParam('absorptionTentWidth', v, true, false, true, (v) => validatePositiveNumberRange(v, 1, 50));
+    set absorptionTentWidth(value: number) {
+        this.#setParam('absorptionTentWidth', value, true, false, true, (value) => validatePositiveNumberRange(value, 1, 50));
     }
 
     /**
@@ -542,8 +542,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.multiScatteringFactor;
     }
 
-    set multiScatteringFactor(v: number) {
-        this.#setParam('multiScatteringFactor', v, true, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
+    set multiScatteringFactor(value: number) {
+        this.#setParam('multiScatteringFactor', value, true, false, true, (value) => validatePositiveNumberRange(value, 0, 10));
     }
 
     /**
@@ -558,8 +558,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.sunSize;
     }
 
-    set sunSize(v: number) {
-        this.#setParam('sunSize', v, false, true, true, (v) => validatePositiveNumberRange(v, 0.01, 10.0));
+    set sunSize(value: number) {
+        this.#setParam('sunSize', value, false, true, true, (value) => validatePositiveNumberRange(value, 0.01, 10.0));
     }
 
     /**
@@ -574,8 +574,8 @@ class SkyAtmosphere extends RedGPUObject {
         return this.#params.sunLimbDarkening;
     }
 
-    set sunLimbDarkening(v: number) {
-        this.#setParam('sunLimbDarkening', v, false, false, true, (v) => validateNumberRange(v, 0, 10.0));
+    set sunLimbDarkening(value: number) {
+        this.#setParam('sunLimbDarkening', value, false, false, true, (value) => validateNumberRange(value, 0, 10.0));
     }
 
     /**
@@ -610,7 +610,7 @@ class SkyAtmosphere extends RedGPUObject {
      * [KO] Multi-Scattering LUT 텍스처
      * [EN] Multi-Scattering LUT texture
      */
-    get multiScatLUT(): DirectTexture {
+    get multiScatteringLUT(): DirectTexture {
         return this.#multiScatteringGenerator.lutTexture;
     }
 
@@ -646,7 +646,7 @@ class SkyAtmosphere extends RedGPUObject {
      * [KO] Irradiance 큐브 텍스처
      * [EN] Irradiance cube texture
      */
-    get skyAtmosphereIrradianceLUT(): DirectCubeTexture {
+    get irradianceLUT(): DirectCubeTexture {
         return this.#skyLight.irradianceLUT;
     }
 
@@ -658,7 +658,7 @@ class SkyAtmosphere extends RedGPUObject {
      * [KO] Reflection 큐브 텍스처
      * [EN] Reflection cube texture
      */
-    get skyAtmosphereReflectionLUT(): DirectCubeTexture {
+    get reflectionLUT(): DirectCubeTexture {
         return this.#skyLight.reflectionLUT;
     }
 
@@ -734,7 +734,7 @@ class SkyAtmosphere extends RedGPUObject {
             const newCloudTime = view.renderViewStateData.time * 0.001 * this.#params.cloudTimeMultiplier;
             if (Math.abs(this.#params.cloudTime - newCloudTime) > EPSILON) {
                 this.#params.cloudTime = newCloudTime;
-                this.#dirtyUniformBuffer = true;
+                this.#isDirtyUniformBuffer = true;
             }
         }
 
@@ -784,43 +784,43 @@ class SkyAtmosphere extends RedGPUObject {
         this.#prevSunSource = null;
     }
 
-    #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
-        this.#dirtyUniformBuffer = true;
-        if (lut) this.#dirtyLUT = true;
-        if (skyView) {
-            this.#dirtySkyView = true;
-            this.#dirtyAerialPerspective = true;
+    #markDirty(isDirtyOpticalLUT: boolean, isDirtySkyView: boolean, isDirtySkyLight: boolean): void {
+        this.#isDirtyUniformBuffer = true;
+        if (isDirtyOpticalLUT) this.#isDirtyOpticalLUT = true;
+        if (isDirtySkyView) {
+            this.#isDirtySkyView = true;
+            this.#isDirtyAerialPerspective = true;
         }
-        if (ibl) this.#dirtySkyLight = true;
+        if (isDirtySkyLight) this.#isDirtySkyLight = true;
     }
 
     #updateSunInfo(view: View3D): void {
         const lights = view.scene.lightManager.directionalLights;
         const source = lights[0] || null;
-        const sourceChanged = this.#prevSunSource !== source;
-        if (sourceChanged) {
+        const isSourceChanged = this.#prevSunSource !== source;
+        if (isSourceChanged) {
             this.#prevSunSource = source;
         }
 
         if (source) {
-            const dir = source.direction;
-            const currentDir = this.#params.sunDirection;
-            const dirLen = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-            const invLen = dirLen > EPSILON ? -1 / dirLen : -1;
+            const direction = source.direction;
+            const currentDirection = this.#params.sunDirection;
+            const directionLength = Math.sqrt(direction[0] * direction[0] + direction[1] * direction[1] + direction[2] * direction[2]);
+            const inverseLength = directionLength > EPSILON ? -1 / directionLength : -1;
 
-            const targetDirX = dir[0] * invLen;
-            const targetDirY = dir[1] * invLen;
-            const targetDirZ = dir[2] * invLen;
+            const targetDirectionX = direction[0] * inverseLength;
+            const targetDirectionY = direction[1] * inverseLength;
+            const targetDirectionZ = direction[2] * inverseLength;
 
-            const directionChanged =
-                Math.abs(targetDirX - currentDir[0]) > EPSILON ||
-                Math.abs(targetDirY - currentDir[1]) > EPSILON ||
-                Math.abs(targetDirZ - currentDir[2]) > EPSILON;
+            const isDirectionChanged =
+                Math.abs(targetDirectionX - currentDirection[0]) > EPSILON ||
+                Math.abs(targetDirectionY - currentDirection[1]) > EPSILON ||
+                Math.abs(targetDirectionZ - currentDirection[2]) > EPSILON;
 
-            if (sourceChanged || directionChanged) {
-                currentDir[0] = targetDirX;
-                currentDir[1] = targetDirY;
-                currentDir[2] = targetDirZ;
+            if (isSourceChanged || isDirectionChanged) {
+                currentDirection[0] = targetDirectionX;
+                currentDirection[1] = targetDirectionY;
+                currentDirection[2] = targetDirectionZ;
                 this.#markDirty(false, true, true);
             }
 
@@ -838,61 +838,68 @@ class SkyAtmosphere extends RedGPUObject {
 
         if (Math.abs(this.#params.cameraHeight - currentHeightKm) > EPSILON) {
             this.#params.cameraHeight = currentHeightKm;
-            this.#dirtyUniformBuffer = true;
-            this.#dirtySkyView = true;
-            this.#dirtyAerialPerspective = true;
+            this.#isDirtyUniformBuffer = true;
+            this.#isDirtySkyView = true;
+            this.#isDirtyAerialPerspective = true;
         }
 
-        const camMatrix = rawCamera.viewMatrix;
-        if (this.#dirtyAerialPerspective || this.#dirtyLUT) {
-            mat4.copy(this.#prevCameraMatrix, camMatrix);
+        const cameraMatrix = rawCamera.viewMatrix;
+        if (this.#isDirtyAerialPerspective || this.#isDirtyOpticalLUT) {
+            mat4.copy(this.#prevCameraMatrix, cameraMatrix);
         } else {
             for (let i = 0; i < 16; i++) {
-                if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > EPSILON) {
-                    mat4.copy(this.#prevCameraMatrix, camMatrix);
-                    this.#dirtyAerialPerspective = true;
+                if (Math.abs(cameraMatrix[i] - this.#prevCameraMatrix[i]) > EPSILON) {
+                    mat4.copy(this.#prevCameraMatrix, cameraMatrix);
+                    this.#isDirtyAerialPerspective = true;
                     break;
                 }
             }
         }
 
-        if (this.#dirtyUniformBuffer) {
+        if (this.#isDirtyUniformBuffer) {
             this.#updateSharedUniformBuffer();
-            this.#dirtyUniformBuffer = false;
+            this.#isDirtyUniformBuffer = false;
         }
 
         const transmittanceLUT = this.#transmittanceGenerator.lutTexture;
-        const multiScatLUT = this.#multiScatteringGenerator.lutTexture;
+        const multiScatteringLUT = this.#multiScatteringGenerator.lutTexture;
 
-        if (this.#dirtyLUT) {
+        if (this.#isDirtyOpticalLUT) {
             this.#transmittanceGenerator.render();
             this.#multiScatteringGenerator.render(transmittanceLUT);
-            this.#dirtyLUT = false;
-            this.#dirtySkyView = true;
-            this.#dirtyAerialPerspective = true;
-            this.#dirtySkyLight = true;
+            this.#isDirtyOpticalLUT = false;
+            this.#isDirtySkyView = true;
+            this.#isDirtyAerialPerspective = true;
+            this.#isDirtySkyLight = true;
         }
 
-        if (this.#dirtySkyView) {
-            this.#skyViewGenerator.render(transmittanceLUT, multiScatLUT);
-            this.#dirtySkyView = false;
+        if (this.#isDirtySkyView) {
+            this.#skyViewGenerator.render(transmittanceLUT, multiScatteringLUT);
+            this.#isDirtySkyView = false;
         }
 
-        if (this.#dirtyAerialPerspective) {
-            this.#aerialPerspectiveGenerator.render(view, transmittanceLUT, multiScatLUT);
-            this.#dirtyAerialPerspective = false;
+        if (this.#isDirtyAerialPerspective) {
+            this.#aerialPerspectiveGenerator.render(view, transmittanceLUT, multiScatteringLUT);
+            this.#isDirtyAerialPerspective = false;
         }
 
-        if (this.#dirtySkyLight) {
+        if (this.#isDirtySkyLight) {
             this.#skyLight.update(this);
-            this.#dirtySkyLight = false;
+            this.#isDirtySkyLight = false;
         }
     }
 
-    #setParam(key: string, value: any, lut: boolean, skyView: boolean, ibl: boolean, validator?: (v: any) => void): void {
+    #setParam(
+        key: string,
+        value: any,
+        isDirtyOpticalLUT: boolean,
+        isDirtySkyView: boolean,
+        isDirtySkyLight: boolean,
+        validator?: (value: any) => void
+    ): void {
         if (validator) validator(value);
         (this.#params as any)[key] = value;
-        this.#markDirty(lut, skyView, ibl);
+        this.#markDirty(isDirtyOpticalLUT, isDirtySkyView, isDirtySkyLight);
     }
 
     #updateVec3FromColorAndScale(
@@ -926,9 +933,9 @@ class SkyAtmosphere extends RedGPUObject {
         const dataViewF32 = this.#sharedUniformBuffer.dataViewF32;
         const members = this.#cachedUniformMembers;
         const params = this.#params as any;
-        const len = members.length;
+        const length = members.length;
 
-        for (let i = 0; i < len; i++) {
+        for (let i = 0; i < length; i++) {
             const item = members[i];
             const value = params[item.key];
             const offset = item.offset;
