@@ -1,13 +1,12 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1783326645983";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1783326645983";
-import {createEventInfoBox, updateEventInfo, updateEventInfoBoxStyle} from "../eventInfoBox.js?t=1783326645983";
+import * as RedGPU from "../../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 
 /**
  * [KO] Sprite3D Mouse Event 예제
  * [EN] Sprite3D Mouse Event example
  *
- * [KO] Sprite3D 객체에서 발생하는 마우스 이벤트를 처리하는 방법을 보여줍니다.
- * [EN] Demonstrates how to handle mouse events on Sprite3D objects.
+ * [KO] Sprite3D 객체에서 발생하는 마우스 피킹 이벤트(MOVE, DOWN, UP, OVER, OUT, CLICK) 처리 방법을 시연합니다.
+ * [EN] Demonstrates how to handle mouse picking events (MOVE, DOWN, UP, OVER, OUT, CLICK) on Sprite3D objects.
  */
 
 const canvas = document.createElement('canvas');
@@ -16,55 +15,33 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const {detector} = redGPUContext;
-        const isMobile = detector.isMobile;
-
-        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 10;
         controller.tilt = -15;
-        controller.speedDistance = 0.1;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
-        // 2. UI 요소 (이벤트 정보 표시 박스) 생성
-        const infoBox = createEventInfoBox(isMobile);
-
-        // 3. 샘플 Sprite3D 생성 및 배치
-        const {updateLayout} = createSampleSprite3D(redGPUContext, scene, infoBox);
-
-        // 4. 리사이즈 핸들러 설정
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
-        redGPUContext.onResize = (resizeEvent) => {
-            const {width, height} = resizeEvent.pixelRectObject;
-            const aspect = width / height;
-            const isMobile = detector.isMobile;
-            const baseDistance = isMobile ? 7.5 : 9.5;
-
-            // 화면 비율에 맞춰 카메라 거리 자동 조절
-            controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
-
-            // UI 스타일 및 배치 업데이트
-            updateEventInfoBoxStyle(infoBox, isMobile);
-            updateLayout();
+        const eventState = {
+            type: 'None',
+            target: 'None',
+            pickingId: 0,
+            mouseX: 0,
+            mouseY: 0,
+            distance: 0,
+            point: '0.00, 0.00, 0.00',
+            uv: '0.000, 0.000'
         };
 
-        // 초기 리사이즈 실행
-        redGPUContext.onResize({
-            target: redGPUContext,
-            screenRectObject: redGPUContext.screenRectObject,
-            pixelRectObject: redGPUContext.pixelRectObject
+        const sprites = createSampleSprite3D(redGPUContext, scene, eventState);
+
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, (time) => {
         });
 
-        // 5. 렌더링 시작
-        const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
-
-        renderTestPane(redGPUContext, scene);
+        renderTestPane(redGPUContext, sprites, eventState);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -74,16 +51,17 @@ RedGPU.init(
     }
 );
 
-/**
- * [KO] 샘플 Sprite3D를 생성합니다.
- * [EN] Creates sample Sprite3D.
- */
-const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
+const createSampleSprite3D = (redGPUContext, scene, eventState) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg');
+    const eventTypes = Object.values(RedGPU.Picking.PICKING_EVENT_TYPE);
+    const radius = 3;
+    const labelRadius = 4.25;
     const sprites = [];
-    const labels = [];
 
-    Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
+    // [KO] 모든 피킹 이벤트 타입별로 Sprite3D 생성 및 리스너 등록
+    // [EN] Create a Sprite3D and register a listener for each picking event type
+    eventTypes.forEach((eventName, index) => {
+        const angle = (index / eventTypes.length) * Math.PI * 2;
         const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
         material.useTint = true;
 
@@ -91,84 +69,65 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
         sprite3D.name = `Sprite3D_${eventName}`;
         sprite3D.worldSize = 1.0;
         sprite3D.pixelSize = 64;
+        sprite3D.x = Math.cos(angle) * radius;
+        sprite3D.y = Math.sin(angle) * radius;
         scene.addChild(sprite3D);
 
         sprite3D.addListener(eventName, (e) => {
-            updateEventInfo(infoBox, eventName, e);
-            TweenMax.to(material.tint, 0.5, {
-                r: Math.floor(Math.random() * 255),
-                g: Math.floor(Math.random() * 255),
-                b: Math.floor(Math.random() * 255),
-                roundProps: "r,g,b",
-                ease: Power2.easeOut
-            });
+            material.tint.setColorByRGB(
+                Math.floor(Math.random() * 256),
+                Math.floor(Math.random() * 256),
+                Math.floor(Math.random() * 256)
+            );
+            eventState.type = e.type;
+            eventState.target = e.target.name;
+            eventState.pickingId = e.pickingId;
+            eventState.mouseX = Math.round(e.mouseX);
+            eventState.mouseY = Math.round(e.mouseY);
+            eventState.distance = Number(e.distance.toFixed(3));
+            eventState.point = `${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}`;
+            eventState.uv = `${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}`;
         });
 
-        const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.text = eventName;
-        label.fontSize = 32;
+        const label = new RedGPU.Display.TextField3D(redGPUContext, eventName);
+        label.x = Math.cos(angle) * labelRadius;
+        label.y = Math.sin(angle) * labelRadius;
         label.worldSize = 0.5;
         scene.addChild(label);
 
         sprites.push(sprite3D);
-        labels.push(label);
     });
 
-    const updateLayout = () => {
-        const isMobile = redGPUContext.detector.isMobile;
-        const radius = isMobile ? 2.5 : 3;
-        const labelRadius = radius + 1.25; // [KO] Mesh 예제 오프셋과 일치 [EN] Synced label offset with Mesh example
-        const total = sprites.length;
-        sprites.forEach((sprite, index) => {
-            const angle = (index / total) * Math.PI * 2;
-            sprite.x = Math.cos(angle) * radius;
-            sprite.y = Math.sin(angle) * radius;
-
-            const label = labels[index];
-            label.x = Math.cos(angle) * labelRadius;
-            label.y = Math.sin(angle) * labelRadius;
-        });
-    };
-
-    updateLayout();
-    return {sprites, updateLayout};
+    return sprites;
 };
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- */
-const renderTestPane = async (redGPUContext, scene) => {
+const renderTestPane = (redGPUContext, sprites, eventState) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
-            const target = scene.children.find(c => c instanceof RedGPU.Display.Sprite3D);
-
+            const target = sprites[0];
             const updateAll = (key, value) => {
-                scene.children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.Sprite3D) child[key] = value;
+                sprites.forEach((sprite) => {
+                    sprite[key] = value;
                 });
             };
 
-            folder.addBinding(target, 'useBillboard').on('change', (evt) => {
+            const spriteFolder = pane.addFolder({title: 'Sprite3D', expanded: true});
+            spriteFolder.addBinding(target, 'useBillboard').on('change', (evt) => {
                 updateAll('useBillboard', evt.value);
             });
-
-            folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
+            spriteFolder.addBinding(target, 'usePixelSize').on('change', (evt) => {
                 updateAll('usePixelSize', evt.value);
                 updateUIState();
             });
-
-            const pixelSizeBinding = folder.addBinding(target, 'pixelSize', {
-                min: 1,
+            const pixelSizeBinding = spriteFolder.addBinding(target, 'pixelSize', {
+                min: 16,
                 max: 256,
                 step: 1
             }).on('change', (evt) => {
                 updateAll('pixelSize', evt.value);
             });
-
-            const worldSizeBinding = folder.addBinding(target, 'worldSize', {
-                min: 0.01,
+            const worldSizeBinding = spriteFolder.addBinding(target, 'worldSize', {
+                min: 0.1,
                 max: 5,
                 step: 0.01
             }).on('change', (evt) => {
@@ -182,8 +141,17 @@ const renderTestPane = async (redGPUContext, scene) => {
                 pixelSizeBinding.refresh();
                 worldSizeBinding.refresh();
             };
-
             updateUIState();
+
+            const eventFolder = pane.addFolder({title: 'PickingEvent', expanded: true});
+            eventFolder.addBinding(eventState, 'type', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'target', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'pickingId', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'mouseX', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'mouseY', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'distance', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'point', {readonly: true, interval: 50});
+            eventFolder.addBinding(eventState, 'uv', {readonly: true, interval: 50});
         }
     });
 };
