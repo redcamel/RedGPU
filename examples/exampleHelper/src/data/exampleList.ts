@@ -1096,8 +1096,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Basic Lake',
                                         path: '3d/water/lake/basicLake',
                                         description: {
-                                            ko: `최소한의 코드로 호수 수체(Lake)를 생성하고 수위(waterLevel) 및 기본 PBR 재질 속성을 실시간으로 조작하는 입문 예제입니다.`,
-                                            en: `An introductory example creating a Lake with minimal code and manipulating waterLevel and PBR properties in real time.`
+                                            ko: `최소한의 코드로 호수 수체(Lake)를 생성하여 씬에 등록(scene.addWater)하고, 수위(waterLevel)·정점 파동(waveAmplitude, waveWavelength) 및 기본 수면 재질(baseColor, deepColor, roughness, opacity)과 듀얼 노멀 텍스처를 실시간으로 제어하는 입문 예제입니다.<br/>
+                                                • <b>수위 및 정점 파동 제어</b>: Lake 폴더의 waterLevel, waveAmplitude, waveWavelength를 조절하여 수면 높이와 큰 물결의 파고·파장 변화를 관찰하세요.<br/>
+                                                • <b>수면 색상 및 기본 물성</b>: LakeMaterial 폴더에서 얕은 물(baseColor)과 깊은 물(deepColor) 색상, 거칠기(roughness) 및 불투명도(opacity)를 실시간으로 조정할 수 있습니다.`,
+                                            en: `An introductory example demonstrating how to create and register a Lake (scene.addWater), controlling waterLevel, vertex swell (waveAmplitude, waveWavelength), basic surface properties (baseColor, deepColor, roughness, opacity), and dual normal textures in real time.<br/>
+                                                • <b>Water Level & Vertex Swell</b>: Adjust waterLevel, waveAmplitude, and waveWavelength in the Lake folder to observe water elevation and macro wave changes.<br/>
+                                                • <b>Surface Color & PBR Basics</b>: Tune shallow (baseColor) and deep (deepColor) water colors, roughness, and opacity in the LakeMaterial folder.`
                                         }
                                     },
                                     {
@@ -1105,8 +1109,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Lake Material',
                                         path: '3d/water/lake/lakeMaterial',
                                         description: {
-                                            ko: `듀얼 노멀 맵, 풍향/풍속 시뮬레이션, 수중 굴절, 코스틱스(Caustics) 및 PBR 광학 제어를 실시간으로 조작하는 예제입니다.`,
-                                            en: `An example demonstrating dual normal map blending, wind simulation, refraction, caustics, and PBR optics control in real time.`
+                                            ko: `LakeMaterial의 듀얼 노멀 블렌딩, 풍향/풍속 연동(Global Wind), 수중 굴절·감쇠, 커스틱(Caustics), 스크린 스페이스 반사(SSR) 및 16종 디버그 뷰를 실시간으로 제어하는 심화 재질 예제입니다.<br/>
+                                                • <b>수중 광학 및 커스틱</b>: refractionStrength, extinctionFactor, depthFadeDistance, turbidity 및 causticsStrength를 조절하여 수심 단계별 계단 지형의 빛 흡수와 바닥 물그림자를 확인하세요.<br/>
+                                                • <b>SSR 및 렌더 패스 디버그</b>: enableSSR과 레이 마칭 옵션을 튜닝하고, Debug View(debugMode 0~15)를 전환하여 굴절·프레넬·선형 수심·스페큘러 등 개별 렌더링 채널을 분석해보세요.`,
+                                            en: `An in-depth material example controlling LakeMaterial's dual normal blending, Global Wind integration, underwater refraction/extinction, caustics, Screen Space Reflection (SSR), and 16 diagnostic debug views in real time.<br/>
+                                                • <b>Underwater Optics & Caustics</b>: Tune refractionStrength, extinctionFactor, depthFadeDistance, turbidity, and causticsStrength to inspect light absorption and caustics across stepped depths.<br/>
+                                                • <b>SSR & Render Pass Debugging</b>: Configure enableSSR ray-marching parameters and switch debugMode (0–15) in Debug View to isolate refraction, Fresnel, linear depth, and specular channels.`
                                         }
                                     },
                                     {
@@ -1114,8 +1122,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Object Interaction',
                                         path: '3d/water/lake/interaction',
                                         description: {
-                                            ko: `동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 감쇄 유예(Decay Grace Period) 메커니즘을 시연합니다.`,
-                                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and decay grace period mechanisms between dynamic objects and the water body.`
+                                            ko: `동적 객체(구체)와 호수 수면 간의 실시간 2D 파동 방정식(FDTD) 물결 시뮬레이션 및 상호작용 속성을 시연하는 예제입니다.<br/>
+                                                • <b>파동 물리 시뮬레이션 제어</b>: Lake 폴더에서 파동 전파 속도(rippleWaveSpeed), 감쇠율(rippleDamping), 노멀 강도(rippleNormalStrength), 시뮬레이션 영역 크기(interactionDomainSize) 및 최대 침투 깊이(maxPenetration)를 조절해보세요.<br/>
+                                                • <b>객체 상호작용 및 이동 제어</b>: Interactive Sphere 폴더에서 enableWaterInteraction, waterWaveStrength를 조작하거나 autoMove를 끄고 구체 좌표(x, y, z)를 직접 움직여 동심원 파문과 감쇄 유예(Decay Grace Period) 동작을 확인할 수 있습니다.`,
+                                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and water interaction properties between a dynamic sphere and the Lake surface.<br/>
+                                                • <b>Wave Physics Tuning</b>: Adjust rippleWaveSpeed, rippleDamping, rippleNormalStrength, interactionDomainSize, and maxPenetration in the Lake folder.<br/>
+                                                • <b>Interactive Object Control</b>: Modify enableWaterInteraction and waterWaveStrength in Interactive Sphere, or disable autoMove and drag x/y/z coordinates to observe live ripples and decay grace period behavior.`
                                         }
                                     },
                                     {
@@ -1123,8 +1135,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Character Walking',
                                         path: '3d/water/lake/characterWalking',
                                         description: {
-                                            ko: `스킨드 메시(Soldier GLTF) 캐릭터가 호숫가를 걸을 때 발생하는 발걸음 펄스(Footstep Cadence Pulse), AABB 침수 판정 및 실시간 파동 연동을 시연합니다.`,
-                                            en: `Demonstrates footstep cadence pulses, AABB submersion detection, and real-time wave interaction as a skinned GLTF character walks in the lake.`
+                                            ko: `스키닝 캐릭터(Soldier.glb)의 해변 및 수중 보행에 따른 실시간 동적 물결(Ripple) 생성과 파동 시뮬레이션 도메인 추적(interactionFollowTarget)을 시연하는 예제입니다.<br/>
+                                                • <b>재귀적 스키닝 수체 상호작용</b>: setEnableWaterInteractionRecursively를 통해 다중 서브 메시로 구성된 캐릭터와 부유 바위(floatingRocks)가 동시에 일으키는 수면 파동을 시뮬레이션합니다.<br/>
+                                                • <b>도메인 중심 추적 및 보행 제어</b>: WASD(이동), Shift(달리기), Space(점프)로 해변에서 물속으로 걸어 들어가며 캐릭터 위치를 따라 스냅 이동하는 파동 시뮬레이션 도메인을 체험하세요.`,
+                                            en: `Demonstrates real-time dynamic ripple generation and wave simulation domain tracking (interactionFollowTarget) as a skinned character (Soldier.glb) walks through the beach and shallow water.<br/>
+                                                • <b>Recursive Skinned Interaction</b>: Uses setEnableWaterInteractionRecursively to simulate simultaneous water ripples from the multi-mesh character and bobbing floating rocks.<br/>
+                                                • <b>Domain Tracking & Locomotion</b>: Walk or run from the shoreline into the water using WASD, Shift, and Space to observe the texel-snapped ripple simulation domain following the character.`
                                         }
                                     },
                                     {
@@ -1132,8 +1148,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Lake with Landscape',
                                         path: '3d/water/lake/lakeWithLandscape',
                                         description: {
-                                            ko: `대규모 랜드스케이프 지형과 결합된 호수 수체를 구성하여, 자연스러운 해안선 웻니스, 수중 굴절/코스틱스, 카메라 시선 추적 인터랙션을 종합 시연합니다.`,
-                                            en: `A showcase combining large-scale terrain landscape with an interactive Lake, highlighting shoreline wetness, underwater optics, caustics, and camera-guided wave ripples.`
+                                            ko: `4채널 스플랫맵 기반 대규모 랜드스케이프(Landscape) 지형 및 Multi-LOD 소나무 식생(Foliage)과 호수 수체(Lake)를 결합한 환경 통합 예제입니다.<br/>
+                                                • <b>지형 수변 경계 및 광학 조화</b>: 산악 분지 지형과 맞닿는 호숫가의 부드러운 수심 페이드(depthFadeDistance), 수중 굴절(refractionStrength) 및 바닥 커스틱(causticsStrength) 효과를 조절해보세요.<br/>
+                                                • <b>오픈월드 환경 및 캐릭터 인터랙션</b>: Landscape의 지형 높이(heightScale)와 식생(Foliage) 표시를 제어하고, 호숫가를 걷는 캐릭터가 만드는 실시간 물결 파동을 함께 확인할 수 있습니다.`,
+                                            en: `An environment showcase integrating a 4-channel splatmap Landscape terrain and Multi-LOD pine tree foliage with an interactive Lake.<br/>
+                                                • <b>Shoreline Blending & Optics</b>: Tune depthFadeDistance, refractionStrength, and causticsStrength where the Lake meets the mountain basin terrain.<br/>
+                                                • <b>Landscape & Character Integration</b>: Control terrain heightScale and Foliage visibility while walking the character along the shoreline to generate real-time water ripples.`
                                         }
                                     },
                                     {
@@ -1141,8 +1161,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Multi Lake',
                                         path: '3d/water/lake/multiLake',
                                         description: {
-                                            ko: `단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 Lake 수체를 동시에 렌더링하고, 다중 수체의 SSR, 굴절, 코스틱스를 종합 테스트하는 예제입니다.`,
-                                            en: `A demonstration rendering 5 independent Lake bodies with distinct elevations (waterLevel), locations, and optical properties simultaneously, testing multi-lake SSR, refraction, and caustics.`
+                                            ko: `단일 씬 내에 서로 다른 고도(waterLevel), 위치, 크기 및 광학 물성을 지닌 5개의 독립된 Lake 수체를 동시에 렌더링하고 제어하는 다중 수체 예제입니다.<br/>
+                                                • <b>마스터 일괄 제어</b>: Master Controls 폴더에서 5개 호수 전체의 스크린 스페이스 반사(enableSSR) 활성 여부와 전체 파고 배율(waveScale)을 한 번에 조절할 수 있습니다.<br/>
+                                                • <b>개별 수체 선택 튜닝</b>: Selected Pool Tuning에서 대상 풀(Pool 1~5)을 선택하여 각 호수의 수위(waterLevel), 색상(baseColor, deepColor), 거칠기, 굴절 및 커스틱 강도를 독립적으로 커스터마이징해보세요.`,
+                                            en: `Simultaneously renders and controls 5 independent Lake instances with distinct elevations (waterLevel), positions, dimensions, and optical properties within a single scene.<br/>
+                                                • <b>Master Batch Controls</b>: Toggle enableSSR across all 5 pools at once or scale global wave heights via waveScale in the Master Controls folder.<br/>
+                                                • <b>Per-Pool Custom Tuning</b>: Select any pool (Pool 1–5) in Selected Pool Tuning to independently customize its waterLevel, baseColor, deepColor, roughness, refractionStrength, and causticsStrength.`
                                         }
                                     }
                                 ]
