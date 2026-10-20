@@ -23,7 +23,6 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
  */
 class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
-    #sourceCubeTextureView: GPUTextureView;
     #sourceTextureDescriptor: GPUTextureDescriptor;
     #lutTexture: DirectCubeTexture;
     #pipeline: GPUComputePipeline;
@@ -91,7 +90,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
         }
         this.#sourceCubeTexture = null;
-        this.#sourceCubeTextureView = null;
         this.#sourceTextureDescriptor = null;
         this.#lutTexture = null;
         this.#pipeline = null;
@@ -100,7 +98,14 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
     #createBindGroup(transmittance: DirectTexture, skyView: DirectTexture): GPUBindGroup {
         return this.createBindGroup('SkyLight_Reflection_BindGroup', this.#pipeline, [
-            {binding: 0, resource: this.#sourceCubeTextureView},
+            {
+                binding: 0,
+                resource: this.#sourceCubeTexture.createView({
+                    dimension: '2d-array',
+                    baseMipLevel: 0,
+                    mipLevelCount: 1
+                })
+            },
             {binding: 2, resource: this.sampler.gpuSampler},
             {binding: 3, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}},
             {binding: 4, resource: transmittance.gpuTextureView},
@@ -122,11 +127,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
             dimension: '2d'
         };
         this.#sourceCubeTexture = gpuDevice.createTexture(this.#sourceTextureDescriptor);
-        this.#sourceCubeTextureView = this.#sourceCubeTexture.createView({
-            dimension: '2d-array',
-            baseMipLevel: 0,
-            mipLevelCount: 1
-        });
 
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
         this.#pipeline = this.createComputePipeline('SkyLight_Reflection_Pipeline', SPECULAR_SHADER_INFO.defaultSource);

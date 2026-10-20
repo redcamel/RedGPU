@@ -23,6 +23,8 @@ import {IPostEffectResult} from "../../postEffect/core/types";
 import RedGPUObject from "../../base/RedGPUObject";
 
 
+const EPSILON = 0.0001;
+
 interface CachedUniformMember {
     key: string;
     offset: number;
@@ -654,7 +656,7 @@ class SkyAtmosphere extends RedGPUObject {
 
         if (this.#params.cloudTimeMultiplier !== 0) {
             const newCloudTime = view.renderViewStateData.time * 0.001 * this.#params.cloudTimeMultiplier;
-            if (Math.abs(this.#params.cloudTime - newCloudTime) > 0.0001) {
+            if (Math.abs(this.#params.cloudTime - newCloudTime) > EPSILON) {
                 this.#params.cloudTime = newCloudTime;
                 this.#dirtyUniformBuffer = true;
             }
@@ -727,7 +729,6 @@ class SkyAtmosphere extends RedGPUObject {
         if (source) {
             const dir = source.direction;
             const currentDir = this.#params.sunDirection;
-            const EPSILON = 0.0001;
             const dirLen = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
             const invLen = dirLen > EPSILON ? -1 / dirLen : -1;
 
@@ -759,7 +760,7 @@ class SkyAtmosphere extends RedGPUObject {
         const {rawCamera} = view;
         const currentHeightKm = Math.max(0.001, (rawCamera.y / 1000.0));
 
-        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > 0.0001) {
+        if (Math.abs(this.#params.cameraHeight - currentHeightKm) > EPSILON) {
             this.#params.cameraHeight = currentHeightKm;
             this.#dirtyUniformBuffer = true;
             this.#dirtySkyView = true;
@@ -771,7 +772,7 @@ class SkyAtmosphere extends RedGPUObject {
             mat4.copy(this.#prevCameraMatrix, camMatrix);
         } else {
             for (let i = 0; i < 16; i++) {
-                if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > 0.0001) {
+                if (Math.abs(camMatrix[i] - this.#prevCameraMatrix[i]) > EPSILON) {
                     mat4.copy(this.#prevCameraMatrix, camMatrix);
                     this.#dirtyAerialPerspective = true;
                     break;
@@ -829,13 +830,11 @@ class SkyAtmosphere extends RedGPUObject {
     #initCachedUniformMembers(uniformStruct: any): void {
         const {members} = uniformStruct;
         const params = this.#params as any;
-        this.#cachedUniformMembers = [];
         for (const [key, member] of Object.entries(members)) {
             if (params[key] !== undefined) {
-                const targetMember = member as any;
                 this.#cachedUniformMembers.push({
                     key,
-                    offset: targetMember.uniformOffset / 4,
+                    offset: (member as any).uniformOffset / 4,
                     isVector: Array.isArray(params[key]) || params[key] instanceof Float32Array
                 });
             }

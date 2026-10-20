@@ -25,7 +25,6 @@ struct SkyAtmosphere {
 	sunLimbDarkening: f32,
 	cameraHeight: f32,
 	cloudTime: f32,
-	cloudTimeMultiplier: f32,
 	cloudCoverage: f32,
 	cloudDensity: f32,
 	cloudHeight: f32

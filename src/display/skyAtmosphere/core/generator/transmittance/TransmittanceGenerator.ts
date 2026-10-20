@@ -55,12 +55,6 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
      * [EN] Computes the transmittance LUT based on shared atmospheric parameters.
      */
     render(): void {
-        if (!this.#bindGroup) {
-            this.#bindGroup = this.createBindGroup('SkyAtmosphere_Transmittance_BindGroup', this.#pipeline, [
-                {binding: 0, resource: this.#lutTexture.gpuTextureView},
-                {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
-            ]);
-        }
         this.executeComputePass(this.#pipeline, this.#bindGroup);
     }
 
@@ -80,6 +74,10 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
 
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
+        this.#bindGroup = this.createBindGroup('SkyAtmosphere_Transmittance_BindGroup', this.#pipeline, [
+            {binding: 0, resource: this.#lutTexture.gpuTextureView},
+            {binding: 1, resource: {buffer: this.sharedUniformBuffer.gpuBuffer}}
+        ]);
     }
 }
 
