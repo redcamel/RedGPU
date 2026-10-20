@@ -8,7 +8,6 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 
 
@@ -16,8 +15,8 @@ const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
 
 
 /**
- * [KO] 3D 스프라이트 시트의 빌보드 및 렌더링 비율 속성을 정의하는 인터페이스입니다.
- * [EN] Interface defining billboard and rendering ratio properties of a 3D sprite sheet.
+ * [KO] 3D 스프라이트 시트의 빌보드 속성을 정의하는 인터페이스입니다.
+ * [EN] Interface defining billboard properties of a 3D sprite sheet.
  *
  * @category SpriteSheet
  */
@@ -27,16 +26,6 @@ interface SpriteSheet3D extends ASpriteSheet {
      * [EN] Whether to use billboard mode (always faces the camera if `true`)
      */
     useBillboard: boolean;
-    /**
-     * [KO] X축 렌더링 비율
-     * [EN] X-axis rendering ratio
-     */
-    _renderRatioX: number;
-    /**
-     * [KO] Y축 렌더링 비율
-     * [EN] Y-axis rendering ratio
-     */
-    _renderRatioY: number;
 }
 
 /**
@@ -66,6 +55,8 @@ class SpriteSheet3D extends ASpriteSheet {
     #worldSize: number = 1
     #pixelSize: number = 0
     #usePixelSize: boolean = false
+    #renderRatioX: number = 1
+    #renderRatioY: number = 1
 
     /**
      * [KO] SpriteSheet3D 인스턴스를 생성합니다.
@@ -231,33 +222,37 @@ class SpriteSheet3D extends ASpriteSheet {
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('SPRITE_SHEET_3D_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
-        return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
+        const shaderModule = this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
+        this.#updateRatios();
+        return shaderModule;
     }
 
     #updateRatios() {
         if (this.#nativeHeight) {
-            const prevX = this._renderRatioX;
-            const prevY = this._renderRatioY;
+            const prevX = this.#renderRatioX;
+            const prevY = this.#renderRatioY;
 
-            if (this.usePixelSize) {
-                this._renderRatioY = 1;
-                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            if (this.#usePixelSize) {
+                this.#renderRatioY = 1;
+                this.#renderRatioX = this.#nativeWidth / this.#nativeHeight;
             } else {
-                this._renderRatioY = this.#worldSize;
-                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+                this.#renderRatioY = this.#worldSize;
+                this.#renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
             }
 
-            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+            if (this.gpuRenderInfo) {
+                const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
+                vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members.renderRatioX, this.#renderRatioX);
+                vertexUniformBuffer.writeOnlyBuffer(vertexUniformInfo.members.renderRatioY, this.#renderRatioY);
+            }
+
+            if (prevX !== this.#renderRatioX || prevY !== this.#renderRatioY) {
                 this.dirtyTransform = true;
             }
         }
     }
 }
 
-definePositiveNumber(SpriteSheet3D, [
-    {key: '_renderRatioX', value: 1},
-    {key: '_renderRatioY', value: 1},
-])
 defineBoolean(SpriteSheet3D, [
     {key: 'useBillboard', value: true},
 ])

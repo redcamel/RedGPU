@@ -21,8 +21,8 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
-    let u_renderRatioX = vertexUniforms._renderRatioX;
-    let u_renderRatioY = vertexUniforms._renderRatioY;
+    let u_renderRatioX = vertexUniforms.renderRatioX;
+    let u_renderRatioY = vertexUniforms.renderRatioY;
 
     var ratioScaleMatrix: mat4x4<f32> = mat4x4<f32>(
         u_renderRatioX, 0, 0, 0,
