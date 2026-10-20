@@ -76,7 +76,7 @@ sunLight.azimuth = 180;
 
 ::: tip [Controlling Other Physical Parameters]
 More detailed atmospheric simulation physical parameters, such as Rayleigh/Mie scattering coefficients, ozone absorption
-rate, ground radius, and cloud density, can be adjusted through the `skyAtmosphere.params` property.
+rate, ground radius, and cloud density, can be adjusted directly through the properties of the `SkyAtmosphere` instance.
 Please refer to
 the [SkyAtmosphere API Reference](../api/RedGPU-API/namespaces/RedGPU/namespaces/Display/classes/SkyAtmosphere.md) for
 details.

@@ -67,7 +67,8 @@ sunLight.azimuth = 180;
 ```
 
 ::: tip [기타 물리 파라미터 제어]
-Rayleigh/Mie 산란 계수, 오존 흡수율, 지표면 반경, 구름 밀도 등 더 세밀한 대기 시뮬레이션 물리 파라미터는 `skyAtmosphere.params` 속성을 통해 조정할 수 있습니다.
+Rayleigh/Mie 산란 색상 (`ColorRGB`) 및 계수 배율 (`*Scale`), 오존 흡수 (`absorption`, `absorptionScale`), 지표면 반경 (`groundRadius`), 구름
+(`cloudCoverage`, `cloudDensity`) 등 더 세밀한 대기 시뮬레이션 물리 파라미터는 `SkyAtmosphere` 인스턴스의 속성을 통해 직접 조정할 수 있습니다.
 자세한 파라미터 종류와 설정
 방법은 [SkyAtmosphere API 레퍼런스](../api/RedGPU-API/namespaces/RedGPU/namespaces/Display/classes/SkyAtmosphere.md)를 참고하십시오.
 :::
