@@ -991,8 +991,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
-                                    ko: `단일 16비트 글로벌 하이트맵(globalHeightmapUrl)을 기반으로 지형을 생성하고, 연속 LOD·지오모핑, 하이트맵 레이마칭 그림자(castHeightmapShadow) 및 디버그 모드를 제어하는 기본 예제입니다.`,
-                                    en: `Basic example creating a terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.`
+                                    ko: `단일 16비트 글로벌 하이트맵(globalHeightmapUrl)으로 대규모 지형을 생성하고, 연속 LOD·지오모핑, 하이트맵 레이마칭 그림자(castHeightmapShadow) 및 디버그 모드를 제어하는 기본 예제입니다.`,
+                                    en: `Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.`
                                 }
                             },
                             {
@@ -1000,7 +1000,7 @@ export const ExampleList: ExampleListType = [
                                 name: 'Multi-Layer Splatting',
                                 path: '3d/landscape/multiLayerSplatting',
                                 description: {
-                                    ko: `RGBA 4채널 스플랫맵 가중치(weightTexture, weightChannel)를 기반으로 잔디·암석·자갈·낙엽 등 4종의 PBR 재질 레이어를 등록(addLayer)하고 스토캐스틱 타일링과 높이 블렌딩을 제어하는 예제입니다.`,
+                                    ko: `RGBA 4채널 스플랫맵 가중치(weightTexture, weightChannel)를 기반으로 잔디·암석·자갈·낙엽 4종의 PBR 재질 레이어를 등록(addLayer)하고 스토캐스틱 타일링과 높이 블렌딩을 제어하는 예제입니다.`,
                                     en: `Demonstrates registering (addLayer) and blending 4 PBR material layers (Grass, Rock, Gravel, Leave) driven by RGBA splatmap weights (weightTexture, weightChannel) with stochastic tiling and height blending.`
                                 }
                             },
@@ -1009,8 +1009,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Tile Streaming',
                                 path: '3d/landscape/tileStreaming',
                                 description: {
-                                    ko: `8km x 8km 지형을 256개 타일로 분할하여 카메라 이동에 따라 16비트 고해상도 하이트맵 타일을 비동기 스트리밍(tileUrlResolver, tileLoadingRadius)하고, 공간 분할 디버거(debuggerManager)로 모니터링하는 예제입니다.`,
-                                    en: `Divides an 8km x 8km terrain into 256 tiles to asynchronously stream 16-bit heightmap tiles around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.`
+                                    ko: `대규모 지형을 16x16(256개) 타일로 분할하여 카메라 이동에 따라 16비트 고해상도 하이트맵 타일을 실시간 비동기 스트리밍(tileUrlResolver, tileLoadingRadius)하고, 공간 그리드 및 가상 텍스처 디버거(debuggerManager)로 모니터링하는 예제입니다.`,
+                                    en: `Partitions a large-scale terrain into 16x16 (256) tiles to stream 16-bit high-resolution heightmap tiles asynchronously around the camera (tileUrlResolver, tileLoadingRadius), monitored in real time via debuggerManager.`
                                 }
                             },
                             {
@@ -1018,8 +1018,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Procedural Grass Field',
                                 path: '3d/landscape/proceduralGrass',
                                 description: {
-                                    ko: `지형 스플랫 레이어 가중치(targetLayer)와 연동하여 GPU 인스턴싱 기반 절차적 잔디를 배치(grassManager.addType)하고, Near/Far LOD 파이프라인 및 거리 컬링(cullingDistance)을 시연하는 예제입니다.`,
-                                    en: `Scatters GPU-instanced procedural grass (grassManager.addType) driven by terrain splat layer weights (targetLayer), featuring Near/Far LOD pipelines and distance culling (cullingDistance).`
+                                    ko: `지형의 스플랫 레이어 가중치(targetLayer)와 경사도를 기반으로 GPU 컴퓨트 셰이더에서 수만 개의 절차적 잔디 인스턴스를 실시간 베이킹·컬링(grassManager.addType)하고 Near/Far LOD 및 지형 색상 블렌딩을 제어하는 예제입니다.`,
+                                    en: `Procedurally bakes and culls tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType, featuring Near/Far LOD and ground color blending.`
                                 }
                             },
                             {
@@ -1027,8 +1027,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Foliage & Impostors',
                                 path: '3d/landscape/foliageAndImpostors',
                                 description: {
-                                    ko: `8km x 8km 지형에 다단계 메시 LOD(lods)와 원거리 옥타헤드럴 임포스터(useImpostor)가 결합된 대규모 수목 식생을 배치(foliageManager.addType)하고 경사도 필터링 및 바람 애니메이션을 제어하는 예제입니다.`,
-                                    en: `Places large-scale pine foliage across an 8km x 8km terrain (foliageManager.addType), combining multi-stage mesh LODs (lods) with far-distance Octahedral Impostors (useImpostor), slope filtering, and wind animation.`
+                                    ko: `지형의 스플랫 레이어 가중치를 기반으로 대규모 수목 식생을 절차적 배치(foliageManager.addType)하고, 3단계 메쉬 LOD(LOD0~LOD2)와 원거리 옥타헤드럴 임포스터(Octahedral Impostor) 및 전역 바람(windManager)을 연동하는 예제입니다.`,
+                                    en: `Procedurally scatters large-scale tree foliage based on terrain splat layer weights (foliageManager.addType), combining 3-stage mesh LODs (LOD0–LOD2), distant Octahedral Impostors, and global wind (windManager).`
                                 }
                             },
                             {
@@ -1036,8 +1036,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Open World Integration',
                                 path: '3d/landscape/openWorldIntegration',
                                 description: {
-                                    ko: `8km x 8km 타일 스트리밍 지형, 4레이어 PBR 스플랫, 절차적 잔디(grassManager), 수목 임포스터(foliageManager) 및 지형 높이에 동기화(getHeightAt)되는 3D 캐릭터 컨트롤러를 통합한 오픈월드 예제입니다.`,
-                                    en: `Integrates an 8km x 8km tile-streamed terrain, 4-layer PBR splatting, procedural grass (grassManager), foliage impostors (foliageManager), and a 3D character controller aligned via getHeightAt.`
+                                    ko: `타일 스트리밍 지형(Landscape), 4채널 멀티레이어 PBR 스플랫, GPU 절차적 잔디(grassManager), 다단계 LOD 및 옥타헤드럴 임포스터 수목 식생(foliageManager), 그리고 지형 높이에 동기화(getHeightAt)되는 3D 캐릭터 컨트롤러를 결합한 오픈월드 통합 예제입니다.`,
+                                    en: `Unites tile-streaming terrain (Landscape), 4-channel multi-layer PBR splatting, GPU procedural grass (grassManager), multi-stage LOD and Octahedral Impostor tree foliage (foliageManager), and a 3D character controller aligned via getHeightAt.`
                                 }
                             },
                             {
@@ -1045,8 +1045,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Landscape & Water System',
                                 path: '3d/landscape/landscapeAndWater',
                                 description: {
-                                    ko: `Landscape 지형과 물리 기반 호수(Lake)를 결합(scene.addWater)하여 수위 조절에 따른 계곡 침수, 수중 광학 효과, 캐릭터 보행 물결(enableWaterInteraction, interactionFollowTarget)을 시연하는 예제입니다.`,
-                                    en: `Combines Landscape terrain with a physical Lake (scene.addWater), demonstrating valley flooding by water level, underwater optics, and character walking ripples (enableWaterInteraction, interactionFollowTarget).`
+                                    ko: `타일 스트리밍 지형(Landscape)의 계곡 분지와 호수 수체(Lake)를 결합(scene.addWater)하여 수위 조절, 듀얼 노멀 물결, 수중 굴절·코스틱스 및 캐릭터 보행 파동(enableWaterInteraction, interactionFollowTarget) 상호작용을 시연하는 예제입니다.`,
+                                    en: `Combines tile-streaming terrain (Landscape) valleys with a Lake water body (scene.addWater), featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions (enableWaterInteraction, interactionFollowTarget).`
                                 }
                             }
                         ]
