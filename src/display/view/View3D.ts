@@ -502,7 +502,6 @@ class View3D extends AView {
         const structInfo = this.systemUniform_Vertex_StructInfo;
         const {members} = structInfo
         {
-            shadowManager.directionalShadowManager.calculateCSMMatrices(this);
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
             SystemUniformUpdater.updateCamera(rawCamera, members.camera.members, this.#uniformDataF32, this.#uniformDataU32)

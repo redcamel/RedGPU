@@ -1,4 +1,3 @@
-import {mat4} from "gl-matrix";
 import Camera2D from "../../../camera/camera/Camera2D";
 import View3D from "../View3D";
 import {CommandBatchStats} from "../../../commandEncoderManager/CommandEncoderManager";
@@ -227,7 +226,8 @@ class RenderViewStateData {
      * [EN] Map of vertex uniform states dirtied by materials
      */
     dirtyVertexUniformFromMaterial = {};
-    #lastCascadePVArray: (mat4 | null)[] = [null, null, null, null];
+    #lastCascadePVFlat: Float32Array = new Float32Array(64);
+    #hasInitializedShadowFrustum: boolean = false;
 
     /**
      * [KO] 렌더링 레이어별 렌더 번들 목록
@@ -363,32 +363,49 @@ class RenderViewStateData {
             return;
         }
 
+        if (view.pixelRectObject.width && view.pixelRectObject.height) {
+            dirShadow.calculateCSMMatrices(view);
+        }
+
         const cascadeCount = Math.min(dirShadow.cascadeCount, 4);
         this.activeCascadeCount = cascadeCount;
         const cascadePV = dirShadow.cascadeProjectionViewMatrices;
         const splitDepths = dirShadow.cascadeSplitDepths;
 
         const isCameraStill = !this.interleavedCullingInfo.forceCullingCheck;
-        let isDirty = !isCameraStill;
+        let isDirty = !this.#hasInitializedShadowFrustum || !isCameraStill;
 
         if (!isDirty) {
-            for (let c = 0; c < cascadeCount; c++) {
-                if (this.#lastCascadePVArray[c] !== cascadePV[c] || this.cascadeSplitDepths[c] !== (splitDepths[c] ?? 200.0)) {
+            const lastFlat = this.#lastCascadePVFlat;
+            outer: for (let c = 0; c < cascadeCount; c++) {
+                if (this.cascadeSplitDepths[c] !== (splitDepths[c] ?? 200.0)) {
                     isDirty = true;
                     break;
+                }
+                const pv = cascadePV[c];
+                if (pv) {
+                    const baseIdx = c * 16;
+                    for (let i = 0; i < 16; i++) {
+                        if (lastFlat[baseIdx + i] !== pv[i]) {
+                            isDirty = true;
+                            break outer;
+                        }
+                    }
                 }
             }
         }
 
         if (isDirty) {
+            const lastFlat = this.#lastCascadePVFlat;
             for (let c = 0; c < cascadeCount; c++) {
                 const pv = cascadePV[c];
-                this.#lastCascadePVArray[c] = pv;
                 this.cascadeSplitDepths[c] = splitDepths[c] ?? 200.0;
                 if (pv) {
+                    lastFlat.set(pv, c * 16);
                     computeFrustumPlanesFromPVMatrixFlat(pv, this.cascadeShadowFrustumPlanesByCascade[c]);
                 }
             }
+            this.#hasInitializedShadowFrustum = true;
         }
     }
 
