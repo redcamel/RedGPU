@@ -9,22 +9,26 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [EN] Basic example creating a large-scale terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, raymarched heightmap shadows, and debug modes.
  */
 
+const SPAWN_X = -271.5;
+const SPAWN_Z = -1416.25;
+const SPAWN_Y = 138.83;
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 2000;
-        controller.minDistance = 400;
-        controller.maxDistance = 3000;
-        controller.tilt = -25;
-        controller.pan = 35;
-        controller.speedDistance = 50;
+        const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
+        orbitController.distance = 3500;
+        orbitController.minDistance = 400;
+        orbitController.maxDistance = 6000;
+        orbitController.tilt = -25;
+        orbitController.pan = 35;
+        orbitController.speedDistance = 50;
 
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, orbitController);
         redGPUContext.addView(view);
 
         const ibl = new RedGPU.Resource.IBL(
@@ -41,16 +45,24 @@ RedGPU.init(
 
         // [KO] 기본 Landscape 지형 생성 및 16비트 글로벌 하이트맵 설정
         // [EN] Create default Landscape terrain and set 16-bit global heightmap
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
+        landscape.heightScale = 300;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
-        landscape.castHeightmapShadow = true;
         scene.landscape = landscape;
+
+        const testPane = renderTestPane({
+            redGPUContext,
+            scene,
+            view,
+            orbitController,
+            landscape,
+            directionalLight
+        });
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
+            testPane.update(time);
         });
-
-        renderTestPane(redGPUContext, landscape, directionalLight);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -60,8 +72,34 @@ RedGPU.init(
     }
 );
 
-const renderTestPane = (redGPUContext, landscape, directionalLight) => {
+const renderTestPane = ({
+                            redGPUContext,
+                            scene,
+                            view,
+                            orbitController,
+                            landscape,
+                            directionalLight
+                        }) => {
+    const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
+    characterOrbitController.distance = 5.5;
+    characterOrbitController.tilt = -12;
+    characterOrbitController.pan = 35;
+    characterOrbitController.speedDistance = 0.5;
+    characterOrbitController.centerX = SPAWN_X;
+    characterOrbitController.centerY = SPAWN_Y + 1.2;
+    characterOrbitController.centerZ = SPAWN_Z;
+
+    const character = initCharacter(redGPUContext, scene, landscape, characterOrbitController);
+
+    const setCameraMode = (mode) => {
+        const isCharacter = mode === 'Character';
+        view.camera = isCharacter ? characterOrbitController : orbitController;
+        character.setMode(mode);
+    };
+    setCameraMode('Orbit');
+
     const params = {
+        cameraMode: 'Orbit',
         baseColor: landscape.baseColor.hex,
     };
 
@@ -76,6 +114,20 @@ const renderTestPane = (redGPUContext, landscape, directionalLight) => {
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
+            const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
+            controllerFolder.addBinding(params, 'cameraMode', {
+                view: 'radiogrid',
+                groupName: 'cameraMode',
+                size: [2, 1],
+                cells: (x) => ({
+                    title: x === 0 ? 'Orbit' : 'Character',
+                    value: x === 0 ? 'Orbit' : 'Character'
+                })
+            }).on('change', (ev) => {
+                setCameraMode(ev.value);
+                pane.refresh();
+            });
+
             const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
             landscapeFolder.addBinding(params, 'baseColor').on('change', (ev) => {
                 landscape.baseColor.setColorByHEX(ev.value);
@@ -119,8 +171,113 @@ const renderTestPane = (redGPUContext, landscape, directionalLight) => {
             debugFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
+            lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
         }
     });
+
+    return {
+        update: (time) => character.update(view, time)
+    };
+};
+
+const initCharacter = (redGPUContext, scene, landscape, characterOrbitController) => {
+    let characterMesh = null;
+    let characterController = null;
+    let targetState = 'Idle';
+    let isCharacterMode = false;
+
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        'https://threejs.org/examples/models/gltf/Soldier.glb',
+        (loader) => {
+            characterMesh = loader.resultMesh;
+            characterMesh.x = SPAWN_X;
+            characterMesh.z = SPAWN_Z;
+            const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
+            characterMesh.y = startH > 0 ? startH : SPAWN_Y;
+
+            characterMesh.setCastShadowRecursively(true);
+            characterMesh.setReceiveShadowRecursively(true);
+            scene.addChild(characterMesh);
+
+            characterOrbitController.centerX = characterMesh.x;
+            characterOrbitController.centerY = characterMesh.y + 1.2;
+            characterOrbitController.centerZ = characterMesh.z;
+
+            characterController = new RedGPU.Charactor.SimpleCharacterController(
+                redGPUContext,
+                characterMesh,
+                characterOrbitController,
+                {
+                    speed: 5.0,
+                    runSpeed: 10.0,
+                    rotationSpeed: 10.0,
+                    gravity: 24.0,
+                    jumpForce: 9.0,
+                    floorHeight: 0.0,
+                    floorOffset: 0.0,
+                    getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
+                }
+            );
+
+            const clips = loader.parsingResult.animations;
+            if (clips && clips.length > 0) {
+                const idleState = clips[0];
+                const runState = clips[1];
+                const walkState = clips[3] || clips[2];
+
+                idleState.name = 'Idle';
+                walkState.name = 'Walk';
+                runState.name = 'Run';
+
+                const stateMachine = new RedGPU.AnimStateMachine(idleState);
+                stateMachine.addState(walkState);
+                stateMachine.addState(runState);
+
+                [
+                    ['Idle', 'Walk'], ['Idle', 'Run'],
+                    ['Walk', 'Idle'], ['Walk', 'Run'],
+                    ['Run', 'Idle'], ['Run', 'Walk'],
+                ].forEach(([fromState, toState]) => {
+                    stateMachine.addTransition({
+                        fromState,
+                        toState,
+                        duration: 0.25,
+                        conditions: () => targetState === toState,
+                    });
+                });
+
+                loader.stopAnimation();
+                loader.playAnimation(idleState);
+                if (loader.activeAnimations.length > 0) {
+                    loader.activeAnimations[0].animStateMachine = stateMachine;
+                }
+            }
+        }
+    );
+
+    return {
+        setMode: (mode) => {
+            isCharacterMode = mode === 'Character';
+            if (isCharacterMode && characterMesh) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+        },
+        update: (view, time) => {
+            if (!isCharacterMode || !characterMesh || !characterController) return;
+            characterController.update(view, time);
+
+            characterOrbitController.centerX = characterMesh.x;
+            characterOrbitController.centerY = characterMesh.y + 1.2;
+            characterOrbitController.centerZ = characterMesh.z;
+
+            if (characterController.isRunning) targetState = 'Run';
+            else if (characterController.isMoving) targetState = 'Walk';
+            else targetState = 'Idle';
+        }
+    };
 };
