@@ -48,7 +48,6 @@ RedGPU.init(
         // [KO] Lake 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
         const lake = new RedGPU.Water.Lake(redGPUContext, 80, 80, 80, 80);
-        lake.interactionDomainSize = 18.0;
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -232,8 +231,6 @@ const renderTestPane = (redGPUContext, lake, orbitSphere, bobbingSphere, directi
             lakeFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.05, max: 0.8, step: 0.01});
             lakeFolder.addBinding(lake, 'rippleDamping', {min: 0.001, max: 0.05, step: 0.001});
             lakeFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
-            lakeFolder.addBinding(lake, 'interactionDomainSize', {min: 4.0, max: 32.0, step: 1.0});
-            lakeFolder.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.0, step: 0.05});
             lakeFolder.addBinding(lake, 'waterLevel', {min: -2.0, max: 2.0, step: 0.05});
 
             const bobbingFolder = pane.addFolder({title: 'Bobbing Sphere (Vertical - Cyan)', expanded: true});

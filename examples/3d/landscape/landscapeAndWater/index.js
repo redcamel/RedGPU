@@ -204,6 +204,7 @@ function renderTestPane({
         characterOrbitController,
         onLoaded: (handle) => {
             characterMesh = handle.characterMesh;
+            lake.interactionFollowTarget = characterMesh;
             characterController = handle.characterController;
             setCharacterState = handle.setState;
 

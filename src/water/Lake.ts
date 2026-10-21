@@ -48,7 +48,7 @@ class Lake extends Mesh {
     #maxPenetration: number = 0.35;
     #interactionFollowTarget: Mesh | null = null;
     #interactionEnabled: boolean = true;
-    #interactionDomainSize: number = 16.0;
+    #interactionDomainSize: number = 20.0;
 
     #interactionManager: LakeInteractionManager;
     #capturePass: LakeCapturePass;
@@ -128,7 +128,7 @@ class Lake extends Mesh {
             this.#waveSimulator.rippleNormalTexture
         );
         this.waterMaterial.rippleTexture = this.#rippleDirectTexture;
-        this.waterMaterial.rippleDomainSize = this.interactionDomainSize;
+        this.waterMaterial.rippleDomainSize = this.#interactionDomainSize;
     }
 
     /**
@@ -177,22 +177,6 @@ class Lake extends Mesh {
         return this.#waveWavelength;
     }
 
-    set maxPenetration(value: number) {
-        this.#maxPenetration = Math.max(0.05, value);
-    }
-
-    /**
-     * [KO] 상호작용 캡처 시 허용되는 최대 수면 침투 깊이를 반환하거나 설정합니다. (최소값: `0.05`, 기본값: `0.35`)
-     * [EN] Gets or sets the maximum penetration depth into the water surface for interaction capture. (Min: `0.05`, default: `0.35`)
-     *
-     * @returns
-     * [KO] 최대 침투 깊이
-     * [EN] Maximum penetration depth
-     */
-    get maxPenetration(): number {
-        return this.#maxPenetration;
-    }
-
     set interactionFollowTarget(target: Mesh | null) {
         this.#interactionFollowTarget = target;
     }
@@ -232,25 +216,6 @@ class Lake extends Mesh {
      */
     get interactionEnabled(): boolean {
         return this.#interactionEnabled;
-    }
-
-    set interactionDomainSize(value: number) {
-        this.#interactionDomainSize = value;
-        if (this.material) {
-            this.waterMaterial.rippleDomainSize = value;
-        }
-    }
-
-    /**
-     * [KO] 상호작용 파동 시뮬레이션 영역의 월드 단위 한 변 크기를 반환하거나 설정합니다. (기본값: `16.0`)
-     * [EN] Gets or sets the side length of the interaction wave simulation domain in world units. (Default: `16.0`)
-     *
-     * @returns
-     * [KO] 시뮬레이션 도메인 크기
-     * [EN] Simulation domain size
-     */
-    get interactionDomainSize(): number {
-        return this.#interactionDomainSize;
     }
 
     /**

@@ -169,8 +169,8 @@ interface LakeMaterial {
      */
     rippleDomainCenter: [number, number];
     /**
-     * [KO] 상호작용 리플 시뮬레이션 도메인의 월드 단위 한 변 크기입니다. (최소값: `1.0`, 기본값: `16.0`)
-     * [EN] Side length of the interaction ripple simulation domain in world units. (Min: `1.0`, default: `16.0`)
+     * [KO] 상호작용 리플 시뮬레이션 도메인의 월드 단위 한 변 크기입니다. (최소값: `1.0`, 기본값: `20.0`)
+     * [EN] Side length of the interaction ripple simulation domain in world units. (Min: `1.0`, default: `20.0`)
      */
     rippleDomainSize: number;
     /**
@@ -270,7 +270,7 @@ class LakeMaterial extends ABitmapBaseMaterial {
         this.ssrThickness = 1.0;
         this.turbidity = 0.35;
         this.rippleDomainCenter = [0.0, 0.0];
-        this.rippleDomainSize = 16.0;
+        this.rippleDomainSize = 20.0;
         this.rippleNormalStrength = 1.0;
 
         this.debugMode = 0;
@@ -316,7 +316,7 @@ definePositiveNumber(LakeMaterial, [
     {key: 'ssrMaxDistance', value: 100.0, min: 2.0, max: 300.0},
     {key: 'ssrThickness', value: 1.0, min: 0.05, max: 5.0},
     {key: 'turbidity', value: 0.35, min: 0.0, max: 1.0},
-    {key: 'rippleDomainSize', value: 16.0, min: 1.0},
+    {key: 'rippleDomainSize', value: 20.0, min: 1.0},
     {key: 'rippleNormalStrength', value: 1.0, min: 0.0},
 ]);
 

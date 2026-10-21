@@ -128,7 +128,6 @@ RedGPU.init(
         const lake = new RedGPU.Water.Lake(redGPUContext, 300, 300, 96, 96);
         lake.y = 6.5;
         lake.waveAmplitude = 0.045;
-        lake.interactionDomainSize = 35.0;
 
         lake.waterMaterial.baseColor.setColorByHEX('#179fa0');
         lake.waterMaterial.deepColor.setColorByHEX('#042436');
@@ -246,6 +245,7 @@ RedGPU.init(
                 scene.addChild(characterMesh);
 
                 characterMesh.enableWaterInteraction = true;
+                lake.interactionFollowTarget = characterMesh;
 
                 controller.centerX = characterMesh.x;
                 controller.centerY = characterMesh.y + 1.2;
