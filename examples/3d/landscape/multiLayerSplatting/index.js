@@ -11,7 +11,6 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 const SPAWN_X = -271.5;
 const SPAWN_Z = -1416.25;
-const SPAWN_Y = 138.83;
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -113,7 +112,7 @@ const renderTestPane = ({
     characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
     characterOrbitController.centerX = SPAWN_X;
-    characterOrbitController.centerY = SPAWN_Y + 1.2;
+    characterOrbitController.centerY = landscape.getHeightAt(SPAWN_X, SPAWN_Z) + 1.2;
     characterOrbitController.centerZ = SPAWN_Z;
 
     const character = initCharacter(redGPUContext, scene, landscape, characterOrbitController);
@@ -237,8 +236,7 @@ const initCharacter = (redGPUContext, scene, landscape, characterOrbitController
             characterMesh = loader.resultMesh;
             characterMesh.x = SPAWN_X;
             characterMesh.z = SPAWN_Z;
-            const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = startH > 0 ? startH : SPAWN_Y;
+            characterMesh.y = landscape.getHeightAt(SPAWN_X, SPAWN_Z);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
@@ -260,6 +258,7 @@ const initCharacter = (redGPUContext, scene, landscape, characterOrbitController
                     jumpForce: 9.0,
                     floorHeight: 0.0,
                     floorOffset: 0.0,
+                    useKeyboard: isCharacterMode,
                     getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                 }
             );
@@ -303,6 +302,7 @@ const initCharacter = (redGPUContext, scene, landscape, characterOrbitController
     return {
         setMode: (mode) => {
             isCharacterMode = mode === 'Character';
+            if (characterController) characterController.useKeyboard = isCharacterMode;
             if (isCharacterMode && characterMesh) {
                 characterOrbitController.centerX = characterMesh.x;
                 characterOrbitController.centerY = characterMesh.y + 1.2;
@@ -310,12 +310,14 @@ const initCharacter = (redGPUContext, scene, landscape, characterOrbitController
             }
         },
         update: (view, time) => {
-            if (!isCharacterMode || !characterMesh || !characterController) return;
+            if (!characterMesh || !characterController) return;
             characterController.update(view, time);
 
-            characterOrbitController.centerX = characterMesh.x;
-            characterOrbitController.centerY = characterMesh.y + 1.2;
-            characterOrbitController.centerZ = characterMesh.z;
+            if (isCharacterMode) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
 
             if (characterController.isRunning) targetState = 'Run';
             else if (characterController.isMoving) targetState = 'Walk';
