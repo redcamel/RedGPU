@@ -153,8 +153,26 @@ RedGPU.init(
         );
         scene.addWater(lake);
 
-        // [KO] 호숫가 및 산기슭 소나무(Pine Trees) Multi-LOD 식생 시스템 구성
-        // [EN] Configure Multi-LOD pine tree foliage system along the shoreline and foothills
+        // [KO] 호숫가 절차적 잔디(GrassManager) 및 소나무(Pine Trees) Multi-LOD 식생 시스템 구성
+        // [EN] Configure shoreline procedural grass (GrassManager) and Multi-LOD pine tree foliage system
+        const grassManager = landscape.grassManager;
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../../assets/terrain/grass.glb',
+            (grassLoader) => {
+                grassManager.addType({
+                    name: 'Lawn Clump',
+                    mesh: grassLoader.resultMesh,
+                    densityPerHectare: 20000,
+                    targetLayer: 'Grass',
+                    cullingDistance: 110,
+                    minScale: [12.0, 8.0, 12.0],
+                    maxScale: [18.0, 12.0, 18.0],
+                    bottomOffset: -0.2
+                });
+            }
+        );
+
         const foliageManager = landscape.foliageManager;
         foliageManager.debugSubCellColoration = false;
 
@@ -346,8 +364,8 @@ const renderTestPane = (redGPUContext, lake, landscape, directionalLight, charac
             folderLake.addBinding(lake, 'y', {min: -1.0, max: 12.0, step: 0.1});
             folderLake.addBinding(lake, 'waveAmplitude', {min: 0, max: 0.15, step: 0.002});
             folderLake.addBinding(lake, 'waveWavelength', {min: 2, max: 40, step: 0.5});
-            folderLake.addBinding(lake, 'maxPenetration', {min: 0.05, max: 0.8, step: 0.02});
-            folderLake.addBinding(lake, 'interactionDomainSize', {min: 5, max: 60, step: 1});
+            folderLake.addBinding(lake, 'interactionEnabled');
+            folderLake.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
 
             const folderMat = pane.addFolder({title: 'LakeMaterial', expanded: false});
             folderMat.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
@@ -361,6 +379,12 @@ const renderTestPane = (redGPUContext, lake, landscape, directionalLight, charac
 
             const folderLandscape = pane.addFolder({title: 'Landscape', expanded: false});
             folderLandscape.addBinding(landscape, 'heightScale', {min: 1.0, max: 30.0, step: 0.5});
+
+            const grassManager = landscape?.grassManager;
+            if (grassManager) {
+                const folderGrass = pane.addFolder({title: 'Grass', expanded: false});
+                folderGrass.addBinding(grassManager, 'enabled');
+            }
 
             const foliageManager = landscape?.foliageManager;
             if (foliageManager) {
