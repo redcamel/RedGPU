@@ -2,16 +2,15 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Step 7: Landscape & Water System (랜드스케이프와 호수 수체 통합 시스템)
- * [EN] Step 7: Landscape & Water System (Landscape & Lake Water System Integration)
+ * [KO] Landscape & Water 예제
+ * [EN] Landscape & Water Example
  *
- * [KO] 랜드스케이프 지형의 계곡 분지와 물리 기반 호수 수체(Lake)를 결합하여 수위, 듀얼 노멀 파도, 수중 굴절 및 심도 기반 흡수·코스틱스 광학 효과를 종합 제어하는 예제입니다.
- *      • 수위(Water Level) 조절: Water 폴더의 y 값을 조절하여 지형의 골짜기가 호수로 채워지거나 말라붙는 수변 경계를 실시간으로 확인하세요.
- *      • 수중 광학 효과: causticsStrength, refractionStrength, depthFadeDistance를 조절하여 얕은 여울과 깊은 호수 바닥의 빛 투과를 관찰하세요.
- * [EN] An integrated simulation uniting landscape terrain valleys with physical lake water (Lake), controlling water level, dual normal waves, refraction, and depth caustics.
- *      • Water Level Control: Adjust lake y in the Water folder to watch terrain valleys flood or drain dynamically.
- *      • Underwater Optics: Tune causticsStrength, refractionStrength, and depthFadeDistance to inspect light absorption and caustics.
+ * [KO] 타일 스트리밍 지형(Landscape)의 계곡 분지와 호수 수체(Lake)를 결합하여 수위 조절, 듀얼 노멀 물결, 수중 굴절·코스틱스 및 캐릭터 보행 파동(Ripple) 상호작용을 시연하는 예제입니다.
+ * [EN] Demonstrates combining tile-streaming terrain (Landscape) valleys with a Lake water body, featuring water level control, dual-normal waves, underwater refraction/caustics, and character walking ripple interactions.
  */
+
+const SPAWN_X = -271.5;
+const SPAWN_Z = -1416.25;
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -19,113 +18,80 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 컨트롤러 구성 (기본: 캐릭터 3인칭 추종 카메라 & 호수 조망 궤도 회전 카메라)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
-        orbitController.centerX = -543;
-        orbitController.centerY = 301.2;
-        orbitController.centerZ = -2832.5;
-        orbitController.distance = 600.0;
+        orbitController.centerX = SPAWN_X;
+        orbitController.centerY = 139.2;
+        orbitController.centerZ = SPAWN_Z;
+        orbitController.distance = 600;
+        orbitController.minDistance = 10;
+        orbitController.maxDistance = 6000;
         orbitController.tilt = -22;
-        orbitController.pan = 75;
-        orbitController.minDistance = 10.0;
-        orbitController.maxDistance = 6000.0;
-        orbitController.speedDistance = 10.0;
+        orbitController.pan = 35;
+        orbitController.speedDistance = 15;
 
-        const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
-        characterOrbitController.distance = 7.0;
-        characterOrbitController.tilt = -16;
-        characterOrbitController.pan = 75;
-        characterOrbitController.minDistance = 2.0;
-        characterOrbitController.maxDistance = 25.0;
-        characterOrbitController.speedDistance = 0.5;
-        characterOrbitController.centerX = -543;
-        characterOrbitController.centerY = 300.8 + 1.2;
-        characterOrbitController.centerZ = -2832.5;
-
-        // 2. 씬 및 뷰3D 생성 (기본: 캐릭터 3인칭 시점)
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, characterOrbitController);
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, orbitController);
         redGPUContext.addView(view);
 
-        // 3. IBL 환경광 및 스카이박스 설정
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/field.hdr',
-            35000
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 35000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // 4. 태양광 & 그림자 설정 (Directional Light & CSM Shadow)
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 55;
-        directionalLight.azimuth = 90;
-        directionalLight.color.setColorByHEX('#fff8ea');
-        directionalLight.lux = 100000;
+        directionalLight.elevation = 36;
+        directionalLight.azimuth = 325;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 350;
-
-        // 5. 8km x 8km 랜드스케이프 지형 및 256개 타일 스트리밍 설정
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
-        landscape.heightScale = 650;
-        landscape.tileLoadingRadius = 2500.0;
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
+        landscape.heightScale = 300;
+        landscape.tileLoadingRadius = 1250;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
-
-        // 256개 분할 16비트 타일 스트리밍 경로 해석기
         landscape.tileUrlResolver = (row, col) => {
-            const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
-            const rStr = String(row).padStart(2, '0');
-            const cStr = String(col).padStart(2, '0');
-
-            let sizeStr = '512_512';
-            if (row === 15 && col === 15) sizeStr = '449_449';
-            else if (col === 15) sizeStr = '449_512';
-            else if (row === 15) sizeStr = '512_449';
-
-            return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
+            const host = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
+            const r = String(row).padStart(2, '0');
+            const c = String(col).padStart(2, '0');
+            const size = (row === 15 && col === 15) ? '449_449'
+                : (col === 15) ? '449_512'
+                    : (row === 15) ? '512_449'
+                        : '512_512';
+            return `${host}28_134_86_730_13_${size}_16bit_tile_${r}_${c}.png`;
         };
 
-        // 6. RGBA 4채널 스플랫맵 기반 멀티레이어 구성
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const weightTexturePath = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
+        const weightTexture = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layerConfigs = [
-            {name: 'Grass', key: 'grass', weightChannel: 'R', uvScale: [50, 50], roughness: 0.85},
-            {name: 'Rock', key: 'rock', weightChannel: 'G', uvScale: [15, 15], roughness: 0.7},
-            {name: 'Gravel', key: 'gravel', weightChannel: 'B', uvScale: [40, 40], roughness: 0.9},
-            {name: 'Leave', key: 'leave', weightChannel: 'A', uvScale: [50, 50], roughness: 0.8}
+            {name: 'Grass', weightChannel: 'R', uvScale: [25, 25], roughness: 0.85},
+            {name: 'Rock', weightChannel: 'G', uvScale: [7.5, 7.5], roughness: 0.7},
+            {name: 'Gravel', weightChannel: 'B', uvScale: [20, 20], roughness: 0.9},
+            {name: 'Leave', weightChannel: 'A', uvScale: [25, 25], roughness: 0.8}
         ];
 
-        const layers = layerConfigs.map(cfg => {
+        const layers = layerConfigs.map(({name, weightChannel, uvScale, roughness}) => {
+            const key = name.toLowerCase();
             return landscape.addLayer({
-                name: cfg.name,
-                baseColorTexture: `${assetPath}${cfg.key}.jpg`,
-                normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
-                ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
-                weightTexture: weightTexturePath,
-                weightChannel: cfg.weightChannel,
-                uvScale: cfg.uvScale,
-                roughness: cfg.roughness
+                name,
+                baseColorTexture: `${assetPath}${key}.jpg`,
+                normalTexture: `${assetPath}${key}_normal.jpg`,
+                ormTexture: `${assetPath}${key}_orm.jpg`,
+                weightTexture,
+                weightChannel,
+                uvScale,
+                roughness
             });
         });
 
         scene.landscape = landscape;
 
-        // 7. 물리 기반 산중 호수 수체 (Lake) 생성
-        const lake = new RedGPU.Water.Lake(
-            redGPUContext,
-            1500,
-            1500,
-            96,
-            96
-        );
-        lake.x = -543;
-        lake.z = -2832.5;
-        lake.y = 301.2; // 캐릭터 발목(수심 약 40cm)이 찰랑거리는 완만한 수변 수위
-
-
+        // [KO] 지형 분지 수역에 호수(Lake) 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
+        // [EN] Create Lake water body in the terrain basin and bind linear ('rgba8unorm') dual normal textures
+        const lake = new RedGPU.Water.Lake(redGPUContext, 1500, 1500, 96, 96);
+        lake.x = SPAWN_X;
+        lake.z = SPAWN_Z;
+        lake.y = 139.2;
         lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/lake_normal.png',
@@ -142,261 +108,176 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-
         scene.addWater(lake);
 
-        // 8. GUI 컨트롤 패널 및 캐릭터 상호작용 초기화
         const testPane = renderTestPane({
             redGPUContext,
             scene,
             view,
-            characterOrbitController,
             orbitController,
             landscape,
             lake,
             directionalLight,
-            directionalShadowManager,
             layers
         });
 
-        // 9. 렌더러 시작
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, (timestamp) => {
-            testPane.update(timestamp);
+        renderer.start(redGPUContext, (time) => {
+            testPane.update(time);
         });
     },
-    (error) => {
-        console.error('RedGPU 초기화 실패:', error);
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] Tweakpane GUI를 구성하여 카메라 모드, 3D 캐릭터, 호수 수체, 지형 및 광원을 제어합니다.
- * [EN] Configures the Tweakpane GUI to control camera modes, 3D character, lake water, terrain, and lighting.
- */
-function renderTestPane({
+const renderTestPane = ({
                             redGPUContext,
                             scene,
                             view,
-                            characterOrbitController,
                             orbitController,
                             landscape,
                             lake,
                             directionalLight,
-                            directionalShadowManager,
                             layers
-                        }) {
-    let characterMesh = null;
-    let characterController = null;
-    let setCharacterState = null;
+                        }) => {
+    const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
+    characterOrbitController.distance = 6.5;
+    characterOrbitController.tilt = -15;
+    characterOrbitController.pan = 35;
+    characterOrbitController.speedDistance = 0.5;
+    characterOrbitController.centerX = SPAWN_X;
+    characterOrbitController.centerY = landscape.getHeightAt(SPAWN_X, SPAWN_Z) + 1.2;
+    characterOrbitController.centerZ = SPAWN_Z;
+
+    const character = initCharacter(redGPUContext, scene, landscape, lake, characterOrbitController);
+
+    const setCameraMode = (mode) => {
+        const isCharacter = mode === 'Character';
+        view.camera = isCharacter ? characterOrbitController : orbitController;
+        landscape.nearDetailDistance = isCharacter ? 250 : 800;
+        character.setMode(mode);
+    };
+    setCameraMode('Character');
 
     const params = {
-        cameraMode: 'Character'
-    };
-
-    let paneInstance = null;
-
-    // 3D 캐릭터 로딩 및 상태 머신 구성
-    initCharacter({
-        redGPUContext,
-        scene,
-        landscape,
-        characterOrbitController,
-        onLoaded: (handle) => {
-            characterMesh = handle.characterMesh;
-            lake.interactionFollowTarget = characterMesh;
-            characterController = handle.characterController;
-            setCharacterState = handle.setState;
-
-            if (params.cameraMode === 'Character') {
-                characterController.useKeyboard = true;
-            }
-            if (paneInstance) {
-                bindCharacterFolder(paneInstance, characterController);
-            }
-        }
-    });
-
-    const bindCharacterFolder = (pane, cc) => {
-        if (!pane || !cc) return;
-        const charFolder = pane.addFolder({title: 'Character', expanded: false});
-        charFolder.addBinding(cc, 'floorOffset', {min: -0.2, max: 0.5, step: 0.01});
-        charFolder.addBinding(cc, 'speed', {min: 1.0, max: 15.0, step: 0.5});
-        charFolder.addBinding(cc, 'runSpeed', {min: 2.0, max: 25.0, step: 0.5});
-        charFolder.addBinding(cc, 'jumpForce', {min: 2.0, max: 20.0, step: 0.5});
-        charFolder.addBinding(cc, 'gravity', {min: 5.0, max: 60.0, step: 1.0});
-    };
-
-    const resetCamera = () => {
-        if (params.cameraMode === 'Character') {
-            if (characterMesh) {
-                characterOrbitController.centerX = characterMesh.x;
-                characterOrbitController.centerY = characterMesh.y + 1.2;
-                characterOrbitController.centerZ = characterMesh.z;
-            }
-            characterOrbitController.distance = 7.0;
-            characterOrbitController.tilt = -16;
-            characterOrbitController.pan = 75;
-        } else {
-            orbitController.centerX = -543;
-            orbitController.centerY = 301.2;
-            orbitController.centerZ = -2832.5;
-            orbitController.distance = 600.0;
-            orbitController.tilt = -22;
-            orbitController.pan = 75;
-        }
+        cameraMode: 'Character',
     };
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            paneInstance = pane;
-
-            // 1. Controller 설정 (Character / Orbit 전환)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
-
             controllerFolder.addBinding(params, 'cameraMode', {
                 view: 'radiogrid',
                 groupName: 'cameraMode',
                 size: [2, 1],
-                cells: (x, y) => ({
-                    title: x === 0 ? 'Character' : 'Orbit',
-                    value: x === 0 ? 'Character' : 'Orbit'
+                cells: (x) => ({
+                    title: x === 0 ? 'Orbit' : 'Character',
+                    value: x === 0 ? 'Orbit' : 'Character'
                 })
             }).on('change', (ev) => {
-                const mode = ev.value;
-                if (mode === 'Character') {
-                    view.camera = characterOrbitController;
-                    if (characterController) characterController.useKeyboard = true;
-                    if (characterMesh) {
-                        characterOrbitController.centerX = characterMesh.x;
-                        characterOrbitController.centerY = characterMesh.y + 1.2;
-                        characterOrbitController.centerZ = characterMesh.z;
-                    }
-                } else {
-                    view.camera = orbitController;
-                    if (characterController) characterController.useKeyboard = false;
-                }
+                setCameraMode(ev.value);
+                pane.refresh();
             });
 
-            controllerFolder.addButton({title: 'Reset Camera'}).on('click', resetCamera);
+            const lakeFolder = pane.addFolder({title: 'Lake', expanded: true});
+            lakeFolder.addBinding(lake, 'y', {min: 135.0, max: 150.0, step: 0.1});
+            lakeFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.3, step: 0.005});
+            lakeFolder.addBinding(lake, 'waveWavelength', {min: 2.0, max: 40.0, step: 0.5});
+            lakeFolder.addBinding(lake, 'interactionEnabled');
+            lakeFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
 
-            if (characterController) {
-                bindCharacterFolder(pane, characterController);
-            }
+            const materialFolder = lakeFolder.addFolder({title: 'material', expanded: true});
+            materialFolder.addBinding(lake.material, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+            materialFolder.addBinding(lake.material, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.02});
+            materialFolder.addBinding(lake.material, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
+            materialFolder.addBinding(lake.material, 'causticsScale', {min: 0.1, max: 5.0, step: 0.1});
+            materialFolder.addBinding(lake.material, 'depthFadeDistance', {min: 0.1, max: 10.0, step: 0.1});
+            materialFolder.addBinding(lake.material, 'extinctionFactor', {min: 0.01, max: 1.0, step: 0.01});
+            materialFolder.addBinding(lake.material, 'turbidity', {min: 0.0, max: 1.0, step: 0.02});
+            materialFolder.addBinding(lake.material, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
+            materialFolder.addBinding(lake.material, 'normalScale', {min: 0.0, max: 1.0, step: 0.05});
+            materialFolder.addBinding(lake.material, 'normalDetailScale', {min: 0.0, max: 1.0, step: 0.05});
+            materialFolder.addBinding(lake.material, 'enableSSR');
 
-            // 2. 호수 수체 폴더
-            const waterFolder = pane.addFolder({title: 'Water', expanded: true});
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
+            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 600, step: 5});
+            landscapeFolder.addBinding(landscape, 'receiveShadow');
+            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 1500, step: 10});
 
-            waterFolder.addBinding(lake, 'y', {min: 295.0, max: 310.0, step: 0.1});
-            waterFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.5, step: 0.01});
-            waterFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
-            waterFolder.addBinding(lake.material, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
-            waterFolder.addBinding(lake.material, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
-            waterFolder.addBinding(lake.material, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.1});
-            waterFolder.addBinding(lake.material, 'depthFadeDistance', {min: 0.1, max: 10.0, step: 0.1});
-            waterFolder.addBinding(lake.material, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
-            waterFolder.addBinding(lake.material, 'normalScale', {min: 0.1, max: 3.0, step: 0.1});
-
-            // 3. 지형 설정 폴더
-            const terrainFolder = pane.addFolder({title: 'Terrain', expanded: false});
-
-            terrainFolder.addBinding(landscape, 'heightScale', {min: 100, max: 1200, step: 10});
-            terrainFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 500, step: 5});
-            terrainFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
-            terrainFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
-
-            // 4. 조명 및 그림자 폴더
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
-
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 2000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-            lightFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {min: 30, max: 500, step: 10});
 
-            // 5. 스플랫 레이어 폴더
             const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
-
             layers.forEach((layer) => {
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
-
                 layerSubFolder.addBinding(layer, 'enabled');
                 layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
             });
         }
     });
 
-    const update = (timestamp) => {
-        if (characterMesh && characterController) {
-            characterController.update(view, timestamp);
-
-            if (params.cameraMode === 'Character') {
-                characterOrbitController.centerX = characterMesh.x;
-                characterOrbitController.centerY = characterMesh.y + 1.2;
-                characterOrbitController.centerZ = characterMesh.z;
-            }
-
-            if (setCharacterState) {
-                if (characterController.isRunning) setCharacterState('Run');
-                else if (characterController.isMoving) setCharacterState('Walk');
-                else setCharacterState('Idle');
-            }
-        }
-    };
-
     return {
-        update
+        update: (time) => character.update(view, time)
     };
-}
+};
 
-/**
- * [KO] 3D 캐릭터 로딩 및 물리 컨트롤러/애니메이션 상태 머신 구성
- * [EN] Loads 3D character and configures physics controller and animation state machine
- */
-function initCharacter({redGPUContext, scene, landscape, characterOrbitController, onLoaded}) {
-    const CHARACTER_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+const initCharacter = (redGPUContext, scene, landscape, lake, characterOrbitController) => {
+    let characterMesh = null;
+    let characterController = null;
+    let targetState = 'Idle';
+    let isCharacterMode = true;
 
     new RedGPU.GLTFLoader(
         redGPUContext,
-        CHARACTER_URL,
+        'https://threejs.org/examples/models/gltf/Soldier.glb',
         (loader) => {
-            const characterMesh = loader.resultMesh;
-            characterMesh.x = -543;
-            characterMesh.z = -2832.5;
-
-            const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 300.8);
+            characterMesh = loader.resultMesh;
+            characterMesh.x = SPAWN_X;
+            characterMesh.z = SPAWN_Z;
+            characterMesh.y = landscape.getHeightAt(SPAWN_X, SPAWN_Z);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
             scene.addChild(characterMesh);
 
-            // [핵심] 캐릭터 메시를 수체 상호작용 객체로 재귀 등록하여 이동/발걸음 시 동심원 물결(Ripple) 시뮬레이션 활성화
+            // [KO] 캐릭터 메시의 수체 상호작용을 활성화하고 호수의 파동 추적 타겟으로 등록
+            // [EN] Enable water interaction on the character mesh and register it as the lake's ripple follow target
             characterMesh.enableWaterInteraction = true;
+            lake.interactionFollowTarget = characterMesh;
 
             characterOrbitController.centerX = characterMesh.x;
             characterOrbitController.centerY = characterMesh.y + 1.2;
             characterOrbitController.centerZ = characterMesh.z;
-            characterOrbitController.distance = 7.0;
-            characterOrbitController.tilt = -16;
-            characterOrbitController.pan = 75;
 
-            const characterController = new RedGPU.Charactor.SimpleCharacterController(
+            characterController = new RedGPU.Charactor.SimpleCharacterController(
                 redGPUContext,
                 characterMesh,
                 characterOrbitController,
                 {
+                    speed: 5.0,
+                    runSpeed: 10.0,
+                    rotationSpeed: 10.0,
                     gravity: 24.0,
                     jumpForce: 9.0,
+                    floorHeight: 0.0,
+                    floorOffset: 0.0,
+                    useKeyboard: isCharacterMode,
                     getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                 }
             );
 
-            let targetState = 'Idle';
             const clips = loader.parsingResult.animations;
             if (clips && clips.length > 0) {
                 const idleState = clips[0];
                 const runState = clips[1];
                 const walkState = clips[3] || clips[2];
+
                 idleState.name = 'Idle';
                 walkState.name = 'Walk';
                 runState.name = 'Run';
@@ -405,18 +286,16 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
                 stateMachine.addState(walkState);
                 stateMachine.addState(runState);
 
-                const BLEND = 0.25;
-                const pairs = [
+                [
                     ['Idle', 'Walk'], ['Idle', 'Run'],
                     ['Walk', 'Idle'], ['Walk', 'Run'],
                     ['Run', 'Idle'], ['Run', 'Walk'],
-                ];
-                pairs.forEach(([from, to]) => {
+                ].forEach(([fromState, toState]) => {
                     stateMachine.addTransition({
-                        fromState: from,
-                        toState: to,
-                        duration: BLEND,
-                        conditions: () => targetState === to,
+                        fromState,
+                        toState,
+                        duration: 0.25,
+                        conditions: () => targetState === toState,
                     });
                 });
 
@@ -426,15 +305,32 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
                     loader.activeAnimations[0].animStateMachine = stateMachine;
                 }
             }
-
-            onLoaded?.({
-                characterMesh,
-                characterController,
-                setState: (state) => {
-                    targetState = state;
-                }
-            });
         }
     );
-}
 
+    return {
+        setMode: (mode) => {
+            isCharacterMode = mode === 'Character';
+            if (characterController) characterController.useKeyboard = isCharacterMode;
+            if (isCharacterMode && characterMesh) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+        },
+        update: (view, time) => {
+            if (!characterMesh || !characterController) return;
+            characterController.update(view, time);
+
+            if (isCharacterMode) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+
+            if (characterController.isRunning) targetState = 'Run';
+            else if (characterController.isMoving) targetState = 'Walk';
+            else targetState = 'Idle';
+        }
+    };
+};
