@@ -102,20 +102,9 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
     let worldTangent = normalize((gu_normalModelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-    let toCam = systemUniforms.camera.cameraPosition - worldPos.xyz;
-    let camDist = length(toCam);
-    let V = toCam / max(camDist, 0.001);
-    let NdotV = saturate(V.y);
-    let grazingFactor = 1.0 - NdotV;
-    let horizonAngleFactor = smoothstep(0.65, 0.90, grazingFactor);
-    let distFactor = smoothstep(20.0, 100.0, camDist);
-    let taaFactor = horizonAngleFactor * distFactor;
-
-    let relPos = -toCam;
+    let relPos = worldPos.xyz - systemUniforms.camera.cameraPosition;
     let viewPos = (systemUniforms.camera.viewMatrix * vec4<f32>(relPos, 0.0)).xyz;
-    let clipPosNoneJitter = su_projection.noneJitterProjectionMatrix * vec4<f32>(viewPos, 1.0);
-    let clipPosJittered = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
-    output.position = mix(clipPosNoneJitter, clipPosJittered, taaFactor);
+    output.position = su_projection.projectionMatrix * vec4<f32>(viewPos, 1.0);
     output.vertexPosition = worldPos.xyz;
     output.vertexNormal = worldNormal;
     output.uv = inputData.uv * globalVertexData.uvTransform.zw + globalVertexData.uvTransform.xy;

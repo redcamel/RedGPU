@@ -112,6 +112,7 @@ fn calculateWaterSSR(
 
     var currentWorldPos = startWorldPos + worldNormal * 0.02;
     var hitUV = vec2<f32>(0.0);
+    var hitWorldPos = currentWorldPos;
     var hitFound = false;
     var hitStep = 0u;
 
@@ -119,6 +120,7 @@ fn calculateWaterSSR(
         let progress = f32(i) / f32(maxSteps);
         let stepScale = 0.35 + progress * 1.3;
         let actualStep = baseStepSize * stepScale;
+        let prevWorldPos = currentWorldPos;
         currentWorldPos = currentWorldPos + R * actualStep;
 
         let travelVec = currentWorldPos - startWorldPos;
@@ -145,17 +147,20 @@ fn calculateWaterSSR(
             continue;
         }
 
+        let prevRayDist = length(prevWorldPos - cameraWorldPos);
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
         let effectiveThickness = thickness + actualStep * 0.8;
+        let crossedFromFront = prevRayDist <= surfaceDistanceFromCamera + actualStep * 0.55;
 
-        if (distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
-            // 정밀 이분 탐색 (Binary Search Refinement)
-            var minPos = currentWorldPos - R * actualStep;
+        if (crossedFromFront && distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
+            // 정밀 이분 탐색 (실루엣 경계 너머 배경/수중 바닥 번짐 방지)
+            var minPos = prevWorldPos;
             var maxPos = currentWorldPos;
             var bestUV = currentScreenUV;
+            var bestPos = currentWorldPos;
 
             for (var r = 0u; r < 5u; r = r + 1u) {
                 let midPos = (minPos + maxPos) * 0.5;
@@ -172,19 +177,28 @@ fn calculateWaterSSR(
                 }
 
                 let midSampledPos = getWorldPositionFromDepth(midUV, midRawDepth, systemUniforms.projection.inverseProjectionViewMatrix);
-                let midRayDist = length(midPos - cameraWorldPos);
                 let midSurfDist = length(midSampledPos - cameraWorldPos);
+
+                // 실루엣 바깥(수중 바닥 또는 원경 벽면)으로 벗어난 샘플은 제외
+                if (midSampledPos.y < startWorldPos.y - 0.08 || abs(midSurfDist - surfaceDistanceFromCamera) > actualStep * 1.2) {
+                    minPos = midPos;
+                    continue;
+                }
+
+                let midRayDist = length(midPos - cameraWorldPos);
                 let midDiff = midRayDist - midSurfDist;
 
                 if (midDiff > 0.0 && midDiff < effectiveThickness) {
                     maxPos = midPos;
                     bestUV = midUV;
+                    bestPos = midPos;
                 } else {
                     minPos = midPos;
                 }
             }
 
             hitUV = bestUV;
+            hitWorldPos = bestPos;
             hitFound = true;
             hitStep = i;
             break;
@@ -198,8 +212,7 @@ fn calculateWaterSSR(
     let edge = min(hitUV, vec2<f32>(1.0) - hitUV);
     let edgeFade = smoothstep(0.0, 0.08, min(edge.x, edge.y));
 
-    let finalTravelDistSq = dot(currentWorldPos - startWorldPos, currentWorldPos - startWorldPos);
-    let finalTravelDist = sqrt(finalTravelDistSq);
+    let finalTravelDist = length(hitWorldPos - startWorldPos);
     let distFade = 1.0 - smoothstep(maxDist * 0.70, maxDist * 0.95, finalTravelDist);
 
     let stepFade = smoothstep(0.0, 0.08, 1.0 - f32(hitStep) / f32(maxSteps));
@@ -643,13 +656,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
     output.gBufferNormal = vec4<f32>(worldNormal, 1.0);
 
-    let currClip = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    let currClip = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     let prevClip = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     let cameraMotion = getMotionVector(currClip, prevClip);
 
-    let finalMotion = cameraMotion * taaFactor;
-    let jitterDisableFlag = select(1.0, 0.0, taaFactor > 0.2);
-    output.gBufferMotionVector = vec4<f32>(finalMotion, jitterDisableFlag, 1.0);
+    output.gBufferMotionVector = vec4<f32>(cameraMotion, 0.0, 1.0);
 
     return output;
 }

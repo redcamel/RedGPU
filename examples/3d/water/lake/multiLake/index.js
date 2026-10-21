@@ -186,7 +186,7 @@ RedGPU.init(
             }
         });
 
-        renderTestPane(redGPUContext, lakes, directionalLight);
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -429,122 +429,6 @@ const createPrecisePoolEnvironment = (redGPUContext, scene, poolConfigs) => {
     return animatedList;
 };
 
-const renderTestPane = (redGPUContext, lakes, directionalLight) => {
-    const lakeNames = [
-        'Pool 1 (Top Alpine)',
-        'Pool 2 (Mid-Left Deep)',
-        'Pool 3 (Mid-Right Lagoon)',
-        'Pool 4 (Lower-Center)',
-        'Pool 5 (Bottom Mystic)'
-    ];
-
-    const masterParams = {
-        enableSSR: true,
-        waveScale: 1.0,
-        activePool: 0
-    };
-
-    const currentParams = {
-        waterLevel: lakes[0].waterLevel,
-        waveAmplitude: lakes[0].waveAmplitude,
-        baseColor: lakes[0].waterMaterial.baseColor.hex,
-        deepColor: lakes[0].waterMaterial.deepColor.hex,
-        roughness: lakes[0].waterMaterial.roughness,
-        opacity: lakes[0].waterMaterial.opacity,
-        refractionStrength: lakes[0].waterMaterial.refractionStrength,
-        causticsStrength: lakes[0].waterMaterial.causticsStrength,
-        enableSSR: lakes[0].waterMaterial.enableSSR
-    };
-
-    new RedGPUExampleHelper(redGPUContext, {
-        gui: (pane) => {
-            const masterFolder = pane.addFolder({title: 'Master Controls', expanded: true});
-            masterFolder.addBinding(masterParams, 'enableSSR').on('change', (ev) => {
-                for (let i = 0; i < lakes.length; i++) {
-                    lakes[i].waterMaterial.enableSSR = ev.value;
-                }
-                currentParams.enableSSR = ev.value;
-                pane.refresh();
-            });
-
-            masterFolder.addBinding(masterParams, 'waveScale', {min: 0.0, max: 3.0, step: 0.1}).on('change', (ev) => {
-                const scale = ev.value;
-                const baseAmps = [0.02, 0.025, 0.015, 0.022, 0.018];
-                for (let i = 0; i < lakes.length; i++) {
-                    lakes[i].waveAmplitude = baseAmps[i] * scale;
-                }
-                currentParams.waveAmplitude = lakes[masterParams.activePool].waveAmplitude;
-                pane.refresh();
-            });
-
-            const lakeFolder = pane.addFolder({title: 'Selected Pool Tuning', expanded: true});
-            lakeFolder.addBinding(masterParams, 'activePool', {
-                options: {
-                    'Pool 1 (Top Alpine)': 0,
-                    'Pool 2 (Mid-Left Deep)': 1,
-                    'Pool 3 (Mid-Right Lagoon)': 2,
-                    'Pool 4 (Lower-Center)': 3,
-                    'Pool 5 (Bottom Mystic)': 4
-                }
-            }).on('change', (ev) => {
-                const lake = lakes[ev.value];
-                const mat = lake.waterMaterial;
-                currentParams.waterLevel = lake.waterLevel;
-                currentParams.waveAmplitude = lake.waveAmplitude;
-                currentParams.baseColor = mat.baseColor.hex;
-                currentParams.deepColor = mat.deepColor.hex;
-                currentParams.roughness = mat.roughness;
-                currentParams.opacity = mat.opacity;
-                currentParams.refractionStrength = mat.refractionStrength;
-                currentParams.causticsStrength = mat.causticsStrength;
-                currentParams.enableSSR = mat.enableSSR;
-                pane.refresh();
-            });
-
-            lakeFolder.addBinding(currentParams, 'waterLevel', {min: -6.0, max: 8.0, step: 0.05}).on('change', (ev) => {
-                lakes[masterParams.activePool].waterLevel = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'waveAmplitude', {
-                min: 0.0,
-                max: 0.06,
-                step: 0.001
-            }).on('change', (ev) => {
-                lakes[masterParams.activePool].waveAmplitude = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'baseColor').on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.baseColor.setColorByHEX(ev.value);
-            });
-            lakeFolder.addBinding(currentParams, 'deepColor').on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.deepColor.setColorByHEX(ev.value);
-            });
-            lakeFolder.addBinding(currentParams, 'roughness', {min: 0.0, max: 1.0, step: 0.01}).on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.roughness = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'opacity', {min: 0.0, max: 1.0, step: 0.01}).on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.opacity = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'refractionStrength', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.02
-            }).on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.refractionStrength = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'causticsStrength', {
-                min: 0.0,
-                max: 2.0,
-                step: 0.05
-            }).on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.causticsStrength = ev.value;
-            });
-            lakeFolder.addBinding(currentParams, 'enableSSR').on('change', (ev) => {
-                lakes[masterParams.activePool].waterMaterial.enableSSR = ev.value;
-            });
-
-            const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
-            lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 85, step: 1});
-            lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-            lightFolder.addBinding(directionalLight, 'lux', {min: 10000, max: 150000, step: 5000});
-        }
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
