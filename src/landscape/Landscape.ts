@@ -63,7 +63,7 @@ class Landscape extends RedGPUObject {
     #grassManager: GrassManager;
     #debuggerManager: LandscapeDebuggerManager;
 
-    #heightScale: number = 500.0;
+    #heightScale: number = 200.0;
     #componentSizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
 
@@ -79,7 +79,7 @@ class Landscape extends RedGPUObject {
     #receiveShadow: boolean = true;
     #castHeightmapShadow: boolean = false;
     #heightmapShadowSteps: number = 16;
-    #heightmapShadowDistance: number = 3000.0;
+    #heightmapShadowDistance: number = 1000.0;
     #heightmapShadowSoftness: number = 8.0;
 
     #renderer: LandscapeRenderer;
@@ -139,7 +139,7 @@ class Landscape extends RedGPUObject {
         this.#lodMetric = 'screenSize';
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
         this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
-        this.#heightScale = 500.0;
+        this.#heightScale = 200.0;
 
         this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
         this.#tileStreamer.setMaterial(material);
@@ -406,8 +406,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 정규화된 하이트맵 값(`0.0 ~ 1.0`)에 곱해지는 최대 고도 스케일(월드 단위, 기본값: `500.0`)을 반환하거나 설정합니다.
-     * [EN] Gets or sets the maximum elevation scale (in world units, default: `500.0`) multiplied by normalized heightmap values (`0.0 to 1.0`).
+     * [KO] 정규화된 하이트맵 값(`0.0 ~ 1.0`)에 곱해지는 최대 고도 스케일(월드 단위, 기본값: `200.0`)을 반환하거나 설정합니다.
+     * [EN] Gets or sets the maximum elevation scale (in world units, default: `200.0`) multiplied by normalized heightmap values (`0.0 to 1.0`).
      *
      * @returns
      * [KO] 최대 높이 스케일
@@ -771,8 +771,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 하이트맵 자체 그림자 레이마칭의 최대 추적 거리(월드 단위, 최솟값: `10.0`, 기본값: `3000.0`)를 반환하거나 설정합니다.
-     * [EN] Gets or sets the maximum trace distance (in world units, minimum: `10.0`, default: `3000.0`) for heightmap self-shadow raymarching.
+     * [KO] 하이트맵 자체 그림자 레이마칭의 최대 추적 거리(월드 단위, 최솟값: `10.0`, 기본값: `1000.0`)를 반환하거나 설정합니다.
+     * [EN] Gets or sets the maximum trace distance (in world units, minimum: `10.0`, default: `1000.0`) for heightmap self-shadow raymarching.
      *
      * @returns
      * [KO] 하이트맵 그림자 최대 추적 거리

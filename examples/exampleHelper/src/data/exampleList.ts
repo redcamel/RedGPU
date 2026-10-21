@@ -991,8 +991,8 @@ export const ExampleList: ExampleListType = [
                                 name: 'Basic Terrain',
                                 path: '3d/landscape/basicTerrain',
                                 description: {
-                                    ko: `16비트 글로벌 하이트맵(globalHeightmapUrl)을 기반으로 8km x 8km 지형을 구축하고, 연속 LOD·지오모핑, 하이트맵 레이마칭 그림자(castHeightmapShadow) 및 높이 동기화(getHeightAt)를 테스트하는 기본 예제입니다.`,
-                                    en: `Basic example building an 8km x 8km terrain from a 16-bit global heightmap (globalHeightmapUrl), demonstrating continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and height queries (getHeightAt).`
+                                    ko: `단일 16비트 글로벌 하이트맵(globalHeightmapUrl)을 기반으로 지형을 생성하고, 연속 LOD·지오모핑, 하이트맵 레이마칭 그림자(castHeightmapShadow) 및 디버그 모드를 제어하는 기본 예제입니다.`,
+                                    en: `Basic example creating a terrain from a single 16-bit global heightmap (globalHeightmapUrl) and controlling continuous LOD, geomorphing, raymarched heightmap shadows (castHeightmapShadow), and debug modes.`
                                 }
                             },
                             {

@@ -70,7 +70,7 @@ class LandscapeTileStreamer extends RedGPUObject {
     #globalCPUHeightMap: { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null = null;
     #onGlobalHeightmapBaked: (() => void) | null = null;
 
-    #heightScale: number = 500.0;
+    #heightScale: number = 200.0;
     #lod0SizeQuads: number = 256;
 
     #tempCellBuffer: Int32Array = new Int32Array(2);
@@ -658,6 +658,21 @@ class LandscapeTileStreamer extends RedGPUObject {
         const vntGen = this.#vntGenerator;
         const heightScale = this.#heightScale;
         const {worldSizeX, tileCountX, tileCountZ} = this.#spatialGrid;
+
+        if (this.#globalHeightTexture) {
+            vntGen.bakeTileRegion(
+                vhtAtlas,
+                vntAtlas,
+                0,
+                0,
+                tileCountX * TILE_PIXEL_SIZE,
+                tileCountZ * TILE_PIXEL_SIZE,
+                heightScale,
+                worldSizeX,
+                tileCountX
+            );
+            return;
+        }
 
         for (const key of this.#cpuHeightMap.keys()) {
             const [rowStr, colStr] = key.split('_');
