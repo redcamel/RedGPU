@@ -248,7 +248,7 @@ const renderTestPane = ({
             type.clearSubCellCache();
         });
 
-        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: false});
+        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
         const layerOptions = {'(All / None)': ''};
         if (landscape?.layers) {
             landscape.layers.forEach((l) => {
@@ -280,7 +280,7 @@ const renderTestPane = ({
             alignFactorBinding.disabled = !ev.value;
         });
 
-        const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: false});
+        const groundBlendFolder = typeFolder.addFolder({title: 'Ground Blend', expanded: true});
         groundBlendFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
         groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
 
@@ -317,6 +317,7 @@ const renderTestPane = ({
     };
 
     new RedGPUExampleHelper(redGPUContext, {
+        globalWind: true,
         gui: (pane) => {
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
             controllerFolder.addBinding(params, 'cameraMode', {
@@ -344,13 +345,6 @@ const renderTestPane = ({
             managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'mainPassDrawCalls', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'shadowDrawCalls', {readonly: true, interval: 200});
-
-            const windManager = scene.windManager;
-            const windGlobalFolder = foliageFolder.addFolder({title: 'Global Wind (Scene)', expanded: false});
-            windGlobalFolder.addBinding(windManager, 'enabled');
-            windGlobalFolder.addBinding(windManager, 'strength', {min: 0.0, max: 3.0, step: 0.05});
-            windGlobalFolder.addBinding(windManager, 'speed', {min: 0.0, max: 10.0, step: 0.1});
-            windGlobalFolder.addBinding(windManager, 'directionAngle', {min: 0, max: 360, step: 1});
 
             while (pendingFoliageTypes.length > 0) {
                 addFoliageTypeToUI(pendingFoliageTypes.shift());
