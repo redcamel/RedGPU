@@ -266,7 +266,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let originalSceneColor = textureSampleLevel(renderPath1ResultTexture, renderPath1ResultTextureSampler, screenUV, 0.0).rgb;
 
     let timeSec = systemUniforms.time.time;
-    let V = normalize(systemUniforms.camera.cameraPosition - worldPos);
+    let toCam = systemUniforms.camera.cameraPosition - worldPos;
+    let camDist = length(toCam);
+    let V = toCam / max(0.0001, camDist);
 
     let primaryWindDir = systemUniforms.wind.direction.xz;
     let secondaryWindDir = vec2<f32>(
@@ -285,13 +287,38 @@ fn main(inputData: InputData) -> OutputFragment {
     if (uniforms.invertNormalY == 1u) {
         rawXY1.y = -rawXY1.y;
     }
-    var n1 = rawXY1 * uniforms.normalScale;
+
+    // 원거리 매크로 파동(Distant Normal): -23도 교차 회전 및 비정수 저주파(0.23배) 샘플링으로 중·원거리 격자 타일링 제거
+    let macroBaseUV = vec2<f32>(
+        baseWorldUV.x * 0.9205049 + baseWorldUV.y * 0.3907311,
+        -baseWorldUV.x * 0.3907311 + baseWorldUV.y * 0.9205049
+    );
+    let macroWindDir = vec2<f32>(
+        primaryWindDir.x * 0.9205049 - primaryWindDir.y * 0.3907311,
+        primaryWindDir.x * 0.3907311 + primaryWindDir.y * 0.9205049
+    );
+    let macroWaveUV = macroBaseUV * (uniforms.normalTiling * 0.23) + macroWindDir * (baseScrollSpeed * 0.35);
+    let rawMacroSample = textureSample(normalTexture, normalTextureSampler, macroWaveUV).rgb;
+    var rawMacroXY = rawMacroSample.xy * 2.0 - 1.0;
+    rawMacroXY.y = -rawMacroXY.y;
+    if (uniforms.invertNormalY == 1u) {
+        rawMacroXY.y = -rawMacroXY.y;
+    }
+
+    let macroBlend = mix(0.28, 0.65, smoothstep(8.0, 65.0, camDist));
+    let blendedPrimaryXY = mix(rawXY1, rawMacroXY, macroBlend);
+    var n1 = blendedPrimaryXY * uniforms.normalScale;
     let z1 = sqrt(max(0.0, 1.0 - dot(n1, n1)));
     var combinedTangentNormal = normalize(vec3<f32>(n1, z1));
 
     #redgpu_if normalDetailTexture
     {
-        let waveUV2 = baseWorldUV * uniforms.normalDetailTiling + secondaryWindDir * (baseScrollSpeed * 1.6);
+        // 근거리 디테일 파동: +37도 교차 회전으로 기본 노멀과의 정수배 모아레(Moiré) 간섭 제거 및 원거리 감쇠
+        let rotatedDetailBaseUV = vec2<f32>(
+            baseWorldUV.x * 0.7986355 - baseWorldUV.y * 0.6018150,
+            baseWorldUV.x * 0.6018150 + baseWorldUV.y * 0.7986355
+        );
+        let waveUV2 = rotatedDetailBaseUV * uniforms.normalDetailTiling + secondaryWindDir * (baseScrollSpeed * 1.6);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
@@ -299,7 +326,8 @@ fn main(inputData: InputData) -> OutputFragment {
         if (uniforms.invertNormalDetailY == 1u) {
             rawXY2.y = -rawXY2.y;
         }
-        var n2 = rawXY2 * uniforms.normalDetailScale;
+        let detailDistFade = 1.0 - smoothstep(18.0, 75.0, camDist) * 0.75;
+        var n2 = rawXY2 * (uniforms.normalDetailScale * detailDistFade);
         let z2 = sqrt(max(0.0, 1.0 - dot(n2, n2)));
         let tangentNormal2 = normalize(vec3<f32>(n2, z2));
 
@@ -325,8 +353,7 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    let camDist = length(systemUniforms.camera.cameraPosition - inputData.vertexPosition);
-    let distNormalFade = clamp((camDist - 35.0) / 45.0, 0.0, 0.85);
+    let distNormalFade = smoothstep(45.0, 160.0, camDist) * 0.65;
     combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), distNormalFade));
 
     let baseNormal = normalize(inputData.vertexNormal);
