@@ -430,8 +430,9 @@ class DirectionalShadowManager {
             }
         } else {
             const maxD0 = shadowFar / cascadeCount;
-            const minD0 = Math.min(Math.max(near + 0.5, 15.0), maxD0 * 0.5);
-            const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * kSafe);
+            const minD0 = Math.min(Math.max(near + 0.5, 2.0), maxD0 * 0.5);
+            const refK = Math.max(tanHalfFov * 2.0155644370746373, 0.001);
+            const calculatedD0 = (textureSize * this.#targetNearTexelSize) / (2.0 * refK);
             const d0 = Math.min(Math.max(calculatedD0, minD0), maxD0);
 
             g_cascadeSplits[1] = d0;

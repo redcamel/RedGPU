@@ -42,14 +42,22 @@ RedGPU.init(
         directionalLight.azimuth = 135;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 4000x4000 월드 크기의 Landscape 지형 생성 및 최대 고도 스케일(heightScale: 300) 설정
-        // [EN] Create a 4000x4000 world-size Landscape terrain and configure the maximum elevation scale (heightScale: 300)
+        // [KO] 4000x4000 월드 크기(두 번째 인자: 단일 숫자 전달 시 정사각형 [4000, 4000]으로 설정)의 Landscape 지형 인스턴스를 생성합니다.
+        // [EN] Create a Landscape terrain instance with a 4000x4000 world size (passing a single number sets a square [4000, 4000] dimension).
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
+
+        // [KO] 정규화된 하이트맵 데이터(0.0 ~ 1.0)에 곱해질 최대 수직 고도 배율(월드 단위: 300)을 설정합니다.
+        // [EN] Set the maximum vertical elevation scale (300 in world units) multiplied against normalized heightmap values (0.0 to 1.0).
         landscape.heightScale = 300;
 
-        // [KO] 단일 16비트 글로벌 하이트맵을 로드하여 VHT(가상 높이 텍스처) 및 VNT(가상 노멀 텍스처) 아틀라스에 베이크하고 씬에 등록
-        // [EN] Load a single 16-bit global heightmap, bake it into the VHT (Virtual Height Texture) and VNT (Virtual Normal Texture) atlases, and register it to the scene
+        // [KO] 지형 전체의 거시적 윤곽(Macro Base)을 정의하는 16비트 PNG 글로벌 하이트맵 URL을 지정합니다.
+        // [EN] Specify the 16-bit PNG global heightmap URL that defines the macro base elevation across the entire terrain.
+        // [KO] 로드 완료 시 GPU의 VHT(Virtual Height Texture) 및 VNT(Virtual Normal Texture) 아틀라스에 베이크되고, CPU 높이 조회(getHeightAt) 데이터도 함께 갱신됩니다.
+        // [EN] Once loaded, it is baked into GPU VHT (Virtual Height Texture) and VNT (Virtual Normal Texture) atlases and updates CPU height query (getHeightAt) data.
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
+
+        // [KO] 구성된 Landscape 인스턴스를 Scene에 연결하여 연속 LOD 컬링, 하이트맵 레이마칭 그림자 및 지형 렌더링 파이프라인을 활성화합니다.
+        // [EN] Attach the configured Landscape instance to the Scene to activate continuous LOD culling, heightmap raymarched shadows, and terrain rendering pipelines.
         scene.landscape = landscape;
 
         const testPane = renderTestPane({

@@ -1,55 +1,51 @@
 import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
+/**
+ * [KO] Procedural Grass 예제
+ * [EN] Procedural Grass Example
+ *
+ * [KO] 지형의 특정 스플랫 레이어(targetLayer) 가중치와 경사도를 기반으로 GPU 컴퓨트 셰이더에서 수만 개의 절차적 잔디 인스턴스를 실시간 배치·컬링(grassManager.addType)하는 예제입니다.
+ * [EN] Demonstrates procedurally scattering and culling tens of thousands of grass instances on the GPU based on terrain splat layer weights (targetLayer) and slope via grassManager.addType.
+ */
+
+const SPAWN_X = -271.5;
+const SPAWN_Z = -1416.25;
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // [KO] 기본 궤도 카메라 (지형 전체 조망)
-        // [EN] Default orbit camera (overview of the entire terrain)
         const orbitController = new RedGPU.Camera.OrbitController(redGPUContext);
-        orbitController.distance = 7000;
+        orbitController.distance = 3500;
+        orbitController.minDistance = 400;
+        orbitController.maxDistance = 6000;
         orbitController.tilt = -25;
-        orbitController.pan = 40;
-        orbitController.minDistance = 300;
-        orbitController.maxDistance = 35000;
-        orbitController.speedDistance = 80.0;
+        orbitController.pan = 35;
+        orbitController.speedDistance = 50;
 
-        // [KO] 씬 및 뷰 생성
-        // [EN] Create scene and view
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, orbitController);
         redGPUContext.addView(view);
 
-        // [KO] 환경광(IBL) 및 스카이박스
-        // [EN] Environment light (IBL) and skybox
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/hdr/field.hdr',
-            30000
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 35000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // [KO] 태양광 (DirectionalLight)
-        // [EN] Sunlight (DirectionalLight)
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 45;
-        directionalLight.azimuth = 45;
-        directionalLight.lux = 90000;
+        directionalLight.elevation = 36;
+        directionalLight.azimuth = 135;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 8km x 8km 대규모 랜드스케이프 지형 및 256개 타일 스트리밍 구성
-        // [EN] 8km x 8km large-scale landscape and 256-tile streaming setup
-        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [8000, 8000]);
-        landscape.heightScale = 650;
-        landscape.tileLoadingRadius = 2500.0;
+        const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
+        landscape.heightScale = 300;
+        landscape.tileLoadingRadius = 1250;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
-
-        // [KO] 256개 분할 16-bit 타일 URL 해석기
-        // [EN] 256-split 16-bit tile URL resolver
         landscape.tileUrlResolver = (row, col) => {
             const host = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const r = String(row).padStart(2, '0');
@@ -61,62 +57,36 @@ RedGPU.init(
             return `${host}28_134_86_730_13_${size}_16bit_tile_${r}_${c}.png`;
         };
 
-        // [KO] RGBA 4채널 스플랫맵 기반 멀티레이어 구성
-        // [EN] Multi-layer setup based on RGBA 4-channel splatmap
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const weightTexturePath = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
+        const weightTexture = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
         const layerConfigs = [
-            {
-                name: 'Grass',
-                weightChannel: 'R',
-                uvScale: [50, 50],
-                roughness: 0.85
-            },
-            {
-                name: 'Rock',
-                weightChannel: 'G',
-                uvScale: [15, 15],
-                roughness: 0.7
-            },
-            {
-                name: 'Gravel',
-                weightChannel: 'B',
-                uvScale: [40, 40],
-                roughness: 0.9
-            },
-            {
-                name: 'Leave',
-                weightChannel: 'A',
-                uvScale: [50, 50],
-                roughness: 0.8
-            }
+            {name: 'Grass', weightChannel: 'R', uvScale: [25, 25], roughness: 0.85},
+            {name: 'Rock', weightChannel: 'G', uvScale: [7.5, 7.5], roughness: 0.7},
+            {name: 'Gravel', weightChannel: 'B', uvScale: [20, 20], roughness: 0.9},
+            {name: 'Leave', weightChannel: 'A', uvScale: [25, 25], roughness: 0.8}
         ];
 
-        const layers = layerConfigs.map(cfg => {
-            const fileKey = cfg.name.toLowerCase();
+        const layers = layerConfigs.map(({name, weightChannel, uvScale, roughness}) => {
+            const key = name.toLowerCase();
             return landscape.addLayer({
-                name: cfg.name,
-                baseColorTexture: `${assetPath}${fileKey}.jpg`,
-                normalTexture: `${assetPath}${fileKey}_normal.jpg`,
-                ormTexture: `${assetPath}${fileKey}_orm.jpg`,
-                weightTexture: weightTexturePath,
-                weightChannel: cfg.weightChannel,
-                uvScale: cfg.uvScale,
-                roughness: cfg.roughness
+                name,
+                baseColorTexture: `${assetPath}${key}.jpg`,
+                normalTexture: `${assetPath}${key}_normal.jpg`,
+                ormTexture: `${assetPath}${key}_orm.jpg`,
+                weightTexture,
+                weightChannel,
+                uvScale,
+                roughness
             });
         });
 
         scene.landscape = landscape;
 
-        // [KO] 절차적 잔디 서브시스템 (GrassManager) 구성
-        // [EN] Configure procedural grass subsystem (GrassManager)
+        // [KO] 지형에 내장된 절차적 잔디 매니저(grassManager) 참조 획득
+        // [EN] Acquire reference to the terrain's built-in procedural grass manager (grassManager)
         const grassManager = landscape.grassManager;
 
-        let onGrassTypeAdded = null;
-
-        // [KO] GUI 패널 및 인터랙션(카메라 모드, 캐릭터, 절차적 잔디) 초기화
-        // [EN] Initialize GUI panel and interactions (camera modes, character, procedural grass)
         const testPane = renderTestPane({
             redGPUContext,
             scene,
@@ -128,37 +98,56 @@ RedGPU.init(
             layers
         });
 
-        onGrassTypeAdded = (type, isDefaultExpanded) => {
-            testPane.addGrassTypeToUI(type, isDefaultExpanded);
-        };
-
-        // [KO] 절차적 잔디 3D 에셋 로딩 및 등록
-        // [EN] Load and register procedural grass 3D assets
-        initGrassField({
+        // [KO] 잔디 클럼프 3D 모델(grass.glb)을 비동기 로드하여 절차적 잔디 타입(Grass)으로 등록합니다.
+        // [EN] Asynchronously load the grass clump 3D model (grass.glb) and register it as a procedural grass type (Grass).
+        // [KO] 복수 종류의 잔디나 들꽃을 함께 배치하려면 동일한 방식으로 grassManager.addType()을 추가 호출합니다.
+        // [EN] To scatter multiple grass varieties or wildflowers together, call grassManager.addType() additionally in the same way.
+        new RedGPU.GLTFLoader(
             redGPUContext,
-            grassManager,
-            onGrassTypeAdded: (type, isDefaultExpanded) => {
-                onGrassTypeAdded?.(type, isDefaultExpanded);
-            }
-        });
+            '../../../assets/terrain/grass.glb',
+            (loader) => {
+                // [KO] GPU 기반 절차적 잔디 타입 등록 (계층 구조의 GLTF 메쉬를 전달하면 내부에서 단일 렌더 유닛으로 자동 병합하여 드로우콜을 최소화합니다)
+                // [EN] Register GPU-driven procedural grass type (passing a hierarchical GLTF mesh automatically merges it into a unified render unit to minimize draw calls)
+                const grass = grassManager.addType({
+                    // [KO] 잔디 타입 식별 이름
+                    // [EN] Identifier name of the grass type
+                    name: 'Lawn Clump',
+                    // [KO] 인스턴싱할 원본 잔디 메쉬 (loader.resultMesh)
+                    // [EN] Source grass mesh to instance (loader.resultMesh)
+                    mesh: loader.resultMesh,
+                    // [KO] 헥타르(100m x 100m = 10,000㎡) 당 생성할 목표 잔디 인스턴스 밀도
+                    // [EN] Target grass instance density per hectare (100m x 100m = 10,000㎡)
+                    densityPerHectare: 20000,
+                    // [KO] 잔디가 자라날 대상 지형 스플랫 레이어 이름 ('Grass' 레이어의 R 채널 가중치에 비례하여 스폰)
+                    // [EN] Target terrain splat layer name where grass spawns (proportional to the 'Grass' layer's R-channel weight)
+                    targetLayer: 'Grass',
+                    // [KO] 카메라로부터 잔디가 렌더링될 최대 가시거리 및 GPU 셀 베이킹 반경 기준값 (월드 단위)
+                    // [EN] Maximum rendering culling distance from the camera and GPU cell baking radius reference (in world units)
+                    cullingDistance: 110,
+                    // [KO] 인스턴스별 무작위 스케일 최소/최대 범위 [scaleX, scaleY, scaleZ]
+                    // [EN] Per-instance random scale minimum/maximum range [scaleX, scaleY, scaleZ]
+                    minScale: [12.0, 8.0, 12.0],
+                    maxScale: [18.0, 12.0, 18.0]
+                });
 
-        // [KO] 렌더 루프 시작
-        // [EN] Start render loop
+                testPane.addGrassTypeToUI(grass, true);
+            }
+        );
+
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, (timestamp) => {
-            testPane.update(timestamp);
+        renderer.start(redGPUContext, (time) => {
+            testPane.update(time);
         });
     },
-    (error) => {
-        console.error('RedGPU 초기화 실패 / Initialization failed:', error);
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] GUI 컨트롤 패널 및 테스트 인터랙션(카메라 모드, 캐릭터 연동, 절차적 잔디, 지형, 조명)을 구성합니다.
- * [EN] Sets up GUI control panel and test interactions (camera modes, character sync, procedural grass, terrain, lighting).
- */
-function renderTestPane({
+const renderTestPane = ({
                             redGPUContext,
                             scene,
                             view,
@@ -167,164 +156,160 @@ function renderTestPane({
                             directionalLight,
                             grassManager,
                             layers
-                        }) {
-    // [KO] 캐릭터 추종 궤도 카메라 (Character)
-    // [EN] Character orbit follow camera
+                        }) => {
     const characterOrbitController = new RedGPU.Camera.OrbitController(redGPUContext);
     characterOrbitController.distance = 5.5;
     characterOrbitController.tilt = -12;
     characterOrbitController.pan = 35;
     characterOrbitController.speedDistance = 0.5;
-    characterOrbitController.centerX = -543;
-    characterOrbitController.centerY = 300.8 + 1.2;
-    characterOrbitController.centerZ = -2832.5;
+    characterOrbitController.centerX = SPAWN_X;
+    characterOrbitController.centerY = landscape.getHeightAt(SPAWN_X, SPAWN_Z) + 1.2;
+    characterOrbitController.centerZ = SPAWN_Z;
 
-    // [KO] 기본 카메라를 캐릭터 시점으로 설정
-    // [EN] Set default camera to character follow view
-    view.camera = characterOrbitController;
+    const character = initCharacter(redGPUContext, scene, landscape, characterOrbitController);
 
-    // [KO] 캐릭터 상태 관리
-    // [EN] Character state management
-    let characterMesh = null;
-    let characterController = null;
-    let setCharacterState = null;
+    const setCameraMode = (mode) => {
+        const isCharacter = mode === 'Character';
+        view.camera = isCharacter ? characterOrbitController : orbitController;
+        landscape.nearDetailDistance = isCharacter ? 250 : 800;
+        character.setMode(mode);
+    };
+    setCameraMode('Character');
 
     const params = {
         cameraMode: 'Character',
-        lodMetric: landscape.lodMetric
     };
 
-    // [KO] 3D 캐릭터 로딩 및 바인딩
-    // [EN] Load and bind 3D character
-    initCharacter({
-        redGPUContext,
-        scene,
-        landscape,
-        characterOrbitController,
-        onLoaded: (handle) => {
-            characterMesh = handle.characterMesh;
-            characterController = handle.characterController;
-            setCharacterState = handle.setState;
-            if (params.cameraMode === 'Character') {
-                characterController.useKeyboard = true;
-            }
-        }
-    });
+    const quadOptions = {
+        '16': 16,
+        '32': 32,
+        '64': 64,
+        '128': 128,
+        '256': 256,
+        '512': 512
+    };
 
     let grassFolder = null;
+    const pendingGrassTypes = [];
+
+    const addGrassTypeToUI = (type, isDefaultExpanded = false) => {
+        if (!grassFolder) {
+            pendingGrassTypes.push({type, isDefaultExpanded});
+            return;
+        }
+        const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
+        typeFolder.addBinding(type, 'renderUnitCount', {readonly: true});
+        typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
+
+        const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
+        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5}).on('change', () => {
+            cullingFolder.refresh();
+        });
+        cullingFolder.addBinding(type, 'bakeRadius', {readonly: true});
+        cullingFolder.addBinding(type, 'farDistance', {readonly: true});
+
+        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
+        const layerOptions = {'(All / None)': ''};
+        if (landscape?.layers) {
+            landscape.layers.forEach((layer) => {
+                layerOptions[layer.name] = layer.name;
+            });
+        }
+        placementFolder.addBinding(type, 'targetLayer', {options: layerOptions});
+        placementFolder.addBinding(type, 'densityPerHectare', {min: 1000, max: 60000, step: 1000}).on('change', () => {
+            placementFolder.refresh();
+        });
+        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1}).on('change', () => {
+            placementFolder.refresh();
+        });
+        placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
+        placementFolder.addBinding(type, 'densityScaleByWeight');
+
+        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
+        const scaleProxy = {
+            minScaleXZ: type.minScale[0],
+            minScaleY: type.minScale[1],
+            maxScaleXZ: type.maxScale[0],
+            maxScaleY: type.maxScale[1]
+        };
+        transformFolder.addBinding(scaleProxy, 'minScaleXZ', {min: 0.1, max: 30.0, step: 0.1}).on('change', (ev) => {
+            type.minScale = [ev.value, type.minScale[1], ev.value];
+        });
+        transformFolder.addBinding(scaleProxy, 'minScaleY', {min: 0.1, max: 30.0, step: 0.1}).on('change', (ev) => {
+            type.minScale = [type.minScale[0], ev.value, type.minScale[2]];
+        });
+        transformFolder.addBinding(scaleProxy, 'maxScaleXZ', {min: 0.1, max: 30.0, step: 0.1}).on('change', (ev) => {
+            type.maxScale = [ev.value, type.maxScale[1], ev.value];
+        });
+        transformFolder.addBinding(scaleProxy, 'maxScaleY', {min: 0.1, max: 30.0, step: 0.1}).on('change', (ev) => {
+            type.maxScale = [type.maxScale[0], ev.value, type.maxScale[2]];
+        });
+        transformFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
+        transformFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
+        transformFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
+
+        const materialFolder = typeFolder.addFolder({title: 'Material & PBR', expanded: true});
+        materialFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
+        materialFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
+        materialFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.05});
+        materialFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
+        materialFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
+
+        const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
+        shadowFolder.addBinding(type, 'castShadow');
+        shadowFolder.addBinding(type, 'receiveShadow');
+        shadowFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05});
+    };
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // [KO] Controller 설정 (토글 버튼 방식)
-            // [EN] Controller settings (Toggle button style)
             const controllerFolder = pane.addFolder({title: 'Controller', expanded: true});
-
             controllerFolder.addBinding(params, 'cameraMode', {
                 view: 'radiogrid',
                 groupName: 'cameraMode',
                 size: [2, 1],
-                cells: (x, y) => ({
+                cells: (x) => ({
                     title: x === 0 ? 'Orbit' : 'Character',
                     value: x === 0 ? 'Orbit' : 'Character'
                 })
             }).on('change', (ev) => {
-                const mode = ev.value;
-
-                if (mode === 'Character') {
-                    view.camera = characterOrbitController;
-                    if (characterController) characterController.useKeyboard = true;
-                    if (characterMesh) {
-                        characterOrbitController.centerX = characterMesh.x;
-                        characterOrbitController.centerY = characterMesh.y + 1.2;
-                        characterOrbitController.centerZ = characterMesh.z;
-                    }
-                    // [KO] 캐릭터 근접 시점에 최적화된 근경 디테일 거리 설정
-                    // [EN] Optimized detail distance for character close-up view
-                    landscape.nearDetailDistance = 250;
-                } else {
-                    view.camera = orbitController;
-                    if (characterController) characterController.useKeyboard = false;
-                    // [KO] 광범위 지형 조망(오빗) 시점에 맞춘 넓은 디테일 거리 설정
-                    // [EN] Extended detail distance for orbit overview
-                    landscape.nearDetailDistance = 1000;
-                }
-
-                // [KO] UI 슬라이더 값 동기화
-                // [EN] Refresh UI sliders
+                setCameraMode(ev.value);
                 pane.refresh();
             });
 
-            // [KO] 절차적 잔디 설정 (GrassManager)
-            // [EN] Procedural grass settings (GrassManager)
             grassFolder = pane.addFolder({title: 'GrassManager', expanded: true});
-
             grassFolder.addBinding(grassManager, 'enabled');
-            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true});
-            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true});
-            grassFolder.addBinding(grassManager, 'totalDrawCalls', {readonly: true});
-            grassFolder.addBinding(grassManager, 'shadowDrawCalls', {readonly: true});
+            grassFolder.addBinding(grassManager, 'totalInstanceCount', {readonly: true, interval: 200});
+            grassFolder.addBinding(grassManager, 'instanceCapacity', {readonly: true, interval: 200});
+            grassFolder.addBinding(grassManager, 'totalDrawCalls', {readonly: true, interval: 200});
+            grassFolder.addBinding(grassManager, 'shadowDrawCalls', {readonly: true, interval: 200});
 
-            // [KO] Landscape 설정
-            // [EN] Landscape settings
-            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: true});
+            while (pendingGrassTypes.length > 0) {
+                const item = pendingGrassTypes.shift();
+                addGrassTypeToUI(item.type, item.isDefaultExpanded);
+            }
 
-            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 1500, step: 10});
+            const landscapeFolder = pane.addFolder({title: 'Landscape', expanded: false});
+            landscapeFolder.addBinding(landscape, 'heightScale', {min: 0, max: 600, step: 5});
             landscapeFolder.addBinding(landscape, 'receiveShadow');
-            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {
-                min: 0,
-                max: 1500,
-                step: 1
-            });
+            landscapeFolder.addBinding(landscape, 'nearDetailDistance', {min: 0, max: 1500, step: 10});
 
-            // [KO] LOD 설정
-            // [EN] LOD settings
             const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
-            lodFolder.addBinding(params, 'lodMetric', {
+            lodFolder.addBinding(landscape, 'lodMetric', {
                 options: {
-                    'screenSize': 'screenSize',
-                    'distance': 'distance'
+                    screenSize: 'screenSize',
+                    distance: 'distance'
                 }
-            }).on('change', (ev) => {
-                landscape.lodMetric = ev.value;
             });
-            const quadOptions = {
-                '16': 16,
-                '32': 32,
-                '64': 64,
-                '128': 128,
-                '256': 256,
-                '512': 512
-            };
-            lodFolder.addBinding(landscape, 'componentSizeQuads', {
-                options: quadOptions
-            });
-            lodFolder.addBinding(landscape, 'lod0SizeQuads', {
-                options: quadOptions
-            });
+            lodFolder.addBinding(landscape, 'componentSizeQuads', {options: quadOptions});
+            lodFolder.addBinding(landscape, 'lod0SizeQuads', {options: quadOptions});
 
-            // [KO] Heightmap Shadow 설정
-            // [EN] Heightmap shadow settings
             const shadowFolder = landscapeFolder.addFolder({title: 'Heightmap Shadow', expanded: false});
-
             shadowFolder.addBinding(landscape, 'castHeightmapShadow');
-            shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {
-                min: 4,
-                max: 32,
-                step: 1
-            });
-            shadowFolder.addBinding(landscape, 'heightmapShadowSoftness', {
-                min: 1,
-                max: 20,
-                step: 0.5
-            });
-            shadowFolder.addBinding(landscape, 'heightmapShadowDistance', {
-                min: 500,
-                max: 6000,
-                step: 100
-            });
+            shadowFolder.addBinding(landscape, 'heightmapShadowSteps', {min: 4, max: 32, step: 1});
+            shadowFolder.addBinding(landscape, 'heightmapShadowSoftness', {min: 1, max: 20, step: 0.5});
+            shadowFolder.addBinding(landscape, 'heightmapShadowDistance', {min: 200, max: 3000, step: 50});
 
-            // [KO] Debug 설정
-            // [EN] Debug settings
             const debugFolder = landscapeFolder.addFolder({title: 'Debug', expanded: false});
             debugFolder.addBinding(landscape.debuggerManager, 'landscapeDebugMode', {
                 options: {
@@ -345,178 +330,49 @@ function renderTestPane({
             debugFolder.addBinding(landscape.debuggerManager, 'landscapeWireframe');
             debugFolder.addBinding(landscape.debuggerManager, 'landscapeLodColoration');
 
-            // [KO] Light 설정
-            // [EN] Light settings
             const lightFolder = pane.addFolder({title: 'Light', expanded: false});
-
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 200000, step: 1000});
             lightFolder.addBinding(directionalLight, 'elevation', {min: 5, max: 90, step: 1});
             lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // [KO] Layers 설정 (4종 스플랫 재질)
-            // [EN] Layers settings (4 splat materials)
             const splatFolder = pane.addFolder({title: 'Layers', expanded: false});
-
             layers.forEach((layer) => {
                 const layerSubFolder = splatFolder.addFolder({title: layer.name, expanded: false});
-
                 layerSubFolder.addBinding(layer, 'enabled');
+                layerSubFolder.addBinding(layer, 'stochasticTiling');
+                layerSubFolder.addBinding(layer, 'stochasticScale', {min: 0.1, max: 5.0, step: 0.1});
 
                 const uvProxy = {uvScale: layer.uvScale[0]};
-                layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 5, max: 150, step: 1})
-                    .on('change', (ev) => {
-                        layer.uvScale = [ev.value, ev.value];
-                    });
+                layerSubFolder.addBinding(uvProxy, 'uvScale', {min: 1, max: 100, step: 0.5}).on('change', (ev) => {
+                    layer.uvScale = [ev.value, ev.value];
+                });
 
                 layerSubFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.05});
+                layerSubFolder.addBinding(layer, 'heightBlendFactor', {min: 0.0, max: 3.0, step: 0.05});
             });
         }
     });
 
-    const addGrassTypeToUI = (type, isDefaultExpanded = false) => {
-        if (!grassFolder) return;
-        const typeFolder = grassFolder.addFolder({title: type.name, expanded: isDefaultExpanded});
-
-        typeFolder.addBinding(type, 'renderUnitCount', {readonly: true, label: 'Render Units'});
-        typeFolder.addBinding(type, 'drawCallCount', {readonly: true});
-
-        // -----------------------------------------------------------------
-        // 1. Culling & Distance (컬링 및 자동 베이킹 반경)
-        // -----------------------------------------------------------------
-        const cullingFolder = typeFolder.addFolder({title: 'Culling & Distance', expanded: true});
-        cullingFolder.addBinding(type, 'cullingDistance', {min: 20, max: 250, step: 5})
-            .on('change', () => cullingFolder.refresh());
-        cullingFolder.addBinding(type, 'bakeRadius', {readonly: true});
-        cullingFolder.addBinding(type, 'farDistance', {readonly: true});
-
-        // -----------------------------------------------------------------
-        // 2. Placement & Density (스폰 배치 및 밀도)
-        // -----------------------------------------------------------------
-        const placementFolder = typeFolder.addFolder({title: 'Placement & Density', expanded: true});
-
-        const layerOptions = {'(All / None)': ''};
-        if (landscape?.layers) {
-            landscape.layers.forEach((layer) => {
-                layerOptions[layer.name] = layer.name;
-            });
-        }
-        placementFolder.addBinding(type, 'targetLayer', {options: layerOptions});
-        placementFolder.addBinding(type, 'densityPerHectare', {min: 1000, max: 60000, step: 1000})
-            .on('change', () => placementFolder.refresh());
-        placementFolder.addBinding(type, 'densityMultiplier', {min: 0.0, max: 3.0, step: 0.1})
-            .on('change', () => placementFolder.refresh());
-        placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
-        placementFolder.addBinding(type, 'densityScaleByWeight');
-
-        // -----------------------------------------------------------------
-        // 3. Transform & Slope (스케일 및 지형 경사각)
-        // -----------------------------------------------------------------
-        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
-
-        const scaleProxy = {
-            minScaleXZ: type.minScale[0],
-            minScaleY: type.minScale[1],
-            maxScaleXZ: type.maxScale[0],
-            maxScaleY: type.maxScale[1]
-        };
-        transformFolder.addBinding(scaleProxy, 'minScaleXZ', {min: 0.1, max: 30.0, step: 0.1})
-            .on('change', (ev) => {
-                type.minScale = [ev.value, type.minScale[1], ev.value];
-            });
-        transformFolder.addBinding(scaleProxy, 'minScaleY', {min: 0.1, max: 30.0, step: 0.1})
-            .on('change', (ev) => {
-                type.minScale = [type.minScale[0], ev.value, type.minScale[2]];
-            });
-        transformFolder.addBinding(scaleProxy, 'maxScaleXZ', {min: 0.1, max: 30.0, step: 0.1})
-            .on('change', (ev) => {
-                type.maxScale = [ev.value, type.maxScale[1], ev.value];
-            });
-        transformFolder.addBinding(scaleProxy, 'maxScaleY', {min: 0.1, max: 30.0, step: 0.1})
-            .on('change', (ev) => {
-                type.maxScale = [type.maxScale[0], ev.value, type.maxScale[2]];
-            });
-
-        transformFolder.addBinding(type, 'minSlope', {min: 0, max: 90, step: 1});
-        transformFolder.addBinding(type, 'maxSlope', {min: 0, max: 90, step: 1});
-        transformFolder.addBinding(type, 'bottomOffset', {min: -0.8, max: 0.3, step: 0.01});
-
-        // -----------------------------------------------------------------
-        // 4. Material & PBR (재질, 알파 및 SSS)
-        // -----------------------------------------------------------------
-        const materialFolder = typeFolder.addFolder({title: 'Material & PBR', expanded: true});
-        materialFolder.addBinding(type, 'groundBlendStrength', {min: 0.0, max: 1.0, step: 0.05});
-        materialFolder.addBinding(type, 'alphaCutoff', {min: 0.05, max: 0.9, step: 0.05});
-        materialFolder.addBinding(type, 'roughness', {min: 0.04, max: 1.0, step: 0.05});
-        materialFolder.addBinding(type, 'exposureBoost', {min: 0.5, max: 3.0, step: 0.1});
-        materialFolder.addBinding(type, 'subsurfaceStrength', {min: 0.0, max: 3.0, step: 0.05});
-
-        // -----------------------------------------------------------------
-        // 5. Shadow (그림자 캐스팅/수신 및 강도)
-        // -----------------------------------------------------------------
-        const shadowFolder = typeFolder.addFolder({title: 'Shadow', expanded: true});
-        shadowFolder.addBinding(type, 'castShadow');
-        shadowFolder.addBinding(type, 'receiveShadow');
-        shadowFolder.addBinding(type, 'shadowStrength', {min: 0.0, max: 1.0, step: 0.05});
-    };
-
-    // [KO] 매 프레임 캐릭터 및 카메라 업데이트
-    // [EN] Update character and camera per frame
-    let lastStatsRefreshTime = 0;
-    const update = (timestamp) => {
-        if (timestamp - lastStatsRefreshTime > 500) {
-            lastStatsRefreshTime = timestamp;
-            grassFolder?.refresh();
-        }
-
-        if (characterMesh && characterController) {
-            characterController.update(view, timestamp);
-
-            if (params.cameraMode === 'Character') {
-                characterOrbitController.centerX = characterMesh.x;
-                characterOrbitController.centerY = characterMesh.y + 1.2;
-                characterOrbitController.centerZ = characterMesh.z;
-            }
-
-            if (setCharacterState) {
-                if (characterController.isRunning) setCharacterState('Run');
-                else if (characterController.isMoving) setCharacterState('Walk');
-                else setCharacterState('Idle');
-            }
-        }
-    };
-
     return {
         addGrassTypeToUI,
-        update
+        update: (time) => character.update(view, time)
     };
-}
+};
 
-/**
- * [KO] 3D 캐릭터 모델을 로드하고 물리 컨트롤러 및 애니메이션 상태 머신을 구성합니다.
- * [EN] Loads 3D character model and configures physics controller and animation state machine.
- */
-function initCharacter({
-                           redGPUContext,
-                           scene,
-                           landscape,
-                           characterOrbitController,
-                           onLoaded
-                       }) {
-    const CHARACTER_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+const initCharacter = (redGPUContext, scene, landscape, characterOrbitController) => {
+    let characterMesh = null;
+    let characterController = null;
+    let targetState = 'Idle';
+    let isCharacterMode = true;
 
     new RedGPU.GLTFLoader(
         redGPUContext,
-        CHARACTER_URL,
+        'https://threejs.org/examples/models/gltf/Soldier.glb',
         (loader) => {
-            const characterMesh = loader.resultMesh;
-            // [KO] 언덕 기슭과 인접한 안정적인 평지 좌표로 배치
-            // [EN] Spawn at flat ground adjacent to the hill base
-            characterMesh.x = -543;
-            characterMesh.z = -2832.5;
-            // [KO] 지형 고도에 맞춰 초기 위치 배치 및 그림자 설정
-            // [EN] Place at terrain height and configure shadows
-            const startH = landscape.getHeightAt(characterMesh.x, characterMesh.z);
-            characterMesh.y = (startH > 0 ? startH : 300.8);
+            characterMesh = loader.resultMesh;
+            characterMesh.x = SPAWN_X;
+            characterMesh.z = SPAWN_Z;
+            characterMesh.y = landscape.getHeightAt(SPAWN_X, SPAWN_Z);
 
             characterMesh.setCastShadowRecursively(true);
             characterMesh.setReceiveShadowRecursively(true);
@@ -526,9 +382,7 @@ function initCharacter({
             characterOrbitController.centerY = characterMesh.y + 1.2;
             characterOrbitController.centerZ = characterMesh.z;
 
-            // [KO] 캐릭터 물리 컨트롤러 생성
-            // [EN] Create character physics controller
-            const characterController = new RedGPU.Charactor.SimpleCharacterController(
+            characterController = new RedGPU.Charactor.SimpleCharacterController(
                 redGPUContext,
                 characterMesh,
                 characterOrbitController,
@@ -540,14 +394,11 @@ function initCharacter({
                     jumpForce: 9.0,
                     floorHeight: 0.0,
                     floorOffset: 0.0,
-                    useKeyboard: false,
+                    useKeyboard: isCharacterMode,
                     getFloorHeight: (x, z) => landscape.getHeightAt(x, z),
                 }
             );
 
-            // [KO] 애니메이션 상태 머신 구성
-            // [EN] Configure animation state machine
-            let targetState = 'Idle';
             const clips = loader.parsingResult.animations;
             if (clips && clips.length > 0) {
                 const idleState = clips[0];
@@ -562,18 +413,16 @@ function initCharacter({
                 stateMachine.addState(walkState);
                 stateMachine.addState(runState);
 
-                const BLEND = 0.25;
-                const pairs = [
+                [
                     ['Idle', 'Walk'], ['Idle', 'Run'],
                     ['Walk', 'Idle'], ['Walk', 'Run'],
                     ['Run', 'Idle'], ['Run', 'Walk'],
-                ];
-                pairs.forEach(([from, to]) => {
+                ].forEach(([fromState, toState]) => {
                     stateMachine.addTransition({
-                        fromState: from,
-                        toState: to,
-                        duration: BLEND,
-                        conditions: () => targetState === to,
+                        fromState,
+                        toState,
+                        duration: 0.25,
+                        conditions: () => targetState === toState,
                     });
                 });
 
@@ -583,47 +432,32 @@ function initCharacter({
                     loader.activeAnimations[0].animStateMachine = stateMachine;
                 }
             }
-
-            onLoaded?.({
-                characterMesh,
-                characterController,
-                setState: (state) => {
-                    targetState = state;
-                }
-            });
         }
     );
-}
 
-/**
- * [KO] 절차적 잔디 에셋(Lawn Clump)을 로드하고 잔디를 등록합니다.
- *      ※ 복수 종류의 잔디(야생 들풀, 꽃 등)를 추가하려면 동일한 방식으로 grassManager.addType()를 추가 호출하면 됩니다.
- * [EN] Loads procedural grass assets (Lawn Clump) and registers the grass.
- *      * To add multiple grass varieties (wild grass, flowers, etc.), call grassManager.addType() as needed.
- */
-function initGrassField({
-                            redGPUContext,
-                            grassManager,
-                            onGrassTypeAdded
-                        }) {
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        '../../../assets/terrain/grass.glb',
-        (loader) => {
-            // [KO] 복합 계층 GLTF 메쉬(loader.resultMesh)를 직접 전달하여 단일 지오메트리로 자동 결합 렌더링
-            // [EN] Directly pass composite hierarchical GLTF mesh (loader.resultMesh) to automatically merge into unified geometry
-            const grass = grassManager.addType({
-                name: 'Lawn Clump',
-                mesh: loader.resultMesh,
-                densityPerHectare: 20000,
-                targetLayer: 'Grass',
-                cullingDistance: 110,
-                minScale: [12.0, 8.0, 12.0],
-                maxScale: [18.0, 12.0, 18.0]
-            });
+    return {
+        setMode: (mode) => {
+            isCharacterMode = mode === 'Character';
+            if (characterController) characterController.useKeyboard = isCharacterMode;
+            if (isCharacterMode && characterMesh) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+        },
+        update: (view, time) => {
+            if (!characterMesh || !characterController) return;
+            characterController.update(view, time);
 
-            onGrassTypeAdded?.(grass, true);
+            if (isCharacterMode) {
+                characterOrbitController.centerX = characterMesh.x;
+                characterOrbitController.centerY = characterMesh.y + 1.2;
+                characterOrbitController.centerZ = characterMesh.z;
+            }
+
+            if (characterController.isRunning) targetState = 'Run';
+            else if (characterController.isMoving) targetState = 'Walk';
+            else targetState = 'Idle';
         }
-    );
-}
-
+    };
+};
