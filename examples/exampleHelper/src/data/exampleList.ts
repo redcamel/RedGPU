@@ -1122,12 +1122,12 @@ export const ExampleList: ExampleListType = [
                                         name: 'Object Interaction',
                                         path: '3d/water/lake/interaction',
                                         description: {
-                                            ko: `동적 객체(구체)와 호수 수면 간의 실시간 2D 파동 방정식(FDTD) 물결 시뮬레이션 및 상호작용 속성을 시연하는 예제입니다.<br/>
+                                            ko: `상하 왕복 구체(동심원 파동)와 수평 공전 구체(진행 항적 파동)를 통해 실시간 2D 파동 방정식(FDTD) 물결 생성 및 파동 간섭을 시연하는 예제입니다.<br/>
                                                 • <b>파동 물리 시뮬레이션 제어</b>: Lake 폴더에서 파동 전파 속도(rippleWaveSpeed), 감쇠율(rippleDamping), 노멀 강도(rippleNormalStrength), 시뮬레이션 영역 크기(interactionDomainSize) 및 최대 침투 깊이(maxPenetration)를 조절해보세요.<br/>
-                                                • <b>객체 상호작용 및 이동 제어</b>: Interactive Sphere 폴더에서 enableWaterInteraction, waterWaveStrength를 조작하거나 autoMove를 끄고 구체 좌표(x, y, z)를 직접 움직여 동심원 파문과 감쇄 유예(Decay Grace Period) 동작을 확인할 수 있습니다.`,
-                                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple simulation and water interaction properties between a dynamic sphere and the Lake surface.<br/>
+                                                • <b>상하 왕복 vs 수평 공전 파형 비교</b>: Bobbing Sphere(중앙 시안 구체)와 Orbiting Sphere(외곽 골드 구체)의 enableWaterInteraction, waterWaveStrength를 각각 제어하며 제자리 동심원 물결과 이동 항적 물결의 차이 및 보강·상쇄 간섭을 비교해보세요.`,
+                                            en: `Demonstrates real-time 2D wave equation (FDTD) ripple generation and wave interference using a vertically bobbing sphere (concentric ripples) and a horizontally orbiting sphere (wake waves).<br/>
                                                 • <b>Wave Physics Tuning</b>: Adjust rippleWaveSpeed, rippleDamping, rippleNormalStrength, interactionDomainSize, and maxPenetration in the Lake folder.<br/>
-                                                • <b>Interactive Object Control</b>: Modify enableWaterInteraction and waterWaveStrength in Interactive Sphere, or disable autoMove and drag x/y/z coordinates to observe live ripples and decay grace period behavior.`
+                                                • <b>Vertical Bobbing vs. Horizontal Orbiting</b>: Toggle enableWaterInteraction and adjust waterWaveStrength on Bobbing Sphere (Center Cyan) and Orbiting Sphere (Outer Gold) to compare concentric ripples, directional wakes, and wave interference.`
                                         }
                                     },
                                     {
@@ -1136,10 +1136,10 @@ export const ExampleList: ExampleListType = [
                                         path: '3d/water/lake/characterWalking',
                                         description: {
                                             ko: `스키닝 캐릭터(Soldier.glb)의 해변 및 수중 보행에 따른 실시간 동적 물결(Ripple) 생성과 파동 시뮬레이션 도메인 추적(interactionFollowTarget)을 시연하는 예제입니다.<br/>
-                                                • <b>재귀적 스키닝 수체 상호작용</b>: setEnableWaterInteractionRecursively를 통해 다중 서브 메시로 구성된 캐릭터와 부유 바위(floatingRocks)가 동시에 일으키는 수면 파동을 시뮬레이션합니다.<br/>
+                                                • <b>스키닝 캐릭터 및 다중 객체 상호작용</b>: enableWaterInteraction 설정을 통해 하위 계층을 포함한 스키닝 캐릭터와 부유 바위(floatingRocks)가 동시에 일으키는 수면 파동을 시뮬레이션합니다.<br/>
                                                 • <b>도메인 중심 추적 및 보행 제어</b>: WASD(이동), Shift(달리기), Space(점프)로 해변에서 물속으로 걸어 들어가며 캐릭터 위치를 따라 스냅 이동하는 파동 시뮬레이션 도메인을 체험하세요.`,
                                             en: `Demonstrates real-time dynamic ripple generation and wave simulation domain tracking (interactionFollowTarget) as a skinned character (Soldier.glb) walks through the beach and shallow water.<br/>
-                                                • <b>Recursive Skinned Interaction</b>: Uses setEnableWaterInteractionRecursively to simulate simultaneous water ripples from the multi-mesh character and bobbing floating rocks.<br/>
+                                                • <b>Skinned & Multi-Object Interaction</b>: Enables enableWaterInteraction on both the hierarchical skinned character and bobbing floating rocks to simulate simultaneous water ripples.<br/>
                                                 • <b>Domain Tracking & Locomotion</b>: Walk or run from the shoreline into the water using WASD, Shift, and Space to observe the texel-snapped ripple simulation domain following the character.`
                                         }
                                     },

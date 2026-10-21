@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] Lake Object Interaction 예제
  * [EN] Lake Object Interaction Example
  *
- * [KO] 동적 객체(구체)와 수체 간의 실시간 2D 파동 방정식(FDTD) 잔물결 시뮬레이션 및 수체 상호작용 속성을 시연합니다.
- * [EN] Demonstrates real-time 2D wave equation (FDTD) ripple simulation and water interaction properties between dynamic objects and the water body.
+ * [KO] 수평 공전 구체(항적 파동)와 상하 왕복 구체(동심원 파동)를 통해 실시간 2D 파동 방정식(FDTD) 물결 생성 및 파동 간섭을 시연합니다.
+ * [EN] Demonstrates real-time 2D wave equation (FDTD) ripple generation and wave interference using a horizontally orbiting sphere (wake waves) and a vertically bobbing sphere (concentric ripples).
  */
 
 const canvas = document.createElement('canvas');
@@ -16,9 +16,9 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 18;
-        controller.tilt = -14;
-        controller.pan = 18;
+        controller.distance = 17;
+        controller.tilt = -22;
+        controller.pan = 15;
         controller.minDistance = 4;
         controller.maxDistance = 60;
         controller.speedDistance = 0.2;
@@ -41,13 +41,14 @@ RedGPU.init(
         directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 수중 바닥 지형 및 SSR 반사용 포털 게이트 환경 생성
-        // [EN] Create underwater floor and golden portal gate environment for SSR reflection
+        // [KO] 물결 굴절 관찰용 수중 바둑판 타일 플라자 및 SSR 반사용 8각 열주 아레나 생성
+        // [EN] Create underwater checkered tile plaza for ripple refraction and octagonal colonnade arena for SSR
         createUnderwaterEnvironment(redGPUContext, scene);
 
         // [KO] Lake 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
         const lake = new RedGPU.Water.Lake(redGPUContext, 80, 80, 80, 80);
+        lake.interactionDomainSize = 18.0;
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -66,48 +67,43 @@ RedGPU.init(
         );
         scene.addWater(lake);
 
-        // [KO] 실시간 수체 상호작용 객체(골드 메탈릭 구체) 생성 및 추적 타겟 지정
-        // [EN] Create interactive gold metallic sphere and assign as interaction follow target
-        const sphereMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        sphereMaterial.baseColorFactor = [0.95, 0.61, 0.07, 1.0];
-        sphereMaterial.roughnessFactor = 0.15;
-        sphereMaterial.metallicFactor = 0.85;
+        const sphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 0.95, 32, 32);
 
-        const sphere = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 32, 32),
-            sphereMaterial
-        );
-        sphere.castShadow = true;
-        sphere.receiveShadow = true;
-        sphere.enableWaterInteraction = true;
-        sphere.waterWaveStrength = 1.5;
-        lake.interactionFollowTarget = sphere;
-        scene.addChild(sphere);
+        // [KO] 1. 중앙 상하 왕복 구체 (시안 메탈릭): 수면을 수직으로 관통하며 360도 동심원 파문(Concentric Ripple) 생성
+        // [EN] 1. Center vertically bobbing sphere (Cyan Metallic): Pierces water vertically to generate concentric ripples
+        const bobbingMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+        bobbingMaterial.baseColorFactor = [0.10, 0.82, 0.88, 1.0];
+        bobbingMaterial.roughnessFactor = 0.15;
+        bobbingMaterial.metallicFactor = 0.85;
 
-        const motionState = {
-            autoMove: true,
-            moveSpeed: 1.2,
-            moveRadius: 3.8,
-            bobbingAmplitude: 0.25,
-            time: 0,
-        };
+        const bobbingSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, bobbingMaterial);
+        bobbingSphere.castShadow = true;
+        bobbingSphere.receiveShadow = true;
+        bobbingSphere.enableWaterInteraction = true;
+        scene.addChild(bobbingSphere);
 
-        let lastTimestamp = performance.now();
+        // [KO] 2. 외곽 수평 공전 구체 (골드 메탈릭): 수면을 가르며 이동하여 진행 항적 파동(Wake Wave) 생성
+        // [EN] 2. Outer horizontally orbiting sphere (Gold Metallic): Skims across water to generate wake waves
+        const orbitMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+        orbitMaterial.baseColorFactor = [0.95, 0.61, 0.07, 1.0];
+        orbitMaterial.roughnessFactor = 0.15;
+        orbitMaterial.metallicFactor = 0.85;
+
+        const orbitSphere = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, orbitMaterial);
+        orbitSphere.castShadow = true;
+        orbitSphere.receiveShadow = true;
+        orbitSphere.enableWaterInteraction = true;
+        scene.addChild(orbitSphere);
+
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, (currentTimestamp) => {
-            const dt = Math.min((currentTimestamp - lastTimestamp) * 0.001, 0.1);
-            lastTimestamp = currentTimestamp;
-
-            if (motionState.autoMove) {
-                motionState.time += dt * motionState.moveSpeed;
-                sphere.x = Math.sin(motionState.time) * motionState.moveRadius;
-                sphere.z = Math.cos(motionState.time * 0.8) * (motionState.moveRadius * 0.7);
-                sphere.y = Math.sin(motionState.time * 2.2) * motionState.bobbingAmplitude;
-            }
+        renderer.start(redGPUContext, (time) => {
+            const sec = time * 0.001;
+            bobbingSphere.y = 0.15 + Math.sin(sec * 2.6) * 0.75;
+            orbitSphere.x = Math.cos(sec * 1.1) * 3.8;
+            orbitSphere.z = Math.sin(sec * 1.1) * 3.1;
         });
 
-        renderTestPane(redGPUContext, lake, sphere, directionalLight, motionState);
+        renderTestPane(redGPUContext, lake, orbitSphere, bobbingSphere, directionalLight);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -118,73 +114,117 @@ RedGPU.init(
 );
 
 const createUnderwaterEnvironment = (redGPUContext, scene) => {
+    const floorY = -2.8;
+
     const groundMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    groundMaterial.baseColorFactor = [0.17, 0.24, 0.31, 1.0];
-    groundMaterial.roughnessFactor = 0.8;
-    groundMaterial.metallicFactor = 0.1;
+    groundMaterial.baseColorFactor = [0.18, 0.22, 0.27, 1.0];
+    groundMaterial.roughnessFactor = 0.85;
+    groundMaterial.metallicFactor = 0.05;
 
     const groundMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 60, 60, 32, 32),
+        new RedGPU.Primitive.Ground(redGPUContext, 80, 80, 32, 32),
         groundMaterial
     );
-    groundMesh.y = -3.0;
+    groundMesh.y = floorY;
     groundMesh.receiveShadow = true;
     scene.addChild(groundMesh);
 
-    const pillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    pillarMaterial.baseColorFactor = [0.74, 0.76, 0.78, 1.0];
-    pillarMaterial.roughnessFactor = 0.4;
-    pillarMaterial.metallicFactor = 0.2;
+    // 1. 수중 6x6 바둑판 타일 플라자 (상단면 y: -1.25m, 동심원 물결 전파 시 격자 굴절 왜곡 극대화)
+    const lightTileMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    lightTileMaterial.baseColorFactor = [0.92, 0.89, 0.83, 1.0];
+    lightTileMaterial.roughnessFactor = 0.25;
+    lightTileMaterial.metallicFactor = 0.05;
 
-    const pillarCoords = [
-        [-6, -6], [6, -6], [-6, 6], [6, 6]
-    ];
-    for (let i = 0; i < pillarCoords.length; i++) {
-        const coord = pillarCoords[i];
-        const pillar = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.Cylinder(redGPUContext, 0.6, 0.6, 3.5, 24),
-            pillarMaterial
-        );
-        pillar.setPosition(coord[0], -1.25, coord[1]);
-        pillar.castShadow = true;
-        pillar.receiveShadow = true;
-        scene.addChild(pillar);
+    const darkTileMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    darkTileMaterial.baseColorFactor = [0.22, 0.28, 0.35, 1.0];
+    darkTileMaterial.roughnessFactor = 0.35;
+    darkTileMaterial.metallicFactor = 0.15;
+
+    const gridCount = 6;
+    const tileStep = 2.0;
+    const tileSize = 1.92;
+    const tileTopY = -1.25;
+    const tileHeight = tileTopY - floorY;
+    const tileGeom = new RedGPU.Primitive.Box(redGPUContext, tileSize, tileHeight, tileSize);
+    const startOffset = -((gridCount - 1) * tileStep) * 0.5;
+
+    for (let r = 0; r < gridCount; r++) {
+        for (let c = 0; c < gridCount; c++) {
+            const isLight = (r + c) % 2 === 0;
+            const tileMesh = new RedGPU.Display.Mesh(
+                redGPUContext,
+                tileGeom,
+                isLight ? lightTileMaterial : darkTileMaterial
+            );
+            tileMesh.setPosition(
+                startOffset + c * tileStep,
+                floorY + tileHeight * 0.5,
+                startOffset + r * tileStep
+            );
+            tileMesh.receiveShadow = true;
+            scene.addChild(tileMesh);
+        }
     }
 
-    const gateGold = new RedGPU.Material.PBRMaterial(redGPUContext);
-    gateGold.baseColorFactor = [1.0, 0.75, 0.25, 1.0];
-    gateGold.roughnessFactor = 0.15;
-    gateGold.metallicFactor = 0.95;
+    // 2. 8각 원형 반사 열주 아레나 (반경 7.4m: 시뮬레이션 도메인 경계 표시 및 전 방향 SSR 수직 반사 제공)
+    const plinthMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    plinthMaterial.baseColorFactor = [0.78, 0.80, 0.83, 1.0];
+    plinthMaterial.roughnessFactor = 0.35;
+    plinthMaterial.metallicFactor = 0.1;
 
-    const portalRing = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Torus(redGPUContext, 3.2, 0.70, 32, 32),
-        gateGold
-    );
-    portalRing.setPosition(0, 1.5, -5.2);
-    portalRing.castShadow = true;
-    scene.addChild(portalRing);
+    const goldPillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    goldPillarMaterial.baseColorFactor = [0.95, 0.76, 0.28, 1.0];
+    goldPillarMaterial.roughnessFactor = 0.18;
+    goldPillarMaterial.metallicFactor = 0.9;
 
-    const towerMat = new RedGPU.Material.PBRMaterial(redGPUContext);
-    towerMat.baseColorFactor = [0.85, 0.88, 0.92, 1.0];
-    towerMat.roughnessFactor = 0.25;
-    towerMat.metallicFactor = 0.3;
+    const marblePillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    marblePillarMaterial.baseColorFactor = [0.88, 0.90, 0.94, 1.0];
+    marblePillarMaterial.roughnessFactor = 0.22;
+    marblePillarMaterial.metallicFactor = 0.25;
 
-    const towerGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.75, 0.75, 8.5, 24);
-    const leftGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
-    leftGate.setPosition(-6.5, 1.2, -5.2);
-    leftGate.castShadow = true;
-    scene.addChild(leftGate);
+    const arenaRadius = 7.4;
+    const columnCount = 8;
+    const plinthTopY = 0.35;
+    const plinthHeight = plinthTopY - floorY;
+    const plinthGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.72, 0.82, plinthHeight, 24);
+    const shaftHeight = 6.8;
+    const shaftGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.46, 0.46, shaftHeight, 24);
+    const capGeom = new RedGPU.Primitive.Box(redGPUContext, 1.25, 0.45, 1.25);
 
-    const rightGate = new RedGPU.Display.Mesh(redGPUContext, towerGeom, towerMat);
-    rightGate.setPosition(6.5, 1.2, -5.2);
-    rightGate.castShadow = true;
-    scene.addChild(rightGate);
+    for (let i = 0; i < columnCount; i++) {
+        const angle = (i * Math.PI * 2) / columnCount + Math.PI / 8;
+        const px = Math.cos(angle) * arenaRadius;
+        const pz = Math.sin(angle) * arenaRadius;
+
+        const plinth = new RedGPU.Display.Mesh(redGPUContext, plinthGeom, plinthMaterial);
+        plinth.setPosition(px, floorY + plinthHeight * 0.5, pz);
+        plinth.castShadow = true;
+        plinth.receiveShadow = true;
+        scene.addChild(plinth);
+
+        if (pz < 4.5) {
+            const isGold = i % 2 === 0;
+            const shaft = new RedGPU.Display.Mesh(
+                redGPUContext,
+                shaftGeom,
+                isGold ? goldPillarMaterial : marblePillarMaterial
+            );
+            shaft.setPosition(px, plinthTopY + shaftHeight * 0.5, pz);
+            shaft.castShadow = true;
+            shaft.receiveShadow = true;
+            scene.addChild(shaft);
+
+            const cap = new RedGPU.Display.Mesh(redGPUContext, capGeom, plinthMaterial);
+            cap.setPosition(px, plinthTopY + shaftHeight + 0.22, pz);
+            cap.rotationY = (-angle * 180) / Math.PI;
+            cap.castShadow = true;
+            scene.addChild(cap);
+        }
+    }
 };
 
-const renderTestPane = (redGPUContext, lake, sphere, directionalLight, motionState) => {
+const renderTestPane = (redGPUContext, lake, orbitSphere, bobbingSphere, directionalLight) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const lakeFolder = pane.addFolder({title: 'Lake', expanded: true});
@@ -196,21 +236,13 @@ const renderTestPane = (redGPUContext, lake, sphere, directionalLight, motionSta
             lakeFolder.addBinding(lake, 'maxPenetration', {min: 0.05, max: 1.0, step: 0.05});
             lakeFolder.addBinding(lake, 'waterLevel', {min: -2.0, max: 2.0, step: 0.05});
 
-            const sphereFolder = pane.addFolder({title: 'Interactive Sphere', expanded: true});
-            sphereFolder.addBinding(sphere, 'enableWaterInteraction');
-            sphereFolder.addBinding(sphere, 'waterWaveStrength', {min: 0.0, max: 4.0, step: 0.1});
-            sphereFolder.addBinding(motionState, 'autoMove');
-            sphereFolder.addBinding(motionState, 'moveSpeed', {min: 0.1, max: 3.0, step: 0.1});
-            sphereFolder.addBinding(motionState, 'moveRadius', {min: 1.0, max: 8.0, step: 0.2});
-            sphereFolder.addBinding(sphere, 'y', {min: -2.0, max: 4.0, step: 0.05}).on('change', () => {
-                motionState.autoMove = false;
-            });
-            sphereFolder.addBinding(sphere, 'x', {min: -10.0, max: 10.0, step: 0.1}).on('change', () => {
-                motionState.autoMove = false;
-            });
-            sphereFolder.addBinding(sphere, 'z', {min: -10.0, max: 10.0, step: 0.1}).on('change', () => {
-                motionState.autoMove = false;
-            });
+            const bobbingFolder = pane.addFolder({title: 'Bobbing Sphere (Vertical - Cyan)', expanded: true});
+            bobbingFolder.addBinding(bobbingSphere, 'enableWaterInteraction');
+            bobbingFolder.addBinding(bobbingSphere, 'waterWaveStrength', {min: 0.0, max: 4.0, step: 0.1});
+
+            const orbitFolder = pane.addFolder({title: 'Orbiting Sphere (Horizontal - Gold)', expanded: true});
+            orbitFolder.addBinding(orbitSphere, 'enableWaterInteraction');
+            orbitFolder.addBinding(orbitSphere, 'waterWaveStrength', {min: 0.0, max: 4.0, step: 0.1});
 
             const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
             lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 1000});

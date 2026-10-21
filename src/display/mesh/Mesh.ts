@@ -459,6 +459,7 @@ class Mesh extends MeshBase {
                 LakeInteractionRegistry.unregister(this);
             }
         }
+        this.#setEnableWaterInteractionRecursively(boolVal);
     }
 
     /**
@@ -474,7 +475,15 @@ class Mesh extends MeshBase {
     }
 
     set waterWaveStrength(value: number) {
-        this.#waterWaveStrength = Math.max(0, value);
+        const strength = Math.max(0, value);
+        this.#waterWaveStrength = strength;
+        const children = this.children;
+        if (children) {
+            const len = children.length;
+            for (let i = 0; i < len; i++) {
+                children[i].waterWaveStrength = strength;
+            }
+        }
     }
 
     /**
@@ -490,7 +499,15 @@ class Mesh extends MeshBase {
     }
 
     set waterInteractionStatic(value: boolean) {
-        this.#waterInteractionStatic = !!value;
+        const boolVal = !!value;
+        this.#waterInteractionStatic = boolVal;
+        const children = this.children;
+        if (children) {
+            const len = children.length;
+            for (let i = 0; i < len; i++) {
+                children[i].waterInteractionStatic = boolVal;
+            }
+        }
     }
 
     /**
@@ -856,29 +873,12 @@ class Mesh extends MeshBase {
         }
     }
 
-    /**
-     * [KO] 하위 계층의 모든 객체에 물 인터랙션 활성화 여부 및 파라미터를 재귀적으로 설정합니다.
-     * [EN] Recursively sets water interaction enable status and parameters for all objects in the hierarchy.
-     *
-     * @param enable -
-     * [KO] 활성화 여부 (기본값: true)
-     * [EN] Whether to enable (default: true)
-     * @param waveStrength -
-     * [KO] 파동 생성 강도 (기본값: 1.0)
-     * [EN] Wave generation strength (default: 1.0)
-     * @param isStatic -
-     * [KO] 정적 객체 여부 (기본값: false)
-     * [EN] Whether it is a static object (default: false)
-     */
-    setEnableWaterInteractionRecursively(enable: boolean = true, waveStrength: number = 1.0, isStatic: boolean = false): void {
-        this.enableWaterInteraction = enable;
-        this.waterWaveStrength = waveStrength;
-        this.waterInteractionStatic = isStatic;
+    #setEnableWaterInteractionRecursively(enable: boolean): void {
         const children = this.children;
         if (children) {
             const len = children.length;
             for (let i = 0; i < len; i++) {
-                children[i].setEnableWaterInteractionRecursively(enable, waveStrength, isStatic);
+                children[i].enableWaterInteraction = enable;
             }
         }
     }

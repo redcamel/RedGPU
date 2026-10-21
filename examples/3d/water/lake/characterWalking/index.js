@@ -97,7 +97,7 @@ RedGPU.init(
                 characterMesh.setReceiveShadowRecursively(true);
                 scene.addChild(characterMesh);
 
-                characterMesh.setEnableWaterInteractionRecursively(true, 1.4);
+                characterMesh.enableWaterInteraction = true;
                 lake.interactionFollowTarget = characterMesh;
 
                 controller.centerX = characterMesh.x;

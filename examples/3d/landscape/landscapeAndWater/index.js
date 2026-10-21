@@ -370,7 +370,7 @@ function initCharacter({redGPUContext, scene, landscape, characterOrbitControlle
             scene.addChild(characterMesh);
 
             // [핵심] 캐릭터 메시를 수체 상호작용 객체로 재귀 등록하여 이동/발걸음 시 동심원 물결(Ripple) 시뮬레이션 활성화
-            characterMesh.setEnableWaterInteractionRecursively(true, 1.8);
+            characterMesh.enableWaterInteraction = true;
 
             characterOrbitController.centerX = characterMesh.x;
             characterOrbitController.centerY = characterMesh.y + 1.2;
