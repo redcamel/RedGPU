@@ -46,11 +46,15 @@ RedGPU.init(
         landscape.heightScale = 300;
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
-        // [KO] RGBA 4채널 스플랫맵 기반 4종 PBR 레이어 등록
-        // [EN] Register 4 PBR layers driven by RGBA 4-channel splatmap weights
+        // [KO] 지형 전체에 걸쳐 각 레이어의 혼합 비율을 정의하는 RGBA 4채널 스플랫 가중치 맵(weightTexture)과 레이어 텍스처 경로
+        // [EN] RGBA 4-channel splat weight map (weightTexture) defining the blend ratio of each layer across the terrain and the layer texture directory path
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const weightTexture = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
+        // [KO] 스플랫맵의 R/G/B/A 각 채널(weightChannel)에 매핑할 4종 PBR 재질 레이어의 타일링 배율(uvScale) 및 거칠기(roughness) 정의
+        // [EN] Define tiling scale (uvScale) and roughness for 4 PBR material layers mapped to each R/G/B/A channel (weightChannel) of the splatmap
+        // [KO] 0번 레이어(Grass)는 가중치 합이 0인 구역의 기본 바탕(Base Fallback) 레이어를 겸하며, 상위 레이어들은 채널 가중치와 높이 맵(Height Blend)을 기반으로 합성됩니다.
+        // [EN] Layer 0 (Grass) also serves as the base fallback layer for zero-weight areas, while upper layers blend based on channel weights and height-modulated blending.
         const layerConfigs = [
             {name: 'Grass', weightChannel: 'R', uvScale: [25, 25], roughness: 0.85},
             {name: 'Rock', weightChannel: 'G', uvScale: [7.5, 7.5], roughness: 0.7},
@@ -58,15 +62,29 @@ RedGPU.init(
             {name: 'Leave', weightChannel: 'A', uvScale: [25, 25], roughness: 0.8}
         ];
 
+        // [KO] landscape.addLayer()를 통해 각 레이어의 PBR 텍스처 세트(baseColor, normal, orm)와 스플랫 가중치 채널을 등록합니다.
+        // [EN] Register each layer's PBR texture set (baseColor, normal, orm) and splat weight channel via landscape.addLayer().
+        // [KO] 등록된 레이어들은 카메라 근경(nearDetailDistance 이내)에서는 스토캐스틱 타일링 및 높이 블렌딩으로 실시간 합성되고, 원경에서는 VBT(가상 블렌드 텍스처) 아틀라스로 베이크되어 렌더링됩니다.
+        // [EN] Registered layers are composited in real time with stochastic tiling and height blending within nearDetailDistance, and baked into VBT (Virtual Blend Texture) atlases for distant rendering.
         const layers = layerConfigs.map(({name, weightChannel, uvScale, roughness}) => {
             const key = name.toLowerCase();
             return landscape.addLayer({
                 name,
+                // [KO] 표면 기본 색상(Albedo) 텍스처
+                // [EN] Surface base color (Albedo) texture
                 baseColorTexture: `${assetPath}${key}.jpg`,
+                // [KO] 탄젠트 공간 디테일 노멀 맵 텍스처 (지형 매크로 노멀과 합성)
+                // [EN] Tangent-space detail normal map texture (perturbed over macro terrain normal)
                 normalTexture: `${assetPath}${key}_normal.jpg`,
+                // [KO] 채널 패킹된 ORM 텍스처 (R: Ambient Occlusion, G: Roughness, B: Metallic, A: Height)
+                // [EN] Channel-packed ORM texture (R: Ambient Occlusion, G: Roughness, B: Metallic, A: Height)
                 ormTexture: `${assetPath}${key}_orm.jpg`,
+                // [KO] 스플랫 가중치 텍스처 및 참조할 색상 채널('R' | 'G' | 'B' | 'A')
+                // [EN] Splat weight texture and target color channel ('R' | 'G' | 'B' | 'A')
                 weightTexture,
                 weightChannel,
+                // [KO] 타일 당 텍스처 반복 횟수 [u, v] 및 표면 거칠기 계수
+                // [EN] Texture repetition count per tile [u, v] and surface roughness factor
                 uvScale,
                 roughness
             });

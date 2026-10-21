@@ -42,10 +42,13 @@ RedGPU.init(
         directionalLight.azimuth = 135;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 기본 Landscape 지형 생성 및 16비트 글로벌 하이트맵 설정
-        // [EN] Create default Landscape terrain and set 16-bit global heightmap
+        // [KO] 4000x4000 월드 크기의 Landscape 지형 생성 및 최대 고도 스케일(heightScale: 300) 설정
+        // [EN] Create a 4000x4000 world-size Landscape terrain and configure the maximum elevation scale (heightScale: 300)
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
         landscape.heightScale = 300;
+
+        // [KO] 단일 16비트 글로벌 하이트맵을 로드하여 VHT(가상 높이 텍스처) 및 VNT(가상 노멀 텍스처) 아틀라스에 베이크하고 씬에 등록
+        // [EN] Load a single 16-bit global heightmap, bake it into the VHT (Virtual Height Texture) and VNT (Virtual Normal Texture) atlases, and register it to the scene
         landscape.globalHeightmapUrl = '../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
         scene.landscape = landscape;
 
