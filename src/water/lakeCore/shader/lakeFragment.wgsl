@@ -143,7 +143,7 @@ fn calculateWaterSSR(
 
         let sampledWorldPos = getWorldPositionFromDepth(currentScreenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
 
-        if (sampledWorldPos.y < startWorldPos.y - 0.08) {
+        if (sampledWorldPos.y < startWorldPos.y) {
             continue;
         }
 
@@ -153,10 +153,9 @@ fn calculateWaterSSR(
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
         let effectiveThickness = thickness + actualStep * 0.8;
-        let crossedFromFront = prevRayDist <= surfaceDistanceFromCamera + actualStep * 0.55;
+        let crossedFromFront = prevRayDist <= surfaceDistanceFromCamera;
 
         if (crossedFromFront && distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
-            // 정밀 이분 탐색 (실루엣 경계 너머 배경/수중 바닥 번짐 방지)
             var minPos = prevWorldPos;
             var maxPos = currentWorldPos;
             var bestUV = currentScreenUV;
@@ -177,14 +176,12 @@ fn calculateWaterSSR(
                 }
 
                 let midSampledPos = getWorldPositionFromDepth(midUV, midRawDepth, systemUniforms.projection.inverseProjectionViewMatrix);
-                let midSurfDist = length(midSampledPos - cameraWorldPos);
-
-                // 실루엣 바깥(수중 바닥 또는 원경 벽면)으로 벗어난 샘플은 제외
-                if (midSampledPos.y < startWorldPos.y - 0.08 || abs(midSurfDist - surfaceDistanceFromCamera) > actualStep * 1.2) {
+                if (midSampledPos.y < startWorldPos.y) {
                     minPos = midPos;
                     continue;
                 }
 
+                let midSurfDist = length(midSampledPos - cameraWorldPos);
                 let midRayDist = length(midPos - cameraWorldPos);
                 let midDiff = midRayDist - midSurfDist;
 
