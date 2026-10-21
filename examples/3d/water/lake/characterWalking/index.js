@@ -12,13 +12,25 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+const SEABED_BOX_Y = -0.85;
+const SEABED_HALF_HEIGHT = 1.0;
+const SEABED_SLOPE_DEG = 2.8;
+const SEABED_SLOPE_RAD = (SEABED_SLOPE_DEG * Math.PI) / 180;
+const SEABED_TOP_Y = SEABED_BOX_Y + SEABED_HALF_HEIGHT * Math.cos(SEABED_SLOPE_RAD);
+const SEABED_TOP_Z = SEABED_HALF_HEIGHT * Math.sin(SEABED_SLOPE_RAD);
+const SEABED_TAN = Math.tan(SEABED_SLOPE_RAD);
+
+const getLakeFloorHeight = (x, z) => {
+    return SEABED_TOP_Y - (z - SEABED_TOP_Z) * SEABED_TAN;
+};
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 28;
-        controller.tilt = -13;
-        controller.pan = 28;
+        controller.distance = 8.2;
+        controller.tilt = -11;
+        controller.pan = 180;
         controller.speedDistance = 0.25;
 
         const scene = new RedGPU.Display.Scene();
@@ -28,26 +40,34 @@ RedGPU.init(
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
             '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
-            30000
+            20000
         );
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
+        // [KO] 해안가 및 수중 바닥에 드리워지는 긴 그림자를 위한 직사광 설정
+        // [EN] Directional sunlight casting long shadows across the open shoreline and seabed
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.lux = 30000;
-        directionalLight.elevation = 26;
-        directionalLight.azimuth = 148;
-        directionalLight.color.setColorByHEX('#fffcf0');
+        directionalLight.lux = 90000;
+        directionalLight.elevation = 25;
+        directionalLight.azimuth = 135;
+        directionalLight.color.setColorByHEX('#ffe8c8');
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // [KO] 해변 지형, 수중 암초, 해안 바위, 고대 신전 기둥 및 부유 바위 환경 생성
-        // [EN] Create beach terrain, submerged reefs, shoreline boulders, temple colonnade, and floating rocks
+
+        // [KO] 탁 트인 완만 경사 해변 지형과 여유 있게 배치된 외곽 해안 바위·석주 생성
+        // [EN] Create open sloped beach terrain with widely spaced coastal rocks and pillars
         const beachEnvironment = createBeachEnvironment(redGPUContext, scene);
 
         // [KO] 호수(Lake) 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
         const lake = new RedGPU.Water.Lake(redGPUContext, 240, 240, 120, 120);
         lake.waterLevel = 0.5;
+        lake.waterMaterial.baseColor.setColorByHEX('#16c8b8');
+        lake.waterMaterial.deepColor.setColorByHEX('#042842');
+        lake.waterMaterial.causticsStrength = 1.25;
+        lake.waterMaterial.refractionStrength = 0.9;
+        lake.waterMaterial.roughness = 0.05;
         lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
@@ -66,10 +86,9 @@ RedGPU.init(
         );
         scene.addWater(lake);
 
-        if (beachEnvironment.floatingRocks && beachEnvironment.floatingRocks.length > 0) {
-            beachEnvironment.floatingRocks.forEach((rock) => {
-                rock.enableWaterInteraction = true;
-            });
+        const floatingRocks = beachEnvironment.floatingRocks;
+        for (let i = 0; i < floatingRocks.length; i++) {
+            floatingRocks[i].enableWaterInteraction = true;
         }
 
         let characterMesh = null;
@@ -77,20 +96,17 @@ RedGPU.init(
         let stateMachine = null;
         let targetStateName = 'Idle';
         let lastTime = null;
+        let onCharacterLoaded = null;
 
-        const getLakeFloorHeight = (x, z) => {
-            return -1.212 - (z - 0.156) * 0.158384;
-        };
-
-        // [KO] 로컬 스킨드 메시(Soldier.glb) 로드 및 수체 상호작용 재귀 등록
-        // [EN] Load local skinned mesh (Soldier.glb) and recursively register for water interaction
+        // [KO] 로컬 스킨드 메시(Soldier.glb) 로드 — 수심 약 42cm(무릎 깊이)의 개방된 수역 중앙에서 시작
+        // [EN] Load local skinned mesh (Soldier.glb) — starts knee-deep (~42cm) in the open water
         new RedGPU.GLTFLoader(
             redGPUContext,
             '../../../../assets/gltf/Soldier.glb',
             (loader) => {
                 characterMesh = loader.resultMesh;
                 characterMesh.x = 0;
-                characterMesh.z = -12;
+                characterMesh.z = 1.4;
                 characterMesh.y = getLakeFloorHeight(characterMesh.x, characterMesh.z);
 
                 characterMesh.setCastShadowRecursively(true);
@@ -101,11 +117,8 @@ RedGPU.init(
                 lake.interactionFollowTarget = characterMesh;
 
                 controller.centerX = characterMesh.x;
-                controller.centerY = characterMesh.y + 1.2;
+                controller.centerY = characterMesh.y + 1.25;
                 controller.centerZ = characterMesh.z;
-                controller.distance = 9.0;
-                controller.tilt = -10;
-                controller.pan = 180;
 
                 characterController = new RedGPU.Charactor.SimpleCharacterController(
                     redGPUContext,
@@ -154,18 +167,21 @@ RedGPU.init(
                         loader.activeAnimations[0].animStateMachine = stateMachine;
                     }
                 }
+
+                if (onCharacterLoaded) {
+                    onCharacterLoaded(characterMesh);
+                }
             },
             RedGPUExampleHelper.loadingProgressInfoHandler
         );
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            const floatingRocks = beachEnvironment.floatingRocks;
             const count = floatingRocks.length;
             const t = time * 0.001;
             for (let i = 0; i < count; i++) {
                 const rock = floatingRocks[i];
-                rock.y = rock.originalY + Math.sin(t * 1.5 + i);
+                rock.y = rock.originalY + Math.sin(t * 1.6 + i * 1.4) * 0.22;
             }
 
             if (characterMesh && characterController) {
@@ -175,7 +191,7 @@ RedGPU.init(
                     characterController.update(view, time);
 
                     controller.centerX = characterMesh.x;
-                    controller.centerY = characterMesh.y + 1.2;
+                    controller.centerY = characterMesh.y + 1.25;
                     controller.centerZ = characterMesh.z;
 
                     if (characterController.isRunning) targetStateName = 'Run';
@@ -185,7 +201,13 @@ RedGPU.init(
             }
         });
 
-        new RedGPUExampleHelper(redGPUContext);
+        renderTestPane(redGPUContext, lake, directionalLight, (bindCharacterFn) => {
+            if (characterMesh) {
+                bindCharacterFn(characterMesh);
+            } else {
+                onCharacterLoaded = bindCharacterFn;
+            }
+        });
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -215,6 +237,7 @@ const createBeachEnvironment = (redGPUContext, scene) => {
         maxAnisotropy: 16
     });
 
+    // 1. 연속된 완만 경사 해변/수중 바닥 (육지 해변에서 수중까지 이음새 없이 연결)
     const seabedMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     seabedMaterial.baseColorTexture = gravelAlbedo;
     seabedMaterial.normalTexture = gravelNormal;
@@ -222,44 +245,22 @@ const createBeachEnvironment = (redGPUContext, scene) => {
     seabedMaterial.occlusionTexture = gravelOrm;
     seabedMaterial.baseColorTextureSampler = terrainRepeatSampler;
     seabedMaterial.normalTextureSampler = terrainRepeatSampler;
-    seabedMaterial.textureScale = [18, 18];
-    seabedMaterial.baseColorFactor = [1.15, 1.1, 1.0, 1.0];
-    seabedMaterial.roughnessFactor = 0.92;
+    seabedMaterial.textureScale = [26, 26];
+    seabedMaterial.baseColorFactor = [1.0, 0.95, 0.88, 1.0];
+    seabedMaterial.roughnessFactor = 0.88;
     seabedMaterial.metallicFactor = 0.0;
 
     const seabedMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 280),
+        new RedGPU.Primitive.Box(redGPUContext, 280, SEABED_HALF_HEIGHT * 2, 280),
         seabedMaterial
     );
-    seabedMesh.setPosition(0, -2.2, 0);
-    seabedMesh.rotationX = 9.0;
+    seabedMesh.setPosition(0, SEABED_BOX_Y, 0);
+    seabedMesh.rotationX = SEABED_SLOPE_DEG;
     seabedMesh.receiveShadow = true;
     scene.addChild(seabedMesh);
 
-    const beachMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    beachMaterial.baseColorTexture = gravelAlbedo;
-    beachMaterial.normalTexture = gravelNormal;
-    beachMaterial.metallicRoughnessTexture = gravelOrm;
-    beachMaterial.occlusionTexture = gravelOrm;
-    beachMaterial.baseColorTextureSampler = terrainRepeatSampler;
-    beachMaterial.normalTextureSampler = terrainRepeatSampler;
-    beachMaterial.textureScale = [36, 6];
-    beachMaterial.baseColorFactor = [1.32, 1.25, 1.15, 1.0];
-    beachMaterial.roughnessFactor = 0.95;
-    beachMaterial.metallicFactor = 0.0;
-
-    const beachMesh = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 280, 2.0, 40),
-        beachMaterial
-    );
-    beachMesh.setPosition(0, 0.35, -30);
-    beachMesh.rotationX = 13.5;
-    beachMesh.castShadow = true;
-    beachMesh.receiveShadow = true;
-    scene.addChild(beachMesh);
-
+    // 2. 자연 해안 바위 및 외곽 석주 재질 정의
     const rockMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     rockMaterial.baseColorTexture = rockAlbedo;
     rockMaterial.normalTexture = rockNormal;
@@ -267,162 +268,93 @@ const createBeachEnvironment = (redGPUContext, scene) => {
     rockMaterial.occlusionTexture = rockOrm;
     rockMaterial.baseColorTextureSampler = terrainRepeatSampler;
     rockMaterial.normalTextureSampler = terrainRepeatSampler;
-    rockMaterial.textureScale = [1.4, 1.4];
-    rockMaterial.baseColorFactor = [1.2, 1.16, 1.12, 1.0];
+    rockMaterial.textureScale = [1.5, 1.5];
+    rockMaterial.baseColorFactor = [0.94, 0.90, 0.86, 1.0];
     rockMaterial.roughnessFactor = 0.82;
     rockMaterial.metallicFactor = 0.04;
 
-    const rockStack = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Cylinder(redGPUContext, 2.2, 3.0, 8.5, 18),
-        rockMaterial
-    );
-    rockStack.setPosition(11.5, 2.2, -0.5);
-    rockStack.rotationY = 25;
-    rockStack.rotationZ = -4;
-    rockStack.castShadow = true;
-    rockStack.receiveShadow = true;
-    scene.addChild(rockStack);
+    const pillarMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    pillarMaterial.baseColorFactor = [0.90, 0.86, 0.80, 1.0];
+    pillarMaterial.roughnessFactor = 0.30;
+    pillarMaterial.metallicFactor = 0.05;
 
-    const rockStackSub = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Sphere(redGPUContext, 2.6, 24, 24),
-        rockMaterial
-    );
-    rockStackSub.setPosition(7.8, 1.0, -4.2);
-    rockStackSub.setScale(1.3, 0.9, 1.2);
-    rockStackSub.rotationX = 40;
-    rockStackSub.rotationY = -25;
-    rockStackSub.castShadow = true;
-    rockStackSub.receiveShadow = true;
-    scene.addChild(rockStackSub);
-
-    const sphereGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
+    // 3. 중앙 수역을 비워두고 외곽에 여유 있게 배치한 수중 석주 4기 (긴 사선 그림자 및 SSR 반사 제공)
+    const pillarGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 0.78, 8.5, 24);
     [
-        {x: -11, y: -0.9, z: -4, scale: [3.2, 1.3, 2.8], rotX: 35, rotY: 15},
-        {x: -9.5, y: -1.7, z: 4, scale: [3.8, 1.5, 3.4], rotX: -25, rotY: 45},
-        {x: -6.5, y: -2.8, z: 11, scale: [4.4, 2.0, 4.0], rotX: 40, rotY: -30},
-        {x: 5.5, y: -1.4, z: 4, scale: [2.6, 1.2, 2.6], rotX: 20, rotY: 60},
-        {x: 1.5, y: -2.6, z: 10, scale: [3.6, 1.7, 3.0], rotX: -30, rotY: -15},
-    ].forEach((info) => {
-        const reefMesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, rockMaterial);
-        reefMesh.setPosition(info.x, info.y, info.z);
-        reefMesh.setScale(info.scale[0], info.scale[1], info.scale[2]);
-        reefMesh.rotationX = info.rotX;
-        reefMesh.rotationY = info.rotY;
-        reefMesh.castShadow = true;
-        reefMesh.receiveShadow = true;
-        scene.addChild(reefMesh);
-    });
-
-    [
-        {x: -14, y: 0.5, z: -8, scale: [2.4, 1.8, 2.2], rotX: 30, rotY: 25},
-        {x: -6, y: 0.38, z: -8.5, scale: [1.8, 1.3, 1.6], rotX: -35, rotY: -40},
-        {x: 13, y: 0.48, z: -7, scale: [2.6, 1.7, 2.4], rotX: 45, rotY: 10},
-        {x: 2.5, y: 0.28, z: -7.5, scale: [2.0, 1.2, 1.8], rotX: -20, rotY: 55},
-    ].forEach((info) => {
-        const boulderMesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeom, rockMaterial);
-        boulderMesh.setPosition(info.x, info.y, info.z);
-        boulderMesh.setScale(info.scale[0], info.scale[1], info.scale[2]);
-        boulderMesh.rotationX = info.rotX;
-        boulderMesh.rotationY = info.rotY;
-        boulderMesh.castShadow = true;
-        boulderMesh.receiveShadow = true;
-        scene.addChild(boulderMesh);
-    });
-
-    const floatReefGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16);
-    const floatReef1 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
-    floatReef1.setPosition(-2.5, 0.46, 6);
-    floatReef1.originalY = 0.46;
-    floatReef1.castShadow = true;
-    scene.addChild(floatReef1);
-    floatingRocks.push(floatReef1);
-
-    const floatReef2 = new RedGPU.Display.Mesh(redGPUContext, floatReefGeom, rockMaterial);
-    floatReef2.setPosition(7.5, 0.38, 8);
-    floatReef2.originalY = 0.38;
-    floatReef2.scaleX = 0.85;
-    floatReef2.scaleZ = 0.85;
-    floatReef2.castShadow = true;
-    scene.addChild(floatReef2);
-    floatingRocks.push(floatReef2);
-
-    const marbleMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    marbleMaterial.baseColorFactor = [1.7, 1.68, 1.62, 1.0];
-    marbleMaterial.roughnessFactor = 0.18;
-    marbleMaterial.metallicFactor = 0.05;
-
-    const terracottaMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-    terracottaMaterial.baseColorFactor = [1.75, 0.52, 0.32, 1.0];
-    terracottaMaterial.roughnessFactor = 0.28;
-    terracottaMaterial.metallicFactor = 0.05;
-
-    const platformMesh = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 8.5, 0.8, 6.0),
-        marbleMaterial
-    );
-    platformMesh.setPosition(-3.2, 0.7, 2.0);
-    platformMesh.rotationY = 22;
-    platformMesh.castShadow = true;
-    platformMesh.receiveShadow = true;
-    scene.addChild(platformMesh);
-
-    const obeliskMesh = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Cylinder(redGPUContext, 0.65, 1.1, 13.5, 16),
-        terracottaMaterial
-    );
-    obeliskMesh.setPosition(-3.2, 6.8, 2.0);
-    obeliskMesh.rotationY = 22;
-    obeliskMesh.castShadow = true;
-    obeliskMesh.receiveShadow = true;
-    scene.addChild(obeliskMesh);
-
-    const columnGeom = new RedGPU.Primitive.Cylinder(redGPUContext, 0.5, 0.5, 9.0, 24);
-    const capGeom = new RedGPU.Primitive.Box(redGPUContext, 1.3, 0.45, 1.3);
-    [
-        {x: -5.8, z: 0.6},
-        {x: -1.0, z: 3.2},
-        {x: 3.8, z: 1.2},
-        {x: 6.8, z: 3.5},
+        {x: 8.5, z: -2.5, heightScale: 1.0},
+        {x: 11.5, z: 6.5, heightScale: 1.15},
+        {x: -9.5, z: 3.5, heightScale: 0.95},
+        {x: -12.0, z: 13.0, heightScale: 1.1},
     ].forEach((p) => {
-        const column = new RedGPU.Display.Mesh(redGPUContext, columnGeom, marbleMaterial);
-        column.setPosition(p.x, 4.3, p.z);
-        column.castShadow = true;
-        column.receiveShadow = true;
-        scene.addChild(column);
-
-        const cap = new RedGPU.Display.Mesh(redGPUContext, capGeom, marbleMaterial);
-        cap.setPosition(p.x, 8.8, p.z);
-        cap.castShadow = true;
-        cap.receiveShadow = true;
-        scene.addChild(cap);
+        const floorY = getLakeFloorHeight(p.x, p.z);
+        const pillar = new RedGPU.Display.Mesh(redGPUContext, pillarGeom, pillarMaterial);
+        pillar.setPosition(p.x, floorY + 3.8 * p.heightScale, p.z);
+        pillar.setScale(1.0, p.heightScale, 1.0);
+        pillar.castShadow = true;
+        pillar.receiveShadow = true;
+        scene.addChild(pillar);
     });
 
-    const beam = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Box(redGPUContext, 5.5, 0.6, 1.2),
-        marbleMaterial
-    );
-    beam.setPosition(-3.4, 9.3, 1.9);
-    beam.rotationY = 28;
-    beam.castShadow = true;
-    beam.receiveShadow = true;
-    scene.addChild(beam);
+    // 4. 원경 및 좌우 해안가 외곽의 큼직한 바위 군락 (중앙 보행 경로를 방해하지 않는 개방형 구도)
+    const boulderGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 24, 24);
+    [
+        {x: -13.5, y: 0.3, z: -5.0, scale: [4.2, 2.2, 3.6], rotX: 15, rotY: 25},
+        {x: 14.0, y: 0.2, z: -6.0, scale: [3.8, 1.9, 3.2], rotX: -12, rotY: -30},
+        {x: -15.0, y: -0.2, z: 9.0, scale: [5.0, 2.8, 4.2], rotX: 20, rotY: 40},
+        {x: 15.5, y: -0.3, z: 12.0, scale: [4.6, 2.5, 3.8], rotX: -18, rotY: -35},
+        {x: -6.5, y: -0.55, z: 11.5, scale: [2.8, 1.1, 2.4], rotX: 25, rotY: 15},
+        {x: 7.0, y: -0.45, z: 9.5, scale: [2.5, 1.0, 2.2], rotX: -20, rotY: 35},
+    ].forEach((b) => {
+        const boulder = new RedGPU.Display.Mesh(redGPUContext, boulderGeom, rockMaterial);
+        boulder.setPosition(b.x, b.y, b.z);
+        boulder.setScale(b.scale[0], b.scale[1], b.scale[2]);
+        boulder.rotationX = b.rotX;
+        boulder.rotationY = b.rotY;
+        boulder.castShadow = true;
+        boulder.receiveShadow = true;
+        scene.addChild(boulder);
+    });
 
-    const strawMesh = new RedGPU.Display.Mesh(
-        redGPUContext,
-        new RedGPU.Primitive.Cylinder(redGPUContext, 0.45, 0.55, 12.0, 20),
-        marbleMaterial
-    );
-    strawMesh.setPosition(0.5, 1.2, -1.2);
-    strawMesh.rotationZ = 34;
-    strawMesh.rotationX = 18;
-    strawMesh.castShadow = true;
-    strawMesh.receiveShadow = true;
-    scene.addChild(strawMesh);
+    // 5. 수면 상하 부유 바위 3개 (캐릭터 이동 시 20x20 슬라이딩 파동 도메인 진입/이탈 확인용)
+    const floatRockGeom = new RedGPU.Primitive.Sphere(redGPUContext, 1.0, 20, 20);
+    [
+        {x: -5.8, y: 0.44, z: 1.5, scale: 1.05},
+        {x: 5.8, y: 0.44, z: 2.5, scale: 0.95},
+        {x: -4.8, y: 0.44, z: 8.5, scale: 1.10},
+    ].forEach((cfg) => {
+        const floatRock = new RedGPU.Display.Mesh(redGPUContext, floatRockGeom, rockMaterial);
+        floatRock.setPosition(cfg.x, cfg.y, cfg.z);
+        floatRock.setScale(cfg.scale, cfg.scale * 0.72, cfg.scale);
+        floatRock.originalY = cfg.y;
+        floatRock.castShadow = true;
+        floatRock.receiveShadow = true;
+        scene.addChild(floatRock);
+        floatingRocks.push(floatRock);
+    });
 
     return {floatingRocks};
+};
+
+const renderTestPane = (redGPUContext, lake, directionalLight, registerCharacterBinding) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const lakeFolder = pane.addFolder({title: 'Lake', expanded: true});
+            lakeFolder.addBinding(lake, 'interactionEnabled');
+            lakeFolder.addBinding(lake, 'rippleWaveSpeed', {min: 0.05, max: 0.8, step: 0.01});
+            lakeFolder.addBinding(lake, 'rippleDamping', {min: 0.001, max: 0.05, step: 0.001});
+            lakeFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
+            lakeFolder.addBinding(lake, 'waterLevel', {min: -0.5, max: 1.5, step: 0.05});
+
+            const characterFolder = pane.addFolder({title: 'Character', expanded: true});
+            registerCharacterBinding((characterMesh) => {
+                characterFolder.addBinding(characterMesh, 'enableWaterInteraction');
+                characterFolder.addBinding(characterMesh, 'waterWaveStrength', {min: 0.0, max: 4.0, step: 0.1});
+            });
+
+            const lightFolder = pane.addFolder({title: 'DirectionalLight', expanded: false});
+            lightFolder.addBinding(directionalLight, 'lux', {min: 0, max: 150000, step: 1000});
+            lightFolder.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            lightFolder.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+        }
+    });
 };
