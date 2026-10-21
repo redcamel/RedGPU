@@ -107,13 +107,18 @@ export interface LandscapeLayerOptions {
 }
 
 /**
- * [KO] 지형 멀티 레이어 스플래팅에 사용되는 개별 재질 레이어의 텍스처, UV 변환, PBR 속성 및 가중치 채널을 정의하는 클래스입니다.
- * [EN] Class that defines the textures, UV transform, PBR properties, and weight channel of an individual material layer used in terrain multi-layer splatting.
+ * [KO] 지형 멀티 레이어 스플래팅에 사용되는 개별 재질 레이어의 텍스처, UV 변환, PBR 속성 및 가중치 채널을 정의하는 클래스입니다. `landscape.addLayer()`를 통해 내부적으로 자동 생성됩니다.
+ * [EN] Class that defines the textures, UV transform, PBR properties, and weight channel of an individual material layer used in terrain multi-layer splatting. Automatically created internally via `landscape.addLayer()`.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * ### Example
  * ```typescript
- * // [KO] 지형에 새로운 스플래팅 레이어 추가
- * // [EN] Add a new splatting layer to the landscape
+ * // [KO] 지형에 새로운 스플래팅 레이어 추가 및 참조
+ * // [EN] Add and reference a new splatting layer on the landscape
  * const rockLayer = landscape.addLayer({
  *     name: 'Rock',
  *     baseColorTexture: './assets/rock_diff.jpg',
@@ -176,17 +181,6 @@ class LandscapeLayer {
     /**
      * [KO] `LandscapeLayer` 인스턴스를 생성합니다.
      * [EN] Creates a `LandscapeLayer` instance.
-     *
-     * ### Example
-     * ```typescript
-     * // [KO] 스플래팅 레이어 인스턴스 생성
-     * // [EN] Create a splatting layer instance
-     * const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
-     *     name: 'Grass',
-     *     baseColorTexture: './assets/grass_albedo.jpg',
-     *     uvScale: [25, 25]
-     * });
-     * ```
      *
      * @param redGPUContextOrOptions -
      * [KO] `RedGPUContext` 인스턴스 또는 `LandscapeLayerOptions` 설정 객체
