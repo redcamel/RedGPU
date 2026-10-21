@@ -117,7 +117,6 @@ class Mesh extends MeshBase {
 
     #enableWaterInteraction: boolean = false;
     #waterWaveStrength: number = 1.0;
-    #waterInteractionStatic: boolean = false;
 
     #parent: Object3DContainer
     #x: number = 0
@@ -482,30 +481,6 @@ class Mesh extends MeshBase {
             const len = children.length;
             for (let i = 0; i < len; i++) {
                 children[i].waterWaveStrength = strength;
-            }
-        }
-    }
-
-    /**
-     * [KO] 물 인터랙션 시 정적 객체(속도 추적 제외)로 처리할지 여부를 가져오거나 설정합니다.
-     * [EN] Gets or sets whether this mesh is treated as a static object (excluding speed tracking) in water interaction.
-     *
-     * @returns
-     * [KO] 정적 객체 처리 여부
-     * [EN] Whether treated as a static object
-     */
-    get waterInteractionStatic(): boolean {
-        return this.#waterInteractionStatic;
-    }
-
-    set waterInteractionStatic(value: boolean) {
-        const boolVal = !!value;
-        this.#waterInteractionStatic = boolVal;
-        const children = this.children;
-        if (children) {
-            const len = children.length;
-            for (let i = 0; i < len; i++) {
-                children[i].waterInteractionStatic = boolVal;
             }
         }
     }

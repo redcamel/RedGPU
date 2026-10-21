@@ -53,7 +53,7 @@ class MeshMotionTracker {
         return this.data[6];
     }
 
-    update(x: number, y: number, z: number, dt: number, isStatic: boolean): void {
+    update(x: number, y: number, z: number, dt: number): void {
         const d = this.data;
         if (!this.isInitialized) {
             d[0] = x;
@@ -64,15 +64,6 @@ class MeshMotionTracker {
             d[5] = 0;
             d[6] = 1.0;
             this.isInitialized = true;
-            return;
-        }
-
-        if (isStatic) {
-            d[0] = x;
-            d[1] = y;
-            d[2] = z;
-            d[3] = 0;
-            d[5] = 0;
             return;
         }
 
@@ -193,7 +184,7 @@ class LakeInteractionManager extends RedGPUObject {
                 tracker = new MeshMotionTracker();
                 this.#motionTrackers.set(mesh, tracker);
             }
-            tracker.update(mx, my, mz, dt, mesh.waterInteractionStatic);
+            tracker.update(mx, my, mz, dt);
 
             const speed = tracker.speed;
             let stepPulse = tracker.stepPulse;
