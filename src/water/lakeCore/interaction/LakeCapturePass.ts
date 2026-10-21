@@ -7,11 +7,11 @@ import vertexShaderSkinnedCode from "./shader/lakeCapturePenetrationSkinned.wgsl
 import {LakeActiveMeshEntry} from "./LakeInteractionManager";
 
 /**
- * [KO] 상단 직교 투영(Top-down Orthographic Projection)을 통해 활성 메시의 수면 침투 깊이 및 파동 자극 데이터를 `rg16float` 텍스처에 캡처하는 렌더 패스 클래스입니다.
- * [EN] Render pass class that captures water penetration depth and wave impulse data of active meshes into an `rg16float` texture via top-down orthographic projection.
+ * [KO] 활성 메시의 수면 침투 깊이 및 파동 자극 데이터를 캡처하는 렌더 패스 클래스입니다.
+ * [EN] Render pass class that captures water penetration depth and wave impulse data of active meshes.
  *
- * [KO] 일반 정적/동적 메시와 스키닝(Skinned) 메시 파이프라인을 모두 지원하며, `Lake` 인스턴스 내부에서 자동으로 생성됩니다.
- * [EN] Supports both standard static/dynamic meshes and skinned mesh pipelines, and is automatically created inside a `Lake` instance.
+ * [KO] `Lake` 인스턴스 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Automatically created internally when a `Lake` instance is constructed.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -28,8 +28,8 @@ class LakeCapturePass extends RedGPUObject {
     textureSize: number = 512;
 
     /**
-     * [KO] 침투 깊이 및 속도 자극이 기록되는 `rg16float` 포맷의 `GPUTexture`입니다.
-     * [EN] `GPUTexture` in `rg16float` format where penetration depth and velocity impulses are recorded.
+     * [KO] 침투 깊이 및 속도 자극이 기록되는 `GPUTexture`입니다.
+     * [EN] `GPUTexture` where penetration depth and velocity impulses are recorded.
      */
     captureTexture: GPUTexture;
     /**
@@ -75,7 +75,7 @@ class LakeCapturePass extends RedGPUObject {
 
     /**
      * [KO] `LakeCapturePass` 인스턴스를 생성합니다.
-     * [EN] Creates an instance of `LakeCapturePass`.
+     * [EN] Creates a `LakeCapturePass` instance.
      *
      * @param redGPUContext -
      * [KO] `RedGPUContext` 인스턴스
@@ -93,15 +93,15 @@ class LakeCapturePass extends RedGPUObject {
     }
 
     /**
-     * [KO] 활성 메시 목록을 상단 직교 투영으로 렌더링하여 수면 침투 깊이를 캡처 텍스처에 기록합니다.
-     * [EN] Renders the active mesh list with top-down orthographic projection to record water penetration depth into the capture texture.
+     * [KO] 활성 메시 목록을 렌더링하여 수면 침투 깊이를 캡처 텍스처에 기록합니다.
+     * [EN] Renders the active mesh list to record water penetration depth into the capture texture.
      *
      * @param commandEncoder -
      * [KO] 패스를 기록할 `GPUCommandEncoder`
      * [EN] `GPUCommandEncoder` to record the pass
      * @param activeMeshes -
-     * [KO] 수면과 교차 중인 활성 메시 엔트리 배열 (`LakeActiveMeshEntry[]`)
-     * [EN] Array of active mesh entries intersecting the water surface (`LakeActiveMeshEntry[]`)
+     * [KO] 활성 메시 엔트리 배열 (`LakeActiveMeshEntry[]`)
+     * [EN] Array of active mesh entries (`LakeActiveMeshEntry[]`)
      * @param domainCenterX -
      * [KO] 캡처 도메인 중심 월드 X 좌표
      * [EN] Capture domain center world X coordinate
@@ -205,8 +205,8 @@ class LakeCapturePass extends RedGPUObject {
     }
 
     /**
-     * [KO] 캡처 텍스처, 깊이 텍스처 및 유니폼 버퍼 등 할당된 GPU 리소스를 모두 해제합니다.
-     * [EN] Releases all allocated GPU resources including capture texture, depth texture, and uniform buffers.
+     * [KO] 할당된 GPU 리소스를 모두 해제합니다.
+     * [EN] Releases all allocated GPU resources.
      */
     destroy(): void {
         if (this.captureTexture) {
@@ -515,4 +515,3 @@ class LakeCapturePass extends RedGPUObject {
 
 Object.freeze(LakeCapturePass);
 export default LakeCapturePass;
-

@@ -32,13 +32,11 @@ RedGPU.init(
             '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 32;
         directionalLight.azimuth = 145;
-        directionalLight.color.setColorByHEX('#fffbf0');
-        directionalLight.lux = 75000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // [KO] 공용 노멀 맵 텍스처 생성 (선형 포맷 'rgba8unorm')
@@ -63,110 +61,27 @@ RedGPU.init(
         // [KO] 5개의 독립된 수영장(Lake) 규격 정의 및 생성
         // [EN] Define and create 5 independent pool Lake instances
         const poolConfigs = [
-            {
-                name: 'Pool 1 (Top Alpine)',
-                x: 0,
-                y: 4.0,
-                z: -32,
-                poolWidth: 32,
-                poolHeight: 32,
-                baseColor: '#18d8b6',
-                deepColor: '#065279',
-                waveAmplitude: 0.02,
-                roughness: 0.06,
-                opacity: 0.95,
-                refractionStrength: 0.85,
-                causticsStrength: 0.9,
-            },
-            {
-                name: 'Pool 2 (Mid-Left Deep)',
-                x: -24,
-                y: 2.0,
-                z: -8,
-                poolWidth: 24,
-                poolHeight: 24,
-                baseColor: '#00a8ff',
-                deepColor: '#001845',
-                waveAmplitude: 0.025,
-                roughness: 0.04,
-                opacity: 1.0,
-                refractionStrength: 0.7,
-                causticsStrength: 0.6,
-            },
-            {
-                name: 'Pool 3 (Mid-Right Lagoon)',
-                x: 24,
-                y: 2.0,
-                z: -8,
-                poolWidth: 24,
-                poolHeight: 24,
-                baseColor: '#48dbfb',
-                deepColor: '#0abde3',
-                waveAmplitude: 0.015,
-                roughness: 0.08,
-                opacity: 0.88,
-                refractionStrength: 1.0,
-                causticsStrength: 1.2,
-            },
-            {
-                name: 'Pool 4 (Lower-Center Golden)',
-                x: 0,
-                y: 0.0,
-                z: 16,
-                poolWidth: 38,
-                poolHeight: 28,
-                baseColor: '#ff9f43',
-                deepColor: '#ee5253',
-                waveAmplitude: 0.022,
-                roughness: 0.05,
-                opacity: 0.96,
-                refractionStrength: 0.9,
-                causticsStrength: 0.8,
-            },
-            {
-                name: 'Pool 5 (Bottom-Left Mystic)',
-                x: -22,
-                y: -2.0,
-                z: 38,
-                poolWidth: 22,
-                poolHeight: 22,
-                baseColor: '#9b59b6',
-                deepColor: '#2c003e',
-                waveAmplitude: 0.018,
-                roughness: 0.03,
-                opacity: 1.0,
-                refractionStrength: 1.0,
-                causticsStrength: 0.7,
-            },
+            {x: 0, y: 4.0, z: -32, poolWidth: 32, poolHeight: 32, baseColor: '#18d8b6', deepColor: '#065279'},
+            {x: -24, y: 2.0, z: -8, poolWidth: 24, poolHeight: 24, baseColor: '#00a8ff', deepColor: '#001845'},
+            {x: 24, y: 2.0, z: -8, poolWidth: 24, poolHeight: 24, baseColor: '#48dbfb', deepColor: '#0abde3'},
+            {x: 0, y: 0.0, z: 16, poolWidth: 38, poolHeight: 28, baseColor: '#ff9f43', deepColor: '#ee5253'},
+            {x: -22, y: -2.0, z: 38, poolWidth: 22, poolHeight: 22, baseColor: '#9b59b6', deepColor: '#2c003e'},
         ];
 
-        const lakes = [];
         for (let i = 0; i < poolConfigs.length; i++) {
             const cfg = poolConfigs[i];
-            const lake = new RedGPU.Water.Lake(
-                redGPUContext,
-                cfg.poolWidth,
-                cfg.poolHeight,
-                64,
-                64
-            );
+            const lake = new RedGPU.Water.Lake(redGPUContext, cfg.poolWidth, cfg.poolHeight);
             lake.x = cfg.x;
             lake.waterLevel = cfg.y;
             lake.z = cfg.z;
-            lake.waveAmplitude = cfg.waveAmplitude;
 
-            const mat = lake.waterMaterial;
+            const mat = lake.material;
             mat.normalTexture = sharedNormalTexture;
             mat.normalDetailTexture = sharedNormalDetailTexture;
             mat.baseColor.setColorByHEX(cfg.baseColor);
             mat.deepColor.setColorByHEX(cfg.deepColor);
-            mat.roughness = cfg.roughness;
-            mat.opacity = cfg.opacity;
-            mat.refractionStrength = cfg.refractionStrength;
-            mat.causticsStrength = cfg.causticsStrength;
 
             scene.addWater(lake);
-            lakes.push(lake);
         }
 
         const animatedObjects = createPrecisePoolEnvironment(redGPUContext, scene, poolConfigs);

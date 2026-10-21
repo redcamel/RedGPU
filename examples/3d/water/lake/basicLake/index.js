@@ -19,7 +19,6 @@ RedGPU.init(
         controller.distance = 18;
         controller.tilt = -12;
         controller.pan = 8;
-        controller.speedDistance = 0.3;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -35,7 +34,6 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 28;
         directionalLight.azimuth = 145;
-        directionalLight.color.setColorByHEX('#fffbf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // [KO] 수위(waterLevel) 비교용 바닥 및 기본 프리미티브 배치
@@ -44,8 +42,8 @@ RedGPU.init(
 
         // [KO] 기본 호수(Lake) 수체 생성 및 선형('rgba8unorm') 노멀 텍스처 바인딩
         // [EN] Create basic Lake water body and bind linear ('rgba8unorm') normal textures
-        const lake = new RedGPU.Water.Lake(redGPUContext, 60, 60);
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+        const lake = new RedGPU.Water.Lake(redGPUContext);
+        lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
             true,
@@ -53,7 +51,7 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal_detail.png',
             true,
@@ -81,11 +79,10 @@ const createEnvironment = (redGPUContext, scene) => {
     const groundMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
     groundMaterial.baseColorFactor = [0.32, 0.28, 0.24, 1.0];
     groundMaterial.roughnessFactor = 0.9;
-    groundMaterial.metallicFactor = 0.0;
 
     const groundMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 80, 80, 16, 16),
+        new RedGPU.Primitive.Ground(redGPUContext, 100, 100),
         groundMaterial
     );
     groundMesh.y = -2.5;
@@ -141,7 +138,7 @@ const createEnvironment = (redGPUContext, scene) => {
 };
 
 const renderTestPane = (redGPUContext, lake) => {
-    const mat = lake.waterMaterial;
+    const mat = lake.material;
     const colors = {
         baseColor: mat.baseColor.hex,
         deepColor: mat.deepColor.hex

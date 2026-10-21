@@ -19,9 +19,6 @@ RedGPU.init(
         controller.distance = 17;
         controller.tilt = -22;
         controller.pan = 15;
-        controller.minDistance = 4;
-        controller.maxDistance = 60;
-        controller.speedDistance = 0.2;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -32,13 +29,11 @@ RedGPU.init(
             '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 38;
         directionalLight.azimuth = 135;
-        directionalLight.lux = 75000;
-        directionalLight.color.setColorByHEX('#fffcf0');
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // [KO] 물결 굴절 관찰용 수중 바둑판 타일 플라자 및 SSR 반사용 8각 열주 아레나 생성
@@ -47,8 +42,8 @@ RedGPU.init(
 
         // [KO] Lake 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
-        const lake = new RedGPU.Water.Lake(redGPUContext, 80, 80, 80, 80);
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+        const lake = new RedGPU.Water.Lake(redGPUContext);
+        lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
             true,
@@ -56,7 +51,7 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal_detail.png',
             true,
@@ -122,7 +117,7 @@ const createUnderwaterEnvironment = (redGPUContext, scene) => {
 
     const groundMesh = new RedGPU.Display.Mesh(
         redGPUContext,
-        new RedGPU.Primitive.Ground(redGPUContext, 80, 80, 32, 32),
+        new RedGPU.Primitive.Ground(redGPUContext, 100, 100),
         groundMaterial
     );
     groundMesh.y = floorY;

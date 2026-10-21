@@ -31,7 +31,6 @@ RedGPU.init(
         controller.distance = 8.2;
         controller.tilt = -11;
         controller.pan = 180;
-        controller.speedDistance = 0.25;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -39,21 +38,15 @@ RedGPU.init(
 
         const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
-            20000
+            '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
         view.ibl = ibl;
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // [KO] 해안가 및 수중 바닥에 드리워지는 긴 그림자를 위한 직사광 설정
-        // [EN] Directional sunlight casting long shadows across the open shoreline and seabed
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.lux = 90000;
         directionalLight.elevation = 25;
         directionalLight.azimuth = 135;
-        directionalLight.color.setColorByHEX('#ffe8c8');
         scene.lightManager.addDirectionalLight(directionalLight);
-
 
         // [KO] 탁 트인 완만 경사 해변 지형과 여유 있게 배치된 외곽 해안 바위·석주 생성
         // [EN] Create open sloped beach terrain with widely spaced coastal rocks and pillars
@@ -61,14 +54,9 @@ RedGPU.init(
 
         // [KO] 호수(Lake) 수체 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body and bind linear ('rgba8unorm') dual normal textures
-        const lake = new RedGPU.Water.Lake(redGPUContext, 240, 240, 120, 120);
+        const lake = new RedGPU.Water.Lake(redGPUContext, 240, 240);
         lake.waterLevel = 0.5;
-        lake.waterMaterial.baseColor.setColorByHEX('#16c8b8');
-        lake.waterMaterial.deepColor.setColorByHEX('#042842');
-        lake.waterMaterial.causticsStrength = 1.25;
-        lake.waterMaterial.refractionStrength = 0.9;
-        lake.waterMaterial.roughness = 0.05;
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
             true,
@@ -76,7 +64,7 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal_detail.png',
             true,

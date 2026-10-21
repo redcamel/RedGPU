@@ -14,7 +14,6 @@ import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-
 import DirectTexture from "../../resources/texture/DirectTexture";
 
 interface LakeMaterial {
@@ -34,8 +33,8 @@ interface LakeMaterial {
      */
     normalTexture: BitmapTexture;
     /**
-     * [KO] 노멀 텍스처 샘플러입니다. (기본값: `LINEAR` 필터, `REPEAT` 주소 모드)
-     * [EN] Sampler for normal textures. (Default: `LINEAR` filter, `REPEAT` address mode)
+     * [KO] 노멀 텍스처 샘플러입니다.
+     * [EN] Sampler for normal textures.
      */
     normalTextureSampler: Sampler;
     /**
@@ -59,13 +58,13 @@ interface LakeMaterial {
      */
     normalDetailScale: number;
     /**
-     * [KO] 기본 지오메트리 크기(월드 `100m`) 기준 기본 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `20.0`, 타일당 `5.0m`)
-     * [EN] Tiling repeat count of the primary normal texture per `100m` reference world scale. (Default: `20.0`, `5.0m` per tile)
+     * [KO] 월드 `100m` 기준 기본 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `20.0`)
+     * [EN] Tiling repeat count of the primary normal texture per `100m` world scale. (Default: `20.0`)
      */
     normalTiling: number;
     /**
-     * [KO] 기본 지오메트리 크기(월드 `100m`) 기준 디테일 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `40.0`, 타일당 `2.5m`)
-     * [EN] Tiling repeat count of the detail normal texture per `100m` reference world scale. (Default: `40.0`, `2.5m` per tile)
+     * [KO] 월드 `100m` 기준 디테일 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `40.0`)
+     * [EN] Tiling repeat count of the detail normal texture per `100m` world scale. (Default: `40.0`)
      */
     normalDetailTiling: number;
     /**
@@ -104,8 +103,8 @@ interface LakeMaterial {
      */
     specularFactor: number;
     /**
-     * [KO] 디버그 시각화 모드입니다. (`0`: 일반 렌더링, 기본값: `0`)
-     * [EN] Debug visualization mode. (`0`: normal rendering, default: `0`)
+     * [KO] 디버그 시각화 모드입니다. (기본값: `0`)
+     * [EN] Debug visualization mode. (Default: `0`)
      */
     debugMode: number;
     /**
@@ -114,13 +113,13 @@ interface LakeMaterial {
      */
     debugMaxDepth: number;
     /**
-     * [KO] 기본 노멀 텍스처의 Y(G) 채널 반전 여부입니다. (기본값: `false`)
-     * [EN] Whether to invert the Y (G) channel of the primary normal texture. (Default: `false`)
+     * [KO] 기본 노멀 텍스처의 Y 채널 반전 여부입니다. (기본값: `false`)
+     * [EN] Whether to invert the Y channel of the primary normal texture. (Default: `false`)
      */
     invertNormalY: boolean;
     /**
-     * [KO] 디테일 노멀 텍스처의 Y(G) 채널 반전 여부입니다. (기본값: `false`)
-     * [EN] Whether to invert the Y (G) channel of the detail normal texture. (Default: `false`)
+     * [KO] 디테일 노멀 텍스처의 Y 채널 반전 여부입니다. (기본값: `false`)
+     * [EN] Whether to invert the Y channel of the detail normal texture. (Default: `false`)
      */
     invertNormalDetailY: boolean;
     /**
@@ -159,18 +158,18 @@ interface LakeMaterial {
      */
     ssrThickness: number;
     /**
-     * [KO] 물의 탁도입니다. 값이 클수록 수중 시야가 흐려집니다. (범위: `0` ~ `1`, 기본값: `0.35`)
-     * [EN] Water turbidity. Higher values reduce underwater visibility. (Range: `0` ~ `1`, default: `0.35`)
+     * [KO] 물의 탁도입니다. (범위: `0` ~ `1`, 기본값: `0.35`)
+     * [EN] Water turbidity. (Range: `0` ~ `1`, default: `0.35`)
      */
     turbidity: number;
     /**
-     * [KO] 상호작용 리플 시뮬레이션 도메인의 월드 XZ 중심 좌표입니다. (기본값: `[0.0, 0.0]`)
-     * [EN] World XZ center coordinates of the interaction ripple simulation domain. (Default: `[0.0, 0.0]`)
+     * [KO] 상호작용 리플 도메인의 월드 XZ 중심 좌표입니다. (기본값: `[0.0, 0.0]`)
+     * [EN] World XZ center coordinates of the interaction ripple domain. (Default: `[0.0, 0.0]`)
      */
     rippleDomainCenter: [number, number];
     /**
-     * [KO] 상호작용 리플 시뮬레이션 도메인의 월드 단위 한 변 크기입니다. (최소값: `1.0`, 기본값: `20.0`)
-     * [EN] Side length of the interaction ripple simulation domain in world units. (Min: `1.0`, default: `20.0`)
+     * [KO] 상호작용 리플 도메인의 월드 단위 한 변 크기입니다. (최소값: `1.0`, 기본값: `20.0`)
+     * [EN] Side length of the interaction ripple domain in world units. (Min: `1.0`, default: `20.0`)
      */
     rippleDomainSize: number;
     /**
@@ -181,11 +180,11 @@ interface LakeMaterial {
 }
 
 /**
- * [KO] 굴절, 수심 기반 색상 감쇠, 수중 커스틱, 스크린 스페이스 반사(SSR)를 지원하는 호수 수면 재질 클래스입니다.
- * [EN] Lake water surface material class supporting refraction, depth-based color extinction, underwater caustics, and screen-space reflection (SSR).
+ * [KO] 호수 수면의 굴절, 수심 감쇠, 수중 커스틱 및 스크린 스페이스 반사(SSR)를 표현하는 재질 클래스입니다.
+ * [EN] Material class representing lake water refraction, depth extinction, underwater caustics, and screen-space reflection (SSR).
  *
- * [KO] `Lake` 인스턴스 생성 시 내부적으로 자동 생성되며, 2패스 렌더링(`use2PathRender`)을 통해 불투명 씬 렌더링 이후 수면 굴절 및 반사를 합성합니다.
- * [EN] Automatically created internally when a `Lake` instance is constructed, and uses 2-pass rendering (`use2PathRender`) to composite water refraction and reflection after the opaque scene is rendered.
+ * [KO] `Lake` 인스턴스 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Automatically created internally when a `Lake` instance is constructed.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -196,9 +195,8 @@ interface LakeMaterial {
  * ```typescript
  * // [KO] 올바른 접근 방법
  * // [EN] Correct access method
- * const lake = new RedGPU.Water.Lake(redGPUContext, 200, 200);
- * const material = lake.waterMaterial;
- * material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'waterNormal.jpg');
+ * const lake = new RedGPU.Water.Lake(redGPUContext);
+ * const material = lake.material;
  * ```
  *
  * <iframe src="/RedGPU/examples/3d/water/lake/lakeMaterial/" style="width:100%; height:500px;"></iframe>
@@ -210,7 +208,7 @@ interface LakeMaterial {
 class LakeMaterial extends ABitmapBaseMaterial {
     /**
      * [KO] `LakeMaterial` 인스턴스를 생성합니다.
-     * [EN] Creates an instance of `LakeMaterial`.
+     * [EN] Creates a `LakeMaterial` instance.
      *
      * @param redGPUContext -
      * [KO] `RedGPUContext` 인스턴스

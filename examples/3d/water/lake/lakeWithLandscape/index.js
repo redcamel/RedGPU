@@ -19,22 +19,18 @@ RedGPU.init(
         controller.distance = 8.5;
         controller.tilt = -10;
         controller.pan = 180;
-        controller.speedDistance = 0.2;
-        controller.minDistance = 3;
-        controller.maxDistance = 25;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const currentIbl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/field.hdr', 35000);
+        const currentIbl = new RedGPU.Resource.IBL(redGPUContext, '../../../../assets/hdr/field.hdr');
         view.ibl = currentIbl;
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, 35000);
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 61.6;
         directionalLight.azimuth = 98.0;
-        directionalLight.lux = 105000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
@@ -44,9 +40,7 @@ RedGPU.init(
         // [EN] Configure Landscape terrain (400x400, height 10m) and 4-channel splat layers
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [400, 400];
-        landscape.componentCount = [16, 16];
         landscape.heightScale = 10.0;
-        landscape.lodMaxLevel = 4;
         landscape.tileLoadingRadius = 300;
         landscape.globalHeightmapUrl = '../../../../assets/terrain/terrainTest_001/global_heightmap_1024.png';
 
@@ -125,17 +119,9 @@ RedGPU.init(
 
         // [KO] 산악 분지와 맞닿는 호수 수체(Lake) 생성 및 선형('rgba8unorm') 듀얼 노멀 텍스처 바인딩
         // [EN] Create Lake water body matching the mountain basin and bind linear ('rgba8unorm') dual normal textures
-        const lake = new RedGPU.Water.Lake(redGPUContext, 300, 300, 96, 96);
-        lake.y = 6.5;
-        lake.waveAmplitude = 0.045;
-
-        lake.waterMaterial.baseColor.setColorByHEX('#179fa0');
-        lake.waterMaterial.deepColor.setColorByHEX('#042436');
-        lake.waterMaterial.refractionStrength = 0.85;
-        lake.waterMaterial.causticsStrength = 1.2;
-        lake.waterMaterial.depthFadeDistance = 1.0;
-        lake.waterMaterial.roughness = 0.04;
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+        const lake = new RedGPU.Water.Lake(redGPUContext, 300, 300);
+        lake.waterLevel = 6.5;
+        lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal.png',
             true,
@@ -143,7 +129,7 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../../assets/water/lake_normal_detail.png',
             true,
@@ -368,14 +354,14 @@ const renderTestPane = (redGPUContext, lake, landscape, directionalLight, charac
             folderLake.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
 
             const folderMat = pane.addFolder({title: 'LakeMaterial', expanded: false});
-            folderMat.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
-            folderMat.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
-            folderMat.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.02});
-            folderMat.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
-            folderMat.addBinding(lake.waterMaterial, 'causticsScale', {min: 0.2, max: 3.0, step: 0.1});
-            folderMat.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.1, max: 3.0, step: 0.1});
-            folderMat.addBinding(lake.waterMaterial, 'normalTiling', {min: 2.0, max: 60.0, step: 1.0});
-            folderMat.addBinding(lake.waterMaterial, 'normalDetailTiling', {min: 5.0, max: 100.0, step: 1.0});
+            folderMat.addBinding(lake.material, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+            folderMat.addBinding(lake.material, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
+            folderMat.addBinding(lake.material, 'refractionStrength', {min: 0.0, max: 1.0, step: 0.02});
+            folderMat.addBinding(lake.material, 'causticsStrength', {min: 0.0, max: 2.0, step: 0.05});
+            folderMat.addBinding(lake.material, 'causticsScale', {min: 0.2, max: 3.0, step: 0.1});
+            folderMat.addBinding(lake.material, 'depthFadeDistance', {min: 0.1, max: 3.0, step: 0.1});
+            folderMat.addBinding(lake.material, 'normalTiling', {min: 2.0, max: 60.0, step: 1.0});
+            folderMat.addBinding(lake.material, 'normalDetailTiling', {min: 5.0, max: 100.0, step: 1.0});
 
             const folderLandscape = pane.addFolder({title: 'Landscape', expanded: false});
             folderLandscape.addBinding(landscape, 'heightScale', {min: 1.0, max: 30.0, step: 0.5});

@@ -126,7 +126,7 @@ RedGPU.init(
         lake.y = 301.2; // 캐릭터 발목(수심 약 40cm)이 찰랑거리는 완만한 수변 수위
 
 
-        lake.waterMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/lake_normal.png',
             true,
@@ -134,7 +134,7 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        lake.waterMaterial.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+        lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/water/lake_normal_detail.png',
             true,
@@ -290,12 +290,12 @@ function renderTestPane({
             waterFolder.addBinding(lake, 'y', {min: 295.0, max: 310.0, step: 0.1});
             waterFolder.addBinding(lake, 'waveAmplitude', {min: 0.0, max: 0.5, step: 0.01});
             waterFolder.addBinding(lake, 'rippleNormalStrength', {min: 0.0, max: 3.0, step: 0.1});
-            waterFolder.addBinding(lake.waterMaterial, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
-            waterFolder.addBinding(lake.waterMaterial, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
-            waterFolder.addBinding(lake.waterMaterial, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.1});
-            waterFolder.addBinding(lake.waterMaterial, 'depthFadeDistance', {min: 0.1, max: 10.0, step: 0.1});
-            waterFolder.addBinding(lake.waterMaterial, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
-            waterFolder.addBinding(lake.waterMaterial, 'normalScale', {min: 0.1, max: 3.0, step: 0.1});
+            waterFolder.addBinding(lake.material, 'flowRateScale', {min: 0.0, max: 0.1, step: 0.002});
+            waterFolder.addBinding(lake.material, 'refractionStrength', {min: 0.0, max: 2.0, step: 0.05});
+            waterFolder.addBinding(lake.material, 'causticsStrength', {min: 0.0, max: 3.0, step: 0.1});
+            waterFolder.addBinding(lake.material, 'depthFadeDistance', {min: 0.1, max: 10.0, step: 0.1});
+            waterFolder.addBinding(lake.material, 'roughness', {min: 0.01, max: 0.5, step: 0.01});
+            waterFolder.addBinding(lake.material, 'normalScale', {min: 0.1, max: 3.0, step: 0.1});
 
             // 3. 지형 설정 폴더
             const terrainFolder = pane.addFolder({title: 'Terrain', expanded: false});

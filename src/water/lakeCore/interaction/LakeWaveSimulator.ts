@@ -3,11 +3,11 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import computeShaderCode from "./shader/lakeWaveSimulation.wgsl";
 
 /**
- * [KO] 2D 유한차분 시간영역(FDTD) 파동 방정식을 컴퓨트 셰이더로 시뮬레이션하고 리플 노멀 텍스처를 생성하는 클래스입니다.
- * [EN] Class that simulates 2D Finite-Difference Time-Domain (FDTD) wave equations via a compute shader and generates a ripple normal texture.
+ * [KO] 호수 수면의 파동 전파를 시뮬레이션하고 리플 노멀 텍스처를 생성하는 클래스입니다.
+ * [EN] Class that simulates lake surface wave propagation and generates a ripple normal texture.
  *
- * [KO] 핑퐁(Ping-pong) 스토리지 텍스처 버퍼를 사용하여 도메인 이동(Shift) 보정 및 파동 감쇠를 처리하며, `Lake` 인스턴스 내부에서 자동으로 생성됩니다.
- * [EN] Uses ping-pong storage texture buffers to handle domain shift compensation and wave damping, and is automatically created inside a `Lake` instance.
+ * [KO] `Lake` 인스턴스 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Automatically created internally when a `Lake` instance is constructed.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -24,8 +24,8 @@ class LakeWaveSimulator extends RedGPUObject {
     textureSize: number = 512;
 
     /**
-     * [KO] 시뮬레이션 결과로 계산된 리플 노멀이 저장되는 `rgba16float` 포맷의 `GPUTexture`입니다.
-     * [EN] `GPUTexture` in `rgba16float` format storing the computed ripple normals from the simulation.
+     * [KO] 시뮬레이션 결과 리플 노멀이 저장되는 `GPUTexture`입니다.
+     * [EN] `GPUTexture` storing the simulated ripple normals.
      */
     rippleNormalTexture: GPUTexture;
     /**
@@ -45,8 +45,8 @@ class LakeWaveSimulator extends RedGPUObject {
      */
     damping: number = 0.012;
     /**
-     * [KO] 생성되는 리플 노멀의 기울기 강도입니다. (기본값: `1.0`)
-     * [EN] Gradient strength of the generated ripple normal. (Default: `1.0`)
+     * [KO] 생성되는 리플 노멀의 강도입니다. (기본값: `1.0`)
+     * [EN] Strength of the generated ripple normal. (Default: `1.0`)
      */
     normalStrength: number = 1.0;
 
@@ -68,7 +68,7 @@ class LakeWaveSimulator extends RedGPUObject {
 
     /**
      * [KO] `LakeWaveSimulator` 인스턴스를 생성합니다.
-     * [EN] Creates an instance of `LakeWaveSimulator`.
+     * [EN] Creates a `LakeWaveSimulator` instance.
      *
      * @param redGPUContext -
      * [KO] `RedGPUContext` 인스턴스
@@ -87,8 +87,8 @@ class LakeWaveSimulator extends RedGPUObject {
     }
 
     /**
-     * [KO] `LakeCapturePass`에서 생성된 침투 깊이 텍스처 뷰를 컴퓨트 바인드 그룹에 연결합니다.
-     * [EN] Binds the penetration depth texture view from `LakeCapturePass` to the compute bind groups.
+     * [KO] 캡처 패스의 침투 깊이 텍스처 뷰를 바인드 그룹에 연결합니다.
+     * [EN] Binds the penetration depth texture view from the capture pass to the bind groups.
      *
      * @param captureTextureView -
      * [KO] 캡처 패스의 `GPUTextureView`
@@ -124,18 +124,18 @@ class LakeWaveSimulator extends RedGPUObject {
     }
 
     /**
-     * [KO] 1스텝의 파동 방정식 컴퓨트 패스를 디스패치하고 핑퐁 버퍼를 교체합니다.
-     * [EN] Dispatches one step of the wave equation compute pass and swaps the ping-pong buffers.
+     * [KO] 파동 시뮬레이션 컴퓨트 패스를 실행합니다.
+     * [EN] Executes the wave simulation compute pass.
      *
      * @param commandEncoder -
      * [KO] 컴퓨트 패스를 기록할 `GPUCommandEncoder`
      * [EN] `GPUCommandEncoder` to record the compute pass
      * @param shiftX -
-     * [KO] 도메인 스냅 이동에 따른 X축 텍셀 오프셋 (기본값: `0`)
-     * [EN] X-axis texel offset from domain snap movement (default: `0`)
+     * [KO] 도메인 이동에 따른 X축 텍셀 오프셋 (기본값: `0`)
+     * [EN] X-axis texel offset from domain movement (default: `0`)
      * @param shiftZ -
-     * [KO] 도메인 스냅 이동에 따른 Z축 텍셀 오프셋 (기본값: `0`)
-     * [EN] Z-axis texel offset from domain snap movement (default: `0`)
+     * [KO] 도메인 이동에 따른 Z축 텍셀 오프셋 (기본값: `0`)
+     * [EN] Z-axis texel offset from domain movement (default: `0`)
      */
     simulate(commandEncoder: GPUCommandEncoder, shiftX: number = 0, shiftZ: number = 0): void {
         if (!this.#bindGroupA || !this.#bindGroupB) return;
@@ -165,12 +165,12 @@ class LakeWaveSimulator extends RedGPUObject {
     }
 
     /**
-     * [KO] 파동 핑퐁 버퍼(`#waveBufferA`, `#waveBufferB`)와 리플 노멀 텍스처(`rippleNormalTexture`)를 0으로 초기화합니다.
-     * [EN] Clears the ping-pong wave buffers (`#waveBufferA`, `#waveBufferB`) and the ripple normal texture (`rippleNormalTexture`) to zero.
+     * [KO] 파동 버퍼와 리플 노멀 텍스처를 0으로 초기화합니다.
+     * [EN] Clears the wave buffers and ripple normal texture to zero.
      *
      * @param commandEncoder -
-     * [KO] 클리어 렌더 패스를 기록할 `GPUCommandEncoder`
-     * [EN] `GPUCommandEncoder` to record the clear render pass
+     * [KO] 클리어 패스를 기록할 `GPUCommandEncoder`
+     * [EN] `GPUCommandEncoder` to record the clear pass
      */
     clear(commandEncoder: GPUCommandEncoder): void {
         if (!this.#clearPassDescriptor) return;
@@ -179,8 +179,8 @@ class LakeWaveSimulator extends RedGPUObject {
     }
 
     /**
-     * [KO] 핑퐁 파동 버퍼, 리플 노멀 텍스처 및 유니폼 버퍼 GPU 리소스를 해제합니다.
-     * [EN] Releases the ping-pong wave buffers, ripple normal texture, and uniform buffer GPU resources.
+     * [KO] 할당된 GPU 리소스를 모두 해제합니다.
+     * [EN] Releases all allocated GPU resources.
      */
     destroy(): void {
         if (this.#waveBufferA) this.#waveBufferA.destroy();
