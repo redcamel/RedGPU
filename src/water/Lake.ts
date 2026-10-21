@@ -59,6 +59,7 @@ class Lake extends Mesh {
     #prevSnapZ: number = 0;
     #isFirstSnap: boolean = true;
     #decayFramesRemaining: number = 0;
+    #needsWaveClear: boolean = false;
 
     #domainCenterBuffer: [number, number] = [0, 0];
     #currentActiveMeshes: LakeActiveMeshEntry[] = [];
@@ -214,6 +215,9 @@ class Lake extends Mesh {
             this.#interactionEnabled = boolVal;
             if (boolVal) {
                 this.#isFirstSnap = true;
+            } else {
+                this.#decayFramesRemaining = 0;
+                this.#needsWaveClear = true;
             }
         }
     }
@@ -395,6 +399,10 @@ class Lake extends Mesh {
         super.destroy();
     }
 
+    #encodeClearPass = (encoder: GPUCommandEncoder): void => {
+        this.#waveSimulator.clear(encoder);
+    };
+
     #encodePass = (encoder: GPUCommandEncoder): void => {
         this.#capturePass.render(
             encoder,
@@ -409,14 +417,22 @@ class Lake extends Mesh {
     };
 
     #updateInteraction(renderViewStateData?: RenderViewStateData): void {
-        if (!this.#interactionEnabled || !this.passFrustumCulling) return;
+        if (!this.passFrustumCulling) return;
 
-        const hasMeshes = LakeInteractionRegistry.meshes.size > 0;
-        if (hasMeshes) {
-            this.#decayFramesRemaining = 90;
-        } else if (this.#decayFramesRemaining > 0) {
-            this.#decayFramesRemaining--;
-        } else {
+        if (!this.#interactionEnabled) {
+            if (this.#needsWaveClear) {
+                this.#needsWaveClear = false;
+                this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodeClearPass);
+            }
+            return;
+        }
+
+        const hasRegisteredMeshes = LakeInteractionRegistry.meshes.size > 0;
+        if (!hasRegisteredMeshes && this.#decayFramesRemaining <= 0) {
+            if (this.#needsWaveClear) {
+                this.#needsWaveClear = false;
+                this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodeClearPass);
+            }
             return;
         }
 
@@ -472,6 +488,26 @@ class Lake extends Mesh {
             this.waterLevel,
             6.0
         );
+
+        const requiredDecayFrames = Math.ceil(16.0 / Math.max(0.001, this.rippleDamping));
+        if (activeMeshes.length > 0) {
+            this.#decayFramesRemaining = requiredDecayFrames;
+            this.#needsWaveClear = false;
+        } else if (this.#decayFramesRemaining > 0) {
+            if (this.#decayFramesRemaining > requiredDecayFrames) {
+                this.#decayFramesRemaining = requiredDecayFrames;
+            }
+            this.#decayFramesRemaining--;
+            if (this.#decayFramesRemaining === 0) {
+                this.#needsWaveClear = true;
+            }
+        } else {
+            if (this.#needsWaveClear) {
+                this.#needsWaveClear = false;
+                this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodeClearPass);
+            }
+            return;
+        }
 
         this.#currentActiveMeshes = activeMeshes;
         this.#currentSnapX = snapX;

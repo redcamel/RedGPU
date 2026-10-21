@@ -63,6 +63,7 @@ class LakeWaveSimulator extends RedGPUObject {
     #computePassDescriptor: GPUComputePassDescriptor = {
         label: 'LakeWave_ComputePass'
     };
+    #clearPassDescriptor: GPURenderPassDescriptor;
     #workgroups: number;
 
     /**
@@ -164,6 +165,20 @@ class LakeWaveSimulator extends RedGPUObject {
     }
 
     /**
+     * [KO] 파동 핑퐁 버퍼(`#waveBufferA`, `#waveBufferB`)와 리플 노멀 텍스처(`rippleNormalTexture`)를 0으로 초기화합니다.
+     * [EN] Clears the ping-pong wave buffers (`#waveBufferA`, `#waveBufferB`) and the ripple normal texture (`rippleNormalTexture`) to zero.
+     *
+     * @param commandEncoder -
+     * [KO] 클리어 렌더 패스를 기록할 `GPUCommandEncoder`
+     * [EN] `GPUCommandEncoder` to record the clear render pass
+     */
+    clear(commandEncoder: GPUCommandEncoder): void {
+        if (!this.#clearPassDescriptor) return;
+        const passEncoder = commandEncoder.beginRenderPass(this.#clearPassDescriptor);
+        passEncoder.end();
+    }
+
+    /**
      * [KO] 핑퐁 파동 버퍼, 리플 노멀 텍스처 및 유니폼 버퍼 GPU 리소스를 해제합니다.
      * [EN] Releases the ping-pong wave buffers, ripple normal texture, and uniform buffer GPU resources.
      */
@@ -181,7 +196,7 @@ class LakeWaveSimulator extends RedGPUObject {
             return gpuDevice.createTexture({
                 size: [this.textureSize, this.textureSize, 1],
                 format: 'rgba16float',
-                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
+                usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT,
                 label
             });
         };
@@ -194,6 +209,30 @@ class LakeWaveSimulator extends RedGPUObject {
 
         this.rippleNormalTexture = createStorageTexture('LakeWave_RippleNormalTexture');
         this.rippleNormalTextureView = this.rippleNormalTexture.createView();
+
+        this.#clearPassDescriptor = {
+            colorAttachments: [
+                {
+                    view: this.#waveBufferAView,
+                    clearValue: {r: 0, g: 0, b: 0, a: 0},
+                    loadOp: 'clear',
+                    storeOp: 'store'
+                },
+                {
+                    view: this.#waveBufferBView,
+                    clearValue: {r: 0, g: 0, b: 0, a: 0},
+                    loadOp: 'clear',
+                    storeOp: 'store'
+                },
+                {
+                    view: this.rippleNormalTextureView,
+                    clearValue: {r: 0, g: 0, b: 0, a: 0},
+                    loadOp: 'clear',
+                    storeOp: 'store'
+                }
+            ],
+            label: 'LakeWave_ClearPass'
+        };
     }
 
     #createPipeline(): void {
@@ -265,4 +304,3 @@ class LakeWaveSimulator extends RedGPUObject {
 
 Object.freeze(LakeWaveSimulator);
 export default LakeWaveSimulator;
-
