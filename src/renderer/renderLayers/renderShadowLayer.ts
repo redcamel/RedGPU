@@ -19,7 +19,7 @@ const renderShadowLayer = (view: View3D, viewShadowRenderPassEncoder: GPURenderP
     const {renderViewStateData, scene} = view;
     renderViewStateData.currentRenderPassEncoder = viewShadowRenderPassEncoder;
     const {directionalShadowManager} = scene.shadowManager;
-    const {castingList, cascadeBoundingSpheres} = directionalShadowManager;
+    const {castingList, cascadeBoundingSpheres, cascadeLightDistances} = directionalShadowManager;
 
     const len = castingList.length;
     if (!len) return;
@@ -33,6 +33,22 @@ const renderShadowLayer = (view: View3D, viewShadowRenderPassEncoder: GPURenderP
     const cy = cascadeBoundingSpheres[sphereIdx + 1];
     const cz = cascadeBoundingSpheres[sphereIdx + 2];
     const cr = cascadeBoundingSpheres[sphereIdx + 3];
+    const lightDistance = cascadeLightDistances[cascadeIndex];
+
+    const directionalLight = scene.lightManager?.directionalLights?.[0];
+    let lx = 0;
+    let ly = -1;
+    let lz = 0;
+    if (directionalLight) {
+        const dir = directionalLight.direction;
+        const d0 = dir[0];
+        const d1 = dir[1];
+        const d2 = dir[2];
+        const invLen = 1.0 / (Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2) || 1.0);
+        lx = d0 * invLen;
+        ly = d1 * invLen;
+        lz = d2 * invLen;
+    }
 
     for (let i = 0; i < len; i++) {
         const target = castingList[i];
@@ -54,7 +70,13 @@ const renderShadowLayer = (view: View3D, viewShadowRenderPassEncoder: GPURenderP
             const dz = mz - cz;
             const maxDist = cr + mr;
 
-            if ((dx * dx + dy * dy + dz * dz) > (maxDist * maxDist)) {
+            const alongLight = dx * lx + dy * ly + dz * lz;
+            if (alongLight > maxDist || alongLight < -(lightDistance + mr)) {
+                continue;
+            }
+
+            const perpDistSq = (dx * dx + dy * dy + dz * dz) - (alongLight * alongLight);
+            if (perpDistSq > (maxDist * maxDist)) {
                 continue;
             }
         }

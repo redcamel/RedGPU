@@ -64,8 +64,11 @@ class DirectionalShadowManager {
 
     #cascadeSplitDepths: Float32Array = new Float32Array(4);
     #cascadeBoundingSpheres: Float32Array = new Float32Array(16);
+    #cascadeLightDistances: Float32Array = new Float32Array(4);
     #cascadeProjectionViewMatrices: mat4[] = [mat4.create(), mat4.create(), mat4.create(), mat4.create()];
 
+    #casterAabbCenter: Float32Array = new Float32Array(3);
+    #casterAabbRadius: number = -1;
     #casterBoundingCenter: Float32Array = new Float32Array(3);
     #casterBoundingRadiusSq: number = -1;
     #hasCastingListCycleStarted: boolean = false;
@@ -76,6 +79,14 @@ class DirectionalShadowManager {
      */
     get cascadeBoundingSpheres(): Float32Array {
         return this.#cascadeBoundingSpheres;
+    }
+
+    /**
+     * [KO] 각 캐스케이드 중심으로부터 광원 역방향(-lightDir)으로 설정된 실제 직교 광원 거리 배열(길이 4 Float32Array)을 반환합니다.
+     * [EN] Returns the array of orthographic light distances (length 4 Float32Array) along the inverse light direction (-lightDir) from each cascade center.
+     */
+    get cascadeLightDistances(): Float32Array {
+        return this.#cascadeLightDistances;
     }
 
     /**
@@ -466,7 +477,17 @@ class DirectionalShadowManager {
             g_p[1] = Math.floor(g_p[1] / worldUnitsPerTexel) * worldUnitsPerTexel;
             vec3.transformMat4(g_snappedCenter, g_p, g_invLightRotMat);
 
-            const lightDistance = Math.max(sphereRadius * 2.0 + 50.0, 100.0);
+            let lightDistance: number;
+            if (this.#casterAabbRadius > 0) {
+                const cdx = this.#casterAabbCenter[0] - g_snappedCenter[0];
+                const cdy = this.#casterAabbCenter[1] - g_snappedCenter[1];
+                const cdz = this.#casterAabbCenter[2] - g_snappedCenter[2];
+                const upstreamCasterDist = -(cdx * g_lightDir[0] + cdy * g_lightDir[1] + cdz * g_lightDir[2]) + this.#casterAabbRadius;
+                lightDistance = Math.max(sphereRadius, upstreamCasterDist);
+            } else {
+                lightDistance = Math.max(sphereRadius, shadowFar);
+            }
+            this.#cascadeLightDistances[c] = lightDistance;
             vec3.scaleAndAdd(g_lightPos, g_snappedCenter, g_lightDir, -lightDistance);
 
             mat4.lookAt(g_tempLightV, g_lightPos, g_snappedCenter, g_up);
@@ -491,6 +512,7 @@ class DirectionalShadowManager {
 
         for (let c = cascadeCount; c < 4; c++) {
             mat4.copy(cascadePV[c], cascadePV[cascadeCount - 1]);
+            this.#cascadeLightDistances[c] = this.#cascadeLightDistances[cascadeCount - 1];
             const srcIdx = (cascadeCount - 1) * 4;
             const dstIdx = c * 4;
             this.#cascadeBoundingSpheres[dstIdx] = this.#cascadeBoundingSpheres[srcIdx];
@@ -543,6 +565,7 @@ class DirectionalShadowManager {
                 const len = types.length;
                 for (let i = 0; i < len; i++) {
                     if (types[i].castShadow) {
+                        this.#casterAabbRadius = -1.0;
                         this.#casterBoundingRadiusSq = -1.0;
                         return;
                     }
@@ -554,6 +577,7 @@ class DirectionalShadowManager {
                 const len = types.length;
                 for (let i = 0; i < len; i++) {
                     if (types[i].castShadow) {
+                        this.#casterAabbRadius = -1.0;
                         this.#casterBoundingRadiusSq = -1.0;
                         return;
                     }
@@ -564,6 +588,7 @@ class DirectionalShadowManager {
         const castingList = this.#castingList;
         const count = castingList.length;
         if (count === 0) {
+            this.#casterAabbRadius = 0.0;
             this.#casterBoundingRadiusSq = this.#hasCastingListCycleStarted ? 0.0 : -1.0;
             return;
         }
@@ -593,6 +618,11 @@ class DirectionalShadowManager {
         const dy = (maxY - minY) * 0.5;
         const dz = (maxZ - minZ) * 0.5;
         const casterRadius = Math.sqrt(dx * dx + dy * dy + dz * dz);
+
+        this.#casterAabbCenter[0] = cx;
+        this.#casterAabbCenter[1] = cy;
+        this.#casterAabbCenter[2] = cz;
+        this.#casterAabbRadius = casterRadius;
 
         const shadowDirX = lightDir[0];
         const shadowDirZ = lightDir[2];
