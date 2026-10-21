@@ -115,10 +115,11 @@ fn calculateWaterSSR(
     var hitWorldPos = currentWorldPos;
     var hitFound = false;
     var hitStep = 0u;
+    var wasInFront = false;
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
         let progress = f32(i) / f32(maxSteps);
-        let stepScale = 0.35 + progress * 1.3;
+        let stepScale = 0.20 + progress * 1.45;
         let actualStep = baseStepSize * stepScale;
         let prevWorldPos = currentWorldPos;
         currentWorldPos = currentWorldPos + R * actualStep;
@@ -138,12 +139,14 @@ fn calculateWaterSSR(
         let rawSceneDepth = textureLoad(renderPath1DepthTexture, coord, 0);
 
         if (rawSceneDepth >= 0.9999) {
+            wasInFront = true;
             continue;
         }
 
         let sampledWorldPos = getWorldPositionFromDepth(currentScreenUV, rawSceneDepth, systemUniforms.projection.inverseProjectionViewMatrix);
 
         if (sampledWorldPos.y < startWorldPos.y) {
+            wasInFront = false;
             continue;
         }
 
@@ -152,10 +155,16 @@ fn calculateWaterSSR(
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        let effectiveThickness = thickness + actualStep * 0.8;
-        let crossedFromFront = prevRayDist <= surfaceDistanceFromCamera;
+        if (distanceDiff <= 0.0) {
+            wasInFront = true;
+            continue;
+        }
 
-        if (crossedFromFront && distanceDiff > 0.0 && distanceDiff < effectiveThickness) {
+        let effectiveThickness = thickness + actualStep * 0.8;
+        let crossedFromFront = wasInFront || (prevRayDist <= surfaceDistanceFromCamera);
+        wasInFront = false;
+
+        if (crossedFromFront && distanceDiff < effectiveThickness) {
             var minPos = prevWorldPos;
             var maxPos = currentWorldPos;
             var bestUV = currentScreenUV;
@@ -191,6 +200,10 @@ fn calculateWaterSSR(
                     bestPos = midPos;
                 } else {
                     minPos = midPos;
+                    if (midDiff <= 0.0 && midDiff > -actualStep) {
+                        bestUV = midUV;
+                        bestPos = midPos;
+                    }
                 }
             }
 
