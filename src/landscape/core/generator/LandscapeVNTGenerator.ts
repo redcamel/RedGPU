@@ -64,6 +64,9 @@ class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
      * @param componentCountX -
      * [KO] X축 방향 타일(컴포넌트) 개수
      * [EN] Number of tiles (components) along the X-axis
+     * @param sampleStep -
+     * [KO] 법선 기울기 샘플링 아틀라스 텍셀 간격 (기본값: `1`)
+     * [EN] Atlas texel stride for normal gradient sampling (default: `1`)
      */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
@@ -74,7 +77,8 @@ class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         pixelH: number,
         heightScale: number,
         worldSizeX: number,
-        componentCountX: number
+        componentCountX: number,
+        sampleStep: number = 1
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
         if (!vhtAtlas?.gpuTexture || !vntAtlas?.gpuTexture) return;
@@ -101,6 +105,7 @@ class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         arr[5] = height;
         arr[6] = heightScale;
         arr[7] = texelWorldSize;
+        arr[8] = sampleStep;
 
         const uniformBuffer = this.acquireUniformBuffer(this.#uniformByteLength);
         gpuDevice.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);

@@ -547,6 +547,7 @@ class LandscapeTileStreamer extends RedGPUObject {
             countZ
         );
 
+        const globalSampleStep = Math.max(1, Math.round(atlasW / Math.max(1, tex.width)));
         this.#vntGenerator.bakeTileRegion(
             this.#vhtAtlasTexture,
             this.#vntAtlasTexture,
@@ -554,7 +555,8 @@ class LandscapeTileStreamer extends RedGPUObject {
             atlasW, atlasH,
             hScale,
             wsX,
-            countX
+            countX,
+            globalSampleStep
         );
     }
 
@@ -660,18 +662,20 @@ class LandscapeTileStreamer extends RedGPUObject {
         const {worldSizeX, tileCountX, tileCountZ} = this.#spatialGrid;
 
         if (this.#globalHeightTexture) {
+            const atlasW = tileCountX * TILE_PIXEL_SIZE;
+            const globalSampleStep = Math.max(1, Math.round(atlasW / Math.max(1, this.#globalHeightTexture.width)));
             vntGen.bakeTileRegion(
                 vhtAtlas,
                 vntAtlas,
                 0,
                 0,
-                tileCountX * TILE_PIXEL_SIZE,
+                atlasW,
                 tileCountZ * TILE_PIXEL_SIZE,
                 heightScale,
                 worldSizeX,
-                tileCountX
+                tileCountX,
+                globalSampleStep
             );
-            return;
         }
 
         for (const key of this.#cpuHeightMap.keys()) {
@@ -778,24 +782,15 @@ class LandscapeTileStreamer extends RedGPUObject {
         const fx = gx - ix;
         const fz = gz - iz;
 
-        const {worldSizeX, worldSizeZ, tileCountX, tileCountZ} = grid;
+        const {tileCountX, tileCountZ} = grid;
         const texSizeX = tileCountX * 512;
         const texSizeZ = tileCountZ * 512;
+        const texStep = 512 / segments;
 
-        const v00_x = tileMinX + ix * stepX;
-        const v00_z = tileMinZ + iz * stepZ;
-        const v10_x = v00_x + stepX;
-        const v01_z = v00_z + stepZ;
-
-        const gU0 = (v00_x + halfWX) / worldSizeX;
-        const gV0 = (v00_z + halfWZ) / worldSizeZ;
-        const gU1 = (v10_x + halfWX) / worldSizeX;
-        const gV1 = (v01_z + halfWZ) / worldSizeZ;
-
-        const globalTexX0 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU0 * texSizeX)));
-        const globalTexZ0 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV0 * texSizeZ)));
-        const globalTexX1 = Math.min(texSizeX - 1, Math.max(0, Math.floor(gU1 * texSizeX)));
-        const globalTexZ1 = Math.min(texSizeZ - 1, Math.max(0, Math.floor(gV1 * texSizeZ)));
+        const globalTexX0 = Math.min(texSizeX - 1, Math.max(0, Math.round(col * 512 + ix * texStep)));
+        const globalTexZ0 = Math.min(texSizeZ - 1, Math.max(0, Math.round(row * 512 + iz * texStep)));
+        const globalTexX1 = Math.min(texSizeX - 1, Math.max(0, Math.round(col * 512 + (ix + 1) * texStep)));
+        const globalTexZ1 = Math.min(texSizeZ - 1, Math.max(0, Math.round(row * 512 + (iz + 1) * texStep)));
 
         let h00 = 0;
         let h10 = 0;
@@ -808,12 +803,19 @@ class LandscapeTileStreamer extends RedGPUObject {
             const tX1 = Math.min(511, Math.max(0, globalTexX1 - col * 512));
             const tZ1 = Math.min(511, Math.max(0, globalTexZ1 - row * 512));
 
-            const {pixels, width} = tileData;
+            const {pixels, width, height} = tileData;
 
-            h00 = pixels[tZ0 * width + tX0] || 0;
-            h10 = pixels[tZ0 * width + tX1] || 0;
-            h01 = pixels[tZ1 * width + tX0] || 0;
-            h11 = pixels[tZ1 * width + tX1] || 0;
+            if (width === 512 && height === 512) {
+                h00 = pixels[tZ0 * 512 + tX0] || 0;
+                h10 = pixels[tZ0 * 512 + tX1] || 0;
+                h01 = pixels[tZ1 * 512 + tX0] || 0;
+                h11 = pixels[tZ1 * 512 + tX1] || 0;
+            } else {
+                h00 = this.#sampleGlobalLinear(tileData, (tX0 + 0.5) / 512.0, (tZ0 + 0.5) / 512.0);
+                h10 = this.#sampleGlobalLinear(tileData, (tX1 + 0.5) / 512.0, (tZ0 + 0.5) / 512.0);
+                h01 = this.#sampleGlobalLinear(tileData, (tX0 + 0.5) / 512.0, (tZ1 + 0.5) / 512.0);
+                h11 = this.#sampleGlobalLinear(tileData, (tX1 + 0.5) / 512.0, (tZ1 + 0.5) / 512.0);
+            }
         } else if (this.#globalCPUHeightMap) {
             const g = this.#globalCPUHeightMap;
             const sU0 = (globalTexX0 + 0.5) / texSizeX;
@@ -909,6 +911,7 @@ class LandscapeTileStreamer extends RedGPUObject {
                     if (val > maxP) maxP = val;
                 }
                 const maxNorm = pixels instanceof Uint16Array ? 65535.0 : 255.0;
+                (cpuParsed as any).maxVal = maxNorm;
                 const minHeightNorm = minP / maxNorm;
                 const maxHeightNorm = maxP / maxNorm;
                 comp.setHeightBounds(minHeightNorm, maxHeightNorm);

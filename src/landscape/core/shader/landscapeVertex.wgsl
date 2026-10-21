@@ -51,7 +51,7 @@ fn getLodInvMorphRange(lod: u32) -> f32 {
 }
 
 fn sampleBilinearHeight(uv: vec2<f32>, texSize: vec2<f32>) -> f32 {
-    let p = clamp(uv * texSize - vec2<f32>(0.5), vec2<f32>(0.0), texSize - vec2<f32>(1.0));
+    let p = clamp(uv * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0));
     let base = vec2<i32>(floor(p));
     let f = fract(p);
 
@@ -116,7 +116,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
     );
 
     let texSize = landscapeUniforms.vhtTextureSize;
-    let initialTexCoord = vec2<i32>(clamp(initialGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+    let initialTexCoord = vec2<i32>(clamp(round(initialGlobalUV * texSize), vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
     let initialHeight = textureLoad(heightMapTexture, initialTexCoord, 0).r;
 
     let camPos = systemUniforms.camera.cameraPosition.xyz;

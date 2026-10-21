@@ -195,10 +195,14 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
                 },
                 {
                     binding: 1,
-                    resource: vhtAtlas.gpuTextureView
+                    resource: this.redGPUContext.resourceManager.basicSampler.gpuSampler
                 },
                 {
                     binding: 2,
+                    resource: vhtAtlas.gpuTextureView
+                },
+                {
+                    binding: 3,
                     resource: {buffer: uniformBuffer}
                 }
             ]
@@ -249,14 +253,7 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         const {gpuDevice, resourceManager} = this.redGPUContext;
         const shaderInfo = resourceManager.wgslParser.parse('Landscape_VHT_GlobalBake_ShaderModule', vhtGlobalBakeShaderCode);
 
-        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
-            0: {
-                texture: {
-                    sampleType: 'unfilterable-float',
-                    viewDimension: '2d'
-                }
-            }
-        });
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
         this.#globalBindGroupLayout = resourceManager.createBindGroupLayout(
             'Landscape_VHT_GlobalBake_BindGroupLayout',
