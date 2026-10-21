@@ -116,19 +116,13 @@ fn calculateWaterSSR(
     var hitFound = false;
     var hitStep = 0u;
     var wasInFront = false;
+    let invMaxSteps = 1.0 / f32(maxSteps);
 
     for (var i = 0u; i < maxSteps; i = i + 1u) {
-        let progress = f32(i) / f32(maxSteps);
-        let stepScale = 0.20 + progress * 1.45;
+        let stepScale = f32(2u * i + 1u) * invMaxSteps;
         let actualStep = baseStepSize * stepScale;
         let prevWorldPos = currentWorldPos;
         currentWorldPos = currentWorldPos + R * actualStep;
-
-        let travelVec = currentWorldPos - startWorldPos;
-        let travelDistSq = dot(travelVec, travelVec);
-        if (travelDistSq > maxDist * maxDist) {
-            break;
-        }
 
         let currentScreenUV = worldToScreen(currentWorldPos);
         if (currentScreenUV.x < 0.0 || currentScreenUV.x > 1.0 || currentScreenUV.y < 0.0 || currentScreenUV.y > 1.0) {
@@ -160,7 +154,7 @@ fn calculateWaterSSR(
             continue;
         }
 
-        let effectiveThickness = thickness + actualStep * 0.8;
+        let effectiveThickness = thickness + actualStep;
         let crossedFromFront = wasInFront || (prevRayDist <= surfaceDistanceFromCamera);
         wasInFront = false;
 
