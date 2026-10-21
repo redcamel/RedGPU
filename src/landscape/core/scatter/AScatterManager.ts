@@ -34,8 +34,8 @@ abstract class AScatterManager<
     #typesByName: Map<string, TType> = new Map();
 
     /**
-     * [KO] AScatterManager 인스턴스를 초기화합니다.
-     * [EN] Initializes an AScatterManager instance.
+     * [KO] `AScatterManager` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AScatterManager` instance.
      *
      * @param landscape -
      * [KO] 이 스캐터 매니저를 소유하는 대상 `Landscape` 인스턴스
@@ -49,6 +49,10 @@ abstract class AScatterManager<
     /**
      * [KO] 이 스캐터 매니저가 속한 `Landscape` 인스턴스를 반환합니다.
      * [EN] Returns the `Landscape` instance to which this scatter manager belongs.
+     *
+     * @returns
+     * [KO] 소유자 `Landscape` 인스턴스
+     * [EN] Owner `Landscape` instance
      */
     get landscape(): Landscape {
         return this.#landscape;
@@ -57,6 +61,10 @@ abstract class AScatterManager<
     /**
      * [KO] 스캐터 매니저의 활성화 여부를 반환하거나 설정합니다.
      * [EN] Gets or sets whether the scatter manager is enabled.
+     *
+     * @returns
+     * [KO] 활성화 여부
+     * [EN] Whether enabled
      */
     get enabled(): boolean {
         return this.#enabled;
@@ -69,6 +77,10 @@ abstract class AScatterManager<
     /**
      * [KO] 현재 등록된 모든 스캐터 타입(`TType[]`) 목록을 반환합니다.
      * [EN] Returns the list of all currently registered scatter types (`TType[]`).
+     *
+     * @returns
+     * [KO] 등록된 스캐터 타입 배열 (`TType[]`)
+     * [EN] Array of registered scatter types (`TType[]`)
      */
     get types(): TType[] {
         return this.#types;
@@ -77,6 +89,10 @@ abstract class AScatterManager<
     /**
      * [KO] 현재 등록된 스캐터 타입의 개수를 반환합니다.
      * [EN] Returns the number of currently registered scatter types.
+     *
+     * @returns
+     * [KO] 등록된 스캐터 타입 수
+     * [EN] Number of registered scatter types
      */
     get typeCount(): number {
         return this.#types.length;
@@ -85,18 +101,30 @@ abstract class AScatterManager<
     /**
      * [KO] 할당된 전체 스캐터 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of allocated scatter instances.
+     *
+     * @returns
+     * [KO] 전체 인스턴스 수
+     * [EN] Total instance count
      */
     abstract get totalInstanceCount(): number;
 
     /**
      * [KO] 메가 버퍼에 확보된 최대 인스턴스 수용량(Capacity)을 반환합니다.
      * [EN] Returns the maximum instance capacity allocated in the mega buffer.
+     *
+     * @returns
+     * [KO] 최대 인스턴스 수용량
+     * [EN] Maximum instance capacity
      */
     abstract get instanceCapacity(): number;
 
     /**
      * [KO] 활성 상태에서 등록된 모든 스캐터 타입의 총 메인 패스 드로우콜 수를 반환합니다.
      * [EN] Returns the total number of main pass draw calls across all registered scatter types when enabled.
+     *
+     * @returns
+     * [KO] 총 메인 패스 드로우콜 수
+     * [EN] Total main pass draw call count
      */
     get totalDrawCalls(): number {
         const {enabled, types} = this;
@@ -112,6 +140,10 @@ abstract class AScatterManager<
     /**
      * [KO] 그림자 투사(`castShadow`)가 활성화된 모든 스캐터 타입의 총 그림자 패스 드로우콜 수를 반환합니다.
      * [EN] Returns the total number of shadow pass draw calls across all scatter types with `castShadow` enabled.
+     *
+     * @returns
+     * [KO] 총 그림자 패스 드로우콜 수
+     * [EN] Total shadow pass draw call count
      */
     get shadowDrawCalls(): number {
         const {enabled, types} = this;

@@ -8,6 +8,7 @@ import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 /**
  * [KO] 지형 또는 타일 스트리머로부터 디버그 대상 GPU 텍스처와 뷰를 조회하는 함수 타입입니다.
  * [EN] Function type that retrieves the target debug GPU texture and view from a `Landscape` or `LandscapeTileStreamer`.
+ *
  * @category Debugger
  */
 export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileStreamer | null) => {
@@ -16,13 +17,21 @@ export type TextureGetter = (landscape: Landscape, tileStreamer?: LandscapeTileS
 } | null;
 
 /**
- * [KO] 지형(Landscape)의 가상 텍스처(VHT, VNT, VBT 등) 아틀라스를 화면 오버레이 캔버스에 시각화하는 디버거 클래스입니다.
+ * [KO] 지형(`Landscape`)의 가상 텍스처(VHT, VNT, VBT 등) 아틀라스를 화면 오버레이 캔버스에 시각화하는 디버거 클래스입니다.
  * [EN] Debugger class that visualizes `Landscape` virtual texture atlases (VHT, VNT, VBT, etc.) on an on-screen overlay canvas.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] LandscapeDebuggerManager를 통해 가상 텍스처 디버거 활성화
+ * // [EN] Enable virtual texture debuggers via LandscapeDebuggerManager
+ * landscape.debuggerManager.vht = true;
+ * landscape.debuggerManager.vbt = true;
+ * ```
  *
  * @category Debugger
  */
@@ -45,17 +54,17 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
      * [EN] Creates a `LandscapeTextureDebugger` instance.
      *
      * @param landscape -
-     * [KO] 대상 지형 인스턴스
+     * [KO] 대상 `Landscape` 인스턴스
      * [EN] Target `Landscape` instance
      * @param tileStreamer -
-     * [KO] 타일 스트리머 인스턴스
+     * [KO] `LandscapeTileStreamer` 인스턴스
      * [EN] `LandscapeTileStreamer` instance
      * @param cameraOrOptions -
      * [KO] 추적할 카메라 인스턴스 또는 디버거 설정 옵션
      * [EN] Camera instance to track or debugger configuration options
      * @param options -
-     * [KO] 디버거 UI 배치 및 크기 옵션
-     * [EN] Debugger UI placement and size options
+     * [KO] 디버거 UI 배치 및 크기 옵션 (`ALandscapeDebuggerOptions`)
+     * [EN] Debugger UI placement and size options (`ALandscapeDebuggerOptions`)
      * @param shaderCode -
      * [KO] 텍스처 시각화에 사용할 프래그먼트 WGSL 셰이더 코드
      * [EN] Fragment WGSL shader code used for texture visualization
@@ -63,11 +72,11 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
      * [KO] 셰이더 모듈 식별 이름
      * [EN] Identifier name for the shader module
      * @param textureGetter -
-     * [KO] 시각화할 텍스처를 반환하는 콜백 함수
-     * [EN] Callback function returning the texture to visualize
+     * [KO] 시각화할 텍스처를 반환하는 콜백 함수 (`TextureGetter`)
+     * [EN] Callback function returning the texture to visualize (`TextureGetter`)
      * @param clearColor -
-     * [KO] 렌더 패스 배경 클리어 색상
-     * [EN] Render pass background clear color
+     * [KO] 렌더 패스 배경 클리어 색상 (`GPUColorDict`)
+     * [EN] Render pass background clear color (`GPUColorDict`)
      */
     constructor(
         landscape: Landscape,
@@ -234,4 +243,3 @@ class LandscapeTextureDebugger extends ALandscapeDebugger {
 
 Object.freeze(LandscapeTextureDebugger);
 export default LandscapeTextureDebugger;
-

@@ -45,7 +45,7 @@ class LandscapeWeightMapCPUSampler {
      * [KO] 가중치 맵 이미지 경로(URL)
      * [EN] Weight map image path (URL)
      * @returns
-     * [KO] 로드된 픽셀 데이터(`Promise<WeightMapPixelData | null>`)
+     * [KO] 로드된 픽셀 데이터 (`Promise<WeightMapPixelData | null>`)
      * [EN] Loaded pixel data (`Promise<WeightMapPixelData | null>`)
      */
     async load(src: string): Promise<WeightMapPixelData | null> {
@@ -148,24 +148,24 @@ class LandscapeWeightMapCPUSampler {
     }
 
     /**
-     * [KO] 정규화된 UV 좌표(0.0 ~ 1.0)와 채널 인덱스에 해당하는 가중치 값을 이중 선형 보간하여 반환합니다.
-     * [EN] Returns the bilinearly interpolated weight value at the normalized UV coordinates (0.0 to 1.0) and channel index.
+     * [KO] 정규화된 UV 좌표(`0.0` ~ `1.0`)와 채널 인덱스에 해당하는 가중치 값을 이중 선형 보간하여 반환합니다.
+     * [EN] Returns the bilinearly interpolated weight value at the normalized UV coordinates (`0.0` to `1.0`) and channel index.
      *
      * @param src -
      * [KO] 가중치 맵 이미지 경로(URL)
      * [EN] Weight map image path (URL)
      * @param u -
-     * [KO] 정규화된 U 좌표 (0.0 ~ 1.0)
-     * [EN] Normalized U coordinate (0.0 to 1.0)
+     * [KO] 정규화된 U 좌표 (`0.0` ~ `1.0`)
+     * [EN] Normalized U coordinate (`0.0` to `1.0`)
      * @param v -
-     * [KO] 정규화된 V 좌표 (0.0 ~ 1.0)
-     * [EN] Normalized V coordinate (0.0 to 1.0)
+     * [KO] 정규화된 V 좌표 (`0.0` ~ `1.0`)
+     * [EN] Normalized V coordinate (`0.0` to `1.0`)
      * @param channelIndex -
-     * [KO] 샘플링할 색상 채널 인덱스 (0: R, 1: G, 2: B, 3: A, 기본값: 0)
-     * [EN] Color channel index to sample (0: R, 1: G, 2: B, 3: A, default: 0)
+     * [KO] 샘플링할 색상 채널 인덱스 (`0`: R, `1`: G, `2`: B, `3`: A, 기본값: `0`)
+     * [EN] Color channel index to sample (`0`: R, `1`: G, `2`: B, `3`: A, default: `0`)
      * @returns
-     * [KO] 샘플링된 가중치 값 (0.0 ~ 1.0)
-     * [EN] Sampled weight value (0.0 to 1.0)
+     * [KO] 샘플링된 가중치 값 (`0.0` ~ `1.0`)
+     * [EN] Sampled weight value (`0.0` to `1.0`)
      */
     getWeight(src: string, u: number, v: number, channelIndex: number = 0): number {
         const entry = this.#cache.get(src);

@@ -94,6 +94,8 @@ export interface GrassOptions extends AScatterTypeInitOptions {
  *
  * ### Example
  * ```typescript
+ * // [KO] 밀도 및 컬링 거리를 지정하여 잔디 타입 추가
+ * // [EN] Add a grass type with density and culling distance
  * const grass = landscape.grassManager.addType({
  *     name: 'MeadowGrass',
  *     mesh: grassMesh,
@@ -102,7 +104,7 @@ export interface GrassOptions extends AScatterTypeInitOptions {
  * });
  * ```
  *
- * @see {@link GrassManager}
+ * @see [Foliage and Impostors example](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @see {@link GrassOptions}
  * @category Landscape
  */

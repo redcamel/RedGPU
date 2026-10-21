@@ -25,12 +25,12 @@ class LandscapeGPUCuller extends RedGPUObject {
     #uniformUintData: Uint32Array;
 
     /**
-     * [KO] LandscapeGPUCuller 인스턴스를 생성하고 GPU 리소스를 초기화합니다.
-     * [EN] Creates a LandscapeGPUCuller instance and initializes GPU resources.
+     * [KO] `LandscapeGPUCuller` 인스턴스를 생성하고 GPU 리소스를 초기화합니다.
+     * [EN] Creates a `LandscapeGPUCuller` instance and initializes GPU resources.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

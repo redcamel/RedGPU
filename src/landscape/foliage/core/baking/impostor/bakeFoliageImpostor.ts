@@ -9,7 +9,7 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] 폴리지를 팔면체 임포스터(Octahedral Impostor)로 베이킹한 결과 데이터 인터페이스입니다.
+ * [KO] 식생 메시를 팔면체 임포스터(Octahedral Impostor)로 베이킹한 결과 데이터 인터페이스입니다.
  * [EN] Result data interface for baking foliage into an octahedral impostor.
  * @category Landscape
  */
@@ -240,8 +240,8 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
  * [EN] Renders the specified render units from hemi-octahedral grid viewpoints to bake atlas textures (BaseColor, Normal, ORM) for far-distance impostors.
  *
  * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPUContext instance
+ * [KO] `RedGPUContext` 인스턴스
+ * [EN] `RedGPUContext` instance
  * @param renderUnits -
  * [KO] 베이킹 대상 원본 렌더 유닛 배열
  * [EN] Array of source render units to bake

@@ -76,12 +76,14 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
      *
      * ### Example
      * ```typescript
+     * // [KO] 지형 전용 머티리얼 생성
+     * // [EN] Create a landscape-specific material
      * const material = new RedGPU.Landscape.LandscapeMaterial(redGPUContext, '#387d42', 1024);
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param baseColorHex -
      * [KO] 초기 베이스 컬러 HEX 문자열 (기본값: `'#387d42'`)
      * [EN] Initial base color HEX string (default: `'#387d42'`)

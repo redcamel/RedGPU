@@ -10,13 +10,20 @@ const LOD_RGBA_STRINGS: readonly string[] = Object.freeze(
 );
 
 /**
- * [KO] 지형(Landscape) 타일 컴포넌트의 로드 여부와 카메라 거리에 따른 LOD 단계를 2D 그리드 오버레이로 시각화하는 디버거 클래스입니다.
+ * [KO] 지형(`Landscape`) 타일 컴포넌트의 로드 여부와 카메라 거리에 따른 LOD 단계를 2D 그리드 오버레이로 시각화하는 디버거 클래스입니다.
  * [EN] Debugger class that visualizes the loaded status and distance-based LOD levels of `Landscape` tile components as a 2D grid overlay.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
+ *
+ * ### Example
+ * ```typescript
+ * // [KO] LandscapeDebuggerManager를 통해 공간 그리드 디버거 활성화
+ * // [EN] Enable the spatial grid debugger via LandscapeDebuggerManager
+ * landscape.debuggerManager.spatialGrid = true;
+ * ```
  *
  * @category Debugger
  */
@@ -28,14 +35,14 @@ class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
      * [EN] Creates a `LandscapeSpatialGridDebugger` instance.
      *
      * @param landscape -
-     * [KO] 대상 지형 인스턴스
+     * [KO] 대상 `Landscape` 인스턴스
      * [EN] Target `Landscape` instance
      * @param cameraOrOptions -
      * [KO] 추적할 카메라 인스턴스 또는 디버거 설정 옵션
      * [EN] Camera instance to track or debugger configuration options
      * @param options -
-     * [KO] 디버거 UI 배치 및 크기 옵션
-     * [EN] Debugger UI placement and size options
+     * [KO] 디버거 UI 배치 및 크기 옵션 (`ALandscapeDebuggerOptions`)
+     * [EN] Debugger UI placement and size options (`ALandscapeDebuggerOptions`)
      */
     constructor(
         landscape: Landscape,
@@ -128,4 +135,3 @@ class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
 Object.freeze(LandscapeSpatialGridDebugger);
 export default LandscapeSpatialGridDebugger;
-

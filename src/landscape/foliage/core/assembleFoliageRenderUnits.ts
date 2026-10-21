@@ -170,18 +170,18 @@ export interface FoliageAssemblyResult {
      */
     lodInfoList: FoliageLODInfo[];
     /**
-     * [KO] 지오메트리 최하단 기준 수직 오프셋(월드 단위)
-     * [EN] Vertical bottom offset based on the lowest geometry point in world units
+     * [KO] 지오메트리 최하단 기준 수직 오프셋(미터 단위)
+     * [EN] Vertical bottom offset based on the lowest geometry point in meters
      */
     bottomOffset: number;
     /**
-     * [KO] 식생 전체 바운딩 스피어 반경(월드 단위)
-     * [EN] Overall bounding sphere radius of the foliage in world units
+     * [KO] 식생 전체 바운딩 스피어 반경(미터 단위)
+     * [EN] Overall bounding sphere radius of the foliage in meters
      */
     boundingRadius: number;
     /**
-     * [KO] 식생 전체 바운딩 높이(월드 단위)
-     * [EN] Overall bounding height of the foliage in world units
+     * [KO] 식생 전체 바운딩 높이(미터 단위)
+     * [EN] Overall bounding height of the foliage in meters
      */
     boundingHeight: number;
 }
@@ -191,8 +191,8 @@ export interface FoliageAssemblyResult {
  * [EN] Merges LOD meshes defined in foliage options and bakes an octahedral impostor to assemble render unit lists.
  *
  * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPU context instance
+ * [KO] `RedGPUContext` 인스턴스
+ * [EN] `RedGPUContext` instance
  * @param options -
  * [KO] 식생 생성 및 LOD 구성 옵션
  * [EN] Foliage creation and LOD configuration options
@@ -200,8 +200,8 @@ export interface FoliageAssemblyResult {
  * [KO] 렌더 유닛 동적 유니폼 슬롯 풀러 (선택)
  * [EN] Render unit dynamic uniform slot pooler (optional)
  * @returns
- * [KO] 조립된 렌더 유닛, 그림자 유닛, LOD 정보 및 바운딩 치수를 담은 결과 객체
- * [EN] Result object containing assembled render units, shadow units, LOD info, and bounding dimensions
+ * [KO] 조립된 렌더 유닛, 그림자 유닛, LOD 정보 및 바운딩 치수를 담은 결과 객체(`FoliageAssemblyResult`)
+ * [EN] Result object containing assembled render units, shadow units, LOD info, and bounding dimensions (`FoliageAssemblyResult`)
  * @category Landscape
  */
 export default function assembleFoliageRenderUnits(

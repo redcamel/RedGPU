@@ -127,12 +127,12 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     #onRecreated: (() => void) | null = null;
 
     /**
-     * [KO] AScatterMegaBuffer 인스턴스를 초기화하고 기본 GPU 버퍼들을 생성합니다.
-     * [EN] Initializes an AScatterMegaBuffer instance and creates the base GPU buffers.
+     * [KO] `AScatterMegaBuffer` 인스턴스를 초기화하고 기본 GPU 버퍼들을 생성합니다.
+     * [EN] Initializes an `AScatterMegaBuffer` instance and creates the base GPU buffers.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param reflectionConfig -
      * [KO] 구조체 크기 추출을 위한 셰이더 리플렉션 설정
      * [EN] Shader reflection configuration for extracting struct sizes
@@ -195,6 +195,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 단일 인스턴스 데이터의 바이트 단위 스트라이드 크기를 반환합니다.
      * [EN] Returns the stride size in bytes for a single instance data entry.
+     *
+     * @returns
+     * [KO] 인스턴스당 바이트 스트라이드
+     * [EN] Byte stride per instance
      */
     get strideBytes(): number {
         return this.#strideBytes;
@@ -203,6 +207,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 단일 인스턴스 데이터의 `Float32` 요소 개수를 반환합니다.
      * [EN] Returns the number of `Float32` elements for a single instance data entry.
+     *
+     * @returns
+     * [KO] 인스턴스당 `Float32` 요소 수
+     * [EN] Number of `Float32` elements per instance
      */
     get strideFloats(): number {
         return this.#strideFloats;
@@ -211,6 +219,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 단일 타입 파라미터 구조체의 `Float32` 요소 개수를 반환합니다.
      * [EN] Returns the number of `Float32` elements for a single type parameter struct.
+     *
+     * @returns
+     * [KO] 타입 파라미터당 `Float32` 요소 수
+     * [EN] Number of `Float32` elements per type parameter struct
      */
     get typeParamFloats(): number {
         return this.#typeParamFloats;
@@ -219,6 +231,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 메가 버퍼가 지원하는 최대 렌더 유닛 슬롯 수를 반환합니다.
      * [EN] Returns the maximum number of render unit slots supported by the mega buffer.
+     *
+     * @returns
+     * [KO] 최대 렌더 유닛 슬롯 수
+     * [EN] Maximum render unit slot count
      */
     get maxRenderUnits(): number {
         return this.#maxRenderUnits;
@@ -227,6 +243,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 메가 버퍼가 지원하는 최대 스캐터 타입 수를 반환합니다.
      * [EN] Returns the maximum number of scatter types supported by the mega buffer.
+     *
+     * @returns
+     * [KO] 최대 스캐터 타입 수
+     * [EN] Maximum scatter type count
      */
     get maxTypes(): number {
         return this.#maxTypes;
@@ -235,6 +255,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 현재 할당된 최대 인스턴스 수용량(Capacity)을 반환합니다.
      * [EN] Returns the currently allocated maximum instance capacity.
+     *
+     * @returns
+     * [KO] 현재 최대 인스턴스 수용량
+     * [EN] Current maximum instance capacity
      */
     get instanceCapacity(): number {
         return this.#instanceCapacity;
@@ -243,6 +267,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] CPU 측 타입 파라미터 `Float32Array` 버퍼를 반환합니다.
      * [EN] Returns the CPU-side type parameter `Float32Array` buffer.
+     *
+     * @returns
+     * [KO] CPU 타입 파라미터 `Float32Array` 버퍼
+     * [EN] CPU type parameter `Float32Array` buffer
      */
     get cpuTypeParamsBuffer(): Float32Array {
         return this.#cpuTypeParamsBuffer;
@@ -251,6 +279,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] CPU 측 타입 파라미터 버퍼의 `Uint32Array` 뷰를 반환합니다.
      * [EN] Returns the `Uint32Array` view of the CPU-side type parameter buffer.
+     *
+     * @returns
+     * [KO] CPU 타입 파라미터 `Uint32Array` 뷰
+     * [EN] CPU type parameter `Uint32Array` view
      */
     get cpuTypeParamsUint32(): Uint32Array {
         return this.#cpuTypeParamsUint32;
@@ -259,6 +291,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 필수 GPU 버퍼(원시 버퍼 및 인다이렉트 버퍼)가 모두 생성되어 준비되었는지 여부를 반환합니다.
      * [EN] Returns whether the essential GPU buffers (raw buffer and indirect buffer) are created and ready.
+     *
+     * @returns
+     * [KO] 버퍼 준비 완료 여부
+     * [EN] Whether the buffers are ready
      */
     get isReady(): boolean {
         return this.#rawGPUBuffer != null && this.#indirectGPUBuffer != null;
@@ -267,6 +303,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 베이킹된 원시(Raw) 인스턴스 데이터를 보관하는 GPU 버퍼를 반환합니다.
      * [EN] Returns the GPU buffer holding baked raw instance data.
+     *
+     * @returns
+     * [KO] 원시 인스턴스 `GPUBuffer` 또는 파기 시 `null`
+     * [EN] Raw instance `GPUBuffer`, or `null` if destroyed
      */
     get rawGPUBuffer(): GPUBuffer | null {
         return this.#rawGPUBuffer;
@@ -275,6 +315,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 메인 패스 컬링 결과 인스턴스 데이터를 보관하는 GPU 버퍼를 반환하거나 설정합니다.
      * [EN] Gets or sets the GPU buffer holding culled instance data for the main pass.
+     *
+     * @returns
+     * [KO] 컬링된 인스턴스 `GPUBuffer` 또는 미할당 시 `null`
+     * [EN] Culled instance `GPUBuffer`, or `null` if unallocated
      */
     get culledGPUBuffer(): GPUBuffer | null {
         return this.#culledGPUBuffer;
@@ -287,6 +331,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 메인 패스 `drawIndexedIndirect` 명령 인자들을 보관하는 GPU 버퍼를 반환합니다.
      * [EN] Returns the GPU buffer holding `drawIndexedIndirect` command arguments for the main pass.
+     *
+     * @returns
+     * [KO] 인다이렉트 드로우 `GPUBuffer` 또는 파기 시 `null`
+     * [EN] Indirect draw `GPUBuffer`, or `null` if destroyed
      */
     get indirectGPUBuffer(): GPUBuffer | null {
         return this.#indirectGPUBuffer;
@@ -295,6 +343,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 타입별 컬링 파라미터를 보관하는 GPU 버퍼를 반환합니다.
      * [EN] Returns the GPU buffer holding per-type culling parameters.
+     *
+     * @returns
+     * [KO] 타입 파라미터 `GPUBuffer` 또는 미사용 시 `null`
+     * [EN] Type parameter `GPUBuffer`, or `null` if unused
      */
     get typeParamsGPUBuffer(): GPUBuffer | null {
         return this.#typeParamsGPUBuffer;
@@ -303,6 +355,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 용량 확장으로 인해 GPU 버퍼가 재생성되었을 때 호출되는 콜백 함수를 반환하거나 설정합니다.
      * [EN] Gets or sets the callback function invoked when GPU buffers are recreated due to capacity expansion.
+     *
+     * @returns
+     * [KO] 재생성 콜백 함수(`(() => void)`) 또는 `null`
+     * [EN] Recreation callback function (`(() => void)`), or `null`
      */
     get onRecreated(): (() => void) | null {
         return this.#onRecreated;
@@ -315,6 +371,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 현재까지 세그먼트로 할당된 총 원시 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of raw instances allocated across segments so far.
+     *
+     * @returns
+     * [KO] 할당된 총 원시 인스턴스 수
+     * [EN] Total allocated raw instance count
      */
     get totalAllocatedInstances(): number {
         return this.#totalAllocatedInstances;
@@ -323,6 +383,10 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
     /**
      * [KO] 현재까지 할당된 총 인다이렉트 드로우콜 슬롯 수를 반환합니다.
      * [EN] Returns the total number of indirect draw call slots allocated so far.
+     *
+     * @returns
+     * [KO] 할당된 총 인다이렉트 드로우콜 슬롯 수
+     * [EN] Total allocated indirect draw call slot count
      */
     get totalIndirectDrawCalls(): number {
         return this.#totalIndirectDrawCalls;

@@ -68,12 +68,12 @@ class LandscapeSharedGeometry extends RedGPUObject {
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
     /**
-     * [KO] LandscapeSharedGeometry 인스턴스를 생성하고 전체 LOD 통합 버퍼를 빌드합니다.
-     * [EN] Creates a LandscapeSharedGeometry instance and builds the combined buffer for all LODs.
+     * [KO] `LandscapeSharedGeometry` 인스턴스를 생성하고 전체 LOD 통합 버퍼를 빌드합니다.
+     * [EN] Creates a `LandscapeSharedGeometry` instance and builds the combined buffer for all LODs.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param tileSizeX -
      * [KO] 단일 타일의 가로(X) 월드 크기
      * [EN] World width (X) of a single tile
@@ -104,6 +104,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] 전체 LOD 정점이 하나로 병합된 공유 정점 버퍼를 반환합니다.
      * [EN] Returns the shared vertex buffer containing merged vertices for all LODs.
+     *
+     * @returns
+     * [KO] 공유 정점 버퍼 (`VertexBuffer`) 또는 `null`
+     * [EN] Shared vertex buffer (`VertexBuffer`) or `null`
      */
     get combinedVertexBuffer(): VertexBuffer | null {
         return this.#combinedVertexBuffer;
@@ -112,6 +116,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] 전체 LOD 삼각형 인덱스가 하나로 병합된 공유 인덱스 버퍼를 반환합니다.
      * [EN] Returns the shared index buffer containing merged triangle indices for all LODs.
+     *
+     * @returns
+     * [KO] 공유 삼각형 인덱스 버퍼 (`IndexBuffer`) 또는 `null`
+     * [EN] Shared triangle index buffer (`IndexBuffer`) or `null`
      */
     get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
@@ -120,6 +128,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] 전체 LOD 와이어프레임 라인 인덱스가 병합된 공유 인덱스 버퍼를 반환합니다.
      * [EN] Returns the shared index buffer containing merged wireframe line indices for all LODs.
+     *
+     * @returns
+     * [KO] 공유 와이어프레임 인덱스 버퍼 (`IndexBuffer`) 또는 `null`
+     * [EN] Shared wireframe index buffer (`IndexBuffer`) or `null`
      */
     get combinedWireframeIndexBuffer(): IndexBuffer | null {
         return this.#combinedWireframeIndexBuffer;
@@ -128,6 +140,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] 최대 LOD 레벨 수를 반환합니다.
      * [EN] Returns the maximum number of LOD levels.
+     *
+     * @returns
+     * [KO] 최대 LOD 레벨 수
+     * [EN] Maximum number of LOD levels
      */
     get lodMaxLevel(): number {
         return this.#lodMaxLevel;
@@ -136,6 +152,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] 기본 타일 컴포넌트의 축당 쿼드 분할 수를 반환합니다.
      * [EN] Returns the quad subdivision count per axis of the base tile component.
+     *
+     * @returns
+     * [KO] 기본 타일 축당 쿼드 분할 수
+     * [EN] Base tile quad subdivision count per axis
      */
     get componentSizeQuads(): number {
         return this.#componentSizeQuads;
@@ -144,6 +164,10 @@ class LandscapeSharedGeometry extends RedGPUObject {
     /**
      * [KO] LOD 0 단계의 축당 쿼드 분할 수를 반환합니다.
      * [EN] Returns the quad subdivision count per axis at LOD 0.
+     *
+     * @returns
+     * [KO] LOD 0 축당 쿼드 분할 수
+     * [EN] LOD 0 quad subdivision count per axis
      */
     get lod0SizeQuads(): number {
         return this.#lod0SizeQuads;

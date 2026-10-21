@@ -179,6 +179,8 @@ class LandscapeLayer {
      *
      * ### Example
      * ```typescript
+     * // [KO] 스플래팅 레이어 인스턴스 생성
+     * // [EN] Create a splatting layer instance
      * const layer = new RedGPU.Landscape.LandscapeLayer(redGPUContext, {
      *     name: 'Grass',
      *     baseColorTexture: './assets/grass_albedo.jpg',

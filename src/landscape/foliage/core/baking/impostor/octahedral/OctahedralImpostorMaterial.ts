@@ -83,8 +83,8 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
      * [EN] Creates an `OctahedralImpostorMaterial` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param baseColorTexture -
      * [KO] 베이킹된 베이스 컬러 아틀라스 텍스처 (선택)
      * [EN] Baked base color atlas texture (optional)

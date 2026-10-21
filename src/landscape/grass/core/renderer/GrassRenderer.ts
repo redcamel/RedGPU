@@ -112,12 +112,12 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     #preferredCanvasFormat: GPUTextureFormat;
 
     /**
-     * [KO] GrassRenderer 인스턴스를 초기화합니다.
-     * [EN] Initializes the GrassRenderer instance.
+     * [KO] `GrassRenderer` 인스턴스를 생성합니다.
+     * [EN] Creates a `GrassRenderer` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

@@ -19,8 +19,8 @@ class LandscapeComponent {
     #key: string = '';
 
     /**
-     * [KO] LandscapeComponent 인스턴스를 생성합니다.
-     * [EN] Creates a LandscapeComponent instance.
+     * [KO] `LandscapeComponent` 인스턴스를 생성합니다.
+     * [EN] Creates a `LandscapeComponent` instance.
      *
      * @param worldX -
      * [KO] 타일 중심의 월드 X 좌표
@@ -61,6 +61,10 @@ class LandscapeComponent {
     /**
      * [KO] 타일 컴포넌트를 식별하는 고유 키(`{componentZ}_{componentX}`)를 반환합니다.
      * [EN] Returns the unique key (`{componentZ}_{componentX}`) identifying the tile component.
+     *
+     * @returns
+     * [KO] 타일 고유 식별 키 문자열
+     * [EN] Unique tile identifier key string
      */
     get key(): string {
         return this.#key;
@@ -69,6 +73,10 @@ class LandscapeComponent {
     /**
      * [KO] 타일 중심의 월드 X 좌표를 반환합니다.
      * [EN] Returns the world X coordinate of the tile center.
+     *
+     * @returns
+     * [KO] 타일 중심 월드 X 좌표
+     * [EN] Tile center world X coordinate
      */
     get worldX(): number {
         return this.#worldX;
@@ -77,6 +85,10 @@ class LandscapeComponent {
     /**
      * [KO] 타일 중심의 월드 Z 좌표를 반환합니다.
      * [EN] Returns the world Z coordinate of the tile center.
+     *
+     * @returns
+     * [KO] 타일 중심 월드 Z 좌표
+     * [EN] Tile center world Z coordinate
      */
     get worldZ(): number {
         return this.#worldZ;
@@ -85,6 +97,10 @@ class LandscapeComponent {
     /**
      * [KO] 그리드 내 타일의 열(Column) 인덱스를 반환합니다.
      * [EN] Returns the column index of the tile within the grid.
+     *
+     * @returns
+     * [KO] 타일 열(X) 인덱스
+     * [EN] Tile column (X) index
      */
     get componentX(): number {
         return this.#componentX;
@@ -93,6 +109,10 @@ class LandscapeComponent {
     /**
      * [KO] 그리드 내 타일의 행(Row) 인덱스를 반환합니다.
      * [EN] Returns the row index of the tile within the grid.
+     *
+     * @returns
+     * [KO] 타일 행(Z) 인덱스
+     * [EN] Tile row (Z) index
      */
     get componentZ(): number {
         return this.#componentZ;
@@ -101,6 +121,10 @@ class LandscapeComponent {
     /**
      * [KO] 타일의 정규화된 최소 높이값을 반환합니다.
      * [EN] Returns the normalized minimum height value of the tile.
+     *
+     * @returns
+     * [KO] 정규화된 최소 높이값 (`0.0` ~ `1.0`)
+     * [EN] Normalized minimum height value (`0.0` to `1.0`)
      */
     get minHeightNorm(): number {
         return this.#minHeightNorm;
@@ -109,6 +133,10 @@ class LandscapeComponent {
     /**
      * [KO] 타일의 정규화된 최대 높이값을 반환합니다.
      * [EN] Returns the normalized maximum height value of the tile.
+     *
+     * @returns
+     * [KO] 정규화된 최대 높이값 (`0.0` ~ `1.0`)
+     * [EN] Normalized maximum height value (`0.0` to `1.0`)
      */
     get maxHeightNorm(): number {
         return this.#maxHeightNorm;

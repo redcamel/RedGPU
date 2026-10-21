@@ -26,12 +26,12 @@ class GrassSlotPooler extends AScatterSlotPooler {
     static PARAMS_SIZE_BYTES: number = 96;
 
     /**
-     * [KO] GrassSlotPooler 인스턴스를 초기화합니다.
-     * [EN] Initializes the GrassSlotPooler instance.
+     * [KO] `GrassSlotPooler` 인스턴스를 생성합니다.
+     * [EN] Creates a `GrassSlotPooler` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(

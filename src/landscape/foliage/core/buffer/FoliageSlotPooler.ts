@@ -29,8 +29,8 @@ class FoliageSlotPooler extends AScatterSlotPooler {
      * [EN] Creates a `FoliageSlotPooler` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(

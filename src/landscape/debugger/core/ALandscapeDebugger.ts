@@ -4,6 +4,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 /**
  * [KO] 지형 디버거의 UI 크기, 위치 및 제목 설정 옵션 인터페이스입니다.
  * [EN] Configuration options interface for the UI size, position, and title of a landscape debugger.
+ *
  * @category Debugger
  */
 export interface ALandscapeDebuggerOptions {
@@ -37,6 +38,7 @@ export interface ALandscapeDebuggerOptions {
 /**
  * [KO] 지형 디버거 오버레이 렌더링을 위해 계산된 카메라 및 월드 상태 정보 인터페이스입니다.
  * [EN] Interface representing calculated camera and world state information for rendering the landscape debugger overlay.
+ *
  * @category Debugger
  */
 export interface LandscapeDebuggerCameraState {
@@ -86,13 +88,13 @@ export interface LandscapeDebuggerCameraState {
      */
     dirY: number;
     /**
-     * [KO] 지형 범위 내 정규화된 카메라 X 좌표 (`0.0` ~ `1.0`)
-     * [EN] Normalized camera X coordinate within the landscape bounds (`0.0` to `1.0`)
+     * [KO] 지형 범위 내 정규화된 카메라 X 좌표 (`0.0 ~ 1.0`)
+     * [EN] Normalized camera X coordinate within the landscape bounds (`0.0 to 1.0`)
      */
     camNormX: number;
     /**
-     * [KO] 지형 범위 내 정규화된 카메라 Z 좌표 (`0.0` ~ `1.0`)
-     * [EN] Normalized camera Z coordinate within the landscape bounds (`0.0` to `1.0`)
+     * [KO] 지형 범위 내 정규화된 카메라 Z 좌표 (`0.0 ~ 1.0`)
+     * [EN] Normalized camera Z coordinate within the landscape bounds (`0.0 to 1.0`)
      */
     camNormZ: number;
     /**
@@ -203,7 +205,7 @@ function ensureDebuggerStyles(): void {
 }
 
 /**
- * [KO] 지형(Landscape) 디버거 UI 컨테이너와 카메라 시야 오버레이 렌더링 기능을 제공하는 추상 기반 클래스입니다.
+ * [KO] 지형(`Landscape`) 디버거 UI 컨테이너와 카메라 시야 오버레이 렌더링 기능을 제공하는 추상 기반 클래스입니다.
  * [EN] Abstract base class providing UI container management and camera frustum/radius overlay rendering for `Landscape` debuggers.
  *
  * ::: warning
@@ -257,14 +259,14 @@ abstract class ALandscapeDebugger {
      * [EN] Initializes the base DOM elements and canvases of `ALandscapeDebugger`.
      *
      * @param landscape -
-     * [KO] 대상 지형 인스턴스
+     * [KO] 대상 `Landscape` 인스턴스
      * [EN] Target `Landscape` instance
      * @param cameraOrOptions -
      * [KO] 추적할 카메라 인스턴스 또는 디버거 설정 옵션
      * [EN] Camera instance to track or debugger configuration options
      * @param options -
-     * [KO] 디버거 UI 배치 및 크기 옵션
-     * [EN] Debugger UI placement and size options
+     * [KO] 디버거 UI 배치 및 크기 옵션 (`ALandscapeDebuggerOptions`)
+     * [EN] Debugger UI placement and size options (`ALandscapeDebuggerOptions`)
      * @param canvasId -
      * [KO] 메인 디버거 캔버스 요소에 부여할 HTML `id` 속성값
      * [EN] HTML `id` attribute value to assign to the main debugger canvas element
@@ -360,6 +362,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 하단 헤더에 표시되는 제목 문자열을 반환하거나 설정합니다.
      * [EN] Gets or sets the title string displayed on the bottom header of the debugger.
+     *
      * @returns
      * [KO] 디버거 제목 문자열
      * [EN] Debugger title string
@@ -385,6 +388,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 지형이 속한 `RedGPUContext` 인스턴스를 반환합니다.
      * [EN] Returns the `RedGPUContext` instance to which the landscape belongs.
+     *
      * @returns
      * [KO] `RedGPUContext` 인스턴스
      * [EN] `RedGPUContext` instance
@@ -396,6 +400,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버깅 대상 `Landscape` 인스턴스를 반환합니다.
      * [EN] Returns the target `Landscape` instance being debugged.
+     *
      * @returns
      * [KO] `Landscape` 인스턴스
      * [EN] `Landscape` instance
@@ -407,9 +412,10 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 UI의 최상위 `HTMLDivElement` 컨테이너를 반환합니다.
      * [EN] Returns the root `HTMLDivElement` container of the debugger UI.
+     *
      * @returns
-     * [KO] 컨테이너 DOM 요소
-     * [EN] Container DOM element
+     * [KO] 컨테이너 DOM 요소 (`HTMLDivElement`)
+     * [EN] Container DOM element (`HTMLDivElement`)
      */
     get container(): HTMLDivElement {
         return this.#container;
@@ -418,9 +424,10 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 콘텐츠가 그려지는 메인 `HTMLCanvasElement`를 반환합니다.
      * [EN] Returns the main `HTMLCanvasElement` where debugger content is drawn.
+     *
      * @returns
-     * [KO] 메인 캔버스 DOM 요소
-     * [EN] Main canvas DOM element
+     * [KO] 메인 캔버스 DOM 요소 (`HTMLCanvasElement`)
+     * [EN] Main canvas DOM element (`HTMLCanvasElement`)
      */
     get canvas(): HTMLCanvasElement {
         return this.#canvas;
@@ -429,6 +436,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 UI의 화면 표시 여부를 반환하거나 설정합니다.
      * [EN] Gets or sets whether the debugger UI is visible on screen.
+     *
      * @returns
      * [KO] 가시성 여부
      * [EN] Visibility state
@@ -440,6 +448,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 카메라 위치 및 시야각 오버레이 표시에 사용되는 카메라 인스턴스를 반환하거나 설정합니다.
      * [EN] Gets or sets the camera instance used for rendering the camera position and FOV overlay.
+     *
      * @returns
      * [KO] 카메라 인스턴스
      * [EN] Camera instance
@@ -456,6 +465,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 캔버스 해상도 스케일링에 적용된 디바이스 픽셀 비율(DPR)을 반환합니다.
      * [EN] Returns the device pixel ratio (DPR) applied to canvas resolution scaling.
+     *
      * @returns
      * [KO] 디바이스 픽셀 비율
      * [EN] Device pixel ratio
@@ -467,6 +477,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 컨테이너의 가로 너비(픽셀)를 반환하거나 설정합니다.
      * [EN] Gets or sets the horizontal width of the debugger container in pixels.
+     *
      * @returns
      * [KO] 가로 너비 (픽셀)
      * [EN] Width in pixels
@@ -478,6 +489,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 컨테이너의 세로 높이(픽셀)를 반환하거나 설정합니다.
      * [EN] Gets or sets the vertical height of the debugger container in pixels.
+     *
      * @returns
      * [KO] 세로 높이 (픽셀)
      * [EN] Height in pixels
@@ -489,6 +501,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 여백과 테두리를 제외한 내부 렌더링 영역의 가로 너비(CSS 픽셀)를 반환합니다.
      * [EN] Returns the horizontal width of the inner rendering area excluding margins and borders in CSS pixels.
+     *
      * @returns
      * [KO] 내부 콘텐츠 가로 너비
      * [EN] Inner content width
@@ -504,6 +517,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 여백과 테두리를 제외한 내부 렌더링 영역의 세로 높이(CSS 픽셀)를 반환합니다.
      * [EN] Returns the vertical height of the inner rendering area excluding margins and borders in CSS pixels.
+     *
      * @returns
      * [KO] 내부 콘텐츠 세로 높이
      * [EN] Inner content height
@@ -515,6 +529,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 화면 좌측 기준 디버거 컨테이너의 위치(픽셀)를 반환하거나 설정합니다.
      * [EN] Gets or sets the position of the debugger container from the left edge of the screen in pixels.
+     *
      * @returns
      * [KO] 좌측 오프셋 (픽셀)
      * [EN] Left offset in pixels
@@ -530,6 +545,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 화면 하단 기준 디버거 컨테이너의 위치(픽셀)를 반환하거나 설정합니다.
      * [EN] Gets or sets the position of the debugger container from the bottom edge of the screen in pixels.
+     *
      * @returns
      * [KO] 하단 오프셋 (픽셀)
      * [EN] Bottom offset in pixels
@@ -545,6 +561,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 현재 브라우저 환경의 기본 WebGPU 캔버스 텍스처 포맷을 반환합니다.
      * [EN] Returns the preferred WebGPU canvas texture format for the current browser environment.
+     *
      * @returns
      * [KO] 권장 `GPUTextureFormat` 값
      * [EN] Preferred `GPUTextureFormat` value
@@ -578,6 +595,7 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 디버거 UI의 가시성 상태를 반전(토글)시키고 변경된 상태를 반환합니다.
      * [EN] Toggles the visibility state of the debugger UI and returns the updated state.
+     *
      * @returns
      * [KO] 토글 후의 가시성 여부
      * [EN] Visibility state after toggling
@@ -594,9 +612,10 @@ abstract class ALandscapeDebugger {
     /**
      * [KO] 현재 카메라와 지형 정보를 기반으로 정규화된 카메라 상태 객체를 계산하여 반환합니다.
      * [EN] Calculates and returns the normalized camera state object based on the current camera and landscape information.
+     *
      * @returns
-     * [KO] 계산된 카메라 상태 객체 또는 지형이 없을 경우 `null`
-     * [EN] Calculated camera state object, or `null` if no landscape is bound
+     * [KO] 계산된 `LandscapeDebuggerCameraState` 객체 또는 지형이 없을 경우 `null`
+     * [EN] Calculated `LandscapeDebuggerCameraState` object, or `null` if no landscape is bound
      */
     getCameraState(): LandscapeDebuggerCameraState | null {
         if (!this.#landscape) return null;
@@ -816,4 +835,3 @@ abstract class ALandscapeDebugger {
 
 Object.freeze(ALandscapeDebugger);
 export default ALandscapeDebugger;
-

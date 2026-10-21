@@ -37,12 +37,12 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     #allocatedCount: number = 0;
 
     /**
-     * [KO] AScatterSlotPooler 인스턴스를 초기화하고 CPU/GPU 슬롯 풀 버퍼를 할당합니다.
-     * [EN] Initializes an AScatterSlotPooler instance and allocates CPU/GPU slot pool buffers.
+     * [KO] `AScatterSlotPooler` 인스턴스를 초기화하고 CPU/GPU 슬롯 풀 버퍼를 할당합니다.
+     * [EN] Initializes an `AScatterSlotPooler` instance and allocates CPU/GPU slot pool buffers.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param maxSlots -
      * [KO] 풀에서 관리할 최대 슬롯 개수
      * [EN] Maximum number of slots to manage in the pool
@@ -86,6 +86,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 풀이 수용할 수 있는 최대 슬롯 개수를 반환합니다.
      * [EN] Returns the maximum number of slots the pool can accommodate.
+     *
+     * @returns
+     * [KO] 최대 슬롯 개수
+     * [EN] Maximum slot count
      */
     get maxSlots(): number {
         return this.#maxSlots;
@@ -94,6 +98,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 단일 슬롯 내 실제 유니폼 파라미터의 바이트 크기를 반환합니다.
      * [EN] Returns the actual byte size of uniform parameters within a single slot.
+     *
+     * @returns
+     * [KO] 슬롯 파라미터 바이트 크기
+     * [EN] Slot parameter byte size
      */
     get paramsSizeBytes(): number {
         return this.#paramsSizeBytes;
@@ -102,6 +110,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 전체 슬롯 데이터를 보관하는 통합 유니폼 `GPUBuffer`를 반환합니다.
      * [EN] Returns the unified uniform `GPUBuffer` holding all slot data.
+     *
+     * @returns
+     * [KO] 통합 유니폼 `GPUBuffer` 또는 파기 시 `null`
+     * [EN] Unified uniform `GPUBuffer`, or `null` if destroyed
      */
     get gpuBuffer(): GPUBuffer | null {
         return this.#gpuBuffer;
@@ -110,6 +122,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 전체 슬롯 데이터의 CPU 측 `Float32Array` 버퍼를 반환합니다.
      * [EN] Returns the CPU-side `Float32Array` buffer for all slot data.
+     *
+     * @returns
+     * [KO] CPU 슬롯 `Float32Array` 버퍼
+     * [EN] CPU slot `Float32Array` buffer
      */
     get cpuBuffer(): Float32Array {
         return this.#cpuBuffer;
@@ -118,6 +134,10 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 전체 슬롯 데이터의 CPU 측 `Uint32Array` 뷰를 반환합니다.
      * [EN] Returns the CPU-side `Uint32Array` view for all slot data.
+     *
+     * @returns
+     * [KO] CPU 슬롯 `Uint32Array` 뷰
+     * [EN] CPU slot `Uint32Array` view
      */
     get cpuUint32View(): Uint32Array {
         return this.#cpuUint32View;

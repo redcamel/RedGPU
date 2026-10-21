@@ -37,12 +37,12 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
     /**
-     * [KO] LandscapeInstanceBuffer 인스턴스를 생성하고 GPU 버퍼들을 할당합니다.
-     * [EN] Creates a LandscapeInstanceBuffer instance and allocates GPU buffers.
+     * [KO] `LandscapeInstanceBuffer` 인스턴스를 생성하고 GPU 버퍼들을 할당합니다.
+     * [EN] Creates a `LandscapeInstanceBuffer` instance and allocates GPU buffers.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param maxComponentCount -
      * [KO] 최대 타일 컴포넌트 개수
      * [EN] Maximum number of tile components
@@ -66,6 +66,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] 모든 타일의 정적 월드 좌표 및 높이 경계가 저장된 GPU 버퍼를 반환합니다.
      * [EN] Returns the GPU buffer storing static world coordinates and height bounds for all tiles.
+     *
+     * @returns
+     * [KO] 전체 타일 정적 정보 `GPUBuffer` 또는 `null`
+     * [EN] Static tile information `GPUBuffer` or `null`
      */
     get allTilesBuffer(): GPUBuffer | null {
         return this.#allTilesBuffer;
@@ -74,6 +78,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] GPU 컬링 통과 후 가시 타일 데이터가 기록되는 GPU 스토리지 버퍼를 반환합니다.
      * [EN] Returns the GPU storage buffer where visible tile data is written after GPU culling.
+     *
+     * @returns
+     * [KO] 가시 타일 스토리지 `GPUBuffer` 또는 `null`
+     * [EN] Visible tile storage `GPUBuffer` or `null`
      */
     get visibleTilesBuffer(): GPUBuffer | null {
         return this.#visibleTilesBuffer;
@@ -82,6 +90,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] LOD별 `drawIndexedIndirect` 인자가 저장된 GPU 버퍼를 반환합니다.
      * [EN] Returns the GPU buffer storing `drawIndexedIndirect` arguments per LOD.
+     *
+     * @returns
+     * [KO] 인다이렉트 드로우 `GPUBuffer` 또는 `null`
+     * [EN] Indirect draw `GPUBuffer` or `null`
      */
     get indirectDrawBuffer(): GPUBuffer | null {
         return this.#indirectDrawBuffer;
@@ -90,6 +102,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] 지형 렌더링 시 그룹 1에 바인딩되는 인스턴스 스토리지 바인드 그룹을 반환합니다.
      * [EN] Returns the instance storage bind group bound to group 1 during terrain rendering.
+     *
+     * @returns
+     * [KO] 인스턴스 스토리지 `GPUBindGroup` 또는 `null`
+     * [EN] Instance storage `GPUBindGroup` or `null`
      */
     get instanceStorageBindGroup(): GPUBindGroup | null {
         return this.#instanceStorageBindGroup;
@@ -98,6 +114,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] 인스턴스 스토리지 바인드 그룹 레이아웃을 반환합니다.
      * [EN] Returns the instance storage bind group layout.
+     *
+     * @returns
+     * [KO] 인스턴스 스토리지 `GPUBindGroupLayout` 또는 `null`
+     * [EN] Instance storage `GPUBindGroupLayout` or `null`
      */
     get instanceStorageBindGroupLayout(): GPUBindGroupLayout | null {
         return this.#instanceStorageBindGroupLayout;
@@ -106,6 +126,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] 버퍼가 수용 가능한 최대 타일 컴포넌트 개수를 반환합니다.
      * [EN] Returns the maximum number of tile components the buffer can accommodate.
+     *
+     * @returns
+     * [KO] 최대 타일 컴포넌트 개수
+     * [EN] Maximum number of tile components
      */
     get maxComponentCount(): number {
         return this.#maxComponentCount;
@@ -114,6 +138,10 @@ class LandscapeInstanceBuffer extends RedGPUObject {
     /**
      * [KO] 설정된 최대 LOD 레벨 수를 반환합니다.
      * [EN] Returns the configured maximum number of LOD levels.
+     *
+     * @returns
+     * [KO] 최대 LOD 레벨 수
+     * [EN] Maximum number of LOD levels
      */
     get lodMaxLevel(): number {
         return this.#lodMaxLevel;

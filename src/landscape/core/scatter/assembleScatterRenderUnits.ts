@@ -332,8 +332,8 @@ function traverseHierarchy(
  * [EN] Traverses one or more `Mesh` hierarchies to merge vertex and index buffers by identical material, producing a list of `ScatterRenderUnit` instances and bounding metrics optimized for scatter instanced rendering.
  *
  * @param redGPUContext -
- * [KO] RedGPU 컨텍스트 인스턴스
- * [EN] RedGPUContext instance
+ * [KO] `RedGPUContext` 인스턴스
+ * [EN] `RedGPUContext` instance
  * @param roots -
  * [KO] 병합할 루트 `Mesh` 또는 `Mesh[]` 배열
  * [EN] Root `Mesh` or `Mesh[]` array to merge

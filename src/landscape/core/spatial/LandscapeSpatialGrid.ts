@@ -28,8 +28,8 @@ class LandscapeSpatialGrid {
     #flatCells: LandscapeComponent[] = [];
 
     /**
-     * [KO] LandscapeSpatialGrid 인스턴스를 생성합니다.
-     * [EN] Creates a LandscapeSpatialGrid instance.
+     * [KO] `LandscapeSpatialGrid` 인스턴스를 생성합니다.
+     * [EN] Creates a `LandscapeSpatialGrid` instance.
      *
      * @param tileCountX -
      * [KO] 가로(X) 방향 타일 개수
@@ -57,6 +57,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형의 월드 크기 튜플(`[worldSizeX, worldSizeZ]`)을 반환합니다.
      * [EN] Returns the world size tuple (`[worldSizeX, worldSizeZ]`) of the entire terrain.
+     *
+     * @returns
+     * [KO] 전체 지형 월드 크기 튜플 (`[number, number]`)
+     * [EN] Entire terrain world size tuple (`[number, number]`)
      */
     get worldSize(): [number, number] {
         return this.#worldSizeTuple;
@@ -65,6 +69,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 타일 컴포넌트 개수 튜플(`[tileCountX, tileCountZ]`)을 반환합니다.
      * [EN] Returns the tile component count tuple (`[tileCountX, tileCountZ]`).
+     *
+     * @returns
+     * [KO] 타일 컴포넌트 개수 튜플 (`[number, number]`)
+     * [EN] Tile component count tuple (`[number, number]`)
      */
     get componentCount(): [number, number] {
         return this.#componentCountTuple;
@@ -73,6 +81,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 단일 타일의 월드 크기 튜플(`[tileSizeX, tileSizeZ]`)을 반환합니다.
      * [EN] Returns the single tile world size tuple (`[tileSizeX, tileSizeZ]`).
+     *
+     * @returns
+     * [KO] 단일 타일 월드 크기 튜플 (`[number, number]`)
+     * [EN] Single tile world size tuple (`[number, number]`)
      */
     get tileSize(): [number, number] {
         return this.#tileSizeTuple;
@@ -81,6 +93,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형의 가로(X) 월드 크기를 반환합니다.
      * [EN] Returns the total world width (X) of the terrain.
+     *
+     * @returns
+     * [KO] 전체 지형 가로(X) 월드 크기
+     * [EN] Total terrain world width (X)
      */
     get worldSizeX(): number {
         return this.#worldSizeTuple[0];
@@ -89,6 +105,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형의 세로(Z) 월드 크기를 반환합니다.
      * [EN] Returns the total world depth (Z) of the terrain.
+     *
+     * @returns
+     * [KO] 전체 지형 세로(Z) 월드 크기
+     * [EN] Total terrain world depth (Z)
      */
     get worldSizeZ(): number {
         return this.#worldSizeTuple[1];
@@ -97,6 +117,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형 가로 월드 크기의 역수(`1 / worldSizeX`)를 반환합니다.
      * [EN] Returns the reciprocal of the total terrain world width (`1 / worldSizeX`).
+     *
+     * @returns
+     * [KO] 가로 월드 크기의 역수
+     * [EN] Reciprocal of the world width
      */
     get invWorldSizeX(): number {
         return this.#invWorldSizeX;
@@ -105,6 +129,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형 세로 월드 크기의 역수(`1 / worldSizeZ`)를 반환합니다.
      * [EN] Returns the reciprocal of the total terrain world depth (`1 / worldSizeZ`).
+     *
+     * @returns
+     * [KO] 세로 월드 크기의 역수
+     * [EN] Reciprocal of the world depth
      */
     get invWorldSizeZ(): number {
         return this.#invWorldSizeZ;
@@ -113,6 +141,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 그리드 내 모든 타일 컴포넌트의 1차원 배열(`Array<LandscapeComponent>`)을 반환합니다.
      * [EN] Returns the 1D array (`Array<LandscapeComponent>`) of all tile components in the grid.
+     *
+     * @returns
+     * [KO] 타일 컴포넌트 1차원 배열 (`Array<LandscapeComponent>`)
+     * [EN] 1D array of tile components (`Array<LandscapeComponent>`)
      */
     get flatCells(): LandscapeComponent[] {
         return this.#flatCells;
@@ -121,6 +153,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 가로(X) 방향 타일 개수를 반환합니다.
      * [EN] Returns the number of tiles along the X axis.
+     *
+     * @returns
+     * [KO] 가로(X) 방향 타일 개수
+     * [EN] Number of tiles along the X axis
      */
     get tileCountX(): number {
         return this.#tileCountX;
@@ -129,6 +165,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 세로(Z) 방향 타일 개수를 반환합니다.
      * [EN] Returns the number of tiles along the Z axis.
+     *
+     * @returns
+     * [KO] 세로(Z) 방향 타일 개수
+     * [EN] Number of tiles along the Z axis
      */
     get tileCountZ(): number {
         return this.#tileCountZ;
@@ -137,6 +177,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 단일 타일의 가로(X) 월드 크기를 반환합니다.
      * [EN] Returns the world width (X) of a single tile.
+     *
+     * @returns
+     * [KO] 단일 타일 가로(X) 월드 크기
+     * [EN] Single tile world width (X)
      */
     get tileSizeX(): number {
         return this.#tileSizeX;
@@ -145,6 +189,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 단일 타일의 세로(Z) 월드 크기를 반환합니다.
      * [EN] Returns the world depth (Z) of a single tile.
+     *
+     * @returns
+     * [KO] 단일 타일 세로(Z) 월드 크기
+     * [EN] Single tile world depth (Z)
      */
     get tileSizeZ(): number {
         return this.#tileSizeZ;
@@ -153,6 +201,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형 가로 월드 크기의 절반(`worldSizeX / 2`)을 반환합니다.
      * [EN] Returns half of the total terrain world width (`worldSizeX / 2`).
+     *
+     * @returns
+     * [KO] 전체 지형 가로 월드 크기의 절반
+     * [EN] Half of the total terrain world width
      */
     get halfWorldSizeX(): number {
         return this.#halfWorldSizeX;
@@ -161,6 +213,10 @@ class LandscapeSpatialGrid {
     /**
      * [KO] 전체 지형 세로 월드 크기의 절반(`worldSizeZ / 2`)을 반환합니다.
      * [EN] Returns half of the total terrain world depth (`worldSizeZ / 2`).
+     *
+     * @returns
+     * [KO] 전체 지형 세로 월드 크기의 절반
+     * [EN] Half of the total terrain world depth
      */
     get halfWorldSizeZ(): number {
         return this.#halfWorldSizeZ;

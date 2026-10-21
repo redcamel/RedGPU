@@ -1,6 +1,6 @@
 /**
- * [KO] 식생(Foliage) 시스템의 핵심 내부 클래스, 베이킹, 컬링 및 렌더링 파이프라인 구성 요소를 제공하는 코어 모듈입니다.
- * [EN] Core module providing core internal classes, baking, culling, and rendering pipeline components for the foliage system.
+ * [KO] 식생(Foliage) 시스템의 내부 코어 클래스, 베이킹, 컬링 및 렌더링 파이프라인 구성 요소를 제공합니다.
+ * [EN] Provides internal core classes, baking, culling, and rendering pipeline components for the foliage system.
  * @packageDocumentation
  */
 import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions, type FoliageSubCell} from "./Foliage";

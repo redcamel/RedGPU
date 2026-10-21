@@ -86,12 +86,12 @@ class LandscapeTileStreamer extends RedGPUObject {
     #sortCamZ: number = 0;
 
     /**
-     * [KO] LandscapeTileStreamer 인스턴스를 생성하고 아틀라스 생성기(VHT, VNT, VBT)를 초기화합니다.
-     * [EN] Creates a LandscapeTileStreamer instance and initializes atlas generators (VHT, VNT, VBT).
+     * [KO] `LandscapeTileStreamer` 인스턴스를 생성하고 아틀라스 생성기(VHT, VNT, VBT)를 초기화합니다.
+     * [EN] Creates a `LandscapeTileStreamer` instance and initializes atlas generators (VHT, VNT, VBT).
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param spatialGrid -
      * [KO] 지형 공간 분할 그리드 인스턴스
      * [EN] Landscape spatial grid instance
@@ -111,6 +111,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 가상 하이트맵 아틀라스(VHT) 텍스처를 반환합니다.
      * [EN] Returns the Virtual Heightmap Texture (VHT) atlas.
+     *
+     * @returns
+     * [KO] VHT 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VHT atlas `DirectTexture` or `null`
      */
     get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
@@ -119,6 +123,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 가상 노멀맵 아틀라스(VNT) 텍스처를 반환합니다.
      * [EN] Returns the Virtual Normalmap Texture (VNT) atlas.
+     *
+     * @returns
+     * [KO] VNT 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VNT atlas `DirectTexture` or `null`
      */
     get vntAtlasTexture(): DirectTexture | null {
         return this.#vntAtlasTexture;
@@ -127,6 +135,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 가상 블렌드 BaseColor 아틀라스(VBT) 텍스처를 반환합니다.
      * [EN] Returns the Virtual Blend Texture (VBT) BaseColor atlas.
+     *
+     * @returns
+     * [KO] VBT BaseColor 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VBT BaseColor atlas `DirectTexture` or `null`
      */
     get vbtBaseColorAtlas(): DirectTexture | null {
         return this.#vbtBaseColorAtlas;
@@ -135,6 +147,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 가상 블렌드 Normal 아틀라스(VBT) 텍스처를 반환합니다.
      * [EN] Returns the Virtual Blend Texture (VBT) Normal atlas.
+     *
+     * @returns
+     * [KO] VBT Normal 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VBT Normal atlas `DirectTexture` or `null`
      */
     get vbtNormalAtlas(): DirectTexture | null {
         return this.#vbtNormalAtlas;
@@ -143,6 +159,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 가상 블렌드 ORM(Occlusion/Roughness/Metallic) 아틀라스(VBT) 텍스처를 반환합니다.
      * [EN] Returns the Virtual Blend Texture (VBT) ORM (Occlusion/Roughness/Metallic) atlas.
+     *
+     * @returns
+     * [KO] VBT ORM 아틀라스 `DirectTexture` 또는 `null`
+     * [EN] VBT ORM atlas `DirectTexture` or `null`
      */
     get vbtORMAtlas(): DirectTexture | null {
         return this.#vbtORMAtlas;
@@ -151,6 +171,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] LOD 0 단계의 축당 쿼드 분할 수를 가져오거나 설정합니다.
      * [EN] Gets or sets the quad subdivision count per axis at LOD 0.
+     *
+     * @returns
+     * [KO] LOD 0 축당 쿼드 분할 수
+     * [EN] LOD 0 quad subdivision count per axis
      */
     get lod0SizeQuads(): number {
         return this.#lod0SizeQuads;
@@ -163,6 +187,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 전역 베이스 하이트맵 이미지의 URL을 가져오거나 설정합니다.
      * [EN] Gets or sets the URL of the global base heightmap image.
+     *
+     * @returns
+     * [KO] 전역 베이스 하이트맵 URL 문자열
+     * [EN] Global base heightmap URL string
      */
     get globalHeightmapUrl(): string {
         return this.#globalHeightmapUrl;
@@ -178,6 +206,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 로드된 전역 베이스 하이트맵의 원시 `GPUTexture`를 반환합니다.
      * [EN] Returns the raw `GPUTexture` of the loaded global base heightmap.
+     *
+     * @returns
+     * [KO] 전역 베이스 하이트맵 `GPUTexture` 또는 `null`
+     * [EN] Global base heightmap `GPUTexture` or `null`
      */
     get globalHeightTexture(): GPUTexture | null {
         return this.#globalHeightTexture;
@@ -186,6 +218,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 카메라 주변 타일 스트리밍 로딩 반경(월드 단위)을 가져오거나 설정합니다.
      * [EN] Gets or sets the tile streaming loading radius (in world units) around the camera.
+     *
+     * @returns
+     * [KO] 타일 스트리밍 로딩 반경 (월드 단위)
+     * [EN] Tile streaming loading radius (in world units)
      */
     get tileLoadingRadius(): number {
         return this.#tileLoadingRadius;
@@ -198,6 +234,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 프레임당 최대 비동기 타일 로드 요청 개수를 가져오거나 설정합니다.
      * [EN] Gets or sets the maximum number of asynchronous tile load requests per frame.
+     *
+     * @returns
+     * [KO] 프레임당 최대 비동기 타일 로드 요청 개수
+     * [EN] Maximum number of asynchronous tile load requests per frame
      */
     get tileMaxLoadsPerFrame(): number {
         return this.#tileMaxLoadsPerFrame;
@@ -210,6 +250,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 타일별 하이트맵 URL을 결정하는 리졸버 함수를 가져오거나 설정합니다.
      * [EN] Gets or sets the resolver function that determines the heightmap URL per tile.
+     *
+     * @returns
+     * [KO] 타일 URL 리졸버 함수 (`LandscapeTileUrlResolver`) 또는 `null`
+     * [EN] Tile URL resolver function (`LandscapeTileUrlResolver`) or `null`
      */
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileUrlResolver;
@@ -223,6 +267,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 현재까지 스트리밍 로드가 완료된 타일의 개수를 반환합니다.
      * [EN] Returns the number of tiles that have finished streaming loading so far.
+     *
+     * @returns
+     * [KO] 로드 완료된 타일 개수
+     * [EN] Number of loaded tiles
      */
     get tileLoadedCount(): number {
         return this.#loadedMap.size;
@@ -231,6 +279,10 @@ class LandscapeTileStreamer extends RedGPUObject {
     /**
      * [KO] 현재 설정된 전역 CPU 하이트맵 픽셀 데이터를 반환합니다.
      * [EN] Returns the currently configured global CPU heightmap pixel data.
+     *
+     * @returns
+     * [KO] 전역 CPU 하이트맵 픽셀 데이터 객체 또는 `null`
+     * [EN] Global CPU heightmap pixel data object or `null`
      */
     get globalCPUHeightMap(): { width: number; height: number; pixels: ArrayLike<number>; maxVal: number } | null {
         return this.#globalCPUHeightMap;

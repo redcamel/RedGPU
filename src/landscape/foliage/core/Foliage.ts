@@ -309,6 +309,8 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  *
  * ### Example
  * ```typescript
+ * // [KO] LOD 및 임포스터 옵션을 포함하여 식생 타입 추가
+ * // [EN] Add a foliage type with LOD and impostor options
  * const pineTree = landscape.foliageManager.addType({
  *     name: 'PineTree',
  *     lods: [
@@ -320,7 +322,7 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * });
  * ```
  *
- * @see {@link FoliageManager}
+ * @see [Foliage and Impostors example](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @see {@link FoliageOptions}
  * @category Landscape
  */

@@ -18,12 +18,12 @@ abstract class AScatterCuller extends RedGPUObject {
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
-     * [KO] AScatterCuller 인스턴스를 초기화합니다.
-     * [EN] Initializes an AScatterCuller instance.
+     * [KO] `AScatterCuller` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AScatterCuller` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -32,6 +32,10 @@ abstract class AScatterCuller extends RedGPUObject {
     /**
      * [KO] 생성된 WebGPU 컴퓨트 파이프라인을 반환합니다.
      * [EN] Returns the created WebGPU compute pipeline.
+     *
+     * @returns
+     * [KO] 컴퓨트 파이프라인(`GPUComputePipeline`) 또는 미초기화 시 `null`
+     * [EN] Compute pipeline (`GPUComputePipeline`), or `null` if not initialized
      */
     get computePipeline(): GPUComputePipeline | null {
         return this.#computePipeline;
@@ -40,6 +44,10 @@ abstract class AScatterCuller extends RedGPUObject {
     /**
      * [KO] 컴퓨트 컬링 셰이더의 바인드 그룹 레이아웃을 반환합니다.
      * [EN] Returns the bind group layout of the compute culling shader.
+     *
+     * @returns
+     * [KO] 바인드 그룹 레이아웃(`GPUBindGroupLayout`) 또는 미초기화 시 `null`
+     * [EN] Bind group layout (`GPUBindGroupLayout`), or `null` if not initialized
      */
     get bindGroupLayout(): GPUBindGroupLayout | null {
         return this.#bindGroupLayout;

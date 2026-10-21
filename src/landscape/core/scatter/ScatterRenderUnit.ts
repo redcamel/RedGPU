@@ -115,8 +115,8 @@ class ScatterRenderUnit {
     #isMasked: boolean;
 
     /**
-     * [KO] ScatterRenderUnit 인스턴스를 초기화합니다.
-     * [EN] Initializes a ScatterRenderUnit instance.
+     * [KO] `ScatterRenderUnit` 인스턴스를 초기화합니다.
+     * [EN] Initializes a `ScatterRenderUnit` instance.
      *
      * @param init -
      * [KO] 렌더 유닛 초기화 옵션
@@ -164,6 +164,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 렌더 유닛의 `Geometry` 인스턴스를 반환합니다.
      * [EN] Returns the `Geometry` instance of the render unit.
+     *
+     * @returns
+     * [KO] `Geometry` 인스턴스
+     * [EN] `Geometry` instance
      */
     get geometry(): Geometry {
         return this.#geometry;
@@ -172,6 +176,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 렌더 유닛의 정점 개수를 반환합니다.
      * [EN] Returns the vertex count of the render unit.
+     *
+     * @returns
+     * [KO] 정점 개수
+     * [EN] Vertex count
      */
     get vertexCount(): number {
         return this.#vertexCount;
@@ -180,6 +188,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 렌더 유닛의 인덱스 개수를 반환합니다.
      * [EN] Returns the index count of the render unit.
+     *
+     * @returns
+     * [KO] 인덱스 개수
+     * [EN] Index count
      */
     get indexCount(): number {
         return this.#indexCount;
@@ -188,6 +200,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 통합 인덱스 버퍼 내 시작 인덱스 오프셋을 반환합니다.
      * [EN] Returns the starting index offset within the unified index buffer.
+     *
+     * @returns
+     * [KO] 시작 인덱스 오프셋
+     * [EN] Starting index offset
      */
     get firstIndex(): number {
         return this.#firstIndex;
@@ -196,6 +212,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 인덱스 버퍼 기반 렌더링 여부를 반환합니다.
      * [EN] Returns whether rendering is index-buffer based.
+     *
+     * @returns
+     * [KO] 인덱스 버퍼 사용 여부
+     * [EN] Whether an index buffer is used
      */
     get isIndexed(): boolean {
         return this.#isIndexed;
@@ -204,6 +224,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 인덱스 버퍼의 `GPUIndexFormat`을 반환합니다.
      * [EN] Returns the `GPUIndexFormat` of the index buffer.
+     *
+     * @returns
+     * [KO] 인덱스 포맷 (`GPUIndexFormat`)
+     * [EN] Index format (`GPUIndexFormat`)
      */
     get indexFormat(): GPUIndexFormat {
         return this.#indexFormat;
@@ -212,6 +236,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 정점당 바이트 스트라이드를 반환합니다.
      * [EN] Returns the byte stride per vertex.
+     *
+     * @returns
+     * [KO] 정점당 바이트 스트라이드
+     * [EN] Byte stride per vertex
      */
     get strideBytes(): number {
         return this.#strideBytes;
@@ -220,6 +248,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 인다이렉트 드로우 버퍼 내 바이트 오프셋을 반환하거나 설정합니다.
      * [EN] Gets or sets the byte offset within the indirect draw buffer.
+     *
+     * @returns
+     * [KO] 인다이렉트 버퍼 내 바이트 오프셋
+     * [EN] Byte offset within the indirect buffer
      */
     get indirectOffsetBytes(): number {
         return this.#indirectOffsetBytes;
@@ -232,6 +264,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 컬링된 인스턴스 버퍼 내 시작 인스턴스 오프셋을 반환하거나 설정합니다.
      * [EN] Gets or sets the starting instance offset within the culled instance buffer.
+     *
+     * @returns
+     * [KO] 시작 인스턴스 오프셋
+     * [EN] Starting instance offset
      */
     get instanceBufferOffset(): number {
         return this.#instanceBufferOffset;
@@ -244,6 +280,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 렌더 유닛에 연결된 머티리얼 인스턴스를 반환합니다.
      * [EN] Returns the material instance associated with the render unit.
+     *
+     * @returns
+     * [KO] 머티리얼 인스턴스
+     * [EN] Material instance
      */
     get material(): any {
         return this.#material;
@@ -252,6 +292,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 렌더 유닛의 베이스 컬러 `BitmapTexture`를 반환하거나 설정합니다.
      * [EN] Gets or sets the base color `BitmapTexture` of the render unit.
+     *
+     * @returns
+     * [KO] 베이스 컬러 `BitmapTexture`, `null` 또는 `undefined`
+     * [EN] Base color `BitmapTexture`, `null`, or `undefined`
      */
     get baseColorTexture(): BitmapTexture | null | undefined {
         return this.#baseColorTexture;
@@ -264,6 +308,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 이 렌더 유닛이 속한 LOD 레벨 인덱스를 반환합니다.
      * [EN] Returns the LOD level index to which this render unit belongs.
+     *
+     * @returns
+     * [KO] LOD 레벨 인덱스
+     * [EN] LOD level index
      */
     get lodIndex(): number {
         return this.#lodIndex;
@@ -272,6 +320,10 @@ class ScatterRenderUnit {
     /**
      * [KO] 알파 마스크(Alpha Cutoff) 머티리얼 사용 여부를 반환합니다.
      * [EN] Returns whether an alpha mask (alpha cutoff) material is used.
+     *
+     * @returns
+     * [KO] 알파 마스크 사용 여부
+     * [EN] Whether alpha masking is used
      */
     get isMasked(): boolean {
         return this.#isMasked;

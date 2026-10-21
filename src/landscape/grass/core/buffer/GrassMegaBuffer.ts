@@ -57,12 +57,12 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
     #cachedCullBindGroupLayout: GPUBindGroupLayout | null = null;
 
     /**
-     * [KO] GrassMegaBuffer 인스턴스를 초기화합니다.
-     * [EN] Initializes the GrassMegaBuffer instance.
+     * [KO] `GrassMegaBuffer` 인스턴스를 생성합니다.
+     * [EN] Creates a `GrassMegaBuffer` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param initialCapacity -
      * [KO] 초기 최대 인스턴스 수용량 (기본값: 131072)
      * [EN] Initial maximum instance capacity (default: 131072)

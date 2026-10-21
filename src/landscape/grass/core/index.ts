@@ -1,6 +1,6 @@
 /**
- * [KO] 절차적 잔디(Grass) 시스템의 핵심 내부 클래스, 베이킹, 컬링 및 렌더링 구성 요소를 제공하는 코어 모듈입니다.
- * [EN] Core module providing core internal classes, baking, culling, and rendering components for the procedural grass system.
+ * [KO] 절차적 잔디(Grass) 시스템의 내부 코어 클래스, 베이킹, 컬링 및 렌더링 구성 요소를 제공합니다.
+ * [EN] Provides internal core classes, baking, culling, and rendering components for the procedural grass system.
  * @packageDocumentation
  */
 import Grass, {type GrassOptions} from "./Grass";

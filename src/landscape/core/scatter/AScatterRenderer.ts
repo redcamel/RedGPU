@@ -29,12 +29,12 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
 
     /**
-     * [KO] AScatterRenderer 인스턴스를 초기화합니다.
-     * [EN] Initializes an AScatterRenderer instance.
+     * [KO] `AScatterRenderer` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AScatterRenderer` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -43,6 +43,10 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
     /**
      * [KO] 동적 유니폼 오프셋 바인딩 시 임시 배열 할당을 방지하기 위한 재사용 가능한 1요소 `Uint32Array`를 반환합니다.
      * [EN] Returns a reusable 1-element `Uint32Array` to prevent temporary array allocations when binding dynamic uniform offsets.
+     *
+     * @returns
+     * [KO] 동적 유니폼 오프셋용 1요소 `Uint32Array`
+     * [EN] 1-element `Uint32Array` for dynamic uniform offsets
      */
     get dynamicOffsetArray(): Uint32Array {
         return this.#dynamicOffsetArray;
@@ -51,6 +55,10 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
     /**
      * [KO] `View3D`를 키로 하여 메인 렌더 번들 캐시를 관리하는 `WeakMap<View3D, TMainBundleCache>`를 반환합니다.
      * [EN] Returns the `WeakMap<View3D, TMainBundleCache>` managing main render bundle caches keyed by `View3D`.
+     *
+     * @returns
+     * [KO] 뷰별 메인 렌더 번들 캐시 (`WeakMap<View3D, TMainBundleCache>`)
+     * [EN] Per-view main render bundle cache (`WeakMap<View3D, TMainBundleCache>`)
      */
     get mainBundlesByView(): WeakMap<View3D, TMainBundleCache> {
         return this.#mainBundlesByView;

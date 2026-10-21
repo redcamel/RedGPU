@@ -65,12 +65,12 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
     };
 
     /**
-     * [KO] AScatterInstanceBaker 인스턴스를 초기화합니다.
-     * [EN] Initializes an AScatterInstanceBaker instance.
+     * [KO] `AScatterInstanceBaker` 인스턴스를 초기화합니다.
+     * [EN] Initializes an `AScatterInstanceBaker` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -79,6 +79,10 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
     /**
      * [KO] 인스턴스 베이킹용 WebGPU 컴퓨트 파이프라인을 반환합니다.
      * [EN] Returns the WebGPU compute pipeline for instance baking.
+     *
+     * @returns
+     * [KO] 컴퓨트 파이프라인(`GPUComputePipeline`) 또는 미초기화 시 `null`
+     * [EN] Compute pipeline (`GPUComputePipeline`), or `null` if not initialized
      */
     get computePipeline(): GPUComputePipeline | null {
         return this.#computePipeline;
@@ -87,6 +91,10 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
     /**
      * [KO] 인스턴스 베이킹 셰이더의 바인드 그룹 레이아웃을 반환합니다.
      * [EN] Returns the bind group layout of the instance baking shader.
+     *
+     * @returns
+     * [KO] 바인드 그룹 레이아웃(`GPUBindGroupLayout`) 또는 미초기화 시 `null`
+     * [EN] Bind group layout (`GPUBindGroupLayout`), or `null` if not initialized
      */
     get bindGroupLayout(): GPUBindGroupLayout | null {
         return this.#bindGroupLayout;
@@ -95,6 +103,10 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
     /**
      * [KO] 베이킹 파라미터 전송에 사용되는 유니폼 GPU 버퍼를 반환합니다.
      * [EN] Returns the uniform GPU buffer used for uploading baking parameters.
+     *
+     * @returns
+     * [KO] 유니폼 버퍼(`GPUBuffer`) 또는 미초기화 시 `null`
+     * [EN] Uniform buffer (`GPUBuffer`), or `null` if not initialized
      */
     get uniformGPUBuffer(): GPUBuffer | null {
         return this.#uniformGPUBuffer;
@@ -103,6 +115,10 @@ abstract class AScatterInstanceBaker extends RedGPUObject {
     /**
      * [KO] 지형 텍스처 샘플링에 사용되는 기본 GPU 샘플러를 반환합니다.
      * [EN] Returns the default GPU sampler used for terrain texture sampling.
+     *
+     * @returns
+     * [KO] 기본 샘플러(`GPUSampler`) 또는 미초기화 시 `null`
+     * [EN] Default sampler (`GPUSampler`), or `null` if not initialized
      */
     get defaultSampler(): GPUSampler | null {
         return this.#defaultSampler;

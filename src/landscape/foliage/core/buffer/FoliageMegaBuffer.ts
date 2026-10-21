@@ -62,8 +62,8 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
      * [EN] Creates a `FoliageMegaBuffer` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param initialCapacity -
      * [KO] 초기 최대 인스턴스 수용량 (기본값: `65536`)
      * [EN] Initial maximum instance capacity (default: `65536`)

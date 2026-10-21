@@ -1,6 +1,6 @@
 /**
- * [KO] 지형 컴포넌트의 기본 격자(Quad) 해상도 프리셋 상수입니다.
- * [EN] Base grid (Quad) resolution preset constants for landscape components.
+ * [KO] 지형 컴포넌트의 한 변당 기본 쿼드(Quad) 분할 해상도 프리셋 상수입니다.
+ * [EN] Base quad subdivision resolution preset constants per side of a landscape component.
  *
  * @category Landscape
  */
@@ -40,7 +40,7 @@ Object.freeze(LANDSCAPE_BASE_GRID_SIZE);
 
 /**
  * [KO] 지형 기본 격자 해상도 상수의 값 타입입니다.
- * [EN] Value type of landscape base grid size constants.
+ * [EN] Value type of the landscape base grid size constants.
  *
  * @category Landscape
  */
@@ -72,4 +72,3 @@ export function validateLandscapeBaseGridSize(value: number): void {
 }
 
 export default LANDSCAPE_BASE_GRID_SIZE;
-

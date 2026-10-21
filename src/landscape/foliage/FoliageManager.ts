@@ -16,8 +16,8 @@ const DEFAULT_MOUNT_BUDGET: number = 16;
 const DEFAULT_UNMOUNT_BUDGET: number = 32;
 
 /**
- * [KO] 지형(Landscape) 상의 식생(Foliage) 타입 등록, 서브 셀 스트리밍, GPU 컬링 및 렌더링을 총괄하는 매니저 클래스입니다.
- * [EN] Manager class that oversees foliage type registration, sub-cell streaming, GPU culling, and rendering on a landscape.
+ * [KO] 지형(`Landscape`) 상의 식생 타입 등록, 서브 셀 스트리밍, GPU 컬링 및 렌더링을 관리하는 클래스입니다.
+ * [EN] Class that manages foliage type registration, sub-cell streaming, GPU culling, and rendering on a `Landscape`.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -26,6 +26,8 @@ const DEFAULT_UNMOUNT_BUDGET: number = 32;
  *
  * ### Example
  * ```typescript
+ * // [KO] 지형 식생 매니저를 통해 새로운 식생 타입 등록
+ * // [EN] Register a new foliage type via the landscape foliage manager
  * const foliage = landscape.foliageManager.addType({
  *     name: 'PineTree',
  *     lods: [{ mesh: pineMesh, lodDistance: 80 }],
@@ -60,7 +62,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      *
      * @param landscape -
      * [KO] 식생이 배치될 대상 `Landscape` 인스턴스
-     * [EN] Target `Landscape` instance where foliage will be placed
+     * [EN] Target `Landscape` instance where foliage is placed
      * @param onUniformUpdateNeeded -
      * [KO] 지형 유니폼 갱신이 필요할 때 호출되는 콜백 함수
      * [EN] Callback function invoked when landscape uniform update is needed
@@ -160,8 +162,8 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 메인 렌더링 패스에서 발생하는 총 드로우 콜 수를 반환합니다.
-     * [EN] Returns the total number of draw calls issued in the main rendering pass.
+     * [KO] 메인 렌더 패스에서 발생하는 총 드로우 콜 수를 반환합니다.
+     * [EN] Returns the total number of draw calls issued in the main render pass.
      *
      * @returns
      * [KO] 메인 패스 드로우 콜 수
@@ -232,12 +234,12 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 식생 스트리밍 서브 셀의 한 변 크기(월드 단위)를 반환합니다.
-     * [EN] Returns the side length of a foliage streaming sub-cell in world units.
+     * [KO] 식생 스트리밍 서브 셀의 한 변 크기(미터 단위)를 반환합니다.
+     * [EN] Returns the side length of a foliage streaming sub-cell in meters.
      *
      * @returns
-     * [KO] 서브 셀 크기
-     * [EN] Sub-cell size
+     * [KO] 서브 셀 크기 (미터)
+     * [EN] Sub-cell size in meters
      */
     get subCellSize(): number {
         return FOLIAGE_SUB_CELL_SIZE;
@@ -256,7 +258,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 간접 드로우 버퍼(Indirect Buffer) 카운터를 초기화하는 커맨드를 커맨드 인코더에 기록합니다.
+     * [KO] 간접 드로우 버퍼 카운터 초기화 명령을 커맨드 인코더에 기록합니다.
      * [EN] Records commands to reset indirect draw buffer counters into the command encoder.
      *
      * @param encoder -
@@ -434,7 +436,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 지정한 식생 인스턴스 또는 이름과 일치하는 식생 타입을 매니저에서 제거하고 파괴합니다.
+     * [KO] 지정한 식생 인스턴스 또는 이름과 일치하는 식생 타입을 매니저에서 제거하고 파기합니다.
      * [EN] Removes and destroys the foliage type matching the specified instance or name from the manager.
      *
      * @param target -
@@ -469,7 +471,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 새로운 식생(Foliage) 타입을 생성하여 매니저에 등록합니다.
+     * [KO] 새로운 식생(`Foliage`) 타입을 생성하여 매니저에 등록합니다.
      * [EN] Creates a new `Foliage` type and registers it with the manager.
      *
      * @param options -

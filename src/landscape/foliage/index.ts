@@ -1,6 +1,6 @@
 /**
- * [KO] 식생(Foliage) 렌더링 및 관리 기능을 제공하는 모듈입니다.
- * [EN] Module providing foliage rendering and management functionality.
+ * [KO] 지형 식생(Foliage) 스트리밍, GPU 컬링 및 렌더링 모듈입니다.
+ * [EN] Module for terrain foliage streaming, GPU culling, and rendering.
  * @packageDocumentation
  */
 export * as Core from "./core";

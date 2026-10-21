@@ -35,8 +35,8 @@ class FoliageCuller extends AScatterCuller {
      * [EN] Creates a `FoliageCuller` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPU context instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param megaBuffer -
      * [KO] 식생 통합 GPU 버퍼를 관리하는 `FoliageMegaBuffer` 인스턴스 (선택)
      * [EN] `FoliageMegaBuffer` instance managing unified foliage GPU buffers (optional)

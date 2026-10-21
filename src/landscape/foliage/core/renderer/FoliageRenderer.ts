@@ -24,8 +24,8 @@ interface FoliageMainBundleCacheEntry {
  * [EN] Renderer class that performs Depth Prepass, main pass, and shadow pass rendering for massive foliage instances using GPU indirect drawing (`drawIndexedIndirect`) and render bundle (`GPURenderBundle`) caching.
  *
  * ::: warning
- * [KO] 이 클래스는 `FoliageManager` 내부에서 자동으로 생성 및 관리됩니다.<br/>직접 `new` 키워드로 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created and managed internally by `FoliageManager`.<br/>Do not create an instance directly using the `new` keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Landscape
@@ -63,8 +63,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
      * [EN] Initializes a `FoliageRenderer` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param pipelineRegistry -
      * [KO] 폴리지 파이프라인 레지스트리
      * [EN] Foliage pipeline registry
@@ -103,6 +103,10 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     /**
      * [KO] Depth Prepass 사용 여부를 반환하거나 설정합니다.
      * [EN] Gets or sets whether Depth Prepass is enabled.
+     *
+     * @returns
+     * [KO] Depth Prepass 사용 여부
+     * [EN] Whether Depth Prepass is enabled
      */
     get useDepthPrepass(): boolean {
         return this.#useDepthPrepass;

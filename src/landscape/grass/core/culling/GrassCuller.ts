@@ -23,12 +23,12 @@ class GrassCuller extends AScatterCuller {
     #uniformUint32View: Uint32Array;
 
     /**
-     * [KO] GrassCuller 인스턴스를 초기화합니다.
-     * [EN] Initializes the GrassCuller instance.
+     * [KO] `GrassCuller` 인스턴스를 생성합니다.
+     * [EN] Creates a `GrassCuller` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);

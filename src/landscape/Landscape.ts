@@ -94,12 +94,14 @@ class Landscape extends RedGPUObject {
      *
      * ### Example
      * ```typescript
+     * // [KO] 가로/세로 4000 크기의 지형 인스턴스 생성
+     * // [EN] Create a Landscape instance with 4000x4000 dimensions
      * const landscape = new RedGPU.Landscape.Landscape(redGPUContext, [4000, 4000]);
      * ```
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param worldSize -
      * [KO] 지형의 전체 월드 크기 (단일 숫자 또는 `[worldSizeX, worldSizeZ]` 튜플, 기본값: `2000`)
      * [EN] Total world size of the terrain (single number or `[worldSizeX, worldSizeZ]` tuple, default: `2000`)
@@ -208,8 +210,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 디버그 시각화 및 바운딩 박스/와이어프레임을 제어하는 `LandscapeDebuggerManager`를 반환합니다.
-     * [EN] Returns the `LandscapeDebuggerManager` that controls terrain debug visualization and bounding boxes/wireframes.
+     * [KO] 지형 디버그 시각화 및 오버레이를 제어하는 `LandscapeDebuggerManager`를 반환합니다.
+     * [EN] Returns the `LandscapeDebuggerManager` that controls terrain debug visualization and overlays.
      *
      * @returns
      * [KO] `LandscapeDebuggerManager` 인스턴스
@@ -220,8 +222,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 위 식생(나무, 바위 등 3D 메시) 산포를 관리하는 `FoliageManager`를 반환합니다.
-     * [EN] Returns the `FoliageManager` that manages vegetation (3D meshes such as trees and rocks) scattering on the terrain.
+     * [KO] 지형 위 식생(3D 메시) 산포를 관리하는 `FoliageManager`를 반환합니다.
+     * [EN] Returns the `FoliageManager` that manages vegetation (3D mesh) scattering on the terrain.
      *
      * @returns
      * [KO] `FoliageManager` 인스턴스
@@ -874,6 +876,8 @@ class Landscape extends RedGPUObject {
      *
      * ### Example
      * ```typescript
+     * // [KO] 지형에 잔디 스플래팅 레이어 추가
+     * // [EN] Add a grass splatting layer to the landscape
      * const grassLayer = landscape.addLayer({
      *     name: 'Grass',
      *     baseColorTexture: './assets/grass_diff.jpg',

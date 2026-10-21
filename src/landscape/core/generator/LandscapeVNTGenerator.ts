@@ -24,8 +24,8 @@ class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
      * [EN] Initializes a `LandscapeVNTGenerator` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VNT');

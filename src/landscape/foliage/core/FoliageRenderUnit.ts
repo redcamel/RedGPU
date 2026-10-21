@@ -239,11 +239,11 @@ class FoliageRenderUnit extends ScatterRenderUnit {
      * [EN] Updates ground surface color blend strength and range in the slot buffer.
      *
      * @param groundBlendStrength -
-     * [KO] 지형 블렌딩 강도 (0.0 ~ 1.0)
-     * [EN] Ground blend strength (0.0 to 1.0)
+     * [KO] 지형 블렌딩 강도 (`0.0` ~ `1.0`)
+     * [EN] Ground blend strength (`0.0` to `1.0`)
      * @param groundBlendRange -
-     * [KO] 지형 블렌딩 적용 높이 범위(월드 단위)
-     * [EN] Ground blend height range in world units
+     * [KO] 지형 블렌딩 적용 높이 범위(미터 단위)
+     * [EN] Ground blend height range in meters
      */
     updateGroundBlendParams(
         groundBlendStrength: number,

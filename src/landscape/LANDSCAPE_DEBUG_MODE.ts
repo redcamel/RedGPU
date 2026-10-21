@@ -1,6 +1,6 @@
 /**
- * [KO] 지형 렌더링의 시각적 디버깅 모드 상수입니다.
- * [EN] Visual debugging mode constants for landscape rendering.
+ * [KO] 지형 렌더링의 시각적 디버그 모드 상수입니다.
+ * [EN] Visual debug mode constants for landscape rendering.
  *
  * @category Landscape
  */
@@ -69,10 +69,9 @@ export const LANDSCAPE_DEBUG_MODE = {
 
 /**
  * [KO] 지형 디버그 모드 상수의 값 타입입니다.
- * [EN] Value type of landscape debug mode constants.
+ * [EN] Value type of the landscape debug mode constants.
  *
  * @category Landscape
  */
 export type LANDSCAPE_DEBUG_MODE = typeof LANDSCAPE_DEBUG_MODE[keyof typeof LANDSCAPE_DEBUG_MODE];
 Object.freeze(LANDSCAPE_DEBUG_MODE);
-

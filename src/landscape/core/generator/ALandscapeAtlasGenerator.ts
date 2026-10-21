@@ -28,14 +28,14 @@ abstract class ALandscapeAtlasGenerator extends RedGPUObject {
      * [EN] Initializes an `ALandscapeAtlasGenerator` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      * @param generatorLabel -
      * [KO] GPU 리소스 디버그 라벨 식별자 (예: `'VHT'`, `'VNT'`, `'VBT'`)
      * [EN] GPU resource debug label identifier (e.g., `'VHT'`, `'VNT'`, `'VBT'`)
      * @param workgroupSize -
      * [KO] 컴퓨트 셰이더 2D 워크그룹 가로/세로 크기 (기본값: `16`)
-     * [EN] Compute shader 2D workgroup width/height size (Default: `16`)
+     * [EN] Compute shader 2D workgroup width/height size (default: `16`)
      */
     constructor(redGPUContext: RedGPUContext, generatorLabel: string, workgroupSize: number = 16) {
         super(redGPUContext);
@@ -169,11 +169,11 @@ abstract class ALandscapeAtlasGenerator extends RedGPUObject {
      * [KO] WGSL 컴퓨트 셰이더 소스 코드
      * [EN] WGSL compute shader source code
      * @param layoutEntries -
-     * [KO] 바인드 그룹 레이아웃 엔트리 배열 (`GPUBindGroupLayoutEntry[]`)
-     * [EN] Array of bind group layout entries (`GPUBindGroupLayoutEntry[]`)
+     * [KO] 바인드 그룹 레이아웃 엔트리 배열 (`Array<GPUBindGroupLayoutEntry>`)
+     * [EN] Array of bind group layout entries (`Array<GPUBindGroupLayoutEntry>`)
      * @param defaultUniformByteLength -
-     * [KO] 초기 유니폼 버퍼 슬롯의 기본 바이트 크기 (기본값: 16)
-     * [EN] Default byte length for initial uniform buffer slots (default: 16)
+     * [KO] 초기 유니폼 버퍼 슬롯의 기본 바이트 크기 (기본값: `16`)
+     * [EN] Default byte length for initial uniform buffer slots (default: `16`)
      */
     initBaseComputePipeline(
         shaderModuleKey: string,

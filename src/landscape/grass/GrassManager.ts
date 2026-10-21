@@ -11,16 +11,18 @@ import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_
 import {AScatterManager} from "../core/scatter";
 
 /**
- * [KO] 지형(`Landscape`) 상의 대규모 잔디(Grass) 스캐터링, 카메라 중심 GPU 인스턴스 베이킹, GPU 프러스텀 컬링 및 렌더링을 총괄하는 매니저 클래스입니다.
- * [EN] Manager class that oversees large-scale grass scattering, camera-centered GPU instance baking, GPU frustum culling, and rendering on a `Landscape`.
+ * [KO] 지형(`Landscape`) 상의 대규모 잔디 스캐터링, 카메라 중심 GPU 인스턴스 베이킹, GPU 프러스텀 컬링 및 렌더링을 관리하는 클래스입니다.
+ * [EN] Class that manages large-scale grass scattering, camera-centered GPU instance baking, GPU frustum culling, and rendering on a `Landscape`.
  *
  * ::: warning
- * [KO] 이 클래스는 `Landscape` 내부에서 자동으로 생성되어 `landscape.grassManager`를 통해 제공됩니다.<br/>직접 `new` 키워드로 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created inside `Landscape` and provided via `landscape.grassManager`.<br/>Do not create an instance directly using the `new` keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * ### Example
  * ```typescript
+ * // [KO] 지형 잔디 매니저를 통해 새로운 잔디 타입 등록
+ * // [EN] Register a new grass type via the landscape grass manager
  * const grass = landscape.grassManager.addType({
  *     name: 'MeadowGrass',
  *     mesh: grassMesh,
@@ -29,8 +31,7 @@ import {AScatterManager} from "../core/scatter";
  * });
  * ```
  *
- * @see {@link Grass}
- * @see {@link GrassOptions}
+ * @see [Foliage and Impostors example](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
  * @category Landscape
  */
 class GrassManager extends AScatterManager<Grass, GrassOptions> {
@@ -54,8 +55,8 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
     #lastUpdateFrameIndex: number = -1;
 
     /**
-     * [KO] `GrassManager` 인스턴스를 초기화합니다.
-     * [EN] Initializes a `GrassManager` instance.
+     * [KO] `GrassManager` 인스턴스를 생성합니다.
+     * [EN] Creates a `GrassManager` instance.
      *
      * @param landscape -
      * [KO] 이 매니저가 속한 대상 `Landscape` 인스턴스
@@ -81,6 +82,10 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
     /**
      * [KO] 등록된 모든 잔디 타입에 대해 현재 베이킹된 총 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of currently baked instances across all registered grass types.
+     *
+     * @returns
+     * [KO] 베이킹된 총 인스턴스 수
+     * [EN] Total baked instance count
      */
     get totalInstanceCount(): number {
         let count = 0;
@@ -97,6 +102,10 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
     /**
      * [KO] 최소 하나 이상의 잔디 타입이 등록되어 초기화되었는지 여부를 반환합니다.
      * [EN] Returns whether at least one grass type has been registered and populated.
+     *
+     * @returns
+     * [KO] 잔디 타입 등록 및 초기화 여부
+     * [EN] Whether grass types are populated
      */
     get populated(): boolean {
         return this.#populated;
@@ -105,6 +114,10 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
     /**
      * [KO] 메가 버퍼(`GrassMegaBuffer`)가 수용할 수 있는 최대 잔디 인스턴스 용량을 반환합니다.
      * [EN] Returns the maximum grass instance capacity of the mega buffer (`GrassMegaBuffer`).
+     *
+     * @returns
+     * [KO] 최대 잔디 인스턴스 수용량
+     * [EN] Maximum grass instance capacity
      */
     get instanceCapacity(): number {
         return this.#megaBuffer.instanceCapacity;

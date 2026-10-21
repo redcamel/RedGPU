@@ -40,8 +40,8 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [EN] Initializes a `LandscapeVBTGenerator` instance.
      *
      * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * [KO] `RedGPUContext` 인스턴스
+     * [EN] `RedGPUContext` instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VBT', 8);
@@ -69,8 +69,8 @@ class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
      * [KO] 합성할 레이어 정보를 가진 `LandscapeMaterial` 인스턴스
      * [EN] `LandscapeMaterial` instance containing layer information to composite
      * @param singleTilePixels -
-     * [KO] 단일 타일당 픽셀 해상도 (기본값: 256)
-     * [EN] Pixel resolution per single tile (default: 256)
+     * [KO] 단일 타일당 픽셀 해상도 (기본값: `256`)
+     * [EN] Pixel resolution per single tile (default: `256`)
      */
     bakeAtlas(
         vntAtlas: DirectTexture,
