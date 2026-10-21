@@ -59,13 +59,13 @@ interface LakeMaterial {
      */
     normalDetailScale: number;
     /**
-     * [KO] 기본 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `18.0`)
-     * [EN] Tiling repeat count of the primary normal texture. (Default: `18.0`)
+     * [KO] 기본 지오메트리 크기(월드 `100m`) 기준 기본 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `20.0`, 타일당 `5.0m`)
+     * [EN] Tiling repeat count of the primary normal texture per `100m` reference world scale. (Default: `20.0`, `5.0m` per tile)
      */
     normalTiling: number;
     /**
-     * [KO] 디테일 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `36.0`)
-     * [EN] Tiling repeat count of the detail normal texture. (Default: `36.0`)
+     * [KO] 기본 지오메트리 크기(월드 `100m`) 기준 디테일 노멀 텍스처의 타일링 반복 횟수입니다. (기본값: `40.0`, 타일당 `2.5m`)
+     * [EN] Tiling repeat count of the detail normal texture per `100m` reference world scale. (Default: `40.0`, `2.5m` per tile)
      */
     normalDetailTiling: number;
     /**
@@ -252,8 +252,8 @@ class LakeMaterial extends ABitmapBaseMaterial {
         this.refractionStrength = 1.0;
         this.normalScale = 1.0;
         this.normalDetailScale = 0.5;
-        this.normalTiling = 18.0;
-        this.normalDetailTiling = 36.0;
+        this.normalTiling = 20.0;
+        this.normalDetailTiling = 40.0;
         this.flowRateScale = 0.025;
         this.extinctionFactor = 0.22;
         this.depthFadeDistance = 0.8;
@@ -302,8 +302,8 @@ definePositiveNumber(LakeMaterial, [
     {key: 'refractionStrength', value: 1.0, min: 0, max: 1},
     {key: 'normalScale', value: 1.0, min: 0.0, max: 1.0},
     {key: 'normalDetailScale', value: 0.5, min: 0.0, max: 1.0},
-    {key: 'normalTiling', value: 18.0},
-    {key: 'normalDetailTiling', value: 36.0},
+    {key: 'normalTiling', value: 20.0},
+    {key: 'normalDetailTiling', value: 40.0},
     {key: 'flowRateScale', value: 0.025},
     {key: 'extinctionFactor', value: 0.22},
     {key: 'depthFadeDistance', value: 0.8},

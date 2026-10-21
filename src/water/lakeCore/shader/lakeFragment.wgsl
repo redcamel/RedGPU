@@ -276,7 +276,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let effectiveWindSpeed = select(0.0, systemUniforms.wind.speed, systemUniforms.wind.enabled == 1u);
     let baseScrollSpeed = timeSec * effectiveWindSpeed * uniforms.flowRateScale;
-    let waveUV1 = inputData.uv * uniforms.normalTiling + primaryWindDir * baseScrollSpeed;
+    let baseWorldUV = worldPos.xz * 0.01;
+    let waveUV1 = baseWorldUV * uniforms.normalTiling + primaryWindDir * baseScrollSpeed;
 
     let rawSample1 = textureSample(normalTexture, normalTextureSampler, waveUV1).rgb;
     var rawXY1 = rawSample1.xy * 2.0 - 1.0;
@@ -290,7 +291,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     #redgpu_if normalDetailTexture
     {
-        let waveUV2 = inputData.uv * uniforms.normalDetailTiling + secondaryWindDir * (baseScrollSpeed * 1.6);
+        let waveUV2 = baseWorldUV * uniforms.normalDetailTiling + secondaryWindDir * (baseScrollSpeed * 1.6);
 
         let rawSample2 = textureSample(normalDetailTexture, normalTextureSampler, waveUV2).rgb;
         var rawXY2 = rawSample2.xy * 2.0 - 1.0;
