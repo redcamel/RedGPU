@@ -356,7 +356,7 @@ fn computeNearFieldLandscapeLayers(
         let layerBlendNormal = normalize(blendedNormalTangent);
         result.normal = perturbNormalOrthonormal(baseNormal, layerBlendNormal);
         result.isValid = true;
-    } else {
+    } else if (uniforms.layerParams[0].enabled > 0.5) {
         let layer0Params = uniforms.layerParams[0];
         let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
         let ddx0UV = ddxWorldTileUV * layer0Params.uvScale;
@@ -724,83 +724,88 @@ fn main(inputData: InputData) -> OutputFragment {
     let fadeStartDist = max(0.0, nearDist - nearFade);
     let fadeStartDistSq = fadeStartDist * fadeStartDist;
 
-    let isDetailActive = uniforms.activeLayerCount > 0u && nearDist > 0.0 && rawViewDistSq < nearDistSq;
+    var hasAnyEnabledLayer = false;
+    for (var li = 0u; li < uniforms.activeLayerCount; li = li + 1u) {
+        if (uniforms.layerParams[li].enabled > 0.5) {
+            hasAnyEnabledLayer = true;
+            break;
+        }
+    }
+
+    let isDetailActive = hasAnyEnabledLayer && nearDist > 0.0 && rawViewDistSq < nearDistSq;
 
     var albedo = uniforms.color.rgb;
     var N = baseNormal;
     var roughnessFactor = 0.85;
     var ambientOcclusion = 1.0;
 
-    if (!isDetailActive) {
-        let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-        let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+    if (hasAnyEnabledLayer) {
+        if (!isDetailActive) {
+            let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+            let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
 
-        let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
-        let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
-        N = select(baseNormal, vbtN, isVBTNormalValid);
+            let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
+            let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
+            N = select(baseNormal, vbtN, isVBTNormalValid);
 
-        let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
-        albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
-        roughnessFactor = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
-        ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
-    } else if (rawViewDistSq <= fadeStartDistSq) {
-        let nearDetail = computeNearFieldLandscapeLayers(
-            globalUV,
-            worldTileUV,
-            ddxGlobalUV,
-            ddyGlobalUV,
-            ddxWorldTileUV,
-            ddyWorldTileUV,
-            baseNormal
-        );
+            let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
+            albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
+            roughnessFactor = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
+            ambientOcclusion = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+        } else if (rawViewDistSq <= fadeStartDistSq) {
+            let nearDetail = computeNearFieldLandscapeLayers(
+                globalUV,
+                worldTileUV,
+                ddxGlobalUV,
+                ddyGlobalUV,
+                ddxWorldTileUV,
+                ddyWorldTileUV,
+                baseNormal
+            );
 
-        if (nearDetail.isValid) {
-            albedo = nearDetail.albedo;
-            N = nearDetail.normal;
-            roughnessFactor = clamp(nearDetail.roughness, 0.35, 1.0);
-            ambientOcclusion = nearDetail.ao;
+            if (nearDetail.isValid) {
+                albedo = nearDetail.albedo;
+                N = nearDetail.normal;
+                roughnessFactor = clamp(nearDetail.roughness, 0.35, 1.0);
+                ambientOcclusion = nearDetail.ao;
+            }
         } else {
             let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-            albedo = select(uniforms.color.rgb, vbtBaseColor.rgb, vbtBaseColor.a > 0.001);
-        }
-    } else {
-        let vbtBaseColor = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-        let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
+            let vbtNormalRaw = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
 
-        let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
-        let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
-        let farN = select(baseNormal, vbtN, isVBTNormalValid);
+            let vbtN = normalize(vbtNormalRaw * 2.0 - vec3<f32>(1.0));
+            let isVBTNormalValid = dot(vbtNormalRaw, vbtNormalRaw) > 0.001;
+            let farN = select(baseNormal, vbtN, isVBTNormalValid);
 
-        let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
-        let farAlbedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
-        let farRoughness = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
-        let farAO = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
+            let isVBTColorValid = vbtBaseColor.a > 0.001 || dot(vbtBaseColor.rgb, vbtBaseColor.rgb) > 0.0001;
+            let farAlbedo = select(uniforms.color.rgb, vbtBaseColor.rgb, isVBTColorValid);
+            let farRoughness = select(0.85, clamp(vbtORM.g, 0.4, 1.0), isVBTColorValid);
+            let farAO = select(1.0, vbtORM.r, isVBTColorValid && vbtORM.r > 0.001);
 
-        let nearDetail = computeNearFieldLandscapeLayers(
-            globalUV,
-            worldTileUV,
-            ddxGlobalUV,
-            ddyGlobalUV,
-            ddxWorldTileUV,
-            ddyWorldTileUV,
-            baseNormal
-        );
+            let nearDetail = computeNearFieldLandscapeLayers(
+                globalUV,
+                worldTileUV,
+                ddxGlobalUV,
+                ddyGlobalUV,
+                ddxWorldTileUV,
+                ddyWorldTileUV,
+                baseNormal
+            );
 
-        if (nearDetail.isValid) {
             let blendFactor = saturate((nearDist - rawViewDist) / max(0.001, nearFade));
             let smoothBlend = smoothstep(0.0, 1.0, blendFactor);
 
-            albedo = mix(farAlbedo, nearDetail.albedo, smoothBlend);
-            N = normalize(mix(farN, nearDetail.normal, smoothBlend));
-            roughnessFactor = mix(farRoughness, nearDetail.roughness, smoothBlend);
-            ambientOcclusion = mix(farAO, nearDetail.ao, smoothBlend);
-        } else {
-            albedo = farAlbedo;
-            N = farN;
-            roughnessFactor = farRoughness;
-            ambientOcclusion = farAO;
+            let nearAlbedo = select(uniforms.color.rgb, nearDetail.albedo, nearDetail.isValid);
+            let nearN = select(baseNormal, nearDetail.normal, nearDetail.isValid);
+            let nearRoughness = select(0.85, nearDetail.roughness, nearDetail.isValid);
+            let nearAO = select(1.0, nearDetail.ao, nearDetail.isValid);
+
+            albedo = mix(farAlbedo, nearAlbedo, smoothBlend);
+            N = normalize(mix(farN, nearN, smoothBlend));
+            roughnessFactor = mix(farRoughness, nearRoughness, smoothBlend);
+            ambientOcclusion = mix(farAO, nearAO, smoothBlend);
         }
     }
 

@@ -271,7 +271,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             finalMetallic = blendedMetallic * invW;
             finalAO = blendedAO * invW;
             N = perturbNormalOrthonormal(N, layerBlendNormal);
-        } else {
+        } else if (uniforms.layerParams[0].enabled > 0.5) {
             let layer0Params = uniforms.layerParams[0];
             let layer0UV = worldTileUV * layer0Params.uvScale + layer0Params.uvOffset;
             var layer0Albedo: vec3<f32>;
