@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] Character Walking 예제
  * [EN] Character Walking Example
  *
- * [KO] 스키닝 캐릭터(Soldier.glb)의 해변/수중 보행에 따른 실시간 동적 물결(Ripple) 생성과 파동 시뮬레이션 도메인 추적(interactionFollowTarget)을 시연합니다.
- * [EN] Demonstrates real-time dynamic ripple generation and wave simulation domain tracking (interactionFollowTarget) as a skinned character (Soldier.glb) walks through the beach and shallow water.
+ * [KO] Lake의 interactionFollowTarget 속성에 스키닝 캐릭터를 지정하여, 캐릭터 이동을 따라 파동 시뮬레이션 영역이 실시간 추적되며 보행 물결(Ripple)을 생성하는 예제입니다.
+ * [EN] Assigns a skinned character to Lake's interactionFollowTarget property so the wave simulation domain tracks the moving character and generates walking ripples in real time.
  */
 
 const canvas = document.createElement('canvas');

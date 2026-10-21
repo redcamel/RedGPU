@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
  * [KO] Lake Object Interaction 예제
  * [EN] Lake Object Interaction Example
  *
- * [KO] 수평 공전 구체(항적 파동)와 상하 왕복 구체(동심원 파동)를 통해 실시간 2D 파동 방정식(FDTD) 물결 생성 및 파동 간섭을 시연합니다.
- * [EN] Demonstrates real-time 2D wave equation (FDTD) ripple generation and wave interference using a horizontally orbiting sphere (wake waves) and a vertically bobbing sphere (concentric ripples).
+ * [KO] 메쉬의 enableWaterInteraction 속성을 활성화하여, 상하 왕복 구체와 수평 공전 구체가 수면과 상호작용하며 일으키는 실시간 물결(Ripple)과 파동 간섭을 시연합니다.
+ * [EN] Demonstrates real-time water ripples and wave interference by enabling enableWaterInteraction on vertically bobbing and horizontally orbiting spheres.
  */
 
 const canvas = document.createElement('canvas');
