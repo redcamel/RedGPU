@@ -41,6 +41,8 @@ import RenderViewStateData from "../display/view/core/RenderViewStateData";
  */
 class Lake extends Mesh {
     #isWater: boolean = true;
+    #width: number;
+    #height: number;
     #waveAmplitude: number = 0.025;
     #waveWavelength: number = 16.0;
     #maxPenetration: number = 0.35;
@@ -107,6 +109,9 @@ class Lake extends Mesh {
 
         super(redGPUContext, waterGeometry, waterMaterial, name);
 
+        this.#width = width;
+        this.#height = height;
+
         this.depthStencilState.depthWriteEnabled = false;
         this.primitiveState.cullMode = GPU_CULL_MODE.NONE;
         this.dirtyPipeline = true;
@@ -130,7 +135,7 @@ class Lake extends Mesh {
      * [EN] Returns whether this object is a water surface. (Always `true`)
      *
      * @returns
-     * [KO] 수면 객체 여부 (`true`)
+     * [KO] 수면 객체 여부를 반환합니다. (`true`)
      * [EN] Whether this is a water surface (`true`)
      */
     get isWater(): boolean {
@@ -192,8 +197,8 @@ class Lake extends Mesh {
     }
 
     /**
-     * [KO] 상호작용 시뮬레이션 도메인 중심이 추적할 대상 메시를 반환하거나 설정합니다. `null`이면 첫 번째 등록 메시 또는 호수 중심을 기준으로 동작합니다.
-     * [EN] Gets or sets the target mesh tracked as the center of the interaction simulation domain. If `null`, uses the first registered mesh or the lake center.
+     * [KO] 상호작용 시뮬레이션 도메인 중심이 추적할 대상 메시를 반환하거나 설정합니다. `null`이면 호수 중심(`this.x`, `this.z`)을 기준으로 동작합니다.
+     * [EN] Gets or sets the target mesh tracked as the center of the interaction simulation domain. If `null`, operates around the lake center (`this.x`, `this.z`).
      *
      * @returns
      * [KO] 추적 대상 `Mesh` 또는 `null`
@@ -280,6 +285,10 @@ class Lake extends Mesh {
         return this.#waveSimulator.waveSpeed;
     }
 
+    set rippleWaveSpeed(value: number) {
+        this.#waveSimulator.waveSpeed = value;
+    }
+
     /**
      * [KO] 상호작용 물결의 감쇠율을 반환하거나 설정합니다. (기본값: `0.012`)
      * [EN] Gets or sets the damping factor of interaction ripples. (Default: `0.012`)
@@ -292,8 +301,8 @@ class Lake extends Mesh {
         return this.#waveSimulator.damping;
     }
 
-    set rippleWaveSpeed(value: number) {
-        this.#waveSimulator.waveSpeed = value;
+    set rippleDamping(value: number) {
+        this.#waveSimulator.damping = value;
     }
 
     /**
@@ -308,8 +317,11 @@ class Lake extends Mesh {
         return this.#waveSimulator.normalStrength;
     }
 
-    set rippleDamping(value: number) {
-        this.#waveSimulator.damping = value;
+    set rippleNormalStrength(value: number) {
+        this.#waveSimulator.normalStrength = value;
+        if (this.material) {
+            this.waterMaterial.rippleNormalStrength = value;
+        }
     }
 
     /**
@@ -324,11 +336,8 @@ class Lake extends Mesh {
         return this.y;
     }
 
-    set rippleNormalStrength(value: number) {
-        this.#waveSimulator.normalStrength = value;
-        if (this.material) {
-            this.waterMaterial.rippleNormalStrength = value;
-        }
+    set waterLevel(value: number) {
+        this.y = value;
     }
 
     /**
@@ -417,20 +426,21 @@ class Lake extends Mesh {
             : Math.min(0.05, Math.max(0.001, (currentTime - this.#lastInteractionTime) * 0.001));
         this.#lastInteractionTime = currentTime;
 
-        let targetX = this.x;
-        let targetZ = this.z;
+        const lakeMatrix = this.modelMatrix;
+        const lakeX = lakeMatrix ? lakeMatrix[12] : this.x;
+        const lakeZ = lakeMatrix ? lakeMatrix[14] : this.z;
+
+        let targetX = lakeX;
+        let targetZ = lakeZ;
 
         if (this.#interactionFollowTarget) {
             const m = this.#interactionFollowTarget.modelMatrix;
-            targetX = m ? m[12] : this.#interactionFollowTarget.x;
-            targetZ = m ? m[14] : this.#interactionFollowTarget.z;
-        } else {
-            const firstMesh = LakeInteractionRegistry.firstMesh;
-            if (firstMesh) {
-                const m = firstMesh.modelMatrix;
-                targetX = m ? m[12] : firstMesh.x;
-                targetZ = m ? m[14] : firstMesh.z;
-            }
+            const rawTargetX = m ? m[12] : this.#interactionFollowTarget.x;
+            const rawTargetZ = m ? m[14] : this.#interactionFollowTarget.z;
+            const halfW = (this.#width * Math.abs(this.scaleX)) * 0.5;
+            const halfH = (this.#height * Math.abs(this.scaleZ)) * 0.5;
+            targetX = Math.max(lakeX - halfW, Math.min(lakeX + halfW, rawTargetX));
+            targetZ = Math.max(lakeZ - halfH, Math.min(lakeZ + halfH, rawTargetZ));
         }
 
         const domainSize = this.#interactionDomainSize;
@@ -470,10 +480,6 @@ class Lake extends Mesh {
         this.#currentShiftX = shiftX;
         this.#currentShiftZ = shiftZ;
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, this.#encodePass);
-    }
-
-    set waterLevel(value: number) {
-        this.y = value;
     }
 }
 

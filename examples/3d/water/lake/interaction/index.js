@@ -99,8 +99,8 @@ RedGPU.init(
         renderer.start(redGPUContext, (time) => {
             const sec = time * 0.001;
             bobbingSphere.y = 0.15 + Math.sin(sec * 2.6) * 0.75;
-            orbitSphere.x = Math.cos(sec * 1.1) * 3.8;
-            orbitSphere.z = Math.sin(sec * 1.1) * 3.1;
+            orbitSphere.x = Math.cos(sec * 1.1) * 7.8;
+            orbitSphere.z = Math.sin(sec * 1.1) * 3.8;
         });
 
         renderTestPane(redGPUContext, lake, orbitSphere, bobbingSphere, directionalLight);
