@@ -290,18 +290,27 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             }
         }
 
-        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG)
-            || this.#lastShadowMegaBuffer !== megaBuffer
-            || this.#lastShadowMaskLow !== shadowMaskLow
-            || this.#lastShadowMaskHigh !== shadowMaskHigh;
-
-        if (needsRebuild) {
+        if (
+            this.#lastShadowMegaBuffer !== megaBuffer ||
+            this.#lastShadowMaskLow !== shadowMaskLow ||
+            this.#lastShadowMaskHigh !== shadowMaskHigh
+        ) {
+            this.markShadowBundleDirty();
+            this.#lastShadowMegaBuffer = megaBuffer;
             this.#lastShadowMaskLow = shadowMaskLow;
             this.#lastShadowMaskHigh = shadowMaskHigh;
+        }
+
+        if (shadowMaskLow === 0 && shadowMaskHigh === 0) {
+            return;
+        }
+
+        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG);
+
+        if (needsRebuild) {
             const bundle = this.#recordShadowRenderBundle(currentCascade, systemBG, grassList, megaBuffer, unifiedGroup1);
             if (bundle) {
                 this.setShadowBundle(currentCascade, bundle, systemBG);
-                this.#lastShadowMegaBuffer = megaBuffer;
             } else {
                 this.setShadowBundle(currentCascade, null, null);
                 return;

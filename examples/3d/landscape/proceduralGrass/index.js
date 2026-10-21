@@ -39,7 +39,7 @@ RedGPU.init(
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 36;
-        directionalLight.azimuth = 135;
+        directionalLight.azimuth = 325;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
@@ -225,7 +225,7 @@ const renderTestPane = ({
         placementFolder.addBinding(type, 'instancesPerCell', {readonly: true});
         placementFolder.addBinding(type, 'densityScaleByWeight');
 
-        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: true});
+        const transformFolder = typeFolder.addFolder({title: 'Transform & Slope', expanded: false});
         const scaleProxy = {
             minScaleXZ: type.minScale[0],
             minScaleY: type.minScale[1],

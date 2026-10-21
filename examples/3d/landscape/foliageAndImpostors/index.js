@@ -38,8 +38,8 @@ RedGPU.init(
         view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 45;
-        directionalLight.azimuth = 225;
+        directionalLight.elevation = 36;
+        directionalLight.azimuth = 325;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         const landscape = new RedGPU.Landscape.Landscape(redGPUContext, 4000);
