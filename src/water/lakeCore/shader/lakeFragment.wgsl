@@ -335,6 +335,9 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
+    let distNormalFade = smoothstep(45.0, 160.0, camDist) * 0.65;
+    combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), distNormalFade));
+
     #redgpu_if rippleTexture
     {
         let simDomainSize = max(1.0, uniforms.rippleDomainSize);
@@ -344,17 +347,15 @@ fn main(inputData: InputData) -> OutputFragment {
             let edgeDist = min(simUV, vec2<f32>(1.0) - simUV);
             let edgeFade = smoothstep(0.0, 0.08, min(edgeDist.x, edgeDist.y));
 
-            let rawRippleNormal = vec3<f32>(simSample.x * uniforms.rippleNormalStrength, simSample.y * uniforms.rippleNormalStrength, 1.0);
-            let normalizedRippleNormal = normalize(rawRippleNormal);
-            let finalRippleNormal = normalize(mix(vec3<f32>(0.0, 0.0, 1.0), normalizedRippleNormal, edgeFade));
+            let rippleXY = simSample.xy * (uniforms.rippleNormalStrength * edgeFade);
+            let rippleFlatten = saturate(length(rippleXY) * 1.8) * 0.72;
+            combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), rippleFlatten));
 
+            let finalRippleNormal = normalize(vec3<f32>(rippleXY, 1.0));
             combinedTangentNormal = blendRNM(combinedTangentNormal, finalRippleNormal);
         }
     }
     #redgpu_endIf
-
-    let distNormalFade = smoothstep(45.0, 160.0, camDist) * 0.65;
-    combinedTangentNormal = normalize(mix(combinedTangentNormal, vec3<f32>(0.0, 0.0, 1.0), distNormalFade));
 
     let baseNormal = normalize(inputData.vertexNormal);
     let tbn = getTBNFromVertexTangent(baseNormal, inputData.vertexTangent);
