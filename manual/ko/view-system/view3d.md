@@ -71,7 +71,7 @@ const multiViewGraph = `
 **View3D** 인스턴스는 다음과 같은 독립적인 설정과 기능을 가집니다.
 
 * **독립적 환경 설정**: 스카이박스(Skybox), 스카이 대기(SkyAtmosphere), IBL 등을 뷰별로 다르게 적용 가능
-*   **디버깅 도구 지원**: 그리드(**Grid**) 및 축(**Axis**) 표시 여부 개별 제어
+* **디버깅 도구 지원**: 절차적 안티앨리어싱 그리드 (**Grid**) 및 축 (**Axis**) 표시 여부 개별 제어
 *   **멀티 뷰 운용**: 하나의 컨텍스트 내에서 여러 개의 독립적인 뷰를 동시에 렌더링 가능
 
 ## 2. 초기화 및 등록
@@ -140,7 +140,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 **View3D** 는 캔버스 내에서 자신이 차지할 영역과 렌더링 해상도를 결정합니다. 반응형 레이아웃 대응을 위해 CSS 픽셀 단위의 크기와 실제 GPU 렌더링 해상도를 분리하여 관리합니다.
 
-### 영역 설정 (Size & Position)
+### 영역 설정
 
 `setSize()` 와 `setPosition()` 메서드를 통해 뷰의 크기와 위치를 지정할 수 있습니다. 수치(Number), 퍼센트(`%`), 그리고 픽셀(`px`) 단위를 모두 지원합니다.
 
@@ -163,28 +163,26 @@ view.setPosition('10px', '10%');
 *   **`view.pixelRectObject`**: `devicePixelRatio` 가 적용된 실제 **물리 해상도**(Physical Resolution) 입니다. 내부적인 렌더링 계산에 사용됩니다.
 :::
 
-### 3.3 뷰별 크기 변경 감지 (onResize)
+### 3.3 뷰별 크기 변경 감지
 
 `redGPUContext.onResize`가 전체 캔버스의 크기 변화를 감지한다면, 개별 **View3D** 객체의 `onResize` 콜백은 해당 뷰의 크기가 변경될 때마다 호출됩니다. 
 
-뷰의 크기를 퍼센트(`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()`를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다. 이 콜백은 `RedResizeEvent` 인터페이스
-형식의 이벤트를 인자로 받습니다.
+뷰의 크기를 퍼센트 (`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()`를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다. 이 콜백은 `RedResizeEvent` 형식의
+이벤트 객체를 인자로 받습니다.
 
 #### RedResizeEvent 인터페이스 구조
 
-| 속성명                    | 타입                  | 설명                                                              |
-|:-----------------------|:--------------------|:----------------------------------------------------------------|
-| **`target`**           | `T` (예: `View3D`)   | 이벤트가 발생한 대상 뷰 인스턴스                                              |
+| 속성명                 | 타입                | 설명                                                                        |
+|:-----------------------|:--------------------|:----------------------------------------------------------------------------|
+| **`target`**           | `View3D`            | 이벤트가 발생한 대상 뷰 인스턴스                                            |
 | **`screenRectObject`** | `IRedGPURectObject` | CSS 픽셀 단위의 크기 및 위치 정보 (`{ x, y, width, height }`)               |
 | **`pixelRectObject`**  | `IRedGPURectObject` | `devicePixelRatio`가 적용된 물리 픽셀 단위 정보 (`{ x, y, width, height }`) |
 
-```typescript
-import {RedResizeEvent, View3D} from "RedGPU";
-
+```javascript
 // 개별 뷰의 크기 변경 시 호출될 콜백 정의
-view.onResize = (event: RedResizeEvent<View3D>) => {
-    const {target, screenRectObject, pixelRectObject} = event;
-    const {width, height} = screenRectObject;
+view.onResize = (event) => {
+    const { target, screenRectObject, pixelRectObject } = event;
+    const { width, height } = screenRectObject;
     console.log(`뷰 영역 변경: ${width}x${height} (물리 해상도: ${pixelRectObject.width}x${pixelRectObject.height})`);
     
     // 해당 뷰 내의 특정 UI 요소를 재배치하거나 카메라 설정을 조정합니다.
@@ -196,11 +194,19 @@ view.onResize = (event: RedResizeEvent<View3D>) => {
 
 개발 중 객체의 상대적인 위치와 방향을 직관적으로 파악할 수 있도록 시각화 도구를 제공합니다.
 
-*   **grid**: 3D 월드의 기본 평면(**XZ** 축) 에 격자를 렌더링합니다. 물체가 지면에 닿아 있는지 가늠하는 기준이 됩니다.
-*   **axis**: 월드의 원점(**0, 0, 0**) 을 기준으로 **XYZ** 축을 색상별로 표시합니다.
+* **grid**: 3D 월드의 기본 평면 (**XZ** 축) 에 절차적 안티앨리어싱 격자 (`DrawDebuggerGrid`)를 렌더링합니다. `1m` 단위의 보조 격자와 `10m` 단위의 주 격자 및 원거리
+  자동 페이드아웃을 지원하며, `boolean`(`true`/`false`)을 대입하거나 생성된 `view.grid` 인스턴스의 속성 (`size`, `lineColor`)을 직접 제어할 수 있습니다.
+* **axis**: 월드의 원점 (**0, 0, 0**) 을 기준으로 **XYZ** 축 (`DrawDebuggerAxis`)을 색상별로 표시합니다.
     *   <span style="color:#ff3e3e;font-weight:bold">Red</span>: **X** 축 (Right)
     *   <span style="color:#3eff3e;font-weight:bold">Green</span>: **Y** 축 (Up)
     *   <span style="color:#3e3eff;font-weight:bold">Blue</span>: **Z** 축 (Depth)
+
+```javascript
+// 그리드 활성화 및 커스터마이징
+view.grid = true;
+view.grid.size = 200;          // 그리드 전체 범위 설정 (기본값: 100)
+view.grid.lineColor = '#888888'; // 보조 격자선 색상 변경
+```
 
 ## 5. 멀티 뷰 시스템
 
@@ -316,16 +322,21 @@ RedGPU.init(
 * **`skyAtmosphere`** (`SkyAtmosphere`): 대기 산란 효과를 연출하기 위한 스카이 대기를 설정하거나 가져옵니다.
 * **`ibl`** (`IBL`): 이미지 기반 조명(Image-Based Lighting) 효과를 위한 IBL 데이터를 연결하거나 가져옵니다.
 
-### 6.2 후처리 및 톤 매핑 매니저
+### 6.2 후처리, 톤 매핑 및 TAA 매니저
 
-* **`postEffectManager`** (`PostEffectManager`): 블러, 블룸 등 해당 뷰 영역 전체에 최종 적용할 후처리 필터들을 추가하고 관리하는 매니저입니다.
+* **`postEffectManager`** (`PostEffectManager`): 자동 노출 (`autoExposure`), 빌트인 이펙트 (`ssao`, `ssr`), 블러·블룸 등 해당 뷰 영역 전체에
+  적용할 후처리 필터들을 관리하는 매니저입니다.
 * **`toneMappingManager`** (`ToneMappingManager`): 고대비(HDR)로 계산된 해당 뷰의 렌더링 결과물을 모니터 표준 범위(SDR)로 변환해주는 톤 매핑 정책을 관리합니다.
+* **`taa`** (`TAA`, 읽기 전용): 뷰별 시간축 안티앨리어싱 (`TAA`)의 샤프닝 강도 (`view.taa.sharpness`) 조절 및 히스토리 리셋 (`view.taa.reset()`)을 담당하는
+  객체입니다.
 
-### 6.3 렌더링 최적화 (Culling)
+### 6.3 렌더링 최적화
 
 * **`useFrustumCulling`** (`boolean`, 기본값: `true`): 카메라 시야각(절두체)을 벗어난 메쉬들의 드로우 콜을 자동으로 생략하여 프레임 레이트를 높입니다.
 * **`useDistanceCulling`** (`boolean`, 기본값: `false`): 카메라와 메쉬 간의 거리를 기준으로 특정 거리 이상 멀어진 물체의 렌더링을 차단합니다.
 * **`distanceCulling`** (`number`, 기본값: `50`): 거리 기반 컬링을 수행할 한계 거리 수치입니다.
+* **`hierarchicalZBuffer`** (`HierarchicalZBuffer`, 읽기 전용): 대규모 지형 (`Landscape`), 식생 (`Foliage`), 인스턴싱 메시
+  (`InstancingMesh`)의 GPU 기반 오클루전 컬링 (Occlusion Culling)을 위해 뷰의 깊이 버퍼로부터 매 프레임 자동 생성되는 계층적 Z-버퍼 (HZB) 피라미드 객체입니다.
 
 ### 6.4 유틸리티 및 디버그 상태 데이터
 

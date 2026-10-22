@@ -15,8 +15,9 @@ RedGPU 는 용도에 따라 세 가지 표준 투영 방식을 지원합니다.
 **PerspectiveCamera** 는 **원근 투영**(Perspective Projection) 방식을 사용합니다. 사람의 눈이나 실제 카메라 렌즈와 유사하게 작동하며, 멀리 있는 물체는 작고 가까운 물체는
 크게 렌더링하여 현실감 있는 공간감을 제공합니다.
 
-특히 RedGPU의 **PerspectiveCamera**는 실제 세계의 렌즈를 시뮬레이션하는 **물리 기반 카메라(Physical Camera)** 모델링을 지향합니다. 주변 환경의 조도(광량) 변화에 맞추어
-실시간으로 화면의 적정 밝기 노출값을 자동 계산해주는 **자동 노출(`useAutoExposure`) 기능이 기본 활성화(`true`)** 되어 동작합니다.
+특히 RedGPU의 **PerspectiveCamera**는 실제 세계의 렌즈를 시뮬레이션하는 **물리 기반 카메라**(Physical Camera) 모델링을 지향합니다. 주변 환경의 조도 (광량) 변화에 맞추어
+실시간으로 화면의 적정 밝기 노출값을 자동 계산해주는 **자동 노출**(`useAutoExposure`) 기능이 기본 활성화 (`true`)되어 동작하며, 대규모 오픈월드 (LWC) 렌더링을 위해 기본 최대 가시
+거리 (`farClipping`)가 `50000`으로 설정되어 있습니다.
 
 ```javascript
 // 인스턴스 생성 (Context 주입 불필요)
@@ -30,14 +31,43 @@ camera.useAutoExposure = true;
 camera.fieldOfView = 45;
 
 // 3. 가시 거리(Clipping Planes) 설정
-// near ~ far 사이의 물체만 화면에 그려집니다.
+// near ~ far 사이의 물체만 화면에 그려집니다. (기본값: near 0.1, far 50000)
 camera.nearClipping = 0.1;
-camera.farClipping = 1000;
+camera.farClipping = 50000;
 
 // 4. 위치 설정 (Transform)
 camera.x = 0;
 camera.y = 5;
 camera.z = -15;
+```
+
+### 1.1 물리 카메라 노출 속성 및 자동 노출 제어
+
+카메라는 실제 DSLR/시네마 카메라와 동일한 물리적 노출 파라미터를 보유하며, `useAutoExposure = false` 일 때 수동 노출 (`ev100`) 기준으로 동작하고
+`useAutoExposure = true` 일 때는 뷰의 `view.postEffectManager.autoExposure` 설정에 따라 실시간 휘도 적응을 수행합니다.
+
+| 구분                   | 속성명                           | 기본값              | 설명                                                          |
+|:-----------------------|:---------------------------------|:--------------------|:--------------------------------------------------------------|
+| **Camera (`ACamera`)** | **`useAutoExposure`**            | `true`              | 실시간 화면 휘도 분석 기반 자동 노출 활성화 여부              |
+| **Camera (`ACamera`)** | **`aperture`**                   | `16.0`              | 조리개 값 (f-stop, 범위: `1.0 ~ 32.0`)                        |
+| **Camera (`ACamera`)** | **`shutterSpeed`**               | `1 / 125`           | 셔터 스피드 (초 단위 노출 시간)                               |
+| **Camera (`ACamera`)** | **`iso`**                        | `100`               | 센서 감도 (ISO, 범위: `50 ~ 25600`)                           |
+| **Camera (`ACamera`)** | **`ev100`**                      | 읽기 전용           | 조리개, 셔터 스피드, ISO로부터 자동 산출된 EV100 노출값       |
+| **AutoExposure**       | **`exposureCompensation`**       | `0.0`               | 자동 노출 결과에 가산할 노출 보정값 (EV 단위)                 |
+| **AutoExposure**       | **`meteringMode`**               | `'center-weighted'` | 측광 모드 (`AVERAGE` 전체 평균 / `CENTER_WEIGHTED` 중앙 중점) |
+| **AutoExposure**       | **`minEV100` / `maxEV100`**      | `6.0` / `15.0`      | 자동 노출이 적응할 최소·최대 EV100 한계 범위                  |
+| **AutoExposure**       | **`adaptationSpeedUp` / `Down`** | `3.0` / `1.0`       | 밝은 곳 및 어두운 곳으로 이동할 때의 눈 적응 속도             |
+| **AutoExposure**       | **`targetLuminance`**            | `0.18`              | 자동 노출이 목표로 삼는 화면 평균 휘도 기준값 (18% 중성 회색) |
+
+```javascript
+// 자동 노출(AutoExposure) 세부 파라미터 조정 예시
+const autoExposure = view.postEffectManager.autoExposure;
+autoExposure.exposureCompensation = 0.5; // +0.5 EV 밝게 보정
+autoExposure.meteringMode = RedGPU.Camera.AutoExposure.METERING_MODE.CENTER_WEIGHTED;
+autoExposure.minEV100 = 6.0;
+autoExposure.maxEV100 = 15.0;
+autoExposure.adaptationSpeedUp = 3.0;
+autoExposure.adaptationSpeedDown = 1.0;
 ```
 
 ## 2. Camera2D
@@ -48,11 +78,11 @@ camera.z = -15;
 ## 3. OrthographicCamera
 
 **OrthographicCamera** 는 원근감에 따른 왜곡이 발생하지 않는 **직교 투영**(Orthographic Projection) 카메라입니다. 주로 원근감이 없이 물체의 실제 스펙 비율을 정확히
-유지해야 하는 기계 및 건축 도면 설계 뷰어나 2.5D 쿼터뷰(Isometric) 환경이 필요한 경우에 이런 카메라가 있다는 점을 참고하여 제한적으로 사용됩니다.
+유지해야 하는 기계 및 건축 도면 설계 뷰어나 2.5D 쿼터뷰 (Isometric) 환경이 필요한 경우에 제한적으로 사용됩니다.
 
 ---
 
-## 4. 시선 제어 (lookAt)
+## 4. 시선 제어
 
 카메라의 위치를 옮긴 후 특정 지점을 정면으로 응시하게 하려면 `lookAt()` 메서드를 사용합니다. 이 메서드는 목표 지점을 바라보도록 **뷰 행렬** 을 자동으로 재계산합니다.
 
@@ -64,7 +94,7 @@ camera.lookAt(0, 0, 0);
 // camera.lookAt(mesh.x, mesh.y, mesh.z);
 ```
 
-## 4. 실습 예제: 카메라 궤도 회전
+## 5. 실습 예제: 카메라 궤도 회전
 
 카메라의 위치를 원형 궤도로 이동시키면서, `lookAt()` 을 이용해 항상 중앙의 물체를 주시하는 예제입니다.
 

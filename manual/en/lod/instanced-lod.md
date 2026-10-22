@@ -62,7 +62,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.5;
+    ambientLight.lux = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Create InstancingMesh

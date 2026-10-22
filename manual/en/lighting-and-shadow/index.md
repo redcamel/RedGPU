@@ -12,6 +12,8 @@ Covers lighting and shadows, key elements that complete the sense of three-dimen
 1. **[Light](./light.md)**: Types of various light sources and how to use the light manager (`LightManager`)
 2. **[Phong Material](./phong-material.md)**: Learning properties of realistic materials reacting to light
 3. **[Shadow](./shadow.md)**: Shadow generation principles and quality settings
+4. **[PBR Material](./pbr-material.md)**: Physically based rendering (Metallic-Roughness) and glTF KHR material
+   extensions
 
 ---
 

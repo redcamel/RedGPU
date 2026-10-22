@@ -11,12 +11,13 @@ If the **Camera** learned earlier is the 'eye', the **Controller** is the 'joyst
 
 RedGPU provides standard controllers that respond to various interaction scenarios.
 
-| Class Name | Control Method | Main Usage |
-| :--- | :--- | :--- |
-| **`OrbitController`** | **Left Click**: Rotate<br>**Wheel**: Zoom | Product 360 viewer, character observation, exploration centered on a specific target |
-| **`FollowController`** | Automatic target tracking (smooth interpolation) | TPS (3rd-person) games, character tracking camera |
-| **`FreeController`** | **W, A, S, D**: Move<br>**Mouse**: Gaze rotation | FPS games, architectural interior tours, debugging |
-| **`IsometricController`** | Maintains a fixed 45-degree angle | Real-time strategy (RTS) games, isometric views |
+| Class Name                      | Control Method                                                           | Main Usage                                                                              |
+|:--------------------------------|:-------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|
+| **`OrbitController`**           | **Left Click**: Rotate<br>**Wheel**: Zoom                                | Product 360 viewer, character observation, exploration centered on a specific target    |
+| **`FollowController`**          | Automatic target tracking (smooth interpolation)                         | TPS (3rd-person) games, character tracking camera                                       |
+| **`FreeController`**            | **W, A, S, D**: Move<br>**Mouse**: Gaze rotation                         | FPS games, architectural interior tours, debugging                                      |
+| **`IsometricController`**       | Maintains a fixed 45-degree angle                                        | Real-time strategy (RTS) games, isometric views                                         |
+| **`SimpleCharacterController`** | **W, A, S, D**: Move character<br>**Space**: Jump / **Mouse**: TPS orbit | 3rd-person character movement, terrain (`Landscape`) height snapping, water interaction |
 
 ::: tip [Camera Instance Management]
 All **Controller** classes internally create and own a dedicated **Camera** instance. Therefore, you don't need to create a separate camera when creating a **Controller**; just pass the controller into the camera argument when creating `View3D`, and it will be linked automatically.
@@ -80,6 +81,44 @@ Suitable for strategy simulations or infographics by maintaining a fixed angle.
 ### FollowController
 Provides a viewpoint that smoothly follows characters or moving objects.
 <iframe src="/RedGPU/examples/3d/controller/followController/" ></iframe>
+
+---
+
+## 4. 3rd-Person Character Controller (`SimpleCharacterController`)
+
+`RedGPU.Camera.SimpleCharacterController` combines **W, A, S, D** character movement, **Space** jumping, gravity
+physics, and a 3rd-person orbit camera around a target `Mesh`. It also accepts a custom ground height callback in
+`update(deltaTime, getGroundHeight)` to snap characters seamlessly onto open-world terrain
+(`landscape.getHeightAt(x, z)`).
+
+| Property / Method                 | Default         | Description                                                                                               |
+|:----------------------------------|:----------------|:----------------------------------------------------------------------------------------------------------|
+| **`moveSpeed`**                   | `8.0`           | Character movement speed (units/sec)                                                                      |
+| **`jumpForce` / `gravity`**       | `8.5` / `-24.0` | Jump initial velocity and gravity acceleration                                                            |
+| **`distance` / `heightOffset`**   | `6.0` / `1.5`   | Camera distance from the character and vertical look-at offset                                            |
+| **`groundHeight`**                | `0.0`           | Fallback ground plane Y height                                                                            |
+| **`isMoving` / `isGrounded`**     | Read-only       | Whether the character is currently moving or touching the ground (useful for animation state transitions) |
+| **`update(dt, getGroundHeight)`** | Method          | Updates character movement, gravity, camera transform, and terrain height snapping each frame             |
+
+```javascript
+// 1. Create a SimpleCharacterController targeting the character mesh
+const charController = new RedGPU.Camera.SimpleCharacterController(redGPUContext, characterMesh);
+charController.moveSpeed = 10;
+charController.distance = 8;
+charController.heightOffset = 1.8;
+
+const view = new RedGPU.Display.View3D(redGPUContext, scene, charController);
+redGPUContext.addView(view);
+
+// 2. Update character movement and snap to terrain elevation in the render loop
+let lastTime = performance.now();
+renderer.start(redGPUContext, (time) => {
+    const dt = (time - lastTime) * 0.001;
+    lastTime = time;
+
+    charController.update(dt, (x, z) => landscape.getHeightAt(x, z));
+});
+```
 
 ---
 

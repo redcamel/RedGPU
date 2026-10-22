@@ -5,7 +5,7 @@ pageClass: redgpu-home
 hero:
   name: RedGPU
   text: High-Performance WebGPU Graphics Engine
-  tagline: A robust framework for building sophisticated 2D/3D visuals with modern WebGPU standards.
+  tagline: A modern WebGPU framework for building real-time 2D/3D graphics on the web.
   actions:
     - theme: brand
       text: 시작하기
@@ -30,7 +30,7 @@ features:
     details: 엔지니어의 생산성을 고려하여 설계된 인터페이스와 상세한 기술 문서를 제공합니다.
   - icon:
       light: /icon-performance-light.svg
-      dark: /icon-performance-light.svg
+      dark: /icon-performance-dark.svg
     title: 퍼포먼스 아키텍처
     details: WebGPU의 병렬 처리 능력을 효율적으로 활용하도록 설계되어, 복잡한 환경에서도 안정적인 성능을 구현합니다.
 ---

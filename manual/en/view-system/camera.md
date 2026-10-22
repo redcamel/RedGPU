@@ -32,13 +32,28 @@ camera.fieldOfView = 45;
 // 3. Clipping Planes setup
 // Only objects between near and far are rendered on the screen.
 camera.nearClipping = 0.1; 
-camera.farClipping = 1000;
+camera.farClipping = 50000; // Default: 50000 (supports 16km+ open-world visibility)
 
 // 4. Transform setup
 camera.x = 0;
 camera.y = 5;
 camera.z = -15;
 ```
+
+## 2. Camera2D
+
+### Physical Camera Exposure Parameters (`aperture`, `shutterSpeed`, `iso`)
+
+When manual physical exposure is used (`camera.useAutoExposure = false`), `PerspectiveCamera` calculates exposure value
+(**EV100**, `camera.ev100`) using real-world photographic parameters:
+
+| Property              | Default   | Description                                                                                          |
+|:----------------------|:----------|:-----------------------------------------------------------------------------------------------------|
+| **`useAutoExposure`** | `true`    | Enables automatic luminance-based exposure adaptation (`false` switches to manual physical exposure) |
+| **`aperture`**        | `16.0`    | Lens aperture f-stop number (`f/1.4 ~ f/22`, default: `16.0`)                                        |
+| **`shutterSpeed`**    | `0.008`   | Shutter exposure time in seconds (`0.008` = 1/125s)                                                  |
+| **`iso`**             | `100`     | Sensor light sensitivity (`ISO 100` standard)                                                        |
+| **`ev100`**           | Read-only | Exposure value at ISO 100 computed from `aperture`, `shutterSpeed`, and `iso`                        |
 
 ## 2. Camera2D
 

@@ -1,5 +1,5 @@
 ---
-title: Post-Effect Overview
+title: Post-Effect
 order: 9
 ---
 
@@ -72,7 +72,27 @@ All effects are processed in the following order. This sequence is fixed for gra
     * During this loop, **Tone Mapping** is performed immediately when the first LDR (Low Dynamic Range) effect is
       encountered. If not triggered during the loop, it is executed at the end of the loop.
 3. **LDR Phase (Antialiasing)**: The final correction stage for the final image, where `FXAA` or `TAA` (along with
-   `TAASharpen`) is executed based on activation states.
+   `TAACASPass`) is executed based on activation states.
+
+### Automatic Exposure Control (`AutoExposure`)
+
+`View3D` computes scene luminance histograms in a GPU compute shader every frame and adapts exposure smoothly via
+`view.postEffectManager.autoExposure` (`RedGPU.PostEffect.AutoExposure`). Automatic exposure is enabled when
+`camera.useAutoExposure = true` (default).
+
+| Property                          | Default        | Description                                                                                              |
+|:----------------------------------|:---------------|:---------------------------------------------------------------------------------------------------------|
+| **`minExposure` / `maxExposure`** | `0.15` / `4.0` | Minimum and maximum automatic exposure clamp limits                                                      |
+| **`speedUp` / `speedDown`**       | `3.0` / `1.0`  | Eye adaptation speed when transitioning from dark to bright (`speedUp`) and bright to dark (`speedDown`) |
+| **`exposureBias`**                | `0.0`          | Manual exposure compensation bias in EV stops (`-5.0 ~ +5.0`)                                            |
+| **`reset()`**                     | Method         | Resets exposure adaptation history immediately after camera cuts or scene transitions                    |
+
+```javascript
+const autoExposure = view.postEffectManager.autoExposure;
+autoExposure.minExposure = 0.25;
+autoExposure.maxExposure = 3.5;
+autoExposure.exposureBias = 0.2;
+```
 
 ::: tip [Live Demo]
 Check out all effects in action in real-time on

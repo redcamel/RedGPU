@@ -31,7 +31,7 @@ const meshGraph = `
   <MermaidResponsive :definition="meshGraph" />
 </ClientOnly>
 
-## 2. 지오메트리와 프리미티브 (Geometry & Primitive)
+## 2. 지오메트리와 프리미티브
 
 **지오메트리**(Geometry) 는 3D 공간 상의 수많은 **점**(Vertex) 데이터들의 집합입니다. 
 
@@ -46,7 +46,7 @@ RedGPU는 외부 모델 파일을 불러오기 전, **공간 구성이나 시각
 | **Circle** / **Ring**     | 채워진 원형 평면 또는 가운데가 뚫린 링 평면 형태 |
 | **Torus** / **TorusKnot** | 도넛 모양의 고리 또는 복잡하게 꼬인 매듭 형태   |
 
-## 3. 표면 정의: 머티리얼 (Material)
+## 3. 표면 정의: 머티리얼
 
 **Material** 은 물체의 표면이 어떻게 보일지를 결정하는 속성입니다. 단순한 색상뿐만 아니라 텍스처, 반사율, 투명도 등을 정의할 수 있습니다.
 
@@ -69,16 +69,17 @@ blueAlphaMat.alpha = 0.5;
 ```
 
 ::: info [다양한 재질]
-이미지를 입히려면 **BitmapMaterial**, 빛과 그림자를 표현하려면 **PhongMaterial** 등을 사용합니다. 이들은 이어지는 챕터에서 상세히 다룹니다.
+이미지를 입히려면 **BitmapMaterial**, 빛과 그림자를 표현하려면 **PhongMaterial** 또는 **PBRMaterial** 등을 사용합니다. 이들은 이어지는 챕터에서 상세히 다룹니다.
 :::
 
-## 4. 메시 제어 (Transformation)
+## 4. 메시 제어
 
 생성된 **Mesh** 객체는 3D 공간 안에서 자유롭게 변형할 수 있는 속성을 가집니다.
 
 - **Position** (`x`, `y`, `z`): 공간 상의 위치를 지정합니다.
 - **Rotation** (`rotationX`, `rotationY`, `rotationZ`): 객체의 회전값을 조절합니다. (단위: Degree)
 - **Scale** (`scaleX`, `scaleY`, `scaleZ`): 객체의 크기를 배수로 조절합니다.
+- **Pivot** (`pivotX`, `pivotY`, `pivotZ`): 위치·회전·스케일 변환의 기준점 좌표를 지정합니다.
 
 ::: tip [중심점(Pivot) 안내]
 모든 위치 이동, 회전, 크기 조절은 객체의 **중심점**(Pivot) 을 기준으로 동작합니다. 프리미티브의 경우 각 도형의 기하학적 중심이 기준점이 됩니다.
@@ -94,12 +95,21 @@ mesh.scaleX = 2;       // X축 방향으로 2배 확대
 
 ## 5. 주요 API 속성
 
-`Mesh` 인스턴스는 외형과 렌더링 세부 옵션을 조율하기 위한 핵심 속성을 가집니다.
+`Mesh` 인스턴스는 외형, 그림자, 컬링 최적화, 그리고 물리적 수면 상호작용을 조율하기 위한 핵심 속성을 가집니다.
 
-* **`geometry`** (`Geometry`): 버텍스(점, 선, 면) 데이터로 구성된 메시의 뼈대를 가져오거나 바인딩합니다.
+* **`geometry`** (`Geometry` | `Primitive`): 버텍스 (점, 선, 면) 데이터로 구성된 메시의 뼈대를 가져오거나 바인딩합니다.
 * **`material`** (`ABaseMaterial`): 조명 반사도, 이미지 매핑 등을 관장하는 메시의 표면 머티리얼을 설정하거나 가져옵니다.
+* **`opacity`** (`number`, 범위: `0 ~ 1`, 기본값: `1`): 메시의 투명도를 설정하거나 가져옵니다. 부모 메시의 투명도는 하위 자식 객체에도 곱연산으로 전파됩니다.
 * **`castShadow`** (`boolean`, 기본값: `false`): 이 메시가 빛을 받았을 때 다른 물체 위로 그림자를 드리울지(Casting) 여부를 결정합니다.
 * **`receiveShadow`** (`boolean`, 기본값: `true`): 다른 물체가 드리운 그림자가 이 메시의 표면 위에 맺히게 할지(Receiving) 여부를 결정합니다.
+* **`ignoreFrustumCulling`** (`boolean`, 기본값: `false`): 카메라 절두체 (Frustum) 컬링을 무시하고 항상 렌더링에 포함할지 여부를 설정합니다.
+* **`useScreenSpaceSizeCulling`** (`boolean`, 기본값: `true`): 화면에 투영된 객체의 크기 비율이 임계값보다 작을 때 드로우 콜을 생략하는 **투영 면적 컬링**
+  (Screen Space Size Culling) 사용 여부를 설정합니다.
+* **`minScreenSpaceSize`** (`number`, 기본값: `0.006`): 투영 면적 컬링을 수행할 최소 화면 크기 비율 임계값입니다.
+* **`enableWaterInteraction`** (`boolean`, 기본값: `false`): 수체 (`RedGPU.Water.Lake`) 표면과 닿거나 이동할 때 실시간 2D 파동 (물결)을 생성할지
+  여부를 설정합니다 (하위 자식 메시까지 재귀 적용).
+* **`waterWaveStrength`** (`number`, 기본값: `1.0`): 수체 (`Lake`)와 상호작용할 때 생성되는 물결 파동의 강도 배율을 설정합니다.
+* **`enableDebugger`** (`boolean`, 기본값: `false`): 바운딩 볼륨 및 법선 등을 시각적으로 확인하기 위한 디버그 메시 (`DrawDebuggerMesh`) 표시 여부를 설정합니다.
 
 ---
 
@@ -154,7 +164,7 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-const camera = new RedGPU.Camera.PerspectiveCamera();
+const camera = new RedGPU.Camera.PerspectiveCamera ();
     camera.z = -15; camera.y = 8;
     camera.lookAt(0, 0, 0);
 

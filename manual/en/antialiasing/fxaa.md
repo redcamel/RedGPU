@@ -49,7 +49,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.3;
+    ambientLight.lux = 0.3;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)

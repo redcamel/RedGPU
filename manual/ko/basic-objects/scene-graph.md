@@ -5,13 +5,15 @@ order: 2
 
 <script setup>
 const sceneGraph = `
-    Scene["Scene (Root)"] --> ParentMesh["부모 메시 (Parent)"]
+    Scene["Scene (Root)"] --> Group["그룹 컨테이너 (Group3D)"]
+    Group --> ParentMesh["부모 메시 (Parent)"]
     ParentMesh --> ChildMesh1["자식 메시 A (Child)"]
     ParentMesh --> ChildMesh2["자식 메시 B (Child)"]
     ChildMesh2 --> GrandChild["손자 메시 (Grandchild)"]
 
     %% 회색조 스타일 적용
     style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Group fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
     style ParentMesh fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
     style ChildMesh1 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
     style ChildMesh2 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
@@ -22,12 +24,15 @@ const sceneGraph = `
 
 # Scene Graph
 
-**Scene Graph** 는 3D 공간에 배치된 객체들의 계층 구조를 의미합니다. RedGPU에서는 모든 **Mesh** 가 다른 메시의 부모가 될 수 있으며, 부모의 변형(위치, 회전, 크기)은 자식에게 고스란히 상속됩니다.
+**Scene Graph** 는 3D 공간에 배치된 객체들의 계층 구조를 의미합니다. RedGPU에서는 모든 **Mesh** 및 **Group3D** 가 다른 객체의 부모가 될 수 있으며, 부모의 변형 (위치,
+회전, 크기)은 자식에게 고스란히 상속됩니다.
 
-## 1. 메시 계층 구조
+## 1. 메시 계층 구조와 Group3D
 
-RedGPU의 **Mesh** 는 지오메트리와 머티리얼을 가진 객체임과 동시에, 다른 메시를 포함할 수 있는 컨테이너 역할을 합니다.
+RedGPU의 **Mesh** 는 지오메트리와 머티리얼을 가진 객체임과 동시에 다른 메시를 포함할 수 있는 컨테이너 역할을 수행합니다. 또한 자체적인 지오메트리·머티리얼 없이 순수하게 여러 객체를 논리적 그룹으로
+묶어 이동·회전·스케일만 일괄 제어하고 싶을 때는 **`RedGPU.Display.Group3D`** (2D 환경에서는 **`RedGPU.Display.Group2D`**)를 사용합니다.
 
+- **그룹 컨테이너**(`Group3D` / `Group2D`) : 화면에 직접 그려지지 않으면서 자식 객체들의 기준점 (Pivot) 및 계층 묶음 역할만 수행하는 경량 컨테이너입니다.
 - **부모 메시**(Parent) : 자식 객체들을 포함하는 기준점입니다. 부모가 움직이면 자식은 부모로부터의 상대적인 거리를 유지하며 함께 움직입니다.
 - **자식 메시**(Child) : 부모에 소속된 객체입니다. 자신의 `x, y, z` 좌표는 부모의 중심점을 `(0, 0, 0)`으로 간주하는 상대 좌표로 계산됩니다.
 
@@ -35,28 +40,30 @@ RedGPU의 **Mesh** 는 지오메트리와 머티리얼을 가진 객체임과 �
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
 
-## 2. 계층 구조 형성: addChild
+## 2. 계층 구조 형성: addChild 및 Group3D 활용
 
-`RedGPU.Display.Mesh` 의 `addChild()` 메서드를 사용하여 특정 메시를 다른 메시의 자식으로 등록할 수 있습니다.
+`addChild()` 메서드를 사용하여 특정 메시나 `Group3D`에 자식 객체를 등록할 수 있습니다.
 
 ```javascript
-// 부모 메시 생성 (태양)
+// 1. 순수 논리적 컨테이너인 Group3D 생성 (태양계 전체 그룹)
+const solarSystemGroup = new RedGPU.Display.Group3D('SolarSystem');
+scene.addChild(solarSystemGroup);
+
+// 2. 부모 메시 생성 (태양) 및 그룹에 추가
 const sun = new RedGPU.Display.Mesh(redGPUContext, sunGeo, sunMat);
-scene.addChild(sun);
+solarSystemGroup.addChild(sun);
 
-// 자식 메시 생성 (지구)
+// 3. 자식 메시 생성 (지구) 및 태양의 자식으로 등록
 const earth = new RedGPU.Display.Mesh(redGPUContext, earthGeo, earthMat);
-
-// 지구를 태양의 자식으로 등록
 sun.addChild(earth);
 
-// 이제 earth.x = 5는 태양으로부터 5만큼 떨어진 위치를 의미합니다.
+// 이제 earth.x = 5는 태양으로부터 5만큼 떨어진 상대 위치를 의미합니다.
 earth.x = 5;
 ```
 
 ## 3. 변형 상속
 
-부모 메시의 상태 변화는 모든 자식에게 영향을 미칩니다.
+부모 객체 (`Group3D` 또는 `Mesh`)의 상태 변화는 모든 자식에게 영향을 미칩니다.
 
 1. **위치 이동**: 부모가 이동하면 자식은 부모에 부착된 상태로 함께 이동합니다.
 2. **회전**: 부모가 자신의 축을 기준으로 회전하면 자식은 부모의 중심을 축으로 돌아 공전하듯 회전합니다.
@@ -117,7 +124,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-## 라이브 데모 (Live Demo)
+## 라이브 데모
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Mesh Hierarchy" slugHash="mesh-hierarchy">
@@ -135,7 +142,7 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-const camera = new RedGPU.Camera.PerspectiveCamera();
+const camera = new RedGPU.Camera.PerspectiveCamera ();
     camera.z = -15; camera.y = 5;
     camera.lookAt(0, 0, 0);
 
@@ -177,7 +184,7 @@ const camera = new RedGPU.Camera.PerspectiveCamera();
 
 ## 핵심 요약
 
-- 모든 **Mesh** 는 부모 컨테이너가 되어 자식 메시를 포함할 수 있습니다.
+- **Group3D** (`Group2D`) 및 **Mesh** 는 부모 컨테이너가 되어 자식 객체들을 계층적으로 묶을 수 있습니다.
 - 자식의 좌표는 항상 부모의 위치를 기준으로 하는 **상대 좌표**입니다.
 - 부모의 회전과 크기 변형은 자식에게 물리적으로 상속되어 복잡한 연동 애니메이션을 쉽게 구현할 수 있습니다.
 

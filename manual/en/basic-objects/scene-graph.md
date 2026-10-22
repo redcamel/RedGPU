@@ -55,6 +55,23 @@ earth.x = 5;
 
 ## 3. Transformation Inheritance
 
+### Grouping Without Geometry (`Group3D` & `Group2D`)
+
+When you need a logical pivot or container node to group multiple meshes without rendering geometry of its own, use **
+`RedGPU.Display.Group3D`** (or **`RedGPU.Display.Group2D`** in 2D views).
+
+```javascript
+// Create an empty 3D transform group (no geometry or material overhead)
+const solarSystemGroup = new RedGPU.Display.Group3D();
+solarSystemGroup.y = 10;
+scene.addChild(solarSystemGroup);
+
+// Add multiple meshes into the group
+solarSystemGroup.addChild(sun);
+```
+
+## 3. Transformation Inheritance
+
 State changes of the parent mesh affect all of its children.
 
 1. **Position**: If the parent moves, the child moves with it as if attached to the parent.

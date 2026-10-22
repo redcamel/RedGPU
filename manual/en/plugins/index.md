@@ -1,6 +1,6 @@
 ---
 title: Plugins
-order: 11
+order: 14
 ---
 
 # Plugins

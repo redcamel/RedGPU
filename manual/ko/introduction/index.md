@@ -224,5 +224,5 @@ RedGPU의 주요 클래스 관계와 애플리케이션 생명 주기를 도식�
 - **[메시](../basic-objects/mesh.md)** : 지오메트리와 머티리얼을 결합하여 물체를 만들고 제어하는 방법.
 - **[조명과 그림자](../lighting-and-shadow/phong-material.md)** : 빛에 반응하는 사실적인 질감과 그림자 표현.
 - **[환경 설정](../environment/skybox.md)** : 스카이박스 및 IBL 설정 방법.
-- **[확장 객체](../assets/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
+- **[확장 객체](../extended-objects/model-loading/index.md)** : 외부 3D 모델 및 스프라이트 사용 방법.
 

@@ -1,6 +1,6 @@
 ---
-title: LOD (Level of Detail)
-order: 9
+title: LOD
+order: 10
 ---
 
 # LOD

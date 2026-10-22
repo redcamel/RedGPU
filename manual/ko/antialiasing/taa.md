@@ -3,7 +3,7 @@ title: TAA
 order: 1
 ---
 
-# TAA (Temporal AA)
+# TAA
 
 **TAA**(Temporal Antialiasing) 는 이전 프레임의 결과물을 현재 프레임과 합성하여 계단 현상을 제거하는 시간축 기반 기법입니다.
 현존하는 안티앨리어싱 기법 중 가장 뛰어난 품질을 보여주며, 영화와 같은 부드러운 이미지를 만들어냅니다.
@@ -15,13 +15,21 @@ order: 1
 - **장점**: 움직임이 없는 정적인 장면에서 완벽에 가까운 안티앨리어싱 품질을 제공합니다.
 - **단점**: 빠르게 움직이는 물체에서 잔상(Ghosting) 현상이 발생할 수 있습니다.
 
-## 2. 사용법
+## 2. 사용법 및 세부 설정
 
 `antialiasingManager.useTAA` 를 통해 활성화합니다. 이를 켜면 MSAA나 FXAA는 자동으로 비활성화됩니다.
+또한 개별 **View3D** 의 `view.taa` 인스턴스를 통해 **대비 적응형 샤프닝**(Contrast Adaptive Sharpening, `TAACASPass`) 강도를 조절하거나 누적된 히스토리 버퍼를
+즉시 초기화할 수 있습니다.
 
 ```javascript
-// TAA 활성화 (다른 AA는 꺼짐)
+// 1. 전역 TAA 활성화 (다른 AA는 꺼짐)
 redGPUContext.antialiasingManager.useTAA = true;
+
+// 2. 뷰별 TAA 샤프닝 강도 조절 (0.0 ~ 1.0, 기본값: 0.5)
+view.taa.sharpness = 0.5;
+
+// 3. 카메라 순간 이동 시 이전 프레임 잔상(히스토리) 즉시 초기화
+view.taa.reset();
 ```
 
 ## 3. 실습 예제: TAA 품질 확인
@@ -50,8 +58,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)
@@ -132,5 +139,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 ## 핵심 요약
 
 - **최고 품질**: 계단 현상을 거의 완벽하게 제거합니다.
+- **샤프닝 내장**: `TAACASPass`를 통해 시간축 누적 시 발생할 수 있는 미세한 블러를 선명하게 복원합니다.
 - **자동 선택**: 고해상도 디스플레이(Retina 등)에서는 기본적으로 TAA가 활성화됩니다.
 - **고비용**: 매 프레임 연산 및 메모리 오버헤드가 발생하므로 데스크탑 환경에서 권장됩니다.

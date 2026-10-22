@@ -32,7 +32,7 @@ const postEffectGraph = `
             AE --> GE --> TM
         end
 
-        AA["3. LDR Phase (FXAA / TAA)"]:::pipelineNode
+        AA["3. LDR Phase (FXAA / TAA & TAACASPass)"]:::pipelineNode
 
     TMM -.->|Inject Settings| TM
     PEM -.->|Manage & Execute| Transition
@@ -54,7 +54,8 @@ const postEffectGraph = `
 사용자는 목적에 따라 두 개의 매니저를 통해 후처리를 제어하지만, 실제 연산은 `PostEffectManager` 가 총괄하는 하나의 파이프라인 내에서 순차적으로 실행됩니다.
 
 *   **ToneMappingManager** (`view.toneMappingManager`): 씬의 가장 기본적인 색조, 노출, 대비 등 **색상 변환 설정**을 담당하는 전용 창구입니다.
-*   **PostEffectManager** (`view.postEffectManager`): 일반 이펙트의 추가/삭제 및 파이프라인의 **전체 실행**을 담당합니다.
+* **PostEffectManager** (`view.postEffectManager`): 자동 노출 (`view.postEffectManager.autoExposure`), 빌트인 이펙트 (`ssao`,
+  `ssr`), 일반 이펙트의 추가/삭제 및 파이프라인의 **전체 실행**을 담당합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="postEffectGraph" />
@@ -64,12 +65,13 @@ const postEffectGraph = `
 
 모든 효과는 아래 순서에 따라 처리됩니다. 이 순서는 그래픽스 최적화와 시각적 결과의 일관성을 위해 고정되어 있습니다.
 
-1. **HDR Phase (장면 구성 요소)**: `SkyAtmosphere`, `SSAO`(SSAO), `SSR`(실시간 반사) 등 물리적인 씬 정보를 조립하는 단계입니다.
+1. **HDR Phase (장면 구성 요소)**: `SkyAtmosphere`, `SSAO`(환경 차폐), `SSR`(실시간 화면 공간 반사) 등 물리적인 씬 정보를 조립하는 단계입니다.
 2. **Exposure & Transition (노출 및 톤매핑 전환)**:
-    * `AutoExposure`(자동 노출) 연산이 수행됩니다.
+    * 카메라의 `useAutoExposure` 활성화 시 `AutoExposure`(`view.postEffectManager.autoExposure`) 컴퓨트 패스 연산이 수행되어 적정 노출값을 산출합니다.
     * 사용자가 `addEffect()`로 등록한 **일반 이펙트** 루프를 실행합니다.
     * 루프 도중 첫 번째 LDR(Low Dynamic Range) 이펙트를 만나는 시점에 즉시 **Tone Mapping**을 수행하며, 만약 루프가 끝날 때까지 수행되지 않았다면 루프 종료 시점에 수행합니다.
-3. **LDR Phase (안티앨리어싱)**: 최종 이미지를 보정하는 마지막 단계로, 활성화 상태에 따라 `FXAA` 또는 `TAA` (및 `TAASharpen`) 연산이 수행됩니다.
+3. **LDR Phase (안티앨리어싱 및 샤프닝)**: 최종 이미지를 보정하는 마지막 단계로, 활성화 상태에 따라 `FXAA` 또는 `TAA` (및 대비 적응형 샤프닝 패스인 `TAACASPass`) 연산이
+   수행됩니다.
 
 ::: tip [라이브 데모]
 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)에서 모든 효과의 실시간 작동 모습을 확인할 수 있습니다.

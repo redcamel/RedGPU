@@ -144,4 +144,4 @@ RedGPU.init(canvas, (redGPUContext) => {
 Based on the objects and environment settings learned so far, let's explore more deeply how to load and control models
 in actual projects.
 
-- **[GLTF Loader](../assets/model-loading/index.md)**
+- **[Global Wind System (WindManager)](./wind.md)**

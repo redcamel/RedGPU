@@ -1,6 +1,6 @@
 ---
 title: Antialiasing
-order: 10
+order: 11
 ---
 
 # 안티앨리어싱

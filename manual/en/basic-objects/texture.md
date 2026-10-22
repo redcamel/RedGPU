@@ -39,7 +39,7 @@ const texture = new RedGPU.Resource.BitmapTexture(
 
 ### BitmapTexture Constructor Parameter Options
 
-```typescript
+```javascript
 constructor(
     redGPUContext
 :
@@ -65,6 +65,17 @@ boolean = false
 | **`onLoad`**              | `(texture?: BitmapTexture) => void` | Callback function when the image resource loading and GPU texture conversion are fully complete |
 | **`onError`**             | `(error: Error) => void`            | Callback function when an exception occurs, such as image network load failure                  |
 | **`usePremultiplyAlpha`** | `boolean` (Default: `false`)        | Whether to use premultiplied alpha format with alpha channel values pre-multiplied              |
+
+### Supported Formats & Advanced Texture Classes
+
+* **Supported Image Formats (`BitmapTexture`)**: Standard web formats (`.png`, `.jpg`, `.webp`, `.avif`), vector
+  graphics (`.svg`), and GPU-compressed **`.ktx2` (Basis Universal / UASTC & ETC1S)** textures.
+* **`addLoadListeners(onLoad, onError)`**: Registers additional load or error callbacks after creating a `BitmapTexture`
+  instance.
+* **`RedGPU.Resource.TextureArray`**: Bundles multiple 2D images of the same resolution into a single `2d-array` GPU
+  texture resource, minimizing bind group switches across multi-layer shaders.
+* **`RedGPU.Resource.PackedTexture`**: Packs separate R, G, B, A channel textures (such as Occlusion, Roughness, and
+  Metallic maps) into a single GPU texture on the fly.
 
 ---
 

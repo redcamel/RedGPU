@@ -70,6 +70,18 @@ dirShadowManager.pcssLightSize = 0.08;
 dirShadowManager.strength = 0.85;
 ```
 
+### Key Properties of `DirectionalShadowManager`
+
+| Property                     | Default  | Description                                                                                         |
+|:-----------------------------|:---------|:----------------------------------------------------------------------------------------------------|
+| **`shadowDepthTextureSize`** | `2048`   | Shadow map depth texture resolution (`256 ~ 8192`)                                                  |
+| **`cascadeCount`**           | `4`      | Number of CSM cascades (`1 ~ 4`)                                                                    |
+| **`maxShadowDistance`**      | `200`    | Maximum shadow rendering distance from the camera                                                   |
+| **`pcssLightSize`**          | `0.05`   | Virtual light source size for 16-Tap Vogel Spiral PCSS soft shadows (`0.0 ~ 1.0`)                   |
+| **`strength`**               | `0.8`    | Shadow darkness strength (`0.0`: no shadow ~ `1.0`: pitch black)                                    |
+| **`bias`**                   | `0.0002` | Depth bias to prevent shadow acne (`0.0 ~ 0.01`)                                                    |
+| **`targetNearTexelSize`**    | `0.025`  | Target texel size in meters for the closest cascade (`0.005 ~ 1.0`), stabilized with texel snapping |
+
 ## 4. Practical Example: Configuring a Scene with Shadows
 
 An example of casting a rotating hexahedron's shadow onto the floor using a DirectionalLight.

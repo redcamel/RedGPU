@@ -3,9 +3,9 @@ title: FXAA
 order: 3
 ---
 
-# FXAA (Fast Approximate AA)
+# FXAA
 
-**FXAA** 는 렌더링된 최종 이미지를 분석하여 경계를 찾고 흐리게 만드는 **후처리**(Post-Processing) 방식의 안티앨리어싱입니다.
+**FXAA**(Fast Approximate Antialiasing) 는 렌더링된 최종 이미지를 분석하여 경계를 찾고 흐리게 만드는 **후처리**(Post-Processing) 방식의 안티앨리어싱입니다.
 
 ## 1. 특징 및 장점
 
@@ -48,8 +48,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)

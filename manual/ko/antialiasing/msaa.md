@@ -3,7 +3,7 @@ title: MSAA
 order: 2
 ---
 
-# MSAA (Multisample AA)
+# MSAA
 
 **MSAA**(Multisample Antialiasing) 는 하드웨어(GPU) 레벨에서 지원하는 가장 표준적인 안티앨리어싱 방식입니다. 지오메트리의 경계(Edge) 부분을 여러 번 샘플링하여 부드럽게 처리합니다.
 
@@ -48,8 +48,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.3;
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)

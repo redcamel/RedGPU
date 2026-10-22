@@ -1,6 +1,6 @@
 ---
 title: Inspector
-order: 12
+order: 15
 ---
 
 # 인스펙터 (Inspector)

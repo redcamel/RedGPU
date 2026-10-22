@@ -21,6 +21,12 @@ Enabled via `antialiasingManager.useTAA`. Enabling this automatically disables M
 ```javascript
 // Enable TAA (Other AAs are disabled)
 redGPUContext.antialiasingManager.useTAA = true;
+
+// Adjust CAS sharpness per View3D (0.0 ~ 1.0, default: 0.5)
+view.taa.sharpness = 0.6;
+
+// Reset temporal history when teleporting the camera or switching scenes
+view.taa.reset();
 ```
 
 ## 3. Live Example: TAA Quality Check
@@ -50,7 +56,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensityMultiplier = 0.3;
+    ambientLight.lux = 0.3;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -96,6 +102,12 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // Initial state: TAA Enabled
     redGPUContext.antialiasingManager.useTAA = true;
+
+// Adjust CAS sharpness per View3D (0.0 ~ 1.0, default: 0.5)
+view.taa.sharpness = 0.6;
+
+// Reset temporal history when teleporting the camera or switching scenes
+view.taa.reset ();
 
     // UI: TAA Toggle Button
     const btn = document.createElement('button');

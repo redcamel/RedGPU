@@ -178,11 +178,11 @@ interface type.
 | **`screenRectObject`** | `IRedGPURectObject`  | Dimension and position information in CSS pixels (`{ x, y, width, height }`)           |
 | **`pixelRectObject`**  | `IRedGPURectObject`  | Physical pixel information with `devicePixelRatio` applied (`{ x, y, width, height }`) |
 
-```typescript
+```javascript
 import {RedResizeEvent, View3D} from "RedGPU";
 
 // Define callback to be called when an individual view's size changes
-view.onResize = (event: RedResizeEvent<View3D>) => {
+view.onResize = (event) => {
     const {target, screenRectObject, pixelRectObject} = event;
     const {width, height} = screenRectObject;
     console.log(`View area changed: ${width}x${height} (Physical: ${pixelRectObject.width}x${pixelRectObject.height})`);
@@ -331,6 +331,10 @@ The `View3D` class provides various APIs for adjusting 3D rendering quality, per
 * **`useDistanceCulling`** (`boolean`, default: `false`): Restricts rendering of objects that are further away than a
   specific distance from the camera.
 * **`distanceCulling`** (`number`, default: `50`): The threshold distance used for distance-based culling.
+* **`hierarchicalZBuffer`** (`HierarchicalZBuffer`, Read-only): A GPU-driven **Hierarchical Z-Buffer (HZB)** mipmap
+  pyramid generated from the depth buffer every frame. It powers GPU occlusion culling for large-scale terrain
+  (`Landscape`), foliage (`Foliage`), and procedural grass (`Grass`).
+* **`taa`** (`TAA`, Read-only): Per-view Temporal Antialiasing manager (`view.taa.sharpness`, `view.taa.reset()`).
 
 ### 6.4 Utility and Debug State Data
 

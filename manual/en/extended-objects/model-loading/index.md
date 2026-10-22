@@ -1,0 +1,195 @@
+---
+title: GLTF Loader
+order: 1
+---
+
+<script setup>
+const loaderGraph = `
+    GLTF[".gltf / .glb File"] -->|Async Load & Parse| Loader["GLTFLoader (Loader)"]
+    Loader -->|Create PBRMaterial| Mat["Material (Surface)"]
+    Loader -->|Parse Geometry| Geo["Geometry (Skeleton)"]
+    Mat --> Mesh["resultMesh (Final Mesh)"]
+    Geo --> Mesh
+
+    %% Grayscale styles applied
+    style GLTF fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Loader fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Mat fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Geo fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
+
+# GLTF Loader
+
+While you can create basic shapes with **Primitives**, high-quality assets such as detailed characters or buildings need
+to be created in external 3D tools (Blender, Maya, etc.) and then imported.
+RedGPU provides the **GLTFLoader**, which supports loading the web 3D standard format **glTF** (GL Transmission Format)
+2.0.
+
+<ClientOnly>
+  <MermaidResponsive :definition="loaderGraph" />
+</ClientOnly>
+
+## 1. Loading a Model
+
+You can load `.gltf` or `.glb` files using `RedGPU.GLTFLoader`. Loading is asynchronous, and the result is delivered via
+a callback function upon completion.
+
+```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+new RedGPU.GLTFLoader(
+    redGPUContext, 
+    'https://.../DamagedHelmet.glb', // Model path
+    (loader) => {
+        // [Load Success] loader.resultMesh is the final model object.
+        scene.addChild(loader.resultMesh);
+    }
+);
+```
+
+### Key Properties (GLTFLoader Instance)
+
+- **`resultMesh`**: The `RedGPU.Display.Mesh` object containing the loaded model.
+- **`parsingResult`**: Detailed parsing data of the glTF file, including materials, groups, textures, and more.
+
+### Playing Animations & Animation State Machine (`AnimStateMachine`)
+
+When a loaded `.gltf` / `.glb` model includes skeletal or morph animations, `GLTFLoader` provides direct playback
+methods as well as **`loader.animStateMachine`** (`RedGPU.GLTFLoader.AnimStateMachine`) for cross-fade blending and
+state transitions.
+
+| Method / Property                                                     | Description                                                                              |
+|:----------------------------------------------------------------------|:-----------------------------------------------------------------------------------------|
+| **`loader.playAnimation(clipOrName, loop, speedFactor)`**             | Plays a specific animation clip (`GLTFParsingClip` or clip name string)                  |
+| **`loader.stopAnimation()`**                                          | Stops all currently playing animations                                                   |
+| **`loader.animStateMachine.addState(name, options)`**                 | Registers an animation state (`{ clipName, loop, speed, blendDuration }`)                |
+| **`loader.animStateMachine.setParameter(name, value)`**               | Updates a state parameter (`boolean` or `number`) to trigger automatic state transitions |
+| **`loader.animStateMachine.crossFadeTo(stateName, duration, force)`** | Smoothly cross-fades to the target animation state over `duration` seconds               |
+
+```javascript
+new RedGPU.GLTFLoader(
+    redGPUContext,
+    './assets/character/soldier.glb',
+    (loader) => {
+        scene.addChild(loader.resultMesh);
+
+        // Configure animation states and cross-fade transitions
+        const fsm = loader.animStateMachine;
+        fsm.addState('Idle', { clipName: 'Idle', loop: true });
+        fsm.addState('Run', { clipName: 'Run', loop: true, speed: 1.1 });
+        fsm.addState('Jump', { clipName: 'Jump', loop: false });
+
+        // Smoothly cross-fade to the 'Run' animation over 0.25 seconds
+        fsm.crossFadeTo('Run', 0.25);
+    }
+);
+```
+
+## 2. Synergy with IBL (Highly Recommended)
+
+Most high-quality models imported from external sources use **PBR (Physically Based Rendering)** materials. Since these
+materials express textures by reflecting light information from the surrounding environment, you can achieve the most
+realistic results when using them with **IBL** (Image-Based Lighting), as learned earlier.
+
+If you load a PBR model without IBL, metallic textures may appear black or look very awkward.
+
+## 3. Practical Example: Environment Light and Model Loading
+
+This is the full process of setting up an environment with IBL and loading a detailed metal helmet model. You can adjust
+the `distance` property of the camera controller to observe the model at an appropriate size.
+
+```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+RedGPU.init(canvas, (redGPUContext) => {
+    const scene = new RedGPU.Display.Scene();
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    
+    // 1. Set Camera Distance (Adjust to fit the model size)
+    controller.distance = 3; 
+
+    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    redGPUContext.addView(view);
+
+    // 2. Set up IBL and a SkyBox (Key for PBR materials)
+    const ibl = new RedGPU.Resource.IBL(
+        redGPUContext,
+        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+    );
+    view.ibl = ibl;
+    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
+    // 3. Load a GLTF Model
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+        (loader) => {
+            scene.addChild(loader.resultMesh);
+        }
+    );
+
+    const renderer = new RedGPU.Renderer();
+    renderer.start(redGPUContext);
+});
+```
+
+### Live Demo
+
+Check out the metal helmet model reflecting the IBL environment light realistically.
+
+<ClientOnly>
+<CodePen title="RedGPU Basics - GLTF Loader with IBL" slugHash="gltf-loader">
+<pre data-lang="html">
+&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
+</pre>
+<pre data-lang="css">
+body { margin: 0; overflow: hidden; background: #000; }
+canvas { display: block; width: 100vw; height: 100vh; }
+</pre>
+<pre data-lang="js">
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+const canvas = document.getElementById ("redgpu-canvas");
+
+RedGPU.init (canvas, (redGPUContext) => {
+const scene = new RedGPU.Display.Scene ();
+
+    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+    controller.distance = 3; // Adjust the camera distance
+
+    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    redGPUContext.addView(view);
+
+    // Set up IBL and a Skybox
+    const ibl = new RedGPU.Resource.IBL(
+        redGPUContext,
+        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+    );
+    view.ibl = ibl;
+    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
+    new RedGPU.GLTFLoader(
+        redGPUContext,
+        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
+        (loader) => {
+            scene.addChild(loader.resultMesh);
+            
+            const renderer = new RedGPU.Renderer();
+            renderer.start(redGPUContext, () => {
+                loader.resultMesh.rotationY += 1;
+            });
+        }
+    );
+
+});
+</pre>
+</CodePen>
+</ClientOnly>
+
+## Next Steps
+
+Learn about image-based objects that will enrich the 3D space alongside text.
+
+- **[Sprite](../sprite/index.md)**
