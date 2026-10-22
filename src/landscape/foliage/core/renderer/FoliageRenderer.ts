@@ -676,9 +676,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
-        depthPassMode: FoliageDepthPassMode = 'normal',
-        overrideInstanceOffset?: number,
-        overrideIndirectOffset?: number
+        depthPassMode: FoliageDepthPassMode = 'normal'
     ): void {
         const {geometry, isMasked, material} = unit;
         const vertexGPUBuffer = geometry.vertexBuffer.gpuBuffer;
@@ -706,9 +704,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             matUniformBG,
             vertexGPUBuffer,
             culledGPUBuffer,
-            indirectGPUBuffer,
-            overrideInstanceOffset,
-            overrideIndirectOffset
+            indirectGPUBuffer
         );
     }
 }

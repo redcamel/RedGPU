@@ -1,5 +1,3 @@
-import Landscape from "../Landscape";
-
 type DebuggerPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean | number) => void;
 
@@ -24,7 +22,6 @@ type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean |
  * @category Debugger
  */
 class LandscapeDebuggerManager {
-    #landscape: Landscape;
     #landscapeWireframe: boolean = false;
     #landscapeLodColoration: boolean = false;
     #landscapeDebugMode: number = 0;
@@ -34,28 +31,12 @@ class LandscapeDebuggerManager {
      * [KO] `LandscapeDebuggerManager` 인스턴스를 생성합니다.
      * [EN] Creates a `LandscapeDebuggerManager` instance.
      *
-     * @param landscape -
-     * [KO] 대상 `Landscape` 인스턴스
-     * [EN] Target `Landscape` instance
      * @param onDebugPropertyChange -
      * [KO] 디버그 속성 변경 시 호출될 콜백 핸들러
      * [EN] Callback handler invoked when a debug property changes
      */
-    constructor(landscape: Landscape, onDebugPropertyChange?: DebuggerPropertyChangeHandler) {
-        this.#landscape = landscape;
+    constructor(onDebugPropertyChange?: DebuggerPropertyChangeHandler) {
         this.#onDebugPropertyChange = onDebugPropertyChange;
-    }
-
-    /**
-     * [KO] 관리 대상 `Landscape` 인스턴스를 반환합니다.
-     * [EN] Returns the managed `Landscape` instance.
-     *
-     * @returns
-     * [KO] `Landscape` 인스턴스
-     * [EN] `Landscape` instance
-     */
-    get landscape(): Landscape {
-        return this.#landscape;
     }
 
     /**

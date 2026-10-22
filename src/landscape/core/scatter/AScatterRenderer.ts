@@ -160,19 +160,11 @@ abstract class AScatterRenderer<TMainBundleCache = any> extends RedGPUObject {
     }
 
     /**
-     * [KO] 모든 뷰의 메인 패스 렌더 번들 캐시를 무효화하고 `onMainBundleDirty` 훅을 호출합니다.
-     * [EN] Invalidates main pass render bundle caches for all views and invokes the `onMainBundleDirty` hook.
+     * [KO] 모든 뷰의 메인 패스 렌더 번들 캐시를 무효화합니다.
+     * [EN] Invalidates main pass render bundle caches for all views.
      */
     markMainBundleDirty(): void {
         this.#mainBundlesByView = new WeakMap();
-        this.onMainBundleDirty();
-    }
-
-    /**
-     * [KO] 메인 패스 렌더 번들이 무효화될 때 서브클래스에서 추가 상태를 초기화하기 위한 훅 메서드입니다.
-     * [EN] Hook method for subclasses to reset additional state when main pass render bundles are invalidated.
-     */
-    onMainBundleDirty(): void {
     }
 
     /**

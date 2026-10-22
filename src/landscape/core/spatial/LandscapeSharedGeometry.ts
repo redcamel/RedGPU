@@ -150,30 +150,6 @@ class LandscapeSharedGeometry extends RedGPUObject {
     }
 
     /**
-     * [KO] 기본 타일 컴포넌트의 축당 쿼드 분할 수를 반환합니다.
-     * [EN] Returns the quad subdivision count per axis of the base tile component.
-     *
-     * @returns
-     * [KO] 기본 타일 축당 쿼드 분할 수
-     * [EN] Base tile quad subdivision count per axis
-     */
-    get componentSizeQuads(): number {
-        return this.#componentSizeQuads;
-    }
-
-    /**
-     * [KO] LOD 0 단계의 축당 쿼드 분할 수를 반환합니다.
-     * [EN] Returns the quad subdivision count per axis at LOD 0.
-     *
-     * @returns
-     * [KO] LOD 0 축당 쿼드 분할 수
-     * [EN] LOD 0 quad subdivision count per axis
-     */
-    get lod0SizeQuads(): number {
-        return this.#lod0SizeQuads;
-    }
-
-    /**
      * [KO] 타일의 가로/세로 월드 크기를 변경하고 공유 지오메트리 버퍼를 재빌드합니다.
      * [EN] Updates the tile world width/depth and rebuilds the shared geometry buffers.
      *

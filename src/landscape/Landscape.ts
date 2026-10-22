@@ -159,7 +159,7 @@ class Landscape extends RedGPUObject {
             this.#grassManager?.rebakeAll();
             this.#foliageManager?.repopulateAll();
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this, (key) => {
+        this.#debuggerManager = new LandscapeDebuggerManager((key) => {
             if (key === 'debugMode' || key === 'lodColoration') {
                 this.#updateLandscapeUniforms();
             }
