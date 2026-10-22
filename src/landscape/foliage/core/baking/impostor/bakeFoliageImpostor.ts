@@ -121,17 +121,6 @@ function getOrCreateContextCache(redGPUContext: RedGPUContext): ImpostorBakerCon
     return cache;
 }
 
-function isIdentityMatrix(m: mat4 | null | undefined): boolean {
-    if (!m) return true;
-    return (
-        m[0] === 1 && m[5] === 1 && m[10] === 1 && m[15] === 1 &&
-        m[1] === 0 && m[2] === 0 && m[3] === 0 &&
-        m[4] === 0 && m[6] === 0 && m[7] === 0 &&
-        m[8] === 0 && m[9] === 0 && m[11] === 0 &&
-        m[12] === 0 && m[13] === 0 && m[14] === 0
-    );
-}
-
 function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
     min: [number, number, number];
     max: [number, number, number];
@@ -147,56 +136,27 @@ function calculateAABBFromRenderUnits(renderUnits: FoliageRenderUnit[]): {
 
     for (let s = 0; s < renderUnits.length; s++) {
         const unit = renderUnits[s];
-        const {isImpostor, geometry, relativeModelMatrix} = unit;
+        const {isImpostor, geometry} = unit;
         if (isImpostor) continue;
 
         const {vertexBuffer} = geometry;
         const {data, stride, vertexCount} = vertexBuffer;
         if (!data || data.length === 0) continue;
 
-        const isIdentity = isIdentityMatrix(relativeModelMatrix);
+        for (let i = 0, idx = 0; i < vertexCount; i++, idx += stride) {
+            const x = data[idx];
+            const y = data[idx + 1];
+            const z = data[idx + 2];
 
-        if (isIdentity) {
-            for (let i = 0, idx = 0; i < vertexCount; i++, idx += stride) {
-                const x = data[idx];
-                const y = data[idx + 1];
-                const z = data[idx + 2];
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
 
-                if (x < minX) minX = x;
-                if (y < minY) minY = y;
-                if (z < minZ) minZ = z;
-                if (x > maxX) maxX = x;
-                if (y > maxY) maxY = y;
-                if (z > maxZ) maxZ = z;
-
-                const horizDistSq = x * x + z * z;
-                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
-            }
-        } else {
-            const modelMatrix = relativeModelMatrix;
-            const m0 = modelMatrix[0], m4 = modelMatrix[4], m8 = modelMatrix[8], m12 = modelMatrix[12];
-            const m1 = modelMatrix[1], m5 = modelMatrix[5], m9 = modelMatrix[9], m13 = modelMatrix[13];
-            const m2 = modelMatrix[2], m6 = modelMatrix[6], m10 = modelMatrix[10], m14 = modelMatrix[14];
-
-            for (let i = 0, idx = 0; i < vertexCount; i++, idx += stride) {
-                const x = data[idx];
-                const y = data[idx + 1];
-                const z = data[idx + 2];
-
-                const wx = m0 * x + m4 * y + m8 * z + m12;
-                const wy = m1 * x + m5 * y + m9 * z + m13;
-                const wz = m2 * x + m6 * y + m10 * z + m14;
-
-                if (wx < minX) minX = wx;
-                if (wy < minY) minY = wy;
-                if (wz < minZ) minZ = wz;
-                if (wx > maxX) maxX = wx;
-                if (wy > maxY) maxY = wy;
-                if (wz > maxZ) maxZ = wz;
-
-                const horizDistSq = wx * wx + wz * wz;
-                if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
-            }
+            const horizDistSq = x * x + z * z;
+            if (horizDistSq > maxHorizDistSq) maxHorizDistSq = horizDistSq;
         }
     }
 
@@ -365,25 +325,22 @@ function bakeFoliageImpostor(
     const {basicSampler, emptyBitmapTextureView} = resourceManager;
 
     const cachedRenderUnits: {
-            isImpostor: boolean;
-            pipeline: GPURenderPipeline | null;
-            bindGroup: GPUBindGroup | null;
-            vertexBuffer: GPUBuffer | null;
-            indexBuffer: GPUBuffer | null;
-            isIndexed: boolean;
-            indexCount: number;
-            indexFormat: GPUIndexFormat;
-            vertexCount: number;
-        relativeModelMatrix: mat4 | null;
-        isIdentityModelMatrix: boolean;
-            matProps: Float32Array;
-            modelMatProps: Float32Array;
-            isFoliage: number;
-        }[] = [];
+        isImpostor: boolean;
+        pipeline: GPURenderPipeline | null;
+        bindGroup: GPUBindGroup | null;
+        vertexBuffer: GPUBuffer | null;
+        indexBuffer: GPUBuffer | null;
+        isIndexed: boolean;
+        indexCount: number;
+        indexFormat: GPUIndexFormat;
+        vertexCount: number;
+        matProps: Float32Array;
+        isFoliage: number;
+    }[] = [];
 
     for (let s = 0; s < renderUnits.length; s++) {
         const unit = renderUnits[s];
-        const {isImpostor, relativeModelMatrix} = unit;
+        const {isImpostor} = unit;
         if (isImpostor) {
             cachedRenderUnits.push({
                 isImpostor: true,
@@ -395,10 +352,7 @@ function bakeFoliageImpostor(
                 indexCount: 0,
                 indexFormat: 'uint32',
                 vertexCount: 0,
-                relativeModelMatrix,
-                isIdentityModelMatrix: true,
                 matProps: EMPTY_FLOAT32_12,
-                modelMatProps: EMPTY_FLOAT32_12,
                 isFoliage: 0,
             });
             continue;
@@ -413,7 +367,6 @@ function bakeFoliageImpostor(
             vertexCount
         } = unit;
         const {vertexBuffer, indexBuffer} = geometry;
-        const isIdentityModelMatrix = isIdentityMatrix(relativeModelMatrix);
 
         const {
             baseColorTexture,
@@ -493,12 +446,6 @@ function bakeFoliageImpostor(
             hasDiff ? 1.0 : 0.0, hasNorm ? 1.0 : 0.0, hasORM ? 1.0 : 0.0, useVertexColor ? 1.0 : 0.0
         ]);
 
-        const modelMatProps = new Float32Array([
-            relativeModelMatrix[0], relativeModelMatrix[1], relativeModelMatrix[2], relativeModelMatrix[12],
-            relativeModelMatrix[4], relativeModelMatrix[5], relativeModelMatrix[6], relativeModelMatrix[13],
-            relativeModelMatrix[8], relativeModelMatrix[9], relativeModelMatrix[10], relativeModelMatrix[14]
-        ]);
-
         cachedRenderUnits.push({
             isImpostor: false,
             pipeline: getOrCreateBakePipeline(redGPUContext, unit),
@@ -509,10 +456,7 @@ function bakeFoliageImpostor(
             indexCount,
             indexFormat,
             vertexCount,
-            relativeModelMatrix,
-            isIdentityModelMatrix,
             matProps,
-            modelMatProps,
             isFoliage,
         });
         }
@@ -520,11 +464,9 @@ function bakeFoliageImpostor(
         const totalViews = renderPassViews.length;
     const totalUnits = renderUnits.length;
     const totalDrawCalls = totalViews * totalUnits;
-        const strideFloats = 48;
+    const strideFloats = 36;
         const totalFloats = totalDrawCalls * strideFloats;
         const allInstanceData = new Float32Array(totalFloats);
-
-        const tempMVP = mat4.create();
 
         let drawSlot = 0;
         for (let v = 0; v < totalViews; v++) {
@@ -535,35 +477,25 @@ function bakeFoliageImpostor(
                 const cached = cachedRenderUnits[s];
                 const {
                     isImpostor,
-                    isIdentityModelMatrix,
-                    relativeModelMatrix,
-                    matProps,
-                    modelMatProps
+                    matProps
                 } = cached;
                 const baseOffset = drawSlot * strideFloats;
                 drawSlot++;
 
                 if (isImpostor) continue;
 
-                if (isIdentityModelMatrix || !relativeModelMatrix) {
-                    allInstanceData.set(projView, baseOffset);
-                } else {
-                    mat4.multiply(tempMVP, projView, relativeModelMatrix);
-                    allInstanceData.set(tempMVP, baseOffset);
-                }
-
+                allInstanceData.set(projView, baseOffset);
                 allInstanceData.set(matProps, baseOffset + 16);
-                allInstanceData.set(modelMatProps, baseOffset + 28);
 
-                allInstanceData[baseOffset + 40] = centerX;
-                allInstanceData[baseOffset + 41] = centerY;
-                allInstanceData[baseOffset + 42] = centerZ;
-                allInstanceData[baseOffset + 43] = maxRadius;
+                allInstanceData[baseOffset + 28] = centerX;
+                allInstanceData[baseOffset + 29] = centerY;
+                allInstanceData[baseOffset + 30] = centerZ;
+                allInstanceData[baseOffset + 31] = maxRadius;
 
-                allInstanceData[baseOffset + 44] = normX;
-                allInstanceData[baseOffset + 45] = normY;
-                allInstanceData[baseOffset + 46] = normZ;
-                allInstanceData[baseOffset + 47] = cached.isFoliage;
+                allInstanceData[baseOffset + 32] = normX;
+                allInstanceData[baseOffset + 33] = normY;
+                allInstanceData[baseOffset + 34] = normZ;
+                allInstanceData[baseOffset + 35] = cached.isFoliage;
             }
         }
 
@@ -757,7 +689,7 @@ function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRend
                         ]
                     },
                     {
-                        arrayStride: 48 * 4,
+                        arrayStride: 36 * 4,
                         stepMode: 'instance',
                         attributes: [
                             {shaderLocation: 6, offset: 0, format: 'float32x4'},
@@ -769,9 +701,6 @@ function getOrCreateBakePipeline(redGPUContext: RedGPUContext, unit: FoliageRend
                             {shaderLocation: 12, offset: 96, format: 'float32x4'},
                             {shaderLocation: 13, offset: 112, format: 'float32x4'},
                             {shaderLocation: 14, offset: 128, format: 'float32x4'},
-                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
-                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
-                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
                         ]
                     }
                 ]

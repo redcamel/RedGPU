@@ -8,11 +8,8 @@ struct TransformInput {
     @location(10) baseColorFactor: vec4<f32>,
     @location(11) materialParams: vec4<f32>,
     @location(12) textureFlags: vec4<f32>,
-    @location(13) nMat0: vec4<f32>,
-    @location(14) nMat1: vec4<f32>,
-    @location(15) nMat2: vec4<f32>,
-    @location(16) sphereCenterRadius: vec4<f32>,
-    @location(17) cameraDir: vec4<f32>,
+    @location(13) sphereCenterRadius: vec4<f32>,
+    @location(14) cameraDir: vec4<f32>,
 };
 
 @vertex
@@ -27,8 +24,6 @@ fn main(
 ) -> VertexOutput {
     var out: VertexOutput;
     let mvp = mat4x4<f32>(trans.mvp0, trans.mvp1, trans.mvp2, trans.mvp3);
-    let nMat = mat3x3<f32>(trans.nMat0.xyz, trans.nMat1.xyz, trans.nMat2.xyz);
-    let translation = vec3<f32>(trans.nMat0.w, trans.nMat1.w, trans.nMat2.w);
 
     out.position = mvp * vec4<f32>(position, 1.0);
     out.uv = uv;
@@ -36,17 +31,17 @@ fn main(
 
     var n = normal;
     if (dot(n, n) < 1e-6) { n = vec3<f32>(0.0, 1.0, 0.0); }
-    out.worldNormal = normalize(nMat * n);
+    out.worldNormal = normalize(n);
 
     var t = tangent.xyz;
     if (dot(t, t) < 1e-6) {
         t = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 1.0, 0.0), abs(n.x) > 0.9);
     }
-    let worldT = normalize(nMat * t);
+    let worldT = normalize(t);
     let tanW = select(1.0, tangent.w, tangent.w != 0.0);
     out.worldTangent = vec4<f32>(worldT, tanW);
 
-    out.worldPos = nMat * position + translation;
+    out.worldPos = position;
     out.baseColorFactor = trans.baseColorFactor;
     out.materialParams = trans.materialParams;
     out.textureFlags = trans.textureFlags;

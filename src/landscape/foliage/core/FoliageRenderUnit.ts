@@ -1,4 +1,3 @@
-import {mat4} from "gl-matrix";
 import ScatterRenderUnit, {type ScatterRenderUnitInitOptions} from "../../core/scatter/ScatterRenderUnit";
 import FoliagePipelineRegistry, {type FoliageDepthPassMode} from "./pipeline/FoliagePipelineRegistry";
 import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
@@ -32,11 +31,6 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
      * [EN] LOD level index to which the render unit belongs
      */
     lodIndex?: number;
-    /**
-     * [KO] 루트 메시 대비 상대 모델 변환 행렬(`mat4`)
-     * [EN] Relative model transformation matrix (`mat4`) with respect to the root mesh
-     */
-    relativeModelMatrix?: mat4 | null;
     /**
      * [KO] 깊이 프리패스(Depth Prepass) 렌더링 참여 여부
      * [EN] Whether this unit participates in depth prepass rendering
@@ -80,8 +74,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
     #slotPooler: FoliageSlotPooler | null = null;
     #isShadowMerged: boolean = false;
 
-    #relativeModelMatrix: mat4 | null = null;
-
     #isDepthPrepass: boolean = false;
     #isMainOpaqueOrMasked: boolean = true;
     #mainDepthMode: FoliageDepthPassMode = 'normal';
@@ -105,7 +97,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
             indirectOffsetBytes = 0,
             slotIndex = -1,
             slotPooler = null,
-            relativeModelMatrix = null,
             isDepthPrepass = false,
             isMainOpaqueOrMasked = !isShadowMerged,
             mainDepthMode = 'normal',
@@ -124,8 +115,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
         this.#isShadowMerged = isShadowMerged;
         this.#slotIndex = slotIndex;
         this.#slotPooler = slotPooler;
-
-        this.#relativeModelMatrix = relativeModelMatrix;
 
         this.#isDepthPrepass = isDepthPrepass;
         this.#isMainOpaqueOrMasked = isMainOpaqueOrMasked;
@@ -167,18 +156,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
      */
     get isShadowMerged(): boolean {
         return this.#isShadowMerged;
-    }
-
-    /**
-     * [KO] 상대 모델 변환 행렬(`mat4`)을 반환합니다.
-     * [EN] Returns the relative model transformation matrix (`mat4`).
-     *
-     * @returns
-     * [KO] 상대 모델 행렬 또는 `null`
-     * [EN] Relative model matrix or `null`
-     */
-    get relativeModelMatrix(): mat4 | null {
-        return this.#relativeModelMatrix;
     }
 
     /**

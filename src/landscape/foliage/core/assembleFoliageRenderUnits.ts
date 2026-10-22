@@ -1,4 +1,3 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import type Mesh from "../../../display/mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
@@ -17,7 +16,6 @@ import {
     POSITION_ONLY_STRIDE_BYTES
 } from "../../core/scatter/ScatterVertexFormats";
 
-const identityMatrix: mat4 = mat4.create();
 const IMPOSTOR_QUAD_INDICES: Uint32Array = new Uint32Array([0, 1, 2, 0, 2, 3]);
 
 function createOctahedralImpostorGeometry(
@@ -137,7 +135,6 @@ function createPBRRenderUnit(
         firstIndex,
         indexCount,
         strideBytes: PBR_STRIDE_BYTES,
-        relativeModelMatrix: identityMatrix,
         slotIndex,
         slotPooler,
         lodIndex,
