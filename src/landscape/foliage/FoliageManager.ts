@@ -46,7 +46,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
     #culler: FoliageCuller;
-    #useDepthPrepass: boolean = true;
 
     #roundRobinIndex: number = 0;
 
@@ -136,7 +135,7 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * [EN] Number of depth prepass draw calls
      */
     get depthPrepassDrawCalls(): number {
-        if (!this.enabled || !this.#useDepthPrepass) return 0;
+        if (!this.enabled) return 0;
         let count = 0;
         const {types} = this;
         const len = types.length;
@@ -144,11 +143,10 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             const foliage = types[i];
             const {
                 activeInstanceCount,
-                useDepthPrepass,
                 depthPrepassOpaqueRenderUnits,
                 depthPrepassMaskedRenderUnits
             } = foliage;
-            if (activeInstanceCount > 0 && useDepthPrepass) {
+            if (activeInstanceCount > 0) {
                 count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
             }
         }
@@ -175,25 +173,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             }
         }
         return count;
-    }
-
-    /**
-     * [KO] 깊이 프리패스(Depth Prepass) 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether the depth prepass is enabled.
-     *
-     * @returns
-     * [KO] 깊이 프리패스 활성화 여부
-     * [EN] Whether the depth prepass is enabled
-     */
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
-    }
-
-    set useDepthPrepass(val: boolean) {
-        if (this.#useDepthPrepass !== val) {
-            this.#useDepthPrepass = val;
-            this.#renderer.useDepthPrepass = val;
-        }
     }
 
     /**
@@ -362,16 +341,11 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         const {
             activeInstanceCount,
             mainRenderUnits,
-            useDepthPrepass,
             depthPrepassOpaqueRenderUnits,
             depthPrepassMaskedRenderUnits
         } = foliage;
         if (activeInstanceCount <= 0) return 0;
-        let count = mainRenderUnits.length;
-        if (this.#useDepthPrepass && useDepthPrepass) {
-            count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
-        }
-        return count;
+        return mainRenderUnits.length + depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
     }
 
     /**

@@ -295,7 +295,7 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
      * [KO] Depth Prepass 렌더링 사용 여부 (기본값: `true`)
      * [EN] Whether to use Depth Prepass rendering (default: `true`)
      */
-    useDepthPrepass?: boolean;
+
 }
 
 /**
@@ -353,7 +353,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #useImpostor: boolean = true;
-    #useDepthPrepass: boolean = true;
+
     #receiveShadow: boolean = true;
     #trunkBendScale: number = 1.0;
     #leafFlutterScale: number = 1.0;
@@ -438,7 +438,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             alignFactor,
             groundBlendStrength,
             groundBlendRange,
-            useDepthPrepass = true,
+
             shadowCullDistance,
             targetLayer,
             minSlope = 0.0,
@@ -453,7 +453,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
 
         this.#receiveShadow = receiveShadow;
         this.#useImpostor = useImpostor;
-        this.#useDepthPrepass = useDepthPrepass;
+
         this.#megaBuffer = megaBuffer ?? null;
 
         const [minX = 1.0, minY = 1.0, minZ = 1.0] = minScale ?? [];
@@ -748,7 +748,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     override get drawCallCount(): number {
         let count = this.#mainRenderUnits.length;
-        if (this.#useDepthPrepass) {
+        if (true) {
             count += this.#depthPrepassOpaqueRenderUnits.length + this.#depthPrepassMaskedRenderUnits.length;
         }
         return count;
@@ -963,26 +963,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             this.#updatePassBuckets();
             this.#notifyUniformDirty();
         }
-    }
-
-    set useDepthPrepass(value: boolean) {
-        const boolVal = !!value;
-        if (this.#useDepthPrepass !== boolVal) {
-            this.#useDepthPrepass = boolVal;
-            this.#updatePassBuckets();
-            this.#notifyUniformDirty();
-        }
-    }
-
-    /**
-     * [KO] Depth Prepass 렌더링 사용 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether Depth Prepass rendering is used.
-     * @returns
-     * [KO] Depth Prepass 사용 여부
-     * [EN] Whether Depth Prepass is used
-     */
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
     }
 
     /**
@@ -1517,7 +1497,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         mainList.length = 0;
 
         const useImpostor = this.#useImpostor && !!this.#impostorRenderUnit;
-        const useDepthPrepass = this.#useDepthPrepass;
+        const useDepthPrepass = true;
 
         for (let i = 0; i < count; i++) {
             const unit = unitList[i];

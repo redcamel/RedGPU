@@ -16,7 +16,7 @@ interface FoliageMainBundleCacheEntry {
     systemBG: GPUBindGroup | null;
     sampleCount: number;
     validTypeCount: number;
-    useDepthPrepass: boolean;
+
 }
 
 /**
@@ -48,7 +48,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
     #lastRecordedTypeCount: number = 0;
 
-    #useDepthPrepass: boolean = true;
     #depthPrepassBundlesByView: WeakMap<View3D, {
         bundle: GPURenderBundle;
         systemBG: GPUBindGroup | null;
@@ -97,26 +96,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                 culledGPU: null,
                 indirectGPU: null
             } as unknown as ValidFoliageTypeItem);
-        }
-    }
-
-    /**
-     * [KO] Depth Prepass 사용 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether Depth Prepass is enabled.
-     *
-     * @returns
-     * [KO] Depth Prepass 사용 여부
-     * [EN] Whether Depth Prepass is enabled
-     */
-    get useDepthPrepass(): boolean {
-        return this.#useDepthPrepass;
-    }
-
-    set useDepthPrepass(value: boolean) {
-        const boolVal = !!value;
-        if (this.#useDepthPrepass !== boolVal) {
-            this.#useDepthPrepass = boolVal;
-            this.markDepthPrepassBundleDirty();
         }
     }
 
@@ -178,7 +157,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
         if (validCount === 0) return;
 
-        if (this.#useDepthPrepass) {
+        if (true) {
             let viewCache = this.#depthPrepassBundlesByView.get(view);
             const needsRebuild = !viewCache
                 || viewCache.systemBG !== systemBG
@@ -211,7 +190,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             || mainViewCache.systemBG !== systemBG
             || mainViewCache.sampleCount !== sampleCount
             || mainViewCache.validTypeCount !== validCount
-            || mainViewCache.useDepthPrepass !== this.#useDepthPrepass;
+            || mainViewCache.validTypeCount !== validCount;
 
         if (needsMainRebuild) {
             const bundle = this.#recordMainRenderBundle(validCount, systemBG, sampleCount, msaaID, view);
@@ -221,7 +200,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
                     systemBG,
                     sampleCount,
                     validTypeCount: validCount,
-                    useDepthPrepass: this.#useDepthPrepass
+
                 };
                 this.mainBundlesByView.set(view, mainViewCache);
             } else {
@@ -238,9 +217,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             for (let t = 0; t < validCount; t++) {
                 const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
 
-                const {mainRenderUnits, useDepthPrepass} = type;
+                const {mainRenderUnits} = type;
                 const unitCount = mainRenderUnits.length;
-                const effectiveUsePrepass = this.#useDepthPrepass && useDepthPrepass;
+                const effectiveUsePrepass = true;
 
                 for (let s = 0; s < unitCount; s++) {
                     const unit = mainRenderUnits[s];
@@ -357,7 +336,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const {type} = this.#validTypesMain[t];
-            if (type.useDepthPrepass) {
+            if (true) {
                 const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = type;
                 if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
                     hasPrepassRenderUnits = true;
@@ -382,7 +361,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!type.useDepthPrepass) continue;
+
             const {depthPrepassOpaqueRenderUnits} = type;
             const unitCount = depthPrepassOpaqueRenderUnits.length;
 
@@ -393,7 +372,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            if (!type.useDepthPrepass) continue;
+
             const {depthPrepassMaskedRenderUnits} = type;
             const unitCount = depthPrepassMaskedRenderUnits.length;
 
@@ -433,9 +412,9 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
         for (let t = 0; t < validCount; t++) {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
-            const {mainRenderUnits, useDepthPrepass} = type;
+            const {mainRenderUnits} = type;
             const unitCount = mainRenderUnits.length;
-            const effectiveUsePrepass = this.#useDepthPrepass && useDepthPrepass;
+            const effectiveUsePrepass = true;
 
             for (let s = 0; s < unitCount; s++) {
                 const unit = mainRenderUnits[s];
