@@ -11,5 +11,4 @@ export {
 export type {
     WeightMapPixelData
 };
-export default LandscapeWeightMapCPUSampler;
 

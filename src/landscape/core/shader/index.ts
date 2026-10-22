@@ -3,6 +3,5 @@
  * [EN] Provides shared WGSL shader libraries used across the landscape system.
  * @packageDocumentation
  */
-export * from "./library/LandscapeShaderLibrary";
 export {LandscapeShaderLibrary} from "./library/LandscapeShaderLibrary";
 

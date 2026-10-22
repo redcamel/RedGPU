@@ -3,7 +3,7 @@
  * [EN] Provides internal core classes, baking, culling, and rendering pipeline components for the foliage system.
  * @packageDocumentation
  */
-import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions, type FoliageSubCell} from "./Foliage";
+import {type FoliageLODInfo, type FoliageSubCell} from "./Foliage";
 import FoliageRenderUnit from "./FoliageRenderUnit";
 
 import FoliageMegaBuffer from "./buffer/FoliageMegaBuffer";
@@ -19,7 +19,6 @@ import OctahedralImpostorMaterial from "./baking/impostor/octahedral/OctahedralI
 import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./assembleFoliageRenderUnits";
 
 export {
-    Foliage,
     FoliageRenderUnit,
     FoliageSlotPooler,
     FoliageMegaBuffer,
@@ -32,8 +31,6 @@ export {
     assembleFoliageRenderUnits,
     bakeFoliageImpostor,
 
-    type FoliageOptions,
-    type FoliageLODConfig,
     type FoliageLODInfo,
     type FoliageSubCell,
     type FoliageAssemblyResult,

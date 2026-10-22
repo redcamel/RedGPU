@@ -6,18 +6,14 @@
 export * as Core from "./core";
 
 import FoliageManager from "./FoliageManager";
-import Foliage, {type FoliageLODConfig, type FoliageLODInfo, type FoliageOptions} from "./core/Foliage";
-import assembleFoliageRenderUnits, {type FoliageAssemblyResult} from "./core/assembleFoliageRenderUnits";
+import Foliage, {type FoliageLODConfig, type FoliageOptions} from "./core/Foliage";
 
 export {
     Foliage,
-    FoliageManager,
-    assembleFoliageRenderUnits
+    FoliageManager
 };
 
 export type {
     FoliageOptions,
-    FoliageLODConfig,
-    FoliageLODInfo,
-    FoliageAssemblyResult
+    FoliageLODConfig
 };
