@@ -29,7 +29,6 @@ class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VNT');
-        this.#uniformArray = new Float32Array(12);
         this.#initComputeResources();
     }
 

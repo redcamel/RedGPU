@@ -38,7 +38,6 @@ class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VHT');
-        this.#uniformArray = new Uint32Array(4);
 
         this.#globalUniformBuffer = new ArrayBuffer(32);
         this.#globalUniformU32 = new Uint32Array(this.#globalUniformBuffer);
