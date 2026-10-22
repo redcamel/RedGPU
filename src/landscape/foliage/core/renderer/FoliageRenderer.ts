@@ -336,6 +336,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const {type} = this.#validTypesMain[t];
+            const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = type;
+            if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
+                hasPrepassRenderUnits = true;
+                break;
+            }
 
         }
         if (!hasPrepassRenderUnits) return null;
