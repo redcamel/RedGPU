@@ -219,11 +219,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
                 const {mainRenderUnits} = type;
                 const unitCount = mainRenderUnits.length;
-                const effectiveUsePrepass = true;
+
 
                 for (let s = 0; s < unitCount; s++) {
                     const unit = mainRenderUnits[s];
-                    const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
+                    const depthMode = unit.mainDepthMode;
                     this.#drawRenderUnit(passEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
                 }
             }
@@ -336,13 +336,7 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         let hasPrepassRenderUnits = false;
         for (let t = 0; t < validCount; t++) {
             const {type} = this.#validTypesMain[t];
-            if (true) {
-                const {depthPrepassOpaqueRenderUnits, depthPrepassMaskedRenderUnits} = type;
-                if (depthPrepassOpaqueRenderUnits.length > 0 || depthPrepassMaskedRenderUnits.length > 0) {
-                    hasPrepassRenderUnits = true;
-                    break;
-                }
-            }
+
         }
         if (!hasPrepassRenderUnits) return null;
 
@@ -414,11 +408,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             const {type, culledGPU, indirectGPU} = this.#validTypesMain[t];
             const {mainRenderUnits} = type;
             const unitCount = mainRenderUnits.length;
-            const effectiveUsePrepass = true;
+
 
             for (let s = 0; s < unitCount; s++) {
                 const unit = mainRenderUnits[s];
-                const depthMode = effectiveUsePrepass ? unit.mainDepthMode : 'normal';
+                const depthMode = unit.mainDepthMode;
                 this.#drawRenderUnit(bundleEncoder, unit, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, depthMode);
             }
         }

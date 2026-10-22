@@ -747,11 +747,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
      * [EN] Number of draw calls
      */
     override get drawCallCount(): number {
-        let count = this.#mainRenderUnits.length;
-        if (true) {
-            count += this.#depthPrepassOpaqueRenderUnits.length + this.#depthPrepassMaskedRenderUnits.length;
-        }
-        return count;
+        return this.#mainRenderUnits.length + this.#depthPrepassOpaqueRenderUnits.length + this.#depthPrepassMaskedRenderUnits.length;
     }
 
     /**
@@ -1497,13 +1493,13 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         mainList.length = 0;
 
         const useImpostor = this.#useImpostor && !!this.#impostorRenderUnit;
-        const useDepthPrepass = true;
+
 
         for (let i = 0; i < count; i++) {
             const unit = unitList[i];
             const {isImpostor, isMasked} = unit;
             if (!useImpostor && isImpostor) continue;
-            if (useDepthPrepass && unit.canRenderInPass('depthPrepass')) {
+            if (unit.canRenderInPass('depthPrepass')) {
                 if (!isMasked) {
                     prepassOpaqueList.push(unit);
                 } else {

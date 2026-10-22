@@ -285,7 +285,6 @@ const renderTestPane = ({
         groundBlendFolder.addBinding(type, 'groundBlendRange', {min: 0.1, max: 10.0, step: 0.1});
 
         const lodFolder = typeFolder.addFolder({title: 'LOD & Impostor', expanded: false});
-        lodFolder.addBinding(type, 'useDepthPrepass');
         if (type.hasImpostor) {
             lodFolder.addBinding(type, 'useImpostor');
         }
@@ -337,7 +336,6 @@ const renderTestPane = ({
 
             const managerFolder = foliageFolder.addFolder({title: 'foliageManager', expanded: false});
             managerFolder.addBinding(foliageManager, 'enabled');
-            managerFolder.addBinding(foliageManager, 'useDepthPrepass');
             managerFolder.addBinding(foliageManager, 'subCellSize', {readonly: true});
             managerFolder.addBinding(foliageManager, 'typeCount', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, interval: 200});
