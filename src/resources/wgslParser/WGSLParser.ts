@@ -4,7 +4,7 @@ import ShaderVariantGenerator from "./core/ShaderVariantGenerator";
 import PassClustersLightHelper from "../../light/core/clusterLight/core/PassClustersLightHelper";
 import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 
-const includePattern = /#redgpu_include\s+([\w.]+)/g;
+const includePattern = /#redgpu_include\s+([\w.]+)\s*;?/g;
 const extensionLibraries: Map<string, any> = new Map();
 const definePattern = /REDGPU_DEFINE_(?:TILE_COUNT_[XYZ]|TOTAL_TILES|WORKGROUP_SIZE_[XYZ]|MAX_LIGHTS_PER_CLUSTER)/g;
 const defineValues = {

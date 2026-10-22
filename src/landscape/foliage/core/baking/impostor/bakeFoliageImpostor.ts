@@ -1,3 +1,4 @@
+import "../../../../core/shader/library/LandscapeShaderLibrary";
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";

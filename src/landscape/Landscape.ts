@@ -1,3 +1,4 @@
+import "./core/shader/library/LandscapeShaderLibrary";
 import RedGPUContext from "../context/RedGPUContext";
 import LandscapeRenderer from "./core/renderer/LandscapeRenderer";
 import RenderViewStateData from "../display/view/core/RenderViewStateData";

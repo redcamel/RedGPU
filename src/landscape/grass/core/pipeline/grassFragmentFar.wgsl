@@ -1,84 +1,9 @@
 #redgpu_include SYSTEM_UNIFORM;
-struct GrassRenderParams {
-    cullingDistance: f32,
-    fadeStartDistance: f32,
-    meshHeight: f32,
-    minY: f32,
-
-    shadowCullDistance: f32,
-    farAlphaCutoff: f32,
-    invMeshHeight: f32,
-    invFadeRange: f32,
-
-    groundBlendStrength: f32,
-    alphaCutoff: f32,
-    hasGroundTexture: u32,
-    exposureBoost: f32,
-
-    subsurfaceColor: vec3<f32>,
-    subsurfaceStrength: f32,
-
-    roughness: f32,
-    shadowStrength: f32,
-    receiveShadow: u32,
-    shadowCullDistanceSq: f32,
-
-    shadowFadeStartSq: f32,
-    invShadowFadeRange: f32,
-    pad0: u32,
-    pad1: u32,
-};
-
-struct VertexOutput {
-    @builtin(position) clipPos: vec4<f32>,
-    @location(0) worldPos: vec3<f32>,
-    @location(1) uv: vec2<f32>,
-    @location(2) normal: vec3<f32>,
-    @location(3) heightRatio: f32,
-    @location(4) alphaFade: f32,
-    @location(5) currentClipPos: vec4<f32>,
-    @location(6) prevClipPos: vec4<f32>,
-    @location(7) groundColor: vec4<f32>,
-    @location(8) @interpolate(flat) shadowData: vec2<f32>,
-};
-
-const NORM_225: f32 = 0.44444445;
-
-fn filterGrassAlpha(baseTex: vec4<f32>, alphaFade: f32) -> f32 {
-    let rgbMax = max(baseTex.r, max(baseTex.g, baseTex.b));
-    var sourceAlpha = baseTex.a;
-    if (sourceAlpha > 0.85 && rgbMax < 0.15) {
-        sourceAlpha = saturate((rgbMax - 0.02) * 10.0);
-    }
-    return sourceAlpha * alphaFade;
-}
-
-fn blendGrassGroundColor(
-    baseColor: vec3<f32>,
-    exposureBoost: f32,
-    hasGroundTexture: u32,
-    groundBlendStrength: f32,
-    heightRatio: f32,
-    groundColor: vec3<f32>
-) -> vec3<f32> {
-    let boost = max(0.1, exposureBoost);
-    var albedo = baseColor * boost;
-    if (hasGroundTexture != 0u && groundBlendStrength > 0.01) {
-        let blendFactor = saturate((0.40 - heightRatio) * 2.5) * groundBlendStrength;
-        albedo = mix(albedo, groundColor, blendFactor);
-    }
-    return albedo;
-}
-
-fn computeGrassSkyOcclusion(heightRatio: f32) -> f32 {
-    return mix(0.65, 1.0, saturate(heightRatio * 1.43));
-}
-
-fn computeGrassContactAO(heightRatio: f32) -> f32 {
-    return mix(0.40, 1.0, saturate(heightRatio * 4.0));
-}
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
+#redgpu_include landscape.struct.GrassRenderParams;
+#redgpu_include landscape.struct.GrassVertexOutput;
+#redgpu_include landscape.grassFragmentCommon;
 
 @group(1) @binding(1) var<uniform> materialUniforms: GrassRenderParams;
 
@@ -167,4 +92,3 @@ fn main(input: VertexOutput) -> OutputFragment {
 
     return output;
 }
-

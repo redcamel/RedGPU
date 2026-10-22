@@ -1,4 +1,6 @@
 #redgpu_include landscape.checkAABBInHZB;
+#redgpu_include landscape.struct.LandscapeTile;
+#redgpu_include landscape.struct.DrawIndexedIndirectArgs;
 
 struct CameraFrustumUniforms {
 
@@ -21,21 +23,6 @@ struct CameraFrustumUniforms {
     pad2: f32,
     pad3: f32,
     pad4: f32,
-};
-
-struct LandscapeTile {
-    centerWorldX: f32,
-    centerWorldZ: f32,
-    minHeightNorm: f32,
-    maxHeightNorm: f32,
-};
-
-struct DrawIndexedIndirectArgs {
-    indexCount: u32,
-    instanceCount: atomic<u32>,
-    firstIndex: u32,
-    baseVertex: u32,
-    firstInstance: u32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: CameraFrustumUniforms;
@@ -146,4 +133,3 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         visibleTiles[targetIndex] = currentTile;
     }
 }
-

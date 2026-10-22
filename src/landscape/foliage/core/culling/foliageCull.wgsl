@@ -64,28 +64,8 @@ struct FoliageCullingUniforms {
     cascades: array<CascadeCullingInfo, 4>,
 };
 
-struct FoliageInstance {
-    posX: f32,
-    posY: f32,
-    posZ: f32,
-    scaleY: f32,
-    packedRotXY: u32,
-    packedRotZW: u32,
-    packedScaleXZ: u32,
-    packedGroundColorAndType: u32,
-};
-
-struct DrawIndexedIndirectArgs {
-    indexCount: u32,
-    instanceCount: atomic<u32>,
-    firstIndex: u32,
-    baseVertex: u32,
-    firstInstance: u32,
-};
-
-fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
-    return extractBits(packedGroundColorAndType, 24u, 8u);
-}
+#redgpu_include landscape.struct.FoliageInstance;
+#redgpu_include landscape.scatterCullCommon;
 
 fn replacePackedAlpha(packedGroundColorAndType: u32, alphaByte: u32) -> u32 {
     return insertBits(packedGroundColorAndType, alphaByte, 24u, 8u);
@@ -341,4 +321,3 @@ fn main(
         }
     }
 }
-

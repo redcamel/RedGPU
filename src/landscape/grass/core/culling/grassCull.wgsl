@@ -1,15 +1,6 @@
 #redgpu_include landscape.testSphereInFrustum;
-
-struct GrassInstance {
-    posX: f32,
-    posY: f32,
-    posZ: f32,
-    scaleY: f32,
-    scaleXZ: f32,
-    packedBounding: u32,
-    packedQuat: u32,
-    packedGroundColorAndType: u32,
-};
+#redgpu_include landscape.struct.GrassInstance;
+#redgpu_include landscape.scatterCullCommon;
 
 struct GrassTypeParam {
     cullingDistanceSq: f32,
@@ -33,18 +24,6 @@ struct GrassTypeParam {
     pad0: u32,
     pad1: u32,
 };
-
-struct DrawIndexedIndirectArgs {
-    indexCount: u32,
-    instanceCount: atomic<u32>,
-    firstIndex: u32,
-    baseVertex: i32,
-    firstInstance: u32,
-};
-
-fn unpackTypeId(packedGroundColorAndType: u32) -> u32 {
-    return extractBits(packedGroundColorAndType, 24u, 8u);
-}
 
 struct GlobalCullUniforms {
     cameraPosition: vec3<f32>,
@@ -154,4 +133,3 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     let culledTargetIdx = culledBase + writeSlot;
     culledInstances[culledTargetIdx] = culledInst;
 }
-
