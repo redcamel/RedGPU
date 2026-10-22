@@ -249,7 +249,7 @@ const manualSidebarConfigs = languages.map(lang => ({
     useFolderLinkFromIndexFile: true,
     sortMenusByFrontmatterOrder: true,
         // 폴더 및 파일 정렬 순서 지정
-    manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'landscape', 'plugins', 'inspector', 'model-loading', 'instanced-mesh', 'sprite', 'text-field', 'particle']
+    manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'landscape', 'water', 'plugins', 'inspector', 'model-loading', 'instanced-mesh', 'sprite', 'text-field', 'particle']
     }));
 
 // [Group 2] API 문서 사이드바 설정 (API Reference)
@@ -268,10 +268,9 @@ const apiSidebarConfigs = languages.map(lang => ({
 }));
 
 // 전체 사이드바 설정 합치기
-const sidebarEntries = [...manualSidebarConfigs, ...apiSidebarConfigs];
 
-const rawSidebarConfig = generateSidebar(sidebarEntries);
-const finalSidebar = sortSidebar(rawSidebarConfig);
+
+const finalSidebar = {...generateSidebar(manualSidebarConfigs), ...sortSidebar(generateSidebar(apiSidebarConfigs))};
 
 /**
  * 3. VitePress Main Configuration
