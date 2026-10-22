@@ -290,12 +290,6 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
      * [EN] Height range over which terrain ground color blending is applied in meters (default: `1.5`)
      */
     groundBlendRange?: number;
-
-    /**
-     * [KO] Depth Prepass 렌더링 사용 여부 (기본값: `true`)
-     * [EN] Whether to use Depth Prepass rendering (default: `true`)
-     */
-
 }
 
 /**

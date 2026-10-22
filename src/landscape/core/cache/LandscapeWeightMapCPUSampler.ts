@@ -118,36 +118,6 @@ class LandscapeWeightMapCPUSampler {
     }
 
     /**
-     * [KO] 해당 이미지 경로의 픽셀 데이터가 캐시에 존재하는지 확인합니다.
-     * [EN] Checks whether pixel data for the specified image path exists in the cache.
-     *
-     * @param src -
-     * [KO] 가중치 맵 이미지 경로(URL)
-     * [EN] Weight map image path (URL)
-     * @returns
-     * [KO] 캐시 존재 여부
-     * [EN] Whether the data exists in the cache
-     */
-    has(src: string): boolean {
-        return this.#cache.has(src);
-    }
-
-    /**
-     * [KO] 캐시된 가중치 맵 픽셀 데이터를 반환합니다.
-     * [EN] Returns the cached weight map pixel data.
-     *
-     * @param src -
-     * [KO] 가중치 맵 이미지 경로(URL)
-     * [EN] Weight map image path (URL)
-     * @returns
-     * [KO] 캐시된 픽셀 데이터 또는 `null`
-     * [EN] Cached pixel data or `null`
-     */
-    get(src: string): WeightMapPixelData | null {
-        return this.#cache.get(src) || null;
-    }
-
-    /**
      * [KO] 정규화된 UV 좌표(`0.0` ~ `1.0`)와 채널 인덱스에 해당하는 가중치 값을 이중 선형 보간하여 반환합니다.
      * [EN] Returns the bilinearly interpolated weight value at the normalized UV coordinates (`0.0` to `1.0`) and channel index.
      *

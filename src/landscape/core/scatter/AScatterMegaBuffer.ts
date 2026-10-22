@@ -103,7 +103,6 @@ export interface ScatterBaseSegmentAllocation {
  */
 abstract class AScatterMegaBuffer extends RedGPUObject {
     #instanceCapacity: number;
-    #strideFloats: number;
     #strideBytes: number;
     #typeParamFloats: number;
     #maxRenderUnits: number;
@@ -178,7 +177,6 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
         this.#maxTypes = maxTypes;
         this.#maxRenderUnits = maxRenderUnits;
         this.#strideBytes = strideBytes;
-        this.#strideFloats = strideBytes / Float32Array.BYTES_PER_ELEMENT;
         this.#typeParamFloats = typeParamBytes / Float32Array.BYTES_PER_ELEMENT;
 
         this.#instanceCapacity = Math.ceil(initialCapacity / CULLING_WORKGROUP_SIZE) * CULLING_WORKGROUP_SIZE;
@@ -202,18 +200,6 @@ abstract class AScatterMegaBuffer extends RedGPUObject {
      */
     get strideBytes(): number {
         return this.#strideBytes;
-    }
-
-    /**
-     * [KO] 단일 인스턴스 데이터의 `Float32` 요소 개수를 반환합니다.
-     * [EN] Returns the number of `Float32` elements for a single instance data entry.
-     *
-     * @returns
-     * [KO] 인스턴스당 `Float32` 요소 수
-     * [EN] Number of `Float32` elements per instance
-     */
-    get strideFloats(): number {
-        return this.#strideFloats;
     }
 
     /**
