@@ -81,7 +81,7 @@ class LandscapeRenderer extends RedGPUObject {
         const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
         if (!storageBG || !storageBGLayout) return;
 
-        const pipeline = this.getOrCreateRenderPipeline(combinedVB, storageBGLayout);
+        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
         if (!pipeline) return;
 
         renderPassEncoder.setPipeline(pipeline);
@@ -129,7 +129,7 @@ class LandscapeRenderer extends RedGPUObject {
      * [KO] 생성 또는 캐시된 `GPURenderPipeline` 인스턴스 또는 실패 시 `null`
      * [EN] Created or cached `GPURenderPipeline` instance, or `null` on failure
      */
-    getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
+    #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const {gpuDevice, antialiasingManager, resourceManager} = this;
         const landscape = this.#landscape;
         if (!landscape) return null;

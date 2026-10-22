@@ -237,7 +237,7 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
             }
         }
 
-        this.registerRenderUnitsToTemplate(renderUnits, indirectBaseOffset, shadowMergedRenderUnits, lodInfoList);
+        this.#registerRenderUnitsToTemplate(renderUnits, indirectBaseOffset, shadowMergedRenderUnits, lodInfoList);
         this.invalidateUnifiedCullingBindGroup();
 
         return allocation;
@@ -576,7 +576,7 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
      * [KO] LOD 단계별 메타데이터 목록 (선택)
      * [EN] List of metadata per LOD level (optional)
      */
-    registerRenderUnitsToTemplate(
+    #registerRenderUnitsToTemplate(
         renderUnits: FoliageRenderUnit[],
         indirectBaseOffset: number,
         shadowMergedRenderUnits?: FoliageRenderUnit[],

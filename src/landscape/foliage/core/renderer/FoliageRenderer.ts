@@ -100,21 +100,35 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     }
 
     /**
-     * [KO] 캐싱된 모든 뷰의 Depth Prepass 렌더 번들을 무효화합니다.
-     * [EN] Invalidates cached Depth Prepass render bundles for all views.
-     */
-    markDepthPrepassBundleDirty(): void {
-        this.#depthPrepassBundlesByView = new WeakMap();
-    }
-
-    /**
      * [KO] 그림자, Depth Prepass, 메인 패스의 모든 캐싱된 렌더 번들을 무효화합니다.
      * [EN] Invalidates all cached render bundles for shadow, Depth Prepass, and main passes.
      */
     override markAllBundlesDirty(): void {
         this.markShadowBundleDirty();
-        this.markDepthPrepassBundleDirty();
+        this.#markDepthPrepassBundleDirty();
         this.markMainBundleDirty();
+    }
+
+    /**
+     * [KO] 렌더러가 보유한 캐시 및 내부 참조를 모두 정리하고 파기합니다.
+     * [EN] Cleans up and destroys all caches and internal references held by the renderer.
+     */
+    override destroy(): void {
+        super.destroy();
+        this.#renderUnitDynamicBindGroup = null;
+        this.#renderUnitVertexBindGroupLayout = null;
+        this.#markDepthPrepassBundleDirty();
+        this.#resetBoundState();
+        for (let i = 0; i < this.#validTypesMain.length; i++) {
+            (this.#validTypesMain[i] as any).type = null;
+            (this.#validTypesMain[i] as any).culledGPU = null;
+            (this.#validTypesMain[i] as any).indirectGPU = null;
+            (this.#validTypesShadow[i] as any).type = null;
+            (this.#validTypesShadow[i] as any).culledGPU = null;
+            (this.#validTypesShadow[i] as any).indirectGPU = null;
+        }
+        this.#validTypesMain.length = 0;
+        this.#validTypesShadow.length = 0;
     }
 
     /**
@@ -289,25 +303,11 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
     }
 
     /**
-     * [KO] 렌더러가 보유한 캐시 및 내부 참조를 모두 정리하고 파기합니다.
-     * [EN] Cleans up and destroys all caches and internal references held by the renderer.
+     * [KO] 캐싱된 모든 뷰의 Depth Prepass 렌더 번들을 무효화합니다.
+     * [EN] Invalidates cached Depth Prepass render bundles for all views.
      */
-    override destroy(): void {
-        super.destroy();
-        this.#renderUnitDynamicBindGroup = null;
-        this.#renderUnitVertexBindGroupLayout = null;
-        this.markDepthPrepassBundleDirty();
-        this.#resetBoundState();
-        for (let i = 0; i < this.#validTypesMain.length; i++) {
-            (this.#validTypesMain[i] as any).type = null;
-            (this.#validTypesMain[i] as any).culledGPU = null;
-            (this.#validTypesMain[i] as any).indirectGPU = null;
-            (this.#validTypesShadow[i] as any).type = null;
-            (this.#validTypesShadow[i] as any).culledGPU = null;
-            (this.#validTypesShadow[i] as any).indirectGPU = null;
-        }
-        this.#validTypesMain.length = 0;
-        this.#validTypesShadow.length = 0;
+    #markDepthPrepassBundleDirty(): void {
+        this.#depthPrepassBundlesByView = new WeakMap();
     }
 
     #resetBoundState(): void {

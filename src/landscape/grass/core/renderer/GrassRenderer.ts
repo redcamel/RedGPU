@@ -126,13 +126,14 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     }
 
     /**
-     * [KO] 캐싱된 Group 1 통합 바인드 그룹을 무효화합니다.
-     * [EN] Invalidates the cached unified Group 1 bind group.
+     * [KO] 메인 및 그림자 렌더 번들과 바인드 그룹 캐시를 모두 더티 상태로 표시합니다.
+     * [EN] Marks all main and shadow render bundles and bind group caches as dirty.
      */
-    invalidateGroup1BindGroup(): void {
-        this.#unifiedGroup1BindGroup = null;
-        this.#lastCulledBuffer = null;
-        this.#lastSlotPoolerBuffer = null;
+    override markAllBundlesDirty(): void {
+        this.markShadowBundleDirty();
+        this.markMainBundleDirty();
+        this.#invalidateGroup1BindGroup();
+        this.#materialBindGroupCache.clear();
     }
 
     /**
@@ -146,14 +147,27 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     }
 
     /**
-     * [KO] 메인 및 그림자 렌더 번들과 바인드 그룹 캐시를 모두 더티 상태로 표시합니다.
-     * [EN] Marks all main and shadow render bundles and bind group caches as dirty.
+     * [KO] 렌더러가 점유한 파이프라인, 셰이더 모듈, 바인드 그룹 및 렌더 번들 캐시를 모두 해제합니다.
+     * [EN] Releases all pipelines, shader modules, bind groups, and render bundle caches occupied by the renderer.
      */
-    override markAllBundlesDirty(): void {
-        this.markShadowBundleDirty();
-        this.markMainBundleDirty();
-        this.invalidateGroup1BindGroup();
+    override destroy(): void {
+        super.destroy();
+        this.#invalidateGroup1BindGroup();
+        this.#renderPipelinesNear.clear();
+        this.#renderPipelinesFar.clear();
         this.#materialBindGroupCache.clear();
+        this.#shadowPipeline = null;
+        this.#unifiedGroup1BindGroup = null;
+        this.#lastCulledBuffer = null;
+        this.#lastSlotPoolerBuffer = null;
+        this.#vertexModule = null;
+        this.#vertexShadowModule = null;
+        this.#fragmentNearModule = null;
+        this.#fragmentFarModule = null;
+        this.#fragmentShadowModule = null;
+        this.#pipelineLayout = null;
+        this.#pipelineBindGroupLayout1 = null;
+        this.#pipelineBindGroupLayout2 = null;
     }
 
     /**
@@ -323,27 +337,13 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     }
 
     /**
-     * [KO] 렌더러가 점유한 파이프라인, 셰이더 모듈, 바인드 그룹 및 렌더 번들 캐시를 모두 해제합니다.
-     * [EN] Releases all pipelines, shader modules, bind groups, and render bundle caches occupied by the renderer.
+     * [KO] 캐싱된 Group 1 통합 바인드 그룹을 무효화합니다.
+     * [EN] Invalidates the cached unified Group 1 bind group.
      */
-    override destroy(): void {
-        super.destroy();
-        this.invalidateGroup1BindGroup();
-        this.#renderPipelinesNear.clear();
-        this.#renderPipelinesFar.clear();
-        this.#materialBindGroupCache.clear();
-        this.#shadowPipeline = null;
+    #invalidateGroup1BindGroup(): void {
         this.#unifiedGroup1BindGroup = null;
         this.#lastCulledBuffer = null;
         this.#lastSlotPoolerBuffer = null;
-        this.#vertexModule = null;
-        this.#vertexShadowModule = null;
-        this.#fragmentNearModule = null;
-        this.#fragmentFarModule = null;
-        this.#fragmentShadowModule = null;
-        this.#pipelineLayout = null;
-        this.#pipelineBindGroupLayout1 = null;
-        this.#pipelineBindGroupLayout2 = null;
     }
 
     #recordMainRenderBundle(
