@@ -1,10 +1,10 @@
 #redgpu_include shadow.getShadowCoord;
 
 /**
- * 🌿 [식생(Foliage) 전용 초경량 1-Tap CSM 섀도우 메인 함수]
- * - 캐스케이드 전환 블렌딩 스킵 (2중 샘플링 폭풍 차단 및 경계선 스터터링 100% 방지)
- * - 전 캐스케이드 초고속 1-Tap 하드웨어 Bilinear PCF 단일화
- * - 풀잎 자체의 고주파 지오메트리 요철로 인해 1-Tap만으로도 완벽한 소프트 섀도우 구현
+ * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수]
+ * - Cascade 0 (초근경): 회전 지터 없는 대칭 5-Tap Tent PCF로 지형(Landscape)과 나무 기둥/바위 접지부 그림자 품질 100% 일치
+ * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대역폭 절감
+ * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
  *
  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
  * @param directionalShadowMapSampler 비교 샘플러
@@ -28,7 +28,6 @@ fn getDirectionalShadowVisibilityFoliage(
 
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-    let bias = shadowInfo.directionalShadowBias;
 
     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
@@ -40,16 +39,31 @@ fn getDirectionalShadowVisibilityFoliage(
         return 1.0;
     }
 
+    // 🌟 [Caster Bounding Volume 0-Tap 가드]
+    let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+    if (casterRadiusSq == 0.0) {
+        return 1.0;
+    }
+    if (casterRadiusSq > 0.0) {
+        let diff = worldPosition - shadowInfo.casterBoundingCenter;
+        if (dot(diff, diff) > casterRadiusSq) {
+            return 1.0;
+        }
+    }
+
+    let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+    let bias = shadowInfo.directionalShadowBias;
+
     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드만 선택)
     var cascadeIndex: u32 = 0u;
     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 4. 경량 슬로프 바이어스 및 노멀 오프셋
+    // 4. 식생 맞춤형 서브텍셀 슬로프 바이어스 및 노멀 오프셋
     let slopeBias = saturate(1.0 - nDotL);
-    let normalBiasScale = 0.5 + slopeBias * 1.5;
-    let baseBiasFactor = bias * (1.0 + slopeBias * 2.0);
+    let normalBiasScale = 0.25 + slopeBias * 0.65;
+    let baseBiasFactor = bias * (1.0 + slopeBias * 1.5);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -68,16 +82,35 @@ fn getDirectionalShadowVisibilityFoliage(
     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);
     let shadowDepth = saturate(shadowCoord.z);
-    let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+    let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0002 + driftBias);
 
-    // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
-    var finalVis = textureSampleCompareLevel(
-        directionalShadowMap,
-        directionalShadowMapSampler,
-        tUV,
-        cascadeIndex,
-        shadowDepth - cascadeBias
-    );
+    var finalVis: f32 = 1.0;
+
+    // 5. 적응형 샘플링: 초근경(Cascade 0)은 대칭 5-Tap Tent PCF, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+    if (cascadeIndex == 0u) {
+        let stepUV = oneOverTextureSize * 0.75;
+        let compareDepth = shadowDepth - cascadeBias;
+        let centerSample = textureSampleCompareLevel(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            0u,
+            compareDepth
+        );
+        let s0 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV, -stepUV), 0u, compareDepth);
+        let s1 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV, -stepUV), 0u, compareDepth);
+        let s2 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV,  stepUV), 0u, compareDepth);
+        let s3 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV,  stepUV), 0u, compareDepth);
+        finalVis = centerSample * 0.28 + (s0 + s1 + s2 + s3) * 0.18;
+    } else {
+        finalVis = textureSampleCompareLevel(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            cascadeIndex,
+            shadowDepth - cascadeBias
+        );
+    }
 
     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
@@ -99,7 +132,7 @@ fn getDirectionalShadowVisibilityFoliage(
 
             let nextTUV = nextShadowCoord.xy;
             let nextShadowDepth = saturate(nextShadowCoord.z);
-            let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+            let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0002 + driftBias);
 
             let nextVis = textureSampleCompareLevel(
                 directionalShadowMap,

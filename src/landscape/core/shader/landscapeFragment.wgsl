@@ -725,8 +725,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 input_vertexPosition,
                 baseNormal,
                 L,
-                inputData.viewDepth,
-                inputData.position.xy
+                inputData.viewDepth
             );
             csmVisibility = mix(1.0 - shadowStrength, 1.0, rawVisibility);
         }

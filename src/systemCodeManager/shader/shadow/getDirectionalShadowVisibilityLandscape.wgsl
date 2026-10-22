@@ -1,19 +1,8 @@
 #redgpu_include shadow.getShadowCoord;
-#redgpu_include math.getInterleavedGradientNoise;
-
-/**
- * 🌟 [지형(Landscape) 전용 적응형 초경량 4-Tap/1-Tap Poisson PCF 오프셋]
- */
-const LANDSCAPE_SHADOW_OFFSETS_4 = array<vec2<f32>, 4>(
-    vec2<f32>(-0.7071, -0.7071),
-    vec2<f32>( 0.7071, -0.7071),
-    vec2<f32>(-0.7071,  0.7071),
-    vec2<f32>( 0.7071,  0.7071)
-);
 
 /**
  * 🏔️ [지형(Landscape) 전용 초경량 CSM 섀도우 메인 함수]
- * - Cascade 0 (발밑 초근경): 4-Tap Poisson Disk PCF로 캐릭터 및 식생 그림자의 부드러운 외곽선 완벽 보존
+ * - Cascade 0 (발밑 초근경): 회전 지터 없는 고정 대칭 5-Tap Tent PCF로 빗살무늬 아티팩트 없이 부드러운 외곽선 보존
  * - Cascade 1+ (중원경 지형의 95% 면적): 초고속 1-Tap 하드웨어 Bilinear PCF로 94% 연산 절감
  * - 캐스케이드 2중 블렌딩(32-Tap 폭풍) 및 OOB 반복 계산을 전면 제거하여 GPU 워프 점유율 극대화
  *
@@ -23,7 +12,6 @@ const LANDSCAPE_SHADOW_OFFSETS_4 = array<vec2<f32>, 4>(
  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
  * @param viewDepth [KO] 사전 보간된 카메라 뷰 공간 깊이 [EN] Pre-interpolated camera view-space depth
- * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
  */
 fn getDirectionalShadowVisibilityLandscape(
@@ -32,8 +20,7 @@ fn getDirectionalShadowVisibilityLandscape(
     worldPosition: vec3<f32>,
     N: vec3<f32>,
     L: vec3<f32>,
-    viewDepth: f32,
-    screenPos: vec2<f32>
+    viewDepth: f32
 ) -> f32 {
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
@@ -96,38 +83,22 @@ fn getDirectionalShadowVisibilityLandscape(
 
     var finalVis: f32 = 1.0;
 
-    // 5. 적응형 샘플링: 발밑(Cascade 0)은 5-Tap 회전 PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
+    // 5. 적응형 샘플링: 발밑(Cascade 0)은 회전 지터 없는 대칭 5-Tap Tent PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
     if (cascadeIndex == 0u) {
-        let noise = getInterleavedGradientNoise(screenPos);
-        let angle = noise * 6.2831853;
-        let cosAngle = cos(angle);
-        let sinAngle = sin(angle);
-
-        let filterRadius = oneOverTextureSize * 1.25;
+        let stepUV = oneOverTextureSize * 0.75;
+        let compareDepth = shadowDepth - cascadeBias;
         let centerSample = textureSampleCompareLevel(
             directionalShadowMap,
             directionalShadowMapSampler,
             tUV,
             0u,
-            shadowDepth - cascadeBias
+            compareDepth
         );
-        var accum: f32 = centerSample;
-        for (var i = 0u; i < 4u; i++) {
-            let rawOffset = LANDSCAPE_SHADOW_OFFSETS_4[i];
-            let rotatedOffset = vec2<f32>(
-                rawOffset.x * cosAngle - rawOffset.y * sinAngle,
-                rawOffset.x * sinAngle + rawOffset.y * cosAngle
-            );
-            let offsetUV = tUV + rotatedOffset * filterRadius;
-            accum += textureSampleCompareLevel(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                offsetUV,
-                0u,
-                shadowDepth - cascadeBias
-            );
-        }
-        finalVis = accum * 0.2; // (중심 1-Tap + 주변 4-Tap) 5-Tap 반음영 정밀 필터링
+        let s0 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV, -stepUV), 0u, compareDepth);
+        let s1 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV, -stepUV), 0u, compareDepth);
+        let s2 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV,  stepUV), 0u, compareDepth);
+        let s3 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV,  stepUV), 0u, compareDepth);
+        finalVis = centerSample * 0.28 + (s0 + s1 + s2 + s3) * 0.18;
     } else {
         finalVis = textureSampleCompareLevel(
             directionalShadowMap,
