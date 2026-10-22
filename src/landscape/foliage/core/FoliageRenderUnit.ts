@@ -27,20 +27,10 @@ export interface FoliageRenderUnitInitOptions extends ScatterRenderUnitInitOptio
      */
     slotPooler?: FoliageSlotPooler | null;
     /**
-     * [KO] 렌더 유닛이 속한 LOD 단계 인덱스
-     * [EN] LOD level index to which the render unit belongs
-     */
-    lodIndex?: number;
-    /**
      * [KO] 깊이 프리패스(Depth Prepass) 렌더링 참여 여부
      * [EN] Whether this unit participates in depth prepass rendering
      */
     isDepthPrepass?: boolean;
-    /**
-     * [KO] 메인 패스 불투명/마스크 렌더링 참여 여부
-     * [EN] Whether this unit participates in main pass opaque/masked rendering
-     */
-    isMainOpaqueOrMasked?: boolean;
     /**
      * [KO] 메인 패스에서의 깊이 테스트 모드
      * [EN] Depth test mode during the main pass
@@ -75,7 +65,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
     #isShadowMerged: boolean = false;
 
     #isDepthPrepass: boolean = false;
-    #isMainOpaqueOrMasked: boolean = true;
     #mainDepthMode: FoliageDepthPassMode = 'normal';
     #isImpostor: boolean = false;
 
@@ -98,7 +87,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
             slotIndex = -1,
             slotPooler = null,
             isDepthPrepass = false,
-            isMainOpaqueOrMasked = !isShadowMerged,
             mainDepthMode = 'normal',
             isImpostor = false,
         } = init;
@@ -117,7 +105,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
         this.#slotPooler = slotPooler;
 
         this.#isDepthPrepass = isDepthPrepass;
-        this.#isMainOpaqueOrMasked = isMainOpaqueOrMasked;
         this.#mainDepthMode = mainDepthMode;
         this.#isImpostor = isImpostor;
     }
@@ -289,7 +276,7 @@ class FoliageRenderUnit extends ScatterRenderUnit {
             case 'depthPrepass':
                 return this.#isDepthPrepass;
             case 'main':
-                return this.#isMainOpaqueOrMasked;
+                return true;
             default:
                 return false;
         }

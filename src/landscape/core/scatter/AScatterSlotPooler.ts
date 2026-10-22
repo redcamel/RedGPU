@@ -34,7 +34,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     #cpuUint32View: Uint32Array;
     #freeSlotStack: Int32Array;
     #freeTop: number = 0;
-    #allocatedCount: number = 0;
 
     /**
      * [KO] `AScatterSlotPooler` 인스턴스를 초기화하고 CPU/GPU 슬롯 풀 버퍼를 할당합니다.
@@ -157,7 +156,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
             return -1;
         }
         this.#freeTop--;
-        this.#allocatedCount++;
         return this.#freeSlotStack[this.#freeTop];
     }
 
@@ -181,7 +179,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
 
         this.#freeSlotStack[this.#freeTop] = slot;
         this.#freeTop++;
-        this.#allocatedCount = Math.max(0, this.#allocatedCount - 1);
     }
 
     /**
@@ -194,7 +191,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
             this.#freeSlotStack[i] = this.#maxSlots - 1 - i;
         }
         this.#freeTop = this.#maxSlots;
-        this.#allocatedCount = 0;
 
         const {gpuDevice} = this;
         if (this.#gpuBuffer) {
@@ -213,7 +209,6 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         }
         this.#cpuBuffer.fill(0);
         this.#freeTop = 0;
-        this.#allocatedCount = 0;
     }
 
     /**
