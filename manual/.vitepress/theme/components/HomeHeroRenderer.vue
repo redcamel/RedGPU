@@ -11,7 +11,7 @@ onMounted(async () => {
   if (!canvasRef.value) return
 
   // 1. Initialize RedGPU
-  RedGPU = await import(/* @vite-ignore */ `https://redcamel.github.io/RedGPU/dist/index.js?t=${Date.now()}`)
+  RedGPU = await import(/* @vite-ignore */ `${window.location.origin}/RedGPU/dist/index.js?t=${Date.now()}`)
   RedGPU.init(
       canvasRef.value,
       (redGPUContext) => {
@@ -22,8 +22,8 @@ onMounted(async () => {
         controller.speedDistance = 0.01;
         controller.tilt = -15;
 
-        redGPUContext.onResize = () => {
-          const {width,height} = view.screenRectObject;
+        redGPUContext.onResize = (resizeEvent) => {
+          const {width, height} = resizeEvent.screenRectObject;
           if (width < 250) {
             controller.distance = 0.7;
             controller.centerY = 0.289;
@@ -54,10 +54,15 @@ onMounted(async () => {
 
         // Initial size setup
         redGPUContext.setSize('100%', '100%');
+        redGPUContext.onResize({
+          target: redGPUContext,
+          screenRectObject: redGPUContext.screenRectObject,
+          pixelRectObject: redGPUContext.pixelRectObject
+        });
         redGPUContext.backgroundColor.a = 0; // 배경 투명
 
         // 2. Setup HDR Environment (IBL only)
-        const hdrUrl = 'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+        const hdrUrl = `${window.location.origin}/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr`;
         const ibl = new RedGPU.Resource.IBL(redGPUContext, hdrUrl);
         view.ibl = ibl;
 
@@ -92,6 +97,11 @@ onMounted(async () => {
         resizeObserver = new ResizeObserver(() => {
           if (redGPUContext) {
             redGPUContext.setSize('100%', '100%');
+            redGPUContext.onResize({
+              target: redGPUContext,
+              screenRectObject: redGPUContext.screenRectObject,
+              pixelRectObject: redGPUContext.pixelRectObject
+            });
           }
         });
         if (canvasRef.value.parentElement) {
