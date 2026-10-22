@@ -1,6 +1,8 @@
 import RedGPUContext from '../../../context/RedGPUContext';
 import RedGPUObject from '../../../base/RedGPUObject';
 
+const SLOT_STRIDE_BYTES = 256;
+
 /**
  * [KO] 동적 유니폼 버퍼 오프셋(Dynamic Uniform Offset) 규격에 맞춰 256바이트 단위로 정렬된 UBO 슬롯을 풀링 및 관리하는 추상 기반 클래스입니다.
  * [EN] Abstract base class that pools and manages 256-byte aligned UBO slots conforming to Dynamic Uniform Offset specifications.
@@ -13,12 +15,6 @@ import RedGPUObject from '../../../base/RedGPUObject';
  * @category Landscape
  */
 abstract class AScatterSlotPooler extends RedGPUObject {
-    /**
-     * [KO] WebGPU 동적 유니폼 오프셋 최소 정렬 규격에 맞춘 슬롯당 바이트 스트라이드 (`256`)입니다.
-     * [EN] Byte stride per slot (`256`) aligned to the WebGPU minimum dynamic uniform offset alignment specification.
-     */
-    static SLOT_STRIDE_BYTES: number = 256;
-
     /**
      * [KO] 슬롯당 `Float32` 요소 개수 (`64`)입니다.
      * [EN] Number of `Float32` elements per slot (`64`).
@@ -77,7 +73,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         const {UNIFORM, COPY_DST} = GPUBufferUsage;
         this.#gpuBuffer = gpuDevice.createBuffer({
             label: bufferLabel,
-            size: maxSlots * AScatterSlotPooler.SLOT_STRIDE_BYTES,
+            size: maxSlots * SLOT_STRIDE_BYTES,
             usage: UNIFORM | COPY_DST
         });
     }
@@ -226,7 +222,7 @@ abstract class AScatterSlotPooler extends RedGPUObject {
         const gpuBuffer = this.#gpuBuffer;
         if (!gpuBuffer) return;
 
-        const {SLOT_STRIDE_BYTES, SLOT_STRIDE_FLOATS} = AScatterSlotPooler;
+        const {SLOT_STRIDE_FLOATS} = AScatterSlotPooler;
         const offsetBytes = slot * SLOT_STRIDE_BYTES;
         const baseFloat = slot * SLOT_STRIDE_FLOATS;
         const {buffer, byteOffset} = this.#cpuBuffer;

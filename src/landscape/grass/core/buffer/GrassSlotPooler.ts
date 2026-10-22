@@ -2,6 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import type Grass from "../Grass";
 import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
+const MAX_SLOTS = 256;
+
 /**
  * [KO] 잔디(Grass) 타입별 렌더링 유니폼 파라미터 슬롯을 메가 UBO로 풀링 및 관리하는 시스템 내부 클래스입니다.
  * [EN] Internal system class that pools and manages per-type grass rendering uniform parameter slots in a mega UBO.
@@ -14,11 +16,6 @@ import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
  * @category Landscape
  */
 class GrassSlotPooler extends AScatterSlotPooler {
-    /**
-     * [KO] 풀링 가능한 최대 잔디 슬롯 수
-     * [EN] Maximum number of poolable grass slots
-     */
-    static MAX_SLOTS: number = 256;
     /**
      * [KO] 슬롯당 유효 유니폼 파라미터 크기 (바이트 단위)
      * [EN] Effective uniform parameter size per slot (in bytes)
@@ -36,7 +33,7 @@ class GrassSlotPooler extends AScatterSlotPooler {
     constructor(redGPUContext: RedGPUContext) {
         super(
             redGPUContext,
-            GrassSlotPooler.MAX_SLOTS,
+            MAX_SLOTS,
             GrassSlotPooler.PARAMS_SIZE_BYTES,
             'Grass_SlotPooler_MegaUBO'
         );

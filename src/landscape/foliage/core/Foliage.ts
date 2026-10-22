@@ -9,6 +9,8 @@ import FoliageSlotPooler from "./buffer/FoliageSlotPooler";
 import FoliageInstanceBaker from "./baking/FoliageInstanceBaker";
 import {FOLIAGE_SEED_GRID_SIZE} from "../FOLIAGE_CONSTANTS";
 
+const MAX_SAFE_TYPE_CAPACITY = 262144;
+
 function sampleNormalizedLayerWeight(
     landscape: any,
     targetLayer: any,
@@ -316,12 +318,6 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * @category Landscape
  */
 class Foliage extends AScatterType<FoliageTypeAllocation> {
-    /**
-     * [KO] 단일 식생 타입이 안전하게 할당할 수 있는 최대 인스턴스 수용량 (`262144`)
-     * [EN] Maximum safe instance capacity that a single foliage type can allocate (`262144`)
-     */
-    static MAX_SAFE_TYPE_CAPACITY: number = 262144;
-
     #minScale: [number, number, number] = [1.0, 1.0, 1.0];
     #maxScale: [number, number, number] = [1.0, 1.0, 1.0];
     #randomRotationY: boolean = true;
@@ -549,7 +545,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         const expectedActiveInstances = activeHectares * resolvedDensityPerHectare * resolvedDensityMultiplier;
         const calculatedMax = Math.ceil((expectedActiveInstances * 1.30) / 64) * 64;
 
-        const MAX_SAFE_CAPACITY = Foliage.MAX_SAFE_TYPE_CAPACITY;
+        const MAX_SAFE_CAPACITY = MAX_SAFE_TYPE_CAPACITY;
         const minSafeCapacity = 16384;
 
         const resolvedMaxInstances = maxInstances !== undefined

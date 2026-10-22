@@ -1,6 +1,9 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
 
+const MAX_SLOTS = 1024;
+const PARAMS_SIZE_BYTES = 32;
+
 /**
  * [KO] 식생(Foliage) 렌더 유닛별 동적 유니폼 슬롯 할당 및 데이터를 관리하는 풀러 클래스입니다.
  * [EN] Pooler class that manages dynamic uniform slot allocation and data per foliage render unit.
@@ -14,17 +17,6 @@ import AScatterSlotPooler from "../../../core/scatter/AScatterSlotPooler";
  */
 class FoliageSlotPooler extends AScatterSlotPooler {
     /**
-     * [KO] 풀러가 지원하는 최대 렌더 유닛 슬롯 개수입니다.
-     * [EN] Maximum number of render unit slots supported by the pooler.
-     */
-    static MAX_SLOTS: number = 1024;
-    /**
-     * [KO] 슬롯당 실제 유효 유니폼 파라미터 크기(바이트)입니다.
-     * [EN] Effective uniform parameter size per slot in bytes.
-     */
-    static PARAMS_SIZE_BYTES: number = 32;
-
-    /**
      * [KO] `FoliageSlotPooler` 인스턴스를 생성합니다.
      * [EN] Creates a `FoliageSlotPooler` instance.
      *
@@ -35,8 +27,8 @@ class FoliageSlotPooler extends AScatterSlotPooler {
     constructor(redGPUContext: RedGPUContext) {
         super(
             redGPUContext,
-            FoliageSlotPooler.MAX_SLOTS,
-            FoliageSlotPooler.PARAMS_SIZE_BYTES,
+            MAX_SLOTS,
+            PARAMS_SIZE_BYTES,
             'Foliage_RenderUnit_MegaUBO'
         );
     }
