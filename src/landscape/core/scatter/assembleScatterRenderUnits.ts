@@ -24,11 +24,6 @@ const identityMatrix: mat4 = mat4.create();
  */
 export interface RawMeshNode {
     /**
-     * [KO] 원본 `Mesh` 노드 인스턴스
-     * [EN] Original `Mesh` node instance
-     */
-    node: Mesh;
-    /**
      * [KO] 메시에 연결된 `Geometry` 또는 `Primitive` 인스턴스
      * [EN] `Geometry` or `Primitive` instance attached to the mesh
      */
@@ -87,11 +82,6 @@ export interface AssembledMeshGroup {
      * [EN] Starting index offset within the unified index buffer
      */
     firstIndex: number;
-    /**
-     * [KO] 이 그룹으로 병합된 원시 메시 노드(`RawMeshNode[]`) 목록
-     * [EN] List of raw mesh nodes (`RawMeshNode[]`) merged into this group
-     */
-    rawNodes: RawMeshNode[];
 }
 
 /**
@@ -163,45 +153,15 @@ export interface ScatterAssemblyResult {
      */
     boundingHeight: number;
     /**
-     * [KO] 피벗 보존 시 지형 접지를 위한 하단 오프셋 값
-     * [EN] Bottom offset value for terrain grounding when preserving the pivot
-     */
-    bottomOffset: number;
-    /**
      * [KO] 그림자 패스용으로 병합된 위치 전용 `Geometry` 인스턴스 (생성 시)
      * [EN] Position-only `Geometry` instance merged for the shadow pass (when generated)
      */
     shadowMergedGeometry?: Geometry | null;
     /**
-     * [KO] 정렬 후 바운딩 박스의 최소 X 좌표
-     * [EN] Minimum X coordinate of the bounding box after alignment
-     */
-    minX: number;
-    /**
-     * [KO] 정렬 후 바운딩 박스의 최대 X 좌표
-     * [EN] Maximum X coordinate of the bounding box after alignment
-     */
-    maxX: number;
-    /**
      * [KO] 정렬 후 바운딩 박스의 최소 Y 좌표
      * [EN] Minimum Y coordinate of the bounding box after alignment
      */
     minY: number;
-    /**
-     * [KO] 정렬 후 바운딩 박스의 최대 Y 좌표
-     * [EN] Maximum Y coordinate of the bounding box after alignment
-     */
-    maxY: number;
-    /**
-     * [KO] 정렬 후 바운딩 박스의 최소 Z 좌표
-     * [EN] Minimum Z coordinate of the bounding box after alignment
-     */
-    minZ: number;
-    /**
-     * [KO] 정렬 후 바운딩 박스의 최대 Z 좌표
-     * [EN] Maximum Z coordinate of the bounding box after alignment
-     */
-    maxZ: number;
 }
 
 function computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
@@ -306,7 +266,6 @@ function traverseHierarchy(
         mat4.transpose(normalMatrix, normalMatrix);
 
         rawList.push({
-            node,
             geometry,
             material: mat,
             currentRelativeMatrix,
@@ -372,9 +331,8 @@ export default function assembleScatterRenderUnits(
             totalIndexCount: 0,
             boundingRadius: 0,
             boundingHeight: 0,
-            bottomOffset: 0,
             shadowMergedGeometry: null,
-            minX: 0, maxX: 0, minY: 0, maxY: 0, minZ: 0, maxZ: 0
+            minY: 0
         };
     }
 
@@ -656,8 +614,7 @@ export default function assembleScatterRenderUnits(
             geometry: groupGeom as Geometry,
             vertexCount: totalVertexCount,
             indexCount: totalIndexCount,
-            firstIndex: groupFirstIndex,
-            rawNodes: raws
+            firstIndex: groupFirstIndex
         });
     }
 
@@ -706,14 +663,7 @@ export default function assembleScatterRenderUnits(
 
     const boundingRadius = Math.sqrt(maxDistSq);
     const boundingHeight = (isFinite(minY) && isFinite(maxY) && maxY > minY) ? (maxY - minY) : (boundingRadius > 0 ? boundingRadius * 2.0 : 1.0);
-    const bottomOffset = preservePivot ? (isFinite(minY) ? -minY : 0) : 0;
-
-    const finalMinX = isFinite(minX) ? minX - offsetX : 0;
-    const finalMaxX = isFinite(maxX) ? maxX - offsetX : 0;
     const finalMinY = isFinite(minY) ? minY - offsetY : 0;
-    const finalMaxY = isFinite(maxY) ? maxY - offsetY : 0;
-    const finalMinZ = isFinite(minZ) ? minZ - offsetZ : 0;
-    const finalMaxZ = isFinite(maxZ) ? maxZ - offsetZ : 0;
 
     const renderUnits: ScatterRenderUnit[] = unifiedGeometry ? groups.map(({
                                                                                vertexCount,
@@ -738,14 +688,8 @@ export default function assembleScatterRenderUnits(
         totalIndexCount: lodTotalIndices,
         boundingRadius,
         boundingHeight,
-        bottomOffset,
         shadowMergedGeometry,
-        minX: finalMinX,
-        maxX: finalMaxX,
-        minY: finalMinY,
-        maxY: finalMaxY,
-        minZ: finalMinZ,
-        maxZ: finalMaxZ
+        minY: finalMinY
     };
 }
 

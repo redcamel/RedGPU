@@ -201,11 +201,6 @@ export interface FoliageLODInfo {
      * [EN] Number of render units belonging to this LOD level
      */
     renderUnitCount: number;
-    /**
-     * [KO] 그림자 수신 여부
-     * [EN] Whether shadows are received
-     */
-    receiveShadow?: boolean;
 }
 
 /**

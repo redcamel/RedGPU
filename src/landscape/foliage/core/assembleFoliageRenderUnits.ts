@@ -167,11 +167,6 @@ export interface FoliageAssemblyResult {
      */
     lodInfoList: FoliageLODInfo[];
     /**
-     * [KO] 지오메트리 최하단 기준 수직 오프셋(미터 단위)
-     * [EN] Vertical bottom offset based on the lowest geometry point in meters
-     */
-    bottomOffset: number;
-    /**
      * [KO] 식생 전체 바운딩 스피어 반경(미터 단위)
      * [EN] Overall bounding sphere radius of the foliage in meters
      */
@@ -233,7 +228,6 @@ export default function assembleFoliageRenderUnits(
 
     let maxBoundingRadius = 0;
     let maxBoundingHeight = 0;
-    let autoBottomOffset = 0;
     let lod0RenderUnits: FoliageRenderUnit[] = [];
 
     for (let l = 0; l < numLODs; l++) {
@@ -319,9 +313,6 @@ export default function assembleFoliageRenderUnits(
             if (boundingHeight > maxBoundingHeight) {
                 maxBoundingHeight = boundingHeight;
             }
-            if (l === 0) {
-                autoBottomOffset = mergeResult.bottomOffset;
-            }
         }
 
         const unitCountForThisLOD = renderUnits.length - startSubOffset;
@@ -338,7 +329,6 @@ export default function assembleFoliageRenderUnits(
             lodDistance: switchDist,
             renderUnitOffset: startSubOffset,
             renderUnitCount: unitCountForThisLOD,
-            receiveShadow: lodReceiveShadow,
         });
     }
 
@@ -414,18 +404,15 @@ export default function assembleFoliageRenderUnits(
             lodDistance: 1000000.0,
             renderUnitOffset: bbStartOffset,
             renderUnitCount: 1,
-            receiveShadow: bbReceiveShadow,
         });
     }
 
     const boundingHeight = maxBoundingHeight > 0 ? maxBoundingHeight : height;
-    const resolvedBottomOffset = options.bottomOffset ?? autoBottomOffset;
 
     return {
         renderUnits,
         shadowMergedRenderUnits,
         lodInfoList,
-        bottomOffset: resolvedBottomOffset,
         boundingRadius: maxBoundingRadius ?? 10.0,
         boundingHeight
     };
