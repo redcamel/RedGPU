@@ -141,7 +141,6 @@ class Landscape extends RedGPUObject {
         this.#tileStreamer.lod0SizeQuads = lod0SizeQuads;
         this.#heightScale = 200.0;
 
-        this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
         this.#tileStreamer.setMaterial(material);
 
         material.setOnRebakeVBTRequested(() => {
@@ -149,7 +148,7 @@ class Landscape extends RedGPUObject {
             this.#grassManager?.rebakeAll();
         });
 
-        this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
+        this.#initSystems(redGPUContext);
         this.#foliageManager = new FoliageManager(this);
         this.#grassManager = new GrassManager(this);
         this.#tileStreamer.setOnTileLoaded((tileComponent) => {
@@ -166,7 +165,6 @@ class Landscape extends RedGPUObject {
             }
         });
         this.#renderer = new LandscapeRenderer(this);
-        this.#updateLandscapeUniforms();
     }
 
     /**
@@ -280,7 +278,6 @@ class Landscape extends RedGPUObject {
             const tcX = this.#spatialGrid.tileCountX;
             const tcZ = this.#spatialGrid.tileCountZ;
             this.#spatialGrid.setConfig(tcX, tcZ, wx / tcX, wz / tcZ);
-            this.#updateLandscapeUniforms();
             this.#rebuildTiles();
         }
     }
@@ -1068,14 +1065,7 @@ class Landscape extends RedGPUObject {
         this.#currentRenderViewStateData = null;
     }
 
-    #initSystems(
-        redGPUContext: RedGPUContext,
-        componentCountX: number,
-        componentCountZ: number,
-        lodMaxLevel: number
-    ) {
-        this.#tileStreamer.setTerrainConfig(this.#heightScale);
-
+    #initSystems(redGPUContext: RedGPUContext) {
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('Landscape_Flat_VertexShaderModule');
         if (!vModule) {
@@ -1084,19 +1074,6 @@ class Landscape extends RedGPUObject {
             });
         }
         this.#vertexShaderModule = vModule;
-
-        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, lodMaxLevel);
-        const tileStreamer = this.#tileStreamer;
-        if (tileStreamer?.vhtAtlasTexture && tileStreamer?.vntAtlasTexture) {
-            const {vhtAtlasTexture, vntAtlasTexture, vbtBaseColorAtlas, vbtNormalAtlas, vbtORMAtlas} = tileStreamer;
-            this.#instanceBuffer.updateBindGroup(
-                vhtAtlasTexture.gpuTextureView,
-                vntAtlasTexture.gpuTextureView,
-                vbtBaseColorAtlas?.gpuTextureView,
-                vbtNormalAtlas?.gpuTextureView,
-                vbtORMAtlas?.gpuTextureView
-            );
-        }
 
         this.#rebuildLODStructures();
         this.#rebuildTiles();
@@ -1117,7 +1094,6 @@ class Landscape extends RedGPUObject {
         const changed = this.#tileStreamer.ensureAtlasSize(componentCountX, componentCountZ);
         if (changed) {
             this.#tileStreamer.setTerrainConfig(this.#heightScale);
-            this.#tileStreamer.resetTileState();
             needRebuildBindGroup = true;
         }
 
@@ -1150,7 +1126,7 @@ class Landscape extends RedGPUObject {
             }
         }
 
-        this.#gpuCuller = new LandscapeGPUCuller(this.redGPUContext);
+        this.#gpuCuller ??= new LandscapeGPUCuller(this.redGPUContext);
 
         this.#spatialGrid.rebuildTiles((comp, index) => {
             comp.setHeightBounds(0.0, 1.0);
@@ -1195,9 +1171,6 @@ class Landscape extends RedGPUObject {
         for (let i = 0; i < this.#lodMaxLevel - 1; i++) {
             this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
         }
-
-        this.#updateLODDistances();
-        this.#updateLandscapeUniforms();
     }
 
     #updateLODDistances(): void {
