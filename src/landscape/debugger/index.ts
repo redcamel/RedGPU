@@ -3,17 +3,8 @@
  * [EN] Provides the landscape debugger manager and related modules.
  * @packageDocumentation
  */
-export * as Core from "./core";
-
-import LandscapeDebuggerManager, {
-    type DebuggerPropertyChangeHandler,
-    type DebuggerPropertyKey,
-    type LandscapeDebuggerManagerOptions
-} from "./LandscapeDebuggerManager";
+import LandscapeDebuggerManager from "./LandscapeDebuggerManager";
 
 export {
-    LandscapeDebuggerManager,
-    type LandscapeDebuggerManagerOptions,
-    type DebuggerPropertyKey,
-    type DebuggerPropertyChangeHandler
+    LandscapeDebuggerManager
 };

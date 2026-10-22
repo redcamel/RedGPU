@@ -28,12 +28,8 @@ struct LandscapeUniforms {
     heightmapShadowSteps: f32,
     heightmapShadowDistance: f32,
     heightmapShadowSoftness: f32,
-    foliageSubCellColoration: f32,
-    foliageSubCellSize: f32,
     debugMode: u32,
     pad0: f32,
-    pad1: f32,
-    pad2: f32,
 };
 
 @group(1) @binding(0) var<storage, read> visibleTiles: array<LandscapeTile>;

@@ -49,8 +49,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     #useDepthPrepass: boolean = true;
 
     #roundRobinIndex: number = 0;
-    #debugSubCellColoration: boolean = false;
-    #onUniformUpdateNeeded: (() => void) | null = null;
 
     #dirtyUboMask: number = 0;
     #needsRepopulateMask: number = 0;
@@ -63,13 +61,9 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
      * @param landscape -
      * [KO] 식생이 배치될 대상 `Landscape` 인스턴스
      * [EN] Target `Landscape` instance where foliage is placed
-     * @param onUniformUpdateNeeded -
-     * [KO] 지형 유니폼 갱신이 필요할 때 호출되는 콜백 함수
-     * [EN] Callback function invoked when landscape uniform update is needed
      */
-    constructor(landscape: Landscape, onUniformUpdateNeeded?: () => void) {
+    constructor(landscape: Landscape) {
         super(landscape);
-        this.#onUniformUpdateNeeded = onUniformUpdateNeeded ?? null;
         const {redGPUContext} = this;
         this.#slotPooler = new FoliageSlotPooler(redGPUContext);
         const renderUnitMegaUBO = this.#slotPooler.gpuBuffer;
@@ -246,18 +240,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 서브 셀 디버그 색상 표시 활성화 여부를 반환하거나 설정합니다.
-     * [EN] Gets or sets whether sub-cell debug coloration is enabled.
-     *
-     * @returns
-     * [KO] 서브 셀 디버그 색상 표시 여부
-     * [EN] Whether sub-cell debug coloration is enabled
-     */
-    get debugSubCellColoration(): boolean {
-        return this.#debugSubCellColoration;
-    }
-
-    /**
      * [KO] 간접 드로우 버퍼 카운터 초기화 명령을 커맨드 인코더에 기록합니다.
      * [EN] Records commands to reset indirect draw buffer counters into the command encoder.
      *
@@ -292,7 +274,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
         this.#renderer.destroy();
         this.#culler.destroy();
         this.#slotPooler.destroy();
-        this.#onUniformUpdateNeeded = null;
     }
 
     /**
@@ -391,14 +372,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
             count += depthPrepassOpaqueRenderUnits.length + depthPrepassMaskedRenderUnits.length;
         }
         return count;
-    }
-
-    set debugSubCellColoration(val: boolean) {
-        const boolVal = !!val;
-        if (this.#debugSubCellColoration !== boolVal) {
-            this.#debugSubCellColoration = boolVal;
-            this.#onUniformUpdateNeeded?.();
-        }
     }
 
     /**

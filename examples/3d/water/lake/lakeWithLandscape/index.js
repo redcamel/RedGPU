@@ -160,7 +160,6 @@ RedGPU.init(
         );
 
         const foliageManager = landscape.foliageManager;
-        foliageManager.debugSubCellColoration = false;
 
         new RedGPU.GLTFLoader(
             redGPUContext,

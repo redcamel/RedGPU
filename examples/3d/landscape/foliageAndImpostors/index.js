@@ -339,7 +339,6 @@ const renderTestPane = ({
             managerFolder.addBinding(foliageManager, 'enabled');
             managerFolder.addBinding(foliageManager, 'useDepthPrepass');
             managerFolder.addBinding(foliageManager, 'subCellSize', {readonly: true});
-            managerFolder.addBinding(foliageManager, 'debugSubCellColoration');
             managerFolder.addBinding(foliageManager, 'typeCount', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'totalDrawCalls', {readonly: true, interval: 200});
             managerFolder.addBinding(foliageManager, 'depthPrepassDrawCalls', {readonly: true, interval: 200});
@@ -358,7 +357,6 @@ const renderTestPane = ({
             const streamFolder = landscapeFolder.addFolder({title: 'Tile Streaming', expanded: false});
             streamFolder.addBinding(landscape, 'tileLoadingRadius', {min: 500, max: 4000, step: 100});
             streamFolder.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 8, step: 1});
-            streamFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
 
             const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
             lodFolder.addBinding(landscape, 'lodMetric', {

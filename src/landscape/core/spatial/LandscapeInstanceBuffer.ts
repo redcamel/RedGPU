@@ -3,7 +3,6 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
 import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
-import {FOLIAGE_SUB_CELL_SIZE} from "../../foliage/FOLIAGE_CONSTANTS";
 
 /**
  * [KO] 지형(Landscape) 타일 인스턴스 버퍼, 가시 타일 스토리지 버퍼, 인다이렉트 드로우 버퍼 및 전역 지형 유니폼 버퍼를 관리하는 클래스입니다.
@@ -32,7 +31,7 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
     #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
-    #landscapeUniformByteLength: number = 320;
+    #landscapeUniformByteLength: number = 304;
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
@@ -282,12 +281,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
      * @param heightmapShadowSoftness -
      * [KO] 하이트맵 그림자 소프트니스 계수
      * [EN] Softness factor for heightmap shadow
-     * @param foliageSubCellColoration -
-     * [KO] 식생 서브셀 디버그 색상 표시 여부
-     * [EN] Whether to display foliage sub-cell debug coloration
-     * @param foliageSubCellSize -
-     * [KO] 식생 서브셀 월드 크기
-     * [EN] World size of a foliage sub-cell
      * @param debugMode -
      * [KO] 지형 셰이더 디버그 모드 인덱스
      * [EN] Terrain shader debug mode index
@@ -313,8 +306,6 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         heightmapShadowSteps: number = 16,
         heightmapShadowDistance: number = 3000.0,
         heightmapShadowSoftness: number = 8.0,
-        foliageSubCellColoration: boolean = false,
-        foliageSubCellSize: number = FOLIAGE_SUB_CELL_SIZE,
         debugMode: number = 0
     ): void {
         const gpuDevice = this.gpuDevice;
@@ -381,13 +372,8 @@ class LandscapeInstanceBuffer extends RedGPUObject {
         f32[71] = heightmapShadowSteps;
         f32[72] = heightmapShadowDistance;
         f32[73] = heightmapShadowSoftness;
-        f32[74] = foliageSubCellColoration ? 1.0 : 0.0;
-        f32[75] = foliageSubCellSize;
-
-        u32[76] = debugMode;
-        f32[77] = 0.0;
-        f32[78] = 0.0;
-        f32[79] = 0.0;
+        u32[74] = debugMode;
+        f32[75] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,
@@ -584,7 +570,7 @@ class LandscapeInstanceBuffer extends RedGPUObject {
 
         const uniformByteLength = vertexShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
             || fragmentShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
-            || 320;
+            || 304;
         this.#landscapeUniformByteLength = uniformByteLength;
 
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({

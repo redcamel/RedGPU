@@ -15,7 +15,6 @@ import LandscapeSpatialGrid from "./core/spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./core/spatial/LandscapeTileStreamer";
 import RedGPUObject from "../base/RedGPUObject";
 import FoliageManager from "./foliage/FoliageManager";
-import {FOLIAGE_SUB_CELL_SIZE} from "./foliage/FOLIAGE_CONSTANTS";
 import GrassManager from "./grass/GrassManager";
 import LandscapeGPUCuller from "./core/spatial/LandscapeGPUCuller";
 import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
@@ -150,9 +149,7 @@ class Landscape extends RedGPUObject {
         });
 
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, lodMaxLevel);
-        this.#foliageManager = new FoliageManager(this, () => {
-            this.#updateLandscapeUniforms();
-        });
+        this.#foliageManager = new FoliageManager(this);
         this.#grassManager = new GrassManager(this);
         this.#tileStreamer.setOnTileLoaded((tileComponent) => {
             this.#onTileHeightBoundsLoaded(tileComponent);
@@ -162,11 +159,9 @@ class Landscape extends RedGPUObject {
             this.#grassManager?.rebakeAll();
             this.#foliageManager?.repopulateAll();
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this, this.#tileStreamer, {
-            onDebugPropertyChange: (key) => {
-                if (key === 'debugMode' || key === 'lodColoration') {
-                    this.#updateLandscapeUniforms();
-                }
+        this.#debuggerManager = new LandscapeDebuggerManager(this, (key) => {
+            if (key === 'debugMode' || key === 'lodColoration') {
+                this.#updateLandscapeUniforms();
             }
         });
         this.#renderer = new LandscapeRenderer(this);
@@ -1035,8 +1030,6 @@ class Landscape extends RedGPUObject {
             'Landscape_UnifiedCulling_ComputePass',
             this.#onPreProcessUnifiedComputePass
         );
-
-        this.#debuggerManager.update(rawCamera);
     }
 
     /**
@@ -1260,8 +1253,6 @@ class Landscape extends RedGPUObject {
             this.#heightmapShadowSteps,
             this.#heightmapShadowDistance,
             this.#heightmapShadowSoftness,
-            this.#foliageManager?.debugSubCellColoration ?? false,
-            FOLIAGE_SUB_CELL_SIZE,
             this.#debuggerManager?.landscapeDebugMode ?? 0
         );
     }

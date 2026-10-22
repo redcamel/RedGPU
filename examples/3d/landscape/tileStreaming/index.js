@@ -68,10 +68,6 @@ RedGPU.init(
             return `${host}28_134_86_730_13_${size}_16bit_tile_${r}_${c}.png`;
         };
 
-        // [KO] 실시간 타일 로딩 상태 및 카메라 반경을 시각화하는 공간 그리드 디버거 활성화
-        // [EN] Enable the spatial grid debugger to visualize real-time tile streaming states and camera radius
-        landscape.debuggerManager.spatialGrid = true;
-
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const weightTexture = '../../../assets/terrain/terrainTest_001/weightTexture.jpg';
 
@@ -187,15 +183,6 @@ const renderTestPane = ({
             streamFolder.addBinding(landscape, 'tileLoadedCount', {readonly: true, interval: 200});
             streamFolder.addBinding(landscape, 'tileLoadingRadius', {min: 500, max: 4000, step: 100});
             streamFolder.addBinding(landscape, 'tileMaxLoadsPerFrame', {min: 1, max: 8, step: 1});
-
-            const debugViewersFolder = streamFolder.addFolder({title: '2D Debug Viewers', expanded: true});
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'visible');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'spatialGrid');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'vht');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'vnt');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbt');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbtNormal');
-            debugViewersFolder.addBinding(landscape.debuggerManager, 'vbtORM');
 
             const lodFolder = landscapeFolder.addFolder({title: 'LOD', expanded: false});
             lodFolder.addBinding(landscape, 'lodMetric', {
