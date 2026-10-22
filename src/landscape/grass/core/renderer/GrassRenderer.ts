@@ -260,6 +260,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
     ): void {
         const currentCascade = view.currentCascadeIndex ?? 0;
         if (currentCascade > 1) return;
+        const shadowSystemBG = view.getCascadeUniformBindGroup(currentCascade) || view.systemUniform_Vertex_UniformBindGroup;
+        if (!shadowSystemBG) return;
 
         const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
         if (!systemBG) return;
@@ -305,12 +307,12 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
             return;
         }
 
-        const needsRebuild = !this.isShadowBundleValid(currentCascade, systemBG);
+        const needsRebuild = !this.isShadowBundleValid(currentCascade, shadowSystemBG);
 
         if (needsRebuild) {
-            const bundle = this.#recordShadowRenderBundle(currentCascade, systemBG, grassList, megaBuffer, unifiedGroup1);
+            const bundle = this.#recordShadowRenderBundle(currentCascade, shadowSystemBG, grassList, megaBuffer, unifiedGroup1);
             if (bundle) {
-                this.setShadowBundle(currentCascade, bundle, systemBG);
+                this.setShadowBundle(currentCascade, bundle, shadowSystemBG);
             } else {
                 this.setShadowBundle(currentCascade, null, null);
                 return;

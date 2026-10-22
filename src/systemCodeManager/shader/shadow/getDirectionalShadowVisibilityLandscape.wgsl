@@ -77,7 +77,7 @@ fn getDirectionalShadowVisibilityLandscape(
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     // 🚀 [UBO 사전 계산]: CPU에서 사전 계산된 캐스케이드별 텍셀 크기를 직접 로드하여 매 픽셀 dot + inverseSqrt 완전 제거
     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-    let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
+    let normalOffset = N * (0.15 + slopeBias * 0.35) * worldTexelSize;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -92,7 +92,7 @@ fn getDirectionalShadowVisibilityLandscape(
     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
     let driftBias = max(maxCoord * 0.00000035, 0.0001);
     let shadowDepth = saturate(shadowCoord.z);
-    let cascadeBias = max(bias * (1.0 + slopeBias * 2.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+    let cascadeBias = max(bias * (1.0 + slopeBias * 1.2) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0001 + driftBias);
 
     var finalVis: f32 = 1.0;
 
@@ -103,7 +103,7 @@ fn getDirectionalShadowVisibilityLandscape(
         let cosAngle = cos(angle);
         let sinAngle = sin(angle);
 
-        let filterRadius = oneOverTextureSize * 2.5;
+        let filterRadius = oneOverTextureSize * 1.25;
         let centerSample = textureSampleCompareLevel(
             directionalShadowMap,
             directionalShadowMapSampler,
@@ -151,13 +151,13 @@ fn getDirectionalShadowVisibilityLandscape(
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-            let nextNormalOffset = N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
+            let nextNormalOffset = N * (0.15 + slopeBias * 0.35) * nextWorldTexelSize;
             let nextBiasedPos = worldPosition + nextNormalOffset;
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
 
             let nextTUV = nextShadowCoord.xy;
             let nextShadowDepth = saturate(nextShadowCoord.z);
-            let nextCascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+            let nextCascadeBias = max(bias * (1.0 + slopeBias * 1.2) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0001 + driftBias);
 
             let nextVis = textureSampleCompareLevel(
                 directionalShadowMap,

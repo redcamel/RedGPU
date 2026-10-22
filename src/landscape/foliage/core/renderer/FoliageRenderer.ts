@@ -272,13 +272,15 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         const {currentCascadeIndex = 0, systemUniform_Vertex_UniformBindGroup} = view;
 
         if (currentCascadeIndex > 3) return;
+        const shadowSystemBindGroup = view.getCascadeUniformBindGroup(currentCascadeIndex) || systemUniform_Vertex_UniformBindGroup;
+        if (!shadowSystemBindGroup) return;
 
         if (this.#lastRecordedTypeCount !== typeCount) {
             this.markShadowBundleDirty();
             this.#lastRecordedTypeCount = typeCount;
         }
 
-        const needsRebuild = !this.isShadowBundleValid(currentCascadeIndex, systemUniform_Vertex_UniformBindGroup);
+        const needsRebuild = !this.isShadowBundleValid(currentCascadeIndex, shadowSystemBindGroup);
 
         if (needsRebuild) {
             let validCount = 0;
@@ -297,8 +299,8 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
             }
 
             if (validCount > 0) {
-                const bundle = this.#recordShadowRenderBundle(currentCascadeIndex, validCount, systemUniform_Vertex_UniformBindGroup);
-                this.setShadowBundle(currentCascadeIndex, bundle, systemUniform_Vertex_UniformBindGroup);
+                const bundle = this.#recordShadowRenderBundle(currentCascadeIndex, validCount, shadowSystemBindGroup);
+                this.setShadowBundle(currentCascadeIndex, bundle, shadowSystemBindGroup);
             } else {
                 this.setShadowBundle(currentCascadeIndex, null, null);
             }

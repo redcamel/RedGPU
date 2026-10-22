@@ -1,5 +1,6 @@
 #redgpu_include landscape.struct.GrassRenderParams;
 #redgpu_include landscape.struct.GrassShadowVertexOutput;
+#redgpu_include landscape.grassFragmentCommon;
 
 @group(1) @binding(1) var<uniform> materialUniforms: GrassRenderParams;
 
@@ -10,7 +11,7 @@
 fn main(input: ShadowVertexOutput) {
     let baseTex = textureSample(baseColorTexture, baseColorSampler, input.uv);
 
-    let sourceAlpha = baseTex.a * input.alphaFade;
+    let sourceAlpha = filterGrassAlpha(baseTex, input.alphaFade);
 
     if (sourceAlpha < materialUniforms.alphaCutoff) {
         discard;
