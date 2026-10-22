@@ -1,6 +1,5 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include color.getTintBlendMode;
-#redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
 #redgpu_include math.PI;

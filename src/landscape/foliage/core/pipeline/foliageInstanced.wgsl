@@ -38,9 +38,7 @@ const INV_150: f32 = 0.006666667;
 const WIND_SPATIAL_SCALE: f32 = 0.05;
 
 fn calculateFoliageWindDisplacement(
-    worldPos: vec3<f32>,
     localPos: vec3<f32>,
-    vertexNormal: vec3<f32>,
     vertexColor: vec4<f32>,
     instancePos: vec3<f32>,
     time: f32
@@ -141,9 +139,7 @@ fn calculateFoliageOpaqueWorldPosition(
 ) -> vec3<f32> {
     let instData = unpackAndTransformFoliage(position, instancePos_scaleY, instanceRotQuat, instanceScaleXZ);
     let windDisp = calculateFoliageWindDisplacement(
-        instData.xform.worldPos,
         position,
-        vec3<f32>(0.0, 1.0, 0.0),
         vec4<f32>(1.0),
         instData.instancePos,
         systemUniforms.time.time
@@ -245,7 +241,7 @@ fn entryPointMainVertex(input : VertexInput) -> OutputData {
         let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
         output.vertexTangent = vec4<f32>(worldTangent, tanW);
 
-        let windDisp = calculateFoliageWindDisplacement(worldPos, hierarchyPos, worldNormal, input.vertexColor_0, instancePos, systemUniforms.time.time);
+        let windDisp = calculateFoliageWindDisplacement(hierarchyPos, input.vertexColor_0, instancePos, systemUniforms.time.time);
         worldPos += windDisp;
     }
 
@@ -361,9 +357,7 @@ fn entryPointShadowMaskedVertex(input : VertexInput) -> FoliageShadowMaskedOutpu
         outUV = (grid + safeSubUV) * 0.125;
     } else {
         let windDisp = calculateFoliageWindDisplacement(
-            instData.xform.worldPos,
             input.position,
-            input.vertexNormal,
             input.vertexColor_0,
             instData.instancePos,
             systemUniforms.time.time

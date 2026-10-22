@@ -87,7 +87,5 @@ fn sampleLandscapeHeightAndNormal(
     result.height = terrainHeight;
     result.normal = normal;
     result.slopeTan2 = slopeTan2;
-    result.rawNx = nx;
-    result.rawNz = nz;
     return result;
 }

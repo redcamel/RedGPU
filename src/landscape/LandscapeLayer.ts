@@ -75,11 +75,6 @@ export interface LandscapeLayerOptions {
      */
     roughness?: number;
     /**
-     * [KO] 금속성(Metallic) 계수 (기본값: `0.0`)
-     * [EN] Metallic factor (default: `0.0`)
-     */
-    metallic?: number;
-    /**
      * [KO] 노멀 맵 강도 (기본값: `1.0`)
      * [EN] Normal map intensity (default: `1.0`)
      */
@@ -154,7 +149,6 @@ class LandscapeLayer {
     #weightChannelIndex: number = 0;
 
     #roughness: number = 1.0;
-    #metallic: number = 0.0;
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
     #heightBlendFactor: number = 1.0;
@@ -210,7 +204,6 @@ class LandscapeLayer {
             nearUVScaleMultiplier,
             weightChannel,
             roughness,
-            metallic,
             normalIntensity,
             aoIntensity,
             heightBlendFactor,
@@ -257,10 +250,6 @@ class LandscapeLayer {
 
         if (roughness !== undefined) {
             this.#roughness = roughness;
-        }
-
-        if (metallic !== undefined) {
-            this.#metallic = metallic;
         }
 
         if (normalIntensity !== undefined) {
@@ -545,24 +534,6 @@ class LandscapeLayer {
     }
 
     /**
-     * [KO] 레이어의 금속성(Metallic) 계수를 반환하거나 설정합니다.
-     * [EN] Gets or sets the metallic factor of the layer.
-     *
-     * @returns
-     * [KO] 금속성 계수
-     * [EN] Metallic factor
-     */
-    get metallic(): number {
-        return this.#metallic;
-    }
-
-    set metallic(val: number) {
-        if (this.#metallic === val) return;
-        this.#metallic = val;
-        this.onChange?.();
-    }
-
-    /**
      * [KO] 레이어의 노멀 맵 강도를 반환하거나 설정합니다.
      * [EN] Gets or sets the normal map intensity of the layer.
      *
@@ -771,17 +742,17 @@ class LandscapeLayer {
         targetBuffer[offset + 3] = this.#uvScale[1];
 
         targetBuffer[offset + 4] = this.#roughness;
-        targetBuffer[offset + 5] = this.#metallic;
-        targetBuffer[offset + 6] = this.#normalIntensity;
-        targetBuffer[offset + 7] = this.#enabled ? 1.0 : 0.0;
+        targetBuffer[offset + 5] = this.#normalIntensity;
+        targetBuffer[offset + 6] = this.#enabled ? 1.0 : 0.0;
+        targetBuffer[offset + 7] = this.#aoIntensity;
 
-        targetBuffer[offset + 8] = this.#aoIntensity;
-        targetBuffer[offset + 9] = this.#weightChannelIndex;
-        targetBuffer[offset + 10] = this.#nearUVScaleMultiplier;
-        targetBuffer[offset + 11] = this.#heightBlendFactor;
+        targetBuffer[offset + 8] = this.#weightChannelIndex;
+        targetBuffer[offset + 9] = this.#nearUVScaleMultiplier;
+        targetBuffer[offset + 10] = this.#heightBlendFactor;
+        targetBuffer[offset + 11] = this.#stochasticTiling ? 1.0 : 0.0;
 
-        targetBuffer[offset + 12] = this.#stochasticTiling ? 1.0 : 0.0;
-        targetBuffer[offset + 13] = this.#stochasticScale;
+        targetBuffer[offset + 12] = this.#stochasticScale;
+        targetBuffer[offset + 13] = 0.0;
         targetBuffer[offset + 14] = 0.0;
         targetBuffer[offset + 15] = 0.0;
     }

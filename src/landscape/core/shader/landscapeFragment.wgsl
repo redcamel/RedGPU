@@ -4,7 +4,6 @@
 #redgpu_include math.PI2;
 #redgpu_include math.INV_PI;
 #redgpu_include math.EPSILON;
-#redgpu_include math.direction.getViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
 #redgpu_include shadow.getDirectionalShadowVisibilityLandscape;
 #redgpu_include math.getInterleavedGradientNoise;
@@ -42,7 +41,6 @@ struct NearDetailLayerResult {
     albedo: vec3<f32>,
     normal: vec3<f32>,
     roughness: f32,
-    metallic: f32,
     ao: f32,
     isValid: bool,
 };
@@ -130,7 +128,6 @@ fn computeNearFieldLandscapeLayers(
     result.albedo = vec3<f32>(0.0);
     result.normal = baseNormal;
     result.roughness = 0.85;
-    result.metallic = 0.0;
     result.ao = 1.0;
     result.isValid = false;
 
@@ -143,7 +140,7 @@ fn computeNearFieldLandscapeLayers(
 
     var layerAlbedoCache: array<vec3<f32>, 8>;
     var layerNormalCache: array<vec3<f32>, 8>;
-    var layerORMACache: array<vec4<f32>, 8>;
+    var layerORMACache: array<vec3<f32>, 8>;
     var layerScoreCache: array<f32, 8>;
     var validLayerCount: u32 = 0u;
     var maxScore: f32 = 0.0;
@@ -201,10 +198,9 @@ fn computeNearFieldLandscapeLayers(
         layerAlbedoCache[validLayerCount] = layerAlbedoSample.rgb;
         layerNormalCache[validLayerCount] = layerNormalSample;
         let r = layerParams.roughness * layerORMSample.g;
-        let m = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
         let ao = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
-        layerORMACache[validLayerCount] = vec4<f32>(r, m, ao, layerW);
+        layerORMACache[validLayerCount] = vec3<f32>(r, ao, layerW);
         layerScoreCache[validLayerCount] = score;
 
         validLayerCount = validLayerCount + 1u;
@@ -214,20 +210,18 @@ fn computeNearFieldLandscapeLayers(
     var blendedAlbedo = vec3<f32>(0.0);
     var blendedNormalTangent = vec3<f32>(0.0);
     var blendedRoughness = 0.0;
-    var blendedMetallic = 0.0;
     var blendedAO = 0.0;
 
     let contrast = 0.25;
     for (var k = 0u; k < validLayerCount; k = k + 1u) {
         let score = layerScoreCache[k];
-        let rawW = layerORMACache[k].w;
+        let rawW = layerORMACache[k].z;
         let heightWeighted = max(0.0, score - maxScore + contrast) * rawW;
 
         blendedAlbedo += layerAlbedoCache[k] * heightWeighted;
         blendedNormalTangent += layerNormalCache[k] * heightWeighted;
         blendedRoughness += layerORMACache[k].x * heightWeighted;
-        blendedMetallic += layerORMACache[k].y * heightWeighted;
-        blendedAO += layerORMACache[k].z * heightWeighted;
+        blendedAO += layerORMACache[k].y * heightWeighted;
 
         totalLayerWeight += heightWeighted;
     }
@@ -236,7 +230,6 @@ fn computeNearFieldLandscapeLayers(
         let invW = 1.0 / totalLayerWeight;
         result.albedo = blendedAlbedo * invW;
         result.roughness = blendedRoughness * invW;
-        result.metallic = blendedMetallic * invW;
         result.ao = blendedAO * invW;
 
         let layerBlendNormal = normalize(blendedNormalTangent);
@@ -266,7 +259,6 @@ fn computeNearFieldLandscapeLayers(
 
         result.albedo = layer0Albedo;
         result.roughness = layer0Params.roughness * layer0ORM.g;
-        result.metallic = layer0Params.metallic * layer0ORM.b;
         let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
         result.ao = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 

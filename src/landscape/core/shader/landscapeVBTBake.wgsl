@@ -99,7 +99,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var baseAlbedo = uniforms.baseColor.rgb;
     var baseRoughness = 0.9;
-    var baseMetallic = 0.0;
     var baseAO = 1.0;
 
     let activeLayerCount = uniforms.activeLayerCount;
@@ -117,7 +116,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var blendedAlbedo = vec3<f32>(0.0);
     var blendedNormalTangent = vec3<f32>(0.0, 0.0, 0.0);
     var blendedRoughness = 0.0;
-    var blendedMetallic = 0.0;
     var blendedAO = 0.0;
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
@@ -159,14 +157,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         let r = layerParams.roughness * layerORMSample.g;
-        let m = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
         let ao = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
 
         blendedAlbedo += layerAlbedoSample * layerW;
         blendedNormalTangent += layerNormalSample * layerW;
         blendedRoughness += r * layerW;
-        blendedMetallic += m * layerW;
         blendedAO += ao * layerW;
 
         totalLayerWeight += layerW;
@@ -174,7 +170,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     var finalAlbedo = baseAlbedo;
     var finalRoughness = baseRoughness;
-    var finalMetallic = baseMetallic;
     var finalAO = baseAO;
 
     if (activeLayerCount > 0u) {
@@ -183,7 +178,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             finalAlbedo = blendedAlbedo * invW;
             let layerBlendNormal = normalize(blendedNormalTangent);
             finalRoughness = blendedRoughness * invW;
-            finalMetallic = blendedMetallic * invW;
             finalAO = blendedAO * invW;
             N = perturbNormalOrthonormal(N, layerBlendNormal);
         } else if (uniforms.layerParams[0].enabled > 0.5) {
@@ -208,7 +202,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
             finalAlbedo = layer0Albedo;
             finalRoughness = layer0Params.roughness * layer0ORM.g;
-            finalMetallic = layer0Params.metallic * layer0ORM.b;
             let rawAO = select(1.0, layer0ORM.r, layer0ORM.r > 0.001);
             finalAO = clamp(mix(1.0, rawAO, layer0Params.aoIntensity), 0.2, 1.0);
 
@@ -223,6 +216,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let encodedFinalN = N * 0.5 + vec3<f32>(0.5);
     textureStore(vbtNormalOutput, storeCoord, vec4<f32>(encodedFinalN, 1.0));
 
-    textureStore(vbtORMOutput, storeCoord, vec4<f32>(finalAO, finalRoughness, finalMetallic, 1.0));
+    textureStore(vbtORMOutput, storeCoord, vec4<f32>(finalAO, finalRoughness, 0.0, 1.0));
 }
 

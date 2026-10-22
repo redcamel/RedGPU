@@ -31,7 +31,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let step = uniforms.stepOffset;
     var bestColor = centerSample;
-    var foundValid = false;
 
     let offsets = array<vec2<i32>, 8>(
         vec2<i32>(-step, 0),
@@ -61,11 +60,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let neighbor = textureLoad(inputTexture, clampedCoord, 0);
         if (neighbor.a > 0.05) {
             bestColor = vec4<f32>(neighbor.rgb, 0.0);
-            foundValid = true;
             break;
         }
     }
 
     textureStore(outputTexture, px, bestColor);
 }
-
