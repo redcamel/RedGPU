@@ -297,7 +297,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         this.#renderUnitDynamicBindGroup = null;
         this.#renderUnitVertexBindGroupLayout = null;
         this.markDepthPrepassBundleDirty();
-        this.markMainBundleDirty();
         this.#resetBoundState();
         for (let i = 0; i < this.#validTypesMain.length; i++) {
             (this.#validTypesMain[i] as any).type = null;

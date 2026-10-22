@@ -376,9 +376,7 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
         this.#dirtyUboMask &= ~(1 << typeId);
         this.#needsRebakeMask &= ~(1 << typeId);
 
-        removedGrass.bindAllocation(null);
-        removedGrass.onUniformDirty = null;
-        removedGrass.onRepopulateRequired = null;
+        removedGrass.destroy();
         if (this.types.length === 0) {
             this.#populated = false;
         }
@@ -392,10 +390,8 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Removes all registered grass types and resets the mega buffer and slot pool to their initial state.
      */
     clearTypes(): void {
-        const {types, redGPUContext} = this;
-        while (types.length > 0) {
-            this.removeType(types[types.length - 1]);
-        }
+        const {redGPUContext} = this;
+        super.clearTypes();
 
         this.#dirtyUboMask = 0;
         this.#needsRebakeMask = 0;
@@ -421,18 +417,16 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
      * [EN] Destroys all GPU buffers, pipelines, renderer, and registered grass type resources held by the manager.
      */
     destroy(): void {
+        super.clearTypes();
+        this.#dirtyUboMask = 0;
+        this.#needsRebakeMask = 0;
+        this.#populated = false;
+
         this.#megaBuffer.destroy();
         this.#baker.destroy();
         this.#culler.destroy();
         this.#renderer.destroy();
         this.#slotPooler.destroy();
-
-        const {types} = this;
-        const len = types.length;
-        for (let i = 0; i < len; i++) {
-            types[i].destroy();
-        }
-        this.clearTypes();
 
         this.#currentRenderViewStateData = null;
     }

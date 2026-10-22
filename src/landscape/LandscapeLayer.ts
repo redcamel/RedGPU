@@ -2,6 +2,8 @@ import BitmapTexture from "../resources/texture/BitmapTexture";
 import type RedGPUContext from "../context/RedGPUContext";
 import LandscapeWeightMapCPUSampler from "./core/cache/LandscapeWeightMapCPUSampler";
 
+const LINEAR_TEXTURE_FORMAT: GPUTextureFormat = 'rgba8unorm';
+
 /**
  * [KO] 지형 레이어 가중치 맵에서 샘플링할 RGBA 색상 채널 식별자 타입입니다.
  * [EN] RGBA color channel identifier type to sample from a terrain layer weight map.
@@ -318,7 +320,7 @@ class LandscapeLayer {
     set normalTexture(val: BitmapTexture | string | undefined) {
         if (typeof val === 'string') {
             if (this.#redGPUContext) {
-                this.#normalTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#normalTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
                 this.#pendingNormalSrc = undefined;
             } else {
                 this.#pendingNormalSrc = val;
@@ -346,7 +348,7 @@ class LandscapeLayer {
     set ormTexture(val: BitmapTexture | string | undefined) {
         if (typeof val === 'string') {
             if (this.#redGPUContext) {
-                this.#ormTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#ormTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
                 this.#pendingOrmSrc = undefined;
             } else {
                 this.#pendingOrmSrc = val;
@@ -374,7 +376,7 @@ class LandscapeLayer {
     set weightTexture(val: BitmapTexture | string | undefined) {
         if (typeof val === 'string') {
             if (this.#redGPUContext) {
-                this.#weightTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#weightTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
                 this.#pendingWeightSrc = undefined;
             } else {
                 this.#pendingWeightSrc = val;
@@ -401,10 +403,6 @@ class LandscapeLayer {
      */
     get weightTexture(): BitmapTexture | undefined {
         return this.#weightTexture;
-    }
-
-    #resolveLinearFormat(): GPUTextureFormat {
-        return 'rgba8unorm';
     }
 
     /**
@@ -690,15 +688,15 @@ class LandscapeLayer {
             this.#pendingBaseColorSrc = undefined;
         }
         if (this.#pendingNormalSrc) {
-            this.#normalTexture = new BitmapTexture(context, this.#pendingNormalSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#normalTexture = new BitmapTexture(context, this.#pendingNormalSrc, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
             this.#pendingNormalSrc = undefined;
         }
         if (this.#pendingOrmSrc) {
-            this.#ormTexture = new BitmapTexture(context, this.#pendingOrmSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#ormTexture = new BitmapTexture(context, this.#pendingOrmSrc, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
             this.#pendingOrmSrc = undefined;
         }
         if (this.#pendingWeightSrc) {
-            this.#weightTexture = new BitmapTexture(context, this.#pendingWeightSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#weightTexture = new BitmapTexture(context, this.#pendingWeightSrc, true, undefined, undefined, LINEAR_TEXTURE_FORMAT);
             this.#pendingWeightSrc = undefined;
         }
     }

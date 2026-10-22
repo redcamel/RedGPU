@@ -150,8 +150,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
      * [EN] Marks all main and shadow render bundles and bind group caches as dirty.
      */
     override markAllBundlesDirty(): void {
-        this.markMainBundleDirty();
         this.markShadowBundleDirty();
+        this.markMainBundleDirty();
         this.invalidateGroup1BindGroup();
         this.#materialBindGroupCache.clear();
     }
@@ -328,7 +328,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
      */
     override destroy(): void {
         super.destroy();
-        this.markMainBundleDirty();
         this.invalidateGroup1BindGroup();
         this.#renderPipelinesNear.clear();
         this.#renderPipelinesFar.clear();
