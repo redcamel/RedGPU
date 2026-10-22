@@ -100,18 +100,6 @@ class GrassManager extends AScatterManager<Grass, GrassOptions> {
     }
 
     /**
-     * [KO] 최소 하나 이상의 잔디 타입이 등록되어 초기화되었는지 여부를 반환합니다.
-     * [EN] Returns whether at least one grass type has been registered and populated.
-     *
-     * @returns
-     * [KO] 잔디 타입 등록 및 초기화 여부
-     * [EN] Whether grass types are populated
-     */
-    get populated(): boolean {
-        return this.#populated;
-    }
-
-    /**
      * [KO] 메가 버퍼(`GrassMegaBuffer`)가 수용할 수 있는 최대 잔디 인스턴스 용량을 반환합니다.
      * [EN] Returns the maximum grass instance capacity of the mega buffer (`GrassMegaBuffer`).
      *

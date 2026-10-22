@@ -115,18 +115,6 @@ class FoliageManager extends AScatterManager<Foliage, FoliageOptions> {
     }
 
     /**
-     * [KO] 렌더 유닛 동적 유니폼 슬롯 풀러(`FoliageSlotPooler`)를 반환합니다.
-     * [EN] Returns the render unit dynamic uniform slot pooler (`FoliageSlotPooler`).
-     *
-     * @returns
-     * [KO] `FoliageSlotPooler` 인스턴스
-     * [EN] `FoliageSlotPooler` instance
-     */
-    get slotPooler(): FoliageSlotPooler {
-        return this.#slotPooler;
-    }
-
-    /**
      * [KO] 깊이 프리패스(Depth Prepass)에서 발생하는 총 드로우 콜 수를 반환합니다.
      * [EN] Returns the total number of draw calls issued in the depth prepass.
      *

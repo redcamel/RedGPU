@@ -734,17 +734,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
     }
 
     /**
-     * [KO] 현재 활성화된 패스 구성을 기준으로 발생하는 총 드로우콜 수를 반환합니다.
-     * [EN] Returns the total number of draw calls generated based on the currently active pass configuration.
-     * @returns
-     * [KO] 드로우콜 수
-     * [EN] Number of draw calls
-     */
-    override get drawCallCount(): number {
-        return this.#mainRenderUnits.length + this.#depthPrepassOpaqueRenderUnits.length + this.#depthPrepassMaskedRenderUnits.length;
-    }
-
-    /**
      * [KO] Depth Prepass에서 렌더링되는 불투명(Opaque) `FoliageRenderUnit` 목록을 반환합니다.
      * [EN] Returns the list of opaque `FoliageRenderUnit` instances rendered in the Depth Prepass.
      * @returns
@@ -819,17 +808,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
      */
     get activeInstanceCount(): number {
         return this.allocation ? this.allocation.instanceCount : 0;
-    }
-
-    /**
-     * [KO] 렌더 유닛 UBO 슬롯을 관리하는 `FoliageSlotPooler` 인스턴스를 반환합니다.
-     * [EN] Returns the `FoliageSlotPooler` instance managing render unit UBO slots.
-     * @returns
-     * [KO] `FoliageSlotPooler` 인스턴스 또는 `null`
-     * [EN] `FoliageSlotPooler` instance or `null`
-     */
-    get slotPooler(): FoliageSlotPooler | null {
-        return this.#slotPooler;
     }
 
     /**

@@ -299,22 +299,6 @@ class Grass extends AScatterType<GrassTypeAllocation> {
     }
 
     /**
-     * [KO] 근거리(Near) 및 원거리(Far) 슬롯을 포함한 총 드로우콜 수를 반환합니다.
-     * [EN] Returns the total number of draw calls including near and far slots.
-     * @returns
-     * [KO] 드로우콜 수
-     * [EN] Number of draw calls
-     */
-    override get drawCallCount(): number {
-        const alloc = this.allocation;
-        if (alloc && alloc.instanceCount > 0) {
-            const {nearSlots, farSlots} = alloc;
-            return nearSlots.length + farSlots.length;
-        }
-        return this.#renderUnits.length * 2;
-    }
-
-    /**
      * [KO] 근거리(Near)와 원거리(Far) 잔디 버킷이 분리되는 기준 거리(미터 단위)를 반환합니다.
      * [EN] Returns the threshold distance in meters separating near and far grass buckets.
      * @returns

@@ -122,30 +122,6 @@ class FoliageRenderUnit extends ScatterRenderUnit {
     }
 
     /**
-     * [KO] 연결된 `FoliageSlotPooler` 인스턴스를 반환합니다.
-     * [EN] Returns the associated `FoliageSlotPooler` instance.
-     *
-     * @returns
-     * [KO] `FoliageSlotPooler` 인스턴스 또는 `null`
-     * [EN] `FoliageSlotPooler` instance or `null`
-     */
-    get slotPooler(): FoliageSlotPooler | null {
-        return this.#slotPooler;
-    }
-
-    /**
-     * [KO] 그림자 전용 병합 지오메트리 렌더 유닛인지 여부를 반환합니다.
-     * [EN] Returns whether this render unit is a shadow-only merged geometry unit.
-     *
-     * @returns
-     * [KO] 그림자 전용 병합 유닛 여부
-     * [EN] Whether this is a shadow-only merged unit
-     */
-    get isShadowMerged(): boolean {
-        return this.#isShadowMerged;
-    }
-
-    /**
      * [KO] 메인 패스에서의 깊이 테스트 모드를 반환합니다.
      * [EN] Returns the depth test mode used in the main pass.
      *

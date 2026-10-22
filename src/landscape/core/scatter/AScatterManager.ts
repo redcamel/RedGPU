@@ -87,18 +87,6 @@ abstract class AScatterManager<
     }
 
     /**
-     * [KO] 현재 등록된 스캐터 타입의 개수를 반환합니다.
-     * [EN] Returns the number of currently registered scatter types.
-     *
-     * @returns
-     * [KO] 등록된 스캐터 타입 수
-     * [EN] Number of registered scatter types
-     */
-    get typeCount(): number {
-        return this.#types.length;
-    }
-
-    /**
      * [KO] 할당된 전체 스캐터 인스턴스 수를 반환합니다.
      * [EN] Returns the total number of allocated scatter instances.
      *
