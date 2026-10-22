@@ -370,7 +370,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         if (s[0] !== sx || s[1] !== sy) {
             s[0] = sx;
             s[1] = sy;
-            this.onParameterChanged('minScale', s);
+            this.onParameterChanged('minScale');
         }
     }
 
@@ -394,7 +394,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         if (s[0] !== sx || s[1] !== sy) {
             s[0] = sx;
             s[1] = sy;
-            this.onParameterChanged('maxScale', s);
+            this.onParameterChanged('maxScale');
         }
     }
 
@@ -413,7 +413,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const val = Math.max(0.1, Number(v) || 0.1);
         if (this.#exposureBoost !== val) {
             this.#exposureBoost = val;
-            this.onParameterChanged('exposureBoost', val);
+            this.onParameterChanged('exposureBoost');
         }
     }
 
@@ -443,7 +443,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const val = Math.max(0.01, Math.min(1, Number(v) || 0.01));
         if (this.#alphaCutoff !== val) {
             this.#alphaCutoff = val;
-            this.onParameterChanged('alphaCutoff', val);
+            this.onParameterChanged('alphaCutoff');
         }
     }
 
@@ -462,7 +462,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const val = Math.max(0.04, Math.min(1, Number(v) || 0.04));
         if (this.#roughness !== val) {
             this.#roughness = val;
-            this.onParameterChanged('roughness', val);
+            this.onParameterChanged('roughness');
         }
     }
 
@@ -481,7 +481,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const val = Math.max(0.0, Math.min(3.0, Number(v) || 0.0));
         if (this.#subsurfaceStrength !== val) {
             this.#subsurfaceStrength = val;
-            this.onParameterChanged('subsurfaceStrength', val);
+            this.onParameterChanged('subsurfaceStrength');
         }
     }
 
@@ -507,7 +507,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
             c[0] = r;
             c[1] = g;
             c[2] = b;
-            this.onParameterChanged('subsurfaceColor', c);
+            this.onParameterChanged('subsurfaceColor');
         }
     }
 
@@ -526,7 +526,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const boolVal = !!v;
         if (this.#receiveShadow !== boolVal) {
             this.#receiveShadow = boolVal;
-            this.onParameterChanged('receiveShadow', boolVal);
+            this.onParameterChanged('receiveShadow');
         }
     }
 
@@ -545,7 +545,7 @@ class Grass extends AScatterType<GrassTypeAllocation> {
         const val = Math.max(0.0, Math.min(1.0, Number(v) || 0.0));
         if (this.#shadowStrength !== val) {
             this.#shadowStrength = val;
-            this.onParameterChanged('shadowStrength', val);
+            this.onParameterChanged('shadowStrength');
         }
     }
 
@@ -666,14 +666,8 @@ class Grass extends AScatterType<GrassTypeAllocation> {
      * @param prop -
      * [KO] 변경된 속성 이름
      * [EN] Name of the changed property
-     * @param value -
-     * [KO] 새로운 속성 값
-     * [EN] New property value
-     * @param prevValue -
-     * [KO] 이전 속성 값
-     * [EN] Previous property value
      */
-    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
+    override onParameterChanged(prop: string): void {
         switch (prop) {
             case 'bottomOffset':
             case 'targetLayer':

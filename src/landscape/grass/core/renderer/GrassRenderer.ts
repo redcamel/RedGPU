@@ -263,9 +263,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         const shadowSystemBG = view.getCascadeUniformBindGroup(currentCascade) || view.systemUniform_Vertex_UniformBindGroup;
         if (!shadowSystemBG) return;
 
-        const {systemUniform_Vertex_UniformBindGroup: systemBG} = view;
-        if (!systemBG) return;
-
         const count = grassList.length;
         if (count === 0) return;
 

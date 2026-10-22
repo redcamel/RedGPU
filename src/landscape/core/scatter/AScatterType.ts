@@ -259,7 +259,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.01, Number(val) || 0.01);
         if (this.#height !== numVal) {
             this.#height = numVal;
-            this.onParameterChanged('height', numVal);
+            this.onParameterChanged('height');
         }
     }
 
@@ -279,7 +279,7 @@ abstract class AScatterType<
         const numVal = Number(val) || 0;
         if (this.#bottomOffset !== numVal) {
             this.#bottomOffset = numVal;
-            this.onParameterChanged('bottomOffset', numVal);
+            this.onParameterChanged('bottomOffset');
         }
     }
 
@@ -299,7 +299,7 @@ abstract class AScatterType<
         const numVal = Math.max(0, Number(val) || 0);
         if (this.#cullingDistance !== numVal) {
             this.#cullingDistance = numVal;
-            this.onParameterChanged('cullingDistance', numVal);
+            this.onParameterChanged('cullingDistance');
         }
     }
 
@@ -319,7 +319,7 @@ abstract class AScatterType<
         const numVal = Math.max(0, Number(val) || 0);
         if (this.#shadowCullDistance !== numVal) {
             this.#shadowCullDistance = numVal;
-            this.onParameterChanged('shadowCullDistance', numVal);
+            this.onParameterChanged('shadowCullDistance');
         }
     }
 
@@ -338,7 +338,7 @@ abstract class AScatterType<
     set targetLayer(val: string | number | undefined) {
         if (this.#targetLayer !== val) {
             this.#targetLayer = val;
-            this.onParameterChanged('targetLayer', val);
+            this.onParameterChanged('targetLayer');
         }
     }
 
@@ -358,7 +358,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
         if (this.#minSlope !== numVal) {
             this.#minSlope = numVal;
-            this.onParameterChanged('minSlope', numVal);
+            this.onParameterChanged('minSlope');
         }
     }
 
@@ -378,7 +378,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.0, Math.min(90.0, Number(val) || 0.0));
         if (this.#maxSlope !== numVal) {
             this.#maxSlope = numVal;
-            this.onParameterChanged('maxSlope', numVal);
+            this.onParameterChanged('maxSlope');
         }
     }
 
@@ -398,7 +398,7 @@ abstract class AScatterType<
         const boolVal = !!val;
         if (this.#densityScaleByWeight !== boolVal) {
             this.#densityScaleByWeight = boolVal;
-            this.onParameterChanged('densityScaleByWeight', boolVal);
+            this.onParameterChanged('densityScaleByWeight');
         }
     }
 
@@ -418,7 +418,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#densityPerHectare !== numVal) {
             this.#densityPerHectare = numVal;
-            this.onParameterChanged('densityPerHectare', numVal);
+            this.onParameterChanged('densityPerHectare');
         }
     }
 
@@ -438,7 +438,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.0, Number(val) || 0.0);
         if (this.#densityMultiplier !== numVal) {
             this.#densityMultiplier = numVal;
-            this.onParameterChanged('densityMultiplier', numVal);
+            this.onParameterChanged('densityMultiplier');
         }
     }
 
@@ -458,7 +458,7 @@ abstract class AScatterType<
         const boolVal = !!val;
         if (this.#castShadow !== boolVal) {
             this.#castShadow = boolVal;
-            this.onParameterChanged('castShadow', boolVal);
+            this.onParameterChanged('castShadow');
         }
     }
 
@@ -481,7 +481,7 @@ abstract class AScatterType<
         const numVal = Math.max(0.0, Math.min(1.0, Number(val) || 0.0));
         if (this.#groundBlendStrength !== numVal) {
             this.#groundBlendStrength = numVal;
-            this.onParameterChanged('groundBlendStrength', numVal);
+            this.onParameterChanged('groundBlendStrength');
         }
     }
 
@@ -544,14 +544,8 @@ abstract class AScatterType<
      * @param prop -
      * [KO] 변경된 프로퍼티 이름
      * [EN] Name of the changed property
-     * @param value -
-     * [KO] 새로 설정된 값
-     * [EN] Newly set value
-     * @param prevValue -
-     * [KO] 변경 전 이전 값 (선택적)
-     * [EN] Previous value before the change (optional)
      */
-    abstract onParameterChanged(prop: string, value: any, prevValue?: any): void;
+    abstract onParameterChanged(prop: string): void;
 
     /**
      * [KO] 스캐터 타입의 세그먼트 할당 참조를 해제합니다.

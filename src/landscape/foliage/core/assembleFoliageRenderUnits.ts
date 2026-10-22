@@ -218,7 +218,6 @@ export default function assembleFoliageRenderUnits(
         useImpostor = true,
         lods = [],
         preservePivot = true,
-        bottomOffset = 0,
         height = 2.0,
         groundBlendStrength,
         groundBlendRange,

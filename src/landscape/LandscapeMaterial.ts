@@ -695,19 +695,17 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const dataFormat = this.#getDataArrayFormat();
         const {mipmapGenerator} = this.redGPUContext.resourceManager;
 
-        if (this.#gpuBaseColorArrayTexture) {
-            mipmapGenerator.generateMipmap(
-                this.#gpuBaseColorArrayTexture,
-                {
-                    size: [this.#textureArraySize, this.#textureArraySize, count],
-                    mipLevelCount,
-                    format: baseColorFormat,
-                    usage: 0
-                },
-                false,
-                COMMAND_ENCODER_TYPE.IMMEDIATE
-            );
-        }
+        mipmapGenerator.generateMipmap(
+            this.#gpuBaseColorArrayTexture,
+            {
+                size: [this.#textureArraySize, this.#textureArraySize, count],
+                mipLevelCount,
+                format: baseColorFormat,
+                usage: 0
+            },
+            false,
+            COMMAND_ENCODER_TYPE.IMMEDIATE
+        );
         if (this.#gpuNormalArrayTexture) {
             mipmapGenerator.generateMipmap(
                 this.#gpuNormalArrayTexture,

@@ -977,7 +977,7 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         if (this.#receiveShadow !== boolVal) {
             this.#receiveShadow = boolVal;
             this.#updateRenderUnitReceiveShadow();
-            this.onParameterChanged('receiveShadow', boolVal);
+            this.onParameterChanged('receiveShadow');
         }
     }
 
@@ -1142,14 +1142,8 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
      * @param prop -
      * [KO] 변경된 속성 이름
      * [EN] Name of the changed property
-     * @param value -
-     * [KO] 새로운 속성 값
-     * [EN] New property value
-     * @param prevValue -
-     * [KO] 이전 속성 값
-     * [EN] Previous property value
      */
-    override onParameterChanged(prop: string, value: any, prevValue?: any): void {
+    override onParameterChanged(prop: string): void {
         switch (prop) {
             case 'targetLayer':
             case 'minSlope':
@@ -1635,8 +1629,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
             return;
         }
         const {
-            worldSizeX,
-            worldSizeZ,
             invWorldSizeX,
             invWorldSizeZ,
             halfWorldSizeX: halfWorldX,
@@ -1767,23 +1759,6 @@ class Foliage extends AScatterType<FoliageTypeAllocation> {
         cell.instanceCount = validCount;
     }
 
-    #populateSingleSubCell(scX: number, scZ: number, subCellSize: number, currentLandscape?: Landscape): FoliageSubCell {
-        const landscape = currentLandscape ?? this.#landscape;
-        const halfWorldX = landscape ? landscape.halfWorldSizeX : 0;
-        const halfWorldZ = landscape ? landscape.halfWorldSizeZ : 0;
-        const cell: FoliageSubCell = {
-            subCellKey: packSubCellKey(scX, scZ),
-            subCellX: scX,
-            subCellZ: scZ,
-            centerX: (scX + 0.5) * subCellSize - halfWorldX,
-            centerZ: (scZ + 0.5) * subCellSize - halfWorldZ,
-            instanceCount: -1,
-            isMounted: false,
-            mountedSlotIndex: -1
-        };
-        this.#computeSubCellInstances(cell, subCellSize, landscape);
-        return cell;
-    }
 }
 
 Object.freeze(Foliage);

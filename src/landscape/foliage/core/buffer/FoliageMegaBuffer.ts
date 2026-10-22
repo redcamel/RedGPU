@@ -256,12 +256,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
      * @param viewProjectionMatrix -
      * [KO] 뷰-프로젝션 결합 행렬(`mat4` 또는 `null`)
      * [EN] Combined view-projection matrix (`mat4` or `null`)
-     * @param hzbWidth -
-     * [KO] HZB 텍스처 너비 (기본값: `512.0`)
-     * [EN] HZB texture width (default: `512.0`)
-     * @param hzbHeight -
-     * [KO] HZB 텍스처 높이 (기본값: `256.0`)
-     * [EN] HZB texture height (default: `256.0`)
      * @param depthBias -
      * [KO] HZB 오클루전 테스트 깊이 바이어스 (기본값: `0.002`)
      * [EN] HZB occlusion test depth bias (default: `0.002`)
@@ -270,8 +264,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         renderViewStateData: RenderViewStateData,
         fovFactor: number,
         viewProjectionMatrix: mat4 | null = null,
-        hzbWidth: number = 512.0,
-        hzbHeight: number = 256.0,
         depthBias: number = 0.002
     ): void {
         const {typeParamsGPUBuffer} = this;

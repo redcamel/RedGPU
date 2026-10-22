@@ -157,39 +157,36 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
         if (validCount === 0) return;
 
-        if (true) {
-            let viewCache = this.#depthPrepassBundlesByView.get(view);
-            const needsRebuild = !viewCache
-                || viewCache.systemBG !== systemBG
-                || viewCache.sampleCount !== sampleCount
-                || viewCache.validTypeCount !== validCount;
+        let viewCache = this.#depthPrepassBundlesByView.get(view);
+        const needsRebuild = !viewCache
+            || viewCache.systemBG !== systemBG
+            || viewCache.sampleCount !== sampleCount
+            || viewCache.validTypeCount !== validCount;
 
-            if (needsRebuild) {
-                const bundle = this.#recordDepthPrepassRenderBundle(validCount, systemBG, sampleCount, msaaID, view);
-                if (bundle) {
-                    viewCache = {
-                        bundle,
-                        systemBG,
-                        sampleCount,
-                        validTypeCount: validCount
-                    };
-                    this.#depthPrepassBundlesByView.set(view, viewCache);
-                } else {
-                    viewCache = undefined;
-                    this.#depthPrepassBundlesByView.delete(view);
-                }
+        if (needsRebuild) {
+            const bundle = this.#recordDepthPrepassRenderBundle(validCount, systemBG, sampleCount, msaaID, view);
+            if (bundle) {
+                viewCache = {
+                    bundle,
+                    systemBG,
+                    sampleCount,
+                    validTypeCount: validCount
+                };
+                this.#depthPrepassBundlesByView.set(view, viewCache);
+            } else {
+                viewCache = undefined;
+                this.#depthPrepassBundlesByView.delete(view);
             }
+        }
 
-            if (viewCache) {
-                this.executeSingleBundle(passEncoder, viewCache.bundle);
-            }
+        if (viewCache) {
+            this.executeSingleBundle(passEncoder, viewCache.bundle);
         }
 
         let mainViewCache = this.mainBundlesByView.get(view);
         const needsMainRebuild = !mainViewCache
             || mainViewCache.systemBG !== systemBG
             || mainViewCache.sampleCount !== sampleCount
-            || mainViewCache.validTypeCount !== validCount
             || mainViewCache.validTypeCount !== validCount;
 
         if (needsMainRebuild) {

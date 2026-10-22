@@ -361,34 +361,6 @@ class LandscapeTileStreamer extends RedGPUObject {
     }
 
     /**
-     * [KO] 지정된 타입 식별자에 해당하는 가상 아틀라스 `DirectTexture`를 반환합니다.
-     * [EN] Returns the virtual atlas `DirectTexture` corresponding to the specified type identifier.
-     *
-     * @param type -
-     * [KO] 조회할 아틀라스 타입 (`'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'`)
-     * [EN] Atlas type to query (`'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'`)
-     * @returns
-     * [KO] 해당 아틀라스 텍스처 인스턴스 또는 `null`
-     * [EN] Corresponding atlas texture instance or `null`
-     */
-    getAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
-        switch (type) {
-            case 'vht':
-                return this.#vhtAtlasTexture;
-            case 'vnt':
-                return this.#vntAtlasTexture;
-            case 'vbtBaseColor':
-                return this.#vbtBaseColorAtlas;
-            case 'vbtNormal':
-                return this.#vbtNormalAtlas;
-            case 'vbtORM':
-                return this.#vbtORMAtlas;
-            default:
-                return null;
-        }
-    }
-
-    /**
      * [KO] 타일 그리드 크기에 맞춰 VHT, VNT, VBT 아틀라스 텍스처의 해상도를 확인하고 필요 시 재생성합니다.
      * [EN] Verifies the resolution of VHT, VNT, and VBT atlas textures according to the tile grid size and recreates them if necessary.
      *
@@ -536,7 +508,7 @@ class LandscapeTileStreamer extends RedGPUObject {
         const atlasW = countX * 512;
         const atlasH = countZ * 512;
 
-        if (!this.#vhtGenerator || !this.#vntGenerator || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) {
+        if (!this.#vhtGenerator || !this.#vntGenerator) {
             return;
         }
 

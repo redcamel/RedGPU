@@ -121,8 +121,6 @@ class FoliageInstanceBaker extends AScatterInstanceBaker {
         const vbtView = vbtTextureView ?? emptyBitmapTextureView;
 
         const {
-            worldSizeX,
-            worldSizeZ,
             invWorldSizeX,
             invWorldSizeZ,
             halfWorldSizeX: halfWorldX,
