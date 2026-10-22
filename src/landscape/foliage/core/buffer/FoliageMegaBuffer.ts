@@ -559,23 +559,6 @@ class FoliageMegaBuffer extends AScatterMegaBuffer {
         this.#cachedHZBSampler = null;
     }
 
-    /**
-     * [KO] 메인 및 그림자 렌더 유닛들의 인덱스 개수와 시작 오프셋을 간접 드로우 리셋 템플릿 버퍼에 등록합니다.
-     * [EN] Registers index counts and start offsets of main and shadow render units into the indirect draw reset template buffers.
-     *
-     * @param renderUnits -
-     * [KO] 메인 패스용 렌더 유닛 목록
-     * [EN] List of render units for the main pass
-     * @param indirectBaseOffset -
-     * [KO] 간접 드로우 버퍼 내 시작 슬롯 오프셋
-     * [EN] Starting slot offset in the indirect draw buffer
-     * @param shadowMergedRenderUnits -
-     * [KO] 그림자 패스 전용 병합 렌더 유닛 목록 (선택)
-     * [EN] List of merged render units for the shadow pass (optional)
-     * @param lodInfoList -
-     * [KO] LOD 단계별 메타데이터 목록 (선택)
-     * [EN] List of metadata per LOD level (optional)
-     */
     #registerRenderUnitsToTemplate(
         renderUnits: FoliageRenderUnit[],
         indirectBaseOffset: number,

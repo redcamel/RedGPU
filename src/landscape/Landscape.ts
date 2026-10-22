@@ -204,8 +204,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 디버그 시각화 및 오버레이를 제어하는 `LandscapeDebuggerManager`를 반환합니다.
-     * [EN] Returns the `LandscapeDebuggerManager` that controls terrain debug visualization and overlays.
+     * [KO] 지형 디버그 시각화 및 와이어프레임 상태를 제어하는 `LandscapeDebuggerManager`를 반환합니다.
+     * [EN] Returns the `LandscapeDebuggerManager` that controls terrain debug visualization and wireframe states.
      *
      * @returns
      * [KO] `LandscapeDebuggerManager` 인스턴스

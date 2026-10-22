@@ -303,8 +303,8 @@ function traverseHierarchy(
  * [KO] 병합할 루트 `Mesh` 또는 `Mesh[]` 배열
  * [EN] Root `Mesh` or `Mesh[]` array to merge
  * @param options -
- * [KO] 피벗 보존, XZ 중심 정렬 및 그림자 병합 지오메트리 생성 옵션 (선택적)
- * [EN] Options for pivot preservation, XZ center alignment, and shadow merged geometry generation (optional)
+ * [KO] 피벗 보존, XZ 중심 정렬, 그림자 병합 지오메트리 및 렌더 유닛 생성 옵션 (선택적)
+ * [EN] Options for pivot preservation, XZ center alignment, shadow merged geometry, and render unit generation (optional)
  * @returns
  * [KO] 병합된 렌더 유닛, 통합 지오메트리 및 바운딩 볼륨 정보를 담은 `ScatterAssemblyResult` 객체
  * [EN] `ScatterAssemblyResult` object containing merged render units, unified geometry, and bounding volume metrics

@@ -314,7 +314,6 @@ export interface FoliageOptions extends AScatterTypeInitOptions {
  * ```
  *
  * @see [Foliage and Impostors example](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
- * @see {@link FoliageOptions}
  * @category Landscape
  */
 class Foliage extends AScatterType<FoliageTypeAllocation> {

@@ -3,15 +3,7 @@ import AScatterMegaBuffer, {type ScatterBaseSegmentAllocation} from '../../../co
 import grassCullWGSL from '../culling/grassCull.wgsl';
 import type Grass from '../Grass';
 
-/**
- * [KO] 잔디 간접 드로우(Indirect Draw) 슬롯의 오프셋 정보를 담는 내부 인터페이스입니다.
- * [EN] Internal interface holding offset information for a grass indirect draw slot.
- */
 interface GrassDrawSlot {
-    /**
-     * [KO] 간접 드로우 버퍼 내 슬롯 인덱스 오프셋
-     * [EN] Slot index offset within the indirect draw buffer
-     */
     readonly indirectOffset: number;
 }
 
@@ -64,11 +56,11 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
      * [KO] `RedGPUContext` 인스턴스
      * [EN] `RedGPUContext` instance
      * @param initialCapacity -
-     * [KO] 초기 최대 인스턴스 수용량 (기본값: 131072)
-     * [EN] Initial maximum instance capacity (default: 131072)
+     * [KO] 초기 최대 인스턴스 수용량 (기본값: `131072`)
+     * [EN] Initial maximum instance capacity (default: `131072`)
      * @param maxTypes -
-     * [KO] 지원할 최대 잔디 타입 수 (기본값: 64)
-     * [EN] Maximum number of supported grass types (default: 64)
+     * [KO] 지원할 최대 잔디 타입 수 (기본값: `64`)
+     * [EN] Maximum number of supported grass types (default: `64`)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -122,8 +114,8 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
      * [KO] 서브메시 렌더 유닛의 인덱스 수 및 시작 인덱스 배열
      * [EN] Array of index counts and first indices for submesh render units
      * @returns
-     * [KO] 할당된 잔디 타입 세그먼트 정보
-     * [EN] Allocated grass type segment information
+     * [KO] 할당된 잔디 타입 세그먼트 정보(`GrassTypeAllocation`)
+     * [EN] Allocated grass type segment information (`GrassTypeAllocation`)
      */
     allocateType(
         typeId: number,
@@ -223,8 +215,8 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
      * [KO] 조회할 잔디 타입 고유 식별자
      * [EN] Unique identifier of the grass type to query
      * @returns
-     * [KO] 할당 정보 객체 또는 미할당 시 `undefined`
-     * [EN] Allocation information object, or `undefined` if not allocated
+     * [KO] 할당 정보 객체(`GrassTypeAllocation`) 또는 미할당 시 `undefined`
+     * [EN] Allocation information object (`GrassTypeAllocation`), or `undefined` if not allocated
      */
     getAllocation(typeId: number): GrassTypeAllocation | undefined {
         return this.#allocations.get(typeId);
@@ -238,8 +230,8 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
      * [KO] 잔디 타입 고유 식별자
      * [EN] Unique identifier of the grass type
      * @param grass -
-     * [KO] 잔디(Grass) 타입 인스턴스
-     * [EN] Grass type instance
+     * [KO] 잔디(`Grass`) 타입 인스턴스
+     * [EN] `Grass` type instance
      * @param alloc -
      * [KO] 해당 잔디 타입의 할당 정보
      * [EN] Allocation information for the grass type
@@ -425,4 +417,3 @@ class GrassMegaBuffer extends AScatterMegaBuffer {
 
 Object.freeze(GrassMegaBuffer);
 export default GrassMegaBuffer;
-

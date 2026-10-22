@@ -18,6 +18,8 @@ abstract class AScatterSlotPooler extends RedGPUObject {
     /**
      * [KO] 슬롯당 `Float32` 요소 개수 (`64`)입니다.
      * [EN] Number of `Float32` elements per slot (`64`).
+     *
+     * @category Landscape
      */
     static SLOT_STRIDE_FLOATS: number = 64;
 

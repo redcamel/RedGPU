@@ -115,20 +115,6 @@ class LandscapeRenderer extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 현재 지오메트리 레이아웃, 토폴로지, 머티리얼 및 MSAA 상태에 부합하는 `GPURenderPipeline`을 조회하거나 새로 생성하여 반환합니다.
-     * [EN] Retrieves or creates a `GPURenderPipeline` matching the current geometry layout, topology, material, and MSAA state.
-     *
-     * @param geom -
-     * [KO] 정점 버퍼 인터리브 구조 정보를 포함한 지오메트리 버퍼 객체
-     * [EN] Geometry buffer object containing vertex buffer interleaved struct information
-     * @param storageBGLayout -
-     * [KO] 지형 인스턴스 스토리지 바인드 그룹 레이아웃 (`GPUBindGroupLayout`)
-     * [EN] Terrain instance storage bind group layout (`GPUBindGroupLayout`)
-     * @returns
-     * [KO] 생성 또는 캐시된 `GPURenderPipeline` 인스턴스 또는 실패 시 `null`
-     * [EN] Created or cached `GPURenderPipeline` instance, or `null` on failure
-     */
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const {gpuDevice, antialiasingManager, resourceManager} = this;
         const landscape = this.#landscape;

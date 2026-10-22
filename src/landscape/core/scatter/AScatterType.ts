@@ -138,6 +138,9 @@ abstract class AScatterType<
      * @param typeId -
      * [KO] 스캐터 타입의 초기 숫자 ID (기본값: `0`)
      * [EN] Initial numeric ID of the scatter type (default: `0`)
+     * @throws
+     * [KO] `name`이 비어 있거나 유효한 문자열이 아닌 경우 에러 발생
+     * [EN] Throws an error if `name` is empty or not a valid string
      */
     constructor(redGPUContext: RedGPUContext, name: string, typeId: number = 0) {
         super(redGPUContext);

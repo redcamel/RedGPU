@@ -302,10 +302,6 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 캐싱된 모든 뷰의 Depth Prepass 렌더 번들을 무효화합니다.
-     * [EN] Invalidates cached Depth Prepass render bundles for all views.
-     */
     #markDepthPrepassBundleDirty(): void {
         this.#depthPrepassBundlesByView = new WeakMap();
     }
@@ -711,4 +707,3 @@ class FoliageRenderer extends AScatterRenderer<FoliageMainBundleCacheEntry> {
 
 Object.freeze(FoliageRenderer);
 export default FoliageRenderer;
-

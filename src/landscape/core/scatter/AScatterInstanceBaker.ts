@@ -27,10 +27,6 @@ export interface ResolvedWeightLayerInfo {
     weightChannelIndex: number;
 }
 
-/**
- * [KO] 스캐터 인스턴스 베이킹용 바인드 그룹 캐시 엔트리 인터페이스입니다.
- * [EN] Bind group cache entry interface for scatter instance baking.
- */
 interface ScatterBakeBindGroupCacheEntry {
     bindGroup: GPUBindGroup;
     rawBuffer: GPUBuffer;

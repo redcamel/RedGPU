@@ -1214,22 +1214,73 @@ export namespace ShadowLibrary {
      */
     export const getDirectionalShadowVisibility = getDirectionalShadowVisibility_wgsl;
     /**
-     * // 🌿 [식생(Foliage) 전용 초경량 1-Tap CSM 섀도우 메인 함수]
-     * // - 캐스케이드 전환 블렌딩 스킵 (2중 샘플링 폭풍 차단 및 경계선 스터터링 100% 방지)
-     * // - 전 캐스케이드 초고속 1-Tap 하드웨어 Bilinear PCF 단일화
-     * // - 풀잎 자체의 고주파 지오메트리 요철로 인해 1-Tap만으로도 완벽한 소프트 섀도우 구현
-     *
-     * // @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
-     * // @param directionalShadowMapSampler 비교 샘플러
-     * // @param worldPosition 월드 공간 상의 정점/픽셀 좌표
-     * // @param N 단위 법선 벡터
-     * // @param L 광원 방향 단위 벡터
-     * // @returns 가시성 계수 (0.0 ~ 1.0)
+     * // 🌟 [언리얼 엔진 표준 9-Tap Optimized 5x5 Tent PCF (식생용)]
+     * // - 하드웨어 2x2 Bilinear 비교 샘플러를 활용하여 단 9-Tap으로 5x5 텐트 필터를 수학적으로 100% 재구성합니다.
      *
      *
      * ```wgsl
      * #redgpu_include shadow.getShadowCoord;
      * 
+     * fn sampleShadowTent5x5Foliage(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     texSize: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let uv = tUV * texSize + vec2<f32>(0.5);
+     *     let base = (floor(uv) - vec2<f32>(0.5)) * oneOverTextureSize;
+     *     let st = fract(uv);
+     * 
+     *     let uw0 = 4.0 - 3.0 * st.x;
+     *     let uw1 = 7.0;
+     *     let uw2 = 1.0 + 3.0 * st.x;
+     * 
+     *     let vw0 = 4.0 - 3.0 * st.y;
+     *     let vw1 = 7.0;
+     *     let vw2 = 1.0 + 3.0 * st.y;
+     * 
+     *     let u0 = base.x + ((3.0 - 2.0 * st.x) / uw0 - 2.0) * oneOverTextureSize;
+     *     let u1 = base.x + ((3.0 + st.x) / uw1) * oneOverTextureSize;
+     *     let u2 = base.x + (st.x / uw2 + 2.0) * oneOverTextureSize;
+     * 
+     *     let v0 = base.y + ((3.0 - 2.0 * st.y) / vw0 - 2.0) * oneOverTextureSize;
+     *     let v1 = base.y + ((3.0 + st.y) / vw1) * oneOverTextureSize;
+     *     let v2 = base.y + (st.y / vw2 + 2.0) * oneOverTextureSize;
+     * 
+     *     var sum: f32 = 0.0;
+     * 
+     *     sum += uw0 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v0), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v0), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v0), cascadeIndex, compareDepth);
+     * 
+     *     sum += uw0 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v1), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v1), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v1), cascadeIndex, compareDepth);
+     * 
+     *     sum += uw0 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v2), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v2), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v2), cascadeIndex, compareDepth);
+     * 
+     *     return sum * (1.0 / 144.0);
+     * }
+     * 
+     * /**
+     *  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수]
+     *  * - Cascade 0 (초근경): 언리얼 표준 9-Tap Optimized 5x5 Tent PCF로 지형(Landscape)과 나무 기둥/바위 접지부 반음영 품질 100% 일치
+     *  * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대역폭 절감
+     *  * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
+     *  * 
+     *  * @param directionalShadowMap 방향성 광원용 2D 뎁스 텍스처 어레이
+     *  * @param directionalShadowMapSampler 비교 샘플러
+     *  * @param worldPosition 월드 공간 상의 정점/픽셀 좌표
+     *  * @param N 단위 법선 벡터
+     *  * @param L 광원 방향 단위 벡터
+     *  * @returns 가시성 계수 (0.0 ~ 1.0)
+     *  * 
+     *  *\/
      * fn getDirectionalShadowVisibilityFoliage(
      *     directionalShadowMap: texture_depth_2d_array,
      *     directionalShadowMapSampler: sampler_comparison,
@@ -1245,7 +1296,6 @@ export namespace ShadowLibrary {
      * 
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
-     *     let bias = shadowInfo.directionalShadowBias;
      * 
      *     // 2. 뷰 깊이 산출 (고정밀 카메라 상대 좌표 기반)
      *     let relPos = worldPosition - systemUniforms.camera.cameraPosition;
@@ -1257,16 +1307,32 @@ export namespace ShadowLibrary {
      *         return 1.0;
      *     }
      * 
+     *     // 🌟 [Caster Bounding Volume 0-Tap 가드]
+     *     let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
+     *     if (casterRadiusSq == 0.0) {
+     *         return 1.0;
+     *     }
+     *     if (casterRadiusSq > 0.0) {
+     *         let diff = worldPosition - shadowInfo.casterBoundingCenter;
+     *         if (dot(diff, diff) > casterRadiusSq) {
+     *             return 1.0;
+     *         }
+     *     }
+     * 
+     *     let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let oneOverTextureSize = 1.0 / texSize;
+     *     let bias = shadowInfo.directionalShadowBias;
+     * 
      *     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드만 선택)
      *     var cascadeIndex: u32 = 0u;
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
      *     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
      * 
-     *     // 4. 경량 슬로프 바이어스 및 노멀 오프셋
+     *     // 4. 식생 맞춤형 서브텍셀 슬로프 바이어스 및 노멀 오프셋
      *     let slopeBias = saturate(1.0 - nDotL);
-     *     let normalBiasScale = 0.5 + slopeBias * 1.5;
-     *     let baseBiasFactor = bias * (1.0 + slopeBias * 2.0);
+     *     let normalBiasScale = 0.25 + slopeBias * 0.65;
+     *     let baseBiasFactor = bias * (1.0 + slopeBias * 1.5);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
      *     let normalOffset = N * normalBiasScale * worldTexelSize;
@@ -1285,19 +1351,32 @@ export namespace ShadowLibrary {
      *     let maxCoord = max(absPos.x, max(absPos.y, absPos.z));
      *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
      *     let shadowDepth = saturate(shadowCoord.z);
-     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *     let cascadeBias = max(baseBiasFactor * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0002 + driftBias);
      * 
-     *     // 5. 초경량 1-Tap 하드웨어 Bilinear PCF (식생/풀잎 자체 요철로 1-Tap만으로도 완벽한 소프트 섀도우 연출)
-     *     var finalVis = textureSampleCompareLevel(
-     *         directionalShadowMap,
-     *         directionalShadowMapSampler,
-     *         tUV,
-     *         cascadeIndex,
-     *         shadowDepth - cascadeBias
-     *     );
+     *     var finalVis: f32 = 1.0;
+     * 
+     *     // 5. 적응형 샘플링: 초근경(Cascade 0)은 언리얼 9-Tap 5x5 Tent PCF, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+     *     if (cascadeIndex == 0u) {
+     *         finalVis = sampleShadowTent5x5Foliage(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             0u,
+     *             shadowDepth - cascadeBias,
+     *             texSize,
+     *             oneOverTextureSize
+     *         );
+     *     } else {
+     *         finalVis = textureSampleCompareLevel(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             cascadeIndex,
+     *             shadowDepth - cascadeBias
+     *         );
+     *     }
      * 
      *     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
-     *     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
      *         let safePrevIndex = max(1u, cascadeIndex) - 1u;
@@ -1316,7 +1395,7 @@ export namespace ShadowLibrary {
      * 
      *             let nextTUV = nextShadowCoord.xy;
      *             let nextShadowDepth = saturate(nextShadowCoord.z);
-     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *             let nextCascadeBias = max(baseBiasFactor * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0002 + driftBias);
      * 
      *             let nextVis = textureSampleCompareLevel(
      *                 directionalShadowMap,
@@ -1346,23 +1425,63 @@ export namespace ShadowLibrary {
      */
     export const getDirectionalShadowVisibilityFoliage = getDirectionalShadowVisibilityFoliage_wgsl;
     /**
-     * // 🌟 [지형(Landscape) 전용 적응형 초경량 4-Tap/1-Tap Poisson PCF 오프셋]
+     * // 🌟 [언리얼 엔진 표준 9-Tap Optimized 5x5 Tent PCF]
+     * // - 하드웨어 2x2 Bilinear 비교 샘플러를 활용하여 단 9-Tap으로 5x5(25~36 Texels) 텐트 필터를 수학적으로 100% 재구성합니다.
+     * // - 회전 지터(IGN) 없이 완벽한 C1 연속 반음영(Soft Penumbra)을 생성하여 빗살무늬 및 다중 테두리 층짐(Mach Banding)을 원천 차단합니다.
      *
      *
      * ```wgsl
      * #redgpu_include shadow.getShadowCoord;
-     * #redgpu_include math.getInterleavedGradientNoise;
      * 
-     * const LANDSCAPE_SHADOW_OFFSETS_4 = array<vec2<f32>, 4>(
-     *     vec2<f32>(-0.7071, -0.7071),
-     *     vec2<f32>( 0.7071, -0.7071),
-     *     vec2<f32>(-0.7071,  0.7071),
-     *     vec2<f32>( 0.7071,  0.7071)
-     * );
+     * fn sampleShadowTent5x5(
+     *     directionalShadowMap: texture_depth_2d_array,
+     *     directionalShadowMapSampler: sampler_comparison,
+     *     tUV: vec2<f32>,
+     *     cascadeIndex: u32,
+     *     compareDepth: f32,
+     *     texSize: f32,
+     *     oneOverTextureSize: f32
+     * ) -> f32 {
+     *     let uv = tUV * texSize + vec2<f32>(0.5);
+     *     let base = (floor(uv) - vec2<f32>(0.5)) * oneOverTextureSize;
+     *     let st = fract(uv);
+     * 
+     *     let uw0 = 4.0 - 3.0 * st.x;
+     *     let uw1 = 7.0;
+     *     let uw2 = 1.0 + 3.0 * st.x;
+     * 
+     *     let vw0 = 4.0 - 3.0 * st.y;
+     *     let vw1 = 7.0;
+     *     let vw2 = 1.0 + 3.0 * st.y;
+     * 
+     *     let u0 = base.x + ((3.0 - 2.0 * st.x) / uw0 - 2.0) * oneOverTextureSize;
+     *     let u1 = base.x + ((3.0 + st.x) / uw1) * oneOverTextureSize;
+     *     let u2 = base.x + (st.x / uw2 + 2.0) * oneOverTextureSize;
+     * 
+     *     let v0 = base.y + ((3.0 - 2.0 * st.y) / vw0 - 2.0) * oneOverTextureSize;
+     *     let v1 = base.y + ((3.0 + st.y) / vw1) * oneOverTextureSize;
+     *     let v2 = base.y + (st.y / vw2 + 2.0) * oneOverTextureSize;
+     * 
+     *     var sum: f32 = 0.0;
+     * 
+     *     sum += uw0 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v0), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v0), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v0), cascadeIndex, compareDepth);
+     * 
+     *     sum += uw0 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v1), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v1), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v1), cascadeIndex, compareDepth);
+     * 
+     *     sum += uw0 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v2), cascadeIndex, compareDepth);
+     *     sum += uw1 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v2), cascadeIndex, compareDepth);
+     *     sum += uw2 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v2), cascadeIndex, compareDepth);
+     * 
+     *     return sum * (1.0 / 144.0);
+     * }
      * 
      * /**
      *  * 🏔️ [지형(Landscape) 전용 초경량 CSM 섀도우 메인 함수]
-     *  * - Cascade 0 (발밑 초근경): 4-Tap Poisson Disk PCF로 캐릭터 및 식생 그림자의 부드러운 외곽선 완벽 보존
+     *  * - Cascade 0 (발밑 초근경): 언리얼 표준 9-Tap Optimized 5x5 Tent PCF로 빗살무늬 및 층짐 없이 완벽히 부드러운 반음영 보존
      *  * - Cascade 1+ (중원경 지형의 95% 면적): 초고속 1-Tap 하드웨어 Bilinear PCF로 94% 연산 절감
      *  * - 캐스케이드 2중 블렌딩(32-Tap 폭풍) 및 OOB 반복 계산을 전면 제거하여 GPU 워프 점유율 극대화
      *  * 
@@ -1372,7 +1491,6 @@ export namespace ShadowLibrary {
      *  * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
      *  * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
      *  * @param viewDepth [KO] 사전 보간된 카메라 뷰 공간 깊이 [EN] Pre-interpolated camera view-space depth
-     *  * @param screenPos [KO] 프래그먼트 스크린 픽셀 좌표 (@builtin(position).xy) [EN] Fragment screen pixel position
      *  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
      *  * 
      *  *\/
@@ -1382,8 +1500,7 @@ export namespace ShadowLibrary {
      *     worldPosition: vec3<f32>,
      *     N: vec3<f32>,
      *     L: vec3<f32>,
-     *     viewDepth: f32,
-     *     screenPos: vec2<f32>
+     *     viewDepth: f32
      * ) -> f32 {
      *     let shadowInfo = systemUniforms.shadow;
      *     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
@@ -1395,7 +1512,6 @@ export namespace ShadowLibrary {
      *     }
      * 
      *     // 🌟 [Caster Bounding Volume 0-Tap 가드]
-     *     // 그림자를 드리우는 캐스터가 없거나(0.0), 지형 픽셀이 캐스터 그림자 투영 반경 밖인 경우 즉시 탈출 (>0.0)
      *     let casterRadiusSq = shadowInfo.casterBoundingRadiusSq;
      *     if (casterRadiusSq == 0.0) {
      *         return 1.0;
@@ -1413,7 +1529,8 @@ export namespace ShadowLibrary {
      *         return 0.0;
      *     }
      * 
-     *     let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+     *     let oneOverTextureSize = 1.0 / texSize;
      *     let bias = shadowInfo.directionalShadowBias;
      * 
      *     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드 인덱스 확정)
@@ -1425,9 +1542,8 @@ export namespace ShadowLibrary {
      *     // 4. 지형 특화 서브텍셀 노멀 오프셋
      *     let slopeBias = saturate(1.0 - nDotL);
      *     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-     *     // 🚀 [UBO 사전 계산]: CPU에서 사전 계산된 캐스케이드별 텍셀 크기를 직접 로드하여 매 픽셀 dot + inverseSqrt 완전 제거
      *     let worldTexelSize = shadowInfo.cascadeTexelSizes[cascadeIndex];
-     *     let normalOffset = N * (0.5 + slopeBias * 1.5) * worldTexelSize;
+     *     let normalOffset = N * (0.15 + slopeBias * 0.35) * worldTexelSize;
      *     let biasedWorldPosition = worldPosition + normalOffset;
      * 
      *     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -1442,42 +1558,21 @@ export namespace ShadowLibrary {
      *     let maxCoord = max(abs(worldPosition.x), max(abs(worldPosition.y), abs(worldPosition.z)));
      *     let driftBias = max(maxCoord * 0.00000035, 0.0001);
      *     let shadowDepth = saturate(shadowCoord.z);
-     *     let cascadeBias = max(bias * (1.0 + slopeBias * 2.5) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *     let cascadeBias = max(bias * (1.0 + slopeBias * 1.2) * (1.0 + f32(cascadeIndex) * 0.5) + driftBias, 0.0001 + driftBias);
      * 
      *     var finalVis: f32 = 1.0;
      * 
-     *     // 5. 적응형 샘플링: 발밑(Cascade 0)은 5-Tap 회전 PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
+     *     // 5. 적응형 샘플링: 발밑(Cascade 0)은 언리얼 9-Tap 5x5 Tent PCF, 중원경(Cascade 1+)은 1-Tap 초고속 처리
      *     if (cascadeIndex == 0u) {
-     *         let noise = getInterleavedGradientNoise(screenPos);
-     *         let angle = noise * 6.2831853;
-     *         let cosAngle = cos(angle);
-     *         let sinAngle = sin(angle);
-     * 
-     *         let filterRadius = oneOverTextureSize * 2.5;
-     *         let centerSample = textureSampleCompareLevel(
+     *         finalVis = sampleShadowTent5x5(
      *             directionalShadowMap,
      *             directionalShadowMapSampler,
      *             tUV,
      *             0u,
-     *             shadowDepth - cascadeBias
+     *             shadowDepth - cascadeBias,
+     *             texSize,
+     *             oneOverTextureSize
      *         );
-     *         var accum: f32 = centerSample;
-     *         for (var i = 0u; i < 4u; i++) {
-     *             let rawOffset = LANDSCAPE_SHADOW_OFFSETS_4[i];
-     *             let rotatedOffset = vec2<f32>(
-     *                 rawOffset.x * cosAngle - rawOffset.y * sinAngle,
-     *                 rawOffset.x * sinAngle + rawOffset.y * cosAngle
-     *             );
-     *             let offsetUV = tUV + rotatedOffset * filterRadius;
-     *             accum += textureSampleCompareLevel(
-     *                 directionalShadowMap,
-     *                 directionalShadowMapSampler,
-     *                 offsetUV,
-     *                 0u,
-     *                 shadowDepth - cascadeBias
-     *             );
-     *         }
-     *         finalVis = accum * 0.2; // (중심 1-Tap + 주변 4-Tap) 5-Tap 반음영 정밀 필터링
      *     } else {
      *         finalVis = textureSampleCompareLevel(
      *             directionalShadowMap,
@@ -1489,7 +1584,6 @@ export namespace ShadowLibrary {
      *     }
      * 
      *     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
-     *     // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
      *     if (cascadeIndex < cascadeCount - 1u) {
      *         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
      *         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
@@ -1501,13 +1595,13 @@ export namespace ShadowLibrary {
      *             let nextIndex = cascadeIndex + 1u;
      *             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
      *             let nextWorldTexelSize = shadowInfo.cascadeTexelSizes[nextIndex];
-     *             let nextNormalOffset = N * (0.5 + slopeBias * 1.5) * nextWorldTexelSize;
+     *             let nextNormalOffset = N * (0.15 + slopeBias * 0.35) * nextWorldTexelSize;
      *             let nextBiasedPos = worldPosition + nextNormalOffset;
      *             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
      * 
      *             let nextTUV = nextShadowCoord.xy;
      *             let nextShadowDepth = saturate(nextShadowCoord.z);
-     *             let nextCascadeBias = max(bias * (1.0 + slopeBias * 2.0) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0004 + driftBias);
+     *             let nextCascadeBias = max(bias * (1.0 + slopeBias * 1.2) * (1.0 + f32(nextIndex) * 0.5) + driftBias, 0.0001 + driftBias);
      * 
      *             let nextVis = textureSampleCompareLevel(
      *                 directionalShadowMap,

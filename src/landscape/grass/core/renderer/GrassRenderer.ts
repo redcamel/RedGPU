@@ -14,62 +14,18 @@ import grassFragmentFarWGSL from "../pipeline/grassFragmentFar.wgsl";
 import grassShadowVertexWGSL from "../pipeline/grassShadowVertex.wgsl";
 import grassShadowFragmentWGSL from "../pipeline/grassShadowFragment.wgsl";
 
-/**
- * [KO] 잔디 서브메시 재질 바인드 그룹 캐시 엔트리 인터페이스입니다.
- * [EN] Material bind group cache entry interface for grass submeshes.
- */
 interface MaterialBindGroupCacheEntry {
-    /**
-     * [KO] 캐싱된 `GPUBindGroup` 인스턴스
-     * [EN] Cached `GPUBindGroup` instance
-     */
     bindGroup: GPUBindGroup;
-    /**
-     * [KO] 캐싱된 베이스 컬러 `GPUTextureView`
-     * [EN] Cached base color `GPUTextureView`
-     */
     cachedColorTexView: GPUTextureView;
-    /**
-     * [KO] 캐싱된 서브메시 `BitmapTexture`
-     * [EN] Cached submesh `BitmapTexture`
-     */
     cachedSubTex: BitmapTexture | null | undefined;
-    /**
-     * [KO] 캐싱된 잔디 타입 기본 `GPUTextureView`
-     * [EN] Cached grass type default `GPUTextureView`
-     */
     cachedTypeTexView: GPUTextureView | null;
 }
 
-/**
- * [KO] 뷰별 잔디 메인 렌더 번들 캐시 엔트리 인터페이스입니다.
- * [EN] Per-view grass main render bundle cache entry interface.
- */
 interface MainBundleCacheEntry {
-    /**
-     * [KO] 기록된 `GPURenderBundle` 인스턴스
-     * [EN] Recorded `GPURenderBundle` instance
-     */
     bundle: GPURenderBundle;
-    /**
-     * [KO] 시스템 유니폼 바인드 그룹
-     * [EN] System uniform bind group
-     */
     systemBG: GPUBindGroup;
-    /**
-     * [KO] 멀티샘플링 수 (1 또는 4)
-     * [EN] Sample count for multisampling (1 or 4)
-     */
     sampleCount: number;
-    /**
-     * [KO] 번들 기록 시점의 잔디 타입 수
-     * [EN] Number of grass types at the time of bundle recording
-     */
     grassCount: number;
-    /**
-     * [KO] 번들 기록에 사용된 `GrassMegaBuffer` 인스턴스
-     * [EN] `GrassMegaBuffer` instance used for bundle recording
-     */
     megaBufferInstance: GrassMegaBuffer;
 }
 
@@ -181,8 +137,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
      * [KO] 현재 `GPURenderPassEncoder` 인스턴스
      * [EN] Current `GPURenderPassEncoder` instance
      * @param grassList -
-     * [KO] 렌더링할 잔디 타입 배열
-     * [EN] Array of grass types to render
+     * [KO] 렌더링할 `Grass` 타입 배열
+     * [EN] Array of `Grass` types to render
      * @param megaBuffer -
      * [KO] 잔디 메가 버퍼 인스턴스
      * [EN] Grass mega buffer instance
@@ -256,8 +212,8 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
      * [KO] 그림자 패스용 `GPURenderPassEncoder` 인스턴스
      * [EN] `GPURenderPassEncoder` instance for the shadow pass
      * @param grassList -
-     * [KO] 렌더링할 잔디 타입 배열
-     * [EN] Array of grass types to render
+     * [KO] 렌더링할 `Grass` 타입 배열
+     * [EN] Array of `Grass` types to render
      * @param megaBuffer -
      * [KO] 잔디 메가 버퍼 인스턴스
      * [EN] Grass mega buffer instance
@@ -336,10 +292,6 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
         }
     }
 
-    /**
-     * [KO] 캐싱된 Group 1 통합 바인드 그룹을 무효화합니다.
-     * [EN] Invalidates the cached unified Group 1 bind group.
-     */
     #invalidateGroup1BindGroup(): void {
         this.#unifiedGroup1BindGroup = null;
         this.#lastCulledBuffer = null;
@@ -742,4 +694,3 @@ class GrassRenderer extends AScatterRenderer<MainBundleCacheEntry> {
 
 Object.freeze(GrassRenderer);
 export default GrassRenderer;
-

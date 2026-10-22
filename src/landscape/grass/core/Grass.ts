@@ -105,7 +105,6 @@ export interface GrassOptions extends AScatterTypeInitOptions {
  * ```
  *
  * @see [Foliage and Impostors example](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
- * @see {@link GrassOptions}
  * @category Landscape
  */
 class Grass extends AScatterType<GrassTypeAllocation> {

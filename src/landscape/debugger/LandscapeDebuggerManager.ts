@@ -2,8 +2,8 @@ type DebuggerPropertyKey = 'wireframe' | 'debugMode' | 'lodColoration';
 type DebuggerPropertyChangeHandler = (key: DebuggerPropertyKey, value: boolean | number) => void;
 
 /**
- * [KO] 지형(`Landscape`)의 와이어프레임, LOD 색상 시각화, 디버그 렌더링 모드를 관리하는 매니저 클래스입니다.
- * [EN] Manager class that controls wireframe, LOD coloration, and debug rendering modes for `Landscape`.
+ * [KO] 지형(`Landscape`)의 와이어프레임, LOD 색상 시각화, 디버그 렌더링 모드를 관리하는 매니저 클래스입니다. `Landscape` 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Manager class that controls wireframe, LOD coloration, and debug rendering modes for `Landscape`. Automatically created internally when a `Landscape` is instantiated.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

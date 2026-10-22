@@ -580,14 +580,6 @@ class LandscapeTileStreamer extends RedGPUObject {
         this.#onGlobalHeightmapBaked = null;
     }
 
-    /**
-     * [KO] CPU 측 높이 질의(`getHeightAt`) 폴백에 사용할 전역 하이트맵 픽셀 데이터를 설정합니다.
-     * [EN] Sets the global heightmap pixel data to be used as a fallback for CPU-side height queries (`getHeightAt`).
-     *
-     * @param data -
-     * [KO] 가로/세로 해상도, 픽셀 배열(`ArrayLike<number>`) 및 최대값을 포함한 하이트맵 데이터 객체 또는 `null`
-     * [EN] Heightmap data object containing width/height resolution, pixel array (`ArrayLike<number>`), and maximum value, or `null`
-     */
     #setGlobalCPUHeightMap(data: {
         width: number;
         height: number;
