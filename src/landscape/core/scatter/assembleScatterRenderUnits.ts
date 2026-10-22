@@ -108,6 +108,12 @@ export interface ScatterAssemblyOptions {
      * [EN] Whether to also generate a position-only (`POSITION_ONLY`) single merged geometry for the shadow pass (default: `false`)
      */
     generateShadowMergedGeometry?: boolean;
+
+    /**
+     * [KO] 기본 `ScatterRenderUnit[]` 인스턴스 배열을 생성할지 여부 (기본값: `true`)
+     * [EN] Whether to instantiate the default `ScatterRenderUnit[]` array (default: `true`)
+     */
+    createRenderUnits?: boolean;
 }
 
 /**
@@ -665,20 +671,22 @@ export default function assembleScatterRenderUnits(
     const boundingHeight = (isFinite(minY) && isFinite(maxY) && maxY > minY) ? (maxY - minY) : (boundingRadius > 0 ? boundingRadius * 2.0 : 1.0);
     const finalMinY = isFinite(minY) ? minY - offsetY : 0;
 
-    const renderUnits: ScatterRenderUnit[] = unifiedGeometry ? groups.map(({
-                                                                               vertexCount,
-                                                                               indexCount,
-                                                                               firstIndex,
-                                                                               material
-                                                                           }) => {
-        return new ScatterRenderUnit({
-            geometry: unifiedGeometry,
-            vertexCount,
-            indexCount,
-            firstIndex,
-            material
-        });
-    }) : [];
+    const renderUnits: ScatterRenderUnit[] = (unifiedGeometry && options?.createRenderUnits !== false)
+        ? groups.map(({
+                          vertexCount,
+                          indexCount,
+                          firstIndex,
+                          material
+                      }) => {
+            return new ScatterRenderUnit({
+                geometry: unifiedGeometry,
+                vertexCount,
+                indexCount,
+                firstIndex,
+                material
+            });
+        })
+        : [];
 
     return {
         groups,

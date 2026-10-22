@@ -246,7 +246,8 @@ export default function assembleFoliageRenderUnits(
             {
                 preservePivot,
                 centerXZ: true,
-                generateShadowMergedGeometry: true
+                generateShadowMergedGeometry: true,
+                createRenderUnits: false
             }
         );
 
