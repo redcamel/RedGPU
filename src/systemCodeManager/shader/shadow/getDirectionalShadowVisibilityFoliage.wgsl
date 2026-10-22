@@ -1,8 +1,58 @@
 #redgpu_include shadow.getShadowCoord;
 
 /**
+ * 🌟 [언리얼 엔진 표준 9-Tap Optimized 5x5 Tent PCF (식생용)]
+ * - 하드웨어 2x2 Bilinear 비교 샘플러를 활용하여 단 9-Tap으로 5x5 텐트 필터를 수학적으로 100% 재구성합니다.
+ */
+fn sampleShadowTent5x5Foliage(
+    directionalShadowMap: texture_depth_2d_array,
+    directionalShadowMapSampler: sampler_comparison,
+    tUV: vec2<f32>,
+    cascadeIndex: u32,
+    compareDepth: f32,
+    texSize: f32,
+    oneOverTextureSize: f32
+) -> f32 {
+    let uv = tUV * texSize + vec2<f32>(0.5);
+    let base = (floor(uv) - vec2<f32>(0.5)) * oneOverTextureSize;
+    let st = fract(uv);
+
+    let uw0 = 4.0 - 3.0 * st.x;
+    let uw1 = 7.0;
+    let uw2 = 1.0 + 3.0 * st.x;
+
+    let vw0 = 4.0 - 3.0 * st.y;
+    let vw1 = 7.0;
+    let vw2 = 1.0 + 3.0 * st.y;
+
+    let u0 = base.x + ((3.0 - 2.0 * st.x) / uw0 - 2.0) * oneOverTextureSize;
+    let u1 = base.x + ((3.0 + st.x) / uw1) * oneOverTextureSize;
+    let u2 = base.x + (st.x / uw2 + 2.0) * oneOverTextureSize;
+
+    let v0 = base.y + ((3.0 - 2.0 * st.y) / vw0 - 2.0) * oneOverTextureSize;
+    let v1 = base.y + ((3.0 + st.y) / vw1) * oneOverTextureSize;
+    let v2 = base.y + (st.y / vw2 + 2.0) * oneOverTextureSize;
+
+    var sum: f32 = 0.0;
+
+    sum += uw0 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v0), cascadeIndex, compareDepth);
+    sum += uw1 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v0), cascadeIndex, compareDepth);
+    sum += uw2 * vw0 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v0), cascadeIndex, compareDepth);
+
+    sum += uw0 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v1), cascadeIndex, compareDepth);
+    sum += uw1 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v1), cascadeIndex, compareDepth);
+    sum += uw2 * vw1 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v1), cascadeIndex, compareDepth);
+
+    sum += uw0 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u0, v2), cascadeIndex, compareDepth);
+    sum += uw1 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u1, v2), cascadeIndex, compareDepth);
+    sum += uw2 * vw2 * textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, vec2<f32>(u2, v2), cascadeIndex, compareDepth);
+
+    return sum * (1.0 / 144.0);
+}
+
+/**
  * 🌿 [식생(Foliage) 전용 적응형 CSM 섀도우 메인 함수]
- * - Cascade 0 (초근경): 회전 지터 없는 대칭 5-Tap Tent PCF로 지형(Landscape)과 나무 기둥/바위 접지부 그림자 품질 100% 일치
+ * - Cascade 0 (초근경): 언리얼 표준 9-Tap Optimized 5x5 Tent PCF로 지형(Landscape)과 나무 기둥/바위 접지부 반음영 품질 100% 일치
  * - Cascade 1+ (중원경): 초고속 1-Tap 하드웨어 Bilinear PCF로 대역폭 절감
  * - Caster Bounding Volume 0-Tap 가드 및 캐스케이드 전환 크로스페이드 적용
  *
@@ -51,7 +101,8 @@ fn getDirectionalShadowVisibilityFoliage(
         }
     }
 
-    let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+    let texSize = f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
+    let oneOverTextureSize = 1.0 / texSize;
     let bias = shadowInfo.directionalShadowBias;
 
     // 3. 캐스케이드 레벨 결정 (단일 캐스케이드만 선택)
@@ -86,22 +137,17 @@ fn getDirectionalShadowVisibilityFoliage(
 
     var finalVis: f32 = 1.0;
 
-    // 5. 적응형 샘플링: 초근경(Cascade 0)은 대칭 5-Tap Tent PCF, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
+    // 5. 적응형 샘플링: 초근경(Cascade 0)은 언리얼 9-Tap 5x5 Tent PCF, 중원경(Cascade 1+)은 1-Tap 하드웨어 Bilinear PCF
     if (cascadeIndex == 0u) {
-        let stepUV = oneOverTextureSize * 0.75;
-        let compareDepth = shadowDepth - cascadeBias;
-        let centerSample = textureSampleCompareLevel(
+        finalVis = sampleShadowTent5x5Foliage(
             directionalShadowMap,
             directionalShadowMapSampler,
             tUV,
             0u,
-            compareDepth
+            shadowDepth - cascadeBias,
+            texSize,
+            oneOverTextureSize
         );
-        let s0 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV, -stepUV), 0u, compareDepth);
-        let s1 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV, -stepUV), 0u, compareDepth);
-        let s2 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>(-stepUV,  stepUV), 0u, compareDepth);
-        let s3 = textureSampleCompareLevel(directionalShadowMap, directionalShadowMapSampler, tUV + vec2<f32>( stepUV,  stepUV), 0u, compareDepth);
-        finalVis = centerSample * 0.28 + (s0 + s1 + s2 + s3) * 0.18;
     } else {
         finalVis = textureSampleCompareLevel(
             directionalShadowMap,
@@ -113,7 +159,6 @@ fn getDirectionalShadowVisibilityFoliage(
     }
 
     // 6. 캐스케이드 전환 블렌딩 (Cascade Transition Blending)
-    // 🚀 Cascade 0 -> 1 등 경계선 구간에서 하드 컷 직선을 완전히 소거하고 부드럽게 크로스페이드
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let safePrevIndex = max(1u, cascadeIndex) - 1u;
