@@ -249,7 +249,7 @@ const manualSidebarConfigs = languages.map(lang => ({
     useFolderLinkFromIndexFile: true,
     sortMenusByFrontmatterOrder: true,
         // 폴더 및 파일 정렬 순서 지정
-    manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'plugins', 'inspector']
+    manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'landscape', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'plugins', 'inspector']
     }));
 
 // [Group 2] API 문서 사이드바 설정 (API Reference)
@@ -279,7 +279,7 @@ const finalSidebar = sortSidebar(rawSidebarConfig);
 export default withMermaid(defineConfig({
     title: 'RedGPU',
     description: 'RedGPU - WebGPU based 3D Graphics Engine',
-    base: process.env.NODE_ENV === 'production' ? '/RedGPU/manual/' : '/',
+    base: '/RedGPU/manual/',
     ignoreDeadLinks: true,
     lastUpdated: true,
 

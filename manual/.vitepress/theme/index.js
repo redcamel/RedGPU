@@ -30,6 +30,7 @@ export default {
 
         onMounted(() => {
             setupOutlineToggle();
+            fixExamplesLinks();
         });
 
         const fixBreadcrumbs = () => {
@@ -62,7 +63,21 @@ export default {
         };
 
         // 경로가 바뀔 때마다 실행
+        const fixExamplesLinks = () => {
+            if (typeof window === 'undefined') return;
+            nextTick(() => {
+                const links = document.querySelectorAll('a[href^="https://redcamel.github.io/RedGPU/examples/"]');
+                links.forEach(link => {
+                    const href = link.getAttribute('href');
+                    if (href) {
+                        link.setAttribute('href', href.replace('https://redcamel.github.io/RedGPU/examples/', '/RedGPU/examples/'));
+                    }
+                });
+            });
+        };
+
         watch(() => route.path, () => {
+            fixExamplesLinks();
             // api 폴더 하위일 때만 작동하도록 조건부 실행 가능
             if (route.path.includes('/api/')) {
                 fixBreadcrumbs();
