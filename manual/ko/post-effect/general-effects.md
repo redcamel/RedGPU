@@ -5,128 +5,43 @@ order: 2
 
 # 일반 이펙트
 
-방사형 블러, 그레이스케일 등 RedGPU가 제공하는 다양한 표준 효과들을 관리합니다.
-
-::: tip [학습 가이드]
-기술적으로 톤 매핑은 전체 후처리 과정의 가장 첫 번째 단계에서 실행되지만, 이 장에서는 시각적인 변화를 가장 직관적으로 체감할 수 있는 **일반 이펙트** 를 먼저 다룹니다.
-:::
+가우시안 블러, 색조 보정, 피사계 심도 (DoF), 안개 등 `RedGPU.PostEffect` 네임스페이스가 제공하는 다양한 표준 후처리 효과들을 관리합니다.
 
 ## 1. 사용 방법
 
-이펙트 객체를 생성한 후 `view.postEffectManager.addEffect()` 를 통해 등록합니다. 등록된 순서대로 파이프라인 체인이 형성됩니다.
+이펙트 인스턴스를 생성한 후 `view.postEffectManager.addEffect()`를 통해 등록합니다. 여러 개의 이펙트를 추가하면 등록된 순서대로 파이프라인 체인이 형성됩니다.
 
 ```javascript
-const radialBlur = new RedGPU.PostEffect.RadialBlur(redGPUContext);
-view.postEffectManager.addEffect(radialBlur);
+// 1. 이펙트 생성 및 추가
+const gaussianBlur = new RedGPU.PostEffect.GaussianBlur(redGPUContext);
+view.postEffectManager.addEffect(gaussianBlur);
+
+// 2. 특정 이펙트 제거 또는 전체 초기화
+view.postEffectManager.removeEffect(gaussianBlur);
+view.postEffectManager.removeAllEffect();
 ```
 
 ## 2. 주요 이펙트 예시
 
-### 2.1 방사형 블러 (Radial Blur)
-중심점에서 바깥쪽으로 퍼져나가는 속도감이나 집중 효과를 연출합니다.
+### 2.1 가우시안 블러 (GaussianBlur)
 
-<ClientOnly>
-<CodePen title="RedGPU PostEffect - RadialBlur" slugHash="posteffect-radialblur">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+화면을 부드럽게 흐리게 처리하는 가장 대표적인 블러 효과입니다.
 
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    const ibl = new RedGPU.Resource.IBL(
-        redGPUContext, 
-        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
-    );
-
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf',
-        (result) => { scene.addChild(result.resultMesh); }
-    );
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.ibl = ibl;
-    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-    redGPUContext.addView(view);
-
-    const radialBlur = new RedGPU.PostEffect.RadialBlur(redGPUContext);
-    radialBlur.blur = 0.1;
-    view.postEffectManager.addEffect(radialBlur);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-</pre>
-</CodePen>
-</ClientOnly>
+<iframe src="/RedGPU/examples/postEffect/blur/gaussianBlur/" style="width:100%; height:500px;"></iframe>
 
 ### 2.2 그레이스케일 (Grayscale)
 
-이미지를 흑백으로 변환하여 고전적인 분위기를 연출합니다.
+화면의 채도를 제거하여 흑백 이미지로 변환합니다.
 
-<ClientOnly>
-<CodePen title="RedGPU PostEffect - Grayscale" slugHash="posteffect-grayscale">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    const ibl = new RedGPU.Resource.IBL(
-        redGPUContext, 
-        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
-    );
-
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/DamagedHelmet/glTF/DamagedHelmet.gltf',
-        (result) => { scene.addChild(result.resultMesh); }
-    );
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.ibl = ibl;
-    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-    
-    redGPUContext.addView(view);
-
-    // 흑백 효과 추가
-    const grayscale = new RedGPU.PostEffect.Grayscale(redGPUContext);
-    view.postEffectManager.addEffect(grayscale);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-</pre>
-</CodePen>
-</ClientOnly>
+<iframe src="/RedGPU/examples/postEffect/adjustments/grayscale/" style="width:100%; height:500px;"></iframe>
 
 ## 3. 전체 지원 목록
 
-RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트는 `RedGPU.PostEffect` 네임스페이스 하위에 위치합니다.
+모든 일반 이펙트는 `RedGPU.PostEffect` 네임스페이스 하위에 위치합니다.
 
 | 카테고리             | 클래스 명              | 설명                                           |
 |:---------------------|:-----------------------|:-----------------------------------------------|
-| **`Blur`**           | `Blur`, `GaussianBlur` | 가우시안 블러 (가장 일반적인 흐림 효과)        |
+| **Blur**             | `Blur`, `GaussianBlur` | 가우시안 블러 (가장 일반적인 흐림 효과)        |
 |                      | `BlurX`, `BlurY`       | 단방향(가로/세로) 블러                         |
 |                      | `DirectionalBlur`      | 지정된 각도 방향으로 흐려지는 효과             |
 |                      | `RadialBlur`           | 중심에서 바깥쪽으로 원형으로 흐려지는 효과     |
@@ -139,7 +54,7 @@ RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트
 |                      | `Grayscale`            | 흑백 이미지로 변환                             |
 |                      | `Invert`               | 색상 반전                                      |
 |                      | `Threshold`            | 임계값을 기준으로 이진화                       |
-| **Lens**             | `OldBloom`             | 클래식한 빛 번짐 효과                          |
+| **Lens**             | `OldBloom`             | 클래식한 빛 번짐 효과 (HDR 단계에서 동작)      |
 |                      | `DOF`                  | 피사계 심도 (초점 외 영역 블러)                |
 |                      | `Vignetting`           | 화면 외곽을 어둡게 처리하는 효과               |
 |                      | `ChromaticAberration`  | 렌즈의 색수차 현상 재현                        |
@@ -150,11 +65,7 @@ RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트
 |                      | `Sharpen`              | 선명도 강조                                    |
 |                      | `Convolution`          | 커널 기반 필터 (Sharpen, Edge, Emboss 등 지원) |
 
-::: info [라이브 확인]
-위의 모든 이펙트들은 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)의 **PostEffect**
-카테고리에서 실시간 데모로 확인하실 수 있습니다.
-:::
-
+---
 
 ## 관련 예제
 

@@ -64,142 +64,16 @@ mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
 | **`time`**                                  | `number`  | 이벤트가 발생한 시간(ms)입니다.                       |
 | **`altKey`**, **`ctrlKey`**, **`shiftKey`** | `boolean` | 이벤트 발생 시 조합 키의 눌림 상태입니다.             |
 
-### 1.4 실습 예제: 인터렉티브 큐브
+### 1.4 실습 예제: 마우스 피킹 및 정밀 레이캐스팅
 
-마우스 오버 시 크기가 변하고, 클릭 시 색상이 바뀌며, 이동 시 좌표를 확인할 수 있는 인터렉티브 예제입니다.
+복잡한 3D 지오메트리 위에서 마우스를 움직여 삼각형 단위의 정밀 교차 지점 (`point`, `localPoint`, `faceIndex`, `uv`)이 검출되는 과정을 확인해 보세요.
 
-<ClientOnly>
-<CodePen title="RedGPU - Interaction Example" slugHash="interaction-basic">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById("redgpu-canvas");
-
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    const { PICKING_EVENT_TYPE } = RedGPU.Picking;
-
-    // 1. 기본 큐브 생성
-    const geometry = new RedGPU.Primitive.Box(redGPUContext);
-    const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#00CC99');
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    scene.addChild(mesh);
-
-    // 2. 상태 표시를 위한 HTML UI 생성 (하단 좌측)
-    const statusOverlay = document.createElement('div');
-    Object.assign(statusOverlay.style, {
-        position: 'fixed',
-        bottom: '20px',
-        left: '20px',
-        padding: '12px 16px',
-        background: 'rgba(0, 0, 0, 0.85)',
-        color: 'white',
-        borderRadius: '8px',
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        textAlign: 'left',
-        pointerEvents: 'none',
-        border: '1px solid #444',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-        minWidth: '240px'
-    });
-    
-    statusOverlay.innerHTML = `
-        <div id="event-type" style="color: #00CC99; font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #444; padding-bottom: 4px;">Ready to Interact</div>
-        <div style="display: grid; grid-template-columns: 80px 1fr; gap: 4px;">
-            <div style="color: #888;">Canvas:</div><div id="canvas-pos">-</div>
-            <div style="color: #888; border-top: 1px solid #222; padding-top: 4px;">World:</div><div id="world-pos" style="border-top: 1px solid #222; padding-top: 4px;">-</div>
-            <div style="color: #888;">Local:</div><div id="local-pos">-</div>
-            <div style="color: #888; border-top: 1px solid #222; padding-top: 4px;">UV:</div><div id="uv-pos" style="border-top: 1px solid #222; padding-top: 4px;">-</div>
-            <div style="color: #888;">Distance:</div><div id="distance">-</div>
-            <div style="color: #888;">FaceIdx:</div><div id="face-index">-</div>
-        </div>
-    `;
-    document.body.appendChild(statusOverlay);
-
-    const typeEl = statusOverlay.querySelector('#event-type');
-    const updateUI = (e) => {
-        typeEl.innerText = `Event: ${e.type.toUpperCase()}`;
-     
-        statusOverlay.querySelector('#world-pos').innerText = `${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}`;
-        statusOverlay.querySelector('#local-pos').innerText = `${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}`;
-        statusOverlay.querySelector('#uv-pos').innerText = `${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}`;
-        statusOverlay.querySelector('#distance').innerText = e.distance.toFixed(3);
-        statusOverlay.querySelector('#face-index').innerText = e.faceIndex;
-    };
-
-    // 3. 이벤트 리스너 등록
-    
-    // [CLICK] 클릭 시 랜덤 색상 변경 및 회전
-    mesh.addListener(PICKING_EVENT_TYPE.CLICK, (e) => {
-        const r = Math.floor(Math.random() * 255);
-        const g = Math.floor(Math.random() * 255);
-        const b = Math.floor(Math.random() * 255);
-        e.target.material.color.setColorByRGB(r, g, b);
-        
-        
-        updateUI(e);
-        typeEl.style.color = '#ffcc00';
-    });
-
-    // [DOWN] 마우스 버튼을 눌렀을 때
-    mesh.addListener(PICKING_EVENT_TYPE.DOWN, (e) => {
-        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 0.9;
-        updateUI(e);
-        typeEl.style.color = '#ff4444';
-    });
-
-    // [MOVE] 객체 위에서 마우스 이동 시 좌표 표시
-    mesh.addListener(PICKING_EVENT_TYPE.MOVE, (e) => {
-        updateUI(e);
-    });
-
-    // [OVER] 마우스 오버 시
-    mesh.addListener(PICKING_EVENT_TYPE.OVER, (e) => {
-        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.2;
-        document.body.style.cursor = 'pointer';
-        updateUI(e);
-        typeEl.style.color = '#00CC99';
-    });
-
-    // [OUT] 마우스 아웃 시
-    mesh.addListener(PICKING_EVENT_TYPE.OUT, (e) => {
-        e.target.scaleX = e.target.scaleY = e.target.scaleZ = 1.0;
-        document.body.style.cursor = 'default';
-        updateUI(e); // 마우스 아웃 시 UI 업데이트 (대시 표시)
-        typeEl.innerText = 'Event: MOUSE_OUT';
-        typeEl.style.color = '#ffffff';
-    });
-
-    // 4. 카메라 및 뷰 설정
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 5;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    redGPUContext.addView(view);
-
-    // 5. 렌더링 시작
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-</pre>
-</CodePen>
-</ClientOnly>
+<iframe src="/RedGPU/examples/3d/interaction/mouseEvent/raycasting/" style="width:100%; height:500px;"></iframe>
 
 ## 2. 키보드 인터렉션 (keyboardKeyBuffer)
 
-객체 피킹 외에도, `redGPUContext.keyboardKeyBuffer`를 통해 키보드의 실시간 눌림 상태를 확인할 수 있습니다. 이는 캐릭터 이동, 카메라 컨트롤 등 매 프레임마다 키 상태를 체크해야 하는
-로직에 매우 유용합니다.
-
-### 2.1 기본 사용법
-
-`keyboardKeyBuffer`는 현재 눌려있는 키의 이름을 키 (Key)로, 눌림 여부를 값 (Value)으로 가지는 객체입니다.
+객체 피킹 외에도, `redGPUContext.keyboardKeyBuffer`를 통해 키보드의 실시간 눌림 상태를 확인할 수 있습니다. 이는 캐릭터 이동이나 카메라 컨트롤처럼 매 프레임마다 키 입력 상태를 체크해야
+하는 로직에 유용합니다.
 
 ```javascript
 RedGPU.init(canvas, (redGPUContext) => {
@@ -220,20 +94,22 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-### 2.2 주요 특징
-
-- **실시간 상태 관리**: 별도의 `keydown`, `keyup` 리스너를 직접 관리할 필요 없이 `redGPUContext`에서 통합 관리됩니다.
-- **대소문자 구분**: `e.key` 값을 그대로 사용하므로 대소문자를 구분합니다. 보편적인 입력을 위해서는 `'w'`와 `'W'`를 모두 체크하는 것이 좋습니다.
-- **조합 키 지원**: `Shift`, `Control`, `Alt` 등의 특수 키 상태도 동일하게 확인할 수 있습니다.
+> [!TIP]
+> `keyboardKeyBuffer`는 브라우저 표준 `KeyboardEvent.key` 값을 키 (Key)로 사용합니다 (`'w'`, `'W'`, `' '`, `'ArrowUp'`, `'Shift'` 등).
 
 ---
 
 ## 관련 예제
 
-- **마우스 및
-  터치**: [일반 메시](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [스프라이트 3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [스프라이트 시트 3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [텍스트 필드 3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [고정밀 레이캐스팅](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
--
-**키보드**: [3D 키보드 인터랙션](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D 키보드 인터랙션](/RedGPU/examples/2d/interaction/keyboardEvent/)
+- **마우스 및 터치**
+    - [일반 메시](/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
+    - [스프라이트 3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+    - [스프라이트 시트 3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
+    - [텍스트 필드 3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
+    - [고정밀 레이캐스팅](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
+- **키보드**
+    - [3D 키보드 인터랙션](/RedGPU/examples/3d/interaction/keyboardEvent/)
+    - [2D 키보드 인터랙션](/RedGPU/examples/2d/interaction/keyboardEvent/)
 
 ---
 
