@@ -3,115 +3,75 @@ title: Camera Controller
 order: 5
 ---
 
+<script setup>
+const controllerGraph = `
+    graph LR
+        Input["User Input (Mouse · Touch · Keyboard)"]
+        Controller["Controller (Orbit / Free / Follow / Isometric)"]
+        Camera["Built-in Camera (Updates View · Projection Matrix)"]
+        View["View3D (Screen Rendering)"]
+
+        Input -->|Detects Events| Controller
+        Controller -->|Real-time Control| Camera
+        Controller -.->|Registered Directly to View| View
+
+        %% Grayscale styles applied
+        style Input fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style Controller fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style Camera fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+`
+</script>
+
 # Camera Controller
 
-A **Controller** is an interaction module that detects mouse, touch, and keyboard inputs to control camera viewpoints or
-3D character movement and jumping in real time.
+If `Camera` learned earlier is the 'eye', **Controller** is the 'joystick' that moves that eye. It is an **Interaction
+Module** that detects user input (mouse, touch, keyboard) to control the camera's position and rotation in real time,
+enabling intuitive 3D navigation without complex matrix calculations.
 
----
+## 1. Architecture and Role
 
-## 1. Controller Types
+<ClientOnly>
+  <MermaidResponsive :definition="controllerGraph" />
+</ClientOnly>
 
-RedGPU provides 4 standard camera controllers and a 3rd-person character controller tailored for different interaction
-scenarios.
+RedGPU provides four standard controllers (`AController`) tailored to different interaction scenarios:
 
-| Class                           | Namespace       | Control Method                                            | Primary Usage                                                                                    |
-|:--------------------------------|:----------------|:----------------------------------------------------------|:-------------------------------------------------------------------------------------------------|
-| **`OrbitController`**           | `RedGPU.Camera` | **Left Click**: Rotate / **Wheel**: Zoom                  | Product 360 viewer, character inspection, target-centered exploration                            |
-| **`FollowController`**          | `RedGPU.Camera` | Automatic target mesh tracking (interpolated)             | 3rd-person (TPS) camera, moving object tracking                                                  |
-| **`FreeController`**            | `RedGPU.Camera` | **W, A, S, D**: Move / **Mouse**: Rotate                  | 1st-person (FPS) view, architectural walkthroughs, open-world debugging                          |
-| **`IsometricController`**       | `RedGPU.Camera` | Maintains a fixed isometric angle                         | Real-time strategy (RTS) games, isometric views                                                  |
-| **`SimpleCharacterController`** | `RedGPU.Camera` | **W, A, S, D**: Move / **Space**: Jump / **Mouse**: Orbit | 3rd-person character locomotion, jump/gravity physics, and terrain (`Landscape`) height snapping |
+| Class                     | Control Method                                        | Primary Use Case                                                              |
+|:--------------------------|:------------------------------------------------------|:------------------------------------------------------------------------------|
+| **`OrbitController`**     | **Left-Click**: Rotate / **Wheel**: Zoom              | 360-degree product viewers, character inspection, target-centered exploration |
+| **`FollowController`**    | Automatic target mesh tracking (smooth interpolation) | Third-person (TPS) games, moving character tracking cameras                   |
+| **`FreeController`**      | **W, A, S, D**: Move / **Mouse**: Look around         | First-person (FPS) viewpoints, architectural interior tours, world debugging  |
+| **`IsometricController`** | Maintains a fixed isometric angle                     | Real-time strategy (RTS) games, isometric views                               |
 
-> [!TIP]
-> All controller classes internally instantiate and own a dedicated `Camera` instance. You do not need to create a
-separate camera—simply pass the controller directly into the camera argument of
+::: tip [Camera Instance Management]
+Every controller class automatically creates and owns a dedicated internal `Camera` instance. Therefore, when using a
+controller, you do not need to create a separate camera—simply pass the controller directly to the camera parameter of
 `new RedGPU.Display.View3D(redGPUContext, scene, controller)`.
+:::
 
 ---
 
-## 2. OrbitController Configuration
+## 2. Try Out Controller Samples
 
-Below are the key control properties of the most commonly used `OrbitController`.
-
-| Property                              | Default       | Description                                                               |
-|:--------------------------------------|:--------------|:--------------------------------------------------------------------------|
-| **`centerX`, `centerY`, `centerZ`**   | `0`           | World coordinates of the center target around which the camera orbits     |
-| **`distance`**                        | `15`          | Zoom distance of the camera from the center target                        |
-| **`minDistance` / `maxDistance`**     | `1` / `10000` | Minimum and maximum zoom distance limits via mouse wheel or pinch-to-zoom |
-| **`pan` / `tilt`**                    | `0` / `-35`   | Horizontal rotation angle (`pan`) and vertical rotation angle (`tilt`)    |
-| **`minTilt` / `maxTilt`**             | `-90` / `90`  | Minimum and maximum vertical rotation angle limits                        |
-| **`speedRotation` / `speedDistance`** | `3` / `2`     | Sensitivity multipliers for drag rotation and scroll wheel zoom           |
-
-```javascript
-const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-
-controller.centerY = 2;
-controller.distance = 10;
-controller.minDistance = 2;
-controller.maxDistance = 30;
-controller.minTilt = -60;
-controller.maxTilt = 60;
-```
-
----
-
-## 3. 3rd-Person Character Controller and Terrain Snapping
-
-`RedGPU.Camera.SimpleCharacterController` combines keyboard locomotion, jump/gravity physics, and a 3rd-person orbit
-camera around a target mesh (`targetMesh`). By passing a `landscape.getHeightAt(x, z)` callback to
-`update(dt, getGroundHeight)`, the character walks and jumps seamlessly along uneven open-world terrain surfaces.
-
-| Property / Method                 | Default         | Description                                                                                                          |
-|:----------------------------------|:----------------|:---------------------------------------------------------------------------------------------------------------------|
-| **`moveSpeed`**                   | `8.0`           | Base character movement speed (world units/sec)                                                                      |
-| **`jumpForce` / `gravity`**       | `8.5` / `-24.0` | Initial vertical velocity on jump (`Space`) and gravity acceleration                                                 |
-| **`distance` / `heightOffset`**   | `6.0` / `1.5`   | Camera distance from the character and vertical look-at offset                                                       |
-| **`groundHeight`**                | `0.0`           | Fallback ground plane Y height when no terrain callback is provided                                                  |
-| **`isMoving` / `isGrounded`**     | Read-only       | Whether the character is currently moving or touching the ground (used for animation state transitions)              |
-| **`update(dt, getGroundHeight)`** | `Method`        | Updates character locomotion, gravity, camera transform, and terrain height (`(x, z) => number`) snapping each frame |
-
-```javascript
-// 1. Create a SimpleCharacterController targeting the character mesh and bind to View3D
-const charController = new RedGPU.Camera.SimpleCharacterController(redGPUContext, characterMesh);
-charController.moveSpeed = 10;
-charController.distance = 8;
-charController.heightOffset = 1.8;
-
-const view = new RedGPU.Display.View3D(redGPUContext, scene, charController);
-redGPUContext.addView(view);
-
-// 2. Update character movement and snap to terrain (Landscape) elevation each frame
-let lastTime = performance.now();
-renderer.start(redGPUContext, (time) => {
-    const dt = (time - lastTime) * 0.001;
-    lastTime = time;
-
-    charController.update(dt, (x, z) => landscape.getHeightAt(x, z));
-});
-```
-
----
-
-## 4. Experience Controller Samples
+Experience the live behavior of each controller directly in the interactive previews below.
 
 ### OrbitController
 
-Optimized for observing while rotating around a specific target.
+Optimized for rotating around and inspecting a specific target.
 <iframe src="/RedGPU/examples/3d/controller/orbitController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FreeController
 
-Explore space freely from a first-person perspective using the **W, A, S, D** keys and the mouse.
+Freely explore 3D space from a first-person perspective using the **W, A, S, D** keys and mouse.
 <iframe src="/RedGPU/examples/3d/controller/freeController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### IsometricController
 
-Suitable for strategy simulations or infographics by maintaining a fixed angle.
+Maintains a fixed viewing angle suitable for strategy simulations or infographics.
 <iframe src="/RedGPU/examples/3d/controller/isometricController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
 ### FollowController
-
 Provides a viewpoint that smoothly follows characters or moving objects.
 <iframe src="/RedGPU/examples/3d/controller/followController/" style="width:100%; height:400px; border:none; border-radius:8px;"></iframe>
 
@@ -127,6 +87,10 @@ Provides a viewpoint that smoothly follows characters or moving objects.
 ---
 
 ## Next Steps
+
+Now that you have learned how to set up viewports and control camera viewpoints, the next **Basic Objects** section
+covers how to create and manipulate 3D objects using `Mesh` (combining geometry and materials), hierarchical `Group3D`
+structures, and image `Texture` mapping.
 
 - **[Basic Objects Overview](../basic-objects/index.md)**: Composing 3D objects using `Mesh`, `Scene Graph`, and
   `Texture`

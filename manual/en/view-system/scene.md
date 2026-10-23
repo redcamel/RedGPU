@@ -34,28 +34,31 @@ const sceneGraph = `
 
 # Scene
 
-`Scene` is the **root container** (`Object3DContainer`) of the **Scene Graph** that centrally manages all 3D display
-objects (`Mesh`, `Group3D`, etc.), lighting, shadows, natural environments, and physics engines placed in 3D space.
+If `View3D` is the 'window' that displays a view, `Scene` is the 'stage' unfolding beyond that window. It serves as the
+**root container** (`Object3DContainer`) of the **Scene Graph** that centrally manages all 3D display objects (`Mesh`,
+`Group3D`, etc.), lighting, shadows, natural environments, and physics engines placed in 3D space.
 
-A `Scene` instance provides the following core capabilities:
+## 1. Architecture and Role
 
-- **3D Object Hierarchy Management**: Organizes 3D objects to render in a tree hierarchy (`children`) via
-  `addChild(child)` and `removeChild(child)`.
-- **Integrated Lighting & Shadow Control**: Owns `lightManager` and `shadowManager` by default to control scene-wide
-  light sources and shadow quality.
-- **Terrain, Water, Wind & Physics Integration**: Binds open-world terrain (`landscape`), water bodies (`addWater`),
-  global wind (`windManager`), and physics engines (`physicsEngine`) per scene.
-
----
-
-## 1. Architecture and Basic Usage
-
-Created 3D objects must be registered via `scene.addChild()` to be rendered, and light sources are added through
-`scene.lightManager`.
+Beyond acting as a simple container, `Scene` performs the following core roles:
 
 <ClientOnly>
   <MermaidResponsive :definition="sceneGraph" />
 </ClientOnly>
+
+- **3D Object Hierarchy Management**: Manages parent-child tree structures (`children`) of 3D objects to render via
+  `addChild(child)` and `removeChild(child)`.
+- **Integrated Lighting & Shadow Control**: Centrally manages scene-wide light sources and shadow quality through the
+  built-in `lightManager` and `shadowManager`.
+- **Natural Environment & Simulation Integration**: Binds and controls open-world terrain (`landscape`), water bodies
+  (`addWater`), global wind (`windManager`), and physics engines (`physicsEngine`) per scene.
+
+---
+
+## 2. Basic Usage
+
+The fundamental role of `Scene` is to hold the 3D objects and lights to be rendered. Created 3D objects must be added
+via `scene.addChild()` to appear on screen, and light sources are registered through `scene.lightManager`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -142,7 +145,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
-## 2. Custom Scene Background Color
+## 3. Custom Scene Background Color
 
 By default, viewports use `redGPUContext.backgroundColor`. Enabling `scene.useBackgroundColor = true` applies an
 independent background color (`ColorRGBA`) specific to that `Scene`.
@@ -154,7 +157,7 @@ scene.backgroundColor.setColorByHEX('#1a1a2e');
 
 ---
 
-## 3. Sharing a Scene Across Views
+## 4. Sharing a Scene Across Views
 
 Connecting a single `Scene` instance to multiple `View3D` instances renders the same 3D space simultaneously from
 different camera viewpoints.
@@ -177,4 +180,7 @@ const subView = new RedGPU.Display.View3D(redGPUContext, sharedScene, subCamera)
 
 ## Next Steps
 
-- **[Camera](./camera.md)**: Projecting 3D space onto a 2D screen and configuring physical camera exposure
+Now that the `Scene` (stage) is ready, we need to define the **viewpoint** looking at that stage. Let's explore
+`Camera`, which projects 3D space onto a 2D screen.
+
+- **[Camera](./camera.md)**: Projecting 3D space onto a 2D screen and controlling camera viewpoints

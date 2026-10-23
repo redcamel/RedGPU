@@ -21,27 +21,16 @@ const contextLifeCycle = `
 
 # RedGPUContext
 
-`RedGPUContext` 는 WebGPU 디바이스·어댑터 초기화, 캔버스 해상도 제어, `View3D` 컨테이너 및 엔진 핵심 매니저들을 통합 관리하는 최상위 컨텍스트 객체입니다.
-
-```javascript
-RedGPU.init(
-    canvas,
-    (redGPUContext) => {
-      // RedGPU.init() 초기화 성공 시 redGPUContext 인스턴스가 전달됩니다.
-    },
-        (error) => {
-          console.error('RedGPU 초기화 실패:', error);
-    }
-);
-```
+`RedGPUContext` 는 RedGPU 엔진이 동작하는 기반이 되는 최상위 컨텍스트 객체입니다. 복잡한 WebGPU 초기화 과정을 대신 처리하며, 디바이스, 어댑터, 캔버스, 리소스 및 렌더링에 필요한 다양한
+매니저 객체들을 관리하는 중심 역할을 수행합니다.
 
 > [!WARNING]
 > `RedGPUContext` 는 `RedGPU.init()` 호출을 통해 내부적으로 자동 생성됩니다.<br/>
-> 개발자가 직접 `new` 키워드로 인스턴스를 생성하면 안 됩니다.
+> 개발자가 직접 `new` 키워드를 사용하여 인스턴스를 생성하면 안 됩니다.
 
 ---
 
-## 1. 초기화 프로세스
+## 1. 아키텍처 및 역할
 
 `RedGPU.init()` 함수를 호출하여 WebGPU 어댑터와 디바이스를 비동기로 초기화하고 `RedGPUContext` 인스턴스를 획득합니다.
 
@@ -49,78 +38,87 @@ RedGPU.init(
   <MermaidResponsive :definition="contextLifeCycle" />
 </ClientOnly>
 
----
+`RedGPUContext` 는 엔진의 전반적인 상태를 관리하며 다음과 같은 핵심 역할을 수행합니다:
 
-## 2. 뷰 등록과 관리
-
-`RedGPUContext` 는 화면에 렌더링할 `View3D`(`View2D` 포함) 목록을 관리하는 컨테이너 (`RedGPUContextViewContainer`)입니다. 등록된 뷰들은 인덱스 순서대로
-렌더링되며, 다중 뷰를 등록해 화면 분할이나 PIP (Picture-in-Picture), UI 오버레이를 구성할 수 있습니다.
-
-- **`addView(view)` / `removeView(view)`**: 렌더링할 뷰를 등록하거나 제거합니다.
-- **`viewList` / `numViews`**: 현재 등록된 뷰 배열 (`View3D[]`)과 개수를 조회합니다.
-
-> 특정 인덱스 삽입 (`addViewAt`), 렌더링 순서 변경 (`setViewIndex`, `swapViews`) 등 전체 컨테이너 제어 메서드는 `RedGPUContextViewContainer` API
-> 문서를 참고하세요.
+- **뷰 컨테이너 운용**: 화면에 렌더링할 `View3D`(`View2D` 포함) 목록을 관리하며 (`addView`, `removeView`), 다중 뷰를 통한 화면 분할이나 UI 오버레이 구성을 지원합니다.
+- **화면 크기 및 해상도 제어**: HTML `<canvas>` 크기 변화를 자동 감지 (`onResize`)하고, 렌더링 배율 (`renderScale`) 및 기본 배경색 (`backgroundColor`)을
+  제어합니다.
+- **내장 핵심 매니저 제공**: 안티앨리어싱 (`antialiasingManager`), GPU 리소스 캐싱 (`resourceManager`), 커맨드 인코딩 (`commandEncoderManager`),
+  하드웨어 환경 분석 (`detector`) 매니저를 기본 보유합니다.
+- **전역 입력 상태 버퍼링**: 실시간 키보드 눌림 상태를 저장하는 `keyboardKeyBuffer` 를 제공합니다.
 
 ---
 
-## 3. 화면 크기 및 해상도 제어
+## 2. 기본 초기화 사용법
 
-HTML 캔버스 요소의 레이아웃 크기 (CSS 픽셀) 변화를 감지하여 GPU 렌더링 해상도를 자동으로 갱신합니다.
+WebGPU 환경을 구축하기 위해 대상 `<canvas>` 요소와 성공·실패 콜백을 전달하여 `RedGPU.init()` 을 호출합니다.
 
-- **`width` / `height`** (`number | string`): 캔버스의 가로·세로 크기를 조회하거나 변경합니다 (`'100%'`, `'800px'`, `600` 등 지원).
-- **`setSize(width, height)`**: 가로·세로 크기를 한 번에 지정합니다.
-- **`renderScale`** (`number`, 기본값: `1`): 렌더링 해상도 배율입니다. 저사양·모바일 환경에서 성능 확보를 위해 `0.5 ~ 0.8` 등으로 낮출 수 있습니다.
-- **`screenRectObject`** (`IRedGPURectObject`): CSS 픽셀 기준 캔버스 영역 `{ x, y, width, height }`를 반환합니다.
-- **`pixelRectObject`** (`IRedGPURectObject`): `devicePixelRatio`와 `renderScale`이 반영된 실제 물리 픽셀 해상도
-  `{ x, y, width, height }`를 반환합니다.
+```javascript
+import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+
+const canvas = document.getElementById('redgpu-canvas');
+
+RedGPU.init(
+    canvas,
+    (redGPUContext) => {
+        // 초기화 성공 시 redGPUContext 인스턴스를 획득합니다.
+        console.log('RedGPUContext 준비 완료:', redGPUContext);
+
+        // 기본 배경색 지정
+        redGPUContext.backgroundColor.setColorByHEX('#000000');
+    },
+    (error) => {
+        // 초기화 실패 시 (WebGPU 미지원 환경 등) 처리
+        console.error('RedGPU 초기화 실패:', error);
+    }
+);
+```
+
+---
+
+## 3. 크기와 해상도 관리
+
+`RedGPUContext` 는 HTML 캔버스 요소의 화면 레이아웃 크기 (CSS 픽셀 단위) 변화를 감지하고 렌더링 해상도를 자동으로 최적화합니다.
+
+### 주요 스펙 및 메서드
+
+- **`width` / `height`** (`number | string`): 캔버스의 너비와 높이 값을 직접 변경하거나 가져올 수 있습니다. `'100%'`, `'800px'`, `600` 과 같은 형식을 모두
+  지원합니다.
+- **`setSize(width, height)`**: 가로/세로 크기를 한 번에 지정합니다.
+- **`renderScale`** (`number`): 화면의 렌더링 해상도 배율을 결정합니다. 기본값은 `1` 이며, 모바일 기기에서의 성능 최적화를 위해 해상도를 낮추고 싶다면 `0.5` 등으로 조절할 수
+  있습니다.
+- **`screenRectObject`** (`IRedGPURectObject`): CSS 픽셀 기준 캔버스의 영역 정보 `{ x, y, width, height }` 를 제공합니다.
+- **`pixelRectObject`** (`IRedGPURectObject`): 물리 픽셀 기준 캔버스의 실제 렌더 해상도 정보 `{ x, y, width, height }` 를 제공합니다.
 
 ### `onResize` 이벤트 콜백
 
-캔버스 크기가 변경될 때 호출되며, `RedResizeEvent<RedGPUContext>` 객체가 인자로 전달됩니다.
+캔버스 크기가 조절되거나 `setSize()` 가 호출되어 크기가 변경될 때, `onResize` 콜백을 등록하여 UI 레이아웃 재배치 등의 추가 연산을 수행할 수 있습니다. 매개변수로 전달되는 `event` 객체는
+`RedResizeEvent<RedGPUContext>` 인터페이스를 따릅니다.
 
 ```javascript
 redGPUContext.onResize = (event) => {
+    // event.target은 RedGPUContext 인스턴스를 가리킵니다.
     const { width, height } = event.screenRectObject; // CSS 픽셀 단위
     const { width: pWidth, height: pHeight } = event.pixelRectObject; // 물리 픽셀 단위
 
-  console.log(`CSS 크기: ${width}x${height}, 물리 해상도: ${pWidth}x${pHeight}`);
+    console.log(`CSS 크기: ${width}x${height}, 실제 물리 해상도: ${pWidth}x${pHeight}`);
 };
 ```
 
 ---
 
-## 4. 주요 속성 및 내장 매니저
+## 4. 컨텍스트 주입의 필요성
 
-`RedGPUContext` 가 기본 보유하는 설정 속성과 4대 핵심 매니저 및 WebGPU 네이티브 객체 목록입니다.
+RedGPU의 거의 모든 3D 객체 (메시, 지오메트리, 텍스처, 재질 등)는 생성자 첫 번째 인자로 `redGPUContext` 를 요구합니다.
 
-| 속성 / 메서드               | 타입                         | 설명                                                                               |
-|:----------------------------|:-----------------------------|:-----------------------------------------------------------------------------------|
-| **`backgroundColor`**       | `ColorRGBA`                  | 캔버스 기본 배경색 (기본값: `0, 0, 0, 1`)                                          |
-| **`alphaMode`**             | `GPUCanvasAlphaMode`         | 캔버스 알파 합성 모드 (`'premultiplied'` 또는 `'opaque'`)                          |
-| **`antialiasingManager`**   | `AntialiasingManager`        | 전역 안티앨리어싱(`useTAA`, `useMSAA`, `useFXAA`) 배타 제어 (읽기 전용)            |
-| **`resourceManager`**       | `ResourceManager`            | 텍스처·버퍼·셰이더 모듈·바인드 그룹 레이아웃 중앙 캐싱 및 메모리 추적 (읽기 전용)  |
-| **`commandEncoderManager`** | `CommandEncoderManager`      | 프레임 내 렌더/컴퓨트 패스 실행 순서 조율 및 GPU 큐 일괄 제출 (읽기 전용)          |
-| **`detector`**              | `RedGPUContextDetector`      | 모바일 여부(`isMobile`), OS, 브라우저 및 WebGPU 하드웨어 `limits` 분석 (읽기 전용) |
-| **`keyboardKeyBuffer`**     | `{ [key: string]: boolean }` | 현재 눌려 있는 키보드 키 상태를 저장하는 실시간 버퍼                               |
-| **`gpuDevice`**             | `GPUDevice`                  | WebGPU 논리 디바이스 객체 (읽기 전용)                                              |
-| **`gpuAdapter`**            | `GPUAdapter`                 | 물리 GPU 어댑터 정보 객체 (읽기 전용)                                              |
-| **`gpuContext`**            | `GPUCanvasContext`           | HTML 캔버스와 연결된 WebGPU 컨텍스트 (읽기 전용)                                   |
-| **`htmlCanvas`**            | `HTMLCanvasElement`          | 렌더링에 사용 중인 DOM `<canvas>` 요소 (읽기 전용)                                 |
-| **`destroy()`**             | `() => void`                 | 컨텍스트가 보유한 모든 GPU 리소스를 파기하고 디바이스를 해제합니다.                |
-
----
-
-## 5. 컨텍스트 주입의 필요성
-
-RedGPU의 모든 그래픽 리소스와 디스플레이 객체 (메시, 지오메트리, 재질, 텍스처 등)는 생성자 첫 번째 인자로 `redGPUContext` 를 전달받습니다. 이는 객체가 어느 `GPUDevice` 와
-`ResourceManager` 에 속해 GPU 메모리를 할당받을지 결정하는 기준이 되기 때문입니다.
+각 그래픽 객체는 GPU 메모리를 동적으로 할당받아야 하는데, 이때 **"어느 GPU 디바이스 (`gpuDevice`)와 리소스 매니저 (`resourceManager`)를 사용하여 리소스를 생성할 것인가"**에
+대한 연결 기준이 바로 `RedGPUContext` 가 되기 때문입니다.
 
 ```javascript
-// [O] 생성 시 첫 번째 인자로 redGPUContext 주입
+// [O] 올바른 방법: 생성 시 항상 첫 번째 인자로 컨텍스트를 주입합니다.
 const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 
-// [X] 컨텍스트 누락 시 에러 발생
+// [X] 잘못된 방법: 컨텍스트를 전달하지 않으면 에러가 발생합니다.
 // const material = new RedGPU.Material.ColorMaterial(); 
 ```
 
@@ -134,5 +132,8 @@ const material = new RedGPU.Material.ColorMaterial(redGPUContext);
 ---
 
 ## 다음 단계
+
+`RedGPUContext` 를 통해 엔진을 구동할 준비를 마쳤습니다. 이제 빈 캔버스 위에 **카메라**(`Camera`)를 배치하고, 물체를 담을 **공간**(`Scene`)을 정의하여 실제 3D 세계를 화면에
+그려내는 방법을 알아봅니다.
 
 - **[View System](../view-system/index.md)** : `View3D`, `Scene`, `Camera` 를 조합하여 화면에 3D 무대를 출력하는 방법

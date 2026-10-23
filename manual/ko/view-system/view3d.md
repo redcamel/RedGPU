@@ -56,8 +56,16 @@ const multiViewGraph = `
 
 # View3D
 
-`View3D` 는 `RedGPUContext` 내에서 렌더링이 수행되는 **화면 영역**(Viewport)을 정의하며, 장면 데이터 (`Scene`)와 시점 정보 (`Camera` 또는 `AController`)를
-결합하여 프레임을 생성하는 렌더링 단위입니다.
+**View System** 의 가장 핵심적인 '틀' 역할을 하는 `View3D` 는, `RedGPUContext` 내에서 실제로 렌더링이 수행되는 **화면 영역**(Viewport)을 정의하는 객체입니다. 장면
+데이터 (`Scene`)와 시점 정보 (`Camera`)를 하나로 묶어 최종 프레임을 생성하는 **렌더링 패스**(Render Pass) 역할을 수행합니다.
+
+## 1. 아키텍처 및 역할
+
+`View3D` 는 `Scene` 과 `Camera`(또는 컨트롤러)를 참조하며, `redGPUContext.addView(view)` 로 등록되어야 렌더링 루프에 포함됩니다.
+
+<ClientOnly>
+  <MermaidResponsive :definition="viewSystemGraph" />
+</ClientOnly>
 
 `View3D` 인스턴스는 다음과 같은 독립적인 설정과 기능을 가집니다:
 
@@ -68,13 +76,7 @@ const multiViewGraph = `
 
 ---
 
-## 1. 아키텍처 및 기본 사용법
-
-`View3D` 는 `Scene` 과 `Camera`(또는 컨트롤러)를 참조하며, `redGPUContext.addView(view)` 로 등록되어야 렌더링 루프에 포함됩니다.
-
-<ClientOnly>
-  <MermaidResponsive :definition="viewSystemGraph" />
-</ClientOnly>
+## 2. 기본 사용법
 
 ```javascript
 RedGPU.init(
@@ -132,36 +134,75 @@ const controller = new RedGPU.Camera.OrbitController (redGPUContext);
 
 ---
 
-## 2. 영역 설정 및 리사이즈 감지
+## 3. 크기와 해상도 관리
 
-뷰포트의 위치와 크기는 숫자 (`number`), 픽셀 (`'500px'`), 백분율 (`'100%'`) 단위로 제어할 수 있습니다.
+`View3D` 는 캔버스 내에서 자신이 차지할 영역과 렌더링 해상도를 결정합니다. 반응형 레이아웃 대응을 위해 CSS 픽셀 단위의 크기와 실제 GPU 렌더링 해상도를 분리하여 관리합니다.
 
-- **`x` / `y`** (`number | string`): 뷰포트의 좌측 상단 기준 X·Y 좌표를 조회하거나 설정합니다 (기본값: `0`).
-- **`width` / `height`** (`number | string`): 뷰포트의 가로·세로 크기를 조회하거나 설정합니다 (기본값: `'100%'`).
-- **`setPosition(x, y)` / `setSize(width, height)`**: 위치와 크기를 한 번에 변경합니다.
-- **`screenRectObject`** (`IRedGPURectObject`): CSS 픽셀 단위의 표시 영역 `{ x, y, width, height }`를 반환합니다.
-- **`pixelRectObject`** (`IRedGPURectObject`): `devicePixelRatio`와 `renderScale`이 반영된 실제 물리 픽셀 영역
-  `{ x, y, width, height }`를 반환합니다.
+### 영역 설정 (Size & Position)
+
+`setSize()` 와 `setPosition()` 메서드를 통해 뷰의 크기와 위치를 지정할 수 있습니다. 수치 (`number`), 퍼센트 (`%`), 그리고 픽셀 (`px`) 단위를 모두 지원합니다.
 
 ```javascript
-view.setSize('50%', '100%');
-view.setPosition('50%', 0);
+// 수치(Number) 또는 픽셀(px) 문자열 사용 가능
+view.setSize(500, 300);
+view.setSize('500px', '300px');
+
+// 퍼센트(%) 단위 사용 가능
+view.setSize('100%', '100%');
+
+// 위치 설정
+view.setPosition(10, 10);
+view.setPosition('10px', '10%');
 ```
 
-### `onResize` 이벤트 콜백
+::: tip [픽셀 단위 가이드]
+고해상도 디스플레이 (HiDPI/Retina) 대응을 위해 두 가지 좌표 객체를 제공합니다.
 
-뷰의 크기가 변경될 때 호출되며, `RedResizeEvent<View3D>` 객체 (`target`, `screenRectObject`, `pixelRectObject`)가 인자로 전달됩니다.
+* **`view.screenRectObject`**: CSS 픽셀 단위의 **표시 크기**(Layout Size)입니다. **UI 배치**나 **마우스 이벤트 좌표 계산** 시에 사용합니다.
+* **`view.pixelRectObject`**: `devicePixelRatio` 가 적용된 실제 **물리 해상도**(Physical Resolution)입니다. 내부적인 렌더링 계산에 사용됩니다.
+  :::
+
+### 뷰별 크기 변경 감지 (`onResize`)
+
+`redGPUContext.onResize` 가 전체 캔버스의 크기 변화를 감지한다면, 개별 `View3D` 객체의 `onResize` 콜백은 해당 뷰의 크기가 변경될 때마다 호출됩니다.
+
+뷰의 크기를 퍼센트 (`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()` 를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다. 이 콜백은 `RedResizeEvent`
+인터페이스 형식의 이벤트를 인자로 받습니다.
+
+#### `RedResizeEvent` 인터페이스 구조
+
+| 속성명                 | 타입                | 설명                                                                         |
+|:-----------------------|:--------------------|:-----------------------------------------------------------------------------|
+| **`target`**           | `T` (예: `View3D`)  | 이벤트가 발생한 대상 뷰 인스턴스                                             |
+| **`screenRectObject`** | `IRedGPURectObject` | CSS 픽셀 단위의 크기 및 위치 정보 (`{ x, y, width, height }`)                |
+| **`pixelRectObject`**  | `IRedGPURectObject` | `devicePixelRatio` 가 적용된 물리 픽셀 단위 정보 (`{ x, y, width, height }`) |
 
 ```javascript
+// 개별 뷰의 크기 변경 시 호출될 콜백 정의
 view.onResize = (event) => {
-    const {screenRectObject, pixelRectObject} = event;
-    console.log(`CSS 영역: ${screenRectObject.width}x${screenRectObject.height}, 물리 해상도: ${pixelRectObject.width}x${pixelRectObject.height}`);
+    const { target, screenRectObject, pixelRectObject } = event;
+    const { width, height } = screenRectObject;
+    console.log(`뷰 영역 변경: ${width}x${height} (물리 해상도: ${pixelRectObject.width}x${pixelRectObject.height})`);
+    
+    // 해당 뷰 내의 특정 UI 요소를 재배치하거나 카메라 설정을 조정합니다.
 };
 ```
 
 ---
 
-## 3. 멀티 뷰 시스템
+## 4. 디버깅 도구
+
+개발 중 객체의 상대적인 위치와 방향을 직관적으로 파악할 수 있도록 시각화 도구를 제공합니다.
+
+* **`grid`**: 3D 월드의 기본 평면 (**XZ** 축)에 격자를 렌더링합니다. 물체가 지면에 닿아 있는지 가늠하는 기준이 됩니다.
+* **`axis`**: 월드의 원점 (**0, 0, 0**)을 기준으로 **XYZ** 축을 색상별로 표시합니다.
+    * <span style="color:#ff3e3e;font-weight:bold">Red</span>: **X** 축 (Right)
+    * <span style="color:#3eff3e;font-weight:bold">Green</span>: **Y** 축 (Up)
+    * <span style="color:#3e3eff;font-weight:bold">Blue</span>: **Z** 축 (Depth)
+
+---
+
+## 5. 멀티 뷰 시스템
 
 단일 `RedGPUContext` 에 여러 `View3D` 를 등록하면 동일한 `Scene` 을 서로 다른 카메라 시점으로 동시에 렌더링 (화면 분할, 미니맵 PIP 등)할 수 있습니다.
 
@@ -274,5 +315,8 @@ RedGPU.init(
 ---
 
 ## 다음 단계
+
+`View3D` 를 통해 장면을 그려낼 '틀'을 준비했습니다. 이제 그 틀 안에 채워넣을 실제 **장면**(`Scene`)을 구성할 차례입니다. 메시와 조명이 배치되는 공간인 `Scene` 의 역할과 구성 방법을
+알아봅니다.
 
 - **[Scene](./scene.md)** : 3D 객체와 조명이 배치되는 `Scene` 의 구조와 설정 방법
