@@ -475,6 +475,90 @@ export default withMermaid(defineConfig({
                 }
                 return defaultLinkRender(tokens, idx, options, env, self);
             };
+
+            // API 심볼 자동 링크 맵 생성 (classes, interfaces, type-aliases 및 RedGPU.init)
+            const apiSymbolMap = new Map([
+                ['RedGPU.init', 'api/RedGPU-API/namespaces/RedGPU/functions/init.html'],
+                ['RedGPU.init()', 'api/RedGPU-API/namespaces/RedGPU/functions/init.html']
+            ]);
+            const apiRootDir = path.resolve(__dirname, '../ko/api/RedGPU-API');
+            if (fs.existsSync(apiRootDir)) {
+                const scanApiDir = (dir) => {
+                    for (const entry of fs.readdirSync(dir, {withFileTypes: true})) {
+                        const fullPath = path.join(dir, entry.name);
+                        if (entry.isDirectory()) {
+                            scanApiDir(fullPath);
+                        } else if (
+                            entry.isFile() &&
+                            entry.name.endsWith('.md') &&
+                            entry.name !== 'README.md' &&
+                            entry.name !== 'index.md'
+                        ) {
+                            const normalized = fullPath.replace(/\\/g, '/');
+                            if (
+                                normalized.includes('/classes/') ||
+                                normalized.includes('/interfaces/') ||
+                                normalized.includes('/type-aliases/')
+                            ) {
+                                const symbolName = path.basename(entry.name, '.md');
+                                const relApiPath = normalized
+                                    .slice(normalized.indexOf('api/RedGPU-API/'))
+                                    .replace(/\.md$/, '.html');
+                                if (!apiSymbolMap.has(symbolName)) {
+                                    apiSymbolMap.set(symbolName, relApiPath);
+                                }
+                            }
+                        }
+                    }
+                };
+                scanApiDir(apiRootDir);
+            }
+
+            // 인라인 백틱 코드(`ClassName`)를 해당 언어의 API 문서 링크로 자동 변환
+            md.core.ruler.push('auto_api_link', (state) => {
+                const relPath = (state.env?.relativePath || '').replace(/\\/g, '/');
+                if (!relPath || relPath.includes('api/RedGPU-API/')) return;
+
+                const langMatch = relPath.match(/^([a-z]{2})\//);
+                const lang = langMatch ? langMatch[1] : 'ko';
+
+                let inHeading = false;
+                for (const blockToken of state.tokens) {
+                    if (blockToken.type === 'heading_open') {
+                        inHeading = true;
+                        continue;
+                    }
+                    if (blockToken.type === 'heading_close') {
+                        inHeading = false;
+                        continue;
+                    }
+                    if (inHeading || blockToken.type !== 'inline' || !blockToken.children) continue;
+
+                    const newChildren = [];
+                    let linkDepth = 0;
+
+                    for (const child of blockToken.children) {
+                        if (child.type === 'link_open') linkDepth++;
+                        else if (child.type === 'link_close') linkDepth = Math.max(0, linkDepth - 1);
+
+                        if (linkDepth === 0 && child.type === 'code_inline') {
+                            const rawText = child.content.trim();
+                            const baseSymbol = rawText.replace(/(\[\]|<.*>)$/, '');
+                            const targetApiPath = apiSymbolMap.get(rawText) || apiSymbolMap.get(baseSymbol);
+
+                            if (targetApiPath) {
+                                const linkOpen = new state.Token('link_open', 'a', 1);
+                                linkOpen.attrs = [['href', `/${lang}/${targetApiPath}`]];
+                                const linkClose = new state.Token('link_close', 'a', -1);
+                                newChildren.push(linkOpen, child, linkClose);
+                                continue;
+                            }
+                        }
+                        newChildren.push(child);
+                    }
+                    blockToken.children = newChildren;
+                }
+            });
         }
     },
     async transformPageData(pageData) {

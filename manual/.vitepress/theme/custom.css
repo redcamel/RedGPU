@@ -50,6 +50,12 @@
     word-break: break-word;
 }
 
+.vp-doc th:first-child,
+.vp-doc td:first-child,
+.vp-doc td:first-child code {
+    white-space: nowrap;
+}
+
 @media (min-width: 1280px) {
     .VPDoc .container {
         display: flex;
