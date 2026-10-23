@@ -1,6 +1,6 @@
 ---
 title: Foliage & Impostors
-order: 3
+order: 5
 ---
 
 # Foliage & Impostors
@@ -86,4 +86,4 @@ new RedGPU.GLTFLoader(
 
 ---
 
-[Next Step: Learn Procedural Grass](./grass.md)
+[Next Step: Learn Water System](../water/index.md)

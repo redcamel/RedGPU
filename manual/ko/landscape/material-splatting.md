@@ -3,17 +3,24 @@ title: Multi-Layer Splatting
 order: 2
 ---
 
-# 다중 레이어 스플래팅
+# 다중 레이어 스플래팅 (Multi-Layer Splatting)
 
-`RedGPU.Landscape.LandscapeMaterial`과 `RedGPU.Landscape.LandscapeLayer`는 지형 표면 위에 최대 **8개의 PBR 레이어**를 가중치 맵
-(`weightTexture`)과 높이 블렌딩 (`heightBlendFactor`)에 따라 자연스럽게 합성하는 **다중 레이어 스플래팅**(Multi-Layer Splatting) 시스템을 제공합니다.
+`RedGPU.Landscape.LandscapeMaterial`과 `RedGPU.Landscape.LandscapeLayer`는 **단일 RGBA 가중치 맵 (`weightTexture`)의 4개 채널 (`R`,
+`G`, `B`, `A`)** 과 높이 블렌딩 (`heightBlendFactor`)을 기반으로 지형 표면 위에 최대 **8개의 PBR 레이어**를 합성하는 **다중 레이어 스플래팅**(Multi-Layer
+Splatting) 시스템을 제공합니다.
 
 ---
 
 ## 1. 스플래팅 레이어 등록 (`addLayer`)
 
 `landscape.addLayer(options)`를 호출하여 최대 8개의 `LandscapeLayer`를 등록합니다. 첫 번째 (0번) 레이어는 기본 바탕 (Base Fallback) 레이어를 겸하며, 각
-레이어는 `weightTexture`의 지정된 채널 (`'R' | 'G' | 'B' | 'A'`) 가중치에 따라 혼합됩니다.
+레이어는 공유 가중치 맵 (`weightTexture`)의 지정된 채널 (`'R' | 'G' | 'B' | 'A'`) 가중치에 따라 혼합됩니다.
+
+> [!IMPORTANT]
+> **PBR 레이어와 가중치 맵 (`weightTexture`) 지원 규격**
+> - **PBR 재질 레이어 (`LandscapeLayer`)**: 최대 **8개**까지 등록할 수 있습니다.
+> - **스플랫 가중치 맵 (`weightTexture`)**: 지형 전체에서 **단일 RGBA 텍스처 1장 (4개 채널: `'R'`, `'G'`, `'B'`, `'A'`)** 만 공유하여 지원합니다. (근거리
+    실시간 프래그먼트 셰이더 및 식생·잔디의 CPU 가중치 샘플러 모두 단일 가중치 맵의 RGBA 채널을 참조합니다.)
 
 - **`nearDetailDistance` 이내 (근거리)**: 고해상도 PBR 텍스처들과 스토캐스틱 타일링 (`stochasticTiling`)을 실시간 블렌딩합니다.
 - **`nearDetailDistance` 이후 (원거리)**: 타일 스트리밍 시점에 사전 베이킹된 가상 블렌드 텍스처 (VBT) 아틀라스에서 단일 샘플링하여 대역폭을 절감합니다.
@@ -67,7 +74,7 @@ const rockLayer = landscape.addLayer({
 | **텍스처 및 가중치** | **`baseColorTexture`**                    | `undefined`           | 베이스 컬러(Albedo) 텍스처 경로 또는 `BitmapTexture`                                 |
 |                      | **`normalTexture`**                       | `undefined`           | 탄젠트 공간 노멀 맵 경로 또는 `BitmapTexture`                                        |
 |                      | **`ormTexture`**                          | `undefined`           | Occlusion(R), Roughness(G), Metallic(B), Height(A) 패킹 텍스처                       |
-|                      | **`weightTexture`**                       | `undefined`           | 레이어 분포 가중치를 담은 스플랫 맵 텍스처                                           |
+|                      | **`weightTexture`**                       | `undefined`           | 레이어 분포 가중치를 담은 스플랫 맵 텍스처 (단일 RGBA 맵 공유)                       |
 |                      | **`weightChannel`**                       | `'R'`                 | `weightTexture`에서 참조할 채널 (`'R' \| 'G' \| 'B' \| 'A'` 또는 `0 ~ 3`)            |
 | **UV 및 타일링**     | **`uvScale`** / **`uvOffset`**            | `[20, 20]` / `[0, 0]` | 타일 대비 텍스처 UV 반복 배율 `[u, v]` 및 오프셋 `[u, v]`                            |
 |                      | **`nearUVScaleMultiplier`**               | `2.0`                 | 근접 디테일 영역에 적용되는 UV 스케일 배율                                           |
@@ -105,4 +112,4 @@ landscape.removeLayer('Rock');
 
 ---
 
-[다음 단계: 대규모 식생과 임포스터 배우기](./foliage.md)
+[다음 단계: 타일 스트리밍 배우기](./tile-streaming.md)

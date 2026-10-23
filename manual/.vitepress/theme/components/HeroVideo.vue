@@ -14,32 +14,38 @@ const topics = computed(() => {
   const prefix = localePrefix.value
   if (isKo.value) {
     return [
+      {title: '시작하기 (Getting Started)', desc: '엔진 도입 및 첫 3D 씬 구성', link: `${prefix}/introduction/`},
       {title: '컨텍스트 (Context)', desc: '초기화 및 전역 설정', link: `${prefix}/context/`},
-      {title: '뷰 시스템 (View)', desc: 'Scene · View3D · Camera', link: `${prefix}/view-system/`},
-      {title: '기본 객체 (Objects)', desc: 'Mesh · 씬 그래프 · 텍스처', link: `${prefix}/basic-objects/`},
+      {title: '뷰 시스템 (View System)', desc: 'Scene · View3D · Camera', link: `${prefix}/view-system/`},
+      {title: '기본 객체 (Basic Objects)', desc: 'Mesh · Geometry · Material · 텍스처', link: `${prefix}/basic-objects/`},
       {title: '조명과 그림자', desc: 'PBR · 라이트 · 캐스케이드 섀도우', link: `${prefix}/lighting-and-shadow/`},
-      {title: '환경 설정', desc: 'IBL · SkyBox · SkyAtmosphere', link: `${prefix}/environment/`},
-      {title: '에셋 및 로더', desc: 'glTF 2.0 · 스프라이트 · 파티클', link: `${prefix}/assets/`},
+      {title: '환경 설정 (Environment)', desc: 'SkyBox · IBL · 안개 · 전역 바람', link: `${prefix}/environment/`},
+      {title: '확장 객체 (Extended Objects)', desc: 'glTF 2.0 · 인스턴스 메시 · 스프라이트 · 텍스트', link: `${prefix}/extended-objects/`},
+      {title: '사용자 인터랙션', desc: '마우스 피킹 및 키보드 이벤트', link: `${prefix}/interaction/`},
       {title: '포스트 이펙트', desc: 'SSR · DOF · Bloom · 톤 매핑', link: `${prefix}/post-effect/`},
-      {title: '안티앨리어싱', desc: 'TAA · FXAA · MSAA', link: `${prefix}/antialiasing/`},
       {title: 'LOD 시스템', desc: '거리 기반 메시 · 인스턴스 최적화', link: `${prefix}/lod/`},
-      {title: '랜드스케이프', desc: '대규모 지형 · 식생(Foliage & Grass)', link: `${prefix}/landscape/`},
-      {title: '워터 (Water)', desc: '실시간 수면 렌더링', link: `${prefix}/water/`},
+      {title: '안티앨리어싱', desc: 'TAA · MSAA · FXAA', link: `${prefix}/antialiasing/`},
+      {title: '랜드스케이프 (Landscape)', desc: '지형 · 스플래팅 · 타일 스트리밍 · 잔디 · 식생', link: `${prefix}/landscape/`},
+      {title: '워터 (Water)', desc: '물리 기반 호수 · 수면 파동 인터랙션', link: `${prefix}/water/`},
+      {title: '플러그인 (Plugins)', desc: '캐릭터 컨트롤러 · 물리 엔진', link: `${prefix}/plugins/`},
       {title: '인스펙터 (Inspector)', desc: '실시간 씬 디버깅 및 프로파일링', link: `${prefix}/inspector/`}
     ]
   }
   return [
+    {title: 'Getting Started', desc: 'Quick start & first 3D scene setup', link: `${prefix}/introduction/`},
     {title: 'Context', desc: 'Initialization & global settings', link: `${prefix}/context/`},
     {title: 'View System', desc: 'Scene · View3D · Camera', link: `${prefix}/view-system/`},
-    {title: 'Basic Objects', desc: 'Mesh · Scene graph · Textures', link: `${prefix}/basic-objects/`},
+    {title: 'Basic Objects', desc: 'Mesh · Geometry · Material · Textures', link: `${prefix}/basic-objects/`},
     {title: 'Lighting & Shadow', desc: 'PBR · Lights · Cascaded shadows', link: `${prefix}/lighting-and-shadow/`},
-    {title: 'Environment', desc: 'IBL · SkyBox · SkyAtmosphere', link: `${prefix}/environment/`},
-    {title: 'Assets & Loaders', desc: 'glTF 2.0 · Sprites · Particles', link: `${prefix}/assets/`},
+    {title: 'Environment', desc: 'SkyBox · IBL · Fog · Global Wind', link: `${prefix}/environment/`},
+    {title: 'Extended Objects', desc: 'glTF 2.0 · InstancedMesh · Sprites · Text', link: `${prefix}/extended-objects/`},
+    {title: 'Interaction', desc: 'Mouse picking & keyboard events', link: `${prefix}/interaction/`},
     {title: 'Post-Effect', desc: 'SSR · DOF · Bloom · Tone mapping', link: `${prefix}/post-effect/`},
-    {title: 'Anti-Aliasing', desc: 'TAA · FXAA · MSAA', link: `${prefix}/antialiasing/`},
     {title: 'LOD System', desc: 'Mesh & instanced LOD optimization', link: `${prefix}/lod/`},
-    {title: 'Landscape', desc: 'Terrain · Foliage & Grass scatter', link: `${prefix}/landscape/`},
-    {title: 'Water', desc: 'Real-time water surface rendering', link: `${prefix}/water/`},
+    {title: 'Anti-Aliasing', desc: 'TAA · MSAA · FXAA', link: `${prefix}/antialiasing/`},
+    {title: 'Landscape', desc: 'Terrain · Splatting · Streaming · Grass · Foliage', link: `${prefix}/landscape/`},
+    {title: 'Water', desc: 'Physically based lake & wave interaction', link: `${prefix}/water/`},
+    {title: 'Plugins', desc: 'Character controller & physics engine', link: `${prefix}/plugins/`},
     {title: 'Inspector', desc: 'Real-time scene debugging & profiling', link: `${prefix}/inspector/`}
   ]
 })

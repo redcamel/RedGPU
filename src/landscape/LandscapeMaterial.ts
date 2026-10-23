@@ -34,8 +34,8 @@ interface LandscapeMaterial {
 const DEFAULT_BASE_COLOR: number[] = [0.22, 0.49, 0.26, 1.0];
 
 /**
- * [KO] 최대 8개의 `LandscapeLayer`를 `2d-array` 텍스처로 통합 관리하고 VBT 베이킹 및 근거리 디테일 블렌딩을 수행하는 지형 전용 머티리얼 클래스입니다. `Landscape` 생성 시 내부적으로 자동 생성됩니다.
- * [EN] Terrain-specific material class that consolidates up to 8 `LandscapeLayer` instances into `2d-array` textures and handles VBT baking and near-detail blending. Automatically created internally when a `Landscape` is instantiated.
+ * [KO] 최대 8개의 `LandscapeLayer`를 `2d-array` 텍스처로 통합 관리하고 단일 공유 RGBA 가중치 맵(`weightTexture`)을 기반으로 VBT 베이킹 및 근거리 디테일 블렌딩을 수행하는 지형 전용 머티리얼 클래스입니다. `Landscape` 생성 시 내부적으로 자동 생성됩니다.
+ * [EN] Terrain-specific material class that consolidates up to 8 `LandscapeLayer` instances into `2d-array` textures and performs VBT baking and near-detail blending based on a single shared RGBA weight map (`weightTexture`). Automatically created internally when a `Landscape` is instantiated.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.

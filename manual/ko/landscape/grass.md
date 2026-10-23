@@ -3,7 +3,7 @@ title: Procedural Grass
 order: 4
 ---
 
-# 절차적 잔디
+# 절차적 잔디 (Procedural Grass)
 
 `RedGPU.Landscape.GrassManager`는 카메라 주변의 지형 표면 위에 수십만~수백만 개의 잔디 및 초목 클럼프를 **GPU 컴퓨트 셰이더에서 16m 셀 단위로 실시간 베이킹 및 컬링**하여
 렌더링하는 시스템입니다.
@@ -82,4 +82,4 @@ new RedGPU.GLTFLoader(
 
 ---
 
-[다음 단계: 수체 시스템 (Water) 배우기](../water/index.md)
+[다음 단계: 대규모 식생과 임포스터 배우기](./foliage.md)

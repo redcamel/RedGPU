@@ -84,4 +84,4 @@ new RedGPU.GLTFLoader(
 
 ---
 
-[Next Step: Learn Water System](../water/index.md)
+[Next Step: Learn Foliage & Impostors](./foliage.md)

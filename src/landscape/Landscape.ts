@@ -864,8 +864,8 @@ class Landscape extends RedGPUObject {
     }
 
     /**
-     * [KO] 지형 머티리얼에 새로운 스플래팅 레이어(`LandscapeLayer`)를 생성하여 추가하고 반환합니다. (최대 8개)
-     * [EN] Creates, adds, and returns a new splatting layer (`LandscapeLayer`) to the terrain material. (Maximum 8 layers)
+     * [KO] 지형 머티리얼에 새로운 스플래팅 레이어(`LandscapeLayer`)를 생성하여 추가하고 반환합니다. PBR 재질 레이어는 최대 8개까지 등록할 수 있으며, 가중치 맵(`weightTexture`)은 지형 전체에서 단일 RGBA 텍스처 1장(4채널: `'R' | 'G' | 'B' | 'A'`)을 공유하여 사용합니다.
+     * [EN] Creates, adds, and returns a new splatting layer (`LandscapeLayer`) to the terrain material. Up to 8 PBR material layers can be registered, sharing a single RGBA weight map texture (`weightTexture`, 4 channels: `'R' | 'G' | 'B' | 'A'`) across the terrain.
      *
      * ### Example
      * ```typescript

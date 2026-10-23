@@ -45,8 +45,8 @@ export interface LandscapeLayerOptions {
      */
     ormTexture?: BitmapTexture | string;
     /**
-     * [KO] 스플래팅 가중치(Weight) 텍스처 인스턴스 또는 이미지 URL
-     * [EN] Splatting weight texture instance or image URL
+     * [KO] 스플래팅 가중치(Weight) 텍스처 인스턴스 또는 이미지 URL (지형 전체에서 단일 RGBA 가중치 맵 1장을 공유하여 `weightChannel`로 R/G/B/A 채널을 참조합니다)
+     * [EN] Splatting weight texture instance or image URL (shares a single RGBA weight map across the terrain, referencing R/G/B/A channels via `weightChannel`)
      */
     weightTexture?: BitmapTexture | string;
 
@@ -394,8 +394,8 @@ class LandscapeLayer {
     }
 
     /**
-     * [KO] 레이어의 스플래팅 가중치(Weight) 텍스처를 반환하거나 설정합니다.
-     * [EN] Gets or sets the splatting weight texture of the layer.
+     * [KO] 레이어의 스플래팅 가중치(Weight) 텍스처를 반환하거나 설정합니다. (지형 전체에서 단일 RGBA 가중치 맵 1장만 공유 지원)
+     * [EN] Gets or sets the splatting weight texture of the layer. (Supports a single shared RGBA weight map across the terrain)
      *
      * @returns
      * [KO] `BitmapTexture` 인스턴스 또는 `undefined`

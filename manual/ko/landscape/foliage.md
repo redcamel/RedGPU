@@ -1,9 +1,9 @@
 ---
 title: Foliage & Impostors
-order: 3
+order: 5
 ---
 
-# 대규모 식생과 임포스터
+# 대규모 식생과 임포스터 (Foliage & Impostors)
 
 `RedGPU.Landscape.FoliageManager`는 지형 위에 나무, 바위, 관목 등 수만~수십만 개의 3D 메시를 서브 셀 (Sub-Cell) 단위로 스트리밍하고, 거리별 다단계 메시 LOD와 **팔면체
 임포스터**(Octahedral Impostor)를 결합하여 고속으로 렌더링합니다.
@@ -83,4 +83,4 @@ new RedGPU.GLTFLoader(
 
 ---
 
-[다음 단계: 절차적 잔디 배우기](./grass.md)
+[다음 단계: 수체 시스템 (Water) 배우기](../water/index.md)

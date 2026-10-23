@@ -6,16 +6,23 @@ order: 2
 # Multi-Layer Splatting
 
 `RedGPU.Landscape.LandscapeMaterial` and `RedGPU.Landscape.LandscapeLayer` provide a **Multi-Layer Splatting** system
-that blends up to **8 PBR layers** across the terrain surface using weight maps (`weightTexture`) and height-modulated
-blending (`heightBlendFactor`).
+that blends up to **8 PBR layers** across the terrain surface based on the **4 channels (`R`, `G`, `B`, `A`) of a single
+shared RGBA weight map (`weightTexture`)** and height-modulated blending (`heightBlendFactor`).
 
 ---
 
 ## 1. Registering Splatting Layers (`addLayer`)
 
 Call `landscape.addLayer(options)` to register up to 8 `LandscapeLayer` instances. The first layer (index 0) also acts
-as the base fallback layer, while each layer blends according to its designated channel (`'R' | 'G' | 'B' | 'A'`) in
-`weightTexture`.
+as the base fallback layer, while each layer blends according to its designated channel (`'R' | 'G' | 'B' | 'A'`) in the
+shared `weightTexture`.
+
+> [!IMPORTANT]
+> **PBR Layers vs. Weight Map (`weightTexture`) Support**
+> - **PBR Material Layers (`LandscapeLayer`)**: Up to **8 layers** can be registered.
+> - **Splat Weight Map (`weightTexture`)**: Only **1 shared RGBA weight map texture (4 channels: `'R'`, `'G'`, `'B'`,
+    `'A'`)** is supported across the terrain. (Both the near-range fragment shader and the CPU weight sampler for
+    foliage and grass reference the RGBA channels of this single weight map.)
 
 - **Near Range (within `nearDetailDistance`)**: Blends high-resolution PBR textures with stochastic tiling
   (`stochasticTiling`) in real time.
@@ -71,7 +78,7 @@ const rockLayer = landscape.addLayer({
 | **Textures & Weight** | **`baseColorTexture`**                    | `undefined`           | Base color (Albedo) texture path or `BitmapTexture`                                          |
 |                       | **`normalTexture`**                       | `undefined`           | Tangent-space normal map path or `BitmapTexture`                                             |
 |                       | **`ormTexture`**                          | `undefined`           | Packed Occlusion (R), Roughness (G), Metallic (B), Height (A) texture                        |
-|                       | **`weightTexture`**                       | `undefined`           | Splat map texture containing layer distribution weights                                      |
+|                       | **`weightTexture`**                       | `undefined`           | Splat map texture containing layer distribution weights (single shared RGBA map)             |
 |                       | **`weightChannel`**                       | `'R'`                 | Channel to sample from `weightTexture` (`'R' \| 'G' \| 'B' \| 'A'` or `0 ~ 3`)               |
 | **UV & Tiling**       | **`uvScale`** / **`uvOffset`**            | `[20, 20]` / `[0, 0]` | Texture UV repeat scale `[u, v]` per tile and UV offset `[u, v]`                             |
 |                       | **`nearUVScaleMultiplier`**               | `2.0`                 | UV scale multiplier applied to the near-detail region                                        |
@@ -110,4 +117,4 @@ landscape.removeLayer('Rock');
 
 ---
 
-[Next Step: Learn Foliage & Impostors](./foliage.md)
+[Next Step: Learn Tile Streaming](./tile-streaming.md)
