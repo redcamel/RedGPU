@@ -11,22 +11,19 @@ order: 3
 
 ## 1. 동작 원리: 스마트 톤 매핑 전환 (Smart Transition)
 
-RedGPU의 톤 매핑은 단순히 파이프라인의 시작 또는 끝에 고정되어 실행되지 않습니다. 효율적인 HDR 연산과 LDR 후처리 간의 전환을 위해 `PostEffectManager`가 내부적으로 타이밍을 자동으로
+RedGPU의 톤 매핑은 파이프라인의 시작이나 끝에 단순히 고정되어 실행되지 않고, 효율적인 HDR 연산과 LDR 후처리 간의 전환을 위해 `PostEffectManager`가 내부적으로 실행 시점을 자동
 제어합니다.
 
-- **HDR 영역 보존**: 씬 렌더링 직후 `SkyAtmosphere`, `SSAO`, `SSR` 등 깊이 정보 및 광범위한 색역을 필요로 하는 효과들은 톤 매핑 이전의 **HDR 원본 데이터 상태**에서
-  계산됩니다.
+- **HDR 영역 보존**: 씬 렌더링 직후 `SkyAtmosphere`, `SSAO`, `SSR`, `TAA`, `AutoExposure` 등 깊이 정보 및 광범위한 색역을 필요로 하는 효과들은 톤 매핑 이전의
+  **HDR 원본 데이터 상태**에서 계산됩니다.
 - **자동 전환 타이밍**: 사용자가 추가한 일반 이펙트 (`view.postEffectManager.addEffect()`) 루프를 순회하다가 **최초의 LDR (Low Dynamic Range) 효과를 만나는
-  시점에 즉시** 톤 매핑을 수행합니다.
-- **기본 예외 처리**: 만약 일반 이펙트 체인 내에 LDR 효과가 하나도 등록되어 있지 않다면, 파이프라인 루프의 맨 마지막 단계에서 톤 매핑이 자동으로 적용됩니다.
+  시점에 즉시** 톤 매핑을 수행합니다 (LDR 효과가 없을 경우 루프 종료 직후 자동 적용).
 
 ---
 
 ## 2. ToneMappingManager 설정
 
-모든 톤 매핑 관련 매개변수는 `view.toneMappingManager` 속성들을 통해 동적으로 조절할 수 있습니다. `View3D` 인스턴스 생성 시 내장되므로 직접 생성할 필요가 없습니다.
-
-### 2.1 속성 정보
+모든 톤 매핑 관련 매개변수는 `view.toneMappingManager` 속성을 통해 동적으로 조절할 수 있습니다. `View3D` 인스턴스 생성 시 내장되므로 직접 생성할 필요가 없습니다.
 
 | 속성명           | 기본값                | 범위           | 설명                                                           |
 |:-----------------|:----------------------|:---------------|:---------------------------------------------------------------|
@@ -45,7 +42,7 @@ tm.brightness = 0.02;
 
 ## 3. 지원 알고리즘 (TONE_MAPPING_MODE)
 
-원하는 비주얼 스타일에 따라 톤 매핑 모드를 실시간으로 변경할 수 있습니다. 상수값은 `RedGPU.ToneMapping.TONE_MAPPING_MODE` 네임스페이스 하위에 선언되어 있습니다.
+원하는 비주얼 스타일에 따라 톤 매핑 모드를 실시간으로 변경할 수 있습니다. 상수값은 `RedGPU.ToneMapping.TONE_MAPPING_MODE`에 정의되어 있습니다.
 
 ```javascript
 // ACES Filmic 알고리즘을 적용해 영화 같은 연출 적용
@@ -59,12 +56,11 @@ view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_
 | **`ACES_FILMIC_HILL`**      | 시네마틱 영화 산업 표준인 ACES 알고리즘의 Hill 근사 버전으로 높은 대비를 만듭니다.                     | ![ACES Hill](/toneMapping/acesHill.jpg) |
 | **`ACES_FILMIC_NARKOWICZ`** | ACES 알고리즘의 Narkowicz 수학적 근사 버전으로 더욱 드라마틱한 대비를 만듭니다.                        | ![ACES Nark](/toneMapping/acesNark.jpg) |
 
----
-
-## 관련 예제
-
-- [DamagedHelmet PBR & 톤 매핑](/RedGPU/examples/gltf/models/helmets/)
-- [Sponza HDR 노출 & 톤 매핑](/RedGPU/examples/gltf/models/sponza/)
+> [!TIP]
+> **실시간 테스트 안내**: RedGPU의 모든 예제 화면 UI에 위치한 **`TONE MAPPING`** 드롭다운 메뉴를 통해 현재 실행 중인 씬에서 4가지 톤 매핑 모드를 즉시 전환하며 비교해 볼 수
+있습니다.
+>
+> ![Tone Mapping Control](/toneMapping/toneMappingControl.png)
 
 ---
 
