@@ -33,39 +33,30 @@ RedGPU provides the `GLTFLoader`, which supports loading the web 3D standard for
 
 ## 1. Loading a Model
 
-You can load `.gltf` or `.glb` files using `RedGPU.GLTFLoader`. Loading is asynchronous, and the result is delivered via
-a callback function upon completion.
+Creating a `GLTFLoader` instance asynchronously loads and parses the file. Once complete, add `loader.resultMesh` passed
+to the callback function to the `Scene`.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
 new RedGPU.GLTFLoader(
     redGPUContext, 
     'https://.../DamagedHelmet.glb', // Model path
     (loader) => {
-        // [Load Success] loader.resultMesh is the final model object.
+        // Add the loaded root mesh (resultMesh) to the scene
         scene.addChild(loader.resultMesh);
     }
 );
 ```
 
-### Key Properties (GLTFLoader Instance)
+- **`resultMesh`**: The root `Mesh` object containing the loaded model hierarchy.
+- **`parsingResult`**: Detailed parsed data including `materials`, `textures`, and `animations`.
 
-- **`resultMesh`**: The `RedGPU.Display.Mesh` object containing the loaded model.
-- **`parsingResult`**: Detailed parsing data of the glTF file, including materials, groups, textures, and more.
+> [!TIP]
+> Since most glTF models use `PBRMaterial`, we recommend configuring `IBL` environment lighting on `view.ibl` for
+realistic metallic reflections and shading.
 
-## 2. Synergy with IBL (Highly Recommended)
+## 2. Practical Example: Environment Light and Model Loading
 
-Most high-quality models imported from external sources use **PBR (Physically Based Rendering)** materials. Since these
-materials express textures by reflecting light information from the surrounding environment, you can achieve the most
-realistic results when using them with `IBL` (Image-Based Lighting), as learned earlier.
-
-If you load a PBR model without IBL, metallic textures may appear black or look very awkward.
-
-## 3. Practical Example: Environment Light and Model Loading
-
-This is the full process of setting up an environment with IBL and loading a detailed metal helmet model. You can adjust
-the `distance` property of the camera controller to observe the model at an appropriate size.
+An example of setting up an environment with `IBL` and loading a metallic helmet model.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -73,14 +64,12 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    
-    // 1. Set Camera Distance (Adjust to fit the model size)
-    controller.distance = 3; 
+    controller.distance = 3;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 2. Set up IBL and a SkyBox (Key for PBR materials)
+    // 1. Configure IBL and SkyBox
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -88,7 +77,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-    // 3. Load a GLTF Model
+    // 2. Load GLTF Model
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
@@ -103,8 +92,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 ```
 
 ### Live Demo
-
-Check out the metal helmet model reflecting the IBL environment light realistically.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - GLTF Loader with IBL" slugHash="gltf-loader">
@@ -124,12 +111,11 @@ RedGPU.init (canvas, (redGPUContext) => {
 const scene = new RedGPU.Display.Scene ();
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3; // Adjust the camera distance
+    controller.distance = 3;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // Set up IBL and a Skybox
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -137,18 +123,20 @@ const scene = new RedGPU.Display.Scene ();
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
+    let targetMesh;
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
         (loader) => {
-            scene.addChild(loader.resultMesh);
-            
-            const renderer = new RedGPU.Renderer();
-            renderer.start(redGPUContext, () => {
-                loader.resultMesh.rotationY += 1;
-            });
+            targetMesh = loader.resultMesh;
+            scene.addChild(targetMesh);
         }
     );
+
+    const renderer = new RedGPU.Renderer();
+    renderer.start(redGPUContext, () => {
+        if (targetMesh) targetMesh.rotationY += 1;
+    });
 });
 </pre>
 </CodePen>
@@ -158,15 +146,15 @@ const scene = new RedGPU.Display.Scene ();
 
 ## Related Examples
 
+- [DamagedHelmet Model Loading](/RedGPU/examples/gltf/models/helmets/)
 - [glTF Basic Animations](/RedGPU/examples/gltf/animation/basicAnimations/)
-- [Animation State Machine Motion Blending](/RedGPU/examples/gltf/animation/motionBlending/)
-- [Keyboard Character Animation Control](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
+- [Animation Motion Blending](/RedGPU/examples/gltf/animation/motionBlending/)
 - [Sponza Scene Model](/RedGPU/examples/gltf/models/sponza/)
 
 ---
 
 ## Next Steps
 
-Learn about image-based objects that will enrich the 3D space alongside text.
+Learn how to render thousands of identical objects with high performance in a single draw call.
 
-- **[Sprite](../sprite/index.md)**
+- **[Instancing Mesh](../instanced-mesh/index.md)**

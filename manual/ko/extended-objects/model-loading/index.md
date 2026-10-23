@@ -22,7 +22,7 @@ const loaderGraph = `
 
 # GLTF Loader
 
-**`Primitive`** 로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴 (Blender, Maya 등)에서 제작하여 가져와야 합니다.
+**Primitive** 로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴 (Blender, Maya 등)에서 제작하여 가져와야 합니다.
 RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩을 지원하는 `GLTFLoader` 를 제공합니다.
 
 <ClientOnly>
@@ -31,36 +31,28 @@ RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩을
 
 ## 1. 모델 불러오기
 
-`RedGPU.GLTFLoader` 를 사용하여 `.gltf` 또는 `.glb` 파일을 로드할 수 있습니다. 로딩은 비동기적으로 진행되며, 완료 시 콜백 함수를 통해 결과를 전달받습니다.
+`GLTFLoader` 를 생성하면 비동기로 파일을 로드 및 파싱하며, 완료 시 콜백 함수로 전달된 `loader.resultMesh` 를 `Scene` 에 추가하여 렌더링합니다.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
 new RedGPU.GLTFLoader(
     redGPUContext, 
     'https://.../DamagedHelmet.glb', // 모델 경로
     (loader) => {
-        // [로드 성공] loader.resultMesh가 최종 모델 객체입니다.
+        // 로드 완료 후 최종 모델(resultMesh)을 씬에 추가
         scene.addChild(loader.resultMesh);
     }
 );
 ```
 
-### 주요 속성 (GLTFLoader 인스턴스)
+- **`resultMesh`**: 로드된 모델 계층 구조를 담고 있는 루트 `Mesh` 객체입니다.
+- **`parsingResult`**: 재질 (`materials`), 텍스처 (`textures`), 애니메이션 (`animations`) 등 파싱된 상세 데이터입니다.
 
-- **`resultMesh`**: 로드된 모델을 담고 있는 `RedGPU.Display.Mesh` 객체입니다.
-- **`parsingResult`**: 재질, 그룹, 텍스처 등 glTF 파일의 상세 파싱 데이터입니다.
+> [!TIP]
+> glTF 모델은 대부분 `PBRMaterial` 을 사용하므로, 사실적인 금속 반사와 색감을 표현하려면 `view.ibl` 에 `IBL` 환경광을 함께 설정하는 것을 권장합니다.
 
-## 2. IBL과의 시너지 (필수 권장)
+## 2. 실습 예제: 환경광과 모델 로딩
 
-외부에서 가져온 고품질 모델들은 대부분 **물리 기반 렌더링**(PBR) 재질을 사용합니다. 이러한 재질은 주변 환경의 빛 정보를 반사하여 질감을 표현하기 때문에, 앞서 배운 `IBL` 과 함께 사용할 때 가장
-사실적인 결과를 얻을 수 있습니다.
-
-IBL이 없는 환경에서 PBR 모델을 로드하면 금속 질감이 검게 보이거나 매우 어색하게 출력될 수 있습니다.
-
-## 3. 실습 예제: 환경광과 모델 로딩
-
-IBL로 환경을 구성하고, 정교한 금속 헬멧 모델을 로드하는 전체 과정입니다. 카메라 컨트롤러의 `distance` 속성을 조절하여 모델을 적절한 크기로 관찰할 수 있습니다.
+`IBL` 로 환경을 구성하고 금속 헬멧 모델을 로드하는 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -68,14 +60,12 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    
-    // 1. 카메라 거리 설정 (모델 크기에 맞춰 조절)
-    controller.distance = 3; 
+    controller.distance = 3;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // 2. IBL 및 SkyBox 설정 (PBR 재질의 핵심)
+    // 1. IBL 및 SkyBox 설정
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -83,7 +73,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-    // 3. GLTF 모델 로딩
+    // 2. GLTF 모델 로딩
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
@@ -98,8 +88,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 ```
 
 ### 라이브 데모
-
-IBL 환경광을 받아 정교하게 반사되는 금속 헬멧 모델을 확인해 보세요.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - GLTF Loader with IBL" slugHash="gltf-loader">
@@ -119,12 +107,11 @@ RedGPU.init (canvas, (redGPUContext) => {
 const scene = new RedGPU.Display.Scene ();
 
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 3; // 카메라 거리 조절
+    controller.distance = 3;
 
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
     redGPUContext.addView(view);
 
-    // IBL 및 Skybox 설정
     const ibl = new RedGPU.Resource.IBL(
         redGPUContext,
         'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
@@ -132,18 +119,20 @@ const scene = new RedGPU.Display.Scene ();
     view.ibl = ibl;
     view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
+    let targetMesh;
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
         (loader) => {
-            scene.addChild(loader.resultMesh);
-            
-            const renderer = new RedGPU.Renderer();
-            renderer.start(redGPUContext, () => {
-                loader.resultMesh.rotationY += 1;
-            });
+            targetMesh = loader.resultMesh;
+            scene.addChild(targetMesh);
         }
     );
+
+    const renderer = new RedGPU.Renderer();
+    renderer.start(redGPUContext, () => {
+        if (targetMesh) targetMesh.rotationY += 1;
+    });
 });
 </pre>
 </CodePen>
@@ -153,15 +142,15 @@ const scene = new RedGPU.Display.Scene ();
 
 ## 관련 예제
 
+- [DamagedHelmet 모델 로딩](/RedGPU/examples/gltf/models/helmets/)
 - [glTF 기본 애니메이션](/RedGPU/examples/gltf/animation/basicAnimations/)
-- [애니메이션 상태 머신 모션 블렌딩](/RedGPU/examples/gltf/animation/motionBlending/)
-- [키보드 캐릭터 애니메이션 제어](/RedGPU/examples/gltf/animation/keyboardCharacterControl/)
+- [애니메이션 모션 블렌딩](/RedGPU/examples/gltf/animation/motionBlending/)
 - [Sponza 씬 모델](/RedGPU/examples/gltf/models/sponza/)
 
 ---
 
 ## 다음 단계
 
-텍스트와 함께 3D 공간을 풍성하게 채워줄 이미지 기반의 객체들에 대해 알아봅니다.
+수천~수만 개의 동일한 객체를 단일 드로우 콜로 고성능 렌더링하는 방법을 알아봅니다.
 
-- **[스프라이트](../sprite/index.md)**
+- **[Instancing Mesh](../instanced-mesh/index.md)**

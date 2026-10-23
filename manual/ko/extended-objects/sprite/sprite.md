@@ -76,7 +76,7 @@ sprite.pixelSize = 64;
 #### 3.3.3 고정 픽셀 모드 (`usePixelSize` & `pixelSize`)
 
 - **역할**: 3D 공간에 위치하지만, 화면에는 **지정한 픽셀 크기** 그대로 표시합니다.
-- **특징**: 이 모드가 활성화되면 `worldSize`는 무시됩니다. 기본적으로 텍스처가 로드될 때의 **원본 높이 (Height)**가 `pixelSize`에 자동으로 할당됩니다. 아이콘이나 마커처럼 거리에
+- **특징**: 이 모드가 활성화되면 `worldSize`는 무시됩니다. 기본적으로 텍스처가 로드될 때의 **원본 높이**(Height)가 `pixelSize`에 자동으로 할당됩니다. 아이콘이나 마커처럼 거리에
   상관없이 일정한 크기와 가독성을 유지해야 할 때 사용합니다.
 
 ::: tip [픽셀 크기 조절]
@@ -87,76 +87,7 @@ sprite.pixelSize = 64;
 
 3D 공간에 서로 다른 설정의 스프라이트를 배치하여 시각적 차이를 확인해 봅니다.
 
-<ClientOnly>
-<CodePen title="RedGPU - Sprite3D Showcase" slugHash="sprite3d-showcase">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById ("redgpu-canvas");
-
-RedGPU.init (canvas, (redGPUContext) => {
-const scene = new RedGPU.Display.Scene ();
-
-    // 공용 재질 생성
-    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/texture/crate.png');
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
-
-    // 1. 기본 월드 사이즈 (World Size)
-    const sprite1 = new RedGPU.Display.Sprite3D(redGPUContext, material);
-    sprite1.x = -3; sprite1.y = 1;
-    sprite1.worldSize = 1.5;
-    scene.addChild(sprite1);
-
-    // 2. 고정 픽셀 사이즈 (Pixel Size) - 멀어져도 크기가 변하지 않음
-    const sprite2 = new RedGPU.Display.Sprite3D(redGPUContext, material);
-    sprite2.x = 3; sprite2.y = 1;
-    sprite2.usePixelSize = true;
-    sprite2.pixelSize = 100;
-    scene.addChild(sprite2);
-
-    // 3. 옵션 설명 라벨 (TextField3D)
-    const createLabel = (text, x, y) => {
-        const label = new RedGPU.Display.TextField3D(redGPUContext, text);
-        label.x = x; label.y = y;
-        label.color = '#ffffff';
-        label.fontSize = 16;
-        label.background = '#ff3333';
-        label.padding = 8;
-        label.useBillboard = true;
-        scene.addChild(label);
-    };
-
-    createLabel('World Size', -3, 2.5);
-    createLabel('Pixel Size', 3, 2.5);
-
-    // 3D 뷰 설정
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 12;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.grid = true;
-    redGPUContext.addView(view);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-</pre>
-</CodePen>
-</ClientOnly>
-
----
-
-## 핵심 요약
-
-- **`Sprite3D`** 는 3D 좌표계를 가지면서도 카메라를 정면으로 바라보는 **Billboard** 기능을 제공합니다.
-- `usePixelSize` 속성을 통해 거리에 관계없이 일정한 크기로 표현되는 UI 스타일 요소를 구현할 수 있습니다.
-- 텍스처의 해상도와 비율에 따라 지오메트리 크기가 자동 조정되어 편리하게 사용할 수 있습니다.
+<ExampleFrame src="/RedGPU/examples/3d/sprite/sprite3D/" height="500px" />
 
 ---
 
