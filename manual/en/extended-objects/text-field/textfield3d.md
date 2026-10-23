@@ -23,16 +23,9 @@ scene.addChild(textField);
 3D text can be seen from the side or back depending on the camera position. To make the text always visible from the
 front, activate the **Billboard** feature, and you can set the world unit size or fixed pixel size as needed.
 
-### Billboard Setup
-
-| Property Name      | Description                                                                 | Default Value |
-|:-------------------|:----------------------------------------------------------------------------|:--------------|
-| **`useBillboard`** | When activated, the text always faces the front even if the camera rotates. | `true`        |
-
-### Size and Rendering Mode
-
 | Property Name      | Description                                                                                                                  | Default Value |
 |:-------------------|:-----------------------------------------------------------------------------------------------------------------------------|:--------------|
+| **`useBillboard`** | When activated, the text always faces the front even if the camera rotates.                                                  | `true`        |
 | **`worldSize`**    | Vertical size in world space (Unit). Horizontal size is automatically adjusted according to text length.                     | `1`           |
 | **`usePixelSize`** | Whether to use fixed pixel size mode. If `true`, it is displayed at the rendered physical pixel size regardless of distance. | `false`       |
 
@@ -74,113 +67,14 @@ Conversely, if it should behave like a general 3D object, it is recommended to s
 value (e.g., 24-48) for texture clarity and adjust the actual size with `worldSize`.
 :::
 
-## 4. Practical Example: Configuring 3D Text
+## 4. Practical Example: Style and Sizing Mode Comparison
 
-Let's configure 3D text placed together with a GLTF model.
+Explore various font style options and see the differences between world size (`worldSize`) mode and fixed pixel
+(`usePixelSize`) mode.
 
-```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+<iframe src="/RedGPU/examples/3d/textField/textField3D/" style="width:100%; height:500px;"></iframe>
 
-RedGPU.init(canvas, (redGPUContext) => {
-    const scene = new RedGPU.Display.Scene();
-    
-    // 1. Create and Place 3D Text
-    const text3D = new RedGPU.Display.TextField3D(redGPUContext, "Damaged Helmet");
-    text3D.y = 2.5;
-    text3D.fontSize = 24;
-    text3D.background = "rgba(0, 204, 153, 0.8)";
-    text3D.padding = 10;
-    text3D.useBillboard = true; // Rotate with camera
-    text3D.worldSize = 1.2;     // Set world size
-    
-    scene.addChild(text3D);
-
-    // 2. Setup Model and Environment
-    const ibl = new RedGPU.Resource.IBL(redGPUContext, 'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 5;
-    
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.ibl = ibl;
-    redGPUContext.addView(view);
-
-    new RedGPU.GLTFLoader(redGPUContext, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb', (loader) => {
-        scene.addChild(loader.resultMesh);
-    });
-
-    new RedGPU.Renderer().start(redGPUContext);
-});
-```
-
-### Live Demo
-
-Check out the differences between text fields based on setting combinations in the example below.
-
-<ClientOnly>
-<CodePen title="RedGPU Basics - TextField3D Showcase" slugHash="textfield3d-showcase">
-<pre data-lang="html">
-&lt;canvas id="redgpu-canvas"&gt;&lt;/canvas&gt;
-</pre>
-<pre data-lang="css">
-body { margin: 0; overflow: hidden; background: #000; }
-canvas { display: block; width: 100vw; height: 100vh; }
-</pre>
-<pre data-lang="js">
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
-
-const canvas = document.getElementById ("redgpu-canvas");
-
-RedGPU.init (canvas, (redGPUContext) => {
-const scene = new RedGPU.Display.Scene ();
-
-    // IBL Setup
-    const ibl = new RedGPU.Resource.IBL(
-        redGPUContext, 
-        'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
-    );
-
-    // Helper function for creating helmet and text field groups
-    const createCase = (x, label, color, useBB, usePS) => {
-        // 1. Load Model
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb',
-            (loader) => {
-                const mesh = loader.resultMesh;
-                mesh.x = x;
-                scene.addChild(mesh);
-            }
-        );
-
-        // 2. Create Text Field
-        const text = new RedGPU.Display.TextField3D(redGPUContext, label);
-        text.x = x; text.y = 1.5;
-        text.background = color;
-        text.padding = 15;
-        text.useBillboard = useBB;
-        text.usePixelSize = usePS;
-        scene.addChild(text);
-    };
-
-    // Place cases
-    createCase(-3, "Billboard: OFF", "rgba(255, 0, 0, 0.8)", false, false);
-    createCase(0, "World Size", "rgba(0, 204, 153, 0.8)", true, false);
-    createCase(3, "Pixel Size", "rgba(0, 102, 255, 0.8)", true, true);
-
-    const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-    controller.distance = 10;
-    const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.ibl = ibl;
-    view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-    redGPUContext.addView(view);
-
-    const renderer = new RedGPU.Renderer();
-    renderer.start(redGPUContext);
-});
-</pre>
-</CodePen>
-</ClientOnly>
-
+---
 
 ## Related Examples
 
