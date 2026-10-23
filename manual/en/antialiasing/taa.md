@@ -3,39 +3,33 @@ title: TAA
 order: 1
 ---
 
-# TAA
+# TAA (Temporal AA)
 
-**TAA** (Temporal Antialiasing) is a temporal accumulation technique that jitters the camera at sub-pixel intervals each
-frame and blends previous frame history with the current frame to eliminate jagged edges. It suppresses aliasing not
-only on geometry outlines but also across textures and shader highlights.
+**`TAA`** (Temporal Antialiasing) is a time-based technique that blends information from previous frames with the
+current frame to eliminate jagged edges. It provides the highest quality among current antialiasing techniques,
+producing smooth, cinematic images.
 
-## 1. Features and Usage
+## 1. How it Works
 
-Enable TAA globally via `redGPUContext.antialiasingManager.useTAA`, which automatically disables `MSAA` and `FXAA`. Any
-slight softening from temporal accumulation is restored through the built-in Contrast Adaptive Sharpening pass
-(`TAACASPass`), controlled per `View3D` via `view.taa`.
+TAA works by slightly jittering the camera every frame and then accumulating and averaging multiple rendered frames.
+This process allows the engine to obtain resolution information more precise than a single pixel.
 
-- **`view.taa.sharpness`** (`number`, default: `0.5`, range: `0.0 ~ 1.0`): Adjusts contrast adaptive sharpening
-  intensity per view.
-- **`view.taa.reset()`**: Immediately clears the temporal history buffer upon camera teleportation or scene cuts to
-  prevent ghosting trails.
+- **Pros**: Provides near-perfect antialiasing quality in static or slow-moving scenes.
+- **Cons**: Ghosting artifacts (trails) may occur on fast-moving objects.
+
+## 2. Usage
+
+Enabled via `antialiasingManager.useTAA`. Enabling this automatically disables MSAA or FXAA.
 
 ```javascript
-// 1. Enable global TAA (other AAs are automatically disabled)
+// Enable TAA (Other AAs are disabled)
 redGPUContext.antialiasingManager.useTAA = true;
-
-// 2. Adjust per-view sharpening intensity (0.0 ~ 1.0, default: 0.5)
-view.taa.sharpness = 0.5;
-
-// 3. Reset temporal history buffer when teleporting the camera
-view.taa.reset();
 ```
 
----
+## 3. Live Example: TAA Quality Check
 
-## 2. Live Example
-
-Compare how TAA resolves aliasing on fine grid patterns, wireframe edges, and textured surfaces.
+Observe how TAA handles edges, textures, and fine patterns in the same scene. (Notice how it perfectly resolves the
+shimmering in the grid pattern and texture details.)
 
 <ClientOnly>
 <CodePen title="RedGPU - TAA Example" slugHash="antialiasing-taa">
@@ -59,7 +53,8 @@ RedGPU.init(canvas, (redGPUContext) => {
     light.x = 10; light.y = 10; light.z = 10;
     scene.lightManager.addDirectionalLight(light);
     
-    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
+    const ambientLight = new RedGPU.Light.AmbientLight();
+    ambientLight.intensity = 0.3;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -116,7 +111,11 @@ RedGPU.init(canvas, (redGPUContext) => {
     });
     btn.onclick = () => {
         const manager = redGPUContext.antialiasingManager;
-        manager.useTAA = !manager.useTAA;
+        if (manager.useTAA) {
+            manager.useTAA = false; // Turn off
+        } else {
+            manager.useTAA = true;  // Turn on
+        }
         
         btn.textContent = `TAA: ${manager.useTAA ? 'ON' : 'OFF (None)'}`;
         btn.style.background = manager.useTAA ? '#00aaff' : '#555';
@@ -133,16 +132,15 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
+## Key Summary
+
+- **Best Quality**: Almost completely eliminates jagged edges.
+- **Auto-Selection**: Automatically enabled on high-DPI displays (like Retina).
+- **High Cost**: Recommended for desktop environments due to per-frame computation and memory overhead.
+
 ---
 
 ## Related Examples
 
 - [Hello World 3D](/RedGPU/examples/3d/helloWorld/)
 - [Sponza Scene](/RedGPU/examples/gltf/models/sponza/)
-
----
-
-## Next Steps
-
-- **[MSAA](./msaa.md)**: Hardware multisample antialiasing
-- **[FXAA](./fxaa.md)**: Fast approximate post-processing antialiasing

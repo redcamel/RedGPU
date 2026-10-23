@@ -5,35 +5,41 @@ order: 2
 
 # Mesh LOD
 
-`Mesh` 의 LOD는 CPU에서 매 프레임 카메라와의 거리를 계산하고, `mesh.LODManager` 에 등록된 조건에 맞는 지오메트리로 렌더링 대상을 교체합니다.
+일반적인 **메시**(Mesh) 객체에 LOD 를 적용하는 방법을 다룹니다.
+`Mesh` 의 LOD 는 CPU 에서 카메라 와의 거리를 매 프레임 계산하여, 조건에 맞는 **지오메트리**(Geometry) 로 교체하는 방식으로 동작합니다.
 
-## 1. 동작 원리 및 사용법
+## 1. 동작 원리
 
-`mesh.LODManager.addLOD(distance, geometry)` 메서드로 전환 거리와 교체할 지오메트리를 등록합니다. `LODManager` 는 등록된 레벨 중 현재 카메라 거리 이하에서 가장 큰
-거리값을 가진 레벨의 지오메트리를 선택합니다.
+`Mesh` 내부의 `LODManager` 는 등록된 LOD 레벨들을 순회하며, 현재 카메라 거리보다 작거나 같은 가장 큰 거리값의 레벨을 찾습니다.
+적합한 레벨을 찾으면 해당 레벨에 등록된 지오메트리 로 렌더링 대상이 교체됩니다.
+
+## 2. 사용법
+
+`mesh.LODManager.addLOD(distance, geometry)` 를 사용하여 거리별 지오메트리 를 등록합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
-// 1. 기본 메시 생성 (거리 0 ~ 10 구간)
+// 1. 기본 메쉬 생성 (거리 0~10)
 const mesh = new RedGPU.Display.Mesh(
-    redGPUContext,
-    new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
+    redGPUContext, 
+    new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32), 
     material
 );
 
-// 2. 거리별 LOD 레벨 등록
-mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8)); // 거리 10 이상
-mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));    // 거리 20 이상
+// 2. LOD 레벨 추가
+// 거리 10 이상: Sphere (16x16)
+mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 1, 16, 16));
+
+// 거리 20 이상: Box
+mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext));
 
 scene.addChild(mesh);
 ```
 
----
+## 3. 실습 예제
 
-## 2. 실습 예제
-
-카메라 줌인·줌아웃에 따라 구체 (32세그먼트 ➔ 8세그먼트)에서 박스로 지오메트리가 전환되는 과정을 확인합니다.
+거리에 따라 구 형태가 단순해지다가 결국 박스로 변하는 과정을 확인해 보세요.
 
 <ClientOnly>
 <CodePen title="RedGPU - Mesh LOD Example" slugHash="lod-mesh-basic">
@@ -56,7 +62,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const light = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(light);
 
-    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 100);
+    const ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 60);
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 재질 및 텍스처 설정
@@ -64,7 +70,8 @@ RedGPU.init(canvas, (redGPUContext) => {
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     material.diffuseTexture = texture;
 
-    // 2. 기본 메시 생성 (거리 0 ~ 10)
+    // 2. 기본 메쉬 생성 (거리 0 ~ 10)
+    // High Detail: Sphere (반지름 2, 세그먼트 32x32)
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32),
@@ -73,7 +80,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.addChild(mesh);
 
     // 3. LOD 레벨 추가
+    // Level 1: 거리 10 이상 (Mid Detail - Sphere 2, 8x8)
     mesh.LODManager.addLOD(10, new RedGPU.Primitive.Sphere(redGPUContext, 2, 8, 8));
+    
+    // Level 2: 거리 20 이상 (Low Detail - Box 3x3x3)
     mesh.LODManager.addLOD(20, new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3));
 
     // 4. 상태 표시 UI
@@ -96,6 +106,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     // 6. 렌더링 루프
     const renderer = new RedGPU.Renderer();
     const render = () => {
+        // 거리 계산 및 UI 업데이트 (시각적 확인용)
         const dist = Math.sqrt(
             Math.pow(view.rawCamera.x - mesh.x, 2) +
             Math.pow(view.rawCamera.y - mesh.y, 2) +
@@ -122,9 +133,3 @@ RedGPU.init(canvas, (redGPUContext) => {
 - [Mesh CPU LOD](/RedGPU/examples/3d/lod/MeshCPULOD/)
 - [Mesh CPU LOD (레벨별 재질 변경)](/RedGPU/examples/3d/lod/MeshCPULOD_material/)
 - [거리 컬링 (Distance Culling)](/RedGPU/examples/3d/frustumCulling/distanceCulling/)
-
----
-
-## 다음 단계
-
-- **[Instancing Mesh LOD](./instanced-lod.md)** : 대량 인스턴싱 메시에 GPU 기반 LOD 적용

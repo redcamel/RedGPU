@@ -1,29 +1,33 @@
 ---
 title: Sprite & SpriteSheet
-order: 3
+order: 1
 ---
 
 # Sprite & SpriteSheet
 
-RedGPU's sprite system renders 2D images and frame-based animations in both 3D space (`View3D`) and 2D screen space
-(`View2D`). It provides built-in camera-facing **Billboard** support and automatic texture aspect ratio adjustment.
+RedGPU provides a **Sprite** system that allows you to effectively use 2D images in 3D space. You can bring your scene
+to life with the **Billboard** feature, which always faces the camera, and sprite sheets that support frame animation.
 
-## 1. Main Components
+## 1. Key Features
 
-| Class                 | Namespace        | Description                                                                                             |
-|:----------------------|:-----------------|:--------------------------------------------------------------------------------------------------------|
-| **`Sprite3D`**        | `RedGPU.Display` | Billboard sprite object displaying a single image in 3D space                                           |
-| **`SpriteSheet3D`**   | `RedGPU.Display` | Sprite sheet object playing frame-based animations in 3D space                                          |
-| **`Sprite2D`**        | `RedGPU.Display` | 2D sprite object placed in `View2D` pixel coordinates                                                   |
-| **`SpriteSheet2D`**   | `RedGPU.Display` | 2D sprite sheet object playing frame-based animations in `View2D` pixel coordinates                     |
-| **`SpriteSheetInfo`** | `RedGPU.Display` | Data object defining sprite sheet grid structure (horizontal/vertical segments, frame count, FPS, etc.) |
+- **Billboard Support**: Placed in 3D space but can be set to always face the camera, optimized for UI, particles,
+  icons, etc.
+- **Animation System**: Implement high-performance 2D animations using sheets containing multiple frames in a single
+  texture.
+- **Automatic Aspect Ratio**: The sprite's rendering ratio is automatically adjusted to match the texture size.
 
----
+## 2. Main Components
+
+| Class Name            | Description                                                                           |
+|:----------------------|:--------------------------------------------------------------------------------------|
+| **`Sprite3D`**        | A 3D sprite object using a single image.                                              |
+| **`SpriteSheet3D`**   | A sprite sheet object supporting frame animation.                                     |
+| **`SpriteSheetInfo`** | A data object defining the structure (segments, frame count, etc.) of a sprite sheet. |
 
 ## Learning Roadmap
 
-1. **[Sprite3D](./sprite.md)**: Configuring 3D billboard sprites using a single image
-2. **[SpriteSheet3D](./spritesheet.md)**: Controlling frame animations using sprite sheets
+1. **[Sprite3D](./sprite.md)**: Creating billboard sprites using a single image
+2. **[SpriteSheet3D](./spritesheet.md)**: Utilizing sprite sheets with animation
 
 ---
 
@@ -36,6 +40,4 @@ RedGPU's sprite system renders 2D images and frame-based animations in both 3D s
 
 ---
 
-## Next Steps
-
-- **[Sprite3D](./sprite.md)**: Configuring 3D billboard sprites using a single image
+[Next Step: Learn Sprite3D](./sprite.md)

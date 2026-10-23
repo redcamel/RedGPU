@@ -5,19 +5,17 @@ order: 13
 
 # Water System
 
-RedGPU's **physically based Water** system is a rendering pipeline that captures screen color and depth buffers
-immediately after opaque geometry and terrain (`Landscape`) rendering complete to compute depth-based light attenuation
-(Beer-Lambert), refraction, underwater caustics, Screen Space Reflections (**SSR**), and real-time wave ripple
-interactions.
+RedGPU provides a **physically based Water** rendering pipeline that integrates seamlessly with open-world terrain
+(`Landscape`) and standard 3D scenes.
 
----
+Immediately after opaque geometry and large-scale terrain rendering complete, the pipeline captures screen color and
+depth buffers to compute depth-based light attenuation (Beer-Lambert), refraction, underwater caustics, Screen Space
+Reflections (**SSR**), and real-time wave ripple interactions.
 
-## Core Components
+## What You Will Learn
 
-| Class                 | Role & Description                                                                                                                                                                            |
-|:----------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **[Lake](./lake.md)** | Lake water class that controls water surface mesh geometry, vertex waves, and real-time 2D wave equation surface interactions.                                                                |
-| **`LakeMaterial`**    | Dedicated water material that controls optical properties including depth colors (`baseColor`, `deepColor`), turbidity, normal maps, underwater caustics, and Screen Space Reflections (SSR). |
+- **[Lake (Lake & Water Surface Simulation)](./lake.md)** : Controlling optical water materials and real-time 2D wave
+  equation surface interactions using `RedGPU.Water.Lake` and `LakeMaterial`
 
 ---
 
@@ -30,7 +28,4 @@ interactions.
 
 ---
 
-## Next Steps
-
-- **[Physically Based Lake Water](./lake.md)**: Controlling optical water materials and real-time wave interactions
-  using `Lake` and `LakeMaterial`
+[Next Step: Learn Lake](./lake.md)

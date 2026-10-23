@@ -5,23 +5,24 @@ order: 2
 
 # 일반 이펙트
 
-**일반 이펙트**(General Effects) 는 블러, 색상 보정, 렌즈 효과 등 사용자가 원하는 순서대로 조합하여 적용할 수 있는 표준 후처리 필터입니다.
+방사형 블러, 그레이스케일 등 RedGPU가 제공하는 다양한 표준 효과들을 관리합니다.
+
+::: tip [학습 가이드]
+기술적으로 톤 매핑은 전체 후처리 과정의 가장 첫 번째 단계에서 실행되지만, 이 장에서는 시각적인 변화를 가장 직관적으로 체감할 수 있는 **일반 이펙트** 를 먼저 다룹니다.
+:::
 
 ## 1. 사용 방법
 
-`RedGPU.PostEffect` 네임스페이스의 이펙트 인스턴스를 생성한 후 `view.postEffectManager.addEffect()` 로 등록합니다. 등록한 순서대로 후처리 파이프라인 체인이 구성됩니다.
+이펙트 객체를 생성한 후 `view.postEffectManager.addEffect()` 를 통해 등록합니다. 등록된 순서대로 파이프라인 체인이 형성됩니다.
 
 ```javascript
 const radialBlur = new RedGPU.PostEffect.RadialBlur(redGPUContext);
 view.postEffectManager.addEffect(radialBlur);
 ```
 
----
-
 ## 2. 주요 이펙트 예시
 
-### 2.1 방사형 블러
-
+### 2.1 방사형 블러 (Radial Blur)
 중심점에서 바깥쪽으로 퍼져나가는 속도감이나 집중 효과를 연출합니다.
 
 <ClientOnly>
@@ -69,9 +70,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-### 2.2 그레이스케일
+### 2.2 그레이스케일 (Grayscale)
 
-화면을 흑백으로 변환합니다.
+이미지를 흑백으로 변환하여 고전적인 분위기를 연출합니다.
 
 <ClientOnly>
 <CodePen title="RedGPU PostEffect - Grayscale" slugHash="posteffect-grayscale">
@@ -119,42 +120,45 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
----
+## 3. 전체 지원 목록
 
-## 3. 지원 이펙트 목록
+RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트는 `RedGPU.PostEffect` 네임스페이스 하위에 위치합니다.
 
-모든 일반 이펙트는 `RedGPU.PostEffect` 네임스페이스 하위에 위치합니다.
+| 카테고리             | 클래스 명              | 설명                                           |
+|:---------------------|:-----------------------|:-----------------------------------------------|
+| **`Blur`**           | `Blur`, `GaussianBlur` | 가우시안 블러 (가장 일반적인 흐림 효과)        |
+|                      | `BlurX`, `BlurY`       | 단방향(가로/세로) 블러                         |
+|                      | `DirectionalBlur`      | 지정된 각도 방향으로 흐려지는 효과             |
+|                      | `RadialBlur`           | 중심에서 바깥쪽으로 원형으로 흐려지는 효과     |
+|                      | `ZoomBlur`             | 중심에서 바깥쪽으로 확대되며 흐려지는 효과     |
+| **Adjustments**      | `BrightnessContrast`   | 밝기와 대비 조절                               |
+|                      | `HueSaturation`        | 색조와 채도 조절                               |
+|                      | `ColorBalance`         | 색상 균형(미드톤, 쉐도우, 하이라이트) 조절     |
+|                      | `ColorTemperatureTint` | 색온도와 틴트 조절                             |
+|                      | `Vibrance`             | 활기(채도가 낮은 부분 위주로 보정) 조절        |
+|                      | `Grayscale`            | 흑백 이미지로 변환                             |
+|                      | `Invert`               | 색상 반전                                      |
+|                      | `Threshold`            | 임계값을 기준으로 이진화                       |
+| **Lens**             | `OldBloom`             | 클래식한 빛 번짐 효과                          |
+|                      | `DOF`                  | 피사계 심도 (초점 외 영역 블러)                |
+|                      | `Vignetting`           | 화면 외곽을 어둡게 처리하는 효과               |
+|                      | `ChromaticAberration`  | 렌즈의 색수차 현상 재현                        |
+|                      | `LensDistortion`       | 렌즈 왜곡 효과                                 |
+| **Atmospheric**      | `Fog`                  | 거리 기반 안개 효과                            |
+|                      | `HeightFog`            | 높이 기반 안개 효과                            |
+| **Visual / Utility** | `FilmGrain`            | 필름 노이즈(그레인) 효과                       |
+|                      | `Sharpen`              | 선명도 강조                                    |
+|                      | `Convolution`          | 커널 기반 필터 (Sharpen, Edge, Emboss 등 지원) |
 
-| 카테고리             | 클래스명               | 설명                                               |
-|:---------------------|:-----------------------|:---------------------------------------------------|
-| **Blur**             | `Blur`, `GaussianBlur` | 가우시안 블러                                      |
-|                      | `BlurX`, `BlurY`       | 단방향(가로/세로) 블러                             |
-|                      | `DirectionalBlur`      | 지정된 각도 방향 블러                              |
-|                      | `RadialBlur`           | 중심에서 바깥쪽으로 원형 블러                      |
-|                      | `ZoomBlur`             | 중심에서 바깥쪽으로 확대 블러                      |
-| **Adjustments**      | `BrightnessContrast`   | 밝기와 대비 조절                                   |
-|                      | `HueSaturation`        | 색조와 채도 조절                                   |
-|                      | `ColorBalance`         | 색상 균형(미드톤, 쉐도우, 하이라이트) 조절         |
-|                      | `ColorTemperatureTint` | 색온도와 틴트 조절                                 |
-|                      | `Vibrance`             | 채도가 낮은 영역 위주의 활기 보정                  |
-|                      | `Grayscale`            | 흑백 변환                                          |
-|                      | `Invert`               | 색상 반전                                          |
-|                      | `Threshold`            | 임계값 기준 이진화                                 |
-| **Lens**             | `OldBloom`             | 빛 번짐 효과                                       |
-|                      | `DOF`                  | 피사계 심도 (초점 외 영역 블러)                    |
-|                      | `Vignetting`           | 화면 외곽 어둡게 처리                              |
-|                      | `ChromaticAberration`  | 렌즈 색수차 현상 재현                              |
-|                      | `LensDistortion`       | 렌즈 왜곡 효과                                     |
-| **Atmospheric**      | `Fog`                  | 거리 기반 안개 효과                                |
-|                      | `HeightFog`            | 높이 기반 안개 효과                                |
-| **Visual / Utility** | `FilmGrain`            | 필름 그레인(노이즈) 효과                           |
-|                      | `Sharpen`              | 선명도 강조                                        |
-|                      | `Convolution`          | 커널 기반 컨볼루션 필터 (Sharpen, Edge, Emboss 등) |
-
-::: info [라이브 데모]
-모든 이펙트는 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)의 **PostEffect** 탭에서
-실시간으로 확인할 수 있습니다.
+::: info [라이브 확인]
+위의 모든 이펙트들은 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)의 **PostEffect**
+카테고리에서 실시간 데모로 확인하실 수 있습니다.
 :::
+
+## 핵심 요약
+
+- `addEffect()` 를 사용해 원하는 순서대로 효과를 중첩할 수 있습니다.
+- 실제 렌더링은 톤 매핑 직후 단계에서 수행됩니다.
 
 ---
 
@@ -168,7 +172,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
-## 다음 단계
+## 다음 학습 추천
 
-- **[톤 매핑](./tone-mapping.md)** : HDR에서 LDR로의 색상 변환과 노출 제어
-- **[빌트인 이펙트](./builtin-effects.md)** : `SSAO` 및 `SSR` 설정
+- **[톤 매핑](./tone-mapping.md)**
+- **[빌트인 이펙트](./builtin-effects.md)**

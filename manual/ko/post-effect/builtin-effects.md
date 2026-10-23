@@ -5,44 +5,58 @@ order: 4
 
 # 빌트인 이펙트
 
-**빌트인 이펙트**(Built-in Effects) 는 G-Buffer와 깊이 버퍼 (Depth Buffer)를 직접 참조하여 시스템 내부에서 자동 관리되는 고정 단계 후처리 효과입니다. 별도의 인스턴스 생성이나
-`addEffect()` 호출 없이 `view.postEffectManager` 의 불리언 속성 (`useSSAO`, `useSSR`)만으로 활성화합니다.
+빌트인 이펙트는 성능 최적화와 깊이 버퍼 (Depth Buffer) 활용을 위해 시스템 내부에서 자동으로 관리되는 고성능 후처리 효과입니다.
 
-## 1. SSAO
+## 1. 특징 및 사용 방법
 
-**SSAO**(Screen Space Ambient Occlusion) 는 객체 사이의 구석진 부분이나 겹치는 영역에 미세한 환경 차폐 그림자를 생성하여 입체감을 높입니다.
+일반 이펙트와 달리 사용자가 직접 인스턴스를 생성하거나 `addEffect()` 로 추가하지 않습니다. `PostEffectManager` 의 속성 값을 변경하는 것만으로 즉시 제어할 수 있습니다.
 
+- **접근 경로**: `view.postEffectManager`
+- **활성화 방식**: `useSSAO`, `useSSR` 등의 불리언 (Boolean) 속성 사용
+
+## 2. SSAO
+
+객체 사이의 구석진 부분이나 겹치는 영역에 미세한 그림자를 생성하여 입체감을 극대화합니다.
+
+### 활성화 및 설정
 ```javascript
 // 1. SSAO 활성화
 view.postEffectManager.useSSAO = true;
 
-// 2. 세부 설정
+// 2. 세부 설정 (필요 시)
 const ssao = view.postEffectManager.ssao;
-ssao.radius = 0.5;      // 차폐 탐색 반경
+ssao.radius = 0.5;      // 그림자 반경
 ssao.intensity = 1.0;   // 그림자 강도
-ssao.useBlur = true;    // 노이즈 제거용 블러 사용 여부
+ssao.useBlur = true;    // 그림자 노이즈 제거를 위한 블러 사용 여부
 ```
 
----
+## 3. SSR
 
-## 2. SSR
-
-**SSR**(Screen Space Reflection) 은 화면 공간의 색상·깊이·법선 정보를 활용하여 바닥이나 벽면 등에 실시간 반사를 구현합니다.
+화면상의 정보를 활용하여 실시간 반사를 구현합니다. 바닥이나 벽면에 주변 환경이 비치는 효과를 낼 때 효과적입니다.
 
 ::: warning [실험적 기능]
-현재 SSR은 실험적 기능입니다. 사용 환경에 따라 노이즈나 화면 밖 영역의 반사 누락이 발생할 수 있으므로 결과물을 확인하며 적용하시기 바랍니다.
+현재 SSR은 실험적인 단계의 기능입니다. 사용 환경에 따라 노이즈나 시각적 한계가 발생할 수 있으므로, 결과물을 확인하며 신중하게 적용하시기 바랍니다.
 :::
 
+### 활성화 및 설정
 ```javascript
 // 1. SSR 활성화
 view.postEffectManager.useSSR = true;
 
-// 2. 세부 설정
+// 2. 세부 설정 (필요 시)
 const ssr = view.postEffectManager.ssr;
 ssr.reflectionIntensity = 1.0; // 반사 강도
 ssr.maxDistance = 15.0;        // 최대 반사 추적 거리
-ssr.maxSteps = 64;             // 레이 마칭 계산 정밀도 (스텝 수)
+ssr.maxSteps = 64;             // 반사 계산 정밀도 (스텝 수)
 ```
+
+## 핵심 요약
+
+- 빌트인 이펙트는 **속성 설정** 만으로 활성화되는 고정 단계 효과입니다.
+
+- 시스템 내부에서 깊이 정보를 공유하므로 직접 구현하는 것보다 성능 면에서 유리합니다.
+
+- `useSSAO`, `useSSR` 속성을 통해 개별적으로 제어할 수 있습니다.
 
 ---
 
@@ -53,6 +67,6 @@ ssr.maxSteps = 64;             // 레이 마칭 계산 정밀도 (스텝 수)
 
 ---
 
-## 다음 단계
+## 다음 학습 추천
 
-- **[LOD](../lod/index.md)** : 카메라 거리에 따른 메시 정밀도 최적화
+- **[LOD](../lod/index.md)**

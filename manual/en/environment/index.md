@@ -5,22 +5,34 @@ order: 6
 
 # Environment
 
-RedGPU provides realistic spatial environments through 3D scene background rendering, image-based global illumination,
-physically based atmospheric scattering, and a global wind system.
+Now that shadows have been applied and a sense of three-dimensionality has been formed, it's time to add infinite
+backgrounds and photorealistic light information. RedGPU provides the following features to maximize the realism of 3D
+scenes:
+
+- **`SkyBox`**: Represents the infinite background of the scene.
+- **Image-Based Lighting (`IBL`)**: Uses surrounding environment images as light sources for physical reflections and
+  global lighting.
+- **`SkyAtmosphere`**: Simulates real-time physically-based atmospheric scattering.
+- **`WindManager`**: Controls global wind direction and speed across the scene.
+
+> [!NOTE]
+> **Tone Mapping**, which fine-tunes the final color scheme of the screen, will be covered in detail in the later
+> post-effects section.
 
 ## Main Learning Topics
 
-- **[SkyBox](./skybox.md)**: Renders an infinite 360-degree scene background using a cubemap or HDR environment texture
-  (`SkyBox`).
-- **[IBL](./ibl.md)**: Analyzes surrounding environment images to apply realistic reflections and diffuse ambient
-  lighting to PBR materials (`IBL`).
-- **[SkyAtmosphere](./skyatmosphere.md)**: Simulates real-time atmospheric scattering and aerial perspective based on
-  sun elevation and atmospheric density (`SkyAtmosphere`).
-- **[Global Wind System](./wind.md)**: Controls wind direction, speed, and strength across foliage, grass, and water
-  surfaces via `scene.windManager` (`WindManager`).
+- **[SkyBox](./skybox.md)**: Fills the scene background with 360-degree textures to provide a vast sense of space.
+- **[IBL](./ibl.md)**: Analyzes light information from the surrounding environment to apply realistic reflection and
+  lighting to objects.
+- **[SkyAtmosphere](./skyatmosphere.md)**: Provides a real-time, physically-based atmospheric scattering simulation to
+  add dynamic sky and atmosphere scattering effects to the scene.
+- **[WindManager](./wind.md)**: Controls global wind direction and speed to drive natural motion in `Grass`, foliage,
+  and `Water`.
 
-> [!NOTE]
-> **Tone Mapping**, which fine-tunes the final screen color balance, is covered in the Post-Effects section.
+::: info [Learning Guide]
+First, we will look at `SkyBox`, which defines the background of the space, then `IBL`, where the background acts as
+actual lighting on objects, and finally `SkyAtmosphere` for real-time physical simulation of atmospheric scattering.
+:::
 
 ---
 
@@ -32,6 +44,4 @@ physically based atmospheric scattering, and a global wind system.
 
 ---
 
-## Next Steps
-
-- **[SkyBox](./skybox.md)**: Configuring 360-degree background cubemaps and skybox transitions
+[Next Step: Learn SkyBox](./skybox.md)

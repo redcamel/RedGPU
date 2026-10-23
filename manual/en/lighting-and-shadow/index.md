@@ -5,20 +5,14 @@ order: 5
 
 # Lighting & Shadow
 
-Covers light sources (`Light`), lighting materials (`PhongMaterial`, `PBRMaterial`), and the shadow (`Shadow`) system
-that create depth and realism in 3D space.
+Covers lighting and shadows, key elements that complete the sense of three-dimensionality and realism in 3D space.
 
----
+## Learning Topics
 
-## Learning Roadmap
-
-1. **[Light](./light.md)**: Physical light units (`Lux`, `Lumen`), characteristics of the 4 light types, and
-   `LightManager` usage
-2. **[Phong Material](./phong-material.md)**: Diffuse/specular lighting models and multi-texture maps (`Normal`,
-   `Specular`, `Displacement`, etc.)
-3. **[Shadow System](./shadow.md)**: Cascaded Shadow Maps (CSM), PCSS soft shadow principles, and quality configuration
-4. **[PBR Material](./pbr-material.md)**: Metallic-Roughness workflow and glTF KHR extension-based physically based
-   materials
+1. **[Light](./light.md)**: Types of various light sources and how to use the light manager (`LightManager`)
+2. **[Phong Material](./phong-material.md)**: Learning properties of realistic materials reacting to light
+3. **[PBR Material](./pbr-material.md)**: Understanding the Physically Based Rendering (PBR) material system
+4. **[Shadow](./shadow.md)**: Shadow generation principles and quality settings
 
 ---
 
@@ -32,6 +26,4 @@ that create depth and realism in 3D space.
 
 ---
 
-## Next Steps
-
-- **[Light](./light.md)**: Creating light sources and registering them in `LightManager`
+[Next Step: Learn Light](./light.md)

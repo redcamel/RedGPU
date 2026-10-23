@@ -17,62 +17,78 @@ const skyAtmosphereGraph = `
 
 # SkyAtmosphere
 
-`SkyAtmosphere` is a physically based atmospheric simulation system that computes
-Rayleigh scattering, Mie scattering, and Ozone absorption in real time to render dynamic sky colors and aerial
-perspective effects.
+**`SkyAtmosphere`** is a physically-based atmospheric scattering simulation system. It calculates Rayleigh scattering,
+Mie
+scattering, and Ozone absorption in real time to provide realistic skies, evening sunsets, and aerial perspective
+effects based on altitude and distance.
 
 <ClientOnly>
   <MermaidResponsive :definition="skyAtmosphereGraph" />
 </ClientOnly>
 
-## 1. Key Features and Comparison
+## 1. Main Features
 
-- **Real-time Scattering & IBL Integration**: Generates dedicated LUTs (Transmittance, SkyView, MultiScattering) and sky
-  lighting based on sun elevation and atmospheric density, providing real-time ambient light to PBR objects in the
-  scene.
-- **Aerial Perspective**: Synthesizes distance-based atmospheric color attenuation and scattering as a post-effect using
-  scene depth.
-
-| Category               | SkyBox                                     | SkyAtmosphere                                         |
-|:-----------------------|:-------------------------------------------|:------------------------------------------------------|
-| **Method**             | Static image-based (`CubeTexture` / `IBL`) | Real-time physical calculation (LUT-based)            |
-| **Sun Responsiveness** | No (Static background image)               | Yes (Real-time color changes with sun direction)      |
-| **Aerial Perspective** | No                                         | Yes (Distance-based atmospheric scattering)           |
-| **Primary Usage**      | Outer space, indoors, fixed backgrounds    | Open-world outdoor scenes, dynamic time-of-day scenes |
+* **Real-time Physically Based Simulation**: The color of the sky changes naturally in real time according to the sun's
+  altitude (light direction) and atmospheric density.
+* **Atmospheric IBL Integration**: Analyzes the atmospheric state to generate dedicated LUTs (Transmittance, SkyView,
+  MultiScattering, etc.) and atmospheric light (SkyLight), providing real-time atmospheric light information to other
+  PBR objects in the scene.
+* **Aerial Perspective**: Synthesizes color attenuation and scattering caused by the atmosphere as a post-effect based
+  on the depth information of objects to maximize the sense of space.
+* **Integrated Control**: By simply setting it on `View3D`, background rendering, IBL reflection updates, and
+  post-effect processing are activated all at once.
 
 ---
 
-## 2. Basic Usage and Sun Angle Control
+## 2. Basic Usage
 
-`SkyAtmosphere` uses the **first `DirectionalLight`** added to the `Scene` as the sun light source. Assigning it to
-`view.skyAtmosphere` automatically activates background rendering, atmospheric IBL, and aerial perspective at once.
+SkyAtmosphere uses the **first DirectionalLight** added to the Scene as the sun light source to compute atmospheric
+scattering in real time.
+The entire pipeline is automatically applied to `SkyAtmosphere` simply by assigning it to the `skyAtmosphere` property
+of `View3D` without complex manual settings.
 
 ```javascript
+// 1. Create a SkyAtmosphere instance
 const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+
+// 2. Set to View (Automatically applies background and atmospheric post-effects)
 view.skyAtmosphere = skyAtmosphere;
 ```
 
-Simulate time-of-day changes by modifying the `direction` vector or angle properties of the first `DirectionalLight`:
+---
 
-- **`elevation`** (`-90` to `90`): Vertical sun altitude angle in degrees. `90` represents noon (blue sky), `0` to `10`
-  represents sunrise/sunset (red glow), and negative values represent night below the horizon.
-- **`azimuth`** (`0` to `360`): Horizontal rotation angle in degrees as the sun moves from east to west.
+## 3. Controlling Sun Angle (DirectionalLight Integration)
+
+The sun's position can be intuitively changed by controlling the angle properties of the first `DirectionalLight`
+instance added to the scene. Instead of changing vector data directly, you can easily simulate time-of-day changes using
+angle (degree) properties.
+
+* **`elevation`**: Adjusts the sun's vertical altitude angle (degrees, `-90` to `90`).
+  * `90`: Represents noon with the sun directly overhead, rendering a blue sky.
+  * `0` to `10`: Represents sunrise/sunset with the sun on the horizon, rendering a red glow.
+  * Negative values (e.g., `-10`): Represents a night state with the sun below the horizon.
+* **`azimuth`**: Adjusts the horizontal rotation angle (degrees, `0` to `360`) as the sun moves from east to west.
 
 ```javascript
+// Adjust the sun's position by changing the elevation and azimuth directly
 sunLight.elevation = 5;  // Render a red sunset glow
 sunLight.azimuth = 180;
 ```
 
-> [!TIP]
-> For detailed physical parameters such as Rayleigh/Mie scattering colors (`ColorRGB`) and scale multipliers (`*Scale`),
-ozone absorption (`absorption`, `absorptionScale`), ground radius (`groundRadius`), and clouds (`cloudCoverage`,
-`cloudDensity`), refer to the `SkyAtmosphere` API documentation.
+::: tip [Controlling Other Physical Parameters]
+More detailed atmospheric simulation physical parameters, such as Rayleigh/Mie scattering coefficients, ozone absorption
+rate, ground radius, and cloud density, can be adjusted directly through the properties of the `SkyAtmosphere` instance.
+Please refer to
+the [SkyAtmosphere API Reference](../api/RedGPU-API/namespaces/RedGPU/namespaces/Display/classes/SkyAtmosphere.md) for
+details.
+:::
 
 ---
 
-## 3. Example Code
+## 4. Example Code
 
-The following example updates the atmospheric state in real time as the `DirectionalLight` direction changes.
+The following example shows how the sky's atmospheric state changes in real time in response to changes in the direction
+of `DirectionalLight` (the sun's movement).
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -86,26 +102,41 @@ RedGPU.init(canvas, (redGPUContext) => {
     const sunLight = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(sunLight);
 
-  // 2. Create SkyAtmosphere and assign to View
+    // 2. Create and apply SkyAtmosphere
     const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+    
+    // 3. Configure Camera and View
     const controller = new RedGPU.Camera.OrbitController(redGPUContext);
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+    
+    // 4. Set the atmospheric system to the View
     view.skyAtmosphere = skyAtmosphere;
     redGPUContext.addView(view);
 
-  // 3. Update sun altitude (light direction) every frame
+    // 5. Update sun altitude (light direction) every frame
     let time = 0;
     const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, (timeDelta) => {
         time += timeDelta * 0.001;
-
-      // Simulate sun trajectory from east to west (negative y represents night)
+        
+        // Simulate a trajectory where the sun rises in the east and sets in the west
         const x = Math.cos(time);
-      const y = Math.sin(time);
+        const y = Math.sin(time); // When y becomes negative, night (darkness after sunset) is expressed.
         sunLight.direction = [x, y, 0];
     });
 });
 ```
+
+---
+
+## 5. Comparison with Skybox
+
+| Category               | Skybox                                           | SkyAtmosphere                                                                  |
+|:-----------------------|:-------------------------------------------------|:-------------------------------------------------------------------------------|
+| **Method**             | Static image based (CubeMap / IBL)               | Real-time physical mathematical calculation (LUT-based)                        |
+| **Sun Responsiveness** | No (Background image is static)                  | Yes (Real-time color change according to the sun's direction)                  |
+| **Aerial Perspective** | No                                               | Yes (Differential application of atmospheric effects based on object distance) |
+| **Suitable Usage**     | Outer space, indoors, specific fixed backgrounds | Vast open-world outdoor scenes, real-time time-of-day change scenes            |
 
 ---
 
@@ -119,4 +150,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-- **[Global Wind System](./wind.md)**: Controlling scene-wide wind direction and strength with `WindManager`
+Based on the objects and environment settings learned so far, let's explore more deeply how to load and control models
+in actual projects.
+
+- **[Global Wind System (WindManager)](./wind.md)**

@@ -30,7 +30,7 @@ realistic 3D objects. In RedGPU, image files are loaded as **BitmapTexture** and
 ## 1. Loading Images: BitmapTexture
 
 To use an image in a 3D engine, you must first convert it into a texture object. Using
-**RedGPU.Resource.BitmapTexture**, you can create texture data from an image path on the web.
+`BitmapTexture`, you can create texture data from an image path on the web.
 
 ```javascript
 // Create texture data by specifying the image path
@@ -40,40 +40,13 @@ const texture = new RedGPU.Resource.BitmapTexture(
 );
 ```
 
-### BitmapTexture Constructor Parameter Options
-
-```typescript
-constructor(
-    redGPUContext
-:
-RedGPUContext,
-    src ? : string | {src: string, cacheKey: string},
-    useMipMap
-:
-boolean = true,
-    onLoad ? : (textureInstance?: BitmapTexture) => void,
-    onError ? : (error: Error) => void,
-    format ? : GPUTextureFormat,
-    usePremultiplyAlpha
-:
-boolean = false
-)
-```
-
-| Parameter                 | Type                                | Description                                                                                     |
-|:--------------------------|:------------------------------------|:------------------------------------------------------------------------------------------------|
-| **`redGPUContext`**       | `RedGPUContext`                     | Engine context instance (Required)                                                              |
-| **`src`**                 | `string` or `{ src, cacheKey }`     | URL path of the image to load, or a source object with a defined cache key                      |
-| **`useMipMap`**           | `boolean` (Default: `true`)         | Whether to enable multi-level mipmap generation to prevent distance distortion                  |
-| **`onLoad`**              | `(texture?: BitmapTexture) => void` | Callback function when the image resource loading and GPU texture conversion are fully complete |
-| **`onError`**             | `(error: Error) => void`            | Callback function when an exception occurs, such as image network load failure                  |
-| **`usePremultiplyAlpha`** | `boolean` (Default: `false`)        | Whether to use premultiplied alpha format with alpha channel values pre-multiplied              |
-
----
+> [!TIP]
+> `BitmapTexture` loads images asynchronously and automatically displays the texture on the screen as soon as loading
+completes, without requiring separate loading-check logic.
 
 ## 2. Applying to Material: BitmapMaterial
 
-The loaded texture is used as the mesh's appearance through **BitmapMaterial**. You can specify it directly in the
+The loaded texture is used as the mesh's appearance through `BitmapMaterial`. You can specify it directly in the
 constructor or assign it to the `diffuseTexture` property.
 
 ```javascript
@@ -84,15 +57,7 @@ const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
 const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 ```
 
-## 3. Understanding Asynchronous Loading
-
-Image files take time to load because they are downloaded over the network. RedGPU remains in a default state while the
-image is loading and **automatically displays the texture on the screen as soon as loading is complete**.
-
-This is highly convenient because the engine manages the state internally, so developers don't have to write separate
-logic to check for loading completion.
-
-## 4. Practice: Creating a Textured Box
+## 3. Practice: Creating a Textured Box
 
 Let's load a real image and apply it to a rotating box.
 

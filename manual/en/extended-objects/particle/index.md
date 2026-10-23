@@ -5,13 +5,13 @@ order: 5
 
 # Particle & Line
 
-Covers `ParticleEmitter`, which simulates tens of thousands of particles in parallel using GPU compute shaders, and
-`Line3D` / `Line2D`, which connect vertices in 3D or 2D space with straight lines or smooth curves.
+RedGPU provides `ParticleEmitter`, which simulates tens of thousands of particles in parallel using GPU compute
+shaders, and `Line3D`, which connects vertices in 3D or 2D space with straight lines or smooth curves.
 
-## 1. GPU Particle System
+## 1. GPU Particle System (`ParticleEmitter`)
 
-`ParticleEmitter` simulates and renders large-scale particle effects—such as fire,
-smoke, snow, and magic spells—in real time on the GPU (Compute Shader) with zero CPU overhead.
+`RedGPU.Display.ParticleEmitter` simulates and renders large-scale particle effects—such as fire, smoke, snow, and magic
+spells—in real time on the GPU (**Compute Shader**) with zero CPU overhead.
 
 | Property                                  | Default         | Description                                                                                         |
 |:------------------------------------------|:----------------|:----------------------------------------------------------------------------------------------------|
@@ -43,16 +43,16 @@ scene.addChild(emitter);
 
 ---
 
-## 2. 3D/2D Line and Spline Renderer
+## 2. 3D/2D Line and Spline Renderer (`Line3D` / `Line2D`)
 
-`Line3D` (`RedGPU.Display.Line3D`, or `RedGPU.Display.Line2D` in 2D views) connects spatial points (`addPoint`) into
-straight lines, Bezier curves, or Catmull-Rom splines.
+`RedGPU.Display.Line3D` (or `RedGPU.Display.Line2D` in 2D views) connects spatial points (`addPoint`) into straight
+lines (`LINEAR`), Bezier curves (`BEZIER`), or Catmull-Rom splines (`CATMULL_ROM`).
 
-| Line Type                   | Description                                                                                                |
-|:----------------------------|:-----------------------------------------------------------------------------------------------------------|
-| **`LINE_TYPE.LINEAR`**      | Connects added points directly with straight segments.                                                     |
-| **`LINE_TYPE.CATMULL_ROM`** | Generates a smooth spline curve passing through all control points; curvature is controlled via `tension`. |
-| **`LINE_TYPE.BEZIER`**      | Draws Bezier curves using in/out tangent control points (`inX/Y/Z`, `outX/Y/Z`).                           |
+| Line Type (`RedGPU.Display.LINE_TYPE`) | Description                                                                                                |
+|:---------------------------------------|:-----------------------------------------------------------------------------------------------------------|
+| **`LINE_TYPE.LINEAR`**                 | Connects added points directly with straight segments.                                                     |
+| **`LINE_TYPE.CATMULL_ROM`**            | Generates a smooth spline curve passing through all control points; curvature is controlled via `tension`. |
+| **`LINE_TYPE.BEZIER`**                 | Draws precise Bezier curves using in/out tangent control points (`inX/Y/Z`, `outX/Y/Z`).                   |
 
 ```javascript
 // Create a Catmull-Rom spline Line3D
@@ -72,6 +72,15 @@ scene.addChild(line);
 
 ---
 
+## Next Step
+
+After exploring extended objects, learn how the interaction system lets users click and control objects in the scene
+with mouse and touch input.
+
+- **[Interaction](../../interaction/index.md)**
+
+---
+
 ## Related Examples
 
 - [GPU Particle Basics](/RedGPU/examples/3d/particle/basic/)
@@ -79,10 +88,3 @@ scene.addChild(line);
 - [Line3D Linear](/RedGPU/examples/3d/line3D/linear/)
 - [Line3D Bezier Curve](/RedGPU/examples/3d/line3D/bezier/)
 - [Line3D Catmull-Rom Spline](/RedGPU/examples/3d/line3D/catmullRom/)
-
----
-
-## Next Steps
-
-- **[Interaction](../../interaction/index.md)**: Event system for clicking and controlling scene objects via mouse and
-  touch input

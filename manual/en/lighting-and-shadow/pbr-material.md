@@ -5,12 +5,12 @@ order: 4
 
 # PBR Material
 
-`PBRMaterial` is a Physically Based Rendering material built on energy conservation and microfacet theory, simulating
-real-world surface properties such as `metallicFactor`, `roughnessFactor`, refraction, and multi-layer clearcoat. It is
-automatically created when loading `.gltf` / `.glb` models via `GLTFLoader` and can also be instantiated directly for
-primitives or custom meshes.
+**`PBRMaterial`** is a **Physically Based Rendering** material built on energy
+conservation and microfacet theory, accurately simulating real-world physical surface properties such as **Metallic**,
+**Roughness**, refraction, and multi-layer clearcoat.
 
----
+It is automatically created and assigned when loading external `.gltf` / `.glb` models with `GLTFLoader`, and can also
+be instantiated directly via `new RedGPU.Material.PBRMaterial(redGPUContext)` to apply to primitives or custom meshes.
 
 ## 1. Core PBR Properties and Texture Channels
 
@@ -35,6 +35,8 @@ primitives or custom meshes.
 
 ```javascript
 const pbrMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+
+// Example: Smooth golden metal material
 pbrMaterial.baseColorFactor = [1.0, 0.85, 0.35, 1.0];
 pbrMaterial.metallicFactor = 1.0;
 pbrMaterial.roughnessFactor = 0.15;
@@ -47,14 +49,17 @@ const sphere = new RedGPU.Display.Mesh(
 scene.addChild(sphere);
 ```
 
-> [!TIP]
-> Metallic surfaces (high `metallicFactor`) and smooth surfaces express their material quality by reflecting their
-surroundings. Configure **[IBL](../environment/ibl.md)** on `view.ibl` or enable
-**[SkyAtmosphere](../environment/skyatmosphere.md)** for optimal results.
+::: tip [Recommended: Use with IBL Environment Lighting]
+Metallic surfaces (high `metallicFactor`) and smooth surfaces express their material quality by reflecting their
+surroundings. To get the best results from `PBRMaterial`, configure
+**[IBL (Image-Based Lighting)](../environment/ibl.md)** on `view.ibl` or enable
+**[SkyAtmosphere](../environment/skyatmosphere.md)**.
+:::
 
----
+## 2. Supported glTF KHR Advanced Material Extensions
 
-## 2. Supported glTF KHR Material Extensions
+Beyond the baseline Metallic-Roughness model, RedGPU's `PBRMaterial` supports a wide range of official Khronos (`KHR`)
+extensions for rendering glass, automotive clearcoat paint, velvet fabric, and thin-film iridescence.
 
 | KHR Extension                            | Key Control Properties                                                                              | Example Materials                                                                |
 |:-----------------------------------------|:----------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------|
@@ -71,6 +76,15 @@ surroundings. Configure **[IBL](../environment/ibl.md)** on `view.ibl` or enable
 
 ---
 
+## Next Step
+
+With lighting, physically based materials, and shadows in place, learn how to add infinite backgrounds and realistic
+environment lighting to your scene.
+
+- **[Environment](../environment/index.md)**
+
+---
+
 ## Related Examples
 
 - [Metallic-Roughness Spheres](/RedGPU/examples/gltf/basic/metalRoughSpheres/)
@@ -78,10 +92,3 @@ surroundings. Configure **[IBL](../environment/ibl.md)** on `view.ibl` or enable
 - [Clearcoat](/RedGPU/examples/gltf/gltfExtensions/clearcoat/clearCoatCarPaint/)
 - [Sheen](/RedGPU/examples/gltf/gltfExtensions/sheen/glamVelvetSofa/)
 - [Iridescence](/RedGPU/examples/gltf/gltfExtensions/iridescence/iridescenceLamp/)
-
----
-
-## Next Steps
-
-- **[Environment](../environment/index.md)**: Configuring backgrounds and environment lighting with `IBL`, `SkyBox`, and
-  `SkyAtmosphere`

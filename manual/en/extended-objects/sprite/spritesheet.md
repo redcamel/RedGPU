@@ -5,15 +5,21 @@ order: 3
 
 # SpriteSheet3D
 
-`SpriteSheet3D` is a 3D display object that divides a grid-based **Sprite Sheet**
-texture into designated segments and plays its frames sequentially.
+**`SpriteSheet3D`** is an object that implements continuous motion in 3D space using a **Sprite Sheet** containing
+multiple animation frames in a single image. It is useful when placing dynamic 2D animations such as explosion effects,
+flames, or walking characters in 3D space.
+
+## 1. Understanding Sprite Sheets
+
+A sprite sheet is a single large texture with multiple frame images arranged in a grid. RedGPU completes the animation
+by dividing this texture into designated segments and displaying them sequentially frame by frame.
 
 ![SpriteSheet Image](https://redcamel.github.io/RedGPU/examples/assets/spriteSheet/spriteSheet.png)
 
-## 1. Basic Usage
+## 2. Basic Usage
 
-Create a `SpriteSheetInfo` instance defining the grid layout and playback speed, then pass it to the `SpriteSheet3D`
-constructor.
+To use a sprite sheet, you must first create a `SpriteSheetInfo` object that defines the structure of the sheet and then
+pass it to `SpriteSheet3D`.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -34,21 +40,32 @@ const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
 scene.addChild(spriteSheet);
 ```
 
----
+## 3. Key Property Control
 
-## 2. Animation and Size Control
+Key properties controlling the playback state and the size of the sprite.
 
-Provides frame playback control methods alongside the same billboard and sizing properties as `Sprite3D`.
+### Animation Control
 
-| Property / Method             | Default | Description                                                                                 |
-|:------------------------------|:--------|:--------------------------------------------------------------------------------------------|
-| **`play()` / `stop()`**       | -       | Starts animation playback or pauses at the current frame.                                   |
-| **`gotoAndPlay(frameIndex)`** | -       | Moves to the specified frame index and plays immediately.                                   |
-| **`gotoAndStop(frameIndex)`** | -       | Moves to the specified frame index and pauses.                                              |
-| **`useBillboard`**            | `true`  | Whether the sprite sheet always faces the camera                                            |
-| **`worldSize`**               | `1`     | Vertical height in world units when `usePixelSize` is `false`                               |
-| **`usePixelSize`**            | `false` | Enables fixed pixel size mode (`true` renders at `pixelSize` regardless of camera distance) |
-| **`pixelSize`**               | `0`     | Fixed vertical height in screen pixels (`px`) when `usePixelSize` is `true`                 |
+- **`play()`**: Starts the animation.
+- **`stop()`**: Pauses the animation at the current frame.
+- **`gotoAndPlay(frameIndex)`**: Moves to the specified frame and plays immediately.
+- **`gotoAndStop(frameIndex)`**: Moves to the specified frame and stops.
+
+### Billboard Settings
+
+| Property Name      | Description                       | Default Value |
+|:-------------------|:----------------------------------|:--------------|
+| **`useBillboard`** | Whether to always face the camera | `true`        |
+
+### Size and Rendering Mode
+
+`SpriteSheet3D` provides the same size setting options as `Sprite3D`.
+
+| Property Name      | Description                           | Default Value |
+|:-------------------|:--------------------------------------|:--------------|
+| **`worldSize`**    | Vertical size in world space (Unit).  | `1`           |
+| **`usePixelSize`** | Whether to use fixed pixel size mode. | `false`       |
+| **`pixelSize`**    | Fixed pixel size value (in `px`).     | `0`           |
 
 ```javascript
 // Display character animation at a fixed pixel size
@@ -56,13 +73,18 @@ spriteSheet.usePixelSize = true;
 spriteSheet.pixelSize = 128;
 ```
 
-> For details on how `worldSize` and `usePixelSize` interact, refer to the **[Sprite3D manual](./sprite.md)**.
+### 3.3 Size Setting Policy
 
----
+`SpriteSheet3D` shares the same size setting mechanism as `Sprite3D`. It supports physical size setting in 3D space
+through `worldSize` and absolute pixel size setting on the screen through `usePixelSize`.
 
-## 3. Practical Example: Character Sprite Animation
+For detailed differences between modes and operating principles, please refer to the
+**[Size Relationship section of the Sprite3D manual](./sprite.md#_3-3-relationship-between-world-size-and-pixel-size)**.
 
-Plays a 5x3 grid sprite sheet (`SpriteSheetInfo`) in both world size mode and fixed pixel size mode.
+## 4. Practical Example: Walking Character Animation
+
+See how a grid-type sheet image transforms into a natural character motion through `SpriteSheet3D` and **Billboard**
+settings.
 
 <ClientOnly>
 <CodePen title="RedGPU - SpriteSheet3D Animation" slugHash="spritesheet3d-basic">
@@ -133,6 +155,15 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## Key Summary
+
+- **`SpriteSheetInfo`**: Defines image source, sheet grid structure (Segments), animation speed (FPS), etc.
+- **Animation Control**: Control visual flow through methods like `play`, `stop`, `gotoAndPlay`.
+- **Efficiency**: Beneficial in terms of network overhead and GPU memory management by using a single sheet file instead
+  of loading multiple images individually.
+
+---
+
 ## Related Examples
 
 - [SpriteSheet3D Basics](/RedGPU/examples/3d/sprite/spriteSheet3D/)
@@ -143,4 +174,6 @@ const scene = new RedGPU.Display.Scene ();
 
 ## Next Steps
 
-- **[TextField3D](../text-field/textfield3d.md)**: Constructing and placing text labels in 3D space
+Learn how to construct and place three-dimensional text labels within 3D space.
+
+- **[TextField3D](../text-field/textfield3d.md)**

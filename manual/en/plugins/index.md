@@ -1,20 +1,20 @@
 ---
 title: Plugins
-order: 14
+order: 11
 ---
 
 # Plugins
 
-RedGPU's **Plugin System** is an interface for integrating external extension modules—such as WASM-based physics
-engines—into `Scene` and the rendering loop while keeping the core engine bundle lightweight.
+RedGPU supports a **Plugin System** to extend the core functionality of the engine and facilitate integration with
+external libraries.
 
----
+Currently, the following official plugin is provided.
 
 ## Available Plugins
 
-| Plugin                             | Core Class      | Description                                                                                                                        |
-|:-----------------------------------|:----------------|:-----------------------------------------------------------------------------------------------------------------------------------|
-| **[Physics Plugin](./physics.md)** | `RapierPhysics` | Integrates the WASM-based Rapier physics engine for rigid body simulation, collision detection, character controllers, and joints. |
+| Plugin                               | Description                                             |
+|:-------------------------------------|:--------------------------------------------------------|
+| **[Physics (Rapier)](./physics.md)** | Supports high-performance WASM-based physics simulation |
 
 ---
 
@@ -26,6 +26,4 @@ engines—into `Scene` and the rendering loop while keeping the core engine bund
 
 ---
 
-## Next Steps
-
-- **[Physics Plugin](./physics.md)**: Initializing `RapierPhysics` and binding physics bodies (`createBody`)
+[Next Step: Learn Physics Plugin](./physics.md)

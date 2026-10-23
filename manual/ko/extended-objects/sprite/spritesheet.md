@@ -5,14 +5,18 @@ order: 3
 
 # SpriteSheet3D
 
-`SpriteSheet3D` 는 격자 형태로 여러 애니메이션 프레임이 나열된 **스프라이트 시트**(Sprite Sheet) 텍스처를 지정된 구획 (Segment)으로 나누어 순차 재생하는 3D 디스플레이
-객체입니다.
+**`SpriteSheet3D`** 는 하나의 이미지에 여러 애니메이션 프레임이 포함된 **스프라이트 시트**(Sprite Sheet) 를 사용하여 3D 공간 내에서 연속된 동작을 구현하는 객체입니다. 폭발 효과,
+불꽃, 걷는 캐릭터 등 역동적인 2D 애니메이션을 3D 공간에 배치할 때 유용합니다.
+
+## 1. 스프라이트 시트 이해
+
+스프라이트 시트는 여러 프레임의 이미지를 격자 형태로 나열한 하나의 커다란 텍스처입니다. RedGPU는 이 텍스처를 지정된 구획 (Segment)으로 나누어 프레임별로 순차적으로 보여줌으로써 애니메이션을 완성합니다.
 
 ![SpriteSheet Image](https://redcamel.github.io/RedGPU/examples/assets/spriteSheet/spriteSheet.png)
 
-## 1. 기본 사용법
+## 2. 기본 사용법
 
-시트의 격자 구조와 재생 속도를 정의하는 `SpriteSheetInfo` 인스턴스를 생성한 뒤 `SpriteSheet3D` 생성자에 전달합니다.
+스프라이트 시트를 사용하기 위해서는 먼저 시트의 구조를 정의하는 `SpriteSheetInfo` 객체를 생성한 뒤, 이를 `SpriteSheet3D` 에 전달해야 합니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -33,21 +37,32 @@ const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, sheetInfo);
 scene.addChild(spriteSheet);
 ```
 
----
+## 3. 핵심 속성 제어
 
-## 2. 애니메이션 및 크기 제어
+애니메이션 재생 상태 및 스프라이트의 크기를 제어하는 주요 속성들입니다.
 
-프레임 재생 제어 메서드와 함께 `Sprite3D` 와 동일한 빌보드 및 크기 설정 속성을 제공합니다.
+### 애니메이션 제어
 
-| 속성 / 메서드                 | 기본값  | 설명                                                                                 |
-|:------------------------------|:--------|:-------------------------------------------------------------------------------------|
-| **`play()` / `stop()`**       | -       | 애니메이션 재생을 시작하거나 현재 프레임에서 일시 정지합니다.                        |
-| **`gotoAndPlay(frameIndex)`** | -       | 지정한 프레임 인덱스로 이동한 후 즉시 재생합니다.                                    |
-| **`gotoAndStop(frameIndex)`** | -       | 지정한 프레임 인덱스로 이동한 후 정지합니다.                                         |
-| **`useBillboard`**            | `true`  | 카메라를 항상 정면으로 향하게 할지 여부                                              |
-| **`worldSize`**               | `1`     | `usePixelSize: false` 일 때 적용되는 월드 공간 세로 크기(Unit 단위)                  |
-| **`usePixelSize`**            | `false` | 고정 픽셀 크기 모드 사용 여부 (`true` 설정 시 거리에 관계없이 `pixelSize` 로 렌더링) |
-| **`pixelSize`**               | `0`     | `usePixelSize: true` 일 때 적용되는 화면상 고정 픽셀 크기(`px`)                      |
+- **`play()`**: 애니메이션을 시작합니다.
+- **`stop()`**: 현재 프레임에서 애니메이션을 일시 정지합니다.
+- **`gotoAndPlay(frameIndex)`**: 지정한 프레임으로 이동한 즉시 재생합니다.
+- **`gotoAndStop(frameIndex)`**: 지정한 프레임으로 이동한 후 정지합니다.
+
+### 빌보드 설정
+
+| 속성명             | 설명                           | 기본값 |
+|:-------------------|:-------------------------------|:-------|
+| **`useBillboard`** | 카메라를 항상 향하게 할지 여부 | `true` |
+
+### 크기 및 렌더링 모드
+
+`SpriteSheet3D`는 `Sprite3D`와 동일한 크기 설정 옵션을 제공합니다.
+
+| 속성명             | 설명                                   | 기본값  |
+|:-------------------|:---------------------------------------|:--------|
+| **`worldSize`**    | 월드 공간에서의 세로 크기 (Unit 단위). | `1`     |
+| **`usePixelSize`** | 고정 픽셀 크기 모드 사용 여부.         | `false` |
+| **`pixelSize`**    | 고정 픽셀 크기 값 (`px` 단위).         | `0`     |
 
 ```javascript
 // 고정 픽셀 크기로 캐릭터 애니메이션 표시
@@ -55,13 +70,16 @@ spriteSheet.usePixelSize = true;
 spriteSheet.pixelSize = 128;
 ```
 
-> `worldSize` 와 `usePixelSize` 의 상세 동작 원리는 **[Sprite3D 매뉴얼](./sprite.md)** 을 참고하세요.
+### 3.3 크기 설정 정책
 
----
+`SpriteSheet3D`는 `Sprite3D`와 동일한 크기 설정 메커니즘을 공유합니다. `worldSize`를 통한 3D 공간 내 물리 크기 설정과 `usePixelSize`를 통한 화면상 절대 픽셀 크기
+설정을 지원합니다.
 
-## 3. 실습 예제: 캐릭터 스프라이트 애니메이션
+상세한 모드별 차이점과 작동 원리는 **[Sprite3D 매뉴얼의 크기 관계 섹션](./sprite.md#_3-3-월드-사이즈와-픽셀-사이즈의-관계)**을 참조하십시오.
 
-5x3 격자 시트 이미지 (`SpriteSheetInfo`)를 사용하여 월드 크기 모드와 고정 픽셀 크기 모드로 애니메이션을 재생하는 예제입니다.
+## 4. 실습 예제: 걷는 캐릭터 애니메이션
+
+격자 형태의 시트 이미지가 `SpriteSheet3D` 와 **Billboard** 설정을 통해 어떻게 자연스러운 캐릭터 동작으로 변하는지 확인해 봅니다.
 
 <ClientOnly>
 <CodePen title="RedGPU - SpriteSheet3D Animation" slugHash="spritesheet3d-basic">
@@ -132,6 +150,14 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
+## 핵심 요약
+
+- **`SpriteSheetInfo`** : 이미지 소스와 시트의 격자 구조 (Segments), 애니메이션 속도 (FPS) 등을 정의합니다.
+- **애니메이션 제어**: `play`, `stop`, `gotoAndPlay` 등의 메서드를 통해 시각적 흐름을 제어합니다.
+- **효율성**: 여러 장의 이미지를 각각 불러오는 대신 하나의 시트 파일을 사용하므로 네트워크 오버헤드와 GPU 메모리 관리 측면에서 유리합니다.
+
+---
+
 ## 관련 예제
 
 - [SpriteSheet3D 기본](/RedGPU/examples/3d/sprite/spriteSheet3D/)
@@ -140,6 +166,8 @@ const scene = new RedGPU.Display.Scene ();
 
 ---
 
-## 다음 단계
+## 다음 학습 추천
 
-- **[TextField3D](../text-field/textfield3d.md)** : 3D 공간 내에 텍스트 레이블 구성 및 배치하기
+3D 공간 내에 입체적인 텍스트 레이블을 구성하고 배치하는 방법에 대해 알아봅니다.
+
+- **[TextField3D](../text-field/textfield3d.md)**

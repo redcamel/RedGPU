@@ -4,18 +4,18 @@ order: 2
 
 <script setup>
 const iblGraph = `
-    HDR["HDR 원본 (.hdr)"] -->|생성| IBL["RedGPU.Resource.IBL"]
-    Cube["6면 이미지 (CubeMap)"] -->|생성| IBL
+    HDR["HDR Source"] -->|new| IBL["RedGPU.Resource.IBL"]
+    Cube["6 Images (CubeMap)"] -->|new| IBL
     
-    subgraph Outputs ["생성되는 GPU 텍스처"]
-        IBL --> Irradiance["irradianceTexture (난반사 환경광)"]
-        IBL --> Specular["prefilterTexture (정반사 환경광)"]
-        IBL --> Environment["environmentTexture (배경 큐브맵)"]
+    subgraph Outputs ["Generated Resources"]
+        IBL --> Irradiance["irradianceTexture (Diffuse)"]
+        IBL --> Specular["prefilterTexture (Specular)"]
+        IBL --> Environment["environmentTexture (Background)"]
     end
 
-    Irradiance -->|간접 조명| PBR["PBRMaterial"]
-    Specular -->|환경 반사| PBR
-    Environment -->|배경 연결| Skybox["RedGPU.Display.SkyBox"]
+    Irradiance -->|Lighting| PBR["PBR Material"]
+    Specular -->|Reflection| PBR
+    Environment -->|Background| Skybox["RedGPU.Display.SkyBox"]
 
     %% 회색조 스타일 적용
     style HDR fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
@@ -31,31 +31,37 @@ const iblGraph = `
 
 # IBL
 
-**이미지 기반 조명**(IBL, `RedGPU.Resource.IBL`)은 주변 환경 이미지를 광원으로 분석하여 물리 기반 렌더링 (PBR) 재질에 사실적인 반사광과 전역 확산광을 제공하는 리소스입니다.
+IBL은 주변 환경의 이미지를 광원으로 사용하여 물체를 비추는 방식입니다. 단순한 광원만으로는 표현하기 힘든 사실적인 반사와 전역 조명 효과를 제공하여 3D 씬의 사실감을 극대화합니다.
 
-## 1. 핵심 구성 요소
+## 1. IBL의 핵심 구성
 
-`IBL` 은 HDR 환경 맵 또는 큐브맵 이미지를 입력받아 세 가지 큐브 텍스처 리소스를 자동 생성합니다.
+RedGPU의 **이미지 기반 조명**(IBL) 시스템은 HDR 환경 맵 또는 큐브맵 이미지를 분석하여 다음 세 가지 핵심 리소스를 자동으로 생성합니다.
 
 <ClientOnly>
   <MermaidResponsive :definition="iblGraph" />
 </ClientOnly>
 
-| 속성                     | 역할                  | 설명                                                                                                       |
-|:-------------------------|:----------------------|:-----------------------------------------------------------------------------------------------------------|
-| **`irradianceTexture`**  | 확산 주변광 (Diffuse) | 물체의 기본 명암과 주변광(Ambient) 역할을 담당하며 직접 광원이 없는 영역에도 자연스러운 색감을 부여합니다. |
-| **`prefilterTexture`**   | 반사광 (Specular)     | 거칠기(Roughness) 단계별로 프리필터링된 반사 맵으로, 금속이나 유리 표면의 환경 반사를 표현합니다.          |
-| **`environmentTexture`** | 배경 (Background)     | 원본 이미지를 고해상도 큐브맵으로 변환한 텍스처로, `SkyBox` 의 배경 텍스처로 사용됩니다.                   |
+### 1.1 방사 조도 텍스처 (Irradiance Texture)
 
-> [!TIP]
-> `view.ibl` 속성에 `IBL` 인스턴스를 할당하면, 내부의 `irradianceTexture` 와 `prefilterTexture` 가 해당 뷰에서 렌더링되는 모든 PBR 객체 (glTF 모델 등)에 자동
-적용됩니다.
+물체의 기본 명암과 주변광 (Ambient) 역할을 담당하는 **Diffuse Irradiance Map**입니다. 직접적인 광원이 없는 곳에서도 자연스러운 색감을 부여합니다. (`irradianceTexture`
+속성을 통해 접근)
 
----
+### 1.2 스펙큘러 프리필터 텍스처 (Specular Prefilter Texture)
 
-## 2. 생성 및 적용
+물체 표면에 주변 환경이 비치는 효과를 담당하는 **Specular Prefilter Map**입니다. 물리 기반 렌더링 (PBR) 재질에서 금속이나 유리 같은 표면의 반사를 현실감 있게 표현합니다.
+(`prefilterTexture` 속성을 통해 접근)
 
-`IBL` 리소스를 생성한 뒤 `View3D` 의 `ibl` 및 `skybox` 속성에 연결합니다.
+::: tip [조명 리소스 자동 적용]
+`view.ibl` 속성에 `IBL` 인스턴스를 할당하면, 내부에 생성된 **방사 조도 텍스처**와 **스펙큘러 프리필터 텍스처**가 해당 뷰에서 렌더링되는 모든 PBR 객체에 자동으로 적용됩니다.
+:::
+
+### 1.3 환경 텍스처 (Environment Texture)
+
+원본 이미지를 고해상도 큐브맵으로 유지한 데이터로, 주로 `SkyBox` 의 시각적 배경 텍스처로 사용됩니다. (`environmentTexture` 속성을 통해 접근)
+
+## 2. 구현하기: 생성 및 적용
+
+IBL을 적용하려면 리소스를 생성한 후, `View3D`에 등록해야 합니다.
 
 ```javascript
 // 1. IBL 리소스 생성 (HDR 파일 권장)
@@ -64,18 +70,16 @@ const ibl = new RedGPU.Resource.IBL(
     'https://redcamel.github.io/RedGPU/examples/assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
 );
 
-// 2. View에 IBL 조명 적용
+// 2. View에 IBL 적용 (조명 효과)
 view.ibl = ibl;
 
-// 3. View에 SkyBox 배경 적용
+// 3. View에 SkyBox 적용 (시각적 배경)
 view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 ```
 
----
+## 3. 라이브 샘플: 환경 구성
 
-## 3. 라이브 예제
-
-HDR 소스로부터 `IBL` 과 `SkyBox` 를 동시에 구성한 예제입니다. 외부에서 제작된 glTF 등 PBR 모델을 로드할 때 이 환경 데이터를 기반으로 실사 수준의 금속 반사와 환경광이 표현됩니다.
+아래 예제는 HDR 소스로부터 IBL과 Skybox를 동시에 생성한 결과입니다. 지금은 단순히 360도 배경이 보일 뿐이지만, 이 공간은 이미 물리적으로 정확한 빛의 데이터를 머금고 있는 상태입니다.
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Environmental Setup" slugHash="env-setup">
@@ -114,6 +118,13 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
+## 4. 진정한 가치: GLTF와의 시너지
+
+단순히 배경 (Skybox)만 보았을 때는 큰 차이가 없게 느껴질 수 있습니다. 하지만 이 환경 설정의 진정한 가치는 다음 장에서 다룰 **GLTF 모델** 을 로드할 때 드러납니다.
+
+외부에서 제작된 정교한 모델들은 대부분 PBR (물리 기반 렌더링) 재질을 사용합니다. IBL은 이러한 모델들에게 현실적인 반사 데이터와 부드러운 환경광을 제공하여, 모델이 마치 실제 그 공간에 존재하는 것 같은
+실사 수준의 질감을 구현하게 해줍니다.
+
 ---
 
 ## 관련 예제
@@ -124,6 +135,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ---
 
-## 다음 단계
+## 다음 학습 추천
 
-- **[스카이 대기](./skyatmosphere.md)** : 실시간 물리 기반 대기 산란 시뮬레이션으로 동적인 하늘 효과 구성하기
+실시간 물리 기반 대기 산란 시뮬레이션을 통해 동적인 하늘 효과를 씬에 부여하는 방법에 대해 알아봅니다.
+
+- **[스카이 대기 (SkyAtmosphere)](./skyatmosphere.md)**

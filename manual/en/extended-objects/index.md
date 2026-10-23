@@ -5,21 +5,15 @@ order: 7
 
 # Extended Objects
 
-Covers how to compose scene content using external 3D model loading, mass GPU instancing, 2D/3D sprites and text, and
-GPU particle and line renderers.
+This section covers how to enrich the content of your scene by loading external models and utilizing 2D elements.
 
 ## Learning Topics
 
-1. **[GLTF Loader](./model-loading/index.md)**: Loading external 3D model files (`.gltf`, `.glb`), playing animations,
-   and motion blending with `AnimStateMachine`
-2. **[Instancing Mesh](./instanced-mesh/index.md)**: High-performance GPU instancing that renders tens of thousands of
-   identical objects in a single draw call (`InstancingMesh`)
-3. **[Sprite](./sprite/index.md)**: Billboard icons (`Sprite3D`), 2D sprites (`Sprite2D`), and frame-based animations
-   (`SpriteSheet3D` / `SpriteSheet2D`)
-4. **[Text Field](./text-field/index.md)**: Placing text in the 3D world and on the 2D screen (`TextField3D` /
-   `TextField2D`)
-5. **[Particle & Line](./particle/index.md)**: GPU compute shader particle systems (`ParticleEmitter`) and 3D/2D spline
-   renderers (`Line3D` / `Line2D`)
+1. **[GLTF Loader](./model-loading/index.md)**: Loading external 3D model files (.gltf, .glb)
+2. **[Instancing Mesh](./instanced-mesh/index.md)**: High-performance rendering of tens of thousands of objects
+3. **[Sprite](./sprite/index.md)**: Using billboard icons and animated sprites
+4. **[Text Field](./text-field/index.md)**: Placing text in the 3D world
+5. **[Particle](./particle/index.md)**: GPU compute shader-based particle system
 
 ---
 
@@ -33,6 +27,4 @@ GPU particle and line renderers.
 
 ---
 
-## Next Steps
-
-- **[GLTF Loader](./model-loading/index.md)**: Loading external `.gltf` / `.glb` models and playing skeletal animations
+[Next Step: Learn GLTF Loader](./model-loading/index.md)

@@ -5,27 +5,25 @@ order: 2
 
 # Multi-Layer Splatting
 
-`LandscapeMaterial` and `LandscapeLayer` provide a **Multi-Layer Splatting** system that blends up to 8 PBR layers
-across the terrain surface using weight maps, elevation, and slope.
+`RedGPU.Landscape.LandscapeMaterial` and `RedGPU.Landscape.LandscapeLayer` provide a **Multi-Layer Splatting** system
+that blends up to **8 PBR layers** across the terrain surface using weight maps, elevation, and slope.
 
-## 1. Hybrid Rendering Architecture
+## 1. Hybrid Rendering Architecture (Near Detail + VBT)
 
-To eliminate the GPU texture bandwidth bottleneck caused by sampling 8 layers at every pixel on a massive terrain,
-RedGPU uses a **Hybrid VBT** (Virtual Blend Texture) pipeline:
+Sampling textures (BaseColor, Normal, ORM) across 8 layers for every pixel on a massive terrain creates severe GPU
+texture bandwidth bottlenecks. RedGPU solves this with a **Hybrid VBT** (Virtual Blend Texture) pipeline:
 
 - **Near Range (within `nearDetailDistance`)**: Blends high-resolution PBR layers with **Stochastic Tiling** in real
   time for crisp surface detail.
-- **Far Range (beyond `nearDetailDistance`)**: Fetches color with a single sample from the pre-baked Virtual Blend
-  Texture (VBT) atlas generated during tile streaming.
+- **Far Range (beyond `nearDetailDistance`)**: Fetches color with a single sample from the pre-baked **Virtual Blend
+  Texture (VBT)** atlas generated during tile streaming, drastically reducing rendering cost.
 
 ```javascript
 // Set the distance (in world units) within which near high-resolution texture blending is active
 landscape.nearDetailDistance = 350;
 ```
 
----
-
-## 2. Adding Splatting Layers
+## 2. Adding Splatting Layers (`addLayer`)
 
 Call `landscape.addLayer(options)` to register up to 8 `LandscapeLayer` instances sequentially. The first layer acts as
 the base layer, while subsequent layers blend according to the specified channel (`weightChannel`) of their
@@ -70,8 +68,6 @@ const rockLayer = landscape.addLayer({
 });
 ```
 
----
-
 ## 3. `LandscapeLayerOptions` Key Properties
 
 | Property               | Default   | Description                                                                                   |
@@ -88,8 +84,6 @@ const rockLayer = landscape.addLayer({
 | **`metallicFactor`**   | `0.0`     | Metallic factor (`0.0 ~ 1.0`)                                                                 |
 | **`aoFactor`**         | `1.0`     | Ambient occlusion intensity factor                                                            |
 | **`stochasticTiling`** | `false`   | Enables stochastic sampling to eliminate repetitive texture tiling artifacts over large areas |
-
----
 
 ## 4. Querying and Managing Layers
 
@@ -111,14 +105,16 @@ landscape.removeLayer('Rock');
 
 ---
 
+## Next Step
+
+Learn how the foliage system scatters tens of thousands of trees and rocks based on terrain layer weights
+(`targetLayer`) and slope.
+
+- **[Foliage & Impostors](./foliage.md)**
+
+---
+
 ## Related Examples
 
 - [Multi-Layer Splatting](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
 - [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
-
----
-
-## Next Steps
-
-- **[Foliage & Impostors](./foliage.md)**: Foliage system for scattering trees and rocks based on terrain layer weights
-  (`targetLayer`) and slope

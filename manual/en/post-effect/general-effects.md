@@ -5,26 +5,28 @@ order: 2
 
 # General Effects
 
-**General Effects** are standard post-processing filters—such as blur, color adjustments, and lens effects—that can be
-combined and chained in any order.
+RedGPU provides various standard effects, such as radial blur and grayscale, managed through the `PostEffectManager`.
 
-## 1. Usage
+::: tip [Learning Guide]
+Technically, tone mapping is executed at the very first stage of the overall post-processing, but in this chapter, we
+first cover **General Effects** where visual changes can be experienced most intuitively.
+:::
 
-Instantiate an effect from the `RedGPU.PostEffect` namespace and register it via `view.postEffectManager.addEffect()`.
-Effects are executed sequentially in the order they are added.
+## 1. Usage (addEffect)
+
+After creating an effect object, register it through `view.postEffectManager.addEffect()`. A pipeline chain is formed in
+the order of registration.
 
 ```javascript
 const radialBlur = new RedGPU.PostEffect.RadialBlur(redGPUContext);
 view.postEffectManager.addEffect(radialBlur);
 ```
 
----
-
 ## 2. Key Effect Examples
 
 ### 2.1 Radial Blur
 
-Creates a sense of speed or focus radiating outward from a center point.
+Creates a sense of speed or concentration effects that radiate outward from a center point.
 
 <ClientOnly>
 <CodePen title="RedGPU PostEffect - RadialBlur" slugHash="posteffect-radialblur">
@@ -73,7 +75,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ### 2.2 Grayscale
 
-Converts the rendered image to black and white.
+Converts the image to black and white to create a classic atmosphere.
 
 <ClientOnly>
 <CodePen title="RedGPU PostEffect - Grayscale" slugHash="posteffect-grayscale">
@@ -121,42 +123,51 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
----
+## 3. Full Support List
 
-## 3. Supported Effects List
+Here is the complete list of all general effects provided by RedGPU. All effects are located under the
+`RedGPU.PostEffect` namespace.
 
-All general effects are located under the `RedGPU.PostEffect` namespace.
+| Category             | Class Name             | Description                                                |
+|:---------------------|:-----------------------|:-----------------------------------------------------------|
+| **`Blur`**           | `Blur`, `GaussianBlur` | Gaussian blur (the most common blur effect)                |
+|                      | `BlurX`, `BlurY`       | Unidirectional (horizontal or vertical) blur               |
+|                      | `DirectionalBlur`      | Blur effect in a specified angle direction                 |
+|                      | `RadialBlur`           | Blur effect spreading outward from the center in a circle  |
+|                      | `ZoomBlur`             | Blur effect expanding outward from the center              |
+| **Adjustments**      | `BrightnessContrast`   | Brightness and contrast adjustment                         |
+|                      | `HueSaturation`        | Hue and saturation adjustment                              |
+|                      | `ColorBalance`         | Color balance adjustment (midtones, shadows, highlights)   |
+|                      | `ColorTemperatureTint` | Color temperature and tint adjustment                      |
+|                      | `Vibrance`             | Vibrance adjustment (affects mainly unsaturated parts)     |
+|                      | `Grayscale`            | Converts the image to black and white                      |
+|                      | `Invert`               | Color inversion                                            |
+|                      | `Threshold`            | Binarization based on a threshold                          |
+| **Lens**             | `OldBloom`             | Classic light bleeding effect                              |
+|                      | `DOF`                  | Depth of Field (blurs areas out of focus)                  |
+|                      | `Vignetting`           | Darkens the outer edges of the screen                      |
+|                      | `ChromaticAberration`  | Recreates lens chromatic aberration                        |
+|                      | `LensDistortion`       | Lens distortion effect                                     |
+| **Atmospheric**      | `Fog`                  | Distance-based fog effect                                  |
+|                      | `HeightFog`            | Height-based fog effect                                    |
+| **Visual / Utility** | `FilmGrain`            | Film noise (grain) effect                                  |
+|                      | `Sharpen`              | Sharpening                                                 |
+|                      | `Convolution`          | Kernel-based filter (supports Sharpen, Edge, Emboss, etc.) |
 
-| Category             | Class Name             | Description                                                   |
-|:---------------------|:-----------------------|:--------------------------------------------------------------|
-| **Blur**             | `Blur`, `GaussianBlur` | Gaussian blur                                                 |
-|                      | `BlurX`, `BlurY`       | Unidirectional (horizontal or vertical) blur                  |
-|                      | `DirectionalBlur`      | Blur along a specified angle                                  |
-|                      | `RadialBlur`           | Circular blur spreading outward from the center               |
-|                      | `ZoomBlur`             | Zoom blur expanding outward from the center                   |
-| **Adjustments**      | `BrightnessContrast`   | Brightness and contrast adjustment                            |
-|                      | `HueSaturation`        | Hue and saturation adjustment                                 |
-|                      | `ColorBalance`         | Color balance adjustment (midtones, shadows, highlights)      |
-|                      | `ColorTemperatureTint` | Color temperature and tint adjustment                         |
-|                      | `Vibrance`             | Vibrance adjustment targeting muted colors                    |
-|                      | `Grayscale`            | Black-and-white conversion                                    |
-|                      | `Invert`               | Color inversion                                               |
-|                      | `Threshold`            | Threshold-based binarization                                  |
-| **Lens**             | `OldBloom`             | Classic bloom / light bleeding effect                         |
-|                      | `DOF`                  | Depth of Field (blurs out-of-focus regions)                   |
-|                      | `Vignetting`           | Darkens the outer edges of the screen                         |
-|                      | `ChromaticAberration`  | Simulates lens chromatic aberration                           |
-|                      | `LensDistortion`       | Barrel/pincushion lens distortion                             |
-| **Atmospheric**      | `Fog`                  | Distance-based fog effect                                     |
-|                      | `HeightFog`            | Height-based fog effect                                       |
-| **Visual / Utility** | `FilmGrain`            | Film grain noise effect                                       |
-|                      | `Sharpen`              | Edge sharpening                                               |
-|                      | `Convolution`          | Kernel-based convolution filter (Sharpen, Edge, Emboss, etc.) |
-
-::: info [Live Demo]
-All effects can be tested in real-time under the **PostEffect** tab on
+::: info [Live Verification]
+All the effects listed above can be checked in real-time demos in the **PostEffect** category of
 the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect).
 :::
+
+## Key Summary
+
+- You can layer effects in any order using `addEffect()`.
+- Actual rendering is performed immediately after the tone mapping stage.
+
+## Next Learning Recommendations
+
+- **[Tone Mapping](./tone-mapping.md)**
+- **[Built-in Effects](./builtin-effects.md)**
 
 ---
 
@@ -167,10 +178,3 @@ the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/i
 - [Depth of Field (DoF)](/RedGPU/examples/postEffect/lens/dof/)
 - [Chromatic Aberration](/RedGPU/examples/postEffect/lens/chromaticAberration/)
 - [Height Fog](/RedGPU/examples/postEffect/fog/heightFog/)
-
----
-
-## Next Steps
-
-- **[Tone Mapping](./tone-mapping.md)**: HDR-to-LDR color conversion and exposure control
-- **[Built-in Effects](./builtin-effects.md)**: Configuring `SSAO` and `SSR`
