@@ -5,57 +5,67 @@ order: 4
 
 # Built-in Effects
 
-Built-in effects are high-performance post-processing effects managed automatically within the system for performance
-optimization and depth buffer utilization.
+Built-in Effects are integrated screen-space lighting effects executed in the HDR stage prior to tone mapping, utilizing
+the 3D scene's G-Buffer (depth and normal buffers). Instead of manually instantiating effects and registering them via
+`addEffect()`, you can enable them directly using boolean properties (`useSSAO`, `useSSR`) on `view.postEffectManager`
+and fine-tune parameters through the built-in instances (`ssao`, `ssr`).
 
-## 1. Features & Usage
+---
 
-Unlike general effects, you do not need to create an instance yourself or add it via `addEffect()`. You can control them
-instantly by simply changing the property values of the `PostEffectManager`.
+## 1. SSAO (Screen Space Ambient Occlusion)
 
-- **Access Path**: `view.postEffectManager`
-- **Activation Method**: Use Boolean properties such as `useSSAO` and `useSSR`.
+`SSAO` generates natural contact and corner shadows based on depth and normal buffers, enhancing spatial depth where
+surfaces meet or overlap.
 
-## 2. SSAO (Screen Space Ambient Occlusion)
-
-SSAO creates subtle shadows in corners or where objects overlap, maximizing three-dimensionality.
-
-### Activation & Configuration
 ```javascript
 // 1. Enable SSAO
 view.postEffectManager.useSSAO = true;
 
-// 2. Detailed settings (optional)
+// 2. Fine-tune parameters
 const ssao = view.postEffectManager.ssao;
-ssao.radius = 0.5;      // Shadow radius
-ssao.intensity = 1.0;   // Shadow intensity
-ssao.useBlur = true;    // Whether to use blur to remove shadow noise
+ssao.radius = 0.25;     // Occlusion sampling radius (default: 0.25)
+ssao.intensity = 1.0;   // Shadow intensity (default: 1.0)
+ssao.contrast = 1.5;    // Shadow contrast (default: 1.5)
+ssao.useBlur = true;    // Whether to apply Gaussian blur for noise reduction (default: true)
 ```
 
-## 3. SSR (Screen Space Reflection)
+<iframe src="/RedGPU/examples/postEffect/ssao/" style="width:100%; height:500px;"></iframe>
 
-SSR implements real-time reflections using information on the screen. It is effective for creating effects where the
-surrounding environment is reflected on floors or walls.
+---
 
-::: warning [Experimental Feature]
-Currently, SSR is an experimental feature. Noise or visual artifacts may occur depending on the environment, so please
-apply it carefully after reviewing the results.
-:::
+## 2. SSR (Screen Space Reflection)
 
-### Activation & Configuration
+`SSR` performs ray marching across screen-space depth and normal buffers to render real-time reflections on floors,
+metals, and glossy surfaces.
+
+- **How to Apply**: Set `view.postEffectManager.useSSR = true`, and also set `material.useSSR = true` on the materials
+  (`PhongMaterial`, `PBRMaterial`, etc.) of the objects that should receive reflections.
+
 ```javascript
-// 1. Enable SSR
+// 1. Enable SSR post-processing on the view
 view.postEffectManager.useSSR = true;
 
-// 2. Detailed settings (optional)
+// 2. Enable useSSR on the target material
+material.useSSR = true;
+
+// 3. Fine-tune parameters
 const ssr = view.postEffectManager.ssr;
-ssr.reflectionIntensity = 1.0; // Reflection intensity
-ssr.maxDistance = 15.0;        // Maximum reflection tracking distance
-ssr.maxSteps = 64;             // Reflection calculation precision (number of steps)
+ssr.reflectionIntensity = 1.0; // Reflection intensity (default: 1.0)
+ssr.maxDistance = 15.0;        // Maximum reflection tracking distance (default: 15.0)
+ssr.maxSteps = 64;             // Ray marching step count (default: 64)
 ```
 
+<iframe src="/RedGPU/examples/postEffect/ssr/" style="width:100%; height:500px;"></iframe>
+
+---
 
 ## Related Examples
 
 - [SSAO (Screen Space Ambient Occlusion)](/RedGPU/examples/postEffect/ssao/)
 - [SSR (Screen Space Reflection)](/RedGPU/examples/postEffect/ssr/)
+
+---
+
+## Next Steps
+
+- **[Antialiasing](../antialiasing/index.md)**
