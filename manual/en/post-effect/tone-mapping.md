@@ -9,22 +9,7 @@ Tone mapping is an essential post-processing technique that naturally maps the w
 Range (HDR) images into the limited representation range of standard display devices (LDR). It determines the ultimate
 visual quality of your rendering by coordinating the scene's exposure, contrast, and overall color palette.
 
-## 1. Operating Principle: Smart Tone Mapping Transition
-
-In RedGPU, tone mapping does not execute at a fixed position like the beginning or end of the pipeline. Instead,
-`PostEffectManager` dynamically controls its execution timing to transition smoothly between HDR calculations and LDR
-post-processing.
-
-- **HDR Retention**: Immediately after scene rendering, effects that require depth information and a wide color
-  gamut—such as `SkyAtmosphere`, `SSAO`, `SSR`, `TAA`, and `AutoExposure`—are calculated on the **HDR source data**
-  prior to tone mapping.
-- **Smart Transition Timing**: While iterating through the user effects registered via
-  `view.postEffectManager.addEffect()`, **tone mapping is executed immediately as soon as the first LDR (Low Dynamic
-  Range) effect is encountered** (if no LDR effects are present, tone mapping is applied right after the loop).
-
----
-
-## 2. ToneMappingManager Settings
+## 1. ToneMappingManager Settings
 
 All tone mapping parameters can be dynamically adjusted using `view.toneMappingManager`. This manager is built-in when a
 `View3D` instance is created, so there is no need to instantiate it manually.
@@ -44,7 +29,7 @@ tm.brightness = 0.02;
 
 ---
 
-## 3. Supported Algorithms (TONE_MAPPING_MODE)
+## 2. Supported Algorithms (TONE_MAPPING_MODE)
 
 You can change the tone mapping mode in real time depending on your target visual style. Constants are defined in
 `RedGPU.ToneMapping.TONE_MAPPING_MODE`.

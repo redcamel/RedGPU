@@ -9,19 +9,7 @@ order: 3
 최종
 조율하여 렌더링 결과물의 완성도를 결정합니다.
 
-## 1. 동작 원리: 스마트 톤 매핑 전환 (Smart Transition)
-
-RedGPU의 톤 매핑은 파이프라인의 시작이나 끝에 단순히 고정되어 실행되지 않고, 효율적인 HDR 연산과 LDR 후처리 간의 전환을 위해 `PostEffectManager`가 내부적으로 실행 시점을 자동
-제어합니다.
-
-- **HDR 영역 보존**: 씬 렌더링 직후 `SkyAtmosphere`, `SSAO`, `SSR`, `TAA`, `AutoExposure` 등 깊이 정보 및 광범위한 색역을 필요로 하는 효과들은 톤 매핑 이전의
-  **HDR 원본 데이터 상태**에서 계산됩니다.
-- **자동 전환 타이밍**: 사용자가 추가한 일반 이펙트 (`view.postEffectManager.addEffect()`) 루프를 순회하다가 **최초의 LDR (Low Dynamic Range) 효과를 만나는
-  시점에 즉시** 톤 매핑을 수행합니다 (LDR 효과가 없을 경우 루프 종료 직후 자동 적용).
-
----
-
-## 2. ToneMappingManager 설정
+## 1. ToneMappingManager 설정
 
 모든 톤 매핑 관련 매개변수는 `view.toneMappingManager` 속성을 통해 동적으로 조절할 수 있습니다. `View3D` 인스턴스 생성 시 내장되므로 직접 생성할 필요가 없습니다.
 
@@ -40,7 +28,7 @@ tm.brightness = 0.02;
 
 ---
 
-## 3. 지원 알고리즘 (TONE_MAPPING_MODE)
+## 2. 지원 알고리즘 (TONE_MAPPING_MODE)
 
 원하는 비주얼 스타일에 따라 톤 매핑 모드를 실시간으로 변경할 수 있습니다. 상수값은 `RedGPU.ToneMapping.TONE_MAPPING_MODE`에 정의되어 있습니다.
 
