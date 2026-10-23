@@ -544,7 +544,32 @@ export default withMermaid(defineConfig({
                         if (linkDepth === 0 && child.type === 'code_inline') {
                             const rawText = child.content.trim();
                             const baseSymbol = rawText.replace(/(\[\]|<.*>)$/, '');
-                            const targetApiPath = apiSymbolMap.get(rawText) || apiSymbolMap.get(baseSymbol);
+                            const lastSegment = baseSymbol.includes('.') ? baseSymbol.split('.').pop() : baseSymbol;
+                            const aliasMap = {
+                                skybox: 'SkyBox',
+                                ibl: 'IBL',
+                                taa: 'TAA',
+                                fxaa: 'FXAA',
+                                ssao: 'SSAO',
+                                ssr: 'SSR',
+                                detector: 'RedGPUContextDetector',
+                                debuggerManager: 'LandscapeDebuggerManager'
+                            };
+                            const excludedLower = new Set([
+                                'scene', 'camera', 'mesh', 'view', 'material', 'geometry',
+                                'texture', 'color', 'light', 'water', 'group', 'line', 'text'
+                            ]);
+                            const pascalCandidate =
+                                !excludedLower.has(lastSegment) && lastSegment.length > 2
+                                    ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1)
+                                    : '';
+
+                            const targetApiPath =
+                                apiSymbolMap.get(rawText) ||
+                                apiSymbolMap.get(baseSymbol) ||
+                                apiSymbolMap.get(lastSegment) ||
+                                (aliasMap[lastSegment] && apiSymbolMap.get(aliasMap[lastSegment])) ||
+                                (pascalCandidate && apiSymbolMap.get(pascalCandidate));
 
                             if (targetApiPath) {
                                 const linkOpen = new state.Token('link_open', 'a', 1);
