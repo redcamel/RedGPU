@@ -95,7 +95,7 @@ instead of `worldSize`.
 
 Let's place sprites with different settings in 3D space to check the visual differences.
 
-<ExampleFrame src="/RedGPU/examples/3d/sprite/sprite3D/" height="500px" />
+<iframe src="/RedGPU/examples/3d/sprite/sprite3DCompare/" style="width:100%; height:500px;"></iframe>
 
 ---
 

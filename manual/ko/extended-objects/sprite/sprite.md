@@ -87,7 +87,7 @@ sprite.pixelSize = 64;
 
 3D 공간에 서로 다른 설정의 스프라이트를 배치하여 시각적 차이를 확인해 봅니다.
 
-<ExampleFrame src="/RedGPU/examples/3d/sprite/sprite3D/" height="500px" />
+<iframe src="/RedGPU/examples/3d/sprite/sprite3DCompare/" style="width:100%; height:500px;"></iframe>
 
 ---
 
