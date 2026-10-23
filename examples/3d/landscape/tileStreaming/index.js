@@ -254,6 +254,8 @@ const initCharacter = (redGPUContext, scene, landscape, characterOrbitController
     let targetState = 'Idle';
     let isCharacterMode = true;
 
+    // [KO] 캐릭터 모델 로드 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+    // [EN] Load character model (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
     new RedGPU.GLTFLoader(
         redGPUContext,
         'https://threejs.org/examples/models/gltf/Soldier.glb',

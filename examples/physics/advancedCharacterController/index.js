@@ -166,6 +166,8 @@ RedGPU.init(
 		let targetStateName = 'Idle';
 		let lastTime = null;
 
+        // [KO] 캐릭터 모델 로드 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+        // [EN] Load character model (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
 		const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
 		new RedGPU.GLTFLoader(
 			redGPUContext,

@@ -86,11 +86,11 @@ RedGPU.init(
         let lastTime = null;
         let onCharacterLoaded = null;
 
-        // [KO] 로컬 스킨드 메시(Soldier.glb) 로드 — 수심 약 42cm(무릎 깊이)의 개방된 수역 중앙에서 시작
-        // [EN] Load local skinned mesh (Soldier.glb) — starts knee-deep (~42cm) in the open water
+        // [KO] 스킨드 메시(Soldier.glb) 로드 — 수심 약 42cm(무릎 깊이)의 개방된 수역 중앙에서 시작 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+        // [EN] Load skinned mesh (Soldier.glb) — starts knee-deep (~42cm) in the open water (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../../assets/gltf/Soldier.glb',
+            'https://threejs.org/examples/models/gltf/Soldier.glb',
             (loader) => {
                 characterMesh = loader.resultMesh;
                 characterMesh.x = 0;

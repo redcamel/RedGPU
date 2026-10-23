@@ -232,11 +232,11 @@ RedGPU.init(
         let stateMachine = null;
         let targetStateName = 'Idle';
 
-        // [KO] 로컬 스킨드 메시(Soldier.glb) 로드 및 수체 상호작용 재귀 등록
-        // [EN] Load local skinned mesh (Soldier.glb) and recursively register for water interaction
+        // [KO] 스킨드 메시(Soldier.glb) 로드 및 수체 상호작용 재귀 등록 (출처: https://threejs.org/examples/models/gltf/Soldier.glb)
+        // [EN] Load skinned mesh (Soldier.glb) and recursively register for water interaction (Source: https://threejs.org/examples/models/gltf/Soldier.glb)
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../../assets/gltf/Soldier.glb',
+            'https://threejs.org/examples/models/gltf/Soldier.glb',
             (loader) => {
                 characterMesh = loader.resultMesh;
                 characterMesh.x = 0;
