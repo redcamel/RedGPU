@@ -3,40 +3,52 @@ title: WindManager
 order: 4
 ---
 
-# Global Wind System
+<script setup>
+const windGraph = `
+    Scene["Scene"] -->|scene.windManager| Wind["WindManager (Global Wind Control)"]
+    Wind -->|Direction, Speed & Strength| Foliage["FoliageManager (Trees & Foliage)"]
+    Wind -->|Direction, Speed & Strength| Lake["Lake (Water Surface)"]
 
-`RedGPU.Wind.WindManager` is a global environment manager that controls wind direction, wind
-speed, and wind strength across the entire scene through a unified interface.
+    %% Grayscale styles applied
+    style Scene fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Wind fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Foliage fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Lake fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+`
+</script>
+
+# WindManager
+
+`WindManager` is a global environment manager that controls wind direction, speed, and strength across the entire scene.
+It is automatically created with each `Scene` and accessed via `scene.windManager`.
+
+<ClientOnly>
+  <MermaidResponsive :definition="windGraph" />
+</ClientOnly>
 
 ## 1. Integrated Systems
 
-Modifying properties on `scene.windManager` (owned by default by every `Scene` instance) immediately affects the
-following rendering systems:
+Modifying properties on `scene.windManager` immediately affects the following natural environment systems in the scene:
 
-- **Large-Scale Foliage (`FoliageManager`)**: Direction and frequency of trunk bending (`trunkBendScale`) and leaf
-  flutter (`leafFlutterScale`)
-- **Procedural Grass (`GrassManager`)**: Travel direction and sway amplitude of wind gusts sweeping across meadows
-- **Physically Based Water (`Lake`)**: Flow direction and speed (`flowRateScale`) of lake surface normal maps
+- **Large-Scale Foliage (`FoliageManager`)**: Direction and frequency of tree trunk bending and leaf flutter
+- **Physically Based Water (`Lake`)**: Flow direction and speed of water surface ripples
 
-## 2. Usage and Key Properties
+## 2. Key Property Control
 
-Access the manager directly via `scene.windManager` without creating a separate instance.
+Adjust properties directly on `scene.windManager` without creating a separate instance.
 
-| Property             | Type      | Default   | Description                                                                          |
-|:---------------------|:----------|:----------|:-------------------------------------------------------------------------------------|
-| **`enabled`**        | `boolean` | `true`    | Enables or disables global wind effects (`false` pauses all wind animations)         |
-| **`directionAngle`** | `number`  | `45`      | Horizontal wind direction angle in degrees (`0 ~ 360`)                               |
-| **`speed`**          | `number`  | `1.0`     | Time-axis progression speed multiplier for wind waves (`0` or higher)                |
-| **`strength`**       | `number`  | `1.0`     | Wind force intensity multiplier applied to foliage, grass, and water (`0` or higher) |
-| **`directionX`**     | `number`  | Read-only | Normalized X-axis direction component computed from `directionAngle`                 |
-| **`directionZ`**     | `number`  | Read-only | Normalized Z-axis direction component computed from `directionAngle`                 |
+| Property             | Default | Description                                                                  |
+|:---------------------|:--------|:-----------------------------------------------------------------------------|
+| **`directionAngle`** | `0`     | Horizontal wind direction angle (`0 ~ 360` degrees)                          |
+| **`speed`**          | `1.0`   | Wind animation speed multiplier                                              |
+| **`strength`**       | `1.0`   | Wind force multiplier applied to foliage and water                           |
+| **`enabled`**        | `true`  | Enables or disables global wind effects (`false` pauses all wind animations) |
 
 ```javascript
-// Access the Scene's global wind manager
 const windManager = scene.windManager;
 
 // 1. Set wind direction angle (0 ~ 360 degrees)
-windManager.directionAngle = 120;
+windManager.directionAngle = 45;
 
 // 2. Adjust wind speed and strength
 windManager.speed = 1.2;
@@ -48,17 +60,16 @@ windManager.strength = 1.5;
 
 ---
 
-## Next Step
+## Related Examples
+
+- [Foliage & Wind Integration](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
+- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
+## Next Steps
 
 Now that you have configured the natural environment, move on to the Extended Objects category to learn how to load
 external 3D models and use specialized display objects.
 
 - **[Extended Objects](../extended-objects/index.md)**
-
----
-
-## Related Examples
-
-- [Procedural Grass & Wind Integration](/RedGPU/examples/3d/landscape/proceduralGrass/)
-- [Foliage & Wind Integration](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
-- [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)

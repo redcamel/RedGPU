@@ -3,40 +3,54 @@ title: WindManager
 order: 4
 ---
 
-# 전역 바람 시스템
+<script setup>
+const windGraph = `
+    Scene["Scene"] -->|scene.windManager| Wind["WindManager (전역 바람 제어)"]
+    Wind -->|풍향·풍속·강도 전달| Foliage["FoliageManager (나무·수목)"]
+    Wind -->|풍향·풍속·강도 전달| Lake["Lake (호수·수면)"]
 
-`RedGPU.Wind.WindManager`는 씬 전체의 바람 방향 (풍향), 이동 속도 (풍속), 그리고 세기 (풍력 강도)를 단일 인터페이스로 제어하는 전역 환경
-매니저입니다.
+    %% 회색조 스타일 적용
+    style Scene fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Wind fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Foliage fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Lake fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+`
+</script>
 
-## 1. 연동되는 시스템
+# WindManager
 
-`Scene` 인스턴스가 기본 소유하는 `scene.windManager`의 속성을 변경하면 다음 렌더링 시스템들에 즉시 반영됩니다.
+`WindManager` 는 씬 전체의 바람 방향 (풍향), 이동 속도 (풍속), 세기 (풍력 강도)를 통합 제어하는 전역 환경 매니저입니다. `Scene` 생성 시 내부적으로 자동 생성되며
+`scene.windManager` 속성을 통해 접근합니다.
 
-- **대규모 식생 (`FoliageManager`)**: 나무 기둥의 휘어짐 (`trunkBendScale`)과 나뭇잎의 미세 떨림 (`leafFlutterScale`) 방향 및 주기
-- **절차적 잔디 (`GrassManager`)**: 초원 위를 지나가는 바람 파동 (Wind Gust)의 진행 방향과 흔들림 폭
-- **물리 기반 수체 (`Lake`)**: 호수 수면 노멀 맵의 흐름 방향과 속도 (`flowRateScale`)
+<ClientOnly>
+  <MermaidResponsive :definition="windGraph" />
+</ClientOnly>
 
-## 2. 사용법 및 주요 속성
+## 1. 연동되는 환경 시스템
 
-별도의 인스턴스 생성 없이 `scene.windManager`를 통해 접근합니다.
+`scene.windManager` 의 속성을 변경하면 씬 내의 다음 자연 환경 시스템들에 즉시 반영됩니다.
 
-| 속성명               | 타입      | 기본값    | 설명                                                                   |
-|:---------------------|:----------|:----------|:-----------------------------------------------------------------------|
-| **`enabled`**        | `boolean` | `true`    | 전역 바람 효과 활성화 여부 (`false` 설정 시 모든 바람 애니메이션 정지) |
-| **`directionAngle`** | `number`  | `45`      | 바람이 불어가는 수평 풍향 각도 (단위: 도, `0 ~ 360`)                   |
-| **`speed`**          | `number`  | `1.0`     | 바람 파동의 시간축 진행 속도 배율 (`0` 이상)                           |
-| **`strength`**       | `number`  | `1.0`     | 식생·잔디·수면에 가해지는 풍력 강도 배율 (`0` 이상)                    |
-| **`directionX`**     | `number`  | 읽기 전용 | `directionAngle`로부터 계산된 정규화 X축 방향 성분 (`cos`)             |
-| **`directionZ`**     | `number`  | 읽기 전용 | `directionAngle`로부터 계산된 정규화 Z축 방향 성분 (`sin`)             |
+- **대규모 식생 (`FoliageManager`)**: 나무 기둥의 휘어짐과 나뭇잎의 흔들림 방향 및 주기
+- **물리 기반 수면 (`Lake`)**: 호수 수면 물결의 흐름 방향과 속도
+
+## 2. 주요 속성 제어
+
+별도의 인스턴스를 생성하지 않고 `scene.windManager` 의 속성을 직접 조절합니다.
+
+| 속성                 | 기본값 | 설명                                                                   |
+|:---------------------|:-------|:-----------------------------------------------------------------------|
+| **`directionAngle`** | `0`    | 바람이 불어가는 수평 풍향 각도 (`0 ~ 360`도)                           |
+| **`speed`**          | `1.0`  | 바람 애니메이션의 진행 속도 배율                                       |
+| **`strength`**       | `1.0`  | 식생·수면에 가해지는 바람의 세기 배율                                  |
+| **`enabled`**        | `true` | 전역 바람 효과 활성화 여부 (`false` 설정 시 모든 바람 애니메이션 정지) |
 
 ```javascript
-// Scene의 전역 바람 매니저 접근
 const windManager = scene.windManager;
 
 // 1. 풍향 각도 설정 (0 ~ 360도)
-windManager.directionAngle = 120;
+windManager.directionAngle = 45;
 
-// 2. 풍속 및 풍력 강도 조절
+// 2. 풍속 및 바람 세기 조절
 windManager.speed = 1.2;
 windManager.strength = 1.5;
 
@@ -48,7 +62,6 @@ windManager.strength = 1.5;
 
 ## 관련 예제
 
-- [절차적 잔디 및 바람 연동](/RedGPU/examples/3d/landscape/proceduralGrass/)
 - [대규모 식생 및 바람 연동](/RedGPU/examples/3d/landscape/foliageAndImpostors/)
 - [오픈월드 통합 환경](/RedGPU/examples/3d/landscape/openWorldIntegration/)
 

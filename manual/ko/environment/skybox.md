@@ -92,13 +92,13 @@ const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
 | 구분            | IBL 활용 (권장)       | CubeTexture   |
 |:----------------|:----------------------|:--------------|
 | **소스**        | 1장의 HDR 이미지      | 6장의 이미지  |
-| **타입**        | `IBLCubeTexture`      | `CubeTexture` |
+| **타입**        | `DirectCubeTexture`   | `CubeTexture` |
 | **조명 데이터** | O (자동 생성)         | X             |
 | **주요 용도**   | 배경 + 물리 기반 조명 | 단순 배경     |
 
 ## 4. 라이브 데모
 
-### A. IBL 활용 방식 (조명 포함)
+### A. IBL 환경 텍스처 활용 (HDR)
 
 <ClientOnly>
 <CodePen title="RedGPU Basics - Skybox (IBL)" slugHash="skybox-ibl">
@@ -178,12 +178,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
-
-## 핵심 요약
-
-- **`SkyBox`** 는 뷰 (**`View3D`**)에 설정하여 배경을 렌더링합니다.
-- 사실적인 조명이 필요하다면 **`IBL`** 을 통해 생성된 환경 텍스처를 사용하는 것이 가장 좋습니다.
-- 단순 배경이 목적이라면 **`CubeTexture`** 를 사용합니다.
 
 ---
 
