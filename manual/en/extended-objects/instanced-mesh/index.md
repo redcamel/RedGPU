@@ -151,13 +151,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 });
 ```
 
-## Key Summary
-
-- **Mass Rendering**: The best solution for rendering tens of thousands of objects in a single draw call.
-- **Performance Maximization**: Eliminates CPU-to-GPU communication overhead to maintain high frame rates.
-- **Dynamic Control**: You can control the active render count dynamically using the `instanceCount` property.
-
----
 
 ## Related Examples
 

@@ -159,17 +159,6 @@ All the effects listed above can be checked in real-time demos in the **PostEffe
 the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect).
 :::
 
-## Key Summary
-
-- You can layer effects in any order using `addEffect()`.
-- Actual rendering is performed immediately after the tone mapping stage.
-
-## Next Learning Recommendations
-
-- **[Tone Mapping](./tone-mapping.md)**
-- **[Built-in Effects](./builtin-effects.md)**
-
----
 
 ## Related Examples
 

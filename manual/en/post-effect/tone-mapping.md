@@ -66,22 +66,14 @@ view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_
 
 ---
 
-## 4. Key Summary
-
-- Tone mapping settings are supervised by the `ToneMappingManager`, while execution and transition scheduling are
-  optimized automatically by the `PostEffectManager`.
-- It splits dynamically during the effect chain execution to preserve high-fidelity HDR operations (SSAO, SSR).
-- `KHRONOS_PBR_NEUTRAL` is recommended for scenes where physical correctness is paramount, whereas the `ACES_FILMIC_`
-  suite is ideal for artistic, cinematic rendering.
-
-## 5. Next Learning Recommendation
-
-- **[Built-in Effects](./builtin-effects.md)**: Activating SSAO and real-time SSR for physical depth.
-- **[General Effects](./general-effects.md)**: Adding bloom, blur, and grayscale before or after tone mapping.
-
----
-
 ## Related Examples
 
 - [DamagedHelmet PBR & Tone Mapping](/RedGPU/examples/gltf/models/helmets/)
 - [Sponza HDR Exposure & Tone Mapping](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
+## Next Steps
+
+- **[Built-in Effects](./builtin-effects.md)**: Activating SSAO and real-time SSR for physical depth.
+- **[General Effects](./general-effects.md)**: Adding bloom, blur, and grayscale before or after tone mapping.

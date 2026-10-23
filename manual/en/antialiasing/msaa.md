@@ -128,13 +128,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **Hardware Support**: Utilizes built-in GPU features.
-- **Edge-Specialized**: Excellent for smoothing object outlines.
-- **Default**: Enabled by default in standard display environments.
-
----
 
 ## Related Examples
 

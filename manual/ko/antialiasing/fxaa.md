@@ -128,13 +128,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **후처리 방식**: 렌더링된 이미지 위에서 동작합니다.
-- **배타적 실행**: FXAA를 켜면 MSAA, TAA는 꺼집니다.
-- **전역 제어**: `redGPUContext` 단위로 제어됩니다.
-
----
 
 ## 관련 예제
 

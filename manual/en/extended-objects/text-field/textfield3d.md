@@ -181,13 +181,6 @@ const scene = new RedGPU.Display.Scene ();
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **`TextField3D`**: A text object placed at actual coordinates in world space.
-- **CSS Styles**: Web standard styles such as color, background, and border can be applied as is.
-- **Billboard**: Can be set so that 3D text always faces the camera to improve readability.
-
----
 
 ## Related Examples
 

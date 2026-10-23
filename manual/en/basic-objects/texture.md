@@ -145,13 +145,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **BitmapTexture** converts external image files into resources for the 3D engine.
-- **BitmapMaterial** is a dedicated material for representing object surfaces using textures.
-- RedGPU provides convenience by automatically handling asynchronous image loading.
-
----
 
 ## Related Examples
 

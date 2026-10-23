@@ -61,20 +61,14 @@ view.toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_
 
 ---
 
-## 4. 핵심 요약
-
-- 톤 매핑 설정은 `ToneMappingManager`가 담당하고, 실행 및 순서 전환은 `PostEffectManager`가 자동으로 최적화하여 처리합니다.
-- 고품질 HDR 효과 (SSAO, SSR) 연산 보존을 위해 이펙트 체인 진행 도중 스마트하게 분기하여 작동합니다.
-- 물리적 정확도가 최우선인 씬에는 기본값인 `KHRONOS_PBR_NEUTRAL`을, 연출 중심의 씬에는 `ACES_FILMIC_` 계열을 권장합니다.
-
-## 5. 다음 학습 추천
-
-- **[빌트인 이펙트](./builtin-effects.md)** : 물리 기반 입체감을 부여하는 SSAO 및 실시간 SSR 활성화하기
-- **[일반 이펙트](./general-effects.md)** : 톤 매핑 전후 단계에 블룸, 블러, 그레이스케일 추가하기
-
----
-
 ## 관련 예제
 
 - [DamagedHelmet PBR & 톤 매핑](/RedGPU/examples/gltf/models/helmets/)
 - [Sponza HDR 노출 & 톤 매핑](/RedGPU/examples/gltf/models/sponza/)
+
+---
+
+## 다음 학습 추천
+
+- **[빌트인 이펙트](./builtin-effects.md)** : 물리 기반 입체감을 부여하는 SSAO 및 실시간 SSR 활성화하기
+- **[일반 이펙트](./general-effects.md)** : 톤 매핑 전후 단계에 블룸, 블러, 그레이스케일 추가하기

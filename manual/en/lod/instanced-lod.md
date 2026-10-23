@@ -125,13 +125,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **GPU Acceleration**: Since the GPU determines distances without CPU calculation, there is almost no performance
-  degradation even with a massive number of objects.
-- **Memory Optimization**: Using low-resolution models for distant objects dramatically reduces vertex processing costs.
-
----
 
 ## Related Examples
 

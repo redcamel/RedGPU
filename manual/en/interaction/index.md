@@ -235,35 +235,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 - **Modifier Key Support**: The state of special keys such as `Shift`, `Control`, and `Alt` can be checked in the same
   way.
 
-## 3. Live Examples
-
-You can directly explore various interaction behaviors provided by RedGPU through the examples below.
-
-### 3.1 Mouse and Touch Examples
-
-- [Basic Mesh Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
-- [Sprite Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
-- [Sprite Sheet Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
-- [Text Field Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
-- [High-Precision Raycasting (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
-
-### 3.2 Keyboard Interaction Examples
-
-- [Keyboard Interaction 3D Example](https://redcamel.github.io/RedGPU/examples/3d/interaction/keyboardEvent/)
-- [Keyboard Interaction 2D Example](https://redcamel.github.io/RedGPU/examples/2d/interaction/keyboardEvent/)
-
-## 4. Key Summary
-
-- Independent event processing for each object is possible through `addListener`.
-- Precise, frame-by-frame keyboard state control is possible through `keyboardKeyBuffer`.
-- A rich user experience (UX) can be provided by using these alongside the web-standard DOM API.
-
-## 5. Next Learning Recommendation
-
-Apply post-processing effects that enhance the visual completion of scenes enriched with interaction.
-
-- **[Post-Effect](../post-effect/index.md)**
-
 ---
 
 ## Related Examples
@@ -272,3 +243,11 @@ Apply post-processing effects that enhance the visual completion of scenes enric
   Touch**: [Mesh](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [Sprite3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [SpriteSheet3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [TextField3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [High-Precision Raycasting](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 -
 **Keyboard**: [3D Keyboard Interaction](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D Keyboard Interaction](/RedGPU/examples/2d/interaction/keyboardEvent/)
+
+---
+
+## Next Steps
+
+Apply post-processing effects that enhance the visual completion of scenes enriched with interaction.
+
+- **[Post-Effect](../post-effect/index.md)**

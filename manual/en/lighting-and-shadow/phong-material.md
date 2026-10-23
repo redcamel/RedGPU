@@ -152,13 +152,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **Phong Material** is a lighting material that calculates light **Diffuse** and **Specular** reflections.
-- Using a **Normal Map** allows for expressing detailed surface textures without having to subdivide faces.
-- Physical three-dimensionality can be created by transforming actual geometry through a **Displacement Map**.
-
----
 
 ## Related Examples
 

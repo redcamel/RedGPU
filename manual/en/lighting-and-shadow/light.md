@@ -252,21 +252,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- Manage all light sources by registering and controlling them via the **`LightManager`**.
-- To see lighting effects, you must use glossy materials such as **`PhongMaterial`** or **`PBRMaterial`**.
-- **`DirectionalLight`** is suitable for global lighting, while **`PointLight`** and **`SpotLight`** are better for
-  highlight lighting.
-
-## Next Learning Recommendation
-
-Learn about Phong Material, a sophisticated material that expresses detailed surface texture and three-dimensionality by
-receiving light.
-
-- **[Phong Material](./phong-material.md)**
-
----
 
 ## Related Examples
 

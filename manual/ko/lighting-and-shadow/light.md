@@ -241,13 +241,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **`LightManager`** 를 통해 모든 광원을 등록하고 제어합니다.
-- 조명 효과를 보려면 **`PhongMaterial`** 이나 **`PBRMaterial`** 등 광택 재질을 사용해야 합니다.
-- **`DirectionalLight`** 는 전역적인 조명에, **`PointLight`** / **`SpotLight`** 는 강조 조명에 적합합니다.
-
----
 
 ## 관련 예제
 

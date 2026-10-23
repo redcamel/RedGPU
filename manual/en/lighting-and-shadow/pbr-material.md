@@ -168,15 +168,6 @@ const scene = new RedGPU.Display.Scene ();
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **`PBRMaterial`** calculates realistic surface appearance based on **Metallic** (`metallicFactor`) and **Roughness**
-  (`roughnessFactor`).
-- It serves as the standard material for 3D models loaded via `GLTFLoader` and supports glTF extensions such as glass
-  refraction (`KHR_materials_transmission`) and clearcoat (`KHR_materials_clearcoat`).
-- It achieves the most realistic results when paired with **`IBL`** environment lighting.
-
----
 
 ## Related Examples
 

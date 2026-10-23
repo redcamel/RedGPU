@@ -54,17 +54,6 @@ ssr.maxDistance = 15.0;        // Maximum reflection tracking distance
 ssr.maxSteps = 64;             // Reflection calculation precision (number of steps)
 ```
 
-## Key Summary
-
-- Built-in effects are fixed-stage effects activated by **property settings** alone.
-- They are more performant than manual implementation because they share depth information within the system.
-- They can be controlled individually via the `useSSAO` and `useSSR` properties.
-
-## Next Learning Recommendation
-
-- **[LOD](../lod/index.md)**
-
----
 
 ## Related Examples
 

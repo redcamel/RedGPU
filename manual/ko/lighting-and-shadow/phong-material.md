@@ -149,13 +149,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **Phong Material** 은 빛의 **난반사**(Diffuse) 와 **정반사**(Specular) 를 계산하는 라이팅 재질입니다.
-- **Normal Map** 을 사용하면 면을 쪼개지 않고도 정교한 표면 질감을 표현할 수 있습니다.
-- **Displacement Map** 을 통해 실제 지오메트리를 변형시켜 물리적인 입체감을 만들 수 있습니다.
-
----
 
 ## 관련 예제
 

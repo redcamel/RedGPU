@@ -157,14 +157,6 @@ Explore practical use cases of the physics engine through these categorized exam
 
 ---
 
-## Key Summary
-
-1. `RapierPhysics` must be imported separately and requires **asynchronous initialization**.
-2. After registering `scene.physicsEngine`, simulation runs automatically.
-3. `createBody` automatically reflects the mesh hierarchy in the physics world.
-
----
-
 ## Related Examples
 
 - **Basics &

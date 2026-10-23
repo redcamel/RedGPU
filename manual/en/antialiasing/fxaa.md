@@ -130,13 +130,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **Post-Processing**: Works on top of the rendered image.
-- **Exclusive**: Enabling FXAA disables MSAA and TAA.
-- **Global Control**: Controlled via `redGPUContext`.
-
----
 
 ## Related Examples
 

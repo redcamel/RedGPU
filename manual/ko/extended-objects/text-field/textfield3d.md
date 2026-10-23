@@ -176,13 +176,6 @@ const scene = new RedGPU.Display.Scene ();
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **`TextField3D`** : 월드 공간 내 실제 좌표에 배치되는 텍스트 객체입니다.
-- **CSS 스타일**: 색상, 배경, 보더 등 웹 표준 스타일을 그대로 적용할 수 있습니다.
-- **Billboard** : 3D 텍스트가 항상 카메라를 바라보게 설정하여 가독성을 높일 수 있습니다.
-
----
 
 ## 관련 예제
 

@@ -179,14 +179,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- Every **Mesh** can act as a parent container and include child meshes.
-- Child coordinates are always **relative coordinates** based on the parent's position.
-- A parent's rotation and scale transformations are physically inherited by its children, making it easy to implement
-  complex linked animations.
-
----
 
 ## Related Examples
 

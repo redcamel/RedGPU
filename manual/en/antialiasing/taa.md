@@ -132,13 +132,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **Best Quality**: Almost completely eliminates jagged edges.
-- **Auto-Selection**: Automatically enabled on high-DPI displays (like Retina).
-- **High Cost**: Recommended for desktop environments due to per-frame computation and memory overhead.
-
----
 
 ## Related Examples
 

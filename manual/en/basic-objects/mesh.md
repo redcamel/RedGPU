@@ -218,14 +218,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## Key Summary
-
-- **`Mesh`** is the basic unit of a 3D object, combining **`Geometry`** and **Material**.
-- **Primitive** refers to standard shape data for visualization testing and structural design.
-- **`ColorMaterial`** is lightweight and suitable for checking colors without lighting.
-- All transformations are based on the object's **Pivot** point.
-
----
 
 ## Related Examples
 

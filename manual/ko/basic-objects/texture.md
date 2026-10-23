@@ -141,13 +141,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **`BitmapTexture`** 는 외부 이미지 파일을 3D 엔진용 리소스로 변환합니다.
-- **`BitmapMaterial`** 은 텍스처를 사용하여 물체의 표면을 표현하는 전용 재질입니다.
-- RedGPU 는 이미지의 비동기 로딩을 자동으로 처리하여 관리의 편의성을 제공합니다.
-
----
 
 ## 관련 예제
 

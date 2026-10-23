@@ -210,14 +210,6 @@ const camera = new RedGPU.Camera.PerspectiveCamera ();
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **`Mesh`** 는 **`Geometry`** 와 **Material** 이 결합된 3D 객체의 기본 단위입니다.
-- **Primitive** 는 시각화 테스트 및 구조 설계를 위한 표준 도형 데이터입니다.
-- **`ColorMaterial`** 은 성능이 가볍고 조명 없이 색상을 확인하기에 적합합니다.
-- 모든 변형 (Transform)은 객체의 **중심점**(Pivot) 을 기준으로 이루어집니다.
-
----
 
 ## 관련 예제
 

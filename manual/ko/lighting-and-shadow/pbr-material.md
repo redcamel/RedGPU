@@ -163,14 +163,6 @@ const scene = new RedGPU.Display.Scene ();
 </CodePen>
 </ClientOnly>
 
-## 핵심 요약
-
-- **`PBRMaterial`** 은 **금속성**(`metallicFactor`)과 **거칠기**(`roughnessFactor`)를 기반으로 현실적인 표면 질감을 계산합니다.
-- `GLTFLoader` 로 로드된 3D 모델의 표준 재질로 사용되며, 투명 유리 (`KHR_materials_transmission`), 클리어코트 (`KHR_materials_clearcoat`) 등 다양한
-  glTF 확장 속성도 지원합니다.
-- 주변 환경을 반사하는 **`IBL`** 과 함께 사용할 때 가장 사실적인 결과물을 얻을 수 있습니다.
-
----
 
 ## 관련 예제
 

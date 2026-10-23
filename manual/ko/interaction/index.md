@@ -226,35 +226,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 - **대소문자 구분**: `e.key` 값을 그대로 사용하므로 대소문자를 구분합니다. 보편적인 입력을 위해서는 `'w'`와 `'W'`를 모두 체크하는 것이 좋습니다.
 - **조합 키 지원**: `Shift`, `Control`, `Alt` 등의 특수 키 상태도 동일하게 확인할 수 있습니다.
 
-## 3. 라이브 예제
-
-RedGPU가 제공하는 다양한 인터렉션 동작을 아래 예제들을 통해 직접 확인할 수 있습니다.
-
-### 3.1 마우스 및 터치 예제
-
-- [일반 메시 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
-- [스프라이트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
-- [스프라이트 시트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
-- [텍스트 필드 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
-- [고정밀 레이캐스팅 (Raycasting)](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
-
-### 3.2 키보드 인터렉션 예제
-
-- [키보드 인터렉션 3D 예제](/RedGPU/examples/3d/interaction/keyboardEvent/)
-- [키보드 인터렉션 2D 예제](/RedGPU/examples/2d/interaction/keyboardEvent/)
-
-## 4. 핵심 요약
-
-- `addListener` 를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
-- `keyboardKeyBuffer` 를 통해 프레임 단위의 정밀한 키보드 상태 제어가 가능합니다.
-- 웹 표준 DOM API와 함께 사용하여 풍부한 사용자 경험 (UX)을 제공할 수 있습니다.
-
-## 5. 다음 학습 추천
-
-인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
-
-- **[포스트 이펙트](../post-effect/index.md)**
-
 ---
 
 ## 관련 예제
@@ -263,3 +234,11 @@ RedGPU가 제공하는 다양한 인터렉션 동작을 아래 예제들을 통�
   터치**: [일반 메시](/RedGPU/examples/3d/interaction/mouseEvent/mesh/) · [스프라이트 3D](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/) · [스프라이트 시트 3D](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/) · [텍스트 필드 3D](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/) · [고정밀 레이캐스팅](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 -
 **키보드**: [3D 키보드 인터랙션](/RedGPU/examples/3d/interaction/keyboardEvent/) · [2D 키보드 인터랙션](/RedGPU/examples/2d/interaction/keyboardEvent/)
+
+---
+
+## 다음 학습 추천
+
+인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
+
+- **[포스트 이펙트](../post-effect/index.md)**
