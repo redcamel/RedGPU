@@ -3,101 +3,96 @@ title: Lake
 order: 1
 ---
 
-# Physically Based Lake Water
+# Lake
 
-`RedGPU.Water.Lake` is a lake water class that provides depth-based Beer-Lambert light attenuation, refraction,
-underwater caustics, real-time Screen Space Reflections (**SSR**), and **real-time 2D wave equation surface
-interactions** triggered by object collisions.
+`RedGPU.Water.Lake` is a lake water class supporting depth-based light attenuation, underwater refraction, caustics,
+Screen Space Reflections (**SSR**), and **real-time water surface interactions** that propagate concentric ripples when
+objects collide with the water.
 
-## 1. Creating Water and Registering to Scene
+---
 
-Because `Lake` captures the background color and depth buffers after opaque geometry and terrain rendering finish to
-compute refraction and shoreline depth fades, you must register it using the dedicated **`scene.addWater(lake)`** method
-rather than `scene.addChild()`.
+## 1. Creation & Scene Registration
+
+`Lake` operates as a 2-Pass mesh that references the background color and depth buffers after opaque objects are
+rendered. Register it to the scene using `scene.addWater(lake)`.
+
+> [!NOTE]
+> Because wave normal maps (`normalTexture`, `normalDetailTexture`) store normal vectors rather than color values, pass
+**`'rgba8unorm'`** as the format when creating the `BitmapTexture` for accurate wave undulations.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+// 1. Create a lake (width = 100, height = 100, widthSegments = 64, heightSegments = 64)
+const lake = new RedGPU.Water.Lake(redGPUContext, 100, 100, 64, 64);
 
-// 1. Create a 200m x 200m lake with 64x64 segments
-const lake = new RedGPU.Water.Lake(redGPUContext, 200, 200, 64, 64);
-
-// 2. Configure water surface elevation (Y coordinate) and vertex waves
-lake.waterLevel = 15.0;       // Equivalent to lake.y = 15.0
-lake.waveAmplitude = 0.03;    // Vertex wave amplitude (default: 0.025)
+// 2. Configure water elevation (Y coordinate) and vertex waves
+lake.waterLevel = 0.0;        // Water surface height (equivalent to lake.y)
+lake.waveAmplitude = 0.025;   // Vertex wave amplitude (default: 0.025)
 lake.waveWavelength = 16.0;   // Vertex wave wavelength (default: 16.0)
 
-// 3. Register to the Scene's dedicated water render layer (Required)
+// 3. Assign linear ('rgba8unorm') normal textures
+lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
+    redGPUContext, './assets/water/lake_normal.png', true, null, null, 'rgba8unorm'
+);
+lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+    redGPUContext, './assets/water/lake_normal_detail.png', true, null, null, 'rgba8unorm'
+);
+
+// 4. Register lake to the scene
 scene.addWater(lake);
 ```
 
-## 2. Optical Water Material (`LakeMaterial`)
+### Live Example: Basic Lake & Water Level Control
 
-When a `Lake` instance is created, a `LakeMaterial` is automatically assigned to `lake.material`. You can finely tune
-depth colors, turbidity, normal maps, caustics, and SSR reflections.
+<iframe src="/RedGPU/examples/3d/water/lake/basicLake/" style="width:100%; height:500px;"></iframe>
 
-| Property                                    | Default         | Description                                                                                |
-|:--------------------------------------------|:----------------|:-------------------------------------------------------------------------------------------|
-| **`baseColor`**                             | `'#18d8b6'`     | Shallow water base color (`ColorRGB` — `lake.material.baseColor.setColorByHEX('#18d8b6')`) |
-| **`deepColor`**                             | `'#065279'`     | Deep water color (`ColorRGB`)                                                              |
-| **`extinctionFactor`**                      | `0.22`          | Light attenuation coefficient as water depth increases                                     |
-| **`depthFadeDistance`**                     | `0.8`           | Water depth distance over which shoreline edges softly fade into terrain                   |
-| **`turbidity`**                             | `0.35`          | Water turbidity (`0.0 ~ 1.0`)                                                              |
-| **`refractionStrength`**                    | `1.0`           | Underwater background refraction distortion strength (`0.0 ~ 1.0`)                         |
-| **`roughness`**                             | `0.07`          | Water surface roughness (`0.0 ~ 1.0`)                                                      |
-| **`normalTexture` / `normalDetailTexture`** | `null`          | Base wave normal map and fine detail wave normal map (`BitmapTexture`)                     |
-| **`normalScale` / `normalDetailScale`**     | `1.0` / `0.5`   | Base normal and detail normal intensity (`0.0 ~ 1.0`)                                      |
-| **`normalTiling` / `normalDetailTiling`**   | `20.0` / `40.0` | Normal texture repeat count per `100m` in world space                                      |
-| **`flowRateScale`**                         | `0.025`         | Wave flow speed multiplier synchronized with global wind (`scene.windManager`)             |
-| **`causticsStrength`**                      | `1.0`           | Intensity of underwater caustics projected onto the lake bed (`0.0 ~ 2.0`)                 |
-| **`causticsScale` / `causticsSpeed`**       | `1.0` / `1.0`   | Pattern scale and animation speed of underwater caustics                                   |
-| **`enableSSR`**                             | `true`          | Enables Screen Space Reflections (SSR)                                                     |
-| **`ssrMaxDistance` / `ssrStepCount`**       | `100.0` / `64`  | Maximum raymarching trace distance and step count for SSR                                  |
+---
+
+## 2. Optical Material Configuration (`LakeMaterial`)
+
+When a `Lake` instance is created, `LakeMaterial` is automatically assigned to `lake.material`. You can adjust
+depth-based colors (`baseColor`, `deepColor`), refraction (`refractionStrength`), underwater caustics
+(`causticsStrength`), and Screen Space Reflections (`enableSSR`).
 
 ```javascript
-const waterMat = lake.material;
-
-// Assign normal maps and adjust optical parameters
-waterMat.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, './assets/water/water_normal.png');
-waterMat.normalDetailTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, './assets/water/water_detail_normal.png');
-waterMat.baseColor.setColorByHEX('#18d8b6');
-waterMat.deepColor.setColorByHEX('#065279');
-waterMat.depthFadeDistance = 1.2;
-waterMat.causticsStrength = 1.2;
-waterMat.enableSSR = true;
-```
-
-## 3. Real-Time 2D Wave Equation Surface Interaction
-
-RedGPU's `Lake` includes a built-in GPU 2D wave simulator (`LakeWaveSimulator`) that propagates concentric water ripples
-in real time when characters or objects walk through or enter the water.
-
-1. **Configure Interactive Objects (`Mesh`)**: Set `mesh.enableWaterInteraction = true` on any mesh that should generate
-   ripples. (Setting this on a glTF character root mesh automatically propagates it to all child meshes.)
-2. **Set Water (`Lake`) Follow Target**: Assign the main character mesh to `lake.interactionFollowTarget` to focus
-   simulation resolution around the character across a large lake.
-
-```javascript
-// 1. Enable water wave interaction on the character (or standard Mesh)
-characterMesh.enableWaterInteraction = true;
-characterMesh.waterWaveStrength = 1.2; // Wave generation intensity multiplier (default: 1.0)
-
-// 2. Make the lake's wave simulation center follow the character
-lake.interactionEnabled = true;
-lake.interactionFollowTarget = characterMesh;
-
-// 3. Fine-tune ripple propagation speed, damping, and normal strength
-lake.rippleWaveSpeed = 0.32;      // Ripple propagation speed (default: 0.32)
-lake.rippleDamping = 0.012;       // Ripple damping rate (default: 0.012)
-lake.rippleNormalStrength = 1.0;  // Ripple normal strength (default: 1.0)
+const mat = lake.material;
+mat.baseColor.setColorByHEX('#18d8b6'); // Shallow water color
+mat.deepColor.setColorByHEX('#065279'); // Deep water color
+mat.extinctionFactor = 0.22;            // Light attenuation by depth
+mat.refractionStrength = 1.0;           // Underwater refraction strength
+mat.causticsStrength = 1.0;             // Underwater caustics intensity
+mat.enableSSR = true;                   // Enable Screen Space Reflections (SSR)
 ```
 
 ---
 
-## Next Step
+## 3. Real-Time Water Wave Interaction
 
-Explore RedGPU's plugin system, including the WASM-powered Rapier physics engine.
+`Lake` includes a built-in GPU 2D wave simulation that propagates concentric ripples in real time when characters or
+objects touch or move across the water surface.
 
-- **[Plugins](../plugins/index.md)**
+1. **Configure Interactive Objects (`Mesh`)**: Set `mesh.enableWaterInteraction = true` on any mesh that should generate
+   ripples (automatically propagates to child meshes when set on a root mesh).
+2. **Set Simulation Follow Target**: Assign `lake.interactionFollowTarget = characterMesh` to focus wave simulation
+   resolution around a character across a large lake.
+
+```javascript
+// 1. Enable water interaction on the target mesh
+characterMesh.enableWaterInteraction = true;
+characterMesh.waterWaveStrength = 1.0; // Wave generation strength (default: 1.0)
+
+// 2. Configure lake wave simulation
+lake.interactionEnabled = true;
+lake.interactionFollowTarget = characterMesh; // Operates around lake center if omitted
+
+// 3. Adjust ripple propagation properties
+lake.rippleWaveSpeed = 0.32;      // Ripple propagation speed (default: 0.32)
+lake.rippleDamping = 0.012;       // Ripple damping factor (default: 0.012)
+lake.rippleNormalStrength = 1.0;  // Ripple normal strength (default: 1.0)
+```
+
+### Live Example: Water Wave Interaction
+
+<iframe src="/RedGPU/examples/3d/water/lake/interaction/" style="width:100%; height:500px;"></iframe>
 
 ---
 
@@ -108,3 +103,8 @@ Explore RedGPU's plugin system, including the WASM-powered Rapier physics engine
 - [Water Wave Interaction](/RedGPU/examples/3d/water/lake/interaction/)
 - [Character Walking Ripples](/RedGPU/examples/3d/water/lake/characterWalking/)
 - [Multi Lake](/RedGPU/examples/3d/water/lake/multiLake/)
+- [Lake with Landscape](/RedGPU/examples/3d/water/lake/lakeWithLandscape/)
+
+---
+
+[Next Step: Learn Plugin System](../plugins/index.md)

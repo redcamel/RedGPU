@@ -3,88 +3,90 @@ title: Lake
 order: 1
 ---
 
-# 물리 기반 호수 수체
+# Lake (호수 수체)
 
-`RedGPU.Water.Lake`는 수심에 따른 Beer-Lambert 빛 감쇠, 굴절 (Refraction), 수중 커스틱 (Caustics), 실시간 화면 공간 반사 (**SSR**), 그리고 물체와의 충돌에
-의해 퍼져나가는 **실시간 2D 파동 방정식 수면 인터랙션**을 제공하는 호수 수체 클래스입니다.
+`RedGPU.Water.Lake`는 수심별 빛 감쇠, 수중 굴절, 커스틱 (Caustics), 화면 공간 반사 (**SSR**), 그리고 물체와 부딪힐 때 동심원 물결이 퍼져나가는 **실시간 수면 인터랙션**을
+지원하는 호수 수체 클래스입니다.
 
-## 1. 수체 생성 및 Scene 전용 등록
+---
 
-`Lake`는 불투명 지오메트리 및 지형 렌더링이 완료된 후 배경 색상·깊이 버퍼를 캡처하여 굴절과 수심 페이드를 계산하므로, 일반 `scene.addChild()`가 아닌 **
-`scene.addWater(lake)`** 전용 메서드로 등록해야 합니다.
+## 1. 생성 및 Scene 등록
+
+`Lake`는 불투명 객체 렌더링이 끝난 뒤 배경 색상·깊이 버퍼를 참조하는 2-Pass 구조로 동작합니다. `scene.addWater(lake)` 메서드로 씬에 등록하여 사용합니다.
+
+> [!NOTE]
+> 물결 노멀 맵 (`normalTexture`, `normalDetailTexture`)은 색상이 아닌 법선 벡터 데이터이므로 `BitmapTexture` 생성 시 포맷을 선형 포맷인 **
+`'rgba8unorm'`** 으로 지정해야 정확한 물결 굴곡이 표현됩니다.
 
 ```javascript
-import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+// 1. 호수 생성 (width = 100, height = 100, widthSegments = 64, heightSegments = 64)
+const lake = new RedGPU.Water.Lake(redGPUContext, 100, 100, 64, 64);
 
-// 1. 가로 200m, 세로 200m, 세그먼트 64x64 크기의 호수 생성
-const lake = new RedGPU.Water.Lake(redGPUContext, 200, 200, 64, 64);
-
-// 2. 수면 높이(Y 좌표) 및 정점 파도 설정
-lake.waterLevel = 15.0;       // lake.y = 15.0 과 동일
-lake.waveAmplitude = 0.03;    // 정점 파동 진폭 (기본값: 0.025)
+// 2. 수위(Y 좌표) 및 정점 파동 설정
+lake.waterLevel = 0.0;        // 수면 높이 (lake.y 와 동일)
+lake.waveAmplitude = 0.025;   // 정점 파동 진폭 (기본값: 0.025)
 lake.waveWavelength = 16.0;   // 정점 파동 파장 (기본값: 16.0)
 
-// 3. Scene의 전용 수체 렌더 레이어에 등록 (필수)
+// 3. 선형('rgba8unorm') 노멀 텍스처 설정
+lake.material.normalTexture = new RedGPU.Resource.BitmapTexture(
+    redGPUContext, './assets/water/lake_normal.png', true, null, null, 'rgba8unorm'
+);
+lake.material.normalDetailTexture = new RedGPU.Resource.BitmapTexture(
+    redGPUContext, './assets/water/lake_normal_detail.png', true, null, null, 'rgba8unorm'
+);
+
+// 4. 씬에 호수 등록
 scene.addWater(lake);
 ```
 
-## 2. 광학 수체 재질 (`LakeMaterial`)
+### 라이브 예제: 기본 호수 및 수위 제어
 
-`Lake` 인스턴스 생성 시 `lake.material`에 `LakeMaterial`이 자동으로 할당됩니다. 수심 색상, 탁도, 노멀 맵, 커스틱, SSR 반사 등을 세밀하게 제어할 수 있습니다.
+<iframe src="/RedGPU/examples/3d/water/lake/basicLake/" style="width:100%; height:500px;"></iframe>
 
-| 속성명                                      | 기본값          | 설명                                                                                    |
-|:--------------------------------------------|:----------------|:----------------------------------------------------------------------------------------|
-| **`baseColor`**                             | `'#18d8b6'`     | 얕은 수면의 기본 색상 (`ColorRGB` — `lake.material.baseColor.setColorByHEX('#18d8b6')`) |
-| **`deepColor`**                             | `'#065279'`     | 깊은 수심의 색상 (`ColorRGB`)                                                           |
-| **`extinctionFactor`**                      | `0.22`          | 수심 증가에 따른 빛 감쇠 계수                                                           |
-| **`depthFadeDistance`**                     | `0.8`           | 해안선(물가) 경계가 지형과 부드럽게 페이드되는 수심 거리                                |
-| **`turbidity`**                             | `0.35`          | 물의 탁도 (`0.0 ~ 1.0`)                                                                 |
-| **`refractionStrength`**                    | `1.0`           | 수중 배경의 굴절 왜곡 강도 (`0.0 ~ 1.0`)                                                |
-| **`roughness`**                             | `0.07`          | 수면 거칠기 (`0.0 ~ 1.0`)                                                               |
-| **`normalTexture` / `normalDetailTexture`** | `null`          | 기본 물결 노멀 맵 및 미세 물결 디테일 노멀 맵 (`BitmapTexture`)                         |
-| **`normalScale` / `normalDetailScale`**     | `1.0` / `0.5`   | 기본 노멀 및 디테일 노멀 강도 (`0.0 ~ 1.0`)                                             |
-| **`normalTiling` / `normalDetailTiling`**   | `20.0` / `40.0` | 월드 `100m` 기준 노멀 텍스처 반복 횟수                                                  |
-| **`flowRateScale`**                         | `0.025`         | 전역 바람(`scene.windManager`)에 연동되는 물결 흐름 속도 배율                           |
-| **`causticsStrength`**                      | `1.0`           | 수중 바닥에 맺히는 커스틱(물결 무늬 빛) 강도 (`0.0 ~ 2.0`)                              |
-| **`causticsScale` / `causticsSpeed`**       | `1.0` / `1.0`   | 수중 커스틱 패턴 크기 및 애니메이션 속도                                                |
-| **`enableSSR`**                             | `true`          | 화면 공간 반사(SSR) 활성화 여부                                                         |
-| **`ssrMaxDistance` / `ssrStepCount`**       | `100.0` / `64`  | SSR 레이 마칭 최대 추적 거리 및 스텝 수                                                 |
+---
+
+## 2. 광학 재질 설정 (`LakeMaterial`)
+
+`Lake` 생성 시 `lake.material`에 `LakeMaterial`이 자동으로 할당됩니다. 수심에 따른 색상 (`baseColor`, `deepColor`), 굴절
+(`refractionStrength`), 수중 커스틱 (`causticsStrength`), 화면 공간 반사 (`enableSSR`) 등을 조절할 수 있습니다.
 
 ```javascript
-const waterMat = lake.material;
-
-// 노멀 맵 연결 및 광학 파라미터 조정
-waterMat.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, './assets/water/water_normal.png');
-waterMat.normalDetailTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, './assets/water/water_detail_normal.png');
-waterMat.baseColor.setColorByHEX('#18d8b6');
-waterMat.deepColor.setColorByHEX('#065279');
-waterMat.depthFadeDistance = 1.2;
-waterMat.causticsStrength = 1.2;
-waterMat.enableSSR = true;
+const mat = lake.material;
+mat.baseColor.setColorByHEX('#18d8b6'); // 얕은 수면 색상
+mat.deepColor.setColorByHEX('#065279'); // 깊은 수심 색상
+mat.extinctionFactor = 0.22;            // 수심별 빛 감쇠율
+mat.refractionStrength = 1.0;           // 수중 굴절 강도
+mat.causticsStrength = 1.0;             // 수중 커스틱 빛 무늬 강도
+mat.enableSSR = true;                   // 화면 공간 반사(SSR) 활성화
 ```
 
-## 3. 실시간 2D 파동 방정식 수면 인터랙션
+---
 
-RedGPU의 `Lake`는 캐릭터나 물체가 물 위를 걷거나 빠질 때 실시간으로 동심원 물결 (Ripple)이 퍼져나가는 GPU 기반 2D 파동 시뮬레이터 (`LakeWaveSimulator`)를 내장하고 있습니다.
+## 3. 실시간 수면 파동 인터랙션
 
-1. **상호작용할 객체 (`Mesh`) 설정**: 물결을 일으킬 메시에서 `mesh.enableWaterInteraction = true`를 설정합니다. (glTF 캐릭터 루트 메시에 설정하면 하위 모든 자식
-   메시에 자동 전파됩니다.)
-2. **수체 (`Lake`) 추적 대상 설정**: 넓은 호수에서 시뮬레이션 해상도를 집중시키기 위해 `lake.interactionFollowTarget`에 주인공 캐릭터 메시를 지정할 수 있습니다.
+캐릭터나 물체가 수면에 닿거나 이동할 때 실시간으로 동심원 물결 (Ripple)이 퍼져나가는 GPU 2D 파동 시뮬레이션을 지원합니다.
+
+1. **상호작용할 객체 (`Mesh`) 설정**: 물결을 일으킬 메시에 `mesh.enableWaterInteraction = true`를 설정합니다. (루트 메시에 설정 시 하위 자식 메시에 자동 적용)
+2. **시뮬레이션 추적 대상 설정**: 넓은 호수에서 특정 캐릭터 주변에 물결 해상도를 집중시키려면 `lake.interactionFollowTarget = characterMesh`를 지정합니다.
 
 ```javascript
-// 1. 캐릭터(또는 일반 Mesh)의 수면 파동 인터랙션 활성화
+// 1. 물결을 일으킬 객체 설정
 characterMesh.enableWaterInteraction = true;
-characterMesh.waterWaveStrength = 1.2; // 파동 생성 강도 배율 (기본값: 1.0)
+characterMesh.waterWaveStrength = 1.0; // 파동 생성 강도 (기본값: 1.0)
 
-// 2. 호수의 파동 시뮬레이션 중심이 캐릭터를 따라다니도록 설정
+// 2. 호수의 파동 시뮬레이션 제어
 lake.interactionEnabled = true;
-lake.interactionFollowTarget = characterMesh;
+lake.interactionFollowTarget = characterMesh; // 생략 시 호수 중심 기준 동작
 
-// 3. 물결 전파 속도, 감쇠율 및 노멀 강도 미세 조정
+// 3. 물결 전파 속성 조절
 lake.rippleWaveSpeed = 0.32;      // 물결 전파 속도 (기본값: 0.32)
 lake.rippleDamping = 0.012;       // 물결 감쇠율 (기본값: 0.012)
 lake.rippleNormalStrength = 1.0;  // 물결 노멀 강도 (기본값: 1.0)
 ```
+
+### 라이브 예제: 수면 물결 인터랙션
+
+<iframe src="/RedGPU/examples/3d/water/lake/interaction/" style="width:100%; height:500px;"></iframe>
 
 ---
 
@@ -95,11 +97,8 @@ lake.rippleNormalStrength = 1.0;  // 물결 노멀 강도 (기본값: 1.0)
 - [수면 물결 인터랙션 (Water Interaction)](/RedGPU/examples/3d/water/lake/interaction/)
 - [캐릭터 수면 보행 파동 (Character Walking)](/RedGPU/examples/3d/water/lake/characterWalking/)
 - [다중 호수 (Multi Lake)](/RedGPU/examples/3d/water/lake/multiLake/)
+- [지형과 호수 통합 (Lake with Landscape)](/RedGPU/examples/3d/water/lake/lakeWithLandscape/)
 
 ---
 
-## 다음 단계
-
-WASM 기반 물리 엔진 (Rapier)을 비롯한 RedGPU의 플러그인 시스템을 알아봅니다.
-
-- **[플러그인 (Plugins)](../plugins/index.md)**
+[다음 단계: 플러그인 시스템 배우기](../plugins/index.md)

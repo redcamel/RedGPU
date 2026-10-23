@@ -6,96 +6,94 @@ order: 2
 # Multi-Layer Splatting
 
 `RedGPU.Landscape.LandscapeMaterial` and `RedGPU.Landscape.LandscapeLayer` provide a **Multi-Layer Splatting** system
-that blends up to **8 PBR layers** across the terrain surface using weight maps, elevation, and slope.
+that blends up to **8 PBR layers** across the terrain surface using weight maps (`weightTexture`) and height-modulated
+blending (`heightBlendFactor`).
 
-## 1. Hybrid Rendering Architecture (Near Detail + VBT)
+---
 
-Sampling textures (BaseColor, Normal, ORM) across 8 layers for every pixel on a massive terrain creates severe GPU
-texture bandwidth bottlenecks. RedGPU solves this with a **Hybrid VBT** (Virtual Blend Texture) pipeline:
+## 1. Registering Splatting Layers (`addLayer`)
 
-- **Near Range (within `nearDetailDistance`)**: Blends high-resolution PBR layers with **Stochastic Tiling** in real
-  time for crisp surface detail.
-- **Far Range (beyond `nearDetailDistance`)**: Fetches color with a single sample from the pre-baked **Virtual Blend
-  Texture (VBT)** atlas generated during tile streaming, drastically reducing rendering cost.
+Call `landscape.addLayer(options)` to register up to 8 `LandscapeLayer` instances. The first layer (index 0) also acts
+as the base fallback layer, while each layer blends according to its designated channel (`'R' | 'G' | 'B' | 'A'`) in
+`weightTexture`.
+
+- **Near Range (within `nearDetailDistance`)**: Blends high-resolution PBR textures with stochastic tiling
+  (`stochasticTiling`) in real time.
+- **Far Range (beyond `nearDetailDistance`)**: Samples the pre-baked Virtual Blend Texture (VBT) atlas in a single
+  lookup to save GPU texture bandwidth.
 
 ```javascript
 // Set the distance (in world units) within which near high-resolution texture blending is active
 landscape.nearDetailDistance = 350;
-```
 
-## 2. Adding Splatting Layers (`addLayer`)
+const weightTexture = './assets/terrain/weightTexture.jpg';
 
-Call `landscape.addLayer(options)` to register up to 8 `LandscapeLayer` instances sequentially. The first layer acts as
-the base layer, while subsequent layers blend according to the specified channel (`weightChannel`) of their
-`weightTexture` (splat map).
-
-```javascript
-// 1. Add base Dirt layer
-const dirtLayer = landscape.addLayer({
-    name: 'Dirt',
-    baseColorTexture: './assets/terrain/dirt_diff.ktx2',
-    normalTexture: './assets/terrain/dirt_norm.ktx2',
-    ormTexture: './assets/terrain/dirt_orm.ktx2',
-    uvScale: 40,
-    roughnessFactor: 0.85,
-    stochasticTiling: true
-});
-
-// 2. Add Grass layer (uses R channel: 0 of splat map)
+// 1. Add Grass layer (uses 'R' channel of splat map)
 const grassLayer = landscape.addLayer({
     name: 'Grass',
-    baseColorTexture: './assets/terrain/grass_diff.ktx2',
-    normalTexture: './assets/terrain/grass_norm.ktx2',
-    ormTexture: './assets/terrain/grass_orm.ktx2',
-    weightTexture: './assets/terrain/splat_map.png',
-    weightChannel: 0, // 0: R, 1: G, 2: B, 3: A
-    uvScale: 60,
-    roughnessFactor: 0.7,
+    baseColorTexture: './assets/terrain/layer/grass.jpg',
+    normalTexture: './assets/terrain/layer/grass_normal.jpg',
+    ormTexture: './assets/terrain/layer/grass_orm.jpg',
+    weightTexture,
+    weightChannel: 'R',
+    uvScale: [25, 25],
+    roughness: 0.85,
     stochasticTiling: true
 });
 
-// 3. Add Rock layer (uses G channel: 1 of splat map)
+// 2. Add Rock layer (uses 'G' channel of splat map)
 const rockLayer = landscape.addLayer({
     name: 'Rock',
-    baseColorTexture: './assets/terrain/rock_diff.ktx2',
-    normalTexture: './assets/terrain/rock_norm.ktx2',
-    ormTexture: './assets/terrain/rock_orm.ktx2',
-    weightTexture: './assets/terrain/splat_map.png',
-    weightChannel: 1,
-    uvScale: 25,
-    normalStrength: 1.4,
+    baseColorTexture: './assets/terrain/layer/rock.jpg',
+    normalTexture: './assets/terrain/layer/rock_normal.jpg',
+    ormTexture: './assets/terrain/layer/rock_orm.jpg',
+    weightTexture,
+    weightChannel: 'G',
+    uvScale: [7.5, 7.5],
+    roughness: 0.7,
+    normalIntensity: 1.2,
     stochasticTiling: true
 });
 ```
 
-## 3. `LandscapeLayerOptions` Key Properties
+### Live Example: Multi-Layer Splatting
 
-| Property               | Default   | Description                                                                                   |
-|:-----------------------|:----------|:----------------------------------------------------------------------------------------------|
-| **`name`**             | `'Layer'` | Unique identifier name for the layer (linked with `targetLayer` in foliage and grass)         |
-| **`baseColorTexture`** | `null`    | Base color (Albedo) texture path or `BitmapTexture`                                           |
-| **`normalTexture`**    | `null`    | Tangent-space normal map path or `BitmapTexture`                                              |
-| **`ormTexture`**       | `null`    | Packed Occlusion (R), Roughness (G), Metallic (B) texture                                     |
-| **`weightTexture`**    | `null`    | Splat map texture containing layer distribution weights                                       |
-| **`weightChannel`**    | `0`       | Channel index to sample from `weightTexture` (`0`: R, `1`: G, `2`: B, `3`: A)                 |
-| **`uvScale`**          | `10.0`    | Texture UV repeat multiplier relative to terrain tiles (`number` or `[u, v]`)                 |
-| **`normalStrength`**   | `1.0`     | Normal map bump intensity multiplier                                                          |
-| **`roughnessFactor`**  | `0.8`     | Surface roughness factor (`0.0 ~ 1.0`)                                                        |
-| **`metallicFactor`**   | `0.0`     | Metallic factor (`0.0 ~ 1.0`)                                                                 |
-| **`aoFactor`**         | `1.0`     | Ambient occlusion intensity factor                                                            |
-| **`stochasticTiling`** | `false`   | Enables stochastic sampling to eliminate repetitive texture tiling artifacts over large areas |
+<iframe src="/RedGPU/examples/3d/landscape/multiLayerSplatting/" style="width:100%; height:500px;"></iframe>
 
-## 4. Querying and Managing Layers
+---
 
-Registered layers can be queried, modified, or removed by name or instance at any time, automatically recalculating the
-VBT atlas and ecosystem weights.
+## 2. `LandscapeLayerOptions` Key Properties
+
+| Category              | Property                                  | Default               | Description                                                                                  |
+|:----------------------|:------------------------------------------|:----------------------|:---------------------------------------------------------------------------------------------|
+| **Identity & State**  | **`name`**                                | Required              | Unique layer name (linked with `targetLayer` in foliage and grass)                           |
+|                       | **`enabled`**                             | `true`                | Whether the layer is enabled                                                                 |
+| **Textures & Weight** | **`baseColorTexture`**                    | `undefined`           | Base color (Albedo) texture path or `BitmapTexture`                                          |
+|                       | **`normalTexture`**                       | `undefined`           | Tangent-space normal map path or `BitmapTexture`                                             |
+|                       | **`ormTexture`**                          | `undefined`           | Packed Occlusion (R), Roughness (G), Metallic (B), Height (A) texture                        |
+|                       | **`weightTexture`**                       | `undefined`           | Splat map texture containing layer distribution weights                                      |
+|                       | **`weightChannel`**                       | `'R'`                 | Channel to sample from `weightTexture` (`'R' \| 'G' \| 'B' \| 'A'` or `0 ~ 3`)               |
+| **UV & Tiling**       | **`uvScale`** / **`uvOffset`**            | `[20, 20]` / `[0, 0]` | Texture UV repeat scale `[u, v]` per tile and UV offset `[u, v]`                             |
+|                       | **`nearUVScaleMultiplier`**               | `2.0`                 | UV scale multiplier applied to the near-detail region                                        |
+|                       | **`stochasticTiling`**                    | `true`                | Enables stochastic sampling to suppress repetitive texture tiling artifacts over large areas |
+|                       | **`stochasticScale`**                     | `1.0`                 | Stochastic tiling cell scale (`0.01` or higher)                                              |
+| **PBR & Blending**    | **`roughness`**                           | `1.0`                 | Surface roughness factor                                                                     |
+|                       | **`normalIntensity`** / **`aoIntensity`** | `1.0` / `1.0`         | Normal map bump intensity and ambient occlusion (AO) intensity                               |
+|                       | **`heightBlendFactor`**                   | `1.0`                 | Height-based layer boundary blending contrast factor using ORM alpha (`0.0 ~ 5.0`)           |
+
+---
+
+## 3. Querying and Managing Layers
+
+Registered layers can be queried, modified, or removed by name or instance at any time, automatically updating the VBT
+atlas and ecosystem weights.
 
 ```javascript
 // Retrieve a layer by name and update its properties
 const layer = landscape.getLayer('Rock');
 if (layer) {
-    layer.uvScale = 30;
-    layer.normalStrength = 1.6;
+    layer.uvScale = [15, 15];
+    layer.heightBlendFactor = 1.5;
 }
 
 // Remove a specific layer or clear all layers
@@ -105,16 +103,11 @@ landscape.removeLayer('Rock');
 
 ---
 
-## Next Step
-
-Learn how the foliage system scatters tens of thousands of trees and rocks based on terrain layer weights
-(`targetLayer`) and slope.
-
-- **[Foliage & Impostors](./foliage.md)**
-
----
-
 ## Related Examples
 
 - [Multi-Layer Splatting](/RedGPU/examples/3d/landscape/multiLayerSplatting/)
 - [Open World Integration](/RedGPU/examples/3d/landscape/openWorldIntegration/)
+
+---
+
+[Next Step: Learn Foliage & Impostors](./foliage.md)
