@@ -55,10 +55,6 @@ material.alpha = 1.0;
 // 2. Highlight (Specular) control
 material.shininess = 32;    // Sharpness of the highlight (Shininess)
 material.specularStrength = 1.0; // Intensity of the highlight
-
-// 3. Advanced properties
-material.displacementScale = 1.0; // Protrusion level of the displacement map
-material.useSSR = true;           // Use screen space reflection
 ```
 
 ## 3. Practical Example: Combining Textures
@@ -85,9 +81,6 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
     material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
     material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
-    material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
-    
-    material.displacementScale = 0.5; // Adjust displacement intensity
 
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
@@ -137,10 +130,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
     material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
     material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
-    material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
-    
-    material.displacementScale = 0.5;
-    material.specularPower = 32;
+    material.shininess = 32;
 
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
@@ -181,6 +171,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Learn how to implement shadows that are cast when light is blocked and add a realistic sense of space to the scene.
+Learn about `PBRMaterial`, which realistically expresses metallic and roughness properties through Physically Based
+Rendering (PBR).
 
-- **[Shadow](./shadow.md)**
+- **[PBR Material](./pbr-material.md)**

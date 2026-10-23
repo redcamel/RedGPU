@@ -81,39 +81,38 @@ scene.lightManager.addPointLight(pointLight);
 RedGPU provides four types of light sources with different physical characteristics. It is important to understand the
 characteristics of each light and combine them appropriately.
 
-| Type                   | Features                             | Main Usage                                             | Unit (Property)                    | Analogy    |
-|:-----------------------|:-------------------------------------|:-------------------------------------------------------|:-----------------------------------|:-----------|
-| **`DirectionalLight`** | Parallel light (Sunlight)            | Global lighting, shadow generation                     | **Lux** (`lux`, default 100,000)   | The Sun    |
-| **`PointLight`**       | Spreads from a single point          | Emphasizing specific areas, distance-based attenuation | **Lumen** (`lumen`, default 1,000) | Light bulb |
-| **`SpotLight`**        | Concentrated cone-shaped light       | Highlight lighting, theatrical stage effects           | **Lumen** (`lumen`, default 1,000) | Flashlight |
-| **`AmbientLight`**     | Shines uniformly from all directions | Softening shadows, overall brightness correction       | **Lux** (`lux`, default 50)        | Fill light |
-
-### 3.1 DirectionalLight
+### 3.1 `DirectionalLight`
 
 Light that shines in parallel from an infinitely distant source in a specific direction, like the sun.
 
-- **Features**: Direction is constant regardless of position, and it is the most representative light source capable of
-  creating shadows.
+- **Features & Usage**: Direction (`direction`) is constant regardless of position, primarily used for global lighting
+  and shadow generation.
+- **Unit**: **Lux** (`lux`, default `100,000`)
 
-### 3.2 PointLight
+### 3.2 `PointLight`
 
-Light that radiates in all directions from a point in space.
+Light that radiates in all directions from a single point in space, like a light bulb.
 
-- **Features**: **Attenuation** occurs, where brightness decreases in proportion to the square of the distance. The
-  `radius` property determines the range the light reaches.
+- **Features & Usage**: Distance-based **attenuation** occurs, and the `radius` property controls the reach to emphasize
+  specific areas.
+- **Unit**: **Lumen** (`lumen`, default `1,000`)
 
-### 3.3 SpotLight
+### 3.3 `SpotLight`
 
-A light source that shines a cone-shaped light in a specific direction from a specific point.
+A light source that shines a cone-shaped beam in a specific direction from a single point, like a flashlight or stage
+light.
 
-- **Features**: Creates concentrated lighting effects by adjusting the light's `angle` and outer softness (`exponent`).
+- **Features & Usage**: Creates concentrated lighting effects by adjusting the inner angle (`innerCutoff`), outer angle
+  (`outerCutoff`), and reach (`radius`).
+- **Unit**: **Lumen** (`lumen`, default `1,000`)
 
-### 3.4 AmbientLight
+### 3.4 `AmbientLight`
 
-Light that shines uniformly from all directions onto objects.
+Fill light that shines uniformly from all directions onto objects.
 
-- **Features**: Has no position or direction, and creates no shadows. It is used for correction to slightly brighten
-  dark areas where light does not reach.
+- **Features & Usage**: Has no position or direction and casts no shadows. Used to soften dark areas where direct light
+  does not reach and to adjust overall base brightness.
+- **Unit**: **Lux** (`lux`, default `50`)
 
 ::: warning [Material Note]
 **`ColorMaterial`** is not affected by light and outputs only a single color. To see lighting effects, you must use a

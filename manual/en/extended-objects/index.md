@@ -13,7 +13,6 @@ This section covers how to enrich the content of your scene by loading external 
 2. **[Instancing Mesh](./instanced-mesh/index.md)**: High-performance rendering of tens of thousands of objects
 3. **[Sprite](./sprite/index.md)**: Using billboard icons and animated sprites
 4. **[Text Field](./text-field/index.md)**: Placing text in the 3D world
-5. **[Particle](./particle/index.md)**: GPU compute shader-based particle system
 
 ---
 
@@ -23,7 +22,6 @@ This section covers how to enrich the content of your scene by loading external 
 - [InstancingMesh](/RedGPU/examples/3d/instancedMesh/simple/)
 - [Sprite3D](/RedGPU/examples/3d/sprite/sprite3D/)
 - [TextField3D](/RedGPU/examples/3d/textField/textField3D/)
-- [GPU Particle Basics](/RedGPU/examples/3d/particle/basic/)
 
 ---
 

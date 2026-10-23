@@ -53,10 +53,6 @@ material.alpha = 1.0;
 // 2. 하이라이트(Specular) 제어
 material.shininess = 32;    // 하이라이트의 날카로운 정도 (Shininess)
 material.specularStrength = 1.0; // 하이라이트의 강도
-
-// 3. 고급 속성
-material.displacementScale = 1.0; // 변위 맵의 돌출 정도
-material.useSSR = true;           // 스크린 스페이스 반사 사용
 ```
 
 ## 3. 실습 예제: 텍스처 조합하기
@@ -82,9 +78,6 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
     material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
     material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
-    material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
-    
-    material.displacementScale = 0.5; // 변위 강도 조절
 
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
@@ -134,9 +127,6 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
     material.normalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_normalMap.jpg');
     material.specularTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_specularMap.jpg');
-    material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
-    
-    material.displacementScale = 0.5;
     material.shininess = 32;
 
     const mesh = new RedGPU.Display.Mesh(
@@ -178,6 +168,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-빛이 가려져 생기는 그림자를 구현하고 씬에 사실적인 공간감을 부여하는 방법에 대해 알아봅니다.
+물리 기반 렌더링 (PBR)을 통해 금속성과 거칠기를 사실적으로 표현하는 `PBRMaterial` 에 대해 알아봅니다.
 
-- **[그림자](./shadow.md)**
+- **[PBR Material](./pbr-material.md)**

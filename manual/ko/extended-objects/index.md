@@ -13,7 +13,6 @@ order: 7
 2. **[Instancing Mesh](./instanced-mesh/index.md)** : 수만 개의 객체 고성능 렌더링
 3. **[Sprite](./sprite/index.md)** : 빌보드 아이콘 및 애니메이션 스프라이트 활용
 4. **[Text Field](./text-field/index.md)** : 3D 월드 내 텍스트 배치
-5. **[Particle](./particle/index.md)** : GPU 컴퓨트 셰이더 기반 파티클 시스템 활용
 
 ---
 
@@ -23,7 +22,6 @@ order: 7
 - [인스턴싱 메시 (InstancingMesh)](/RedGPU/examples/3d/instancedMesh/simple/)
 - [3D 스프라이트 (Sprite3D)](/RedGPU/examples/3d/sprite/sprite3D/)
 - [3D 텍스트 필드 (TextField3D)](/RedGPU/examples/3d/textField/textField3D/)
-- [GPU 파티클 기본](/RedGPU/examples/3d/particle/basic/)
 
 ---
 

@@ -46,13 +46,17 @@
     margin: 1.5rem 0;
 }
 
-.vp-doc th, .vp-doc td {
-    word-break: break-word;
+.vp-doc th {
+    white-space: nowrap;
+}
+
+.vp-doc td {
+    word-break: keep-all;
 }
 
 .vp-doc th:first-child,
 .vp-doc td:first-child,
-.vp-doc td:first-child code {
+.vp-doc td code {
     white-space: nowrap;
 }
 

@@ -1,6 +1,6 @@
 ---
 title: Shadow System
-order: 3
+order: 4
 ---
 
 <script setup>
@@ -51,17 +51,28 @@ floor.receiveShadow = true;
 
 ## 3. 그림자 품질 관리 (ShadowManager)
 
-**`Scene`** 은 내부적으로 **`ShadowManager`** 를 소유하고 있어, 그림자의 해상도나 품질을 전역적으로 관리할 수 있습니다.
+`Scene` 은 내부적으로 `ShadowManager` 와 `DirectionalShadowManager` 를 소유하고 있으며, 캐스케이드 그림자 맵 (CSM)과 소프트 섀도우 (PCSS) 품질을 전역적으로 제어할
+수 있습니다.
 
 ```javascript
-// 그림자 맵의 해상도 설정 (기본값: 1024)
-// 값이 클수록 그림자 경계가 선명해지지만 성능 비용이 증가합니다.
-scene.shadowManager.directionalShadowManager.shadowDepthTextureSize = 2048;
+const directionalShadowManager = scene.shadowManager.directionalShadowManager;
+
+// 1. 그림자 맵 해상도 설정 (기본값: 2048)
+directionalShadowManager.shadowDepthTextureSize = 2048;
+
+// 2. 캐스케이드(CSM) 분할 수 및 최대 그림자 가시거리
+directionalShadowManager.cascadeCount = 4;        // 분할 수 (1 ~ 4, 기본값: 4)
+directionalShadowManager.maxShadowDistance = 200; // 최대 가시거리 (기본값: 200)
+
+// 3. 그림자 농도 및 소프트 섀도우(PCSS) 제어
+directionalShadowManager.strength = 0.9;      // 그림자 진하기 (0.0 ~ 1.0, 기본값: 0.9)
+directionalShadowManager.pcssLightSize = 1.0; // 광원 가상 크기 (클수록 외곽이 부드러워짐, 기본값: 1.0)
+directionalShadowManager.bias = 0.00015;      // 섀도우 아크네 방지 바이어스 (기본값: 0.00015)
 ```
 
 ## 4. 실습 예제: 그림자가 있는 씬 구성
 
-방향광 (DirectionalLight)을 사용하여 회전하는 정육면체의 그림자를 바닥에 드리우는 예제입니다.
+방향광 (`DirectionalLight`)을 사용하여 회전하는 정육면체의 그림자를 바닥에 드리우는 예제입니다.
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -71,9 +82,8 @@ const canvas = document.getElementById('redgpu-canvas');
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // 1. 조명 및 그림자 설정
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = -5; light.y = 10; light.z = 5;
+    // 1. 방향광 설정 (빛의 진행 방향 벡터 지정)
+    const light = new RedGPU.Light.DirectionalLight([-1, -1, -1]);
     scene.lightManager.addDirectionalLight(light);
 
     // 2. 바닥 생성 (Receiver)
@@ -127,8 +137,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
 
     // Light
-    const light = new RedGPU.Light.DirectionalLight();
-    light.x = -3; light.y = 5; light.z = 3;
+    const light = new RedGPU.Light.DirectionalLight([-1, -1, -1]);
     scene.lightManager.addDirectionalLight(light);
 
     scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight('#ffffff', 50);
@@ -165,12 +174,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 </pre>
 </CodePen>
 </ClientOnly>
-
-## 핵심 요약
-
-- **castShadow** : 물체가 그림자를 생성하도록 설정합니다.
-- **receiveShadow** : 물체 표면에 그림자가 드리우도록 설정합니다.
-- **품질 제어**: `ShadowManager` 를 통해 성능과 선명도 사이의 균형을 조절할 수 있습니다.
 
 ---
 
